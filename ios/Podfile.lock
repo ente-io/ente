@@ -24,9 +24,9 @@ PODS:
     - FirebaseCoreInternal (~> 10.0)
     - GoogleUtilities/Environment (~> 7.8)
     - GoogleUtilities/Logger (~> 7.8)
-  - FirebaseCoreInternal (10.10.0):
+  - FirebaseCoreInternal (10.13.0):
     - "GoogleUtilities/NSData+zlib (~> 7.8)"
-  - FirebaseInstallations (10.10.0):
+  - FirebaseInstallations (10.13.0):
     - FirebaseCore (~> 10.0)
     - GoogleUtilities/Environment (~> 7.8)
     - GoogleUtilities/UserDefaults (~> 7.8)
@@ -71,26 +71,26 @@ PODS:
   - FMDB (2.7.5):
     - FMDB/standard (= 2.7.5)
   - FMDB/standard (2.7.5)
-  - GoogleDataTransport (9.2.3):
+  - GoogleDataTransport (9.2.5):
     - GoogleUtilities/Environment (~> 7.7)
     - nanopb (< 2.30910.0, >= 2.30908.0)
     - PromisesObjC (< 3.0, >= 1.2)
-  - GoogleUtilities/AppDelegateSwizzler (7.11.1):
+  - GoogleUtilities/AppDelegateSwizzler (7.11.5):
     - GoogleUtilities/Environment
     - GoogleUtilities/Logger
     - GoogleUtilities/Network
-  - GoogleUtilities/Environment (7.11.1):
+  - GoogleUtilities/Environment (7.11.5):
     - PromisesObjC (< 3.0, >= 1.2)
-  - GoogleUtilities/Logger (7.11.1):
+  - GoogleUtilities/Logger (7.11.5):
     - GoogleUtilities/Environment
-  - GoogleUtilities/Network (7.11.1):
+  - GoogleUtilities/Network (7.11.5):
     - GoogleUtilities/Logger
     - "GoogleUtilities/NSData+zlib"
     - GoogleUtilities/Reachability
-  - "GoogleUtilities/NSData+zlib (7.11.1)"
-  - GoogleUtilities/Reachability (7.11.1):
+  - "GoogleUtilities/NSData+zlib (7.11.5)"
+  - GoogleUtilities/Reachability (7.11.5):
     - GoogleUtilities/Logger
-  - GoogleUtilities/UserDefaults (7.11.1):
+  - GoogleUtilities/UserDefaults (7.11.5):
     - GoogleUtilities/Logger
   - image_editor_common (1.0.0):
     - Flutter
@@ -101,15 +101,18 @@ PODS:
     - FlutterMacOS
   - integration_test (0.0.1):
     - Flutter
-  - libwebp (1.2.4):
-    - libwebp/demux (= 1.2.4)
-    - libwebp/mux (= 1.2.4)
-    - libwebp/webp (= 1.2.4)
-  - libwebp/demux (1.2.4):
+  - libwebp (1.3.1):
+    - libwebp/demux (= 1.3.1)
+    - libwebp/mux (= 1.3.1)
+    - libwebp/sharpyuv (= 1.3.1)
+    - libwebp/webp (= 1.3.1)
+  - libwebp/demux (1.3.1):
     - libwebp/webp
-  - libwebp/mux (1.2.4):
+  - libwebp/mux (1.3.1):
     - libwebp/demux
-  - libwebp/webp (1.2.4)
+  - libwebp/sharpyuv (1.3.1)
+  - libwebp/webp (1.3.1):
+    - libwebp/sharpyuv
   - local_auth_ios (0.0.1):
     - Flutter
   - Mantle (2.2.0):
@@ -137,21 +140,23 @@ PODS:
   - photo_manager (2.0.0):
     - Flutter
     - FlutterMacOS
-  - PromisesObjC (2.2.0)
+  - PromisesObjC (2.3.1)
   - ReachabilitySwift (5.0.0)
   - receive_sharing_intent (0.0.1):
     - Flutter
-  - SDWebImage (5.16.0):
-    - SDWebImage/Core (= 5.16.0)
-  - SDWebImage/Core (5.16.0)
-  - SDWebImageWebPCoder (0.11.0):
+  - SDWebImage (5.17.0):
+    - SDWebImage/Core (= 5.17.0)
+  - SDWebImage/Core (5.17.0)
+  - SDWebImageWebPCoder (0.13.0):
     - libwebp (~> 1.0)
-    - SDWebImage/Core (~> 5.15)
-  - Sentry/HybridSDK (7.31.5)
+    - SDWebImage/Core (~> 5.17)
+  - Sentry/HybridSDK (8.9.1):
+    - SentryPrivate (= 8.9.1)
   - sentry_flutter (0.0.1):
     - Flutter
     - FlutterMacOS
-    - Sentry/HybridSDK (= 7.31.5)
+    - Sentry/HybridSDK (= 8.9.1)
+  - SentryPrivate (8.9.1)
   - share_plus (0.0.1):
     - Flutter
   - shared_preferences_foundation (0.0.1):
@@ -238,6 +243,7 @@ SPEC REPOS:
     - SDWebImage
     - SDWebImageWebPCoder
     - Sentry
+    - SentryPrivate
     - Toast
 
 EXTERNAL SOURCES:
@@ -331,8 +337,8 @@ SPEC CHECKSUMS:
   firebase_core: ce64b0941c6d87c6ef5022ae9116a158236c8c94
   firebase_messaging: 42912365e62efc1ea3e00724e5eecba6068ddb88
   FirebaseCore: b68d3616526ec02e4d155166bbafb8eca64af557
-  FirebaseCoreInternal: 971029061d326000d65bfdc21f5502c75c8b0893
-  FirebaseInstallations: 52153982b057d3afcb4e1fbb3eb0b6d00611e681
+  FirebaseCoreInternal: b342e37cd4f5b4454ec34308f073420e7920858e
+  FirebaseInstallations: b28af1b9f997f1a799efe818c94695a3728c352f
   FirebaseMessaging: 6b7052cc3da7bc8e5f72bef871243e8f04a14eed
   fk_user_agent: 1f47ec39291e8372b1d692b50084b0d54103c545
   Flutter: f04841e97a9d0b0a8025694d0796dd46242b2854
@@ -345,13 +351,13 @@ SPEC CHECKSUMS:
   flutter_sodium: c84426b4de738514b5b66cfdeb8a06634e72fe0b
   fluttertoast: fafc4fa4d01a6a9e4f772ecd190ffa525e9e2d9c
   FMDB: 2ce00b547f966261cd18927a3ddb07cb6f3db82a
-  GoogleDataTransport: f0308f5905a745f94fb91fea9c6cbaf3831cb1bd
-  GoogleUtilities: 9aa0ad5a7bc171f8bae016300bfcfa3fb8425749
+  GoogleDataTransport: 54dee9d48d14580407f8f5fbf2f496e92437a2f2
+  GoogleUtilities: 13e2c67ede716b8741c7989e26893d151b2b2084
   image_editor_common: d6f6644ae4a6de80481e89fe6d0a8c49e30b4b43
   image_picker_ios: 4a8aadfbb6dc30ad5141a2ce3832af9214a705b5
   in_app_purchase_storekit: 4fb7ee9e824b1f09107fbfbbce8c4b276366dc43
   integration_test: 13825b8a9334a850581300559b8839134b124670
-  libwebp: f62cb61d0a484ba548448a4bd52aabf150ff6eef
+  libwebp: 33dc822fbbf4503668d09f7885bbfedc76c45e96
   local_auth_ios: c6cf091ded637a88f24f86a8875d8b0f526e2605
   Mantle: c5aa8794a29a022dfbbfc9799af95f477a69b62d
   media_extension: 6d30dc1431ebaa63f43c397c37917b1a0a597a4c
@@ -363,13 +369,14 @@ SPEC CHECKSUMS:
   package_info_plus: 6c92f08e1f853dc01228d6f553146438dafcd14e
   path_provider_foundation: eaf5b3e458fc0e5fbb9940fb09980e853fe058b8
   photo_manager: 4f6810b7dfc4feb03b461ac1a70dacf91fba7604
-  PromisesObjC: 09985d6d70fbe7878040aa746d78236e6946d2ef
+  PromisesObjC: c50d2056b5253dadbd6c2bea79b0674bd5a52fa4
   ReachabilitySwift: 985039c6f7b23a1da463388634119492ff86c825
   receive_sharing_intent: c0d87310754e74c0f9542947e7cbdf3a0335a3b1
-  SDWebImage: 2aea163b50bfcb569a2726b6a754c54a4506fcf6
-  SDWebImageWebPCoder: 295a6573c512f54ad2dd58098e64e17dcf008499
-  Sentry: 4c9babff9034785067c896fd580b1f7de44da020
-  sentry_flutter: 1346a880b24c0240807b53b10cf50ddad40f504e
+  SDWebImage: 750adf017a315a280c60fde706ab1e552a3ae4e9
+  SDWebImageWebPCoder: af09429398d99d524cae2fe00f6f0f6e491ed102
+  Sentry: e3203780941722a1fcfee99e351de14244c7f806
+  sentry_flutter: 8f0ffd53088e6a4d50c095852c5cad9e4405025c
+  SentryPrivate: 5e3683390f66611fc7c6215e27645873adb55d13
   share_plus: 056a1e8ac890df3e33cb503afffaf1e9b4fbae68
   shared_preferences_foundation: e2dae3258e06f44cc55f49d42024fd8dd03c590c
   sqflite: 31f7eba61e3074736dff8807a9b41581e4f7f15a

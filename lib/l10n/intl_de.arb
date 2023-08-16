@@ -219,7 +219,7 @@
   "after1Month": "Nach 1 Monat",
   "after1Year": "Nach 1 Jahr",
   "manageParticipants": "Verwalten",
-  "albumParticipantsCount": "{count, plural, one {}=0 {Keine Teilnehmer} =1 {1 Teilnehmer} other {{count} Teilnehmer}}",
+  "albumParticipantsCount": "{count, plural, =0 {Keine Teilnehmer} =1 {1 Teilnehmer} other {{count} Teilnehmer}}",
   "@albumParticipantsCount": {
     "placeholders": {
       "count": {
