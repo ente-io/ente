@@ -271,8 +271,9 @@ class Configuration {
   // SRP setup for existing users.
   Future<Uint8List> decryptSecretsAndGetKeyEncKey(
     String password,
-    KeyAttributes attributes,
-  ) async {
+    KeyAttributes attributes, {
+    Uint8List? keyEncryptionKey,
+  }) async {
     validatePreVerificationStateCheck(
       attributes,
       password,
@@ -280,7 +281,7 @@ class Configuration {
     );
     // Derive key-encryption-key from the entered password and existing
     // mem and ops limits
-    final keyEncryptionKey = await CryptoUtil.deriveKey(
+    keyEncryptionKey ??= await CryptoUtil.deriveKey(
       utf8.encode(password) as Uint8List,
       CryptoUtil.base642bin(attributes.kekSalt),
       attributes.memLimit!,
