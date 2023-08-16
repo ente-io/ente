@@ -67,7 +67,7 @@
 		 <key>FLTEnableImpeller</key>
          <false />
          <key>FLTEnableWideGamut</key>
-         <true/>
+         <false/>
 		<key>NSFaceIDUsageDescription</key>
 		<string>Please allow ente to lock itself with FaceID or TouchID</string>
 		<key>NSCameraUsageDescription</key>
