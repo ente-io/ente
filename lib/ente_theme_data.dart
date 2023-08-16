@@ -344,7 +344,7 @@ extension CustomColorScheme on ColorScheme {
       ? const Color.fromRGBO(245, 245, 245, 1.0)
       : const Color.fromRGBO(30, 30, 30, 1.0);
 
-  Color get searchResultsCountTextColor => brightness == Brightness.light
+  Color get mutedTextColor => brightness == Brightness.light
       ? const Color.fromRGBO(80, 80, 80, 1)
       : const Color.fromRGBO(150, 150, 150, 1);
 
