@@ -179,7 +179,7 @@ PODS:
   - video_thumbnail (0.0.1):
     - Flutter
     - libwebp
-  - wakelock (0.0.1):
+  - wakelock_plus (0.0.1):
     - Flutter
 
 DEPENDENCIES:
@@ -222,7 +222,7 @@ DEPENDENCIES:
   - url_launcher_ios (from `.symlinks/plugins/url_launcher_ios/ios`)
   - video_player_avfoundation (from `.symlinks/plugins/video_player_avfoundation/ios`)
   - video_thumbnail (from `.symlinks/plugins/video_thumbnail/ios`)
-  - wakelock (from `.symlinks/plugins/wakelock/ios`)
+  - wakelock_plus (from `.symlinks/plugins/wakelock_plus/ios`)
 
 SPEC REPOS:
   trunk:
@@ -325,8 +325,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/video_player_avfoundation/ios"
   video_thumbnail:
     :path: ".symlinks/plugins/video_thumbnail/ios"
-  wakelock:
-    :path: ".symlinks/plugins/wakelock/ios"
+  wakelock_plus:
+    :path: ".symlinks/plugins/wakelock_plus/ios"
 
 SPEC CHECKSUMS:
   background_fetch: bc9b44b0bf8b434e282a2ac9be8662800a0296ed
@@ -366,7 +366,7 @@ SPEC CHECKSUMS:
   nanopb: b552cce312b6c8484180ef47159bc0f65a1f0431
   open_mail_app: 794172f6a22cd16319d3ddaf45e945b2f74952b0
   OrderedSet: aaeb196f7fef5a9edf55d89760da9176ad40b93c
-  package_info_plus: 6c92f08e1f853dc01228d6f553146438dafcd14e
+  package_info_plus: fd030dabf36271f146f1f3beacd48f564b0f17f7
   path_provider_foundation: eaf5b3e458fc0e5fbb9940fb09980e853fe058b8
   photo_manager: 4f6810b7dfc4feb03b461ac1a70dacf91fba7604
   PromisesObjC: c50d2056b5253dadbd6c2bea79b0674bd5a52fa4
@@ -387,7 +387,7 @@ SPEC CHECKSUMS:
   url_launcher_ios: 08a3dfac5fb39e8759aeb0abbd5d9480f30fc8b4
   video_player_avfoundation: 81e49bb3d9fb63dccf9fa0f6d877dc3ddbeac126
   video_thumbnail: c4e2a3c539e247d4de13cd545344fd2d26ffafd1
-  wakelock: d0fc7c864128eac40eba1617cb5264d9c940b46f
+  wakelock_plus: 8b09852c8876491e4b6d179e17dfe2a0b5f60d47
 
 PODFILE CHECKSUM: c1a8f198a245ed1f10e40b617efdb129b021b225
 
