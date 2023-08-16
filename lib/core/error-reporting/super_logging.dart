@@ -216,7 +216,7 @@ class SuperLogging {
 
   static void setUserID(String userID) async {
     if (config.sentryDsn != null) {
-      Sentry.configureScope((scope) => scope.user = SentryUser(id: userID));
+      Sentry.configureScope((scope) => scope.setUser(SentryUser(id: userID)));
       $.info("setting sentry user ID to: $userID");
     }
   }
