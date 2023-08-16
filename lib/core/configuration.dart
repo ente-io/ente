@@ -38,6 +38,7 @@ class Configuration {
   static const encryptedTokenKey = "encrypted_token";
   static const userIDKey = "user_id";
   static const hasMigratedSecureStorageKey = "has_migrated_secure_storage";
+  static const hasOptedForOfflineModeKey = "has_opted_for_offline_mode";
 
   final kTempFolderDeletionTimeBuffer = const Duration(days: 1).inMicroseconds;
 
@@ -179,8 +180,9 @@ class Configuration {
     return KeyGenResult(attributes, privateAttributes, loginKey);
   }
 
-
-  Future<Tuple2<KeyAttributes, Uint8List>> getAttributesForNewPassword(String password) async {
+  Future<Tuple2<KeyAttributes, Uint8List>> getAttributesForNewPassword(
+    String password,
+  ) async {
     // Get master key
     final masterKey = getKey();
 
@@ -215,18 +217,16 @@ class Configuration {
   // SRP setup for existing users.
   Future<Uint8List> decryptSecretsAndGetKeyEncKey(
     String password,
-    KeyAttributes attributes,
-  {
+    KeyAttributes attributes, {
     Uint8List? keyEncryptionKey,
-  }
-  ) async {
+  }) async {
     _logger.info('Start decryptAndSaveSecrets');
     keyEncryptionKey ??= await CryptoUtil.deriveKey(
-        utf8.encode(password) as Uint8List,
-        Sodium.base642bin(attributes.kekSalt),
-        attributes.memLimit,
-        attributes.opsLimit,
-      );
+      utf8.encode(password) as Uint8List,
+      Sodium.base642bin(attributes.kekSalt),
+      attributes.memLimit,
+      attributes.opsLimit,
+    );
 
     _logger.info('user-key done');
     Uint8List key;
@@ -444,6 +444,14 @@ class Configuration {
 
   bool hasConfiguredAccount() {
     return getToken() != null && _key != null;
+  }
+
+  bool hasOptedForOfflineMode() {
+    return _preferences.getBool(hasOptedForOfflineModeKey) ?? false;
+  }
+
+  Future<void> optForOfflineMode() {
+    return _preferences.setBool(hasOptedForOfflineModeKey, true);
   }
 
   bool shouldShowLockScreen() {
