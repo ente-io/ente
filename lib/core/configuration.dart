@@ -30,6 +30,7 @@ class Configuration {
   static const emailKey = "email";
   static const keyAttributesKey = "key_attributes";
   static const keyKey = "key";
+  static const localKeyKey = "local_key";
   static const keyShouldShowLockScreen = "should_show_lock_screen";
   static const lastTempFolderClearTimeKey = "last_temp_folder_clear_time";
   static const secretKeyKey = "secret_key";
@@ -53,6 +54,7 @@ class Configuration {
   late FlutterSecureStorage _secureStorage;
   late String _tempDirectory;
   late String _thumbnailCacheDirectory;
+  late Uint8List _localKey;
 
   // 6th July 22: Remove this after 3 months. Hopefully, active users
   // will migrate to newer version of the app, where shared media is stored
@@ -116,6 +118,7 @@ class Configuration {
       }
       await _migrateSecurityStorageToFirstUnlock();
     }
+    await _setupLocalKey();
   }
 
   Future<void> logout({bool autoLogout = false}) async {
@@ -300,6 +303,10 @@ class Configuration {
     );
   }
 
+  Uint8List getLocalKey() {
+    return _localKey;
+  }
+
   String getHttpEndpoint() {
     return endpoint;
   }
@@ -472,6 +479,30 @@ class Configuration {
 
   String? getVolatilePassword() {
     return _volatilePassword;
+  }
+
+
+  Future<void> _setupLocalKey() async {
+    final localKey = await _secureStorage.read(
+      key: localKeyKey,
+      iOptions: _secureStorageOptionsIOS,
+    );
+
+    if (localKey == null) {
+      await _generateLocalKey();
+      return _setupLocalKey();
+    } else {
+      _localKey = Sodium.base642bin(localKey);
+    }
+  }
+
+  Future<void> _generateLocalKey() async {
+    final key = CryptoUtil.generateKey();
+    await _secureStorage.write(
+      key: localKeyKey,
+      value: Sodium.bin2base64(key),
+      iOptions: _secureStorageOptionsIOS,
+    );
   }
 
   Future<void> _migrateSecurityStorageToFirstUnlock() async {
