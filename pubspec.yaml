@@ -56,7 +56,7 @@ dependencies:
     sdk: flutter
   flutter_animate: ^4.1.0
   flutter_cache_manager: ^3.3.0
-  flutter_datetime_picker: ^1.5.1
+  flutter_datetime_picker_bdaya: ^3.0.2
   flutter_easyloading: ^3.0.0
   flutter_email_sender: ^5.2.0
   flutter_image_compress: ^1.1.0
@@ -114,8 +114,8 @@ dependencies:
   quiver: ^3.0.1
   receive_sharing_intent: ^1.4.5
   scrollable_positioned_list: ^0.3.5
-  sentry: ^6.12.1
-  sentry_flutter: ^6.12.1
+  sentry: ^7.9.0
+  sentry_flutter: ^7.9.0
   share_plus: ^4.0.10
   shared_preferences: ^2.0.5
   sqflite: ^2.0.0+3

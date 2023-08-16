@@ -648,14 +648,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.3.0"
-  flutter_datetime_picker:
+  flutter_datetime_picker_bdaya:
     dependency: "direct main"
     description:
-      name: flutter_datetime_picker
-      sha256: "8e695c63c769350e541951227c2775190ec73ceda774a315b1dc9a99d5facfe5"
+      name: flutter_datetime_picker_bdaya
+      sha256: "6cb42a7d659cb9a10afa0a390b81677e15fd2f7e340e7eaffabf770e6b6709c0"
       url: "https://pub.dev"
     source: hosted
-    version: "1.5.1"
+    version: "3.0.2"
   flutter_driver:
     dependency: "direct dev"
     description: flutter
@@ -1668,18 +1668,18 @@ packages:
     dependency: "direct main"
     description:
       name: sentry
-      sha256: a1529c545fcbc899e5dcc7c94ff1c6ad0c334dfc99a3cda366b1da98af7c5678
+      sha256: "39c23342fc96105da449914f7774139a17a0ca8a4e70d9ad5200171f7e47d6ba"
       url: "https://pub.dev"
     source: hosted
-    version: "6.22.0"
+    version: "7.9.0"
   sentry_flutter:
     dependency: "direct main"
     description:
       name: sentry_flutter
-      sha256: cab07e99a8f27af94f399cabceaff6968011660505b30a0e2286728a81bc476c
+      sha256: ff68ab31918690da004a42e20204242a3ad9ad57da7e2712da8487060ac9767f
       url: "https://pub.dev"
     source: hosted
-    version: "6.22.0"
+    version: "7.9.0"
   share_plus:
     dependency: "direct main"
     description:

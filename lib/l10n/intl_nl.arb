@@ -219,7 +219,7 @@
   "after1Month": "Na 1 maand",
   "after1Year": "Na 1 jaar",
   "manageParticipants": "Beheren",
-  "albumParticipantsCount": "{count, plural, one {}=0 {Geen deelnemers} =1 {1 deelnemer} other {{count} deelnemers}}",
+  "albumParticipantsCount": "{count, plural, =0 {Geen deelnemers} =1 {1 deelnemer} other {{count} deelnemers}}",
   "@albumParticipantsCount": {
     "placeholders": {
       "count": {
@@ -730,7 +730,7 @@
   "referFriendsAnd2xYourPlan": "Verwijs vrienden en 2x uw abonnement",
   "shareAlbumHint": "Open een album en tik op de deelknop rechts bovenaan om te delen.",
   "itemsShowTheNumberOfDaysRemainingBeforePermanentDeletion": "Bestanden tonen het aantal resterende dagen voordat ze permanent worden verwijderd",
-  "trashDaysLeft": "{count, plural, one {}=0 {} =1 {1 dag} other {{count} dagen}}",
+  "trashDaysLeft": "{count, plural, =0 {} =1 {1 dag} other {{count} dagen}}",
   "@trashDaysLeft": {
     "description": "Text to indicate number of days remaining before permanent deletion",
     "placeholders": {

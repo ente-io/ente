@@ -221,7 +221,7 @@
   "after1Month": "Dopo un mese",
   "after1Year": "Dopo un anno",
   "manageParticipants": "Gestisci",
-  "albumParticipantsCount": "{count, plural, one {}=0 {Nessun partecipante} =1 {1 Partecipante} other {{count} Partecipanti}}",
+  "albumParticipantsCount": "{count, plural, =0 {Nessun partecipante} =1 {1 Partecipante} other {{count} Partecipanti}}",
   "@albumParticipantsCount": {
     "placeholders": {
       "count": {
@@ -242,7 +242,7 @@
   "publicLinkEnabled": "Link pubblico abilitato",
   "shareALink": "Condividi un link",
   "sharedAlbumSectionDescription": "Crea album condivisi e collaborativi con altri utenti ente, inclusi utenti su piani gratuiti.",
-  "shareWithPeopleSectionTitle": "{numberOfPeople, plural, one {}=0 {Condividi con persone specifiche} =1 {Condividi con una persona} other {Condividi con {numberOfPeople} persone}}",
+  "shareWithPeopleSectionTitle": "{numberOfPeople, plural, =0 {Condividi con persone specifiche} =1 {Condividi con una persona} other {Condividi con {numberOfPeople} persone}}",
   "@shareWithPeopleSectionTitle": {
     "placeholders": {
       "numberOfPeople": {
@@ -419,7 +419,7 @@
   "skip": "Salta",
   "updatingFolderSelection": "Aggiornamento della selezione delle cartelle...",
   "itemCount": "{count, plural, one{{count} elemento} other{{count} elementi}}",
-  "deleteItemCount": "{count, plural, one {}=1 {Elimina {count} elemento} other {Elimina {count} elementi}}",
+  "deleteItemCount": "{count, plural, =1 {Elimina {count} elemento} other {Elimina {count} elementi}}",
   "duplicateItemsGroup": "{count} file, {formattedSize} l'uno",
   "@duplicateItemsGroup": {
     "description": "Display the number of duplicate files and their size",
@@ -754,7 +754,7 @@
   "referFriendsAnd2xYourPlan": "Invita un amico e raddoppia il tuo spazio",
   "shareAlbumHint": "Apri un album e tocca il pulsante di condivisione in alto a destra per condividerlo.",
   "itemsShowTheNumberOfDaysRemainingBeforePermanentDeletion": "Gli elementi mostrano il numero di giorni rimanenti prima della cancellazione permanente",
-  "trashDaysLeft": "{count, plural, one {}=0 {} =1 {1 giorno} other {{count} giorni}}",
+  "trashDaysLeft": "{count, plural, =0 {} =1 {1 giorno} other {{count} giorni}}",
   "@trashDaysLeft": {
     "description": "Text to indicate number of days remaining before permanent deletion",
     "placeholders": {
