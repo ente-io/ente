@@ -174,7 +174,7 @@ class _CodeWidgetState extends State<CodeWidget> {
                             Row(
                               mainAxisAlignment: MainAxisAlignment.end,
                               children: [
-                                widget.code.hasSynced == null &&
+                                widget.code.hasSynced != null &&
                                         widget.code.hasSynced!
                                     ? Container()
                                     : const Icon(
