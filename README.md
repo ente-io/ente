@@ -19,7 +19,7 @@ This repository contains the code for our mobile apps, built with a lot of ‚ù§Ô∏
 - Highlights of memories from previous years
 - Photos map powered by `OpenStreetMap`
 - Hidden photos protected by a device lock
-- Pin or Archive albums
+- Options to Pin and Archive albums
 - Search by album, day, month, year, and file types (more in the works...)
 - Ability to detect and delete duplicate files
 - Light and dark mode
