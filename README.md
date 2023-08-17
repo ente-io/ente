@@ -17,6 +17,9 @@ This repository contains the code for our mobile apps, built with a lot of ❤�
 - Family plans
 - Shareable links for albums
 - Highlights of memories from previous years
+- Photos map powered by `OpenStreetMap`
+- Hidden photos protected by a device lock
+- Pin or Archive albums
 - Search by album, day, month, year, and file types (more in the works...)
 - Ability to detect and delete duplicate files
 - Light and dark mode
@@ -61,13 +64,15 @@ You can alternatively install the build from PlayStore or F-Droid.
 
 ## 🧑‍💻 Building from source
 
-1. [Install Flutter](https://flutter.dev/docs/get-started/install)
+1. [Install Flutter v3.10.6](https://flutter.dev/docs/get-started/install)
 2. Clone this repository with `git clone git@github.com:ente-io/photos-app.git`
 3. Pull in all submodules with `git submodule update --init --recursive`
 4. Enable repo git hooks `git config core.hooksPath hooks`
 5. Setup TensorFlowLite by executing `setup.sh`
 6. If using Visual Studio Code, add the [Flutter Intl](https://marketplace.visualstudio.com/items?itemName=localizely.flutter-intl) extension
-7. For Android, [setup your keystore](https://docs.flutter.dev/deployment/android#create-an-upload-keystore) and run `flutter build apk --release --flavor independent`
+7. Android:
+   * For development, run ```flutter run -t lib/main.dart --flavor independent```
+   * For building APK, [setup your keystore](https://docs.flutter.dev/deployment/android#create-an-upload-keystore) and run `flutter build apk --release --flavor independent`
 8. For iOS, run `flutter build ios`
 <br/>
 
