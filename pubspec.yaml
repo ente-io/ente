@@ -95,6 +95,8 @@ flutter:
     - assets/
     - assets/simple-icons/icons/
     - assets/simple-icons/_data/
+    - assets/custom-icons/icons/
+    - assets/custom-icons/_data/
 
   fonts:
     - family: Inter
