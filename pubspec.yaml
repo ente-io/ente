@@ -92,6 +92,7 @@ flutter:
   # https://docs:flutter:dev/development/ui/assets-and-images:
   assets:
     - assets/
+    - assets/simple-icons/icons/
 
   fonts:
     - family: Inter
