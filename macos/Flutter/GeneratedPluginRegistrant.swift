@@ -9,7 +9,7 @@ import connectivity_macos
 import device_info_plus
 import flutter_local_notifications
 import flutter_secure_storage_macos
-import package_info_plus_macos
+import package_info_plus
 import path_provider_foundation
 import sentry_flutter
 import share_plus_macos
