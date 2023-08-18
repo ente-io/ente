@@ -1,3 +1,4 @@
+import 'package:ente_auth/ui/settings/data/import/aegis_import.dart';
 import 'package:ente_auth/ui/settings/data/import/encrypted_ente_import.dart';
 import 'package:ente_auth/ui/settings/data/import/google_auth_import.dart';
 import 'package:ente_auth/ui/settings/data/import/plain_text_import.dart';
@@ -25,8 +26,10 @@ class ImportService {
         break;
       case ImportType.googleAuthenticator:
         showGoogleAuthInstruction(context);
-
         // showToast(context, 'coming soon');
+        break;
+      case ImportType.aegis:
+        showAegisImportInstruction(context);
         break;
     }
   }
