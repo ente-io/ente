@@ -14,7 +14,6 @@ import 'package:ente_auth/ui/components/dialog_widget.dart';
 import 'package:ente_auth/ui/components/models/button_type.dart';
 import 'package:ente_auth/ui/settings/data/import/import_success.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
-import 'package:ente_auth/utils/toast_util.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -83,7 +82,10 @@ Future<void> _pickAegisJsonFile(BuildContext context) async {
 }
 
 Future<int?> _processAegisExportFile(
-    BuildContext context, String path, final ProgressDialog dialog) async {
+  BuildContext context,
+  String path,
+  final ProgressDialog dialog,
+) async {
   File file = File(path);
 
   final jsonString = await file.readAsString();
@@ -124,7 +126,6 @@ Future<int?> _processAegisExportFile(
   } else {
     aegisDB = decodedJson['db'];
   }
-  int dbVersion = aegisDB['version'];
   final parsedCodes = [];
   for (var item in aegisDB['entries']) {
     var kind = item['type'];
