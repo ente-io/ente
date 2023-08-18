@@ -111,23 +111,18 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     return galleryType == GalleryType.homepage
         ? const SizedBox.shrink()
         : AppBar(
-            backgroundColor: galleryType == GalleryType.homepage
-                ? const Color(0x00000000)
-                : null,
             elevation: 0,
             centerTitle: false,
-            title: galleryType == GalleryType.homepage
-                ? const SizedBox.shrink()
-                : TextButton(
-                    child: Text(
-                      _appBarTitle!,
-                      style: Theme.of(context)
-                          .textTheme
-                          .headlineSmall!
-                          .copyWith(fontSize: 16),
-                    ),
-                    onPressed: () => _renameAlbum(context),
-                  ),
+            title: TextButton(
+              child: Text(
+                _appBarTitle!,
+                style: Theme.of(context)
+                    .textTheme
+                    .headlineSmall!
+                    .copyWith(fontSize: 16),
+              ),
+              onPressed: () => _renameAlbum(context),
+            ),
             actions: _getDefaultActions(context),
           );
   }
