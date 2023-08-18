@@ -85,6 +85,7 @@
   "importSelectJsonFile": "Select JSON file",
   "importEnteEncGuide": "Select the encrypted JSON file exported from ente",
   "importRaivoGuide": "Use the \"Export OTPs to Zip archive\" option in Raivo's Settings.\n\nExtract the zip file and import the JSON file.",
+  "importAegisGuide": "Use the \"Export the vault\" option in Aegis's Settings.\n\nDeselect 'Encrypt the vault` option while exporting from Aegis",
   "exportCodes": "Export codes",
   "importLabel": "Import",
   "importInstruction": "Please select a file that contains a list of your codes in the following format",
