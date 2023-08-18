@@ -20,20 +20,20 @@ class IconUtils {
 
   Widget getIcon(String provider) {
     final title = _getProviderTitle(provider);
-    if (_simpleIcons.containsKey(title)) {
-      return _getSVGIcon(
-        "assets/simple-icons/icons/$title.svg",
-        title,
-        _simpleIcons[title]!,
-      );
-    } else if (_customIcons.containsKey(title)) {
+    if (_customIcons.containsKey(title)) {
       return _getSVGIcon(
         "assets/custom-icons/icons/$title.svg",
         title,
         _customIcons[title]!,
       );
+    } else if (_simpleIcons.containsKey(title)) {
+      return _getSVGIcon(
+        "assets/simple-icons/icons/$title.svg",
+        title,
+        _simpleIcons[title]!,
+      );
     } else {
-      return Text(title);
+      return const SizedBox.shrink();
     }
   }
 
