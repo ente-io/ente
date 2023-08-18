@@ -44,6 +44,7 @@ dependencies:
     git:
       url: https://github.com/ente-io/flutter_sodium.git
   flutter_speed_dial: ^6.2.0
+  flutter_svg: ^2.0.5
   fluttertoast: ^8.1.1
   google_nav_bar: ^5.0.5 #supported
   http: ^0.13.4
@@ -92,6 +93,10 @@ flutter:
   # https://docs:flutter:dev/development/ui/assets-and-images:
   assets:
     - assets/
+    - assets/simple-icons/icons/
+    - assets/simple-icons/_data/
+    - assets/custom-icons/icons/
+    - assets/custom-icons/_data/
 
   fonts:
     - family: Inter

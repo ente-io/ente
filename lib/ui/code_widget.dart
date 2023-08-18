@@ -8,6 +8,7 @@ import 'package:ente_auth/onboarding/view/setup_enter_secret_key_page.dart';
 import 'package:ente_auth/onboarding/view/view_qr_page.dart';
 import 'package:ente_auth/store/code_store.dart';
 import 'package:ente_auth/ui/code_timer_progress.dart';
+import 'package:ente_auth/ui/utils/icon_utils.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
 import 'package:ente_auth/utils/toast_util.dart';
 import 'package:ente_auth/utils/totp_util.dart';
@@ -81,7 +82,7 @@ class _CodeWidgetState extends State<CodeWidget> {
               backgroundColor: Colors.grey.withOpacity(0.1),
               borderRadius: const BorderRadius.all(Radius.circular(12.0)),
               foregroundColor:
-              Theme.of(context).colorScheme.inverseBackgroundColor,
+                  Theme.of(context).colorScheme.inverseBackgroundColor,
               icon: Icons.qr_code_2_outlined,
               label: "QR",
               padding: const EdgeInsets.only(left: 4, right: 0),
@@ -90,7 +91,6 @@ class _CodeWidgetState extends State<CodeWidget> {
             const SizedBox(
               width: 4,
             ),
-
             SlidableAction(
               onPressed: _onEditPressed,
               backgroundColor: Colors.grey.withOpacity(0.1),
@@ -171,14 +171,23 @@ class _CodeWidgetState extends State<CodeWidget> {
                                 ),
                               ],
                             ),
-                            widget.code.hasSynced != null &&
-                                    widget.code.hasSynced!
-                                ? Container()
-                                : const Icon(
-                                    Icons.sync_disabled,
-                                    size: 20,
-                                    color: Colors.amber,
-                                  ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                widget.code.hasSynced != null &&
+                                        widget.code.hasSynced!
+                                    ? Container()
+                                    : const Icon(
+                                        Icons.sync_disabled,
+                                        size: 20,
+                                        color: Colors.amber,
+                                      ),
+                                const SizedBox(width: 12),
+                                IconUtils.instance.getIcon(
+                                  safeDecode(widget.code.issuer).trim(),
+                                ),
+                              ],
+                            ),
                           ],
                         ),
                       ),
@@ -231,7 +240,7 @@ class _CodeWidgetState extends State<CodeWidget> {
                                         style:
                                             Theme.of(context).textTheme.caption,
                                       ),
-                                       InkWell(
+                                      InkWell(
                                         onTap: _onNextHotpTapped,
                                         child: const Icon(
                                           Icons.forward_outlined,
@@ -264,8 +273,13 @@ class _CodeWidgetState extends State<CodeWidget> {
   }
 
   void _onNextHotpTapped() {
-    if(widget.code.type == Type.hotp) {
-     CodeStore.instance.addCode(widget.code.copyWith(counter: widget.code.counter + 1), shouldSync: true).ignore();
+    if (widget.code.type == Type.hotp) {
+      CodeStore.instance
+          .addCode(
+            widget.code.copyWith(counter: widget.code.counter + 1),
+            shouldSync: true,
+          )
+          .ignore();
     }
   }
 
@@ -305,7 +319,6 @@ class _CodeWidgetState extends State<CodeWidget> {
       },
     );
   }
-
 
   String _getCurrentOTP() {
     try {
