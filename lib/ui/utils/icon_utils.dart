@@ -33,7 +33,7 @@ class IconUtils {
         _customIcons[title]!,
       );
     } else {
-      return Text(title);
+      return const SizedBox.shrink();
     }
   }
 
