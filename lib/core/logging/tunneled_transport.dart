@@ -22,11 +22,11 @@ class TunneledTransport implements Transport {
       : _dsn = _options.dsn != null ? Dsn.parse(_options.dsn!) : null,
         _headers = _buildHeaders(
           _options.platformChecker.isWeb,
-          _options.sdk.identifier,
+          _options.sentryClientName,
         ) {
     _credentialBuilder = _CredentialBuilder(
       _dsn,
-      _options.sdk.identifier,
+      _options.sentryClientName,
       _options.clock,
     );
   }
