@@ -3,17 +3,16 @@ import {
     Box,
     Button,
     ButtonProps,
-    IconButton,
     Snackbar,
     Stack,
     SxProps,
     Theme,
     Typography,
 } from '@mui/material';
-import React from 'react';
 import { NotificationAttributes } from 'types/Notification';
 
 import InfoIcon from '@mui/icons-material/Info';
+import { IconButtonWithBG } from './Container';
 
 interface Iprops {
     open: boolean;
@@ -86,18 +85,28 @@ export default function Notification({
                                 {attributes.message}
                             </Typography>
                         )}
+                        {attributes.title && (
+                            <Typography fontWeight="bold">
+                                {attributes.title}
+                            </Typography>
+                        )}
+                        {attributes.caption && (
+                            <Typography variant="small">
+                                {attributes.caption}
+                            </Typography>
+                        )}
                     </Stack>
 
                     {attributes.endIcon ? (
-                        <IconButton
+                        <IconButtonWithBG
                             onClick={attributes.onClick}
                             sx={{ fontSize: '36px' }}>
                             {attributes?.endIcon}
-                        </IconButton>
+                        </IconButtonWithBG>
                     ) : (
-                        <IconButton onClick={handleClose}>
+                        <IconButtonWithBG onClick={handleClose}>
                             <CloseIcon />
-                        </IconButton>
+                        </IconButtonWithBG>
                     )}
                 </Stack>
             </Button>
