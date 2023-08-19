@@ -120,7 +120,9 @@ class _HiddenPageState extends State<HiddenPage> {
       tagPrefix: widget.tagPrefix,
       selectedFiles: _selectedFiles,
       initialFiles: null,
-      emptyState: const EmptyHiddenWidget(),
+      emptyState: _hiddenCollectionsExcludingDefault.isEmpty
+          ? const EmptyHiddenWidget()
+          : const SizedBox.shrink(),
       header: AlbumHorizontalList(
         () async {
           return _hiddenCollectionsExcludingDefault;
