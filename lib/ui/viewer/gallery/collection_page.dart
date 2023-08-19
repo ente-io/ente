@@ -5,7 +5,6 @@ import 'package:photos/db/files_db.dart';
 import "package:photos/events/collection_meta_event.dart";
 import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/events/files_updated_event.dart';
-import 'package:photos/models/collection.dart';
 import 'package:photos/models/collection_items.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/file_load_result.dart';
@@ -40,8 +39,10 @@ class CollectionPage extends StatelessWidget {
       return const EmptyState();
     }
 
-    final galleryType =
-        _getGalleryType(c.collection, Configuration.instance.getUserID()!);
+    final galleryType = getGalleryType(
+      c.collection,
+      Configuration.instance.getUserID()!,
+    );
     final List<File>? initialFiles =
         c.thumbnail != null ? [c.thumbnail!] : null;
     final gallery = Gallery(
@@ -110,23 +111,5 @@ class CollectionPage extends StatelessWidget {
         ],
       ),
     );
-  }
-
-  GalleryType _getGalleryType(Collection c, int userID) {
-    if (!c.isOwner(userID)) {
-      return GalleryType.sharedCollection;
-    }
-    if (c.isDefaultHidden()) {
-      return GalleryType.hidden;
-    } else if (c.type == CollectionType.uncategorized) {
-      return GalleryType.uncategorized;
-    } else if (c.type == CollectionType.favorites) {
-      return GalleryType.favorite;
-    } else if (c.isQuickLinkCollection()) {
-      return GalleryType.quickLink;
-    }
-    debugPrint("Unknown gallery type for collection ${c.id}, falling back to "
-        "default");
-    return GalleryType.ownedCollection;
   }
 }

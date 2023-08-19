@@ -1,3 +1,6 @@
+import "package:flutter/foundation.dart";
+import "package:photos/models/collection.dart";
+
 enum GalleryType {
   homepage,
   archive,
@@ -214,4 +217,26 @@ extension GalleyTypeExtension on GalleryType {
   bool showPermanentlyDeleteOption() {
     return this == GalleryType.trash;
   }
+}
+
+extension GalleryAppBarExtn on GalleryType {
+
+}
+
+GalleryType getGalleryType(Collection c, int userID) {
+  if (!c.isOwner(userID)) {
+    return GalleryType.sharedCollection;
+  }
+  if (c.isDefaultHidden()) {
+    return GalleryType.hidden;
+  } else if (c.type == CollectionType.uncategorized) {
+    return GalleryType.uncategorized;
+  } else if (c.type == CollectionType.favorites) {
+    return GalleryType.favorite;
+  } else if (c.isQuickLinkCollection()) {
+    return GalleryType.quickLink;
+  }
+  debugPrint("Unknown gallery type for collection ${c.id}, falling back to "
+      "default");
+  return GalleryType.ownedCollection;
 }
