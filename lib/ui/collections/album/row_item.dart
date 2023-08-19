@@ -197,7 +197,13 @@ class AlbumRowItemWidget extends StatelessWidget {
           CollectionPage(
             CollectionWithThumbnail(c, thumbnail),
             tagPrefix: tagPrefix,
-            appBarType: galleryType,
+            appBarType: galleryType == null
+                ? isOwner
+                    ? (c.type == CollectionType.favorites
+                        ? GalleryType.favorite
+                        : GalleryType.ownedCollection)
+                    : GalleryType.sharedCollection
+                : galleryType!,
             hasVerifiedLock: hasVerifiedLock,
           ),
         );

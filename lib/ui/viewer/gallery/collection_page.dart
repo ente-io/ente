@@ -21,7 +21,7 @@ import 'package:photos/ui/viewer/gallery/gallery_app_bar_widget.dart';
 class CollectionPage extends StatelessWidget {
   final CollectionWithThumbnail c;
   final String tagPrefix;
-  final GalleryType? appBarType;
+  final GalleryType appBarType;
   final bool? hasVerifiedLock;
 
   CollectionPage(
@@ -127,6 +127,6 @@ class CollectionPage extends StatelessWidget {
     } else if (c.isQuickLinkCollection()) {
       return GalleryType.quickLink;
     }
-    return appBarType!;
+    return appBarType;
   }
 }
