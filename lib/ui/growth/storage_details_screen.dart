@@ -138,7 +138,7 @@ class _StorageDetailsScreenState extends State<StorageDetailsScreen> {
                                   S.of(context).usableReferralStorageInfo,
                                   style: textStyle.small
                                       .copyWith(color: colorScheme.textMuted),
-                                )
+                                ),
                               ],
                             ),
                           );

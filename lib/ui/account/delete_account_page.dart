@@ -175,7 +175,7 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
                         style: getEnteTextTheme(context).bodyMuted,
                         textAlign: TextAlign.left,
                       ),
-                    )
+                    ),
                   ],
                 ),
               ),

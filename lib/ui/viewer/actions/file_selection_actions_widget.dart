@@ -461,7 +461,7 @@ class _FileSelectionActionsWidgetState
           buttonAction: ButtonAction.third,
           shouldStickToDarkTheme: true,
           isInAlert: true,
-        )
+        ),
       ],
       title: S.of(context).publicLinkCreated,
       body: S.of(context).youCanManageYourLinksInTheShareTab,

@@ -264,7 +264,7 @@ const List<Color> avatarLight = [
   Color.fromRGBO(176, 198, 149, 1),
   Color.fromRGBO(233, 154, 173, 1),
   Color.fromRGBO(209, 132, 132, 1),
-  Color.fromRGBO(120, 181, 167, 1)
+  Color.fromRGBO(120, 181, 167, 1),
 ];
 
 const List<Color> avatarDark = [
@@ -290,5 +290,5 @@ const List<Color> avatarDark = [
   Color.fromRGBO(176, 198, 149, 1),
   Color.fromRGBO(233, 154, 173, 1),
   Color.fromRGBO(209, 132, 132, 1),
-  Color.fromRGBO(120, 181, 167, 1)
+  Color.fromRGBO(120, 181, 167, 1),
 ];

@@ -113,7 +113,7 @@ class _ZoomableImageState extends State<ZoomableImage>
         ? null
         : (d) => {
               if (!_isZooming && d.delta.dy > dragSensitivity)
-                {Navigator.of(context).pop()}
+                {Navigator.of(context).pop()},
             };
     return GestureDetector(
       onVerticalDragUpdate: verticalDragCallback,
@@ -284,7 +284,7 @@ class _ZoomableImageState extends State<ZoomableImage>
         _logger.info('Updating aspect ratio for ${widget.photo} to $h:$w');
 
         await FileMagicService.instance.updatePublicMagicMetadata([
-          widget.photo
+          widget.photo,
         ], {
           heightKey: h,
           widthKey: w,

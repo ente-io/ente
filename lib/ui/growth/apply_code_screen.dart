@@ -141,7 +141,7 @@ class _ApplyCodeScreenState extends State<ApplyCodeScreen> {
                           );
                         }
                       },
-                    )
+                    ),
                   ],
                 ),
               ),

@@ -72,7 +72,7 @@ class CollectionPage extends StatelessWidget {
               (event) =>
                   event.id == c.collection.id &&
                   event.type == CollectionMetaEventType.sortChanged,
-            )
+            ),
       ],
       removalEventTypes: const {
         EventType.deletedFromRemote,
@@ -107,7 +107,7 @@ class CollectionPage extends StatelessWidget {
             galleryType,
             _selectedFiles,
             collection: c.collection,
-          )
+          ),
         ],
       ),
     );

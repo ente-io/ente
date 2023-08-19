@@ -148,7 +148,7 @@ class _AddLocationSheetState extends State<AddLocationSheet> {
                                   ),
                                 );
                               },
-                            )
+                            ),
                           ],
                         ),
                         const SizedBox(height: 24),

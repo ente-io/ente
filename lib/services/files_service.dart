@@ -32,7 +32,7 @@ class FilesService {
       final response = await _enteDio.post(
         "/files/size",
         data: {
-          "fileIDs": [uploadedFileID]
+          "fileIDs": [uploadedFileID],
         },
       );
       return response.data["size"];

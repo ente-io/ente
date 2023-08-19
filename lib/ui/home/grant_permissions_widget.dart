@@ -78,7 +78,7 @@ class GrantPermissionsWidget extends StatelessWidget {
               spreadRadius: 190,
               blurRadius: 30,
               offset: const Offset(0, 170),
-            )
+            ),
           ],
         ),
         width: double.infinity,

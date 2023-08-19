@@ -117,7 +117,7 @@ class _LoadingPhotosWidgetState extends State<LoadingPhotosWidget> {
                           height: 400,
                         ),
                       ],
-                    )
+                    ),
                   ],
                 ),
                 Text(
@@ -164,7 +164,7 @@ class _LoadingPhotosWidgetState extends State<LoadingPhotosWidget> {
                             left: 0,
                             right: 0,
                             child: BottomShadowWidget(),
-                          )
+                          ),
                         ],
                       ),
                     ),

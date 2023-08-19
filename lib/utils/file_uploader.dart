@@ -397,7 +397,7 @@ class FileUploader {
       await _checkIfWithinStorageLimit(mediaUploadData!.sourceFile!);
       final encryptedFile = io.File(encryptedFilePath);
       final EncryptionResult fileAttributes = await CryptoUtil.encryptFile(
-        mediaUploadData!.sourceFile!.path,
+        mediaUploadData.sourceFile!.path,
         encryptedFilePath,
         key: key,
       );
@@ -468,7 +468,7 @@ class FileUploader {
             (mediaUploadData.width ?? 0) != 0) {
           final pubMetadata = {
             heightKey: mediaUploadData.height,
-            widthKey: mediaUploadData.width
+            widthKey: mediaUploadData.width,
           };
           if (mediaUploadData.motionPhotoStartIndex != null) {
             pubMetadata[motionVideoIndexKey] =
@@ -780,7 +780,7 @@ class FileUploader {
       "metadata": {
         "encryptedData": encryptedMetadata,
         "decryptionHeader": metadataDecryptionHeader,
-      }
+      },
     };
     if (pubMetadata != null) {
       request["pubMagicMetadata"] = pubMetadata;
@@ -855,7 +855,7 @@ class FileUploader {
       "metadata": {
         "encryptedData": encryptedMetadata,
         "decryptionHeader": metadataDecryptionHeader,
-      }
+      },
     };
     try {
       final response = await _enteDio.put("/files/update", data: request);

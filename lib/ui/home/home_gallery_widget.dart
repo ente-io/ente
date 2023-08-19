@@ -86,7 +86,7 @@ class HomeGalleryWidget extends StatelessWidget {
       alignment: Alignment.bottomCenter,
       children: [
         gallery,
-        FileSelectionOverlayBar(GalleryType.homepage, selectedFiles)
+        FileSelectionOverlayBar(GalleryType.homepage, selectedFiles),
       ],
     );
     // return gallery;

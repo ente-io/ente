@@ -53,7 +53,7 @@ class NotificationWidget extends StatelessWidget {
         subTextStyle = textTheme.miniMuted;
         strokeColorScheme = colorScheme;
         boxShadow = [
-          BoxShadow(color: Colors.black.withOpacity(0.25), blurRadius: 1)
+          BoxShadow(color: Colors.black.withOpacity(0.25), blurRadius: 1),
         ];
         break;
       case NotificationType.goldenBanner:
@@ -122,7 +122,7 @@ class NotificationWidget extends StatelessWidget {
                   defaultColor: strokeColorScheme.fillFaint,
                   pressedColor: strokeColorScheme.fillMuted,
                   onTap: onTap,
-                )
+                ),
               ],
             ),
           ),

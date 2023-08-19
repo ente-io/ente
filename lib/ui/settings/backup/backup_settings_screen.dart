@@ -122,7 +122,7 @@ class BackupSettingsScreen extends StatelessWidget {
                                   MenuSectionDescriptionWidget(
                                     content:
                                         S.of(context).deviceLockExplanation,
-                                  )
+                                  ),
                                 ],
                               )
                             : const SizedBox.shrink(),

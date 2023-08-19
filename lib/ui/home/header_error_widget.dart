@@ -28,7 +28,7 @@ class HeaderErrorWidget extends StatelessWidget {
               context,
               getSubscriptionPage(),
               forceCustomPageRoute: true,
-            )
+            ),
           },
         ),
       );
@@ -45,7 +45,7 @@ class HeaderErrorWidget extends StatelessWidget {
               context,
               getSubscriptionPage(),
               forceCustomPageRoute: true,
-            )
+            ),
           },
         ),
       );
@@ -63,7 +63,7 @@ class HeaderErrorWidget extends StatelessWidget {
               S.of(context).raiseTicket,
               "support@ente.io",
               subject: S.of(context).backupFailed,
-            )
+            ),
           },
         ),
       );

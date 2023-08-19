@@ -18,7 +18,7 @@ class HeaderWidget extends StatelessWidget {
       _statusBarWidget,
       _memoriesWidget,
     ];
-    return Column(
+    return const Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: list,
     );

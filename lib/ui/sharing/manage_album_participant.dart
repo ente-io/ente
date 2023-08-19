@@ -174,7 +174,7 @@ class _ManageIndividualParticipantState
                   Navigator.of(context).pop(true);
                 }
               },
-            )
+            ),
           ],
         ),
       ),

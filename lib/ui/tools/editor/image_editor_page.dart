@@ -87,7 +87,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
                       });
                     },
                     icon: const Icon(Icons.history),
-                  )
+                  ),
                 ]
               : [],
         ),

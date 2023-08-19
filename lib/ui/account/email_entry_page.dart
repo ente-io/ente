@@ -377,8 +377,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                   .copyWith(fontSize: 12),
               tags: {
                 'u-terms': StyledTextActionTag(
-                  (String? text, Map<String?, String?> attrs) => {
-                    Navigator.of(context).push(
+                  (String? text, Map<String?, String?> attrs) => Navigator.of(context).push(
                       MaterialPageRoute(
                         builder: (BuildContext context) {
                           return WebPage(
@@ -387,15 +386,13 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                           );
                         },
                       ),
-                    )
-                  },
+                    ),
                   style: const TextStyle(
                     decoration: TextDecoration.underline,
                   ),
                 ),
                 'u-policy': StyledTextActionTag(
-                  (String? text, Map<String?, String?> attrs) => {
-                    Navigator.of(context).push(
+                  (String? text, Map<String?, String?> attrs) => Navigator.of(context).push(
                       MaterialPageRoute(
                         builder: (BuildContext context) {
                           return WebPage(
@@ -404,12 +401,11 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                           );
                         },
                       ),
-                    )
-                  },
+                    ),
                   style: const TextStyle(
                     decoration: TextDecoration.underline,
                   ),
-                )
+                ),
               },
             ),
           ),
@@ -446,8 +442,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                   .copyWith(fontSize: 12),
               tags: {
                 'underline': StyledTextActionTag(
-                  (String? text, Map<String?, String?> attrs) => {
-                    Navigator.of(context).push(
+                  (String? text, Map<String?, String?> attrs) => Navigator.of(context).push(
                       MaterialPageRoute(
                         builder: (BuildContext context) {
                           return WebPage(
@@ -456,8 +451,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                           );
                         },
                       ),
-                    )
-                  },
+                    ),
                   style: const TextStyle(
                     decoration: TextDecoration.underline,
                   ),

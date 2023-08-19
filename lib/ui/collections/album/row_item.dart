@@ -170,7 +170,7 @@ class AlbumRowItemWidget extends StatelessWidget {
                               TextSpan(text: '  \u2022  $textCount'),
                             ],
                           ),
-                        )
+                        ),
                       ],
                     );
                   } else {

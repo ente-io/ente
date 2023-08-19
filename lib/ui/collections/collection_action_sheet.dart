@@ -188,7 +188,7 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
                         labelText: S.of(context).cancel,
                       ),
                     ),
-                  )
+                  ),
                 ],
               ),
             ),

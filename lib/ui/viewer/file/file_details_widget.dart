@@ -159,7 +159,7 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
                 )
               : const SizedBox.shrink();
         },
-      )
+      ),
     ]);
     if (_isImage) {
       fileDetailsTiles.addAll([
@@ -173,7 +173,7 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
               ],
             );
           },
-        )
+        ),
       ]);
     }
 
@@ -230,7 +230,7 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
                   },
                   childCount: fileDetailsTiles.length,
                 ),
-              )
+              ),
             ],
           ),
         ),
@@ -253,10 +253,10 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
           locationDataFromExif?.longitude != null) {
         widget.file.location = locationDataFromExif;
         await FileMagicService.instance.updatePublicMagicMetadata([
-          widget.file
+          widget.file,
         ], {
           latKey: locationDataFromExif!.latitude,
-          longKey: locationDataFromExif.longitude
+          longKey: locationDataFromExif.longitude,
         });
         hasLocationData.value = true;
       }

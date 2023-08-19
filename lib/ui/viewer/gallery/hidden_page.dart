@@ -49,7 +49,7 @@ class HiddenPage extends StatelessWidget {
       removalEventTypes: const {
         EventType.unhide,
         EventType.deletedFromEverywhere,
-        EventType.deletedFromRemote
+        EventType.deletedFromRemote,
       },
       forceReloadEvents: [
         Bus.instance.on<FilesUpdatedEvent>().where(

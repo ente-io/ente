@@ -90,7 +90,7 @@ class _MapViewState extends State<MapView> {
                 bottom: widget.bottomSheetDraggableAreaHeight,
               ),
               child: const OSMFranceTileAttributes(),
-            )
+            ),
           ],
           children: [
             const OSMFranceTileLayer(),
@@ -123,12 +123,12 @@ class _MapViewState extends State<MapView> {
                         key: Key(markers.first.key.toString()),
                         imageMarker: widget.imageMarkers[index],
                       ),
-                      MapGalleryTileBadge(size: markers.length)
+                      MapGalleryTileBadge(size: markers.length),
                     ],
                   );
                 },
               ),
-            )
+            ),
           ],
         ),
         Positioned(
