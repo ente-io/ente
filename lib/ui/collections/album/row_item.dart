@@ -197,7 +197,7 @@ class AlbumRowItemWidget extends StatelessWidget {
           CollectionPage(
             CollectionWithThumbnail(c, thumbnail),
             tagPrefix: tagPrefix,
-            // appBarType: galleryType ?? GalleryType.ownedCollection,
+            appBarType: galleryType,
             hasVerifiedLock: hasVerifiedLock,
           ),
         );
