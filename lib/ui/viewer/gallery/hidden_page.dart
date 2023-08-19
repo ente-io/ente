@@ -27,8 +27,8 @@ class HiddenPage extends StatefulWidget {
 
   const HiddenPage({
     this.tagPrefix = "hidden_page",
-    this.appBarType = GalleryType.hidden,
-    this.overlayType = GalleryType.hidden,
+    this.appBarType = GalleryType.hiddenSection,
+    this.overlayType = GalleryType.hiddenSection,
     Key? key,
   }) : super(key: key);
 

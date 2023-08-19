@@ -121,7 +121,6 @@ class QuickLinkAlbumItem extends StatelessWidget {
             c,
             thumbnail,
           ),
-          galleryType: GalleryType.ownedCollection,
           tagPrefix: heroTagPrefix,
         );
         routeToPage(context, page);

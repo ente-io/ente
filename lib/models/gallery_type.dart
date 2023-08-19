@@ -5,7 +5,10 @@ enum GalleryType {
   homepage,
   archive,
   uncategorized,
-  hidden,
+  // hidden section shows all the files that are present in the defaultHidden
+  // collections.
+  hiddenSection,
+  hiddenOwnedCollection,
   favorite,
   trash,
   localFolder,
@@ -30,7 +33,8 @@ extension GalleyTypeExtension on GalleryType {
       case GalleryType.quickLink:
         return true;
 
-      case GalleryType.hidden:
+      case GalleryType.hiddenSection:
+      case GalleryType.hiddenOwnedCollection:
       case GalleryType.uncategorized:
       case GalleryType.trash:
       case GalleryType.sharedCollection:
@@ -45,7 +49,8 @@ extension GalleyTypeExtension on GalleryType {
       case GalleryType.quickLink:
         return true;
 
-      case GalleryType.hidden:
+      case GalleryType.hiddenSection:
+      case GalleryType.hiddenOwnedCollection:
       case GalleryType.favorite:
       case GalleryType.searchResults:
       case GalleryType.archive:
@@ -73,7 +78,8 @@ extension GalleyTypeExtension on GalleryType {
         return true;
       case GalleryType.trash:
       case GalleryType.archive:
-      case GalleryType.hidden:
+      case GalleryType.hiddenSection:
+      case GalleryType.hiddenOwnedCollection:
       case GalleryType.sharedCollection:
         return false;
     }
@@ -87,7 +93,8 @@ extension GalleyTypeExtension on GalleryType {
       case GalleryType.favorite:
       case GalleryType.uncategorized:
       case GalleryType.archive:
-      case GalleryType.hidden:
+      case GalleryType.hiddenSection:
+      case GalleryType.hiddenOwnedCollection:
       case GalleryType.localFolder:
       case GalleryType.locationTag:
       case GalleryType.quickLink:
@@ -108,7 +115,8 @@ extension GalleyTypeExtension on GalleryType {
       case GalleryType.uncategorized:
       case GalleryType.locationTag:
         return true;
-      case GalleryType.hidden:
+      case GalleryType.hiddenSection:
+      case GalleryType.hiddenOwnedCollection:
       case GalleryType.localFolder:
       case GalleryType.trash:
       case GalleryType.sharedCollection:
@@ -123,7 +131,8 @@ extension GalleyTypeExtension on GalleryType {
       case GalleryType.sharedCollection:
       case GalleryType.quickLink:
         return true;
-      case GalleryType.hidden:
+      case GalleryType.hiddenSection:
+      case GalleryType.hiddenOwnedCollection:
       case GalleryType.uncategorized:
       case GalleryType.favorite:
       case GalleryType.searchResults:
@@ -144,8 +153,8 @@ extension GalleyTypeExtension on GalleryType {
       case GalleryType.quickLink:
         return true;
 
-      case GalleryType.hidden:
-
+      case GalleryType.hiddenSection:
+      case GalleryType.hiddenOwnedCollection:
       case GalleryType.favorite:
       case GalleryType.searchResults:
       case GalleryType.archive:
@@ -172,8 +181,8 @@ extension GalleyTypeExtension on GalleryType {
       case GalleryType.quickLink:
         return true;
 
-      case GalleryType.hidden:
-
+      case GalleryType.hiddenSection:
+      case GalleryType.hiddenOwnedCollection:
       case GalleryType.localFolder:
       case GalleryType.trash:
       case GalleryType.favorite:
@@ -183,7 +192,7 @@ extension GalleyTypeExtension on GalleryType {
   }
 
   bool showUnHideOption() {
-    return this == GalleryType.hidden;
+    return this == GalleryType.hiddenSection || this == GalleryType.hiddenOwnedCollection;
   }
 
   bool showFavoriteOption() {
@@ -195,7 +204,8 @@ extension GalleyTypeExtension on GalleryType {
       case GalleryType.locationTag:
         return true;
 
-      case GalleryType.hidden:
+      case GalleryType.hiddenSection:
+      case GalleryType.hiddenOwnedCollection:
       case GalleryType.quickLink:
       case GalleryType.favorite:
       case GalleryType.archive:
@@ -228,13 +238,15 @@ GalleryType getGalleryType(Collection c, int userID) {
     return GalleryType.sharedCollection;
   }
   if (c.isDefaultHidden()) {
-    return GalleryType.hidden;
+    return GalleryType.hiddenSection;
   } else if (c.type == CollectionType.uncategorized) {
     return GalleryType.uncategorized;
   } else if (c.type == CollectionType.favorites) {
     return GalleryType.favorite;
   } else if (c.isQuickLinkCollection()) {
     return GalleryType.quickLink;
+  } else if(c.isHidden()) {
+    return GalleryType.hiddenOwnedCollection;
   }
   debugPrint("Unknown gallery type for collection ${c.id}, falling back to "
       "default");
