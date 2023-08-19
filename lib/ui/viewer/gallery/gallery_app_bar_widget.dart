@@ -725,6 +725,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
       if (collection == null ||
           (galleryType != GalleryType.ownedCollection &&
               galleryType != GalleryType.sharedCollection &&
+              galleryType != GalleryType.hiddenOwnedCollection &&
               !isQuickLink)) {
         throw Exception(
           "Cannot share empty collection of type $galleryType",
@@ -735,7 +736,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
           routeToPage(
             context,
             (isQuickLink && (collection.hasLink))
-                ? ManageSharedLinkWidget(collection: collection!)
+                ? ManageSharedLinkWidget(collection: collection)
                 : ShareCollectionPage(collection),
           ),
         );
