@@ -129,6 +129,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
 
   Future<dynamic> _renameAlbum(BuildContext context) async {
     if (galleryType != GalleryType.ownedCollection &&
+        galleryType != GalleryType.hiddenOwnedCollection &&
         galleryType != GalleryType.quickLink) {
       showToast(
         context,
