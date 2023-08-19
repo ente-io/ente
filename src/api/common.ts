@@ -27,6 +27,19 @@ export const openDirectory = async (dirPath: string): Promise<void> => {
     }
 };
 
+export const getDownloadsDir = async (): Promise<string> => {
+    try {
+        const systemDownloadsDir = await ipcRenderer.invoke(
+            'get-path',
+            'downloads'
+        );
+        return systemDownloadsDir;
+    } catch (e) {
+        logError(e, 'error while getting download directory');
+        throw e;
+    }
+};
+
 export {
     logToDisk,
     openLogDirectory,

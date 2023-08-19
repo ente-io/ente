@@ -40,6 +40,7 @@ import {
     getSentryUserID,
     getAppVersion,
     openDirectory,
+    getDownloadsDir,
 } from './api/common';
 import { fixHotReloadNext12 } from './utils/preload';
 import {
@@ -110,4 +111,5 @@ windowObject['ElectronAPIs'] = {
     moveFile,
     deleteFolder,
     rename,
+    getDownloadsDir,
 };
