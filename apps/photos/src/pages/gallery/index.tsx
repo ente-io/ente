@@ -122,6 +122,7 @@ import { getSessionExpiredMessage } from 'utils/ui';
 import { syncEntities } from 'services/entityService';
 import { constructUserIDToEmailMap } from 'services/collectionService';
 import { getLocalFamilyData } from 'utils/user/family';
+import { CollectionDownloadProgressAttributes } from 'components/Collections/CollectionDownloadProgress';
 
 export const DeadCenter = styled('div')`
     flex: 1;
@@ -146,6 +147,7 @@ const defaultGalleryContext: GalleryContextType = {
     user: null,
     userIDToEmailMap: null,
     emailList: null,
+    setCollectionDownloadProgressAttributes: () => null,
 };
 
 export const GalleryContext = createContext<GalleryContextType>(
@@ -178,6 +180,10 @@ export default function Gallery() {
     const [collectionNamerAttributes, setCollectionNamerAttributes] =
         useState<CollectionNamerAttributes>(null);
     const [collectionNamerView, setCollectionNamerView] = useState(false);
+    const [
+        collectionDownloadProgressAttributes,
+        setCollectionDownloadProgressAttributes,
+    ] = useState<CollectionDownloadProgressAttributes>(null);
     const [search, setSearch] = useState<Search>(null);
     const [shouldDisableDropzone, setShouldDisableDropzone] = useState(false);
     const [isPhotoSwipeOpen, setIsPhotoSwipeOpen] = useState(false);
@@ -864,6 +870,7 @@ export default function Gallery() {
                 userIDToEmailMap,
                 user,
                 emailList,
+                setCollectionDownloadProgressAttributes,
             }}>
             <FullScreenDropZone
                 getDragAndDropRootProps={getDragAndDropRootProps}>
@@ -926,6 +933,9 @@ export default function Gallery() {
                     collectionSummaries={collectionSummaries}
                     setCollectionNamerAttributes={setCollectionNamerAttributes}
                     setPhotoListHeader={setPhotoListHeader}
+                    collectionDownloadProgressAttributes={
+                        collectionDownloadProgressAttributes
+                    }
                 />
 
                 <Uploader

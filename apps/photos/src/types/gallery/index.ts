@@ -1,3 +1,4 @@
+import { CollectionDownloadProgressAttributes } from 'components/Collections/CollectionDownloadProgress';
 import { CollectionSelectorAttributes } from 'components/Collections/CollectionSelector';
 import { TimeStampListItem } from 'components/PhotoList';
 import { Collection } from 'types/collection';
@@ -15,6 +16,9 @@ export type SetCollections = React.Dispatch<React.SetStateAction<Collection[]>>;
 export type SetLoading = React.Dispatch<React.SetStateAction<boolean>>;
 export type SetCollectionSelectorAttributes = React.Dispatch<
     React.SetStateAction<CollectionSelectorAttributes>
+>;
+export type SetCollectionDownloadProgressAttributes = React.Dispatch<
+    React.SetStateAction<CollectionDownloadProgressAttributes>
 >;
 
 export type MergedSourceURL = {
@@ -40,6 +44,7 @@ export type GalleryContextType = {
     user: User;
     userIDToEmailMap: Map<number, string>;
     emailList: string[];
+    setCollectionDownloadProgressAttributes: SetCollectionDownloadProgressAttributes;
 };
 
 export enum CollectionSelectorIntent {

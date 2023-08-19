@@ -15,6 +15,10 @@ import {
 import { useLocalState } from 'hooks/useLocalState';
 import { sortCollectionSummaries } from 'services/collectionService';
 import { LS_KEYS } from 'utils/storage/localStorage';
+import {
+    CollectionDownloadProgress,
+    CollectionDownloadProgressAttributes,
+} from './CollectionDownloadProgress';
 
 interface Iprops {
     activeCollection: Collection;
@@ -24,6 +28,7 @@ interface Iprops {
     collectionSummaries: CollectionSummaries;
     setCollectionNamerAttributes: SetCollectionNamerAttributes;
     setPhotoListHeader: (value: TimeStampListItem) => void;
+    collectionDownloadProgressAttributes: CollectionDownloadProgressAttributes;
 }
 
 export default function Collections(props: Iprops) {
@@ -35,10 +40,14 @@ export default function Collections(props: Iprops) {
         collectionSummaries,
         setCollectionNamerAttributes,
         setPhotoListHeader,
+        collectionDownloadProgressAttributes,
     } = props;
 
     const [allCollectionView, setAllCollectionView] = useState(false);
     const [collectionShareModalView, setCollectionShareModalView] =
+        useState(false);
+
+    const [collectionDownloadProgressView, setCollectionDownloadProgressView] =
         useState(false);
 
     const [collectionListSortBy, setCollectionListSortBy] =
@@ -87,6 +96,11 @@ export default function Collections(props: Iprops) {
         });
     }, [collectionSummaries, activeCollectionID, isInSearchMode]);
 
+    useEffect(() => {
+        collectionDownloadProgressAttributes &&
+            setCollectionDownloadProgressView(true);
+    }, [collectionDownloadProgressAttributes]);
+
     if (shouldBeHidden) {
         return <></>;
     }
@@ -94,6 +108,8 @@ export default function Collections(props: Iprops) {
     const closeAllCollections = () => setAllCollectionView(false);
     const openAllCollections = () => setAllCollectionView(true);
     const closeCollectionShare = () => setCollectionShareModalView(false);
+    const closeCollectionDownloadProgress = () =>
+        setCollectionDownloadProgressView(false);
 
     return (
         <>
@@ -124,6 +140,11 @@ export default function Collections(props: Iprops) {
                 open={collectionShareModalView}
                 onClose={closeCollectionShare}
                 collection={activeCollection}
+            />
+            <CollectionDownloadProgress
+                isOpen={collectionDownloadProgressView}
+                onClose={closeCollectionDownloadProgress}
+                attributes={collectionDownloadProgressAttributes}
             />
         </>
     );
