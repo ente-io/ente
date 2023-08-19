@@ -44,6 +44,12 @@ class ElectronService {
             this.electronAPIs.registerForegroundEventListener(onForeground);
         }
     }
+
+    getDownloadsDir() {
+        if (this.electronAPIs?.getDownloadsDir) {
+            return this.electronAPIs.getDownloadsDir();
+        }
+    }
 }
 
 export default new ElectronService();

@@ -1,6 +1,7 @@
 import {
     addToCollection,
     createAlbum,
+    getLocalCollections,
     getNonEmptyCollections,
     moveToCollection,
     removeFromCollection,
@@ -10,7 +11,7 @@ import {
     updatePublicCollectionMagicMetadata,
     updateSharedCollectionMagicMetadata,
 } from 'services/collectionService';
-import { downloadFiles } from 'utils/file';
+import { downloadFiles, downloadFilesDesktop } from 'utils/file';
 import { getLocalFiles, getLocalHiddenFiles } from 'services/fileService';
 import { EnteFile } from 'types/file';
 import { CustomError } from 'utils/error';
@@ -39,6 +40,8 @@ import { isArchivedCollection, updateMagicMetadata } from 'utils/magicMetadata';
 import { getAlbumsURL } from 'utils/common/apiUtil';
 import bs58 from 'bs58';
 import { t } from 'i18next';
+import isElectron from 'is-electron';
+import { getHiddenCollectionProperCasedName } from 'utils/export';
 
 export enum COLLECTION_OPS_TYPE {
     ADD,
@@ -91,7 +94,15 @@ export async function downloadAllCollectionFiles(collectionID: number) {
         const collectionFiles = allFiles.filter(
             (file) => file.collectionID === collectionID
         );
-        await downloadFiles(collectionFiles);
+        const allCollections = await getLocalCollections();
+        const collection = allCollections.find(
+            (collection) => collection.id === collectionID
+        );
+        if (isElectron()) {
+            await downloadFilesDesktop(collection.name, collectionFiles);
+        } else {
+            await downloadFiles(collectionFiles);
+        }
     } catch (e) {
         logError(e, 'download collection failed ');
     }
@@ -100,7 +111,14 @@ export async function downloadAllCollectionFiles(collectionID: number) {
 export async function downloadHiddenFiles() {
     try {
         const hiddenFiles = await getLocalHiddenFiles();
-        await downloadFiles(hiddenFiles);
+        if (isElectron()) {
+            await downloadFilesDesktop(
+                getHiddenCollectionProperCasedName(),
+                hiddenFiles
+            );
+        } else {
+            await downloadFiles(hiddenFiles);
+        }
     } catch (e) {
         logError(e, 'download hidden files failed ');
     }

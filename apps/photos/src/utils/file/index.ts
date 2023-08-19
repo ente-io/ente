@@ -46,6 +46,13 @@ import { isPlaybackPossible } from 'utils/photoFrame';
 import { FileTypeInfo } from 'types/upload';
 import { moveToHiddenCollection } from 'services/collectionService';
 
+import ElectronService from 'services/electron/common';
+import {
+    getCollectionExportPath,
+    getUniqueCollectionExportName,
+} from 'utils/export';
+import exportService from 'services/export';
+
 const WAIT_TIME_IMAGE_CONVERSION = 30 * 1000;
 
 export enum FILE_OPS_TYPE {
@@ -582,6 +589,25 @@ export async function downloadFiles(files: EnteFile[]) {
         } catch (e) {
             logError(e, 'download fail for file');
         }
+    }
+}
+
+export async function downloadFilesDesktop(
+    collectionName: string,
+    files: EnteFile[]
+) {
+    const downloadDirPath = await ElectronService.getDownloadsDir();
+    const collectionDownloadName = getUniqueCollectionExportName(
+        downloadDirPath,
+        collectionName
+    );
+    const collectionDownloadPath = getCollectionExportPath(
+        downloadDirPath,
+        collectionDownloadName
+    );
+    await exportService.checkExistsAndCreateDir(collectionDownloadPath);
+    for (const file of files) {
+        await exportService.downloadAndSave(collectionDownloadPath, file, true);
     }
 }
 

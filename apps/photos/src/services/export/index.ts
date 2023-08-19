@@ -1060,7 +1060,8 @@ class ExportService {
 
     async downloadAndSave(
         collectionExportPath: string,
-        file: EnteFile
+        file: EnteFile,
+        skipMetadata?: boolean
     ): Promise<string> {
         try {
             const fileExportName = getUniqueFileExportName(
@@ -1088,7 +1089,8 @@ class ExportService {
                 return await this.exportLivePhoto(
                     collectionExportPath,
                     fileStream,
-                    file
+                    file,
+                    skipMetadata
                 );
             } else {
                 await this.saveMediaFile(
@@ -1096,11 +1098,13 @@ class ExportService {
                     fileExportName,
                     fileStream
                 );
-                await this.saveMetadataFile(
-                    collectionExportPath,
-                    fileExportName,
-                    file
-                );
+                if (!skipMetadata) {
+                    await this.saveMetadataFile(
+                        collectionExportPath,
+                        fileExportName,
+                        file
+                    );
+                }
                 return fileExportName;
             }
         } catch (e) {
@@ -1112,7 +1116,8 @@ class ExportService {
     private async exportLivePhoto(
         collectionExportPath: string,
         fileStream: ReadableStream<any>,
-        file: EnteFile
+        file: EnteFile,
+        skipMetadata?: boolean
     ) {
         const fileBlob = await new Response(fileStream).blob();
         const livePhoto = await decodeLivePhoto(file, fileBlob);
@@ -1126,11 +1131,13 @@ class ExportService {
             imageExportName,
             imageStream
         );
-        await this.saveMetadataFile(
-            collectionExportPath,
-            imageExportName,
-            file
-        );
+        if (!skipMetadata) {
+            await this.saveMetadataFile(
+                collectionExportPath,
+                imageExportName,
+                file
+            );
+        }
 
         const videoStream = generateStreamFromArrayBuffer(livePhoto.video);
         const videoExportName = getUniqueFileExportName(
@@ -1142,11 +1149,13 @@ class ExportService {
             videoExportName,
             videoStream
         );
-        await this.saveMetadataFile(
-            collectionExportPath,
-            videoExportName,
-            file
-        );
+        if (!skipMetadata) {
+            await this.saveMetadataFile(
+                collectionExportPath,
+                videoExportName,
+                file
+            );
+        }
 
         return getLivePhotoExportName(imageExportName, videoExportName);
     }
