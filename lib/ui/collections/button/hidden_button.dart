@@ -80,7 +80,7 @@ class HiddenCollectionsButtonWidget extends StatelessWidget {
         if (hasAuthenticated) {
           routeToPage(
             context,
-            const HiddenPage(),
+            HiddenPage(),
           );
         }
       },

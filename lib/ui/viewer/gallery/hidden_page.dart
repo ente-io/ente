@@ -122,7 +122,6 @@ class _HiddenPageState extends State<HiddenPage> {
       initialFiles: null,
       emptyState: const EmptyHiddenWidget(),
       header: AlbumHorizontalList(
-        galleryType: GalleryType.hidden,
         () async {
           return _hiddenCollectionsExcludingDefault;
         },

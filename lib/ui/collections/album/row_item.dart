@@ -21,7 +21,6 @@ class AlbumRowItemWidget extends StatelessWidget {
   final bool showFileCount;
   final String tag;
   final bool? hasVerifiedLock;
-  final GalleryType? galleryType;
 
   const AlbumRowItemWidget(
     this.c,
@@ -30,7 +29,6 @@ class AlbumRowItemWidget extends StatelessWidget {
     this.showFileCount = true,
     this.tag = "",
     this.hasVerifiedLock,
-    this.galleryType,
   });
 
   @override
@@ -197,13 +195,11 @@ class AlbumRowItemWidget extends StatelessWidget {
           CollectionPage(
             CollectionWithThumbnail(c, thumbnail),
             tagPrefix: tagPrefix,
-            appBarType: galleryType == null
-                ? isOwner
-                    ? (c.type == CollectionType.favorites
-                        ? GalleryType.favorite
-                        : GalleryType.ownedCollection)
-                    : GalleryType.sharedCollection
-                : galleryType!,
+            appBarType: isOwner
+                ? (c.type == CollectionType.favorites
+                    ? GalleryType.favorite
+                    : GalleryType.ownedCollection)
+                : GalleryType.sharedCollection,
             hasVerifiedLock: hasVerifiedLock,
           ),
         );
