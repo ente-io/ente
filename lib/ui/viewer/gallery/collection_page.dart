@@ -21,13 +21,11 @@ import 'package:photos/ui/viewer/gallery/gallery_app_bar_widget.dart';
 class CollectionPage extends StatelessWidget {
   final CollectionWithThumbnail c;
   final String tagPrefix;
-  final GalleryType appBarType;
   final bool? hasVerifiedLock;
 
   CollectionPage(
     this.c, {
     this.tagPrefix = "collection",
-    this.appBarType = GalleryType.ownedCollection,
     this.hasVerifiedLock = false,
     Key? key,
   }) : super(key: key);
@@ -42,7 +40,8 @@ class CollectionPage extends StatelessWidget {
       return const EmptyState();
     }
 
-    final galleryType = _getGalleryType(c.collection);
+    final galleryType =
+        _getGalleryType(c.collection, Configuration.instance.getUserID()!);
     final List<File>? initialFiles =
         c.thumbnail != null ? [c.thumbnail!] : null;
     final gallery = Gallery(
@@ -113,9 +112,8 @@ class CollectionPage extends StatelessWidget {
     );
   }
 
-  GalleryType _getGalleryType(Collection c) {
-    final currentUserID = Configuration.instance.getUserID()!;
-    if (!c.isOwner(currentUserID)) {
+  GalleryType _getGalleryType(Collection c, int userID) {
+    if (!c.isOwner(userID)) {
       return GalleryType.sharedCollection;
     }
     if (c.isDefaultHidden()) {
@@ -127,6 +125,8 @@ class CollectionPage extends StatelessWidget {
     } else if (c.isQuickLinkCollection()) {
       return GalleryType.quickLink;
     }
-    return appBarType;
+    debugPrint("Unknown gallery type for collection ${c.id}, falling back to "
+        "default");
+    return GalleryType.ownedCollection;
   }
 }

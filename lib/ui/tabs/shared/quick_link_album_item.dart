@@ -121,7 +121,7 @@ class QuickLinkAlbumItem extends StatelessWidget {
             c,
             thumbnail,
           ),
-          appBarType: GalleryType.ownedCollection,
+          galleryType: GalleryType.ownedCollection,
           tagPrefix: heroTagPrefix,
         );
         routeToPage(context, page);

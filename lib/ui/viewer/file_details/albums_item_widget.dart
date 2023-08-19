@@ -92,9 +92,6 @@ class AlbumsItemWidget extends StatelessWidget {
                 context,
                 CollectionPage(
                   CollectionWithThumbnail(c, null),
-                  appBarType: c.isOwner(currentUserID)
-                      ? GalleryType.ownedCollection
-                      : GalleryType.sharedCollection,
                 ),
               );
             },
