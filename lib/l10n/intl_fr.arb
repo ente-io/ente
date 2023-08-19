@@ -6,11 +6,11 @@
   "verify": "Vérifier",
   "invalidEmailAddress": "Adresse e-mail invalide",
   "enterValidEmail": "Veuillez entrer une adresse email valide.",
-  "deleteAccount": "Supprimer mon compte",
+  "deleteAccount": "Supprimer le compte",
   "askDeleteReason": "Quelle est la principale raison pour laquelle vous supprimez votre compte ?",
-  "deleteAccountFeedbackPrompt": "Nous sommes désolés de vous voir partir. Veuillez partager vos commentaires pour nous aider à nous améliorer.",
+  "deleteAccountFeedbackPrompt": "Nous sommes désolés de vous voir partir. S'il vous plaît partagez vos commentaires pour nous aider à améliorer le service.",
   "feedback": "Commentaires",
-  "kindlyHelpUsWithThisInformation": "Veuillez nous aider avec cette information",
+  "kindlyHelpUsWithThisInformation": "Merci de nous aider avec cette information",
   "confirmDeletePrompt": "Oui, je veux supprimer définitivement ce compte et toutes ses données.",
   "confirmAccountDeletion": "Confirmer la suppression du compte",
   "deleteConfirmDialogBody": "Vous allez supprimer définitivement votre compte et toutes ses données.\nCette action est irréversible.",
@@ -18,13 +18,14 @@
   "yourAccountHasBeenDeleted": "Votre compte a été supprimé",
   "selectReason": "Sélectionner une raison",
   "deleteReason1": "Il manque une fonction clé dont j'ai besoin",
-  "deleteReason2": "L'application ou une certaine fonctionnalité ne se comporte pas comme je pense qu'elle devrait",
+  "deleteReason2": "L'application ou une fonctionnalité particulière ne se comporte pas comme je pense qu'elle devrait",
   "deleteReason3": "J'ai trouvé un autre service que je préfère",
   "deleteReason4": "Ma raison n'est pas listée",
   "sendEmail": "Envoyer un e-mail",
-  "deleteRequestSLAText": "Votre demande sera traitée en moins de 72 heures.",
+  "deleteRequestSLAText": "Votre demande sera traitée sous 72 heures.",
   "deleteEmailRequest": "Veuillez envoyer un e-mail à <warning>account-deletion@ente.io</warning> à partir de votre adresse e-mail enregistrée.",
-  "ok": "OK",
+  "entePhotosPerm": "ente <i>a besoin d'une autorisation pour</i> préserver vos photos",
+  "ok": "Ok",
   "createAccount": "Créer un compte",
   "createNewAccount": "Créer un nouveau compte",
   "password": "Mot de passe",
@@ -34,23 +35,35 @@
   "somethingWentWrongPleaseTryAgain": "Quelque chose s'est mal passé, veuillez recommencer",
   "thisWillLogYouOutOfThisDevice": "Cela vous déconnectera de cet appareil !",
   "thisWillLogYouOutOfTheFollowingDevice": "Cela vous déconnectera de l'appareil suivant :",
-  "terminateSession": "Quitter la session ?",
-  "terminate": "Quitte",
+  "terminateSession": "Se déconnecter ?",
+  "terminate": "Se déconnecter",
   "thisDevice": "Cet appareil",
-  "recoverButton": "Récupérer",
-  "recoverySuccessful": "Récupération réussie !",
-  "decrypting": "Déchiffrage...",
-  "incorrectRecoveryKeyTitle": "Clé de récupération non valide",
-  "incorrectRecoveryKeyBody": "La clé de récupération que vous avez entrée est incorrecte",
+  "recoverButton": "Restaurer",
+  "recoverySuccessful": "Restauration réussie !",
+  "decrypting": "Déchiffrement en cours...",
+  "incorrectRecoveryKeyTitle": "Clé de secours non valide",
+  "incorrectRecoveryKeyBody": "La clé de secours que vous avez entrée est incorrecte",
   "forgotPassword": "Mot de passe oublié",
   "enterYourRecoveryKey": "Entrez votre clé de récupération",
   "noRecoveryKey": "Aucune clé de récupération?",
   "sorry": "Désolé",
   "noRecoveryKeyNoDecryption": "En raison de notre protocole de chiffrement de bout en bout, vos données ne peuvent pas être déchiffré sans votre mot de passe ou clé de récupération",
   "verifyEmail": "Vérifier l'email",
+  "toResetVerifyEmail": "Pour réinitialiser votre mot de passe, veuillez d'abord vérifier votre e-mail.",
   "checkInboxAndSpamFolder": "Veuillez consulter votre boîte de courriels (et les indésirables) pour compléter la vérification",
-  "tapToEnterCode": "Appuyez pour entrer un code",
-  "resendEmail": "Renvoyer le courriel",
+  "tapToEnterCode": "Appuyez pour entrer le code",
+  "resendEmail": "Renvoyer l'e-mail",
+  "weHaveSendEmailTo": "Nous avons envoyé un e-mail à <green>{email}</green>",
+  "@weHaveSendEmailTo": {
+    "description": "Text to indicate that we have sent a mail to the user",
+    "placeholders": {
+      "email": {
+        "description": "The email address of the user",
+        "type": "String",
+        "example": "example@ente.io"
+      }
+    }
+  },
   "setPasswordTitle": "Définir le mot de passe",
   "changePasswordTitle": "Modifier le mot de passe",
   "resetPasswordTitle": "Réinitialiser le mot de passe",
@@ -58,10 +71,10 @@
   "passwordWarning": "Nous ne stockons pas ce mot de passe, donc si vous l'oubliez, <underline>nous ne pouvons pas déchiffrer vos données</underline>",
   "enterPasswordToEncrypt": "Entrez un mot de passe que nous pouvons utiliser pour chiffrer vos données",
   "enterNewPasswordToEncrypt": "Entrez un nouveau mot de passe que nous pouvons utiliser pour chiffrer vos données",
-  "weakStrength": "Faible",
-  "strongStrength": "Fort",
-  "moderateStrength": "Modéré",
-  "passwordStrength": "Puissance du mot de passe : {passwordStrengthValue}",
+  "weakStrength": "Securité Faible",
+  "strongStrength": "Securité forte",
+  "moderateStrength": "Sécurité moyenne",
+  "passwordStrength": "Sécurité du mot de passe : {passwordStrengthValue}",
   "@passwordStrength": {
     "description": "Text to indicate the password strength",
     "placeholders": {
@@ -81,7 +94,7 @@
   "sorryWeCouldNotGenerateSecureKeysOnThisDevicennplease": "Désolé, nous n'avons pas pu générer de clés sécurisées sur cet appareil.\n\nVeuillez vous inscrire depuis un autre appareil.",
   "howItWorks": "Comment ça fonctionne",
   "encryption": "Chiffrement",
-  "ackPasswordLostWarning": "Je comprends que si je perds mon mot de passe, je risque de perdre mes données puisque mes données sont <underline>chiffrées de bout en bout</underline>.",
+  "ackPasswordLostWarning": "Je comprends que si je perds mon mot de passe, je perdrai mes données puisque mes données sont <underline>chiffrées de bout en bout</underline>.",
   "privacyPolicyTitle": "Politique de Confidentialité",
   "termsOfServicesTitle": "Conditions d'utilisation",
   "signUpTerms": "J'accepte les <u-terms>conditions d'utilisation</u-terms> et la <u-policy>politique de confidentialité</u-policy>",
@@ -94,17 +107,17 @@
   "incorrectPasswordTitle": "Mot de passe incorrect",
   "pleaseTryAgain": "Veuillez réessayer",
   "recreatePasswordTitle": "Recréer le mot de passe",
-  "useRecoveryKey": "Utiliser la clé de récupération",
-  "recreatePasswordBody": "L'appareil actuel n'est pas assez puissant pour vérifier votre mot de passe, mais nous pouvons régénérer d'une manière qui fonctionne avec tous les appareils.\n\nVeuillez vous connecter à l'aide de votre clé de récupération et régénérer votre mot de passe (vous pouvez réutiliser le même si vous le souhaitez).",
+  "useRecoveryKey": "Utiliser la clé de secours",
+  "recreatePasswordBody": "L'appareil actuel n'est pas assez puissant pour vérifier votre mot de passe, mais nous pouvons le régénérer d'une manière qui fonctionne avec tous les appareils.\n\nVeuillez vous connecter à l'aide de votre clé de secours et régénérer votre mot de passe (vous pouvez réutiliser le même si vous le souhaitez).",
   "verifyPassword": "Vérifier le mot de passe",
-  "recoveryKey": "Clé de récupération",
+  "recoveryKey": "Clé de secours",
   "recoveryKeyOnForgotPassword": "Si vous oubliez votre mot de passe, la seule façon de récupérer vos données sera grâce à cette clé.",
-  "recoveryKeySaveDescription": "Nous ne stockons pas cette clé, veuillez enregistrer cette clé de 24 mots dans un endroit sûr.",
+  "recoveryKeySaveDescription": "Nous ne stockons pas cette clé, veuillez garder cette clé de 24 mots dans un endroit sûr.",
   "doThisLater": "Plus tard",
   "saveKey": "Enregistrer la clé",
-  "recoveryKeyCopiedToClipboard": "Clé de récupération copiée dans le presse-papiers",
+  "recoveryKeyCopiedToClipboard": "Clé de secours copiée dans le presse-papiers",
   "recoverAccount": "Récupérer un compte",
-  "recover": "Restaurer",
+  "recover": "Récupérer",
   "dropSupportEmail": "Veuillez envoyer un e-mail à {supportEmail} depuis votre adresse enregistrée",
   "@dropSupportEmail": {
     "placeholders": {
@@ -208,6 +221,16 @@
   "after1Month": "Après 1 mois",
   "after1Year": "Après 1 an",
   "manageParticipants": "Gérer",
+  "albumParticipantsCount": "{count, plural, one {}=0 {Aucun Participant} =1 {1 Participant} other {{count} Participants}}",
+  "@albumParticipantsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "5"
+      }
+    },
+    "description": "Number of participants in an album, including the album owner."
+  },
   "collabLinkSectionDescription": "Créez un lien pour permettre aux gens d'ajouter et de voir des photos dans votre album partagé sans avoir besoin d'une application ente ou d'un compte. Idéal pour collecter des photos d'événement.",
   "collectPhotos": "Récupérer les photos",
   "collaborativeLink": "Lien collaboratif",
@@ -350,6 +373,10 @@
       "count": {
         "example": "1",
         "type": "int"
+      },
+      "formattedCount": {
+        "type": "String",
+        "example": "11.513, 11,511"
       }
     }
   },
@@ -392,6 +419,22 @@
   "skip": "Ignorer",
   "updatingFolderSelection": "Mise à jour de la sélection du dossier...",
   "itemCount": "{count, plural, one{{count} objet} other{{count} objets}}",
+  "deleteItemCount": "{count, plural, =1 {Supprimer le fichier} other {Supprimer {count} fichiers}}",
+  "duplicateItemsGroup": "{count} fichiers, {formattedSize} chacun",
+  "@duplicateItemsGroup": {
+    "description": "Display the number of duplicate files and their size",
+    "type": "text",
+    "placeholders": {
+      "count": {
+        "example": "12",
+        "type": "int"
+      },
+      "formattedSize": {
+        "example": "2.3 MB",
+        "type": "String"
+      }
+    }
+  },
   "yearsAgo": "{count, plural, one{{count} il y a un an} other{{count} il y a des années}}",
   "backupSettings": "Paramètres de la sauvegarde",
   "backupOverMobileData": "Sauvegarde sur données mobiles",
@@ -410,16 +453,19 @@
   "authToChangeYourEmail": "Veuillez vous authentifier pour modifier votre adresse e-mail",
   "changePassword": "Modifier le mot de passe",
   "authToChangeYourPassword": "Veuillez vous authentifier pour modifier votre mot de passe",
+  "emailVerificationToggle": "Vérification de l'adresse e-mail",
+  "authToChangeEmailVerificationSetting": "Veuillez vous authentifier pour modifier votre adresse e-mail",
   "exportYourData": "Exportez vos données",
   "logout": "Déconnexion",
   "authToInitiateAccountDeletion": "Veuillez vous authentifier pour débuter la suppression du compte",
   "areYouSureYouWantToLogout": "Voulez-vous vraiment vous déconnecter ?",
   "yesLogout": "Oui, se déconnecter",
-  "aNewVersionOfEnteIsAvailable": "Une nouvelle version de Wire est disponible.",
+  "aNewVersionOfEnteIsAvailable": "Une nouvelle version de ente est disponible.",
   "update": "Mise à jour",
   "installManually": "Installation manuelle",
   "criticalUpdateAvailable": "Mise à jour critique disponible",
   "updateAvailable": "Une mise à jour est disponible",
+  "ignoreUpdate": "Ignorer",
   "downloading": "Téléchargement en cours...",
   "theDownloadCouldNotBeCompleted": "Le téléchargement n'a pas pu être terminé",
   "retry": "Réessayer",
@@ -464,6 +510,9 @@
   },
   "familyPlans": "Forfaits famille",
   "referrals": "Parrainages",
+  "notifications": "Notifications",
+  "sharedPhotoNotifications": "Nouvelles photos partagées",
+  "sharedPhotoNotificationsExplanation": "Recevoir des notifications quand quelqu'un ajoute une photo à un album partagé dont vous faites partie",
   "advanced": "Avancé",
   "general": "Général",
   "security": "Sécurité",
@@ -511,6 +560,8 @@
   },
   "faqs": "FAQ",
   "renewsOn": "Renouvellement le {endDate}",
+  "freeTrialValidTill": "Essai gratuit valide jusqu’au {endDate}",
+  "playStoreFreeTrialValidTill": "Essai gratuit valable jusqu'à {endDate}.\nVous pouvez choisir un plan payant par la suite.",
   "subWillBeCancelledOn": "Votre abonnement sera annulé le {endDate}",
   "subscription": "Abonnement",
   "paymentDetails": "Détails de paiement",
@@ -560,17 +611,83 @@
   "googlePlayId": "Identifiant Google Play",
   "appleId": "Apple ID",
   "playstoreSubscription": "Abonnement au PlayStore",
+  "appstoreSubscription": "Abonnement à l'AppStore",
+  "subAlreadyLinkedErrMessage": "Votre {id} est déjà lié à un autre compte ente.\nSi vous souhaitez utiliser votre {id} avec ce compte, veuillez contacter notre support",
+  "visitWebToManage": "Veuillez visiter web.ente.io pour gérer votre abonnement",
+  "couldNotUpdateSubscription": "Impossible de mettre à jour l’abonnement",
+  "pleaseContactSupportAndWeWillBeHappyToHelp": "Veuillez contacter support@ente.io et nous serons heureux de vous aider!",
+  "paymentFailed": "Échec du paiement",
+  "paymentFailedTalkToProvider": "Veuillez contacter le support {providerName} si vous avez été facturé",
+  "@paymentFailedTalkToProvider": {
+    "description": "The text to display when the payment failed",
+    "type": "text",
+    "placeholders": {
+      "providerName": {
+        "example": "AppStore|PlayStore",
+        "type": "String"
+      }
+    }
+  },
+  "continueOnFreeTrial": "Poursuivre avec la version d'essai gratuite",
   "areYouSureYouWantToExit": "Êtes-vous sûr de vouloir quitter ?",
   "thankYou": "Merci",
+  "failedToVerifyPaymentStatus": "Échec de la vérification du statut du paiement",
   "pleaseWaitForSometimeBeforeRetrying": "Veuillez attendre quelque temps avant de réessayer",
+  "paymentFailedWithReason": "Malheureusement, votre paiement a échoué pour {reason}",
+  "youAreOnAFamilyPlan": "Vous êtes sur un plan familial !",
+  "contactFamilyAdmin": "Veuillez contacter <green>{familyAdminEmail}</green> pour gérer votre abonnement",
+  "leaveFamily": "Quitter le plan familial",
+  "areYouSureThatYouWantToLeaveTheFamily": "Êtes-vous certains de vouloir quitter le plan familial?",
+  "leave": "Quitter",
+  "rateTheApp": "Évaluer l'application",
+  "startBackup": "Démarrer la sauvegarde",
+  "noPhotosAreBeingBackedUpRightNow": "Aucune photo en cours de sauvegarde",
+  "preserveMore": "Conserver plus",
+  "existingUser": "Utilisateur existant",
+  "privateBackups": "Sauvegardes privées",
+  "forYourMemories": "pour vos souvenirs",
+  "endtoendEncryptedByDefault": "Chiffrement de bout en bout par défaut",
+  "safelyStored": "Stockage sécurisé",
+  "atAFalloutShelter": "dans un abri antiatomique",
+  "designedToOutlive": "Conçu pour survivre",
   "available": "Disponible",
+  "everywhere": "partout",
+  "androidIosWebDesktop": "Android, iOS, Web, Ordinateur",
+  "mobileWebDesktop": "Mobile, Web, Ordinateur",
+  "newToEnte": "Nouveau sur ente",
+  "pleaseLoginAgain": "Veuillez vous reconnecter",
+  "devAccountChanged": "Le compte développeur que nous utilisons pour publier ente sur l'App Store a changé. Pour cette raison, vous devrez vous connecter à nouveau.\n\nNous nous excusons pour la gêne occasionnée, mais cela était inévitable.",
+  "yourSubscriptionHasExpired": "Votre abonnement a expiré",
+  "storageLimitExceeded": "Limite de stockage atteinte",
   "upgrade": "Améliorer",
+  "raiseTicket": "Créer un ticket",
+  "@raiseTicket": {
+    "description": "Button text for raising a support tickets in case of unhandled errors during backup",
+    "type": "text"
+  },
+  "backupFailed": "Échec de la sauvegarde",
+  "couldNotBackUpTryLater": "Nous n'avons pas pu sauvegarder vos données.\nNous allons réessayer plus tard.",
+  "enteCanEncryptAndPreserveFilesOnlyIfYouGrant": "ente peut chiffrer et conserver des fichiers que si vous leur accordez l'accès",
+  "pleaseGrantPermissions": "Veuillez accorder la permission",
+  "grantPermission": "Accorder la permission",
+  "privateSharing": "Partage privé",
+  "shareOnlyWithThePeopleYouWant": "Partager uniquement avec les personnes que vous voulez",
   "usePublicLinksForPeopleNotOnEnte": "Utiliser des liens publics pour les personnes qui ne sont pas sur ente",
   "allowPeopleToAddPhotos": "Autoriser les personnes à ajouter des photos",
   "shareAnAlbumNow": "Partagez un album maintenant",
   "collectEventPhotos": "Collecter des photos de l'événement",
   "sessionExpired": "Session expirée",
   "loggingOut": "Deconnexion...",
+  "@onDevice": {
+    "description": "The text displayed above folders/albums stored on device",
+    "type": "text"
+  },
+  "onDevice": "Sur l'appareil",
+  "@onEnte": {
+    "description": "The text displayed above albums backed up to ente",
+    "type": "text"
+  },
+  "onEnte": "Sur <branding>ente</branding>",
   "name": "Nom",
   "newest": "Le plus récent",
   "lastUpdated": "Dernière mise à jour",
@@ -594,6 +711,10 @@
   "favorite": "Favori",
   "removeFromFavorite": "Retirer des favoris",
   "shareLink": "Partager le lien",
+  "createCollage": "Créez un collage",
+  "saveCollage": "Enregistrer le collage",
+  "collageSaved": "Collage sauvegardé dans la galerie",
+  "collageLayout": "Disposition",
   "addToEnte": "Ajouter à ente",
   "addToAlbum": "Ajouter à l'album",
   "delete": "Supprimer",
@@ -624,21 +745,64 @@
   "thisAlbumAlreadyHDACollaborativeLink": "Cet album a déjà un lien collaboratif",
   "collaborativeLinkCreatedFor": "Lien collaboratif créé pour {albumName}",
   "askYourLovedOnesToShare": "Demandez à vos proches de partager",
+  "invite": "Inviter",
+  "shareYourFirstAlbum": "Partagez votre premier album",
   "sharedWith": "Partagé avec {emailIDs}",
+  "sharedWithMe": "Partagés avec moi",
   "sharedByMe": "Partagé par moi",
   "doubleYourStorage": "Doubler votre espace de stockage",
   "referFriendsAnd2xYourPlan": "Parrainez des amis et 2x votre abonnement",
   "shareAlbumHint": "Ouvrez un album et appuyez sur le bouton de partage en haut à droite pour le partager.",
   "itemsShowTheNumberOfDaysRemainingBeforePermanentDeletion": "Les éléments montrent le nombre de jours restants avant la suppression définitive",
+  "trashDaysLeft": "{count, plural, =0 {0 jour} =1 {1 jour} other {{count} jours}}",
+  "@trashDaysLeft": {
+    "description": "Text to indicate number of days remaining before permanent deletion",
+    "placeholders": {
+      "count": {
+        "example": "1|2|3",
+        "type": "int"
+      }
+    }
+  },
   "deleteAll": "Tout Supprimer",
   "renameAlbum": "Renommer l'album",
+  "convertToAlbum": "Convertir en album",
+  "setCover": "Définir la couverture",
+  "@setCover": {
+    "description": "Text to set cover photo for an album"
+  },
+  "sortAlbumsBy": "Trier par",
+  "sortNewestFirst": "Plus récent en premier",
+  "sortOldestFirst": "Plus ancien en premier",
   "rename": "Renommer",
   "leaveSharedAlbum": "Quitter l'album partagé?",
   "leaveAlbum": "Quitter l'album",
   "photosAddedByYouWillBeRemovedFromTheAlbum": "Les photos ajoutées par vous seront retirées de l'album",
   "youveNoFilesInThisAlbumThatCanBeDeleted": "Vous n'avez pas de fichiers dans cet album qui peuvent être supprimés",
+  "youDontHaveAnyArchivedItems": "Vous n'avez aucun élément archivé.",
   "ignoredFolderUploadReason": "Certains fichiers de cet album sont ignorés parce qu'ils avaient été précédemment supprimés de ente.",
   "resetIgnoredFiles": "Réinitialiser les fichiers ignorés",
+  "deviceFilesAutoUploading": "Les fichiers ajoutés à cet album seront automatiquement téléchargés sur ente.",
+  "turnOnBackupForAutoUpload": "Activez la sauvegarde pour télécharger automatiquement les fichiers ajoutés à ce dossier de l'appareil sur ente.",
+  "noHiddenPhotosOrVideos": "Aucune photo ou vidéo cachée",
+  "toHideAPhotoOrVideo": "Cacher une photo ou une vidéo",
+  "openTheItem": "• Ouvrir l'élément",
+  "clickOnTheOverflowMenu": "• Cliquez sur le menu de débordement",
+  "click": "• Click",
+  "nothingToSeeHere": "Il n'y a encore rien à voir ici 👀",
+  "unarchiveAlbum": "Désarchiver l'album",
+  "archiveAlbum": "Archiver l'album",
+  "calculating": "Calcul en cours...",
+  "pleaseWaitDeletingAlbum": "Veuillez patienter, suppression de l'album",
+  "searchHintText": "Albums, mois, jours, années, ...",
+  "searchByExamples": "• Noms d'albums (par exemple \"Caméra\")\n• Types de fichiers (par exemple \"Vidéos\", \".gif\")\n• Années et mois (par exemple \"2022\", \"Janvier\")\n• Vacances (par exemple \"Noël\")\n• Descriptions de photos (par exemple \"#fun\")",
+  "youCanTrySearchingForADifferentQuery": "Vous pouvez essayer de rechercher une autre requête.",
+  "noResultsFound": "Aucun résultat trouvé",
+  "addedBy": "Ajouté par {emailOrName}",
+  "loadingExifData": "Chargement des données EXIF...",
+  "viewAllExifData": "Visualiser toutes les données EXIF",
+  "noExifData": "Aucune donnée EXIF",
+  "thisImageHasNoExifData": "Cette image n'a pas de données exif",
   "exif": "EXIF",
   "noResults": "Aucun résultat",
   "weDontSupportEditingPhotosAndAlbumsThatYouDont": "Nous ne prenons pas en charge l'édition des photos et des albums que vous ne possédez pas encore",
@@ -646,14 +810,81 @@
   "close": "Fermer",
   "setAs": "Définir comme",
   "fileSavedToGallery": "Fichier enregistré dans la galerie",
+  "fileFailedToSaveToGallery": "Échec de l'enregistrement dans la galerie",
   "download": "Télécharger",
   "pressAndHoldToPlayVideo": "Appuyez et maintenez enfoncé pour lire la vidéo",
   "downloadFailed": "Échec du téléchargement",
   "deduplicateFiles": "Déduplication de fichiers",
   "deselectAll": "Tout déselectionner",
   "reviewDeduplicateItems": "Veuillez vérifier et supprimer les éléments que vous croyez dupliqués.",
-  "clubByCaptureTime": "Durée du Club par capture",
+  "clubByCaptureTime": "Grouper par durée",
+  "clubByFileName": "Grouper par nom de fichier",
+  "count": "Total",
   "totalSize": "Taille totale",
+  "time": "Date et heure",
+  "longpressOnAnItemToViewInFullscreen": "Appuyez longuement sur un élément pour le voir en plein écran",
+  "decryptingVideo": "Déchiffrement de la vidéo...",
+  "authToViewYourMemories": "Veuillez vous authentifier pour voir vos souvenirs",
+  "unlock": "Déverrouiller",
+  "freeUpSpace": "Libérer de l'espace",
+  "freeUpSpaceSaving": "{count, plural, one {Peut être supprimé de l'appareil pour libérer {formattedSize}} other {Peuvent être supprimés de l'appareil pour libérer {formattedSize}}}",
+  "filesBackedUpInAlbum": "{count, plural, one {1 fichier dans cet album a été sauvegardé en toute sécurité} other {{formattedNumber} fichiers dans cet album ont été sauvegardés en toute sécurité}}",
+  "@filesBackedUpInAlbum": {
+    "description": "Text to tell user how many files have been backed up in the album",
+    "placeholders": {
+      "count": {
+        "example": "1",
+        "type": "int"
+      },
+      "formattedNumber": {
+        "content": "{formattedNumber}",
+        "example": "1,000",
+        "type": "String"
+      }
+    }
+  },
+  "filesBackedUpFromDevice": "{count, plural, one {1 fichier sur cet appareil a été sauvegardé en toute sécurité} other {{formattedNumber} fichiers sur cet appareil ont été sauvegardés en toute sécurité}}",
+  "@filesBackedUpFromDevice": {
+    "description": "Text to tell user how many files have been backed up from this device",
+    "placeholders": {
+      "count": {
+        "example": "1",
+        "type": "int"
+      },
+      "formattedNumber": {
+        "content": "{formattedNumber}",
+        "example": "1,000",
+        "type": "String"
+      }
+    }
+  },
+  "@freeUpSpaceSaving": {
+    "description": "Text to tell user how much space they can free up by deleting items from the device"
+  },
+  "freeUpAccessPostDelete": "Vous pouvez toujours accéder à {count, plural, one {it} other {them}} sur ente tant que vous avez un abonnement actif",
+  "@freeUpAccessPostDelete": {
+    "placeholders": {
+      "count": {
+        "example": "1",
+        "type": "int"
+      }
+    }
+  },
+  "freeUpAmount": "Libérer {sizeInMBorGB}",
+  "thisEmailIsAlreadyInUse": "Cette adresse mail est déjà utilisé",
+  "incorrectCode": "Code non valide",
+  "authenticationFailedPleaseTryAgain": "L'authentification a échouée, veuillez réessayer",
+  "verificationFailedPleaseTryAgain": "La vérification a échouée, veuillez réessayer",
+  "authenticating": "Authentification...",
+  "authenticationSuccessful": "Authentification réussie!",
+  "incorrectRecoveryKey": "Clé de récupération non valide",
+  "theRecoveryKeyYouEnteredIsIncorrect": "La clé de récupération que vous avez entrée est incorrecte",
+  "twofactorAuthenticationSuccessfullyReset": "L'authentification à deux facteurs a été réinitialisée avec succès ",
+  "pleaseVerifyTheCodeYouHaveEntered": "Veuillez vérifier le code que vous avez entré",
+  "pleaseContactSupportIfTheProblemPersists": "Merci de contacter l'assistance si cette erreur persiste",
+  "twofactorAuthenticationHasBeenDisabled": "L'authentification à deux facteurs a été désactivée",
+  "sorryTheCodeYouveEnteredIsIncorrect": "Le code que vous avez saisi est incorrect",
+  "yourVerificationCodeHasExpired": "Votre code de vérification a expiré",
   "emailChangedTo": "L'e-mail a été changé en {newEmail}",
   "verifying": "Validation en cours...",
   "disablingTwofactorAuthentication": "Désactiver la double-authentification...",
@@ -715,13 +946,154 @@
   "dismiss": "Rejeter",
   "didYouKnow": "Le savais-tu ?",
   "loadingMessage": "Chargement de vos photos...",
+  "loadMessage1": "Vous pouvez partager votre abonnement avec votre famille",
+  "loadMessage2": "Nous avons conservé plus de 10 millions de souvenirs jusqu'à présent",
+  "loadMessage3": "Nous conservons 3 copies de vos données, l'une dans un abri anti-atomique",
+  "loadMessage4": "Toutes nos applications sont open source",
+  "loadMessage5": "Notre code source et notre cryptographie ont été audités en externe",
+  "loadMessage6": "Vous pouvez partager des liens vers vos albums avec vos proches",
+  "loadMessage7": "Nos applications mobiles s'exécutent en arrière-plan pour chiffrer et sauvegarder automatiquement les nouvelles photos que vous prenez",
+  "loadMessage8": "web.ente.io dispose d'un outil de téléchargement facile à utiliser",
+  "loadMessage9": "Nous utilisons Xchacha20Poly1305 pour chiffrer vos données en toute sécurité",
   "language": "Langue",
+  "selectLanguage": "Sélectionner une langue",
+  "locationName": "Nom du lieu",
+  "addLocation": "Ajouter la localisation",
+  "groupNearbyPhotos": "Grouper les photos à proximité",
+  "location": "Emplacement",
+  "kiloMeterUnit": "km",
+  "addLocationButton": "Ajouter",
+  "radius": "Rayon",
+  "locationTagFeatureDescription": "Un tag d'emplacement regroupe toutes les photos qui ont été prises dans un certain rayon d'une photo",
+  "galleryMemoryLimitInfo": "Jusqu'à 1000 souvenirs affichés dans la galerie",
+  "save": "Sauvegarder",
+  "centerPoint": "Point central",
+  "pickCenterPoint": "Sélectionner le point central",
+  "useSelectedPhoto": "Utiliser la photo sélectionnée",
+  "resetToDefault": "Réinitialiser aux valeurs par défaut",
+  "@resetToDefault": {
+    "description": "Button text to reset cover photo to default"
+  },
   "edit": "Éditer",
-  "nothingSharedWithYouYet": "Nothing shared with you yet",
-  "shareYourFirstAlbum": "Share your first album",
-  "noAlbumsSharedByYouYet": "No albums shared by you yet",
-  "sharedWithYou": "Shared with you",
-  "sharedByYou": "Shared by you",
-  "inviteYourFriendsToEnte": "Invite your friends to ente",
-  "failedToDownloadVideo": "Failed to download video"
+  "deleteLocation": "Supprimer la localisation",
+  "rotateLeft": "Pivoter à gauche",
+  "flip": "Retourner",
+  "rotateRight": "Faire pivoter à droite",
+  "saveCopy": "Enregistrer une copie",
+  "light": "Clair",
+  "color": "Couleur ",
+  "yesDiscardChanges": "Oui, ignorer les modifications",
+  "doYouWantToDiscardTheEditsYouHaveMade": "Voulez-vous annuler les modifications que vous avez faites ?",
+  "saving": "Enregistrement...",
+  "editsSaved": "Modification sauvegardée",
+  "oopsCouldNotSaveEdits": "Oups, impossible d'enregistrer les modifications",
+  "distanceInKMUnit": "km",
+  "@distanceInKMUnit": {
+    "description": "Unit for distance in km"
+  },
+  "dayToday": "Aujourd'hui",
+  "dayYesterday": "Hier",
+  "storage": "Stockage",
+  "usedSpace": "Mémoire utilisée",
+  "storageBreakupFamily": "Famille",
+  "storageBreakupYou": "Vous",
+  "@storageBreakupYou": {
+    "description": "Label to indicate how much storage you are using when you are part of a family plan"
+  },
+  "storageUsageInfo": "{usedAmount} {usedStorageUnit} sur {totalAmount} {totalStorageUnit} utilisé",
+  "@storageUsageInfo": {
+    "description": "Example: 1.2 GB of 2 GB used or 100 GB or 2TB used"
+  },
+  "freeStorageSpace": "{freeAmount} {storageUnit} libre",
+  "appVersion": "Version : {versionValue}",
+  "verifyIDLabel": "Vérifier",
+  "fileInfoAddDescHint": "Ajouter une description...",
+  "editLocationTagTitle": "Modifier l’emplacement",
+  "setLabel": "Définir",
+  "@setLabel": {
+    "description": "Label of confirm button to add a new custom radius to the radius selector of a location tag"
+  },
+  "setRadius": "Définir le rayon",
+  "familyPlanPortalTitle": "Famille",
+  "familyPlanOverview": "Ajoutez 5 membres de votre famille à votre abonnement existant sans payer de supplément.\n\nChaque membre dispose de son propre espace privé et ne peut pas voir les fichiers des autres membres, sauf s'ils sont partagés.\n\nLes abonnement familiaux sont disponibles pour les clients qui ont un abonnement ente payant.\n\nAbonnez-vous maintenant pour commencer !",
+  "androidBiometricHint": "Vérifier l’identité",
+  "@androidBiometricHint": {
+    "description": "Hint message advising the user how to authenticate with biometrics. It is used on Android side. Maximum 60 characters."
+  },
+  "androidBiometricNotRecognized": "Reconnaissance impossible. Réessayez.",
+  "@androidBiometricNotRecognized": {
+    "description": "Message to let the user know that authentication was failed. It is used on Android side. Maximum 60 characters."
+  },
+  "androidBiometricSuccess": "Succès",
+  "@androidBiometricSuccess": {
+    "description": "Message to let the user know that authentication was successful. It is used on Android side. Maximum 60 characters."
+  },
+  "androidCancelButton": "Annuler",
+  "@androidCancelButton": {
+    "description": "Message showed on a button that the user can click to leave the current dialog. It is used on Android side. Maximum 30 characters."
+  },
+  "androidSignInTitle": "Authentification requise",
+  "@androidSignInTitle": {
+    "description": "Message showed as a title in a dialog which indicates the user that they need to scan biometric to continue. It is used on Android side. Maximum 60 characters."
+  },
+  "androidBiometricRequiredTitle": "Empreinte digitale requise",
+  "@androidBiometricRequiredTitle": {
+    "description": "Message showed as a title in a dialog which indicates the user has not set up biometric authentication on their device. It is used on Android side. Maximum 60 characters."
+  },
+  "androidDeviceCredentialsRequiredTitle": "Identifiants requis",
+  "@androidDeviceCredentialsRequiredTitle": {
+    "description": "Message showed as a title in a dialog which indicates the user has not set up credentials authentication on their device. It is used on Android side. Maximum 60 characters."
+  },
+  "androidDeviceCredentialsSetupDescription": "Identifiants requis",
+  "@androidDeviceCredentialsSetupDescription": {
+    "description": "Message advising the user to go to the settings and configure device credentials on their device. It shows in a dialog on Android side."
+  },
+  "goToSettings": "Allez aux réglages",
+  "@goToSettings": {
+    "description": "Message showed on a button that the user can click to go to settings pages from the current dialog. It is used on both Android and iOS side. Maximum 30 characters."
+  },
+  "androidGoToSettingsDescription": "L'authentification biométrique n'est pas configurée sur votre appareil. Allez dans 'Paramètres > Sécurité' pour ajouter l'authentification biométrique.",
+  "@androidGoToSettingsDescription": {
+    "description": "Message advising the user to go to the settings and configure biometric on their device. It shows in a dialog on Android side."
+  },
+  "iOSLockOut": "L'authentification biométrique est désactivée. Veuillez verrouiller et déverrouiller votre écran pour l'activer.",
+  "@iOSLockOut": {
+    "description": "Message advising the user to re-enable biometrics on their device. It shows in a dialog on iOS side."
+  },
+  "iOSGoToSettingsDescription": "L'authentification biométrique n'est pas configurée sur votre appareil. Veuillez activer Touch ID ou Face ID sur votre téléphone.",
+  "@iOSGoToSettingsDescription": {
+    "description": "Message advising the user to go to the settings and configure Biometrics for their device. It shows in a dialog on iOS side."
+  },
+  "iOSOkButton": "Ok",
+  "@iOSOkButton": {
+    "description": "Message showed on a button that the user can click to leave the current dialog. It is used on iOS side. Maximum 30 characters."
+  },
+  "openstreetmapContributors": "Contributeurs d'OpenStreetMap",
+  "hostedAtOsmFrance": "Hébergé chez OSM France",
+  "map": "Carte",
+  "@map": {
+    "description": "Label for the map view"
+  },
+  "maps": "Cartes",
+  "enableMaps": "Activer la carte",
+  "enableMapsDesc": "Vos photos seront affichées sur une carte du monde.\n\nCette carte est hébergée par Open Street Map, et les emplacements exacts de vos photos ne sont jamais partagés.\n\nVous pouvez désactiver cette fonction à tout moment dans les Paramètres.",
+  "quickLinks": "Liens rapides",
+  "selectItemsToAdd": "Sélectionner les éléments à ajouter",
+  "addSelected": "Ajouter la sélection",
+  "addFromDevice": "Ajouter depuis l'appareil",
+  "addPhotos": "Ajouter des photos",
+  "noPhotosFoundHere": "Aucune photo trouvée",
+  "zoomOutToSeePhotos": "Zoom en arrière pour voir les photos",
+  "noImagesWithLocation": "Aucune image avec localisation",
+  "unpinAlbum": "Désépingler l'album",
+  "pinAlbum": "Épingler l'album",
+  "create": "Créer",
+  "viewAll": "Tout afficher",
+  "nothingSharedWithYouYet": "Rien n'a encore été partagé avec vous",
+  "noAlbumsSharedByYouYet": "Aucun album que vous avez partagé",
+  "sharedWithYou": "Partagé avec vous",
+  "sharedByYou": "Partagé par vous",
+  "inviteYourFriendsToEnte": "Invitez vos amis sur ente",
+  "failedToDownloadVideo": "Échec du téléchargement de la vidéo",
+  "crashReporting": "Rapports d'erreurs"
 }
