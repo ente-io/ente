@@ -309,14 +309,12 @@ extension GalleryAppBarExtn on GalleryType {
     switch (this) {
       case GalleryType.homepage:
       case GalleryType.archive:
-      case GalleryType.uncategorized:
       case GalleryType.hiddenSection:
-
       case GalleryType.trash:
       case GalleryType.localFolder:
-
       case GalleryType.locationTag:
         return false;
+      case GalleryType.uncategorized:
       case GalleryType.ownedCollection:
       case GalleryType.searchResults:
       case GalleryType.sharedCollection:
