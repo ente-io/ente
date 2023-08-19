@@ -277,26 +277,20 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     }
     final int userID = Configuration.instance.getUserID()!;
     isQuickLink = widget.collection?.isQuickLinkCollection() ?? false;
-    if ((galleryType == GalleryType.ownedCollection ||
-            galleryType == GalleryType.sharedCollection ||
-            isQuickLink) &&
-        widget.collection?.type != CollectionType.favorites) {
-      final bool canAddFiles = galleryType == GalleryType.ownedCollection ||
-          widget.collection!.getRole(userID) ==
-              CollectionParticipantRole.collaborator;
-      if (canAddFiles) {
-        actions.add(
-          Tooltip(
-            message: "Add Files",
-            child: IconButton(
-              icon: const Icon(Icons.add_photo_alternate_outlined),
-              onPressed: () async {
-                await _showAddPhotoDialog(context);
-              },
-            ),
+    if (galleryType.canAddFiles(widget.collection, userID)) {
+      actions.add(
+        Tooltip(
+          message: "Add Files",
+          child: IconButton(
+            icon: const Icon(Icons.add_photo_alternate_outlined),
+            onPressed: () async {
+              await _showAddPhotoDialog(context);
+            },
           ),
-        );
-      }
+        ),
+      );
+    }
+    if (galleryType.isSharable()) {
       actions.add(
         Tooltip(
           message: "Share",
@@ -314,176 +308,175 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
       );
     }
     final List<PopupMenuItem<AlbumPopupAction>> items = [];
-    if (galleryType == GalleryType.ownedCollection || isQuickLink) {
-      if (widget.collection!.type != CollectionType.favorites) {
-        items.add(
-          PopupMenuItem(
-            value: AlbumPopupAction.rename,
-            child: Row(
-              children: [
-                Icon(isQuickLink ? Icons.photo_album_outlined : Icons.edit),
-                const Padding(
-                  padding: EdgeInsets.all(8),
-                ),
-                Text(
-                  isQuickLink
-                      ? S.of(context).convertToAlbum
-                      : S.of(context).renameAlbum,
-                ),
-              ],
-            ),
-          ),
-        );
-        if (!isQuickLink) {
-          items.add(
-            PopupMenuItem(
-              value: AlbumPopupAction.setCover,
-              child: Row(
-                children: [
-                  const Icon(Icons.image_outlined),
-                  const Padding(
-                    padding: EdgeInsets.all(8),
-                  ),
-                  Text(S.of(context).setCover),
-                ],
+    if (galleryType.canRename()) {
+      items.add(
+        PopupMenuItem(
+          value: AlbumPopupAction.rename,
+          child: Row(
+            children: [
+              Icon(isQuickLink ? Icons.photo_album_outlined : Icons.edit),
+              const Padding(
+                padding: EdgeInsets.all(8),
               ),
-            ),
-          );
-        }
-      }
-      if (galleryType == GalleryType.ownedCollection ||
-          galleryType == GalleryType.sharedCollection ||
-          isQuickLink) {
-        items.add(
-          PopupMenuItem(
-            value: AlbumPopupAction.map,
-            child: Row(
-              children: [
-                const Icon(Icons.map_outlined),
-                const Padding(
-                  padding: EdgeInsets.all(8),
-                ),
-                Text(S.of(context).map),
-              ],
-            ),
-          ),
-        );
-      }
-      final bool isArchived = widget.collection!.isArchived();
-      final bool isHidden = widget.collection!.isHidden();
-      // Do not show archive option for favorite collection. If collection is
-      // already archived, allow user to unarchive that collection.
-      if (isArchived || widget.collection!.type != CollectionType.favorites) {
-        items.add(
-          PopupMenuItem(
-            value: AlbumPopupAction.sort,
-            child: Row(
-              children: [
-                const Icon(Icons.sort_outlined),
-                const Padding(
-                  padding: EdgeInsets.all(8),
-                ),
-                Text(
-                  S.of(context).sortAlbumsBy,
-                ),
-              ],
-            ),
-          ),
-        );
-        if (!isQuickLink) {
-          items.add(
-            PopupMenuItem(
-              value: AlbumPopupAction.pinAlbum,
-              child: Row(
-                children: [
-                  widget.collection!.isPinned
-                      ? const Icon(CupertinoIcons.pin_slash)
-                      : Transform.rotate(
-                          angle: 45 * math.pi / 180, // rotate by 45 degrees
-                          child: const Icon(CupertinoIcons.pin),
-                        ),
-                  const Padding(
-                    padding: EdgeInsets.all(8),
-                  ),
-                  Text(
-                    widget.collection!.isPinned
-                        ? S.of(context).unpinAlbum
-                        : S.of(context).pinAlbum,
-                  ),
-                ],
+              Text(
+                isQuickLink
+                    ? S.of(context).convertToAlbum
+                    : S.of(context).renameAlbum,
               ),
-            ),
-          );
-        }
+            ],
+          ),
+        ),
+      );
+    }
+    if (galleryType.canSetCover()) {
+      items.add(
+        PopupMenuItem(
+          value: AlbumPopupAction.setCover,
+          child: Row(
+            children: [
+              const Icon(Icons.image_outlined),
+              const Padding(
+                padding: EdgeInsets.all(8),
+              ),
+              Text(S.of(context).setCover),
+            ],
+          ),
+        ),
+      );
+    }
+    if (galleryType.showMap()) {
+      items.add(
+        PopupMenuItem(
+          value: AlbumPopupAction.map,
+          child: Row(
+            children: [
+              const Icon(Icons.map_outlined),
+              const Padding(
+                padding: EdgeInsets.all(8),
+              ),
+              Text(S.of(context).map),
+            ],
+          ),
+        ),
+      );
+    }
 
-        if (!isQuickLink) {
-          items.add(
-            PopupMenuItem(
-              value: AlbumPopupAction.ownedArchive,
-              child: Row(
-                children: [
-                  Icon(isArchived ? Icons.unarchive : Icons.archive_outlined),
-                  const Padding(
-                    padding: EdgeInsets.all(8),
-                  ),
-                  Text(
-                    isArchived
-                        ? S.of(context).unarchiveAlbum
-                        : S.of(context).archiveAlbum,
-                  ),
-                ],
+    if (galleryType.canSort()) {
+      items.add(
+        PopupMenuItem(
+          value: AlbumPopupAction.sort,
+          child: Row(
+            children: [
+              const Icon(Icons.sort_outlined),
+              const Padding(
+                padding: EdgeInsets.all(8),
               ),
-            ),
-          );
-          items.add(
-            PopupMenuItem(
-              value: AlbumPopupAction.ownedHide,
-              child: Row(
-                children: [
-                  Icon(
-                    isHidden
-                        ? Icons.visibility_outlined
-                        : Icons.visibility_off_outlined,
-                  ),
-                  const Padding(
-                    padding: EdgeInsets.all(8),
-                  ),
-                  Text(
-                    isHidden ? S.of(context).unhide : S.of(context).hide,
-                  ),
-                ],
+              Text(
+                S.of(context).sortAlbumsBy,
               ),
-            ),
-          );
-        }
-      }
-      if (widget.collection!.type != CollectionType.favorites) {
-        items.add(
-          PopupMenuItem(
-            value: isQuickLink
-                ? AlbumPopupAction.removeLink
-                : AlbumPopupAction.delete,
-            child: Row(
-              children: [
-                Icon(
-                  isQuickLink
-                      ? Icons.remove_circle_outline
-                      : Icons.delete_outline,
-                ),
-                const Padding(
-                  padding: EdgeInsets.all(8),
-                ),
-                Text(
-                  isQuickLink
-                      ? S.of(context).removeLink
-                      : S.of(context).deleteAlbum,
-                ),
-              ],
-            ),
+            ],
           ),
-        );
-      }
-    } // ownedCollection open ends
+        ),
+      );
+    }
+    if (galleryType.canPin()) {
+      items.add(
+        PopupMenuItem(
+          value: AlbumPopupAction.pinAlbum,
+          child: Row(
+            children: [
+              widget.collection!.isPinned
+                  ? const Icon(CupertinoIcons.pin_slash)
+                  : Transform.rotate(
+                      angle: 45 * math.pi / 180, // rotate by 45 degrees
+                      child: const Icon(CupertinoIcons.pin),
+                    ),
+              const Padding(
+                padding: EdgeInsets.all(8),
+              ),
+              Text(
+                widget.collection!.isPinned
+                    ? S.of(context).unpinAlbum
+                    : S.of(context).pinAlbum,
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+    final bool isArchived = widget.collection?.isArchived() ?? false;
+    final bool isHidden = widget.collection?.isHidden() ?? false;
+    // Do not show archive option for favorite collection. If collection is
+    // already archived, allow user to unarchive that collection.
+    if (isArchived || (galleryType.canArchive() && !isHidden)) {
+      items.add(
+        PopupMenuItem(
+          value: AlbumPopupAction.ownedArchive,
+          child: Row(
+            children: [
+              Icon(isArchived ? Icons.unarchive : Icons.archive_outlined),
+              const Padding(
+                padding: EdgeInsets.all(8),
+              ),
+              Text(
+                isArchived
+                    ? S.of(context).unarchiveAlbum
+                    : S.of(context).archiveAlbum,
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+    if (!isArchived && galleryType.canHide()) {
+      items.add(
+        PopupMenuItem(
+          value: AlbumPopupAction.ownedHide,
+          child: Row(
+            children: [
+              Icon(
+                isHidden
+                    ? Icons.visibility_outlined
+                    : Icons.visibility_off_outlined,
+              ),
+              const Padding(
+                padding: EdgeInsets.all(8),
+              ),
+              Text(
+                isHidden ? S.of(context).unhide : S.of(context).hide,
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    if (galleryType.canDelete()) {
+      items.add(
+        PopupMenuItem(
+          value: isQuickLink
+              ? AlbumPopupAction.removeLink
+              : AlbumPopupAction.delete,
+          child: Row(
+            children: [
+              Icon(
+                isQuickLink
+                    ? Icons.remove_circle_outline
+                    : Icons.delete_outline,
+              ),
+              const Padding(
+                padding: EdgeInsets.all(8),
+              ),
+              Text(
+                isQuickLink
+                    ? S.of(context).removeLink
+                    : S.of(context).deleteAlbum,
+              ),
+            ],
+          ),
+        ),
+      );
+    }
 
     if (galleryType == GalleryType.sharedCollection) {
       final bool hasShareeArchived = widget.collection!.hasShareeArchived();
