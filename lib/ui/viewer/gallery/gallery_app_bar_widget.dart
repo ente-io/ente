@@ -551,33 +551,9 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
               );
               if (mounted) setState(() {});
             } else if (value == AlbumPopupAction.ownedArchive) {
-              final isArchived = widget.collection!.isArchived();
-              final int prevVisiblity =
-                  isArchived ? archiveVisibility : visibleVisibility;
-              final int newVisiblity =
-                  isArchived ? visibleVisibility : archiveVisibility;
-
-              await changeCollectionVisibility(
-                context,
-                collection: widget.collection!,
-                newVisibility: newVisiblity,
-                prevVisibility: prevVisiblity,
-              );
-              setState(() {});
+              await archiveOrUnarchive();
             } else if (value == AlbumPopupAction.ownedHide) {
-              final isHidden = widget.collection!.isHidden();
-              final int prevVisiblity =
-                  isHidden ? hiddenVisibility : visibleVisibility;
-              final int newVisiblity =
-                  isHidden ? visibleVisibility : hiddenVisibility;
-
-              await changeCollectionVisibility(
-                context,
-                collection: widget.collection!,
-                newVisibility: newVisiblity,
-                prevVisibility: prevVisiblity,
-              );
-              setState(() {});
+              await hideOrUnhide();
             } else if (value == AlbumPopupAction.delete) {
               await _trashCollection();
             } else if (value == AlbumPopupAction.removeLink) {
@@ -765,5 +741,34 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
       _logger.severe(e, s);
       showGenericErrorDialog(context: bContext);
     }
+  }
+
+  Future<void> hideOrUnhide() async {
+    final isHidden = widget.collection!.isHidden();
+    final int prevVisiblity = isHidden ? hiddenVisibility : visibleVisibility;
+    final int newVisiblity = isHidden ? visibleVisibility : hiddenVisibility;
+
+    await changeCollectionVisibility(
+      context,
+      collection: widget.collection!,
+      newVisibility: newVisiblity,
+      prevVisibility: prevVisiblity,
+    );
+    setState(() {});
+  }
+
+  Future<void> archiveOrUnarchive() async {
+    final isArchived = widget.collection!.isArchived();
+    final int prevVisiblity =
+        isArchived ? archiveVisibility : visibleVisibility;
+    final int newVisiblity = isArchived ? visibleVisibility : archiveVisibility;
+
+    await changeCollectionVisibility(
+      context,
+      collection: widget.collection!,
+      newVisibility: newVisiblity,
+      prevVisibility: prevVisiblity,
+    );
+    setState(() {});
   }
 }
