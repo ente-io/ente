@@ -33,7 +33,7 @@ import 'package:photos/utils/validator_util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import "package:tuple/tuple.dart";
 import 'package:uuid/uuid.dart';
-import 'package:wakelock/wakelock.dart';
+import 'package:wakelock_plus/wakelock_plus.dart';
 
 class Configuration {
   Configuration._privateConstructor();
@@ -271,8 +271,9 @@ class Configuration {
   // SRP setup for existing users.
   Future<Uint8List> decryptSecretsAndGetKeyEncKey(
     String password,
-    KeyAttributes attributes,
-  ) async {
+    KeyAttributes attributes, {
+    Uint8List? keyEncryptionKey,
+  }) async {
     validatePreVerificationStateCheck(
       attributes,
       password,
@@ -280,7 +281,7 @@ class Configuration {
     );
     // Derive key-encryption-key from the entered password and existing
     // mem and ops limits
-    final keyEncryptionKey = await CryptoUtil.deriveKey(
+    keyEncryptionKey ??= await CryptoUtil.deriveKey(
       utf8.encode(password) as Uint8List,
       CryptoUtil.base642bin(attributes.kekSalt),
       attributes.memLimit!,
@@ -547,7 +548,7 @@ class Configuration {
 
   Future<void> setShouldKeepDeviceAwake(bool value) async {
     await _preferences.setBool(keyShouldKeepDeviceAwake, value);
-    await Wakelock.toggle(enable: value);
+    await WakelockPlus.toggle(enable: value);
   }
 
   Future<void> setShouldBackupVideos(bool value) async {

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
+import "package:flutter_datetime_picker_bdaya/flutter_datetime_picker_bdaya.dart";
 import 'package:photos/ente_theme_data.dart';
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/collection.dart';
@@ -142,7 +142,7 @@ class _ItemsWidgetState extends State<ItemsWidget> {
 
   // _showDateTimePicker return null if user doesn't select date-time
   Future<int?> _showDateTimePicker(BuildContext context) async {
-    final dateResult = await DatePicker.showDatePicker(
+    final dateResult = await DatePickerBdaya.showDatePicker(
       context,
       minTime: DateTime.now(),
       currentTime: DateTime.now(),
@@ -152,7 +152,7 @@ class _ItemsWidgetState extends State<ItemsWidget> {
     if (dateResult == null) {
       return null;
     }
-    final dateWithTimeResult = await DatePicker.showTime12hPicker(
+    final dateWithTimeResult = await DatePickerBdaya.showTime12hPicker(
       context,
       showTitleActions: true,
       currentTime: dateResult,

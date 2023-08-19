@@ -34,6 +34,7 @@ import 'package:photos/ui/account/two_factor_authentication_page.dart';
 import 'package:photos/ui/account/two_factor_recovery_page.dart';
 import 'package:photos/ui/account/two_factor_setup_page.dart';
 import "package:photos/ui/components/buttons/button_widget.dart";
+import "package:photos/ui/tabs/home_widget.dart";
 import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/dialog_util.dart';
 import "package:photos/utils/email_util.dart";
@@ -569,14 +570,15 @@ class UserService {
       isDismissible: true,
     );
     await dialog.show();
+    late Uint8List keyEncryptionKey;
     try {
-      final kek = await CryptoUtil.deriveKey(
+      keyEncryptionKey = await CryptoUtil.deriveKey(
         utf8.encode(userPassword) as Uint8List,
         CryptoUtil.base642bin(srpAttributes.kekSalt),
         srpAttributes.memLimit,
         srpAttributes.opsLimit,
       );
-      final loginKey = await CryptoUtil.deriveLoginKey(kek);
+      final loginKey = await CryptoUtil.deriveLoginKey(keyEncryptionKey);
       final Uint8List identity = Uint8List.fromList(
         utf8.encode(srpAttributes.srpUserID),
       );
@@ -614,7 +616,6 @@ class UserService {
         },
       );
       if (response.statusCode == 200) {
-        await dialog.hide();
         Widget page;
         final String twoFASessionID = response.data["twoFactorSessionID"];
         Configuration.instance.setVolatilePassword(userPassword);
@@ -624,11 +625,17 @@ class UserService {
         } else {
           await _saveConfiguration(response);
           if (Configuration.instance.getEncryptedToken() != null) {
-            page = const PasswordReentryPage();
+            await Configuration.instance.decryptSecretsAndGetKeyEncKey(
+              userPassword,
+              Configuration.instance.getKeyAttributes()!,
+              keyEncryptionKey: keyEncryptionKey,
+            );
+            page = const HomeWidget();
           } else {
             throw Exception("unexpected response during email verification");
           }
         }
+        await dialog.hide();
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(
             builder: (BuildContext context) {
