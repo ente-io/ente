@@ -46,7 +46,7 @@ class ChipButtonWidget extends StatelessWidget {
                     label!,
                     style: getEnteTextTheme(context).miniBold,
                   ),
-                )
+                ),
             ],
           ),
         ),

@@ -75,7 +75,7 @@ class _SubscriptionHeaderWidgetState extends State<SubscriptionHeaderWidget> {
                       .textTheme
                       .titleMedium!
                       .copyWith(fontWeight: FontWeight.bold),
-                )
+                ),
               ],
             ),
           ),

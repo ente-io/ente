@@ -130,9 +130,9 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
                     ),
                   ],
                 ),
-              )
+              ),
             ],
-          )
+          ),
         ],
       ),
       body: _getBody(),

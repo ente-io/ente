@@ -84,7 +84,7 @@ class CollectionActions {
           isInAlert: true,
           shouldStickToDarkTheme: true,
           labelText: S.of(context).cancel,
-        )
+        ),
       ],
       title: S.of(context).removePublicLink,
       body:
@@ -176,7 +176,7 @@ class CollectionActions {
           isInAlert: true,
           shouldStickToDarkTheme: true,
           labelText: S.of(context).cancel,
-        )
+        ),
       ],
       title: S.of(context).removeWithQuestionMark,
       body: S.of(context).removeParticipantBody(user.email),

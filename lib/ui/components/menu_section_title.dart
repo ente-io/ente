@@ -27,7 +27,7 @@ class MenuSectionTitle extends StatelessWidget {
             style: getEnteTextTheme(context).small.copyWith(
                   color: colorScheme.textMuted,
                 ),
-          )
+          ),
         ],
       ),
     );

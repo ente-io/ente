@@ -159,7 +159,7 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
                       blurRadius: 24,
                       offset: const Offset(0, -8),
                       spreadRadius: 4,
-                    )
+                    ),
                   ],
                 ),
                 padding: widget.isOnboarding
@@ -313,7 +313,7 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
               : LinearGradient(
                   colors: [
                     Theme.of(context).colorScheme.boxUnSelectColor,
-                    Theme.of(context).colorScheme.boxUnSelectColor
+                    Theme.of(context).colorScheme.boxUnSelectColor,
                   ],
                 ),
         ),

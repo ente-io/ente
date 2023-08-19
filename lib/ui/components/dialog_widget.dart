@@ -311,7 +311,7 @@ class _TextInputDialogState extends State<TextInputDialog> {
                   ),
                 ),
               ],
-            )
+            ),
           ],
         ),
       ),

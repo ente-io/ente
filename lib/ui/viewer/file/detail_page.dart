@@ -81,7 +81,7 @@ class _DetailPageState extends State<DetailPage> {
   void initState() {
     super.initState();
     _files = [
-      ...widget.config.files
+      ...widget.config.files,
     ]; // Make a copy since we append preceding and succeeding entries to this
     _selectedIndexNotifier.value = widget.config.selectedIndex;
     _preloadEntries();
@@ -305,7 +305,7 @@ class _DetailPageState extends State<DetailPage> {
     }
     if (_selectedIndexNotifier.value == totalFiles - 1) {
       // Deleted the last file
-      await _pageController!.previousPage(
+      await _pageController.previousPage(
         duration: const Duration(milliseconds: 200),
         curve: Curves.easeInOut,
       );
@@ -313,7 +313,7 @@ class _DetailPageState extends State<DetailPage> {
         _files!.remove(file);
       });
     } else {
-      await _pageController!.nextPage(
+      await _pageController.nextPage(
         duration: const Duration(milliseconds: 200),
         curve: Curves.easeInOut,
       );

@@ -38,7 +38,7 @@ class MarkerImage extends StatelessWidget {
                 painter: MarkerPointer(bgColor),
               ),
             ),
-          )
+          ),
         ],
       ),
     );

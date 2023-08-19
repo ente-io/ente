@@ -92,7 +92,7 @@ class AlbumColumnItemWidget extends StatelessWidget {
                             );
                           }
                         },
-                      )
+                      ),
                     ],
                   ),
                 ),

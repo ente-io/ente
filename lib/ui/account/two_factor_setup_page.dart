@@ -104,7 +104,7 @@ class _TwoFactorSetupPageState extends State<TwoFactorSetupPage>
                       ),
                       Tab(
                         text: S.of(context).scanCode,
-                      )
+                      ),
                     ],
                     controller: _tabController,
                     indicatorSize: TabBarIndicatorSize.tab,
@@ -174,7 +174,7 @@ class _TwoFactorSetupPageState extends State<TwoFactorSetupPage>
           Text(
             S.of(context).tapToCopy,
             style: TextStyle(color: textColor.withOpacity(0.5)),
-          )
+          ),
         ],
       ),
     );

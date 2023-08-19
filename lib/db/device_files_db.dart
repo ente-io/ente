@@ -154,7 +154,7 @@ extension DeviceFiles on FilesDB {
             {
               "id": localPathAsset.pathID,
               "name": localPathAsset.pathName,
-              "should_backup": shouldAutoBackup ? _sqlBoolTrue : _sqlBoolFalse
+              "should_backup": shouldAutoBackup ? _sqlBoolTrue : _sqlBoolFalse,
             },
             conflictAlgorithm: ConflictAlgorithm.ignore,
           );
@@ -210,7 +210,7 @@ extension DeviceFiles on FilesDB {
               "name": pathEntity.name,
               "count": pathEntity.assetCount,
               "cover_id": localID,
-              "should_backup": shouldBackup ? _sqlBoolTrue : _sqlBoolFalse
+              "should_backup": shouldBackup ? _sqlBoolTrue : _sqlBoolFalse,
             },
             conflictAlgorithm: ConflictAlgorithm.ignore,
           );

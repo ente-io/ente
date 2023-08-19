@@ -151,7 +151,7 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
                   SizedBox(
                     width: MediaQuery.of(context).size.width * 0.2,
                     height: 1,
-                  )
+                  ),
                 ],
               ),
             ),
@@ -203,7 +203,7 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
                             decoration: TextDecoration.underline,
                           ),
                     ),
-                  )
+                  ),
                 ],
               ),
             ),

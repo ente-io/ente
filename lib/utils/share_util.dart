@@ -27,7 +27,7 @@ final _videoExtension = {
   "webm",
   "wmv",
   "flv",
-  "3gp"
+  "3gp",
 };
 // share is used to share media/files from ente to other apps
 Future<void> share(
@@ -172,7 +172,7 @@ Future<List<File>> convertPickedFiles(
         enteTypeType = FileType.video;
       } else {
         _logger.warning(
-          "ignore file type ${media.mimeType}, extn ${extenName} path: ${media.path}",
+          "ignore file type ${media.mimeType}, extn $extenName path: ${media.path}",
         );
         continue;
       }

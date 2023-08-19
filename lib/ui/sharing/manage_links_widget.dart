@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:typed_data';
 
 import 'package:collection/collection.dart';
 import "package:fast_base58/fast_base58.dart";
@@ -256,7 +255,9 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                       onTap: () async {
                         await Clipboard.setData(ClipboardData(text: urlValue));
                         showShortToast(
-                            context, S.of(context).linkCopiedToClipboard);
+                          context,
+                          S.of(context).linkCopiedToClipboard,
+                        );
                       },
                       isBottomBorderRadiusRemoved: true,
                     ),

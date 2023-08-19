@@ -193,7 +193,7 @@ class AddPhotosPhotoWidget extends StatelessWidget {
                         ],
                       ),
                     ),
-                  )
+                  ),
                 ],
               ),
             ),

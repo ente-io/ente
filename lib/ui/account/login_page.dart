@@ -179,8 +179,7 @@ class _LoginPageState extends State<LoginPage> {
                               .copyWith(fontSize: 12),
                           tags: {
                             'u-terms': StyledTextActionTag(
-                              (String? text, Map<String?, String?> attrs) => {
-                                Navigator.of(context).push(
+                              (String? text, Map<String?, String?> attrs) => Navigator.of(context).push(
                                   MaterialPageRoute(
                                     builder: (BuildContext context) {
                                       return WebPage(
@@ -189,15 +188,13 @@ class _LoginPageState extends State<LoginPage> {
                                       );
                                     },
                                   ),
-                                )
-                              },
+                                ),
                               style: const TextStyle(
                                 decoration: TextDecoration.underline,
                               ),
                             ),
                             'u-policy': StyledTextActionTag(
-                              (String? text, Map<String?, String?> attrs) => {
-                                Navigator.of(context).push(
+                              (String? text, Map<String?, String?> attrs) => Navigator.of(context).push(
                                   MaterialPageRoute(
                                     builder: (BuildContext context) {
                                       return WebPage(
@@ -206,19 +203,18 @@ class _LoginPageState extends State<LoginPage> {
                                       );
                                     },
                                   ),
-                                )
-                              },
+                                ),
                               style: const TextStyle(
                                 decoration: TextDecoration.underline,
                               ),
-                            )
+                            ),
                           },
                         ),
                       ),
                       const Expanded(
                         flex: 1,
                         child: SizedBox.shrink(),
-                      )
+                      ),
                     ],
                   ),
                 ),

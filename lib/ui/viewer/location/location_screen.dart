@@ -234,7 +234,7 @@ class _LocationGalleryWidgetState extends State<LocationGalleryWidget> {
               FileSelectionOverlayBar(
                 GalleryType.locationTag,
                 _selectedFiles,
-              )
+              ),
             ],
           );
         } else {
@@ -307,7 +307,7 @@ class _GalleryHeaderWidgetState extends State<GalleryHeaderWidget> {
                   );
                 }
               },
-            )
+            ),
           ],
         ),
       ),

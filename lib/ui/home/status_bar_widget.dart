@@ -114,11 +114,11 @@ class _StatusBarWidgetState extends State<StatusBarWidget> {
                       context,
                       const VerifyRecoveryPage(),
                       forceCustomPageRoute: true,
-                    )
+                    ),
                   },
                 ),
               )
-            : const SizedBox.shrink()
+            : const SizedBox.shrink(),
       ],
     );
   }

@@ -38,7 +38,7 @@ class ObjectsItemWidget extends StatelessWidget {
           ChipButtonWidget(
             S.of(context).noResults,
             noChips: true,
-          )
+          ),
         ];
       }
       // sort by values

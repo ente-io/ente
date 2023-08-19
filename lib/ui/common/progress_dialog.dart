@@ -277,7 +277,7 @@ class _BodyState extends State<_Body> {
                   _direction == TextDirection.ltr ? loader : text,
                   const SizedBox(width: 8.0),
                   _direction == TextDirection.rtl ? loader : text,
-                  const SizedBox(width: 8.0)
+                  const SizedBox(width: 8.0),
                 ],
               ),
             ],

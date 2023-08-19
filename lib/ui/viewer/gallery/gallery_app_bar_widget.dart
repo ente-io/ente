@@ -201,7 +201,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
           isInAlert: true,
           shouldStickToDarkTheme: true,
           labelText: S.of(context).cancel,
-        )
+        ),
       ],
       title: S.of(context).leaveSharedAlbum,
       body: S.of(context).photosAddedByYouWillBeRemovedFromTheAlbum,
@@ -699,7 +699,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         unawaited(
           routeToPage(
             context,
-              (isQuickLink && (collection.hasLink)) ? ManageSharedLinkWidget(collection: collection!) :
+              (isQuickLink && (collection.hasLink)) ? ManageSharedLinkWidget(collection: collection) :
               ShareCollectionPage
               (collection),
           ),

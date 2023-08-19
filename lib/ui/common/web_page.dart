@@ -56,7 +56,7 @@ class _WebPageState extends State<WebPage> {
               : const EnteLoadingWidget(
                   color: Colors.white,
                   padding: 12,
-                )
+                ),
         ],
       ),
       backgroundColor: Colors.black,

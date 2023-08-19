@@ -30,7 +30,7 @@ class EmptyAlbumState extends StatelessWidget {
             onTap: () async {
               try {
                 await showAddPhotosSheet(context, c);
-              } catch (e, s) {
+              } catch (e) {
                 showGenericErrorDialog(context: context);
               }
             },

@@ -392,9 +392,7 @@ ElevatedButtonThemeData buildElevatedButtonThemeData({
 }) {
   return ElevatedButtonThemeData(
     style: ElevatedButton.styleFrom(
-      elevation: elevation,
-      onPrimary: onPrimary,
-      primary: primary,
+      foregroundColor: onPrimary, backgroundColor: primary, elevation: elevation,
       alignment: Alignment.center,
       textStyle: const TextStyle(
         fontWeight: FontWeight.w600,

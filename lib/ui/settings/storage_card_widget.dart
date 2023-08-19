@@ -225,7 +225,7 @@ class _StorageCardWidgetState extends State<StorageCardWidget> {
                         : strokeBaseDark,
                     fractionOfStorage:
                         (userDetails.usage / userDetails.getTotalStorage()),
-                  )
+                  ),
                 ],
               ),
               const SizedBox(height: 12),
@@ -279,7 +279,7 @@ class _StorageCardWidgetState extends State<StorageCardWidget> {
                 ],
               ),
             ],
-          )
+          ),
         ],
       ),
     );
@@ -354,7 +354,7 @@ class _StorageCardWidgetState extends State<StorageCardWidget> {
               totalStorage,
               totalStorageUnit,
             ),
-      )
+      ),
     ];
   }
 }
