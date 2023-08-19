@@ -563,6 +563,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
                 newVisibility: newVisiblity,
                 prevVisibility: prevVisiblity,
               );
+              setState(() {});
             } else if (value == AlbumPopupAction.ownedHide) {
               final isHidden = widget.collection!.isHidden();
               final int prevVisiblity =
@@ -576,6 +577,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
                 newVisibility: newVisiblity,
                 prevVisibility: prevVisiblity,
               );
+              setState(() {});
             } else if (value == AlbumPopupAction.delete) {
               await _trashCollection();
             } else if (value == AlbumPopupAction.removeLink) {
