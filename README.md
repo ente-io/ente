@@ -106,8 +106,9 @@ releases.
 ente Auth supports the icon pack provided by
 [simple-icons](https://github.com/simple-icons/simple-icons).
 
-If you would like to add your own custom icon, please create a pull-request with
-an SVG for your service that matches the contents within `assets/custom-icons`.
+If you would like to add your own custom icon, please open a pull-request
+with the relevant SVG and color
+code ([example PR](https://github.com/ente-io/auth/pull/213/files)).
 
 ## 🙋‍♂️ Support
 
