@@ -11,7 +11,7 @@ import {
 } from '@mui/material';
 import { NotificationAttributes } from 'types/Notification';
 
-import InfoIcon from '@mui/icons-material/Info';
+import InfoIcon from '@mui/icons-material/InfoOutlined';
 import { IconButtonWithBG } from './Container';
 
 interface Iprops {
