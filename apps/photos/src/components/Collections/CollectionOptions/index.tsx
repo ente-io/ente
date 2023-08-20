@@ -6,8 +6,8 @@ import {
     changeCollectionOrder,
     changeCollectionSortOrder,
     changeCollectionVisibility,
-    downloadAllCollectionFiles,
-    downloadHiddenFiles,
+    downloadCollectionHelper,
+    downloadDefaultHiddenCollectionHelper,
 } from 'utils/collection';
 import { SetCollectionNamerAttributes } from '../CollectionNamer';
 import { Collection } from 'types/collection';
@@ -28,9 +28,11 @@ import { Trans } from 'react-i18next';
 import { t } from 'i18next';
 import { Box } from '@mui/material';
 import CollectionSortOrderMenu from './CollectionSortOrderMenu';
+import { SetCollectionDownloadProgressAttributes } from 'types/gallery';
 
 interface CollectionOptionsProps {
     setCollectionNamerAttributes: SetCollectionNamerAttributes;
+    setCollectionDownloadProgressAttributes: SetCollectionDownloadProgressAttributes;
     activeCollection: Collection;
     collectionSummaryType: CollectionSummaryType;
     showCollectionShareModal: () => void;
@@ -65,6 +67,7 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
         redirectToAll,
         setCollectionNamerAttributes,
         showCollectionShareModal,
+        setCollectionDownloadProgressAttributes,
     } = props;
 
     const { startLoading, finishLoading, setDialogMessage } =
@@ -198,9 +201,14 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
 
     const downloadCollection = () => {
         if (collectionSummaryType === CollectionSummaryType.hidden) {
-            downloadHiddenFiles();
+            downloadDefaultHiddenCollectionHelper(
+                setCollectionDownloadProgressAttributes
+            );
         } else {
-            downloadAllCollectionFiles(activeCollection.id);
+            downloadCollectionHelper(
+                activeCollection.id,
+                setCollectionDownloadProgressAttributes
+            );
         }
     };
 

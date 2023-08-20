@@ -11,6 +11,7 @@ import Favorite from '@mui/icons-material/FavoriteRounded';
 import ArchiveOutlined from '@mui/icons-material/ArchiveOutlined';
 import PeopleIcon from '@mui/icons-material/People';
 import LinkIcon from '@mui/icons-material/Link';
+import { SetCollectionDownloadProgressAttributes } from 'types/gallery';
 
 interface Iprops {
     activeCollection: Collection;
@@ -18,6 +19,7 @@ interface Iprops {
     setCollectionNamerAttributes: SetCollectionNamerAttributes;
     showCollectionShareModal: () => void;
     redirectToAll: () => void;
+    setCollectionDownloadProgressAttributes: SetCollectionDownloadProgressAttributes;
 }
 
 export default function CollectionInfoWithOptions({

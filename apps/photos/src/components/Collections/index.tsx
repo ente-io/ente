@@ -28,7 +28,6 @@ interface Iprops {
     collectionSummaries: CollectionSummaries;
     setCollectionNamerAttributes: SetCollectionNamerAttributes;
     setPhotoListHeader: (value: TimeStampListItem) => void;
-    collectionDownloadProgressAttributes: CollectionDownloadProgressAttributes;
 }
 
 export default function Collections(props: Iprops) {
@@ -40,7 +39,6 @@ export default function Collections(props: Iprops) {
         collectionSummaries,
         setCollectionNamerAttributes,
         setPhotoListHeader,
-        collectionDownloadProgressAttributes,
     } = props;
 
     const [allCollectionView, setAllCollectionView] = useState(false);
@@ -49,6 +47,11 @@ export default function Collections(props: Iprops) {
 
     const [collectionDownloadProgressView, setCollectionDownloadProgressView] =
         useState(false);
+
+    const [
+        collectionDownloadProgressAttributes,
+        setCollectionDownloadProgressAttributes,
+    ] = useState<CollectionDownloadProgressAttributes>();
 
     const [collectionListSortBy, setCollectionListSortBy] =
         useLocalState<COLLECTION_LIST_SORT_BY>(
@@ -88,6 +91,9 @@ export default function Collections(props: Iprops) {
                     redirectToAll={() => setActiveCollectionID(ALL_SECTION)}
                     showCollectionShareModal={() =>
                         setCollectionShareModalView(true)
+                    }
+                    setCollectionDownloadProgressAttributes={
+                        setCollectionDownloadProgressAttributes
                     }
                 />
             ),

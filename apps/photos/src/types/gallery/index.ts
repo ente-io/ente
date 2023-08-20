@@ -44,7 +44,6 @@ export type GalleryContextType = {
     user: User;
     userIDToEmailMap: Map<number, string>;
     emailList: string[];
-    setCollectionDownloadProgressAttributes: SetCollectionDownloadProgressAttributes;
 };
 
 export enum CollectionSelectorIntent {
