@@ -83,6 +83,7 @@
   "importSelectJsonFile": "JSON dosyasını seçin",
   "importEnteEncGuide": "Ente'den dışa aktarılan şifrelenmiş JSON dosyasını seçin",
   "importRaivoGuide": "Raivo'nun ayarlarında \"OTP'leri Zip arşivine aktar\" seçeneğini kullanın.\n\nZip dosyasını çıkarın ve JSON dosyasını içe aktarın.",
+  "importAegisGuide": "Aegis'in Ayarlarında \"Kasayı dışa aktar\" seçeneğini kullanın.\n\nKasanız şifrelenmişse, kasanın şifresini çözmek için kasa parolasını girmeniz gerekecektir.",
   "exportCodes": "Kodu dışa aktar",
   "importLabel": "İçe aktar",
   "importInstruction": "Lütfen aşağıdaki şekilde kodlarınızın listesini içeren dosyayı seçiniz",
