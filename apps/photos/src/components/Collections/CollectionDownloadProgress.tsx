@@ -89,10 +89,10 @@ export const CollectionDownloadProgress: React.FC<CollectionDownloadProgressProp
                 attributes={{
                     variant: 'secondary',
                     title: downloadCompletedWithErrors
-                        ? `Download failed`
+                        ? t('DOWNLOAD_FAILED')
                         : downloadCompleted
-                        ? `Download complete`
-                        : `Downloading`,
+                        ? t(`DOWNLOAD_COMPLETE`)
+                        : t(`DOWNLOADING`),
                     caption: downloadCompleted
                         ? attributes.collectionName
                         : `${attributes.success} / ${attributes.total} items`,
