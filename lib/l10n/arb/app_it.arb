@@ -85,6 +85,7 @@
   "importSelectJsonFile": "Seleziona file JSON",
   "importEnteEncGuide": "Seleziona il file JSON criptato esportato da ente",
   "importRaivoGuide": "Utilizza l'opzione \"Esporta i codici OTP in archivio Zip\" nelle impostazioni di Raivo.\n\nEstrai il file zip e importa il file JSON.",
+  "importAegisGuide": "Usa l'opzione \"Esporta la cassaforte\" nelle impostazioni di Aegis.\n\nSe la tua cassaforte è criptata, dovrai inserire la password della cassaforte per decriptarla.",
   "exportCodes": "Esporta codici",
   "importLabel": "Importa",
   "importInstruction": "Per favore seleziona un file contenente una lista dei tuoi codici nel seguente formato",

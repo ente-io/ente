@@ -101,6 +101,15 @@ For maintainers, there is [additional documentation](RELEASES.md) on
 automatically publishing the main branch to App store, Play store and GitHub
 releases.
 
+## 🙂 Icons
+
+ente Auth supports the icon pack provided by
+[simple-icons](https://github.com/simple-icons/simple-icons).
+
+If you would like to add your own custom icon, please open a pull-request
+with the relevant SVG and color
+code ([example PR](https://github.com/ente-io/auth/pull/213/files)).
+
 ## 🙋‍♂️ Support
 
 If you need help, please reach out to support@ente.io, and a human will get in

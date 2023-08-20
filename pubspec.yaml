@@ -1,10 +1,10 @@
 name: ente_auth
 description: ente two-factor authenticator
-version: 1.0.54+54
+version: 1.0.55+55
 publish_to: none
 
 environment:
-  sdk: ">=2.17.0 <3.0.0"
+  sdk: ">=3.0.0 <4.0.0"
 
 dependencies:
   adaptive_theme: ^3.1.0 # done
@@ -25,7 +25,7 @@ dependencies:
   email_validator: ^2.0.1
   event_bus: ^2.0.0
   expandable: ^5.0.1
-  expansion_tile_card: ^2.0.0
+  expansion_tile_card: ^3.0.0
   file_picker: ^5.2.4
   fk_user_agent: ^2.1.0
   flutter:
@@ -44,10 +44,11 @@ dependencies:
     git:
       url: https://github.com/ente-io/flutter_sodium.git
   flutter_speed_dial: ^6.2.0
+  flutter_svg: ^2.0.5
   fluttertoast: ^8.1.1
   google_nav_bar: ^5.0.5 #supported
   http: ^0.13.4
-  intl: ^0.17.0
+  intl: ^0.18.0
   json_annotation: ^4.5.0
   local_auth: ^2.1.3
   logging: ^1.0.1
@@ -55,7 +56,7 @@ dependencies:
   move_to_background: ^1.0.2
   open_filex: ^4.3.2
   otp: ^3.1.1
-  package_info_plus: ^1.0.1
+  package_info_plus: ^4.1.0
   password_strength: ^0.2.0
   path_provider: ^2.0.11
   pinput: ^1.2.2
@@ -63,8 +64,8 @@ dependencies:
   protobuf: ^3.0.0
   qr_code_scanner: ^1.0.1
   qr_flutter: 4.0.0
-  sentry: ^6.12.1
-  sentry_flutter: ^6.12.1
+  sentry: ^7.9.0
+  sentry_flutter: ^7.9.0
   share_plus: ^4.4.0
   shared_preferences: ^2.0.5
   sqflite: ^2.1.0
@@ -92,6 +93,10 @@ flutter:
   # https://docs:flutter:dev/development/ui/assets-and-images:
   assets:
     - assets/
+    - assets/simple-icons/icons/
+    - assets/simple-icons/_data/
+    - assets/custom-icons/icons/
+    - assets/custom-icons/_data/
 
   fonts:
     - family: Inter

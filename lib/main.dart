@@ -17,6 +17,7 @@ import 'package:ente_auth/services/user_service.dart';
 import 'package:ente_auth/store/code_store.dart';
 import 'package:ente_auth/ui/tools/app_lock.dart';
 import 'package:ente_auth/ui/tools/lock_screen.dart';
+import 'package:ente_auth/ui/utils/icon_utils.dart';
 import 'package:ente_auth/utils/crypto_util.dart';
 import 'package:flutter/foundation.dart';
 import "package:flutter/material.dart";
@@ -85,4 +86,5 @@ Future<void> _init(bool bool, {String? via}) async {
   await BillingService.instance.init();
   await NotificationService.instance.init();
   await UpdateService.instance.init();
+  await IconUtils.instance.init();
 }

@@ -66,7 +66,6 @@ List<Code> parseGoogleAuth(String qrCodeData) {
   try {
     List<Code> codes = <Code>[];
     final String payload = qrCodeData.substring(kGoogleAuthExportPrefix.length);
-    debugPrint("GoogleAuthImport: payload: $payload");
     final Uint8List base64Decoded = base64Decode(Uri.decodeComponent(payload));
     final MigrationPayload mPayload =
         MigrationPayload.fromBuffer(base64Decoded);
