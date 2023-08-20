@@ -50,6 +50,12 @@ class ElectronService {
             return this.electronAPIs.getDownloadsDir();
         }
     }
+
+    openDirectory(dirPath: string) {
+        if (this.electronAPIs?.openDirectory) {
+            this.electronAPIs.openDirectory(dirPath);
+        }
+    }
 }
 
 export default new ElectronService();
