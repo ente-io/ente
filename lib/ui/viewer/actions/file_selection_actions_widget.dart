@@ -89,6 +89,8 @@ class _FileSelectionActionsWidgetState
 
   @override
   Widget build(BuildContext context) {
+    final textScaleFactor = MediaQuery.textScaleFactorOf(context);
+
     final bool showPrefix =
         split.pendingUploads.isNotEmpty || split.ownedByOtherUsers.isNotEmpty;
     final String suffix = showPrefix
@@ -284,22 +286,16 @@ class _FileSelectionActionsWidgetState
     );
 
     if (items.isNotEmpty) {
-      return NotificationListener<OverscrollIndicatorNotification>(
-        onNotification: (overscroll) {
-          overscroll.disallowIndicator();
-          return true;
-        },
-        child: SingleChildScrollView(
-          physics: const ClampingScrollPhysics(),
+      return SizedBox(
+        height: 90 * textScaleFactor,
+        child: ListView.builder(
+          itemBuilder: (context, index) {
+            return Align(alignment: Alignment.topCenter, child: items[index]);
+          },
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+          itemCount: items.length,
           scrollDirection: Axis.horizontal,
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(width: 8),
-              ...items,
-              const SizedBox(width: 8),
-            ],
-          ),
+          shrinkWrap: true,
         ),
       );
     } else {
