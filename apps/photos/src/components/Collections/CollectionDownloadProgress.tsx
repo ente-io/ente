@@ -97,7 +97,9 @@ export const CollectionDownloadProgress: React.FC<CollectionDownloadProgressProp
                         : t(`DOWNLOADING`),
                     caption: downloadCompleted
                         ? attributes.collectionName
-                        : `${attributes.success} / ${attributes.total} items`,
+                        : `${attributes.success + attributes.failed} / ${
+                              attributes.total
+                          } items`,
                     onClick: handleOnClick,
                 }}
             />
