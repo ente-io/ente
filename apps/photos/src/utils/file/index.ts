@@ -47,10 +47,6 @@ import { FileTypeInfo } from 'types/upload';
 import { moveToHiddenCollection } from 'services/collectionService';
 
 import ElectronService from 'services/electron/common';
-import {
-    getCollectionExportPath,
-    getUniqueCollectionExportName,
-} from 'utils/export';
 import exportService from 'services/export';
 
 const WAIT_TIME_IMAGE_CONVERSION = 30 * 1000;
@@ -582,32 +578,52 @@ export function getUniqueFiles(files: EnteFile[], sortAsc = false) {
     return uniqueFiles;
 }
 
-export async function downloadFiles(files: EnteFile[]) {
+export async function downloadFiles(
+    files: EnteFile[],
+    progressBarUpdater?: {
+        increaseSuccess: () => void;
+        increaseFailed: () => void;
+        isCancelled: () => boolean;
+    }
+) {
     for (const file of files) {
         try {
+            if (progressBarUpdater?.isCancelled()) {
+                return;
+            }
             await downloadFile(file, false);
+            progressBarUpdater?.increaseSuccess();
         } catch (e) {
             logError(e, 'download fail for file');
+            progressBarUpdater?.increaseFailed();
         }
     }
 }
 
 export async function downloadFilesDesktop(
-    collectionName: string,
-    files: EnteFile[]
+    files: EnteFile[],
+    progressBarUpdater: {
+        increaseSuccess: () => void;
+        increaseFailed: () => void;
+        isCancelled: () => boolean;
+    },
+    downloadPath?: string
 ) {
-    const downloadDirPath = await ElectronService.getDownloadsDir();
-    const collectionDownloadName = getUniqueCollectionExportName(
-        downloadDirPath,
-        collectionName
-    );
-    const collectionDownloadPath = getCollectionExportPath(
-        downloadDirPath,
-        collectionDownloadName
-    );
-    await exportService.checkExistsAndCreateDir(collectionDownloadPath);
+    if (!downloadPath) {
+        // can also open a dialog to select download path
+        downloadPath = await ElectronService.getDownloadsDir();
+    }
     for (const file of files) {
-        await exportService.downloadAndSave(collectionDownloadPath, file, true);
+        try {
+            if (progressBarUpdater?.isCancelled()) {
+                return;
+            }
+            await exportService.downloadAndSave(downloadPath, file, true);
+            progressBarUpdater?.increaseSuccess();
+        } catch (e) {
+            logError(e, 'download fail for file');
+            progressBarUpdater?.increaseFailed();
+        }
     }
 }
 

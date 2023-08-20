@@ -33,6 +33,7 @@ import {
     SYSTEM_COLLECTION_TYPES,
     MOVE_TO_NOT_ALLOWED_COLLECTION,
     ADD_TO_NOT_ALLOWED_COLLECTION,
+    HIDDEN_SECTION,
 } from 'constants/collection';
 import { getUnixTimeInMicroSecondsWithDelta } from 'utils/time';
 import { SUB_TYPE, VISIBILITY_STATE } from 'types/magicMetadata';
@@ -42,6 +43,13 @@ import bs58 from 'bs58';
 import { t } from 'i18next';
 import isElectron from 'is-electron';
 import { getHiddenCollectionProperCasedName } from 'utils/export';
+import { SetCollectionDownloadProgressAttributes } from 'types/gallery';
+import ElectronService from 'services/electron/common';
+import {
+    getCollectionExportPath,
+    getUniqueCollectionExportName,
+} from 'utils/export';
+import exportService from 'services/export';
 
 export enum COLLECTION_OPS_TYPE {
     ADD,
@@ -88,7 +96,10 @@ export function getSelectedCollection(
     return collections.find((collection) => collection.id === collectionID);
 }
 
-export async function downloadAllCollectionFiles(collectionID: number) {
+export async function downloadCollectionHelper(
+    collectionID: number,
+    setCollectionDownloadProgressAttributes: SetCollectionDownloadProgressAttributes
+) {
     try {
         const allFiles = await getLocalFiles();
         const collectionFiles = allFiles.filter(
@@ -98,30 +109,99 @@ export async function downloadAllCollectionFiles(collectionID: number) {
         const collection = allCollections.find(
             (collection) => collection.id === collectionID
         );
-        if (isElectron()) {
-            await downloadFilesDesktop(collection.name, collectionFiles);
-        } else {
-            await downloadFiles(collectionFiles);
+        if (!collection) {
+            throw Error('collection not found');
         }
+        await downloadCollectionFiles(
+            collection.name,
+            collection.id,
+            collectionFiles,
+            setCollectionDownloadProgressAttributes
+        );
     } catch (e) {
         logError(e, 'download collection failed ');
     }
 }
 
-export async function downloadHiddenFiles() {
+export async function downloadDefaultHiddenCollectionHelper(
+    setCollectionDownloadProgressAttributes: SetCollectionDownloadProgressAttributes
+) {
     try {
         const hiddenFiles = await getLocalHiddenFiles();
-        if (isElectron()) {
-            await downloadFilesDesktop(
-                getHiddenCollectionProperCasedName(),
-                hiddenFiles
-            );
-        } else {
-            await downloadFiles(hiddenFiles);
-        }
+        await downloadCollectionFiles(
+            getHiddenCollectionProperCasedName(),
+            HIDDEN_SECTION,
+            hiddenFiles,
+            setCollectionDownloadProgressAttributes
+        );
     } catch (e) {
         logError(e, 'download hidden files failed ');
     }
+}
+
+async function downloadCollectionFiles(
+    collectionName: string,
+    collectionID: number,
+    collectionFiles: EnteFile[],
+    setCollectionDownloadProgressAttributes: SetCollectionDownloadProgressAttributes
+) {
+    const canceller = new AbortController();
+    setCollectionDownloadProgressAttributes({
+        collectionName: collectionName,
+        collectionID: collectionID,
+        total: collectionFiles.length,
+        success: 0,
+        failed: 0,
+        canceller,
+    });
+    const increaseSuccess = () => {
+        if (canceller.signal.aborted) return;
+        setCollectionDownloadProgressAttributes((prev) => ({
+            ...prev,
+            success: prev.success + 1,
+        }));
+    };
+    const increaseFailed = () => {
+        if (canceller.signal.aborted) return;
+        setCollectionDownloadProgressAttributes((prev) => ({
+            ...prev,
+            failed: prev.failed + 1,
+        }));
+    };
+    const isCancelled = () => canceller.signal.aborted;
+    if (isElectron()) {
+        const collectionDownloadPath =
+            await getOrCreateCollectionDownloadFolder(collectionName);
+        setCollectionDownloadProgressAttributes((prev) => ({
+            ...prev,
+            collectionDownloadPath,
+        }));
+        await downloadFilesDesktop(
+            collectionFiles,
+            { increaseSuccess, increaseFailed, isCancelled },
+            collectionDownloadPath
+        );
+    } else {
+        await downloadFiles(collectionFiles, {
+            increaseSuccess,
+            increaseFailed,
+            isCancelled,
+        });
+    }
+}
+
+async function getOrCreateCollectionDownloadFolder(collectionName: string) {
+    const downloadDirPath = await ElectronService.getDownloadsDir();
+    const collectionDownloadName = getUniqueCollectionExportName(
+        downloadDirPath,
+        collectionName
+    );
+    const collectionDownloadPath = getCollectionExportPath(
+        downloadDirPath,
+        collectionDownloadName
+    );
+    await exportService.checkExistsAndCreateDir(collectionDownloadPath);
+    return collectionDownloadPath;
 }
 
 export function appendCollectionKeyToShareURL(
