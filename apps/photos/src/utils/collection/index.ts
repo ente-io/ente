@@ -170,16 +170,17 @@ async function downloadCollectionFiles(
     };
     const isCancelled = () => canceller.signal.aborted;
     if (isElectron()) {
-        const collectionDownloadPath =
-            await getOrCreateCollectionDownloadFolder(collectionName);
+        const downloadPath = await getOrCreateCollectionDownloadFolder(
+            collectionName
+        );
         setCollectionDownloadProgressAttributes((prev) => ({
             ...prev,
-            collectionDownloadPath,
+            downloadPath,
         }));
         await downloadFilesDesktop(
             collectionFiles,
             { increaseSuccess, increaseFailed, isCancelled },
-            collectionDownloadPath
+            downloadPath
         );
     } else {
         await downloadFiles(collectionFiles, {

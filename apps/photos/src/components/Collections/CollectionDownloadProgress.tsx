@@ -1,6 +1,9 @@
 import Notification from 'components/Notification';
+import { HIDDEN_SECTION } from 'constants/collection';
 import { t } from 'i18next';
+import isElectron from 'is-electron';
 import { AppContext } from 'pages/_app';
+import { GalleryContext } from 'pages/gallery';
 import { useContext } from 'react';
 import ElectronService from 'services/electron/common';
 
@@ -9,8 +12,9 @@ export interface CollectionDownloadProgressAttributes {
     failed: number;
     total: number;
     collectionName: string;
-    collectionDownloadPath: string;
-    cancelDownload: () => void;
+    collectionID: number;
+    downloadPath?: string;
+    canceller?: AbortController;
 }
 
 interface CollectionDownloadProgressProps {
@@ -22,18 +26,22 @@ interface CollectionDownloadProgressProps {
 export const CollectionDownloadProgress: React.FC<CollectionDownloadProgressProps> =
     ({ isOpen, onClose, attributes }) => {
         const appContext = useContext(AppContext);
+        const galleryContext = useContext(GalleryContext);
 
         if (!attributes) {
             return <></>;
         }
         const confirmCancelUpload = () => {
             appContext.setDialogMessage({
-                title: t('STOP_UPLOADS_HEADER'),
-                content: t('STOP_ALL_UPLOADS_MESSAGE'),
+                title: t('STOP_DOWNLOADS_HEADER'),
+                content: t('STOP_ALL_DOWNLOADS_MESSAGE'),
                 proceed: {
-                    text: t('YES_STOP_UPLOADS'),
+                    text: t('YES_STOP_DOWNLOADS'),
                     variant: 'critical',
-                    action: attributes?.cancelDownload,
+                    action: () => {
+                        attributes?.canceller.abort();
+                        onClose();
+                    },
                 },
                 close: {
                     text: t('NO'),
@@ -57,10 +65,27 @@ export const CollectionDownloadProgress: React.FC<CollectionDownloadProgressProp
             }
         };
 
+        const handleOnClick = () => {
+            if (isElectron()) {
+                ElectronService.openDirectory(attributes.downloadPath);
+            } else {
+                if (attributes.collectionID === HIDDEN_SECTION) {
+                    galleryContext.authenticateUser(() => {
+                        galleryContext.setActiveCollectionID(HIDDEN_SECTION);
+                    });
+                } else {
+                    galleryContext.setActiveCollectionID(
+                        attributes.collectionID
+                    );
+                }
+            }
+        };
+
         return (
             <Notification
                 open={isOpen}
                 onClose={handleClose}
+                keepOpenOnClick
                 attributes={{
                     variant: 'secondary',
                     title: downloadCompletedWithErrors
@@ -71,11 +96,7 @@ export const CollectionDownloadProgress: React.FC<CollectionDownloadProgressProp
                     caption: downloadCompleted
                         ? attributes.collectionName
                         : `${attributes.success} / ${attributes.total} items`,
-                    onClick: () => {
-                        ElectronService.openDirectory(
-                            attributes.collectionDownloadPath
-                        );
-                    },
+                    onClick: handleOnClick,
                 }}
             />
         );
