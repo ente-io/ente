@@ -87,7 +87,9 @@ export const CollectionDownloadProgress: React.FC<CollectionDownloadProgressProp
                 onClose={handleClose}
                 keepOpenOnClick
                 attributes={{
-                    variant: 'secondary',
+                    variant: downloadCompletedWithErrors
+                        ? 'critical'
+                        : 'secondary',
                     title: downloadCompletedWithErrors
                         ? t('DOWNLOAD_FAILED')
                         : downloadCompleted
