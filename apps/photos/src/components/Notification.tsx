@@ -17,6 +17,7 @@ import { IconButtonWithBG } from './Container';
 interface Iprops {
     open: boolean;
     onClose: () => void;
+    keepOpenOnClick?: boolean;
     attributes: NotificationAttributes;
     horizontal?: 'left' | 'right';
     vertical?: 'top' | 'bottom';
@@ -30,6 +31,7 @@ export default function Notification({
     vertical,
     sx,
     attributes,
+    keepOpenOnClick,
 }: Iprops) {
     if (!attributes) {
         return <></>;
@@ -42,7 +44,9 @@ export default function Notification({
 
     const handleClick = () => {
         attributes.onClick();
-        onClose();
+        if (!keepOpenOnClick) {
+            onClose();
+        }
     };
     return (
         <Snackbar
