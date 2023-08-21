@@ -1,10 +1,12 @@
 import "dart:math";
 
+import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:modal_bottom_sheet/modal_bottom_sheet.dart";
 import "package:photos/core/configuration.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/generated/l10n.dart";
+import "package:photos/l10n/l10n.dart";
 import "package:photos/models/collection.dart";
 import "package:photos/models/selected_files.dart";
 import "package:photos/services/collections_service.dart";
@@ -18,6 +20,7 @@ import "package:photos/ui/components/buttons/button_widget.dart";
 import "package:photos/ui/components/models/button_type.dart";
 import "package:photos/ui/components/title_bar_title_widget.dart";
 import "package:photos/ui/viewer/gallery/gallery.dart";
+import "package:photos/utils/dialog_util.dart";
 import 'package:wechat_assets_picker/wechat_assets_picker.dart';
 
 Future<dynamic> showAddPhotosSheet(
@@ -167,19 +170,7 @@ class AddPhotosPhotoWidget extends StatelessWidget {
                             buttonAction: ButtonAction.second,
                             labelText: S.of(context).addFromDevice,
                             onTap: () async {
-                              final List<AssetEntity>? result = await AssetPicker.pickAssets(context);
-                              if(result != null && result.isNotEmpty) {
-                                final ca = CollectionActions(
-                                  CollectionsService.instance,
-                                );
-                                await ca.addToCollection(
-                                  context,
-                                  collection.id,
-                                  false,
-                                  picketAssets: result,
-                                );
-                              }
-                              Navigator.of(context).pop();
+                              await _onPickFromDeviceClicked(context);
                             },
                           ),
                         ],
@@ -193,5 +184,45 @@ class AddPhotosPhotoWidget extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  Future<void> _onPickFromDeviceClicked(BuildContext context) async {
+    try {
+      final List<AssetEntity>? result = await AssetPicker.pickAssets(context);
+      if (result != null && result.isNotEmpty) {
+        final ca = CollectionActions(
+          CollectionsService.instance,
+        );
+        await ca.addToCollection(
+          context,
+          collection.id,
+          false,
+          picketAssets: result,
+        );
+        Navigator.of(context).pop();
+      }
+    } catch (e) {
+      if (e is StateError) {
+        final PermissionState ps = await PhotoManager.requestPermissionExtend();
+        if (ps != PermissionState.authorized && ps != PermissionState.limited) {
+          showChoiceDialog(
+            context,
+            title: context.l10n.grantPermission,
+            body: context.l10n.pleaseGrantPermissions,
+            firstButtonLabel: context.l10n.ok,
+            secondButtonLabel: context.l10n.cancel,
+            firstButtonOnTap: () async {
+              await PhotoManager.openSetting();
+            },
+          );
+        } else {
+          showErrorDialog(
+            context,
+            context.l10n.oops,
+            context.l10n.somethingWentWrong + (kDebugMode ? "\n$e" : ""),
+          );
+        }
+      }
+    }
   }
 }
