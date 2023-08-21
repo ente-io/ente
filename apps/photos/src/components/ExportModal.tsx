@@ -132,7 +132,9 @@ export default function ExportModal(props: Props) {
             );
             setExportStage(exportRecord.stage);
             setLastExportTime(exportRecord.lastAttemptTimestamp);
-            const pendingExports = await exportService.getPendingExports(null);
+            const pendingExports = await exportService.getPendingExports(
+                exportRecord
+            );
             setPendingExports(pendingExports);
         } catch (e) {
             if (e.message !== CustomError.EXPORT_FOLDER_DOES_NOT_EXIST) {
