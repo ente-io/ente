@@ -1,5 +1,34 @@
 # CHANGELOG
 
+
+## v0.7.82
+
+### Added
+* #### Hidden albums
+
+    You can now hide albums, just like individual memories.
+
+* #### Album improvements
+
+    You can now pin your favourite albums, and set cover photos for them.
+
+    We have also added a way to first create empty albums, and then add photos to it, both from ente and your device gallery.
+
+
+* #### Email verification
+
+    We have now made email verification optional, so you can sign in with just your email address and password, without waiting for a verification code.
+
+    If you would still like to enforce email verification, you can opt-in from Settings > Security.
+
+
+* #### Bug fixes & other enhancements
+
+    We have squashed a few pesky bugs that were reported by our community, and have improved the experience for albums and quick links.
+
+    If you would like to help us improve ente, come join the party @ ente.io/community!
+
+
 ## v0.7.71
 
 ### Added
