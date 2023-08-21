@@ -5,11 +5,13 @@ import {
     Stack,
     Typography,
 } from '@mui/material';
-import React from 'react';
 import { t } from 'i18next';
 import { formatDateTime } from 'utils/time/format';
 import { SpaceBetweenFlex } from './Container';
 import { formatNumber } from 'utils/number/format';
+import ExportPendingList from './ExportPendingList';
+import { useState } from 'react';
+import LinkButton from './pages/gallery/LinkButton';
 
 interface Props {
     pendingFileCount: number;
@@ -19,6 +21,16 @@ interface Props {
 }
 
 export default function ExportFinished(props: Props) {
+    const [pendingFileListView, setPendingFileListView] =
+        useState<boolean>(false);
+
+    const openPendingFileList = () => {
+        setPendingFileListView(true);
+    };
+
+    const closePendingFileList = () => {
+        setPendingFileListView(false);
+    };
     return (
         <>
             <DialogContent>
@@ -27,9 +39,9 @@ export default function ExportFinished(props: Props) {
                         <Typography color={'text.muted'}>
                             {t('PENDING_ITEMS')}
                         </Typography>
-                        <Typography>
+                        <LinkButton onClick={openPendingFileList}>
                             {formatNumber(props.pendingFileCount)}
-                        </Typography>
+                        </LinkButton>
                     </SpaceBetweenFlex>
                     <SpaceBetweenFlex minHeight={'48px'}>
                         <Typography color="text.muted">
@@ -54,6 +66,10 @@ export default function ExportFinished(props: Props) {
                     {t('EXPORT_AGAIN')}
                 </Button>
             </DialogActions>
+            <ExportPendingList
+                isOpen={pendingFileListView}
+                onClose={closePendingFileList}
+            />
         </>
     );
 }

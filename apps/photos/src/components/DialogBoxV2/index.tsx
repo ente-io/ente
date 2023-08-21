@@ -18,7 +18,6 @@ type IProps = React.PropsWithChildren<
         onClose: () => void;
         attributes: DialogBoxAttributesV2;
         size?: Breakpoint;
-        titleCloseButton?: boolean;
     }
 >;
 
@@ -42,12 +41,12 @@ export default function DialogBoxV2({
 
     return (
         <Dialog
+            maxWidth={props.size ?? 'xs'}
             open={open}
             onClose={handleClose}
             PaperProps={{
                 sx: {
                     padding: '8px 12px',
-                    maxWidth: '360px',
                 },
             }}
             {...props}>

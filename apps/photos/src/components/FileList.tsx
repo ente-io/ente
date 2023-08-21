@@ -4,6 +4,8 @@ import { FixedSizeList as List } from 'react-window';
 
 interface Iprops {
     fileList: any[];
+    maxHeight?: number;
+    itemSize?: number;
 }
 
 export default function FileList(props: Iprops) {
@@ -26,9 +28,11 @@ export default function FileList(props: Iprops) {
     return (
         <Box pl={2}>
             <List
-                height={Math.min(35 * props.fileList.length, 160)}
+                height={
+                    props.maxHeight ?? Math.min(35 * props.fileList.length, 160)
+                }
                 width={'100%'}
-                itemSize={35}
+                itemSize={props.itemSize ?? 35}
                 itemCount={props.fileList.length}>
                 {Row}
             </List>
