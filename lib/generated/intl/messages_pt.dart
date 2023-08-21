@@ -207,8 +207,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "Digite sua chave de recuperação"),
         "exportYourData":
             MessageLookupByLibrary.simpleMessage("Exportar seus dados"),
-        "failedToDownloadVideo":
-            MessageLookupByLibrary.simpleMessage("Failed to download video"),
         "failedToFetchReferralDetails": MessageLookupByLibrary.simpleMessage(
             "Não foi possível buscar informações do produto. Por favor, tente novamente mais tarde."),
         "faq": MessageLookupByLibrary.simpleMessage("Perguntas frequentes"),
@@ -242,8 +240,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Convidar para o ente"),
         "inviteYourFriends":
             MessageLookupByLibrary.simpleMessage("Convide seus amigos"),
-        "inviteYourFriendsToEnte":
-            MessageLookupByLibrary.simpleMessage("Invite your friends to ente"),
         "itemsWillBeRemovedFromAlbum": MessageLookupByLibrary.simpleMessage(
             "Os itens selecionados serão removidos deste álbum"),
         "keepPhotos": MessageLookupByLibrary.simpleMessage("Manter fotos"),
@@ -261,14 +257,10 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Dispositivo perdido?"),
         "manage": MessageLookupByLibrary.simpleMessage("Gerenciar"),
         "moderateStrength": MessageLookupByLibrary.simpleMessage("Moderada"),
-        "noAlbumsSharedByYouYet":
-            MessageLookupByLibrary.simpleMessage("No albums shared by you yet"),
         "noRecoveryKey": MessageLookupByLibrary.simpleMessage(
             "Nenhuma chave de recuperação?"),
         "noRecoveryKeyNoDecryption": MessageLookupByLibrary.simpleMessage(
             "Devido à natureza do nosso protocolo de criptografia de ponta a ponta, seus dados não podem ser descriptografados sem sua senha ou chave de recuperação"),
-        "nothingSharedWithYouYet":
-            MessageLookupByLibrary.simpleMessage("Nothing shared with you yet"),
         "ok": MessageLookupByLibrary.simpleMessage("Ok"),
         "oops": MessageLookupByLibrary.simpleMessage("Ops"),
         "oopsSomethingWentWrong":
@@ -357,11 +349,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "setupComplete":
             MessageLookupByLibrary.simpleMessage("Configuração concluída"),
         "shareTextReferralCode": m44,
-        "shareYourFirstAlbum":
-            MessageLookupByLibrary.simpleMessage("Share your first album"),
-        "sharedByYou": MessageLookupByLibrary.simpleMessage("Shared by you"),
-        "sharedWithYou":
-            MessageLookupByLibrary.simpleMessage("Shared with you"),
         "sharing": MessageLookupByLibrary.simpleMessage("Compartilhando..."),
         "signUpTerms": MessageLookupByLibrary.simpleMessage(
             "Eu concordo com os <u-terms>termos de serviço</u-terms> e a <u-policy>política de privacidade</u-policy>"),
