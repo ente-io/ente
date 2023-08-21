@@ -252,7 +252,9 @@ class _ResetIgnoredFilesWidgetState extends State<ResetIgnoredFilesWidget> {
               widget.filesInDeviceCollection,
             );
             RemoteSyncService.instance.sync(silently: true).then((value) {
-              widget.parentSetState.call();
+              if(mounted) {
+                widget.parentSetState.call();
+              }
             });
           },
         ),
