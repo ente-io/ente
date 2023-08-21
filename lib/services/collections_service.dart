@@ -346,15 +346,15 @@ class CollectionsService {
   Future<List<Collection>> getCollectionForOnEnteSection() async {
     final AlbumSortKey sortKey = LocalSettings.instance.albumSortKey();
     final List<Collection> collections =
-    CollectionsService.instance.getCollectionsForUI();
+        CollectionsService.instance.getCollectionsForUI();
     final bool hasFavorites = FavoritesService.instance.hasFavorites();
     late Map<int, int> collectionIDToNewestPhotoTime;
     if (sortKey == AlbumSortKey.newestPhoto) {
       collectionIDToNewestPhotoTime =
-      await CollectionsService.instance.getCollectionIDToNewestFileTime();
+          await CollectionsService.instance.getCollectionIDToNewestFileTime();
     }
     collections.sort(
-          (first, second) {
+      (first, second) {
         if (sortKey == AlbumSortKey.albumName) {
           return compareAsciiLowerCaseNatural(
             first.displayName,

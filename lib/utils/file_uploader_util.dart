@@ -34,6 +34,7 @@ class MediaUploadData {
   final FileHashData? hashData;
   final int? height;
   final int? width;
+
   // For android motion photos, the startIndex is the index of the first frame
   // For iOS, this value will be always null.
   final int? motionPhotoStartIndex;
