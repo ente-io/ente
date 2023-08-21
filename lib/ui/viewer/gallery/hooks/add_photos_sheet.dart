@@ -1,5 +1,6 @@
 import "dart:math";
 
+import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:modal_bottom_sheet/modal_bottom_sheet.dart";
 import "package:photos/core/configuration.dart";
@@ -218,10 +219,9 @@ class AddPhotosPhotoWidget extends StatelessWidget {
           showErrorDialog(
             context,
             context.l10n.oops,
-            context.l10n.somethingWentWrong + "\n$e",
+            context.l10n.somethingWentWrong + (kDebugMode ? "\n$e" : ""),
           );
         }
-        // Navigator.of(context).pop();
       }
     }
   }
