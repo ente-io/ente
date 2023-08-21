@@ -50,14 +50,16 @@ const ExportPendingList = (props: Iprops) => {
         <DialogBoxV2
             open={props.isOpen}
             onClose={props.onClose}
+            PaperProps={{
+                sx: { maxWidth: '444px' },
+            }}
             attributes={{
                 title: t('PENDING_ITEMS'),
                 close: {
                     action: props.onClose,
                     text: t('CLOSE'),
                 },
-            }}
-            size="xs">
+            }}>
             <ItemList
                 maxHeight={240}
                 itemSize={50}

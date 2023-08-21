@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import {
     Box,
-    Breakpoint,
     Button,
     Dialog,
     DialogProps,
@@ -14,10 +13,9 @@ import { DialogBoxAttributesV2 } from 'types/dialogBox';
 import EnteButton from 'components/EnteButton';
 
 type IProps = React.PropsWithChildren<
-    Omit<DialogProps, 'onClose' | 'maxSize'> & {
+    Omit<DialogProps, 'onClose'> & {
         onClose: () => void;
         attributes: DialogBoxAttributesV2;
-        size?: Breakpoint;
     }
 >;
 
@@ -39,17 +37,21 @@ export default function DialogBoxV2({
         onClose: onClose,
     });
 
+    const { PaperProps, ...rest } = props;
+
     return (
         <Dialog
-            maxWidth={props.size ?? 'xs'}
             open={open}
             onClose={handleClose}
             PaperProps={{
+                ...PaperProps,
                 sx: {
                     padding: '8px 12px',
+                    maxWidth: '360px',
+                    ...PaperProps?.sx,
                 },
             }}
-            {...props}>
+            {...rest}>
             <Stack spacing={'36px'} p={'16px'}>
                 <Stack spacing={'19px'}>
                     {attributes.icon && (
