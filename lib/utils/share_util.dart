@@ -2,9 +2,9 @@ import 'dart:async';
 import 'dart:io' as dartio;
 
 import 'package:flutter/widgets.dart';
-import "package:image_picker/image_picker.dart";
 import 'package:logging/logging.dart';
 import 'package:path/path.dart';
+import "package:photo_manager/photo_manager.dart";
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/models/file.dart';
@@ -149,62 +149,13 @@ Future<List<File>> convertIncomingSharedMediaToFile(
   return localFiles;
 }
 
-Future<List<File>> convertPickedFiles(
-  List<XFile> pickedFiles,
+Future<List<File>> convertPicketAssets(
+  List<AssetEntity> pickedAssets,
   int collectionID,
 ) async {
   final List<File> localFiles = [];
-  for (var media in pickedFiles) {
-    FileType? enteTypeType;
-    final String mimeType = (media.mimeType ?? '').toLowerCase();
-    if (mimeType.contains('image')) {
-      enteTypeType = FileType.image;
-    } else if (mimeType.contains('video')) {
-      enteTypeType = FileType.video;
-    } else {
-      final extenName = extension(media.path ?? '').toLowerCase().replaceFirst(
-            '.',
-            '',
-          );
-      if (_imageExtension.contains(extenName)) {
-        enteTypeType = FileType.image;
-      } else if (_videoExtension.contains(extenName)) {
-        enteTypeType = FileType.video;
-      } else {
-        _logger.warning(
-          "ignore file type ${media.mimeType}, extn $extenName path: ${media.path}",
-        );
-        continue;
-      }
-    }
-    final enteFile = File();
-    // fileName: img_x.jpg
-    enteFile.title = basename(media.path);
-    var ioFile = dartio.File(media.path);
-    ioFile = ioFile.renameSync(
-      Configuration.instance.getSharedMediaDirectory() + "/" + enteFile.title!,
-    );
-    enteFile.localID = sharedMediaIdentifier + enteFile.title!;
-    enteFile.collectionID = collectionID;
-    enteFile.fileType = enteTypeType;
-    if (enteFile.fileType == FileType.image) {
-      final exifTime = await getCreationTimeFromEXIF(ioFile, null);
-      if (exifTime != null) {
-        enteFile.creationTime = exifTime.microsecondsSinceEpoch;
-      }
-    } else if (enteFile.fileType == FileType.video) {
-      // enteFile.duration = (media.duration ?? 0) ~/ 1000;
-    }
-    if (enteFile.creationTime == null || enteFile.creationTime == 0) {
-      final parsedDateTime =
-          parseDateTimeFromFileNameV2(basenameWithoutExtension(media.path));
-      if (parsedDateTime != null) {
-        enteFile.creationTime = parsedDateTime.microsecondsSinceEpoch;
-      } else {
-        enteFile.creationTime = DateTime.now().microsecondsSinceEpoch;
-      }
-    }
-    enteFile.modificationTime = enteFile.creationTime;
+  for (var asset in pickedAssets) {
+    final enteFile = await File.fromAsset('', asset);
     localFiles.add(enteFile);
   }
   return localFiles;

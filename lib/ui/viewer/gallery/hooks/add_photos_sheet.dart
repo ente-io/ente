@@ -1,7 +1,6 @@
 import "dart:math";
 
 import "package:flutter/material.dart";
-import "package:image_picker/image_picker.dart";
 import "package:modal_bottom_sheet/modal_bottom_sheet.dart";
 import "package:photos/core/configuration.dart";
 import "package:photos/db/files_db.dart";
@@ -19,6 +18,7 @@ import "package:photos/ui/components/buttons/button_widget.dart";
 import "package:photos/ui/components/models/button_type.dart";
 import "package:photos/ui/components/title_bar_title_widget.dart";
 import "package:photos/ui/viewer/gallery/gallery.dart";
+import 'package:wechat_assets_picker/wechat_assets_picker.dart';
 
 Future<dynamic> showAddPhotosSheet(
   BuildContext context,
@@ -167,16 +167,8 @@ class AddPhotosPhotoWidget extends StatelessWidget {
                             buttonAction: ButtonAction.second,
                             labelText: S.of(context).addFromDevice,
                             onTap: () async {
-                              final ImagePicker picker = ImagePicker();
-                              final pickedFiles =
-                                  await picker.pickMultipleMedia();
-                              if (pickedFiles.isNotEmpty) {
-                                for (XFile f in pickedFiles) {
-                                  // print XFile f details
-                                  debugPrint(f.name);
-                                  debugPrint(f.path);
-                                  debugPrint(f.mimeType);
-                                }
+                              final List<AssetEntity>? result = await AssetPicker.pickAssets(context);
+                              if(result != null && result.isNotEmpty) {
                                 final ca = CollectionActions(
                                   CollectionsService.instance,
                                 );
@@ -184,7 +176,7 @@ class AddPhotosPhotoWidget extends StatelessWidget {
                                   context,
                                   collection.id,
                                   false,
-                                  pickedFiles: pickedFiles,
+                                  picketAssets: result,
                                 );
                               }
                               Navigator.of(context).pop();

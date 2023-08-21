@@ -1,5 +1,5 @@
 import 'package:flutter/cupertino.dart';
-import "package:image_picker/image_picker.dart";
+import "package:photo_manager/photo_manager.dart";
 import "package:photos/core/configuration.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/db/files_db.dart";
@@ -83,7 +83,7 @@ extension CollectionFileActions on CollectionActions {
     bool showProgressDialog, {
     List<File>? selectedFiles,
     List<SharedMediaFile>? sharedFiles,
-    List<XFile>? pickedFiles,
+    List<AssetEntity>? picketAssets,
   }) async {
     ProgressDialog? dialog = showProgressDialog
         ? createProgressDialog(
@@ -104,10 +104,10 @@ extension CollectionFileActions on CollectionActions {
             collectionID,
           ),
         );
-      } else if (pickedFiles != null) {
+      } else if (picketAssets != null) {
         filesPendingUpload.addAll(
-          await convertPickedFiles(
-            pickedFiles,
+          await convertPicketAssets(
+            picketAssets,
             collectionID,
           ),
         );
@@ -159,6 +159,9 @@ extension CollectionFileActions on CollectionActions {
             files.add(uploadedFile);
           }
         } else {
+          for(final file in filesPendingUpload) {
+            file.collectionID = collectionID;
+          }
           // filesPendingUpload might be getting ignored during auto-upload
           // because the user deleted these files from ente in the past.
           await IgnoredFilesService.instance

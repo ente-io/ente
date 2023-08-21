@@ -94,8 +94,6 @@ PODS:
     - GoogleUtilities/Logger
   - image_editor_common (1.0.0):
     - Flutter
-  - image_picker_ios (0.0.1):
-    - Flutter
   - in_app_purchase_storekit (0.0.1):
     - Flutter
     - FlutterMacOS
@@ -200,7 +198,6 @@ DEPENDENCIES:
   - flutter_sodium (from `.symlinks/plugins/flutter_sodium/ios`)
   - fluttertoast (from `.symlinks/plugins/fluttertoast/ios`)
   - image_editor_common (from `.symlinks/plugins/image_editor_common/ios`)
-  - image_picker_ios (from `.symlinks/plugins/image_picker_ios/ios`)
   - in_app_purchase_storekit (from `.symlinks/plugins/in_app_purchase_storekit/darwin`)
   - integration_test (from `.symlinks/plugins/integration_test/ios`)
   - local_auth_ios (from `.symlinks/plugins/local_auth_ios/ios`)
@@ -281,8 +278,6 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/fluttertoast/ios"
   image_editor_common:
     :path: ".symlinks/plugins/image_editor_common/ios"
-  image_picker_ios:
-    :path: ".symlinks/plugins/image_picker_ios/ios"
   in_app_purchase_storekit:
     :path: ".symlinks/plugins/in_app_purchase_storekit/darwin"
   integration_test:
@@ -354,7 +349,6 @@ SPEC CHECKSUMS:
   GoogleDataTransport: 54dee9d48d14580407f8f5fbf2f496e92437a2f2
   GoogleUtilities: 13e2c67ede716b8741c7989e26893d151b2b2084
   image_editor_common: d6f6644ae4a6de80481e89fe6d0a8c49e30b4b43
-  image_picker_ios: 4a8aadfbb6dc30ad5141a2ce3832af9214a705b5
   in_app_purchase_storekit: 4fb7ee9e824b1f09107fbfbbce8c4b276366dc43
   integration_test: 13825b8a9334a850581300559b8839134b124670
   libwebp: 33dc822fbbf4503668d09f7885bbfedc76c45e96
