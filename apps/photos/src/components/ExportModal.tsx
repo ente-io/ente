@@ -1,7 +1,7 @@
 import isElectron from 'is-electron';
 import React, { useEffect, useState, useContext } from 'react';
 import exportService from 'services/export';
-import { ExportProgress, ExportSettings, FileExportStats } from 'types/export';
+import { ExportProgress, ExportSettings } from 'types/export';
 import {
     Box,
     Button,
@@ -30,6 +30,7 @@ import { t } from 'i18next';
 import LinkButton from './pages/gallery/LinkButton';
 import { CustomError } from 'utils/error';
 import { addLogLine } from 'utils/logging';
+import { EnteFile } from 'types/file';
 
 const ExportFolderPathContainer = styled(LinkButton)`
     width: 262px;
@@ -44,6 +45,7 @@ const ExportFolderPathContainer = styled(LinkButton)`
 interface Props {
     show: boolean;
     onHide: () => void;
+    collectionNameMap: Map<number, string>;
 }
 export default function ExportModal(props: Props) {
     const appContext = useContext(AppContext);
@@ -55,10 +57,7 @@ export default function ExportModal(props: Props) {
         failed: 0,
         total: 0,
     });
-    const [fileExportStats, setFileExportStats] = useState<FileExportStats>({
-        totalCount: 0,
-        pendingCount: 0,
-    });
+    const [pendingExports, setPendingExports] = useState<EnteFile[]>([]);
     const [lastExportTime, setLastExportTime] = useState(0);
 
     // ====================
@@ -72,8 +71,8 @@ export default function ExportModal(props: Props) {
             exportService.setUIUpdaters({
                 setExportStage,
                 setExportProgress,
-                setFileExportStats,
                 setLastExportTime,
+                setPendingExports,
             });
             const exportSettings: ExportSettings =
                 exportService.getExportSettings();
@@ -123,20 +122,18 @@ export default function ExportModal(props: Props) {
     const syncExportRecord = async (exportFolder: string): Promise<void> => {
         try {
             if (!exportService.exportFolderExists(exportFolder)) {
-                const fileExportStats = await exportService.getFileExportStats(
+                const pendingExports = await exportService.getPendingExports(
                     null
                 );
-                setFileExportStats(fileExportStats);
+                setPendingExports(pendingExports);
             }
             const exportRecord = await exportService.getExportRecord(
                 exportFolder
             );
             setExportStage(exportRecord.stage);
             setLastExportTime(exportRecord.lastAttemptTimestamp);
-            const fileExportStats = await exportService.getFileExportStats(
-                exportRecord
-            );
-            setFileExportStats(fileExportStats);
+            const pendingExports = await exportService.getPendingExports(null);
+            setPendingExports(pendingExports);
         } catch (e) {
             if (e.message !== CustomError.EXPORT_FOLDER_DOES_NOT_EXIST) {
                 logError(e, 'syncExportRecord failed');
@@ -219,8 +216,9 @@ export default function ExportModal(props: Props) {
                 stopExport={stopExport}
                 onHide={props.onHide}
                 lastExportTime={lastExportTime}
-                pendingFileCount={fileExportStats.pendingCount}
                 exportProgress={exportProgress}
+                pendingExports={pendingExports}
+                collectionNameMap={props.collectionNameMap}
             />
         </Dialog>
     );
@@ -306,16 +304,18 @@ const ExportDynamicContent = ({
     stopExport,
     onHide,
     lastExportTime,
-    pendingFileCount,
     exportProgress,
+    pendingExports,
+    collectionNameMap,
 }: {
     exportStage: ExportStage;
     startExport: () => void;
     stopExport: () => void;
     onHide: () => void;
     lastExportTime: number;
-    pendingFileCount: number;
     exportProgress: ExportProgress;
+    pendingExports: EnteFile[];
+    collectionNameMap: Map<number, string>;
 }) => {
     switch (exportStage) {
         case ExportStage.INIT:
@@ -336,7 +336,8 @@ const ExportDynamicContent = ({
                 <ExportFinished
                     onHide={onHide}
                     lastExportTime={lastExportTime}
-                    pendingFileCount={pendingFileCount}
+                    pendingExports={pendingExports}
+                    collectionNameMap={collectionNameMap}
                     startExport={startExport}
                 />
             );

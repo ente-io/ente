@@ -1032,7 +1032,11 @@ export default function Gallery() {
                             isInSearchMode={isInSearchMode}
                         />
                     )}
-                <ExportModal show={exportModalView} onHide={closeExportModal} />
+                <ExportModal
+                    show={exportModalView}
+                    onHide={closeExportModal}
+                    collectionNameMap={collectionNameMap}
+                />
                 <AuthenticateUserModal
                     open={authenticateUserModalView}
                     onClose={closeAuthenticateUserModal}

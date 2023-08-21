@@ -48,14 +48,13 @@ import {
     ExportRecord,
     ExportSettings,
     ExportUIUpdaters,
-    FileExportStats,
 } from 'types/export';
 import { User } from 'types/user';
 import { FILE_TYPE, TYPE_JPEG, TYPE_JPG } from 'constants/file';
 import { ExportStage } from 'constants/export';
 import { ElectronAPIs } from 'types/electron';
 import { CustomError } from 'utils/error';
-import { addLocalLog, addLogLine } from 'utils/logging';
+import { addLogLine } from 'utils/logging';
 import { eventBus, Events } from '../events';
 import {
     getCollectionNameMap,
@@ -87,7 +86,7 @@ class ExportService {
         setExportProgress: () => {},
         setExportStage: () => {},
         setLastExportTime: () => {},
-        setFileExportStats: () => {},
+        setPendingExports: () => {},
     };
     private currentExportProgress: ExportProgress = {
         total: 0,
@@ -230,9 +229,9 @@ class ExportService {
         }
     }
 
-    getFileExportStats = async (
+    getPendingExports = async (
         exportRecord: ExportRecord
-    ): Promise<FileExportStats> => {
+    ): Promise<EnteFile[]> => {
         try {
             const user: User = getData(LS_KEYS.USER);
             const files = [
@@ -241,44 +240,11 @@ class ExportService {
             ];
             const userPersonalFiles = getPersonalFiles(files, user);
 
-            const collections = await getLocalCollections(true);
-            const userNonEmptyPersonalCollections =
-                getNonEmptyPersonalCollections(
-                    collections,
-                    userPersonalFiles,
-                    user
-                );
-
             const unExportedFiles = getUnExportedFiles(
                 userPersonalFiles,
                 exportRecord
             );
-            const deletedExportedFiles = getDeletedExportedFiles(
-                userPersonalFiles,
-                exportRecord
-            );
-            const renamedCollections = getRenamedExportedCollections(
-                userNonEmptyPersonalCollections,
-                exportRecord
-            );
-            const deletedCollections = getDeletedExportedCollections(
-                userNonEmptyPersonalCollections,
-                exportRecord
-            );
-
-            addLocalLog(
-                () =>
-                    `personal files:${userPersonalFiles.length} unexported files: ${unExportedFiles.length}, deleted exported files: ${deletedExportedFiles.length}, renamed collections: ${renamedCollections.length}, deleted collections: ${deletedCollections.length}`
-            );
-
-            return {
-                totalCount: userPersonalFiles.length,
-                pendingCount:
-                    unExportedFiles.length +
-                    deletedExportedFiles.length +
-                    renamedCollections.length +
-                    deletedCollections.length,
-            };
+            return unExportedFiles;
         } catch (e) {
             logError(e, 'getUpdateFileLists failed');
             throw e;
@@ -319,8 +285,8 @@ class ExportService {
 
             const exportRecord = await this.getExportRecord(exportFolder);
 
-            const fileExportStats = await this.getFileExportStats(exportRecord);
-            this.uiUpdater.setFileExportStats(fileExportStats);
+            const pendingExports = await this.getPendingExports(exportRecord);
+            this.uiUpdater.setPendingExports(pendingExports);
         } catch (e) {
             logError(e, 'postExport failed');
         }

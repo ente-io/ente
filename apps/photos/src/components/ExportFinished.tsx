@@ -12,9 +12,11 @@ import { formatNumber } from 'utils/number/format';
 import ExportPendingList from './ExportPendingList';
 import { useState } from 'react';
 import LinkButton from './pages/gallery/LinkButton';
+import { EnteFile } from 'types/file';
 
 interface Props {
-    pendingFileCount: number;
+    pendingExports: EnteFile[];
+    collectionNameMap: Map<number, string>;
     onHide: () => void;
     lastExportTime: number;
     startExport: () => void;
@@ -40,7 +42,7 @@ export default function ExportFinished(props: Props) {
                             {t('PENDING_ITEMS')}
                         </Typography>
                         <LinkButton onClick={openPendingFileList}>
-                            {formatNumber(props.pendingFileCount)}
+                            {formatNumber(props.pendingExports.length)}
                         </LinkButton>
                     </SpaceBetweenFlex>
                     <SpaceBetweenFlex minHeight={'48px'}>
@@ -67,6 +69,8 @@ export default function ExportFinished(props: Props) {
                 </Button>
             </DialogActions>
             <ExportPendingList
+                pendingExports={props.pendingExports}
+                collectionNameMap={props.collectionNameMap}
                 isOpen={pendingFileListView}
                 onClose={closePendingFileList}
             />
