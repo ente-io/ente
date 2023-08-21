@@ -96,7 +96,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Nie pamiętam hasła"),
         "generatingEncryptionKeys": MessageLookupByLibrary.simpleMessage(
             "Generowanie kluczy szyfrujących..."),
-        "hiding": MessageLookupByLibrary.simpleMessage("Hiding..."),
         "howItWorks": MessageLookupByLibrary.simpleMessage("Jak to działa"),
         "incorrectPasswordTitle":
             MessageLookupByLibrary.simpleMessage("Nieprawidłowe hasło"),
@@ -164,10 +163,6 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Coś poszło nie tak, spróbuj ponownie"),
         "sorry": MessageLookupByLibrary.simpleMessage("Przepraszamy"),
         "strongStrength": MessageLookupByLibrary.simpleMessage("Silne"),
-        "successfullyHid":
-            MessageLookupByLibrary.simpleMessage("Successfully hid"),
-        "successfullyUnhid":
-            MessageLookupByLibrary.simpleMessage("Successfully unhid"),
         "terminate": MessageLookupByLibrary.simpleMessage("Zakończ"),
         "terminateSession":
             MessageLookupByLibrary.simpleMessage("Zakończyć sesję?"),
@@ -185,7 +180,6 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Uwierzytelnianie dwuskładnikowe"),
         "twofactorSetup": MessageLookupByLibrary.simpleMessage(
             "Uwierzytelnianie dwuskładnikowe"),
-        "unhiding": MessageLookupByLibrary.simpleMessage("Unhiding..."),
         "useRecoveryKey":
             MessageLookupByLibrary.simpleMessage("Użyj kodu odzyskiwania"),
         "verify": MessageLookupByLibrary.simpleMessage("Weryfikuj"),

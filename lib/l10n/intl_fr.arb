@@ -723,9 +723,5 @@
   "sharedWithYou": "Shared with you",
   "sharedByYou": "Shared by you",
   "inviteYourFriendsToEnte": "Invite your friends to ente",
-  "failedToDownloadVideo": "Failed to download video",
-  "hiding": "Hiding...",
-  "unhiding": "Unhiding...",
-  "successfullyHid": "Successfully hid",
-  "successfullyUnhid": "Successfully unhid"
+  "failedToDownloadVideo": "Failed to download video"
 }

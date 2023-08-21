@@ -720,7 +720,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Groep foto\'s in de buurt"),
         "hidden": MessageLookupByLibrary.simpleMessage("Verborgen"),
         "hide": MessageLookupByLibrary.simpleMessage("Verbergen"),
-        "hiding": MessageLookupByLibrary.simpleMessage("Hiding..."),
         "hostedAtOsmFrance":
             MessageLookupByLibrary.simpleMessage("Gehost bij OSM France"),
         "howItWorks": MessageLookupByLibrary.simpleMessage("Hoe het werkt"),
@@ -1238,12 +1237,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "success": MessageLookupByLibrary.simpleMessage("Succes"),
         "successfullyArchived":
             MessageLookupByLibrary.simpleMessage("Succesvol gearchiveerd"),
-        "successfullyHid":
-            MessageLookupByLibrary.simpleMessage("Successfully hid"),
         "successfullyUnarchived": MessageLookupByLibrary.simpleMessage(
             "Succesvol uit archief gehaald"),
-        "successfullyUnhid":
-            MessageLookupByLibrary.simpleMessage("Successfully unhid"),
         "suggestFeatures":
             MessageLookupByLibrary.simpleMessage("Features voorstellen"),
         "support": MessageLookupByLibrary.simpleMessage("Ondersteuning"),
@@ -1338,7 +1333,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "unhide": MessageLookupByLibrary.simpleMessage("Zichtbaar maken"),
         "unhideToAlbum":
             MessageLookupByLibrary.simpleMessage("Zichtbaar maken in album"),
-        "unhiding": MessageLookupByLibrary.simpleMessage("Unhiding..."),
         "unhidingFilesToAlbum": MessageLookupByLibrary.simpleMessage(
             "Bestanden zichtbaar maken in album"),
         "unlock": MessageLookupByLibrary.simpleMessage("Ontgrendelen"),

@@ -660,7 +660,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Agrupar fotos cercanas"),
         "hidden": MessageLookupByLibrary.simpleMessage("Oculto"),
         "hide": MessageLookupByLibrary.simpleMessage("Ocultar"),
-        "hiding": MessageLookupByLibrary.simpleMessage("Hiding..."),
         "howItWorks": MessageLookupByLibrary.simpleMessage("Cómo funciona"),
         "howToViewShareeVerificationID": MessageLookupByLibrary.simpleMessage(
             "Por favor, pídeles que mantengan presionada su dirección de correo electrónico en la pantalla de ajustes, y verifique que los IDs de ambos dispositivos coincidan."),
@@ -1158,12 +1157,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "success": MessageLookupByLibrary.simpleMessage("Éxito"),
         "successfullyArchived":
             MessageLookupByLibrary.simpleMessage("Archivado correctamente"),
-        "successfullyHid":
-            MessageLookupByLibrary.simpleMessage("Successfully hid"),
         "successfullyUnarchived":
             MessageLookupByLibrary.simpleMessage("Desarchivado correctamente"),
-        "successfullyUnhid":
-            MessageLookupByLibrary.simpleMessage("Successfully unhid"),
         "suggestFeatures":
             MessageLookupByLibrary.simpleMessage("Sugerir una característica"),
         "support": MessageLookupByLibrary.simpleMessage("Soporte"),
@@ -1252,7 +1247,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "unhide": MessageLookupByLibrary.simpleMessage("Dejar de ocultar"),
         "unhideToAlbum":
             MessageLookupByLibrary.simpleMessage("Hacer visible al álbum"),
-        "unhiding": MessageLookupByLibrary.simpleMessage("Unhiding..."),
         "unhidingFilesToAlbum": MessageLookupByLibrary.simpleMessage(
             "Desocultar archivos al álbum"),
         "unlock": MessageLookupByLibrary.simpleMessage("Desbloquear"),

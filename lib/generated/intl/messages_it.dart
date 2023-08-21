@@ -711,7 +711,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "Raggruppa foto nelle vicinanze"),
         "hidden": MessageLookupByLibrary.simpleMessage("Nascosti"),
         "hide": MessageLookupByLibrary.simpleMessage("Nascondi"),
-        "hiding": MessageLookupByLibrary.simpleMessage("Hiding..."),
         "hostedAtOsmFrance":
             MessageLookupByLibrary.simpleMessage("Ospitato presso OSM France"),
         "howItWorks": MessageLookupByLibrary.simpleMessage("Come funziona"),
@@ -1237,12 +1236,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "success": MessageLookupByLibrary.simpleMessage("Operazione riuscita"),
         "successfullyArchived":
             MessageLookupByLibrary.simpleMessage("Archiviato correttamente"),
-        "successfullyHid":
-            MessageLookupByLibrary.simpleMessage("Successfully hid"),
         "successfullyUnarchived": MessageLookupByLibrary.simpleMessage(
             "Rimosso dall\'archivio correttamente"),
-        "successfullyUnhid":
-            MessageLookupByLibrary.simpleMessage("Successfully unhid"),
         "suggestFeatures":
             MessageLookupByLibrary.simpleMessage("Suggerisci una funzionalità"),
         "support": MessageLookupByLibrary.simpleMessage("Assistenza"),
@@ -1339,7 +1334,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "unhide": MessageLookupByLibrary.simpleMessage("Mostra"),
         "unhideToAlbum":
             MessageLookupByLibrary.simpleMessage("Non nascondere l\'album"),
-        "unhiding": MessageLookupByLibrary.simpleMessage("Unhiding..."),
         "unhidingFilesToAlbum":
             MessageLookupByLibrary.simpleMessage("Mostra i file nell\'album"),
         "unlock": MessageLookupByLibrary.simpleMessage("Sblocca"),

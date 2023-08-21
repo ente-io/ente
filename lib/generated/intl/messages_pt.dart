@@ -222,7 +222,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "Armazenamento livre utilizável"),
         "generatingEncryptionKeys": MessageLookupByLibrary.simpleMessage(
             "Gerando chaves de criptografia..."),
-        "hiding": MessageLookupByLibrary.simpleMessage("Hiding..."),
         "howItWorks": MessageLookupByLibrary.simpleMessage("Como funciona"),
         "incorrectPasswordTitle":
             MessageLookupByLibrary.simpleMessage("Senha incorreta"),
@@ -383,10 +382,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "subscribe": MessageLookupByLibrary.simpleMessage("Inscrever-se"),
         "subscribeToEnableSharing": MessageLookupByLibrary.simpleMessage(
             "Parece que sua assinatura expirou. Por favor inscreva-se para ativar o compartilhamento."),
-        "successfullyHid":
-            MessageLookupByLibrary.simpleMessage("Successfully hid"),
-        "successfullyUnhid":
-            MessageLookupByLibrary.simpleMessage("Successfully unhid"),
         "tapToCopy": MessageLookupByLibrary.simpleMessage("toque para copiar"),
         "tapToEnterCode":
             MessageLookupByLibrary.simpleMessage("Clica para inserir código"),
@@ -411,7 +406,6 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Autenticação de dois fatores"),
         "twofactorSetup": MessageLookupByLibrary.simpleMessage(
             "Autenticação de dois fatores"),
-        "unhiding": MessageLookupByLibrary.simpleMessage("Unhiding..."),
         "update": MessageLookupByLibrary.simpleMessage("Atualização"),
         "updateAvailable":
             MessageLookupByLibrary.simpleMessage("Atualização disponível"),

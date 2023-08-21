@@ -1068,10 +1068,6 @@
   "@iOSOkButton": {
     "description": "Message showed on a button that the user can click to leave the current dialog. It is used on iOS side. Maximum 30 characters."
   },
-  "hiding": "Hiding...",
-  "unhiding": "Unhiding...",
-  "successfullyHid": "Successfully hid",
-  "successfullyUnhid": "Successfully unhid",
   "openstreetmapContributors": "OpenStreetMap 贡献者",
   "hostedAtOsmFrance": "法国 OSM 主办",
   "map": "地图",
