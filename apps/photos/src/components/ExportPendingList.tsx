@@ -46,7 +46,7 @@ const ExportPendingList = (props: Iprops) => {
     };
 
     const getItemTitle = (file: EnteFile) => {
-        return `${props.collectionNameMap.get(file.collectionID)} - ${
+        return `${props.collectionNameMap.get(file.collectionID)} / ${
             file.metadata.title
         }`;
     };
