@@ -135,27 +135,6 @@ class _FileSelectionActionsWidgetState
       }
     }
 
-    bool hasVideoFile = false;
-    for (final file in widget.selectedFiles.files) {
-      if (file.fileType == FileType.video) {
-        hasVideoFile = true;
-      }
-    }
-
-    if (!hasVideoFile &&
-        widget.selectedFiles.files.length >=
-            CollageCreatorPage.collageItemsMin &&
-        widget.selectedFiles.files.length <=
-            CollageCreatorPage.collageItemsMax) {
-      items.add(
-        SelectionActionButton(
-          icon: Icons.grid_view_outlined,
-          labelText: S.of(context).createCollage,
-          onTap: _onCreateCollageClicked,
-        ),
-      );
-    }
-
     final showUploadIcon = widget.type == GalleryType.localFolder &&
         split.ownedByCurrentUser.isEmpty;
     if (widget.type.showAddToAlbum()) {
@@ -284,6 +263,27 @@ class _FileSelectionActionsWidgetState
         ),
       ),
     );
+
+    bool hasVideoFile = false;
+    for (final file in widget.selectedFiles.files) {
+      if (file.fileType == FileType.video) {
+        hasVideoFile = true;
+      }
+    }
+
+    if (!hasVideoFile &&
+        widget.selectedFiles.files.length >=
+            CollageCreatorPage.collageItemsMin &&
+        widget.selectedFiles.files.length <=
+            CollageCreatorPage.collageItemsMax) {
+      items.add(
+        SelectionActionButton(
+          icon: Icons.grid_view_outlined,
+          labelText: S.of(context).createCollage,
+          onTap: _onCreateCollageClicked,
+        ),
+      );
+    }
 
     if (items.isNotEmpty) {
       return SizedBox(
