@@ -204,7 +204,9 @@ class AddPhotosPhotoWidget extends StatelessWidget {
       if (e is StateError) {
         final PermissionState ps = await PhotoManager.requestPermissionExtend();
         if (ps != PermissionState.authorized && ps != PermissionState.limited) {
-          showChoiceDialog(context, title: context.l10n.grantPermission,
+          showChoiceDialog(
+            context,
+            title: context.l10n.grantPermission,
             body: context.l10n.pleaseGrantPermissions,
             firstButtonLabel: context.l10n.ok,
             secondButtonLabel: context.l10n.cancel,
@@ -213,11 +215,14 @@ class AddPhotosPhotoWidget extends StatelessWidget {
             },
           );
         } else {
-          showErrorDialog(context, context.l10n.oops, context.l10n
-              .somethingWentWrong + "\n$e",);
+          showErrorDialog(
+            context,
+            context.l10n.oops,
+            context.l10n.somethingWentWrong + "\n$e",
+          );
         }
         // Navigator.of(context).pop();
       }
     }
   }
-  }
+}
