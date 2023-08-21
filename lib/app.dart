@@ -92,7 +92,7 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
           localeListResolutionCallback: localResolutionCallBack,
           localizationsDelegates: const [
             ...AppLocalizations.localizationsDelegates,
-            S.delegate
+            S.delegate,
           ],
         ),
       );
@@ -110,7 +110,7 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
         localeListResolutionCallback: localResolutionCallBack,
         localizationsDelegates: const [
           ...AppLocalizations.localizationsDelegates,
-          S.delegate
+          S.delegate,
         ],
       );
     }

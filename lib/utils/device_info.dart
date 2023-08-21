@@ -27,7 +27,7 @@ final Set<String> iOSLowEndMachineCodes = <String>{
   "iPhone10,2", // iPhone 8 Plus
   "iPhone10,3", // iPhone X Global
   "iPhone10,4", // iPhone 8
-  "iPhone10,5" //  iPhone 8
+  "iPhone10,5", //  iPhone 8
 };
 
 Future<bool> isLowSpecDevice() async {

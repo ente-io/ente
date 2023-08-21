@@ -460,7 +460,7 @@ class CollectionsService {
           "collectionID": collectionID,
           "email": email,
           "encryptedKey": CryptoUtil.bin2base64(encryptedKey),
-          "role": role.toStringVal()
+          "role": role.toStringVal(),
         },
       );
       final sharees = <User>[];
@@ -657,7 +657,7 @@ class CollectionsService {
         data: {
           "collectionID": collection.id,
           "encryptedName": CryptoUtil.bin2base64(encryptedName.encryptedData!),
-          "nameDecryptionNonce": CryptoUtil.bin2base64(encryptedName.nonce!)
+          "nameDecryptionNonce": CryptoUtil.bin2base64(encryptedName.nonce!),
         },
       );
       collection.setName(newName);

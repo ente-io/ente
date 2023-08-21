@@ -320,7 +320,7 @@ class _ButtonChildWidgetState extends State<ButtonChildWidget> {
                                             overflow: TextOverflow.ellipsis,
                                           ),
                                         ),
-                                      )
+                                      ),
                               ],
                             );
                           },

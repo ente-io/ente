@@ -67,7 +67,7 @@ class SearchResultPage extends StatelessWidget {
           FileSelectionOverlayBar(
             overlayType,
             _selectedFiles,
-          )
+          ),
         ],
       ),
     );

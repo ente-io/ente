@@ -89,7 +89,7 @@ class TrashPage extends StatelessWidget {
               ),
             ),
           ),
-          FileSelectionOverlayBar(GalleryType.trash, _selectedFiles)
+          FileSelectionOverlayBar(GalleryType.trash, _selectedFiles),
         ],
       ),
     );

@@ -320,7 +320,7 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
                       ),
                     ],
                   ),
-                )
+                ),
               ],
             ),
           ),

@@ -170,7 +170,7 @@ class LocationService {
         LocationTagUpdatedEvent(
           LocTagEventType.update,
           updatedLocTagEntities: [
-            LocalEntity(updatedLoationTag, locationTagEntity.id)
+            LocalEntity(updatedLoationTag, locationTagEntity.id),
           ],
         ),
       );

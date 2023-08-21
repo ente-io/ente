@@ -76,9 +76,9 @@ class NotificationSettingsScreen extends StatelessWidget {
                               content: S
                                   .of(context)
                                   .sharedPhotoNotificationsExplanation,
-                            )
+                            ),
                           ],
-                        )
+                        ),
                       ],
                     ),
                   ),

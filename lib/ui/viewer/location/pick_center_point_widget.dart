@@ -165,7 +165,7 @@ class PickCenterPointWidget extends StatelessWidget {
                         ],
                       ),
                     ),
-                  )
+                  ),
                 ],
               ),
             ),

@@ -245,7 +245,7 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
                             );
                           },
                         ),
-                      )
+                      ),
                     ],
                   )
                 : const SizedBox.shrink(),

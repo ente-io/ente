@@ -215,7 +215,7 @@ class _LazyGroupGalleryState extends State<LazyGroupGallery> {
                               },
                             );
                     },
-                  )
+                  ),
           ],
         ),
         _shouldRender!

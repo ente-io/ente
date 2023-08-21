@@ -131,7 +131,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
               color: Theme.of(context).colorScheme.background,
               blurRadius: 16,
               offset: const Offset(0, 8),
-            )
+            ),
           ],
         ),
         child: widget.isOnboarding
@@ -166,7 +166,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
           _getBody(),
           const BottomShadowWidget(
             offsetDy: 40,
-          )
+          ),
         ],
       ),
     );

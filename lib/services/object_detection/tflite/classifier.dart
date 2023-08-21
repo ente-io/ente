@@ -56,10 +56,10 @@ abstract class Classifier {
       final outputTensors = _interpreter.getOutputTensors();
       _outputShapes = [];
       _outputTypes = [];
-      outputTensors.forEach((tensor) {
+      for (var tensor in outputTensors) {
         _outputShapes.add(tensor.shape);
         _outputTypes.add(tensor.type);
-      });
+      }
       logger.info("Interpreter initialized");
     } catch (e, s) {
       logger.severe("Error while creating interpreter", e, s);

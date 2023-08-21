@@ -198,7 +198,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
           isInAlert: true,
           shouldStickToDarkTheme: true,
           labelText: S.of(context).cancel,
-        )
+        ),
       ],
       title: S.of(context).leaveSharedAlbum,
       body: S.of(context).photosAddedByYouWillBeRemovedFromTheAlbum,

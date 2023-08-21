@@ -43,7 +43,7 @@ class _AppUpdateDialogState extends State<AppUpdateDialog> {
                   style:
                       enteTextTheme.small.copyWith(color: enteColor.textMuted),
                 ),
-              )
+              ),
             ],
           ),
         ),
@@ -104,7 +104,7 @@ class _AppUpdateDialogState extends State<AppUpdateDialog> {
               mode: LaunchMode.externalApplication,
             ),
           ),
-        )
+        ),
       ],
     );
     final shouldForceUpdate =

@@ -419,7 +419,7 @@
   "skip": "Overslaan",
   "updatingFolderSelection": "Map selectie bijwerken...",
   "itemCount": "{count, plural, one{{count} item} other{{count} items}}",
-  "deleteItemCount": "{count, plural, one {}=1 {Verwijder {count} bestand} other {Verwijder {count} bestanden}}",
+  "deleteItemCount": "{count, plural, one {Verwijder {count} bestand} other {Verwijder {count} bestanden}}",
   "duplicateItemsGroup": "{count} bestanden, elk {formattedSize}",
   "@duplicateItemsGroup": {
     "description": "Display the number of duplicate files and their size",

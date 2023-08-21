@@ -46,7 +46,7 @@ class DeviceLimitPickerPage extends StatelessWidget {
                       ),
                       MenuSectionDescriptionWidget(
                         content: S.of(context).maxDeviceLimitSpikeHandling(50),
-                      )
+                      ),
                     ],
                   ),
                 );

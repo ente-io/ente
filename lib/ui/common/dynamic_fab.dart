@@ -28,7 +28,7 @@ class DynamicFAB extends StatelessWidget {
               spreadRadius: 200,
               blurRadius: 100,
               offset: const Offset(0, 230),
-            )
+            ),
           ],
         ),
         width: double.infinity,

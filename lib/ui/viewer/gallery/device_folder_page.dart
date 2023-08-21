@@ -73,7 +73,7 @@ class DeviceFolderPage extends StatelessWidget {
           FileSelectionOverlayBar(
             GalleryType.localFolder,
             _selectedFiles,
-          )
+          ),
         ],
       ),
     );
@@ -183,7 +183,7 @@ class _BackupHeaderWidgetState extends State<BackupHeaderWidget> {
                     duration: const Duration(milliseconds: 1000),
                   );
                 },
-              )
+              ),
             ],
           ),
         ],

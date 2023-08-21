@@ -158,8 +158,8 @@ class _HomeWidgetState extends State<HomeWidget> {
               {
                 setState(
                   () {},
-                )
-              }
+                ),
+              },
           },
         );
       }
@@ -204,7 +204,7 @@ class _HomeWidgetState extends State<HomeWidget> {
       (_) => Future.delayed(
         const Duration(seconds: 1),
         () => {
-          if (mounted) {showChangeLog(context)}
+          if (mounted) {showChangeLog(context)},
         },
       ),
     );

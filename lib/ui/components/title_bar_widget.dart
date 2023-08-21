@@ -178,7 +178,7 @@ class TitleWidget extends StatelessWidget {
               : Text(
                   caption!,
                   style: textTheme.miniMuted,
-                )
+                ),
         ],
       ),
     );
@@ -224,7 +224,7 @@ class FlexibleSpaceBarWidget extends StatelessWidget {
                           style: textTheme.smallMuted,
                           overflow: TextOverflow.ellipsis,
                           maxLines: 1,
-                        )
+                        ),
                 ],
               ),
             ),

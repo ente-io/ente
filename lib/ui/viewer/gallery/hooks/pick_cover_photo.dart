@@ -179,7 +179,7 @@ class PickCoverPhotoWidget extends StatelessWidget {
                         ],
                       ),
                     ),
-                  )
+                  ),
                 ],
               ),
             ),

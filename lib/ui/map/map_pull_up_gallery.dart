@@ -141,7 +141,7 @@ class _MapPullUpGalleryState extends State<MapPullUpGallery> {
                               Text(
                                 S.of(context).zoomOutToSeePhotos,
                                 style: textTheme.smallFaint,
-                              )
+                              ),
                             ],
                           ),
                         ),
@@ -179,7 +179,7 @@ class _MapPullUpGalleryState extends State<MapPullUpGallery> {
                 },
               ),
             ),
-          )
+          ),
         ],
       ),
     );

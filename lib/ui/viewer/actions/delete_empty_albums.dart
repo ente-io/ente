@@ -107,7 +107,7 @@ class _DeleteEmptyAlbumsState extends State<DeleteEmptyAlbums> {
                     _isCancelled = true;
                     Navigator.of(context, rootNavigator: true).pop();
                   },
-                )
+                ),
               ],
               title: S.of(context).deleteEmptyAlbumsWithQuestionMark,
               body: S.of(context).deleteAlbumsDialogBody,

@@ -92,7 +92,7 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
             AddParticipantPage(widget.collection, true),
           ).then(
             (value) => {
-              if (mounted) {setState(() => {})}
+              if (mounted) {setState(() => {})},
             },
           );
         },
@@ -117,7 +117,7 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
           routeToPage(context, AddParticipantPage(widget.collection, false))
               .then(
             (value) => {
-              if (mounted) {setState(() => {})}
+              if (mounted) {setState(() => {})},
             },
           );
         },
@@ -221,7 +221,7 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
                 ManageSharedLinkWidget(collection: widget.collection),
               ).then(
                 (value) => {
-                  if (mounted) {setState(() => {})}
+                  if (mounted) {setState(() => {})},
                 },
               );
             },
