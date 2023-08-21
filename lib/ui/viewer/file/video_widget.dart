@@ -123,10 +123,16 @@ class _VideoWidgetState extends State<VideoWidget> {
     super.dispose();
   }
 
-  VideoPlayerController _setVideoPlayerController({
+  void _setVideoPlayerController({
     String? url,
     io.File? file,
   }) {
+    if (!mounted) {
+      // Note: Do not initiale video player if widget is not mounted.
+      // On Android, if multiple instance of ExoPlayer is created, it will start
+      // resulting in playback errors for videos. See https://github.com/google/ExoPlayer/issues/6168
+      return;
+    }
     VideoPlayerController videoPlayerController;
     if (url != null) {
       videoPlayerController = VideoPlayerController.network(url);
@@ -156,7 +162,6 @@ class _VideoWidgetState extends State<VideoWidget> {
           }
         },
       );
-    return videoPlayerController;
   }
 
   @override
