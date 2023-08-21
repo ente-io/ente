@@ -75,9 +75,9 @@ import {
     getAppNameAndTitle,
 } from 'constants/apps';
 import exportService from 'services/export';
-import { ExportStage } from 'constants/export';
 import { REDIRECTS } from 'constants/redirects';
 import { getLocalMapEnabled, setLocalMapEnabled } from 'utils/storage';
+import { isExportInProgress } from 'utils/export';
 
 const redirectMap = new Map([
     [REDIRECTS.ROADMAP, getRoadmapRedirectURL],
@@ -275,7 +275,7 @@ export default function App(props) {
                 if (exportSettings.continuousExport) {
                     exportService.enableContinuousExport();
                 }
-                if (exportRecord.stage === ExportStage.INPROGRESS) {
+                if (isExportInProgress(exportRecord.stage)) {
                     addLogLine('export was in progress, resuming');
                     exportService.scheduleExport();
                 }

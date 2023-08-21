@@ -10,7 +10,11 @@ import { EnteFile } from 'types/file';
 
 import { Metadata } from 'types/upload';
 import { splitFilenameAndExtension } from 'utils/file';
-import { ENTE_METADATA_FOLDER, ENTE_TRASH_FOLDER } from 'constants/export';
+import {
+    ENTE_METADATA_FOLDER,
+    ENTE_TRASH_FOLDER,
+    ExportStage,
+} from 'constants/export';
 import sanitize from 'sanitize-filename';
 import { formatDateTimeShort } from 'utils/time/format';
 import { HIDDEN_COLLECTION_NAME } from 'services/collectionService';
@@ -305,3 +309,6 @@ export const parseLivePhotoExportName = (
     const { image, video } = JSON.parse(livePhotoExportName);
     return { image, video };
 };
+
+export const isExportInProgress = (exportStage: ExportStage) =>
+    exportStage > ExportStage.INIT && exportStage < ExportStage.FINISHED;

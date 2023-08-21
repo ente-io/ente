@@ -44,6 +44,7 @@ export const CollectionTile = styled('div')`
         height: 100%;
         pointer-events: none;
     }
+    user-select: none;
 `;
 
 export const ActiveIndicator = styled('div')`
