@@ -1,12 +1,11 @@
 import { EnteFile } from 'types/file';
-import { ResultItemContainer } from './Upload/UploadProgress/styledComponents';
 import ItemList from 'components/ItemList';
 import DialogBoxV2 from './DialogBoxV2';
 import { t } from 'i18next';
 import { FlexWrapper } from './Container';
 import CollectionCard from './Collections/CollectionCard';
 import { ResultPreviewTile } from './Collections/styledComponents';
-import { Box } from '@mui/material';
+import { Box, styled } from '@mui/material';
 
 interface Iprops {
     isOpen: boolean;
@@ -15,24 +14,34 @@ interface Iprops {
     pendingExports: EnteFile[];
 }
 
+export const ItemContainer = styled('div')`
+    position: relative;
+    top: 5px;
+    display: inline-block;
+    max-width: 394px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+`;
+
 const ExportPendingList = (props: Iprops) => {
     const renderListItem = (file: EnteFile) => {
         return (
-            <ResultItemContainer key={file.id} sx={{ marginBottom: '2px' }}>
-                <FlexWrapper>
-                    <Box sx={{ marginRight: '8px' }}>
-                        <CollectionCard
-                            key={file.id}
-                            coverFile={file}
-                            onClick={() => null}
-                            collectionTile={ResultPreviewTile}
-                        />
-                    </Box>
+            <FlexWrapper>
+                <Box sx={{ marginRight: '8px' }}>
+                    <CollectionCard
+                        key={file.id}
+                        coverFile={file}
+                        onClick={() => null}
+                        collectionTile={ResultPreviewTile}
+                    />
+                </Box>
+                <ItemContainer>
                     {`${props.collectionNameMap.get(file.collectionID)} / ${
                         file.metadata.title
                     }`}
-                </FlexWrapper>
-            </ResultItemContainer>
+                </ItemContainer>
+            </FlexWrapper>
         );
     };
 
