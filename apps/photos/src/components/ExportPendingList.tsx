@@ -1,6 +1,6 @@
 import { EnteFile } from 'types/file';
 import { ResultItemContainer } from './Upload/UploadProgress/styledComponents';
-import FileList from 'components/FileList';
+import ItemList from 'components/ItemList';
 import DialogBoxV2 from './DialogBoxV2';
 import { t } from 'i18next';
 import { FlexWrapper } from './Container';
@@ -16,6 +16,36 @@ interface Iprops {
 }
 
 const ExportPendingList = (props: Iprops) => {
+    const renderListItem = (file: EnteFile) => {
+        return (
+            <ResultItemContainer key={file.id} sx={{ marginBottom: '2px' }}>
+                <FlexWrapper>
+                    <Box sx={{ marginRight: '8px' }}>
+                        <CollectionCard
+                            key={file.id}
+                            coverFile={file}
+                            onClick={() => null}
+                            collectionTile={ResultPreviewTile}
+                        />
+                    </Box>
+                    {`${props.collectionNameMap.get(file.collectionID)} / ${
+                        file.metadata.title
+                    }`}
+                </FlexWrapper>
+            </ResultItemContainer>
+        );
+    };
+
+    const getItemTitle = (file: EnteFile) => {
+        return `${props.collectionNameMap.get(file.collectionID)} - ${
+            file.metadata.title
+        }`;
+    };
+
+    const generateItemKey = (file: EnteFile) => {
+        return `${file.collectionID}-${file.id}`;
+    };
+
     return (
         <DialogBoxV2
             open={props.isOpen}
@@ -28,28 +58,13 @@ const ExportPendingList = (props: Iprops) => {
                 },
             }}
             size="xs">
-            <FileList
+            <ItemList
                 maxHeight={240}
                 itemSize={50}
-                fileList={props.pendingExports.map((file) => (
-                    <ResultItemContainer
-                        key={file.id}
-                        sx={{ marginBottom: '2px' }}>
-                        <FlexWrapper>
-                            <Box sx={{ marginRight: '8px' }}>
-                                <CollectionCard
-                                    key={file.id}
-                                    coverFile={file}
-                                    onClick={() => null}
-                                    collectionTile={ResultPreviewTile}
-                                />
-                            </Box>
-                            {`${props.collectionNameMap.get(
-                                file.collectionID
-                            )} - ${file.metadata.title}`}
-                        </FlexWrapper>
-                    </ResultItemContainer>
-                ))}
+                items={props.pendingExports}
+                renderListItem={renderListItem}
+                getItemTitle={getItemTitle}
+                generateItemKey={generateItemKey}
             />
         </DialogBoxV2>
     );
