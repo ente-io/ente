@@ -528,6 +528,9 @@
     "STOP_EXPORT": "Stop",
     "EXPORT_PROGRESS": "<a>{{progress.success}} / {{progress.total}}</a> fichiers exportés",
     "MIGRATING_EXPORT": "Préparations...",
+    "RENAMING_COLLECTION_FOLDERS": "",
+    "TRASHING_DELETED_FILES": "",
+    "TRASHING_DELETED_COLLECTIONS": "",
     "EXPORT_NOTIFICATION": {
         "START": "L'export a démarré",
         "IN_PROGRESS": "Un export est déjà en cours",
