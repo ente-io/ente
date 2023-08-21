@@ -255,22 +255,12 @@ class ExportService {
         this.verifyExportFolderExists(exportFolder);
         const exportRecord = await this.getExportRecord(exportFolder);
         await this.updateExportStage(ExportStage.MIGRATION);
-        this.updateExportProgress({
-            success: 0,
-            failed: 0,
-            total: 0,
-        });
         await this.runMigration(
             exportFolder,
             exportRecord,
             this.updateExportProgress.bind(this)
         );
-        await this.updateExportStage(ExportStage.INPROGRESS);
-        this.updateExportProgress({
-            success: 0,
-            failed: 0,
-            total: 0,
-        });
+        await this.updateExportStage(ExportStage.STARTING);
     }
 
     async postExport() {
@@ -408,58 +398,45 @@ class ExportService {
             this.uiUpdater.setExportProgress({
                 success: success,
                 failed: failed,
-                total:
-                    removedFileUIDs.length +
-                    filesToExport.length +
-                    deletedExportedCollections.length +
-                    renamedCollections.length,
+                total: filesToExport.length,
             });
             const incrementSuccess = () => {
                 this.updateExportProgress({
                     success: ++success,
                     failed: failed,
-                    total:
-                        removedFileUIDs.length +
-                        filesToExport.length +
-                        deletedExportedCollections.length +
-                        renamedCollections.length,
+                    total: filesToExport.length,
                 });
             };
             const incrementFailed = () => {
                 this.updateExportProgress({
                     success: success,
                     failed: ++failed,
-                    total:
-                        removedFileUIDs.length +
-                        filesToExport.length +
-                        deletedExportedCollections.length +
-                        renamedCollections.length,
+                    total: filesToExport.length,
                 });
             };
             if (renamedCollections?.length > 0) {
+                this.updateExportStage(ExportStage.RENAMING_COLLECTION_FOLDERS);
                 addLogLine(`renaming ${renamedCollections.length} collections`);
                 await this.collectionRenamer(
                     exportFolder,
                     collectionIDExportNameMap,
                     renamedCollections,
-                    incrementSuccess,
-                    incrementFailed,
                     isCanceled
                 );
             }
 
             if (removedFileUIDs?.length > 0) {
+                this.updateExportStage(ExportStage.TRASHING_DELETED_FILES);
                 addLogLine(`trashing ${removedFileUIDs.length} files`);
                 await this.fileTrasher(
                     exportFolder,
                     collectionIDExportNameMap,
                     removedFileUIDs,
-                    incrementSuccess,
-                    incrementFailed,
                     isCanceled
                 );
             }
             if (filesToExport?.length > 0) {
+                this.updateExportStage(ExportStage.EXPORTING_FILES);
                 addLogLine(`exporting ${filesToExport.length} files`);
                 await this.fileExporter(
                     filesToExport,
@@ -472,14 +449,15 @@ class ExportService {
                 );
             }
             if (deletedExportedCollections?.length > 0) {
+                this.updateExportStage(
+                    ExportStage.TRASHING_DELETED_COLLECTIONS
+                );
                 addLogLine(
                     `removing ${deletedExportedCollections.length} collections`
                 );
                 await this.collectionRemover(
                     deletedExportedCollections,
                     exportFolder,
-                    incrementSuccess,
-                    incrementFailed,
                     isCanceled
                 );
             }
@@ -498,8 +476,6 @@ class ExportService {
         exportFolder: string,
         collectionIDExportNameMap: Map<number, string>,
         renamedCollections: Collection[],
-        incrementSuccess: () => void,
-        incrementFailed: () => void,
         isCanceled: CancellationStatus
     ) {
         try {
@@ -546,9 +522,7 @@ class ExportService {
                     addLogLine(
                         `renaming collection with id ${collection.id} from ${oldCollectionExportName} to ${newCollectionExportName} successful`
                     );
-                    incrementSuccess();
                 } catch (e) {
-                    incrementFailed();
                     logError(e, 'collectionRenamer failed a collection');
                     if (
                         e.message ===
@@ -575,8 +549,6 @@ class ExportService {
     async collectionRemover(
         deletedExportedCollectionIDs: number[],
         exportFolder: string,
-        incrementSuccess: () => void,
-        incrementFailed: () => void,
         isCanceled: CancellationStatus
     ) {
         try {
@@ -623,9 +595,7 @@ class ExportService {
                     addLogLine(
                         `removing collection with id ${collectionID} from export folder successful`
                     );
-                    incrementSuccess();
                 } catch (e) {
-                    incrementFailed();
                     logError(e, 'collectionRemover failed a collection');
                     if (
                         e.message ===
@@ -745,8 +715,6 @@ class ExportService {
         exportDir: string,
         collectionIDExportNameMap: Map<number, string>,
         removedFileUIDs: string[],
-        incrementSuccess: () => void,
-        incrementFailed: () => void,
         isCanceled: CancellationStatus
     ): Promise<void> {
         try {
@@ -844,9 +812,7 @@ class ExportService {
                     }
                     await this.removeFileExportedRecord(exportDir, fileUID);
                     addLogLine(`trashing file with id ${fileUID} successful`);
-                    incrementSuccess();
                 } catch (e) {
-                    incrementFailed();
                     logError(e, 'trashing failed for a file');
                     if (
                         e.message ===

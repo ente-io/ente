@@ -275,7 +275,7 @@ export default function App(props) {
                 if (exportSettings.continuousExport) {
                     exportService.enableContinuousExport();
                 }
-                if (exportRecord.stage === ExportStage.INPROGRESS) {
+                if (exportRecord.stage === ExportStage.EXPORTING_FILES) {
                     addLogLine('export was in progress, resuming');
                     exportService.scheduleExport();
                 }

@@ -323,8 +323,12 @@ const ExportDynamicContent = ({
         case ExportStage.INIT:
             return <ExportInit startExport={startExport} />;
 
-        case ExportStage.INPROGRESS:
         case ExportStage.MIGRATION:
+        case ExportStage.STARTING:
+        case ExportStage.EXPORTING_FILES:
+        case ExportStage.RENAMING_COLLECTION_FOLDERS:
+        case ExportStage.TRASHING_DELETED_FILES:
+        case ExportStage.TRASHING_DELETED_COLLECTIONS:
             return (
                 <ExportInProgress
                     exportStage={exportStage}
