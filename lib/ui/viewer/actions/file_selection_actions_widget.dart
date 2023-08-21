@@ -209,7 +209,7 @@ class _FileSelectionActionsWidgetState
     } else if (widget.type.showUnHideOption()) {
       items.add(
         SelectionActionButton(
-          icon: Icons.visibility_off_outlined,
+          icon: Icons.visibility_outlined,
           labelText: S.of(context).unhide + suffix,
           onTap: _onUnhideClick,
         ),

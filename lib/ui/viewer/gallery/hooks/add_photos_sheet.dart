@@ -58,7 +58,7 @@ class AddPhotosPhotoWidget extends StatelessWidget {
       isFileSelected.value = selectedFiles.files.isNotEmpty;
     });
     final Set<int> hiddenCollectionIDs =
-        CollectionsService.instance.getHiddenCollections();
+        CollectionsService.instance.getHiddenCollectionIds();
     // Hide the current collection files from suggestions
     hiddenCollectionIDs.add(collection.id);
 

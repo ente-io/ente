@@ -7585,6 +7585,46 @@ class S {
     );
   }
 
+  /// `Hiding...`
+  String get hiding {
+    return Intl.message(
+      'Hiding...',
+      name: 'hiding',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Unhiding...`
+  String get unhiding {
+    return Intl.message(
+      'Unhiding...',
+      name: 'unhiding',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Successfully hid`
+  String get successfullyHid {
+    return Intl.message(
+      'Successfully hid',
+      name: 'successfullyHid',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Successfully unhid`
+  String get successfullyUnhid {
+    return Intl.message(
+      'Successfully unhid',
+      name: 'successfullyUnhid',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Crash reporting`
   String get crashReporting {
     return Intl.message(

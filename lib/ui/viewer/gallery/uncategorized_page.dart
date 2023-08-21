@@ -69,6 +69,7 @@ class UnCategorizedPage extends StatelessWidget {
           appBarType,
           S.of(context).uncategorized,
           _selectedFiles,
+          collection: collection,
         ),
       ),
       body: Stack(
