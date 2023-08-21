@@ -78,11 +78,21 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
                     const SizedBox(
                       height: 8,
                     ),
+                    // ButtonWidget(
+                    //   buttonType: ButtonType.trailingIconSecondary,
+                    //   buttonSize: ButtonSize.large,
+                    //   labelText: S.of(context).rateTheApp,
+                    //   icon: Icons.favorite_rounded,
+                    //   iconColor: enteColorScheme.primary500,
+                    //   onTap: () async {
+                    //     await UpdateService.instance.launchReviewUrl();
+                    //   },
+                    // ),
                     ButtonWidget(
                       buttonType: ButtonType.trailingIconSecondary,
                       buttonSize: ButtonSize.large,
-                      labelText: S.of(context).rateTheApp,
-                      icon: Icons.favorite_rounded,
+                      labelText: "Join the ente community",
+                      icon: Icons.people_alt_rounded,
                       iconColor: enteColorScheme.primary500,
                       onTap: () async {
                         await UpdateService.instance.launchReviewUrl();
@@ -120,7 +130,7 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
         "Email verification ✨",
         'We have now made email verification optional, so you can sign in with'
             ' just your email address and password, without waiting for a verification code.\n'
-            '\nIf you would still like to enforce email verification, you can opt-in from Settings > Security.\n',
+            '\nYou can opt in / out of email verification from Settings > Security.\n',
       ),
     );
 
@@ -129,7 +139,7 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
         "Bug fixes & other enhancements",
         'We have squashed a few pesky bugs that were reported by our community,'
             'and have improved the experience for albums and quick links.\n'
-            '\nIf you would like to help us improve ente, come join the party @ ente.io/community!\n',
+            '\nIf you would like to help us improve ente, come join the ente community!',
         isFeature: false,
       ),
     );
