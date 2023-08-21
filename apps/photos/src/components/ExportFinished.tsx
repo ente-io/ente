@@ -41,9 +41,15 @@ export default function ExportFinished(props: Props) {
                         <Typography color={'text.muted'}>
                             {t('PENDING_ITEMS')}
                         </Typography>
-                        <LinkButton onClick={openPendingFileList}>
-                            {formatNumber(props.pendingExports.length)}
-                        </LinkButton>
+                        {props.pendingExports.length ? (
+                            <LinkButton onClick={openPendingFileList}>
+                                {formatNumber(props.pendingExports.length)}
+                            </LinkButton>
+                        ) : (
+                            <Typography>
+                                {formatNumber(props.pendingExports.length)}
+                            </Typography>
+                        )}
                     </SpaceBetweenFlex>
                     <SpaceBetweenFlex minHeight={'48px'}>
                         <Typography color="text.muted">
