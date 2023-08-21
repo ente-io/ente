@@ -4,7 +4,6 @@ import "package:photos/core/configuration.dart";
 import 'package:photos/models/collection.dart';
 import 'package:photos/models/collection_items.dart';
 import "package:photos/models/file.dart";
-import 'package:photos/models/gallery_type.dart';
 import "package:photos/services/collections_service.dart";
 import "package:photos/theme/colors.dart";
 import 'package:photos/theme/ente_theme.dart';
@@ -20,6 +19,7 @@ class AlbumRowItemWidget extends StatelessWidget {
   final double sideOfThumbnail;
   final bool showFileCount;
   final String tag;
+  final bool? hasVerifiedLock;
 
   const AlbumRowItemWidget(
     this.c,
@@ -27,6 +27,7 @@ class AlbumRowItemWidget extends StatelessWidget {
     super.key,
     this.showFileCount = true,
     this.tag = "",
+    this.hasVerifiedLock,
   });
 
   @override
@@ -90,18 +91,18 @@ class AlbumRowItemWidget extends StatelessWidget {
                         },
                       ),
                       if (isOwner && (c.hasSharees || c.hasLink))
-                          Hero(
-                            tag: tagPrefix + "_sharees",
-                            transitionOnUserGestures: true,
-                            child: Align(
-                              alignment: Alignment.topLeft,
-                              child: AlbumSharesIcons(
-                                sharees: c.getSharees(),
-                                type: AvatarType.mini,
-                                trailingWidget: linkIcon,
-                              ),
+                        Hero(
+                          tag: tagPrefix + "_sharees",
+                          transitionOnUserGestures: true,
+                          child: Align(
+                            alignment: Alignment.topLeft,
+                            child: AlbumSharesIcons(
+                              sharees: c.getSharees(),
+                              type: AvatarType.mini,
+                              trailingWidget: linkIcon,
                             ),
                           ),
+                        ),
                       if (!isOwner)
                         Align(
                           alignment: Alignment.bottomRight,
@@ -193,11 +194,7 @@ class AlbumRowItemWidget extends StatelessWidget {
           CollectionPage(
             CollectionWithThumbnail(c, thumbnail),
             tagPrefix: tagPrefix,
-            appBarType: isOwner
-                ? (c.type == CollectionType.favorites
-                    ? GalleryType.favorite
-                    : GalleryType.ownedCollection)
-                : GalleryType.sharedCollection,
+            hasVerifiedLock: hasVerifiedLock,
           ),
         );
       },

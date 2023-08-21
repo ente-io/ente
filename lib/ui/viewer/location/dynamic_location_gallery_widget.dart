@@ -37,7 +37,7 @@ class _DynamicLocationGalleryWidgetState
   @override
   void initState() {
     final collectionsToHide =
-        CollectionsService.instance.archivedOrHiddenCollections();
+        CollectionsService.instance.archivedOrHiddenCollectionIds();
     fileLoadResult =
         FilesDB.instance.fetchAllUploadedAndSharedFilesWithLocation(
       galleryLoadStartTime,

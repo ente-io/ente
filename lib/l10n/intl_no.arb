@@ -12,13 +12,5 @@
   "feedback": "Tilbakemelding",
   "kindlyHelpUsWithThisInformation": "Vær vennlig og hjelp oss med denne informasjonen",
   "confirmDeletePrompt": "Ja, jeg ønsker å slette denne kontoen og all dataen dens permanent.",
-  "confirmAccountDeletion": "Bekreft sletting av konto",
-  "nothingSharedWithYouYet": "Nothing shared with you yet",
-  "shareYourFirstAlbum": "Share your first album",
-  "noAlbumsSharedByYouYet": "No albums shared by you yet",
-  "sharedWithYou": "Shared with you",
-  "sharedByYou": "Shared by you",
-  "inviteYourFriendsToEnte": "Invite your friends to ente",
-  "deleteReason2": "The app or a certain feature does not behave as I think it should",
-  "failedToDownloadVideo": "Failed to download video"
+  "confirmAccountDeletion": "Bekreft sletting av konto"
 }

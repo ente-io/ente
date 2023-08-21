@@ -5,7 +5,6 @@ import "package:photos/generated/l10n.dart";
 import "package:photos/models/collection.dart";
 import "package:photos/models/collection_items.dart";
 import "package:photos/models/file.dart";
-import "package:photos/models/gallery_type.dart";
 import "package:photos/services/collections_service.dart";
 import "package:photos/ui/components/buttons/chip_button_widget.dart";
 import "package:photos/ui/components/info_item_widget.dart";
@@ -92,9 +91,6 @@ class AlbumsItemWidget extends StatelessWidget {
                 context,
                 CollectionPage(
                   CollectionWithThumbnail(c, null),
-                  appBarType: c.isOwner(currentUserID)
-                      ? GalleryType.ownedCollection
-                      : GalleryType.sharedCollection,
                 ),
               );
             },

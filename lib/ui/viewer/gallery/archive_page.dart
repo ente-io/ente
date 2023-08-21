@@ -32,7 +32,7 @@ class ArchivePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final Set<int> hiddenCollectionIDs =
-        CollectionsService.instance.getHiddenCollections();
+        CollectionsService.instance.getHiddenCollectionIds();
     final gallery = Gallery(
       asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) {
         return FilesDB.instance.getAllPendingOrUploadedFiles(

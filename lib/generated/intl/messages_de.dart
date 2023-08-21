@@ -625,8 +625,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "Der Code konnte nicht aktiviert werden"),
         "failedToCancel":
             MessageLookupByLibrary.simpleMessage("Kündigung fehlgeschlagen"),
-        "failedToDownloadVideo":
-            MessageLookupByLibrary.simpleMessage("Failed to download video"),
         "failedToFetchOriginalForEdit": MessageLookupByLibrary.simpleMessage(
             "Fehler beim Abrufen des Originals zur Bearbeitung"),
         "failedToFetchReferralDetails": MessageLookupByLibrary.simpleMessage(
@@ -730,8 +728,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Zu ente einladen"),
         "inviteYourFriends":
             MessageLookupByLibrary.simpleMessage("Lade deine Freunde ein"),
-        "inviteYourFriendsToEnte":
-            MessageLookupByLibrary.simpleMessage("Invite your friends to ente"),
         "itLooksLikeSomethingWentWrongPleaseRetryAfterSome":
             MessageLookupByLibrary.simpleMessage(
                 "Etwas ist schiefgelaufen. Bitte versuche es später noch einmal. Sollte der Fehler weiter bestehen, kontaktiere unser Supportteam."),
@@ -844,8 +840,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "newToEnte": MessageLookupByLibrary.simpleMessage("Neu bei ente"),
         "newest": MessageLookupByLibrary.simpleMessage("Zuletzt"),
         "no": MessageLookupByLibrary.simpleMessage("Nein"),
-        "noAlbumsSharedByYouYet":
-            MessageLookupByLibrary.simpleMessage("No albums shared by you yet"),
         "noDeviceThatCanBeDeleted": MessageLookupByLibrary.simpleMessage(
             "Du hast keine Dateien auf diesem Gerät, die gelöscht werden können"),
         "noDuplicates":
@@ -863,8 +857,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "noResults": MessageLookupByLibrary.simpleMessage("Keine Ergebnisse"),
         "noResultsFound":
             MessageLookupByLibrary.simpleMessage("Keine Ergebnisse gefunden"),
-        "nothingSharedWithYouYet":
-            MessageLookupByLibrary.simpleMessage("Nothing shared with you yet"),
         "nothingToSeeHere": MessageLookupByLibrary.simpleMessage(
             "Hier gibt es nichts zu sehen! 👀"),
         "ok": MessageLookupByLibrary.simpleMessage("Ok"),
@@ -1130,11 +1122,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "sharedAlbumSectionDescription": MessageLookupByLibrary.simpleMessage(
             "Erstelle gemeinsame Alben mit anderen ente Benutzern, einschließlich solchen im kostenlosen Tarif."),
         "sharedByMe": MessageLookupByLibrary.simpleMessage("Von mir geteilt"),
-        "sharedByYou": MessageLookupByLibrary.simpleMessage("Shared by you"),
         "sharedWith": m46,
         "sharedWithMe": MessageLookupByLibrary.simpleMessage("Mit mir geteilt"),
-        "sharedWithYou":
-            MessageLookupByLibrary.simpleMessage("Shared with you"),
         "sharing": MessageLookupByLibrary.simpleMessage("Teilt..."),
         "signUpTerms": MessageLookupByLibrary.simpleMessage(
             "Ich stimme den <u-terms>Nutzungsbedingungen</u-terms> und der <u-policy>Datenschutzerklärung</u-policy> zu"),

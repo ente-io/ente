@@ -5,7 +5,6 @@ import 'package:photos/db/files_db.dart';
 import "package:photos/events/collection_meta_event.dart";
 import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/events/files_updated_event.dart';
-import 'package:photos/models/collection.dart';
 import 'package:photos/models/collection_items.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/file_load_result.dart';
@@ -21,13 +20,11 @@ import 'package:photos/ui/viewer/gallery/gallery_app_bar_widget.dart';
 class CollectionPage extends StatelessWidget {
   final CollectionWithThumbnail c;
   final String tagPrefix;
-  final GalleryType appBarType;
-  final bool hasVerifiedLock;
+  final bool? hasVerifiedLock;
 
   CollectionPage(
     this.c, {
     this.tagPrefix = "collection",
-    this.appBarType = GalleryType.ownedCollection,
     this.hasVerifiedLock = false,
     Key? key,
   }) : super(key: key);
@@ -42,7 +39,10 @@ class CollectionPage extends StatelessWidget {
       return const EmptyState();
     }
 
-    final galleryType = _getGalleryType(c.collection);
+    final galleryType = getGalleryType(
+      c.collection,
+      Configuration.instance.getUserID()!,
+    );
     final List<File>? initialFiles =
         c.thumbnail != null ? [c.thumbnail!] : null;
     final gallery = Gallery(
@@ -111,22 +111,5 @@ class CollectionPage extends StatelessWidget {
         ],
       ),
     );
-  }
-
-  GalleryType _getGalleryType(Collection c) {
-    final currentUserID = Configuration.instance.getUserID()!;
-    if (!c.isOwner(currentUserID)) {
-      return GalleryType.sharedCollection;
-    }
-    if (c.isDefaultHidden()) {
-      return GalleryType.hidden;
-    } else if (c.type == CollectionType.uncategorized) {
-      return GalleryType.uncategorized;
-    } else if (c.type == CollectionType.favorites) {
-      return GalleryType.favorite;
-    } else if (c.isQuickLinkCollection()) {
-      return GalleryType.quickLink;
-    }
-    return appBarType;
   }
 }

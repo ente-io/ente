@@ -196,7 +196,14 @@ class CollectionsService {
         .toList();
   }
 
-  Set<int> getHiddenCollections() {
+  List<Collection> getHiddenCollections() {
+    return _collectionIDToCollections.values
+        .toList()
+        .where((element) => element.isHidden())
+        .toList();
+  }
+
+  Set<int> getHiddenCollectionIds() {
     return _collectionIDToCollections.values
         .toList()
         .where((element) => element.isHidden())
@@ -204,7 +211,7 @@ class CollectionsService {
         .toSet();
   }
 
-  Set<int> archivedOrHiddenCollections() {
+  Set<int> archivedOrHiddenCollectionIds() {
     return _collectionIDToCollections.values
         .toList()
         .where(
@@ -320,12 +327,12 @@ class CollectionsService {
         .toList();
   }
 
-
   SharedCollections getSharedCollections() {
     final List<Collection> outgoing = [];
     final List<Collection> incoming = [];
     final List<Collection> quickLinks = [];
-    final List<Collection> collections = getCollectionsForUI(includedShared: true);
+    final List<Collection> collections =
+        getCollectionsForUI(includedShared: true);
     for (final c in collections) {
       if (c.owner!.id == Configuration.instance.getUserID()) {
         if (c.hasSharees || c.hasLink && !c.isQuickLinkCollection()) {
