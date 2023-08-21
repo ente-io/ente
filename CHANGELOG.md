@@ -19,7 +19,7 @@
 
     We have now made email verification optional, so you can sign in with just your email address and password, without waiting for a verification code.
 
-    If you would still like to enforce email verification, you can opt-in from Settings > Security.
+    You can opt in / out of email verification from Settings > Security.
 
 
 * #### Bug fixes & other enhancements
