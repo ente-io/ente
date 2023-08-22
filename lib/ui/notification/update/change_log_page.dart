@@ -78,11 +78,21 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
                     const SizedBox(
                       height: 8,
                     ),
+                    // ButtonWidget(
+                    //   buttonType: ButtonType.trailingIconSecondary,
+                    //   buttonSize: ButtonSize.large,
+                    //   labelText: S.of(context).rateTheApp,
+                    //   icon: Icons.favorite_rounded,
+                    //   iconColor: enteColorScheme.primary500,
+                    //   onTap: () async {
+                    //     await UpdateService.instance.launchReviewUrl();
+                    //   },
+                    // ),
                     ButtonWidget(
                       buttonType: ButtonType.trailingIconSecondary,
                       buttonSize: ButtonSize.large,
-                      labelText: S.of(context).rateTheApp,
-                      icon: Icons.favorite_rounded,
+                      labelText: "Join the ente community",
+                      icon: Icons.people_alt_rounded,
                       iconColor: enteColorScheme.primary500,
                       onTap: () async {
                         await UpdateService.instance.launchReviewUrl();
@@ -104,26 +114,32 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
     final List<ChangeLogEntry> items = [];
     items.add(
       ChangeLogEntry(
-        "Map View ✨",
-        'You can now explore the photos you\'ve taken around the world!!\n'
-            '\nClick on the Map icon on the Search screen to view your photos'
-            ' laid out on a map.',
+        "Hidden albums ✨",
+        'You can now hide albums, just like individual memories.\n',
+      ),
+    );
+    items.add(
+      ChangeLogEntry(
+          "Album improvements ✨",
+          'You can now pin your favourite albums, and set cover photos for them.\n'
+              '\nWe have also added a way to first create empty albums, and then add photos to it, both from ente and your device gallery.\n'),
+    );
+
+    items.add(
+      ChangeLogEntry(
+        "Email verification ✨",
+        'We have now made email verification optional, so you can sign in with'
+            ' just your email address and password, without waiting for a verification code.\n'
+            '\nYou can opt in / out of email verification from Settings > Security.\n',
       ),
     );
 
     items.add(
       ChangeLogEntry(
-        "Cover Photos ✨",
-        'You can now set cover photos for your albums.\n\nOpen an album, and '
-            'click on the overflow menu on the top right corner to pick your favorite memory from that album.',
-      ),
-    );
-
-    items.add(
-      ChangeLogEntry(
-        "Improvements",
-        "This release contains massive improvements to how smoothly our "
-            "gallery scrolls. More improvements are on the way!",
+        "Bug fixes & other enhancements",
+        'We have squashed a few pesky bugs that were reported by our community,'
+            'and have improved the experience for albums and quick links.\n'
+            '\nIf you would like to help us improve ente, come join the ente community!',
         isFeature: false,
       ),
     );

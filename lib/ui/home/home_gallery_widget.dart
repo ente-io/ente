@@ -35,7 +35,7 @@ class HomeGalleryWidget extends StatelessWidget {
         final hasSelectedAllForBackup =
             Configuration.instance.hasSelectedAllFoldersForBackup();
         final collectionsToHide =
-            CollectionsService.instance.archivedOrHiddenCollections();
+            CollectionsService.instance.archivedOrHiddenCollectionIds();
         FileLoadResult result;
         final DBFilterOptions filterOptions = DBFilterOptions(
           hideIgnoredForUpload: true,

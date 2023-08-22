@@ -1241,7 +1241,8 @@ class FilesDB {
     final order = sortAsc ? 'ASC' : 'DESC';
     final rows = await db.query(
       filesTable,
-      where: '$columnCollectionID = ? AND $columnUploadedFileID IS NOT NULL',
+      where: '$columnCollectionID = ? AND ($columnUploadedFileID IS NOT NULL '
+          'AND $columnUploadedFileID IS NOT -1)',
       whereArgs: [collectionID],
       orderBy:
           '$columnCreationTime ' + order + ', $columnModificationTime ' + order,
