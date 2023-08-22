@@ -879,13 +879,14 @@ class FilesDB {
     );
   }
 
-  Future<int> updateUploadedFile(
+  Future<int> markFilesForReUpload(
+    int ownerID,
     String localID,
     String? title,
     Location? location,
     int creationTime,
     int modificationTime,
-    int? updationTime,
+    FileType fileType,
   ) async {
     final db = await instance.database;
     return await db.update(
@@ -896,10 +897,13 @@ class FilesDB {
         columnLongitude: location?.longitude,
         columnCreationTime: creationTime,
         columnModificationTime: modificationTime,
-        columnUpdationTime: updationTime,
+        // #hack reset updation time to null for re-upload
+        columnUpdationTime: null,
+        columnFileType: getInt(fileType),
       },
-      where: '$columnLocalID = ?',
-      whereArgs: [localID],
+      where:
+          '$columnLocalID = ? AND ($columnOwnerID = ? OR $columnOwnerID IS NULL)',
+      whereArgs: [localID, ownerID],
     );
   }
 
