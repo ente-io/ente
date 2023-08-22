@@ -197,11 +197,15 @@ void _assertFileType(AssetEntity asset, ente.File file) {
   if (io.Platform.isIOS || io.Platform.isMacOS) {
     if (assetType == FileType.image && file.fileType == FileType.livePhoto) {
       throw InvalidFileError(
-          'id ${asset.id}', InvalidReason.imageToLivePhotoTypeChanged,);
+        'id ${asset.id}',
+        InvalidReason.livePhotoToImageTypeChanged,
+      );
     } else if (assetType == FileType.livePhoto &&
         file.fileType == FileType.image) {
       throw InvalidFileError(
-          'id ${asset.id}', InvalidReason.livePhotoToImageTypeChanged,);
+        'id ${asset.id}',
+        InvalidReason.imageToLivePhotoTypeChanged,
+      );
     }
   }
   throw InvalidFileError(

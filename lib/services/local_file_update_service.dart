@@ -8,6 +8,7 @@ import 'package:photos/core/errors.dart';
 import 'package:photos/db/file_updation_db.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/models/file.dart' as ente;
+import "package:photos/models/file_type.dart";
 import 'package:photos/utils/file_uploader_util.dart';
 import 'package:photos/utils/file_util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -141,18 +142,41 @@ class LocalFileUpdateService {
             "Marking for file update as hash did not match ${file.tag}",
           );
           await clearCache(file);
-          await FilesDB.instance.updateUploadedFile(
+          await FilesDB.instance.markFilesForReUpload(
+            userID,
             file.localID!,
             file.title,
             file.location,
             file.creationTime!,
             file.modificationTime!,
-            null,
+            file.fileType,
           );
         }
         processedIDs.add(file.localID!);
       } on InvalidFileError catch (e) {
-        _logger.fine("Failed to check hash due to invalidfile ${file.tag}", e);
+        if (e.reason == InvalidReason.livePhotoToImageTypeChanged ||
+            e.reason == InvalidReason.imageToLivePhotoTypeChanged) {
+
+          late FileType fileType;
+          if (e.reason == InvalidReason.livePhotoToImageTypeChanged) {
+            fileType = FileType.image;
+          } else if (e.reason == InvalidReason.imageToLivePhotoTypeChanged) {
+            fileType = FileType.livePhoto;
+          }
+          final int count = await FilesDB.instance.markFilesForReUpload(
+            userID,
+            file.localID!,
+            file.title,
+            file.location,
+            file.creationTime!,
+            file.modificationTime!,
+            fileType,
+          );
+          _logger.fine('fileType changed for ${file.tag} to ${e.reason} for '
+              '$count files');
+        } else {
+          _logger.severe("failed to check hash: invalid file ${file.tag}", e);
+        }
         processedIDs.add(file.localID!);
       } catch (e) {
         _logger.severe("Failed to check hash", e);
