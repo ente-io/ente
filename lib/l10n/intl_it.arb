@@ -1095,5 +1095,9 @@
   "sharedByYou": "Condivise da te",
   "inviteYourFriendsToEnte": "Invita i tuoi amici a ente",
   "failedToDownloadVideo": "Download del video non riuscito",
+  "hiding": "Nascondendo...",
+  "unhiding": "Rimuovendo dal nascondiglio...",
+  "successfullyHid": "Nascosta con successo",
+  "successfullyUnhid": "Rimossa dal nascondiglio con successo",
   "crashReporting": "Segnalazione di crash"
 }
