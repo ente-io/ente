@@ -110,27 +110,6 @@ class File extends EnteFile {
     return creationTime;
   }
 
-  static FileType _fileTypeFromAsset(AssetEntity asset) {
-    FileType type = FileType.image;
-    switch (asset.type) {
-      case AssetType.image:
-        type = FileType.image;
-        // PHAssetMediaSubtype.photoLive.rawValue is 8
-        // This hack should go away once photos_manager support livePhotos
-        if (asset.subtype > -1 && (asset.subtype & 8) != 0) {
-          type = FileType.livePhoto;
-        }
-        break;
-      case AssetType.video:
-        type = FileType.video;
-        break;
-      default:
-        type = FileType.other;
-        break;
-    }
-    return type;
-  }
-
   Future<AssetEntity?> get getAsset {
     if (localID == null) {
       return Future.value(null);

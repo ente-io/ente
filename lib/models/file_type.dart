@@ -1,3 +1,5 @@
+import "package:photo_manager/photo_manager.dart";
+
 enum FileType {
   image,
   video,
@@ -29,6 +31,27 @@ FileType getFileType(int fileType) {
     default:
       return FileType.other;
   }
+}
+
+FileType fileTypeFromAsset(AssetEntity asset) {
+  FileType type = FileType.image;
+  switch (asset.type) {
+    case AssetType.image:
+      type = FileType.image;
+      // PHAssetMediaSubtype.photoLive.rawValue is 8
+      // This hack should go away once photos_manager support livePhotos
+      if (asset.subtype > -1 && (asset.subtype & 8) != 0) {
+        type = FileType.livePhoto;
+      }
+      break;
+    case AssetType.video:
+      type = FileType.video;
+      break;
+    default:
+      type = FileType.other;
+      break;
+  }
+  return type;
 }
 
 String getHumanReadableString(FileType fileType) {
