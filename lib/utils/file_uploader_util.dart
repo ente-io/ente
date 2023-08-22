@@ -90,6 +90,7 @@ Future<MediaUploadData> _getMediaUploadDataFromAssetFile(ente.File file) async {
   if (asset == null) {
     throw InvalidFileError("", InvalidReason.assetDeleted);
   }
+  _assertFileType(asset, file);
   sourceFile = await asset.originFile
       .timeout(const Duration(seconds: 3))
       .catchError((e) async {
@@ -183,6 +184,29 @@ Future<MediaUploadData> _getMediaUploadDataFromAssetFile(ente.File file) async {
     height: h,
     width: w,
     motionPhotoStartIndex: motionPhotoStartingIndex,
+  );
+}
+
+// check if the assetType is still the same. This can happen for livePhotos
+// if the user turns off the video using native photos app
+void _assertFileType(AssetEntity asset, ente.File file) {
+  final assetType = fileTypeFromAsset(asset);
+  if (assetType == file.fileType) {
+    return;
+  }
+  if (io.Platform.isIOS || io.Platform.isMacOS) {
+    if (assetType == FileType.image && file.fileType == FileType.livePhoto) {
+      throw InvalidFileError(
+          'id ${asset.id}', InvalidReason.imageToLivePhotoTypeChanged,);
+    } else if (assetType == FileType.livePhoto &&
+        file.fileType == FileType.image) {
+      throw InvalidFileError(
+          'id ${asset.id}', InvalidReason.livePhotoToImageTypeChanged,);
+    }
+  }
+  throw InvalidFileError(
+    'fileType mismatch for id ${asset.id} assetType $assetType fileType ${file.fileType}',
+    InvalidReason.unknown,
   );
 }
 

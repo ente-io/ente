@@ -2,9 +2,11 @@ enum InvalidReason {
   assetDeleted,
   assetDeletedEvent,
   sourceFileMissing,
-  livePhotoTypeChanged,
+  livePhotoToImageTypeChanged,
+  imageToLivePhotoTypeChanged,
   livePhotoVideoMissing,
   thumbnailMissing,
+  unknown,
 }
 
 class InvalidFileError extends ArgumentError {

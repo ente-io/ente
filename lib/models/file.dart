@@ -75,7 +75,7 @@ class File extends EnteFile {
     file.deviceFolder = pathName;
     file.location =
         Location(latitude: asset.latitude, longitude: asset.longitude);
-    file.fileType = _fileTypeFromAsset(asset);
+    file.fileType = fileTypeFromAsset(asset);
     file.creationTime = parseFileCreationTime(file.title, asset);
     file.modificationTime = asset.modifiedDateTime.microsecondsSinceEpoch;
     file.fileSubType = asset.subtype;
