@@ -1,5 +1,21 @@
+enum InvalidReason {
+  assetDeleted,
+  sourceFileMissing,
+  livePhotoTypeChanged,
+  thumbnailMissing,
+  unknown,
+}
+
 class InvalidFileError extends ArgumentError {
-  InvalidFileError(String message) : super(message);
+  final InvalidReason invalidReason;
+
+  InvalidFileError(String message, {this.invalidReason = InvalidReason.unknown})
+      : super(message);
+
+  @override
+  String toString() {
+    return 'InvalidFileError: $message (reason: $invalidReason)';
+  }
 }
 
 class InvalidFileUploadState extends AssertionError {
