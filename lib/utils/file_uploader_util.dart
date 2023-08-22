@@ -88,8 +88,9 @@ Future<MediaUploadData> _getMediaUploadDataFromAssetFile(ente.File file) async {
     }
   });
   if (asset == null) {
-    throw InvalidFileError("asset is null");
+    throw InvalidFileError("", InvalidReason.assetDeleted);
   }
+  _assertFileType(asset, file);
   sourceFile = await asset.originFile
       .timeout(const Duration(seconds: 3))
       .catchError((e) async {
@@ -101,7 +102,10 @@ Future<MediaUploadData> _getMediaUploadDataFromAssetFile(ente.File file) async {
     }
   });
   if (sourceFile == null || !sourceFile.existsSync()) {
-    throw InvalidFileError("source fill is null or do not exist");
+    throw InvalidFileError(
+      "id: ${file.localID}",
+      InvalidReason.sourceFileMissing,
+    );
   }
 
   // h4ck to fetch location data if missing (thank you Android Q+) lazily only during uploads
@@ -114,7 +118,7 @@ Future<MediaUploadData> _getMediaUploadDataFromAssetFile(ente.File file) async {
       final String errMsg =
           "missing livePhoto url for  ${file.toString()} with subType ${file.fileSubType}";
       _logger.severe(errMsg);
-      throw InvalidFileUploadState(errMsg);
+      throw InvalidFileError(errMsg, InvalidReason.livePhotoVideoMissing);
     }
     final String livePhotoVideoHash =
         CryptoUtil.bin2base64(await CryptoUtil.getHash(videoUrl));
@@ -143,7 +147,10 @@ Future<MediaUploadData> _getMediaUploadDataFromAssetFile(ente.File file) async {
     quality: thumbnailQuality,
   );
   if (thumbnailData == null) {
-    throw InvalidFileError("unable to get asset thumbData");
+    throw InvalidFileError(
+      "no thumbnail ${file.tag}",
+      InvalidReason.thumbnailMissing,
+    );
   }
   int compressionAttempts = 0;
   while (thumbnailData!.length > thumbnailDataLimit &&
@@ -177,6 +184,29 @@ Future<MediaUploadData> _getMediaUploadDataFromAssetFile(ente.File file) async {
     height: h,
     width: w,
     motionPhotoStartIndex: motionPhotoStartingIndex,
+  );
+}
+
+// check if the assetType is still the same. This can happen for livePhotos
+// if the user turns off the video using native photos app
+void _assertFileType(AssetEntity asset, ente.File file) {
+  final assetType = fileTypeFromAsset(asset);
+  if (assetType == file.fileType) {
+    return;
+  }
+  if (io.Platform.isIOS || io.Platform.isMacOS) {
+    if (assetType == FileType.image && file.fileType == FileType.livePhoto) {
+      throw InvalidFileError(
+          'id ${asset.id}', InvalidReason.imageToLivePhotoTypeChanged,);
+    } else if (assetType == FileType.livePhoto &&
+        file.fileType == FileType.image) {
+      throw InvalidFileError(
+          'id ${asset.id}', InvalidReason.livePhotoToImageTypeChanged,);
+    }
+  }
+  throw InvalidFileError(
+    'fileType mismatch for id ${asset.id} assetType $assetType fileType ${file.fileType}',
+    InvalidReason.unknown,
   );
 }
 
@@ -229,7 +259,10 @@ Future<MediaUploadData> _getMediaUploadDataFromAppCache(ente.File file) async {
   sourceFile = io.File(localPath);
   if (!sourceFile.existsSync()) {
     _logger.warning("File doesn't exist in app sandbox");
-    throw InvalidFileError("File doesn't exist in app sandbox");
+    throw InvalidFileError(
+      "source missing in sandbox",
+      InvalidReason.sourceFileMissing,
+    );
   }
   try {
     thumbnailData = await getThumbnailFromInAppCacheFile(file);
@@ -259,7 +292,8 @@ Future<MediaUploadData> _getMediaUploadDataFromAppCache(ente.File file) async {
   } catch (e, s) {
     _logger.severe("failed to generate thumbnail", e, s);
     throw InvalidFileError(
-      "thumbnail generation failed for fileType: ${file.fileType.toString()}",
+      "thumbnail failed for appCache fileType: ${file.fileType.toString()}",
+      InvalidReason.thumbnailMissing,
     );
   }
 }

@@ -1,9 +1,23 @@
-class InvalidFileError extends ArgumentError {
-  InvalidFileError(String message) : super(message);
+enum InvalidReason {
+  assetDeleted,
+  assetDeletedEvent,
+  sourceFileMissing,
+  livePhotoToImageTypeChanged,
+  imageToLivePhotoTypeChanged,
+  livePhotoVideoMissing,
+  thumbnailMissing,
+  unknown,
 }
 
-class InvalidFileUploadState extends AssertionError {
-  InvalidFileUploadState(String message) : super(message);
+class InvalidFileError extends ArgumentError {
+  final InvalidReason reason;
+
+  InvalidFileError(String message, this.reason) : super(message);
+
+  @override
+  String toString() {
+    return 'InvalidFileError: $message (reason: $reason)';
+  }
 }
 
 class SubscriptionAlreadyClaimedError extends Error {}

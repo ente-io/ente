@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:core';
 import 'dart:io';
 
-import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/errors.dart';
 import 'package:photos/db/file_updation_db.dart';
@@ -144,14 +143,13 @@ class LocalFileUpdateService {
           );
         }
         processedIDs.add(file.localID!);
-      } on InvalidFileError {
-        // if we fail to get the file, we can ignore the update
+      } on InvalidFileError catch (e) {
+        _logger.fine("Failed to check hash due to invalidfile ${file.tag}", e);
         processedIDs.add(file.localID!);
       } catch (e) {
-        _logger.severe("Failed to get file uploadData", e);
+        _logger.severe("Failed to check hash", e);
       } finally {}
     }
-    debugPrint("Deleting files ${processedIDs.length}");
     await _fileUpdationDB.deleteByLocalIDs(
       processedIDs.toList(),
       FileUpdationDB.modificationTimeUpdated,
