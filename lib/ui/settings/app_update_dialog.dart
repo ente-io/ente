@@ -27,7 +27,7 @@ class _AppUpdateDialogState extends State<AppUpdateDialog> {
           padding: const EdgeInsets.fromLTRB(8, 4, 0, 4),
           child: Text(
             "- " + log,
-            style: Theme.of(context).textTheme.caption!.copyWith(
+            style: Theme.of(context).textTheme.bodySmall!.copyWith(
                   fontSize: 14,
                 ),
           ),
@@ -65,7 +65,7 @@ class _AppUpdateDialogState extends State<AppUpdateDialog> {
             style: Theme.of(context).outlinedButtonTheme.style!.copyWith(
               textStyle: MaterialStateProperty.resolveWith<TextStyle?>(
                 (Set<MaterialState> states) {
-                  return Theme.of(context).textTheme.subtitle1;
+                  return Theme.of(context).textTheme.titleMedium;
                 },
               ),
             ),

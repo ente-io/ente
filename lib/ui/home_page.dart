@@ -248,7 +248,7 @@ class _HomePageState extends State<HomePage> {
                           Code? code;
                           try {
                             code = _filteredCodes[index];
-                            return CodeWidget(code!);
+                            return CodeWidget(code);
                           } catch (e, s) {
                             _logger.severe("code widget error", e, s);
                             return Center(

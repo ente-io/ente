@@ -68,8 +68,7 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
       body: _getBody(),
       floatingActionButton: DynamicFAB(
         isKeypadOpen: isKeypadOpen,
-        isFormValid: !(_verificationCodeController.text == null ||
-            _verificationCodeController.text.isEmpty),
+        isFormValid: !(_verificationCodeController.text.isEmpty),
         buttonText: l10n.verify,
         onPressedFunction: () {
           if (widget.isChangeEmail) {
@@ -102,7 +101,7 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
               padding: const EdgeInsets.fromLTRB(20, 30, 20, 15),
               child: Text(
                 l10n.verifyEmail,
-                style: Theme.of(context).textTheme.headline4,
+                style: Theme.of(context).textTheme.headlineMedium,
               ),
             ),
             Padding(
@@ -119,7 +118,7 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
                             text: l10n.weHaveSendEmailTo(widget.email),
                             style: Theme.of(context)
                                 .textTheme
-                                .subtitle1!
+                                .titleMedium!
                                 .copyWith(fontSize: 14),
                             tags: {
                               'green': StyledTextTag(
@@ -144,7 +143,7 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
                                 l10n.checkInboxAndSpamFolder,
                                 style: Theme.of(context)
                                     .textTheme
-                                    .subtitle1!
+                                    .titleMedium!
                                     .copyWith(fontSize: 14),
                               ),
                       ],
@@ -160,7 +159,7 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
               child: TextFormField(
-                style: Theme.of(context).textTheme.subtitle1,
+                style: Theme.of(context).textTheme.titleMedium,
                 decoration: InputDecoration(
                   filled: true,
                   hintText: l10n.tapToEnterCode,
@@ -199,7 +198,7 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
                     },
                     child: Text(
                       l10n.resendEmail,
-                      style: Theme.of(context).textTheme.subtitle1!.copyWith(
+                      style: Theme.of(context).textTheme.titleMedium!.copyWith(
                             fontSize: 14,
                             decoration: TextDecoration.underline,
                           ),

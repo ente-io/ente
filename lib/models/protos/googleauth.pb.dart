@@ -14,6 +14,7 @@ import 'dart:core' as $core;
 import 'package:fixnum/fixnum.dart' as $fixnum;
 import 'package:protobuf/protobuf.dart' as $pb;
 
+// ignore: always_use_package_imports
 import 'googleauth.pbenum.dart';
 
 export 'googleauth.pbenum.dart';

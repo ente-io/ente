@@ -201,8 +201,8 @@ Widget getDayWidget(
     child: Text(
       getDayTitle(timestamp),
       style: (getDayTitle(timestamp) == "Today" && !smallerTodayFont)
-          ? Theme.of(context).textTheme.headline5
-          : Theme.of(context).textTheme.caption?.copyWith(
+          ? Theme.of(context).textTheme.headlineSmall
+          : Theme.of(context).textTheme.bodySmall?.copyWith(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
                 fontFamily: 'Inter-SemiBold',
