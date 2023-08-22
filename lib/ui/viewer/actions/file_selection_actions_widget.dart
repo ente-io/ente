@@ -89,8 +89,6 @@ class _FileSelectionActionsWidgetState
 
   @override
   Widget build(BuildContext context) {
-    final textScaleFactor = MediaQuery.textScaleFactorOf(context);
-
     final bool showPrefix =
         split.pendingUploads.isNotEmpty || split.ownedByOtherUsers.isNotEmpty;
     final String suffix = showPrefix
@@ -285,16 +283,24 @@ class _FileSelectionActionsWidgetState
     }
 
     if (items.isNotEmpty) {
-      return SizedBox(
-        height: 90 * textScaleFactor,
-        child: ListView.builder(
-          itemBuilder: (context, index) {
-            return Align(alignment: Alignment.topCenter, child: items[index]);
-          },
-          padding: const EdgeInsets.symmetric(horizontal: 8),
-          itemCount: items.length,
-          scrollDirection: Axis.horizontal,
-          shrinkWrap: true,
+      return AnimatedSize(
+        duration: const Duration(milliseconds: 250),
+        curve: Curves.easeInOutCirc,
+        child: SizedBox(
+          width: double.infinity,
+          child: Center(
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(width: 4),
+                  ...items,
+                  const SizedBox(width: 4),
+                ],
+              ),
+            ),
+          ),
         ),
       );
     } else {
