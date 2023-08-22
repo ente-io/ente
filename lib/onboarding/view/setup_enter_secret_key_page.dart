@@ -10,30 +10,27 @@ class SetupEnterSecretKeyPage extends StatefulWidget {
   SetupEnterSecretKeyPage({this.code, Key? key}) : super(key: key);
 
   @override
-  State<SetupEnterSecretKeyPage> createState() =>
-      _SetupEnterSecretKeyPageState();
+  State<SetupEnterSecretKeyPage> createState() => _SetupEnterSecretKeyPageState();
 }
 
 class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
   late TextEditingController _issuerController;
   late TextEditingController _accountController;
   late TextEditingController _secretController;
+  late bool _secretKeyObscured;
 
   @override
   void initState() {
     _issuerController = TextEditingController(
-      text: widget.code != null
-          ? safeDecode(widget.code!.issuer).trim()
-          : null,
+      text: widget.code != null ? safeDecode(widget.code!.issuer).trim() : null,
     );
     _accountController = TextEditingController(
-      text: widget.code != null
-          ? safeDecode(widget.code!.account).trim()
-          : null,
+      text: widget.code != null ? safeDecode(widget.code!.account).trim() : null,
     );
     _secretController = TextEditingController(
       text: widget.code != null ? widget.code!.secret : null,
     );
+    _secretKeyObscured = widget.code != null;
     super.initState();
   }
 
@@ -77,7 +74,18 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
                   },
                   decoration: InputDecoration(
                     hintText: l10n.codeSecretKeyHint,
+                    suffixIcon: IconButton(
+                      onPressed: () {
+                        setState(() {
+                          _secretKeyObscured = !_secretKeyObscured;
+                        });
+                      },
+                      icon: _secretKeyObscured
+                          ? const Icon(Icons.visibility_off_rounded)
+                          : const Icon(Icons.visibility_rounded),
+                    ),
                   ),
+                  obscureText: _secretKeyObscured,
                   controller: _secretController,
                 ),
                 const SizedBox(
@@ -85,6 +93,7 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
                 ),
                 TextFormField(
                   // The validator receives the text that the user has entered.
+
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return "Please enter some text";
@@ -118,8 +127,7 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
                       try {
                         final account = _accountController.text.trim();
                         final issuer = _issuerController.text.trim();
-                        final secret =
-                            _secretController.text.trim().replaceAll(' ', '');
+                        final secret = _secretController.text.trim().replaceAll(' ', '');
                         final Code newCode = widget.code == null
                             ? Code.fromAccountAndSecret(
                                 account,
@@ -146,7 +154,7 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
                       child: Text(l10n.saveAction),
                     ),
                   ),
-                )
+                ),
               ],
             ),
           ),
