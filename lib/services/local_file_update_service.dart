@@ -3,6 +3,7 @@ import 'dart:core';
 import 'dart:io';
 
 import 'package:logging/logging.dart';
+import "package:photos/core/configuration.dart";
 import 'package:photos/core/errors.dart';
 import 'package:photos/db/file_updation_db.dart';
 import 'package:photos/db/files_db.dart';
@@ -113,10 +114,17 @@ class LocalFileUpdateService {
     List<String> localIDsToProcess,
   ) async {
     _logger.info("files to process ${localIDsToProcess.length} for reupload");
-    final List<ente.File> localFiles =
+    final int userID = Configuration.instance.getUserID()!;
+    final List<ente.File> result =
         await FilesDB.instance.getLocalFiles(localIDsToProcess);
+    final List<ente.File> localFilesForUser = [];
+    for (ente.File file in result) {
+      if (file.ownerID == null || file.ownerID == userID) {
+        localFilesForUser.add(file);
+      }
+    }
     final Set<String> processedIDs = {};
-    for (ente.File file in localFiles) {
+    for (ente.File file in localFilesForUser) {
       if (processedIDs.contains(file.localID)) {
         continue;
       }
