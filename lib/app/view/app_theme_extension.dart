@@ -38,9 +38,7 @@ final darkTheme = ThemeData(
   fontFamily: "Inter",
   brightness: Brightness.dark,
   scaffoldBackgroundColor: Colors.black,
-  backgroundColor: Colors.black,
   appBarTheme: const AppBarTheme(color: Colors.orange),
-  colorScheme: const ColorScheme.dark(primary: Colors.white),
   textTheme: _buildTextTheme(Colors.white),
   outlinedButtonTheme: buildOutlinedButtonThemeData(
     bgDisabled: Colors.grey.shade500,
@@ -59,25 +57,25 @@ final darkTheme = ThemeData(
       borderSide: BorderSide.none,
       borderRadius: BorderRadius.circular(6),
     ),
-  ),
+  ), colorScheme: const ColorScheme.dark(primary: Colors.white).copyWith(background: Colors.black),
 );
 
 TextTheme _buildTextTheme(Color textColor) {
   return const TextTheme().copyWith(
-    headline4: TextStyle(
+    headlineMedium: TextStyle(
       color: textColor,
       fontSize: 32,
       fontWeight: FontWeight.w700,
       fontFamily: "Inter",
     ),
-    headline5: TextStyle(
+    headlineSmall: TextStyle(
       color: textColor,
       fontSize: 24,
       fontWeight: FontWeight.w600,
       fontFamily: "Inter",
     ),
     // AG: Body
-    headline6: TextStyle(
+    titleLarge: TextStyle(
       color: textColor,
       fontSize: 18,
       fontFamily: "Inter",
@@ -92,31 +90,31 @@ TextTheme _buildTextTheme(Color textColor) {
       height: 28,
     ),
 
-    subtitle1: TextStyle(
+    titleMedium: TextStyle(
       color: textColor,
       fontFamily: "Inter",
       fontSize: 16,
       fontWeight: FontWeight.w500,
     ),
-    subtitle2: TextStyle(
+    titleSmall: TextStyle(
       color: textColor,
       fontFamily: "Inter",
       fontSize: 14,
       fontWeight: FontWeight.w500,
     ),
-    bodyText1: TextStyle(
+    bodyLarge: TextStyle(
       fontFamily: "Inter",
       color: textColor,
       fontSize: 16,
       fontWeight: FontWeight.w500,
     ),
-    bodyText2: TextStyle(
+    bodyMedium: TextStyle(
       fontFamily: "Inter",
       color: textColor,
       fontSize: 14,
       fontWeight: FontWeight.w500,
     ),
-    caption: TextStyle(
+    bodySmall: TextStyle(
       color: textColor.withOpacity(0.6),
       fontSize: 14,
       fontWeight: FontWeight.w500,

@@ -36,7 +36,7 @@ class HomeEmptyStateWidget extends StatelessWidget {
                   Text(
                     l10n.setupFirstAccount,
                     textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.headline4,
+                    style: Theme.of(context).textTheme.headlineMedium,
                   ),
                   const SizedBox(height: 64),
                   SizedBox(

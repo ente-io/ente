@@ -41,7 +41,7 @@ class CoachMarkWidget extends StatelessWidget {
                         ),
                         Text(
                           l10n.swipeHint,
-                          style: Theme.of(context).textTheme.headline6,
+                          style: Theme.of(context).textTheme.titleLarge,
                         ),
                         const SizedBox(
                           height: 36,

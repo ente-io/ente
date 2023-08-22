@@ -229,7 +229,7 @@ Future<void> sendEmail(
       final Uri params = Uri(
         scheme: 'mailto',
         path: to,
-        query: 'subject=$_subject&body=${_body}',
+        query: 'subject=$_subject&body=$_body',
       );
       if (await canLaunchUrl(params)) {
         await launchUrl(params);

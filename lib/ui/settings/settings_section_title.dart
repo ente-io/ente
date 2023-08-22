@@ -24,9 +24,9 @@ class SettingsSectionTitle extends StatelessWidget {
             style: color != null
                 ? Theme.of(context)
                     .textTheme
-                    .headline6!
+                    .titleLarge!
                     .merge(TextStyle(color: color))
-                : Theme.of(context).textTheme.headline6,
+                : Theme.of(context).textTheme.titleLarge,
           ),
         ),
         const Padding(padding: EdgeInsets.all(4)),

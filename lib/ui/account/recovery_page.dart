@@ -88,7 +88,7 @@ class _RecoveryPageState extends State<RecoveryPage> {
                       const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
                   child: Text(
                     'Forgot password',
-                    style: Theme.of(context).textTheme.headline4,
+                    style: Theme.of(context).textTheme.headlineMedium,
                   ),
                 ),
                 Padding(
@@ -140,7 +140,7 @@ class _RecoveryPageState extends State<RecoveryPage> {
                           child: Text(
                             "No recovery key?",
                             style:
-                                Theme.of(context).textTheme.subtitle1!.copyWith(
+                                Theme.of(context).textTheme.titleMedium!.copyWith(
                                       fontSize: 14,
                                       decoration: TextDecoration.underline,
                                     ),

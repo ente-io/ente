@@ -48,7 +48,7 @@ class DeleteAccountPage extends StatelessWidget {
               Center(
                 child: Text(
                   l10n.deleteAccountQuery,
-                  style: Theme.of(context).textTheme.subtitle1,
+                  style: Theme.of(context).textTheme.titleMedium,
                 ),
               ),
               const SizedBox(
@@ -67,7 +67,7 @@ class DeleteAccountPage extends StatelessWidget {
                       text: ", maybe there is a way we can help.",
                     ),
                   ],
-                  style: Theme.of(context).textTheme.subtitle1,
+                  style: Theme.of(context).textTheme.titleMedium,
                 ),
               ),
               const SizedBox(

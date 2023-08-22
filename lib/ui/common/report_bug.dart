@@ -6,10 +6,10 @@ PopupMenuButton<dynamic> reportBugPopupMenu(BuildContext context) {
     itemBuilder: (context) {
       final List<PopupMenuItem> items = [];
       items.add(
-        PopupMenuItem(
+        const PopupMenuItem(
           value: 1,
           child: Row(
-            children: const [
+            children: [
               Text("Contact support"),
             ],
           ),
