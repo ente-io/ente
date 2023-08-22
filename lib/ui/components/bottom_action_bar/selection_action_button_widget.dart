@@ -1,12 +1,43 @@
 import "package:flutter/material.dart";
 import "package:photos/theme/ente_theme.dart";
 
-class SelectionActionButton extends StatefulWidget {
+class SelectionActionButton extends StatelessWidget {
   final String labelText;
   final IconData icon;
   final VoidCallback? onTap;
+  final bool shouldShow;
 
   const SelectionActionButton({
+    required this.labelText,
+    required this.icon,
+    required this.onTap,
+    this.shouldShow = true,
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedSize(
+      duration: const Duration(milliseconds: 250),
+      curve: Curves.easeInOutCirc,
+      child: shouldShow
+          ? _Body(
+              labelText: labelText,
+              icon: icon,
+              onTap: onTap,
+            )
+          : const SizedBox(
+              height: 60,
+            ),
+    );
+  }
+}
+
+class _Body extends StatefulWidget {
+  final String labelText;
+  final IconData icon;
+  final VoidCallback? onTap;
+  const _Body({
     required this.labelText,
     required this.icon,
     required this.onTap,
@@ -14,10 +45,10 @@ class SelectionActionButton extends StatefulWidget {
   });
 
   @override
-  State<SelectionActionButton> createState() => _SelectionActionButtonState();
+  State<_Body> createState() => __BodyState();
 }
 
-class _SelectionActionButtonState extends State<SelectionActionButton> {
+class __BodyState extends State<_Body> {
   static const minWidth = 64.0;
   late double widthOfButton;
   Color? backgroundColor;
