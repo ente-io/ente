@@ -350,11 +350,11 @@ class FileUploader {
     var uploadHardFailure = false;
 
     try {
+      final bool isUpdatedFile =
+          file.uploadedFileID != null && file.updationTime == -1;
       _logger.info(
-        "Trying to upload " +
-            file.toString() +
-            ", isForced: " +
-            forcedUpload.toString(),
+        'starting ${forcedUpload ? 'forced' : ''} '
+        '${isUpdatedFile ? 're-upload' : 'upload'} of ${file.toString()}',
       );
       try {
         mediaUploadData = await getUploadDataFromEnteFile(file);
@@ -365,12 +365,8 @@ class FileUploader {
           rethrow;
         }
       }
-
       Uint8List? key;
-      final bool isUpdatedFile =
-          file.uploadedFileID != null && file.updationTime == -1;
       if (isUpdatedFile) {
-        _logger.info("File was updated " + file.toString());
         key = getFileKey(file);
       } else {
         key = null;
