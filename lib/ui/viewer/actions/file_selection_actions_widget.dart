@@ -114,7 +114,6 @@ class _FileSelectionActionsWidgetState
     final bool showRemoveOption = widget.type.showRemoveFromAlbum();
     debugPrint('$runtimeType building  $mounted');
     final List<SelectionActionButton> items = [];
-
     if (widget.type.showCreateLink()) {
       if (_cachedCollectionForSharedLink != null && anyUploadedFiles) {
         items.add(
@@ -134,6 +133,18 @@ class _FileSelectionActionsWidgetState
         );
       }
     }
+
+    items.add(
+      SelectionActionButton(
+        labelText: "Share",
+        icon: Icons.adaptive.share_outlined,
+        onTap: () => shareSelected(
+          context,
+          shareButtonKey,
+          widget.selectedFiles.files.toList(),
+        ),
+      ),
+    );
 
     final showUploadIcon = widget.type == GalleryType.localFolder &&
         split.ownedByCurrentUser.isEmpty;
@@ -179,6 +190,24 @@ class _FileSelectionActionsWidgetState
       );
     }
 
+    if (widget.type.showFavoriteOption()) {
+      items.add(
+        SelectionActionButton(
+          icon: Icons.favorite_border_rounded,
+          labelText: S.of(context).favorite + suffix,
+          onTap: anyUploadedFiles ? _onFavoriteClick : null,
+        ),
+      );
+    } else if (widget.type.showUnFavoriteOption()) {
+      items.add(
+        SelectionActionButton(
+          icon: Icons.favorite,
+          labelText: S.of(context).removeFromFavorite + suffix,
+          onTap: _onUnFavoriteClick,
+        ),
+      );
+    }
+
     if (widget.type.showHideOption()) {
       items.add(
         SelectionActionButton(
@@ -214,24 +243,6 @@ class _FileSelectionActionsWidgetState
       );
     }
 
-    if (widget.type.showFavoriteOption()) {
-      items.add(
-        SelectionActionButton(
-          icon: Icons.favorite_border_rounded,
-          labelText: S.of(context).favorite + suffix,
-          onTap: anyUploadedFiles ? _onFavoriteClick : null,
-        ),
-      );
-    } else if (widget.type.showUnFavoriteOption()) {
-      items.add(
-        SelectionActionButton(
-          icon: Icons.favorite,
-          labelText: S.of(context).removeFromFavorite + suffix,
-          onTap: _onUnFavoriteClick,
-        ),
-      );
-    }
-
     if (widget.type.showRestoreOption()) {
       items.add(
         SelectionActionButton(
@@ -251,18 +262,6 @@ class _FileSelectionActionsWidgetState
         ),
       );
     }
-
-    items.add(
-      SelectionActionButton(
-        labelText: "Share",
-        icon: Icons.adaptive.share_outlined,
-        onTap: () => shareSelected(
-          context,
-          shareButtonKey,
-          widget.selectedFiles.files.toList(),
-        ),
-      ),
-    );
 
     bool hasVideoFile = false;
     for (final file in widget.selectedFiles.files) {
