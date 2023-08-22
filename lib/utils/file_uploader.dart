@@ -112,7 +112,8 @@ class FileUploader {
             }
             return false;
           },
-          InvalidFileError("File already deleted"),
+          InvalidFileError(
+              "File already deleted", InvalidReason.assetDeletedEvent,),
         );
       }
     });
