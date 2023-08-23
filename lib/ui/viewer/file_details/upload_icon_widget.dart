@@ -1,5 +1,6 @@
 import "dart:async";
 
+import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:flutter_animate/flutter_animate.dart";
 import "package:photos/core/event_bus.dart";
@@ -7,12 +8,14 @@ import "package:photos/db/files_db.dart";
 import "package:photos/events/collection_updated_event.dart";
 import "package:photos/events/files_updated_event.dart";
 import "package:photos/models/file.dart";
+import "package:photos/models/ignored_file.dart";
 import "package:photos/services/collections_service.dart";
 import "package:photos/services/hidden_service.dart";
 import "package:photos/services/ignored_files_service.dart";
 import "package:photos/services/remote_sync_service.dart";
 import "package:photos/services/sync_service.dart";
 import "package:photos/ui/common/loading_widget.dart";
+import "package:photos/utils/toast_util.dart";
 
 class UploadIconWidget extends StatefulWidget {
   final File file;
@@ -27,12 +30,14 @@ class UploadIconWidget extends StatefulWidget {
 
 class _UpdateIconWidgetState extends State<UploadIconWidget> {
   late StreamSubscription<CollectionUpdatedEvent> _firstImportEvent;
+  late IgnoredFilesService ignoreService;
   bool isUploadedNow = false;
   bool isBeingUploaded = false;
 
   @override
   void initState() {
     super.initState();
+    ignoreService = IgnoredFilesService.instance;
     _firstImportEvent =
         Bus.instance.on<CollectionUpdatedEvent>().listen((event) {
       if (mounted &&
@@ -80,39 +85,53 @@ class _UpdateIconWidgetState extends State<UploadIconWidget> {
       }
       return const SizedBox.shrink();
     }
-    return FutureBuilder<bool>(
-      future: IgnoredFilesService.instance.shouldSkipUploadAsync(widget.file),
+    return FutureBuilder<Map<String,String>>(
+      future: ignoreService.idToIgnoreReasonMap,
       builder: (context, snapshot) {
         if (snapshot.hasData) {
-          final bool isIgnored = snapshot.data!;
+          final Map<String,String> idsToReasonMap = snapshot.data!;
+          final ignoreReason = ignoreService.getUploadSkipReason(idsToReasonMap, widget.file);
+          final bool isIgnored = ignoreReason != null;
           final bool isQueuedForUpload =
               !isIgnored && widget.file.collectionID != null;
           if (isQueuedForUpload && isBeingUploaded) {
             return const EnteLoadingWidget();
           }
-          return IconButton(
-            icon: const Icon(
-              Icons.upload_rounded,
-              color: Colors.white,
+          if (isIgnored && kDebugMode) {
+            showToast(
+              context,
+              'Upload is ignored due to $ignoreReason',
+            );
+          }
+          return Tooltip(
+            message: isIgnored
+                ? "Tap to upload, upload is currently ignored due "
+                "to $ignoreReason"
+                : "Tap to upload",
+            child: IconButton(
+              icon: const Icon(
+                Icons.upload_rounded,
+                color: Colors.white,
+              ),
+              onPressed: () async {
+                if (isIgnored) {
+                  await IgnoredFilesService.instance
+                      .removeIgnoredMappings([widget.file]);
+                }
+                if (widget.file.collectionID == null) {
+                  widget.file.collectionID = (await CollectionsService.instance
+                          .getUncategorizedCollection())
+                      .id;
+                  FilesDB.instance.insert(widget.file);
+                }
+                RemoteSyncService.instance.sync().ignore();
+                if (mounted) {
+                  setState(() {
+                    isBeingUploaded = true;
+                  });
+                }
+              },
             ),
-            onPressed: () async {
-              if (isIgnored) {
-                await IgnoredFilesService.instance
-                    .removeIgnoredMappings([widget.file]);
-              }
-              if (widget.file.collectionID == null) {
-                widget.file.collectionID = (await CollectionsService.instance
-                        .getUncategorizedCollection())
-                    .id;
-                FilesDB.instance.insert(widget.file);
-              }
-              RemoteSyncService.instance.sync().ignore();
-              if (mounted) {
-                setState(() {
-                  isBeingUploaded = true;
-                });
-              }
-            },
           );
         } else {
           return const SizedBox.shrink();

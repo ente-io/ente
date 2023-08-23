@@ -47,6 +47,14 @@ class IgnoredFilesService {
     return false;
   }
 
+  String? getUploadSkipReason(Map<String, String> idToReasonMap, File file) {
+    final id = _getIgnoreID(file.localID, file.deviceFolder, file.title);
+    if (id != null && id.isNotEmpty) {
+      return idToReasonMap[id];
+    }
+    return null;
+  }
+
   Future<bool> shouldSkipUploadAsync(File file) async {
     final ignoredID = await idToIgnoreReasonMap;
     return shouldSkipUpload(ignoredID, file);
