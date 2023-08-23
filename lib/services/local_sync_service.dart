@@ -204,7 +204,7 @@ class LocalSyncService {
     return hasUnsyncedFiles;
   }
 
-  Future<void> trackInvalidFile(File file, InvalidFileError error) async {
+  Future<void> ignoreUpload(File file, InvalidFileError error) async {
     if (file.localID == null ||
         file.deviceFolder == null ||
         file.title == null) {

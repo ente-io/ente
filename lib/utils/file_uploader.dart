@@ -749,7 +749,7 @@ class FileUploader {
       await FilesDB.instance.deleteLocalFile(file);
     }
     if (canIgnoreFile) {
-      await LocalSyncService.instance.trackInvalidFile(file, e);
+      await LocalSyncService.instance.ignoreUpload(file, e);
     }
     throw e;
   }
