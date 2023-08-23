@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/core/configuration.dart';
+import "package:photos/core/errors.dart";
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/device_files_db.dart';
 import 'package:photos/db/file_updation_db.dart';
@@ -201,7 +202,7 @@ class LocalSyncService {
     return hasUnsyncedFiles;
   }
 
-  Future<void> trackInvalidFile(File file) async {
+  Future<void> trackInvalidFile(File file, InvalidFileError error) async {
     if (file.localID == null) {
       debugPrint("Warning: Invalid file has no localID");
       return;
@@ -211,9 +212,13 @@ class LocalSyncService {
     await _prefs.setStringList(kInvalidFileIDsKey, invalidIDs);
   }
 
+  @Deprecated(
+    "remove usage after few releases as we will switch to ignored files. Keeping it now to clear the invalid file ids from shared prefs",
+  )
   List<String> _getInvalidFileIDs() {
     if (_prefs.containsKey(kInvalidFileIDsKey)) {
-      return _prefs.getStringList(kInvalidFileIDsKey)!;
+      _prefs.remove(kInvalidFileIDsKey);
+      return <String>[];
     } else {
       return <String>[];
     }
