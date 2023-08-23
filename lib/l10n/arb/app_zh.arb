@@ -85,6 +85,7 @@
   "importSelectJsonFile": "选择 JSON 文件",
   "importEnteEncGuide": "选择从ente导出的加密JSON文件",
   "importRaivoGuide": "使用 Raivo 设置中的“将 OTP 导出到 Zip 存档”选项。\n\n解压 zip 文件并导入 JSON 文件。",
+  "importAegisGuide": "在Aegis的设置中使用\"导出密码库\"选项。\n\n如果您的密码库已加密，您需要输入密码才能解密密码库。",
   "exportCodes": "导出代码",
   "importLabel": "导入",
   "importInstruction": "请以以下格式选择包含代码列表的文件",
