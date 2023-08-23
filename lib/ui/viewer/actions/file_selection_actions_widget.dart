@@ -89,28 +89,28 @@ class _FileSelectionActionsWidgetState
 
   @override
   Widget build(BuildContext context) {
-    final bool showPrefix =
-        split.pendingUploads.isNotEmpty || split.ownedByOtherUsers.isNotEmpty;
-    final String suffix = showPrefix
-        ? " (${split.ownedByCurrentUser.length})"
-            ""
-        : "";
+    final ownedFilesCount = split.ownedByCurrentUser.length;
+    final ownedAndPendingUploadFilesCount =
+        ownedFilesCount + split.pendingUploads.length;
     final int removeCount = split.ownedByCurrentUser.length +
         (isCollectionOwner ? split.ownedByOtherUsers.length : 0);
-    final String removeSuffix = showPrefix
-        ? " ($removeCount)"
-            ""
-        : "";
-    final String suffixInPending = split.ownedByOtherUsers.isNotEmpty
-        ? " (${split.ownedByCurrentUser.length + split.pendingUploads.length})"
-            ""
-        : "";
 
     final bool anyOwnedFiles =
         split.pendingUploads.isNotEmpty || split.ownedByCurrentUser.isNotEmpty;
+
     final bool anyUploadedFiles = split.ownedByCurrentUser.isNotEmpty;
-    final bool showRemoveOption = widget.type.showRemoveFromAlbum();
-    debugPrint('$runtimeType building  $mounted');
+
+    bool hasVideoFile = false;
+    for (final file in widget.selectedFiles.files) {
+      if (file.fileType == FileType.video) {
+        hasVideoFile = true;
+      }
+    }
+    final showCollageOption = !hasVideoFile &&
+        widget.selectedFiles.files.length >=
+            CollageCreatorPage.collageItemsMin &&
+        widget.selectedFiles.files.length <= CollageCreatorPage.collageItemsMax;
+
     final List<SelectionActionButton> items = [];
 
     if (widget.type.showCreateLink()) {
@@ -126,64 +126,66 @@ class _FileSelectionActionsWidgetState
         items.add(
           SelectionActionButton(
             icon: Icons.link_outlined,
-            labelText: S.of(context).shareLink + suffix,
+            labelText: S.of(context).shareLink,
             onTap: anyUploadedFiles ? _onCreatedSharedLinkClicked : null,
+            shouldShow: ownedFilesCount > 0,
           ),
         );
       }
     }
 
-    bool hasVideoFile = false;
-    for (final file in widget.selectedFiles.files) {
-      if (file.fileType == FileType.video) {
-        hasVideoFile = true;
-      }
-    }
-
-    if (!hasVideoFile &&
-        widget.selectedFiles.files.length >=
-            CollageCreatorPage.collageItemsMin &&
-        widget.selectedFiles.files.length <=
-            CollageCreatorPage.collageItemsMax) {
-      items.add(
-        SelectionActionButton(
-          icon: Icons.grid_view_outlined,
-          labelText: S.of(context).createCollage,
-          onTap: _onCreateCollageClicked,
+    items.add(
+      SelectionActionButton(
+        labelText: "Share",
+        icon: Icons.adaptive.share_outlined,
+        onTap: () => shareSelected(
+          context,
+          shareButtonKey,
+          widget.selectedFiles.files.toList(),
         ),
-      );
-    }
+      ),
+    );
 
     final showUploadIcon = widget.type == GalleryType.localFolder &&
         split.ownedByCurrentUser.isEmpty;
     if (widget.type.showAddToAlbum()) {
-      items.add(
-        SelectionActionButton(
-          icon:
-              showUploadIcon ? Icons.cloud_upload_outlined : Icons.add_outlined,
-          labelText: showUploadIcon
-              ? S.of(context).addToEnte
-              : S.of(context).addToAlbum + suffixInPending,
-          onTap: anyOwnedFiles ? _addToAlbum : null,
-        ),
-      );
+      if (showUploadIcon) {
+        items.add(
+          SelectionActionButton(
+            icon: Icons.cloud_upload_outlined,
+            labelText: S.of(context).addToEnte,
+            onTap: anyOwnedFiles ? _addToAlbum : null,
+          ),
+        );
+      } else {
+        items.add(
+          SelectionActionButton(
+            icon: Icons.add_outlined,
+            labelText: S.of(context).addToAlbum,
+            onTap: anyOwnedFiles ? _addToAlbum : null,
+            shouldShow: ownedAndPendingUploadFilesCount > 0,
+          ),
+        );
+      }
     }
     if (widget.type.showMoveToAlbum()) {
       items.add(
         SelectionActionButton(
           icon: Icons.arrow_forward_outlined,
-          labelText: S.of(context).moveToAlbum + suffix,
+          labelText: S.of(context).moveToAlbum,
           onTap: anyUploadedFiles ? _moveFiles : null,
+          shouldShow: ownedFilesCount > 0,
         ),
       );
     }
 
-    if (showRemoveOption) {
+    if (widget.type.showRemoveFromAlbum()) {
       items.add(
         SelectionActionButton(
           icon: Icons.remove_outlined,
-          labelText: "${S.of(context).removeFromAlbum}$removeSuffix",
+          labelText: S.of(context).removeFromAlbum,
           onTap: removeCount > 0 ? _removeFilesFromAlbum : null,
+          shouldShow: removeCount > 0,
         ),
       );
     }
@@ -192,43 +194,9 @@ class _FileSelectionActionsWidgetState
       items.add(
         SelectionActionButton(
           icon: Icons.delete_outline,
-          labelText: S.of(context).delete + suffixInPending,
+          labelText: S.of(context).delete,
           onTap: anyOwnedFiles ? _onDeleteClick : null,
-        ),
-      );
-    }
-
-    if (widget.type.showHideOption()) {
-      items.add(
-        SelectionActionButton(
-          icon: Icons.visibility_off_outlined,
-          labelText: S.of(context).hide + suffix,
-          onTap: anyUploadedFiles ? _onHideClick : null,
-        ),
-      );
-    } else if (widget.type.showUnHideOption()) {
-      items.add(
-        SelectionActionButton(
-          icon: Icons.visibility_outlined,
-          labelText: S.of(context).unhide + suffix,
-          onTap: _onUnhideClick,
-        ),
-      );
-    }
-    if (widget.type.showArchiveOption()) {
-      items.add(
-        SelectionActionButton(
-          icon: Icons.archive_outlined,
-          labelText: S.of(context).archive + suffix,
-          onTap: anyUploadedFiles ? _onArchiveClick : null,
-        ),
-      );
-    } else if (widget.type.showUnArchiveOption()) {
-      items.add(
-        SelectionActionButton(
-          icon: Icons.unarchive,
-          labelText: S.of(context).unarchive + suffix,
-          onTap: _onUnArchiveClick,
+          shouldShow: ownedAndPendingUploadFilesCount > 0,
         ),
       );
     }
@@ -237,16 +205,57 @@ class _FileSelectionActionsWidgetState
       items.add(
         SelectionActionButton(
           icon: Icons.favorite_border_rounded,
-          labelText: S.of(context).favorite + suffix,
+          labelText: S.of(context).favorite,
           onTap: anyUploadedFiles ? _onFavoriteClick : null,
+          shouldShow: ownedFilesCount > 0,
         ),
       );
     } else if (widget.type.showUnFavoriteOption()) {
       items.add(
         SelectionActionButton(
           icon: Icons.favorite,
-          labelText: S.of(context).removeFromFavorite + suffix,
+          labelText: S.of(context).removeFromFavorite,
           onTap: _onUnFavoriteClick,
+          shouldShow: ownedFilesCount > 0,
+        ),
+      );
+    }
+
+    if (widget.type.showHideOption()) {
+      items.add(
+        SelectionActionButton(
+          icon: Icons.visibility_off_outlined,
+          labelText: S.of(context).hide,
+          onTap: anyUploadedFiles ? _onHideClick : null,
+          shouldShow: ownedFilesCount > 0,
+        ),
+      );
+    } else if (widget.type.showUnHideOption()) {
+      items.add(
+        SelectionActionButton(
+          icon: Icons.visibility_outlined,
+          labelText: S.of(context).unhide,
+          onTap: _onUnhideClick,
+          shouldShow: ownedFilesCount > 0,
+        ),
+      );
+    }
+    if (widget.type.showArchiveOption()) {
+      items.add(
+        SelectionActionButton(
+          icon: Icons.archive_outlined,
+          labelText: S.of(context).archive,
+          onTap: anyUploadedFiles ? _onArchiveClick : null,
+          shouldShow: ownedFilesCount > 0,
+        ),
+      );
+    } else if (widget.type.showUnArchiveOption()) {
+      items.add(
+        SelectionActionButton(
+          icon: Icons.unarchive,
+          labelText: S.of(context).unarchive,
+          onTap: _onUnArchiveClick,
+          shouldShow: ownedFilesCount > 0,
         ),
       );
     }
@@ -273,32 +282,27 @@ class _FileSelectionActionsWidgetState
 
     items.add(
       SelectionActionButton(
-        labelText: "Share",
-        icon: Icons.adaptive.share_outlined,
-        onTap: () => shareSelected(
-          context,
-          shareButtonKey,
-          widget.selectedFiles.files.toList(),
-        ),
+        icon: Icons.grid_view_outlined,
+        labelText: S.of(context).createCollage,
+        onTap: _onCreateCollageClicked,
+        shouldShow: showCollageOption,
       ),
     );
 
     if (items.isNotEmpty) {
-      return NotificationListener<OverscrollIndicatorNotification>(
-        onNotification: (overscroll) {
-          overscroll.disallowIndicator();
-          return true;
-        },
-        child: SingleChildScrollView(
-          physics: const ClampingScrollPhysics(),
-          scrollDirection: Axis.horizontal,
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(width: 8),
-              ...items,
-              const SizedBox(width: 8),
-            ],
+      return SizedBox(
+        width: double.infinity,
+        child: Center(
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(width: 4),
+                ...items,
+                const SizedBox(width: 4),
+              ],
+            ),
           ),
         ),
       );

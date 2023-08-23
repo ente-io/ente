@@ -1,23 +1,56 @@
 import "package:flutter/material.dart";
 import "package:photos/theme/ente_theme.dart";
 
-class SelectionActionButton extends StatefulWidget {
+class SelectionActionButton extends StatelessWidget {
   final String labelText;
   final IconData icon;
   final VoidCallback? onTap;
+  final bool shouldShow;
 
   const SelectionActionButton({
     required this.labelText,
     required this.icon,
     required this.onTap,
+    this.shouldShow = true,
     super.key,
   });
 
   @override
-  State<SelectionActionButton> createState() => _SelectionActionButtonState();
+  Widget build(BuildContext context) {
+    return AnimatedSize(
+      duration: const Duration(milliseconds: 350),
+      curve: Curves.easeInOutCirc,
+      child: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 300),
+        child: shouldShow
+            ? _Body(
+                labelText: labelText,
+                icon: icon,
+                onTap: onTap,
+              )
+            : const SizedBox(
+                height: 60,
+              ),
+      ),
+    );
+  }
 }
 
-class _SelectionActionButtonState extends State<SelectionActionButton> {
+class _Body extends StatefulWidget {
+  final String labelText;
+  final IconData icon;
+  final VoidCallback? onTap;
+  const _Body({
+    required this.labelText,
+    required this.icon,
+    required this.onTap,
+  });
+
+  @override
+  State<_Body> createState() => __BodyState();
+}
+
+class __BodyState extends State<_Body> {
   static const minWidth = 64.0;
   late double widthOfButton;
   Color? backgroundColor;
@@ -84,17 +117,6 @@ class _SelectionActionButtonState extends State<SelectionActionButton> {
     return minWidth;
   }
 
-  double computeWidthOfWord(String text, TextStyle style) {
-    final textPainter = TextPainter(
-      text: TextSpan(text: text, style: style),
-      maxLines: 1,
-      textDirection: TextDirection.ltr,
-      textScaleFactor: MediaQuery.of(context).textScaleFactor,
-    )..layout();
-
-    return textPainter.size.width;
-  }
-
   double getWidthOfWidestWord(String labelText) {
     final words = labelText.split(RegExp(r'\s+'));
     if (words.isEmpty) return 0.0;
@@ -108,5 +130,16 @@ class _SelectionActionButtonState extends State<SelectionActionButton> {
       }
     }
     return maxWidth;
+  }
+
+  double computeWidthOfWord(String text, TextStyle style) {
+    final textPainter = TextPainter(
+      text: TextSpan(text: text, style: style),
+      maxLines: 1,
+      textDirection: TextDirection.ltr,
+      textScaleFactor: MediaQuery.of(context).textScaleFactor,
+    )..layout();
+
+    return textPainter.size.width;
   }
 }
