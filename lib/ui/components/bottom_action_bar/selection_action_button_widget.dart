@@ -18,17 +18,20 @@ class SelectionActionButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AnimatedSize(
-      duration: const Duration(milliseconds: 250),
+      duration: const Duration(milliseconds: 350),
       curve: Curves.easeInOutCirc,
-      child: shouldShow
-          ? _Body(
-              labelText: labelText,
-              icon: icon,
-              onTap: onTap,
-            )
-          : const SizedBox(
-              height: 60,
-            ),
+      child: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 300),
+        child: shouldShow
+            ? _Body(
+                labelText: labelText,
+                icon: icon,
+                onTap: onTap,
+              )
+            : const SizedBox(
+                height: 60,
+              ),
+      ),
     );
   }
 }
