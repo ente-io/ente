@@ -44,7 +44,6 @@ class _Body extends StatefulWidget {
     required this.labelText,
     required this.icon,
     required this.onTap,
-    super.key,
   });
 
   @override
@@ -118,17 +117,6 @@ class __BodyState extends State<_Body> {
     return minWidth;
   }
 
-  double computeWidthOfWord(String text, TextStyle style) {
-    final textPainter = TextPainter(
-      text: TextSpan(text: text, style: style),
-      maxLines: 1,
-      textDirection: TextDirection.ltr,
-      textScaleFactor: MediaQuery.of(context).textScaleFactor,
-    )..layout();
-
-    return textPainter.size.width;
-  }
-
   double getWidthOfWidestWord(String labelText) {
     final words = labelText.split(RegExp(r'\s+'));
     if (words.isEmpty) return 0.0;
@@ -142,5 +130,16 @@ class __BodyState extends State<_Body> {
       }
     }
     return maxWidth;
+  }
+
+  double computeWidthOfWord(String text, TextStyle style) {
+    final textPainter = TextPainter(
+      text: TextSpan(text: text, style: style),
+      maxLines: 1,
+      textDirection: TextDirection.ltr,
+      textScaleFactor: MediaQuery.of(context).textScaleFactor,
+    )..layout();
+
+    return textPainter.size.width;
   }
 }
