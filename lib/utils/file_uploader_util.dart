@@ -168,27 +168,37 @@ Future<MediaUploadData> _getMediaUploadDataFromAssetFile(ente.File file) async {
   );
 }
 
-Future<Uint8List?> _getThumbnailForUpload(AssetEntity asset, ente.File file) async {
-  Uint8List? thumbnailData = await asset.thumbnailDataWithSize(
-    const ThumbnailSize(thumbnailLargeSize, thumbnailLargeSize),
-    quality: thumbnailQuality,
-  );
-  if (thumbnailData == null) {
-    throw InvalidFileError(
-      "no thumbnail ${file.tag}",
-      InvalidReason.thumbnailMissing,
+Future<Uint8List?> _getThumbnailForUpload(
+  AssetEntity asset,
+  ente.File file,
+) async {
+  try {
+    Uint8List? thumbnailData = await asset.thumbnailDataWithSize(
+      const ThumbnailSize(thumbnailLargeSize, thumbnailLargeSize),
+      quality: thumbnailQuality,
     );
+    if (thumbnailData == null) {
+      throw InvalidFileError(
+        "no thumbnail : ${file.fileType} ${file.tag}",
+        InvalidReason.thumbnailMissing,
+      );
+    }
+    int compressionAttempts = 0;
+    while (thumbnailData!.length > thumbnailDataLimit &&
+        compressionAttempts < kMaximumThumbnailCompressionAttempts) {
+      _logger.info("Thumbnail size " + thumbnailData.length.toString());
+      thumbnailData = await compressThumbnail(thumbnailData);
+      _logger
+          .info("Compressed thumbnail size " + thumbnailData.length.toString());
+      compressionAttempts++;
+    }
+    return thumbnailData;
+  } catch (e) {
+    final String errMessage =
+        "thumbErr for ${file.fileType}, ${extension(file.displayName)} ${file.tag}";
+    _logger.warning(errMessage, e);
+    throw InvalidFileError(errMessage, InvalidReason.thumbnailMissing);
   }
-  int compressionAttempts = 0;
-  while (thumbnailData!.length > thumbnailDataLimit &&
-      compressionAttempts < kMaximumThumbnailCompressionAttempts) {
-    _logger.info("Thumbnail size " + thumbnailData.length.toString());
-    thumbnailData = await compressThumbnail(thumbnailData);
-    _logger
-        .info("Compressed thumbnail size " + thumbnailData.length.toString());
-    compressionAttempts++;
-  }
-  return thumbnailData;
 }
 
 // check if the assetType is still the same. This can happen for livePhotos
