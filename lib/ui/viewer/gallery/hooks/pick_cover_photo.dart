@@ -97,8 +97,8 @@ class PickCoverPhotoWidget extends StatelessWidget {
                                 asc: asc,
                               );
                               // hide ignored files from home page UI
-                              final ignoredIDs =
-                                  await IgnoredFilesService.instance.ignoredIDs;
+                              final ignoredIDs = await IgnoredFilesService
+                                  .instance.idToIgnoreReasonMap;
                               result.files.removeWhere(
                                 (f) =>
                                     f.uploadedFileID == null &&
@@ -151,8 +151,10 @@ class PickCoverPhotoWidget extends StatelessWidget {
                                   onTap: () async {
                                     final selectedFile =
                                         selectedFiles.files.first;
-                                    Navigator.pop(context, selectedFile
-                                        .uploadedFileID!,);
+                                    Navigator.pop(
+                                      context,
+                                      selectedFile.uploadedFileID!,
+                                    );
                                   },
                                 ),
                               );
@@ -169,7 +171,7 @@ class PickCoverPhotoWidget extends StatelessWidget {
                                 ? Icons.restore_outlined
                                 : null,
                             onTap: () async {
-                              if(collection.hasCover) {
+                              if (collection.hasCover) {
                                 Navigator.pop(context, 0);
                               } else {
                                 Navigator.of(context).pop();

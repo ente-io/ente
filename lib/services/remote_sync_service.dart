@@ -192,7 +192,8 @@ class RemoteSyncService {
   }
 
   Future<void> _syncUpdatedCollections(
-      final Map<int, int> idsToRemoteUpdationTimeMap,) async {
+    final Map<int, int> idsToRemoteUpdationTimeMap,
+  ) async {
     for (final cid in idsToRemoteUpdationTimeMap.keys) {
       await _syncCollectionDiff(
         cid,
@@ -222,7 +223,7 @@ class RemoteSyncService {
   Future<void> _syncCollectionDiff(int collectionID, int sinceTime) async {
     _logger.info(
       "[Collection-$collectionID] fetch diff silently: $_isExistingSyncSilent "
-          "since: $sinceTime",
+      "since: $sinceTime",
     );
     if (!_isExistingSyncSilent) {
       Bus.instance.fire(SyncStatusUpdate(SyncStatus.applyingRemoteDiff));
@@ -492,7 +493,7 @@ class RemoteSyncService {
     }
     final bool shouldRemoveVideos =
         !_config.shouldBackupVideos() || _shouldThrottleSync();
-    final ignoredIDs = await IgnoredFilesService.instance.ignoredIDs;
+    final ignoredIDs = await IgnoredFilesService.instance.idToIgnoreReasonMap;
     bool shouldSkipUploadFunc(File file) {
       return IgnoredFilesService.instance.shouldSkipUpload(ignoredIDs, file);
     }
@@ -665,7 +666,10 @@ class RemoteSyncService {
         // Case [1] Check and clear local cache when uploadedFile already exist
         // Note: Existing file can be null here if it's replaced by the time we
         // reach here
-        existingFile = await _db.getUploadedFile(remoteFile.uploadedFileID!, remoteFile.collectionID!,);
+        existingFile = await _db.getUploadedFile(
+          remoteFile.uploadedFileID!,
+          remoteFile.collectionID!,
+        );
         if (existingFile != null &&
             _shouldClearCache(remoteFile, existingFile)) {
           needsGalleryReload = true;
@@ -860,18 +864,18 @@ class RemoteSyncService {
     // TODO: Add option to opt out of notifications for a specific collection
     // Screen: https://www.figma.com/file/SYtMyLBs5SAOkTbfMMzhqt/ente-Visual-Design?type=design&node-id=7689-52943&t=IyWOfh0Gsb0p7yVC-4
     final isForeground = AppLifecycleService.instance.isForeground;
-    final bool showNotification = NotificationService.instance
-        .shouldShowNotificationsForSharedPhotos() &&
-        isFirstRemoteSyncDone() &&
-        !isForeground;
+    final bool showNotification =
+        NotificationService.instance.shouldShowNotificationsForSharedPhotos() &&
+            isFirstRemoteSyncDone() &&
+            !isForeground;
     _logger.info(
       "[Collection-$collectionID] shouldShow notification: $showNotification, "
-          "isAppInForeground: $isForeground",
+      "isAppInForeground: $isForeground",
     );
     return showNotification;
   }
 
-  Future<void>  _notifyNewFiles(List<int> collectionIDs) async {
+  Future<void> _notifyNewFiles(List<int> collectionIDs) async {
     final userID = Configuration.instance.getUserID();
     final appOpenTime = AppLifecycleService.instance.getLastAppOpenTime();
     for (final collectionID in collectionIDs) {
@@ -882,11 +886,11 @@ class RemoteSyncService {
           await _db.getNewFilesInCollection(collectionID, appOpenTime);
       final Set<int> sharedFilesIDs = {};
       final Set<int> collectedFilesIDs = {};
-      for(final file in files) {
+      for (final file in files) {
         if (file.isUploaded && file.ownerID != userID) {
           sharedFilesIDs.add(file.uploadedFileID!);
-        } else if (file.isUploaded && file.pubMagicMetadata!.uploaderName !=
-        null) {
+        } else if (file.isUploaded &&
+            file.pubMagicMetadata!.uploaderName != null) {
           collectedFilesIDs.add(file.uploadedFileID!);
         }
       }
