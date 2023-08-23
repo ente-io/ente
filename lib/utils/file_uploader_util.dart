@@ -107,7 +107,6 @@ Future<MediaUploadData> _getMediaUploadDataFromAssetFile(ente.File file) async {
       InvalidReason.sourceFileMissing,
     );
   }
-
   // h4ck to fetch location data if missing (thank you Android Q+) lazily only during uploads
   await _decorateEnteFileData(file, asset);
   fileHash = CryptoUtil.bin2base64(await CryptoUtil.getHash(sourceFile));
@@ -142,25 +141,7 @@ Future<MediaUploadData> _getMediaUploadDataFromAssetFile(ente.File file) async {
     zipHash = CryptoUtil.bin2base64(await CryptoUtil.getHash(sourceFile));
   }
 
-  thumbnailData = await asset.thumbnailDataWithSize(
-    const ThumbnailSize(thumbnailLargeSize, thumbnailLargeSize),
-    quality: thumbnailQuality,
-  );
-  if (thumbnailData == null) {
-    throw InvalidFileError(
-      "no thumbnail ${file.tag}",
-      InvalidReason.thumbnailMissing,
-    );
-  }
-  int compressionAttempts = 0;
-  while (thumbnailData!.length > thumbnailDataLimit &&
-      compressionAttempts < kMaximumThumbnailCompressionAttempts) {
-    _logger.info("Thumbnail size " + thumbnailData.length.toString());
-    thumbnailData = await compressThumbnail(thumbnailData);
-    _logger
-        .info("Compressed thumbnail size " + thumbnailData.length.toString());
-    compressionAttempts++;
-  }
+  thumbnailData = await _getThumbnailForUpload(asset, file);
   isDeleted = !(await asset.exists);
   int? h, w;
   if (asset.width != 0 && asset.height != 0) {
@@ -185,6 +166,39 @@ Future<MediaUploadData> _getMediaUploadDataFromAssetFile(ente.File file) async {
     width: w,
     motionPhotoStartIndex: motionPhotoStartingIndex,
   );
+}
+
+Future<Uint8List?> _getThumbnailForUpload(
+  AssetEntity asset,
+  ente.File file,
+) async {
+  try {
+    Uint8List? thumbnailData = await asset.thumbnailDataWithSize(
+      const ThumbnailSize(thumbnailLargeSize, thumbnailLargeSize),
+      quality: thumbnailQuality,
+    );
+    if (thumbnailData == null) {
+      throw InvalidFileError(
+        "no thumbnail : ${file.fileType} ${file.tag}",
+        InvalidReason.thumbnailMissing,
+      );
+    }
+    int compressionAttempts = 0;
+    while (thumbnailData!.length > thumbnailDataLimit &&
+        compressionAttempts < kMaximumThumbnailCompressionAttempts) {
+      _logger.info("Thumbnail size " + thumbnailData.length.toString());
+      thumbnailData = await compressThumbnail(thumbnailData);
+      _logger
+          .info("Compressed thumbnail size " + thumbnailData.length.toString());
+      compressionAttempts++;
+    }
+    return thumbnailData;
+  } catch (e) {
+    final String errMessage =
+        "thumbErr for ${file.fileType}, ${extension(file.displayName)} ${file.tag}";
+    _logger.warning(errMessage, e);
+    throw InvalidFileError(errMessage, InvalidReason.thumbnailMissing);
+  }
 }
 
 // check if the assetType is still the same. This can happen for livePhotos

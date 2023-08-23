@@ -9,7 +9,6 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
-import 'package:path/path.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/errors.dart';
 import 'package:photos/core/event_bus.dart';
@@ -113,7 +112,9 @@ class FileUploader {
             return false;
           },
           InvalidFileError(
-              "File already deleted", InvalidReason.assetDeletedEvent,),
+            "File already deleted",
+            InvalidReason.assetDeletedEvent,
+          ),
         );
       }
     });
@@ -350,11 +351,11 @@ class FileUploader {
     var uploadHardFailure = false;
 
     try {
+      final bool isUpdatedFile =
+          file.uploadedFileID != null && file.updationTime == -1;
       _logger.info(
-        "Trying to upload " +
-            file.toString() +
-            ", isForced: " +
-            forcedUpload.toString(),
+        'starting ${forcedUpload ? 'forced' : ''} '
+        '${isUpdatedFile ? 're-upload' : 'upload'} of ${file.toString()}',
       );
       try {
         mediaUploadData = await getUploadDataFromEnteFile(file);
@@ -365,12 +366,8 @@ class FileUploader {
           rethrow;
         }
       }
-
       Uint8List? key;
-      final bool isUpdatedFile =
-          file.uploadedFileID != null && file.updationTime == -1;
       if (isUpdatedFile) {
-        _logger.info("File was updated " + file.toString());
         key = getFileKey(file);
       } else {
         key = null;
@@ -737,13 +734,23 @@ class FileUploader {
   }
 
   Future _onInvalidFileError(File file, InvalidFileError e) async {
-    final String ext = file.title == null ? "no title" : extension(file.title!);
-    _logger.severe(
-      "Invalid file: (ext: $ext) encountered: " + file.toString(),
-      e,
-    );
-    await FilesDB.instance.deleteLocalFile(file);
-    await LocalSyncService.instance.trackInvalidFile(file);
+    final bool canIgnoreFile = file.localID != null &&
+        file.deviceFolder != null &&
+        file.title != null &&
+        !file.isSharedMediaToAppSandbox;
+    final bool deleteEntry = !file.isUploaded && !canIgnoreFile;
+    if (e.reason != InvalidReason.thumbnailMissing || !canIgnoreFile) {
+      _logger.severe(
+        "Invalid file, localDelete: $deleteEntry, ignored: $canIgnoreFile",
+        e,
+      );
+    }
+    if (deleteEntry) {
+      await FilesDB.instance.deleteLocalFile(file);
+    }
+    if (canIgnoreFile) {
+      await LocalSyncService.instance.ignoreUpload(file, e);
+    }
     throw e;
   }
 

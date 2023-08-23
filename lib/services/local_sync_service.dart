@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/core/configuration.dart';
+import "package:photos/core/errors.dart";
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/device_files_db.dart';
 import 'package:photos/db/file_updation_db.dart';
@@ -14,7 +15,9 @@ import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/events/sync_status_update_event.dart';
 import 'package:photos/extensions/stop_watch.dart';
 import 'package:photos/models/file.dart';
+import "package:photos/models/ignored_file.dart";
 import 'package:photos/services/app_lifecycle_service.dart';
+import "package:photos/services/ignored_files_service.dart";
 import 'package:photos/services/local/local_sync_util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite/sqflite.dart';
@@ -201,19 +204,29 @@ class LocalSyncService {
     return hasUnsyncedFiles;
   }
 
-  Future<void> trackInvalidFile(File file) async {
-    if (file.localID == null) {
-      debugPrint("Warning: Invalid file has no localID");
+  Future<void> ignoreUpload(File file, InvalidFileError error) async {
+    if (file.localID == null ||
+        file.deviceFolder == null ||
+        file.title == null) {
+      _logger.warning('Invalid file received for ignoring: $file');
       return;
     }
-    final invalidIDs = _getInvalidFileIDs();
-    invalidIDs.add(file.localID!);
-    await _prefs.setStringList(kInvalidFileIDsKey, invalidIDs);
+    final ignored = IgnoredFile(
+      file.localID,
+      file.title,
+      file.deviceFolder,
+      error.reason.name,
+    );
+    await IgnoredFilesService.instance.cacheAndInsert([ignored]);
   }
 
+  @Deprecated(
+    "remove usage after few releases as we will switch to ignored files. Keeping it now to clear the invalid file ids from shared prefs",
+  )
   List<String> _getInvalidFileIDs() {
     if (_prefs.containsKey(kInvalidFileIDsKey)) {
-      return _prefs.getStringList(kInvalidFileIDsKey)!;
+      _prefs.remove(kInvalidFileIDsKey);
+      return <String>[];
     } else {
       return <String>[];
     }
