@@ -15,7 +15,9 @@ import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/events/sync_status_update_event.dart';
 import 'package:photos/extensions/stop_watch.dart';
 import 'package:photos/models/file.dart';
+import "package:photos/models/ignored_file.dart";
 import 'package:photos/services/app_lifecycle_service.dart';
+import "package:photos/services/ignored_files_service.dart";
 import 'package:photos/services/local/local_sync_util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite/sqflite.dart';
@@ -203,13 +205,19 @@ class LocalSyncService {
   }
 
   Future<void> trackInvalidFile(File file, InvalidFileError error) async {
-    if (file.localID == null) {
-      debugPrint("Warning: Invalid file has no localID");
+    if (file.localID == null ||
+        file.deviceFolder == null ||
+        file.title == null) {
+      _logger.warning('Invalid file received for ignoring: $file');
       return;
     }
-    final invalidIDs = _getInvalidFileIDs();
-    invalidIDs.add(file.localID!);
-    await _prefs.setStringList(kInvalidFileIDsKey, invalidIDs);
+    final ignored = IgnoredFile(
+      file.localID,
+      file.title,
+      file.deviceFolder,
+      error.reason.name,
+    );
+    await IgnoredFilesService.instance.cacheAndInsert([ignored]);
   }
 
   @Deprecated(
