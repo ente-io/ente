@@ -139,7 +139,7 @@ class FilesService {
   }
 
   Future<void> removeIgnoredFiles(Future<FileLoadResult> result) async {
-    final ignoredIDs = await IgnoredFilesService.instance.ignoredIDs;
+    final ignoredIDs = await IgnoredFilesService.instance.idToIgnoreReasonMap;
     (await result).files.removeWhere(
           (f) =>
               f.uploadedFileID == null &&

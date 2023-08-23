@@ -41,7 +41,8 @@ class UnCategorizedPage extends StatelessWidget {
           asc: asc,
         );
         // hide ignored files from home page UI
-        final ignoredIDs = await IgnoredFilesService.instance.ignoredIDs;
+        final ignoredIDs =
+            await IgnoredFilesService.instance.idToIgnoreReasonMap;
         result.files.removeWhere(
           (f) =>
               f.uploadedFileID == null &&

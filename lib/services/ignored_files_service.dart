@@ -15,20 +15,20 @@ class IgnoredFilesService {
   static final IgnoredFilesService instance =
       IgnoredFilesService._privateConstructor();
 
-  Future<Set<String>>? _ignoredIDs;
+  Future<Map<String, String>>? _idsToReasonMap;
 
-  Future<Set<String>> get ignoredIDs async {
+  Future<Map<String, String>> get idToIgnoreReasonMap async {
     // lazily instantiate the db the first time it is accessed
-    _ignoredIDs ??= _loadExistingIDs();
-    return _ignoredIDs!;
+    _idsToReasonMap ??= _loadIDsToReasonMap();
+    return _idsToReasonMap!;
   }
 
   Future<void> cacheAndInsert(List<IgnoredFile> ignoredFiles) async {
-    final existingIDs = await ignoredIDs;
+    final existingIDs = await idToIgnoreReasonMap;
     for (IgnoredFile iFile in ignoredFiles) {
       final id = _idForIgnoredFile(iFile);
       if (id != null) {
-        existingIDs.add(id);
+        existingIDs[id] = iFile.reason;
       }
     }
     return _db.insertMultiple(ignoredFiles);
@@ -39,16 +39,24 @@ class IgnoredFilesService {
   // to avoid making it async in nature.
   // This syntax is intentional as we want to ensure that ignoredIDs are loaded
   // from the DB before calling this method.
-  bool shouldSkipUpload(Set<String> ignoredIDs, File file) {
+  bool shouldSkipUpload(Map<String, String> idToReasonMap, File file) {
     final id = _getIgnoreID(file.localID, file.deviceFolder, file.title);
     if (id != null && id.isNotEmpty) {
-      return ignoredIDs.contains(id);
+      return idToReasonMap.containsKey(id);
     }
     return false;
   }
 
+  String? getUploadSkipReason(Map<String, String> idToReasonMap, File file) {
+    final id = _getIgnoreID(file.localID, file.deviceFolder, file.title);
+    if (id != null && id.isNotEmpty) {
+      return idToReasonMap[id];
+    }
+    return null;
+  }
+
   Future<bool> shouldSkipUploadAsync(File file) async {
-    final ignoredID = await ignoredIDs;
+    final ignoredID = await idToIgnoreReasonMap;
     return shouldSkipUpload(ignoredID, file);
   }
 
@@ -57,7 +65,7 @@ class IgnoredFilesService {
   Future<void> removeIgnoredMappings(List<File> files) async {
     final List<IgnoredFile> ignoredFiles = [];
     final Set<String> idsToRemoveFromCache = {};
-    final Set<String> currentlyIgnoredIDs = await ignoredIDs;
+    final Map<String, String> currentlyIgnoredIDs = await idToIgnoreReasonMap;
     for (final file in files) {
       // check if upload is not skipped for file. If not, no need to remove
       // any mapping
@@ -74,23 +82,25 @@ class IgnoredFilesService {
 
     if (ignoredFiles.isNotEmpty) {
       await _db.removeIgnoredEntries(ignoredFiles);
-      currentlyIgnoredIDs.removeAll(idsToRemoveFromCache);
+      for (final id in idsToRemoveFromCache) {
+        currentlyIgnoredIDs.remove(id);
+      }
     }
   }
 
   Future<void> reset() async {
     await _db.clearTable();
-    _ignoredIDs = null;
+    _idsToReasonMap = null;
   }
 
-  Future<Set<String>> _loadExistingIDs() async {
+  Future<Map<String, String>> _loadIDsToReasonMap() async {
     _logger.fine('loading existing IDs');
     final dbResult = await _db.getAll();
-    final Set<String> result = <String>{};
+    final Map<String, String> result = <String, String>{};
     for (IgnoredFile iFile in dbResult) {
       final id = _idForIgnoredFile(iFile);
       if (id != null) {
-        result.add(id);
+        result[id] = iFile.reason;
       }
     }
     return result;

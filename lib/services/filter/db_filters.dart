@@ -33,10 +33,10 @@ Future<List<File>> applyDBFilters(
   }
   final List<Filter> filters = [];
   if (options.hideIgnoredForUpload) {
-    final Set<String> ignoredIDs =
-        await IgnoredFilesService.instance.ignoredIDs;
-    if (ignoredIDs.isNotEmpty) {
-      filters.add(UploadIgnoreFilter(ignoredIDs));
+    final Map<String, String> idToReasonMap =
+        await IgnoredFilesService.instance.idToIgnoreReasonMap;
+    if (idToReasonMap.isNotEmpty) {
+      filters.add(UploadIgnoreFilter(idToReasonMap));
     }
   }
   if (options.dedupeUploadID) {

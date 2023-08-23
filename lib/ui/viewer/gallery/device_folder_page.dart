@@ -205,17 +205,19 @@ class _BackupHeaderWidgetState extends State<BackupHeaderWidget> {
     Future<List<File>> filesInDeviceCollection,
   ) async {
     final List<File> deviceCollectionFiles = await filesInDeviceCollection;
-
-    final ignoredIdsForFile = <String>{};
+    final allIgnoredIDs =
+        await IgnoredFilesService.instance.idToIgnoreReasonMap;
+    if (allIgnoredIDs.isEmpty) {
+      return false;
+    }
     for (File file in deviceCollectionFiles) {
       final String? ignoreID =
           IgnoredFilesService.instance.getIgnoredIDForFile(file);
-      if (ignoreID != null) {
-        ignoredIdsForFile.add(ignoreID);
+      if (ignoreID != null && allIgnoredIDs.containsKey(ignoreID!)) {
+        return true;
       }
     }
-    final ignoredFiles = await IgnoredFilesService.instance.ignoredIDs;
-    return ignoredFiles.intersection(ignoredIdsForFile).isNotEmpty;
+    return false;
   }
 }
 
@@ -252,7 +254,7 @@ class _ResetIgnoredFilesWidgetState extends State<ResetIgnoredFilesWidget> {
               widget.filesInDeviceCollection,
             );
             RemoteSyncService.instance.sync(silently: true).then((value) {
-              if(mounted) {
+              if (mounted) {
                 widget.parentSetState.call();
               }
             });
