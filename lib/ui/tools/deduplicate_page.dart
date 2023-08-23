@@ -163,9 +163,9 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
           child: ListView.builder(
             itemBuilder: (context, index) {
               if (index == 0) {
-                return _getHeader();
+                return const SizedBox.shrink();
               } else if (index == 1) {
-                return _getClubbingConfig();
+                return const SizedBox.shrink();
               } else if (index == 2) {
                 if (_duplicates.isNotEmpty) {
                   return _getSortMenu(context);
@@ -200,6 +200,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
     );
   }
 
+  @Deprecated('Remove options for club by name, clean code in 2024')
   Padding _getHeader() {
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
@@ -221,6 +222,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
     );
   }
 
+  @Deprecated('Remove options for clubbing, clean code in 2024')
   Widget _getClubbingConfig() {
     return Padding(
       padding: const EdgeInsets.fromLTRB(12, 0, 12, 4),
