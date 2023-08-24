@@ -8,7 +8,7 @@ import "package:visibility_detector/visibility_detector.dart";
 
 class RecyclableGridViewWidget extends StatefulWidget {
   final bool shouldRender;
-  final List<File> filesInGroup;
+  final List<EnteFile> filesInGroup;
   final int photoGridSize;
   final bool limitSelectionToOne;
   final String tag;

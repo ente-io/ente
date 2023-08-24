@@ -46,7 +46,7 @@ class FileCaptionReadyOnly extends StatelessWidget {
 }
 
 class FileCaptionWidget extends StatefulWidget {
-  final File file;
+  final EnteFile file;
 
   const FileCaptionWidget({required this.file, super.key});
 

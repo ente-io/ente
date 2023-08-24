@@ -23,7 +23,7 @@ group into multiple grid views during rendering.
  */
 class MultipleGroupsGalleryView extends StatelessWidget {
   final ItemScrollController itemScroller;
-  final List<List<File>> groupedFiles;
+  final List<List<EnteFile>> groupedFiles;
   final bool disableScroll;
   final Widget? header;
   final Widget? footer;
@@ -65,7 +65,7 @@ class MultipleGroupsGalleryView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return HugeListView<List<File>>(
+    return HugeListView<List<EnteFile>>(
       controller: itemScroller,
       startIndex: 0,
       totalCount: groupedFiles.length,

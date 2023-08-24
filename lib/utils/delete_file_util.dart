@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io' as io;
 import 'dart:io';
 import 'dart:math';
 
@@ -33,7 +32,7 @@ final _logger = Logger("DeleteFileUtil");
 
 Future<void> deleteFilesFromEverywhere(
   BuildContext context,
-  List<File> files,
+  List<EnteFile> files,
 ) async {
   _logger.info("Trying to deleteFilesFromEverywhere " + files.toString());
   final List<String> localAssetIDs = [];
@@ -71,7 +70,7 @@ Future<void> deleteFilesFromEverywhere(
   deletedIDs.addAll(await _tryDeleteSharedMediaFiles(localSharedMediaIDs));
   final updatedCollectionIDs = <int>{};
   final List<TrashRequest> uploadedFilesToBeTrashed = [];
-  final List<File> deletedFiles = [];
+  final List<EnteFile> deletedFiles = [];
   for (final file in files) {
     if (file.localID != null) {
       // Remove only those files that have already been removed from disk
@@ -139,7 +138,7 @@ Future<void> deleteFilesFromEverywhere(
 
 Future<void> deleteFilesFromRemoteOnly(
   BuildContext context,
-  List<File> files,
+  List<EnteFile> files,
 ) async {
   files.removeWhere((element) => element.uploadedFileID == null);
   if (files.isEmpty) {
@@ -189,7 +188,7 @@ Future<void> deleteFilesFromRemoteOnly(
 
 Future<void> deleteFilesOnDeviceOnly(
   BuildContext context,
-  List<File> files,
+  List<EnteFile> files,
 ) async {
   _logger.info("Trying to deleteFilesOnDeviceOnly" + files.toString());
   final List<String> localAssetIDs = [];
@@ -225,7 +224,7 @@ Future<void> deleteFilesOnDeviceOnly(
     _logger.severe("Could not delete file", e, s);
   }
   deletedIDs.addAll(await _tryDeleteSharedMediaFiles(localSharedMediaIDs));
-  final List<File> deletedFiles = [];
+  final List<EnteFile> deletedFiles = [];
   for (final file in files) {
     // Remove only those files that have been removed from disk
     if (deletedIDs.contains(file.localID) ||
@@ -246,7 +245,7 @@ Future<void> deleteFilesOnDeviceOnly(
   }
 }
 
-Future<bool> deleteFromTrash(BuildContext context, List<File> files) async {
+Future<bool> deleteFromTrash(BuildContext context, List<EnteFile> files) async {
   bool didDeletionStart = false;
   final actionResult = await showChoiceActionSheet(
     context,
@@ -444,9 +443,9 @@ Future<List<String>> deleteLocalFilesInBatches(
   return deletedIDs;
 }
 
-Future<bool> _localFileExist(File file) {
+Future<bool> _localFileExist(EnteFile file) {
   if (file.isSharedMediaToAppSandbox) {
-    final localFile = io.File(getSharedMediaFilePath(file));
+    final localFile = File(getSharedMediaFilePath(file));
     return localFile.exists();
   } else {
     return file.getAsset.then((asset) {
@@ -465,8 +464,8 @@ Future<List<String>> _tryDeleteSharedMediaFiles(List<String> localIDs) {
       final String localPath = getSharedMediaPathFromLocalID(id);
       try {
         // verify the file exists as the OS may have already deleted it from cache
-        if (io.File(localPath).existsSync()) {
-          await io.File(localPath).delete();
+        if (File(localPath).existsSync()) {
+          await File(localPath).delete();
         }
         actuallyDeletedIDs.add(id);
       } catch (e, s) {

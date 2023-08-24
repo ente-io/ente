@@ -63,7 +63,7 @@ class _FileSelectionActionsWidgetState
   @override
   void initState() {
     currentUserID = Configuration.instance.getUserID()!;
-    split = FilesSplit.split(<File>[], currentUserID);
+    split = FilesSplit.split(<EnteFile>[], currentUserID);
     widget.selectedFiles.addListener(_selectFileChangeListener);
     collectionActions = CollectionActions(CollectionsService.instance);
     isCollectionOwner =

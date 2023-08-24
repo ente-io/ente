@@ -9,7 +9,7 @@ class DeviceCollection {
   UploadStrategy uploadStrategy;
   final String? coverId;
   int? collectionID;
-  File? thumbnail;
+  EnteFile? thumbnail;
 
   bool hasCollectionID() {
     return collectionID != null && collectionID! != -1;

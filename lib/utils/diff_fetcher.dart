@@ -30,11 +30,11 @@ class DiffFetcher {
       if(diff.isNotEmpty) {
         existingUploadIDs = await FilesDB.instance.getUploadedFileIDs(collectionID);
       }
-      final deletedFiles = <File>[];
-      final updatedFiles = <File>[];
+      final deletedFiles = <EnteFile>[];
+      final updatedFiles = <EnteFile>[];
 
       for (final item in diff) {
-        final file = File();
+        final file = EnteFile();
         file.uploadedFileID = item["id"];
         file.collectionID = item["collectionID"];
         file.updationTime = item["updationTime"];
@@ -107,8 +107,8 @@ class DiffFetcher {
 }
 
 class Diff {
-  final List<File> updatedFiles;
-  final List<File> deletedFiles;
+  final List<EnteFile> updatedFiles;
+  final List<EnteFile> deletedFiles;
   final bool hasMore;
   final int latestUpdatedAtTime;
 

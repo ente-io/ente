@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:collection';
 import 'dart:convert';
-import 'dart:io' as io;
+import 'dart:io';
 import 'dart:math';
 
 import 'package:collection/collection.dart';
@@ -122,14 +122,14 @@ class FileUploader {
 
   // upload future will return null as File when the file entry is deleted
   // locally because it's already present in the destination collection.
-  Future<File> upload(File file, int collectionID) {
+  Future<EnteFile> upload(EnteFile file, int collectionID) {
     if (file.localID == null || file.localID!.isEmpty) {
       return Future.error(Exception("file's localID can not be null or empty"));
     }
     // If the file hasn't been queued yet, queue it
     _totalCountInUploadSession++;
     if (!_queue.containsKey(file.localID)) {
-      final completer = Completer<File>();
+      final completer = Completer<EnteFile>();
       _queue[file.localID] = FileUploadItem(file, collectionID, completer);
       _pollQueue();
       return completer.future;
@@ -163,7 +163,7 @@ class FileUploader {
       }
       return CollectionsService.instance
           .addToCollection(collectionID, [uploadedFile]).then((aVoid) {
-        return uploadedFile as File;
+        return uploadedFile as EnteFile;
       });
     });
   }
@@ -189,7 +189,10 @@ class FileUploader {
     _uploadURLs.clear();
   }
 
-  void removeFromQueueWhere(final bool Function(File) fn, final Error reason) {
+  void removeFromQueueWhere(
+    final bool Function(EnteFile) fn,
+    final Error reason,
+  ) {
     final List<String> uploadsToBeRemoved = [];
     _queue.entries
         .where((entry) => entry.value.status == UploadStatus.notStarted)
@@ -245,8 +248,8 @@ class FileUploader {
     }
   }
 
-  Future<File?> _encryptAndUploadFileToCollection(
-    File file,
+  Future<EnteFile?> _encryptAndUploadFileToCollection(
+    EnteFile file,
     int collectionID, {
     bool forcedUpload = false,
   }) async {
@@ -301,12 +304,12 @@ class FileUploader {
     }
   }
 
-  Future<File> forceUpload(File file, int collectionID) async {
+  Future<EnteFile> forceUpload(EnteFile file, int collectionID) async {
     return _tryToUpload(file, collectionID, true);
   }
 
-  Future<File> _tryToUpload(
-    File file,
+  Future<EnteFile> _tryToUpload(
+    EnteFile file,
     int collectionID,
     bool forcedUpload,
   ) async {
@@ -389,11 +392,11 @@ class FileUploader {
         }
       }
 
-      if (io.File(encryptedFilePath).existsSync()) {
-        await io.File(encryptedFilePath).delete();
+      if (File(encryptedFilePath).existsSync()) {
+        await File(encryptedFilePath).delete();
       }
       await _checkIfWithinStorageLimit(mediaUploadData!.sourceFile!);
-      final encryptedFile = io.File(encryptedFilePath);
+      final encryptedFile = File(encryptedFilePath);
       final EncryptionResult fileAttributes = await CryptoUtil.encryptFile(
         mediaUploadData.sourceFile!.path,
         encryptedFilePath,
@@ -406,10 +409,10 @@ class FileUploader {
         thumbnailData!,
         fileAttributes.key!,
       );
-      if (io.File(encryptedThumbnailPath).existsSync()) {
-        await io.File(encryptedThumbnailPath).delete();
+      if (File(encryptedThumbnailPath).existsSync()) {
+        await File(encryptedThumbnailPath).delete();
       }
-      final encryptedThumbnailFile = io.File(encryptedThumbnailPath);
+      final encryptedThumbnailFile = File(encryptedThumbnailPath);
       await encryptedThumbnailFile
           .writeAsBytes(encryptedThumbnailData.encryptedData!);
 
@@ -437,7 +440,7 @@ class FileUploader {
       if (SyncService.instance.shouldStopSync()) {
         throw SyncStopRequestedError();
       }
-      File remoteFile;
+      EnteFile remoteFile;
       if (isUpdatedFile) {
         remoteFile = await _updateFile(
           file,
@@ -555,9 +558,9 @@ class FileUploader {
     different from the {fileToUpload}, then most probably device has
     duplicate files.
   */
-  Future<Tuple2<bool, File>> _mapToExistingUploadWithSameHash(
+  Future<Tuple2<bool, EnteFile>> _mapToExistingUploadWithSameHash(
     MediaUploadData mediaUploadData,
-    File fileToUpload,
+    EnteFile fileToUpload,
     int toCollectionID,
   ) async {
     if (fileToUpload.uploadedFileID != null) {
@@ -569,7 +572,7 @@ class FileUploader {
       return Tuple2(false, fileToUpload);
     }
 
-    final List<File> existingUploadedFiles =
+    final List<EnteFile> existingUploadedFiles =
         await FilesDB.instance.getUploadedFilesWithHashes(
       mediaUploadData.hashData!,
       fileToUpload.fileType,
@@ -581,7 +584,7 @@ class FileUploader {
     }
 
     // case a
-    final File? sameLocalSameCollection =
+    final EnteFile? sameLocalSameCollection =
         existingUploadedFiles.firstWhereOrNull(
       (e) =>
           e.collectionID == toCollectionID && e.localID == fileToUpload.localID,
@@ -607,7 +610,7 @@ class FileUploader {
     }
 
     // case b
-    final File? fileMissingLocal = existingUploadedFiles.firstWhereOrNull(
+    final EnteFile? fileMissingLocal = existingUploadedFiles.firstWhereOrNull(
       (e) => e.localID == null,
     );
     if (fileMissingLocal != null) {
@@ -639,7 +642,7 @@ class FileUploader {
     }
 
     // case c
-    final File? fileExistsButDifferentCollection =
+    final EnteFile? fileExistsButDifferentCollection =
         existingUploadedFiles.firstWhereOrNull(
       (e) =>
           e.collectionID != toCollectionID && e.localID == fileToUpload.localID,
@@ -675,7 +678,7 @@ class FileUploader {
     MediaUploadData? mediaUploadData,
     bool uploadCompleted,
     bool uploadHardFailure,
-    File file,
+    EnteFile file,
     String encryptedFilePath,
     String encryptedThumbnailPath, {
     required String lockKey,
@@ -686,16 +689,16 @@ class FileUploader {
       // when upload is either completed or there's a tempFailure
       // Shared Media should only be cleared when the upload
       // succeeds.
-      if ((io.Platform.isIOS && (uploadCompleted || uploadHardFailure)) ||
+      if ((Platform.isIOS && (uploadCompleted || uploadHardFailure)) ||
           (uploadCompleted && file.isSharedMediaToAppSandbox)) {
         await mediaUploadData.sourceFile?.delete();
       }
     }
-    if (io.File(encryptedFilePath).existsSync()) {
-      await io.File(encryptedFilePath).delete();
+    if (File(encryptedFilePath).existsSync()) {
+      await File(encryptedFilePath).delete();
     }
-    if (io.File(encryptedThumbnailPath).existsSync()) {
-      await io.File(encryptedThumbnailPath).delete();
+    if (File(encryptedThumbnailPath).existsSync()) {
+      await File(encryptedThumbnailPath).delete();
     }
     await _uploadLocks.releaseLock(lockKey, _processType.toString());
   }
@@ -709,7 +712,7 @@ class FileUploader {
     Note: Local storageBuffer is 20MB, server storageBuffer is 50MB, and an
     additional 30MB is reserved for thumbnails and encryption overhead.
    */
-  Future<void> _checkIfWithinStorageLimit(io.File fileToBeUploaded) async {
+  Future<void> _checkIfWithinStorageLimit(File fileToBeUploaded) async {
     try {
       final UserDetails? userDetails =
           UserService.instance.getCachedUserDetails();
@@ -733,7 +736,7 @@ class FileUploader {
     }
   }
 
-  Future _onInvalidFileError(File file, InvalidFileError e) async {
+  Future _onInvalidFileError(EnteFile file, InvalidFileError e) async {
     final bool canIgnoreFile = file.localID != null &&
         file.deviceFolder != null &&
         file.title != null &&
@@ -754,8 +757,8 @@ class FileUploader {
     throw e;
   }
 
-  Future<File> _uploadFile(
-    File file,
+  Future<EnteFile> _uploadFile(
+    EnteFile file,
     int collectionID,
     String encryptedKey,
     String keyDecryptionNonce,
@@ -836,8 +839,8 @@ class FileUploader {
     }
   }
 
-  Future<File> _updateFile(
-    File file,
+  Future<EnteFile> _updateFile(
+    EnteFile file,
     String fileObjectKey,
     String fileDecryptionHeader,
     int fileSize,
@@ -959,7 +962,7 @@ class FileUploader {
 
   Future<String> _putFile(
     UploadURL uploadURL,
-    io.File file, {
+    File file, {
     int? contentLength,
     int attempt = 1,
   }) async {
@@ -1048,9 +1051,9 @@ class FileUploader {
 }
 
 class FileUploadItem {
-  final File file;
+  final EnteFile file;
   final int collectionID;
-  final Completer<File> completer;
+  final Completer<EnteFile> completer;
   UploadStatus status;
 
   FileUploadItem(

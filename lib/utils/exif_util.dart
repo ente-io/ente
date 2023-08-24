@@ -1,4 +1,4 @@
-import 'dart:io' as io;
+import "dart:io";
 
 import "package:computer/computer.dart";
 import 'package:exif/exif.dart';
@@ -16,14 +16,14 @@ const kEmptyExifDateTime = "0000:00:00 00:00:00";
 
 final _logger = Logger("ExifUtil");
 
-Future<Map<String, IfdTag>> getExif(File file) async {
+Future<Map<String, IfdTag>> getExif(EnteFile file) async {
   try {
-    final io.File? originFile = await getFile(file, isOrigin: true);
+    final File? originFile = await getFile(file, isOrigin: true);
     if (originFile == null) {
       throw Exception("Failed to fetch origin file");
     }
     final exif = await readExifAsync(originFile);
-    if (!file.isRemoteFile && io.Platform.isIOS) {
+    if (!file.isRemoteFile && Platform.isIOS) {
       await originFile.delete();
     }
     return exif;
@@ -33,7 +33,7 @@ Future<Map<String, IfdTag>> getExif(File file) async {
   }
 }
 
-Future<Map<String, IfdTag>?> getExifFromSourceFile(io.File originFile) async {
+Future<Map<String, IfdTag>?> getExifFromSourceFile(File originFile) async {
   try {
     final exif = await readExifAsync(originFile);
     return exif;
@@ -44,7 +44,7 @@ Future<Map<String, IfdTag>?> getExifFromSourceFile(io.File originFile) async {
 }
 
 Future<DateTime?> getCreationTimeFromEXIF(
-  io.File? file,
+  File? file,
   Map<String, IfdTag>? exifData,
 ) async {
   try {
@@ -77,7 +77,7 @@ Future<Map<String, IfdTag>> _readExifArgs(Map<String, dynamic> args) {
   return readExifFromFile(args["file"]);
 }
 
-Future<Map<String, IfdTag>> readExifAsync(io.File file) async {
+Future<Map<String, IfdTag>> readExifAsync(File file) async {
   return await Computer.shared().compute(
     _readExifArgs,
     param: {"file": file},

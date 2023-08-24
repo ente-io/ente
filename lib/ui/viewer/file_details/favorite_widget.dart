@@ -9,7 +9,7 @@ import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/toast_util.dart";
 
 class FavoriteWidget extends StatefulWidget {
-  final File file;
+  final EnteFile file;
 
   const FavoriteWidget(
     this.file, {

@@ -74,7 +74,7 @@ class TrashSyncService {
       Bus.instance.fire(
         CollectionUpdatedEvent(
           0,
-          <File>[],
+          <EnteFile>[],
           "trash_change",
         ),
       );
@@ -132,7 +132,7 @@ class TrashSyncService {
     );
   }
 
-  Future<void> deleteFromTrash(List<File> files) async {
+  Future<void> deleteFromTrash(List<EnteFile> files) async {
     final params = <String, dynamic>{};
     final uniqueFileIds = files.map((e) => e.uploadedFileID!).toSet().toList();
     final batchedFileIDs = uniqueFileIds.chunks(batchSize);

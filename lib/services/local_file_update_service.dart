@@ -7,7 +7,7 @@ import "package:photos/core/configuration.dart";
 import 'package:photos/core/errors.dart';
 import 'package:photos/db/file_updation_db.dart';
 import 'package:photos/db/files_db.dart';
-import 'package:photos/models/file.dart' as ente;
+import 'package:photos/models/file.dart';
 import "package:photos/models/file_type.dart";
 import 'package:photos/utils/file_uploader_util.dart';
 import 'package:photos/utils/file_util.dart';
@@ -116,16 +116,16 @@ class LocalFileUpdateService {
   ) async {
     _logger.info("files to process ${localIDsToProcess.length} for reupload");
     final int userID = Configuration.instance.getUserID()!;
-    final List<ente.File> result =
+    final List<EnteFile> result =
         await FilesDB.instance.getLocalFiles(localIDsToProcess);
-    final List<ente.File> localFilesForUser = [];
-    for (ente.File file in result) {
+    final List<EnteFile> localFilesForUser = [];
+    for (EnteFile file in result) {
       if (file.ownerID == null || file.ownerID == userID) {
         localFilesForUser.add(file);
       }
     }
     final Set<String> processedIDs = {};
-    for (ente.File file in localFilesForUser) {
+    for (EnteFile file in localFilesForUser) {
       if (processedIDs.contains(file.localID)) {
         continue;
       }
@@ -188,7 +188,7 @@ class LocalFileUpdateService {
     );
   }
 
-  Future<MediaUploadData> getUploadData(ente.File file) async {
+  Future<MediaUploadData> getUploadData(EnteFile file) async {
     final mediaUploadData = await getUploadDataFromEnteFile(file);
     // delete the file from app's internal cache if it was copied to app
     // for upload. Shared Media should only be cleared when the upload

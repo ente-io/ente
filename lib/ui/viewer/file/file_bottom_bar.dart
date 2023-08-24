@@ -14,15 +14,15 @@ import 'package:photos/ui/collections/collection_action_sheet.dart';
 import 'package:photos/utils/delete_file_util.dart';
 import 'package:photos/utils/share_util.dart';
 
-class FadingBottomBar extends StatefulWidget {
-  final File file;
-  final Function(File) onEditRequested;
-  final Function(File) onFileRemoved;
+class FileBottomBar extends StatefulWidget {
+  final EnteFile file;
+  final Function(EnteFile) onEditRequested;
+  final Function(EnteFile) onFileRemoved;
   final bool showOnlyInfoButton;
   final int? userID;
   final ValueNotifier<bool> enableFullScreenNotifier;
 
-  const FadingBottomBar(
+  const FileBottomBar(
     this.file,
     this.onEditRequested,
     this.showOnlyInfoButton, {
@@ -33,10 +33,10 @@ class FadingBottomBar extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  FadingBottomBarState createState() => FadingBottomBarState();
+  FileBottomBarState createState() => FileBottomBarState();
 }
 
-class FadingBottomBarState extends State<FadingBottomBar> {
+class FileBottomBarState extends State<FileBottomBar> {
   final GlobalKey shareButtonKey = GlobalKey();
 
   @override
@@ -206,7 +206,7 @@ class FadingBottomBarState extends State<FadingBottomBar> {
     );
   }
 
-  Future<void> _showSingleFileDeleteSheet(File file) async {
+  Future<void> _showSingleFileDeleteSheet(EnteFile file) async {
     await showSingleFileDeleteSheet(
       context,
       file,
@@ -262,7 +262,7 @@ class FadingBottomBarState extends State<FadingBottomBar> {
     );
   }
 
-  Future<void> _displayDetails(File file) async {
+  Future<void> _displayDetails(EnteFile file) async {
     await showDetailsSheet(context, file);
   }
 }

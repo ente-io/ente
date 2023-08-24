@@ -25,7 +25,7 @@ class SearchResultPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final List<File> files = searchResult.resultFiles();
+    final List<EnteFile> files = searchResult.resultFiles();
     final gallery = Gallery(
       asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) {
         final result = files

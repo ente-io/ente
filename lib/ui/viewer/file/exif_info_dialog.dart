@@ -8,7 +8,7 @@ import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/utils/exif_util.dart';
 
 class ExifInfoDialog extends StatelessWidget {
-  final File file;
+  final EnteFile file;
   const ExifInfoDialog(this.file, {Key? key}) : super(key: key);
 
   @override

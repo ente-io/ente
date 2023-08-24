@@ -174,7 +174,7 @@ class _LocationGalleryWidgetState extends State<LocationGalleryWidget> {
       final FileLoadResult result = await fileLoadResult;
       //wait for ignored files to be removed after init
       final stopWatch = Stopwatch()..start();
-      final copyOfFiles = List<File>.from(result.files);
+      final copyOfFiles = List<EnteFile>.from(result.files);
       copyOfFiles.removeWhere((f) {
         return !LocationService.instance.isFileInsideLocationTag(
           centerPoint,

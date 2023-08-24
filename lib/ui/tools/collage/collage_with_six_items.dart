@@ -23,7 +23,7 @@ class CollageWithSixItems extends StatefulWidget {
     super.key,
   });
 
-  final File first, second, third, fourth, fifth, sixth;
+  final EnteFile first, second, third, fourth, fifth, sixth;
 
   @override
   State<CollageWithSixItems> createState() => _CollageWithSixItemsState();

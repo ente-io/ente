@@ -5,13 +5,13 @@ abstract class SearchResult {
 
   String name();
 
-  File? previewThumbnail();
+  EnteFile? previewThumbnail();
 
   String heroTag() {
     return '${type().toString()}_${name()}';
   }
 
-  List<File> resultFiles();
+  List<EnteFile> resultFiles();
 }
 
 enum ResultType {

@@ -12,7 +12,7 @@ class TypeFilter extends Filter {
   });
 
   @override
-  bool filter(File file) {
+  bool filter(EnteFile file) {
     return reverse ? file.fileType != type : file.fileType == type;
   }
 }

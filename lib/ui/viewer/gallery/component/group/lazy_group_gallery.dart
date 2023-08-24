@@ -15,7 +15,7 @@ import 'package:photos/ui/viewer/gallery/gallery.dart';
 import "package:photos/ui/viewer/gallery/state/gallery_context_state.dart";
 
 class LazyGroupGallery extends StatefulWidget {
-  final List<File> files;
+  final List<EnteFile> files;
   final int index;
   final Stream<FilesUpdatedEvent>? reloadEvent;
   final Set<EventType> removalEventTypes;
@@ -56,8 +56,8 @@ class _LazyGroupGalleryState extends State<LazyGroupGallery> {
 
   late Logger _logger;
 
-  late List<File> _files;
-  Set<File>? _filesAsSet;
+  late List<EnteFile> _files;
+  Set<EnteFile>? _filesAsSet;
   late StreamSubscription<FilesUpdatedEvent>? _reloadEventSubscription;
   late StreamSubscription<int> _currentIndexSubscription;
   bool? _shouldRender;
@@ -90,7 +90,7 @@ class _LazyGroupGalleryState extends State<LazyGroupGallery> {
     });
   }
 
-  Set<File> get _setOfFiles {
+  Set<EnteFile> get _setOfFiles {
     _filesAsSet ??= _files.toSet();
     return _filesAsSet!;
   }

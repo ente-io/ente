@@ -50,7 +50,7 @@ class EditCenterPointTileWidget extends StatelessWidget {
         ),
         IconButtonWidget(
           onTap: () async {
-            final File? centerPointFile = await showPickCenterPointSheet(
+            final EnteFile? centerPointFile = await showPickCenterPointSheet(
               context,
               InheritedLocationTagData.of(context).locationTagEntity!,
             );

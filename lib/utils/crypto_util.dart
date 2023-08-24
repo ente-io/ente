@@ -1,5 +1,5 @@
 import "dart:convert";
-import 'dart:io' as io;
+import "dart:io";
 import 'dart:typed_data';
 
 import 'package:computer/computer.dart';
@@ -54,9 +54,9 @@ Uint8List cryptoKdfDeriveFromKey(
 
 // Returns the hash for a given file, chunking it in batches of hashChunkSize
 Future<Uint8List> cryptoGenericHash(Map<String, dynamic> args) async {
-  final sourceFile = io.File(args["sourceFilePath"]);
+  final sourceFile = File(args["sourceFilePath"]);
   final sourceFileLength = await sourceFile.length();
-  final inputFile = sourceFile.openSync(mode: io.FileMode.read);
+  final inputFile = sourceFile.openSync(mode: FileMode.read);
   final state =
       Sodium.cryptoGenerichashInit(null, Sodium.cryptoGenerichashBytesMax);
   var bytesRead = 0;
@@ -94,12 +94,12 @@ EncryptionResult chachaEncryptData(Map<String, dynamic> args) {
 Future<EncryptionResult> chachaEncryptFile(Map<String, dynamic> args) async {
   final encryptionStartTime = DateTime.now().millisecondsSinceEpoch;
   final logger = Logger("ChaChaEncrypt");
-  final sourceFile = io.File(args["sourceFilePath"]);
-  final destinationFile = io.File(args["destinationFilePath"]);
+  final sourceFile = File(args["sourceFilePath"]);
+  final destinationFile = File(args["destinationFilePath"]);
   final sourceFileLength = await sourceFile.length();
   logger.info("Encrypting file of size " + sourceFileLength.toString());
 
-  final inputFile = sourceFile.openSync(mode: io.FileMode.read);
+  final inputFile = sourceFile.openSync(mode: FileMode.read);
   final key = args["key"] ?? Sodium.cryptoSecretstreamXchacha20poly1305Keygen();
   final initPushResult =
   Sodium.cryptoSecretstreamXchacha20poly1305InitPush(key);
@@ -119,7 +119,7 @@ Future<EncryptionResult> chachaEncryptFile(Map<String, dynamic> args) async {
       null,
       tag,
     );
-    await destinationFile.writeAsBytes(encryptedData, mode: io.FileMode.append);
+    await destinationFile.writeAsBytes(encryptedData, mode: FileMode.append);
   }
   await inputFile.close();
 
@@ -135,12 +135,12 @@ Future<EncryptionResult> chachaEncryptFile(Map<String, dynamic> args) async {
 Future<void> chachaDecryptFile(Map<String, dynamic> args) async {
   final logger = Logger("ChaChaDecrypt");
   final decryptionStartTime = DateTime.now().millisecondsSinceEpoch;
-  final sourceFile = io.File(args["sourceFilePath"]);
-  final destinationFile = io.File(args["destinationFilePath"]);
+  final sourceFile = File(args["sourceFilePath"]);
+  final destinationFile = File(args["destinationFilePath"]);
   final sourceFileLength = await sourceFile.length();
   logger.info("Decrypting file of size " + sourceFileLength.toString());
 
-  final inputFile = sourceFile.openSync(mode: io.FileMode.read);
+  final inputFile = sourceFile.openSync(mode: FileMode.read);
   final pullState = Sodium.cryptoSecretstreamXchacha20poly1305InitPull(
     args["header"],
     args["key"],
@@ -157,7 +157,7 @@ Future<void> chachaDecryptFile(Map<String, dynamic> args) async {
     bytesRead += chunkSize;
     final pullResult =
     Sodium.cryptoSecretstreamXchacha20poly1305Pull(pullState, buffer, null);
-    await destinationFile.writeAsBytes(pullResult.m, mode: io.FileMode.append);
+    await destinationFile.writeAsBytes(pullResult.m, mode: FileMode.append);
     tag = pullResult.tag;
   }
   inputFile.closeSync();
@@ -478,7 +478,7 @@ class CryptoUtil {
   }
 
   // Computes and returns the hash of the source file
-  static Future<Uint8List> getHash(io.File source) {
+  static Future<Uint8List> getHash(File source) {
     return _computer.compute(
       cryptoGenericHash,
       param: {

@@ -1,4 +1,3 @@
-import 'dart:io' as io;
 import "dart:io";
 
 import 'package:chewie/chewie.dart';
@@ -19,7 +18,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:video_player/video_player.dart';
 
 class ZoomableLiveImage extends StatefulWidget {
-  final File file;
+  final EnteFile file;
   final Function(bool)? shouldDisableScroll;
   final String? tagPrefix;
   final Decoration? backgroundDecoration;
@@ -39,7 +38,7 @@ class ZoomableLiveImage extends StatefulWidget {
 class _ZoomableLiveImageState extends State<ZoomableLiveImage>
     with SingleTickerProviderStateMixin {
   final Logger _logger = Logger("ZoomableLiveImage");
-  late File _file;
+  late EnteFile _file;
   bool _showVideo = false;
   bool _isLoadingVideoPlayer = false;
 
@@ -125,7 +124,7 @@ class _ZoomableLiveImageState extends State<ZoomableLiveImage>
       return;
     }
     _isLoadingVideoPlayer = true;
-    final io.File? videoFile = _file.fileType == FileType.livePhoto
+    final File? videoFile = _file.fileType == FileType.livePhoto
         ? await _getLivePhotoVideo()
         : await _getMotionPhotoVideo();
 
@@ -137,12 +136,12 @@ class _ZoomableLiveImageState extends State<ZoomableLiveImage>
     _isLoadingVideoPlayer = false;
   }
 
-  Future<io.File?> _getLivePhotoVideo() async {
+  Future<File?> _getLivePhotoVideo() async {
     if (_file.isRemoteFile && !(await isFileCached(_file, liveVideo: true))) {
       showShortToast(context, S.of(context).downloading);
     }
 
-    io.File? videoFile = await getFile(widget.file, liveVideo: true)
+    File? videoFile = await getFile(widget.file, liveVideo: true)
         .timeout(const Duration(seconds: 15))
         .onError((dynamic e, s) {
       _logger.info("getFile failed ${_file.tag}", e);
@@ -164,12 +163,12 @@ class _ZoomableLiveImageState extends State<ZoomableLiveImage>
     return videoFile;
   }
 
-  Future<io.File?> _getMotionPhotoVideo() async {
+  Future<File?> _getMotionPhotoVideo() async {
     if (_file.isRemoteFile && !(await isFileCached(_file))) {
       showShortToast(context, S.of(context).downloading);
     }
 
-    final io.File? imageFile = await getFile(
+    final File? imageFile = await getFile(
       widget.file,
       isOrigin: !Platform.isAndroid,
     ).timeout(const Duration(seconds: 15)).onError((dynamic e, s) {
@@ -196,7 +195,7 @@ class _ZoomableLiveImageState extends State<ZoomableLiveImage>
     return null;
   }
 
-  VideoPlayerController _setVideoPlayerController({required io.File file}) {
+  VideoPlayerController _setVideoPlayerController({required File file}) {
     final videoPlayerController = VideoPlayerController.file(file);
     return _videoPlayerController = videoPlayerController
       ..initialize().whenComplete(() {

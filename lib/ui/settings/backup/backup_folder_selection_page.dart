@@ -407,7 +407,7 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
     });
   }
 
-  Widget _getThumbnail(File file, bool isSelected) {
+  Widget _getThumbnail(EnteFile file, bool isSelected) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(8),
       child: SizedBox(

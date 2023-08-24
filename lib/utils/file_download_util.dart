@@ -1,4 +1,4 @@
-import 'dart:io' as io;
+import 'dart:io';
 import 'dart:typed_data';
 
 import "package:computer/computer.dart";
@@ -6,15 +6,15 @@ import 'package:dio/dio.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/network/network.dart';
-import 'package:photos/models/file.dart' as ente;
+import 'package:photos/models/file.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/utils/crypto_util.dart';
 import "package:photos/utils/data_util.dart";
 
 final _logger = Logger("file_download_util");
 
-Future<io.File?> downloadAndDecrypt(
-  ente.File file, {
+Future<File?> downloadAndDecrypt(
+  EnteFile file, {
   ProgressCallback? progressCallback,
 }) {
   final String logPrefix = 'File-${file.uploadedFileID}:';
@@ -22,7 +22,7 @@ Future<io.File?> downloadAndDecrypt(
   final encryptedFilePath = Configuration.instance.getTempDirectory() +
       file.generatedID.toString() +
       ".encrypted";
-  final encryptedFile = io.File(encryptedFilePath);
+  final encryptedFile = File(encryptedFilePath);
   final startTime = DateTime.now().millisecondsSinceEpoch;
   return NetworkClient.instance
       .getDio()
@@ -68,11 +68,11 @@ Future<io.File?> downloadAndDecrypt(
     }
     _logger.info('$logPrefix decryption completed');
     await encryptedFile.delete();
-    return io.File(decryptedFilePath);
+    return File(decryptedFilePath);
   });
 }
 
-Uint8List getFileKey(ente.File file) {
+Uint8List getFileKey(EnteFile file) {
   final encryptedKey = CryptoUtil.base642bin(file.encryptedKey!);
   final nonce = CryptoUtil.base642bin(file.keyDecryptionNonce!);
   final collectionKey =
@@ -80,7 +80,7 @@ Uint8List getFileKey(ente.File file) {
   return CryptoUtil.decryptSync(encryptedKey, collectionKey, nonce);
 }
 
-Future<Uint8List> getFileKeyUsingBgWorker(ente.File file) async {
+Future<Uint8List> getFileKeyUsingBgWorker(EnteFile file) async {
   final collectionKey =
       CollectionsService.instance.getCollectionKey(file.collectionID!);
   return await Computer.shared().compute(

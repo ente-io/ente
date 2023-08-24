@@ -204,7 +204,7 @@ class LocalSyncService {
     return hasUnsyncedFiles;
   }
 
-  Future<void> ignoreUpload(File file, InvalidFileError error) async {
+  Future<void> ignoreUpload(EnteFile file, InvalidFileError error) async {
     if (file.localID == null ||
         file.deviceFolder == null ||
         file.title == null) {
@@ -276,10 +276,10 @@ class LocalSyncService {
     required int fromTime,
     required int toTime,
   }) async {
-    final Tuple2<List<LocalPathAsset>, List<File>> result =
+    final Tuple2<List<LocalPathAsset>, List<EnteFile>> result =
         await getLocalPathAssetsAndFiles(fromTime, toTime);
 
-    final List<File> files = result.item2;
+    final List<EnteFile> files = result.item2;
     if (files.isNotEmpty) {
       // Update the mapping for device path_id to local file id. Also, keep track
       // of newly discovered device paths
@@ -297,7 +297,7 @@ class LocalSyncService {
       );
       await _trackUpdatedFiles(files, existingLocalDs);
       // keep reference of all Files for firing LocalPhotosUpdatedEvent
-      final List<File> allFiles = [];
+      final List<EnteFile> allFiles = [];
       allFiles.addAll(files);
       // remove existing files and insert newly imported files in the table
       files.removeWhere((file) => existingLocalDs.contains(file.localID));
@@ -314,7 +314,7 @@ class LocalSyncService {
   }
 
   Future<void> _trackUpdatedFiles(
-    List<File> files,
+    List<EnteFile> files,
     Set<String> existingLocalFileIDs,
   ) async {
     final List<String> updatedLocalIDs = files

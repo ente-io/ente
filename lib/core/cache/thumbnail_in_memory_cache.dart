@@ -2,7 +2,7 @@ import 'dart:typed_data';
 
 import 'package:photos/core/cache/lru_map.dart';
 import 'package:photos/core/constants.dart';
-import 'package:photos/models/ente_file.dart';
+import "package:photos/models/file.dart";
 
 class ThumbnailInMemoryLruCache {
   static final LRUMap<String, Uint8List?> _map = LRUMap(1000);

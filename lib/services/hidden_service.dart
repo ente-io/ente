@@ -106,7 +106,7 @@ extension HiddenService on CollectionsService {
 
   Future<bool> hideFiles(
     BuildContext context,
-    List<File> filesToHide, {
+    List<EnteFile> filesToHide, {
     bool forceHide = false,
   }) async {
     final int userID = config.getUserID()!;
@@ -117,7 +117,7 @@ extension HiddenService on CollectionsService {
     );
     await dialog.show();
     try {
-      for (File file in filesToHide) {
+      for (EnteFile file in filesToHide) {
         if (file.uploadedFileID == null) {
           throw AssertionError("Can only hide uploaded files");
         }
@@ -128,9 +128,9 @@ extension HiddenService on CollectionsService {
       }
 
       final defaultHiddenCollection = await getDefaultHiddenCollection();
-      final Map<int, List<File>> collectionToFilesMap =
+      final Map<int, List<EnteFile>> collectionToFilesMap =
           await filesDB.getAllFilesGroupByCollectionID(uploadedIDs);
-      for (MapEntry<int, List<File>> entry in collectionToFilesMap.entries) {
+      for (MapEntry<int, List<EnteFile>> entry in collectionToFilesMap.entries) {
         if (entry.key == defaultHiddenCollection.id) {
           _logger.finest('file already part of hidden collection');
           continue;

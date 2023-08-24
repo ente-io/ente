@@ -42,7 +42,7 @@ class DuplicateItems {
 }
 
 class DuplicateFiles {
-  final List<File> files;
+  final List<EnteFile> files;
   final int size;
   static final collectionsService = CollectionsService.instance;
 

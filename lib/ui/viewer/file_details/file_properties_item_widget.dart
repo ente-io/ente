@@ -9,7 +9,7 @@ import "package:photos/utils/file_util.dart";
 import "package:photos/utils/magic_util.dart";
 
 class FilePropertiesItemWidget extends StatefulWidget {
-  final File file;
+  final EnteFile file;
   final bool isImage;
   final Map<String, dynamic> exifData;
   final int currentUserID;

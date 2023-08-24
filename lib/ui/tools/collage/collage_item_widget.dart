@@ -9,7 +9,7 @@ class CollageItemWidget extends StatelessWidget {
     super.key,
   });
 
-  final File file;
+  final EnteFile file;
 
   @override
   Widget build(BuildContext context) {

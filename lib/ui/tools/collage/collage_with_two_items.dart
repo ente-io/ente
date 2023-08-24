@@ -19,7 +19,7 @@ class CollageWithTwoItems extends StatefulWidget {
     super.key,
   });
 
-  final File first, second;
+  final EnteFile first, second;
 
   @override
   State<CollageWithTwoItems> createState() => _CollageWithTwoItemsState();

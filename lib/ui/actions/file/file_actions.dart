@@ -15,8 +15,8 @@ import "package:photos/utils/toast_util.dart";
 
 Future<void> showSingleFileDeleteSheet(
   BuildContext context,
-  File file, {
-  Function(File)? onFileRemoved,
+  EnteFile file, {
+  Function(EnteFile)? onFileRemoved,
 }) async {
   final List<ButtonWidget> buttons = [];
   final String fileType = file.fileType == FileType.video
@@ -129,7 +129,7 @@ Future<void> showSingleFileDeleteSheet(
   }
 }
 
-Future<void> showDetailsSheet(BuildContext context, File file) async {
+Future<void> showDetailsSheet(BuildContext context, EnteFile file) async {
   final colorScheme = getEnteColorScheme(context);
   return showBarModalBottomSheet(
     topControl: const SizedBox.shrink(),

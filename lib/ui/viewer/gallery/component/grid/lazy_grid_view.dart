@@ -13,7 +13,7 @@ import "package:photos/ui/viewer/gallery/gallery.dart";
 
 class LazyGridView extends StatefulWidget {
   final String tag;
-  final List<File> filesInGroup;
+  final List<EnteFile> filesInGroup;
   final GalleryLoader asyncLoader;
   final SelectedFiles? selectedFiles;
   final bool shouldRender;

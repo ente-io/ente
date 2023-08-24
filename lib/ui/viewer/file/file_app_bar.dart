@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:io' as io;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -30,15 +29,15 @@ import 'package:photos/utils/file_util.dart';
 import "package:photos/utils/magic_util.dart";
 import 'package:photos/utils/toast_util.dart';
 
-class FadingAppBar extends StatefulWidget {
-  final File file;
-  final Function(File) onFileRemoved;
+class FileAppBar extends StatefulWidget {
+  final EnteFile file;
+  final Function(EnteFile) onFileRemoved;
   final double height;
   final bool shouldShowActions;
   final int? userID;
   final ValueNotifier<bool> enableFullScreenNotifier;
 
-  const FadingAppBar(
+  const FileAppBar(
     this.file,
     this.onFileRemoved,
     this.userID,
@@ -49,10 +48,10 @@ class FadingAppBar extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  FadingAppBarState createState() => FadingAppBarState();
+  FileAppBarState createState() => FileAppBarState();
 }
 
-class FadingAppBarState extends State<FadingAppBar> {
+class FileAppBarState extends State<FileAppBar> {
   final _logger = Logger("FadingAppBar");
 
   @override
@@ -277,7 +276,7 @@ class FadingAppBarState extends State<FadingAppBar> {
     );
   }
 
-  Future<void> _toggleFileArchiveStatus(File file) async {
+  Future<void> _toggleFileArchiveStatus(EnteFile file) async {
     final bool isArchived =
         widget.file.magicMetadata.visibility == archiveVisibility;
     await changeVisibility(
@@ -290,7 +289,7 @@ class FadingAppBarState extends State<FadingAppBar> {
     }
   }
 
-  Future<void> _download(File file) async {
+  Future<void> _download(EnteFile file) async {
     final dialog = createProgressDialog(context, "Downloading...");
     await dialog.show();
     try {
@@ -298,7 +297,7 @@ class FadingAppBarState extends State<FadingAppBar> {
       final bool downloadLivePhotoOnDroid =
           type == FileType.livePhoto && Platform.isAndroid;
       AssetEntity? savedAsset;
-      final io.File? fileToSave = await getFile(file);
+      final File? fileToSave = await getFile(file);
       //Disabling notifications for assets changing to insert the file into
       //files db before triggering a sync.
       PhotoManager.stopChangeNotify();
@@ -309,7 +308,7 @@ class FadingAppBarState extends State<FadingAppBar> {
         savedAsset = await PhotoManager.editor
             .saveVideo(fileToSave!, title: file.title!);
       } else if (type == FileType.livePhoto) {
-        final io.File? liveVideoFile =
+        final File? liveVideoFile =
             await getFileFromServer(file, liveVideo: true);
         if (liveVideoFile == null) {
           throw AssertionError("Live video can not be null");
@@ -350,9 +349,9 @@ class FadingAppBarState extends State<FadingAppBar> {
   }
 
   Future<void> _saveLivePhotoOnDroid(
-    io.File image,
-    io.File video,
-    File enteFile,
+    File image,
+    File video,
+    EnteFile enteFile,
   ) async {
     debugPrint("Downloading LivePhoto on Droid");
     AssetEntity? savedAsset = await (PhotoManager.editor
@@ -386,11 +385,11 @@ class FadingAppBarState extends State<FadingAppBar> {
     await IgnoredFilesService.instance.cacheAndInsert([ignoreVideoFile]);
   }
 
-  Future<void> _setAs(File file) async {
+  Future<void> _setAs(EnteFile file) async {
     final dialog = createProgressDialog(context, S.of(context).pleaseWait);
     await dialog.show();
     try {
-      final io.File? fileToSave = await (getFile(file));
+      final File? fileToSave = await (getFile(file));
       if (fileToSave == null) {
         throw Exception("Fail to get file for setAs operation");
       }

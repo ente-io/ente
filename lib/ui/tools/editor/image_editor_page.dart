@@ -31,7 +31,7 @@ import 'package:syncfusion_flutter_sliders/sliders.dart';
 class ImageEditorPage extends StatefulWidget {
   final ImageProvider imageProvider;
   final DetailPageConfiguration detailPageConfig;
-  final ente.File originalFile;
+  final ente.EnteFile originalFile;
 
   const ImageEditorPage(
     this.imageProvider,
@@ -351,7 +351,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
       PhotoManager.stopChangeNotify();
       final AssetEntity? newAsset =
           await (PhotoManager.editor.saveImage(result, title: fileName));
-      final newFile = await ente.File.fromAsset(
+      final newFile = await ente.EnteFile.fromAsset(
         widget.originalFile.deviceFolder ?? '',
         newAsset!,
       );

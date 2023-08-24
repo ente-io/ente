@@ -31,7 +31,7 @@ class QuickLinkAlbumItem extends StatelessWidget {
               child: SizedBox(
                 height: 60,
                 width: 60,
-                child: FutureBuilder<File?>(
+                child: FutureBuilder<EnteFile?>(
                   future: CollectionsService.instance.getCover(c),
                   builder: (context, snapshot) {
                     if (snapshot.hasData) {

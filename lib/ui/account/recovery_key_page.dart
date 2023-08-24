@@ -1,4 +1,4 @@
-import 'dart:io' as io;
+import 'dart:io';
 
 import 'package:bip39/bip39.dart' as bip39;
 import 'package:dotted_border/dotted_border.dart';
@@ -43,7 +43,7 @@ class RecoveryKeyPage extends StatefulWidget {
 
 class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
   bool _hasTriedToSave = false;
-  final _recoveryKeyFile = io.File(
+  final _recoveryKeyFile = File(
     Configuration.instance.getTempDirectory() + "ente-recovery-key.txt",
   );
 

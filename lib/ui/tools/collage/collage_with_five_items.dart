@@ -22,7 +22,7 @@ class CollageWithFiveItems extends StatefulWidget {
     super.key,
   });
 
-  final File first, second, third, fourth, fifth;
+  final EnteFile first, second, third, fourth, fifth;
 
   @override
   State<CollageWithFiveItems> createState() => _CollageWithFiveItemsState();

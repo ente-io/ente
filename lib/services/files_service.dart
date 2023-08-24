@@ -84,16 +84,16 @@ class FilesService {
   // Note: this method is not used anywhere, but it is kept for future
   // reference when we add bulk EditTime feature
   Future<void> bulkEditTime(
-    List<File> files,
+    List<EnteFile> files,
     EditTimeSource source,
   ) async {
-    final ListMatch<File> result = files.splitMatch(
+    final ListMatch<EnteFile> result = files.splitMatch(
       (element) => element.isUploaded,
     );
-    final List<File> uploadedFiles = result.matched;
+    final List<EnteFile> uploadedFiles = result.matched;
     // editTime For LocalFiles
-    final List<File> localOnlyFiles = result.unmatched;
-    for (File localFile in localOnlyFiles) {
+    final List<EnteFile> localOnlyFiles = result.unmatched;
+    for (EnteFile localFile in localOnlyFiles) {
       final timeResult = _parseTime(localFile, source);
       if (timeResult != null) {
         localFile.creationTime = timeResult;
@@ -101,9 +101,9 @@ class FilesService {
     }
     await _filesDB.insertMultiple(localOnlyFiles);
 
-    final List<File> remoteFilesToUpdate = [];
+    final List<EnteFile> remoteFilesToUpdate = [];
     final Map<int, Map<String, int>> fileIDToUpdateMetadata = {};
-    for (File remoteFile in uploadedFiles) {
+    for (EnteFile remoteFile in uploadedFiles) {
       // discard files not owned by user and also dedupe already processed
       // files
       if (remoteFile.ownerID != _config.getUserID()! ||
@@ -127,7 +127,7 @@ class FilesService {
     }
   }
 
-  int? _parseTime(File file, EditTimeSource source) {
+  int? _parseTime(EnteFile file, EditTimeSource source) {
     assert(
       source == EditTimeSource.fileName,
       "edit source ${source.name} is not supported yet",
