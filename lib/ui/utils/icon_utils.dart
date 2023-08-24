@@ -65,6 +65,6 @@ class IconUtils {
   }
 
   String _getProviderTitle(String provider) {
-    return provider.split(".")[0].toLowerCase();
+    return provider.split(RegExp(r'[.(]'))[0].trim().toLowerCase();
   }
 }
