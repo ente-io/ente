@@ -696,10 +696,14 @@ class RemoteSyncService {
         continue;
       }
 
-      // If remoteFile is not already synced (i.e. existingFile is null), check
-      // if the remoteFile was uploaded from this device.
+      // If remoteFile was synced before, assign the localID of the existing
+      // file entry.
+      // If remoteFile is not synced before and has localID (i.e. existingFile
+      // is null), check if the remoteFile was uploaded from this device.
       // Note: DeviceFolder is ignored for iOS during matching
-      if (existingFile == null && remoteFile.localID != null) {
+      if (existingFile != null) {
+        remoteFile.localID = existingFile.localID;
+      } else if (remoteFile.localID != null && existingFile == null) {
         final localFileEntries = await _db.getUnlinkedLocalMatchesForRemoteFile(
           userID,
           remoteFile.localID!,
