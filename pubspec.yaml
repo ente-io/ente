@@ -90,6 +90,11 @@ dependencies:
   logging: ^1.0.1
   lottie: ^1.2.2
   media_extension: ^1.0.1
+  # media_kit: ^1.1.0  
+  # media_kit_libs_android_video: ^1.2.0        
+  # media_kit_libs_ios_video: ^1.0.5  
+  # media_kit_native_event_loop: ^1.0.7             
+  # media_kit_video: ^1.1.0                        
   modal_bottom_sheet: ^3.0.0-pre
   motion_photos:
     git: "https://github.com/ente-io/motion_photo.git"
@@ -131,7 +136,7 @@ dependencies:
   tuple: ^2.0.0
   uni_links: ^0.5.1
   url_launcher: ^6.0.3
-  uuid: ^3.0.4
+  uuid: ^3.0.7
   video_player:
     git:
       url: https://github.com/ente-io/packages.git
