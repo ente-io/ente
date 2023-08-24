@@ -22,8 +22,6 @@ import 'package:photos/utils/dialog_util.dart';
 extension HiddenService on CollectionsService {
   static final _logger = Logger("HiddenCollectionService");
 
-  // getDefaultHiddenCollection will return null if there's no default
-  // collection
   Future<Collection> getDefaultHiddenCollection() async {
     Collection? defaultHidden;
     if (cachedDefaultHiddenCollection != null) {
