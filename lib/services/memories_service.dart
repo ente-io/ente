@@ -5,18 +5,23 @@ import "package:photos/core/event_bus.dart";
 import 'package:photos/db/files_db.dart';
 import 'package:photos/db/memories_db.dart';
 import "package:photos/events/files_updated_event.dart";
+import "package:photos/events/memories_setting_changed.dart";
 import 'package:photos/models/filters/important_items_filter.dart';
 import 'package:photos/models/memory.dart';
 import 'package:photos/services/collections_service.dart';
+import "package:shared_preferences/shared_preferences.dart";
 
 class MemoriesService extends ChangeNotifier {
   final _logger = Logger("MemoryService");
   final _memoriesDB = MemoriesDB.instance;
   final _filesDB = FilesDB.instance;
+  late SharedPreferences _prefs;
+
   static const daysInAYear = 365;
   static const yearsBefore = 30;
   static const daysBefore = 7;
   static const daysAfter = 1;
+  static const _showMemoryKey = "memories.enabled";
 
   List<Memory>? _cachedMemories;
   Future<List<Memory>>? _future;
@@ -25,10 +30,11 @@ class MemoriesService extends ChangeNotifier {
 
   static final MemoriesService instance = MemoriesService._privateConstructor();
 
-  void init() {
+  void init(SharedPreferences prefs) {
     addListener(() {
       _cachedMemories = null;
     });
+    _prefs = prefs;
     // Clear memory after a delay, in async manner.
     // Intention of delay is to give more CPU cycles to other tasks
     Future.delayed(const Duration(seconds: 5), () {
@@ -54,7 +60,19 @@ class MemoriesService extends ChangeNotifier {
     _future = null;
   }
 
+  bool get showMemories {
+    return _prefs.getBool(_showMemoryKey) ?? true;
+  }
+
+  Future<void> setShowMemories(bool value) async {
+    await _prefs.setBool(_showMemoryKey, value);
+    Bus.instance.fire(MemoriesSettingChanged());
+  }
+
   Future<List<Memory>> getMemories() async {
+    if (!showMemories) {
+      return [];
+    }
     if (_cachedMemories != null) {
       return _cachedMemories!;
     }

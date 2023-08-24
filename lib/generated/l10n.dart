@@ -1,6 +1,7 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+
 import 'intl/messages_all.dart';
 
 // **************************************************************************
@@ -2947,6 +2948,16 @@ class S {
       name: 'duplicateItemsGroup',
       desc: 'Display the number of duplicate files and their size',
       args: [count, formattedSize],
+    );
+  }
+
+  /// `Show memories`
+  String get showMemories {
+    return Intl.message(
+      'Show memories',
+      name: 'showMemories',
+      desc: '',
+      args: [],
     );
   }
 
