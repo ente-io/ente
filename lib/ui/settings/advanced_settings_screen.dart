@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import "package:photos/core/error-reporting/super_logging.dart";
 import "package:photos/generated/l10n.dart";
+import "package:photos/services/memories_service.dart";
 import "package:photos/services/user_remote_flag_service.dart";
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/buttons/icon_button_widget.dart';
@@ -89,6 +90,26 @@ class _AdvancedSettingsScreenState extends State<AdvancedSettingsScreen> {
                                 singleBorderRadius: 8,
                                 alignCaptionedTextToLeft: true,
                                 isGestureDetectorDisabled: true,
+                              ),
+                            ),
+                            const SizedBox(
+                              height: 24,
+                            ),
+                            MenuItemWidget(
+                              captionedTextWidget: CaptionedTextWidget(
+                                title: S.of(context).showMemories,
+                              ),
+                              menuItemColor: colorScheme.fillFaint,
+                              singleBorderRadius: 8,
+                              alignCaptionedTextToLeft: true,
+                              trailingWidget: ToggleSwitchWidget(
+                                value: () =>
+                                    MemoriesService.instance.showMemories,
+                                onChanged: () async {
+                                  MemoriesService.instance.setShowMemories(
+                                    !MemoriesService.instance.showMemories,
+                                  );
+                                },
                               ),
                             ),
                             const SizedBox(
