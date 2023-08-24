@@ -60,7 +60,7 @@ extension HiddenService on CollectionsService {
 
     for (Collection defaultHidden in allDefaultHidden) {
       try {
-        if (defaultHidden.id == allDefaultHidden.first.id) {
+        if (defaultHidden.id == result.id) {
           continue;
         }
         final filesInCollection = (await FilesDB.instance.getFilesInCollection(
