@@ -8,8 +8,8 @@ import 'package:photos/core/errors.dart';
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/file.dart';
 import 'package:photos/ui/tools/editor/image_editor_page.dart';
-import 'package:photos/ui/viewer/file/fading_app_bar.dart';
-import 'package:photos/ui/viewer/file/fading_bottom_bar.dart';
+import "package:photos/ui/viewer/file/file_app_bar.dart";
+import "package:photos/ui/viewer/file/file_bottom_bar.dart";
 import 'package:photos/ui/viewer/file/file_widget.dart';
 import 'package:photos/ui/viewer/gallery/gallery.dart';
 import 'package:photos/utils/dialog_util.dart';
@@ -116,7 +116,7 @@ class _DetailPageState extends State<DetailPage> {
         preferredSize: const Size.fromHeight(80),
         child: ValueListenableBuilder(
           builder: (BuildContext context, int selectedIndex, _) {
-            return FadingAppBar(
+            return FileAppBar(
               _files![selectedIndex],
               _onFileRemoved,
               Configuration.instance.getUserID(),
@@ -136,7 +136,7 @@ class _DetailPageState extends State<DetailPage> {
             _buildPageView(context),
             ValueListenableBuilder(
               builder: (BuildContext context, int selectedIndex, _) {
-                return FadingBottomBar(
+                return FileBottomBar(
                   _files![_selectedIndexNotifier.value],
                   _onEditFileRequested,
                   widget.config.mode == DetailPageMode.minimalistic,

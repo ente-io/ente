@@ -14,7 +14,7 @@ import 'package:photos/ui/collections/collection_action_sheet.dart';
 import 'package:photos/utils/delete_file_util.dart';
 import 'package:photos/utils/share_util.dart';
 
-class FadingBottomBar extends StatefulWidget {
+class FileBottomBar extends StatefulWidget {
   final File file;
   final Function(File) onEditRequested;
   final Function(File) onFileRemoved;
@@ -22,7 +22,7 @@ class FadingBottomBar extends StatefulWidget {
   final int? userID;
   final ValueNotifier<bool> enableFullScreenNotifier;
 
-  const FadingBottomBar(
+  const FileBottomBar(
     this.file,
     this.onEditRequested,
     this.showOnlyInfoButton, {
@@ -33,10 +33,10 @@ class FadingBottomBar extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  FadingBottomBarState createState() => FadingBottomBarState();
+  FileBottomBarState createState() => FileBottomBarState();
 }
 
-class FadingBottomBarState extends State<FadingBottomBar> {
+class FileBottomBarState extends State<FileBottomBar> {
   final GlobalKey shareButtonKey = GlobalKey();
 
   @override

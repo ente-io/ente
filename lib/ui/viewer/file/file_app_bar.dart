@@ -30,7 +30,7 @@ import 'package:photos/utils/file_util.dart';
 import "package:photos/utils/magic_util.dart";
 import 'package:photos/utils/toast_util.dart';
 
-class FadingAppBar extends StatefulWidget {
+class FileAppBar extends StatefulWidget {
   final File file;
   final Function(File) onFileRemoved;
   final double height;
@@ -38,7 +38,7 @@ class FadingAppBar extends StatefulWidget {
   final int? userID;
   final ValueNotifier<bool> enableFullScreenNotifier;
 
-  const FadingAppBar(
+  const FileAppBar(
     this.file,
     this.onFileRemoved,
     this.userID,
@@ -49,10 +49,10 @@ class FadingAppBar extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  FadingAppBarState createState() => FadingAppBarState();
+  FileAppBarState createState() => FileAppBarState();
 }
 
-class FadingAppBarState extends State<FadingAppBar> {
+class FileAppBarState extends State<FileAppBar> {
   final _logger = Logger("FadingAppBar");
 
   @override
