@@ -4,7 +4,9 @@ import 'dart:typed_data';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
+import "package:photos/core/constants.dart";
 import 'package:photos/core/event_bus.dart';
+import "package:photos/db/files_db.dart";
 import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/models/api/collection/create_request.dart';
@@ -20,25 +22,66 @@ import 'package:photos/utils/dialog_util.dart';
 extension HiddenService on CollectionsService {
   static final _logger = Logger("HiddenCollectionService");
 
-  // getDefaultHiddenCollection will return null if there's no default
-  // collection
   Future<Collection> getDefaultHiddenCollection() async {
+    Collection? defaultHidden;
     if (cachedDefaultHiddenCollection != null) {
       return cachedDefaultHiddenCollection!;
     }
     final int userID = config.getUserID()!;
-    final Collection? defaultHidden =
-        collectionIDToCollections.values.firstWhereOrNull(
-      (element) => element.isDefaultHidden() && element.owner!.id == userID,
-    );
+    final allDefaultHidden = collectionIDToCollections.values
+        .where(
+          (element) => element.isDefaultHidden() && element.owner!.id == userID,
+        )
+        .toList();
+
+    if (allDefaultHidden.length > 1) {
+      defaultHidden = await clubAllDefaultHiddenToOne(
+        allDefaultHidden,
+      );
+    } else if (allDefaultHidden.length == 1) {
+      defaultHidden = allDefaultHidden.first;
+    }
+
     if (defaultHidden != null) {
       cachedDefaultHiddenCollection = defaultHidden;
       return cachedDefaultHiddenCollection!;
     }
+
     final Collection createdHiddenCollection =
         await _createDefaultHiddenAlbum();
     cachedDefaultHiddenCollection = createdHiddenCollection;
     return cachedDefaultHiddenCollection!;
+  }
+
+  Future<Collection> clubAllDefaultHiddenToOne(
+    List<Collection> allDefaultHidden,
+  ) async {
+    final Collection result = allDefaultHidden.first;
+
+    for (Collection defaultHidden in allDefaultHidden) {
+      try {
+        if (defaultHidden.id == result.id) {
+          continue;
+        }
+        final filesInCollection = (await FilesDB.instance.getFilesInCollection(
+          defaultHidden.id,
+          galleryLoadStartTime,
+          galleryLoadEndTime,
+        ))
+            .files;
+        await move(result.id, defaultHidden.id, filesInCollection);
+        await CollectionsService.instance.trashEmptyCollection(defaultHidden);
+      } catch (e, s) {
+        _logger.severe(
+          "One iteration of clubbing all default hidden failed",
+          e,
+          s,
+        );
+        continue;
+      }
+    }
+
+    return result;
   }
 
   // getUncategorizedCollection will return the uncategorized collection
