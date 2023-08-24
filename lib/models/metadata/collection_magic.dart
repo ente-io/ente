@@ -16,7 +16,7 @@ const orderKey = "order";
 class CollectionMagicMetadata {
   // 0 -> visible
   // 1 -> archived
-  // 2 -> hidden etc?
+  // 2 -> hidden
   int visibility;
 
   // null/0 value -> no subType
