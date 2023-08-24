@@ -24,7 +24,7 @@ enum _VisibilityAction { hide, unHide, archive, unarchive }
 
 Future<void> changeVisibility(
   BuildContext context,
-  List<File> files,
+  List<EnteFile> files,
   int newVisibility,
 ) async {
   final dialog = createProgressDialog(
@@ -153,7 +153,7 @@ Future<void> changeCoverPhoto(
     Bus.instance.fire(
       CollectionUpdatedEvent(
         collection.id,
-        <File>[],
+        <EnteFile>[],
         "cover_change",
         type: EventType.coverChanged,
       ),
@@ -167,7 +167,7 @@ Future<void> changeCoverPhoto(
 
 Future<bool> editTime(
   BuildContext context,
-  List<File> files,
+  List<EnteFile> files,
   int editedTime,
 ) async {
   try {
@@ -186,7 +186,7 @@ Future<bool> editTime(
 
 Future<void> editFilename(
   BuildContext context,
-  File file,
+  EnteFile file,
 ) async {
   final fileName = file.displayName;
   final nameWithoutExt = basenameWithoutExtension(fileName);
@@ -224,7 +224,7 @@ Future<void> editFilename(
 
 Future<bool> editFileCaption(
   BuildContext? context,
-  File file,
+  EnteFile file,
   String caption,
 ) async {
   try {
@@ -246,7 +246,7 @@ Future<bool> editFileCaption(
 
 Future<void> _updatePublicMetadata(
   BuildContext? context,
-  List<File> files,
+  List<EnteFile> files,
   String key,
   dynamic value, {
   bool showDoneToast = true,

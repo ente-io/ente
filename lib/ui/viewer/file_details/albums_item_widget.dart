@@ -12,7 +12,7 @@ import "package:photos/ui/viewer/gallery/collection_page.dart";
 import "package:photos/utils/navigation_util.dart";
 
 class AlbumsItemWidget extends StatelessWidget {
-  final File file;
+  final EnteFile file;
   final int currentUserID;
   const AlbumsItemWidget(
     this.file,

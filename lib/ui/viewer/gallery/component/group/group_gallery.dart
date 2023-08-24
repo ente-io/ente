@@ -9,7 +9,7 @@ import 'package:photos/ui/viewer/gallery/gallery.dart';
 
 class GroupGallery extends StatelessWidget {
   final int photoGridSize;
-  final List<File> files;
+  final List<EnteFile> files;
   final String tag;
   final GalleryLoader asyncLoader;
   final SelectedFiles? selectedFiles;

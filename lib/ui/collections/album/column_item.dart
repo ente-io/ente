@@ -37,7 +37,7 @@ class AlbumColumnItemWidget extends StatelessWidget {
                   child: SizedBox(
                     height: sideOfThumbnail,
                     width: sideOfThumbnail,
-                    child: FutureBuilder<File?>(
+                    child: FutureBuilder<EnteFile?>(
                       future: CollectionsService.instance.getCover(collection),
                       builder: (context, snapshot) {
                         if (snapshot.hasData) {

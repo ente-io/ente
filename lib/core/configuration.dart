@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'dart:io' as io;
+import "dart:io";
 import 'dart:typed_data';
 
 import 'package:bip39/bip39.dart' as bip39;
@@ -97,7 +97,7 @@ class Configuration {
     _secureStorage = const FlutterSecureStorage();
     _documentsDirectory = (await getApplicationDocumentsDirectory()).path;
     _tempDirectory = _documentsDirectory + "/temp/";
-    final tempDirectory = io.Directory(_tempDirectory);
+    final tempDirectory = Directory(_tempDirectory);
     try {
       final currentTime = DateTime.now().microsecondsSinceEpoch;
       if (tempDirectory.existsSync() &&
@@ -115,11 +115,11 @@ class Configuration {
     tempDirectory.createSync(recursive: true);
     final tempDirectoryPath = (await getTemporaryDirectory()).path;
     _thumbnailCacheDirectory = tempDirectoryPath + "/thumbnail-cache";
-    io.Directory(_thumbnailCacheDirectory).createSync(recursive: true);
+    Directory(_thumbnailCacheDirectory).createSync(recursive: true);
     _sharedTempMediaDirectory = tempDirectoryPath + "/ente-shared-media";
-    io.Directory(_sharedTempMediaDirectory).createSync(recursive: true);
+    Directory(_sharedTempMediaDirectory).createSync(recursive: true);
     _sharedDocumentsMediaDirectory = _documentsDirectory + "/ente-shared-media";
-    io.Directory(_sharedDocumentsMediaDirectory).createSync(recursive: true);
+    Directory(_sharedDocumentsMediaDirectory).createSync(recursive: true);
     if (!_preferences.containsKey(tokenKey)) {
       await _secureStorage.deleteAll(iOptions: _secureStorageOptionsIOS);
     } else {

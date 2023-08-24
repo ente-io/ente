@@ -20,7 +20,7 @@ import 'package:photos/utils/file_util.dart';
 import 'package:photos/utils/thumbnail_util.dart';
 
 class ThumbnailWidget extends StatefulWidget {
-  final File? file;
+  final EnteFile? file;
   final BoxFit fit;
   final bool shouldShowSyncStatus;
   final bool shouldShowArchiveStatus;

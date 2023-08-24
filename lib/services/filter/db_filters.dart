@@ -24,8 +24,8 @@ class DBFilterOptions {
   );
 }
 
-Future<List<File>> applyDBFilters(
-  List<File> files,
+Future<List<EnteFile>> applyDBFilters(
+  List<EnteFile> files,
   DBFilterOptions? options,
 ) async {
   if (options == null) {
@@ -48,7 +48,7 @@ Future<List<File>> applyDBFilters(
         CollectionsIgnoreFilter(options.ignoredCollectionIDs!, files);
     filters.add(collectionIgnoreFilter);
   }
-  final List<File> filterFiles = [];
+  final List<EnteFile> filterFiles = [];
   for (final file in files) {
     if (filters.every((f) => f.filter(file))) {
       filterFiles.add(file);

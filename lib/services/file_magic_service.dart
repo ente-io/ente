@@ -32,7 +32,7 @@ class FileMagicService {
   static final FileMagicService instance =
       FileMagicService._privateConstructor();
 
-  Future<void> changeVisibility(List<File> files, int visibility) async {
+  Future<void> changeVisibility(List<EnteFile> files, int visibility) async {
     final Map<String, dynamic> update = {magicKeyVisibility: visibility};
     await _updateMagicData(files, update);
     if (visibility == visibleVisibility) {
@@ -57,7 +57,7 @@ class FileMagicService {
   }
 
   Future<void> updatePublicMagicMetadata(
-    List<File> files,
+    List<EnteFile> files,
     Map<String, dynamic>? newMetadataUpdate, {
     Map<int, Map<String, dynamic>>? metadataUpdateMap,
   }) async {
@@ -129,7 +129,7 @@ class FileMagicService {
   }
 
   Future<void> _updateMagicData(
-    List<File> files,
+    List<EnteFile> files,
     Map<String, dynamic> newMetadataUpdate,
   ) async {
     final params = <String, dynamic>{};

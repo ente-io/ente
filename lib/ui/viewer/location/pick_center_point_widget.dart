@@ -22,7 +22,7 @@ import "package:photos/ui/components/models/button_type.dart";
 import "package:photos/ui/components/title_bar_title_widget.dart";
 import "package:photos/ui/viewer/gallery/gallery.dart";
 
-Future<File?> showPickCenterPointSheet(
+Future<EnteFile?> showPickCenterPointSheet(
   BuildContext context,
   LocalEntity<LocationTag> locationTagEntity,
 ) async {

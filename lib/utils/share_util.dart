@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'dart:io' as dartio;
+import "dart:io";
 
 import 'package:flutter/widgets.dart';
 import 'package:logging/logging.dart';
@@ -32,7 +32,7 @@ final _videoExtension = {
 // share is used to share media/files from ente to other apps
 Future<void> share(
   BuildContext context,
-  List<File> files, {
+  List<EnteFile> files, {
   GlobalKey? shareButtonKey,
 }) async {
   final remoteFileCount = files.where((element) => element.isRemoteFile).length;
@@ -44,7 +44,7 @@ Future<void> share(
   await dialog.show();
   try {
     final List<Future<String?>> pathFutures = [];
-    for (File file in files) {
+    for (EnteFile file in files) {
       // Note: We are requesting the origin file for performance reasons on iOS.
       // This will eat up storage, which will be reset only when the app restarts.
       // We could have cleared the cache had there been a callback to the share API.
@@ -102,11 +102,11 @@ Future<void> shareText(String text) async {
   return Share.share(text);
 }
 
-Future<List<File>> convertIncomingSharedMediaToFile(
+Future<List<EnteFile>> convertIncomingSharedMediaToFile(
   List<SharedMediaFile> sharedMedia,
   int collectionID,
 ) async {
-  final List<File> localFiles = [];
+  final List<EnteFile> localFiles = [];
   for (var media in sharedMedia) {
     if (!(media.type == SharedMediaType.IMAGE ||
         media.type == SharedMediaType.VIDEO)) {
@@ -115,10 +115,10 @@ Future<List<File>> convertIncomingSharedMediaToFile(
       );
       continue;
     }
-    final enteFile = File();
+    final enteFile = EnteFile();
     // fileName: img_x.jpg
     enteFile.title = basename(media.path);
-    var ioFile = dartio.File(media.path);
+    var ioFile = File(media.path);
     ioFile = ioFile.renameSync(
       Configuration.instance.getSharedMediaDirectory() + "/" + enteFile.title!,
     );
@@ -149,13 +149,13 @@ Future<List<File>> convertIncomingSharedMediaToFile(
   return localFiles;
 }
 
-Future<List<File>> convertPicketAssets(
+Future<List<EnteFile>> convertPicketAssets(
   List<AssetEntity> pickedAssets,
   int collectionID,
 ) async {
-  final List<File> localFiles = [];
+  final List<EnteFile> localFiles = [];
   for (var asset in pickedAssets) {
-    final enteFile = await File.fromAsset('', asset);
+    final enteFile = await EnteFile.fromAsset('', asset);
     localFiles.add(enteFile);
   }
   return localFiles;
@@ -184,7 +184,7 @@ DateTime? parseDateFromFileNam1e(String fileName) {
 void shareSelected(
   BuildContext context,
   GlobalKey shareButtonKey,
-  List<File> selectedFiles,
+  List<EnteFile> selectedFiles,
 ) {
   share(
     context,

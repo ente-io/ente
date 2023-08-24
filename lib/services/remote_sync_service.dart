@@ -357,7 +357,7 @@ class RemoteSyncService {
         );
         final filesWithCollectionID =
             await _db.getLocalFiles(localIDsToSync.toList());
-        final List<File> newFilesToInsert = [];
+        final List<EnteFile> newFilesToInsert = [];
         final Set<String> fileFoundForLocalIDs = {};
         for (var existingFile in filesWithCollectionID) {
           final String localID = existingFile.localID!;
@@ -401,7 +401,7 @@ class RemoteSyncService {
       Configuration.instance.setSelectAllFoldersForBackup(false).ignore();
     }
     Bus.instance.fire(
-      LocalPhotosUpdatedEvent(<File>[], source: "deviceFolderSync"),
+      LocalPhotosUpdatedEvent(<EnteFile>[], source: "deviceFolderSync"),
     );
     Bus.instance.fire(BackupFoldersUpdatedEvent());
   }
@@ -415,7 +415,7 @@ class RemoteSyncService {
      */
     _logger.info("Removing files for collections $collectionIDs");
     for (int collectionID in collectionIDs) {
-      final List<File> pendingUploads =
+      final List<EnteFile> pendingUploads =
           await _db.getPendingUploadForCollection(collectionID);
       if (pendingUploads.isEmpty) {
         continue;
@@ -434,9 +434,9 @@ class RemoteSyncService {
         "RemovingFiles $collectionIDs: filesInOtherCollection "
         "${localIDsInOtherFileEntries.length}",
       );
-      final List<File> entriesToUpdate = [];
+      final List<EnteFile> entriesToUpdate = [];
       final List<int> entriesToDelete = [];
-      for (File pendingUpload in pendingUploads) {
+      for (EnteFile pendingUpload in pendingUploads) {
         if (localIDsInOtherFileEntries.contains(pendingUpload.localID)) {
           entriesToDelete.add(pendingUpload.generatedID!);
         } else {
@@ -486,19 +486,19 @@ class RemoteSyncService {
     return collection.id;
   }
 
-  Future<List<File>> _getFilesToBeUploaded() async {
-    final List<File> originalFiles = await _db.getFilesPendingForUpload();
+  Future<List<EnteFile>> _getFilesToBeUploaded() async {
+    final List<EnteFile> originalFiles = await _db.getFilesPendingForUpload();
     if (originalFiles.isEmpty) {
       return originalFiles;
     }
     final bool shouldRemoveVideos =
         !_config.shouldBackupVideos() || _shouldThrottleSync();
     final ignoredIDs = await IgnoredFilesService.instance.idToIgnoreReasonMap;
-    bool shouldSkipUploadFunc(File file) {
+    bool shouldSkipUploadFunc(EnteFile file) {
       return IgnoredFilesService.instance.shouldSkipUpload(ignoredIDs, file);
     }
 
-    final List<File> filesToBeUploaded = [];
+    final List<EnteFile> filesToBeUploaded = [];
     int ignoredForUpload = 0;
     int skippedVideos = 0;
     for (var file in originalFiles) {
@@ -521,7 +521,7 @@ class RemoteSyncService {
     return filesToBeUploaded;
   }
 
-  Future<bool> _uploadFiles(List<File> filesToBeUploaded) async {
+  Future<bool> _uploadFiles(List<EnteFile> filesToBeUploaded) async {
     final int ownerID = _config.getUserID()!;
     final updatedFileIDs = await _db.getUploadedFileIDsToBeUpdated(ownerID);
     if (updatedFileIDs.isNotEmpty) {
@@ -590,14 +590,14 @@ class RemoteSyncService {
     return _completedUploads > 0;
   }
 
-  void _uploadFile(File file, int collectionID, List<Future> futures) {
+  void _uploadFile(EnteFile file, int collectionID, List<Future> futures) {
     final future = _uploader
         .upload(file, collectionID)
         .then((uploadedFile) => _onFileUploaded(uploadedFile));
     futures.add(future);
   }
 
-  Future<void> _onFileUploaded(File file) async {
+  Future<void> _onFileUploaded(EnteFile file) async {
     Bus.instance.fire(
       CollectionUpdatedEvent(file.collectionID, [file], "fileUpload"),
     );
@@ -643,7 +643,7 @@ class RemoteSyncService {
       [Existing]
     ]
    */
-  Future<void> _storeDiff(List<File> diff, int collectionID) async {
+  Future<void> _storeDiff(List<EnteFile> diff, int collectionID) async {
     int sharedFileNew = 0,
         sharedFileUpdated = 0,
         localUploadedFromDevice = 0,
@@ -657,11 +657,11 @@ class RemoteSyncService {
     // as we update the generatedID for remoteFile to local file's genID
     final Set<int> alreadyClaimedLocalFilesGenID = {};
 
-    final List<File> toBeInserted = [];
-    for (File remoteFile in diff) {
+    final List<EnteFile> toBeInserted = [];
+    for (EnteFile remoteFile in diff) {
       // existingFile will be either set to existing collectionID+localID or
       // to the unclaimed aka not already linked to any uploaded file.
-      File? existingFile;
+      EnteFile? existingFile;
       if (remoteFile.generatedID != null) {
         // Case [1] Check and clear local cache when uploadedFile already exist
         // Note: Existing file can be null here if it's replaced by the time we
@@ -785,14 +785,14 @@ class RemoteSyncService {
     }
   }
 
-  bool _shouldClearCache(File remoteFile, File existingFile) {
+  bool _shouldClearCache(EnteFile remoteFile, EnteFile existingFile) {
     if (remoteFile.hash != null && existingFile.hash != null) {
       return remoteFile.hash != existingFile.hash;
     }
     return remoteFile.updationTime != (existingFile.updationTime ?? 0);
   }
 
-  bool _shouldReloadHomeGallery(File remoteFile, File existingFile) {
+  bool _shouldReloadHomeGallery(EnteFile remoteFile, EnteFile existingFile) {
     int remoteCreationTime = remoteFile.creationTime!;
     if (remoteFile.pubMmdVersion > 0 &&
         (remoteFile.pubMagicMetadata?.editedTime ?? 0) != 0) {
@@ -841,7 +841,7 @@ class RemoteSyncService {
 
   // _sortByTimeAndType moves videos to end and sort by creation time (desc).
   // This is done to upload most recent photo first.
-  void _sortByTimeAndType(List<File> file) {
+  void _sortByTimeAndType(List<EnteFile> file) {
     file.sort((first, second) {
       if (first.fileType == second.fileType) {
         return second.creationTime!.compareTo(first.creationTime!);

@@ -17,7 +17,7 @@ import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/utils/toast_util.dart";
 
 class UploadIconWidget extends StatefulWidget {
-  final File file;
+  final EnteFile file;
 
   const UploadIconWidget({super.key, required this.file});
 

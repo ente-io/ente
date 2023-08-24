@@ -57,10 +57,10 @@ class AlbumRowItemWidget extends StatelessWidget {
                   width: sideOfThumbnail,
                   child: Stack(
                     children: [
-                      FutureBuilder<File?>(
+                      FutureBuilder<EnteFile?>(
                         future: CollectionsService.instance.getCover(c),
                         builder: (context, snapshot) {
-                          File? thumbnail;
+                          EnteFile? thumbnail;
                           if (snapshot.hasData) {
                             thumbnail = snapshot.data!;
                           } else {

@@ -5,7 +5,7 @@ import "package:photos/services/collections_service.dart";
 import "package:photos/theme/ente_theme.dart";
 
 class AddedByWidget extends StatelessWidget {
-  final File file;
+  final EnteFile file;
   final int currentUserID;
   const AddedByWidget(this.file, this.currentUserID, {super.key});
 

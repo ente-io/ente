@@ -340,8 +340,8 @@ class AlbumVerticalListWidget extends StatelessWidget {
         : null;
     await dialog?.show();
     try {
-      final List<File> files = [];
-      final List<File> filesPendingUpload = [];
+      final List<EnteFile> files = [];
+      final List<EnteFile> filesPendingUpload = [];
       final int currentUserID = Configuration.instance.getUserID()!;
       if (sharedFiles != null) {
         filesPendingUpload.addAll(
@@ -352,7 +352,7 @@ class AlbumVerticalListWidget extends StatelessWidget {
         );
       } else {
         for (final file in selectedFiles!.files) {
-          File? currentFile;
+          EnteFile? currentFile;
           if (file.uploadedFileID != null) {
             currentFile = file;
           } else if (file.generatedID != null) {

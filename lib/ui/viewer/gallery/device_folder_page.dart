@@ -90,7 +90,7 @@ class BackupHeaderWidget extends StatefulWidget {
 }
 
 class _BackupHeaderWidgetState extends State<BackupHeaderWidget> {
-  late Future<List<File>> filesInDeviceCollection;
+  late Future<List<EnteFile>> filesInDeviceCollection;
   late ValueNotifier<bool> shouldBackup;
   final Logger _logger = Logger("_BackupHeaderWidgetState");
   @override
@@ -191,7 +191,7 @@ class _BackupHeaderWidgetState extends State<BackupHeaderWidget> {
     );
   }
 
-  Future<List<File>> _filesInDeviceCollection() async {
+  Future<List<EnteFile>> _filesInDeviceCollection() async {
     return (await FilesDB.instance.getFilesInDeviceCollection(
       widget.deviceCollection,
       Configuration.instance.getUserID(),
@@ -202,15 +202,15 @@ class _BackupHeaderWidgetState extends State<BackupHeaderWidget> {
   }
 
   Future<bool> _hasIgnoredFiles(
-    Future<List<File>> filesInDeviceCollection,
+    Future<List<EnteFile>> filesInDeviceCollection,
   ) async {
-    final List<File> deviceCollectionFiles = await filesInDeviceCollection;
+    final List<EnteFile> deviceCollectionFiles = await filesInDeviceCollection;
     final allIgnoredIDs =
         await IgnoredFilesService.instance.idToIgnoreReasonMap;
     if (allIgnoredIDs.isEmpty) {
       return false;
     }
-    for (File file in deviceCollectionFiles) {
+    for (EnteFile file in deviceCollectionFiles) {
       final String? ignoreID =
           IgnoredFilesService.instance.getIgnoredIDForFile(file);
       if (ignoreID != null && allIgnoredIDs.containsKey(ignoreID!)) {
@@ -222,7 +222,7 @@ class _BackupHeaderWidgetState extends State<BackupHeaderWidget> {
 }
 
 class ResetIgnoredFilesWidget extends StatefulWidget {
-  final Future<List<File>> filesInDeviceCollection;
+  final Future<List<EnteFile>> filesInDeviceCollection;
   final VoidCallback parentSetState;
   const ResetIgnoredFilesWidget(
     this.filesInDeviceCollection,
@@ -268,9 +268,9 @@ class _ResetIgnoredFilesWidgetState extends State<ResetIgnoredFilesWidget> {
   }
 
   Future<void> _removeFilesFromIgnoredFiles(
-    Future<List<File>> filesInDeviceCollection,
+    Future<List<EnteFile>> filesInDeviceCollection,
   ) async {
-    final List<File> deviceCollectionFiles = await filesInDeviceCollection;
+    final List<EnteFile> deviceCollectionFiles = await filesInDeviceCollection;
     await IgnoredFilesService.instance
         .removeIgnoredMappings(deviceCollectionFiles);
   }

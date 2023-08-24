@@ -6,7 +6,7 @@ class CollectionUpdatedEvent extends FilesUpdatedEvent {
 
   CollectionUpdatedEvent(
     this.collectionID,
-    List<File> updatedFiles,
+    List<EnteFile> updatedFiles,
     String? source, {
     EventType? type,
   }) : super(

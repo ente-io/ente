@@ -103,7 +103,7 @@ class CollectionActions {
 
   Future<Collection?> createSharedCollectionLink(
     BuildContext context,
-    List<File> files,
+    List<EnteFile> files,
   ) async {
     final dialog = createProgressDialog(
       context,
@@ -115,10 +115,10 @@ class CollectionActions {
       // create album with emptyName, use collectionCreationTime on UI to
       // show name
       logger.finest("creating album for sharing files");
-      final File fileWithMinCreationTime = files.reduce(
+      final EnteFile fileWithMinCreationTime = files.reduce(
         (a, b) => (a.creationTime ?? 0) < (b.creationTime ?? 0) ? a : b,
       );
-      final File fileWithMaxCreationTime = files.reduce(
+      final EnteFile fileWithMaxCreationTime = files.reduce(
         (a, b) => (a.creationTime ?? 0) > (b.creationTime ?? 0) ? a : b,
       );
       final String dummyName = getNameForDateRange(
@@ -365,7 +365,7 @@ class CollectionActions {
   }
 
   Future<void> trashCollectionKeepingPhotos(Collection collection, BuildContext bContext) async {
-    final List<File> files =
+    final List<EnteFile> files =
         await FilesDB.instance.getAllFilesCollection(collection.id);
     await moveFilesFromCurrentCollection(bContext, collection, files);
     // collection should be empty on server now
@@ -409,7 +409,7 @@ class CollectionActions {
   Future<void> moveFilesFromCurrentCollection(
     BuildContext context,
     Collection collection,
-    Iterable<File> files,
+    Iterable<EnteFile> files,
   ) async {
     final int currentUserID = Configuration.instance.getUserID()!;
     final isCollectionOwner = collection.owner!.id == currentUserID;
@@ -439,38 +439,38 @@ class CollectionActions {
 
     // pendingAssignMap keeps a track of files which are yet to be assigned to
     // to destination collection.
-    final Map<int, File> pendingAssignMap = {};
+    final Map<int, EnteFile> pendingAssignMap = {};
     // destCollectionToFilesMap contains the destination collection and
     // files entry which needs to be moved in destination.
     // After the end of mapping logic, the number of files entries in
     // pendingAssignMap should be equal to files in destCollectionToFilesMap
-    final Map<int, List<File>> destCollectionToFilesMap = {};
+    final Map<int, List<EnteFile>> destCollectionToFilesMap = {};
     final List<int> uploadedIDs = [];
-    for (File f in split.ownedByCurrentUser) {
+    for (EnteFile f in split.ownedByCurrentUser) {
       if (f.uploadedFileID != null) {
         pendingAssignMap[f.uploadedFileID!] = f;
         uploadedIDs.add(f.uploadedFileID!);
       }
     }
 
-    final Map<int, List<File>> collectionToFilesMap =
+    final Map<int, List<EnteFile>> collectionToFilesMap =
         await FilesDB.instance.getAllFilesGroupByCollectionID(uploadedIDs);
 
     // Find and map the files from current collection to to entries in other
     // collections. This mapping is done to avoid moving all the files to
     // uncategorized during remove from album.
-    for (MapEntry<int, List<File>> entry in collectionToFilesMap.entries) {
+    for (MapEntry<int, List<EnteFile>> entry in collectionToFilesMap.entries) {
       if (!_isAutoMoveCandidate(collection.id, entry.key, currentUserID)) {
         continue;
       }
       final targetCollection = collectionsService.getCollectionByID(entry.key)!;
       // for each file which already exist in the destination collection
       // add entries in the moveDestCollectionToFiles map
-      for (File file in entry.value) {
+      for (EnteFile file in entry.value) {
         // Check if the uploaded file is still waiting to be mapped
         if (pendingAssignMap.containsKey(file.uploadedFileID)) {
           if (!destCollectionToFilesMap.containsKey(targetCollection.id)) {
-            destCollectionToFilesMap[targetCollection.id] = <File>[];
+            destCollectionToFilesMap[targetCollection.id] = <EnteFile>[];
           }
           destCollectionToFilesMap[targetCollection.id]!
               .add(pendingAssignMap[file.uploadedFileID!]!);
@@ -483,11 +483,11 @@ class CollectionActions {
       final Collection uncategorizedCollection =
           await collectionsService.getUncategorizedCollection();
       final int toCollectionID = uncategorizedCollection.id;
-      for (MapEntry<int, File> entry in pendingAssignMap.entries) {
+      for (MapEntry<int, EnteFile> entry in pendingAssignMap.entries) {
         final file = entry.value;
         if (pendingAssignMap.containsKey(file.uploadedFileID)) {
           if (!destCollectionToFilesMap.containsKey(toCollectionID)) {
-            destCollectionToFilesMap[toCollectionID] = <File>[];
+            destCollectionToFilesMap[toCollectionID] = <EnteFile>[];
           }
           destCollectionToFilesMap[toCollectionID]!
               .add(pendingAssignMap[file.uploadedFileID!]!);
@@ -507,7 +507,7 @@ class CollectionActions {
       );
     }
 
-    for (MapEntry<int, List<File>> entry in destCollectionToFilesMap.entries) {
+    for (MapEntry<int, List<EnteFile>> entry in destCollectionToFilesMap.entries) {
       await collectionsService.move(entry.key, collection.id, entry.value);
     }
   }

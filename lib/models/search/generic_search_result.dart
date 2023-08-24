@@ -4,7 +4,7 @@ import 'package:photos/models/search/search_result.dart';
 
 class GenericSearchResult extends SearchResult {
   final String _name;
-  final List<File> _files;
+  final List<EnteFile> _files;
   final ResultType _type;
   final Function(BuildContext context)? onResultTap;
 
@@ -21,12 +21,12 @@ class GenericSearchResult extends SearchResult {
   }
 
   @override
-  File? previewThumbnail() {
+  EnteFile? previewThumbnail() {
     return _files.first;
   }
 
   @override
-  List<File> resultFiles() {
+  List<EnteFile> resultFiles() {
     return _files;
   }
 }

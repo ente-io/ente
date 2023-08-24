@@ -12,7 +12,7 @@ class CollageCreatorPage extends StatelessWidget {
   static const int collageItemsMin = 2;
   static const int collageItemsMax = 6;
 
-  final List<File> files;
+  final List<EnteFile> files;
 
   const CollageCreatorPage(this.files, {super.key});
 

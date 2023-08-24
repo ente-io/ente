@@ -7,7 +7,7 @@ class DedupeUploadIDFilter extends Filter {
   final Set<int> trackedUploadIDs = {};
 
   @override
-  bool filter(File file) {
+  bool filter(EnteFile file) {
     if (!file.isUploaded) {
       return true;
     }

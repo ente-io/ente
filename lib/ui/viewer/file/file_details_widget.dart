@@ -24,7 +24,7 @@ import "package:photos/ui/viewer/file_details/objects_item_widget.dart";
 import "package:photos/utils/exif_util.dart";
 
 class FileDetailsWidget extends StatefulWidget {
-  final File file;
+  final EnteFile file;
 
   const FileDetailsWidget(
     this.file, {

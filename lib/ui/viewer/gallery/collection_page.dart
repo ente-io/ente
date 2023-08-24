@@ -43,7 +43,7 @@ class CollectionPage extends StatelessWidget {
       c.collection,
       Configuration.instance.getUserID()!,
     );
-    final List<File>? initialFiles =
+    final List<EnteFile>? initialFiles =
         c.thumbnail != null ? [c.thumbnail!] : null;
     final gallery = Gallery(
       asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) async {

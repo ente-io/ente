@@ -4,7 +4,7 @@ import 'package:photos/ui/viewer/file/no_thumbnail_widget.dart';
 import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
 
 class SearchThumbnailWidget extends StatelessWidget {
-  final File? file;
+  final EnteFile? file;
   final String tagPrefix;
 
   const SearchThumbnailWidget(

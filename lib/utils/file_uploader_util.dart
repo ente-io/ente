@@ -1,10 +1,10 @@
 import 'dart:async';
 import "dart:convert";
-import 'dart:io' as io;
+import "dart:io";
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
-import 'package:archive/archive_io.dart';
+import "package:archive/archive_io.dart";
 import 'package:logging/logging.dart';
 import "package:motion_photos/motion_photos.dart";
 import 'package:motionphoto/motionphoto.dart';
@@ -14,7 +14,7 @@ import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/errors.dart';
-import 'package:photos/models/file.dart' as ente;
+import 'package:photos/models/file.dart';
 import 'package:photos/models/file_type.dart';
 import "package:photos/models/location/location.dart";
 import "package:photos/models/metadata/file_magic.dart";
@@ -28,7 +28,7 @@ const kMaximumThumbnailCompressionAttempts = 2;
 const kLivePhotoHashSeparator = ':';
 
 class MediaUploadData {
-  final io.File? sourceFile;
+  final File? sourceFile;
   final Uint8List? thumbnail;
   final bool isDeleted;
   final FileHashData? hashData;
@@ -61,7 +61,7 @@ class FileHashData {
   FileHashData(this.fileHash, {this.zipHash});
 }
 
-Future<MediaUploadData> getUploadDataFromEnteFile(ente.File file) async {
+Future<MediaUploadData> getUploadDataFromEnteFile(EnteFile file) async {
   if (file.isSharedMediaToAppSandbox) {
     return await _getMediaUploadDataFromAppCache(file);
   } else {
@@ -69,8 +69,8 @@ Future<MediaUploadData> getUploadDataFromEnteFile(ente.File file) async {
   }
 }
 
-Future<MediaUploadData> _getMediaUploadDataFromAssetFile(ente.File file) async {
-  io.File? sourceFile;
+Future<MediaUploadData> _getMediaUploadDataFromAssetFile(EnteFile file) async {
+  File? sourceFile;
   Uint8List? thumbnailData;
   bool isDeleted;
   String? zipHash;
@@ -111,8 +111,8 @@ Future<MediaUploadData> _getMediaUploadDataFromAssetFile(ente.File file) async {
   await _decorateEnteFileData(file, asset);
   fileHash = CryptoUtil.bin2base64(await CryptoUtil.getHash(sourceFile));
 
-  if (file.fileType == FileType.livePhoto && io.Platform.isIOS) {
-    final io.File? videoUrl = await Motionphoto.getLivePhotoFile(file.localID!);
+  if (file.fileType == FileType.livePhoto && Platform.isIOS) {
+    final File? videoUrl = await Motionphoto.getLivePhotoFile(file.localID!);
     if (videoUrl == null || !videoUrl.existsSync()) {
       final String errMsg =
           "missing livePhoto url for  ${file.toString()} with subType ${file.fileSubType}";
@@ -133,11 +133,11 @@ Future<MediaUploadData> _getMediaUploadDataFromAssetFile(ente.File file) async {
     encoder.addFile(sourceFile, "image" + extension(sourceFile.path));
     encoder.close();
     // delete the temporary video and image copy (only in IOS)
-    if (io.Platform.isIOS) {
+    if (Platform.isIOS) {
       await sourceFile.delete();
     }
     // new sourceFile which needs to be uploaded
-    sourceFile = io.File(livePhotoPath);
+    sourceFile = File(livePhotoPath);
     zipHash = CryptoUtil.bin2base64(await CryptoUtil.getHash(sourceFile));
   }
 
@@ -149,7 +149,7 @@ Future<MediaUploadData> _getMediaUploadDataFromAssetFile(ente.File file) async {
     w = asset.width;
   }
   int? motionPhotoStartingIndex;
-  if (io.Platform.isAndroid && asset.type == AssetType.image) {
+  if (Platform.isAndroid && asset.type == AssetType.image) {
     try {
       motionPhotoStartingIndex =
           (await MotionPhotos(sourceFile.path).getMotionVideoIndex())?.start;
@@ -170,7 +170,7 @@ Future<MediaUploadData> _getMediaUploadDataFromAssetFile(ente.File file) async {
 
 Future<Uint8List?> _getThumbnailForUpload(
   AssetEntity asset,
-  ente.File file,
+  EnteFile file,
 ) async {
   try {
     Uint8List? thumbnailData = await asset.thumbnailDataWithSize(
@@ -203,12 +203,12 @@ Future<Uint8List?> _getThumbnailForUpload(
 
 // check if the assetType is still the same. This can happen for livePhotos
 // if the user turns off the video using native photos app
-void _assertFileType(AssetEntity asset, ente.File file) {
+void _assertFileType(AssetEntity asset, EnteFile file) {
   final assetType = fileTypeFromAsset(asset);
   if (assetType == file.fileType) {
     return;
   }
-  if (io.Platform.isIOS || io.Platform.isMacOS) {
+  if (Platform.isIOS || Platform.isMacOS) {
     if (assetType == FileType.image && file.fileType == FileType.livePhoto) {
       throw InvalidFileError(
         'id ${asset.id}',
@@ -228,7 +228,7 @@ void _assertFileType(AssetEntity asset, ente.File file) {
   );
 }
 
-Future<void> _decorateEnteFileData(ente.File file, AssetEntity asset) async {
+Future<void> _decorateEnteFileData(EnteFile file, AssetEntity asset) async {
   // h4ck to fetch location data if missing (thank you Android Q+) lazily only during uploads
   if (file.location == null ||
       (file.location!.latitude == 0 && file.location!.longitude == 0)) {
@@ -244,7 +244,7 @@ Future<void> _decorateEnteFileData(ente.File file, AssetEntity asset) async {
 }
 
 Future<MetadataRequest> getPubMetadataRequest(
-  ente.File file,
+  EnteFile file,
   Map<String, dynamic> newData,
   Uint8List fileKey,
 ) async {
@@ -269,12 +269,12 @@ Future<MetadataRequest> getPubMetadataRequest(
   );
 }
 
-Future<MediaUploadData> _getMediaUploadDataFromAppCache(ente.File file) async {
-  io.File sourceFile;
+Future<MediaUploadData> _getMediaUploadDataFromAppCache(EnteFile file) async {
+  File sourceFile;
   Uint8List? thumbnailData;
   const bool isDeleted = false;
   final localPath = getSharedMediaFilePath(file);
-  sourceFile = io.File(localPath);
+  sourceFile = File(localPath);
   if (!sourceFile.existsSync()) {
     _logger.warning("File doesn't exist in app sandbox");
     throw InvalidFileError(
@@ -326,7 +326,7 @@ Future<Map<String, int>?> getImageHeightAndWith({
   try {
     late Uint8List bytes;
     if (imagePath != null) {
-      final io.File imageFile = io.File(imagePath);
+      final File imageFile = File(imagePath);
       bytes = await imageFile.readAsBytes();
     } else {
       bytes = imageBytes!;
@@ -347,8 +347,8 @@ Future<Map<String, int>?> getImageHeightAndWith({
   }
 }
 
-Future<Uint8List?> getThumbnailFromInAppCacheFile(ente.File file) async {
-  var localFile = io.File(getSharedMediaFilePath(file));
+Future<Uint8List?> getThumbnailFromInAppCacheFile(EnteFile file) async {
+  var localFile = File(getSharedMediaFilePath(file));
   if (!localFile.existsSync()) {
     return null;
   }
@@ -360,7 +360,7 @@ Future<Uint8List?> getThumbnailFromInAppCacheFile(ente.File file) async {
       maxWidth: thumbnailLargeSize,
       quality: 80,
     );
-    localFile = io.File(thumbnailFilePath!);
+    localFile = File(thumbnailFilePath!);
   }
   var thumbnailData = await localFile.readAsBytes();
   int compressionAttempts = 0;

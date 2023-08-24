@@ -15,9 +15,9 @@ import 'package:photos/utils/delete_file_util.dart';
 import 'package:photos/utils/share_util.dart';
 
 class FileBottomBar extends StatefulWidget {
-  final File file;
-  final Function(File) onEditRequested;
-  final Function(File) onFileRemoved;
+  final EnteFile file;
+  final Function(EnteFile) onEditRequested;
+  final Function(EnteFile) onFileRemoved;
   final bool showOnlyInfoButton;
   final int? userID;
   final ValueNotifier<bool> enableFullScreenNotifier;
@@ -206,7 +206,7 @@ class FileBottomBarState extends State<FileBottomBar> {
     );
   }
 
-  Future<void> _showSingleFileDeleteSheet(File file) async {
+  Future<void> _showSingleFileDeleteSheet(EnteFile file) async {
     await showSingleFileDeleteSheet(
       context,
       file,
@@ -262,7 +262,7 @@ class FileBottomBarState extends State<FileBottomBar> {
     );
   }
 
-  Future<void> _displayDetails(File file) async {
+  Future<void> _displayDetails(EnteFile file) async {
     await showDetailsSheet(context, file);
   }
 }

@@ -64,7 +64,7 @@ class FileSearchResultWidget extends StatelessWidget {
     );
   }
 
-  void _routeToDetailPage(File file, BuildContext context) {
+  void _routeToDetailPage(EnteFile file, BuildContext context) {
     final page = DetailPage(
       DetailPageConfiguration(
         List.unmodifiable([file]),

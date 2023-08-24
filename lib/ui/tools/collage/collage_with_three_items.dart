@@ -21,7 +21,7 @@ class CollageWithThreeItems extends StatefulWidget {
     super.key,
   });
 
-  final File first, second, third;
+  final EnteFile first, second, third;
 
   @override
   State<CollageWithThreeItems> createState() => _CollageWithThreeItemsState();

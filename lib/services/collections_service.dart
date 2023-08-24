@@ -60,7 +60,7 @@ class CollectionsService {
   Collection? cachedDefaultHiddenCollection;
   Future<Map<int, int>>? _collectionIDToNewestFileTime;
   Collection? cachedUncategorizedCollection;
-  final Map<String, File> _coverCache = <String, File>{};
+  final Map<String, EnteFile> _coverCache = <String, EnteFile>{};
   final Map<int, int> _countCache = <int, int>{};
 
   CollectionsService._privateConstructor() {
@@ -141,7 +141,7 @@ class CollectionsService {
     if (shouldFireDeleteEvent) {
       Bus.instance.fire(
         LocalPhotosUpdatedEvent(
-          List<File>.empty(),
+          List<EnteFile>.empty(),
           source: "syncCollectionDeleted",
         ),
       );
@@ -158,7 +158,7 @@ class CollectionsService {
       Bus.instance.fire(
         CollectionUpdatedEvent(
           null,
-          List<File>.empty(),
+          List<EnteFile>.empty(),
           "collections_updated",
         ),
       );
@@ -236,7 +236,7 @@ class CollectionsService {
     return _collectionIDToNewestFileTime!;
   }
 
-  Future<File?> getCover(Collection c) async {
+  Future<EnteFile?> getCover(Collection c) async {
     final int localSyncTime = getCollectionSyncTime(c.id);
     final String coverKey = '${c.id}_${localSyncTime}_${c.updationTime}';
     if (_coverCache.containsKey(coverKey)) {
@@ -247,7 +247,7 @@ class CollectionsService {
     }
     if (c.hasCover) {
       final coverID = c.pubMagicMetadata.coverID ?? 0;
-      final File? cover = await filesDB.getUploadedFile(coverID, c.id);
+      final EnteFile? cover = await filesDB.getUploadedFile(coverID, c.id);
       if (cover != null) {
         _coverCache[coverKey] = cover;
         return Future.value(cover);
@@ -264,7 +264,7 @@ class CollectionsService {
     return null;
   }
 
-  File? getCoverCache(Collection c) {
+  EnteFile? getCoverCache(Collection c) {
     final int localSyncTime = getCollectionSyncTime(c.id);
     final String coverKey = '${c.id}_${localSyncTime}_${c.updationTime}';
     return _coverCache[coverKey];
@@ -579,7 +579,7 @@ class CollectionsService {
     Bus.instance.fire(
       CollectionUpdatedEvent(
         collection.id,
-        <File>[],
+        <EnteFile>[],
         "delete_collection",
         type: EventType.deletedFromRemote,
       ),
@@ -874,7 +874,7 @@ class CollectionsService {
       await _db.insert(List.from([collection]));
       _collectionIDToCollections[collection.id] = collection;
       Bus.instance.fire(
-        CollectionUpdatedEvent(collection.id, <File>[], "shareUrL"),
+        CollectionUpdatedEvent(collection.id, <EnteFile>[], "shareUrL"),
       );
     } on DioError catch (e) {
       if (e.response?.statusCode == 402) {
@@ -903,7 +903,7 @@ class CollectionsService {
       await _db.insert(List.from([collection]));
       _collectionIDToCollections[collection.id] = collection;
       Bus.instance
-          .fire(CollectionUpdatedEvent(collection.id, <File>[], "updateUrl"));
+          .fire(CollectionUpdatedEvent(collection.id, <EnteFile>[], "updateUrl"));
     } on DioError catch (e) {
       if (e.response?.statusCode == 402) {
         throw SharingNotPermittedForFreeAccountsError();
@@ -926,7 +926,7 @@ class CollectionsService {
       Bus.instance.fire(
         CollectionUpdatedEvent(
           collection.id,
-          <File>[],
+          <EnteFile>[],
           "disableShareUrl",
         ),
       );
@@ -1100,7 +1100,7 @@ class CollectionsService {
     return collection;
   }
 
-  Future<void> addToCollection(int collectionID, List<File> files) async {
+  Future<void> addToCollection(int collectionID, List<EnteFile> files) async {
     final containsUploadedFile = files.firstWhereOrNull(
           (element) => element.uploadedFileID != null,
         ) !=
@@ -1157,10 +1157,10 @@ class CollectionsService {
     }
   }
 
-  Future<File> linkLocalFileToExistingUploadedFileInAnotherCollection(
+  Future<EnteFile> linkLocalFileToExistingUploadedFileInAnotherCollection(
     int destCollectionID, {
-    required File localFileToUpload,
-    required File existingUploadedFile,
+    required EnteFile localFileToUpload,
+    required EnteFile existingUploadedFile,
   }) async {
     final params = <String, dynamic>{};
     params["collectionID"] = destCollectionID;
@@ -1199,7 +1199,7 @@ class CollectionsService {
     }
   }
 
-  Future<void> restore(int toCollectionID, List<File> files) async {
+  Future<void> restore(int toCollectionID, List<EnteFile> files) async {
     final params = <String, dynamic>{};
     params["collectionID"] = toCollectionID;
     final toCollectionKey = getCollectionKey(toCollectionID);
@@ -1268,7 +1268,7 @@ class CollectionsService {
   Future<void> move(
     int toCollectionID,
     int fromCollectionID,
-    List<File> files,
+    List<EnteFile> files,
   ) async {
     _validateMoveRequest(toCollectionID, fromCollectionID, files);
     files.removeWhere((element) => element.uploadedFileID == null);
@@ -1335,7 +1335,7 @@ class CollectionsService {
   void _validateMoveRequest(
     int toCollectionID,
     int fromCollectionID,
-    List<File> files,
+    List<EnteFile> files,
   ) {
     if (toCollectionID == fromCollectionID) {
       throw AssertionError("Can't move to same album");
@@ -1353,7 +1353,7 @@ class CollectionsService {
     }
   }
 
-  Future<void> removeFromCollection(int collectionID, List<File> files) async {
+  Future<void> removeFromCollection(int collectionID, List<EnteFile> files) async {
     final params = <String, dynamic>{};
     params["collectionID"] = collectionID;
     final batchedFiles = files.chunks(batchSize);

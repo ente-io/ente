@@ -60,7 +60,7 @@ class _DynamicLocationGalleryWidgetState
     Future<FileLoadResult> filterFiles() async {
       final FileLoadResult result = await fileLoadResult;
       final stopWatch = Stopwatch()..start();
-      final copyOfFiles = List<File>.from(result.files);
+      final copyOfFiles = List<EnteFile>.from(result.files);
       copyOfFiles.removeWhere((f) {
         return !LocationService.instance.isFileInsideLocationTag(
           InheritedLocationTagData.of(context).centerPoint,

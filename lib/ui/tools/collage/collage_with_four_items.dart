@@ -21,7 +21,7 @@ class CollageWithFourItems extends StatefulWidget {
     super.key,
   });
 
-  final File first, second, third, fourth;
+  final EnteFile first, second, third, fourth;
 
   @override
   State<CollageWithFourItems> createState() => _CollageWithFourItemsState();

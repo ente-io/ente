@@ -81,7 +81,7 @@ extension CollectionFileActions on CollectionActions {
     BuildContext context,
     int collectionID,
     bool showProgressDialog, {
-    List<File>? selectedFiles,
+    List<EnteFile>? selectedFiles,
     List<SharedMediaFile>? sharedFiles,
     List<AssetEntity>? picketAssets,
   }) async {
@@ -94,8 +94,8 @@ extension CollectionFileActions on CollectionActions {
         : null;
     await dialog?.show();
     try {
-      final List<File> files = [];
-      final List<File> filesPendingUpload = [];
+      final List<EnteFile> files = [];
+      final List<EnteFile> filesPendingUpload = [];
       final int currentUserID = Configuration.instance.getUserID()!;
       if (sharedFiles != null) {
         filesPendingUpload.addAll(
@@ -113,7 +113,7 @@ extension CollectionFileActions on CollectionActions {
         );
       } else {
         for (final file in selectedFiles!) {
-          File? currentFile;
+          EnteFile? currentFile;
           if (file.uploadedFileID != null) {
             currentFile = file;
           } else if (file.generatedID != null) {
@@ -151,7 +151,7 @@ extension CollectionFileActions on CollectionActions {
           }
           final Collection uncat =
               await CollectionsService.instance.getUncategorizedCollection();
-          for (File unuploadedFile in filesPendingUpload) {
+          for (EnteFile unuploadedFile in filesPendingUpload) {
             final uploadedFile = await FileUploader.instance.forceUpload(
               unuploadedFile,
               uncat.id,
@@ -192,7 +192,7 @@ extension CollectionFileActions on CollectionActions {
 
   Future<bool> updateFavorites(
     BuildContext context,
-    List<File> files,
+    List<EnteFile> files,
     bool markAsFavorite,
   ) async {
     final ProgressDialog dialog = createProgressDialog(

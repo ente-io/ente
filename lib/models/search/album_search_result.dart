@@ -18,12 +18,12 @@ class AlbumSearchResult extends SearchResult {
   }
 
   @override
-  File? previewThumbnail() {
+  EnteFile? previewThumbnail() {
     return collectionWithThumbnail.thumbnail;
   }
 
   @override
-  List<File> resultFiles() {
+  List<EnteFile> resultFiles() {
     // for album search result, we should open the album page directly
     throw UnimplementedError();
   }

@@ -90,7 +90,7 @@ class _DeleteEmptyAlbumsState extends State<DeleteEmptyAlbums> {
                     Bus.instance.fire(
                       CollectionUpdatedEvent(
                         0,
-                        <File>[],
+                        <EnteFile>[],
                         "empty_albums_deleted",
                       ),
                     );

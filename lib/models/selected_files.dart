@@ -5,19 +5,19 @@ import 'package:photos/events/clear_selections_event.dart';
 import 'package:photos/models/file.dart';
 
 class SelectedFiles extends ChangeNotifier {
-  final files = <File>{};
+  final files = <EnteFile>{};
 
   ///This variable is used to track the files that were involved in last selection
   ///operation (select/unselect). Each [LazyGridView] checks this variable on
   ///change in [SelectedFiles] to see if any of it's files were involved in last
   ///select/unselect operation. If yes, then it will rebuild itself.
-  final lastSelectionOperationFiles = <File>{};
+  final lastSelectionOperationFiles = <EnteFile>{};
 
-  void toggleSelection(File fileToToggle) {
+  void toggleSelection(EnteFile fileToToggle) {
     // To handle the cases, where the file might have changed due to upload
     // or any other update, using file.generatedID to track if this file was already
     // selected or not
-    final File? alreadySelected = files.firstWhereOrNull(
+    final EnteFile? alreadySelected = files.firstWhereOrNull(
       (element) => _isMatch(fileToToggle, element),
     );
     if (alreadySelected != null) {
@@ -30,7 +30,7 @@ class SelectedFiles extends ChangeNotifier {
     notifyListeners();
   }
 
-  void toggleGroupSelection(Set<File> filesToToggle) {
+  void toggleGroupSelection(Set<EnteFile> filesToToggle) {
     if (files.containsAll(filesToToggle)) {
       unSelectAll(filesToToggle);
     } else {
@@ -38,14 +38,14 @@ class SelectedFiles extends ChangeNotifier {
     }
   }
 
-  void selectAll(Set<File> filesToSelect) {
+  void selectAll(Set<EnteFile> filesToSelect) {
     files.addAll(filesToSelect);
     lastSelectionOperationFiles.clear();
     lastSelectionOperationFiles.addAll(filesToSelect);
     notifyListeners();
   }
 
-  void unSelectAll(Set<File> filesToUnselect, {bool skipNotify = false}) {
+  void unSelectAll(Set<EnteFile> filesToUnselect, {bool skipNotify = false}) {
     files.removeWhere((file) => filesToUnselect.contains(file));
     lastSelectionOperationFiles.clear();
     lastSelectionOperationFiles.addAll(filesToUnselect);
@@ -54,21 +54,21 @@ class SelectedFiles extends ChangeNotifier {
     }
   }
 
-  bool isFileSelected(File file) {
-    final File? alreadySelected = files.firstWhereOrNull(
+  bool isFileSelected(EnteFile file) {
+    final EnteFile? alreadySelected = files.firstWhereOrNull(
       (element) => _isMatch(file, element),
     );
     return alreadySelected != null;
   }
 
-  bool isPartOfLastSelected(File file) {
-    final File? matchedFile = lastSelectionOperationFiles.firstWhereOrNull(
+  bool isPartOfLastSelected(EnteFile file) {
+    final EnteFile? matchedFile = lastSelectionOperationFiles.firstWhereOrNull(
       (element) => _isMatch(file, element),
     );
     return matchedFile != null;
   }
 
-  bool _isMatch(File first, File second) {
+  bool _isMatch(EnteFile first, EnteFile second) {
     if (first.generatedID != null && second.generatedID != null) {
       if (first.generatedID == second.generatedID) {
         return true;
@@ -88,7 +88,7 @@ class SelectedFiles extends ChangeNotifier {
 
   ///Retains only the files that are present in the [filesToRetain] set in
   ///[files]. Takes the intersection of the two sets.
-  void retainFiles(Set<File> filesToRetain) {
+  void retainFiles(Set<EnteFile> filesToRetain) {
     files.retainAll(filesToRetain);
     notifyListeners();
   }

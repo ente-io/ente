@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'dart:collection';
-import 'dart:io' as io;
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
@@ -23,7 +23,7 @@ final _downloadQueue = Queue<int>();
 const int kMaximumConcurrentDownloads = 500;
 
 class FileDownloadItem {
-  final File file;
+  final EnteFile file;
   final Completer<Uint8List> completer;
   final CancelToken cancelToken;
   int counter = 0; // number of times file download was requested
@@ -31,7 +31,7 @@ class FileDownloadItem {
   FileDownloadItem(this.file, this.completer, this.cancelToken, this.counter);
 }
 
-Future<Uint8List?> getThumbnail(File file) async {
+Future<Uint8List?> getThumbnail(EnteFile file) async {
   if (file.isRemoteFile) {
     return getThumbnailFromServer(file);
   } else {
@@ -42,7 +42,7 @@ Future<Uint8List?> getThumbnail(File file) async {
   }
 }
 
-Future<Uint8List> getThumbnailFromServer(File file) async {
+Future<Uint8List> getThumbnailFromServer(EnteFile file) async {
   final cachedThumbnail = cachedThumbnailPath(file);
   if (await cachedThumbnail.exists()) {
     final data = await cachedThumbnail.readAsBytes();
@@ -71,7 +71,7 @@ Future<Uint8List> getThumbnailFromServer(File file) async {
 }
 
 Future<Uint8List?> getThumbnailFromLocal(
-  File file, {
+  EnteFile file, {
   int size = thumbnailSmallSize,
   int quality = thumbnailQuality,
 }) async {
@@ -108,7 +108,7 @@ Future<Uint8List?> getThumbnailFromLocal(
   }
 }
 
-void removePendingGetThumbnailRequestIfAny(File file) {
+void removePendingGetThumbnailRequestIfAny(EnteFile file) {
   if (_uploadIDToDownloadItem.containsKey(file.uploadedFileID)) {
     final item = _uploadIDToDownloadItem[file.uploadedFileID]!;
     item.counter--;
@@ -192,10 +192,10 @@ Future<void> _downloadAndDecryptThumbnail(FileDownloadItem item) async {
   }
 }
 
-io.File cachedThumbnailPath(File file) {
+File cachedThumbnailPath(EnteFile file) {
   final thumbnailCacheDirectory =
       Configuration.instance.getThumbnailCacheDirectory();
-  return io.File(
+  return File(
     thumbnailCacheDirectory + "/" + file.uploadedFileID.toString(),
   );
 }

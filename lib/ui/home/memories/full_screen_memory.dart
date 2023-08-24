@@ -207,7 +207,7 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
   }
 
   Widget _buildBottomIcons() {
-    final File currentFile = widget.memories[_index].file;
+    final EnteFile currentFile = widget.memories[_index].file;
     final List<Widget> rowChildren = [
       IconButton(
         icon: Icon(

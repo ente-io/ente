@@ -9,7 +9,7 @@ class ImportantItemsFilter implements GalleryItemsFilter {
   final _importantPaths = Configuration.instance.getPathsToBackUp();
 
   @override
-  bool shouldInclude(File file) {
+  bool shouldInclude(EnteFile file) {
     if (file.uploadedFileID != null) {
       return true;
     }

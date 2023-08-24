@@ -6,7 +6,7 @@ import "package:photos/ui/viewer/gallery/component/gallery_file_widget.dart";
 import "package:photos/ui/viewer/gallery/gallery.dart";
 
 class GalleryGridViewWidget extends StatelessWidget {
-  final List<File> filesInGroup;
+  final List<EnteFile> filesInGroup;
   final int photoGridSize;
   final SelectedFiles? selectedFiles;
   final bool limitSelectionToOne;
