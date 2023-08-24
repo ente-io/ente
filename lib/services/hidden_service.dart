@@ -73,9 +73,6 @@ extension HiddenService on CollectionsService {
             .files;
         await move(result.id, defaultHidden.id, filesInCollection);
         await CollectionsService.instance.trashEmptyCollection(defaultHidden);
-      } on AssertionError catch (e) {
-        _logger.severe("Clubbing all defaultHidden : ${e.message}");
-        continue;
       } catch (e, s) {
         _logger.severe(
           "One iteration of clubbing all default hidden failed",
