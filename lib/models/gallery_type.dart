@@ -31,11 +31,11 @@ extension GalleyTypeExtension on GalleryType {
       case GalleryType.favorite:
       case GalleryType.locationTag:
       case GalleryType.quickLink:
+      case GalleryType.uncategorized:
         return true;
 
       case GalleryType.hiddenSection:
       case GalleryType.hiddenOwnedCollection:
-      case GalleryType.uncategorized:
       case GalleryType.trash:
       case GalleryType.sharedCollection:
         return false;
