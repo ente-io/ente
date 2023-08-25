@@ -1,6 +1,6 @@
 import { Collection, CollectionSummaries } from 'types/collection';
 import CollectionListBar from 'components/Collections/CollectionListBar';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import AllCollections from 'components/Collections/AllCollections';
 import CollectionInfoWithOptions from 'components/Collections/CollectionInfoWithOptions';
 import { ALL_SECTION, COLLECTION_LIST_SORT_BY } from 'constants/collection';
@@ -18,6 +18,8 @@ import { LS_KEYS } from 'utils/storage/localStorage';
 import {
     CollectionDownloadProgress,
     CollectionDownloadProgressAttributes,
+    isCollectionDownloadCancelled,
+    isCollectionDownloadCompleted,
 } from './CollectionDownloadProgress';
 import { SetCollectionDownloadProgressAttributes } from 'types/gallery';
 
@@ -96,12 +98,19 @@ export default function Collections(props: Iprops) {
             });
         };
 
-    const isCollectionDownloadInProgress = (collectionID: number) => {
-        const attributes = collectionDownloadProgressAttributesList.find(
-            (attr) => attr.collectionID === collectionID
-        );
-        return attributes && !attributes.canceller.signal.aborted;
-    };
+    const isCollectionDownloadInProgress = useCallback(
+        (collectionID: number) => {
+            const attributes = collectionDownloadProgressAttributesList.find(
+                (attr) => attr.collectionID === collectionID
+            );
+            return (
+                attributes &&
+                !isCollectionDownloadCancelled(attributes) &&
+                !isCollectionDownloadCompleted(attributes)
+            );
+        },
+        [collectionDownloadProgressAttributesList]
+    );
 
     useEffect(() => {
         if (isInSearchMode) {
@@ -130,7 +139,12 @@ export default function Collections(props: Iprops) {
             itemType: ITEM_TYPE.HEADER,
             height: 68,
         });
-    }, [collectionSummaries, activeCollectionID, isInSearchMode]);
+    }, [
+        collectionSummaries,
+        activeCollectionID,
+        isInSearchMode,
+        isCollectionDownloadInProgress,
+    ]);
 
     if (shouldBeHidden) {
         return <></>;
