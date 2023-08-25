@@ -155,13 +155,7 @@ class FileUploader {
         "original upload completer resolved, try adding the file to another "
         "collection",
       );
-      // if (uploadedFile == null) {
-      //   /* todo: handle this case, ideally during next sync the localId
-      //     should be uploaded to this collection ID
-      //    */
-      //   _logger.severe('unexpected upload state');
-      //   return null;
-      // }
+
       return CollectionsService.instance
           .addToCollection(collectionID, [uploadedFile]).then((aVoid) {
         return uploadedFile;
