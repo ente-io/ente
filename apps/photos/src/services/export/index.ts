@@ -48,14 +48,13 @@ import {
     ExportRecord,
     ExportSettings,
     ExportUIUpdaters,
-    FileExportStats,
 } from 'types/export';
 import { User } from 'types/user';
 import { FILE_TYPE, TYPE_JPEG, TYPE_JPG } from 'constants/file';
 import { ExportStage } from 'constants/export';
 import { ElectronAPIs } from 'types/electron';
 import { CustomError } from 'utils/error';
-import { addLocalLog, addLogLine } from 'utils/logging';
+import { addLogLine } from 'utils/logging';
 import { eventBus, Events } from '../events';
 import {
     getCollectionNameMap,
@@ -87,7 +86,7 @@ class ExportService {
         setExportProgress: () => {},
         setExportStage: () => {},
         setLastExportTime: () => {},
-        setFileExportStats: () => {},
+        setPendingExports: () => {},
     };
     private currentExportProgress: ExportProgress = {
         total: 0,
@@ -230,9 +229,9 @@ class ExportService {
         }
     }
 
-    getFileExportStats = async (
+    getPendingExports = async (
         exportRecord: ExportRecord
-    ): Promise<FileExportStats> => {
+    ): Promise<EnteFile[]> => {
         try {
             const user: User = getData(LS_KEYS.USER);
             const files = [
@@ -241,44 +240,11 @@ class ExportService {
             ];
             const userPersonalFiles = getPersonalFiles(files, user);
 
-            const collections = await getLocalCollections(true);
-            const userNonEmptyPersonalCollections =
-                getNonEmptyPersonalCollections(
-                    collections,
-                    userPersonalFiles,
-                    user
-                );
-
             const unExportedFiles = getUnExportedFiles(
                 userPersonalFiles,
                 exportRecord
             );
-            const deletedExportedFiles = getDeletedExportedFiles(
-                userPersonalFiles,
-                exportRecord
-            );
-            const renamedCollections = getRenamedExportedCollections(
-                userNonEmptyPersonalCollections,
-                exportRecord
-            );
-            const deletedCollections = getDeletedExportedCollections(
-                userNonEmptyPersonalCollections,
-                exportRecord
-            );
-
-            addLocalLog(
-                () =>
-                    `personal files:${userPersonalFiles.length} unexported files: ${unExportedFiles.length}, deleted exported files: ${deletedExportedFiles.length}, renamed collections: ${renamedCollections.length}, deleted collections: ${deletedCollections.length}`
-            );
-
-            return {
-                totalCount: userPersonalFiles.length,
-                pendingCount:
-                    unExportedFiles.length +
-                    deletedExportedFiles.length +
-                    renamedCollections.length +
-                    deletedCollections.length,
-            };
+            return unExportedFiles;
         } catch (e) {
             logError(e, 'getUpdateFileLists failed');
             throw e;
@@ -289,22 +255,12 @@ class ExportService {
         this.verifyExportFolderExists(exportFolder);
         const exportRecord = await this.getExportRecord(exportFolder);
         await this.updateExportStage(ExportStage.MIGRATION);
-        this.updateExportProgress({
-            success: 0,
-            failed: 0,
-            total: 0,
-        });
         await this.runMigration(
             exportFolder,
             exportRecord,
             this.updateExportProgress.bind(this)
         );
-        await this.updateExportStage(ExportStage.INPROGRESS);
-        this.updateExportProgress({
-            success: 0,
-            failed: 0,
-            total: 0,
-        });
+        await this.updateExportStage(ExportStage.STARTING);
     }
 
     async postExport() {
@@ -319,8 +275,8 @@ class ExportService {
 
             const exportRecord = await this.getExportRecord(exportFolder);
 
-            const fileExportStats = await this.getFileExportStats(exportRecord);
-            this.uiUpdater.setFileExportStats(fileExportStats);
+            const pendingExports = await this.getPendingExports(exportRecord);
+            this.uiUpdater.setPendingExports(pendingExports);
         } catch (e) {
             logError(e, 'postExport failed');
         }
@@ -442,58 +398,45 @@ class ExportService {
             this.uiUpdater.setExportProgress({
                 success: success,
                 failed: failed,
-                total:
-                    removedFileUIDs.length +
-                    filesToExport.length +
-                    deletedExportedCollections.length +
-                    renamedCollections.length,
+                total: filesToExport.length,
             });
             const incrementSuccess = () => {
                 this.updateExportProgress({
                     success: ++success,
                     failed: failed,
-                    total:
-                        removedFileUIDs.length +
-                        filesToExport.length +
-                        deletedExportedCollections.length +
-                        renamedCollections.length,
+                    total: filesToExport.length,
                 });
             };
             const incrementFailed = () => {
                 this.updateExportProgress({
                     success: success,
                     failed: ++failed,
-                    total:
-                        removedFileUIDs.length +
-                        filesToExport.length +
-                        deletedExportedCollections.length +
-                        renamedCollections.length,
+                    total: filesToExport.length,
                 });
             };
             if (renamedCollections?.length > 0) {
+                this.updateExportStage(ExportStage.RENAMING_COLLECTION_FOLDERS);
                 addLogLine(`renaming ${renamedCollections.length} collections`);
                 await this.collectionRenamer(
                     exportFolder,
                     collectionIDExportNameMap,
                     renamedCollections,
-                    incrementSuccess,
-                    incrementFailed,
                     isCanceled
                 );
             }
 
             if (removedFileUIDs?.length > 0) {
+                this.updateExportStage(ExportStage.TRASHING_DELETED_FILES);
                 addLogLine(`trashing ${removedFileUIDs.length} files`);
                 await this.fileTrasher(
                     exportFolder,
                     collectionIDExportNameMap,
                     removedFileUIDs,
-                    incrementSuccess,
-                    incrementFailed,
                     isCanceled
                 );
             }
             if (filesToExport?.length > 0) {
+                this.updateExportStage(ExportStage.EXPORTING_FILES);
                 addLogLine(`exporting ${filesToExport.length} files`);
                 await this.fileExporter(
                     filesToExport,
@@ -506,14 +449,15 @@ class ExportService {
                 );
             }
             if (deletedExportedCollections?.length > 0) {
+                this.updateExportStage(
+                    ExportStage.TRASHING_DELETED_COLLECTIONS
+                );
                 addLogLine(
                     `removing ${deletedExportedCollections.length} collections`
                 );
                 await this.collectionRemover(
                     deletedExportedCollections,
                     exportFolder,
-                    incrementSuccess,
-                    incrementFailed,
                     isCanceled
                 );
             }
@@ -532,8 +476,6 @@ class ExportService {
         exportFolder: string,
         collectionIDExportNameMap: Map<number, string>,
         renamedCollections: Collection[],
-        incrementSuccess: () => void,
-        incrementFailed: () => void,
         isCanceled: CancellationStatus
     ) {
         try {
@@ -580,9 +522,7 @@ class ExportService {
                     addLogLine(
                         `renaming collection with id ${collection.id} from ${oldCollectionExportName} to ${newCollectionExportName} successful`
                     );
-                    incrementSuccess();
                 } catch (e) {
-                    incrementFailed();
                     logError(e, 'collectionRenamer failed a collection');
                     if (
                         e.message ===
@@ -609,8 +549,6 @@ class ExportService {
     async collectionRemover(
         deletedExportedCollectionIDs: number[],
         exportFolder: string,
-        incrementSuccess: () => void,
-        incrementFailed: () => void,
         isCanceled: CancellationStatus
     ) {
         try {
@@ -657,9 +595,7 @@ class ExportService {
                     addLogLine(
                         `removing collection with id ${collectionID} from export folder successful`
                     );
-                    incrementSuccess();
                 } catch (e) {
-                    incrementFailed();
                     logError(e, 'collectionRemover failed a collection');
                     if (
                         e.message ===
@@ -779,8 +715,6 @@ class ExportService {
         exportDir: string,
         collectionIDExportNameMap: Map<number, string>,
         removedFileUIDs: string[],
-        incrementSuccess: () => void,
-        incrementFailed: () => void,
         isCanceled: CancellationStatus
     ): Promise<void> {
         try {
@@ -878,9 +812,7 @@ class ExportService {
                     }
                     await this.removeFileExportedRecord(exportDir, fileUID);
                     addLogLine(`trashing file with id ${fileUID} successful`);
-                    incrementSuccess();
                 } catch (e) {
-                    incrementFailed();
                     logError(e, 'trashing failed for a file');
                     if (
                         e.message ===

@@ -528,6 +528,9 @@
     "STOP_EXPORT": "Stop",
     "EXPORT_PROGRESS": "",
     "MIGRATING_EXPORT": "",
+    "RENAMING_COLLECTION_FOLDERS": "",
+    "TRASHING_DELETED_FILES": "",
+    "TRASHING_DELETED_COLLECTIONS": "",
     "EXPORT_NOTIFICATION": {
         "START": "Export gestartet",
         "IN_PROGRESS": "",

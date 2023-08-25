@@ -27,16 +27,33 @@ interface Props {
 }
 
 export default function ExportInProgress(props: Props) {
-    const isLoading = props.exportProgress.total === 0;
+    const showIndeterminateProgress = () => {
+        return (
+            props.exportStage === ExportStage.STARTING ||
+            props.exportStage === ExportStage.MIGRATION ||
+            props.exportStage === ExportStage.RENAMING_COLLECTION_FOLDERS ||
+            props.exportStage === ExportStage.TRASHING_DELETED_FILES ||
+            props.exportStage === ExportStage.TRASHING_DELETED_COLLECTIONS
+        );
+    };
     return (
         <>
             <DialogContent>
                 <VerticallyCentered>
                     <Box mb={1.5}>
-                        {isLoading ? (
+                        {props.exportStage === ExportStage.STARTING ? (
                             t('EXPORT_STARTING')
                         ) : props.exportStage === ExportStage.MIGRATION ? (
                             t('MIGRATING_EXPORT')
+                        ) : props.exportStage ===
+                          ExportStage.RENAMING_COLLECTION_FOLDERS ? (
+                            t('RENAMING_COLLECTION_FOLDERS')
+                        ) : props.exportStage ===
+                          ExportStage.TRASHING_DELETED_FILES ? (
+                            t('TRASHING_DELETED_FILES')
+                        ) : props.exportStage ===
+                          ExportStage.TRASHING_DELETED_COLLECTIONS ? (
+                            t('TRASHING_DELETED_COLLECTIONS')
                         ) : (
                             <Trans
                                 i18nKey={'EXPORT_PROGRESS'}
@@ -53,7 +70,7 @@ export default function ExportInProgress(props: Props) {
                         <ProgressBar
                             style={{ width: '100%' }}
                             now={
-                                isLoading
+                                showIndeterminateProgress()
                                     ? 100
                                     : Math.round(
                                           ((props.exportProgress.success +

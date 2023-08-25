@@ -528,6 +528,9 @@
     "STOP_EXPORT": "停止",
     "EXPORT_PROGRESS": "<a>{{progress.success}} / {{progress.total}}</a> 个文件已导出",
     "MIGRATING_EXPORT": "准备中...",
+    "RENAMING_COLLECTION_FOLDERS": "",
+    "TRASHING_DELETED_FILES": "",
+    "TRASHING_DELETED_COLLECTIONS": "",
     "EXPORT_NOTIFICATION": {
         "START": "导出已开始",
         "IN_PROGRESS": "导出已在进行中",

@@ -1,4 +1,5 @@
 import { ExportStage } from 'constants/export';
+import { EnteFile } from 'types/file';
 
 export interface ExportProgress {
     success: number;
@@ -15,11 +16,6 @@ export interface CollectionExportNames {
 
 export interface FileExportNames {
     [ID: string]: string;
-}
-
-export interface FileExportStats {
-    totalCount: number;
-    pendingCount: number;
 }
 
 export interface ExportRecordV0 {
@@ -66,6 +62,6 @@ export interface ExportSettings {
 export interface ExportUIUpdaters {
     setExportStage: (stage: ExportStage) => void;
     setExportProgress: (progress: ExportProgress) => void;
-    setFileExportStats: (fileExportStats: FileExportStats) => void;
     setLastExportTime: (exportTime: number) => void;
+    setPendingExports: (pendingExports: EnteFile[]) => void;
 }
