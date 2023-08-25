@@ -217,10 +217,10 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
       size: widget.thumbnailSize,
     ).then((thumbData) async {
       if (thumbData == null) {
-        if (widget.file.uploadedFileID != null) {
+        if (widget.file.isUploaded) {
           _logger.fine("Removing localID reference for " + widget.file.tag);
           widget.file.localID = null;
-          if (widget.file is TrashFile) {
+          if (widget.file.isTrash) {
             TrashDB.instance.update(widget.file as TrashFile);
           } else {
             FilesDB.instance.update(widget.file);
