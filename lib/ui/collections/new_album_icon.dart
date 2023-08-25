@@ -9,8 +9,8 @@ import "package:photos/ui/viewer/gallery/collection_page.dart";
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/navigation_util.dart";
 
-class CreateNewAlbumIcon extends StatelessWidget {
-  const CreateNewAlbumIcon({Key? key}) : super(key: key);
+class NewAlbumIcon extends StatelessWidget {
+  const NewAlbumIcon({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
