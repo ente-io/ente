@@ -4,8 +4,8 @@ import 'dart:io';
 import 'package:logging/logging.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:photos/models/file_load_result.dart';
 import 'package:photos/models/file/trash_file.dart';
+import 'package:photos/models/file_load_result.dart';
 import 'package:sqflite/sqflite.dart';
 
 // The TrashDB doesn't need to flatten and store all attributes of a file.

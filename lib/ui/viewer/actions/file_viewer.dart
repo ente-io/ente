@@ -7,7 +7,6 @@ import "package:logging/logging.dart";
 import "package:media_extension/media_extension_action_types.dart";
 import "package:photo_view/photo_view.dart";
 import "package:photos/services/app_lifecycle_service.dart";
-
 import "package:video_player/video_player.dart";
 
 class FileViewer extends StatefulWidget {
