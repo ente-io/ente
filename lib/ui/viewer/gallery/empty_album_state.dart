@@ -1,6 +1,6 @@
 import "package:flutter/material.dart";
 import "package:photos/generated/l10n.dart";
-import "package:photos/models/collection.dart";
+import 'package:photos/models/collection/collection.dart';
 import "package:photos/ui/components/buttons/button_widget.dart";
 import "package:photos/ui/components/models/button_type.dart";
 import "package:photos/ui/viewer/gallery/hooks/add_photos_sheet.dart";

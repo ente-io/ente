@@ -6,7 +6,7 @@ import 'package:photos/ente_theme_data.dart';
 import 'package:photos/events/user_details_changed_event.dart';
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/duplicate_files.dart';
-import 'package:photos/models/file.dart';
+import 'package:photos/models/file/file.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/deduplication_service.dart';
 import 'package:photos/ui/viewer/file/detail_page.dart';

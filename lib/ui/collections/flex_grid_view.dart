@@ -1,7 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import "package:photos/models/collection.dart";
+import 'package:photos/models/collection/collection.dart';
 import "package:photos/ui/collections/album/row_item.dart";
 
 class CollectionsFlexiGridViewWidget extends StatelessWidget {

@@ -1,4 +1,4 @@
-import 'package:photos/models/file.dart';
+import 'package:photos/models/file/file.dart';
 
 class GalleryItemsFilter {
   bool shouldInclude(EnteFile file) {

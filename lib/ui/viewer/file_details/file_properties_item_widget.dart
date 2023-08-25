@@ -1,7 +1,7 @@
 import "package:flutter/material.dart";
 import 'package:path/path.dart' as path;
-import "package:photos/models/file.dart";
-import "package:photos/models/file_type.dart";
+import 'package:photos/models/file/file.dart';
+import 'package:photos/models/file/file_type.dart';
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/info_item_widget.dart";
 import "package:photos/utils/date_time_util.dart";

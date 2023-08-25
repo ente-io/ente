@@ -7,7 +7,7 @@ import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/events/user_logged_out_event.dart';
 import "package:photos/generated/l10n.dart";
-import 'package:photos/models/collection_items.dart';
+import 'package:photos/models/collection/collection_items.dart';
 import 'package:photos/services/collections_service.dart';
 import "package:photos/ui/collections/album/row_item.dart";
 import "package:photos/ui/collections/collection_list_page.dart";

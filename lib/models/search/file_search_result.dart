@@ -1,4 +1,4 @@
-import 'package:photos/models/file.dart';
+import 'package:photos/models/file/file.dart';
 import 'package:photos/models/search/search_result.dart';
 
 class FileSearchResult extends SearchResult {

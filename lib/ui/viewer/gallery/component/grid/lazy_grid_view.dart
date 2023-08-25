@@ -5,7 +5,7 @@ import "package:flutter/material.dart";
 import "package:photos/core/configuration.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/clear_selections_event.dart";
-import "package:photos/models/file.dart";
+import 'package:photos/models/file/file.dart';
 import "package:photos/models/selected_files.dart";
 import "package:photos/ui/viewer/gallery/component/grid/non_recyclable_grid_view_widget.dart";
 import "package:photos/ui/viewer/gallery/component/grid/recyclable_grid_view_widget.dart";

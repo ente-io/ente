@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
-import 'package:photos/models/file.dart';
-import 'package:photos/models/file_type.dart';
+import 'package:photos/models/file/file.dart';
+import 'package:photos/models/file/file_type.dart';
 import 'package:photos/ui/viewer/file/video_widget.dart';
 import 'package:photos/ui/viewer/file/zoomable_live_image.dart';
 

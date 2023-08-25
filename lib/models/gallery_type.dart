@@ -1,5 +1,5 @@
 import "package:flutter/foundation.dart";
-import "package:photos/models/collection.dart";
+import 'package:photos/models/collection/collection.dart';
 
 enum GalleryType {
   homepage,

@@ -3,7 +3,7 @@ import 'dart:io';
 
 import 'package:logging/logging.dart';
 import 'package:photos/db/ignored_files_db.dart';
-import 'package:photos/models/file.dart';
+import 'package:photos/models/file/file.dart';
 import 'package:photos/models/ignored_file.dart';
 
 class IgnoredFilesService {

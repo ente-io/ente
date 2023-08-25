@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import "package:intl/intl.dart";
 import "package:photos/core/configuration.dart";
-import 'package:photos/models/collection.dart';
-import 'package:photos/models/collection_items.dart';
-import "package:photos/models/file.dart";
+import 'package:photos/models/collection/collection.dart';
+import 'package:photos/models/collection/collection_items.dart';
+import 'package:photos/models/file/file.dart';
 import "package:photos/services/collections_service.dart";
 import "package:photos/theme/colors.dart";
 import 'package:photos/theme/ente_theme.dart';

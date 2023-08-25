@@ -13,7 +13,7 @@ import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import "package:photos/generated/l10n.dart";
-import 'package:photos/models/file.dart' as ente;
+import 'package:photos/models/file/file.dart' as ente;
 import 'package:photos/models/location/location.dart';
 import 'package:photos/services/sync_service.dart';
 import 'package:photos/ui/common/loading_widget.dart';

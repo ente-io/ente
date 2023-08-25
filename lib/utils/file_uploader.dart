@@ -20,8 +20,8 @@ import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/events/subscription_purchased_event.dart';
 import 'package:photos/main.dart';
 import 'package:photos/models/encryption_result.dart';
-import 'package:photos/models/file.dart';
-import 'package:photos/models/file_type.dart';
+import 'package:photos/models/file/file.dart';
+import 'package:photos/models/file/file_type.dart';
 import "package:photos/models/metadata/file_magic.dart";
 import 'package:photos/models/upload_url.dart';
 import "package:photos/models/user_details.dart";
@@ -49,7 +49,8 @@ class FileUploader {
   final _logger = Logger("FileUploader");
   final _dio = NetworkClient.instance.getDio();
   final _enteDio = NetworkClient.instance.enteDio;
-  final LinkedHashMap _queue = LinkedHashMap<String, FileUploadItem>();
+  final LinkedHashMap<String, FileUploadItem> _queue =
+      LinkedHashMap<String, FileUploadItem>();
   final _uploadLocks = UploadLocksDB.instance;
   final kSafeBufferForLockExpiry = const Duration(days: 1).inMicroseconds;
   final kBGTaskDeathTimeout = const Duration(seconds: 5).inMicroseconds;
@@ -126,18 +127,18 @@ class FileUploader {
     if (file.localID == null || file.localID!.isEmpty) {
       return Future.error(Exception("file's localID can not be null or empty"));
     }
-    // If the file hasn't been queued yet, queue it
+    // If the file hasn't been queued yet, queue it for upload
     _totalCountInUploadSession++;
-    if (!_queue.containsKey(file.localID)) {
+    final String localID = file.localID!;
+    if (!_queue.containsKey(localID)) {
       final completer = Completer<EnteFile>();
-      _queue[file.localID] = FileUploadItem(file, collectionID, completer);
+      _queue[localID] = FileUploadItem(file, collectionID, completer);
       _pollQueue();
       return completer.future;
     }
-
     // If the file exists in the queue for a matching collectionID,
     // return the existing future
-    final item = _queue[file.localID];
+    final FileUploadItem item = _queue[localID]!;
     if (item.collectionID == collectionID) {
       _totalCountInUploadSession--;
       return item.completer.future;
@@ -154,16 +155,10 @@ class FileUploader {
         "original upload completer resolved, try adding the file to another "
         "collection",
       );
-      if (uploadedFile == null) {
-        /* todo: handle this case, ideally during next sync the localId
-          should be uploaded to this collection ID
-         */
-        _logger.severe('unexpected upload state');
-        return null;
-      }
+
       return CollectionsService.instance
           .addToCollection(collectionID, [uploadedFile]).then((aVoid) {
-        return uploadedFile as EnteFile;
+        return uploadedFile;
       });
     });
   }
@@ -180,7 +175,7 @@ class FileUploader {
       uploadsToBeRemoved.add(pendingUpload.key);
     });
     for (final id in uploadsToBeRemoved) {
-      _queue.remove(id).completer.completeError(reason);
+      _queue.remove(id)?.completer.completeError(reason);
     }
     _totalCountInUploadSession = 0;
   }
@@ -202,7 +197,7 @@ class FileUploader {
       }
     });
     for (final id in uploadsToBeRemoved) {
-      _queue.remove(id).completer.completeError(reason);
+      _queue.remove(id)?.completer.completeError(reason);
     }
     _logger.info(
       'number of enteries removed from queue ${uploadsToBeRemoved.length}',
@@ -257,7 +252,7 @@ class FileUploader {
     if (file.fileType == FileType.video) {
       _videoUploadCounter++;
     }
-    final localID = file.localID;
+    final localID = file.localID!;
     try {
       final uploadedFile =
           await _tryToUpload(file, collectionID, forcedUpload).timeout(
@@ -268,14 +263,14 @@ class FileUploader {
           throw TimeoutException(message);
         },
       );
-      _queue.remove(localID).completer.complete(uploadedFile);
+      _queue.remove(localID)!.completer.complete(uploadedFile);
       return uploadedFile;
     } catch (e) {
       if (e is LockAlreadyAcquiredError) {
-        _queue[localID].status = UploadStatus.inBackground;
-        return _queue[localID].completer.future;
+        _queue[localID]!.status = UploadStatus.inBackground;
+        return _queue[localID]!.completer.future;
       } else {
-        _queue.remove(localID).completer.completeError(e);
+        _queue.remove(localID)!.completer.completeError(e);
         return null;
       }
     } finally {
@@ -1028,19 +1023,19 @@ class FileUploader {
     for (final upload in blockedUploads) {
       final file = upload.value.file;
       final isStillLocked = await _uploadLocks.isLocked(
-        file.localID,
+        file.localID!,
         ProcessType.background.toString(),
       );
       if (!isStillLocked) {
-        final completer = _queue.remove(upload.key).completer;
+        final completer = _queue.remove(upload.key)?.completer;
         final dbFile =
-            await FilesDB.instance.getFile(upload.value.file.generatedID);
+            await FilesDB.instance.getFile(upload.value.file.generatedID!);
         if (dbFile?.uploadedFileID != null) {
           _logger.info("Background upload success detected");
-          completer.complete(dbFile);
+          completer?.complete(dbFile);
         } else {
           _logger.info("Background upload failure detected");
-          completer.completeError(SilentlyCancelUploadsError());
+          completer?.completeError(SilentlyCancelUploadsError());
         }
       }
     }
