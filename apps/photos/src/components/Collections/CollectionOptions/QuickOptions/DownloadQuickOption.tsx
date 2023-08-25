@@ -30,7 +30,7 @@ export function DownloadQuickOption({
             }>
             <IconButton
                 onClick={handleCollectionAction(
-                    CollectionActions.CONFIRM_DOWNLOAD,
+                    CollectionActions.DOWNLOAD,
                     false
                 )}>
                 <FileDownloadOutlinedIcon />

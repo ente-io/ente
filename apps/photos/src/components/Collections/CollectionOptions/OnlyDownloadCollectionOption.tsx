@@ -28,10 +28,7 @@ export function OnlyDownloadCollectionOption({
                     <EnteSpinner size="20px" sx={{ cursor: 'not-allowed' }} />
                 )
             }
-            onClick={handleCollectionAction(
-                CollectionActions.CONFIRM_DOWNLOAD,
-                false
-            )}>
+            onClick={handleCollectionAction(CollectionActions.DOWNLOAD, false)}>
             {downloadOptionText}
         </OverflowMenuOption>
     );

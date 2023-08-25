@@ -45,7 +45,6 @@ interface CollectionOptionsProps {
 export enum CollectionActions {
     SHOW_RENAME_DIALOG,
     RENAME,
-    CONFIRM_DOWNLOAD,
     DOWNLOAD,
     ARCHIVE,
     UNARCHIVE,
@@ -99,9 +98,6 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
                 break;
             case CollectionActions.RENAME:
                 callback = renameCollection;
-                break;
-            case CollectionActions.CONFIRM_DOWNLOAD:
-                callback = confirmDownloadCollection;
                 break;
             case CollectionActions.DOWNLOAD:
                 callback = downloadCollection;
@@ -264,21 +260,6 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
                     CollectionActions.DELETE_BUT_KEEP_FILES
                 ),
                 variant: 'primary',
-            },
-            close: {
-                text: t('CANCEL'),
-            },
-        });
-    };
-
-    const confirmDownloadCollection = () => {
-        setDialogMessage({
-            title: t('DOWNLOAD_COLLECTION'),
-            content: <Trans i18nKey={'DOWNLOAD_COLLECTION_MESSAGE'} />,
-            proceed: {
-                text: t('DOWNLOAD'),
-                action: handleCollectionAction(CollectionActions.DOWNLOAD),
-                variant: 'accent',
             },
             close: {
                 text: t('CANCEL'),
