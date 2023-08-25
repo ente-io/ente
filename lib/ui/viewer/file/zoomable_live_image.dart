@@ -7,6 +7,7 @@ import 'package:motion_photos/motion_photos.dart';
 import "package:photos/core/configuration.dart";
 import 'package:photos/core/constants.dart';
 import "package:photos/generated/l10n.dart";
+import "package:photos/models/file/extensions/file_props.dart";
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file/file_type.dart';
 import "package:photos/models/metadata/file_magic.dart";
@@ -208,8 +209,7 @@ class _ZoomableLiveImageState extends State<ZoomableLiveImage>
   }
 
   void _showHintForMotionPhotoPlay() async {
-    if (widget.file.fileType != FileType.livePhoto ||
-        widget.file.pubMagicMetadata?.mvi != null) {
+    if (!_file.isLiveOrMotionPhoto) {
       return;
     }
     final preferences = await SharedPreferences.getInstance();
