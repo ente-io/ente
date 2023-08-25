@@ -10,17 +10,20 @@ import {
     showShareQuickOption,
     showEmptyTrashQuickOption,
 } from 'utils/collection';
+import EnteSpinner from 'components/EnteSpinner';
 interface Iprops {
     handleCollectionAction: (
         action: CollectionActions,
         loader?: boolean
     ) => (...args: any[]) => Promise<void>;
     collectionSummaryType: CollectionSummaryType;
+    isDownloadInProgress: boolean;
 }
 
 export function QuickOptions({
     handleCollectionAction,
     collectionSummaryType,
+    isDownloadInProgress,
 }: Iprops) {
     return (
         <FlexWrapper sx={{ gap: '16px' }}>
@@ -29,12 +32,15 @@ export function QuickOptions({
                     handleCollectionAction={handleCollectionAction}
                 />
             )}
-            {showDownloadQuickOption(collectionSummaryType) && (
-                <DownloadQuickOption
-                    handleCollectionAction={handleCollectionAction}
-                    collectionSummaryType={collectionSummaryType}
-                />
-            )}
+            {showDownloadQuickOption(collectionSummaryType) &&
+                (!isDownloadInProgress ? (
+                    <DownloadQuickOption
+                        handleCollectionAction={handleCollectionAction}
+                        collectionSummaryType={collectionSummaryType}
+                    />
+                ) : (
+                    <EnteSpinner size="20px" sx={{ cursor: 'not-allowed' }} />
+                ))}
             {showShareQuickOption(collectionSummaryType) && (
                 <ShareQuickOption
                     handleCollectionAction={handleCollectionAction}

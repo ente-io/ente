@@ -96,6 +96,13 @@ export default function Collections(props: Iprops) {
             });
         };
 
+    const isCollectionDownloadInProgress = (collectionID: number) => {
+        const attributes = collectionDownloadProgressAttributesList.find(
+            (attr) => attr.collectionID === collectionID
+        );
+        return attributes && !attributes.canceller.signal.aborted;
+    };
+
     useEffect(() => {
         if (isInSearchMode) {
             return;
@@ -114,6 +121,9 @@ export default function Collections(props: Iprops) {
                     }
                     setCollectionDownloadProgressAttributesCreator={
                         setCollectionDownloadProgressAttributesCreator
+                    }
+                    isCollectionDownloadInProgress={
+                        isCollectionDownloadInProgress
                     }
                 />
             ),

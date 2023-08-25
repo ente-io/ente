@@ -22,6 +22,7 @@ interface Iprops {
     setCollectionDownloadProgressAttributesCreator: (
         collectionID: number
     ) => SetCollectionDownloadProgressAttributes;
+    isCollectionDownloadInProgress: (collectionID: number) => boolean;
 }
 
 export default function CollectionInfoWithOptions({
