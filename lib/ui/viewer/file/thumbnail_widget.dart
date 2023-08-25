@@ -140,24 +140,17 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
         contentChildren.add(const LivePhotoOverlayIcon());
       }
       if (widget.shouldShowOwnerAvatar) {
-        if (widget.file.ownerID != null &&
-            widget.file.ownerID != Configuration.instance.getUserID()) {
+        if (!widget.file.isOwner) {
           final owner = CollectionsService.instance
               .getFileOwner(widget.file.ownerID!, widget.file.collectionID);
-          // hide this icon if the current thumbnail is being showed as album
-          // cover
           contentChildren.add(
             OwnerAvatarOverlayIcon(owner),
           );
-        } else if (widget.file.pubMagicMetadata!.uploaderName != null) {
+        } else if (widget.file.isCollect) {
           contentChildren.add(
             // Use -1 as userID for enforcing black avatar color
             OwnerAvatarOverlayIcon(
-              User(
-                id: -1,
-                email: '',
-                name: widget.file.pubMagicMetadata!.uploaderName,
-              ),
+              User(id: -1, email: '', name: widget.file.uploaderName),
             ),
           );
         }
@@ -173,7 +166,7 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
       const ThumbnailPlaceHolder(),
       content ?? const SizedBox(),
     ];
-    if (widget.shouldShowSyncStatus && widget.file.uploadedFileID == null) {
+    if (widget.shouldShowSyncStatus && !widget.file.isUploaded) {
       viewChildren.add(const UnSyncedIcon());
     }
 
