@@ -1,3 +1,4 @@
+import "package:photos/core/configuration.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/file/file_type.dart";
 
@@ -8,7 +9,8 @@ extension FilePropsExtn on EnteFile {
 
   bool get isLiveOrMotionPhoto => isLivePhoto || isMotionPhoto;
 
-  bool isOwner(int userID) => (ownerID == null) || (ownerID! == userID);
+  bool get isOwner =>
+      (ownerID == null) || (ownerID! == Configuration.instance.getUserID()!);
 
-  bool canEditMetaInfo(int userID) => isUploaded && isOwner(userID);
+  bool get canEditMetaInfo => isUploaded && isOwner;
 }

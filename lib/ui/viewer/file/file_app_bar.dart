@@ -10,6 +10,7 @@ import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import "package:photos/generated/l10n.dart";
+import "package:photos/models/file/extensions/file_props.dart";
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file/file_type.dart';
 import 'package:photos/models/file/trash_file.dart';
@@ -34,13 +35,11 @@ class FileAppBar extends StatefulWidget {
   final Function(EnteFile) onFileRemoved;
   final double height;
   final bool shouldShowActions;
-  final int? userID;
   final ValueNotifier<bool> enableFullScreenNotifier;
 
   const FileAppBar(
     this.file,
     this.onFileRemoved,
-    this.userID,
     this.height,
     this.shouldShowActions, {
     required this.enableFullScreenNotifier,
@@ -94,8 +93,7 @@ class FileAppBarState extends State<FileAppBar> {
     final List<Widget> actions = [];
     final isTrashedFile = widget.file is TrashFile;
     final shouldShowActions = widget.shouldShowActions && !isTrashedFile;
-    final bool isOwnedByUser =
-        widget.file.ownerID == null || widget.file.ownerID == widget.userID;
+    final bool isOwnedByUser = widget.file.isOwner;
     final bool isFileUploaded = widget.file.isUploaded;
     bool isFileHidden = false;
     if (isOwnedByUser && isFileUploaded) {

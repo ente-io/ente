@@ -4,7 +4,6 @@ import 'package:chewie/chewie.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:motion_photos/motion_photos.dart';
-import "package:photos/core/configuration.dart";
 import 'package:photos/core/constants.dart';
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/file/extensions/file_props.dart";
@@ -183,9 +182,7 @@ class _ZoomableLiveImageState extends State<ZoomableLiveImage>
       final index = await motionPhoto.getMotionVideoIndex();
       if (index != null) {
         // Update the metadata if it is not updated
-        if (!_enteFile.isMotionPhoto &&
-            _enteFile
-                .canEditMetaInfo(Configuration.instance.getUserID()!)) {
+        if (!_enteFile.isMotionPhoto && _enteFile.canEditMetaInfo) {
           FileMagicService.instance.updatePublicMagicMetadata(
             [_enteFile],
             {motionVideoIndexKey: index.start},
@@ -196,7 +193,6 @@ class _ZoomableLiveImageState extends State<ZoomableLiveImage>
         );
       }
     }
-
     return null;
   }
 
