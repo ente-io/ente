@@ -814,6 +814,7 @@
   "fileFailedToSaveToGallery": "Failed to save file to gallery",
   "download": "Download",
   "pressAndHoldToPlayVideo": "Press and hold to play video",
+  "pressAndHoldToPlayVideoDetailed": "Press and hold on the image to  play video",
   "downloadFailed": "Download failed",
   "deduplicateFiles": "Deduplicate Files",
   "deselectAll": "Deselect all",

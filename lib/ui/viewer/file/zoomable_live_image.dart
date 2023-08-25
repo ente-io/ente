@@ -4,7 +4,6 @@ import 'package:chewie/chewie.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:motion_photos/motion_photos.dart';
-import 'package:photos/core/constants.dart';
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/file/extensions/file_props.dart";
 import 'package:photos/models/file/file.dart';
@@ -13,7 +12,6 @@ import "package:photos/services/file_magic_service.dart";
 import 'package:photos/ui/viewer/file/zoomable_image.dart';
 import 'package:photos/utils/file_util.dart';
 import 'package:photos/utils/toast_util.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:video_player/video_player.dart';
 
 class ZoomableLiveImage extends StatefulWidget {
@@ -47,7 +45,6 @@ class _ZoomableLiveImageState extends State<ZoomableLiveImage>
   @override
   void initState() {
     _enteFile = widget.enteFile;
-    Future.microtask(() => _showHintForMotionPhotoPlay).ignore();
     super.initState();
   }
 
@@ -208,15 +205,4 @@ class _ZoomableLiveImageState extends State<ZoomableLiveImage>
       });
   }
 
-  void _showHintForMotionPhotoPlay() async {
-    if (!_enteFile.isLiveOrMotionPhoto) {
-      return;
-    }
-    final preferences = await SharedPreferences.getInstance();
-    final int promptTillNow = preferences.getInt(livePhotoToastCounterKey) ?? 0;
-    if (promptTillNow < maxLivePhotoToastCount && mounted) {
-      showShortToast(context, S.of(context).pressAndHoldToPlayVideo);
-      preferences.setInt(livePhotoToastCounterKey, promptTillNow + 1);
-    }
-  }
 }

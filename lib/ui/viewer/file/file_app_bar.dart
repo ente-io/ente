@@ -102,6 +102,16 @@ class FileAppBarState extends State<FileAppBar> {
               ?.isHidden() ??
           false;
     }
+    if (widget.file.isLiveOrMotionPhoto) {
+      actions.add(
+        IconButton(
+          icon: const Icon(Icons.album_outlined),
+          onPressed: () {
+            showShortToast(context, S.of(context).pressAndHoldToPlayVideoDetailed);
+          },
+        ),
+      );
+    }
     // only show fav option for files owned by the user
     if (isOwnedByUser && !isFileHidden && isFileUploaded) {
       actions.add(FavoriteWidget(widget.file));

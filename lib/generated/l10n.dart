@@ -1,7 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-
 import 'intl/messages_all.dart';
 
 // **************************************************************************
@@ -5821,6 +5820,16 @@ class S {
     return Intl.message(
       'Press and hold to play video',
       name: 'pressAndHoldToPlayVideo',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Press and hold on the image to  play video`
+  String get pressAndHoldToPlayVideoDetailed {
+    return Intl.message(
+      'Press and hold on the image to  play video',
+      name: 'pressAndHoldToPlayVideoDetailed',
       desc: '',
       args: [],
     );
