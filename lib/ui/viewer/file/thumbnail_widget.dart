@@ -10,6 +10,7 @@ import 'package:photos/db/trash_db.dart';
 import 'package:photos/events/files_updated_event.dart';
 import "package:photos/events/local_photos_updated_event.dart";
 import "package:photos/models/api/collection/user.dart";
+import "package:photos/models/file/extensions/file_props.dart";
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file/file_type.dart';
 import 'package:photos/models/file/trash_file.dart';
@@ -20,7 +21,7 @@ import 'package:photos/utils/file_util.dart';
 import 'package:photos/utils/thumbnail_util.dart';
 
 class ThumbnailWidget extends StatefulWidget {
-  final EnteFile? file;
+  final EnteFile file;
   final BoxFit fit;
   final bool shouldShowSyncStatus;
   final bool shouldShowArchiveStatus;
@@ -45,7 +46,7 @@ class ThumbnailWidget extends StatefulWidget {
     this.diskLoadDeferDuration,
     this.serverLoadDeferDuration,
     this.thumbnailSize = thumbnailSmallSize,
-  }) : super(key: key ?? Key(file!.tag));
+  }) : super(key: key ?? Key(file.tag));
 
   @override
   State<ThumbnailWidget> createState() => _ThumbnailWidgetState();
@@ -73,8 +74,8 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
     super.dispose();
     Future.delayed(const Duration(milliseconds: 10), () {
       // Cancel request only if the widget has been unmounted
-      if (!mounted && widget.file!.isRemoteFile && !_hasLoadedThumbnail) {
-        removePendingGetThumbnailRequestIfAny(widget.file!);
+      if (!mounted && widget.file.isRemoteFile && !_hasLoadedThumbnail) {
+        removePendingGetThumbnailRequestIfAny(widget.file);
       }
     });
   }
@@ -82,7 +83,7 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
   @override
   void didUpdateWidget(ThumbnailWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.file!.generatedID != oldWidget.file!.generatedID) {
+    if (widget.file.generatedID != oldWidget.file.generatedID) {
       _reset();
     }
   }
@@ -90,10 +91,10 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
   ///Assigned dimension will be the size of a grid item. The size will be
   ///assigned to the side which is smaller in dimension.
   void assignOptimizedImageDimensions() {
-    if (widget.file!.width == 0 || widget.file!.height == 0) {
+    if (widget.file.width == 0 || widget.file.height == 0) {
       return;
     }
-    if (widget.file!.width < widget.file!.height) {
+    if (widget.file.width < widget.file.height) {
       optimizedImageWidth = widget.thumbnailSize;
     } else {
       optimizedImageHeight = widget.thumbnailSize;
@@ -102,7 +103,7 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.file!.isRemoteFile) {
+    if (widget.file.isRemoteFile) {
       _loadNetworkImage();
     } else {
       _loadLocalImage(context);
@@ -127,36 +128,35 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
     if (image != null) {
       final List<Widget> contentChildren = [image];
       if (FavoritesService.instance.isFavoriteCache(
-        widget.file!,
+        widget.file,
         checkOnlyAlbum: widget.showFavForAlbumOnly,
       )) {
         contentChildren.add(const FavoriteOverlayIcon());
       }
-      if (widget.file!.fileType == FileType.video) {
+      if (widget.file.fileType == FileType.video) {
         contentChildren.add(const VideoOverlayIcon());
       } else if (widget.shouldShowLivePhotoOverlay &&
-          (widget.file!.fileType == FileType.livePhoto ||
-              ((widget.file!.pubMagicMetadata?.mvi ?? 0) > 0))) {
+          widget.file.isLiveOrMotionPhoto) {
         contentChildren.add(const LivePhotoOverlayIcon());
       }
       if (widget.shouldShowOwnerAvatar) {
-        if (widget.file!.ownerID != null &&
-            widget.file!.ownerID != Configuration.instance.getUserID()) {
+        if (widget.file.ownerID != null &&
+            widget.file.ownerID != Configuration.instance.getUserID()) {
           final owner = CollectionsService.instance
-              .getFileOwner(widget.file!.ownerID!, widget.file!.collectionID);
+              .getFileOwner(widget.file.ownerID!, widget.file.collectionID);
           // hide this icon if the current thumbnail is being showed as album
           // cover
           contentChildren.add(
             OwnerAvatarOverlayIcon(owner),
           );
-        } else if (widget.file!.pubMagicMetadata!.uploaderName != null) {
+        } else if (widget.file.pubMagicMetadata!.uploaderName != null) {
           contentChildren.add(
             // Use -1 as userID for enforcing black avatar color
             OwnerAvatarOverlayIcon(
               User(
                 id: -1,
                 email: '',
-                name: widget.file!.pubMagicMetadata!.uploaderName,
+                name: widget.file.pubMagicMetadata!.uploaderName,
               ),
             ),
           );
@@ -173,11 +173,11 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
       const ThumbnailPlaceHolder(),
       content ?? const SizedBox(),
     ];
-    if (widget.shouldShowSyncStatus && widget.file!.uploadedFileID == null) {
+    if (widget.shouldShowSyncStatus && widget.file.uploadedFileID == null) {
       viewChildren.add(const UnSyncedIcon());
     }
 
-    if (widget.file is TrashFile) {
+    if (widget.file.isTrash) {
       viewChildren.add(TrashedFileOverlayText(widget.file as TrashFile));
     }
     // todo: Move this icon overlay to the collection widget.
@@ -200,7 +200,7 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
         !_isLoadingLocalThumbnail) {
       _isLoadingLocalThumbnail = true;
       final cachedSmallThumbnail =
-          ThumbnailInMemoryLruCache.get(widget.file!, thumbnailSmallSize);
+          ThumbnailInMemoryLruCache.get(widget.file, thumbnailSmallSize);
       if (cachedSmallThumbnail != null) {
         _imageProvider = Image.memory(cachedSmallThumbnail).image;
         _hasLoadedThumbnail = true;
@@ -220,26 +220,26 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
 
   Future _getThumbnailFromDisk() async {
     getThumbnailFromLocal(
-      widget.file!,
+      widget.file,
       size: widget.thumbnailSize,
     ).then((thumbData) async {
       if (thumbData == null) {
-        if (widget.file!.uploadedFileID != null) {
-          _logger.fine("Removing localID reference for " + widget.file!.tag);
-          widget.file!.localID = null;
+        if (widget.file.uploadedFileID != null) {
+          _logger.fine("Removing localID reference for " + widget.file.tag);
+          widget.file.localID = null;
           if (widget.file is TrashFile) {
             TrashDB.instance.update(widget.file as TrashFile);
           } else {
-            FilesDB.instance.update(widget.file!);
+            FilesDB.instance.update(widget.file);
           }
           _loadNetworkImage();
         } else {
-          if (await doesLocalFileExist(widget.file!) == false) {
-            _logger.info("Deleting file " + widget.file!.tag);
-            FilesDB.instance.deleteLocalFile(widget.file!);
+          if (await doesLocalFileExist(widget.file) == false) {
+            _logger.info("Deleting file " + widget.file.tag);
+            FilesDB.instance.deleteLocalFile(widget.file);
             Bus.instance.fire(
               LocalPhotosUpdatedEvent(
-                [widget.file!],
+                [widget.file],
                 type: EventType.deletedFromDevice,
                 source: "thumbFileDeleted",
               ),
@@ -254,7 +254,7 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
         _cacheAndRender(imageProvider);
       }
       ThumbnailInMemoryLruCache.put(
-        widget.file!,
+        widget.file,
         thumbData,
         thumbnailSmallSize,
       );
@@ -269,7 +269,7 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
         !_errorLoadingRemoteThumbnail &&
         !_isLoadingRemoteThumbnail) {
       _isLoadingRemoteThumbnail = true;
-      final cachedThumbnail = ThumbnailInMemoryLruCache.get(widget.file!);
+      final cachedThumbnail = ThumbnailInMemoryLruCache.get(widget.file);
       if (cachedThumbnail != null) {
         _imageProvider = Image.memory(cachedThumbnail).image;
         _hasLoadedThumbnail = true;
@@ -289,7 +289,7 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
 
   void _getThumbnailFromServer() async {
     try {
-      final thumbnail = await getThumbnailFromServer(widget.file!);
+      final thumbnail = await getThumbnailFromServer(widget.file);
       if (mounted) {
         final imageProvider = Image.memory(thumbnail).image;
         _cacheAndRender(imageProvider);
