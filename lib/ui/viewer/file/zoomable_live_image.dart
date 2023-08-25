@@ -182,10 +182,12 @@ class _ZoomableLiveImageState extends State<ZoomableLiveImage>
       final motionPhoto = MotionPhotos(imageFile.path);
       final index = await motionPhoto.getMotionVideoIndex();
       if (index != null) {
-        if (widget.enteFile.pubMagicMetadata?.mvi == null &&
-            (widget.enteFile.ownerID ?? 0) == Configuration.instance.getUserID()!) {
+        // Update the metadata if it is not updated
+        if (!_enteFile.isMotionPhoto &&
+            _enteFile
+                .canEditMetaInfo(Configuration.instance.getUserID()!)) {
           FileMagicService.instance.updatePublicMagicMetadata(
-            [widget.enteFile],
+            [_enteFile],
             {motionVideoIndexKey: index.start},
           ).ignore();
         }

@@ -7,4 +7,8 @@ extension FilePropsExtn on EnteFile {
   bool get isMotionPhoto => pubMagicMetadata?.mvi != null;
 
   bool get isLiveOrMotionPhoto => isLivePhoto || isMotionPhoto;
+
+  bool isOwner(int userID) => (ownerID == null) || (ownerID! == userID);
+
+  bool canEditMetaInfo(int userID) => isUploaded && isOwner(userID);
 }
