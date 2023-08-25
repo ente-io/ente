@@ -22,6 +22,31 @@ interface CollectionDownloadProgressProps {
     setAttributesList: (value: CollectionDownloadProgressAttributes[]) => void;
 }
 
+export const isCollectionDownloadCompleted = (
+    attributes: CollectionDownloadProgressAttributes
+) => {
+    return (
+        attributes &&
+        attributes.success + attributes.failed === attributes.total
+    );
+};
+
+export const isCollectionDownloadCompletedWithErrors = (
+    attributes: CollectionDownloadProgressAttributes
+) => {
+    return (
+        attributes &&
+        attributes.failed > 0 &&
+        isCollectionDownloadCompleted(attributes)
+    );
+};
+
+export const isCollectionDownloadCancelled = (
+    attributes: CollectionDownloadProgressAttributes
+) => {
+    return attributes && attributes.canceller?.signal?.aborted;
+};
+
 export const CollectionDownloadProgress: React.FC<CollectionDownloadProgressProps> =
     ({ attributesList, setAttributesList }) => {
         const appContext = useContext(AppContext);
@@ -30,18 +55,6 @@ export const CollectionDownloadProgress: React.FC<CollectionDownloadProgressProp
         if (!attributesList) {
             return <></>;
         }
-
-        const isDownloadCompleted = (
-            attributes: CollectionDownloadProgressAttributes
-        ) => {
-            return attributes.success + attributes.failed === attributes.total;
-        };
-
-        const isDownloadCompletedWithErrors = (
-            attributes: CollectionDownloadProgressAttributes
-        ) => {
-            return attributes.failed > 0 && isDownloadCompleted(attributes);
-        };
 
         const onClose = (collectionID: number) => {
             setAttributesList(
@@ -75,7 +88,7 @@ export const CollectionDownloadProgress: React.FC<CollectionDownloadProgressProp
 
         const handleClose =
             (attributes: CollectionDownloadProgressAttributes) => () => {
-                if (isDownloadCompleted(attributes)) {
+                if (isCollectionDownloadCompleted(attributes)) {
                     onClose(attributes.collectionID);
                 } else {
                     confirmCancelUpload(attributes);
@@ -112,17 +125,21 @@ export const CollectionDownloadProgress: React.FC<CollectionDownloadProgressProp
                         onClose={handleClose(attributes)}
                         keepOpenOnClick
                         attributes={{
-                            variant: isDownloadCompletedWithErrors(attributes)
+                            variant: isCollectionDownloadCompletedWithErrors(
+                                attributes
+                            )
                                 ? 'critical'
                                 : 'secondary',
-                            title: isDownloadCompletedWithErrors(attributes)
+                            title: isCollectionDownloadCompletedWithErrors(
+                                attributes
+                            )
                                 ? t('DOWNLOAD_FAILED')
-                                : isDownloadCompleted(attributes)
+                                : isCollectionDownloadCompleted(attributes)
                                 ? t(`DOWNLOAD_COMPLETE`)
                                 : t('DOWNLOADING_COLLECTION', {
                                       name: attributes.collectionName,
                                   }),
-                            caption: isDownloadCompleted(attributes)
+                            caption: isCollectionDownloadCompleted(attributes)
                                 ? attributes.collectionName
                                 : t('DOWNLOAD_PROGRESS', {
                                       progress: {
