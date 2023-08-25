@@ -1,4 +1,4 @@
-import "package:photos/models/file.dart";
+import 'package:photos/models/file/file.dart';
 import "package:photos/services/filter/filter.dart";
 
 // DedupeUploadIDFilter will filter out files where were previously filtered

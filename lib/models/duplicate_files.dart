@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:photos/models/file.dart';
+import 'package:photos/models/file/file.dart';
 import 'package:photos/services/collections_service.dart';
 
 class DuplicateFilesResponse {

@@ -2,7 +2,7 @@ import 'package:collection/collection.dart' show IterableExtension;
 import 'package:flutter/foundation.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/clear_selections_event.dart';
-import 'package:photos/models/file.dart';
+import 'package:photos/models/file/file.dart';
 
 class SelectedFiles extends ChangeNotifier {
   final files = <EnteFile>{};

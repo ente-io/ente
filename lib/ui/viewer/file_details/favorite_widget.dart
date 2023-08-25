@@ -2,7 +2,7 @@ import "package:flutter/material.dart";
 import "package:like_button/like_button.dart";
 import "package:logging/logging.dart";
 import "package:photos/generated/l10n.dart";
-import 'package:photos/models/file.dart';
+import 'package:photos/models/file/file.dart';
 import "package:photos/services/favorites_service.dart";
 import "package:photos/ui/common/progress_dialog.dart";
 import "package:photos/utils/dialog_util.dart";

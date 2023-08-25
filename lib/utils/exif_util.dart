@@ -4,7 +4,7 @@ import "package:computer/computer.dart";
 import 'package:exif/exif.dart';
 import 'package:intl/intl.dart';
 import 'package:logging/logging.dart';
-import 'package:photos/models/file.dart';
+import 'package:photos/models/file/file.dart';
 import "package:photos/models/location/location.dart";
 import "package:photos/services/location_service.dart";
 import 'package:photos/utils/file_util.dart';

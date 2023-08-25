@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/events/files_updated_event.dart';
-import 'package:photos/models/file.dart';
+import 'package:photos/models/file/file.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/theme/ente_theme.dart';
 import "package:photos/ui/viewer/gallery/component/grid/place_holder_grid_view_widget.dart";

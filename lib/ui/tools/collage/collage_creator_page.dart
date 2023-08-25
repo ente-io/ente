@@ -1,6 +1,6 @@
 import "package:flutter/material.dart";
 import "package:photos/generated/l10n.dart";
-import "package:photos/models/file.dart";
+import 'package:photos/models/file/file.dart';
 import "package:photos/ui/tools/collage/collage_test_grid.dart";
 import "package:photos/ui/tools/collage/collage_with_five_items.dart";
 import "package:photos/ui/tools/collage/collage_with_four_items.dart";

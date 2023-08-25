@@ -1,4 +1,4 @@
-import "package:photos/models/file.dart";
+import 'package:photos/models/file/file.dart';
 import "package:photos/services/filter/filter.dart";
 
 // CollectionsIgnoreFilter will filter out files that are in present in the

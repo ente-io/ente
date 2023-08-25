@@ -2,7 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:photos/core/constants.dart';
-import 'package:photos/models/file.dart';
+import 'package:photos/models/file/file.dart';
 import 'package:photos/models/selected_files.dart';
 import "package:photos/ui/viewer/gallery/component/grid/lazy_grid_view.dart";
 import 'package:photos/ui/viewer/gallery/gallery.dart';

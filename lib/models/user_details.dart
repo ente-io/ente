@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:math';
 
 import 'package:collection/collection.dart';
-import 'package:photos/models/file_type.dart';
+import 'package:photos/models/file/file_type.dart';
 import 'package:photos/models/subscription.dart';
 
 class UserDetails {

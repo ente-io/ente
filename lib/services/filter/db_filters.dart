@@ -1,4 +1,4 @@
-import "package:photos/models/file.dart";
+import 'package:photos/models/file/file.dart';
 import "package:photos/services/filter/collection_ignore.dart";
 import "package:photos/services/filter/dedupe_by_upload_id.dart";
 import "package:photos/services/filter/filter.dart";

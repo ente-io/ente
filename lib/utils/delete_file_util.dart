@@ -13,7 +13,7 @@ import 'package:photos/events/files_updated_event.dart';
 import "package:photos/events/force_reload_trash_page_event.dart";
 import 'package:photos/events/local_photos_updated_event.dart';
 import "package:photos/generated/l10n.dart";
-import 'package:photos/models/file.dart';
+import 'package:photos/models/file/file.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/models/trash_item_request.dart';
 import 'package:photos/services/remote_sync_service.dart';

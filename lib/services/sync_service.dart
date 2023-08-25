@@ -17,7 +17,7 @@ import 'package:photos/events/subscription_purchased_event.dart';
 import 'package:photos/events/sync_status_update_event.dart';
 import 'package:photos/events/trigger_logout_event.dart';
 import 'package:photos/models/backup_status.dart';
-import 'package:photos/models/file_type.dart';
+import 'package:photos/models/file/file_type.dart';
 import "package:photos/services/files_service.dart";
 import 'package:photos/services/local_sync_service.dart';
 import 'package:photos/services/notification_service.dart';
