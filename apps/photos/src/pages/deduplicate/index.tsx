@@ -156,9 +156,7 @@ export default function Deduplicate() {
     if (!duplicateFiles) {
         return (
             <VerticallyCentered>
-                <EnteSpinner>
-                    <span className="sr-only">Loading...</span>
-                </EnteSpinner>
+                <EnteSpinner />
             </VerticallyCentered>
         );
     }

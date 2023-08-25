@@ -3,6 +3,7 @@ import React, { useContext, useEffect, useState } from 'react';
 import { t } from 'i18next';
 
 import { AppContext } from './_app';
+import EnteSpinner from 'components/EnteSpinner';
 
 export default function NotFound() {
     const appContext = useContext(AppContext);
@@ -13,11 +14,7 @@ export default function NotFound() {
     }, []);
     return (
         <VerticallyCentered>
-            {loading ? (
-                <span className="sr-only">Loading...</span>
-            ) : (
-                t('NOT_FOUND')
-            )}
+            {loading ? <EnteSpinner /> : t('NOT_FOUND')}
         </VerticallyCentered>
     );
 }

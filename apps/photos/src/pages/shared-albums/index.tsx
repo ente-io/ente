@@ -58,13 +58,6 @@ import MoreHoriz from '@mui/icons-material/MoreHoriz';
 import OverflowMenu from 'components/OverflowMenu/menu';
 import { OverflowMenuOption } from 'components/OverflowMenu/option';
 
-const Loader = () => (
-    <VerticallyCentered>
-        <EnteSpinner>
-            <span className="sr-only">Loading...</span>
-        </EnteSpinner>
-    </VerticallyCentered>
-);
 export default function PublicCollectionGallery() {
     const token = useRef<string>(null);
     // passwordJWTToken refers to the jwt token which is used for album protected by password.
@@ -396,7 +389,11 @@ export default function PublicCollectionGallery() {
 
     if (loading) {
         if (!publicFiles) {
-            return <Loader />;
+            return (
+                <VerticallyCentered>
+                    <EnteSpinner />
+                </VerticallyCentered>
+            );
         }
     } else {
         if (errorMessage) {
