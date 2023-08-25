@@ -19,6 +19,7 @@ import {
     CollectionDownloadProgress,
     CollectionDownloadProgressAttributes,
 } from './CollectionDownloadProgress';
+import { SetCollectionDownloadProgressAttributes } from 'types/gallery';
 
 interface Iprops {
     activeCollection: Collection;
@@ -45,13 +46,10 @@ export default function Collections(props: Iprops) {
     const [collectionShareModalView, setCollectionShareModalView] =
         useState(false);
 
-    const [collectionDownloadProgressView, setCollectionDownloadProgressView] =
-        useState(false);
-
     const [
-        collectionDownloadProgressAttributes,
-        setCollectionDownloadProgressAttributes,
-    ] = useState<CollectionDownloadProgressAttributes>();
+        collectionDownloadProgressAttributesList,
+        setCollectionDownloadProgressAttributesList,
+    ] = useState<CollectionDownloadProgressAttributes[]>([]);
 
     const [collectionListSortBy, setCollectionListSortBy] =
         useLocalState<COLLECTION_LIST_SORT_BY>(
@@ -76,6 +74,28 @@ export default function Collections(props: Iprops) {
         [collectionListSortBy, collectionSummaries]
     );
 
+    const setCollectionDownloadProgressAttributesCreator =
+        (collectionID: number): SetCollectionDownloadProgressAttributes =>
+        (value) => {
+            setCollectionDownloadProgressAttributesList((prev) => {
+                const attributes = prev?.find(
+                    (attr) => attr.collectionID === collectionID
+                );
+                const updatedAttributes =
+                    typeof value === 'function' ? value(attributes) : value;
+
+                const updatedAttributesList = attributes
+                    ? prev.map((attr) =>
+                          attr.collectionID === collectionID
+                              ? updatedAttributes
+                              : attr
+                      )
+                    : [...prev, updatedAttributes];
+
+                return updatedAttributesList;
+            });
+        };
+
     useEffect(() => {
         if (isInSearchMode) {
             return;
@@ -92,8 +112,8 @@ export default function Collections(props: Iprops) {
                     showCollectionShareModal={() =>
                         setCollectionShareModalView(true)
                     }
-                    setCollectionDownloadProgressAttributes={
-                        setCollectionDownloadProgressAttributes
+                    setCollectionDownloadProgressAttributesCreator={
+                        setCollectionDownloadProgressAttributesCreator
                     }
                 />
             ),
@@ -102,11 +122,6 @@ export default function Collections(props: Iprops) {
         });
     }, [collectionSummaries, activeCollectionID, isInSearchMode]);
 
-    useEffect(() => {
-        collectionDownloadProgressAttributes &&
-            setCollectionDownloadProgressView(true);
-    }, [collectionDownloadProgressAttributes]);
-
     if (shouldBeHidden) {
         return <></>;
     }
@@ -114,8 +129,6 @@ export default function Collections(props: Iprops) {
     const closeAllCollections = () => setAllCollectionView(false);
     const openAllCollections = () => setAllCollectionView(true);
     const closeCollectionShare = () => setCollectionShareModalView(false);
-    const closeCollectionDownloadProgress = () =>
-        setCollectionDownloadProgressView(false);
 
     return (
         <>
@@ -148,9 +161,8 @@ export default function Collections(props: Iprops) {
                 collection={activeCollection}
             />
             <CollectionDownloadProgress
-                isOpen={collectionDownloadProgressView}
-                onClose={closeCollectionDownloadProgress}
-                attributes={collectionDownloadProgressAttributes}
+                attributesList={collectionDownloadProgressAttributesList}
+                setAttributesList={setCollectionDownloadProgressAttributesList}
             />
         </>
     );

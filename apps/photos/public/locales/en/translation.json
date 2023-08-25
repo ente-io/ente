@@ -570,7 +570,8 @@
     "SELECT_COLLECTION": "Select album",
     "PIN_ALBUM": "Pin album",
     "UNPIN_ALBUM": "Unpin album",
-    "DOWNLOAD_COMPLETE":"Download complete",
-    "DOWNLOADING":"Downloading",
-    "DOWNLOAD_FAILED":"Download failed"
+    "DOWNLOAD_COMPLETE": "Download complete",
+    "DOWNLOADING_COLLECTION": "Downloading {{name}}",
+    "DOWNLOAD_FAILED": "Download failed",
+    "DOWNLOAD_PROGRESS": "{{progress.current}} / {{progress.total}} files"
 }

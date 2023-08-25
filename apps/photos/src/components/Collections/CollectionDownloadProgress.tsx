@@ -18,20 +18,42 @@ export interface CollectionDownloadProgressAttributes {
 }
 
 interface CollectionDownloadProgressProps {
-    isOpen: boolean;
-    onClose: () => void;
-    attributes: CollectionDownloadProgressAttributes;
+    attributesList: CollectionDownloadProgressAttributes[];
+    setAttributesList: (value: CollectionDownloadProgressAttributes[]) => void;
 }
 
 export const CollectionDownloadProgress: React.FC<CollectionDownloadProgressProps> =
-    ({ isOpen, onClose, attributes }) => {
+    ({ attributesList, setAttributesList }) => {
         const appContext = useContext(AppContext);
         const galleryContext = useContext(GalleryContext);
 
-        if (!attributes) {
+        if (!attributesList) {
             return <></>;
         }
-        const confirmCancelUpload = () => {
+
+        const isDownloadCompleted = (
+            attributes: CollectionDownloadProgressAttributes
+        ) => {
+            return attributes.success + attributes.failed === attributes.total;
+        };
+
+        const isDownloadCompletedWithErrors = (
+            attributes: CollectionDownloadProgressAttributes
+        ) => {
+            return attributes.failed > 0 && isDownloadCompleted(attributes);
+        };
+
+        const onClose = (collectionID: number) => {
+            setAttributesList(
+                attributesList.filter(
+                    (attr) => attr.collectionID !== collectionID
+                )
+            );
+        };
+
+        const confirmCancelUpload = (
+            attributes: CollectionDownloadProgressAttributes
+        ) => {
             appContext.setDialogMessage({
                 title: t('STOP_DOWNLOADS_HEADER'),
                 content: t('STOP_ALL_DOWNLOADS_MESSAGE'),
@@ -40,7 +62,7 @@ export const CollectionDownloadProgress: React.FC<CollectionDownloadProgressProp
                     variant: 'critical',
                     action: () => {
                         attributes?.canceller.abort();
-                        onClose();
+                        onClose(attributes.collectionID);
                     },
                 },
                 close: {
@@ -51,21 +73,19 @@ export const CollectionDownloadProgress: React.FC<CollectionDownloadProgressProp
             });
         };
 
-        const downloadCompleted =
-            attributes.success + attributes.failed === attributes.total;
+        const handleClose =
+            (attributes: CollectionDownloadProgressAttributes) => () => {
+                if (isDownloadCompleted(attributes)) {
+                    onClose(attributes.collectionID);
+                } else {
+                    confirmCancelUpload(attributes);
+                }
+            };
 
-        const downloadCompletedWithErrors =
-            attributes.failed > 0 && downloadCompleted;
-
-        const handleClose = () => {
-            if (downloadCompleted) {
-                onClose();
-            } else {
-                confirmCancelUpload();
-            }
-        };
-
-        const handleOnClick = () => {
+        const handleOnClick = (collectionID: number) => () => {
+            const attributes = attributesList.find(
+                (attr) => attr.collectionID === collectionID
+            );
             if (isElectron()) {
                 ElectronService.openDirectory(attributes.downloadPath);
             } else {
@@ -82,26 +102,40 @@ export const CollectionDownloadProgress: React.FC<CollectionDownloadProgressProp
         };
 
         return (
-            <Notification
-                open={isOpen}
-                onClose={handleClose}
-                keepOpenOnClick
-                attributes={{
-                    variant: downloadCompletedWithErrors
-                        ? 'critical'
-                        : 'secondary',
-                    title: downloadCompletedWithErrors
-                        ? t('DOWNLOAD_FAILED')
-                        : downloadCompleted
-                        ? t(`DOWNLOAD_COMPLETE`)
-                        : t(`DOWNLOADING`),
-                    caption: downloadCompleted
-                        ? attributes.collectionName
-                        : `${attributes.success + attributes.failed} / ${
-                              attributes.total
-                          } items`,
-                    onClick: handleOnClick,
-                }}
-            />
+            <>
+                {attributesList.map((attributes, index) => (
+                    <Notification
+                        key={attributes.collectionID}
+                        horizontal="left"
+                        sx={{ '&&': { bottom: `${index * 80 + 20}px` } }}
+                        open
+                        onClose={handleClose(attributes)}
+                        keepOpenOnClick
+                        attributes={{
+                            variant: isDownloadCompletedWithErrors(attributes)
+                                ? 'critical'
+                                : 'secondary',
+                            title: isDownloadCompletedWithErrors(attributes)
+                                ? t('DOWNLOAD_FAILED')
+                                : isDownloadCompleted(attributes)
+                                ? t(`DOWNLOAD_COMPLETE`)
+                                : t('DOWNLOADING_COLLECTION', {
+                                      name: attributes.collectionName,
+                                  }),
+                            caption: isDownloadCompleted(attributes)
+                                ? attributes.collectionName
+                                : t('DOWNLOAD_PROGRESS', {
+                                      progress: {
+                                          current:
+                                              attributes.success +
+                                              attributes.failed,
+                                          total: attributes.total,
+                                      },
+                                  }),
+                            onClick: handleOnClick(attributes.collectionID),
+                        }}
+                    />
+                ))}
+            </>
         );
     };

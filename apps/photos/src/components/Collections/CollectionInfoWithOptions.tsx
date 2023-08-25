@@ -19,7 +19,9 @@ interface Iprops {
     setCollectionNamerAttributes: SetCollectionNamerAttributes;
     showCollectionShareModal: () => void;
     redirectToAll: () => void;
-    setCollectionDownloadProgressAttributes: SetCollectionDownloadProgressAttributes;
+    setCollectionDownloadProgressAttributesCreator: (
+        collectionID: number
+    ) => SetCollectionDownloadProgressAttributes;
 }
 
 export default function CollectionInfoWithOptions({

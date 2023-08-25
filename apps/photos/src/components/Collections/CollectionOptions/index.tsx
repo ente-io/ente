@@ -17,7 +17,7 @@ import { logError } from 'utils/sentry';
 import { VISIBILITY_STATE } from 'types/magicMetadata';
 import { AppContext } from 'pages/_app';
 import OverflowMenu from 'components/OverflowMenu/menu';
-import { CollectionSummaryType } from 'constants/collection';
+import { CollectionSummaryType, HIDDEN_SECTION } from 'constants/collection';
 import { TrashCollectionOption } from './TrashCollectionOption';
 import { SharedCollectionOption } from './SharedCollectionOption';
 import { OnlyDownloadCollectionOption } from './OnlyDownloadCollectionOption';
@@ -32,7 +32,9 @@ import { SetCollectionDownloadProgressAttributes } from 'types/gallery';
 
 interface CollectionOptionsProps {
     setCollectionNamerAttributes: SetCollectionNamerAttributes;
-    setCollectionDownloadProgressAttributes: SetCollectionDownloadProgressAttributes;
+    setCollectionDownloadProgressAttributesCreator: (
+        collectionID: number
+    ) => SetCollectionDownloadProgressAttributes;
     activeCollection: Collection;
     collectionSummaryType: CollectionSummaryType;
     showCollectionShareModal: () => void;
@@ -67,7 +69,7 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
         redirectToAll,
         setCollectionNamerAttributes,
         showCollectionShareModal,
-        setCollectionDownloadProgressAttributes,
+        setCollectionDownloadProgressAttributesCreator,
     } = props;
 
     const { startLoading, finishLoading, setDialogMessage } =
@@ -201,10 +203,16 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
 
     const downloadCollection = () => {
         if (collectionSummaryType === CollectionSummaryType.hidden) {
+            const setCollectionDownloadProgressAttributes =
+                setCollectionDownloadProgressAttributesCreator(HIDDEN_SECTION);
             downloadDefaultHiddenCollectionHelper(
                 setCollectionDownloadProgressAttributes
             );
         } else {
+            const setCollectionDownloadProgressAttributes =
+                setCollectionDownloadProgressAttributesCreator(
+                    activeCollection.id
+                );
             downloadCollectionHelper(
                 activeCollection.id,
                 setCollectionDownloadProgressAttributes
