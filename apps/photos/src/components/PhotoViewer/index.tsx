@@ -514,12 +514,16 @@ function PhotoViewer(props: Iprops) {
     const downloadFileHelper = async (file) => {
         if (file && props.enableDownload) {
             appContext.startLoading();
-            await downloadFile(
-                file,
-                publicCollectionGalleryContext.accessedThroughSharedURL,
-                publicCollectionGalleryContext.token,
-                publicCollectionGalleryContext.passwordToken
-            );
+            try {
+                await downloadFile(
+                    file,
+                    publicCollectionGalleryContext.accessedThroughSharedURL,
+                    publicCollectionGalleryContext.token,
+                    publicCollectionGalleryContext.passwordToken
+                );
+            } catch (e) {
+                // do nothing
+            }
             appContext.finishLoading();
         }
     };

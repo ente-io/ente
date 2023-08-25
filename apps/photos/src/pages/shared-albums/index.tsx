@@ -206,12 +206,16 @@ export default function PublicCollectionGallery() {
         }
         appContext.startLoading();
         for (const file of publicFiles) {
-            await downloadFile(
-                file,
-                true,
-                token.current,
-                passwordJWTToken.current
-            );
+            try {
+                await downloadFile(
+                    file,
+                    true,
+                    token.current,
+                    passwordJWTToken.current
+                );
+            } catch (e) {
+                // do nothing
+            }
         }
         appContext.finishLoading();
     };

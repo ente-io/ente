@@ -142,6 +142,7 @@ export async function downloadFile(
         }
     } catch (e) {
         logError(e, 'failed to download file');
+        throw e;
     }
 }
 
