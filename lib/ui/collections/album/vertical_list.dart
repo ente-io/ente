@@ -178,6 +178,8 @@ class AlbumVerticalListWidget extends StatelessWidget {
     if (await _runCollectionAction(context, item)) {
       late final String toastMessage;
       bool shouldNavigateToCollection = false;
+      bool hasVerifiedLock = false;
+
       if (actionType == CollectionActionType.addFiles) {
         toastMessage = S.of(context).addedSuccessfullyTo(item.displayName);
         shouldNavigateToCollection = true;
@@ -188,6 +190,8 @@ class AlbumVerticalListWidget extends StatelessWidget {
         shouldNavigateToCollection = true;
       } else if (actionType == CollectionActionType.moveToHiddenCollection) {
         toastMessage = S.of(context).movedSuccessfullyTo(item.displayName);
+        shouldNavigateToCollection = true;
+        hasVerifiedLock = true;
       } else {
         toastMessage = "";
       }
@@ -201,6 +205,7 @@ class AlbumVerticalListWidget extends StatelessWidget {
         _navigateToCollection(
           context,
           item,
+          hasVerifiedLock: hasVerifiedLock,
         );
       }
     }
@@ -233,12 +238,17 @@ class AlbumVerticalListWidget extends StatelessWidget {
     }
   }
 
-  void _navigateToCollection(BuildContext context, Collection collection) {
+  void _navigateToCollection(
+    BuildContext context,
+    Collection collection, {
+    bool hasVerifiedLock = false,
+  }) {
     Navigator.pop(context);
     routeToPage(
       context,
       CollectionPage(
         CollectionWithThumbnail(collection, null),
+        hasVerifiedLock: hasVerifiedLock,
       ),
     );
   }
