@@ -186,6 +186,8 @@ class AlbumVerticalListWidget extends StatelessWidget {
           actionType == CollectionActionType.unHide) {
         toastMessage = S.of(context).movedSuccessfullyTo(item.displayName);
         shouldNavigateToCollection = true;
+      } else if (actionType == CollectionActionType.moveToHiddenCollection) {
+        toastMessage = S.of(context).movedSuccessfullyTo(item.displayName);
       } else {
         toastMessage = "";
       }
@@ -227,7 +229,7 @@ class AlbumVerticalListWidget extends StatelessWidget {
       case CollectionActionType.collectPhotos:
         return _createCollaborativeLink(context, collection);
       case CollectionActionType.moveToHiddenCollection:
-        return false;
+        return _moveFilesToCollection(context, collection.id);
     }
   }
 
@@ -412,9 +414,14 @@ class AlbumVerticalListWidget extends StatelessWidget {
     BuildContext context,
     int toCollectionID,
   ) async {
-    final String message = actionType == CollectionActionType.moveFiles
-        ? S.of(context).movingFilesToAlbum
-        : S.of(context).unhidingFilesToAlbum;
+    late final String message;
+    if (actionType == CollectionActionType.moveFiles ||
+        actionType == CollectionActionType.moveToHiddenCollection) {
+      message = S.of(context).movingFilesToAlbum;
+    } else {
+      message = S.of(context).unhidingFilesToAlbum;
+    }
+
     final dialog = createProgressDialog(context, message, isDismissible: true);
     await dialog.show();
     try {
