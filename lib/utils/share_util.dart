@@ -156,6 +156,7 @@ Future<List<EnteFile>> convertPicketAssets(
   final List<EnteFile> localFiles = [];
   for (var asset in pickedAssets) {
     final enteFile = await EnteFile.fromAsset('', asset);
+    enteFile.collectionID = collectionID;
     localFiles.add(enteFile);
   }
   return localFiles;
