@@ -166,7 +166,7 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
                             borderRadius: 2,
                           ),
                         ),
-                        _getCollectionItems(filesCount),
+                        _getCollectionItems(),
                       ],
                     ),
                   ),
@@ -198,7 +198,7 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
     );
   }
 
-  Flexible _getCollectionItems(int filesCount) {
+  Flexible _getCollectionItems() {
     return Flexible(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 24, 4, 0),
