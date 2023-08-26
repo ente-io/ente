@@ -230,7 +230,8 @@ extension GalleyTypeExtension on GalleryType {
   }
 
   bool showMovetoHiddenAlbum() {
-    return this == GalleryType.hiddenSection;
+    return this == GalleryType.hiddenSection ||
+        this == GalleryType.hiddenOwnedCollection;
   }
 }
 
