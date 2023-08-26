@@ -226,6 +226,8 @@ class AlbumVerticalListWidget extends StatelessWidget {
         return _showShareCollectionPage(context, collection);
       case CollectionActionType.collectPhotos:
         return _createCollaborativeLink(context, collection);
+      case CollectionActionType.moveToHiddenCollection:
+        return false;
     }
   }
 

@@ -27,6 +27,7 @@ enum CollectionActionType {
   unHide,
   shareCollection,
   collectPhotos,
+  moveToHiddenCollection,
 }
 
 String _actionName(
@@ -53,6 +54,8 @@ String _actionName(
       break;
     case CollectionActionType.collectPhotos:
       text = S.of(context).share;
+    case CollectionActionType.moveToHiddenCollection:
+      text = "Move to hidden album";
       break;
   }
   return text;

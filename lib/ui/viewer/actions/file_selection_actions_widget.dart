@@ -283,6 +283,16 @@ class _FileSelectionActionsWidgetState
       );
     }
 
+    if (widget.type.showMovetoHiddenAlbum()) {
+      items.add(
+        SelectionActionButton(
+          icon: Icons.arrow_forward_outlined,
+          labelText: S.of(context).moveToAlbum,
+          onTap: _moveFilesToHiddenAlbum,
+        ),
+      );
+    }
+
     items.add(
       SelectionActionButton(
         icon: Icons.grid_view_outlined,
@@ -329,6 +339,14 @@ class _FileSelectionActionsWidgetState
       context,
       selectedFiles: widget.selectedFiles,
       actionType: CollectionActionType.moveFiles,
+    );
+  }
+
+  Future<void> _moveFilesToHiddenAlbum() async {
+    showCollectionActionSheet(
+      context,
+      selectedFiles: widget.selectedFiles,
+      actionType: CollectionActionType.moveToHiddenCollection,
     );
   }
 
