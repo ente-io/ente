@@ -7,8 +7,8 @@ import 'package:path_provider/path_provider.dart';
 import "package:photos/extensions/stop_watch.dart";
 import 'package:photos/models/backup_status.dart';
 import 'package:photos/models/file/file.dart';
-import 'package:photos/models/file_load_result.dart';
 import 'package:photos/models/file/file_type.dart';
+import 'package:photos/models/file_load_result.dart';
 import 'package:photos/models/location/location.dart';
 import "package:photos/models/metadata/common_keys.dart";
 import "package:photos/services/filter/db_filters.dart";
@@ -580,7 +580,8 @@ class FilesDB {
       limit: limit,
     );
     final files = convertToFiles(results);
-    final List<EnteFile> filteredFiles = await applyDBFilters(files, filterOptions);
+    final List<EnteFile> filteredFiles =
+        await applyDBFilters(files, filterOptions);
     return FileLoadResult(filteredFiles, files.length == limit);
   }
 
@@ -1515,7 +1516,8 @@ class FilesDB {
       limit: limit,
     );
     final files = convertToFiles(results);
-    final List<EnteFile> filteredFiles = await applyDBFilters(files, filterOptions);
+    final List<EnteFile> filteredFiles =
+        await applyDBFilters(files, filterOptions);
     return FileLoadResult(filteredFiles, files.length == limit);
   }
 
