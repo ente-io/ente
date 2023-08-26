@@ -206,7 +206,7 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 24, 4, 0),
         child: FutureBuilder<List<Collection>>(
-          future: _getCollectionsWithThumbnail(),
+          future: _getCollections(),
           builder: (context, snapshot) {
             if (snapshot.hasError) {
               //Need to show an error on the UI here
@@ -249,34 +249,46 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
     );
   }
 
-  Future<List<Collection>> _getCollectionsWithThumbnail() async {
-    final List<Collection> collections =
-        CollectionsService.instance.getCollectionsForUI(
-      // in collections where user is a collaborator, only addTo and remove
-      // action can to be performed
-      includeCollab: widget.actionType == CollectionActionType.addFiles,
-    );
-    collections.sort((first, second) {
-      return compareAsciiLowerCaseNatural(
-        first.displayName,
-        second.displayName,
+  Future<List<Collection>> _getCollections() async {
+    if (widget.actionType == CollectionActionType.moveToHiddenCollection) {
+      final hiddenCollections = CollectionsService.instance
+          .getHiddenCollections(includeDefaultHidden: false);
+      hiddenCollections.sort((first, second) {
+        return compareAsciiLowerCaseNatural(
+          first.displayName,
+          second.displayName,
+        );
+      });
+      return hiddenCollections;
+    } else {
+      final List<Collection> collections =
+          CollectionsService.instance.getCollectionsForUI(
+        // in collections where user is a collaborator, only addTo and remove
+        // action can to be performed
+        includeCollab: widget.actionType == CollectionActionType.addFiles,
       );
-    });
-    final List<Collection> pinned = [];
-    final List<Collection> unpinned = [];
-    for (final collection in collections) {
-      if (collection.isQuickLinkCollection() ||
-          collection.type == CollectionType.favorites ||
-          collection.type == CollectionType.uncategorized) {
-        continue;
+      collections.sort((first, second) {
+        return compareAsciiLowerCaseNatural(
+          first.displayName,
+          second.displayName,
+        );
+      });
+      final List<Collection> pinned = [];
+      final List<Collection> unpinned = [];
+      for (final collection in collections) {
+        if (collection.isQuickLinkCollection() ||
+            collection.type == CollectionType.favorites ||
+            collection.type == CollectionType.uncategorized) {
+          continue;
+        }
+        if (collection.isPinned) {
+          pinned.add(collection);
+        } else {
+          unpinned.add(collection);
+        }
       }
-      if (collection.isPinned) {
-        pinned.add(collection);
-      } else {
-        unpinned.add(collection);
-      }
+      return pinned + unpinned;
     }
-    return pinned + unpinned;
   }
 
   void _removeIncomingCollections(List<Collection> items) {
