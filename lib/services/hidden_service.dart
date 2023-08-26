@@ -130,7 +130,8 @@ extension HiddenService on CollectionsService {
       final defaultHiddenCollection = await getDefaultHiddenCollection();
       final Map<int, List<EnteFile>> collectionToFilesMap =
           await filesDB.getAllFilesGroupByCollectionID(uploadedIDs);
-      for (MapEntry<int, List<EnteFile>> entry in collectionToFilesMap.entries) {
+      for (MapEntry<int, List<EnteFile>> entry
+          in collectionToFilesMap.entries) {
         if (entry.key == defaultHiddenCollection.id) {
           _logger.finest('file already part of hidden collection');
           continue;
@@ -161,11 +162,11 @@ extension HiddenService on CollectionsService {
     return true;
   }
 
-  Future<Collection> _createDefaultHiddenAlbum() async {
+  Future<Collection> createHiddenAlbum(String name) async {
     final CreateRequest createRequest = await buildCollectionCreateRequest(
-      ".Hidden",
+      name,
       visibility: hiddenVisibility,
-      subType: subTypeDefaultHidden,
+      subType: 0,
     );
     _logger.info("Creating Hidden Collection");
     final collection = await createAndCacheCollection(createRequest);
@@ -173,6 +174,21 @@ extension HiddenService on CollectionsService {
     final Collection collectionFromServer =
         await fetchCollectionByID(collection.id);
     _logger.info("Fetched Created Hidden Collection Successfully");
+    return collectionFromServer;
+  }
+
+  Future<Collection> _createDefaultHiddenAlbum() async {
+    final CreateRequest createRequest = await buildCollectionCreateRequest(
+      ".Hidden",
+      visibility: hiddenVisibility,
+      subType: subTypeDefaultHidden,
+    );
+    _logger.info("Creating Default Hidden Collection");
+    final collection = await createAndCacheCollection(createRequest);
+    _logger.info("Default Hidden Collection Created Successfully");
+    final Collection collectionFromServer =
+        await fetchCollectionByID(collection.id);
+    _logger.info("Fetched Created Default Hidden Collection Successfully");
     return collectionFromServer;
   }
 

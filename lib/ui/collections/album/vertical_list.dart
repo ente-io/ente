@@ -13,6 +13,7 @@ import 'package:photos/models/collection/collection_items.dart';
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/collections_service.dart';
+import "package:photos/services/hidden_service.dart";
 import 'package:photos/services/ignored_files_service.dart';
 import 'package:photos/services/remote_sync_service.dart';
 import "package:photos/ui/actions/collection/collection_sharing_actions.dart";
@@ -136,7 +137,17 @@ class AlbumVerticalListWidget extends StatelessWidget {
 
   Future<void> _nameAlbum(BuildContext context, String albumName) async {
     if (albumName.isNotEmpty) {
-      final collection = await _createAlbum(albumName);
+      bool hasVerifiedLock = false;
+      late final Collection? collection;
+
+      if (actionType == CollectionActionType.moveToHiddenCollection) {
+        collection =
+            await CollectionsService.instance.createHiddenAlbum(albumName);
+        hasVerifiedLock = true;
+      } else {
+        collection = await _createAlbum(albumName);
+      }
+
       if (collection != null) {
         if (await _runCollectionAction(
           context,
@@ -154,7 +165,11 @@ class AlbumVerticalListWidget extends StatelessWidget {
               "Album '" + albumName + "' created.",
             );
           }
-          _navigateToCollection(context, collection);
+          _navigateToCollection(
+            context,
+            collection,
+            hasVerifiedLock: hasVerifiedLock,
+          );
         }
       }
     }
