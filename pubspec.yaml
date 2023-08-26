@@ -32,7 +32,11 @@ dependencies:
   collection: # dart
   computer:
     git: "https://github.com/ente-io/computer.git"
-  connectivity_plus: ^3.0.3
+  connectivity_plus:
+    git:
+      url: https://github.com/ente-io/plus_plugins.git
+      ref: check_mobile_first
+      path: packages/connectivity_plus/connectivity_plus/
   crypto: ^3.0.2
   cupertino_icons: ^1.0.0
   defer_pointer: ^0.0.2
