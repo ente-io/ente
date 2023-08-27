@@ -74,6 +74,7 @@ import { VISIBILITY_STATE } from 'types/magicMetadata';
 const ENDPOINT = getEndpoint();
 const COLLECTION_TABLE = 'collections';
 const COLLECTION_UPDATION_TIME = 'collection-updation-time';
+const HIDDEN_COLLECTION_IDS = 'hidden-collection-ids';
 
 const UNCATEGORIZED_COLLECTION_NAME = 'Uncategorized';
 export const HIDDEN_COLLECTION_NAME = '.hidden';
@@ -221,6 +222,9 @@ export const getLocalCollections = async (
 export const getCollectionUpdationTime = async (): Promise<number> =>
     (await localForage.getItem<number>(COLLECTION_UPDATION_TIME)) ?? 0;
 
+export const getHiddenCollectionIDs = async (): Promise<number[]> =>
+    (await localForage.getItem<number[]>(HIDDEN_COLLECTION_IDS)) ?? [];
+
 export const getLatestCollections = async (
     includeHidden = false
 ): Promise<Collection[]> => {
@@ -230,7 +234,8 @@ export const getLatestCollections = async (
 
 export const syncCollections = async () => {
     const localCollections = await getLocalCollections(true);
-    const lastCollectionUpdationTime = await getCollectionUpdationTime();
+    let lastCollectionUpdationTime = await getCollectionUpdationTime();
+    const hiddenCollectionIDs = await getHiddenCollectionIDs();
     const token = getToken();
     const key = await getActualKey();
     const updatedCollections =
@@ -254,21 +259,45 @@ export const syncCollections = async () => {
     });
 
     const collections: Collection[] = [];
-    let updationTime = await localForage.getItem<number>(
-        COLLECTION_UPDATION_TIME
-    );
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     for (const [_, collection] of latestCollectionsInstances) {
-        if (!collection.isDeleted) {
-            collections.push(collection);
-            updationTime = Math.max(updationTime, collection.updationTime);
-        } else {
+        const isDeletedCollection = collection.isDeleted;
+        const isNewlyHiddenCollection =
+            isHiddenCollection(collection) &&
+            !hiddenCollectionIDs.includes(collection.id);
+        const isNewlyUnHiddenCollection =
+            !isHiddenCollection(collection) &&
+            hiddenCollectionIDs.includes(collection.id);
+        if (
+            isDeletedCollection ||
+            isNewlyHiddenCollection ||
+            isNewlyUnHiddenCollection
+        ) {
             removeCollectionLastSyncTime(collection);
         }
+        if (isDeletedCollection) {
+            continue;
+        }
+        collections.push(collection);
+        lastCollectionUpdationTime = Math.max(
+            lastCollectionUpdationTime,
+            collection.updationTime
+        );
     }
 
+    const updatedHiddenCollectionIDs = collections
+        .filter((collection) => isHiddenCollection(collection))
+        .map((collection) => collection.id);
+
     await localForage.setItem(COLLECTION_TABLE, collections);
-    await localForage.setItem(COLLECTION_UPDATION_TIME, updationTime);
+    await localForage.setItem(
+        COLLECTION_UPDATION_TIME,
+        lastCollectionUpdationTime
+    );
+    await localForage.setItem(
+        HIDDEN_COLLECTION_IDS,
+        updatedHiddenCollectionIDs
+    );
     return collections;
 };
 
