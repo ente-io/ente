@@ -66,20 +66,26 @@ export function AlbumCollectionOption({
                     {t('PIN_ALBUM')}
                 </OverflowMenuOption>
             )}
-            {isArchived ? (
-                <OverflowMenuOption
-                    onClick={handleCollectionAction(
-                        CollectionActions.UNARCHIVE
+            {!isHidden && (
+                <>
+                    {isArchived ? (
+                        <OverflowMenuOption
+                            onClick={handleCollectionAction(
+                                CollectionActions.UNARCHIVE
+                            )}
+                            startIcon={<Unarchive />}>
+                            {t('UNARCHIVE_COLLECTION')}
+                        </OverflowMenuOption>
+                    ) : (
+                        <OverflowMenuOption
+                            onClick={handleCollectionAction(
+                                CollectionActions.ARCHIVE
+                            )}
+                            startIcon={<ArchiveOutlined />}>
+                            {t('ARCHIVE_COLLECTION')}
+                        </OverflowMenuOption>
                     )}
-                    startIcon={<Unarchive />}>
-                    {t('UNARCHIVE_COLLECTION')}
-                </OverflowMenuOption>
-            ) : (
-                <OverflowMenuOption
-                    onClick={handleCollectionAction(CollectionActions.ARCHIVE)}
-                    startIcon={<ArchiveOutlined />}>
-                    {t('ARCHIVE_COLLECTION')}
-                </OverflowMenuOption>
+                </>
             )}
             {isHidden ? (
                 <OverflowMenuOption
