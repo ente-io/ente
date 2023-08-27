@@ -73,7 +73,7 @@ interface Iprops {
     deletedFileIds: Set<number>;
     setDeletedFileIds?: (value: Set<number>) => void;
     isTrashCollection: boolean;
-    isHiddenCollection: boolean;
+    isInHiddenSection: boolean;
     enableDownload: boolean;
     isSourceLoaded: boolean;
     conversionFailed: boolean;
@@ -389,7 +389,7 @@ function PhotoViewer(props: Iprops) {
                 !file ||
                 props.isTrashCollection ||
                 !isOwnFile ||
-                props.isHiddenCollection
+                props.isInHiddenSection
             ) {
                 return;
             }
@@ -641,7 +641,7 @@ function PhotoViewer(props: Iprops) {
                             </button>
                             {isOwnFile &&
                                 !props.isTrashCollection &&
-                                !props.isHiddenCollection && (
+                                !props.isInHiddenSection && (
                                     <button
                                         title={
                                             isFav
@@ -694,7 +694,7 @@ function PhotoViewer(props: Iprops) {
                 showCollectionChips={
                     !props.isTrashCollection &&
                     isOwnFile &&
-                    !props.isHiddenCollection
+                    !props.isInHiddenSection
                 }
                 showInfo={showInfo}
                 handleCloseInfo={handleCloseInfo}

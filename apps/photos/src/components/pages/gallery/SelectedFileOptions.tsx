@@ -8,7 +8,7 @@ import { COLLECTION_OPS_TYPE } from 'utils/collection';
 import {
     ALL_SECTION,
     ARCHIVE_SECTION,
-    HIDDEN_SECTION,
+    HIDDEN_ITEMS_SECTION,
     TRASH_SECTION,
 } from 'constants/collection';
 import { SelectionBar } from '../../Navbar/SelectionBar';
@@ -242,7 +242,7 @@ const SelectedFileOptions = ({
                             <DownloadIcon />
                         </IconButton>
                     </Tooltip>
-                ) : activeCollectionID === HIDDEN_SECTION ? (
+                ) : activeCollectionID === HIDDEN_ITEMS_SECTION ? (
                     <>
                         <Tooltip title={t('UNHIDE')}>
                             <IconButton onClick={unhideToCollection}>

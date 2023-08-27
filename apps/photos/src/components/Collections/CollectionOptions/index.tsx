@@ -7,7 +7,7 @@ import {
     changeCollectionSortOrder,
     changeCollectionVisibility,
     downloadAllCollectionFiles,
-    downloadHiddenFiles,
+    downloadDefaultHiddenFiles,
 } from 'utils/collection';
 import { SetCollectionNamerAttributes } from '../CollectionNamer';
 import { Collection } from 'types/collection';
@@ -206,8 +206,8 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
     };
 
     const downloadCollection = () => {
-        if (collectionSummaryType === CollectionSummaryType.hidden) {
-            downloadHiddenFiles();
+        if (collectionSummaryType === CollectionSummaryType.hiddenItems) {
+            downloadDefaultHiddenFiles();
         } else {
             downloadAllCollectionFiles(activeCollection.id);
         }
@@ -357,10 +357,11 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
                         handleCollectionAction={handleCollectionAction}
                         downloadOptionText={t('DOWNLOAD_UNCATEGORIZED')}
                     />
-                ) : collectionSummaryType === CollectionSummaryType.hidden ? (
+                ) : collectionSummaryType ===
+                  CollectionSummaryType.hiddenItems ? (
                     <OnlyDownloadCollectionOption
                         handleCollectionAction={handleCollectionAction}
-                        downloadOptionText={t('DOWNLOAD_HIDDEN')}
+                        downloadOptionText={t('DOWNLOAD_HIDDEN_ITEMS')}
                     />
                 ) : collectionSummaryType ===
                       CollectionSummaryType.incomingShareViewer ||

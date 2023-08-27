@@ -17,6 +17,7 @@ interface Iprops {
     setActiveCollectionID: (id?: number) => void;
     collectionListSortBy: COLLECTION_LIST_SORT_BY;
     setCollectionListSortBy: (v: COLLECTION_LIST_SORT_BY) => void;
+    isInHiddenSection: boolean;
 }
 
 const LeftSlideTransition = Transition('up');
@@ -29,6 +30,7 @@ export default function AllCollections(props: Iprops) {
         setActiveCollectionID,
         collectionListSortBy,
         setCollectionListSortBy,
+        isInHiddenSection,
     } = props;
     const { isMobile } = useContext(AppContext);
 
@@ -45,6 +47,7 @@ export default function AllCollections(props: Iprops) {
             open={open}
             fullScreen={isMobile}>
             <AllCollectionsHeader
+                isInHiddenSection={isInHiddenSection}
                 onClose={onClose}
                 collectionCount={props.collectionSummaries.length}
                 collectionSortBy={collectionListSortBy}
