@@ -1,5 +1,5 @@
 import { getLocalCollections } from 'services/collectionService';
-import { getLocalFiles } from 'services/fileService';
+import { getAllLocalFiles } from 'services/fileService';
 import {
     ExportRecordV1,
     ExportRecordV2,
@@ -100,7 +100,7 @@ async function migrationV0ToV1(
     }
     const collectionIDPathMap = new Map<number, string>();
     const user: User = getData(LS_KEYS.USER);
-    const localFiles = mergeMetadata(await getLocalFiles());
+    const localFiles = mergeMetadata(await getAllLocalFiles());
     const localCollections = await getLocalCollections();
     const personalFiles = getIDBasedSortedFiles(
         getPersonalFiles(localFiles, user)
@@ -137,7 +137,7 @@ async function migrationV2ToV3(
         return;
     }
     const user: User = getData(LS_KEYS.USER);
-    const localFiles = mergeMetadata(await getLocalFiles());
+    const localFiles = mergeMetadata(await getAllLocalFiles());
     const personalFiles = getIDBasedSortedFiles(
         getPersonalFiles(localFiles, user)
     );

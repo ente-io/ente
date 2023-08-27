@@ -26,7 +26,7 @@ import { logError } from 'utils/sentry';
 import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
 import { getLocalCollections } from '../collectionService';
 import downloadManager from '../downloadManager';
-import { getLocalFiles, getLocalHiddenFiles } from '../fileService';
+import { getAllLocalFiles } from '../fileService';
 import { EnteFile } from 'types/file';
 
 import { decodeLivePhoto } from '../livePhotoService';
@@ -234,10 +234,7 @@ class ExportService {
     ): Promise<EnteFile[]> => {
         try {
             const user: User = getData(LS_KEYS.USER);
-            const files = [
-                ...(await getLocalFiles()),
-                ...(await getLocalHiddenFiles()),
-            ];
+            const files = await getAllLocalFiles();
             const userPersonalFiles = getPersonalFiles(files, user);
 
             const unExportedFiles = getUnExportedFiles(
@@ -350,10 +347,7 @@ class ExportService {
     ) {
         try {
             const user: User = getData(LS_KEYS.USER);
-            const files = mergeMetadata([
-                ...(await getLocalFiles()),
-                ...(await getLocalHiddenFiles()),
-            ]);
+            const files = mergeMetadata(await getAllLocalFiles());
             const personalFiles = getPersonalFiles(files, user);
 
             const collections = await getLocalCollections(true);

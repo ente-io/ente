@@ -11,7 +11,7 @@ import {
     updateSharedCollectionMagicMetadata,
 } from 'services/collectionService';
 import { downloadFiles } from 'utils/file';
-import { getLocalFiles, getLocalHiddenFiles } from 'services/fileService';
+import { getLocalFiles } from 'services/fileService';
 import { EnteFile } from 'types/file';
 import { CustomError } from 'utils/error';
 import { User } from 'types/user';
@@ -99,7 +99,7 @@ export async function downloadAllCollectionFiles(collectionID: number) {
 
 export async function downloadHiddenFiles() {
     try {
-        const hiddenFiles = await getLocalHiddenFiles();
+        const hiddenFiles = await getLocalFiles('hidden');
         await downloadFiles(hiddenFiles);
     } catch (e) {
         logError(e, 'download hidden files failed ');

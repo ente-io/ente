@@ -8,12 +8,7 @@ import {
 } from 'react';
 import { useRouter } from 'next/router';
 import { clearKeys, getKey, SESSION_KEYS } from 'utils/storage/sessionStorage';
-import {
-    getLocalFiles,
-    syncFiles,
-    getLocalHiddenFiles,
-    syncHiddenFiles,
-} from 'services/fileService';
+import { getLocalFiles, syncFiles } from 'services/fileService';
 import { styled, Typography } from '@mui/material';
 import {
     getLatestCollections,
@@ -287,9 +282,11 @@ export default function Gallery() {
             setIsFirstLogin(false);
             const user = getData(LS_KEYS.USER);
             const familyData = getLocalFamilyData();
-            const files = sortFiles(mergeMetadata(await getLocalFiles()));
+            const files = sortFiles(
+                mergeMetadata(await getLocalFiles('normal'))
+            );
             const hiddenFiles = sortFiles(
-                mergeMetadata(await getLocalHiddenFiles())
+                mergeMetadata(await getLocalFiles('hidden'))
             );
             const collections = await getLocalCollections();
             const trashedFiles = await getLocalTrashedFiles();
@@ -642,8 +639,8 @@ export default function Gallery() {
             const { normalCollections, hiddenCollections } =
                 await splitNormalAndHiddenCollections(collections);
             setCollections(normalCollections);
-            await syncFiles(normalCollections, setFiles);
-            await syncHiddenFiles(hiddenCollections, setHiddenFiles);
+            await syncFiles('normal', normalCollections, setFiles);
+            await syncFiles('hidden', hiddenCollections, setHiddenFiles);
             await syncTrash(collections, setTrashedFiles);
             await syncEntities();
             await syncMapEnabled();
