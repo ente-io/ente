@@ -149,10 +149,10 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
                 callback = unPinAlbum;
                 break;
             case CollectionActions.HIDE:
-                callback = hideAbum;
+                callback = hideAlbum;
                 break;
             case CollectionActions.UNHIDE:
-                callback = unHideAbum;
+                callback = unHideAlbum;
                 break;
 
             default:
@@ -321,14 +321,14 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
         await changeCollectionOrder(activeCollection, 0);
     };
 
-    const hideAbum = async () => {
+    const hideAlbum = async () => {
         await changeCollectionVisibility(
             activeCollection,
             VISIBILITY_STATE.HIDDEN
         );
         setActiveCollectionID(ALL_SECTION);
     };
-    const unHideAbum = async () => {
+    const unHideAlbum = async () => {
         await changeCollectionVisibility(
             activeCollection,
             VISIBILITY_STATE.VISIBLE
