@@ -1137,7 +1137,10 @@ export function getCollectionSummaries(
 
     let hasUncategorizedCollection = false;
     for (const collection of collections) {
-        if (collection.type === CollectionType.uncategorized) {
+        if (
+            !hasUncategorizedCollection &&
+            collection.type === CollectionType.uncategorized
+        ) {
             hasUncategorizedCollection = true;
         }
         if (
@@ -1185,12 +1188,12 @@ export function getCollectionSummaries(
                 order: collection.magicMetadata?.data?.order ?? 0,
             });
         }
-        if (!hasUncategorizedCollection) {
-            collectionSummaries.set(
-                DUMMY_UNCATEGORIZED_COLLECTION,
-                getDummyUncategorizedCollectionSummary()
-            );
-        }
+    }
+    if (!hasUncategorizedCollection) {
+        collectionSummaries.set(
+            DUMMY_UNCATEGORIZED_COLLECTION,
+            getDummyUncategorizedCollectionSummary()
+        );
     }
 
     return collectionSummaries;
