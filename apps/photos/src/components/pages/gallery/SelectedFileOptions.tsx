@@ -8,7 +8,6 @@ import { COLLECTION_OPS_TYPE } from 'utils/collection';
 import {
     ALL_SECTION,
     ARCHIVE_SECTION,
-    HIDDEN_ITEMS_SECTION,
     TRASH_SECTION,
 } from 'constants/collection';
 import { SelectionBar } from '../../Navbar/SelectionBar';
@@ -48,6 +47,7 @@ interface Props {
     isIncomingSharedCollection: boolean;
     isInSearchMode: boolean;
     selectedCollection: Collection;
+    isInHiddenSection: boolean;
 }
 
 const SelectedFileOptions = ({
@@ -64,6 +64,7 @@ const SelectedFileOptions = ({
     isUncategorizedCollection,
     isIncomingSharedCollection,
     isInSearchMode,
+    isInHiddenSection,
 }: Props) => {
     const { setDialogMessage } = useContext(AppContext);
     const addToCollection = () =>
@@ -242,7 +243,7 @@ const SelectedFileOptions = ({
                             <DownloadIcon />
                         </IconButton>
                     </Tooltip>
-                ) : activeCollectionID === HIDDEN_ITEMS_SECTION ? (
+                ) : isInHiddenSection ? (
                     <>
                         <Tooltip title={t('UNHIDE')}>
                             <IconButton onClick={unhideToCollection}>

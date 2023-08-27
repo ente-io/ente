@@ -1094,6 +1094,7 @@ export default function Gallery() {
                                     CollectionSummaryType.incomingShareViewer
                             }
                             isInSearchMode={isInSearchMode}
+                            isInHiddenSection={isInHiddenSection}
                         />
                     )}
                 <ExportModal
