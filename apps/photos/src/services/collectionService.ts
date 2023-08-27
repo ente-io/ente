@@ -8,7 +8,11 @@ import HTTPService from './HTTPService';
 import { EnteFile } from 'types/file';
 import { logError } from 'utils/sentry';
 import { CustomError } from 'utils/error';
-import { sortFiles, groupFilesBasedOnCollectionID } from 'utils/file';
+import {
+    sortFiles,
+    groupFilesBasedOnCollectionID,
+    getUniqueFiles,
+} from 'utils/file';
 import {
     Collection,
     CollectionToFileMap,
@@ -1250,15 +1254,17 @@ function getAllSectionVisibleFiles(
     files: EnteFile[],
     archivedCollections: Set<number>
 ): EnteFile[] {
-    const allSectionVisibleFiles = files.filter((file) => {
-        if (
-            isArchivedFile(file) ||
-            archivedCollections.has(file.collectionID)
-        ) {
-            return false;
-        }
-        return true;
-    });
+    const allSectionVisibleFiles = getUniqueFiles(
+        files.filter((file) => {
+            if (
+                isArchivedFile(file) ||
+                archivedCollections.has(file.collectionID)
+            ) {
+                return false;
+            }
+            return true;
+        })
+    );
     return allSectionVisibleFiles;
 }
 
@@ -1277,7 +1283,9 @@ export function getDummyUncategorizedCollectionSummary(): CollectionSummary {
 export function getArchivedSectionSummary(
     files: EnteFile[]
 ): CollectionSummary {
-    const archivedFiles = files.filter((file) => isArchivedFile(file));
+    const archivedFiles = getUniqueFiles(
+        files.filter((file) => isArchivedFile(file))
+    );
     return {
         id: ARCHIVE_SECTION,
         name: t('ARCHIVE_SECTION_NAME'),
@@ -1298,8 +1306,10 @@ export function getHiddenItemsSummary(
             .filter((collection) => isDefaultHiddenCollection(collection))
             .map((collection) => collection.id)
     );
-    const hiddenItems = hiddenFiles.filter((file) =>
-        defaultHiddenCollectionIds.has(file.collectionID)
+    const hiddenItems = getUniqueFiles(
+        hiddenFiles.filter((file) =>
+            defaultHiddenCollectionIds.has(file.collectionID)
+        )
     );
     return {
         id: HIDDEN_ITEMS_SECTION,
