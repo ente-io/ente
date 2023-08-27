@@ -45,12 +45,10 @@ const setLocalFiles = async (type: 'normal' | 'hidden', files: EnteFile[]) => {
     try {
         const tableName = type === 'normal' ? FILES_TABLE : HIDDEN_FILES_TABLE;
         await localForage.setItem(tableName, files);
-        if (type === 'normal') {
-            try {
-                eventBus.emit(Events.LOCAL_FILES_UPDATED);
-            } catch (e) {
-                logError(e, 'Error in localFileUpdated handlers');
-            }
+        try {
+            eventBus.emit(Events.LOCAL_FILES_UPDATED);
+        } catch (e) {
+            logError(e, 'Error in localFileUpdated handlers');
         }
     } catch (e1) {
         try {
