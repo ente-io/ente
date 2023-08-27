@@ -74,6 +74,8 @@ export default function Collections(props: Iprops) {
         [collectionListSortBy, toShowCollectionSummaries]
     );
 
+    const showCollectionShareModal = () => setCollectionShareModalView(true);
+
     useEffect(() => {
         if (isInSearchMode) {
             return;
@@ -86,10 +88,8 @@ export default function Collections(props: Iprops) {
                     )}
                     activeCollection={activeCollection}
                     setCollectionNamerAttributes={setCollectionNamerAttributes}
-                    redirectToAll={() => setActiveCollectionID(ALL_SECTION)}
-                    showCollectionShareModal={() =>
-                        setCollectionShareModalView(true)
-                    }
+                    setActiveCollectionID={setActiveCollectionID}
+                    showCollectionShareModal={showCollectionShareModal}
                 />
             ),
             itemType: ITEM_TYPE.HEADER,

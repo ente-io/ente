@@ -17,7 +17,7 @@ interface Iprops {
     collectionSummary: CollectionSummary;
     setCollectionNamerAttributes: SetCollectionNamerAttributes;
     showCollectionShareModal: () => void;
-    redirectToAll: () => void;
+    setActiveCollectionID: (collectionID: number) => void;
 }
 
 export default function CollectionInfoWithOptions({

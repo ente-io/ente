@@ -16,6 +16,7 @@ import VisibilityOffOutlined from '@mui/icons-material/VisibilityOffOutlined';
 interface Iprops {
     isArchived: boolean;
     isPinned: boolean;
+    isHidden: boolean;
     handleCollectionAction: (
         action: CollectionActions,
         loader?: boolean
@@ -25,6 +26,7 @@ interface Iprops {
 export function AlbumCollectionOption({
     isArchived,
     isPinned,
+    isHidden,
     handleCollectionAction,
 }: Iprops) {
     return (
@@ -79,11 +81,25 @@ export function AlbumCollectionOption({
                     {t('ARCHIVE_COLLECTION')}
                 </OverflowMenuOption>
             )}
-            <OverflowMenuOption
-                onClick={handleCollectionAction(CollectionActions.HIDE)}
-                startIcon={<VisibilityOffOutlined />}>
-                {t('HIDE_COLLECTION')}
-            </OverflowMenuOption>
+            {isHidden ? (
+                <OverflowMenuOption
+                    onClick={handleCollectionAction(
+                        CollectionActions.UNHIDE,
+                        false
+                    )}
+                    startIcon={<VisibilityOffOutlined />}>
+                    {t('UNHIDE_COLLECTION')}
+                </OverflowMenuOption>
+            ) : (
+                <OverflowMenuOption
+                    onClick={handleCollectionAction(
+                        CollectionActions.HIDE,
+                        false
+                    )}
+                    startIcon={<VisibilityOffOutlined />}>
+                    {t('HIDE_COLLECTION')}
+                </OverflowMenuOption>
+            )}
             <OverflowMenuOption
                 startIcon={<DeleteOutlinedIcon />}
                 onClick={handleCollectionAction(

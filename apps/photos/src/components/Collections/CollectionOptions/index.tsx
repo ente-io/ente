@@ -8,6 +8,7 @@ import {
     changeCollectionVisibility,
     downloadAllCollectionFiles,
     downloadDefaultHiddenFiles,
+    isHiddenCollection,
 } from 'utils/collection';
 import { SetCollectionNamerAttributes } from '../CollectionNamer';
 import { Collection } from 'types/collection';
@@ -17,7 +18,11 @@ import { logError } from 'utils/sentry';
 import { VISIBILITY_STATE } from 'types/magicMetadata';
 import { AppContext } from 'pages/_app';
 import OverflowMenu from 'components/OverflowMenu/menu';
-import { CollectionSummaryType } from 'constants/collection';
+import {
+    ALL_SECTION,
+    CollectionSummaryType,
+    HIDDEN_ITEMS_SECTION,
+} from 'constants/collection';
 import { TrashCollectionOption } from './TrashCollectionOption';
 import { SharedCollectionOption } from './SharedCollectionOption';
 import { OnlyDownloadCollectionOption } from './OnlyDownloadCollectionOption';
@@ -34,7 +39,7 @@ interface CollectionOptionsProps {
     activeCollection: Collection;
     collectionSummaryType: CollectionSummaryType;
     showCollectionShareModal: () => void;
-    redirectToAll: () => void;
+    setActiveCollectionID: (collectionID: number) => void;
 }
 
 export enum CollectionActions {
@@ -64,7 +69,7 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
     const {
         activeCollection,
         collectionSummaryType,
-        redirectToAll,
+        setActiveCollectionID,
         setCollectionNamerAttributes,
         showCollectionShareModal,
     } = props;
@@ -184,17 +189,17 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
 
     const deleteCollectionAlongWithFiles = async () => {
         await CollectionAPI.deleteCollection(activeCollection.id, false);
-        redirectToAll();
+        setActiveCollectionID(ALL_SECTION);
     };
 
     const deleteCollectionButKeepFiles = async () => {
         await CollectionAPI.deleteCollection(activeCollection.id, true);
-        redirectToAll();
+        setActiveCollectionID(ALL_SECTION);
     };
 
     const leaveSharedAlbum = async () => {
         await CollectionAPI.leaveSharedAlbum(activeCollection.id);
-        redirectToAll();
+        setActiveCollectionID(ALL_SECTION);
     };
 
     const archiveCollection = () => {
@@ -216,7 +221,7 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
     const emptyTrash = async () => {
         await TrashService.emptyTrash();
         await TrashService.clearLocalTrash();
-        redirectToAll();
+        setActiveCollectionID(ALL_SECTION);
     };
 
     const showRenameCollectionModal = () => {
@@ -321,14 +326,14 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
             activeCollection,
             VISIBILITY_STATE.HIDDEN
         );
-        redirectToAll();
+        setActiveCollectionID(ALL_SECTION);
     };
     const unHideAbum = async () => {
         await changeCollectionVisibility(
             activeCollection,
             VISIBILITY_STATE.VISIBLE
         );
-        redirectToAll();
+        setActiveCollectionID(HIDDEN_ITEMS_SECTION);
     };
 
     return (
@@ -374,6 +379,7 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
                 ) : (
                     <AlbumCollectionOption
                         isArchived={isArchivedCollection(activeCollection)}
+                        isHidden={isHiddenCollection(activeCollection)}
                         isPinned={isPinnedCollection(activeCollection)}
                         handleCollectionAction={handleCollectionAction}
                     />
