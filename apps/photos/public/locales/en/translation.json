@@ -306,6 +306,8 @@
     "MOVE_TO_COLLECTION": "Move to album",
     "UNARCHIVE": "Unarchive",
     "UNARCHIVE_COLLECTION": "Unarchive album",
+    "HIDE_COLLECTION":"Hide album",
+    "UNHIDE_COLLECTION":"Unhide album",
     "MOVE": "Move",
     "ADD": "Add",
     "REMOVE": "Remove",

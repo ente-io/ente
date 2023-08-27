@@ -11,6 +11,7 @@ import SortIcon from '@mui/icons-material/Sort';
 import { t } from 'i18next';
 import PushPinOutlined from '@mui/icons-material/PushPinOutlined';
 import { UnPinIcon } from 'components/icons/UnPinIcon';
+import VisibilityOffOutlined from '@mui/icons-material/VisibilityOffOutlined';
 
 interface Iprops {
     isArchived: boolean;
@@ -47,7 +48,7 @@ export function AlbumCollectionOption({
             {isPinned ? (
                 <OverflowMenuOption
                     onClick={handleCollectionAction(
-                        CollectionActions.UNPIN_ALBUM,
+                        CollectionActions.UNPIN,
                         false
                     )}
                     startIcon={<UnPinIcon />}>
@@ -56,7 +57,7 @@ export function AlbumCollectionOption({
             ) : (
                 <OverflowMenuOption
                     onClick={handleCollectionAction(
-                        CollectionActions.PIN_ALBUM,
+                        CollectionActions.PIN,
                         false
                     )}
                     startIcon={<PushPinOutlined />}>
@@ -78,6 +79,11 @@ export function AlbumCollectionOption({
                     {t('ARCHIVE_COLLECTION')}
                 </OverflowMenuOption>
             )}
+            <OverflowMenuOption
+                onClick={handleCollectionAction(CollectionActions.HIDE)}
+                startIcon={<VisibilityOffOutlined />}>
+                {t('HIDE_COLLECTION')}
+            </OverflowMenuOption>
             <OverflowMenuOption
                 startIcon={<DeleteOutlinedIcon />}
                 onClick={handleCollectionAction(

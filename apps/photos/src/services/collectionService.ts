@@ -61,6 +61,7 @@ import {
     changeCollectionSubType,
     isIncomingCollabShare,
     isIncomingShare,
+    isDefaultHiddenCollection,
 } from 'utils/collection';
 import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
 import { getLocalFiles } from './fileService';
@@ -1353,10 +1354,10 @@ export function createUnCategorizedCollection() {
     );
 }
 
-export async function getHiddenCollection(): Promise<Collection> {
+export async function getDefaultHiddenCollection(): Promise<Collection> {
     const collections = await getLocalCollections(true);
     const hiddenCollection = collections.find((collection) =>
-        isHiddenCollection(collection)
+        isDefaultHiddenCollection(collection)
     );
 
     return hiddenCollection;
@@ -1371,7 +1372,7 @@ export function createHiddenCollection() {
 
 export async function moveToHiddenCollection(files: EnteFile[]) {
     try {
-        let hiddenCollection = await getHiddenCollection();
+        let hiddenCollection = await getDefaultHiddenCollection();
         if (!hiddenCollection) {
             hiddenCollection = await createHiddenCollection();
         }

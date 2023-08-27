@@ -54,8 +54,10 @@ export enum CollectionActions {
     LEAVE_SHARED_ALBUM,
     SHOW_SORT_ORDER_MENU,
     UPDATE_COLLECTION_SORT_ORDER,
-    PIN_ALBUM,
-    UNPIN_ALBUM,
+    PIN,
+    UNPIN,
+    HIDE,
+    UNHIDE,
 }
 
 const CollectionOptions = (props: CollectionOptionsProps) => {
@@ -135,12 +137,19 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
             case CollectionActions.UPDATE_COLLECTION_SORT_ORDER:
                 callback = updateCollectionSortOrder;
                 break;
-            case CollectionActions.PIN_ALBUM:
+            case CollectionActions.PIN:
                 callback = pinAlbum;
                 break;
-            case CollectionActions.UNPIN_ALBUM:
+            case CollectionActions.UNPIN:
                 callback = unPinAlbum;
                 break;
+            case CollectionActions.HIDE:
+                callback = hideAbum;
+                break;
+            case CollectionActions.UNHIDE:
+                callback = unHideAbum;
+                break;
+
             default:
                 logError(
                     Error('invalid collection action '),
@@ -305,6 +314,21 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
 
     const unPinAlbum = async () => {
         await changeCollectionOrder(activeCollection, 0);
+    };
+
+    const hideAbum = async () => {
+        await changeCollectionVisibility(
+            activeCollection,
+            VISIBILITY_STATE.HIDDEN
+        );
+        redirectToAll();
+    };
+    const unHideAbum = async () => {
+        await changeCollectionVisibility(
+            activeCollection,
+            VISIBILITY_STATE.VISIBLE
+        );
+        redirectToAll();
     };
 
     return (
