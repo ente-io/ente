@@ -22,6 +22,7 @@ import {
     parseLivePhotoExportName,
     getCollectionIDFromFileUID,
     getCollectionExportNameMap,
+    getCollectionExportName,
 } from 'utils/export';
 import { logError } from 'utils/sentry';
 import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
@@ -487,7 +488,7 @@ class ExportService {
                     const newCollectionExportName =
                         getUniqueCollectionExportName(
                             exportFolder,
-                            collection.name
+                            getCollectionExportName(collection)
                         );
                     addLogLine(
                         `renaming collection with id ${collection.id} from ${oldCollectionExportName} to ${newCollectionExportName}`
