@@ -100,7 +100,7 @@ export async function downloadAllCollectionFiles(collectionID: number) {
 
 export async function downloadDefaultHiddenFiles() {
     try {
-        const collections = await getLocalCollections();
+        const collections = await getLocalCollections('hidden');
         const defaultHiddenCollectionsIds =
             getDefaultHiddenCollectionIDs(collections);
         const hiddenFiles = await getLocalFiles('hidden');
@@ -441,6 +441,10 @@ export function getNonHiddenCollections(
     collections: Collection[]
 ): Collection[] {
     return collections.filter((collection) => !isHiddenCollection(collection));
+}
+
+export function getHiddenCollections(collections: Collection[]): Collection[] {
+    return collections.filter((collection) => isHiddenCollection(collection));
 }
 
 export async function splitNormalAndHiddenCollections(

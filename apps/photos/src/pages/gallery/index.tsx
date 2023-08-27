@@ -11,14 +11,14 @@ import { clearKeys, getKey, SESSION_KEYS } from 'utils/storage/sessionStorage';
 import { getLocalFiles, syncFiles } from 'services/fileService';
 import { styled, Typography } from '@mui/material';
 import {
-    getLatestCollections,
+    getAllLatestCollections,
     getFavItemIds,
-    getLocalCollections,
     createAlbum,
     getCollectionSummaries,
     constructEmailList,
     getSectionSummaries,
     getHiddenItemsSummary,
+    getAllLocalCollections,
 } from 'services/collectionService';
 import { t } from 'i18next';
 
@@ -310,7 +310,7 @@ export default function Gallery() {
             const hiddenFiles = sortFiles(
                 mergeMetadata(await getLocalFiles('hidden'))
             );
-            const collections = await getLocalCollections(true);
+            const collections = await getAllLocalCollections();
             const { normalCollections, hiddenCollections } =
                 await splitNormalAndHiddenCollections(collections);
             const trashedFiles = await getLocalTrashedFiles();
@@ -668,10 +668,11 @@ export default function Gallery() {
                 throw new Error(ServerErrorCodes.SESSION_EXPIRED);
             }
             !silent && startLoading();
-            const collections = await getLatestCollections(true);
+            const collections = await getAllLatestCollections();
             const { normalCollections, hiddenCollections } =
                 await splitNormalAndHiddenCollections(collections);
             setCollections(normalCollections);
+            setHiddenCollections(hiddenCollections);
             await syncFiles('normal', normalCollections, setFiles);
             await syncFiles('hidden', hiddenCollections, setHiddenFiles);
             await syncTrash(collections, setTrashedFiles);

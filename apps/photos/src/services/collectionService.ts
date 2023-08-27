@@ -58,6 +58,7 @@ import {
     isIncomingCollabShare,
     isIncomingShare,
     isDefaultHiddenCollection,
+    getHiddenCollections,
 } from 'utils/collection';
 import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
 import { getLocalFiles } from './fileService';
@@ -208,11 +209,18 @@ const getCollections = async (
 };
 
 export const getLocalCollections = async (
-    includeHidden = false
+    type: 'normal' | 'hidden' = 'normal'
 ): Promise<Collection[]> => {
+    const collections = await getAllLocalCollections();
+    return type === 'normal'
+        ? getNonHiddenCollections(collections)
+        : getHiddenCollections(collections);
+};
+
+export const getAllLocalCollections = async (): Promise<Collection[]> => {
     const collections: Collection[] =
         (await localForage.getItem(COLLECTION_TABLE)) ?? [];
-    return includeHidden ? collections : getNonHiddenCollections(collections);
+    return collections;
 };
 
 export const getCollectionUpdationTime = async (): Promise<number> =>
@@ -222,14 +230,20 @@ export const getHiddenCollectionIDs = async (): Promise<number[]> =>
     (await localForage.getItem<number[]>(HIDDEN_COLLECTION_IDS)) ?? [];
 
 export const getLatestCollections = async (
-    includeHidden = false
+    type: 'normal' | 'hidden' = 'normal'
 ): Promise<Collection[]> => {
+    const collections = await getAllLatestCollections();
+    return type === 'normal'
+        ? getNonHiddenCollections(collections)
+        : getHiddenCollections(collections);
+};
+export const getAllLatestCollections = async (): Promise<Collection[]> => {
     const collections = await syncCollections();
-    return includeHidden ? collections : getNonHiddenCollections(collections);
+    return collections;
 };
 
 export const syncCollections = async () => {
-    const localCollections = await getLocalCollections(true);
+    const localCollections = await getAllLocalCollections();
     let lastCollectionUpdationTime = await getCollectionUpdationTime();
     const hiddenCollectionIDs = await getHiddenCollectionIDs();
     const token = getToken();
@@ -1330,7 +1344,7 @@ export function createUnCategorizedCollection() {
 }
 
 export async function getDefaultHiddenCollection(): Promise<Collection> {
-    const collections = await getLocalCollections(true);
+    const collections = await getLocalCollections('hidden');
     const hiddenCollection = collections.find((collection) =>
         isDefaultHiddenCollection(collection)
     );
