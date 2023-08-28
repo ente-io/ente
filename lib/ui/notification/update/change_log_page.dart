@@ -7,6 +7,7 @@ import 'package:photos/ui/components/divider_widget.dart';
 import 'package:photos/ui/components/models/button_type.dart';
 import 'package:photos/ui/components/title_bar_title_widget.dart';
 import 'package:photos/ui/notification/update/change_log_entry.dart';
+import "package:url_launcher/url_launcher_string.dart";
 
 class ChangeLogPage extends StatefulWidget {
   const ChangeLogPage({
@@ -95,7 +96,10 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
                       icon: Icons.people_alt_rounded,
                       iconColor: enteColorScheme.primary500,
                       onTap: () async {
-                        await UpdateService.instance.launchReviewUrl();
+                        launchUrlString(
+                          "https://ente.io/community",
+                          mode: LaunchMode.externalApplication,
+                        );
                       },
                     ),
                     const SizedBox(height: 8),
