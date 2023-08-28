@@ -3,11 +3,13 @@ import "dart:async";
 import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:flutter_animate/flutter_animate.dart";
+import "package:photos/core/errors.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/events/collection_updated_event.dart";
 import "package:photos/events/files_updated_event.dart";
 import 'package:photos/models/file/file.dart';
+import "package:photos/models/ignored_file.dart";
 import "package:photos/services/collections_service.dart";
 import "package:photos/services/hidden_service.dart";
 import "package:photos/services/ignored_files_service.dart";
@@ -97,7 +99,7 @@ class _UpdateIconWidgetState extends State<UploadIconWidget> {
           if (isQueuedForUpload && isBeingUploaded) {
             return const EnteLoadingWidget();
           }
-          if (isIgnored && kDebugMode) {
+          if (isIgnored && (kDebugMode || ignoreReason != kIgnoreReasonTrash)) {
             showToast(
               context,
               'Upload is ignored due to $ignoreReason',
