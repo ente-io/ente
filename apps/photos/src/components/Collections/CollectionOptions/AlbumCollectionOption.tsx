@@ -12,6 +12,7 @@ import { t } from 'i18next';
 import PushPinOutlined from '@mui/icons-material/PushPinOutlined';
 import { UnPinIcon } from 'components/icons/UnPinIcon';
 import VisibilityOffOutlined from '@mui/icons-material/VisibilityOffOutlined';
+import VisibilityOutlined from '@mui/icons-material/VisibilityOutlined';
 
 interface Iprops {
     isArchived: boolean;
@@ -93,7 +94,7 @@ export function AlbumCollectionOption({
                         CollectionActions.UNHIDE,
                         false
                     )}
-                    startIcon={<VisibilityOffOutlined />}>
+                    startIcon={<VisibilityOutlined />}>
                     {t('UNHIDE_COLLECTION')}
                 </OverflowMenuOption>
             ) : (
