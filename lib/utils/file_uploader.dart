@@ -736,7 +736,11 @@ class FileUploader {
         file.deviceFolder != null &&
         file.title != null &&
         !file.isSharedMediaToAppSandbox;
-    final bool deleteEntry = !file.isUploaded && !canIgnoreFile;
+    // If the file is not uploaded yet and either it can not be ignored or the
+    // err is related to live photo media, delete the local entry
+    final bool deleteEntry = !file.isUploaded &&
+        (!canIgnoreFile || e.reason.isLivePhotoErr);
+
     if (e.reason != InvalidReason.thumbnailMissing || !canIgnoreFile) {
       _logger.severe(
         "Invalid file, localDelete: $deleteEntry, ignored: $canIgnoreFile",
