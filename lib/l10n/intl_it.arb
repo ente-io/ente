@@ -1099,5 +1099,7 @@
   "unhiding": "Rimuovendo dal nascondiglio...",
   "successfullyHid": "Nascosta con successo",
   "successfullyUnhid": "Rimossa dal nascondiglio con successo",
-  "crashReporting": "Segnalazione di crash"
+  "crashReporting": "Segnalazione di crash",
+  "addToHiddenAlbum": "Add to hidden album",
+  "moveToHiddenAlbum": "Move to hidden album"
 }

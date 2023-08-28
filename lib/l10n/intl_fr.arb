@@ -1100,5 +1100,7 @@
   "unhiding": "Démasquage en cours...",
   "successfullyHid": "Masquage réussi",
   "successfullyUnhid": "Masquage réussi",
-  "crashReporting": "Rapports d'erreurs"
+  "crashReporting": "Rapports d'erreurs",
+  "addToHiddenAlbum": "Add to hidden album",
+  "moveToHiddenAlbum": "Move to hidden album"
 }

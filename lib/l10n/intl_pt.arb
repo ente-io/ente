@@ -266,5 +266,7 @@
   "update": "Atualização",
   "installManually": "Instalar manualmente",
   "criticalUpdateAvailable": "Atualização crítica disponível",
-  "updateAvailable": "Atualização disponível"
+  "updateAvailable": "Atualização disponível",
+  "addToHiddenAlbum": "Add to hidden album",
+  "moveToHiddenAlbum": "Move to hidden album"
 }

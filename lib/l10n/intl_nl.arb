@@ -1095,5 +1095,7 @@
   "sharedByYou": "Gedeeld door jou",
   "inviteYourFriendsToEnte": "Vrienden uitnodigen voor ente",
   "failedToDownloadVideo": "Downloaden van video mislukt",
-  "crashReporting": "Crash rapportering"
+  "crashReporting": "Crash rapportering",
+  "addToHiddenAlbum": "Add to hidden album",
+  "moveToHiddenAlbum": "Move to hidden album"
 }

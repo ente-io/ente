@@ -28,6 +28,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "accountWelcomeBack":
             MessageLookupByLibrary.simpleMessage("Witaj ponownie!"),
         "activeSessions": MessageLookupByLibrary.simpleMessage("Aktywne sesje"),
+        "addToHiddenAlbum":
+            MessageLookupByLibrary.simpleMessage("Add to hidden album"),
         "askDeleteReason": MessageLookupByLibrary.simpleMessage(
             "Jaka jest przyczyna usunięcia konta?"),
         "cancel": MessageLookupByLibrary.simpleMessage("Anuluj"),
@@ -107,6 +109,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Pomóż nam z tą informacją"),
         "logInLabel": MessageLookupByLibrary.simpleMessage("Zaloguj się"),
         "moderateStrength": MessageLookupByLibrary.simpleMessage("Umiarkowana"),
+        "moveToHiddenAlbum":
+            MessageLookupByLibrary.simpleMessage("Move to hidden album"),
         "noRecoveryKey":
             MessageLookupByLibrary.simpleMessage("Brak klucza odzyskiwania?"),
         "noRecoveryKeyNoDecryption": MessageLookupByLibrary.simpleMessage(

@@ -73,6 +73,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "addCollaborator":
             MessageLookupByLibrary.simpleMessage("Adicionar colaborador"),
         "addMore": MessageLookupByLibrary.simpleMessage("Adicione mais"),
+        "addToHiddenAlbum":
+            MessageLookupByLibrary.simpleMessage("Add to hidden album"),
         "addViewer":
             MessageLookupByLibrary.simpleMessage("Adicionar visualizador"),
         "addedAs": MessageLookupByLibrary.simpleMessage("Adicionado como"),
@@ -257,6 +259,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Dispositivo perdido?"),
         "manage": MessageLookupByLibrary.simpleMessage("Gerenciar"),
         "moderateStrength": MessageLookupByLibrary.simpleMessage("Moderada"),
+        "moveToHiddenAlbum":
+            MessageLookupByLibrary.simpleMessage("Move to hidden album"),
         "noRecoveryKey": MessageLookupByLibrary.simpleMessage(
             "Nenhuma chave de recuperação?"),
         "noRecoveryKeyNoDecryption": MessageLookupByLibrary.simpleMessage(

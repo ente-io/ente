@@ -1100,5 +1100,7 @@
   "unhiding": "Unhiding...",
   "successfullyHid": "Successfully hid",
   "successfullyUnhid": "Successfully unhid",
-  "crashReporting": "Crash reporting"
+  "crashReporting": "Crash reporting",
+  "addToHiddenAlbum": "Add to hidden album",
+  "moveToHiddenAlbum": "Move to hidden album"
 }

@@ -1095,5 +1095,7 @@
   "sharedByYou": "您共享的",
   "inviteYourFriendsToEnte": "邀请您的好友加入ente",
   "failedToDownloadVideo": "视频下载失败",
-  "crashReporting": "崩溃报告"
+  "crashReporting": "崩溃报告",
+  "addToHiddenAlbum": "Add to hidden album",
+  "moveToHiddenAlbum": "Move to hidden album"
 }
