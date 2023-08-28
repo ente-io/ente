@@ -3,7 +3,6 @@ import "dart:async";
 import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:flutter_animate/flutter_animate.dart";
-import "package:photos/core/errors.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/events/collection_updated_event.dart";
