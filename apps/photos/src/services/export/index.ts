@@ -1123,6 +1123,10 @@ class ExportService {
         return this.electronAPIs.checkExistsAndCreateDir(path);
     };
 
+    deleteFolder = (path: string, deleteFiles?: boolean) => {
+        return this.electronAPIs.deleteFolder(path, deleteFiles);
+    };
+
     exportFolderExists = (exportFolder: string) => {
         return exportFolder && this.exists(exportFolder);
     };

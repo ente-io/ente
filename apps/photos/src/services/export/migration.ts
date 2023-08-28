@@ -12,7 +12,13 @@ import {
 import { EnteFile } from 'types/file';
 import { User } from 'types/user';
 import { getNonEmptyPersonalCollections } from 'utils/collection';
-import { getExportRecordFileUID, getLivePhotoExportName } from 'utils/export';
+import {
+    getCollectionExportPath,
+    getCollectionIDFromFileUID,
+    getExportRecordFileUID,
+    getLivePhotoExportName,
+    getMetadataFolderExportPath,
+} from 'utils/export';
 import {
     getIDBasedSortedFiles,
     getPersonalFiles,
@@ -83,6 +89,14 @@ export async function migrateExport(
                 version: 4,
             });
             addLogLine('migration to version 4 complete');
+        }
+        if (exportRecord.version === 4) {
+            addLogLine('migrating export to version 5');
+            await migrationV4ToV5(exportDir, exportRecord as ExportRecord);
+            exportRecord = await exportService.updateExportRecord(exportDir, {
+                version: 5,
+            });
+            addLogLine('migration to version 5 complete');
         }
         addLogLine(`Record at latest version`);
     } catch (e) {
@@ -174,6 +188,10 @@ async function migrationV3ToV4(exportDir: string, exportRecord: ExportRecord) {
     };
 
     await exportService.updateExportRecord(exportDir, updatedExportRecord);
+}
+
+async function migrationV4ToV5(exportDir: string, exportRecord: ExportRecord) {
+    await removeCollectionExportMissingMetadataFolder(exportDir, exportRecord);
 }
 
 /*
@@ -403,5 +421,68 @@ async function addCollectionExportedRecordV1(
     } catch (e) {
         logError(e, 'addCollectionExportedRecord failed');
         throw e;
+    }
+}
+
+async function removeCollectionExportMissingMetadataFolder(
+    exportDir: string,
+    exportRecord: ExportRecord
+) {
+    if (!exportRecord?.collectionExportNames) {
+        return;
+    }
+
+    const properlyExportedCollections = Object.entries(
+        exportRecord.collectionExportNames
+    )
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        .filter(([_, collectionExportName]) =>
+            exportService.exists(
+                getMetadataFolderExportPath(
+                    getCollectionExportPath(exportDir, collectionExportName)
+                )
+            )
+        );
+
+    const properlyExportedCollectionIDs = properlyExportedCollections.map(
+        ([collectionID]) => Number(collectionID)
+    );
+
+    const missingMetadataFolderCollection = Object.entries(
+        exportRecord.collectionExportNames
+    ).filter(
+        ([collectionID]) =>
+            !properlyExportedCollectionIDs.includes(Number(collectionID))
+    );
+
+    const properlyExportedFiles = Object.entries(
+        exportRecord.fileExportNames
+    ).filter(([fileUID]) =>
+        properlyExportedCollectionIDs.includes(
+            getCollectionIDFromFileUID(fileUID)
+        )
+    );
+
+    const updatedExportRecord: ExportRecord = {
+        ...exportRecord,
+        collectionExportNames: Object.fromEntries(
+            properlyExportedCollections
+        ) as CollectionExportNames,
+        fileExportNames: Object.fromEntries(
+            properlyExportedFiles
+        ) as FileExportNames,
+    };
+    await exportService.updateExportRecord(exportDir, updatedExportRecord);
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    for (const [_, collectionExportName] of missingMetadataFolderCollection) {
+        const collectionExportPath = getCollectionExportPath(
+            exportDir,
+            collectionExportName
+        );
+        await exportService.deleteFolder(
+            getMetadataFolderExportPath(collectionExportPath),
+            true
+        );
     }
 }
