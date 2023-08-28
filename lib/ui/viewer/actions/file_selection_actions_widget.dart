@@ -214,6 +214,16 @@ class _FileSelectionActionsWidgetState
       );
     }
 
+    if (widget.type.showRemoveFromHiddenAlbum()) {
+      items.add(
+        SelectionActionButton(
+          icon: Icons.remove_outlined,
+          labelText: S.of(context).removeFromAlbum,
+          onTap: _removeFilesFromHiddenAlbum,
+        ),
+      );
+    }
+
     if (widget.type.showDeleteOption()) {
       items.add(
         SelectionActionButton(
@@ -397,6 +407,16 @@ class _FileSelectionActionsWidgetState
       widget.collection!,
       widget.selectedFiles,
       removingOthersFile,
+    );
+  }
+
+  Future<void> _removeFilesFromHiddenAlbum() async {
+    await collectionActions.showRemoveFromCollectionSheetV2(
+      context,
+      widget.collection!,
+      widget.selectedFiles,
+      false,
+      isHidden: true,
     );
   }
 

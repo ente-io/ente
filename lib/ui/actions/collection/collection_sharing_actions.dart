@@ -71,7 +71,7 @@ class CollectionActions {
           labelText: S.of(context).yesRemove,
           onTap: () async {
             // for quickLink collection, we need to trash the collection
-            if(collection.isQuickLinkCollection() && !collection.hasSharees) {
+            if (collection.isQuickLinkCollection() && !collection.hasSharees) {
               await trashCollectionKeepingPhotos(collection, context);
             } else {
               await CollectionsService.instance.disableShareUrl(collection);
@@ -364,7 +364,10 @@ class CollectionActions {
     return false;
   }
 
-  Future<void> trashCollectionKeepingPhotos(Collection collection, BuildContext bContext) async {
+  Future<void> trashCollectionKeepingPhotos(
+    Collection collection,
+    BuildContext bContext,
+  ) async {
     final List<EnteFile> files =
         await FilesDB.instance.getAllFilesCollection(collection.id);
     await moveFilesFromCurrentCollection(bContext, collection, files);
@@ -409,8 +412,9 @@ class CollectionActions {
   Future<void> moveFilesFromCurrentCollection(
     BuildContext context,
     Collection collection,
-    Iterable<EnteFile> files,
-  ) async {
+    Iterable<EnteFile> files, {
+    bool isHidden = false,
+  }) async {
     final int currentUserID = Configuration.instance.getUserID()!;
     final isCollectionOwner = collection.owner!.id == currentUserID;
     final FilesSplit split = FilesSplit.split(
@@ -480,9 +484,15 @@ class CollectionActions {
     }
     // Move the remaining files to uncategorized collection
     if (pendingAssignMap.isNotEmpty) {
-      final Collection uncategorizedCollection =
-          await collectionsService.getUncategorizedCollection();
-      final int toCollectionID = uncategorizedCollection.id;
+      late final int toCollectionID;
+      if (isHidden) {
+        toCollectionID = collectionsService.cachedDefaultHiddenCollection!.id;
+      } else {
+        final Collection uncategorizedCollection =
+            await collectionsService.getUncategorizedCollection();
+        toCollectionID = uncategorizedCollection.id;
+      }
+
       for (MapEntry<int, EnteFile> entry in pendingAssignMap.entries) {
         final file = entry.value;
         if (pendingAssignMap.containsKey(file.uploadedFileID)) {
@@ -507,7 +517,8 @@ class CollectionActions {
       );
     }
 
-    for (MapEntry<int, List<EnteFile>> entry in destCollectionToFilesMap.entries) {
+    for (MapEntry<int, List<EnteFile>> entry
+        in destCollectionToFilesMap.entries) {
       await collectionsService.move(entry.key, collection.id, entry.value);
     }
   }
