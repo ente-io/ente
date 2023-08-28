@@ -669,6 +669,9 @@ class ExportService {
                     await this.electronAPIs.checkExistsAndCreateDir(
                         collectionExportPath
                     );
+                    await this.electronAPIs.checkExistsAndCreateDir(
+                        getMetadataFolderExportPath(collectionExportPath)
+                    );
                     const fileExportName = await this.downloadAndSave(
                         collectionExportPath,
                         file
