@@ -1,7 +1,6 @@
 import "dart:async";
 
 import 'package:flutter/material.dart';
-import "package:fluttertoast/fluttertoast.dart";
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import "package:photos/core/event_bus.dart";
@@ -121,7 +120,6 @@ class AlbumVerticalListWidget extends StatelessWidget {
       await showToast(
         context,
         S.of(context).createAlbumActionHint,
-        toastLength: Toast.LENGTH_LONG,
       );
       Bus.instance.fire(
         TabChangedEvent(

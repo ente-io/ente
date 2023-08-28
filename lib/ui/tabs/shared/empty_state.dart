@@ -1,5 +1,4 @@
 import "package:flutter/material.dart";
-import "package:fluttertoast/fluttertoast.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/tab_changed_event.dart";
 import "package:photos/generated/l10n.dart";
@@ -143,7 +142,6 @@ class OutgoingAlbumEmptyState extends StatelessWidget {
               await showToast(
                 context,
                 S.of(context).shareAlbumHint,
-                toastLength: Toast.LENGTH_LONG,
               );
               Bus.instance.fire(
                 TabChangedEvent(1, TabChangedEventSource.collectionsPage),
