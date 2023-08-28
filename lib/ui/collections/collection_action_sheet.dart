@@ -247,11 +247,14 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
   }
 
   Future<List<Collection>> _getCollectionsWithThumbnail() async {
+    final bool includeUncategorized =
+        widget.actionType == CollectionActionType.restoreFiles;
     final List<Collection> collections =
         CollectionsService.instance.getCollectionsForUI(
       // in collections where user is a collaborator, only addTo and remove
       // action can to be performed
       includeCollab: widget.actionType == CollectionActionType.addFiles,
+          includeUncategorized: includeUncategorized,
     );
     collections.sort((first, second) {
       return compareAsciiLowerCaseNatural(
@@ -261,10 +264,15 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
     });
     final List<Collection> pinned = [];
     final List<Collection> unpinned = [];
+    // show uncategorized collection only for restore files action
+    Collection? uncategorized;
     for (final collection in collections) {
       if (collection.isQuickLinkCollection() ||
           collection.type == CollectionType.favorites ||
           collection.type == CollectionType.uncategorized) {
+        if(collection.type == CollectionType.uncategorized && includeUncategorized) {
+          uncategorized = collection;
+        }
         continue;
       }
       if (collection.isPinned) {
@@ -273,7 +281,7 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
         unpinned.add(collection);
       }
     }
-    return pinned + unpinned;
+    return pinned + unpinned + (uncategorized != null ? [uncategorized] : []);
   }
 
   void _removeIncomingCollections(List<Collection> items) {
