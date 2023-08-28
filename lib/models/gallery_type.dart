@@ -233,6 +233,11 @@ extension GalleyTypeExtension on GalleryType {
     return this == GalleryType.hiddenSection ||
         this == GalleryType.hiddenOwnedCollection;
   }
+
+  bool showAddtoHiddenAlbum() {
+    return this == GalleryType.hiddenSection ||
+        this == GalleryType.hiddenOwnedCollection;
+  }
 }
 
 extension GalleryAppBarExtn on GalleryType {

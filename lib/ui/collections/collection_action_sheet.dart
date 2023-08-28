@@ -27,6 +27,7 @@ enum CollectionActionType {
   unHide,
   shareCollection,
   collectPhotos,
+  addToHiddenAlbum,
   moveToHiddenCollection,
 }
 
@@ -54,6 +55,8 @@ String _actionName(
       break;
     case CollectionActionType.collectPhotos:
       text = S.of(context).share;
+    case CollectionActionType.addToHiddenAlbum:
+      text = "Add to hidden album";
     case CollectionActionType.moveToHiddenCollection:
       text = "Move to hidden album";
       break;
@@ -109,8 +112,17 @@ class CollectionActionSheet extends StatefulWidget {
 }
 
 class _CollectionActionSheetState extends State<CollectionActionSheet> {
+  late final bool _showOnlyHiddenCollections;
   static const int cancelButtonSize = 80;
   String _searchQuery = "";
+
+  @override
+  void initState() {
+    super.initState();
+    _showOnlyHiddenCollections =
+        widget.actionType == CollectionActionType.moveToHiddenCollection ||
+            widget.actionType == CollectionActionType.addToHiddenAlbum;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -250,7 +262,7 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
   }
 
   Future<List<Collection>> _getCollections() async {
-    if (widget.actionType == CollectionActionType.moveToHiddenCollection) {
+    if (_showOnlyHiddenCollections) {
       final hiddenCollections = CollectionsService.instance
           .getHiddenCollections(includeDefaultHidden: false);
       hiddenCollections.sort((first, second) {

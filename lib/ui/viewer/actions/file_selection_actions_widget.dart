@@ -171,6 +171,17 @@ class _FileSelectionActionsWidgetState
         );
       }
     }
+
+    if (widget.type.showAddtoHiddenAlbum()) {
+      items.add(
+        SelectionActionButton(
+          icon: Icons.add_outlined,
+          labelText: S.of(context).addToAlbum,
+          onTap: _addToHiddenAlbum,
+        ),
+      );
+    }
+
     if (widget.type.showMoveToAlbum()) {
       items.add(
         SelectionActionButton(
@@ -178,6 +189,16 @@ class _FileSelectionActionsWidgetState
           labelText: S.of(context).moveToAlbum,
           onTap: anyUploadedFiles ? _moveFiles : null,
           shouldShow: ownedFilesCount > 0,
+        ),
+      );
+    }
+
+    if (widget.type.showMovetoHiddenAlbum()) {
+      items.add(
+        SelectionActionButton(
+          icon: Icons.arrow_forward_outlined,
+          labelText: S.of(context).moveToAlbum,
+          onTap: _moveFilesToHiddenAlbum,
         ),
       );
     }
@@ -283,16 +304,6 @@ class _FileSelectionActionsWidgetState
       );
     }
 
-    if (widget.type.showMovetoHiddenAlbum()) {
-      items.add(
-        SelectionActionButton(
-          icon: Icons.arrow_forward_outlined,
-          labelText: S.of(context).moveToAlbum,
-          onTap: _moveFilesToHiddenAlbum,
-        ),
-      );
-    }
-
     items.add(
       SelectionActionButton(
         icon: Icons.grid_view_outlined,
@@ -356,6 +367,14 @@ class _FileSelectionActionsWidgetState
           .unSelectAll(split.ownedByOtherUsers.toSet(), skipNotify: true);
     }
     showCollectionActionSheet(context, selectedFiles: widget.selectedFiles);
+  }
+
+  Future<void> _addToHiddenAlbum() async {
+    showCollectionActionSheet(
+      context,
+      selectedFiles: widget.selectedFiles,
+      actionType: CollectionActionType.addToHiddenAlbum,
+    );
   }
 
   Future<void> _onDeleteClick() async {

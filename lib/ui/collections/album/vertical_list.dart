@@ -207,6 +207,10 @@ class AlbumVerticalListWidget extends StatelessWidget {
         toastMessage = S.of(context).movedSuccessfullyTo(item.displayName);
         shouldNavigateToCollection = true;
         hasVerifiedLock = true;
+      } else if (actionType == CollectionActionType.addToHiddenAlbum) {
+        toastMessage = S.of(context).addedSuccessfullyTo(item.displayName);
+        shouldNavigateToCollection = true;
+        hasVerifiedLock = true;
       } else {
         toastMessage = "";
       }
@@ -250,6 +254,8 @@ class AlbumVerticalListWidget extends StatelessWidget {
         return _createCollaborativeLink(context, collection);
       case CollectionActionType.moveToHiddenCollection:
         return _moveFilesToCollection(context, collection.id);
+      case CollectionActionType.addToHiddenAlbum:
+        return _addToCollection(context, collection.id, showProgressDialog);
     }
   }
 
