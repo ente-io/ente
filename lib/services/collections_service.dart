@@ -305,6 +305,7 @@ class CollectionsService {
   List<Collection> getCollectionsForUI({
     bool includedShared = false,
     bool includeCollab = false,
+    bool includeUncategorized = false,
   }) {
     final Set<CollectionParticipantRole> allowedRoles = {
       CollectionParticipantRole.owner,
@@ -320,7 +321,8 @@ class CollectionsService {
         .where(
           (c) =>
               !c.isDeleted &&
-              c.type != CollectionType.uncategorized &&
+              (includeUncategorized ||
+                  c.type != CollectionType.uncategorized) &&
               !c.isHidden() &&
               allowedRoles.contains(c.getRole(userID)),
         )
