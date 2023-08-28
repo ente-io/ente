@@ -727,6 +727,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Grouper les photos à proximité"),
         "hidden": MessageLookupByLibrary.simpleMessage("Masqué"),
         "hide": MessageLookupByLibrary.simpleMessage("Masquer"),
+        "hiding": MessageLookupByLibrary.simpleMessage("Masquage en cours..."),
         "hostedAtOsmFrance":
             MessageLookupByLibrary.simpleMessage("Hébergé chez OSM France"),
         "howItWorks":
@@ -1203,6 +1204,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "sharedWithYou":
             MessageLookupByLibrary.simpleMessage("Partagé avec vous"),
         "sharing": MessageLookupByLibrary.simpleMessage("Partage..."),
+        "showMemories":
+            MessageLookupByLibrary.simpleMessage("Montrer les souvenirs"),
         "signUpTerms": MessageLookupByLibrary.simpleMessage(
             "J\'accepte les <u-terms>conditions d\'utilisation</u-terms> et la <u-policy>politique de confidentialité</u-policy>"),
         "singleFileDeleteFromDevice": m47,
@@ -1264,8 +1267,12 @@ class MessageLookup extends MessageLookupByLibrary {
         "success": MessageLookupByLibrary.simpleMessage("Succès"),
         "successfullyArchived":
             MessageLookupByLibrary.simpleMessage("Archivé avec succès"),
+        "successfullyHid":
+            MessageLookupByLibrary.simpleMessage("Masquage réussi"),
         "successfullyUnarchived":
             MessageLookupByLibrary.simpleMessage("Désarchivé avec succès"),
+        "successfullyUnhid":
+            MessageLookupByLibrary.simpleMessage("Masquage réussi"),
         "suggestFeatures": MessageLookupByLibrary.simpleMessage(
             "Suggérer des fonctionnalités"),
         "support": MessageLookupByLibrary.simpleMessage("Support"),
@@ -1361,6 +1368,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "unhide": MessageLookupByLibrary.simpleMessage("Dévoiler"),
         "unhideToAlbum":
             MessageLookupByLibrary.simpleMessage("Afficher dans l\'album"),
+        "unhiding":
+            MessageLookupByLibrary.simpleMessage("Démasquage en cours..."),
         "unhidingFilesToAlbum": MessageLookupByLibrary.simpleMessage(
             "Démasquage des fichiers vers l\'album"),
         "unlock": MessageLookupByLibrary.simpleMessage("Déverrouiller"),

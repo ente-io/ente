@@ -3,7 +3,7 @@ description: ente photos application
 
 # The following defines the version and build number for your application.
 # A version number is three numbers separated by dots, like 1.2.43
-# followed by an optional build number separated by a +.
+# followed by an optional build number separated by a +.q
 # Both the version and the builder number may be overridden in flutter
 # build by specifying --build-name and --build-number, respectively.
 # In Android, build-name is used as versionName while build-number used as versionCode.
@@ -12,7 +12,7 @@ description: ente photos application
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 
-version: 0.7.83+483
+version: 0.7.84+484
 
 environment:
   sdk: ">=3.0.0 <4.0.0"
@@ -32,7 +32,11 @@ dependencies:
   collection: # dart
   computer:
     git: "https://github.com/ente-io/computer.git"
-  connectivity_plus: ^3.0.3
+  connectivity_plus:
+    git:
+      url: https://github.com/ente-io/plus_plugins.git
+      ref: check_mobile_first
+      path: packages/connectivity_plus/connectivity_plus/
   crypto: ^3.0.2
   cupertino_icons: ^1.0.0
   defer_pointer: ^0.0.2

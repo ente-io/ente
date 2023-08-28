@@ -172,15 +172,6 @@ class SyncService {
     _doSync().ignore();
   }
 
-  void onFoldersSet(Set<String> paths) {
-    _uploader.removeFromQueueWhere(
-      (file) {
-        return !paths.contains(file.deviceFolder);
-      },
-      UserCancelledUploadError(),
-    );
-  }
-
   void onDeviceCollectionSet(Set<int> collectionIDs) {
     _uploader.removeFromQueueWhere(
       (file) {
@@ -196,15 +187,6 @@ class SyncService {
         return file.fileType == FileType.video;
       },
       UserCancelledUploadError(),
-    );
-  }
-
-  Future<Response> deleteFilesOnServer(List<int> fileIDs) async {
-    return await _enteDio.post(
-      "/files/delete",
-      data: {
-        "fileIDs": fileIDs,
-      },
     );
   }
 

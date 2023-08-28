@@ -7,6 +7,13 @@ enum InvalidReason {
   livePhotoVideoMissing,
   thumbnailMissing,
   unknown,
+
+}
+extension InvalidReasonExn on InvalidReason {
+  bool get isLivePhotoErr =>
+      this == InvalidReason.livePhotoToImageTypeChanged ||
+      this == InvalidReason.imageToLivePhotoTypeChanged ||
+      this == InvalidReason.livePhotoVideoMissing;
 }
 
 class InvalidFileError extends ArgumentError {

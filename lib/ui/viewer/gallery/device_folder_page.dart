@@ -213,7 +213,7 @@ class _BackupHeaderWidgetState extends State<BackupHeaderWidget> {
     for (EnteFile file in deviceCollectionFiles) {
       final String? ignoreID =
           IgnoredFilesService.instance.getIgnoredIDForFile(file);
-      if (ignoreID != null && allIgnoredIDs.containsKey(ignoreID!)) {
+      if (ignoreID != null && allIgnoredIDs.containsKey(ignoreID)) {
         return true;
       }
     }

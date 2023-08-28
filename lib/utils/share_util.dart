@@ -144,6 +144,7 @@ Future<List<EnteFile>> convertIncomingSharedMediaToFile(
       }
     }
     enteFile.modificationTime = enteFile.creationTime;
+    enteFile.metadataVersion = EnteFile.kCurrentMetadataVersion;
     localFiles.add(enteFile);
   }
   return localFiles;
@@ -156,6 +157,7 @@ Future<List<EnteFile>> convertPicketAssets(
   final List<EnteFile> localFiles = [];
   for (var asset in pickedAssets) {
     final enteFile = await EnteFile.fromAsset('', asset);
+    enteFile.collectionID = collectionID;
     localFiles.add(enteFile);
   }
   return localFiles;
