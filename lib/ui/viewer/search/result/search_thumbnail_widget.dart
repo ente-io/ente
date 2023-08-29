@@ -24,7 +24,7 @@ class SearchThumbnailWidget extends StatelessWidget {
           borderRadius: BorderRadius.circular(3),
           child: file != null
               ? ThumbnailWidget(
-                  file,
+                  file!,
                 )
               : const NoThumbnailWidget(),
         ),

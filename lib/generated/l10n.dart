@@ -5825,6 +5825,16 @@ class S {
     );
   }
 
+  /// `Press and hold on the image to  play video`
+  String get pressAndHoldToPlayVideoDetailed {
+    return Intl.message(
+      'Press and hold on the image to  play video',
+      name: 'pressAndHoldToPlayVideoDetailed',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Download failed`
   String get downloadFailed {
     return Intl.message(

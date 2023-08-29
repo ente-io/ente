@@ -1,24 +1,23 @@
 import "package:flutter/material.dart";
 import "package:photos/generated/l10n.dart";
+import "package:photos/models/file/extensions/file_props.dart";
 import 'package:photos/models/file/file.dart';
 import "package:photos/services/collections_service.dart";
 import "package:photos/theme/ente_theme.dart";
 
 class AddedByWidget extends StatelessWidget {
   final EnteFile file;
-  final int currentUserID;
-  const AddedByWidget(this.file, this.currentUserID, {super.key});
+
+  const AddedByWidget(this.file, {super.key});
 
   @override
   Widget build(BuildContext context) {
-    if (file.uploadedFileID == null) {
+    if (file.isUploaded) {
       return const SizedBox.shrink();
     }
     String? addedBy;
-    if (file.ownerID == currentUserID) {
-      if (file.pubMagicMetadata!.uploaderName != null) {
-        addedBy = file.pubMagicMetadata!.uploaderName;
-      }
+    if (file.isOwner && file.isCollect) {
+      addedBy = file.uploaderName;
     } else {
       final fileOwner = CollectionsService.instance
           .getFileOwner(file.ownerID!, file.collectionID);

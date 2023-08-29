@@ -1,5 +1,7 @@
+import "package:photos/core/configuration.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/file/file_type.dart";
+import "package:photos/models/file/trash_file.dart";
 
 extension FilePropsExtn on EnteFile {
   bool get isLivePhoto => fileType == FileType.livePhoto;
@@ -8,7 +10,15 @@ extension FilePropsExtn on EnteFile {
 
   bool get isLiveOrMotionPhoto => isLivePhoto || isMotionPhoto;
 
-  bool isOwner(int userID) => (ownerID == null) || (ownerID! == userID);
+  bool get isOwner =>
+      (ownerID == null) || (ownerID! == Configuration.instance.getUserID()!);
 
-  bool canEditMetaInfo(int userID) => isUploaded && isOwner(userID);
+  bool get canEditMetaInfo => isUploaded && isOwner;
+
+  bool get isTrash => this is TrashFile;
+
+  // Return true if the file was uploaded via collect photos workflow
+  bool get isCollect => uploaderName != null;
+
+  String? get uploaderName => pubMagicMetadata?.uploaderName;
 }

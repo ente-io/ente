@@ -5,9 +5,9 @@ import 'package:chewie/chewie.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
-import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
 import "package:photos/generated/l10n.dart";
+import "package:photos/models/file/extensions/file_props.dart";
 import 'package:photos/models/file/file.dart';
 import "package:photos/services/feature_flag_service.dart";
 import 'package:photos/services/files_service.dart';
@@ -76,8 +76,7 @@ class _VideoWidgetState extends State<VideoWidget> {
   }
 
   void _setFileSizeIfNull() {
-    if (widget.file.fileSize == null &&
-        widget.file.ownerID == Configuration.instance.getUserID()) {
+    if (widget.file.fileSize == null && widget.file.canEditMetaInfo) {
       FilesService.instance
           .getFileSize(widget.file.uploadedFileID!)
           .then((value) {
