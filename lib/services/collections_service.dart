@@ -196,11 +196,21 @@ class CollectionsService {
         .toList();
   }
 
-  List<Collection> getHiddenCollections() {
-    return _collectionIDToCollections.values
-        .toList()
-        .where((element) => element.isHidden())
-        .toList();
+  List<Collection> getHiddenCollections({bool includeDefaultHidden = true}) {
+    if (includeDefaultHidden) {
+      return _collectionIDToCollections.values
+          .toList()
+          .where((element) => element.isHidden())
+          .toList();
+    } else {
+      return _collectionIDToCollections.values
+          .toList()
+          .where(
+            (element) => (element.isHidden() &&
+                element.id != cachedDefaultHiddenCollection?.id),
+          )
+          .toList();
+    }
   }
 
   Set<int> getHiddenCollectionIds() {
@@ -904,8 +914,9 @@ class CollectionsService {
       collection.publicURLs?.add(PublicURL.fromMap(response.data["result"]));
       await _db.insert(List.from([collection]));
       _collectionIDToCollections[collection.id] = collection;
-      Bus.instance
-          .fire(CollectionUpdatedEvent(collection.id, <EnteFile>[], "updateUrl"));
+      Bus.instance.fire(
+        CollectionUpdatedEvent(collection.id, <EnteFile>[], "updateUrl"),
+      );
     } on DioError catch (e) {
       if (e.response?.statusCode == 402) {
         throw SharingNotPermittedForFreeAccountsError();
@@ -1355,7 +1366,10 @@ class CollectionsService {
     }
   }
 
-  Future<void> removeFromCollection(int collectionID, List<EnteFile> files) async {
+  Future<void> removeFromCollection(
+    int collectionID,
+    List<EnteFile> files,
+  ) async {
     final params = <String, dynamic>{};
     params["collectionID"] = collectionID;
     final batchedFiles = files.chunks(batchSize);

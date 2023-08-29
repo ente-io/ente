@@ -10,6 +10,7 @@ import 'package:photos/models/collection/collection.dart';
 import 'package:photos/models/collection/collection_items.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/collections_service.dart';
+import "package:photos/services/hidden_service.dart";
 import 'package:photos/services/remote_sync_service.dart';
 import "package:photos/ui/actions/collection/collection_file_actions.dart";
 import "package:photos/ui/actions/collection/collection_sharing_actions.dart";
@@ -43,7 +44,8 @@ class AlbumVerticalListWidget extends StatelessWidget {
   }) : super(key: key);
 
   final _logger = Logger("CollectionsListWidgetState");
-  final CollectionActions _collectionActions = CollectionActions(CollectionsService.instance);
+  final CollectionActions _collectionActions =
+      CollectionActions(CollectionsService.instance);
 
   @override
   Widget build(BuildContext context) {
@@ -132,7 +134,17 @@ class AlbumVerticalListWidget extends StatelessWidget {
 
   Future<void> _nameAlbum(BuildContext context, String albumName) async {
     if (albumName.isNotEmpty) {
-      final collection = await _createAlbum(albumName);
+      bool hasVerifiedLock = false;
+      late final Collection? collection;
+
+      if (actionType == CollectionActionType.moveToHiddenCollection) {
+        collection =
+            await CollectionsService.instance.createHiddenAlbum(albumName);
+        hasVerifiedLock = true;
+      } else {
+        collection = await _createAlbum(albumName);
+      }
+
       if (collection != null) {
         if (await _runCollectionAction(
           context,
@@ -150,7 +162,11 @@ class AlbumVerticalListWidget extends StatelessWidget {
               "Album '" + albumName + "' created.",
             );
           }
-          _navigateToCollection(context, collection);
+          _navigateToCollection(
+            context,
+            collection,
+            hasVerifiedLock: hasVerifiedLock,
+          );
         }
       }
     }
@@ -174,6 +190,8 @@ class AlbumVerticalListWidget extends StatelessWidget {
     if (await _runCollectionAction(context, item)) {
       late final String toastMessage;
       bool shouldNavigateToCollection = false;
+      bool hasVerifiedLock = false;
+
       if (actionType == CollectionActionType.addFiles) {
         toastMessage = S.of(context).addedSuccessfullyTo(item.displayName);
         shouldNavigateToCollection = true;
@@ -182,6 +200,14 @@ class AlbumVerticalListWidget extends StatelessWidget {
           actionType == CollectionActionType.unHide) {
         toastMessage = S.of(context).movedSuccessfullyTo(item.displayName);
         shouldNavigateToCollection = true;
+      } else if (actionType == CollectionActionType.moveToHiddenCollection) {
+        toastMessage = S.of(context).movedSuccessfullyTo(item.displayName);
+        shouldNavigateToCollection = true;
+        hasVerifiedLock = true;
+      } else if (actionType == CollectionActionType.addToHiddenAlbum) {
+        toastMessage = S.of(context).addedSuccessfullyTo(item.displayName);
+        shouldNavigateToCollection = true;
+        hasVerifiedLock = true;
       } else {
         toastMessage = "";
       }
@@ -195,6 +221,7 @@ class AlbumVerticalListWidget extends StatelessWidget {
         _navigateToCollection(
           context,
           item,
+          hasVerifiedLock: hasVerifiedLock,
         );
       }
     }
@@ -222,15 +249,24 @@ class AlbumVerticalListWidget extends StatelessWidget {
         return _showShareCollectionPage(context, collection);
       case CollectionActionType.collectPhotos:
         return _createCollaborativeLink(context, collection);
+      case CollectionActionType.moveToHiddenCollection:
+        return _moveFilesToCollection(context, collection.id);
+      case CollectionActionType.addToHiddenAlbum:
+        return _addToCollection(context, collection.id, showProgressDialog);
     }
   }
 
-  void _navigateToCollection(BuildContext context, Collection collection) {
+  void _navigateToCollection(
+    BuildContext context,
+    Collection collection, {
+    bool hasVerifiedLock = false,
+  }) {
     Navigator.pop(context);
     routeToPage(
       context,
       CollectionPage(
         CollectionWithThumbnail(collection, null),
+        hasVerifiedLock: hasVerifiedLock,
       ),
     );
   }
@@ -344,9 +380,14 @@ class AlbumVerticalListWidget extends StatelessWidget {
     BuildContext context,
     int toCollectionID,
   ) async {
-    final String message = actionType == CollectionActionType.moveFiles
-        ? S.of(context).movingFilesToAlbum
-        : S.of(context).unhidingFilesToAlbum;
+    late final String message;
+    if (actionType == CollectionActionType.moveFiles ||
+        actionType == CollectionActionType.moveToHiddenCollection) {
+      message = S.of(context).movingFilesToAlbum;
+    } else {
+      message = S.of(context).unhidingFilesToAlbum;
+    }
+
     final dialog = createProgressDialog(context, message, isDismissible: true);
     await dialog.show();
     try {

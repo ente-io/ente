@@ -7644,6 +7644,26 @@ class S {
       args: [],
     );
   }
+
+  /// `Add to hidden album`
+  String get addToHiddenAlbum {
+    return Intl.message(
+      'Add to hidden album',
+      name: 'addToHiddenAlbum',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Move to hidden album`
+  String get moveToHiddenAlbum {
+    return Intl.message(
+      'Move to hidden album',
+      name: 'moveToHiddenAlbum',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

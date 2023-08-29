@@ -228,6 +228,20 @@ extension GalleyTypeExtension on GalleryType {
   bool showPermanentlyDeleteOption() {
     return this == GalleryType.trash;
   }
+
+  bool showMovetoHiddenAlbum() {
+    return this == GalleryType.hiddenSection ||
+        this == GalleryType.hiddenOwnedCollection;
+  }
+
+  bool showAddtoHiddenAlbum() {
+    return this == GalleryType.hiddenSection ||
+        this == GalleryType.hiddenOwnedCollection;
+  }
+
+  bool showRemoveFromHiddenAlbum() {
+    return this == GalleryType.hiddenOwnedCollection;
+  }
 }
 
 extension GalleryAppBarExtn on GalleryType {
@@ -289,7 +303,8 @@ extension GalleryAppBarExtn on GalleryType {
   }
 
   bool canHide() {
-    return this == GalleryType.ownedCollection || this == GalleryType.hiddenOwnedCollection;
+    return this == GalleryType.ownedCollection ||
+        this == GalleryType.hiddenOwnedCollection;
   }
 
   bool canDelete() {

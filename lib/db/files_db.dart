@@ -580,7 +580,8 @@ class FilesDB {
       limit: limit,
     );
     final files = convertToFiles(results);
-    final List<EnteFile> filteredFiles = await applyDBFilters(files, filterOptions);
+    final List<EnteFile> filteredFiles =
+        await applyDBFilters(files, filterOptions);
     return FileLoadResult(filteredFiles, files.length == limit);
   }
 
@@ -1515,7 +1516,8 @@ class FilesDB {
       limit: limit,
     );
     final files = convertToFiles(results);
-    final List<EnteFile> filteredFiles = await applyDBFilters(files, filterOptions);
+    final List<EnteFile> filteredFiles =
+        await applyDBFilters(files, filterOptions);
     return FileLoadResult(filteredFiles, files.length == limit);
   }
 

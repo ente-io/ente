@@ -29,8 +29,9 @@ extension CollectionFileActions on CollectionActions {
     BuildContext bContext,
     Collection collection,
     SelectedFiles selectedFiles,
-    bool removingOthersFile,
-  ) async {
+    bool removingOthersFile, {
+    bool isHidden = false,
+  }) async {
     final actionResult = await showActionSheet(
       context: bContext,
       buttons: [
@@ -47,6 +48,7 @@ extension CollectionFileActions on CollectionActions {
                 bContext,
                 collection,
                 selectedFiles.files,
+                isHidden: isHidden,
               );
             } catch (e) {
               logger.severe("Failed to move files", e);
@@ -159,7 +161,7 @@ extension CollectionFileActions on CollectionActions {
             files.add(uploadedFile);
           }
         } else {
-          for(final file in filesPendingUpload) {
+          for (final file in filesPendingUpload) {
             file.collectionID = collectionID;
           }
           // filesPendingUpload might be getting ignored during auto-upload

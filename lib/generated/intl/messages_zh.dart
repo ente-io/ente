@@ -203,6 +203,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "addSelected": MessageLookupByLibrary.simpleMessage("添加所选项"),
         "addToAlbum": MessageLookupByLibrary.simpleMessage("添加到相册"),
         "addToEnte": MessageLookupByLibrary.simpleMessage("添加到 ente"),
+        "addToHiddenAlbum":
+            MessageLookupByLibrary.simpleMessage("Add to hidden album"),
         "addViewer": MessageLookupByLibrary.simpleMessage("添加查看者"),
         "addedAs": MessageLookupByLibrary.simpleMessage("已添加为"),
         "addedBy": m1,
@@ -702,6 +704,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "monthly": MessageLookupByLibrary.simpleMessage("每月"),
         "moveItem": m29,
         "moveToAlbum": MessageLookupByLibrary.simpleMessage("移动到相册"),
+        "moveToHiddenAlbum":
+            MessageLookupByLibrary.simpleMessage("Move to hidden album"),
         "movedSuccessfullyTo": m30,
         "movedToTrash": MessageLookupByLibrary.simpleMessage("已移至回收站"),
         "movingFilesToAlbum":
