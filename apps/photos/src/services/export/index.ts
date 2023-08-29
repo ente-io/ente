@@ -789,24 +789,28 @@ class ExportService {
                             addLogLine(
                                 `moving image file ${imageExportPath} to trash folder`
                             );
-                            await this.electronAPIs.moveFile(
-                                imageExportPath,
-                                getTrashedFileExportPath(
-                                    exportDir,
-                                    imageExportPath
-                                )
-                            );
+                            if (this.exists(imageExportPath)) {
+                                await this.electronAPIs.moveFile(
+                                    imageExportPath,
+                                    getTrashedFileExportPath(
+                                        exportDir,
+                                        imageExportPath
+                                    )
+                                );
+                            }
 
                             const imageMetadataFileExportPath =
                                 getMetadataFileExportPath(imageExportPath);
 
-                            await this.electronAPIs.moveFile(
-                                imageMetadataFileExportPath,
-                                getTrashedFileExportPath(
-                                    exportDir,
-                                    imageMetadataFileExportPath
-                                )
-                            );
+                            if (this.exists(imageMetadataFileExportPath)) {
+                                await this.electronAPIs.moveFile(
+                                    imageMetadataFileExportPath,
+                                    getTrashedFileExportPath(
+                                        exportDir,
+                                        imageMetadataFileExportPath
+                                    )
+                                );
+                            }
 
                             const videoExportPath = getFileExportPath(
                                 collectionExportPath,
@@ -815,22 +819,26 @@ class ExportService {
                             addLogLine(
                                 `moving video file ${videoExportPath} to trash folder`
                             );
-                            await this.electronAPIs.moveFile(
-                                videoExportPath,
-                                getTrashedFileExportPath(
-                                    exportDir,
-                                    videoExportPath
-                                )
-                            );
+                            if (this.exists(videoExportPath)) {
+                                await this.electronAPIs.moveFile(
+                                    videoExportPath,
+                                    getTrashedFileExportPath(
+                                        exportDir,
+                                        videoExportPath
+                                    )
+                                );
+                            }
                             const videoMetadataFileExportPath =
                                 getMetadataFileExportPath(videoExportPath);
-                            await this.electronAPIs.moveFile(
-                                videoMetadataFileExportPath,
-                                getTrashedFileExportPath(
-                                    exportDir,
-                                    videoMetadataFileExportPath
-                                )
-                            );
+                            if (this.exists(videoMetadataFileExportPath)) {
+                                await this.electronAPIs.moveFile(
+                                    videoMetadataFileExportPath,
+                                    getTrashedFileExportPath(
+                                        exportDir,
+                                        videoMetadataFileExportPath
+                                    )
+                                );
+                            }
                         } else {
                             const fileExportPath = getFileExportPath(
                                 collectionExportPath,
@@ -843,19 +851,23 @@ class ExportService {
                             addLogLine(
                                 `moving file ${fileExportPath} to ${trashedFilePath} trash folder`
                             );
-                            await this.electronAPIs.moveFile(
-                                fileExportPath,
-                                trashedFilePath
-                            );
+                            if (this.exists(fileExportPath)) {
+                                await this.electronAPIs.moveFile(
+                                    fileExportPath,
+                                    trashedFilePath
+                                );
+                            }
                             const metadataFileExportPath =
                                 getMetadataFileExportPath(fileExportPath);
-                            await this.electronAPIs.moveFile(
-                                metadataFileExportPath,
-                                getTrashedFileExportPath(
-                                    exportDir,
-                                    metadataFileExportPath
-                                )
-                            );
+                            if (this.exists(metadataFileExportPath)) {
+                                await this.electronAPIs.moveFile(
+                                    metadataFileExportPath,
+                                    getTrashedFileExportPath(
+                                        exportDir,
+                                        metadataFileExportPath
+                                    )
+                                );
+                            }
                         }
                     } catch (e) {
                         await this.addFileExportedRecord(
