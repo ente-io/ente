@@ -445,21 +445,14 @@ async function removeCollectionExportMissingMetadataFolder(
         );
 
     const properlyExportedCollectionIDs = properlyExportedCollections.map(
-        ([collectionID]) => Number(collectionID)
-    );
-
-    const missingMetadataFolderCollection = Object.entries(
-        exportRecord.collectionExportNames
-    ).filter(
-        ([collectionID]) =>
-            !properlyExportedCollectionIDs.includes(Number(collectionID))
+        ([collectionID]) => collectionID
     );
 
     const properlyExportedFiles = Object.entries(
         exportRecord.fileExportNames
     ).filter(([fileUID]) =>
         properlyExportedCollectionIDs.includes(
-            getCollectionIDFromFileUID(fileUID)
+            getCollectionIDFromFileUID(fileUID).toString()
         )
     );
 
@@ -473,16 +466,4 @@ async function removeCollectionExportMissingMetadataFolder(
         ) as FileExportNames,
     };
     await exportService.updateExportRecord(exportDir, updatedExportRecord);
-
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    for (const [_, collectionExportName] of missingMetadataFolderCollection) {
-        const collectionExportPath = getCollectionExportPath(
-            exportDir,
-            collectionExportName
-        );
-        await exportService.deleteFolder(
-            getMetadataFolderExportPath(collectionExportPath),
-            true
-        );
-    }
 }
