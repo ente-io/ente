@@ -695,29 +695,11 @@ class ExportService {
                     await this.electronAPIs.checkExistsAndCreateDir(
                         getMetadataFolderExportPath(collectionExportPath)
                     );
-                    const fileExportName = getUniqueFileExportName(
-                        collectionExportPath,
-                        file.metadata.title
-                    );
-                    const fileUID = getExportRecordFileUID(file);
-                    await this.addFileExportedRecord(
+                    await this.downloadAndSave(
                         exportDir,
-                        fileUID,
-                        fileExportName
+                        collectionExportPath,
+                        file
                     );
-                    try {
-                        await this.downloadAndSave(
-                            collectionExportPath,
-                            fileExportName,
-                            file
-                        );
-                    } catch (e) {
-                        await this.removeFileExportedRecord(
-                            exportDir,
-                            getExportRecordFileUID(file)
-                        );
-                        throw e;
-                    }
                     incrementSuccess();
                     addLogLine(
                         `exporting file ${file.metadata.title} with id ${
@@ -1067,10 +1049,10 @@ class ExportService {
     }
 
     async downloadAndSave(
+        exportDir: string,
         collectionExportPath: string,
-        fileExportName: string,
         file: EnteFile
-    ): Promise<string> {
+    ): Promise<void> {
         try {
             let fileStream = await downloadManager.downloadFile(file);
             const fileType = getFileExtension(file.metadata.title);
@@ -1090,23 +1072,41 @@ class ExportService {
                 fileStream = updatedFileBlob.stream();
             }
             if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
-                return await this.exportLivePhoto(
+                await this.exportLivePhoto(
+                    exportDir,
                     collectionExportPath,
                     fileStream,
                     file
                 );
             } else {
-                await this.saveMetadataFile(
+                const fileExportName = getUniqueFileExportName(
                     collectionExportPath,
-                    fileExportName,
-                    file
+                    file.metadata.title
                 );
-                await this.saveMediaFile(
-                    collectionExportPath,
-                    fileExportName,
-                    fileStream
+                const fileUID = getExportRecordFileUID(file);
+                await this.addFileExportedRecord(
+                    exportDir,
+                    fileUID,
+                    fileExportName
                 );
-                return fileExportName;
+                try {
+                    await this.saveMetadataFile(
+                        collectionExportPath,
+                        fileExportName,
+                        file
+                    );
+                    await this.saveMediaFile(
+                        collectionExportPath,
+                        fileExportName,
+                        fileStream
+                    );
+                } catch (e) {
+                    await this.removeFileExportedRecord(
+                        exportDir,
+                        getExportRecordFileUID(file)
+                    );
+                    throw e;
+                }
             }
         } catch (e) {
             logError(e, 'download and save failed');
@@ -1115,53 +1115,69 @@ class ExportService {
     }
 
     private async exportLivePhoto(
+        exportDir: string,
         collectionExportPath: string,
         fileStream: ReadableStream<any>,
         file: EnteFile
     ) {
         const fileBlob = await new Response(fileStream).blob();
         const livePhoto = await decodeLivePhoto(file, fileBlob);
-        const imageStream = generateStreamFromArrayBuffer(livePhoto.image);
         const imageExportName = getUniqueFileExportName(
             collectionExportPath,
             livePhoto.imageNameTitle
         );
-        await this.saveMetadataFile(
-            collectionExportPath,
-            imageExportName,
-            file
-        );
-        await this.saveMediaFile(
-            collectionExportPath,
-            imageExportName,
-            imageStream
-        );
-
-        const videoStream = generateStreamFromArrayBuffer(livePhoto.video);
         const videoExportName = getUniqueFileExportName(
             collectionExportPath,
             livePhoto.videoNameTitle
         );
-
-        await this.saveMetadataFile(
-            collectionExportPath,
-            videoExportName,
-            file
+        const livePhotoExportName = getLivePhotoExportName(
+            imageExportName,
+            videoExportName
+        );
+        const fileUID = getExportRecordFileUID(file);
+        await this.addFileExportedRecord(
+            exportDir,
+            fileUID,
+            livePhotoExportName
         );
         try {
+            const imageStream = generateStreamFromArrayBuffer(livePhoto.image);
+            await this.saveMetadataFile(
+                collectionExportPath,
+                imageExportName,
+                file
+            );
             await this.saveMediaFile(
                 collectionExportPath,
-                videoExportName,
-                videoStream
+                imageExportName,
+                imageStream
             );
+
+            const videoStream = generateStreamFromArrayBuffer(livePhoto.video);
+            await this.saveMetadataFile(
+                collectionExportPath,
+                videoExportName,
+                file
+            );
+            try {
+                await this.saveMediaFile(
+                    collectionExportPath,
+                    videoExportName,
+                    videoStream
+                );
+            } catch (e) {
+                await this.deleteExportedFile(
+                    getFileExportPath(collectionExportPath, imageExportName)
+                );
+                throw e;
+            }
         } catch (e) {
-            await this.deleteExportedFile(
-                getFileExportPath(collectionExportPath, imageExportName)
+            await this.removeFileExportedRecord(
+                exportDir,
+                getExportRecordFileUID(file)
             );
             throw e;
         }
-
-        return getLivePhotoExportName(imageExportName, videoExportName);
     }
 
     private async saveMediaFile(
