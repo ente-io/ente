@@ -70,6 +70,7 @@ export const CustomError = {
     UNSUPPORTED_RAW_FORMAT: 'unsupported raw format',
     NON_PREVIEWABLE_FILE: 'non previewable file',
     PROCESSING_FAILED: 'processing failed',
+    EXPORT_RECORD_JSON_PARSING_FAILED: 'export record json parsing failed',
 };
 
 export function parseUploadErrorCodes(error) {

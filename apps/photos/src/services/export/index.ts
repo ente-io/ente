@@ -1,4 +1,4 @@
-import { runningInBrowser } from 'utils/common';
+import { runningInBrowser, sleep } from 'utils/common';
 import {
     getUnExportedFiles,
     getGoogleLikeMetadataFile,
@@ -961,8 +961,16 @@ class ExportService {
             const recordFile = await this.electronAPIs.readTextFile(
                 exportRecordJSONPath
             );
-            return JSON.parse(recordFile);
+            try {
+                return JSON.parse(recordFile);
+            } catch (e) {
+                throw Error(CustomError.EXPORT_RECORD_JSON_PARSING_FAILED);
+            }
         } catch (e) {
+            if (e.message === CustomError.EXPORT_RECORD_JSON_PARSING_FAILED) {
+                await sleep(1000);
+                return await this.getExportRecord(folder);
+            }
             if (e.message !== CustomError.EXPORT_FOLDER_DOES_NOT_EXIST) {
                 logError(e, 'export Record JSON parsing failed');
             }
