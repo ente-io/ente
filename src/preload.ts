@@ -49,6 +49,7 @@ import {
     deleteFolder,
     rename,
     readTextFile,
+    deleteFile,
 } from './api/fs';
 import { convertToJPEG, generateImageThumbnail } from './api/imageProcessor';
 import { setupLogging } from './utils/logging';
@@ -110,4 +111,5 @@ windowObject['ElectronAPIs'] = {
     moveFile,
     deleteFolder,
     rename,
+    deleteFile,
 };
