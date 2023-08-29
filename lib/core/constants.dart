@@ -25,9 +25,6 @@ const subGalleryMultiplier = 10;
 const String oldSharedMediaIdentifier = 'ente-shared://';
 const String sharedMediaIdentifier = 'ente-shared-media://';
 
-const int maxLivePhotoToastCount = 2;
-const String livePhotoToastCounterKey = "show_live_photo_toast";
-
 const thumbnailDiskLoadDeferDuration = Duration(milliseconds: 40);
 const thumbnailServerLoadDeferDuration = Duration(milliseconds: 80);
 

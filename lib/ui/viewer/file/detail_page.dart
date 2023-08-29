@@ -119,7 +119,6 @@ class _DetailPageState extends State<DetailPage> {
             return FileAppBar(
               _files![selectedIndex],
               _onFileRemoved,
-              Configuration.instance.getUserID(),
               100,
               widget.config.mode == DetailPageMode.full,
               enableFullScreenNotifier: _enableFullScreenNotifier,
