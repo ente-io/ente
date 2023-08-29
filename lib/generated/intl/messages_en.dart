@@ -687,6 +687,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Generating encryption keys..."),
         "goToSettings": MessageLookupByLibrary.simpleMessage("Go to settings"),
         "googlePlayId": MessageLookupByLibrary.simpleMessage("Google Play ID"),
+        "grantFullAccessPrompt": MessageLookupByLibrary.simpleMessage(
+            "Please allow access to all photos in the Settings app"),
         "grantPermission":
             MessageLookupByLibrary.simpleMessage("Grant permission"),
         "groupNearbyPhotos":
@@ -877,6 +879,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Oops, could not save edits"),
         "oopsSomethingWentWrong":
             MessageLookupByLibrary.simpleMessage("Oops, something went wrong"),
+        "openSettings": MessageLookupByLibrary.simpleMessage("Open Settings"),
         "openTheItem": MessageLookupByLibrary.simpleMessage("• Open the item"),
         "openstreetmapContributors":
             MessageLookupByLibrary.simpleMessage("OpenStreetMap contributors"),
@@ -1080,6 +1083,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Select items to add"),
         "selectLanguage":
             MessageLookupByLibrary.simpleMessage("Select Language"),
+        "selectMorePhotos":
+            MessageLookupByLibrary.simpleMessage("Select more photos"),
         "selectReason": MessageLookupByLibrary.simpleMessage("Select reason"),
         "selectYourPlan":
             MessageLookupByLibrary.simpleMessage("Select your plan"),

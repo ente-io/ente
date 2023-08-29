@@ -78,14 +78,14 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
               title: const Text(""),
             ),
       body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.start,
         children: [
           const SizedBox(
             height: 0,
           ),
           SafeArea(
             child: Container(
-              padding: const EdgeInsets.fromLTRB(24, 32, 24, 8),
+              padding: const EdgeInsets.fromLTRB(24, 8, 24, 8),
               child: Text(
                 S.of(context).selectFoldersForBackup,
                 textAlign: TextAlign.left,

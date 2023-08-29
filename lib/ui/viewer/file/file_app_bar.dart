@@ -150,7 +150,7 @@ class FileAppBarState extends State<FileAppBar> {
             );
           }
           // options for files owned by the user
-          if (isOwnedByUser && !isFileHidden) {
+          if (isOwnedByUser && !isFileHidden && isFileUploaded) {
             final bool isArchived =
                 widget.file.magicMetadata.visibility == archiveVisibility;
             items.add(

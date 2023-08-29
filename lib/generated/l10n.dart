@@ -4455,6 +4455,36 @@ class S {
     );
   }
 
+  /// `Please allow access to all photos in the Settings app`
+  String get grantFullAccessPrompt {
+    return Intl.message(
+      'Please allow access to all photos in the Settings app',
+      name: 'grantFullAccessPrompt',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Open Settings`
+  String get openSettings {
+    return Intl.message(
+      'Open Settings',
+      name: 'openSettings',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Select more photos`
+  String get selectMorePhotos {
+    return Intl.message(
+      'Select more photos',
+      name: 'selectMorePhotos',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Existing user`
   String get existingUser {
     return Intl.message(
