@@ -1084,16 +1084,26 @@ class ExportService {
                     file
                 );
             } else {
-                await this.saveMediaFile(
-                    collectionExportPath,
-                    fileExportName,
-                    fileStream
-                );
                 await this.saveMetadataFile(
                     collectionExportPath,
                     fileExportName,
                     file
                 );
+                try {
+                    await this.saveMediaFile(
+                        collectionExportPath,
+                        fileExportName,
+                        fileStream
+                    );
+                } catch (e) {
+                    await this.deleteExportedFile(
+                        getFileMetadataExportPath(
+                            collectionExportPath,
+                            fileExportName
+                        )
+                    );
+                    throw e;
+                }
                 return fileExportName;
             }
         } catch (e) {
@@ -1114,32 +1124,62 @@ class ExportService {
             collectionExportPath,
             livePhoto.imageNameTitle
         );
-        await this.saveMediaFile(
-            collectionExportPath,
-            imageExportName,
-            imageStream
-        );
         await this.saveMetadataFile(
             collectionExportPath,
             imageExportName,
             file
         );
+        try {
+            await this.saveMediaFile(
+                collectionExportPath,
+                imageExportName,
+                imageStream
+            );
+        } catch (e) {
+            await this.deleteExportedFile(
+                getFileMetadataExportPath(collectionExportPath, imageExportName)
+            );
+            throw e;
+        }
 
         const videoStream = generateStreamFromArrayBuffer(livePhoto.video);
         const videoExportName = getUniqueFileExportName(
             collectionExportPath,
             livePhoto.videoNameTitle
         );
-        await this.saveMediaFile(
-            collectionExportPath,
-            videoExportName,
-            videoStream
-        );
-        await this.saveMetadataFile(
-            collectionExportPath,
-            videoExportName,
-            file
-        );
+        try {
+            await this.saveMetadataFile(
+                collectionExportPath,
+                videoExportName,
+                file
+            );
+        } catch (e) {
+            await this.deleteExportedFile(
+                getFileExportPath(collectionExportPath, imageExportName)
+            );
+            await this.deleteExportedFile(
+                getFileMetadataExportPath(collectionExportPath, imageExportName)
+            );
+            throw e;
+        }
+        try {
+            await this.saveMediaFile(
+                collectionExportPath,
+                videoExportName,
+                videoStream
+            );
+        } catch (e) {
+            await this.deleteExportedFile(
+                getFileExportPath(collectionExportPath, imageExportName)
+            );
+            await this.deleteExportedFile(
+                getFileMetadataExportPath(collectionExportPath, imageExportName)
+            );
+            await this.deleteExportedFile(
+                getFileMetadataExportPath(collectionExportPath, videoExportName)
+            );
+            throw e;
+        }
 
         return getLivePhotoExportName(imageExportName, videoExportName);
     }
@@ -1154,6 +1194,7 @@ class ExportService {
             fileStream
         );
     }
+
     private async saveMetadataFile(
         collectionExportPath: string,
         fileExportName: string,
@@ -1183,6 +1224,10 @@ class ExportService {
 
     exportFolderExists = (exportFolder: string) => {
         return exportFolder && this.exists(exportFolder);
+    };
+
+    private deleteExportedFile = async (path: string) => {
+        return this.electronAPIs.deleteFile(path);
     };
 
     private verifyExportFolderExists = (exportFolder: string) => {
