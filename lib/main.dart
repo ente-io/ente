@@ -9,6 +9,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import "package:flutter/rendering.dart";
 import 'package:logging/logging.dart';
+import "package:media_kit/media_kit.dart";
 import 'package:path_provider/path_provider.dart';
 import 'package:photos/app.dart';
 import 'package:photos/core/configuration.dart';
@@ -61,6 +62,7 @@ const kBackgroundLockLatency = Duration(seconds: 3);
 void main() async {
   debugRepaintRainbowEnabled = false;
   WidgetsFlutterBinding.ensureInitialized();
+  MediaKit.ensureInitialized();
   final savedThemeMode = await AdaptiveTheme.getThemeMode();
   await _runInForeground(savedThemeMode);
   BackgroundFetch.registerHeadlessTask(_headlessTaskHandler);

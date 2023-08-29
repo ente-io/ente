@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file/file_type.dart';
-import 'package:photos/ui/viewer/file/video_widget.dart';
+import "package:photos/ui/viewer/file/video_widget_new.dart";
 import 'package:photos/ui/viewer/file/zoomable_live_image.dart';
 
 class FileWidget extends StatelessWidget {
@@ -34,12 +34,13 @@ class FileWidget extends StatelessWidget {
         backgroundDecoration: backgroundDecoration,
       );
     } else if (file.fileType == FileType.video) {
-      return VideoWidget(
-        file,
-        autoPlay: autoPlay ?? false, // Autoplay if it was opened directly
-        tagPrefix: tagPrefix,
-        playbackCallback: playbackCallback,
-      );
+      // return VideoWidget(
+      //   file,
+      //   autoPlay: autoPlay ?? false, // Autoplay if it was opened directly
+      //   tagPrefix: tagPrefix,
+      //   playbackCallback: playbackCallback,
+      // );
+      return const VideoWidgetNew();
     } else {
       Logger('FileWidget').severe('unsupported file type ${file.fileType}');
       return const Icon(Icons.error);
