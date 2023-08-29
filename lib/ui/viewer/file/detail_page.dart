@@ -1,4 +1,5 @@
 import 'package:extended_image/extended_image.dart';
+import "package:flutter/foundation.dart";
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:logging/logging.dart';
@@ -142,7 +143,7 @@ class _DetailPageState extends State<DetailPage> {
             ValueListenableBuilder(
               builder: (BuildContext context, int selectedIndex, _) {
                 return FileBottomBar(
-                  _files![_selectedIndexNotifier.value],
+                  _files![selectedIndex],
                   _onEditFileRequested,
                   widget.config.mode == DetailPageMode.minimalistic,
                   onFileRemoved: _onFileRemoved,
@@ -165,33 +166,46 @@ class _DetailPageState extends State<DetailPage> {
       itemBuilder: (context, index) {
         final file = _files![index];
         _preloadFiles(index);
+        final Widget fileContent = FileWidget(
+          file,
+          autoPlay: shouldAutoPlay(),
+          tagPrefix: widget.config.tagPrefix,
+          shouldDisableScroll: (value) {
+            if (_shouldDisableScroll != value) {
+              setState(() {
+                _shouldDisableScroll = value;
+              });
+            }
+          },
+          //Noticed that when the video is seeked, the video pops and moves the
+          //seek bar along with it and it happens when bottomPadding is 0. So we
+          //don't toggle full screen for cases where this issue happens.
+          playbackCallback: bottomPadding != 0
+              ? (isPlaying) {
+            Future.delayed(Duration.zero, () {
+              _toggleFullScreen();
+            });
+          }
+              : null,
+          backgroundDecoration: const BoxDecoration(color: Colors.black),
+        );
         return GestureDetector(
           onTap: () {
             _toggleFullScreen();
           },
-          child: FileWidget(
-            file,
-            autoPlay: shouldAutoPlay(),
-            tagPrefix: widget.config.tagPrefix,
-            shouldDisableScroll: (value) {
-              if (_shouldDisableScroll != value) {
-                setState(() {
-                  _shouldDisableScroll = value;
-                });
-              }
-            },
-            //Noticed that when the video is seeked, the video pops and moves the
-            //seek bar along with it and it happens when bottomPadding is 0. So we
-            //don't toggle full screen for cases where this issue happens.
-            playbackCallback: bottomPadding != 0
-                ? (isPlaying) {
-                    Future.delayed(Duration.zero, () {
-                      _toggleFullScreen();
-                    });
-                  }
-                : null,
-            backgroundDecoration: const BoxDecoration(color: Colors.black),
-          ),
+          child: kDebugMode ?
+              Stack(children: [
+                fileContent,
+                Positioned(
+                  top: 80,
+                  right: 80,
+                  child: Text(
+                    file.generatedID?.toString() ?? 'null',
+                    style: const TextStyle(color: Colors.white),
+                  ),
+                ),
+              ],)
+          : fileContent,
         );
       },
       onPageChanged: (index) {

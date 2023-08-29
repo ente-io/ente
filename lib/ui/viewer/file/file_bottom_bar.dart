@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
+import "package:flutter/foundation.dart";
 import 'package:flutter/material.dart';
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/file/file.dart';
@@ -54,6 +55,14 @@ class FileBottomBarState extends State<FileBottomBar> {
     final List<Widget> children = [];
     final bool isOwnedByUser =
         widget.file.ownerID == null || widget.file.ownerID == widget.userID;
+    if (kDebugMode) {
+      children.add(
+        Text(
+          widget.file.generatedID?.toString() ?? 'null',
+          style: TextStyle(color: Colors.white),
+        ),
+      );
+    }
     children.add(
       Tooltip(
         message: "Info",
