@@ -1001,7 +1001,7 @@ class ExportService {
         }
     }
 
-    async getExportRecord(folder: string): Promise<ExportRecord> {
+    async getExportRecord(folder: string, retry = true): Promise<ExportRecord> {
         try {
             this.verifyExportFolderExists(folder);
             const exportRecordJSONPath = `${folder}/${EXPORT_RECORD_FILE_NAME}`;
@@ -1017,9 +1017,12 @@ class ExportService {
                 throw Error(CustomError.EXPORT_RECORD_JSON_PARSING_FAILED);
             }
         } catch (e) {
-            if (e.message === CustomError.EXPORT_RECORD_JSON_PARSING_FAILED) {
+            if (
+                e.message === CustomError.EXPORT_RECORD_JSON_PARSING_FAILED &&
+                retry
+            ) {
                 await sleep(1000);
-                return await this.getExportRecord(folder);
+                return await this.getExportRecord(folder, false);
             }
             if (e.message !== CustomError.EXPORT_FOLDER_DOES_NOT_EXIST) {
                 logError(e, 'export Record JSON parsing failed');
