@@ -1,12 +1,12 @@
 import "package:flutter/widgets.dart";
 import "package:photos/core/constants.dart";
-import "package:photos/models/file.dart";
+import 'package:photos/models/file/file.dart';
 import "package:photos/models/selected_files.dart";
 import "package:photos/ui/viewer/gallery/component/gallery_file_widget.dart";
 import "package:photos/ui/viewer/gallery/gallery.dart";
 
 class GalleryGridViewWidget extends StatelessWidget {
-  final List<File> filesInGroup;
+  final List<EnteFile> filesInGroup;
   final int photoGridSize;
   final SelectedFiles? selectedFiles;
   final bool limitSelectionToOne;

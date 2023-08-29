@@ -1,8 +1,8 @@
 import 'package:photos/events/event.dart';
-import 'package:photos/models/file.dart';
+import 'package:photos/models/file/file.dart';
 
 class FilesUpdatedEvent extends Event {
-  final List<File> updatedFiles;
+  final List<EnteFile> updatedFiles;
   final EventType type;
   final String source;
 

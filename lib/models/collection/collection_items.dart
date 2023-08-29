@@ -1,9 +1,9 @@
-import 'package:photos/models/collection.dart';
-import 'package:photos/models/file.dart';
+import 'package:photos/models/collection/collection.dart';
+import 'package:photos/models/file/file.dart';
 
 class CollectionWithThumbnail {
   final Collection collection;
-  final File? thumbnail;
+  final EnteFile? thumbnail;
 
   CollectionWithThumbnail(
     this.collection,

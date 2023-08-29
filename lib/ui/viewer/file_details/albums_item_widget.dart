@@ -2,9 +2,9 @@ import "package:flutter/material.dart";
 import "package:logging/logging.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/generated/l10n.dart";
-import "package:photos/models/collection.dart";
-import "package:photos/models/collection_items.dart";
-import "package:photos/models/file.dart";
+import 'package:photos/models/collection/collection.dart';
+import 'package:photos/models/collection/collection_items.dart';
+import 'package:photos/models/file/file.dart';
 import "package:photos/services/collections_service.dart";
 import "package:photos/ui/components/buttons/chip_button_widget.dart";
 import "package:photos/ui/components/info_item_widget.dart";
@@ -12,7 +12,7 @@ import "package:photos/ui/viewer/gallery/collection_page.dart";
 import "package:photos/utils/navigation_util.dart";
 
 class AlbumsItemWidget extends StatelessWidget {
-  final File file;
+  final EnteFile file;
   final int currentUserID;
   const AlbumsItemWidget(
     this.file,

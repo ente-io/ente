@@ -3,8 +3,8 @@ import 'package:photos/core/event_bus.dart';
 import "package:photos/db/files_db.dart";
 import 'package:photos/events/collection_updated_event.dart';
 import "package:photos/generated/l10n.dart";
-import 'package:photos/models/collection.dart';
-import 'package:photos/models/file.dart';
+import 'package:photos/models/collection/collection.dart';
+import 'package:photos/models/file/file.dart';
 import 'package:photos/services/collections_service.dart';
 import "package:photos/services/remote_sync_service.dart";
 import 'package:photos/ui/components/action_sheet_widget.dart';
@@ -90,7 +90,7 @@ class _DeleteEmptyAlbumsState extends State<DeleteEmptyAlbums> {
                     Bus.instance.fire(
                       CollectionUpdatedEvent(
                         0,
-                        <File>[],
+                        <EnteFile>[],
                         "empty_albums_deleted",
                       ),
                     );

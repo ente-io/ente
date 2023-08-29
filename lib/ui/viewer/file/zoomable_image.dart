@@ -12,7 +12,7 @@ import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
-import 'package:photos/models/file.dart';
+import 'package:photos/models/file/file.dart';
 import "package:photos/models/metadata/file_magic.dart";
 import "package:photos/services/file_magic_service.dart";
 import 'package:photos/ui/common/loading_widget.dart';
@@ -21,7 +21,7 @@ import 'package:photos/utils/image_util.dart';
 import 'package:photos/utils/thumbnail_util.dart';
 
 class ZoomableImage extends StatefulWidget {
-  final File photo;
+  final EnteFile photo;
   final Function(bool)? shouldDisableScroll;
   final String? tagPrefix;
   final Decoration? backgroundDecoration;
@@ -43,7 +43,7 @@ class ZoomableImage extends StatefulWidget {
 class _ZoomableImageState extends State<ZoomableImage>
     with SingleTickerProviderStateMixin {
   late Logger _logger;
-  late File _photo;
+  late EnteFile _photo;
   ImageProvider? _imageProvider;
   bool _loadedSmallThumbnail = false;
   bool _loadingLargeThumbnail = false;

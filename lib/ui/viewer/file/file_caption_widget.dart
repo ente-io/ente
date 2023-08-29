@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import "package:photos/generated/l10n.dart";
-import 'package:photos/models/file.dart';
+import 'package:photos/models/file/file.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/keyboard/keybiard_oveylay.dart';
 import 'package:photos/ui/components/keyboard/keyboard_top_button.dart';
@@ -46,7 +46,7 @@ class FileCaptionReadyOnly extends StatelessWidget {
 }
 
 class FileCaptionWidget extends StatefulWidget {
-  final File file;
+  final EnteFile file;
 
   const FileCaptionWidget({required this.file, super.key});
 

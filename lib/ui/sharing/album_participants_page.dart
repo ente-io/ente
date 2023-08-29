@@ -3,7 +3,7 @@ import 'package:photos/core/configuration.dart';
 import 'package:photos/extensions/list.dart';
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/api/collection/user.dart";
-import 'package:photos/models/collection.dart';
+import 'package:photos/models/collection/collection.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';
 import 'package:photos/ui/components/divider_widget.dart';

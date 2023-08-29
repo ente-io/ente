@@ -5,7 +5,7 @@ import "package:flutter/cupertino.dart";
 import "package:flutter/material.dart";
 import "package:intl/intl.dart";
 import "package:photos/core/configuration.dart";
-import 'package:photos/models/file.dart';
+import 'package:photos/models/file/file.dart';
 import "package:photos/models/memory.dart";
 import "package:photos/services/memories_service.dart";
 import "package:photos/theme/text_style.dart";
@@ -207,7 +207,7 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
   }
 
   Widget _buildBottomIcons() {
-    final File currentFile = widget.memories[_index].file;
+    final EnteFile currentFile = widget.memories[_index].file;
     final List<Widget> rowChildren = [
       IconButton(
         icon: Icon(

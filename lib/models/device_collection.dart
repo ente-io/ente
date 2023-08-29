@@ -1,4 +1,4 @@
-import 'package:photos/models/file.dart';
+import 'package:photos/models/file/file.dart';
 import 'package:photos/models/upload_strategy.dart';
 
 class DeviceCollection {
@@ -9,7 +9,7 @@ class DeviceCollection {
   UploadStrategy uploadStrategy;
   final String? coverId;
   int? collectionID;
-  File? thumbnail;
+  EnteFile? thumbnail;
 
   bool hasCollectionID() {
     return collectionID != null && collectionID! != -1;

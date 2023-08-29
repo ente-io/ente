@@ -6,8 +6,7 @@ import 'package:path/path.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
-import 'package:photos/models/ente_file.dart';
-import 'package:photos/models/file_type.dart';
+import 'package:photos/models/file/file_type.dart';
 import 'package:photos/models/location/location.dart';
 import "package:photos/models/metadata/file_magic.dart";
 import 'package:photos/services/feature_flag_service.dart';
@@ -15,7 +14,7 @@ import 'package:photos/utils/date_time_util.dart';
 import 'package:photos/utils/exif_util.dart';
 import 'package:photos/utils/file_uploader_util.dart';
 
-class File extends EnteFile {
+class EnteFile {
   int? generatedID;
   int? uploadedFileID;
   int? ownerID;
@@ -66,10 +65,10 @@ class File extends EnteFile {
 
   static final _logger = Logger('File');
 
-  File();
+  EnteFile();
 
-  static Future<File> fromAsset(String pathName, AssetEntity asset) async {
-    final File file = File();
+  static Future<EnteFile> fromAsset(String pathName, AssetEntity asset) async {
+    final EnteFile file = EnteFile();
     file.localID = asset.id;
     file.title = asset.title;
     file.deviceFolder = pathName;
@@ -304,7 +303,7 @@ class File extends EnteFile {
   bool operator ==(Object o) {
     if (identical(this, o)) return true;
 
-    return o is File &&
+    return o is EnteFile &&
         o.generatedID == generatedID &&
         o.uploadedFileID == uploadedFileID &&
         o.localID == localID;
@@ -324,7 +323,6 @@ class File extends EnteFile {
         generatedID.toString();
   }
 
-  @override
   String cacheKey() {
     // todo: Neeraj: 19thJuly'22: evaluate and add fileHash as the key?
     return localID ?? uploadedFileID?.toString() ?? generatedID.toString();

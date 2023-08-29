@@ -8,7 +8,7 @@ import "package:photos/db/files_db.dart";
 import "package:photos/events/files_updated_event.dart";
 import "package:photos/events/local_photos_updated_event.dart";
 import "package:photos/generated/l10n.dart";
-import "package:photos/models/file.dart";
+import 'package:photos/models/file/file.dart';
 import "package:photos/models/file_load_result.dart";
 import "package:photos/models/gallery_type.dart";
 import "package:photos/models/selected_files.dart";
@@ -174,7 +174,7 @@ class _LocationGalleryWidgetState extends State<LocationGalleryWidget> {
       final FileLoadResult result = await fileLoadResult;
       //wait for ignored files to be removed after init
       final stopWatch = Stopwatch()..start();
-      final copyOfFiles = List<File>.from(result.files);
+      final copyOfFiles = List<EnteFile>.from(result.files);
       copyOfFiles.removeWhere((f) {
         return !LocationService.instance.isFileInsideLocationTag(
           centerPoint,

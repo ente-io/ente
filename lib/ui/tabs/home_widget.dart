@@ -23,7 +23,7 @@ import 'package:photos/events/tab_changed_event.dart';
 import 'package:photos/events/trigger_logout_event.dart';
 import 'package:photos/events/user_logged_out_event.dart';
 import "package:photos/generated/l10n.dart";
-import "package:photos/models/collection_items.dart";
+import 'package:photos/models/collection/collection_items.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/app_lifecycle_service.dart';
 import 'package:photos/services/collections_service.dart';

@@ -1,8 +1,8 @@
-import 'package:photos/models/file.dart';
+import 'package:photos/models/file/file.dart';
 import 'package:photos/models/search/search_result.dart';
 
 class FileSearchResult extends SearchResult {
-  final File file;
+  final EnteFile file;
 
   FileSearchResult(this.file);
 
@@ -17,12 +17,12 @@ class FileSearchResult extends SearchResult {
   }
 
   @override
-  File previewThumbnail() {
+  EnteFile previewThumbnail() {
     return file;
   }
 
   @override
-  List<File> resultFiles() {
+  List<EnteFile> resultFiles() {
     // for fileSearchResult, the file detailed page view will be opened
     throw UnimplementedError();
   }

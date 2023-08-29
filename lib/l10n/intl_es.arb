@@ -962,5 +962,7 @@
   },
   "setRadius": "Establecer radio",
   "familyPlanPortalTitle": "Familia",
-  "familyPlanOverview": "Añada 5 familiares a su plan existente sin pagar más.\n\nCada miembro tiene su propio espacio privado y no puede ver los archivos del otro a menos que sean compartidos.\n\nLos planes familiares están disponibles para los clientes que tienen una suscripción de ente pagada.\n\n¡Suscríbete ahora para empezar!"
+  "familyPlanOverview": "Añada 5 familiares a su plan existente sin pagar más.\n\nCada miembro tiene su propio espacio privado y no puede ver los archivos del otro a menos que sean compartidos.\n\nLos planes familiares están disponibles para los clientes que tienen una suscripción de ente pagada.\n\n¡Suscríbete ahora para empezar!",
+  "addToHiddenAlbum": "Add to hidden album",
+  "moveToHiddenAlbum": "Move to hidden album"
 }

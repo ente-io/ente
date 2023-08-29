@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import "package:logging/logging.dart";
 import "package:photos/generated/l10n.dart";
-import "package:photos/models/collection.dart";
-import "package:photos/models/collection_items.dart";
+import 'package:photos/models/collection/collection.dart';
+import 'package:photos/models/collection/collection_items.dart';
 import "package:photos/services/collections_service.dart";
 import "package:photos/ui/components/buttons/icon_button_widget.dart";
 import "package:photos/ui/viewer/gallery/collection_page.dart";
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/navigation_util.dart";
 
-class CreateNewAlbumIcon extends StatelessWidget {
-  const CreateNewAlbumIcon({Key? key}) : super(key: key);
+class NewAlbumIcon extends StatelessWidget {
+  const NewAlbumIcon({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

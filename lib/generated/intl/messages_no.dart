@@ -24,6 +24,8 @@ class MessageLookup extends MessageLookupByLibrary {
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
         "accountWelcomeBack":
             MessageLookupByLibrary.simpleMessage("Velkommen tilbake!"),
+        "addToHiddenAlbum":
+            MessageLookupByLibrary.simpleMessage("Add to hidden album"),
         "askDeleteReason": MessageLookupByLibrary.simpleMessage(
             "Hva er hovedårsaken til at du sletter kontoen din?"),
         "cancel": MessageLookupByLibrary.simpleMessage("Avbryt"),
@@ -44,6 +46,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Ugyldig e-postadresse"),
         "kindlyHelpUsWithThisInformation": MessageLookupByLibrary.simpleMessage(
             "Vær vennlig og hjelp oss med denne informasjonen"),
+        "moveToHiddenAlbum":
+            MessageLookupByLibrary.simpleMessage("Move to hidden album"),
         "verify": MessageLookupByLibrary.simpleMessage("Bekreft")
       };
 }

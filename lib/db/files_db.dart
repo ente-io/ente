@@ -1,4 +1,4 @@
-import 'dart:io' as io;
+import "dart:io";
 
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
@@ -6,9 +6,9 @@ import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import "package:photos/extensions/stop_watch.dart";
 import 'package:photos/models/backup_status.dart';
-import 'package:photos/models/file.dart';
+import 'package:photos/models/file/file.dart';
+import 'package:photos/models/file/file_type.dart';
 import 'package:photos/models/file_load_result.dart';
-import 'package:photos/models/file_type.dart';
 import 'package:photos/models/location/location.dart';
 import "package:photos/models/metadata/common_keys.dart";
 import "package:photos/services/filter/db_filters.dart";
@@ -107,7 +107,7 @@ class FilesDB {
 
   // this opens the database (and creates it if it doesn't exist)
   Future<Database> _initDatabase() async {
-    final io.Directory documentsDirectory =
+    final Directory documentsDirectory =
         await getApplicationDocumentsDirectory();
     final String path = join(documentsDirectory.path, _databaseName);
     _logger.info("DB path " + path);
@@ -391,23 +391,23 @@ class FilesDB {
   Future<void> deleteDB() async {
     if (kDebugMode) {
       debugPrint("Deleting files db");
-      final io.Directory documentsDirectory =
+      final Directory documentsDirectory =
           await getApplicationDocumentsDirectory();
       final String path = join(documentsDirectory.path, _databaseName);
-      io.File(path).deleteSync(recursive: true);
+      File(path).deleteSync(recursive: true);
       _dbFuture = null;
     }
   }
 
   Future<void> insertMultiple(
-    List<File> files, {
+    List<EnteFile> files, {
     ConflictAlgorithm conflictAlgorithm = ConflictAlgorithm.replace,
   }) async {
     final startTime = DateTime.now();
     final db = await database;
     var batch = db.batch();
     int batchCounter = 0;
-    for (File file in files) {
+    for (EnteFile file in files) {
       if (batchCounter == 400) {
         await batch.commit(noResult: true);
         batch = db.batch();
@@ -435,7 +435,7 @@ class FilesDB {
     );
   }
 
-  Future<int> insert(File file) async {
+  Future<int> insert(EnteFile file) async {
     final db = await instance.database;
     return db.insert(
       filesTable,
@@ -444,7 +444,7 @@ class FilesDB {
     );
   }
 
-  Future<File?> getFile(int generatedID) async {
+  Future<EnteFile?> getFile(int generatedID) async {
     final db = await instance.database;
     final results = await db.query(
       filesTable,
@@ -457,7 +457,7 @@ class FilesDB {
     return convertToFiles(results)[0];
   }
 
-  Future<File?> getUploadedFile(int uploadedID, int collectionID) async {
+  Future<EnteFile?> getUploadedFile(int uploadedID, int collectionID) async {
     final db = await instance.database;
     final results = await db.query(
       filesTable,
@@ -580,13 +580,14 @@ class FilesDB {
       limit: limit,
     );
     final files = convertToFiles(results);
-    final List<File> filteredFiles = await applyDBFilters(files, filterOptions);
+    final List<EnteFile> filteredFiles =
+        await applyDBFilters(files, filterOptions);
     return FileLoadResult(filteredFiles, files.length == limit);
   }
 
-  List<File> deduplicateByLocalID(List<File> files) {
+  List<EnteFile> deduplicateByLocalID(List<EnteFile> files) {
     final localIDs = <String>{};
-    final List<File> deduplicatedFiles = [];
+    final List<EnteFile> deduplicatedFiles = [];
     for (final file in files) {
       final id = file.localID;
       if (id == null) {
@@ -627,7 +628,7 @@ class FilesDB {
     return FileLoadResult(files, files.length == limit);
   }
 
-  Future<List<File>> getAllFilesCollection(int collectionID) async {
+  Future<List<EnteFile>> getAllFilesCollection(int collectionID) async {
     final db = await instance.database;
     const String whereClause = '$columnCollectionID = ?';
     final List<Object> whereArgs = [collectionID];
@@ -640,7 +641,7 @@ class FilesDB {
     return files;
   }
 
-  Future<List<File>> getNewFilesInCollection(
+  Future<List<EnteFile>> getNewFilesInCollection(
     int collectionID,
     int addedTime,
   ) async {
@@ -666,7 +667,7 @@ class FilesDB {
     bool? asc,
   }) async {
     if (collectionIDs.isEmpty) {
-      return FileLoadResult(<File>[], false);
+      return FileLoadResult(<EnteFile>[], false);
     }
     String inParam = "";
     for (final id in collectionIDs) {
@@ -695,13 +696,13 @@ class FilesDB {
     return FileLoadResult(files, files.length == limit);
   }
 
-  Future<List<File>> getFilesCreatedWithinDurations(
+  Future<List<EnteFile>> getFilesCreatedWithinDurations(
     List<List<int>> durations,
     Set<int> ignoredCollectionIDs, {
     String order = 'ASC',
   }) async {
     if (durations.isEmpty) {
-      return <File>[];
+      return <EnteFile>[];
     }
     final db = await instance.database;
     String whereClause = "( ";
@@ -730,7 +731,7 @@ class FilesDB {
 
   // Files which user added to a collection manually but they are not
   // uploaded yet or files belonging to a collection which is marked for backup
-  Future<List<File>> getFilesPendingForUpload() async {
+  Future<List<EnteFile>> getFilesPendingForUpload() async {
     final db = await instance.database;
     final results = await db.query(
       filesTable,
@@ -753,7 +754,7 @@ class FilesDB {
     return files;
   }
 
-  Future<List<File>> getUnUploadedLocalFiles() async {
+  Future<List<EnteFile>> getUnUploadedLocalFiles() async {
     final db = await instance.database;
     final results = await db.query(
       filesTable,
@@ -785,7 +786,7 @@ class FilesDB {
     return uploadedFileIDs;
   }
 
-  Future<File?> getUploadedLocalFileInAnyCollection(
+  Future<EnteFile?> getUploadedLocalFileInAnyCollection(
     int uploadedFileID,
     int userID,
   ) async {
@@ -911,7 +912,7 @@ class FilesDB {
     This method should only return localIDs which are not uploaded yet
     and can be mapped to incoming remote entry
    */
-  Future<List<File>> getUnlinkedLocalMatchesForRemoteFile(
+  Future<List<EnteFile>> getUnlinkedLocalMatchesForRemoteFile(
     int ownerID,
     String localID,
     FileType fileType, {
@@ -930,7 +931,7 @@ class FilesDB {
       getInt(fileType),
       title,
     ];
-    if (io.Platform.isAndroid) {
+    if (Platform.isAndroid) {
       whereClause = ''' ($columnOwnerID = ? OR $columnOwnerID IS NULL) AND 
           $columnLocalID = ? AND $columnFileType = ? AND $columnTitle=? AND $columnDeviceFolder= ? 
            ''';
@@ -952,7 +953,7 @@ class FilesDB {
     return convertToFiles(rows);
   }
 
-  Future<List<File>> getUploadedFilesWithHashes(
+  Future<List<EnteFile>> getUploadedFilesWithHashes(
     FileHashData hashData,
     FileType fileType,
     int ownerID,
@@ -976,7 +977,7 @@ class FilesDB {
     return convertToFiles(rows);
   }
 
-  Future<int> update(File file) async {
+  Future<int> update(EnteFile file) async {
     final db = await instance.database;
     return await db.update(
       filesTable,
@@ -986,7 +987,7 @@ class FilesDB {
     );
   }
 
-  Future<int> updateUploadedFileAcrossCollections(File file) async {
+  Future<int> updateUploadedFileAcrossCollections(EnteFile file) async {
     final db = await instance.database;
     return await db.update(
       filesTable,
@@ -1043,7 +1044,7 @@ class FilesDB {
     );
   }
 
-  Future<int> deleteLocalFile(File file) async {
+  Future<int> deleteLocalFile(EnteFile file) async {
     final db = await instance.database;
     if (file.localID != null) {
       // delete all files with same local ID
@@ -1077,7 +1078,7 @@ class FilesDB {
     );
   }
 
-  Future<List<File>> getLocalFiles(List<String> localIDs) async {
+  Future<List<EnteFile>> getLocalFiles(List<String> localIDs) async {
     String inParam = "";
     for (final localID in localIDs) {
       inParam += "'" + localID + "',";
@@ -1173,7 +1174,7 @@ class FilesDB {
     );
   }
 
-  Future<List<File>> getPendingUploadForCollection(int collectionID) async {
+  Future<List<EnteFile>> getPendingUploadForCollection(int collectionID) async {
     final db = await instance.database;
     final results = await db.query(
       filesTable,
@@ -1185,7 +1186,7 @@ class FilesDB {
   }
 
   Future<Set<String>> getLocalIDsPresentInEntries(
-    List<File> existingFiles,
+    List<EnteFile> existingFiles,
     int collectionID,
   ) async {
     String inParam = "";
@@ -1237,7 +1238,7 @@ class FilesDB {
 
   // getCollectionFileFirstOrLast returns the first or last uploaded file in
   // the collection based on the given collectionID and the order.
-  Future<File?> getCollectionFileFirstOrLast(
+  Future<EnteFile?> getCollectionFileFirstOrLast(
     int collectionID,
     bool sortAsc,
   ) async {
@@ -1292,8 +1293,8 @@ class FilesDB {
     return rows.isNotEmpty;
   }
 
-  Future<Map<int, File>> getFilesFromIDs(List<int> ids) async {
-    final result = <int, File>{};
+  Future<Map<int, EnteFile>> getFilesFromIDs(List<int> ids) async {
+    final result = <int, EnteFile>{};
     if (ids.isEmpty) {
       return result;
     }
@@ -1314,8 +1315,8 @@ class FilesDB {
     return result;
   }
 
-  Future<Map<int, File>> getFilesFromGeneratedIDs(List<int> ids) async {
-    final result = <int, File>{};
+  Future<Map<int, EnteFile>> getFilesFromGeneratedIDs(List<int> ids) async {
+    final result = <int, EnteFile>{};
     if (ids.isEmpty) {
       return result;
     }
@@ -1336,10 +1337,10 @@ class FilesDB {
     return result;
   }
 
-  Future<Map<int, List<File>>> getAllFilesGroupByCollectionID(
+  Future<Map<int, List<EnteFile>>> getAllFilesGroupByCollectionID(
     List<int> ids,
   ) async {
-    final result = <int, List<File>>{};
+    final result = <int, List<EnteFile>>{};
     if (ids.isEmpty) {
       return result;
     }
@@ -1354,9 +1355,9 @@ class FilesDB {
       where: '$columnUploadedFileID IN ($inParam)',
     );
     final files = convertToFiles(results);
-    for (File eachFile in files) {
+    for (EnteFile eachFile in files) {
       if (!result.containsKey(eachFile.collectionID)) {
-        result[eachFile.collectionID as int] = <File>[];
+        result[eachFile.collectionID as int] = <EnteFile>[];
       }
       result[eachFile.collectionID]!.add(eachFile);
     }
@@ -1381,8 +1382,8 @@ class FilesDB {
     return collectionIDsOfFile;
   }
 
-  List<File> convertToFiles(List<Map<String, dynamic>> results) {
-    final List<File> files = [];
+  List<EnteFile> convertToFiles(List<Map<String, dynamic>> results) {
+    final List<EnteFile> files = [];
     for (final result in results) {
       files.add(_getFileFromRow(result));
     }
@@ -1467,12 +1468,12 @@ class FilesDB {
     await batch.commit(noResult: true);
   }
 
-  Future<List<File>> getAllFilesFromDB(Set<int> collectionsToIgnore) async {
+  Future<List<EnteFile>> getAllFilesFromDB(Set<int> collectionsToIgnore) async {
     final db = await instance.database;
     final List<Map<String, dynamic>> result =
         await db.query(filesTable, orderBy: '$columnCreationTime DESC');
-    final List<File> files = convertToFiles(result);
-    final List<File> deduplicatedFiles = await applyDBFilters(
+    final List<EnteFile> files = convertToFiles(result);
+    final List<EnteFile> deduplicatedFiles = await applyDBFilters(
       files,
       DBFilterOptions(ignoredCollectionIDs: collectionsToIgnore),
     );
@@ -1515,11 +1516,12 @@ class FilesDB {
       limit: limit,
     );
     final files = convertToFiles(results);
-    final List<File> filteredFiles = await applyDBFilters(files, filterOptions);
+    final List<EnteFile> filteredFiles =
+        await applyDBFilters(files, filterOptions);
     return FileLoadResult(filteredFiles, files.length == limit);
   }
 
-  Map<String, dynamic> _getRowForFile(File file) {
+  Map<String, dynamic> _getRowForFile(EnteFile file) {
     final row = <String, dynamic>{};
     if (file.generatedID != null) {
       row[columnGeneratedID] = file.generatedID;
@@ -1574,7 +1576,7 @@ class FilesDB {
     return row;
   }
 
-  Map<String, dynamic> _getRowForFileWithoutCollection(File file) {
+  Map<String, dynamic> _getRowForFileWithoutCollection(EnteFile file) {
     final row = <String, dynamic>{};
     row[columnLocalID] = file.localID;
     row[columnUploadedFileID] = file.uploadedFileID ?? -1;
@@ -1615,8 +1617,8 @@ class FilesDB {
     return row;
   }
 
-  File _getFileFromRow(Map<String, dynamic> row) {
-    final file = File();
+  EnteFile _getFileFromRow(Map<String, dynamic> row) {
+    final file = EnteFile();
     file.generatedID = row[columnGeneratedID];
     file.localID = row[columnLocalID];
     file.uploadedFileID =

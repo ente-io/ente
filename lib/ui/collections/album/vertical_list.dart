@@ -1,20 +1,18 @@
 import "dart:async";
 
 import 'package:flutter/material.dart';
-import "package:fluttertoast/fluttertoast.dart";
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import "package:photos/core/event_bus.dart";
-import 'package:photos/db/files_db.dart';
 import "package:photos/events/tab_changed_event.dart";
 import "package:photos/generated/l10n.dart";
-import 'package:photos/models/collection.dart';
-import 'package:photos/models/collection_items.dart';
-import 'package:photos/models/file.dart';
+import 'package:photos/models/collection/collection.dart';
+import 'package:photos/models/collection/collection_items.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/collections_service.dart';
-import 'package:photos/services/ignored_files_service.dart';
+import "package:photos/services/hidden_service.dart";
 import 'package:photos/services/remote_sync_service.dart';
+import "package:photos/ui/actions/collection/collection_file_actions.dart";
 import "package:photos/ui/actions/collection/collection_sharing_actions.dart";
 import "package:photos/ui/collections/album/column_item.dart";
 import "package:photos/ui/collections/album/new_list_item.dart";
@@ -24,7 +22,6 @@ import 'package:photos/ui/viewer/gallery/collection_page.dart';
 import "package:photos/ui/viewer/gallery/empty_state.dart";
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/navigation_util.dart';
-import 'package:photos/utils/share_util.dart';
 import 'package:photos/utils/toast_util.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 
@@ -47,6 +44,8 @@ class AlbumVerticalListWidget extends StatelessWidget {
   }) : super(key: key);
 
   final _logger = Logger("CollectionsListWidgetState");
+  final CollectionActions _collectionActions =
+      CollectionActions(CollectionsService.instance);
 
   @override
   Widget build(BuildContext context) {
@@ -123,7 +122,6 @@ class AlbumVerticalListWidget extends StatelessWidget {
       await showToast(
         context,
         S.of(context).createAlbumActionHint,
-        toastLength: Toast.LENGTH_LONG,
       );
       Bus.instance.fire(
         TabChangedEvent(
@@ -136,7 +134,17 @@ class AlbumVerticalListWidget extends StatelessWidget {
 
   Future<void> _nameAlbum(BuildContext context, String albumName) async {
     if (albumName.isNotEmpty) {
-      final collection = await _createAlbum(albumName);
+      bool hasVerifiedLock = false;
+      late final Collection? collection;
+
+      if (actionType == CollectionActionType.moveToHiddenCollection) {
+        collection =
+            await CollectionsService.instance.createHiddenAlbum(albumName);
+        hasVerifiedLock = true;
+      } else {
+        collection = await _createAlbum(albumName);
+      }
+
       if (collection != null) {
         if (await _runCollectionAction(
           context,
@@ -154,7 +162,11 @@ class AlbumVerticalListWidget extends StatelessWidget {
               "Album '" + albumName + "' created.",
             );
           }
-          _navigateToCollection(context, collection);
+          _navigateToCollection(
+            context,
+            collection,
+            hasVerifiedLock: hasVerifiedLock,
+          );
         }
       }
     }
@@ -178,6 +190,8 @@ class AlbumVerticalListWidget extends StatelessWidget {
     if (await _runCollectionAction(context, item)) {
       late final String toastMessage;
       bool shouldNavigateToCollection = false;
+      bool hasVerifiedLock = false;
+
       if (actionType == CollectionActionType.addFiles) {
         toastMessage = S.of(context).addedSuccessfullyTo(item.displayName);
         shouldNavigateToCollection = true;
@@ -186,6 +200,14 @@ class AlbumVerticalListWidget extends StatelessWidget {
           actionType == CollectionActionType.unHide) {
         toastMessage = S.of(context).movedSuccessfullyTo(item.displayName);
         shouldNavigateToCollection = true;
+      } else if (actionType == CollectionActionType.moveToHiddenCollection) {
+        toastMessage = S.of(context).movedSuccessfullyTo(item.displayName);
+        shouldNavigateToCollection = true;
+        hasVerifiedLock = true;
+      } else if (actionType == CollectionActionType.addToHiddenAlbum) {
+        toastMessage = S.of(context).addedSuccessfullyTo(item.displayName);
+        shouldNavigateToCollection = true;
+        hasVerifiedLock = true;
       } else {
         toastMessage = "";
       }
@@ -199,6 +221,7 @@ class AlbumVerticalListWidget extends StatelessWidget {
         _navigateToCollection(
           context,
           item,
+          hasVerifiedLock: hasVerifiedLock,
         );
       }
     }
@@ -226,15 +249,24 @@ class AlbumVerticalListWidget extends StatelessWidget {
         return _showShareCollectionPage(context, collection);
       case CollectionActionType.collectPhotos:
         return _createCollaborativeLink(context, collection);
+      case CollectionActionType.moveToHiddenCollection:
+        return _moveFilesToCollection(context, collection.id);
+      case CollectionActionType.addToHiddenAlbum:
+        return _addToCollection(context, collection.id, showProgressDialog);
     }
   }
 
-  void _navigateToCollection(BuildContext context, Collection collection) {
+  void _navigateToCollection(
+    BuildContext context,
+    Collection collection, {
+    bool hasVerifiedLock = false,
+  }) {
     Navigator.pop(context);
     routeToPage(
       context,
       CollectionPage(
         CollectionWithThumbnail(collection, null),
+        hasVerifiedLock: hasVerifiedLock,
       ),
     );
   }
@@ -331,88 +363,31 @@ class AlbumVerticalListWidget extends StatelessWidget {
     int collectionID,
     bool showProgressDialog,
   ) async {
-    final dialog = showProgressDialog
-        ? createProgressDialog(
-            context,
-            S.of(context).uploadingFilesToAlbum,
-            isDismissible: true,
-          )
-        : null;
-    await dialog?.show();
-    try {
-      final List<File> files = [];
-      final List<File> filesPendingUpload = [];
-      final int currentUserID = Configuration.instance.getUserID()!;
-      if (sharedFiles != null) {
-        filesPendingUpload.addAll(
-          await convertIncomingSharedMediaToFile(
-            sharedFiles!,
-            collectionID,
-          ),
-        );
-      } else {
-        for (final file in selectedFiles!.files) {
-          File? currentFile;
-          if (file.uploadedFileID != null) {
-            currentFile = file;
-          } else if (file.generatedID != null) {
-            // when file is not uploaded, refresh the state from the db to
-            // ensure we have latest upload status for given file before
-            // queueing it up as pending upload
-            currentFile = await (FilesDB.instance.getFile(file.generatedID!));
-          } else if (file.generatedID == null) {
-            _logger.severe("generated id should not be null");
-          }
-          if (currentFile == null) {
-            _logger.severe("Failed to find fileBy genID");
-            continue;
-          }
-          if (currentFile.uploadedFileID == null) {
-            currentFile.collectionID = collectionID;
-            filesPendingUpload.add(currentFile);
-          } else {
-            files.add(currentFile);
-          }
-        }
-      }
-      if (filesPendingUpload.isNotEmpty) {
-        // Newly created collection might not be cached
-        final Collection? c =
-            CollectionsService.instance.getCollectionByID(collectionID);
-        if (c != null && c.owner!.id != currentUserID) {
-          showToast(context, S.of(context).canNotUploadToAlbumsOwnedByOthers);
-          await dialog?.hide();
-          return false;
-        } else {
-          // filesPendingUpload might be getting ignored during auto-upload
-          // because the user deleted these files from ente in the past.
-          await IgnoredFilesService.instance
-              .removeIgnoredMappings(filesPendingUpload);
-          await FilesDB.instance.insertMultiple(filesPendingUpload);
-        }
-      }
-      if (files.isNotEmpty) {
-        await CollectionsService.instance.addToCollection(collectionID, files);
-      }
-      RemoteSyncService.instance.sync(silently: true);
-      await dialog?.hide();
+    bool result = await _collectionActions.addToCollection(
+      context,
+      collectionID,
+      showProgressDialog,
+      selectedFiles: selectedFiles?.files.toList(),
+      sharedFiles: sharedFiles,
+    );
+    if (result) {
       selectedFiles?.clearAll();
-      return true;
-    } catch (e, s) {
-      _logger.severe("Failed to add to album", e, s);
-      await dialog?.hide();
-      showGenericErrorDialog(context: context);
-      rethrow;
     }
+    return result;
   }
 
   Future<bool> _moveFilesToCollection(
     BuildContext context,
     int toCollectionID,
   ) async {
-    final String message = actionType == CollectionActionType.moveFiles
-        ? S.of(context).movingFilesToAlbum
-        : S.of(context).unhidingFilesToAlbum;
+    late final String message;
+    if (actionType == CollectionActionType.moveFiles ||
+        actionType == CollectionActionType.moveToHiddenCollection) {
+      message = S.of(context).movingFilesToAlbum;
+    } else {
+      message = S.of(context).unhidingFilesToAlbum;
+    }
+
     final dialog = createProgressDialog(context, message, isDismissible: true);
     await dialog.show();
     try {

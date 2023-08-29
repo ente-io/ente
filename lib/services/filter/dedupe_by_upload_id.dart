@@ -1,4 +1,4 @@
-import "package:photos/models/file.dart";
+import 'package:photos/models/file/file.dart';
 import "package:photos/services/filter/filter.dart";
 
 // DedupeUploadIDFilter will filter out files where were previously filtered
@@ -7,7 +7,7 @@ class DedupeUploadIDFilter extends Filter {
   final Set<int> trackedUploadIDs = {};
 
   @override
-  bool filter(File file) {
+  bool filter(EnteFile file) {
     if (!file.isUploaded) {
       return true;
     }

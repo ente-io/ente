@@ -7,7 +7,7 @@ import "package:photos/core/event_bus.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/events/local_photos_updated_event.dart";
 import "package:photos/generated/l10n.dart";
-import "package:photos/models/file.dart";
+import 'package:photos/models/file/file.dart';
 import "package:photos/models/file_load_result.dart";
 import "package:photos/models/local_entity_data.dart";
 import "package:photos/models/location_tag/location_tag.dart";
@@ -22,7 +22,7 @@ import "package:photos/ui/components/models/button_type.dart";
 import "package:photos/ui/components/title_bar_title_widget.dart";
 import "package:photos/ui/viewer/gallery/gallery.dart";
 
-Future<File?> showPickCenterPointSheet(
+Future<EnteFile?> showPickCenterPointSheet(
   BuildContext context,
   LocalEntity<LocationTag> locationTagEntity,
 ) async {

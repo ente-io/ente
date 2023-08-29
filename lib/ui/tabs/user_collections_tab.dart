@@ -8,17 +8,17 @@ import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/events/user_logged_out_event.dart';
 import "package:photos/generated/l10n.dart";
-import 'package:photos/models/collection.dart';
+import 'package:photos/models/collection/collection.dart';
 import 'package:photos/services/collections_service.dart';
 import "package:photos/ui/collections/button/archived_button.dart";
 import "package:photos/ui/collections/button/hidden_button.dart";
 import "package:photos/ui/collections/button/trash_button.dart";
 import "package:photos/ui/collections/button/uncategorized_button.dart";
 import "package:photos/ui/collections/collection_list_page.dart";
-import "package:photos/ui/collections/create_new_album_widget.dart";
 import "package:photos/ui/collections/device/device_folders_grid_view.dart";
 import "package:photos/ui/collections/device/device_folders_vertical_grid_view.dart";
 import "package:photos/ui/collections/flex_grid_view.dart";
+import "package:photos/ui/collections/new_album_icon.dart";
 import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/components/buttons/icon_button_widget.dart';
 import "package:photos/ui/tabs/section_title.dart";
@@ -224,7 +224,7 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
       ),
       child: Row(
         children: [
-          const CreateNewAlbumIcon(),
+          const NewAlbumIcon(),
           GestureDetector(
             onTapDown: (TapDownDetails details) async {
               final int? selectedValue = await showMenu<int>(

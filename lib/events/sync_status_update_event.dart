@@ -1,5 +1,4 @@
 import "package:logging/logging.dart";
-
 import 'package:photos/events/event.dart';
 
 class SyncStatusUpdate extends Event {

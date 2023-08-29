@@ -3,7 +3,7 @@ import 'dart:io';
 
 import 'package:logging/logging.dart';
 import 'package:photos/db/ignored_files_db.dart';
-import 'package:photos/models/file.dart';
+import 'package:photos/models/file/file.dart';
 import 'package:photos/models/ignored_file.dart';
 
 class IgnoredFilesService {
@@ -39,7 +39,7 @@ class IgnoredFilesService {
   // to avoid making it async in nature.
   // This syntax is intentional as we want to ensure that ignoredIDs are loaded
   // from the DB before calling this method.
-  bool shouldSkipUpload(Map<String, String> idToReasonMap, File file) {
+  bool shouldSkipUpload(Map<String, String> idToReasonMap, EnteFile file) {
     final id = _getIgnoreID(file.localID, file.deviceFolder, file.title);
     if (id != null && id.isNotEmpty) {
       return idToReasonMap.containsKey(id);
@@ -47,7 +47,7 @@ class IgnoredFilesService {
     return false;
   }
 
-  String? getUploadSkipReason(Map<String, String> idToReasonMap, File file) {
+  String? getUploadSkipReason(Map<String, String> idToReasonMap, EnteFile file) {
     final id = _getIgnoreID(file.localID, file.deviceFolder, file.title);
     if (id != null && id.isNotEmpty) {
       return idToReasonMap[id];
@@ -55,14 +55,14 @@ class IgnoredFilesService {
     return null;
   }
 
-  Future<bool> shouldSkipUploadAsync(File file) async {
+  Future<bool> shouldSkipUploadAsync(EnteFile file) async {
     final ignoredID = await idToIgnoreReasonMap;
     return shouldSkipUpload(ignoredID, file);
   }
 
   // removeIgnoredMappings is used to remove the ignore mapping for the given
   // set of files so that they can be uploaded.
-  Future<void> removeIgnoredMappings(List<File> files) async {
+  Future<void> removeIgnoredMappings(List<EnteFile> files) async {
     final List<IgnoredFile> ignoredFiles = [];
     final Set<String> idsToRemoveFromCache = {};
     final Map<String, String> currentlyIgnoredIDs = await idToIgnoreReasonMap;
@@ -114,7 +114,7 @@ class IgnoredFilesService {
     );
   }
 
-  String? getIgnoredIDForFile(File file) {
+  String? getIgnoredIDForFile(EnteFile file) {
     return _getIgnoreID(
       file.localID,
       file.deviceFolder,

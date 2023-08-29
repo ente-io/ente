@@ -9,8 +9,8 @@ import 'package:photos/db/files_db.dart';
 import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/models/api/collection/create_request.dart';
-import 'package:photos/models/collection.dart';
-import 'package:photos/models/file.dart';
+import 'package:photos/models/collection/collection.dart';
+import 'package:photos/models/file/file.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/remote_sync_service.dart';
 import 'package:photos/ui/actions/collection/collection_sharing_actions.dart';
@@ -76,7 +76,7 @@ class FavoritesService {
     _cachedFavoritesCollectionID = null;
   }
 
-  bool isFavoriteCache(File file, {bool checkOnlyAlbum = false}) {
+  bool isFavoriteCache(EnteFile file, {bool checkOnlyAlbum = false}) {
     if (file.collectionID != null &&
         _cachedFavoritesCollectionID != null &&
         file.collectionID == _cachedFavoritesCollectionID) {
@@ -94,7 +94,7 @@ class FavoritesService {
     return false;
   }
 
-  Future<bool> isFavorite(File file) async {
+  Future<bool> isFavorite(EnteFile file) async {
     final collection = await _getFavoritesCollection();
     if (collection == null || file.uploadedFileID == null) {
       return false;
@@ -105,7 +105,7 @@ class FavoritesService {
     );
   }
 
-  void _updateFavoriteFilesCache(List<File> files, {required bool favFlag}) {
+  void _updateFavoriteFilesCache(List<EnteFile> files, {required bool favFlag}) {
     final Set<int> updatedIDs = {};
     final Set<String> localIDs = {};
     for (var file in files) {
@@ -126,9 +126,9 @@ class FavoritesService {
     }
   }
 
-  Future<void> addToFavorites(BuildContext context, File file) async {
+  Future<void> addToFavorites(BuildContext context, EnteFile file) async {
     final collectionID = await _getOrCreateFavoriteCollectionID();
-    final List<File> files = [file];
+    final List<EnteFile> files = [file];
     if (file.uploadedFileID == null) {
       file.collectionID = collectionID;
       await _filesDB.insert(file);
@@ -142,7 +142,7 @@ class FavoritesService {
 
   Future<void> updateFavorites(
     BuildContext context,
-    List<File> files,
+    List<EnteFile> files,
     bool favFlag,
   ) async {
     final int currentUserID = Configuration.instance.getUserID()!;
@@ -166,7 +166,7 @@ class FavoritesService {
     _updateFavoriteFilesCache(files, favFlag: favFlag);
   }
 
-  Future<void> removeFromFavorites(BuildContext context, File file) async {
+  Future<void> removeFromFavorites(BuildContext context, EnteFile file) async {
     final fileID = file.uploadedFileID;
     if (fileID == null) {
       // Do nothing, ignore

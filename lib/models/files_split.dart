@@ -1,9 +1,9 @@
-import 'package:photos/models/file.dart';
+import 'package:photos/models/file/file.dart';
 
 class FilesSplit {
-  final List<File> pendingUploads;
-  final List<File> ownedByCurrentUser;
-  final List<File> ownedByOtherUsers;
+  final List<EnteFile> pendingUploads;
+  final List<EnteFile> ownedByCurrentUser;
+  final List<EnteFile> ownedByOtherUsers;
 
   FilesSplit({
     required this.pendingUploads,
@@ -14,8 +14,8 @@ class FilesSplit {
   int get totalFileOwnedCount =>
       pendingUploads.length + ownedByCurrentUser.length;
 
-  static FilesSplit split(Iterable<File> files, int currentUserID) {
-    final List<File> ownedByCurrentUser = [],
+  static FilesSplit split(Iterable<EnteFile> files, int currentUserID) {
+    final List<EnteFile> ownedByCurrentUser = [],
         ownedByOtherUsers = [],
         pendingUploads = [];
     for (var f in files) {

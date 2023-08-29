@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:photos/models/file.dart';
+import 'package:photos/models/file/file.dart';
 import 'package:photos/services/collections_service.dart';
 
 class DuplicateFilesResponse {
@@ -42,7 +42,7 @@ class DuplicateItems {
 }
 
 class DuplicateFiles {
-  final List<File> files;
+  final List<EnteFile> files;
   final int size;
   static final collectionsService = CollectionsService.instance;
 

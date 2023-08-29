@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import "package:photos/core/configuration.dart";
 import "package:photos/generated/l10n.dart";
-import 'package:photos/models/collection.dart';
+import 'package:photos/models/collection/collection.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/theme/colors.dart';
@@ -27,6 +27,8 @@ enum CollectionActionType {
   unHide,
   shareCollection,
   collectPhotos,
+  addToHiddenAlbum,
+  moveToHiddenCollection,
 }
 
 String _actionName(
@@ -53,6 +55,10 @@ String _actionName(
       break;
     case CollectionActionType.collectPhotos:
       text = S.of(context).share;
+    case CollectionActionType.addToHiddenAlbum:
+      text = S.of(context).addToHiddenAlbum;
+    case CollectionActionType.moveToHiddenCollection:
+      text = S.of(context).moveToHiddenAlbum;
       break;
   }
   return text;
@@ -106,8 +112,17 @@ class CollectionActionSheet extends StatefulWidget {
 }
 
 class _CollectionActionSheetState extends State<CollectionActionSheet> {
+  late final bool _showOnlyHiddenCollections;
   static const int cancelButtonSize = 80;
   String _searchQuery = "";
+
+  @override
+  void initState() {
+    super.initState();
+    _showOnlyHiddenCollections =
+        widget.actionType == CollectionActionType.moveToHiddenCollection ||
+            widget.actionType == CollectionActionType.addToHiddenAlbum;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -166,7 +181,7 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
                             borderRadius: 2,
                           ),
                         ),
-                        _getCollectionItems(filesCount),
+                        _getCollectionItems(),
                       ],
                     ),
                   ),
@@ -198,12 +213,12 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
     );
   }
 
-  Flexible _getCollectionItems(int filesCount) {
+  Flexible _getCollectionItems() {
     return Flexible(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 24, 4, 0),
         child: FutureBuilder<List<Collection>>(
-          future: _getCollectionsWithThumbnail(),
+          future: _getCollections(),
           builder: (context, snapshot) {
             if (snapshot.hasError) {
               //Need to show an error on the UI here
@@ -246,34 +261,55 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
     );
   }
 
-  Future<List<Collection>> _getCollectionsWithThumbnail() async {
-    final List<Collection> collections =
-        CollectionsService.instance.getCollectionsForUI(
-      // in collections where user is a collaborator, only addTo and remove
-      // action can to be performed
-      includeCollab: widget.actionType == CollectionActionType.addFiles,
-    );
-    collections.sort((first, second) {
-      return compareAsciiLowerCaseNatural(
-        first.displayName,
-        second.displayName,
+  Future<List<Collection>> _getCollections() async {
+    if (_showOnlyHiddenCollections) {
+      final hiddenCollections = CollectionsService.instance
+          .getHiddenCollections(includeDefaultHidden: false);
+      hiddenCollections.sort((first, second) {
+        return compareAsciiLowerCaseNatural(
+          first.displayName,
+          second.displayName,
+        );
+      });
+      return hiddenCollections;
+    } else {
+      final bool includeUncategorized =
+          widget.actionType == CollectionActionType.restoreFiles;
+      final List<Collection> collections =
+          CollectionsService.instance.getCollectionsForUI(
+        // in collections where user is a collaborator, only addTo and remove
+        // action can to be performed
+        includeCollab: widget.actionType == CollectionActionType.addFiles,
+        includeUncategorized: includeUncategorized,
       );
-    });
-    final List<Collection> pinned = [];
-    final List<Collection> unpinned = [];
-    for (final collection in collections) {
-      if (collection.isQuickLinkCollection() ||
-          collection.type == CollectionType.favorites ||
-          collection.type == CollectionType.uncategorized) {
-        continue;
+      collections.sort((first, second) {
+        return compareAsciiLowerCaseNatural(
+          first.displayName,
+          second.displayName,
+        );
+      });
+      final List<Collection> pinned = [];
+      final List<Collection> unpinned = [];
+      // show uncategorized collection only for restore files action
+      Collection? uncategorized;
+      for (final collection in collections) {
+        if (collection.isQuickLinkCollection() ||
+            collection.type == CollectionType.favorites ||
+            collection.type == CollectionType.uncategorized) {
+          if (collection.type == CollectionType.uncategorized &&
+              includeUncategorized) {
+            uncategorized = collection;
+          }
+          continue;
+        }
+        if (collection.isPinned) {
+          pinned.add(collection);
+        } else {
+          unpinned.add(collection);
+        }
       }
-      if (collection.isPinned) {
-        pinned.add(collection);
-      } else {
-        unpinned.add(collection);
-      }
+      return pinned + unpinned + (uncategorized != null ? [uncategorized] : []);
     }
-    return pinned + unpinned;
   }
 
   void _removeIncomingCollections(List<Collection> items) {

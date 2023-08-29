@@ -229,6 +229,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "addToAlbum":
             MessageLookupByLibrary.simpleMessage("Aggiungi all\'album"),
         "addToEnte": MessageLookupByLibrary.simpleMessage("Aggiungi su ente"),
+        "addToHiddenAlbum":
+            MessageLookupByLibrary.simpleMessage("Add to hidden album"),
         "addViewer":
             MessageLookupByLibrary.simpleMessage("Aggiungi in sola lettura"),
         "addedAs": MessageLookupByLibrary.simpleMessage("Aggiunto come"),
@@ -858,6 +860,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "moveItem": m29,
         "moveToAlbum":
             MessageLookupByLibrary.simpleMessage("Sposta nell\'album"),
+        "moveToHiddenAlbum":
+            MessageLookupByLibrary.simpleMessage("Move to hidden album"),
         "movedSuccessfullyTo": m30,
         "movedToTrash":
             MessageLookupByLibrary.simpleMessage("Spostato nel cestino"),

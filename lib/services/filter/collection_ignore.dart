@@ -1,4 +1,4 @@
-import "package:photos/models/file.dart";
+import 'package:photos/models/file/file.dart';
 import "package:photos/services/filter/filter.dart";
 
 // CollectionsIgnoreFilter will filter out files that are in present in the
@@ -9,11 +9,11 @@ class CollectionsIgnoreFilter extends Filter {
 
   Set<int>? _ignoredUploadIDs;
 
-  CollectionsIgnoreFilter(this.collectionIDs, List<File> files) : super() {
+  CollectionsIgnoreFilter(this.collectionIDs, List<EnteFile> files) : super() {
     init(files);
   }
 
-  void init(List<File> files) {
+  void init(List<EnteFile> files) {
     _ignoredUploadIDs = {};
     if (collectionIDs.isEmpty) return;
     for (var file in files) {
@@ -26,7 +26,7 @@ class CollectionsIgnoreFilter extends Filter {
   }
 
   @override
-  bool filter(File file) {
+  bool filter(EnteFile file) {
     if (!file.isUploaded) {
       // if file is in one of the ignored collections, filter it out. This check
       // avoids showing un-uploaded files that are going to be uploaded to one of

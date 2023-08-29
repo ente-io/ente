@@ -2,14 +2,14 @@ import "package:flutter/material.dart";
 import "package:flutter_datetime_picker_bdaya/flutter_datetime_picker_bdaya.dart";
 import "package:intl/intl.dart";
 import "package:photos/ente_theme_data.dart";
-import "package:photos/models/file.dart";
+import 'package:photos/models/file/file.dart';
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/info_item_widget.dart";
 import "package:photos/utils/date_time_util.dart";
 import "package:photos/utils/magic_util.dart";
 
 class CreationTimeItem extends StatefulWidget {
-  final File file;
+  final EnteFile file;
   final int currentUserID;
   const CreationTimeItem(this.file, this.currentUserID, {super.key});
 
@@ -45,7 +45,7 @@ class _CreationTimeItemState extends State<CreationTimeItem> {
     );
   }
 
-  void _showDateTimePicker(File file) async {
+  void _showDateTimePicker(EnteFile file) async {
     final dateResult = await DatePickerBdaya.showDatePicker(
       context,
       minTime: DateTime(1800, 1, 1),

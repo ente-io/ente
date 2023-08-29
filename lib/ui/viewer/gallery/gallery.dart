@@ -8,7 +8,7 @@ import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/event.dart';
 import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/events/tab_changed_event.dart';
-import 'package:photos/models/file.dart';
+import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file_load_result.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/ui/common/loading_widget.dart';
@@ -29,7 +29,7 @@ typedef SortAscFn = bool Function();
 
 class Gallery extends StatefulWidget {
   final GalleryLoader asyncLoader;
-  final List<File>? initialFiles;
+  final List<EnteFile>? initialFiles;
   final Stream<FilesUpdatedEvent>? reloadEvent;
   final List<Stream<Event>>? forceReloadEvents;
   final Set<EventType> removalEventTypes;
@@ -91,7 +91,7 @@ class _GalleryState extends State<Gallery> {
   static const int kInitialLoadLimit = 100;
 
   late Logger _logger;
-  List<List<File>> _currentGroupedFiles = [];
+  List<List<EnteFile>> _currentGroupedFiles = [];
   bool _hasLoadedFiles = false;
   late ItemScrollController _itemScroller;
   StreamSubscription<FilesUpdatedEvent>? _reloadEventSubscription;
@@ -159,7 +159,7 @@ class _GalleryState extends State<Gallery> {
     super.initState();
   }
 
-  void _setFilesAndReload(List<File> files) {
+  void _setFilesAndReload(List<EnteFile> files) {
     final hasReloaded = _onFilesLoaded(files);
     if (!hasReloaded && mounted) {
       setState(() {});
@@ -194,7 +194,7 @@ class _GalleryState extends State<Gallery> {
 
   // group files into multiple groups and returns `true` if it resulted in a
   // gallery reload
-  bool _onFilesLoaded(List<File> files) {
+  bool _onFilesLoaded(List<EnteFile> files) {
     final updatedGroupedFiles =
         widget.enableFileGrouping ? _groupFiles(files) : [files];
     if (_currentGroupedFiles.length != updatedGroupedFiles.length ||
@@ -254,9 +254,9 @@ class _GalleryState extends State<Gallery> {
     );
   }
 
-  List<List<File>> _groupFiles(List<File> files) {
-    List<File> dailyFiles = [];
-    final List<List<File>> resultGroupedFiles = [];
+  List<List<EnteFile>> _groupFiles(List<EnteFile> files) {
+    List<EnteFile> dailyFiles = [];
+    final List<List<EnteFile>> resultGroupedFiles = [];
     for (int index = 0; index < files.length; index++) {
       if (index > 0 &&
           !areFromSameDay(

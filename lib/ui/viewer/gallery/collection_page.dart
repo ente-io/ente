@@ -5,8 +5,8 @@ import 'package:photos/db/files_db.dart';
 import "package:photos/events/collection_meta_event.dart";
 import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/events/files_updated_event.dart';
-import 'package:photos/models/collection_items.dart';
-import 'package:photos/models/file.dart';
+import 'package:photos/models/collection/collection_items.dart';
+import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file_load_result.dart';
 import 'package:photos/models/gallery_type.dart';
 import 'package:photos/models/selected_files.dart';
@@ -43,7 +43,7 @@ class CollectionPage extends StatelessWidget {
       c.collection,
       Configuration.instance.getUserID()!,
     );
-    final List<File>? initialFiles =
+    final List<EnteFile>? initialFiles =
         c.thumbnail != null ? [c.thumbnail!] : null;
     final gallery = Gallery(
       asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) async {

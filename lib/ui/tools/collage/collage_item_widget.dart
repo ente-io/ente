@@ -1,6 +1,6 @@
 
 import "package:flutter/material.dart";
-import "package:photos/models/file.dart";
+import 'package:photos/models/file/file.dart';
 import "package:photos/ui/viewer/file/zoomable_image.dart";
 
 class CollageItemWidget extends StatelessWidget {
@@ -9,7 +9,7 @@ class CollageItemWidget extends StatelessWidget {
     super.key,
   });
 
-  final File file;
+  final EnteFile file;
 
   @override
   Widget build(BuildContext context) {

@@ -13,7 +13,7 @@ import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import "package:photos/generated/l10n.dart";
-import 'package:photos/models/file.dart' as ente;
+import 'package:photos/models/file/file.dart' as ente;
 import 'package:photos/models/location/location.dart';
 import 'package:photos/services/sync_service.dart';
 import 'package:photos/ui/common/loading_widget.dart';
@@ -31,7 +31,7 @@ import 'package:syncfusion_flutter_sliders/sliders.dart';
 class ImageEditorPage extends StatefulWidget {
   final ImageProvider imageProvider;
   final DetailPageConfiguration detailPageConfig;
-  final ente.File originalFile;
+  final ente.EnteFile originalFile;
 
   const ImageEditorPage(
     this.imageProvider,
@@ -351,7 +351,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
       PhotoManager.stopChangeNotify();
       final AssetEntity? newAsset =
           await (PhotoManager.editor.saveImage(result, title: fileName));
-      final newFile = await ente.File.fromAsset(
+      final newFile = await ente.EnteFile.fromAsset(
         widget.originalFile.deviceFolder ?? '',
         newAsset!,
       );

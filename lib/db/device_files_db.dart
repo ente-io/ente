@@ -5,7 +5,7 @@ import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/models/backup_status.dart';
 import 'package:photos/models/device_collection.dart';
-import 'package:photos/models/file.dart';
+import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file_load_result.dart';
 import 'package:photos/models/upload_strategy.dart';
 import 'package:photos/services/local/local_sync_util.dart';
@@ -375,7 +375,7 @@ extension DeviceFiles on FilesDB {
     );
     try {
       final db = await database;
-      final coverFiles = <File>[];
+      final coverFiles = <EnteFile>[];
       if (includeCoverThumbnail) {
         final fileRows = await db.rawQuery(
           '''SELECT * FROM FILES where local_id in (select cover_id from device_collections) group by local_id;
@@ -403,7 +403,7 @@ extension DeviceFiles on FilesDB {
             (element) => element.localID == deviceCollection.coverId,
           );
           if (deviceCollection.thumbnail == null) {
-            final File? result =
+            final EnteFile? result =
                 await getDeviceCollectionThumbnail(deviceCollection.id);
             if (result == null) {
               _logger.finest(
@@ -430,7 +430,7 @@ extension DeviceFiles on FilesDB {
     }
   }
 
-  Future<File?> getDeviceCollectionThumbnail(String pathID) async {
+  Future<EnteFile?> getDeviceCollectionThumbnail(String pathID) async {
     debugPrint("Call fallback method to get potential thumbnail");
     final db = await database;
     final fileRows = await db.rawQuery(

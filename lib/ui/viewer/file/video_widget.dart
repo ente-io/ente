@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'dart:io' as io;
+import 'dart:io';
 
 import 'package:chewie/chewie.dart';
 import 'package:flutter/cupertino.dart';
@@ -8,7 +8,7 @@ import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
 import "package:photos/generated/l10n.dart";
-import 'package:photos/models/file.dart';
+import 'package:photos/models/file/file.dart';
 import "package:photos/services/feature_flag_service.dart";
 import 'package:photos/services/files_service.dart';
 import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
@@ -21,7 +21,7 @@ import 'package:visibility_detector/visibility_detector.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
 class VideoWidget extends StatefulWidget {
-  final File file;
+  final EnteFile file;
   final bool? autoPlay;
   final String? tagPrefix;
   final Function(bool)? playbackCallback;
@@ -53,7 +53,7 @@ class _VideoWidgetState extends State<VideoWidget> {
       _loadNetworkVideo();
       _setFileSizeIfNull();
     } else if (widget.file.isSharedMediaToAppSandbox) {
-      final localFile = io.File(getSharedMediaFilePath(widget.file));
+      final localFile = File(getSharedMediaFilePath(widget.file));
       if (localFile.existsSync()) {
         _logger.fine("loading from app cache");
         _setVideoPlayerController(file: localFile);
@@ -125,7 +125,7 @@ class _VideoWidgetState extends State<VideoWidget> {
 
   void _setVideoPlayerController({
     String? url,
-    io.File? file,
+    File? file,
   }) {
     if (!mounted) {
       // Note: Do not initiale video player if widget is not mounted.

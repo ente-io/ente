@@ -12,7 +12,7 @@ import 'package:photos/db/files_db.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/generated/l10n.dart';
 import 'package:photos/models/device_collection.dart';
-import 'package:photos/models/file.dart';
+import 'package:photos/models/file/file.dart';
 import 'package:photos/services/remote_sync_service.dart';
 import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
@@ -407,7 +407,7 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
     });
   }
 
-  Widget _getThumbnail(File file, bool isSelected) {
+  Widget _getThumbnail(EnteFile file, bool isSelected) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(8),
       child: SizedBox(

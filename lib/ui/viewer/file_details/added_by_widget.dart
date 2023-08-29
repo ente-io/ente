@@ -1,11 +1,11 @@
 import "package:flutter/material.dart";
 import "package:photos/generated/l10n.dart";
-import "package:photos/models/file.dart";
+import 'package:photos/models/file/file.dart';
 import "package:photos/services/collections_service.dart";
 import "package:photos/theme/ente_theme.dart";
 
 class AddedByWidget extends StatelessWidget {
-  final File file;
+  final EnteFile file;
   final int currentUserID;
   const AddedByWidget(this.file, this.currentUserID, {super.key});
 

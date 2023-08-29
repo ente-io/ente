@@ -4,7 +4,7 @@ import "dart:math";
 import "package:flutter/material.dart";
 import "package:photos/core/constants.dart";
 import "package:photos/db/files_db.dart";
-import "package:photos/models/file.dart";
+import 'package:photos/models/file/file.dart';
 import "package:photos/models/file_load_result.dart";
 import "package:photos/services/collections_service.dart";
 import "package:photos/services/filter/db_filters.dart";
@@ -60,7 +60,7 @@ class _DynamicLocationGalleryWidgetState
     Future<FileLoadResult> filterFiles() async {
       final FileLoadResult result = await fileLoadResult;
       final stopWatch = Stopwatch()..start();
-      final copyOfFiles = List<File>.from(result.files);
+      final copyOfFiles = List<EnteFile>.from(result.files);
       copyOfFiles.removeWhere((f) {
         return !LocationService.instance.isFileInsideLocationTag(
           InheritedLocationTagData.of(context).centerPoint,

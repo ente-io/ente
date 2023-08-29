@@ -1,5 +1,5 @@
-import "package:photos/models/file.dart";
-import "package:photos/models/file_type.dart";
+import 'package:photos/models/file/file.dart';
+import 'package:photos/models/file/file_type.dart';
 import "package:photos/services/filter/filter.dart";
 
 class TypeFilter extends Filter {
@@ -12,7 +12,7 @@ class TypeFilter extends Filter {
   });
 
   @override
-  bool filter(File file) {
+  bool filter(EnteFile file) {
     return reverse ? file.fileType != type : file.fileType == type;
   }
 }

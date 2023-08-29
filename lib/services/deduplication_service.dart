@@ -4,7 +4,7 @@ import 'package:photos/core/errors.dart';
 import 'package:photos/core/network/network.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/models/duplicate_files.dart';
-import 'package:photos/models/file.dart';
+import 'package:photos/models/file/file.dart';
 import "package:photos/services/collections_service.dart";
 import "package:photos/services/files_service.dart";
 
@@ -33,7 +33,7 @@ class DeduplicationService {
       final result = <DuplicateFiles>[];
       final missingFileIDs = <int>[];
       for (final dupe in dupes.duplicates) {
-        final files = <File>[];
+        final files = <EnteFile>[];
         for (final id in dupe.fileIDs) {
           final file = fileMap[id];
           if (file != null) {
@@ -76,18 +76,18 @@ class DeduplicationService {
 
   List<DuplicateFiles> clubDuplicates(
     List<DuplicateFiles> dupesBySize, {
-    required String? Function(File) clubbingKey,
+    required String? Function(EnteFile) clubbingKey,
   }) {
     final dupesBySizeAndClubKey = <DuplicateFiles>[];
     for (final sizeBasedDupe in dupesBySize) {
-      final Map<String, List<File>> clubKeyToFilesMap = {};
+      final Map<String, List<EnteFile>> clubKeyToFilesMap = {};
       for (final file in sizeBasedDupe.files) {
         final String? clubKey = clubbingKey(file);
         if (clubKey == null || clubKey.isEmpty) {
           continue;
         }
         if (!clubKeyToFilesMap.containsKey(clubKey)) {
-          clubKeyToFilesMap[clubKey] = <File>[];
+          clubKeyToFilesMap[clubKey] = <EnteFile>[];
         }
         clubKeyToFilesMap[clubKey]!.add(file);
       }
@@ -104,7 +104,7 @@ class DeduplicationService {
   }
 
   Future<List<DuplicateFiles>> _getDuplicateFilesFromLocal() async {
-    final List<File> allFiles = await FilesDB.instance.getAllFilesFromDB(
+    final List<EnteFile> allFiles = await FilesDB.instance.getAllFilesFromDB(
       CollectionsService.instance.getHiddenCollectionIds(),
     );
     final int ownerID = Configuration.instance.getUserID()!;
@@ -114,16 +114,16 @@ class DeduplicationService {
           (f.ownerID ?? 0) != ownerID ||
           (f.fileSize ?? 0) <= 0,
     );
-    final Map<int, List<File>> sizeToFilesMap = {};
+    final Map<int, List<EnteFile>> sizeToFilesMap = {};
     for (final file in allFiles) {
       if (!sizeToFilesMap.containsKey(file.fileSize)) {
-        sizeToFilesMap[file.fileSize!] = <File>[];
+        sizeToFilesMap[file.fileSize!] = <EnteFile>[];
       }
       sizeToFilesMap[file.fileSize]!.add(file);
     }
     final List<DuplicateFiles> dupesBySize = [];
     for (final size in sizeToFilesMap.keys) {
-      final List<File> files = sizeToFilesMap[size]!;
+      final List<EnteFile> files = sizeToFilesMap[size]!;
       if (files.length > 1) {
         dupesBySize.add(DuplicateFiles(files, size));
       }

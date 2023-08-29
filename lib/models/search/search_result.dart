@@ -1,17 +1,17 @@
-import 'package:photos/models/file.dart';
+import 'package:photos/models/file/file.dart';
 
 abstract class SearchResult {
   ResultType type();
 
   String name();
 
-  File? previewThumbnail();
+  EnteFile? previewThumbnail();
 
   String heroTag() {
     return '${type().toString()}_${name()}';
   }
 
-  List<File> resultFiles();
+  List<EnteFile> resultFiles();
 }
 
 enum ResultType {

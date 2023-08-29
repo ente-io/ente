@@ -1,6 +1,6 @@
 import "package:flutter/material.dart";
 import "package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart";
-import "package:photos/models/file.dart";
+import 'package:photos/models/file/file.dart';
 import "package:photos/ui/tools/collage/collage_common_widgets.dart";
 import 'package:photos/ui/tools/collage/collage_item_icon.dart';
 import "package:photos/ui/tools/collage/collage_item_widget.dart";
@@ -21,7 +21,7 @@ class CollageWithThreeItems extends StatefulWidget {
     super.key,
   });
 
-  final File first, second, third;
+  final EnteFile first, second, third;
 
   @override
   State<CollageWithThreeItems> createState() => _CollageWithThreeItemsState();

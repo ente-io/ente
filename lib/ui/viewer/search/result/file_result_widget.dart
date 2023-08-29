@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:photos/ente_theme_data.dart';
-import 'package:photos/models/file.dart';
+import 'package:photos/models/file/file.dart';
 import 'package:photos/models/search/file_search_result.dart';
 import 'package:photos/ui/viewer/file/detail_page.dart';
 import 'package:photos/ui/viewer/search/result/search_thumbnail_widget.dart';
@@ -64,7 +64,7 @@ class FileSearchResultWidget extends StatelessWidget {
     );
   }
 
-  void _routeToDetailPage(File file, BuildContext context) {
+  void _routeToDetailPage(EnteFile file, BuildContext context) {
     final page = DetailPage(
       DetailPageConfiguration(
         List.unmodifiable([file]),

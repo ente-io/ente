@@ -3,10 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:photos/core/configuration.dart';
 import "package:photos/generated/l10n.dart";
-import 'package:photos/models/collection.dart';
+import 'package:photos/models/collection/collection.dart';
 import 'package:photos/models/device_collection.dart';
-import 'package:photos/models/file.dart';
-import "package:photos/models/file_type.dart";
+import 'package:photos/models/file/file.dart';
+import 'package:photos/models/file/file_type.dart';
 import 'package:photos/models/files_split.dart';
 import 'package:photos/models/gallery_type.dart';
 import "package:photos/models/metadata/common_keys.dart";
@@ -63,7 +63,7 @@ class _FileSelectionActionsWidgetState
   @override
   void initState() {
     currentUserID = Configuration.instance.getUserID()!;
-    split = FilesSplit.split(<File>[], currentUserID);
+    split = FilesSplit.split(<EnteFile>[], currentUserID);
     widget.selectedFiles.addListener(_selectFileChangeListener);
     collectionActions = CollectionActions(CollectionsService.instance);
     isCollectionOwner =
@@ -171,6 +171,17 @@ class _FileSelectionActionsWidgetState
         );
       }
     }
+
+    if (widget.type.showAddtoHiddenAlbum()) {
+      items.add(
+        SelectionActionButton(
+          icon: Icons.add_outlined,
+          labelText: S.of(context).addToAlbum,
+          onTap: _addToHiddenAlbum,
+        ),
+      );
+    }
+
     if (widget.type.showMoveToAlbum()) {
       items.add(
         SelectionActionButton(
@@ -182,6 +193,16 @@ class _FileSelectionActionsWidgetState
       );
     }
 
+    if (widget.type.showMovetoHiddenAlbum()) {
+      items.add(
+        SelectionActionButton(
+          icon: Icons.arrow_forward_outlined,
+          labelText: S.of(context).moveToAlbum,
+          onTap: _moveFilesToHiddenAlbum,
+        ),
+      );
+    }
+
     if (widget.type.showRemoveFromAlbum()) {
       items.add(
         SelectionActionButton(
@@ -189,6 +210,16 @@ class _FileSelectionActionsWidgetState
           labelText: S.of(context).removeFromAlbum,
           onTap: removeCount > 0 ? _removeFilesFromAlbum : null,
           shouldShow: removeCount > 0,
+        ),
+      );
+    }
+
+    if (widget.type.showRemoveFromHiddenAlbum()) {
+      items.add(
+        SelectionActionButton(
+          icon: Icons.remove_outlined,
+          labelText: S.of(context).removeFromAlbum,
+          onTap: _removeFilesFromHiddenAlbum,
         ),
       );
     }
@@ -332,12 +363,28 @@ class _FileSelectionActionsWidgetState
     );
   }
 
+  Future<void> _moveFilesToHiddenAlbum() async {
+    showCollectionActionSheet(
+      context,
+      selectedFiles: widget.selectedFiles,
+      actionType: CollectionActionType.moveToHiddenCollection,
+    );
+  }
+
   Future<void> _addToAlbum() async {
     if (split.ownedByOtherUsers.isNotEmpty) {
       widget.selectedFiles
           .unSelectAll(split.ownedByOtherUsers.toSet(), skipNotify: true);
     }
     showCollectionActionSheet(context, selectedFiles: widget.selectedFiles);
+  }
+
+  Future<void> _addToHiddenAlbum() async {
+    showCollectionActionSheet(
+      context,
+      selectedFiles: widget.selectedFiles,
+      actionType: CollectionActionType.addToHiddenAlbum,
+    );
   }
 
   Future<void> _onDeleteClick() async {
@@ -360,6 +407,16 @@ class _FileSelectionActionsWidgetState
       widget.collection!,
       widget.selectedFiles,
       removingOthersFile,
+    );
+  }
+
+  Future<void> _removeFilesFromHiddenAlbum() async {
+    await collectionActions.showRemoveFromCollectionSheetV2(
+      context,
+      widget.collection!,
+      widget.selectedFiles,
+      false,
+      isHidden: true,
     );
   }
 

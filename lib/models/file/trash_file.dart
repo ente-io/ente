@@ -1,6 +1,6 @@
-import 'package:photos/models/file.dart';
+import 'package:photos/models/file/file.dart';
 
-class TrashFile extends File {
+class TrashFile extends EnteFile {
   // time when file was put in the trash for first time
   late int createdAt;
 

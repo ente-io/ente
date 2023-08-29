@@ -1,5 +1,5 @@
 import "package:flutter/material.dart";
-import "package:photos/models/file.dart";
+import 'package:photos/models/file/file.dart';
 import "package:photos/models/selected_files.dart";
 import "package:photos/ui/viewer/gallery/component/grid/gallery_grid_view_widget.dart";
 import "package:photos/ui/viewer/gallery/component/grid/place_holder_grid_view_widget.dart";
@@ -8,7 +8,7 @@ import "package:visibility_detector/visibility_detector.dart";
 
 class NonRecyclableGridViewWidget extends StatefulWidget {
   final bool shouldRender;
-  final List<File> filesInGroup;
+  final List<EnteFile> filesInGroup;
   final int photoGridSize;
   final bool limitSelectionToOne;
   final String tag;

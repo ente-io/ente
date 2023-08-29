@@ -7,7 +7,8 @@ import "package:photos/core/event_bus.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/events/collection_updated_event.dart";
 import "package:photos/events/files_updated_event.dart";
-import "package:photos/models/file.dart";
+import 'package:photos/models/file/file.dart';
+import "package:photos/models/ignored_file.dart";
 import "package:photos/services/collections_service.dart";
 import "package:photos/services/hidden_service.dart";
 import "package:photos/services/ignored_files_service.dart";
@@ -17,7 +18,7 @@ import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/utils/toast_util.dart";
 
 class UploadIconWidget extends StatefulWidget {
-  final File file;
+  final EnteFile file;
 
   const UploadIconWidget({super.key, required this.file});
 
@@ -97,7 +98,7 @@ class _UpdateIconWidgetState extends State<UploadIconWidget> {
           if (isQueuedForUpload && isBeingUploaded) {
             return const EnteLoadingWidget();
           }
-          if (isIgnored && kDebugMode) {
+          if (isIgnored && (kDebugMode || ignoreReason != kIgnoreReasonTrash)) {
             showToast(
               context,
               'Upload is ignored due to $ignoreReason',

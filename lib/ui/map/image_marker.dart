@@ -1,7 +1,7 @@
-import "package:photos/models/file.dart";
+import 'package:photos/models/file/file.dart';
 
 class ImageMarker {
-  final File imageFile;
+  final EnteFile imageFile;
   final double latitude;
   final double longitude;
 

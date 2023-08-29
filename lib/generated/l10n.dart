@@ -2950,6 +2950,16 @@ class S {
     );
   }
 
+  /// `Show memories`
+  String get showMemories {
+    return Intl.message(
+      'Show memories',
+      name: 'showMemories',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `{count, plural, one{{count} year ago} other{{count} years ago}}`
   String yearsAgo(num count) {
     return Intl.plural(
@@ -7630,6 +7640,26 @@ class S {
     return Intl.message(
       'Crash reporting',
       name: 'crashReporting',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Add to hidden album`
+  String get addToHiddenAlbum {
+    return Intl.message(
+      'Add to hidden album',
+      name: 'addToHiddenAlbum',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Move to hidden album`
+  String get moveToHiddenAlbum {
+    return Intl.message(
+      'Move to hidden album',
+      name: 'moveToHiddenAlbum',
       desc: '',
       args: [],
     );

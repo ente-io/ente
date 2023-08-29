@@ -1,4 +1,4 @@
-import "package:photos/models/file.dart";
+import 'package:photos/models/file/file.dart';
 import "package:photos/services/filter/filter.dart";
 import "package:photos/services/ignored_files_service.dart";
 
@@ -10,7 +10,7 @@ class UploadIgnoreFilter extends Filter {
   UploadIgnoreFilter(this.idToReasonMap) : super();
 
   @override
-  bool filter(File file) {
+  bool filter(EnteFile file) {
     // Already uploaded files pass the filter
     if (file.isUploaded) return true;
     return !IgnoredFilesService.instance.shouldSkipUpload(idToReasonMap, file);

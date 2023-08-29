@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import "package:flutter_datetime_picker_bdaya/flutter_datetime_picker_bdaya.dart";
 import 'package:photos/ente_theme_data.dart';
 import "package:photos/generated/l10n.dart";
-import 'package:photos/models/collection.dart';
+import 'package:photos/models/collection/collection.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';

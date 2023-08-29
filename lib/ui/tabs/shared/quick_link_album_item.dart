@@ -1,8 +1,8 @@
 import "package:flutter/material.dart";
 import "package:photos/generated/l10n.dart";
-import "package:photos/models/collection.dart";
-import "package:photos/models/collection_items.dart";
-import "package:photos/models/file.dart";
+import 'package:photos/models/collection/collection.dart';
+import 'package:photos/models/collection/collection_items.dart';
+import 'package:photos/models/file/file.dart';
 import "package:photos/services/collections_service.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
@@ -31,7 +31,7 @@ class QuickLinkAlbumItem extends StatelessWidget {
               child: SizedBox(
                 height: 60,
                 width: 60,
-                child: FutureBuilder<File?>(
+                child: FutureBuilder<EnteFile?>(
                   future: CollectionsService.instance.getCover(c),
                   builder: (context, snapshot) {
                     if (snapshot.hasData) {

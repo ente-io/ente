@@ -6,7 +6,7 @@ import "package:photos/core/event_bus.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/events/collection_updated_event.dart";
 import "package:photos/generated/l10n.dart";
-import "package:photos/models/collection.dart";
+import 'package:photos/models/collection/collection.dart';
 import "package:photos/models/file_load_result.dart";
 import "package:photos/models/selected_files.dart";
 import "package:photos/services/ignored_files_service.dart";

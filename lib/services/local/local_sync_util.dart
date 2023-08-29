@@ -6,14 +6,14 @@ import 'package:logging/logging.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/local_import_progress.dart';
-import 'package:photos/models/file.dart';
+import 'package:photos/models/file/file.dart';
 import 'package:tuple/tuple.dart';
 
 final _logger = Logger("FileSyncUtil");
 const ignoreSizeConstraint = SizeConstraint(ignoreSize: true);
 const assetFetchPageSize = 2000;
 
-Future<Tuple2<List<LocalPathAsset>, List<File>>> getLocalPathAssetsAndFiles(
+Future<Tuple2<List<LocalPathAsset>, List<EnteFile>>> getLocalPathAssetsAndFiles(
   int fromTime,
   int toTime,
 ) async {
@@ -27,10 +27,10 @@ Future<Tuple2<List<LocalPathAsset>, List<File>>> getLocalPathAssetsAndFiles(
   // localID if it's already present in another album. This only impacts iOS
   // devices where a file can belong to multiple
   final Set<String> alreadySeenLocalIDs = {};
-  final List<File> uniqueFiles = [];
+  final List<EnteFile> uniqueFiles = [];
   for (AssetPathEntity pathEntity in pathEntities) {
     final List<AssetEntity> assetsInPath = await _getAllAssetLists(pathEntity);
-    late Tuple2<Set<String>, List<File>> result;
+    late Tuple2<Set<String>, List<EnteFile>> result;
     if (assetsInPath.isEmpty) {
       result = const Tuple2({}, []);
     } else {
@@ -191,11 +191,11 @@ LocalDiffResult _getLocalAssetsDiff(Map<String, dynamic> args) {
   );
 }
 
-Future<List<File>> _convertLocalAssetsToUniqueFiles(
+Future<List<EnteFile>> _convertLocalAssetsToUniqueFiles(
   List<LocalPathAsset> assets,
 ) async {
   final Set<String> alreadySeenLocalIDs = <String>{};
-  final List<File> files = [];
+  final List<EnteFile> files = [];
   for (LocalPathAsset localPathAsset in assets) {
     final String localPathName = localPathAsset.pathName;
     for (final String localID in localPathAsset.localIDs) {
@@ -206,7 +206,7 @@ Future<List<File>> _convertLocalAssetsToUniqueFiles(
           continue;
         }
         files.add(
-          await File.fromAsset(localPathName, assetEntity),
+          await EnteFile.fromAsset(localPathName, assetEntity),
         );
         alreadySeenLocalIDs.add(localID);
       }
@@ -285,14 +285,14 @@ Future<List<AssetEntity>> _getAllAssetLists(AssetPathEntity pathEntity) async {
 
 // review: do we need to run this inside compute, after making File.FromAsset
 // sync. If yes, update the method documentation with reason.
-Future<Tuple2<Set<String>, List<File>>> _getLocalIDsAndFilesFromAssets(
+Future<Tuple2<Set<String>, List<EnteFile>>> _getLocalIDsAndFilesFromAssets(
   Map<String, dynamic> args,
 ) async {
   final pathEntity = args["pathEntity"] as AssetPathEntity;
   final assetList = args["assetList"];
   final fromTime = args["fromTime"];
   final alreadySeenLocalIDs = args["alreadySeenLocalIDs"] as Set<String>;
-  final List<File> files = [];
+  final List<EnteFile> files = [];
   final Set<String> localIDs = {};
   for (AssetEntity entity in assetList) {
     localIDs.add(entity.id);
@@ -304,7 +304,7 @@ Future<Tuple2<Set<String>, List<File>>> _getLocalIDsAndFilesFromAssets(
     if (!alreadySeenLocalIDs.contains(entity.id) &&
         assetCreatedOrUpdatedAfterGivenTime) {
       try {
-        final file = await File.fromAsset(pathEntity.name, entity);
+        final file = await EnteFile.fromAsset(pathEntity.name, entity);
         files.add(file);
       } catch (e) {
         _logger.severe(e);
@@ -331,7 +331,7 @@ class LocalDiffResult {
   final List<LocalPathAsset>? localPathAssets;
 
   // set of File object created from localPathAssets
-  List<File>? uniqueLocalFiles;
+  List<EnteFile>? uniqueLocalFiles;
 
   // newPathToLocalIDs represents new entries which needs to be synced to
   // the local db

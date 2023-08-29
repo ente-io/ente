@@ -2,14 +2,14 @@ import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:logging/logging.dart";
 import "package:photos/generated/l10n.dart";
-import "package:photos/models/file.dart";
+import 'package:photos/models/file/file.dart';
 import "package:photos/services/object_detection/object_detection_service.dart";
 import "package:photos/ui/components/buttons/chip_button_widget.dart";
 import "package:photos/ui/components/info_item_widget.dart";
 import "package:photos/utils/thumbnail_util.dart";
 
 class ObjectsItemWidget extends StatelessWidget {
-  final File file;
+  final EnteFile file;
   const ObjectsItemWidget(this.file, {super.key});
 
   @override
@@ -24,7 +24,7 @@ class ObjectsItemWidget extends StatelessWidget {
 
   Future<List<ChipButtonWidget>> _objectTags(
     BuildContext context,
-    File file,
+    EnteFile file,
   ) async {
     try {
       final chipButtons = <ChipButtonWidget>[];

@@ -1,8 +1,8 @@
 import "package:flutter/cupertino.dart";
 import "package:modal_bottom_sheet/modal_bottom_sheet.dart";
 import "package:photos/generated/l10n.dart";
-import "package:photos/models/file.dart";
-import "package:photos/models/file_type.dart";
+import 'package:photos/models/file/file.dart';
+import 'package:photos/models/file/file_type.dart';
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/action_sheet_widget.dart";
@@ -15,8 +15,8 @@ import "package:photos/utils/toast_util.dart";
 
 Future<void> showSingleFileDeleteSheet(
   BuildContext context,
-  File file, {
-  Function(File)? onFileRemoved,
+  EnteFile file, {
+  Function(EnteFile)? onFileRemoved,
 }) async {
   final List<ButtonWidget> buttons = [];
   final String fileType = file.fileType == FileType.video
@@ -129,7 +129,7 @@ Future<void> showSingleFileDeleteSheet(
   }
 }
 
-Future<void> showDetailsSheet(BuildContext context, File file) async {
+Future<void> showDetailsSheet(BuildContext context, EnteFile file) async {
   final colorScheme = getEnteColorScheme(context);
   return showBarModalBottomSheet(
     topControl: const SizedBox.shrink(),

@@ -225,6 +225,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "addSelected": MessageLookupByLibrary.simpleMessage("Add selected"),
         "addToAlbum": MessageLookupByLibrary.simpleMessage("Add to album"),
         "addToEnte": MessageLookupByLibrary.simpleMessage("Add to ente"),
+        "addToHiddenAlbum":
+            MessageLookupByLibrary.simpleMessage("Add to hidden album"),
         "addViewer": MessageLookupByLibrary.simpleMessage("Add viewer"),
         "addedAs": MessageLookupByLibrary.simpleMessage("Added as"),
         "addedBy": m1,
@@ -827,6 +829,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "monthly": MessageLookupByLibrary.simpleMessage("Monthly"),
         "moveItem": m29,
         "moveToAlbum": MessageLookupByLibrary.simpleMessage("Move to album"),
+        "moveToHiddenAlbum":
+            MessageLookupByLibrary.simpleMessage("Move to hidden album"),
         "movedSuccessfullyTo": m30,
         "movedToTrash": MessageLookupByLibrary.simpleMessage("Moved to trash"),
         "movingFilesToAlbum":
@@ -1133,6 +1137,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "sharedWithYou":
             MessageLookupByLibrary.simpleMessage("Shared with you"),
         "sharing": MessageLookupByLibrary.simpleMessage("Sharing..."),
+        "showMemories": MessageLookupByLibrary.simpleMessage("Show memories"),
         "signUpTerms": MessageLookupByLibrary.simpleMessage(
             "I agree to the <u-terms>terms of service</u-terms> and <u-policy>privacy policy</u-policy>"),
         "singleFileDeleteFromDevice": m47,

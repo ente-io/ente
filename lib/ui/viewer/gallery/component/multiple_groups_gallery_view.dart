@@ -4,7 +4,7 @@ import "package:logging/logging.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/ente_theme_data.dart";
 import "package:photos/events/files_updated_event.dart";
-import "package:photos/models/file.dart";
+import 'package:photos/models/file/file.dart';
 import "package:photos/models/selected_files.dart";
 import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/huge_listview/huge_listview.dart";
@@ -23,7 +23,7 @@ group into multiple grid views during rendering.
  */
 class MultipleGroupsGalleryView extends StatelessWidget {
   final ItemScrollController itemScroller;
-  final List<List<File>> groupedFiles;
+  final List<List<EnteFile>> groupedFiles;
   final bool disableScroll;
   final Widget? header;
   final Widget? footer;
@@ -65,7 +65,7 @@ class MultipleGroupsGalleryView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return HugeListView<List<File>>(
+    return HugeListView<List<EnteFile>>(
       controller: itemScroller,
       startIndex: 0,
       totalCount: groupedFiles.length,

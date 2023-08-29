@@ -214,6 +214,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "addMore": MessageLookupByLibrary.simpleMessage("Añadir más"),
         "addToAlbum": MessageLookupByLibrary.simpleMessage("Añadir al álbum"),
         "addToEnte": MessageLookupByLibrary.simpleMessage("Añadir a ente"),
+        "addToHiddenAlbum":
+            MessageLookupByLibrary.simpleMessage("Add to hidden album"),
         "addViewer": MessageLookupByLibrary.simpleMessage("Añadir espectador"),
         "addedAs": MessageLookupByLibrary.simpleMessage("Agregado como"),
         "addedBy": m1,
@@ -792,6 +794,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "monthly": MessageLookupByLibrary.simpleMessage("Mensual"),
         "moveItem": m29,
         "moveToAlbum": MessageLookupByLibrary.simpleMessage("Mover al álbum"),
+        "moveToHiddenAlbum":
+            MessageLookupByLibrary.simpleMessage("Move to hidden album"),
         "movedSuccessfullyTo": m30,
         "movedToTrash":
             MessageLookupByLibrary.simpleMessage("Movido a la papelera"),
