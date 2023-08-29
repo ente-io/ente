@@ -197,26 +197,26 @@ packages:
     dependency: transitive
     description:
       name: camera
-      sha256: "3ad71371b8168a4c8012c0b40a53c05afc75d46cc688b0f37b4611a841d47b25"
+      sha256: b4cede7c66f44fa476272d21bfe143d5f32e75de1ea56f737e3eaf982da23bab
       url: "https://pub.dev"
     source: hosted
-    version: "0.9.8+1"
+    version: "0.10.5+3"
   camera_android:
     dependency: transitive
     description:
       name: camera_android
-      sha256: "665d62c1f334722c7519ca5d3b94ad68ecaa801691870602da5638a42c1fff67"
+      sha256: ffbcf60f107776e0bfda7ed787e7ae6ec7f4cb962598973756daa2ad70d8f191
       url: "https://pub.dev"
     source: hosted
-    version: "0.9.8+3"
+    version: "0.10.8+7"
   camera_avfoundation:
     dependency: transitive
     description:
       name: camera_avfoundation
-      sha256: "1a416e452b30955b392f4efbf23291d3f2ba3660a85e1628859eb62d2a2bab26"
+      sha256: "332747f20cf911980e38c8442108102d4456752711781108fda237635baf362c"
       url: "https://pub.dev"
     source: hosted
-    version: "0.9.13+2"
+    version: "0.9.13+3"
   camera_platform_interface:
     dependency: transitive
     description:
@@ -229,10 +229,10 @@ packages:
     dependency: transitive
     description:
       name: camera_web
-      sha256: "18cdbee5441e9a6fb129fdd9b68a06d1b8c5236932ba97d5faeaefe80db2e5bd"
+      sha256: "894df2a4e9ddd77ffecee9553d5980eeabb8bf09d98e53934859e67dc367933b"
       url: "https://pub.dev"
     source: hosted
-    version: "0.2.1+6"
+    version: "0.3.2+1"
   characters:
     dependency: transitive
     description:
@@ -2018,9 +2018,9 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: a7d7a59a33f7cffa0a2a12ab05625807622cc97a
-      resolved-ref: a7d7a59a33f7cffa0a2a12ab05625807622cc97a
-      url: "https://github.com/elephantum/tflite_flutter_helper.git"
+      ref: "43e87d4b9627539266dc20250beb35bf36320dce"
+      resolved-ref: "43e87d4b9627539266dc20250beb35bf36320dce"
+      url: "https://github.com/pnyompen/tflite_flutter_helper.git"
     source: git
     version: "0.3.0"
   timezone:
