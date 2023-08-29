@@ -36,7 +36,7 @@ class DeviceFolderItem extends StatelessWidget {
                 child: Stack(
                   children: [
                     ThumbnailWidget(
-                      deviceCollection.thumbnail,
+                      deviceCollection.thumbnail!,
                       shouldShowSyncStatus: false,
                       key: Key(
                         "device_folder:" +

@@ -217,12 +217,7 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
                   onTap: () => Navigator.pop(context),
                 ),
               ),
-              SliverToBoxAdapter(
-                child: AddedByWidget(
-                  widget.file,
-                  _currentUserID,
-                ),
-              ),
+              SliverToBoxAdapter(child: AddedByWidget(widget.file)),
               SliverList(
                 delegate: SliverChildBuilderDelegate(
                   (context, index) {

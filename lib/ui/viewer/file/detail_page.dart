@@ -102,6 +102,12 @@ class _DetailPageState extends State<DetailPage> {
 
   @override
   Widget build(BuildContext context) {
+    try {
+      _files![_selectedIndexNotifier.value];
+    } catch (e) {
+      _logger.severe(e);
+      Navigator.pop(context);
+    }
     _logger.info(
       "Opening " +
           _files![_selectedIndexNotifier.value].toString() +
@@ -119,7 +125,6 @@ class _DetailPageState extends State<DetailPage> {
             return FileAppBar(
               _files![selectedIndex],
               _onFileRemoved,
-              Configuration.instance.getUserID(),
               100,
               widget.config.mode == DetailPageMode.full,
               enableFullScreenNotifier: _enableFullScreenNotifier,
