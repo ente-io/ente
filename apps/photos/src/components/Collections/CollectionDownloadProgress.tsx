@@ -1,5 +1,4 @@
 import Notification from 'components/Notification';
-import { HIDDEN_SECTION } from 'constants/collection';
 import { t } from 'i18next';
 import isElectron from 'is-electron';
 import { AppContext } from 'pages/_app';
@@ -13,6 +12,7 @@ export interface CollectionDownloadProgressAttributes {
     total: number;
     collectionName: string;
     collectionID: number;
+    isHidden: boolean;
     downloadPath?: string;
     canceller?: AbortController;
 }
@@ -102,9 +102,11 @@ export const CollectionDownloadProgress: React.FC<CollectionDownloadProgressProp
             if (isElectron()) {
                 ElectronService.openDirectory(attributes.downloadPath);
             } else {
-                if (attributes.collectionID === HIDDEN_SECTION) {
-                    galleryContext.authenticateUser(() => {
-                        galleryContext.setActiveCollectionID(HIDDEN_SECTION);
+                if (attributes.isHidden) {
+                    galleryContext.openHiddenSection(() => {
+                        galleryContext.setActiveCollectionID(
+                            attributes.collectionID
+                        );
                     });
                 } else {
                     galleryContext.setActiveCollectionID(

@@ -9,9 +9,9 @@ import { EnteFile } from 'types/file';
 import { logError } from 'utils/sentry';
 import { CustomError } from 'utils/error';
 import {
-    isSharedFile,
     sortFiles,
     groupFilesBasedOnCollectionID,
+    getUniqueFiles,
 } from 'utils/file';
 import {
     Collection,
@@ -40,8 +40,8 @@ import {
     COLLECTION_SORT_ORDER,
     ALL_SECTION,
     CollectionSummaryType,
-    DUMMY_UNCATEGORIZED_SECTION,
-    HIDDEN_SECTION,
+    DUMMY_UNCATEGORIZED_COLLECTION,
+    HIDDEN_ITEMS_SECTION,
 } from 'constants/collection';
 import { SUB_TYPE, UpdateMagicMetadataRequest } from 'types/magicMetadata';
 import {
@@ -61,6 +61,8 @@ import {
     changeCollectionSubType,
     isIncomingCollabShare,
     isIncomingShare,
+    isDefaultHiddenCollection,
+    getHiddenCollections,
 } from 'utils/collection';
 import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
 import { getLocalFiles } from './fileService';
@@ -73,6 +75,7 @@ import { VISIBILITY_STATE } from 'types/magicMetadata';
 const ENDPOINT = getEndpoint();
 const COLLECTION_TABLE = 'collections';
 const COLLECTION_UPDATION_TIME = 'collection-updation-time';
+const HIDDEN_COLLECTION_IDS = 'hidden-collection-ids';
 
 const UNCATEGORIZED_COLLECTION_NAME = 'Uncategorized';
 export const HIDDEN_COLLECTION_NAME = '.hidden';
@@ -210,26 +213,43 @@ const getCollections = async (
 };
 
 export const getLocalCollections = async (
-    includeHidden = false
+    type: 'normal' | 'hidden' = 'normal'
 ): Promise<Collection[]> => {
+    const collections = await getAllLocalCollections();
+    return type === 'normal'
+        ? getNonHiddenCollections(collections)
+        : getHiddenCollections(collections);
+};
+
+export const getAllLocalCollections = async (): Promise<Collection[]> => {
     const collections: Collection[] =
         (await localForage.getItem(COLLECTION_TABLE)) ?? [];
-    return includeHidden ? collections : getNonHiddenCollections(collections);
+    return collections;
 };
 
 export const getCollectionUpdationTime = async (): Promise<number> =>
     (await localForage.getItem<number>(COLLECTION_UPDATION_TIME)) ?? 0;
 
+export const getHiddenCollectionIDs = async (): Promise<number[]> =>
+    (await localForage.getItem<number[]>(HIDDEN_COLLECTION_IDS)) ?? [];
+
 export const getLatestCollections = async (
-    includeHidden = false
+    type: 'normal' | 'hidden' = 'normal'
 ): Promise<Collection[]> => {
+    const collections = await getAllLatestCollections();
+    return type === 'normal'
+        ? getNonHiddenCollections(collections)
+        : getHiddenCollections(collections);
+};
+export const getAllLatestCollections = async (): Promise<Collection[]> => {
     const collections = await syncCollections();
-    return includeHidden ? collections : getNonHiddenCollections(collections);
+    return collections;
 };
 
 export const syncCollections = async () => {
-    const localCollections = await getLocalCollections(true);
-    const lastCollectionUpdationTime = await getCollectionUpdationTime();
+    const localCollections = await getAllLocalCollections();
+    let lastCollectionUpdationTime = await getCollectionUpdationTime();
+    const hiddenCollectionIDs = await getHiddenCollectionIDs();
     const token = getToken();
     const key = await getActualKey();
     const updatedCollections =
@@ -253,21 +273,45 @@ export const syncCollections = async () => {
     });
 
     const collections: Collection[] = [];
-    let updationTime = await localForage.getItem<number>(
-        COLLECTION_UPDATION_TIME
-    );
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     for (const [_, collection] of latestCollectionsInstances) {
-        if (!collection.isDeleted) {
-            collections.push(collection);
-            updationTime = Math.max(updationTime, collection.updationTime);
-        } else {
+        const isDeletedCollection = collection.isDeleted;
+        const isNewlyHiddenCollection =
+            isHiddenCollection(collection) &&
+            !hiddenCollectionIDs.includes(collection.id);
+        const isNewlyUnHiddenCollection =
+            !isHiddenCollection(collection) &&
+            hiddenCollectionIDs.includes(collection.id);
+        if (
+            isDeletedCollection ||
+            isNewlyHiddenCollection ||
+            isNewlyUnHiddenCollection
+        ) {
             removeCollectionLastSyncTime(collection);
         }
+        if (isDeletedCollection) {
+            continue;
+        }
+        collections.push(collection);
+        lastCollectionUpdationTime = Math.max(
+            lastCollectionUpdationTime,
+            collection.updationTime
+        );
     }
 
+    const updatedHiddenCollectionIDs = collections
+        .filter((collection) => isHiddenCollection(collection))
+        .map((collection) => collection.id);
+
     await localForage.setItem(COLLECTION_TABLE, collections);
-    await localForage.setItem(COLLECTION_UPDATION_TIME, updationTime);
+    await localForage.setItem(
+        COLLECTION_UPDATION_TIME,
+        lastCollectionUpdationTime
+    );
+    await localForage.setItem(
+        HIDDEN_COLLECTION_IDS,
+        updatedHiddenCollectionIDs
+    );
     return collections;
 };
 
@@ -297,8 +341,7 @@ export const getCollection = async (
 };
 
 export const getCollectionLatestFiles = (
-    files: EnteFile[],
-    archivedCollections: Set<number>
+    files: EnteFile[]
 ): CollectionToFileMap => {
     const latestFiles = new Map<number, EnteFile>();
 
@@ -306,20 +349,12 @@ export const getCollectionLatestFiles = (
         if (!latestFiles.has(file.collectionID)) {
             latestFiles.set(file.collectionID, file);
         }
-        if (
-            !latestFiles.has(ALL_SECTION) &&
-            !isArchivedFile(file) &&
-            !archivedCollections.has(file.collectionID)
-        ) {
-            latestFiles.set(ALL_SECTION, file);
-        }
     });
     return latestFiles;
 };
 
 export const getCollectionCoverFiles = (
     files: EnteFile[],
-    archivedCollections: Set<number>,
     collections: Collection[]
 ): CollectionToFileMap => {
     const collectionIDToFileMap = groupFilesBasedOnCollectionID(files);
@@ -350,19 +385,6 @@ export const getCollectionCoverFiles = (
             coverFiles.set(collection.id, collectionFiles[0]);
         }
     });
-
-    for (const file of files) {
-        if (coverFiles.has(ALL_SECTION)) {
-            break;
-        }
-        if (
-            !isArchivedFile(file) &&
-            !archivedCollections.has(file.collectionID)
-        ) {
-            coverFiles.set(ALL_SECTION, file);
-        }
-    }
-
     return coverFiles;
 };
 
@@ -1084,7 +1106,7 @@ export function sortCollectionSummaries(
                     return a.name.localeCompare(b.name);
             }
         })
-        .sort((a, b) => b.order - a.order)
+        .sort((a, b) => b.order ?? 0 - a.order ?? 0)
         .sort(
             (a, b) =>
                 COLLECTION_SORT_ORDER.get(a.type) -
@@ -1107,32 +1129,24 @@ function compareCollectionsLatestFile(first: EnteFile, second: EnteFile) {
     }
 }
 
-export async function getCollectionSummaries(
+export function getCollectionSummaries(
     user: User,
     collections: Collection[],
-    files: EnteFile[],
-    trashedFiles: EnteFile[],
-    hiddenFiles: EnteFile[],
-    archivedCollections: Set<number>
-): Promise<CollectionSummaries> {
+    files: EnteFile[]
+): CollectionSummaries {
     const collectionSummaries: CollectionSummaries = new Map();
-    const collectionLatestFiles = getCollectionLatestFiles(
-        files,
-        archivedCollections
-    );
-    const collectionCoverFiles = getCollectionCoverFiles(
-        files,
-        archivedCollections,
-        collections
-    );
-    const collectionFilesCount = getCollectionsFileCount(
-        files,
-        trashedFiles,
-        hiddenFiles,
-        archivedCollections
-    );
+    const collectionLatestFiles = getCollectionLatestFiles(files);
+    const collectionCoverFiles = getCollectionCoverFiles(files, collections);
+    const collectionFilesCount = getCollectionsFileCount(files);
 
+    let hasUncategorizedCollection = false;
     for (const collection of collections) {
+        if (
+            !hasUncategorizedCollection &&
+            collection.type === CollectionType.uncategorized
+        ) {
+            hasUncategorizedCollection = true;
+        }
         if (
             collectionFilesCount.get(collection.id) ||
             collection.type === CollectionType.uncategorized
@@ -1150,17 +1164,26 @@ export async function getCollectionSummaries(
                 type = CollectionSummaryType.sharedOnlyViaLink;
             } else if (isArchivedCollection(collection)) {
                 type = CollectionSummaryType.archived;
-            } else if (isHiddenCollection(collection)) {
-                type = CollectionSummaryType.hidden;
+            } else if (isDefaultHiddenCollection(collection)) {
+                type = CollectionSummaryType.defaultHidden;
             } else if (isPinnedCollection(collection)) {
                 type = CollectionSummaryType.pinned;
             } else {
                 type = CollectionSummaryType[collection.type];
             }
 
+            let CollectionSummaryItemName: string;
+            if (type === CollectionSummaryType.uncategorized) {
+                CollectionSummaryItemName = t('UNCATEGORIZED');
+            } else if (type === CollectionSummaryType.favorites) {
+                CollectionSummaryItemName = t('FAVORITES');
+            } else {
+                CollectionSummaryItemName = collection.name;
+            }
+
             collectionSummaries.set(collection.id, {
                 id: collection.id,
-                name: collection.name,
+                name: CollectionSummaryItemName,
                 latestFile: collectionLatestFiles.get(collection.id),
                 coverFile: collectionCoverFiles.get(collection.id),
                 fileCount: collectionFilesCount.get(collection.id) ?? 0,
@@ -1170,166 +1193,146 @@ export async function getCollectionSummaries(
             });
         }
     }
-    const uncategorizedCollection = await getUncategorizedCollection(
-        collections
-    );
-
-    if (!uncategorizedCollection) {
+    if (!hasUncategorizedCollection) {
         collectionSummaries.set(
-            DUMMY_UNCATEGORIZED_SECTION,
-            getDummyUncategorizedCollectionSummaries()
+            DUMMY_UNCATEGORIZED_COLLECTION,
+            getDummyUncategorizedCollectionSummary()
         );
-    } else {
-        collectionSummaries.get(uncategorizedCollection.id).name =
-            t('UNCATEGORIZED');
     }
-
-    const favCollection = await getFavCollection();
-    if (favCollection) {
-        const favoriteEntry = collectionSummaries.get(favCollection.id);
-        if (favoriteEntry) {
-            collectionSummaries.get(favCollection.id).name = t('FAVORITES');
-        }
-    }
-
-    collectionSummaries.set(
-        ALL_SECTION,
-        getAllCollectionSummaries(
-            collectionFilesCount,
-            collectionCoverFiles,
-            collectionLatestFiles
-        )
-    );
-    collectionSummaries.set(
-        ARCHIVE_SECTION,
-        getArchivedCollectionSummaries(
-            collectionFilesCount,
-            collectionLatestFiles
-        )
-    );
-    collectionSummaries.set(
-        TRASH_SECTION,
-        getTrashedCollectionSummaries(
-            collectionFilesCount,
-            collectionLatestFiles
-        )
-    );
-
-    collectionSummaries.set(
-        HIDDEN_SECTION,
-        getHiddenCollectionSummaries(
-            collectionFilesCount,
-            collectionLatestFiles
-        )
-    );
 
     return collectionSummaries;
 }
 
-function getCollectionsFileCount(
-    files: EnteFile[],
-    trashedFiles: EnteFile[],
-    hiddenFiles: EnteFile[],
-    archivedCollections: Set<number>
-): CollectionFilesCount {
+function getCollectionsFileCount(files: EnteFile[]): CollectionFilesCount {
     const collectionIDToFileMap = groupFilesBasedOnCollectionID(files);
     const collectionFilesCount = new Map<number, number>();
     for (const [id, files] of collectionIDToFileMap) {
         collectionFilesCount.set(id, files.length);
     }
-    const user: User = getData(LS_KEYS.USER);
-    const uniqueArchivedFileIDs = new Set<number>();
-    const uniqueAllSectionFileIDs = new Set<number>();
-    for (const file of files) {
-        if (isSharedFile(user, file)) {
-            continue;
-        } else if (isArchivedFile(file)) {
-            uniqueArchivedFileIDs.add(file.id);
-        } else if (!archivedCollections.has(file.collectionID)) {
-            uniqueAllSectionFileIDs.add(file.id);
-        }
-    }
-    collectionFilesCount.set(TRASH_SECTION, trashedFiles?.length ?? 0);
-    collectionFilesCount.set(ARCHIVE_SECTION, uniqueArchivedFileIDs.size);
-    collectionFilesCount.set(ALL_SECTION, uniqueAllSectionFileIDs.size);
-    collectionFilesCount.set(HIDDEN_SECTION, hiddenFiles?.length ?? 0);
     return collectionFilesCount;
 }
 
-function getAllCollectionSummaries(
-    collectionFilesCount: CollectionFilesCount,
-    collectionCoverFiles: CollectionToFileMap,
-    collectionsLatestFile: CollectionToFileMap
+export function getSectionSummaries(
+    files: EnteFile[],
+    trashedFiles: EnteFile[],
+    archivedCollections: Set<number>
+): CollectionSummaries {
+    const collectionSummaries: CollectionSummaries = new Map();
+    collectionSummaries.set(
+        ALL_SECTION,
+        getAllSectionSummary(files, archivedCollections)
+    );
+    collectionSummaries.set(
+        TRASH_SECTION,
+        getTrashedCollectionSummary(trashedFiles)
+    );
+    collectionSummaries.set(ARCHIVE_SECTION, getArchivedSectionSummary(files));
+
+    return collectionSummaries;
+}
+
+function getAllSectionSummary(
+    files: EnteFile[],
+    archivedCollections: Set<number>
 ): CollectionSummary {
+    const allSectionFiles = getAllSectionVisibleFiles(
+        files,
+        archivedCollections
+    );
     return {
         id: ALL_SECTION,
         name: t('ALL_SECTION_NAME'),
         type: CollectionSummaryType.all,
-        coverFile: collectionCoverFiles.get(ALL_SECTION),
-        latestFile: collectionsLatestFile.get(ALL_SECTION),
-        fileCount: collectionFilesCount.get(ALL_SECTION) || 0,
-        updationTime: collectionsLatestFile.get(ALL_SECTION)?.updationTime,
-        order: 1,
+        coverFile: allSectionFiles?.[0],
+        latestFile: allSectionFiles?.[0],
+        fileCount: allSectionFiles?.length || 0,
+        updationTime: allSectionFiles?.[0]?.updationTime,
     };
 }
 
-function getDummyUncategorizedCollectionSummaries(): CollectionSummary {
+function getAllSectionVisibleFiles(
+    files: EnteFile[],
+    archivedCollections: Set<number>
+): EnteFile[] {
+    const allSectionVisibleFiles = getUniqueFiles(
+        files.filter((file) => {
+            if (
+                isArchivedFile(file) ||
+                archivedCollections.has(file.collectionID)
+            ) {
+                return false;
+            }
+            return true;
+        })
+    );
+    return allSectionVisibleFiles;
+}
+
+export function getDummyUncategorizedCollectionSummary(): CollectionSummary {
     return {
-        id: DUMMY_UNCATEGORIZED_SECTION,
+        id: DUMMY_UNCATEGORIZED_COLLECTION,
         name: t('UNCATEGORIZED'),
         type: CollectionSummaryType.uncategorized,
         latestFile: null,
         coverFile: null,
         fileCount: 0,
         updationTime: 0,
-        order: 1,
     };
 }
 
-function getHiddenCollectionSummaries(
-    collectionFilesCount: CollectionFilesCount,
-    collectionsLatestFile: CollectionToFileMap
+export function getArchivedSectionSummary(
+    files: EnteFile[]
 ): CollectionSummary {
-    return {
-        id: HIDDEN_SECTION,
-        name: t('HIDDEN'),
-        type: CollectionSummaryType.hidden,
-        coverFile: null,
-        latestFile: collectionsLatestFile.get(HIDDEN_SECTION),
-        fileCount: collectionFilesCount.get(HIDDEN_SECTION) ?? 0,
-        updationTime: collectionsLatestFile.get(HIDDEN_SECTION)?.updationTime,
-        order: -1,
-    };
-}
-function getArchivedCollectionSummaries(
-    collectionFilesCount: CollectionFilesCount,
-    collectionsLatestFile: CollectionToFileMap
-): CollectionSummary {
+    const archivedFiles = getUniqueFiles(
+        files.filter((file) => isArchivedFile(file))
+    );
     return {
         id: ARCHIVE_SECTION,
         name: t('ARCHIVE_SECTION_NAME'),
         type: CollectionSummaryType.archive,
         coverFile: null,
-        latestFile: collectionsLatestFile.get(ARCHIVE_SECTION),
-        fileCount: collectionFilesCount.get(ARCHIVE_SECTION) ?? 0,
-        updationTime: collectionsLatestFile.get(ARCHIVE_SECTION)?.updationTime,
-        order: -1,
+        latestFile: archivedFiles?.[0],
+        fileCount: archivedFiles?.length,
+        updationTime: archivedFiles?.[0]?.updationTime,
     };
 }
 
-function getTrashedCollectionSummaries(
-    collectionFilesCount: CollectionFilesCount,
-    collectionsLatestFile: CollectionToFileMap
+export function getHiddenItemsSummary(
+    hiddenFiles: EnteFile[],
+    hiddenCollections: Collection[]
+): CollectionSummary {
+    const defaultHiddenCollectionIds = new Set(
+        hiddenCollections
+            .filter((collection) => isDefaultHiddenCollection(collection))
+            .map((collection) => collection.id)
+    );
+    const hiddenItems = getUniqueFiles(
+        hiddenFiles.filter((file) =>
+            defaultHiddenCollectionIds.has(file.collectionID)
+        )
+    );
+    return {
+        id: HIDDEN_ITEMS_SECTION,
+        name: t('HIDDEN_ITEMS'),
+        type: CollectionSummaryType.hiddenItems,
+        coverFile: hiddenItems?.[0],
+        latestFile: hiddenItems?.[0],
+        fileCount: hiddenItems?.length,
+        updationTime: hiddenItems?.[0]?.updationTime,
+    };
+}
+
+export function getTrashedCollectionSummary(
+    trashedFiles: EnteFile[]
 ): CollectionSummary {
     return {
         id: TRASH_SECTION,
         name: t('TRASH'),
         type: CollectionSummaryType.trash,
         coverFile: null,
-        latestFile: collectionsLatestFile.get(TRASH_SECTION),
-        fileCount: collectionFilesCount.get(TRASH_SECTION) ?? 0,
-        updationTime: collectionsLatestFile.get(TRASH_SECTION)?.updationTime,
-        order: -1,
+        latestFile: trashedFiles?.[0],
+        fileCount: trashedFiles?.length,
+        updationTime: trashedFiles?.[0]?.updationTime,
     };
 }
 
@@ -1353,10 +1356,10 @@ export function createUnCategorizedCollection() {
     );
 }
 
-export async function getHiddenCollection(): Promise<Collection> {
-    const collections = await getLocalCollections(true);
+export async function getDefaultHiddenCollection(): Promise<Collection> {
+    const collections = await getLocalCollections('hidden');
     const hiddenCollection = collections.find((collection) =>
-        isHiddenCollection(collection)
+        isDefaultHiddenCollection(collection)
     );
 
     return hiddenCollection;
@@ -1371,7 +1374,7 @@ export function createHiddenCollection() {
 
 export async function moveToHiddenCollection(files: EnteFile[]) {
     try {
-        let hiddenCollection = await getHiddenCollection();
+        let hiddenCollection = await getDefaultHiddenCollection();
         if (!hiddenCollection) {
             hiddenCollection = await createHiddenCollection();
         }

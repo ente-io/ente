@@ -8,6 +8,7 @@ import {
     changeCollectionVisibility,
     downloadCollectionHelper,
     downloadDefaultHiddenCollectionHelper,
+    isHiddenCollection,
 } from 'utils/collection';
 import { SetCollectionNamerAttributes } from '../CollectionNamer';
 import { Collection } from 'types/collection';
@@ -17,7 +18,11 @@ import { logError } from 'utils/sentry';
 import { VISIBILITY_STATE } from 'types/magicMetadata';
 import { AppContext } from 'pages/_app';
 import OverflowMenu from 'components/OverflowMenu/menu';
-import { CollectionSummaryType, HIDDEN_SECTION } from 'constants/collection';
+import {
+    ALL_SECTION,
+    CollectionSummaryType,
+    HIDDEN_ITEMS_SECTION,
+} from 'constants/collection';
 import { TrashCollectionOption } from './TrashCollectionOption';
 import { SharedCollectionOption } from './SharedCollectionOption';
 import { OnlyDownloadCollectionOption } from './OnlyDownloadCollectionOption';
@@ -39,7 +44,7 @@ interface CollectionOptionsProps {
     activeCollection: Collection;
     collectionSummaryType: CollectionSummaryType;
     showCollectionShareModal: () => void;
-    redirectToAll: () => void;
+    setActiveCollectionID: (collectionID: number) => void;
 }
 
 export enum CollectionActions {
@@ -58,15 +63,17 @@ export enum CollectionActions {
     LEAVE_SHARED_ALBUM,
     SHOW_SORT_ORDER_MENU,
     UPDATE_COLLECTION_SORT_ORDER,
-    PIN_ALBUM,
-    UNPIN_ALBUM,
+    PIN,
+    UNPIN,
+    HIDE,
+    UNHIDE,
 }
 
 const CollectionOptions = (props: CollectionOptionsProps) => {
     const {
         activeCollection,
         collectionSummaryType,
-        redirectToAll,
+        setActiveCollectionID,
         setCollectionNamerAttributes,
         showCollectionShareModal,
         setCollectionDownloadProgressAttributesCreator,
@@ -138,12 +145,19 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
             case CollectionActions.UPDATE_COLLECTION_SORT_ORDER:
                 callback = updateCollectionSortOrder;
                 break;
-            case CollectionActions.PIN_ALBUM:
+            case CollectionActions.PIN:
                 callback = pinAlbum;
                 break;
-            case CollectionActions.UNPIN_ALBUM:
+            case CollectionActions.UNPIN:
                 callback = unPinAlbum;
                 break;
+            case CollectionActions.HIDE:
+                callback = hideAlbum;
+                break;
+            case CollectionActions.UNHIDE:
+                callback = unHideAlbum;
+                break;
+
             default:
                 logError(
                     Error('invalid collection action '),
@@ -158,6 +172,7 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
                 loader && startLoading();
                 await callback(...args);
             } catch (e) {
+                logError(e, 'collection action failed', { action });
                 setDialogMessage({
                     title: t('ERROR'),
                     content: t('UNKNOWN_ERROR'),
@@ -178,17 +193,17 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
 
     const deleteCollectionAlongWithFiles = async () => {
         await CollectionAPI.deleteCollection(activeCollection.id, false);
-        redirectToAll();
+        setActiveCollectionID(ALL_SECTION);
     };
 
     const deleteCollectionButKeepFiles = async () => {
         await CollectionAPI.deleteCollection(activeCollection.id, true);
-        redirectToAll();
+        setActiveCollectionID(ALL_SECTION);
     };
 
     const leaveSharedAlbum = async () => {
         await CollectionAPI.leaveSharedAlbum(activeCollection.id);
-        redirectToAll();
+        setActiveCollectionID(ALL_SECTION);
     };
 
     const archiveCollection = () => {
@@ -203,9 +218,11 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
         if (isCollectionDownloadInProgress(activeCollection.id)) {
             return;
         }
-        if (collectionSummaryType === CollectionSummaryType.hidden) {
+        if (collectionSummaryType === CollectionSummaryType.hiddenItems) {
             const setCollectionDownloadProgressAttributes =
-                setCollectionDownloadProgressAttributesCreator(HIDDEN_SECTION);
+                setCollectionDownloadProgressAttributesCreator(
+                    HIDDEN_ITEMS_SECTION
+                );
             downloadDefaultHiddenCollectionHelper(
                 setCollectionDownloadProgressAttributes
             );
@@ -224,7 +241,7 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
     const emptyTrash = async () => {
         await TrashService.emptyTrash();
         await TrashService.clearLocalTrash();
-        redirectToAll();
+        setActiveCollectionID(ALL_SECTION);
     };
 
     const showRenameCollectionModal = () => {
@@ -309,6 +326,21 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
         await changeCollectionOrder(activeCollection, 0);
     };
 
+    const hideAlbum = async () => {
+        await changeCollectionVisibility(
+            activeCollection,
+            VISIBILITY_STATE.HIDDEN
+        );
+        setActiveCollectionID(ALL_SECTION);
+    };
+    const unHideAlbum = async () => {
+        await changeCollectionVisibility(
+            activeCollection,
+            VISIBILITY_STATE.VISIBLE
+        );
+        setActiveCollectionID(HIDDEN_ITEMS_SECTION);
+    };
+
     return (
         <HorizontalFlex sx={{ display: 'inline-flex', gap: '16px' }}>
             <QuickOptions
@@ -341,10 +373,11 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
                         handleCollectionAction={handleCollectionAction}
                         downloadOptionText={t('DOWNLOAD_UNCATEGORIZED')}
                     />
-                ) : collectionSummaryType === CollectionSummaryType.hidden ? (
+                ) : collectionSummaryType ===
+                  CollectionSummaryType.hiddenItems ? (
                     <OnlyDownloadCollectionOption
                         handleCollectionAction={handleCollectionAction}
-                        downloadOptionText={t('DOWNLOAD_HIDDEN')}
+                        downloadOptionText={t('DOWNLOAD_HIDDEN_ITEMS')}
                     />
                 ) : collectionSummaryType ===
                       CollectionSummaryType.incomingShareViewer ||
@@ -357,6 +390,7 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
                 ) : (
                     <AlbumCollectionOption
                         isArchived={isArchivedCollection(activeCollection)}
+                        isHidden={isHiddenCollection(activeCollection)}
                         isPinned={isPinnedCollection(activeCollection)}
                         handleCollectionAction={handleCollectionAction}
                     />

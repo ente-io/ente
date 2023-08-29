@@ -18,11 +18,11 @@ interface Iprops {
     collectionSummary: CollectionSummary;
     setCollectionNamerAttributes: SetCollectionNamerAttributes;
     showCollectionShareModal: () => void;
-    redirectToAll: () => void;
     setCollectionDownloadProgressAttributesCreator: (
         collectionID: number
     ) => SetCollectionDownloadProgressAttributes;
     isCollectionDownloadInProgress: (collectionID: number) => boolean;
+    setActiveCollectionID: (collectionID: number) => void;
 }
 
 export default function CollectionInfoWithOptions({

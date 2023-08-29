@@ -86,7 +86,7 @@ export default function Deduplicate() {
             collectionNameMap.set(collection.id, collection.name);
         }
         setCollectionNameMap(collectionNameMap);
-        const files = await syncFiles(collections, () => null);
+        const files = await syncFiles('normal', collections, () => null);
         let duplicates = await getDuplicateFiles(files, collectionNameMap);
         if (clubSameTimeFilesOnly) {
             duplicates = clubDuplicatesByTime(duplicates);
