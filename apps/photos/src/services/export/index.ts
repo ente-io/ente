@@ -1101,21 +1101,11 @@ class ExportService {
                     fileExportName,
                     file
                 );
-                try {
-                    await this.saveMediaFile(
-                        collectionExportPath,
-                        fileExportName,
-                        fileStream
-                    );
-                } catch (e) {
-                    await this.deleteExportedFile(
-                        getFileMetadataExportPath(
-                            collectionExportPath,
-                            fileExportName
-                        )
-                    );
-                    throw e;
-                }
+                await this.saveMediaFile(
+                    collectionExportPath,
+                    fileExportName,
+                    fileStream
+                );
                 return fileExportName;
             }
         } catch (e) {
@@ -1141,39 +1131,23 @@ class ExportService {
             imageExportName,
             file
         );
-        try {
-            await this.saveMediaFile(
-                collectionExportPath,
-                imageExportName,
-                imageStream
-            );
-        } catch (e) {
-            await this.deleteExportedFile(
-                getFileMetadataExportPath(collectionExportPath, imageExportName)
-            );
-            throw e;
-        }
+        await this.saveMediaFile(
+            collectionExportPath,
+            imageExportName,
+            imageStream
+        );
 
         const videoStream = generateStreamFromArrayBuffer(livePhoto.video);
         const videoExportName = getUniqueFileExportName(
             collectionExportPath,
             livePhoto.videoNameTitle
         );
-        try {
-            await this.saveMetadataFile(
-                collectionExportPath,
-                videoExportName,
-                file
-            );
-        } catch (e) {
-            await this.deleteExportedFile(
-                getFileExportPath(collectionExportPath, imageExportName)
-            );
-            await this.deleteExportedFile(
-                getFileMetadataExportPath(collectionExportPath, imageExportName)
-            );
-            throw e;
-        }
+
+        await this.saveMetadataFile(
+            collectionExportPath,
+            videoExportName,
+            file
+        );
         try {
             await this.saveMediaFile(
                 collectionExportPath,
@@ -1183,12 +1157,6 @@ class ExportService {
         } catch (e) {
             await this.deleteExportedFile(
                 getFileExportPath(collectionExportPath, imageExportName)
-            );
-            await this.deleteExportedFile(
-                getFileMetadataExportPath(collectionExportPath, imageExportName)
-            );
-            await this.deleteExportedFile(
-                getFileMetadataExportPath(collectionExportPath, videoExportName)
             );
             throw e;
         }
