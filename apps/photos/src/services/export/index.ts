@@ -1054,6 +1054,7 @@ class ExportService {
         file: EnteFile
     ): Promise<void> {
         try {
+            const fileUID = getExportRecordFileUID(file);
             let fileStream = await downloadManager.downloadFile(file);
             const fileType = getFileExtension(file.metadata.title);
             if (
@@ -1074,6 +1075,7 @@ class ExportService {
             if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
                 await this.exportLivePhoto(
                     exportDir,
+                    fileUID,
                     collectionExportPath,
                     fileStream,
                     file
@@ -1083,7 +1085,6 @@ class ExportService {
                     collectionExportPath,
                     file.metadata.title
                 );
-                const fileUID = getExportRecordFileUID(file);
                 await this.addFileExportedRecord(
                     exportDir,
                     fileUID,
@@ -1101,10 +1102,7 @@ class ExportService {
                         fileStream
                     );
                 } catch (e) {
-                    await this.removeFileExportedRecord(
-                        exportDir,
-                        getExportRecordFileUID(file)
-                    );
+                    await this.removeFileExportedRecord(exportDir, fileUID);
                     throw e;
                 }
             }
@@ -1116,6 +1114,7 @@ class ExportService {
 
     private async exportLivePhoto(
         exportDir: string,
+        fileUID: string,
         collectionExportPath: string,
         fileStream: ReadableStream<any>,
         file: EnteFile
@@ -1134,7 +1133,6 @@ class ExportService {
             imageExportName,
             videoExportName
         );
-        const fileUID = getExportRecordFileUID(file);
         await this.addFileExportedRecord(
             exportDir,
             fileUID,
@@ -1172,10 +1170,7 @@ class ExportService {
                 throw e;
             }
         } catch (e) {
-            await this.removeFileExportedRecord(
-                exportDir,
-                getExportRecordFileUID(file)
-            );
+            await this.removeFileExportedRecord(exportDir, fileUID);
             throw e;
         }
     }
