@@ -215,7 +215,11 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
     };
 
     const downloadCollection = () => {
-        if (isCollectionDownloadInProgress(activeCollection.id)) {
+        if (
+            isCollectionDownloadInProgress(
+                activeCollection?.id ?? HIDDEN_ITEMS_SECTION
+            )
+        ) {
             return;
         }
         if (collectionSummaryType === CollectionSummaryType.hiddenItems) {
