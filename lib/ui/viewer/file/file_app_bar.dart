@@ -89,7 +89,7 @@ class FileAppBarState extends State<FileAppBar> {
   }
 
   AppBar _buildAppBar() {
-    debugPrint("building app bar");
+    _logger.fine("building app bar ${widget.file.generatedID?.toString()}");
 
     final List<Widget> actions = [];
     final isTrashedFile = widget.file is TrashFile;

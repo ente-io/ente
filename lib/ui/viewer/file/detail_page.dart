@@ -1,3 +1,5 @@
+import "dart:math";
+
 import 'package:extended_image/extended_image.dart';
 import "package:flutter/foundation.dart";
 import 'package:flutter/material.dart';
@@ -161,7 +163,6 @@ class _DetailPageState extends State<DetailPage> {
 
   Widget _buildPageView(BuildContext context) {
     final bottomPadding = MediaQuery.of(context).padding.bottom;
-    _logger.info("Building with " + _selectedIndexNotifier.value.toString());
     return PageView.builder(
       itemBuilder: (context, index) {
         final file = _files![index];
@@ -173,6 +174,7 @@ class _DetailPageState extends State<DetailPage> {
           shouldDisableScroll: (value) {
             if (_shouldDisableScroll != value) {
               setState(() {
+                _logger.fine('setState $_shouldDisableScroll to $value');
                 _shouldDisableScroll = value;
               });
             }
@@ -209,7 +211,16 @@ class _DetailPageState extends State<DetailPage> {
         );
       },
       onPageChanged: (index) {
-        _selectedIndexNotifier.value = index;
+        if(_selectedIndexNotifier.value == index) {
+          if(kDebugMode) {
+            debugPrint("onPageChanged called with same index $index");
+          }
+          // always notify listeners when the index is the same because
+          // the total number of files might have changed
+          _selectedIndexNotifier.notifyListeners();
+        } else {
+          _selectedIndexNotifier.value = index;
+        }
         _preloadEntries();
       },
       physics: _shouldDisableScroll
@@ -270,6 +281,7 @@ class _DetailPageState extends State<DetailPage> {
           );
 
     setState(() {
+      _logger.fine('setState loadStartEntries');
       // Returned result could be a subtype of File
       // ignore: unnecessary_cast
       final files = result.files.reversed.map((e) => e as EnteFile).toList();
@@ -302,6 +314,7 @@ class _DetailPageState extends State<DetailPage> {
       if (!result.hasMore) {
         _hasLoadedTillEnd = true;
       }
+      _logger.fine('setState loadEndEntries hasMore ${result.hasMore}');
       _files!.addAll(result.files);
     });
   }
@@ -322,24 +335,21 @@ class _DetailPageState extends State<DetailPage> {
       Navigator.of(context).pop(); // Close pageview
       return;
     }
-    if (_selectedIndexNotifier.value == totalFiles - 1) {
-      // Deleted the last file
-      await _pageController.previousPage(
+    setState(() {
+      _files!.remove(file);
+      _selectedIndexNotifier.value = min(_selectedIndexNotifier.value,
+          totalFiles - 2,);
+    });
+    final currentPageIndex = _pageController.page!.round();
+    final int targetPageIndex = _files!.length > currentPageIndex
+        ? currentPageIndex
+        : currentPageIndex - 1;
+    if (_files!.isNotEmpty) {
+      _pageController.animateToPage(
+        targetPageIndex,
         duration: const Duration(milliseconds: 200),
         curve: Curves.easeInOut,
       );
-      setState(() {
-        _files!.remove(file);
-      });
-    } else {
-      await _pageController.nextPage(
-        duration: const Duration(milliseconds: 200),
-        curve: Curves.easeInOut,
-      );
-      setState(() {
-        _selectedIndexNotifier.value--;
-        _files!.remove(file);
-      });
     }
   }
 

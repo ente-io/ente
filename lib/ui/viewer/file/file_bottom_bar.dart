@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import "package:flutter/foundation.dart";
 import 'package:flutter/material.dart';
+import "package:logging/logging.dart";
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file/file_type.dart';
@@ -52,6 +53,8 @@ class FileBottomBarState extends State<FileBottomBar> {
   }
 
   Widget _getBottomBar() {
+    Logger("FileBottomBar").fine("building bottom bar ${widget.file
+        .generatedID}");
     final List<Widget> children = [];
     final bool isOwnedByUser =
         widget.file.ownerID == null || widget.file.ownerID == widget.userID;
@@ -59,7 +62,7 @@ class FileBottomBarState extends State<FileBottomBar> {
       children.add(
         Text(
           widget.file.generatedID?.toString() ?? 'null',
-          style: TextStyle(color: Colors.white),
+          style: const TextStyle(color: Colors.white),
         ),
       );
     }
