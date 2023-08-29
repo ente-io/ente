@@ -9,6 +9,7 @@ export {
     isFolder,
     moveFile,
     deleteFolder,
+    deleteFile,
     rename,
     readTextFile,
 } from '../services/fs';

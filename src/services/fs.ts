@@ -279,6 +279,9 @@ export async function deleteFolder(folderPath: string): Promise<void> {
     if (!existsSync(folderPath)) {
         return;
     }
+    if (!fs.statSync(folderPath).isDirectory()) {
+        throw new Error('Path is not a folder');
+    }
     // check if folder is empty
     const files = await fs.readdir(folderPath);
     if (files.length > 0) {
@@ -292,4 +295,14 @@ export async function rename(oldPath: string, newPath: string) {
         throw new Error('Path does not exist');
     }
     await fs.rename(oldPath, newPath);
+}
+
+export function deleteFile(filePath: string): void {
+    if (!existsSync(filePath)) {
+        return;
+    }
+    if (!fs.statSync(filePath).isFile()) {
+        throw new Error('Path is not a file');
+    }
+    fs.rmSync(filePath);
 }
