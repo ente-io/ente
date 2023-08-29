@@ -21,12 +21,14 @@ import {
     isLivePhotoExportName,
     parseLivePhotoExportName,
     getCollectionIDFromFileUID,
+    getCollectionExportNameMap,
+    getCollectionExportName,
 } from 'utils/export';
 import { logError } from 'utils/sentry';
 import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
-import { getLocalCollections } from '../collectionService';
+import { getAllLocalCollections } from '../collectionService';
 import downloadManager from '../downloadManager';
-import { getLocalFiles, getLocalHiddenFiles } from '../fileService';
+import { getAllLocalFiles } from '../fileService';
 import { EnteFile } from 'types/file';
 
 import { decodeLivePhoto } from '../livePhotoService';
@@ -56,10 +58,7 @@ import { ElectronAPIs } from 'types/electron';
 import { CustomError } from 'utils/error';
 import { addLogLine } from 'utils/logging';
 import { eventBus, Events } from '../events';
-import {
-    getCollectionNameMap,
-    getNonEmptyPersonalCollections,
-} from 'utils/collection';
+import { getNonEmptyPersonalCollections } from 'utils/collection';
 import { migrateExport } from './migration';
 
 const EXPORT_RECORD_FILE_NAME = 'export_status.json';
@@ -234,10 +233,7 @@ class ExportService {
     ): Promise<EnteFile[]> => {
         try {
             const user: User = getData(LS_KEYS.USER);
-            const files = [
-                ...(await getLocalFiles()),
-                ...(await getLocalHiddenFiles()),
-            ];
+            const files = await getAllLocalFiles();
             const userPersonalFiles = getPersonalFiles(files, user);
 
             const unExportedFiles = getUnExportedFiles(
@@ -350,13 +346,10 @@ class ExportService {
     ) {
         try {
             const user: User = getData(LS_KEYS.USER);
-            const files = mergeMetadata([
-                ...(await getLocalFiles()),
-                ...(await getLocalHiddenFiles()),
-            ]);
+            const files = mergeMetadata(await getAllLocalFiles());
             const personalFiles = getPersonalFiles(files, user);
 
-            const collections = await getLocalCollections(true);
+            const collections = await getAllLocalCollections();
             const nonEmptyPersonalCollections = getNonEmptyPersonalCollections(
                 collections,
                 personalFiles,
@@ -368,7 +361,7 @@ class ExportService {
                 convertCollectionIDExportNameObjectToMap(
                     exportRecord.collectionExportNames
                 );
-            const collectionIDNameMap = getCollectionNameMap(
+            const collectionIDNameMap = getCollectionExportNameMap(
                 nonEmptyPersonalCollections
             );
 
@@ -495,7 +488,7 @@ class ExportService {
                     const newCollectionExportName =
                         getUniqueCollectionExportName(
                             exportFolder,
-                            collection.name
+                            getCollectionExportName(collection)
                         );
                     addLogLine(
                         `renaming collection with id ${collection.id} from ${oldCollectionExportName} to ${newCollectionExportName}`

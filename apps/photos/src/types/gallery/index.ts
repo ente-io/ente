@@ -40,6 +40,7 @@ export type GalleryContextType = {
     user: User;
     userIDToEmailMap: Map<number, string>;
     emailList: string[];
+    openHiddenSection: (callback?: () => void) => void;
 };
 
 export enum CollectionSelectorIntent {

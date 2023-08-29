@@ -1,6 +1,7 @@
 import {
     addToCollection,
     createAlbum,
+    getLocalCollections,
     getNonEmptyCollections,
     moveToCollection,
     removeFromCollection,
@@ -11,7 +12,7 @@ import {
     updateSharedCollectionMagicMetadata,
 } from 'services/collectionService';
 import { downloadFiles } from 'utils/file';
-import { getLocalFiles, getLocalHiddenFiles } from 'services/fileService';
+import { getAllLocalFiles, getLocalFiles } from 'services/fileService';
 import { EnteFile } from 'types/file';
 import { CustomError } from 'utils/error';
 import { User } from 'types/user';
@@ -87,7 +88,7 @@ export function getSelectedCollection(
 
 export async function downloadAllCollectionFiles(collectionID: number) {
     try {
-        const allFiles = await getLocalFiles();
+        const allFiles = await getAllLocalFiles();
         const collectionFiles = allFiles.filter(
             (file) => file.collectionID === collectionID
         );
@@ -97,10 +98,16 @@ export async function downloadAllCollectionFiles(collectionID: number) {
     }
 }
 
-export async function downloadHiddenFiles() {
+export async function downloadDefaultHiddenFiles() {
     try {
-        const hiddenFiles = await getLocalHiddenFiles();
-        await downloadFiles(hiddenFiles);
+        const collections = await getLocalCollections('hidden');
+        const defaultHiddenCollectionsIds =
+            getDefaultHiddenCollectionIDs(collections);
+        const hiddenFiles = await getLocalFiles('hidden');
+        const defaultHiddenCollectionFiles = hiddenFiles.filter((file) =>
+            defaultHiddenCollectionsIds.has(file.collectionID)
+        );
+        await downloadFiles(defaultHiddenCollectionFiles);
     } catch (e) {
         logError(e, 'download hidden files failed ');
     }
@@ -271,6 +278,14 @@ export const getArchivedCollections = (collections: Collection[]) => {
     );
 };
 
+export const getDefaultHiddenCollectionIDs = (collections: Collection[]) => {
+    return new Set<number>(
+        collections
+            .filter(isDefaultHiddenCollection)
+            .map((collection) => collection.id)
+    );
+};
+
 export const hasNonSystemCollections = (
     collectionSummaries: CollectionSummaries
 ) => {
@@ -304,7 +319,7 @@ export const showDownloadQuickOption = (type: CollectionSummaryType) => {
         type === CollectionSummaryType.favorites ||
         type === CollectionSummaryType.album ||
         type === CollectionSummaryType.uncategorized ||
-        type === CollectionSummaryType.hidden ||
+        type === CollectionSummaryType.hiddenItems ||
         type === CollectionSummaryType.incomingShareViewer ||
         type === CollectionSummaryType.incomingShareCollaborator ||
         type === CollectionSummaryType.outgoingShare ||
@@ -341,8 +356,7 @@ export const isDefaultHiddenCollection = (collection: Collection) =>
     collection.magicMetadata?.data.subType === SUB_TYPE.DEFAULT_HIDDEN;
 
 export const isHiddenCollection = (collection: Collection) =>
-    collection.magicMetadata?.data.visibility === VISIBILITY_STATE.HIDDEN ||
-    collection.magicMetadata?.data.subType === SUB_TYPE.DEFAULT_HIDDEN;
+    collection.magicMetadata?.data.visibility === VISIBILITY_STATE.HIDDEN;
 
 export const isQuickLinkCollection = (collection: Collection) =>
     collection.magicMetadata?.data.subType === SUB_TYPE.QUICK_LINK_COLLECTION;
@@ -427,6 +441,10 @@ export function getNonHiddenCollections(
     collections: Collection[]
 ): Collection[] {
     return collections.filter((collection) => !isHiddenCollection(collection));
+}
+
+export function getHiddenCollections(collections: Collection[]): Collection[] {
+    return collections.filter((collection) => isHiddenCollection(collection));
 }
 
 export async function splitNormalAndHiddenCollections(

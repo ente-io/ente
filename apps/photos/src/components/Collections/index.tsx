@@ -21,7 +21,9 @@ interface Iprops {
     activeCollectionID?: number;
     setActiveCollectionID: (id?: number) => void;
     isInSearchMode: boolean;
+    isInHiddenSection: boolean;
     collectionSummaries: CollectionSummaries;
+    hiddenCollectionSummaries: CollectionSummaries;
     setCollectionNamerAttributes: SetCollectionNamerAttributes;
     setPhotoListHeader: (value: TimeStampListItem) => void;
 }
@@ -30,9 +32,11 @@ export default function Collections(props: Iprops) {
     const {
         activeCollection,
         isInSearchMode,
+        isInHiddenSection,
         activeCollectionID,
         setActiveCollectionID,
         collectionSummaries,
+        hiddenCollectionSummaries,
         setCollectionNamerAttributes,
         setPhotoListHeader,
     } = props;
@@ -47,22 +51,30 @@ export default function Collections(props: Iprops) {
             COLLECTION_LIST_SORT_BY.UPDATION_TIME_DESCENDING
         );
 
+    const toShowCollectionSummaries = useMemo(
+        () =>
+            isInHiddenSection ? hiddenCollectionSummaries : collectionSummaries,
+        [isInHiddenSection, hiddenCollectionSummaries, collectionSummaries]
+    );
+
     const shouldBeHidden = useMemo(
         () =>
             isInSearchMode ||
-            (!hasNonSystemCollections(collectionSummaries) &&
+            (!hasNonSystemCollections(toShowCollectionSummaries) &&
                 activeCollectionID === ALL_SECTION),
-        [isInSearchMode, collectionSummaries, activeCollectionID]
+        [isInSearchMode, toShowCollectionSummaries, activeCollectionID]
     );
 
     const sortedCollectionSummaries = useMemo(
         () =>
             sortCollectionSummaries(
-                [...collectionSummaries.values()],
+                [...toShowCollectionSummaries.values()],
                 collectionListSortBy
             ),
-        [collectionListSortBy, collectionSummaries]
+        [collectionListSortBy, toShowCollectionSummaries]
     );
+
+    const showCollectionShareModal = () => setCollectionShareModalView(true);
 
     useEffect(() => {
         if (isInSearchMode) {
@@ -71,21 +83,19 @@ export default function Collections(props: Iprops) {
         setPhotoListHeader({
             item: (
                 <CollectionInfoWithOptions
-                    collectionSummary={collectionSummaries.get(
+                    collectionSummary={toShowCollectionSummaries.get(
                         activeCollectionID
                     )}
                     activeCollection={activeCollection}
                     setCollectionNamerAttributes={setCollectionNamerAttributes}
-                    redirectToAll={() => setActiveCollectionID(ALL_SECTION)}
-                    showCollectionShareModal={() =>
-                        setCollectionShareModalView(true)
-                    }
+                    setActiveCollectionID={setActiveCollectionID}
+                    showCollectionShareModal={showCollectionShareModal}
                 />
             ),
             itemType: ITEM_TYPE.HEADER,
             height: 68,
         });
-    }, [collectionSummaries, activeCollectionID, isInSearchMode]);
+    }, [toShowCollectionSummaries, activeCollectionID, isInSearchMode]);
 
     if (shouldBeHidden) {
         return <></>;
@@ -98,6 +108,7 @@ export default function Collections(props: Iprops) {
     return (
         <>
             <CollectionListBar
+                isInHiddenSection={isInHiddenSection}
                 activeCollectionID={activeCollectionID}
                 setActiveCollectionID={setActiveCollectionID}
                 collectionSummaries={sortedCollectionSummaries.filter((x) =>
@@ -117,10 +128,13 @@ export default function Collections(props: Iprops) {
                 setActiveCollectionID={setActiveCollectionID}
                 setCollectionListSortBy={setCollectionListSortBy}
                 collectionListSortBy={collectionListSortBy}
+                isInHiddenSection={isInHiddenSection}
             />
 
             <CollectionShare
-                collectionSummary={collectionSummaries.get(activeCollectionID)}
+                collectionSummary={toShowCollectionSummaries.get(
+                    activeCollectionID
+                )}
                 open={collectionShareModalView}
                 onClose={closeCollectionShare}
                 collection={activeCollection}

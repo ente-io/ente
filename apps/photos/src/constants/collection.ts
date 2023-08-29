@@ -1,7 +1,7 @@
 export const ARCHIVE_SECTION = -1;
 export const TRASH_SECTION = -2;
-export const DUMMY_UNCATEGORIZED_SECTION = -3;
-export const HIDDEN_SECTION = -4;
+export const DUMMY_UNCATEGORIZED_COLLECTION = -3;
+export const HIDDEN_ITEMS_SECTION = -4;
 export const ALL_SECTION = 0;
 export enum CollectionType {
     folder = 'folder',
@@ -23,7 +23,8 @@ export enum CollectionSummaryType {
     incomingShareCollaborator = 'incomingShareCollaborator',
     sharedOnlyViaLink = 'sharedOnlyViaLink',
     archived = 'archived',
-    hidden = 'hidden',
+    defaultHidden = 'defaultHidden',
+    hiddenItems = 'hiddenItems',
     pinned = 'pinned',
 }
 export enum COLLECTION_LIST_SORT_BY {
@@ -38,6 +39,7 @@ export const COLLECTION_SHARE_DEFAULT_DEVICE_LIMIT = 4;
 
 export const COLLECTION_SORT_ORDER = new Map([
     [CollectionSummaryType.all, 0],
+    [CollectionSummaryType.hiddenItems, 0],
     [CollectionSummaryType.uncategorized, 1],
     [CollectionSummaryType.favorites, 2],
     [CollectionSummaryType.pinned, 3],
@@ -50,7 +52,7 @@ export const COLLECTION_SORT_ORDER = new Map([
     [CollectionSummaryType.archived, 4],
     [CollectionSummaryType.archive, 5],
     [CollectionSummaryType.trash, 6],
-    [CollectionSummaryType.hidden, 7],
+    [CollectionSummaryType.defaultHidden, 7],
 ]);
 
 export const SYSTEM_COLLECTION_TYPES = new Set([
@@ -58,7 +60,8 @@ export const SYSTEM_COLLECTION_TYPES = new Set([
     CollectionSummaryType.archive,
     CollectionSummaryType.trash,
     CollectionSummaryType.uncategorized,
-    CollectionSummaryType.hidden,
+    CollectionSummaryType.hiddenItems,
+    CollectionSummaryType.defaultHidden,
 ]);
 
 export const ADD_TO_NOT_ALLOWED_COLLECTION = new Set([
@@ -67,7 +70,8 @@ export const ADD_TO_NOT_ALLOWED_COLLECTION = new Set([
     CollectionSummaryType.incomingShareViewer,
     CollectionSummaryType.trash,
     CollectionSummaryType.uncategorized,
-    CollectionSummaryType.hidden,
+    CollectionSummaryType.defaultHidden,
+    CollectionSummaryType.hiddenItems,
 ]);
 
 export const MOVE_TO_NOT_ALLOWED_COLLECTION = new Set([
@@ -77,7 +81,8 @@ export const MOVE_TO_NOT_ALLOWED_COLLECTION = new Set([
     CollectionSummaryType.incomingShareCollaborator,
     CollectionSummaryType.trash,
     CollectionSummaryType.uncategorized,
-    CollectionSummaryType.hidden,
+    CollectionSummaryType.defaultHidden,
+    CollectionSummaryType.hiddenItems,
 ]);
 
 export const OPTIONS_NOT_HAVING_COLLECTION_TYPES = new Set([
@@ -89,5 +94,5 @@ export const HIDE_FROM_COLLECTION_BAR_TYPES = new Set([
     CollectionSummaryType.trash,
     CollectionSummaryType.archive,
     CollectionSummaryType.uncategorized,
-    CollectionSummaryType.hidden,
+    CollectionSummaryType.defaultHidden,
 ]);
