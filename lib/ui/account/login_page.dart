@@ -107,7 +107,7 @@ class _LoginPageState extends State<LoginPage> {
                       const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
                   child: Text(
                     l10n.welcomeBack,
-                    style: Theme.of(context).textTheme.headline4,
+                    style: Theme.of(context).textTheme.headlineMedium,
                   ),
                 ),
                 Padding(
@@ -172,12 +172,11 @@ class _LoginPageState extends State<LoginPage> {
                           text: context.l10n.loginTerms,
                           style: Theme.of(context)
                               .textTheme
-                              .subtitle1!
+                              .titleMedium!
                               .copyWith(fontSize: 12),
                           tags: {
                             'u-terms': StyledTextActionTag(
-                              (String? text, Map<String?, String?> attrs) => {
-                                Navigator.of(context).push(
+                              (String? text, Map<String?, String?> attrs) => Navigator.of(context).push(
                                   MaterialPageRoute(
                                     builder: (BuildContext context) {
                                       return WebPage(
@@ -186,15 +185,13 @@ class _LoginPageState extends State<LoginPage> {
                                       );
                                     },
                                   ),
-                                )
-                              },
+                                ),
                               style: const TextStyle(
                                 decoration: TextDecoration.underline,
                               ),
                             ),
                             'u-policy': StyledTextActionTag(
-                              (String? text, Map<String?, String?> attrs) => {
-                                Navigator.of(context).push(
+                              (String? text, Map<String?, String?> attrs) => Navigator.of(context).push(
                                   MaterialPageRoute(
                                     builder: (BuildContext context) {
                                       return WebPage(
@@ -203,8 +200,7 @@ class _LoginPageState extends State<LoginPage> {
                                       );
                                     },
                                   ),
-                                )
-                              },
+                                ),
                               style: const TextStyle(
                                 decoration: TextDecoration.underline,
                               ),

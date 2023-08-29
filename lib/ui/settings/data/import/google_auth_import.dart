@@ -13,7 +13,6 @@ import 'package:ente_auth/ui/components/models/button_type.dart';
 import 'package:ente_auth/ui/scanner_gauth_page.dart';
 import 'package:ente_auth/ui/settings/data/import/import_success.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:logging/logging.dart';
 
 const kGoogleAuthExportPrefix = 'otpauth-migration://offline?data=';

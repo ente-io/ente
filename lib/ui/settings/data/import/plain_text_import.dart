@@ -10,7 +10,6 @@ import 'package:ente_auth/store/code_store.dart';
 import 'package:ente_auth/ui/settings/data/import/import_success.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 
@@ -59,7 +58,7 @@ Future<void> showImportInstructionDialog(BuildContext context) async {
     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
     title: Text(
       l10n.importCodes,
-      style: Theme.of(context).textTheme.headline6,
+      style: Theme.of(context).textTheme.titleLarge,
     ),
     content: const SingleChildScrollView(
       child: PlainTextImport(),

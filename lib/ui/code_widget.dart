@@ -156,14 +156,14 @@ class _CodeWidgetState extends State<CodeWidget> {
                               children: [
                                 Text(
                                   safeDecode(widget.code.issuer).trim(),
-                                  style: Theme.of(context).textTheme.headline6,
+                                  style: Theme.of(context).textTheme.titleLarge,
                                 ),
                                 const SizedBox(height: 2),
                                 Text(
                                   safeDecode(widget.code.account).trim(),
                                   style: Theme.of(context)
                                       .textTheme
-                                      .caption
+                                      .bodySmall
                                       ?.copyWith(
                                         fontSize: 12,
                                         color: Colors.grey,
@@ -216,7 +216,7 @@ class _CodeWidgetState extends State<CodeWidget> {
                                       Text(
                                         l10n.nextTotpTitle,
                                         style:
-                                            Theme.of(context).textTheme.caption,
+                                            Theme.of(context).textTheme.bodySmall,
                                       ),
                                       ValueListenableBuilder<String>(
                                         valueListenable: _nextCode,
@@ -238,7 +238,7 @@ class _CodeWidgetState extends State<CodeWidget> {
                                       Text(
                                         l10n.nextTotpTitle,
                                         style:
-                                            Theme.of(context).textTheme.caption,
+                                            Theme.of(context).textTheme.bodySmall,
                                       ),
                                       InkWell(
                                         onTap: _onNextHotpTapped,

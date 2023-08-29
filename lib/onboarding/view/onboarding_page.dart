@@ -104,17 +104,18 @@ class _OnboardingPageState extends State<OnboardingPage> {
                         const SizedBox(height: 4),
                         Text(
                           "Authenticator",
-                          style: Theme.of(context).textTheme.headline4,
+                          style: Theme.of(context).textTheme.headlineMedium,
                         ),
                         const SizedBox(height: 32),
                         Text(
                           l10n.onBoardingBody,
                           textAlign: TextAlign.center,
                           style:
-                              Theme.of(context).textTheme.headline6!.copyWith(
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .mutedTextColor,
+                              Theme.of(context).textTheme.titleLarge!.copyWith(
+                                    color: Colors.white38,
+                                    // color: Theme.of(context)
+                                    //                            .colorScheme
+                                    //                            .mutedTextColor,
                                   ),
                         ),
                       ],

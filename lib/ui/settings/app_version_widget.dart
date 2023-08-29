@@ -49,7 +49,7 @@ class _AppVersionWidgetState extends State<AppVersionWidget> {
               padding: const EdgeInsets.all(20),
               child: Text(
                 "Version: " + snapshot.data!,
-                style: Theme.of(context).textTheme.caption,
+                style: Theme.of(context).textTheme.bodySmall,
               ),
             );
           }
