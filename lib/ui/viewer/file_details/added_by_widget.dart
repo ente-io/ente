@@ -12,7 +12,7 @@ class AddedByWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (file.isUploaded) {
+    if (!file.isUploaded) {
       return const SizedBox.shrink();
     }
     String? addedBy;
