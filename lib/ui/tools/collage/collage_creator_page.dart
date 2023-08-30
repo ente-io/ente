@@ -9,8 +9,11 @@ import "package:photos/ui/tools/collage/collage_with_three_items.dart";
 import "package:photos/ui/tools/collage/collage_with_two_items.dart";
 
 class CollageCreatorPage extends StatelessWidget {
-  static const int collageItemsMin = 2;
-  static const int collageItemsMax = 6;
+  static const int _collageItemsMin = 2;
+  static const int _collageItemsMax = 6;
+  static bool isValidCount(int count) {
+    return count >= _collageItemsMin && count <= _collageItemsMax;
+  }
 
   final List<EnteFile> files;
 
