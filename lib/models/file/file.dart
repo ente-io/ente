@@ -271,6 +271,9 @@ class EnteFile {
   int get width {
     return pubMagicMetadata?.w ?? 0;
   }
+  bool get hasDimensions {
+    return height != 0 && width != 0;
+  }
 
   // returns true if the file isn't available in the user's gallery
   bool get isRemoteFile {

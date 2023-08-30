@@ -279,10 +279,10 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
             "ImageLength"];
     if (imageWidth != null && imageLength != null) {
       _exifData["resolution"] = '$imageWidth x $imageLength';
-      _exifData['megaPixels'] =
-          ((imageWidth.values.firstAsInt() * imageLength.values.firstAsInt()) /
-                  1000000)
-              .toStringAsFixed(1);
+      final double megaPixels =
+          (imageWidth.values.firstAsInt() * imageLength.values.firstAsInt()) / 1000000;
+      final double roundedMegaPixels = (megaPixels * 10).round() / 10.0;
+      _exifData['megaPixels'] = roundedMegaPixels..toStringAsFixed(1);
     } else {
       debugPrint("No image width/height");
     }
