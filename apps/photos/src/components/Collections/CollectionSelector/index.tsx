@@ -70,6 +70,13 @@ function CollectionSelector({
                             isMoveToAllowedCollection(type) ||
                             type === CollectionSummaryType.uncategorized
                         );
+                    } else if (
+                        attributes.intent === CollectionSelectorIntent.restore
+                    ) {
+                        return (
+                            isMoveToAllowedCollection(type) ||
+                            type === CollectionSummaryType.uncategorized
+                        );
                     } else {
                         return isMoveToAllowedCollection(type);
                     }

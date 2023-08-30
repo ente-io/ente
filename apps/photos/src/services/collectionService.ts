@@ -1246,7 +1246,7 @@ function getAllSectionSummary(
         coverFile: allSectionFiles?.[0],
         latestFile: allSectionFiles?.[0],
         fileCount: allSectionFiles?.length || 0,
-        updationTime: allSectionFiles?.[0].updationTime,
+        updationTime: allSectionFiles?.[0]?.updationTime,
     };
 }
 

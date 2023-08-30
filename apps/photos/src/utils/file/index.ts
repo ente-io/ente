@@ -196,6 +196,20 @@ export function sortFiles(files: EnteFile[], sortAsc = false) {
     });
 }
 
+export function sortTrashFiles(files: EnteFile[]) {
+    return files.sort((a, b) => {
+        if (a.deleteBy === b.deleteBy) {
+            if (a.metadata.creationTime === b.metadata.creationTime) {
+                return (
+                    b.metadata.modificationTime - a.metadata.modificationTime
+                );
+            }
+            return b.metadata.creationTime - a.metadata.creationTime;
+        }
+        return a.deleteBy - b.deleteBy;
+    });
+}
+
 export async function decryptFile(
     file: EncryptedEnteFile,
     collectionKey: string
