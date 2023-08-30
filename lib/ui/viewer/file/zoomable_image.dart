@@ -127,7 +127,6 @@ class _ZoomableImageState extends State<ZoomableImage>
       if (cachedThumbnail != null) {
         _imageProvider = Image.memory(cachedThumbnail).image;
         _loadedSmallThumbnail = true;
-        _captureThumbnailDimensions(_imageProvider!);
       } else {
         getThumbnailFromServer(_photo).then((file) {
           final imageProvider = Image.memory(file).image;
@@ -137,7 +136,6 @@ class _ZoomableImageState extends State<ZoomableImage>
                 setState(() {
                   _imageProvider = imageProvider;
                   _loadedSmallThumbnail = true;
-                  _captureThumbnailDimensions(_imageProvider!);
                 });
               }
             }).catchError((e) {
@@ -235,7 +233,10 @@ class _ZoomableImageState extends State<ZoomableImage>
     if (mounted) {
       precacheImage(imageProvider, context).then((value) async {
         if (mounted) {
-          await _updatePhotoViewController(imageProvider);
+          await _updatePhotoViewController(
+            previewImageProvider: _imageProvider,
+            finalImageProvider: imageProvider,
+          );
           setState(() {
             _imageProvider = imageProvider;
             _loadedFinalImage = true;
@@ -246,18 +247,17 @@ class _ZoomableImageState extends State<ZoomableImage>
     }
   }
 
-  Future<void> _captureThumbnailDimensions(ImageProvider imageProvider) async {
-    final imageInfo = await getImageInfo(imageProvider);
-    _thumbnailWidth = imageInfo.image.width;
-  }
-
-  Future<void> _updatePhotoViewController(ImageProvider imageProvider) async {
-    if (_thumbnailWidth == null || _photoViewController.scale == null) {
+  Future<void> _updatePhotoViewController({
+    required ImageProvider? previewImageProvider,
+    required ImageProvider finalImageProvider,
+  }) async {
+    if (_photoViewController.scale == null || previewImageProvider == null) {
       return;
     }
-    final imageInfo = await getImageInfo(imageProvider);
+    final prevImageInfo = await getImageInfo(previewImageProvider);
+    final finalImageInfo = await getImageInfo(finalImageProvider);
     final scale = _photoViewController.scale! /
-        (imageInfo.image.width / _thumbnailWidth!);
+        (finalImageInfo.image.width / prevImageInfo.image.width);
     final currentPosition = _photoViewController.value.position;
     final positionScaleFactor = 1 / scale;
     final newPosition = currentPosition.scale(
@@ -268,7 +268,7 @@ class _ZoomableImageState extends State<ZoomableImage>
       initialPosition: newPosition,
       initialScale: scale,
     );
-    _updateAspectRatioIfNeeded(imageInfo).ignore();
+    _updateAspectRatioIfNeeded(finalImageInfo).ignore();
   }
 
   // Fallback logic to finish back fill and update aspect
