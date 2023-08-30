@@ -88,7 +88,6 @@ class _SearchWidgetState extends State<SearchWidget> {
                       // Below parameters are to disable auto-suggestion
                       enableSuggestions: false,
                       autocorrect: false,
-                      keyboardType: TextInputType.visiblePassword,
                       // Above parameters are to disable auto-suggestion
                       decoration: InputDecoration(
                         hintText: S.of(context).searchHintText,
