@@ -258,10 +258,12 @@ class _ZoomableImageState extends State<ZoomableImage>
         _isZooming &&
         _photoViewController.scale != null;
     ImageInfo? finalImageInfo;
-    if(shouldFixPosition) {
+    if (shouldFixPosition) {
       if (kDebugMode) {
-        showToast(context,
-            'Updating photo scale zooming: $_isZooming and scale: ${_photoViewController.scale}');
+        showToast(
+          context,
+          'Updating photo scale zooming: $_isZooming and scale: ${_photoViewController.scale}',
+        );
       }
       final prevImageInfo = await getImageInfo(previewImageProvider);
       finalImageInfo = await getImageInfo(finalImageProvider);
