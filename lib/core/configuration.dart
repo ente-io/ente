@@ -136,7 +136,7 @@ class Configuration {
       }
       await _migrateSecurityStorageToFirstUnlock();
     }
-    SuperLogging.setUserID(await _getOrCreateAnonymousUserID());
+    SuperLogging.setUserID(await _getOrCreateAnonymousUserID()).ignore();
   }
 
   Future<void> logout({bool autoLogout = false}) async {

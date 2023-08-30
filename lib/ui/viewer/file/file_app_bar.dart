@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
+import "package:flutter/foundation.dart";
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:media_extension/media_extension.dart';
@@ -88,7 +89,7 @@ class FileAppBarState extends State<FileAppBar> {
   }
 
   AppBar _buildAppBar() {
-    debugPrint("building app bar");
+    _logger.fine("building app bar ${widget.file.generatedID?.toString()}");
 
     final List<Widget> actions = [];
     final isTrashedFile = widget.file is TrashFile;
@@ -102,6 +103,14 @@ class FileAppBarState extends State<FileAppBar> {
               ?.isHidden() ??
           false;
     }
+      if (kDebugMode) {
+        actions.add(
+          Text(
+            widget.file.generatedID?.toString() ?? 'null',
+            style: TextStyle(color: Colors.white),
+          ),
+        );
+      }
     if (widget.file.isLiveOrMotionPhoto) {
       actions.add(
         IconButton(

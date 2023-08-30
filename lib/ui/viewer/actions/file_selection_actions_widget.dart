@@ -99,17 +99,12 @@ class _FileSelectionActionsWidgetState
         split.pendingUploads.isNotEmpty || split.ownedByCurrentUser.isNotEmpty;
 
     final bool anyUploadedFiles = split.ownedByCurrentUser.isNotEmpty;
-
-    bool hasVideoFile = false;
-    for (final file in widget.selectedFiles.files) {
-      if (file.fileType == FileType.video) {
-        hasVideoFile = true;
-      }
-    }
-    final showCollageOption = !hasVideoFile &&
-        widget.selectedFiles.files.length >=
-            CollageCreatorPage.collageItemsMin &&
-        widget.selectedFiles.files.length <= CollageCreatorPage.collageItemsMax;
+    final showCollageOption = CollageCreatorPage.isValidCount(
+          widget.selectedFiles.files.length,
+        ) &&
+        !widget.selectedFiles.files.any(
+          (element) => element.fileType == FileType.video,
+        );
 
     //To animate adding and removing of [SelectedActionButton], add all items
     //and set [shouldShow] to false for items that should not be shown and true
@@ -139,7 +134,7 @@ class _FileSelectionActionsWidgetState
 
     items.add(
       SelectionActionButton(
-        labelText: "Share",
+        labelText: S.of(context).share,
         icon: Icons.adaptive.share_outlined,
         onTap: () => shareSelected(
           context,

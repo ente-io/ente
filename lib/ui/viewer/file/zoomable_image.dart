@@ -62,8 +62,8 @@ class _ZoomableImageState extends State<ZoomableImage>
   @override
   void initState() {
     _photo = widget.photo;
-    _logger = Logger("ZoomableImage_" + _photo.tag);
-    debugPrint('initState for ${_photo.toString()}');
+    _logger = Logger("ZoomableImage");
+    _logger.info('initState for ${_photo.generatedID} with tag ${_photo.tag}');
     _scaleStateChangedCallback = (value) {
       if (widget.shouldDisableScroll != null) {
         widget.shouldDisableScroll!(value != PhotoViewScaleState.initial);

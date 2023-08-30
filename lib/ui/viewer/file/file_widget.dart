@@ -25,6 +25,9 @@ class FileWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Specify key to ensure that the widget is rebuilt when the file changes
+    // Before changing this, ensure that file deletes are handled properly
+    final String fileKey = "file_${file.generatedID}";
     if (file.fileType == FileType.livePhoto ||
         file.fileType == FileType.image) {
       return ZoomableLiveImage(
@@ -32,6 +35,7 @@ class FileWidget extends StatelessWidget {
         shouldDisableScroll: shouldDisableScroll,
         tagPrefix: tagPrefix,
         backgroundDecoration: backgroundDecoration,
+        key: key ?? ValueKey(fileKey),
       );
     } else if (file.fileType == FileType.video) {
       return VideoWidget(
@@ -39,6 +43,7 @@ class FileWidget extends StatelessWidget {
         autoPlay: autoPlay ?? false, // Autoplay if it was opened directly
         tagPrefix: tagPrefix,
         playbackCallback: playbackCallback,
+        key: key ?? ValueKey(fileKey),
       );
     } else {
       Logger('FileWidget').severe('unsupported file type ${file.fileType}');
