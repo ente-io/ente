@@ -23,7 +23,7 @@ const getCollectionRowListHeight = (
     Math.min(
         collectionRowList.length * CollectionRowItemSize + 32,
         windowSize?.height - 177
-    ) ?? 0;
+    ) || 0;
 
 interface Iprops {
     collectionSummaries: CollectionSummary[];
