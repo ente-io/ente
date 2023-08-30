@@ -91,6 +91,7 @@ export interface ElectronAPIs {
     openDirectory: (dirPath: string) => Promise<void>;
     moveFile: (oldPath: string, newPath: string) => Promise<void>;
     deleteFolder: (path: string) => Promise<void>;
+    deleteFile: (path: string) => void;
     rename: (oldPath: string, newPath: string) => Promise<void>;
     getDownloadsDir: () => Promise<string>;
 }
