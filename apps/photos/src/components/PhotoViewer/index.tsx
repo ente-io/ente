@@ -177,7 +177,6 @@ function PhotoViewer(props: Iprops) {
 
     useEffect(() => {
         if (photoSwipe) {
-            photoSwipe.options.arrowKeys = !showInfo;
             photoSwipe.options.escKey = !showInfo;
         }
     }, [showInfo]);
