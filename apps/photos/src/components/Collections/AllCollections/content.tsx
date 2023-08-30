@@ -131,7 +131,7 @@ export default function AllCollectionContent({
     const itemData = createItemData(collectionRowList, onCollectionClick);
 
     return (
-        <DialogContent sx={{ overflow: 'hidden', '&&': { padding: 0 } }}>
+        <DialogContent sx={{ '&&': { padding: 0 } }}>
             <List
                 height={getCollectionRowListHeight(
                     collectionRowList,
