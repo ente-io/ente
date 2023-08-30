@@ -21,7 +21,7 @@ const getCollectionRowListHeight = (
     windowSize: { height: number; width: number }
 ) =>
     Math.min(
-        collectionRowList.length * CollectionRowItemSize,
+        collectionRowList.length * CollectionRowItemSize + 32,
         windowSize?.height - 177
     ) ?? 0;
 
