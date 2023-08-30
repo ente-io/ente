@@ -134,7 +134,7 @@ class _FileSelectionActionsWidgetState
 
     items.add(
       SelectionActionButton(
-        labelText: "Share",
+        labelText: S.of(context).share,
         icon: Icons.adaptive.share_outlined,
         onTap: () => shareSelected(
           context,
