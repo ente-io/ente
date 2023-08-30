@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import "package:flutter/foundation.dart";
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:logging/logging.dart';
@@ -12,6 +13,7 @@ import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
+import "package:photos/models/file/extensions/file_props.dart";
 import 'package:photos/models/file/file.dart';
 import "package:photos/models/metadata/file_magic.dart";
 import "package:photos/services/file_magic_service.dart";
@@ -19,6 +21,7 @@ import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/utils/file_util.dart';
 import 'package:photos/utils/image_util.dart';
 import 'package:photos/utils/thumbnail_util.dart';
+import "package:photos/utils/toast_util.dart";
 
 class ZoomableImage extends StatefulWidget {
   final EnteFile photo;
@@ -251,45 +254,58 @@ class _ZoomableImageState extends State<ZoomableImage>
     required ImageProvider? previewImageProvider,
     required ImageProvider finalImageProvider,
   }) async {
-    if (_photoViewController.scale == null || previewImageProvider == null) {
-      return;
+    final bool shouldFixPosition = previewImageProvider != null &&
+        _isZooming &&
+        _photoViewController.scale != null;
+    ImageInfo? finalImageInfo;
+    if(shouldFixPosition) {
+      if (kDebugMode) {
+        showToast(context,
+            'Updating photo scale zooming: $_isZooming and scale: ${_photoViewController.scale}');
+      }
+      final prevImageInfo = await getImageInfo(previewImageProvider);
+      finalImageInfo = await getImageInfo(finalImageProvider);
+      final scale = _photoViewController.scale! /
+          (finalImageInfo.image.width / prevImageInfo.image.width);
+      final currentPosition = _photoViewController.value.position;
+      final positionScaleFactor = 1 / scale;
+      final newPosition = currentPosition.scale(
+        positionScaleFactor,
+        positionScaleFactor,
+      );
+      _photoViewController = PhotoViewController(
+        initialPosition: newPosition,
+        initialScale: scale,
+      );
     }
-    final prevImageInfo = await getImageInfo(previewImageProvider);
-    final finalImageInfo = await getImageInfo(finalImageProvider);
-    final scale = _photoViewController.scale! /
-        (finalImageInfo.image.width / prevImageInfo.image.width);
-    final currentPosition = _photoViewController.value.position;
-    final positionScaleFactor = 1 / scale;
-    final newPosition = currentPosition.scale(
-      positionScaleFactor,
-      positionScaleFactor,
-    );
-    _photoViewController = PhotoViewController(
-      initialPosition: newPosition,
-      initialScale: scale,
-    );
-    _updateAspectRatioIfNeeded(finalImageInfo).ignore();
+    final bool canUpdateMetadata = _photo.canEditMetaInfo;
+    // forcefully get finalImageInfo is dimensions are not available in metadata
+    if (finalImageInfo == null && canUpdateMetadata && !_photo.hasDimensions) {
+      finalImageInfo = await getImageInfo(finalImageProvider);
+    }
+    if (finalImageInfo != null && canUpdateMetadata) {
+      _updateAspectRatioIfNeeded(_photo, finalImageInfo).ignore();
+    }
   }
 
   // Fallback logic to finish back fill and update aspect
   // ratio if needed.
-  Future<void> _updateAspectRatioIfNeeded(ImageInfo imageInfo) async {
-    if (_imageProvider != null &&
-        widget.photo.isUploaded &&
-        widget.photo.ownerID == _currentUserID) {
-      final int h = imageInfo.image.height, w = imageInfo.image.width;
-      if (h != 0 &&
-          w != 0 &&
-          (h != widget.photo.height || w != widget.photo.width)) {
-        _logger.info('Updating aspect ratio for ${widget.photo} to $h:$w');
-
-        await FileMagicService.instance.updatePublicMagicMetadata([
-          widget.photo,
-        ], {
-          heightKey: h,
-          widthKey: w,
-        });
+  Future<void> _updateAspectRatioIfNeeded(
+    EnteFile enteFile,
+    ImageInfo imageInfo,
+  ) async {
+    final int h = imageInfo.image.height, w = imageInfo.image.width;
+    if (h != enteFile.height || w != enteFile.width) {
+      if (kDebugMode) {
+        showToast(context, 'Updating aspect ratio');
       }
+      _logger.info('Updating aspect ratio for $enteFile to $h:$w');
+      await FileMagicService.instance.updatePublicMagicMetadata([
+        enteFile,
+      ], {
+        heightKey: h,
+        widthKey: w,
+      });
     }
   }
 
