@@ -112,6 +112,7 @@ class _VideoWidgetState extends State<VideoWidget> {
   void dispose() {
     _videoPlayerController?.dispose();
     _chewieController?.dispose();
+    _progressNotifier.dispose();
     if (_wakeLockEnabledHere) {
       unawaited(
         WakelockPlus.enabled.then((isEnabled) {
