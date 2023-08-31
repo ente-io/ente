@@ -34,12 +34,11 @@ import { EnteFile } from 'types/file';
 import { decodeLivePhoto } from '../livePhotoService';
 import {
     generateStreamFromArrayBuffer,
-    getFileExtension,
     getPersonalFiles,
+    getUpdatedEXIFFileForDownload,
     mergeMetadata,
 } from 'utils/file';
 
-import { updateFileCreationDateInEXIF } from '../upload/exifService';
 import QueueProcessor, {
     CancellationStatus,
     RequestCanceller,
@@ -52,7 +51,7 @@ import {
     ExportUIUpdaters,
 } from 'types/export';
 import { User } from 'types/user';
-import { FILE_TYPE, TYPE_JPEG, TYPE_JPG } from 'constants/file';
+import { FILE_TYPE } from 'constants/file';
 import { ExportStage } from 'constants/export';
 import { ElectronAPIs } from 'types/electron';
 import { CustomError } from 'utils/error';
@@ -60,6 +59,7 @@ import { addLogLine } from 'utils/logging';
 import { eventBus, Events } from '../events';
 import { getNonEmptyPersonalCollections } from 'utils/collection';
 import { migrateExport } from './migration';
+import ElectronFSService from '../electron/fs';
 
 const EXPORT_RECORD_FILE_NAME = 'export_status.json';
 
@@ -1048,29 +1048,18 @@ class ExportService {
     ): Promise<void> {
         try {
             const fileUID = getExportRecordFileUID(file);
-            let fileStream = await downloadManager.downloadFile(file);
-            const fileType = getFileExtension(file.metadata.title);
-            if (
-                file.pubMagicMetadata?.data.editedTime &&
-                (fileType === TYPE_JPEG || fileType === TYPE_JPG)
-            ) {
-                const fileBlob = await new Response(fileStream).blob();
-                if (!this.fileReader) {
-                    this.fileReader = new FileReader();
-                }
-                const updatedFileBlob = await updateFileCreationDateInEXIF(
-                    this.fileReader,
-                    fileBlob,
-                    new Date(file.pubMagicMetadata.data.editedTime / 1000)
-                );
-                fileStream = updatedFileBlob.stream();
-            }
+            const originalFileStream = await downloadManager.downloadFile(file);
+            const updatedFileStream = await getUpdatedEXIFFileForDownload(
+                this.fileReader,
+                file,
+                originalFileStream
+            );
             if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
                 await this.exportLivePhoto(
                     exportDir,
                     fileUID,
                     collectionExportPath,
-                    fileStream,
+                    updatedFileStream,
                     file
                 );
             } else {
@@ -1089,10 +1078,9 @@ class ExportService {
                         fileExportName,
                         file
                     );
-                    await this.saveMediaFile(
-                        collectionExportPath,
-                        fileExportName,
-                        fileStream
+                    await ElectronFSService.saveMediaFile(
+                        getFileExportPath(collectionExportPath, fileExportName),
+                        updatedFileStream
                     );
                 } catch (e) {
                     await this.removeFileExportedRecord(exportDir, fileUID);
@@ -1138,9 +1126,8 @@ class ExportService {
                 imageExportName,
                 file
             );
-            await this.saveMediaFile(
-                collectionExportPath,
-                imageExportName,
+            await ElectronFSService.saveMediaFile(
+                getFileExportPath(collectionExportPath, imageExportName),
                 imageStream
             );
 
@@ -1151,13 +1138,12 @@ class ExportService {
                 file
             );
             try {
-                await this.saveMediaFile(
-                    collectionExportPath,
-                    videoExportName,
+                await ElectronFSService.saveMediaFile(
+                    getFileExportPath(collectionExportPath, videoExportName),
                     videoStream
                 );
             } catch (e) {
-                await this.deleteExportedFile(
+                ElectronFSService.deleteFile(
                     getFileExportPath(collectionExportPath, imageExportName)
                 );
                 throw e;
@@ -1166,17 +1152,6 @@ class ExportService {
             await this.removeFileExportedRecord(exportDir, fileUID);
             throw e;
         }
-    }
-
-    private async saveMediaFile(
-        collectionExportPath: string,
-        fileExportName: string,
-        fileStream: ReadableStream<any>
-    ) {
-        await this.electronAPIs.saveStreamToDisk(
-            getFileExportPath(collectionExportPath, fileExportName),
-            fileStream
-        );
     }
 
     private async saveMetadataFile(
@@ -1208,10 +1183,6 @@ class ExportService {
 
     exportFolderExists = (exportFolder: string) => {
         return exportFolder && this.exists(exportFolder);
-    };
-
-    private deleteExportedFile = async (path: string) => {
-        return this.electronAPIs.deleteFile(path);
     };
 
     private verifyExportFolderExists = (exportFolder: string) => {
