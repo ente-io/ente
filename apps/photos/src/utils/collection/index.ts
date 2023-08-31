@@ -184,17 +184,22 @@ async function downloadCollectionFiles(
     };
     const isCancelled = () => canceller.signal.aborted;
     if (isElectron()) {
-        const downloadPath = await createCollectionDownloadFolder(
+        const selectedDir = await ElectronService.selectDirectory();
+        if (!selectedDir) {
+            return;
+        }
+        const downloadDirPath = await createCollectionDownloadFolder(
+            selectedDir,
             collectionName
         );
         setCollectionDownloadProgressAttributes((prev) => ({
             ...prev,
-            downloadPath,
+            downloadDirPath,
         }));
         await downloadFilesDesktop(
             collectionFiles,
             { increaseSuccess, increaseFailed, isCancelled },
-            downloadPath
+            downloadDirPath
         );
     } else {
         await downloadFiles(collectionFiles, {
@@ -205,8 +210,10 @@ async function downloadCollectionFiles(
     }
 }
 
-async function createCollectionDownloadFolder(collectionName: string) {
-    const downloadDirPath = await ElectronService.getDownloadsDir();
+async function createCollectionDownloadFolder(
+    downloadDirPath: string,
+    collectionName: string
+) {
     const collectionDownloadName = getUniqueCollectionExportName(
         downloadDirPath,
         collectionName

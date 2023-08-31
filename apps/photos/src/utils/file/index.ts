@@ -46,7 +46,6 @@ import { isPlaybackPossible } from 'utils/photoFrame';
 import { FileTypeInfo } from 'types/upload';
 import { moveToHiddenCollection } from 'services/collectionService';
 
-import ElectronService from 'services/electron/common';
 import ElectronFSService from 'services/electron/fs';
 import { getFileExportPath, getUniqueFileExportName } from 'utils/export';
 
@@ -628,12 +627,8 @@ export async function downloadFilesDesktop(
         increaseFailed: () => void;
         isCancelled: () => boolean;
     },
-    downloadPath?: string
+    downloadPath: string
 ) {
-    if (!downloadPath) {
-        // can also open a dialog to select download path
-        downloadPath = await ElectronService.getDownloadsDir();
-    }
     const fileReader = new FileReader();
     for (const file of files) {
         try {
