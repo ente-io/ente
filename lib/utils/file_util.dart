@@ -237,9 +237,9 @@ Future<_LivePhoto?> _downloadLivePhoto(
           final videoFile = File(decodePath);
           await videoFile.create(recursive: true);
           await videoFile.writeAsBytes(data);
-          videoFileCache = await VideoCacheManager.instance.putFile(
+          videoFileCache = await VideoCacheManager.instance.putFileStream(
             file.downloadUrl,
-            await videoFile.readAsBytes(),
+            videoFile.openRead(),
             eTag: file.downloadUrl,
             maxAge: const Duration(days: 365),
             fileExtension: fileExtension,
@@ -287,9 +287,9 @@ Future<File?> _downloadAndCache(
       }
       await decryptedFile.delete();
     }
-    final cachedFile = await cacheManager.putFile(
+    final cachedFile = await cacheManager.putFileStream(
       file.downloadUrl,
-      await outputFile.readAsBytes(),
+      outputFile.openRead(),
       eTag: file.downloadUrl,
       maxAge: const Duration(days: 365),
       fileExtension: fileExtension,
