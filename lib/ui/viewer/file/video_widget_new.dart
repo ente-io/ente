@@ -1,3 +1,5 @@
+import "dart:io";
+
 import "package:flutter/material.dart";
 import "package:media_kit/media_kit.dart";
 import "package:media_kit_video/media_kit_video.dart";
@@ -28,6 +30,17 @@ class _VideoWidgetNewState extends State<VideoWidgetNew> {
     if (widget.file.isRemoteFile) {
       _loadNetworkVideo();
       _setFileSizeIfNull();
+    } else if (widget.file.isSharedMediaToAppSandbox) {
+      final localFile = File(getSharedMediaFilePath(widget.file));
+      if (localFile.existsSync()) {
+        player.open(
+          Media(
+            localFile.path,
+          ),
+        );
+      } else if (widget.file.uploadedFileID != null) {
+        _loadNetworkVideo();
+      }
     } else {
       widget.file.getAsset.then((asset) async {
         if (asset == null || !(await asset.exists)) {
