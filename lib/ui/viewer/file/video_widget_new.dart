@@ -1,9 +1,16 @@
 import "package:flutter/material.dart";
 import "package:media_kit/media_kit.dart";
 import "package:media_kit_video/media_kit_video.dart";
+import "package:photos/generated/l10n.dart";
+import "package:photos/models/file/extensions/file_props.dart";
+import "package:photos/models/file/file.dart";
+import "package:photos/services/files_service.dart";
+import "package:photos/utils/dialog_util.dart";
+import "package:photos/utils/file_util.dart";
 
 class VideoWidgetNew extends StatefulWidget {
-  const VideoWidgetNew({super.key});
+  final EnteFile file;
+  const VideoWidgetNew(this.file, {super.key});
 
   @override
   State<VideoWidgetNew> createState() => _VideoWidgetNewState();
@@ -18,12 +25,10 @@ class _VideoWidgetNewState extends State<VideoWidgetNew> {
   @override
   void initState() {
     super.initState();
-    // Play a [Media] or [Playlist].
-    player.open(
-      Media(
-        'https://user-images.githubusercontent.com/28951144/229373695-22f88f13-d18f-4288-9bf1-c3e078d83722.mp4',
-      ),
-    );
+    if (widget.file.isRemoteFile) {
+      _loadNetworkVideo();
+      _setFileSizeIfNull();
+    }
   }
 
   @override
@@ -38,9 +43,33 @@ class _VideoWidgetNewState extends State<VideoWidgetNew> {
       child: SizedBox(
         width: MediaQuery.of(context).size.width,
         height: MediaQuery.of(context).size.width * 9.0 / 16.0,
-        // Use [Video] widget to display video output.
         child: Video(controller: controller),
       ),
     );
+  }
+
+  void _loadNetworkVideo() {
+    getFileFromServer(
+      widget.file,
+    ).then((file) {
+      if (file != null) {
+        player.open(Media(file.path));
+      }
+    }).onError((error, stackTrace) {
+      showErrorDialog(context, "Error", S.of(context).failedToDownloadVideo);
+    });
+  }
+
+  void _setFileSizeIfNull() {
+    if (widget.file.fileSize == null && widget.file.canEditMetaInfo) {
+      FilesService.instance
+          .getFileSize(widget.file.uploadedFileID!)
+          .then((value) {
+        widget.file.fileSize = value;
+        if (mounted) {
+          setState(() {});
+        }
+      });
+    }
   }
 }

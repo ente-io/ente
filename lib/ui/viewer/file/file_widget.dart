@@ -40,7 +40,7 @@ class FileWidget extends StatelessWidget {
       //   tagPrefix: tagPrefix,
       //   playbackCallback: playbackCallback,
       // );
-      return const VideoWidgetNew();
+      return VideoWidgetNew(file);
     } else {
       Logger('FileWidget').severe('unsupported file type ${file.fileType}');
       return const Icon(Icons.error);
