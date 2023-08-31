@@ -1,6 +1,7 @@
 import isElectron from 'is-electron';
 import { ElectronAPIs } from 'types/electron';
 
+const ENTE_DOWNLOAD_FOLDER = 'ente-downloads';
 class ElectronService {
     private electronAPIs: ElectronAPIs;
 
@@ -45,9 +46,18 @@ class ElectronService {
         }
     }
 
-    getDownloadsDir() {
+    async getDownloadsDir() {
         if (this.electronAPIs?.getDownloadsDir) {
-            return this.electronAPIs.getDownloadsDir();
+            const downloadDir = await this.electronAPIs.getDownloadsDir();
+            const enteDownloadDir = `${downloadDir}/${ENTE_DOWNLOAD_FOLDER}`;
+            this.checkExistsAndCreateDir(enteDownloadDir);
+            return enteDownloadDir;
+        }
+    }
+
+    checkExistsAndCreateDir(dirPath: string) {
+        if (this.electronAPIs?.checkExistsAndCreateDir) {
+            this.electronAPIs.checkExistsAndCreateDir(dirPath);
         }
     }
 
