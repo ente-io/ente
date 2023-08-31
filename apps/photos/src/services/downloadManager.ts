@@ -163,7 +163,8 @@ class DownloadManager {
     };
 
     public async getCachedOriginalFile(file: EnteFile) {
-        return await this.fileObjectURLPromise.get(file.id.toString());
+        return (await this.fileObjectURLPromise.get(file.id.toString()))
+            .original;
     }
 
     async downloadFile(
