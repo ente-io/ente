@@ -28,6 +28,24 @@ class _VideoWidgetNewState extends State<VideoWidgetNew> {
     if (widget.file.isRemoteFile) {
       _loadNetworkVideo();
       _setFileSizeIfNull();
+    } else {
+      widget.file.getAsset.then((asset) async {
+        if (asset == null || !(await asset.exists)) {
+          if (widget.file.uploadedFileID != null) {
+            _loadNetworkVideo();
+          }
+        } else {
+          asset.getMediaUrl().then((url) {
+            player.open(
+              Media(
+                //falling back to a default video to know when url is null
+                url ??
+                    'https://user-images.githubusercontent.com/28951144/229373695-22f88f13-d18f-4288-9bf1-c3e078d83722.mp4',
+              ),
+            );
+          });
+        }
+      });
     }
   }
 
