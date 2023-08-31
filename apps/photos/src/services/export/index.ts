@@ -166,7 +166,7 @@ class ExportService {
 
     async changeExportDirectory() {
         try {
-            const newRootDir = await this.electronAPIs.selectRootDirectory();
+            const newRootDir = await this.electronAPIs.selectDirectory();
             if (!newRootDir) {
                 throw Error(CustomError.SELECT_FOLDER_ABORTED);
             }

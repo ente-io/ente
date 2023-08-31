@@ -13,7 +13,7 @@ export interface CollectionDownloadProgressAttributes {
     collectionName: string;
     collectionID: number;
     isHidden: boolean;
-    downloadPath?: string;
+    downloadDirPath?: string;
     canceller?: AbortController;
 }
 
@@ -100,7 +100,7 @@ export const CollectionDownloadProgress: React.FC<CollectionDownloadProgressProp
                 (attr) => attr.collectionID === collectionID
             );
             if (isElectron()) {
-                ElectronService.openDirectory(attributes.downloadPath);
+                ElectronService.openDirectory(attributes.downloadDirPath);
             } else {
                 if (attributes.isHidden) {
                     galleryContext.openHiddenSection(() => {
