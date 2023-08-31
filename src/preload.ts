@@ -34,13 +34,12 @@ import {
     exists,
 } from './api/export';
 import {
-    selectRootDirectory,
+    selectDirectory,
     logToDisk,
     openLogDirectory,
     getSentryUserID,
     getAppVersion,
     openDirectory,
-    getDownloadsDir,
 } from './api/common';
 import { fixHotReloadNext12 } from './utils/preload';
 import {
@@ -71,7 +70,7 @@ windowObject['ElectronAPIs'] = {
     checkExistsAndCreateDir,
     saveStreamToDisk,
     saveFileToDisk,
-    selectRootDirectory,
+    selectDirectory,
     clearElectronStore,
     sendNotification,
     reloadWindow,
@@ -112,6 +111,5 @@ windowObject['ElectronAPIs'] = {
     moveFile,
     deleteFolder,
     rename,
-    getDownloadsDir,
     deleteFile,
 };

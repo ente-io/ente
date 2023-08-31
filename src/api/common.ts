@@ -1,7 +1,7 @@
 import { ipcRenderer } from 'electron/renderer';
 import { logError } from '../services/logging';
 
-export const selectRootDirectory = async (): Promise<string> => {
+export const selectDirectory = async (): Promise<string> => {
     try {
         return await ipcRenderer.invoke('select-dir');
     } catch (e) {
@@ -23,19 +23,6 @@ export const openDirectory = async (dirPath: string): Promise<void> => {
         await ipcRenderer.invoke('open-dir', dirPath);
     } catch (e) {
         logError(e, 'error while opening directory');
-        throw e;
-    }
-};
-
-export const getDownloadsDir = async (): Promise<string> => {
-    try {
-        const systemDownloadsDir = await ipcRenderer.invoke(
-            'get-path',
-            'downloads'
-        );
-        return systemDownloadsDir;
-    } catch (e) {
-        logError(e, 'error while getting download directory');
         throw e;
     }
 };
