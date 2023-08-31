@@ -184,7 +184,7 @@ async function downloadCollectionFiles(
     };
     const isCancelled = () => canceller.signal.aborted;
     if (isElectron()) {
-        const downloadPath = await getOrCreateCollectionDownloadFolder(
+        const downloadPath = await createCollectionDownloadFolder(
             collectionName
         );
         setCollectionDownloadProgressAttributes((prev) => ({
@@ -205,7 +205,7 @@ async function downloadCollectionFiles(
     }
 }
 
-async function getOrCreateCollectionDownloadFolder(collectionName: string) {
+async function createCollectionDownloadFolder(collectionName: string) {
     const downloadDirPath = await ElectronService.getDownloadsDir();
     const collectionDownloadName = getUniqueCollectionExportName(
         downloadDirPath,
