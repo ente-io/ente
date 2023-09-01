@@ -109,17 +109,18 @@ class _VideoWidgetState extends State<VideoWidget> {
     }).onError((error, stackTrace) {
       if(mounted) {
         showErrorDialog(context, "Error", S
-            .of(context)
-            .failedToDownloadVideo);
+            .of(context).failedToDownloadVideo,);
       }
     });
   }
 
   @override
   void dispose() {
+    removeCallBack(widget.file);
     _videoPlayerController?.dispose();
     _chewieController?.dispose();
     _progressNotifier.dispose();
+
     if (_wakeLockEnabledHere) {
       unawaited(
         WakelockPlus.enabled.then((isEnabled) {

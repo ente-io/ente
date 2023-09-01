@@ -14,6 +14,7 @@ import 'package:photos/core/cache/thumbnail_in_memory_cache.dart';
 import 'package:photos/core/cache/video_cache_manager.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
+import "package:photos/models/file/extensions/file_props.dart";
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file/file_type.dart';
 import 'package:photos/utils/file_download_util.dart';
@@ -108,15 +109,27 @@ void preloadThumbnail(EnteFile file) {
   }
 }
 
-final Map<String, Future<File?>> fileDownloadsInProgress =
+final Map<String, Future<File?>> _fileDownloadsInProgress =
     <String, Future<File?>>{};
-Map<String, ProgressCallback?> progressCallbacks = {};
+Map<String, ProgressCallback?> _progressCallbacks = {};
+
+void removeCallBack(EnteFile file) {
+  if (!file.isUploaded) {
+    return;
+  }
+  String id = file.uploadedFileID.toString() + false.toString();
+  _progressCallbacks.remove(id);
+  if (file.isLivePhoto) {
+    id = file.uploadedFileID.toString() + true.toString();
+    _progressCallbacks.remove(id);
+  }
+}
 
 Future<File?> getFileFromServer(
-    EnteFile file, {
-      ProgressCallback? progressCallback,
-      bool liveVideo = false, // only needed in case of live photos
-    }) async {
+  EnteFile file, {
+  ProgressCallback? progressCallback,
+  bool liveVideo = false, // only needed in case of live photos
+}) async {
   final cacheManager = (file.fileType == FileType.video || liveVideo)
       ? VideoCacheManager.instance
       : DefaultCacheManager();
@@ -127,19 +140,19 @@ Future<File?> getFileFromServer(
   final downloadID = file.uploadedFileID.toString() + liveVideo.toString();
 
   if (progressCallback != null) {
-    progressCallbacks[downloadID] = progressCallback;
+    _progressCallbacks[downloadID] = progressCallback;
   }
 
-  if (!fileDownloadsInProgress.containsKey(downloadID)) {
+  if (!_fileDownloadsInProgress.containsKey(downloadID)) {
     final completer = Completer<File?>();
-    fileDownloadsInProgress[downloadID] = completer.future;
+    _fileDownloadsInProgress[downloadID] = completer.future;
 
     Future<File?> downloadFuture;
     if (file.fileType == FileType.livePhoto) {
       downloadFuture = _getLivePhotoFromServer(
         file,
         progressCallback: (count, total) {
-          progressCallbacks[downloadID]?.call(count, total);
+          _progressCallbacks[downloadID]?.call(count, total);
         },
         needLiveVideo: liveVideo,
       );
@@ -148,20 +161,20 @@ Future<File?> getFileFromServer(
         file,
         cacheManager,
         progressCallback: (count, total) {
-          progressCallbacks[downloadID]?.call(count, total);
+          _progressCallbacks[downloadID]?.call(count, total);
         },
       );
     }
-
     downloadFuture.then((downloadedFile) {
       completer.complete(downloadedFile);
-      fileDownloadsInProgress.remove(downloadID);
-      progressCallbacks.remove(downloadID);
+      _fileDownloadsInProgress.remove(downloadID);
+      _progressCallbacks.remove(downloadID);
     });
   }
-
-  return fileDownloadsInProgress[downloadID];
+  return _fileDownloadsInProgress[downloadID];
 }
+
+
 
 Future<bool> isFileCached(EnteFile file, {bool liveVideo = false}) async {
   final cacheManager = (file.fileType == FileType.video || liveVideo)
@@ -278,7 +291,7 @@ Future<_LivePhoto?> _downloadLivePhoto(
 Future<File?> _downloadAndCache(
   EnteFile file,
   BaseCacheManager cacheManager, {
-  ProgressCallback? progressCallback,
+  required ProgressCallback progressCallback,
 }) async {
   return downloadAndDecrypt(file, progressCallback: progressCallback)
       .then((decryptedFile) async {
