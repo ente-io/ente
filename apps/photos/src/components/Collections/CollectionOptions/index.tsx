@@ -40,7 +40,7 @@ interface CollectionOptionsProps {
     setCollectionDownloadProgressAttributesCreator: (
         collectionID: number
     ) => SetCollectionDownloadProgressAttributes;
-    isCollectionDownloadInProgress: (collectionID: number) => boolean;
+    isActiveCollectionDownloadInProgress: () => boolean;
     activeCollection: Collection;
     collectionSummaryType: CollectionSummaryType;
     showCollectionShareModal: () => void;
@@ -77,7 +77,7 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
         setCollectionNamerAttributes,
         showCollectionShareModal,
         setCollectionDownloadProgressAttributesCreator,
-        isCollectionDownloadInProgress,
+        isActiveCollectionDownloadInProgress,
     } = props;
 
     const { startLoading, finishLoading, setDialogMessage } =
@@ -215,11 +215,7 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
     };
 
     const downloadCollection = () => {
-        if (
-            isCollectionDownloadInProgress(
-                activeCollection?.id ?? HIDDEN_ITEMS_SECTION
-            )
-        ) {
+        if (isActiveCollectionDownloadInProgress()) {
             return;
         }
         if (collectionSummaryType === CollectionSummaryType.hiddenItems) {
@@ -350,9 +346,7 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
             <QuickOptions
                 handleCollectionAction={handleCollectionAction}
                 collectionSummaryType={collectionSummaryType}
-                isDownloadInProgress={isCollectionDownloadInProgress(
-                    activeCollection?.id
-                )}
+                isDownloadInProgress={isActiveCollectionDownloadInProgress()}
             />
 
             <OverflowMenu
@@ -365,9 +359,7 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
                 ) : collectionSummaryType ===
                   CollectionSummaryType.favorites ? (
                     <OnlyDownloadCollectionOption
-                        isDownloadInProgress={isCollectionDownloadInProgress(
-                            activeCollection?.id
-                        )}
+                        isDownloadInProgress={isActiveCollectionDownloadInProgress()}
                         handleCollectionAction={handleCollectionAction}
                         downloadOptionText={t('DOWNLOAD_FAVORITES')}
                     />

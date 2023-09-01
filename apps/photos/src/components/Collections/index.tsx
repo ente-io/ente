@@ -108,19 +108,16 @@ export default function Collections(props: Iprops) {
             });
         };
 
-    const isCollectionDownloadInProgress = useCallback(
-        (collectionID: number) => {
-            const attributes = collectionDownloadProgressAttributesList.find(
-                (attr) => attr.collectionID === collectionID
-            );
-            return (
-                attributes &&
-                !isCollectionDownloadCancelled(attributes) &&
-                !isCollectionDownloadCompleted(attributes)
-            );
-        },
-        [collectionDownloadProgressAttributesList]
-    );
+    const isActiveCollectionDownloadInProgress = useCallback(() => {
+        const attributes = collectionDownloadProgressAttributesList.find(
+            (attr) => attr.collectionID === activeCollectionID
+        );
+        return (
+            attributes &&
+            !isCollectionDownloadCancelled(attributes) &&
+            !isCollectionDownloadCompleted(attributes)
+        );
+    }, [activeCollectionID, collectionDownloadProgressAttributesList]);
 
     useEffect(() => {
         if (isInSearchMode) {
@@ -140,8 +137,8 @@ export default function Collections(props: Iprops) {
                     setCollectionDownloadProgressAttributesCreator={
                         setCollectionDownloadProgressAttributesCreator
                     }
-                    isCollectionDownloadInProgress={
-                        isCollectionDownloadInProgress
+                    isActiveCollectionDownloadInProgress={
+                        isActiveCollectionDownloadInProgress
                     }
                     setActiveCollectionID={setActiveCollectionID}
                 />
@@ -153,7 +150,7 @@ export default function Collections(props: Iprops) {
         toShowCollectionSummaries,
         activeCollectionID,
         isInSearchMode,
-        isCollectionDownloadInProgress,
+        isActiveCollectionDownloadInProgress,
     ]);
 
     if (shouldBeHidden) {

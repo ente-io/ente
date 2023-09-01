@@ -13,8 +13,8 @@ export interface CollectionDownloadProgressAttributes {
     collectionName: string;
     collectionID: number;
     isHidden: boolean;
+    canceller: AbortController;
     downloadDirPath?: string;
-    canceller?: AbortController;
 }
 
 interface CollectionDownloadProgressProps {

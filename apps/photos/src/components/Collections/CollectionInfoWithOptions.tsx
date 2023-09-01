@@ -21,7 +21,7 @@ interface Iprops {
     setCollectionDownloadProgressAttributesCreator: (
         collectionID: number
     ) => SetCollectionDownloadProgressAttributes;
-    isCollectionDownloadInProgress: (collectionID: number) => boolean;
+    isActiveCollectionDownloadInProgress: () => boolean;
     setActiveCollectionID: (collectionID: number) => void;
 }
 
