@@ -32,11 +32,11 @@ class FakePeriodicProgress {
     if (_shouldRun) {
       try {
         runCount++;
-        callback
-            ?.call(runCount); // replace 0,0 with actual progress if available
+        callback?.call(runCount);
       } catch (e) {
         debugPrint("Error in FakePeriodicProgress callback: $e");
         stop();
+        return;
       }
       _timer = Timer(duration, _invokePeriodically);
     }
