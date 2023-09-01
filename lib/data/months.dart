@@ -1,17 +1,20 @@
-List<MonthData> allMonths = [
-  MonthData('January', 1),
-  MonthData('February', 2),
-  MonthData('March', 3),
-  MonthData('April', 4),
-  MonthData('May', 5),
-  MonthData('June', 6),
-  MonthData('July', 7),
-  MonthData('August', 8),
-  MonthData('September', 9),
-  MonthData('October', 10),
-  MonthData('November', 11),
-  MonthData('December', 12),
-];
+import "package:flutter/widgets.dart";
+import "package:intl/intl.dart";
+
+final Map<String, List<MonthData>> _cache = {};
+
+List<MonthData> getMonthData(BuildContext context) {
+  final locale = Localizations.localeOf(context).toString();
+
+  if (!_cache.containsKey(locale)) {
+    final dateSymbols = DateFormat('MMMM', locale).dateSymbols;
+    _cache[locale] = List.generate(
+      12,
+      (index) => MonthData(dateSymbols.MONTHS[index], index + 1),
+    );
+  }
+  return _cache[locale]!;
+}
 
 class MonthData {
   final String name;
