@@ -7,7 +7,7 @@ import { useRouter } from 'next/router';
 import SubmitButton from 'components/SubmitButton';
 import {
     generateAndSaveIntermediateKeyAttributes,
-    generateKeyAttributes,
+    generateKeyAndSRPAttributes,
     isWeakPassword,
     saveKeyInSessionStore,
 } from 'utils/crypto';
@@ -77,9 +77,11 @@ export default function SignUp(props: SignUpProps) {
                 throw e;
             }
             try {
-                const { keyAttributes, masterKey } =
-                    await generateKeyAttributes(passphrase);
+                const { keyAttributes, masterKey, srpSetupAttributes } =
+                    await generateKeyAndSRPAttributes(passphrase);
+
                 setData(LS_KEYS.ORIGINAL_KEY_ATTRIBUTES, keyAttributes);
+                setData(LS_KEYS.SRP_SETUP_ATTRIBUTES, srpSetupAttributes);
                 await generateAndSaveIntermediateKeyAttributes(
                     passphrase,
                     keyAttributes,

@@ -1,14 +1,14 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { t } from 'i18next';
 
-import { logoutUser, putAttributes } from 'services/userService';
+import { configureSRP, logoutUser, putAttributes } from 'services/userService';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import { useRouter } from 'next/router';
 import { getKey, SESSION_KEYS } from 'utils/storage/sessionStorage';
 import {
     saveKeyInSessionStore,
     generateAndSaveIntermediateKeyAttributes,
-    generateKeyAttributes,
+    generateKeyAndSRPAttributes,
 } from 'utils/crypto';
 import SetPasswordForm from 'components/SetPasswordForm';
 import { justSignedUp, setJustSignedUp } from 'utils/storage';
@@ -69,11 +69,11 @@ export default function Generate() {
 
     const onSubmit = async (passphrase, setFieldError) => {
         try {
-            const { keyAttributes, masterKey } = await generateKeyAttributes(
-                passphrase
-            );
+            const { keyAttributes, masterKey, srpSetupAttributes } =
+                await generateKeyAndSRPAttributes(passphrase);
 
             await putAttributes(token, keyAttributes);
+            await configureSRP(srpSetupAttributes);
             await generateAndSaveIntermediateKeyAttributes(
                 passphrase,
                 keyAttributes,

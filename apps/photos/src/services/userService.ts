@@ -6,12 +6,16 @@ import { clearData, getData, LS_KEYS } from 'utils/storage/localStorage';
 import localForage from 'utils/storage/localForage';
 import { getToken } from 'utils/common/key';
 import HTTPService from './HTTPService';
-import { getRecoveryKey } from 'utils/crypto';
+import {
+    computeVerifierHelper,
+    generateLoginSubKey,
+    generateSRPClient,
+    getRecoveryKey,
+} from 'utils/crypto';
 import { logError } from 'utils/sentry';
 import { eventBus, Events } from './events';
 import {
     KeyAttributes,
-    UpdatedKey,
     RecoveryKey,
     TwoFactorSecret,
     TwoFactorVerificationResponse,
@@ -19,7 +23,18 @@ import {
     UserDetails,
     DeleteChallengeResponse,
     GetRemoteStoreValueResponse,
+    SetupSRPRequest,
+    CreateSRPSessionResponse,
+    UserVerificationResponse,
     GetFeatureFlagResponse,
+    SetupSRPResponse,
+    CompleteSRPSetupRequest,
+    CompleteSRPSetupResponse,
+    SRPSetupAttributes,
+    SRPAttributes,
+    UpdateSRPAndKeysRequest,
+    UpdateSRPAndKeysResponse,
+    GetSRPAttributesResponse,
 } from 'types/user';
 import { ServerErrorCodes } from 'utils/error';
 import isElectron from 'is-electron';
@@ -29,6 +44,9 @@ import { B64EncryptionResult } from 'types/crypto';
 import { getLocalFamilyData, isPartOfFamily } from 'utils/user/family';
 import { AxiosResponse } from 'axios';
 import { APPS, getAppName } from 'constants/apps';
+import { addLocalLog } from 'utils/logging';
+import { setUserSRPSetupPending } from 'utils/storage';
+import { convertBase64ToBuffer, convertBufferToBase64 } from 'utils/user';
 import { setLocalMapEnabled } from 'utils/storage';
 
 const ENDPOINT = getEndpoint();
@@ -110,11 +128,6 @@ export const verifyOtt = (email: string, ott: string) =>
 
 export const putAttributes = (token: string, keyAttributes: KeyAttributes) =>
     HTTPService.put(`${ENDPOINT}/users/attributes`, { keyAttributes }, null, {
-        'X-Auth-Token': token,
-    });
-
-export const setKeys = (token: string, updatedKey: UpdatedKey) =>
-    HTTPService.put(`${ENDPOINT}/users/keys`, updatedKey, null, {
         'X-Auth-Token': token,
     });
 
@@ -517,3 +530,200 @@ export async function getDisableCFUploadProxyFlag(): Promise<boolean> {
         return false;
     }
 }
+
+export const getSRPAttributes = async (
+    email: string
+): Promise<SRPAttributes | null> => {
+    try {
+        const resp = await HTTPService.get(`${ENDPOINT}/users/srp/attributes`, {
+            email,
+        });
+        return (resp.data as GetSRPAttributesResponse).attributes;
+    } catch (e) {
+        if (e.status?.toString() === ServerErrorCodes.NOT_FOUND) {
+            return null;
+        }
+        logError(e, 'failed to get SRP attributes');
+        throw e;
+    }
+};
+
+export const configureSRP = async ({
+    srpSalt,
+    srpUserID,
+    srpVerifier,
+    loginSubKey,
+}: SRPSetupAttributes) => {
+    try {
+        const srpClient = await generateSRPClient(
+            srpSalt,
+            srpUserID,
+            loginSubKey
+        );
+
+        const srpA = convertBufferToBase64(srpClient.computeA());
+
+        addLocalLog(() => `srp a: ${srpA}`);
+        const token = getToken();
+        const { setupID, srpB } = await startSRPSetup(token, {
+            srpA,
+            srpUserID,
+            srpSalt,
+            srpVerifier,
+        });
+
+        srpClient.setB(convertBase64ToBuffer(srpB));
+
+        const srpM1 = convertBufferToBase64(srpClient.computeM1());
+
+        const { srpM2 } = await completeSRPSetup(token, {
+            srpM1,
+            setupID,
+        });
+
+        srpClient.checkM2(convertBase64ToBuffer(srpM2));
+
+        setUserSRPSetupPending(false);
+    } catch (e) {
+        logError(e, 'srp configure failed');
+        throw e;
+    }
+};
+
+export const startSRPSetup = async (
+    token: string,
+    setupSRPRequest: SetupSRPRequest
+): Promise<SetupSRPResponse> => {
+    try {
+        const resp = await HTTPService.post(
+            `${ENDPOINT}/users/srp/setup`,
+            setupSRPRequest,
+            null,
+            {
+                'X-Auth-Token': token,
+            }
+        );
+
+        return resp.data as SetupSRPResponse;
+    } catch (e) {
+        logError(e, 'failed to post SRP attributes');
+        throw e;
+    }
+};
+
+export const completeSRPSetup = async (
+    token: string,
+    completeSRPSetupRequest: CompleteSRPSetupRequest
+) => {
+    try {
+        const resp = await HTTPService.post(
+            `${ENDPOINT}/users/srp/complete`,
+            completeSRPSetupRequest,
+            null,
+            {
+                'X-Auth-Token': token,
+            }
+        );
+        return resp.data as CompleteSRPSetupResponse;
+    } catch (e) {
+        logError(e, 'failed to complete SRP setup');
+        throw e;
+    }
+};
+
+export const loginViaSRP = async (
+    srpAttributes: SRPAttributes,
+    kek: string
+): Promise<UserVerificationResponse> => {
+    try {
+        const loginSubKey = await generateLoginSubKey(kek);
+        const srpClient = await generateSRPClient(
+            srpAttributes.srpSalt,
+            srpAttributes.srpUserID,
+            loginSubKey
+        );
+        const srpVerifier = computeVerifierHelper(
+            srpAttributes.srpSalt,
+            srpAttributes.srpUserID,
+            loginSubKey
+        );
+        addLocalLog(() => `srp verifier: ${srpVerifier}`);
+        const srpA = srpClient.computeA();
+        const { srpB, sessionID } = await createSRPSession(
+            srpAttributes.srpUserID,
+            convertBufferToBase64(srpA)
+        );
+        srpClient.setB(convertBase64ToBuffer(srpB));
+
+        const m1 = srpClient.computeM1();
+        addLocalLog(() => `srp m1: ${convertBufferToBase64(m1)}`);
+        const { srpM2, ...rest } = await verifySRPSession(
+            sessionID,
+            srpAttributes.srpUserID,
+            convertBufferToBase64(m1)
+        );
+        addLocalLog(() => `srp verify session successful,srpM2: ${srpM2}`);
+
+        srpClient.checkM2(convertBase64ToBuffer(srpM2));
+
+        addLocalLog(() => `srp server verify successful`);
+
+        return rest;
+    } catch (e) {
+        logError(e, 'srp verify failed');
+        throw e;
+    }
+};
+
+export const createSRPSession = async (srpUserID: string, srpA: string) => {
+    try {
+        const resp = await HTTPService.post(
+            `${ENDPOINT}/users/srp/create-session`,
+            {
+                srpUserID,
+                srpA,
+            }
+        );
+        return resp.data as CreateSRPSessionResponse;
+    } catch (e) {
+        logError(e, 'createSRPSession failed');
+        throw e;
+    }
+};
+
+export const verifySRPSession = async (
+    sessionID: string,
+    srpUserID: string,
+    srpM1: string
+) => {
+    try {
+        const resp = await HTTPService.post(
+            `${ENDPOINT}/users/srp/verify-session`,
+            {
+                sessionID,
+                srpUserID,
+                srpM1,
+            },
+            null
+        );
+        return resp.data as UserVerificationResponse;
+    } catch (e) {
+        logError(e, 'verifySRPSession failed');
+        throw e;
+    }
+};
+
+export const updateSRPAndKeys = async (
+    token: string,
+    updateSRPAndKeyRequest: UpdateSRPAndKeysRequest
+): Promise<UpdateSRPAndKeysResponse> => {
+    const resp = await HTTPService.post(
+        `${ENDPOINT}/users/srp/update`,
+        updateSRPAndKeyRequest,
+        null,
+        {
+            'X-Auth-Token': token,
+        }
+    );
+    return resp.data as UpdateSRPAndKeysResponse;
+};
