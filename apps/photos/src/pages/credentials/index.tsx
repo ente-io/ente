@@ -42,6 +42,7 @@ import { APPS, getAppName } from 'constants/apps';
 import { addLocalLog } from 'utils/logging';
 import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
 import { B64EncryptionResult } from 'types/crypto';
+import { CustomError } from 'utils/error';
 
 export default function Credentials() {
     const router = useRouter();
@@ -75,23 +76,36 @@ export default function Credentials() {
             const kekEncryptedAttributes: B64EncryptionResult = getKey(
                 SESSION_KEYS.KEY_ENCRYPTION_KEY
             );
+            const passphraseEncryptedAttributes: B64EncryptionResult = getKey(
+                SESSION_KEYS.PASSPHRASE_ENCRYPTION_KEY
+            );
             const keyAttributes: KeyAttributes = getData(
                 LS_KEYS.KEY_ATTRIBUTES
             );
-            if (kekEncryptedAttributes && keyAttributes) {
+            if (
+                kekEncryptedAttributes &&
+                keyAttributes &&
+                passphraseEncryptedAttributes
+            ) {
                 const cryptoWorker = await ComlinkCryptoWorker.getInstance();
                 const kek = await cryptoWorker.decryptB64(
                     kekEncryptedAttributes.encryptedData,
                     kekEncryptedAttributes.nonce,
                     kekEncryptedAttributes.key
                 );
+                const passphrase = await cryptoWorker.toUTF8(
+                    await cryptoWorker.decryptB64(
+                        passphraseEncryptedAttributes.encryptedData,
+                        passphraseEncryptedAttributes.nonce,
+                        passphraseEncryptedAttributes.key
+                    )
+                );
                 const key = await cryptoWorker.decryptB64(
                     keyAttributes.encryptedKey,
                     keyAttributes.keyDecryptionNonce,
                     kek
                 );
-                await saveKeyInSessionStore(SESSION_KEYS.ENCRYPTION_KEY, key);
-                router.push(PAGES.GALLERY);
+                useMasterPassword(key, passphrase, kek, keyAttributes);
                 return;
             }
 
@@ -122,34 +136,56 @@ export default function Credentials() {
         appContext.showNavBar(true);
     }, []);
 
-    const getKeyAttributes = async (kek: string) => {
-        const cryptoWorker = await ComlinkCryptoWorker.getInstance();
-        const { keyAttributes, encryptedToken, token, id, twoFactorSessionID } =
-            await loginViaSRP(srpAttributes, kek);
-        setData(LS_KEYS.KEY_ATTRIBUTES, keyAttributes);
-        if (twoFactorSessionID) {
-            const sessionKeyAttributes =
-                await cryptoWorker.generateKeyAndEncryptToB64(kek);
-            setKey(SESSION_KEYS.KEY_ENCRYPTION_KEY, sessionKeyAttributes);
-            const user = getData(LS_KEYS.USER);
-            setData(LS_KEYS.USER, {
-                ...user,
-                twoFactorSessionID,
-                isTwoFactorEnabled: true,
-            });
-            setIsFirstLogin(true);
-            router.push(PAGES.TWO_FACTOR_VERIFY);
-            return null;
-        } else {
-            const user = getData(LS_KEYS.USER);
-            setData(LS_KEYS.USER, {
-                ...user,
-                token,
+    const getKeyAttributes = async (kek: string, passphrase: string) => {
+        try {
+            const cryptoWorker = await ComlinkCryptoWorker.getInstance();
+            const {
+                keyAttributes,
                 encryptedToken,
+                token,
                 id,
-                isTwoFactorEnabled: false,
-            });
-            return keyAttributes;
+                twoFactorSessionID,
+            } = await loginViaSRP(srpAttributes, kek);
+            setData(LS_KEYS.KEY_ATTRIBUTES, keyAttributes);
+            if (twoFactorSessionID) {
+                const sessionKeyAttributes =
+                    await cryptoWorker.generateKeyAndEncryptToB64(kek);
+                const passphraseKeyAttributes =
+                    await cryptoWorker.generateKeyAndEncryptToB64(
+                        await cryptoWorker.toB64(
+                            await cryptoWorker.fromUTF8(passphrase)
+                        )
+                    );
+                setKey(SESSION_KEYS.KEY_ENCRYPTION_KEY, sessionKeyAttributes);
+                setKey(
+                    SESSION_KEYS.PASSPHRASE_ENCRYPTION_KEY,
+                    passphraseKeyAttributes
+                );
+                const user = getData(LS_KEYS.USER);
+                setData(LS_KEYS.USER, {
+                    ...user,
+                    twoFactorSessionID,
+                    isTwoFactorEnabled: true,
+                });
+                setIsFirstLogin(true);
+                router.push(PAGES.TWO_FACTOR_VERIFY);
+                throw Error(CustomError.TWO_FACTOR_ENABLED);
+            } else {
+                const user = getData(LS_KEYS.USER);
+                setData(LS_KEYS.USER, {
+                    ...user,
+                    token,
+                    encryptedToken,
+                    id,
+                    isTwoFactorEnabled: false,
+                });
+                return keyAttributes;
+            }
+        } catch (e) {
+            if (e.message !== CustomError.TWO_FACTOR_ENABLED) {
+                logError(e, 'getKeyAttributes failed');
+            }
+            throw e;
         }
     };
 

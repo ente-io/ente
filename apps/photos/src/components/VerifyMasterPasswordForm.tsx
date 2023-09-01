@@ -22,7 +22,10 @@ export interface VerifyMasterPasswordFormProps {
     ) => void;
     buttonText: string;
     submitButtonProps?: ButtonProps;
-    getKeyAttributes?: (kek: string) => Promise<KeyAttributes>;
+    getKeyAttributes?: (
+        kek: string,
+        passphrase: string
+    ) => Promise<KeyAttributes>;
     srpAttributes?: SRPAttributes;
 }
 
@@ -63,7 +66,7 @@ export default function VerifyMasterPasswordForm({
                 throw Error(CustomError.WEAK_DEVICE);
             }
             if (!keyAttributes && typeof getKeyAttributes === 'function') {
-                keyAttributes = await getKeyAttributes(kek);
+                keyAttributes = await getKeyAttributes(kek, passphrase);
             }
             if (!keyAttributes) {
                 throw Error("couldn't get key attributes");
@@ -80,6 +83,11 @@ export default function VerifyMasterPasswordForm({
                 throw Error(CustomError.INCORRECT_PASSWORD);
             }
         } catch (e) {
+            if (e.message === CustomError.TWO_FACTOR_ENABLED) {
+                // two factor enabled, user has been redirected to two factor page
+                return;
+            }
+            logError(e, 'failed to verify passphrase');
             switch (e.message) {
                 case CustomError.WEAK_DEVICE:
                     setFieldError(t('WEAK_DEVICE'));
