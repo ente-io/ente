@@ -110,12 +110,13 @@ void preloadThumbnail(EnteFile file) {
 
 final Map<String, Future<File?>> fileDownloadsInProgress =
     <String, Future<File?>>{};
+Map<String, ProgressCallback?> progressCallbacks = {};
 
 Future<File?> getFileFromServer(
-  EnteFile file, {
-  ProgressCallback? progressCallback,
-  bool liveVideo = false, // only needed in case of live photos
-}) async {
+    EnteFile file, {
+      ProgressCallback? progressCallback,
+      bool liveVideo = false, // only needed in case of live photos
+    }) async {
   final cacheManager = (file.fileType == FileType.video || liveVideo)
       ? VideoCacheManager.instance
       : DefaultCacheManager();
@@ -124,27 +125,41 @@ Future<File?> getFileFromServer(
     return fileFromCache.file;
   }
   final downloadID = file.uploadedFileID.toString() + liveVideo.toString();
+
+  if (progressCallback != null) {
+    progressCallbacks[downloadID] = progressCallback;
+  }
+
   if (!fileDownloadsInProgress.containsKey(downloadID)) {
+    final completer = Completer<File?>();
+    fileDownloadsInProgress[downloadID] = completer.future;
+
+    Future<File?> downloadFuture;
     if (file.fileType == FileType.livePhoto) {
-      fileDownloadsInProgress[downloadID] = _getLivePhotoFromServer(
+      downloadFuture = _getLivePhotoFromServer(
         file,
-        progressCallback: progressCallback,
+        progressCallback: (count, total) {
+          progressCallbacks[downloadID]?.call(count, total);
+        },
         needLiveVideo: liveVideo,
       );
-      fileDownloadsInProgress[downloadID]!.whenComplete(() {
-        fileDownloadsInProgress.remove(downloadID);
-      });
     } else {
-      fileDownloadsInProgress[downloadID] = _downloadAndCache(
+      downloadFuture = _downloadAndCache(
         file,
         cacheManager,
-        progressCallback: progressCallback,
+        progressCallback: (count, total) {
+          progressCallbacks[downloadID]?.call(count, total);
+        },
       );
-      fileDownloadsInProgress[downloadID]!.whenComplete(() {
-        fileDownloadsInProgress.remove(downloadID);
-      });
     }
+
+    downloadFuture.then((downloadedFile) {
+      completer.complete(downloadedFile);
+      fileDownloadsInProgress.remove(downloadID);
+      progressCallbacks.remove(downloadID);
+    });
   }
+
   return fileDownloadsInProgress[downloadID];
 }
 
