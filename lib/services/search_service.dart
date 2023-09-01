@@ -397,7 +397,7 @@ class SearchService {
     final int startYear = year ?? searchStartYear;
     final int endYear = year ?? currentYear;
     for (var yr = startYear; yr <= endYear; yr++) {
-      if (isValidDate(day: day, month: month, year: yr)) {
+      if (isValidGregorianDate(day: day, month: month, year: yr)) {
         durationsOfHolidayInEveryYear.add([
           DateTime(yr, month, day).microsecondsSinceEpoch,
           DateTime(yr, month, day + 1).microsecondsSinceEpoch,
