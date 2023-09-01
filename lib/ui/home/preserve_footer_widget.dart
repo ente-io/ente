@@ -2,10 +2,8 @@ import 'dart:async';
 import "dart:io";
 
 import 'package:flutter/material.dart';
-import "package:flutter/services.dart";
 import "package:logging/logging.dart";
 import 'package:photo_manager/photo_manager.dart';
-import "package:photos/core/configuration.dart";
 import "package:photos/generated/l10n.dart";
 import 'package:photos/services/local_sync_service.dart';
 import 'package:photos/ui/common/gradient_button.dart';
