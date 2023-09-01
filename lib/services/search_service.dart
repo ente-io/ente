@@ -1,3 +1,4 @@
+import "package:flutter/cupertino.dart";
 import 'package:logging/logging.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/data/holidays.dart';
@@ -93,7 +94,8 @@ class SearchService {
     final List<GenericSearchResult> searchResults = [];
     for (var yearData in YearsData.instance.yearsData) {
       if (yearData.year.startsWith(yearFromQuery)) {
-        final List<EnteFile> filesInYear = await _getFilesInYear(yearData.duration);
+        final List<EnteFile> filesInYear =
+            await _getFilesInYear(yearData.duration);
         if (filesInYear.isNotEmpty) {
           searchResults.add(
             GenericSearchResult(
@@ -314,9 +316,12 @@ class SearchService {
     return searchResults;
   }
 
-  Future<List<GenericSearchResult>> getMonthSearchResults(String query) async {
+  Future<List<GenericSearchResult>> getMonthSearchResults(
+    BuildContext context,
+    String query,
+  ) async {
     final List<GenericSearchResult> searchResults = [];
-    for (var month in _getMatchingMonths(query)) {
+    for (var month in _getMatchingMonths(context, query)) {
       final matchedFiles =
           await FilesDB.instance.getFilesCreatedWithinDurations(
         _getDurationsOfMonthInEveryYear(month.monthNumber),
@@ -337,10 +342,11 @@ class SearchService {
   }
 
   Future<List<GenericSearchResult>> getDateResults(
+    BuildContext context,
     String query,
   ) async {
     final List<GenericSearchResult> searchResults = [];
-    final potentialDates = _getPossibleEventDate(query);
+    final potentialDates = _getPossibleEventDate(context, query);
 
     for (var potentialDate in potentialDates) {
       final int day = potentialDate.item1;
@@ -365,8 +371,8 @@ class SearchService {
     return searchResults;
   }
 
-  List<MonthData> _getMatchingMonths(String query) {
-    return allMonths
+  List<MonthData> _getMatchingMonths(BuildContext context, String query) {
+    return getMonthData(context)
         .where(
           (monthData) =>
               monthData.name.toLowerCase().startsWith(query.toLowerCase()),
@@ -414,7 +420,10 @@ class SearchService {
     return durationsOfMonthInEveryYear;
   }
 
-  List<Tuple3<int, MonthData, int?>> _getPossibleEventDate(String query) {
+  List<Tuple3<int, MonthData, int?>> _getPossibleEventDate(
+    BuildContext context,
+    String query,
+  ) {
     final List<Tuple3<int, MonthData, int?>> possibleEvents = [];
     if (query.trim().isEmpty) {
       return possibleEvents;
@@ -434,8 +443,9 @@ class SearchService {
     if (day == null || day < 1 || day > 31) {
       return possibleEvents;
     }
-    final List<MonthData> potentialMonth =
-        resultCount > 1 ? _getMatchingMonths(result[1]) : allMonths;
+    final List<MonthData> potentialMonth = resultCount > 1
+        ? _getMatchingMonths(context, result[1])
+        : getMonthData(context);
     final int? parsedYear = resultCount >= 3 ? int.tryParse(result[2]) : null;
     final List<int> matchingYears = [];
     if (parsedYear != null) {
