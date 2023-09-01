@@ -7,9 +7,11 @@ import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/network/network.dart';
 import 'package:photos/models/file/file.dart';
+import "package:photos/models/file/file_type.dart";
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/utils/crypto_util.dart';
 import "package:photos/utils/data_util.dart";
+import "package:photos/utils/fake_progress.dart";
 
 final _logger = Logger("file_download_util");
 
@@ -58,15 +60,29 @@ Future<File?> downloadAndDecrypt(
     );
 
     final String decryptedFilePath = "$tempDir${file.generatedID}.decrypted";
+    // As decryption can take time, emit fake progress for large files during
+    // decryption
+    final FakePeriodicProgress? fakeProgress = file.fileType == FileType.video
+        ? FakePeriodicProgress(
+            callback: (count) {
+              progressCallback?.call(sizeInBytes, sizeInBytes);
+            },
+            duration: const Duration(milliseconds: 5000),
+          )
+        : null;
     try {
+      // Start the periodic callback after initial 5 seconds
+      fakeProgress?.start();
       await CryptoUtil.decryptFile(
         encryptedFilePath,
         decryptedFilePath,
         CryptoUtil.base642bin(file.fileDecryptionHeader!),
         getFileKey(file),
       );
+      fakeProgress?.stop();
       _logger.info('$logPrefix decryption completed');
     } catch (e, s) {
+      fakeProgress?.stop();
       _logger.severe("Critical: $logPrefix failed to decrypt", e, s);
       return null;
     }
