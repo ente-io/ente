@@ -7,7 +7,7 @@ typedef FakeProgressCallback = void Function(int count);
 class FakePeriodicProgress {
   final FakeProgressCallback? callback;
   final Duration duration;
-  late Timer _timer;
+  Timer? _timer;
   bool _shouldRun = true;
   int runCount = 0;
 
@@ -24,7 +24,7 @@ class FakePeriodicProgress {
   void stop() {
     if (_shouldRun) {
       _shouldRun = false;
-      _timer.cancel();
+      _timer?.cancel();
     }
   }
 
