@@ -44,6 +44,7 @@ import { getParsedExifData } from 'services/upload/exifService';
 import { getFileType } from 'services/typeDetectionService';
 import { ConversionFailedNotification } from './styledComponents/ConversionFailedNotification';
 import { GalleryContext } from 'pages/gallery';
+import { ConvertBtn } from './styledComponents/ConvertBtn';
 
 interface PhotoswipeFullscreenAPI {
     enter: () => void;
@@ -67,6 +68,7 @@ interface Iprops {
     currentIndex?: number;
     onClose?: (needUpdate: boolean) => void;
     gettingData: (instance: any, index: number, item: EnteFile) => void;
+    getConvertedVideo: (instance: any, index: number, item: EnteFile) => void;
     id?: string;
     className?: string;
     favItemIds: Set<number>;
@@ -107,6 +109,8 @@ function PhotoViewer(props: Iprops) {
     const shouldShowCopyOption = useMemo(() => isClipboardItemPresent(), []);
 
     const [isOwnFile, setIsOwnFile] = useState(false);
+
+    const [showConvertBtn, setShowConvertBtn] = useState(false);
 
     useEffect(() => {
         if (!pswpElement) return;
@@ -256,6 +260,11 @@ function PhotoViewer(props: Iprops) {
         setIsOwnFile(isOwnFile);
     }
 
+    function updateShowConvertBtn(file: EnteFile) {
+        const showConvertBtn = file.metadata.fileType === FILE_TYPE.VIDEO;
+        setShowConvertBtn(showConvertBtn);
+    }
+
     const openPhotoSwipe = () => {
         const { items, currentIndex } = props;
         const options = {
@@ -324,6 +333,7 @@ function PhotoViewer(props: Iprops) {
             }
             updateFavButton(currItem);
             updateIsOwnFile(currItem);
+            updateShowConvertBtn(currItem);
             if (currItem.metadata.fileType !== FILE_TYPE.IMAGE) {
                 setExif({ key: currItem.src, value: null });
                 return;
@@ -574,6 +584,19 @@ function PhotoViewer(props: Iprops) {
                                 downloadFileHelper(photoSwipe.currItem)
                             }
                         />
+                    )}
+                    {showConvertBtn && (
+                        <ConvertBtn
+                            onClick={() => {
+                                props.getConvertedVideo(
+                                    photoSwipe,
+                                    photoSwipe.getCurrentIndex(),
+                                    photoSwipe.currItem as EnteFile
+                                );
+                            }}
+                            disabled={!isSourceLoaded}>
+                            {t('CONVERT')}
+                        </ConvertBtn>
                     )}
 
                     <div className="pswp__container">

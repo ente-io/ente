@@ -18,6 +18,7 @@ import { logError } from 'utils/sentry';
 import { addLogLine } from 'utils/logging';
 import PhotoSwipe from 'photoswipe';
 import useMemoSingleThreaded from 'hooks/useMemoSingleThreaded';
+import { getPlayableVideo } from 'utils/file';
 
 const Container = styled('div')`
     display: block;
@@ -174,33 +175,37 @@ const PhotoFrame = ({
         return <div />;
     }
 
-    const updateURL = (index: number) => (id: number, url: string) => {
-        const file = displayFiles[index];
-        // this is to prevent outdated updateURL call from updating the wrong file
-        if (file.id !== id) {
-            addLogLine(
-                `PhotoSwipe: updateURL: file id mismatch: ${file.id} !== ${id}`
-            );
-            return;
-        }
-        if (file.msrc && file.msrc !== url) {
-            addLogLine(`PhotoSwipe: updateURL: msrc already set: ${file.msrc}`);
-            logError(
-                new Error(
+    const updateURL =
+        (index: number) => (id: number, url: string, forceUpdate?: boolean) => {
+            const file = displayFiles[index];
+            // this is to prevent outdated updateURL call from updating the wrong file
+            if (file.id !== id) {
+                addLogLine(
+                    `PhotoSwipe: updateURL: file id mismatch: ${file.id} !== ${id}`
+                );
+                return;
+            }
+            if (file.msrc && file.msrc !== url && !forceUpdate) {
+                addLogLine(
                     `PhotoSwipe: updateURL: msrc already set: ${file.msrc}`
-                ),
-                'PhotoSwipe: updateURL called with msrc already set'
-            );
-            return;
-        }
-        updateFileMsrcProps(file, url);
-    };
+                );
+                logError(
+                    new Error(
+                        `PhotoSwipe: updateURL: msrc already set: ${file.msrc}`
+                    ),
+                    'PhotoSwipe: updateURL called with msrc already set'
+                );
+                return;
+            }
+            updateFileMsrcProps(file, url);
+        };
 
     const updateSrcURL = async (
         index: number,
         id: number,
         mergedSrcURL: MergedSourceURL,
-        conversionFailed: boolean
+        conversionFailed: boolean,
+        forceUpdate?: boolean
     ) => {
         const file = displayFiles[index];
         // this is to prevent outdate updateSrcURL call from updating the wrong file
@@ -210,7 +215,7 @@ const PhotoFrame = ({
             );
             return;
         }
-        if (file.isSourceLoaded) {
+        if (file.isSourceLoaded && !forceUpdate) {
             addLogLine(
                 `PhotoSwipe: updateSrcURL: source already loaded: ${file.id}`
             );
@@ -511,6 +516,116 @@ const PhotoFrame = ({
         }
     };
 
+    const getConvertedVideo = async (
+        instance: PhotoSwipe<PhotoSwipe.Options>,
+        index: number,
+        item: EnteFile
+    ) => {
+        setIsSourceLoaded(false);
+        setConversionFailed(false);
+        updateURL(index)(item.id, item.msrc, true);
+        try {
+            addLogLine(
+                `[${
+                    item.id
+                }] calling invalidateCurrItems for thumbnail msrc :${!!item.msrc}`
+            );
+            instance.invalidateCurrItems();
+            if ((instance as any).isOpen()) {
+                instance.updateSize(true);
+            }
+        } catch (e) {
+            logError(e, 'updating photoswipe after msrc url update failed');
+            // ignore
+        }
+        try {
+            addLogLine(`[${item.id}] new file getConvertedVideo request`);
+            fetching[item.id] = true;
+            let srcURL: MergedSourceURL;
+            let conversionFailed: boolean = false;
+            if (galleryContext.files.has(item.id)) {
+                addLogLine(
+                    `[${item.id}] gallery context cache hit, using cached file`
+                );
+                srcURL = galleryContext.files.get(item.id);
+                const originalVideoURL = srcURL.original;
+                const convertedVideoURL = URL.createObjectURL(
+                    await getPlayableVideo(
+                        item.metadata.title,
+                        new Uint8Array(
+                            await (await fetch(originalVideoURL)).arrayBuffer()
+                        ),
+                        true
+                    )
+                );
+                console.log('convertedVideoURL', convertedVideoURL);
+                if (convertedVideoURL) {
+                    srcURL.converted = convertedVideoURL;
+                    galleryContext.files.set(item.id, srcURL);
+                } else {
+                    conversionFailed = true;
+                }
+            } else {
+                addLogLine(
+                    `[${item.id}] gallery context cache miss, calling downloadManager to get file`
+                );
+                appContext.startLoading();
+                let downloadedURL: {
+                    original: string[];
+                    converted: string[];
+                };
+                if (publicCollectionGalleryContext.accessedThroughSharedURL) {
+                    downloadedURL =
+                        await PublicCollectionDownloadManager.getFile(
+                            item,
+                            publicCollectionGalleryContext.token,
+                            publicCollectionGalleryContext.passwordToken,
+                            true,
+                            true
+                        );
+                } else {
+                    downloadedURL = await DownloadManager.getFile(
+                        item,
+                        true,
+                        true
+                    );
+                }
+                appContext.finishLoading();
+                if (
+                    downloadedURL.converted.filter((url) => !!url).length !==
+                    downloadedURL.converted.length
+                ) {
+                    conversionFailed = true;
+                } else {
+                    const mergedURL: MergedSourceURL = {
+                        original: downloadedURL.original.join(','),
+                        converted: downloadedURL.converted.join(','),
+                    };
+                    galleryContext.files.set(item.id, mergedURL);
+                    srcURL = mergedURL;
+                }
+            }
+            await updateSrcURL(index, item.id, srcURL, conversionFailed, true);
+
+            try {
+                addLogLine(
+                    `[${item.id}] calling invalidateCurrItems for src, source loaded :${item.isSourceLoaded}`
+                );
+                instance.invalidateCurrItems();
+                if ((instance as any).isOpen()) {
+                    instance.updateSize(true);
+                }
+            } catch (e) {
+                logError(e, 'updating photoswipe after src url update failed');
+                throw e;
+            }
+        } catch (e) {
+            logError(e, 'getConvertedVideo failed get src url failed');
+            fetching[item.id] = false;
+            // no-op
+        }
+    };
+
     return (
         <Container>
             <AutoSizer>
@@ -531,6 +646,7 @@ const PhotoFrame = ({
                 currentIndex={currentIndex}
                 onClose={handleClose}
                 gettingData={getSlideData}
+                getConvertedVideo={getConvertedVideo}
                 favItemIds={favItemIds}
                 deletedFileIds={deletedFileIds}
                 setDeletedFileIds={setDeletedFileIds}

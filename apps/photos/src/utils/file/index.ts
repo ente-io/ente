@@ -290,7 +290,11 @@ export function generateStreamFromArrayBuffer(data: Uint8Array) {
     });
 }
 
-export async function getRenderableFileURL(file: EnteFile, fileBlob: Blob) {
+export async function getRenderableFileURL(
+    file: EnteFile,
+    fileBlob: Blob,
+    forceConvert = false
+) {
     switch (file.metadata.fileType) {
         case FILE_TYPE.IMAGE: {
             const convertedBlob = await getRenderableImage(
@@ -316,7 +320,8 @@ export async function getRenderableFileURL(file: EnteFile, fileBlob: Blob) {
         case FILE_TYPE.VIDEO: {
             const convertedBlob = await getPlayableVideo(
                 file.metadata.title,
-                new Uint8Array(await fileBlob.arrayBuffer())
+                new Uint8Array(await fileBlob.arrayBuffer()),
+                forceConvert
             );
             return {
                 converted: [URL.createObjectURL(convertedBlob)],
@@ -350,13 +355,14 @@ async function getRenderableLivePhoto(
 
 export async function getPlayableVideo(
     videoNameTitle: string,
-    video: Uint8Array
+    video: Uint8Array,
+    forceConvert = false
 ) {
     try {
-        const isPlayable = await isPlaybackPossible(
+        const isPlayable = isPlaybackPossible(
             URL.createObjectURL(new Blob([video]))
         );
-        if (isPlayable) {
+        if (isPlayable && !forceConvert) {
             return new Blob([video.buffer]);
         } else {
             addLogLine('video format not supported, converting it');

@@ -139,7 +139,8 @@ class PublicCollectionDownloadManager {
         file: EnteFile,
         token: string,
         passwordToken: string,
-        forPreview = false
+        forPreview = false,
+        forceConvert = false
     ) => {
         const fileKey = forPreview ? `${file.id}_preview` : `${file.id}`;
         try {
@@ -151,7 +152,11 @@ class PublicCollectionDownloadManager {
                 );
                 const fileBlob = await new Response(fileStream).blob();
                 if (forPreview) {
-                    return await getRenderableFileURL(file, fileBlob);
+                    return await getRenderableFileURL(
+                        file,
+                        fileBlob,
+                        forceConvert
+                    );
                 } else {
                     const fileURL = await createTypedObjectURL(
                         fileBlob,

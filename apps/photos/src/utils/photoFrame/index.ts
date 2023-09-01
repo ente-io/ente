@@ -4,20 +4,45 @@ import { EnteFile } from 'types/file';
 import { MergedSourceURL } from 'types/gallery';
 import { logError } from 'utils/sentry';
 
-const WAIT_FOR_VIDEO_PLAYBACK = 1 * 1000;
+// Define the get_mime function
+const get_mime = function (filetype) {
+    let mimetype = '';
+    const media_container = 'video';
+    switch (filetype) {
+        case 'mp4':
+            mimetype = 'video/mp4; codecs="avc1.42E01E, mp4a.40.2"';
+            break;
+        case 'ogg':
+            mimetype = 'video/ogg; codecs="theora, vorbis"';
+            break;
+        case 'webm':
+            mimetype = 'video/webm; codecs="vp8, vorbis"';
+            break;
+    }
+    return {
+        mimetype: mimetype,
+        container: media_container,
+    };
+};
 
-export async function isPlaybackPossible(url: string): Promise<boolean> {
-    return await new Promise((resolve) => {
-        const t = setTimeout(() => {
-            resolve(false);
-        }, WAIT_FOR_VIDEO_PLAYBACK);
-        const video = document.createElement('video');
-        video.addEventListener('canplay', function () {
-            clearTimeout(t);
-            resolve(true);
-        });
-        video.src = url;
-    });
+// Check to see if the browser can render the file type
+// using HTML5
+const supports_media = function (mimetype, container) {
+    const elem = document.createElement(container);
+    if (typeof elem.canPlayType === 'function') {
+        const playable = elem.canPlayType(mimetype);
+        if (
+            playable.toLowerCase() === 'maybe' ||
+            playable.toLowerCase() === 'probably'
+        ) {
+            return true;
+        }
+    }
+    return false;
+};
+export function isPlaybackPossible(fielName: string): boolean {
+    const extension = get_mime(fielName.split('.').pop());
+    return supports_media(extension.mimetype, extension.container);
 }
 
 export async function playVideo(livePhotoVideo, livePhotoImage) {
@@ -97,7 +122,7 @@ export async function updateFileSrcProps(
     }
 
     const isPlayable =
-        convertedVideoURL && (await isPlaybackPossible(convertedVideoURL));
+        convertedVideoURL && isPlaybackPossible(file.metadata.title);
 
     file.w = window.innerWidth;
     file.h = window.innerHeight;
@@ -108,11 +133,11 @@ export async function updateFileSrcProps(
     if (file.metadata.fileType === FILE_TYPE.VIDEO) {
         if (isPlayable) {
             file.html = `
-            <video controls onContextMenu="return false;">
-                <source src="${convertedVideoURL}" />
-                Your browser does not support the video tag.
-            </video>
-        `;
+                <video controls onContextMenu="return false;">
+                    <source src="${convertedVideoURL}" />
+                    Your browser does not support the video tag.
+                </video>
+                `;
         } else {
             file.html = `
                 <div class="pswp-item-container">

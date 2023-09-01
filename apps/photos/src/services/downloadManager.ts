@@ -134,14 +134,22 @@ class DownloadManager {
         return decrypted;
     };
 
-    getFile = async (file: EnteFile, forPreview = false) => {
+    getFile = async (
+        file: EnteFile,
+        forPreview = false,
+        forceConvert = false
+    ) => {
         const fileKey = forPreview ? `${file.id}_preview` : `${file.id}`;
         try {
             const getFilePromise = async () => {
                 const fileStream = await this.downloadFile(file);
                 const fileBlob = await new Response(fileStream).blob();
                 if (forPreview) {
-                    return await getRenderableFileURL(file, fileBlob);
+                    return await getRenderableFileURL(
+                        file,
+                        fileBlob,
+                        forceConvert
+                    );
                 } else {
                     const fileURL = await createTypedObjectURL(
                         fileBlob,
