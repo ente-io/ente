@@ -111,11 +111,16 @@ class SearchService {
   }
 
   Future<List<GenericSearchResult>> getHolidaySearchResults(
+    BuildContext context,
     String query,
   ) async {
     final List<GenericSearchResult> searchResults = [];
+    if (query.isEmpty) {
+      return searchResults;
+    }
+    final holidays = getHolidays(context);
 
-    for (var holiday in allHolidays) {
+    for (var holiday in holidays) {
       if (holiday.name.toLowerCase().contains(query.toLowerCase())) {
         final matchedFiles =
             await FilesDB.instance.getFilesCreatedWithinDurations(
