@@ -11,6 +11,7 @@ import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import "package:photos/generated/l10n.dart";
+import "package:photos/l10n/l10n.dart";
 import "package:photos/models/file/extensions/file_props.dart";
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file/file_type.dart';
@@ -307,7 +308,11 @@ class FileAppBarState extends State<FileAppBar> {
   }
 
   Future<void> _download(EnteFile file) async {
-    final dialog = createProgressDialog(context, "Downloading...");
+    final dialog = createProgressDialog(
+      context,
+      context.l10n.downloading,
+      isDismissible: true,
+    );
     await dialog.show();
     try {
       final FileType type = file.fileType;
