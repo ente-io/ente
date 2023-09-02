@@ -83,14 +83,8 @@ You can view your 2FA codes at [auth.ente.io](https://auth.ente.io). For adding 
 The architecture that powers end-to-end encrypted storage and sync of your
 tokens has been documented [here](architecture/README.md).
 
-## 🧑‍💻 Contribute
 
-Please refer to the [contribution guide](./CONTRIBUTING.md) if you wish to add an icon, assist with translation, or develop new features.
-
-You can also support us by giving this project a ⭐ star on GitHub or by leaving a review on [PlayStore](https://play.google.com/store/apps/details?id=io.ente.auth), [AppStore](https://apps.apple.com/us/app/ente-authenticator/id6444121398) or [AlternativeTo](https://alternativeto.net/software/ente-authenticator/).
-
-
-## 🧑‍💻 Building from source
+## 🧑‍💻 Build from source
 
 1. [Install Flutter](https://flutter.dev/docs/get-started/install)
 2. Clone this repository with `git clone git@github.com:ente-io/auth.git` 
@@ -101,6 +95,18 @@ You can also support us by giving this project a ⭐ star on GitHub or by leavin
 For maintainers, there is [additional documentation](RELEASES.md) on
 automatically publishing the main branch to App store, Play store and GitHub
 releases.
+
+
+## 🧑‍🔧 Contribute
+
+Please refer to our [contribution guide](./CONTRIBUTING.md) if you wish to add
+an icon, assist with translation, or develop new features.
+
+You can also support us by giving this project a ⭐ star on GitHub or by leaving
+a review on
+[PlayStore](https://play.google.com/store/apps/details?id=io.ente.auth),
+[AppStore](https://apps.apple.com/us/app/ente-authenticator/id6444121398) or
+[AlternativeTo](https://alternativeto.net/software/ente-authenticator/).
 
 
 ## 🙋‍♂️ Help
