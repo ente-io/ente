@@ -1530,6 +1530,16 @@ class S {
     );
   }
 
+  /// `None`
+  String get noDeviceLimit {
+    return Intl.message(
+      'None',
+      name: 'noDeviceLimit',
+      desc: 'Text to indicate that there is limit on number of devices',
+      args: [],
+    );
+  }
+
   /// `Link expiry`
   String get linkExpiry {
     return Intl.message(
@@ -1647,16 +1657,6 @@ class S {
       name: 'albumUpdated',
       desc: '',
       args: [],
-    );
-  }
-
-  /// `When set to the maximum ({maxValue}), the device limit will be relaxed to allow for temporary spikes of large number of viewers.`
-  String maxDeviceLimitSpikeHandling(int maxValue) {
-    return Intl.message(
-      'When set to the maximum ($maxValue), the device limit will be relaxed to allow for temporary spikes of large number of viewers.',
-      name: 'maxDeviceLimitSpikeHandling',
-      desc: '',
-      args: [maxValue],
     );
   }
 

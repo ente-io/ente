@@ -189,6 +189,10 @@
   "disableDownloadWarningBody": "Viewers can still take screenshots or save a copy of your photos using external tools",
   "allowDownloads": "Allow downloads",
   "linkDeviceLimit": "Device limit",
+  "noDeviceLimit": "None",
+  "@noDeviceLimit": {
+    "description": "Text to indicate that there is limit on number of devices"
+  },
   "linkExpiry": "Link expiry",
   "linkExpired": "Expired",
   "linkEnabled": "Enabled",
@@ -201,15 +205,6 @@
   "manageLink": "Manage link",
   "linkExpiresOn": "Link will expire on {expiryTime}",
   "albumUpdated": "Album updated",
-  "maxDeviceLimitSpikeHandling": "When set to the maximum ({maxValue}), the device limit will be relaxed to allow for temporary spikes of large number of viewers.",
-  "@maxDeviceLimitSpikeHandling": {
-    "placeholders": {
-      "maxValue": {
-        "type": "int",
-        "example": "100"
-      }
-    }
-  },
   "never": "Never",
   "custom": "Custom",
   "@custom": {
