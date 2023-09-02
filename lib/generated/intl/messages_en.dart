@@ -358,6 +358,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "cancelSubscription":
             MessageLookupByLibrary.simpleMessage("Cancel subscription"),
         "cannotAddMorePhotosAfterBecomingViewer": m6,
+        "cannotDeleteSharedFiles":
+            MessageLookupByLibrary.simpleMessage("Cannot delete shared files"),
         "centerPoint": MessageLookupByLibrary.simpleMessage("Center point"),
         "changeEmail": MessageLookupByLibrary.simpleMessage("Change email"),
         "changePassword":

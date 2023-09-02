@@ -383,7 +383,7 @@ class _FileSelectionActionsWidgetState
   }
 
   Future<void> _onDeleteClick() async {
-    return showDeleteSheet(context, widget.selectedFiles);
+    return showDeleteSheet(context, widget.selectedFiles, split);
   }
 
   Future<void> _removeFilesFromAlbum() async {

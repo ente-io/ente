@@ -463,6 +463,7 @@
   "updateAvailable": "Update available",
   "ignoreUpdate": "Ignore",
   "downloading": "Downloading...",
+  "cannotDeleteSharedFiles": "Cannot delete shared files",
   "theDownloadCouldNotBeCompleted": "The download could not be completed",
   "retry": "Retry",
   "backedUpFolders": "Backed up folders",

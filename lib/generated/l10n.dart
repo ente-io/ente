@@ -3282,6 +3282,16 @@ class S {
     );
   }
 
+  /// `Cannot delete shared files`
+  String get cannotDeleteSharedFiles {
+    return Intl.message(
+      'Cannot delete shared files',
+      name: 'cannotDeleteSharedFiles',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `The download could not be completed`
   String get theDownloadCouldNotBeCompleted {
     return Intl.message(

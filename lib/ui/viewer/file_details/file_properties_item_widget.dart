@@ -4,6 +4,7 @@ import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file/file_type.dart';
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/info_item_widget.dart";
+import "package:photos/utils/data_util.dart";
 import "package:photos/utils/date_time_util.dart";
 import "package:photos/utils/file_util.dart";
 import "package:photos/utils/magic_util.dart";
@@ -78,7 +79,7 @@ class _FilePropertiesItemWidgetState extends State<FilePropertiesItemWidget> {
     }
     subSectionWidgets.add(
       Text(
-        (fileSize / (1024 * 1024)).toStringAsFixed(2) + " MB",
+        formatBytes(fileSize),
         style: getEnteTextTheme(context).miniMuted,
       ),
     );
