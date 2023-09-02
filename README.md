@@ -1,5 +1,9 @@
 # ente Authenticator
 
+![Build](https://github.com/ente-io/auth/actions/workflows/ci.yml/badge.svg?branch=)
+[![Crowdin](https://badges.crowdin.net/ente-authenticator-app/localized.svg)](https://crowdin.com/project/ente-authenticator-app) 
+ [![Matrix](https://img.shields.io/matrix/ente:matrix.org?color=blue)](https://matrix.to/#/#ente:matrix.org)
+
 ente's Authenticator app helps you generate and store 2 step verification (2FA)
 tokens on your mobile devices.
 
@@ -32,15 +36,12 @@ the way of your workflow.
 You can add tokens to ente by one of the following methods:
 1. Scanning a QR code
 2. Manually entering (copy-pasting) a 2FA secret
-3. Bulk importing from a file that contains a list of codes in the following
-   format:
-```
-otpauth://totp/provider.com:you@email.com?secret=YOUR_SECRET
-```
-The codes maybe separated by new lines or commas.
+3. Bulk importing from other popular 2FA apps and from a file  that contains a list of codes in the following format:.
+    ```
+    otpauth://totp/provider.com:you@email.com?secret=YOUR_SECRET
+    ```
 
-You can also export the codes you have added to ente, to an **unencrypted** text
-file, that adheres to the above format.
+You can export the codes you have added to ente, to either an **encrypted** or plain text file. 
 
 
 ## 📲 Download
@@ -71,22 +72,22 @@ src="https://ente.io/static/ed265c3abdcd3efa5e29f64b927bcb44/e230a/play-store-ba
 src="https://user-images.githubusercontent.com/1161789/154795157-c4468ff9-97fd-46f3-87fe-dca789d8733a.png">
 </a>
 
-### Web
+### Web / Desktop
 
 You can view your 2FA codes at [auth.ente.io](https://auth.ente.io). For adding or managing your secrets, please use our mobile app.
 
-### Desktop
-
-Support for desktop platforms (Linux, Windows and older Macs) is a [work in
-progress](https://github.com/ente-io/auth/tree/desktop).
-
-Please ⭐ this repo to be notified of updates.
 
 
 ## 🔩 Architecture
 
 The architecture that powers end-to-end encrypted storage and sync of your
 tokens has been documented [here](architecture/README.md).
+
+## 🧑‍💻 Contribute
+
+Please refer to the [contribution guide](./CONTRIBUTING.md) if you wish to add an icon, assist with translation, or develop new features.
+
+You can also support us by giving this project a ⭐ star on GitHub or by leaving a review on [PlayStore](https://play.google.com/store/apps/details?id=io.ente.auth), [AppStore](https://apps.apple.com/us/app/ente-authenticator/id6444121398) or [AlternativeTo](https://alternativeto.net/software/ente-authenticator/).
 
 
 ## 🧑‍💻 Building from source
@@ -101,29 +102,15 @@ For maintainers, there is [additional documentation](RELEASES.md) on
 automatically publishing the main branch to App store, Play store and GitHub
 releases.
 
-## 🙂 Icons
 
-ente Auth supports the icon pack provided by
-[simple-icons](https://github.com/simple-icons/simple-icons).
-
-If you would like to add your own custom icon, please open a pull-request
-with the relevant SVG and color
-code ([example PR](https://github.com/ente-io/auth/pull/213/files)).
-
-## 🙋‍♂️ Support
+## 🙋‍♂️ Help
 
 If you need help, please reach out to support@ente.io, and a human will get in
 touch with you.
 
 If you have feature requests, please create a [GitHub issue](https://github.com/ente-io/auth/issues/).
 
-If you wish to support us, please ⭐
-[star](https://github.com/ente-io/auth/stargazers) this project.
 
-## 🙌 Translation
-[![Crowdin](https://badges.crowdin.net/ente-authenticator-app/localized.svg)](https://crowdin.com/project/ente-authenticator-app)
-
-If you're interested in helping out with translation, please visit our [Crowdin project](https://crowdin.com/project/ente-authenticator-app) to get started. Thank you for your support.
 
 ## 💜 Community
 
