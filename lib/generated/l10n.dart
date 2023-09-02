@@ -1660,16 +1660,6 @@ class S {
     );
   }
 
-  /// `When set to the maximum ({maxValue}), the device limit will be relaxed to allow for temporary spikes of large number of viewers.`
-  String maxDeviceLimitSpikeHandling(int maxValue) {
-    return Intl.message(
-      'When set to the maximum ($maxValue), the device limit will be relaxed to allow for temporary spikes of large number of viewers.',
-      name: 'maxDeviceLimitSpikeHandling',
-      desc: '',
-      args: [maxValue],
-    );
-  }
-
   /// `Never`
   String get never {
     return Intl.message(

@@ -44,9 +44,6 @@ class DeviceLimitPickerPage extends StatelessWidget {
                             const BorderRadius.all(Radius.circular(8)),
                         child: ItemsWidget(collection),
                       ),
-                      MenuSectionDescriptionWidget(
-                        content: S.of(context).maxDeviceLimitSpikeHandling(50),
-                      ),
                     ],
                   ),
                 );
