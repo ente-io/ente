@@ -253,6 +253,8 @@
   "privacy": "Privacy",
   "terms": "Terms",
   "checkForUpdates": "Check for updates",
+  "installManually": "Install manually",
+  "update": "Update",
   "checking": "Checking...",
   "youAreOnTheLatestVersion": "You are on the latest version",
   "warning": "Warning",

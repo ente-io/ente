@@ -3,10 +3,12 @@
 import 'package:ente_auth/core/configuration.dart';
 import 'package:ente_auth/core/network.dart';
 import 'package:ente_auth/ente_theme_data.dart';
+import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/services/update_service.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:open_filex/open_filex.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 class AppUpdateDialog extends StatefulWidget {
   final LatestVersionInfo? latestVersionInfo;
@@ -81,6 +83,23 @@ class _AppUpdateDialogState extends State<AppUpdateDialog> {
             },
             child: const Text(
               "Update",
+            ),
+
+          ),
+        ),
+        const Padding(padding: EdgeInsets.all(8)),
+        Center(
+          child: InkWell(
+            child: Text(
+              context.l10n.installManually,
+              style: Theme.of(context)
+                  .textTheme
+                  .bodySmall!
+                  .copyWith(decoration: TextDecoration.underline),
+            ),
+            onTap: () => launchUrlString(
+              widget.latestVersionInfo!.url!,
+              mode: LaunchMode.externalApplication,
             ),
           ),
         ),
