@@ -135,9 +135,9 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                   MenuItemWidget(
                     captionedTextWidget: CaptionedTextWidget(
                       title: S.of(context).linkDeviceLimit,
-                      subTitle: widget
-                          .collection!.publicURLs!.first!.deviceLimit
-                          .toString(),
+                      subTitle: url.deviceLimit == 0
+                          ? S.of(context).unlimited
+                          : "${url.deviceLimit}",
                     ),
                     trailingIcon: Icons.chevron_right,
                     menuItemColor: enteColorScheme.fillFaint,

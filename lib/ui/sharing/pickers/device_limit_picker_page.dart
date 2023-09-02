@@ -115,7 +115,7 @@ class _ItemsWidgetState extends State<ItemsWidget> {
       key: ValueKey(deviceLimit),
       menuItemColor: getEnteColorScheme(context).fillFaint,
       captionedTextWidget: CaptionedTextWidget(
-        title: "$deviceLimit",
+        title: deviceLimit == 0 ? S.of(context).unlimited : "$deviceLimit",
       ),
       trailingIcon: currentDeviceLimit == deviceLimit ? Icons.check : null,
       alignCaptionedTextToLeft: true,

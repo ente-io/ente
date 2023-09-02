@@ -1530,6 +1530,16 @@ class S {
     );
   }
 
+  /// `Unlimited`
+  String get unlimited {
+    return Intl.message(
+      'Unlimited',
+      name: 'unlimited',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Link expiry`
   String get linkExpiry {
     return Intl.message(

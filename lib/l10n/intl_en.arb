@@ -189,6 +189,7 @@
   "disableDownloadWarningBody": "Viewers can still take screenshots or save a copy of your photos using external tools",
   "allowDownloads": "Allow downloads",
   "linkDeviceLimit": "Device limit",
+  "unlimited": "Unlimited",
   "linkExpiry": "Link expiry",
   "linkExpired": "Expired",
   "linkEnabled": "Enabled",
