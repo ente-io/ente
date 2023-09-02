@@ -22,7 +22,7 @@ with the relevant SVG and color
 code ([example PR](https://github.com/ente-io/auth/pull/213/files)).
 
 
-## Developement
+## Development
 
 If you're planning on adding a new feature or making other changes, please
 discuss it with us by creating [an
@@ -43,7 +43,7 @@ same page before you start working on your change.
 
 
 #### Localization
-If the feature works require adding new strings, you can do that by following these steps.
+If the feature requires adding new strings, you can do that by following these steps:
 
 1. Add a new entry inside [app_en.arb](https://github.com/ente-io/auth/blob/main/lib/l10n/arb/app_en.arb) (Remember to save)
 2.  In your dart file, add follwing import
