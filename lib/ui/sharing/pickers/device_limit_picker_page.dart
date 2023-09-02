@@ -7,7 +7,6 @@ import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';
 import 'package:photos/ui/components/divider_widget.dart';
 import 'package:photos/ui/components/menu_item_widget/menu_item_widget.dart';
-import 'package:photos/ui/components/menu_section_description_widget.dart';
 import 'package:photos/ui/components/title_bar_title_widget.dart';
 import 'package:photos/ui/components/title_bar_widget.dart';
 import 'package:photos/utils/dialog_util.dart';
@@ -112,7 +111,7 @@ class _ItemsWidgetState extends State<ItemsWidget> {
       key: ValueKey(deviceLimit),
       menuItemColor: getEnteColorScheme(context).fillFaint,
       captionedTextWidget: CaptionedTextWidget(
-        title: deviceLimit == 0 ? S.of(context).unlimited : "$deviceLimit",
+        title: deviceLimit == 0 ? S.of(context).noDeviceLimit : "$deviceLimit",
       ),
       trailingIcon: currentDeviceLimit == deviceLimit ? Icons.check : null,
       alignCaptionedTextToLeft: true,

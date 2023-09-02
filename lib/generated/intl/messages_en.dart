@@ -841,6 +841,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "no": MessageLookupByLibrary.simpleMessage("No"),
         "noAlbumsSharedByYouYet":
             MessageLookupByLibrary.simpleMessage("No albums shared by you yet"),
+        "noDeviceLimit": MessageLookupByLibrary.simpleMessage("None"),
         "noDeviceThatCanBeDeleted": MessageLookupByLibrary.simpleMessage(
             "You\'ve no files on this device that can be deleted"),
         "noDuplicates": MessageLookupByLibrary.simpleMessage("✨ No duplicates"),
@@ -1295,7 +1296,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "unhiding": MessageLookupByLibrary.simpleMessage("Unhiding..."),
         "unhidingFilesToAlbum":
             MessageLookupByLibrary.simpleMessage("Unhiding files to album"),
-        "unlimited": MessageLookupByLibrary.simpleMessage("Unlimited"),
         "unlock": MessageLookupByLibrary.simpleMessage("Unlock"),
         "unpinAlbum": MessageLookupByLibrary.simpleMessage("Unpin album"),
         "unselectAll": MessageLookupByLibrary.simpleMessage("Unselect all"),

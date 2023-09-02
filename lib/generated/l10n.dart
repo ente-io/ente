@@ -1530,12 +1530,12 @@ class S {
     );
   }
 
-  /// `Unlimited`
-  String get unlimited {
+  /// `None`
+  String get noDeviceLimit {
     return Intl.message(
-      'Unlimited',
-      name: 'unlimited',
-      desc: '',
+      'None',
+      name: 'noDeviceLimit',
+      desc: 'Text to indicate that there is limit on number of devices',
       args: [],
     );
   }

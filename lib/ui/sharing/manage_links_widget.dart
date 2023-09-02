@@ -136,7 +136,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                     captionedTextWidget: CaptionedTextWidget(
                       title: S.of(context).linkDeviceLimit,
                       subTitle: url.deviceLimit == 0
-                          ? S.of(context).unlimited
+                          ? S.of(context).noDeviceLimit
                           : "${url.deviceLimit}",
                     ),
                     trailingIcon: Icons.chevron_right,
