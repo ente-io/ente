@@ -4,6 +4,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
+import "package:path/path.dart";
 import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/event_bus.dart';
@@ -14,6 +15,7 @@ import "package:photos/events/force_reload_trash_page_event.dart";
 import 'package:photos/events/local_photos_updated_event.dart';
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/file/file.dart';
+import "package:photos/models/files_split.dart";
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/models/trash_item_request.dart';
 import 'package:photos/services/remote_sync_service.dart';
@@ -500,18 +502,21 @@ Future<bool> shouldProceedWithDeletion(BuildContext context) async {
 Future<void> showDeleteSheet(
   BuildContext context,
   SelectedFiles selectedFiles,
+  FilesSplit filesSplit,
 ) async {
-  bool containsUploadedFile = false, containsLocalFile = false;
-  for (final file in selectedFiles.files) {
-    if (file.uploadedFileID != null) {
-      debugPrint("${file.toString()} is uploaded");
-      containsUploadedFile = true;
-    }
-    if (file.localID != null) {
-      debugPrint("${file.toString()} has local");
-      containsLocalFile = true;
-    }
+  if (selectedFiles.files.length != filesSplit.count) {
+    throw AssertionError("Unexpected state, #{selectedFiles.files.length} != "
+        "${filesSplit.count}");
   }
+  final List<EnteFile> deletableFiles =
+      filesSplit.ownedByCurrentUser + filesSplit.pendingUploads;
+  if (deletableFiles.isEmpty && filesSplit.ownedByOtherUsers.isNotEmpty) {
+    showShortToast(context, S.of(context).cannotDeleteSharedFiles);
+    return;
+  }
+  final containsUploadedFile = deletableFiles.any((f) => f.isUploaded);
+  final containsLocalFile = deletableFiles.any((f) => f.localID != null);
+
   final List<ButtonWidget> buttons = [];
   final bool isBothLocalAndRemote = containsUploadedFile && containsLocalFile;
   final bool isLocalOnly = !containsUploadedFile;
@@ -545,7 +550,7 @@ Future<void> showDeleteSheet(
         onTap: () async {
           await deleteFilesFromRemoteOnly(
             context,
-            selectedFiles.files.toList(),
+            deletableFiles,
           ).then(
             (value) {
               showShortToast(context, S.of(context).movedToTrash);
@@ -572,7 +577,7 @@ Future<void> showDeleteSheet(
         shouldSurfaceExecutionStates: false,
         isInAlert: true,
         onTap: () async {
-          await deleteFilesOnDeviceOnly(context, selectedFiles.files.toList());
+          await deleteFilesOnDeviceOnly(context, deletableFiles);
         },
       ),
     );
@@ -591,7 +596,7 @@ Future<void> showDeleteSheet(
         onTap: () async {
           await deleteFilesFromEverywhere(
             context,
-            selectedFiles.files.toList(),
+            deletableFiles,
           );
         },
       ),
