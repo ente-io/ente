@@ -393,6 +393,7 @@
     "LINK_PASSWORD_LOCK": "密码锁",
     "PUBLIC_COLLECT": "允许添加照片",
     "LINK_DEVICE_LIMIT": "设备限制",
+    "NO_DEVICE_LIMIT": "",
     "LINK_EXPIRY": "链接过期",
     "NEVER": "永不",
     "DISABLE_FILE_DOWNLOAD": "禁止下载",
