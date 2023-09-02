@@ -393,6 +393,7 @@
     "LINK_PASSWORD_LOCK": "Wachtwoord versleuteling",
     "PUBLIC_COLLECT": "Foto's toevoegen toestaan",
     "LINK_DEVICE_LIMIT": "Apparaat limiet",
+    "NO_DEVICE_LIMIT": "",
     "LINK_EXPIRY": "Vervaldatum link",
     "NEVER": "Nooit",
     "DISABLE_FILE_DOWNLOAD": "Download uitschakelen",
