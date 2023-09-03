@@ -51,6 +51,7 @@ import {
     getUniqueCollectionExportName,
 } from 'utils/export';
 import exportService from 'services/export';
+import { CollectionDownloadProgressAttributes } from 'components/Collections/CollectionDownloadProgress';
 
 export enum COLLECTION_OPS_TYPE {
     ADD,
@@ -159,15 +160,6 @@ async function downloadCollectionFiles(
         return;
     }
     const canceller = new AbortController();
-    setCollectionDownloadProgressAttributes({
-        collectionName,
-        collectionID,
-        isHidden,
-        canceller,
-        total: collectionFiles.length,
-        success: 0,
-        failed: 0,
-    });
     const increaseSuccess = () => {
         if (canceller.signal.aborted) return;
         setCollectionDownloadProgressAttributes((prev) => ({
@@ -183,6 +175,16 @@ async function downloadCollectionFiles(
         }));
     };
     const isCancelled = () => canceller.signal.aborted;
+    const initialProgressAttributes: CollectionDownloadProgressAttributes = {
+        collectionName,
+        collectionID,
+        isHidden,
+        canceller,
+        total: collectionFiles.length,
+        success: 0,
+        failed: 0,
+        downloadDirPath: null,
+    };
     if (isElectron()) {
         const selectedDir = await ElectronService.selectDirectory();
         if (!selectedDir) {
@@ -192,16 +194,17 @@ async function downloadCollectionFiles(
             selectedDir,
             collectionName
         );
-        setCollectionDownloadProgressAttributes((prev) => ({
-            ...prev,
+        setCollectionDownloadProgressAttributes({
+            ...initialProgressAttributes,
             downloadDirPath,
-        }));
+        });
         await downloadFilesDesktop(
             collectionFiles,
             { increaseSuccess, increaseFailed, isCancelled },
             downloadDirPath
         );
     } else {
+        setCollectionDownloadProgressAttributes(initialProgressAttributes);
         await downloadFiles(collectionFiles, {
             increaseSuccess,
             increaseFailed,
