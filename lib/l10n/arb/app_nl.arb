@@ -85,6 +85,7 @@
   "importSelectJsonFile": "Selecteer JSON bestand",
   "importEnteEncGuide": "Selecteer het versleutelde JSON-bestand dat vanuit ente geëxporteerd is",
   "importRaivoGuide": "Gebruik de optie \"Export OTPs to Zip archive\" in Raivo's instellingen.\n\nPak het zip-bestand uit en importeer het JSON-bestand.",
+  "importAegisGuide": "Gebruik de optie \"Exporteer de kluis\" in de instellingen van Aegis.\n\nAls uw kluis is versleuteld, moet u het wachtwoord invoeren om de kluis te ontsleutelen.",
   "exportCodes": "Codes exporteren",
   "importLabel": "Importeren",
   "importInstruction": "Selecteer een bestand dat een lijst van uw codes in de volgende indeling bevat",
