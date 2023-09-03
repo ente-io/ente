@@ -2,6 +2,7 @@ import isElectron from 'is-electron';
 import { UserDetails } from 'types/user';
 import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
 import ElectronService from 'services/electron/common';
+import { Buffer } from 'buffer';
 
 export function makeID(length) {
     let result = '';
@@ -40,4 +41,12 @@ export const isInternalUser = () => {
     return (
         userEmail.endsWith('@ente.io') || userEmail === 'kr.anand619@gmail.com'
     );
+};
+
+export const convertBufferToBase64 = (buffer: Buffer) => {
+    return buffer.toString('base64');
+};
+
+export const convertBase64ToBuffer = (base64: string) => {
+    return Buffer.from(base64, 'base64');
 };

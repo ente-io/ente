@@ -1,5 +1,6 @@
 export enum SESSION_KEYS {
     ENCRYPTION_KEY = 'encryptionKey',
+    KEY_ENCRYPTION_KEY = 'keyEncryptionKey',
 }
 
 export const setKey = (key: SESSION_KEYS, value: object) => {

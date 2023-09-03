@@ -393,6 +393,7 @@
     "LINK_PASSWORD_LOCK": "Contraseña bloqueada",
     "PUBLIC_COLLECT": "Permitir añadir fotos",
     "LINK_DEVICE_LIMIT": "Límites del dispositivo",
+    "NO_DEVICE_LIMIT": "",
     "LINK_EXPIRY": "Enlace vencio",
     "NEVER": "Nunca",
     "DISABLE_FILE_DOWNLOAD": "Deshabilitar descarga",

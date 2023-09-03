@@ -250,11 +250,12 @@ export function appendCollectionKeyToShareURL(
 }
 
 const _intSelectOption = (i: number) => {
-    return { label: i.toString(), value: i };
+    const label = i === 0 ? t('NO_DEVICE_LIMIT') : i.toString();
+    return { label, value: i };
 };
 
 export function getDeviceLimitOptions() {
-    return [2, 5, 10, 25, 50].map((i) => _intSelectOption(i));
+    return [0, 2, 5, 10, 25, 50].map((i) => _intSelectOption(i));
 }
 
 export const shareExpiryOptions = () => [

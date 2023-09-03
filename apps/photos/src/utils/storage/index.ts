@@ -27,6 +27,14 @@ export function getUserLocale(): Language {
     return getData(LS_KEYS.LOCALE)?.value;
 }
 
+export function setUserSRPSetupPending(status) {
+    setData(LS_KEYS.USER_SRP_SETUP_PENDING, { status });
+}
+
+export function getUserSRPSetupPending() {
+    return getData(LS_KEYS.USER_SRP_SETUP_PENDING)?.status ?? true;
+}
+
 export function getLocalMapEnabled(): boolean {
     return getData(LS_KEYS.MAP_ENABLED)?.value ?? false;
 }

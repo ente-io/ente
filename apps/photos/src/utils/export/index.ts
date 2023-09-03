@@ -17,13 +17,9 @@ import {
 } from 'constants/export';
 import sanitize from 'sanitize-filename';
 import { formatDateTimeShort } from 'utils/time/format';
-import {
-    isDefaultHiddenCollection,
-    isHiddenCollection,
-} from 'utils/collection';
+import { isDefaultHiddenCollection } from 'utils/collection';
 
-export const PROPER_CASED_HIDDEN_COLLECTION_EXPORT_NAME = '.Hidden';
-export const DOT = '.';
+export const PROPER_CASED_HIDDEN_COLLECTION_EXPORT_NAME = 'Hidden';
 
 export const getExportRecordFileUID = (file: EnteFile) =>
     `${file.id}_${file.collectionID}_${file.updationTime}`;
@@ -54,8 +50,6 @@ export const convertFileIDExportNameObjectToMap = (
 export const getCollectionExportName = (collection: Collection) => {
     if (isDefaultHiddenCollection(collection)) {
         return PROPER_CASED_HIDDEN_COLLECTION_EXPORT_NAME;
-    } else if (isHiddenCollection(collection)) {
-        return `${DOT}${collection.name}`;
     }
     return collection.name;
 };

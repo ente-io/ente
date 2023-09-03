@@ -393,6 +393,7 @@
     "LINK_PASSWORD_LOCK": "Password lock",
     "PUBLIC_COLLECT": "Allow adding photos",
     "LINK_DEVICE_LIMIT": "Device limit",
+    "NO_DEVICE_LIMIT": "None",
     "LINK_EXPIRY": "Link expiry",
     "NEVER": "Never",
     "DISABLE_FILE_DOWNLOAD": "Disable download",

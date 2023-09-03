@@ -393,6 +393,7 @@
     "LINK_PASSWORD_LOCK": "",
     "PUBLIC_COLLECT": "",
     "LINK_DEVICE_LIMIT": "",
+    "NO_DEVICE_LIMIT": "",
     "LINK_EXPIRY": "",
     "NEVER": "",
     "DISABLE_FILE_DOWNLOAD": "",

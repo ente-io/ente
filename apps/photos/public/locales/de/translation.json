@@ -393,6 +393,7 @@
     "LINK_PASSWORD_LOCK": "Passwort Sperre",
     "PUBLIC_COLLECT": "",
     "LINK_DEVICE_LIMIT": "Geräte Limit",
+    "NO_DEVICE_LIMIT": "",
     "LINK_EXPIRY": "Ablaufdatum des Links",
     "NEVER": "Niemals",
     "DISABLE_FILE_DOWNLOAD": "",
