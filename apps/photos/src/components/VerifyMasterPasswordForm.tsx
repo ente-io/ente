@@ -16,16 +16,13 @@ export interface VerifyMasterPasswordFormProps {
     keyAttributes: KeyAttributes;
     callback: (
         key: string,
-        passphrase: string,
         kek: string,
-        keyAttributes: KeyAttributes
+        keyAttributes: KeyAttributes,
+        passphrase?: string
     ) => void;
     buttonText: string;
     submitButtonProps?: ButtonProps;
-    getKeyAttributes?: (
-        kek: string,
-        passphrase: string
-    ) => Promise<KeyAttributes>;
+    getKeyAttributes?: (kek: string) => Promise<KeyAttributes>;
     srpAttributes?: SRPAttributes;
 }
 
@@ -66,7 +63,7 @@ export default function VerifyMasterPasswordForm({
                 throw Error(CustomError.WEAK_DEVICE);
             }
             if (!keyAttributes && typeof getKeyAttributes === 'function') {
-                keyAttributes = await getKeyAttributes(kek, passphrase);
+                keyAttributes = await getKeyAttributes(kek);
             }
             if (!keyAttributes) {
                 throw Error("couldn't get key attributes");
@@ -77,7 +74,7 @@ export default function VerifyMasterPasswordForm({
                     keyAttributes.keyDecryptionNonce,
                     kek
                 );
-                callback(key, passphrase, kek, keyAttributes);
+                callback(key, kek, keyAttributes, passphrase);
             } catch (e) {
                 logError(e, 'user entered a wrong password');
                 throw Error(CustomError.INCORRECT_PASSWORD);
