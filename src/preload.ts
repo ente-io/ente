@@ -58,6 +58,7 @@ import {
     logRendererProcessMemoryUsage,
 } from './utils/processStats';
 import { runFFmpegCmd } from './api/ffmpeg';
+import { setOptOutOfCrashReport } from './services/userPreference';
 
 fixHotReloadNext12();
 setupLogging();
@@ -112,4 +113,5 @@ windowObject['ElectronAPIs'] = {
     deleteFolder,
     rename,
     deleteFile,
+    setOptOutOfCrashReport,
 };

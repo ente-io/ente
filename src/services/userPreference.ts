@@ -23,3 +23,11 @@ export function getMuteUpdateNotificationVersion() {
 export function setMuteUpdateNotificationVersion(version: string) {
     userPreferencesStore.set('muteUpdateNotificationVersion', version);
 }
+
+export function getOptOutOfCrashReport() {
+    return userPreferencesStore.get('optOutOfCrashReport');
+}
+
+export function setOptOutOfCrashReport(optOut: boolean) {
+    userPreferencesStore.set('optOutOfCrashReport', optOut);
+}
