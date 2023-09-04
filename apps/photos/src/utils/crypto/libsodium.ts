@@ -202,7 +202,7 @@ export async function generateKeyAndEncryptToB64(data: string) {
 }
 
 export async function encryptUTF8(data: string, key: string) {
-    const b64Data = await toB64(await fromString(data));
+    const b64Data = await toB64(await fromUTF8(data));
     return await encryptToB64(b64Data, key);
 }
 
@@ -281,7 +281,7 @@ export async function deriveKey(
     return await toB64(
         sodium.crypto_pwhash(
             sodium.crypto_secretbox_KEYBYTES,
-            await fromString(passphrase),
+            await fromUTF8(passphrase),
             await fromB64(salt),
             opsLimit,
             memLimit,
@@ -315,7 +315,7 @@ export async function deriveInteractiveKey(passphrase: string, salt: string) {
     const key = await toB64(
         sodium.crypto_pwhash(
             sodium.crypto_secretbox_KEYBYTES,
-            await fromString(passphrase),
+            await fromUTF8(passphrase),
             await fromB64(salt),
             sodium.crypto_pwhash_OPSLIMIT_INTERACTIVE,
             sodium.crypto_pwhash_MEMLIMIT_INTERACTIVE,
@@ -402,9 +402,14 @@ export async function toURLSafeB64(input: Uint8Array) {
     return sodium.to_base64(input, sodium.base64_variants.URLSAFE);
 }
 
-export async function fromString(input: string) {
+export async function fromUTF8(input: string) {
     await sodium.ready;
     return sodium.from_string(input);
+}
+
+export async function toUTF8(input: string) {
+    await sodium.ready;
+    return sodium.to_string(await fromB64(input));
 }
 export async function toHex(input: string) {
     await sodium.ready;

@@ -10,7 +10,12 @@ import {
 } from 'utils/storage/localStorage';
 import { useRouter } from 'next/router';
 import { PAGES } from 'constants/pages';
-import { SESSION_KEYS, getKey, setKey } from 'utils/storage/sessionStorage';
+import {
+    SESSION_KEYS,
+    getKey,
+    removeKey,
+    setKey,
+} from 'utils/storage/sessionStorage';
 import {
     decryptAndStoreToken,
     generateAndSaveIntermediateKeyAttributes,
@@ -42,6 +47,7 @@ import { APPS, getAppName } from 'constants/apps';
 import { addLocalLog } from 'utils/logging';
 import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
 import { B64EncryptionResult } from 'types/crypto';
+import { CustomError } from 'utils/error';
 
 export default function Credentials() {
     const router = useRouter();
@@ -79,6 +85,7 @@ export default function Credentials() {
                 LS_KEYS.KEY_ATTRIBUTES
             );
             if (kekEncryptedAttributes && keyAttributes) {
+                removeKey(SESSION_KEYS.KEY_ENCRYPTION_KEY);
                 const cryptoWorker = await ComlinkCryptoWorker.getInstance();
                 const kek = await cryptoWorker.decryptB64(
                     kekEncryptedAttributes.encryptedData,
@@ -90,8 +97,7 @@ export default function Credentials() {
                     keyAttributes.keyDecryptionNonce,
                     kek
                 );
-                await saveKeyInSessionStore(SESSION_KEYS.ENCRYPTION_KEY, key);
-                router.push(PAGES.GALLERY);
+                useMasterPassword(key, kek, keyAttributes, kek);
                 return;
             }
 
@@ -122,45 +128,61 @@ export default function Credentials() {
         appContext.showNavBar(true);
     }, []);
 
-    const getKeyAttributes = async (kek: string) => {
-        const cryptoWorker = await ComlinkCryptoWorker.getInstance();
-        const { keyAttributes, encryptedToken, token, id, twoFactorSessionID } =
-            await loginViaSRP(srpAttributes, kek);
-        setData(LS_KEYS.KEY_ATTRIBUTES, keyAttributes);
-        if (twoFactorSessionID) {
-            const sessionKeyAttributes =
-                await cryptoWorker.generateKeyAndEncryptToB64(kek);
-            setKey(SESSION_KEYS.KEY_ENCRYPTION_KEY, sessionKeyAttributes);
-            const user = getData(LS_KEYS.USER);
-            setData(LS_KEYS.USER, {
-                ...user,
-                twoFactorSessionID,
-                isTwoFactorEnabled: true,
-            });
-            setIsFirstLogin(true);
-            router.push(PAGES.TWO_FACTOR_VERIFY);
-            return null;
-        } else {
-            const user = getData(LS_KEYS.USER);
-            setData(LS_KEYS.USER, {
-                ...user,
-                token,
-                encryptedToken,
-                id,
-                isTwoFactorEnabled: false,
-            });
-            return keyAttributes;
-        }
-    };
+    const getKeyAttributes: VerifyMasterPasswordFormProps['getKeyAttributes'] =
+        async (kek: string) => {
+            try {
+                const cryptoWorker = await ComlinkCryptoWorker.getInstance();
+                const {
+                    keyAttributes,
+                    encryptedToken,
+                    token,
+                    id,
+                    twoFactorSessionID,
+                } = await loginViaSRP(srpAttributes, kek);
+                setData(LS_KEYS.KEY_ATTRIBUTES, keyAttributes);
+                if (twoFactorSessionID) {
+                    const sessionKeyAttributes =
+                        await cryptoWorker.generateKeyAndEncryptToB64(kek);
+                    setKey(
+                        SESSION_KEYS.KEY_ENCRYPTION_KEY,
+                        sessionKeyAttributes
+                    );
+                    const user = getData(LS_KEYS.USER);
+                    setData(LS_KEYS.USER, {
+                        ...user,
+                        twoFactorSessionID,
+                        isTwoFactorEnabled: true,
+                    });
+                    setIsFirstLogin(true);
+                    router.push(PAGES.TWO_FACTOR_VERIFY);
+                    throw Error(CustomError.TWO_FACTOR_ENABLED);
+                } else {
+                    const user = getData(LS_KEYS.USER);
+                    setData(LS_KEYS.USER, {
+                        ...user,
+                        token,
+                        encryptedToken,
+                        id,
+                        isTwoFactorEnabled: false,
+                    });
+                    return keyAttributes;
+                }
+            } catch (e) {
+                if (e.message !== CustomError.TWO_FACTOR_ENABLED) {
+                    logError(e, 'getKeyAttributes failed');
+                }
+                throw e;
+            }
+        };
 
     const useMasterPassword: VerifyMasterPasswordFormProps['callback'] = async (
         key,
-        passphrase,
         kek,
-        keyAttributes
+        keyAttributes,
+        passphrase
     ) => {
         try {
-            if (isFirstLogin()) {
+            if (isFirstLogin() && passphrase) {
                 await generateAndSaveIntermediateKeyAttributes(
                     passphrase,
                     keyAttributes,
