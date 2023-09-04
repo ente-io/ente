@@ -8,6 +8,8 @@ import "package:photos/generated/l10n.dart";
 import "package:photos/models/file/extensions/file_props.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/services/files_service.dart";
+import "package:photos/theme/colors.dart";
+import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/file_util.dart";
@@ -68,10 +70,74 @@ class _VideoWidgetNewState extends State<VideoWidgetNew> {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: controller != null
-          ? Video(controller: controller!)
-          : _getLoadingWidget(),
+    final colorScheme = getEnteColorScheme(context);
+    return MaterialVideoControlsTheme(
+      normal: MaterialVideoControlsThemeData(
+        seekBarMargin: const EdgeInsets.only(bottom: 100),
+        bottomButtonBarMargin: const EdgeInsets.only(bottom: 112),
+        controlsHoverDuration: const Duration(seconds: 100),
+        seekBarHeight: 4,
+        seekBarBufferColor: Colors.transparent,
+        seekBarThumbColor: backgroundElevatedLight,
+        seekBarColor: fillMutedDark,
+        seekBarPositionColor: colorScheme.primary300.withOpacity(0.8),
+        bottomButtonBar: [
+          const Spacer(),
+          GestureDetector(
+            onTap: () => controller!.player.playOrPause(),
+            child: Container(
+              padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color: strokeFaintDark,
+                  width: 1,
+                ),
+                borderRadius: BorderRadius.circular(24),
+              ),
+              child: Row(
+                children: [
+                  StreamBuilder(
+                    builder: (context, snapshot) {
+                      final bool isPlaying = snapshot.data ?? false;
+                      return AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 250),
+                        switchInCurve: Curves.easeInOutExpo,
+                        switchOutCurve: Curves.easeInOutExpo,
+                        child: Icon(
+                          key: ValueKey(
+                            isPlaying ? "pause_button" : "play_button",
+                          ),
+                          isPlaying
+                              ? Icons.pause_rounded
+                              : Icons.play_arrow_rounded,
+                          color: backdropBaseLight,
+                        ),
+                      );
+                    },
+                    initialData: true,
+                    stream: controller!.player.stream.playing,
+                  ),
+                  const SizedBox(width: 8),
+                  MaterialPositionIndicator(
+                    style: getEnteTextTheme(context).mini,
+                  ),
+                  const SizedBox(width: 10),
+                ],
+              ),
+            ),
+          ),
+          const Spacer(),
+        ],
+        primaryButtonBar: [],
+      ),
+      fullscreen: const MaterialVideoControlsThemeData(),
+      child: Center(
+        child: controller != null
+            ? Video(
+                controller: controller!,
+              )
+            : _getLoadingWidget(),
+      ),
     );
   }
 
