@@ -1,10 +1,11 @@
-
+import 'dart:io';
 
 import 'package:ente_auth/core/configuration.dart';
 import 'package:ente_auth/core/network.dart';
 import 'package:ente_auth/ente_theme_data.dart';
 import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/services/update_service.dart';
+import 'package:ente_auth/theme/ente_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:open_filex/open_filex.dart';
@@ -22,6 +23,7 @@ class AppUpdateDialog extends StatefulWidget {
 class _AppUpdateDialogState extends State<AppUpdateDialog> {
   @override
   Widget build(BuildContext context) {
+    final enteTextTheme = getEnteTextTheme(context);
     final List<Widget> changelog = [];
     for (final log in widget.latestVersionInfo!.changelog) {
       changelog.add(
@@ -43,18 +45,19 @@ class _AppUpdateDialogState extends State<AppUpdateDialog> {
         Text(
           widget.latestVersionInfo!.name!,
           style: const TextStyle(
-            fontSize: 20,
+            fontSize: 14,
             fontWeight: FontWeight.bold,
           ),
         ),
         const Padding(padding: EdgeInsets.all(8)),
-        const Text(
-          "Changelog",
-          style: TextStyle(
-            fontSize: 18,
+        if (changelog.isNotEmpty)
+          const Text(
+            "Changelog",
+            style: TextStyle(
+              fontSize: 18,
+            ),
           ),
-        ),
-        const Padding(padding: EdgeInsets.all(4)),
+        if (changelog.isNotEmpty) const Padding(padding: EdgeInsets.all(4)),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: changelog,
@@ -71,35 +74,12 @@ class _AppUpdateDialogState extends State<AppUpdateDialog> {
                 },
               ),
             ),
-            onPressed: () async {
-              Navigator.pop(context);
-              showDialog(
-                context: context,
-                builder: (BuildContext context) {
-                  return ApkDownloaderDialog(widget.latestVersionInfo);
-                },
-                barrierDismissible: false,
-              );
-            },
-            child: const Text(
-              "Update",
-            ),
-
-          ),
-        ),
-        const Padding(padding: EdgeInsets.all(8)),
-        Center(
-          child: InkWell(
-            child: Text(
-              context.l10n.installManually,
-              style: Theme.of(context)
-                  .textTheme
-                  .bodySmall!
-                  .copyWith(decoration: TextDecoration.underline),
-            ),
-            onTap: () => launchUrlString(
+            onPressed: () => launchUrlString(
               widget.latestVersionInfo!.url!,
               mode: LaunchMode.externalApplication,
+            ),
+            child: Text(
+              context.l10n.downloadUpdate,
             ),
           ),
         ),
@@ -110,8 +90,24 @@ class _AppUpdateDialogState extends State<AppUpdateDialog> {
     return WillPopScope(
       onWillPop: () async => !shouldForceUpdate,
       child: AlertDialog(
-        title: Text(
-          shouldForceUpdate ? "Critical update available" : "Update available",
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(
+              Icons.auto_awesome_outlined,
+              size: 24,
+              color: getEnteColorScheme(context).strokeMuted,
+            ),
+            const SizedBox(
+              height: 16,
+            ),
+            Text(
+              shouldForceUpdate
+                  ? context.l10n.criticalUpdateAvailable
+                  : context.l10n.updateAvailable,
+              style: enteTextTheme.h3Bold,
+            ),
+          ],
         ),
         content: content,
       ),
@@ -166,15 +162,17 @@ class _ApkDownloaderDialogState extends State<ApkDownloaderDialog> {
 
   Future<void> _downloadApk() async {
     try {
-      await Network.instance.getDio().download(
-        widget.versionInfo!.url!,
-        _saveUrl,
-        onReceiveProgress: (count, _) {
-          setState(() {
-            _downloadProgress = count / widget.versionInfo!.size!;
-          });
-        },
-      );
+      if (!File(_saveUrl!).existsSync()) {
+        await Network.instance.getDio().download(
+          widget.versionInfo!.url!,
+          _saveUrl,
+          onReceiveProgress: (count, _) {
+            setState(() {
+              _downloadProgress = count / widget.versionInfo!.size!;
+            });
+          },
+        );
+      }
       Navigator.of(context, rootNavigator: true).pop('dialog');
       OpenFilex.open(_saveUrl);
     } catch (e) {
