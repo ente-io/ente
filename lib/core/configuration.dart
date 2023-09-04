@@ -438,12 +438,22 @@ class Configuration {
   }
 
   Future<void> optForOfflineMode() async {
-    _offlineAuthKey = Sodium.bin2base64(CryptoUtil.generateKey());
-    await _secureStorage.write(
+    if ((await _secureStorage.containsKey(
       key: offlineAuthSecretKey,
-      value: _offlineAuthKey,
       iOptions: _secureStorageOptionsIOS,
-    );
+    ))) {
+      _offlineAuthKey = await _secureStorage.read(
+        key: offlineAuthSecretKey,
+        iOptions: _secureStorageOptionsIOS,
+      );
+    } else {
+      _offlineAuthKey = Sodium.bin2base64(CryptoUtil.generateKey());
+      await _secureStorage.write(
+        key: offlineAuthSecretKey,
+        value: _offlineAuthKey,
+        iOptions: _secureStorageOptionsIOS,
+      );
+    }
     await _preferences.setBool(hasOptedForOfflineModeKey, true);
   }
 
