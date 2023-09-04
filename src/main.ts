@@ -21,12 +21,15 @@ import { setupLogging } from './utils/logging';
 import { isDev } from './utils/common';
 import { setupMainProcessStatsLogger } from './utils/processStats';
 import { setupAppEventEmitter } from './utils/events';
+import { getOptOutOfCrashReport } from './services/userPreference';
 
 let mainWindow: BrowserWindow;
 
 let appIsQuitting = false;
 
 let updateIsAvailable = false;
+
+let sentryEnabled = true;
 
 export const isAppQuitting = (): boolean => {
     return appIsQuitting;
@@ -41,6 +44,14 @@ export const isUpdateAvailable = (): boolean => {
 };
 export const setIsUpdateAvailable = (value: boolean): void => {
     updateIsAvailable = value;
+};
+
+export const isSentryEnabled = (): boolean => {
+    return sentryEnabled;
+};
+
+export const setIsSentryEnabled = (value: boolean): void => {
+    sentryEnabled = value;
 };
 
 setupMainHotReload();
@@ -72,6 +83,8 @@ if (!gotTheLock) {
     app.on('ready', async () => {
         logSystemInfo();
         setupMainProcessStatsLogger();
+        const isSentryEnabled = getOptOutOfCrashReport();
+        setIsSentryEnabled(isSentryEnabled);
         initSentry();
         mainWindow = await createWindow();
         const tray = setupTrayItem(mainWindow);

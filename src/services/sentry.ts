@@ -4,6 +4,7 @@ import { keysStore } from '../stores/keys.store';
 import { SENTRY_DSN, RELEASE_VERSION } from '../config';
 import { isDev } from '../utils/common';
 import { logToDisk } from './logging';
+import { isSentryEnabled } from '../main';
 
 const ENV_DEVELOPMENT = 'development';
 
@@ -11,6 +12,9 @@ const isDEVSentryENV = () =>
     process.env.NEXT_PUBLIC_SENTRY_ENV === ENV_DEVELOPMENT;
 
 export function initSentry(): void {
+    if (!isSentryEnabled()) {
+        return;
+    }
     Sentry.init({
         dsn: SENTRY_DSN,
         release: RELEASE_VERSION,
@@ -32,6 +36,9 @@ export function logErrorSentry(
     );
     if (isDEVSentryENV()) {
         console.log(error, { msg, info });
+    }
+    if (!isSentryEnabled()) {
+        return;
     }
     Sentry.captureException(err, {
         level: Sentry.Severity.Info,
