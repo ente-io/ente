@@ -1049,6 +1049,9 @@ class ExportService {
         try {
             const fileUID = getExportRecordFileUID(file);
             const originalFileStream = await downloadManager.downloadFile(file);
+            if (!this.fileReader) {
+                this.fileReader = new FileReader();
+            }
             const updatedFileStream = await getUpdatedEXIFFileForDownload(
                 this.fileReader,
                 file,
