@@ -224,7 +224,7 @@ ProgressDialog createProgressDialog(
   );
   dialog.style(
     message: message,
-    messageTextStyle: Theme.of(context).textTheme.bodySmall,
+    messageTextStyle: Theme.of(context).textTheme.labelMedium,
     backgroundColor: Theme.of(context).dialogTheme.backgroundColor,
     progressWidget: const EnteLoadingWidget(),
     borderRadius: 10,
