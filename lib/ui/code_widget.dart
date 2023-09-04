@@ -179,7 +179,7 @@ class _CodeWidgetState extends State<CodeWidget> {
                               children: [
                                 (widget.code.hasSynced != null &&
                                         widget.code.hasSynced!) || !hasConfiguredAccount
-                                    ? Container()
+                                    ? const SizedBox.shrink()
                                     : const Icon(
                                         Icons.sync_disabled,
                                         size: 20,
