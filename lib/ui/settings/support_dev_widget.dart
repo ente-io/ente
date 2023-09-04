@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:ente_auth/core/configuration.dart';
 import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/models/subscription.dart';
 import 'package:ente_auth/services/billing_service.dart';
@@ -18,13 +19,26 @@ class SupportDevWidget extends StatelessWidget {
     final l10n = context.l10n;
 
     // fetch
-    return FutureBuilder<Subscription>(
-      future: BillingService.instance.getSubscription(),
-      builder: (context, snapshot) {
-        if (snapshot.hasData) {
-          final subscription = snapshot.data;
-          if (subscription != null && subscription.productID == "free") {
-            return GestureDetector(
+    if (Configuration.instance.hasConfiguredAccount()) {
+      return FutureBuilder<Subscription>(
+        future: BillingService.instance.getSubscription(),
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            final subscription = snapshot.data;
+            if (subscription != null && subscription.productID == "free") {
+              return buildWidget(l10n, context);
+            }
+          }
+          return const SizedBox.shrink();
+        },
+      );
+    } else {
+      return buildWidget(l10n, context);
+    }
+  }
+
+  GestureDetector buildWidget(AppLocalizations l10n, BuildContext context) {
+    return GestureDetector(
               onTap: () {
                 launchUrl(Uri.parse("https://ente.io"));
               },
@@ -35,6 +49,7 @@ class SupportDevWidget extends StatelessWidget {
                   children: [
                     StyledText(
                       text: l10n.supportDevs,
+                      style: getEnteTextTheme(context).large,
                       tags: {
                         'bold-green': StyledTextTag(
                           style: TextStyle(
@@ -45,23 +60,16 @@ class SupportDevWidget extends StatelessWidget {
                       },
                     ),
                     const Padding(padding: EdgeInsets.all(6)),
-                    Platform.isAndroid
-                        ? Text(
+                        Text(
                             l10n.supportDiscount,
                             textAlign: TextAlign.center,
                             style: const TextStyle(
                               color: Colors.grey,
                             ),
                           )
-                        : const SizedBox.shrink(),
                   ],
                 ),
               ),
             );
-          }
-        }
-        return const SizedBox.shrink();
-      },
-    );
   }
 }

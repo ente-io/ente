@@ -1,4 +1,3 @@
-
 import 'dart:async';
 import 'dart:io';
 
@@ -129,7 +128,8 @@ class _AppState extends State<App> {
 
   Map<String, WidgetBuilder> get _getRoutes {
     return {
-      "/": (context) => Configuration.instance.hasConfiguredAccount()
+      "/": (context) => Configuration.instance.hasConfiguredAccount() ||
+              Configuration.instance.hasOptedForOfflineMode()
           ? const HomePage()
           : const OnboardingPage(),
     };

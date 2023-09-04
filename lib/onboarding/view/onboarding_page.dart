@@ -7,17 +7,23 @@ import 'package:ente_auth/ente_theme_data.dart';
 import 'package:ente_auth/events/trigger_logout_event.dart';
 import "package:ente_auth/l10n/l10n.dart";
 import 'package:ente_auth/locale.dart';
+import 'package:ente_auth/theme/text_style.dart';
 import 'package:ente_auth/ui/account/email_entry_page.dart';
 import 'package:ente_auth/ui/account/login_page.dart';
 import 'package:ente_auth/ui/account/logout_dialog.dart';
 import 'package:ente_auth/ui/account/password_entry_page.dart';
 import 'package:ente_auth/ui/account/password_reentry_page.dart';
 import 'package:ente_auth/ui/common/gradient_button.dart';
+import 'package:ente_auth/ui/components/buttons/button_widget.dart';
+import 'package:ente_auth/ui/components/models/button_result.dart';
 import 'package:ente_auth/ui/home_page.dart';
 import 'package:ente_auth/ui/settings/language_picker.dart';
+import 'package:ente_auth/utils/dialog_util.dart';
 import 'package:ente_auth/utils/navigation_util.dart';
+import 'package:ente_auth/utils/toast_util.dart';
 import 'package:flutter/foundation.dart';
 import "package:flutter/material.dart";
+import 'package:local_auth/local_auth.dart';
 
 class OnboardingPage extends StatefulWidget {
   const OnboardingPage({Key? key}) : super(key: key);
@@ -112,6 +118,9 @@ class _OnboardingPageState extends State<OnboardingPage> {
                           style:
                               Theme.of(context).textTheme.titleLarge!.copyWith(
                                     color: Colors.white38,
+                                    // color: Theme.of(context)
+                                    //                            .colorScheme
+                                    //                            .mutedTextColor,
                                   ),
                         ),
                       ],
@@ -128,7 +137,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                     const SizedBox(height: 4),
                     Container(
                       width: double.infinity,
-                      padding: const EdgeInsets.fromLTRB(20, 12, 20, 28),
+                      padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
                       child: Hero(
                         tag: "log_in",
                         child: ElevatedButton(
@@ -145,6 +154,23 @@ class _OnboardingPageState extends State<OnboardingPage> {
                         ),
                       ),
                     ),
+                    const SizedBox(height: 4),
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.only(top: 20, bottom: 20),
+                      child: GestureDetector(
+                        onTap: _optForOfflineMode,
+                        child: Center(
+                          child: Text(
+                            l10n.useOffline,
+                            style: body.copyWith(
+                              color:
+                                  Theme.of(context).colorScheme.mutedTextColor,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -155,6 +181,36 @@ class _OnboardingPageState extends State<OnboardingPage> {
     );
   }
 
+  Future<void> _optForOfflineMode() async {
+    bool canCheckBio = await LocalAuthentication().canCheckBiometrics;
+    if(!canCheckBio) {
+      showToast(context, "Sorry, biometric authentication is not supported on this device.");
+      return;
+    }
+    final bool hasOptedBefore = Configuration.instance.hasOptedForOfflineMode();
+    ButtonResult? result;
+    if(!hasOptedBefore) {
+      result = await showChoiceActionSheet(
+        context,
+        title: context.l10n.warning,
+        body: context.l10n.offlineModeWarning,
+        secondButtonLabel: context.l10n.cancel,
+        firstButtonLabel: context.l10n.ok,
+      );
+    }
+    if (hasOptedBefore || result?.action == ButtonAction.first) {
+      await Configuration.instance.optForOfflineMode();
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (BuildContext context) {
+            return const HomePage();
+          },
+        ),
+      );
+    }
+
+  }
+
   void _navigateToSignUpPage() {
     Widget page;
     if (Configuration.instance.getEncryptedToken() == null) {
@@ -163,7 +219,9 @@ class _OnboardingPageState extends State<OnboardingPage> {
       // No key
       if (Configuration.instance.getKeyAttributes() == null) {
         // Never had a key
-        page = const PasswordEntryPage(mode: PasswordEntryMode.set,);
+        page = const PasswordEntryPage(
+          mode: PasswordEntryMode.set,
+        );
       } else if (Configuration.instance.getKey() == null) {
         // Yet to decrypt the key
         page = const PasswordReentryPage();
@@ -189,7 +247,9 @@ class _OnboardingPageState extends State<OnboardingPage> {
       // No key
       if (Configuration.instance.getKeyAttributes() == null) {
         // Never had a key
-        page = const PasswordEntryPage(mode: PasswordEntryMode.set,);
+        page = const PasswordEntryPage(
+          mode: PasswordEntryMode.set,
+        );
       } else if (Configuration.instance.getKey() == null) {
         // Yet to decrypt the key
         page = const PasswordReentryPage();

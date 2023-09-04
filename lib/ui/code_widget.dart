@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:clipboard/clipboard.dart';
+import 'package:ente_auth/core/configuration.dart';
 import 'package:ente_auth/ente_theme_data.dart';
 import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/models/code.dart';
@@ -31,6 +32,7 @@ class _CodeWidgetState extends State<CodeWidget> {
   final ValueNotifier<String> _nextCode = ValueNotifier<String>("");
   final Logger logger = Logger("_CodeWidgetState");
   bool _isInitialized = false;
+  late bool hasConfiguredAccount;
 
   @override
   void initState() {
@@ -46,6 +48,7 @@ class _CodeWidgetState extends State<CodeWidget> {
         }
       }
     });
+    hasConfiguredAccount = Configuration.instance.hasConfiguredAccount();
   }
 
   @override
@@ -174,9 +177,9 @@ class _CodeWidgetState extends State<CodeWidget> {
                             Row(
                               mainAxisAlignment: MainAxisAlignment.end,
                               children: [
-                                widget.code.hasSynced != null &&
-                                        widget.code.hasSynced!
-                                    ? Container()
+                                (widget.code.hasSynced != null &&
+                                        widget.code.hasSynced!) || !hasConfiguredAccount
+                                    ? const SizedBox.shrink()
                                     : const Icon(
                                         Icons.sync_disabled,
                                         size: 20,

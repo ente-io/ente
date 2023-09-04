@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io' as io;
 import 'dart:typed_data';
@@ -29,15 +30,23 @@ class Configuration {
   );
   static const emailKey = "email";
   static const keyAttributesKey = "key_attributes";
-  static const keyKey = "key";
+
   static const keyShouldShowLockScreen = "should_show_lock_screen";
   static const lastTempFolderClearTimeKey = "last_temp_folder_clear_time";
+  static const keyKey = "key";
   static const secretKeyKey = "secret_key";
   static const authSecretKeyKey = "auth_secret_key";
+  static const offlineAuthSecretKey = "offline_auth_secret_key";
   static const tokenKey = "token";
   static const encryptedTokenKey = "encrypted_token";
   static const userIDKey = "user_id";
   static const hasMigratedSecureStorageKey = "has_migrated_secure_storage";
+  static const hasOptedForOfflineModeKey = "has_opted_for_offline_mode";
+  final List<String> onlineSecureKeys = [
+    keyKey,
+    secretKeyKey,
+    authSecretKeyKey
+  ];
 
   final kTempFolderDeletionTimeBuffer = const Duration(days: 1).inMicroseconds;
 
@@ -45,27 +54,19 @@ class Configuration {
 
   String? _cachedToken;
   late String _documentsDirectory;
-  String? _key;
   late SharedPreferences _preferences;
+  String? _key;
   String? _secretKey;
   String? _authSecretKey;
+  String? _offlineAuthKey;
   late FlutterSecureStorage _secureStorage;
   late String _tempDirectory;
-  late String _thumbnailCacheDirectory;
 
-  // 6th July 22: Remove this after 3 months. Hopefully, active users
-  // will migrate to newer version of the app, where shared media is stored
-  // on appSupport directory which OS won't clean up automatically
-  late String _sharedTempMediaDirectory;
-
-  late String _sharedDocumentsMediaDirectory;
   String? _volatilePassword;
 
   final _secureStorageOptionsIOS = const IOSOptions(
     accessibility: KeychainAccessibility.first_unlock_this_device,
   );
-
-  // const IOSOptions(accessibility: IOSAccessibility.first_unlock);
 
   Future<void> init() async {
     _preferences = await SharedPreferences.getInstance();
@@ -88,15 +89,27 @@ class Configuration {
       _logger.warning(e);
     }
     tempDirectory.createSync(recursive: true);
-    final tempDirectoryPath = (await getTemporaryDirectory()).path;
-    _thumbnailCacheDirectory = tempDirectoryPath + "/thumbnail-cache";
-    io.Directory(_thumbnailCacheDirectory).createSync(recursive: true);
-    _sharedTempMediaDirectory = tempDirectoryPath + "/ente-shared-media";
-    io.Directory(_sharedTempMediaDirectory).createSync(recursive: true);
-    _sharedDocumentsMediaDirectory = _documentsDirectory + "/ente-shared-media";
-    io.Directory(_sharedDocumentsMediaDirectory).createSync(recursive: true);
+    await _initOnlineAccount();
+    await _initOfflineAccount();
+  }
+
+  Future<void> _initOfflineAccount() async {
+    _offlineAuthKey = await _secureStorage.read(
+      key: offlineAuthSecretKey,
+      iOptions: _secureStorageOptionsIOS,
+    );
+  }
+
+  Future<void> _initOnlineAccount() async {
     if (!_preferences.containsKey(tokenKey)) {
-      await _secureStorage.deleteAll(iOptions: _secureStorageOptionsIOS);
+      for (final key in onlineSecureKeys) {
+        unawaited(
+          _secureStorage.delete(
+            key: key,
+            iOptions: _secureStorageOptionsIOS,
+          ),
+        );
+      }
     } else {
       _key = await _secureStorage.read(
         key: keyKey,
@@ -113,13 +126,17 @@ class Configuration {
       if (_key == null) {
         await logout(autoLogout: true);
       }
-      await _migrateSecurityStorageToFirstUnlock();
     }
   }
 
   Future<void> logout({bool autoLogout = false}) async {
     await _preferences.clear();
-    await _secureStorage.deleteAll(iOptions: _secureStorageOptionsIOS);
+    for (String key in onlineSecureKeys) {
+      await _secureStorage.delete(
+        key: key,
+        iOptions: _secureStorageOptionsIOS,
+      );
+    }
     await AuthenticatorDB.instance.clearTable();
     _key = null;
     _cachedToken = null;
@@ -179,8 +196,9 @@ class Configuration {
     return KeyGenResult(attributes, privateAttributes, loginKey);
   }
 
-
-  Future<Tuple2<KeyAttributes, Uint8List>> getAttributesForNewPassword(String password) async {
+  Future<Tuple2<KeyAttributes, Uint8List>> getAttributesForNewPassword(
+    String password,
+  ) async {
     // Get master key
     final masterKey = getKey();
 
@@ -215,18 +233,16 @@ class Configuration {
   // SRP setup for existing users.
   Future<Uint8List> decryptSecretsAndGetKeyEncKey(
     String password,
-    KeyAttributes attributes,
-  {
+    KeyAttributes attributes, {
     Uint8List? keyEncryptionKey,
-  }
-  ) async {
+  }) async {
     _logger.info('Start decryptAndSaveSecrets');
     keyEncryptionKey ??= await CryptoUtil.deriveKey(
-        utf8.encode(password) as Uint8List,
-        Sodium.base642bin(attributes.kekSalt),
-        attributes.memLimit,
-        attributes.opsLimit,
-      );
+      utf8.encode(password) as Uint8List,
+      Sodium.base642bin(attributes.kekSalt),
+      attributes.memLimit,
+      attributes.opsLimit,
+    );
 
     _logger.info('user-key done');
     Uint8List key;
@@ -356,52 +372,31 @@ class Configuration {
     }
   }
 
-  Future<void> setKey(String? key) async {
+  Future<void> setKey(String key) async {
     _key = key;
-    if (key == null) {
-      await _secureStorage.delete(
-        key: keyKey,
-        iOptions: _secureStorageOptionsIOS,
-      );
-    } else {
-      await _secureStorage.write(
-        key: keyKey,
-        value: key,
-        iOptions: _secureStorageOptionsIOS,
-      );
-    }
+    await _secureStorage.write(
+      key: keyKey,
+      value: key,
+      iOptions: _secureStorageOptionsIOS,
+    );
   }
 
   Future<void> setSecretKey(String? secretKey) async {
     _secretKey = secretKey;
-    if (secretKey == null) {
-      await _secureStorage.delete(
-        key: secretKeyKey,
-        iOptions: _secureStorageOptionsIOS,
-      );
-    } else {
-      await _secureStorage.write(
-        key: secretKeyKey,
-        value: secretKey,
-        iOptions: _secureStorageOptionsIOS,
-      );
-    }
+    await _secureStorage.write(
+      key: secretKeyKey,
+      value: secretKey,
+      iOptions: _secureStorageOptionsIOS,
+    );
   }
 
   Future<void> setAuthSecretKey(String? authSecretKey) async {
     _authSecretKey = authSecretKey;
-    if (authSecretKey == null) {
-      await _secureStorage.delete(
-        key: authSecretKeyKey,
-        iOptions: _secureStorageOptionsIOS,
-      );
-    } else {
-      await _secureStorage.write(
-        key: authSecretKeyKey,
-        value: authSecretKey,
-        iOptions: _secureStorageOptionsIOS,
-      );
-    }
+    await _secureStorage.write(
+      key: authSecretKeyKey,
+      value: authSecretKey,
+      iOptions: _secureStorageOptionsIOS,
+    );
   }
 
   Uint8List? getKey() {
@@ -414,6 +409,10 @@ class Configuration {
 
   Uint8List? getAuthSecretKey() {
     return _authSecretKey == null ? null : Sodium.base642bin(_authSecretKey!);
+  }
+
+  Uint8List? getOfflineSecretKey() {
+    return _offlineAuthKey == null ? null : Sodium.base642bin(_offlineAuthKey!);
   }
 
   Uint8List getRecoveryKey() {
@@ -430,20 +429,32 @@ class Configuration {
     return _tempDirectory;
   }
 
-  String getThumbnailCacheDirectory() {
-    return _thumbnailCacheDirectory;
-  }
-
-  String getOldSharedMediaCacheDirectory() {
-    return _sharedTempMediaDirectory;
-  }
-
-  String getSharedMediaDirectory() {
-    return _sharedDocumentsMediaDirectory;
-  }
-
   bool hasConfiguredAccount() {
     return getToken() != null && _key != null;
+  }
+
+  bool hasOptedForOfflineMode() {
+    return _preferences.getBool(hasOptedForOfflineModeKey) ?? false;
+  }
+
+  Future<void> optForOfflineMode() async {
+    if ((await _secureStorage.containsKey(
+      key: offlineAuthSecretKey,
+      iOptions: _secureStorageOptionsIOS,
+    ))) {
+      _offlineAuthKey = await _secureStorage.read(
+        key: offlineAuthSecretKey,
+        iOptions: _secureStorageOptionsIOS,
+      );
+    } else {
+      _offlineAuthKey = Sodium.bin2base64(CryptoUtil.generateKey());
+      await _secureStorage.write(
+        key: offlineAuthSecretKey,
+        value: _offlineAuthKey,
+        iOptions: _secureStorageOptionsIOS,
+      );
+    }
+    await _preferences.setBool(hasOptedForOfflineModeKey, true);
   }
 
   bool shouldShowLockScreen() {
@@ -464,28 +475,5 @@ class Configuration {
 
   String? getVolatilePassword() {
     return _volatilePassword;
-  }
-
-  Future<void> _migrateSecurityStorageToFirstUnlock() async {
-    final hasMigratedSecureStorageToFirstUnlock =
-        _preferences.getBool(hasMigratedSecureStorageKey) ?? false;
-    if (!hasMigratedSecureStorageToFirstUnlock &&
-        _key != null &&
-        _secretKey != null) {
-      await _secureStorage.write(
-        key: keyKey,
-        value: _key,
-        iOptions: _secureStorageOptionsIOS,
-      );
-      await _secureStorage.write(
-        key: secretKeyKey,
-        value: _secretKey,
-        iOptions: _secureStorageOptionsIOS,
-      );
-      await _preferences.setBool(
-        hasMigratedSecureStorageKey,
-        true,
-      );
-    }
   }
 }

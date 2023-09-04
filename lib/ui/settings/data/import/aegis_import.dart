@@ -156,7 +156,7 @@ Future<int?> _processAegisExportFile(
   for (final code in parsedCodes) {
     await CodeStore.instance.addCode(code, shouldSync: false);
   }
-  unawaited(AuthenticatorService.instance.sync());
+  unawaited(AuthenticatorService.instance.onlineSync());
   int count = parsedCodes.length;
   return count;
 }

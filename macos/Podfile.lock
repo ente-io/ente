@@ -88,14 +88,14 @@ SPEC CHECKSUMS:
   FlutterMacOS: 8f6f14fa908a6fb3fba0cd85dbd81ec4b251fb24
   FMDB: 2ce00b547f966261cd18927a3ddb07cb6f3db82a
   package_info_plus_macos: f010621b07802a241d96d01876d6705f15e77c1c
-  path_provider_foundation: 37748e03f12783f9de2cb2c4eadfaa25fe6d4852
+  path_provider_foundation: 29f094ae23ebbca9d3d0cec13889cd9060c0e943
   Reachability: 33e18b67625424e47b6cde6d202dce689ad7af96
   Sentry: 4c9babff9034785067c896fd580b1f7de44da020
-  sentry_flutter: b10ae7a5ddcbc7f04648eeb2672b5747230172f1
+  sentry_flutter: 1346a880b24c0240807b53b10cf50ddad40f504e
   share_plus_macos: 853ee48e7dce06b633998ca0735d482dd671ade4
-  shared_preferences_foundation: 297b3ebca31b34ec92be11acd7fb0ba932c822ca
+  shared_preferences_foundation: 5b919d13b803cadd15ed2dc053125c68730e5126
   sqflite: a5789cceda41d54d23f31d6de539d65bb14100ea
-  url_launcher_macos: c04e4fa86382d4f94f6b38f14625708be3ae52e2
+  url_launcher_macos: d2691c7dd33ed713bf3544850a623080ec693d95
 
 PODFILE CHECKSUM: 353c8bcc5d5b0994e508d035b5431cfe18c1dea7
 

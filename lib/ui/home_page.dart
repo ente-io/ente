@@ -65,6 +65,10 @@ class _HomePageState extends State<HomePage> {
       await autoLogoutAlert(context);
     });
     _initDeepLinks();
+    Future.delayed(
+      const Duration(seconds: 0),
+          () => CodeStore.instance.importOfflineCodes(),
+    );
 
   }
 

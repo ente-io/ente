@@ -5,7 +5,7 @@
   "@counterAppBarTitle": {
     "description": "Text shown in the AppBar of the Counter Page"
   },
-  "onBoardingBody": "Secure your 2FA codes",
+  "onBoardingBody": "Securely backup your 2FA codes",
   "onBoardingGetStarted": "Get Started",
   "setupFirstAccount": "Setup your first account",
   "importScanQrCode": "Scan a QR Code",
@@ -320,5 +320,10 @@
   "encrypted": "Encrypted",
   "plainText": "Plain text",
   "passwordToEncryptExport": "Password to encrypt export",
-  "export": "Export"
+  "export": "Export",
+  "useOffline": "Use without backups",
+  "signInToBackup": "Sign in to backup your codes",
+  "singIn": "Sign in",
+  "sigInBackupReminder": "Please export your codes to ensure that you have a backup you can restore from.",
+  "offlineModeWarning": "You have chosen to proceed without backups. Please take manual backups to make sure your codes are safe."
 }

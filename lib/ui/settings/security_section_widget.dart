@@ -31,9 +31,11 @@ class SecuritySectionWidget extends StatefulWidget {
 
 class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
   final _config = Configuration.instance;
+  late bool _hasLoggedIn;
 
   @override
   void initState() {
+    _hasLoggedIn = _config.hasConfiguredAccount();
     super.initState();
   }
 
@@ -53,49 +55,103 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
   }
 
   Widget _getSectionOptions(BuildContext context) {
-    final bool? canDisableMFA = UserService.instance.canDisableEmailMFA();
-    if (canDisableMFA == null) {
-      // We don't know if the user can disable MFA yet, so we fetch the info
-      UserService.instance.getUserDetailsV2().ignore();
-    }
     final l10n = context.l10n;
     final List<Widget> children = [];
-    children.addAll([
-      sectionOptionSpacing,
-      MenuItemWidget(
-        captionedTextWidget: CaptionedTextWidget(
-          title: l10n.recoveryKey,
-        ),
-        pressedColor: getEnteColorScheme(context).fillFaint,
-        trailingIcon: Icons.chevron_right_outlined,
-        trailingIconIsMuted: true,
-        onTap: () async {
-          final hasAuthenticated = await LocalAuthenticationService.instance
-              .requestLocalAuthentication(
-            context,
-            l10n.authToViewYourRecoveryKey,
-          );
-          if (hasAuthenticated) {
-            String recoveryKey;
-            try {
-              recoveryKey =
-                  Sodium.bin2hex(Configuration.instance.getRecoveryKey());
-            } catch (e) {
-              showGenericErrorDialog(context: context);
-              return;
-            }
-            routeToPage(
+    if (_hasLoggedIn) {
+      final bool? canDisableMFA = UserService.instance.canDisableEmailMFA();
+      if (canDisableMFA == null) {
+        // We don't know if the user can disable MFA yet, so we fetch the info
+        UserService.instance.getUserDetailsV2().ignore();
+      }
+      children.addAll([
+        sectionOptionSpacing,
+        MenuItemWidget(
+          captionedTextWidget: CaptionedTextWidget(
+            title: l10n.recoveryKey,
+          ),
+          pressedColor: getEnteColorScheme(context).fillFaint,
+          trailingIcon: Icons.chevron_right_outlined,
+          trailingIconIsMuted: true,
+          onTap: () async {
+            final hasAuthenticated = await LocalAuthenticationService.instance
+                .requestLocalAuthentication(
               context,
-              RecoveryKeyPage(
-                recoveryKey,
-                l10n.ok,
-                showAppBar: true,
-                onDone: () {},
-              ),
+              l10n.authToViewYourRecoveryKey,
             );
-          }
-        },
-      ),
+            if (hasAuthenticated) {
+              String recoveryKey;
+              try {
+                recoveryKey =
+                    Sodium.bin2hex(Configuration.instance.getRecoveryKey());
+              } catch (e) {
+                showGenericErrorDialog(context: context);
+                return;
+              }
+              routeToPage(
+                context,
+                RecoveryKeyPage(
+                  recoveryKey,
+                  l10n.ok,
+                  showAppBar: true,
+                  onDone: () {},
+                ),
+              );
+            }
+          },
+        ),
+        MenuItemWidget(
+          captionedTextWidget: CaptionedTextWidget(
+            title: l10n.emailVerificationToggle,
+          ),
+          trailingWidget: ToggleSwitchWidget(
+            value: () => UserService.instance.hasEmailMFAEnabled(),
+            onChanged: () async {
+              final hasAuthenticated = await LocalAuthenticationService.instance
+                  .requestLocalAuthentication(
+                context,
+                l10n.authToChangeEmailVerificationSetting,
+              );
+              final isEmailMFAEnabled =
+                  UserService.instance.hasEmailMFAEnabled();
+              if (hasAuthenticated) {
+                await updateEmailMFA(!isEmailMFAEnabled);
+                if (mounted) {
+                  setState(() {});
+                }
+              }
+            },
+          ),
+        ),
+        sectionOptionSpacing,
+        MenuItemWidget(
+          captionedTextWidget: CaptionedTextWidget(
+            title: context.l10n.viewActiveSessions,
+          ),
+          pressedColor: getEnteColorScheme(context).fillFaint,
+          trailingIcon: Icons.chevron_right_outlined,
+          trailingIconIsMuted: true,
+          onTap: () async {
+            final hasAuthenticated = await LocalAuthenticationService.instance
+                .requestLocalAuthentication(
+              context,
+              context.l10n.authToViewYourActiveSessions,
+            );
+            if (hasAuthenticated) {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (BuildContext context) {
+                    return const SessionsPage();
+                  },
+                ),
+              );
+            }
+          },
+        ),
+      ]);
+    } else {
+      children.add(sectionOptionSpacing);
+    }
+    children.addAll([
       MenuItemWidget(
         captionedTextWidget: CaptionedTextWidget(
           title: l10n.lockscreen,
@@ -117,54 +173,6 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
         ),
       ),
       sectionOptionSpacing,
-      MenuItemWidget(
-        captionedTextWidget: CaptionedTextWidget(
-          title: l10n.emailVerificationToggle,
-        ),
-        trailingWidget: ToggleSwitchWidget(
-          value: () => UserService.instance.hasEmailMFAEnabled(),
-          onChanged: () async {
-            final hasAuthenticated = await LocalAuthenticationService.instance
-                .requestLocalAuthentication(
-              context,
-              l10n.authToChangeEmailVerificationSetting,
-            );
-            final isEmailMFAEnabled = UserService.instance.hasEmailMFAEnabled();
-            if (hasAuthenticated) {
-              await updateEmailMFA(!isEmailMFAEnabled);
-              if (mounted) {
-                setState(() {});
-              }
-            }
-          },
-        ),
-      ),
-      sectionOptionSpacing,
-      MenuItemWidget(
-        captionedTextWidget: CaptionedTextWidget(
-          title: context.l10n.viewActiveSessions,
-        ),
-        pressedColor: getEnteColorScheme(context).fillFaint,
-        trailingIcon: Icons.chevron_right_outlined,
-        trailingIconIsMuted: true,
-        onTap: () async {
-          final hasAuthenticated = await LocalAuthenticationService.instance
-              .requestLocalAuthentication(
-            context,
-            context.l10n.authToViewYourActiveSessions,
-          );
-          if (hasAuthenticated) {
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (BuildContext context) {
-                  return const SessionsPage();
-                },
-              ),
-            );
-          }
-        },
-      ),
-      sectionOptionSpacing,
     ]);
     return Column(
       children: children,
@@ -173,12 +181,19 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
 
   Future<void> updateEmailMFA(bool isEnabled) async {
     try {
-      final UserDetails details = await UserService.instance.getUserDetailsV2(memoryCount: false);
-      if(details.profileData?.canDisableEmailMFA == false) {
-        await routeToPage(context, RequestPasswordVerificationPage(onPasswordVerified: (Uint8List keyEncryptionKey) async {
-          final Uint8List loginKey = await CryptoUtil.deriveLoginKey(keyEncryptionKey);
-          await UserService.instance.registerOrUpdateSrp(loginKey);
-        },),);
+      final UserDetails details =
+          await UserService.instance.getUserDetailsV2(memoryCount: false);
+      if (details.profileData?.canDisableEmailMFA == false) {
+        await routeToPage(
+          context,
+          RequestPasswordVerificationPage(
+            onPasswordVerified: (Uint8List keyEncryptionKey) async {
+              final Uint8List loginKey =
+                  await CryptoUtil.deriveLoginKey(keyEncryptionKey);
+              await UserService.instance.registerOrUpdateSrp(loginKey);
+            },
+          ),
+        );
       }
       await UserService.instance.updateEmailMFA(isEnabled);
     } catch (e) {

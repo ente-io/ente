@@ -15,11 +15,21 @@ import 'package:ente_auth/models/authenticator/auth_key.dart';
 import 'package:ente_auth/models/authenticator/entity_result.dart';
 import 'package:ente_auth/models/authenticator/local_auth_entity.dart';
 import 'package:ente_auth/store/authenticator_db.dart';
+import 'package:ente_auth/store/offline_authenticator_db.dart';
 import 'package:ente_auth/utils/crypto_util.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:logging/logging.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+enum AccountMode {
+  online,
+  offline,
+}
+extension on AccountMode {
+  bool get isOnline => this == AccountMode.online;
+  bool get isOffline => this == AccountMode.offline;
+}
 
 class AuthenticatorService {
   final _logger = Logger((AuthenticatorService).toString());
@@ -27,6 +37,7 @@ class AuthenticatorService {
   late SharedPreferences _prefs;
   late AuthenticatorGateway _gateway;
   late AuthenticatorDB _db;
+  late OfflineAuthenticatorDB _offlineDb;
   final String _lastEntitySyncTime = "lastEntitySyncTime";
 
   AuthenticatorService._privateConstructor();
@@ -34,25 +45,34 @@ class AuthenticatorService {
   static final AuthenticatorService instance =
       AuthenticatorService._privateConstructor();
 
+  AccountMode getAccountMode() {
+    return Configuration.instance.hasOptedForOfflineMode() &&
+            !Configuration.instance.hasConfiguredAccount()
+        ? AccountMode.offline
+        : AccountMode.online;
+  }
+
   Future<void> init() async {
     _prefs = await SharedPreferences.getInstance();
     _db = AuthenticatorDB.instance;
+    _offlineDb = OfflineAuthenticatorDB.instance;
     _gateway = AuthenticatorGateway(Network.instance.getDio(), _config);
     if (Configuration.instance.hasConfiguredAccount()) {
-      unawaited(sync());
+      unawaited(onlineSync());
     }
     Bus.instance.on<SignedInEvent>().listen((event) {
-      unawaited(sync());
+      unawaited(onlineSync());
     });
   }
 
-  Future<List<EntityResult>> getEntities() async {
-    final List<LocalAuthEntity> result = await _db.getAll();
+  Future<List<EntityResult>> getEntities(AccountMode mode) async {
+    final List<LocalAuthEntity> result =
+        mode.isOnline ? await _db.getAll() : await _offlineDb.getAll();
     final List<EntityResult> entities = [];
     if (result.isEmpty) {
       return entities;
     }
-    final key = await getOrCreateAuthDataKey();
+    final key = await getOrCreateAuthDataKey(mode);
     for (LocalAuthEntity e in result) {
       try {
         final decryptedValue = await CryptoUtil.decryptChaCha(
@@ -75,17 +95,23 @@ class AuthenticatorService {
     return entities;
   }
 
-  Future<int> addEntry(String plainText, bool shouldSync) async {
-    var key = await getOrCreateAuthDataKey();
+  Future<int> addEntry(
+    String plainText,
+    bool shouldSync,
+    AccountMode accountMode,
+  ) async {
+    var key = await getOrCreateAuthDataKey(accountMode);
     final encryptedKeyData = await CryptoUtil.encryptChaCha(
       utf8.encode(plainText) as Uint8List,
       key,
     );
     String encryptedData = Sodium.bin2base64(encryptedKeyData.encryptedData!);
     String header = Sodium.bin2base64(encryptedKeyData.header!);
-    final insertedID = await _db.insert(encryptedData, header);
+    final insertedID = accountMode.isOnline
+        ? await _db.insert(encryptedData, header)
+        : await _offlineDb.insert(encryptedData, header);
     if (shouldSync) {
-      unawaited(sync());
+      unawaited(onlineSync());
     }
     return insertedID;
   }
@@ -94,39 +120,53 @@ class AuthenticatorService {
     int generatedID,
     String plainText,
     bool shouldSync,
+    AccountMode accountMode,
   ) async {
-    var key = await getOrCreateAuthDataKey();
+    var key = await getOrCreateAuthDataKey(accountMode);
     final encryptedKeyData = await CryptoUtil.encryptChaCha(
       utf8.encode(plainText) as Uint8List,
       key,
     );
     String encryptedData = Sodium.bin2base64(encryptedKeyData.encryptedData!);
     String header = Sodium.bin2base64(encryptedKeyData.header!);
-    final int affectedRows =
-        await _db.updateEntry(generatedID, encryptedData, header);
+    final int affectedRows = accountMode.isOnline
+        ? await _db.updateEntry(generatedID, encryptedData, header)
+        : await _offlineDb.updateEntry(generatedID, encryptedData, header);
     assert(
       affectedRows == 1,
       "updateEntry should have updated exactly one row",
     );
     if (shouldSync) {
-      unawaited(sync());
+      unawaited(onlineSync());
     }
   }
 
-  Future<void> deleteEntry(int genID) async {
-    LocalAuthEntity? result = await _db.getEntryByID(genID);
+  Future<void> deleteEntry(int genID, AccountMode accountMode) async {
+    LocalAuthEntity? result = accountMode.isOnline
+        ? await _db.getEntryByID(genID)
+        : await _offlineDb.getEntryByID(genID);
     if (result == null) {
       _logger.info("No entry found for given id");
       return;
     }
-    if (result.id != null) {
+    if (result.id != null && accountMode.isOnline) {
       await _gateway.deleteEntity(result.id!);
+    } else {
+      debugPrint("Skipping delete since account mode is offline");
     }
-    await _db.deleteByIDs(generatedIDs: [genID]);
+    if(accountMode.isOnline) {
+      await _db.deleteByIDs(generatedIDs: [genID]);
+    } else {
+      await _offlineDb.deleteByIDs(generatedIDs: [genID]);
+    }
   }
 
-  Future<void> sync() async {
+  Future<void> onlineSync() async {
     try {
+      if(getAccountMode().isOffline) {
+        debugPrint("Skipping sync since account mode is offline");
+        return;
+      }
       _logger.info("Sync");
       await _remoteToLocalSync();
       _logger.info("remote fetch completed");
@@ -209,7 +249,10 @@ class AuthenticatorService {
     }
   }
 
-  Future<Uint8List> getOrCreateAuthDataKey() async {
+  Future<Uint8List> getOrCreateAuthDataKey(AccountMode mode) async {
+    if(mode.isOffline) {
+      return _config.getOfflineSecretKey()!;
+    }
     if (_config.getAuthSecretKey() != null) {
       return _config.getAuthSecretKey()!;
     }
