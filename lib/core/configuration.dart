@@ -36,12 +36,17 @@ class Configuration {
   static const keyKey = "key";
   static const secretKeyKey = "secret_key";
   static const authSecretKeyKey = "auth_secret_key";
+  static const offlineAuthSecretKey = "offline_auth_secret_key";
   static const tokenKey = "token";
   static const encryptedTokenKey = "encrypted_token";
   static const userIDKey = "user_id";
   static const hasMigratedSecureStorageKey = "has_migrated_secure_storage";
-  static const hasOptedForOfflineModeKey = "has_opted_for_offline_mode";
-  final List<String> onlineSecureKeys = [keyKey, secretKeyKey, authSecretKeyKey];
+  static const hasOptedForOfflineModeKey = "has_opted_for_offline_mode2";
+  final List<String> onlineSecureKeys = [
+    keyKey,
+    secretKeyKey,
+    authSecretKeyKey
+  ];
 
   final kTempFolderDeletionTimeBuffer = const Duration(days: 1).inMicroseconds;
 
@@ -53,6 +58,7 @@ class Configuration {
   String? _key;
   String? _secretKey;
   String? _authSecretKey;
+  String? _offlineAuthKey;
   late FlutterSecureStorage _secureStorage;
   late String _tempDirectory;
 
@@ -84,6 +90,14 @@ class Configuration {
     }
     tempDirectory.createSync(recursive: true);
     await _initOnlineAccount();
+    await _initOfflineAccount();
+  }
+
+  Future<void> _initOfflineAccount() async {
+    _offlineAuthKey = await _secureStorage.read(
+      key: offlineAuthSecretKey,
+      iOptions: _secureStorageOptionsIOS,
+    );
   }
 
   Future<void> _initOnlineAccount() async {
@@ -397,6 +411,10 @@ class Configuration {
     return _authSecretKey == null ? null : Sodium.base642bin(_authSecretKey!);
   }
 
+  Uint8List? getOfflineSecretKey() {
+    return _offlineAuthKey == null ? null : Sodium.base642bin(_offlineAuthKey!);
+  }
+
   Uint8List getRecoveryKey() {
     final keyAttributes = getKeyAttributes()!;
     return CryptoUtil.decryptSync(
@@ -419,8 +437,14 @@ class Configuration {
     return _preferences.getBool(hasOptedForOfflineModeKey) ?? false;
   }
 
-  Future<void> optForOfflineMode() {
-    return _preferences.setBool(hasOptedForOfflineModeKey, true);
+  Future<void> optForOfflineMode() async {
+    _offlineAuthKey = Sodium.bin2base64(CryptoUtil.generateKey());
+    await _secureStorage.write(
+      key: offlineAuthSecretKey,
+      value: _offlineAuthKey,
+      iOptions: _secureStorageOptionsIOS,
+    );
+    await _preferences.setBool(hasOptedForOfflineModeKey, true);
   }
 
   bool shouldShowLockScreen() {

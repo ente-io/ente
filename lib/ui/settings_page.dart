@@ -19,12 +19,13 @@ import 'package:flutter/material.dart';
 
 class SettingsPage extends StatelessWidget {
   final ValueNotifier<String?> emailNotifier;
-  final _hasLoggedIn = Configuration.instance.hasConfiguredAccount();
+
 
   SettingsPage({Key? key, required this.emailNotifier}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final _hasLoggedIn = Configuration.instance.hasConfiguredAccount();
     if (_hasLoggedIn) {
       UserService.instance.getUserDetailsV2().ignore();
     }
@@ -38,6 +39,7 @@ class SettingsPage extends StatelessWidget {
   }
 
   Widget _getBody(BuildContext context, EnteColorScheme colorScheme) {
+    final _hasLoggedIn = Configuration.instance.hasConfiguredAccount();
     final enteTextTheme = getEnteTextTheme(context);
     const sectionSpacing = SizedBox(height: 8);
     final List<Widget> contents = [];

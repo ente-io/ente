@@ -177,6 +177,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
   }
 
   Future<void> _optForOfflineMode() async {
+
     await Configuration.instance.optForOfflineMode();
     Navigator.of(context).push(
       MaterialPageRoute(

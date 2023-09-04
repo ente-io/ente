@@ -55,7 +55,7 @@ Future<void> showGoogleAuthInstruction(BuildContext context) async {
       for (final code in codes) {
         await CodeStore.instance.addCode(code, shouldSync: false);
       }
-      unawaited(AuthenticatorService.instance.sync());
+      unawaited(AuthenticatorService.instance.onlineSync());
       importSuccessDialog(context, codes.length);
     }
   }

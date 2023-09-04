@@ -93,7 +93,8 @@ Future<void> _decryptExportData(
               derivedKey,
               Sodium.base642bin(enteAuthExport.encryptionNonce),
             );
-          } catch (e) {
+          } catch (e,s) {
+            Logger("encryptedImport").warning('failed to decrypt',e,s);
             showToast(context, l10n.incorrectPasswordTitle);
             isPasswordIncorrect = true;
           }
@@ -118,7 +119,7 @@ Future<void> _decryptExportData(
           for (final code in parsedCodes) {
             await CodeStore.instance.addCode(code, shouldSync: false);
           }
-          unawaited(AuthenticatorService.instance.sync());
+          unawaited(AuthenticatorService.instance.onlineSync());
           importedCodeCount = parsedCodes.length;
           await progressDialog.hide();
         } catch (e, s) {

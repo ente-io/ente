@@ -111,7 +111,7 @@ Future<int?> _processRaivoExportFile(BuildContext context,String path) async {
   for (final code in parsedCodes) {
     await CodeStore.instance.addCode(code, shouldSync: false);
   }
-  unawaited(AuthenticatorService.instance.sync());
+  unawaited(AuthenticatorService.instance.onlineSync());
   int count = parsedCodes.length;
   return count;
 }

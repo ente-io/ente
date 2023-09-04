@@ -20,9 +20,12 @@ class CodeStore {
     _authenticatorService = AuthenticatorService.instance;
   }
 
-  Future<List<Code>> getAllCodes() async {
+
+
+  Future<List<Code>> getAllCodes({AccountMode? accountMode}) async {
+    final mode = accountMode ?? _authenticatorService.getAccountMode();
     final List<EntityResult> entities =
-        await _authenticatorService.getEntities();
+        await _authenticatorService.getEntities(mode);
     final List<Code> codes = [];
     for (final entity in entities) {
       final decodeJson = jsonDecode(entity.rawData);
@@ -46,8 +49,10 @@ class CodeStore {
   Future<void> addCode(
     Code code, {
     bool shouldSync = true,
+    AccountMode? accountMode,
   }) async {
-    final codes = await getAllCodes();
+    final mode = accountMode ??  _authenticatorService.getAccountMode();
+    final codes = await getAllCodes(accountMode: mode);
     bool isExistingCode = false;
     for (final existingCode in codes) {
       if (existingCode == code) {
@@ -63,18 +68,21 @@ class CodeStore {
         code.generatedID!,
         jsonEncode(code.rawData),
         shouldSync,
+        mode,
       );
     } else {
       code.generatedID = await _authenticatorService.addEntry(
         jsonEncode(code.rawData),
         shouldSync,
+        mode,
       );
     }
     Bus.instance.fire(CodesUpdatedEvent());
   }
 
-  Future<void> removeCode(Code code) async {
-    await _authenticatorService.deleteEntry(code.generatedID!);
+  Future<void> removeCode(Code code, {AccountMode? accountMode}) async {
+    final mode = accountMode ?? _authenticatorService.getAccountMode();
+    await _authenticatorService.deleteEntry(code.generatedID!, mode);
     Bus.instance.fire(CodesUpdatedEvent());
   }
 }

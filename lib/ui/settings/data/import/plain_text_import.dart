@@ -121,7 +121,7 @@ Future<void> _pickImportFile(BuildContext context) async {
     for (final code in parsedCodes) {
       await CodeStore.instance.addCode(code, shouldSync: false);
     }
-    unawaited(AuthenticatorService.instance.sync());
+    unawaited(AuthenticatorService.instance.onlineSync());
     await progressDialog.hide();
     await importSuccessDialog(context, parsedCodes.length);
   } catch (e) {
