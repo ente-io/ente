@@ -16,9 +16,9 @@ export interface VerifyMasterPasswordFormProps {
     keyAttributes: KeyAttributes;
     callback: (
         key: string,
-        passphrase: string,
         kek: string,
-        keyAttributes: KeyAttributes
+        keyAttributes: KeyAttributes,
+        passphrase?: string
     ) => void;
     buttonText: string;
     submitButtonProps?: ButtonProps;
@@ -74,12 +74,17 @@ export default function VerifyMasterPasswordForm({
                     keyAttributes.keyDecryptionNonce,
                     kek
                 );
-                callback(key, passphrase, kek, keyAttributes);
+                callback(key, kek, keyAttributes, passphrase);
             } catch (e) {
                 logError(e, 'user entered a wrong password');
                 throw Error(CustomError.INCORRECT_PASSWORD);
             }
         } catch (e) {
+            if (e.message === CustomError.TWO_FACTOR_ENABLED) {
+                // two factor enabled, user has been redirected to two factor page
+                return;
+            }
+            logError(e, 'failed to verify passphrase');
             switch (e.message) {
                 case CustomError.WEAK_DEVICE:
                     setFieldError(t('WEAK_DEVICE'));
