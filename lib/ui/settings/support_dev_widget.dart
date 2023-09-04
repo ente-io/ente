@@ -26,46 +26,51 @@ class SupportDevWidget extends StatelessWidget {
           if (snapshot.hasData) {
             final subscription = snapshot.data;
             if (subscription != null && subscription.productID == "free") {
-              return GestureDetector(
-                onTap: () {
-                  launchUrl(Uri.parse("https://ente.io"));
-                },
-                child: Padding(
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 12.0, horizontal: 6),
-                  child: Column(
-                    children: [
-                      StyledText(
-                        text: l10n.supportDevs,
-                        tags: {
-                          'bold-green': StyledTextTag(
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: getEnteColorScheme(context).primaryGreen,
-                            ),
-                          ),
-                        },
-                      ),
-                      const Padding(padding: EdgeInsets.all(6)),
-                      Platform.isAndroid
-                          ? Text(
-                              l10n.supportDiscount,
-                              textAlign: TextAlign.center,
-                              style: const TextStyle(
-                                color: Colors.grey,
-                              ),
-                            )
-                          : const SizedBox.shrink(),
-                    ],
-                  ),
-                ),
-              );
+              return buildWidget(l10n, context);
             }
           }
           return const SizedBox.shrink();
         },
       );
+    } else {
+      return buildWidget(l10n, context);
     }
-    return const SizedBox.shrink();
+  }
+
+  GestureDetector buildWidget(AppLocalizations l10n, BuildContext context) {
+    return GestureDetector(
+              onTap: () {
+                launchUrl(Uri.parse("https://ente.io"));
+              },
+              child: Padding(
+                padding:
+                    const EdgeInsets.symmetric(vertical: 12.0, horizontal: 6),
+                child: Column(
+                  children: [
+                    StyledText(
+                      text: l10n.supportDevs,
+                      tags: {
+                        'bold-green': StyledTextTag(
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: getEnteColorScheme(context).primaryGreen,
+                          ),
+                        ),
+                      },
+                    ),
+                    const Padding(padding: EdgeInsets.all(6)),
+                    Platform.isAndroid
+                        ? Text(
+                            l10n.supportDiscount,
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              color: Colors.grey,
+                            ),
+                          )
+                        : const SizedBox.shrink(),
+                  ],
+                ),
+              ),
+            );
   }
 }
