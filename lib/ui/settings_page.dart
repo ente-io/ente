@@ -1,9 +1,12 @@
 import 'dart:io';
 
 import 'package:ente_auth/core/configuration.dart';
+import 'package:ente_auth/l10n/l10n.dart';
+import 'package:ente_auth/onboarding/view/onboarding_page.dart';
 import 'package:ente_auth/services/user_service.dart';
 import 'package:ente_auth/theme/colors.dart';
 import 'package:ente_auth/theme/ente_theme.dart';
+import 'package:ente_auth/ui/components/notification_warning_widget.dart';
 import 'package:ente_auth/ui/settings/about_section_widget.dart';
 import 'package:ente_auth/ui/settings/account_section_widget.dart';
 import 'package:ente_auth/ui/settings/app_version_widget.dart';
@@ -14,12 +17,12 @@ import 'package:ente_auth/ui/settings/support_dev_widget.dart';
 import 'package:ente_auth/ui/settings/support_section_widget.dart';
 import 'package:ente_auth/ui/settings/theme_switch_widget.dart';
 import 'package:ente_auth/ui/settings/title_bar_widget.dart';
+import 'package:ente_auth/utils/navigation_util.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 class SettingsPage extends StatelessWidget {
   final ValueNotifier<String?> emailNotifier;
-
 
   SettingsPage({Key? key, required this.emailNotifier}) : super(key: key);
 
@@ -68,6 +71,23 @@ class SettingsPage extends StatelessWidget {
       contents.addAll([
         const SizedBox(height: 12),
         AccountSectionWidget(),
+        sectionSpacing,
+      ]);
+    } else {
+      contents.addAll([
+        NotificationWidget(
+          startIcon: Icons.account_box_outlined,
+          actionIcon: Icons.arrow_forward,
+          text: context.l10n.signInToBackup,
+          type: NotificationType.notice,
+          onTap: () async => {
+            await routeToPage(
+              context,
+              const OnboardingPage(),
+            ),
+          },
+        ),
+        sectionSpacing,
         sectionSpacing,
       ]);
     }

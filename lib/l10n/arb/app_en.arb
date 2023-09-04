@@ -321,5 +321,6 @@
   "plainText": "Plain text",
   "passwordToEncryptExport": "Password to encrypt export",
   "export": "Export",
-  "useOffline": "Use without backups"
+  "useOffline": "Use without backups",
+  "signInToBackup": "Sign in to backup your codes"
 }
