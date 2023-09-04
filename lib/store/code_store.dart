@@ -1,11 +1,14 @@
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:collection/collection.dart';
+import 'package:ente_auth/core/configuration.dart';
 import 'package:ente_auth/core/event_bus.dart';
 import 'package:ente_auth/events/codes_updated_event.dart';
 import 'package:ente_auth/models/authenticator/entity_result.dart';
 import 'package:ente_auth/models/code.dart';
 import 'package:ente_auth/services/authenticator_service.dart';
+import 'package:ente_auth/store/offline_authenticator_db.dart';
 import 'package:logging/logging.dart';
 
 class CodeStore {
@@ -19,8 +22,6 @@ class CodeStore {
   Future<void> init() async {
     _authenticatorService = AuthenticatorService.instance;
   }
-
-
 
   Future<List<Code>> getAllCodes({AccountMode? accountMode}) async {
     final mode = accountMode ?? _authenticatorService.getAccountMode();
@@ -51,7 +52,7 @@ class CodeStore {
     bool shouldSync = true,
     AccountMode? accountMode,
   }) async {
-    final mode = accountMode ??  _authenticatorService.getAccountMode();
+    final mode = accountMode ?? _authenticatorService.getAccountMode();
     final codes = await getAllCodes(accountMode: mode);
     bool isExistingCode = false;
     for (final existingCode in codes) {
@@ -84,5 +85,37 @@ class CodeStore {
     final mode = accountMode ?? _authenticatorService.getAccountMode();
     await _authenticatorService.deleteEntry(code.generatedID!, mode);
     Bus.instance.fire(CodesUpdatedEvent());
+  }
+
+  Future<void> importOfflineCodes() async {
+    try {
+      Configuration config = Configuration.instance;
+      // Account isn't configured yet, so we can't import offline codes
+      if (!config.hasConfiguredAccount()) {
+        return;
+      }
+      // Never opted for offline mode, so we can't import offline codes
+      if (!config.hasOptedForOfflineMode()) {
+        return;
+      }
+      Uint8List? hasOfflineKey = config.getOfflineSecretKey();
+      if (hasOfflineKey == null) {
+        // No offline key, so we can't import offline codes
+        return;
+      }
+      List<Code> offlineCodes =
+      await CodeStore.instance.getAllCodes(accountMode: AccountMode.offline);
+      for (Code eachCode in offlineCodes) {
+        await CodeStore.instance.addCode(
+          eachCode,
+          accountMode: AccountMode.online,
+          shouldSync: false,
+        );
+      }
+      OfflineAuthenticatorDB.instance.clearTable();
+      AuthenticatorService.instance.onlineSync().ignore();
+    } catch (e, s) {
+      _logger.severe("error while importing offline codes", e, s);
+    }
   }
 }
