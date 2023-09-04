@@ -423,6 +423,9 @@
     "STOP_ALL_UPLOADS_MESSAGE": "Are you sure that you want to stop all the uploads in progress?",
     "STOP_UPLOADS_HEADER": "Stop uploads?",
     "YES_STOP_UPLOADS": "Yes, stop uploads",
+    "STOP_DOWNLOADS_HEADER": "Stop downloads?",
+    "YES_STOP_DOWNLOADS": "Yes, stop downloads",
+    "STOP_ALL_DOWNLOADS_MESSAGE": "Are you sure that you want to stop all the downloads in progress?",
     "albums_one": "1 Album",
     "albums_other": "{{count, number}} Albums",
     "ALL_ALBUMS": "All Albums",
@@ -576,5 +579,9 @@
     "CONVERSION_FAILED_NOTIFICATION_MESSAGE": "This file could not be previewed. Click here to download the original.",
     "SELECT_COLLECTION": "Select album",
     "PIN_ALBUM": "Pin album",
-    "UNPIN_ALBUM": "Unpin album"
+    "UNPIN_ALBUM": "Unpin album",
+    "DOWNLOAD_COMPLETE": "Download complete",
+    "DOWNLOADING_COLLECTION": "Downloading {{name}}",
+    "DOWNLOAD_FAILED": "Download failed",
+    "DOWNLOAD_PROGRESS": "{{progress.current}} / {{progress.total}} files"
 }

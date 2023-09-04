@@ -6,8 +6,8 @@ import {
     changeCollectionOrder,
     changeCollectionSortOrder,
     changeCollectionVisibility,
-    downloadAllCollectionFiles,
-    downloadDefaultHiddenFiles,
+    downloadCollectionHelper,
+    downloadDefaultHiddenCollectionHelper,
     isHiddenCollection,
 } from 'utils/collection';
 import { SetCollectionNamerAttributes } from '../CollectionNamer';
@@ -33,9 +33,14 @@ import { Trans } from 'react-i18next';
 import { t } from 'i18next';
 import { Box } from '@mui/material';
 import CollectionSortOrderMenu from './CollectionSortOrderMenu';
+import { SetCollectionDownloadProgressAttributes } from 'types/gallery';
 
 interface CollectionOptionsProps {
     setCollectionNamerAttributes: SetCollectionNamerAttributes;
+    setCollectionDownloadProgressAttributesCreator: (
+        collectionID: number
+    ) => SetCollectionDownloadProgressAttributes;
+    isActiveCollectionDownloadInProgress: () => boolean;
     activeCollection: Collection;
     collectionSummaryType: CollectionSummaryType;
     showCollectionShareModal: () => void;
@@ -45,7 +50,6 @@ interface CollectionOptionsProps {
 export enum CollectionActions {
     SHOW_RENAME_DIALOG,
     RENAME,
-    CONFIRM_DOWNLOAD,
     DOWNLOAD,
     ARCHIVE,
     UNARCHIVE,
@@ -72,6 +76,8 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
         setActiveCollectionID,
         setCollectionNamerAttributes,
         showCollectionShareModal,
+        setCollectionDownloadProgressAttributesCreator,
+        isActiveCollectionDownloadInProgress,
     } = props;
 
     const { startLoading, finishLoading, setDialogMessage } =
@@ -99,9 +105,6 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
                 break;
             case CollectionActions.RENAME:
                 callback = renameCollection;
-                break;
-            case CollectionActions.CONFIRM_DOWNLOAD:
-                callback = confirmDownloadCollection;
                 break;
             case CollectionActions.DOWNLOAD:
                 callback = downloadCollection;
@@ -169,6 +172,7 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
                 loader && startLoading();
                 await callback(...args);
             } catch (e) {
+                logError(e, 'collection action failed', { action });
                 setDialogMessage({
                     title: t('ERROR'),
                     content: t('UNKNOWN_ERROR'),
@@ -211,10 +215,26 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
     };
 
     const downloadCollection = () => {
+        if (isActiveCollectionDownloadInProgress()) {
+            return;
+        }
         if (collectionSummaryType === CollectionSummaryType.hiddenItems) {
-            downloadDefaultHiddenFiles();
+            const setCollectionDownloadProgressAttributes =
+                setCollectionDownloadProgressAttributesCreator(
+                    HIDDEN_ITEMS_SECTION
+                );
+            downloadDefaultHiddenCollectionHelper(
+                setCollectionDownloadProgressAttributes
+            );
         } else {
-            downloadAllCollectionFiles(activeCollection.id);
+            const setCollectionDownloadProgressAttributes =
+                setCollectionDownloadProgressAttributesCreator(
+                    activeCollection.id
+                );
+            downloadCollectionHelper(
+                activeCollection.id,
+                setCollectionDownloadProgressAttributes
+            );
         }
     };
 
@@ -257,21 +277,6 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
                     CollectionActions.DELETE_BUT_KEEP_FILES
                 ),
                 variant: 'primary',
-            },
-            close: {
-                text: t('CANCEL'),
-            },
-        });
-    };
-
-    const confirmDownloadCollection = () => {
-        setDialogMessage({
-            title: t('DOWNLOAD_COLLECTION'),
-            content: <Trans i18nKey={'DOWNLOAD_COLLECTION_MESSAGE'} />,
-            proceed: {
-                text: t('DOWNLOAD'),
-                action: handleCollectionAction(CollectionActions.DOWNLOAD),
-                variant: 'accent',
             },
             close: {
                 text: t('CANCEL'),
@@ -341,6 +346,7 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
             <QuickOptions
                 handleCollectionAction={handleCollectionAction}
                 collectionSummaryType={collectionSummaryType}
+                isDownloadInProgress={isActiveCollectionDownloadInProgress()}
             />
 
             <OverflowMenu
@@ -353,6 +359,7 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
                 ) : collectionSummaryType ===
                   CollectionSummaryType.favorites ? (
                     <OnlyDownloadCollectionOption
+                        isDownloadInProgress={isActiveCollectionDownloadInProgress()}
                         handleCollectionAction={handleCollectionAction}
                         downloadOptionText={t('DOWNLOAD_FAVORITES')}
                     />

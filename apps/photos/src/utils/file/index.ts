@@ -46,6 +46,9 @@ import { isPlaybackPossible } from 'utils/photoFrame';
 import { FileTypeInfo } from 'types/upload';
 import { moveToHiddenCollection } from 'services/collectionService';
 
+import ElectronFSService from 'services/electron/fs';
+import { getFileExportPath, getUniqueFileExportName } from 'utils/export';
+
 const WAIT_TIME_IMAGE_CONVERSION = 30 * 1000;
 
 export enum FILE_OPS_TYPE {
@@ -64,6 +67,29 @@ export function downloadAsFile(filename: string, content: string) {
     });
     const fileURL = URL.createObjectURL(file);
     downloadUsingAnchor(fileURL, filename);
+}
+
+export async function getUpdatedEXIFFileForDownload(
+    fileReader: FileReader,
+    file: EnteFile,
+    fileStream: ReadableStream<Uint8Array>
+): Promise<ReadableStream<Uint8Array>> {
+    const extension = getFileExtension(file.metadata.title);
+    if (
+        file.metadata.fileType === FILE_TYPE.IMAGE &&
+        file.pubMagicMetadata?.data.editedTime &&
+        (extension === TYPE_JPEG || extension === TYPE_JPG)
+    ) {
+        const fileBlob = await new Response(fileStream).blob();
+        const updatedFileBlob = await updateFileCreationDateInEXIF(
+            fileReader,
+            fileBlob,
+            new Date(file.pubMagicMetadata.data.editedTime / 1000)
+        );
+        return updatedFileBlob.stream();
+    } else {
+        return fileStream;
+    }
 }
 
 export async function downloadFile(
@@ -122,23 +148,20 @@ export async function downloadFile(
             const fileType = await getFileType(
                 new File([fileBlob], file.metadata.title)
             );
-            if (
-                file.pubMagicMetadata?.data.editedTime &&
-                (fileType.exactType === TYPE_JPEG ||
-                    fileType.exactType === TYPE_JPG)
-            ) {
-                fileBlob = await updateFileCreationDateInEXIF(
+            fileBlob = await new Response(
+                await getUpdatedEXIFFileForDownload(
                     fileReader,
-                    fileBlob,
-                    new Date(file.pubMagicMetadata.data.editedTime / 1000)
-                );
-            }
+                    file,
+                    fileBlob.stream()
+                )
+            ).blob();
             fileBlob = new Blob([fileBlob], { type: fileType.mimeType });
             const tempURL = URL.createObjectURL(fileBlob);
             downloadUsingAnchor(tempURL, file.metadata.title);
         }
     } catch (e) {
         logError(e, 'failed to download file');
+        throw e;
     }
 }
 
@@ -589,13 +612,107 @@ export function getUniqueFiles(files: EnteFile[], sortAsc = false) {
     return uniqueFiles;
 }
 
-export async function downloadFiles(files: EnteFile[]) {
+export async function downloadFiles(
+    files: EnteFile[],
+    progressBarUpdater?: {
+        increaseSuccess: () => void;
+        increaseFailed: () => void;
+        isCancelled: () => boolean;
+    }
+) {
     for (const file of files) {
         try {
+            if (progressBarUpdater?.isCancelled()) {
+                return;
+            }
             await downloadFile(file, false);
+            progressBarUpdater?.increaseSuccess();
         } catch (e) {
             logError(e, 'download fail for file');
+            progressBarUpdater?.increaseFailed();
         }
+    }
+}
+
+export async function downloadFilesDesktop(
+    files: EnteFile[],
+    progressBarUpdater: {
+        increaseSuccess: () => void;
+        increaseFailed: () => void;
+        isCancelled: () => boolean;
+    },
+    downloadPath: string
+) {
+    const fileReader = new FileReader();
+    for (const file of files) {
+        try {
+            if (progressBarUpdater?.isCancelled()) {
+                return;
+            }
+            await downloadFileDesktop(fileReader, file, downloadPath);
+            progressBarUpdater?.increaseSuccess();
+        } catch (e) {
+            logError(e, 'download fail for file');
+            progressBarUpdater?.increaseFailed();
+        }
+    }
+}
+
+export async function downloadFileDesktop(
+    fileReader: FileReader,
+    file: EnteFile,
+    downloadPath: string
+) {
+    let fileStream: ReadableStream<Uint8Array>;
+    const fileURL = await DownloadManager.getCachedOriginalFile(file)[0];
+    if (!fileURL) {
+        fileStream = await DownloadManager.downloadFile(file);
+    } else {
+        fileStream = await fetch(fileURL).then((res) => res.body);
+    }
+    const updatedFileStream = await getUpdatedEXIFFileForDownload(
+        fileReader,
+        file,
+        fileStream
+    );
+
+    if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
+        const fileBlob = await new Response(updatedFileStream).blob();
+        const livePhoto = await decodeLivePhoto(file, fileBlob);
+        const imageExportName = getUniqueFileExportName(
+            downloadPath,
+            livePhoto.imageNameTitle
+        );
+        const imageStream = generateStreamFromArrayBuffer(livePhoto.image);
+        await ElectronFSService.saveMediaFile(
+            getFileExportPath(downloadPath, imageExportName),
+            imageStream
+        );
+        try {
+            const videoExportName = getUniqueFileExportName(
+                downloadPath,
+                livePhoto.videoNameTitle
+            );
+            const videoStream = generateStreamFromArrayBuffer(livePhoto.video);
+            await ElectronFSService.saveMediaFile(
+                getFileExportPath(downloadPath, videoExportName),
+                videoStream
+            );
+        } catch (e) {
+            ElectronFSService.deleteFile(
+                getFileExportPath(downloadPath, imageExportName)
+            );
+            throw e;
+        }
+    } else {
+        const fileExportName = getUniqueFileExportName(
+            downloadPath,
+            file.metadata.title
+        );
+        await ElectronFSService.saveMediaFile(
+            getFileExportPath(downloadPath, fileExportName),
+            updatedFileStream
+        );
     }
 }
 

@@ -336,6 +336,9 @@ export function PhotoList({
         displayFiles,
         deduplicateContext.isOnDeduplicatePage,
         deduplicateContext.fileSizeMap,
+        deduplicateContext.clubSameTimeFilesOnly,
+        galleryContext.photoListHeader,
+        publicCollectionGalleryContext.photoListHeader,
     ]);
 
     useEffect(() => {

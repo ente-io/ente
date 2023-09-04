@@ -1,6 +1,6 @@
 import { Collection, CollectionSummaries } from 'types/collection';
 import CollectionListBar from 'components/Collections/CollectionListBar';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import AllCollections from 'components/Collections/AllCollections';
 import CollectionInfoWithOptions from 'components/Collections/CollectionInfoWithOptions';
 import { ALL_SECTION, COLLECTION_LIST_SORT_BY } from 'constants/collection';
@@ -15,6 +15,13 @@ import {
 import { useLocalState } from 'hooks/useLocalState';
 import { sortCollectionSummaries } from 'services/collectionService';
 import { LS_KEYS } from 'utils/storage/localStorage';
+import {
+    CollectionDownloadProgress,
+    CollectionDownloadProgressAttributes,
+    isCollectionDownloadCancelled,
+    isCollectionDownloadCompleted,
+} from './CollectionDownloadProgress';
+import { SetCollectionDownloadProgressAttributes } from 'types/gallery';
 
 interface Iprops {
     activeCollection: Collection;
@@ -45,6 +52,11 @@ export default function Collections(props: Iprops) {
     const [collectionShareModalView, setCollectionShareModalView] =
         useState(false);
 
+    const [
+        collectionDownloadProgressAttributesList,
+        setCollectionDownloadProgressAttributesList,
+    ] = useState<CollectionDownloadProgressAttributes[]>([]);
+
     const [collectionListSortBy, setCollectionListSortBy] =
         useLocalState<COLLECTION_LIST_SORT_BY>(
             LS_KEYS.COLLECTION_SORT_BY,
@@ -74,7 +86,38 @@ export default function Collections(props: Iprops) {
         [collectionListSortBy, toShowCollectionSummaries]
     );
 
-    const showCollectionShareModal = () => setCollectionShareModalView(true);
+    const setCollectionDownloadProgressAttributesCreator =
+        (collectionID: number): SetCollectionDownloadProgressAttributes =>
+        (value) => {
+            setCollectionDownloadProgressAttributesList((prev) => {
+                const attributes = prev?.find(
+                    (attr) => attr.collectionID === collectionID
+                );
+                const updatedAttributes =
+                    typeof value === 'function' ? value(attributes) : value;
+
+                const updatedAttributesList = attributes
+                    ? prev.map((attr) =>
+                          attr.collectionID === collectionID
+                              ? updatedAttributes
+                              : attr
+                      )
+                    : [...prev, updatedAttributes];
+
+                return updatedAttributesList;
+            });
+        };
+
+    const isActiveCollectionDownloadInProgress = useCallback(() => {
+        const attributes = collectionDownloadProgressAttributesList.find(
+            (attr) => attr.collectionID === activeCollectionID
+        );
+        return (
+            attributes &&
+            !isCollectionDownloadCancelled(attributes) &&
+            !isCollectionDownloadCompleted(attributes)
+        );
+    }, [activeCollectionID, collectionDownloadProgressAttributesList]);
 
     useEffect(() => {
         if (isInSearchMode) {
@@ -88,14 +131,27 @@ export default function Collections(props: Iprops) {
                     )}
                     activeCollection={activeCollection}
                     setCollectionNamerAttributes={setCollectionNamerAttributes}
+                    showCollectionShareModal={() =>
+                        setCollectionShareModalView(true)
+                    }
+                    setCollectionDownloadProgressAttributesCreator={
+                        setCollectionDownloadProgressAttributesCreator
+                    }
+                    isActiveCollectionDownloadInProgress={
+                        isActiveCollectionDownloadInProgress
+                    }
                     setActiveCollectionID={setActiveCollectionID}
-                    showCollectionShareModal={showCollectionShareModal}
                 />
             ),
             itemType: ITEM_TYPE.HEADER,
             height: 68,
         });
-    }, [toShowCollectionSummaries, activeCollectionID, isInSearchMode]);
+    }, [
+        toShowCollectionSummaries,
+        activeCollectionID,
+        isInSearchMode,
+        isActiveCollectionDownloadInProgress,
+    ]);
 
     if (shouldBeHidden) {
         return <></>;
@@ -138,6 +194,10 @@ export default function Collections(props: Iprops) {
                 open={collectionShareModalView}
                 onClose={closeCollectionShare}
                 collection={activeCollection}
+            />
+            <CollectionDownloadProgress
+                attributesList={collectionDownloadProgressAttributesList}
+                setAttributesList={setCollectionDownloadProgressAttributesList}
             />
         </>
     );

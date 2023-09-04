@@ -524,9 +524,7 @@ export default function App(props) {
                                 zIndex: 2000,
                                 backgroundColor: theme.colors.background.base,
                             })}>
-                            <EnteSpinner>
-                                <span className="sr-only">Loading...</span>
-                            </EnteSpinner>
+                            <EnteSpinner />
                         </Overlay>
                     )}
                     <Component setLoading={setLoading} {...pageProps} />

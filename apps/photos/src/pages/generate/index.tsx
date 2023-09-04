@@ -92,9 +92,7 @@ export default function Generate() {
         <>
             {loading ? (
                 <VerticallyCentered>
-                    <EnteSpinner>
-                        <span className="sr-only">Loading...</span>
-                    </EnteSpinner>
+                    <EnteSpinner />
                 </VerticallyCentered>
             ) : recoverModalView ? (
                 <RecoveryKey

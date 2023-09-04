@@ -1,6 +1,7 @@
 import {
     addToCollection,
     createAlbum,
+    getAllLocalCollections,
     getLocalCollections,
     getNonEmptyCollections,
     moveToCollection,
@@ -11,7 +12,7 @@ import {
     updatePublicCollectionMagicMetadata,
     updateSharedCollectionMagicMetadata,
 } from 'services/collectionService';
-import { downloadFiles } from 'utils/file';
+import { downloadFiles, downloadFilesDesktop } from 'utils/file';
 import { getAllLocalFiles, getLocalFiles } from 'services/fileService';
 import { EnteFile } from 'types/file';
 import { CustomError } from 'utils/error';
@@ -33,6 +34,7 @@ import {
     SYSTEM_COLLECTION_TYPES,
     MOVE_TO_NOT_ALLOWED_COLLECTION,
     ADD_TO_NOT_ALLOWED_COLLECTION,
+    HIDDEN_ITEMS_SECTION,
 } from 'constants/collection';
 import { getUnixTimeInMicroSecondsWithDelta } from 'utils/time';
 import { SUB_TYPE, VISIBILITY_STATE } from 'types/magicMetadata';
@@ -40,6 +42,16 @@ import { isArchivedCollection, updateMagicMetadata } from 'utils/magicMetadata';
 import { getAlbumsURL } from 'utils/common/apiUtil';
 import bs58 from 'bs58';
 import { t } from 'i18next';
+import isElectron from 'is-electron';
+import { PROPER_CASED_HIDDEN_COLLECTION_EXPORT_NAME } from 'utils/export';
+import { SetCollectionDownloadProgressAttributes } from 'types/gallery';
+import ElectronService from 'services/electron/common';
+import {
+    getCollectionExportPath,
+    getUniqueCollectionExportName,
+} from 'utils/export';
+import exportService from 'services/export';
+import { CollectionDownloadProgressAttributes } from 'components/Collections/CollectionDownloadProgress';
 
 export enum COLLECTION_OPS_TYPE {
     ADD,
@@ -86,31 +98,135 @@ export function getSelectedCollection(
     return collections.find((collection) => collection.id === collectionID);
 }
 
-export async function downloadAllCollectionFiles(collectionID: number) {
+export async function downloadCollectionHelper(
+    collectionID: number,
+    setCollectionDownloadProgressAttributes: SetCollectionDownloadProgressAttributes
+) {
     try {
         const allFiles = await getAllLocalFiles();
         const collectionFiles = allFiles.filter(
             (file) => file.collectionID === collectionID
         );
-        await downloadFiles(collectionFiles);
+        const allCollections = await getAllLocalCollections();
+        const collection = allCollections.find(
+            (collection) => collection.id === collectionID
+        );
+        if (!collection) {
+            throw Error('collection not found');
+        }
+        await downloadCollectionFiles(
+            collection.name,
+            collection.id,
+            isHiddenCollection(collection),
+            collectionFiles,
+            setCollectionDownloadProgressAttributes
+        );
     } catch (e) {
         logError(e, 'download collection failed ');
     }
 }
 
-export async function downloadDefaultHiddenFiles() {
+export async function downloadDefaultHiddenCollectionHelper(
+    setCollectionDownloadProgressAttributes: SetCollectionDownloadProgressAttributes
+) {
     try {
-        const collections = await getLocalCollections('hidden');
+        const hiddenCollections = await getLocalCollections('hidden');
         const defaultHiddenCollectionsIds =
-            getDefaultHiddenCollectionIDs(collections);
+            getDefaultHiddenCollectionIDs(hiddenCollections);
         const hiddenFiles = await getLocalFiles('hidden');
         const defaultHiddenCollectionFiles = hiddenFiles.filter((file) =>
             defaultHiddenCollectionsIds.has(file.collectionID)
         );
-        await downloadFiles(defaultHiddenCollectionFiles);
+        await downloadCollectionFiles(
+            PROPER_CASED_HIDDEN_COLLECTION_EXPORT_NAME,
+            HIDDEN_ITEMS_SECTION,
+            true,
+            defaultHiddenCollectionFiles,
+            setCollectionDownloadProgressAttributes
+        );
     } catch (e) {
         logError(e, 'download hidden files failed ');
     }
+}
+
+async function downloadCollectionFiles(
+    collectionName: string,
+    collectionID: number,
+    isHidden: boolean,
+    collectionFiles: EnteFile[],
+    setCollectionDownloadProgressAttributes: SetCollectionDownloadProgressAttributes
+) {
+    if (!collectionFiles.length) {
+        return;
+    }
+    const canceller = new AbortController();
+    const increaseSuccess = () => {
+        if (canceller.signal.aborted) return;
+        setCollectionDownloadProgressAttributes((prev) => ({
+            ...prev,
+            success: prev.success + 1,
+        }));
+    };
+    const increaseFailed = () => {
+        if (canceller.signal.aborted) return;
+        setCollectionDownloadProgressAttributes((prev) => ({
+            ...prev,
+            failed: prev.failed + 1,
+        }));
+    };
+    const isCancelled = () => canceller.signal.aborted;
+    const initialProgressAttributes: CollectionDownloadProgressAttributes = {
+        collectionName,
+        collectionID,
+        isHidden,
+        canceller,
+        total: collectionFiles.length,
+        success: 0,
+        failed: 0,
+        downloadDirPath: null,
+    };
+    if (isElectron()) {
+        const selectedDir = await ElectronService.selectDirectory();
+        if (!selectedDir) {
+            return;
+        }
+        const downloadDirPath = await createCollectionDownloadFolder(
+            selectedDir,
+            collectionName
+        );
+        setCollectionDownloadProgressAttributes({
+            ...initialProgressAttributes,
+            downloadDirPath,
+        });
+        await downloadFilesDesktop(
+            collectionFiles,
+            { increaseSuccess, increaseFailed, isCancelled },
+            downloadDirPath
+        );
+    } else {
+        setCollectionDownloadProgressAttributes(initialProgressAttributes);
+        await downloadFiles(collectionFiles, {
+            increaseSuccess,
+            increaseFailed,
+            isCancelled,
+        });
+    }
+}
+
+async function createCollectionDownloadFolder(
+    downloadDirPath: string,
+    collectionName: string
+) {
+    const collectionDownloadName = getUniqueCollectionExportName(
+        downloadDirPath,
+        collectionName
+    );
+    const collectionDownloadPath = getCollectionExportPath(
+        downloadDirPath,
+        collectionDownloadName
+    );
+    await exportService.checkExistsAndCreateDir(collectionDownloadPath);
+    return collectionDownloadPath;
 }
 
 export function appendCollectionKeyToShareURL(
