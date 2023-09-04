@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io' as io;
 import 'dart:typed_data';
@@ -40,6 +41,7 @@ class Configuration {
   static const userIDKey = "user_id";
   static const hasMigratedSecureStorageKey = "has_migrated_secure_storage";
   static const hasOptedForOfflineModeKey = "has_opted_for_offline_mode";
+  final List<String> onlineSecureKeys = [keyKey, secretKeyKey, authSecretKeyKey];
 
   final kTempFolderDeletionTimeBuffer = const Duration(days: 1).inMicroseconds;
 
@@ -81,8 +83,19 @@ class Configuration {
       _logger.warning(e);
     }
     tempDirectory.createSync(recursive: true);
+    await _initOnlineAccount();
+  }
+
+  Future<void> _initOnlineAccount() async {
     if (!_preferences.containsKey(tokenKey)) {
-      await _secureStorage.deleteAll(iOptions: _secureStorageOptionsIOS);
+      for (final key in onlineSecureKeys) {
+        unawaited(
+          _secureStorage.delete(
+            key: key,
+            iOptions: _secureStorageOptionsIOS,
+          ),
+        );
+      }
     } else {
       _key = await _secureStorage.read(
         key: keyKey,
@@ -104,7 +117,12 @@ class Configuration {
 
   Future<void> logout({bool autoLogout = false}) async {
     await _preferences.clear();
-    await _secureStorage.deleteAll(iOptions: _secureStorageOptionsIOS);
+    for (String key in onlineSecureKeys) {
+      await _secureStorage.delete(
+        key: key,
+        iOptions: _secureStorageOptionsIOS,
+      );
+    }
     await AuthenticatorDB.instance.clearTable();
     _key = null;
     _cachedToken = null;
