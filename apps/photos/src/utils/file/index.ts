@@ -691,7 +691,7 @@ export async function downloadFileDesktop(
         try {
             const videoExportName = getUniqueFileExportName(
                 downloadPath,
-                livePhoto.imageNameTitle
+                livePhoto.videoNameTitle
             );
             const videoStream = generateStreamFromArrayBuffer(livePhoto.video);
             await ElectronFSService.saveMediaFile(
