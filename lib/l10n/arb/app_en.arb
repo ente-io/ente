@@ -322,5 +322,7 @@
   "passwordToEncryptExport": "Password to encrypt export",
   "export": "Export",
   "useOffline": "Use without backups",
-  "signInToBackup": "Sign in to backup your codes"
+  "signInToBackup": "Sign in to backup your codes",
+  "singIn": "Sign in",
+  "sigInBackupReminder": "Please export your codes to ensure that you have a backup you can restore from."
 }

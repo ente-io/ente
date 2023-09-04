@@ -51,7 +51,7 @@ class DataSectionWidget extends StatelessWidget {
         trailingIcon: Icons.chevron_right_outlined,
         trailingIconIsMuted: true,
         onTap: () async {
-          handleExportClick(context);
+          await handleExportClick(context);
         },
       ),
       sectionOptionSpacing,

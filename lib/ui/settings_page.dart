@@ -6,20 +6,25 @@ import 'package:ente_auth/onboarding/view/onboarding_page.dart';
 import 'package:ente_auth/services/user_service.dart';
 import 'package:ente_auth/theme/colors.dart';
 import 'package:ente_auth/theme/ente_theme.dart';
+import 'package:ente_auth/ui/components/buttons/button_widget.dart';
+import 'package:ente_auth/ui/components/models/button_result.dart';
 import 'package:ente_auth/ui/components/notification_warning_widget.dart';
 import 'package:ente_auth/ui/settings/about_section_widget.dart';
 import 'package:ente_auth/ui/settings/account_section_widget.dart';
 import 'package:ente_auth/ui/settings/app_version_widget.dart';
 import 'package:ente_auth/ui/settings/data/data_section_widget.dart';
+import 'package:ente_auth/ui/settings/data/export_widget.dart';
 import 'package:ente_auth/ui/settings/security_section_widget.dart';
 import 'package:ente_auth/ui/settings/social_section_widget.dart';
 import 'package:ente_auth/ui/settings/support_dev_widget.dart';
 import 'package:ente_auth/ui/settings/support_section_widget.dart';
 import 'package:ente_auth/ui/settings/theme_switch_widget.dart';
 import 'package:ente_auth/ui/settings/title_bar_widget.dart';
+import 'package:ente_auth/utils/dialog_util.dart';
 import 'package:ente_auth/utils/navigation_util.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+
 
 class SettingsPage extends StatelessWidget {
   final ValueNotifier<String?> emailNotifier;
@@ -80,11 +85,26 @@ class SettingsPage extends StatelessWidget {
           actionIcon: Icons.arrow_forward,
           text: context.l10n.signInToBackup,
           type: NotificationType.notice,
-          onTap: () async => {
-            await routeToPage(
+          onTap: () async {
+             ButtonResult? result = await showChoiceActionSheet(
               context,
-              const OnboardingPage(),
-            ),
+              title: context.l10n.warning,
+              body: context.l10n.sigInBackupReminder,
+              secondButtonLabel: context.l10n.singIn,
+              secondButtonAction: ButtonAction.second,
+              firstButtonLabel: context.l10n.exportCodes,
+            );
+            if (result == null) return;
+            if (result.action == ButtonAction.first) {
+              await handleExportClick(context);
+            } else {
+              if (result.action == ButtonAction.second) {
+                await routeToPage(
+                  context,
+                  const OnboardingPage(),
+                );
+              }
+            }
           },
         ),
         sectionSpacing,
