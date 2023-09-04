@@ -310,7 +310,7 @@ class SuperLogging {
     if (_preferences.containsKey(keyShouldReportErrors)) {
       return _preferences.getBool(keyShouldReportErrors)!;
     } else {
-      return false;
+      return kDebugMode;
     }
   }
 
