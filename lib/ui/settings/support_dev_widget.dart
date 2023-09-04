@@ -49,6 +49,7 @@ class SupportDevWidget extends StatelessWidget {
                   children: [
                     StyledText(
                       text: l10n.supportDevs,
+                      style: getEnteTextTheme(context).large,
                       tags: {
                         'bold-green': StyledTextTag(
                           style: TextStyle(
@@ -59,15 +60,13 @@ class SupportDevWidget extends StatelessWidget {
                       },
                     ),
                     const Padding(padding: EdgeInsets.all(6)),
-                    Platform.isAndroid
-                        ? Text(
+                        Text(
                             l10n.supportDiscount,
                             textAlign: TextAlign.center,
                             style: const TextStyle(
                               color: Colors.grey,
                             ),
                           )
-                        : const SizedBox.shrink(),
                   ],
                 ),
               ),
