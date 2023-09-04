@@ -7,7 +7,6 @@ import 'package:ente_auth/ente_theme_data.dart';
 import 'package:ente_auth/events/trigger_logout_event.dart';
 import "package:ente_auth/l10n/l10n.dart";
 import 'package:ente_auth/locale.dart';
-import 'package:ente_auth/services/local_authentication_service.dart';
 import 'package:ente_auth/theme/text_style.dart';
 import 'package:ente_auth/ui/account/email_entry_page.dart';
 import 'package:ente_auth/ui/account/login_page.dart';
@@ -15,8 +14,11 @@ import 'package:ente_auth/ui/account/logout_dialog.dart';
 import 'package:ente_auth/ui/account/password_entry_page.dart';
 import 'package:ente_auth/ui/account/password_reentry_page.dart';
 import 'package:ente_auth/ui/common/gradient_button.dart';
+import 'package:ente_auth/ui/components/buttons/button_widget.dart';
+import 'package:ente_auth/ui/components/models/button_result.dart';
 import 'package:ente_auth/ui/home_page.dart';
 import 'package:ente_auth/ui/settings/language_picker.dart';
+import 'package:ente_auth/utils/dialog_util.dart';
 import 'package:ente_auth/utils/navigation_util.dart';
 import 'package:ente_auth/utils/toast_util.dart';
 import 'package:flutter/foundation.dart';
@@ -185,14 +187,28 @@ class _OnboardingPageState extends State<OnboardingPage> {
       showToast(context, "Sorry, biometric authentication is not supported on this device.");
       return;
     }
-    await Configuration.instance.optForOfflineMode();
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (BuildContext context) {
-          return const HomePage();
-        },
-      ),
-    );
+    final bool hasOptedBefore = Configuration.instance.hasOptedForOfflineMode();
+    ButtonResult? result;
+    if(!hasOptedBefore) {
+      result = await showChoiceActionSheet(
+        context,
+        title: context.l10n.warning,
+        body: context.l10n.offlineModeWarning,
+        secondButtonLabel: context.l10n.cancel,
+        firstButtonLabel: context.l10n.ok,
+      );
+    }
+    if (hasOptedBefore || result?.action == ButtonAction.first) {
+      await Configuration.instance.optForOfflineMode();
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (BuildContext context) {
+            return const HomePage();
+          },
+        ),
+      );
+    }
+
   }
 
   void _navigateToSignUpPage() {

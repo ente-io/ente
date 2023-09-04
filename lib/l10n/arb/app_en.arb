@@ -324,5 +324,6 @@
   "useOffline": "Use without backups",
   "signInToBackup": "Sign in to backup your codes",
   "singIn": "Sign in",
-  "sigInBackupReminder": "Please export your codes to ensure that you have a backup you can restore from."
+  "sigInBackupReminder": "Please export your codes to ensure that you have a backup you can restore from.",
+  "offlineModeWarning": "You have chosen to proceed without backups. Please take manual backups to make sure your codes are safe."
 }
