@@ -41,7 +41,7 @@ class Configuration {
   static const encryptedTokenKey = "encrypted_token";
   static const userIDKey = "user_id";
   static const hasMigratedSecureStorageKey = "has_migrated_secure_storage";
-  static const hasOptedForOfflineModeKey = "has_opted_for_offline_mode2";
+  static const hasOptedForOfflineModeKey = "has_opted_for_offline_mode";
   final List<String> onlineSecureKeys = [
     keyKey,
     secretKeyKey,
