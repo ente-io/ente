@@ -39,37 +39,36 @@ class SupportDevWidget extends StatelessWidget {
 
   GestureDetector buildWidget(AppLocalizations l10n, BuildContext context) {
     return GestureDetector(
-              onTap: () {
-                launchUrl(Uri.parse("https://ente.io"));
-              },
-              child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(vertical: 12.0, horizontal: 6),
-                child: Column(
-                  children: [
-                    StyledText(
-                      text: l10n.supportDevs,
-                      style: getEnteTextTheme(context).large,
-                      tags: {
-                        'bold-green': StyledTextTag(
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: getEnteColorScheme(context).primaryGreen,
-                          ),
-                        ),
-                      },
-                    ),
-                    const Padding(padding: EdgeInsets.all(6)),
-                        Text(
-                            l10n.supportDiscount,
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(
-                              color: Colors.grey,
-                            ),
-                          )
-                  ],
+      onTap: () {
+        launchUrl(Uri.parse("https://ente.io"));
+      },
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 6),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            StyledText(
+              text: l10n.supportDevs,
+              style: getEnteTextTheme(context).large,
+              tags: {
+                'bold-green': StyledTextTag(
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: getEnteColorScheme(context).primaryGreen,
+                  ),
                 ),
+              },
+            ),
+            const Padding(padding: EdgeInsets.all(6)),
+            Text(
+              l10n.supportDiscount,
+              style: const TextStyle(
+                color: Colors.grey,
               ),
-            );
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
