@@ -122,7 +122,10 @@ class CodeStore {
               oc.account == eachCode.account &&
               oc.secret == eachCode.secret,
         );
+        int? generatedID = eachCode.generatedID!;
         if (!alreadyPresent) {
+          // Avoid conflict with generatedID of online codes
+          eachCode.generatedID = null;
           await CodeStore.instance.addCode(
             eachCode,
             accountMode: AccountMode.online,
@@ -130,7 +133,7 @@ class CodeStore {
           );
         }
         await OfflineAuthenticatorDB.instance.deleteByIDs(
-          generatedIDs: [eachCode.generatedID!],
+          generatedIDs: [generatedID],
         );
       }
       AuthenticatorService.instance.onlineSync().ignore();
