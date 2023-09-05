@@ -535,6 +535,14 @@ export default function Gallery() {
                     }
                 }
 
+                // HIDDEN ITEMS SECTION - show all individual hidden files
+                if (
+                    activeCollectionID === HIDDEN_ITEMS_SECTION &&
+                    defaultHiddenCollectionIDs.has(item.collectionID)
+                ) {
+                    return true;
+                }
+
                 // Archived files can only be seen in archive section or their respective collection
                 if (isArchivedFile(item)) {
                     if (
@@ -549,13 +557,6 @@ export default function Gallery() {
 
                 // ALL SECTION - show all files
                 if (activeCollectionID === ALL_SECTION) {
-                    return true;
-                }
-
-                if (
-                    activeCollectionID === HIDDEN_ITEMS_SECTION &&
-                    defaultHiddenCollectionIDs.has(item.collectionID)
-                ) {
                     return true;
                 }
 
@@ -815,7 +816,11 @@ export default function Gallery() {
     const fileOpsHelper = (ops: FILE_OPS_TYPE) => async () => {
         startLoading();
         try {
-            const selectedFiles = getSelectedFiles(selected, filteredData);
+            // passing files here instead of filteredData for hide ops because we want to move all files copies to hidden collection
+            const selectedFiles = getSelectedFiles(
+                selected,
+                ops === FILE_OPS_TYPE.HIDE ? files : filteredData
+            );
             const toProcessFiles =
                 ops === FILE_OPS_TYPE.DOWNLOAD
                     ? selectedFiles
