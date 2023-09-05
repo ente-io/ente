@@ -51,13 +51,13 @@ This section contains the parameters that were using during KDF operation:
 As mentioned above, the auth data is encrypted using a key that's derived by using user provided password & kdf params.
 For encryption, we are using `XChaCha20-Poly1305` algorithm.
 
-## How to use the export data
+## How to use the exported data
 
 * **ente Authenticator app**: You can directly import the codes in the ente Authenticator app.
   > Settings -> Data -> Import Codes -> ente Encrypted export.
 
-* **Decryption Tool** : You can download the [decrypt tool](decrypt/decrypt) and run the following command.
+* **Decryption Tool** : You can download the prebuilt [decryption tool](decrypt/decrypt) (or build it from [source](decrypt)) and run the following command.
          
-  ```./decrypt <export_file> <password> <output_file>```
-         
-
+```
+  ./decrypt <export_file> <password> <output_file>
+```
