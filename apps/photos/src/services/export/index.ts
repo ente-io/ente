@@ -21,8 +21,6 @@ import {
     isLivePhotoExportName,
     parseLivePhotoExportName,
     getCollectionIDFromFileUID,
-    getCollectionExportNameMap,
-    getCollectionExportName,
 } from 'utils/export';
 import { logError } from 'utils/sentry';
 import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
@@ -57,7 +55,11 @@ import { ElectronAPIs } from 'types/electron';
 import { CustomError } from 'utils/error';
 import { addLogLine } from 'utils/logging';
 import { eventBus, Events } from '../events';
-import { getNonEmptyPersonalCollections } from 'utils/collection';
+import {
+    constructCollectionNameMap,
+    getCollectionUserFacingName,
+    getNonEmptyPersonalCollections,
+} from 'utils/collection';
 import { migrateExport } from './migration';
 import ElectronFSService from '../electron/fs';
 
@@ -361,7 +363,7 @@ class ExportService {
                 convertCollectionIDExportNameObjectToMap(
                     exportRecord.collectionExportNames
                 );
-            const collectionIDNameMap = getCollectionExportNameMap(
+            const collectionIDNameMap = constructCollectionNameMap(
                 nonEmptyPersonalCollections
             );
 
@@ -488,7 +490,7 @@ class ExportService {
                     const newCollectionExportName =
                         getUniqueCollectionExportName(
                             exportFolder,
-                            getCollectionExportName(collection)
+                            getCollectionUserFacingName(collection)
                         );
                     addLogLine(
                         `renaming collection with id ${collection.id} from ${oldCollectionExportName} to ${newCollectionExportName}`
