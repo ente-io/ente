@@ -90,7 +90,13 @@ class CodeStore {
     Bus.instance.fire(CodesUpdatedEvent());
   }
 
+  bool _isOfflineImportRunning = false;
+
   Future<void> importOfflineCodes() async {
+    if(_isOfflineImportRunning) {
+      return;
+    }
+    _isOfflineImportRunning = true;
     Logger logger = Logger('importOfflineCodes');
     try {
       Configuration config = Configuration.instance;
@@ -146,6 +152,8 @@ class CodeStore {
       AuthenticatorService.instance.onlineSync().ignore();
     } catch (e, s) {
       _logger.severe("error while importing offline codes", e, s);
+    } finally {
+      _isOfflineImportRunning = false;
     }
   }
 }
