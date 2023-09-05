@@ -815,7 +815,11 @@ export default function Gallery() {
     const fileOpsHelper = (ops: FILE_OPS_TYPE) => async () => {
         startLoading();
         try {
-            const selectedFiles = getSelectedFiles(selected, filteredData);
+            // passing files here instead of filteredData for hide ops because we want to move all files copies to hidden collection
+            const selectedFiles = getSelectedFiles(
+                selected,
+                ops === FILE_OPS_TYPE.HIDE ? files : filteredData
+            );
             const toProcessFiles =
                 ops === FILE_OPS_TYPE.DOWNLOAD
                     ? selectedFiles

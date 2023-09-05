@@ -908,7 +908,6 @@ const hideFilesHelper = async (
     ) => void
 ) => {
     try {
-        // passing files here instead of filteredData because we want to move all files copies to hidden collection
         setHiddenFileIds((hiddenFileIds) => {
             selectedFiles.forEach((file) => hiddenFileIds.add(file.id));
             return new Set(hiddenFileIds);
