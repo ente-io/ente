@@ -66,10 +66,9 @@ class _HomePageState extends State<HomePage> {
     });
     _initDeepLinks();
     Future.delayed(
-      const Duration(seconds: 0),
-          () => CodeStore.instance.importOfflineCodes(),
+      const Duration(seconds: 1),
+      () async => await CodeStore.instance.importOfflineCodes(),
     );
-
   }
 
   void _loadCodes() {

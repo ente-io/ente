@@ -98,22 +98,37 @@ class CodeStore {
       }
       _logger.info('starting offline imports');
 
-      List<Code> offlineCodes =
-      await CodeStore.instance.getAllCodes(accountMode: AccountMode.offline);
-      if(offlineCodes.isEmpty) {
+      List<Code> offlineCodes = await CodeStore.instance
+          .getAllCodes(accountMode: AccountMode.offline);
+      if (offlineCodes.isEmpty) {
         return;
       }
       bool isOnlineSyncDone = await AuthenticatorService.instance.onlineSync();
-      if(!isOnlineSyncDone) {
-        debugPrint("Skipping offline import since online sync failed");
+      if (!isOnlineSyncDone) {
+        _logger.info("Skipping offline import since online sync failed");
         return;
       }
+      final List<Code> onlineCodes =
+          await CodeStore.instance.getAllCodes(accountMode: AccountMode.online);
+      _logger.info(
+        'Starting import of ${offlineCodes.length} offline codes when online codes are ${onlineCodes.length}',
+      );
       for (Code eachCode in offlineCodes) {
-        await CodeStore.instance.addCode(
-          eachCode,
-          accountMode: AccountMode.online,
-          shouldSync: false,
+        _logger
+            .info('importing offline code with genID  ${eachCode.generatedID}');
+        bool alreadyPresent = onlineCodes.any(
+          (oc) =>
+              oc.issuer == eachCode.issuer &&
+              oc.account == eachCode.account &&
+              oc.secret == eachCode.secret,
         );
+        if (!alreadyPresent) {
+          await CodeStore.instance.addCode(
+            eachCode,
+            accountMode: AccountMode.online,
+            shouldSync: false,
+          );
+        }
         await OfflineAuthenticatorDB.instance.deleteByIDs(
           generatedIDs: [eachCode.generatedID!],
         );
