@@ -115,7 +115,7 @@ class _VideoWidgetNewState extends State<VideoWidgetNew> {
                       );
                     },
                     initialData: true,
-                    stream: controller!.player.stream.playing,
+                    stream: controller?.player.stream.playing,
                   ),
                   const SizedBox(width: 8),
                   MaterialPositionIndicator(
