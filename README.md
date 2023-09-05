@@ -29,7 +29,8 @@ your devices. Every new device you sign into will have access to these tokens.
 ### Offline Mode
 
 ente generates 2FA tokens offline, so your network connectivity will not get in
-the way of your workflow.
+the way of your workflow. If you wish to use the app without an account for e2ee
+backups, you can do that as well.
 
 ### Import and Export Tokens
 
@@ -41,7 +42,10 @@ You can add tokens to ente by one of the following methods:
     otpauth://totp/provider.com:you@email.com?secret=YOUR_SECRET
     ```
 
-You can export the codes you have added to ente, to either an **encrypted** or plain text file. 
+You can export the codes you have added to ente, to either an **encrypted** or
+plain text file. The encrypted backups can be accessed through the app, as well
+as a standalone CLI tool. [Read
+more](migration-guides/encrypted_export.md#how-to-use-the-exported-data).
 
 
 ## 📲 Download
