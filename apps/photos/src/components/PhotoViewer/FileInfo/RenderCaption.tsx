@@ -60,6 +60,9 @@ export function RenderCaption({
             setLoading(false);
         }
     };
+    if (!caption?.length && shouldDisableEdits) {
+        return <></>;
+    }
     return (
         <Box p={1}>
             <Formik<formValues>
