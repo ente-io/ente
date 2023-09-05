@@ -25,7 +25,6 @@ import 'package:ente_auth/utils/navigation_util.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-
 class SettingsPage extends StatelessWidget {
   final ValueNotifier<String?> emailNotifier;
 
@@ -81,12 +80,12 @@ class SettingsPage extends StatelessWidget {
     } else {
       contents.addAll([
         NotificationWidget(
-          startIcon: Icons.account_box_outlined,
+          startIcon: Icons.account_circle_sharp,
           actionIcon: Icons.arrow_forward,
           text: context.l10n.signInToBackup,
           type: NotificationType.notice,
           onTap: () async {
-             ButtonResult? result = await showChoiceActionSheet(
+            ButtonResult? result = await showChoiceActionSheet(
               context,
               title: context.l10n.warning,
               body: context.l10n.sigInBackupReminder,
