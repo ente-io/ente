@@ -9,6 +9,7 @@ import 'package:ente_auth/models/authenticator/entity_result.dart';
 import 'package:ente_auth/models/code.dart';
 import 'package:ente_auth/services/authenticator_service.dart';
 import 'package:ente_auth/store/offline_authenticator_db.dart';
+import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 
 class CodeStore {
@@ -89,6 +90,7 @@ class CodeStore {
 
   Future<void> importOfflineCodes() async {
     try {
+      _logger.info('starting offline imports');
       Configuration config = Configuration.instance;
       // Account isn't configured yet, so we can't import offline codes
       if (!config.hasConfiguredAccount()) {
@@ -105,11 +107,19 @@ class CodeStore {
       }
       List<Code> offlineCodes =
       await CodeStore.instance.getAllCodes(accountMode: AccountMode.offline);
+      bool isOnlineSyncDone = await AuthenticatorService.instance.onlineSync();
+      if(!isOnlineSyncDone) {
+        debugPrint("Skipping offline import since online sync failed");
+        return;
+      }
       for (Code eachCode in offlineCodes) {
         await CodeStore.instance.addCode(
           eachCode,
           accountMode: AccountMode.online,
           shouldSync: false,
+        );
+        await OfflineAuthenticatorDB.instance.deleteByIDs(
+          generatedIDs: [eachCode.generatedID!],
         );
       }
       OfflineAuthenticatorDB.instance.clearTable();
