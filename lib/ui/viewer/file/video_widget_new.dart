@@ -89,54 +89,7 @@ class _VideoWidgetNewState extends State<VideoWidgetNew> {
           topButtonBarMargin: const EdgeInsets.only(top: verticalMargin),
           bottomButtonBar: [
             const Spacer(),
-            GestureDetector(
-              onTap: () => controller!.player.playOrPause(),
-              child: Container(
-                padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-                decoration: BoxDecoration(
-                  color: fillMutedLight,
-                  border: Border.all(
-                    color: strokeFaintDark,
-                    width: 1,
-                  ),
-                  borderRadius: BorderRadius.circular(24),
-                ),
-                child: AnimatedSize(
-                  duration: const Duration(seconds: 2),
-                  curve: Curves.easeInOutExpo,
-                  child: Row(
-                    children: [
-                      StreamBuilder(
-                        builder: (context, snapshot) {
-                          final bool isPlaying = snapshot.data ?? false;
-                          return AnimatedSwitcher(
-                            duration: const Duration(milliseconds: 250),
-                            switchInCurve: Curves.easeInOutExpo,
-                            switchOutCurve: Curves.easeInOutExpo,
-                            child: Icon(
-                              key: ValueKey(
-                                isPlaying ? "pause_button" : "play_button",
-                              ),
-                              isPlaying
-                                  ? Icons.pause_rounded
-                                  : Icons.play_arrow_rounded,
-                              color: backdropBaseLight,
-                            ),
-                          );
-                        },
-                        initialData: true,
-                        stream: controller?.player.stream.playing,
-                      ),
-                      const SizedBox(width: 8),
-                      MaterialPositionIndicator(
-                        style: getEnteTextTheme(context).mini,
-                      ),
-                      const SizedBox(width: 10),
-                    ],
-                  ),
-                ),
-              ),
-            ),
+            PausePlayAndDuration(controller?.player),
             const Spacer(),
           ],
           primaryButtonBar: [],
@@ -237,5 +190,69 @@ class _VideoWidgetNewState extends State<VideoWidgetNew> {
         player.open(Media(url));
       });
     }
+  }
+}
+
+class PausePlayAndDuration extends StatefulWidget {
+  final Player? player;
+  const PausePlayAndDuration(this.player, {super.key});
+
+  @override
+  State<PausePlayAndDuration> createState() => _PausePlayAndDurationState();
+}
+
+class _PausePlayAndDurationState extends State<PausePlayAndDuration> {
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () => widget.player!.playOrPause(),
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+        decoration: BoxDecoration(
+          color: fillMutedLight,
+          border: Border.all(
+            color: strokeFaintDark,
+            width: 1,
+          ),
+          borderRadius: BorderRadius.circular(24),
+        ),
+        child: AnimatedSize(
+          duration: const Duration(seconds: 2),
+          curve: Curves.easeInOutExpo,
+          child: Row(
+            children: [
+              StreamBuilder(
+                builder: (context, snapshot) {
+                  final bool isPlaying = snapshot.data ?? false;
+                  return AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 250),
+                    switchInCurve: Curves.easeInOutExpo,
+                    switchOutCurve: Curves.easeInOutExpo,
+                    child: Icon(
+                      key: ValueKey(
+                        isPlaying ? "pause_button" : "play_button",
+                      ),
+                      isPlaying
+                          ? Icons.pause_rounded
+                          : Icons.play_arrow_rounded,
+                      color: backdropBaseLight,
+                    ),
+                  );
+                },
+                initialData: true,
+                stream: widget.player?.stream.playing,
+              ),
+              const SizedBox(width: 8),
+              MaterialPositionIndicator(
+                style: getEnteTextTheme(context).mini.copyWith(
+                      color: textBaseDark,
+                    ),
+              ),
+              const SizedBox(width: 10),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }
