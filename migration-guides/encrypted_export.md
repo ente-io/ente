@@ -2,8 +2,9 @@
 
 ## Overview
 
-When we export the auth codes, the data is encrypted using a key derived from the user's password. 
-This document describes the JSON structure used to organize exported data, including versioning and key derivation parameters.
+When we export the auth codes, the data is encrypted using a key derived from the user's password.
+This document describes the JSON structure used to organize exported data, including versioning and key derivation
+parameters.
 
 ## Export JSON Sample
 
@@ -27,10 +28,12 @@ The main object used to represent the export data. It contains the following key
 - `encryptedData"`:  The encrypted authentication data.
 - `encryptionNonce`: The nonce used for encryption.
 
-### Version 
+### Version
 
-Export version is used to identify the format of the export data. 
+Export version is used to identify the format of the export data.
+
 #### Ver: 1
+
 * KDF Algorithm: `ARGON2ID`
 * Decrypted data format: `otpauth://totp/...`, separated by a new line.
 * Encryption Algo: `XChaCha20-Poly1305`
@@ -44,9 +47,17 @@ This section contains the parameters that were using during KDF operation:
 - `salt`:  The salt used in the derivation process.
 
 #### Encrypted Data
+
 As mentioned above, the auth data is encrypted using a key that's derived by using user provided password & kdf params.
-For encryption, we are using `XChaCha20-Poly1305` algorithm. 
+For encryption, we are using `XChaCha20-Poly1305` algorithm.
 
 ## How to use the export data
-* **ente Authenticator app**: You can directly import the codes in the ente Authenticator app. 
-    >Settings -> Data -> Import Codes -> ente Encrypted export. 
+
+* **ente Authenticator app**: You can directly import the codes in the ente Authenticator app.
+  > Settings -> Data -> Import Codes -> ente Encrypted export.
+
+* **Decryption Tool** : You can download the [decrypt tool](decrypt/decrypt) and run the following command.
+         
+  ```./decrypt <export_file> <password> <output_file>```
+         
+
