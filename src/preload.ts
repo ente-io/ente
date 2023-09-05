@@ -34,7 +34,7 @@ import {
     exists,
 } from './api/export';
 import {
-    selectRootDirectory,
+    selectDirectory,
     logToDisk,
     openLogDirectory,
     getSentryUserID,
@@ -70,7 +70,7 @@ windowObject['ElectronAPIs'] = {
     checkExistsAndCreateDir,
     saveStreamToDisk,
     saveFileToDisk,
-    selectRootDirectory,
+    selectDirectory,
     clearElectronStore,
     sendNotification,
     reloadWindow,
