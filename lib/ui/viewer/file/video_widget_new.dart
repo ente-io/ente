@@ -202,14 +202,40 @@ class PausePlayAndDuration extends StatefulWidget {
 }
 
 class _PausePlayAndDurationState extends State<PausePlayAndDuration> {
+  Color backgroundColor = fillMutedLight;
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
+      onTapDown: (details) {
+        setState(() {
+          backgroundColor = fillMutedDark;
+        });
+      },
+      onTapUp: (details) {
+        Future.delayed(const Duration(milliseconds: 175), () {
+          if (mounted) {
+            setState(() {
+              backgroundColor = fillMutedLight;
+            });
+          }
+        });
+      },
+      onTapCancel: () {
+        Future.delayed(const Duration(milliseconds: 175), () {
+          if (mounted) {
+            setState(() {
+              backgroundColor = fillMutedLight;
+            });
+          }
+        });
+      },
       onTap: () => widget.player!.playOrPause(),
-      child: Container(
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 150),
+        curve: Curves.easeInBack,
         padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
         decoration: BoxDecoration(
-          color: fillMutedLight,
+          color: backgroundColor,
           border: Border.all(
             color: strokeFaintDark,
             width: 1,
