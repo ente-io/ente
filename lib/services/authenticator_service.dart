@@ -161,11 +161,11 @@ class AuthenticatorService {
     }
   }
 
-  Future<void> onlineSync() async {
+  Future<bool> onlineSync() async {
     try {
       if(getAccountMode().isOffline) {
         debugPrint("Skipping sync since account mode is offline");
-        return;
+        return false;
       }
       _logger.info("Sync");
       await _remoteToLocalSync();
@@ -173,6 +173,7 @@ class AuthenticatorService {
       await _localToRemoteSync();
       _logger.info("local push completed");
       Bus.instance.fire(CodesUpdatedEvent());
+      return true;
     } on UnauthorizedError {
       if ((await _db.removeSyncedData()) > 0) {
         Bus.instance.fire(CodesUpdatedEvent());
@@ -180,8 +181,10 @@ class AuthenticatorService {
       debugPrint("Firing logout event");
 
       Bus.instance.fire(TriggerLogoutEvent());
+      return false;
     } catch (e) {
       _logger.severe("Failed to sync with remote", e);
+      return false;
     }
   }
 
