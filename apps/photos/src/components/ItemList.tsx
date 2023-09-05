@@ -1,41 +1,44 @@
 import { Box, Tooltip } from '@mui/material';
-import React from 'react';
+import React, { ReactElement } from 'react';
 import {
     FixedSizeList as List,
     ListChildComponentProps,
+    ListItemKeySelector,
     areEqual,
 } from 'react-window';
 import memoize from 'memoize-one';
 
-interface Iprops {
-    items: any[];
-    generateItemKey: (item: any) => string;
-    getItemTitle: (item: any) => string;
-    renderListItem: (item: any) => JSX.Element;
+export interface ItemListProps<T> {
+    items: T[];
+    generateItemKey: (item: T) => string | number;
+    getItemTitle: (item: T) => string;
+    renderListItem: (item: T) => JSX.Element;
     maxHeight?: number;
     itemSize?: number;
 }
 
-interface ItemData {
-    renderListItem: (item: any) => JSX.Element;
-    getItemTitle: (item: any) => string;
-    items: any[];
+interface ItemData<T> {
+    renderListItem: (item: T) => JSX.Element;
+    getItemTitle: (item: T) => string;
+    items: T[];
 }
 
-const createItemData = memoize(
-    (
-        renderListItem: (item: any) => JSX.Element,
-        getItemTitle: (item: any) => string,
-        items: any[]
-    ): ItemData => ({
-        renderListItem,
-        getItemTitle,
-        items,
-    })
-);
+const createItemData: <T>(
+    renderListItem: (item: T) => JSX.Element,
+    getItemTitle: (item: T) => string,
+    items: T[]
+) => ItemData<T> = memoize((renderListItem, getItemTitle, items) => ({
+    renderListItem,
+    getItemTitle,
+    items,
+}));
 
-const Row = React.memo(
-    ({ index, style, data }: ListChildComponentProps<ItemData>) => {
+const Row: <T>({
+    index,
+    style,
+    data,
+}: ListChildComponentProps<ItemData<T>>) => ReactElement = React.memo(
+    ({ index, style, data }) => {
         const { renderListItem, items, getItemTitle } = data;
         return (
             <Tooltip
@@ -58,12 +61,18 @@ const Row = React.memo(
     areEqual
 );
 
-export default function ItemList(props: Iprops) {
+export default function ItemList<T>(props: ItemListProps<T>) {
     const itemData = createItemData(
         props.renderListItem,
         props.getItemTitle,
         props.items
     );
+
+    const getItemKey: ListItemKeySelector<ItemData<T>> = (index, data) => {
+        const { items } = data;
+        return props.generateItemKey(items[index]);
+    };
+
     return (
         <Box pl={2}>
             <List
@@ -75,7 +84,7 @@ export default function ItemList(props: Iprops) {
                 width={'100%'}
                 itemSize={props.itemSize}
                 itemCount={props.items.length}
-                itemKey={props.generateItemKey}>
+                itemKey={getItemKey}>
                 {Row}
             </List>
         </Box>
