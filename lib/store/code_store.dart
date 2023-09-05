@@ -90,23 +90,19 @@ class CodeStore {
 
   Future<void> importOfflineCodes() async {
     try {
-      _logger.info('starting offline imports');
       Configuration config = Configuration.instance;
-      // Account isn't configured yet, so we can't import offline codes
-      if (!config.hasConfiguredAccount()) {
+      if (!config.hasConfiguredAccount() ||
+          !config.hasOptedForOfflineMode() ||
+          config.getOfflineSecretKey() == null) {
         return;
       }
-      // Never opted for offline mode, so we can't import offline codes
-      if (!config.hasOptedForOfflineMode()) {
-        return;
-      }
-      Uint8List? hasOfflineKey = config.getOfflineSecretKey();
-      if (hasOfflineKey == null) {
-        // No offline key, so we can't import offline codes
-        return;
-      }
+      _logger.info('starting offline imports');
+
       List<Code> offlineCodes =
       await CodeStore.instance.getAllCodes(accountMode: AccountMode.offline);
+      if(offlineCodes.isEmpty) {
+        return;
+      }
       bool isOnlineSyncDone = await AuthenticatorService.instance.onlineSync();
       if(!isOnlineSyncDone) {
         debugPrint("Skipping offline import since online sync failed");
@@ -122,7 +118,6 @@ class CodeStore {
           generatedIDs: [eachCode.generatedID!],
         );
       }
-      OfflineAuthenticatorDB.instance.clearTable();
       AuthenticatorService.instance.onlineSync().ignore();
     } catch (e, s) {
       _logger.severe("error while importing offline codes", e, s);
