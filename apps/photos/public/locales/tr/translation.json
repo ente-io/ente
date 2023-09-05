@@ -423,6 +423,9 @@
     "STOP_ALL_UPLOADS_MESSAGE": "",
     "STOP_UPLOADS_HEADER": "",
     "YES_STOP_UPLOADS": "",
+    "STOP_DOWNLOADS_HEADER": "",
+    "YES_STOP_DOWNLOADS": "",
+    "STOP_ALL_DOWNLOADS_MESSAGE": "",
     "albums_one": "",
     "albums_other": "",
     "ALL_ALBUMS": "",
@@ -576,5 +579,9 @@
     "CONVERSION_FAILED_NOTIFICATION_MESSAGE": "",
     "SELECT_COLLECTION": "",
     "PIN_ALBUM": "",
-    "UNPIN_ALBUM": ""
+    "UNPIN_ALBUM": "",
+    "DOWNLOAD_COMPLETE": "",
+    "DOWNLOADING_COLLECTION": "",
+    "DOWNLOAD_FAILED": "",
+    "DOWNLOAD_PROGRESS": ""
 }

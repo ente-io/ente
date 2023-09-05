@@ -423,6 +423,9 @@
     "STOP_ALL_UPLOADS_MESSAGE": "Êtes-vous certains de vouloir arrêter tous les chargements en cours?",
     "STOP_UPLOADS_HEADER": "Arrêter les chargements ?",
     "YES_STOP_UPLOADS": "Oui, arrêter tout",
+    "STOP_DOWNLOADS_HEADER": "",
+    "YES_STOP_DOWNLOADS": "",
+    "STOP_ALL_DOWNLOADS_MESSAGE": "",
     "albums_one": "1 album",
     "albums_other": "{{count}} albums",
     "ALL_ALBUMS": "Tous les albums",
@@ -576,5 +579,9 @@
     "CONVERSION_FAILED_NOTIFICATION_MESSAGE": "Ce fichier n'a pas pu être aperçu. Cliquez ici pour télécharger l'original.",
     "SELECT_COLLECTION": "Sélectionner album",
     "PIN_ALBUM": "Épingler l'album",
-    "UNPIN_ALBUM": "Désépingler l'album"
+    "UNPIN_ALBUM": "Désépingler l'album",
+    "DOWNLOAD_COMPLETE": "",
+    "DOWNLOADING_COLLECTION": "",
+    "DOWNLOAD_FAILED": "",
+    "DOWNLOAD_PROGRESS": ""
 }

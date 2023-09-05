@@ -423,6 +423,9 @@
     "STOP_ALL_UPLOADS_MESSAGE": "Weet u zeker dat u wilt stoppen met alle uploads die worden uitgevoerd?",
     "STOP_UPLOADS_HEADER": "Stoppen met uploaden?",
     "YES_STOP_UPLOADS": "Ja, stop uploaden",
+    "STOP_DOWNLOADS_HEADER": "",
+    "YES_STOP_DOWNLOADS": "",
+    "STOP_ALL_DOWNLOADS_MESSAGE": "",
     "albums_one": "1 Album",
     "albums_other": "{{count, number}} Albums",
     "ALL_ALBUMS": "Alle albums",
@@ -576,5 +579,9 @@
     "CONVERSION_FAILED_NOTIFICATION_MESSAGE": "Dit bestand kan niet worden bekeken in de app, klik hier om het origineel te downloaden",
     "SELECT_COLLECTION": "Album selecteren",
     "PIN_ALBUM": "Album bovenaan vastzetten",
-    "UNPIN_ALBUM": "Album losmaken"
+    "UNPIN_ALBUM": "Album losmaken",
+    "DOWNLOAD_COMPLETE": "",
+    "DOWNLOADING_COLLECTION": "",
+    "DOWNLOAD_FAILED": "",
+    "DOWNLOAD_PROGRESS": ""
 }
