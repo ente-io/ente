@@ -24,6 +24,7 @@ class VideoWidgetNew extends StatefulWidget {
 }
 
 class _VideoWidgetNewState extends State<VideoWidgetNew> {
+  static const verticalMargin = 100.0;
   // Create a [Player] to control playback.
   late final player = Player();
   // Create a [VideoController] to handle video output from [Player].
@@ -77,7 +78,7 @@ class _VideoWidgetNewState extends State<VideoWidgetNew> {
       onHorizontalDragUpdate: (details) {},
       child: MaterialVideoControlsTheme(
         normal: MaterialVideoControlsThemeData(
-          seekBarMargin: const EdgeInsets.only(bottom: 100),
+          seekBarMargin: const EdgeInsets.only(bottom: verticalMargin),
           bottomButtonBarMargin: const EdgeInsets.only(bottom: 112),
           controlsHoverDuration: const Duration(seconds: 3),
           seekBarHeight: 4,
@@ -85,6 +86,7 @@ class _VideoWidgetNewState extends State<VideoWidgetNew> {
           seekBarThumbColor: backgroundElevatedLight,
           seekBarColor: fillMutedDark,
           seekBarPositionColor: colorScheme.primary300.withOpacity(0.8),
+          topButtonBarMargin: const EdgeInsets.only(top: verticalMargin),
           bottomButtonBar: [
             const Spacer(),
             GestureDetector(
