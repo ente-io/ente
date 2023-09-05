@@ -423,6 +423,9 @@
     "STOP_ALL_UPLOADS_MESSAGE": "您确定要停止所有正在进行的上传吗？",
     "STOP_UPLOADS_HEADER": "要停止上传吗？",
     "YES_STOP_UPLOADS": "是的，停止上传",
+    "STOP_DOWNLOADS_HEADER": "",
+    "YES_STOP_DOWNLOADS": "",
+    "STOP_ALL_DOWNLOADS_MESSAGE": "",
     "albums_one": "1个相册",
     "albums_other": "{{count, number}} 个相册",
     "ALL_ALBUMS": "所有相册",
@@ -576,5 +579,9 @@
     "CONVERSION_FAILED_NOTIFICATION_MESSAGE": "无法预览此文件。点击这里下载原始文件。",
     "SELECT_COLLECTION": "选择相册",
     "PIN_ALBUM": "置顶相册",
-    "UNPIN_ALBUM": "取消置顶相册"
+    "UNPIN_ALBUM": "取消置顶相册",
+    "DOWNLOAD_COMPLETE": "",
+    "DOWNLOADING_COLLECTION": "",
+    "DOWNLOAD_FAILED": "",
+    "DOWNLOAD_PROGRESS": ""
 }
