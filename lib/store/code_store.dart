@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:typed_data';
 
 import 'package:collection/collection.dart';
 import 'package:ente_auth/core/configuration.dart';
@@ -9,7 +8,6 @@ import 'package:ente_auth/models/authenticator/entity_result.dart';
 import 'package:ente_auth/models/code.dart';
 import 'package:ente_auth/services/authenticator_service.dart';
 import 'package:ente_auth/store/offline_authenticator_db.dart';
-import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 
 class CodeStore {
@@ -48,7 +46,7 @@ class CodeStore {
     return codes;
   }
 
-  Future<void> addCode(
+  Future<AddResult> addCode(
     Code code, {
     bool shouldSync = true,
     AccountMode? accountMode,
@@ -59,13 +57,15 @@ class CodeStore {
     for (final existingCode in codes) {
       if (existingCode == code) {
         _logger.info("Found duplicate code, skipping add");
-        return;
+        return AddResult.duplicate;
       } else if (existingCode.generatedID == code.generatedID) {
         isExistingCode = true;
         break;
       }
     }
+    late AddResult result;
     if (isExistingCode) {
+      result = AddResult.updateCode;
       await _authenticatorService.updateEntry(
         code.generatedID!,
         jsonEncode(code.rawData),
@@ -73,6 +73,7 @@ class CodeStore {
         mode,
       );
     } else {
+      result = AddResult.newCode;
       code.generatedID = await _authenticatorService.addEntry(
         jsonEncode(code.rawData),
         shouldSync,
@@ -80,6 +81,7 @@ class CodeStore {
       );
     }
     Bus.instance.fire(CodesUpdatedEvent());
+    return result;
   }
 
   Future<void> removeCode(Code code, {AccountMode? accountMode}) async {
@@ -89,6 +91,7 @@ class CodeStore {
   }
 
   Future<void> importOfflineCodes() async {
+    Logger logger = Logger('importOfflineCodes');
     try {
       Configuration config = Configuration.instance;
       if (!config.hasConfiguredAccount() ||
@@ -96,7 +99,7 @@ class CodeStore {
           config.getOfflineSecretKey() == null) {
         return;
       }
-      _logger.info('starting offline imports');
+      logger.info('start import');
 
       List<Code> offlineCodes = await CodeStore.instance
           .getAllCodes(accountMode: AccountMode.offline);
@@ -105,17 +108,15 @@ class CodeStore {
       }
       bool isOnlineSyncDone = await AuthenticatorService.instance.onlineSync();
       if (!isOnlineSyncDone) {
-        _logger.info("Skipping offline import since online sync failed");
+        logger.info("skip as online sync is not done");
         return;
       }
       final List<Code> onlineCodes =
           await CodeStore.instance.getAllCodes(accountMode: AccountMode.online);
-      _logger.info(
-        'Starting import of ${offlineCodes.length} offline codes when online codes are ${onlineCodes.length}',
+      logger.info(
+        'importing ${offlineCodes.length} offline codes with ${onlineCodes.length} online codes',
       );
       for (Code eachCode in offlineCodes) {
-        _logger
-            .info('importing offline code with genID  ${eachCode.generatedID}');
         bool alreadyPresent = onlineCodes.any(
           (oc) =>
               oc.issuer == eachCode.issuer &&
@@ -123,13 +124,19 @@ class CodeStore {
               oc.secret == eachCode.secret,
         );
         int? generatedID = eachCode.generatedID!;
+        logger.info(
+          'importingCode: genID ${eachCode.generatedID} & isAlreadyPresent $alreadyPresent',
+        );
         if (!alreadyPresent) {
           // Avoid conflict with generatedID of online codes
           eachCode.generatedID = null;
-          await CodeStore.instance.addCode(
+          final AddResult result = await CodeStore.instance.addCode(
             eachCode,
             accountMode: AccountMode.online,
             shouldSync: false,
+          );
+          logger.info(
+            'importedCode: genID ${eachCode.generatedID} result: ${result.name}',
           );
         }
         await OfflineAuthenticatorDB.instance.deleteByIDs(
@@ -141,4 +148,10 @@ class CodeStore {
       _logger.severe("error while importing offline codes", e, s);
     }
   }
+}
+
+enum AddResult {
+  newCode,
+  duplicate,
+  updateCode,
 }
