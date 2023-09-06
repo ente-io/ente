@@ -13,6 +13,7 @@ import { EnteMenuItem } from 'components/Menu/EnteMenuItem';
 import { LS_KEYS } from 'utils/storage/localStorage';
 import { useLocalState } from 'hooks/useLocalState';
 import ElectronService from 'services/electron/common';
+import InMemoryStore, { MS_KEYS } from 'services/InMemoryStore';
 
 export default function Preferences({ open, onClose, onRootClose }) {
     const [advancedSettingsView, setAdvancedSettingsView] = useState(false);
@@ -48,6 +49,10 @@ export default function Preferences({ open, onClose, onRootClose }) {
             );
         }
         setOptOutOfCrashReports(!optOutOfCrashReports);
+        InMemoryStore.set(
+            MS_KEYS.OPT_OUT_OF_CRASH_REPORTS,
+            !optOutOfCrashReports
+        );
     };
 
     return (
