@@ -99,7 +99,19 @@ export default function Credentials() {
                     keyAttributes.keyDecryptionNonce,
                     kek
                 );
-                useMasterPassword(key, kek, keyAttributes, kek);
+                useMasterPassword(key, kek, keyAttributes);
+                return;
+            }
+            if (keyAttributes) {
+                if (
+                    (!user?.token && !user?.encryptedToken) ||
+                    (keyAttributes && !keyAttributes.memLimit)
+                ) {
+                    clearData();
+                    router.push(PAGES.ROOT);
+                    return;
+                }
+                setKeyAttributes(keyAttributes);
                 return;
             }
 
@@ -110,21 +122,6 @@ export default function Credentials() {
                 setSrpAttributes(srpAttributes);
                 return;
             }
-
-            if (
-                (!user?.token && !user?.encryptedToken) ||
-                (keyAttributes && !keyAttributes.memLimit)
-            ) {
-                clearData();
-                router.push(PAGES.ROOT);
-                return;
-            }
-
-            if (!keyAttributes) {
-                router.push(PAGES.GENERATE);
-                return;
-            }
-            setKeyAttributes(keyAttributes);
         };
         main();
         appContext.showNavBar(true);
@@ -141,7 +138,6 @@ export default function Credentials() {
                     id,
                     twoFactorSessionID,
                 } = await loginViaSRP(srpAttributes, kek);
-                setData(LS_KEYS.KEY_ATTRIBUTES, keyAttributes);
                 if (twoFactorSessionID) {
                     const sessionKeyAttributes =
                         await cryptoWorker.generateKeyAndEncryptToB64(kek);
@@ -167,6 +163,7 @@ export default function Credentials() {
                         id,
                         isTwoFactorEnabled: false,
                     });
+                    setData(LS_KEYS.KEY_ATTRIBUTES, keyAttributes);
                     return keyAttributes;
                 }
             } catch (e) {
