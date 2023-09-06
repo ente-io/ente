@@ -18,5 +18,5 @@ export function getSentryUserID(): Promise<string> {
 }
 
 export function updateOptOutOfCrashReports(optOut: boolean) {
-    return ipcRenderer.invoke('update-opt-out-crash-report', optOut);
+    return ipcRenderer.invoke('update-opt-out-crash-reports', optOut);
 }

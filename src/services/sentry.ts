@@ -4,7 +4,7 @@ import { keysStore } from '../stores/keys.store';
 import { SENTRY_DSN, RELEASE_VERSION } from '../config';
 import { isDev } from '../utils/common';
 import { logToDisk } from './logging';
-import { isSentryEnabled } from '../main';
+import { hasOptedOutOfCrashReports } from '../main';
 
 const ENV_DEVELOPMENT = 'development';
 
@@ -34,7 +34,7 @@ export function logErrorSentry(
     if (isDEVSentryENV()) {
         console.log(error, { msg, info });
     }
-    if (!isSentryEnabled()) {
+    if (hasOptedOutOfCrashReports()) {
         return;
     }
     Sentry.captureException(err, {

@@ -21,7 +21,7 @@ import { setupLogging } from './utils/logging';
 import { isDev } from './utils/common';
 import { setupMainProcessStatsLogger } from './utils/processStats';
 import { setupAppEventEmitter } from './utils/events';
-import { getOptOutOfCrashReport } from './services/userPreference';
+import { getOptOutOfCrashReports } from './services/userPreference';
 
 let mainWindow: BrowserWindow;
 
@@ -29,7 +29,7 @@ let appIsQuitting = false;
 
 let updateIsAvailable = false;
 
-let sentryEnabled = true;
+let optedOutOfCrashReports = false;
 
 export const isAppQuitting = (): boolean => {
     return appIsQuitting;
@@ -46,12 +46,12 @@ export const setIsUpdateAvailable = (value: boolean): void => {
     updateIsAvailable = value;
 };
 
-export const isSentryEnabled = (): boolean => {
-    return sentryEnabled;
+export const hasOptedOutOfCrashReports = (): boolean => {
+    return optedOutOfCrashReports;
 };
 
-export const setIsSentryEnabled = (value: boolean): void => {
-    sentryEnabled = value;
+export const updateOptOutOfCrashReports = (value: boolean): void => {
+    optedOutOfCrashReports = value;
 };
 
 setupMainHotReload();
@@ -83,9 +83,9 @@ if (!gotTheLock) {
     app.on('ready', async () => {
         logSystemInfo();
         setupMainProcessStatsLogger();
-        const isSentryEnabled = getOptOutOfCrashReport();
-        setIsSentryEnabled(isSentryEnabled);
-        if (isSentryEnabled) {
+        const hasOptedOutOfCrashReports = getOptOutOfCrashReports();
+        updateOptOutOfCrashReports(hasOptedOutOfCrashReports);
+        if (!hasOptedOutOfCrashReports) {
             initSentry();
         }
         mainWindow = await createWindow();

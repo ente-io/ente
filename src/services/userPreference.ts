@@ -24,10 +24,10 @@ export function setMuteUpdateNotificationVersion(version: string) {
     userPreferencesStore.set('muteUpdateNotificationVersion', version);
 }
 
-export function getOptOutOfCrashReport() {
-    return userPreferencesStore.get('optOutOfCrashReport') ?? false;
+export function getOptOutOfCrashReports() {
+    return userPreferencesStore.get('optOutOfCrashReports') ?? false;
 }
 
-export function setOptOutOfCrashReport(optOut: boolean) {
-    userPreferencesStore.set('optOutOfCrashReport', optOut);
+export function setOptOutOfCrashReports(optOut: boolean) {
+    userPreferencesStore.set('optOutOfCrashReports', optOut);
 }

@@ -11,7 +11,7 @@ const userPreferencesSchema: Schema<UserPreferencesType> = {
     muteUpdateNotificationVersion: {
         type: 'string',
     },
-    optOutOfCrashReport: {
+    optOutOfCrashReports: {
         type: 'boolean',
     },
 };

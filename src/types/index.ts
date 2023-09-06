@@ -58,7 +58,7 @@ export interface UserPreferencesType {
     hideDockIcon: boolean;
     skipAppVersion: string;
     muteUpdateNotificationVersion: string;
-    optOutOfCrashReport: boolean;
+    optOutOfCrashReports: boolean;
 }
 
 export interface AppUpdateInfo {
