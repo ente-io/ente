@@ -35,6 +35,7 @@ import {
     MOVE_TO_NOT_ALLOWED_COLLECTION,
     ADD_TO_NOT_ALLOWED_COLLECTION,
     HIDDEN_ITEMS_SECTION,
+    DEFAULT_HIDDEN_COLLECTION_USER_FACING_NAME,
 } from 'constants/collection';
 import { getUnixTimeInMicroSecondsWithDelta } from 'utils/time';
 import { SUB_TYPE, VISIBILITY_STATE } from 'types/magicMetadata';
@@ -43,7 +44,6 @@ import { getAlbumsURL } from 'utils/common/apiUtil';
 import bs58 from 'bs58';
 import { t } from 'i18next';
 import isElectron from 'is-electron';
-import { PROPER_CASED_HIDDEN_COLLECTION_EXPORT_NAME } from 'utils/export';
 import { SetCollectionDownloadProgressAttributes } from 'types/gallery';
 import ElectronService from 'services/electron/common';
 import {
@@ -138,7 +138,7 @@ export async function downloadDefaultHiddenCollectionHelper(
             defaultHiddenCollectionsIds.has(file.collectionID)
         );
         await downloadCollectionFiles(
-            PROPER_CASED_HIDDEN_COLLECTION_EXPORT_NAME,
+            DEFAULT_HIDDEN_COLLECTION_USER_FACING_NAME,
             HIDDEN_ITEMS_SECTION,
             true,
             defaultHiddenCollectionFiles,
@@ -588,10 +588,17 @@ export function constructCollectionNameMap(
     return new Map<number, string>(
         (collections ?? []).map((collection) => [
             collection.id,
-            collection.name,
+            getCollectionUserFacingName(collection),
         ])
     );
 }
+
+export const getCollectionUserFacingName = (collection: Collection) => {
+    if (isDefaultHiddenCollection(collection)) {
+        return DEFAULT_HIDDEN_COLLECTION_USER_FACING_NAME;
+    }
+    return collection.name;
+};
 
 export const getOrCreateAlbum = async (
     albumName: string,

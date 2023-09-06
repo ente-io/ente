@@ -75,6 +75,8 @@ export default function Credentials() {
                         true
                     );
                 }
+            }
+            if (key) {
                 router.push(PAGES.GALLERY);
                 return;
             }

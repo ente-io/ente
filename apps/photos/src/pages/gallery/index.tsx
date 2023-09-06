@@ -645,8 +645,14 @@ export default function Gallery() {
     }, [files]);
 
     const collectionNameMap = useMemo(() => {
-        return constructCollectionNameMap(collections);
-    }, [collections]);
+        if (!collections || !hiddenCollections) {
+            return new Map();
+        }
+        return constructCollectionNameMap([
+            ...collections,
+            ...hiddenCollections,
+        ]);
+    }, [collections, hiddenCollections]);
 
     const showSessionExpiredMessage = () => {
         setDialogMessage(getSessionExpiredMessage());

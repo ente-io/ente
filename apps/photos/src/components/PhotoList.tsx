@@ -260,7 +260,7 @@ export function PhotoList({
     const listRef = useRef(null);
 
     const fittableColumns = getFractionFittableColumns(width);
-    let columns = Math.ceil(fittableColumns);
+    let columns = Math.floor(fittableColumns);
 
     let skipMerge = false;
     if (columns < MIN_COLUMNS) {

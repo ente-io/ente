@@ -17,9 +17,7 @@ import {
 } from 'constants/export';
 import sanitize from 'sanitize-filename';
 import { formatDateTimeShort } from 'utils/time/format';
-import { isDefaultHiddenCollection } from 'utils/collection';
-
-export const PROPER_CASED_HIDDEN_COLLECTION_EXPORT_NAME = 'Hidden';
+import { getCollectionUserFacingName } from 'utils/collection';
 
 export const getExportRecordFileUID = (file: EnteFile) =>
     `${file.id}_${file.collectionID}_${file.updationTime}`;
@@ -47,13 +45,6 @@ export const convertFileIDExportNameObjectToMap = (
     );
 };
 
-export const getCollectionExportName = (collection: Collection) => {
-    if (isDefaultHiddenCollection(collection)) {
-        return PROPER_CASED_HIDDEN_COLLECTION_EXPORT_NAME;
-    }
-    return collection.name;
-};
-
 export const getRenamedExportedCollections = (
     collections: Collection[],
     exportRecord: ExportRecord
@@ -70,7 +61,8 @@ export const getRenamedExportedCollections = (
                 collection.id
             );
 
-            const collectionExportName = getCollectionExportName(collection);
+            const collectionExportName =
+                getCollectionUserFacingName(collection);
 
             if (currentExportName === collectionExportName) {
                 return false;
@@ -315,14 +307,3 @@ export const parseLivePhotoExportName = (
 
 export const isExportInProgress = (exportStage: ExportStage) =>
     exportStage > ExportStage.INIT && exportStage < ExportStage.FINISHED;
-
-export const getCollectionExportNameMap = (
-    collections: Collection[]
-): Map<number, string> => {
-    return new Map<number, string>(
-        collections.map((collection) => {
-            const exportName = getCollectionExportName(collection);
-            return [collection.id, exportName];
-        })
-    );
-};

@@ -3,6 +3,8 @@ export const TRASH_SECTION = -2;
 export const DUMMY_UNCATEGORIZED_COLLECTION = -3;
 export const HIDDEN_ITEMS_SECTION = -4;
 export const ALL_SECTION = 0;
+export const DEFAULT_HIDDEN_COLLECTION_USER_FACING_NAME = 'Hidden';
+
 export enum CollectionType {
     folder = 'folder',
     favorites = 'favorites',
