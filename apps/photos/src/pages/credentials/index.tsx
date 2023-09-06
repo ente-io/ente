@@ -197,6 +197,9 @@ export default function Credentials() {
                 );
                 if (!srpAttributes) {
                     srpAttributes = await getSRPAttributes(user.email);
+                    if (srpAttributes) {
+                        setData(LS_KEYS.SRP_ATTRIBUTES, srpAttributes);
+                    }
                 }
                 addLocalLog(() => `userSRPSetupPending ${!srpAttributes}`);
                 if (!srpAttributes) {
