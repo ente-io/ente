@@ -25,7 +25,7 @@ export function setMuteUpdateNotificationVersion(version: string) {
 }
 
 export function getOptOutOfCrashReport() {
-    return userPreferencesStore.get('optOutOfCrashReport');
+    return userPreferencesStore.get('optOutOfCrashReport') ?? false;
 }
 
 export function setOptOutOfCrashReport(optOut: boolean) {

@@ -12,9 +12,6 @@ const isDEVSentryENV = () =>
     process.env.NEXT_PUBLIC_SENTRY_ENV === ENV_DEVELOPMENT;
 
 export function initSentry(): void {
-    if (!isSentryEnabled()) {
-        return;
-    }
     Sentry.init({
         dsn: SENTRY_DSN,
         release: RELEASE_VERSION,

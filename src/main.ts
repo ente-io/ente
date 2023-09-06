@@ -85,7 +85,9 @@ if (!gotTheLock) {
         setupMainProcessStatsLogger();
         const isSentryEnabled = getOptOutOfCrashReport();
         setIsSentryEnabled(isSentryEnabled);
-        initSentry();
+        if (isSentryEnabled) {
+            initSentry();
+        }
         mainWindow = await createWindow();
         const tray = setupTrayItem(mainWindow);
         const watcher = initWatcher(mainWindow);
