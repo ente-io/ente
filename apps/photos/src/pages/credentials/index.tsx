@@ -23,12 +23,13 @@ import {
     generateSRPSetupAttributes,
     saveKeyInSessionStore,
 } from 'utils/crypto';
-import { logoutUser, configureSRP, loginViaSRP } from 'services/userService';
 import {
-    getUserSRPSetupPending,
-    isFirstLogin,
-    setIsFirstLogin,
-} from 'utils/storage';
+    logoutUser,
+    configureSRP,
+    loginViaSRP,
+    getSRPAttributes,
+} from 'services/userService';
+import { isFirstLogin, setIsFirstLogin } from 'utils/storage';
 import { AppContext } from 'pages/_app';
 import { logError } from 'utils/sentry';
 import { KeyAttributes, SRPAttributes, User } from 'types/user';
@@ -99,7 +100,19 @@ export default function Credentials() {
                     keyAttributes.keyDecryptionNonce,
                     kek
                 );
-                useMasterPassword(key, kek, keyAttributes, kek);
+                useMasterPassword(key, kek, keyAttributes);
+                return;
+            }
+            if (keyAttributes) {
+                if (
+                    (!user?.token && !user?.encryptedToken) ||
+                    (keyAttributes && !keyAttributes.memLimit)
+                ) {
+                    clearData();
+                    router.push(PAGES.ROOT);
+                    return;
+                }
+                setKeyAttributes(keyAttributes);
                 return;
             }
 
@@ -110,21 +123,6 @@ export default function Credentials() {
                 setSrpAttributes(srpAttributes);
                 return;
             }
-
-            if (
-                (!user?.token && !user?.encryptedToken) ||
-                (keyAttributes && !keyAttributes.memLimit)
-            ) {
-                clearData();
-                router.push(PAGES.ROOT);
-                return;
-            }
-
-            if (!keyAttributes) {
-                router.push(PAGES.GENERATE);
-                return;
-            }
-            setKeyAttributes(keyAttributes);
         };
         main();
         appContext.showNavBar(true);
@@ -141,7 +139,6 @@ export default function Credentials() {
                     id,
                     twoFactorSessionID,
                 } = await loginViaSRP(srpAttributes, kek);
-                setData(LS_KEYS.KEY_ATTRIBUTES, keyAttributes);
                 if (twoFactorSessionID) {
                     const sessionKeyAttributes =
                         await cryptoWorker.generateKeyAndEncryptToB64(kek);
@@ -167,6 +164,7 @@ export default function Credentials() {
                         id,
                         isTwoFactorEnabled: false,
                     });
+                    setData(LS_KEYS.KEY_ATTRIBUTES, keyAttributes);
                     return keyAttributes;
                 }
             } catch (e) {
@@ -194,9 +192,17 @@ export default function Credentials() {
             await saveKeyInSessionStore(SESSION_KEYS.ENCRYPTION_KEY, key);
             await decryptAndStoreToken(keyAttributes, key);
             try {
-                const userSRPSetupPending = getUserSRPSetupPending();
-                addLocalLog(() => `userSRPSetupPending ${userSRPSetupPending}`);
-                if (userSRPSetupPending) {
+                let srpAttributes: SRPAttributes = getData(
+                    LS_KEYS.SRP_ATTRIBUTES
+                );
+                if (!srpAttributes) {
+                    srpAttributes = await getSRPAttributes(user.email);
+                    if (srpAttributes) {
+                        setData(LS_KEYS.SRP_ATTRIBUTES, srpAttributes);
+                    }
+                }
+                addLocalLog(() => `userSRPSetupPending ${!srpAttributes}`);
+                if (!srpAttributes) {
                     const loginSubKey = await generateLoginSubKey(kek);
                     const srpSetupAttributes = await generateSRPSetupAttributes(
                         loginSubKey

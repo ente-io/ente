@@ -6,7 +6,6 @@ import FormPaperTitle from './Form/FormPaper/Title';
 import FormPaperFooter from './Form/FormPaper/Footer';
 import LinkButton from './pages/gallery/LinkButton';
 import { t } from 'i18next';
-import { setUserSRPSetupPending } from 'utils/storage';
 import { addLocalLog } from 'utils/logging';
 import { Input } from '@mui/material';
 import SingleInputForm, { SingleInputFormProps } from './SingleInputForm';
@@ -28,7 +27,6 @@ export default function Login(props: LoginProps) {
             addLocalLog(
                 () => ` srpAttributes: ${JSON.stringify(srpAttributes)}`
             );
-            setUserSRPSetupPending(!srpAttributes);
             if (!srpAttributes || srpAttributes.isEmailMFAEnabled) {
                 await sendOtt(email);
                 router.push(PAGES.VERIFY);
