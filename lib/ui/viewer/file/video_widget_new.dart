@@ -265,7 +265,7 @@ class _PausePlayAndDurationState extends State<PausePlayAndDuration> {
                     ),
                   );
                 },
-                initialData: true,
+                initialData: widget.player?.state.playing,
                 stream: widget.player?.stream.playing,
               ),
               const SizedBox(width: 8),
