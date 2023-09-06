@@ -31,4 +31,5 @@ export {
     logToDisk,
     openLogDirectory,
     getSentryUserID,
+    updateOptOutOfCrashReports,
 } from '../services/logging';

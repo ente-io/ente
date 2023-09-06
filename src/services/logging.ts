@@ -16,3 +16,7 @@ export function logError(error: Error, message: string, info?: string): void {
 export function getSentryUserID(): Promise<string> {
     return ipcRenderer.invoke('get-sentry-id');
 }
+
+export function updateOptOutOfCrashReports(optOut: boolean) {
+    return ipcRenderer.invoke('update-opt-out-crash-report', optOut);
+}

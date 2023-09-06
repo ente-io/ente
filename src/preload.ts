@@ -40,6 +40,7 @@ import {
     getSentryUserID,
     getAppVersion,
     openDirectory,
+    updateOptOutOfCrashReports,
 } from './api/common';
 import { fixHotReloadNext12 } from './utils/preload';
 import {
@@ -58,7 +59,6 @@ import {
     logRendererProcessMemoryUsage,
 } from './utils/processStats';
 import { runFFmpegCmd } from './api/ffmpeg';
-import { setOptOutOfCrashReport } from './services/userPreference';
 
 fixHotReloadNext12();
 setupLogging();
@@ -113,5 +113,5 @@ windowObject['ElectronAPIs'] = {
     deleteFolder,
     rename,
     deleteFile,
-    setOptOutOfCrashReport,
+    updateOptOutOfCrashReports,
 };

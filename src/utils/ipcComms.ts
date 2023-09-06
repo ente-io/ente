@@ -25,6 +25,7 @@ import {
 } from '../services/appUpdater';
 import { deleteTempFile, runFFmpegCmd } from '../services/ffmpeg';
 import { generateTempFilePath } from './temp';
+import { setOptOutOfCrashReport } from '../services/userPreference';
 
 export default function setupIpcComs(
     tray: Tray,
@@ -159,4 +160,8 @@ export default function setupIpcComs(
             return generateImageThumbnail(fileData, maxDimension, maxSize);
         }
     );
+
+    ipcMain.handle('update-opt-out-crash-report', (_, optOut) => {
+        setOptOutOfCrashReport(optOut);
+    });
 }
