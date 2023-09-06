@@ -14,6 +14,7 @@ import { LS_KEYS } from 'utils/storage/localStorage';
 import { useLocalState } from 'hooks/useLocalState';
 import ElectronService from 'services/electron/common';
 import InMemoryStore, { MS_KEYS } from 'services/InMemoryStore';
+import { logError } from 'utils/sentry';
 
 export default function Preferences({ open, onClose, onRootClose }) {
     const [advancedSettingsView, setAdvancedSettingsView] = useState(false);
@@ -43,16 +44,20 @@ export default function Preferences({ open, onClose, onRootClose }) {
     };
 
     const toggleOptOutOfCrashReports = async () => {
-        if (isElectron()) {
-            await ElectronService.updateOptOutOfCrashReports(
+        try {
+            if (isElectron()) {
+                await ElectronService.updateOptOutOfCrashReports(
+                    !optOutOfCrashReports
+                );
+            }
+            setOptOutOfCrashReports(!optOutOfCrashReports);
+            InMemoryStore.set(
+                MS_KEYS.OPT_OUT_OF_CRASH_REPORTS,
                 !optOutOfCrashReports
             );
+        } catch (e) {
+            logError(e, 'toggleOptOutOfCrashReports failed');
         }
-        setOptOutOfCrashReports(!optOutOfCrashReports);
-        InMemoryStore.set(
-            MS_KEYS.OPT_OUT_OF_CRASH_REPORTS,
-            !optOutOfCrashReports
-        );
     };
 
     return (
