@@ -17,7 +17,12 @@ import "package:photos/utils/toast_util.dart";
 
 class VideoWidgetNew extends StatefulWidget {
   final EnteFile file;
-  const VideoWidgetNew(this.file, {super.key});
+  final String? tagPrefix;
+  const VideoWidgetNew(
+    this.file, {
+    this.tagPrefix,
+    super.key,
+  });
 
   @override
   State<VideoWidgetNew> createState() => _VideoWidgetNewState();
@@ -25,9 +30,7 @@ class VideoWidgetNew extends StatefulWidget {
 
 class _VideoWidgetNewState extends State<VideoWidgetNew> {
   static const verticalMargin = 100.0;
-  // Create a [Player] to control playback.
   late final player = Player();
-  // Create a [VideoController] to handle video output from [Player].
   VideoController? controller;
   final _progressNotifier = ValueNotifier<double?>(null);
 
@@ -72,35 +75,38 @@ class _VideoWidgetNewState extends State<VideoWidgetNew> {
   @override
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
-    return GestureDetector(
-      //This gestureDetector is to stop swiping the pageView when seeking the
-      //video using the seekbar.
-      onHorizontalDragUpdate: (details) {},
-      child: MaterialVideoControlsTheme(
-        normal: MaterialVideoControlsThemeData(
-          seekBarMargin: const EdgeInsets.only(bottom: verticalMargin),
-          bottomButtonBarMargin: const EdgeInsets.only(bottom: 112),
-          controlsHoverDuration: const Duration(seconds: 3),
-          seekBarHeight: 4,
-          seekBarBufferColor: Colors.transparent,
-          seekBarThumbColor: backgroundElevatedLight,
-          seekBarColor: fillMutedDark,
-          seekBarPositionColor: colorScheme.primary300.withOpacity(0.8),
-          topButtonBarMargin: const EdgeInsets.only(top: verticalMargin),
-          bottomButtonBar: [
-            const Spacer(),
-            PausePlayAndDuration(controller?.player),
-            const Spacer(),
-          ],
-          primaryButtonBar: [],
-        ),
-        fullscreen: const MaterialVideoControlsThemeData(),
-        child: Center(
-          child: controller != null
-              ? Video(
-                  controller: controller!,
-                )
-              : _getLoadingWidget(),
+    return Hero(
+      tag: widget.tagPrefix! + widget.file.tag,
+      child: GestureDetector(
+        //This gestureDetector is to stop swiping the pageView when seeking the
+        //video using the seekbar.
+        onHorizontalDragUpdate: (details) {},
+        child: MaterialVideoControlsTheme(
+          normal: MaterialVideoControlsThemeData(
+            seekBarMargin: const EdgeInsets.only(bottom: verticalMargin),
+            bottomButtonBarMargin: const EdgeInsets.only(bottom: 112),
+            controlsHoverDuration: const Duration(seconds: 3),
+            seekBarHeight: 4,
+            seekBarBufferColor: Colors.transparent,
+            seekBarThumbColor: backgroundElevatedLight,
+            seekBarColor: fillMutedDark,
+            seekBarPositionColor: colorScheme.primary300.withOpacity(0.8),
+            topButtonBarMargin: const EdgeInsets.only(top: verticalMargin),
+            bottomButtonBar: [
+              const Spacer(),
+              PausePlayAndDuration(controller?.player),
+              const Spacer(),
+            ],
+            primaryButtonBar: [],
+          ),
+          fullscreen: const MaterialVideoControlsThemeData(),
+          child: Center(
+            child: controller != null
+                ? Video(
+                    controller: controller!,
+                  )
+                : _getLoadingWidget(),
+          ),
         ),
       ),
     );
