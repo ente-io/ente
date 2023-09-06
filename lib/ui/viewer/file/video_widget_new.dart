@@ -251,9 +251,9 @@ class _PausePlayAndDurationState extends State<PausePlayAndDuration> {
                 builder: (context, snapshot) {
                   final bool isPlaying = snapshot.data ?? false;
                   return AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 250),
-                    switchInCurve: Curves.easeInOutExpo,
-                    switchOutCurve: Curves.easeInOutExpo,
+                    duration: const Duration(milliseconds: 350),
+                    switchInCurve: Curves.easeInOutCirc,
+                    switchOutCurve: Curves.easeInOutCirc,
                     child: Icon(
                       key: ValueKey(
                         isPlaying ? "pause_button" : "play_button",
