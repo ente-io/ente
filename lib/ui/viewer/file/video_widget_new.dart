@@ -77,36 +77,35 @@ class _VideoWidgetNewState extends State<VideoWidgetNew> {
     final colorScheme = getEnteColorScheme(context);
     return Hero(
       tag: widget.tagPrefix! + widget.file.tag,
-      child: GestureDetector(
-        //This gestureDetector is to stop swiping the pageView when seeking the
-        //video using the seekbar.
-        onHorizontalDragUpdate: (details) {},
-        child: MaterialVideoControlsTheme(
-          normal: MaterialVideoControlsThemeData(
-            seekBarMargin: const EdgeInsets.only(bottom: verticalMargin),
-            bottomButtonBarMargin: const EdgeInsets.only(bottom: 112),
-            controlsHoverDuration: const Duration(seconds: 3),
-            seekBarHeight: 4,
-            seekBarBufferColor: Colors.transparent,
-            seekBarThumbColor: backgroundElevatedLight,
-            seekBarColor: fillMutedDark,
-            seekBarPositionColor: colorScheme.primary300.withOpacity(0.8),
-            topButtonBarMargin: const EdgeInsets.only(top: verticalMargin),
-            bottomButtonBar: [
-              const Spacer(),
-              PausePlayAndDuration(controller?.player),
-              const Spacer(),
-            ],
-            primaryButtonBar: [],
-          ),
-          fullscreen: const MaterialVideoControlsThemeData(),
-          child: Center(
-            child: controller != null
-                ? Video(
-                    controller: controller!,
-                  )
-                : _getLoadingWidget(),
-          ),
+      child: MaterialVideoControlsTheme(
+        normal: MaterialVideoControlsThemeData(
+          automaticallyImplySkipNextButton: false,
+          automaticallyImplySkipPreviousButton: false,
+          seekOnDoubleTap: false,
+          displaySeekBar: true,
+          seekBarMargin: const EdgeInsets.only(bottom: verticalMargin),
+          bottomButtonBarMargin: const EdgeInsets.only(bottom: 112),
+          controlsHoverDuration: const Duration(seconds: 3),
+          seekBarHeight: 4,
+          seekBarBufferColor: Colors.transparent,
+          seekBarThumbColor: backgroundElevatedLight,
+          seekBarColor: fillMutedDark,
+          seekBarPositionColor: colorScheme.primary300,
+          topButtonBarMargin: const EdgeInsets.only(top: verticalMargin),
+          bottomButtonBar: [
+            const Spacer(),
+            PausePlayAndDuration(controller?.player),
+            const Spacer(),
+          ],
+          primaryButtonBar: [],
+        ),
+        fullscreen: const MaterialVideoControlsThemeData(),
+        child: Center(
+          child: controller != null
+              ? Video(
+                  controller: controller!,
+                )
+              : _getLoadingWidget(),
         ),
       ),
     );
