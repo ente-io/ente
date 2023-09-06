@@ -41,9 +41,11 @@ export default function Preferences({ open, onClose, onRootClose }) {
         }
     };
 
-    const toggleOptOutOfCrashReports = () => {
+    const toggleOptOutOfCrashReports = async () => {
         if (isElectron()) {
-            ElectronService.updateOptOutOfCrashReports(!optOutOfCrashReports);
+            await ElectronService.updateOptOutOfCrashReports(
+                !optOutOfCrashReports
+            );
         }
         setOptOutOfCrashReports(!optOutOfCrashReports);
     };

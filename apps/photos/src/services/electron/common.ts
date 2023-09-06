@@ -65,7 +65,7 @@ class ElectronService {
 
     updateOptOutOfCrashReports(optOut: boolean) {
         if (this.electronAPIs?.updateOptOutOfCrashReports) {
-            this.electronAPIs.updateOptOutOfCrashReports(optOut);
+            return this.electronAPIs.updateOptOutOfCrashReports(optOut);
         }
     }
 }
