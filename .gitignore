@@ -1,0 +1,8 @@
+data/**
+.DS_Store
+Photos.code-workspace
+logs/**
+.idea/**
+.vscode/**
+tmp/**
+museum.yaml
