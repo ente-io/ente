@@ -22,7 +22,6 @@ export enum LS_KEYS {
     WAIT_TIME = 'waitTime',
     API_ENDPOINT = 'apiEndpoint',
     LOCALE = 'locale',
-    USER_SRP_SETUP_PENDING = 'userSRPSetupPending',
     MAP_ENABLED = 'mapEnabled',
     SRP_SETUP_ATTRIBUTES = 'srpSetupAttributes',
     SRP_ATTRIBUTES = 'srpAttributes',

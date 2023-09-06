@@ -45,7 +45,6 @@ import { getLocalFamilyData, isPartOfFamily } from 'utils/user/family';
 import { AxiosResponse } from 'axios';
 import { APPS, getAppName } from 'constants/apps';
 import { addLocalLog } from 'utils/logging';
-import { setUserSRPSetupPending } from 'utils/storage';
 import { convertBase64ToBuffer, convertBufferToBase64 } from 'utils/user';
 import { setLocalMapEnabled } from 'utils/storage';
 
@@ -582,8 +581,6 @@ export const configureSRP = async ({
         });
 
         srpClient.checkM2(convertBase64ToBuffer(srpM2));
-
-        setUserSRPSetupPending(false);
     } catch (e) {
         logError(e, 'srp configure failed');
         throw e;

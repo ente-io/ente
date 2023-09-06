@@ -23,12 +23,13 @@ import {
     generateSRPSetupAttributes,
     saveKeyInSessionStore,
 } from 'utils/crypto';
-import { logoutUser, configureSRP, loginViaSRP } from 'services/userService';
 import {
-    getUserSRPSetupPending,
-    isFirstLogin,
-    setIsFirstLogin,
-} from 'utils/storage';
+    logoutUser,
+    configureSRP,
+    loginViaSRP,
+    getSRPAttributes,
+} from 'services/userService';
+import { isFirstLogin, setIsFirstLogin } from 'utils/storage';
 import { AppContext } from 'pages/_app';
 import { logError } from 'utils/sentry';
 import { KeyAttributes, SRPAttributes, User } from 'types/user';
@@ -191,9 +192,14 @@ export default function Credentials() {
             await saveKeyInSessionStore(SESSION_KEYS.ENCRYPTION_KEY, key);
             await decryptAndStoreToken(keyAttributes, key);
             try {
-                const userSRPSetupPending = getUserSRPSetupPending();
-                addLocalLog(() => `userSRPSetupPending ${userSRPSetupPending}`);
-                if (userSRPSetupPending) {
+                let srpAttributes: SRPAttributes = getData(
+                    LS_KEYS.SRP_ATTRIBUTES
+                );
+                if (!srpAttributes) {
+                    srpAttributes = await getSRPAttributes(user.email);
+                }
+                addLocalLog(() => `userSRPSetupPending ${!srpAttributes}`);
+                if (!srpAttributes) {
                     const loginSubKey = await generateLoginSubKey(kek);
                     const srpSetupAttributes = await generateSRPSetupAttributes(
                         loginSubKey
