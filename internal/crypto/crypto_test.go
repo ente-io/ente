@@ -17,7 +17,7 @@ const (
 )
 
 func TestDeriveArgonKey(t *testing.T) {
-	derivedKey, err := deriveArgonKey(password, kdfSalt, memLimit, opsLimit)
+	derivedKey, err := DeriveArgonKey(password, kdfSalt, memLimit, opsLimit)
 	if err != nil {
 		t.Fatalf("Failed to derive key: %v", err)
 	}
@@ -28,7 +28,7 @@ func TestDeriveArgonKey(t *testing.T) {
 }
 
 func TestDecryptChaCha20poly1305(t *testing.T) {
-	derivedKey, err := deriveArgonKey(password, kdfSalt, memLimit, opsLimit)
+	derivedKey, err := DeriveArgonKey(password, kdfSalt, memLimit, opsLimit)
 	if err != nil {
 		t.Fatalf("Failed to derive key: %v", err)
 	}

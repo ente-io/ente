@@ -11,7 +11,13 @@ import (
 	"golang.org/x/crypto/argon2"
 )
 
-// deriveArgonKey generates a 32-bit cryptographic key using the Argon2id algorithm.
+const (
+	loginSubKeyLen     = 32
+	loginSubKeyId      = 1
+	loginSubKeyContext = "loginctx"
+)
+
+// DeriveArgonKey generates a 32-bit cryptographic key using the Argon2id algorithm.
 // Parameters:
 //   - password: The plaintext password to be hashed.
 //   - salt: The salt as a base64 encoded string.
@@ -67,4 +73,11 @@ func decryptChaCha20poly1305(data []byte, key []byte, nonce []byte) ([]byte, err
 		return nil, err
 	}
 	return decryptedData[:n], nil
+}
+
+func DeriveLoginKey(keyEncKey []byte) []byte {
+	mainKey := sodium.MasterKey{Bytes: keyEncKey}
+	subKey := mainKey.Derive(loginSubKeyLen, loginSubKeyId, loginSubKeyContext).Bytes
+	// return the first 16 bytes of the derived key
+	return subKey[:16]
 }
