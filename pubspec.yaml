@@ -186,7 +186,7 @@ flutter_icons:
 
 flutter_native_splash:
   color: "#ffffff"
-  color_dark: "#000000"
+  color_dark: "#171717"
   image: assets/splash-screen-light.png
   image_dark: assets/splash-screen-dark.png
   android_fullscreen: true
