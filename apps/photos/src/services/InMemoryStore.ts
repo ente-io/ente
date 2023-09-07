@@ -18,6 +18,9 @@ class InMemoryStore {
     has(key: MS_KEYS) {
         return this.store.has(key);
     }
+    clear() {
+        this.store.clear();
+    }
 }
 
 export default new InMemoryStore();
