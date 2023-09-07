@@ -230,8 +230,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "addToAlbum":
             MessageLookupByLibrary.simpleMessage("Toevoegen aan album"),
         "addToEnte": MessageLookupByLibrary.simpleMessage("Toevoegen aan ente"),
-        "addToHiddenAlbum":
-            MessageLookupByLibrary.simpleMessage("Add to hidden album"),
+        "addToHiddenAlbum": MessageLookupByLibrary.simpleMessage(
+            "Toevoegen aan verborgen album"),
         "addViewer": MessageLookupByLibrary.simpleMessage("Voeg kijker toe"),
         "addedAs": MessageLookupByLibrary.simpleMessage("Toegevoegd als"),
         "addedBy": m1,
@@ -370,6 +370,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "cancelSubscription":
             MessageLookupByLibrary.simpleMessage("Abonnement opzeggen"),
         "cannotAddMorePhotosAfterBecomingViewer": m6,
+        "cannotDeleteSharedFiles": MessageLookupByLibrary.simpleMessage(
+            "Kan gedeelde bestanden niet verwijderen"),
         "centerPoint": MessageLookupByLibrary.simpleMessage("Middelpunt"),
         "changeEmail": MessageLookupByLibrary.simpleMessage("E-mail wijzigen"),
         "changePassword":
@@ -713,12 +715,15 @@ class MessageLookup extends MessageLookupByLibrary {
         "goToSettings":
             MessageLookupByLibrary.simpleMessage("Ga naar instellingen"),
         "googlePlayId": MessageLookupByLibrary.simpleMessage("Google Play ID"),
+        "grantFullAccessPrompt": MessageLookupByLibrary.simpleMessage(
+            "Geef toegang tot alle foto\'s in de Instellingen app"),
         "grantPermission":
             MessageLookupByLibrary.simpleMessage("Toestemming verlenen"),
         "groupNearbyPhotos":
             MessageLookupByLibrary.simpleMessage("Groep foto\'s in de buurt"),
         "hidden": MessageLookupByLibrary.simpleMessage("Verborgen"),
         "hide": MessageLookupByLibrary.simpleMessage("Verbergen"),
+        "hiding": MessageLookupByLibrary.simpleMessage("Verbergen..."),
         "hostedAtOsmFrance":
             MessageLookupByLibrary.simpleMessage("Gehost bij OSM France"),
         "howItWorks": MessageLookupByLibrary.simpleMessage("Hoe het werkt"),
@@ -858,8 +863,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "moveItem": m28,
         "moveToAlbum":
             MessageLookupByLibrary.simpleMessage("Verplaats naar album"),
-        "moveToHiddenAlbum":
-            MessageLookupByLibrary.simpleMessage("Move to hidden album"),
+        "moveToHiddenAlbum": MessageLookupByLibrary.simpleMessage(
+            "Verplaatsen naar verborgen album"),
         "movedSuccessfullyTo": m29,
         "movedToTrash":
             MessageLookupByLibrary.simpleMessage("Naar prullenbak verplaatst"),
@@ -873,6 +878,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "no": MessageLookupByLibrary.simpleMessage("Nee"),
         "noAlbumsSharedByYouYet": MessageLookupByLibrary.simpleMessage(
             "Nog geen albums gedeeld door jou"),
+        "noDeviceLimit": MessageLookupByLibrary.simpleMessage("Geen"),
         "noDeviceThatCanBeDeleted": MessageLookupByLibrary.simpleMessage(
             "Je hebt geen bestanden op dit apparaat die verwijderd kunnen worden"),
         "noDuplicates":
@@ -909,6 +915,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Oeps, kon bewerkingen niet opslaan"),
         "oopsSomethingWentWrong":
             MessageLookupByLibrary.simpleMessage("Oeps, er is iets misgegaan"),
+        "openSettings":
+            MessageLookupByLibrary.simpleMessage("Instellingen openen"),
         "openTheItem": MessageLookupByLibrary.simpleMessage("• Open het item"),
         "openstreetmapContributors":
             MessageLookupByLibrary.simpleMessage("OpenStreetMap bijdragers"),
@@ -981,6 +989,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "preserveMore": MessageLookupByLibrary.simpleMessage("Meer bewaren"),
         "pressAndHoldToPlayVideo": MessageLookupByLibrary.simpleMessage(
             "Ingedrukt houden om video af te spelen"),
+        "pressAndHoldToPlayVideoDetailed": MessageLookupByLibrary.simpleMessage(
+            "Houd de afbeelding ingedrukt om video af te spelen"),
         "privacy": MessageLookupByLibrary.simpleMessage("Privacy"),
         "privacyPolicyTitle":
             MessageLookupByLibrary.simpleMessage("Privacybeleid"),
@@ -1119,6 +1129,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Selecteer items om toe te voegen"),
         "selectLanguage":
             MessageLookupByLibrary.simpleMessage("Taal selecteren"),
+        "selectMorePhotos":
+            MessageLookupByLibrary.simpleMessage("Selecteer meer foto\'s"),
         "selectReason": MessageLookupByLibrary.simpleMessage("Selecteer reden"),
         "selectYourPlan":
             MessageLookupByLibrary.simpleMessage("Kies uw abonnement"),
@@ -1180,6 +1192,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "sharedWithYou":
             MessageLookupByLibrary.simpleMessage("Gedeeld met jou"),
         "sharing": MessageLookupByLibrary.simpleMessage("Delen..."),
+        "showMemories":
+            MessageLookupByLibrary.simpleMessage("Toon herinneringen"),
         "signUpTerms": MessageLookupByLibrary.simpleMessage(
             "Ik ga akkoord met de <u-terms>gebruiksvoorwaarden</u-terms> en <u-policy>privacybeleid</u-policy>"),
         "singleFileDeleteFromDevice": m46,
@@ -1237,8 +1251,12 @@ class MessageLookup extends MessageLookupByLibrary {
         "success": MessageLookupByLibrary.simpleMessage("Succes"),
         "successfullyArchived":
             MessageLookupByLibrary.simpleMessage("Succesvol gearchiveerd"),
+        "successfullyHid":
+            MessageLookupByLibrary.simpleMessage("Succesvol verborgen"),
         "successfullyUnarchived": MessageLookupByLibrary.simpleMessage(
             "Succesvol uit archief gehaald"),
+        "successfullyUnhid": MessageLookupByLibrary.simpleMessage(
+            "Met succes zichtbaar gemaakt"),
         "suggestFeatures":
             MessageLookupByLibrary.simpleMessage("Features voorstellen"),
         "support": MessageLookupByLibrary.simpleMessage("Ondersteuning"),
@@ -1333,6 +1351,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "unhide": MessageLookupByLibrary.simpleMessage("Zichtbaar maken"),
         "unhideToAlbum":
             MessageLookupByLibrary.simpleMessage("Zichtbaar maken in album"),
+        "unhiding": MessageLookupByLibrary.simpleMessage("Zichtbaar maken..."),
         "unhidingFilesToAlbum": MessageLookupByLibrary.simpleMessage(
             "Bestanden zichtbaar maken in album"),
         "unlock": MessageLookupByLibrary.simpleMessage("Ontgrendelen"),
