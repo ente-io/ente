@@ -1,6 +1,7 @@
 package api
 
 import (
+	"context"
 	"errors"
 
 	"github.com/go-resty/resty/v2"
@@ -18,6 +19,10 @@ func NewClient() *Client {
 	return &Client{
 		restClient: c,
 	}
+}
+
+func authReq(ctx context.Context, fn func(*resty.Request) (*resty.Response, error)) (*resty.Response, error) {
+	return fn(ctx.Value("auth").(*resty.Request))
 }
 
 // Error type for resty.Error{}

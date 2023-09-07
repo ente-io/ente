@@ -20,19 +20,15 @@ type CreateSRPSessionResponse struct {
 
 // KeyAttributes stores the key related attributes for a user
 type KeyAttributes struct {
-	KEKSalt                           string `json:"kekSalt" binding:"required"`
-	KEKHash                           string `json:"kekHash"`
-	EncryptedKey                      string `json:"encryptedKey" binding:"required"`
-	KeyDecryptionNonce                string `json:"keyDecryptionNonce" binding:"required"`
-	PublicKey                         string `json:"publicKey" binding:"required"`
-	EncryptedSecretKey                string `json:"encryptedSecretKey" binding:"required"`
-	SecretKeyDecryptionNonce          string `json:"secretKeyDecryptionNonce" binding:"required"`
-	MemLimit                          int    `json:"memLimit" binding:"required"`
-	OpsLimit                          int    `json:"opsLimit" binding:"required"`
-	MasterKeyEncryptedWithRecoveryKey string `json:"masterKeyEncryptedWithRecoveryKey"`
-	MasterKeyDecryptionNonce          string `json:"masterKeyDecryptionNonce"`
-	RecoveryKeyEncryptedWithMasterKey string `json:"recoveryKeyEncryptedWithMasterKey"`
-	RecoveryKeyDecryptionNonce        string `json:"recoveryKeyDecryptionNonce"`
+	KEKSalt                  string `json:"kekSalt" binding:"required"`
+	KEKHash                  string `json:"kekHash"`
+	EncryptedKey             string `json:"encryptedKey" binding:"required"`
+	KeyDecryptionNonce       string `json:"keyDecryptionNonce" binding:"required"`
+	PublicKey                string `json:"publicKey" binding:"required"`
+	EncryptedSecretKey       string `json:"encryptedSecretKey" binding:"required"`
+	SecretKeyDecryptionNonce string `json:"secretKeyDecryptionNonce" binding:"required"`
+	MemLimit                 int    `json:"memLimit" binding:"required"`
+	OpsLimit                 int    `json:"opsLimit" binding:"required"`
 }
 
 type AuthorizationResponse struct {

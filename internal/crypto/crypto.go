@@ -75,6 +75,9 @@ func decryptChaCha20poly1305(data []byte, key []byte, nonce []byte) ([]byte, err
 	return decryptedData[:n], nil
 }
 
+// DeriveLoginKey derives a login key from the given key encryption key.
+// This loginKey act as user provided password during SRP authentication.
+// Parameters: keyEncKey: This is the keyEncryptionKey that is derived from the user's password.
 func DeriveLoginKey(keyEncKey []byte) []byte {
 	mainKey := sodium.MasterKey{Bytes: keyEncKey}
 	subKey := mainKey.Derive(loginSubKeyLen, loginSubKeyId, loginSubKeyContext).Bytes
