@@ -100,7 +100,6 @@ Map<String, List<HolidayData>> localeToHolidays = {
     HolidayData('Valentijnsdag', month: 2, day: 14), // Valentine's Day
     HolidayData('Koningsdag', month: 4, day: 27), // King's Day
     HolidayData('Bevrijdingsdag', month: 5, day: 5), // Liberation Day
-    HolidayData('Hemelvaartsdag', month: 5, day: 26), // Ascension Day
     HolidayData('Halloween', month: 10, day: 31), // Halloween
     HolidayData('Sinterklaas', month: 12, day: 5), // Sinterklaas
     HolidayData('Eerste Kerstdag', month: 12, day: 25), // First Christmas Day
