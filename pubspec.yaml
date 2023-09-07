@@ -179,10 +179,10 @@ dev_dependencies:
 
 flutter_icons:
   android: "launcher_icon"
-  adaptive_icon_foreground: "assets/launcher_icon/ente-icon-foreground.png"
+  adaptive_icon_foreground: "assets/launcher_icon/adaptive_icon.png"
   adaptive_icon_background: "#ffffff"
   ios: true
-  image_path: "assets/icon-light.png"
+  image_path: "assets/launcher_icon/icon.png"
 
 flutter_native_splash:
   color: "#ffffff"
