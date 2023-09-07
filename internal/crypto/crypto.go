@@ -27,7 +27,7 @@ const (
 // Returns:
 //   - A byte slice representing the derived key.
 //   - An error object, which is nil if no error occurs.
-func deriveArgonKey(password, salt string, memLimit, opsLimit int) ([]byte, error) {
+func DeriveArgonKey(password, salt string, memLimit, opsLimit int) ([]byte, error) {
 	if memLimit < 1024 || opsLimit < 1 {
 		return nil, fmt.Errorf("invalid memory or operation limits")
 	}
