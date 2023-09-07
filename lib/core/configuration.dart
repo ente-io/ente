@@ -77,7 +77,7 @@ class Configuration {
   late SharedPreferences _preferences;
   String? _secretKey;
   late FlutterSecureStorage _secureStorage;
-  late String _tempDirectory;
+  late String _tempDocumentsDirPath;
   late String _thumbnailCacheDirectory;
 
   // 6th July 22: Remove this after 3 months. Hopefully, active users
@@ -96,14 +96,14 @@ class Configuration {
     _preferences = await SharedPreferences.getInstance();
     _secureStorage = const FlutterSecureStorage();
     _documentsDirectory = (await getApplicationDocumentsDirectory()).path;
-    _tempDirectory = _documentsDirectory + "/temp/";
-    final tempDirectory = Directory(_tempDirectory);
+    _tempDocumentsDirPath = _documentsDirectory + "/temp/";
+    final tempDocumentsDir = Directory(_tempDocumentsDirPath);
     try {
       final currentTime = DateTime.now().microsecondsSinceEpoch;
-      if (tempDirectory.existsSync() &&
+      if (tempDocumentsDir.existsSync() &&
           (_preferences.getInt(lastTempFolderClearTimeKey) ?? 0) <
               (currentTime - kTempFolderDeletionTimeBuffer)) {
-        await tempDirectory.delete(recursive: true);
+        await tempDocumentsDir.delete(recursive: true);
         await _preferences.setInt(lastTempFolderClearTimeKey, currentTime);
         _logger.info("Cleared temp folder");
       } else {
@@ -112,7 +112,7 @@ class Configuration {
     } catch (e) {
       _logger.warning(e);
     }
-    tempDirectory.createSync(recursive: true);
+    tempDocumentsDir.createSync(recursive: true);
     final tempDirectoryPath = (await getTemporaryDirectory()).path;
     _thumbnailCacheDirectory = tempDirectoryPath + "/thumbnail-cache";
     Directory(_thumbnailCacheDirectory).createSync(recursive: true);
@@ -499,7 +499,7 @@ class Configuration {
 
   // Caution: This directory is cleared on app start
   String getTempDirectory() {
-    return _tempDirectory;
+    return _tempDocumentsDirPath;
   }
 
   String getThumbnailCacheDirectory() {
