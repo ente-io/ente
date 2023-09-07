@@ -67,7 +67,7 @@ class Configuration {
       "has_selected_all_folders_for_backup";
   static const anonymousUserIDKey = "anonymous_user_id";
 
-  final kTempFolderDeletionTimeBuffer = const Duration(days: 1).inMicroseconds;
+  final kTempFolderDeletionTimeBuffer = const Duration(hours: 6).inMicroseconds;
 
   static final _logger = Logger("Configuration");
 
