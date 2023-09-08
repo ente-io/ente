@@ -783,6 +783,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.8"
+  local_hero:
+    dependency: "direct main"
+    description:
+      name: local_hero
+      sha256: "2dd2904c46d786dbc6f7179ba863e04f2be1fd603c530501a336a07744b60c7b"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.2.0"
   logging:
     dependency: "direct main"
     description:
