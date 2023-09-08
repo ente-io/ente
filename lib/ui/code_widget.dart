@@ -136,136 +136,143 @@ class _CodeWidgetState extends State<CodeWidget> {
                 onLongPress: () {
                   _copyToClipboard();
                 },
-                child: SizedBox(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      if (widget.code.type == Type.totp)
-                        CodeTimerProgress(
-                          period: widget.code.period,
-                        ),
-                      const SizedBox(
-                        height: 16,
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.only(left: 16, right: 16),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  safeDecode(widget.code.issuer).trim(),
-                                  style: Theme.of(context).textTheme.titleLarge,
-                                ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  safeDecode(widget.code.account).trim(),
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .bodySmall
-                                      ?.copyWith(
-                                        fontSize: 12,
-                                        color: Colors.grey,
-                                      ),
-                                ),
-                              ],
-                            ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              children: [
-                                (widget.code.hasSynced != null &&
-                                        widget.code.hasSynced!) || !hasConfiguredAccount
-                                    ? const SizedBox.shrink()
-                                    : const Icon(
-                                        Icons.sync_disabled,
-                                        size: 20,
-                                        color: Colors.amber,
-                                      ),
-                                const SizedBox(width: 12),
-                                IconUtils.instance.getIcon(
-                                  safeDecode(widget.code.issuer).trim(),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Container(
-                        padding: const EdgeInsets.only(left: 16, right: 16),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            Expanded(
-                              child: ValueListenableBuilder<String>(
-                                valueListenable: _currentCode,
-                                builder: (context, value, child) {
-                                  return Text(
-                                    value,
-                                    style: const TextStyle(fontSize: 24),
-                                  );
-                                },
-                              ),
-                            ),
-                            widget.code.type == Type.totp
-                                ? Column(
-                                    crossAxisAlignment: CrossAxisAlignment.end,
-                                    children: [
-                                      Text(
-                                        l10n.nextTotpTitle,
-                                        style:
-                                            Theme.of(context).textTheme.bodySmall,
-                                      ),
-                                      ValueListenableBuilder<String>(
-                                        valueListenable: _nextCode,
-                                        builder: (context, value, child) {
-                                          return Text(
-                                            value,
-                                            style: const TextStyle(
-                                              fontSize: 18,
-                                              color: Colors.grey,
-                                            ),
-                                          );
-                                        },
-                                      ),
-                                    ],
-                                  )
-                                : Column(
-                                    crossAxisAlignment: CrossAxisAlignment.end,
-                                    children: [
-                                      Text(
-                                        l10n.nextTotpTitle,
-                                        style:
-                                            Theme.of(context).textTheme.bodySmall,
-                                      ),
-                                      InkWell(
-                                        onTap: _onNextHotpTapped,
-                                        child: const Icon(
-                                          Icons.forward_outlined,
-                                          size: 32,
-                                          color: Colors.grey,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(
-                        height: 20,
-                      ),
-                    ],
-                  ),
-                ),
+                child: _getCardContents(l10n),
               ),
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  SizedBox _getCardContents(AppLocalizations l10n) {
+    return SizedBox(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          if (widget.code.type == Type.totp)
+            CodeTimerProgress(
+              period: widget.code.period,
+            ),
+          const SizedBox(
+            height: 16,
+          ),
+          _getTopRow(),
+          const SizedBox(height: 4),
+          _getBottomRow(l10n),
+          const SizedBox(
+            height: 20,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Container _getBottomRow(AppLocalizations l10n) {
+    return Container(
+      padding: const EdgeInsets.only(left: 16, right: 16),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          Expanded(
+            child: ValueListenableBuilder<String>(
+              valueListenable: _currentCode,
+              builder: (context, value, child) {
+                return Text(
+                  value,
+                  style: const TextStyle(fontSize: 24),
+                );
+              },
+            ),
+          ),
+          widget.code.type == Type.totp
+              ? Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      l10n.nextTotpTitle,
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                    ValueListenableBuilder<String>(
+                      valueListenable: _nextCode,
+                      builder: (context, value, child) {
+                        return Text(
+                          value,
+                          style: const TextStyle(
+                            fontSize: 18,
+                            color: Colors.grey,
+                          ),
+                        );
+                      },
+                    ),
+                  ],
+                )
+              : Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      l10n.nextTotpTitle,
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                    InkWell(
+                      onTap: _onNextHotpTapped,
+                      child: const Icon(
+                        Icons.forward_outlined,
+                        size: 32,
+                        color: Colors.grey,
+                      ),
+                    ),
+                  ],
+                ),
+        ],
+      ),
+    );
+  }
+
+  Padding _getTopRow() {
+    return Padding(
+      padding: const EdgeInsets.only(left: 16, right: 16),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                safeDecode(widget.code.issuer).trim(),
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+              const SizedBox(height: 2),
+              Text(
+                safeDecode(widget.code.account).trim(),
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      fontSize: 12,
+                      color: Colors.grey,
+                    ),
+              ),
+            ],
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              (widget.code.hasSynced != null && widget.code.hasSynced!) ||
+                      !hasConfiguredAccount
+                  ? const SizedBox.shrink()
+                  : const Icon(
+                      Icons.sync_disabled,
+                      size: 20,
+                      color: Colors.amber,
+                    ),
+              const SizedBox(width: 12),
+              IconUtils.instance.getIcon(
+                safeDecode(widget.code.issuer).trim(),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -300,6 +307,7 @@ class _CodeWidgetState extends State<CodeWidget> {
   }
 
   Future<void> _onShowQrPressed(_) async {
+    // ignore: unused_local_variable
     final Code? code = await Navigator.of(context).push(
       MaterialPageRoute(
         builder: (BuildContext context) {
