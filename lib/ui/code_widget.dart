@@ -7,6 +7,7 @@ import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/models/code.dart';
 import 'package:ente_auth/onboarding/view/setup_enter_secret_key_page.dart';
 import 'package:ente_auth/onboarding/view/view_qr_page.dart';
+import 'package:ente_auth/services/preference_service.dart';
 import 'package:ente_auth/store/code_store.dart';
 import 'package:ente_auth/ui/code_timer_progress.dart';
 import 'package:ente_auth/ui/utils/icon_utils.dart';
@@ -33,6 +34,7 @@ class _CodeWidgetState extends State<CodeWidget> {
   final Logger logger = Logger("_CodeWidgetState");
   bool _isInitialized = false;
   late bool hasConfiguredAccount;
+  late bool _shouldShowLargeIcon;
 
   @override
   void initState() {
@@ -61,6 +63,7 @@ class _CodeWidgetState extends State<CodeWidget> {
 
   @override
   Widget build(BuildContext context) {
+    _shouldShowLargeIcon = PreferenceService.instance.shouldShowLargeIcons();
     if (!_isInitialized) {
       _currentCode.value = _getCurrentOTP();
       if (widget.code.type == Type.totp) {
@@ -158,9 +161,20 @@ class _CodeWidgetState extends State<CodeWidget> {
           const SizedBox(
             height: 16,
           ),
-          _getTopRow(),
-          const SizedBox(height: 4),
-          _getBottomRow(l10n),
+          Row(
+            children: [
+              _shouldShowLargeIcon ? _getIcon() : const SizedBox.shrink(),
+              Expanded(
+                child: Column(
+                  children: [
+                    _getTopRow(),
+                    const SizedBox(height: 4),
+                    _getBottomRow(l10n),
+                  ],
+                ),
+              ),
+            ],
+          ),
           const SizedBox(
             height: 20,
           ),
@@ -267,12 +281,27 @@ class _CodeWidgetState extends State<CodeWidget> {
                       color: Colors.amber,
                     ),
               const SizedBox(width: 12),
-              IconUtils.instance.getIcon(
-                safeDecode(widget.code.issuer).trim(),
-              ),
+              _shouldShowLargeIcon ? const SizedBox.shrink() : _getIcon(),
             ],
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _getIcon() {
+    return Padding(
+      padding: _shouldShowLargeIcon
+          ? const EdgeInsets.only(left: 16)
+          : const EdgeInsets.all(0),
+      child: GestureDetector(
+        onTap: () {
+          PreferenceService.instance.setShowLargeIcons(!_shouldShowLargeIcon);
+        },
+        child: IconUtils.instance.getIcon(
+          safeDecode(widget.code.issuer).trim(),
+          width: _shouldShowLargeIcon ? 42 : 24,
+        ),
       ),
     );
   }

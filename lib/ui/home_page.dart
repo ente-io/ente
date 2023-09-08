@@ -5,6 +5,7 @@ import 'package:ente_auth/core/configuration.dart';
 import 'package:ente_auth/core/event_bus.dart';
 import 'package:ente_auth/ente_theme_data.dart';
 import 'package:ente_auth/events/codes_updated_event.dart';
+import 'package:ente_auth/events/icons_changed_event.dart';
 import 'package:ente_auth/events/trigger_logout_event.dart';
 import "package:ente_auth/l10n/l10n.dart";
 import 'package:ente_auth/models/code.dart';
@@ -51,6 +52,7 @@ class _HomePageState extends State<HomePage> {
   List<Code> _filteredCodes = [];
   StreamSubscription<CodesUpdatedEvent>? _streamSubscription;
   StreamSubscription<TriggerLogoutEvent>? _triggerLogoutEvent;
+  StreamSubscription<IconsChangedEvent>? _iconsChangedEvent;
 
   @override
   void initState() {
@@ -69,6 +71,9 @@ class _HomePageState extends State<HomePage> {
       const Duration(seconds: 1),
       () async => await CodeStore.instance.importOfflineCodes(),
     );
+    _iconsChangedEvent = Bus.instance.on<IconsChangedEvent>().listen((event) {
+      setState(() {});
+    });
   }
 
   void _loadCodes() {
@@ -100,6 +105,7 @@ class _HomePageState extends State<HomePage> {
   void dispose() {
     _streamSubscription?.cancel();
     _triggerLogoutEvent?.cancel();
+    _iconsChangedEvent?.cancel();
     _textController.removeListener(_applyFilteringAndRefresh);
     super.dispose();
   }
@@ -228,7 +234,7 @@ class _HomePageState extends State<HomePage> {
           itemBuilder: ((context, index) {
             try {
               return CodeWidget(_filteredCodes[index]);
-            } catch(e) {
+            } catch (e) {
               return const Text("Failed");
             }
           }),
