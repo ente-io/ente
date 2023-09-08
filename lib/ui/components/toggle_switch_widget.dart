@@ -53,6 +53,7 @@ class _ToggleSwitchWidgetState extends State<ToggleSwitchWidget> {
             fit: BoxFit.contain,
             child: Switch.adaptive(
               activeColor: enteColorScheme.primary400,
+              activeTrackColor: enteColorScheme.primary300,
               inactiveTrackColor: enteColorScheme.fillMuted,
               materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
               value: toggleValue ?? false,
