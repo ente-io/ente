@@ -22,7 +22,7 @@ class _GeneralSectionWidgetState extends State<GeneralSectionWidget> {
     return ExpandableMenuItemWidget(
       title: l10n.general,
       selectionOptionsWidget: _getSectionOptions(context),
-      leadingIcon: Icons.help_outline_outlined,
+      leadingIcon: Icons.graphic_eq,
     );
   }
 
