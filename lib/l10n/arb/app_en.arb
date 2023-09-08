@@ -183,6 +183,7 @@
   "enterDetailsManually": "Enter details manually",
   "edit": "Edit",
   "copiedToClipboard": "Copied to clipboard",
+  "copiedNextToClipboard": "Copied next code to clipboard",
   "error": "Error",
   "recoveryKeyCopiedToClipboard": "Recovery key copied to clipboard",
   "recoveryKeyOnForgotPassword": "If you forget your password, the only way you can recover your data is with this key.",
