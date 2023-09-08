@@ -7,6 +7,7 @@ import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/models/code.dart';
 import 'package:ente_auth/onboarding/view/setup_enter_secret_key_page.dart';
 import 'package:ente_auth/onboarding/view/view_qr_page.dart';
+import 'package:ente_auth/services/preference_service.dart';
 import 'package:ente_auth/store/code_store.dart';
 import 'package:ente_auth/ui/code_timer_progress.dart';
 import 'package:ente_auth/ui/utils/icon_utils.dart';
@@ -15,7 +16,9 @@ import 'package:ente_auth/utils/toast_util.dart';
 import 'package:ente_auth/utils/totp_util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:local_hero/local_hero.dart';
 import 'package:logging/logging.dart';
+import 'package:uuid/uuid.dart';
 
 class CodeWidget extends StatefulWidget {
   final Code code;
@@ -33,6 +36,8 @@ class _CodeWidgetState extends State<CodeWidget> {
   final Logger logger = Logger("_CodeWidgetState");
   bool _isInitialized = false;
   late bool hasConfiguredAccount;
+  late bool _shouldShowLargeIcon;
+  final String _key = const Uuid().v4();
 
   @override
   void initState() {
@@ -61,6 +66,7 @@ class _CodeWidgetState extends State<CodeWidget> {
 
   @override
   Widget build(BuildContext context) {
+    _shouldShowLargeIcon = PreferenceService.instance.shouldShowLargeIcons();
     if (!_isInitialized) {
       _currentCode.value = _getCurrentOTP();
       if (widget.code.type == Type.totp) {
@@ -136,134 +142,186 @@ class _CodeWidgetState extends State<CodeWidget> {
                 onLongPress: () {
                   _copyToClipboard();
                 },
-                child: SizedBox(
+                child: _getCardContents(l10n),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _getCardContents(AppLocalizations l10n) {
+    return LocalHeroScope(
+      duration: const Duration(milliseconds: 200),
+      curve: Curves.easeInOut,
+      child: SizedBox(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            if (widget.code.type == Type.totp)
+              CodeTimerProgress(
+                period: widget.code.period,
+              ),
+            const SizedBox(
+              height: 16,
+            ),
+            Row(
+              children: [
+                _shouldShowLargeIcon ? _getIcon() : const SizedBox.shrink(),
+                Expanded(
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      if (widget.code.type == Type.totp)
-                        CodeTimerProgress(
-                          period: widget.code.period,
-                        ),
-                      const SizedBox(
-                        height: 16,
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.only(left: 16, right: 16),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  safeDecode(widget.code.issuer).trim(),
-                                  style: Theme.of(context).textTheme.titleLarge,
-                                ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  safeDecode(widget.code.account).trim(),
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .bodySmall
-                                      ?.copyWith(
-                                        fontSize: 12,
-                                        color: Colors.grey,
-                                      ),
-                                ),
-                              ],
-                            ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              children: [
-                                (widget.code.hasSynced != null &&
-                                        widget.code.hasSynced!) || !hasConfiguredAccount
-                                    ? const SizedBox.shrink()
-                                    : const Icon(
-                                        Icons.sync_disabled,
-                                        size: 20,
-                                        color: Colors.amber,
-                                      ),
-                                const SizedBox(width: 12),
-                                IconUtils.instance.getIcon(
-                                  safeDecode(widget.code.issuer).trim(),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
+                      _getTopRow(),
                       const SizedBox(height: 4),
-                      Container(
-                        padding: const EdgeInsets.only(left: 16, right: 16),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            Expanded(
-                              child: ValueListenableBuilder<String>(
-                                valueListenable: _currentCode,
-                                builder: (context, value, child) {
-                                  return Text(
-                                    value,
-                                    style: const TextStyle(fontSize: 24),
-                                  );
-                                },
-                              ),
-                            ),
-                            widget.code.type == Type.totp
-                                ? Column(
-                                    crossAxisAlignment: CrossAxisAlignment.end,
-                                    children: [
-                                      Text(
-                                        l10n.nextTotpTitle,
-                                        style:
-                                            Theme.of(context).textTheme.bodySmall,
-                                      ),
-                                      ValueListenableBuilder<String>(
-                                        valueListenable: _nextCode,
-                                        builder: (context, value, child) {
-                                          return Text(
-                                            value,
-                                            style: const TextStyle(
-                                              fontSize: 18,
-                                              color: Colors.grey,
-                                            ),
-                                          );
-                                        },
-                                      ),
-                                    ],
-                                  )
-                                : Column(
-                                    crossAxisAlignment: CrossAxisAlignment.end,
-                                    children: [
-                                      Text(
-                                        l10n.nextTotpTitle,
-                                        style:
-                                            Theme.of(context).textTheme.bodySmall,
-                                      ),
-                                      InkWell(
-                                        onTap: _onNextHotpTapped,
-                                        child: const Icon(
-                                          Icons.forward_outlined,
-                                          size: 32,
-                                          color: Colors.grey,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(
-                        height: 20,
-                      ),
+                      _getBottomRow(l10n),
                     ],
                   ),
                 ),
+              ],
+            ),
+            const SizedBox(
+              height: 20,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _getBottomRow(AppLocalizations l10n) {
+    return LocalHero(
+      tag: _key + "_bottom_row",
+      child: Container(
+        padding: const EdgeInsets.only(left: 16, right: 16),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Expanded(
+              child: ValueListenableBuilder<String>(
+                valueListenable: _currentCode,
+                builder: (context, value, child) {
+                  return Material(
+                    type: MaterialType.transparency,
+                    child: Text(
+                      value,
+                      style: const TextStyle(fontSize: 24),
+                    ),
+                  );
+                },
               ),
             ),
+            widget.code.type == Type.totp
+                ? Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text(
+                        l10n.nextTotpTitle,
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                      ValueListenableBuilder<String>(
+                        valueListenable: _nextCode,
+                        builder: (context, value, child) {
+                          return Material(
+                            type: MaterialType.transparency,
+                            child: Text(
+                              value,
+                              style: const TextStyle(
+                                fontSize: 18,
+                                color: Colors.grey,
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ],
+                  )
+                : Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text(
+                        l10n.nextTotpTitle,
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                      InkWell(
+                        onTap: _onNextHotpTapped,
+                        child: const Icon(
+                          Icons.forward_outlined,
+                          size: 32,
+                          color: Colors.grey,
+                        ),
+                      ),
+                    ],
+                  ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _getTopRow() {
+    return Padding(
+      padding: const EdgeInsets.only(left: 16, right: 16),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          LocalHero(
+            tag: _key + "_top_row",
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  safeDecode(widget.code.issuer).trim(),
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  safeDecode(widget.code.account).trim(),
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        fontSize: 12,
+                        color: Colors.grey,
+                      ),
+                ),
+              ],
+            ),
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              (widget.code.hasSynced != null && widget.code.hasSynced!) ||
+                      !hasConfiguredAccount
+                  ? const SizedBox.shrink()
+                  : const Icon(
+                      Icons.sync_disabled,
+                      size: 20,
+                      color: Colors.amber,
+                    ),
+              const SizedBox(width: 12),
+              _shouldShowLargeIcon ? const SizedBox.shrink() : _getIcon(),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _getIcon() {
+    return LocalHero(
+      tag: _key,
+      child: Padding(
+        padding: _shouldShowLargeIcon
+            ? const EdgeInsets.only(left: 16)
+            : const EdgeInsets.all(0),
+        child: GestureDetector(
+          onTap: () {
+            PreferenceService.instance.setShowLargeIcons(!_shouldShowLargeIcon);
+          },
+          child: IconUtils.instance.getIcon(
+            safeDecode(widget.code.issuer).trim(),
+            width: _shouldShowLargeIcon ? 42 : 24,
           ),
         ),
       ),
@@ -300,6 +358,7 @@ class _CodeWidgetState extends State<CodeWidget> {
   }
 
   Future<void> _onShowQrPressed(_) async {
+    // ignore: unused_local_variable
     final Code? code = await Navigator.of(context).push(
       MaterialPageRoute(
         builder: (BuildContext context) {

@@ -18,29 +18,39 @@ class IconUtils {
     await _loadJson();
   }
 
-  Widget getIcon(String provider) {
+  Widget getIcon(
+    String provider, {
+    double width = 24,
+  }) {
     final title = _getProviderTitle(provider);
     if (_customIcons.containsKey(title)) {
       return _getSVGIcon(
         "assets/custom-icons/icons/$title.svg",
         title,
         _customIcons[title]!,
+        width,
       );
     } else if (_simpleIcons.containsKey(title)) {
       return _getSVGIcon(
         "assets/simple-icons/icons/$title.svg",
         title,
         _simpleIcons[title]!,
+        width,
       );
     } else {
       return const SizedBox.shrink();
     }
   }
 
-  Widget _getSVGIcon(String path, String title, String color) {
+  Widget _getSVGIcon(
+    String path,
+    String title,
+    String color,
+    double width,
+  ) {
     return SvgPicture.asset(
       path,
-      width: 24,
+      width: width,
       semanticsLabel: title,
       colorFilter: ColorFilter.mode(
         Color(int.parse("0xFF" + color)),
