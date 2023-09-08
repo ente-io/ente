@@ -189,6 +189,7 @@ class _HomePageState extends State<HomePage> {
                   decoration: InputDecoration(
                     hintText: l10n.searchHint,
                     border: InputBorder.none,
+                    focusedBorder: InputBorder.none,
                   ),
                 ),
           actions: <Widget>[
