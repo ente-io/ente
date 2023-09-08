@@ -74,6 +74,7 @@ class _HomePageState extends State<HomePage> {
     _iconsChangedEvent = Bus.instance.on<IconsChangedEvent>().listen((event) {
       setState(() {});
     });
+    _showSearchBox = PreferenceService.instance.shouldAutoFocusOnSearchBar();
   }
 
   void _loadCodes() {

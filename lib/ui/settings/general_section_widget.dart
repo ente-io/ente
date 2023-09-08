@@ -48,6 +48,22 @@ class _GeneralSectionWidgetState extends State<GeneralSectionWidget> {
         sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: CaptionedTextWidget(
+            title: l10n.focusOnSearchBar,
+          ),
+          trailingWidget: ToggleSwitchWidget(
+            value: () =>
+                PreferenceService.instance.shouldAutoFocusOnSearchBar(),
+            onChanged: () async {
+              await PreferenceService.instance.setAutoFocusOnSearchBar(
+                !PreferenceService.instance.shouldAutoFocusOnSearchBar(),
+              );
+              setState(() {});
+            },
+          ),
+        ),
+        sectionOptionSpacing,
+        MenuItemWidget(
+          captionedTextWidget: CaptionedTextWidget(
             title: l10n.crashAndErrorReporting,
           ),
           trailingWidget: ToggleSwitchWidget(
