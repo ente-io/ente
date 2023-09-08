@@ -8,19 +8,19 @@ import 'package:ente_auth/ui/components/toggle_switch_widget.dart';
 import 'package:ente_auth/ui/settings/common_settings.dart';
 import 'package:flutter/material.dart';
 
-class GeneralSectionWidget extends StatefulWidget {
-  const GeneralSectionWidget({Key? key}) : super(key: key);
+class AdvancedSectionWidget extends StatefulWidget {
+  const AdvancedSectionWidget({Key? key}) : super(key: key);
 
   @override
-  State<GeneralSectionWidget> createState() => _GeneralSectionWidgetState();
+  State<AdvancedSectionWidget> createState() => _AdvancedSectionWidgetState();
 }
 
-class _GeneralSectionWidgetState extends State<GeneralSectionWidget> {
+class _AdvancedSectionWidgetState extends State<AdvancedSectionWidget> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     return ExpandableMenuItemWidget(
-      title: l10n.general,
+      title: l10n.advanced,
       selectionOptionsWidget: _getSectionOptions(context),
       leadingIcon: Icons.graphic_eq,
     );
