@@ -206,7 +206,7 @@ class _CodeWidgetState extends State<CodeWidget> {
                   return Material(
                     type: MaterialType.transparency,
                     child: Text(
-                      value,
+                      _getFormattedCode(value),
                       style: const TextStyle(fontSize: 24),
                     ),
                   );
@@ -231,7 +231,7 @@ class _CodeWidgetState extends State<CodeWidget> {
                             return Material(
                               type: MaterialType.transparency,
                               child: Text(
-                                value,
+                                _getFormattedCode(value),
                                 style: const TextStyle(
                                   fontSize: 18,
                                   color: Colors.grey,
@@ -408,5 +408,12 @@ class _CodeWidgetState extends State<CodeWidget> {
     } catch (e) {
       return context.l10n.error;
     }
+  }
+
+  String _getFormattedCode(String code) {
+    if (code.length == 6) {
+      return code.substring(0, 3) + " " + code.substring(3, 6);
+    }
+    return code;
   }
 }
