@@ -1,28 +1,51 @@
 package api
 
 import (
-	"context"
 	"errors"
 
 	"github.com/go-resty/resty/v2"
 )
 
+const (
+	TokenHeader = "X-Auth-Token"
+	TokenQuery  = "token"
+)
+
+var (
+	RedactedHeaders = []string{TokenHeader, " X-Request-Id"}
+)
+
 type Client struct {
 	restClient *resty.Client
+	authToken  *string
 }
 
-func NewClient() *Client {
+type Params struct {
+	Debug bool
+	Trace bool
+}
+
+func NewClient(p Params) *Client {
 	c := resty.New()
-	c.EnableTrace()
+	if p.Trace {
+		c.EnableTrace()
+	}
+	if p.Debug {
+		c.OnBeforeRequest(func(c *resty.Client, req *resty.Request) error {
+			logRequest(req)
+			return nil
+		})
+
+		c.OnAfterResponse(func(c *resty.Client, resp *resty.Response) error {
+			logResponse(resp)
+			return nil
+		})
+	}
 	c.SetError(&Error{})
 	c.SetBaseURL("https://api.ente.io")
 	return &Client{
 		restClient: c,
 	}
-}
-
-func authReq(ctx context.Context, fn func(*resty.Request) (*resty.Response, error)) (*resty.Response, error) {
-	return fn(ctx.Value("auth").(*resty.Request))
 }
 
 // Error type for resty.Error{}
