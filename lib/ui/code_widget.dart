@@ -214,29 +214,34 @@ class _CodeWidgetState extends State<CodeWidget> {
               ),
             ),
             widget.code.type == Type.totp
-                ? Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Text(
-                        l10n.nextTotpTitle,
-                        style: Theme.of(context).textTheme.bodySmall,
-                      ),
-                      ValueListenableBuilder<String>(
-                        valueListenable: _nextCode,
-                        builder: (context, value, child) {
-                          return Material(
-                            type: MaterialType.transparency,
-                            child: Text(
-                              value,
-                              style: const TextStyle(
-                                fontSize: 18,
-                                color: Colors.grey,
+                ? GestureDetector(
+                    onTap: () {
+                      _copyNextToClipboard();
+                    },
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(
+                          l10n.nextTotpTitle,
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                        ValueListenableBuilder<String>(
+                          valueListenable: _nextCode,
+                          builder: (context, value, child) {
+                            return Material(
+                              type: MaterialType.transparency,
+                              child: Text(
+                                value,
+                                style: const TextStyle(
+                                  fontSize: 18,
+                                  color: Colors.grey,
+                                ),
                               ),
-                            ),
-                          );
-                        },
-                      ),
-                    ],
+                            );
+                          },
+                        ),
+                      ],
+                    ),
                   )
                 : Column(
                     crossAxisAlignment: CrossAxisAlignment.end,
@@ -331,6 +336,12 @@ class _CodeWidgetState extends State<CodeWidget> {
   void _copyToClipboard() {
     FlutterClipboard.copy(_getCurrentOTP())
         .then((value) => showToast(context, context.l10n.copiedToClipboard));
+  }
+
+  void _copyNextToClipboard() {
+    FlutterClipboard.copy(_getNextTotp()).then(
+      (value) => showToast(context, context.l10n.copiedNextToClipboard),
+    );
   }
 
   void _onNextHotpTapped() {
