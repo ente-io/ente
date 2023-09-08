@@ -16,9 +16,7 @@ import 'package:ente_auth/utils/toast_util.dart';
 import 'package:ente_auth/utils/totp_util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
-import 'package:local_hero/local_hero.dart';
 import 'package:logging/logging.dart';
-import 'package:uuid/uuid.dart';
 
 class CodeWidget extends StatefulWidget {
   final Code code;
@@ -37,7 +35,6 @@ class _CodeWidgetState extends State<CodeWidget> {
   bool _isInitialized = false;
   late bool hasConfiguredAccount;
   late bool _shouldShowLargeIcon;
-  final String _key = const Uuid().v4();
 
   @override
   void initState() {
@@ -152,116 +149,109 @@ class _CodeWidgetState extends State<CodeWidget> {
   }
 
   Widget _getCardContents(AppLocalizations l10n) {
-    return LocalHeroScope(
-      duration: const Duration(milliseconds: 200),
-      curve: Curves.easeInOut,
-      child: SizedBox(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            if (widget.code.type == Type.totp)
-              CodeTimerProgress(
-                period: widget.code.period,
-              ),
-            const SizedBox(
-              height: 16,
+    return SizedBox(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          if (widget.code.type == Type.totp)
+            CodeTimerProgress(
+              period: widget.code.period,
             ),
-            Row(
-              children: [
-                _shouldShowLargeIcon ? _getIcon() : const SizedBox.shrink(),
-                Expanded(
-                  child: Column(
-                    children: [
-                      _getTopRow(),
-                      const SizedBox(height: 4),
-                      _getBottomRow(l10n),
-                    ],
-                  ),
+          const SizedBox(
+            height: 16,
+          ),
+          Row(
+            children: [
+              _shouldShowLargeIcon ? _getIcon() : const SizedBox.shrink(),
+              Expanded(
+                child: Column(
+                  children: [
+                    _getTopRow(),
+                    const SizedBox(height: 4),
+                    _getBottomRow(l10n),
+                  ],
                 ),
-              ],
-            ),
-            const SizedBox(
-              height: 20,
-            ),
-          ],
-        ),
+              ),
+            ],
+          ),
+          const SizedBox(
+            height: 20,
+          ),
+        ],
       ),
     );
   }
 
   Widget _getBottomRow(AppLocalizations l10n) {
-    return LocalHero(
-      tag: _key + "_bottom_row",
-      child: Container(
-        padding: const EdgeInsets.only(left: 16, right: 16),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            Expanded(
-              child: ValueListenableBuilder<String>(
-                valueListenable: _currentCode,
-                builder: (context, value, child) {
-                  return Material(
-                    type: MaterialType.transparency,
-                    child: Text(
-                      _getFormattedCode(value),
-                      style: const TextStyle(fontSize: 24),
-                    ),
-                  );
-                },
-              ),
+    return Container(
+      padding: const EdgeInsets.only(left: 16, right: 16),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          Expanded(
+            child: ValueListenableBuilder<String>(
+              valueListenable: _currentCode,
+              builder: (context, value, child) {
+                return Material(
+                  type: MaterialType.transparency,
+                  child: Text(
+                    _getFormattedCode(value),
+                    style: const TextStyle(fontSize: 24),
+                  ),
+                );
+              },
             ),
-            widget.code.type == Type.totp
-                ? GestureDetector(
-                    onTap: () {
-                      _copyNextToClipboard();
-                    },
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Text(
-                          l10n.nextTotpTitle,
-                          style: Theme.of(context).textTheme.bodySmall,
-                        ),
-                        ValueListenableBuilder<String>(
-                          valueListenable: _nextCode,
-                          builder: (context, value, child) {
-                            return Material(
-                              type: MaterialType.transparency,
-                              child: Text(
-                                _getFormattedCode(value),
-                                style: const TextStyle(
-                                  fontSize: 18,
-                                  color: Colors.grey,
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-                      ],
-                    ),
-                  )
-                : Column(
+          ),
+          widget.code.type == Type.totp
+              ? GestureDetector(
+                  onTap: () {
+                    _copyNextToClipboard();
+                  },
+                  child: Column(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       Text(
                         l10n.nextTotpTitle,
                         style: Theme.of(context).textTheme.bodySmall,
                       ),
-                      InkWell(
-                        onTap: _onNextHotpTapped,
-                        child: const Icon(
-                          Icons.forward_outlined,
-                          size: 32,
-                          color: Colors.grey,
-                        ),
+                      ValueListenableBuilder<String>(
+                        valueListenable: _nextCode,
+                        builder: (context, value, child) {
+                          return Material(
+                            type: MaterialType.transparency,
+                            child: Text(
+                              _getFormattedCode(value),
+                              style: const TextStyle(
+                                fontSize: 18,
+                                color: Colors.grey,
+                              ),
+                            ),
+                          );
+                        },
                       ),
                     ],
                   ),
-          ],
-        ),
+                )
+              : Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      l10n.nextTotpTitle,
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                    InkWell(
+                      onTap: _onNextHotpTapped,
+                      child: const Icon(
+                        Icons.forward_outlined,
+                        size: 32,
+                        color: Colors.grey,
+                      ),
+                    ),
+                  ],
+                ),
+        ],
       ),
     );
   }
@@ -273,25 +263,22 @@ class _CodeWidgetState extends State<CodeWidget> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          LocalHero(
-            tag: _key + "_top_row",
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  safeDecode(widget.code.issuer).trim(),
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  safeDecode(widget.code.account).trim(),
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        fontSize: 12,
-                        color: Colors.grey,
-                      ),
-                ),
-              ],
-            ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                safeDecode(widget.code.issuer).trim(),
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+              const SizedBox(height: 2),
+              Text(
+                safeDecode(widget.code.account).trim(),
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      fontSize: 12,
+                      color: Colors.grey,
+                    ),
+              ),
+            ],
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
@@ -314,21 +301,13 @@ class _CodeWidgetState extends State<CodeWidget> {
   }
 
   Widget _getIcon() {
-    return LocalHero(
-      tag: _key,
-      child: Padding(
-        padding: _shouldShowLargeIcon
-            ? const EdgeInsets.only(left: 16)
-            : const EdgeInsets.all(0),
-        child: GestureDetector(
-          onTap: () {
-            PreferenceService.instance.setShowLargeIcons(!_shouldShowLargeIcon);
-          },
-          child: IconUtils.instance.getIcon(
-            safeDecode(widget.code.issuer).trim(),
-            width: _shouldShowLargeIcon ? 42 : 24,
-          ),
-        ),
+    return Padding(
+      padding: _shouldShowLargeIcon
+          ? const EdgeInsets.only(left: 16)
+          : const EdgeInsets.all(0),
+      child: IconUtils.instance.getIcon(
+        safeDecode(widget.code.issuer).trim(),
+        width: _shouldShowLargeIcon ? 42 : 24,
       ),
     );
   }
