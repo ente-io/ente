@@ -11,6 +11,7 @@ class PreferenceService {
 
   static const kHasShownCoachMarkKey = "has_shown_coach_mark";
   static const kShouldShowLargeIconsKey = "should_show_large_icons";
+  static const kShouldAutoFocusOnSearchBar = "should_auto_focus_on_search_bar";
 
   Future<void> init() async {
     _prefs = await SharedPreferences.getInstance();
@@ -38,6 +39,19 @@ class PreferenceService {
 
   Future<void> setShowLargeIcons(bool value) async {
     await _prefs.setBool(kShouldShowLargeIconsKey, value);
+    Bus.instance.fire(IconsChangedEvent());
+  }
+
+  bool shouldAutoFocusOnSearchBar() {
+    if (_prefs.containsKey(kShouldAutoFocusOnSearchBar)) {
+      return _prefs.getBool(kShouldAutoFocusOnSearchBar)!;
+    } else {
+      return false;
+    }
+  }
+
+  Future<void> setAutoFocusOnSearchBar(bool value) async {
+    await _prefs.setBool(kShouldAutoFocusOnSearchBar, value);
     Bus.instance.fire(IconsChangedEvent());
   }
 }

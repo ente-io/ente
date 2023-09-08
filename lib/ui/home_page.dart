@@ -74,6 +74,7 @@ class _HomePageState extends State<HomePage> {
     _iconsChangedEvent = Bus.instance.on<IconsChangedEvent>().listen((event) {
       setState(() {});
     });
+    _showSearchBox = PreferenceService.instance.shouldAutoFocusOnSearchBar();
   }
 
   void _loadCodes() {
@@ -177,7 +178,7 @@ class _HomePageState extends State<HomePage> {
         resizeToAvoidBottomInset: false,
         appBar: AppBar(
           title: !_showSearchBox
-              ? const Text('ente Authenticator')
+              ? const Text('ente Auth')
               : TextField(
                   autofocus: _searchText.isEmpty,
                   controller: _textController,
@@ -188,6 +189,7 @@ class _HomePageState extends State<HomePage> {
                   decoration: InputDecoration(
                     hintText: l10n.searchHint,
                     border: InputBorder.none,
+                    focusedBorder: InputBorder.none,
                   ),
                 ),
           actions: <Widget>[

@@ -102,6 +102,7 @@
   "no": "No",
   "email": "Email",
   "support": "Support",
+  "advanced": "Advanced",
   "settings": "Settings",
   "copied": "Copied",
   "pleaseTryAgain": "Please try again",
@@ -326,5 +327,7 @@
   "signInToBackup": "Sign in to backup your codes",
   "singIn": "Sign in",
   "sigInBackupReminder": "Please export your codes to ensure that you have a backup you can restore from.",
-  "offlineModeWarning": "You have chosen to proceed without backups. Please take manual backups to make sure your codes are safe."
+  "offlineModeWarning": "You have chosen to proceed without backups. Please take manual backups to make sure your codes are safe.",
+  "showLargeIcons": "Show large icons",
+  "focusOnSearchBar": "Focus search on app start"
 }

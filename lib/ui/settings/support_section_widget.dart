@@ -1,11 +1,9 @@
 import 'package:ente_auth/core/constants.dart';
-import 'package:ente_auth/core/logging/super_logging.dart';
 import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/theme/ente_theme.dart';
 import 'package:ente_auth/ui/components/captioned_text_widget.dart';
 import 'package:ente_auth/ui/components/expandable_menu_item_widget.dart';
 import 'package:ente_auth/ui/components/menu_item_widget.dart';
-import 'package:ente_auth/ui/components/toggle_switch_widget.dart';
 import 'package:ente_auth/ui/settings/common_settings.dart';
 import 'package:ente_auth/ui/settings/faq.dart';
 import 'package:ente_auth/utils/email_util.dart';
@@ -35,7 +33,6 @@ class _SupportSectionWidgetState extends State<SupportSectionWidget> {
     return Column(
       children: [
         sectionOptionSpacing,
-
         MenuItemWidget(
           captionedTextWidget: CaptionedTextWidget(
             title: l10n.faq,
@@ -96,21 +93,6 @@ class _SupportSectionWidgetState extends State<SupportSectionWidget> {
             final zipFilePath = await getZippedLogsFile(context);
             await shareLogs(context, "auth@ente.io", zipFilePath);
           },
-        ),
-        sectionOptionSpacing,
-        MenuItemWidget(
-          captionedTextWidget: CaptionedTextWidget(
-            title: l10n.crashAndErrorReporting,
-          ),
-          trailingWidget: ToggleSwitchWidget(
-            value: () => SuperLogging.shouldReportErrors(),
-            onChanged: () async {
-              await SuperLogging.setShouldReportErrors(
-                !SuperLogging.shouldReportErrors(),
-              );
-              setState(() {});
-            },
-          ),
         ),
         sectionOptionSpacing,
       ],
