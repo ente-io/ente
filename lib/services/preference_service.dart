@@ -1,3 +1,5 @@
+import 'package:ente_auth/core/event_bus.dart';
+import 'package:ente_auth/events/icons_changed_event.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class PreferenceService {
@@ -34,7 +36,8 @@ class PreferenceService {
     }
   }
 
-  Future<void> setShowLargeIcons(bool value) {
-    return _prefs.setBool(kShouldShowLargeIconsKey, value);
+  Future<void> setShowLargeIcons(bool value) async {
+    await _prefs.setBool(kShouldShowLargeIconsKey, value);
+    Bus.instance.fire(IconsChangedEvent());
   }
 }
