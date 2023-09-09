@@ -189,6 +189,10 @@
   "disableDownloadWarningBody": "Les téléspectateurs peuvent toujours prendre des captures d'écran ou enregistrer une copie de vos photos en utilisant des outils externes",
   "allowDownloads": "Autoriser les téléchargements",
   "linkDeviceLimit": "Limite d'appareil",
+  "noDeviceLimit": "Aucune",
+  "@noDeviceLimit": {
+    "description": "Text to indicate that there is limit on number of devices"
+  },
   "linkExpiry": "Expiration du lien",
   "linkExpired": "Expiré",
   "linkEnabled": "Activé",
@@ -201,15 +205,6 @@
   "manageLink": "Gérer le lien",
   "linkExpiresOn": "Le lien expirera le {expiryTime}",
   "albumUpdated": "Album mis à jour",
-  "maxDeviceLimitSpikeHandling": "Lorsqu'elle est définie au maximum ({maxValue}), la limite de l'appareil sera assouplie pour permettre des pointes temporaires d'un grand nombre de téléspectateurs.",
-  "@maxDeviceLimitSpikeHandling": {
-    "placeholders": {
-      "maxValue": {
-        "type": "int",
-        "example": "100"
-      }
-    }
-  },
   "never": "Jamais",
   "custom": "Personnaliser",
   "@custom": {
@@ -321,7 +316,7 @@
   "removeFromAlbumTitle": "Retirer de l'album ?",
   "removeFromAlbum": "Retirer de l'album",
   "itemsWillBeRemovedFromAlbum": "Les éléments sélectionnés seront supprimés de cet album",
-  "removeShareItemsWarning": "Certains des objets que vous êtes en train de retirer ont été ajoutés par d'autres personnes, vous perdrez l'accès vers ces objets",
+  "removeShareItemsWarning": "Certains des éléments que vous êtes en train de retirer ont été ajoutés par d'autres personnes, vous perdrez l'accès vers ces éléments",
   "addingToFavorites": "Ajout aux favoris...",
   "removingFromFavorites": "Suppression des favoris…",
   "sorryCouldNotAddToFavorites": "Désolé, impossible d'ajouter aux favoris !",
@@ -331,8 +326,8 @@
   "canOnlyRemoveFilesOwnedByYou": "Vous ne pouvez supprimer que les fichiers que vous possédez",
   "deleteSharedAlbum": "Supprimer l'album partagé ?",
   "deleteAlbum": "Supprimer l'album",
-  "deleteAlbumDialog": "Supprimer aussi les photos (et vidéos) présentes dans cet album depuis <bold>tous</bold> les autres albums dont ils font partie ?",
-  "deleteSharedAlbumDialogBody": "L'album sera supprimé pour tout le monde\n\nVous perdrez l'accès aux photos partagées dans cet album qui est détenues par d'autres personnes",
+  "deleteAlbumDialog": "Supprimer aussi les photos (et vidéos) présentes dans cet album de <bold>tous</bold> les autres albums dont elles font partie ?",
+  "deleteSharedAlbumDialogBody": "L'album sera supprimé pour tout le monde\n\nVous perdrez l'accès aux photos partagées dans cet album qui sont détenues par d'autres personnes",
   "yesRemove": "Oui, supprimer",
   "creatingLink": "Création du lien...",
   "removeWithQuestionMark": "Enlever?",
@@ -354,10 +349,10 @@
   "uncategorized": "Aucune catégorie",
   "videoSmallCase": "vidéo",
   "photoSmallCase": "photo",
-  "singleFileDeleteHighlight": "Il sera supprimé de tous les albums.",
-  "singleFileInBothLocalAndRemote": "Ce {fileType} est à la fois dans ente et votre appareil.",
+  "singleFileDeleteHighlight": "Elle sera supprimée de tous les albums.",
+  "singleFileInBothLocalAndRemote": "Cette {fileType} est à la fois sur ente et sur votre appareil.",
   "singleFileInRemoteOnly": "Ce {fileType} sera supprimé de ente.",
-  "singleFileDeleteFromDevice": "Ce {fileType} sera supprimé de votre appareil.",
+  "singleFileDeleteFromDevice": "Elle {fileType} sera supprimée de votre appareil.",
   "deleteFromEnte": "Supprimer de ente",
   "yesDelete": "Oui, supprimer",
   "movedToTrash": "Déplacé dans la corbeille",
@@ -380,7 +375,7 @@
       }
     }
   },
-  "selectedPhotos": "{count} sélectionné",
+  "selectedPhotos": "{count} sélectionné(s)",
   "@selectedPhotos": {
     "description": "Display the number of selected photos",
     "type": "text",
@@ -391,7 +386,7 @@
       }
     }
   },
-  "selectedPhotosWithYours": "{count} sélectionné ({yourCount} votre)",
+  "selectedPhotosWithYours": "{count} sélectionné(s) ({yourCount} à vous)",
   "@selectedPhotosWithYours": {
     "description": "Display the number of selected photos, including the number of selected photos owned by the user",
     "type": "text",
@@ -436,7 +431,7 @@
     }
   },
   "showMemories": "Montrer les souvenirs",
-  "yearsAgo": "{count, plural, one{{count} il y a un an} other{{count} il y a des années}}",
+  "yearsAgo": "{count, plural, one{il y a {count} an} other{il y a {count} ans}}",
   "backupSettings": "Paramètres de la sauvegarde",
   "backupOverMobileData": "Sauvegarde sur données mobiles",
   "backupVideos": "Sauvegarde des vidéos",
@@ -468,6 +463,7 @@
   "updateAvailable": "Une mise à jour est disponible",
   "ignoreUpdate": "Ignorer",
   "downloading": "Téléchargement en cours...",
+  "cannotDeleteSharedFiles": "Les fichiers partagés ne peuvent pas être supprimés",
   "theDownloadCouldNotBeCompleted": "Le téléchargement n'a pas pu être terminé",
   "retry": "Réessayer",
   "backedUpFolders": "Dossiers sauvegardés",
@@ -644,6 +640,9 @@
   "startBackup": "Démarrer la sauvegarde",
   "noPhotosAreBeingBackedUpRightNow": "Aucune photo en cours de sauvegarde",
   "preserveMore": "Conserver plus",
+  "grantFullAccessPrompt": "Veuillez autoriser l’accès à toutes les photos dans les paramètres",
+  "openSettings": "Ouvrir les paramètres",
+  "selectMorePhotos": "Sélectionner plus de photos",
   "existingUser": "Utilisateur existant",
   "privateBackups": "Sauvegardes privées",
   "forYourMemories": "pour vos souvenirs",
@@ -814,6 +813,7 @@
   "fileFailedToSaveToGallery": "Échec de l'enregistrement dans la galerie",
   "download": "Télécharger",
   "pressAndHoldToPlayVideo": "Appuyez et maintenez enfoncé pour lire la vidéo",
+  "pressAndHoldToPlayVideoDetailed": "Maintenez appuyé sur l'image pour lire la vidéo",
   "downloadFailed": "Échec du téléchargement",
   "deduplicateFiles": "Déduplication de fichiers",
   "deselectAll": "Tout déselectionner",
@@ -862,7 +862,7 @@
   "@freeUpSpaceSaving": {
     "description": "Text to tell user how much space they can free up by deleting items from the device"
   },
-  "freeUpAccessPostDelete": "Vous pouvez toujours accéder à {count, plural, one {it} other {them}} sur ente tant que vous avez un abonnement actif",
+  "freeUpAccessPostDelete": "Vous pouvez toujours {count, plural, one {y} other {y}} accéder sur ente tant que vous avez un abonnement actif",
   "@freeUpAccessPostDelete": {
     "placeholders": {
       "count": {
@@ -1101,6 +1101,6 @@
   "successfullyHid": "Masquage réussi",
   "successfullyUnhid": "Masquage réussi",
   "crashReporting": "Rapports d'erreurs",
-  "addToHiddenAlbum": "Add to hidden album",
-  "moveToHiddenAlbum": "Move to hidden album"
+  "addToHiddenAlbum": "Ajouter à un album masqué",
+  "moveToHiddenAlbum": "Déplacer vers un album masqué"
 }
