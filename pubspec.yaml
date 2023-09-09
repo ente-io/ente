@@ -189,8 +189,8 @@ flutter_launcher_icons:
 flutter_native_splash:
   color: "#ffffff"
   color_dark: "#171717"
-  image: assets/splash-screen-light.png
-  image_dark: assets/splash-screen-dark.png
+  image: assets/splash-icon-light.png
+  image_dark: assets/splash-icon-dark.png
   android_fullscreen: true
   android_gravity: center
   ios_content_mode: center
@@ -200,8 +200,8 @@ flutter_native_splash:
     # Please note that the splash screen will be clipped to a circle on the center of the screen.
     # App icon without an icon background: This should be 1152×1152 pixels, and fit within a circle
     # 768 pixels in diameter.
-    image: assets/splash-screen-light.png
-    image_dark: assets/splash-screen-dark.png
+    image: assets/splash-icon-light.png
+    image_dark: assets/splash-icon-dark.png
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
