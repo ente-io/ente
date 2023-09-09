@@ -27,6 +27,7 @@ import { Person, Thing, WordGroup } from 'types/machineLearning';
 import { t } from 'i18next';
 import memoize from 'memoize-one';
 import { LocationTagData } from 'types/entity';
+import { FILE_TYPE } from 'constants/file';
 
 interface Iprops {
     isOpen: boolean;
@@ -117,6 +118,10 @@ export default function SearchInput(props: Iprops) {
                 break;
             case SuggestionType.TEXT:
                 search = { text: selectedOption.value as WordGroup };
+                break;
+            case SuggestionType.FILE_TYPE:
+                search = { fileType: selectedOption.value as FILE_TYPE };
+                break;
         }
         props.updateSearch(search, {
             optionName: selectedOption.label,

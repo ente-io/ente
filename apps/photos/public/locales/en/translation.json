@@ -209,7 +209,8 @@
         "DATE": "Date",
         "FILE_NAME": "File name",
         "THING": "Content",
-        "FILE_CAPTION": "Description"
+        "FILE_CAPTION": "Description",
+        "FILE_TYPE": "File type"
     },
     "photos_count_zero": "No memories",
     "photos_count_one": "1 memory",
@@ -583,5 +584,12 @@
     "DOWNLOAD_COMPLETE": "Download complete",
     "DOWNLOADING_COLLECTION": "Downloading {{name}}",
     "DOWNLOAD_FAILED": "Download failed",
-    "DOWNLOAD_PROGRESS": "{{progress.current}} / {{progress.total}} files"
+    "DOWNLOAD_PROGRESS": "{{progress.current}} / {{progress.total}} files",
+    "CHRISTMAS": "Christmas",
+    "CHRISTMAS_EVE": "Christmas Eve",
+    "NEW_YEAR": "New Year",
+    "NEW_YEAR_EVE": "New Year's Eve",
+    "IMAGE": "Image",
+    "VIDEO": "Video",
+    "LIVE_PHOTO": "Live photo"
 }
