@@ -209,7 +209,8 @@
         "DATE": "Data",
         "FILE_NAME": "Nome file",
         "THING": "",
-        "FILE_CAPTION": "Descrizione"
+        "FILE_CAPTION": "Descrizione",
+        "FILE_TYPE": ""
     },
     "photos_count_zero": "",
     "photos_count_one": "",
@@ -583,5 +584,12 @@
     "DOWNLOAD_COMPLETE": "",
     "DOWNLOADING_COLLECTION": "",
     "DOWNLOAD_FAILED": "",
-    "DOWNLOAD_PROGRESS": ""
+    "DOWNLOAD_PROGRESS": "",
+    "CHRISTMAS": "",
+    "CHRISTMAS_EVE": "",
+    "NEW_YEAR": "",
+    "NEW_YEAR_EVE": "",
+    "IMAGE": "",
+    "VIDEO": "",
+    "LIVE_PHOTO": ""
 }
