@@ -209,7 +209,8 @@
         "DATE": "Datum",
         "FILE_NAME": "Bestandsnaam",
         "THING": "Inhoud",
-        "FILE_CAPTION": "Omschrijving"
+        "FILE_CAPTION": "Omschrijving",
+        "FILE_TYPE": ""
     },
     "photos_count_zero": "Geen herinneringen",
     "photos_count_one": "1 herinnering",
@@ -583,5 +584,12 @@
     "DOWNLOAD_COMPLETE": "",
     "DOWNLOADING_COLLECTION": "",
     "DOWNLOAD_FAILED": "",
-    "DOWNLOAD_PROGRESS": ""
+    "DOWNLOAD_PROGRESS": "",
+    "CHRISTMAS": "",
+    "CHRISTMAS_EVE": "",
+    "NEW_YEAR": "",
+    "NEW_YEAR_EVE": "",
+    "IMAGE": "",
+    "VIDEO": "",
+    "LIVE_PHOTO": ""
 }
