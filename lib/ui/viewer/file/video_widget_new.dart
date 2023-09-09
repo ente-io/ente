@@ -74,6 +74,8 @@ class _VideoWidgetNewState extends State<VideoWidgetNew> {
 
   @override
   Widget build(BuildContext context) {
+    final deviceSize = MediaQuery.sizeOf(context);
+    final fileAspectRatio = widget.file.width / widget.file.height;
     final colorScheme = getEnteColorScheme(context);
     return Hero(
       tag: widget.tagPrefix! + widget.file.tag,
@@ -93,9 +95,20 @@ class _VideoWidgetNewState extends State<VideoWidgetNew> {
           seekBarPositionColor: colorScheme.primary300,
           topButtonBarMargin: const EdgeInsets.only(top: verticalMargin),
           bufferingIndicatorBuilder: (p0) {
+            ///Workaround for displaying thumbnail when media_kit is buffering
+
+            //Calculate dimensions of file in wrt to screen
+            double? width = deviceSize.aspectRatio <= fileAspectRatio
+                ? deviceSize.width
+                : null;
+            double? height = deviceSize.aspectRatio >= fileAspectRatio
+                ? deviceSize.height
+                : null;
+            width ??= height! * fileAspectRatio;
+            height ??= width / fileAspectRatio;
             return OverflowBox(
-              maxHeight: MediaQuery.sizeOf(context).height,
-              maxWidth: MediaQuery.sizeOf(context).width,
+              maxHeight: height,
+              maxWidth: width,
               child: _getLoadingWidget(),
             );
           },
