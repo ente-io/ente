@@ -84,8 +84,6 @@ function convertSuggestionsToOptions(
         })
         .filter((option) => option.fileCount);
 
-    console.log('previewImageAppendedOptions', previewImageAppendedOptions);
-
     return previewImageAppendedOptions;
 }
 function getFileTypeSuggestion(searchPhrase: string): Suggestion[] {
