@@ -27,6 +27,10 @@
     {
       "title": "Control D",
       "hex": "5FD800"
+    },
+    {
+      "title": "Filen",
+      "hex": "858585"
     }
   ]
 }
