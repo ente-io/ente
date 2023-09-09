@@ -523,6 +523,12 @@ export default function Gallery() {
                     if (search?.files && search.files.indexOf(item.id) === -1) {
                         return false;
                     }
+                    if (
+                        typeof search?.fileType !== 'undefined' &&
+                        search.fileType !== item.metadata.fileType
+                    ) {
+                        return false;
+                    }
                     return true;
                 }
 

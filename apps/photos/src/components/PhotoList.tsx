@@ -105,6 +105,15 @@ function getGapFromScreenEdge(width: number) {
     }
 }
 
+function getShrinkRatio(width: number, columns: number) {
+    return (
+        (width -
+            2 * getGapFromScreenEdge(width) -
+            (columns - 1) * GAP_BTW_TILES) /
+        (columns * IMAGE_CONTAINER_MAX_WIDTH)
+    );
+}
+
 const ListContainer = styled(Box)<{
     columns: number;
     shrinkRatio: number;
@@ -264,10 +273,10 @@ export function PhotoList({
 
     let skipMerge = false;
     if (columns < MIN_COLUMNS) {
-        columns = MIN_COLUMNS - 1;
+        columns = MIN_COLUMNS;
         skipMerge = true;
     }
-    const shrinkRatio = fittableColumns / columns;
+    const shrinkRatio = getShrinkRatio(width, columns);
     const listItemHeight =
         IMAGE_CONTAINER_MAX_HEIGHT * shrinkRatio + GAP_BTW_TILES;
 

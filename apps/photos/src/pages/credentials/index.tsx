@@ -121,7 +121,8 @@ export default function Credentials() {
             );
             if (srpAttributes) {
                 setSrpAttributes(srpAttributes);
-                return;
+            } else {
+                router.push(PAGES.ROOT);
             }
         };
         main();
