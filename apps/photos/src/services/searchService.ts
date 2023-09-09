@@ -73,9 +73,6 @@ function convertSuggestionsToOptions(
             searchQuery: convertSuggestionToSearchQuery(suggestion),
         }))
         .map(({ suggestion, searchQuery }) => {
-            if (suggestion.type === SuggestionType.FILE_TYPE) {
-                console.log('searchQuery', searchQuery);
-            }
             const resultFiles = getUniqueFiles(
                 files.filter((file) => isSearchedFile(file, searchQuery))
             );
