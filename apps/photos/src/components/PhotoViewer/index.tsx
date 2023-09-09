@@ -554,6 +554,15 @@ function PhotoViewer(props: Iprops) {
             fullScreenApi.enter();
         }
     };
+
+    const triggerManualConvert = () => {
+        props.getConvertedVideo(
+            photoSwipe,
+            photoSwipe.getCurrentIndex(),
+            photoSwipe.currItem as EnteFile
+        );
+    };
+
     const scheduleUpdate = () => (needUpdate.current = true);
     const { id } = props;
     let { className } = props;
@@ -587,13 +596,7 @@ function PhotoViewer(props: Iprops) {
                     )}
                     {showConvertBtn && (
                         <ConvertBtn
-                            onClick={() => {
-                                props.getConvertedVideo(
-                                    photoSwipe,
-                                    photoSwipe.getCurrentIndex(),
-                                    photoSwipe.currItem as EnteFile
-                                );
-                            }}
+                            onClick={triggerManualConvert}
                             disabled={!isSourceLoaded}>
                             {t('CONVERT')}
                         </ConvertBtn>
