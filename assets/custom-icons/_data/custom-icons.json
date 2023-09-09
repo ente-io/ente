@@ -1,12 +1,24 @@
 {
-    "icons": [
-        {
-            "title": "ente",
-            "hex": "1DB954"
-        },
-        {
-            "title": "Github",
-            "hex": "858585"
-        }
-    ]
+  "icons": [
+    {
+      "title": "ente",
+      "hex": "1DB954"
+    },
+    {
+      "title": "Github",
+      "hex": "858585"
+    },
+    {
+      "title": "Porkbun",
+      "hex": "F27777"
+    },
+    {
+      "title": "Windscribe",
+      "hex": "858585"
+    },
+    {
+      "title": "Kick",
+      "hex": "53FC19"
+    }
+  ]
 }
