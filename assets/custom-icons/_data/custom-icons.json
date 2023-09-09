@@ -55,6 +55,10 @@
     {
       "title": "KuCoin",
       "hex": "01BC8D"
+    },
+    {
+      "title": "Plutus",
+      "hex": "DEC685"
     }
   ]
 }
