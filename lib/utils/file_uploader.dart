@@ -340,8 +340,10 @@ class FileUploader {
 
     final tempDirectory = Configuration.instance.getTempDirectory();
     final String uniqueID = const Uuid().v4().toString();
-    final encryptedFilePath = '$tempDirectory${uniqueID}_file.encrypted';
-    final encryptedThumbnailPath = '$tempDirectory${uniqueID}_thumb.encrypted';
+    final encryptedFilePath = '${tempDirectory}upload_${uniqueID}_file'
+        '.encrypted';
+    final encryptedThumbnailPath = '${tempDirectory}upload_${uniqueID}_thumb'
+        '.encrypted';
     MediaUploadData? mediaUploadData;
     var uploadCompleted = false;
     // This flag is used to decide whether to clear the iOS origin file cache
