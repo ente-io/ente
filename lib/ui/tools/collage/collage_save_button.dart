@@ -54,7 +54,7 @@ class SaveCollageButton extends StatelessWidget {
               return;
             }
             final newFile = await EnteFile.fromAsset("ente Collages", newAsset);
-            SyncService.instance.sync();
+            SyncService.instance.sync().ignore();
             showShortToast(context, S.of(context).collageSaved);
             replacePage(
               context,

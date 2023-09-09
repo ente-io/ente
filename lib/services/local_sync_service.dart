@@ -241,6 +241,16 @@ class LocalSyncService {
         PermissionState.limited.toString();
   }
 
+  bool hasGrantedFullPermission() {
+    return (_prefs.getString(kPermissionStateKey) ?? '') ==
+        PermissionState.authorized.toString();
+  }
+
+  Future<void> onUpdatePermission(PermissionState state) async {
+    await _prefs.setBool(kHasGrantedPermissionsKey, true);
+    await _prefs.setString(kPermissionStateKey, state.toString());
+  }
+
   Future<void> onPermissionGranted(PermissionState state) async {
     await _prefs.setBool(kHasGrantedPermissionsKey, true);
     await _prefs.setString(kPermissionStateKey, state.toString());

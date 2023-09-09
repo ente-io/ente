@@ -45,6 +45,8 @@ class _ZoomableLiveImageState extends State<ZoomableLiveImage>
   @override
   void initState() {
     _enteFile = widget.enteFile;
+    _logger.info('initState for ${_enteFile.generatedID} with tag ${_enteFile
+        .tag} and name ${_enteFile.displayName}');
     super.initState();
   }
 

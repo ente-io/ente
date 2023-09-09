@@ -189,6 +189,10 @@
   "disableDownloadWarningBody": "Kijkers kunnen nog steeds screenshots maken of een kopie van je foto's opslaan met behulp van externe tools",
   "allowDownloads": "Downloads toestaan",
   "linkDeviceLimit": "Apparaat limiet",
+  "noDeviceLimit": "Geen",
+  "@noDeviceLimit": {
+    "description": "Text to indicate that there is limit on number of devices"
+  },
   "linkExpiry": "Vervaldatum",
   "linkExpired": "Verlopen",
   "linkEnabled": "Ingeschakeld",
@@ -201,15 +205,6 @@
   "manageLink": "Beheer link",
   "linkExpiresOn": "Link vervalt op {expiryTime}",
   "albumUpdated": "Album bijgewerkt",
-  "maxDeviceLimitSpikeHandling": "Wanneer ingesteld op het maximum ({maxValue}), wordt het apparaatlimiet versoepeld om tijdelijke pieken van grote aantallen kijkers mogelijk te maken.",
-  "@maxDeviceLimitSpikeHandling": {
-    "placeholders": {
-      "maxValue": {
-        "type": "int",
-        "example": "100"
-      }
-    }
-  },
   "never": "Nooit",
   "custom": "Aangepast",
   "@custom": {
@@ -435,6 +430,7 @@
       }
     }
   },
+  "showMemories": "Toon herinneringen",
   "yearsAgo": "{count, plural, one{{count} jaar geleden} other{{count} jaar geleden}}",
   "backupSettings": "Back-up instellingen",
   "backupOverMobileData": "Back-up maken via mobiele data",
@@ -467,6 +463,7 @@
   "updateAvailable": "Update beschikbaar",
   "ignoreUpdate": "Negeren",
   "downloading": "Downloaden...",
+  "cannotDeleteSharedFiles": "Kan gedeelde bestanden niet verwijderen",
   "theDownloadCouldNotBeCompleted": "De download kon niet worden voltooid",
   "retry": "Opnieuw",
   "backedUpFolders": "Back-up mappen",
@@ -643,6 +640,9 @@
   "startBackup": "Back-up starten",
   "noPhotosAreBeingBackedUpRightNow": "Er worden momenteel geen foto's geback-upt",
   "preserveMore": "Meer bewaren",
+  "grantFullAccessPrompt": "Geef toegang tot alle foto's in de Instellingen app",
+  "openSettings": "Instellingen openen",
+  "selectMorePhotos": "Selecteer meer foto's",
   "existingUser": "Bestaande gebruiker",
   "privateBackups": "Privé back-ups",
   "forYourMemories": "voor uw herinneringen",
@@ -813,6 +813,7 @@
   "fileFailedToSaveToGallery": "Opslaan van bestand naar galerij mislukt",
   "download": "Downloaden",
   "pressAndHoldToPlayVideo": "Ingedrukt houden om video af te spelen",
+  "pressAndHoldToPlayVideoDetailed": "Houd de afbeelding ingedrukt om video af te spelen",
   "downloadFailed": "Download mislukt",
   "deduplicateFiles": "Dubbele bestanden verwijderen",
   "deselectAll": "Alles deselecteren",
@@ -1095,7 +1096,11 @@
   "sharedByYou": "Gedeeld door jou",
   "inviteYourFriendsToEnte": "Vrienden uitnodigen voor ente",
   "failedToDownloadVideo": "Downloaden van video mislukt",
+  "hiding": "Verbergen...",
+  "unhiding": "Zichtbaar maken...",
+  "successfullyHid": "Succesvol verborgen",
+  "successfullyUnhid": "Met succes zichtbaar gemaakt",
   "crashReporting": "Crash rapportering",
-  "addToHiddenAlbum": "Add to hidden album",
-  "moveToHiddenAlbum": "Move to hidden album"
+  "addToHiddenAlbum": "Toevoegen aan verborgen album",
+  "moveToHiddenAlbum": "Verplaatsen naar verborgen album"
 }

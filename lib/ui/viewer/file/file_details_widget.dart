@@ -7,7 +7,7 @@ import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file/file_type.dart';
 import "package:photos/models/metadata/file_magic.dart";
 import "package:photos/services/file_magic_service.dart";
-import "package:photos/services/update_service.dart";
+// import "package:photos/services/update_service.dart";
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/buttons/icon_button_widget.dart';
 import "package:photos/ui/components/divider_widget.dart";
@@ -20,7 +20,7 @@ import "package:photos/ui/viewer/file_details/creation_time_item_widget.dart";
 import 'package:photos/ui/viewer/file_details/exif_item_widgets.dart';
 import "package:photos/ui/viewer/file_details/file_properties_item_widget.dart";
 import "package:photos/ui/viewer/file_details/location_tags_widget.dart";
-import "package:photos/ui/viewer/file_details/objects_item_widget.dart";
+// import "package:photos/ui/viewer/file_details/objects_item_widget.dart";
 import "package:photos/utils/exif_util.dart";
 
 class FileDetailsWidget extends StatefulWidget {
@@ -177,12 +177,12 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
       ]);
     }
 
-    if (!UpdateService.instance.isFdroidFlavor()) {
-      fileDetailsTiles.addAll([
-        ObjectsItemWidget(file),
-        const FileDetailsDivider(),
-      ]);
-    }
+    // if (!UpdateService.instance.isFdroidFlavor()) {
+    //   fileDetailsTiles.addAll([
+    //     ObjectsItemWidget(file),
+    //     const FileDetailsDivider(),
+    //   ]);
+    // }
 
     if (file.uploadedFileID != null && file.updationTime != null) {
       fileDetailsTiles.addAll(
@@ -279,10 +279,11 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
             "ImageLength"];
     if (imageWidth != null && imageLength != null) {
       _exifData["resolution"] = '$imageWidth x $imageLength';
-      _exifData['megaPixels'] =
-          ((imageWidth.values.firstAsInt() * imageLength.values.firstAsInt()) /
-                  1000000)
-              .toStringAsFixed(1);
+      final double megaPixels =
+          (imageWidth.values.firstAsInt() * imageLength.values.firstAsInt()) /
+              1000000;
+      final double roundedMegaPixels = (megaPixels * 10).round() / 10.0;
+      _exifData['megaPixels'] = roundedMegaPixels..toStringAsFixed(1);
     } else {
       debugPrint("No image width/height");
     }

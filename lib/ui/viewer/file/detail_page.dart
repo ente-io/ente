@@ -1,4 +1,7 @@
+import "dart:math";
+
 import 'package:extended_image/extended_image.dart';
+import "package:flutter/foundation.dart";
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:logging/logging.dart';
@@ -7,6 +10,7 @@ import 'package:photos/core/constants.dart';
 import 'package:photos/core/errors.dart';
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/file/file.dart';
+import "package:photos/ui/common/fast_scroll_physics.dart";
 import 'package:photos/ui/tools/editor/image_editor_page.dart';
 import "package:photos/ui/viewer/file/file_app_bar.dart";
 import "package:photos/ui/viewer/file/file_bottom_bar.dart";
@@ -102,6 +106,12 @@ class _DetailPageState extends State<DetailPage> {
 
   @override
   Widget build(BuildContext context) {
+    try {
+      _files![_selectedIndexNotifier.value];
+    } catch (e) {
+      _logger.severe(e);
+      Navigator.pop(context);
+    }
     _logger.info(
       "Opening " +
           _files![_selectedIndexNotifier.value].toString() +
@@ -136,7 +146,7 @@ class _DetailPageState extends State<DetailPage> {
             ValueListenableBuilder(
               builder: (BuildContext context, int selectedIndex, _) {
                 return FileBottomBar(
-                  _files![_selectedIndexNotifier.value],
+                  _files![selectedIndex],
                   _onEditFileRequested,
                   widget.config.mode == DetailPageMode.minimalistic,
                   onFileRemoved: _onFileRemoved,
@@ -154,47 +164,69 @@ class _DetailPageState extends State<DetailPage> {
 
   Widget _buildPageView(BuildContext context) {
     final bottomPadding = MediaQuery.of(context).padding.bottom;
-    _logger.info("Building with " + _selectedIndexNotifier.value.toString());
     return PageView.builder(
       itemBuilder: (context, index) {
         final file = _files![index];
         _preloadFiles(index);
+        final Widget fileContent = FileWidget(
+          file,
+          autoPlay: shouldAutoPlay(),
+          tagPrefix: widget.config.tagPrefix,
+          shouldDisableScroll: (value) {
+            if (_shouldDisableScroll != value) {
+              setState(() {
+                _logger.fine('setState $_shouldDisableScroll to $value');
+                _shouldDisableScroll = value;
+              });
+            }
+          },
+          //Noticed that when the video is seeked, the video pops and moves the
+          //seek bar along with it and it happens when bottomPadding is 0. So we
+          //don't toggle full screen for cases where this issue happens.
+          playbackCallback: bottomPadding != 0
+              ? (isPlaying) {
+            Future.delayed(Duration.zero, () {
+              _toggleFullScreen();
+            });
+          }
+              : null,
+          backgroundDecoration: const BoxDecoration(color: Colors.black),
+        );
         return GestureDetector(
           onTap: () {
             _toggleFullScreen();
           },
-          child: FileWidget(
-            file,
-            autoPlay: shouldAutoPlay(),
-            tagPrefix: widget.config.tagPrefix,
-            shouldDisableScroll: (value) {
-              if (_shouldDisableScroll != value) {
-                setState(() {
-                  _shouldDisableScroll = value;
-                });
-              }
-            },
-            //Noticed that when the video is seeked, the video pops and moves the
-            //seek bar along with it and it happens when bottomPadding is 0. So we
-            //don't toggle full screen for cases where this issue happens.
-            playbackCallback: bottomPadding != 0
-                ? (isPlaying) {
-                    Future.delayed(Duration.zero, () {
-                      _toggleFullScreen();
-                    });
-                  }
-                : null,
-            backgroundDecoration: const BoxDecoration(color: Colors.black),
-          ),
+          child: kDebugMode ?
+              Stack(children: [
+                fileContent,
+                Positioned(
+                  top: 80,
+                  right: 80,
+                  child: Text(
+                    file.generatedID?.toString() ?? 'null',
+                    style: const TextStyle(color: Colors.white),
+                  ),
+                ),
+              ],)
+          : fileContent,
         );
       },
       onPageChanged: (index) {
-        _selectedIndexNotifier.value = index;
+        if(_selectedIndexNotifier.value == index) {
+          if(kDebugMode) {
+            debugPrint("onPageChanged called with same index $index");
+          }
+          // always notify listeners when the index is the same because
+          // the total number of files might have changed
+          _selectedIndexNotifier.notifyListeners();
+        } else {
+          _selectedIndexNotifier.value = index;
+        }
         _preloadEntries();
       },
       physics: _shouldDisableScroll
           ? const NeverScrollableScrollPhysics()
-          : const PageScrollPhysics(),
+          : const FastScrollPhysics(speedFactor: 4.0),
       controller: _pageController,
       itemCount: _files!.length,
     );
@@ -250,6 +282,7 @@ class _DetailPageState extends State<DetailPage> {
           );
 
     setState(() {
+      _logger.fine('setState loadStartEntries');
       // Returned result could be a subtype of File
       // ignore: unnecessary_cast
       final files = result.files.reversed.map((e) => e as EnteFile).toList();
@@ -282,6 +315,7 @@ class _DetailPageState extends State<DetailPage> {
       if (!result.hasMore) {
         _hasLoadedTillEnd = true;
       }
+      _logger.fine('setState loadEndEntries hasMore ${result.hasMore}');
       _files!.addAll(result.files);
     });
   }
@@ -302,24 +336,21 @@ class _DetailPageState extends State<DetailPage> {
       Navigator.of(context).pop(); // Close pageview
       return;
     }
-    if (_selectedIndexNotifier.value == totalFiles - 1) {
-      // Deleted the last file
-      await _pageController.previousPage(
+    setState(() {
+      _files!.remove(file);
+      _selectedIndexNotifier.value = min(_selectedIndexNotifier.value,
+          totalFiles - 2,);
+    });
+    final currentPageIndex = _pageController.page!.round();
+    final int targetPageIndex = _files!.length > currentPageIndex
+        ? currentPageIndex
+        : currentPageIndex - 1;
+    if (_files!.isNotEmpty) {
+      _pageController.animateToPage(
+        targetPageIndex,
         duration: const Duration(milliseconds: 200),
         curve: Curves.easeInOut,
       );
-      setState(() {
-        _files!.remove(file);
-      });
-    } else {
-      await _pageController.nextPage(
-        duration: const Duration(milliseconds: 200),
-        curve: Curves.easeInOut,
-      );
-      setState(() {
-        _selectedIndexNotifier.value--;
-        _files!.remove(file);
-      });
     }
   }
 

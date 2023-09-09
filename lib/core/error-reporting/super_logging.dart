@@ -214,10 +214,14 @@ class SuperLogging {
     }
   }
 
-  static void setUserID(String userID) async {
+  static Future<void> setUserID(String userID) async {
     if (config.sentryDsn != null) {
-      Sentry.configureScope((scope) => scope.setUser(SentryUser(id: userID)));
-      $.info("setting sentry user ID to: $userID");
+      $.finest("setting sentry user ID to: $userID");
+      Sentry.configureScope(
+        (scope) => scope.setUser(SentryUser(id: userID)).onError(
+              (e, s) => $.warning("failed to configure scope user", e, s),
+            ),
+      );
     }
   }
 

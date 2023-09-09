@@ -483,22 +483,6 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
       final bool hasShareeArchived = widget.collection!.hasShareeArchived();
       items.add(
         PopupMenuItem(
-          value: AlbumPopupAction.leave,
-          child: Row(
-            children: [
-              const Icon(Icons.logout),
-              const Padding(
-                padding: EdgeInsets.all(8),
-              ),
-              Text(S.of(context).leaveAlbum),
-            ],
-          ),
-        ),
-      );
-
-      //here
-      items.add(
-        PopupMenuItem(
           value: AlbumPopupAction.sharedArchive,
           child: Row(
             children: [
@@ -513,6 +497,20 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
                     ? S.of(context).unarchiveAlbum
                     : S.of(context).archiveAlbum,
               ),
+            ],
+          ),
+        ),
+      );
+      items.add(
+        PopupMenuItem(
+          value: AlbumPopupAction.leave,
+          child: Row(
+            children: [
+              const Icon(Icons.logout),
+              const Padding(
+                padding: EdgeInsets.all(8),
+              ),
+              Text(S.of(context).leaveAlbum),
             ],
           ),
         ),

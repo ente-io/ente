@@ -88,7 +88,6 @@ class _SearchWidgetState extends State<SearchWidget> {
                       // Below parameters are to disable auto-suggestion
                       enableSuggestions: false,
                       autocorrect: false,
-                      keyboardType: TextInputType.visiblePassword,
                       // Above parameters are to disable auto-suggestion
                       decoration: InputDecoration(
                         hintText: S.of(context).searchHintText,
@@ -142,7 +141,7 @@ class _SearchWidgetState extends State<SearchWidget> {
                       onChanged: (value) async {
                         _query = value;
                         final List<SearchResult> allResults =
-                            await getSearchResultsForQuery(value);
+                            await getSearchResultsForQuery(context, value);
                         /*checking if _query == value to make sure that the results are from the current query
                         and not from the previous query (race condition).*/
                         if (mounted && _query == value) {
@@ -175,12 +174,15 @@ class _SearchWidgetState extends State<SearchWidget> {
     super.dispose();
   }
 
-  Future<List<SearchResult>> getSearchResultsForQuery(String query) async {
+  Future<List<SearchResult>> getSearchResultsForQuery(
+    BuildContext context,
+    String query,
+  ) async {
     final Completer<List<SearchResult>> completer = Completer();
 
     _debouncer.run(
       () {
-        return _getSearchResultsFromService(query, completer);
+        return _getSearchResultsFromService(context, query, completer);
       },
     );
 
@@ -188,6 +190,7 @@ class _SearchWidgetState extends State<SearchWidget> {
   }
 
   Future<void> _getSearchResultsFromService(
+    BuildContext context,
     String query,
     Completer completer,
   ) async {
@@ -203,7 +206,7 @@ class _SearchWidgetState extends State<SearchWidget> {
       }
 
       final holidayResults =
-          await _searchService.getHolidaySearchResults(query);
+      await _searchService.getHolidaySearchResults(context, query);
       allResults.addAll(holidayResults);
 
       final fileTypeSearchResults =
@@ -225,10 +228,12 @@ class _SearchWidgetState extends State<SearchWidget> {
           await _searchService.getCollectionSearchResults(query);
       allResults.addAll(collectionResults);
 
-      final monthResults = await _searchService.getMonthSearchResults(query);
+      final monthResults =
+          await _searchService.getMonthSearchResults(context, query);
       allResults.addAll(monthResults);
 
-      final possibleEvents = await _searchService.getDateResults(query);
+      final possibleEvents =
+          await _searchService.getDateResults(context, query);
       allResults.addAll(possibleEvents);
     } catch (e, s) {
       _logger.severe("error during search", e, s);

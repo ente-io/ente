@@ -11,7 +11,7 @@ extension FilePropsExtn on EnteFile {
   bool get isLiveOrMotionPhoto => isLivePhoto || isMotionPhoto;
 
   bool get isOwner =>
-      (ownerID == null) || (ownerID! == Configuration.instance.getUserID()!);
+      (ownerID == null) || (ownerID == Configuration.instance.getUserID());
 
   bool get canEditMetaInfo => isUploaded && isOwner;
 

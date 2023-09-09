@@ -435,6 +435,7 @@
       }
     }
   },
+  "showMemories": "Mostra ricordi",
   "yearsAgo": "{count, plural, one{{count} anno fa} other{{count} anni fa}}",
   "backupSettings": "Impostazioni backup",
   "backupOverMobileData": "Backup su dati mobili",
@@ -643,6 +644,9 @@
   "startBackup": "Avvia backup",
   "noPhotosAreBeingBackedUpRightNow": "Il backup delle foto attualmente non viene eseguito",
   "preserveMore": "Salva più foto",
+  "grantFullAccessPrompt": "Consenti l'accesso a tutte le foto nelle Impostazioni",
+  "openSettings": "Apri Impostazioni",
+  "selectMorePhotos": "Seleziona più foto",
   "existingUser": "Accedi",
   "privateBackups": "Backup privato",
   "forYourMemories": "per i tuoi ricordi",
@@ -813,6 +817,7 @@
   "fileFailedToSaveToGallery": "Impossibile salvare il file nella galleria",
   "download": "Scarica",
   "pressAndHoldToPlayVideo": "Tieni premuto per riprodurre il video",
+  "pressAndHoldToPlayVideoDetailed": "Tieni premuto sull'immagine per riprodurre il video",
   "downloadFailed": "Scaricamento fallito",
   "deduplicateFiles": "File Duplicati",
   "deselectAll": "Deseleziona tutti",
@@ -1100,6 +1105,6 @@
   "successfullyHid": "Nascosta con successo",
   "successfullyUnhid": "Rimossa dal nascondiglio con successo",
   "crashReporting": "Segnalazione di crash",
-  "addToHiddenAlbum": "Add to hidden album",
-  "moveToHiddenAlbum": "Move to hidden album"
+  "addToHiddenAlbum": "Aggiungi ad album nascosto",
+  "moveToHiddenAlbum": "Sposta in album nascosto"
 }

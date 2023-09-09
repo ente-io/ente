@@ -1530,6 +1530,16 @@ class S {
     );
   }
 
+  /// `None`
+  String get noDeviceLimit {
+    return Intl.message(
+      'None',
+      name: 'noDeviceLimit',
+      desc: 'Text to indicate that there is limit on number of devices',
+      args: [],
+    );
+  }
+
   /// `Link expiry`
   String get linkExpiry {
     return Intl.message(
@@ -1647,16 +1657,6 @@ class S {
       name: 'albumUpdated',
       desc: '',
       args: [],
-    );
-  }
-
-  /// `When set to the maximum ({maxValue}), the device limit will be relaxed to allow for temporary spikes of large number of viewers.`
-  String maxDeviceLimitSpikeHandling(int maxValue) {
-    return Intl.message(
-      'When set to the maximum ($maxValue), the device limit will be relaxed to allow for temporary spikes of large number of viewers.',
-      name: 'maxDeviceLimitSpikeHandling',
-      desc: '',
-      args: [maxValue],
     );
   }
 
@@ -3282,6 +3282,16 @@ class S {
     );
   }
 
+  /// `Cannot delete shared files`
+  String get cannotDeleteSharedFiles {
+    return Intl.message(
+      'Cannot delete shared files',
+      name: 'cannotDeleteSharedFiles',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `The download could not be completed`
   String get theDownloadCouldNotBeCompleted {
     return Intl.message(
@@ -4450,6 +4460,36 @@ class S {
     return Intl.message(
       'Preserve more',
       name: 'preserveMore',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please allow access to all photos in the Settings app`
+  String get grantFullAccessPrompt {
+    return Intl.message(
+      'Please allow access to all photos in the Settings app',
+      name: 'grantFullAccessPrompt',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Open Settings`
+  String get openSettings {
+    return Intl.message(
+      'Open Settings',
+      name: 'openSettings',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Select more photos`
+  String get selectMorePhotos {
+    return Intl.message(
+      'Select more photos',
+      name: 'selectMorePhotos',
       desc: '',
       args: [],
     );

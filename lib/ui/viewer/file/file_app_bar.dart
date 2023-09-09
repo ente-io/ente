@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
+import "package:flutter/foundation.dart";
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:media_extension/media_extension.dart';
@@ -10,6 +11,7 @@ import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import "package:photos/generated/l10n.dart";
+import "package:photos/l10n/l10n.dart";
 import "package:photos/models/file/extensions/file_props.dart";
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file/file_type.dart';
@@ -88,7 +90,7 @@ class FileAppBarState extends State<FileAppBar> {
   }
 
   AppBar _buildAppBar() {
-    debugPrint("building app bar");
+    _logger.fine("building app bar ${widget.file.generatedID?.toString()}");
 
     final List<Widget> actions = [];
     final isTrashedFile = widget.file is TrashFile;
@@ -102,6 +104,14 @@ class FileAppBarState extends State<FileAppBar> {
               ?.isHidden() ??
           false;
     }
+      if (kDebugMode) {
+        actions.add(
+          Text(
+            widget.file.generatedID?.toString() ?? 'null',
+            style: TextStyle(color: Colors.white),
+          ),
+        );
+      }
     if (widget.file.isLiveOrMotionPhoto) {
       actions.add(
         IconButton(
@@ -150,7 +160,7 @@ class FileAppBarState extends State<FileAppBar> {
             );
           }
           // options for files owned by the user
-          if (isOwnedByUser && !isFileHidden) {
+          if (isOwnedByUser && !isFileHidden && isFileUploaded) {
             final bool isArchived =
                 widget.file.magicMetadata.visibility == archiveVisibility;
             items.add(
@@ -298,7 +308,11 @@ class FileAppBarState extends State<FileAppBar> {
   }
 
   Future<void> _download(EnteFile file) async {
-    final dialog = createProgressDialog(context, "Downloading...");
+    final dialog = createProgressDialog(
+      context,
+      context.l10n.downloading,
+      isDismissible: true,
+    );
     await dialog.show();
     try {
       final FileType type = file.fileType;

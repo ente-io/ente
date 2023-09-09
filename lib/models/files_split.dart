@@ -14,6 +14,8 @@ class FilesSplit {
   int get totalFileOwnedCount =>
       pendingUploads.length + ownedByCurrentUser.length;
 
+  int get count => totalFileOwnedCount + ownedByOtherUsers.length;
+
   static FilesSplit split(Iterable<EnteFile> files, int currentUserID) {
     final List<EnteFile> ownedByCurrentUser = [],
         ownedByOtherUsers = [],
