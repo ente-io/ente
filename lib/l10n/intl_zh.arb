@@ -189,6 +189,10 @@
   "disableDownloadWarningBody": "查看者仍然可以使用外部工具截图或保存您的照片副本",
   "allowDownloads": "允许下载",
   "linkDeviceLimit": "设备限制",
+  "noDeviceLimit": "无",
+  "@noDeviceLimit": {
+    "description": "Text to indicate that there is limit on number of devices"
+  },
   "linkExpiry": "链接过期",
   "linkExpired": "已过期",
   "linkEnabled": "已启用",
@@ -201,15 +205,6 @@
   "manageLink": "管理链接",
   "linkExpiresOn": "链接将在 {expiryTime} 过期",
   "albumUpdated": "相册已更新",
-  "maxDeviceLimitSpikeHandling": "当设置为最大值 ({maxValue}) 时，设备限制将放宽以允许大量查看者查看的临时高峰。",
-  "@maxDeviceLimitSpikeHandling": {
-    "placeholders": {
-      "maxValue": {
-        "type": "int",
-        "example": "100"
-      }
-    }
-  },
   "never": "永不",
   "custom": "自定义",
   "@custom": {
@@ -435,6 +430,7 @@
       }
     }
   },
+  "showMemories": "显示回忆",
   "yearsAgo": "{count, plural, one{{count} 年前} other{{count} 年前}}",
   "backupSettings": "备份设置",
   "backupOverMobileData": "通过移动数据备份",
@@ -467,6 +463,7 @@
   "updateAvailable": "有可用的更新",
   "ignoreUpdate": "忽略",
   "downloading": "正在下载...",
+  "cannotDeleteSharedFiles": "无法删除共享文件",
   "theDownloadCouldNotBeCompleted": "未能完成下载",
   "retry": "重试",
   "backedUpFolders": "已备份的文件夹",
@@ -643,6 +640,9 @@
   "startBackup": "开始备份",
   "noPhotosAreBeingBackedUpRightNow": "目前没有照片正在备份",
   "preserveMore": "保留更多",
+  "grantFullAccessPrompt": "请在“设置”应用中将权限更改为允许访问所有所有照片",
+  "openSettings": "打开“设置”",
+  "selectMorePhotos": "选择更多照片",
   "existingUser": "现有用户",
   "privateBackups": "私人备份",
   "forYourMemories": "为您的回忆",
@@ -813,6 +813,7 @@
   "fileFailedToSaveToGallery": "无法将文件保存到相册",
   "download": "下载",
   "pressAndHoldToPlayVideo": "按住以播放视频",
+  "pressAndHoldToPlayVideoDetailed": "长按图像以播放视频",
   "downloadFailed": "下載失敗",
   "deduplicateFiles": "重复文件",
   "deselectAll": "取消全选",
@@ -1095,7 +1096,11 @@
   "sharedByYou": "您共享的",
   "inviteYourFriendsToEnte": "邀请您的好友加入ente",
   "failedToDownloadVideo": "视频下载失败",
+  "hiding": "正在隐藏...",
+  "unhiding": "正在取消隐藏...",
+  "successfullyHid": "已成功隐藏",
+  "successfullyUnhid": "已成功取消隐藏",
   "crashReporting": "崩溃报告",
-  "addToHiddenAlbum": "Add to hidden album",
-  "moveToHiddenAlbum": "Move to hidden album"
+  "addToHiddenAlbum": "添加到隐藏相册",
+  "moveToHiddenAlbum": "移至隐藏相册"
 }
