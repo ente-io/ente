@@ -25,8 +25,9 @@ class NotificationService {
       NotificationResponse notificationResponse,
     )
         onNotificationTapped,
+        SharedPreferences preferences,
   ) async {
-    _preferences = await SharedPreferences.getInstance();
+    _preferences = preferences;
     const androidSettings = AndroidInitializationSettings('notification_icon');
     const iosSettings = DarwinInitializationSettings(
       requestAlertPermission: false,
