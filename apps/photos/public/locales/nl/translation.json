@@ -209,7 +209,8 @@
         "DATE": "Datum",
         "FILE_NAME": "Bestandsnaam",
         "THING": "Inhoud",
-        "FILE_CAPTION": "Omschrijving"
+        "FILE_CAPTION": "Omschrijving",
+        "FILE_TYPE": "Bestandstype"
     },
     "photos_count_zero": "Geen herinneringen",
     "photos_count_one": "1 herinnering",
@@ -423,9 +424,9 @@
     "STOP_ALL_UPLOADS_MESSAGE": "Weet u zeker dat u wilt stoppen met alle uploads die worden uitgevoerd?",
     "STOP_UPLOADS_HEADER": "Stoppen met uploaden?",
     "YES_STOP_UPLOADS": "Ja, stop uploaden",
-    "STOP_DOWNLOADS_HEADER": "",
-    "YES_STOP_DOWNLOADS": "",
-    "STOP_ALL_DOWNLOADS_MESSAGE": "",
+    "STOP_DOWNLOADS_HEADER": "Downloaden stoppen?",
+    "YES_STOP_DOWNLOADS": "Ja, downloads stoppen",
+    "STOP_ALL_DOWNLOADS_MESSAGE": "Weet je zeker dat je wilt stoppen met alle downloads die worden uitgevoerd?",
     "albums_one": "1 Album",
     "albums_other": "{{count, number}} Albums",
     "ALL_ALBUMS": "Alle albums",
@@ -580,8 +581,15 @@
     "SELECT_COLLECTION": "Album selecteren",
     "PIN_ALBUM": "Album bovenaan vastzetten",
     "UNPIN_ALBUM": "Album losmaken",
-    "DOWNLOAD_COMPLETE": "",
-    "DOWNLOADING_COLLECTION": "",
-    "DOWNLOAD_FAILED": "",
-    "DOWNLOAD_PROGRESS": ""
+    "DOWNLOAD_COMPLETE": "Download compleet",
+    "DOWNLOADING_COLLECTION": "{{name}} downloaden",
+    "DOWNLOAD_FAILED": "Download mislukt",
+    "DOWNLOAD_PROGRESS": "{{progress.current}} / {{progress.total}} bestanden",
+    "CHRISTMAS": "Kerst",
+    "CHRISTMAS_EVE": "Kerstavond",
+    "NEW_YEAR": "Nieuwjaar",
+    "NEW_YEAR_EVE": "Oudjaarsavond",
+    "IMAGE": "Afbeelding",
+    "VIDEO": "Video",
+    "LIVE_PHOTO": "Live foto"
 }

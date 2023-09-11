@@ -2,6 +2,7 @@ import { Person, Thing, WordGroup } from 'types/machineLearning';
 import { IndexStatus } from 'types/machineLearning/ui';
 import { EnteFile } from 'types/file';
 import { LocationTagData } from 'types/entity';
+import { FILE_TYPE } from 'constants/file';
 
 export enum SuggestionType {
     DATE = 'DATE',
@@ -13,6 +14,7 @@ export enum SuggestionType {
     THING = 'THING',
     TEXT = 'TEXT',
     FILE_CAPTION = 'FILE_CAPTION',
+    FILE_TYPE = 'FILE_TYPE',
 }
 
 export interface DateValue {
@@ -31,7 +33,8 @@ export interface Suggestion {
         | IndexStatus
         | Thing
         | WordGroup
-        | LocationTagData;
+        | LocationTagData
+        | FILE_TYPE;
     hide?: boolean;
 }
 
@@ -43,6 +46,7 @@ export type Search = {
     person?: Person;
     thing?: Thing;
     text?: WordGroup;
+    fileType?: FILE_TYPE;
 };
 
 export type SearchResultSummary = {
