@@ -83,6 +83,14 @@ const PhotoFrame = ({
     const [isSourceLoaded, setIsSourceLoaded] = useState(false);
     const [conversionFailed, setConversionFailed] = useState(false);
 
+    const thumbsStore = publicCollectionGalleryContext?.accessedThroughSharedURL
+        ? publicCollectionGalleryContext.thumbs
+        : galleryContext.thumbs;
+
+    const filesStore = publicCollectionGalleryContext?.accessedThroughSharedURL
+        ? publicCollectionGalleryContext.files
+        : galleryContext.files;
+
     const displayFiles = useMemoSingleThreaded(() => {
         return files.map((item) => {
             const filteredItem = {
@@ -92,17 +100,11 @@ const PhotoFrame = ({
                 title: item.pubMagicMetadata?.data.caption,
             };
             try {
-                if (galleryContext.thumbs.has(item.id)) {
-                    updateFileMsrcProps(
-                        filteredItem,
-                        galleryContext.thumbs.get(item.id)
-                    );
+                if (thumbsStore.has(item.id)) {
+                    updateFileMsrcProps(filteredItem, thumbsStore.get(item.id));
                 }
-                if (galleryContext.files.has(item.id)) {
-                    updateFileSrcProps(
-                        filteredItem,
-                        galleryContext.files.get(item.id)
-                    );
+                if (filesStore.has(item.id)) {
+                    updateFileSrcProps(filteredItem, filesStore.get(item.id));
                 }
             } catch (e) {
                 logError(e, 'PhotoFrame url prefill failed');
@@ -388,11 +390,11 @@ const PhotoFrame = ({
             addLogLine(`[${item.id}] doesn't have thumbnail`);
             try {
                 let url: string;
-                if (galleryContext.thumbs.has(item.id)) {
+                if (thumbsStore.has(item.id)) {
                     addLogLine(
                         `[${item.id}] gallery context cache hit, using cached thumb`
                     );
-                    url = galleryContext.thumbs.get(item.id);
+                    url = thumbsStore.get(item.id);
                 } else {
                     addLogLine(
                         `[${item.id}] gallery context cache miss, calling downloadManager to get thumb`
@@ -409,7 +411,7 @@ const PhotoFrame = ({
                     } else {
                         url = await DownloadManager.getThumbnail(item);
                     }
-                    galleryContext.thumbs.set(item.id, url);
+                    thumbsStore.set(item.id, url);
                 }
                 updateURL(index)(item.id, url);
                 try {
@@ -455,11 +457,11 @@ const PhotoFrame = ({
             fetching[item.id] = true;
             let srcURL: MergedSourceURL;
             let conversionFailed: boolean = false;
-            if (galleryContext.files.has(item.id)) {
+            if (filesStore.has(item.id)) {
                 addLogLine(
                     `[${item.id}] gallery context cache hit, using cached file`
                 );
-                srcURL = galleryContext.files.get(item.id);
+                srcURL = filesStore.get(item.id);
             } else {
                 addLogLine(
                     `[${item.id}] gallery context cache miss, calling downloadManager to get file`
@@ -491,7 +493,7 @@ const PhotoFrame = ({
                         original: downloadedURL.original.join(','),
                         converted: downloadedURL.converted.join(','),
                     };
-                    galleryContext.files.set(item.id, mergedURL);
+                    filesStore.set(item.id, mergedURL);
                     srcURL = mergedURL;
                 }
             }
@@ -541,70 +543,37 @@ const PhotoFrame = ({
         try {
             addLogLine(`[${item.id}] new file getConvertedVideo request`);
             fetching[item.id] = true;
-            let srcURL: MergedSourceURL;
             let conversionFailed: boolean = false;
-            if (galleryContext.files.has(item.id)) {
+            if (!filesStore.has(item.id)) {
                 addLogLine(
-                    `[${item.id}] gallery context cache hit, using cached file`
+                    `[${item.id}] getConvertedVideo called for file that is not downloaded`
                 );
-                srcURL = galleryContext.files.get(item.id);
-                const originalVideoURL = srcURL.original;
-                const convertedVideoURL = URL.createObjectURL(
-                    await getPlayableVideo(
-                        item.metadata.title,
-                        new Uint8Array(
-                            await (await fetch(originalVideoURL)).arrayBuffer()
-                        ),
-                        true
-                    )
+                logError(
+                    new Error(),
+                    'getConvertedVideo called for file that is not downloaded'
                 );
-                console.log('convertedVideoURL', convertedVideoURL);
-                if (convertedVideoURL) {
-                    srcURL.converted = convertedVideoURL;
-                    galleryContext.files.set(item.id, srcURL);
-                } else {
-                    conversionFailed = true;
-                }
-            } else {
-                addLogLine(
-                    `[${item.id}] gallery context cache miss, calling downloadManager to get file`
-                );
-                appContext.startLoading();
-                let downloadedURL: {
-                    original: string[];
-                    converted: string[];
-                };
-                if (publicCollectionGalleryContext.accessedThroughSharedURL) {
-                    downloadedURL =
-                        await PublicCollectionDownloadManager.getFile(
-                            item,
-                            publicCollectionGalleryContext.token,
-                            publicCollectionGalleryContext.passwordToken,
-                            true,
-                            true
-                        );
-                } else {
-                    downloadedURL = await DownloadManager.getFile(
-                        item,
-                        true,
-                        true
-                    );
-                }
-                appContext.finishLoading();
-                if (
-                    downloadedURL.converted.filter((url) => !!url).length !==
-                    downloadedURL.converted.length
-                ) {
-                    conversionFailed = true;
-                } else {
-                    const mergedURL: MergedSourceURL = {
-                        original: downloadedURL.original.join(','),
-                        converted: downloadedURL.converted.join(','),
-                    };
-                    galleryContext.files.set(item.id, mergedURL);
-                    srcURL = mergedURL;
-                }
+                // this should never happen, convert video button should not be visible if file is not downloaded
+                return;
             }
+
+            const srcURL = filesStore.get(item.id);
+            const originalVideoURL = srcURL.original;
+            const convertedVideoURL = URL.createObjectURL(
+                await getPlayableVideo(
+                    item.metadata.title,
+                    new Uint8Array(
+                        await (await fetch(originalVideoURL)).arrayBuffer()
+                    ),
+                    true
+                )
+            );
+            if (convertedVideoURL) {
+                srcURL.converted = convertedVideoURL;
+                filesStore.set(item.id, srcURL);
+            } else {
+                conversionFailed = true;
+            }
+
             await updateSrcURL(index, item.id, srcURL, conversionFailed, true);
 
             try {
