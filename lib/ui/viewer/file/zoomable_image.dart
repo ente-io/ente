@@ -152,12 +152,16 @@ class _ZoomableImageState extends State<ZoomableImage>
     if (!_loadedFinalImage && !_loadingFinalImage) {
       _loadingFinalImage = true;
       getFileFromServer(_photo).then((file) {
-        _onFinalImageLoaded(
-          Image.file(
-            file!,
-            gaplessPlayback: true,
-          ).image,
-        );
+        if (file != null) {
+          _onFinalImageLoaded(
+            Image.file(
+              file,
+              gaplessPlayback: true,
+            ).image,
+          );
+        } else {
+          _loadingFinalImage = false;
+        }
       });
     }
   }

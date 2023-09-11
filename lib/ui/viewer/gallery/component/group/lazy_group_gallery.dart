@@ -106,6 +106,9 @@ class _LazyGroupGalleryState extends State<LazyGroupGallery> {
   }
 
   Future _onReload(FilesUpdatedEvent event) async {
+    if (_files.isEmpty) {
+      return;
+    }
     final DateTime groupDate =
         DateTime.fromMicrosecondsSinceEpoch(_files[0].creationTime!);
     // iterate over  files and check if any of the belongs to this group
