@@ -5,6 +5,7 @@ import downloadManager from 'services/downloadManager';
 import { EnteFile } from 'types/file';
 import { StaticThumbnail } from 'components/PlaceholderThumbnails';
 import { LoadingThumbnail } from 'components/PlaceholderThumbnails';
+import { PublicCollectionGalleryContext } from 'utils/publicCollectionGallery';
 
 export default function CollectionCard(props: {
     children?: any;
@@ -23,19 +24,27 @@ export default function CollectionCard(props: {
 
     const [coverImageURL, setCoverImageURL] = useState(null);
     const galleryContext = useContext(GalleryContext);
+    const publicCollectionGalleryContext = useContext(
+        PublicCollectionGalleryContext
+    );
+
+    const thumbsStore = publicCollectionGalleryContext?.accessedThroughSharedURL
+        ? publicCollectionGalleryContext.thumbs
+        : galleryContext.thumbs;
+
     useEffect(() => {
         const main = async () => {
             if (!file) {
                 return;
             }
-            if (!galleryContext.thumbs.has(file.id)) {
+            if (!thumbsStore.has(file.id)) {
                 if (isScrolling) {
                     return;
                 }
                 const url = await downloadManager.getThumbnail(file);
-                galleryContext.thumbs.set(file.id, url);
+                thumbsStore.set(file.id, url);
             }
-            setCoverImageURL(galleryContext.thumbs.get(file.id));
+            setCoverImageURL(thumbsStore.get(file.id));
         };
         main();
     }, [file, isScrolling]);

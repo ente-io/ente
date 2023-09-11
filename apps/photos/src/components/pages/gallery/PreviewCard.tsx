@@ -216,7 +216,15 @@ const Cont = styled('div')<{ disabled: boolean }>`
 `;
 
 export default function PreviewCard(props: IProps) {
-    const { thumbs, user } = useContext(GalleryContext);
+    const galleryContext = useContext(GalleryContext);
+    const publicCollectionGalleryContext = useContext(
+        PublicCollectionGalleryContext
+    );
+    const deduplicateContext = useContext(DeduplicateContext);
+
+    const thumbsStore = publicCollectionGalleryContext?.accessedThroughSharedURL
+        ? publicCollectionGalleryContext.thumbs
+        : galleryContext.thumbs;
 
     const {
         file,
@@ -234,11 +242,6 @@ export default function PreviewCard(props: IProps) {
 
     const [imgSrc, setImgSrc] = useState<string>(file.msrc);
 
-    const publicCollectionGalleryContext = useContext(
-        PublicCollectionGalleryContext
-    );
-    const deduplicateContext = useContext(DeduplicateContext);
-
     const isMounted = useRef(true);
 
     useEffect(() => {
@@ -255,8 +258,8 @@ export default function PreviewCard(props: IProps) {
                 }
                 let url: string;
                 // check in in-memory cache
-                if (thumbs.has(file.id)) {
-                    url = thumbs.get(file.id);
+                if (thumbsStore.has(file.id)) {
+                    url = thumbsStore.get(file.id);
                 } else {
                     // check in cacheStorage
                     if (
@@ -270,7 +273,7 @@ export default function PreviewCard(props: IProps) {
                         url = await DownloadManager.getCachedThumbnail(file);
                     }
                     if (url) {
-                        thumbs.set(file.id, url);
+                        thumbsStore.set(file.id, url);
                     } else {
                         // download thumbnail
                         if (props.showPlaceholder) {
@@ -288,7 +291,7 @@ export default function PreviewCard(props: IProps) {
                         } else {
                             url = await DownloadManager.getThumbnail(file);
                         }
-                        thumbs.set(file.id, url);
+                        thumbsStore.set(file.id, url);
                     }
                 }
                 if (!isMounted.current) {
@@ -368,7 +371,7 @@ export default function PreviewCard(props: IProps) {
                 )
             )}
             <SelectedOverlay selected={selected} />
-            {shouldShowAvatar(file, user) && (
+            {shouldShowAvatar(file, galleryContext.user) && (
                 <AvatarOverlay>
                     <Avatar file={file} />
                 </AvatarOverlay>
