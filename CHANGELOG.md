@@ -16,9 +16,7 @@
 
 - #### Download Album
 
-    You can now chose the download location for downloading albums.
-
-     Along with that we have also added album download progress notification
+    You can now chose the download location for downloading albums. Along with that we have also added progress bar for album download.
 
 - #### Bug fixes & other enhancements
 
