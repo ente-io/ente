@@ -72,7 +72,7 @@
   "madeWithLoveAtPrefix": "realizzato con ❤️ a ",
   "supportDevs": "Iscriviti a <bold-green>ente</bold-green> per supportare questo progetto.",
   "supportDiscount": "Utilizzare il codice coupon \"AUTH\" per ottenere il 10% di sconto al primo anno",
-  "changeEmail": "modifica email",
+  "changeEmail": "Modifica email",
   "changePassword": "Cambia password",
   "data": "Dati",
   "importCodes": "Importa codici",
@@ -91,7 +91,7 @@
   "importInstruction": "Per favore seleziona un file contenente una lista dei tuoi codici nel seguente formato",
   "importCodeDelimiterInfo": "I codici possono essere separati da una virgola o da una nuova riga",
   "selectFile": "Seleziona file",
-  "emailVerificationToggle": "Verifica Email",
+  "emailVerificationToggle": "Verifica email",
   "authToChangeEmailVerificationSetting": "Autenticati per cambiare la verifica email",
   "authToViewYourRecoveryKey": "Autenticati per visualizzare la tua chiave di recupero",
   "authToChangeYourEmail": "Autenticati per cambiare la tua email",
@@ -102,6 +102,7 @@
   "no": "No",
   "email": "Email",
   "support": "Supporto",
+  "general": "Generali",
   "settings": "Impostazioni",
   "copied": "Copiato",
   "pleaseTryAgain": "Per favore riprova",
@@ -138,7 +139,7 @@
   "recoverAccount": "Recupera account",
   "enterRecoveryKeyHint": "Inserisci la tua chiave di recupero",
   "recover": "Recupera",
-  "contactSupportViaEmailMessage": "Per favore invia un'email a {email} dal tuo indirizzo email registrato",
+  "contactSupportViaEmailMessage": "Per favore invia un'email a {email} dall'indirizzo email con cui sei registrato",
   "@contactSupportViaEmailMessage": {
     "placeholders": {
       "email": {
@@ -183,6 +184,7 @@
   "enterDetailsManually": "Inserisci i dettagli manualmente",
   "edit": "Modifica",
   "copiedToClipboard": "Copiato negli appunti",
+  "copiedNextToClipboard": "Copiato il codice successivo negli appunti",
   "error": "Errore",
   "recoveryKeyCopiedToClipboard": "Chiave di recupero copiata negli appunti",
   "recoveryKeyOnForgotPassword": "Se dimentichi la password, l'unico modo per recuperare i tuoi dati è con questa chiave.",
@@ -253,6 +255,10 @@
   "privacy": "Privacy",
   "terms": "Termini",
   "checkForUpdates": "Controlla aggiornamenti",
+  "downloadUpdate": "Scarica",
+  "criticalUpdateAvailable": "Un aggiornamento importante è disponibile",
+  "updateAvailable": "Aggiornamento disponibile",
+  "update": "Aggiorna",
   "checking": "Controllo...",
   "youAreOnTheLatestVersion": "Stai utilizzando l'ultima versione",
   "warning": "Attenzione",
@@ -316,5 +322,12 @@
   "encrypted": "Criptato",
   "plainText": "Testo in chiaro",
   "passwordToEncryptExport": "Password per criptare il file esportato",
-  "export": "Esporta"
+  "export": "Esporta",
+  "useOffline": "Utilizzare senza backup",
+  "signInToBackup": "Accedi per salvare i tuoi codici",
+  "singIn": "Accedi",
+  "sigInBackupReminder": "Si prega di esportare i codici per assicurarsi di avere un backup da cui è possibile ripristinare.",
+  "offlineModeWarning": "Hai scelto di procedere senza backup. Si prega di eseguire backup manuali per assicurarsi che i codici siano al sicuro.",
+  "showLargeIcons": "Mostra icone grandi",
+  "focusOnSearchBar": "Apri ricerca all'avvio dell'app"
 }
