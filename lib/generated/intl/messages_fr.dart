@@ -94,7 +94,7 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m21(endDate) => "Essai gratuit valide jusqu’au ${endDate}";
 
   static String m22(count) =>
-      "Vous pouvez toujours accéder à ${Intl.plural(count, one: 'it', other: 'them')} sur ente tant que vous avez un abonnement actif";
+      "Vous pouvez toujours ${Intl.plural(count, one: 'y', other: 'y')} accéder sur ente tant que vous avez un abonnement actif";
 
   static String m23(sizeInMBorGB) => "Libérer ${sizeInMBorGB}";
 
@@ -140,10 +140,10 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m38(endDate) => "Renouvellement le ${endDate}";
 
-  static String m39(count) => "${count} sélectionné";
+  static String m39(count) => "${count} sélectionné(s)";
 
   static String m40(count, yourCount) =>
-      "${count} sélectionné (${yourCount} votre)";
+      "${count} sélectionné(s) (${yourCount} à vous)";
 
   static String m41(verificationID) =>
       "Voici mon ID de vérification : ${verificationID} pour ente.io.";
@@ -160,10 +160,10 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m45(emailIDs) => "Partagé avec ${emailIDs}";
 
   static String m46(fileType) =>
-      "Ce ${fileType} sera supprimé de votre appareil.";
+      "Elle ${fileType} sera supprimée de votre appareil.";
 
   static String m47(fileType) =>
-      "Ce ${fileType} est à la fois dans ente et votre appareil.";
+      "Cette ${fileType} est à la fois sur ente et sur votre appareil.";
 
   static String m48(fileType) => "Ce ${fileType} sera supprimé de ente.";
 
@@ -195,7 +195,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Nous avons envoyé un e-mail à <green>${email}</green>";
 
   static String m59(count) =>
-      "${Intl.plural(count, one: '${count} il y a un an', other: '${count} il y a des années')}";
+      "${Intl.plural(count, one: 'il y a ${count} an', other: 'il y a ${count} ans')}";
 
   static String m60(storageSaved) =>
       "Vous avez libéré ${storageSaved} avec succès !";
@@ -230,7 +230,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Ajouter à l\'album"),
         "addToEnte": MessageLookupByLibrary.simpleMessage("Ajouter à ente"),
         "addToHiddenAlbum":
-            MessageLookupByLibrary.simpleMessage("Add to hidden album"),
+            MessageLookupByLibrary.simpleMessage("Ajouter à un album masqué"),
         "addViewer":
             MessageLookupByLibrary.simpleMessage("Ajouter un observateur"),
         "addedAs": MessageLookupByLibrary.simpleMessage("Ajouté comme"),
@@ -373,6 +373,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "cancelSubscription":
             MessageLookupByLibrary.simpleMessage("Annuler l\'abonnement"),
         "cannotAddMorePhotosAfterBecomingViewer": m6,
+        "cannotDeleteSharedFiles": MessageLookupByLibrary.simpleMessage(
+            "Les fichiers partagés ne peuvent pas être supprimés"),
         "centerPoint": MessageLookupByLibrary.simpleMessage("Point central"),
         "changeEmail":
             MessageLookupByLibrary.simpleMessage("Modifier l\'e-mail"),
@@ -503,7 +505,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "deleteAlbum":
             MessageLookupByLibrary.simpleMessage("Supprimer l\'album"),
         "deleteAlbumDialog": MessageLookupByLibrary.simpleMessage(
-            "Supprimer aussi les photos (et vidéos) présentes dans cet album depuis <bold>tous</bold> les autres albums dont ils font partie ?"),
+            "Supprimer aussi les photos (et vidéos) présentes dans cet album de <bold>tous</bold> les autres albums dont elles font partie ?"),
         "deleteAlbumsDialogBody": MessageLookupByLibrary.simpleMessage(
             "Ceci supprimera tous les albums vides. Ceci est utile lorsque vous voulez réduire l\'encombrement dans votre liste d\'albums."),
         "deleteAll": MessageLookupByLibrary.simpleMessage("Tout Supprimer"),
@@ -541,7 +543,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "deleteSharedAlbum": MessageLookupByLibrary.simpleMessage(
             "Supprimer l\'album partagé ?"),
         "deleteSharedAlbumDialogBody": MessageLookupByLibrary.simpleMessage(
-            "L\'album sera supprimé pour tout le monde\n\nVous perdrez l\'accès aux photos partagées dans cet album qui est détenues par d\'autres personnes"),
+            "L\'album sera supprimé pour tout le monde\n\nVous perdrez l\'accès aux photos partagées dans cet album qui sont détenues par d\'autres personnes"),
         "deselectAll":
             MessageLookupByLibrary.simpleMessage("Tout déselectionner"),
         "designedToOutlive":
@@ -720,6 +722,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Allez aux réglages"),
         "googlePlayId":
             MessageLookupByLibrary.simpleMessage("Identifiant Google Play"),
+        "grantFullAccessPrompt": MessageLookupByLibrary.simpleMessage(
+            "Veuillez autoriser l’accès à toutes les photos dans les paramètres"),
         "grantPermission":
             MessageLookupByLibrary.simpleMessage("Accorder la permission"),
         "groupNearbyPhotos": MessageLookupByLibrary.simpleMessage(
@@ -873,8 +877,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "moveItem": m28,
         "moveToAlbum":
             MessageLookupByLibrary.simpleMessage("Déplacer vers l\'album"),
-        "moveToHiddenAlbum":
-            MessageLookupByLibrary.simpleMessage("Move to hidden album"),
+        "moveToHiddenAlbum": MessageLookupByLibrary.simpleMessage(
+            "Déplacer vers un album masqué"),
         "movedSuccessfullyTo": m29,
         "movedToTrash":
             MessageLookupByLibrary.simpleMessage("Déplacé dans la corbeille"),
@@ -888,6 +892,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "no": MessageLookupByLibrary.simpleMessage("Non"),
         "noAlbumsSharedByYouYet": MessageLookupByLibrary.simpleMessage(
             "Aucun album que vous avez partagé"),
+        "noDeviceLimit": MessageLookupByLibrary.simpleMessage("Aucune"),
         "noDeviceThatCanBeDeleted": MessageLookupByLibrary.simpleMessage(
             "Vous n\'avez pas de fichiers sur cet appareil qui peuvent être supprimés"),
         "noDuplicates": MessageLookupByLibrary.simpleMessage("✨ Aucun doublon"),
@@ -923,6 +928,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Oups, impossible d\'enregistrer les modifications"),
         "oopsSomethingWentWrong": MessageLookupByLibrary.simpleMessage(
             "Oups, une erreur est arrivée"),
+        "openSettings":
+            MessageLookupByLibrary.simpleMessage("Ouvrir les paramètres"),
         "openTheItem":
             MessageLookupByLibrary.simpleMessage("• Ouvrir l\'élément"),
         "openstreetmapContributors": MessageLookupByLibrary.simpleMessage(
@@ -996,6 +1003,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "preserveMore": MessageLookupByLibrary.simpleMessage("Conserver plus"),
         "pressAndHoldToPlayVideo": MessageLookupByLibrary.simpleMessage(
             "Appuyez et maintenez enfoncé pour lire la vidéo"),
+        "pressAndHoldToPlayVideoDetailed": MessageLookupByLibrary.simpleMessage(
+            "Maintenez appuyé sur l\'image pour lire la vidéo"),
         "privacy": MessageLookupByLibrary.simpleMessage("Confidentialité"),
         "privacyPolicyTitle": MessageLookupByLibrary.simpleMessage(
             "Politique de Confidentialité"),
@@ -1073,7 +1082,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "removePublicLink":
             MessageLookupByLibrary.simpleMessage("Supprimer le lien public"),
         "removeShareItemsWarning": MessageLookupByLibrary.simpleMessage(
-            "Certains des objets que vous êtes en train de retirer ont été ajoutés par d\'autres personnes, vous perdrez l\'accès vers ces objets"),
+            "Certains des éléments que vous êtes en train de retirer ont été ajoutés par d\'autres personnes, vous perdrez l\'accès vers ces éléments"),
         "removeWithQuestionMark":
             MessageLookupByLibrary.simpleMessage("Enlever?"),
         "removingFromFavorites":
@@ -1139,6 +1148,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Sélectionner les éléments à ajouter"),
         "selectLanguage":
             MessageLookupByLibrary.simpleMessage("Sélectionner une langue"),
+        "selectMorePhotos":
+            MessageLookupByLibrary.simpleMessage("Sélectionner plus de photos"),
         "selectReason":
             MessageLookupByLibrary.simpleMessage("Sélectionner une raison"),
         "selectYourPlan":
@@ -1210,7 +1221,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "J\'accepte les <u-terms>conditions d\'utilisation</u-terms> et la <u-policy>politique de confidentialité</u-policy>"),
         "singleFileDeleteFromDevice": m46,
         "singleFileDeleteHighlight": MessageLookupByLibrary.simpleMessage(
-            "Il sera supprimé de tous les albums."),
+            "Elle sera supprimée de tous les albums."),
         "singleFileInBothLocalAndRemote": m47,
         "singleFileInRemoteOnly": m48,
         "skip": MessageLookupByLibrary.simpleMessage("Ignorer"),
