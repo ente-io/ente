@@ -61,7 +61,7 @@ export async function buildMenuBar(mainWindow: BrowserWindow): Promise<Menu> {
                     },
                 },
                 {
-                    label: 'Changelog',
+                    label: 'View Changelog',
                     click: () => {
                         shell.openExternal(
                             'https://github.com/ente-io/photos-desktop/blob/main/CHANGELOG.md'
