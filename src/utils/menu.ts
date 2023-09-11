@@ -54,6 +54,20 @@ export async function buildMenuBar(): Promise<Menu> {
                     : []) as MenuItemConstructorOptions[]),
                 { type: 'separator' },
                 {
+                    label: 'Check for updates...',
+                    click: () => {
+                        // not implemented yet
+                    },
+                },
+                {
+                    label: 'Changelog',
+                    click: () => {
+                        // not implemented yet
+                    },
+                },
+                { type: 'separator' },
+
+                {
                     label: 'Preferences',
                     submenu: [
                         {
