@@ -139,6 +139,11 @@ class RemoteSyncService {
           Bus.instance.fire(SyncStatusUpdate(SyncStatus.completedBackup));
         }
       } else {
+        // if filesToBeUploaded is empty, clear any stale files in the temp
+        // directory
+        if (filesToBeUploaded.isEmpty) {
+          await _uploader.removeStaleFiles();
+        }
         _existingSync?.complete();
         _existingSync = null;
       }
