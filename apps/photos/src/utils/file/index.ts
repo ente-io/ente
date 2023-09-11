@@ -290,11 +290,7 @@ export function generateStreamFromArrayBuffer(data: Uint8Array) {
     });
 }
 
-export async function getRenderableFileURL(
-    file: EnteFile,
-    fileBlob: Blob,
-    forceConvert = false
-) {
+export async function getRenderableFileURL(file: EnteFile, fileBlob: Blob) {
     switch (file.metadata.fileType) {
         case FILE_TYPE.IMAGE: {
             const convertedBlob = await getRenderableImage(
@@ -320,8 +316,7 @@ export async function getRenderableFileURL(
         case FILE_TYPE.VIDEO: {
             const convertedBlob = await getPlayableVideo(
                 file.metadata.title,
-                new Uint8Array(await fileBlob.arrayBuffer()),
-                forceConvert
+                new Uint8Array(await fileBlob.arrayBuffer())
             );
             return {
                 converted: [URL.createObjectURL(convertedBlob)],
