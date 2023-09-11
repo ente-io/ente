@@ -23,3 +23,11 @@ export function getMuteUpdateNotificationVersion() {
 export function setMuteUpdateNotificationVersion(version: string) {
     userPreferencesStore.set('muteUpdateNotificationVersion', version);
 }
+
+export function clearSkipAppVersion() {
+    userPreferencesStore.delete('skipAppVersion');
+}
+
+export function clearMuteUpdateNotificationVersion() {
+    userPreferencesStore.delete('muteUpdateNotificationVersion');
+}

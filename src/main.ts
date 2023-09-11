@@ -77,7 +77,7 @@ if (!gotTheLock) {
         const tray = setupTrayItem(mainWindow);
         const watcher = initWatcher(mainWindow);
         setupMacWindowOnDockIconClick();
-        setupMainMenu();
+        setupMainMenu(mainWindow);
         setupIpcComs(tray, mainWindow, watcher);
         await handleUpdates(mainWindow);
         handleDownloads(mainWindow);
