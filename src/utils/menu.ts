@@ -13,6 +13,7 @@ import { setIsAppQuitting } from '../main';
 import autoLauncher from '../services/autoLauncher';
 import { isPlatform } from './common/platform';
 import ElectronLog from 'electron-log';
+import { forceCheckForUpdateAndNotify } from '../services/appUpdater';
 
 export function buildContextMenu(mainWindow: BrowserWindow): Menu {
     // eslint-disable-next-line camelcase
@@ -36,7 +37,7 @@ export function buildContextMenu(mainWindow: BrowserWindow): Menu {
     return contextMenu;
 }
 
-export async function buildMenuBar(): Promise<Menu> {
+export async function buildMenuBar(mainWindow: BrowserWindow): Promise<Menu> {
     let isAutoLaunchEnabled = await autoLauncher.isEnabled();
     const isMac = isPlatform('mac');
     let shouldHideDockIcon = getHideDockIconPreference();
@@ -56,7 +57,7 @@ export async function buildMenuBar(): Promise<Menu> {
                 {
                     label: 'Check for updates...',
                     click: () => {
-                        // not implemented yet
+                        forceCheckForUpdateAndNotify(mainWindow);
                     },
                 },
                 {
