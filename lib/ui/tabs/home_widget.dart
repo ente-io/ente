@@ -278,10 +278,12 @@ class _HomeWidgetState extends State<HomeWidget> {
     );
     // For sharing images coming from outside the app while the app is closed
     ReceiveSharingIntent.getInitialMedia().then((List<SharedMediaFile> value) {
-      setState(() {
-        _sharedFiles = value;
-        _shouldRenderCreateCollectionSheet = true;
-      });
+      if (mounted) {
+        setState(() {
+          _sharedFiles = value;
+          _shouldRenderCreateCollectionSheet = true;
+        });
+      }
     });
   }
 
