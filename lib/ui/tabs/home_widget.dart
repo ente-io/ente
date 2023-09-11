@@ -54,6 +54,7 @@ import "package:photos/ui/viewer/gallery/collection_page.dart";
 import 'package:photos/utils/dialog_util.dart';
 import "package:photos/utils/navigation_util.dart";
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
+import "package:shared_preferences/shared_preferences.dart";
 import 'package:uni_links/uni_links.dart';
 
 class HomeWidget extends StatefulWidget {
@@ -209,7 +210,10 @@ class _HomeWidgetState extends State<HomeWidget> {
       ),
     );
 
-    NotificationService.instance.init(_onDidReceiveNotificationResponse);
+    SharedPreferences.getInstance().then((preferences) {
+      NotificationService.instance
+          .init(_onDidReceiveNotificationResponse, preferences);
+    });
 
     super.initState();
   }
