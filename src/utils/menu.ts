@@ -63,7 +63,9 @@ export async function buildMenuBar(mainWindow: BrowserWindow): Promise<Menu> {
                 {
                     label: 'Changelog',
                     click: () => {
-                        // not implemented yet
+                        shell.openExternal(
+                            'https://github.com/ente-io/photos-desktop/blob/main/CHANGELOG.md'
+                        );
                     },
                 },
                 { type: 'separator' },
