@@ -1,6 +1,8 @@
 import * as Sentry from '@sentry/nextjs';
-import { addLogLine } from 'utils/logging';
+import { addLocalLog, addLogLine } from 'utils/logging';
 import { getSentryUserID } from 'utils/user';
+import InMemoryStore, { MS_KEYS } from 'services/InMemoryStore';
+import { getHasOptedOutOfCrashReports } from 'utils/storage';
 
 export const logError = async (
     error: any,
@@ -19,6 +21,18 @@ export const logError = async (
             } msg: ${msg} ${info ? `info: ${JSON.stringify(info)}` : ''}`
         );
     }
+    if (!InMemoryStore.has(MS_KEYS.OPT_OUT_OF_CRASH_REPORTS)) {
+        const optedOutOfCrashReports = getHasOptedOutOfCrashReports();
+        InMemoryStore.set(
+            MS_KEYS.OPT_OUT_OF_CRASH_REPORTS,
+            optedOutOfCrashReports
+        );
+    }
+    if (InMemoryStore.get(MS_KEYS.OPT_OUT_OF_CRASH_REPORTS)) {
+        addLocalLog(() => `skipping sentry error: ${error?.name}`);
+        return;
+    }
+
     Sentry.captureException(err, {
         level: 'info',
         user: { id: await getSentryUserID() },

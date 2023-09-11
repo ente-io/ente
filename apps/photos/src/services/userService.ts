@@ -47,6 +47,7 @@ import { APPS, getAppName } from 'constants/apps';
 import { addLocalLog } from 'utils/logging';
 import { convertBase64ToBuffer, convertBufferToBase64 } from 'utils/user';
 import { setLocalMapEnabled } from 'utils/storage';
+import InMemoryStore from './InMemoryStore';
 
 const ENDPOINT = getEndpoint();
 
@@ -142,6 +143,11 @@ export const logoutUser = async () => {
             await _logout();
         } catch (e) {
             //ignore
+        }
+        try {
+            InMemoryStore.clear();
+        } catch (e) {
+            logError(e, 'clear InMemoryStore failed');
         }
         try {
             clearKeys();

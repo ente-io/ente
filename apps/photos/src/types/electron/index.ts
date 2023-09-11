@@ -93,4 +93,5 @@ export interface ElectronAPIs {
     deleteFolder: (path: string) => Promise<void>;
     deleteFile: (path: string) => void;
     rename: (oldPath: string, newPath: string) => Promise<void>;
+    updateOptOutOfCrashReports: (optOut: boolean) => Promise<void>;
 }

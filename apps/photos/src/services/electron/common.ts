@@ -62,6 +62,12 @@ class ElectronService {
             return this.electronAPIs.selectDirectory();
         }
     }
+
+    updateOptOutOfCrashReports(optOut: boolean) {
+        if (this.electronAPIs?.updateOptOutOfCrashReports) {
+            return this.electronAPIs.updateOptOutOfCrashReports(optOut);
+        }
+    }
 }
 
 export default new ElectronService();
