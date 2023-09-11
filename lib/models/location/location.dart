@@ -27,4 +27,27 @@ class Location with _$Location {
     if (latValue == 0.0 && longValue == 0.0) return false;
     return true;
   }
+
+  // isValidRange checks if the latitude and longitude are within the valid range
+  // for latitude and longitude. Note: We are only checking the range while
+  // rending location on the map. We need to investigate in which cases we are
+  // parsing incorrect location value.
+  static bool isValidRange({
+    required double latitude,
+    required double longitude,
+  }) {
+    if (latitude.isNaN || latitude.isInfinite) {
+      return false;
+    }
+    if (longitude.isNaN || longitude.isInfinite) {
+      return false;
+    }
+    if (latitude > 90 || latitude < -90) {
+      return false;
+    }
+    if (longitude > 180 || longitude < -180) {
+      return false;
+    }
+    return true;
+  }
 }

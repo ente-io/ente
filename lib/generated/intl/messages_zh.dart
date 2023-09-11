@@ -200,8 +200,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "addSelected": MessageLookupByLibrary.simpleMessage("添加所选项"),
         "addToAlbum": MessageLookupByLibrary.simpleMessage("添加到相册"),
         "addToEnte": MessageLookupByLibrary.simpleMessage("添加到 ente"),
-        "addToHiddenAlbum":
-            MessageLookupByLibrary.simpleMessage("Add to hidden album"),
+        "addToHiddenAlbum": MessageLookupByLibrary.simpleMessage("添加到隐藏相册"),
         "addViewer": MessageLookupByLibrary.simpleMessage("添加查看者"),
         "addedAs": MessageLookupByLibrary.simpleMessage("已添加为"),
         "addedBy": m1,
@@ -318,6 +317,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "cancelOtherSubscription": m5,
         "cancelSubscription": MessageLookupByLibrary.simpleMessage("取消订阅"),
         "cannotAddMorePhotosAfterBecomingViewer": m6,
+        "cannotDeleteSharedFiles":
+            MessageLookupByLibrary.simpleMessage("无法删除共享文件"),
         "centerPoint": MessageLookupByLibrary.simpleMessage("中心点"),
         "changeEmail": MessageLookupByLibrary.simpleMessage("修改邮箱"),
         "changePassword": MessageLookupByLibrary.simpleMessage("修改密码"),
@@ -577,10 +578,13 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("正在生成加密密钥..."),
         "goToSettings": MessageLookupByLibrary.simpleMessage("前往设置"),
         "googlePlayId": MessageLookupByLibrary.simpleMessage("Google Play ID"),
+        "grantFullAccessPrompt":
+            MessageLookupByLibrary.simpleMessage("请在“设置”应用中将权限更改为允许访问所有所有照片"),
         "grantPermission": MessageLookupByLibrary.simpleMessage("授予权限"),
         "groupNearbyPhotos": MessageLookupByLibrary.simpleMessage("将附近的照片分组"),
         "hidden": MessageLookupByLibrary.simpleMessage("已隐藏"),
         "hide": MessageLookupByLibrary.simpleMessage("隐藏"),
+        "hiding": MessageLookupByLibrary.simpleMessage("正在隐藏..."),
         "hostedAtOsmFrance": MessageLookupByLibrary.simpleMessage("法国 OSM 主办"),
         "howItWorks": MessageLookupByLibrary.simpleMessage("工作原理"),
         "howToViewShareeVerificationID": MessageLookupByLibrary.simpleMessage(
@@ -700,8 +704,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "monthly": MessageLookupByLibrary.simpleMessage("每月"),
         "moveItem": m28,
         "moveToAlbum": MessageLookupByLibrary.simpleMessage("移动到相册"),
-        "moveToHiddenAlbum":
-            MessageLookupByLibrary.simpleMessage("Move to hidden album"),
+        "moveToHiddenAlbum": MessageLookupByLibrary.simpleMessage("移至隐藏相册"),
         "movedSuccessfullyTo": m29,
         "movedToTrash": MessageLookupByLibrary.simpleMessage("已移至回收站"),
         "movingFilesToAlbum":
@@ -714,6 +717,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "no": MessageLookupByLibrary.simpleMessage("否"),
         "noAlbumsSharedByYouYet":
             MessageLookupByLibrary.simpleMessage("您尚未共享任何相册"),
+        "noDeviceLimit": MessageLookupByLibrary.simpleMessage("无"),
         "noDeviceThatCanBeDeleted":
             MessageLookupByLibrary.simpleMessage("您在此设备上没有可被删除的文件"),
         "noDuplicates": MessageLookupByLibrary.simpleMessage("✨ 没有重复内容"),
@@ -743,6 +747,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("糟糕，无法保存编辑"),
         "oopsSomethingWentWrong":
             MessageLookupByLibrary.simpleMessage("哎呀，似乎出了点问题"),
+        "openSettings": MessageLookupByLibrary.simpleMessage("打开“设置”"),
         "openTheItem": MessageLookupByLibrary.simpleMessage("• 打开该项目"),
         "openstreetmapContributors":
             MessageLookupByLibrary.simpleMessage("OpenStreetMap 贡献者"),
@@ -798,6 +803,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "preserveMore": MessageLookupByLibrary.simpleMessage("保留更多"),
         "pressAndHoldToPlayVideo":
             MessageLookupByLibrary.simpleMessage("按住以播放视频"),
+        "pressAndHoldToPlayVideoDetailed":
+            MessageLookupByLibrary.simpleMessage("长按图像以播放视频"),
         "privacy": MessageLookupByLibrary.simpleMessage("隐私"),
         "privacyPolicyTitle": MessageLookupByLibrary.simpleMessage("隐私政策"),
         "privateBackups": MessageLookupByLibrary.simpleMessage("私人备份"),
@@ -901,6 +908,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("选择要备份的文件夹"),
         "selectItemsToAdd": MessageLookupByLibrary.simpleMessage("选择要添加的项目"),
         "selectLanguage": MessageLookupByLibrary.simpleMessage("选择语言"),
+        "selectMorePhotos": MessageLookupByLibrary.simpleMessage("选择更多照片"),
         "selectReason": MessageLookupByLibrary.simpleMessage("选择原因"),
         "selectYourPlan": MessageLookupByLibrary.simpleMessage("选择您的计划"),
         "selectedFilesAreNotOnEnte":
@@ -953,6 +961,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "sharedWithMe": MessageLookupByLibrary.simpleMessage("与我共享"),
         "sharedWithYou": MessageLookupByLibrary.simpleMessage("已与您共享"),
         "sharing": MessageLookupByLibrary.simpleMessage("正在分享..."),
+        "showMemories": MessageLookupByLibrary.simpleMessage("显示回忆"),
         "signUpTerms": MessageLookupByLibrary.simpleMessage(
             "我同意 <u-terms>服务条款</u-terms> 和 <u-policy>隐私政策</u-policy>"),
         "singleFileDeleteFromDevice": m46,
@@ -1001,8 +1010,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "subscription": MessageLookupByLibrary.simpleMessage("订阅"),
         "success": MessageLookupByLibrary.simpleMessage("成功"),
         "successfullyArchived": MessageLookupByLibrary.simpleMessage("归档成功"),
+        "successfullyHid": MessageLookupByLibrary.simpleMessage("已成功隐藏"),
         "successfullyUnarchived":
             MessageLookupByLibrary.simpleMessage("取消归档成功"),
+        "successfullyUnhid": MessageLookupByLibrary.simpleMessage("已成功取消隐藏"),
         "suggestFeatures": MessageLookupByLibrary.simpleMessage("建议新功能"),
         "support": MessageLookupByLibrary.simpleMessage("支持"),
         "syncProgress": m53,
@@ -1078,6 +1089,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "uncategorized": MessageLookupByLibrary.simpleMessage("未分类的"),
         "unhide": MessageLookupByLibrary.simpleMessage("取消隐藏"),
         "unhideToAlbum": MessageLookupByLibrary.simpleMessage("取消隐藏到相册"),
+        "unhiding": MessageLookupByLibrary.simpleMessage("正在取消隐藏..."),
         "unhidingFilesToAlbum":
             MessageLookupByLibrary.simpleMessage("正在取消隐藏文件到相册"),
         "unlock": MessageLookupByLibrary.simpleMessage("解锁"),
