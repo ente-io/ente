@@ -246,6 +246,23 @@ function PhotoViewer(props: Iprops) {
     }, [photoSwipe?.currItem, isOpen, isSourceLoaded]);
 
     useEffect(() => {
+        const file = photoSwipe?.currItem as EnteFile;
+        if (!file) return;
+        console.log(
+            file.metadata.fileType === FILE_TYPE.VIDEO,
+            !file.isConverted,
+            isSourceLoaded,
+            !conversionFailed
+        );
+        const shouldShowConvertBtn =
+            file.metadata.fileType === FILE_TYPE.VIDEO &&
+            !file.isConverted &&
+            isSourceLoaded &&
+            !conversionFailed;
+        setShowConvertBtn(shouldShowConvertBtn);
+    }, [photoSwipe?.currItem, isSourceLoaded, conversionFailed]);
+
+    useEffect(() => {
         exifCopy.current = exif;
     }, [exif]);
 
@@ -258,11 +275,6 @@ function PhotoViewer(props: Iprops) {
             !publicCollectionGalleryContext.accessedThroughSharedURL &&
             galleryContext.user?.id === file.ownerID;
         setIsOwnFile(isOwnFile);
-    }
-
-    function updateShowConvertBtn(file: EnteFile) {
-        const showConvertBtn = file.metadata.fileType === FILE_TYPE.VIDEO;
-        setShowConvertBtn(showConvertBtn);
     }
 
     const openPhotoSwipe = () => {
@@ -333,7 +345,6 @@ function PhotoViewer(props: Iprops) {
             }
             updateFavButton(currItem);
             updateIsOwnFile(currItem);
-            updateShowConvertBtn(currItem);
             if (currItem.metadata.fileType !== FILE_TYPE.IMAGE) {
                 setExif({ key: currItem.src, value: null });
                 return;
@@ -595,9 +606,7 @@ function PhotoViewer(props: Iprops) {
                         />
                     )}
                     {showConvertBtn && (
-                        <ConvertBtn
-                            onClick={triggerManualConvert}
-                            disabled={!isSourceLoaded}>
+                        <ConvertBtn onClick={triggerManualConvert}>
                             {t('CONVERT')}
                         </ConvertBtn>
                     )}

@@ -7,6 +7,7 @@ import { logError } from 'utils/sentry';
 const WAIT_FOR_VIDEO_PLAYBACK = 1 * 1000;
 
 export async function isPlaybackPossible(url: string): Promise<boolean> {
+    return true;
     return await new Promise((resolve) => {
         const t = setTimeout(() => {
             resolve(false);
@@ -83,27 +84,36 @@ export async function updateFileSrcProps(
     let convertedImageURL;
     let convertedVideoURL;
     let originalURL;
+    let isConverted;
     if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
         [originalImageURL, originalVideoURL] = urls.original;
         [convertedImageURL, convertedVideoURL] = urls.converted;
+        isConverted =
+            originalVideoURL !== convertedVideoURL ||
+            originalImageURL !== convertedImageURL;
     } else if (file.metadata.fileType === FILE_TYPE.VIDEO) {
         [originalVideoURL] = urls.original;
         [convertedVideoURL] = urls.converted;
+        isConverted = originalVideoURL !== convertedVideoURL;
     } else if (file.metadata.fileType === FILE_TYPE.IMAGE) {
         [originalImageURL] = urls.original;
         [convertedImageURL] = urls.converted;
+        isConverted = originalImageURL !== convertedImageURL;
     } else {
         [originalURL] = urls.original;
+        isConverted = false;
     }
 
     const isPlayable =
-        convertedVideoURL && isPlaybackPossible(file.metadata.title);
+        convertedVideoURL && isPlaybackPossible(convertedVideoURL);
 
+    console.log('isConverted', isConverted);
     file.w = window.innerWidth;
     file.h = window.innerHeight;
     file.isSourceLoaded = true;
     file.originalImageURL = originalImageURL;
     file.originalVideoURL = originalVideoURL;
+    file.isConverted = isConverted;
 
     if (file.metadata.fileType === FILE_TYPE.VIDEO) {
         if (isPlayable) {

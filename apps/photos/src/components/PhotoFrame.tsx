@@ -561,9 +561,7 @@ const PhotoFrame = ({
             const convertedVideoURL = URL.createObjectURL(
                 await getPlayableVideo(
                     item.metadata.title,
-                    new Uint8Array(
-                        await (await fetch(originalVideoURL)).arrayBuffer()
-                    ),
+                    await (await fetch(originalVideoURL)).blob(),
                     true
                 )
             );
