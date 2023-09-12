@@ -9,6 +9,8 @@ const defaultPublicCollectionGalleryContext: PublicCollectionGalleryContextType 
         accessedThroughSharedURL: false,
         photoListHeader: null,
         photoListFooter: null,
+        files: new Map(),
+        thumbs: new Map(),
     };
 
 export const PublicCollectionGalleryContext =
