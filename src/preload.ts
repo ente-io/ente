@@ -40,6 +40,7 @@ import {
     getSentryUserID,
     getAppVersion,
     openDirectory,
+    updateOptOutOfCrashReports,
 } from './api/common';
 import { fixHotReloadNext12 } from './utils/preload';
 import {
@@ -112,4 +113,5 @@ windowObject['ElectronAPIs'] = {
     deleteFolder,
     rename,
     deleteFile,
+    updateOptOutOfCrashReports,
 };
