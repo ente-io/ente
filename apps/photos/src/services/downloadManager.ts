@@ -27,6 +27,14 @@ class DownloadManager {
     >();
     private thumbnailObjectURLPromise = new Map<number, Promise<string>>();
 
+    private fileDownloadProgress = new Map<number, number>();
+
+    private progressUpdater: (value: Map<number, number>) => void;
+
+    setProgressUpdater(progressUpdater: (value: Map<number, number>) => void) {
+        this.progressUpdater = progressUpdater;
+    }
+
     private async getThumbnailCache() {
         try {
             const thumbnailCache = await CacheStorageService.open(
@@ -180,6 +188,7 @@ class DownloadManager {
             if (!token) {
                 return null;
             }
+            const onDownloadProgress = this.trackDownloadProgress(file.id);
             if (
                 file.metadata.fileType === FILE_TYPE.IMAGE ||
                 file.metadata.fileType === FILE_TYPE.LIVE_PHOTO
@@ -189,7 +198,11 @@ class DownloadManager {
                         getFileURL(file.id),
                         null,
                         { 'X-Auth-Token': token },
-                        { responseType: 'arraybuffer', timeout }
+                        {
+                            responseType: 'arraybuffer',
+                            timeout,
+                            onDownloadProgress,
+                        }
                     )
                 );
                 if (typeof resp.data === 'undefined') {
@@ -226,6 +239,10 @@ class DownloadManager {
                 })
             );
             const reader = resp.body.getReader();
+
+            const contentLength = +resp.headers.get('Content-Length');
+            let downloadedBytes = 0;
+
             const stream = new ReadableStream({
                 async start(controller) {
                     try {
@@ -246,6 +263,11 @@ class DownloadManager {
                                 try {
                                     // Is there more data to read?
                                     if (!done) {
+                                        downloadedBytes += value.byteLength;
+                                        onDownloadProgress({
+                                            loaded: downloadedBytes,
+                                            total: contentLength,
+                                        });
                                         const buffer = new Uint8Array(
                                             data.byteLength + value.byteLength
                                         );
@@ -363,6 +385,20 @@ class DownloadManager {
             throw e;
         }
     }
+
+    trackDownloadProgress = (fileID: number) => {
+        return (event: { loaded: number; total: number }) => {
+            if (event.loaded === event.total) {
+                this.fileDownloadProgress.delete(fileID);
+            } else {
+                this.fileDownloadProgress.set(
+                    fileID,
+                    Math.round((event.loaded * 100) / event.total)
+                );
+            }
+            this.progressUpdater(new Map(this.fileDownloadProgress));
+        };
+    };
 }
 
 export default new DownloadManager();
