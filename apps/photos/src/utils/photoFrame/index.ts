@@ -7,7 +7,6 @@ import { logError } from 'utils/sentry';
 const WAIT_FOR_VIDEO_PLAYBACK = 1 * 1000;
 
 export async function isPlaybackPossible(url: string): Promise<boolean> {
-    return true;
     return await new Promise((resolve) => {
         const t = setTimeout(() => {
             resolve(false);
@@ -42,6 +41,9 @@ export async function pauseVideo(livePhotoVideo, livePhotoImage) {
 
 export function updateFileMsrcProps(file: EnteFile, url: string) {
     file.msrc = url;
+    file.isSourceLoaded = false;
+    file.conversionFailed = false;
+    file.isConverted = false;
     if (file.metadata.fileType === FILE_TYPE.VIDEO) {
         file.html = `
                 <div class="pswp-item-container">
