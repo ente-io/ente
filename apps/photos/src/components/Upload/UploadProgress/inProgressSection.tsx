@@ -1,5 +1,5 @@
 import React, { useContext } from 'react';
-import FileList from 'components/FileList';
+import ItemList from 'components/ItemList';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { InProgressItemContainer } from './styledComponents';
 import {
@@ -18,6 +18,29 @@ export const InProgressSection = () => {
         useContext(UploadProgressContext);
     const fileList = inProgressUploads ?? [];
 
+    const renderListItem = ({ localFileID, progress }) => {
+        return (
+            <InProgressItemContainer key={localFileID}>
+                <span>{uploadFileNames.get(localFileID)}</span>
+                {uploadStage === UPLOAD_STAGES.UPLOADING && (
+                    <>
+                        {' '}
+                        <span className="separator">{`-`}</span>
+                        <span>{`${progress}%`}</span>
+                    </>
+                )}
+            </InProgressItemContainer>
+        );
+    };
+
+    const getItemTitle = ({ localFileID, progress }) => {
+        return `${uploadFileNames.get(localFileID)} - ${progress}%`;
+    };
+
+    const generateItemKey = ({ localFileID, progress }) => {
+        return `${localFileID}-${progress}`;
+    };
+
     return (
         <UploadProgressSection>
             <UploadProgressSectionTitle expandIcon={<ExpandMoreIcon />}>
@@ -29,19 +52,13 @@ export const InProgressSection = () => {
                 {hasLivePhotos && (
                     <SectionInfo>{t('LIVE_PHOTOS_DETECTED')}</SectionInfo>
                 )}
-                <FileList
-                    fileList={fileList.map(({ localFileID, progress }) => (
-                        <InProgressItemContainer key={localFileID}>
-                            <span>{uploadFileNames.get(localFileID)}</span>
-                            {uploadStage === UPLOAD_STAGES.UPLOADING && (
-                                <>
-                                    {' '}
-                                    <span className="separator">{`-`}</span>
-                                    <span>{`${progress}%`}</span>
-                                </>
-                            )}
-                        </InProgressItemContainer>
-                    ))}
+                <ItemList
+                    items={fileList}
+                    generateItemKey={generateItemKey}
+                    getItemTitle={getItemTitle}
+                    renderListItem={renderListItem}
+                    maxHeight={160}
+                    itemSize={35}
                 />
             </UploadProgressSectionContent>
         </UploadProgressSection>

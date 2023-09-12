@@ -197,7 +197,7 @@ const Cont = styled('div')<{ disabled: boolean }>`
     position: relative;
     flex: 1;
     cursor: ${(props) => (props.disabled ? 'not-allowed' : 'pointer')};
-
+    user-select: none;
     & > img {
         object-fit: cover;
         max-width: 100%;

@@ -72,8 +72,7 @@ export default function AuthenticateUserModal({
             sx={{ position: 'absolute' }}
             attributes={{
                 title: t('PASSWORD'),
-            }}
-            PaperProps={{ sx: { padding: '8px 12px', maxWidth: '320px' } }}>
+            }}>
             <VerifyMasterPasswordForm
                 buttonText={t('AUTHENTICATE')}
                 callback={useMasterPassword}

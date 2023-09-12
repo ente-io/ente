@@ -11,10 +11,13 @@ import SortIcon from '@mui/icons-material/Sort';
 import { t } from 'i18next';
 import PushPinOutlined from '@mui/icons-material/PushPinOutlined';
 import { UnPinIcon } from 'components/icons/UnPinIcon';
+import VisibilityOffOutlined from '@mui/icons-material/VisibilityOffOutlined';
+import VisibilityOutlined from '@mui/icons-material/VisibilityOutlined';
 
 interface Iprops {
     isArchived: boolean;
     isPinned: boolean;
+    isHidden: boolean;
     handleCollectionAction: (
         action: CollectionActions,
         loader?: boolean
@@ -24,6 +27,7 @@ interface Iprops {
 export function AlbumCollectionOption({
     isArchived,
     isPinned,
+    isHidden,
     handleCollectionAction,
 }: Iprops) {
     return (
@@ -47,7 +51,7 @@ export function AlbumCollectionOption({
             {isPinned ? (
                 <OverflowMenuOption
                     onClick={handleCollectionAction(
-                        CollectionActions.UNPIN_ALBUM,
+                        CollectionActions.UNPIN,
                         false
                     )}
                     startIcon={<UnPinIcon />}>
@@ -56,26 +60,51 @@ export function AlbumCollectionOption({
             ) : (
                 <OverflowMenuOption
                     onClick={handleCollectionAction(
-                        CollectionActions.PIN_ALBUM,
+                        CollectionActions.PIN,
                         false
                     )}
                     startIcon={<PushPinOutlined />}>
                     {t('PIN_ALBUM')}
                 </OverflowMenuOption>
             )}
-            {isArchived ? (
+            {!isHidden && (
+                <>
+                    {isArchived ? (
+                        <OverflowMenuOption
+                            onClick={handleCollectionAction(
+                                CollectionActions.UNARCHIVE
+                            )}
+                            startIcon={<Unarchive />}>
+                            {t('UNARCHIVE_COLLECTION')}
+                        </OverflowMenuOption>
+                    ) : (
+                        <OverflowMenuOption
+                            onClick={handleCollectionAction(
+                                CollectionActions.ARCHIVE
+                            )}
+                            startIcon={<ArchiveOutlined />}>
+                            {t('ARCHIVE_COLLECTION')}
+                        </OverflowMenuOption>
+                    )}
+                </>
+            )}
+            {isHidden ? (
                 <OverflowMenuOption
                     onClick={handleCollectionAction(
-                        CollectionActions.UNARCHIVE
+                        CollectionActions.UNHIDE,
+                        false
                     )}
-                    startIcon={<Unarchive />}>
-                    {t('UNARCHIVE_COLLECTION')}
+                    startIcon={<VisibilityOutlined />}>
+                    {t('UNHIDE_COLLECTION')}
                 </OverflowMenuOption>
             ) : (
                 <OverflowMenuOption
-                    onClick={handleCollectionAction(CollectionActions.ARCHIVE)}
-                    startIcon={<ArchiveOutlined />}>
-                    {t('ARCHIVE_COLLECTION')}
+                    onClick={handleCollectionAction(
+                        CollectionActions.HIDE,
+                        false
+                    )}
+                    startIcon={<VisibilityOffOutlined />}>
+                    {t('HIDE_COLLECTION')}
                 </OverflowMenuOption>
             )}
             <OverflowMenuOption

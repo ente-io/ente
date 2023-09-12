@@ -15,7 +15,7 @@ export interface ElectronAPIs {
         fileStream: ReadableStream<any>
     ) => Promise<void>;
     saveFileToDisk: (path: string, file: any) => Promise<void>;
-    selectRootDirectory: () => Promise<string>;
+    selectDirectory: () => Promise<string>;
     sendNotification: (content: string) => void;
     readTextFile: (path: string) => Promise<string>;
     showUploadFilesDialog: () => Promise<ElectronFile[]>;
@@ -91,5 +91,7 @@ export interface ElectronAPIs {
     openDirectory: (dirPath: string) => Promise<void>;
     moveFile: (oldPath: string, newPath: string) => Promise<void>;
     deleteFolder: (path: string) => Promise<void>;
+    deleteFile: (path: string) => void;
     rename: (oldPath: string, newPath: string) => Promise<void>;
+    updateOptOutOfCrashReports: (optOut: boolean) => Promise<void>;
 }

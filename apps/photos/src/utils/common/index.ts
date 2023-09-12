@@ -139,3 +139,11 @@ export function batch<T>(arr: T[], batchSize: number): T[][] {
     }
     return batches;
 }
+
+export const mergeMaps = <K, V>(map1: Map<K, V>, map2: Map<K, V>) => {
+    const mergedMap = new Map<K, V>(map1);
+    map2.forEach((value, key) => {
+        mergedMap.set(key, value);
+    });
+    return mergedMap;
+};

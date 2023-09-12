@@ -10,10 +10,19 @@ import AdvancedSettings from '../AdvancedSettings';
 import MapSettings from '../MapSetting';
 import { LanguageSelector } from './LanguageSelector';
 import { EnteMenuItem } from 'components/Menu/EnteMenuItem';
+import { LS_KEYS } from 'utils/storage/localStorage';
+import { useLocalState } from 'hooks/useLocalState';
+import ElectronService from 'services/electron/common';
+import InMemoryStore, { MS_KEYS } from 'services/InMemoryStore';
+import { logError } from 'utils/sentry';
 
 export default function Preferences({ open, onClose, onRootClose }) {
     const [advancedSettingsView, setAdvancedSettingsView] = useState(false);
     const [mapSettingsView, setMapSettingsView] = useState(false);
+    const [optOutOfCrashReports, setOptOutOfCrashReports] = useLocalState(
+        LS_KEYS.OPT_OUT_OF_CRASH_REPORTS,
+        false
+    );
 
     const openAdvancedSettings = () => setAdvancedSettingsView(true);
     const closeAdvancedSettings = () => setAdvancedSettingsView(false);
@@ -31,6 +40,23 @@ export default function Preferences({ open, onClose, onRootClose }) {
             handleRootClose();
         } else {
             onClose();
+        }
+    };
+
+    const toggleOptOutOfCrashReports = async () => {
+        try {
+            if (isElectron()) {
+                await ElectronService.updateOptOutOfCrashReports(
+                    !optOutOfCrashReports
+                );
+            }
+            setOptOutOfCrashReports(!optOutOfCrashReports);
+            InMemoryStore.set(
+                MS_KEYS.OPT_OUT_OF_CRASH_REPORTS,
+                !optOutOfCrashReports
+            );
+        } catch (e) {
+            logError(e, 'toggleOptOutOfCrashReports failed');
         }
     };
 
@@ -62,6 +88,12 @@ export default function Preferences({ open, onClose, onRootClose }) {
                             onClick={openMapSettings}
                             endIcon={<ChevronRight />}
                             label={t('MAP')}
+                        />
+                        <EnteMenuItem
+                            variant="toggle"
+                            checked={!optOutOfCrashReports}
+                            onClick={toggleOptOutOfCrashReports}
+                            label={t('CRASH_REPORTING')}
                         />
                     </Stack>
                 </Box>

@@ -58,14 +58,6 @@ import MoreHoriz from '@mui/icons-material/MoreHoriz';
 import OverflowMenu from 'components/OverflowMenu/menu';
 import { OverflowMenuOption } from 'components/OverflowMenu/option';
 
-const Loader = () => (
-    <VerticallyCentered>
-        <EnteSpinner>
-            <span className="sr-only">Loading...</span>
-        </EnteSpinner>
-    </VerticallyCentered>
-);
-
 const defaultThumbStore = new Map();
 const defaultFileStore = new Map();
 
@@ -217,12 +209,16 @@ export default function PublicCollectionGallery() {
         }
         appContext.startLoading();
         for (const file of publicFiles) {
-            await downloadFile(
-                file,
-                true,
-                token.current,
-                passwordJWTToken.current
-            );
+            try {
+                await downloadFile(
+                    file,
+                    true,
+                    token.current,
+                    passwordJWTToken.current
+                );
+            } catch (e) {
+                // do nothing
+            }
         }
         appContext.finishLoading();
     };
@@ -400,7 +396,11 @@ export default function PublicCollectionGallery() {
 
     if (loading) {
         if (!publicFiles) {
-            return <Loader />;
+            return (
+                <VerticallyCentered>
+                    <EnteSpinner />
+                </VerticallyCentered>
+            );
         }
     } else {
         if (errorMessage) {

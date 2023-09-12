@@ -1,5 +1,5 @@
 import React, { useContext } from 'react';
-import FileList from 'components/FileList';
+import ItemList from 'components/ItemList';
 import { Typography } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { ResultItemContainer } from './styledComponents';
@@ -26,6 +26,23 @@ export const ResultSection = (props: ResultSectionProps) => {
     if (!fileList?.length) {
         return <></>;
     }
+
+    const renderListItem = (fileID) => {
+        return (
+            <ResultItemContainer key={fileID}>
+                {uploadFileNames.get(fileID)}
+            </ResultItemContainer>
+        );
+    };
+
+    const getItemTitle = (fileID) => {
+        return uploadFileNames.get(fileID);
+    };
+
+    const generateItemKey = (fileID) => {
+        return fileID;
+    };
+
     return (
         <UploadProgressSection>
             <UploadProgressSectionTitle expandIcon={<ExpandMoreIcon />}>
@@ -35,12 +52,13 @@ export const ResultSection = (props: ResultSectionProps) => {
                 {props.sectionInfo && (
                     <SectionInfo>{props.sectionInfo}</SectionInfo>
                 )}
-                <FileList
-                    fileList={fileList.map((fileID) => (
-                        <ResultItemContainer key={fileID}>
-                            {uploadFileNames.get(fileID)}
-                        </ResultItemContainer>
-                    ))}
+                <ItemList
+                    items={fileList}
+                    generateItemKey={generateItemKey}
+                    getItemTitle={getItemTitle}
+                    renderListItem={renderListItem}
+                    maxHeight={160}
+                    itemSize={35}
                 />
             </UploadProgressSectionContent>
         </UploadProgressSection>

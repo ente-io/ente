@@ -5,20 +5,34 @@ import {
     Stack,
     Typography,
 } from '@mui/material';
-import React from 'react';
 import { t } from 'i18next';
 import { formatDateTime } from 'utils/time/format';
 import { SpaceBetweenFlex } from './Container';
 import { formatNumber } from 'utils/number/format';
+import ExportPendingList from './ExportPendingList';
+import { useState } from 'react';
+import LinkButton from './pages/gallery/LinkButton';
+import { EnteFile } from 'types/file';
 
 interface Props {
-    pendingFileCount: number;
+    pendingExports: EnteFile[];
+    collectionNameMap: Map<number, string>;
     onHide: () => void;
     lastExportTime: number;
     startExport: () => void;
 }
 
 export default function ExportFinished(props: Props) {
+    const [pendingFileListView, setPendingFileListView] =
+        useState<boolean>(false);
+
+    const openPendingFileList = () => {
+        setPendingFileListView(true);
+    };
+
+    const closePendingFileList = () => {
+        setPendingFileListView(false);
+    };
     return (
         <>
             <DialogContent>
@@ -27,9 +41,15 @@ export default function ExportFinished(props: Props) {
                         <Typography color={'text.muted'}>
                             {t('PENDING_ITEMS')}
                         </Typography>
-                        <Typography>
-                            {formatNumber(props.pendingFileCount)}
-                        </Typography>
+                        {props.pendingExports.length ? (
+                            <LinkButton onClick={openPendingFileList}>
+                                {formatNumber(props.pendingExports.length)}
+                            </LinkButton>
+                        ) : (
+                            <Typography>
+                                {formatNumber(props.pendingExports.length)}
+                            </Typography>
+                        )}
                     </SpaceBetweenFlex>
                     <SpaceBetweenFlex minHeight={'48px'}>
                         <Typography color="text.muted">
@@ -54,6 +74,12 @@ export default function ExportFinished(props: Props) {
                     {t('EXPORT_AGAIN')}
                 </Button>
             </DialogActions>
+            <ExportPendingList
+                pendingExports={props.pendingExports}
+                collectionNameMap={props.collectionNameMap}
+                isOpen={pendingFileListView}
+                onClose={closePendingFileList}
+            />
         </>
     );
 }

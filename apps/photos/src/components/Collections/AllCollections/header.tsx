@@ -14,13 +14,18 @@ export default function AllCollectionsHeader({
     collectionCount,
     collectionSortBy,
     setCollectionSortBy,
+    isInHiddenSection,
 }) {
     return (
         <DialogTitle>
             <FlexWrapper>
                 <FluidContainer mr={1.5}>
                     <Box>
-                        <Typography variant="h3">{t('ALL_ALBUMS')}</Typography>
+                        <Typography variant="h3">
+                            {isInHiddenSection
+                                ? t('ALL_HIDDEN_ALBUMS')
+                                : t('ALL_ALBUMS')}
+                        </Typography>
                         <Typography variant="small" color={'text.muted'}>
                             {t('albums', { count: collectionCount })}
                         </Typography>

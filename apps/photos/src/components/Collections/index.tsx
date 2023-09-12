@@ -1,6 +1,6 @@
 import { Collection, CollectionSummaries } from 'types/collection';
 import CollectionListBar from 'components/Collections/CollectionListBar';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import AllCollections from 'components/Collections/AllCollections';
 import CollectionInfoWithOptions from 'components/Collections/CollectionInfoWithOptions';
 import { ALL_SECTION, COLLECTION_LIST_SORT_BY } from 'constants/collection';
@@ -15,13 +15,22 @@ import {
 import { useLocalState } from 'hooks/useLocalState';
 import { sortCollectionSummaries } from 'services/collectionService';
 import { LS_KEYS } from 'utils/storage/localStorage';
+import {
+    CollectionDownloadProgress,
+    CollectionDownloadProgressAttributes,
+    isCollectionDownloadCancelled,
+    isCollectionDownloadCompleted,
+} from './CollectionDownloadProgress';
+import { SetCollectionDownloadProgressAttributes } from 'types/gallery';
 
 interface Iprops {
     activeCollection: Collection;
     activeCollectionID?: number;
     setActiveCollectionID: (id?: number) => void;
     isInSearchMode: boolean;
+    isInHiddenSection: boolean;
     collectionSummaries: CollectionSummaries;
+    hiddenCollectionSummaries: CollectionSummaries;
     setCollectionNamerAttributes: SetCollectionNamerAttributes;
     setPhotoListHeader: (value: TimeStampListItem) => void;
 }
@@ -30,9 +39,11 @@ export default function Collections(props: Iprops) {
     const {
         activeCollection,
         isInSearchMode,
+        isInHiddenSection,
         activeCollectionID,
         setActiveCollectionID,
         collectionSummaries,
+        hiddenCollectionSummaries,
         setCollectionNamerAttributes,
         setPhotoListHeader,
     } = props;
@@ -41,28 +52,72 @@ export default function Collections(props: Iprops) {
     const [collectionShareModalView, setCollectionShareModalView] =
         useState(false);
 
+    const [
+        collectionDownloadProgressAttributesList,
+        setCollectionDownloadProgressAttributesList,
+    ] = useState<CollectionDownloadProgressAttributes[]>([]);
+
     const [collectionListSortBy, setCollectionListSortBy] =
         useLocalState<COLLECTION_LIST_SORT_BY>(
             LS_KEYS.COLLECTION_SORT_BY,
             COLLECTION_LIST_SORT_BY.UPDATION_TIME_DESCENDING
         );
 
+    const toShowCollectionSummaries = useMemo(
+        () =>
+            isInHiddenSection ? hiddenCollectionSummaries : collectionSummaries,
+        [isInHiddenSection, hiddenCollectionSummaries, collectionSummaries]
+    );
+
     const shouldBeHidden = useMemo(
         () =>
             isInSearchMode ||
-            (!hasNonSystemCollections(collectionSummaries) &&
+            (!hasNonSystemCollections(toShowCollectionSummaries) &&
                 activeCollectionID === ALL_SECTION),
-        [isInSearchMode, collectionSummaries, activeCollectionID]
+        [isInSearchMode, toShowCollectionSummaries, activeCollectionID]
     );
 
     const sortedCollectionSummaries = useMemo(
         () =>
             sortCollectionSummaries(
-                [...collectionSummaries.values()],
+                [...toShowCollectionSummaries.values()],
                 collectionListSortBy
             ),
-        [collectionListSortBy, collectionSummaries]
+        [collectionListSortBy, toShowCollectionSummaries]
     );
+
+    const setCollectionDownloadProgressAttributesCreator =
+        (collectionID: number): SetCollectionDownloadProgressAttributes =>
+        (value) => {
+            setCollectionDownloadProgressAttributesList((prev) => {
+                const attributes = prev?.find(
+                    (attr) => attr.collectionID === collectionID
+                );
+                const updatedAttributes =
+                    typeof value === 'function' ? value(attributes) : value;
+
+                const updatedAttributesList = attributes
+                    ? prev.map((attr) =>
+                          attr.collectionID === collectionID
+                              ? updatedAttributes
+                              : attr
+                      )
+                    : [...prev, updatedAttributes];
+
+                return updatedAttributesList;
+            });
+        };
+
+    const isActiveCollectionDownloadInProgress = useCallback(() => {
+        const attributes = collectionDownloadProgressAttributesList.find(
+            (attr) => attr.collectionID === activeCollectionID
+        );
+        return (
+            attributes &&
+            !isCollectionDownloadCancelled(attributes) &&
+            !isCollectionDownloadCompleted(attributes)
+        );
+    }, [activeCollectionID, collectionDownloadProgressAttributesList]);
 
     useEffect(() => {
         if (isInSearchMode) {
@@ -71,21 +126,32 @@ export default function Collections(props: Iprops) {
         setPhotoListHeader({
             item: (
                 <CollectionInfoWithOptions
-                    collectionSummary={collectionSummaries.get(
+                    collectionSummary={toShowCollectionSummaries.get(
                         activeCollectionID
                     )}
                     activeCollection={activeCollection}
                     setCollectionNamerAttributes={setCollectionNamerAttributes}
-                    redirectToAll={() => setActiveCollectionID(ALL_SECTION)}
                     showCollectionShareModal={() =>
                         setCollectionShareModalView(true)
                     }
+                    setCollectionDownloadProgressAttributesCreator={
+                        setCollectionDownloadProgressAttributesCreator
+                    }
+                    isActiveCollectionDownloadInProgress={
+                        isActiveCollectionDownloadInProgress
+                    }
+                    setActiveCollectionID={setActiveCollectionID}
                 />
             ),
             itemType: ITEM_TYPE.HEADER,
             height: 68,
         });
-    }, [collectionSummaries, activeCollectionID, isInSearchMode]);
+    }, [
+        toShowCollectionSummaries,
+        activeCollectionID,
+        isInSearchMode,
+        isActiveCollectionDownloadInProgress,
+    ]);
 
     if (shouldBeHidden) {
         return <></>;
@@ -98,6 +164,7 @@ export default function Collections(props: Iprops) {
     return (
         <>
             <CollectionListBar
+                isInHiddenSection={isInHiddenSection}
                 activeCollectionID={activeCollectionID}
                 setActiveCollectionID={setActiveCollectionID}
                 collectionSummaries={sortedCollectionSummaries.filter((x) =>
@@ -117,13 +184,20 @@ export default function Collections(props: Iprops) {
                 setActiveCollectionID={setActiveCollectionID}
                 setCollectionListSortBy={setCollectionListSortBy}
                 collectionListSortBy={collectionListSortBy}
+                isInHiddenSection={isInHiddenSection}
             />
 
             <CollectionShare
-                collectionSummary={collectionSummaries.get(activeCollectionID)}
+                collectionSummary={toShowCollectionSummaries.get(
+                    activeCollectionID
+                )}
                 open={collectionShareModalView}
                 onClose={closeCollectionShare}
                 collection={activeCollection}
+            />
+            <CollectionDownloadProgress
+                attributesList={collectionDownloadProgressAttributesList}
+                setAttributesList={setCollectionDownloadProgressAttributesList}
             />
         </>
     );

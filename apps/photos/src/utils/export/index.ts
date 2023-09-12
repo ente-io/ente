@@ -10,12 +10,14 @@ import { EnteFile } from 'types/file';
 
 import { Metadata } from 'types/upload';
 import { splitFilenameAndExtension } from 'utils/file';
-import { ENTE_METADATA_FOLDER, ENTE_TRASH_FOLDER } from 'constants/export';
+import {
+    ENTE_METADATA_FOLDER,
+    ENTE_TRASH_FOLDER,
+    ExportStage,
+} from 'constants/export';
 import sanitize from 'sanitize-filename';
 import { formatDateTimeShort } from 'utils/time/format';
-import { HIDDEN_COLLECTION_NAME } from 'services/collectionService';
-
-const PROPER_CASED_HIDDEN_COLLECTION_NAME = '.Hidden';
+import { getCollectionUserFacingName } from 'utils/collection';
 
 export const getExportRecordFileUID = (file: EnteFile) =>
     `${file.id}_${file.collectionID}_${file.updationTime}`;
@@ -23,9 +25,6 @@ export const getExportRecordFileUID = (file: EnteFile) =>
 export const getCollectionIDFromFileUID = (fileUID: string) =>
     Number(fileUID.split('_')[1]);
 
-export const getHiddenCollectionProperCasedName = () => {
-    return PROPER_CASED_HIDDEN_COLLECTION_NAME;
-};
 export const convertCollectionIDExportNameObjectToMap = (
     collectionExportNames: CollectionExportNames
 ): Map<number, string> => {
@@ -61,10 +60,11 @@ export const getRenamedExportedCollections = (
             const currentExportName = collectionIDExportNameMap.get(
                 collection.id
             );
-            if (collection.name === HIDDEN_COLLECTION_NAME) {
-                collection.name = getHiddenCollectionProperCasedName();
-            }
-            if (currentExportName === collection.name) {
+
+            const collectionExportName =
+                getCollectionUserFacingName(collection);
+
+            if (currentExportName === collectionExportName) {
                 return false;
             }
             const hasNumberedSuffix = currentExportName.match(/\(\d+\)$/);
@@ -72,7 +72,9 @@ export const getRenamedExportedCollections = (
                 ? currentExportName.replace(/\(\d+\)$/, '')
                 : currentExportName;
 
-            return collection.name !== currentExportNameWithoutNumberedSuffix;
+            return (
+                collectionExportName !== currentExportNameWithoutNumberedSuffix
+            );
         }
         return false;
     });
@@ -199,9 +201,6 @@ export const getUniqueCollectionExportName = (
     dir: string,
     collectionName: string
 ): string => {
-    if (collectionName === HIDDEN_COLLECTION_NAME) {
-        collectionName = getHiddenCollectionProperCasedName();
-    }
     let collectionExportName = sanitizeName(collectionName);
     let count = 1;
     while (
@@ -305,3 +304,6 @@ export const parseLivePhotoExportName = (
     const { image, video } = JSON.parse(livePhotoExportName);
     return { image, video };
 };
+
+export const isExportInProgress = (exportStage: ExportStage) =>
+    exportStage > ExportStage.INIT && exportStage < ExportStage.FINISHED;

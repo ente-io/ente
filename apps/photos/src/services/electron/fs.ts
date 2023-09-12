@@ -23,6 +23,27 @@ class ElectronFSService {
             logError(e, 'error while checking if is Folder');
         }
     }
+
+    async saveMediaFile(
+        filePath: string,
+        fileStream: ReadableStream<Uint8Array>
+    ) {
+        try {
+            await this.electronAPIs.saveStreamToDisk(filePath, fileStream);
+        } catch (e) {
+            logError(e, 'error while saving media file');
+            throw e;
+        }
+    }
+
+    deleteFile(filePath: string) {
+        try {
+            this.electronAPIs.deleteFile(filePath);
+        } catch (e) {
+            logError(e, 'error while deleting file');
+            throw e;
+        }
+    }
 }
 
 export default new ElectronFSService();

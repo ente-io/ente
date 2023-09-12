@@ -25,6 +25,7 @@ import { getUniqueFiles } from 'utils/file';
 import { getLatestEntities } from './entityService';
 import { LocationTag, LocationTagData, EntityType } from 'types/entity';
 import { addLogLine } from 'utils/logging';
+import { FILE_TYPE } from 'constants/file';
 
 const DIGITS = new Set(['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']);
 
@@ -44,6 +45,7 @@ export const getAutoCompleteSuggestions =
                 return [];
             }
             const suggestions: Suggestion[] = [
+                ...getFileTypeSuggestion(searchPhrase),
                 ...getHolidaySuggestion(searchPhrase),
                 ...getYearSuggestion(searchPhrase),
                 ...getDateSuggestion(searchPhrase),
@@ -84,26 +86,47 @@ function convertSuggestionsToOptions(
 
     return previewImageAppendedOptions;
 }
+function getFileTypeSuggestion(searchPhrase: string): Suggestion[] {
+    return [
+        {
+            label: t('IMAGE'),
+            value: FILE_TYPE.IMAGE,
+            type: SuggestionType.FILE_TYPE,
+        },
+        {
+            label: t('VIDEO'),
+            value: FILE_TYPE.VIDEO,
+            type: SuggestionType.FILE_TYPE,
+        },
+        {
+            label: t('LIVE_PHOTO'),
+            value: FILE_TYPE.LIVE_PHOTO,
+            type: SuggestionType.FILE_TYPE,
+        },
+    ].filter((suggestion) =>
+        suggestion.label.toLowerCase().includes(searchPhrase)
+    );
+}
 
 function getHolidaySuggestion(searchPhrase: string): Suggestion[] {
     return [
         {
-            label: 'Christmas',
+            label: t('CHRISTMAS'),
             value: { month: 11, date: 25 },
             type: SuggestionType.DATE,
         },
         {
-            label: 'Christmas Eve',
+            label: t('CHRISTMAS_EVE'),
             value: { month: 11, date: 24 },
             type: SuggestionType.DATE,
         },
         {
-            label: 'New Year',
+            label: t('NEW_YEAR'),
             value: { month: 0, date: 1 },
             type: SuggestionType.DATE,
         },
         {
-            label: 'New Year Eve',
+            label: t('NEW_YEAR_EVE'),
             value: { month: 11, date: 31 },
             type: SuggestionType.DATE,
         },
@@ -353,6 +376,9 @@ function isSearchedFile(file: EnteFile, search: Search) {
     if (search?.text) {
         return search.text.files.indexOf(file.id) !== -1;
     }
+    if (typeof search?.fileType !== 'undefined') {
+        return search.fileType === file.metadata.fileType;
+    }
     return false;
 }
 
@@ -382,5 +408,7 @@ function convertSuggestionToSearchQuery(option: Suggestion): Search {
 
         case SuggestionType.THING:
             return { thing: option.value as Thing };
+        case SuggestionType.FILE_TYPE:
+            return { fileType: option.value as FILE_TYPE };
     }
 }

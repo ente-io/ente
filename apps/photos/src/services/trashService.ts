@@ -2,7 +2,7 @@ import { SetFiles } from 'types/gallery';
 import { Collection } from 'types/collection';
 import { getEndpoint } from 'utils/common/apiUtil';
 import { getToken } from 'utils/common/key';
-import { decryptFile, sortFiles } from 'utils/file';
+import { decryptFile, sortTrashFiles } from 'utils/file';
 import { logError } from 'utils/sentry';
 import localForage from 'utils/storage/localForage';
 import { getCollection } from './collectionService';
@@ -141,7 +141,7 @@ export const updateTrash = async (
 };
 
 export function getTrashedFiles(trash: Trash): EnteFile[] {
-    return sortFiles(
+    return sortTrashFiles(
         mergeMetadata(
             trash.map((trashedFile) => ({
                 ...trashedFile.file,

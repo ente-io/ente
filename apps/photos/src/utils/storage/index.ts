@@ -34,3 +34,7 @@ export function getLocalMapEnabled(): boolean {
 export function setLocalMapEnabled(value: boolean) {
     setData(LS_KEYS.MAP_ENABLED, { value });
 }
+
+export function getHasOptedOutOfCrashReports(): boolean {
+    return getData(LS_KEYS.OPT_OUT_OF_CRASH_REPORTS)?.value ?? false;
+}

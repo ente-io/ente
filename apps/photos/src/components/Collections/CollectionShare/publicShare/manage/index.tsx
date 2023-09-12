@@ -58,6 +58,7 @@ export default function ManagePublicShareOptions({
             galleryContext.setBlockingLoad(true);
             const response = await updateShareableURL(req);
             setPublicShareProp(response);
+            galleryContext.syncWithRemote(false, true);
         } catch (e) {
             const errorMessage = handleSharingErrors(e);
             setSharableLinkError(errorMessage);
@@ -70,6 +71,7 @@ export default function ManagePublicShareOptions({
             galleryContext.setBlockingLoad(true);
             await deleteShareableURL(collection);
             setPublicShareProp(null);
+            galleryContext.syncWithRemote(false, true);
             onClose();
         } catch (e) {
             const errorMessage = handleSharingErrors(e);

@@ -4,8 +4,7 @@ import { t } from 'i18next';
 import { GalleryContext } from 'pages/gallery';
 import {
     ARCHIVE_SECTION,
-    HIDDEN_SECTION,
-    DUMMY_UNCATEGORIZED_SECTION,
+    DUMMY_UNCATEGORIZED_COLLECTION,
     TRASH_SECTION,
 } from 'constants/collection';
 import { CollectionSummaries } from 'types/collection';
@@ -35,7 +34,7 @@ export default function ShortcutSection({
             if (unCategorizedCollection) {
                 setUncategorizedCollectionID(unCategorizedCollection.id);
             } else {
-                setUncategorizedCollectionID(DUMMY_UNCATEGORIZED_SECTION);
+                setUncategorizedCollectionID(DUMMY_UNCATEGORIZED_COLLECTION);
             }
         };
         main();
@@ -57,8 +56,7 @@ export default function ShortcutSection({
     };
 
     const openHiddenSection = () => {
-        galleryContext.authenticateUser(() => {
-            galleryContext.setActiveCollectionID(HIDDEN_SECTION);
+        galleryContext.openHiddenSection(() => {
             closeSidebar();
         });
     };

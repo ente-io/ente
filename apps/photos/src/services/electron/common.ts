@@ -44,6 +44,30 @@ class ElectronService {
             this.electronAPIs.registerForegroundEventListener(onForeground);
         }
     }
+
+    checkExistsAndCreateDir(dirPath: string) {
+        if (this.electronAPIs?.checkExistsAndCreateDir) {
+            this.electronAPIs.checkExistsAndCreateDir(dirPath);
+        }
+    }
+
+    openDirectory(dirPath: string) {
+        if (this.electronAPIs?.openDirectory) {
+            this.electronAPIs.openDirectory(dirPath);
+        }
+    }
+
+    selectDirectory() {
+        if (this.electronAPIs?.selectDirectory) {
+            return this.electronAPIs.selectDirectory();
+        }
+    }
+
+    updateOptOutOfCrashReports(optOut: boolean) {
+        if (this.electronAPIs?.updateOptOutOfCrashReports) {
+            return this.electronAPIs.updateOptOutOfCrashReports(optOut);
+        }
+    }
 }
 
 export default new ElectronService();

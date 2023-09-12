@@ -15,6 +15,16 @@ import { AllCollectionMobileBreakpoint } from './dialog';
 const MobileColumns = 2;
 const DesktopColumns = 3;
 
+const CollectionRowItemSize = 154;
+const getCollectionRowListHeight = (
+    collectionRowList: CollectionSummary[][],
+    windowSize: { height: number; width: number }
+) =>
+    Math.min(
+        collectionRowList.length * CollectionRowItemSize + 32,
+        windowSize?.height - 177
+    ) || 0;
+
 interface Iprops {
     collectionSummaries: CollectionSummary[];
     onCollectionClick: (id?: number) => void;
@@ -50,7 +60,7 @@ const AllCollectionRow = React.memo(
         const collectionRow = collectionRowList[index];
         return (
             <div style={style}>
-                <FlexWrapper gap={0.5}>
+                <FlexWrapper gap={'4px'} padding={'16px'}>
                     {collectionRow.map((item: any) => (
                         <AllCollectionCard
                             isScrolling={isScrolling}
@@ -121,12 +131,15 @@ export default function AllCollectionContent({
     const itemData = createItemData(collectionRowList, onCollectionClick);
 
     return (
-        <DialogContent>
+        <DialogContent sx={{ '&&': { padding: 0 } }}>
             <List
-                height={windowSize.height ?? 0}
+                height={getCollectionRowListHeight(
+                    collectionRowList,
+                    windowSize
+                )}
                 width={'100%'}
                 itemCount={collectionRowList.length}
-                itemSize={154}
+                itemSize={CollectionRowItemSize}
                 itemData={itemData}>
                 {AllCollectionRow}
             </List>

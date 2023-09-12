@@ -10,12 +10,18 @@ import {
     logoutUser,
     clearFiles,
     putAttributes,
+    configureSRP,
 } from 'services/userService';
 import { setIsFirstLogin } from 'utils/storage';
 import { clearKeys } from 'utils/storage/sessionStorage';
 import { AppContext } from 'pages/_app';
 import { PAGES } from 'constants/pages';
-import { KeyAttributes, EmailVerificationResponse, User } from 'types/user';
+import {
+    KeyAttributes,
+    UserVerificationResponse,
+    User,
+    SRPSetupAttributes,
+} from 'types/user';
 import { Box, Typography } from '@mui/material';
 import FormPaperTitle from 'components/Form/FormPaper/Title';
 import FormPaper from 'components/Form/FormPaper';
@@ -69,7 +75,7 @@ export default function Verify() {
                 token,
                 id,
                 twoFactorSessionID,
-            } = resp.data as EmailVerificationResponse;
+            } = resp.data as UserVerificationResponse;
             if (twoFactorSessionID) {
                 setData(LS_KEYS.USER, {
                     email,
@@ -89,19 +95,29 @@ export default function Verify() {
                 if (keyAttributes) {
                     setData(LS_KEYS.KEY_ATTRIBUTES, keyAttributes);
                     setData(LS_KEYS.ORIGINAL_KEY_ATTRIBUTES, keyAttributes);
-                } else if (getData(LS_KEYS.ORIGINAL_KEY_ATTRIBUTES)) {
-                    await putAttributes(
-                        token,
-                        getData(LS_KEYS.ORIGINAL_KEY_ATTRIBUTES)
-                    );
+                } else {
+                    if (getData(LS_KEYS.ORIGINAL_KEY_ATTRIBUTES)) {
+                        await putAttributes(
+                            token,
+                            getData(LS_KEYS.ORIGINAL_KEY_ATTRIBUTES)
+                        );
+                    }
+                    if (getData(LS_KEYS.SRP_SETUP_ATTRIBUTES)) {
+                        const srpSetupAttributes: SRPSetupAttributes = getData(
+                            LS_KEYS.SRP_SETUP_ATTRIBUTES
+                        );
+                        await configureSRP(srpSetupAttributes);
+                    }
                 }
                 clearFiles();
                 setIsFirstLogin(true);
+                const redirectURL = appContext.redirectURL;
+                appContext.setRedirectURL(null);
                 if (keyAttributes?.encryptedKey) {
                     clearKeys();
-                    router.push(PAGES.CREDENTIALS);
+                    router.push(redirectURL ?? PAGES.CREDENTIALS);
                 } else {
-                    router.push(PAGES.GENERATE);
+                    router.push(redirectURL ?? PAGES.GENERATE);
                 }
             }
         } catch (e) {
