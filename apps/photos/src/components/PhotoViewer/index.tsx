@@ -136,10 +136,6 @@ function PhotoViewer(props: Iprops) {
     }, []);
 
     useEffect(() => {
-        console.log(fileDownloadProgress);
-    }, [fileDownloadProgress]);
-
-    useEffect(() => {
         if (!pswpElement) return;
         if (isOpen) {
             openPhotoSwipe();
