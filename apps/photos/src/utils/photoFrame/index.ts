@@ -1,5 +1,4 @@
 import { FILE_TYPE } from 'constants/file';
-import { t } from 'i18next';
 import { EnteFile } from 'types/file';
 import { MergedSourceURL } from 'types/gallery';
 import { logError } from 'utils/sentry';
@@ -121,30 +120,20 @@ export async function updateFileSrcProps(
     file.isConverted = isConverted;
     file.conversionFailed = conversionFailed;
 
+    if (!isPlayable) {
+        file.src = file.msrc;
+        return;
+    }
+
     if (file.metadata.fileType === FILE_TYPE.VIDEO) {
-        if (isPlayable) {
-            file.html = `
+        file.html = `
                 <video controls onContextMenu="return false;">
                     <source src="${convertedVideoURL}" />
                     Your browser does not support the video tag.
                 </video>
                 `;
-        } else {
-            file.html = `
-                <div class="pswp-item-container">
-                    <img src="${file.msrc}" onContextMenu="return false;"/>
-                    <div class="download-banner">
-                        ${t('VIDEO_PLAYBACK_FAILED_DOWNLOAD_INSTEAD')}
-                        <button class = "btn btn-outline-success" id = "download-btn-${
-                            file.id
-                        }">${t('DOWNLOAD')}</button>
-                    </div>
-                </div>
-                `;
-        }
     } else if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
-        if (isPlayable) {
-            file.html = `
+        file.html = `
                 <div class = 'pswp-item-container'>
                     <img id = "live-photo-image-${file.id}" src="${convertedImageURL}" onContextMenu="return false;"/>
                     <video id = "live-photo-video-${file.id}" loop muted onContextMenu="return false;">
@@ -153,23 +142,8 @@ export async function updateFileSrcProps(
                     </video>
                 </div>
                 `;
-        } else {
-            file.html = `
-                <div class="pswp-item-container">
-                    <img src="${file.msrc}" onContextMenu="return false;"/>
-                    <div class="download-banner">
-                        ${t('VIDEO_PLAYBACK_FAILED_DOWNLOAD_INSTEAD')}
-                        <button class = "btn btn-outline-success" id = "download-btn-${
-                            file.id
-                        }">Download</button>
-                    </div>
-                </div>
-                `;
-        }
     } else if (file.metadata.fileType === FILE_TYPE.IMAGE) {
-        if (isPlayable) {
-            file.src = convertedImageURL;
-        }
+        file.src = convertedImageURL;
     } else {
         logError(
             Error(`unknown file type - ${file.metadata.fileType}`),
