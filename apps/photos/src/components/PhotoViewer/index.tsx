@@ -35,7 +35,7 @@ import ChevronRight from '@mui/icons-material/ChevronRight';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { trashFiles } from 'services/fileService';
 import { getTrashFileMessage } from 'utils/ui';
-import { styled } from '@mui/material';
+import { Box, styled } from '@mui/material';
 import { addLocalLog } from 'utils/logging';
 import ContentCopy from '@mui/icons-material/ContentCopy';
 import ChevronLeft from '@mui/icons-material/ChevronLeft';
@@ -45,6 +45,10 @@ import { getFileType } from 'services/typeDetectionService';
 import { ConversionFailedNotification } from './styledComponents/ConversionFailedNotification';
 import { GalleryContext } from 'pages/gallery';
 import { ConvertBtn } from './styledComponents/ConvertBtn';
+import downloadManager from 'services/downloadManager';
+import publicCollectionDownloadManager from 'services/publicCollectionDownloadManager';
+import CircularProgressWithLabel from './styledComponents/CircularProgressWithLabel';
+import EnteSpinner from 'components/EnteSpinner';
 
 interface PhotoswipeFullscreenAPI {
     enter: () => void;
@@ -116,6 +120,24 @@ function PhotoViewer(props: Iprops) {
         conversionFailedNotificationOpen,
         setConversionFailedNotificationOpen,
     ] = useState(false);
+
+    const [fileDownloadProgress, setFileDownloadProgress] = useState<
+        Map<number, number>
+    >(new Map());
+
+    useEffect(() => {
+        if (publicCollectionGalleryContext.accessedThroughSharedURL) {
+            publicCollectionDownloadManager.setProgressUpdater(
+                setFileDownloadProgress
+            );
+        } else {
+            downloadManager.setProgressUpdater(setFileDownloadProgress);
+        }
+    }, []);
+
+    useEffect(() => {
+        console.log(fileDownloadProgress);
+    }, [fileDownloadProgress]);
 
     useEffect(() => {
         if (!pswpElement) return;
@@ -619,6 +641,27 @@ function PhotoViewer(props: Iprops) {
                             {t('CONVERT')}
                         </ConvertBtn>
                     )}
+
+                    <Box
+                        sx={{
+                            position: 'absolute',
+                            top: '50%',
+                            left: '50%',
+                            transform: 'translate(-50%, -50%)',
+                            zIndex: 10,
+                        }}>
+                        {fileDownloadProgress.has(
+                            (photoSwipe?.currItem as EnteFile)?.id
+                        ) ? (
+                            <CircularProgressWithLabel
+                                value={fileDownloadProgress.get(
+                                    (photoSwipe.currItem as EnteFile)?.id
+                                )}
+                            />
+                        ) : (
+                            !isSourceLoaded && <EnteSpinner />
+                        )}
+                    </Box>
 
                     <div className="pswp__container">
                         <div className="pswp__item" />
