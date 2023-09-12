@@ -3,8 +3,8 @@ export const ConvertBtn = styled((props: ButtonProps) => (
     <Button color="secondary" {...props} />
 ))`
     position: absolute;
-    top: 5vh;
-    right: 2vh;
+    bottom: 10vh;
+    left: 2vh;
     outline: none;
     border: none;
     border-radius: 10%;
