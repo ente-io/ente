@@ -249,9 +249,13 @@ function PhotoViewer(props: Iprops) {
         const file = photoSwipe?.currItem as EnteFile;
         if (!file) return;
         console.log(
+            'isVideo',
             file.metadata.fileType === FILE_TYPE.VIDEO,
+            '!isConverted',
             !file.isConverted,
+            'isSourceLoaded',
             isSourceLoaded,
+            '!conversionFailed',
             !conversionFailed
         );
         const shouldShowConvertBtn =
