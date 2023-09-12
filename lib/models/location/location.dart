@@ -42,10 +42,10 @@ class Location with _$Location {
     if (longitude.isNaN || longitude.isInfinite) {
       return false;
     }
-    if (latitude > 90 || latitude < -90) {
+    if (latitude >= 90 || latitude <= -90) {
       return false;
     }
-    if (longitude > 180 || longitude < -180) {
+    if (longitude >= 180 || longitude <= -180) {
       return false;
     }
     return true;
