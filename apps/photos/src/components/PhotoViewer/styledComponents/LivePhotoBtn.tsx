@@ -1,11 +1,10 @@
-import { styled } from '@mui/material';
-export const LivePhotoBtn = styled('button')`
+import { Button, ButtonProps, styled } from '@mui/material';
+export const LivePhotoBtn = styled((props: ButtonProps) => (
+    <Button color="secondary" {...props} />
+))`
     position: absolute;
     bottom: 6vh;
     right: 6vh;
-    height: 40px;
-    width: 80px;
-    background: #d7d7d7;
     outline: none;
     border: none;
     border-radius: 10%;

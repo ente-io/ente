@@ -1,11 +1,10 @@
-import { styled } from '@mui/material';
-export const ConvertBtn = styled('button')`
+import { Button, ButtonProps, styled } from '@mui/material';
+export const ConvertBtn = styled((props: ButtonProps) => (
+    <Button color="secondary" {...props} />
+))`
     position: absolute;
-    bottom: 6vh;
-    right: 6vh;
-    height: 40px;
-    width: 100px;
-    background: #d7d7d7;
+    top: 5vh;
+    right: 2vh;
     outline: none;
     border: none;
     border-radius: 10%;
