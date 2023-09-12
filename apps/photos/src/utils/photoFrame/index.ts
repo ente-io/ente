@@ -40,36 +40,10 @@ export async function pauseVideo(livePhotoVideo, livePhotoImage) {
 
 export function updateFileMsrcProps(file: EnteFile, url: string) {
     file.msrc = url;
+    file.src = url;
     file.isSourceLoaded = false;
     file.conversionFailed = false;
     file.isConverted = false;
-    if (file.metadata.fileType === FILE_TYPE.VIDEO) {
-        file.html = `
-                <div class="pswp-item-container">
-                    <img src="${url}" onContextMenu="return false;"/>
-                    <div class="spinner-border text-light" role="status">
-                        <span class="sr-only">Loading...</span>
-                    </div>
-                </div>
-            `;
-    } else if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
-        file.html = `
-                <div class="pswp-item-container">
-                    <img src="${url}" onContextMenu="return false;"/>
-                    <div class="spinner-border text-light" role="status">
-                        <span class="sr-only">Loading...</span>
-                    </div>
-                </div>
-            `;
-    } else if (file.metadata.fileType === FILE_TYPE.IMAGE) {
-        file.src = url;
-    } else {
-        logError(
-            Error(`unknown file type - ${file.metadata.fileType}`),
-            'Unknown file type'
-        );
-        file.src = url;
-    }
 }
 
 export async function updateFileSrcProps(
@@ -119,9 +93,9 @@ export async function updateFileSrcProps(
     file.originalVideoURL = originalVideoURL;
     file.isConverted = isConverted;
     file.conversionFailed = conversionFailed;
+    file.src = null;
 
     if (!isPlayable) {
-        file.src = file.msrc;
         return;
     }
 
