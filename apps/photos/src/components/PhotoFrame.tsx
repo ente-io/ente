@@ -513,12 +513,15 @@ const PhotoFrame = ({
         }
     };
 
-    const getConvertedVideo = async (
+    const getConvertedItem = async (
         instance: PhotoSwipe<PhotoSwipe.Options>,
         index: number,
         item: EnteFile
     ) => {
-        if (item.metadata.fileType !== FILE_TYPE.VIDEO) {
+        if (
+            item.metadata.fileType !== FILE_TYPE.VIDEO &&
+            item.metadata.fileType !== FILE_TYPE.LIVE_PHOTO
+        ) {
             logError(
                 new Error(),
                 'getConvertedVideo called for non video file'
@@ -565,7 +568,12 @@ const PhotoFrame = ({
             }
 
             const srcURL = filesStore.get(item.id);
-            const originalVideoURL = srcURL.original;
+            let originalVideoURL;
+            if (item.metadata.fileType === FILE_TYPE.VIDEO) {
+                originalVideoURL = srcURL.original;
+            } else {
+                originalVideoURL = srcURL.original.split(',')[1];
+            }
             const convertedVideoURL = URL.createObjectURL(
                 await getPlayableVideo(
                     item.metadata.title,
@@ -573,7 +581,16 @@ const PhotoFrame = ({
                     true
                 )
             );
-            srcURL.converted = convertedVideoURL;
+            if (item.metadata.fileType === FILE_TYPE.VIDEO) {
+                srcURL.converted = convertedVideoURL;
+            } else {
+                const prvConvertedImageURL = srcURL.converted.split(',')[0];
+                srcURL.converted = [
+                    prvConvertedImageURL,
+                    convertedVideoURL,
+                ].join(',');
+            }
+
             filesStore.set(item.id, srcURL);
 
             await updateSrcURL(index, item.id, srcURL, true);
@@ -617,7 +634,7 @@ const PhotoFrame = ({
                 currentIndex={currentIndex}
                 onClose={handleClose}
                 gettingData={getSlideData}
-                getConvertedVideo={getConvertedVideo}
+                getConvertedItem={getConvertedItem}
                 favItemIds={favItemIds}
                 deletedFileIds={deletedFileIds}
                 setDeletedFileIds={setDeletedFileIds}

@@ -68,7 +68,7 @@ interface Iprops {
     currentIndex?: number;
     onClose?: (needUpdate: boolean) => void;
     gettingData: (instance: any, index: number, item: EnteFile) => void;
-    getConvertedVideo: (instance: any, index: number, item: EnteFile) => void;
+    getConvertedItem: (instance: any, index: number, item: EnteFile) => void;
     id?: string;
     className?: string;
     favItemIds: Set<number>;
@@ -268,7 +268,8 @@ function PhotoViewer(props: Iprops) {
             !conversionFailed
         );
         const shouldShowConvertBtn =
-            file.metadata.fileType === FILE_TYPE.VIDEO &&
+            (file.metadata.fileType === FILE_TYPE.VIDEO ||
+                file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) &&
             !file.isConverted &&
             isSourceLoaded &&
             !conversionFailed;
@@ -584,7 +585,7 @@ function PhotoViewer(props: Iprops) {
     };
 
     const triggerManualConvert = () => {
-        props.getConvertedVideo(
+        props.getConvertedItem(
             photoSwipe,
             photoSwipe.getCurrentIndex(),
             photoSwipe.currItem as EnteFile
