@@ -5,6 +5,8 @@ import { setIsAppQuitting, setIsUpdateAvailable } from '../main';
 import { compareVersions } from 'compare-versions';
 import { AppUpdateInfo, GetFeatureFlagResponse } from '../types';
 import {
+    clearMuteUpdateNotificationVersion,
+    clearSkipAppVersion,
     getMuteUpdateNotificationVersion,
     getSkipAppVersion,
     setMuteUpdateNotificationVersion,
@@ -26,6 +28,16 @@ export function setupAutoUpdater(mainWindow: BrowserWindow) {
         () => checkForUpdateAndNotify(mainWindow),
         ONE_DAY_IN_MICROSECOND
     );
+}
+
+export function forceCheckForUpdateAndNotify(mainWindow: BrowserWindow) {
+    try {
+        clearSkipAppVersion();
+        clearMuteUpdateNotificationVersion();
+        checkForUpdateAndNotify(mainWindow);
+    } catch (e) {
+        logErrorSentry(e, 'forceCheckForUpdateAndNotify failed');
+    }
 }
 
 async function checkForUpdateAndNotify(mainWindow: BrowserWindow) {

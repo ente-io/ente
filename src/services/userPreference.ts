@@ -31,3 +31,11 @@ export function getOptOutOfCrashReports() {
 export function setOptOutOfCrashReports(optOut: boolean) {
     userPreferencesStore.set('optOutOfCrashReports', optOut);
 }
+
+export function clearSkipAppVersion() {
+    userPreferencesStore.delete('skipAppVersion');
+}
+
+export function clearMuteUpdateNotificationVersion() {
+    userPreferencesStore.delete('muteUpdateNotificationVersion');
+}
