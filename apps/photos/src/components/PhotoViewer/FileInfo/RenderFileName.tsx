@@ -70,7 +70,7 @@ export function RenderFileName({
         );
         setFilename(filename);
         setExtension(extension);
-    }, []);
+    }, [file]);
 
     const saveEdits = async (newFilename: string) => {
         try {
