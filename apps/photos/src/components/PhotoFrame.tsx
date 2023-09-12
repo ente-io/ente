@@ -19,6 +19,7 @@ import { addLogLine } from 'utils/logging';
 import PhotoSwipe from 'photoswipe';
 import useMemoSingleThreaded from 'hooks/useMemoSingleThreaded';
 import { getPlayableVideo } from 'utils/file';
+import { FILE_TYPE } from 'constants/file';
 
 const Container = styled('div')`
     display: block;
@@ -206,7 +207,6 @@ const PhotoFrame = ({
         index: number,
         id: number,
         mergedSrcURL: MergedSourceURL,
-        conversionFailed: boolean,
         forceUpdate?: boolean
     ) => {
         const file = displayFiles[index];
@@ -240,11 +240,11 @@ const PhotoFrame = ({
             );
             return;
         }
-        if (conversionFailed) {
-            setConversionFailed(true);
-            return;
-        }
+
         await updateFileSrcProps(file, mergedSrcURL);
+        if (file.conversionFailed) {
+            setConversionFailed(true);
+        }
         setIsSourceLoaded(true);
     };
 
@@ -456,7 +456,6 @@ const PhotoFrame = ({
             addLogLine(`[${item.id}] new file src request`);
             fetching[item.id] = true;
             let srcURL: MergedSourceURL;
-            let conversionFailed: boolean = false;
             if (filesStore.has(item.id)) {
                 addLogLine(
                     `[${item.id}] gallery context cache hit, using cached file`
@@ -483,21 +482,14 @@ const PhotoFrame = ({
                     downloadedURL = await DownloadManager.getFile(item, true);
                 }
                 appContext.finishLoading();
-                if (
-                    downloadedURL.converted.filter((url) => !!url).length !==
-                    downloadedURL.converted.length
-                ) {
-                    conversionFailed = true;
-                } else {
-                    const mergedURL: MergedSourceURL = {
-                        original: downloadedURL.original.join(','),
-                        converted: downloadedURL.converted.join(','),
-                    };
-                    filesStore.set(item.id, mergedURL);
-                    srcURL = mergedURL;
-                }
+                const mergedURL: MergedSourceURL = {
+                    original: downloadedURL.original.join(','),
+                    converted: downloadedURL.converted.join(','),
+                };
+                filesStore.set(item.id, mergedURL);
+                srcURL = mergedURL;
             }
-            await updateSrcURL(index, item.id, srcURL, conversionFailed);
+            await updateSrcURL(index, item.id, srcURL);
 
             try {
                 addLogLine(
@@ -523,6 +515,20 @@ const PhotoFrame = ({
         index: number,
         item: EnteFile
     ) => {
+        if (item.metadata.fileType !== FILE_TYPE.VIDEO) {
+            logError(
+                new Error(),
+                'getConvertedVideo called for non video file'
+            );
+            return;
+        }
+        if (item.conversionFailed) {
+            logError(
+                new Error(),
+                'getConvertedVideo called for file that conversion failed'
+            );
+            return;
+        }
         setIsSourceLoaded(false);
         setConversionFailed(false);
         updateURL(index)(item.id, item.msrc, true);
@@ -543,7 +549,6 @@ const PhotoFrame = ({
         try {
             addLogLine(`[${item.id}] new file getConvertedVideo request`);
             fetching[item.id] = true;
-            let conversionFailed: boolean = false;
             if (!filesStore.has(item.id)) {
                 addLogLine(
                     `[${item.id}] getConvertedVideo called for file that is not downloaded`
@@ -565,14 +570,10 @@ const PhotoFrame = ({
                     true
                 )
             );
-            if (convertedVideoURL) {
-                srcURL.converted = convertedVideoURL;
-                filesStore.set(item.id, srcURL);
-            } else {
-                conversionFailed = true;
-            }
+            srcURL.converted = convertedVideoURL;
+            filesStore.set(item.id, srcURL);
 
-            await updateSrcURL(index, item.id, srcURL, conversionFailed, true);
+            await updateSrcURL(index, item.id, srcURL, true);
 
             try {
                 addLogLine(

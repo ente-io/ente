@@ -87,35 +87,39 @@ export async function updateFileSrcProps(
     let convertedVideoURL;
     let originalURL;
     let isConverted;
+    let conversionFailed;
     if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
         [originalImageURL, originalVideoURL] = urls.original;
         [convertedImageURL, convertedVideoURL] = urls.converted;
         isConverted =
             originalVideoURL !== convertedVideoURL ||
             originalImageURL !== convertedImageURL;
+        conversionFailed = !convertedVideoURL || !convertedImageURL;
     } else if (file.metadata.fileType === FILE_TYPE.VIDEO) {
         [originalVideoURL] = urls.original;
         [convertedVideoURL] = urls.converted;
         isConverted = originalVideoURL !== convertedVideoURL;
+        conversionFailed = !convertedVideoURL;
     } else if (file.metadata.fileType === FILE_TYPE.IMAGE) {
         [originalImageURL] = urls.original;
         [convertedImageURL] = urls.converted;
         isConverted = originalImageURL !== convertedImageURL;
+        conversionFailed = !convertedImageURL;
     } else {
         [originalURL] = urls.original;
         isConverted = false;
+        conversionFailed = false;
     }
 
-    const isPlayable =
-        convertedVideoURL && isPlaybackPossible(convertedVideoURL);
+    const isPlayable = !isConverted || (isConverted && !conversionFailed);
 
-    console.log('isConverted', isConverted);
     file.w = window.innerWidth;
     file.h = window.innerHeight;
     file.isSourceLoaded = true;
     file.originalImageURL = originalImageURL;
     file.originalVideoURL = originalVideoURL;
     file.isConverted = isConverted;
+    file.conversionFailed = conversionFailed;
 
     if (file.metadata.fileType === FILE_TYPE.VIDEO) {
         if (isPlayable) {
@@ -163,7 +167,9 @@ export async function updateFileSrcProps(
                 `;
         }
     } else if (file.metadata.fileType === FILE_TYPE.IMAGE) {
-        file.src = convertedImageURL;
+        if (isPlayable) {
+            file.src = convertedImageURL;
+        }
     } else {
         logError(
             Error(`unknown file type - ${file.metadata.fileType}`),
