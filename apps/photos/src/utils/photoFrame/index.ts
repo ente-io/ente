@@ -40,10 +40,20 @@ export async function pauseVideo(livePhotoVideo, livePhotoImage) {
 
 export function updateFileMsrcProps(file: EnteFile, url: string) {
     file.msrc = url;
-    file.src = url;
     file.isSourceLoaded = false;
     file.conversionFailed = false;
     file.isConverted = false;
+    file.src = null;
+    file.html = null;
+    if (file.metadata.fileType === FILE_TYPE.IMAGE) {
+        file.src = url;
+    } else {
+        file.html = `
+            <div class = 'pswp-item-container'>
+                <img src="${url}"/>
+            </div>
+            `;
+    }
 }
 
 export async function updateFileSrcProps(
