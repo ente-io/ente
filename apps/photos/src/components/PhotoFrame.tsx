@@ -13,7 +13,6 @@ import { MergedSourceURL, SelectedState } from 'types/gallery';
 import PublicCollectionDownloadManager from 'services/publicCollectionDownloadManager';
 import { PublicCollectionGalleryContext } from 'utils/publicCollectionGallery';
 import { useRouter } from 'next/router';
-import { AppContext } from 'pages/_app';
 import { logError } from 'utils/sentry';
 import { addLogLine } from 'utils/logging';
 import PhotoSwipe from 'photoswipe';
@@ -75,7 +74,6 @@ const PhotoFrame = ({
     const [currentIndex, setCurrentIndex] = useState<number>(0);
     const [fetching, setFetching] = useState<{ [k: number]: boolean }>({});
     const galleryContext = useContext(GalleryContext);
-    const appContext = useContext(AppContext);
     const publicCollectionGalleryContext = useContext(
         PublicCollectionGalleryContext
     );
@@ -468,7 +466,6 @@ const PhotoFrame = ({
                 addLogLine(
                     `[${item.id}] gallery context cache miss, calling downloadManager to get file`
                 );
-                appContext.startLoading();
                 let downloadedURL: {
                     original: string[];
                     converted: string[];
@@ -484,7 +481,6 @@ const PhotoFrame = ({
                 } else {
                     downloadedURL = await DownloadManager.getFile(item, true);
                 }
-                appContext.finishLoading();
                 const mergedURL: MergedSourceURL = {
                     original: downloadedURL.original.join(','),
                     converted: downloadedURL.converted.join(','),
