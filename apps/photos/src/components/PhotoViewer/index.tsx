@@ -257,16 +257,7 @@ function PhotoViewer(props: Iprops) {
     useEffect(() => {
         const file = photoSwipe?.currItem as EnteFile;
         if (!file) return;
-        console.log(
-            'isVideo',
-            file.metadata.fileType === FILE_TYPE.VIDEO,
-            '!isConverted',
-            !file.isConverted,
-            'isSourceLoaded',
-            isSourceLoaded,
-            '!conversionFailed',
-            !conversionFailed
-        );
+
         const shouldShowConvertBtn =
             (file.metadata.fileType === FILE_TYPE.VIDEO ||
                 file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) &&
@@ -596,7 +587,6 @@ function PhotoViewer(props: Iprops) {
     const { id } = props;
     let { className } = props;
     className = classnames(['pswp', className]).trim();
-    console.log('conversionFailed', conversionFailed);
     return (
         <>
             <div
