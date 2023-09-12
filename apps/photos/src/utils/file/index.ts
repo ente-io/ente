@@ -405,7 +405,9 @@ export async function getPlayableVideo(
     forceConvert = false
 ) {
     try {
-        const isPlayable = isPlaybackPossible(URL.createObjectURL(videoBlob));
+        const isPlayable = await isPlaybackPossible(
+            URL.createObjectURL(videoBlob)
+        );
         if (isPlayable && !forceConvert) {
             return videoBlob;
         } else {
