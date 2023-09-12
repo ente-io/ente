@@ -438,14 +438,15 @@ const PhotoFrame = ({
             }
         }
 
-        if (item.isSourceLoaded) {
-            setIsSourceLoaded(true);
-            addLogLine(`[${item.id}] source already loaded`);
-            return;
-        }
-        if (item.conversionFailed) {
-            setConversionFailed(true);
-            addLogLine(`[${item.id}] conversion failed`);
+        if (item.isSourceLoaded || item.conversionFailed) {
+            if (item.isSourceLoaded) {
+                setIsSourceLoaded(true);
+                addLogLine(`[${item.id}] source already loaded`);
+            }
+            if (item.conversionFailed) {
+                setConversionFailed(true);
+                addLogLine(`[${item.id}] conversion failed`);
+            }
             return;
         }
         if (fetching[item.id]) {

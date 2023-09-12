@@ -112,6 +112,11 @@ function PhotoViewer(props: Iprops) {
 
     const [showConvertBtn, setShowConvertBtn] = useState(false);
 
+    const [
+        conversionFailedNotificationOpen,
+        setConversionFailedNotificationOpen,
+    ] = useState(false);
+
     useEffect(() => {
         if (!pswpElement) return;
         if (isOpen) {
@@ -124,6 +129,11 @@ function PhotoViewer(props: Iprops) {
             closePhotoSwipe();
         };
     }, [isOpen]);
+
+    useEffect(() => {
+        if (!isOpen) return;
+        setConversionFailedNotificationOpen(conversionFailed);
+    }, [isOpen, conversionFailed]);
 
     useEffect(() => {
         if (!photoSwipe) return;
@@ -585,6 +595,7 @@ function PhotoViewer(props: Iprops) {
     const { id } = props;
     let { className } = props;
     className = classnames(['pswp', className]).trim();
+    console.log('conversionFailed', conversionFailed);
     return (
         <>
             <div
@@ -605,13 +616,13 @@ function PhotoViewer(props: Iprops) {
                             {livePhotoBtnHTML} {t('LIVE')}
                         </LivePhotoBtn>
                     )}
-                    {conversionFailed && (
-                        <ConversionFailedNotification
-                            onClick={() =>
-                                downloadFileHelper(photoSwipe.currItem)
-                            }
-                        />
-                    )}
+                    <ConversionFailedNotification
+                        open={conversionFailedNotificationOpen}
+                        onClose={() =>
+                            setConversionFailedNotificationOpen(false)
+                        }
+                        onClick={() => downloadFileHelper(photoSwipe.currItem)}
+                    />
                     {showConvertBtn && (
                         <ConvertBtn onClick={triggerManualConvert}>
                             {t('CONVERT')}
