@@ -6,3 +6,4 @@ logs/**
 .vscode/**
 tmp/**
 scratch/**
+main
