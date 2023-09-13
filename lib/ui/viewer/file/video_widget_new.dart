@@ -92,13 +92,6 @@ class _VideoWidgetNewState extends State<VideoWidgetNew> {
           seekBarColor: fillMutedDark,
           seekBarPositionColor: colorScheme.primary300,
           topButtonBarMargin: const EdgeInsets.only(top: verticalMargin),
-          bufferingIndicatorBuilder: (p0) {
-            return OverflowBox(
-              maxHeight: MediaQuery.sizeOf(context).height,
-              maxWidth: MediaQuery.sizeOf(context).width,
-              child: _getLoadingWidget(),
-            );
-          },
           bottomButtonBar: [
             const Spacer(),
             PausePlayAndDuration(controller?.player),
