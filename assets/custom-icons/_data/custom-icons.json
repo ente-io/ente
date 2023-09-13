@@ -87,6 +87,10 @@
     {
       "title": "ngrok",
       "hex": "858585"
+    },
+    {
+      "title": "Parsec",
+      "hex": "26ABFF"
     }
   ]
 }
