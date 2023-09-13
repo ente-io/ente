@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"cli-go/pkg"
 	"fmt"
 	"github.com/spf13/viper"
 	"os"
@@ -9,6 +10,8 @@ import (
 )
 
 const AppVersion = "0.0.1"
+
+var ctrl *pkg.ClICtrl
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -24,7 +27,8 @@ var rootCmd = &cobra.Command{
 
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
-func Execute() {
+func Execute(controller *pkg.ClICtrl) {
+	ctrl = controller
 	err := rootCmd.Execute()
 	if err != nil {
 		os.Exit(1)

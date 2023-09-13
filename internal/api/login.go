@@ -2,7 +2,6 @@ package api
 
 import (
 	"context"
-	"fmt"
 	"github.com/google/uuid"
 )
 
@@ -54,7 +53,7 @@ func (c *Client) VerifySRPSession(
 		"sessionID": sessionID.String(),
 		"srpM1":     clientM1,
 	}
-	r, err := c.restClient.R().
+	_, err := c.restClient.R().
 		SetContext(ctx).
 		SetResult(&res).
 		SetBody(payload).
@@ -62,6 +61,5 @@ func (c *Client) VerifySRPSession(
 	if err != nil {
 		return nil, err
 	}
-	fmt.Sprintf("%+v", r.RawResponse)
 	return &res, nil
 }
