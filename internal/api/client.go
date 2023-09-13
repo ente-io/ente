@@ -7,8 +7,9 @@ import (
 )
 
 const (
-	TokenHeader = "X-Auth-Token"
-	TokenQuery  = "token"
+	EnteAPIEndpoint = "https://api.ente.io"
+	TokenHeader     = "X-Auth-Token"
+	TokenQuery      = "token"
 )
 
 var (
@@ -23,6 +24,7 @@ type Client struct {
 type Params struct {
 	Debug bool
 	Trace bool
+	Host  string
 }
 
 func NewClient(p Params) *Client {
@@ -42,7 +44,11 @@ func NewClient(p Params) *Client {
 		})
 	}
 	c.SetError(&Error{})
-	c.SetBaseURL("https://api.ente.io")
+	if p.Host != "" {
+		c.SetBaseURL(p.Host)
+	} else {
+		c.SetBaseURL(EnteAPIEndpoint)
+	}
 	return &Client{
 		restClient: c,
 	}
