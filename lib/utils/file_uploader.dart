@@ -45,6 +45,7 @@ class FileUploader {
   static const kBlockedUploadsPollFrequency = Duration(seconds: 2);
   static const kFileUploadTimeout = Duration(minutes: 50);
   static const k20MBStorageBuffer = 20 * 1024 * 1024;
+  static const kUploadTempPrefix = "upload_file_";
 
   final _logger = Logger("FileUploader");
   final _dio = NetworkClient.instance.getDio();
@@ -282,6 +283,29 @@ class FileUploader {
     }
   }
 
+
+  Future<void> removeStaleFiles() async {
+    try {
+      final String dir = Configuration.instance.getTempDirectory();
+      // delete all files in the temp directory that start with upload_ and
+      // ends with .encrypted. Fetch files in async manner
+      final files = await Directory(dir).list().toList();
+      final filesToDelete = files.where((file) {
+        return file.path.contains(kUploadTempPrefix) &&
+            file.path.contains(".encrypted");
+      });
+      if (filesToDelete.isEmpty) {
+        return;
+      }
+      _logger.info('cleaning up state files ${filesToDelete.length}');
+      for (final file in filesToDelete) {
+        await file.delete();
+      }
+    } catch (e, s) {
+      _logger.severe("Failed to remove stale files", e, s);
+    }
+  }
+
   Future<void> checkNetworkForUpload({bool isForceUpload = false}) async {
     // Note: We don't support force uploading currently. During force upload,
     // network check is skipped completely
@@ -340,8 +364,10 @@ class FileUploader {
 
     final tempDirectory = Configuration.instance.getTempDirectory();
     final String uniqueID = const Uuid().v4().toString();
-    final encryptedFilePath = '$tempDirectory${uniqueID}_file.encrypted';
-    final encryptedThumbnailPath = '$tempDirectory${uniqueID}_thumb.encrypted';
+    final encryptedFilePath =
+        '$tempDirectory$kUploadTempPrefix${uniqueID}_file.encrypted';
+    final encryptedThumbnailPath =
+        '$tempDirectory$kUploadTempPrefix${uniqueID}_thumb.encrypted';
     MediaUploadData? mediaUploadData;
     var uploadCompleted = false;
     // This flag is used to decide whether to clear the iOS origin file cache

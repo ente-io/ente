@@ -42,7 +42,6 @@ class _DeleteEmptyAlbumsState extends State<DeleteEmptyAlbums> {
         })
         .toList()
         .length;
-    debugPrint("Empty albums count $emptyAlbumCount");
     return emptyAlbumCount > 2;
   }
 

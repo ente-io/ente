@@ -130,7 +130,7 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
             padding: const EdgeInsets.only(left: 12, right: 6),
           ),
         ),
-        SliverToBoxAdapter(child: DeleteEmptyAlbums(collections ?? [])),
+        SliverToBoxAdapter(child: DeleteEmptyAlbums(collections)),
         Configuration.instance.hasConfiguredAccount()
             ? CollectionsFlexiGridViewWidget(
                 collections,

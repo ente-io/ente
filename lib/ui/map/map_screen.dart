@@ -9,6 +9,7 @@ import "package:latlong2/latlong.dart";
 import "package:logging/logging.dart";
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/file/file.dart';
+import "package:photos/models/location/location.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/map/image_marker.dart";
@@ -78,9 +79,17 @@ class _MapScreenState extends State<MapScreen> {
     bool hasAnyLocation = false;
     EnteFile? mostRecentFile;
     for (var file in files) {
-      if (file.hasLocation && file.location != null) {
+      if (file.hasLocation) {
+        if (!Location.isValidRange(
+          latitude: file.location!.latitude!,
+          longitude: file.location!.longitude!,
+        )) {
+          _logger.warning(
+            'Skipping file with invalid location ${file.toString()}',
+          );
+          continue;
+        }
         hasAnyLocation = true;
-
         if (mostRecentFile == null) {
           mostRecentFile = file;
         } else {

@@ -24,6 +24,7 @@
   "sendEmail": "E-Mail senden",
   "deleteRequestSLAText": "Deine Anfrage wird innerhalb von 72 Stunden bearbeitet.",
   "deleteEmailRequest": "Bitte sende eine E-Mail an <warning>account-deletion@ente.io</warning> von Deiner bei uns hinterlegten E-Mail-Adresse.",
+  "entePhotosPerm": "ente <i>benötigt die Erlaubnis</i> Ihre Fotos zu bewahren",
   "ok": "Ok",
   "createAccount": "Konto erstellen",
   "createNewAccount": "Neues Konto erstellen",
@@ -48,6 +49,7 @@
   "sorry": "Entschuldigung",
   "noRecoveryKeyNoDecryption": "Aufgrund unseres Ende-zu-Ende-Verschlüsselungsprotokolls können deine Daten nicht ohne dein Passwort oder deinen Wiederherstellungs-Schlüssel entschlüsselt werden",
   "verifyEmail": "E-Mail-Adresse verifizieren",
+  "toResetVerifyEmail": "Um Ihr Passwort zurückzusetzen, verifizieren Sie bitte zuerst Ihre E-Mail Adresse.",
   "checkInboxAndSpamFolder": "Bitte überprüfe deinen E-Mail-Posteingang (und Spam), um die Verifizierung abzuschließen",
   "tapToEnterCode": "Antippen, um den Code einzugeben",
   "resendEmail": "E-Mail erneut senden",
@@ -187,6 +189,10 @@
   "disableDownloadWarningBody": "Zuschauer können weiterhin Screenshots oder mit anderen externen Programmen Kopien der Bilder machen.",
   "allowDownloads": "Downloads erlauben",
   "linkDeviceLimit": "Geräte Limit",
+  "noDeviceLimit": "Keins",
+  "@noDeviceLimit": {
+    "description": "Text to indicate that there is limit on number of devices"
+  },
   "linkExpiry": "Ablaufdatum des Links",
   "linkExpired": "Abgelaufen",
   "linkEnabled": "Aktiviert",
@@ -199,15 +205,6 @@
   "manageLink": "Link verwalten",
   "linkExpiresOn": "Link läuft am {expiryTime} ab",
   "albumUpdated": "Album aktualisiert",
-  "maxDeviceLimitSpikeHandling": "Wenn auf den Höchstwert von {maxValue} gesetzt, dann wird das Limit gelockert um potenzielle Höchstlasten unterstützen zu können.",
-  "@maxDeviceLimitSpikeHandling": {
-    "placeholders": {
-      "maxValue": {
-        "type": "int",
-        "example": "100"
-      }
-    }
-  },
   "never": "Niemals",
   "custom": "Benutzerdefiniert",
   "@custom": {
@@ -417,6 +414,23 @@
   "skip": "Überspringen",
   "updatingFolderSelection": "Ordnerauswahl wird aktualisiert...",
   "itemCount": "{count, plural, one{{count} Objekt} other{{count} Objekte}}",
+  "deleteItemCount": "{count, plural, one {}=1 {Lösche {count} Element} other {Lösche {count} Elemente}}",
+  "duplicateItemsGroup": "{count} Dateien, {formattedSize} jede",
+  "@duplicateItemsGroup": {
+    "description": "Display the number of duplicate files and their size",
+    "type": "text",
+    "placeholders": {
+      "count": {
+        "example": "12",
+        "type": "int"
+      },
+      "formattedSize": {
+        "example": "2.3 MB",
+        "type": "String"
+      }
+    }
+  },
+  "showMemories": "Erinnerungen anschauen",
   "yearsAgo": "{count, plural, one{vor einem Jahr} other{vor {count} Jahren}}",
   "backupSettings": "Backup-Einstellungen",
   "backupOverMobileData": "Über mobile Daten sichern",
@@ -435,6 +449,8 @@
   "authToChangeYourEmail": "Bitte authentifizieren, um deine E-Mail-Adresse zu ändern",
   "changePassword": "Passwort ändern",
   "authToChangeYourPassword": "Bitte authentifizieren, um das Passwort zu ändern",
+  "emailVerificationToggle": "E-Mail-Verifizierung",
+  "authToChangeEmailVerificationSetting": "Bitte Authentifizieren um die E-Mail Bestätigung zu ändern",
   "exportYourData": "Daten exportieren",
   "logout": "Ausloggen",
   "authToInitiateAccountDeletion": "Bitte authentifizieren, um die Löschung des Kontos einzuleiten",
@@ -447,6 +463,7 @@
   "updateAvailable": "Update verfügbar",
   "ignoreUpdate": "Ignorieren",
   "downloading": "Wird heruntergeladen...",
+  "cannotDeleteSharedFiles": "Konnte geteilte Dateien nicht löschen",
   "theDownloadCouldNotBeCompleted": "Der Download konnte nicht abgeschlossen werden",
   "retry": "Erneut versuchen",
   "backedUpFolders": "Gesicherte Ordner",
@@ -490,6 +507,9 @@
   },
   "familyPlans": "Familientarif",
   "referrals": "Weiterempfehlungen",
+  "notifications": "Benachrichtigungen",
+  "sharedPhotoNotifications": "Neue geteilte Fotos",
+  "sharedPhotoNotificationsExplanation": "Erhalte Benachrichtigungen, wenn jemand ein Foto zu einem gemeinsam genutzten Album hinzufügt, dem du angehörst",
   "advanced": "Erweitert",
   "general": "Allgemein",
   "security": "Sicherheit",
@@ -538,6 +558,7 @@
   "faqs": "FAQs",
   "renewsOn": "Erneuert am {endDate}",
   "freeTrialValidTill": "Kostenlose Demo verfügbar bis zum {endDate}",
+  "playStoreFreeTrialValidTill": "Kostenlose Testversion gültig bis {endDate}.\nSie können anschließend ein bezahltes Paket auswählen.",
   "subWillBeCancelledOn": "Ihr Abo endet am {endDate}",
   "subscription": "Abonnement",
   "paymentDetails": "Zahlungsdetails",
@@ -619,6 +640,9 @@
   "startBackup": "Sicherung starten",
   "noPhotosAreBeingBackedUpRightNow": "Momentan werden keine Fotos gesichert",
   "preserveMore": "Mehr Daten sichern",
+  "grantFullAccessPrompt": "Bitte gewähre Zugang zu allen Fotos in der Einstellungen App",
+  "openSettings": "Öffne Einstellungen",
+  "selectMorePhotos": "Mehr Fotos auswählen",
   "existingUser": "Existierender Benutzer",
   "privateBackups": "Private Sicherungen",
   "forYourMemories": "Als Erinnerung",
@@ -742,6 +766,7 @@
   },
   "deleteAll": "Alle löschen",
   "renameAlbum": "Album umbenennen",
+  "convertToAlbum": "Konvertiere zum Album",
   "setCover": "Titelbild festlegen",
   "@setCover": {
     "description": "Text to set cover photo for an album"
@@ -788,6 +813,7 @@
   "fileFailedToSaveToGallery": "Fehler beim Speichern der Datei in der Galerie",
   "download": "Herunterladen",
   "pressAndHoldToPlayVideo": "Gedrückt halten, um Video abzuspielen",
+  "pressAndHoldToPlayVideoDetailed": "Drücke und halte aufs Foto gedrückt um Video abzuspielen",
   "downloadFailed": "Herunterladen fehlgeschlagen",
   "deduplicateFiles": "Dateien duplizieren",
   "deselectAll": "Alle abwählen",
@@ -945,6 +971,10 @@
   "centerPoint": "Mittelpunkt",
   "pickCenterPoint": "Mittelpunkt auswählen",
   "useSelectedPhoto": "Ausgewähltes Foto verwenden",
+  "resetToDefault": "Standardwerte zurücksetzen",
+  "@resetToDefault": {
+    "description": "Button text to reset cover photo to default"
+  },
   "edit": "Bearbeiten",
   "deleteLocation": "Standort löschen",
   "rotateLeft": "Nach links drehen",
@@ -1048,6 +1078,29 @@
   "maps": "Karten",
   "enableMaps": "Karten aktivieren",
   "enableMapsDesc": "Dies zeigt Ihre Fotos auf einer Weltkarte.\n\nDiese Karte wird von OpenStreetMap gehostet und die genauen Standorte Ihrer Fotos werden niemals geteilt.\n\nSie können diese Funktion jederzeit in den Einstellungen deaktivieren.",
-  "addToHiddenAlbum": "Add to hidden album",
-  "moveToHiddenAlbum": "Move to hidden album"
+  "quickLinks": "Quick Links",
+  "selectItemsToAdd": "Elemente zum Hinzufügen auswählen",
+  "addSelected": "Auswahl hinzufügen",
+  "addFromDevice": "Vom Gerät hinzufügen",
+  "addPhotos": "Fotos hinzufügen",
+  "noPhotosFoundHere": "Keine Fotos gefunden",
+  "zoomOutToSeePhotos": "Verkleinern, um Fotos zu sehen",
+  "noImagesWithLocation": "Keine Bilder mit Standort",
+  "unpinAlbum": "Album lösen",
+  "pinAlbum": "Album anheften",
+  "create": "Erstellen",
+  "viewAll": "Alle anzeigen",
+  "nothingSharedWithYouYet": "Noch nichts mit Dir geteilt",
+  "noAlbumsSharedByYouYet": "Noch keine Alben von dir geteilt",
+  "sharedWithYou": "Mit dir geteilt",
+  "sharedByYou": "Von dir geteilt",
+  "inviteYourFriendsToEnte": "Lade deine Freunde zu ente ein",
+  "failedToDownloadVideo": "Herunterladen des Videos fehlgeschlagen",
+  "hiding": "Verstecken...",
+  "unhiding": "Einblenden...",
+  "successfullyHid": "Erfolgreich versteckt",
+  "successfullyUnhid": "Erfolgreich eingeblendet",
+  "crashReporting": "Absturzbericht",
+  "addToHiddenAlbum": "Zum versteckten Album hinzufügen",
+  "moveToHiddenAlbum": "Zu verstecktem Album verschieben"
 }
