@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/spf13/viper"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -40,4 +41,7 @@ func init() {
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
 	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	viper.SetConfigName("config") // Name of your configuration file (e.g., config.yaml)
+	viper.AddConfigPath(".")      // Search for config file in the current directory
+	viper.ReadInConfig()          // Read the configuration file if it exists
 }

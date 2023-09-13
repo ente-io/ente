@@ -41,10 +41,6 @@ var host string
 
 func init() {
 	// Set up Viper configuration
-	viper.SetConfigName("config") // Name of your configuration file (e.g., config.yaml)
-	viper.AddConfigPath(".")      // Search for config file in the current directory
-	viper.ReadInConfig()          // Read the configuration file if it exists
-
 	// Set a default value for 'host' configuration
 	viper.SetDefault("host", "https://api.ente.io")
 
