@@ -3,7 +3,7 @@ import 'package:logging/logging.dart';
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file/file_type.dart';
 import "package:photos/ui/viewer/file/video_widget_new.dart";
-import 'package:photos/ui/viewer/file/zoomable_live_image.dart';
+import "package:photos/ui/viewer/file/zoomable_live_image_new.dart";
 
 class FileWidget extends StatelessWidget {
   final EnteFile file;
@@ -30,7 +30,7 @@ class FileWidget extends StatelessWidget {
     final String fileKey = "file_${file.generatedID}";
     if (file.fileType == FileType.livePhoto ||
         file.fileType == FileType.image) {
-      return ZoomableLiveImage(
+      return ZoomableLiveImageNew(
         file,
         shouldDisableScroll: shouldDisableScroll,
         tagPrefix: tagPrefix,
