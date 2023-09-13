@@ -75,6 +75,10 @@
     {
       "title": "WHMCS",
       "hex": "8ABD56"
+    },
+    {
+      "title": "Twingate",
+      "hex": "858585"
     }
   ]
 }
