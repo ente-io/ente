@@ -11,6 +11,11 @@ import { SetPublicShareProp } from 'types/publicCollection';
 import LinkIcon from '@mui/icons-material/Link';
 import { useState } from 'react';
 import { t } from 'i18next';
+import InfoOutlined from '@mui/icons-material/InfoOutlined';
+
+export const isLinkExpired = (validTill: number) => {
+    return validTill < Date.now() * 1000;
+};
 
 interface Iprops {
     publicShareProp: PublicURL;
@@ -39,11 +44,23 @@ export default function ManagePublicShare({
                     {t('PUBLIC_LINK_ENABLED')}
                 </Typography>
                 <MenuItemGroup>
-                    <EnteMenuItem
-                        startIcon={<ContentCopyIcon />}
-                        onClick={copyToClipboardHelper}
-                        label={t('COPY_LINK')}
-                    />
+                    {publicShareProp.validTill &&
+                    isLinkExpired(publicShareProp.validTill) ? (
+                        <EnteMenuItem
+                            disabled
+                            startIcon={<InfoOutlined />}
+                            color="critical"
+                            onClick={openManageShare}
+                            label={t('LINK_EXPIRED')}
+                        />
+                    ) : (
+                        <EnteMenuItem
+                            startIcon={<ContentCopyIcon />}
+                            onClick={copyToClipboardHelper}
+                            disabled={isLinkExpired(publicShareProp.validTill)}
+                            label={t('COPY_LINK')}
+                        />
+                    )}
 
                     <MenuItemDivider hasIcon={true} />
                     <EnteMenuItem
