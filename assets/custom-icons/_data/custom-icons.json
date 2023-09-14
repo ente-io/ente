@@ -100,6 +100,47 @@
     {
       "title": "Ubisoft",
       "hex": "4285f4"
+    },
+    {
+      "title": "3Commas"
+    },
+    {
+      "title": "AscendEX"
+    },
+    {
+      "title": "Tweakers"
+    },
+    {
+      "title": "Addy.io",
+      "slug": "addy_io"
+    },
+    {
+      "title": "Anycoin Direct",
+      "slug": "anycoindirect"
+    },
+    {
+      "title": "Bitfinex"
+    },
+    {
+      "title": "BitMEX"
+    },
+    {
+      "title": "Bybit"
+    },
+    {
+      "title": "Wise"
+    },
+    {
+      "title": "TradingView"
+    },
+    {
+      "title": "Tresorit"
+    },
+    {
+      "title": "TP-Link"
+    },
+    {
+      "title": "TransIP"
     }
   ]
 }
