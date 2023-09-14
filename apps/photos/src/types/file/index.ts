@@ -61,6 +61,7 @@ export interface EnteFile
     originalImageURL?: string;
     dataIndex?: number;
     conversionFailed?: boolean;
+    isConverted?: boolean;
 }
 
 export interface TrashRequest {

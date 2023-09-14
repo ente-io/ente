@@ -44,6 +44,7 @@ import { getParsedExifData } from 'services/upload/exifService';
 import { getFileType } from 'services/typeDetectionService';
 import { ConversionFailedNotification } from './styledComponents/ConversionFailedNotification';
 import { GalleryContext } from 'pages/gallery';
+import { ConvertBtn } from './styledComponents/ConvertBtn';
 
 interface PhotoswipeFullscreenAPI {
     enter: () => void;
@@ -67,6 +68,7 @@ interface Iprops {
     currentIndex?: number;
     onClose?: (needUpdate: boolean) => void;
     gettingData: (instance: any, index: number, item: EnteFile) => void;
+    getConvertedItem: (instance: any, index: number, item: EnteFile) => void;
     id?: string;
     className?: string;
     favItemIds: Set<number>;
@@ -108,6 +110,13 @@ function PhotoViewer(props: Iprops) {
 
     const [isOwnFile, setIsOwnFile] = useState(false);
 
+    const [showConvertBtn, setShowConvertBtn] = useState(false);
+
+    const [
+        conversionFailedNotificationOpen,
+        setConversionFailedNotificationOpen,
+    ] = useState(false);
+
     useEffect(() => {
         if (!pswpElement) return;
         if (isOpen) {
@@ -120,6 +129,11 @@ function PhotoViewer(props: Iprops) {
             closePhotoSwipe();
         };
     }, [isOpen]);
+
+    useEffect(() => {
+        if (!isOpen) return;
+        setConversionFailedNotificationOpen(conversionFailed);
+    }, [isOpen, conversionFailed]);
 
     useEffect(() => {
         if (!photoSwipe) return;
@@ -239,6 +253,19 @@ function PhotoViewer(props: Iprops) {
             setLivePhotoBtnOptions(defaultLivePhotoDefaultOptions);
         };
     }, [photoSwipe?.currItem, isOpen, isSourceLoaded]);
+
+    useEffect(() => {
+        const file = photoSwipe?.currItem as EnteFile;
+        if (!file) return;
+
+        const shouldShowConvertBtn =
+            (file.metadata.fileType === FILE_TYPE.VIDEO ||
+                file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) &&
+            !file.isConverted &&
+            isSourceLoaded &&
+            !conversionFailed;
+        setShowConvertBtn(shouldShowConvertBtn);
+    }, [photoSwipe?.currItem, isSourceLoaded, conversionFailed]);
 
     useEffect(() => {
         exifCopy.current = exif;
@@ -547,6 +574,15 @@ function PhotoViewer(props: Iprops) {
             fullScreenApi.enter();
         }
     };
+
+    const triggerManualConvert = () => {
+        props.getConvertedItem(
+            photoSwipe,
+            photoSwipe.getCurrentIndex(),
+            photoSwipe.currItem as EnteFile
+        );
+    };
+
     const scheduleUpdate = () => (needUpdate.current = true);
     const { id } = props;
     let { className } = props;
@@ -571,12 +607,17 @@ function PhotoViewer(props: Iprops) {
                             {livePhotoBtnHTML} {t('LIVE')}
                         </LivePhotoBtn>
                     )}
-                    {conversionFailed && (
-                        <ConversionFailedNotification
-                            onClick={() =>
-                                downloadFileHelper(photoSwipe.currItem)
-                            }
-                        />
+                    <ConversionFailedNotification
+                        open={conversionFailedNotificationOpen}
+                        onClose={() =>
+                            setConversionFailedNotificationOpen(false)
+                        }
+                        onClick={() => downloadFileHelper(photoSwipe.currItem)}
+                    />
+                    {showConvertBtn && (
+                        <ConvertBtn onClick={triggerManualConvert}>
+                            {t('CONVERT')}
+                        </ConvertBtn>
                     )}
 
                     <div className="pswp__container">

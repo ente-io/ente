@@ -334,30 +334,30 @@ export async function getRenderableFileURL(file: EnteFile, fileBlob: Blob) {
                 file.metadata.title,
                 fileBlob
             );
+            const { originalURL, convertedURL } = getFileObjectURLs(
+                fileBlob,
+                convertedBlob
+            );
             return {
-                converted: [
-                    convertedBlob ? URL.createObjectURL(convertedBlob) : null,
-                ],
-                original: [URL.createObjectURL(fileBlob)],
+                converted: [convertedURL],
+                original: [originalURL],
             };
         }
         case FILE_TYPE.LIVE_PHOTO: {
-            const livePhoto = await getRenderableLivePhoto(file, fileBlob);
-            return {
-                converted: livePhoto.map((asset) =>
-                    asset ? URL.createObjectURL(asset) : null
-                ),
-                original: [URL.createObjectURL(fileBlob)],
-            };
+            return await getRenderableLivePhotoURL(file, fileBlob);
         }
         case FILE_TYPE.VIDEO: {
             const convertedBlob = await getPlayableVideo(
                 file.metadata.title,
-                new Uint8Array(await fileBlob.arrayBuffer())
+                fileBlob
+            );
+            const { originalURL, convertedURL } = getFileObjectURLs(
+                fileBlob,
+                convertedBlob
             );
             return {
-                converted: [URL.createObjectURL(convertedBlob)],
-                original: [URL.createObjectURL(fileBlob)],
+                converted: [convertedURL],
+                original: [originalURL],
             };
         }
         default: {
@@ -373,38 +373,53 @@ export async function getRenderableFileURL(file: EnteFile, fileBlob: Blob) {
     }
 }
 
-async function getRenderableLivePhoto(
+async function getRenderableLivePhotoURL(
     file: EnteFile,
     fileBlob: Blob
-): Promise<Blob[]> {
+): Promise<{ original: string[]; converted: string[] }> {
     const livePhoto = await decodeLivePhoto(file, fileBlob);
     const imageBlob = new Blob([livePhoto.image]);
-    return await Promise.all([
-        getRenderableImage(livePhoto.imageNameTitle, imageBlob),
-        getPlayableVideo(livePhoto.videoNameTitle, livePhoto.video),
-    ]);
+    const videoBlob = new Blob([livePhoto.video]);
+    const convertedImageBlob = await getRenderableImage(
+        livePhoto.imageNameTitle,
+        imageBlob
+    );
+    const convertedVideoBlob = await getPlayableVideo(
+        livePhoto.videoNameTitle,
+        videoBlob
+    );
+    const { originalURL: originalImageURL, convertedURL: convertedImageURL } =
+        getFileObjectURLs(imageBlob, convertedImageBlob);
+
+    const { originalURL: originalVideoURL, convertedURL: convertedVideoURL } =
+        getFileObjectURLs(videoBlob, convertedVideoBlob);
+    return {
+        converted: [convertedImageURL, convertedVideoURL],
+        original: [originalImageURL, originalVideoURL],
+    };
 }
 
 export async function getPlayableVideo(
     videoNameTitle: string,
-    video: Uint8Array
+    videoBlob: Blob,
+    forceConvert = false
 ) {
     try {
         const isPlayable = await isPlaybackPossible(
-            URL.createObjectURL(new Blob([video]))
+            URL.createObjectURL(videoBlob)
         );
-        if (isPlayable) {
-            return new Blob([video.buffer]);
+        if (isPlayable && !forceConvert) {
+            return videoBlob;
         } else {
             addLogLine('video format not supported, converting it');
             const mp4ConvertedVideo = await ffmpegService.convertToMP4(
-                new File([video], videoNameTitle)
+                new File([videoBlob], videoNameTitle)
             );
             return new Blob([await mp4ConvertedVideo.arrayBuffer()]);
         }
     } catch (e) {
         logError(e, 'video conversion failed');
-        return new Blob([video.buffer]);
+        return null;
     }
 }
 
@@ -926,4 +941,14 @@ const fixTimeHelper = async (
     }) => void
 ) => {
     setFixCreationTimeAttributes({ files: selectedFiles });
+};
+
+const getFileObjectURLs = (originalBlob: Blob, convertedBlob: Blob) => {
+    const originalURL = URL.createObjectURL(originalBlob);
+    const convertedURL = convertedBlob
+        ? convertedBlob === originalBlob
+            ? originalURL
+            : URL.createObjectURL(convertedBlob)
+        : null;
+    return { originalURL, convertedURL };
 };

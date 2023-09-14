@@ -1,22 +1,22 @@
-import { useState } from 'react';
 import Notification from 'components/Notification';
 import React from 'react';
 import { t } from 'i18next';
 
 interface Iprops {
+    open: boolean;
+    onClose: () => void;
     onClick: () => void;
 }
 
-export const ConversionFailedNotification = ({ onClick }: Iprops) => {
-    const [open, setOpen] = useState(true);
-    const handleClose = () => {
-        setOpen(false);
-    };
-
+export const ConversionFailedNotification = ({
+    open,
+    onClose,
+    onClick,
+}: Iprops) => {
     return (
         <Notification
             open={open}
-            onClose={handleClose}
+            onClose={onClose}
             attributes={{
                 variant: 'secondary',
                 subtext: t('CONVERSION_FAILED_NOTIFICATION_MESSAGE'),

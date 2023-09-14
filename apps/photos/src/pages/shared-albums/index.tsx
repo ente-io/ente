@@ -58,6 +58,9 @@ import MoreHoriz from '@mui/icons-material/MoreHoriz';
 import OverflowMenu from 'components/OverflowMenu/menu';
 import { OverflowMenuOption } from 'components/OverflowMenu/option';
 
+const defaultThumbStore = new Map();
+const defaultFileStore = new Map();
+
 export default function PublicCollectionGallery() {
     const token = useRef<string>(null);
     // passwordJWTToken refers to the jwt token which is used for album protected by password.
@@ -435,6 +438,8 @@ export default function PublicCollectionGallery() {
                 accessedThroughSharedURL: true,
                 photoListHeader,
                 photoListFooter,
+                thumbs: defaultThumbStore,
+                files: defaultFileStore,
             }}>
             <FullScreenDropZone
                 getDragAndDropRootProps={getDragAndDropRootProps}>
