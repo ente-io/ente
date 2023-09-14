@@ -11,7 +11,7 @@ import { SetPublicShareProp } from 'types/publicCollection';
 import LinkIcon from '@mui/icons-material/Link';
 import { useState } from 'react';
 import { t } from 'i18next';
-import InfoOutlined from '@mui/icons-material/InfoOutlined';
+import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 
 export const isLinkExpired = (validTill: number) => {
     return validTill && validTill < Date.now() * 1000;
@@ -48,7 +48,7 @@ export default function ManagePublicShare({
                     isLinkExpired(publicShareProp.validTill) ? (
                         <EnteMenuItem
                             disabled
-                            startIcon={<InfoOutlined />}
+                            startIcon={<ErrorOutlineIcon />}
                             color="critical"
                             onClick={openManageShare}
                             label={t('LINK_EXPIRED')}
