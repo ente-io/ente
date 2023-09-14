@@ -9,3 +9,4 @@ scratch/**
 main
 config.yaml
 ente-cli.db
+bin/**
