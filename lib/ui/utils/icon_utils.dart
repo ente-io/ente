@@ -12,7 +12,7 @@ class IconUtils {
 
   // Map of icon-title to the color code in HEX
   final Map<String, String> _simpleIcons = {};
-  final Map<String, String> _customIcons = {};
+  final Map<String, String?> _customIcons = {};
 
   Future<void> init() async {
     await _loadJson();
@@ -27,14 +27,14 @@ class IconUtils {
       return _getSVGIcon(
         "assets/custom-icons/icons/$title.svg",
         title,
-        _customIcons[title]!,
+        _customIcons[title],
         width,
       );
     } else if (_simpleIcons.containsKey(title)) {
       return _getSVGIcon(
         "assets/simple-icons/icons/$title.svg",
         title,
-        _simpleIcons[title]!,
+        _simpleIcons[title],
         width,
       );
     } else {
@@ -45,17 +45,19 @@ class IconUtils {
   Widget _getSVGIcon(
     String path,
     String title,
-    String color,
+    String? color,
     double width,
   ) {
     return SvgPicture.asset(
       path,
       width: width,
       semanticsLabel: title,
-      colorFilter: ColorFilter.mode(
-        Color(int.parse("0xFF" + color)),
-        BlendMode.srcIn,
-      ),
+      colorFilter: color != null
+          ? ColorFilter.mode(
+              Color(int.parse("0xFF" + color)),
+              BlendMode.srcIn,
+            )
+          : null,
     );
   }
 
