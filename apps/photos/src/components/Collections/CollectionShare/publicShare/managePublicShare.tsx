@@ -14,7 +14,7 @@ import { t } from 'i18next';
 import InfoOutlined from '@mui/icons-material/InfoOutlined';
 
 export const isLinkExpired = (validTill: number) => {
-    return validTill < Date.now() * 1000;
+    return validTill && validTill < Date.now() * 1000;
 };
 
 interface Iprops {

@@ -71,11 +71,11 @@ export function ManageLinkExpiry({
                             : 'primary'
                     }
                     subText={
-                        !publicShareProp?.validTill
-                            ? t('NEVER')
-                            : isLinkExpired(publicShareProp?.validTill)
+                        isLinkExpired(publicShareProp?.validTill)
                             ? t('LINK_EXPIRED')
-                            : formatDateTime(publicShareProp?.validTill / 1000)
+                            : publicShareProp?.validTill
+                            ? formatDateTime(publicShareProp?.validTill / 1000)
+                            : t('NEVER')
                     }
                 />
             </MenuItemGroup>
