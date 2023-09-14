@@ -644,9 +644,8 @@ function PhotoViewer(props: Iprops) {
                     <Box
                         sx={{
                             position: 'absolute',
-                            top: '50%',
-                            left: '50%',
-                            transform: 'translate(-50%, -50%)',
+                            top: '10vh',
+                            right: '2vh',
                             zIndex: 10,
                         }}>
                         {fileDownloadProgress.has(
