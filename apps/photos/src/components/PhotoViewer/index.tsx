@@ -13,7 +13,6 @@ import {
     getFileExtension,
     getFileFromURL,
 } from 'utils/file';
-import { livePhotoBtnHTML } from 'components/LivePhotoBtn';
 import { logError } from 'utils/sentry';
 
 import { FILE_TYPE } from 'constants/file';
@@ -49,6 +48,8 @@ import downloadManager from 'services/downloadManager';
 import publicCollectionDownloadManager from 'services/publicCollectionDownloadManager';
 import CircularProgressWithLabel from './styledComponents/CircularProgressWithLabel';
 import EnteSpinner from 'components/EnteSpinner';
+import AlbumOutlined from '@mui/icons-material/AlbumOutlined';
+import { FlexWrapper } from 'components/Container';
 
 interface PhotoswipeFullscreenAPI {
     enter: () => void;
@@ -622,7 +623,9 @@ function PhotoViewer(props: Iprops) {
                             onMouseEnter={livePhotoBtnOptions.show}
                             onMouseLeave={livePhotoBtnOptions.hide}
                             disabled={livePhotoBtnOptions.loading}>
-                            {livePhotoBtnHTML} {t('LIVE')}
+                            <FlexWrapper gap={'4px'}>
+                                {<AlbumOutlined />} {t('LIVE')}
+                            </FlexWrapper>
                         </LivePhotoBtn>
                     )}
                     <ConversionFailedNotification

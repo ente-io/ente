@@ -3,7 +3,7 @@ export const LivePhotoBtn = styled((props: ButtonProps) => (
     <Button color="secondary" {...props} />
 ))`
     position: absolute;
-    bottom: 6vh;
+    bottom: 10vh;
     right: 6vh;
     outline: none;
     border: none;
