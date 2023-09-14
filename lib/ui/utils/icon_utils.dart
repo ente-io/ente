@@ -12,7 +12,7 @@ class IconUtils {
 
   // Map of icon-title to the color code in HEX
   final Map<String, String> _simpleIcons = {};
-  final Map<String, String> _customIcons = {};
+  final Map<String, CustomIconData> _customIcons = {};
 
   Future<void> init() async {
     await _loadJson();
@@ -25,16 +25,16 @@ class IconUtils {
     final title = _getProviderTitle(provider);
     if (_customIcons.containsKey(title)) {
       return _getSVGIcon(
-        "assets/custom-icons/icons/$title.svg",
+        "assets/custom-icons/icons/${_customIcons[title]!.slug ?? title}.svg",
         title,
-        _customIcons[title]!,
+        _customIcons[title]!.color,
         width,
       );
     } else if (_simpleIcons.containsKey(title)) {
       return _getSVGIcon(
         "assets/simple-icons/icons/$title.svg",
         title,
-        _simpleIcons[title]!,
+        _simpleIcons[title],
         width,
       );
     } else {
@@ -45,17 +45,19 @@ class IconUtils {
   Widget _getSVGIcon(
     String path,
     String title,
-    String color,
+    String? color,
     double width,
   ) {
     return SvgPicture.asset(
       path,
       width: width,
       semanticsLabel: title,
-      colorFilter: ColorFilter.mode(
-        Color(int.parse("0xFF" + color)),
-        BlendMode.srcIn,
-      ),
+      colorFilter: color != null
+          ? ColorFilter.mode(
+              Color(int.parse("0xFF" + color)),
+              BlendMode.srcIn,
+            )
+          : null,
     );
   }
 
@@ -70,11 +72,21 @@ class IconUtils {
         .loadString('assets/custom-icons/_data/custom-icons.json');
     final customIcons = json.decode(customIconData);
     for (final icon in customIcons["icons"]) {
-      _customIcons[icon["title"].toString().toLowerCase()] = icon["hex"];
+      _customIcons[icon["title"].toString().toLowerCase()] = CustomIconData(
+        icon["slug"],
+        icon["hex"],
+      );
     }
   }
 
   String _getProviderTitle(String provider) {
     return provider.split(RegExp(r'[.(]'))[0].trim().toLowerCase();
   }
+}
+
+class CustomIconData {
+  final String? slug;
+  final String? color;
+
+  CustomIconData(this.slug, this.color);
 }
