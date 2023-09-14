@@ -25,7 +25,7 @@ import {
     defaultLivePhotoDefaultOptions,
     photoSwipeV4Events,
 } from 'constants/photoViewer';
-import { LivePhotoBtn } from './styledComponents/LivePhotoBtn';
+import { LivePhotoBtnContainer } from './styledComponents/LivePhotoBtn';
 import DownloadIcon from '@mui/icons-material/Download';
 import InfoIcon from '@mui/icons-material/InfoOutlined';
 import FavoriteIcon from '@mui/icons-material/FavoriteRounded';
@@ -34,7 +34,7 @@ import ChevronRight from '@mui/icons-material/ChevronRight';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { trashFiles } from 'services/fileService';
 import { getTrashFileMessage } from 'utils/ui';
-import { Box, styled } from '@mui/material';
+import { Box, Button, styled } from '@mui/material';
 import { addLocalLog } from 'utils/logging';
 import ContentCopy from '@mui/icons-material/ContentCopy';
 import ChevronLeft from '@mui/icons-material/ChevronLeft';
@@ -43,7 +43,7 @@ import { getParsedExifData } from 'services/upload/exifService';
 import { getFileType } from 'services/typeDetectionService';
 import { ConversionFailedNotification } from './styledComponents/ConversionFailedNotification';
 import { GalleryContext } from 'pages/gallery';
-import { ConvertBtn } from './styledComponents/ConvertBtn';
+import { ConvertBtnContainer } from './styledComponents/ConvertBtn';
 import downloadManager from 'services/downloadManager';
 import publicCollectionDownloadManager from 'services/publicCollectionDownloadManager';
 import CircularProgressWithLabel from './styledComponents/CircularProgressWithLabel';
@@ -618,15 +618,18 @@ function PhotoViewer(props: Iprops) {
                 <div className="pswp__bg" />
                 <div className="pswp__scroll-wrap">
                     {livePhotoBtnOptions.visible && (
-                        <LivePhotoBtn
-                            onClick={livePhotoBtnOptions.click}
-                            onMouseEnter={livePhotoBtnOptions.show}
-                            onMouseLeave={livePhotoBtnOptions.hide}
-                            disabled={livePhotoBtnOptions.loading}>
-                            <FlexWrapper gap={'4px'}>
-                                {<AlbumOutlined />} {t('LIVE')}
-                            </FlexWrapper>
-                        </LivePhotoBtn>
+                        <LivePhotoBtnContainer>
+                            <Button
+                                color="secondary"
+                                onClick={livePhotoBtnOptions.click}
+                                onMouseEnter={livePhotoBtnOptions.show}
+                                onMouseLeave={livePhotoBtnOptions.hide}
+                                disabled={livePhotoBtnOptions.loading}>
+                                <FlexWrapper gap={'4px'}>
+                                    {<AlbumOutlined />} {t('LIVE')}
+                                </FlexWrapper>
+                            </Button>
+                        </LivePhotoBtnContainer>
                     )}
                     <ConversionFailedNotification
                         open={conversionFailedNotificationOpen}
@@ -636,9 +639,13 @@ function PhotoViewer(props: Iprops) {
                         onClick={() => downloadFileHelper(photoSwipe.currItem)}
                     />
                     {showConvertBtn && (
-                        <ConvertBtn onClick={triggerManualConvert}>
-                            {t('CONVERT')}
-                        </ConvertBtn>
+                        <ConvertBtnContainer>
+                            <Button
+                                color="secondary"
+                                onClick={triggerManualConvert}>
+                                {t('CONVERT')}
+                            </Button>
+                        </ConvertBtnContainer>
                     )}
 
                     <Box
