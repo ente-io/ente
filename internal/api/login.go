@@ -2,14 +2,15 @@ package api
 
 import (
 	"context"
+
 	"github.com/google/uuid"
 )
 
 func (c *Client) GetSRPAttributes(ctx context.Context, email string) (*SRPAttributes, error) {
 	var res struct {
-		SRPAttributes SRPAttributes `json:"attributes"`
+		SRPAttributes *SRPAttributes `json:"attributes"`
 	}
-	_, err := c.restClient.R().
+	r, err := c.restClient.R().
 		SetContext(ctx).
 		SetResult(&res).
 		SetQueryParam("email", email).
@@ -17,7 +18,13 @@ func (c *Client) GetSRPAttributes(ctx context.Context, email string) (*SRPAttrib
 	if err != nil {
 		return nil, err
 	}
-	return &res.SRPAttributes, err
+	if r.IsError() {
+		return nil, &ApiError{
+			StatusCode: r.StatusCode(),
+			Message:    r.String(),
+		}
+	}
+	return res.SRPAttributes, err
 }
 
 func (c *Client) CreateSRPSession(
@@ -30,13 +37,19 @@ func (c *Client) CreateSRPSession(
 		"srpUserID": srpUserID.String(),
 		"srpA":      clientPub,
 	}
-	_, err := c.restClient.R().
+	r, err := c.restClient.R().
 		SetContext(ctx).
 		SetResult(&res).
 		SetBody(payload).
 		Post("/users/srp/create-session")
 	if err != nil {
 		return nil, err
+	}
+	if r.IsError() {
+		return nil, &ApiError{
+			StatusCode: r.StatusCode(),
+			Message:    r.String(),
+		}
 	}
 	return &res, nil
 }
@@ -53,13 +66,71 @@ func (c *Client) VerifySRPSession(
 		"sessionID": sessionID.String(),
 		"srpM1":     clientM1,
 	}
-	_, err := c.restClient.R().
+	r, err := c.restClient.R().
 		SetContext(ctx).
 		SetResult(&res).
 		SetBody(payload).
 		Post("/users/srp/verify-session")
 	if err != nil {
 		return nil, err
+	}
+	if r.IsError() {
+		return nil, &ApiError{
+			StatusCode: r.StatusCode(),
+			Message:    r.String(),
+		}
+	}
+	return &res, nil
+}
+
+func (c *Client) SendEmailOTP(
+	ctx context.Context,
+	email string,
+) error {
+	var res AuthorizationResponse
+	payload := map[string]interface{}{
+		"email": email,
+	}
+	r, err := c.restClient.R().
+		SetContext(ctx).
+		SetResult(&res).
+		SetBody(payload).
+		Post("/users/ott")
+	if err != nil {
+		return err
+	}
+	if r.IsError() {
+		return &ApiError{
+			StatusCode: r.StatusCode(),
+			Message:    r.String(),
+		}
+	}
+	return nil
+}
+
+func (c *Client) VerifyEmail(
+	ctx context.Context,
+	email string,
+	otp string,
+) (*AuthorizationResponse, error) {
+	var res AuthorizationResponse
+	payload := map[string]interface{}{
+		"email": email,
+		"ott":   otp,
+	}
+	r, err := c.restClient.R().
+		SetContext(ctx).
+		SetResult(&res).
+		SetBody(payload).
+		Post("/users/verify-email")
+	if err != nil {
+		return nil, err
+	}
+	if r.IsError() {
+		return nil, &ApiError{
+			StatusCode: r.StatusCode(),
+			Message:    r.String(),
+		}
 	}
 	return &res, nil
 }

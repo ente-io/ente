@@ -8,14 +8,9 @@ import (
 	"cli-go/internal/api"
 	"cli-go/pkg"
 	"fmt"
-	bolt "go.etcd.io/bbolt"
-	"log"
-)
 
-var db *bolt.DB
-var client = api.NewClient(api.Params{
-	Debug: true,
-})
+	bolt "go.etcd.io/bbolt"
+)
 
 func main() {
 	db, err := pkg.GetDB("ente-cli.db")
@@ -23,19 +18,21 @@ func main() {
 		panic(err)
 	}
 	db.Update(func(tx *bolt.Tx) error {
-		log.Println("creating #AccBucket")
 		_, err := tx.CreateBucketIfNotExists([]byte(pkg.AccBucket))
 		if err != nil {
 			return fmt.Errorf("create bucket: %s", err)
 		}
 		return nil
 	})
+	var client = api.NewClient(api.Params{
+		Debug: false,
+		Host:  "http://localhost:8080",
+	})
 	ctrl := pkg.ClICtrl{
 		Client: client,
 		DB:     db,
 	}
 	defer func() {
-		log.Println("closing db")
 		if err := db.Close(); err != nil {
 			panic(err)
 		}

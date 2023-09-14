@@ -3,8 +3,9 @@ package cmd
 import (
 	"cli-go/pkg"
 	"fmt"
-	"github.com/spf13/viper"
 	"os"
+
+	"github.com/spf13/viper"
 
 	"github.com/spf13/cobra"
 )
