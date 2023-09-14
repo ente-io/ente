@@ -180,6 +180,16 @@ export const getComponents = (
             },
         },
     },
+    MuiMenuItem: {
+        styleOverrides: {
+            // don't reduce opacity of disabled items
+            root: {
+                '&.Mui-disabled': {
+                    opacity: 1,
+                },
+            },
+        },
+    },
 });
 
 const getDropShadowStyle = (shadows: Shadow[]) => {
