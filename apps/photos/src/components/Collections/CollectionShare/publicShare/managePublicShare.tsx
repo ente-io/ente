@@ -44,8 +44,7 @@ export default function ManagePublicShare({
                     {t('PUBLIC_LINK_ENABLED')}
                 </Typography>
                 <MenuItemGroup>
-                    {publicShareProp.validTill &&
-                    isLinkExpired(publicShareProp.validTill) ? (
+                    {isLinkExpired(publicShareProp.validTill) ? (
                         <EnteMenuItem
                             disabled
                             startIcon={<ErrorOutlineIcon />}
