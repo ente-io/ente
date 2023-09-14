@@ -1,114 +1,7 @@
 {
   "icons": [
     {
-      "title": "ente",
-      "hex": "1DB954"
-    },
-    {
-      "title": "Github",
-      "hex": "858585"
-    },
-    {
-      "title": "Porkbun",
-      "hex": "F27777"
-    },
-    {
-      "title": "Windscribe",
-      "hex": "858585"
-    },
-    {
-      "title": "Kick",
-      "hex": "53FC19"
-    },
-    {
-      "title": "Bitvavo",
-      "hex": "0051FF"
-    },
-    {
-      "title": "Control D",
-      "hex": "5FD800"
-    },
-    {
-      "title": "Filen",
-      "hex": "858585"
-    },
-    {
-      "title": "Kraken",
-      "hex": "5848D5"
-    },
-    {
-      "title": "Standard Notes",
-      "hex": "2173E6"
-    },
-    {
-      "title": "Trading 212",
-      "hex": "4BA4DE"
-    },
-    {
-      "title": "Termius",
-      "hex": "858585"
-    },
-    {
-      "title": "Unity",
-      "hex": "858585"
-    },
-    {
-      "title": "KuCoin",
-      "hex": "01BC8D"
-    },
-    {
-      "title": "Plutus",
-      "hex": "DEC685"
-    },
-    {
-      "title": "Peerberry",
-      "hex": "03E5A5"
-    },
-    {
-      "title": "Channel Island Hosting",
-      "slug": "cih",
-      "hex": "D14633"
-    },
-    {
-      "title": "Kronos"
-    },
-    {
-      "title": "WHMCS"
-    },
-    {
-      "title": "Twingate",
-      "hex": "858585"
-    },
-    {
-      "title": "Revolt",
-      "hex": "858585"
-    },
-    {
-      "title": "ngrok",
-      "hex": "858585"
-    },
-    {
-      "title": "Parsec"
-    },
-    {
-      "title": "Jagex",
-      "hex": "D3D800"
-    },
-    {
-      "title": "Google"
-    },
-    {
-      "title": "Ubisoft",
-      "hex": "4285f4"
-    },
-    {
       "title": "3Commas"
-    },
-    {
-      "title": "AscendEX"
-    },
-    {
-      "title": "Tweakers"
     },
     {
       "title": "Addy.io",
@@ -119,31 +12,102 @@
       "slug": "anycoindirect"
     },
     {
-      "title": "Bitfinex"
+      "title": "AscendEX"
     },
     {
       "title": "BitMEX"
     },
     {
+      "title": "Bitfinex"
+    },
+    {
+      "title": "Bitvavo",
+      "hex": "0051FF"
+    },
+    {
       "title": "Bybit"
     },
     {
-      "title": "Wise"
+      "title": "Channel Island Hosting",
+      "slug": "cih",
+      "hex": "D14633"
     },
     {
-      "title": "TradingView"
+      "title": "Control D",
+      "hex": "5FD800"
     },
     {
-      "title": "Tresorit"
+      "title": "ente",
+      "hex": "1DB954"
     },
     {
-      "title": "TP-Link"
+      "title": "Filen",
+      "hex": "858585"
     },
     {
-      "title": "TransIP"
+      "title": "Github",
+      "hex": "858585"
     },
     {
-      "title": "Techlore"
+      "title": "Google"
+    },
+    {
+      "title": "ING"
+    },
+    {
+      "title": "Jagex",
+      "hex": "D3D800"
+    },
+    {
+      "title": "KPN",
+      "color": "00CC00"
+    },
+    {
+      "title": "Kick",
+      "hex": "53FC19"
+    },
+    {
+      "title": "Kraken",
+      "hex": "5848D5"
+    },
+    {
+      "title": "Kronos"
+    },
+    {
+      "title": "KuCoin",
+      "hex": "01BC8D"
+    },
+    {
+      "title": "ngrok",
+      "hex": "858585"
+    },
+    {
+      "title": "Njalla"
+    },
+    {
+      "title": "Odido"
+    },
+    {
+      "title": "Parsec"
+    },
+    {
+      "title": "Peerberry",
+      "hex": "03E5A5"
+    },
+    {
+      "title": "Plutus",
+      "hex": "DEC685"
+    },
+    {
+      "title": "Poloniex"
+    },
+    {
+      "title": "Porkbun",
+      "hex": "F27777"
+    },
+    {
+      "title": "PostNL",
+      "color": "EF8300"
     },
     {
       "title": "Privacy Guides"
@@ -152,27 +116,63 @@
       "title": "Privacy.com"
     },
     {
-      "title": "PostNL",
-      "color": "EF8300"
-    },
-    {
-      "title": "Poloniex"
-    },
-    {
-      "title": "Njalla"
-    },
-    {
-      "title": "KPN",
-      "color": "00CC00"
-    },
-    {
-      "title": "Odido"
-    },
-    {
-      "title": "ING"
+      "title": "Revolt",
+      "hex": "858585"
     },
     {
       "title": "SimpleLogin"
+    },
+    {
+      "title": "Standard Notes",
+      "hex": "2173E6"
+    },
+    {
+      "title": "Techlore"
+    },
+    {
+      "title": "Termius",
+      "hex": "858585"
+    },
+    {
+      "title": "TP-Link"
+    },
+    {
+      "title": "Trading 212",
+      "hex": "4BA4DE"
+    },
+    {
+      "title": "TradingView"
+    },
+    {
+      "title": "TransIP"
+    },
+    {
+      "title": "Tresorit"
+    },
+    {
+      "title": "Tweakers"
+    },
+    {
+      "title": "Twingate",
+      "hex": "858585"
+    },
+    {
+      "title": "Ubisoft",
+      "hex": "4285f4"
+    },
+    {
+      "title": "Unity",
+      "hex": "858585"
+    },
+    {
+      "title": "WHMCS"
+    },
+    {
+      "title": "Windscribe",
+      "hex": "858585"
+    },
+    {
+      "title": "Wise"
     }
   ]
 }
