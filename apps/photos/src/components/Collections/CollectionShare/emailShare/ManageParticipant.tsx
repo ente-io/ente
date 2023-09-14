@@ -193,7 +193,7 @@ export default function ManageParticipant({
 
                                 <MenuItemGroup>
                                     <EnteMenuItem
-                                        color="error"
+                                        color="critical"
                                         fontWeight="normal"
                                         onClick={removeParticipant}
                                         label={'Remove'}

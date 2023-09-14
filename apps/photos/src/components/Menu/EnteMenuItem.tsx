@@ -22,6 +22,7 @@ interface Iprops {
     subIcon?: React.ReactNode;
     checked?: boolean;
     labelComponent?: React.ReactNode;
+    disabled?: boolean;
 }
 export function EnteMenuItem({
     onClick,
@@ -35,6 +36,7 @@ export function EnteMenuItem({
     variant = 'primary',
     fontWeight = 'bold',
     labelComponent,
+    disabled = false,
 }: Iprops) {
     const handleClick = () => {
         onClick();
@@ -42,10 +44,12 @@ export function EnteMenuItem({
 
     return (
         <MenuItem
+            disabled={disabled}
             onClick={handleClick}
             sx={{
                 width: '100%',
-                color: (theme) => theme.palette[color].main,
+                color: (theme) =>
+                    variant !== 'captioned' && theme.palette[color].main,
                 ...(variant !== 'secondary' &&
                     variant !== 'mini' && {
                         backgroundColor: (theme) => theme.colors.fill.faint,
@@ -67,6 +71,7 @@ export function EnteMenuItem({
                             labelComponent
                         ) : variant === 'captioned' ? (
                             <CaptionedText
+                                color={color}
                                 mainText={label}
                                 subText={subText}
                                 subIcon={subIcon}

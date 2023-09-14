@@ -66,6 +66,10 @@ declare module '@mui/material/Button' {
     interface ButtonPropsColorOverrides {
         accent: true;
         critical: true;
+        error: false;
+        success: false;
+        info: false;
+        warning: false;
     }
 }
 declare module '@mui/material/Checkbox' {

@@ -10,6 +10,7 @@ import { MenuItemGroup } from 'components/Menu/MenuItemGroup';
 import { formatDateTime } from 'utils/time/format';
 import Titlebar from 'components/Titlebar';
 import MenuItemDivider from 'components/Menu/MenuItemDivider';
+import { isLinkExpired } from '../managePublicShare';
 
 interface Iprops {
     publicShareProp: PublicURL;
@@ -64,8 +65,15 @@ export function ManageLinkExpiry({
                     endIcon={<ChevronRight />}
                     variant="captioned"
                     label={t('LINK_EXPIRY')}
+                    color={
+                        isLinkExpired(publicShareProp?.validTill)
+                            ? 'critical'
+                            : 'primary'
+                    }
                     subText={
-                        publicShareProp?.validTill
+                        isLinkExpired(publicShareProp?.validTill)
+                            ? t('LINK_EXPIRED')
+                            : publicShareProp?.validTill
                             ? formatDateTime(publicShareProp?.validTill / 1000)
                             : t('NEVER')
                     }
