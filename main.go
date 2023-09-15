@@ -4,9 +4,6 @@ import (
 	"cli-go/cmd"
 	"cli-go/internal/api"
 	"cli-go/pkg"
-	"fmt"
-
-	bolt "go.etcd.io/bbolt"
 )
 
 func main() {
@@ -14,20 +11,16 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	db.Update(func(tx *bolt.Tx) error {
-		_, err := tx.CreateBucketIfNotExists([]byte(pkg.AccBucket))
-		if err != nil {
-			return fmt.Errorf("create bucket: %s", err)
-		}
-		return nil
-	})
-	var client = api.NewClient(api.Params{
-		Debug: false,
-		Host:  "http://localhost:8080",
-	})
 	ctrl := pkg.ClICtrl{
-		Client: client,
-		DB:     db,
+		Client: api.NewClient(api.Params{
+			Debug: false,
+			Host:  "http://localhost:8080",
+		}),
+		DB: db,
+	}
+	err = ctrl.Init()
+	if err != nil {
+		panic(err)
 	}
 	defer func() {
 		if err := db.Close(); err != nil {
