@@ -46,5 +46,23 @@ func (c *ClICtrl) signInViaPassword(ctx context.Context, email string, srpAttr *
 		}
 		return authResp, keyEncKey, nil
 	}
+}
 
+func (c *ClICtrl) validateTOTP(ctx context.Context, authResp *api.AuthorizationResponse) (*api.AuthorizationResponse, error) {
+	if !authResp.IsMFARequired() {
+		return authResp, nil
+	}
+	for {
+		// CLI prompt for TOTP
+		totp, flowErr := GetCode("Enter TOTP", 6)
+		if flowErr != nil {
+			return nil, flowErr
+		}
+		totpResp, err := c.Client.VerifyTotp(ctx, authResp.TwoFactorSessionID, totp)
+		if err != nil {
+			log.Printf("failed to verify %v", err)
+			continue
+		}
+		return totpResp, nil
+	}
 }

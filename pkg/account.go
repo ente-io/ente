@@ -59,11 +59,8 @@ func (c *ClICtrl) AddAccount(cxt context.Context) {
 	if flowErr != nil {
 		return
 	}
-	if authResponse == nil {
-		return
-	}
 	if authResponse.IsMFARequired() {
-
+		authResponse, flowErr = c.validateTOTP(cxt, authResponse)
 	}
 	if keyEncKey == nil {
 		pass, flowErr := GetSensitiveField("Enter password")

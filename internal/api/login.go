@@ -134,3 +134,30 @@ func (c *Client) VerifyEmail(
 	}
 	return &res, nil
 }
+
+func (c *Client) VerifyTotp(
+	ctx context.Context,
+	sessionID string,
+	otp string,
+) (*AuthorizationResponse, error) {
+	var res AuthorizationResponse
+	payload := map[string]interface{}{
+		"sessionID": sessionID,
+		"code":      otp,
+	}
+	r, err := c.restClient.R().
+		SetContext(ctx).
+		SetResult(&res).
+		SetBody(payload).
+		Post("/users/two-factor/verify")
+	if err != nil {
+		return nil, err
+	}
+	if r.IsError() {
+		return nil, &ApiError{
+			StatusCode: r.StatusCode(),
+			Message:    r.String(),
+		}
+	}
+	return &res, nil
+}

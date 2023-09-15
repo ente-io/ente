@@ -13,8 +13,6 @@ var versionCmd = &cobra.Command{
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Printf("ente-cli version %s\n", AppVersion)
-		// increcement counter flag
-
 	},
 }
 
