@@ -264,7 +264,7 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
             title: S.of(context).collectPhotos,
             makeTextBold: true,
           ),
-          leadingIcon: Icons.link,
+          leadingIcon: Icons.download_sharp,
           menuItemColor: getEnteColorScheme(context).fillFaint,
           showOnlyLoadingState: true,
           onTap: () async {
