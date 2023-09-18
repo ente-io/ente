@@ -64,10 +64,10 @@
 		</dict>
 		<key>ITSAppUsesNonExemptEncryption</key>
 		<false/>
-		<key>FLTEnableImpeller</key>
-		<false/>
-		<key>FLTEnableWideGamut</key>
-		<false/>
+		 <key>FLTEnableImpeller</key>
+         <false />
+         <key>FLTEnableWideGamut</key>
+         <false/>
 		<key>NSFaceIDUsageDescription</key>
 		<string>Please allow ente to lock itself with FaceID or TouchID</string>
 		<key>NSCameraUsageDescription</key>
