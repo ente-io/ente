@@ -14,7 +14,7 @@ import { NULL_EXTRACTED_METADATA, NULL_LOCATION } from 'constants/upload';
 import { getVideoMetadata } from './videoMetadataService';
 import {
     parseDateFromFusedDateString,
-    getUnixTimeInMicroSeconds,
+    validateAndGetCreationUnixTimeInMicroSeconds,
     tryToParseDateTime,
 } from 'utils/time';
 import { getFileHash } from './hashService';
@@ -208,7 +208,7 @@ export function extractDateFromFileName(filename: string): number {
         if (!parsedDate) {
             parsedDate = tryToParseDateTime(filename);
         }
-        return getUnixTimeInMicroSeconds(parsedDate);
+        return validateAndGetCreationUnixTimeInMicroSeconds(parsedDate);
     } catch (e) {
         logError(e, 'failed to extract date From FileName ');
         return null;

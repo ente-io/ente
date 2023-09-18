@@ -1,6 +1,6 @@
 import { NULL_LOCATION } from 'constants/upload';
 import { ParsedExtractedMetadata } from 'types/upload';
-import { getUnixTimeInMicroSeconds } from 'utils/time';
+import { validateAndGetCreationUnixTimeInMicroSeconds } from 'utils/time';
 
 enum MetadataTags {
     CREATION_TIME = 'creation_time',
@@ -59,7 +59,9 @@ function parseAppleISOLocation(isoLocation: string) {
 function parseCreationTime(creationTime: string) {
     let dateTime = null;
     if (creationTime) {
-        dateTime = getUnixTimeInMicroSeconds(new Date(creationTime));
+        dateTime = validateAndGetCreationUnixTimeInMicroSeconds(
+            new Date(creationTime)
+        );
     }
     return dateTime;
 }

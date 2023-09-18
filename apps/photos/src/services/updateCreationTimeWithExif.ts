@@ -12,7 +12,7 @@ import { EnteFile } from 'types/file';
 import { getParsedExifData } from './upload/exifService';
 import { getFileType } from 'services/typeDetectionService';
 import { FILE_TYPE } from 'constants/file';
-import { getUnixTimeInMicroSeconds } from 'utils/time';
+import { validateAndGetCreationUnixTimeInMicroSeconds } from 'utils/time';
 
 const EXIF_TIME_TAGS = [
     'DateTimeOriginal',
@@ -38,7 +38,7 @@ export async function updateCreationTimeWithExif(
             try {
                 let correctCreationTime: number;
                 if (fixOption === FIX_OPTIONS.CUSTOM_TIME) {
-                    correctCreationTime = getUnixTimeInMicroSeconds(customTime);
+                    correctCreationTime = customTime.getTime() * 1000;
                 } else {
                     if (file.metadata.fileType !== FILE_TYPE.IMAGE) {
                         continue;
@@ -53,17 +53,21 @@ export async function updateCreationTimeWithExif(
                         EXIF_TIME_TAGS
                     );
                     if (fixOption === FIX_OPTIONS.DATE_TIME_ORIGINAL) {
-                        correctCreationTime = getUnixTimeInMicroSeconds(
-                            exifData?.DateTimeOriginal ?? exifData?.DateCreated
-                        );
+                        correctCreationTime =
+                            validateAndGetCreationUnixTimeInMicroSeconds(
+                                exifData?.DateTimeOriginal ??
+                                    exifData?.DateCreated
+                            );
                     } else if (fixOption === FIX_OPTIONS.DATE_TIME_DIGITIZED) {
-                        correctCreationTime = getUnixTimeInMicroSeconds(
-                            exifData?.CreateDate
-                        );
+                        correctCreationTime =
+                            validateAndGetCreationUnixTimeInMicroSeconds(
+                                exifData?.CreateDate
+                            );
                     } else if (fixOption === FIX_OPTIONS.METADATA_DATE) {
-                        correctCreationTime = getUnixTimeInMicroSeconds(
-                            exifData?.MetadataDate
-                        );
+                        correctCreationTime =
+                            validateAndGetCreationUnixTimeInMicroSeconds(
+                                exifData?.MetadataDate
+                            );
                     } else {
                         throw new Error('Invalid fix option');
                     }

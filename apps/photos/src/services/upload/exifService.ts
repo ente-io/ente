@@ -4,7 +4,7 @@ import exifr from 'exifr';
 import piexif from 'piexifjs';
 import { FileTypeInfo } from 'types/upload';
 import { logError } from 'utils/sentry';
-import { getUnixTimeInMicroSeconds } from 'utils/time';
+import { validateAndGetCreationUnixTimeInMicroSeconds } from 'utils/time';
 import { CustomError } from 'utils/error';
 
 const EXIFR_UNSUPPORTED_FILE_FORMAT_MESSAGE = 'Unknown file format';
@@ -305,7 +305,7 @@ export function getEXIFTime(exifData: ParsedEXIFData): number {
     if (!dateTime) {
         return null;
     }
-    return getUnixTimeInMicroSeconds(dateTime);
+    return validateAndGetCreationUnixTimeInMicroSeconds(dateTime);
 }
 
 export async function updateFileCreationDateInEXIF(
