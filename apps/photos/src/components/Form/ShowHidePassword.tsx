@@ -17,6 +17,7 @@ const ShowHidePassword = ({
 }: Iprops) => (
     <InputAdornment position="end">
         <IconButton
+            tabIndex={-1}
             color="secondary"
             aria-label="toggle password visibility"
             onClick={handleClickShowPassword}
