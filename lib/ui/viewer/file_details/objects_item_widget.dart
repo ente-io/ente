@@ -3,10 +3,8 @@ import "package:flutter/material.dart";
 import "package:logging/logging.dart";
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/file/file.dart';
-import "package:photos/services/object_detection/object_detection_service.dart";
 import "package:photos/ui/components/buttons/chip_button_widget.dart";
 import "package:photos/ui/components/info_item_widget.dart";
-import "package:photos/utils/thumbnail_util.dart";
 
 class ObjectsItemWidget extends StatelessWidget {
   final EnteFile file;
@@ -29,10 +27,10 @@ class ObjectsItemWidget extends StatelessWidget {
     try {
       final chipButtons = <ChipButtonWidget>[];
       var objectTags = <String, double>{};
-      final thumbnail = await getThumbnail(file);
-      if (thumbnail != null) {
-        objectTags = await ObjectDetectionService.instance.predict(thumbnail);
-      }
+      // final thumbnail = await getThumbnail(file);
+      // if (thumbnail != null) {
+      //   objectTags = await ObjectDetectionService.instance.predict(thumbnail);
+      // }
       if (objectTags.isEmpty) {
         return [
           ChipButtonWidget(

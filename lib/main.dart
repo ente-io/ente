@@ -30,7 +30,6 @@ import 'package:photos/services/local_file_update_service.dart';
 import 'package:photos/services/local_sync_service.dart';
 import "package:photos/services/location_service.dart";
 import 'package:photos/services/memories_service.dart';
-import "package:photos/services/object_detection/object_detection_service.dart";
 import 'package:photos/services/push_service.dart';
 import 'package:photos/services/remote_sync_service.dart';
 import 'package:photos/services/search_service.dart';
@@ -192,9 +191,9 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
   // Can not including existing tf/ml binaries as they are not being built
   // from source.
   // See https://gitlab.com/fdroid/fdroiddata/-/merge_requests/12671#note_1294346819
-  if (!UpdateService.instance.isFdroidFlavor()) {
-    unawaited(ObjectDetectionService.instance.init());
-  }
+  // if (!UpdateService.instance.isFdroidFlavor()) {
+  //   unawaited(ObjectDetectionService.instance.init());
+  // }
 
   _logger.info("Initialization done");
 }
