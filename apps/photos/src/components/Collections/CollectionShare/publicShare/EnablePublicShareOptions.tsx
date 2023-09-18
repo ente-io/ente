@@ -19,6 +19,7 @@ import LinkIcon from '@mui/icons-material/Link';
 import { MenuItemGroup } from 'components/Menu/MenuItemGroup';
 import MenuSectionTitle from 'components/Menu/MenuSectionTitle';
 import MenuItemDivider from 'components/Menu/MenuItemDivider';
+import { DownloadSharp } from '@mui/icons-material';
 
 export default function EnablePublicShareOptions({
     collection,
@@ -79,7 +80,7 @@ export default function EnablePublicShareOptions({
                 <MenuItemDivider hasIcon />
                 <EnteMenuItem
                     label={t('COLLECT_PHOTOS')}
-                    startIcon={<LinkIcon />}
+                    startIcon={<DownloadSharp />}
                     onClick={createCollectPhotoShareableURLHelper}
                 />
             </MenuItemGroup>
