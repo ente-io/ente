@@ -93,9 +93,21 @@ dependencies:
   logging: ^1.0.1
   lottie: ^1.2.2
   media_extension: ^1.0.1
-  media_kit: ^1.1.7  
-  media_kit_libs_video: ^1.0.1  
-  media_kit_video: ^1.1.8                     
+  media_kit:
+    git:
+      url: https://github.com/ashilkn/media-kit.git
+      ref: main
+      path: media_kit
+  media_kit_libs_video: 
+    git: 
+      url: https://github.com/ashilkn/media-kit.git
+      ref: main
+      path: libs/universal/media_kit_libs_video
+  media_kit_video: 
+    git: 
+      url: https://github.com/ashilkn/media-kit.git
+      ref: main
+      path: media_kit_video                
   modal_bottom_sheet: ^3.0.0-pre
   motion_photos:
     git: "https://github.com/ente-io/motion_photo.git"
