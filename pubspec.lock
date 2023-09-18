@@ -631,7 +631,7 @@ packages:
     source: hosted
     version: "5.7.2+3"
   flutter_launcher_icons:
-    dependency: "direct dev"
+    dependency: "direct main"
     description:
       name: flutter_launcher_icons
       sha256: "526faf84284b86a4cb36d20a5e45147747b7563d921373d4ee0559c54fcdbcea"
@@ -703,10 +703,10 @@ packages:
     dependency: "direct main"
     description:
       name: flutter_native_splash
-      sha256: ecff62b3b893f2f665de7e4ad3de89f738941fcfcaaba8ee601e749efafa4698
+      sha256: af665ef80a213a9ed502845a3d7a61b9acca4100ee7e9f067a7440bc3acd6730
       url: "https://pub.dev"
     source: hosted
-    version: "2.3.2"
+    version: "2.2.19"
   flutter_password_strength:
     dependency: "direct main"
     description:
@@ -878,10 +878,10 @@ packages:
     dependency: transitive
     description:
       name: html
-      sha256: "3a7812d5bcd2894edf53dfaf8cd640876cf6cef50a8f238745c8b8120ea74d3a"
+      sha256: "58e3491f7bf0b6a4ea5110c0c688877460d1a6366731155c4a4580e7ded773e8"
       url: "https://pub.dev"
     source: hosted
-    version: "0.15.4"
+    version: "0.15.3"
   http:
     dependency: "direct main"
     description:
@@ -1440,10 +1440,10 @@ packages:
     dependency: transitive
     description:
       name: petitparser
-      sha256: cb3798bef7fc021ac45b308f4b51208a152792445cce0448c9a4ba5879dd8750
+      sha256: "49392a45ced973e8d94a85fdb21293fbb40ba805fc49f2965101ae748a3683b4"
       url: "https://pub.dev"
     source: hosted
-    version: "5.4.0"
+    version: "5.1.0"
   photo_manager:
     dependency: "direct main"
     description:
@@ -2326,10 +2326,10 @@ packages:
     dependency: transitive
     description:
       name: xml
-      sha256: "5bc72e1e45e941d825fd7468b9b4cc3b9327942649aeb6fc5cdbf135f0a86e84"
+      sha256: "979ee37d622dec6365e2efa4d906c37470995871fe9ae080d967e192d88286b5"
       url: "https://pub.dev"
     source: hosted
-    version: "6.3.0"
+    version: "6.2.2"
   xmlstream:
     dependency: transitive
     description:

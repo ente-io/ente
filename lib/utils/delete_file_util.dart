@@ -4,6 +4,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
+import "package:path/path.dart";
 import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/event_bus.dart';

@@ -189,6 +189,10 @@
   "disableDownloadWarningBody": "I visualizzatori possono scattare screenshot o salvare una copia delle foto utilizzando strumenti esterni",
   "allowDownloads": "Consenti download",
   "linkDeviceLimit": "Limite dei dispositivi",
+  "noDeviceLimit": "Nessuno",
+  "@noDeviceLimit": {
+    "description": "Text to indicate that there is limit on number of devices"
+  },
   "linkExpiry": "Scadenza del link",
   "linkExpired": "Scaduto",
   "linkEnabled": "Attivato",
@@ -201,15 +205,6 @@
   "manageLink": "Gestisci link",
   "linkExpiresOn": "Il link scadrà il {expiryTime}",
   "albumUpdated": "Album aggiornato",
-  "maxDeviceLimitSpikeHandling": "Se impostato al massimo ({maxValue}), il limite del dispositivo verrà ridotto per consentire picchi temporanei di un numero elevato di visualizzatori.",
-  "@maxDeviceLimitSpikeHandling": {
-    "placeholders": {
-      "maxValue": {
-        "type": "int",
-        "example": "100"
-      }
-    }
-  },
   "never": "Mai",
   "custom": "Personalizza",
   "@custom": {
@@ -468,6 +463,7 @@
   "updateAvailable": "Aggiornamento disponibile",
   "ignoreUpdate": "Ignora",
   "downloading": "Scaricamento in corso...",
+  "cannotDeleteSharedFiles": "Impossibile eliminare i file condivisi",
   "theDownloadCouldNotBeCompleted": "Il download non può essere completato",
   "retry": "Riprova",
   "backedUpFolders": "Cartelle salvate",

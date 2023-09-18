@@ -31,32 +31,32 @@ class MessageLookup extends MessageLookupByLibrary {
             'other': 'Você reeinvindicou ${storageAmountInGb} GB até agora',
           })}";
 
-  static String m12(albumName) =>
+  static String m13(albumName) =>
       "Isso removerá o link público para acessar \"${albumName}\".";
 
-  static String m13(supportEmail) =>
+  static String m14(supportEmail) =>
       "Por favor, envie um e-mail para ${supportEmail} a partir do seu endereço de e-mail registrado";
 
-  static String m19(storageAmountInGB) =>
+  static String m21(storageAmountInGB) =>
       "${storageAmountInGB} GB cada vez que alguém se inscrever para um plano pago e aplica o seu código";
 
-  static String m30(passwordStrengthValue) =>
+  static String m32(passwordStrengthValue) =>
       "Segurança da senha: ${passwordStrengthValue}";
 
-  static String m36(storageInGB) => "3. Ambos ganham ${storageInGB} GB* grátis";
+  static String m39(storageInGB) => "3. Ambos ganham ${storageInGB} GB* grátis";
 
-  static String m37(userEmail) =>
+  static String m40(userEmail) =>
       "${userEmail} será removido deste álbum compartilhado\n\nQuaisquer fotos adicionadas por eles também serão removidas do álbum";
 
-  static String m43(referralCode, referralStorageInGB) =>
+  static String m46(referralCode, referralStorageInGB) =>
       "Código de referência do ente: ${referralCode} \n\nAplique em Configurações → Geral → Indicações para obter ${referralStorageInGB} GB gratuitamente após a sua inscrição em um plano pago\n\nhttps://ente.io";
 
-  static String m49(storageAmountInGB) => "${storageAmountInGB} GB";
+  static String m52(storageAmountInGB) => "${storageAmountInGB} GB";
 
-  static String m54(storageAmountInGB) =>
+  static String m57(storageAmountInGB) =>
       "Eles também recebem ${storageAmountInGB} GB";
 
-  static String m58(email) => "Enviamos um e-mail à <green>${email}</green>";
+  static String m61(email) => "Enviamos um e-mail à <green>${email}</green>";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -181,10 +181,10 @@ class MessageLookup extends MessageLookupByLibrary {
             "Os espectadores ainda podem tirar screenshots ou salvar uma cópia de suas fotos usando ferramentas externas"),
         "disableDownloadWarningTitle":
             MessageLookupByLibrary.simpleMessage("Observe"),
-        "disableLinkMessage": m12,
+        "disableLinkMessage": m13,
         "doThisLater":
             MessageLookupByLibrary.simpleMessage("Fazer isso mais tarde"),
-        "dropSupportEmail": m13,
+        "dropSupportEmail": m14,
         "eligible": MessageLookupByLibrary.simpleMessage("elegível"),
         "email": MessageLookupByLibrary.simpleMessage("E-mail"),
         "encryption": MessageLookupByLibrary.simpleMessage("Criptografia"),
@@ -217,7 +217,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Esqueceu sua senha"),
         "freeStorageClaimed": MessageLookupByLibrary.simpleMessage(
             "Armazenamento gratuito reivindicado"),
-        "freeStorageOnReferralSuccess": m19,
+        "freeStorageOnReferralSuccess": m21,
         "freeStorageUsable": MessageLookupByLibrary.simpleMessage(
             "Armazenamento livre utilizável"),
         "generatingEncryptionKeys": MessageLookupByLibrary.simpleMessage(
@@ -276,7 +276,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Senha alterada com sucesso"),
         "passwordLock":
             MessageLookupByLibrary.simpleMessage("Bloqueio de senha"),
-        "passwordStrength": m30,
+        "passwordStrength": m32,
         "passwordWarning": MessageLookupByLibrary.simpleMessage(
             "Nós não salvamos essa senha, se você esquecer <underline> nós não poderemos descriptografar seus dados</underline>"),
         "peopleUsingYourCode":
@@ -315,7 +315,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Envie esse código aos seus amigos"),
         "referralStep2": MessageLookupByLibrary.simpleMessage(
             "2. Eles se inscrevem em um plano pago"),
-        "referralStep3": m36,
+        "referralStep3": m39,
         "referralsAreCurrentlyPaused": MessageLookupByLibrary.simpleMessage(
             "Referências estão atualmente pausadas"),
         "remove": MessageLookupByLibrary.simpleMessage("Remover"),
@@ -325,7 +325,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Remover do álbum?"),
         "removeParticipant":
             MessageLookupByLibrary.simpleMessage("Remover participante"),
-        "removeParticipantBody": m37,
+        "removeParticipantBody": m40,
         "removePublicLink":
             MessageLookupByLibrary.simpleMessage("Remover link público"),
         "removeShareItemsWarning": MessageLookupByLibrary.simpleMessage(
@@ -352,7 +352,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Chave: definaSenha\n→ definaSenha"),
         "setupComplete":
             MessageLookupByLibrary.simpleMessage("Configuração concluída"),
-        "shareTextReferralCode": m43,
+        "shareTextReferralCode": m46,
         "sharing": MessageLookupByLibrary.simpleMessage("Compartilhando..."),
         "signUpTerms": MessageLookupByLibrary.simpleMessage(
             "Eu concordo com os <u-terms>termos de serviço</u-terms> e a <u-policy>política de privacidade</u-policy>"),
@@ -368,7 +368,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "sorryWeCouldNotGenerateSecureKeysOnThisDevicennplease":
             MessageLookupByLibrary.simpleMessage(
                 "Desculpe, não foi possível gerar chaves seguras neste dispositivo.\n\npor favor, faça o login com um dispositivo diferente."),
-        "storageInGB": m49,
+        "storageInGB": m52,
         "strongStrength": MessageLookupByLibrary.simpleMessage("Forte"),
         "subscribe": MessageLookupByLibrary.simpleMessage("Inscrever-se"),
         "subscribeToEnableSharing": MessageLookupByLibrary.simpleMessage(
@@ -380,7 +380,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "terminateSession":
             MessageLookupByLibrary.simpleMessage("Encerrar sessão?"),
         "termsOfServicesTitle": MessageLookupByLibrary.simpleMessage("Termos"),
-        "theyAlsoGetXGb": m54,
+        "theyAlsoGetXGb": m57,
         "thisCanBeUsedToRecoverYourAccountIfYou":
             MessageLookupByLibrary.simpleMessage(
                 "Isso pode ser usado para recuperar sua conta se você perder seu segundo fator"),
@@ -413,7 +413,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "viewRecoveryKey":
             MessageLookupByLibrary.simpleMessage("Ver chave de recuperação"),
         "viewer": MessageLookupByLibrary.simpleMessage("Visualizador"),
-        "weHaveSendEmailTo": m58,
+        "weHaveSendEmailTo": m61,
         "weakStrength": MessageLookupByLibrary.simpleMessage("Fraca"),
         "welcomeBack":
             MessageLookupByLibrary.simpleMessage("Bem-vindo de volta!"),
