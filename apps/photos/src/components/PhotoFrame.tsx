@@ -81,8 +81,6 @@ const PhotoFrame = ({
     const [currentHover, setCurrentHover] = useState(null);
     const [isShiftKeyPressed, setIsShiftKeyPressed] = useState(false);
     const router = useRouter();
-    const [isSourceLoaded, setIsSourceLoaded] = useState(false);
-    const [conversionFailed, setConversionFailed] = useState(false);
 
     const thumbsStore = publicCollectionGalleryContext?.accessedThroughSharedURL
         ? publicCollectionGalleryContext.thumbs
@@ -242,10 +240,6 @@ const PhotoFrame = ({
         }
 
         await updateFileSrcProps(file, mergedSrcURL);
-        if (file.conversionFailed) {
-            setConversionFailed(true);
-        }
-        setIsSourceLoaded(true);
     };
 
     const handleClose = (needUpdate) => {
@@ -382,9 +376,9 @@ const PhotoFrame = ({
         addLogLine(
             `[${
                 item.id
-            }] getSlideData called for thumbnail:${!!item.msrc} sourceLoaded:${isSourceLoaded} fetching:${
-                fetching[item.id]
-            }`
+            }] getSlideData called for thumbnail:${!!item.msrc} sourceLoaded:${
+                item.isSourceLoaded
+            } fetching:${fetching[item.id]}`
         );
         if (!item.msrc) {
             addLogLine(`[${item.id}] doesn't have thumbnail`);
@@ -438,11 +432,9 @@ const PhotoFrame = ({
 
         if (item.isSourceLoaded || item.conversionFailed) {
             if (item.isSourceLoaded) {
-                setIsSourceLoaded(true);
                 addLogLine(`[${item.id}] source already loaded`);
             }
             if (item.conversionFailed) {
-                setConversionFailed(true);
                 addLogLine(`[${item.id}] conversion failed`);
             }
             return;
@@ -451,8 +443,7 @@ const PhotoFrame = ({
             addLogLine(`[${item.id}] file download already in progress`);
             return;
         }
-        setIsSourceLoaded(false);
-        setConversionFailed(false);
+
         try {
             addLogLine(`[${item.id}] new file src request`);
             fetching[item.id] = true;
@@ -531,8 +522,6 @@ const PhotoFrame = ({
             );
             return;
         }
-        setIsSourceLoaded(false);
-        setConversionFailed(false);
         updateURL(index)(item.id, item.msrc, true);
         try {
             addLogLine(
@@ -637,8 +626,6 @@ const PhotoFrame = ({
                 isTrashCollection={activeCollectionID === TRASH_SECTION}
                 isInHiddenSection={isInHiddenSection}
                 enableDownload={enableDownload}
-                isSourceLoaded={isSourceLoaded}
-                conversionFailed={conversionFailed}
                 fileToCollectionsMap={fileToCollectionsMap}
                 collectionNameMap={collectionNameMap}
             />
