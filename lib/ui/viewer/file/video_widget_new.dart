@@ -79,6 +79,7 @@ class _VideoWidgetNewState extends State<VideoWidgetNew> {
       tag: widget.tagPrefix! + widget.file.tag,
       child: MaterialVideoControlsTheme(
         normal: MaterialVideoControlsThemeData(
+          backdropColor: null,
           automaticallyImplySkipNextButton: false,
           automaticallyImplySkipPreviousButton: false,
           seekOnDoubleTap: false,
