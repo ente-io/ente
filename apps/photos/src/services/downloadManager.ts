@@ -188,7 +188,10 @@ class DownloadManager {
             if (!token) {
                 return null;
             }
-            const onDownloadProgress = this.trackDownloadProgress(file.id);
+            const onDownloadProgress = this.trackDownloadProgress(
+                file.id,
+                file.info.fileSize
+            );
             if (
                 file.metadata.fileType === FILE_TYPE.IMAGE ||
                 file.metadata.fileType === FILE_TYPE.LIVE_PHOTO
@@ -386,10 +389,13 @@ class DownloadManager {
         }
     }
 
-    trackDownloadProgress = (fileID: number) => {
+    trackDownloadProgress = (fileID: number, fileSize?: number) => {
         return (event: { loaded: number; total: number }) => {
             if (isNaN(event.total) || event.total === 0) {
-                return;
+                if (!fileSize) {
+                    return;
+                }
+                event.total = fileSize;
             }
             if (event.loaded === event.total) {
                 this.fileDownloadProgress.delete(fileID);
