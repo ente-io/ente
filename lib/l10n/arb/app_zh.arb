@@ -29,7 +29,7 @@
   "timeBasedKeyType": "基于时间的 (TOTP)",
   "counterBasedKeyType": "基于计数器的(HOTP)",
   "saveAction": "保存",
-  "nextTotpTitle": "下一步",
+  "nextTotpTitle": "下一个",
   "deleteCodeTitle": "要删除代码吗？",
   "deleteCodeMessage": "您确定要删除此代码吗？此操作是不可逆的。",
   "viewLogsAction": "查看日志",
