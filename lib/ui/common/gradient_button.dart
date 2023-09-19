@@ -74,7 +74,7 @@ class GradientButton extends StatelessWidget {
                 ? linearGradientColors
                 : [
                     getEnteColorScheme(context).fillMuted,
-                    getEnteColorScheme(context).fillMuted
+                    getEnteColorScheme(context).fillMuted,
                   ],
           ),
           borderRadius: BorderRadius.circular(8),

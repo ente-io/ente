@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:collection';
 import 'dart:convert';
-import 'dart:io' as io;
+import 'dart:io';
 import 'dart:math';
 
 import 'package:collection/collection.dart';
@@ -9,7 +9,6 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
-import 'package:path/path.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/errors.dart';
 import 'package:photos/core/event_bus.dart';
@@ -21,17 +20,22 @@ import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/events/subscription_purchased_event.dart';
 import 'package:photos/main.dart';
 import 'package:photos/models/encryption_result.dart';
-import 'package:photos/models/file.dart';
-import 'package:photos/models/file_type.dart';
+import 'package:photos/models/file/file.dart';
+import 'package:photos/models/file/file_type.dart';
+import "package:photos/models/metadata/file_magic.dart";
 import 'package:photos/models/upload_url.dart';
+import "package:photos/models/user_details.dart";
 import 'package:photos/services/collections_service.dart';
+import "package:photos/services/file_magic_service.dart";
 import 'package:photos/services/local_sync_service.dart';
 import 'package:photos/services/sync_service.dart';
+import "package:photos/services/user_service.dart";
 import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/file_download_util.dart';
 import 'package:photos/utils/file_uploader_util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tuple/tuple.dart';
+import "package:uuid/uuid.dart";
 
 class FileUploader {
   static const kMaximumConcurrentUploads = 4;
@@ -40,11 +44,14 @@ class FileUploader {
   static const kMaximumUploadAttempts = 4;
   static const kBlockedUploadsPollFrequency = Duration(seconds: 2);
   static const kFileUploadTimeout = Duration(minutes: 50);
+  static const k20MBStorageBuffer = 20 * 1024 * 1024;
+  static const kUploadTempPrefix = "upload_file_";
 
   final _logger = Logger("FileUploader");
   final _dio = NetworkClient.instance.getDio();
   final _enteDio = NetworkClient.instance.enteDio;
-  final LinkedHashMap _queue = LinkedHashMap<String, FileUploadItem>();
+  final LinkedHashMap<String, FileUploadItem> _queue =
+      LinkedHashMap<String, FileUploadItem>();
   final _uploadLocks = UploadLocksDB.instance;
   final kSafeBufferForLockExpiry = const Duration(days: 1).inMicroseconds;
   final kBGTaskDeathTimeout = const Duration(seconds: 5).inMicroseconds;
@@ -106,7 +113,10 @@ class FileUploader {
             }
             return false;
           },
-          InvalidFileError("File already deleted"),
+          InvalidFileError(
+            "File already deleted",
+            InvalidReason.assetDeletedEvent,
+          ),
         );
       }
     });
@@ -114,19 +124,22 @@ class FileUploader {
 
   // upload future will return null as File when the file entry is deleted
   // locally because it's already present in the destination collection.
-  Future<File> upload(File file, int collectionID) {
-    // If the file hasn't been queued yet, queue it
+  Future<EnteFile> upload(EnteFile file, int collectionID) {
+    if (file.localID == null || file.localID!.isEmpty) {
+      return Future.error(Exception("file's localID can not be null or empty"));
+    }
+    // If the file hasn't been queued yet, queue it for upload
     _totalCountInUploadSession++;
-    if (!_queue.containsKey(file.localID)) {
-      final completer = Completer<File>();
-      _queue[file.localID] = FileUploadItem(file, collectionID, completer);
+    final String localID = file.localID!;
+    if (!_queue.containsKey(localID)) {
+      final completer = Completer<EnteFile>();
+      _queue[localID] = FileUploadItem(file, collectionID, completer);
       _pollQueue();
       return completer.future;
     }
-
     // If the file exists in the queue for a matching collectionID,
     // return the existing future
-    final item = _queue[file.localID];
+    final FileUploadItem item = _queue[localID]!;
     if (item.collectionID == collectionID) {
       _totalCountInUploadSession--;
       return item.completer.future;
@@ -143,16 +156,10 @@ class FileUploader {
         "original upload completer resolved, try adding the file to another "
         "collection",
       );
-      if (uploadedFile == null) {
-        /* todo: handle this case, ideally during next sync the localId
-          should be uploaded to this collection ID
-         */
-        _logger.severe('unexpected upload state');
-        return null;
-      }
+
       return CollectionsService.instance
           .addToCollection(collectionID, [uploadedFile]).then((aVoid) {
-        return uploadedFile as File;
+        return uploadedFile;
       });
     });
   }
@@ -169,7 +176,7 @@ class FileUploader {
       uploadsToBeRemoved.add(pendingUpload.key);
     });
     for (final id in uploadsToBeRemoved) {
-      _queue.remove(id).completer.completeError(reason);
+      _queue.remove(id)?.completer.completeError(reason);
     }
     _totalCountInUploadSession = 0;
   }
@@ -178,7 +185,10 @@ class FileUploader {
     _uploadURLs.clear();
   }
 
-  void removeFromQueueWhere(final bool Function(File) fn, final Error reason) {
+  void removeFromQueueWhere(
+    final bool Function(EnteFile) fn,
+    final Error reason,
+  ) {
     final List<String> uploadsToBeRemoved = [];
     _queue.entries
         .where((entry) => entry.value.status == UploadStatus.notStarted)
@@ -188,7 +198,7 @@ class FileUploader {
       }
     });
     for (final id in uploadsToBeRemoved) {
-      _queue.remove(id).completer.completeError(reason);
+      _queue.remove(id)?.completer.completeError(reason);
     }
     _logger.info(
       'number of enteries removed from queue ${uploadsToBeRemoved.length}',
@@ -234,8 +244,8 @@ class FileUploader {
     }
   }
 
-  Future<File?> _encryptAndUploadFileToCollection(
-    File file,
+  Future<EnteFile?> _encryptAndUploadFileToCollection(
+    EnteFile file,
     int collectionID, {
     bool forcedUpload = false,
   }) async {
@@ -243,7 +253,7 @@ class FileUploader {
     if (file.fileType == FileType.video) {
       _videoUploadCounter++;
     }
-    final localID = file.localID;
+    final localID = file.localID!;
     try {
       final uploadedFile =
           await _tryToUpload(file, collectionID, forcedUpload).timeout(
@@ -254,14 +264,14 @@ class FileUploader {
           throw TimeoutException(message);
         },
       );
-      _queue.remove(localID).completer.complete(uploadedFile);
+      _queue.remove(localID)!.completer.complete(uploadedFile);
       return uploadedFile;
     } catch (e) {
       if (e is LockAlreadyAcquiredError) {
-        _queue[localID].status = UploadStatus.inBackground;
-        return _queue[localID].completer.future;
+        _queue[localID]!.status = UploadStatus.inBackground;
+        return _queue[localID]!.completer.future;
       } else {
-        _queue.remove(localID).completer.completeError(e);
+        _queue.remove(localID)!.completer.completeError(e);
         return null;
       }
     } finally {
@@ -270,6 +280,29 @@ class FileUploader {
         _videoUploadCounter--;
       }
       _pollQueue();
+    }
+  }
+
+
+  Future<void> removeStaleFiles() async {
+    try {
+      final String dir = Configuration.instance.getTempDirectory();
+      // delete all files in the temp directory that start with upload_ and
+      // ends with .encrypted. Fetch files in async manner
+      final files = await Directory(dir).list().toList();
+      final filesToDelete = files.where((file) {
+        return file.path.contains(kUploadTempPrefix) &&
+            file.path.contains(".encrypted");
+      });
+      if (filesToDelete.isEmpty) {
+        return;
+      }
+      _logger.info('cleaning up state files ${filesToDelete.length}');
+      for (final file in filesToDelete) {
+        await file.delete();
+      }
+    } catch (e, s) {
+      _logger.severe("Failed to remove stale files", e, s);
     }
   }
 
@@ -290,20 +323,26 @@ class FileUploader {
     }
   }
 
-  Future<File> _tryToUpload(
-    File file,
+  Future<EnteFile> forceUpload(EnteFile file, int collectionID) async {
+    return _tryToUpload(file, collectionID, true);
+  }
+
+  Future<EnteFile> _tryToUpload(
+    EnteFile file,
     int collectionID,
     bool forcedUpload,
   ) async {
     await checkNetworkForUpload(isForceUpload: forcedUpload);
-    final fileOnDisk = await FilesDB.instance.getFile(file.generatedID!);
-    final wasAlreadyUploaded = fileOnDisk != null &&
-        fileOnDisk.uploadedFileID != null &&
-        (fileOnDisk.updationTime ?? -1) != -1 &&
-        (fileOnDisk.collectionID ?? -1) == collectionID;
-    if (wasAlreadyUploaded) {
-      debugPrint("File is already uploaded ${fileOnDisk.tag}");
-      return fileOnDisk;
+    if (!forcedUpload) {
+      final fileOnDisk = await FilesDB.instance.getFile(file.generatedID!);
+      final wasAlreadyUploaded = fileOnDisk != null &&
+          fileOnDisk.uploadedFileID != null &&
+          (fileOnDisk.updationTime ?? -1) != -1 &&
+          (fileOnDisk.collectionID ?? -1) == collectionID;
+      if (wasAlreadyUploaded) {
+        debugPrint("File is already uploaded ${fileOnDisk.tag}");
+        return fileOnDisk;
+      }
     }
     if ((file.localID ?? '') == '') {
       _logger.severe('Trying to upload file with missing localID');
@@ -324,15 +363,11 @@ class FileUploader {
     }
 
     final tempDirectory = Configuration.instance.getTempDirectory();
-    final encryptedFilePath = tempDirectory +
-        file.generatedID.toString() +
-        (_isBackground ? "_bg" : "") +
-        ".encrypted";
-    final encryptedThumbnailPath = tempDirectory +
-        file.generatedID.toString() +
-        "_thumbnail" +
-        (_isBackground ? "_bg" : "") +
-        ".encrypted";
+    final String uniqueID = const Uuid().v4().toString();
+    final encryptedFilePath =
+        '$tempDirectory$kUploadTempPrefix${uniqueID}_file.encrypted';
+    final encryptedThumbnailPath =
+        '$tempDirectory$kUploadTempPrefix${uniqueID}_thumb.encrypted';
     MediaUploadData? mediaUploadData;
     var uploadCompleted = false;
     // This flag is used to decide whether to clear the iOS origin file cache
@@ -340,11 +375,11 @@ class FileUploader {
     var uploadHardFailure = false;
 
     try {
+      final bool isUpdatedFile =
+          file.uploadedFileID != null && file.updationTime == -1;
       _logger.info(
-        "Trying to upload " +
-            file.toString() +
-            ", isForced: " +
-            forcedUpload.toString(),
+        'starting ${forcedUpload ? 'forced' : ''} '
+        '${isUpdatedFile ? 're-upload' : 'upload'} of ${file.toString()}',
       );
       try {
         mediaUploadData = await getUploadDataFromEnteFile(file);
@@ -355,12 +390,8 @@ class FileUploader {
           rethrow;
         }
       }
-
       Uint8List? key;
-      final bool isUpdatedFile =
-          file.uploadedFileID != null && file.updationTime == -1;
       if (isUpdatedFile) {
-        _logger.info("File was updated " + file.toString());
         key = getFileKey(file);
       } else {
         key = null;
@@ -382,25 +413,27 @@ class FileUploader {
         }
       }
 
-      if (io.File(encryptedFilePath).existsSync()) {
-        await io.File(encryptedFilePath).delete();
+      if (File(encryptedFilePath).existsSync()) {
+        await File(encryptedFilePath).delete();
       }
-      final encryptedFile = io.File(encryptedFilePath);
-      final fileAttributes = await CryptoUtil.encryptFile(
-        mediaUploadData!.sourceFile!.path,
+      await _checkIfWithinStorageLimit(mediaUploadData!.sourceFile!);
+      final encryptedFile = File(encryptedFilePath);
+      final EncryptionResult fileAttributes = await CryptoUtil.encryptFile(
+        mediaUploadData.sourceFile!.path,
         encryptedFilePath,
         key: key,
       );
       final thumbnailData = mediaUploadData.thumbnail;
 
-      final encryptedThumbnailData = await CryptoUtil.encryptChaCha(
+      final EncryptionResult encryptedThumbnailData =
+          await CryptoUtil.encryptChaCha(
         thumbnailData!,
         fileAttributes.key!,
       );
-      if (io.File(encryptedThumbnailPath).existsSync()) {
-        await io.File(encryptedThumbnailPath).delete();
+      if (File(encryptedThumbnailPath).existsSync()) {
+        await File(encryptedThumbnailPath).delete();
       }
-      final encryptedThumbnailFile = io.File(encryptedThumbnailPath);
+      final encryptedThumbnailFile = File(encryptedThumbnailPath);
       await encryptedThumbnailFile
           .writeAsBytes(encryptedThumbnailData.encryptedData!);
 
@@ -428,7 +461,7 @@ class FileUploader {
       if (SyncService.instance.shouldStopSync()) {
         throw SyncStopRequestedError();
       }
-      File remoteFile;
+      EnteFile remoteFile;
       if (isUpdatedFile) {
         remoteFile = await _updateFile(
           file,
@@ -452,6 +485,23 @@ class FileUploader {
             CryptoUtil.bin2base64(encryptedFileKeyData.encryptedData!);
         final keyDecryptionNonce =
             CryptoUtil.bin2base64(encryptedFileKeyData.nonce!);
+        MetadataRequest? pubMetadataRequest;
+        if ((mediaUploadData.height ?? 0) != 0 &&
+            (mediaUploadData.width ?? 0) != 0) {
+          final pubMetadata = {
+            heightKey: mediaUploadData.height,
+            widthKey: mediaUploadData.width,
+          };
+          if (mediaUploadData.motionPhotoStartIndex != null) {
+            pubMetadata[motionVideoIndexKey] =
+                mediaUploadData.motionPhotoStartIndex;
+          }
+          pubMetadataRequest = await getPubMetadataRequest(
+            file,
+            pubMetadata,
+            fileAttributes.key!,
+          );
+        }
         remoteFile = await _uploadFile(
           file,
           collectionID,
@@ -466,6 +516,7 @@ class FileUploader {
           await encryptedThumbnailFile.length(),
           encryptedMetadata,
           metadataDecryptionHeader,
+          pubMetadata: pubMetadataRequest,
         );
         if (mediaUploadData.isDeleted) {
           _logger.info("File found to be deleted");
@@ -519,20 +570,18 @@ class FileUploader {
   It performs following checks:
     a) Uploaded file with same localID and destination collection. Delete the
      fileToUpload entry
-    b) Uploaded file in destination collection but with missing localID.
+    b) Uploaded file in any collection but with missing localID.
      Update the localID for uploadedFile and delete the fileToUpload entry
     c) A uploaded file exist with same localID but in a different collection.
-    or
-    d) Uploaded file in different collection but missing localID.
-    For both c and d, perform add to collection operation.
-    e) File already exists but different localID. Re-upload
+    Add a symlink in the destination collection and update the fileToUpload
+    d) File already exists but different localID. Re-upload
     In case the existing files already have local identifier, which is
     different from the {fileToUpload}, then most probably device has
     duplicate files.
   */
-  Future<Tuple2<bool, File>> _mapToExistingUploadWithSameHash(
+  Future<Tuple2<bool, EnteFile>> _mapToExistingUploadWithSameHash(
     MediaUploadData mediaUploadData,
-    File fileToUpload,
+    EnteFile fileToUpload,
     int toCollectionID,
   ) async {
     if (fileToUpload.uploadedFileID != null) {
@@ -544,7 +593,7 @@ class FileUploader {
       return Tuple2(false, fileToUpload);
     }
 
-    final List<File> existingUploadedFiles =
+    final List<EnteFile> existingUploadedFiles =
         await FilesDB.instance.getUploadedFilesWithHashes(
       mediaUploadData.hashData!,
       fileToUpload.fileType,
@@ -556,7 +605,7 @@ class FileUploader {
     }
 
     // case a
-    final File? sameLocalSameCollection =
+    final EnteFile? sameLocalSameCollection =
         existingUploadedFiles.firstWhereOrNull(
       (e) =>
           e.collectionID == toCollectionID && e.localID == fileToUpload.localID,
@@ -567,7 +616,9 @@ class FileUploader {
         "\n existing: ${sameLocalSameCollection.tag}",
       );
       // should delete the fileToUploadEntry
-      await FilesDB.instance.deleteByGeneratedID(fileToUpload.generatedID!);
+      if (fileToUpload.generatedID != null) {
+        await FilesDB.instance.deleteByGeneratedID(fileToUpload.generatedID!);
+      }
 
       Bus.instance.fire(
         LocalPhotosUpdatedEvent(
@@ -580,40 +631,42 @@ class FileUploader {
     }
 
     // case b
-    final File? fileMissingLocalButSameCollection =
-        existingUploadedFiles.firstWhereOrNull(
-      (e) => e.collectionID == toCollectionID && e.localID == null,
+    final EnteFile? fileMissingLocal = existingUploadedFiles.firstWhereOrNull(
+      (e) => e.localID == null,
     );
-    if (fileMissingLocalButSameCollection != null) {
+    if (fileMissingLocal != null) {
       // update the local id of the existing file and delete the fileToUpload
       // entry
       _logger.fine(
-        "fileMissingLocalButSameCollection: \n toUpload  ${fileToUpload.tag} "
-        "\n existing: ${fileMissingLocalButSameCollection.tag}",
+        "fileMissingLocal: \n toUpload  ${fileToUpload.tag} "
+        "\n existing: ${fileMissingLocal.tag}",
       );
-      fileMissingLocalButSameCollection.localID = fileToUpload.localID;
+      fileMissingLocal.localID = fileToUpload.localID;
       // set localID for the given uploadedID across collections
       await FilesDB.instance.updateLocalIDForUploaded(
-        fileMissingLocalButSameCollection.uploadedFileID!,
+        fileMissingLocal.uploadedFileID!,
         fileToUpload.localID!,
       );
-      await FilesDB.instance.deleteByGeneratedID(fileToUpload.generatedID!);
+      // For files selected from device, during collaborative upload, we don't
+      // insert entries in the FilesDB. So, we don't need to delete the entry
+      if (fileToUpload.generatedID != null) {
+        await FilesDB.instance.deleteByGeneratedID(fileToUpload.generatedID!);
+      }
       Bus.instance.fire(
         LocalPhotosUpdatedEvent(
           [fileToUpload],
-          source: "alreadyUploadedInSameCollection",
+          source: "fileMissingLocal",
           type: EventType.deletedFromEverywhere, //
         ),
       );
-      return Tuple2(true, fileMissingLocalButSameCollection);
+      return Tuple2(true, fileMissingLocal);
     }
 
-    // case c and d
-    final File? fileExistsButDifferentCollection =
+    // case c
+    final EnteFile? fileExistsButDifferentCollection =
         existingUploadedFiles.firstWhereOrNull(
       (e) =>
-          e.collectionID != toCollectionID &&
-          (e.localID == null || e.localID == fileToUpload.localID),
+          e.collectionID != toCollectionID && e.localID == fileToUpload.localID,
     );
     if (fileExistsButDifferentCollection != null) {
       _logger.fine(
@@ -638,7 +691,7 @@ class FileUploader {
       "Found hashMatch but probably with diff localIDs "
       "$matchLocalIDs",
     );
-    // case e
+    // case d
     return Tuple2(false, fileToUpload);
   }
 
@@ -646,7 +699,7 @@ class FileUploader {
     MediaUploadData? mediaUploadData,
     bool uploadCompleted,
     bool uploadHardFailure,
-    File file,
+    EnteFile file,
     String encryptedFilePath,
     String encryptedThumbnailPath, {
     required String lockKey,
@@ -657,33 +710,80 @@ class FileUploader {
       // when upload is either completed or there's a tempFailure
       // Shared Media should only be cleared when the upload
       // succeeds.
-      if ((io.Platform.isIOS && (uploadCompleted || uploadHardFailure)) ||
+      if ((Platform.isIOS && (uploadCompleted || uploadHardFailure)) ||
           (uploadCompleted && file.isSharedMediaToAppSandbox)) {
         await mediaUploadData.sourceFile?.delete();
       }
     }
-    if (io.File(encryptedFilePath).existsSync()) {
-      await io.File(encryptedFilePath).delete();
+    if (File(encryptedFilePath).existsSync()) {
+      await File(encryptedFilePath).delete();
     }
-    if (io.File(encryptedThumbnailPath).existsSync()) {
-      await io.File(encryptedThumbnailPath).delete();
+    if (File(encryptedThumbnailPath).existsSync()) {
+      await File(encryptedThumbnailPath).delete();
     }
     await _uploadLocks.releaseLock(lockKey, _processType.toString());
   }
 
-  Future _onInvalidFileError(File file, InvalidFileError e) async {
-    final String ext = file.title == null ? "no title" : extension(file.title!);
-    _logger.severe(
-      "Invalid file: (ext: $ext) encountered: " + file.toString(),
-      e,
-    );
-    await FilesDB.instance.deleteLocalFile(file);
-    await LocalSyncService.instance.trackInvalidFile(file);
+  /*
+  _checkIfWithinStorageLimit verifies if the file size for encryption and upload
+   is within the storage limit. It throws StorageLimitExceededError if the limit
+    is exceeded. This check is best effort and may not be completely accurate
+    due to UserDetail cache. It prevents infinite loops when clients attempt to
+    upload files that exceed the server's storage limit + buffer.
+    Note: Local storageBuffer is 20MB, server storageBuffer is 50MB, and an
+    additional 30MB is reserved for thumbnails and encryption overhead.
+   */
+  Future<void> _checkIfWithinStorageLimit(File fileToBeUploaded) async {
+    try {
+      final UserDetails? userDetails =
+          UserService.instance.getCachedUserDetails();
+      if (userDetails == null) {
+        return;
+      }
+      // add k20MBStorageBuffer to the free storage
+      final num freeStorage = userDetails.getFreeStorage() + k20MBStorageBuffer;
+      final num fileSize = await fileToBeUploaded.length();
+      if (fileSize > freeStorage) {
+        _logger.warning('Storage limit exceeded fileSize $fileSize and '
+            'freeStorage $freeStorage');
+        throw StorageLimitExceededError();
+      }
+    } catch (e) {
+      if (e is StorageLimitExceededError) {
+        rethrow;
+      } else {
+        _logger.severe('Error checking storage limit', e);
+      }
+    }
+  }
+
+  Future _onInvalidFileError(EnteFile file, InvalidFileError e) async {
+    final bool canIgnoreFile = file.localID != null &&
+        file.deviceFolder != null &&
+        file.title != null &&
+        !file.isSharedMediaToAppSandbox;
+    // If the file is not uploaded yet and either it can not be ignored or the
+    // err is related to live photo media, delete the local entry
+    final bool deleteEntry = !file.isUploaded &&
+        (!canIgnoreFile || e.reason.isLivePhotoErr);
+
+    if (e.reason != InvalidReason.thumbnailMissing || !canIgnoreFile) {
+      _logger.severe(
+        "Invalid file, localDelete: $deleteEntry, ignored: $canIgnoreFile",
+        e,
+      );
+    }
+    if (deleteEntry) {
+      await FilesDB.instance.deleteLocalFile(file);
+    }
+    if (canIgnoreFile) {
+      await LocalSyncService.instance.ignoreUpload(file, e);
+    }
     throw e;
   }
 
-  Future<File> _uploadFile(
-    File file,
+  Future<EnteFile> _uploadFile(
+    EnteFile file,
     int collectionID,
     String encryptedKey,
     String keyDecryptionNonce,
@@ -696,6 +796,7 @@ class FileUploader {
     int thumbnailSize,
     String encryptedMetadata,
     String metadataDecryptionHeader, {
+    MetadataRequest? pubMetadata,
     int attempt = 1,
   }) async {
     final request = {
@@ -715,8 +816,11 @@ class FileUploader {
       "metadata": {
         "encryptedData": encryptedMetadata,
         "decryptionHeader": metadataDecryptionHeader,
-      }
+      },
     };
+    if (pubMetadata != null) {
+      request["pubMagicMetadata"] = pubMetadata;
+    }
     try {
       final response = await _enteDio.post("/files", data: request);
       final data = response.data;
@@ -753,14 +857,15 @@ class FileUploader {
           encryptedMetadata,
           metadataDecryptionHeader,
           attempt: attempt + 1,
+          pubMetadata: pubMetadata,
         );
       }
       rethrow;
     }
   }
 
-  Future<File> _updateFile(
-    File file,
+  Future<EnteFile> _updateFile(
+    EnteFile file,
     String fileObjectKey,
     String fileDecryptionHeader,
     int fileSize,
@@ -786,7 +891,7 @@ class FileUploader {
       "metadata": {
         "encryptedData": encryptedMetadata,
         "decryptionHeader": metadataDecryptionHeader,
-      }
+      },
     };
     try {
       final response = await _enteDio.put("/files/update", data: request);
@@ -822,12 +927,14 @@ class FileUploader {
 
   Future<UploadURL> _getUploadURL() async {
     if (_uploadURLs.isEmpty) {
-      await fetchUploadURLs(_queue.length);
+      // the queue is empty, fetch at least for one file to handle force uploads
+      // that are not in the queue. This is to also avoid
+      await fetchUploadURLs(max(_queue.length, 1));
     }
     try {
       return _uploadURLs.removeFirst();
     } catch (e) {
-      if (e is StateError && e.message == 'No element' && _queue.isNotEmpty) {
+      if (e is StateError && e.message == 'No element' && _queue.isEmpty) {
         _logger.warning("Oops, uploadUrls has no element now, fetching again");
         return _getUploadURL();
       } else {
@@ -880,7 +987,7 @@ class FileUploader {
 
   Future<String> _putFile(
     UploadURL uploadURL,
-    io.File file, {
+    File file, {
     int? contentLength,
     int attempt = 1,
   }) async {
@@ -946,19 +1053,19 @@ class FileUploader {
     for (final upload in blockedUploads) {
       final file = upload.value.file;
       final isStillLocked = await _uploadLocks.isLocked(
-        file.localID,
+        file.localID!,
         ProcessType.background.toString(),
       );
       if (!isStillLocked) {
-        final completer = _queue.remove(upload.key).completer;
+        final completer = _queue.remove(upload.key)?.completer;
         final dbFile =
-            await FilesDB.instance.getFile(upload.value.file.generatedID);
+            await FilesDB.instance.getFile(upload.value.file.generatedID!);
         if (dbFile?.uploadedFileID != null) {
           _logger.info("Background upload success detected");
-          completer.complete(dbFile);
+          completer?.complete(dbFile);
         } else {
           _logger.info("Background upload failure detected");
-          completer.completeError(SilentlyCancelUploadsError());
+          completer?.completeError(SilentlyCancelUploadsError());
         }
       }
     }
@@ -969,9 +1076,9 @@ class FileUploader {
 }
 
 class FileUploadItem {
-  final File file;
+  final EnteFile file;
   final int collectionID;
-  final Completer<File> completer;
+  final Completer<EnteFile> completer;
   UploadStatus status;
 
   FileUploadItem(

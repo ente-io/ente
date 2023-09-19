@@ -1,13 +1,13 @@
 /// Represents the recognition output from the model
 class Recognition {
   /// Index of the result
-  int id;
+  final int id;
 
   /// Label of the result
-  String label;
+  final String label;
 
   /// Confidence [0.0, 1.0]
-  double score;
+  final double score;
 
   Recognition(this.id, this.label, this.score);
 

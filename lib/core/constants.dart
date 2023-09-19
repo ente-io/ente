@@ -8,7 +8,7 @@ const String sentryDSN =
 const String sentryDebugDSN =
     "https://ca5e686dd7f149d9bf94e620564cceba@sentry.ente.io/3";
 const String sentryTunnel = "https://sentry-reporter.ente.io";
-const String roadmapURL = "https://roadmap.ente.io";
+const String githubIssuesUrl = "https://github.com/ente-io/photos-app/issues";
 const int microSecondsInDay = 86400000000;
 const int android11SDKINT = 30;
 const int jan011981Time = 347155200000000;
@@ -24,10 +24,6 @@ const subGalleryMultiplier = 10;
 // todo: 6Jun22: delete old media identifier after 3 months
 const String oldSharedMediaIdentifier = 'ente-shared://';
 const String sharedMediaIdentifier = 'ente-shared-media://';
-
-const int maxLivePhotoToastCount = 2;
-const String livePhotoToastCounterKey = "show_live_photo_toast";
-const String fileCaptionDefaultHint = "Add a description...";
 
 const thumbnailDiskLoadDeferDuration = Duration(milliseconds: 40);
 const thumbnailServerLoadDeferDuration = Duration(milliseconds: 80);
@@ -56,12 +52,13 @@ const double restrictedMaxWidth = 430;
 
 const double mobileSmallThreshold = 336;
 
-const publicLinkDeviceLimits = [50, 25, 10, 5, 2, 1];
+// Note: 0 indicates no device limit
+const publicLinkDeviceLimits = [0,50, 25, 10, 5, 2, 1];
 
 const kilometersPerDegree = 111.16;
 
-const radiusValues = <int>[2, 10, 20, 40, 80, 200, 400, 1200];
+const defaultRadiusValues = <double>[1, 2, 10, 20, 40, 80, 200, 400, 1200];
 
-const defaultRadiusValueIndex = 4;
+const defaultRadiusValue = 40.0;
 
 const galleryGridSpacing = 2.0;

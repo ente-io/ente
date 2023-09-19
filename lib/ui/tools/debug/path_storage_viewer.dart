@@ -84,11 +84,14 @@ class _PathStorageViewerState extends State<PathStorageViewer> {
         subTitleColor: getEnteColorScheme(context).textFaint,
       ),
       trailingWidget: stat != null
-          ? Text(
-              formatBytes(stat.size),
-              style: getEnteTextTheme(context)
-                  .small
-                  .copyWith(color: getEnteColorScheme(context).textFaint),
+          ? Padding(
+              padding: const EdgeInsets.only(left: 12.0),
+              child: Text(
+                formatBytes(stat.size),
+                style: getEnteTextTheme(context)
+                    .small
+                    .copyWith(color: getEnteColorScheme(context).textFaint),
+              ),
             )
           : SizedBox.fromSize(
               size: const Size.square(14),

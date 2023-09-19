@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import "package:intl/intl.dart";
+import "package:photos/generated/l10n.dart";
 import 'package:photos/models/user_details.dart';
 import 'package:photos/states/user_details_state.dart';
 import 'package:photos/theme/ente_theme.dart';
@@ -32,7 +33,11 @@ class SettingsTitleBarWidget extends StatelessWidget {
             ),
             userDetails is UserDetails && !isCached
                 ? Text(
-                    "${NumberFormat().format(userDetails.fileCount)} memories",
+                    S.of(context).memoryCount(
+                          userDetails.fileCount,
+                          NumberFormat().format(userDetails.fileCount),
+                        ),
+                    // "${NumberFormat().format(userDetails.fileCount)} memories",
                     style: getEnteTextTheme(context).largeBold,
                   )
                 : const EnteLoadingWidget(),

@@ -216,9 +216,11 @@ class _ButtonChildWidgetState extends State<ButtonChildWidget> {
   Widget build(BuildContext context) {
     if (executionState == ExecutionState.successful) {
       Future.delayed(Duration(seconds: widget.isInAlert ? 1 : 2), () {
-        setState(() {
-          executionState = ExecutionState.idle;
-        });
+        if (mounted) {
+          setState(() {
+            executionState = ExecutionState.idle;
+          });
+        }
       });
     }
     return GestureDetector(
@@ -318,7 +320,7 @@ class _ButtonChildWidgetState extends State<ButtonChildWidget> {
                                             overflow: TextOverflow.ellipsis,
                                           ),
                                         ),
-                                      )
+                                      ),
                               ],
                             );
                           },
@@ -490,12 +492,14 @@ class _ButtonChildWidgetState extends State<ButtonChildWidget> {
     required ButtonAction? buttonAction,
     Exception? exception,
   }) {
-    if (Navigator.of(context).canPop()) {
-      Navigator.of(context).pop(ButtonResult(widget.buttonAction, exception));
-    } else if (exception != null) {
-      //This is to show the execution was unsuccessful if the dialog is manually
-      //closed before the execution completes.
-      showGenericErrorDialog(context: context);
+    if (mounted) {
+      if (Navigator.of(context).canPop()) {
+        Navigator.of(context).pop(ButtonResult(widget.buttonAction, exception));
+      } else if (exception != null) {
+        //This is to show the execution was unsuccessful if the dialog is manually
+        //closed before the execution completes.
+        showGenericErrorDialog(context: context);
+      }
     }
   }
 

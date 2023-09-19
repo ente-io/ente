@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import "package:photos/ui/components/buttons/icon_button_widget.dart";
+import 'package:photos/ui/components/buttons/icon_button_widget.dart';
+import 'package:photos/ui/viewer/search/search_widget.dart';
 
 class HomeHeaderWidget extends StatefulWidget {
   final Widget centerWidget;
@@ -13,10 +14,11 @@ class HomeHeaderWidget extends StatefulWidget {
 class _HomeHeaderWidgetState extends State<HomeHeaderWidget> {
   @override
   Widget build(BuildContext context) {
-    return Stack(
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Row(
-          mainAxisAlignment: MainAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
           children: [
             IconButtonWidget(
               iconButtonType: IconButtonType.primary,
@@ -27,18 +29,11 @@ class _HomeHeaderWidgetState extends State<HomeHeaderWidget> {
             ),
           ],
         ),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(top: 8.0),
-              child: AnimatedSwitcher(
-                duration: const Duration(milliseconds: 250),
-                child: widget.centerWidget,
-              ),
-            ),
-          ],
+        AnimatedSwitcher(
+          duration: const Duration(milliseconds: 250),
+          child: widget.centerWidget,
         ),
+        const SearchIconWidget(),
       ],
     );
   }

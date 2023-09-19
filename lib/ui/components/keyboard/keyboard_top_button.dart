@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import "package:photos/generated/l10n.dart";
+import "package:photos/theme/effects.dart";
 import 'package:photos/theme/ente_theme.dart';
 
 class KeyboardTopButton extends StatelessWidget {
@@ -23,10 +24,7 @@ class KeyboardTopButton extends StatelessWidget {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        border: Border(
-          top: BorderSide(width: 1.0, color: colorScheme.strokeFaint),
-          bottom: BorderSide(width: 1.0, color: colorScheme.strokeFaint),
-        ),
+        boxShadow: shadowFloatFaintLight,
         color: colorScheme.backgroundElevated2,
       ),
       child: Padding(
@@ -39,7 +37,7 @@ class KeyboardTopButton extends StatelessWidget {
               onPressed: onCancelTap,
               child: Text(
                 cancelText ?? S.of(context).cancel,
-                style: enteTheme.bodyBold,
+                style: enteTheme.smallBold,
               ),
             ),
             CupertinoButton(
@@ -47,7 +45,7 @@ class KeyboardTopButton extends StatelessWidget {
               onPressed: onDoneTap,
               child: Text(
                 doneText ?? S.of(context).done,
-                style: enteTheme.bodyBold,
+                style: enteTheme.smallBold,
               ),
             ),
           ],

@@ -1,15 +1,16 @@
 import "package:flutter/material.dart";
 import 'package:path/path.dart' as path;
-import "package:photos/models/file.dart";
-import "package:photos/models/file_type.dart";
+import 'package:photos/models/file/file.dart';
+import 'package:photos/models/file/file_type.dart';
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/info_item_widget.dart";
+import "package:photos/utils/data_util.dart";
 import "package:photos/utils/date_time_util.dart";
 import "package:photos/utils/file_util.dart";
 import "package:photos/utils/magic_util.dart";
 
 class FilePropertiesItemWidget extends StatefulWidget {
-  final File file;
+  final EnteFile file;
   final bool isImage;
   final Map<String, dynamic> exifData;
   final int currentUserID;
@@ -47,16 +48,25 @@ class _FilePropertiesItemWidgetState extends State<FilePropertiesItemWidget> {
   }
 
   Future<List<Widget>> _subTitleSection() async {
-    final bool showDimension = widget.exifData["resolution"] != null &&
-        widget.exifData["megaPixels"] != null;
+    final StringBuffer dimString = StringBuffer();
+    if (widget.exifData["resolution"] != null &&
+        widget.exifData["megaPixels"] != null) {
+      dimString.write('${widget.exifData["megaPixels"]}MP ');
+      dimString.write('${widget.exifData["resolution"]}');
+    } else if (widget.file.hasDimensions) {
+      final double megaPixels =
+          (widget.file.width * widget.file.height) / 1000000;
+      final double roundedMegaPixels = (megaPixels * 10).round() / 10.0;
+      dimString.write('${roundedMegaPixels.toStringAsFixed(1)}MP ');
+      dimString.write('${widget.file.width} x ${widget.file.height}');
+    }
     final subSectionWidgets = <Widget>[];
 
-    if (showDimension) {
+    if (dimString.isNotEmpty) {
       subSectionWidgets.add(
         Text(
-          "${widget.exifData["megaPixels"]}MP  "
-          "${widget.exifData["resolution"]}  ",
-          style: getEnteTextTheme(context).smallMuted,
+          dimString.toString(),
+          style: getEnteTextTheme(context).miniMuted,
         ),
       );
     }
@@ -69,8 +79,8 @@ class _FilePropertiesItemWidgetState extends State<FilePropertiesItemWidget> {
     }
     subSectionWidgets.add(
       Text(
-        (fileSize / (1024 * 1024)).toStringAsFixed(2) + " MB",
-        style: getEnteTextTheme(context).smallMuted,
+        formatBytes(fileSize),
+        style: getEnteTextTheme(context).miniMuted,
       ),
     );
 
@@ -80,7 +90,7 @@ class _FilePropertiesItemWidgetState extends State<FilePropertiesItemWidget> {
         subSectionWidgets.add(
           Text(
             secondsToHHMMSS(widget.file.duration!),
-            style: getEnteTextTheme(context).smallMuted,
+            style: getEnteTextTheme(context).miniMuted,
           ),
         );
       } else {
@@ -88,7 +98,7 @@ class _FilePropertiesItemWidgetState extends State<FilePropertiesItemWidget> {
         subSectionWidgets.add(
           Text(
             asset?.videoDuration.toString().split(".")[0] ?? "",
-            style: getEnteTextTheme(context).smallMuted,
+            style: getEnteTextTheme(context).miniMuted,
           ),
         );
       }

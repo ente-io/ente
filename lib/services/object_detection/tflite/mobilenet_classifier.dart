@@ -10,7 +10,7 @@ import "package:tflite_flutter_helper/tflite_flutter_helper.dart";
 // Source: https://tfhub.dev/tensorflow/lite-model/mobilenet_v1_1.0_224/1/default/1
 class MobileNetClassifier extends Classifier {
   static final _logger = Logger("MobileNetClassifier");
-  static const double threshold = 0.5;
+  static const double threshold = 0.4;
 
   @override
   String get modelPath => "models/mobilenet/mobilenet_v1_1.0_224_quant.tflite";
@@ -60,9 +60,8 @@ class MobileNetClassifier extends Classifier {
     final recognitions = <Recognition>[];
     for (int i = 0; i < labels.length; i++) {
       final score = output.getDoubleValue(i) / 255;
+      final label = labels.elementAt(i);
       if (score >= threshold) {
-        final label = labels.elementAt(i);
-
         recognitions.add(
           Recognition(i, label, score),
         );

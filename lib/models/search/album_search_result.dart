@@ -1,5 +1,5 @@
-import 'package:photos/models/collection_items.dart';
-import 'package:photos/models/file.dart';
+import 'package:photos/models/collection/collection_items.dart';
+import 'package:photos/models/file/file.dart';
 import 'package:photos/models/search/search_result.dart';
 import "package:photos/models/search/search_types.dart";
 
@@ -15,16 +15,16 @@ class AlbumSearchResult extends SearchResult {
 
   @override
   String name() {
-    return collectionWithThumbnail.collection.name!;
+    return collectionWithThumbnail.collection.displayName;
   }
 
   @override
-  File? previewThumbnail() {
+  EnteFile? previewThumbnail() {
     return collectionWithThumbnail.thumbnail;
   }
 
   @override
-  List<File> resultFiles() {
+  List<EnteFile> resultFiles() {
     // for album search result, we should open the album page directly
     throw UnimplementedError();
   }

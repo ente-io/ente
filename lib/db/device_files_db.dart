@@ -5,7 +5,7 @@ import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/models/backup_status.dart';
 import 'package:photos/models/device_collection.dart';
-import 'package:photos/models/file.dart';
+import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file_load_result.dart';
 import 'package:photos/models/upload_strategy.dart';
 import 'package:photos/services/local/local_sync_util.dart';
@@ -154,7 +154,7 @@ extension DeviceFiles on FilesDB {
             {
               "id": localPathAsset.pathID,
               "name": localPathAsset.pathName,
-              "should_backup": shouldAutoBackup ? _sqlBoolTrue : _sqlBoolFalse
+              "should_backup": shouldAutoBackup ? _sqlBoolTrue : _sqlBoolFalse,
             },
             conflictAlgorithm: ConflictAlgorithm.ignore,
           );
@@ -210,7 +210,7 @@ extension DeviceFiles on FilesDB {
               "name": pathEntity.name,
               "count": pathEntity.assetCount,
               "cover_id": localID,
-              "should_backup": shouldBackup ? _sqlBoolTrue : _sqlBoolFalse
+              "should_backup": shouldBackup ? _sqlBoolTrue : _sqlBoolFalse,
             },
             conflictAlgorithm: ConflictAlgorithm.ignore,
           );
@@ -340,8 +340,9 @@ extension DeviceFiles on FilesDB {
   ) async {
     final db = await database;
     const String rawQuery = ''' 
-    SELECT ${FilesDB.columnLocalID}, ${FilesDB.columnUploadedFileID}
-          FROM ${FilesDB.filesTable}
+    SELECT ${FilesDB.columnLocalID}, ${FilesDB.columnUploadedFileID}, 
+    ${FilesDB.columnFileSize} 
+    FROM ${FilesDB.filesTable}
           WHERE ${FilesDB.columnLocalID} IS NOT NULL AND
           (${FilesDB.columnOwnerID} IS NULL OR ${FilesDB.columnOwnerID} = ?)
           AND (${FilesDB.columnUploadedFileID} IS NOT NULL AND ${FilesDB.columnUploadedFileID} IS NOT -1)
@@ -352,12 +353,17 @@ extension DeviceFiles on FilesDB {
     final results = await db.rawQuery(rawQuery, [ownerID, pathID]);
     final localIDs = <String>{};
     final uploadedIDs = <int>{};
+    int localSize = 0;
     for (final result in results) {
-      // FilesDB.[columnLocalID,columnUploadedFileID] is not null check in query
-      localIDs.add(result[FilesDB.columnLocalID] as String);
+      final String localID = result[FilesDB.columnLocalID] as String;
+      final int? fileSize = result[FilesDB.columnFileSize] as int?;
+      if (!localIDs.contains(localID) && fileSize != null) {
+        localSize += fileSize;
+      }
+      localIDs.add(localID);
       uploadedIDs.add(result[FilesDB.columnUploadedFileID] as int);
     }
-    return BackedUpFileIDs(localIDs.toList(), uploadedIDs.toList());
+    return BackedUpFileIDs(localIDs.toList(), uploadedIDs.toList(), localSize);
   }
 
   Future<List<DeviceCollection>> getDeviceCollections({
@@ -369,7 +375,7 @@ extension DeviceFiles on FilesDB {
     );
     try {
       final db = await database;
-      final coverFiles = <File>[];
+      final coverFiles = <EnteFile>[];
       if (includeCoverThumbnail) {
         final fileRows = await db.rawQuery(
           '''SELECT * FROM FILES where local_id in (select cover_id from device_collections) group by local_id;
@@ -397,7 +403,7 @@ extension DeviceFiles on FilesDB {
             (element) => element.localID == deviceCollection.coverId,
           );
           if (deviceCollection.thumbnail == null) {
-            final File? result =
+            final EnteFile? result =
                 await getDeviceCollectionThumbnail(deviceCollection.id);
             if (result == null) {
               _logger.finest(
@@ -424,7 +430,7 @@ extension DeviceFiles on FilesDB {
     }
   }
 
-  Future<File?> getDeviceCollectionThumbnail(String pathID) async {
+  Future<EnteFile?> getDeviceCollectionThumbnail(String pathID) async {
     debugPrint("Call fallback method to get potential thumbnail");
     final db = await database;
     final fileRows = await db.rawQuery(

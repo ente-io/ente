@@ -1,7 +1,7 @@
-import 'package:photos/models/file.dart';
+import 'package:photos/models/file/file.dart';
 
 class Memory {
-  final File file;
+  final EnteFile file;
   int _seenTime;
 
   Memory(this.file, this._seenTime);

@@ -1,10 +1,13 @@
+import 'dart:math' as math;
+
+import "package:flutter/cupertino.dart";
 import 'package:flutter/material.dart';
 import 'package:photos/ente_theme_data.dart';
-import 'package:photos/models/collection.dart';
-import 'package:photos/models/trash_file.dart';
+import "package:photos/generated/l10n.dart";
+import "package:photos/models/api/collection/user.dart";
+import 'package:photos/models/file/trash_file.dart';
 import 'package:photos/theme/colors.dart';
 import 'package:photos/ui/sharing/user_avator_widget.dart';
-import 'package:photos/utils/date_time_util.dart';
 
 class ThumbnailPlaceHolder extends StatelessWidget {
   const ThumbnailPlaceHolder({Key? key}) : super(key: key);
@@ -80,6 +83,19 @@ class ArchiveOverlayIcon extends StatelessWidget {
   }
 }
 
+class PinOverlayIcon extends StatelessWidget {
+  const PinOverlayIcon({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return const _BottomRightOverlayIcon(
+      CupertinoIcons.pin,
+      color: fixedStrokeMutedWhite,
+      rotationAngle: 45 * math.pi / 180,
+    );
+  }
+}
+
 class LivePhotoOverlayIcon extends StatelessWidget {
   const LivePhotoOverlayIcon({Key? key}) : super(key: key);
 
@@ -97,13 +113,10 @@ class VideoOverlayIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const SizedBox(
-      height: 64,
-      child: Icon(
-        Icons.play_circle_outline,
-        size: 40,
-        color: Colors.white70,
-      ),
+    return const Icon(
+      Icons.play_circle_outline,
+      size: 24,
+      color: Colors.white70,
     );
   }
 }
@@ -135,6 +148,10 @@ class TrashedFileOverlayText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final int daysLeft =
+        ((file.deleteBy - DateTime.now().microsecondsSinceEpoch) /
+                Duration.microsecondsPerDay)
+            .ceil();
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
@@ -146,10 +163,10 @@ class TrashedFileOverlayText extends StatelessWidget {
       alignment: Alignment.bottomCenter,
       padding: const EdgeInsets.only(bottom: 5),
       child: Text(
-        daysLeft(file.deleteBy),
+        S.of(context).trashDaysLeft(daysLeft),
         style: Theme.of(context)
             .textTheme
-            .subtitle2!
+            .titleSmall!
             .copyWith(color: Colors.white), //same for both themes
       ),
     );
@@ -242,9 +259,13 @@ class _BottomRightOverlayIcon extends StatelessWidget {
   /// smaller thumbnails).
   final double baseSize;
 
+  // Overridable rotation angle. Default is null, which means no rotation.
+  final double? rotationAngle;
+
   const _BottomRightOverlayIcon(
     this.icon, {
     Key? key,
+    this.rotationAngle,
     this.baseSize = 24,
     this.color = Colors.white, // fixed
   }) : super(key: key);
@@ -283,11 +304,20 @@ class _BottomRightOverlayIcon extends StatelessWidget {
             alignment: Alignment.bottomRight,
             child: Padding(
               padding: EdgeInsets.only(bottom: inset, right: inset),
-              child: Icon(
-                icon,
-                size: size,
-                color: color,
-              ),
+              child: rotationAngle == null
+                  ? Icon(
+                      icon,
+                      size: size,
+                      color: color,
+                    )
+                  : Transform.rotate(
+                      angle: rotationAngle!, // rotate by 45 degrees
+                      child: Icon(
+                        icon,
+                        size: size,
+                        color: color,
+                      ),
+                    ),
             ),
           ),
         );

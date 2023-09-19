@@ -3,7 +3,9 @@ import 'dart:io';
 
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:photos/models/collection.dart';
+import "package:photos/models/api/collection/public_url.dart";
+import "package:photos/models/api/collection/user.dart";
+import 'package:photos/models/collection/collection.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:sqflite_migration/sqflite_migration.dart';
 
@@ -30,6 +32,13 @@ class CollectionsDB {
   // MMD -> Magic Metadata
   static const columnMMdEncodedJson = 'mmd_encoded_json';
   static const columnMMdVersion = 'mmd_ver';
+
+  static const columnPubMMdEncodedJson = 'pub_mmd_encoded_json';
+  static const columnPubMMdVersion = 'pub_mmd_ver';
+
+  static const columnSharedMMdJson = 'shared_mmd_json';
+  static const columnSharedMMdVersion = 'shared_mmd_ver';
+
   static const columnUpdationTime = 'updation_time';
   static const columnIsDeleted = 'is_deleted';
 
@@ -41,6 +50,8 @@ class CollectionsDB {
     ...addIsDeleted(),
     ...addPublicURLs(),
     ...addPrivateMetadata(),
+    ...addPublicMetadata(),
+    ...addShareeMetadata(),
   ];
 
   final dbConfig = MigrationConfig(
@@ -156,6 +167,30 @@ class CollectionsDB {
     ];
   }
 
+  static List<String> addPublicMetadata() {
+    return [
+      '''
+        ALTER TABLE $table ADD COLUMN $columnPubMMdEncodedJson TEXT DEFAULT '
+        {}';
+      ''',
+      '''
+        ALTER TABLE $table ADD COLUMN $columnPubMMdVersion INTEGER DEFAULT 0;
+      '''
+    ];
+  }
+
+  static List<String> addShareeMetadata() {
+    return [
+      '''
+        ALTER TABLE $table ADD COLUMN $columnSharedMMdJson TEXT DEFAULT '
+        {}';
+      ''',
+      '''
+        ALTER TABLE $table ADD COLUMN $columnSharedMMdVersion INTEGER DEFAULT 0;
+      '''
+    ];
+  }
+
   Future<void> insert(List<Collection> collections) async {
     final db = await instance.database;
     var batch = db.batch();
@@ -184,6 +219,24 @@ class CollectionsDB {
       collections.add(_convertToCollection(row));
     }
     return collections;
+  }
+
+  // getActiveCollectionIDsAndUpdationTime returns map of collectionID to
+  // updationTime for non-deleted collections
+  Future<Map<int, int>> getActiveIDsAndRemoteUpdateTime() async {
+    final db = await instance.database;
+    final rows = await db.query(
+      table,
+      where: '($columnIsDeleted = ? OR $columnIsDeleted IS NULL)',
+      whereArgs: [_sqlBoolFalse],
+      columns: [columnID, columnUpdationTime],
+    );
+    final collectionIDsAndUpdationTime = <int, int>{};
+    for (final row in rows) {
+      collectionIDsAndUpdationTime[row[columnID] as int] =
+          int.parse(row[columnUpdationTime] as String);
+    }
+    return collectionIDsAndUpdationTime;
   }
 
   Future<int> deleteCollection(int collectionID) async {
@@ -220,6 +273,11 @@ class CollectionsDB {
     }
     row[columnMMdVersion] = collection.mMdVersion;
     row[columnMMdEncodedJson] = collection.mMdEncodedJson ?? '{}';
+    row[columnPubMMdVersion] = collection.mMbPubVersion;
+    row[columnPubMMdEncodedJson] = collection.mMdPubEncodedJson ?? '{}';
+
+    row[columnSharedMMdVersion] = collection.sharedMmdVersion;
+    row[columnSharedMMdJson] = collection.sharedMmdJson ?? '{}';
     return row;
   }
 
@@ -253,6 +311,11 @@ class CollectionsDB {
     );
     result.mMdVersion = row[columnMMdVersion] ?? 0;
     result.mMdEncodedJson = row[columnMMdEncodedJson] ?? '{}';
+    result.mMbPubVersion = row[columnPubMMdVersion] ?? 0;
+    result.mMdPubEncodedJson = row[columnPubMMdEncodedJson] ?? '{}';
+
+    result.sharedMmdVersion = row[columnSharedMMdVersion] ?? 0;
+    result.sharedMmdJson = row[columnSharedMMdJson] ?? '{}';
     return result;
   }
 }

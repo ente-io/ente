@@ -117,7 +117,7 @@ class _AppLockState extends State<AppLock> with WidgetsBindingObserver {
       localeListResolutionCallback: localResolutionCallBack,
       localizationsDelegates: const [
         ...AppLocalizations.localizationsDelegates,
-        S.delegate
+        S.delegate,
       ],
       onGenerateRoute: (settings) {
         switch (settings.name) {

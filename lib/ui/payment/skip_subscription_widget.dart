@@ -5,7 +5,7 @@ import "package:photos/generated/l10n.dart";
 import 'package:photos/models/billing_plan.dart';
 import 'package:photos/models/subscription.dart';
 import 'package:photos/services/billing_service.dart';
-import 'package:photos/ui/home_widget.dart';
+import "package:photos/ui/tabs/home_widget.dart";
 
 class SkipSubscriptionWidget extends StatelessWidget {
   const SkipSubscriptionWidget({
@@ -26,7 +26,7 @@ class SkipSubscriptionWidget extends StatelessWidget {
         style: Theme.of(context).outlinedButtonTheme.style?.copyWith(
           textStyle: MaterialStateProperty.resolveWith<TextStyle>(
             (Set<MaterialState> states) {
-              return Theme.of(context).textTheme.subtitle1!;
+              return Theme.of(context).textTheme.titleMedium!;
             },
           ),
         ),

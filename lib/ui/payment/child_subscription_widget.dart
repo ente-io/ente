@@ -29,7 +29,7 @@ class ChildSubscriptionWidget extends StatelessWidget {
           Center(
             child: Text(
               S.of(context).youAreOnAFamilyPlan,
-              style: Theme.of(context).textTheme.bodyText1,
+              style: Theme.of(context).textTheme.bodyLarge,
             ),
           ),
           const Padding(
@@ -39,7 +39,7 @@ class ChildSubscriptionWidget extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: StyledText(
               text: S.of(context).contactFamilyAdmin(familyAdmin),
-              style: Theme.of(context).textTheme.bodyText1,
+              style: Theme.of(context).textTheme.bodyLarge,
               tags: {
                 'green': StyledTextTag(
                   style: TextStyle(
@@ -94,7 +94,7 @@ class ChildSubscriptionWidget extends StatelessWidget {
                         text: S
                             .of(context)
                             .pleaseContactSupportAndWeWillBeHappyToHelp,
-                        style: Theme.of(context).textTheme.bodyText2,
+                        style: Theme.of(context).textTheme.bodyMedium,
                       ),
                     ],
                   ),

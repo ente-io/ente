@@ -56,8 +56,7 @@ class _FreeSpacePageState extends State<FreeSpacePage> {
       color: Theme.of(context).colorScheme.onSurface.withOpacity(0.8),
       fontWeight: FontWeight.w500,
     );
-    final isLightMode =
-        MediaQuery.of(context).platformBrightness == Brightness.light;
+    final isLightMode = Theme.of(context).brightness == Brightness.light;
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,

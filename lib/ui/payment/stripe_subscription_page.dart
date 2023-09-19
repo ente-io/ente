@@ -9,6 +9,7 @@ import 'package:photos/models/billing_plan.dart';
 import 'package:photos/models/subscription.dart';
 import 'package:photos/models/user_details.dart';
 import 'package:photos/services/billing_service.dart';
+import "package:photos/services/update_service.dart";
 import 'package:photos/services/user_service.dart';
 import "package:photos/theme/colors.dart";
 import 'package:photos/theme/ente_theme.dart';
@@ -127,10 +128,10 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
         decoration: BoxDecoration(
           boxShadow: [
             BoxShadow(
-              color: Theme.of(context).backgroundColor,
+              color: Theme.of(context).colorScheme.background,
               blurRadius: 16,
               offset: const Offset(0, 8),
-            )
+            ),
           ],
         ),
         child: widget.isOnboarding
@@ -165,7 +166,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
           _getBody(),
           const BottomShadowWidget(
             offsetDy: 40,
-          )
+          ),
         ],
       ),
     );
@@ -541,7 +542,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
               ],
             ),
           ),
-          _isFreePlanUser()
+          _isFreePlanUser() && !UpdateService.instance.isPlayStoreFlavor()
               ? Text(
                   S.of(context).twoMonthsFreeOnYearlyPlans,
                   style: getEnteTextTheme(context).miniMuted,

@@ -22,17 +22,21 @@ import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/extensions/list.dart';
 import 'package:photos/extensions/stop_watch.dart';
 import 'package:photos/models/api/collection/create_request.dart';
-import 'package:photos/models/collection.dart';
-import 'package:photos/models/collection_file_item.dart';
-import 'package:photos/models/collection_items.dart';
-import 'package:photos/models/file.dart';
-import 'package:photos/models/magic_metadata.dart';
+import "package:photos/models/api/collection/public_url.dart";
+import "package:photos/models/api/collection/user.dart";
+import 'package:photos/models/collection/collection.dart';
+import 'package:photos/models/collection/collection_file_item.dart';
+import 'package:photos/models/collection/collection_items.dart';
+import 'package:photos/models/file/file.dart';
+import "package:photos/models/metadata/collection_magic.dart";
 import 'package:photos/services/app_lifecycle_service.dart';
+import "package:photos/services/favorites_service.dart";
 import 'package:photos/services/file_magic_service.dart';
 import 'package:photos/services/local_sync_service.dart';
 import 'package:photos/services/remote_sync_service.dart';
 import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/file_download_util.dart';
+import "package:photos/utils/local_settings.dart";
 import 'package:shared_preferences/shared_preferences.dart';
 
 class CollectionsService {
@@ -54,8 +58,10 @@ class CollectionsService {
   final _cachedKeys = <int, Uint8List>{};
   final _cachedUserIdToUser = <int, User>{};
   Collection? cachedDefaultHiddenCollection;
-  Future<List<File>>? _cachedLatestFiles;
+  Future<Map<int, int>>? _collectionIDToNewestFileTime;
   Collection? cachedUncategorizedCollection;
+  final Map<String, EnteFile> _coverCache = <String, EnteFile>{};
+  final Map<int, int> _countCache = <int, int>{};
 
   CollectionsService._privateConstructor() {
     _db = CollectionsDB.instance;
@@ -71,15 +77,18 @@ class CollectionsService {
     final collections = await _db.getAllCollections();
 
     for (final collection in collections) {
+      // using deprecated method because the path is stored in encrypted
+      // format in the DB
       _cacheCollectionAttributes(collection);
     }
-    Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) {
-      _cachedLatestFiles = null;
-      getLatestCollectionFiles();
-    });
     Bus.instance.on<CollectionUpdatedEvent>().listen((event) {
-      _cachedLatestFiles = null;
-      getLatestCollectionFiles();
+      _collectionIDToNewestFileTime = null;
+      if (event.collectionID != null) {
+        _coverCache.removeWhere(
+          (key, value) => key.startsWith(event.collectionID!.toString()),
+        );
+        _countCache.remove(event.collectionID);
+      }
     });
   }
 
@@ -92,7 +101,7 @@ class CollectionsService {
 
   // sync method fetches just sync the collections, not the individual files
   // within the collection.
-  Future<List<Collection>> sync() async {
+  Future<void> sync() async {
     _logger.info("Syncing collections");
     final EnteWatch watch = EnteWatch("syncCollection")..start();
     final lastCollectionUpdationTime =
@@ -101,17 +110,20 @@ class CollectionsService {
     // Might not have synced the collection fully
     final fetchedCollections =
         await _fetchCollections(lastCollectionUpdationTime);
-    watch.log("remote fetch");
+    watch.log("remote fetch collections ${fetchedCollections.length}");
+    if (fetchedCollections.isEmpty) {
+      return;
+    }
     final updatedCollections = <Collection>[];
     int maxUpdationTime = lastCollectionUpdationTime;
     final ownerID = _config.getUserID();
-    bool fireEventForCollectionDeleted = false;
+    bool shouldFireDeleteEvent = false;
     for (final collection in fetchedCollections) {
       if (collection.isDeleted) {
         await _filesDB.deleteCollection(collection.id);
         await setCollectionSyncTime(collection.id, null);
         if (_collectionIDToCollections.containsKey(collection.id)) {
-          fireEventForCollectionDeleted = true;
+          shouldFireDeleteEvent = true;
         }
       }
       // remove reference for incoming collections when unshared/deleted
@@ -126,10 +138,10 @@ class CollectionsService {
           ? collection.updationTime
           : maxUpdationTime;
     }
-    if (fireEventForCollectionDeleted) {
+    if (shouldFireDeleteEvent) {
       Bus.instance.fire(
         LocalPhotosUpdatedEvent(
-          List<File>.empty(),
+          List<EnteFile>.empty(),
           source: "syncCollectionDeleted",
         ),
       );
@@ -137,22 +149,20 @@ class CollectionsService {
     await _updateDB(updatedCollections);
     _prefs.setInt(_collectionsSyncTimeKey, maxUpdationTime);
     watch.logAndReset("till DB insertion ${updatedCollections.length}");
-    final collections = await _db.getAllCollections();
-    for (final collection in collections) {
-      _cacheCollectionAttributes(collection);
+    for (final collection in fetchedCollections) {
+      _cacheLocalPathAndCollection(collection);
     }
     _logger.info("Collections synced");
-    watch.log("collection cache refresh");
+    watch.log("${fetchedCollections.length} collection cached refreshed ");
     if (fetchedCollections.isNotEmpty) {
       Bus.instance.fire(
         CollectionUpdatedEvent(
           null,
-          List<File>.empty(),
+          List<EnteFile>.empty(),
           "collections_updated",
         ),
       );
     }
-    return collections;
   }
 
   void clearCache() {
@@ -163,35 +173,47 @@ class CollectionsService {
     _cachedKeys.clear();
   }
 
-  Future<List<Collection>> getCollectionsToBeSynced() async {
-    final collections = await _db.getAllCollections();
-    final updatedCollections = <Collection>[];
-    for (final c in collections) {
-      if (c.updationTime > getCollectionSyncTime(c.id) && !c.isDeleted) {
-        updatedCollections.add(c);
+  Future<Map<int, int>> getCollectionIDsToBeSynced() async {
+    final idsToRemoveUpdateTimeMap =
+        await _db.getActiveIDsAndRemoteUpdateTime();
+    final result = <int, int>{};
+    for (final MapEntry<int, int> e in idsToRemoveUpdateTimeMap.entries) {
+      final int cid = e.key;
+      final int remoteUpdateTime = e.value;
+      if (remoteUpdateTime > getCollectionSyncTime(cid)) {
+        result[cid] = remoteUpdateTime;
       }
     }
-    return updatedCollections;
+    return result;
   }
 
-  Set<int> getArchivedCollections() {
-    return _collectionIDToCollections.values
-        .toList()
-        .where((element) => element.isArchived())
-        .map((e) => e.id)
-        .toSet();
-  }
-
-  Future<List<CollectionWithThumbnail>> getArchivedCollectionWithThumb() async {
-    final allCollections = await getCollectionsWithThumbnails();
+  Future<List<Collection>> getArchivedCollection() async {
+    final allCollections = getCollectionsForUI();
     return allCollections
         .where(
-          (c) => c.collection.isArchived() && !c.collection.isHidden(),
+          (c) => c.isArchived() && !c.isHidden(),
         )
         .toList();
   }
 
-  Set<int> getHiddenCollections() {
+  List<Collection> getHiddenCollections({bool includeDefaultHidden = true}) {
+    if (includeDefaultHidden) {
+      return _collectionIDToCollections.values
+          .toList()
+          .where((element) => element.isHidden())
+          .toList();
+    } else {
+      return _collectionIDToCollections.values
+          .toList()
+          .where(
+            (element) => (element.isHidden() &&
+                element.id != cachedDefaultHiddenCollection?.id),
+          )
+          .toList();
+    }
+  }
+
+  Set<int> getHiddenCollectionIds() {
     return _collectionIDToCollections.values
         .toList()
         .where((element) => element.isHidden())
@@ -199,10 +221,15 @@ class CollectionsService {
         .toSet();
   }
 
-  Set<int> collectionsHiddenFromTimeline() {
+  Set<int> archivedOrHiddenCollectionIds() {
     return _collectionIDToCollections.values
         .toList()
-        .where((element) => element.isHidden() || element.isArchived())
+        .where(
+          (element) =>
+              element.hasShareeArchived() ||
+              element.isHidden() ||
+              element.isArchived(),
+        )
         .map((e) => e.id)
         .toSet();
   }
@@ -213,9 +240,58 @@ class CollectionsService {
         0;
   }
 
-  Future<List<File>> getLatestCollectionFiles() {
-    _cachedLatestFiles ??= _filesDB.getLatestCollectionFiles();
-    return _cachedLatestFiles!;
+  Future<Map<int, int>> getCollectionIDToNewestFileTime() {
+    _collectionIDToNewestFileTime ??=
+        _filesDB.getCollectionIDToMaxCreationTime();
+    return _collectionIDToNewestFileTime!;
+  }
+
+  Future<EnteFile?> getCover(Collection c) async {
+    final int localSyncTime = getCollectionSyncTime(c.id);
+    final String coverKey = '${c.id}_${localSyncTime}_${c.updationTime}';
+    if (_coverCache.containsKey(coverKey)) {
+      return Future.value(_coverCache[coverKey]!);
+    }
+    if (kDebugMode) {
+      debugPrint("getCover for collection ${c.id} ${c.displayName}");
+    }
+    if (c.hasCover) {
+      final coverID = c.pubMagicMetadata.coverID ?? 0;
+      final EnteFile? cover = await filesDB.getUploadedFile(coverID, c.id);
+      if (cover != null) {
+        _coverCache[coverKey] = cover;
+        return Future.value(cover);
+      }
+    }
+    final coverFile = await filesDB.getCollectionFileFirstOrLast(
+      c.id,
+      c.pubMagicMetadata.asc ?? false,
+    );
+    if (coverFile != null) {
+      _coverCache[coverKey] = coverFile;
+      return Future.value(coverFile);
+    }
+    return null;
+  }
+
+  EnteFile? getCoverCache(Collection c) {
+    final int localSyncTime = getCollectionSyncTime(c.id);
+    final String coverKey = '${c.id}_${localSyncTime}_${c.updationTime}';
+    return _coverCache[coverKey];
+  }
+
+  Future<int> getFileCount(Collection c) async {
+    if (_countCache.containsKey(c.id)) {
+      return _countCache[c.id]!;
+    } else {
+      final count = await _filesDB.collectionFileCount(c.id);
+      _countCache[c.id] = count;
+      return count;
+    }
+  }
+
+  int? getCachedFileCount(Collection c) {
+    return _countCache[c.id];
   }
 
   Future<bool> setCollectionSyncTime(int collectionID, int? time) async {
@@ -232,6 +308,109 @@ class CollectionsService {
         .toList()
         .where((element) => !element.isDeleted)
         .toList();
+  }
+
+  // returns collections after removing deleted,uncategorized, and hidden
+  // collections
+  List<Collection> getCollectionsForUI({
+    bool includedShared = false,
+    bool includeCollab = false,
+    bool includeUncategorized = false,
+  }) {
+    final Set<CollectionParticipantRole> allowedRoles = {
+      CollectionParticipantRole.owner,
+    };
+    if (includedShared) {
+      allowedRoles.add(CollectionParticipantRole.viewer);
+    }
+    if (includedShared || includeCollab) {
+      allowedRoles.add(CollectionParticipantRole.collaborator);
+    }
+    final int userID = _config.getUserID()!;
+    return _collectionIDToCollections.values
+        .where(
+          (c) =>
+              !c.isDeleted &&
+              (includeUncategorized ||
+                  c.type != CollectionType.uncategorized) &&
+              !c.isHidden() &&
+              allowedRoles.contains(c.getRole(userID)),
+        )
+        .toList();
+  }
+
+  SharedCollections getSharedCollections() {
+    final List<Collection> outgoing = [];
+    final List<Collection> incoming = [];
+    final List<Collection> quickLinks = [];
+    final List<Collection> collections =
+        getCollectionsForUI(includedShared: true);
+    for (final c in collections) {
+      if (c.owner!.id == Configuration.instance.getUserID()) {
+        if (c.hasSharees || c.hasLink && !c.isQuickLinkCollection()) {
+          outgoing.add(c);
+        } else if (c.isQuickLinkCollection()) {
+          quickLinks.add(c);
+        }
+      } else {
+        incoming.add(c);
+      }
+    }
+    incoming.sort((first, second) {
+      return second.updationTime.compareTo(first.updationTime);
+    });
+    return SharedCollections(outgoing, incoming, quickLinks);
+  }
+
+  Future<List<Collection>> getCollectionForOnEnteSection() async {
+    final AlbumSortKey sortKey = LocalSettings.instance.albumSortKey();
+    final List<Collection> collections =
+        CollectionsService.instance.getCollectionsForUI();
+    final bool hasFavorites = FavoritesService.instance.hasFavorites();
+    late Map<int, int> collectionIDToNewestPhotoTime;
+    if (sortKey == AlbumSortKey.newestPhoto) {
+      collectionIDToNewestPhotoTime =
+          await CollectionsService.instance.getCollectionIDToNewestFileTime();
+    }
+    collections.sort(
+      (first, second) {
+        if (sortKey == AlbumSortKey.albumName) {
+          return compareAsciiLowerCaseNatural(
+            first.displayName,
+            second.displayName,
+          );
+        } else if (sortKey == AlbumSortKey.newestPhoto) {
+          return (collectionIDToNewestPhotoTime[second.id] ?? -1 * intMaxValue)
+              .compareTo(
+            collectionIDToNewestPhotoTime[first.id] ?? -1 * intMaxValue,
+          );
+        } else {
+          return second.updationTime.compareTo(first.updationTime);
+        }
+      },
+    );
+    final List<Collection> favorites = [];
+    final List<Collection> pinned = [];
+    final List<Collection> rest = [];
+    for (final collection in collections) {
+      if (collection.type == CollectionType.uncategorized ||
+          collection.isQuickLinkCollection() ||
+          collection.isHidden()) {
+        continue;
+      }
+      if (collection.type == CollectionType.favorites) {
+        // Hide fav collection if it's empty
+        if (hasFavorites) {
+          favorites.add(collection);
+        }
+      } else if (collection.isPinned) {
+        pinned.add(collection);
+      } else {
+        rest.add(collection);
+      }
+    }
+
+    return favorites + pinned + rest;
   }
 
   User getFileOwner(int userID, int? collectionID) {
@@ -258,40 +437,6 @@ class CollectionsService {
           id: userID,
           email: "unknown@unknown.com",
         );
-  }
-
-  Future<List<CollectionWithThumbnail>> getCollectionsWithThumbnails({
-    bool includedOwnedByOthers = false,
-    // includeCollabCollections will include collections where the current user
-    // is added as a collaborator
-    bool includeCollabCollections = false,
-  }) async {
-    final List<CollectionWithThumbnail> collectionsWithThumbnail = [];
-    final usersCollection = getActiveCollections();
-    // remove any hidden collection to avoid accidental rendering on UI
-    usersCollection.removeWhere((element) => element.isHidden());
-    if (!includedOwnedByOthers) {
-      final userID = Configuration.instance.getUserID();
-      if (includeCollabCollections) {
-        usersCollection.removeWhere(
-          (c) =>
-              (c.owner?.id != userID) &&
-              (c.getSharees().any((u) => (u.id ?? -1) == userID && u.isViewer)),
-        );
-      } else {
-        usersCollection.removeWhere((c) => c.owner?.id != userID);
-      }
-    }
-    final latestCollectionFiles = await getLatestCollectionFiles();
-    final Map<int, File> collectionToThumbnailMap = Map.fromEntries(
-      latestCollectionFiles.map((e) => MapEntry(e.collectionID!, e)),
-    );
-
-    for (final c in usersCollection) {
-      final File? thumbnail = collectionToThumbnailMap[c.id];
-      collectionsWithThumbnail.add(CollectionWithThumbnail(c, thumbnail));
-    }
-    return collectionsWithThumbnail;
   }
 
   Future<List<User>> getSharees(int collectionID) {
@@ -327,7 +472,7 @@ class CollectionsService {
           "collectionID": collectionID,
           "email": email,
           "encryptedKey": CryptoUtil.bin2base64(encryptedKey),
-          "role": role.toStringVal()
+          "role": role.toStringVal(),
         },
       );
       final sharees = <User>[];
@@ -388,18 +533,18 @@ class CollectionsService {
 
   Future<void> _turnOffDeviceFolderSync(Collection collection) async {
     final deviceCollections = await _filesDB.getDeviceCollections();
-    final Map<String, bool> deivcePathIDsToUnsync = Map.fromEntries(
+    final Map<String, bool> devicePathIDsToUnSync = Map.fromEntries(
       deviceCollections
           .where((e) => e.shouldBackup && e.collectionID == collection.id)
           .map((e) => MapEntry(e.id, false)),
     );
 
-    if (deivcePathIDsToUnsync.isNotEmpty) {
+    if (devicePathIDsToUnSync.isNotEmpty) {
       _logger.info(
-        'turning off backup status for folders $deivcePathIDsToUnsync',
+        'turning off backup status for folders $devicePathIDsToUnSync',
       );
       await RemoteSyncService.instance
-          .updateDeviceFolderSyncStatus(deivcePathIDsToUnsync);
+          .updateDeviceFolderSyncStatus(devicePathIDsToUnSync);
     }
   }
 
@@ -446,7 +591,7 @@ class CollectionsService {
     Bus.instance.fire(
       CollectionUpdatedEvent(
         collection.id,
-        <File>[],
+        <EnteFile>[],
         "delete_collection",
         type: EventType.deletedFromRemote,
       ),
@@ -512,7 +657,7 @@ class CollectionsService {
     try {
       // Note: when collection created to sharing few files is renamed
       // convert that collection to a regular collection type.
-      if (collection.isSharedFilesCollection()) {
+      if (collection.isQuickLinkCollection()) {
         await updateMagicMetadata(collection, {"subType": 0});
       }
       final encryptedName = CryptoUtil.encryptSync(
@@ -524,10 +669,10 @@ class CollectionsService {
         data: {
           "collectionID": collection.id,
           "encryptedName": CryptoUtil.bin2base64(encryptedName.encryptedData!),
-          "nameDecryptionNonce": CryptoUtil.bin2base64(encryptedName.nonce!)
+          "nameDecryptionNonce": CryptoUtil.bin2base64(encryptedName.nonce!),
         },
       );
-      // trigger sync to fetch the latest name from server
+      collection.setName(newName);
       sync().ignore();
     } catch (e, s) {
       _logger.severe("failed to rename collection", e, s);
@@ -565,10 +710,6 @@ class CollectionsService {
         jsonToUpdate[key] = value;
       });
 
-      // update the local information so that it's reflected on UI
-      collection.mMdEncodedJson = jsonEncode(jsonToUpdate);
-      collection.magicMetadata = CollectionMagicMetadata.fromJson(jsonToUpdate);
-
       final key = getCollectionKey(collection.id);
       final encryptedMMd = await CryptoUtil.encryptChaCha(
         utf8.encode(jsonEncode(jsonToUpdate)) as Uint8List,
@@ -590,8 +731,131 @@ class CollectionsService {
         "/collections/magic-metadata",
         data: params,
       );
+      // update the local information so that it's reflected on UI
+      collection.mMdEncodedJson = jsonEncode(jsonToUpdate);
+      collection.magicMetadata = CollectionMagicMetadata.fromJson(jsonToUpdate);
       collection.mMdVersion = currentVersion + 1;
-      _cacheCollectionAttributes(collection);
+      _collectionIDToCollections[collection.id] = collection;
+
+      // trigger sync to fetch the latest collection state from server
+      sync().ignore();
+    } on DioError catch (e) {
+      if (e.response != null && e.response?.statusCode == 409) {
+        _logger.severe('collection magic data out of sync');
+        sync().ignore();
+      }
+      rethrow;
+    } catch (e, s) {
+      _logger.severe("failed to sync magic metadata", e, s);
+      rethrow;
+    }
+  }
+
+  Future<void> updatePublicMagicMetadata(
+    Collection collection,
+    Map<String, dynamic> newMetadataUpdate,
+  ) async {
+    final int ownerID = Configuration.instance.getUserID()!;
+    try {
+      if (collection.owner?.id != ownerID) {
+        throw AssertionError("cannot modify albums not owned by you");
+      }
+      // read the existing magic metadata and apply new updates to existing data
+      // current update is simple replace. This will be enhanced in the future,
+      // as required.
+      final Map<String, dynamic> jsonToUpdate =
+          jsonDecode(collection.mMdPubEncodedJson ?? '{}');
+      newMetadataUpdate.forEach((key, value) {
+        jsonToUpdate[key] = value;
+      });
+
+      final key = getCollectionKey(collection.id);
+      final encryptedMMd = await CryptoUtil.encryptChaCha(
+        utf8.encode(jsonEncode(jsonToUpdate)) as Uint8List,
+        key,
+      );
+      // for required field, the json validator on golang doesn't treat 0 as valid
+      // value. Instead of changing version to ptr, decided to start version with 1.
+      final int currentVersion = max(collection.mMbPubVersion, 1);
+      final params = UpdateMagicMetadataRequest(
+        id: collection.id,
+        magicMetadata: MetadataRequest(
+          version: currentVersion,
+          count: jsonToUpdate.length,
+          data: CryptoUtil.bin2base64(encryptedMMd.encryptedData!),
+          header: CryptoUtil.bin2base64(encryptedMMd.header!),
+        ),
+      );
+      await _enteDio.put(
+        "/collections/public-magic-metadata",
+        data: params,
+      );
+      // update the local information so that it's reflected on UI
+      collection.mMdPubEncodedJson = jsonEncode(jsonToUpdate);
+      collection.pubMagicMetadata =
+          CollectionPubMagicMetadata.fromJson(jsonToUpdate);
+      collection.mMbPubVersion = currentVersion + 1;
+      _cacheLocalPathAndCollection(collection);
+      // trigger sync to fetch the latest collection state from server
+      sync().ignore();
+    } on DioError catch (e) {
+      if (e.response != null && e.response?.statusCode == 409) {
+        _logger.severe('collection magic data out of sync');
+        sync().ignore();
+      }
+      rethrow;
+    } catch (e, s) {
+      _logger.severe("failed to sync magic metadata", e, s);
+      rethrow;
+    }
+  }
+
+  Future<void> updateShareeMagicMetadata(
+    Collection collection,
+    Map<String, dynamic> newMetadataUpdate,
+  ) async {
+    final int ownerID = Configuration.instance.getUserID()!;
+    try {
+      if (collection.owner?.id == ownerID) {
+        throw AssertionError("cannot modify sharee settings for albums owned "
+            "by you");
+      }
+      // read the existing magic metadata and apply new updates to existing data
+      // current update is simple replace. This will be enhanced in the future,
+      // as required.
+      final Map<String, dynamic> jsonToUpdate =
+          jsonDecode(collection.sharedMmdJson ?? '{}');
+      newMetadataUpdate.forEach((key, value) {
+        jsonToUpdate[key] = value;
+      });
+
+      final key = getCollectionKey(collection.id);
+      final encryptedMMd = await CryptoUtil.encryptChaCha(
+        utf8.encode(jsonEncode(jsonToUpdate)) as Uint8List,
+        key,
+      );
+      // for required field, the json validator on golang doesn't treat 0 as valid
+      // value. Instead of changing version to ptr, decided to start version with 1.
+      final int currentVersion = max(collection.sharedMmdVersion, 1);
+      final params = UpdateMagicMetadataRequest(
+        id: collection.id,
+        magicMetadata: MetadataRequest(
+          version: currentVersion,
+          count: jsonToUpdate.length,
+          data: CryptoUtil.bin2base64(encryptedMMd.encryptedData!),
+          header: CryptoUtil.bin2base64(encryptedMMd.header!),
+        ),
+      );
+      await _enteDio.put(
+        "/collections/sharee-magic-metadata",
+        data: params,
+      );
+      // update the local information so that it's reflected on UI
+      collection.sharedMmdJson = jsonEncode(jsonToUpdate);
+      collection.sharedMagicMetadata =
+          ShareeMagicMetadata.fromJson(jsonToUpdate);
+      collection.sharedMmdVersion = currentVersion + 1;
+      _cacheLocalPathAndCollection(collection);
       // trigger sync to fetch the latest collection state from server
       sync().ignore();
     } on DioError catch (e) {
@@ -620,9 +884,9 @@ class CollectionsService {
       );
       collection.publicURLs?.add(PublicURL.fromMap(response.data["result"]));
       await _db.insert(List.from([collection]));
-      _cacheCollectionAttributes(collection);
+      _collectionIDToCollections[collection.id] = collection;
       Bus.instance.fire(
-        CollectionUpdatedEvent(collection.id, <File>[], "shareUrL"),
+        CollectionUpdatedEvent(collection.id, <EnteFile>[], "shareUrL"),
       );
     } on DioError catch (e) {
       if (e.response?.statusCode == 402) {
@@ -649,9 +913,10 @@ class CollectionsService {
       collection.publicURLs?.clear();
       collection.publicURLs?.add(PublicURL.fromMap(response.data["result"]));
       await _db.insert(List.from([collection]));
-      _cacheCollectionAttributes(collection);
-      Bus.instance
-          .fire(CollectionUpdatedEvent(collection.id, <File>[], "updateUrl"));
+      _collectionIDToCollections[collection.id] = collection;
+      Bus.instance.fire(
+        CollectionUpdatedEvent(collection.id, <EnteFile>[], "updateUrl"),
+      );
     } on DioError catch (e) {
       if (e.response?.statusCode == 402) {
         throw SharingNotPermittedForFreeAccountsError();
@@ -670,11 +935,11 @@ class CollectionsService {
       );
       collection.publicURLs?.clear();
       await _db.insert(List.from([collection]));
-      _cacheCollectionAttributes(collection);
+      _collectionIDToCollections[collection.id] = collection;
       Bus.instance.fire(
         CollectionUpdatedEvent(
           collection.id,
-          <File>[],
+          <EnteFile>[],
           "disableShareUrl",
         ),
       );
@@ -696,30 +961,79 @@ class CollectionsService {
       final List<Collection> collections = [];
       final c = response.data["collections"];
       for (final collectionData in c) {
-        final collection = Collection.fromMap(collectionData);
-        if (collectionData['magicMetadata'] != null) {
-          final collectionKey =
-              _getAndCacheDecryptedKey(collection, source: "fetchCollection");
-          final utfEncodedMmd = await CryptoUtil.decryptChaCha(
-            CryptoUtil.base642bin(collectionData['magicMetadata']['data']),
-            collectionKey,
-            CryptoUtil.base642bin(collectionData['magicMetadata']['header']),
-          );
-          collection.mMdEncodedJson = utf8.decode(utfEncodedMmd);
-          collection.mMdVersion = collectionData['magicMetadata']['version'];
-          collection.magicMetadata = CollectionMagicMetadata.fromEncodedJson(
-            collection.mMdEncodedJson,
-          );
-        }
+        final Collection collection =
+            await _fromRemoteCollection(collectionData);
         collections.add(collection);
       }
       return collections;
-    } catch (e) {
+    } catch (e, s) {
+      _logger.warning(e, s);
       if (e is DioError && e.response?.statusCode == 401) {
         throw UnauthorizedError();
       }
       rethrow;
     }
+  }
+
+  Future<Collection> _fromRemoteCollection(
+    Map<String, dynamic>? collectionData,
+  ) async {
+    final Collection collection = Collection.fromMap(collectionData);
+    if (collectionData != null && !collection.isDeleted) {
+      final collectionKey =
+          _getAndCacheDecryptedKey(collection, source: "fetchDecryptMeta");
+      if (collectionData['magicMetadata'] != null) {
+        final utfEncodedMmd = await CryptoUtil.decryptChaCha(
+          CryptoUtil.base642bin(collectionData['magicMetadata']['data']),
+          collectionKey,
+          CryptoUtil.base642bin(collectionData['magicMetadata']['header']),
+        );
+        collection.mMdEncodedJson = utf8.decode(utfEncodedMmd);
+        collection.mMdVersion = collectionData['magicMetadata']['version'];
+        collection.magicMetadata = CollectionMagicMetadata.fromEncodedJson(
+          collection.mMdEncodedJson ?? '{}',
+        );
+      }
+
+      if (collectionData['pubMagicMetadata'] != null) {
+        final utfEncodedMmd = await CryptoUtil.decryptChaCha(
+          CryptoUtil.base642bin(collectionData['pubMagicMetadata']['data']),
+          collectionKey,
+          CryptoUtil.base642bin(
+            collectionData['pubMagicMetadata']['header'],
+          ),
+        );
+        collection.mMdPubEncodedJson = utf8.decode(utfEncodedMmd);
+        collection.mMbPubVersion =
+            collectionData['pubMagicMetadata']['version'];
+        collection.pubMagicMetadata =
+            CollectionPubMagicMetadata.fromEncodedJson(
+          collection.mMdPubEncodedJson ?? '{}',
+        );
+      }
+      if (collectionData['sharedMagicMetadata'] != null) {
+        final utfEncodedMmd = await CryptoUtil.decryptChaCha(
+          CryptoUtil.base642bin(
+            collectionData['sharedMagicMetadata']['data'],
+          ),
+          collectionKey,
+          CryptoUtil.base642bin(
+            collectionData['sharedMagicMetadata']['header'],
+          ),
+        );
+        collection.sharedMmdJson = utf8.decode(utfEncodedMmd);
+        collection.sharedMmdVersion =
+            collectionData['sharedMagicMetadata']['version'];
+        collection.sharedMagicMetadata = ShareeMagicMetadata.fromEncodedJson(
+          collection.sharedMmdJson ?? '{}',
+        );
+      }
+    }
+    collection.setName(_getDecryptedCollectionName(collection));
+    if (collection.canLinkToDevicePath(_config.getUserID()!)) {
+      collection.decryptedPath = (_decryptCollectionPath(collection));
+    }
+    return collection;
   }
 
   Collection? getCollectionByID(int collectionID) {
@@ -755,24 +1069,9 @@ class CollectionsService {
       );
       assert(response.data != null);
       final collectionData = response.data["collection"];
-      final collection = Collection.fromMap(collectionData);
-      if (collectionData['magicMetadata'] != null) {
-        final collectionKey = _getAndCacheDecryptedKey(
-          collection,
-          source: "fetchCollectionByID",
-        );
-        final utfEncodedMmd = await CryptoUtil.decryptChaCha(
-          CryptoUtil.base642bin(collectionData['magicMetadata']['data']),
-          collectionKey,
-          CryptoUtil.base642bin(collectionData['magicMetadata']['header']),
-        );
-        collection.mMdEncodedJson = utf8.decode(utfEncodedMmd);
-        collection.mMdVersion = collectionData['magicMetadata']['version'];
-        collection.magicMetadata =
-            CollectionMagicMetadata.fromEncodedJson(collection.mMdEncodedJson);
-      }
+      final collection = await _fromRemoteCollection(collectionData);
       await _db.insert(List.from([collection]));
-      _cacheCollectionAttributes(collection);
+      _cacheLocalPathAndCollection(collection);
       return collection;
     } catch (e) {
       if (e is DioError && e.response?.statusCode == 401) {
@@ -788,8 +1087,7 @@ class CollectionsService {
       final Collection? cachedCollection =
           _collectionIDToCollections[_localPathToCollectionID[path]];
       if (cachedCollection != null &&
-          !cachedCollection.isDeleted &&
-          cachedCollection.owner?.id == _config.getUserID()) {
+          cachedCollection.canLinkToDevicePath(_config.getUserID()!)) {
         return cachedCollection;
       }
     }
@@ -815,7 +1113,7 @@ class CollectionsService {
     return collection;
   }
 
-  Future<void> addToCollection(int collectionID, List<File> files) async {
+  Future<void> addToCollection(int collectionID, List<EnteFile> files) async {
     final containsUploadedFile = files.firstWhereOrNull(
           (element) => element.uploadedFileID != null,
         ) !=
@@ -872,10 +1170,10 @@ class CollectionsService {
     }
   }
 
-  Future<File> linkLocalFileToExistingUploadedFileInAnotherCollection(
+  Future<EnteFile> linkLocalFileToExistingUploadedFileInAnotherCollection(
     int destCollectionID, {
-    required File localFileToUpload,
-    required File existingUploadedFile,
+    required EnteFile localFileToUpload,
+    required EnteFile existingUploadedFile,
   }) async {
     final params = <String, dynamic>{};
     params["collectionID"] = destCollectionID;
@@ -914,7 +1212,7 @@ class CollectionsService {
     }
   }
 
-  Future<void> restore(int toCollectionID, List<File> files) async {
+  Future<void> restore(int toCollectionID, List<EnteFile> files) async {
     final params = <String, dynamic>{};
     params["collectionID"] = toCollectionID;
     final toCollectionKey = getCollectionKey(toCollectionID);
@@ -983,7 +1281,7 @@ class CollectionsService {
   Future<void> move(
     int toCollectionID,
     int fromCollectionID,
-    List<File> files,
+    List<EnteFile> files,
   ) async {
     _validateMoveRequest(toCollectionID, fromCollectionID, files);
     files.removeWhere((element) => element.uploadedFileID == null);
@@ -1050,7 +1348,7 @@ class CollectionsService {
   void _validateMoveRequest(
     int toCollectionID,
     int fromCollectionID,
-    List<File> files,
+    List<EnteFile> files,
   ) {
     if (toCollectionID == fromCollectionID) {
       throw AssertionError("Can't move to same album");
@@ -1068,7 +1366,10 @@ class CollectionsService {
     }
   }
 
-  Future<void> removeFromCollection(int collectionID, List<File> files) async {
+  Future<void> removeFromCollection(
+    int collectionID,
+    List<EnteFile> files,
+  ) async {
     final params = <String, dynamic>{};
     params["collectionID"] = collectionID;
     final batchedFiles = files.chunks(batchSize);
@@ -1101,39 +1402,47 @@ class CollectionsService {
     )
         .then((response) async {
       final collectionData = response.data["collection"];
-      final collection = Collection.fromMap(collectionData);
-      if (collectionData['magicMetadata'] != null) {
-        final collectionKey =
-            _getAndCacheDecryptedKey(collection, source: "create");
-        final utfEncodedMmd = await CryptoUtil.decryptChaCha(
-          CryptoUtil.base642bin(collectionData['magicMetadata']['data']),
-          collectionKey,
-          CryptoUtil.base642bin(collectionData['magicMetadata']['header']),
-        );
-        collection.mMdEncodedJson = utf8.decode(utfEncodedMmd);
-        collection.mMdVersion = collectionData['magicMetadata']['version'];
-        collection.magicMetadata = CollectionMagicMetadata.fromEncodedJson(
-          collection.mMdEncodedJson,
-        );
-      }
-      return _cacheCollectionAttributes(collection);
+      final collection = await _fromRemoteCollection(collectionData);
+      return _cacheLocalPathAndCollection(collection);
     });
   }
 
+  @Deprecated("Use _cacheLocalPathAndCollection instead")
   Collection _cacheCollectionAttributes(Collection collection) {
-    final collectionWithDecryptedName =
-        _getCollectionWithDecryptedName(collection);
-    if (collection.attributes.encryptedPath != null &&
-        !collection.isDeleted &&
-        collection.owner?.id == _config.getUserID()) {
-      _localPathToCollectionID[decryptCollectionPath(collection)] =
+    final String decryptedName = _getDecryptedCollectionName(collection);
+    collection.setName(decryptedName);
+    if (collection.canLinkToDevicePath(_config.getUserID()!)) {
+      _localPathToCollectionID[_decryptCollectionPath(collection)] =
           collection.id;
     }
-    _collectionIDToCollections[collection.id] = collectionWithDecryptedName;
-    return collectionWithDecryptedName;
+    _collectionIDToCollections[collection.id] = collection;
+    return collection;
   }
 
-  String decryptCollectionPath(Collection collection) {
+  Collection _cacheLocalPathAndCollection(Collection collection) {
+    assert(
+      collection.decryptedName != null,
+      "decryptedName should be already set",
+    );
+    if (collection.canLinkToDevicePath(_config.getUserID()!) &&
+        (collection.decryptedPath ?? '').isNotEmpty) {
+      _localPathToCollectionID[collection.decryptedPath!] = collection.id;
+    }
+    _collectionIDToCollections[collection.id] = collection;
+    return collection;
+  }
+
+  String _decryptCollectionPath(Collection collection) {
+    if (collection.decryptedPath != null &&
+        collection.decryptedPath!.isNotEmpty) {
+      debugPrint("Using cached decrypted path for collection ${collection.id}");
+      return collection.decryptedPath!;
+    } else {
+      debugPrint(
+        "Decrypting path for collection ${collection.id} from "
+        "encryptedPath",
+      );
+    }
     final key = collection.attributes.version! >= 1
         ? getCollectionKey(collection.id)
         : _config.getKey();
@@ -1150,13 +1459,12 @@ class CollectionsService {
     return _prefs.containsKey(_collectionsSyncTimeKey);
   }
 
-  Collection _getCollectionWithDecryptedName(Collection collection) {
+  String _getDecryptedCollectionName(Collection collection) {
     if (collection.isDeleted) {
-      return collection.copyWith(name: "Deleted Album");
+      return "Deleted Album";
     }
     if (collection.encryptedName != null &&
         collection.encryptedName!.isNotEmpty) {
-      String name;
       try {
         final collectionKey = _getAndCacheDecryptedKey(
           collection,
@@ -1167,19 +1475,16 @@ class CollectionsService {
           collectionKey,
           CryptoUtil.base642bin(collection.nameDecryptionNonce!),
         );
-        name = utf8.decode(result);
+        return utf8.decode(result);
       } catch (e, s) {
         _logger.severe(
           "failed to decrypt collection name: ${collection.id}",
           e,
           s,
         );
-        name = "Unknown Album";
       }
-      return collection.copyWith(name: name);
-    } else {
-      return collection;
     }
+    return collection.displayName;
   }
 
   Future _updateDB(List<Collection> collections, {int attempt = 1}) async {
@@ -1198,5 +1503,3 @@ class CollectionsService {
     }
   }
 }
-
-class SharingNotPermittedForFreeAccountsError extends Error {}

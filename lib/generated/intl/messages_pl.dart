@@ -20,7 +20,7 @@ typedef String MessageIfAbsent(String messageStr, List<dynamic> args);
 class MessageLookup extends MessageLookupByLibrary {
   String get localeName => 'pl';
 
-  static String m3(passwordStrengthValue) =>
+  static String m32(passwordStrengthValue) =>
       "Siła hasła: ${passwordStrengthValue}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
@@ -28,6 +28,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "accountWelcomeBack":
             MessageLookupByLibrary.simpleMessage("Witaj ponownie!"),
         "activeSessions": MessageLookupByLibrary.simpleMessage("Aktywne sesje"),
+        "addToHiddenAlbum":
+            MessageLookupByLibrary.simpleMessage("Add to hidden album"),
         "askDeleteReason": MessageLookupByLibrary.simpleMessage(
             "Jaka jest przyczyna usunięcia konta?"),
         "cancel": MessageLookupByLibrary.simpleMessage("Anuluj"),
@@ -66,7 +68,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "deleteReason1": MessageLookupByLibrary.simpleMessage(
             "Brakuje kluczowej funkcji, której potrzebuję"),
         "deleteReason2": MessageLookupByLibrary.simpleMessage(
-            "Aplikacja lub określona funkcja nie \nzachowuje się tak, jak sądzę, że powinna"),
+            "Aplikacja lub określona funkcja nie zachowuje się tak, jak sądzę, że powinna"),
         "deleteReason3": MessageLookupByLibrary.simpleMessage(
             "Znalazłem inną, lepszą usługę"),
         "deleteReason4": MessageLookupByLibrary.simpleMessage(
@@ -107,6 +109,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Pomóż nam z tą informacją"),
         "logInLabel": MessageLookupByLibrary.simpleMessage("Zaloguj się"),
         "moderateStrength": MessageLookupByLibrary.simpleMessage("Umiarkowana"),
+        "moveToHiddenAlbum":
+            MessageLookupByLibrary.simpleMessage("Move to hidden album"),
         "noRecoveryKey":
             MessageLookupByLibrary.simpleMessage("Brak klucza odzyskiwania?"),
         "noRecoveryKeyNoDecryption": MessageLookupByLibrary.simpleMessage(
@@ -116,7 +120,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "password": MessageLookupByLibrary.simpleMessage("Hasło"),
         "passwordChangedSuccessfully": MessageLookupByLibrary.simpleMessage(
             "Hasło zostało pomyślnie zmienione"),
-        "passwordStrength": m3,
+        "passwordStrength": m32,
         "passwordWarning": MessageLookupByLibrary.simpleMessage(
             "Nie przechowujemy tego hasła, więc jeśli go zapomnisz, <underline>nie będziemy w stanie odszyfrować Twoich danych</underline>"),
         "pleaseTryAgain":
@@ -176,8 +180,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Zweryfikuj hasło"),
         "weakStrength": MessageLookupByLibrary.simpleMessage("Słabe"),
         "welcomeBack": MessageLookupByLibrary.simpleMessage("Witaj ponownie!"),
-        "weveSentAMailTo": MessageLookupByLibrary.simpleMessage(
-            "E-mail został wysłany na adres"),
         "yourAccountHasBeenDeleted":
             MessageLookupByLibrary.simpleMessage("Twoje konto zostało usunięte")
       };

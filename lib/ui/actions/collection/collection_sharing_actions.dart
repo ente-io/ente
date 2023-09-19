@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
+import "package:photos/core/errors.dart";
 import 'package:photos/db/files_db.dart';
 import 'package:photos/ente_theme_data.dart';
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/api/collection/create_request.dart';
-import 'package:photos/models/collection.dart';
-import 'package:photos/models/file.dart';
+import "package:photos/models/api/collection/user.dart";
+import 'package:photos/models/collection/collection.dart';
+import 'package:photos/models/file/file.dart';
 import 'package:photos/models/files_split.dart';
-import 'package:photos/models/magic_metadata.dart';
+import "package:photos/models/metadata/collection_magic.dart";
+import "package:photos/models/metadata/common_keys.dart";
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/hidden_service.dart';
 import 'package:photos/services/user_service.dart';
@@ -67,7 +70,12 @@ class CollectionActions {
           shouldSurfaceExecutionStates: true,
           labelText: S.of(context).yesRemove,
           onTap: () async {
-            await CollectionsService.instance.disableShareUrl(collection);
+            // for quickLink collection, we need to trash the collection
+            if (collection.isQuickLinkCollection() && !collection.hasSharees) {
+              await trashCollectionKeepingPhotos(collection, context);
+            } else {
+              await CollectionsService.instance.disableShareUrl(collection);
+            }
           },
         ),
         ButtonWidget(
@@ -76,12 +84,12 @@ class CollectionActions {
           isInAlert: true,
           shouldStickToDarkTheme: true,
           labelText: S.of(context).cancel,
-        )
+        ),
       ],
       title: S.of(context).removePublicLink,
       body:
           //'This will remove the public link for accessing "${collection.name}".',
-          S.of(context).disableLinkMessage(collection.collectionName),
+          S.of(context).disableLinkMessage(collection.displayName),
     );
     if (actionResult?.action != null) {
       if (actionResult!.action == ButtonAction.error) {
@@ -95,7 +103,7 @@ class CollectionActions {
 
   Future<Collection?> createSharedCollectionLink(
     BuildContext context,
-    List<File> files,
+    List<EnteFile> files,
   ) async {
     final dialog = createProgressDialog(
       context,
@@ -107,10 +115,10 @@ class CollectionActions {
       // create album with emptyName, use collectionCreationTime on UI to
       // show name
       logger.finest("creating album for sharing files");
-      final File fileWithMinCreationTime = files.reduce(
+      final EnteFile fileWithMinCreationTime = files.reduce(
         (a, b) => (a.creationTime ?? 0) < (b.creationTime ?? 0) ? a : b,
       );
-      final File fileWithMaxCreationTime = files.reduce(
+      final EnteFile fileWithMaxCreationTime = files.reduce(
         (a, b) => (a.creationTime ?? 0) > (b.creationTime ?? 0) ? a : b,
       );
       final String dummyName = getNameForDateRange(
@@ -120,7 +128,7 @@ class CollectionActions {
       final CreateRequest req =
           await collectionsService.buildCollectionCreateRequest(
         dummyName,
-        visibility: visibilityVisible,
+        visibility: visibleVisibility,
         subType: subTypeSharedFilesCollection,
       );
       final collection = await collectionsService.createAndCacheCollection(
@@ -168,7 +176,7 @@ class CollectionActions {
           isInAlert: true,
           shouldStickToDarkTheme: true,
           labelText: S.of(context).cancel,
-        )
+        ),
       ],
       title: S.of(context).removeWithQuestionMark,
       body: S.of(context).removeParticipantBody(user.email),
@@ -300,11 +308,7 @@ class CollectionActions {
           isInAlert: true,
           onTap: () async {
             try {
-              final List<File> files =
-                  await FilesDB.instance.getAllFilesCollection(collection.id);
-              await moveFilesFromCurrentCollection(bContext, collection, files);
-              // collection should be empty on server now
-              await collectionsService.trashEmptyCollection(collection);
+              await trashCollectionKeepingPhotos(collection, bContext);
             } catch (e, s) {
               logger.severe("Failed to keep photos & delete collection", e, s);
               rethrow;
@@ -360,6 +364,17 @@ class CollectionActions {
     return false;
   }
 
+  Future<void> trashCollectionKeepingPhotos(
+    Collection collection,
+    BuildContext bContext,
+  ) async {
+    final List<EnteFile> files =
+        await FilesDB.instance.getAllFilesCollection(collection.id);
+    await moveFilesFromCurrentCollection(bContext, collection, files);
+    // collection should be empty on server now
+    await collectionsService.trashEmptyCollection(collection);
+  }
+
   // _confirmSharedAlbumDeletion should be shown when user tries to delete an
   // album shared with other ente users.
   Future<bool> _confirmSharedAlbumDeletion(
@@ -397,8 +412,9 @@ class CollectionActions {
   Future<void> moveFilesFromCurrentCollection(
     BuildContext context,
     Collection collection,
-    Iterable<File> files,
-  ) async {
+    Iterable<EnteFile> files, {
+    bool isHidden = false,
+  }) async {
     final int currentUserID = Configuration.instance.getUserID()!;
     final isCollectionOwner = collection.owner!.id == currentUserID;
     final FilesSplit split = FilesSplit.split(
@@ -427,38 +443,38 @@ class CollectionActions {
 
     // pendingAssignMap keeps a track of files which are yet to be assigned to
     // to destination collection.
-    final Map<int, File> pendingAssignMap = {};
+    final Map<int, EnteFile> pendingAssignMap = {};
     // destCollectionToFilesMap contains the destination collection and
     // files entry which needs to be moved in destination.
     // After the end of mapping logic, the number of files entries in
     // pendingAssignMap should be equal to files in destCollectionToFilesMap
-    final Map<int, List<File>> destCollectionToFilesMap = {};
+    final Map<int, List<EnteFile>> destCollectionToFilesMap = {};
     final List<int> uploadedIDs = [];
-    for (File f in split.ownedByCurrentUser) {
+    for (EnteFile f in split.ownedByCurrentUser) {
       if (f.uploadedFileID != null) {
         pendingAssignMap[f.uploadedFileID!] = f;
         uploadedIDs.add(f.uploadedFileID!);
       }
     }
 
-    final Map<int, List<File>> collectionToFilesMap =
+    final Map<int, List<EnteFile>> collectionToFilesMap =
         await FilesDB.instance.getAllFilesGroupByCollectionID(uploadedIDs);
 
     // Find and map the files from current collection to to entries in other
     // collections. This mapping is done to avoid moving all the files to
     // uncategorized during remove from album.
-    for (MapEntry<int, List<File>> entry in collectionToFilesMap.entries) {
+    for (MapEntry<int, List<EnteFile>> entry in collectionToFilesMap.entries) {
       if (!_isAutoMoveCandidate(collection.id, entry.key, currentUserID)) {
         continue;
       }
       final targetCollection = collectionsService.getCollectionByID(entry.key)!;
       // for each file which already exist in the destination collection
       // add entries in the moveDestCollectionToFiles map
-      for (File file in entry.value) {
+      for (EnteFile file in entry.value) {
         // Check if the uploaded file is still waiting to be mapped
         if (pendingAssignMap.containsKey(file.uploadedFileID)) {
           if (!destCollectionToFilesMap.containsKey(targetCollection.id)) {
-            destCollectionToFilesMap[targetCollection.id] = <File>[];
+            destCollectionToFilesMap[targetCollection.id] = <EnteFile>[];
           }
           destCollectionToFilesMap[targetCollection.id]!
               .add(pendingAssignMap[file.uploadedFileID!]!);
@@ -468,14 +484,20 @@ class CollectionActions {
     }
     // Move the remaining files to uncategorized collection
     if (pendingAssignMap.isNotEmpty) {
-      final Collection uncategorizedCollection =
-          await collectionsService.getUncategorizedCollection();
-      final int toCollectionID = uncategorizedCollection.id;
-      for (MapEntry<int, File> entry in pendingAssignMap.entries) {
+      late final int toCollectionID;
+      if (isHidden) {
+        toCollectionID = collectionsService.cachedDefaultHiddenCollection!.id;
+      } else {
+        final Collection uncategorizedCollection =
+            await collectionsService.getUncategorizedCollection();
+        toCollectionID = uncategorizedCollection.id;
+      }
+
+      for (MapEntry<int, EnteFile> entry in pendingAssignMap.entries) {
         final file = entry.value;
         if (pendingAssignMap.containsKey(file.uploadedFileID)) {
           if (!destCollectionToFilesMap.containsKey(toCollectionID)) {
-            destCollectionToFilesMap[toCollectionID] = <File>[];
+            destCollectionToFilesMap[toCollectionID] = <EnteFile>[];
           }
           destCollectionToFilesMap[toCollectionID]!
               .add(pendingAssignMap[file.uploadedFileID!]!);
@@ -495,7 +517,8 @@ class CollectionActions {
       );
     }
 
-    for (MapEntry<int, List<File>> entry in destCollectionToFilesMap.entries) {
+    for (MapEntry<int, List<EnteFile>> entry
+        in destCollectionToFilesMap.entries) {
       await collectionsService.move(entry.key, collection.id, entry.value);
     }
   }

@@ -1,16 +1,22 @@
-import 'dart:io' as io;
+import "dart:convert";
+import "dart:io";
 import 'dart:typed_data';
 
 import 'package:computer/computer.dart';
 import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:logging/logging.dart';
+import "package:photos/core/errors.dart";
 import 'package:photos/models/derived_key_result.dart';
 import 'package:photos/models/encryption_result.dart';
+import "package:photos/utils/device_info.dart";
 
 const int encryptionChunkSize = 4 * 1024 * 1024;
 final int decryptionChunkSize =
     encryptionChunkSize + Sodium.cryptoSecretstreamXchacha20poly1305Abytes;
 const int hashChunkSize = 4 * 1024 * 1024;
+const int loginSubKeyLen = 32;
+const int loginSubKeyId = 1;
+const String loginSubKeyContext = "loginctx";
 
 Uint8List cryptoSecretboxEasy(Map<String, dynamic> args) {
   return Sodium.cryptoSecretboxEasy(args["source"], args["nonce"], args["key"]);
@@ -35,11 +41,22 @@ Uint8List cryptoPwHash(Map<String, dynamic> args) {
   );
 }
 
+Uint8List cryptoKdfDeriveFromKey(
+  Map<String, dynamic> args,
+) {
+  return Sodium.cryptoKdfDeriveFromKey(
+    args["subkeyLen"],
+    args["subkeyId"],
+    args["context"],
+    args["key"],
+  );
+}
+
 // Returns the hash for a given file, chunking it in batches of hashChunkSize
 Future<Uint8List> cryptoGenericHash(Map<String, dynamic> args) async {
-  final sourceFile = io.File(args["sourceFilePath"]);
+  final sourceFile = File(args["sourceFilePath"]);
   final sourceFileLength = await sourceFile.length();
-  final inputFile = sourceFile.openSync(mode: io.FileMode.read);
+  final inputFile = sourceFile.openSync(mode: FileMode.read);
   final state =
       Sodium.cryptoGenerichashInit(null, Sodium.cryptoGenerichashBytesMax);
   var bytesRead = 0;
@@ -60,7 +77,7 @@ Future<Uint8List> cryptoGenericHash(Map<String, dynamic> args) async {
 
 EncryptionResult chachaEncryptData(Map<String, dynamic> args) {
   final initPushResult =
-      Sodium.cryptoSecretstreamXchacha20poly1305InitPush(args["key"]);
+  Sodium.cryptoSecretstreamXchacha20poly1305InitPush(args["key"]);
   final encryptedData = Sodium.cryptoSecretstreamXchacha20poly1305Push(
     initPushResult.state,
     args["source"],
@@ -77,15 +94,15 @@ EncryptionResult chachaEncryptData(Map<String, dynamic> args) {
 Future<EncryptionResult> chachaEncryptFile(Map<String, dynamic> args) async {
   final encryptionStartTime = DateTime.now().millisecondsSinceEpoch;
   final logger = Logger("ChaChaEncrypt");
-  final sourceFile = io.File(args["sourceFilePath"]);
-  final destinationFile = io.File(args["destinationFilePath"]);
+  final sourceFile = File(args["sourceFilePath"]);
+  final destinationFile = File(args["destinationFilePath"]);
   final sourceFileLength = await sourceFile.length();
   logger.info("Encrypting file of size " + sourceFileLength.toString());
 
-  final inputFile = sourceFile.openSync(mode: io.FileMode.read);
+  final inputFile = sourceFile.openSync(mode: FileMode.read);
   final key = args["key"] ?? Sodium.cryptoSecretstreamXchacha20poly1305Keygen();
   final initPushResult =
-      Sodium.cryptoSecretstreamXchacha20poly1305InitPush(key);
+  Sodium.cryptoSecretstreamXchacha20poly1305InitPush(key);
   var bytesRead = 0;
   var tag = Sodium.cryptoSecretstreamXchacha20poly1305TagMessage;
   while (tag != Sodium.cryptoSecretstreamXchacha20poly1305TagFinal) {
@@ -102,7 +119,7 @@ Future<EncryptionResult> chachaEncryptFile(Map<String, dynamic> args) async {
       null,
       tag,
     );
-    await destinationFile.writeAsBytes(encryptedData, mode: io.FileMode.append);
+    await destinationFile.writeAsBytes(encryptedData, mode: FileMode.append);
   }
   await inputFile.close();
 
@@ -118,12 +135,12 @@ Future<EncryptionResult> chachaEncryptFile(Map<String, dynamic> args) async {
 Future<void> chachaDecryptFile(Map<String, dynamic> args) async {
   final logger = Logger("ChaChaDecrypt");
   final decryptionStartTime = DateTime.now().millisecondsSinceEpoch;
-  final sourceFile = io.File(args["sourceFilePath"]);
-  final destinationFile = io.File(args["destinationFilePath"]);
+  final sourceFile = File(args["sourceFilePath"]);
+  final destinationFile = File(args["destinationFilePath"]);
   final sourceFileLength = await sourceFile.length();
   logger.info("Decrypting file of size " + sourceFileLength.toString());
 
-  final inputFile = sourceFile.openSync(mode: io.FileMode.read);
+  final inputFile = sourceFile.openSync(mode: FileMode.read);
   final pullState = Sodium.cryptoSecretstreamXchacha20poly1305InitPull(
     args["header"],
     args["key"],
@@ -139,8 +156,8 @@ Future<void> chachaDecryptFile(Map<String, dynamic> args) async {
     final buffer = await inputFile.read(chunkSize);
     bytesRead += chunkSize;
     final pullResult =
-        Sodium.cryptoSecretstreamXchacha20poly1305Pull(pullState, buffer, null);
-    await destinationFile.writeAsBytes(pullResult.m, mode: io.FileMode.append);
+    Sodium.cryptoSecretstreamXchacha20poly1305Pull(pullState, buffer, null);
+    await destinationFile.writeAsBytes(pullResult.m, mode: FileMode.append);
     tag = pullResult.tag;
   }
   inputFile.closeSync();
@@ -166,29 +183,27 @@ Uint8List chachaDecryptData(Map<String, dynamic> args) {
 }
 
 class CryptoUtil {
-  static final Computer _computer = Computer();
+  // Note: workers are turned on during app startup.
+  static final Computer _computer = Computer.shared();
 
   static init() {
-    _computer.turnOn(workersCount: 4);
     Sodium.init();
   }
 
-  static Uint8List base642bin(
-    String b64, {
+  static Uint8List base642bin(String b64, {
     String? ignore,
     int variant = Sodium.base64VariantOriginal,
   }) {
     return Sodium.base642bin(b64, ignore: ignore, variant: variant);
   }
 
-  static String bin2base64(
-    Uint8List bin, {
+  static String bin2base64(Uint8List bin, {
     bool urlSafe = false,
   }) {
     return Sodium.bin2base64(
       bin,
       variant:
-          urlSafe ? Sodium.base64VariantUrlsafe : Sodium.base64VariantOriginal,
+      urlSafe ? Sodium.base64VariantUrlsafe : Sodium.base64VariantOriginal,
     );
   }
 
@@ -222,16 +237,18 @@ class CryptoUtil {
 
   // Decrypts the given cipher, with the given key and nonce using XSalsa20
   // (w Poly1305 MAC).
-  static Future<Uint8List> decrypt(
-    Uint8List cipher,
-    Uint8List key,
-    Uint8List nonce,
-  ) async {
+  static Future<Uint8List> decrypt(Uint8List cipher,
+      Uint8List key,
+      Uint8List nonce,) async {
     final args = <String, dynamic>{};
     args["cipher"] = cipher;
     args["nonce"] = nonce;
     args["key"] = key;
-    return _computer.compute(cryptoSecretboxOpenEasy, param: args);
+    return _computer.compute(
+      cryptoSecretboxOpenEasy,
+      param: args,
+      taskName: "decrypt",
+    );
   }
 
   // Decrypts the given cipher, with the given key and nonce using XSalsa20
@@ -239,11 +256,9 @@ class CryptoUtil {
   // This function runs on the same thread as the caller, so should be used only
   // for small amounts of data where thread switching can result in a degraded
   // user experience
-  static Uint8List decryptSync(
-    Uint8List cipher,
-    Uint8List key,
-    Uint8List nonce,
-  ) {
+  static Uint8List decryptSync(Uint8List cipher,
+      Uint8List key,
+      Uint8List nonce,) {
     final args = <String, dynamic>{};
     args["cipher"] = cipher;
     args["nonce"] = nonce;
@@ -255,29 +270,33 @@ class CryptoUtil {
   // nonce, using XChaCha20 (w Poly1305 MAC).
   // This function runs on the isolate pool held by `_computer`.
   // TODO: Remove "ChaCha", an implementation detail from the function name
-  static Future<EncryptionResult> encryptChaCha(
-    Uint8List source,
-    Uint8List key,
-  ) async {
+  static Future<EncryptionResult> encryptChaCha(Uint8List source,
+      Uint8List key,) async {
     final args = <String, dynamic>{};
     args["source"] = source;
     args["key"] = key;
-    return _computer.compute(chachaEncryptData, param: args);
+    return _computer.compute(
+      chachaEncryptData,
+      param: args,
+      taskName: "encryptChaCha",
+    );
   }
 
   // Decrypts the given source, with the given key and header using XChaCha20
   // (w Poly1305 MAC).
   // TODO: Remove "ChaCha", an implementation detail from the function name
-  static Future<Uint8List> decryptChaCha(
-    Uint8List source,
-    Uint8List key,
-    Uint8List header,
-  ) async {
+  static Future<Uint8List> decryptChaCha(Uint8List source,
+      Uint8List key,
+      Uint8List header,) async {
     final args = <String, dynamic>{};
     args["source"] = source;
     args["key"] = key;
     args["header"] = header;
-    return _computer.compute(chachaDecryptData, param: args);
+    return _computer.compute(
+      chachaDecryptData,
+      param: args,
+      taskName: "decryptChaCha",
+    );
   }
 
   // Encrypts the file at sourceFilePath, with the key (if provided) and a
@@ -285,31 +304,38 @@ class CryptoUtil {
   // to the destinationFilePath.
   // If a key is not provided, one is generated and returned.
   static Future<EncryptionResult> encryptFile(
-    String sourceFilePath,
-    String destinationFilePath, {
-    Uint8List? key,
-  }) {
+      String sourceFilePath,
+      String destinationFilePath, {
+      Uint8List? key,
+      }) {
     final args = <String, dynamic>{};
     args["sourceFilePath"] = sourceFilePath;
     args["destinationFilePath"] = destinationFilePath;
     args["key"] = key;
-    return _computer.compute(chachaEncryptFile, param: args);
+    return _computer.compute(
+      chachaEncryptFile,
+      param: args,
+      taskName: "encryptFile",
+    );
   }
 
   // Decrypts the file at sourceFilePath, with the given key and header using
   // XChaCha20 (w Poly1305 MAC), and writes it to the destinationFilePath.
   static Future<void> decryptFile(
-    String sourceFilePath,
-    String destinationFilePath,
-    Uint8List header,
-    Uint8List key,
-  ) {
+      String sourceFilePath,
+      String destinationFilePath,
+      Uint8List header,
+      Uint8List key,) {
     final args = <String, dynamic>{};
     args["sourceFilePath"] = sourceFilePath;
     args["destinationFilePath"] = destinationFilePath;
     args["header"] = header;
     args["key"] = key;
-    return _computer.compute(chachaDecryptFile, param: args);
+    return _computer.compute(
+      chachaDecryptFile,
+      param: args,
+      taskName: "decryptFile",
+    );
   }
 
   // Generates and returns a 256-bit key.
@@ -330,10 +356,10 @@ class CryptoUtil {
 
   // Decrypts the input using the given publicKey-secretKey pair
   static Uint8List openSealSync(
-    Uint8List input,
-    Uint8List publicKey,
-    Uint8List secretKey,
-  ) {
+      Uint8List input,
+      Uint8List publicKey,
+      Uint8List secretKey,
+      ) {
     return Sodium.cryptoBoxSealOpen(input, publicKey, secretKey);
   }
 
@@ -351,12 +377,28 @@ class CryptoUtil {
   // At all points, we ensure that the product of these two variables (the area
   // under the graph that determines the amount of work required) is a constant.
   static Future<DerivedKeyResult> deriveSensitiveKey(
-    Uint8List password,
-    Uint8List salt,
-  ) async {
+      Uint8List password,
+      Uint8List salt,
+      ) async {
     final logger = Logger("pwhash");
     int memLimit = Sodium.cryptoPwhashMemlimitSensitive;
     int opsLimit = Sodium.cryptoPwhashOpslimitSensitive;
+    if (await isLowSpecDevice()) {
+      logger.info("low spec device detected");
+      // When sensitive memLimit (1 GB) is used, on low spec device the OS might
+      // kill the app with OOM. To avoid that, start with 256 MB and
+      // corresponding ops limit (16).
+      // This ensures that the product of these two variables
+      // (the area under the graph that determines the amount of work required)
+      // stays the same
+      // SODIUM_CRYPTO_PWHASH_MEMLIMIT_SENSITIVE: 1073741824
+      // SODIUM_CRYPTO_PWHASH_MEMLIMIT_MODERATE: 268435456
+      // SODIUM_CRYPTO_PWHASH_OPSLIMIT_SENSITIVE: 4
+      memLimit = Sodium.cryptoPwhashMemlimitModerate;
+      final factor = Sodium.cryptoPwhashMemlimitSensitive ~/
+          Sodium.cryptoPwhashMemlimitModerate; // = 4
+      opsLimit = opsLimit * factor; // = 16
+    }
     Uint8List key;
     while (memLimit >= Sodium.cryptoPwhashMemlimitMin &&
         opsLimit <= Sodium.cryptoPwhashOpslimitMax) {
@@ -364,11 +406,8 @@ class CryptoUtil {
         key = await deriveKey(password, salt, memLimit, opsLimit);
         return DerivedKeyResult(key, memLimit, opsLimit);
       } catch (e, s) {
-        logger.severe(
-          "failed to derive memLimit: $memLimit and opsLimit: $opsLimit",
-          e,
-          s,
-        );
+        logger.warning(
+          "failed to deriveKey mem: $memLimit, ops: $opsLimit", e, s,);
       }
       memLimit = (memLimit / 2).round();
       opsLimit = opsLimit * 2;
@@ -382,23 +421,24 @@ class CryptoUtil {
   // extra layer of authentication (atop the access token and collection key).
   // More details @ https://ente.io/blog/building-shareable-links/
   static Future<DerivedKeyResult> deriveInteractiveKey(
-    Uint8List password,
-    Uint8List salt,
-  ) async {
+      Uint8List password,
+      Uint8List salt,
+      ) async {
     final int memLimit = Sodium.cryptoPwhashMemlimitInteractive;
     final int opsLimit = Sodium.cryptoPwhashOpslimitInteractive;
     final key = await deriveKey(password, salt, memLimit, opsLimit);
     return DerivedKeyResult(key, memLimit, opsLimit);
   }
 
-  // Derives a key for a given password, salt, memLimit and opsLimit using 
+  // Derives a key for a given password, salt, memLimit and opsLimit using
   // Argon2id, v1.3.
   static Future<Uint8List> deriveKey(
-    Uint8List password,
-    Uint8List salt,
-    int memLimit,
-    int opsLimit,
-  ) {
+      Uint8List password,
+      Uint8List salt,
+      int memLimit,
+      int opsLimit,
+      ) {
+    try {
     return _computer.compute(
       cryptoPwHash,
       param: {
@@ -407,16 +447,44 @@ class CryptoUtil {
         "memLimit": memLimit,
         "opsLimit": opsLimit,
       },
+      taskName: "deriveKey",
     );
+    } catch(e,s) {
+      final String errMessage = 'failed to deriveKey memLimit: $memLimit and '
+          'opsLimit: $opsLimit';
+      Logger("CryptoUtilDeriveKey").warning(errMessage, e, s);
+      throw KeyDerivationError();
+    }
+  }
+
+  // derives a Login key as subKey from the given key by applying KDF
+  // (Key Derivation Function) with the `loginSubKeyId` and
+  // `loginSubKeyLen` and `loginSubKeyContext` as context
+  static Future<Uint8List> deriveLoginKey(
+      Uint8List key,
+      ) async {
+    final Uint8List derivedKey = await  _computer.compute(
+      cryptoKdfDeriveFromKey,
+      param: {
+        "key": key,
+        "subkeyId": loginSubKeyId,
+        "subkeyLen": loginSubKeyLen,
+        "context": utf8.encode(loginSubKeyContext),
+      },
+      taskName: "deriveLoginKey",
+    );
+    // return the first 16 bytes of the derived key
+    return derivedKey.sublist(0, 16);
   }
 
   // Computes and returns the hash of the source file
-  static Future<Uint8List> getHash(io.File source) {
+  static Future<Uint8List> getHash(File source) {
     return _computer.compute(
       cryptoGenericHash,
       param: {
         "sourceFilePath": source.path,
       },
+      taskName: "fileHash",
     );
   }
 }

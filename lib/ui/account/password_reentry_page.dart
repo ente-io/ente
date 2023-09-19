@@ -1,4 +1,5 @@
 import 'dart:async';
+import "dart:typed_data";
 
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
@@ -7,10 +8,12 @@ import 'package:photos/core/errors.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/subscription_purchased_event.dart';
 import "package:photos/generated/l10n.dart";
+import "package:photos/services/user_service.dart";
 import 'package:photos/ui/account/recovery_page.dart';
 import 'package:photos/ui/common/dynamic_fab.dart';
 import 'package:photos/ui/components/buttons/button_widget.dart';
-import 'package:photos/ui/home_widget.dart';
+import 'package:photos/ui/tabs/home_widget.dart';
+import "package:photos/utils/crypto_util.dart";
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/email_util.dart';
 
@@ -28,16 +31,32 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
   String? email;
   bool _passwordInFocus = false;
   bool _passwordVisible = false;
+  String? _volatilePassword;
 
   @override
   void initState() {
     super.initState();
     email = Configuration.instance.getEmail();
+    _volatilePassword = Configuration.instance.getVolatilePassword();
+    if (_volatilePassword != null) {
+      _passwordController.text = _volatilePassword!;
+      Future.delayed(
+        Duration.zero,
+            () => verifyPassword(_volatilePassword!),
+      );
+    }
     _passwordFocusNode.addListener(() {
       setState(() {
         _passwordInFocus = _passwordFocusNode.hasFocus;
       });
     });
+  }
+
+  @override
+  void dispose() {
+    _passwordController.dispose();
+    _passwordFocusNode.dispose();
+    super.dispose();
   }
 
   @override
@@ -66,75 +85,103 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
       ),
       body: _getBody(),
       floatingActionButton: DynamicFAB(
+        key: const ValueKey("verifyPasswordButton"),
         isKeypadOpen: isKeypadOpen,
         isFormValid: _passwordController.text.isNotEmpty,
         buttonText: S.of(context).verifyPassword,
         onPressedFunction: () async {
           FocusScope.of(context).unfocus();
-          final dialog =
-              createProgressDialog(context, S.of(context).pleaseWait);
-          await dialog.show();
-          try {
-            await Configuration.instance.decryptAndSaveSecrets(
-              _passwordController.text,
-              Configuration.instance.getKeyAttributes()!,
-            );
-          } on KeyDerivationError catch (e, s) {
-            _logger.severe("Password verification failed", e, s);
-            await dialog.hide();
-            final dialogChoice = await showChoiceDialog(
-              context,
-              title: S.of(context).recreatePasswordTitle,
-              body: S.of(context).recreatePasswordBody,
-              firstButtonLabel: S.of(context).useRecoveryKey,
-            );
-            if (dialogChoice!.action == ButtonAction.first) {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (BuildContext context) {
-                    return const RecoveryPage();
-                  },
-                ),
-              );
-            }
-            return;
-          } catch (e, s) {
-            _logger.severe("Password verification failed", e, s);
-            await dialog.hide();
-            final dialogChoice = await showChoiceDialog(
-              context,
-              title: S.of(context).incorrectPasswordTitle,
-              body: S.of(context).pleaseTryAgain,
-              firstButtonLabel: S.of(context).contactSupport,
-              secondButtonLabel: S.of(context).ok,
-            );
-            if (dialogChoice!.action == ButtonAction.first) {
-              await sendLogs(
-                context,
-                S.of(context).contactSupport,
-                "support@ente.io",
-                postShare: () {},
-              );
-            }
-            return;
-          }
-          await dialog.hide();
-          Bus.instance.fire(SubscriptionPurchasedEvent());
-          unawaited(
-            Navigator.of(context).pushAndRemoveUntil(
-              MaterialPageRoute(
-                builder: (BuildContext context) {
-                  return const HomeWidget();
-                },
-              ),
-              (route) => false,
-            ),
-          );
+          await verifyPassword(_passwordController.text);
         },
       ),
       floatingActionButtonLocation: fabLocation(),
       floatingActionButtonAnimator: NoScalingAnimation(),
     );
+  }
+
+  Future<void> verifyPassword(String password) async {
+      FocusScope.of(context).unfocus();
+      final dialog =
+      createProgressDialog(context, S.of(context).pleaseWait);
+      await dialog.show();
+      try {
+        final kek = await Configuration.instance.decryptSecretsAndGetKeyEncKey(
+          password,
+          Configuration.instance.getKeyAttributes()!,
+        );
+        _registerSRPForExistingUsers(kek).ignore();
+      } on KeyDerivationError catch (e, s) {
+        _logger.severe("Password verification failed", e, s);
+        await dialog.hide();
+        final dialogChoice = await showChoiceDialog(
+          context,
+          title: S.of(context).recreatePasswordTitle,
+          body: S.of(context).recreatePasswordBody,
+          firstButtonLabel: S.of(context).useRecoveryKey,
+        );
+        if (dialogChoice!.action == ButtonAction.first) {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (BuildContext context) {
+                return const RecoveryPage();
+              },
+            ),
+          );
+        }
+        return;
+      } catch (e, s) {
+        _logger.severe("Password verification failed", e, s);
+        await dialog.hide();
+        final dialogChoice = await showChoiceDialog(
+          context,
+          title: S.of(context).incorrectPasswordTitle,
+          body: S.of(context).pleaseTryAgain,
+          firstButtonLabel: S.of(context).contactSupport,
+          secondButtonLabel: S.of(context).ok,
+        );
+        if (dialogChoice!.action == ButtonAction.first) {
+          await sendLogs(
+            context,
+            S.of(context).contactSupport,
+            "support@ente.io",
+            postShare: () {},
+          );
+        }
+        return;
+      }
+      await dialog.hide();
+      Configuration.instance.setVolatilePassword(null);
+      Bus.instance.fire(SubscriptionPurchasedEvent());
+      unawaited(
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(
+            builder: (BuildContext context) {
+              return const HomeWidget();
+            },
+          ),
+              (route) => false,
+        ),
+      );
+  }
+
+  Future<void> _registerSRPForExistingUsers(Uint8List key) async {
+    bool shouldSetupSRP = false;
+    try {
+      // ignore: unused_local_variable
+      final attr = await UserService.instance.getSrpAttributes(email!);
+    } on SrpSetupNotCompleteError {
+      shouldSetupSRP = true;
+    } catch (e, s) {
+      _logger.severe("error while fetching attr", e, s);
+    }
+    if (shouldSetupSRP) {
+      try {
+        final Uint8List loginKey = await CryptoUtil.deriveLoginKey(key);
+        await UserService.instance.registerOrUpdateSrp(loginKey);
+      } catch (e, s) {
+        _logger.severe("error while setting up srp for existing users", e, s);
+      }
+    }
   }
 
   Widget _getBody() {
@@ -149,7 +196,7 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
                       const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
                   child: Text(
                     S.of(context).welcomeBack,
-                    style: Theme.of(context).textTheme.headline4,
+                    style: Theme.of(context).textTheme.headlineMedium,
                   ),
                 ),
                 Visibility(
@@ -169,6 +216,7 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
                 Padding(
                   padding: const EdgeInsets.fromLTRB(20, 24, 20, 0),
                   child: TextFormField(
+                    key: const ValueKey("passwordInputField"),
                     autofillHints: const [AutofillHints.password],
                     decoration: InputDecoration(
                       hintText: S.of(context).enterYourPassword,
@@ -234,11 +282,13 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
                         child: Center(
                           child: Text(
                             S.of(context).forgotPassword,
-                            style:
-                                Theme.of(context).textTheme.subtitle1!.copyWith(
-                                      fontSize: 14,
-                                      decoration: TextDecoration.underline,
-                                    ),
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleMedium!
+                                .copyWith(
+                                  fontSize: 14,
+                                  decoration: TextDecoration.underline,
+                                ),
                           ),
                         ),
                       ),
@@ -246,7 +296,9 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
                         behavior: HitTestBehavior.opaque,
                         onTap: () async {
                           final dialog = createProgressDialog(
-                              context, S.of(context).pleaseWait);
+                            context,
+                            S.of(context).pleaseWait,
+                          );
                           await dialog.show();
                           await Configuration.instance.logout();
                           await dialog.hide();
@@ -256,17 +308,19 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
                         child: Center(
                           child: Text(
                             S.of(context).changeEmail,
-                            style:
-                                Theme.of(context).textTheme.subtitle1!.copyWith(
-                                      fontSize: 14,
-                                      decoration: TextDecoration.underline,
-                                    ),
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleMedium!
+                                .copyWith(
+                                  fontSize: 14,
+                                  decoration: TextDecoration.underline,
+                                ),
                           ),
                         ),
                       ),
                     ],
                   ),
-                )
+                ),
               ],
             ),
           ),

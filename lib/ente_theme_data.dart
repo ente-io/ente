@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
+import "package:flutter_datetime_picker_bdaya/flutter_datetime_picker_bdaya.dart";
 import 'package:photos/theme/colors.dart';
 import 'package:photos/theme/ente_theme.dart';
 
@@ -15,8 +15,8 @@ final lightThemeData = ThemeData(
   colorScheme: const ColorScheme.light(
     primary: Colors.black,
     secondary: Color.fromARGB(255, 163, 163, 163),
+    background: Colors.white,
   ),
-  accentColor: const Color.fromRGBO(0, 0, 0, 0.6),
   outlinedButtonTheme: buildOutlinedButtonThemeData(
     bgDisabled: const Color.fromRGBO(158, 158, 158, 1),
     bgEnabled: const Color.fromRGBO(0, 0, 0, 1),
@@ -29,7 +29,6 @@ final lightThemeData = ThemeData(
   ),
   switchTheme: getSwitchThemeData(const Color.fromRGBO(102, 187, 106, 1)),
   scaffoldBackgroundColor: const Color.fromRGBO(255, 255, 255, 1),
-  backgroundColor: const Color.fromRGBO(255, 255, 255, 1),
   appBarTheme: const AppBarTheme().copyWith(
     backgroundColor: Colors.white,
     foregroundColor: Colors.black,
@@ -39,8 +38,8 @@ final lightThemeData = ThemeData(
   //https://api.flutter.dev/flutter/material/TextTheme-class.html
   textTheme: _buildTextTheme(const Color.fromRGBO(0, 0, 0, 1)),
   primaryTextTheme: const TextTheme().copyWith(
-    bodyText2: const TextStyle(color: Colors.yellow),
-    bodyText1: const TextStyle(color: Colors.orange),
+    bodyMedium: const TextStyle(color: Colors.yellow),
+    bodyLarge: const TextStyle(color: Colors.orange),
   ),
   cardColor: const Color.fromRGBO(250, 250, 250, 1.0),
   dialogTheme: const DialogTheme().copyWith(
@@ -91,8 +90,11 @@ final darkThemeData = ThemeData(
   primaryIconTheme:
       const IconThemeData(color: Colors.red, opacity: 1.0, size: 50.0),
   hintColor: const Color.fromRGBO(158, 158, 158, 1),
-  colorScheme: const ColorScheme.dark(primary: Colors.white),
-  accentColor: const Color.fromRGBO(45, 194, 98, 0.2),
+  colorScheme: const ColorScheme.dark(
+    primary: Colors.white,
+    background: Color.fromRGBO(0, 0, 0, 1),
+    secondary: Color.fromARGB(255, 163, 163, 163),
+  ),
   buttonTheme: const ButtonThemeData().copyWith(
     buttonColor: const Color.fromRGBO(45, 194, 98, 1.0),
   ),
@@ -109,7 +111,6 @@ final darkThemeData = ThemeData(
     primary: const Color.fromRGBO(255, 255, 255, 1),
   ),
   scaffoldBackgroundColor: const Color.fromRGBO(0, 0, 0, 1),
-  backgroundColor: const Color.fromRGBO(0, 0, 0, 1),
   appBarTheme: const AppBarTheme().copyWith(
     color: Colors.black,
     elevation: 0,
@@ -161,54 +162,54 @@ final darkThemeData = ThemeData(
 
 TextTheme _buildTextTheme(Color textColor) {
   return const TextTheme().copyWith(
-    headline4: TextStyle(
+    headlineMedium: TextStyle(
       color: textColor,
       fontSize: 32,
       fontWeight: FontWeight.w600,
       fontFamily: 'Inter',
     ),
-    headline5: TextStyle(
+    headlineSmall: TextStyle(
       color: textColor,
       fontSize: 24,
       fontWeight: FontWeight.w600,
       fontFamily: 'Inter',
     ),
-    headline6: TextStyle(
+    titleLarge: TextStyle(
       color: textColor,
       fontSize: 18,
       fontFamily: 'Inter',
       fontWeight: FontWeight.w600,
     ),
-    subtitle1: TextStyle(
+    titleMedium: TextStyle(
       color: textColor,
       fontFamily: 'Inter',
       fontSize: 16,
       fontWeight: FontWeight.w500,
     ),
-    subtitle2: TextStyle(
+    titleSmall: TextStyle(
       color: textColor,
       fontFamily: 'Inter',
       fontSize: 14,
       fontWeight: FontWeight.w500,
     ),
-    bodyText1: TextStyle(
+    bodyLarge: TextStyle(
       fontFamily: 'Inter',
       color: textColor,
       fontSize: 16,
       fontWeight: FontWeight.w500,
     ),
-    bodyText2: TextStyle(
+    bodyMedium: TextStyle(
       fontFamily: 'Inter',
       color: textColor,
       fontSize: 14,
       fontWeight: FontWeight.w500,
     ),
-    caption: TextStyle(
+    bodySmall: TextStyle(
       color: textColor.withOpacity(0.6),
       fontSize: 14,
       fontWeight: FontWeight.w500,
     ),
-    overline: TextStyle(
+    labelSmall: TextStyle(
       fontFamily: 'Inter',
       color: textColor,
       fontSize: 14,
@@ -277,13 +278,13 @@ extension CustomColorScheme on ColorScheme {
       ? const Color.fromARGB(255, 238, 238, 238)
       : const Color.fromRGBO(255, 255, 255, 1).withOpacity(0.1);
 
-  DatePickerTheme get dateTimePickertheme => brightness == Brightness.light
-      ? const DatePickerTheme(
+  DatePickerThemeBdaya get dateTimePickertheme => brightness == Brightness.light
+      ? const DatePickerThemeBdaya(
           backgroundColor: Colors.white,
           itemStyle: TextStyle(color: Colors.black),
           cancelStyle: TextStyle(color: Colors.black),
         )
-      : const DatePickerTheme(
+      : const DatePickerThemeBdaya(
           backgroundColor: Colors.black,
           itemStyle: TextStyle(color: Colors.white),
           cancelStyle: TextStyle(color: Colors.white),
@@ -292,10 +293,6 @@ extension CustomColorScheme on ColorScheme {
   Color get stepProgressUnselectedColor => brightness == Brightness.light
       ? const Color.fromRGBO(196, 196, 196, 0.6)
       : const Color.fromRGBO(255, 255, 255, 0.7);
-
-  Color get gNavBarActiveColor => brightness == Brightness.light
-      ? const Color.fromRGBO(255, 255, 255, 0.6)
-      : const Color.fromRGBO(255, 255, 255, 0.9);
 
   Color get galleryThumbBackgroundColor => brightness == Brightness.light
       ? const Color.fromRGBO(240, 240, 240, 1)
@@ -395,9 +392,7 @@ ElevatedButtonThemeData buildElevatedButtonThemeData({
 }) {
   return ElevatedButtonThemeData(
     style: ElevatedButton.styleFrom(
-      elevation: elevation,
-      onPrimary: onPrimary,
-      primary: primary,
+      foregroundColor: onPrimary, backgroundColor: primary, elevation: elevation,
       alignment: Alignment.center,
       textStyle: const TextStyle(
         fontWeight: FontWeight.w600,

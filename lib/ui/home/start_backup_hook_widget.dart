@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/generated/l10n.dart';
 import 'package:photos/services/local_sync_service.dart';
-import 'package:photos/ui/backup_folder_selection_page.dart';
 import 'package:photos/ui/common/gradient_button.dart';
+import 'package:photos/ui/settings/backup/backup_folder_selection_page.dart';
 import 'package:photos/utils/navigation_util.dart';
 
 class StartBackupHookWidget extends StatelessWidget {
@@ -28,7 +28,7 @@ class StartBackupHookWidget extends StatelessWidget {
           S.of(context).noPhotosAreBeingBackedUpRightNow,
           style: Theme.of(context)
               .textTheme
-              .caption!
+              .bodySmall!
               .copyWith(fontFamily: 'Inter-Medium', fontSize: 16),
         ),
         Center(

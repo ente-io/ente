@@ -1,10 +1,13 @@
 import "package:exif/exif.dart";
-import "package:flutter/cupertino.dart";
 import "package:flutter/material.dart";
+import "package:logging/logging.dart";
 import "package:photos/core/configuration.dart";
-import "package:photos/models/file.dart";
-import "package:photos/models/file_type.dart";
-import "package:photos/services/feature_flag_service.dart";
+import "package:photos/generated/l10n.dart";
+import 'package:photos/models/file/file.dart';
+import 'package:photos/models/file/file_type.dart';
+import "package:photos/models/metadata/file_magic.dart";
+import "package:photos/services/file_magic_service.dart";
+import "package:photos/services/update_service.dart";
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/buttons/icon_button_widget.dart';
 import "package:photos/ui/components/divider_widget.dart";
@@ -21,7 +24,8 @@ import "package:photos/ui/viewer/file_details/objects_item_widget.dart";
 import "package:photos/utils/exif_util.dart";
 
 class FileDetailsWidget extends StatefulWidget {
-  final File file;
+  final EnteFile file;
+
   const FileDetailsWidget(
     this.file, {
     Key? key,
@@ -50,20 +54,23 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
   bool _isImage = false;
   late int _currentUserID;
   bool showExifListTile = false;
-  bool hasLocationData = false;
+  final ValueNotifier<bool> hasLocationData = ValueNotifier(false);
+  final Logger _logger = Logger("_FileDetailsWidgetState");
 
   @override
   void initState() {
     debugPrint('file_details_sheet initState');
     _currentUserID = Configuration.instance.getUserID()!;
+    hasLocationData.value = widget.file.hasLocation;
     _isImage = widget.file.fileType == FileType.image ||
         widget.file.fileType == FileType.livePhoto;
+
     _exifNotifier.addListener(() {
-      if (_exifNotifier.value != null) {
-        _generateExifForLocation(_exifNotifier.value!);
-        hasLocationData = _hasLocationData();
+      if (_exifNotifier.value != null && !widget.file.hasLocation) {
+        _updateLocationFromExif(_exifNotifier.value!).ignore();
       }
     });
+
     if (_isImage) {
       _exifNotifier.addListener(() {
         if (_exifNotifier.value != null) {
@@ -137,25 +144,23 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
         },
       ),
     );
-    if (FeatureFlagService.instance.isInternalUserOrDebugBuild()) {
-      fileDetailsTiles.addAll([
-        ValueListenableBuilder(
-          valueListenable: _exifNotifier,
-          builder: (context, _, __) {
-            return hasLocationData
-                ? Column(
-                    children: [
-                      LocationTagsWidget(
-                        widget.file.location!,
-                      ),
-                      const FileDetailsDivider(),
-                    ],
-                  )
-                : const SizedBox.shrink();
-          },
-        )
-      ]);
-    }
+    fileDetailsTiles.addAll([
+      ValueListenableBuilder(
+        valueListenable: hasLocationData,
+        builder: (context, bool value, __) {
+          return value
+              ? Column(
+                  children: [
+                    LocationTagsWidget(
+                      widget.file.location!,
+                    ),
+                    const FileDetailsDivider(),
+                  ],
+                )
+              : const SizedBox.shrink();
+        },
+      ),
+    ]);
     if (_isImage) {
       fileDetailsTiles.addAll([
         ValueListenableBuilder(
@@ -168,15 +173,17 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
               ],
             );
           },
-        )
+        ),
       ]);
     }
-    if (FeatureFlagService.instance.isInternalUserOrDebugBuild()) {
+
+    if (!UpdateService.instance.isFdroidFlavor()) {
       fileDetailsTiles.addAll([
         ObjectsItemWidget(file),
         const FileDetailsDivider(),
       ]);
     }
+
     if (file.uploadedFileID != null && file.updationTime != null) {
       fileDetailsTiles.addAll(
         [
@@ -201,7 +208,7 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
             slivers: <Widget>[
               TitleBarWidget(
                 isFlexibleSpaceDisabled: true,
-                title: "Details",
+                title: S.of(context).details,
                 isOnTopOfScreen: false,
                 backgroundColor: getEnteColorScheme(context).backgroundElevated,
                 leading: IconButtonWidget(
@@ -210,12 +217,7 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
                   onTap: () => Navigator.pop(context),
                 ),
               ),
-              SliverToBoxAdapter(
-                child: AddedByWidget(
-                  widget.file,
-                  _currentUserID,
-                ),
-              ),
+              SliverToBoxAdapter(child: AddedByWidget(widget.file)),
               SliverList(
                 delegate: SliverChildBuilderDelegate(
                   (context, index) {
@@ -223,7 +225,7 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
                   },
                   childCount: fileDetailsTiles.length,
                 ),
-              )
+              ),
             ],
           ),
         ),
@@ -231,35 +233,30 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
     );
   }
 
-  bool _hasLocationData() {
-    final fileLocation = widget.file.location;
-    final hasLocation = (fileLocation != null &&
-            fileLocation.latitude != null &&
-            fileLocation.longitude != null) &&
-        (fileLocation.latitude != 0 || fileLocation.longitude != 0);
-    return hasLocation;
-  }
-
-  void _generateExifForLocation(Map<String, IfdTag> exif) {
-    if (exif["GPS GPSLatitude"] != null) {
-      _exifData["lat"] = exif["GPS GPSLatitude"]!
-          .values
-          .toList()
-          .map((e) => ((e as Ratio).numerator / e.denominator))
-          .toList();
+  //This code is for updating the location of files in which location data is
+  //missing and the EXIF has location data. This is only happens for a
+  //certain specific minority of devices.
+  Future<void> _updateLocationFromExif(Map<String, IfdTag> exif) async {
+    // If the file is not uploaded or the file is not owned by the current user
+    // then we don't need to update the location.
+    if (!widget.file.isUploaded || widget.file.ownerID! != _currentUserID) {
+      return;
     }
-    if (exif["GPS GPSLongitude"] != null) {
-      _exifData["long"] = exif["GPS GPSLongitude"]!
-          .values
-          .toList()
-          .map((e) => ((e as Ratio).numerator / e.denominator))
-          .toList();
-    }
-    if (exif["GPS GPSLatitudeRef"] != null) {
-      _exifData["latRef"] = exif["GPS GPSLatitudeRef"].toString();
-    }
-    if (exif["GPS GPSLongitudeRef"] != null) {
-      _exifData["longRef"] = exif["GPS GPSLongitudeRef"].toString();
+    try {
+      final locationDataFromExif = locationFromExif(exif);
+      if (locationDataFromExif?.latitude != null &&
+          locationDataFromExif?.longitude != null) {
+        widget.file.location = locationDataFromExif;
+        await FileMagicService.instance.updatePublicMagicMetadata([
+          widget.file,
+        ], {
+          latKey: locationDataFromExif!.latitude,
+          longKey: locationDataFromExif.longitude,
+        });
+        hasLocationData.value = true;
+      }
+    } catch (e, s) {
+      _logger.severe("Error while updating location from EXIF", e, s);
     }
   }
 
@@ -282,10 +279,10 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
             "ImageLength"];
     if (imageWidth != null && imageLength != null) {
       _exifData["resolution"] = '$imageWidth x $imageLength';
-      _exifData['megaPixels'] =
-          ((imageWidth.values.firstAsInt() * imageLength.values.firstAsInt()) /
-                  1000000)
-              .toStringAsFixed(1);
+      final double megaPixels =
+          (imageWidth.values.firstAsInt() * imageLength.values.firstAsInt()) / 1000000;
+      final double roundedMegaPixels = (megaPixels * 10).round() / 10.0;
+      _exifData['megaPixels'] = roundedMegaPixels..toStringAsFixed(1);
     } else {
       debugPrint("No image width/height");
     }
@@ -308,7 +305,7 @@ class FileDetailsDivider extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const dividerPadding = EdgeInsets.symmetric(vertical: 15.5);
+    const dividerPadding = EdgeInsets.symmetric(vertical: 9.5);
     return const DividerWidget(
       dividerType: DividerType.menu,
       divColorHasBlur: false,

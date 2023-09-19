@@ -10,9 +10,9 @@ import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/events/force_reload_trash_page_event.dart';
 import 'package:photos/events/trash_updated_event.dart';
 import 'package:photos/extensions/list.dart';
-import 'package:photos/models/file.dart';
+import 'package:photos/models/file/file.dart';
+import 'package:photos/models/file/trash_file.dart';
 import 'package:photos/models/ignored_file.dart';
-import 'package:photos/models/trash_file.dart';
 import 'package:photos/models/trash_item_request.dart';
 import 'package:photos/services/ignored_files_service.dart';
 import 'package:photos/utils/trash_diff_fetcher.dart';
@@ -74,7 +74,7 @@ class TrashSyncService {
       Bus.instance.fire(
         CollectionUpdatedEvent(
           0,
-          <File>[],
+          <EnteFile>[],
           "trash_change",
         ),
       );
@@ -132,7 +132,7 @@ class TrashSyncService {
     );
   }
 
-  Future<void> deleteFromTrash(List<File> files) async {
+  Future<void> deleteFromTrash(List<EnteFile> files) async {
     final params = <String, dynamic>{};
     final uniqueFileIds = files.map((e) => e.uploadedFileID!).toSet().toList();
     final batchedFileIDs = uniqueFileIds.chunks(batchSize);

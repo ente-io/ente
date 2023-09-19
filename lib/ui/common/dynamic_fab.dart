@@ -24,11 +24,11 @@ class DynamicFAB extends StatelessWidget {
         decoration: BoxDecoration(
           boxShadow: [
             BoxShadow(
-              color: Theme.of(context).backgroundColor,
+              color: Theme.of(context).colorScheme.background,
               spreadRadius: 200,
               blurRadius: 100,
               offset: const Offset(0, 230),
-            )
+            ),
           ],
         ),
         width: double.infinity,

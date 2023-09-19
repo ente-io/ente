@@ -91,17 +91,16 @@ class _StatusBarWidgetState extends State<StatusBarWidget> {
                   : const SyncStatusWidget()
               : const Text("ente", style: brandStyleMedium),
         ),
-        AnimatedOpacity(
-          opacity: _showErrorBanner ? 1 : 0,
-          duration: const Duration(milliseconds: 200),
-          child: const Divider(
-            height: 8,
-          ),
-        ),
+        _showErrorBanner
+            ? const Divider(
+                height: 8,
+              )
+            : const SizedBox.shrink(),
         _showErrorBanner
             ? HeaderErrorWidget(error: _syncError)
             : const SizedBox.shrink(),
-        UserRemoteFlagService.instance.shouldShowRecoveryVerification()
+        UserRemoteFlagService.instance.shouldShowRecoveryVerification() &&
+                !_showErrorBanner
             ? Padding(
                 padding:
                     const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12),
@@ -109,16 +108,17 @@ class _StatusBarWidgetState extends State<StatusBarWidget> {
                   startIcon: Icons.error_outline,
                   actionIcon: Icons.arrow_forward,
                   text: S.of(context).confirmYourRecoveryKey,
+                  type: NotificationType.banner,
                   onTap: () async => {
                     await routeToPage(
                       context,
                       const VerifyRecoveryPage(),
                       forceCustomPageRoute: true,
-                    )
+                    ),
                   },
                 ),
               )
-            : const SizedBox.shrink()
+            : const SizedBox.shrink(),
       ],
     );
   }

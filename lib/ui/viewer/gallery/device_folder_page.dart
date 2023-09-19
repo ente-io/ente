@@ -9,7 +9,7 @@ import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/device_collection.dart';
-import 'package:photos/models/file.dart';
+import 'package:photos/models/file/file.dart';
 import 'package:photos/models/gallery_type.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/ignored_files_service.dart';
@@ -73,7 +73,7 @@ class DeviceFolderPage extends StatelessWidget {
           FileSelectionOverlayBar(
             GalleryType.localFolder,
             _selectedFiles,
-          )
+          ),
         ],
       ),
     );
@@ -90,8 +90,9 @@ class BackupHeaderWidget extends StatefulWidget {
 }
 
 class _BackupHeaderWidgetState extends State<BackupHeaderWidget> {
-  late Future<List<File>> filesInDeviceCollection;
+  late Future<List<EnteFile>> filesInDeviceCollection;
   late ValueNotifier<bool> shouldBackup;
+  final Logger _logger = Logger("_BackupHeaderWidgetState");
   @override
   void initState() {
     shouldBackup = ValueNotifier(widget.deviceCollection.shouldBackup);
@@ -121,21 +122,26 @@ class _BackupHeaderWidgetState extends State<BackupHeaderWidget> {
                 trailingWidget: ToggleSwitchWidget(
                   value: () => shouldBackup.value,
                   onChanged: () async {
-                    await RemoteSyncService.instance
-                        .updateDeviceFolderSyncStatus(
-                      {widget.deviceCollection.id: !shouldBackup.value},
-                    ).then(
-                      (val) {
+                    _logger.fine(
+                      "Toggling device folder sync status to "
+                      "${!shouldBackup.value}",
+                    );
+                    try {
+                      await RemoteSyncService.instance
+                          .updateDeviceFolderSyncStatus(
+                        {widget.deviceCollection.id: !shouldBackup.value},
+                      );
+                      if (mounted) {
                         setState(() {
                           shouldBackup.value = !shouldBackup.value;
                         });
-                      },
-                      onError: (e) {
-                        Logger("BackupHeaderWidget").severe(
-                          "Could not update device folder sync status",
-                        );
-                      },
-                    );
+                      }
+                    } catch (e) {
+                      _logger.severe(
+                        "Could not update device folder sync status",
+                        e,
+                      );
+                    }
                   },
                 ),
               ),
@@ -177,7 +183,7 @@ class _BackupHeaderWidgetState extends State<BackupHeaderWidget> {
                     duration: const Duration(milliseconds: 1000),
                   );
                 },
-              )
+              ),
             ],
           ),
         ],
@@ -185,7 +191,7 @@ class _BackupHeaderWidgetState extends State<BackupHeaderWidget> {
     );
   }
 
-  Future<List<File>> _filesInDeviceCollection() async {
+  Future<List<EnteFile>> _filesInDeviceCollection() async {
     return (await FilesDB.instance.getFilesInDeviceCollection(
       widget.deviceCollection,
       Configuration.instance.getUserID(),
@@ -196,25 +202,27 @@ class _BackupHeaderWidgetState extends State<BackupHeaderWidget> {
   }
 
   Future<bool> _hasIgnoredFiles(
-    Future<List<File>> filesInDeviceCollection,
+    Future<List<EnteFile>> filesInDeviceCollection,
   ) async {
-    final List<File> deviceCollectionFiles = await filesInDeviceCollection;
-
-    final ignoredIdsForFile = <String>{};
-    for (File file in deviceCollectionFiles) {
+    final List<EnteFile> deviceCollectionFiles = await filesInDeviceCollection;
+    final allIgnoredIDs =
+        await IgnoredFilesService.instance.idToIgnoreReasonMap;
+    if (allIgnoredIDs.isEmpty) {
+      return false;
+    }
+    for (EnteFile file in deviceCollectionFiles) {
       final String? ignoreID =
           IgnoredFilesService.instance.getIgnoredIDForFile(file);
-      if (ignoreID != null) {
-        ignoredIdsForFile.add(ignoreID);
+      if (ignoreID != null && allIgnoredIDs.containsKey(ignoreID)) {
+        return true;
       }
     }
-    final ignoredFiles = await IgnoredFilesService.instance.ignoredIDs;
-    return ignoredFiles.intersection(ignoredIdsForFile).isNotEmpty;
+    return false;
   }
 }
 
 class ResetIgnoredFilesWidget extends StatefulWidget {
-  final Future<List<File>> filesInDeviceCollection;
+  final Future<List<EnteFile>> filesInDeviceCollection;
   final VoidCallback parentSetState;
   const ResetIgnoredFilesWidget(
     this.filesInDeviceCollection,
@@ -246,7 +254,9 @@ class _ResetIgnoredFilesWidgetState extends State<ResetIgnoredFilesWidget> {
               widget.filesInDeviceCollection,
             );
             RemoteSyncService.instance.sync(silently: true).then((value) {
-              widget.parentSetState.call();
+              if (mounted) {
+                widget.parentSetState.call();
+              }
             });
           },
         ),
@@ -258,9 +268,9 @@ class _ResetIgnoredFilesWidgetState extends State<ResetIgnoredFilesWidget> {
   }
 
   Future<void> _removeFilesFromIgnoredFiles(
-    Future<List<File>> filesInDeviceCollection,
+    Future<List<EnteFile>> filesInDeviceCollection,
   ) async {
-    final List<File> deviceCollectionFiles = await filesInDeviceCollection;
+    final List<EnteFile> deviceCollectionFiles = await filesInDeviceCollection;
     await IgnoredFilesService.instance
         .removeIgnoredMappings(deviceCollectionFiles);
   }

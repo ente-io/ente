@@ -201,7 +201,7 @@ class _VerifyRecoveryPageState extends State<VerifyRecoveryPage> {
                           ),
                         ),
                       ),
-                      const SizedBox(height: 20)
+                      const SizedBox(height: 20),
                     ],
                   ),
                 ),

@@ -1,4 +1,4 @@
-import 'package:photos/models/trash_file.dart';
+import 'package:photos/models/file/trash_file.dart';
 
 const kIgnoreReasonTrash = "trash";
 

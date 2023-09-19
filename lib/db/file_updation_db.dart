@@ -14,9 +14,8 @@ class FileUpdationDB {
   static const tableName = 're_upload_tracker';
   static const columnLocalID = 'local_id';
   static const columnReason = 'reason';
-  static const missingLocation = 'missing_location';
+
   static const modificationTimeUpdated = 'modificationTimeUpdated';
-  static const badCreationTime = 'badCreationTime';
 
   // SQL code to create the database table
   static List<String> _createTable() {
@@ -36,7 +35,7 @@ class FileUpdationDB {
         ALTER TABLE $tableName ADD COLUMN $columnReason TEXT;
       ''',
       '''
-        UPDATE $tableName SET $columnReason = '$missingLocation';
+        UPDATE $tableName SET $columnReason = '$modificationTimeUpdated';
       ''',
     ];
   }
@@ -144,6 +143,25 @@ class FileUpdationDB {
       result.add(row[columnLocalID] as String);
     }
     return result;
+  }
+
+  // delete entries for given list of reasons
+  Future<void> deleteByReasons(List<String> reasons) async {
+    if (reasons.isEmpty) {
+      return;
+    }
+    String inParam = "";
+    for (final reason in reasons) {
+      inParam += "'" + reason + "',";
+    }
+    inParam = inParam.substring(0, inParam.length - 1);
+    final db = await instance.database;
+    await db.rawQuery(
+      '''
+      DELETE FROM $tableName
+      WHERE $columnReason IN ($inParam);
+    ''',
+    );
   }
 
   Map<String, dynamic> _getRowForReUploadTable(String localID, String reason) {

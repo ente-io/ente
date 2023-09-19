@@ -29,8 +29,8 @@ class InfoItemWidget extends StatelessWidget {
         Text(
           title!,
           style: hasChipButtons
-              ? getEnteTextTheme(context).smallMuted
-              : getEnteTextTheme(context).body,
+              ? getEnteTextTheme(context).miniMuted
+              : getEnteTextTheme(context).small,
         ),
         SizedBox(height: hasChipButtons ? 8 : 4),
       ]);

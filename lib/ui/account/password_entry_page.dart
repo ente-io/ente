@@ -7,6 +7,7 @@ import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/account_configured_event.dart';
 import 'package:photos/events/subscription_purchased_event.dart';
 import "package:photos/generated/l10n.dart";
+import "package:photos/models/key_gen_result.dart";
 import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/account/recovery_key_page.dart';
 import 'package:photos/ui/common/dynamic_fab.dart';
@@ -26,7 +27,8 @@ enum PasswordEntryMode {
 class PasswordEntryPage extends StatefulWidget {
   final PasswordEntryMode mode;
 
-  const PasswordEntryPage({this.mode = PasswordEntryMode.set, Key? key})
+  const PasswordEntryPage({required this.mode, Key?
+  key,})
       : super(key: key);
 
   @override
@@ -101,7 +103,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
       resizeToAvoidBottomInset: isKeypadOpen,
       appBar: AppBar(
         leading: widget.mode == PasswordEntryMode.reset
-            ? Container()
+            ? const SizedBox.shrink()
             : IconButton(
                 icon: const Icon(Icons.arrow_back),
                 color: Theme.of(context).iconTheme.color,
@@ -142,7 +144,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
       passwordStrengthColor = Colors.orangeAccent;
     }
     if (_volatilePassword != null) {
-      return Container();
+      return const SizedBox.shrink();
     }
     return Column(
       children: [
@@ -155,7 +157,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
                       const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
                   child: Text(
                     buttonTextAndHeading,
-                    style: Theme.of(context).textTheme.headline4,
+                    style: Theme.of(context).textTheme.headlineMedium,
                   ),
                 ),
                 Padding(
@@ -167,7 +169,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
                     textAlign: TextAlign.start,
                     style: Theme.of(context)
                         .textTheme
-                        .subtitle1!
+                        .titleMedium!
                         .copyWith(fontSize: 14),
                   ),
                 ),
@@ -178,14 +180,15 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
                     text: S.of(context).passwordWarning,
                     style: Theme.of(context)
                         .textTheme
-                        .subtitle1!
+                        .titleMedium!
                         .copyWith(fontSize: 14),
                     tags: {
                       'underline': StyledTextTag(
-                        style: Theme.of(context).textTheme.subtitle1!.copyWith(
-                              fontSize: 14,
-                              decoration: TextDecoration.underline,
-                            ),
+                        style:
+                            Theme.of(context).textTheme.titleMedium!.copyWith(
+                                  fontSize: 14,
+                                  decoration: TextDecoration.underline,
+                                ),
                       ),
                     },
                   ),
@@ -357,10 +360,11 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
                     child: RichText(
                       text: TextSpan(
                         text: S.of(context).howItWorks,
-                        style: Theme.of(context).textTheme.subtitle1!.copyWith(
-                              fontSize: 14,
-                              decoration: TextDecoration.underline,
-                            ),
+                        style:
+                            Theme.of(context).textTheme.titleMedium!.copyWith(
+                                  fontSize: 14,
+                                  decoration: TextDecoration.underline,
+                                ),
                       ),
                     ),
                   ),
@@ -379,9 +383,9 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
         createProgressDialog(context, S.of(context).generatingEncryptionKeys);
     await dialog.show();
     try {
-      final keyAttributes = await Configuration.instance
-          .updatePassword(_passwordController1.text);
-      await UserService.instance.updateKeyAttributes(keyAttributes);
+      final result = await Configuration.instance
+          .getAttributesForNewPassword(_passwordController1.text);
+      await UserService.instance.updateKeyAttributes(result.item1, result.item2);
       await dialog.hide();
       showShortToast(context, S.of(context).passwordChangedSuccessfully);
       Navigator.of(context).pop();
@@ -401,7 +405,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
         createProgressDialog(context, S.of(context).generatingEncryptionKeys);
     await dialog.show();
     try {
-      final result = await Configuration.instance.generateKey(password);
+      final KeyGenResult result = await Configuration.instance.generateKey(password);
       Configuration.instance.setVolatilePassword(null);
       await dialog.hide();
       onDone() async {
@@ -410,6 +414,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
         try {
           await UserService.instance.setAttributes(result);
           await dialog.hide();
+          Configuration.instance.setVolatilePassword(null);
           Bus.instance.fire(AccountConfiguredEvent());
           Navigator.of(context).pushAndRemoveUntil(
             MaterialPageRoute(

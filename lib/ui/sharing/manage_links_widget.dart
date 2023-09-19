@@ -1,10 +1,12 @@
 import 'dart:convert';
-import 'dart:typed_data';
 
 import 'package:collection/collection.dart';
+import "package:fast_base58/fast_base58.dart";
 import 'package:flutter/material.dart';
+import "package:flutter/services.dart";
 import "package:photos/generated/l10n.dart";
-import 'package:photos/models/collection.dart';
+import "package:photos/models/api/collection/public_url.dart";
+import 'package:photos/models/collection/collection.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/theme/colors.dart';
 import 'package:photos/theme/ente_theme.dart';
@@ -19,6 +21,7 @@ import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/date_time_util.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/navigation_util.dart';
+import "package:photos/utils/share_util.dart";
 import 'package:photos/utils/toast_util.dart';
 
 class ManageSharedLinkWidget extends StatefulWidget {
@@ -49,6 +52,10 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
         widget.collection!.publicURLs?.firstOrNull?.passwordEnabled ?? false;
     final enteColorScheme = getEnteColorScheme(context);
     final PublicURL url = widget.collection!.publicURLs!.firstOrNull!;
+    final String collectionKey = Base58Encode(
+      CollectionsService.instance.getCollectionKey(widget.collection!.id),
+    );
+    final String urlValue = "${url.url}#$collectionKey";
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
@@ -116,6 +123,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                               ? S.of(context).expiredLinkInfo
                               : S.of(context).linkExpiresOn(
                                     getFormattedTime(
+                                      context,
                                       DateTime.fromMicrosecondsSinceEpoch(
                                         url.validTill,
                                       ),
@@ -127,9 +135,9 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                   MenuItemWidget(
                     captionedTextWidget: CaptionedTextWidget(
                       title: S.of(context).linkDeviceLimit,
-                      subTitle: widget
-                          .collection!.publicURLs!.first!.deviceLimit
-                          .toString(),
+                      subTitle: url.deviceLimit == 0
+                          ? S.of(context).noDeviceLimit
+                          : "${url.deviceLimit}",
                     ),
                     trailingIcon: Icons.chevron_right,
                     menuItemColor: enteColorScheme.fillFaint,
@@ -224,6 +232,56 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                   const SizedBox(
                     height: 24,
                   ),
+                  if (url.isExpired)
+                    MenuItemWidget(
+                      captionedTextWidget: CaptionedTextWidget(
+                        title: S.of(context).linkHasExpired,
+                        textColor: getEnteColorScheme(context).warning500,
+                      ),
+                      leadingIcon: Icons.error_outline,
+                      leadingIconColor: getEnteColorScheme(context).warning500,
+                      menuItemColor: getEnteColorScheme(context).fillFaint,
+                      isBottomBorderRadiusRemoved: true,
+                    ),
+                  if (!url.isExpired)
+                    MenuItemWidget(
+                      captionedTextWidget: CaptionedTextWidget(
+                        title: S.of(context).copyLink,
+                        makeTextBold: true,
+                      ),
+                      leadingIcon: Icons.copy,
+                      menuItemColor: getEnteColorScheme(context).fillFaint,
+                      showOnlyLoadingState: true,
+                      onTap: () async {
+                        await Clipboard.setData(ClipboardData(text: urlValue));
+                        showShortToast(
+                          context,
+                          S.of(context).linkCopiedToClipboard,
+                        );
+                      },
+                      isBottomBorderRadiusRemoved: true,
+                    ),
+                  if (!url.isExpired)
+                    DividerWidget(
+                      dividerType: DividerType.menu,
+                      bgColor: getEnteColorScheme(context).fillFaint,
+                    ),
+                  if (!url.isExpired)
+                    MenuItemWidget(
+                      captionedTextWidget: CaptionedTextWidget(
+                        title: S.of(context).sendLink,
+                        makeTextBold: true,
+                      ),
+                      leadingIcon: Icons.adaptive.share,
+                      menuItemColor: getEnteColorScheme(context).fillFaint,
+                      onTap: () async {
+                        shareText(urlValue);
+                      },
+                      isTopBorderRadiusRemoved: true,
+                    ),
+                  const SizedBox(
+                    height: 24,
+                  ),
                   MenuItemWidget(
                     captionedTextWidget: CaptionedTextWidget(
                       title: S.of(context).removeLink,
@@ -241,6 +299,9 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                       );
                       if (result && mounted) {
                         Navigator.of(context).pop();
+                        if (widget.collection!.isQuickLinkCollection()) {
+                          Navigator.of(context).pop();
+                        }
                       }
                     },
                   ),

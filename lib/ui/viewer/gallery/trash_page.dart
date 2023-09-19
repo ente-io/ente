@@ -89,7 +89,7 @@ class TrashPage extends StatelessWidget {
               ),
             ),
           ),
-          FileSelectionOverlayBar(GalleryType.trash, _selectedFiles)
+          FileSelectionOverlayBar(GalleryType.trash, _selectedFiles),
         ],
       ),
     );
@@ -107,11 +107,11 @@ class TrashPage extends StatelessWidget {
                   .of(context)
                   .itemsShowTheNumberOfDaysRemainingBeforePermanentDeletion,
               style:
-                  Theme.of(context).textTheme.caption!.copyWith(fontSize: 16),
+                  Theme.of(context).textTheme.bodySmall!.copyWith(fontSize: 16),
             ),
           );
         } else {
-          return Container();
+          return const SizedBox.shrink();
         }
       },
     );
@@ -145,7 +145,7 @@ class BottomButtonsWidget extends StatelessWidget {
                     ),
                     child: Text(
                       S.of(context).deleteAll,
-                      style: Theme.of(context).textTheme.subtitle2!.copyWith(
+                      style: Theme.of(context).textTheme.titleSmall!.copyWith(
                             color: const Color.fromRGBO(255, 101, 101, 1),
                           ),
                     ),

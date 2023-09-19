@@ -65,7 +65,7 @@ class UploadLocksDB {
     final rows = await db.query(
       _table,
       where: '$_columnID = ? AND $_columnOwner = ?',
-      whereArgs: [id, owner.toString()],
+      whereArgs: [id, owner],
     );
     return rows.length == 1;
   }

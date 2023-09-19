@@ -1,17 +1,19 @@
 import 'dart:developer' as dev;
+
 import "package:flutter/material.dart";
+import "package:intl/intl.dart";
 import "package:photos/core/constants.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/events/files_updated_event.dart";
 import "package:photos/events/local_photos_updated_event.dart";
 import "package:photos/generated/l10n.dart";
-import "package:photos/models/file.dart";
+import 'package:photos/models/file/file.dart';
 import "package:photos/models/file_load_result.dart";
 import "package:photos/models/gallery_type.dart";
 import "package:photos/models/selected_files.dart";
 import "package:photos/services/collections_service.dart";
-import "package:photos/services/files_service.dart";
+import "package:photos/services/filter/db_filters.dart";
 import "package:photos/services/location_service.dart";
 import "package:photos/states/location_screen_state.dart";
 import "package:photos/theme/colors.dart";
@@ -30,9 +32,11 @@ class LocationScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final heightOfStatusBar = MediaQuery.of(context).viewPadding.top;
+    const heightOfAppBar = 48.0;
     return Scaffold(
       appBar: const PreferredSize(
-        preferredSize: Size(double.infinity, 48),
+        preferredSize: Size(double.infinity, heightOfAppBar),
         child: TitleBarWidget(
           isSliver: false,
           isFlexibleSpaceDisabled: true,
@@ -42,7 +46,8 @@ class LocationScreen extends StatelessWidget {
       body: Column(
         children: <Widget>[
           SizedBox(
-            height: MediaQuery.of(context).size.height - 102,
+            height: MediaQuery.of(context).size.height -
+                (heightOfAppBar + heightOfStatusBar),
             width: double.infinity,
             child: const LocationGalleryWidget(),
           ),
@@ -129,23 +134,24 @@ class LocationGalleryWidget extends StatefulWidget {
 
 class _LocationGalleryWidgetState extends State<LocationGalleryWidget> {
   late final Future<FileLoadResult> fileLoadResult;
-  late Future<void> removeIgnoredFiles;
+
   late Widget galleryHeaderWidget;
   final _selectedFiles = SelectedFiles();
   @override
   void initState() {
     final collectionsToHide =
-        CollectionsService.instance.collectionsHiddenFromTimeline();
+        CollectionsService.instance.archivedOrHiddenCollectionIds();
     fileLoadResult =
         FilesDB.instance.fetchAllUploadedAndSharedFilesWithLocation(
       galleryLoadStartTime,
       galleryLoadEndTime,
       limit: null,
       asc: false,
-      ignoredCollectionIDs: collectionsToHide,
+      filterOptions: DBFilterOptions(
+        ignoredCollectionIDs: collectionsToHide,
+        hideIgnoredForUpload: true,
+      ),
     );
-    removeIgnoredFiles =
-        FilesService.instance.removeIgnoredFiles(fileLoadResult);
     galleryHeaderWidget = const GalleryHeaderWidget();
     super.initState();
   }
@@ -167,9 +173,8 @@ class _LocationGalleryWidgetState extends State<LocationGalleryWidget> {
     Future<FileLoadResult> filterFiles() async {
       final FileLoadResult result = await fileLoadResult;
       //wait for ignored files to be removed after init
-      await removeIgnoredFiles;
       final stopWatch = Stopwatch()..start();
-      final copyOfFiles = List<File>.from(result.files);
+      final copyOfFiles = List<EnteFile>.from(result.files);
       copyOfFiles.removeWhere((f) {
         return !LocationService.instance.isFileInsideLocationTag(
           centerPoint,
@@ -198,6 +203,7 @@ class _LocationGalleryWidgetState extends State<LocationGalleryWidget> {
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           return Stack(
+            alignment: Alignment.bottomCenter,
             children: [
               Gallery(
                 loadingWidget: Column(
@@ -228,7 +234,7 @@ class _LocationGalleryWidgetState extends State<LocationGalleryWidget> {
               FileSelectionOverlayBar(
                 GalleryType.locationTag,
                 _selectedFiles,
-              )
+              ),
             ],
           );
         } else {
@@ -272,6 +278,12 @@ class _GalleryHeaderWidgetState extends State<GalleryHeaderWidget> {
               width: double.infinity,
               child: TitleBarTitleWidget(
                 title: locationName,
+                onTap: () {
+                  showEditLocationSheet(
+                    context,
+                    InheritedLocationScreenState.of(context).locationTagEntity,
+                  );
+                },
               ),
             ),
             ValueListenableBuilder(
@@ -288,12 +300,14 @@ class _GalleryHeaderWidgetState extends State<GalleryHeaderWidget> {
                   );
                 } else {
                   return Text(
-                    S.of(context).memoryCount(value),
+                    S
+                        .of(context)
+                        .memoryCount(value, NumberFormat().format(value)),
                     style: getEnteTextTheme(context).smallMuted,
                   );
                 }
               },
-            )
+            ),
           ],
         ),
       ),

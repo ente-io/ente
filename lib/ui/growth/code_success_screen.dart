@@ -151,7 +151,7 @@ class CodeSuccessScreen extends StatelessWidget {
                               ),
                             ),
                           ),
-                        )
+                        ),
                       ],
                     ),
                   ),

@@ -4,13 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
 import "package:photos/generated/l10n.dart";
 import 'package:photos/services/sync_service.dart';
+import "package:styled_text/styled_text.dart";
 
 class GrantPermissionsWidget extends StatelessWidget {
   const GrantPermissionsWidget({Key? key}) : super(key: key);
   @override
   Widget build(BuildContext context) {
-    final isLightMode =
-        MediaQuery.of(context).platformBrightness == Brightness.light;
+    final isLightMode = Theme.of(context).brightness == Brightness.light;
     return Scaffold(
       body: SingleChildScrollView(
         child: Padding(
@@ -50,24 +50,20 @@ class GrantPermissionsWidget extends StatelessWidget {
               const SizedBox(height: 36),
               Padding(
                 padding: const EdgeInsets.fromLTRB(40, 0, 40, 0),
-                child: RichText(
-                  text: TextSpan(
-                    style: Theme.of(context)
-                        .textTheme
-                        .headline5!
-                        .copyWith(fontWeight: FontWeight.w700),
-                    children: [
-                      const TextSpan(text: 'ente '),
-                      TextSpan(
-                        text: "needs permission to ",
-                        style: Theme.of(context)
-                            .textTheme
-                            .headline5!
-                            .copyWith(fontWeight: FontWeight.w400),
-                      ),
-                      const TextSpan(text: 'preserve your photos'),
-                    ],
-                  ),
+                child: StyledText(
+                  text: S.of(context).entePhotosPerm,
+                  style: Theme.of(context)
+                      .textTheme
+                      .headlineSmall!
+                      .copyWith(fontWeight: FontWeight.w700),
+                  tags: {
+                    'i': StyledTextTag(
+                      style: Theme.of(context)
+                          .textTheme
+                          .headlineSmall!
+                          .copyWith(fontWeight: FontWeight.w400),
+                    ),
+                  },
                 ),
               ),
             ],
@@ -78,11 +74,11 @@ class GrantPermissionsWidget extends StatelessWidget {
         decoration: BoxDecoration(
           boxShadow: [
             BoxShadow(
-              color: Theme.of(context).backgroundColor,
+              color: Theme.of(context).colorScheme.background,
               spreadRadius: 190,
               blurRadius: 30,
               offset: const Offset(0, 170),
-            )
+            ),
           ],
         ),
         width: double.infinity,
@@ -92,6 +88,7 @@ class GrantPermissionsWidget extends StatelessWidget {
           bottom: 16,
         ),
         child: OutlinedButton(
+          key: const ValueKey("grantPermissionButton"),
           child: Text(S.of(context).grantPermission),
           onPressed: () async {
             final state = await PhotoManager.requestPermissionExtend();
@@ -108,7 +105,7 @@ class GrantPermissionsWidget extends StatelessWidget {
                   TextButton(
                     child: Text(
                       S.of(context).ok,
-                      style: Theme.of(context).textTheme.subtitle1!.copyWith(
+                      style: Theme.of(context).textTheme.titleMedium!.copyWith(
                             fontSize: 14,
                             fontWeight: FontWeight.w700,
                           ),

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
-import 'package:photos/models/file.dart';
+import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file_load_result.dart';
 import 'package:photos/models/gallery_type.dart';
 import 'package:photos/models/search/search_result.dart';
@@ -25,7 +25,7 @@ class SearchResultPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final List<File> files = searchResult.resultFiles();
+    final List<EnteFile> files = searchResult.resultFiles();
     final gallery = Gallery(
       asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) {
         final result = files
@@ -67,7 +67,7 @@ class SearchResultPage extends StatelessWidget {
           FileSelectionOverlayBar(
             overlayType,
             _selectedFiles,
-          )
+          ),
         ],
       ),
     );

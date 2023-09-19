@@ -4,8 +4,8 @@ import 'dart:math';
 import 'package:logging/logging.dart';
 import 'package:photos/core/network/network.dart';
 import 'package:photos/db/files_db.dart';
-import 'package:photos/models/file.dart';
-import 'package:photos/models/magic_metadata.dart';
+import 'package:photos/models/file/file.dart';
+import "package:photos/models/metadata/file_magic.dart";
 import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/file_download_util.dart';
 
@@ -14,12 +14,6 @@ class DiffFetcher {
   final _enteDio = NetworkClient.instance.enteDio;
 
   Future<Diff> getEncryptedFilesDiff(int collectionID, int sinceTime) async {
-    _logger.info(
-      "Fetching diff in collection " +
-          collectionID.toString() +
-          " since " +
-          sinceTime.toString(),
-    );
     try {
       final response = await _enteDio.get(
         "/collections/v2/diff",
@@ -28,31 +22,35 @@ class DiffFetcher {
           "sinceTime": sinceTime,
         },
       );
-      final files = <File>[];
       int latestUpdatedAtTime = 0;
       final diff = response.data["diff"] as List;
       final bool hasMore = response.data["hasMore"] as bool;
       final startTime = DateTime.now();
-      final existingFiles =
-          await FilesDB.instance.getUploadedFileIDs(collectionID);
-      final deletedFiles = <File>[];
+      late Set<int> existingUploadIDs;
+      if(diff.isNotEmpty) {
+        existingUploadIDs = await FilesDB.instance.getUploadedFileIDs(collectionID);
+      }
+      final deletedFiles = <EnteFile>[];
+      final updatedFiles = <EnteFile>[];
+
       for (final item in diff) {
-        final file = File();
+        final file = EnteFile();
         file.uploadedFileID = item["id"];
         file.collectionID = item["collectionID"];
         file.updationTime = item["updationTime"];
         latestUpdatedAtTime = max(latestUpdatedAtTime, file.updationTime!);
         if (item["isDeleted"]) {
-          if (existingFiles.contains(file.uploadedFileID)) {
+          if (existingUploadIDs.contains(file.uploadedFileID)) {
             deletedFiles.add(file);
           }
           continue;
         }
-        if (existingFiles.contains(file.uploadedFileID)) {
+        if (existingUploadIDs.contains(file.uploadedFileID)) {
           final existingFile = await FilesDB.instance
               .getUploadedFile(file.uploadedFileID!, file.collectionID!);
           if (existingFile != null) {
             file.generatedID = existingFile.generatedID;
+            file.addedTime = existingFile.addedTime;
           }
         }
         file.ownerID = item["ownerID"];
@@ -64,7 +62,6 @@ class DiffFetcher {
         if (item["info"] != null) {
           file.fileSize = item["info"]["fileSize"];
         }
-
         final fileKey = getFileKey(file);
         final encodedMetadata = await CryptoUtil.decryptChaCha(
           CryptoUtil.base642bin(item["metadata"]["encryptedData"]),
@@ -96,22 +93,12 @@ class DiffFetcher {
           file.pubMagicMetadata =
               PubMagicMetadata.fromEncodedJson(file.pubMmdEncodedJson!);
         }
-        files.add(file);
+        updatedFiles.add(file);
       }
-
-      final endTime = DateTime.now();
-      _logger.info(
-        "time for parsing " +
-            files.length.toString() +
-            " items within collection " +
-            collectionID.toString() +
-            ": " +
-            Duration(
-              microseconds: (endTime.microsecondsSinceEpoch -
-                  startTime.microsecondsSinceEpoch),
-            ).inMilliseconds.toString(),
-      );
-      return Diff(files, deletedFiles, hasMore, latestUpdatedAtTime);
+      _logger.info('[Collection-$collectionID] parsed ${diff.length} '
+          'diff items ( ${updatedFiles.length} updated) in ${DateTime.now()
+          .difference(startTime).inMilliseconds}ms');
+      return Diff(updatedFiles, deletedFiles, hasMore, latestUpdatedAtTime);
     } catch (e, s) {
       _logger.severe(e, s);
       rethrow;
@@ -120,8 +107,8 @@ class DiffFetcher {
 }
 
 class Diff {
-  final List<File> updatedFiles;
-  final List<File> deletedFiles;
+  final List<EnteFile> updatedFiles;
+  final List<EnteFile> deletedFiles;
   final bool hasMore;
   final int latestUpdatedAtTime;
 

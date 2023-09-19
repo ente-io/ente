@@ -63,7 +63,7 @@ class _PaymentWebPageState extends State<PaymentWebPage> {
           children: <Widget>[
             (progress != 1.0)
                 ? LinearProgressIndicator(value: progress)
-                : Container(),
+                : const SizedBox.shrink(),
             Expanded(
               child: InAppWebView(
                 initialUrlRequest: URLRequest(url: initPaymentUrl),
@@ -229,7 +229,9 @@ class _PaymentWebPageState extends State<PaymentWebPage> {
           ? S.of(context).yourPurchaseWasSuccessful
           : S.of(context).yourSubscriptionWasUpdatedSuccessfully;
       await _showExitPageDialog(
-          title: S.of(context).thankYou, content: content);
+        title: S.of(context).thankYou,
+        content: content,
+      );
     } catch (error) {
       _logger.severe(error);
       await _dialog.hide();

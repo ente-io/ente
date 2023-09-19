@@ -15,7 +15,7 @@
 		<key>CFBundleInfoDictionaryVersion</key>
 		<string>6.0</string>
 		<key>CFBundleName</key>
-		<string>ente</string>
+		<string>ente Photos</string>
 		<key>CFBundlePackageType</key>
 		<string>APPL</string>
 		<key>CFBundleShortVersionString</key>
@@ -64,6 +64,10 @@
 		</dict>
 		<key>ITSAppUsesNonExemptEncryption</key>
 		<false/>
+		 <key>FLTEnableImpeller</key>
+         <false />
+         <key>FLTEnableWideGamut</key>
+         <false/>
 		<key>NSFaceIDUsageDescription</key>
 		<string>Please allow ente to lock itself with FaceID or TouchID</string>
 		<key>NSCameraUsageDescription</key>

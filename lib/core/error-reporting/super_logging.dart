@@ -16,6 +16,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:photos/core/error-reporting/tunneled_transport.dart';
 import 'package:photos/models/typedefs.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 extension SuperString on String {
   Iterable<String> chunked(int chunkSize) sync* {
@@ -141,11 +142,16 @@ class SuperLogging {
   /// The current super logging configuration
   static late LogConfig config;
 
+  static late SharedPreferences _preferences;
+
+  static const keyShouldReportCrashes = "should_report_crashes";
+
   static Future<void> main([LogConfig? appConfig]) async {
     appConfig ??= LogConfig();
     SuperLogging.config = appConfig;
 
     WidgetsFlutterBinding.ensureInitialized();
+    _preferences = await SharedPreferences.getInstance();
 
     appVersion ??= await getAppVersion();
     final isFDroidClient = await isFDroidBuild();
@@ -155,7 +161,10 @@ class SuperLogging {
     }
 
     final enable = appConfig.enableInDebugMode || kReleaseMode;
-    sentryIsEnabled = enable && appConfig.sentryDsn != null && !isFDroidClient;
+    sentryIsEnabled = enable &&
+        appConfig.sentryDsn != null &&
+        !isFDroidClient &&
+        shouldReportCrashes();
     fileIsEnabled = enable && appConfig.logDirPath != null;
 
     if (fileIsEnabled) {
@@ -205,10 +214,14 @@ class SuperLogging {
     }
   }
 
-  static void setUserID(String userID) async {
+  static Future<void> setUserID(String userID) async {
     if (config.sentryDsn != null) {
-      Sentry.configureScope((scope) => scope.user = SentryUser(id: userID));
-      $.info("setting sentry user ID to: $userID");
+      $.finest("setting sentry user ID to: $userID");
+      Sentry.configureScope(
+        (scope) => scope.setUser(SentryUser(id: userID)).onError(
+              (e, s) => $.warning("failed to configure scope user", e, s),
+            ),
+      );
     }
   }
 
@@ -305,6 +318,18 @@ class SuperLogging {
   static void doSentryRetry(Error error) async {
     await Future.delayed(config.sentryRetryDelay);
     sentryQueueControl.add(error);
+  }
+
+  static bool shouldReportCrashes() {
+    if (_preferences.containsKey(keyShouldReportCrashes)) {
+      return _preferences.getBool(keyShouldReportCrashes)!;
+    } else {
+      return true; // Report crashes by default
+    }
+  }
+
+  static Future<void> setShouldReportCrashes(bool value) {
+    return _preferences.setBool(keyShouldReportCrashes, value);
   }
 
   /// The log file currently in use.

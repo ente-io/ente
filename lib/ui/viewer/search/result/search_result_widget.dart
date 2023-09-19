@@ -83,7 +83,7 @@ class SearchResultWidget extends StatelessWidget {
                         return const SizedBox.shrink();
                       }
                     },
-                  )
+                  ),
                 ],
               ),
               const Spacer(),

@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:photos/core/constants.dart';
 import "package:photos/generated/l10n.dart";
-import 'package:photos/models/collection.dart';
+import 'package:photos/models/collection/collection.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';
 import 'package:photos/ui/components/divider_widget.dart';
 import 'package:photos/ui/components/menu_item_widget/menu_item_widget.dart';
-import 'package:photos/ui/components/menu_section_description_widget.dart';
 import 'package:photos/ui/components/title_bar_title_widget.dart';
 import 'package:photos/ui/components/title_bar_widget.dart';
 import 'package:photos/utils/dialog_util.dart';
@@ -44,9 +43,6 @@ class DeviceLimitPickerPage extends StatelessWidget {
                             const BorderRadius.all(Radius.circular(8)),
                         child: ItemsWidget(collection),
                       ),
-                      MenuSectionDescriptionWidget(
-                        content: S.of(context).maxDeviceLimitSpikeHandling(50),
-                      )
                     ],
                   ),
                 );
@@ -115,7 +111,7 @@ class _ItemsWidgetState extends State<ItemsWidget> {
       key: ValueKey(deviceLimit),
       menuItemColor: getEnteColorScheme(context).fillFaint,
       captionedTextWidget: CaptionedTextWidget(
-        title: "$deviceLimit",
+        title: deviceLimit == 0 ? S.of(context).noDeviceLimit : "$deviceLimit",
       ),
       trailingIcon: currentDeviceLimit == deviceLimit ? Icons.check : null,
       alignCaptionedTextToLeft: true,

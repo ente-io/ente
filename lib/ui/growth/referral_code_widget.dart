@@ -41,7 +41,7 @@ class ReferralCodeWidget extends StatelessWidget {
                   Icons.adaptive.share,
                   size: 22,
                   color: colorScheme.strokeMuted,
-                )
+                ),
               ],
             ),
           ),

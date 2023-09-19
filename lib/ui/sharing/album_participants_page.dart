@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/extensions/list.dart';
 import "package:photos/generated/l10n.dart";
-import 'package:photos/models/collection.dart';
+import "package:photos/models/api/collection/user.dart";
+import 'package:photos/models/collection/collection.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';
 import 'package:photos/ui/components/divider_widget.dart';
@@ -83,9 +84,10 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
         slivers: <Widget>[
           TitleBarWidget(
             flexibleSpaceTitle: TitleBarTitleWidget(
-              title: "${widget.collection.name}",
+              title: widget.collection.displayName,
             ),
-            flexibleSpaceCaption: "$participants Participants",
+            flexibleSpaceCaption:
+                S.of(context).albumParticipantsCount(participants),
           ),
           SliverList(
             delegate: SliverChildBuilderDelegate(

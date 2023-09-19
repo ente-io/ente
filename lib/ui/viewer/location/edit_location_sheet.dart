@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import "package:intl/intl.dart";
 import "package:modal_bottom_sheet/modal_bottom_sheet.dart";
 import "package:photos/core/constants.dart";
 import "package:photos/generated/l10n.dart";
@@ -61,8 +62,8 @@ class _EditLocationSheetState extends State<EditLocationSheet> {
   final ValueNotifier<int?> _memoriesCountNotifier = ValueNotifier(null);
   final ValueNotifier<bool> _submitNotifer = ValueNotifier(false);
   final ValueNotifier<bool> _cancelNotifier = ValueNotifier(false);
-  final ValueNotifier<int> _selectedRadiusIndexNotifier =
-      ValueNotifier(defaultRadiusValueIndex);
+  final ValueNotifier<double> _selectedRadiusNotifier =
+      ValueNotifier(defaultRadiusValue);
   final _focusNode = FocusNode();
   final _textEditingController = TextEditingController();
   final _isEmptyNotifier = ValueNotifier(false);
@@ -71,7 +72,7 @@ class _EditLocationSheetState extends State<EditLocationSheet> {
   @override
   void initState() {
     _focusNode.addListener(_focusNodeListener);
-    _selectedRadiusIndexNotifier.addListener(_selectedRadiusIndexListener);
+    _selectedRadiusNotifier.addListener(_selectedRadiusListener);
     super.initState();
   }
 
@@ -80,7 +81,7 @@ class _EditLocationSheetState extends State<EditLocationSheet> {
     _focusNode.removeListener(_focusNodeListener);
     _submitNotifer.dispose();
     _cancelNotifier.dispose();
-    _selectedRadiusIndexNotifier.dispose();
+    _selectedRadiusNotifier.dispose();
     super.dispose();
   }
 
@@ -94,10 +95,12 @@ class _EditLocationSheetState extends State<EditLocationSheet> {
       padding: const EdgeInsets.fromLTRB(0, 32, 0, 8),
       child: Column(
         children: [
-          const Padding(
-            padding: EdgeInsets.only(bottom: 16),
+          Padding(
+            padding: const EdgeInsets.only(bottom: 16),
             child: BottomOfTitleBarWidget(
-              title: TitleBarTitleWidget(title: "Edit location"),
+              title: TitleBarTitleWidget(
+                title: S.of(context).editLocationTagTitle,
+              ),
             ),
           ),
           Expanded(
@@ -162,9 +165,9 @@ class _EditLocationSheetState extends State<EditLocationSheet> {
                         const EditCenterPointTileWidget(),
                         const SizedBox(height: 20),
                         RadiusPickerWidget(
-                          _selectedRadiusIndexNotifier,
+                          _selectedRadiusNotifier,
                         ),
-                        const SizedBox(height: 20),
+                        const SizedBox(height: 16),
                       ],
                     ),
                   ),
@@ -195,7 +198,10 @@ class _EditLocationSheetState extends State<EditLocationSheet> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  S.of(context).memoryCount(value),
+                                  S.of(context).memoryCount(
+                                        value,
+                                        NumberFormat().format(value),
+                                      ),
                                   style: textTheme.body,
                                 ),
                                 if (value > 1000)
@@ -240,7 +246,7 @@ class _EditLocationSheetState extends State<EditLocationSheet> {
     final locationTagState = InheritedLocationTagData.of(context);
     await LocationService.instance.updateLocationTag(
       locationTagEntity: locationTagState.locationTagEntity!,
-      newRadius: radiusValues[locationTagState.selectedRadiusIndex],
+      newRadius: locationTagState.selectedRadius,
       newName: _textEditingController.text.trim(),
       newCenterPoint: InheritedLocationTagData.of(context).centerPoint,
     );
@@ -264,11 +270,11 @@ class _EditLocationSheetState extends State<EditLocationSheet> {
     }
   }
 
-  void _selectedRadiusIndexListener() {
+  void _selectedRadiusListener() {
     InheritedLocationTagData.of(
       context,
-    ).updateSelectedIndex(
-      _selectedRadiusIndexNotifier.value,
+    ).updateSelectedRadius(
+      _selectedRadiusNotifier.value,
     );
     _memoriesCountNotifier.value = null;
   }

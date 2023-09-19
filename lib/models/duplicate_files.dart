@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:photos/models/file.dart';
+import 'package:photos/models/file/file.dart';
 import 'package:photos/services/collections_service.dart';
 
 class DuplicateFilesResponse {
@@ -42,7 +42,7 @@ class DuplicateItems {
 }
 
 class DuplicateFiles {
-  final List<File> files;
+  final List<EnteFile> files;
   final int size;
   static final collectionsService = CollectionsService.instance;
 
@@ -55,11 +55,12 @@ class DuplicateFiles {
 
   sortByCollectionName() {
     files.sort((first, second) {
-      final firstName =
-          collectionsService.getCollectionByID(first.collectionID!)!.name ?? '';
-      final secondName =
-          collectionsService.getCollectionByID(second.collectionID!)!.name ??
-              '';
+      final firstName = collectionsService
+          .getCollectionByID(first.collectionID!)!
+          .displayName;
+      final secondName = collectionsService
+          .getCollectionByID(second.collectionID!)!
+          .displayName;
       return firstName.compareTo(secondName);
     });
   }

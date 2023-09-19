@@ -1,8 +1,8 @@
 import "package:flutter/cupertino.dart";
 import "package:modal_bottom_sheet/modal_bottom_sheet.dart";
 import "package:photos/generated/l10n.dart";
-import "package:photos/models/file.dart";
-import "package:photos/models/file_type.dart";
+import 'package:photos/models/file/file.dart';
+import 'package:photos/models/file/file_type.dart';
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/action_sheet_widget.dart";
@@ -15,8 +15,8 @@ import "package:photos/utils/toast_util.dart";
 
 Future<void> showSingleFileDeleteSheet(
   BuildContext context,
-  File file, {
-  Function(File)? onFileRemoved,
+  EnteFile file, {
+  Function(EnteFile)? onFileRemoved,
 }) async {
   final List<ButtonWidget> buttons = [];
   final String fileType = file.fileType == FileType.video
@@ -26,7 +26,7 @@ Future<void> showSingleFileDeleteSheet(
       file.uploadedFileID != null && file.localID != null;
   final bool isLocalOnly = file.uploadedFileID == null && file.localID != null;
   final bool isRemoteOnly = file.uploadedFileID != null && file.localID == null;
-  String bodyHighlight = S.of(context).singleFileDeleteHighlight;
+  final String bodyHighlight = S.of(context).singleFileDeleteHighlight;
   String body = "";
   if (isBothLocalAndRemote) {
     body = S.of(context).singleFileInBothLocalAndRemote(fileType);
@@ -54,7 +54,6 @@ Future<void> showSingleFileDeleteSheet(
           await deleteFilesFromRemoteOnly(context, [file]);
           showShortToast(context, S.of(context).movedToTrash);
           if (isRemoteOnly) {
-            Navigator.of(context, rootNavigator: true).pop();
             if (onFileRemoved != null) {
               onFileRemoved(file);
             }
@@ -79,7 +78,6 @@ Future<void> showSingleFileDeleteSheet(
         onTap: () async {
           await deleteFilesOnDeviceOnly(context, [file]);
           if (isLocalOnly) {
-            Navigator.of(context, rootNavigator: true).pop();
             if (onFileRemoved != null) {
               onFileRemoved(file);
             }
@@ -131,11 +129,15 @@ Future<void> showSingleFileDeleteSheet(
   }
 }
 
-Future<void> showDetailsSheet(BuildContext context, File file) async {
+Future<void> showDetailsSheet(BuildContext context, EnteFile file) async {
   final colorScheme = getEnteColorScheme(context);
   return showBarModalBottomSheet(
     topControl: const SizedBox.shrink(),
-    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(0)),
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(
+        top: Radius.circular(5),
+      ),
+    ),
     backgroundColor: colorScheme.backgroundElevated,
     barrierColor: backdropFaintDark,
     context: context,

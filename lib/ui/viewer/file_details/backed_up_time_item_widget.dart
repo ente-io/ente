@@ -1,11 +1,12 @@
 import "package:flutter/material.dart";
-import "package:photos/models/file.dart";
+import "package:intl/intl.dart";
+import 'package:photos/models/file/file.dart';
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/info_item_widget.dart";
 import "package:photos/utils/date_time_util.dart";
 
 class BackedUpTimeItemWidget extends StatelessWidget {
-  final File file;
+  final EnteFile file;
   const BackedUpTimeItemWidget(this.file, {super.key});
 
   @override
@@ -15,15 +16,14 @@ class BackedUpTimeItemWidget extends StatelessWidget {
     return InfoItemWidget(
       key: const ValueKey("Backedup date"),
       leadingIcon: Icons.backup_outlined,
-      title: getFullDate(
-        DateTime.fromMicrosecondsSinceEpoch(file.updationTime!),
-      ),
+      title: DateFormat.yMMMEd(Localizations.localeOf(context).languageCode)
+          .format(dateTimeForUpdationTime),
       subtitleSection: Future.value([
         Text(
           getTimeIn12hrFormat(dateTimeForUpdationTime) +
               "  " +
               dateTimeForUpdationTime.timeZoneName,
-          style: getEnteTextTheme(context).smallMuted,
+          style: getEnteTextTheme(context).miniMuted,
         ),
       ]),
     );

@@ -149,11 +149,12 @@ class TitleWidget extends StatelessWidget {
   final String? title;
   final String? caption;
   final bool isTitleH2WithoutLeading;
-  const TitleWidget(
-      {this.title,
-      this.caption,
-      required this.isTitleH2WithoutLeading,
-      super.key});
+  const TitleWidget({
+    this.title,
+    this.caption,
+    required this.isTitleH2WithoutLeading,
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -177,7 +178,7 @@ class TitleWidget extends StatelessWidget {
               : Text(
                   caption!,
                   style: textTheme.miniMuted,
-                )
+                ),
         ],
       ),
     );
@@ -189,8 +190,11 @@ class FlexibleSpaceBarWidget extends StatelessWidget {
   final String? flexibleSpaceCaption;
   final double toolbarHeight;
   const FlexibleSpaceBarWidget(
-      this.flexibleSpaceTitle, this.flexibleSpaceCaption, this.toolbarHeight,
-      {super.key});
+    this.flexibleSpaceTitle,
+    this.flexibleSpaceCaption,
+    this.toolbarHeight, {
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -220,7 +224,7 @@ class FlexibleSpaceBarWidget extends StatelessWidget {
                           style: textTheme.smallMuted,
                           overflow: TextOverflow.ellipsis,
                           maxLines: 1,
-                        )
+                        ),
                 ],
               ),
             ),

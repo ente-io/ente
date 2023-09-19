@@ -4,16 +4,19 @@ import "package:photos/generated/l10n.dart";
 import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/common/dynamic_fab.dart';
 import 'package:step_progress_indicator/step_progress_indicator.dart';
+import "package:styled_text/styled_text.dart";
 
 class OTTVerificationPage extends StatefulWidget {
   final String email;
   final bool isChangeEmail;
   final bool isCreateAccountScreen;
+  final bool isResetPasswordScreen;
 
   const OTTVerificationPage(
     this.email, {
     this.isChangeEmail = false,
     this.isCreateAccountScreen = false,
+        this.isResetPasswordScreen = false,
     Key? key,
   }) : super(key: key);
 
@@ -63,6 +66,7 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
       ),
       body: _getBody(),
       floatingActionButton: DynamicFAB(
+        key: const ValueKey("verifyOttButton"),
         isKeypadOpen: isKeypadOpen,
         isFormValid: _verificationCodeController.text.isNotEmpty,
         buttonText: S.of(context).verify,
@@ -75,7 +79,8 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
             );
           } else {
             UserService.instance
-                .verifyEmail(context, _verificationCodeController.text);
+                .verifyEmail(context, _verificationCodeController.text,
+              isResettingPasswordScreen: widget.isResetPasswordScreen,);
           }
           FocusScope.of(context).unfocus();
         },
@@ -95,7 +100,7 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
               padding: const EdgeInsets.fromLTRB(20, 30, 20, 15),
               child: Text(
                 S.of(context).verifyEmail,
-                style: Theme.of(context).textTheme.headline4,
+                style: Theme.of(context).textTheme.headlineMedium,
               ),
             ),
             Padding(
@@ -108,31 +113,36 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
                       children: [
                         Padding(
                           padding: const EdgeInsets.fromLTRB(0, 0, 0, 12),
-                          child: RichText(
-                            text: TextSpan(
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .subtitle1!
-                                  .copyWith(fontSize: 14),
-                              children: [
-                                TextSpan(text: S.of(context).weveSentAMailTo),
-                                TextSpan(
-                                  text: widget.email,
-                                  style: TextStyle(
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .greenAlternative,
-                                  ),
-                                )
-                              ],
-                            ),
+                          child: StyledText(
+                            text: S.of(context).weHaveSendEmailTo(widget.email),
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleMedium!
+                                .copyWith(fontSize: 14),
+                            tags: {
+                              'green': StyledTextTag(
+                                style: TextStyle(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .greenAlternative,
+                                ),
+                              ),
+                            },
                           ),
                         ),
+                        widget.isResetPasswordScreen ?
+                          Text(
+                            S.of(context).toResetVerifyEmail,
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleMedium!
+                                .copyWith(fontSize: 14),
+                          ):
                         Text(
                           S.of(context).checkInboxAndSpamFolder,
                           style: Theme.of(context)
                               .textTheme
-                              .subtitle1!
+                              .titleMedium!
                               .copyWith(fontSize: 14),
                         ),
                       ],
@@ -141,14 +151,15 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
                   SizedBox(
                     width: MediaQuery.of(context).size.width * 0.2,
                     height: 1,
-                  )
+                  ),
                 ],
               ),
             ),
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
               child: TextFormField(
-                style: Theme.of(context).textTheme.subtitle1,
+                key: const ValueKey("ottVerificationInputField"),
+                style: Theme.of(context).textTheme.titleMedium,
                 decoration: InputDecoration(
                   filled: true,
                   hintText: S.of(context).tapToEnterCode,
@@ -181,16 +192,18 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
                         context,
                         widget.email,
                         isCreateAccountScreen: widget.isCreateAccountScreen,
+                        isResetPasswordScreen: widget.isResetPasswordScreen,
+                        isChangeEmail: widget.isChangeEmail,
                       );
                     },
                     child: Text(
                       S.of(context).resendEmail,
-                      style: Theme.of(context).textTheme.subtitle1!.copyWith(
+                      style: Theme.of(context).textTheme.titleMedium!.copyWith(
                             fontSize: 14,
                             decoration: TextDecoration.underline,
                           ),
                     ),
-                  )
+                  ),
                 ],
               ),
             ),

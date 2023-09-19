@@ -1,15 +1,26 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import "package:photos/models/typedefs.dart";
 
 class Debouncer {
   final Duration _duration;
   final ValueNotifier<bool> _debounceActiveNotifier = ValueNotifier(false);
+
+  /// If executionInterval is not null, then the debouncer will execute the
+  /// current callback it has in run() method repeatedly in the given interval.
+  final int? executionInterval;
   Timer? _debounceTimer;
 
-  Debouncer(this._duration);
+  Debouncer(this._duration, {this.executionInterval});
 
-  void run(Future<void> Function() fn) {
+  final Stopwatch _stopwatch = Stopwatch();
+
+  void run(FutureVoidCallback fn) {
+    if (executionInterval != null) {
+      runCallbackIfIntervalTimeElapses(fn);
+    }
+
     if (isActive()) {
       _debounceTimer!.cancel();
     }
@@ -23,6 +34,14 @@ class Debouncer {
   void cancelDebounce() {
     if (_debounceTimer != null) {
       _debounceTimer!.cancel();
+    }
+  }
+
+  runCallbackIfIntervalTimeElapses(FutureVoidCallback fn) {
+    _stopwatch.isRunning ? null : _stopwatch.start();
+    if (_stopwatch.elapsedMilliseconds > executionInterval!) {
+      _stopwatch.reset();
+      fn();
     }
   }
 

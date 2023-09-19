@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
+import "package:intl/intl.dart";
 import 'package:photos/ente_theme_data.dart';
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/subscription.dart';
+import "package:photos/services/update_service.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/captioned_text_widget.dart";
 import "package:photos/ui/components/menu_item_widget/menu_item_widget.dart";
 import 'package:photos/ui/payment/billing_questions_widget.dart';
 import 'package:photos/utils/data_util.dart';
-import 'package:photos/utils/date_time_util.dart';
 
 class SubscriptionHeaderWidget extends StatefulWidget {
   final bool? isOnboarding;
@@ -38,19 +39,19 @@ class _SubscriptionHeaderWidgetState extends State<SubscriptionHeaderWidget> {
               children: [
                 Text(
                   S.of(context).selectYourPlan,
-                  style: Theme.of(context).textTheme.headline4,
+                  style: Theme.of(context).textTheme.headlineMedium,
                 ),
               ],
             ),
             const SizedBox(height: 10),
             Text(
               S.of(context).enteSubscriptionPitch,
-              style: Theme.of(context).textTheme.caption,
+              style: Theme.of(context).textTheme.bodySmall,
             ),
             const SizedBox(height: 4),
             Text(
               S.of(context).enteSubscriptionShareWithFamily,
-              style: Theme.of(context).textTheme.caption,
+              style: Theme.of(context).textTheme.bodySmall,
             ),
           ],
         ),
@@ -66,15 +67,15 @@ class _SubscriptionHeaderWidgetState extends State<SubscriptionHeaderWidget> {
               children: [
                 TextSpan(
                   text: S.of(context).currentUsageIs,
-                  style: Theme.of(context).textTheme.subtitle1,
+                  style: Theme.of(context).textTheme.titleMedium,
                 ),
                 TextSpan(
                   text: formatBytes(widget.currentUsage!),
                   style: Theme.of(context)
                       .textTheme
-                      .subtitle1!
+                      .titleMedium!
                       .copyWith(fontWeight: FontWeight.bold),
-                )
+                ),
               ],
             ),
           ),
@@ -94,12 +95,16 @@ class ValidityWidget extends StatelessWidget {
     if (currentSubscription == null) {
       return const SizedBox.shrink();
     }
-    final endDate = getDateAndMonthAndYear(
+    final endDate =
+        DateFormat.yMMMd(Localizations.localeOf(context).languageCode).format(
       DateTime.fromMicrosecondsSinceEpoch(currentSubscription!.expiryTime),
     );
+
     var message = S.of(context).renewsOn(endDate);
     if (currentSubscription!.productID == freeProductID) {
-      message = S.of(context).freeTrialValidTill(endDate);
+      message = UpdateService.instance.isPlayStoreFlavor()
+          ? S.of(context).playStoreFreeTrialValidTill(endDate)
+          : S.of(context).freeTrialValidTill(endDate);
     } else if (currentSubscription!.attributes?.isCancelled ?? false) {
       message = S.of(context).subWillBeCancelledOn(endDate);
     }
@@ -107,7 +112,8 @@ class ValidityWidget extends StatelessWidget {
       padding: const EdgeInsets.only(top: 8),
       child: Text(
         message,
-        style: Theme.of(context).textTheme.caption,
+        style: Theme.of(context).textTheme.bodySmall,
+        textAlign: TextAlign.center,
       ),
     );
   }

@@ -21,7 +21,7 @@ LocationTag _$LocationTagFromJson(Map<String, dynamic> json) {
 /// @nodoc
 mixin _$LocationTag {
   String get name => throw _privateConstructorUsedError;
-  int get radius => throw _privateConstructorUsedError;
+  double get radius => throw _privateConstructorUsedError;
   double get aSquare => throw _privateConstructorUsedError;
   double get bSquare => throw _privateConstructorUsedError;
   Location get centerPoint => throw _privateConstructorUsedError;
@@ -40,7 +40,7 @@ abstract class $LocationTagCopyWith<$Res> {
   @useResult
   $Res call(
       {String name,
-      int radius,
+      double radius,
       double aSquare,
       double bSquare,
       Location centerPoint});
@@ -75,7 +75,7 @@ class _$LocationTagCopyWithImpl<$Res, $Val extends LocationTag>
       radius: null == radius
           ? _value.radius
           : radius // ignore: cast_nullable_to_non_nullable
-              as int,
+              as double,
       aSquare: null == aSquare
           ? _value.aSquare
           : aSquare // ignore: cast_nullable_to_non_nullable
@@ -110,7 +110,7 @@ abstract class _$$_LocationTagCopyWith<$Res>
   @useResult
   $Res call(
       {String name,
-      int radius,
+      double radius,
       double aSquare,
       double bSquare,
       Location centerPoint});
@@ -144,7 +144,7 @@ class __$$_LocationTagCopyWithImpl<$Res>
       radius: null == radius
           ? _value.radius
           : radius // ignore: cast_nullable_to_non_nullable
-              as int,
+              as double,
       aSquare: null == aSquare
           ? _value.aSquare
           : aSquare // ignore: cast_nullable_to_non_nullable
@@ -178,7 +178,7 @@ class _$_LocationTag extends _LocationTag {
   @override
   final String name;
   @override
-  final int radius;
+  final double radius;
   @override
   final double aSquare;
   @override
@@ -226,7 +226,7 @@ class _$_LocationTag extends _LocationTag {
 abstract class _LocationTag extends LocationTag {
   const factory _LocationTag(
       {required final String name,
-      required final int radius,
+      required final double radius,
       required final double aSquare,
       required final double bSquare,
       required final Location centerPoint}) = _$_LocationTag;
@@ -238,7 +238,7 @@ abstract class _LocationTag extends LocationTag {
   @override
   String get name;
   @override
-  int get radius;
+  double get radius;
   @override
   double get aSquare;
   @override

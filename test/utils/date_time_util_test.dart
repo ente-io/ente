@@ -17,7 +17,7 @@ void main() {
       "IMG_20210921_144423_783",
       "Screenshot_2022-06-21-16-51-29-164_newFormat.heic",
       "Screenshot 20221106 211633.com.google.android.apps.nbu.paisa.user.jpg",
-      "signal-2022-12-17-15-16-04-718.jpg"
+      "signal-2022-12-17-15-16-04-718.jpg",
     ];
     for (String val in validParsing) {
       final parsedValue = parseDateTimeFromFileNameV2(val);
@@ -36,7 +36,7 @@ void main() {
     final List<String> badParsing = [
       "Snapchat-431959199.mp4.",
       "Snapchat-400000000.mp4",
-      "Snapchat-900000000.mp4"
+      "Snapchat-900000000.mp4",
     ];
     for (String val in badParsing) {
       final parsedValue = parseDateTimeFromFileNameV2(val);

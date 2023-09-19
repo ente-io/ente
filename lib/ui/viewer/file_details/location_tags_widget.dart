@@ -80,8 +80,8 @@ class _LocationTagsWidgetState extends State<LocationTagsWidget> {
       return [
         Text(
           S.of(context).groupNearbyPhotos,
-          style: getEnteTextTheme(context).smallMuted,
-        )
+          style: getEnteTextTheme(context).miniBoldMuted,
+        ),
       ];
     } else {
       if (mounted) {

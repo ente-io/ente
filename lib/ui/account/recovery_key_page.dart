@@ -1,4 +1,4 @@
-import 'dart:io' as io;
+import 'dart:io';
 
 import 'package:bip39/bip39.dart' as bip39;
 import 'package:dotted_border/dotted_border.dart';
@@ -43,7 +43,7 @@ class RecoveryKeyPage extends StatefulWidget {
 
 class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
   bool _hasTriedToSave = false;
-  final _recoveryKeyFile = io.File(
+  final _recoveryKeyFile = File(
     Configuration.instance.getTempDirectory() + "ente-recovery-key.txt",
   );
 
@@ -103,7 +103,7 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
                           ? const SizedBox.shrink()
                           : Text(
                               widget.title ?? S.of(context).recoveryKey,
-                              style: Theme.of(context).textTheme.headline4,
+                              style: Theme.of(context).textTheme.headlineMedium,
                             ),
                       Padding(
                         padding: EdgeInsets.all(widget.showAppBar! ? 0 : 12),
@@ -111,7 +111,7 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
                       Text(
                         widget.text ??
                             S.of(context).recoveryKeyOnForgotPassword,
-                        style: Theme.of(context).textTheme.subtitle1,
+                        style: Theme.of(context).textTheme.titleMedium,
                       ),
                       const Padding(padding: EdgeInsets.only(top: 24)),
                       DottedBorder(
@@ -165,7 +165,7 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
                                   child: Text(
                                     recoveryKey,
                                     style:
-                                        Theme.of(context).textTheme.bodyText1,
+                                        Theme.of(context).textTheme.bodyLarge,
                                   ),
                                 ),
                               ),
@@ -178,7 +178,7 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
                         child: Text(
                           widget.subText ??
                               S.of(context).recoveryKeySaveDescription,
-                          style: Theme.of(context).textTheme.bodyText1,
+                          style: Theme.of(context).textTheme.bodyLarge,
                         ),
                       ),
                       Expanded(
@@ -192,7 +192,7 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
                             children: _saveOptions(context, recoveryKey),
                           ),
                         ),
-                      )
+                      ),
                     ],
                   ), // columnEnds
                 ),

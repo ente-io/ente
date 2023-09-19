@@ -4,10 +4,10 @@ import "dart:math";
 import "package:flutter/material.dart";
 import "package:photos/core/constants.dart";
 import "package:photos/db/files_db.dart";
-import "package:photos/models/file.dart";
+import 'package:photos/models/file/file.dart';
 import "package:photos/models/file_load_result.dart";
 import "package:photos/services/collections_service.dart";
-import "package:photos/services/files_service.dart";
+import "package:photos/services/filter/db_filters.dart";
 import "package:photos/services/location_service.dart";
 import 'package:photos/states/location_state.dart';
 import "package:photos/ui/viewer/gallery/gallery.dart";
@@ -32,36 +32,35 @@ class DynamicLocationGalleryWidget extends StatefulWidget {
 class _DynamicLocationGalleryWidgetState
     extends State<DynamicLocationGalleryWidget> {
   late final Future<FileLoadResult> fileLoadResult;
-  late Future<void> removeIgnoredFiles;
   double heightOfGallery = 0;
 
   @override
   void initState() {
     final collectionsToHide =
-        CollectionsService.instance.collectionsHiddenFromTimeline();
+        CollectionsService.instance.archivedOrHiddenCollectionIds();
     fileLoadResult =
         FilesDB.instance.fetchAllUploadedAndSharedFilesWithLocation(
       galleryLoadStartTime,
       galleryLoadEndTime,
       limit: null,
       asc: false,
-      ignoredCollectionIDs: collectionsToHide,
+      filterOptions: DBFilterOptions(
+        ignoredCollectionIDs: collectionsToHide,
+        hideIgnoredForUpload: true,
+      ),
     );
-    removeIgnoredFiles =
-        FilesService.instance.removeIgnoredFiles(fileLoadResult);
+
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
     const galleryFilesLimit = 1000;
-    final selectedRadius = _selectedRadius();
+    final selectedRadius = InheritedLocationTagData.of(context).selectedRadius;
     Future<FileLoadResult> filterFiles() async {
       final FileLoadResult result = await fileLoadResult;
-      //wait for ignored files to be removed after init
-      await removeIgnoredFiles;
       final stopWatch = Stopwatch()..start();
-      final copyOfFiles = List<File>.from(result.files);
+      final copyOfFiles = List<EnteFile>.from(result.files);
       copyOfFiles.removeWhere((f) {
         return !LocationService.instance.isFileInsideLocationTag(
           InheritedLocationTagData.of(context).centerPoint,
@@ -91,27 +90,33 @@ class _DynamicLocationGalleryWidgetState
       ),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
-          return SizedBox(
-            height: _galleryHeight(
-              min(
-                (widget.memoriesCountNotifier.value ?? 0),
-                galleryFilesLimit,
-              ),
-            ),
-            child: Gallery(
-              loadingWidget: const SizedBox.shrink(),
-              disableScroll: true,
-              asyncLoader: (
-                creationStartTime,
-                creationEndTime, {
-                limit,
-                asc,
-              }) async {
-                return snapshot.data as FileLoadResult;
-              },
-              tagPrefix: widget.tagPrefix,
-              shouldCollateFilesByDay: false,
-            ),
+          return LayoutBuilder(
+            builder: (context, constrains) {
+              return SizedBox(
+                height: _galleryHeight(
+                  min(
+                    (widget.memoriesCountNotifier.value ?? 0),
+                    galleryFilesLimit,
+                  ),
+                  constrains.maxWidth,
+                ),
+                child: Gallery(
+                  loadingWidget: const SizedBox.shrink(),
+                  disableScroll: true,
+                  asyncLoader: (
+                    creationStartTime,
+                    creationEndTime, {
+                    limit,
+                    asc,
+                  }) async {
+                    return snapshot.data as FileLoadResult;
+                  },
+                  tagPrefix: widget.tagPrefix,
+                  enableFileGrouping: false,
+                  showSelectAllByDefault: false,
+                ),
+              );
+            },
           );
         } else {
           return const SizedBox.shrink();
@@ -121,19 +126,13 @@ class _DynamicLocationGalleryWidgetState
     );
   }
 
-  int _selectedRadius() {
-    return radiusValues[
-        InheritedLocationTagData.of(context).selectedRadiusIndex];
-  }
-
-  double _galleryHeight(int fileCount) {
+  double _galleryHeight(int fileCount, double widthOfGrid) {
     final photoGridSize = LocalSettings.instance.getPhotoGridSize();
     final totalWhiteSpaceBetweenPhotos =
         galleryGridSpacing * (photoGridSize - 1);
 
     final thumbnailHeight =
-        ((MediaQuery.of(context).size.width - totalWhiteSpaceBetweenPhotos) /
-            photoGridSize);
+        ((widthOfGrid - totalWhiteSpaceBetweenPhotos) / photoGridSize);
 
     final numberOfRows = (fileCount / photoGridSize).ceil();
 

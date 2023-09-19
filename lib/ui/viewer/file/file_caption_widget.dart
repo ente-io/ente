@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:photos/core/constants.dart';
-import 'package:photos/models/file.dart';
+import "package:photos/generated/l10n.dart";
+import 'package:photos/models/file/file.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/keyboard/keybiard_oveylay.dart';
 import 'package:photos/ui/components/keyboard/keyboard_top_button.dart';
@@ -46,7 +46,7 @@ class FileCaptionReadyOnly extends StatelessWidget {
 }
 
 class FileCaptionWidget extends StatefulWidget {
-  final File file;
+  final EnteFile file;
 
   const FileCaptionWidget({required this.file, super.key});
 
@@ -65,7 +65,8 @@ class _FileCaptionWidgetState extends State<FileCaptionWidget> {
   final _textController = TextEditingController();
   final _focusNode = FocusNode();
   String? editedCaption;
-  String hintText = fileCaptionDefaultHint;
+  late String defaultHintText = S.of(context).fileInfoAddDescHint;
+  String hintText = '';
   Widget? keyboardTopButtons;
 
   @override
@@ -90,6 +91,9 @@ class _FileCaptionWidgetState extends State<FileCaptionWidget> {
 
   @override
   Widget build(BuildContext context) {
+    if (hintText.isEmpty) {
+      hintText = defaultHintText;
+    }
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
     return TextField(
@@ -121,11 +125,10 @@ class _FileCaptionWidgetState extends State<FileCaptionWidget> {
         filled: true,
         fillColor: colorScheme.fillFaint,
         hintText: hintText,
-        hintStyle: hintText == fileCaptionDefaultHint
-            ? textTheme.small.copyWith(color: colorScheme.textMuted)
-            : textTheme.small,
+        hintStyle:
+            hintText == defaultHintText ? textTheme.miniMuted : textTheme.mini,
       ),
-      style: textTheme.small,
+      style: textTheme.mini,
       cursorWidth: 1.5,
       maxLength: maxLength,
       minLines: 1,
@@ -134,7 +137,7 @@ class _FileCaptionWidgetState extends State<FileCaptionWidget> {
       keyboardType: TextInputType.multiline,
       onChanged: (value) {
         setState(() {
-          hintText = fileCaptionDefaultHint;
+          hintText = defaultHintText;
           currentLength = value.length;
           editedCaption = value;
         });

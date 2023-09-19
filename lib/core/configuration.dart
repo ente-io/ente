@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'dart:io' as io;
+import "dart:io";
 import 'dart:typed_data';
 
 import 'package:bip39/bip39.dart' as bip39;
@@ -8,7 +8,6 @@ import 'package:logging/logging.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/error-reporting/super_logging.dart';
-import 'package:photos/core/errors.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/collections_db.dart';
 import 'package:photos/db/files_db.dart';
@@ -32,8 +31,9 @@ import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/file_uploader.dart';
 import 'package:photos/utils/validator_util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import "package:tuple/tuple.dart";
 import 'package:uuid/uuid.dart';
-import 'package:wakelock/wakelock.dart';
+import 'package:wakelock_plus/wakelock_plus.dart';
 
 class Configuration {
   Configuration._privateConstructor();
@@ -43,6 +43,7 @@ class Configuration {
     "endpoint",
     defaultValue: kDefaultProductionEndpoint,
   );
+
   static const emailKey = "email";
   static const foldersToBackUpKey = "folders_to_back_up";
   static const keyAttributesKey = "key_attributes";
@@ -57,7 +58,6 @@ class Configuration {
   static const keyHasSelectedAnyBackupFolder =
       "has_selected_any_folder_for_backup";
   static const lastTempFolderClearTimeKey = "last_temp_folder_clear_time";
-  static const nameKey = "name";
   static const secretKeyKey = "secret_key";
   static const tokenKey = "token";
   static const encryptedTokenKey = "encrypted_token";
@@ -67,7 +67,7 @@ class Configuration {
       "has_selected_all_folders_for_backup";
   static const anonymousUserIDKey = "anonymous_user_id";
 
-  final kTempFolderDeletionTimeBuffer = const Duration(days: 1).inMicroseconds;
+  final kTempFolderDeletionTimeBuffer = const Duration(hours: 6).inMicroseconds;
 
   static final _logger = Logger("Configuration");
 
@@ -77,7 +77,7 @@ class Configuration {
   late SharedPreferences _preferences;
   String? _secretKey;
   late FlutterSecureStorage _secureStorage;
-  late String _tempDirectory;
+  late String _tempDocumentsDirPath;
   late String _thumbnailCacheDirectory;
 
   // 6th July 22: Remove this after 3 months. Hopefully, active users
@@ -96,14 +96,14 @@ class Configuration {
     _preferences = await SharedPreferences.getInstance();
     _secureStorage = const FlutterSecureStorage();
     _documentsDirectory = (await getApplicationDocumentsDirectory()).path;
-    _tempDirectory = _documentsDirectory + "/temp/";
-    final tempDirectory = io.Directory(_tempDirectory);
+    _tempDocumentsDirPath = _documentsDirectory + "/temp/";
+    final tempDocumentsDir = Directory(_tempDocumentsDirPath);
     try {
       final currentTime = DateTime.now().microsecondsSinceEpoch;
-      if (tempDirectory.existsSync() &&
+      if (tempDocumentsDir.existsSync() &&
           (_preferences.getInt(lastTempFolderClearTimeKey) ?? 0) <
               (currentTime - kTempFolderDeletionTimeBuffer)) {
-        await tempDirectory.delete(recursive: true);
+        await tempDocumentsDir.delete(recursive: true);
         await _preferences.setInt(lastTempFolderClearTimeKey, currentTime);
         _logger.info("Cleared temp folder");
       } else {
@@ -112,14 +112,14 @@ class Configuration {
     } catch (e) {
       _logger.warning(e);
     }
-    tempDirectory.createSync(recursive: true);
+    tempDocumentsDir.createSync(recursive: true);
     final tempDirectoryPath = (await getTemporaryDirectory()).path;
     _thumbnailCacheDirectory = tempDirectoryPath + "/thumbnail-cache";
-    io.Directory(_thumbnailCacheDirectory).createSync(recursive: true);
+    Directory(_thumbnailCacheDirectory).createSync(recursive: true);
     _sharedTempMediaDirectory = tempDirectoryPath + "/ente-shared-media";
-    io.Directory(_sharedTempMediaDirectory).createSync(recursive: true);
+    Directory(_sharedTempMediaDirectory).createSync(recursive: true);
     _sharedDocumentsMediaDirectory = _documentsDirectory + "/ente-shared-media";
-    io.Directory(_sharedDocumentsMediaDirectory).createSync(recursive: true);
+    Directory(_sharedDocumentsMediaDirectory).createSync(recursive: true);
     if (!_preferences.containsKey(tokenKey)) {
       await _secureStorage.deleteAll(iOptions: _secureStorageOptionsIOS);
     } else {
@@ -136,7 +136,7 @@ class Configuration {
       }
       await _migrateSecurityStorageToFirstUnlock();
     }
-    SuperLogging.setUserID(await _getOrCreateAnonymousUserID());
+    SuperLogging.setUserID(await _getOrCreateAnonymousUserID()).ignore();
   }
 
   Future<void> logout({bool autoLogout = false}) async {
@@ -201,6 +201,7 @@ class Configuration {
       utf8.encode(password) as Uint8List,
       kekSalt,
     );
+    final loginKey = await CryptoUtil.deriveLoginKey(derivedKeyResult.key);
 
     // Encrypt the key with this derived key
     final encryptedKeyData =
@@ -230,10 +231,12 @@ class Configuration {
       CryptoUtil.bin2hex(recoveryKey),
       CryptoUtil.bin2base64(keyPair.sk),
     );
-    return KeyGenResult(attributes, privateAttributes);
+    return KeyGenResult(attributes, privateAttributes, loginKey);
   }
 
-  Future<KeyAttributes> updatePassword(String password) async {
+  Future<Tuple2<KeyAttributes, Uint8List>> getAttributesForNewPassword(
+    String password,
+  ) async {
     // Get master key
     final masterKey = getKey();
 
@@ -244,6 +247,7 @@ class Configuration {
       utf8.encode(password) as Uint8List,
       kekSalt,
     );
+    final loginKey = await CryptoUtil.deriveLoginKey(derivedKeyResult.key);
 
     // Encrypt the key with this derived key
     final encryptedKeyData =
@@ -251,19 +255,25 @@ class Configuration {
 
     final existingAttributes = getKeyAttributes();
 
-    return existingAttributes!.copyWith(
+    final updatedAttributes = existingAttributes!.copyWith(
       kekSalt: CryptoUtil.bin2base64(kekSalt),
       encryptedKey: CryptoUtil.bin2base64(encryptedKeyData.encryptedData!),
       keyDecryptionNonce: CryptoUtil.bin2base64(encryptedKeyData.nonce!),
       memLimit: derivedKeyResult.memLimit,
       opsLimit: derivedKeyResult.opsLimit,
     );
+    return Tuple2(updatedAttributes, loginKey);
   }
 
-  Future<void> decryptAndSaveSecrets(
+  // decryptSecretsAndGetLoginKey decrypts the master key and recovery key
+  // with the given password and save them in local secure storage.
+  // This method also returns the keyEncKey that can be used for performing
+  // SRP setup for existing users.
+  Future<Uint8List> decryptSecretsAndGetKeyEncKey(
     String password,
-    KeyAttributes attributes,
-  ) async {
+    KeyAttributes attributes, {
+    Uint8List? keyEncryptionKey,
+  }) async {
     validatePreVerificationStateCheck(
       attributes,
       password,
@@ -271,22 +281,19 @@ class Configuration {
     );
     // Derive key-encryption-key from the entered password and existing
     // mem and ops limits
-    final kek = await CryptoUtil.deriveKey(
+    keyEncryptionKey ??= await CryptoUtil.deriveKey(
       utf8.encode(password) as Uint8List,
       CryptoUtil.base642bin(attributes.kekSalt),
       attributes.memLimit!,
       attributes.opsLimit!,
-    ).onError((e, s) {
-      _logger.severe('key derivation failed', e, s);
-      throw KeyDerivationError();
-    });
+    );
 
     Uint8List key;
     try {
       // Decrypt the master key with the derived key
       key = CryptoUtil.decryptSync(
         CryptoUtil.base642bin(attributes.encryptedKey),
-        kek,
+        keyEncryptionKey,
         CryptoUtil.base642bin(attributes.keyDecryptionNonce),
       );
     } catch (e) {
@@ -308,6 +315,7 @@ class Configuration {
     await setToken(
       CryptoUtil.bin2base64(token, urlSafe: true),
     );
+    return keyEncryptionKey;
   }
 
   Future<KeyAttributes> createNewRecoveryKey() async {
@@ -409,14 +417,6 @@ class Configuration {
     await _preferences.setString(emailKey, email);
   }
 
-  String? getName() {
-    return _preferences.getString(nameKey);
-  }
-
-  Future<void> setName(String name) async {
-    await _preferences.setString(nameKey, name);
-  }
-
   int? getUserID() {
     return _preferences.getInt(userIDKey);
   }
@@ -499,7 +499,7 @@ class Configuration {
 
   // Caution: This directory is cleared on app start
   String getTempDirectory() {
-    return _tempDirectory;
+    return _tempDocumentsDirPath;
   }
 
   String getThumbnailCacheDirectory() {
@@ -548,7 +548,7 @@ class Configuration {
 
   Future<void> setShouldKeepDeviceAwake(bool value) async {
     await _preferences.setBool(keyShouldKeepDeviceAwake, value);
-    await Wakelock.toggle(enable: value);
+    await WakelockPlus.toggle(enable: value);
   }
 
   Future<void> setShouldBackupVideos(bool value) async {

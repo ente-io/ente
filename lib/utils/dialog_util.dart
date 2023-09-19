@@ -1,9 +1,6 @@
-import 'dart:math';
-
-import 'package:confetti/confetti.dart';
 import "package:dio/dio.dart";
 import 'package:flutter/material.dart';
-import 'package:photos/core/constants.dart';
+import "package:flutter/services.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/search/button_result.dart";
 import 'package:photos/models/typedefs.dart';
@@ -29,10 +26,10 @@ Future<ButtonResult?> showErrorDialog(
     title: title,
     body: body,
     isDismissible: isDismissable,
-    buttons: const [
+    buttons: [
       ButtonWidget(
         buttonType: ButtonType.secondary,
-        labelText: "OK",
+        labelText: S.of(context).ok,
         isInAlert: true,
         buttonAction: ButtonAction.first,
       ),
@@ -45,8 +42,10 @@ Future<ButtonResult?> showErrorDialogForException({
   required Exception exception,
   bool isDismissible = true,
   String apiErrorPrefix = "It looks like something went wrong.",
+  String? message,
 }) async {
-  String errorMessage = S.of(context).tempErrorContactSupportIfPersists;
+  String errorMessage =
+      message ?? S.of(context).tempErrorContactSupportIfPersists;
   if (exception is DioError &&
       exception.response != null &&
       exception.response!.data["code"] != null) {
@@ -224,7 +223,7 @@ ProgressDialog createProgressDialog(
   );
   dialog.style(
     message: message,
-    messageTextStyle: Theme.of(context).textTheme.caption,
+    messageTextStyle: Theme.of(context).textTheme.bodySmall,
     backgroundColor: Theme.of(context).dialogTheme.backgroundColor,
     progressWidget: const EnteLoadingWidget(),
     borderRadius: 10,
@@ -232,56 +231,6 @@ ProgressDialog createProgressDialog(
     insetAnimCurve: Curves.easeInOut,
   );
   return dialog;
-}
-
-Future<ButtonResult?> showConfettiDialog<T>({
-  required BuildContext context,
-  required DialogBuilder dialogBuilder,
-  bool barrierDismissible = true,
-  Color? barrierColor,
-  bool useSafeArea = true,
-  bool useRootNavigator = true,
-  RouteSettings? routeSettings,
-  Alignment confettiAlignment = Alignment.center,
-}) {
-  final widthOfScreen = MediaQuery.of(context).size.width;
-  final isMobileSmall = widthOfScreen <= mobileSmallThreshold;
-  final pageBuilder = Builder(
-    builder: dialogBuilder,
-  );
-  final ConfettiController confettiController =
-      ConfettiController(duration: const Duration(seconds: 1));
-  confettiController.play();
-  return showDialog(
-    context: context,
-    builder: (BuildContext buildContext) {
-      return Padding(
-        padding: EdgeInsets.symmetric(horizontal: isMobileSmall ? 8 : 0),
-        child: Stack(
-          children: [
-            Align(alignment: Alignment.center, child: pageBuilder),
-            Align(
-              alignment: confettiAlignment,
-              child: ConfettiWidget(
-                confettiController: confettiController,
-                blastDirection: pi / 2,
-                emissionFrequency: 0,
-                numberOfParticles: 100,
-                // a lot of particles at once
-                gravity: 1,
-                blastDirectionality: BlastDirectionality.explosive,
-              ),
-            ),
-          ],
-        ),
-      );
-    },
-    barrierDismissible: barrierDismissible,
-    barrierColor: barrierColor,
-    useSafeArea: useSafeArea,
-    useRootNavigator: useRootNavigator,
-    routeSettings: routeSettings,
-  );
 }
 
 //Can return ButtonResult? from ButtonWidget or Exception? from TextInputDialog
@@ -303,6 +252,9 @@ Future<dynamic> showTextInputDialog(
   TextCapitalization textCapitalization = TextCapitalization.none,
   bool alwaysShowSuccessState = false,
   bool isPasswordInput = false,
+  TextEditingController? textEditingController,
+  List<TextInputFormatter>? textInputFormatter,
+  TextInputType? textInputType,
 }) {
   return showDialog(
     barrierColor: backdropFaintDark,
@@ -330,6 +282,9 @@ Future<dynamic> showTextInputDialog(
             textCapitalization: textCapitalization,
             alwaysShowSuccessState: alwaysShowSuccessState,
             isPasswordInput: isPasswordInput,
+            textEditingController: textEditingController,
+            textInputFormatter: textInputFormatter,
+            textInputType: textInputType,
           ),
         ),
       );

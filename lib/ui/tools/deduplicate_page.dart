@@ -6,7 +6,7 @@ import 'package:photos/ente_theme_data.dart';
 import 'package:photos/events/user_details_changed_event.dart';
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/duplicate_files.dart';
-import 'package:photos/models/file.dart';
+import 'package:photos/models/file/file.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/deduplication_service.dart';
 import 'package:photos/ui/viewer/file/detail_page.dart';
@@ -45,20 +45,24 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
     ),
   );
 
-  final Set<File> _selectedFiles = <File>{};
+  final Set<EnteFile> _selectedFiles = <EnteFile>{};
   final Map<int?, int> _fileSizeMap = {};
   late List<DuplicateFiles> _duplicates;
-  bool? _shouldClubByCaptureTime = true;
+  bool _shouldClubByCaptureTime = false;
+  bool _shouldClubByFileName = false;
+  bool toastShown = false;
 
   SortKey sortKey = SortKey.size;
 
   @override
   void initState() {
-    super.initState();
-    _duplicates =
-        DeduplicationService.instance.clubDuplicatesByTime(widget.duplicates);
+    _duplicates = DeduplicationService.instance.clubDuplicates(
+      widget.duplicates,
+      clubbingKey: (EnteFile f) => f.hash,
+    );
     _selectAllFilesButFirst();
-    showShortToast(context, S.of(context).longpressOnAnItemToViewInFullscreen);
+
+    super.initState();
   }
 
   void _selectAllFilesButFirst() {
@@ -77,6 +81,13 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
 
   @override
   Widget build(BuildContext context) {
+    if (!toastShown) {
+      toastShown = true;
+      showShortToast(
+        context,
+        S.of(context).longpressOnAnItemToViewInFullscreen,
+      );
+    }
     _sortDuplicates();
     return Scaffold(
       appBar: AppBar(
@@ -113,15 +124,15 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
                         S.of(context).deselectAll,
                         style: Theme.of(context)
                             .textTheme
-                            .subtitle1!
+                            .titleMedium!
                             .copyWith(fontWeight: FontWeight.w600),
                       ),
                     ),
                   ],
                 ),
-              )
+              ),
             ],
-          )
+          ),
         ],
       ),
       body: _getBody(),
@@ -152,9 +163,9 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
           child: ListView.builder(
             itemBuilder: (context, index) {
               if (index == 0) {
-                return _getHeader();
+                return const SizedBox.shrink();
               } else if (index == 1) {
-                return _getClubbingConfig();
+                return const SizedBox.shrink();
               } else if (index == 2) {
                 if (_duplicates.isNotEmpty) {
                   return _getSortMenu(context);
@@ -189,6 +200,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
     );
   }
 
+  @Deprecated('Remove options for club by name, clean code in 2024')
   Padding _getHeader() {
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
@@ -196,16 +208,8 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            "Following files were clubbed based on their sizes" +
-                (_shouldClubByCaptureTime! ? " and capture times." : "."),
-            style: Theme.of(context).textTheme.subtitle2,
-          ),
-          const Padding(
-            padding: EdgeInsets.all(2),
-          ),
-          Text(
             S.of(context).reviewDeduplicateItems,
-            style: Theme.of(context).textTheme.subtitle2,
+            style: Theme.of(context).textTheme.titleSmall,
           ),
           const Padding(
             padding: EdgeInsets.all(12),
@@ -218,28 +222,64 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
     );
   }
 
+  @Deprecated('Remove options for clubbing, clean code in 2024')
   Widget _getClubbingConfig() {
     return Padding(
       padding: const EdgeInsets.fromLTRB(12, 0, 12, 4),
-      child: CheckboxListTile(
-        value: _shouldClubByCaptureTime,
-        onChanged: (value) {
-          _shouldClubByCaptureTime = value;
-          _resetEntriesAndSelection();
-          setState(() {});
-        },
-        title: Text(S.of(context).clubByCaptureTime),
+      child: Column(
+        children: [
+          CheckboxListTile(
+            value: _shouldClubByFileName,
+            onChanged: (value) {
+              _shouldClubByFileName = value!;
+              if (_shouldClubByFileName) {
+                _shouldClubByCaptureTime = false;
+              }
+              _resetEntriesAndSelection();
+              setState(() {});
+            },
+            title: Text(S.of(context).clubByFileName),
+          ),
+          CheckboxListTile(
+            value: _shouldClubByCaptureTime,
+            onChanged: (value) {
+              _shouldClubByCaptureTime = value!;
+              if (_shouldClubByCaptureTime) {
+                _shouldClubByFileName = false;
+              }
+              _resetEntriesAndSelection();
+              setState(() {});
+            },
+            title: Text(S.of(context).clubByCaptureTime),
+          ),
+          const Padding(
+            padding: EdgeInsets.all(8),
+          ),
+          const Divider(
+            height: 0,
+          ),
+          const Padding(
+            padding: EdgeInsets.all(4),
+          ),
+        ],
       ),
     );
   }
 
   void _resetEntriesAndSelection() {
-    if (_shouldClubByCaptureTime!) {
-      _duplicates =
-          DeduplicationService.instance.clubDuplicatesByTime(_duplicates);
+    _duplicates = widget.duplicates;
+    late String? Function(EnteFile) clubbingKeyFn;
+    if (_shouldClubByCaptureTime) {
+      clubbingKeyFn = (EnteFile f) => f.creationTime?.toString() ?? '';
+    } else if (_shouldClubByFileName) {
+      clubbingKeyFn = (EnteFile f) => f.displayName;
     } else {
-      _duplicates = widget.duplicates;
+      clubbingKeyFn = (EnteFile f) => f.hash;
     }
+    _duplicates = DeduplicationService.instance.clubDuplicates(
+      _duplicates,
+      clubbingKey: clubbingKeyFn,
+    );
     _selectAllFilesButFirst();
   }
 
@@ -259,7 +299,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
       }
       return Text(
         text,
-        style: Theme.of(context).textTheme.subtitle1!.copyWith(
+        style: Theme.of(context).textTheme.titleMedium!.copyWith(
               fontSize: 14,
               color: Theme.of(context).iconTheme.color!.withOpacity(0.7),
             ),
@@ -271,7 +311,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
-        Container(),
+        const SizedBox.shrink(),
         PopupMenuButton(
           initialValue: sortKey.index,
           child: Padding(
@@ -312,12 +352,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
   }
 
   Widget _getDeleteButton() {
-    String text;
-    if (_selectedFiles.length == 1) {
-      text = "Delete 1 item";
-    } else {
-      text = "Delete " + _selectedFiles.length.toString() + " items";
-    }
+    final String text = S.of(context).deleteItemCount(_selectedFiles.length);
     int size = 0;
     for (final file in _selectedFiles) {
       size += _fileSizeMap[file.uploadedFileID]!;
@@ -378,11 +413,11 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
         Padding(
           padding: const EdgeInsets.fromLTRB(2, 4, 4, 12),
           child: Text(
-            duplicates.files.length.toString() +
-                " files, " +
-                formatBytes(duplicates.size) +
-                " each",
-            style: Theme.of(context).textTheme.subtitle2,
+            S.of(context).duplicateItemsGroup(
+                  duplicates.files.length,
+                  formatBytes(duplicates.size),
+                ),
+            style: Theme.of(context).textTheme.titleSmall,
           ),
         ),
         Padding(
@@ -407,7 +442,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
     );
   }
 
-  Widget _buildFile(BuildContext context, File file, int index) {
+  Widget _buildFile(BuildContext context, EnteFile file, int index) {
     return GestureDetector(
       onTap: () {
         if (_selectedFiles.contains(file)) {
@@ -472,9 +507,9 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
             child: Text(
               CollectionsService.instance
                   .getCollectionByID(file.collectionID!)!
-                  .name!,
+                  .displayName,
               style:
-                  Theme.of(context).textTheme.caption!.copyWith(fontSize: 12),
+                  Theme.of(context).textTheme.bodySmall!.copyWith(fontSize: 12),
               overflow: TextOverflow.ellipsis,
             ),
           ),

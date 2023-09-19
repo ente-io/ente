@@ -1,25 +1,27 @@
-import 'dart:io' as io;
+import "dart:io";
 
 import 'package:chewie/chewie.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
-import 'package:photos/core/constants.dart';
+import 'package:motion_photos/motion_photos.dart';
 import "package:photos/generated/l10n.dart";
-import 'package:photos/models/file.dart';
+import "package:photos/models/file/extensions/file_props.dart";
+import 'package:photos/models/file/file.dart';
+import "package:photos/models/metadata/file_magic.dart";
+import "package:photos/services/file_magic_service.dart";
 import 'package:photos/ui/viewer/file/zoomable_image.dart';
 import 'package:photos/utils/file_util.dart';
 import 'package:photos/utils/toast_util.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:video_player/video_player.dart';
 
 class ZoomableLiveImage extends StatefulWidget {
-  final File file;
+  final EnteFile enteFile;
   final Function(bool)? shouldDisableScroll;
   final String? tagPrefix;
   final Decoration? backgroundDecoration;
 
   const ZoomableLiveImage(
-    this.file, {
+    this.enteFile, {
     Key? key,
     this.shouldDisableScroll,
     required this.tagPrefix,
@@ -33,7 +35,7 @@ class ZoomableLiveImage extends StatefulWidget {
 class _ZoomableLiveImageState extends State<ZoomableLiveImage>
     with SingleTickerProviderStateMixin {
   final Logger _logger = Logger("ZoomableLiveImage");
-  late File _file;
+  late EnteFile _enteFile;
   bool _showVideo = false;
   bool _isLoadingVideoPlayer = false;
 
@@ -42,8 +44,9 @@ class _ZoomableLiveImageState extends State<ZoomableLiveImage>
 
   @override
   void initState() {
-    _file = widget.file;
-    _showLivePhotoToast();
+    _enteFile = widget.enteFile;
+    _logger.info('initState for ${_enteFile.generatedID} with tag ${_enteFile
+        .tag} and name ${_enteFile.displayName}');
     super.initState();
   }
 
@@ -71,7 +74,7 @@ class _ZoomableLiveImageState extends State<ZoomableLiveImage>
       content = _getVideoPlayer();
     } else {
       content = ZoomableImage(
-        _file,
+        _enteFile,
         tagPrefix: widget.tagPrefix,
         shouldDisableScroll: widget.shouldDisableScroll,
         backgroundDecoration: widget.backgroundDecoration,
@@ -119,14 +122,30 @@ class _ZoomableLiveImageState extends State<ZoomableLiveImage>
       return;
     }
     _isLoadingVideoPlayer = true;
-    if (_file.isRemoteFile && !(await isFileCached(_file, liveVideo: true))) {
+    // For non-live photo, with fileType as Image, we still call _getMotionPhoto
+    // to check if it is a motion photo. This is needed to handle earlier
+    // uploads and upload from desktop
+    final File? videoFile = _enteFile.isLivePhoto
+        ? await _getLivePhotoVideo()
+        : await _getMotionPhotoVideo();
+
+    if (videoFile != null && videoFile.existsSync()) {
+      _setVideoPlayerController(file: videoFile);
+    } else if (_enteFile.isLivePhoto) {
+      showShortToast(context, S.of(context).downloadFailed);
+    }
+    _isLoadingVideoPlayer = false;
+  }
+
+  Future<File?> _getLivePhotoVideo() async {
+    if (_enteFile.isRemoteFile && !(await isFileCached(_enteFile, liveVideo: true))) {
       showShortToast(context, S.of(context).downloading);
     }
 
-    io.File? videoFile = await getFile(widget.file, liveVideo: true)
+    File? videoFile = await getFile(widget.enteFile, liveVideo: true)
         .timeout(const Duration(seconds: 15))
         .onError((dynamic e, s) {
-      _logger.info("getFile failed ${_file.tag}", e);
+      _logger.info("getFile failed ${_enteFile.tag}", e);
       return null;
     });
 
@@ -134,24 +153,49 @@ class _ZoomableLiveImageState extends State<ZoomableLiveImage>
     // getFile with liveVideo as true can fail for file with localID when
     // the live photo was downloaded from remote.
     if ((videoFile == null || !videoFile.existsSync()) &&
-        _file.uploadedFileID != null) {
-      videoFile = await getFileFromServer(widget.file, liveVideo: true)
+        _enteFile.uploadedFileID != null) {
+      videoFile = await getFileFromServer(widget.enteFile, liveVideo: true)
           .timeout(const Duration(seconds: 15))
           .onError((dynamic e, s) {
-        _logger.info("getRemoteFile failed ${_file.tag}", e);
+        _logger.info("getRemoteFile failed ${_enteFile.tag}", e);
         return null;
       });
     }
-
-    if (videoFile != null && videoFile.existsSync()) {
-      _setVideoPlayerController(file: videoFile);
-    } else {
-      showShortToast(context, S.of(context).downloadFailed);
-    }
-    _isLoadingVideoPlayer = false;
+    return videoFile;
   }
 
-  VideoPlayerController _setVideoPlayerController({required io.File file}) {
+  Future<File?> _getMotionPhotoVideo() async {
+    if (_enteFile.isRemoteFile && !(await isFileCached(_enteFile))) {
+      showShortToast(context, S.of(context).downloading);
+    }
+
+    final File? imageFile = await getFile(
+      widget.enteFile,
+      isOrigin: !Platform.isAndroid,
+    ).timeout(const Duration(seconds: 15)).onError((dynamic e, s) {
+      _logger.info("getFile failed ${_enteFile.tag}", e);
+      return null;
+    });
+    if (imageFile != null) {
+      final motionPhoto = MotionPhotos(imageFile.path);
+      final index = await motionPhoto.getMotionVideoIndex();
+      if (index != null) {
+        // Update the metadata if it is not updated
+        if (!_enteFile.isMotionPhoto && _enteFile.canEditMetaInfo) {
+          FileMagicService.instance.updatePublicMagicMetadata(
+            [_enteFile],
+            {motionVideoIndexKey: index.start},
+          ).ignore();
+        }
+        return motionPhoto.getMotionVideoFile(
+          index: index,
+        );
+      }
+    }
+    return null;
+  }
+
+  VideoPlayerController _setVideoPlayerController({required File file}) {
     final videoPlayerController = VideoPlayerController.file(file);
     return _videoPlayerController = videoPlayerController
       ..initialize().whenComplete(() {
@@ -163,12 +207,4 @@ class _ZoomableLiveImageState extends State<ZoomableLiveImage>
       });
   }
 
-  void _showLivePhotoToast() async {
-    final preferences = await SharedPreferences.getInstance();
-    final int promptTillNow = preferences.getInt(livePhotoToastCounterKey) ?? 0;
-    if (promptTillNow < maxLivePhotoToastCount && mounted) {
-      showToast(context, S.of(context).pressAndHoldToPlayVideo);
-      preferences.setInt(livePhotoToastCounterKey, promptTillNow + 1);
-    }
-  }
 }

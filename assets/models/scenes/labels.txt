@@ -8,7 +8,7 @@ blue sky
 cloudy sky
 greenery
 autumn leaves
-potrait
+portrait
 flower
 night shot
 stage concert
@@ -19,7 +19,7 @@ indoor
 backlight
 text documents
 qr images
-group potrait
+group portrait
 computer screens
 kids
 dog

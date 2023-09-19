@@ -18,12 +18,13 @@
   "yourAccountHasBeenDeleted": "Your account has been deleted",
   "selectReason": "Select reason",
   "deleteReason1": "It’s missing a key feature that I need",
-  "deleteReason2": "The app or a certain feature does not \nbehave as I think it should",
+  "deleteReason2": "The app or a certain feature does not behave as I think it should",
   "deleteReason3": "I found another service that I like better",
   "deleteReason4": "My reason isn’t listed",
   "sendEmail": "Send email",
   "deleteRequestSLAText": "Your request will be processed within 72 hours.",
   "deleteEmailRequest": "Please send an email to <warning>account-deletion@ente.io</warning> from your registered email address.",
+  "entePhotosPerm": "ente <i>needs permission to</i> preserve your photos",
   "ok": "Ok",
   "createAccount": "Create account",
   "createNewAccount": "Create new account",
@@ -48,10 +49,21 @@
   "sorry": "Sorry",
   "noRecoveryKeyNoDecryption": "Due to the nature of our end-to-end encryption protocol, your data cannot be decrypted without your password or recovery key",
   "verifyEmail": "Verify email",
+  "toResetVerifyEmail": "To reset your password, please verify your email first.",
   "checkInboxAndSpamFolder": "Please check your inbox (and spam) to complete verification",
   "tapToEnterCode": "Tap to enter code",
   "resendEmail": "Resend email",
-  "weveSentAMailTo": "We've sent a mail to",
+  "weHaveSendEmailTo": "We have sent a mail to <green>{email}</green>",
+  "@weHaveSendEmailTo": {
+    "description": "Text to indicate that we have sent a mail to the user",
+    "placeholders": {
+      "email": {
+        "description": "The email address of the user",
+        "type": "String",
+        "example": "example@ente.io"
+      }
+    }
+  },
   "setPasswordTitle": "Set password",
   "changePasswordTitle": "Change password",
   "resetPasswordTitle": "Reset password",
@@ -138,7 +150,7 @@
   "tryAgain": "Try again",
   "viewRecoveryKey": "View recovery key",
   "confirmRecoveryKey": "Confirm recovery key",
-  "recoveryKeyVerifyReason": "Your recovery key is the only way to recover your photos if you forget your password. You can find your recovery key in Settings > Account.\n\nPlease enter your recovery key here to verify that you have saved it correctly.",
+  "recoveryKeyVerifyReason": "Your recovery key is the only way to recover your photos if you forget your password. You can find your recovery key in Settings > Security.\n\nPlease enter your recovery key here to verify that you have saved it correctly.",
   "confirmYourRecoveryKey": "Confirm your recovery key",
   "addViewer": "Add viewer",
   "addCollaborator": "Add collaborator",
@@ -177,6 +189,10 @@
   "disableDownloadWarningBody": "Viewers can still take screenshots or save a copy of your photos using external tools",
   "allowDownloads": "Allow downloads",
   "linkDeviceLimit": "Device limit",
+  "noDeviceLimit": "None",
+  "@noDeviceLimit": {
+    "description": "Text to indicate that there is limit on number of devices"
+  },
   "linkExpiry": "Link expiry",
   "linkExpired": "Expired",
   "linkEnabled": "Enabled",
@@ -189,15 +205,6 @@
   "manageLink": "Manage link",
   "linkExpiresOn": "Link will expire on {expiryTime}",
   "albumUpdated": "Album updated",
-  "maxDeviceLimitSpikeHandling": "When set to the maximum ({maxValue}), the device limit will be relaxed to allow for temporary spikes of large number of viewers.",
-  "@maxDeviceLimitSpikeHandling": {
-    "placeholders": {
-      "maxValue": {
-        "type": "int",
-        "example": "100"
-      }
-    }
-  },
   "never": "Never",
   "custom": "Custom",
   "@custom": {
@@ -209,6 +216,16 @@
   "after1Month": "After 1 month",
   "after1Year": "After 1 year",
   "manageParticipants": "Manage",
+  "albumParticipantsCount": "{count, plural, =0 {No Participants} =1 {1 Participant} other {{count} Participants}}",
+  "@albumParticipantsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "5"
+      }
+    },
+    "description": "Number of participants in an album, including the album owner."
+  },
   "collabLinkSectionDescription": "Create a link to allow people to add and view photos in your shared album without needing an ente app or account. Great for collecting event photos.",
   "collectPhotos": "Collect photos",
   "collaborativeLink": "Collaborative link",
@@ -248,7 +265,7 @@
   "shareTextConfirmOthersVerificationID": "Hey, can you confirm that this is your ente.io verification ID: {verificationID}",
   "somethingWentWrong": "Something went wrong",
   "sendInvite": "Send invite",
-  "shareTextRecommendUsingEnte": "Download ente so we can easily share original quality photos and videos\n\nhttps://ente.io/#download",
+  "shareTextRecommendUsingEnte": "Download ente so we can easily share original quality photos and videos\n\nhttps://ente.io",
   "done": "Done",
   "applyCodeTitle": "Apply code",
   "enterCodeDescription": "Enter the code provided by your friend to claim free storage for both of you",
@@ -274,7 +291,7 @@
   "referralStep3": "3. Both of you get {storageInGB} GB* free",
   "referralsAreCurrentlyPaused": "Referrals are currently paused",
   "youCanAtMaxDoubleYourStorage": "* You can at max double your storage",
-  "claimedStorageSoFar": "{isFamilyMember, select, true {Your family has claimed {storageAmountInGb} Gb so far} false {You have claimed {storageAmountInGb} Gb so far} other {You have claimed {storageAmountInGb} Gb so far!}}",
+  "claimedStorageSoFar": "{isFamilyMember, select, true {Your family has claimed {storageAmountInGb} GB so far} false {You have claimed {storageAmountInGb} GB so far} other {You have claimed {storageAmountInGb} GB so far!}}",
   "@claimedStorageSoFar": {
     "placeholders": {
       "isFamilyMember": {
@@ -343,7 +360,7 @@
   "deleteFromBoth": "Delete from both",
   "newAlbum": "New album",
   "albums": "Albums",
-  "memoryCount": "{count, plural, zero{no memories} one{{count} memory} other{{count} memories}}",
+  "memoryCount": "{count, plural, zero{no memories} one{{formattedCount} memory} other{{formattedCount} memories}}",
   "@memoryCount": {
     "description": "The text to display the number of memories",
     "type": "text",
@@ -351,6 +368,10 @@
       "count": {
         "example": "1",
         "type": "int"
+      },
+      "formattedCount": {
+        "type": "String",
+        "example": "11.513, 11,511"
       }
     }
   },
@@ -393,6 +414,23 @@
   "skip": "Skip",
   "updatingFolderSelection": "Updating folder selection...",
   "itemCount": "{count, plural, one{{count} item} other{{count} items}}",
+  "deleteItemCount": "{count, plural, =1 {Delete {count} item} other {Delete {count} items}}",
+  "duplicateItemsGroup": "{count} files, {formattedSize} each",
+  "@duplicateItemsGroup": {
+    "description": "Display the number of duplicate files and their size",
+    "type": "text",
+    "placeholders": {
+      "count": {
+        "example": "12",
+        "type": "int"
+      },
+      "formattedSize": {
+        "example": "2.3 MB",
+        "type": "String"
+      }
+    }
+  },
+  "showMemories": "Show memories",
   "yearsAgo": "{count, plural, one{{count} year ago} other{{count} years ago}}",
   "backupSettings": "Backup settings",
   "backupOverMobileData": "Backup over mobile data",
@@ -411,6 +449,8 @@
   "authToChangeYourEmail": "Please authenticate to change your email",
   "changePassword": "Change password",
   "authToChangeYourPassword": "Please authenticate to change your password",
+  "emailVerificationToggle": "Email verification",
+  "authToChangeEmailVerificationSetting": "Please authenticate to change email verification",
   "exportYourData": "Export your data",
   "logout": "Logout",
   "authToInitiateAccountDeletion": "Please authenticate to initiate account deletion",
@@ -421,7 +461,9 @@
   "installManually": "Install manually",
   "criticalUpdateAvailable": "Critical update available",
   "updateAvailable": "Update available",
+  "ignoreUpdate": "Ignore",
   "downloading": "Downloading...",
+  "cannotDeleteSharedFiles": "Cannot delete shared files",
   "theDownloadCouldNotBeCompleted": "The download could not be completed",
   "retry": "Retry",
   "backedUpFolders": "Backed up folders",
@@ -465,6 +507,9 @@
   },
   "familyPlans": "Family plans",
   "referrals": "Referrals",
+  "notifications": "Notifications",
+  "sharedPhotoNotifications": "New shared photos",
+  "sharedPhotoNotificationsExplanation": "Receive notifications when someone adds a photo to a shared album that you're a part of",
   "advanced": "Advanced",
   "general": "General",
   "security": "Security",
@@ -513,6 +558,7 @@
   "faqs": "FAQs",
   "renewsOn": "Renews on {endDate}",
   "freeTrialValidTill": "Free trial valid till {endDate}",
+  "playStoreFreeTrialValidTill": "Free trial valid till {endDate}.\nYou can choose a paid plan afterwards.",
   "subWillBeCancelledOn": "Your subscription will be cancelled on {endDate}",
   "subscription": "Subscription",
   "paymentDetails": "Payment details",
@@ -594,6 +640,9 @@
   "startBackup": "Start backup",
   "noPhotosAreBeingBackedUpRightNow": "No photos are being backed up right now",
   "preserveMore": "Preserve more",
+  "grantFullAccessPrompt": "Please allow access to all photos in the Settings app",
+  "openSettings": "Open Settings",
+  "selectMorePhotos": "Select more photos",
   "existingUser": "Existing user",
   "privateBackups": "Private backups",
   "forYourMemories": "for your memories",
@@ -612,6 +661,10 @@
   "storageLimitExceeded": "Storage limit exceeded",
   "upgrade": "Upgrade",
   "raiseTicket": "Raise ticket",
+  "@raiseTicket": {
+    "description": "Button text for raising a support tickets in case of unhandled errors during backup",
+    "type": "text"
+  },
   "backupFailed": "Backup failed",
   "couldNotBackUpTryLater": "We could not backup your data.\nWe will retry later.",
   "enteCanEncryptAndPreserveFilesOnlyIfYouGrant": "ente can encrypt and preserve files only if you grant access to them",
@@ -625,6 +678,16 @@
   "collectEventPhotos": "Collect event photos",
   "sessionExpired": "Session expired",
   "loggingOut": "Logging out...",
+  "@onDevice": {
+    "description": "The text displayed above folders/albums stored on device",
+    "type": "text"
+  },
+  "onDevice": "On device",
+  "@onEnte": {
+    "description": "The text displayed above albums backed up to ente",
+    "type": "text"
+  },
+  "onEnte": "On <branding>ente</branding>",
   "name": "Name",
   "newest": "Newest",
   "lastUpdated": "Last updated",
@@ -648,20 +711,14 @@
   "favorite": "Favorite",
   "removeFromFavorite": "Remove from favorite",
   "shareLink": "Share link",
+  "createCollage": "Create collage",
+  "saveCollage": "Save collage",
+  "collageSaved": "Collage saved to gallery",
+  "collageLayout": "Layout",
   "addToEnte": "Add to ente",
   "addToAlbum": "Add to album",
   "delete": "Delete",
   "hide": "Hide",
-  "itemSelectedCount": "{count} selected",
-  "@itemSelectedCount": {
-    "description": "Text to indicate number of items selected",
-    "placeholders": {
-      "count": {
-        "example": "1|2|3",
-        "type": "int"
-      }
-    }
-  },
   "share": "Share",
   "unhideToAlbum": "Unhide to album",
   "restoreToAlbum": "Restore to album",
@@ -697,8 +754,26 @@
   "referFriendsAnd2xYourPlan": "Refer friends and 2x your plan",
   "shareAlbumHint": "Open an album and tap the share button on the top right to share.",
   "itemsShowTheNumberOfDaysRemainingBeforePermanentDeletion": "Items show the number of days remaining before permanent deletion",
+  "trashDaysLeft": "{count, plural, =0 {} =1 {1 day} other {{count} days}}",
+  "@trashDaysLeft": {
+    "description": "Text to indicate number of days remaining before permanent deletion",
+    "placeholders": {
+      "count": {
+        "example": "1|2|3",
+        "type": "int"
+      }
+    }
+  },
   "deleteAll": "Delete All",
   "renameAlbum": "Rename album",
+  "convertToAlbum": "Convert to album",
+  "setCover": "Set cover",
+  "@setCover": {
+    "description": "Text to set cover photo for an album"
+  },
+  "sortAlbumsBy": "Sort by",
+  "sortNewestFirst": "Newest first",
+  "sortOldestFirst": "Oldest first",
   "rename": "Rename",
   "leaveSharedAlbum": "Leave shared album?",
   "leaveAlbum": "Leave album",
@@ -735,13 +810,16 @@
   "close": "Close",
   "setAs": "Set as",
   "fileSavedToGallery": "File saved to gallery",
+  "fileFailedToSaveToGallery": "Failed to save file to gallery",
   "download": "Download",
   "pressAndHoldToPlayVideo": "Press and hold to play video",
+  "pressAndHoldToPlayVideoDetailed": "Press and hold on the image to  play video",
   "downloadFailed": "Download failed",
   "deduplicateFiles": "Deduplicate Files",
   "deselectAll": "Deselect all",
   "reviewDeduplicateItems": "Please review and delete the items you believe are duplicates.",
   "clubByCaptureTime": "Club by capture time",
+  "clubByFileName": "Club by file name",
   "count": "Count",
   "totalSize": "Total size",
   "time": "Time",
@@ -905,7 +983,137 @@
   "save": "Save",
   "centerPoint": "Center point",
   "pickCenterPoint": "Pick center point",
-  "useSelectedPhoto": "Use selected photo", 
+  "useSelectedPhoto": "Use selected photo",
+  "resetToDefault": "Reset to default",
+  "@resetToDefault": {
+    "description": "Button text to reset cover photo to default"
+  },
   "edit": "Edit",
-  "deleteLocation": "Delete location"
+  "deleteLocation": "Delete location",
+  "rotateLeft": "Rotate left",
+  "flip": "Flip",
+  "rotateRight": "Rotate right",
+  "saveCopy": "Save copy",
+  "light": "Light",
+  "color": "Color",
+  "yesDiscardChanges": "Yes, discard changes",
+  "doYouWantToDiscardTheEditsYouHaveMade": "Do you want to discard the edits you have made?",
+  "saving": "Saving...",
+  "editsSaved": "Edits saved",
+  "oopsCouldNotSaveEdits": "Oops, could not save edits",
+  "distanceInKMUnit": "km",
+  "@distanceInKMUnit": {
+    "description": "Unit for distance in km"
+  },
+  "dayToday": "Today",
+  "dayYesterday": "Yesterday",
+  "storage": "Storage",
+  "usedSpace": "Used space",
+  "storageBreakupFamily": "Family",
+  "storageBreakupYou": "You",
+  "@storageBreakupYou": {
+    "description": "Label to indicate how much storage you are using when you are part of a family plan"
+  },
+  "storageUsageInfo": "{usedAmount} {usedStorageUnit} of {totalAmount} {totalStorageUnit} used",
+  "@storageUsageInfo": {
+    "description": "Example: 1.2 GB of 2 GB used or 100 GB or 2TB used"
+  },
+  "freeStorageSpace": "{freeAmount} {storageUnit} free",
+  "appVersion": "Version: {versionValue}",
+  "verifyIDLabel": "Verify",
+  "fileInfoAddDescHint": "Add a description...",
+  "editLocationTagTitle": "Edit location",
+  "setLabel": "Set",
+  "@setLabel": {
+    "description": "Label of confirm button to add a new custom radius to the radius selector of a location tag"
+  },
+  "setRadius": "Set radius",
+  "familyPlanPortalTitle": "Family",
+  "familyPlanOverview": "Add 5 family members to your existing plan without paying extra.\n\nEach member gets their own private space, and cannot see each other's files unless they're shared.\n\nFamily plans are available to customers who have a paid ente subscription.\n\nSubscribe now to get started!",
+  "androidBiometricHint": "Verify identity",
+  "@androidBiometricHint": {
+    "description": "Hint message advising the user how to authenticate with biometrics. It is used on Android side. Maximum 60 characters."
+  },
+  "androidBiometricNotRecognized": "Not recognized. Try again.",
+  "@androidBiometricNotRecognized": {
+    "description": "Message to let the user know that authentication was failed. It is used on Android side. Maximum 60 characters."
+  },
+  "androidBiometricSuccess": "Success",
+  "@androidBiometricSuccess": {
+    "description": "Message to let the user know that authentication was successful. It is used on Android side. Maximum 60 characters."
+  },
+  "androidCancelButton": "Cancel",
+  "@androidCancelButton": {
+    "description": "Message showed on a button that the user can click to leave the current dialog. It is used on Android side. Maximum 30 characters."
+  },
+  "androidSignInTitle": "Authentication required",
+  "@androidSignInTitle": {
+    "description": "Message showed as a title in a dialog which indicates the user that they need to scan biometric to continue. It is used on Android side. Maximum 60 characters."
+  },
+  "androidBiometricRequiredTitle": "Biometric required",
+  "@androidBiometricRequiredTitle": {
+    "description": "Message showed as a title in a dialog which indicates the user has not set up biometric authentication on their device. It is used on Android side. Maximum 60 characters."
+  },
+  "androidDeviceCredentialsRequiredTitle": "Device credentials required",
+  "@androidDeviceCredentialsRequiredTitle": {
+    "description": "Message showed as a title in a dialog which indicates the user has not set up credentials authentication on their device. It is used on Android side. Maximum 60 characters."
+  },
+  "androidDeviceCredentialsSetupDescription": "Device credentials required",
+  "@androidDeviceCredentialsSetupDescription": {
+    "description": "Message advising the user to go to the settings and configure device credentials on their device. It shows in a dialog on Android side."
+  },
+  "goToSettings": "Go to settings",
+  "@goToSettings": {
+    "description": "Message showed on a button that the user can click to go to settings pages from the current dialog. It is used on both Android and iOS side. Maximum 30 characters."
+  },
+  "androidGoToSettingsDescription": "Biometric authentication is not set up on your device. Go to 'Settings > Security' to add biometric authentication.",
+  "@androidGoToSettingsDescription": {
+    "description": "Message advising the user to go to the settings and configure biometric on their device. It shows in a dialog on Android side."
+  },
+  "iOSLockOut": "Biometric authentication is disabled. Please lock and unlock your screen to enable it.",
+  "@iOSLockOut": {
+    "description": "Message advising the user to re-enable biometrics on their device. It shows in a dialog on iOS side."
+  },
+  "iOSGoToSettingsDescription": "Biometric authentication is not set up on your device. Please either enable Touch ID or Face ID on your phone.",
+  "@iOSGoToSettingsDescription": {
+    "description": "Message advising the user to go to the settings and configure Biometrics for their device. It shows in a dialog on iOS side."
+  },
+  "iOSOkButton": "OK",
+  "@iOSOkButton": {
+    "description": "Message showed on a button that the user can click to leave the current dialog. It is used on iOS side. Maximum 30 characters."
+  },
+  "openstreetmapContributors": "OpenStreetMap contributors",
+  "hostedAtOsmFrance": "Hosted at OSM France",
+  "map": "Map",
+  "@map": {
+    "description": "Label for the map view"
+  },
+  "maps": "Maps",
+  "enableMaps": "Enable Maps",
+  "enableMapsDesc": "This will show your photos on a world map.\n\nThis map is hosted by Open Street Map, and the exact locations of your photos are never shared.\n\nYou can disable this feature anytime from Settings.",
+  "quickLinks": "Quick links",
+  "selectItemsToAdd": "Select items to add",
+  "addSelected": "Add selected",
+  "addFromDevice": "Add from device",
+  "addPhotos": "Add photos",
+  "noPhotosFoundHere": "No photos found here",
+  "zoomOutToSeePhotos": "Zoom out to see photos",
+  "noImagesWithLocation": "No images with location",
+  "unpinAlbum": "Unpin album",
+  "pinAlbum": "Pin album",
+  "create": "Create",
+  "viewAll": "View all",
+  "nothingSharedWithYouYet": "Nothing shared with you yet",
+  "noAlbumsSharedByYouYet": "No albums shared by you yet",
+  "sharedWithYou": "Shared with you",
+  "sharedByYou": "Shared by you",
+  "inviteYourFriendsToEnte": "Invite your friends to ente",
+  "failedToDownloadVideo": "Failed to download video",
+  "hiding": "Hiding...",
+  "unhiding": "Unhiding...",
+  "successfullyHid": "Successfully hid",
+  "successfullyUnhid": "Successfully unhid",
+  "crashReporting": "Crash reporting",
+  "addToHiddenAlbum": "Add to hidden album",
+  "moveToHiddenAlbum": "Move to hidden album"
 }

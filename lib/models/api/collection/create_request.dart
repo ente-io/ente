@@ -1,4 +1,4 @@
-import 'package:photos/models/collection.dart';
+import 'package:photos/models/collection/collection.dart';
 import 'package:photos/services/file_magic_service.dart';
 
 class CreateRequest {

@@ -1,4 +1,5 @@
 import 'dart:async';
+import "dart:typed_data";
 
 import 'package:flutter/material.dart';
 import 'package:photos/core/configuration.dart';
@@ -6,10 +7,12 @@ import 'package:photos/core/event_bus.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/events/two_factor_status_change_event.dart';
 import "package:photos/generated/l10n.dart";
+import "package:photos/models/user_details.dart";
 import 'package:photos/services/local_authentication_service.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/theme/ente_theme.dart';
 import "package:photos/ui/account/recovery_key_page.dart";
+import "package:photos/ui/account/request_pwd_verification_page.dart";
 import 'package:photos/ui/account/sessions_page.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';
 import 'package:photos/ui/components/expandable_menu_item_widget.dart';
@@ -19,6 +22,7 @@ import 'package:photos/ui/settings/common_settings.dart';
 import "package:photos/utils/crypto_util.dart";
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/navigation_util.dart";
+import "package:photos/utils/toast_util.dart";
 
 class SecuritySectionWidget extends StatefulWidget {
   const SecuritySectionWidget({Key? key}) : super(key: key);
@@ -132,6 +136,28 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
             ),
           ),
           sectionOptionSpacing,
+          MenuItemWidget(
+            captionedTextWidget: CaptionedTextWidget(
+              title: S.of(context).emailVerificationToggle,
+            ),
+            trailingWidget: ToggleSwitchWidget(
+              value: () => UserService.instance.hasEmailMFAEnabled(),
+              onChanged: () async {
+                final hasAuthenticated = await LocalAuthenticationService
+                    .instance
+                    .requestLocalAuthentication(
+                  context,
+                  S.of(context).authToChangeEmailVerificationSetting,
+                );
+                final isEmailMFAEnabled =
+                    UserService.instance.hasEmailMFAEnabled();
+                if (hasAuthenticated) {
+                  await updateEmailMFA(!isEmailMFAEnabled);
+                }
+              },
+            ),
+          ),
+          sectionOptionSpacing,
         ],
       );
     }
@@ -233,5 +259,19 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
     return CryptoUtil.bin2hex(
       await UserService.instance.getOrCreateRecoveryKey(context),
     );
+  }
+  Future<void> updateEmailMFA(bool isEnabled) async {
+    try {
+      final UserDetails details = await UserService.instance.getUserDetailsV2(memoryCount: false);
+      if((details.profileData?.canDisableEmailMFA ?? false) == false) {
+        await routeToPage(context, RequestPasswordVerificationPage(onPasswordVerified: (Uint8List keyEncryptionKey) async {
+          final Uint8List loginKey = await CryptoUtil.deriveLoginKey(keyEncryptionKey);
+          await UserService.instance.registerOrUpdateSrp(loginKey);
+        },),);
+      }
+      await UserService.instance.updateEmailMFA(isEnabled);
+    } catch (e) {
+      showToast(context, S.of(context).somethingWentWrong);
+    }
   }
 }

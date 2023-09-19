@@ -1,9 +1,30 @@
-class InvalidFileError extends ArgumentError {
-  InvalidFileError(String message) : super(message);
+enum InvalidReason {
+  assetDeleted,
+  assetDeletedEvent,
+  sourceFileMissing,
+  livePhotoToImageTypeChanged,
+  imageToLivePhotoTypeChanged,
+  livePhotoVideoMissing,
+  thumbnailMissing,
+  unknown,
+
+}
+extension InvalidReasonExn on InvalidReason {
+  bool get isLivePhotoErr =>
+      this == InvalidReason.livePhotoToImageTypeChanged ||
+      this == InvalidReason.imageToLivePhotoTypeChanged ||
+      this == InvalidReason.livePhotoVideoMissing;
 }
 
-class InvalidFileUploadState extends AssertionError {
-  InvalidFileUploadState(String message) : super(message);
+class InvalidFileError extends ArgumentError {
+  final InvalidReason reason;
+
+  InvalidFileError(String message, this.reason) : super(message);
+
+  @override
+  String toString() {
+    return 'InvalidFileError: $message (reason: $reason)';
+  }
 }
 
 class SubscriptionAlreadyClaimedError extends Error {}
@@ -51,3 +72,7 @@ class InvalidStateError extends AssertionError {
 }
 
 class KeyDerivationError extends Error {}
+
+class SrpSetupNotCompleteError extends Error {}
+
+class SharingNotPermittedForFreeAccountsError extends Error {}

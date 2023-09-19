@@ -8,7 +8,10 @@ import "package:photos/events/tab_changed_event.dart";
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/search/search_result.dart';
 import 'package:photos/services/search_service.dart';
+import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/components/buttons/icon_button_widget.dart';
+import "package:photos/ui/map/enable_map.dart";
+import "package:photos/ui/map/map_screen.dart";
 import 'package:photos/ui/viewer/search/result/no_result_widget.dart';
 import 'package:photos/ui/viewer/search/search_suffix_icon_widget.dart';
 import 'package:photos/ui/viewer/search/search_suggestions.dart';
@@ -90,6 +93,7 @@ class _SearchWidgetState extends State<SearchWidget> {
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 ClipRRect(
                   borderRadius: BorderRadius.circular(8),
@@ -97,11 +101,10 @@ class _SearchWidgetState extends State<SearchWidget> {
                     height: 44,
                     color: Theme.of(context).colorScheme.defaultBackgroundColor,
                     child: TextFormField(
-                      style: Theme.of(context).textTheme.subtitle1,
+                      style: Theme.of(context).textTheme.titleMedium,
                       // Below parameters are to disable auto-suggestion
                       enableSuggestions: false,
                       autocorrect: false,
-                      keyboardType: TextInputType.visiblePassword,
                       // Above parameters are to disable auto-suggestion
                       decoration: InputDecoration(
                         hintText: S.of(context).searchHintText,
@@ -155,7 +158,7 @@ class _SearchWidgetState extends State<SearchWidget> {
                       onChanged: (value) async {
                         _query = value;
                         final List<SearchResult> allResults =
-                            await getSearchResultsForQuery(value);
+                            await getSearchResultsForQuery(context, value);
                         /*checking if _query == value to make sure that the results are from the current query
                         and not from the previous query (race condition).*/
                         if (mounted && _query == value) {
@@ -173,7 +176,7 @@ class _SearchWidgetState extends State<SearchWidget> {
                     ? SearchSuggestionsWidget(_results)
                     : _query.isNotEmpty
                         ? const NoResultWidget()
-                        : const SizedBox.shrink(),
+                        : const NavigateToMap(),
               ],
             ),
           ),
@@ -190,12 +193,15 @@ class _SearchWidgetState extends State<SearchWidget> {
     super.dispose();
   }
 
-  Future<List<SearchResult>> getSearchResultsForQuery(String query) async {
+  Future<List<SearchResult>> getSearchResultsForQuery(
+    BuildContext context,
+    String query,
+  ) async {
     final Completer<List<SearchResult>> completer = Completer();
 
     _debouncer.run(
       () {
-        return _getSearchResultsFromService(query, completer);
+        return _getSearchResultsFromService(context, query, completer);
       },
     );
 
@@ -203,6 +209,7 @@ class _SearchWidgetState extends State<SearchWidget> {
   }
 
   Future<void> _getSearchResultsFromService(
+    BuildContext context,
     String query,
     Completer completer,
   ) async {
@@ -218,7 +225,7 @@ class _SearchWidgetState extends State<SearchWidget> {
       }
 
       final holidayResults =
-          await _searchService.getHolidaySearchResults(query);
+      await _searchService.getHolidaySearchResults(context, query);
       allResults.addAll(holidayResults);
 
       final fileTypeSearchResults =
@@ -240,17 +247,12 @@ class _SearchWidgetState extends State<SearchWidget> {
           await _searchService.getCollectionSearchResults(query);
       allResults.addAll(collectionResults);
 
-      // if (FeatureFlagService.instance.isInternalUserOrDebugBuild() &&
-      //     query.startsWith("l:")) {
-      //   final locationResults = await _searchService
-      //       .getLocationSearchResults(query.replaceAll("l:", ""));
-      //   allResults.addAll(locationResults);
-      // }
-
-      final monthResults = await _searchService.getMonthSearchResults(query);
+      final monthResults =
+          await _searchService.getMonthSearchResults(context, query);
       allResults.addAll(monthResults);
 
-      final possibleEvents = await _searchService.getDateResults(query);
+      final possibleEvents =
+          await _searchService.getDateResults(context, query);
       allResults.addAll(possibleEvents);
     } catch (e, s) {
       _logger.severe("error during search", e, s);
@@ -261,5 +263,36 @@ class _SearchWidgetState extends State<SearchWidget> {
   bool _isYearValid(String year) {
     final yearAsInt = int.tryParse(year); //returns null if cannot be parsed
     return yearAsInt != null && yearAsInt <= currentYear;
+  }
+}
+
+class NavigateToMap extends StatelessWidget {
+  const NavigateToMap({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = getEnteColorScheme(context);
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: IconButtonWidget(
+        icon: Icons.map_sharp,
+        iconButtonType: IconButtonType.primary,
+        defaultColor: colorScheme.backgroundElevated,
+        pressedColor: colorScheme.backgroundElevated2,
+        size: 28,
+        onTap: () async {
+          final bool result = await requestForMapEnable(context);
+          if (result) {
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(
+                builder: (context) => MapScreen(
+                  filesFutureFn: SearchService.instance.getAllFiles,
+                ),
+              ),
+            );
+          }
+        },
+      ),
+    );
   }
 }

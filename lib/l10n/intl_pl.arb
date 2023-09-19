@@ -18,7 +18,7 @@
   "yourAccountHasBeenDeleted": "Twoje konto zostało usunięte",
   "selectReason": "Wybierz powód",
   "deleteReason1": "Brakuje kluczowej funkcji, której potrzebuję",
-  "deleteReason2": "Aplikacja lub określona funkcja nie \nzachowuje się tak, jak sądzę, że powinna",
+  "deleteReason2": "Aplikacja lub określona funkcja nie zachowuje się tak, jak sądzę, że powinna",
   "deleteReason3": "Znalazłem inną, lepszą usługę",
   "deleteReason4": "Inna, niewymieniona wyżej przyczyna",
   "sendEmail": "Wyślij e-mail",
@@ -50,7 +50,6 @@
   "verifyEmail": "Zweryfikuj adres e-mail",
   "checkInboxAndSpamFolder": "Sprawdź swoją skrzynkę odbiorczą (i spam), aby zakończyć weryfikację",
   "resendEmail": "Wyślij e-mail ponownie",
-  "weveSentAMailTo": "E-mail został wysłany na adres",
   "setPasswordTitle": "Ustaw hasło",
   "changePasswordTitle": "Zmień hasło",
   "resetPasswordTitle": "Zresetuj hasło",
@@ -101,5 +100,7 @@
   "codeCopiedToClipboard": "Kod został skopiowany do schowka",
   "confirm": "Potwierdź",
   "twofactorAuthenticationPageTitle": "Uwierzytelnianie dwuskładnikowe",
-  "tryAgain": "Spróbuj ponownie"
+  "tryAgain": "Spróbuj ponownie",
+  "addToHiddenAlbum": "Add to hidden album",
+  "moveToHiddenAlbum": "Move to hidden album"
 }

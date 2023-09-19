@@ -3,11 +3,12 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/constants.dart';
+import "package:photos/generated/l10n.dart";
 import 'package:photos/models/user_details.dart';
 import 'package:photos/states/user_details_state.dart';
 import 'package:photos/theme/colors.dart';
 import 'package:photos/theme/ente_theme.dart';
-import 'package:photos/ui/common/loading_widget.dart';
+import "package:photos/ui/common/loading_widget.dart";
 import 'package:photos/ui/payment/subscription.dart';
 import 'package:photos/ui/settings/storage_progress_widget.dart';
 import 'package:photos/utils/data_util.dart';
@@ -80,36 +81,37 @@ class _StorageCardWidgetState extends State<StorageCardWidget> {
   Widget containerForUserDetails(
     UserDetails? userDetails,
   ) {
-    return ConstrainedBox(
-      constraints: const BoxConstraints(maxWidth: 350),
-      child: AspectRatio(
-        aspectRatio: 2 / 1,
-        child: Stack(
-          children: [
-            _background,
-            userDetails is UserDetails
-                ? _userDetails(userDetails)
-                : const EnteLoadingWidget(
-                    color: strokeBaseDark,
-                  ),
-            Align(
-              alignment: Alignment.centerRight,
-              child: Padding(
-                padding: const EdgeInsets.only(right: 4),
-                child: ValueListenableBuilder<bool>(
-                  builder: (BuildContext context, bool value, Widget? child) {
-                    return Icon(
-                      Icons.chevron_right_outlined,
-                      color: value ? strokeMutedDark : strokeBaseDark,
-                    );
-                  },
-                  valueListenable: _isStorageCardPressed,
+    return Stack(
+      children: [
+        SizedBox(
+          width: double.infinity,
+          child: _background,
+        ),
+        Positioned.fill(
+          child: userDetails is UserDetails
+              ? _userDetails(userDetails)
+              : const EnteLoadingWidget(
+                  color: strokeBaseDark,
                 ),
+        ),
+        Positioned.fill(
+          child: Align(
+            alignment: Alignment.centerRight,
+            child: Padding(
+              padding: const EdgeInsets.only(right: 4),
+              child: ValueListenableBuilder<bool>(
+                builder: (BuildContext context, bool value, Widget? child) {
+                  return Icon(
+                    Icons.chevron_right_outlined,
+                    color: value ? strokeMutedDark : strokeBaseDark,
+                  );
+                },
+                valueListenable: _isStorageCardPressed,
               ),
             ),
-          ],
+          ),
         ),
-      ),
+      ],
     );
   }
 
@@ -137,6 +139,21 @@ class _StorageCardWidgetState extends State<StorageCardWidget> {
 
     final usedStorageInTB = roundGBsToTBs(usedStorageInGB);
     final totalStorageInTB = roundGBsToTBs(totalStorageInGB);
+    late String freeSpace, freeSpaceUnit;
+
+// Determine the appropriate free space and units
+    if (shouldShowFreeSpaceInTBs) {
+      freeSpace =
+          _roundedFreeSpace(totalStorageInTB, usedStorageInTB).toString();
+      freeSpaceUnit = "TB";
+    } else if (shouldShowFreeSpaceInMBs) {
+      freeSpace = max(0, convertBytesToMBs(freeStorageInBytes)).toString();
+      freeSpaceUnit = "MB";
+    } else {
+      freeSpace =
+          _roundedFreeSpace(totalStorageInGB, usedStorageInGB).toString();
+      freeSpaceUnit = "GB";
+    }
 
     return Padding(
       padding: EdgeInsets.fromLTRB(
@@ -154,7 +171,9 @@ class _StorageCardWidgetState extends State<StorageCardWidget> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  isMobileScreenSmall ? "Used space" : "Storage",
+                  isMobileScreenSmall
+                      ? S.of(context).usedSpace
+                      : S.of(context).storage,
                   style: getEnteTextTheme(context)
                       .small
                       .copyWith(color: textMutedDark),
@@ -206,7 +225,7 @@ class _StorageCardWidgetState extends State<StorageCardWidget> {
                         : strokeBaseDark,
                     fractionOfStorage:
                         (userDetails.usage / userDetails.getTotalStorage()),
-                  )
+                  ),
                 ],
               ),
               const SizedBox(height: 12),
@@ -227,7 +246,7 @@ class _StorageCardWidgetState extends State<StorageCardWidget> {
                             ),
                             const SizedBox(width: 4),
                             Text(
-                              "You",
+                              S.of(context).storageBreakupYou,
                               style: getEnteTextTheme(context)
                                   .miniBold
                                   .copyWith(color: textBaseDark),
@@ -243,7 +262,7 @@ class _StorageCardWidgetState extends State<StorageCardWidget> {
                             ),
                             const SizedBox(width: 4),
                             Text(
-                              "Family",
+                              S.of(context).storageBreakupFamily,
                               style: getEnteTextTheme(context)
                                   .miniBold
                                   .copyWith(color: textBaseDark),
@@ -251,30 +270,16 @@ class _StorageCardWidgetState extends State<StorageCardWidget> {
                           ],
                         )
                       : const SizedBox.shrink(),
-                  RichText(
-                    text: TextSpan(
-                      style: getEnteTextTheme(context)
-                          .mini
-                          .copyWith(color: textFaintDark),
-                      children: [
-                        TextSpan(
-                          text:
-                              "${shouldShowFreeSpaceInMBs ? max(0, convertBytesToMBs(freeStorageInBytes)) : _roundedFreeSpace(totalStorageInGB, usedStorageInGB)}",
-                        ),
-                        TextSpan(
-                          text: shouldShowFreeSpaceInTBs
-                              ? " TB free"
-                              : shouldShowFreeSpaceInMBs
-                                  ? " MB free"
-                                  : " GB free",
-                        )
-                      ],
-                    ),
+                  Text(
+                    S.of(context).freeStorageSpace(freeSpace, freeSpaceUnit),
+                    style: getEnteTextTheme(context)
+                        .mini
+                        .copyWith(color: textFaintDark),
                   ),
                 ],
               ),
             ],
-          )
+          ),
         ],
       ),
     );
@@ -314,23 +319,41 @@ class _StorageCardWidgetState extends State<StorageCardWidget> {
   }) {
     if (isMobileScreenSmall) {
       return [
-        TextSpan(text: usedStorageInGB.toString() + "/"),
-        TextSpan(text: totalStorageInGB.toString() + " GB"),
+        TextSpan(text: '$usedStorageInGB/$totalStorageInGB GB'),
       ];
+    }
+    late num currentUsage, totalStorage;
+    late String currentUsageUnit, totalStorageUnit;
+
+// Determine the appropriate usage and units
+    if (shouldShowUsedStorageInTBs) {
+      currentUsage = usedStorageInTB;
+      currentUsageUnit = "TB";
+    } else if (shouldShowUsedStorageInMBs) {
+      currentUsage = convertBytesToMBs(usedStorageInBytes);
+      currentUsageUnit = "MB";
+    } else {
+      currentUsage = usedStorageInGB;
+      currentUsageUnit = "GB";
+    }
+
+// Determine the appropriate total storage and units
+    if (shouldShowTotalStorageInTBs) {
+      totalStorage = totalStorageInTB;
+      totalStorageUnit = "TB";
+    } else {
+      totalStorage = totalStorageInGB;
+      totalStorageUnit = "GB";
     }
 
     return [
       TextSpan(
-        text: shouldShowUsedStorageInTBs
-            ? usedStorageInTB.toString() + " TB of "
-            : shouldShowUsedStorageInMBs
-                ? convertBytesToMBs(usedStorageInBytes).toString() + " MB of "
-                : usedStorageInGB.toString() + " GB of ",
-      ),
-      TextSpan(
-        text: shouldShowTotalStorageInTBs
-            ? totalStorageInTB.toString() + " TB used"
-            : totalStorageInGB.toString() + " GB used",
+        text: S.of(context).storageUsageInfo(
+              currentUsage,
+              currentUsageUnit,
+              totalStorage,
+              totalStorageUnit,
+            ),
       ),
     ];
   }

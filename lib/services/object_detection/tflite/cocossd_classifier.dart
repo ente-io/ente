@@ -12,7 +12,7 @@ import "package:tflite_flutter_helper/tflite_flutter_helper.dart";
 /// Classifier
 class CocoSSDClassifier extends Classifier {
   static final _logger = Logger("CocoSSDClassifier");
-  static const double threshold = 0.5;
+  static const double threshold = 0.4;
 
   @override
   String get modelPath => "models/cocossd/model.tflite";

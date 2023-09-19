@@ -4,10 +4,10 @@
 
 cd "$(dirname "$(readlink -f "$0")")"
 
+
 # Pull from the latest tag where binaries were built
 ANDROID_TAG="tf_2.5"
 IOS_TAG="v0.5.0"
-
 IOS_URL="https://github.com/am15h/tflite_flutter_plugin/releases/download/"
 ANDROID_URL="https://github.com/am15h/tflite_flutter_plugin/releases/download/"
 

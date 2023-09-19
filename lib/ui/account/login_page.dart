@@ -1,9 +1,13 @@
 import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
+import "package:logging/logging.dart";
 import 'package:photos/core/configuration.dart';
+import "package:photos/core/errors.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/l10n/l10n.dart";
+import "package:photos/models/api/user/srp.dart";
 import 'package:photos/services/user_service.dart';
+import "package:photos/ui/account/login_pwd_verification_page.dart";
 import 'package:photos/ui/common/dynamic_fab.dart';
 import 'package:photos/ui/common/web_page.dart';
 import "package:styled_text/styled_text.dart";
@@ -20,6 +24,7 @@ class _LoginPageState extends State<LoginPage> {
   bool _emailIsValid = false;
   String? _email;
   Color? _emailInputFieldColor;
+  final Logger _logger = Logger('_LoginPageState');
 
   @override
   void initState() {
@@ -53,13 +58,36 @@ class _LoginPageState extends State<LoginPage> {
       ),
       body: _getBody(),
       floatingActionButton: DynamicFAB(
+        key: const ValueKey("logInButton"),
         isKeypadOpen: isKeypadOpen,
         isFormValid: _emailIsValid,
         buttonText: S.of(context).logInLabel,
-        onPressedFunction: () {
+        onPressedFunction: () async {
           UserService.instance.setEmail(_email!);
-          UserService.instance
-              .sendOtt(context, _email!, isCreateAccountScreen: false);
+          SrpAttributes? attr;
+          bool isEmailVerificationEnabled = true;
+          try {
+            attr = await UserService.instance.getSrpAttributes(_email!);
+            isEmailVerificationEnabled = attr.isEmailMFAEnabled;
+          } catch (e) {
+            if (e is! SrpSetupNotCompleteError) {
+              _logger.severe('Error getting SRP attributes', e);
+            }
+          }
+          if (attr != null && !isEmailVerificationEnabled) {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (BuildContext context) {
+                  return LoginPasswordVerificationPage(
+                    srpAttributes: attr!,
+                  );
+                },
+              ),
+            );
+          } else {
+            await UserService.instance
+                .sendOtt(context, _email!, isCreateAccountScreen: false);
+          }
           FocusScope.of(context).unfocus();
         },
       ),
@@ -81,12 +109,13 @@ class _LoginPageState extends State<LoginPage> {
                       const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
                   child: Text(
                     l10n.accountWelcomeBack,
-                    style: Theme.of(context).textTheme.headline4,
+                    style: Theme.of(context).textTheme.headlineMedium,
                   ),
                 ),
                 Padding(
                   padding: const EdgeInsets.fromLTRB(20, 24, 20, 0),
                   child: TextFormField(
+                    key: const ValueKey("emailInputField"),
                     autofillHints: const [AutofillHints.email],
                     decoration: InputDecoration(
                       fillColor: _emailInputFieldColor,
@@ -146,12 +175,11 @@ class _LoginPageState extends State<LoginPage> {
                           text: S.of(context).loginTerms,
                           style: Theme.of(context)
                               .textTheme
-                              .subtitle1!
+                              .titleMedium!
                               .copyWith(fontSize: 12),
                           tags: {
                             'u-terms': StyledTextActionTag(
-                              (String? text, Map<String?, String?> attrs) => {
-                                Navigator.of(context).push(
+                              (String? text, Map<String?, String?> attrs) => Navigator.of(context).push(
                                   MaterialPageRoute(
                                     builder: (BuildContext context) {
                                       return WebPage(
@@ -160,15 +188,13 @@ class _LoginPageState extends State<LoginPage> {
                                       );
                                     },
                                   ),
-                                )
-                              },
+                                ),
                               style: const TextStyle(
                                 decoration: TextDecoration.underline,
                               ),
                             ),
                             'u-policy': StyledTextActionTag(
-                              (String? text, Map<String?, String?> attrs) => {
-                                Navigator.of(context).push(
+                              (String? text, Map<String?, String?> attrs) => Navigator.of(context).push(
                                   MaterialPageRoute(
                                     builder: (BuildContext context) {
                                       return WebPage(
@@ -177,19 +203,18 @@ class _LoginPageState extends State<LoginPage> {
                                       );
                                     },
                                   ),
-                                )
-                              },
+                                ),
                               style: const TextStyle(
                                 decoration: TextDecoration.underline,
                               ),
-                            )
+                            ),
                           },
                         ),
                       ),
-                      Expanded(
+                      const Expanded(
                         flex: 1,
-                        child: Container(),
-                      )
+                        child: SizedBox.shrink(),
+                      ),
                     ],
                   ),
                 ),

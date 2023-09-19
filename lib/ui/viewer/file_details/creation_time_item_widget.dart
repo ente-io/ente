@@ -1,14 +1,15 @@
 import "package:flutter/material.dart";
-import "package:flutter_datetime_picker/flutter_datetime_picker.dart";
+import "package:flutter_datetime_picker_bdaya/flutter_datetime_picker_bdaya.dart";
+import "package:intl/intl.dart";
 import "package:photos/ente_theme_data.dart";
-import "package:photos/models/file.dart";
+import 'package:photos/models/file/file.dart';
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/info_item_widget.dart";
 import "package:photos/utils/date_time_util.dart";
 import "package:photos/utils/magic_util.dart";
 
 class CreationTimeItem extends StatefulWidget {
-  final File file;
+  final EnteFile file;
   final int currentUserID;
   const CreationTimeItem(this.file, this.currentUserID, {super.key});
 
@@ -24,13 +25,14 @@ class _CreationTimeItemState extends State<CreationTimeItem> {
     return InfoItemWidget(
       key: const ValueKey("Creation time"),
       leadingIcon: Icons.calendar_today_outlined,
-      title: getFullDate(
+      title: DateFormat.yMMMEd(Localizations.localeOf(context).languageCode)
+          .format(
         DateTime.fromMicrosecondsSinceEpoch(widget.file.creationTime!),
       ),
       subtitleSection: Future.value([
         Text(
           getTimeIn12hrFormat(dateTime) + "  " + dateTime.timeZoneName,
-          style: getEnteTextTheme(context).smallMuted,
+          style: getEnteTextTheme(context).miniMuted,
         ),
       ]),
       editOnTap: ((widget.file.ownerID == null ||
@@ -43,8 +45,8 @@ class _CreationTimeItemState extends State<CreationTimeItem> {
     );
   }
 
-  void _showDateTimePicker(File file) async {
-    final dateResult = await DatePicker.showDatePicker(
+  void _showDateTimePicker(EnteFile file) async {
+    final dateResult = await DatePickerBdaya.showDatePicker(
       context,
       minTime: DateTime(1800, 1, 1),
       maxTime: DateTime.now(),
@@ -55,7 +57,7 @@ class _CreationTimeItemState extends State<CreationTimeItem> {
     if (dateResult == null) {
       return;
     }
-    final dateWithTimeResult = await DatePicker.showTime12hPicker(
+    final dateWithTimeResult = await DatePickerBdaya.showTime12hPicker(
       context,
       showTitleActions: true,
       currentTime: dateResult,

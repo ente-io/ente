@@ -16,7 +16,7 @@ import "package:photos/ui/growth/referral_screen.dart";
 import 'package:photos/ui/settings/about_section_widget.dart';
 import 'package:photos/ui/settings/account_section_widget.dart';
 import 'package:photos/ui/settings/app_version_widget.dart';
-import 'package:photos/ui/settings/backup_section_widget.dart';
+import 'package:photos/ui/settings/backup/backup_section_widget.dart';
 import 'package:photos/ui/settings/debug_section_widget.dart';
 import 'package:photos/ui/settings/general_section_widget.dart';
 import 'package:photos/ui/settings/inherited_settings_state.dart';
@@ -60,8 +60,7 @@ class SettingsPage extends StatelessWidget {
         onLongPress: () {
           _showVerifyIdentityDialog(context);
         },
-        child: Container(
-          constraints: const BoxConstraints(maxWidth: 350),
+        child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 8),
           child: Align(
             alignment: Alignment.centerLeft,

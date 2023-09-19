@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:photos/ui/huge_listview/scroll_bar_thumb.dart';
@@ -63,6 +62,7 @@ class DraggableScrollbarState extends State<DraggableScrollbar>
     super.initState();
     currentFirstIndex = widget.currentFirstIndex;
 
+    ///Where will this be true on init?
     if (widget.initialScrollIndex > 0 && widget.totalCount > 1) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         setState(
@@ -112,18 +112,6 @@ class DraggableScrollbarState extends State<DraggableScrollbar>
       );
     } else {
       return widget.child;
-    }
-  }
-
-  Widget buildKeyboard() {
-    if (defaultTargetPlatform == TargetPlatform.windows) {
-      return RawKeyboardListener(
-        focusNode: FocusNode(),
-        onKey: keyHandler,
-        child: buildThumb(),
-      );
-    } else {
-      return buildThumb();
     }
   }
 

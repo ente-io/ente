@@ -143,7 +143,7 @@ class SlideFadeTransition extends StatelessWidget {
     return AnimatedBuilder(
       animation: animation!,
       builder: (context, child) =>
-          animation!.value == 0.0 ? Container() : child!,
+          animation!.value == 0.0 ? const SizedBox.shrink() : child!,
       child: SlideTransition(
         position: Tween(
           begin: const Offset(0.3, 0.0),

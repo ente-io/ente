@@ -8,7 +8,7 @@ class KeyboardOverlay {
       return;
     }
 
-    final OverlayState? overlayState = Overlay.of(context);
+    final OverlayState overlayState = Overlay.of(context);
     _overlayEntry = OverlayEntry(
       builder: (context) {
         return Positioned(
@@ -20,7 +20,7 @@ class KeyboardOverlay {
       },
     );
 
-    overlayState!.insert(_overlayEntry!);
+    overlayState.insert(_overlayEntry!);
   }
 
   static removeOverlay() {

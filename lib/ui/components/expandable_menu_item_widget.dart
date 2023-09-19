@@ -44,10 +44,9 @@ class _ExpandableMenuItemWidgetState extends State<ExpandableMenuItemWidget> {
     final isSuppressed = isAnySectionExpanded && !isCurrentSectionExpanded;
 
     final enteColorScheme = Theme.of(context).colorScheme.enteTheme.colorScheme;
-    final backgroundColor =
-        MediaQuery.of(context).platformBrightness == Brightness.light
-            ? enteColorScheme.backgroundElevated2
-            : enteColorScheme.backgroundElevated;
+    final backgroundColor = Theme.of(context).brightness == Brightness.light
+        ? enteColorScheme.backgroundElevated2
+        : enteColorScheme.backgroundElevated;
     return Padding(
       padding: EdgeInsets.only(bottom: expandableController.value ? 8 : 0),
       child: AnimatedContainer(

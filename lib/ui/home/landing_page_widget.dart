@@ -116,6 +116,7 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
               child: Hero(
                 tag: "log_in",
                 child: ElevatedButton(
+                  key: const ValueKey("signInButton"),
                   style:
                       Theme.of(context).colorScheme.optionalActionButtonStyle,
                   onPressed: _navigateToSignInPage,
@@ -192,7 +193,7 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
       // No key
       if (Configuration.instance.getKeyAttributes() == null) {
         // Never had a key
-        page = const PasswordEntryPage();
+        page =  const PasswordEntryPage(mode: PasswordEntryMode.set,);
       } else if (Configuration.instance.getKey() == null) {
         // Yet to decrypt the key
         page = const PasswordReentryPage();
@@ -219,7 +220,7 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
       // No key
       if (Configuration.instance.getKeyAttributes() == null) {
         // Never had a key
-        page = const PasswordEntryPage();
+        page =  const PasswordEntryPage(mode: PasswordEntryMode.set,);
       } else if (Configuration.instance.getKey() == null) {
         // Yet to decrypt the key
         page = const PasswordReentryPage();
@@ -291,12 +292,14 @@ class FeatureItemWidget extends StatelessWidget {
           children: [
             Text(
               featureTitleFirstLine,
-              style: Theme.of(context).textTheme.headline5,
+              style: Theme.of(context).textTheme.headlineSmall,
+              textAlign: TextAlign.center,
             ),
             const Padding(padding: EdgeInsets.all(2)),
             Text(
               featureTitleSecondLine,
-              style: Theme.of(context).textTheme.headline5,
+              style: Theme.of(context).textTheme.headlineSmall,
+              textAlign: TextAlign.center,
             ),
             const Padding(padding: EdgeInsets.all(12)),
             Text(
