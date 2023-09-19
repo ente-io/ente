@@ -269,18 +269,20 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
   }
 
   Widget bottomGradient() {
-    return Container(
-      height: 124,
-      width: double.infinity,
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.bottomCenter,
-          end: Alignment.topCenter,
-          colors: [
-            Colors.black.withOpacity(0.5), //same for both themes
-            Colors.transparent,
-          ],
-          stops: const [0, 0.8],
+    return IgnorePointer(
+      child: Container(
+        height: 124,
+        width: double.infinity,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.bottomCenter,
+            end: Alignment.topCenter,
+            colors: [
+              Colors.black.withOpacity(0.5), //same for both themes
+              Colors.transparent,
+            ],
+            stops: const [0, 0.8],
+          ),
         ),
       ),
     );
