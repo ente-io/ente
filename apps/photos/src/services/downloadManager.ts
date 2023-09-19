@@ -190,7 +190,7 @@ class DownloadManager {
             }
             const onDownloadProgress = this.trackDownloadProgress(
                 file.id,
-                file.info.fileSize
+                file.info?.fileSize
             );
             if (
                 file.metadata.fileType === FILE_TYPE.IMAGE ||
@@ -389,7 +389,7 @@ class DownloadManager {
         }
     }
 
-    trackDownloadProgress = (fileID: number, fileSize?: number) => {
+    trackDownloadProgress = (fileID: number, fileSize: number) => {
         return (event: { loaded: number; total: number }) => {
             if (isNaN(event.total) || event.total === 0) {
                 if (!fileSize) {
