@@ -952,7 +952,7 @@ class CollectionsService {
   Future<List<Collection>> _fetchCollections(int sinceTime) async {
     try {
       final response = await _enteDio.get(
-        "/collections",
+        "/collections/v2",
         queryParameters: {
           "sinceTime": sinceTime,
           "source": AppLifecycleService.instance.isForeground ? "fg" : "bg",
