@@ -167,7 +167,7 @@ function getDateFromComponents(dateComponent: DateComponent<number>) {
 
 function hasTimeValues(dateComponent: DateComponent<number>) {
     const { hour, minute, second } = dateComponent;
-    return hour && minute && second;
+    return !isNaN(hour) && !isNaN(minute) && !isNaN(second);
 }
 
 function removeTimeValues(
