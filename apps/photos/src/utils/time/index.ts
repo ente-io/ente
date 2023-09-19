@@ -31,13 +31,15 @@ export function getUnixTimeInMicroSecondsWithDelta(delta: TimeDelta): number {
     return currentDate.getTime() * 1000;
 }
 
-export function getUnixTimeInMicroSeconds(dateTime: Date) {
+export function validateAndGetCreationUnixTimeInMicroSeconds(dateTime: Date) {
     if (!dateTime || isNaN(dateTime.getTime())) {
         return null;
     }
     const unixTime = dateTime.getTime() * 1000;
     //ignoring dateTimeString = "0000:00:00 00:00:00"
     if (unixTime === Date.UTC(0, 0, 0, 0, 0, 0, 0) || unixTime === 0) {
+        return null;
+    } else if (unixTime > Date.now() * 1000) {
         return null;
     } else {
         return unixTime;
@@ -72,15 +74,15 @@ function _addYears(date: Date, years: number) {
 generates data component for date in format YYYYMMDD-HHMMSS
  */
 export function parseDateFromFusedDateString(dateTime: string) {
-    const dateComponent: DateComponent<string> = {
+    const dateComponent: DateComponent<number> = convertDateComponentToNumber({
         year: dateTime.slice(0, 4),
         month: dateTime.slice(4, 6),
         day: dateTime.slice(6, 8),
         hour: dateTime.slice(9, 11),
         minute: dateTime.slice(11, 13),
         second: dateTime.slice(13, 15),
-    };
-    return getDateFromComponents(dateComponent);
+    });
+    return validateAndGetDateFromComponents(dateComponent);
 }
 
 /* sample date format = 2018-08-19 12:34:45
@@ -89,19 +91,15 @@ export function parseDateFromFusedDateString(dateTime: string) {
  */
 export function tryToParseDateTime(dateTime: string): Date {
     const dateComponent = getDateComponentsFromSymbolJoinedString(dateTime);
-    if (isDateComponentValid(dateComponent)) {
-        return getDateFromComponents(dateComponent);
-    } else if (
-        dateComponent.year?.length === 8 &&
-        dateComponent.month?.length === 6
-    ) {
+    if (dateComponent.year?.length === 8 && dateComponent.month?.length === 6) {
         // the filename has size 8 consecutive and then 6 consecutive digits
-        // high possibility that the it is some unhandled date time encoding
+        // high possibility that the it is a date in format YYYYMMDD-HHMMSS
         const possibleDateTime = dateComponent.year + '-' + dateComponent.month;
         return parseDateFromFusedDateString(possibleDateTime);
-    } else {
-        return null;
     }
+    return validateAndGetDateFromComponents(
+        convertDateComponentToNumber(dateComponent)
+    );
 }
 
 function getDateComponentsFromSymbolJoinedString(
@@ -113,35 +111,67 @@ function getDateComponentsFromSymbolJoinedString(
     return { year, month, day, hour, minute, second };
 }
 
-//  has length number of digits in the components
-function isDateComponentValid(dateComponent: DateComponent<string>) {
+function validateAndGetDateFromComponents(
+    dateComponent: DateComponent<number>
+) {
+    let date = getDateFromComponents(dateComponent);
+    if (hasTimeValues(dateComponent) && !isTimePartValid(date, dateComponent)) {
+        // if the date has time values but they are not valid
+        // then we remove the time values and try to validate the date
+        date = getDateFromComponents(removeTimeValues(dateComponent));
+    }
+    if (!isDatePartValid(date, dateComponent)) {
+        return null;
+    }
+    return date;
+}
+
+function isTimePartValid(date: Date, dateComponent: DateComponent<number>) {
     return (
-        dateComponent.year?.length === 4 &&
-        dateComponent.month?.length === 2 &&
-        dateComponent.day?.length === 2
+        date.getHours() === dateComponent.hour &&
+        date.getMinutes() === dateComponent.minute &&
+        date.getSeconds() === dateComponent.second
     );
 }
 
-function parseDateComponentToNumber(
+function isDatePartValid(date: Date, dateComponent: DateComponent<number>) {
+    return (
+        date.getFullYear() === dateComponent.year &&
+        date.getMonth() === dateComponent.month &&
+        date.getDate() === dateComponent.day
+    );
+}
+
+function convertDateComponentToNumber(
     dateComponent: DateComponent<string>
 ): DateComponent<number> {
     return {
-        year: parseInt(dateComponent.year),
+        year: Number(dateComponent.year),
         // https://stackoverflow.com/questions/2552483/why-does-the-month-argument-range-from-0-to-11-in-javascripts-date-constructor
-        month: parseInt(dateComponent.month) - 1,
-        day: parseInt(dateComponent.day),
-        hour: parseInt(dateComponent.hour),
-        minute: parseInt(dateComponent.minute),
-        second: parseInt(dateComponent.second),
+        month: Number(dateComponent.month) - 1,
+        day: Number(dateComponent.day),
+        hour: Number(dateComponent.hour),
+        minute: Number(dateComponent.minute),
+        second: Number(dateComponent.second),
     };
 }
 
-function getDateFromComponents(dateComponent: DateComponent<string>) {
-    const { year, month, day, hour, minute, second } =
-        parseDateComponentToNumber(dateComponent);
-    const hasTimeValues = hour && minute && second;
+function getDateFromComponents(dateComponent: DateComponent<number>) {
+    const { year, month, day, hour, minute, second } = dateComponent;
+    if (hasTimeValues(dateComponent)) {
+        return new Date(year, month, day, hour, minute, second);
+    } else {
+        return new Date(year, month, day);
+    }
+}
 
-    return hasTimeValues
-        ? new Date(year, month, day, hour, minute, second)
-        : new Date(year, month, day);
+function hasTimeValues(dateComponent: DateComponent<number>) {
+    const { hour, minute, second } = dateComponent;
+    return !isNaN(hour) && !isNaN(minute) && !isNaN(second);
+}
+
+function removeTimeValues(
+    dateComponent: DateComponent<number>
+): DateComponent<number> {
+    return { ...dateComponent, hour: 0, minute: 0, second: 0 };
 }
