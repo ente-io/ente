@@ -369,6 +369,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "cancelSubscription":
             MessageLookupByLibrary.simpleMessage("Annulla abbonamento"),
         "cannotAddMorePhotosAfterBecomingViewer": m6,
+        "cannotDeleteSharedFiles": MessageLookupByLibrary.simpleMessage(
+            "Impossibile eliminare i file condivisi"),
         "centerPoint": MessageLookupByLibrary.simpleMessage("Punto centrale"),
         "changeEmail": MessageLookupByLibrary.simpleMessage("Modifica email"),
         "changePassword":
@@ -873,6 +875,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "no": MessageLookupByLibrary.simpleMessage("No"),
         "noAlbumsSharedByYouYet": MessageLookupByLibrary.simpleMessage(
             "Ancora nessun album condiviso da te"),
+        "noDeviceLimit": MessageLookupByLibrary.simpleMessage("Nessuno"),
         "noDeviceThatCanBeDeleted": MessageLookupByLibrary.simpleMessage(
             "Non hai file su questo dispositivo che possono essere eliminati"),
         "noDuplicates":
