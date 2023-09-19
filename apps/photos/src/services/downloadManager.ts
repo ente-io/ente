@@ -240,7 +240,7 @@ class DownloadManager {
             );
             const reader = resp.body.getReader();
 
-            const contentLength = +resp.headers.get('Content-Length');
+            const contentLength = +resp.headers.get('Content-Length') ?? 0;
             let downloadedBytes = 0;
 
             const stream = new ReadableStream({
@@ -388,9 +388,9 @@ class DownloadManager {
 
     trackDownloadProgress = (fileID: number) => {
         return (event: { loaded: number; total: number }) => {
-            addLogLine(
-                `Download progress for fileID: ${fileID} is ${event.loaded} out of ${event.total}`
-            );
+            if (isNaN(event.total) || event.total === 0) {
+                return;
+            }
             if (event.loaded === event.total) {
                 this.fileDownloadProgress.delete(fileID);
             } else {
