@@ -388,6 +388,9 @@ class DownloadManager {
 
     trackDownloadProgress = (fileID: number) => {
         return (event: { loaded: number; total: number }) => {
+            addLogLine(
+                `Download progress for fileID: ${fileID} is ${event.loaded} out of ${event.total}`
+            );
             if (event.loaded === event.total) {
                 this.fileDownloadProgress.delete(fileID);
             } else {
