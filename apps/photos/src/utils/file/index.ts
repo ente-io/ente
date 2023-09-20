@@ -386,7 +386,8 @@ async function getRenderableLivePhotoURL(
     );
     const convertedVideoBlob = await getPlayableVideo(
         livePhoto.videoNameTitle,
-        videoBlob
+        videoBlob,
+        true
     );
     const { originalURL: originalImageURL, convertedURL: convertedImageURL } =
         getFileObjectURLs(imageBlob, convertedImageBlob);
@@ -411,7 +412,7 @@ export async function getPlayableVideo(
         if (isPlayable && !forceConvert) {
             return videoBlob;
         } else {
-            if (!isElectron()) {
+            if (!forceConvert && !isElectron()) {
                 return null;
             }
             addLogLine(
