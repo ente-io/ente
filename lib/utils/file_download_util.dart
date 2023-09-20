@@ -37,7 +37,7 @@ Future<File?> downloadAndDecrypt(
         headers: {"X-Auth-Token": Configuration.instance.getToken()},
       ),
       onReceiveProgress: (a, b) {
-        if (kDebugMode) {
+        if (kDebugMode && a >= 0 && b >= 0) {
           _logger.fine(
             "$logPrefix download progress: ${formatBytes(a)} / ${formatBytes(b)}",
           );

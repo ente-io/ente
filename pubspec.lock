@@ -193,46 +193,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.2"
-  camera:
-    dependency: transitive
-    description:
-      name: camera
-      sha256: "3ad71371b8168a4c8012c0b40a53c05afc75d46cc688b0f37b4611a841d47b25"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.9.8+1"
-  camera_android:
-    dependency: transitive
-    description:
-      name: camera_android
-      sha256: "665d62c1f334722c7519ca5d3b94ad68ecaa801691870602da5638a42c1fff67"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.9.8+3"
-  camera_avfoundation:
-    dependency: transitive
-    description:
-      name: camera_avfoundation
-      sha256: "1a416e452b30955b392f4efbf23291d3f2ba3660a85e1628859eb62d2a2bab26"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.9.13+2"
-  camera_platform_interface:
-    dependency: transitive
-    description:
-      name: camera_platform_interface
-      sha256: "60fa0bb62a4f3bf3a7c413e31e4cd01b69c779ccc8e4668904a24581b86c316b"
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.5.1"
-  camera_web:
-    dependency: transitive
-    description:
-      name: camera_web
-      sha256: "18cdbee5441e9a6fb129fdd9b68a06d1b8c5236932ba97d5faeaefe80db2e5bd"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.2.1+6"
   characters:
     dependency: transitive
     description:
@@ -258,6 +218,14 @@ packages:
       url: "https://github.com/ente-io/chewie.git"
     source: git
     version: "1.7.0"
+  cli_util:
+    dependency: transitive
+    description:
+      name: cli_util
+      sha256: b8db3080e59b2503ca9e7922c3df2072cf13992354d5e944074ffa836fba43b7
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.4.0"
   clock:
     dependency: transitive
     description:
@@ -666,10 +634,10 @@ packages:
     dependency: "direct main"
     description:
       name: flutter_launcher_icons
-      sha256: "559c600f056e7c704bd843723c21e01b5fba47e8824bd02422165bcc02a5de1d"
+      sha256: "526faf84284b86a4cb36d20a5e45147747b7563d921373d4ee0559c54fcdbcea"
       url: "https://pub.dev"
     source: hosted
-    version: "0.9.3"
+    version: "0.13.1"
   flutter_lints:
     dependency: "direct dev"
     description:
@@ -735,10 +703,10 @@ packages:
     dependency: "direct main"
     description:
       name: flutter_native_splash
-      sha256: "6777a3abb974021a39b5fdd2d46a03ca390e03903b6351f21d10e7ecc969f12d"
+      sha256: af665ef80a213a9ed502845a3d7a61b9acca4100ee7e9f067a7440bc3acd6730
       url: "https://pub.dev"
     source: hosted
-    version: "2.2.16"
+    version: "2.2.19"
   flutter_password_strength:
     dependency: "direct main"
     description:
@@ -950,10 +918,10 @@ packages:
     dependency: "direct main"
     description:
       name: image
-      sha256: "8e9d133755c3e84c73288363e6343157c383a0c6c56fc51afcc5d4d7180306d6"
+      sha256: a72242c9a0ffb65d03de1b7113bc4e189686fc07c7147b8b41811d0dd0e0d9bf
       url: "https://pub.dev"
     source: hosted
-    version: "3.3.0"
+    version: "4.0.17"
   image_editor:
     dependency: "direct main"
     description:
@@ -1175,6 +1143,81 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.2"
+  media_kit:
+    dependency: "direct main"
+    description:
+      path: media_kit
+      ref: main
+      resolved-ref: "8926ede69cb11aca45e9ea2b26428202e82ea5de"
+      url: "https://github.com/ashilkn/media-kit.git"
+    source: git
+    version: "1.1.7"
+  media_kit_libs_android_video:
+    dependency: transitive
+    description:
+      name: media_kit_libs_android_video
+      sha256: "498a5062bc5f000bd23ada3be788ea886ab32c52f7a8252dde1264ca019b819b"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.3.3"
+  media_kit_libs_ios_video:
+    dependency: transitive
+    description:
+      name: media_kit_libs_ios_video
+      sha256: fed403dc9d54462e51ee80e0cb23c12a53fadea9a8fa18aca2de9054176d1159
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.1.3"
+  media_kit_libs_linux:
+    dependency: transitive
+    description:
+      name: media_kit_libs_linux
+      sha256: "3b7c272179639a914dc8a50bf8a3f2df0e9a503bd727c88fab499dbdf6cb1eb8"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.1.2"
+  media_kit_libs_macos_video:
+    dependency: transitive
+    description:
+      name: media_kit_libs_macos_video
+      sha256: c06e831f3c22a45296d375788d9bc07871b448f8e9ec98d77b11e5e118a83fb2
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.1.3"
+  media_kit_libs_video:
+    dependency: "direct main"
+    description:
+      path: "libs/universal/media_kit_libs_video"
+      ref: main
+      resolved-ref: "8926ede69cb11aca45e9ea2b26428202e82ea5de"
+      url: "https://github.com/ashilkn/media-kit.git"
+    source: git
+    version: "1.0.1"
+  media_kit_libs_windows_video:
+    dependency: transitive
+    description:
+      name: media_kit_libs_windows_video
+      sha256: "923f068344d7d200184e0aaa2597f3de6c05982a3b1f18035d842ab53f2a1350"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.8"
+  media_kit_native_event_loop:
+    dependency: transitive
+    description:
+      name: media_kit_native_event_loop
+      sha256: e37ce6fb5fa71b8cf513c6a6cd591367743a342a385e7da621a047dd8ef6f4a4
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.7"
+  media_kit_video:
+    dependency: "direct main"
+    description:
+      path: media_kit_video
+      ref: main
+      resolved-ref: "9cbfe2b01a2387b2a536e13069efd6b6b631f366"
+      url: "https://github.com/ashilkn/media-kit.git"
+    source: git
+    version: "1.1.8"
   meta:
     dependency: transitive
     description:
@@ -1529,6 +1572,62 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.27.7"
+  safe_local_storage:
+    dependency: transitive
+    description:
+      name: safe_local_storage
+      sha256: ede4eb6cb7d88a116b3d3bf1df70790b9e2038bc37cb19112e381217c74d9440
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.2"
+  screen_brightness:
+    dependency: transitive
+    description:
+      name: screen_brightness
+      sha256: ed8da4a4511e79422fc1aa88138e920e4008cd312b72cdaa15ccb426c0faaedd
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.2.2+1"
+  screen_brightness_android:
+    dependency: transitive
+    description:
+      name: screen_brightness_android
+      sha256: "3df10961e3a9e968a5e076fe27e7f4741fa8a1d3950bdeb48cf121ed529d0caf"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.1.0+2"
+  screen_brightness_ios:
+    dependency: transitive
+    description:
+      name: screen_brightness_ios
+      sha256: "99adc3ca5490b8294284aad5fcc87f061ad685050e03cf45d3d018fe398fd9a2"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.1.0"
+  screen_brightness_macos:
+    dependency: transitive
+    description:
+      name: screen_brightness_macos
+      sha256: "64b34e7e3f4900d7687c8e8fb514246845a73ecec05ab53483ed025bd4a899fd"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.1.0+1"
+  screen_brightness_platform_interface:
+    dependency: transitive
+    description:
+      name: screen_brightness_platform_interface
+      sha256: b211d07f0c96637a15fb06f6168617e18030d5d74ad03795dd8547a52717c171
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.1.0"
+  screen_brightness_windows:
+    dependency: transitive
+    description:
+      name: screen_brightness_windows
+      sha256: "9261bf33d0fc2707d8cf16339ce25768100a65e70af0fcabaf032fc12408ba86"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.1.3"
   scrollable_positioned_list:
     dependency: "direct main"
     description:
@@ -1886,15 +1985,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.9.1"
-  tflite_flutter_helper:
-    dependency: "direct main"
-    description:
-      path: "."
-      ref: a7d7a59a33f7cffa0a2a12ab05625807622cc97a
-      resolved-ref: a7d7a59a33f7cffa0a2a12ab05625807622cc97a
-      url: "https://github.com/elephantum/tflite_flutter_helper.git"
-    source: git
-    version: "0.3.0"
   timezone:
     dependency: transitive
     description:
@@ -1963,10 +2053,26 @@ packages:
     dependency: transitive
     description:
       name: universal_io
-      sha256: "06866290206d196064fd61df4c7aea1ffe9a4e7c4ccaa8fcded42dd41948005d"
+      sha256: "1722b2dcc462b4b2f3ee7d188dad008b6eb4c40bbd03a3de451d82c78bba9aad"
       url: "https://pub.dev"
     source: hosted
-    version: "2.2.0"
+    version: "2.2.2"
+  universal_platform:
+    dependency: transitive
+    description:
+      name: universal_platform
+      sha256: d315be0f6641898b280ffa34e2ddb14f3d12b1a37882557869646e0cc363d0cc
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.0+1"
+  uri_parser:
+    dependency: transitive
+    description:
+      name: uri_parser
+      sha256: "6543c9fd86d2862fac55d800a43e67c0dcd1a41677cb69c2f8edfe73bbcf1835"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.2"
   url_launcher:
     dependency: "direct main"
     description:
@@ -2112,6 +2218,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "11.3.0"
+  volume_controller:
+    dependency: transitive
+    description:
+      name: volume_controller
+      sha256: "189bdc7a554f476b412e4c8b2f474562b09d74bc458c23667356bce3ca1d48c9"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.7"
   wakelock_plus:
     dependency: "direct main"
     description:
