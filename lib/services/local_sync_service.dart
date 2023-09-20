@@ -19,6 +19,7 @@ import "package:photos/models/ignored_file.dart";
 import 'package:photos/services/app_lifecycle_service.dart';
 import "package:photos/services/ignored_files_service.dart";
 import 'package:photos/services/local/local_sync_util.dart';
+import "package:photos/utils/debouncer.dart";
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:tuple/tuple.dart';
@@ -28,6 +29,7 @@ class LocalSyncService {
   final _db = FilesDB.instance;
   late SharedPreferences _prefs;
   Completer<void>? _existingSync;
+  late Debouncer _changeCallbackDebouncer;
 
   static const kDbUpdationTimeKey = "db_updation_time";
   static const kHasCompletedFirstImportKey = "has_completed_firstImport";
@@ -344,11 +346,14 @@ class LocalSyncService {
   }
 
   void _registerChangeCallback() {
+    _changeCallbackDebouncer = Debouncer(const Duration(milliseconds: 500));
     // In case of iOS limit permission, this call back is fired immediately
     // after file selection dialog is dismissed.
     PhotoManager.addChangeCallback((value) async {
       _logger.info("Something changed on disk");
-      checkAndSync();
+      _changeCallbackDebouncer.run(() async {
+        checkAndSync();
+      });
     });
     PhotoManager.startChangeNotify();
   }
