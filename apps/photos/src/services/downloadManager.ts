@@ -188,7 +188,10 @@ class DownloadManager {
             if (!token) {
                 return null;
             }
-            const onDownloadProgress = this.trackDownloadProgress(file.id);
+            const onDownloadProgress = this.trackDownloadProgress(
+                file.id,
+                file.info?.fileSize
+            );
             if (
                 file.metadata.fileType === FILE_TYPE.IMAGE ||
                 file.metadata.fileType === FILE_TYPE.LIVE_PHOTO
@@ -205,6 +208,7 @@ class DownloadManager {
                         }
                     )
                 );
+                this.clearDownloadProgress(file.id);
                 if (typeof resp.data === 'undefined') {
                     throw Error(CustomError.REQUEST_FAILED);
                 }
@@ -240,7 +244,7 @@ class DownloadManager {
             );
             const reader = resp.body.getReader();
 
-            const contentLength = +resp.headers.get('Content-Length');
+            const contentLength = +resp.headers.get('Content-Length') ?? 0;
             let downloadedBytes = 0;
 
             const stream = new ReadableStream({
@@ -386,8 +390,14 @@ class DownloadManager {
         }
     }
 
-    trackDownloadProgress = (fileID: number) => {
+    trackDownloadProgress = (fileID: number, fileSize: number) => {
         return (event: { loaded: number; total: number }) => {
+            if (isNaN(event.total) || event.total === 0) {
+                if (!fileSize) {
+                    return;
+                }
+                event.total = fileSize;
+            }
             if (event.loaded === event.total) {
                 this.fileDownloadProgress.delete(fileID);
             } else {
@@ -398,6 +408,11 @@ class DownloadManager {
             }
             this.progressUpdater(new Map(this.fileDownloadProgress));
         };
+    };
+
+    clearDownloadProgress = (fileID: number) => {
+        this.fileDownloadProgress.delete(fileID);
+        this.progressUpdater(new Map(this.fileDownloadProgress));
     };
 }
 
