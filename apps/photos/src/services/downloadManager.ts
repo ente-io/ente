@@ -208,6 +208,7 @@ class DownloadManager {
                         }
                     )
                 );
+                this.clearDownloadProgress(file.id);
                 if (typeof resp.data === 'undefined') {
                     throw Error(CustomError.REQUEST_FAILED);
                 }
@@ -391,6 +392,9 @@ class DownloadManager {
 
     trackDownloadProgress = (fileID: number, fileSize: number) => {
         return (event: { loaded: number; total: number }) => {
+            addLogLine(
+                `Download progress for fileID: ${fileID} loaded: ${event.loaded} total: ${event.total}`
+            );
             if (isNaN(event.total) || event.total === 0) {
                 if (!fileSize) {
                     return;
@@ -407,6 +411,11 @@ class DownloadManager {
             }
             this.progressUpdater(new Map(this.fileDownloadProgress));
         };
+    };
+
+    clearDownloadProgress = (fileID: number) => {
+        this.fileDownloadProgress.delete(fileID);
+        this.progressUpdater(new Map(this.fileDownloadProgress));
     };
 }
 
