@@ -559,13 +559,14 @@ const PhotoFrame = ({
             } else {
                 originalVideoURL = srcURL.original.split(',')[1];
             }
-            const convertedVideoURL = URL.createObjectURL(
-                await getPlayableVideo(
-                    item.metadata.title,
-                    await (await fetch(originalVideoURL)).blob(),
-                    true
-                )
+            const playableVideo = await getPlayableVideo(
+                item.metadata.title,
+                await (await fetch(originalVideoURL)).blob(),
+                true
             );
+            const convertedVideoURL = playableVideo
+                ? URL.createObjectURL(playableVideo)
+                : '';
             if (item.metadata.fileType === FILE_TYPE.VIDEO) {
                 srcURL.converted = convertedVideoURL;
             } else {
