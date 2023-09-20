@@ -392,9 +392,6 @@ class DownloadManager {
 
     trackDownloadProgress = (fileID: number, fileSize: number) => {
         return (event: { loaded: number; total: number }) => {
-            addLogLine(
-                `Download progress for fileID: ${fileID} loaded: ${event.loaded} total: ${event.total}`
-            );
             if (isNaN(event.total) || event.total === 0) {
                 if (!fileSize) {
                     return;
