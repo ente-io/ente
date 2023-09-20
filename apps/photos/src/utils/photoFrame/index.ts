@@ -43,8 +43,6 @@ export function updateFileMsrcProps(file: EnteFile, url: string) {
     file.isSourceLoaded = false;
     file.conversionFailed = false;
     file.isConverted = false;
-    file.src = null;
-    file.html = null;
     if (file.metadata.fileType === FILE_TYPE.IMAGE) {
         file.src = url;
     } else {
@@ -103,7 +101,6 @@ export async function updateFileSrcProps(
     file.originalVideoURL = originalVideoURL;
     file.isConverted = isConverted;
     file.conversionFailed = conversionFailed;
-    file.src = null;
 
     if (!isPlayable) {
         return;

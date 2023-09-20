@@ -82,18 +82,22 @@ interface Iprops {
     isTrashCollection: boolean;
     isInHiddenSection: boolean;
     enableDownload: boolean;
-    isSourceLoaded: boolean;
-    conversionFailed: boolean;
     fileToCollectionsMap: Map<number, number[]>;
     collectionNameMap: Map<number, string>;
 }
 
 function PhotoViewer(props: Iprops) {
+    const galleryContext = useContext(GalleryContext);
+    const appContext = useContext(AppContext);
+    const publicCollectionGalleryContext = useContext(
+        PublicCollectionGalleryContext
+    );
+
+    const { isOpen, items } = props;
+
     const pswpElement = useRef<HTMLDivElement>();
     const [photoSwipe, setPhotoSwipe] =
         useState<Photoswipe<Photoswipe.Options>>();
-
-    const { isOpen, items, isSourceLoaded, conversionFailed } = props;
     const [isFav, setIsFav] = useState(false);
     const [showInfo, setShowInfo] = useState(false);
     const [exif, setExif] =
@@ -102,20 +106,13 @@ function PhotoViewer(props: Iprops) {
     const [livePhotoBtnOptions, setLivePhotoBtnOptions] = useState(
         defaultLivePhotoDefaultOptions
     );
+    const [isOwnFile, setIsOwnFile] = useState(false);
+    const [showConvertBtn, setShowConvertBtn] = useState(false);
+    const [isSourceLoaded, setIsSourceLoaded] = useState(false);
+
     const needUpdate = useRef(false);
-    const publicCollectionGalleryContext = useContext(
-        PublicCollectionGalleryContext
-    );
-
-    const galleryContext = useContext(GalleryContext);
-    const appContext = useContext(AppContext);
-
     const exifExtractionInProgress = useRef<string>(null);
     const shouldShowCopyOption = useMemo(() => isClipboardItemPresent(), []);
-
-    const [isOwnFile, setIsOwnFile] = useState(false);
-
-    const [showConvertBtn, setShowConvertBtn] = useState(false);
 
     const [
         conversionFailedNotificationOpen,
@@ -148,11 +145,6 @@ function PhotoViewer(props: Iprops) {
             closePhotoSwipe();
         };
     }, [isOpen]);
-
-    useEffect(() => {
-        if (!isOpen) return;
-        setConversionFailedNotificationOpen(conversionFailed);
-    }, [isOpen, conversionFailed]);
 
     useEffect(() => {
         if (!photoSwipe) return;
@@ -274,19 +266,6 @@ function PhotoViewer(props: Iprops) {
     }, [photoSwipe?.currItem, isOpen, isSourceLoaded]);
 
     useEffect(() => {
-        const file = photoSwipe?.currItem as EnteFile;
-        if (!file) return;
-
-        const shouldShowConvertBtn =
-            (file.metadata.fileType === FILE_TYPE.VIDEO ||
-                file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) &&
-            !file.isConverted &&
-            isSourceLoaded &&
-            !conversionFailed;
-        setShowConvertBtn(shouldShowConvertBtn);
-    }, [photoSwipe?.currItem, isSourceLoaded, conversionFailed]);
-
-    useEffect(() => {
         exifCopy.current = exif;
     }, [exif]);
 
@@ -299,6 +278,40 @@ function PhotoViewer(props: Iprops) {
             !publicCollectionGalleryContext.accessedThroughSharedURL &&
             galleryContext.user?.id === file.ownerID;
         setIsOwnFile(isOwnFile);
+    }
+
+    function updateExif(file: EnteFile) {
+        if (file.metadata.fileType !== FILE_TYPE.IMAGE) {
+            setExif({ key: file.src, value: null });
+            return;
+        }
+        if (
+            !file ||
+            !exifCopy?.current?.value === null ||
+            exifCopy?.current?.key === file.src
+        ) {
+            return;
+        }
+        setExif({ key: file.src, value: undefined });
+        checkExifAvailable(file);
+    }
+
+    function updateShowConvertBtn(file: EnteFile) {
+        const shouldShowConvertBtn =
+            (file.metadata.fileType === FILE_TYPE.VIDEO ||
+                file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) &&
+            !file.isConverted &&
+            file.isSourceLoaded &&
+            !file.conversionFailed;
+        setShowConvertBtn(shouldShowConvertBtn);
+    }
+
+    function updateConversionFailedNotification(file: EnteFile) {
+        setConversionFailedNotificationOpen(file.conversionFailed);
+    }
+
+    function updateIsSourceLoaded(file: EnteFile) {
+        setIsSourceLoaded(file.isSourceLoaded);
     }
 
     const openPhotoSwipe = () => {
@@ -369,36 +382,18 @@ function PhotoViewer(props: Iprops) {
             }
             updateFavButton(currItem);
             updateIsOwnFile(currItem);
-            if (currItem.metadata.fileType !== FILE_TYPE.IMAGE) {
-                setExif({ key: currItem.src, value: null });
-                return;
-            }
-            if (
-                !currItem ||
-                !exifCopy?.current?.value === null ||
-                exifCopy?.current?.key === currItem.src
-            ) {
-                return;
-            }
-            setExif({ key: currItem.src, value: undefined });
-            checkExifAvailable(currItem);
+            updateConversionFailedNotification(currItem);
+            updateExif(currItem);
+            updateShowConvertBtn(currItem);
+            updateIsSourceLoaded(currItem);
         });
         photoSwipe.listen('resize', () => {
             if (!photoSwipe?.currItem) return;
             const currItem = photoSwipe.currItem as EnteFile;
-            if (currItem.metadata.fileType !== FILE_TYPE.IMAGE) {
-                setExif({ key: currItem.src, value: null });
-                return;
-            }
-            if (
-                !currItem ||
-                !exifCopy?.current?.value === null ||
-                exifCopy?.current?.key === currItem.src
-            ) {
-                return;
-            }
-            setExif({ key: currItem.src, value: undefined });
-            checkExifAvailable(currItem);
+            updateExif(currItem);
+            updateConversionFailedNotification(currItem);
+            updateShowConvertBtn(currItem);
+            updateIsSourceLoaded(currItem);
         });
         photoSwipe.init();
         needUpdate.current = false;
