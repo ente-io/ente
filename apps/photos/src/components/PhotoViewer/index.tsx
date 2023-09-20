@@ -50,6 +50,7 @@ import CircularProgressWithLabel from './styledComponents/CircularProgressWithLa
 import EnteSpinner from 'components/EnteSpinner';
 import AlbumOutlined from '@mui/icons-material/AlbumOutlined';
 import { FlexWrapper } from 'components/Container';
+import isElectron from 'is-electron';
 
 interface PhotoswipeFullscreenAPI {
     enter: () => void;
@@ -298,6 +299,7 @@ function PhotoViewer(props: Iprops) {
 
     function updateShowConvertBtn(file: EnteFile) {
         const shouldShowConvertBtn =
+            isElectron() &&
             (file.metadata.fileType === FILE_TYPE.VIDEO ||
                 file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) &&
             !file.isConverted &&

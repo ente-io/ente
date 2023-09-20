@@ -411,6 +411,9 @@ export async function getPlayableVideo(
         if (isPlayable && !forceConvert) {
             return videoBlob;
         } else {
+            if (!isElectron()) {
+                return null;
+            }
             addLogLine(
                 'video format not supported, converting it name:',
                 videoNameTitle
