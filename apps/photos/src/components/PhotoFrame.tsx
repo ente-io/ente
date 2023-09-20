@@ -538,7 +538,9 @@ const PhotoFrame = ({
             // ignore
         }
         try {
-            addLogLine(`[${item.id}] new file getConvertedVideo request`);
+            addLogLine(
+                `[${item.id}] new file getConvertedVideo request- ${item.metadata.title}}`
+            );
             fetching[item.id] = true;
             if (!filesStore.has(item.id)) {
                 addLogLine(

@@ -411,13 +411,18 @@ export async function getPlayableVideo(
         if (isPlayable && !forceConvert) {
             return videoBlob;
         } else {
-            addLogLine('video format not supported, converting it');
+            addLogLine(
+                'video format not supported, converting it name:',
+                videoNameTitle
+            );
             const mp4ConvertedVideo = await ffmpegService.convertToMP4(
                 new File([videoBlob], videoNameTitle)
             );
+            addLogLine('video successfully converted', videoNameTitle);
             return new Blob([await mp4ConvertedVideo.arrayBuffer()]);
         }
     } catch (e) {
+        addLogLine('video conversion failed', videoNameTitle);
         logError(e, 'video conversion failed');
         return null;
     }
