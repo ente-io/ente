@@ -8,6 +8,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import "package:flutter/rendering.dart";
+import "package:flutter_displaymode/flutter_displaymode.dart";
 import 'package:logging/logging.dart';
 import "package:media_kit/media_kit.dart";
 import 'package:path_provider/path_provider.dart';
@@ -65,6 +66,7 @@ void main() async {
   final savedThemeMode = await AdaptiveTheme.getThemeMode();
   await _runInForeground(savedThemeMode);
   BackgroundFetch.registerHeadlessTask(_headlessTaskHandler);
+  FlutterDisplayMode.setHighRefreshRate();
 }
 
 Future<void> _runInForeground(AdaptiveThemeMode? savedThemeMode) async {
