@@ -1,12 +1,11 @@
 import { ElectronAPIs } from 'types/electron';
-import { runningInBrowser } from 'utils/common';
 import { logError } from 'utils/sentry';
 
 class ElectronFSService {
     private electronAPIs: ElectronAPIs;
 
     constructor() {
-        this.electronAPIs = runningInBrowser() && window['ElectronAPIs'];
+        this.electronAPIs = globalThis['ElectronAPIs'];
     }
 
     getDirFiles(dirPath: string) {

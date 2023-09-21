@@ -1,4 +1,4 @@
-import { runningInBrowser, sleep } from 'utils/common';
+import { sleep } from 'utils/common';
 import {
     getUnExportedFiles,
     getGoogleLikeMetadataFile,
@@ -96,9 +96,7 @@ class ExportService {
     };
 
     constructor() {
-        if (runningInBrowser()) {
-            this.electronAPIs = window['ElectronAPIs'];
-        }
+        this.electronAPIs = globalThis['ElectronAPIs'];
     }
 
     getExportSettings(): ExportSettings {

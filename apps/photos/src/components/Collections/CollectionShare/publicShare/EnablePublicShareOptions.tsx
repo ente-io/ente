@@ -19,7 +19,7 @@ import LinkIcon from '@mui/icons-material/Link';
 import { MenuItemGroup } from 'components/Menu/MenuItemGroup';
 import MenuSectionTitle from 'components/Menu/MenuSectionTitle';
 import MenuItemDivider from 'components/Menu/MenuItemDivider';
-import { DownloadSharp } from '@mui/icons-material';
+import DownloadSharp from '@mui/icons-material/DownloadSharp';
 
 export default function EnablePublicShareOptions({
     collection,

@@ -1,7 +1,6 @@
 import { Collection } from 'types/collection';
 import { EncryptedEnteFile } from 'types/file';
 import { ElectronFile, FileWithCollection } from 'types/upload';
-import { runningInBrowser } from 'utils/common';
 import { removeFromCollection } from '../collectionService';
 import { getLocalFiles } from '../fileService';
 import { logError } from 'utils/sentry';
@@ -42,8 +41,7 @@ class watchFolderService {
     private setWatchFolderServiceIsRunning: (isRunning: boolean) => void;
 
     constructor() {
-        this.electronAPIs = (runningInBrowser() &&
-            window['ElectronAPIs']) as ElectronAPIs;
+        this.electronAPIs = globalThis['ElectronAPIs'];
         this.allElectronAPIsExist = !!this.electronAPIs?.getWatchMappings;
     }
 

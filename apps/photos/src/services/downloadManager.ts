@@ -29,7 +29,7 @@ class DownloadManager {
 
     private fileDownloadProgress = new Map<number, number>();
 
-    private progressUpdater: (value: Map<number, number>) => void;
+    private progressUpdater: (value: Map<number, number>) => void = () => {};
 
     setProgressUpdater(progressUpdater: (value: Map<number, number>) => void) {
         this.progressUpdater = progressUpdater;
