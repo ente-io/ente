@@ -32,6 +32,7 @@ import SingleInputForm, {
 } from 'components/SingleInputForm';
 import EnteSpinner from 'components/EnteSpinner';
 import { VerticallyCentered } from 'components/Container';
+import InMemoryStore, { MS_KEYS } from 'services/InMemoryStore';
 
 export default function Verify() {
     const [email, setEmail] = useState('');
@@ -111,8 +112,8 @@ export default function Verify() {
                 }
                 clearFiles();
                 setIsFirstLogin(true);
-                const redirectURL = appContext.redirectURL;
-                appContext.setRedirectURL(null);
+                const redirectURL = InMemoryStore.get(MS_KEYS.REDIRECT_URL);
+                InMemoryStore.delete(MS_KEYS.REDIRECT_URL);
                 if (keyAttributes?.encryptedKey) {
                     clearKeys();
                     router.push(redirectURL ?? PAGES.CREDENTIALS);

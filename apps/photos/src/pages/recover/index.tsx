@@ -19,6 +19,7 @@ import FormPaperFooter from 'components/Form/FormPaper/Footer';
 import LinkButton from 'components/pages/gallery/LinkButton';
 import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
 import { sendOtt } from 'services/userService';
+import InMemoryStore, { MS_KEYS } from 'services/InMemoryStore';
 const bip39 = require('bip39');
 // mobile client library only supports english.
 bip39.setDefaultWordlist('english');
@@ -39,7 +40,7 @@ export default function Recover() {
         }
         if (!user?.encryptedToken && !user?.token) {
             sendOtt(user.email);
-            appContext.setRedirectURL(PAGES.RECOVER);
+            InMemoryStore.set(MS_KEYS.REDIRECT_URL, PAGES.RECOVER);
             router.push(PAGES.VERIFY);
             return;
         }

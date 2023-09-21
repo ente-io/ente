@@ -101,8 +101,6 @@ type AppContextType = {
     showNavBar: (show: boolean) => void;
     sharedFiles: File[];
     resetSharedFiles: () => void;
-    redirectURL: string;
-    setRedirectURL: (url: string) => void;
     mlSearchEnabled: boolean;
     mapEnabled: boolean;
     updateMlSearchEnabled: (enabled: boolean) => Promise<void>;
@@ -149,7 +147,6 @@ export default function App(props) {
     const [showNavbar, setShowNavBar] = useState(false);
     const [sharedFiles, setSharedFiles] = useState<File[]>(null);
     const [redirectName, setRedirectName] = useState<string>(null);
-    const [redirectURL, setRedirectURL] = useState(null);
     const [mlSearchEnabled, setMlSearchEnabled] = useState(false);
     const [mapEnabled, setMapEnabled] = useState(false);
     const isLoadingBarRunning = useRef(false);
@@ -494,8 +491,6 @@ export default function App(props) {
                         updateMlSearchEnabled,
                         sharedFiles,
                         resetSharedFiles,
-                        redirectURL,
-                        setRedirectURL,
                         startLoading,
                         finishLoading,
                         closeMessageDialog,

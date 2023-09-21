@@ -29,6 +29,7 @@ import EnteSpinner from 'components/EnteSpinner';
 import { VerticallyCentered } from 'components/Container';
 import Typography from '@mui/material/Typography';
 import useMemoSingleThreaded from 'hooks/useMemoSingleThreaded';
+import InMemoryStore, { MS_KEYS } from 'services/InMemoryStore';
 
 export const DeduplicateContext = createContext<DeduplicateContextType>(
     DefaultDeduplicateContext
@@ -39,13 +40,8 @@ export const Info = styled('div')`
 `;
 
 export default function Deduplicate() {
-    const {
-        setDialogMessage,
-        startLoading,
-        finishLoading,
-        showNavBar,
-        setRedirectURL,
-    } = useContext(AppContext);
+    const { setDialogMessage, startLoading, finishLoading, showNavBar } =
+        useContext(AppContext);
     const [duplicateFiles, setDuplicateFiles] = useState<EnteFile[]>(null);
     const [clubSameTimeFilesOnly, setClubSameTimeFilesOnly] = useState(false);
     const [fileSizeMap, setFileSizeMap] = useState(new Map<number, number>());
@@ -63,7 +59,7 @@ export default function Deduplicate() {
     useEffect(() => {
         const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
         if (!key) {
-            setRedirectURL(router.asPath);
+            InMemoryStore.set(MS_KEYS.REDIRECT_URL, PAGES.DEDUPLICATE);
             router.push(PAGES.ROOT);
             return;
         }

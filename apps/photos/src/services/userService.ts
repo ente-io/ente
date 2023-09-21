@@ -47,7 +47,7 @@ import { APPS, getAppName } from 'constants/apps';
 import { addLocalLog } from 'utils/logging';
 import { convertBase64ToBuffer, convertBufferToBase64 } from 'utils/user';
 import { setLocalMapEnabled } from 'utils/storage';
-import InMemoryStore from './InMemoryStore';
+import InMemoryStore, { MS_KEYS } from './InMemoryStore';
 
 const ENDPOINT = getEndpoint();
 
@@ -560,6 +560,13 @@ export const configureSRP = async ({
     loginSubKey,
 }: SRPSetupAttributes) => {
     try {
+        const srpConfigureInProgress = InMemoryStore.get(
+            MS_KEYS.SRP_CONFIGURE_IN_PROGRESS
+        );
+        if (srpConfigureInProgress) {
+            throw Error('SRP configure already in progress');
+        }
+        InMemoryStore.set(MS_KEYS.SRP_CONFIGURE_IN_PROGRESS, true);
         const srpClient = await generateSRPClient(
             srpSalt,
             srpUserID,
@@ -590,6 +597,8 @@ export const configureSRP = async ({
     } catch (e) {
         logError(e, 'srp configure failed');
         throw e;
+    } finally {
+        InMemoryStore.set(MS_KEYS.SRP_CONFIGURE_IN_PROGRESS, false);
     }
 };
 
