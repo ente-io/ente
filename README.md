@@ -18,3 +18,17 @@ or you can run the following command
 ./bin/ente-cli --help
 ```
 
+### Getting Started
+
+#### Accounts
+
+* Add an account
+    ```shell
+    ente-cli account add
+    ```
+
+* List accounts
+    ```shell
+    ente-cli account list
+    ```
+
