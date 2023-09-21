@@ -2,7 +2,6 @@ import { PICKED_UPLOAD_TYPE } from 'constants/upload';
 import { Collection } from 'types/collection';
 import { ElectronAPIs } from 'types/electron';
 import { ElectronFile, FileWithCollection } from 'types/upload';
-import { runningInBrowser } from 'utils/common';
 import { logError } from 'utils/sentry';
 
 interface PendingUploads {
@@ -20,7 +19,7 @@ class ImportService {
     private allElectronAPIsExist: boolean = false;
 
     constructor() {
-        this.electronAPIs = runningInBrowser() && window['ElectronAPIs'];
+        this.electronAPIs = globalThis['ElectronAPIs'];
         this.allElectronAPIsExist = !!this.electronAPIs?.getPendingUploads;
     }
 
