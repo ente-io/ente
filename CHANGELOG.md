@@ -1,5 +1,33 @@
 # CHANGELOG
 
+## v1.6.42
+
+### Added
+
+- #### Manual Check for update and changelog
+
+    Added options to check for update manually and a view changelog.
+
+- #### Added Support to opt out of crash reporting
+
+    Added option to out of a crash reporting
+
+- #### Type search
+
+    Added option to filter files by file type i.e, image, video, live-photo.
+
+- #### Manual Convert Button
+
+    In case the video is not playable, Now there is a convert button which can be used to trigger conversion of the video to supported format.
+
+- #### File Download Progress
+
+    The file loader now also shows the exact percentage download progress, instead of just a simple loader.
+
+- #### Bug fixes & other enhancements
+
+    We have squashed a few pesky bugs that were reported by our community
+
 ## v1.6.41
 
 ### Added
