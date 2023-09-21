@@ -2,33 +2,34 @@ package pkg
 
 import (
 	"cli-go/internal/api"
+	"cli-go/pkg/model"
 	"context"
 	"encoding/json"
 	"fmt"
 	"log"
+	"runtime"
 
 	bolt "go.etcd.io/bbolt"
 )
 
 const AccBucket = "accounts"
 
-type AccountInfo struct {
-	Email  string  `json:"email" binding:"required"`
-	UserID int64   `json:"userID" binding:"required"`
-	App    api.App `json:"app" binding:"required"`
-}
-
 func (c *ClICtrl) AddAccount(cxt context.Context) {
 	var flowErr error
 	defer func() {
 		if r := recover(); r != nil {
-			log.Println("recovered from panic", r)
+			fmt.Println("Panic occurred:", r)
+			// Print the stack trace
+			stackTrace := make([]byte, 1024*8)
+			stackTrace = stackTrace[:runtime.Stack(stackTrace, false)]
+			fmt.Printf("Stack Trace:\n%s", stackTrace)
 		}
 		if flowErr != nil {
 			log.Fatal(flowErr)
 		}
 	}()
-
+	app := GetAppType()
+	cxt = context.WithValue(cxt, "app", string(app))
 	email, flowErr := GetUserInput("Enter email address")
 	if flowErr != nil {
 		return

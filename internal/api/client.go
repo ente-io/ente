@@ -1,6 +1,7 @@
 package api
 
 import (
+	"context"
 	"github.com/go-resty/resty/v2"
 )
 
@@ -8,6 +9,7 @@ const (
 	EnteAPIEndpoint = "https://api.ente.io"
 	TokenHeader     = "X-Auth-Token"
 	TokenQuery      = "token"
+	ClientPkgHeader = "X-Client-Package"
 )
 
 var (
@@ -25,28 +27,40 @@ type Params struct {
 	Host  string
 }
 
+func readValueFromContext(ctx context.Context, key string) interface{} {
+	value := ctx.Value(key)
+	return value
+}
 func NewClient(p Params) *Client {
-	c := resty.New()
+	enteAPI := resty.New()
 	if p.Trace {
-		c.EnableTrace()
+		enteAPI.EnableTrace()
 	}
+	enteAPI.OnBeforeRequest(func(c *resty.Client, req *resty.Request) error {
+		app := readValueFromContext(req.Context(), "app")
+		if app == nil {
+			panic("app not set in context")
+		}
+		req.Header.Set(ClientPkgHeader, StringToApp(app.(string)).ClientPkg())
+		return nil
+	})
 	if p.Debug {
-		c.OnBeforeRequest(func(c *resty.Client, req *resty.Request) error {
+		enteAPI.OnBeforeRequest(func(c *resty.Client, req *resty.Request) error {
 			logRequest(req)
 			return nil
 		})
 
-		c.OnAfterResponse(func(c *resty.Client, resp *resty.Response) error {
+		enteAPI.OnAfterResponse(func(c *resty.Client, resp *resty.Response) error {
 			logResponse(resp)
 			return nil
 		})
 	}
 	if p.Host != "" {
-		c.SetBaseURL(p.Host)
+		enteAPI.SetBaseURL(p.Host)
 	} else {
-		c.SetBaseURL(EnteAPIEndpoint)
+		enteAPI.SetBaseURL(EnteAPIEndpoint)
 	}
 	return &Client{
-		restClient: c,
+		restClient: enteAPI,
 	}
 }

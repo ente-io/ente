@@ -1,6 +1,7 @@
 package pkg
 
 import (
+	"cli-go/internal/api"
 	"errors"
 	"fmt"
 	"log"
@@ -29,6 +30,29 @@ func GetUserInput(label string) (string, error) {
 		return "", errors.New("input cannot be empty")
 	}
 	return input, nil
+}
+
+func GetAppType() api.App {
+	for {
+		app, err := GetUserInput("Enter app type (default: photos)")
+		if err != nil {
+			fmt.Printf("Use default app type: %s\n", api.AppPhotos)
+			return api.AppPhotos
+		}
+		switch app {
+		case "photos":
+			return api.AppPhotos
+		case "auth":
+			return api.AppAuth
+		case "locker":
+			return api.AppLocker
+		case "":
+			return api.AppPhotos
+		default:
+			fmt.Println("invalid app type")
+			continue
+		}
+	}
 }
 
 func GetCode(promptText string, length int) (string, error) {
