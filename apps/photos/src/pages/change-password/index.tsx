@@ -26,6 +26,7 @@ import FormPaperTitle from 'components/Form/FormPaper/Title';
 import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
 import { APPS, getAppName } from 'constants/apps';
 import { convertBufferToBase64, convertBase64ToBuffer } from 'utils/user';
+import InMemoryStore, { MS_KEYS } from 'services/InMemoryStore';
 
 export default function ChangePassword() {
     const [token, setToken] = useState<string>();
@@ -36,6 +37,7 @@ export default function ChangePassword() {
         const user = getData(LS_KEYS.USER);
         setUser(user);
         if (!user?.token) {
+            InMemoryStore.set(MS_KEYS.REDIRECT_URL, PAGES.CHANGE_PASSWORD);
             router.push(PAGES.ROOT);
         } else {
             setToken(user.token);
