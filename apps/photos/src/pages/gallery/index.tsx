@@ -120,6 +120,7 @@ import { getSessionExpiredMessage } from 'utils/ui';
 import { syncEntities } from 'services/entityService';
 import { constructUserIDToEmailMap } from 'services/collectionService';
 import { getLocalFamilyData } from 'utils/user/family';
+import InMemoryStore, { MS_KEYS } from 'services/InMemoryStore';
 
 export const DeadCenter = styled('div')`
     flex: 1;
@@ -284,7 +285,7 @@ export default function Gallery() {
         appContext.showNavBar(true);
         const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
         if (!key) {
-            appContext.setRedirectURL(router.asPath);
+            InMemoryStore.set(MS_KEYS.REDIRECT_URL, PAGES.GALLERY);
             router.push(PAGES.ROOT);
             return;
         }

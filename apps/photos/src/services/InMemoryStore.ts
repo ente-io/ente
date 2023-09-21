@@ -17,6 +17,10 @@ class InMemoryStore {
         this.store.set(key, value);
     }
 
+    delete(key: MS_KEYS) {
+        this.store.delete(key);
+    }
+
     has(key: MS_KEYS) {
         return this.store.has(key);
     }

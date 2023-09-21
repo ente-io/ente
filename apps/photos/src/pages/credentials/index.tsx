@@ -49,6 +49,7 @@ import { addLocalLog } from 'utils/logging';
 import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
 import { B64EncryptionResult } from 'types/crypto';
 import { CustomError } from 'utils/error';
+import InMemoryStore, { MS_KEYS } from 'services/InMemoryStore';
 
 export default function Credentials() {
     const router = useRouter();
@@ -213,8 +214,8 @@ export default function Credentials() {
             } catch (e) {
                 logError(e, 'migrate to srp failed');
             }
-            const redirectURL = appContext.redirectURL;
-            appContext.setRedirectURL(null);
+            const redirectURL = InMemoryStore.get(MS_KEYS.REDIRECT_URL);
+            InMemoryStore.delete(MS_KEYS.REDIRECT_URL);
             const appName = getAppName();
             if (appName === APPS.AUTH) {
                 router.push(PAGES.AUTH);

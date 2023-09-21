@@ -11,6 +11,7 @@ import AuthNavbar from 'components/pages/auth/Navbar';
 import { t } from 'i18next';
 import EnteSpinner from 'components/EnteSpinner';
 import { VerticallyCentered } from 'components/Container';
+import InMemoryStore, { MS_KEYS } from 'services/InMemoryStore';
 
 const AuthenticatorCodesPage = () => {
     const appContext = useContext(AppContext);
@@ -26,7 +27,7 @@ const AuthenticatorCodesPage = () => {
                 setCodes(res);
             } catch (err) {
                 if (err.message === CustomError.KEY_MISSING) {
-                    appContext.setRedirectURL(PAGES.AUTH);
+                    InMemoryStore.set(MS_KEYS.REDIRECT_URL, PAGES.AUTH);
                     router.push(PAGES.ROOT);
                 } else {
                     // do not log errors
