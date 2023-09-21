@@ -45,7 +45,7 @@ func DeriveArgonKey(password, salt string, memLimit, opsLimit int) ([]byte, erro
 	return key, nil
 }
 
-// decryptChaCha20poly1305 decrypts the given data using the ChaCha20-Poly1305 algorithm.
+// DecryptChaCha20poly1305 decrypts the given data using the ChaCha20-Poly1305 algorithm.
 // Parameters:
 //   - data: The encrypted data as a byte slice.
 //   - key: The key for decryption as a byte slice.
@@ -54,7 +54,7 @@ func DeriveArgonKey(password, salt string, memLimit, opsLimit int) ([]byte, erro
 // Returns:
 //   - A byte slice representing the decrypted data.
 //   - An error object, which is nil if no error occurs.
-func decryptChaCha20poly1305(data []byte, key []byte, nonce []byte) ([]byte, error) {
+func DecryptChaCha20poly1305(data []byte, key []byte, nonce []byte) ([]byte, error) {
 	reader := bytes.NewReader(data)
 	header := sodium.SecretStreamXCPHeader{Bytes: nonce}
 	decoder, err := sodium.MakeSecretStreamXCPDecoder(
@@ -73,6 +73,26 @@ func decryptChaCha20poly1305(data []byte, key []byte, nonce []byte) ([]byte, err
 		return nil, err
 	}
 	return decryptedData[:n], nil
+}
+
+// EncryptChaCha20poly1305 encrypts the given data using the ChaCha20-Poly1305 algorithm.
+// Parameters:
+//   - data: The plaintext data as a byte slice.
+//   - key: The key for encryption as a byte slice.
+//
+// Returns:
+//   - A byte slice representing the encrypted data.
+//   - A byte slice representing the header of the encrypted data.
+//   - An error object, which is nil if no error occurs.
+func EncryptChaCha20poly1305(data []byte, key []byte) ([]byte, []byte, error) {
+	var buf bytes.Buffer
+	encoder := sodium.MakeSecretStreamXCPEncoder(sodium.SecretStreamXCPKey{Bytes: key}, &buf)
+	_, err := encoder.WriteAndClose(data)
+	if err != nil {
+		log.Println("Failed to write to encoder", err)
+		return nil, nil, err
+	}
+	return buf.Bytes(), encoder.Header().Bytes, nil
 }
 
 // DeriveLoginKey derives a login key from the given key encryption key.
