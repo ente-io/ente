@@ -4,6 +4,7 @@ import (
 	"cli-go/internal/api"
 	"context"
 	"encoding/json"
+	"fmt"
 	"log"
 
 	bolt "go.etcd.io/bbolt"
@@ -32,9 +33,8 @@ func (c *ClICtrl) AddAccount(cxt context.Context) {
 	if flowErr != nil {
 		return
 	}
-	var keyEncKey []byte
 	var verifyEmail bool
-	var authResponse *api.AuthorizationResponse
+
 	srpAttr, flowErr := c.Client.GetSRPAttributes(cxt, email)
 	if flowErr != nil {
 		// if flowErr type is ApiError and status code is 404, then set verifyEmail to true and continue
@@ -45,6 +45,8 @@ func (c *ClICtrl) AddAccount(cxt context.Context) {
 			return
 		}
 	}
+	var authResponse *api.AuthorizationResponse
+	var keyEncKey []byte
 	if verifyEmail || srpAttr.IsEmailMFAEnabled {
 		authResponse, flowErr = c.validateEmail(cxt, email)
 	} else {
@@ -60,14 +62,14 @@ func (c *ClICtrl) AddAccount(cxt context.Context) {
 		log.Fatal("no encrypted token or keyAttributes")
 		return
 	}
-	if keyEncKey == nil {
-		pass, flowErr := GetSensitiveField("Enter password")
-		if flowErr != nil {
-			return
-		} else if pass == "" {
-			log.Printf("do work")
-		}
+	masterKey, token, decErr := c.decryptMasterKeyAndToken(cxt, authResponse, keyEncKey)
+	if decErr != nil {
+		flowErr = decErr
+		return
 	}
+	// print length
+	fmt.Printf("master key length: %d\n", len(masterKey))
+	fmt.Printf("token length: %d\n", len(token))
 }
 
 func (c *ClICtrl) ListAccounts(cxt context.Context) error {

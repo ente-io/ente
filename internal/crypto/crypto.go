@@ -104,3 +104,20 @@ func DeriveLoginKey(keyEncKey []byte) []byte {
 	// return the first 16 bytes of the derived key
 	return subKey[:16]
 }
+
+func SecretBoxOpen(c []byte, n []byte, k []byte) ([]byte, error) {
+	var cp sodium.Bytes = c
+	return cp.SecretBoxOpen(sodium.SecretBoxNonce{Bytes: n}, sodium.SecretBoxKey{Bytes: k})
+}
+
+func SealedBoxOpen(cipherText []byte, publicKey, masterSecret []byte) ([]byte, error) {
+	var cp sodium.Bytes = cipherText
+	om, err := cp.SealedBoxOpen(sodium.BoxKP{
+		PublicKey: sodium.BoxPublicKey{Bytes: publicKey},
+		SecretKey: sodium.BoxSecretKey{Bytes: masterSecret},
+	})
+	if err != nil {
+		return nil, fmt.Errorf("failed to open sealed box: %v", err)
+	}
+	return om, nil
+}

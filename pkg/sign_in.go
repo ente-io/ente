@@ -48,6 +48,69 @@ func (c *ClICtrl) signInViaPassword(ctx context.Context, email string, srpAttr *
 	}
 }
 
+// Parameters:
+//   - keyEncKey: key encryption key is derived from user's password. During SRP based login, this key is already derived.
+//     So, we can pass it to avoid asking for password again.
+func (c *ClICtrl) decryptMasterKeyAndToken(
+	_ context.Context,
+	authResp *api.AuthorizationResponse,
+	keyEncKey []byte,
+) (masterKey, token []byte, err error) {
+
+	var currentKeyEncKey []byte
+	for {
+		if keyEncKey == nil {
+			// CLI prompt for password
+			password, flowErr := GetSensitiveField("Enter password")
+			if flowErr != nil {
+				return nil, nil, flowErr
+			}
+			fmt.Println("\nPlease wait authenticating...")
+			currentKeyEncKey, err = enteCrypto.DeriveArgonKey(password,
+				authResp.KeyAttributes.KEKSalt, authResp.KeyAttributes.MemLimit, authResp.KeyAttributes.OpsLimit)
+			if err != nil {
+				fmt.Printf("error deriving key encryption key: %v", err)
+				return nil, nil, err
+			}
+		} else {
+			currentKeyEncKey = keyEncKey
+		}
+
+		encryptedKey := utils.Base64DecodeString(authResp.KeyAttributes.EncryptedKey)
+		encryptedKeyNonce := utils.Base64DecodeString(authResp.KeyAttributes.KeyDecryptionNonce)
+		key, keyErr := enteCrypto.SecretBoxOpen(encryptedKey, encryptedKeyNonce, currentKeyEncKey)
+		if keyErr != nil {
+			if keyEncKey != nil {
+				fmt.Printf("Failed to get key from keyEncryptionKey %s", keyErr)
+				return nil, nil, keyErr
+			} else {
+				fmt.Printf("Incorrect password, error decrypting master key: %v", keyErr)
+				continue
+			}
+		}
+		masterKey, keyErr = enteCrypto.SecretBoxOpen(
+			utils.Base64DecodeString(authResp.KeyAttributes.EncryptedSecretKey),
+			utils.Base64DecodeString(authResp.KeyAttributes.SecretKeyDecryptionNonce),
+			key,
+		)
+		if keyErr != nil {
+			fmt.Printf("error decrypting master key: %v", keyErr)
+			return nil, nil, keyErr
+		}
+		token, err = enteCrypto.SealedBoxOpen(
+			utils.Base64DecodeString(authResp.EncryptedToken),
+			utils.Base64DecodeString(authResp.KeyAttributes.PublicKey),
+			masterKey,
+		)
+		if err != nil {
+			fmt.Printf("error decrypting token: %v", err)
+			return nil, nil, err
+		}
+		break
+	}
+	return masterKey, token, nil
+}
+
 func (c *ClICtrl) validateTOTP(ctx context.Context, authResp *api.AuthorizationResponse) (*api.AuthorizationResponse, error) {
 	if !authResp.IsMFARequired() {
 		return authResp, nil
