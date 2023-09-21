@@ -31,6 +31,7 @@ func readValueFromContext(ctx context.Context, key string) interface{} {
 	value := ctx.Value(key)
 	return value
 }
+
 func NewClient(p Params) *Client {
 	enteAPI := resty.New()
 	if p.Trace {

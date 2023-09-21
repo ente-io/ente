@@ -33,7 +33,6 @@ var addAccCmd = &cobra.Command{
 }
 
 func init() {
-
 	// Add 'config' subcommands to the root command
 	rootCmd.AddCommand(accountCmd)
 	// Add 'config' subcommands to the 'config' command
