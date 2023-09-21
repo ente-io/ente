@@ -66,3 +66,23 @@ func (c *ClICtrl) validateTOTP(ctx context.Context, authResp *api.AuthorizationR
 		return totpResp, nil
 	}
 }
+
+func (c *ClICtrl) validateEmail(ctx context.Context, email string) (*api.AuthorizationResponse, error) {
+	err := c.Client.SendEmailOTP(ctx, email)
+	if err != nil {
+		return nil, err
+	}
+	for {
+		// CLI prompt for OTP
+		ott, flowErr := GetCode("Enter OTP", 6)
+		if flowErr != nil {
+			return nil, flowErr
+		}
+		authResponse, err := c.Client.VerifyEmail(ctx, email, ott)
+		if err != nil {
+			log.Printf("failed to verify %v", err)
+			continue
+		}
+		return authResponse, nil
+	}
+}

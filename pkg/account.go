@@ -4,7 +4,6 @@ import (
 	"cli-go/internal/api"
 	"context"
 	"encoding/json"
-	"fmt"
 	"log"
 
 	bolt "go.etcd.io/bbolt"
@@ -38,21 +37,16 @@ func (c *ClICtrl) AddAccount(cxt context.Context) {
 	var authResponse *api.AuthorizationResponse
 	srpAttr, flowErr := c.Client.GetSRPAttributes(cxt, email)
 	if flowErr != nil {
-		return
+		// if flowErr type is ApiError and status code is 404, then set verifyEmail to true and continue
+		// else return
+		if apiErr, ok := flowErr.(*api.ApiError); ok && apiErr.StatusCode == 404 {
+			verifyEmail = true
+		} else {
+			return
+		}
 	}
 	if verifyEmail || srpAttr.IsEmailMFAEnabled {
-		flowErr = c.Client.SendEmailOTP(cxt, email)
-		if flowErr != nil {
-			return
-		}
-		ott, otpErr := GetCode(
-			fmt.Sprintf("Enter OTP sent to email %s (or 'c' to cancel)", email),
-			6)
-		if otpErr != nil {
-			flowErr = otpErr
-			return
-		}
-		authResponse, flowErr = c.Client.VerifyEmail(cxt, email, ott)
+		authResponse, flowErr = c.validateEmail(cxt, email)
 	} else {
 		authResponse, keyEncKey, flowErr = c.signInViaPassword(cxt, email, srpAttr)
 	}
@@ -61,6 +55,10 @@ func (c *ClICtrl) AddAccount(cxt context.Context) {
 	}
 	if authResponse.IsMFARequired() {
 		authResponse, flowErr = c.validateTOTP(cxt, authResponse)
+	}
+	if authResponse.EncryptedToken == "" || authResponse.KeyAttributes == nil {
+		log.Fatal("no encrypted token or keyAttributes")
+		return
 	}
 	if keyEncKey == nil {
 		pass, flowErr := GetSensitiveField("Enter password")
