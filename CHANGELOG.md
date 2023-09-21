@@ -4,17 +4,17 @@
 
 ### Added
 
-- #### Manual Check for update and changelog
+- #### Check for update and changelog option
 
-    Added options to check for update manually and a view changelog.
+    Added options to check for update manually and a view changelog via the app menubar
 
-- #### Added Support to opt out of crash reporting
+- #### Opt out of crash reporting
 
-    Added option to out of a crash reporting
+    Added option to out of a crash reporting, it can accessed from the settings -> preferences -> disable crash reporting
 
 - #### Type search
 
-    Added option to filter files by file type i.e, image, video, live-photo.
+    Added new search option to search files based on file type i.e, image, video, live-photo.
 
 - #### Manual Convert Button
 
