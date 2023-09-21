@@ -4,6 +4,7 @@ import (
 	"cli-go/pkg"
 	"fmt"
 	"os"
+	"runtime"
 
 	"github.com/spf13/viper"
 
@@ -49,4 +50,14 @@ func init() {
 	viper.SetConfigName("config") // Name of your configuration file (e.g., config.yaml)
 	viper.AddConfigPath(".")      // Search for config file in the current directory
 	viper.ReadInConfig()          // Read the configuration file if it exists
+}
+
+func recoverWithLog() {
+	if r := recover(); r != nil {
+		fmt.Println("Panic occurred:", r)
+		// Print the stack trace
+		stackTrace := make([]byte, 1024*8)
+		stackTrace = stackTrace[:runtime.Stack(stackTrace, false)]
+		fmt.Printf("Stack Trace:\n%s", stackTrace)
+	}
 }
