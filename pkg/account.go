@@ -76,7 +76,7 @@ func (c *ClICtrl) storeAccount(_ context.Context, email string, userID int64, ap
 		if err != nil {
 			return err
 		}
-		accInfo := model.AccountInfo{
+		accInfo := model.Account{
 			Email:     email,
 			UserID:    userID,
 			MasterKey: *model.MakeEncString(string(masterKey), secret),
@@ -87,18 +87,18 @@ func (c *ClICtrl) storeAccount(_ context.Context, email string, userID int64, ap
 		if err != nil {
 			return err
 		}
-		accountKey := fmt.Sprintf("%s-%d", app, userID)
+		accountKey := accInfo.AccountKey()
 		return b.Put([]byte(accountKey), accInfoBytes)
 	})
 	return err
 }
 
-func (c *ClICtrl) GetAccounts(cxt context.Context) ([]model.AccountInfo, error) {
-	var accounts []model.AccountInfo
+func (c *ClICtrl) GetAccounts(cxt context.Context) ([]model.Account, error) {
+	var accounts []model.Account
 	err := c.DB.View(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(AccBucket))
 		err := b.ForEach(func(k, v []byte) error {
-			var info model.AccountInfo
+			var info model.Account
 			err := json.Unmarshal(v, &info)
 			if err != nil {
 				return err
@@ -123,8 +123,8 @@ func (c *ClICtrl) ListAccounts(cxt context.Context) error {
 	for _, acc := range accounts {
 		fmt.Println("====================================")
 		fmt.Println("Email: ", acc.Email)
-		fmt.Println("UserID: ", acc.UserID)
-		fmt.Println("App: ", acc.App)
+		fmt.Println("ID:    ", acc.UserID)
+		fmt.Println("App:   ", acc.App)
 		fmt.Println("====================================")
 	}
 	return nil
