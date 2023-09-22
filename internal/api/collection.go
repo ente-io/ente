@@ -3,11 +3,20 @@ package api
 import "context"
 
 func (c *Client) GetCollections(ctx context.Context, sinceTime int) ([]Collection, error) {
-	var collections []Collection
-	_, err := c.restClient.R().
+	var res struct {
+		Collections []Collection `json:"collections"`
+	}
+	r, err := c.restClient.R().
 		SetContext(ctx).
-		SetQueryParam("since", string(sinceTime)).
-		SetResult(&collections).
+		SetQueryParam("since", "0").
+		SetResult(&res).
 		Get("/collections")
-	return collections, err
+	if r.IsError() {
+		return nil, &ApiError{
+			StatusCode: r.StatusCode(),
+			Message:    r.String(),
+		}
+	}
+
+	return res.Collections, err
 }
