@@ -52,7 +52,7 @@ class UserService {
   static const keyHasEnabledTwoFactor = "has_enabled_two_factor";
   static const keyUserDetails = "user_details";
 
-  final  SRP6GroupParameters kDefaultSrpGroup = SRP6StandardGroups.rfc5054_4096;
+  final SRP6GroupParameters kDefaultSrpGroup = SRP6StandardGroups.rfc5054_4096;
   final _dio = NetworkClient.instance.getDio();
   final _enteDio = NetworkClient.instance.enteDio;
   final _logger = Logger((UserService).toString());
@@ -247,14 +247,19 @@ class UserService {
         throw Exception("Log out action failed");
       }
     } catch (e) {
-      _logger.severe(e);
+      // check if token is already invalid
+      if (e is DioError && e.response?.statusCode == 401) {
+        await Configuration.instance.logout();
+        Navigator.of(context).popUntil((route) => route.isFirst);
+        return;
+      }
+      _logger.severe("Failed to logout", e);
       //This future is for waiting for the dialog from which logout() is called
       //to close and only then to show the error dialog.
       Future.delayed(
         const Duration(milliseconds: 150),
         () => showGenericErrorDialog(context: context),
       );
-      rethrow;
     }
   }
 
@@ -305,9 +310,11 @@ class UserService {
     }
   }
 
-  Future<void> verifyEmail(BuildContext context, String ott, {bool
-  isResettingPasswordScreen = false,})
-  async {
+  Future<void> verifyEmail(
+    BuildContext context,
+    String ott, {
+    bool isResettingPasswordScreen = false,
+  }) async {
     final dialog = createProgressDialog(context, S.of(context).pleaseWait);
     await dialog.show();
     try {
@@ -328,7 +335,7 @@ class UserService {
         } else {
           await _saveConfiguration(response);
           if (Configuration.instance.getEncryptedToken() != null) {
-            if(isResettingPasswordScreen) {
+            if (isResettingPasswordScreen) {
               page = const RecoveryPage();
             } else {
               page = const PasswordReentryPage();
