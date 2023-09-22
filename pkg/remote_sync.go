@@ -18,7 +18,7 @@ func (c *ClICtrl) SyncAccount(account model.Account) error {
 		return err
 	}
 	token := account.Token.MustDecrypt(cliSecret)
-	urlEncodedToken := base64.URLEncoding.EncodeToString(utils.Base64DecodeString(token))
+	urlEncodedToken := base64.URLEncoding.EncodeToString(utils.DecodeBase64(token))
 	c.Client.AddToken(account.AccountKey(), urlEncodedToken)
 	ctx := c.GetRequestContext(context.Background(), account)
 	return c.syncRemoteCollections(ctx, account)

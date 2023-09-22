@@ -17,15 +17,15 @@ func MakeEncString(plainText string, key []byte) *EncString {
 		log.Fatalf("failed to encrypt %s", err)
 	}
 	return &EncString{
-		CipherText: utils.BytesToBase64(cipher),
-		Nonce:      utils.BytesToBase64(nonce),
+		CipherText: utils.EncodeBase64(cipher),
+		Nonce:      utils.EncodeBase64(nonce),
 	}
 }
 
 func (e *EncString) MustDecrypt(key []byte) string {
-	plainBytes, err := crypto.DecryptChaCha20poly1305(utils.Base64DecodeString(e.CipherText), key, utils.Base64DecodeString(e.Nonce))
+	plainBytes, err := crypto.DecryptChaCha20poly1305(utils.DecodeBase64(e.CipherText), key, utils.DecodeBase64(e.Nonce))
 	if err != nil {
 		panic(err)
 	}
-	return utils.BytesToBase64(plainBytes)
+	return utils.EncodeBase64(plainBytes)
 }

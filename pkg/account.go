@@ -54,12 +54,12 @@ func (c *ClICtrl) AddAccount(cxt context.Context) {
 	if authResponse.EncryptedToken == "" || authResponse.KeyAttributes == nil {
 		panic("no encrypted token or keyAttributes")
 	}
-	masterKey, token, decErr := c.decryptMasterKeyAndToken(cxt, authResponse, keyEncKey)
+	secretInfo, decErr := c.decryptMasterKeyAndToken(cxt, authResponse, keyEncKey)
 	if decErr != nil {
 		flowErr = decErr
 		return
 	}
-	err := c.storeAccount(cxt, email, authResponse.ID, app, masterKey, token)
+	err := c.storeAccount(cxt, email, authResponse.ID, app, secretInfo)
 	if err != nil {
 		flowErr = err
 		return
@@ -68,7 +68,7 @@ func (c *ClICtrl) AddAccount(cxt context.Context) {
 	}
 }
 
-func (c *ClICtrl) storeAccount(_ context.Context, email string, userID int64, app api.App, masterKey, token []byte) error {
+func (c *ClICtrl) storeAccount(_ context.Context, email string, userID int64, app api.App, secretInfo *accSecretInfo) error {
 	// get password
 	secret := GetOrCreateClISecret()
 	err := c.DB.Update(func(tx *bolt.Tx) error {
@@ -79,8 +79,9 @@ func (c *ClICtrl) storeAccount(_ context.Context, email string, userID int64, ap
 		accInfo := model.Account{
 			Email:     email,
 			UserID:    userID,
-			MasterKey: *model.MakeEncString(string(masterKey), secret),
-			Token:     *model.MakeEncString(string(token), secret),
+			MasterKey: *model.MakeEncString(string(secretInfo.MasterKey), secret),
+			Token:     *model.MakeEncString(string(secretInfo.Token), secret),
+			SecretKey: *model.MakeEncString(string(secretInfo.SecretKey), secret),
 			App:       app,
 		}
 		accInfoBytes, err := json.Marshal(accInfo)

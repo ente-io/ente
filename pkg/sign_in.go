@@ -11,6 +11,12 @@ import (
 	"github.com/kong/go-srp"
 )
 
+type accSecretInfo struct {
+	MasterKey []byte
+	SecretKey []byte
+	Token     []byte
+}
+
 func (c *ClICtrl) signInViaPassword(ctx context.Context, email string, srpAttr *api.SRPAttributes) (*api.AuthorizationResponse, []byte, error) {
 	for {
 		// CLI prompt for password
@@ -28,18 +34,18 @@ func (c *ClICtrl) signInViaPassword(ctx context.Context, email string, srpAttr *
 
 		srpParams := srp.GetParams(4096)
 		identify := []byte(srpAttr.SRPUserID.String())
-		salt := utils.Base64DecodeString(srpAttr.SRPSalt)
+		salt := utils.DecodeBase64(srpAttr.SRPSalt)
 		clientSecret := srp.GenKey()
 		srpClient := srp.NewClient(srpParams, salt, identify, loginKey, clientSecret)
 		clientA := srpClient.ComputeA()
-		session, err := c.Client.CreateSRPSession(ctx, srpAttr.SRPUserID, utils.BytesToBase64(clientA))
+		session, err := c.Client.CreateSRPSession(ctx, srpAttr.SRPUserID, utils.EncodeBase64(clientA))
 		if err != nil {
 			return nil, nil, err
 		}
 		serverB := session.SRPB
-		srpClient.SetB(utils.Base64DecodeString(serverB))
+		srpClient.SetB(utils.DecodeBase64(serverB))
 		clientM := srpClient.ComputeM1()
-		authResp, err := c.Client.VerifySRPSession(ctx, srpAttr.SRPUserID, session.SessionID, utils.BytesToBase64(clientM))
+		authResp, err := c.Client.VerifySRPSession(ctx, srpAttr.SRPUserID, session.SessionID, utils.EncodeBase64(clientM))
 		if err != nil {
 			log.Printf("failed to verify %v", err)
 			continue
@@ -55,60 +61,66 @@ func (c *ClICtrl) decryptMasterKeyAndToken(
 	_ context.Context,
 	authResp *api.AuthorizationResponse,
 	keyEncKey []byte,
-) (masterKey, token []byte, err error) {
+) (*accSecretInfo, error) {
 
 	var currentKeyEncKey []byte
+	var masterKey, secretKey, tokenKey []byte
+	var err error
 	for {
 		if keyEncKey == nil {
 			// CLI prompt for password
 			password, flowErr := GetSensitiveField("Enter password")
 			if flowErr != nil {
-				return nil, nil, flowErr
+				return nil, flowErr
 			}
 			fmt.Println("\nPlease wait authenticating...")
 			currentKeyEncKey, err = enteCrypto.DeriveArgonKey(password,
 				authResp.KeyAttributes.KEKSalt, authResp.KeyAttributes.MemLimit, authResp.KeyAttributes.OpsLimit)
 			if err != nil {
 				fmt.Printf("error deriving key encryption key: %v", err)
-				return nil, nil, err
+				return nil, err
 			}
 		} else {
 			currentKeyEncKey = keyEncKey
 		}
 
-		encryptedKey := utils.Base64DecodeString(authResp.KeyAttributes.EncryptedKey)
-		encryptedKeyNonce := utils.Base64DecodeString(authResp.KeyAttributes.KeyDecryptionNonce)
+		encryptedKey := utils.DecodeBase64(authResp.KeyAttributes.EncryptedKey)
+		encryptedKeyNonce := utils.DecodeBase64(authResp.KeyAttributes.KeyDecryptionNonce)
 		key, keyErr := enteCrypto.SecretBoxOpen(encryptedKey, encryptedKeyNonce, currentKeyEncKey)
 		if keyErr != nil {
 			if keyEncKey != nil {
 				fmt.Printf("Failed to get key from keyEncryptionKey %s", keyErr)
-				return nil, nil, keyErr
+				return nil, keyErr
 			} else {
 				fmt.Printf("Incorrect password, error decrypting master key: %v", keyErr)
 				continue
 			}
 		}
-		masterKey, keyErr = enteCrypto.SecretBoxOpen(
-			utils.Base64DecodeString(authResp.KeyAttributes.EncryptedSecretKey),
-			utils.Base64DecodeString(authResp.KeyAttributes.SecretKeyDecryptionNonce),
+		secretKey, keyErr = enteCrypto.SecretBoxOpen(
+			utils.DecodeBase64(authResp.KeyAttributes.EncryptedSecretKey),
+			utils.DecodeBase64(authResp.KeyAttributes.SecretKeyDecryptionNonce),
 			key,
 		)
 		if keyErr != nil {
 			fmt.Printf("error decrypting master key: %v", keyErr)
-			return nil, nil, keyErr
+			return nil, keyErr
 		}
-		token, err = enteCrypto.SealedBoxOpen(
-			utils.Base64DecodeString(authResp.EncryptedToken),
-			utils.Base64DecodeString(authResp.KeyAttributes.PublicKey),
-			masterKey,
+		tokenKey, err = enteCrypto.SealedBoxOpen(
+			utils.DecodeBase64(authResp.EncryptedToken),
+			utils.DecodeBase64(authResp.KeyAttributes.PublicKey),
+			secretKey,
 		)
 		if err != nil {
 			fmt.Printf("error decrypting token: %v", err)
-			return nil, nil, err
+			return nil, err
 		}
 		break
 	}
-	return masterKey, token, nil
+	return &accSecretInfo{
+		MasterKey: masterKey,
+		SecretKey: secretKey,
+		Token:     tokenKey,
+	}, nil
 }
 
 func (c *ClICtrl) validateTOTP(ctx context.Context, authResp *api.AuthorizationResponse) (*api.AuthorizationResponse, error) {
