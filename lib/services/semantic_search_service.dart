@@ -1,4 +1,3 @@
-import "dart:convert";
 import "dart:io";
 
 import "package:clip_ggml/clip_ggml.dart";
@@ -12,23 +11,32 @@ class SemanticSearchService {
   static final SemanticSearchService instance =
       SemanticSearchService._privateConstructor();
 
-  late CLIP _clip;
+  bool hasLoaded = false;
   final _logger = Logger("SemanticSearchService");
 
   Future<void> init() async {
-    _clip = CLIP();
     await _loadModel();
     _testJson();
   }
 
+  Future<void> runInference(Uint8List image, String text) async {
+    if (!hasLoaded) {
+      return;
+    }
+    final imagePath = await _writeToFile(image, "input.jpg");
+    final imageEmbedding = CLIP.createImageEmbedding(imagePath);
+    final textEmbedding = CLIP.createTextEmbedding(text);
+    final score = CLIP.computeScore(imageEmbedding, textEmbedding);
+    _logger.info("Score: " + score.toString());
+  }
+
   Future<void> _loadModel() async {
-    final clip = CLIP();
     const modelPath =
         "assets/models/clip/openai_clip-vit-base-patch32.ggmlv0.f16.bin";
 
     final path = await _getAccessiblePathForAsset(modelPath, "model.bin");
     final startTime = DateTime.now();
-    clip.loadModel(path);
+    CLIP.loadModel(path);
     final endTime = DateTime.now();
     _logger.info(
       "Loading model took: " +
@@ -36,21 +44,18 @@ class SemanticSearchService {
               .toString() +
           "ms",
     );
+    hasLoaded = true;
 
     _testJson();
   }
 
   Future<void> _testJson() async {
     final startTime = DateTime.now();
-    final input = {
-      "embedding": [1.1, 2.2],
-    };
-    _logger.info(jsonEncode(input));
-    final result = _clip.createTextEmbedding("hello world");
+    final result = CLIP.createTextEmbedding("hello world");
     final endTime = DateTime.now();
     _logger.info(
       "Output: " +
-          result +
+          result.toString() +
           " (" +
           (endTime.millisecondsSinceEpoch - startTime.millisecondsSinceEpoch)
               .toString() +
@@ -63,9 +68,13 @@ class SemanticSearchService {
     String tempName,
   ) async {
     final byteData = await rootBundle.load(assetPath);
+    return _writeToFile(byteData.buffer.asUint8List(), tempName);
+  }
+
+  Future<String> _writeToFile(Uint8List bytes, String fileName) async {
     final tempDir = await getTemporaryDirectory();
-    final file = await File('${tempDir.path}/$tempName')
-        .writeAsBytes(byteData.buffer.asUint8List());
+    final file = await File('${tempDir.path}/$fileName')
+        .writeAsBytes(bytes);
     return file.path;
   }
 }
