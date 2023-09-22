@@ -57,7 +57,7 @@ func (c *ClICtrl) signInViaPassword(ctx context.Context, email string, srpAttr *
 // Parameters:
 //   - keyEncKey: key encryption key is derived from user's password. During SRP based login, this key is already derived.
 //     So, we can pass it to avoid asking for password again.
-func (c *ClICtrl) decryptMasterKeyAndToken(
+func (c *ClICtrl) decryptAccSecretInfo(
 	_ context.Context,
 	authResp *api.AuthorizationResponse,
 	keyEncKey []byte,

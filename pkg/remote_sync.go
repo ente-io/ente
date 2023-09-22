@@ -14,15 +14,16 @@ var accountMasterKey = map[string][]byte{}
 
 func (c *ClICtrl) SyncAccount(account model.Account) error {
 	log.SetPrefix(fmt.Sprintf("[%s] ", account.Email))
-
-	err := createDataBuckets(c.DB, account)
+	secretInfo, err := c.KeyHolder.LoadSecrets(account, c.CliKey)
 	if err != nil {
 		return err
 	}
-	token := account.Token.MustDecrypt(c.CliKey)
-	accountMasterKey[account.AccountKey()] = []byte(account.MasterKey.MustDecrypt(c.CliKey))
-	urlEncodedToken := base64.URLEncoding.EncodeToString([]byte(token))
-	c.Client.AddToken(account.AccountKey(), urlEncodedToken)
+	err = createDataBuckets(c.DB, account)
+	if err != nil {
+		return err
+	}
+	accountMasterKey[account.AccountKey()] = secretInfo.MasterKey
+	c.Client.AddToken(account.AccountKey(), base64.URLEncoding.EncodeToString(secretInfo.Token))
 	ctx := c.buildRequestContext(context.Background(), account)
 	return c.syncRemoteCollections(ctx, account)
 }

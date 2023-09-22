@@ -10,7 +10,8 @@ type ClICtrl struct {
 	Client *api.Client
 	DB     *bolt.DB
 	// CliKey is the key used to encrypt/decrypt sensitive data stored in the database
-	CliKey []byte
+	CliKey    []byte
+	KeyHolder *KeyHolder
 }
 
 func (c *ClICtrl) Init() error {
