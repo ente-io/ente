@@ -1,6 +1,5 @@
 
 import 'package:flutter/material.dart';
-import "package:logging/logging.dart";
 import 'package:photos/core/configuration.dart';
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/api/user/srp.dart";
@@ -24,7 +23,6 @@ class LoginPasswordVerificationPage extends StatefulWidget {
 
 class _LoginPasswordVerificationPageState extends
 State<LoginPasswordVerificationPage> {
-  final _logger = Logger((_LoginPasswordVerificationPageState).toString());
   final _passwordController = TextEditingController();
   final FocusNode _passwordFocusNode = FocusNode();
   String? email;
