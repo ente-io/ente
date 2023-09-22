@@ -42,6 +42,18 @@ Future<Uint8List?> getThumbnail(EnteFile file) async {
   }
 }
 
+Future<File?> getThumbnailFile(EnteFile file) async {
+  final thumbnail = await getThumbnail(file);
+  if (thumbnail != null) {
+    final cachedThumbnail = cachedThumbnailPath(file);
+    if (!await cachedThumbnail.exists()) {
+      await cachedThumbnail.writeAsBytes(thumbnail, flush: true);
+    }
+    return cachedThumbnail;
+  }
+  return null;
+}
+
 Future<Uint8List> getThumbnailFromServer(EnteFile file) async {
   final cachedThumbnail = cachedThumbnailPath(file);
   if (await cachedThumbnail.exists()) {

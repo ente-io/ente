@@ -5,6 +5,10 @@ import "package:computer/computer.dart";
 import "package:flutter/services.dart";
 import "package:logging/logging.dart";
 import "package:path_provider/path_provider.dart";
+import "package:photos/db/files_db.dart";
+import "package:photos/models/embedding.dart";
+import "package:photos/models/file/file.dart";
+import "package:photos/utils/thumbnail_util.dart";
 
 class SemanticSearchService {
   SemanticSearchService._privateConstructor();
@@ -21,22 +25,37 @@ class SemanticSearchService {
     await _loadModel();
   }
 
-  Future<void> runInference(Uint8List image, String text) async {
+  Future<void> runInference(EnteFile file, String text) async {
     if (!hasLoaded || isRunning) {
       return;
     }
     isRunning = true;
     _logger.info("Running clip");
-    final imagePath = await _writeToFile(image, "input.jpg");
+    final imagePath = (await getThumbnailFile(file))!.path;
 
     var startTime = DateTime.now();
-    final imageEmbedding = await _computer.compute(
-      createImageEmbedding,
-      param: {
-        "imagePath": imagePath,
-      },
-      taskName: "createImageEmbedding",
-    );
+    // ignore: prefer_typing_uninitialized_variables
+    var imageEmbedding;
+    final embeddings = await FilesDB.instance.getAllEmbeddings();
+    bool hasCachedEmbedding = false;
+    for (final embedding in embeddings) {
+      if (embedding.id == file.generatedID) {
+        imageEmbedding = embedding.embedding;
+        hasCachedEmbedding = true;
+        _logger.info("Found cached embedding");
+      }
+    }
+    if (!hasCachedEmbedding) {
+      imageEmbedding ??= await _computer.compute(
+        createImageEmbedding,
+        param: {
+          "imagePath": imagePath,
+        },
+        taskName: "createImageEmbedding",
+      );
+      await FilesDB.instance
+          .insertEmbedding(Embedding(file.generatedID!, imageEmbedding, -1));
+    }
     var endTime = DateTime.now();
     _logger.info(
       "createImageEmbedding took: " +

@@ -60,7 +60,7 @@ class _ZoomableImageState extends State<ZoomableImage>
   @override
   void initState() {
     _photo = widget.photo;
-    _test();
+    SemanticSearchService.instance.runInference(_photo, "desert with a tree");
     _logger = Logger("ZoomableImage");
     _logger.info('initState for ${_photo.generatedID} with tag ${_photo.tag}');
     _scaleStateChangedCallback = (value) {
@@ -78,13 +78,6 @@ class _ZoomableImageState extends State<ZoomableImage>
   void dispose() {
     _photoViewController.dispose();
     super.dispose();
-  }
-
-  void _test() {
-    final thumb = ThumbnailInMemoryLruCache.get(_photo);
-    if (thumb != null) {
-      SemanticSearchService.instance.runInference(thumb, "desert with a tree");
-    }
   }
 
   @override
