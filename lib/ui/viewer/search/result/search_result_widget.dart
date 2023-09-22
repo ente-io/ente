@@ -100,7 +100,10 @@ class SearchResultWidget extends StatelessWidget {
         } else {
           routeToPage(
             context,
-            SearchResultPage(searchResult),
+            SearchResultPage(
+              searchResult,
+              enableGrouping: searchResult.type() != ResultType.magic,
+            ),
           );
         }
       },
@@ -127,6 +130,8 @@ class SearchResultWidget extends StatelessWidget {
         return "File extension";
       case ResultType.fileCaption:
         return "Description";
+      case ResultType.magic:
+        return "Magic";
       default:
         return type.name.toUpperCase();
     }

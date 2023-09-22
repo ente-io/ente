@@ -24,4 +24,5 @@ enum ResultType {
   fileExtension,
   fileCaption,
   event,
+  magic,
 }
