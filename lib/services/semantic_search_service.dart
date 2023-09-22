@@ -23,6 +23,11 @@ class SemanticSearchService {
 
   Future<void> init() async {
     await _loadModel();
+    final files = await FilesDB.instance.getFilesWithoutEmbeddings();
+    _logger.info(files.length.toString() + " pending to be embedded");
+    for (final file in files) {
+      await runInference(file, "hello");
+    }
   }
 
   Future<void> runInference(EnteFile file, String text) async {
@@ -30,7 +35,7 @@ class SemanticSearchService {
       return;
     }
     isRunning = true;
-    _logger.info("Running clip");
+    // _logger.info("Running clip");
     final imagePath = (await getThumbnailFile(file))!.path;
 
     var startTime = DateTime.now();
@@ -64,23 +69,34 @@ class SemanticSearchService {
           "ms",
     );
 
-    startTime = DateTime.now();
-    final textEmbedding = await _computer.compute(
-      createTextEmbedding,
-      param: {
-        "text": text,
-      },
-      taskName: "createTextEmbedding",
-    );
-    endTime = DateTime.now();
-    _logger.info(
-      "createTextEmbedding took: " +
-          (endTime.millisecondsSinceEpoch - startTime.millisecondsSinceEpoch)
-              .toString() +
-          "ms",
-    );
+    // startTime = DateTime.now();
+    // final textEmbedding = await _computer.compute(
+    //   createTextEmbedding,
+    //   param: {
+    //     "text": text,
+    //   },
+    //   taskName: "createTextEmbedding",
+    // );
+    // endTime = DateTime.now();
+    // _logger.info(
+    //   "createTextEmbedding took: " +
+    //       (endTime.millisecondsSinceEpoch - startTime.millisecondsSinceEpoch)
+    //           .toString() +
+    //       "ms",
+    // );
 
-    startTime = DateTime.now();
+    // startTime = DateTime.now();
+    // final score = computeScore({
+    //   "imageEmbedding": imageEmbedding,
+    //   "textEmbedding": textEmbedding,
+    // });
+    // endTime = DateTime.now();
+    // _logger.info(
+    //   "computeScore took: " +
+    //       (endTime.millisecondsSinceEpoch - startTime.millisecondsSinceEpoch)
+    //           .toString() +
+    //       "ms",
+
     // final score = await _computer.compute(
     //   computeScore,
     //   param: {
@@ -89,19 +105,9 @@ class SemanticSearchService {
     //   },
     //   taskName: "computeScore",
     // );
-    final score = computeScore({
-      "imageEmbedding": imageEmbedding,
-      "textEmbedding": textEmbedding,
-    });
-    endTime = DateTime.now();
-    _logger.info(
-      "computeScore took: " +
-          (endTime.millisecondsSinceEpoch - startTime.millisecondsSinceEpoch)
-              .toString() +
-          "ms",
-    );
+    // );
 
-    _logger.info("Score: " + score.toString());
+    // _logger.info("Score: " + score.toString());
     isRunning = false;
   }
 
