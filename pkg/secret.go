@@ -4,8 +4,9 @@ import (
 	"crypto/rand"
 	"errors"
 	"fmt"
-	"github.com/zalando/go-keyring"
 	"log"
+
+	"github.com/zalando/go-keyring"
 )
 
 func GetOrCreateClISecret() []byte {
@@ -18,13 +19,14 @@ func GetOrCreateClISecret() []byte {
 		key := make([]byte, 32)
 		_, err = rand.Read(key)
 		if err != nil {
-			// handle error here
+			log.Fatal(fmt.Errorf("error generating key: %w", err))
 		}
-		keySetErr := keyring.Set("ente-cli-cli", "ghost", string(key))
+		secret = string(key)
+		keySetErr := keyring.Set("ente-cli-cli", "ghost", string(secret))
 		if keySetErr != nil {
 			log.Fatal(fmt.Errorf("error setting password in keyring: %w", keySetErr))
 		}
-		secret = string(key)
+
 	}
 	return []byte(secret)
 }
