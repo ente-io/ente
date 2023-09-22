@@ -19,7 +19,6 @@ var tokenMap map[string]string = make(map[string]string)
 
 type Client struct {
 	restClient *resty.Client
-	tokenMap   map[string]string
 }
 
 type Params struct {
