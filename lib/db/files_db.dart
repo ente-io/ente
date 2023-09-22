@@ -6,6 +6,7 @@ import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import "package:photos/extensions/stop_watch.dart";
 import 'package:photos/models/backup_status.dart';
+import "package:photos/models/embedding.dart";
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file/file_type.dart';
 import 'package:photos/models/file_load_result.dart';
@@ -30,6 +31,7 @@ class FilesDB {
 
   static const filesTable = 'files';
   static const tempTable = 'temp_files';
+  static const embeddingsTable = 'clip_embeddings';
 
   static const columnGeneratedID = '_id';
   static const columnUploadedFileID = 'uploaded_file_id';
@@ -57,6 +59,7 @@ class FilesDB {
   static const columnThumbnailDecryptionHeader = 'thumbnail_decryption_header';
   static const columnMetadataDecryptionHeader = 'metadata_decryption_header';
   static const columnFileSize = 'file_size';
+  static const columnEmbedding = 'embedding';
 
   // MMD -> Magic Metadata
   static const columnMMdEncodedJson = 'mmd_encoded_json';
@@ -84,6 +87,7 @@ class FilesDB {
     ...updateIndexes(),
     ...createEntityDataTable(),
     ...addAddedTime(),
+    ...createEmbeddingsTable(),
   ];
 
   final dbConfig = MigrationConfig(
@@ -376,6 +380,18 @@ class FilesDB {
       ''',
       '''
         CREATE INDEX IF NOT EXISTS added_time_index ON $filesTable($columnAddedTime);
+      '''
+    ];
+  }
+
+  static List<String> createEmbeddingsTable() {
+    return [
+      '''
+       CREATE TABLE IF NOT EXISTS $embeddingsTable (
+          $columnGeneratedID INTEGER PRIMARY KEY,
+          $columnEmbedding TEXT NOT NULL,
+          $columnUpdationTime INTEGER NOT NULL DEFAULT -1
+      );
       '''
     ];
   }
@@ -1521,6 +1537,23 @@ class FilesDB {
     return FileLoadResult(filteredFiles, files.length == limit);
   }
 
+  Future<void> insertEmbedding(Embedding embedding) async {
+    final db = await instance.database;
+    await db.insert(
+      embeddingsTable,
+      _getRowForEmbedding(embedding),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  Future<List<Embedding>> getAllEmbeddings() async {
+    final db = await instance.database;
+    final results = await db.query(
+      embeddingsTable,
+    );
+    return _convertToEmbeddings(results);
+  }
+
   Map<String, dynamic> _getRowForFile(EnteFile file) {
     final row = <String, dynamic>{};
     if (file.generatedID != null) {
@@ -1657,5 +1690,29 @@ class FilesDB {
     file.pubMmdVersion = row[columnPubMMdVersion] ?? 0;
     file.pubMmdEncodedJson = row[columnPubMMdEncodedJson] ?? '{}';
     return file;
+  }
+
+  Map<String, dynamic> _getRowForEmbedding(Embedding embedding) {
+    final row = <String, dynamic>{};
+    row[columnGeneratedID] = embedding.id;
+    row[columnEmbedding] = Embedding.encodeEmbedding(embedding.embedding);
+    row[columnUpdationTime] = embedding.updationTime;
+    return row;
+  }
+
+  Embedding _getEmbeddingFromRow(Map<String, dynamic> row) {
+    return Embedding(
+      row[columnGeneratedID],
+      Embedding.decodeEmbedding(row[columnEmbedding]),
+      row[columnUpdationTime],
+    );
+  }
+
+  List<Embedding> _convertToEmbeddings(List<Map<String, dynamic>> results) {
+    final List<Embedding> embeddings = [];
+    for (final result in results) {
+      embeddings.add(_getEmbeddingFromRow(result));
+    }
+    return embeddings;
   }
 }
