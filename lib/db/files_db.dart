@@ -1554,6 +1554,17 @@ class FilesDB {
     return _convertToEmbeddings(results);
   }
 
+  Future<List<EnteFile>> getFilesWithoutEmbeddings() async {
+    final db = await instance.database;
+    final result = await db.rawQuery('''
+      SELECT $filesTable.*
+      FROM $filesTable
+      LEFT JOIN $embeddingsTable ON $filesTable.$columnGeneratedID = $embeddingsTable.$columnGeneratedID
+      WHERE $embeddingsTable.$columnGeneratedID IS NULL;
+    ''');
+    return convertToFiles(result);
+  }
+
   Map<String, dynamic> _getRowForFile(EnteFile file) {
     final row = <String, dynamic>{};
     if (file.generatedID != null) {
