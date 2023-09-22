@@ -178,7 +178,7 @@ const getCollections = async (
 ): Promise<Collection[]> => {
     try {
         const resp = await HTTPService.get(
-            `${ENDPOINT}/collections`,
+            `${ENDPOINT}/collections/v2`,
             {
                 sinceTime,
             },
