@@ -33,6 +33,7 @@ if (keystorePropertiesFile.exists()) {
 
 android {
     compileSdkVersion 33
+    ndkVersion "25.1.8937393"
 
     sourceSets {
         main.java.srcDirs += 'src/main/kotlin'
