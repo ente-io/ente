@@ -12,9 +12,9 @@ func TestEncString(t *testing.T) {
 		t.Fatalf("error generating key: %v", err)
 	}
 	data := "dataToEncrypt"
-	encData := MakeEncString(data, key)
+	encData := MakeEncString([]byte(data), key)
 	decryptedData := encData.MustDecrypt(key)
-	if decryptedData != data {
+	if string(decryptedData) != data {
 		t.Fatalf("decrypted data is not equal to original data")
 	}
 }
