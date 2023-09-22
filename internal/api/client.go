@@ -15,6 +15,7 @@ const (
 var (
 	RedactedHeaders = []string{TokenHeader, " X-Request-Id"}
 )
+var tokenMap map[string]string = make(map[string]string)
 
 type Client struct {
 	restClient *resty.Client
@@ -43,6 +44,12 @@ func NewClient(p Params) *Client {
 			panic("app not set in context")
 		}
 		req.Header.Set(ClientPkgHeader, StringToApp(app.(string)).ClientPkg())
+		accountId := readValueFromContext(req.Context(), "account_id")
+		if accountId != nil && accountId != "" {
+			if token, ok := tokenMap[accountId.(string)]; ok {
+				req.SetHeader(TokenHeader, token)
+			}
+		}
 		return nil
 	})
 	if p.Debug {
@@ -63,10 +70,9 @@ func NewClient(p Params) *Client {
 	}
 	return &Client{
 		restClient: enteAPI,
-		tokenMap:   make(map[string]string),
 	}
 }
 
 func (c *Client) AddToken(id string, token string) {
-	c.tokenMap[id] = token
+	tokenMap[id] = token
 }
