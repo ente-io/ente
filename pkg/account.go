@@ -14,7 +14,6 @@ import (
 const AccBucket = "accounts"
 
 func (c *ClICtrl) AddAccount(cxt context.Context) {
-
 	var flowErr error
 	defer func() {
 		if flowErr != nil {
@@ -69,7 +68,7 @@ func (c *ClICtrl) AddAccount(cxt context.Context) {
 	}
 }
 
-func (c *ClICtrl) storeAccount(ctx context.Context, email string, userID int64, app api.App, masterKey, token []byte) error {
+func (c *ClICtrl) storeAccount(_ context.Context, email string, userID int64, app api.App, masterKey, token []byte) error {
 	// get password
 	secret := GetOrCreateClISecret()
 	err := c.DB.Update(func(tx *bolt.Tx) error {
@@ -94,21 +93,17 @@ func (c *ClICtrl) storeAccount(ctx context.Context, email string, userID int64, 
 	return err
 }
 
-func (c *ClICtrl) ListAccounts(cxt context.Context) error {
+func (c *ClICtrl) GetAccounts(cxt context.Context) ([]model.AccountInfo, error) {
+	var accounts []model.AccountInfo
 	err := c.DB.View(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(AccBucket))
-		fmt.Printf("Configured accounts: %d\n", b.Stats().KeyN)
 		err := b.ForEach(func(k, v []byte) error {
 			var info model.AccountInfo
 			err := json.Unmarshal(v, &info)
 			if err != nil {
 				return err
 			}
-			fmt.Println("====================================")
-			fmt.Println("Email: ", info.Email)
-			fmt.Println("UserID: ", info.UserID)
-			fmt.Println("App: ", info.App)
-			fmt.Println("====================================")
+			accounts = append(accounts, info)
 			return nil
 		})
 		if err != nil {
@@ -116,8 +111,21 @@ func (c *ClICtrl) ListAccounts(cxt context.Context) error {
 		}
 		return nil
 	})
+	return accounts, err
+}
+
+func (c *ClICtrl) ListAccounts(cxt context.Context) error {
+	accounts, err := c.GetAccounts(cxt)
 	if err != nil {
 		return err
 	}
-	return err
+	fmt.Printf("Configured accounts: %d\n", len(accounts))
+	for _, acc := range accounts {
+		fmt.Println("====================================")
+		fmt.Println("Email: ", acc.Email)
+		fmt.Println("UserID: ", acc.UserID)
+		fmt.Println("App: ", acc.App)
+		fmt.Println("====================================")
+	}
+	return nil
 }
