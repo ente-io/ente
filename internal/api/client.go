@@ -18,7 +18,7 @@ var (
 
 type Client struct {
 	restClient *resty.Client
-	authToken  *string
+	tokenMap   map[string]string
 }
 
 type Params struct {
@@ -63,5 +63,10 @@ func NewClient(p Params) *Client {
 	}
 	return &Client{
 		restClient: enteAPI,
+		tokenMap:   make(map[string]string),
 	}
+}
+
+func (c *Client) AddToken(id string, token string) {
+	c.tokenMap[id] = token
 }
