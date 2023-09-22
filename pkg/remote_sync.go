@@ -3,7 +3,6 @@ package pkg
 import (
 	enteCrypto "cli-go/internal/crypto"
 	"cli-go/pkg/model"
-	"cli-go/utils"
 	"context"
 	"encoding/base64"
 	"fmt"
@@ -21,14 +20,14 @@ func (c *ClICtrl) SyncAccount(account model.Account) error {
 		return err
 	}
 	token := account.Token.MustDecrypt(c.CliKey)
-	accountMasterKey[account.AccountKey()] = utils.DecodeBase64(account.MasterKey.MustDecrypt(c.CliKey))
-	urlEncodedToken := base64.URLEncoding.EncodeToString(utils.DecodeBase64(token))
+	accountMasterKey[account.AccountKey()] = []byte(account.MasterKey.MustDecrypt(c.CliKey))
+	urlEncodedToken := base64.URLEncoding.EncodeToString([]byte(token))
 	c.Client.AddToken(account.AccountKey(), urlEncodedToken)
-	ctx := c.GetRequestContext(context.Background(), account)
+	ctx := c.buildRequestContext(context.Background(), account)
 	return c.syncRemoteCollections(ctx, account)
 }
 
-func (c *ClICtrl) GetRequestContext(ctx context.Context, account model.Account) context.Context {
+func (c *ClICtrl) buildRequestContext(ctx context.Context, account model.Account) context.Context {
 	ctx = context.WithValue(ctx, "app", string(account.App))
 	ctx = context.WithValue(ctx, "account_id", account.AccountKey())
 	return ctx

@@ -27,5 +27,5 @@ func (e *EncString) MustDecrypt(key []byte) string {
 	if err != nil {
 		panic(err)
 	}
-	return utils.EncodeBase64(plainBytes)
+	return string(plainBytes)
 }
