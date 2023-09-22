@@ -83,7 +83,7 @@ class _ZoomableImageState extends State<ZoomableImage>
   void _test() {
     final thumb = ThumbnailInMemoryLruCache.get(_photo);
     if (thumb != null) {
-      SemanticSearchService.instance.runInference(thumb, "toddler");
+      SemanticSearchService.instance.runInference(thumb, "desert with a tree");
     }
   }
 

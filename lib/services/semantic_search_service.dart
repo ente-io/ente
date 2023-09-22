@@ -1,6 +1,7 @@
 import "dart:io";
 
 import "package:clip_ggml/clip_ggml.dart";
+import "package:computer/computer.dart";
 import "package:flutter/services.dart";
 import "package:logging/logging.dart";
 import "package:path_provider/path_provider.dart";
@@ -10,24 +11,82 @@ class SemanticSearchService {
 
   static final SemanticSearchService instance =
       SemanticSearchService._privateConstructor();
+  static final Computer _computer = Computer.shared();
 
   bool hasLoaded = false;
+  bool isRunning = false;
   final _logger = Logger("SemanticSearchService");
 
   Future<void> init() async {
     await _loadModel();
-    _testJson();
   }
 
   Future<void> runInference(Uint8List image, String text) async {
     if (!hasLoaded) {
       return;
     }
+    if (isRunning) {
+      return;
+    }
+    isRunning = true;
+    _logger.info("Running clip");
     final imagePath = await _writeToFile(image, "input.jpg");
-    final imageEmbedding = CLIP.createImageEmbedding(imagePath);
-    final textEmbedding = CLIP.createTextEmbedding(text);
-    final score = CLIP.computeScore(imageEmbedding, textEmbedding);
+
+    var startTime = DateTime.now();
+    final imageEmbedding = await _computer.compute(
+      createImageEmbedding,
+      param: {
+        "imagePath": imagePath,
+      },
+      taskName: "createImageEmbedding",
+    );
+    var endTime = DateTime.now();
+    _logger.info(
+      "createImageEmbedding took: " +
+          (endTime.millisecondsSinceEpoch - startTime.millisecondsSinceEpoch)
+              .toString() +
+          "ms",
+    );
+
+    startTime = DateTime.now();
+    final textEmbedding = await _computer.compute(
+      createTextEmbedding,
+      param: {
+        "text": text,
+      },
+      taskName: "createTextEmbedding",
+    );
+    endTime = DateTime.now();
+    _logger.info(
+      "createTextEmbedding took: " +
+          (endTime.millisecondsSinceEpoch - startTime.millisecondsSinceEpoch)
+              .toString() +
+          "ms",
+    );
+
+    startTime = DateTime.now();
+    // final score = await _computer.compute(
+    //   computeScore,
+    //   param: {
+    //     "imageEmbedding": imageEmbedding,
+    //     "textEmbedding": textEmbedding,
+    //   },
+    //   taskName: "computeScore",
+    // );
+    final score = computeScore({
+      "imageEmbedding": imageEmbedding,
+      "textEmbedding": textEmbedding,
+    });
+    endTime = DateTime.now();
+    _logger.info(
+      "computeScore took: " +
+          (endTime.millisecondsSinceEpoch - startTime.millisecondsSinceEpoch)
+              .toString() +
+          "ms",
+    );
+
     _logger.info("Score: " + score.toString());
+    isRunning = false;
   }
 
   Future<void> _loadModel() async {
@@ -45,22 +104,6 @@ class SemanticSearchService {
           "ms",
     );
     hasLoaded = true;
-
-    _testJson();
-  }
-
-  Future<void> _testJson() async {
-    final startTime = DateTime.now();
-    final result = CLIP.createTextEmbedding("hello world");
-    final endTime = DateTime.now();
-    _logger.info(
-      "Output: " +
-          result.toString() +
-          " (" +
-          (endTime.millisecondsSinceEpoch - startTime.millisecondsSinceEpoch)
-              .toString() +
-          "ms)",
-    );
   }
 
   Future<String> _getAccessiblePathForAsset(
@@ -73,8 +116,22 @@ class SemanticSearchService {
 
   Future<String> _writeToFile(Uint8List bytes, String fileName) async {
     final tempDir = await getTemporaryDirectory();
-    final file = await File('${tempDir.path}/$fileName')
-        .writeAsBytes(bytes);
+    final file = await File('${tempDir.path}/$fileName').writeAsBytes(bytes);
     return file.path;
   }
+}
+
+List<double> createImageEmbedding(Map args) {
+  return CLIP.createImageEmbedding(args["imagePath"]);
+}
+
+List<double> createTextEmbedding(Map args) {
+  return CLIP.createTextEmbedding(args["text"]);
+}
+
+double computeScore(Map args) {
+  return CLIP.computeScore(
+    args["imageEmbedding"] as List<double>,
+    args["textEmbedding"] as List<double>,
+  );
 }
