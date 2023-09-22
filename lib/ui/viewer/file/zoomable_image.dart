@@ -7,7 +7,6 @@ import 'package:flutter/widgets.dart';
 import 'package:logging/logging.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:photos/core/cache/thumbnail_in_memory_cache.dart';
-import "package:photos/core/configuration.dart";
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
@@ -56,8 +55,6 @@ class _ZoomableImageState extends State<ZoomableImage>
   ValueChanged<PhotoViewScaleState>? _scaleStateChangedCallback;
   bool _isZooming = false;
   PhotoViewController _photoViewController = PhotoViewController();
-  int? _thumbnailWidth;
-  late int _currentUserID;
 
   @override
   void initState() {
@@ -72,7 +69,6 @@ class _ZoomableImageState extends State<ZoomableImage>
       debugPrint("isZooming = $_isZooming, currentState $value");
       // _logger.info('is reakky zooming $_isZooming with state $value');
     };
-    _currentUserID = Configuration.instance.getUserID()!;
     super.initState();
   }
 

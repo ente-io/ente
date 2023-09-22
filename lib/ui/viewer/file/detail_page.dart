@@ -221,6 +221,7 @@ class _DetailPageState extends State<DetailPage> {
           }
           // always notify listeners when the index is the same because
           // the total number of files might have changed
+          // ignore: invalid_use_of_protected_member, invalid_use_of_visible_for_testing_member
           _selectedIndexNotifier.notifyListeners();
         } else {
           _selectedIndexNotifier.value = index;

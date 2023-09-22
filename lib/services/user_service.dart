@@ -520,6 +520,7 @@ class UserService {
         // ignore: need to calculate secret to get M1, unused_local_variable
         final clientS = client.calculateSecret(serverB);
         final clientM = client.calculateClientEvidenceMessage();
+        // ignore: unused_local_variable
         late Response srpCompleteResponse;
         if(setKeysRequest == null) {
           srpCompleteResponse = await _enteDio.post(
