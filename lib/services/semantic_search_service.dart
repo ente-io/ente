@@ -22,10 +22,7 @@ class SemanticSearchService {
   }
 
   Future<void> runInference(Uint8List image, String text) async {
-    if (!hasLoaded) {
-      return;
-    }
-    if (isRunning) {
+    if (!hasLoaded || isRunning) {
       return;
     }
     isRunning = true;
