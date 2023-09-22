@@ -46,7 +46,7 @@ class SemanticSearchService {
       "embedding": [1.1, 2.2],
     };
     _logger.info(jsonEncode(input));
-    final result = _clip.testJSON(jsonEncode(input));
+    final result = _clip.createTextEmbedding("hello world");
     final endTime = DateTime.now();
     _logger.info(
       "Output: " +
