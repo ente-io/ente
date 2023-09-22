@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## v1.6.42
+## v1.6.43
 
 ### Added
 
