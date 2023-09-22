@@ -3,6 +3,7 @@ package pkg
 import (
 	"cli-go/internal/api"
 	"cli-go/pkg/model"
+	"cli-go/utils"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -65,12 +66,16 @@ func (c *ClICtrl) AddAccount(cxt context.Context) {
 		return
 	} else {
 		fmt.Println("Account added successfully")
+		// length of master and secret
+		fmt.Printf("Master key length: %d\n", len(secretInfo.MasterKey))
+		fmt.Printf("Secret key length: %d\n", len(secretInfo.SecretKey))
+		fmt.Printf("Master key: %s", utils.EncodeBase64(secretInfo.MasterKey))
 	}
 }
 
 func (c *ClICtrl) storeAccount(_ context.Context, email string, userID int64, app api.App, secretInfo *accSecretInfo) error {
 	// get password
-	secret := GetOrCreateClISecret()
+	secret := c.CliKey
 	err := c.DB.Update(func(tx *bolt.Tx) error {
 		b, err := tx.CreateBucketIfNotExists([]byte(AccBucket))
 		if err != nil {

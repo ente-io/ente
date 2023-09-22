@@ -1,6 +1,7 @@
 package pkg
 
 import (
+	enteCrypto "cli-go/internal/crypto"
 	"cli-go/pkg/model"
 	"cli-go/utils"
 	"context"
@@ -10,14 +11,17 @@ import (
 	"log"
 )
 
+var accountMasterKey = map[string][]byte{}
+
 func (c *ClICtrl) SyncAccount(account model.Account) error {
 	log.SetPrefix(fmt.Sprintf("[%s] ", account.Email))
-	cliSecret := GetOrCreateClISecret()
+
 	err := createDataBuckets(c.DB, account)
 	if err != nil {
 		return err
 	}
-	token := account.Token.MustDecrypt(cliSecret)
+	token := account.Token.MustDecrypt(c.CliKey)
+	accountMasterKey[account.AccountKey()] = utils.DecodeBase64(account.MasterKey.MustDecrypt(c.CliKey))
 	urlEncodedToken := base64.URLEncoding.EncodeToString(utils.DecodeBase64(token))
 	c.Client.AddToken(account.AccountKey(), urlEncodedToken)
 	ctx := c.GetRequestContext(context.Background(), account)
@@ -54,8 +58,18 @@ func (c *ClICtrl) syncRemoteCollections(ctx context.Context, info model.Account)
 		log.Printf("failed to get collections: %s\n", err)
 		return err
 	}
+	masterKey := accountMasterKey[info.AccountKey()]
 	for _, collection := range collections {
-		fmt.Printf("Collection %d\n", collection.ID)
+		if collection.Owner.ID != info.UserID {
+			fmt.Printf("Skipping collection %d\n", collection.ID)
+			continue
+		}
+		collectionKey := collection.GetCollectionKey(masterKey)
+		name, nameErr := enteCrypto.SecretBoxOpenBase64(collection.EncryptedName, collection.NameDecryptionNonce, collectionKey)
+		if nameErr != nil {
+			log.Fatalf("failed to decrypt collection name: %v", nameErr)
+		}
+		fmt.Printf("Collection Name %s\n", string(name))
 	}
 	return nil
 }

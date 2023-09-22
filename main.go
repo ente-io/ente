@@ -16,7 +16,8 @@ func main() {
 			Debug: false,
 			Host:  "http://localhost:8080",
 		}),
-		DB: db,
+		DB:     db,
+		CliKey: pkg.GetOrCreateClISecret(),
 	}
 	err = ctrl.Init()
 	if err != nil {

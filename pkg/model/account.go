@@ -14,10 +14,10 @@ type Account struct {
 	Token     EncString `json:"token" binding:"required"`
 }
 
-func (a Account) AccountKey() string {
+func (a *Account) AccountKey() string {
 	return fmt.Sprintf("%s-%d", a.App, a.UserID)
 }
 
-func (a Account) DataBucket() string {
+func (a *Account) DataBucket() string {
 	return fmt.Sprintf("%s-%d-data", a.App, a.UserID)
 }

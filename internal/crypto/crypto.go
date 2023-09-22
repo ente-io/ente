@@ -2,6 +2,7 @@ package crypto
 
 import (
 	"bytes"
+	"cli-go/utils"
 	"encoding/base64"
 	"fmt"
 	"io"
@@ -75,6 +76,25 @@ func DecryptChaCha20poly1305(data []byte, key []byte, nonce []byte) ([]byte, err
 	return decryptedData[:n], nil
 }
 
+func DecryptChaChaBase64(data string, key []byte, nonce string) (string, []byte, error) {
+	// Decode data from base64
+	dataBytes, err := base64.StdEncoding.DecodeString(data)
+	if err != nil {
+		return "", nil, fmt.Errorf("invalid data: %v", err)
+	}
+	// Decode nonce from base64
+	nonceBytes, err := base64.StdEncoding.DecodeString(nonce)
+	if err != nil {
+		return "", nil, fmt.Errorf("invalid nonce: %v", err)
+	}
+	// Decrypt data
+	decryptedData, err := DecryptChaCha20poly1305(dataBytes, key, nonceBytes)
+	if err != nil {
+		return "", nil, fmt.Errorf("failed to decrypt data: %v", err)
+	}
+	return base64.StdEncoding.EncodeToString(decryptedData), decryptedData, nil
+}
+
 // EncryptChaCha20poly1305 encrypts the given data using the ChaCha20-Poly1305 algorithm.
 // Parameters:
 //   - data: The plaintext data as a byte slice.
@@ -108,6 +128,15 @@ func DeriveLoginKey(keyEncKey []byte) []byte {
 func SecretBoxOpen(c []byte, n []byte, k []byte) ([]byte, error) {
 	var cp sodium.Bytes = c
 	return cp.SecretBoxOpen(sodium.SecretBoxNonce{Bytes: n}, sodium.SecretBoxKey{Bytes: k})
+}
+
+func SecretBoxOpenBase64(cipher string, nonce string, k []byte) ([]byte, error) {
+	var cp sodium.Bytes = utils.DecodeBase64(cipher)
+	out, err := cp.SecretBoxOpen(sodium.SecretBoxNonce{Bytes: utils.DecodeBase64(nonce)}, sodium.SecretBoxKey{Bytes: k})
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
 }
 
 func SealedBoxOpen(cipherText []byte, publicKey, masterSecret []byte) ([]byte, error) {

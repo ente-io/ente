@@ -62,10 +62,9 @@ func (c *ClICtrl) decryptMasterKeyAndToken(
 	authResp *api.AuthorizationResponse,
 	keyEncKey []byte,
 ) (*accSecretInfo, error) {
-
 	var currentKeyEncKey []byte
-	var masterKey, secretKey, tokenKey []byte
 	var err error
+	var masterKey, secretKey, tokenKey []byte
 	for {
 		if keyEncKey == nil {
 			// CLI prompt for password
@@ -86,24 +85,24 @@ func (c *ClICtrl) decryptMasterKeyAndToken(
 
 		encryptedKey := utils.DecodeBase64(authResp.KeyAttributes.EncryptedKey)
 		encryptedKeyNonce := utils.DecodeBase64(authResp.KeyAttributes.KeyDecryptionNonce)
-		key, keyErr := enteCrypto.SecretBoxOpen(encryptedKey, encryptedKeyNonce, currentKeyEncKey)
-		if keyErr != nil {
+		masterKey, err = enteCrypto.SecretBoxOpen(encryptedKey, encryptedKeyNonce, currentKeyEncKey)
+		if err != nil {
 			if keyEncKey != nil {
-				fmt.Printf("Failed to get key from keyEncryptionKey %s", keyErr)
-				return nil, keyErr
+				fmt.Printf("Failed to get key from keyEncryptionKey %s", err)
+				return nil, err
 			} else {
-				fmt.Printf("Incorrect password, error decrypting master key: %v", keyErr)
+				fmt.Printf("Incorrect password, error decrypting master key: %v", err)
 				continue
 			}
 		}
-		secretKey, keyErr = enteCrypto.SecretBoxOpen(
+		secretKey, err = enteCrypto.SecretBoxOpen(
 			utils.DecodeBase64(authResp.KeyAttributes.EncryptedSecretKey),
 			utils.DecodeBase64(authResp.KeyAttributes.SecretKeyDecryptionNonce),
-			key,
+			masterKey,
 		)
-		if keyErr != nil {
-			fmt.Printf("error decrypting master key: %v", keyErr)
-			return nil, keyErr
+		if err != nil {
+			fmt.Printf("error decrypting master key: %v", err)
+			return nil, err
 		}
 		tokenKey, err = enteCrypto.SealedBoxOpen(
 			utils.DecodeBase64(authResp.EncryptedToken),
