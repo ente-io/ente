@@ -3,6 +3,7 @@ package pkg
 import (
 	"cli-go/internal/api"
 	"cli-go/pkg/model"
+	"cli-go/utils/encoding"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -83,6 +84,7 @@ func (c *ClICtrl) storeAccount(_ context.Context, email string, userID int64, ap
 			SecretKey: *model.MakeEncString(secretInfo.SecretKey, secret),
 			Token:     *model.MakeEncString(secretInfo.Token, secret),
 			App:       app,
+			PublicKey: encoding.EncodeBase64(secretInfo.PublicKey),
 		}
 		accInfoBytes, err := json.Marshal(accInfo)
 		if err != nil {

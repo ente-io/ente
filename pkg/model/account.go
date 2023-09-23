@@ -11,6 +11,8 @@ type Account struct {
 	App       api.App   `json:"app" binding:"required"`
 	MasterKey EncString `json:"masterKey" binding:"required"`
 	SecretKey EncString `json:"secretKey" binding:"required"`
+	// PublicKey corresponding to the secret key
+	PublicKey string    `json:"publicKey" binding:"required"`
 	Token     EncString `json:"token" binding:"required"`
 }
 

@@ -2,6 +2,7 @@ package pkg
 
 import (
 	"cli-go/pkg/model"
+	"cli-go/utils/encoding"
 	"context"
 )
 
@@ -25,6 +26,7 @@ func (k *KeyHolder) LoadSecrets(account model.Account, cliKey []byte) (*accSecre
 		Token:     tokenKey,
 		MasterKey: masterKey,
 		SecretKey: secretKey,
+		PublicKey: encoding.DecodeBase64(account.PublicKey),
 	}
 	return k.AccountSecrets[account.AccountKey()], nil
 }

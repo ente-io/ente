@@ -15,6 +15,7 @@ type accSecretInfo struct {
 	MasterKey []byte
 	SecretKey []byte
 	Token     []byte
+	PublicKey []byte
 }
 
 func (c *ClICtrl) signInViaPassword(ctx context.Context, email string, srpAttr *api.SRPAttributes) (*api.AuthorizationResponse, []byte, error) {
@@ -65,6 +66,7 @@ func (c *ClICtrl) decryptAccSecretInfo(
 	var currentKeyEncKey []byte
 	var err error
 	var masterKey, secretKey, tokenKey []byte
+	var publicKey = encoding.DecodeBase64(authResp.KeyAttributes.PublicKey)
 	for {
 		if keyEncKey == nil {
 			// CLI prompt for password
@@ -106,7 +108,7 @@ func (c *ClICtrl) decryptAccSecretInfo(
 		}
 		tokenKey, err = enteCrypto.SealedBoxOpen(
 			encoding.DecodeBase64(authResp.EncryptedToken),
-			encoding.DecodeBase64(authResp.KeyAttributes.PublicKey),
+			publicKey,
 			secretKey,
 		)
 		if err != nil {
@@ -119,6 +121,7 @@ func (c *ClICtrl) decryptAccSecretInfo(
 		MasterKey: masterKey,
 		SecretKey: secretKey,
 		Token:     tokenKey,
+		PublicKey: publicKey,
 	}, nil
 }
 
