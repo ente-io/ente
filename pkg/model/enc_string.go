@@ -2,7 +2,7 @@ package model
 
 import (
 	"cli-go/internal/crypto"
-	"cli-go/utils"
+	"cli-go/utils/encoding"
 	"log"
 )
 
@@ -17,13 +17,13 @@ func MakeEncString(plainTextBytes []byte, key []byte) *EncString {
 		log.Fatalf("failed to encrypt %s", err)
 	}
 	return &EncString{
-		CipherText: utils.EncodeBase64(cipher),
-		Nonce:      utils.EncodeBase64(nonce),
+		CipherText: encoding.EncodeBase64(cipher),
+		Nonce:      encoding.EncodeBase64(nonce),
 	}
 }
 
 func (e *EncString) MustDecrypt(key []byte) []byte {
-	plainBytes, err := crypto.DecryptChaCha20poly1305(utils.DecodeBase64(e.CipherText), key, utils.DecodeBase64(e.Nonce))
+	plainBytes, err := crypto.DecryptChaCha20poly1305(encoding.DecodeBase64(e.CipherText), key, encoding.DecodeBase64(e.Nonce))
 	if err != nil {
 		panic(err)
 	}

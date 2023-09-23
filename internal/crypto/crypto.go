@@ -2,7 +2,7 @@ package crypto
 
 import (
 	"bytes"
-	"cli-go/utils"
+	"cli-go/utils/encoding"
 	"encoding/base64"
 	"fmt"
 	"io"
@@ -131,8 +131,8 @@ func SecretBoxOpen(c []byte, n []byte, k []byte) ([]byte, error) {
 }
 
 func SecretBoxOpenBase64(cipher string, nonce string, k []byte) ([]byte, error) {
-	var cp sodium.Bytes = utils.DecodeBase64(cipher)
-	out, err := cp.SecretBoxOpen(sodium.SecretBoxNonce{Bytes: utils.DecodeBase64(nonce)}, sodium.SecretBoxKey{Bytes: k})
+	var cp sodium.Bytes = encoding.DecodeBase64(cipher)
+	out, err := cp.SecretBoxOpen(sodium.SecretBoxNonce{Bytes: encoding.DecodeBase64(nonce)}, sodium.SecretBoxKey{Bytes: k})
 	if err != nil {
 		return nil, err
 	}

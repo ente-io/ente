@@ -3,7 +3,7 @@ package pkg
 import (
 	"cli-go/internal/api"
 	enteCrypto "cli-go/internal/crypto"
-	"cli-go/utils"
+	"cli-go/utils/encoding"
 	"context"
 	"fmt"
 	"log"
@@ -34,18 +34,18 @@ func (c *ClICtrl) signInViaPassword(ctx context.Context, email string, srpAttr *
 
 		srpParams := srp.GetParams(4096)
 		identify := []byte(srpAttr.SRPUserID.String())
-		salt := utils.DecodeBase64(srpAttr.SRPSalt)
+		salt := encoding.DecodeBase64(srpAttr.SRPSalt)
 		clientSecret := srp.GenKey()
 		srpClient := srp.NewClient(srpParams, salt, identify, loginKey, clientSecret)
 		clientA := srpClient.ComputeA()
-		session, err := c.Client.CreateSRPSession(ctx, srpAttr.SRPUserID, utils.EncodeBase64(clientA))
+		session, err := c.Client.CreateSRPSession(ctx, srpAttr.SRPUserID, encoding.EncodeBase64(clientA))
 		if err != nil {
 			return nil, nil, err
 		}
 		serverB := session.SRPB
-		srpClient.SetB(utils.DecodeBase64(serverB))
+		srpClient.SetB(encoding.DecodeBase64(serverB))
 		clientM := srpClient.ComputeM1()
-		authResp, err := c.Client.VerifySRPSession(ctx, srpAttr.SRPUserID, session.SessionID, utils.EncodeBase64(clientM))
+		authResp, err := c.Client.VerifySRPSession(ctx, srpAttr.SRPUserID, session.SessionID, encoding.EncodeBase64(clientM))
 		if err != nil {
 			log.Printf("failed to verify %v", err)
 			continue
@@ -83,8 +83,8 @@ func (c *ClICtrl) decryptAccSecretInfo(
 			currentKeyEncKey = keyEncKey
 		}
 
-		encryptedKey := utils.DecodeBase64(authResp.KeyAttributes.EncryptedKey)
-		encryptedKeyNonce := utils.DecodeBase64(authResp.KeyAttributes.KeyDecryptionNonce)
+		encryptedKey := encoding.DecodeBase64(authResp.KeyAttributes.EncryptedKey)
+		encryptedKeyNonce := encoding.DecodeBase64(authResp.KeyAttributes.KeyDecryptionNonce)
 		masterKey, err = enteCrypto.SecretBoxOpen(encryptedKey, encryptedKeyNonce, currentKeyEncKey)
 		if err != nil {
 			if keyEncKey != nil {
@@ -96,8 +96,8 @@ func (c *ClICtrl) decryptAccSecretInfo(
 			}
 		}
 		secretKey, err = enteCrypto.SecretBoxOpen(
-			utils.DecodeBase64(authResp.KeyAttributes.EncryptedSecretKey),
-			utils.DecodeBase64(authResp.KeyAttributes.SecretKeyDecryptionNonce),
+			encoding.DecodeBase64(authResp.KeyAttributes.EncryptedSecretKey),
+			encoding.DecodeBase64(authResp.KeyAttributes.SecretKeyDecryptionNonce),
 			masterKey,
 		)
 		if err != nil {
@@ -105,8 +105,8 @@ func (c *ClICtrl) decryptAccSecretInfo(
 			return nil, err
 		}
 		tokenKey, err = enteCrypto.SealedBoxOpen(
-			utils.DecodeBase64(authResp.EncryptedToken),
-			utils.DecodeBase64(authResp.KeyAttributes.PublicKey),
+			encoding.DecodeBase64(authResp.EncryptedToken),
+			encoding.DecodeBase64(authResp.KeyAttributes.PublicKey),
 			secretKey,
 		)
 		if err != nil {

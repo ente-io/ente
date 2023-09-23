@@ -4,7 +4,7 @@ import (
 	"cli-go/internal/api"
 	enteCrypto "cli-go/internal/crypto"
 	"cli-go/pkg/model"
-	"cli-go/utils"
+	"cli-go/utils/encoding"
 	"context"
 	"encoding/base64"
 	"fmt"
@@ -80,8 +80,8 @@ func (c *ClICtrl) getCollectionKey(ctx context.Context, collection api.Collectio
 	userID := ctx.Value("user_id").(int64)
 	if collection.Owner.ID == userID {
 		collKey, err := enteCrypto.SecretBoxOpen(
-			utils.DecodeBase64(collection.EncryptedKey),
-			utils.DecodeBase64(collection.KeyDecryptionNonce),
+			encoding.DecodeBase64(collection.EncryptedKey),
+			encoding.DecodeBase64(collection.KeyDecryptionNonce),
 			accSecretInfo.MasterKey)
 		if err != nil {
 			log.Fatalf("failed to decrypt collection key %s", err)
