@@ -16,7 +16,7 @@ func (c *ClICtrl) syncRemoteCollections(ctx context.Context, info model.Account)
 		return fmt.Errorf("failed to get collections: %s", err)
 	}
 	for _, collection := range collections {
-		collectionKey, err := c.getCollectionKey(ctx, collection)
+		collectionKey, err := c.KeyHolder.GetCollectionKey(ctx, collection)
 		if err != nil {
 			return err
 		}
@@ -32,26 +32,4 @@ func (c *ClICtrl) syncRemoteCollections(ctx context.Context, info model.Account)
 		}
 	}
 	return nil
-}
-
-func (c *ClICtrl) getCollectionKey(ctx context.Context, collection api.Collection) ([]byte, error) {
-	accSecretInfo := c.KeyHolder.GetAccountSecretInfo(ctx)
-	userID := ctx.Value("user_id").(int64)
-	if collection.Owner.ID == userID {
-		collKey, err := enteCrypto.SecretBoxOpen(
-			encoding.DecodeBase64(collection.EncryptedKey),
-			encoding.DecodeBase64(collection.KeyDecryptionNonce),
-			accSecretInfo.MasterKey)
-		if err != nil {
-			log.Fatalf("failed to decrypt collection key %s", err)
-		}
-		return collKey, nil
-	} else {
-		collKey, err := enteCrypto.SealedBoxOpen(encoding.DecodeBase64(collection.EncryptedKey),
-			accSecretInfo.PublicKey, accSecretInfo.SecretKey)
-		if err != nil {
-			log.Fatalf("failed to decrypt collection key %s", err)
-		}
-		return collKey, nil
-	}
 }
