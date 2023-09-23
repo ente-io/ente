@@ -90,7 +90,7 @@ class SemanticSearchService {
       queryResults.add(QueryResult(embedding.id, score));
     }
     queryResults.sort((first, second) => second.score.compareTo(first.score));
-    queryResults.removeWhere((element) => element.score < 0.27);
+    queryResults.removeWhere((element) => element.score < 0.25);
     endTime = DateTime.now();
     _logger.info(
       "computingScores took: " +
@@ -123,7 +123,7 @@ class SemanticSearchService {
 
   Future<void> _loadModel() async {
     const modelPath =
-        "assets/models/clip/openai_clip-vit-base-patch32.ggmlv0.f16.bin";
+        "assets/models/clip/openai_clip-vit-base-patch32.ggmlv0.q4_0.bin";
 
     final path = await _getAccessiblePathForAsset(modelPath, "model.bin");
     final startTime = DateTime.now();
