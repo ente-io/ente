@@ -73,7 +73,10 @@ class FilesDB {
   // we need to write query based on that field
   static const columnMMdVisibility = 'mmd_visibility';
 
-  static final initializationScript = [...createTable(filesTable)];
+  static final initializationScript = [
+    enableForeignKeys(),
+    ...createTable(filesTable),
+  ];
   static final migrationScripts = [
     ...alterDeviceFolderToAllowNULL(),
     ...alterTimestampColumnTypes(),
@@ -116,6 +119,10 @@ class FilesDB {
     final String path = join(documentsDirectory.path, _databaseName);
     _logger.info("DB path " + path);
     return await openDatabaseWithMigration(path, dbConfig);
+  }
+
+  static String enableForeignKeys() {
+    return "PRAGMA foreign_keys = ON;";
   }
 
   // SQL code to create the database table
@@ -390,7 +397,8 @@ class FilesDB {
        CREATE TABLE IF NOT EXISTS $embeddingsTable (
           $columnGeneratedID INTEGER PRIMARY KEY,
           $columnEmbedding TEXT NOT NULL,
-          $columnUpdationTime INTEGER NOT NULL DEFAULT -1
+          $columnUpdationTime INTEGER NOT NULL DEFAULT -1,
+          FOREIGN KEY($columnGeneratedID) REFERENCES $filesTable($columnGeneratedID)
       );
       '''
     ];
