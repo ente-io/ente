@@ -1,8 +1,10 @@
 package pkg
 
 import (
+	"cli-go/internal"
 	"cli-go/internal/api"
 	enteCrypto "cli-go/internal/crypto"
+	"cli-go/pkg/model"
 	"cli-go/utils/encoding"
 	"context"
 	"fmt"
@@ -11,17 +13,10 @@ import (
 	"github.com/kong/go-srp"
 )
 
-type accSecretInfo struct {
-	MasterKey []byte
-	SecretKey []byte
-	Token     []byte
-	PublicKey []byte
-}
-
 func (c *ClICtrl) signInViaPassword(ctx context.Context, email string, srpAttr *api.SRPAttributes) (*api.AuthorizationResponse, []byte, error) {
 	for {
 		// CLI prompt for password
-		password, flowErr := GetSensitiveField("Enter password")
+		password, flowErr := internal.GetSensitiveField("Enter password")
 		if flowErr != nil {
 			return nil, nil, flowErr
 		}
@@ -62,7 +57,7 @@ func (c *ClICtrl) decryptAccSecretInfo(
 	_ context.Context,
 	authResp *api.AuthorizationResponse,
 	keyEncKey []byte,
-) (*accSecretInfo, error) {
+) (*model.AccSecretInfo, error) {
 	var currentKeyEncKey []byte
 	var err error
 	var masterKey, secretKey, tokenKey []byte
@@ -70,7 +65,7 @@ func (c *ClICtrl) decryptAccSecretInfo(
 	for {
 		if keyEncKey == nil {
 			// CLI prompt for password
-			password, flowErr := GetSensitiveField("Enter password")
+			password, flowErr := internal.GetSensitiveField("Enter password")
 			if flowErr != nil {
 				return nil, flowErr
 			}
@@ -117,7 +112,7 @@ func (c *ClICtrl) decryptAccSecretInfo(
 		}
 		break
 	}
-	return &accSecretInfo{
+	return &model.AccSecretInfo{
 		MasterKey: masterKey,
 		SecretKey: secretKey,
 		Token:     tokenKey,
@@ -131,7 +126,7 @@ func (c *ClICtrl) validateTOTP(ctx context.Context, authResp *api.AuthorizationR
 	}
 	for {
 		// CLI prompt for TOTP
-		totp, flowErr := GetCode("Enter TOTP", 6)
+		totp, flowErr := internal.GetCode("Enter TOTP", 6)
 		if flowErr != nil {
 			return nil, flowErr
 		}
@@ -151,7 +146,7 @@ func (c *ClICtrl) validateEmail(ctx context.Context, email string) (*api.Authori
 	}
 	for {
 		// CLI prompt for OTP
-		ott, flowErr := GetCode("Enter OTP", 6)
+		ott, flowErr := internal.GetCode("Enter OTP", 6)
 		if flowErr != nil {
 			return nil, flowErr
 		}

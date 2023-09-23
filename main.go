@@ -4,6 +4,7 @@ import (
 	"cli-go/cmd"
 	"cli-go/internal/api"
 	"cli-go/pkg"
+	"cli-go/pkg/secrets"
 )
 
 func main() {
@@ -17,8 +18,8 @@ func main() {
 			Host:  "http://localhost:8080",
 		}),
 		DB:        db,
-		CliKey:    pkg.GetOrCreateClISecret(),
-		KeyHolder: pkg.NewKeyHolder(),
+		CliKey:    secrets.GetOrCreateClISecret(),
+		KeyHolder: secrets.NewKeyHolder(),
 	}
 	err = ctrl.Init()
 	if err != nil {

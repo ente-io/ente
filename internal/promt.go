@@ -1,4 +1,4 @@
-package pkg
+package internal
 
 import (
 	"cli-go/internal/api"

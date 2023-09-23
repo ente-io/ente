@@ -1,6 +1,7 @@
 package pkg
 
 import (
+	"cli-go/internal"
 	"cli-go/internal/api"
 	"cli-go/pkg/model"
 	"cli-go/utils/encoding"
@@ -21,9 +22,9 @@ func (c *ClICtrl) AddAccount(cxt context.Context) {
 			log.Fatal(flowErr)
 		}
 	}()
-	app := GetAppType()
+	app := internal.GetAppType()
 	cxt = context.WithValue(cxt, "app", string(app))
-	email, flowErr := GetUserInput("Enter email address")
+	email, flowErr := internal.GetUserInput("Enter email address")
 	if flowErr != nil {
 		return
 	}
@@ -69,7 +70,7 @@ func (c *ClICtrl) AddAccount(cxt context.Context) {
 	}
 }
 
-func (c *ClICtrl) storeAccount(_ context.Context, email string, userID int64, app api.App, secretInfo *accSecretInfo) error {
+func (c *ClICtrl) storeAccount(_ context.Context, email string, userID int64, app api.App, secretInfo *model.AccSecretInfo) error {
 	// get password
 	secret := c.CliKey
 	err := c.DB.Update(func(tx *bolt.Tx) error {

@@ -2,6 +2,7 @@ package pkg
 
 import (
 	"cli-go/internal/api"
+	"cli-go/pkg/secrets"
 	"fmt"
 	bolt "go.etcd.io/bbolt"
 )
@@ -11,7 +12,7 @@ type ClICtrl struct {
 	DB     *bolt.DB
 	// CliKey is the key used to encrypt/decrypt sensitive data stored in the database
 	CliKey    []byte
-	KeyHolder *KeyHolder
+	KeyHolder *secrets.KeyHolder
 }
 
 func (c *ClICtrl) Init() error {

@@ -23,3 +23,10 @@ func (a *Account) AccountKey() string {
 func (a *Account) DataBucket() string {
 	return fmt.Sprintf("%s-%d-data", a.App, a.UserID)
 }
+
+type AccSecretInfo struct {
+	MasterKey []byte
+	SecretKey []byte
+	Token     []byte
+	PublicKey []byte
+}
