@@ -181,16 +181,17 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
                 ),
               ),
               widget.isOnboarding
-                  ? Padding(
-                      padding: EdgeInsets.only(
-                        top: 16,
-                        bottom: Platform.isIOS ? 48 : 32,
-                      ),
-                      child: GestureDetector(
-                        key: const ValueKey("skipBackupButton"),
-                        onTap: () {
-                          Navigator.of(context).pop();
-                        },
+                  ? GestureDetector(
+                      key: const ValueKey("skipBackupButton"),
+                      behavior: HitTestBehavior.opaque,
+                      onTap: () {
+                        Navigator.of(context).pop();
+                      },
+                      child: Padding(
+                        padding: EdgeInsets.only(
+                          top: 16,
+                          bottom: Platform.isIOS ? 48 : 32,
+                        ),
                         child: Text(
                           S.of(context).skip,
                           style:
