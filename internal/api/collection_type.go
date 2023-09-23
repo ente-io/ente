@@ -1,11 +1,5 @@
 package api
 
-import (
-	enteCrypto "cli-go/internal/crypto"
-	"cli-go/utils"
-	"log"
-)
-
 // Collection represents a collection
 type Collection struct {
 	ID                  int64            `json:"id"`
@@ -23,20 +17,6 @@ type Collection struct {
 	PublicMagicMetadata *MagicMetadata   `json:"pubMagicMetadata,omitempty"`
 	SharedMagicMetadata *MagicMetadata   `json:"sharedMagicMetadata,omitempty"`
 	collectionKey       []byte
-}
-
-func (c *Collection) GetCollectionKey(masterKey []byte) []byte {
-	if c.collectionKey == nil || len(c.collectionKey) == 0 {
-		collKey, err := enteCrypto.SecretBoxOpen(
-			utils.DecodeBase64(c.EncryptedKey),
-			utils.DecodeBase64(c.KeyDecryptionNonce),
-			masterKey)
-		if err != nil {
-			log.Fatalf("failed to decrypt collection key %s", err)
-		}
-		c.collectionKey = collKey
-	}
-	return c.collectionKey
 }
 
 // CollectionUser represents the owner of a collection

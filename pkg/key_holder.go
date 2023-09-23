@@ -1,6 +1,9 @@
 package pkg
 
-import "cli-go/pkg/model"
+import (
+	"cli-go/pkg/model"
+	"context"
+)
 
 type KeyHolder struct {
 	AccountSecrets map[string]*accSecretInfo
@@ -24,4 +27,9 @@ func (k *KeyHolder) LoadSecrets(account model.Account, cliKey []byte) (*accSecre
 		SecretKey: secretKey,
 	}
 	return k.AccountSecrets[account.AccountKey()], nil
+}
+
+func (k *KeyHolder) GetAccountSecretInfo(ctx context.Context) *accSecretInfo {
+	accountKey := ctx.Value("account_id").(string)
+	return k.AccountSecrets[accountKey]
 }
