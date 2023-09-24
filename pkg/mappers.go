@@ -11,22 +11,28 @@ import (
 func (c *ClICtrl) mapCollectionToAlbum(ctx context.Context, collection api.Collection) (*model.Album, error) {
 	var album model.Album
 	userID := ctx.Value("user_id").(int64)
-	collectionKey, err := c.KeyHolder.GetCollectionKey(ctx, collection)
 	album.OwnerID = collection.Owner.ID
 	album.ID = collection.ID
 	album.IsShared = collection.Owner.ID != userID
-	album.AlbumKey = *model.MakeEncString(collectionKey, c.CliKey)
 	album.LastUpdatedAt = collection.UpdationTime
 	album.IsDeleted = collection.IsDeleted
+	collectionKey, err := c.KeyHolder.GetCollectionKey(ctx, collection)
 	if err != nil {
 		return nil, err
 	}
-	name, nameErr := enteCrypto.SecretBoxOpenBase64(collection.EncryptedName, collection.NameDecryptionNonce, collectionKey)
-	if nameErr != nil {
-		log.Fatalf("failed to decrypt collection name: %v", nameErr)
+	album.AlbumKey = *model.MakeEncString(collectionKey, c.CliKey)
+	var name string
+	if collection.EncryptedName != "" {
+		decrName, err := enteCrypto.SecretBoxOpenBase64(collection.EncryptedName, collection.NameDecryptionNonce, collectionKey)
+		if err != nil {
+			log.Fatalf("failed to decrypt collection name: %v", err)
+		}
+		name = string(decrName)
+	} else {
+		// Early beta users (friends & family) might have collections without encrypted names
+		name = collection.Name
 	}
-	album.AlbumName = string(name)
-
+	album.AlbumName = name
 	if collection.MagicMetadata != nil {
 		_, encodedJsonBytes, err := enteCrypto.DecryptChaChaBase64(collection.MagicMetadata.Data, collectionKey, collection.MagicMetadata.Header)
 		if err != nil {
