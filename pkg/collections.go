@@ -26,6 +26,9 @@ func (c *ClICtrl) syncRemoteCollections(ctx context.Context, info model.Account)
 	}
 	maxUpdated := lastSyncTime
 	for _, collection := range collections {
+		if lastSyncTime == 0 && collection.IsDeleted {
+			continue
+		}
 		album, err2 := c.mapCollectionToAlbum(ctx, collection)
 		if err2 != nil {
 			return err2
