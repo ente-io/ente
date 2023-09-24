@@ -1,16 +1,19 @@
 package api
 
-import "context"
+import (
+	"context"
+	"strconv"
+)
 
-func (c *Client) GetCollections(ctx context.Context, sinceTime int) ([]Collection, error) {
+func (c *Client) GetCollections(ctx context.Context, sinceTime int64) ([]Collection, error) {
 	var res struct {
 		Collections []Collection `json:"collections"`
 	}
 	r, err := c.restClient.R().
 		SetContext(ctx).
-		SetQueryParam("since", "0").
+		SetQueryParam("sinceTime", strconv.FormatInt(sinceTime, 10)).
 		SetResult(&res).
-		Get("/collections")
+		Get("/collections/v2")
 	if r.IsError() {
 		return nil, &ApiError{
 			StatusCode: r.StatusCode(),
