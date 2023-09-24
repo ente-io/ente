@@ -5,20 +5,41 @@ import (
 	"cli-go/pkg/model"
 	"context"
 	"fmt"
+	"strconv"
 )
 
 func (c *ClICtrl) syncRemoteCollections(ctx context.Context, info model.Account) error {
-	collections, err := c.Client.GetCollections(ctx, 0)
+	valueBytes, err := c.GetConfigValue(ctx, model.CollectionsSyncKey)
+	if err != nil {
+		return fmt.Errorf("failed to get last sync time: %s", err)
+	}
+	var lastSyncTime int64
+	if valueBytes != nil {
+		lastSyncTime, err = strconv.ParseInt(string(valueBytes), 10, 64)
+		if err != nil {
+			return err
+		}
+	}
+	collections, err := c.Client.GetCollections(ctx, lastSyncTime)
 	if err != nil {
 		return fmt.Errorf("failed to get collections: %s", err)
 	}
-
+	maxUpdated := lastSyncTime
 	for _, collection := range collections {
 		album, err2 := c.mapCollectionToAlbum(ctx, collection)
 		if err2 != nil {
 			return err2
 		}
+		if album.LastUpdatedAt > maxUpdated {
+			maxUpdated = album.LastUpdatedAt
+		}
 		debuglog.PrintAlbum(album)
+	}
+	if maxUpdated > lastSyncTime {
+		err = c.PutConfigValue(ctx, model.CollectionsSyncKey, []byte(strconv.FormatInt(maxUpdated, 10)))
+		if err != nil {
+			return fmt.Errorf("failed to update last sync time: %s", err)
+		}
 	}
 	return nil
 }
