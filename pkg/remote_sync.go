@@ -31,16 +31,14 @@ func (c *ClICtrl) buildRequestContext(ctx context.Context, account model.Account
 	return ctx
 }
 
-var dataCategories = []string{"remote-collections", "local-collections", "remote-files", "local-files", "remote-collection-removed", "remote-files-removed"}
-
 func createDataBuckets(db *bolt.DB, account model.Account) error {
 	return db.Update(func(tx *bolt.Tx) error {
-		dataBucket, err := tx.CreateBucketIfNotExists([]byte(account.DataBucket()))
+		dataBucket, err := tx.CreateBucketIfNotExists([]byte(account.AccountKey()))
 		if err != nil {
 			return fmt.Errorf("create bucket: %s", err)
 		}
-		for _, category := range dataCategories {
-			_, err := dataBucket.CreateBucketIfNotExists([]byte(fmt.Sprintf(category)))
+		for _, subBucket := range []model.PhotosStore{model.KVConfig, model.RemoteAlbums, model.RemoteFiles} {
+			_, err := dataBucket.CreateBucketIfNotExists([]byte(subBucket))
 			if err != nil {
 				return err
 			}
