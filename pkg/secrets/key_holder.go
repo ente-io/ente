@@ -21,6 +21,10 @@ func NewKeyHolder() *KeyHolder {
 	}
 }
 
+// LoadSecrets loads the secrets for a given account using the provided CLI key.
+// It decrypts the token key, master key, and secret key using the CLI key.
+// The decrypted keys and the decoded public key are stored in the AccountSecrets map using the account key as the map key.
+// It returns the account secret information or an error if the decryption fails.
 func (k *KeyHolder) LoadSecrets(account model.Account, cliKey []byte) (*model.AccSecretInfo, error) {
 	tokenKey := account.Token.MustDecrypt(cliKey)
 	masterKey := account.MasterKey.MustDecrypt(cliKey)
@@ -39,6 +43,11 @@ func (k *KeyHolder) GetAccountSecretInfo(ctx context.Context) *model.AccSecretIn
 	return k.AccountSecrets[accountKey]
 }
 
+// GetCollectionKey retrieves the key for a given collection.
+// It first fetches the account secret information from the context.
+// If the collection owner's ID matches the user ID from the context, it decrypts the collection key using the master key.
+// If the collection is shared (i.e., the owner's ID does not match the user ID), it decrypts the collection key using the public and secret keys.
+// It returns the decrypted collection key or an error if the decryption fails.
 func (k *KeyHolder) GetCollectionKey(ctx context.Context, collection api.Collection) ([]byte, error) {
 	accSecretInfo := k.GetAccountSecretInfo(ctx)
 	userID := ctx.Value("user_id").(int64)
