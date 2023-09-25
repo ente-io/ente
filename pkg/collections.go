@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"log"
 	"strconv"
+	"time"
 )
 
 func (c *ClICtrl) fetchRemoteCollections(ctx context.Context) error {
@@ -64,8 +65,13 @@ func (c *ClICtrl) fetchRemoteFiles(ctx context.Context) error {
 		}
 		isFirstSync := lastSyncTime == 0
 		for {
+
 			if lastSyncTime == album.LastUpdatedAt {
 				break
+			}
+			if !isFirstSync {
+				t := time.UnixMicro(lastSyncTime)
+				log.Printf("Fetching files for album %s from %v\n", album.AlbumName, t)
 			}
 			files, hasMore, err := c.Client.GetFiles(ctx, album.ID, lastSyncTime)
 			if err != nil {

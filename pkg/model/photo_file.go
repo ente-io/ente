@@ -9,7 +9,7 @@ type PhotoFile struct {
 	ThumbnailNonce  string                 `json:"thumbnailNonce"`
 	PrivateMetadata map[string]interface{} `json:"privateMetadata"`
 	PublicMetadata  map[string]interface{} `json:"publicMetadata"`
-	PhotoInfo       PhotoInfo              ``
+	Info            PhotoInfo              `json:"info"`
 }
 
 type PhotoInfo struct {

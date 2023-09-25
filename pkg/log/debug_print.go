@@ -16,13 +16,13 @@ func PrintAlbum(a *model.Album) {
 	}
 	fmt.Printf(" Name: %s\n", a.AlbumName)
 	if a.PrivateMeta != nil {
-		fmt.Printf("PrivateMeta: %s\n", *a.PrivateMeta)
+		fmt.Printf("PrivateMeta: %s\n", a.PrivateMeta)
 	}
 	if a.PublicMeta != nil {
-		fmt.Printf("PublicMeta: %s\n", *a.PublicMeta)
+		fmt.Printf("PublicMeta: %s\n", a.PublicMeta)
 	}
 	if a.SharedMeta != nil {
-		fmt.Printf("SharedMeta: %s\n", *a.SharedMeta)
+		fmt.Printf("SharedMeta: %s\n", a.SharedMeta)
 	}
 	fmt.Printf("LastUpdatedAt: %d", a.LastUpdatedAt)
 	fmt.Printf("\n=======")

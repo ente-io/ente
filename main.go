@@ -15,7 +15,7 @@ func main() {
 	ctrl := pkg.ClICtrl{
 		Client: api.NewClient(api.Params{
 			Debug: false,
-			Host:  "http://localhost:8080",
+			//Host:  "http://localhost:8080",
 		}),
 		DB:        db,
 		CliKey:    secrets.GetOrCreateClISecret(),

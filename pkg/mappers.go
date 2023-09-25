@@ -41,24 +41,30 @@ func (c *ClICtrl) mapCollectionToAlbum(ctx context.Context, collection api.Colle
 		if err != nil {
 			return nil, err
 		}
-		var val = string(encodedJsonBytes)
-		album.PrivateMeta = &val
+		err = json.Unmarshal(encodedJsonBytes, &album.PrivateMeta)
+		if err != nil {
+			return nil, err
+		}
 	}
 	if collection.PublicMagicMetadata != nil {
 		_, encodedJsonBytes, err := enteCrypto.DecryptChaChaBase64(collection.PublicMagicMetadata.Data, collectionKey, collection.PublicMagicMetadata.Header)
 		if err != nil {
 			return nil, err
 		}
-		var val = string(encodedJsonBytes)
-		album.PublicMeta = &val
+		err = json.Unmarshal(encodedJsonBytes, &album.PublicMeta)
+		if err != nil {
+			return nil, err
+		}
 	}
 	if album.IsShared && collection.SharedMagicMetadata != nil {
 		_, encodedJsonBytes, err := enteCrypto.DecryptChaChaBase64(collection.SharedMagicMetadata.Data, collectionKey, collection.SharedMagicMetadata.Header)
 		if err != nil {
 			return nil, err
 		}
-		var val = string(encodedJsonBytes)
-		album.SharedMeta = &val
+		err = json.Unmarshal(encodedJsonBytes, &album.SharedMeta)
+		if err != nil {
+			return nil, err
+		}
 	}
 	return &album, nil
 }
@@ -82,7 +88,7 @@ func (c *ClICtrl) mapApiFileToPhotoFile(ctx context.Context, album model.Album, 
 	photoFile.ThumbnailNonce = file.Thumbnail.DecryptionHeader
 	photoFile.OwnerID = file.OwnerID
 	if file.Info != nil {
-		photoFile.PhotoInfo = model.PhotoInfo{
+		photoFile.Info = model.PhotoInfo{
 			FileSize:      file.Info.FileSize,
 			ThumbnailSize: file.Info.ThumbnailSize,
 		}
