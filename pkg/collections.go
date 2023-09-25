@@ -80,7 +80,11 @@ func (c *ClICtrl) fetchRemoteFiles(ctx context.Context) error {
 					// on first sync, no need to sync delete markers
 					continue
 				}
-				fileJson := encoding.MustMarshalJSON(file)
+				photoFile, err := c.mapApiFileToPhotoFile(ctx, album, file)
+				if err != nil {
+					return err
+				}
+				fileJson := encoding.MustMarshalJSON(photoFile)
 				putErr := c.PutValue(ctx, model.RemoteFiles, []byte(strconv.FormatInt(file.ID, 10)), fileJson)
 				if putErr != nil {
 					return putErr

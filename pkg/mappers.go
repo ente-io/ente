@@ -4,7 +4,10 @@ import (
 	"cli-go/internal/api"
 	enteCrypto "cli-go/internal/crypto"
 	"cli-go/pkg/model"
+	"cli-go/utils/encoding"
 	"context"
+	"encoding/json"
+	"errors"
 	"log"
 )
 
@@ -58,4 +61,52 @@ func (c *ClICtrl) mapCollectionToAlbum(ctx context.Context, collection api.Colle
 		album.SharedMeta = &val
 	}
 	return &album, nil
+}
+
+func (c *ClICtrl) mapApiFileToPhotoFile(ctx context.Context, album model.Album, file api.File) (*model.PhotoFile, error) {
+	if file.IsDeleted {
+		return nil, errors.New("file is deleted")
+	}
+	albumKey := album.AlbumKey.MustDecrypt(c.CliKey)
+	fileKey, err := enteCrypto.SecretBoxOpen(
+		encoding.DecodeBase64(file.EncryptedKey),
+		encoding.DecodeBase64(file.KeyDecryptionNonce),
+		albumKey)
+	if err != nil {
+		return nil, err
+	}
+	var photoFile model.PhotoFile
+	photoFile.ID = file.ID
+	photoFile.Key = *model.MakeEncString(fileKey, c.CliKey)
+	photoFile.FileNonce = file.File.DecryptionHeader
+	photoFile.ThumbnailNonce = file.Thumbnail.DecryptionHeader
+	photoFile.OwnerID = file.OwnerID
+	if file.Info != nil {
+		photoFile.PhotoInfo = model.PhotoInfo{
+			FileSize:      file.Info.FileSize,
+			ThumbnailSize: file.Info.ThumbnailSize,
+		}
+	}
+	if file.Metadata.DecryptionHeader != "" {
+		_, encodedJsonBytes, err := enteCrypto.DecryptChaChaBase64(file.Metadata.EncryptedData, fileKey, file.Metadata.DecryptionHeader)
+		if err != nil {
+			return nil, err
+		}
+		err = json.Unmarshal(encodedJsonBytes, &photoFile.PrivateMetadata)
+		if err != nil {
+			return nil, err
+		}
+	}
+	if file.MagicMetadata != nil {
+		_, encodedJsonBytes, err := enteCrypto.DecryptChaChaBase64(file.MagicMetadata.Data, fileKey, file.MagicMetadata.Header)
+		if err != nil {
+			return nil, err
+		}
+		err = json.Unmarshal(encodedJsonBytes, &photoFile.PublicMetadata)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return &photoFile, nil
+
 }
