@@ -109,6 +109,7 @@ func (c *ClICtrl) fetchRemoteFiles(ctx context.Context) error {
 	}
 	return nil
 }
+
 func (c *ClICtrl) getRemoteAlbums(ctx context.Context) ([]model.Album, error) {
 	albums := make([]model.Album, 0)
 	albumBytes, err := c.GetAllValues(ctx, model.RemoteAlbums)

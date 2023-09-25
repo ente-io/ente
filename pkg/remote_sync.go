@@ -28,6 +28,11 @@ func (c *ClICtrl) SyncAccount(account model.Account) error {
 	if err != nil {
 		log.Printf("Error fetching files: %s", err)
 	}
+	downloadErr := c.initiateDownload(ctx)
+	if downloadErr != nil {
+		log.Printf("Error downloading files: %s", downloadErr)
+		return downloadErr
+	}
 	return nil
 }
 

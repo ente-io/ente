@@ -19,6 +19,8 @@ var tokenMap map[string]string = make(map[string]string)
 
 type Client struct {
 	restClient *resty.Client
+	// use separate client for downloading files
+	downloadClient *resty.Client
 }
 
 type Params struct {
@@ -34,6 +36,7 @@ func readValueFromContext(ctx context.Context, key string) interface{} {
 
 func NewClient(p Params) *Client {
 	enteAPI := resty.New()
+
 	if p.Trace {
 		enteAPI.EnableTrace()
 	}
@@ -43,12 +46,7 @@ func NewClient(p Params) *Client {
 			panic("app not set in context")
 		}
 		req.Header.Set(ClientPkgHeader, StringToApp(app.(string)).ClientPkg())
-		accountId := readValueFromContext(req.Context(), "account_id")
-		if accountId != nil && accountId != "" {
-			if token, ok := tokenMap[accountId.(string)]; ok {
-				req.SetHeader(TokenHeader, token)
-			}
-		}
+		attachToken(req)
 		return nil
 	})
 	if p.Debug {
@@ -68,7 +66,17 @@ func NewClient(p Params) *Client {
 		enteAPI.SetBaseURL(EnteAPIEndpoint)
 	}
 	return &Client{
-		restClient: enteAPI,
+		restClient:     enteAPI,
+		downloadClient: resty.New(),
+	}
+}
+
+func attachToken(req *resty.Request) {
+	accountId := readValueFromContext(req.Context(), "account_id")
+	if accountId != nil && accountId != "" {
+		if token, ok := tokenMap[accountId.(string)]; ok {
+			req.SetHeader(TokenHeader, token)
+		}
 	}
 }
 
