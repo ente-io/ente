@@ -1,4 +1,6 @@
-# cli tool for exporting ente photos
+# cli tool for exporting data from ente.io
+
+#### You can configure multiple accounts for export
 
 ### Getting Started
 

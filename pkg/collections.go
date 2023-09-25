@@ -1,7 +1,6 @@
 package pkg
 
 import (
-	debuglog "cli-go/pkg/log"
 	"cli-go/pkg/model"
 	"cli-go/utils/encoding"
 	"context"
@@ -38,7 +37,6 @@ func (c *ClICtrl) fetchRemoteCollections(ctx context.Context) error {
 		if putErr != nil {
 			return putErr
 		}
-		debuglog.PrintAlbum(album)
 	}
 	if maxUpdated > lastSyncTime {
 		err = c.PutConfigValue(ctx, model.CollectionsSyncKey, []byte(strconv.FormatInt(maxUpdated, 10)))
