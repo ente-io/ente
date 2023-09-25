@@ -7,7 +7,7 @@ import (
 
 // This file contains functions that are used to print debug information to the console.
 
-func PrintAlbum(a *model.Album) {
+func PrintAlbum(a *model.RemoteAlbum) {
 	fmt.Printf("=======\n")
 	fmt.Printf("ID: %d\n", a.ID)
 	fmt.Printf("OwnerID: %d\n", a.OwnerID)

@@ -110,14 +110,14 @@ func (c *ClICtrl) fetchRemoteFiles(ctx context.Context) error {
 	return nil
 }
 
-func (c *ClICtrl) getRemoteAlbums(ctx context.Context) ([]model.Album, error) {
-	albums := make([]model.Album, 0)
+func (c *ClICtrl) getRemoteAlbums(ctx context.Context) ([]model.RemoteAlbum, error) {
+	albums := make([]model.RemoteAlbum, 0)
 	albumBytes, err := c.GetAllValues(ctx, model.RemoteAlbums)
 	if err != nil {
 		return nil, err
 	}
 	for _, albumJson := range albumBytes {
-		album := model.Album{}
+		album := model.RemoteAlbum{}
 		err = json.Unmarshal(albumJson, &album)
 		if err != nil {
 			return nil, err

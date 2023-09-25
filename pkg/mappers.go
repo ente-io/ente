@@ -11,8 +11,8 @@ import (
 	"log"
 )
 
-func (c *ClICtrl) mapCollectionToAlbum(ctx context.Context, collection api.Collection) (*model.Album, error) {
-	var album model.Album
+func (c *ClICtrl) mapCollectionToAlbum(ctx context.Context, collection api.Collection) (*model.RemoteAlbum, error) {
+	var album model.RemoteAlbum
 	userID := ctx.Value("user_id").(int64)
 	album.OwnerID = collection.Owner.ID
 	album.ID = collection.ID
@@ -69,7 +69,7 @@ func (c *ClICtrl) mapCollectionToAlbum(ctx context.Context, collection api.Colle
 	return &album, nil
 }
 
-func (c *ClICtrl) mapApiFileToPhotoFile(ctx context.Context, album model.Album, file api.File) (*model.PhotoFile, error) {
+func (c *ClICtrl) mapApiFileToPhotoFile(ctx context.Context, album model.RemoteAlbum, file api.File) (*model.RemoteFile, error) {
 	if file.IsDeleted {
 		return nil, errors.New("file is deleted")
 	}
@@ -81,14 +81,14 @@ func (c *ClICtrl) mapApiFileToPhotoFile(ctx context.Context, album model.Album, 
 	if err != nil {
 		return nil, err
 	}
-	var photoFile model.PhotoFile
+	var photoFile model.RemoteFile
 	photoFile.ID = file.ID
 	photoFile.Key = *model.MakeEncString(fileKey, c.CliKey)
 	photoFile.FileNonce = file.File.DecryptionHeader
 	photoFile.ThumbnailNonce = file.Thumbnail.DecryptionHeader
 	photoFile.OwnerID = file.OwnerID
 	if file.Info != nil {
-		photoFile.Info = model.PhotoInfo{
+		photoFile.Info = model.Info{
 			FileSize:      file.Info.FileSize,
 			ThumbnailSize: file.Info.ThumbnailSize,
 		}

@@ -29,14 +29,14 @@ func (c *ClICtrl) initiateDownload(ctx context.Context) error {
 	return nil
 }
 
-func (c *ClICtrl) getRemoteFiles(ctx context.Context) ([]model.PhotoFile, error) {
-	files := make([]model.PhotoFile, 0)
+func (c *ClICtrl) getRemoteFiles(ctx context.Context) ([]model.RemoteFile, error) {
+	files := make([]model.RemoteFile, 0)
 	fileBytes, err := c.GetAllValues(ctx, model.RemoteFiles)
 	if err != nil {
 		return nil, err
 	}
 	for _, fileJson := range fileBytes {
-		file := model.PhotoFile{}
+		file := model.RemoteFile{}
 		err = json.Unmarshal(fileJson, &file)
 		if err != nil {
 			return nil, err
