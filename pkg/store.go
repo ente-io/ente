@@ -40,6 +40,15 @@ func (c *ClICtrl) PutConfigValue(ctx context.Context, key string, value []byte) 
 		return kvBucket.Put([]byte(key), value)
 	})
 }
+func (c *ClICtrl) PutValue(ctx context.Context, store model.PhotosStore, key []byte, value []byte) error {
+	return c.DB.Update(func(tx *bolt.Tx) error {
+		kvBucket, err := getAccountStore(ctx, tx, store)
+		if err != nil {
+			return err
+		}
+		return kvBucket.Put(key, value)
+	})
+}
 
 func getAccountStore(ctx context.Context, tx *bolt.Tx, storeType model.PhotosStore) (*bolt.Bucket, error) {
 	accountId := ctx.Value("account_id").(string)

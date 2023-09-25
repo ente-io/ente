@@ -3,6 +3,7 @@ package pkg
 import (
 	debuglog "cli-go/pkg/log"
 	"cli-go/pkg/model"
+	"cli-go/utils/encoding"
 	"context"
 	"fmt"
 	"strconv"
@@ -35,6 +36,11 @@ func (c *ClICtrl) syncRemoteCollections(ctx context.Context, info model.Account)
 		}
 		if album.LastUpdatedAt > maxUpdated {
 			maxUpdated = album.LastUpdatedAt
+		}
+		albumJson := encoding.MustMarshalJSON(album)
+		err := c.PutValue(ctx, model.RemoteAlbums, []byte(strconv.FormatInt(album.ID, 10)), albumJson)
+		if err != nil {
+			return err
 		}
 		debuglog.PrintAlbum(album)
 	}
