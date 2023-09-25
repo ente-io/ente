@@ -20,11 +20,11 @@ func (c *ClICtrl) SyncAccount(account model.Account) error {
 		return err
 	}
 	c.Client.AddToken(account.AccountKey(), base64.URLEncoding.EncodeToString(secretInfo.Token))
-	err = c.fetchRemoteCollections(ctx, account)
+	err = c.fetchRemoteCollections(ctx)
 	if err != nil {
 		log.Printf("Error fetching collections: %s", err)
 	}
-	err = c.fetchRemoteFiles(ctx, account)
+	err = c.fetchRemoteFiles(ctx)
 	if err != nil {
 		log.Printf("Error fetching files: %s", err)
 	}

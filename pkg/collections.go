@@ -11,7 +11,7 @@ import (
 	"strconv"
 )
 
-func (c *ClICtrl) fetchRemoteCollections(ctx context.Context, info model.Account) error {
+func (c *ClICtrl) fetchRemoteCollections(ctx context.Context) error {
 	lastSyncTime, err2 := c.GetInt64ConfigValue(ctx, model.CollectionsSyncKey)
 	if err2 != nil {
 		return err2
@@ -48,7 +48,7 @@ func (c *ClICtrl) fetchRemoteCollections(ctx context.Context, info model.Account
 	return nil
 }
 
-func (c *ClICtrl) fetchRemoteFiles(ctx context.Context, info model.Account) error {
+func (c *ClICtrl) fetchRemoteFiles(ctx context.Context) error {
 	albums, err := c.getRemoteAlbums(ctx)
 	if err != nil {
 		return err
