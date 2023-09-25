@@ -10,7 +10,6 @@ import (
 )
 
 func (c *ClICtrl) SyncAccount(account model.Account) error {
-	log.SetPrefix(fmt.Sprintf("[%s] ", account.Email))
 	secretInfo, err := c.KeyHolder.LoadSecrets(account, c.CliKey)
 	if err != nil {
 		return err
@@ -21,7 +20,11 @@ func (c *ClICtrl) SyncAccount(account model.Account) error {
 		return err
 	}
 	c.Client.AddToken(account.AccountKey(), base64.URLEncoding.EncodeToString(secretInfo.Token))
-	return c.fetchRemoteCollections(ctx, account)
+	err = c.fetchRemoteCollections(ctx, account)
+	if err != nil {
+		log.Printf("Error fetching collections: %s", err)
+	}
+	return nil
 }
 
 func (c *ClICtrl) buildRequestContext(ctx context.Context, account model.Account) context.Context {

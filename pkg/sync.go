@@ -3,6 +3,7 @@ package pkg
 import (
 	"context"
 	"fmt"
+	"log"
 )
 
 func (c *ClICtrl) StartSync() error {
@@ -15,12 +16,16 @@ func (c *ClICtrl) StartSync() error {
 		return nil
 	}
 	for _, account := range accounts {
-		fmt.Printf("Syncing account %s\n", account.Email)
+		log.SetPrefix(fmt.Sprintf("[%s-%s] ", account.App, account.Email))
+		log.Println("start sync")
 		err = c.SyncAccount(account)
 		if err != nil {
 			fmt.Printf("Error syncing account %s: %s\n", account.Email, err)
 			return err
+		} else {
+			log.Println("sync done")
 		}
+
 	}
 	return nil
 }
