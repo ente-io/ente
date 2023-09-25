@@ -3,9 +3,9 @@ package model
 type PhotosStore string
 
 const (
-	KVConfig     PhotosStore = "kvConfig"
-	RemoteAlbums PhotosStore = "remoteAlbums"
-	RemoteFiles  PhotosStore = "remoteFiles"
+	KVConfig     PhotosStore = "akvConfig"
+	RemoteAlbums PhotosStore = "aremoteAlbums"
+	RemoteFiles  PhotosStore = "aremoteFiles"
 )
 
 const (

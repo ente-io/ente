@@ -24,6 +24,10 @@ func (c *ClICtrl) SyncAccount(account model.Account) error {
 	if err != nil {
 		log.Printf("Error fetching collections: %s", err)
 	}
+	err = c.fetchRemoteFiles(ctx, account)
+	if err != nil {
+		log.Printf("Error fetching files: %s", err)
+	}
 	return nil
 }
 
