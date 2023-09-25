@@ -21,7 +21,7 @@ func (c *ClICtrl) SyncAccount(account model.Account) error {
 		return err
 	}
 	c.Client.AddToken(account.AccountKey(), base64.URLEncoding.EncodeToString(secretInfo.Token))
-	return c.syncRemoteCollections(ctx, account)
+	return c.fetchRemoteCollections(ctx, account)
 }
 
 func (c *ClICtrl) buildRequestContext(ctx context.Context, account model.Account) context.Context {

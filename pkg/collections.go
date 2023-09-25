@@ -9,17 +9,10 @@ import (
 	"strconv"
 )
 
-func (c *ClICtrl) syncRemoteCollections(ctx context.Context, info model.Account) error {
-	valueBytes, err := c.GetConfigValue(ctx, model.CollectionsSyncKey)
-	if err != nil {
-		return fmt.Errorf("failed to get last sync time: %s", err)
-	}
-	var lastSyncTime int64
-	if valueBytes != nil {
-		lastSyncTime, err = strconv.ParseInt(string(valueBytes), 10, 64)
-		if err != nil {
-			return err
-		}
+func (c *ClICtrl) fetchRemoteCollections(ctx context.Context, info model.Account) error {
+	lastSyncTime, err2 := c.GetInt64ConfigValue(ctx, model.CollectionsSyncKey)
+	if err2 != nil {
+		return err2
 	}
 	collections, err := c.Client.GetCollections(ctx, lastSyncTime)
 	if err != nil {
@@ -30,17 +23,17 @@ func (c *ClICtrl) syncRemoteCollections(ctx context.Context, info model.Account)
 		if lastSyncTime == 0 && collection.IsDeleted {
 			continue
 		}
-		album, err2 := c.mapCollectionToAlbum(ctx, collection)
-		if err2 != nil {
-			return err2
+		album, mapErr := c.mapCollectionToAlbum(ctx, collection)
+		if mapErr != nil {
+			return mapErr
 		}
 		if album.LastUpdatedAt > maxUpdated {
 			maxUpdated = album.LastUpdatedAt
 		}
 		albumJson := encoding.MustMarshalJSON(album)
-		err := c.PutValue(ctx, model.RemoteAlbums, []byte(strconv.FormatInt(album.ID, 10)), albumJson)
-		if err != nil {
-			return err
+		putErr := c.PutValue(ctx, model.RemoteAlbums, []byte(strconv.FormatInt(album.ID, 10)), albumJson)
+		if putErr != nil {
+			return putErr
 		}
 		debuglog.PrintAlbum(album)
 	}

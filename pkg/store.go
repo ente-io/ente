@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"strconv"
 	"time"
 
 	bolt "go.etcd.io/bbolt"
@@ -29,6 +30,21 @@ func (c *ClICtrl) GetConfigValue(ctx context.Context, key string) ([]byte, error
 		return nil
 	})
 	return value, err
+}
+
+func (c *ClICtrl) GetInt64ConfigValue(ctx context.Context, key string) (int64, error) {
+	value, err := c.GetConfigValue(ctx, key)
+	if err != nil {
+		return 0, err
+	}
+	var result int64
+	if value != nil {
+		result, err = strconv.ParseInt(string(value), 10, 64)
+		if err != nil {
+			return 0, err
+		}
+	}
+	return result, nil
 }
 
 func (c *ClICtrl) PutConfigValue(ctx context.Context, key string, value []byte) error {
