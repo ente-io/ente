@@ -7,6 +7,7 @@ type PhotoFile struct {
 	LastUpdateTime  int64                  `json:"lastUpdateTime"`
 	FileNonce       string                 `json:"fileNonce"`
 	ThumbnailNonce  string                 `json:"thumbnailNonce"`
+	Metadata        map[string]interface{} `json:"metadata"`
 	PrivateMetadata map[string]interface{} `json:"privateMetadata"`
 	PublicMetadata  map[string]interface{} `json:"publicMetadata"`
 	Info            PhotoInfo              `json:"info"`

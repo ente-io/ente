@@ -98,13 +98,23 @@ func (c *ClICtrl) mapApiFileToPhotoFile(ctx context.Context, album model.Album, 
 		if err != nil {
 			return nil, err
 		}
-		err = json.Unmarshal(encodedJsonBytes, &photoFile.PrivateMetadata)
+		err = json.Unmarshal(encodedJsonBytes, &photoFile.Metadata)
 		if err != nil {
 			return nil, err
 		}
 	}
 	if file.MagicMetadata != nil {
 		_, encodedJsonBytes, err := enteCrypto.DecryptChaChaBase64(file.MagicMetadata.Data, fileKey, file.MagicMetadata.Header)
+		if err != nil {
+			return nil, err
+		}
+		err = json.Unmarshal(encodedJsonBytes, &photoFile.PrivateMetadata)
+		if err != nil {
+			return nil, err
+		}
+	}
+	if file.PubicMagicMetadata != nil {
+		_, encodedJsonBytes, err := enteCrypto.DecryptChaChaBase64(file.PubicMagicMetadata.Data, fileKey, file.PubicMagicMetadata.Header)
 		if err != nil {
 			return nil, err
 		}
