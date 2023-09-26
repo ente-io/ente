@@ -87,7 +87,7 @@ class _VideoWidgetNewState extends State<VideoWidgetNew> {
           seekBarMargin: const EdgeInsets.only(bottom: verticalMargin),
           bottomButtonBarMargin: const EdgeInsets.only(bottom: 112),
           controlsHoverDuration: const Duration(seconds: 3),
-          seekBarHeight: 6,
+          seekBarHeight: 2,
           seekBarThumbSize: 16,
           seekBarBufferColor: Colors.transparent,
           seekBarThumbColor: backgroundElevatedLight,
@@ -209,7 +209,7 @@ class PausePlayAndDuration extends StatefulWidget {
 }
 
 class _PausePlayAndDurationState extends State<PausePlayAndDuration> {
-  Color backgroundColor = fillMutedLight;
+  Color backgroundColor = fillStrongLight;
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -222,7 +222,7 @@ class _PausePlayAndDurationState extends State<PausePlayAndDuration> {
         Future.delayed(const Duration(milliseconds: 175), () {
           if (mounted) {
             setState(() {
-              backgroundColor = fillMutedLight;
+              backgroundColor = fillStrongLight;
             });
           }
         });
@@ -231,7 +231,7 @@ class _PausePlayAndDurationState extends State<PausePlayAndDuration> {
         Future.delayed(const Duration(milliseconds: 175), () {
           if (mounted) {
             setState(() {
-              backgroundColor = fillMutedLight;
+              backgroundColor = fillStrongLight;
             });
           }
         });
@@ -269,6 +269,7 @@ class _PausePlayAndDurationState extends State<PausePlayAndDuration> {
                           ? Icons.pause_rounded
                           : Icons.play_arrow_rounded,
                       color: backdropBaseLight,
+                      size: 24,
                     ),
                   );
                 },
@@ -277,7 +278,7 @@ class _PausePlayAndDurationState extends State<PausePlayAndDuration> {
               ),
               const SizedBox(width: 8),
               MaterialPositionIndicator(
-                style: getEnteTextTheme(context).mini.copyWith(
+                style: getEnteTextTheme(context).tiny.copyWith(
                       color: textBaseDark,
                     ),
               ),
