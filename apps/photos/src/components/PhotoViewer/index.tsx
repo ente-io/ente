@@ -43,7 +43,6 @@ import { getParsedExifData } from 'services/upload/exifService';
 import { getFileType } from 'services/typeDetectionService';
 import { ConversionFailedNotification } from './styledComponents/ConversionFailedNotification';
 import { GalleryContext } from 'pages/gallery';
-import { ConvertBtnContainer } from './styledComponents/ConvertBtn';
 import downloadManager from 'services/downloadManager';
 import publicCollectionDownloadManager from 'services/publicCollectionDownloadManager';
 import CircularProgressWithLabel from './styledComponents/CircularProgressWithLabel';
@@ -51,6 +50,7 @@ import EnteSpinner from 'components/EnteSpinner';
 import AlbumOutlined from '@mui/icons-material/AlbumOutlined';
 import { FlexWrapper } from 'components/Container';
 import isElectron from 'is-electron';
+import ReplayIcon from '@mui/icons-material/Replay';
 
 interface PhotoswipeFullscreenAPI {
     enter: () => void;
@@ -635,15 +635,6 @@ function PhotoViewer(props: Iprops) {
                         }
                         onClick={() => downloadFileHelper(photoSwipe.currItem)}
                     />
-                    {showConvertBtn && (
-                        <ConvertBtnContainer>
-                            <Button
-                                color="secondary"
-                                onClick={triggerManualConvert}>
-                                {t('CONVERT')}
-                            </Button>
-                        </ConvertBtnContainer>
-                    )}
 
                     <Box
                         sx={{
@@ -750,6 +741,14 @@ function PhotoViewer(props: Iprops) {
                                         )}
                                     </button>
                                 )}
+                            {showConvertBtn && (
+                                <button
+                                    title={t('CONVERT')}
+                                    className="pswp__button pswp__button--custom"
+                                    onClick={triggerManualConvert}>
+                                    <ReplayIcon fontSize="small" />
+                                </button>
+                            )}
 
                             <div className="pswp__preloader">
                                 <div className="pswp__preloader__icn">
