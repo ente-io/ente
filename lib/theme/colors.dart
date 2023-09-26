@@ -185,14 +185,14 @@ const Color blurTextBaseDark = Color.fromRGBO(255, 255, 255, 0.95);
 // Fill Colors
 const Color fillBaseLight = Color.fromRGBO(0, 0, 0, 1);
 const Color fillBasePressedLight = Color.fromRGBO(0, 0, 0, 0.87);
-const Color fillStrongLight = Color.fromRGBO(0, 0, 0, 0.48);
+const Color fillStrongLight = Color.fromRGBO(0, 0, 0, 0.24);
 const Color fillMutedLight = Color.fromRGBO(0, 0, 0, 0.12);
 const Color fillFaintLight = Color.fromRGBO(0, 0, 0, 0.04);
 const Color fillFaintPressedLight = Color.fromRGBO(0, 0, 0, 0.08);
 
 const Color fillBaseDark = Color.fromRGBO(255, 255, 255, 1);
 const Color fillBasePressedDark = Color.fromRGBO(255, 255, 255, 0.9);
-const Color fillStrongDark = Color.fromRGBO(225, 225, 225, 0.64);
+const Color fillStrongDark = Color.fromRGBO(255, 255, 255, 0.32);
 const Color fillMutedDark = Color.fromRGBO(255, 255, 255, 0.16);
 const Color fillFaintDark = Color.fromRGBO(255, 255, 255, 0.12);
 const Color fillFaintPressedDark = Color.fromRGBO(255, 255, 255, 0.06);
