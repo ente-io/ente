@@ -83,6 +83,7 @@ func (c *ClICtrl) mapApiFileToPhotoFile(ctx context.Context, album model.RemoteA
 	}
 	var photoFile model.RemoteFile
 	photoFile.ID = file.ID
+	photoFile.LastUpdateTime = file.UpdationTime
 	photoFile.Key = *model.MakeEncString(fileKey, c.CliKey)
 	photoFile.FileNonce = file.File.DecryptionHeader
 	photoFile.ThumbnailNonce = file.Thumbnail.DecryptionHeader
