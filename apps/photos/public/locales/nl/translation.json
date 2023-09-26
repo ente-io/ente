@@ -585,7 +585,7 @@
     "DOWNLOADING_COLLECTION": "{{name}} downloaden",
     "DOWNLOAD_FAILED": "Download mislukt",
     "DOWNLOAD_PROGRESS": "{{progress.current}} / {{progress.total}} bestanden",
-    "CRASH_REPORTING": "",
+    "CRASH_REPORTING": "Foutenrapportering",
     "CHRISTMAS": "Kerst",
     "CHRISTMAS_EVE": "Kerstavond",
     "NEW_YEAR": "Nieuwjaar",
@@ -593,5 +593,5 @@
     "IMAGE": "Afbeelding",
     "VIDEO": "Video",
     "LIVE_PHOTO": "Live foto",
-    "CONVERT": ""
+    "CONVERT": "Converteren"
 }
