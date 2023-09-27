@@ -1,4 +1,4 @@
-name: Flutter CI
+name: Release
 
 # This workflow is triggered on pushes to the repository.
 on:
@@ -26,7 +26,7 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
-          flutter-version: '3.10.6'
+          flutter-version: '3.13.4'
 
       # Fetch sub modules
       - run: git submodule update --init --recursive
