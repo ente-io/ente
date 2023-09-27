@@ -4,6 +4,7 @@ import "package:flutter/cupertino.dart";
 import "package:flutter/material.dart";
 import "package:media_kit/media_kit.dart";
 import "package:media_kit_video/media_kit_video.dart";
+import "package:photos/core/constants.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/file/extensions/file_props.dart";
 import "package:photos/models/file/file.dart";
@@ -105,12 +106,17 @@ class _VideoWidgetNewState extends State<VideoWidgetNew> {
           primaryButtonBar: [],
         ),
         fullscreen: const MaterialVideoControlsThemeData(),
-        child: Center(
-          child: controller != null
-              ? Video(
-                  controller: controller!,
-                )
-              : _getLoadingWidget(),
+        child: GestureDetector(
+          onVerticalDragUpdate: (d) => {
+            if (d.delta.dy > dragSensitivity) {Navigator.of(context).pop()},
+          },
+          child: Center(
+            child: controller != null
+                ? Video(
+                    controller: controller!,
+                  )
+                : _getLoadingWidget(),
+          ),
         ),
       ),
     );
