@@ -188,7 +188,7 @@ class FileBottomBarState extends State<FileBottomBar> {
                           ? Padding(
                               padding: const EdgeInsets.fromLTRB(
                                 16,
-                                0,
+                                12,
                                 16,
                                 0,
                               ),
@@ -205,7 +205,7 @@ class FileBottomBarState extends State<FileBottomBar> {
                                   overflow: TextOverflow.ellipsis,
                                   maxLines: 1,
                                   style: getEnteTextTheme(context)
-                                      .small
+                                      .mini
                                       .copyWith(color: textBaseDark),
                                   textAlign: TextAlign.center,
                                 ),
