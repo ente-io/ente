@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## v1.6.44
+
+- Upgraded electron to get latest security patches and other improvements.
+
 ## v1.6.43
 
 ### Added
