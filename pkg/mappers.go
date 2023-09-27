@@ -4,6 +4,7 @@ import (
 	"cli-go/internal/api"
 	eCrypto "cli-go/internal/crypto"
 	"cli-go/pkg/model"
+	"cli-go/pkg/secrets"
 	"cli-go/utils/encoding"
 	"context"
 	"encoding/json"
@@ -11,7 +12,7 @@ import (
 	"log"
 )
 
-func (c *ClICtrl) mapCollectionToAlbum(ctx context.Context, collection api.Collection) (*model.RemoteAlbum, error) {
+func (c *ClICtrl) mapCollectionToAlbum(ctx context.Context, collection api.Collection, holder *secrets.KeyHolder) (*model.RemoteAlbum, error) {
 	var album model.RemoteAlbum
 	userID := ctx.Value("user_id").(int64)
 	album.OwnerID = collection.Owner.ID
@@ -19,11 +20,11 @@ func (c *ClICtrl) mapCollectionToAlbum(ctx context.Context, collection api.Colle
 	album.IsShared = collection.Owner.ID != userID
 	album.LastUpdatedAt = collection.UpdationTime
 	album.IsDeleted = collection.IsDeleted
-	collectionKey, err := c.KeyHolder.GetCollectionKey(ctx, collection)
+	collectionKey, err := holder.GetCollectionKey(ctx, collection)
 	if err != nil {
 		return nil, err
 	}
-	album.AlbumKey = *model.MakeEncString(collectionKey, c.CliKey)
+	album.AlbumKey = *model.MakeEncString(collectionKey, holder.DeviceKey)
 	var name string
 	if collection.EncryptedName != "" {
 		decrName, err := eCrypto.SecretBoxOpenBase64(collection.EncryptedName, collection.NameDecryptionNonce, collectionKey)
@@ -69,11 +70,11 @@ func (c *ClICtrl) mapCollectionToAlbum(ctx context.Context, collection api.Colle
 	return &album, nil
 }
 
-func (c *ClICtrl) mapApiFileToPhotoFile(ctx context.Context, album model.RemoteAlbum, file api.File) (*model.RemoteFile, error) {
+func (c *ClICtrl) mapApiFileToPhotoFile(ctx context.Context, album model.RemoteAlbum, file api.File, holder *secrets.KeyHolder) (*model.RemoteFile, error) {
 	if file.IsDeleted {
 		return nil, errors.New("file is deleted")
 	}
-	albumKey := album.AlbumKey.MustDecrypt(c.CliKey)
+	albumKey := album.AlbumKey.MustDecrypt(holder.DeviceKey)
 	fileKey, err := eCrypto.SecretBoxOpen(
 		encoding.DecodeBase64(file.EncryptedKey),
 		encoding.DecodeBase64(file.KeyDecryptionNonce),
@@ -84,7 +85,7 @@ func (c *ClICtrl) mapApiFileToPhotoFile(ctx context.Context, album model.RemoteA
 	var photoFile model.RemoteFile
 	photoFile.ID = file.ID
 	photoFile.LastUpdateTime = file.UpdationTime
-	photoFile.Key = *model.MakeEncString(fileKey, c.CliKey)
+	photoFile.Key = *model.MakeEncString(fileKey, holder.DeviceKey)
 	photoFile.FileNonce = file.File.DecryptionHeader
 	photoFile.ThumbnailNonce = file.Thumbnail.DecryptionHeader
 	photoFile.OwnerID = file.OwnerID

@@ -34,7 +34,7 @@ func (c *ClICtrl) StartSync() error {
 }
 
 func (c *ClICtrl) SyncAccount(account model.Account) error {
-	secretInfo, err := c.KeyHolder.LoadSecrets(account, c.CliKey)
+	secretInfo, err := c.KeyHolder.LoadSecrets(account)
 	if err != nil {
 		return err
 	}

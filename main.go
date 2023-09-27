@@ -18,8 +18,7 @@ func main() {
 			//Host:  "http://localhost:8080",
 		}),
 		DB:        db,
-		CliKey:    secrets.GetOrCreateClISecret(),
-		KeyHolder: secrets.NewKeyHolder(),
+		KeyHolder: secrets.NewKeyHolder(secrets.GetOrCreateClISecret()),
 	}
 	err = ctrl.Init()
 	if err != nil {

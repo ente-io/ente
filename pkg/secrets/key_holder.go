@@ -10,14 +10,18 @@ import (
 )
 
 type KeyHolder struct {
+	// DeviceKey is the key used to encrypt/decrypt the data while storing sensitive
+	// information on the disk. Usually, it should be stored in OS Keychain.
+	DeviceKey      []byte
 	AccountSecrets map[string]*model.AccSecretInfo
 	CollectionKeys map[string][]byte
 }
 
-func NewKeyHolder() *KeyHolder {
+func NewKeyHolder(deviceKey []byte) *KeyHolder {
 	return &KeyHolder{
 		AccountSecrets: make(map[string]*model.AccSecretInfo),
 		CollectionKeys: make(map[string][]byte),
+		DeviceKey:      deviceKey,
 	}
 }
 
@@ -25,10 +29,10 @@ func NewKeyHolder() *KeyHolder {
 // It decrypts the token key, master key, and secret key using the CLI key.
 // The decrypted keys and the decoded public key are stored in the AccountSecrets map using the account key as the map key.
 // It returns the account secret information or an error if the decryption fails.
-func (k *KeyHolder) LoadSecrets(account model.Account, cliKey []byte) (*model.AccSecretInfo, error) {
-	tokenKey := account.Token.MustDecrypt(cliKey)
-	masterKey := account.MasterKey.MustDecrypt(cliKey)
-	secretKey := account.SecretKey.MustDecrypt(cliKey)
+func (k *KeyHolder) LoadSecrets(account model.Account) (*model.AccSecretInfo, error) {
+	tokenKey := account.Token.MustDecrypt(k.DeviceKey)
+	masterKey := account.MasterKey.MustDecrypt(k.DeviceKey)
+	secretKey := account.SecretKey.MustDecrypt(k.DeviceKey)
 	k.AccountSecrets[account.AccountKey()] = &model.AccSecretInfo{
 		Token:     tokenKey,
 		MasterKey: masterKey,

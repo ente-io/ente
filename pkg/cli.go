@@ -8,10 +8,8 @@ import (
 )
 
 type ClICtrl struct {
-	Client *api.Client
-	DB     *bolt.DB
-	// CliKey is the key used to encrypt/decrypt sensitive data stored in the database
-	CliKey    []byte
+	Client    *api.Client
+	DB        *bolt.DB
 	KeyHolder *secrets.KeyHolder
 }
 

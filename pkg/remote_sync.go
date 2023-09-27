@@ -25,7 +25,7 @@ func (c *ClICtrl) fetchRemoteCollections(ctx context.Context) error {
 		if lastSyncTime == 0 && collection.IsDeleted {
 			continue
 		}
-		album, mapErr := c.mapCollectionToAlbum(ctx, collection)
+		album, mapErr := c.mapCollectionToAlbum(ctx, collection, c.KeyHolder)
 		if mapErr != nil {
 			return mapErr
 		}
@@ -84,7 +84,7 @@ func (c *ClICtrl) fetchRemoteFiles(ctx context.Context) error {
 					// on first sync, no need to sync delete markers
 					continue
 				}
-				photoFile, err := c.mapApiFileToPhotoFile(ctx, album, file)
+				photoFile, err := c.mapApiFileToPhotoFile(ctx, album, file, c.KeyHolder)
 				if err != nil {
 					return err
 				}

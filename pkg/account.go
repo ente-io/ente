@@ -72,7 +72,6 @@ func (c *ClICtrl) AddAccount(cxt context.Context) {
 
 func (c *ClICtrl) storeAccount(_ context.Context, email string, userID int64, app api.App, secretInfo *model.AccSecretInfo) error {
 	// get password
-	secret := c.CliKey
 	err := c.DB.Update(func(tx *bolt.Tx) error {
 		b, err := tx.CreateBucketIfNotExists([]byte(AccBucket))
 		if err != nil {
@@ -81,9 +80,9 @@ func (c *ClICtrl) storeAccount(_ context.Context, email string, userID int64, ap
 		accInfo := model.Account{
 			Email:     email,
 			UserID:    userID,
-			MasterKey: *model.MakeEncString(secretInfo.MasterKey, secret),
-			SecretKey: *model.MakeEncString(secretInfo.SecretKey, secret),
-			Token:     *model.MakeEncString(secretInfo.Token, secret),
+			MasterKey: *model.MakeEncString(secretInfo.MasterKey, c.KeyHolder.DeviceKey),
+			SecretKey: *model.MakeEncString(secretInfo.SecretKey, c.KeyHolder.DeviceKey),
+			Token:     *model.MakeEncString(secretInfo.Token, c.KeyHolder.DeviceKey),
 			App:       app,
 			PublicKey: encoding.EncodeBase64(secretInfo.PublicKey),
 		}
