@@ -47,6 +47,7 @@ class FileWidget extends StatelessWidget {
       return VideoWidgetNew(
         file,
         tagPrefix: tagPrefix,
+        playbackCallback: playbackCallback,
       );
     } else {
       Logger('FileWidget').severe('unsupported file type ${file.fileType}');

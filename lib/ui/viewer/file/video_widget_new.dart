@@ -19,9 +19,11 @@ import "package:photos/utils/toast_util.dart";
 class VideoWidgetNew extends StatefulWidget {
   final EnteFile file;
   final String? tagPrefix;
+  final Function(bool)? playbackCallback;
   const VideoWidgetNew(
     this.file, {
     this.tagPrefix,
+    this.playbackCallback,
     super.key,
   });
 
@@ -64,6 +66,11 @@ class _VideoWidgetNewState extends State<VideoWidgetNew> {
         }
       });
     }
+    player.stream.playing.listen((event) {
+      if (widget.playbackCallback != null) {
+        widget.playbackCallback!(event);
+      }
+    });
   }
 
   @override
