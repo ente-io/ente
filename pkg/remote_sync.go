@@ -1,6 +1,7 @@
 package pkg
 
 import (
+	"cli-go/pkg/mapper"
 	"cli-go/pkg/model"
 	"cli-go/utils/encoding"
 	"context"
@@ -25,7 +26,7 @@ func (c *ClICtrl) fetchRemoteCollections(ctx context.Context) error {
 		if lastSyncTime == 0 && collection.IsDeleted {
 			continue
 		}
-		album, mapErr := c.mapCollectionToAlbum(ctx, collection, c.KeyHolder)
+		album, mapErr := mapper.MapCollectionToAlbum(ctx, collection, c.KeyHolder)
 		if mapErr != nil {
 			return mapErr
 		}
@@ -84,7 +85,7 @@ func (c *ClICtrl) fetchRemoteFiles(ctx context.Context) error {
 					// on first sync, no need to sync delete markers
 					continue
 				}
-				photoFile, err := c.mapApiFileToPhotoFile(ctx, album, file, c.KeyHolder)
+				photoFile, err := mapper.MapApiFileToPhotoFile(ctx, album, file, c.KeyHolder)
 				if err != nil {
 					return err
 				}

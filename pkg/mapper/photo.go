@@ -1,4 +1,4 @@
-package pkg
+package mapper
 
 import (
 	"cli-go/internal/api"
@@ -12,7 +12,7 @@ import (
 	"log"
 )
 
-func (c *ClICtrl) mapCollectionToAlbum(ctx context.Context, collection api.Collection, holder *secrets.KeyHolder) (*model.RemoteAlbum, error) {
+func MapCollectionToAlbum(ctx context.Context, collection api.Collection, holder *secrets.KeyHolder) (*model.RemoteAlbum, error) {
 	var album model.RemoteAlbum
 	userID := ctx.Value("user_id").(int64)
 	album.OwnerID = collection.Owner.ID
@@ -70,7 +70,7 @@ func (c *ClICtrl) mapCollectionToAlbum(ctx context.Context, collection api.Colle
 	return &album, nil
 }
 
-func (c *ClICtrl) mapApiFileToPhotoFile(ctx context.Context, album model.RemoteAlbum, file api.File, holder *secrets.KeyHolder) (*model.RemoteFile, error) {
+func MapApiFileToPhotoFile(ctx context.Context, album model.RemoteAlbum, file api.File, holder *secrets.KeyHolder) (*model.RemoteFile, error) {
 	if file.IsDeleted {
 		return nil, errors.New("file is deleted")
 	}
