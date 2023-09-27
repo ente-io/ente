@@ -2,8 +2,6 @@
 
 ## v1.6.44
 
-### Bug Fixes
-
 - Upgrade electron to get latest security patches and other improvements.
 
 ## v1.6.43
