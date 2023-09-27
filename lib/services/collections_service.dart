@@ -359,6 +359,9 @@ class CollectionsService {
     incoming.sort((first, second) {
       return second.updationTime.compareTo(first.updationTime);
     });
+    outgoing.sort((first, second) {
+      return second.updationTime.compareTo(first.updationTime);
+    });
     return SharedCollections(outgoing, incoming, quickLinks);
   }
 

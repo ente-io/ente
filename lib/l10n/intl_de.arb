@@ -414,7 +414,7 @@
   "skip": "Überspringen",
   "updatingFolderSelection": "Ordnerauswahl wird aktualisiert...",
   "itemCount": "{count, plural, one{{count} Objekt} other{{count} Objekte}}",
-  "deleteItemCount": "{count, plural, one {}=1 {Lösche {count} Element} other {Lösche {count} Elemente}}",
+  "deleteItemCount": "{count, plural, one {Lösche {count} Element} other {Lösche {count} Elemente}}",
   "duplicateItemsGroup": "{count} Dateien, {formattedSize} jede",
   "@duplicateItemsGroup": {
     "description": "Display the number of duplicate files and their size",
