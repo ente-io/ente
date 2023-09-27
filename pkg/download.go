@@ -1,9 +1,7 @@
 package pkg
 
 import (
-	"cli-go/pkg/model"
 	"context"
-	"encoding/json"
 	"fmt"
 	"log"
 	"os"
@@ -27,21 +25,4 @@ func (c *ClICtrl) initiateDownload(ctx context.Context) error {
 		//}
 	}
 	return nil
-}
-
-func (c *ClICtrl) getRemoteFiles(ctx context.Context) ([]model.RemoteFile, error) {
-	files := make([]model.RemoteFile, 0)
-	fileBytes, err := c.GetAllValues(ctx, model.RemoteFiles)
-	if err != nil {
-		return nil, err
-	}
-	for _, fileJson := range fileBytes {
-		file := model.RemoteFile{}
-		err = json.Unmarshal(fileJson, &file)
-		if err != nil {
-			return nil, err
-		}
-		files = append(files, file)
-	}
-	return files, nil
 }

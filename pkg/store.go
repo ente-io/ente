@@ -20,7 +20,7 @@ func GetDB(path string) (*bolt.DB, error) {
 }
 
 func (c *ClICtrl) GetInt64ConfigValue(ctx context.Context, key string) (int64, error) {
-	value, err := c.GetConfigValue(ctx, key)
+	value, err := c.getConfigValue(ctx, key)
 	if err != nil {
 		return 0, err
 	}
@@ -34,7 +34,7 @@ func (c *ClICtrl) GetInt64ConfigValue(ctx context.Context, key string) (int64, e
 	return result, nil
 }
 
-func (c *ClICtrl) GetConfigValue(ctx context.Context, key string) ([]byte, error) {
+func (c *ClICtrl) getConfigValue(ctx context.Context, key string) ([]byte, error) {
 	var value []byte
 	err := c.DB.View(func(tx *bolt.Tx) error {
 		kvBucket, err := getAccountStore(ctx, tx, model.KVConfig)

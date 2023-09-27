@@ -45,7 +45,7 @@ func (c *ClICtrl) AddAccount(cxt context.Context) {
 	if verifyEmail || srpAttr.IsEmailMFAEnabled {
 		authResponse, flowErr = c.validateEmail(cxt, email)
 	} else {
-		authResponse, keyEncKey, flowErr = c.signInViaPassword(cxt, email, srpAttr)
+		authResponse, keyEncKey, flowErr = c.signInViaPassword(cxt, srpAttr)
 	}
 	if flowErr != nil {
 		return

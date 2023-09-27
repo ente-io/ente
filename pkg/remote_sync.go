@@ -2,59 +2,144 @@ package pkg
 
 import (
 	"cli-go/pkg/model"
+	"cli-go/utils/encoding"
 	"context"
-	"encoding/base64"
+	"encoding/json"
 	"fmt"
-	bolt "go.etcd.io/bbolt"
 	"log"
+	"strconv"
+	"time"
 )
 
-func (c *ClICtrl) SyncAccount(account model.Account) error {
-	secretInfo, err := c.KeyHolder.LoadSecrets(account, c.CliKey)
-	if err != nil {
-		return err
+func (c *ClICtrl) fetchRemoteCollections(ctx context.Context) error {
+	lastSyncTime, err2 := c.GetInt64ConfigValue(ctx, model.CollectionsSyncKey)
+	if err2 != nil {
+		return err2
 	}
-	ctx := c.buildRequestContext(context.Background(), account)
-	err = createDataBuckets(c.DB, account)
+	collections, err := c.Client.GetCollections(ctx, lastSyncTime)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to get collections: %s", err)
 	}
-	c.Client.AddToken(account.AccountKey(), base64.URLEncoding.EncodeToString(secretInfo.Token))
-	err = c.fetchRemoteCollections(ctx)
-	if err != nil {
-		log.Printf("Error fetching collections: %s", err)
+	maxUpdated := lastSyncTime
+	for _, collection := range collections {
+		if lastSyncTime == 0 && collection.IsDeleted {
+			continue
+		}
+		album, mapErr := c.mapCollectionToAlbum(ctx, collection)
+		if mapErr != nil {
+			return mapErr
+		}
+		if album.LastUpdatedAt > maxUpdated {
+			maxUpdated = album.LastUpdatedAt
+		}
+		albumJson := encoding.MustMarshalJSON(album)
+		putErr := c.PutValue(ctx, model.RemoteAlbums, []byte(strconv.FormatInt(album.ID, 10)), albumJson)
+		if putErr != nil {
+			return putErr
+		}
 	}
-	err = c.fetchRemoteFiles(ctx)
-	if err != nil {
-		log.Printf("Error fetching files: %s", err)
-	}
-	downloadErr := c.initiateDownload(ctx)
-	if downloadErr != nil {
-		log.Printf("Error downloading files: %s", downloadErr)
-		return downloadErr
+	if maxUpdated > lastSyncTime {
+		err = c.PutConfigValue(ctx, model.CollectionsSyncKey, []byte(strconv.FormatInt(maxUpdated, 10)))
+		if err != nil {
+			return fmt.Errorf("failed to update last sync time: %s", err)
+		}
 	}
 	return nil
 }
 
-func (c *ClICtrl) buildRequestContext(ctx context.Context, account model.Account) context.Context {
-	ctx = context.WithValue(ctx, "app", string(account.App))
-	ctx = context.WithValue(ctx, "account_id", account.AccountKey())
-	ctx = context.WithValue(ctx, "user_id", account.UserID)
-	return ctx
-}
-
-func createDataBuckets(db *bolt.DB, account model.Account) error {
-	return db.Update(func(tx *bolt.Tx) error {
-		dataBucket, err := tx.CreateBucketIfNotExists([]byte(account.AccountKey()))
-		if err != nil {
-			return fmt.Errorf("create bucket: %s", err)
+func (c *ClICtrl) fetchRemoteFiles(ctx context.Context) error {
+	albums, err := c.getRemoteAlbums(ctx)
+	if err != nil {
+		return err
+	}
+	for _, album := range albums {
+		if album.IsDeleted {
+			log.Printf("Skipping album %s as it is deleted", album.AlbumName)
+			continue
 		}
-		for _, subBucket := range []model.PhotosStore{model.KVConfig, model.RemoteAlbums, model.RemoteFiles} {
-			_, err := dataBucket.CreateBucketIfNotExists([]byte(subBucket))
+		lastSyncTime, lastSyncTimeErr := c.GetInt64ConfigValue(ctx, fmt.Sprintf(model.CollectionsFileSyncKeyFmt, album.ID))
+		if lastSyncTimeErr != nil {
+			return lastSyncTimeErr
+		}
+		isFirstSync := lastSyncTime == 0
+		for {
+
+			if lastSyncTime == album.LastUpdatedAt {
+				break
+			}
+			if !isFirstSync {
+				t := time.UnixMicro(lastSyncTime)
+				log.Printf("Fetching files for album %s from %v\n", album.AlbumName, t)
+			}
+			files, hasMore, err := c.Client.GetFiles(ctx, album.ID, lastSyncTime)
 			if err != nil {
 				return err
 			}
+			maxUpdated := lastSyncTime
+			for _, file := range files {
+				if file.UpdationTime > maxUpdated {
+					maxUpdated = file.UpdationTime
+				}
+				if isFirstSync && file.IsDeleted {
+					// on first sync, no need to sync delete markers
+					continue
+				}
+				photoFile, err := c.mapApiFileToPhotoFile(ctx, album, file)
+				if err != nil {
+					return err
+				}
+				fileJson := encoding.MustMarshalJSON(photoFile)
+				putErr := c.PutValue(ctx, model.RemoteFiles, []byte(strconv.FormatInt(file.ID, 10)), fileJson)
+				if putErr != nil {
+					return putErr
+				}
+			}
+			if !hasMore {
+				maxUpdated = album.LastUpdatedAt
+			}
+			if maxUpdated > lastSyncTime || !hasMore {
+				err = c.PutConfigValue(ctx, fmt.Sprintf(model.CollectionsFileSyncKeyFmt, album.ID), []byte(strconv.FormatInt(maxUpdated, 10)))
+				if err != nil {
+					return fmt.Errorf("failed to update last sync time: %s", err)
+				} else {
+					lastSyncTime = maxUpdated
+				}
+			}
 		}
-		return nil
-	})
+	}
+	return nil
+}
+
+func (c *ClICtrl) getRemoteAlbums(ctx context.Context) ([]model.RemoteAlbum, error) {
+	albums := make([]model.RemoteAlbum, 0)
+	albumBytes, err := c.GetAllValues(ctx, model.RemoteAlbums)
+	if err != nil {
+		return nil, err
+	}
+	for _, albumJson := range albumBytes {
+		album := model.RemoteAlbum{}
+		err = json.Unmarshal(albumJson, &album)
+		if err != nil {
+			return nil, err
+		}
+		albums = append(albums, album)
+	}
+	return albums, nil
+}
+
+func (c *ClICtrl) getRemoteFiles(ctx context.Context) ([]model.RemoteFile, error) {
+	files := make([]model.RemoteFile, 0)
+	fileBytes, err := c.GetAllValues(ctx, model.RemoteFiles)
+	if err != nil {
+		return nil, err
+	}
+	for _, fileJson := range fileBytes {
+		file := model.RemoteFile{}
+		err = json.Unmarshal(fileJson, &file)
+		if err != nil {
+			return nil, err
+		}
+		files = append(files, file)
+	}
+	return files, nil
 }

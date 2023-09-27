@@ -13,7 +13,7 @@ import (
 	"github.com/kong/go-srp"
 )
 
-func (c *ClICtrl) signInViaPassword(ctx context.Context, email string, srpAttr *api.SRPAttributes) (*api.AuthorizationResponse, []byte, error) {
+func (c *ClICtrl) signInViaPassword(ctx context.Context, srpAttr *api.SRPAttributes) (*api.AuthorizationResponse, []byte, error) {
 	for {
 		// CLI prompt for password
 		password, flowErr := internal.GetSensitiveField("Enter password")
