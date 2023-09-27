@@ -93,6 +93,9 @@ class _VideoWidgetNewState extends State<VideoWidgetNew> {
           seekBarThumbColor: backgroundElevatedLight,
           seekBarColor: fillMutedDark,
           seekBarPositionColor: colorScheme.primary300,
+
+          ///topButtonBarMargin is needed for keeping the buffering loading
+          ///indicator to be center aligned
           topButtonBarMargin: const EdgeInsets.only(top: verticalMargin),
           bottomButtonBar: [
             const Spacer(),
