@@ -3,7 +3,7 @@ package pkg
 import (
 	"cli-go/internal"
 	"cli-go/internal/api"
-	enteCrypto "cli-go/internal/crypto"
+	eCrypto "cli-go/internal/crypto"
 	"cli-go/pkg/model"
 	"cli-go/utils/encoding"
 	"context"
@@ -21,12 +21,12 @@ func (c *ClICtrl) signInViaPassword(ctx context.Context, email string, srpAttr *
 			return nil, nil, flowErr
 		}
 		fmt.Println("\nPlease wait authenticating...")
-		keyEncKey, err := enteCrypto.DeriveArgonKey(password, srpAttr.KekSalt, srpAttr.MemLimit, srpAttr.OpsLimit)
+		keyEncKey, err := eCrypto.DeriveArgonKey(password, srpAttr.KekSalt, srpAttr.MemLimit, srpAttr.OpsLimit)
 		if err != nil {
 			fmt.Printf("error deriving key encryption key: %v", err)
 			return nil, nil, err
 		}
-		loginKey := enteCrypto.DeriveLoginKey(keyEncKey)
+		loginKey := eCrypto.DeriveLoginKey(keyEncKey)
 
 		srpParams := srp.GetParams(4096)
 		identify := []byte(srpAttr.SRPUserID.String())
@@ -70,7 +70,7 @@ func (c *ClICtrl) decryptAccSecretInfo(
 				return nil, flowErr
 			}
 			fmt.Println("\nPlease wait authenticating...")
-			currentKeyEncKey, err = enteCrypto.DeriveArgonKey(password,
+			currentKeyEncKey, err = eCrypto.DeriveArgonKey(password,
 				authResp.KeyAttributes.KEKSalt, authResp.KeyAttributes.MemLimit, authResp.KeyAttributes.OpsLimit)
 			if err != nil {
 				fmt.Printf("error deriving key encryption key: %v", err)
@@ -82,7 +82,7 @@ func (c *ClICtrl) decryptAccSecretInfo(
 
 		encryptedKey := encoding.DecodeBase64(authResp.KeyAttributes.EncryptedKey)
 		encryptedKeyNonce := encoding.DecodeBase64(authResp.KeyAttributes.KeyDecryptionNonce)
-		masterKey, err = enteCrypto.SecretBoxOpen(encryptedKey, encryptedKeyNonce, currentKeyEncKey)
+		masterKey, err = eCrypto.SecretBoxOpen(encryptedKey, encryptedKeyNonce, currentKeyEncKey)
 		if err != nil {
 			if keyEncKey != nil {
 				fmt.Printf("Failed to get key from keyEncryptionKey %s", err)
@@ -92,7 +92,7 @@ func (c *ClICtrl) decryptAccSecretInfo(
 				continue
 			}
 		}
-		secretKey, err = enteCrypto.SecretBoxOpen(
+		secretKey, err = eCrypto.SecretBoxOpen(
 			encoding.DecodeBase64(authResp.KeyAttributes.EncryptedSecretKey),
 			encoding.DecodeBase64(authResp.KeyAttributes.SecretKeyDecryptionNonce),
 			masterKey,
@@ -101,7 +101,7 @@ func (c *ClICtrl) decryptAccSecretInfo(
 			fmt.Printf("error decrypting master key: %v", err)
 			return nil, err
 		}
-		tokenKey, err = enteCrypto.SealedBoxOpen(
+		tokenKey, err = eCrypto.SealedBoxOpen(
 			encoding.DecodeBase64(authResp.EncryptedToken),
 			publicKey,
 			secretKey,

@@ -2,7 +2,7 @@ package pkg
 
 import (
 	"cli-go/internal/api"
-	enteCrypto "cli-go/internal/crypto"
+	eCrypto "cli-go/internal/crypto"
 	"cli-go/pkg/model"
 	"cli-go/utils/encoding"
 	"context"
@@ -26,7 +26,7 @@ func (c *ClICtrl) mapCollectionToAlbum(ctx context.Context, collection api.Colle
 	album.AlbumKey = *model.MakeEncString(collectionKey, c.CliKey)
 	var name string
 	if collection.EncryptedName != "" {
-		decrName, err := enteCrypto.SecretBoxOpenBase64(collection.EncryptedName, collection.NameDecryptionNonce, collectionKey)
+		decrName, err := eCrypto.SecretBoxOpenBase64(collection.EncryptedName, collection.NameDecryptionNonce, collectionKey)
 		if err != nil {
 			log.Fatalf("failed to decrypt collection name: %v", err)
 		}
@@ -37,7 +37,7 @@ func (c *ClICtrl) mapCollectionToAlbum(ctx context.Context, collection api.Colle
 	}
 	album.AlbumName = name
 	if collection.MagicMetadata != nil {
-		_, encodedJsonBytes, err := enteCrypto.DecryptChaChaBase64(collection.MagicMetadata.Data, collectionKey, collection.MagicMetadata.Header)
+		_, encodedJsonBytes, err := eCrypto.DecryptChaChaBase64(collection.MagicMetadata.Data, collectionKey, collection.MagicMetadata.Header)
 		if err != nil {
 			return nil, err
 		}
@@ -47,7 +47,7 @@ func (c *ClICtrl) mapCollectionToAlbum(ctx context.Context, collection api.Colle
 		}
 	}
 	if collection.PublicMagicMetadata != nil {
-		_, encodedJsonBytes, err := enteCrypto.DecryptChaChaBase64(collection.PublicMagicMetadata.Data, collectionKey, collection.PublicMagicMetadata.Header)
+		_, encodedJsonBytes, err := eCrypto.DecryptChaChaBase64(collection.PublicMagicMetadata.Data, collectionKey, collection.PublicMagicMetadata.Header)
 		if err != nil {
 			return nil, err
 		}
@@ -57,7 +57,7 @@ func (c *ClICtrl) mapCollectionToAlbum(ctx context.Context, collection api.Colle
 		}
 	}
 	if album.IsShared && collection.SharedMagicMetadata != nil {
-		_, encodedJsonBytes, err := enteCrypto.DecryptChaChaBase64(collection.SharedMagicMetadata.Data, collectionKey, collection.SharedMagicMetadata.Header)
+		_, encodedJsonBytes, err := eCrypto.DecryptChaChaBase64(collection.SharedMagicMetadata.Data, collectionKey, collection.SharedMagicMetadata.Header)
 		if err != nil {
 			return nil, err
 		}
@@ -74,7 +74,7 @@ func (c *ClICtrl) mapApiFileToPhotoFile(ctx context.Context, album model.RemoteA
 		return nil, errors.New("file is deleted")
 	}
 	albumKey := album.AlbumKey.MustDecrypt(c.CliKey)
-	fileKey, err := enteCrypto.SecretBoxOpen(
+	fileKey, err := eCrypto.SecretBoxOpen(
 		encoding.DecodeBase64(file.EncryptedKey),
 		encoding.DecodeBase64(file.KeyDecryptionNonce),
 		albumKey)
@@ -95,7 +95,7 @@ func (c *ClICtrl) mapApiFileToPhotoFile(ctx context.Context, album model.RemoteA
 		}
 	}
 	if file.Metadata.DecryptionHeader != "" {
-		_, encodedJsonBytes, err := enteCrypto.DecryptChaChaBase64(file.Metadata.EncryptedData, fileKey, file.Metadata.DecryptionHeader)
+		_, encodedJsonBytes, err := eCrypto.DecryptChaChaBase64(file.Metadata.EncryptedData, fileKey, file.Metadata.DecryptionHeader)
 		if err != nil {
 			return nil, err
 		}
@@ -105,7 +105,7 @@ func (c *ClICtrl) mapApiFileToPhotoFile(ctx context.Context, album model.RemoteA
 		}
 	}
 	if file.MagicMetadata != nil {
-		_, encodedJsonBytes, err := enteCrypto.DecryptChaChaBase64(file.MagicMetadata.Data, fileKey, file.MagicMetadata.Header)
+		_, encodedJsonBytes, err := eCrypto.DecryptChaChaBase64(file.MagicMetadata.Data, fileKey, file.MagicMetadata.Header)
 		if err != nil {
 			return nil, err
 		}
@@ -115,7 +115,7 @@ func (c *ClICtrl) mapApiFileToPhotoFile(ctx context.Context, album model.RemoteA
 		}
 	}
 	if file.PubicMagicMetadata != nil {
-		_, encodedJsonBytes, err := enteCrypto.DecryptChaChaBase64(file.PubicMagicMetadata.Data, fileKey, file.PubicMagicMetadata.Header)
+		_, encodedJsonBytes, err := eCrypto.DecryptChaChaBase64(file.PubicMagicMetadata.Data, fileKey, file.PubicMagicMetadata.Header)
 		if err != nil {
 			return nil, err
 		}

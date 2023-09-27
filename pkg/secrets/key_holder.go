@@ -2,7 +2,7 @@ package secrets
 
 import (
 	"cli-go/internal/api"
-	enteCrypto "cli-go/internal/crypto"
+	eCrypto "cli-go/internal/crypto"
 	"cli-go/pkg/model"
 	"cli-go/utils/encoding"
 	"context"
@@ -52,7 +52,7 @@ func (k *KeyHolder) GetCollectionKey(ctx context.Context, collection api.Collect
 	accSecretInfo := k.GetAccountSecretInfo(ctx)
 	userID := ctx.Value("user_id").(int64)
 	if collection.Owner.ID == userID {
-		collKey, err := enteCrypto.SecretBoxOpen(
+		collKey, err := eCrypto.SecretBoxOpen(
 			encoding.DecodeBase64(collection.EncryptedKey),
 			encoding.DecodeBase64(collection.KeyDecryptionNonce),
 			accSecretInfo.MasterKey)
@@ -61,7 +61,7 @@ func (k *KeyHolder) GetCollectionKey(ctx context.Context, collection api.Collect
 		}
 		return collKey, nil
 	} else {
-		collKey, err := enteCrypto.SealedBoxOpen(encoding.DecodeBase64(collection.EncryptedKey),
+		collKey, err := eCrypto.SealedBoxOpen(encoding.DecodeBase64(collection.EncryptedKey),
 			accSecretInfo.PublicKey, accSecretInfo.SecretKey)
 		if err != nil {
 			return nil, fmt.Errorf("shared collection %d key drive failed %s", collection.ID, err)
