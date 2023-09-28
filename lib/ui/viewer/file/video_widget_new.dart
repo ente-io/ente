@@ -67,7 +67,7 @@ class _VideoWidgetNewState extends State<VideoWidgetNew> {
       });
     }
     player.stream.playing.listen((event) {
-      if (widget.playbackCallback != null) {
+      if (widget.playbackCallback != null && mounted) {
         widget.playbackCallback!(event);
       }
     });
