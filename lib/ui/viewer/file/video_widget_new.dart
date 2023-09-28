@@ -1,9 +1,11 @@
+import "dart:async";
 import "dart:io";
 
 import "package:flutter/cupertino.dart";
 import "package:flutter/material.dart";
 import "package:media_kit/media_kit.dart";
 import "package:media_kit_video/media_kit_video.dart";
+import "package:photos/core/constants.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/file/extensions/file_props.dart";
 import "package:photos/models/file/file.dart";
@@ -18,9 +20,11 @@ import "package:photos/utils/toast_util.dart";
 class VideoWidgetNew extends StatefulWidget {
   final EnteFile file;
   final String? tagPrefix;
+  final Function(bool)? playbackCallback;
   const VideoWidgetNew(
     this.file, {
     this.tagPrefix,
+    this.playbackCallback,
     super.key,
   });
 
@@ -29,10 +33,11 @@ class VideoWidgetNew extends StatefulWidget {
 }
 
 class _VideoWidgetNewState extends State<VideoWidgetNew> {
-  static const verticalMargin = 100.0;
+  static const verticalMargin = 72.0;
   late final player = Player();
   VideoController? controller;
   final _progressNotifier = ValueNotifier<double?>(null);
+  late StreamSubscription<bool> playingStreamSubscription;
 
   @override
   void initState() {
@@ -63,12 +68,18 @@ class _VideoWidgetNewState extends State<VideoWidgetNew> {
         }
       });
     }
+    playingStreamSubscription = player.stream.playing.listen((event) {
+      if (widget.playbackCallback != null && mounted) {
+        widget.playbackCallback!(event);
+      }
+    });
   }
 
   @override
   void dispose() {
+    playingStreamSubscription.cancel();
     player.dispose();
-    // _progressNotifier.dispose();
+    _progressNotifier.dispose();
     super.dispose();
   }
 
@@ -87,12 +98,16 @@ class _VideoWidgetNewState extends State<VideoWidgetNew> {
           seekBarMargin: const EdgeInsets.only(bottom: verticalMargin),
           bottomButtonBarMargin: const EdgeInsets.only(bottom: 112),
           controlsHoverDuration: const Duration(seconds: 3),
-          seekBarHeight: 6,
+          seekBarHeight: 2,
           seekBarThumbSize: 16,
           seekBarBufferColor: Colors.transparent,
           seekBarThumbColor: backgroundElevatedLight,
           seekBarColor: fillMutedDark,
           seekBarPositionColor: colorScheme.primary300,
+          seekBarContainerHeight: 56,
+
+          ///topButtonBarMargin is needed for keeping the buffering loading
+          ///indicator to be center aligned
           topButtonBarMargin: const EdgeInsets.only(top: verticalMargin),
           bottomButtonBar: [
             const Spacer(),
@@ -102,12 +117,17 @@ class _VideoWidgetNewState extends State<VideoWidgetNew> {
           primaryButtonBar: [],
         ),
         fullscreen: const MaterialVideoControlsThemeData(),
-        child: Center(
-          child: controller != null
-              ? Video(
-                  controller: controller!,
-                )
-              : _getLoadingWidget(),
+        child: GestureDetector(
+          onVerticalDragUpdate: (d) => {
+            if (d.delta.dy > dragSensitivity) {Navigator.of(context).pop()},
+          },
+          child: Center(
+            child: controller != null
+                ? Video(
+                    controller: controller!,
+                  )
+                : _getLoadingWidget(),
+          ),
         ),
       ),
     );
@@ -209,7 +229,7 @@ class PausePlayAndDuration extends StatefulWidget {
 }
 
 class _PausePlayAndDurationState extends State<PausePlayAndDuration> {
-  Color backgroundColor = fillMutedLight;
+  Color backgroundColor = fillStrongLight;
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -222,7 +242,7 @@ class _PausePlayAndDurationState extends State<PausePlayAndDuration> {
         Future.delayed(const Duration(milliseconds: 175), () {
           if (mounted) {
             setState(() {
-              backgroundColor = fillMutedLight;
+              backgroundColor = fillStrongLight;
             });
           }
         });
@@ -231,7 +251,7 @@ class _PausePlayAndDurationState extends State<PausePlayAndDuration> {
         Future.delayed(const Duration(milliseconds: 175), () {
           if (mounted) {
             setState(() {
-              backgroundColor = fillMutedLight;
+              backgroundColor = fillStrongLight;
             });
           }
         });
@@ -269,6 +289,7 @@ class _PausePlayAndDurationState extends State<PausePlayAndDuration> {
                           ? Icons.pause_rounded
                           : Icons.play_arrow_rounded,
                       color: backdropBaseLight,
+                      size: 24,
                     ),
                   );
                 },
@@ -277,7 +298,7 @@ class _PausePlayAndDurationState extends State<PausePlayAndDuration> {
               ),
               const SizedBox(width: 8),
               MaterialPositionIndicator(
-                style: getEnteTextTheme(context).mini.copyWith(
+                style: getEnteTextTheme(context).tiny.copyWith(
                       color: textBaseDark,
                     ),
               ),
