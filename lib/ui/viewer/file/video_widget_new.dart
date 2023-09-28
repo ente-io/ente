@@ -1,3 +1,4 @@
+import "dart:async";
 import "dart:io";
 
 import "package:flutter/cupertino.dart";
@@ -36,6 +37,7 @@ class _VideoWidgetNewState extends State<VideoWidgetNew> {
   late final player = Player();
   VideoController? controller;
   final _progressNotifier = ValueNotifier<double?>(null);
+  late StreamSubscription<bool> playingStreamSubscription;
 
   @override
   void initState() {
@@ -66,7 +68,7 @@ class _VideoWidgetNewState extends State<VideoWidgetNew> {
         }
       });
     }
-    player.stream.playing.listen((event) {
+    playingStreamSubscription = player.stream.playing.listen((event) {
       if (widget.playbackCallback != null && mounted) {
         widget.playbackCallback!(event);
       }
@@ -75,8 +77,9 @@ class _VideoWidgetNewState extends State<VideoWidgetNew> {
 
   @override
   void dispose() {
+    playingStreamSubscription.cancel();
     player.dispose();
-    // _progressNotifier.dispose();
+    _progressNotifier.dispose();
     super.dispose();
   }
 
