@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import "package:flutter/services.dart";
 import 'package:photos/core/constants.dart';
 import "package:photos/generated/l10n.dart";
-import "package:photos/models/search/button_result.dart";
+import 'package:photos/models/button_result.dart';
 import 'package:photos/models/typedefs.dart';
 import 'package:photos/theme/colors.dart';
 import 'package:photos/theme/effects.dart';
