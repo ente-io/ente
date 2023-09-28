@@ -41,7 +41,7 @@ class SearchSection extends StatelessWidget {
           SizedBox(
             width: 85,
             child: SearchSectionCTAIcon(sectionType),
-          )
+          ),
         ],
       ),
     );

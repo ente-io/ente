@@ -39,7 +39,7 @@ class SearchSectionCTAIcon extends StatelessWidget {
         Text(
           sectionType.getCTAText(context),
           style: textTheme.miniFaint,
-        )
+        ),
       ],
     );
   }
