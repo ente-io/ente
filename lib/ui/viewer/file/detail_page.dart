@@ -181,16 +181,11 @@ class _DetailPageState extends State<DetailPage> {
               });
             }
           },
-          //Noticed that when the video is seeked, the video pops and moves the
-          //seek bar along with it and it happens when bottomPadding is 0. So we
-          //don't toggle full screen for cases where this issue happens.
-          playbackCallback: bottomPadding != 0
-              ? (isPlaying) {
-                  Future.delayed(Duration.zero, () {
-                    _toggleFullScreen();
-                  });
-                }
-              : null,
+          playbackCallback: (isPlaying) {
+            Future.delayed(Duration.zero, () {
+              _toggleFullScreen(shouldEnable: isPlaying);
+            });
+          },
           backgroundDecoration: const BoxDecoration(color: Colors.black),
         );
         return GestureDetector(
@@ -244,7 +239,10 @@ class _DetailPageState extends State<DetailPage> {
     return false;
   }
 
-  void _toggleFullScreen() {
+  void _toggleFullScreen({bool? shouldEnable}) {
+    if (shouldEnable != null) {
+      if (_enableFullScreenNotifier.value == shouldEnable) return;
+    }
     _enableFullScreenNotifier.value = !_enableFullScreenNotifier.value;
 
     Future.delayed(const Duration(milliseconds: 125), () {

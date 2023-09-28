@@ -9,8 +9,8 @@ import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file/file_type.dart';
 import 'package:photos/models/file/trash_file.dart';
 import 'package:photos/models/selected_files.dart';
-import 'package:photos/theme/colors.dart';
-import 'package:photos/theme/ente_theme.dart';
+import "package:photos/theme/colors.dart";
+import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/actions/file/file_actions.dart";
 import 'package:photos/ui/collections/collection_action_sheet.dart';
 import 'package:photos/utils/delete_file_util.dart';
@@ -53,8 +53,8 @@ class FileBottomBarState extends State<FileBottomBar> {
   }
 
   Widget _getBottomBar() {
-    Logger("FileBottomBar").fine("building bottom bar ${widget.file
-        .generatedID}");
+    Logger("FileBottomBar")
+        .fine("building bottom bar ${widget.file.generatedID}");
     final List<Widget> children = [];
     final bool isOwnedByUser =
         widget.file.ownerID == null || widget.file.ownerID == widget.userID;
@@ -188,18 +188,27 @@ class FileBottomBarState extends State<FileBottomBar> {
                           ? Padding(
                               padding: const EdgeInsets.fromLTRB(
                                 16,
-                                28,
-                                16,
                                 12,
+                                16,
+                                0,
                               ),
-                              child: Text(
-                                widget.file.caption!,
-                                overflow: TextOverflow.ellipsis,
-                                maxLines: 4,
-                                style: getEnteTextTheme(context)
-                                    .small
-                                    .copyWith(color: textBaseDark),
-                                textAlign: TextAlign.center,
+                              child: GestureDetector(
+                                onTap: () async {
+                                  await _displayDetails(widget.file);
+                                  await Future.delayed(
+                                    const Duration(milliseconds: 500),
+                                  ); //Waiting for some time till the caption gets updated in db if the user closes the bottom sheet without pressing 'done'
+                                  safeRefresh();
+                                },
+                                child: Text(
+                                  widget.file.caption!,
+                                  overflow: TextOverflow.ellipsis,
+                                  maxLines: 1,
+                                  style: getEnteTextTheme(context)
+                                      .mini
+                                      .copyWith(color: textBaseDark),
+                                  textAlign: TextAlign.center,
+                                ),
                               ),
                             )
                           : const SizedBox.shrink(),
