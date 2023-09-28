@@ -15,16 +15,16 @@ enum ResultType {
 
 enum SectionType {
   face,
+  location,
   // Grouping based on ML or manual tagging
   content,
   // includes year, month , day, event ResultType
   moment,
-  location,
   // People section shows the files shared by other persons
   people,
-  album,
-  fileTypesAndExtension,
   fileCaption,
+  fileTypesAndExtension,
+  album,
 }
 
 extension SectionTypeExtensions on SectionType {
