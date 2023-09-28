@@ -219,6 +219,7 @@ class _PaymentWebPageState extends State<PaymentWebPage> {
     final checkoutSessionID = queryParams['session_id'] ?? '';
     await _dialog.show();
     try {
+      // ignore: unused_local_variable
       final response = await billingService.verifySubscription(
         widget.planId,
         checkoutSessionID,

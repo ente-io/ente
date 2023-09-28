@@ -303,6 +303,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
     final bool flipVertical = action.flipX;
     final Uint8List img = state.rawImageData;
 
+    // ignore: unnecessary_null_comparison
     if (img == null) {
       _logger.severe("null rawImageData");
       showToast(context, S.of(context).somethingWentWrong);

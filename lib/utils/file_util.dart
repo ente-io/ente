@@ -174,8 +174,6 @@ Future<File?> getFileFromServer(
   return _fileDownloadsInProgress[downloadID];
 }
 
-
-
 Future<bool> isFileCached(EnteFile file, {bool liveVideo = false}) async {
   final cacheManager = (file.fileType == FileType.video || liveVideo)
       ? VideoCacheManager.instance
@@ -301,8 +299,7 @@ Future<File?> _downloadAndCache(
     final decryptedFilePath = decryptedFile.path;
     final String fileExtension = getExtension(file.title ?? '');
     File outputFile = decryptedFile;
-    if ((fileExtension == "unknown" && file.fileType == FileType.image) ||
-        (Platform.isAndroid && fileExtension == "heic")) {
+    if ((fileExtension == "unknown" && file.fileType == FileType.image)) {
       final compressResult = await FlutterImageCompress.compressAndGetFile(
         decryptedFilePath,
         decryptedFilePath + ".jpg",

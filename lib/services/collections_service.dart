@@ -359,6 +359,9 @@ class CollectionsService {
     incoming.sort((first, second) {
       return second.updationTime.compareTo(first.updationTime);
     });
+    outgoing.sort((first, second) {
+      return second.updationTime.compareTo(first.updationTime);
+    });
     return SharedCollections(outgoing, incoming, quickLinks);
   }
 
@@ -952,7 +955,7 @@ class CollectionsService {
   Future<List<Collection>> _fetchCollections(int sinceTime) async {
     try {
       final response = await _enteDio.get(
-        "/collections",
+        "/collections/v2",
         queryParameters: {
           "sinceTime": sinceTime,
           "source": AppLifecycleService.instance.isForeground ? "fg" : "bg",

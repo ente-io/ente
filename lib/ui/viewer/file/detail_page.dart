@@ -10,6 +10,7 @@ import 'package:photos/core/constants.dart';
 import 'package:photos/core/errors.dart';
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/file/file.dart';
+import "package:photos/models/file/file_type.dart";
 import "package:photos/ui/common/fast_scroll_physics.dart";
 import 'package:photos/ui/tools/editor/image_editor_page.dart';
 import "package:photos/ui/viewer/file/file_app_bar.dart";
@@ -185,39 +186,42 @@ class _DetailPageState extends State<DetailPage> {
           //don't toggle full screen for cases where this issue happens.
           playbackCallback: bottomPadding != 0
               ? (isPlaying) {
-            Future.delayed(Duration.zero, () {
-              _toggleFullScreen();
-            });
-          }
+                  Future.delayed(Duration.zero, () {
+                    _toggleFullScreen();
+                  });
+                }
               : null,
           backgroundDecoration: const BoxDecoration(color: Colors.black),
         );
         return GestureDetector(
           onTap: () {
-            _toggleFullScreen();
+            file.fileType != FileType.video ? _toggleFullScreen() : null;
           },
-          child: kDebugMode ?
-              Stack(children: [
-                fileContent,
-                Positioned(
-                  top: 80,
-                  right: 80,
-                  child: Text(
-                    file.generatedID?.toString() ?? 'null',
-                    style: const TextStyle(color: Colors.white),
-                  ),
-                ),
-              ],)
-          : fileContent,
+          child: kDebugMode
+              ? Stack(
+                  children: [
+                    fileContent,
+                    Positioned(
+                      top: 80,
+                      right: 80,
+                      child: Text(
+                        file.generatedID?.toString() ?? 'null',
+                        style: const TextStyle(color: Colors.white),
+                      ),
+                    ),
+                  ],
+                )
+              : fileContent,
         );
       },
       onPageChanged: (index) {
-        if(_selectedIndexNotifier.value == index) {
-          if(kDebugMode) {
+        if (_selectedIndexNotifier.value == index) {
+          if (kDebugMode) {
             debugPrint("onPageChanged called with same index $index");
           }
           // always notify listeners when the index is the same because
           // the total number of files might have changed
+          // ignore: invalid_use_of_protected_member, invalid_use_of_visible_for_testing_member
           _selectedIndexNotifier.notifyListeners();
         } else {
           _selectedIndexNotifier.value = index;
@@ -338,8 +342,10 @@ class _DetailPageState extends State<DetailPage> {
     }
     setState(() {
       _files!.remove(file);
-      _selectedIndexNotifier.value = min(_selectedIndexNotifier.value,
-          totalFiles - 2,);
+      _selectedIndexNotifier.value = min(
+        _selectedIndexNotifier.value,
+        totalFiles - 2,
+      );
     });
     final currentPageIndex = _pageController.page!.round();
     final int targetPageIndex = _files!.length > currentPageIndex

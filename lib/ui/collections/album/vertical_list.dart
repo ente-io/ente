@@ -363,7 +363,7 @@ class AlbumVerticalListWidget extends StatelessWidget {
     int collectionID,
     bool showProgressDialog,
   ) async {
-    bool result = await _collectionActions.addToCollection(
+    final bool result = await _collectionActions.addToCollection(
       context,
       collectionID,
       showProgressDialog,

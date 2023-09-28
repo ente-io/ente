@@ -96,7 +96,7 @@ class _MapViewState extends State<MapView> {
             const OSMFranceTileLayer(),
             MarkerClusterLayerWidget(
               options: MarkerClusterLayerOptions(
-                anchor: AnchorPos.align(AnchorAlign.top),
+                anchorPos: AnchorPos.align(AnchorAlign.top),
                 maxClusterRadius: 100,
                 showPolygon: false,
                 size: const Size(75, 75),

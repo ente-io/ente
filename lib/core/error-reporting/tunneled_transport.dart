@@ -27,6 +27,7 @@ class TunneledTransport implements Transport {
     _credentialBuilder = _CredentialBuilder(
       _dsn,
       _options.sentryClientName,
+      // ignore: invalid_use_of_internal_member
       _options.clock,
     );
   }

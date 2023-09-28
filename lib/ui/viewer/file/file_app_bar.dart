@@ -108,7 +108,7 @@ class FileAppBarState extends State<FileAppBar> {
         actions.add(
           Text(
             widget.file.generatedID?.toString() ?? 'null',
-            style: TextStyle(color: Colors.white),
+            style: const TextStyle(color: Colors.white),
           ),
         );
       }
