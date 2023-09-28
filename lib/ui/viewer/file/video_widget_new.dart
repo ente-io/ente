@@ -32,7 +32,7 @@ class VideoWidgetNew extends StatefulWidget {
 }
 
 class _VideoWidgetNewState extends State<VideoWidgetNew> {
-  static const verticalMargin = 100.0;
+  static const verticalMargin = 72.0;
   late final player = Player();
   VideoController? controller;
   final _progressNotifier = ValueNotifier<double?>(null);
@@ -101,6 +101,7 @@ class _VideoWidgetNewState extends State<VideoWidgetNew> {
           seekBarThumbColor: backgroundElevatedLight,
           seekBarColor: fillMutedDark,
           seekBarPositionColor: colorScheme.primary300,
+          seekBarContainerHeight: 56,
 
           ///topButtonBarMargin is needed for keeping the buffering loading
           ///indicator to be center aligned
