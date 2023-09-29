@@ -35,11 +35,14 @@ class _CodeWidgetState extends State<CodeWidget> {
   bool _isInitialized = false;
   late bool hasConfiguredAccount;
   late bool _shouldShowLargeIcon;
+  late bool _hideCode;
+  bool isMaskingEnabled = false;
 
   @override
   void initState() {
     super.initState();
-
+    isMaskingEnabled = PreferenceService.instance.shouldHideCodes();
+    _hideCode = isMaskingEnabled;
     _everySecondTimer =
         Timer.periodic(const Duration(milliseconds: 500), (Timer t) {
       String newCode = _getCurrentOTP();
@@ -63,6 +66,10 @@ class _CodeWidgetState extends State<CodeWidget> {
 
   @override
   Widget build(BuildContext context) {
+    if (isMaskingEnabled != PreferenceService.instance.shouldHideCodes()) {
+      isMaskingEnabled = PreferenceService.instance.shouldHideCodes();
+      _hideCode = isMaskingEnabled;
+    }
     _shouldShowLargeIcon = PreferenceService.instance.shouldShowLargeIcons();
     if (!_isInitialized) {
       _currentCode.value = _getCurrentOTP();
@@ -136,6 +143,15 @@ class _CodeWidgetState extends State<CodeWidget> {
                 onTap: () {
                   _copyToClipboard();
                 },
+                onDoubleTap: isMaskingEnabled
+                    ? () {
+                        setState(
+                          () {
+                            _hideCode = !_hideCode;
+                          },
+                        );
+                      }
+                    : null,
                 onLongPress: () {
                   _copyToClipboard();
                 },
@@ -390,6 +406,10 @@ class _CodeWidgetState extends State<CodeWidget> {
   }
 
   String _getFormattedCode(String code) {
+    if (_hideCode) {
+      // replace all digits with •
+      code = code.replaceAll(RegExp(r'\d'), '•');
+    }
     if (code.length == 6) {
       return code.substring(0, 3) + " " + code.substring(3, 6);
     }

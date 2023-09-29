@@ -76,6 +76,21 @@ class _AdvancedSectionWidgetState extends State<AdvancedSectionWidget> {
         sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: CaptionedTextWidget(
+            title: l10n.shouldHideCode,
+          ),
+          trailingWidget: ToggleSwitchWidget(
+            value: () => PreferenceService.instance.shouldHideCodes(),
+            onChanged: () async {
+              await PreferenceService.instance.setHideCodes(
+                !PreferenceService.instance.shouldHideCodes(),
+              );
+              setState(() {});
+            },
+          ),
+        ),
+        sectionOptionSpacing,
+        MenuItemWidget(
+          captionedTextWidget: CaptionedTextWidget(
             title: l10n.focusOnSearchBar,
           ),
           trailingWidget: ToggleSwitchWidget(
