@@ -96,8 +96,8 @@ dependencies:
   lottie: ^1.2.2
   media_extension: ^1.0.1
   media_kit: ^1.1.8    
-  media_kit_libs_video: ^1.0.3                                                 # Primary package.
-  media_kit_video: ^1.2.1                        # For video rendering.
+  media_kit_libs_video: ^1.0.3                                  
+  media_kit_video: ^1.2.1                    
   modal_bottom_sheet: ^3.0.0-pre
   motion_photos:
     git: "https://github.com/ente-io/motion_photo.git"
