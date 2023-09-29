@@ -1,5 +1,4 @@
-import 'dart:io';
-
+import 'package:dotted_border/dotted_border.dart';
 import 'package:ente_auth/core/configuration.dart';
 import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/models/subscription.dart';
@@ -37,36 +36,46 @@ class SupportDevWidget extends StatelessWidget {
     }
   }
 
-  GestureDetector buildWidget(AppLocalizations l10n, BuildContext context) {
+  Widget buildWidget(AppLocalizations l10n, BuildContext context) {
     return GestureDetector(
       onTap: () {
         launchUrl(Uri.parse("https://ente.io"));
       },
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 6),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            StyledText(
-              text: l10n.supportDevs,
-              style: getEnteTextTheme(context).large,
-              tags: {
-                'bold-green': StyledTextTag(
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: getEnteColorScheme(context).primaryGreen,
+      child: DottedBorder(
+        borderType: BorderType.RRect,
+        radius: const Radius.circular(12),
+        padding: const EdgeInsets.all(6),
+        dashPattern: const <double>[3, 3],
+        color: getEnteColorScheme(context).primaryGreen,
+        child: ClipRRect(
+          borderRadius: const BorderRadius.all(Radius.circular(12)),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 6),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                StyledText(
+                  text: l10n.supportDevs,
+                  style: getEnteTextTheme(context).large,
+                  tags: {
+                    'bold-green': StyledTextTag(
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: getEnteColorScheme(context).primaryGreen,
+                      ),
+                    ),
+                  },
+                ),
+                const Padding(padding: EdgeInsets.all(6)),
+                Text(
+                  l10n.supportDiscount,
+                  style: const TextStyle(
+                    color: Colors.grey,
                   ),
                 ),
-              },
+              ],
             ),
-            const Padding(padding: EdgeInsets.all(6)),
-            Text(
-              l10n.supportDiscount,
-              style: const TextStyle(
-                color: Colors.grey,
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );
