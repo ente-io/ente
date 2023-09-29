@@ -1154,12 +1154,11 @@ packages:
   media_kit:
     dependency: "direct main"
     description:
-      path: media_kit
-      ref: improved_seekbar_on_tap_area
-      resolved-ref: "1965f1c1240096b0596da4313753f438d721f46d"
-      url: "https://github.com/ente-io/media-kit.git"
-    source: git
-    version: "1.1.8+1"
+      name: media_kit
+      sha256: "1283b500341d41f033478706204a2b4ae2612e9b331c934bc4fad8c4bb869f6d"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.1.8+2"
   media_kit_libs_android_video:
     dependency: transitive
     description:
@@ -1195,11 +1194,10 @@ packages:
   media_kit_libs_video:
     dependency: "direct main"
     description:
-      path: "libs/universal/media_kit_libs_video"
-      ref: improved_seekbar_on_tap_area
-      resolved-ref: "1965f1c1240096b0596da4313753f438d721f46d"
-      url: "https://github.com/ente-io/media-kit.git"
-    source: git
+      name: media_kit_libs_video
+      sha256: f130964bd4c0907d0af645ba03c8080a914776bfd2e23761a5e22ac3c0c0906a
+      url: "https://pub.dev"
+    source: hosted
     version: "1.0.3"
   media_kit_libs_windows_video:
     dependency: transitive
@@ -1220,12 +1218,11 @@ packages:
   media_kit_video:
     dependency: "direct main"
     description:
-      path: media_kit_video
-      ref: improved_seekbar_on_tap_area
-      resolved-ref: "1965f1c1240096b0596da4313753f438d721f46d"
-      url: "https://github.com/ente-io/media-kit.git"
-    source: git
-    version: "1.2.0"
+      name: media_kit_video
+      sha256: b1a427f0540c5f052dfab73e4b76a5eb8efa7ebb5d83179cb23fc3932afc315a
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.2.1"
   meta:
     dependency: transitive
     description:

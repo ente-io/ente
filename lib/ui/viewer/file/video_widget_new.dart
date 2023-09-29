@@ -105,6 +105,7 @@ class _VideoWidgetNewState extends State<VideoWidgetNew> {
           seekBarColor: fillMutedDark,
           seekBarPositionColor: colorScheme.primary300,
           seekBarContainerHeight: 56,
+          seekBarAlignment: Alignment.center,
 
           ///topButtonBarMargin is needed for keeping the buffering loading
           ///indicator to be center aligned
