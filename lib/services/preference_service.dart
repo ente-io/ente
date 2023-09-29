@@ -11,6 +11,7 @@ class PreferenceService {
 
   static const kHasShownCoachMarkKey = "has_shown_coach_mark";
   static const kShouldShowLargeIconsKey = "should_show_large_icons";
+  static const kShouldHideCodesKey = "should_hide_codes";
   static const kShouldAutoFocusOnSearchBar = "should_auto_focus_on_search_bar";
 
   Future<void> init() async {
@@ -39,6 +40,15 @@ class PreferenceService {
 
   Future<void> setShowLargeIcons(bool value) async {
     await _prefs.setBool(kShouldShowLargeIconsKey, value);
+    Bus.instance.fire(IconsChangedEvent());
+  }
+
+  bool shouldHideCodes() {
+    return _prefs.getBool(kShouldHideCodesKey) ?? false;
+  }
+
+  Future<void> setHideCodes(bool value) async {
+    await _prefs.setBool(kShouldHideCodesKey, value);
     Bus.instance.fire(IconsChangedEvent());
   }
 
