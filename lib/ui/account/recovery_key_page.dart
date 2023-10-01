@@ -191,7 +191,7 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
                             children: _saveOptions(context, recoveryKey),
                           ),
                         ),
-                      )
+                      ),
                     ],
                   ), // columnEnds
                 ),

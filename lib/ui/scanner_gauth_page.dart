@@ -46,7 +46,8 @@ class ScannerGoogleAuthPageState extends State<ScannerGoogleAuthPage> {
             child: QRView(
               key: qrKey,
               overlay: QrScannerOverlayShape(
-                  borderColor: getEnteColorScheme(context).primary700,),
+                borderColor: getEnteColorScheme(context).primary700,
+              ),
               onQRViewCreated: _onQRViewCreated,
               formatsAllowed: const [BarcodeFormat.qrcode],
             ),
@@ -56,7 +57,7 @@ class ScannerGoogleAuthPageState extends State<ScannerGoogleAuthPage> {
             child: Center(
               child: (totp != null) ? Text(totp!) : Text(l10n.scanACode),
             ),
-          )
+          ),
         ],
       ),
     );

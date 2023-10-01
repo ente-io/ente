@@ -89,7 +89,7 @@ class ViewQrPage extends StatelessWidget {
                       child: Text(l10n.back),
                     ),
                   ),
-                )
+                ),
               ],
             ),
           ),

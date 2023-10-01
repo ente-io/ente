@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:clipboard/clipboard.dart';
 import 'package:ente_auth/core/configuration.dart';
@@ -17,6 +18,7 @@ import 'package:ente_auth/utils/totp_util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:logging/logging.dart';
+import 'package:move_to_background/move_to_background.dart';
 
 class CodeWidget extends StatefulWidget {
   final Code code;
@@ -141,7 +143,7 @@ class _CodeWidgetState extends State<CodeWidget> {
                   borderRadius: BorderRadius.circular(10),
                 ),
                 onTap: () {
-                  _copyToClipboard();
+                  _copyCurrentOTPToClipboard();
                 },
                 onDoubleTap: isMaskingEnabled
                     ? () {
@@ -153,7 +155,7 @@ class _CodeWidgetState extends State<CodeWidget> {
                       }
                     : null,
                 onLongPress: () {
-                  _copyToClipboard();
+                  _copyCurrentOTPToClipboard();
                 },
                 child: _getCardContents(l10n),
               ),
@@ -328,15 +330,32 @@ class _CodeWidgetState extends State<CodeWidget> {
     );
   }
 
-  void _copyToClipboard() {
-    FlutterClipboard.copy(_getCurrentOTP())
-        .then((value) => showToast(context, context.l10n.copiedToClipboard));
+  void _copyCurrentOTPToClipboard() async {
+    _copyToClipboard(
+      _getCurrentOTP(),
+      confirmationMessage: context.l10n.copiedToClipboard,
+    );
   }
 
   void _copyNextToClipboard() {
-    FlutterClipboard.copy(_getNextTotp()).then(
-      (value) => showToast(context, context.l10n.copiedNextToClipboard),
+    _copyToClipboard(
+      _getNextTotp(),
+      confirmationMessage: context.l10n.copiedNextToClipboard,
     );
+  }
+
+  void _copyToClipboard(
+    String content, {
+    required String confirmationMessage,
+  }) async {
+    final shouldMinimizeOnCopy =
+        PreferenceService.instance.shouldMinimizeOnCopy();
+
+    await FlutterClipboard.copy(content);
+    showToast(context, confirmationMessage);
+    if (Platform.isAndroid && shouldMinimizeOnCopy) {
+      MoveToBackground.moveTaskToBack();
+    }
   }
 
   void _onNextHotpTapped() {

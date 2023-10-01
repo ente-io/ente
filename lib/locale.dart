@@ -24,7 +24,7 @@ Locale localResolutionCallBack(locales, supportedLocales) {
   Locale? languageCodeMatch;
   final Map<String, Locale> languageCodeToLocale = {
     for (Locale supportedLocale in appSupportedLocales)
-      supportedLocale.languageCode: supportedLocale
+      supportedLocale.languageCode: supportedLocale,
   };
 
   for (Locale locale in locales) {

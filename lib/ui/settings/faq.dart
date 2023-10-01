@@ -95,7 +95,7 @@ class FaqWidget extends StatelessWidget {
                 ),
               ),
             ),
-          )
+          ),
         ],
       ),
     );
