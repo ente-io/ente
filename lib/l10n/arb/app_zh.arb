@@ -92,6 +92,7 @@
   "importCodeDelimiterInfo": "代码可以用逗号或新行分隔。",
   "selectFile": "选择文件",
   "emailVerificationToggle": "电子邮件验证",
+  "emailVerificationEnableWarning": "如果您将 2FA 存储到我们的电子邮件中，则打开电子邮件验证可能会导致僵局。如果您被一项服务锁定，您可能无法登录另一项服务。",
   "authToChangeEmailVerificationSetting": "请进行身份验证以更改电子邮件验证",
   "authToViewYourRecoveryKey": "请验证以查看您的恢复密钥",
   "authToChangeYourEmail": "请验证以更改您的电子邮件",
@@ -329,5 +330,6 @@
   "sigInBackupReminder": "请导出您的代码以确保您有可以恢复的备份。",
   "offlineModeWarning": "您已选择在不进行备份的情况下继续操作。请手动备份以确保您的代码安全。",
   "showLargeIcons": "显示大图标",
+  "shouldHideCode": "隐藏代码",
   "focusOnSearchBar": "应用启动后聚焦搜索"
 }
