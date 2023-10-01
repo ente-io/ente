@@ -51,7 +51,7 @@ class ScannerPageState extends State<ScannerPage> {
             child: Center(
               child: (totp != null) ? Text(totp!) : Text(l10n.scanACode),
             ),
-          )
+          ),
         ],
       ),
     );

@@ -48,7 +48,7 @@ class CaptionedTextWidget extends StatelessWidget {
                   ],
                 ),
               ),
-            )
+            ),
           ],
         ),
       ),

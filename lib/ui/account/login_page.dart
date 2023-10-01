@@ -204,14 +204,14 @@ class _LoginPageState extends State<LoginPage> {
                               style: const TextStyle(
                                 decoration: TextDecoration.underline,
                               ),
-                            )
+                            ),
                           },
                         ),
                       ),
                       Expanded(
                         flex: 2,
                         child: Container(),
-                      )
+                      ),
                     ],
                   ),
                 ),

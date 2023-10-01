@@ -221,7 +221,7 @@ State<LoginPasswordVerificationPage> {
                       ),
                     ],
                   ),
-                )
+                ),
               ],
             ),
           ),

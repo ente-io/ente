@@ -61,7 +61,7 @@ class TitleBarWidget extends StatelessWidget {
                 : Text(
                     caption!,
                     style: textTheme.mini.copyWith(color: colorTheme.textMuted),
-                  )
+                  ),
           ],
         ),
       ),
@@ -112,7 +112,7 @@ class TitleBarWidget extends StatelessWidget {
                                   ),
                                   overflow: TextOverflow.ellipsis,
                                   maxLines: 1,
-                                )
+                                ),
                         ],
                       ),
                     ),

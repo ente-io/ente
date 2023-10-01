@@ -277,7 +277,7 @@ void _showNoMailAppsDialog(BuildContext context, String toEmail) {
             onPressed: () {
               Navigator.pop(context);
             },
-          )
+          ),
         ],
       );
     },

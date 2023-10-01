@@ -403,7 +403,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                   style: const TextStyle(
                     decoration: TextDecoration.underline,
                   ),
-                )
+                ),
               },
             ),
           ),
