@@ -13,6 +13,7 @@ class PreferenceService {
   static const kShouldShowLargeIconsKey = "should_show_large_icons";
   static const kShouldHideCodesKey = "should_hide_codes";
   static const kShouldAutoFocusOnSearchBar = "should_auto_focus_on_search_bar";
+  static const kShouldMinimizeOnCopy = "should_minimize_on_copy";
 
   Future<void> init() async {
     _prefs = await SharedPreferences.getInstance();
@@ -63,5 +64,17 @@ class PreferenceService {
   Future<void> setAutoFocusOnSearchBar(bool value) async {
     await _prefs.setBool(kShouldAutoFocusOnSearchBar, value);
     Bus.instance.fire(IconsChangedEvent());
+  }
+
+  bool shouldMinimizeOnCopy() {
+    if (_prefs.containsKey(kShouldMinimizeOnCopy)) {
+      return _prefs.getBool(kShouldMinimizeOnCopy)!;
+    } else {
+      return false;
+    }
+  }
+
+  Future<void> setShouldMinimizeOnCopy(bool value) async {
+    await _prefs.setBool(kShouldMinimizeOnCopy, value);
   }
 }

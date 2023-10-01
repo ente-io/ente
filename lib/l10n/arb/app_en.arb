@@ -332,5 +332,6 @@
   "showLargeIcons": "Show large icons",
   "shouldHideCode": "Hide codes",
   "focusOnSearchBar": "Focus search on app start",
-  "confirmUpdatingkey": "Are you sure you want to update the secret key?"
+  "confirmUpdatingkey": "Are you sure you want to update the secret key?",
+  "minimizeAppOnCopy":  "Minimize app on copy"
 }
