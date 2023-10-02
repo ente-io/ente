@@ -6,6 +6,7 @@
 
 - Fixed app keeps reloading issue [#235](https://github.com/ente-io/photos-desktop/pull/235)
 - Fixed dng and arw preview issue [#1378](https://github.com/ente-io/photos-web/pull/1378)
+- Added view crash report option (help menu) for user to share electron crash report locally
 
 ## v1.6.44
 
