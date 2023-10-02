@@ -175,13 +175,13 @@ class SemanticSearchService {
     if (!hasLoaded) {
       return;
     }
-    _logger.info("Running clip over " + files.length.toString() + " items");
     final List<String> filePaths = [];
 
-    final startTime = DateTime.now();
     for (final file in files) {
       filePaths.add((await getThumbnailFile(file))!.path);
     }
+    _logger.info("Running clip over " + files.length.toString() + " items");
+    final startTime = DateTime.now();
     final List<List<double>> imageEmbeddings = [];
     if (filePaths.length == 1) {
       final result = await _computer.compute(
