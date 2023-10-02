@@ -1,6 +1,6 @@
 import * as log from 'electron-log';
 import util from 'util';
-import path from 'path';
+import { logErrorSentry } from './sentry';
 const shellescape = require('any-shell-escape');
 const execAsync = util.promisify(require('child_process').exec);
 
@@ -12,45 +12,49 @@ const IMAGE_EMBEDDING_EXTRACT_CMD: string[] = [
     GGMLCLIP_PATH_PLACEHOLDER,
     '-m',
     CLIP_MODEL_PATH_PLACEHOLDER,
-    '-image',
+    '--image',
     INPUT_PATH_PLACEHOLDER,
 ];
 
 function getClipModelPath() {
-    return path.join(
-        __dirname,
-        '../models/openai_clip-vit-base-patch32.ggmlv0.f16'
-    );
+    return './models/openai_clip-vit-base-patch32.ggmlv0.f16.bin';
 }
 
 function getGGMLClipPath() {
-    return path.join(__dirname, '../bin/ggmlclip');
+    return './bin/ggmlclip';
 }
 
 export async function computeImageEmbeddings(
     inputFilePath: string
 ): Promise<Float32Array> {
-    const clipModelPath = getClipModelPath();
-    const ggmlclipPath = getGGMLClipPath();
-    const cmd = IMAGE_EMBEDDING_EXTRACT_CMD.map((cmdPart) => {
-        if (cmdPart === GGMLCLIP_PATH_PLACEHOLDER) {
-            return ggmlclipPath;
-        } else if (cmdPart === CLIP_MODEL_PATH_PLACEHOLDER) {
-            return clipModelPath;
-        } else if (cmdPart === INPUT_PATH_PLACEHOLDER) {
-            return inputFilePath;
-        } else {
-            return cmdPart;
-        }
-    });
+    try {
+        const clipModelPath = getClipModelPath();
+        const ggmlclipPath = getGGMLClipPath();
+        const cmd = IMAGE_EMBEDDING_EXTRACT_CMD.map((cmdPart) => {
+            if (cmdPart === GGMLCLIP_PATH_PLACEHOLDER) {
+                return ggmlclipPath;
+            } else if (cmdPart === CLIP_MODEL_PATH_PLACEHOLDER) {
+                return clipModelPath;
+            } else if (cmdPart === INPUT_PATH_PLACEHOLDER) {
+                return inputFilePath;
+            } else {
+                return cmdPart;
+            }
+        });
 
-    const escapedCmd = shellescape(cmd);
-    log.info('running clip command', escapedCmd);
-    const startTime = Date.now();
-    const { stdout, stderr } = await execAsync(escapedCmd);
-    log.info('clip command execution time ', Date.now() - startTime);
-    log.info('clip command stdout ', stdout);
-    log.info('clip command stderr ', stderr);
-    const embeddings = JSON.parse(stdout);
-    return embeddings;
+        const escapedCmd = shellescape(cmd);
+        log.info('running clip command', escapedCmd);
+        const startTime = Date.now();
+        const { stdout } = await execAsync(escapedCmd);
+        log.info('clip command execution time ', Date.now() - startTime);
+        // parse stdout and return embeddings
+        // get the last line of stdout
+        const lines = stdout.split('\n');
+        const lastLine = lines[lines.length - 1];
+        const embeddings = JSON.parse(lastLine);
+        const embeddingsArray = new Float32Array(embeddings);
+        return embeddingsArray;
+    } catch (err) {
+        logErrorSentry(err, 'Error in computeImageEmbeddings');
+    }
 }
