@@ -92,6 +92,7 @@
   "importCodeDelimiterInfo": "I codici possono essere separati da una virgola o da una nuova riga",
   "selectFile": "Seleziona file",
   "emailVerificationToggle": "Verifica email",
+  "emailVerificationEnableWarning": "Se memorizzate il 2FA per accedere alla vostra email con noi, l'attivazione della verifica dell'email potrebbe provocare dei problemi. Se siete rimasti bloccati fuori da un servizio, potreste non essere in grado di accedere anche all'altro.",
   "authToChangeEmailVerificationSetting": "Autenticati per cambiare la verifica email",
   "authToViewYourRecoveryKey": "Autenticati per visualizzare la tua chiave di recupero",
   "authToChangeYourEmail": "Autenticati per cambiare la tua email",
@@ -329,5 +330,6 @@
   "sigInBackupReminder": "Si prega di esportare i codici per assicurarsi di avere un backup da cui è possibile ripristinare.",
   "offlineModeWarning": "Hai scelto di procedere senza backup. Si prega di eseguire backup manuali per assicurarsi che i codici siano al sicuro.",
   "showLargeIcons": "Mostra icone grandi",
+  "shouldHideCode": "Nascondi i codici",
   "focusOnSearchBar": "Apri ricerca all'avvio dell'app"
 }
