@@ -106,6 +106,8 @@ export function logSystemInfo() {
     const osName = process.platform;
     const osRelease = os.release();
     ElectronLog.info({ osName, osRelease, systemVersion });
+    const appVersion = app.getVersion();
+    ElectronLog.info({ appVersion });
 }
 
 export function handleExternalLinks(mainWindow: BrowserWindow) {
