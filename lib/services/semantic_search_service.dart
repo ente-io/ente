@@ -18,7 +18,7 @@ class SemanticSearchService {
       SemanticSearchService._privateConstructor();
   static final Computer _computer = Computer.shared();
 
-  static const int batchSize = 4;
+  static const int batchSize = 1;
 
   bool hasLoaded = false;
   final _logger = Logger("SemanticSearchService");
@@ -176,31 +176,32 @@ class SemanticSearchService {
       return;
     }
     _logger.info("Running clip over " + files.length.toString() + " items");
-    final List<EnteFile> filesToBeIndexed = [];
     final List<String> filePaths = [];
 
     final startTime = DateTime.now();
-    final embeddings = await FilesDB.instance.getAllEmbeddings();
     for (final file in files) {
-      bool hasCachedEmbedding = false;
-      for (final embedding in embeddings) {
-        if (embedding.id == file.generatedID) {
-          _logger.info("Found cached embedding");
-          hasCachedEmbedding = true;
-        }
-      }
-      if (!hasCachedEmbedding) {
-        filesToBeIndexed.add(file);
-        filePaths.add((await getThumbnailFile(file))!.path);
-      }
+      filePaths.add((await getThumbnailFile(file))!.path);
     }
-    final imageEmbeddings = await _computer.compute(
-      createImageEmbeddings,
-      param: {
-        "imagePaths": filePaths,
-      },
-      taskName: "createImageEmbedding",
-    ) as List<List<double>>;
+    final List<List<double>> imageEmbeddings = [];
+    if (filePaths.length == 1) {
+      final result = await _computer.compute(
+        createImageEmbedding,
+        param: {
+          "imagePath": filePaths.first,
+        },
+        taskName: "createImageEmbedding",
+      ) as List<double>;
+      imageEmbeddings.add(result);
+    } else {
+      final result = await _computer.compute(
+        createImageEmbeddings,
+        param: {
+          "imagePaths": filePaths,
+        },
+        taskName: "createImageEmbeddings",
+      ) as List<List<double>>;
+      imageEmbeddings.addAll(result);
+    }
     for (int i = 0; i < imageEmbeddings.length; i++) {
       await FilesDB.instance.insertEmbedding(
         Embedding(
