@@ -33,9 +33,11 @@ export const SUPPORTED_RAW_FORMATS = [
     'heic',
     'rw2',
     'tiff',
+    'arw',
     'cr3',
     'cr2',
     'nef',
     'psd',
     'dng',
+    'tif',
 ];
