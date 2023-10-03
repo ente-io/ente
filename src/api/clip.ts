@@ -2,15 +2,13 @@ import { ipcRenderer } from 'electron';
 import { writeStream } from '../services/fs';
 
 export async function computeImageEmbeddings(
-    imageFile: File
+    imageData: Uint8Array
 ): Promise<Float32Array> {
     let tempInputFilePath = null;
     try {
-        tempInputFilePath = await ipcRenderer.invoke(
-            'get-temp-file-path',
-            imageFile.name
-        );
-        await writeStream(tempInputFilePath, imageFile.stream());
+        tempInputFilePath = await ipcRenderer.invoke('get-temp-file-path', '');
+        const imageStream = new Response(imageData.buffer).body;
+        await writeStream(tempInputFilePath, imageStream);
         const embeddings = await ipcRenderer.invoke(
             'compute-image-embeddings',
             tempInputFilePath
