@@ -213,15 +213,6 @@ class SemanticSearchService {
       ) as List<List<double>>;
       imageEmbeddings.addAll(result);
     }
-    for (int i = 0; i < imageEmbeddings.length; i++) {
-      await FilesDB.instance.insertEmbedding(
-        Embedding(
-          files[i].generatedID!,
-          "c_uq",
-          imageEmbeddings[i],
-        ),
-      );
-    }
     final endTime = DateTime.now();
     _logger.info(
       "createImageEmbeddings took: " +
@@ -231,6 +222,16 @@ class SemanticSearchService {
           imageEmbeddings.length.toString() +
           " items",
     );
+    for (int i = 0; i < imageEmbeddings.length; i++) {
+      EmbeddingStore.instance.storeEmbedding(
+        files[i],
+        Embedding(
+          files[i].uploadedFileID!,
+          "c_uq",
+          imageEmbeddings[i],
+        ),
+      );
+    }
   }
 }
 
