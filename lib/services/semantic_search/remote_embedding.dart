@@ -28,3 +28,10 @@ class RemoteEmbedding {
   factory RemoteEmbedding.fromJson(String source) =>
       RemoteEmbedding.fromMap(json.decode(source));
 }
+
+class RemoteEmbeddings {
+  final List<RemoteEmbedding> embeddings;
+  final bool hasMore;
+
+  RemoteEmbeddings(this.embeddings, this.hasMore);
+}

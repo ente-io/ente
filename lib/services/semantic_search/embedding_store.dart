@@ -19,7 +19,18 @@ class EmbeddingStore {
     _preferences = preferences;
   }
 
-  Future<List<RemoteEmbedding>> fetchEmbeddings({int limit = 500}) async {
+  Future<void> fetchEmbeddings() async {
+    final remoteEmbeddings = await _getRemoteEmbeddings();
+    await _storeEmbeddings(remoteEmbeddings.embeddings);
+    if (remoteEmbeddings.hasMore) {
+      return fetchEmbeddings();
+    }
+  }
+
+  Future<RemoteEmbeddings> _getRemoteEmbeddings({
+    int limit = 500,
+  }) async {
+    final remoteEmbeddings = <RemoteEmbedding>[];
     try {
       final response = await _dio.get(
         "/embeddings/diff",
@@ -28,16 +39,21 @@ class EmbeddingStore {
           "limit": limit,
         },
       );
-      final remoteEmbeddings = <RemoteEmbedding>[];
       final diff = response.data["diff"] as List;
       for (var entry in diff) {
         final embedding = RemoteEmbedding.fromMap(entry);
         remoteEmbeddings.add(embedding);
       }
-      return remoteEmbeddings;
     } catch (e, s) {
       _logger.severe(e, s);
     }
-    return [];
+    return RemoteEmbeddings(
+      remoteEmbeddings,
+      remoteEmbeddings.length == limit,
+    );
+  }
+
+  Future<void> _storeEmbeddings(List<RemoteEmbedding> remoteEmbeddings) async {
+    // TODO store embeddings
   }
 }
