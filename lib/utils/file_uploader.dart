@@ -15,6 +15,7 @@ import 'package:photos/core/event_bus.dart';
 import 'package:photos/core/network/network.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/db/upload_locks_db.dart';
+import "package:photos/events/file_uploaded_event.dart";
 import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/events/subscription_purchased_event.dart';
@@ -283,7 +284,6 @@ class FileUploader {
     }
   }
 
-
   Future<void> removeStaleFiles() async {
     try {
       final String dir = Configuration.instance.getTempDirectory();
@@ -534,6 +534,7 @@ class FileUploader {
       }
       _logger.info("File upload complete for " + remoteFile.toString());
       uploadCompleted = true;
+      Bus.instance.fire(FileUploadedEvent(remoteFile));
       return remoteFile;
     } catch (e, s) {
       if (!(e is NoActiveSubscriptionError ||
@@ -764,8 +765,8 @@ class FileUploader {
         !file.isSharedMediaToAppSandbox;
     // If the file is not uploaded yet and either it can not be ignored or the
     // err is related to live photo media, delete the local entry
-    final bool deleteEntry = !file.isUploaded &&
-        (!canIgnoreFile || e.reason.isLivePhotoErr);
+    final bool deleteEntry =
+        !file.isUploaded && (!canIgnoreFile || e.reason.isLivePhotoErr);
 
     if (e.reason != InvalidReason.thumbnailMissing || !canIgnoreFile) {
       _logger.severe(

@@ -9,6 +9,7 @@ import "package:logging/logging.dart";
 import "package:path_provider/path_provider.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/db/files_db.dart";
+import "package:photos/events/file_uploaded_event.dart";
 import "package:photos/events/sync_status_update_event.dart";
 import "package:photos/models/embedding.dart";
 import "package:photos/models/file/file.dart";
@@ -31,6 +32,7 @@ class SemanticSearchService {
   final _queue = Queue<EnteFile>();
 
   bool hasLoaded = false;
+  bool isComputingEmbeddings = false;
   Future<List<EnteFile>>? _ongoingRequest;
   PendingQuery? _nextQuery;
 
@@ -42,8 +44,10 @@ class SemanticSearchService {
         EmbeddingStore.instance.fetchEmbeddings();
       }
     });
-
-    _computeMissingEmbeddings();
+    Bus.instance.on<FileUploadedEvent>().listen((event) async {
+      _addToQueue(event.file);
+    });
+    _backFill();
   }
 
   Future<List<EnteFile>> search(String query) async {
@@ -139,6 +143,12 @@ class SemanticSearchService {
     return results;
   }
 
+  void _addToQueue(EnteFile file) {
+    _logger.info("Adding " + file.toString() + " to the queue");
+    _queue.add(file);
+    _pollQueue();
+  }
+
   Future<void> _loadModel() async {
     final path = await _getAccessiblePathForAsset(kModelPath, "model.bin");
     final startTime = DateTime.now();
@@ -167,10 +177,18 @@ class SemanticSearchService {
     return file.path;
   }
 
-  Future<void> _computeMissingEmbeddings() async {
+  Future<void> _backFill() async {
     final files = await FilesDB.instance.getFilesWithoutEmbeddings();
     _logger.info(files.length.toString() + " pending to be embedded");
     _queue.addAll(files);
+    _pollQueue();
+  }
+
+  Future<void> _pollQueue() async {
+    if (isComputingEmbeddings) {
+      return;
+    }
+    isComputingEmbeddings = true;
 
     final List<EnteFile> batch = [];
     while (_queue.isNotEmpty) {
@@ -182,10 +200,12 @@ class SemanticSearchService {
       }
     }
     await _computeImageEmbeddings(batch);
+
+    isComputingEmbeddings = false;
   }
 
   Future<void> _computeImageEmbeddings(List<EnteFile> files) async {
-    if (!hasLoaded) {
+    if (!hasLoaded || files.isEmpty) {
       return;
     }
     final List<String> filePaths = [];
