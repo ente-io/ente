@@ -96,7 +96,6 @@ export async function computeTextEmbeddings(
         const lastLine = lines[lines.length - 1];
         const embeddings = JSON.parse(lastLine);
         const embeddingsArray = new Float32Array(embeddings);
-        console.log('embeddingsArray', embeddingsArray);
         return embeddingsArray;
     } catch (err) {
         logErrorSentry(err, 'Error in computeImageEmbeddings');
