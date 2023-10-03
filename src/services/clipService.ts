@@ -16,6 +16,14 @@ const IMAGE_EMBEDDING_EXTRACT_CMD: string[] = [
     INPUT_PATH_PLACEHOLDER,
 ];
 
+const TEXT_EMBEDDING_EXTRACT_CMD: string[] = [
+    GGMLCLIP_PATH_PLACEHOLDER,
+    '-m',
+    CLIP_MODEL_PATH_PLACEHOLDER,
+    '--text',
+    INPUT_PATH_PLACEHOLDER,
+];
+
 function getClipModelPath() {
     return './models/openai_clip-vit-base-patch32.ggmlv0.f16.bin';
 }
@@ -53,6 +61,42 @@ export async function computeImageEmbeddings(
         const lastLine = lines[lines.length - 1];
         const embeddings = JSON.parse(lastLine);
         const embeddingsArray = new Float32Array(embeddings);
+        return embeddingsArray;
+    } catch (err) {
+        logErrorSentry(err, 'Error in computeImageEmbeddings');
+    }
+}
+
+export async function computeTextEmbeddings(
+    text: string
+): Promise<Float32Array> {
+    try {
+        const clipModelPath = getClipModelPath();
+        const ggmlclipPath = getGGMLClipPath();
+        const cmd = TEXT_EMBEDDING_EXTRACT_CMD.map((cmdPart) => {
+            if (cmdPart === GGMLCLIP_PATH_PLACEHOLDER) {
+                return ggmlclipPath;
+            } else if (cmdPart === CLIP_MODEL_PATH_PLACEHOLDER) {
+                return clipModelPath;
+            } else if (cmdPart === INPUT_PATH_PLACEHOLDER) {
+                return text;
+            } else {
+                return cmdPart;
+            }
+        });
+
+        const escapedCmd = shellescape(cmd);
+        log.info('running clip command', escapedCmd);
+        const startTime = Date.now();
+        const { stdout } = await execAsync(escapedCmd);
+        log.info('clip command execution time ', Date.now() - startTime);
+        // parse stdout and return embeddings
+        // get the last line of stdout
+        const lines = stdout.split('\n');
+        const lastLine = lines[lines.length - 1];
+        const embeddings = JSON.parse(lastLine);
+        const embeddingsArray = new Float32Array(embeddings);
+        console.log('embeddingsArray', embeddingsArray);
         return embeddingsArray;
     } catch (err) {
         logErrorSentry(err, 'Error in computeImageEmbeddings');

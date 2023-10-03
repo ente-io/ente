@@ -59,7 +59,7 @@ import {
     logRendererProcessMemoryUsage,
 } from './utils/processStats';
 import { runFFmpegCmd } from './api/ffmpeg';
-import { computeImageEmbeddings } from './api/clip';
+import { computeImageEmbeddings, computeTextEmbeddings } from './api/clip';
 
 fixHotReloadNext12();
 setupLogging();
@@ -116,4 +116,5 @@ windowObject['ElectronAPIs'] = {
     deleteFile,
     updateOptOutOfCrashReports,
     computeImageEmbeddings,
+    computeTextEmbeddings,
 };

@@ -20,3 +20,13 @@ export async function computeImageEmbeddings(
         }
     }
 }
+
+export async function computeTextEmbeddings(
+    text: string
+): Promise<Float32Array> {
+    const embeddings = await ipcRenderer.invoke(
+        'compute-text-embeddings',
+        text
+    );
+    return embeddings;
+}
