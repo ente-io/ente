@@ -23,6 +23,8 @@ class SemanticSearchService {
   static final Computer _computer = Computer.shared();
 
   static const int batchSize = 1;
+  static const kModelPath =
+      "assets/models/clip/openai_clip-vit-base-patch32.ggmlv0.f16.bin";
 
   bool hasLoaded = false;
   final _logger = Logger("SemanticSearchService");
@@ -135,10 +137,7 @@ class SemanticSearchService {
   }
 
   Future<void> _loadModel() async {
-    const modelPath =
-        "assets/models/clip/openai_clip-vit-base-patch32.ggmlv0.f16.bin";
-
-    final path = await _getAccessiblePathForAsset(modelPath, "model.bin");
+    final path = await _getAccessiblePathForAsset(kModelPath, "model.bin");
     final startTime = DateTime.now();
     CLIP.loadModel(path);
     final endTime = DateTime.now();
