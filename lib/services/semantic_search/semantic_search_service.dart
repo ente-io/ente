@@ -6,10 +6,14 @@ import "package:computer/computer.dart";
 import "package:flutter/services.dart";
 import "package:logging/logging.dart";
 import "package:path_provider/path_provider.dart";
+import "package:photos/core/event_bus.dart";
 import "package:photos/db/files_db.dart";
+import "package:photos/events/sync_status_update_event.dart";
 import "package:photos/models/embedding.dart";
 import "package:photos/models/file/file.dart";
+import "package:photos/services/semantic_search/embedding_store.dart";
 import "package:photos/utils/thumbnail_util.dart";
+import "package:shared_preferences/shared_preferences.dart";
 
 class SemanticSearchService {
   SemanticSearchService._privateConstructor();
@@ -25,8 +29,15 @@ class SemanticSearchService {
   Future<List<EnteFile>>? _ongoingRequest;
   PendingQuery? _nextQuery;
 
-  Future<void> init() async {
+  Future<void> init(SharedPreferences preferences) async {
     await _loadModel();
+    await EmbeddingStore.instance.init(preferences);
+    Bus.instance.on<SyncStatusUpdate>().listen((event) async {
+      if (event.status == SyncStatus.diffSynced) {
+        EmbeddingStore.instance.fetchEmbeddings();
+      }
+    });
+
     _computeMissingEmbeddings();
   }
 

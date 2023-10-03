@@ -34,7 +34,7 @@ import 'package:photos/services/memories_service.dart';
 import 'package:photos/services/push_service.dart';
 import 'package:photos/services/remote_sync_service.dart';
 import 'package:photos/services/search_service.dart';
-import "package:photos/services/semantic_search_service.dart";
+import 'package:photos/services/semantic_search/semantic_search_service.dart';
 import "package:photos/services/storage_bonus_service.dart";
 import 'package:photos/services/sync_service.dart';
 import 'package:photos/services/trash_sync_service.dart';
@@ -190,7 +190,7 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     });
   }
   FeatureFlagService.instance.init();
-  SemanticSearchService.instance.init();
+  SemanticSearchService.instance.init(preferences);
 
   // Can not including existing tf/ml binaries as they are not being built
   // from source.
