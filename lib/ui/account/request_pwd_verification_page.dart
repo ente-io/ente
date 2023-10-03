@@ -2,7 +2,6 @@ import "dart:convert";
 import "dart:typed_data";
 
 import 'package:flutter/material.dart';
-import "package:flutter_sodium/flutter_sodium.dart";
 import "package:logging/logging.dart";
 import 'package:photos/core/configuration.dart';
 import "package:photos/l10n/l10n.dart";
@@ -90,14 +89,14 @@ class _RequestPasswordVerificationPageState
             final attributes = Configuration.instance.getKeyAttributes()!;
             final Uint8List keyEncryptionKey = await CryptoUtil.deriveKey(
               utf8.encode(_passwordController.text) as Uint8List,
-              Sodium.base642bin(attributes.kekSalt),
+              CryptoUtil.base642bin(attributes.kekSalt),
               attributes.memLimit!,
               attributes.opsLimit!,
             );
             CryptoUtil.decryptSync(
-              Sodium.base642bin(attributes.encryptedKey),
+              CryptoUtil.base642bin(attributes.encryptedKey),
               keyEncryptionKey,
-              Sodium.base642bin(attributes.keyDecryptionNonce),
+              CryptoUtil.base642bin(attributes.keyDecryptionNonce),
             );
             dialog.show();
             // pop

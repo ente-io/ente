@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'dart:math';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:logging/logging.dart';
 import "package:photos/core/configuration.dart";
 import "package:photos/core/network/network.dart";
@@ -62,8 +61,8 @@ class EntityService {
       key,
     );
     final String encryptedData =
-        Sodium.bin2base64(encryptedKeyData.encryptedData!);
-    final String header = Sodium.bin2base64(encryptedKeyData.header!);
+        CryptoUtil.bin2base64(encryptedKeyData.encryptedData!);
+    final String header = CryptoUtil.bin2base64(encryptedKeyData.header!);
     debugPrint("Adding entity of type: " + type.typeToString());
     final EntityData data = id == null
         ? await _gateway.createEntity(type, encryptedData, header)
@@ -121,9 +120,9 @@ class EntityService {
       for (EntityData e in result) {
         try {
           final decryptedValue = await CryptoUtil.decryptChaCha(
-            Sodium.base642bin(e.encryptedData!),
+            CryptoUtil.base642bin(e.encryptedData!),
             entityKey,
-            Sodium.base642bin(e.header!),
+            CryptoUtil.base642bin(e.header!),
           );
           final String plainText = utf8.decode(decryptedValue);
           entities.add(
@@ -166,17 +165,17 @@ class EntityService {
         _prefs.setString(_getEntityHeaderPrefix(type), header);
       }
       final entityKey = CryptoUtil.decryptSync(
-        Sodium.base642bin(encryptedKey),
+        CryptoUtil.base642bin(encryptedKey),
         _config.getKey()!,
-        Sodium.base642bin(header),
+        CryptoUtil.base642bin(header),
       );
       return entityKey;
     } on EntityKeyNotFound {
       _logger.info("EntityKeyNotFound generating key for type $type");
       final key = CryptoUtil.generateKey();
       final encryptedKeyData = CryptoUtil.encryptSync(key, _config.getKey()!);
-      encryptedKey = Sodium.bin2base64(encryptedKeyData.encryptedData!);
-      header = Sodium.bin2base64(encryptedKeyData.nonce!);
+      encryptedKey = CryptoUtil.bin2base64(encryptedKeyData.encryptedData!);
+      header = CryptoUtil.bin2base64(encryptedKeyData.nonce!);
       await _gateway.createKey(type, encryptedKey, header);
       await _prefs.setString(_getEntityKeyPrefix(type), encryptedKey);
       await _prefs.setString(_getEntityHeaderPrefix(type), header);
