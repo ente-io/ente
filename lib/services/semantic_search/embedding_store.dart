@@ -97,12 +97,12 @@ class EmbeddingStore {
         continue;
       }
       final fileKey = getFileKey(file);
-      final encodedEmbedding = await CryptoUtil.decryptChaCha(
+      final embeddingData = await CryptoUtil.decryptChaCha(
         CryptoUtil.base642bin(embedding.encryptedEmbedding),
         fileKey,
         CryptoUtil.base642bin(embedding.decryptionHeader),
       );
-      final decodedEmbedding = Float64List.view(encodedEmbedding.buffer);
+      final decodedEmbedding = Float64List.view(embeddingData.buffer);
 
       embeddings.add(
         Embedding(
