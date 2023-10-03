@@ -22,19 +22,40 @@ class EmbeddingStore {
 
   late SharedPreferences _preferences;
 
+  bool isSyncing = false;
+
   Future<void> init(SharedPreferences preferences) async {
     _preferences = preferences;
   }
 
-  Future<void> fetchEmbeddings() async {
-    final remoteEmbeddings = await _getRemoteEmbeddings();
-    await _storeEmbeddings(remoteEmbeddings.embeddings);
-    if (remoteEmbeddings.hasMore) {
-      return fetchEmbeddings();
+  Future<void> pullEmbeddings() async {
+    if (isSyncing) {
+      return;
+    }
+    isSyncing = true;
+    var remoteEmbeddings = await _getRemoteEmbeddings();
+    await _storeRemoteEmbeddings(remoteEmbeddings.embeddings);
+    while (remoteEmbeddings.hasMore) {
+      remoteEmbeddings = await _getRemoteEmbeddings();
+      await _storeRemoteEmbeddings(remoteEmbeddings.embeddings);
+    }
+    isSyncing = false;
+  }
+
+  Future<void> pushEmbeddings() async {
+    final pendingItems = await FilesDB.instance.getUnSyncedEmbeddings();
+    for (final item in pendingItems) {
+      final file = await FilesDB.instance.getAnyUploadedFile(item.fileID);
+      await _pushEmbedding(file!, item);
     }
   }
 
   Future<void> storeEmbedding(EnteFile file, Embedding embedding) async {
+    await FilesDB.instance.upsertEmbedding(embedding);
+    await _pushEmbedding(file, embedding);
+  }
+
+  Future<void> _pushEmbedding(EnteFile file, Embedding embedding) async {
     final encryptionKey = getFileKey(file);
     final embeddingData =
         Uint8List.view(Float64List.fromList(embedding.embedding).buffer);
@@ -57,10 +78,10 @@ class EmbeddingStore {
       );
       final updationTime = response.data["updationTime"];
       embedding.updationTime = updationTime;
+      await FilesDB.instance.upsertEmbedding(embedding);
     } catch (e, s) {
       _logger.severe(e, s);
     }
-    await FilesDB.instance.insertEmbedding(embedding);
   }
 
   Future<RemoteEmbeddings> _getRemoteEmbeddings({
@@ -89,7 +110,9 @@ class EmbeddingStore {
     );
   }
 
-  Future<void> _storeEmbeddings(List<RemoteEmbedding> remoteEmbeddings) async {
+  Future<void> _storeRemoteEmbeddings(
+    List<RemoteEmbedding> remoteEmbeddings,
+  ) async {
     final embeddings = <Embedding>[];
     for (final embedding in remoteEmbeddings) {
       final file = await FilesDB.instance.getAnyUploadedFile(embedding.fileID);

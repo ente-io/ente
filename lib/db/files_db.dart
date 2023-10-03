@@ -1556,7 +1556,7 @@ class FilesDB {
     return FileLoadResult(filteredFiles, files.length == limit);
   }
 
-  Future<void> insertEmbedding(Embedding embedding) async {
+  Future<void> upsertEmbedding(Embedding embedding) async {
     final db = await instance.database;
     await db.insert(
       embeddingsTable,
@@ -1593,7 +1593,7 @@ class FilesDB {
     return _convertToEmbeddings(results);
   }
 
-    Future<List<Embedding>> getUnsyncedEmbeddings() async {
+  Future<List<Embedding>> getUnSyncedEmbeddings() async {
     final db = await instance.database;
     final results = await db.query(
       embeddingsTable,

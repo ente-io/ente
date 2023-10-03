@@ -39,15 +39,16 @@ class SemanticSearchService {
   Future<void> init(SharedPreferences preferences) async {
     await _loadModel();
     await EmbeddingStore.instance.init(preferences);
+    await EmbeddingStore.instance.pushEmbeddings();
     Bus.instance.on<SyncStatusUpdate>().listen((event) async {
       if (event.status == SyncStatus.diffSynced) {
-        EmbeddingStore.instance.fetchEmbeddings();
+        await EmbeddingStore.instance.pullEmbeddings();
       }
     });
     Bus.instance.on<FileUploadedEvent>().listen((event) async {
       _addToQueue(event.file);
     });
-    _backFill();
+    _startBackFill();
   }
 
   Future<List<EnteFile>> search(String query) async {
@@ -177,7 +178,7 @@ class SemanticSearchService {
     return file.path;
   }
 
-  Future<void> _backFill() async {
+  Future<void> _startBackFill() async {
     final files = await FilesDB.instance.getFilesWithoutEmbeddings();
     _logger.info(files.length.toString() + " pending to be embedded");
     _queue.addAll(files);
