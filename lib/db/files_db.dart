@@ -60,6 +60,7 @@ class FilesDB {
   static const columnMetadataDecryptionHeader = 'metadata_decryption_header';
   static const columnFileSize = 'file_size';
   static const columnEmbedding = 'embedding';
+  static const columnModel = 'model';
 
   // MMD -> Magic Metadata
   static const columnMMdEncodedJson = 'mmd_encoded_json';
@@ -74,7 +75,6 @@ class FilesDB {
   static const columnMMdVisibility = 'mmd_visibility';
 
   static final initializationScript = [
-    enableForeignKeys(),
     ...createTable(filesTable),
   ];
   static final migrationScripts = [
@@ -119,10 +119,6 @@ class FilesDB {
     final String path = join(documentsDirectory.path, _databaseName);
     _logger.info("DB path " + path);
     return await openDatabaseWithMigration(path, dbConfig);
-  }
-
-  static String enableForeignKeys() {
-    return "PRAGMA foreign_keys = ON;";
   }
 
   // SQL code to create the database table
@@ -395,10 +391,10 @@ class FilesDB {
     return [
       '''
        CREATE TABLE IF NOT EXISTS $embeddingsTable (
-          $columnGeneratedID INTEGER PRIMARY KEY,
+          $columnUploadedFileID INTEGER PRIMARY KEY,
+          $columnModel TEXT NOT NULL,
           $columnEmbedding TEXT NOT NULL,
-          $columnUpdationTime INTEGER NOT NULL DEFAULT -1,
-          FOREIGN KEY($columnGeneratedID) REFERENCES $filesTable($columnGeneratedID)
+          $columnUpdationTime INTEGER NOT NULL DEFAULT -1
       );
       '''
     ];
@@ -1565,10 +1561,14 @@ class FilesDB {
   Future<List<EnteFile>> getFilesWithoutEmbeddings() async {
     final db = await instance.database;
     final result = await db.rawQuery('''
-      SELECT $filesTable.*
+      SELECT *
       FROM $filesTable
-      LEFT JOIN $embeddingsTable ON $filesTable.$columnGeneratedID = $embeddingsTable.$columnGeneratedID
-      WHERE $embeddingsTable.$columnGeneratedID IS NULL;
+      WHERE NOT EXISTS (
+          SELECT 1
+          FROM $embeddingsTable
+          WHERE $embeddingsTable.$columnUploadedFileID = $filesTable.$columnUploadedFileID
+      )
+      GROUP BY $filesTable.$columnUploadedFileID;
     ''');
     return convertToFiles(result);
   }
@@ -1713,7 +1713,8 @@ class FilesDB {
 
   Map<String, dynamic> _getRowForEmbedding(Embedding embedding) {
     final row = <String, dynamic>{};
-    row[columnGeneratedID] = embedding.id;
+    row[columnUploadedFileID] = embedding.fileID;
+    row[columnModel] = embedding.model;
     row[columnEmbedding] = Embedding.encodeEmbedding(embedding.embedding);
     row[columnUpdationTime] = embedding.updationTime;
     return row;
@@ -1721,7 +1722,8 @@ class FilesDB {
 
   Embedding _getEmbeddingFromRow(Map<String, dynamic> row) {
     return Embedding(
-      row[columnGeneratedID],
+      row[columnUploadedFileID],
+      row[columnModel],
       Embedding.decodeEmbedding(row[columnEmbedding]),
       row[columnUpdationTime],
     );

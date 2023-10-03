@@ -1,11 +1,12 @@
 import "dart:convert";
 
 class Embedding {
-  final int id;
+  final int fileID;
+  final String model;
   final List<double> embedding;
   final int updationTime;
 
-  Embedding(this.id, this.embedding, this.updationTime);
+  Embedding(this.fileID, this.model, this.embedding, this.updationTime);
 
   static List<double> decodeEmbedding(String embedding) {
     return List<double>.from(jsonDecode(embedding) as List);
