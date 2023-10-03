@@ -1,6 +1,12 @@
+import "dart:typed_data";
+
 import "package:logging/logging.dart";
 import "package:photos/core/network/network.dart";
+import "package:photos/db/files_db.dart";
+import "package:photos/models/embedding.dart";
 import "package:photos/services/semantic_search/remote_embedding.dart";
+import "package:photos/utils/crypto_util.dart";
+import "package:photos/utils/file_download_util.dart";
 import "package:shared_preferences/shared_preferences.dart";
 
 class EmbeddingStore {
@@ -54,6 +60,29 @@ class EmbeddingStore {
   }
 
   Future<void> _storeEmbeddings(List<RemoteEmbedding> remoteEmbeddings) async {
-    // TODO store embeddings
+    final embeddings = <Embedding>[];
+    for (final embedding in remoteEmbeddings) {
+      final file = await FilesDB.instance.getAnyUploadedFile(embedding.fileID);
+      if (file == null) {
+        continue;
+      }
+      final fileKey = getFileKey(file);
+      final encodedEmbedding = await CryptoUtil.decryptChaCha(
+        CryptoUtil.base642bin(embedding.encryptedEmbedding),
+        fileKey,
+        CryptoUtil.base642bin(embedding.decryptionHeader),
+      );
+      final decodedEmbedding = Float64List.view(encodedEmbedding.buffer);
+
+      embeddings.add(
+        Embedding(
+          embedding.fileID,
+          embedding.model,
+          decodedEmbedding,
+          embedding.updationTime,
+        ),
+      );
+    }
+    await FilesDB.instance.insertEmbeddings(embeddings);
   }
 }

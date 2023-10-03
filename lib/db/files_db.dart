@@ -493,6 +493,21 @@ class FilesDB {
     return convertToFiles(results)[0];
   }
 
+  Future<EnteFile?> getAnyUploadedFile(int uploadedID) async {
+    final db = await instance.database;
+    final results = await db.query(
+      filesTable,
+      where: '$columnUploadedFileID = ?',
+      whereArgs: [
+        uploadedID,
+      ],
+    );
+    if (results.isEmpty) {
+      return null;
+    }
+    return convertToFiles(results)[0];
+  }
+
   Future<Set<int>> getUploadedFileIDs(int collectionID) async {
     final db = await instance.database;
     final results = await db.query(
@@ -1548,6 +1563,26 @@ class FilesDB {
       _getRowForEmbedding(embedding),
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
+  }
+
+  Future<void> insertEmbeddings(List<Embedding> embeddings) async {
+    final db = await database;
+    var batch = db.batch();
+    int batchCounter = 0;
+    for (final embedding in embeddings) {
+      if (batchCounter == 400) {
+        await batch.commit(noResult: true);
+        batch = db.batch();
+        batchCounter = 0;
+      }
+      batch.insert(
+        embeddingsTable,
+        _getRowForEmbedding(embedding),
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
+      batchCounter++;
+    }
+    await batch.commit(noResult: true);
   }
 
   Future<List<Embedding>> getAllEmbeddings() async {
