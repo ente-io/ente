@@ -394,7 +394,7 @@ class FilesDB {
           $columnUploadedFileID INTEGER PRIMARY KEY,
           $columnModel TEXT NOT NULL,
           $columnEmbedding TEXT NOT NULL,
-          $columnUpdationTime INTEGER NOT NULL DEFAULT -1
+          $columnUpdationTime INTEGER
       );
       '''
     ];
@@ -1593,6 +1593,15 @@ class FilesDB {
     return _convertToEmbeddings(results);
   }
 
+    Future<List<Embedding>> getUnsyncedEmbeddings() async {
+    final db = await instance.database;
+    final results = await db.query(
+      embeddingsTable,
+      where: '$columnUpdationTime IS NULL',
+    );
+    return _convertToEmbeddings(results);
+  }
+
   Future<List<EnteFile>> getFilesWithoutEmbeddings() async {
     final db = await instance.database;
     final result = await db.rawQuery('''
@@ -1751,7 +1760,7 @@ class FilesDB {
     row[columnUploadedFileID] = embedding.fileID;
     row[columnModel] = embedding.model;
     row[columnEmbedding] = Embedding.encodeEmbedding(embedding.embedding);
-    row[columnUpdationTime] = embedding.updationTime ?? -1;
+    row[columnUpdationTime] = embedding.updationTime;
     return row;
   }
 
