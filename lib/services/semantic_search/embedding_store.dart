@@ -113,6 +113,10 @@ class EmbeddingStore {
         ),
       );
     }
+    embeddings.sort(
+      (first, second) => first.updationTime!.compareTo(second.updationTime!),
+    );
     await FilesDB.instance.insertEmbeddings(embeddings);
+    _preferences.setInt(kEmbeddingsSyncTimeKey, embeddings.last.updationTime!);
   }
 }
