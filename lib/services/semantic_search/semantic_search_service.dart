@@ -100,7 +100,7 @@ class SemanticSearchService {
         "imageEmbedding": embedding.embedding,
         "textEmbedding": textEmbedding,
       });
-      queryResults.add(QueryResult(embedding.id, score));
+      queryResults.add(QueryResult(embedding.fileID, score));
     }
     queryResults.sort((first, second) => second.score.compareTo(first.score));
     queryResults.removeWhere((element) => element.score < 0.25);
@@ -217,8 +217,8 @@ class SemanticSearchService {
       await FilesDB.instance.insertEmbedding(
         Embedding(
           files[i].generatedID!,
+          "c_uq",
           imageEmbeddings[i],
-          -1,
         ),
       );
     }

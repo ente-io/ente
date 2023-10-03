@@ -1751,7 +1751,7 @@ class FilesDB {
     row[columnUploadedFileID] = embedding.fileID;
     row[columnModel] = embedding.model;
     row[columnEmbedding] = Embedding.encodeEmbedding(embedding.embedding);
-    row[columnUpdationTime] = embedding.updationTime;
+    row[columnUpdationTime] = embedding.updationTime ?? -1;
     return row;
   }
 
@@ -1760,7 +1760,7 @@ class FilesDB {
       row[columnUploadedFileID],
       row[columnModel],
       Embedding.decodeEmbedding(row[columnEmbedding]),
-      row[columnUpdationTime],
+      updationTime: row[columnUpdationTime],
     );
   }
 

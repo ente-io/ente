@@ -4,6 +4,7 @@ import "package:logging/logging.dart";
 import "package:photos/core/network/network.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/models/embedding.dart";
+import "package:photos/models/file/file.dart";
 import "package:photos/services/semantic_search/remote_embedding.dart";
 import "package:photos/utils/crypto_util.dart";
 import "package:photos/utils/file_download_util.dart";
@@ -31,6 +32,35 @@ class EmbeddingStore {
     if (remoteEmbeddings.hasMore) {
       return fetchEmbeddings();
     }
+  }
+
+  Future<void> storeEmbedding(EnteFile file, Embedding embedding) async {
+    final encryptionKey = getFileKey(file);
+    final embeddingData =
+        Uint8List.view(Float64List.fromList(embedding.embedding).buffer);
+    final encryptedEmbeddingData = await CryptoUtil.encryptChaCha(
+      embeddingData,
+      encryptionKey,
+    );
+    final encryptedData =
+        CryptoUtil.bin2base64(encryptedEmbeddingData.encryptedData!);
+    final header = CryptoUtil.bin2base64(encryptedEmbeddingData.header!);
+    try {
+      final response = await _dio.put(
+        "/embeddings/",
+        data: {
+          "fileID": embedding.fileID,
+          "model": embedding.model,
+          "encryptedEmbedding": encryptedData,
+          "decryptionHeader": header,
+        },
+      );
+      final updationTime = response.data["updationTime"];
+      embedding.updationTime = updationTime;
+    } catch (e, s) {
+      _logger.severe(e, s);
+    }
+    await FilesDB.instance.insertEmbedding(embedding);
   }
 
   Future<RemoteEmbeddings> _getRemoteEmbeddings({
@@ -79,7 +109,7 @@ class EmbeddingStore {
           embedding.fileID,
           embedding.model,
           decodedEmbedding,
-          embedding.updationTime,
+          updationTime: embedding.updationTime,
         ),
       );
     }
