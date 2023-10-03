@@ -1,4 +1,5 @@
 import "dart:async";
+import "dart:collection";
 import "dart:io";
 
 import "package:clip_ggml/clip_ggml.dart";
@@ -26,8 +27,10 @@ class SemanticSearchService {
   static const kModelPath =
       "assets/models/clip/openai_clip-vit-base-patch32.ggmlv0.f16.bin";
 
-  bool hasLoaded = false;
   final _logger = Logger("SemanticSearchService");
+  final _queue = Queue<EnteFile>();
+
+  bool hasLoaded = false;
   Future<List<EnteFile>>? _ongoingRequest;
   PendingQuery? _nextQuery;
 
@@ -167,18 +170,18 @@ class SemanticSearchService {
   Future<void> _computeMissingEmbeddings() async {
     final files = await FilesDB.instance.getFilesWithoutEmbeddings();
     _logger.info(files.length.toString() + " pending to be embedded");
-    int counter = 0;
+    _queue.addAll(files);
+
     final List<EnteFile> batch = [];
-    for (final file in files) {
-      if (counter < batchSize) {
-        batch.add(file);
-        counter++;
+    while (_queue.isNotEmpty) {
+      if (batch.length < batchSize) {
+        batch.add(_queue.removeFirst());
       } else {
         await _computeImageEmbeddings(batch);
-        counter = 0;
         batch.clear();
       }
     }
+    await _computeImageEmbeddings(batch);
   }
 
   Future<void> _computeImageEmbeddings(List<EnteFile> files) async {
