@@ -30,6 +30,7 @@ enum SyncStatus {
   startedFirstGalleryImport,
   completedFirstGalleryImport,
   applyingRemoteDiff,
+  diffSynced,
   preparingForUpload,
   inProgress,
   paused,
