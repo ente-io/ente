@@ -40,7 +40,7 @@ dependencies:
   crypto: ^3.0.2
   cupertino_icons: ^1.0.0
   defer_pointer: ^0.0.2
-  device_info: ^2.0.2
+  device_info_plus: ^9.0.3
   dio: ^4.0.6
   dots_indicator: ^2.0.0
   dotted_border: ^2.0.0+2

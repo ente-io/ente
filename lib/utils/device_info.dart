@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import "package:device_info/device_info.dart";
+import "package:device_info_plus/device_info_plus.dart";
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 
@@ -50,4 +50,14 @@ Future<bool> isAndroidSDKVersionLowerThan(int inputSDK) async {
   } else {
     return false;
   }
+}
+
+bool isCompatibleWithMediaKit() {
+  final os = Platform.operatingSystem.toLowerCase();
+  if (os.contains("graphene") || os.contains("divest")) {
+    Logger("device_info").info("os is $os, using video_player for videos");
+    return false;
+  }
+  Logger("device_info").info("os is $os, using media_kit for videos");
+  return true;
 }
