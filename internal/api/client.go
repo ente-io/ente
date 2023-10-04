@@ -72,9 +72,9 @@ func NewClient(p Params) *Client {
 }
 
 func attachToken(req *resty.Request) {
-	accountId := readValueFromContext(req.Context(), "account_id")
-	if accountId != nil && accountId != "" {
-		if token, ok := tokenMap[accountId.(string)]; ok {
+	accountKey := readValueFromContext(req.Context(), "account_key")
+	if accountKey != nil && accountKey != "" {
+		if token, ok := tokenMap[accountKey.(string)]; ok {
 			req.SetHeader(TokenHeader, token)
 		}
 	}

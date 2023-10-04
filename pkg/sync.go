@@ -62,7 +62,7 @@ func (c *ClICtrl) SyncAccount(account model.Account) error {
 
 func (c *ClICtrl) buildRequestContext(ctx context.Context, account model.Account) context.Context {
 	ctx = context.WithValue(ctx, "app", string(account.App))
-	ctx = context.WithValue(ctx, "account_id", account.AccountKey())
+	ctx = context.WithValue(ctx, "account_key", account.AccountKey())
 	ctx = context.WithValue(ctx, "user_id", account.UserID)
 	return ctx
 }

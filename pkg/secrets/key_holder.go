@@ -43,7 +43,7 @@ func (k *KeyHolder) LoadSecrets(account model.Account) (*model.AccSecretInfo, er
 }
 
 func (k *KeyHolder) GetAccountSecretInfo(ctx context.Context) *model.AccSecretInfo {
-	accountKey := ctx.Value("account_id").(string)
+	accountKey := ctx.Value("account_key").(string)
 	return k.AccountSecrets[accountKey]
 }
 

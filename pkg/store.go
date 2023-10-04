@@ -82,8 +82,8 @@ func (c *ClICtrl) PutValue(ctx context.Context, store model.PhotosStore, key []b
 	})
 }
 func getAccountStore(ctx context.Context, tx *bolt.Tx, storeType model.PhotosStore) (*bolt.Bucket, error) {
-	accountId := ctx.Value("account_id").(string)
-	accountBucket := tx.Bucket([]byte(accountId))
+	accountKey := ctx.Value("account_key").(string)
+	accountBucket := tx.Bucket([]byte(accountKey))
 	if accountBucket == nil {
 		return nil, fmt.Errorf("account bucket not found")
 	}
