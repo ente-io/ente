@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v1.6.66
+
+### Bug Fixes
+
+- Fixes OOM crashes during file upload [#1379](https://github.com/ente-io/photos-web/pull/1379)
+
 ## v1.6.45
 
 ### Bug Fixes
