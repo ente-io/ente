@@ -51,3 +51,13 @@ Future<bool> isAndroidSDKVersionLowerThan(int inputSDK) async {
     return false;
   }
 }
+
+bool isCompatibleWithMediaKit() {
+  final os = Platform.operatingSystem.toLowerCase();
+  if (os == "grapheneos" || os == "divestos") {
+    Logger("device_info").info("os is $os, using video_player for videos");
+    return false;
+  }
+  Logger("device_info").info("os is $os, using media_kit for videos");
+  return true;
+}
