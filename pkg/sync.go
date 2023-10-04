@@ -52,6 +52,11 @@ func (c *ClICtrl) SyncAccount(account model.Account) error {
 	if err != nil {
 		log.Printf("Error fetching files: %s", err)
 	}
+	err = c.CreateLocalFolderForRemoteAlbums(ctx)
+	if err != nil {
+		log.Printf("Error creating local folders: %s", err)
+		return err
+	}
 	downloadErr := c.initiateDownload(ctx)
 	if downloadErr != nil {
 		log.Printf("Error downloading files: %s", downloadErr)
