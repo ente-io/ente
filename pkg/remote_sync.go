@@ -58,15 +58,22 @@ func (c *ClICtrl) fetchRemoteFiles(ctx context.Context) error {
 			log.Printf("Skipping album %s as it is deleted", album.AlbumName)
 			continue
 		}
+
 		lastSyncTime, lastSyncTimeErr := c.GetInt64ConfigValue(ctx, fmt.Sprintf(model.CollectionsFileSyncKeyFmt, album.ID))
 		if lastSyncTimeErr != nil {
 			return lastSyncTimeErr
 		}
-		isFirstSync := lastSyncTime == 0
-		for {
 
+		isFirstSync := lastSyncTime == 0
+
+		for {
 			if lastSyncTime == album.LastUpdatedAt {
 				break
+			}
+			if isFirstSync {
+				log.Printf("First sync for album %s\n", album.AlbumName)
+			} else {
+				log.Printf("Syncing album %s\n from %s", album.AlbumName, time.UnixMicro(lastSyncTime))
 			}
 			if !isFirstSync {
 				t := time.UnixMicro(lastSyncTime)
@@ -85,12 +92,22 @@ func (c *ClICtrl) fetchRemoteFiles(ctx context.Context) error {
 					// on first sync, no need to sync delete markers
 					continue
 				}
+				albumEntry := model.AlbumFileEntry{AlbumID: album.ID, FileID: file.ID, IsDeleted: file.IsDeleted, SyncedLocally: false}
+				albumEntryJson := encoding.MustMarshalJSON(albumEntry)
+				putErr := c.PutValue(ctx, model.RemoteAlbumEntries, []byte(fmt.Sprintf("%d:%d", album.ID, file.ID)), albumEntryJson)
+				if putErr != nil {
+					return putErr
+				}
+				if file.IsDeleted {
+					continue
+				}
 				photoFile, err := mapper.MapApiFileToPhotoFile(ctx, album, file, c.KeyHolder)
 				if err != nil {
 					return err
 				}
 				fileJson := encoding.MustMarshalJSON(photoFile)
-				putErr := c.PutValue(ctx, model.RemoteFiles, []byte(strconv.FormatInt(file.ID, 10)), fileJson)
+				// todo: use batch put
+				putErr = c.PutValue(ctx, model.RemoteFiles, []byte(strconv.FormatInt(file.ID, 10)), fileJson)
 				if putErr != nil {
 					return putErr
 				}
@@ -98,7 +115,8 @@ func (c *ClICtrl) fetchRemoteFiles(ctx context.Context) error {
 			if !hasMore {
 				maxUpdated = album.LastUpdatedAt
 			}
-			if maxUpdated > lastSyncTime || !hasMore {
+			if (maxUpdated > lastSyncTime) || !hasMore {
+				log.Printf("Updating last sync time for album %s to %s\n", album.AlbumName, time.UnixMicro(maxUpdated))
 				err = c.PutConfigValue(ctx, fmt.Sprintf(model.CollectionsFileSyncKeyFmt, album.ID), []byte(strconv.FormatInt(maxUpdated, 10)))
 				if err != nil {
 					return fmt.Errorf("failed to update last sync time: %s", err)

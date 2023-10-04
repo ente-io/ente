@@ -30,3 +30,10 @@ type RemoteAlbum struct {
 	SharedMeta    map[string]interface{} `json:"sharedMeta"`
 	LastUpdatedAt int64                  `json:"lastUpdatedAt"`
 }
+
+type AlbumFileEntry struct {
+	FileID        int64 `json:"fileID"`
+	AlbumID       int64 `json:"albumID"`
+	IsDeleted     bool  `json:"isDeleted"`
+	SyncedLocally bool  `json:"localSync"`
+}
