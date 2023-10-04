@@ -92,7 +92,7 @@ class _VideoWidgetState extends State<VideoWidget> {
     getFileFromServer(
       widget.file,
       progressCallback: (count, total) {
-        if(!mounted) {
+        if (!mounted) {
           return;
         }
         _progressNotifier.value = count / (widget.file.fileSize ?? total);
@@ -107,9 +107,12 @@ class _VideoWidgetState extends State<VideoWidget> {
         _setVideoPlayerController(file: file);
       }
     }).onError((error, stackTrace) {
-      if(mounted) {
-        showErrorDialog(context, "Error", S
-            .of(context).failedToDownloadVideo,);
+      if (mounted) {
+        showErrorDialog(
+          context,
+          "Error",
+          S.of(context).failedToDownloadVideo,
+        );
       }
     });
   }

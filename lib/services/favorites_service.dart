@@ -105,8 +105,10 @@ class FavoritesService {
     );
   }
 
-  void _updateFavoriteFilesCache(List<EnteFile> files,
-      {required bool favFlag}) {
+  void _updateFavoriteFilesCache(
+    List<EnteFile> files, {
+    required bool favFlag,
+  }) {
     final Set<int> updatedIDs = {};
     final Set<String> localIDs = {};
     for (var file in files) {

@@ -32,16 +32,19 @@ class VideoWidgetNew extends StatefulWidget {
   State<VideoWidgetNew> createState() => _VideoWidgetNewState();
 }
 
-class _VideoWidgetNewState extends State<VideoWidgetNew> {
+class _VideoWidgetNewState extends State<VideoWidgetNew>
+    with WidgetsBindingObserver {
   static const verticalMargin = 72.0;
   late final player = Player();
   VideoController? controller;
   final _progressNotifier = ValueNotifier<double?>(null);
   late StreamSubscription<bool> playingStreamSubscription;
+  bool _isAppInFG = true;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     if (widget.file.isRemoteFile) {
       _loadNetworkVideo();
       _setFileSizeIfNull();
@@ -76,7 +79,17 @@ class _VideoWidgetNewState extends State<VideoWidgetNew> {
   }
 
   @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _isAppInFG = true;
+    } else {
+      _isAppInFG = false;
+    }
+  }
+
+  @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     playingStreamSubscription.cancel();
     player.dispose();
     _progressNotifier.dispose();
@@ -215,7 +228,7 @@ class _VideoWidgetNewState extends State<VideoWidgetNew> {
     if (mounted) {
       setState(() {
         controller = VideoController(player);
-        player.open(Media(url));
+        player.open(Media(url), play: _isAppInFG);
       });
     }
   }
