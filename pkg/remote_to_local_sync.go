@@ -1,43 +1,172 @@
 package pkg
 
 import (
+	"cli-go/pkg/model/export"
 	"context"
+	"encoding/json"
 	"fmt"
 	"log"
 	"os"
+	"strings"
+
+	"path/filepath"
 )
 
-// CreateLocalFolderForRemoteAlbums will get all the remote albums and create a local folder for each of them
 func (c *ClICtrl) CreateLocalFolderForRemoteAlbums(ctx context.Context) error {
-	homeDir, err := os.UserHomeDir()
-	if err != nil {
-		return err
+	path, pathErr := exportHome(ctx)
+	if pathErr != nil {
+		return pathErr
 	}
-	path := fmt.Sprintf("%s/%s", homeDir, "photos")
-	if _, err := os.Stat(path); os.IsNotExist(err) {
-		err = os.Mkdir(path, 0755)
-		if err != nil {
-			return err
-		}
-	}
+
 	albums, err := c.getRemoteAlbums(ctx)
 	if err != nil {
 		return err
 	}
+	userID := ctx.Value("user_id").(int64)
+	folderToMetaMap, albumIDToMetaMap, err := readFolderMetadata(path)
+	if err != nil {
+		return err
+	}
+
 	for _, album := range albums {
 		if album.IsDeleted {
+			if meta, ok := albumIDToMetaMap[album.ID]; ok {
+				log.Printf("Deleting album %s as it is deleted", meta.AlbumName)
+				if err = os.RemoveAll(filepath.Join(path, meta.FolderName)); err != nil {
+					return err
+				}
+				delete(folderToMetaMap, meta.FolderName)
+				delete(albumIDToMetaMap, meta.ID)
+			}
 			continue
 		}
-		albumPath := path + "/" + album.AlbumName
-		// create the folder if it doesn't exist
-		if _, err := os.Stat(albumPath); os.IsNotExist(err) {
-			err = os.Mkdir(albumPath, 0755)
-			if err != nil {
-				return err
+		metaByID := albumIDToMetaMap[album.ID]
+		if metaByID != nil {
+			if strings.EqualFold(metaByID.AlbumName, album.AlbumName) {
+				//log.Printf("Skipping album %s as it already exists", album.AlbumName)
+				continue
+			}
+		}
+
+		albumFolderName := album.AlbumName
+		albumID := album.ID
+
+		if _, ok := folderToMetaMap[albumFolderName]; ok {
+			for i := 1; ; i++ {
+				newAlbumName := fmt.Sprintf("%s_%d", albumFolderName, i)
+				if _, ok := folderToMetaMap[newAlbumName]; !ok {
+					albumFolderName = newAlbumName
+					break
+				}
+			}
+		}
+		// Create album and meta folders if they don't exist
+		albumPath := filepath.Join(path, albumFolderName)
+		metaPath := filepath.Join(albumPath, ".meta")
+		if metaByID == nil {
+			log.Printf("Adding folder %s for album %s", albumFolderName, album.AlbumName)
+			for _, p := range []string{albumPath, metaPath} {
+				if _, err := os.Stat(p); os.IsNotExist(err) {
+					if err = os.Mkdir(p, 0755); err != nil {
+						return err
+					}
+				}
 			}
 		} else {
-			log.Printf("Folder %s already exists", albumPath)
+			// rename meta.FolderName to albumFolderName
+			oldAlbumPath := filepath.Join(path, metaByID.FolderName)
+			log.Printf("Renaming path from %s to %s for album %s", oldAlbumPath, albumPath, album.AlbumName)
+			if err = os.Rename(oldAlbumPath, albumPath); err != nil {
+				return err
+			}
 		}
+		// Handle meta file
+		metaFilePath := filepath.Join(path, albumFolderName, ".meta", "album_meta.json")
+		metaData := export.AlbumMetadata{
+			ID:              album.ID,
+			OwnerID:         album.OwnerID,
+			AlbumName:       album.AlbumName,
+			IsDeleted:       album.IsDeleted,
+			AccountOwnerIDs: []int64{userID},
+			FolderName:      albumFolderName,
+		}
+		if err = writeJSONToFile(metaFilePath, metaData); err != nil {
+			return err
+		}
+		folderToMetaMap[albumFolderName] = &metaData
+		albumIDToMetaMap[albumID] = &metaData
 	}
 	return nil
+}
+
+// readFolderMetadata returns a map of folder name to album metadata for all folders in the given path
+// and a map of album ID to album metadata for all albums in the given path.
+func readFolderMetadata(path string) (map[string]*export.AlbumMetadata, map[int64]*export.AlbumMetadata, error) {
+	result := make(map[string]*export.AlbumMetadata)
+	albumIdToMetadataMap := make(map[int64]*export.AlbumMetadata)
+	// Read the top-level directories in the given path
+	entries, err := os.ReadDir(path)
+	if err != nil {
+		return nil, nil, err
+	}
+	for _, entry := range entries {
+		if entry.IsDir() {
+			dirName := entry.Name()
+			metaFilePath := filepath.Join(path, dirName, ".meta", "album_meta.json")
+			// Initialize as nil, will remain nil if JSON file is not found or not readable
+			result[dirName] = nil
+			// Read the JSON file if it exists
+			if _, err := os.Stat(metaFilePath); err == nil {
+				var metaData export.AlbumMetadata
+				metaDataBytes, err := os.ReadFile(metaFilePath)
+				if err != nil {
+					continue // Skip this entry if reading fails
+				}
+
+				if err := json.Unmarshal(metaDataBytes, &metaData); err == nil {
+					metaData.FolderName = dirName
+					result[dirName] = &metaData
+					albumIdToMetadataMap[metaData.ID] = &metaData
+				}
+			}
+		}
+	}
+	return result, albumIdToMetadataMap, nil
+}
+
+func writeJSONToFile(filePath string, data interface{}) error {
+	file, err := os.Create(filePath)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	encoder := json.NewEncoder(file)
+	return encoder.Encode(data)
+}
+
+func readJSONFromFile(filePath string, data interface{}) error {
+	file, err := os.Open(filePath)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	decoder := json.NewDecoder(file)
+	return decoder.Decode(data)
+}
+
+func exportHome(ctx context.Context) (string, error) {
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		return "", err
+	}
+	path := fmt.Sprintf("%s/%s", homeDir, "photos")
+	if _, err = os.Stat(path); os.IsNotExist(err) {
+		err = os.Mkdir(path, 0755)
+		if err != nil {
+			return "", err
+		}
+	}
+	return path, nil
 }
