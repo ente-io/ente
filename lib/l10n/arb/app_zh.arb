@@ -331,5 +331,7 @@
   "offlineModeWarning": "您已选择在不进行备份的情况下继续操作。请手动备份以确保您的代码安全。",
   "showLargeIcons": "显示大图标",
   "shouldHideCode": "隐藏代码",
-  "focusOnSearchBar": "应用启动后聚焦搜索"
+  "focusOnSearchBar": "应用启动后聚焦搜索",
+  "confirmUpdatingkey": "您确定要更新此密钥吗？",
+  "minimizeAppOnCopy": "复制时最小化应用"
 }
