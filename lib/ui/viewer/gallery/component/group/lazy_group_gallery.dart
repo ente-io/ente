@@ -140,9 +140,13 @@ class _LazyGroupGalleryState extends State<LazyGroupGallery> {
 
         //When items are updated in a LazyGroupGallery, only it rebuilds with the
         //new state of _files which is a state variable in it's state object.
-        //widget.files does not change as the Widget itself is immutable. So
-        //to create a new Widget of LazyLoadingGallery with the updated
-        //widget.files, we have to call setState from an ancestor state object.
+        //widget.files is not updated. Calling setState from it's ancestor
+        //state object 'Gallery' creates a new LazyLoadingGallery widget with
+        //updated widget.files
+
+        //If widget.files is kept in it's old state, the old state will come
+        //up when scrolled down and back up to the group.
+
         //[galleryState] will never be null except when LazyLoadingGallery is
         //used without Gallery as an ancestor.
         final galleryState = context.findAncestorStateOfType<GalleryState>();
