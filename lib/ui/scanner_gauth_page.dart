@@ -56,7 +56,7 @@ class ScannerGoogleAuthPageState extends State<ScannerGoogleAuthPage> {
             child: Center(
               child: (totp != null) ? Text(totp!) : Text(l10n.scanACode),
             ),
-          )
+          ),
         ],
       ),
     );

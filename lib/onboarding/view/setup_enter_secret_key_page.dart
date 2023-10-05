@@ -153,7 +153,7 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
                       child: Text(l10n.saveAction),
                     ),
                   ),
-                )
+                ),
               ],
             ),
           ),

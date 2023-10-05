@@ -371,39 +371,43 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
           Expanded(
             child: StyledText(
               text: context.l10n.signUpTerms,
-              style:
-                  Theme.of(context).textTheme.titleMedium!.copyWith(fontSize: 12),
+              style: Theme.of(context)
+                  .textTheme
+                  .titleMedium!
+                  .copyWith(fontSize: 12),
               tags: {
                 'u-terms': StyledTextActionTag(
-                  (String? text, Map<String?, String?> attrs) => Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (BuildContext context) {
-                          return WebPage(
-                            context.l10n.termsOfServicesTitle,
-                            "https://ente.io/terms",
-                          );
-                        },
-                      ),
+                  (String? text, Map<String?, String?> attrs) =>
+                      Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (BuildContext context) {
+                        return WebPage(
+                          context.l10n.termsOfServicesTitle,
+                          "https://ente.io/terms",
+                        );
+                      },
                     ),
+                  ),
                   style: const TextStyle(
                     decoration: TextDecoration.underline,
                   ),
                 ),
                 'u-policy': StyledTextActionTag(
-                  (String? text, Map<String?, String?> attrs) => Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (BuildContext context) {
-                          return WebPage(
-                            context.l10n.privacyPolicyTitle,
-                            "https://ente.io/privacy",
-                          );
-                        },
-                      ),
+                  (String? text, Map<String?, String?> attrs) =>
+                      Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (BuildContext context) {
+                        return WebPage(
+                          context.l10n.privacyPolicyTitle,
+                          "https://ente.io/privacy",
+                        );
+                      },
                     ),
+                  ),
                   style: const TextStyle(
                     decoration: TextDecoration.underline,
                   ),
-                )
+                ),
               },
             ),
           ),
@@ -434,20 +438,23 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
           Expanded(
             child: StyledText(
               text: context.l10n.ackPasswordLostWarning,
-              style:
-                  Theme.of(context).textTheme.titleMedium!.copyWith(fontSize: 12),
+              style: Theme.of(context)
+                  .textTheme
+                  .titleMedium!
+                  .copyWith(fontSize: 12),
               tags: {
                 'underline': StyledTextActionTag(
-                  (String? text, Map<String?, String?> attrs) => Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (BuildContext context) {
-                          return WebPage(
-                            context.l10n.encryption,
-                            "https://ente.io/architecture",
-                          );
-                        },
-                      ),
+                  (String? text, Map<String?, String?> attrs) =>
+                      Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (BuildContext context) {
+                        return WebPage(
+                          context.l10n.encryption,
+                          "https://ente.io/architecture",
+                        );
+                      },
                     ),
+                  ),
                   style: const TextStyle(
                     decoration: TextDecoration.underline,
                   ),

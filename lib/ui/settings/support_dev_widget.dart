@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:ente_auth/core/configuration.dart';
 import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/models/subscription.dart';

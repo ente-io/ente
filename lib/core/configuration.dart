@@ -45,7 +45,7 @@ class Configuration {
   final List<String> onlineSecureKeys = [
     keyKey,
     secretKeyKey,
-    authSecretKeyKey
+    authSecretKeyKey,
   ];
 
   final kTempFolderDeletionTimeBuffer = const Duration(days: 1).inMicroseconds;

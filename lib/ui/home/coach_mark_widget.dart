@@ -56,7 +56,7 @@ class CoachMarkWidget extends StatelessWidget {
                             },
                             child: Text(l10n.ok),
                           ),
-                        )
+                        ),
                       ],
                     ),
                   ],
