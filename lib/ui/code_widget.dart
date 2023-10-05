@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:clipboard/clipboard.dart';
 import 'package:ente_auth/core/configuration.dart';
@@ -17,6 +18,7 @@ import 'package:ente_auth/utils/totp_util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:logging/logging.dart';
+import 'package:move_to_background/move_to_background.dart';
 
 class CodeWidget extends StatefulWidget {
   final Code code;
@@ -35,11 +37,14 @@ class _CodeWidgetState extends State<CodeWidget> {
   bool _isInitialized = false;
   late bool hasConfiguredAccount;
   late bool _shouldShowLargeIcon;
+  late bool _hideCode;
+  bool isMaskingEnabled = false;
 
   @override
   void initState() {
     super.initState();
-
+    isMaskingEnabled = PreferenceService.instance.shouldHideCodes();
+    _hideCode = isMaskingEnabled;
     _everySecondTimer =
         Timer.periodic(const Duration(milliseconds: 500), (Timer t) {
       String newCode = _getCurrentOTP();
@@ -63,6 +68,10 @@ class _CodeWidgetState extends State<CodeWidget> {
 
   @override
   Widget build(BuildContext context) {
+    if (isMaskingEnabled != PreferenceService.instance.shouldHideCodes()) {
+      isMaskingEnabled = PreferenceService.instance.shouldHideCodes();
+      _hideCode = isMaskingEnabled;
+    }
     _shouldShowLargeIcon = PreferenceService.instance.shouldShowLargeIcons();
     if (!_isInitialized) {
       _currentCode.value = _getCurrentOTP();
@@ -134,10 +143,19 @@ class _CodeWidgetState extends State<CodeWidget> {
                   borderRadius: BorderRadius.circular(10),
                 ),
                 onTap: () {
-                  _copyToClipboard();
+                  _copyCurrentOTPToClipboard();
                 },
+                onDoubleTap: isMaskingEnabled
+                    ? () {
+                        setState(
+                          () {
+                            _hideCode = !_hideCode;
+                          },
+                        );
+                      }
+                    : null,
                 onLongPress: () {
-                  _copyToClipboard();
+                  _copyCurrentOTPToClipboard();
                 },
                 child: _getCardContents(l10n),
               ),
@@ -312,15 +330,32 @@ class _CodeWidgetState extends State<CodeWidget> {
     );
   }
 
-  void _copyToClipboard() {
-    FlutterClipboard.copy(_getCurrentOTP())
-        .then((value) => showToast(context, context.l10n.copiedToClipboard));
+  void _copyCurrentOTPToClipboard() async {
+    _copyToClipboard(
+      _getCurrentOTP(),
+      confirmationMessage: context.l10n.copiedToClipboard,
+    );
   }
 
   void _copyNextToClipboard() {
-    FlutterClipboard.copy(_getNextTotp()).then(
-      (value) => showToast(context, context.l10n.copiedNextToClipboard),
+    _copyToClipboard(
+      _getNextTotp(),
+      confirmationMessage: context.l10n.copiedNextToClipboard,
     );
+  }
+
+  void _copyToClipboard(
+    String content, {
+    required String confirmationMessage,
+  }) async {
+    final shouldMinimizeOnCopy =
+        PreferenceService.instance.shouldMinimizeOnCopy();
+
+    await FlutterClipboard.copy(content);
+    showToast(context, confirmationMessage);
+    if (Platform.isAndroid && shouldMinimizeOnCopy) {
+      MoveToBackground.moveTaskToBack();
+    }
   }
 
   void _onNextHotpTapped() {
@@ -390,6 +425,10 @@ class _CodeWidgetState extends State<CodeWidget> {
   }
 
   String _getFormattedCode(String code) {
+    if (_hideCode) {
+      // replace all digits with •
+      code = code.replaceAll(RegExp(r'\d'), '•');
+    }
     if (code.length == 6) {
       return code.substring(0, 3) + " " + code.substring(3, 6);
     }

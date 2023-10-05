@@ -70,7 +70,7 @@
   "incorrectPasswordTitle": "Incorrect password",
   "welcomeBack": "Welcome back!",
   "madeWithLoveAtPrefix": "made with ❤️ at ",
-  "supportDevs": "Subscribe to <bold-green>ente</bold-green> to support this project",
+  "supportDevs": "Subscribe to <bold-green>ente</bold-green> to support us",
   "supportDiscount": "Use coupon code \"AUTH\" to get 10% off first year",
   "changeEmail": "Change email",
   "changePassword": "Change password",
@@ -92,6 +92,7 @@
   "importCodeDelimiterInfo": "The codes can be separated by a comma or a new line",
   "selectFile": "Select file",
   "emailVerificationToggle": "Email verification",
+  "emailVerificationEnableWarning": "If you are storing the 2FA to your email with us, turning on email verification could result in a deadlock. If you are locked out of one service, you might not be able to log in to the other.",
   "authToChangeEmailVerificationSetting": "Please authenticate to change email verification",
   "authToViewYourRecoveryKey": "Please authenticate to view your recovery key",
   "authToChangeYourEmail": "Please authenticate to change your email",
@@ -329,5 +330,8 @@
   "sigInBackupReminder": "Please export your codes to ensure that you have a backup you can restore from.",
   "offlineModeWarning": "You have chosen to proceed without backups. Please take manual backups to make sure your codes are safe.",
   "showLargeIcons": "Show large icons",
-  "focusOnSearchBar": "Focus search on app start"
+  "shouldHideCode": "Hide codes",
+  "focusOnSearchBar": "Focus search on app start",
+  "confirmUpdatingkey": "Are you sure you want to update the secret key?",
+  "minimizeAppOnCopy":  "Minimize app on copy"
 }

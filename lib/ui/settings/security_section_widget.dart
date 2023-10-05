@@ -179,7 +179,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
     );
   }
 
-  Future<void> updateEmailMFA(bool isEnabled) async {
+  Future<void> updateEmailMFA(bool enableEmailMFA) async {
     try {
       final UserDetails details =
           await UserService.instance.getUserDetailsV2(memoryCount: false);
@@ -195,7 +195,21 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
           ),
         );
       }
-      await UserService.instance.updateEmailMFA(isEnabled);
+      if (enableEmailMFA) {
+        await showChoiceActionSheet(
+          context,
+          title: context.l10n.warning,
+          body: context.l10n.emailVerificationEnableWarning,
+          isCritical: true,
+          firstButtonOnTap: () async {
+            await UserService.instance.updateEmailMFA(enableEmailMFA);
+          },
+          secondButtonLabel: context.l10n.cancel,
+          firstButtonLabel: context.l10n.iUnderStand,
+        );
+      } else {
+        await UserService.instance.updateEmailMFA(enableEmailMFA);
+      }
     } catch (e) {
       showToast(context, context.l10n.somethingWentWrongMessage);
     }

@@ -1,5 +1,7 @@
 import "package:ente_auth/l10n/l10n.dart";
 import 'package:ente_auth/models/code.dart';
+import 'package:ente_auth/ui/components/buttons/button_widget.dart';
+import 'package:ente_auth/ui/components/models/button_result.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
 import 'package:ente_auth/utils/totp_util.dart';
 import "package:flutter/material.dart";
@@ -10,7 +12,8 @@ class SetupEnterSecretKeyPage extends StatefulWidget {
   SetupEnterSecretKeyPage({this.code, Key? key}) : super(key: key);
 
   @override
-  State<SetupEnterSecretKeyPage> createState() => _SetupEnterSecretKeyPageState();
+  State<SetupEnterSecretKeyPage> createState() =>
+      _SetupEnterSecretKeyPageState();
 }
 
 class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
@@ -25,7 +28,8 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
       text: widget.code != null ? safeDecode(widget.code!.issuer).trim() : null,
     );
     _accountController = TextEditingController(
-      text: widget.code != null ? safeDecode(widget.code!.account).trim() : null,
+      text:
+          widget.code != null ? safeDecode(widget.code!.account).trim() : null,
     );
     _secretController = TextEditingController(
       text: widget.code != null ? widget.code!.secret : null,
@@ -110,7 +114,7 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
                 SizedBox(
                   width: 400,
                   child: OutlinedButton(
-                    onPressed: () {
+                    onPressed: () async {
                       if ((_accountController.text.trim().isEmpty &&
                               _issuerController.text.trim().isEmpty) ||
                           _secretController.text.trim().isEmpty) {
@@ -118,31 +122,45 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
                         if (_secretController.text.trim().isEmpty) {
                           message = context.l10n.secretCanNotBeEmpty;
                         } else {
-                          message = context.l10n.bothIssuerAndAccountCanNotBeEmpty;
+                          message =
+                              context.l10n.bothIssuerAndAccountCanNotBeEmpty;
                         }
                         _showIncorrectDetailsDialog(context, message: message);
                         return;
                       }
-                      try {
-                        final account = _accountController.text.trim();
-                        final issuer = _issuerController.text.trim();
-                        final secret = _secretController.text.trim().replaceAll(' ', '');
-                        final Code newCode = widget.code == null
-                            ? Code.fromAccountAndSecret(
-                                account,
-                                issuer,
-                                secret,
-                              )
-                            : widget.code!.copyWith(
-                                account: account,
-                                issuer: issuer,
-                                secret: secret,
-                              );
-                        // Verify the validity of the code
-                        getOTP(newCode);
-                        Navigator.of(context).pop(newCode);
-                      } catch (e) {
-                        _showIncorrectDetailsDialog(context);
+                      ButtonResult? result = await showChoiceActionSheet(
+                        context,
+                        title: context.l10n.warning,
+                        body: context.l10n.confirmUpdatingkey,
+                        firstButtonLabel: context.l10n.yes,
+                        secondButtonAction: ButtonAction.cancel,
+                        secondButtonLabel: context.l10n.cancel,
+                      );
+
+                      if (result == null) return;
+                      if (result.action == ButtonAction.first) {
+                        try {
+                          final account = _accountController.text.trim();
+                          final issuer = _issuerController.text.trim();
+                          final secret =
+                              _secretController.text.trim().replaceAll(' ', '');
+                          final Code newCode = widget.code == null
+                              ? Code.fromAccountAndSecret(
+                                  account,
+                                  issuer,
+                                  secret,
+                                )
+                              : widget.code!.copyWith(
+                                  account: account,
+                                  issuer: issuer,
+                                  secret: secret,
+                                );
+                          // Verify the validity of the code
+                          getOTP(newCode);
+                          Navigator.of(context).pop(newCode);
+                        } catch (e) {
+                          _showIncorrectDetailsDialog(context);
+                        }
                       }
                     },
                     child: Padding(
