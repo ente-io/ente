@@ -12,6 +12,7 @@ import 'package:ente_auth/services/preference_service.dart';
 import 'package:ente_auth/store/code_store.dart';
 import 'package:ente_auth/ui/code_timer_progress.dart';
 import 'package:ente_auth/ui/utils/icon_utils.dart';
+import 'package:ente_auth/utils/auth_util.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
 import 'package:ente_auth/utils/toast_util.dart';
 import 'package:ente_auth/utils/totp_util.dart';
@@ -370,6 +371,10 @@ class _CodeWidgetState extends State<CodeWidget> {
   }
 
   Future<void> _onEditPressed(_) async {
+    bool _isAuthSuccessful = await requestAuthentication("Authorize to shoq QR");
+    if(!_isAuthSuccessful) {
+      return;
+    }
     final Code? code = await Navigator.of(context).push(
       MaterialPageRoute(
         builder: (BuildContext context) {
@@ -383,6 +388,10 @@ class _CodeWidgetState extends State<CodeWidget> {
   }
 
   Future<void> _onShowQrPressed(_) async {
+    bool _isAuthSuccessful = await requestAuthentication("Authorize to shoq QR");
+    if(!_isAuthSuccessful) {
+      return;
+    }
     // ignore: unused_local_variable
     final Code? code = await Navigator.of(context).push(
       MaterialPageRoute(
@@ -394,6 +403,10 @@ class _CodeWidgetState extends State<CodeWidget> {
   }
 
   void _onDeletePressed(_) async {
+    bool _isAuthSuccessful = await requestAuthentication("Authorize to shoq QR");
+    if(!_isAuthSuccessful) {
+      return;
+    }
     final l10n = context.l10n;
     await showChoiceActionSheet(
       context,
