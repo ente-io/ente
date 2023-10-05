@@ -83,15 +83,15 @@ class Gallery extends StatefulWidget {
 
   @override
   State<Gallery> createState() {
-    return _GalleryState();
+    return GalleryState();
   }
 }
 
-class _GalleryState extends State<Gallery> {
+class GalleryState extends State<Gallery> {
   static const int kInitialLoadLimit = 100;
 
   late Logger _logger;
-  List<List<EnteFile>> _currentGroupedFiles = [];
+  List<List<EnteFile>> currentGroupedFiles = [];
   bool _hasLoadedFiles = false;
   late ItemScrollController _itemScroller;
   StreamSubscription<FilesUpdatedEvent>? _reloadEventSubscription;
@@ -197,17 +197,17 @@ class _GalleryState extends State<Gallery> {
   bool _onFilesLoaded(List<EnteFile> files) {
     final updatedGroupedFiles =
         widget.enableFileGrouping ? _groupFiles(files) : [files];
-    if (_currentGroupedFiles.length != updatedGroupedFiles.length ||
-        _currentGroupedFiles.isEmpty) {
+    if (currentGroupedFiles.length != updatedGroupedFiles.length ||
+        currentGroupedFiles.isEmpty) {
       if (mounted) {
         setState(() {
           _hasLoadedFiles = true;
-          _currentGroupedFiles = updatedGroupedFiles;
+          currentGroupedFiles = updatedGroupedFiles;
         });
       }
       return true;
     } else {
-      _currentGroupedFiles = updatedGroupedFiles;
+      currentGroupedFiles = updatedGroupedFiles;
       return false;
     }
   }
@@ -233,7 +233,7 @@ class _GalleryState extends State<Gallery> {
       inSelectionMode: widget.inSelectionMode,
       child: MultipleGroupsGalleryView(
         itemScroller: _itemScroller,
-        groupedFiles: _currentGroupedFiles,
+        groupedFiles: currentGroupedFiles,
         disableScroll: widget.disableScroll,
         emptyState: widget.emptyState,
         asyncLoader: widget.asyncLoader,
