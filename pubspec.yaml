@@ -31,6 +31,7 @@ dependencies:
   flutter:
     sdk: flutter
   flutter_bloc: ^8.0.1
+  flutter_displaymode: ^0.6.0
   flutter_email_sender: ^5.1.0
   flutter_inappwebview: ^5.7.1
   flutter_launcher_icons: ^0.9.3
