@@ -21,6 +21,7 @@ import 'package:ente_auth/ui/utils/icon_utils.dart';
 import 'package:ente_auth/utils/crypto_util.dart';
 import 'package:flutter/foundation.dart';
 import "package:flutter/material.dart";
+import 'package:flutter_displaymode/flutter_displaymode.dart';
 import 'package:logging/logging.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -30,6 +31,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final savedThemeMode = await AdaptiveTheme.getThemeMode();
   await _runInForeground(savedThemeMode);
+  FlutterDisplayMode.setHighRefreshRate();
 }
 
 Future<void> _runInForeground(AdaptiveThemeMode? savedThemeMode) async {
