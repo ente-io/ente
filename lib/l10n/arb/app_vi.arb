@@ -267,5 +267,8 @@
   "thisWillLogYouOutOfTheFollowingDevice": "Thao tác này sẽ đăng xuất bạn khỏi thiết bị sau:",
   "terminateSession": "Chấm dứt phiên?",
   "terminate": "Dừng lại",
-  "thisDevice": "Thiết bị này"
+  "thisDevice": "Thiết bị này",
+  "editCodeAuthMessage": "Xác minh để chỉnh sửa mã",
+  "deleteCodeAuthMessage": "Xác minh để xóa mã",
+  "showQRAuthMessage": "Xác minh để hiển thị mã QR"
 }

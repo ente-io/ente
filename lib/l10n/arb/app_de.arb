@@ -267,5 +267,8 @@
   "thisWillLogYouOutOfTheFollowingDevice": "Dadurch wirst du von folgendem Gerät abgemeldet:",
   "terminateSession": "Sitzungen beenden?",
   "terminate": "Beenden",
-  "thisDevice": "Dieses Gerät"
+  "thisDevice": "Dieses Gerät",
+  "editCodeAuthMessage": "Authentifizieren, um Code zu bearbeiten",
+  "deleteCodeAuthMessage": "Authentifizieren, um Code zu löschen",
+  "showQRAuthMessage": "Authentifizieren, um QR-Code anzuzeigen"
 }

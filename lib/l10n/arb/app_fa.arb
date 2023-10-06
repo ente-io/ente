@@ -231,5 +231,8 @@
   "importFailureDesc": "نتوانستیم فایل انتخابی را تجزیه و تحلیل کنیم.\nاگر به کمک نیاز دارید، لطفا به support@ente.io ایمیل بزنید!",
   "pendingSyncs": "اخطار",
   "pendingSyncsWarningBody": "برخی از کدهای شما پشتیبان گیری نشده اند.\n\nلطفا قبل از خروج، مطمئن شوید که یک نسخه پشتیبان برای این کدها دارید.",
-  "thisDevice": "این دستگاه"
+  "thisDevice": "این دستگاه",
+  "editCodeAuthMessage": "احراز هویت برای ویرایش کد",
+  "deleteCodeAuthMessage": "احراز هویت برای حذف کد",
+  "showQRAuthMessage": "احراز هویت برای نمایش کد QR"
 }

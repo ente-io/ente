@@ -333,5 +333,8 @@
   "shouldHideCode": "Hide codes",
   "focusOnSearchBar": "Focus search on app start",
   "confirmUpdatingkey": "Are you sure you want to update the secret key?",
-  "minimizeAppOnCopy":  "Minimize app on copy"
+  "minimizeAppOnCopy":  "Minimize app on copy",
+  "editCodeAuthMessage": "Authenticate to edit code",
+  "deleteCodeAuthMessage": "Authenticate to delete code",
+  "showQRAuthMessage": "Authenticate to show QR"
 }

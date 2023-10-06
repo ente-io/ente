@@ -371,7 +371,7 @@ class _CodeWidgetState extends State<CodeWidget> {
   }
 
   Future<void> _onEditPressed(_) async {
-    bool _isAuthSuccessful = await requestAuthentication("Authorize to shoq QR");
+    bool _isAuthSuccessful = await requestAuthentication(context.l10n.editCodeAuthMessage);
     if(!_isAuthSuccessful) {
       return;
     }
@@ -388,7 +388,7 @@ class _CodeWidgetState extends State<CodeWidget> {
   }
 
   Future<void> _onShowQrPressed(_) async {
-    bool _isAuthSuccessful = await requestAuthentication("Authorize to shoq QR");
+    bool _isAuthSuccessful = await requestAuthentication(context.l10n.showQRAuthMessage);
     if(!_isAuthSuccessful) {
       return;
     }
@@ -403,7 +403,7 @@ class _CodeWidgetState extends State<CodeWidget> {
   }
 
   void _onDeletePressed(_) async {
-    bool _isAuthSuccessful = await requestAuthentication("Authorize to shoq QR");
+    bool _isAuthSuccessful = await requestAuthentication(context.l10n.deleteCodeAuthMessage);
     if(!_isAuthSuccessful) {
       return;
     }
