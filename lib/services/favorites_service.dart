@@ -105,7 +105,10 @@ class FavoritesService {
     );
   }
 
-  void _updateFavoriteFilesCache(List<EnteFile> files, {required bool favFlag}) {
+  void _updateFavoriteFilesCache(
+    List<EnteFile> files, {
+    required bool favFlag,
+  }) {
     final Set<int> updatedIDs = {};
     final Set<String> localIDs = {};
     for (var file in files) {
@@ -172,9 +175,20 @@ class FavoritesService {
       // Do nothing, ignore
     } else {
       final Collection? favCollection = await _getFavoritesCollection();
+      // The file might be part of another collection. For unfav, we need to
+      // move file from the fav collection to the .
+      if (file.collectionID != favCollection!.id) {
+        final EnteFile? favFile = await FilesDB.instance.getUploadedFile(
+          fileID,
+          favCollection.id,
+        );
+        if (favFile != null) {
+          file = favFile;
+        }
+      }
       await _collectionActions.moveFilesFromCurrentCollection(
         context,
-        favCollection!,
+        favCollection,
         [file],
       );
     }

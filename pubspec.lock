@@ -348,22 +348,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.0.2"
-  device_info:
+  device_info_plus:
     dependency: "direct main"
     description:
-      name: device_info
-      sha256: f4a8156cb7b7480d969cb734907d18b333c8f0bc0b1ad0b342cdcecf30d62c48
+      name: device_info_plus
+      sha256: "86add5ef97215562d2e090535b0a16f197902b10c369c558a100e74ea06e8659"
       url: "https://pub.dev"
     source: hosted
-    version: "2.0.3"
-  device_info_platform_interface:
+    version: "9.0.3"
+  device_info_plus_platform_interface:
     dependency: transitive
     description:
-      name: device_info_platform_interface
-      sha256: b148e0bf9640145d09a4f8dea96614076f889e7f7f8b5ecab1c7e5c2dbc73c1b
+      name: device_info_plus_platform_interface
+      sha256: d3b01d5868b50ae571cd1dc6e502fc94d956b665756180f7b16ead09e836fd64
       url: "https://pub.dev"
     source: hosted
-    version: "2.0.1"
+    version: "7.0.0"
   dio:
     dependency: "direct main"
     description:
@@ -2319,6 +2319,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.1.4"
+  win32_registry:
+    dependency: transitive
+    description:
+      name: win32_registry
+      sha256: "1c52f994bdccb77103a6231ad4ea331a244dbcef5d1f37d8462f713143b0bfae"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.1.0"
   wkt_parser:
     dependency: transitive
     description:

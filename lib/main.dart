@@ -43,6 +43,7 @@ import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/tools/app_lock.dart';
 import 'package:photos/ui/tools/lock_screen.dart';
 import 'package:photos/utils/crypto_util.dart';
+import "package:photos/utils/device_info.dart";
 import 'package:photos/utils/file_uploader.dart';
 import 'package:photos/utils/local_settings.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -161,6 +162,7 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
   Computer.shared().turnOn(workersCount: 4, verbose: kDebugMode);
   CryptoUtil.init();
   await NetworkClient.instance.init();
+  initDeviceSpec().ignore();
   await Configuration.instance.init();
   await UserService.instance.init();
   await EntityService.instance.init();
