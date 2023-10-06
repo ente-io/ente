@@ -1,5 +1,7 @@
 import "package:flutter/material.dart";
+import "package:photos/models/search/search_result.dart";
 import "package:photos/models/search/search_types.dart";
+import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/viewer/search/search_section.dart";
 import "package:photos/ui/viewer/search/search_widget.dart";
 
@@ -18,33 +20,19 @@ class _SearchTabState extends State<SearchTab> {
 
   @override
   Widget build(BuildContext context) {
-    // Return a ListViewBuilder for value search_types.dart SectionType,
-    // render search section for each value
-    final searchTypes = SectionType.values.toList(growable: true);
-    // remove face and content sectionType
-    searchTypes.remove(SectionType.face);
-    searchTypes.remove(SectionType.content);
-
-    return Padding(
-      padding: const EdgeInsets.only(
+    return const Padding(
+      padding: EdgeInsets.only(
         left: 12.0,
         right: 12.0,
         bottom: 100,
       ),
       child: Column(
         children: [
-          const Align(
+          Align(
             alignment: Alignment.topRight,
             child: SearchIconWidget(),
           ),
-          Expanded(
-            child: ListView.builder(
-              itemCount: searchTypes.length,
-              itemBuilder: (context, index) {
-                return SearchSection(sectionType: searchTypes[index]);
-              },
-            ),
-          ),
+          AllSearchSections(),
         ],
       ),
     );
@@ -56,5 +44,51 @@ class _SearchTabState extends State<SearchTab> {
 
     textFieldFocusNode.unfocus();
     setState(() => {});
+  }
+}
+
+class AllSearchSections extends StatefulWidget {
+  const AllSearchSections({super.key});
+
+  @override
+  State<AllSearchSections> createState() => _AllSearchSectionsState();
+}
+
+class _AllSearchSectionsState extends State<AllSearchSections> {
+  late Future<List<List<SearchResult>>> allFutures;
+  final locationTags = SectionType.location.getData(limit: 3);
+  @override
+  void initState() {
+    allFutures = Future.wait<List<SearchResult>>([locationTags]);
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // Return a ListViewBuilder for value search_types.dart SectionType,
+    // render search section for each value
+    final searchTypes = SectionType.values.toList(growable: true);
+    // remove face and content sectionType
+    searchTypes.remove(SectionType.face);
+    searchTypes.remove(SectionType.content);
+    return Expanded(
+      child: FutureBuilder(
+        future: allFutures,
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            return ListView.builder(
+              itemCount: searchTypes.length,
+              itemBuilder: (context, index) {
+                return SearchSection(sectionType: searchTypes[index]);
+              },
+            );
+          } else if (snapshot.hasError) {
+            return const EnteLoadingWidget();
+          } else {
+            return const EnteLoadingWidget();
+          }
+        },
+      ),
+    );
   }
 }

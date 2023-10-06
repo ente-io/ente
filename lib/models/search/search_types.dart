@@ -1,5 +1,8 @@
 import "package:flutter/material.dart";
 import "package:photos/generated/l10n.dart";
+import "package:photos/models/search/generic_search_result.dart";
+import "package:photos/models/search/search_result.dart";
+import "package:photos/services/search_service.dart";
 
 enum ResultType {
   collection,
@@ -155,6 +158,34 @@ extension SectionTypeExtensions on SectionType {
         return null;
       case SectionType.fileCaption:
         return null;
+    }
+  }
+
+  Future<List<SearchResult>> getData({int? limit}) {
+    switch (this) {
+      case SectionType.face:
+        return Future.value([GenericSearchResult(ResultType.file, "", [])]);
+
+      case SectionType.content:
+        return Future.value([GenericSearchResult(ResultType.file, "", [])]);
+
+      case SectionType.moment:
+        return Future.value([GenericSearchResult(ResultType.file, "", [])]);
+
+      case SectionType.location:
+        return SearchService.instance.getAllLocationTags(limit);
+
+      case SectionType.people:
+        return Future.value([GenericSearchResult(ResultType.file, "", [])]);
+
+      case SectionType.album:
+        return Future.value([GenericSearchResult(ResultType.file, "", [])]);
+
+      case SectionType.fileTypesAndExtension:
+        return Future.value([GenericSearchResult(ResultType.file, "", [])]);
+
+      case SectionType.fileCaption:
+        return Future.value([GenericSearchResult(ResultType.file, "", [])]);
     }
   }
 }
