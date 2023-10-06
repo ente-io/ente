@@ -137,10 +137,22 @@ class _LazyGroupGalleryState extends State<LazyGroupGallery> {
           dayStartTime.microsecondsSinceEpoch + microSecondsInDay - 1,
           asc: GalleryContextState.of(context)!.sortOrderAsc,
         );
-        if (mounted) {
-          setState(() {
-            _files = result.files;
-          });
+
+        //When items are updated in a LazyGroupGallery, only it rebuilds with the
+        //new state of _files which is a state variable in it's state object.
+        //widget.files is not updated. Calling setState from it's ancestor
+        //state object 'Gallery' creates a new LazyLoadingGallery widget with
+        //updated widget.files
+
+        //If widget.files is kept in it's old state, the old state will come
+        //up when scrolled down and back up to the group.
+
+        //[galleryState] will never be null except when LazyLoadingGallery is
+        //used without Gallery as an ancestor.
+        final galleryState = context.findAncestorStateOfType<GalleryState>();
+        if (galleryState?.mounted ?? false) {
+          galleryState!.setState(() {});
+          _files = result.files;
         }
       } else if (kDebugMode) {
         debugPrint("Unexpected event ${event.type.name}");
