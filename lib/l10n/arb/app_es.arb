@@ -226,5 +226,8 @@
   "authToExportCodes": "Por favor, autentifíquese para exportar sus códigos",
   "sorry": "Lo sentimos",
   "importFailureDesc": "No se pudo analizar el archivo seleccionado.\n¡Por favor escriba a support@ente.io si necesita ayuda!",
-  "pendingSyncs": "Atención"
+  "pendingSyncs": "Atención",
+  "editCodeAuthMessage": "Autenticar para editar código",
+  "deleteCodeAuthMessage": "Autenticar para borrar código",
+  "showQRAuthMessage": "Autenticar para mostrar código QR"
 }

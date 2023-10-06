@@ -316,5 +316,8 @@
   "encrypted": "Зашифрованный",
   "plainText": "Обычный текст",
   "passwordToEncryptExport": "Пароль для шифрования экспорта",
-  "export": "Экспорт"
+  "export": "Экспорт",
+  "editCodeAuthMessage": "Аутентификация для редактирования кода",
+  "deleteCodeAuthMessage": "Аутентификация для удаления кода",
+  "showQRAuthMessage": "Аутентификация для отображения QR-кода"
 }

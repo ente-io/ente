@@ -333,5 +333,8 @@
   "shouldHideCode": "Nascondi i codici",
   "focusOnSearchBar": "Apri ricerca all'avvio dell'app",
   "confirmUpdatingkey": "Sei sicuro di voler aggiornare la chiave segreta?",
-  "minimizeAppOnCopy": "Riduci a icona l'app dopo la copia"
+  "minimizeAppOnCopy": "Riduci a icona l'app dopo la copia",
+  "editCodeAuthMessage": "Autenticarsi per modificare il codice",
+  "deleteCodeAuthMessage": "Autenticarsi per cancellare il codice",
+  "showQRAuthMessage": "Autenticarsi per mostrare il codice QR"
 }

@@ -263,5 +263,8 @@
   "thisWillLogYouOutOfTheFollowingDevice": "以下のデバイスからログアウトします:",
   "terminateSession": "セッションを終了しますか?",
   "terminate": "終了",
-  "thisDevice": "このデバイス"
+  "thisDevice": "このデバイス",
+  "editCodeAuthMessage": "コードを編集するには認証が必要です",
+  "deleteCodeAuthMessage": "コードを削除するには認証が必要です",
+  "showQRAuthMessage": "QRコードを表示するには認証が必要です"
 }

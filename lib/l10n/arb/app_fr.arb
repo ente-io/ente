@@ -330,5 +330,8 @@
   "offlineModeWarning": "Vous avez choisi de procéder sans sauvegarde. Veuillez prendre des sauvegardes manuelles pour vous assurer que vos codes sont sûrs.",
   "showLargeIcons": "Afficher les grandes icônes",
   "shouldHideCode": "Cacher les codes",
-  "focusOnSearchBar": "Cibler le champ de recherche au démarrage de l'application"
+  "focusOnSearchBar": "Cibler le champ de recherche au démarrage de l'application",
+  "editCodeAuthMessage": "Authentification requise pour modifier le code",
+  "deleteCodeAuthMessage": "Authentification requise pour supprimer le code",
+  "showQRAuthMessage": "Authentification requise pour afficher le code QR"
 }

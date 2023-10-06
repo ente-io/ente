@@ -329,5 +329,8 @@
   "sigInBackupReminder": "Exporteer de codes zodat je een back-up hebt waarvandaan je kan herstellen.",
   "offlineModeWarning": "Je hebt ervoor gekozen om verder te gaan zonder back-ups. Neem handmatige back-ups om ervoor te zorgen dat jouw codes veilig zijn.",
   "showLargeIcons": "Grote iconen",
-  "focusOnSearchBar": "Focus zoekveld na starten app"
+  "focusOnSearchBar": "Focus zoekveld na starten app",
+  "editCodeAuthMessage": "Authenticeren om code te bewerken",
+  "deleteCodeAuthMessage": "Authenticeren om code te verwijderen",
+  "showQRAuthMessage": "Authenticeren om QR-code te tonen"
 }

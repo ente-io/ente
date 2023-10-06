@@ -263,5 +263,8 @@
   "thisWillLogYouOutOfTheFollowingDevice": "To wyloguje Cię z tego urządzenia:",
   "terminateSession": "Zakończyć sesję?",
   "terminate": "Zakończ",
-  "thisDevice": "To urządzenie"
+  "thisDevice": "To urządzenie",
+  "editCodeAuthMessage": "Uwierzytelnij, aby edytować kod",
+  "deleteCodeAuthMessage": "Uwierzytelnij, aby usunąć kod",
+  "showQRAuthMessage": "Uwierzytelnij, aby pokazać kod QR"
 }

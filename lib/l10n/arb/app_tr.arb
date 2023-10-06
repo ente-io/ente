@@ -314,5 +314,8 @@
   "encrypted": "Şifreli",
   "plainText": "Düz metin",
   "passwordToEncryptExport": "Dışa aktarımı şifrelemek için parola",
-  "export": "Dışa aktar"
+  "export": "Dışa aktar",
+  "editCodeAuthMessage": "Kodu düzenlemek için doğrulama yapın",
+  "deleteCodeAuthMessage": "Kodu silmek için doğrulama yapın",
+  "showQRAuthMessage": "QR kodunu göstermek için doğrulama yapın"
 }

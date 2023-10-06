@@ -333,5 +333,8 @@
   "shouldHideCode": "隐藏代码",
   "focusOnSearchBar": "应用启动后聚焦搜索",
   "confirmUpdatingkey": "您确定要更新此密钥吗？",
-  "minimizeAppOnCopy": "复制时最小化应用"
+  "minimizeAppOnCopy": "复制时最小化应用",
+  "editCodeAuthMessage": "编辑代码需要身份验证",
+  "deleteCodeAuthMessage": "删除代码需要身份验证",
+  "showQRAuthMessage": "显示QR码需要身份验证"
 }
