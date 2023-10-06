@@ -331,5 +331,7 @@
   "offlineModeWarning": "Hai scelto di procedere senza backup. Si prega di eseguire backup manuali per assicurarsi che i codici siano al sicuro.",
   "showLargeIcons": "Mostra icone grandi",
   "shouldHideCode": "Nascondi i codici",
-  "focusOnSearchBar": "Apri ricerca all'avvio dell'app"
+  "focusOnSearchBar": "Apri ricerca all'avvio dell'app",
+  "confirmUpdatingkey": "Sei sicuro di voler aggiornare la chiave segreta?",
+  "minimizeAppOnCopy": "Riduci a icona l'app dopo la copia"
 }
