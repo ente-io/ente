@@ -336,5 +336,5 @@
   "minimizeAppOnCopy":  "Minimize app on copy",
   "editCodeAuthMessage": "Authenticate to edit code",
   "deleteCodeAuthMessage": "Authenticate to delete code",
-  "showQRAuthMessage": "Authenticate to show QR"
+  "showQRAuthMessage": "Authenticate to show QR code"
 }
