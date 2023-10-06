@@ -321,6 +321,56 @@ class SearchService {
     return searchResults;
   }
 
+  Future<List<GenericSearchResult>> getAllLocationTags(int? limit) async {
+    final Map<LocalEntity<LocationTag>, List<EnteFile>> tagToItemsMap = {};
+    final List<GenericSearchResult> tagSearchResults = [];
+    final locationTagEntities =
+        (await LocationService.instance.getLocationTags());
+    final allFiles = await getAllFiles();
+
+    for (int i = 0; i < locationTagEntities.length; i++) {
+      if (limit != null && i >= limit) break;
+      tagToItemsMap[locationTagEntities.elementAt(i)] = [];
+    }
+
+    for (EnteFile file in allFiles) {
+      if (file.hasLocation) {
+        for (LocalEntity<LocationTag> tag in tagToItemsMap.keys) {
+          if (LocationService.instance.isFileInsideLocationTag(
+            tag.item.centerPoint,
+            file.location!,
+            tag.item.radius,
+          )) {
+            tagToItemsMap[tag]!.add(file);
+          }
+        }
+      }
+    }
+
+    for (MapEntry<LocalEntity<LocationTag>, List<EnteFile>> entry
+        in tagToItemsMap.entries) {
+      if (entry.value.isNotEmpty) {
+        tagSearchResults.add(
+          GenericSearchResult(
+            ResultType.location,
+            entry.key.item.name,
+            entry.value,
+            onResultTap: (ctx) {
+              routeToPage(
+                ctx,
+                LocationScreenStateProvider(
+                  entry.key,
+                  const LocationScreen(),
+                ),
+              );
+            },
+          ),
+        );
+      }
+    }
+    return tagSearchResults;
+  }
+
   Future<List<GenericSearchResult>> getMonthSearchResults(
     BuildContext context,
     String query,
