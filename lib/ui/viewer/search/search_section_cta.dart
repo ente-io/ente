@@ -24,13 +24,13 @@ class SearchSectionCTAIcon extends StatelessWidget {
           children: [
             DottedBorder(
               color: colorScheme.strokeFaint,
-              dashPattern: const [3.9, 3.9],
+              dashPattern: const [3.875, 3.875],
               borderType: BorderType.Circle,
               strokeWidth: 1.5,
-              radius: const Radius.circular(30.5),
+              radius: const Radius.circular(33.25),
               child: SizedBox(
-                width: 61,
-                height: 61,
+                width: 62.5,
+                height: 62.5,
                 child: Icon(
                   sectionType.getCTAIcon() ?? Icons.add,
                   color: colorScheme.strokeFaint,
@@ -39,7 +39,7 @@ class SearchSectionCTAIcon extends StatelessWidget {
               ),
             ),
             const SizedBox(
-              height: 10,
+              height: 9.25,
             ),
             Text(
               sectionType.getCTAText(context),
