@@ -1,10 +1,14 @@
 import "package:collection/collection.dart";
 import "package:flutter/material.dart";
+import "package:photos/models/search/album_search_result.dart";
+import "package:photos/models/search/generic_search_result.dart";
 import "package:photos/models/search/search_result.dart";
 import "package:photos/models/search/search_types.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
+import "package:photos/ui/viewer/gallery/collection_page.dart";
 import "package:photos/ui/viewer/search/search_section_cta.dart";
+import "package:photos/utils/navigation_util.dart";
 
 class SearchSection extends StatelessWidget {
   final SectionType sectionType;
@@ -93,35 +97,54 @@ class SearchExample extends StatelessWidget {
     } else {
       width = 85.0 + ((textScaleFactor - 1.0) * 64);
     }
-    return SizedBox(
-      width: width,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 10),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            SizedBox(
-              width: 64,
-              height: 64,
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(32),
-                child: ThumbnailWidget(
-                  searchResult.previewThumbnail()!,
-                  shouldShowSyncStatus: false,
+    return GestureDetector(
+      onTap: () {
+        if (searchResult is GenericSearchResult) {
+          final genericSearchResult = searchResult as GenericSearchResult;
+          if (genericSearchResult.onResultTap != null) {
+            genericSearchResult.onResultTap!(context);
+          }
+        } else if (searchResult is AlbumSearchResult) {
+          final albumSearchResult = searchResult as AlbumSearchResult;
+          routeToPage(
+            context,
+            CollectionPage(
+              albumSearchResult.collectionWithThumbnail,
+              tagPrefix: albumSearchResult.heroTag(),
+            ),
+          );
+        }
+      },
+      child: SizedBox(
+        width: width,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 10),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SizedBox(
+                width: 64,
+                height: 64,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(32),
+                  child: ThumbnailWidget(
+                    searchResult.previewThumbnail()!,
+                    shouldShowSyncStatus: false,
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(
-              height: 10,
-            ),
-            Text(
-              searchResult.name(),
-              maxLines: 2,
-              textAlign: TextAlign.center,
-              overflow: TextOverflow.ellipsis,
-              style: getEnteTextTheme(context).mini,
-            ),
-          ],
+              const SizedBox(
+                height: 10,
+              ),
+              Text(
+                searchResult.name(),
+                maxLines: 2,
+                textAlign: TextAlign.center,
+                overflow: TextOverflow.ellipsis,
+                style: getEnteTextTheme(context).mini,
+              ),
+            ],
+          ),
         ),
       ),
     );
