@@ -22,42 +22,34 @@ class SearchSection extends StatelessWidget {
     final textTheme = getEnteTextTheme(context);
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 16.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  sectionType.sectionTitle(context),
-                  style: textTheme.largeBold,
-                ),
-                const SizedBox(height: 16),
-                // wrap below text in next line
-                // Text(
-                //   sectionType.getEmptyStateText(context),
-                //   style: textTheme.smallMuted,
-                //   softWrap: true,
-                // ),
-                SearchExampleRow(examples),
-              ],
+      child: Expanded(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              sectionType.sectionTitle(context),
+              style: textTheme.largeBold,
             ),
-          ),
-          SizedBox(
-            width: 85,
-            child: SearchSectionCTAIcon(sectionType),
-          ),
-        ],
+            const SizedBox(height: 16),
+            // wrap below text in next line
+            // Text(
+            //   sectionType.getEmptyStateText(context),
+            //   style: textTheme.smallMuted,
+            //   softWrap: true,
+            // ),
+            SearchExampleRow(examples, sectionType),
+          ],
+        ),
       ),
     );
   }
 }
 
 class SearchExampleRow extends StatelessWidget {
+  final SectionType sectionType;
   final List<SearchResult> reccomendations;
 
-  const SearchExampleRow(this.reccomendations, {super.key});
+  const SearchExampleRow(this.reccomendations, this.sectionType, {super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -70,10 +62,12 @@ class SearchExampleRow extends StatelessWidget {
         ),
       );
     });
+    scrollableExamples.add(SearchSectionCTAIcon(sectionType));
     return SizedBox(
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: scrollableExamples,
         ),
       ),
@@ -106,7 +100,7 @@ class SearchExample extends StatelessWidget {
               height: 10,
             ),
             Text(
-              "Title is spread on max 2 lines",
+              searchResult.name(),
               maxLines: 2,
               textAlign: TextAlign.center,
               overflow: TextOverflow.ellipsis,

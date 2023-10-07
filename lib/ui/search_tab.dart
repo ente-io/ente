@@ -86,6 +86,7 @@ class _AllSearchSectionsState extends State<AllSearchSections> {
               },
             );
           } else if (snapshot.hasError) {
+            //todo: Show something went wrong here
             return const EnteLoadingWidget();
           } else {
             return const EnteLoadingWidget();

@@ -1,3 +1,4 @@
+import "package:dotted_border/dotted_border.dart";
 import "package:flutter/material.dart";
 import "package:photos/models/search/search_types.dart";
 import "package:photos/theme/ente_theme.dart";
@@ -14,33 +15,42 @@ class SearchSectionCTAIcon extends StatelessWidget {
     }
     final textTheme = getEnteTextTheme(context);
     final colorScheme = getEnteColorScheme(context);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        SizedBox(
-          width: 48,
-          height: 48,
-          child: Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(32),
-              border: Border.all(
-                color: colorScheme.strokeFaint,
-                width: 1,
+    return SizedBox(
+      width: 84,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            DottedBorder(
+              color: colorScheme.strokeFaint,
+              dashPattern: const [3.9, 3.9],
+              borderType: BorderType.Circle,
+              strokeWidth: 1.5,
+              radius: const Radius.circular(30.5),
+              child: SizedBox(
+                width: 61,
+                height: 61,
+                child: Icon(
+                  sectionType.getCTAIcon() ?? Icons.add,
+                  color: colorScheme.strokeFaint,
+                  size: 20,
+                ),
               ),
             ),
-            child: Icon(
-              sectionType.getCTAIcon() ?? Icons.add,
-              color: colorScheme.strokeFaint,
-              size: 20,
+            const SizedBox(
+              height: 10,
             ),
-          ),
+            Text(
+              sectionType.getCTAText(context),
+              maxLines: 2,
+              textAlign: TextAlign.center,
+              overflow: TextOverflow.ellipsis,
+              style: textTheme.miniFaint,
+            ),
+          ],
         ),
-        const SizedBox(height: 10),
-        Text(
-          sectionType.getCTAText(context),
-          style: textTheme.miniFaint,
-        ),
-      ],
+      ),
     );
   }
 }
