@@ -69,6 +69,7 @@ class SearchExampleRow extends StatelessWidget {
     scrollableExamples.add(SearchSectionCTAIcon(sectionType));
     return SizedBox(
       child: SingleChildScrollView(
+        physics: const BouncingScrollPhysics(),
         scrollDirection: Axis.horizontal,
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -85,8 +86,15 @@ class SearchExample extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final textScaleFactor = MediaQuery.textScaleFactorOf(context);
+    late final double width;
+    if (textScaleFactor <= 1.0) {
+      width = 85.0;
+    } else {
+      width = 85.0 + ((textScaleFactor - 1.0) * 64);
+    }
     return SizedBox(
-      width: 85,
+      width: width,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 10),
         child: Column(
@@ -97,7 +105,10 @@ class SearchExample extends StatelessWidget {
               height: 64,
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(32),
-                child: ThumbnailWidget(searchResult.previewThumbnail()!),
+                child: ThumbnailWidget(
+                  searchResult.previewThumbnail()!,
+                  shouldShowSyncStatus: false,
+                ),
               ),
             ),
             const SizedBox(
