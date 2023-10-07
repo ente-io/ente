@@ -20,26 +20,30 @@ class SearchSection extends StatelessWidget {
   Widget build(BuildContext context) {
     debugPrint("Building section for ${sectionType.name}");
     final textTheme = getEnteTextTheme(context);
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 16.0),
-      child: Expanded(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              sectionType.sectionTitle(context),
-              style: textTheme.largeBold,
-            ),
-            const SizedBox(height: 16),
-            // wrap below text in next line
-            // Text(
-            //   sectionType.getEmptyStateText(context),
-            //   style: textTheme.smallMuted,
-            //   softWrap: true,
-            // ),
-            SearchExampleRow(examples, sectionType),
-          ],
-        ),
+    return Expanded(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(12),
+                child: Text(
+                  sectionType.sectionTitle(context),
+                  style: textTheme.largeBold,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 2),
+          // wrap below text in next line
+          // Text(
+          //   sectionType.getEmptyStateText(context),
+          //   style: textTheme.smallMuted,
+          //   softWrap: true,
+          // ),
+          SearchExampleRow(examples, sectionType),
+        ],
       ),
     );
   }
@@ -82,9 +86,9 @@ class SearchExample extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: 84,
+      width: 85,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 10),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [

@@ -20,21 +20,14 @@ class _SearchTabState extends State<SearchTab> {
 
   @override
   Widget build(BuildContext context) {
-    return const Padding(
-      padding: EdgeInsets.only(
-        left: 12.0,
-        right: 12.0,
-        bottom: 100,
-      ),
-      child: Column(
-        children: [
-          Align(
-            alignment: Alignment.topRight,
-            child: SearchIconWidget(),
-          ),
-          AllSearchSections(),
-        ],
-      ),
+    return const Column(
+      children: [
+        Align(
+          alignment: Alignment.topRight,
+          child: SearchIconWidget(),
+        ),
+        AllSearchSections(),
+      ],
     );
   }
 
