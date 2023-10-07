@@ -95,6 +95,7 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
             );
 
     return CustomScrollView(
+      physics: const BouncingScrollPhysics(),
       controller: _scrollController,
       slivers: [
         SliverToBoxAdapter(

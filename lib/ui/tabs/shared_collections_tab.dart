@@ -89,6 +89,7 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
     final SectionTitle sharedByYou =
         SectionTitle(title: S.of(context).sharedByYou);
     return SingleChildScrollView(
+      physics: const BouncingScrollPhysics(),
       child: Container(
         margin: const EdgeInsets.only(bottom: 50),
         child: Column(
