@@ -24,31 +24,29 @@ class SearchSection extends StatelessWidget {
   Widget build(BuildContext context) {
     debugPrint("Building section for ${sectionType.name}");
     final textTheme = getEnteTextTheme(context);
-    return Expanded(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(12),
-                child: Text(
-                  sectionType.sectionTitle(context),
-                  style: textTheme.largeBold,
-                ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(12),
+              child: Text(
+                sectionType.sectionTitle(context),
+                style: textTheme.largeBold,
               ),
-            ],
-          ),
-          const SizedBox(height: 2),
-          // wrap below text in next line
-          // Text(
-          //   sectionType.getEmptyStateText(context),
-          //   style: textTheme.smallMuted,
-          //   softWrap: true,
-          // ),
-          SearchExampleRow(examples, sectionType),
-        ],
-      ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 2),
+        // wrap below text in next line
+        // Text(
+        //   sectionType.getEmptyStateText(context),
+        //   style: textTheme.smallMuted,
+        //   softWrap: true,
+        // ),
+        SearchExampleRow(examples, sectionType),
+      ],
     );
   }
 }
