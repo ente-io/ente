@@ -104,20 +104,23 @@ class FileAppBarState extends State<FileAppBar> {
               ?.isHidden() ??
           false;
     }
-      if (kDebugMode) {
-        actions.add(
-          Text(
-            widget.file.generatedID?.toString() ?? 'null',
-            style: const TextStyle(color: Colors.white),
-          ),
-        );
-      }
+    if (kDebugMode) {
+      actions.add(
+        Text(
+          widget.file.generatedID?.toString() ?? 'null',
+          style: const TextStyle(color: Colors.white),
+        ),
+      );
+    }
     if (widget.file.isLiveOrMotionPhoto) {
       actions.add(
         IconButton(
           icon: const Icon(Icons.album_outlined),
           onPressed: () {
-            showShortToast(context, S.of(context).pressAndHoldToPlayVideoDetailed);
+            showShortToast(
+              context,
+              S.of(context).pressAndHoldToPlayVideoDetailed,
+            );
           },
         ),
       );
