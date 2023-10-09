@@ -186,6 +186,45 @@ class SearchService {
     return searchResults;
   }
 
+  Future<List<GenericSearchResult>> getAllFileTypesAndExtensionsResults(
+    int? limit,
+  ) async {
+    final List<GenericSearchResult> searchResults = [];
+    final List<EnteFile> allFiles = await getAllFiles();
+    final fileTypesAndMatchingFiles = <FileType, List<EnteFile>>{};
+    final extensionsAndMatchingFiles = <String, List<EnteFile>>{};
+
+    int i = 0;
+    for (EnteFile file in allFiles) {
+      if (limit != null && i++ <= limit) {
+        final String fileName = file.displayName;
+        final String ext = fileName.split(".").last.toUpperCase();
+
+        if (!fileTypesAndMatchingFiles.containsKey(file.fileType)) {
+          fileTypesAndMatchingFiles[file.fileType] = <EnteFile>[];
+        }
+        fileTypesAndMatchingFiles[file.fileType]!.add(file);
+
+        if (!extensionsAndMatchingFiles.containsKey(ext)) {
+          extensionsAndMatchingFiles[ext] = <EnteFile>[];
+        }
+        extensionsAndMatchingFiles[ext]!.add(file);
+      }
+    }
+
+    fileTypesAndMatchingFiles.forEach((key, value) {
+      searchResults
+          .add(GenericSearchResult(ResultType.fileType, key.name, value));
+    });
+
+    extensionsAndMatchingFiles.forEach((key, value) {
+      searchResults
+          .add(GenericSearchResult(ResultType.fileExtension, key, value));
+    });
+
+    return searchResults;
+  }
+
   Future<List<GenericSearchResult>> getCaptionAndNameResults(
     String query,
   ) async {
