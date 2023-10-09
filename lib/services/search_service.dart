@@ -88,6 +88,30 @@ class SearchService {
     return collectionSearchResults;
   }
 
+  Future<List<AlbumSearchResult>> getAllCollectionSearchResults(
+    int? limit,
+  ) async {
+    final List<Collection> collections = _collectionService.getCollectionsForUI(
+      includedShared: true,
+    );
+
+    final List<AlbumSearchResult> collectionSearchResults = [];
+
+    for (var c in collections) {
+      if (limit != null && collectionSearchResults.length >= limit) {
+        break;
+      }
+
+      if (!c.isHidden() && c.type != CollectionType.uncategorized) {
+        final EnteFile? thumbnail = await _collectionService.getCover(c);
+        collectionSearchResults
+            .add(AlbumSearchResult(CollectionWithThumbnail(c, thumbnail)));
+      }
+    }
+
+    return collectionSearchResults;
+  }
+
   Future<List<GenericSearchResult>> getYearSearchResults(
     String yearFromQuery,
   ) async {

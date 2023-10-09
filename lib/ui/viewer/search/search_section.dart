@@ -5,6 +5,7 @@ import "package:photos/models/search/generic_search_result.dart";
 import "package:photos/models/search/search_result.dart";
 import "package:photos/models/search/search_types.dart";
 import "package:photos/theme/ente_theme.dart";
+import "package:photos/ui/viewer/file/no_thumbnail_widget.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 import "package:photos/ui/viewer/gallery/collection_page.dart";
 import "package:photos/ui/viewer/search/search_section_cta.dart";
@@ -125,10 +126,12 @@ class SearchExample extends StatelessWidget {
                 height: 64,
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(32),
-                  child: ThumbnailWidget(
-                    searchResult.previewThumbnail()!,
-                    shouldShowSyncStatus: false,
-                  ),
+                  child: searchResult.previewThumbnail() != null
+                      ? ThumbnailWidget(
+                          searchResult.previewThumbnail()!,
+                          shouldShowSyncStatus: false,
+                        )
+                      : const NoThumbnailWidget(),
                 ),
               ),
               const SizedBox(

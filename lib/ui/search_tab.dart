@@ -48,11 +48,20 @@ class AllSearchSections extends StatefulWidget {
 }
 
 class _AllSearchSectionsState extends State<AllSearchSections> {
-  late Future<List<List<SearchResult>>> allFutures;
-  final locationTags = SectionType.location.getData(limit: 7);
+  late Future<List<List<SearchResult>>> allExamplesSearchResults;
+
   @override
   void initState() {
-    allFutures = Future.wait<List<SearchResult>>([locationTags]);
+    final exampleSearchResults = <Future<List<SearchResult>>>[];
+    for (SectionType sectionType in SectionType.values) {
+      if (sectionType == SectionType.face ||
+          sectionType == SectionType.content) {
+        continue;
+      }
+      exampleSearchResults.add(sectionType.getData(limit: 7));
+    }
+    allExamplesSearchResults =
+        Future.wait<List<SearchResult>>(exampleSearchResults);
     super.initState();
   }
 
@@ -66,7 +75,7 @@ class _AllSearchSectionsState extends State<AllSearchSections> {
     searchTypes.remove(SectionType.content);
     return Expanded(
       child: FutureBuilder(
-        future: allFutures,
+        future: allExamplesSearchResults,
         builder: (context, snapshot) {
           if (snapshot.hasData) {
             return ListView.builder(
@@ -75,7 +84,7 @@ class _AllSearchSectionsState extends State<AllSearchSections> {
               itemBuilder: (context, index) {
                 return SearchSection(
                   sectionType: searchTypes[index],
-                  examples: snapshot.data!.first,
+                  examples: snapshot.data!.elementAt(index),
                 );
               },
             );
