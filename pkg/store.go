@@ -81,6 +81,20 @@ func (c *ClICtrl) PutValue(ctx context.Context, store model.PhotosStore, key []b
 		return kvBucket.Put(key, value)
 	})
 }
+
+// GetValue
+func (c *ClICtrl) GetValue(ctx context.Context, store model.PhotosStore, key []byte) ([]byte, error) {
+	var value []byte
+	err := c.DB.View(func(tx *bolt.Tx) error {
+		kvBucket, err := getAccountStore(ctx, tx, store)
+		if err != nil {
+			return err
+		}
+		value = kvBucket.Get(key)
+		return nil
+	})
+	return value, err
+}
 func getAccountStore(ctx context.Context, tx *bolt.Tx, storeType model.PhotosStore) (*bolt.Bucket, error) {
 	accountKey := ctx.Value("account_key").(string)
 	accountBucket := tx.Bucket([]byte(accountKey))

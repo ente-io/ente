@@ -5,8 +5,9 @@ import (
 	"context"
 	"encoding/base64"
 	"fmt"
-	bolt "go.etcd.io/bbolt"
 	"log"
+
+	bolt "go.etcd.io/bbolt"
 )
 
 func (c *ClICtrl) StartSync() error {
@@ -52,9 +53,14 @@ func (c *ClICtrl) SyncAccount(account model.Account) error {
 	if err != nil {
 		log.Printf("Error fetching files: %s", err)
 	}
-	err = c.CreateLocalFolderForRemoteAlbums(ctx)
+	err = c.createLocalFolderForRemoteAlbums(ctx)
 	if err != nil {
 		log.Printf("Error creating local folders: %s", err)
+		return err
+	}
+	err = c.syncFiles(ctx)
+	if err != nil {
+		log.Printf("Error syncing files: %s", err)
 		return err
 	}
 	downloadErr := c.initiateDownload(ctx)

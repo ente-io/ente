@@ -12,7 +12,7 @@ import (
 	"path/filepath"
 )
 
-func (c *ClICtrl) CreateLocalFolderForRemoteAlbums(ctx context.Context) error {
+func (c *ClICtrl) createLocalFolderForRemoteAlbums(ctx context.Context) error {
 	path, pathErr := exportHome(ctx)
 	if pathErr != nil {
 		return pathErr

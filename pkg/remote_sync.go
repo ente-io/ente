@@ -162,3 +162,20 @@ func (c *ClICtrl) getRemoteFiles(ctx context.Context) ([]model.RemoteFile, error
 	}
 	return files, nil
 }
+
+func (c *ClICtrl) getRemoteAlbumEntries(ctx context.Context) ([]model.AlbumFileEntry, error) {
+	entries := make([]model.AlbumFileEntry, 0)
+	entryBytes, err := c.GetAllValues(ctx, model.RemoteAlbumEntries)
+	if err != nil {
+		return nil, err
+	}
+	for _, entryJson := range entryBytes {
+		entry := model.AlbumFileEntry{}
+		err = json.Unmarshal(entryJson, &entry)
+		if err != nil {
+			return nil, err
+		}
+		entries = append(entries, entry)
+	}
+	return entries, nil
+}
