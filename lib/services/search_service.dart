@@ -196,20 +196,19 @@ class SearchService {
 
     int i = 0;
     for (EnteFile file in allFiles) {
-      if (limit != null && i++ <= limit) {
-        final String fileName = file.displayName;
-        final String ext = fileName.split(".").last.toUpperCase();
+      if (limit != null && i++ <= limit) break;
+      final String fileName = file.displayName;
+      final String ext = fileName.split(".").last.toUpperCase();
 
-        if (!fileTypesAndMatchingFiles.containsKey(file.fileType)) {
-          fileTypesAndMatchingFiles[file.fileType] = <EnteFile>[];
-        }
-        fileTypesAndMatchingFiles[file.fileType]!.add(file);
-
-        if (!extensionsAndMatchingFiles.containsKey(ext)) {
-          extensionsAndMatchingFiles[ext] = <EnteFile>[];
-        }
-        extensionsAndMatchingFiles[ext]!.add(file);
+      if (!fileTypesAndMatchingFiles.containsKey(file.fileType)) {
+        fileTypesAndMatchingFiles[file.fileType] = <EnteFile>[];
       }
+      fileTypesAndMatchingFiles[file.fileType]!.add(file);
+
+      if (!extensionsAndMatchingFiles.containsKey(ext)) {
+        extensionsAndMatchingFiles[ext] = <EnteFile>[];
+      }
+      extensionsAndMatchingFiles[ext]!.add(file);
     }
 
     fileTypesAndMatchingFiles.forEach((key, value) {
