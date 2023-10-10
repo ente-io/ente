@@ -8,6 +8,7 @@ import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/viewer/file/no_thumbnail_widget.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 import "package:photos/ui/viewer/gallery/collection_page.dart";
+import "package:photos/ui/viewer/search/result/search_result_page.dart";
 import "package:photos/ui/viewer/search/search_section_cta.dart";
 import "package:photos/utils/navigation_util.dart";
 
@@ -102,6 +103,11 @@ class SearchExample extends StatelessWidget {
           final genericSearchResult = searchResult as GenericSearchResult;
           if (genericSearchResult.onResultTap != null) {
             genericSearchResult.onResultTap!(context);
+          } else {
+            routeToPage(
+              context,
+              SearchResultPage(searchResult),
+            );
           }
         } else if (searchResult is AlbumSearchResult) {
           final albumSearchResult = searchResult as AlbumSearchResult;
