@@ -1,5 +1,9 @@
 import { PAGES } from 'constants/pages';
-import { getEndpoint, getFamilyPortalURL } from 'utils/common/apiUtil';
+import {
+    getEndpoint,
+    getFamilyPortalURL,
+    isDevDeployment,
+} from 'utils/common/apiUtil';
 import { clearKeys } from 'utils/storage/sessionStorage';
 import router from 'next/router';
 import { clearData, getData, LS_KEYS } from 'utils/storage/localStorage';
@@ -526,6 +530,11 @@ export const updateMapEnabledStatus = async (newStatus: boolean) => {
 
 export async function getDisableCFUploadProxyFlag(): Promise<boolean> {
     try {
+        const disableCFUploadProxy =
+            process.env.NEXT_PUBLIC_DISABLE_CF_UPLOAD_PROXY;
+        if (isDevDeployment() && typeof disableCFUploadProxy !== 'undefined') {
+            return disableCFUploadProxy === 'true';
+        }
         const featureFlags = (
             await fetch('https://static.ente.io/feature_flags.json')
         ).json() as GetFeatureFlagResponse;
