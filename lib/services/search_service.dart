@@ -197,18 +197,24 @@ class SearchService {
     int i = 0;
     for (EnteFile file in allFiles) {
       if (limit != null && i++ <= limit) break;
-      final String fileName = file.displayName;
-      final String ext = fileName.split(".").last.toUpperCase();
 
       if (!fileTypesAndMatchingFiles.containsKey(file.fileType)) {
         fileTypesAndMatchingFiles[file.fileType] = <EnteFile>[];
       }
       fileTypesAndMatchingFiles[file.fileType]!.add(file);
 
-      if (!extensionsAndMatchingFiles.containsKey(ext)) {
-        extensionsAndMatchingFiles[ext] = <EnteFile>[];
+      final String fileName = file.displayName;
+      late final String ext;
+      //Noticed that some old edited files do not have extensions and a '.'
+      ext =
+          fileName.contains(".") ? fileName.split(".").last.toUpperCase() : "";
+
+      if (ext != "") {
+        if (!extensionsAndMatchingFiles.containsKey(ext)) {
+          extensionsAndMatchingFiles[ext] = <EnteFile>[];
+        }
+        extensionsAndMatchingFiles[ext]!.add(file);
       }
-      extensionsAndMatchingFiles[ext]!.add(file);
     }
 
     fileTypesAndMatchingFiles.forEach((key, value) {
