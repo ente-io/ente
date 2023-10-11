@@ -160,7 +160,7 @@ const syncEntity = async <T>(type: EntityType): Promise<Entity<T>> => {
             addLogLine(
                 `Syncing ${type} entities syncedEntitiesCount: ${nonDeletedEntities.length}`
             );
-        } while (response.hasMore);
+        } while (response.diff.length === DIFF_LIMIT);
     } catch (e) {
         logError(e, 'Sync entity failed');
     }
