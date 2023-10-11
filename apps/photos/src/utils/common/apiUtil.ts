@@ -99,7 +99,7 @@ It's a dev deployment (and should use the environment override for endpoints ) i
 3. if the app is running locally (hence node_env is development)
 4. if the app is running in test mode
 */
-const isDevDeployment = () => {
+export const isDevDeployment = () => {
     if (globalThis?.location) {
         return (
             process.env.NEXT_PUBLIC_ENTE_WEB_ENDPOINT ===
