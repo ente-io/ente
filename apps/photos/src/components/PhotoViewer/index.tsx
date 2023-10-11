@@ -786,17 +786,7 @@ function PhotoViewer(props: Iprops) {
                                     <ReplayIcon fontSize="small" />
                                 </button>
                             )}
-
-                            <div className="pswp__preloader">
-                                <div className="pswp__preloader__icn">
-                                    <div className="pswp__preloader__cut">
-                                        <div className="pswp__preloader__donut" />
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div className="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
-                            <div className="pswp__share-tooltip" />
+                            <div className="pswp__preloader" />
                         </div>
                         <button
                             className="pswp__button pswp__button--arrow--left"
