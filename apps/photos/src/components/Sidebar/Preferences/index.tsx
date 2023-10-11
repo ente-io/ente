@@ -77,6 +77,17 @@ export default function Preferences({ open, onClose, onRootClose }) {
                 <Box px={'8px'}>
                     <Stack py="20px" spacing="24px">
                         <LanguageSelector />
+                        <EnteMenuItem
+                            variant="toggle"
+                            checked={!optOutOfCrashReports}
+                            onClick={toggleOptOutOfCrashReports}
+                            label={t('CRASH_REPORTING')}
+                        />{' '}
+                        <EnteMenuItem
+                            onClick={openMapSettings}
+                            endIcon={<ChevronRight />}
+                            label={t('MAP')}
+                        />
                         {isElectron() && (
                             <EnteMenuItem
                                 onClick={openAdvancedSettings}
@@ -84,17 +95,6 @@ export default function Preferences({ open, onClose, onRootClose }) {
                                 label={t('ADVANCED')}
                             />
                         )}
-                        <EnteMenuItem
-                            onClick={openMapSettings}
-                            endIcon={<ChevronRight />}
-                            label={t('MAP')}
-                        />
-                        <EnteMenuItem
-                            variant="toggle"
-                            checked={!optOutOfCrashReports}
-                            onClick={toggleOptOutOfCrashReports}
-                            label={t('CRASH_REPORTING')}
-                        />
                     </Stack>
                 </Box>
             </Stack>
