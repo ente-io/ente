@@ -3,6 +3,7 @@ package model
 import (
 	"cli-go/pkg/model/export"
 	"fmt"
+	"sort"
 	"time"
 )
 
@@ -51,6 +52,16 @@ type AlbumFileEntry struct {
 	AlbumID       int64 `json:"albumID"`
 	IsDeleted     bool  `json:"isDeleted"`
 	SyncedLocally bool  `json:"localSync"`
+}
+
+// Sort list of AlbumFileEntry by IsDeleted and then by albumID
+func SortAlbumFileEntry(entries []*AlbumFileEntry) {
+	sort.Slice(entries, func(i, j int) bool {
+		if entries[i].IsDeleted != entries[j].IsDeleted {
+			return !entries[i].IsDeleted && entries[j].IsDeleted
+		}
+		return entries[i].AlbumID < entries[j].AlbumID
+	})
 }
 
 func (r *RemoteFile) GetFileType() FileType {
