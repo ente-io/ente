@@ -698,7 +698,7 @@ function PhotoViewer(props: Iprops) {
                                 className="pswp__button pswp__button--custom"
                                 title={t('CLOSE_OPTION')}
                                 onClick={handleClose}>
-                                <CloseIcon fontSize="small" />
+                                <CloseIcon />
                             </button>
 
                             {props.enableDownload && (
@@ -708,7 +708,7 @@ function PhotoViewer(props: Iprops) {
                                     onClick={() =>
                                         downloadFileHelper(photoSwipe.currItem)
                                     }>
-                                    <DownloadIcon fontSize="small" />
+                                    <DownloadIcon />
                                 </button>
                             )}
                             {props.enableDownload && shouldShowCopyOption && (
@@ -732,14 +732,14 @@ function PhotoViewer(props: Iprops) {
                                             photoSwipe?.currItem as EnteFile
                                         );
                                     }}>
-                                    <DeleteIcon fontSize="small" />
+                                    <DeleteIcon />
                                 </button>
                             )}
                             <button
                                 className="pswp__button pswp__button--custom"
                                 onClick={toggleZoomInAndOut}
                                 title={t('ZOOM_IN_OUT')}>
-                                <ZoomInOutlinedIcon fontSize="small" />
+                                <ZoomInOutlinedIcon />
                             </button>
                             <button
                                 className="pswp__button pswp__button--custom"
@@ -747,14 +747,14 @@ function PhotoViewer(props: Iprops) {
                                     toggleFullscreen(photoSwipe);
                                 }}
                                 title={t('TOGGLE_FULLSCREEN')}>
-                                <FullscreenOutlinedIcon fontSize="small" />
+                                <FullscreenOutlinedIcon sx={{ fontSize: 32 }} />
                             </button>
 
                             <button
                                 className="pswp__button pswp__button--custom"
                                 title={t('INFO_OPTION')}
                                 onClick={handleOpenInfo}>
-                                <InfoIcon fontSize="small" />
+                                <InfoIcon />
                             </button>
                             {isOwnFile &&
                                 !props.isTrashCollection &&
@@ -772,9 +772,9 @@ function PhotoViewer(props: Iprops) {
                                             );
                                         }}>
                                         {isFav ? (
-                                            <FavoriteIcon fontSize="small" />
+                                            <FavoriteIcon />
                                         ) : (
-                                            <FavoriteBorderIcon fontSize="small" />
+                                            <FavoriteBorderIcon />
                                         )}
                                     </button>
                                 )}
