@@ -46,6 +46,8 @@ body {
 }
 
 .pswp__button--custom {
+    width: 48px;
+    height: 48px;
     background: none !important;
     background-image: none !important;
     color: #fff;

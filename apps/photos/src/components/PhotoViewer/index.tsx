@@ -26,10 +26,14 @@ import {
     photoSwipeV4Events,
 } from 'constants/photoViewer';
 import { LivePhotoBtnContainer } from './styledComponents/LivePhotoBtn';
-import DownloadIcon from '@mui/icons-material/Download';
+import DownloadIcon from '@mui/icons-material/FileDownloadOutlined';
+import CloseIcon from '@mui/icons-material/Close';
+import ZoomInOutlinedIcon from '@mui/icons-material/ZoomInOutlined';
+import FullscreenOutlinedIcon from '@mui/icons-material/FullscreenOutlined';
 import InfoIcon from '@mui/icons-material/InfoOutlined';
 import FavoriteIcon from '@mui/icons-material/FavoriteRounded';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorderRounded';
+import FullscreenExitOutlinedIcon from '@mui/icons-material/FullscreenExitOutlined';
 import ChevronRight from '@mui/icons-material/ChevronRight';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { trashFiles } from 'services/fileService';
@@ -110,6 +114,7 @@ function PhotoViewer(props: Iprops) {
     const [isOwnFile, setIsOwnFile] = useState(false);
     const [showConvertBtn, setShowConvertBtn] = useState(false);
     const [isSourceLoaded, setIsSourceLoaded] = useState(false);
+    const [isInFullScreenMode, setIsInFullScreenMode] = useState(false);
 
     const needUpdate = useRef(false);
     const exifExtractionInProgress = useRef<string>(null);
@@ -399,6 +404,7 @@ function PhotoViewer(props: Iprops) {
         });
         photoSwipe.init();
         needUpdate.current = false;
+        setIsInFullScreenMode(false);
         setPhotoSwipe(photoSwipe);
     };
 
@@ -586,8 +592,36 @@ function PhotoViewer(props: Iprops) {
         }
         if (fullScreenApi.isFullscreen()) {
             fullScreenApi.exit();
+            setIsInFullScreenMode(false);
         } else {
             fullScreenApi.enter();
+            setIsInFullScreenMode(true);
+        }
+    };
+
+    const toggleZoomInAndOut = () => {
+        if (!photoSwipe) {
+            return;
+        }
+        const initialZoomLevel = photoSwipe.currItem.initialZoomLevel;
+        if (photoSwipe.getZoomLevel() !== initialZoomLevel) {
+            photoSwipe.zoomTo(
+                initialZoomLevel,
+                {
+                    x: photoSwipe.viewportSize.x / 2,
+                    y: photoSwipe.viewportSize.y / 2,
+                },
+                333
+            );
+        } else {
+            photoSwipe.zoomTo(
+                photoSwipe.options.getDoubleTapZoom(true, photoSwipe.currItem),
+                {
+                    x: photoSwipe.viewportSize.x / 2,
+                    y: photoSwipe.viewportSize.y / 2,
+                },
+                333
+            );
         }
     };
 
@@ -666,9 +700,11 @@ function PhotoViewer(props: Iprops) {
                             <div className="pswp__counter" />
 
                             <button
-                                className="pswp__button pswp__button--close"
+                                className="pswp__button pswp__button--custom"
                                 title={t('CLOSE_OPTION')}
-                            />
+                                onClick={handleClose}>
+                                <CloseIcon />
+                            </button>
 
                             {props.enableDownload && (
                                 <button
@@ -677,7 +713,7 @@ function PhotoViewer(props: Iprops) {
                                     onClick={() =>
                                         downloadFileHelper(photoSwipe.currItem)
                                     }>
-                                    <DownloadIcon fontSize="small" />
+                                    <DownloadIcon />
                                 </button>
                             )}
                             {props.enableDownload && shouldShowCopyOption && (
@@ -701,23 +737,37 @@ function PhotoViewer(props: Iprops) {
                                             photoSwipe?.currItem as EnteFile
                                         );
                                     }}>
-                                    <DeleteIcon fontSize="small" />
+                                    <DeleteIcon />
                                 </button>
                             )}
                             <button
-                                className="pswp__button pswp__button--zoom"
-                                title={t('ZOOM_IN_OUT')}
-                            />
+                                className="pswp__button pswp__button--custom"
+                                onClick={toggleZoomInAndOut}
+                                title={t('ZOOM_IN_OUT')}>
+                                <ZoomInOutlinedIcon />
+                            </button>
                             <button
-                                className="pswp__button pswp__button--fs"
-                                title={t('TOGGLE_FULLSCREEN')}
-                            />
+                                className="pswp__button pswp__button--custom"
+                                onClick={() => {
+                                    toggleFullscreen(photoSwipe);
+                                }}
+                                title={t('TOGGLE_FULLSCREEN')}>
+                                {!isInFullScreenMode ? (
+                                    <FullscreenOutlinedIcon
+                                        sx={{ fontSize: 32 }}
+                                    />
+                                ) : (
+                                    <FullscreenExitOutlinedIcon
+                                        sx={{ fontSize: 32 }}
+                                    />
+                                )}
+                            </button>
 
                             <button
                                 className="pswp__button pswp__button--custom"
                                 title={t('INFO_OPTION')}
                                 onClick={handleOpenInfo}>
-                                <InfoIcon fontSize="small" />
+                                <InfoIcon />
                             </button>
                             {isOwnFile &&
                                 !props.isTrashCollection &&
@@ -735,9 +785,9 @@ function PhotoViewer(props: Iprops) {
                                             );
                                         }}>
                                         {isFav ? (
-                                            <FavoriteIcon fontSize="small" />
+                                            <FavoriteIcon />
                                         ) : (
-                                            <FavoriteBorderIcon fontSize="small" />
+                                            <FavoriteBorderIcon />
                                         )}
                                     </button>
                                 )}
@@ -749,17 +799,7 @@ function PhotoViewer(props: Iprops) {
                                     <ReplayIcon fontSize="small" />
                                 </button>
                             )}
-
-                            <div className="pswp__preloader">
-                                <div className="pswp__preloader__icn">
-                                    <div className="pswp__preloader__cut">
-                                        <div className="pswp__preloader__donut" />
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div className="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
-                            <div className="pswp__share-tooltip" />
+                            <div className="pswp__preloader" />
                         </div>
                         <button
                             className="pswp__button pswp__button--arrow--left"
