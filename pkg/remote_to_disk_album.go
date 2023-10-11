@@ -142,6 +142,7 @@ func writeJSONToFile(filePath string, data interface{}) error {
 	defer file.Close()
 
 	encoder := json.NewEncoder(file)
+	encoder.SetIndent("", "  ")
 	return encoder.Encode(data)
 }
 
