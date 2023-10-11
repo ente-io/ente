@@ -33,6 +33,7 @@ import FullscreenOutlinedIcon from '@mui/icons-material/FullscreenOutlined';
 import InfoIcon from '@mui/icons-material/InfoOutlined';
 import FavoriteIcon from '@mui/icons-material/FavoriteRounded';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorderRounded';
+import FullscreenExitOutlinedIcon from '@mui/icons-material/FullscreenExitOutlined';
 import ChevronRight from '@mui/icons-material/ChevronRight';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { trashFiles } from 'services/fileService';
@@ -113,6 +114,7 @@ function PhotoViewer(props: Iprops) {
     const [isOwnFile, setIsOwnFile] = useState(false);
     const [showConvertBtn, setShowConvertBtn] = useState(false);
     const [isSourceLoaded, setIsSourceLoaded] = useState(false);
+    const [isInFullScreenMode, setIsInFullScreenMode] = useState(false);
 
     const needUpdate = useRef(false);
     const exifExtractionInProgress = useRef<string>(null);
@@ -402,6 +404,7 @@ function PhotoViewer(props: Iprops) {
         });
         photoSwipe.init();
         needUpdate.current = false;
+        setIsInFullScreenMode(false);
         setPhotoSwipe(photoSwipe);
     };
 
@@ -589,8 +592,10 @@ function PhotoViewer(props: Iprops) {
         }
         if (fullScreenApi.isFullscreen()) {
             fullScreenApi.exit();
+            setIsInFullScreenMode(false);
         } else {
             fullScreenApi.enter();
+            setIsInFullScreenMode(true);
         }
     };
 
@@ -747,7 +752,15 @@ function PhotoViewer(props: Iprops) {
                                     toggleFullscreen(photoSwipe);
                                 }}
                                 title={t('TOGGLE_FULLSCREEN')}>
-                                <FullscreenOutlinedIcon sx={{ fontSize: 32 }} />
+                                {!isInFullScreenMode ? (
+                                    <FullscreenOutlinedIcon
+                                        sx={{ fontSize: 32 }}
+                                    />
+                                ) : (
+                                    <FullscreenExitOutlinedIcon
+                                        sx={{ fontSize: 32 }}
+                                    />
+                                )}
                             </button>
 
                             <button
