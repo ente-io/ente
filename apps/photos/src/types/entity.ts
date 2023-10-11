@@ -44,5 +44,4 @@ export interface Entity<T>
 
 export interface EntitySyncDiffResponse {
     diff: EncryptedEntity[];
-    hasMore: boolean;
 }
