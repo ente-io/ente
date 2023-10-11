@@ -85,7 +85,7 @@ class FileAppBarState extends State<FileAppBar> {
           );
         },
       ),
-      Size.fromHeight(Platform.isAndroid ? 80 : 96),
+      Size.fromHeight(Platform.isAndroid ? 84 : 96),
     );
   }
 
