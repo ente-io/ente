@@ -54,7 +54,7 @@ type AlbumFileEntry struct {
 	SyncedLocally bool  `json:"localSync"`
 }
 
-// Sort list of AlbumFileEntry by IsDeleted and then by albumID
+// SortAlbumFileEntry sorts the given entries by isDeleted and then by albumID
 func SortAlbumFileEntry(entries []*AlbumFileEntry) {
 	sort.Slice(entries, func(i, j int) bool {
 		if entries[i].IsDeleted != entries[j].IsDeleted {
