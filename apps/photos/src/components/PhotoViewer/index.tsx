@@ -26,7 +26,10 @@ import {
     photoSwipeV4Events,
 } from 'constants/photoViewer';
 import { LivePhotoBtnContainer } from './styledComponents/LivePhotoBtn';
-import DownloadIcon from '@mui/icons-material/Download';
+import DownloadIcon from '@mui/icons-material/FileDownloadOutlined';
+import CloseIcon from '@mui/icons-material/Close';
+import ZoomInOutlinedIcon from '@mui/icons-material/ZoomInOutlined';
+import FullscreenOutlinedIcon from '@mui/icons-material/FullscreenOutlined';
 import InfoIcon from '@mui/icons-material/InfoOutlined';
 import FavoriteIcon from '@mui/icons-material/FavoriteRounded';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorderRounded';
@@ -591,6 +594,32 @@ function PhotoViewer(props: Iprops) {
         }
     };
 
+    const toggleZoomInAndOut = () => {
+        if (!photoSwipe) {
+            return;
+        }
+        const initialZoomLevel = photoSwipe.currItem.initialZoomLevel;
+        if (photoSwipe.getZoomLevel() !== initialZoomLevel) {
+            photoSwipe.zoomTo(
+                initialZoomLevel,
+                {
+                    x: photoSwipe.viewportSize.x / 2,
+                    y: photoSwipe.viewportSize.y / 2,
+                },
+                333
+            );
+        } else {
+            photoSwipe.zoomTo(
+                photoSwipe.options.getDoubleTapZoom(true, photoSwipe.currItem),
+                {
+                    x: photoSwipe.viewportSize.x / 2,
+                    y: photoSwipe.viewportSize.y / 2,
+                },
+                333
+            );
+        }
+    };
+
     const triggerManualConvert = () => {
         props.getConvertedItem(
             photoSwipe,
@@ -666,9 +695,11 @@ function PhotoViewer(props: Iprops) {
                             <div className="pswp__counter" />
 
                             <button
-                                className="pswp__button pswp__button--close"
+                                className="pswp__button pswp__button--custom"
                                 title={t('CLOSE_OPTION')}
-                            />
+                                onClick={handleClose}>
+                                <CloseIcon fontSize="small" />
+                            </button>
 
                             {props.enableDownload && (
                                 <button
@@ -705,13 +736,19 @@ function PhotoViewer(props: Iprops) {
                                 </button>
                             )}
                             <button
-                                className="pswp__button pswp__button--zoom"
-                                title={t('ZOOM_IN_OUT')}
-                            />
+                                className="pswp__button pswp__button--custom"
+                                onClick={toggleZoomInAndOut}
+                                title={t('ZOOM_IN_OUT')}>
+                                <ZoomInOutlinedIcon fontSize="small" />
+                            </button>
                             <button
-                                className="pswp__button pswp__button--fs"
-                                title={t('TOGGLE_FULLSCREEN')}
-                            />
+                                className="pswp__button pswp__button--custom"
+                                onClick={() => {
+                                    toggleFullscreen(photoSwipe);
+                                }}
+                                title={t('TOGGLE_FULLSCREEN')}>
+                                <FullscreenOutlinedIcon fontSize="small" />
+                            </button>
 
                             <button
                                 className="pswp__button pswp__button--custom"
