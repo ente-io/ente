@@ -1,6 +1,7 @@
 package pkg
 
 import (
+	"cli-go/pkg/mapper"
 	"cli-go/pkg/model"
 	"cli-go/utils/encoding"
 	"context"
@@ -10,6 +11,7 @@ import (
 )
 
 func (c *ClICtrl) syncFiles(ctx context.Context) error {
+	log.Printf("Starting sync files")
 	home, err := exportHome(ctx)
 	if err != nil {
 		return err
@@ -22,6 +24,7 @@ func (c *ClICtrl) syncFiles(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
+	log.Println("total entries", len(entries))
 	for _, entry := range entries {
 		if entry.SyncedLocally {
 			continue
@@ -40,17 +43,20 @@ func (c *ClICtrl) syncFiles(ctx context.Context) error {
 			}
 			continue
 		}
-		fileBytes, err := c.GetValue(ctx, model.RemoteAlbumEntries, []byte(fmt.Sprintf("%d:%d", entry.AlbumID, entry.FileID)))
+		fileBytes, err := c.GetValue(ctx, model.RemoteFiles, []byte(fmt.Sprintf("%d", entry.FileID)))
 		if err != nil {
 			return err
 		}
 		if fileBytes != nil {
-			var existingEntry model.RemoteFile
+			var existingEntry *model.RemoteFile
 			err = json.Unmarshal(fileBytes, &existingEntry)
 			if err != nil {
 				return err
 			}
-			log.Printf("Should download %s into %s", existingEntry.Metadata["name"], albumInfo.FolderName)
+			fileDiskMetadata := mapper.MapRemoteFileToDiskMetadata(*existingEntry)
+			log.Printf("File %+v\\n ", fileDiskMetadata)
+		} else {
+			log.Fatalf("remoteFile %d not found in remoteFiles", entry.FileID)
 		}
 	}
 	return nil

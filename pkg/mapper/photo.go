@@ -4,6 +4,7 @@ import (
 	"cli-go/internal/api"
 	eCrypto "cli-go/internal/crypto"
 	"cli-go/pkg/model"
+	"cli-go/pkg/model/export"
 	"cli-go/pkg/secrets"
 	"cli-go/utils/encoding"
 	"context"
@@ -126,5 +127,20 @@ func MapApiFileToPhotoFile(ctx context.Context, album model.RemoteAlbum, file ap
 		}
 	}
 	return &photoFile, nil
+}
 
+func MapRemoteFileToDiskMetadata(file model.RemoteFile) export.DiskFileMetadata {
+	result := export.DiskFileMetadata{
+		Title:            file.GetTitle(),
+		Description:      file.GetCaption(),
+		CreationTime:     file.GetCreationTime(),
+		ModificationTime: file.GetModificationTime(),
+		Location:         file.GetLatlong(),
+		Info: &export.Info{
+			ID:      file.ID,
+			Hash:    file.GetFileHash(),
+			OwnerID: file.OwnerID,
+		},
+	}
+	return result
 }

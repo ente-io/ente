@@ -1,5 +1,7 @@
 package export
 
+import "time"
+
 type AlbumMetadata struct {
 	ID        int64  `json:"id"`
 	OwnerID   int64  `json:"ownerID"`
@@ -25,4 +27,21 @@ func (a *AlbumMetadata) AddAccountOwner(id int64) bool {
 	}
 	a.AccountOwnerIDs = append(a.AccountOwnerIDs, id)
 	return true
+}
+
+// DiskFileMetadata is the metadata for a file when exported to disk
+// For S3 compliant storage, we will introduce a new struct that will contain references to the albums
+type DiskFileMetadata struct {
+	Title            string    `json:"title"`
+	Description      *string   `json:"description"`
+	Location         *Location `json:"location"`
+	CreationTime     time.Time `json:"creationTime"`
+	ModificationTime time.Time `json:"modificationTime"`
+	Info             *Info     `json:"info"`
+}
+
+type Info struct {
+	ID      int64   `json:"id"`
+	Hash    *string `json:"hash"`
+	OwnerID int64   `json:"ownerID"`
 }
