@@ -79,6 +79,14 @@ class _AppStorageViewerState extends State<AppStorageViewer> {
         allowCacheClear: true,
       ),
     ]);
+    final List<String> directoryStatePath = [
+      appDocumentsDirectory.path,
+      appSupportDirectory.path,
+      appTemporaryDirectory.path,
+    ];
+    if (!Platform.isAndroid) {
+      directoryStatePath.add(iosTempDirectoryPath);
+    }
     if (internalUser) {
       paths.addAll([
         PathStorageItem.name(appDocumentsDirectory.path, "Documents"),
@@ -89,8 +97,19 @@ class _AppStorageViewerState extends State<AppStorageViewer> {
         paths.add(PathStorageItem.name(iosTempDirectoryPath, "/tmp"));
       }
     }
+    prettyStringDirectoryStats(directoryStatePath).ignore();
     if (mounted) {
       setState(() => {});
+    }
+  }
+
+  Future<void> prettyStringDirectoryStats(List<String> paths) async {
+    for (var path in paths) {
+      final DirectoryStat state = await getDirectorySize(Directory(path));
+      final content = prettyPrintDirectoryStat(state, path);
+      if (content.isNotEmpty) {
+        debugPrint(content);
+      }
     }
   }
 
