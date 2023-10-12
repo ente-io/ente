@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
+import "package:logging/logging.dart";
 import 'package:path_provider/path_provider.dart';
 import 'package:photos/core/cache/video_cache_manager.dart';
 import 'package:photos/core/configuration.dart';
@@ -29,6 +30,7 @@ class _AppStorageViewerState extends State<AppStorageViewer> {
   late String iosTempDirectoryPath;
   late bool internalUser;
   int _refreshCounterKey = 0;
+  final Logger _logger = Logger("_AppStorageViewerState");
 
   @override
   void initState() {
@@ -104,12 +106,16 @@ class _AppStorageViewerState extends State<AppStorageViewer> {
   }
 
   Future<void> prettyStringDirectoryStats(List<String> paths) async {
-    for (var path in paths) {
-      final DirectoryStat state = await getDirectoryStat(Directory(path));
-      final content = prettyPrintDirectoryStat(state, path);
-      if (content.isNotEmpty) {
-        debugPrint(content);
+    try {
+      for (var path in paths) {
+        final DirectoryStat stat = await getDirectoryStat(Directory(path));
+        final content = prettyPrintDirectoryStat(stat, path);
+        if (content.isNotEmpty) {
+          _logger.info(content);
+        }
       }
+    } catch (e) {
+      _logger.severe("Failed to print directory stats", e);
     }
   }
 
