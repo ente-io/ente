@@ -230,6 +230,84 @@ class SearchService {
     return searchResults;
   }
 
+  //This can be furthur optimized by not just limiting keys to 0 and 1. Use key
+  //0 for single word, 1 for 2 word, 2 for 3 ..... and only check the substrings
+  //in higher key if there are matches in the lower key.
+  Future<List<GenericSearchResult>> getAllDescriptionSearchResults(
+    //todo: use limit
+    int? limit,
+  ) async {
+    final List<GenericSearchResult> searchResults = [];
+    final List<EnteFile> allFiles = await getAllFiles();
+
+    //each list element will be substrings from a description mapped by
+    //word count = 1 and word count > 1
+    //New items will be added to [orderedSubDescriptions] list for every
+    //description. If total of 5 items have description, there will be 5 items
+    //in [orderedSubDescriptions].
+    //[orderedSubDescriptions[x]] has two keys, 0 & 1. Value of key 0 will be single
+    //word substrings. Value of key 1 will be multi word subStrings. When
+    //iterating through [allFiles], we check for matching substrings from
+    //[orderedSubDescriptions[x]] with the file's description. Starts from value
+    //of key 0. If there are no substring matches from key 0, there will be none
+    //from key 1 as well. So these two keys are for avoiding unnecessary checking
+    //string.contains().
+    final orderedSubDescriptions = <Map<int, List<String>>>[];
+    final descriptionAndMatchingFiles = <String, List<EnteFile>>{};
+
+    for (EnteFile file in allFiles) {
+      if (file.caption != null && file.caption!.isNotEmpty) {
+        final words = file.caption!.split(" ");
+        orderedSubDescriptions.add({0: <String>[], 1: <String>[]});
+
+        for (int i = 1; i <= words.length; i++) {
+          for (int j = 0; j <= words.length - i; j++) {
+            final subList = words.sublist(j, j + i);
+            final substring = subList.join(" ");
+            if (i == 1) {
+              orderedSubDescriptions.last[0]!.add(substring);
+            } else {
+              orderedSubDescriptions.last[1]!.add(substring);
+            }
+          }
+        }
+
+        for (Map<int, List<String>> orderedSubDescription
+            in orderedSubDescriptions) {
+          bool matchesSingleWordSubString = false;
+          for (String subDescription in orderedSubDescription[0]!) {
+            if (file.caption!.contains(subDescription)) {
+              matchesSingleWordSubString = true;
+              if (descriptionAndMatchingFiles.containsKey(subDescription)) {
+                descriptionAndMatchingFiles[subDescription]!.add(file);
+              } else {
+                descriptionAndMatchingFiles[subDescription] = [file];
+              }
+            }
+          }
+          if (matchesSingleWordSubString) {
+            for (String subDescription in orderedSubDescription[1]!) {
+              if (file.caption!.contains(subDescription)) {
+                if (descriptionAndMatchingFiles.containsKey(subDescription)) {
+                  descriptionAndMatchingFiles[subDescription]!.add(file);
+                } else {
+                  descriptionAndMatchingFiles[subDescription] = [file];
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+
+    descriptionAndMatchingFiles.forEach((key, value) {
+      searchResults
+          .add(GenericSearchResult(ResultType.fileCaption, key, value));
+    });
+
+    return searchResults;
+  }
+
   Future<List<GenericSearchResult>> getCaptionAndNameResults(
     String query,
   ) async {
