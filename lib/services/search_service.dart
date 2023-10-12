@@ -256,9 +256,19 @@ class SearchService {
     //string.contains().
     final orderedSubDescriptions = <Map<int, List<String>>>[];
     final descriptionAndMatchingFiles = <String, List<EnteFile>>{};
+    int distinctFullDescriptionCount = 0;
 
     for (EnteFile file in allFiles) {
       if (file.caption != null && file.caption!.isNotEmpty) {
+        //This limit doesn't necessarily have to be the limit parameter of the
+        //method. Using the same variable to avoid unwanted iterations (this and
+        //nested loops) in case there is a limit passed. Using the limit passed
+        //here so that there will be almost always be more than 7
+        //descriptionAndMatchingFiles and can shuffle and choose only limited
+        //elements from it. Without shuffling, result will be ["hello", "world",
+        //"hello world"] for the string "hello world"
+        if (limit != null && distinctFullDescriptionCount >= limit) break;
+        distinctFullDescriptionCount++;
         final words = file.caption!.split(" ");
         orderedSubDescriptions.add({0: <String>[], 1: <String>[]});
 
@@ -306,8 +316,11 @@ class SearchService {
       searchResults
           .add(GenericSearchResult(ResultType.fileCaption, key, value));
     });
-
-    return searchResults;
+    if (limit != null && distinctFullDescriptionCount >= limit) {
+      return (searchResults..shuffle()).sublist(0, limit);
+    } else {
+      return searchResults;
+    }
   }
 
   Future<List<GenericSearchResult>> getCaptionAndNameResults(
