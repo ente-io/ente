@@ -291,6 +291,8 @@ class SearchService {
           for (String subDescription in orderedSubDescription[0]!) {
             if (file.caption!.contains(subDescription)) {
               matchesSingleWordSubString = true;
+
+              //continue only after setting [matchesSingleWordSubString] to true
               if (subDescription.isAllConnectWords) continue;
 
               if (descriptionAndMatchingFiles.containsKey(subDescription)) {
