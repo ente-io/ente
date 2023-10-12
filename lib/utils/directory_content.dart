@@ -1,5 +1,8 @@
 import 'dart:io';
 
+import "package:path/path.dart";
+import "package:photos/utils/data_util.dart";
+
 class DirectoryStat {
   final String path;
   final List<DirectoryStat> subDirectory;
@@ -9,6 +12,72 @@ class DirectoryStat {
   DirectoryStat(this.path, this.subDirectory, this.fileNameToSize, this.size);
 
   int get total => fileNameToSize.length + subDirectory.length;
+
+  int get fileCount => fileNameToSize.length;
+}
+
+const int _oneMB = 1048576;
+const int _tenMB = 10485760;
+
+String prettyPrintDirectoryStat(
+  DirectoryStat dirStat,
+  String rootPath, [
+  String indent = '',
+  int minDirSizeForPrint = _tenMB,
+  int minFileSizeForPrint = _oneMB,
+]) {
+  final StringBuffer buffer = StringBuffer();
+  _buildPrettyString(
+    dirStat,
+    rootPath,
+    buffer,
+    indent,
+    minDirSizeForPrint,
+    minFileSizeForPrint,
+  );
+  return buffer.toString();
+}
+
+void _buildPrettyString(
+  DirectoryStat dirStat,
+  String rootPath,
+  StringBuffer buffer,
+  String indent,
+  int minDirSizeForPrint,
+  int minFileSizeForPrint,
+) {
+  if (dirStat.size < minDirSizeForPrint) {
+    return;
+  }
+  final String relativePath = dirStat.path.replaceFirst(rootPath, '');
+
+  if (relativePath.isEmpty) {
+    buffer.writeln(
+        'Root: ${basename(dirStat.path)} [SubDir:${dirStat.subDirectory.length} Files:${dirStat.fileNameToSize.length}], Size:${formatBytes(dirStat.size)}');
+  } else {
+    buffer.writeln(
+      '${indent}Directory: $relativePath, [SubDir:${dirStat.subDirectory.length} Files:${dirStat.fileNameToSize.length}], Size: ${formatBytes(dirStat.size)}',
+    );
+  }
+
+  for (var subDir in dirStat.subDirectory) {
+    _buildPrettyString(
+      subDir,
+      rootPath,
+      buffer,
+      '$indent  ',
+      minDirSizeForPrint,
+      minFileSizeForPrint,
+    );
+  }
+
+  for (var fileName in dirStat.fileNameToSize.keys) {
+    final int fSize = dirStat.fileNameToSize[fileName]!;
+    if (fSize <= minFileSizeForPrint) {
+      continue;
+    }
+    buffer.writeln('$indent  File: $fileName, Size: ${formatBytes(fSize)}');
+  }
 }
 
 Future<DirectoryStat> getDirectorySize(Directory directory) async {
@@ -20,11 +89,11 @@ Future<DirectoryStat> getDirectorySize(Directory directory) async {
     final List<FileSystemEntity> entities = directory.listSync();
     for (FileSystemEntity entity in entities) {
       if (entity is File) {
-        int fileSize = await File(entity.path).length();
+        final int fileSize = await File(entity.path).length();
         size += fileSize;
         fileNameToSize[entity.uri.pathSegments.last] = fileSize;
       } else if (entity is Directory) {
-        DirectoryStat subDirStat =
+        final DirectoryStat subDirStat =
             await getDirectorySize(Directory(entity.path));
         subDirectories.add(subDirStat);
         size += subDirStat.size;
