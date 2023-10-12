@@ -105,7 +105,7 @@ class _AppStorageViewerState extends State<AppStorageViewer> {
 
   Future<void> prettyStringDirectoryStats(List<String> paths) async {
     for (var path in paths) {
-      final DirectoryStat state = await getDirectorySize(Directory(path));
+      final DirectoryStat state = await getDirectoryStat(Directory(path));
       final content = prettyPrintDirectoryStat(state, path);
       if (content.isNotEmpty) {
         debugPrint(content);

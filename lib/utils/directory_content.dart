@@ -80,7 +80,7 @@ void _buildPrettyString(
   }
 }
 
-Future<DirectoryStat> getDirectorySize(Directory directory) async {
+Future<DirectoryStat> getDirectoryStat(Directory directory) async {
   int size = 0;
   final List<DirectoryStat> subDirectories = [];
   final Map<String, int> fileNameToSize = {};
@@ -94,7 +94,7 @@ Future<DirectoryStat> getDirectorySize(Directory directory) async {
         fileNameToSize[entity.uri.pathSegments.last] = fileSize;
       } else if (entity is Directory) {
         final DirectoryStat subDirStat =
-            await getDirectorySize(Directory(entity.path));
+            await getDirectoryStat(Directory(entity.path));
         subDirectories.add(subDirStat);
         size += subDirStat.size;
       }
