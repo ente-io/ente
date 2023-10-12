@@ -6,6 +6,7 @@ import 'package:photos/data/months.dart';
 import 'package:photos/data/years.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
+import "package:photos/extensions/string_ext.dart";
 import 'package:photos/models/collection/collection.dart';
 import 'package:photos/models/collection/collection_items.dart';
 import 'package:photos/models/file/file.dart';
@@ -290,6 +291,8 @@ class SearchService {
           for (String subDescription in orderedSubDescription[0]!) {
             if (file.caption!.contains(subDescription)) {
               matchesSingleWordSubString = true;
+              if (subDescription.isAllConnectWords) continue;
+
               if (descriptionAndMatchingFiles.containsKey(subDescription)) {
                 descriptionAndMatchingFiles[subDescription]!.add(file);
               } else {
@@ -299,6 +302,8 @@ class SearchService {
           }
           if (matchesSingleWordSubString) {
             for (String subDescription in orderedSubDescription[1]!) {
+              if (subDescription.isAllConnectWords) continue;
+
               if (file.caption!.contains(subDescription)) {
                 if (descriptionAndMatchingFiles.containsKey(subDescription)) {
                   descriptionAndMatchingFiles[subDescription]!.add(file);

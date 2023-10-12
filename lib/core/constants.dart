@@ -53,7 +53,7 @@ const double restrictedMaxWidth = 430;
 const double mobileSmallThreshold = 336;
 
 // Note: 0 indicates no device limit
-const publicLinkDeviceLimits = [0,50, 25, 10, 5, 2, 1];
+const publicLinkDeviceLimits = [0, 50, 25, 10, 5, 2, 1];
 
 const kilometersPerDegree = 111.16;
 
