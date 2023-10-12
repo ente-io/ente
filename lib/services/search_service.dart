@@ -293,7 +293,8 @@ class SearchService {
               matchesSingleWordSubString = true;
 
               //continue only after setting [matchesSingleWordSubString] to true
-              if (subDescription.isAllConnectWords) continue;
+              if (subDescription.isAllConnectWords ||
+                  subDescription.isLastWordConnectWord) continue;
 
               if (descriptionAndMatchingFiles.containsKey(subDescription)) {
                 descriptionAndMatchingFiles[subDescription]!.add(file);
@@ -304,7 +305,8 @@ class SearchService {
           }
           if (matchesSingleWordSubString) {
             for (String subDescription in orderedSubDescription[1]!) {
-              if (subDescription.isAllConnectWords) continue;
+              if (subDescription.isAllConnectWords ||
+                  subDescription.isLastWordConnectWord) continue;
 
               if (file.caption!.contains(subDescription)) {
                 if (descriptionAndMatchingFiles.containsKey(subDescription)) {

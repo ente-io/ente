@@ -48,4 +48,13 @@ extension DescriptionString on String? {
       ),
     );
   }
+
+  bool get isLastWordConnectWord {
+    if (this == null) {
+      throw AssertionError("String cannot be null");
+    }
+    final subDescWords = this!.split(" ");
+    return connectWords
+        .any((element) => element == subDescWords.last.toLowerCase());
+  }
 }
