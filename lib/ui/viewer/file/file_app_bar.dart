@@ -129,7 +129,7 @@ class FileAppBarState extends State<FileAppBar> {
     if (isOwnedByUser && !isFileHidden && isFileUploaded) {
       actions.add(
         Padding(
-          padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 7.5),
+          padding: const EdgeInsets.all(8),
           child: FavoriteWidget(widget.file),
         ),
       );
