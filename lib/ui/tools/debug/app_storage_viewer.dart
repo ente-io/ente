@@ -81,12 +81,12 @@ class _AppStorageViewerState extends State<AppStorageViewer> {
     ]);
     if (internalUser) {
       paths.addAll([
-        PathStorageItem.name(appDocumentsDirectory.path, "App Documents Dir"),
-        PathStorageItem.name(appSupportDirectory.path, "App Support Dir"),
-        PathStorageItem.name(appTemporaryDirectory.path, "App Temp Dir"),
+        PathStorageItem.name(appDocumentsDirectory.path, "Documents"),
+        PathStorageItem.name(appSupportDirectory.path, "Support"),
+        PathStorageItem.name(appTemporaryDirectory.path, "App Temp"),
       ]);
       if (!Platform.isAndroid) {
-        paths.add(PathStorageItem.name(iosTempDirectoryPath, "/tmp directory"));
+        paths.add(PathStorageItem.name(iosTempDirectoryPath, "/tmp"));
       }
     }
     if (mounted) {
