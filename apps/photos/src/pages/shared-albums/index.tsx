@@ -57,6 +57,7 @@ import FileDownloadOutlinedIcon from '@mui/icons-material/FileDownloadOutlined';
 import MoreHoriz from '@mui/icons-material/MoreHoriz';
 import OverflowMenu from 'components/OverflowMenu/menu';
 import { OverflowMenuOption } from 'components/OverflowMenu/option';
+import { ENTE_WEBSITE_LINK } from 'constants/urls';
 
 const defaultThumbStore = new Map();
 const defaultFileStore = new Map();
@@ -152,6 +153,7 @@ export default function PublicCollectionGallery() {
             );
         }
         const main = async () => {
+            let redirectingToWebsite = false;
             try {
                 const cryptoWorker = await ComlinkCryptoWorker.getInstance();
 
@@ -159,6 +161,10 @@ export default function PublicCollectionGallery() {
                 const currentURL = new URL(url.current);
                 const t = currentURL.searchParams.get('t');
                 const ck = currentURL.hash.slice(1);
+                if (!t && !ck) {
+                    window.location.href = ENTE_WEBSITE_LINK;
+                    redirectingToWebsite = true;
+                }
                 if (!t || !ck) {
                     return;
                 }
@@ -192,7 +198,9 @@ export default function PublicCollectionGallery() {
                 }
                 await syncWithRemote();
             } finally {
-                setLoading(false);
+                if (!redirectingToWebsite) {
+                    setLoading(false);
+                }
             }
         };
         main();
