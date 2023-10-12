@@ -135,6 +135,31 @@ class SearchService {
     return searchResults;
   }
 
+  Future<List<GenericSearchResult>> getMonthSearchResults(
+    BuildContext context,
+    String query,
+  ) async {
+    final List<GenericSearchResult> searchResults = [];
+    for (var month in _getMatchingMonths(context, query)) {
+      final matchedFiles =
+          await FilesDB.instance.getFilesCreatedWithinDurations(
+        _getDurationsOfMonthInEveryYear(month.monthNumber),
+        ignoreCollections(),
+        order: 'DESC',
+      );
+      if (matchedFiles.isNotEmpty) {
+        searchResults.add(
+          GenericSearchResult(
+            ResultType.month,
+            month.name,
+            matchedFiles,
+          ),
+        );
+      }
+    }
+    return searchResults;
+  }
+
   Future<List<GenericSearchResult>> getHolidaySearchResults(
     BuildContext context,
     String query,
@@ -539,31 +564,6 @@ class SearchService {
       }
     }
     return tagSearchResults;
-  }
-
-  Future<List<GenericSearchResult>> getMonthSearchResults(
-    BuildContext context,
-    String query,
-  ) async {
-    final List<GenericSearchResult> searchResults = [];
-    for (var month in _getMatchingMonths(context, query)) {
-      final matchedFiles =
-          await FilesDB.instance.getFilesCreatedWithinDurations(
-        _getDurationsOfMonthInEveryYear(month.monthNumber),
-        ignoreCollections(),
-        order: 'DESC',
-      );
-      if (matchedFiles.isNotEmpty) {
-        searchResults.add(
-          GenericSearchResult(
-            ResultType.month,
-            month.name,
-            matchedFiles,
-          ),
-        );
-      }
-    }
-    return searchResults;
   }
 
   Future<List<GenericSearchResult>> getDateResults(
