@@ -57,7 +57,7 @@ class _PathStorageViewerState extends State<PathStorageViewer> {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<DirectoryStat>(
-      future: getDirectorySize(Directory(widget.item.path)),
+      future: getDirectoryStat(Directory(widget.item.path)),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           return _buildMenuItemWidget(snapshot.data, null);

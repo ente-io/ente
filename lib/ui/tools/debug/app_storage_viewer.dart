@@ -79,18 +79,37 @@ class _AppStorageViewerState extends State<AppStorageViewer> {
         allowCacheClear: true,
       ),
     ]);
+    final List<String> directoryStatePath = [
+      appDocumentsDirectory.path,
+      appSupportDirectory.path,
+      appTemporaryDirectory.path,
+    ];
+    if (!Platform.isAndroid) {
+      directoryStatePath.add(iosTempDirectoryPath);
+    }
     if (internalUser) {
       paths.addAll([
-        PathStorageItem.name(appDocumentsDirectory.path, "App Documents Dir"),
-        PathStorageItem.name(appSupportDirectory.path, "App Support Dir"),
-        PathStorageItem.name(appTemporaryDirectory.path, "App Temp Dir"),
+        PathStorageItem.name(appDocumentsDirectory.path, "Documents"),
+        PathStorageItem.name(appSupportDirectory.path, "Support"),
+        PathStorageItem.name(appTemporaryDirectory.path, "App Temp"),
       ]);
       if (!Platform.isAndroid) {
-        paths.add(PathStorageItem.name(iosTempDirectoryPath, "/tmp directory"));
+        paths.add(PathStorageItem.name(iosTempDirectoryPath, "/tmp"));
       }
     }
+    prettyStringDirectoryStats(directoryStatePath).ignore();
     if (mounted) {
       setState(() => {});
+    }
+  }
+
+  Future<void> prettyStringDirectoryStats(List<String> paths) async {
+    for (var path in paths) {
+      final DirectoryStat state = await getDirectoryStat(Directory(path));
+      final content = prettyPrintDirectoryStat(state, path);
+      if (content.isNotEmpty) {
+        debugPrint(content);
+      }
     }
   }
 
