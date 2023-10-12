@@ -1,38 +1,37 @@
 import 'dart:io';
 
 class DirectoryStat {
-  final int subDirectoryCount;
+  final String path;
+  final List<DirectoryStat> subDirectory;
+  final Map<String, int> fileNameToSize;
   final int size;
-  final int fileCount;
 
-  DirectoryStat(this.subDirectoryCount, this.size, this.fileCount);
+  DirectoryStat(this.path, this.subDirectory, this.fileNameToSize, this.size);
+
+  int get total => fileNameToSize.length + subDirectory.length;
 }
 
 Future<DirectoryStat> getDirectorySize(Directory directory) async {
   int size = 0;
-  int subDirCount = 0;
-  int fileCount = 0;
+  final List<DirectoryStat> subDirectories = [];
+  final Map<String, int> fileNameToSize = {};
 
   if (await directory.exists()) {
-    // Get a list of all the files and directories in the directory
     final List<FileSystemEntity> entities = directory.listSync();
-    // Iterate through the list of entities and add the sizes of the files to the total size
     for (FileSystemEntity entity in entities) {
       if (entity is File) {
-        size += (await File(entity.path).length());
-        fileCount++;
+        int fileSize = await File(entity.path).length();
+        size += fileSize;
+        fileNameToSize[entity.uri.pathSegments.last] = fileSize;
       } else if (entity is Directory) {
-        subDirCount++;
-        // If the entity is a directory, recursively calculate its size
-        final DirectoryStat subDirStat =
+        DirectoryStat subDirStat =
             await getDirectorySize(Directory(entity.path));
+        subDirectories.add(subDirStat);
         size += subDirStat.size;
-        subDirCount += subDirStat.subDirectoryCount;
-        fileCount += subDirStat.fileCount;
       }
     }
   }
-  return DirectoryStat(subDirCount, size, fileCount);
+  return DirectoryStat(directory.path, subDirectories, fileNameToSize, size);
 }
 
 Future<void> deleteDirectoryContents(String directoryPath) async {
