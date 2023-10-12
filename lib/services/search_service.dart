@@ -194,12 +194,13 @@ class SearchService {
     final fileTypesAndMatchingFiles = <FileType, List<EnteFile>>{};
     final extensionsAndMatchingFiles = <String, List<EnteFile>>{};
 
-    int i = 0;
+    int count = 0;
     for (EnteFile file in allFiles) {
-      if (limit != null && i++ <= limit) break;
+      if (limit != null && count >= limit) break;
 
       if (!fileTypesAndMatchingFiles.containsKey(file.fileType)) {
         fileTypesAndMatchingFiles[file.fileType] = <EnteFile>[];
+        count++;
       }
       fileTypesAndMatchingFiles[file.fileType]!.add(file);
 
@@ -212,6 +213,7 @@ class SearchService {
       if (ext != "") {
         if (!extensionsAndMatchingFiles.containsKey(ext)) {
           extensionsAndMatchingFiles[ext] = <EnteFile>[];
+          count++;
         }
         extensionsAndMatchingFiles[ext]!.add(file);
       }

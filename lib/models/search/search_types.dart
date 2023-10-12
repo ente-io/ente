@@ -181,7 +181,8 @@ extension SectionTypeExtensions on SectionType {
         return SearchService.instance.getAllCollectionSearchResults(limit);
 
       case SectionType.fileTypesAndExtension:
-        return SearchService.instance.getAllFileTypesAndExtensionsResults(null);
+        return SearchService.instance
+            .getAllFileTypesAndExtensionsResults(limit);
 
       case SectionType.fileCaption:
         return SearchService.instance.getAllDescriptionSearchResults(limit);
