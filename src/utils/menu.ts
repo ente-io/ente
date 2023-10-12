@@ -198,6 +198,13 @@ export async function buildMenuBar(mainWindow: BrowserWindow): Promise<Menu> {
                     label: 'Product updates',
                     click: () => shell.openExternal('https://ente.io/blog/'),
                 },
+                { type: 'separator' },
+                {
+                    label: 'View Crash Reports',
+                    click: () => {
+                        shell.openPath(app.getPath('crashDumps'));
+                    },
+                },
                 {
                     label: 'View logs',
                     click: () => {
