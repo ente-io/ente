@@ -77,6 +77,10 @@
       "title": "KuCoin",
       "hex": "01BC8D"
     },
+	{
+      "title": "La Poste",
+	  "slug": "laposte"
+    },
     {
       "title": "ngrok",
       "hex": "858585"
