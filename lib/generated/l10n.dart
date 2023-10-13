@@ -6810,10 +6810,10 @@ class S {
   }
 
   /// `File types and names`
-  String get fileTypesAndNames {
+  String get fileTypes {
     return Intl.message(
-      'File types and names',
-      name: 'fileTypesAndNames',
+      'File types',
+      name: 'fileTypes',
       desc: '',
       args: [],
     );

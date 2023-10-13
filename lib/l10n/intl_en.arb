@@ -968,13 +968,11 @@
   "searchAlbumsEmptySection": "Albums",
   "searchFileTypesAndNamesEmptySection": "File types and names",
   "searchCaptionEmptySection": "Add descriptions like \"#trip\" in photo info to quickly find them here",
-
   "language": "Language",
   "selectLanguage": "Select Language",
   "locationName": "Location name",
   "addLocation": "Add location",
   "groupNearbyPhotos": "Group nearby photos",
-  "location": "Location",
   "kiloMeterUnit": "km",
   "addLocationButton": "Add",
   "radius": "Radius",
@@ -1115,5 +1113,6 @@
   "successfullyUnhid": "Successfully unhid",
   "crashReporting": "Crash reporting",
   "addToHiddenAlbum": "Add to hidden album",
-  "moveToHiddenAlbum": "Move to hidden album"
+  "moveToHiddenAlbum": "Move to hidden album",
+  "fileTypes": "File types"
 }

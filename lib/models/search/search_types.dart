@@ -46,7 +46,7 @@ extension SectionTypeExtensions on SectionType {
       case SectionType.album:
         return S.of(context).albums;
       case SectionType.fileTypesAndExtension:
-        return S.of(context).fileTypesAndNames;
+        return S.of(context).fileTypes;
       case SectionType.fileCaption:
         return S.of(context).photoDescriptions;
     }

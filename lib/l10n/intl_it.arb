@@ -1102,5 +1102,6 @@
   "successfullyUnhid": "Rimossa dal nascondiglio con successo",
   "crashReporting": "Segnalazione di crash",
   "addToHiddenAlbum": "Aggiungi ad album nascosto",
-  "moveToHiddenAlbum": "Sposta in album nascosto"
+  "moveToHiddenAlbum": "Sposta in album nascosto",
+  "fileTypes": "File types"
 }

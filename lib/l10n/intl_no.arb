@@ -14,5 +14,6 @@
   "confirmDeletePrompt": "Ja, jeg ønsker å slette denne kontoen og all dataen dens permanent.",
   "confirmAccountDeletion": "Bekreft sletting av konto",
   "addToHiddenAlbum": "Add to hidden album",
-  "moveToHiddenAlbum": "Move to hidden album"
+  "moveToHiddenAlbum": "Move to hidden album",
+  "fileTypes": "File types"
 }

@@ -1102,5 +1102,6 @@
   "successfullyUnhid": "Erfolgreich eingeblendet",
   "crashReporting": "Absturzbericht",
   "addToHiddenAlbum": "Zum versteckten Album hinzufügen",
-  "moveToHiddenAlbum": "Zu verstecktem Album verschieben"
+  "moveToHiddenAlbum": "Zu verstecktem Album verschieben",
+  "fileTypes": "File types"
 }

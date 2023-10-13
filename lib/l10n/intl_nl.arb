@@ -1102,5 +1102,6 @@
   "successfullyUnhid": "Met succes zichtbaar gemaakt",
   "crashReporting": "Crash rapportering",
   "addToHiddenAlbum": "Toevoegen aan verborgen album",
-  "moveToHiddenAlbum": "Verplaatsen naar verborgen album"
+  "moveToHiddenAlbum": "Verplaatsen naar verborgen album",
+  "fileTypes": "File types"
 }

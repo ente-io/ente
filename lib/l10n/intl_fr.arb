@@ -1102,5 +1102,6 @@
   "successfullyUnhid": "Masquage réussi",
   "crashReporting": "Rapports d'erreurs",
   "addToHiddenAlbum": "Ajouter à un album masqué",
-  "moveToHiddenAlbum": "Déplacer vers un album masqué"
+  "moveToHiddenAlbum": "Déplacer vers un album masqué",
+  "fileTypes": "File types"
 }

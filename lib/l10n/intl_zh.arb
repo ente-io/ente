@@ -1102,5 +1102,6 @@
   "successfullyUnhid": "已成功取消隐藏",
   "crashReporting": "崩溃报告",
   "addToHiddenAlbum": "添加到隐藏相册",
-  "moveToHiddenAlbum": "移至隐藏相册"
+  "moveToHiddenAlbum": "移至隐藏相册",
+  "fileTypes": "File types"
 }
