@@ -292,13 +292,9 @@ class SearchService {
     final fileTypesAndMatchingFiles = <FileType, List<EnteFile>>{};
     final extensionsAndMatchingFiles = <String, List<EnteFile>>{};
 
-    int count = 0;
     for (EnteFile file in allFiles) {
-      if (limit != null && count >= limit) break;
-
       if (!fileTypesAndMatchingFiles.containsKey(file.fileType)) {
         fileTypesAndMatchingFiles[file.fileType] = <EnteFile>[];
-        count++;
       }
       fileTypesAndMatchingFiles[file.fileType]!.add(file);
 
@@ -311,7 +307,6 @@ class SearchService {
       if (ext != "") {
         if (!extensionsAndMatchingFiles.containsKey(ext)) {
           extensionsAndMatchingFiles[ext] = <EnteFile>[];
-          count++;
         }
         extensionsAndMatchingFiles[ext]!.add(file);
       }
@@ -327,7 +322,13 @@ class SearchService {
           .add(GenericSearchResult(ResultType.fileExtension, key, value));
     });
 
-    return searchResults;
+    if (limit != null) {
+      return searchResults
+        ..shuffle()
+        ..sublist(0, limit);
+    } else {
+      return searchResults;
+    }
   }
 
   //This can be furthur optimized by not just limiting keys to 0 and 1. Use key
