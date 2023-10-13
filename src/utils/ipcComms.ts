@@ -28,8 +28,8 @@ import { generateTempFilePath } from './temp';
 import { setOptOutOfCrashReports } from '../services/userPreference';
 import { updateOptOutOfCrashReports } from '../main';
 import {
-    computeImageEmbeddings,
-    computeTextEmbeddings,
+    computeImageEmbedding,
+    computeTextEmbedding,
 } from '../services/clipService';
 
 export default function setupIpcComs(
@@ -170,10 +170,10 @@ export default function setupIpcComs(
         setOptOutOfCrashReports(optOut);
         updateOptOutOfCrashReports(optOut);
     });
-    ipcMain.handle('compute-image-embeddings', (_, inputFilePath) => {
-        return computeImageEmbeddings(inputFilePath);
+    ipcMain.handle('compute-image-embedding', (_, inputFilePath) => {
+        return computeImageEmbedding(inputFilePath);
     });
-    ipcMain.handle('compute-text-embeddings', (_, text) => {
-        return computeTextEmbeddings(text);
+    ipcMain.handle('compute-text-embedding', (_, text) => {
+        return computeTextEmbedding(text);
     });
 }

@@ -32,7 +32,7 @@ function getGGMLClipPath() {
     return './bin/ggmlclip';
 }
 
-export async function computeImageEmbeddings(
+export async function computeImageEmbedding(
     inputFilePath: string
 ): Promise<Float32Array> {
     try {
@@ -55,19 +55,19 @@ export async function computeImageEmbeddings(
         const startTime = Date.now();
         const { stdout } = await execAsync(escapedCmd);
         log.info('clip command execution time ', Date.now() - startTime);
-        // parse stdout and return embeddings
+        // parse stdout and return embedding
         // get the last line of stdout
         const lines = stdout.split('\n');
         const lastLine = lines[lines.length - 1];
-        const embeddings = JSON.parse(lastLine);
-        const embeddingsArray = new Float32Array(embeddings);
-        return embeddingsArray;
+        const embedding = JSON.parse(lastLine);
+        const embeddingArray = new Float32Array(embedding);
+        return embeddingArray;
     } catch (err) {
-        logErrorSentry(err, 'Error in computeImageEmbeddings');
+        logErrorSentry(err, 'Error in computeImageEmbedding');
     }
 }
 
-export async function computeTextEmbeddings(
+export async function computeTextEmbedding(
     text: string
 ): Promise<Float32Array> {
     try {
@@ -90,14 +90,14 @@ export async function computeTextEmbeddings(
         const startTime = Date.now();
         const { stdout } = await execAsync(escapedCmd);
         log.info('clip command execution time ', Date.now() - startTime);
-        // parse stdout and return embeddings
+        // parse stdout and return embedding
         // get the last line of stdout
         const lines = stdout.split('\n');
         const lastLine = lines[lines.length - 1];
-        const embeddings = JSON.parse(lastLine);
-        const embeddingsArray = new Float32Array(embeddings);
-        return embeddingsArray;
+        const embedding = JSON.parse(lastLine);
+        const embeddingArray = new Float32Array(embedding);
+        return embeddingArray;
     } catch (err) {
-        logErrorSentry(err, 'Error in computeImageEmbeddings');
+        logErrorSentry(err, 'Error in computeImageEmbedding');
     }
 }
