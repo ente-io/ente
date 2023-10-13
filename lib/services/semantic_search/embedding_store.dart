@@ -52,10 +52,11 @@ class EmbeddingStore {
 
   Future<void> storeEmbedding(EnteFile file, Embedding embedding) async {
     await FilesDB.instance.upsertEmbedding(embedding);
-    await _pushEmbedding(file, embedding);
+    _pushEmbedding(file, embedding);
   }
 
   Future<void> _pushEmbedding(EnteFile file, Embedding embedding) async {
+    return;
     final encryptionKey = getFileKey(file);
     final embeddingData =
         Uint8List.view(Float64List.fromList(embedding.embedding).buffer);

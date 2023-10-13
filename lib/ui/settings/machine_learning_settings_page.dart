@@ -1,21 +1,35 @@
+import "dart:async";
+
 import "package:flutter/material.dart";
+import "package:intl/intl.dart";
+import "package:photos/core/event_bus.dart";
+import "package:photos/events/file_indexed_event.dart";
 import "package:photos/generated/l10n.dart";
+import "package:photos/services/semantic_search/semantic_search_service.dart";
 import "package:photos/theme/ente_theme.dart";
+import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/components/buttons/icon_button_widget.dart";
 import "package:photos/ui/components/captioned_text_widget.dart";
 import "package:photos/ui/components/menu_item_widget/menu_item_widget.dart";
 import "package:photos/ui/components/menu_section_description_widget.dart";
+import "package:photos/ui/components/menu_section_title.dart";
 import "package:photos/ui/components/title_bar_title_widget.dart";
 import "package:photos/ui/components/title_bar_widget.dart";
 import "package:photos/ui/components/toggle_switch_widget.dart";
 import "package:photos/utils/local_settings.dart";
 
-class MachineLearningSettingsPage extends StatelessWidget {
+class MachineLearningSettingsPage extends StatefulWidget {
   const MachineLearningSettingsPage({super.key});
 
   @override
+  State<MachineLearningSettingsPage> createState() =>
+      _MachineLearningSettingsPageState();
+}
+
+class _MachineLearningSettingsPageState
+    extends State<MachineLearningSettingsPage> {
+  @override
   Widget build(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
     return Scaffold(
       body: CustomScrollView(
         primary: false,
@@ -46,37 +60,7 @@ class MachineLearningSettingsPage extends StatelessWidget {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Column(
-                          children: [
-                            Column(
-                              children: [
-                                MenuItemWidget(
-                                  captionedTextWidget: CaptionedTextWidget(
-                                    title: S.of(context).magicSearch,
-                                  ),
-                                  menuItemColor: colorScheme.fillFaint,
-                                  trailingWidget: ToggleSwitchWidget(
-                                    value: () => LocalSettings.instance
-                                        .hasEnabledMagicSearch(),
-                                    onChanged: () {
-                                      return LocalSettings.instance
-                                          .setShouldEnableMagicSearch(
-                                        !LocalSettings.instance
-                                            .hasEnabledMagicSearch(),
-                                      );
-                                    },
-                                  ),
-                                  singleBorderRadius: 8,
-                                  alignCaptionedTextToLeft: true,
-                                  isGestureDetectorDisabled: true,
-                                ),
-                                MenuSectionDescriptionWidget(
-                                  content: S.of(context).magicSearchDescription,
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
+                        _getMagicSearchSettings(context),
                       ],
                     ),
                   ),
@@ -87,6 +71,128 @@ class MachineLearningSettingsPage extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _getMagicSearchSettings(BuildContext context) {
+    final colorScheme = getEnteColorScheme(context);
+    final hasEnabled = LocalSettings.instance.hasEnabledMagicSearch();
+    return Column(
+      children: [
+        MenuItemWidget(
+          captionedTextWidget: CaptionedTextWidget(
+            title: S.of(context).magicSearch,
+          ),
+          menuItemColor: colorScheme.fillFaint,
+          trailingWidget: ToggleSwitchWidget(
+            value: () => LocalSettings.instance.hasEnabledMagicSearch(),
+            onChanged: () async {
+              await LocalSettings.instance.setShouldEnableMagicSearch(
+                !LocalSettings.instance.hasEnabledMagicSearch(),
+              );
+              if (LocalSettings.instance.hasEnabledMagicSearch()) {
+                await SemanticSearchService.instance.startBackFill();
+              }
+              setState(() {});
+            },
+          ),
+          singleBorderRadius: 8,
+          alignCaptionedTextToLeft: true,
+          isGestureDetectorDisabled: true,
+        ),
+        const SizedBox(
+          height: 4,
+        ),
+        MenuSectionDescriptionWidget(
+          content: S.of(context).magicSearchDescription,
+        ),
+        const SizedBox(
+          height: 12,
+        ),
+        hasEnabled
+            ? const MagicSearchIndexStatsWidget()
+            : const SizedBox.shrink(),
+      ],
+    );
+  }
+}
+
+class MagicSearchIndexStatsWidget extends StatefulWidget {
+  const MagicSearchIndexStatsWidget({
+    super.key,
+  });
+
+  @override
+  State<MagicSearchIndexStatsWidget> createState() =>
+      _MagicSearchIndexStatsWidgetState();
+}
+
+class _MagicSearchIndexStatsWidgetState
+    extends State<MagicSearchIndexStatsWidget> {
+  IndexStatus? _status;
+  late StreamSubscription<FileIndexedEvent> _eventSubscription;
+
+  @override
+  void initState() {
+    super.initState();
+    _eventSubscription = Bus.instance.on<FileIndexedEvent>().listen((event) {
+      _fetchIndexStatus();
+    });
+    _fetchIndexStatus();
+  }
+
+  void _fetchIndexStatus() {
+    SemanticSearchService.instance.getIndexStatus().then((status) {
+      _status = status;
+      setState(() {});
+    });
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _eventSubscription.cancel();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_status == null) {
+      return const EnteLoadingWidget();
+    }
+    return Column(
+      children: [
+        MenuSectionTitle(title: S.of(context).status),
+        MenuItemWidget(
+          captionedTextWidget: CaptionedTextWidget(
+            title: S.of(context).indexedItems,
+          ),
+          trailingWidget: Text(
+            NumberFormat().format(_status!.indexedItems),
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+          // menuItemColor: colorScheme.fillFaint,
+          singleBorderRadius: 8,
+          alignCaptionedTextToLeft: true,
+          isGestureDetectorDisabled: true,
+          // Setting a key here to ensure trailingWidget is refreshed
+          key: ValueKey("indexed_items_" + _status!.indexedItems.toString()),
+        ),
+        MenuItemWidget(
+          captionedTextWidget: CaptionedTextWidget(
+            title: S.of(context).pendingItems,
+          ),
+          trailingWidget: Text(
+            NumberFormat().format(_status!.pendingItems),
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+          // menuItemColor: colorScheme.fillFaint,
+          singleBorderRadius: 8,
+          alignCaptionedTextToLeft: true,
+          isGestureDetectorDisabled: true,
+          // Setting a key here to ensure trailingWidget is refreshed
+          key: ValueKey("pending_items_" + _status!.pendingItems.toString()),
+        ),
+      ],
     );
   }
 }

@@ -2887,6 +2887,36 @@ class S {
     );
   }
 
+  /// `Status`
+  String get status {
+    return Intl.message(
+      'Status',
+      name: 'status',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Indexed items`
+  String get indexedItems {
+    return Intl.message(
+      'Indexed items',
+      name: 'indexedItems',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Pending items`
+  String get pendingItems {
+    return Intl.message(
+      'Pending items',
+      name: 'pendingItems',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Select folders for backup`
   String get selectFoldersForBackup {
     return Intl.message(
