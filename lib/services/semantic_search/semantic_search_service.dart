@@ -127,7 +127,7 @@ class SemanticSearchService {
 
     startTime = DateTime.now();
     final filesMap = await FilesDB.instance
-        .getFilesFromGeneratedIDs(queryResults.map((e) => e.id).toList());
+        .getFilesFromIDs(queryResults.map((e) => e.id).toList());
     final results = <EnteFile>[];
     for (final result in queryResults) {
       if (filesMap.containsKey(result.id)) {
@@ -224,52 +224,56 @@ class SemanticSearchService {
       return;
     }
     final List<String> filePaths = [];
-
-    for (final file in files) {
-      filePaths.add((await getThumbnailFile(file))!.path);
-    }
-    _logger.info("Running clip over " + files.length.toString() + " items");
-    final startTime = DateTime.now();
-    final List<List<double>> imageEmbeddings = [];
-    if (filePaths.length == 1) {
-      final result = await _computer.compute(
-        createImageEmbedding,
-        param: {
-          "imagePath": filePaths.first,
-        },
-        taskName: "createImageEmbedding",
-      ) as List<double>;
-      imageEmbeddings.add(result);
-    } else {
-      final result = await _computer.compute(
-        createImageEmbeddings,
-        param: {
-          "imagePaths": filePaths,
-        },
-        taskName: "createImageEmbeddings",
-      ) as List<List<double>>;
-      imageEmbeddings.addAll(result);
-    }
-    final endTime = DateTime.now();
-    _logger.info(
-      "createImageEmbeddings took: " +
-          (endTime.millisecondsSinceEpoch - startTime.millisecondsSinceEpoch)
-              .toString() +
-          "ms for " +
-          imageEmbeddings.length.toString() +
-          " items",
-    );
-    for (int i = 0; i < imageEmbeddings.length; i++) {
-      await EmbeddingStore.instance.storeEmbedding(
-        files[i],
-        Embedding(
-          files[i].uploadedFileID!,
-          "c_uq",
-          imageEmbeddings[i],
-        ),
+    try {
+      for (final file in files) {
+        filePaths.add((await getThumbnailFile(file))!.path);
+      }
+      _logger.info("Running clip over " + files.length.toString() + " items");
+      final startTime = DateTime.now();
+      final List<List<double>> imageEmbeddings = [];
+      if (filePaths.length == 1) {
+        final result = await _computer.compute(
+          createImageEmbedding,
+          param: {
+            "imagePath": filePaths.first,
+          },
+          taskName: "createImageEmbedding",
+        ) as List<double>;
+        imageEmbeddings.add(result);
+      } else {
+        final result = await _computer.compute(
+          createImageEmbeddings,
+          param: {
+            "imagePaths": filePaths,
+          },
+          taskName: "createImageEmbeddings",
+        ) as List<List<double>>;
+        imageEmbeddings.addAll(result);
+      }
+      final endTime = DateTime.now();
+      _logger.info(
+        "createImageEmbeddings took: " +
+            (endTime.millisecondsSinceEpoch - startTime.millisecondsSinceEpoch)
+                .toString() +
+            "ms for " +
+            imageEmbeddings.length.toString() +
+            " items",
       );
+      for (int i = 0; i < imageEmbeddings.length; i++) {
+        await EmbeddingStore.instance.storeEmbedding(
+          files[i],
+          Embedding(
+            files[i].uploadedFileID!,
+            "c_uq",
+            imageEmbeddings[i],
+          ),
+        );
+      }
+
+      Bus.instance.fire(FileIndexedEvent());
+    } catch (e, s) {
+      _logger.severe(e, s);
     }
-    Bus.instance.fire(FileIndexedEvent());
   }
 }
 
