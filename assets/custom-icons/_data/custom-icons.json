@@ -45,6 +45,9 @@
       "hex": "858585"
     },
     {
+      "title": "Firefox"
+    },
+    {
       "title": "Github",
       "hex": "858585"
     },
@@ -53,6 +56,9 @@
     },
     {
       "title": "ING"
+    },
+    {
+      "title": "Instagram"
     },
     {
       "title": "Jagex",
@@ -82,6 +88,9 @@
 	  "slug": "laposte"
     },
     {
+      "title": "Microsoft"
+    },
+    {
       "title": "ngrok",
       "hex": "858585"
     },
@@ -93,6 +102,9 @@
     },
     {
       "title": "Parsec"
+    },
+    {
+      "title": "PayPal"
     },
     {
       "title": "Peerberry",
@@ -118,6 +130,9 @@
     },
     {
       "title": "Privacy.com"
+    },
+    {
+      "title": "Proton"
     },
     {
       "title": "Revolt",
@@ -158,6 +173,10 @@
       "hex": "858585"
     },
     {
+      "title": "Twitter",
+      "slug": "x"
+    },
+    {
       "title": "Ubisoft",
       "hex": "4285f4"
     },
@@ -174,6 +193,9 @@
     },
     {
       "title": "Wise"
+    },
+    {
+      "title": "X"
     },
     {
       "title": "NextDNS"
