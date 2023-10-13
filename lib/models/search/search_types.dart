@@ -172,7 +172,7 @@ extension SectionTypeExtensions on SectionType {
         return SearchService.instance.getAllLocationTags(limit);
 
       case SectionType.moment:
-        return SearchService.instance.getRandomMonthSearchResults(context!);
+        return SearchService.instance.getRandomMomentsSearchResults(context!);
 
       case SectionType.location:
         return SearchService.instance.getAllLocationTags(limit);

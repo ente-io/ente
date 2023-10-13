@@ -135,6 +135,31 @@ class SearchService {
     return searchResults;
   }
 
+  Future<List<GenericSearchResult>> getRandomMomentsSearchResults(
+    context,
+  ) {
+    final randomYear = getRadomYearSearchResult();
+    final randomMonth = getRandomMonthSearchResult(context);
+
+    return Future.wait([randomYear, randomMonth]);
+  }
+
+  Future<GenericSearchResult> getRadomYearSearchResult() async {
+    for (var yearData in YearsData.instance.yearsData..shuffle()) {
+      final List<EnteFile> filesInYear =
+          await _getFilesInYear(yearData.duration);
+      if (filesInYear.isNotEmpty) {
+        return GenericSearchResult(
+          ResultType.year,
+          yearData.year,
+          filesInYear,
+        );
+      }
+    }
+    //todo this throws error
+    return GenericSearchResult(ResultType.year, "nil", []);
+  }
+
   Future<List<GenericSearchResult>> getMonthSearchResults(
     BuildContext context,
     String query,
@@ -160,11 +185,9 @@ class SearchService {
     return searchResults;
   }
 
-  Future<List<GenericSearchResult>> getRandomMonthSearchResults(
+  Future<GenericSearchResult> getRandomMonthSearchResult(
     BuildContext context,
   ) async {
-    final List<GenericSearchResult> searchResults = [];
-
     final months = getMonthData(context)..shuffle();
     for (MonthData month in months) {
       final matchedFiles =
@@ -174,17 +197,15 @@ class SearchService {
         order: 'DESC',
       );
       if (matchedFiles.isNotEmpty) {
-        searchResults.add(
-          GenericSearchResult(
-            ResultType.month,
-            month.name,
-            matchedFiles,
-          ),
+        return GenericSearchResult(
+          ResultType.month,
+          month.name,
+          matchedFiles,
         );
-        break;
       }
     }
-    return searchResults;
+    //todo: this throws error
+    return GenericSearchResult(ResultType.month, "nil", []);
   }
 
   Future<List<GenericSearchResult>> getHolidaySearchResults(
