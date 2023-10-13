@@ -97,6 +97,24 @@ class _AdvancedSettingsScreenState extends State<AdvancedSettingsScreen> {
                             ),
                             MenuItemWidget(
                               captionedTextWidget: CaptionedTextWidget(
+                                title: S.of(context).manageDeviceStorage,
+                              ),
+                              menuItemColor: colorScheme.fillFaint,
+                              trailingWidget: Icon(
+                                Icons.chevron_right_outlined,
+                                color: colorScheme.strokeBase,
+                              ),
+                              singleBorderRadius: 8,
+                              alignCaptionedTextToLeft: true,
+                              onTap: () async {
+                                routeToPage(context, const AppStorageViewer());
+                              },
+                            ),
+                            const SizedBox(
+                              height: 24,
+                            ),
+                            MenuItemWidget(
+                              captionedTextWidget: CaptionedTextWidget(
                                 title: S.of(context).showMemories,
                               ),
                               menuItemColor: colorScheme.fillFaint,
@@ -111,24 +129,6 @@ class _AdvancedSettingsScreenState extends State<AdvancedSettingsScreen> {
                                   );
                                 },
                               ),
-                            ),
-                            const SizedBox(
-                              height: 24,
-                            ),
-                            MenuItemWidget(
-                              captionedTextWidget: CaptionedTextWidget(
-                                title: S.of(context).manageDeviceStorage,
-                              ),
-                              menuItemColor: colorScheme.fillFaint,
-                              trailingWidget: Icon(
-                                Icons.chevron_right_outlined,
-                                color: colorScheme.strokeBase,
-                              ),
-                              singleBorderRadius: 8,
-                              alignCaptionedTextToLeft: true,
-                              onTap: () async {
-                                routeToPage(context, const AppStorageViewer());
-                              },
                             ),
                             const SizedBox(
                               height: 24,
