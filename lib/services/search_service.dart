@@ -136,12 +136,13 @@ class SearchService {
   }
 
   Future<List<GenericSearchResult>> getRandomMomentsSearchResults(
-    context,
+    BuildContext context,
   ) {
     final randomYear = getRadomYearSearchResult();
     final randomMonth = getRandomMonthSearchResult(context);
+    final randomHoliday = getRandomHolidaySearchResult(context);
 
-    return Future.wait([randomYear, randomMonth]);
+    return Future.wait([randomYear, randomMonth, randomHoliday]);
   }
 
   Future<GenericSearchResult> getRadomYearSearchResult() async {
@@ -234,6 +235,29 @@ class SearchService {
       }
     }
     return searchResults;
+  }
+
+  Future<GenericSearchResult> getRandomHolidaySearchResult(
+    BuildContext context,
+  ) async {
+    final holidays = getHolidays(context)..shuffle();
+    for (var holiday in holidays) {
+      final matchedFiles =
+          await FilesDB.instance.getFilesCreatedWithinDurations(
+        _getDurationsForCalendarDateInEveryYear(holiday.day, holiday.month),
+        ignoreCollections(),
+        order: 'DESC',
+      );
+      if (matchedFiles.isNotEmpty) {
+        return GenericSearchResult(
+          ResultType.event,
+          holiday.name,
+          matchedFiles,
+        );
+      }
+    }
+    //todo: this throws an error
+    return GenericSearchResult(ResultType.event, "nil", []);
   }
 
   Future<List<GenericSearchResult>> getFileTypeResults(
