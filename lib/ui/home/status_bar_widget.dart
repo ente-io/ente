@@ -164,7 +164,8 @@ class _SyncStatusWidgetState extends State<SyncStatusWidget> {
     if (_event == null ||
         isNotOutdatedEvent ||
         //sync error cases are handled in StatusBarWidget
-        _event!.status == SyncStatus.error) {
+        _event!.status == SyncStatus.error ||
+        _event!.status == SyncStatus.diffSynced) {
       return const SizedBox.shrink();
     }
     if (_event!.status == SyncStatus.completedBackup) {
