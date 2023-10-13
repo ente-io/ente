@@ -1605,13 +1605,12 @@ class FilesDB {
   Future<List<EnteFile>> getFilesWithoutEmbeddings() async {
     final db = await instance.database;
     final result = await db.rawQuery('''
-      SELECT *
+      SELECT $filesTable.*
       FROM $filesTable
-      WHERE NOT EXISTS (
-          SELECT 1
-          FROM $embeddingsTable
-          WHERE $embeddingsTable.$columnUploadedFileID = $filesTable.$columnUploadedFileID
-      )
+      LEFT JOIN $embeddingsTable ON $filesTable.$columnUploadedFileID = $embeddingsTable.$columnUploadedFileID
+      WHERE $filesTable.$columnUploadedFileID IS NOT NULL
+      AND $filesTable.$columnUploadedFileID != -1
+      AND $embeddingsTable.$columnUploadedFileID IS NULL
       GROUP BY $filesTable.$columnUploadedFileID;
     ''');
     return convertToFiles(result);
