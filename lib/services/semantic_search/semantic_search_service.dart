@@ -39,6 +39,8 @@ class SemanticSearchService {
   Future<void> init(SharedPreferences preferences) async {
     await _loadModel();
     await EmbeddingStore.instance.init(preferences);
+    _startBackFill();
+
     await EmbeddingStore.instance.pushEmbeddings();
     Bus.instance.on<SyncStatusUpdate>().listen((event) async {
       if (event.status == SyncStatus.diffSynced) {
@@ -46,9 +48,8 @@ class SemanticSearchService {
       }
     });
     Bus.instance.on<FileUploadedEvent>().listen((event) async {
-      _addToQueue(event.file);
+      addToQueue(event.file);
     });
-    _startBackFill();
   }
 
   Future<List<EnteFile>> search(String query) async {
@@ -144,7 +145,7 @@ class SemanticSearchService {
     return results;
   }
 
-  void _addToQueue(EnteFile file) {
+  void addToQueue(EnteFile file) {
     _logger.info("Adding " + file.toString() + " to the queue");
     _queue.add(file);
     _pollQueue();
