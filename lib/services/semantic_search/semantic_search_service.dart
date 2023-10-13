@@ -9,11 +9,13 @@ import "package:logging/logging.dart";
 import "package:path_provider/path_provider.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/db/files_db.dart";
+import "package:photos/events/file_indexed_event.dart";
 import "package:photos/events/file_uploaded_event.dart";
 import "package:photos/events/sync_status_update_event.dart";
 import "package:photos/models/embedding.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/services/semantic_search/embedding_store.dart";
+import "package:photos/utils/local_settings.dart";
 import "package:photos/utils/thumbnail_util.dart";
 import "package:shared_preferences/shared_preferences.dart";
 
@@ -39,7 +41,7 @@ class SemanticSearchService {
   Future<void> init(SharedPreferences preferences) async {
     await _loadModel();
     await EmbeddingStore.instance.init(preferences);
-    _startBackFill();
+    startBackFill();
 
     await EmbeddingStore.instance.pushEmbeddings();
     Bus.instance.on<SyncStatusUpdate>().listen((event) async {
@@ -146,9 +148,17 @@ class SemanticSearchService {
   }
 
   void addToQueue(EnteFile file) {
+    if (!LocalSettings.instance.hasEnabledMagicSearch()) {
+      return;
+    }
     _logger.info("Adding " + file.toString() + " to the queue");
     _queue.add(file);
     _pollQueue();
+  }
+
+  Future<IndexStatus> getIndexStatus() async {
+    final embeddings = await FilesDB.instance.getAllEmbeddings();
+    return IndexStatus(embeddings.length, _queue.length);
   }
 
   Future<void> _loadModel() async {
@@ -179,7 +189,10 @@ class SemanticSearchService {
     return file.path;
   }
 
-  Future<void> _startBackFill() async {
+  Future<void> startBackFill() async {
+    if (!LocalSettings.instance.hasEnabledMagicSearch()) {
+      return;
+    }
     final files = await FilesDB.instance.getFilesWithoutEmbeddings();
     _logger.info(files.length.toString() + " pending to be embedded");
     _queue.addAll(files);
@@ -247,7 +260,7 @@ class SemanticSearchService {
           " items",
     );
     for (int i = 0; i < imageEmbeddings.length; i++) {
-      EmbeddingStore.instance.storeEmbedding(
+      await EmbeddingStore.instance.storeEmbedding(
         files[i],
         Embedding(
           files[i].uploadedFileID!,
@@ -256,6 +269,7 @@ class SemanticSearchService {
         ),
       );
     }
+    Bus.instance.fire(FileIndexedEvent());
   }
 }
 
@@ -290,4 +304,10 @@ class PendingQuery {
   final Completer<List<EnteFile>> completer;
 
   PendingQuery(this.query, this.completer);
+}
+
+class IndexStatus {
+  final int indexedItems, pendingItems;
+
+  IndexStatus(this.indexedItems, this.pendingItems);
 }
