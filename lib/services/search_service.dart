@@ -160,6 +160,33 @@ class SearchService {
     return searchResults;
   }
 
+  Future<List<GenericSearchResult>> getRandomMonthSearchResults(
+    BuildContext context,
+  ) async {
+    final List<GenericSearchResult> searchResults = [];
+
+    final months = getMonthData(context)..shuffle();
+    for (MonthData month in months) {
+      final matchedFiles =
+          await FilesDB.instance.getFilesCreatedWithinDurations(
+        _getDurationsOfMonthInEveryYear(month.monthNumber),
+        ignoreCollections(),
+        order: 'DESC',
+      );
+      if (matchedFiles.isNotEmpty) {
+        searchResults.add(
+          GenericSearchResult(
+            ResultType.month,
+            month.name,
+            matchedFiles,
+          ),
+        );
+        break;
+      }
+    }
+    return searchResults;
+  }
+
   Future<List<GenericSearchResult>> getHolidaySearchResults(
     BuildContext context,
     String query,

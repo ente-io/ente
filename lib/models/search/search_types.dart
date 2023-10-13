@@ -160,7 +160,10 @@ extension SectionTypeExtensions on SectionType {
     }
   }
 
-  Future<List<SearchResult>> getData({int? limit}) {
+  Future<List<SearchResult>> getData({int? limit, BuildContext? context}) {
+    if (this == SectionType.moment && context == null) {
+      AssertionError("context cannot be null for SectionType.moment");
+    }
     switch (this) {
       case SectionType.face:
         return SearchService.instance.getAllLocationTags(limit);
@@ -169,7 +172,7 @@ extension SectionTypeExtensions on SectionType {
         return SearchService.instance.getAllLocationTags(limit);
 
       case SectionType.moment:
-        return SearchService.instance.getAllLocationTags(limit);
+        return SearchService.instance.getRandomMonthSearchResults(context!);
 
       case SectionType.location:
         return SearchService.instance.getAllLocationTags(limit);

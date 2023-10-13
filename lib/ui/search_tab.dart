@@ -49,19 +49,25 @@ class AllSearchSections extends StatefulWidget {
 
 class _AllSearchSectionsState extends State<AllSearchSections> {
   late Future<List<List<SearchResult>>> allSectionsExamples;
+  late List<Future<List<SearchResult>>> sectionExamples;
 
   @override
   void initState() {
-    final sectionExamples = <Future<List<SearchResult>>>[];
+    super.initState();
+    sectionExamples = <Future<List<SearchResult>>>[];
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
     for (SectionType sectionType in SectionType.values) {
       if (sectionType == SectionType.face ||
           sectionType == SectionType.content) {
         continue;
       }
-      sectionExamples.add(sectionType.getData(limit: 7));
+      sectionExamples.add(sectionType.getData(limit: 7, context: context));
     }
     allSectionsExamples = Future.wait<List<SearchResult>>(sectionExamples);
-    super.initState();
   }
 
   @override
