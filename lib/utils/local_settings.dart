@@ -13,6 +13,7 @@ class LocalSettings {
   static final LocalSettings instance = LocalSettings._privateConstructor();
   static const kCollectionSortPref = "collection_sort_pref";
   static const kPhotoGridSize = "photo_grid_size";
+  static const kEnableMagicSearch = "enable_magic_search";
 
   late SharedPreferences _prefs;
 
@@ -38,5 +39,16 @@ class LocalSettings {
 
   Future<void> setPhotoGridSize(int value) async {
     await _prefs.setInt(kPhotoGridSize, value);
+  }
+
+  bool hasEnabledMagicSearch() {
+    if (_prefs.containsKey(kEnableMagicSearch)) {
+      return _prefs.getBool(kEnableMagicSearch)!;
+    }
+    return false;
+  }
+
+  Future<void> setShouldEnableMagicSearch(bool value) async {
+    await _prefs.setBool(kEnableMagicSearch, value);
   }
 }
