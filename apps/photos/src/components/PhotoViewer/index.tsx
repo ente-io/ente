@@ -55,6 +55,7 @@ import AlbumOutlined from '@mui/icons-material/AlbumOutlined';
 import { FlexWrapper } from 'components/Container';
 import isElectron from 'is-electron';
 import ReplayIcon from '@mui/icons-material/Replay';
+import ImageEditorOverlay from './ImageEditorOverlay';
 
 interface PhotoswipeFullscreenAPI {
     enter: () => void;
@@ -834,6 +835,9 @@ function PhotoViewer(props: Iprops) {
                 collectionNameMap={props.collectionNameMap}
                 closePhotoViewer={handleClose}
             />
+            {photoSwipe && photoSwipe.currItem && (
+                <ImageEditorOverlay file={photoSwipe?.currItem as EnteFile} />
+            )}
         </>
     );
 }
