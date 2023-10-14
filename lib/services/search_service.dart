@@ -374,7 +374,7 @@ class SearchService {
         for (int i = 1; i <= words.length; i++) {
           for (int j = 0; j <= words.length - i; j++) {
             final subList = words.sublist(j, j + i);
-            final substring = subList.join(" ");
+            final substring = subList.join(" ").toLowerCase();
             if (i == 1) {
               orderedSubDescriptions.last[0]!.add(substring);
             } else {
@@ -387,7 +387,7 @@ class SearchService {
             in orderedSubDescriptions) {
           bool matchesSingleWordSubString = false;
           for (String subDescription in orderedSubDescription[0]!) {
-            if (file.caption!.contains(subDescription)) {
+            if (file.caption!.toLowerCase().contains(subDescription)) {
               matchesSingleWordSubString = true;
 
               //continue only after setting [matchesSingleWordSubString] to true
@@ -406,7 +406,7 @@ class SearchService {
               if (subDescription.isAllConnectWords ||
                   subDescription.isLastWordConnectWord) continue;
 
-              if (file.caption!.contains(subDescription)) {
+              if (file.caption!.toLowerCase().contains(subDescription)) {
                 if (descriptionAndMatchingFiles.containsKey(subDescription)) {
                   descriptionAndMatchingFiles[subDescription]!.add(file);
                 } else {
