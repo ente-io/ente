@@ -345,14 +345,14 @@ class SearchService {
     //word count = 1 and word count > 1
     //New items will be added to [orderedSubDescriptions] list for every
     //description. If total of 5 items have description, there will be 5 items
-    //in [orderedSubDescriptions].
+    //in [orderedSubDescriptions] (assuming limit is null).
     //[orderedSubDescriptions[x]] has two keys, 0 & 1. Value of key 0 will be single
     //word substrings. Value of key 1 will be multi word subStrings. When
     //iterating through [allFiles], we check for matching substrings from
     //[orderedSubDescriptions[x]] with the file's description. Starts from value
-    //of key 0. If there are no substring matches from key 0, there will be none
-    //from key 1 as well. So these two keys are for avoiding unnecessary checking
-    //string.contains().
+    //of key 0 (x=0). If there are no substring matches from key 0, there will
+    //be none from key 1 as well. So these two keys are for avoiding unnecessary
+    //checking of all subDescriptions with file description.
     final orderedSubDescriptions = <Map<int, List<String>>>[];
     final descriptionAndMatchingFiles = <String, Set<EnteFile>>{};
     int distinctFullDescriptionCount = 0;
@@ -360,25 +360,28 @@ class SearchService {
     for (EnteFile file in allFiles) {
       if (file.caption != null && file.caption!.isNotEmpty) {
         //This limit doesn't necessarily have to be the limit parameter of the
-        //method. Using the same variable to avoid unwanted iterations (this and
-        //nested loops) in case there is a limit passed. Using the limit passed
-        //here so that there will be almost always be more than 7
-        //descriptionAndMatchingFiles and can shuffle and choose only limited
-        //elements from it. Without shuffling, result will be ["hello", "world",
-        //"hello world"] for the string "hello world"
-        if (limit != null && distinctFullDescriptionCount >= limit) break;
-        distinctFullDescriptionCount++;
-        final words = file.caption!.split(" ");
-        orderedSubDescriptions.add({0: <String>[], 1: <String>[]});
+        //method. Using the same variable to avoid unwanted iterations when
+        //iterating over [orderedSubDescriptions] in case there is a limit
+        //passed. Using the limit passed here so that there will be almost
+        //always be more than 7 descriptionAndMatchingFiles and can shuffle
+        //and choose only limited elements from it. Without shuffling,
+        //result will be ["hello", "world", "hello world"] for the string
+        //"hello world"
 
-        for (int i = 1; i <= words.length; i++) {
-          for (int j = 0; j <= words.length - i; j++) {
-            final subList = words.sublist(j, j + i);
-            final substring = subList.join(" ").toLowerCase();
-            if (i == 1) {
-              orderedSubDescriptions.last[0]!.add(substring);
-            } else {
-              orderedSubDescriptions.last[1]!.add(substring);
+        if (limit != null && distinctFullDescriptionCount < limit) {
+          distinctFullDescriptionCount++;
+          final words = file.caption!.split(" ");
+          orderedSubDescriptions.add({0: <String>[], 1: <String>[]});
+
+          for (int i = 1; i <= words.length; i++) {
+            for (int j = 0; j <= words.length - i; j++) {
+              final subList = words.sublist(j, j + i);
+              final substring = subList.join(" ").toLowerCase();
+              if (i == 1) {
+                orderedSubDescriptions.last[0]!.add(substring);
+              } else {
+                orderedSubDescriptions.last[1]!.add(substring);
+              }
             }
           }
         }
