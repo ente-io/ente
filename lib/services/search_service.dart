@@ -354,7 +354,7 @@ class SearchService {
     //from key 1 as well. So these two keys are for avoiding unnecessary checking
     //string.contains().
     final orderedSubDescriptions = <Map<int, List<String>>>[];
-    final descriptionAndMatchingFiles = <String, List<EnteFile>>{};
+    final descriptionAndMatchingFiles = <String, Set<EnteFile>>{};
     int distinctFullDescriptionCount = 0;
 
     for (EnteFile file in allFiles) {
@@ -397,7 +397,7 @@ class SearchService {
               if (descriptionAndMatchingFiles.containsKey(subDescription)) {
                 descriptionAndMatchingFiles[subDescription]!.add(file);
               } else {
-                descriptionAndMatchingFiles[subDescription] = [file];
+                descriptionAndMatchingFiles[subDescription] = {file};
               }
             }
           }
@@ -410,7 +410,7 @@ class SearchService {
                 if (descriptionAndMatchingFiles.containsKey(subDescription)) {
                   descriptionAndMatchingFiles[subDescription]!.add(file);
                 } else {
-                  descriptionAndMatchingFiles[subDescription] = [file];
+                  descriptionAndMatchingFiles[subDescription] = {file};
                 }
               }
             }
@@ -420,8 +420,9 @@ class SearchService {
     }
 
     descriptionAndMatchingFiles.forEach((key, value) {
-      searchResults
-          .add(GenericSearchResult(ResultType.fileCaption, key, value));
+      searchResults.add(
+        GenericSearchResult(ResultType.fileCaption, key, value.toList()),
+      );
     });
     if (limit != null && distinctFullDescriptionCount >= limit) {
       return (searchResults..shuffle()).sublist(0, limit);
