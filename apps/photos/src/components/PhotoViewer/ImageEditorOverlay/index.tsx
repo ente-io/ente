@@ -165,14 +165,32 @@ const ImageEditorOverlay = (props: IProps) => {
     };
 
     const [isDragging, setIsDragging] = useState(false);
+    const [isResizing, setIsResizing] = useState(false);
     const [canvasTop, setCanvasTop] = useState(0);
     const [canvasLeft, setCanvasLeft] = useState(0);
 
+    const [mouseDownX, setMouseDownX] = useState(0);
+    const [mouseDownY, setMouseDownY] = useState(0);
+    const [originalCanvasWidth, setOriginalCanvasWidth] = useState(0);
+    const [originalCanvasHeight, setOriginalCanvasHeight] = useState(0);
+
+    useEffect(() => {
+        if (!canvasRef) return;
+
+        canvasRef.current.style.border = isResizing ? '1px solid red' : 'none';
+    }, [isResizing, canvasRef]);
+
     const handleMouseMove = (event: MouseEvent) => {
-        if (!isDragging) return;
+        if (!isDragging && !isResizing) return;
 
         const canvasDecoyParent = canvasDecoyParentRef.current;
         if (!canvasDecoyParent || !canvasRef.current) return;
+
+        const context = canvasRef.current?.getContext('2d');
+        const canvas = canvasRef.current;
+        if (!context || !canvas) return;
+        context.imageSmoothingEnabled = false;
+
         const parentRect = canvasDecoyParent.getBoundingClientRect();
         const canvasRect = canvasRef.current.getBoundingClientRect();
 
@@ -186,9 +204,34 @@ const ImageEditorOverlay = (props: IProps) => {
         if (newLeft + canvasRect.width > parentRect.width)
             newLeft = parentRect.width - canvasRect.width;
 
-        setCanvasTop(newTop);
-        setCanvasLeft(newLeft);
+        if (isResizing) {
+            // Resize
+            let newWidth = originalCanvasWidth + event.clientX - mouseDownX;
+            let newHeight = originalCanvasHeight + event.clientY - mouseDownY;
 
+            // Adjust the position to keep the bottom right corner fixed
+            if (newWidth <= 0) newWidth = 1;
+            if (newHeight <= 0) newHeight = 1;
+
+            const newTop = canvasTop;
+            const newLeft = canvasLeft;
+
+            setCanvasTop(newTop);
+            setCanvasLeft(newLeft);
+
+            canvasRef.current.width = newWidth;
+            canvasRef.current.height = newHeight;
+
+            return;
+        } else {
+            setCanvasTop(newTop);
+            setCanvasLeft(newLeft);
+        }
+
+        activateSpotlight(newLeft, newTop);
+    };
+
+    const activateSpotlight = (newLeft: number, newTop: number) => {
         const context = canvasRef.current?.getContext('2d');
         const canvas = canvasRef.current;
         if (!context || !canvas) return;
@@ -241,6 +284,7 @@ const ImageEditorOverlay = (props: IProps) => {
             context.restore();
         };
     };
+
     return (
         <>
             {props.show && (
@@ -309,10 +353,62 @@ const ImageEditorOverlay = (props: IProps) => {
 
                                         if (x > rect.width || y > rect.height)
                                             return;
-                                        setIsDragging(true);
+
+                                        // if the click was near the bottom right corner then enable resizing
+                                        const bottomRightCornerOfCanvas = {
+                                            x: rect.width,
+                                            y: rect.height,
+                                        };
+
+                                        // allow 10px tolerance
+                                        const tolerance = 10;
+                                        if (
+                                            x <
+                                                bottomRightCornerOfCanvas.x -
+                                                    tolerance ||
+                                            y <
+                                                bottomRightCornerOfCanvas.y -
+                                                    tolerance
+                                        ) {
+                                            setIsDragging(true);
+                                        } else {
+                                            setIsResizing(true);
+                                        }
+
+                                        setMouseDownX(event.clientX);
+                                        setMouseDownY(event.clientY);
+                                        setOriginalCanvasHeight(canvas.height);
+                                        setOriginalCanvasWidth(canvas.width);
                                     }}
-                                    onMouseUp={() => {
+                                    onMouseUp={(event) => {
+                                        setIsResizing(false);
                                         setIsDragging(false);
+                                        const context =
+                                            canvasRef.current?.getContext('2d');
+                                        const canvas = canvasRef.current;
+                                        if (!context || !canvas) return;
+                                        const canvasDecoyParent =
+                                            canvasDecoyParentRef.current;
+                                        if (
+                                            !canvasDecoyParent ||
+                                            !canvasRef.current
+                                        )
+                                            return;
+
+                                        const parentRect =
+                                            canvasDecoyParent.getBoundingClientRect();
+                                        const canvasRect =
+                                            canvasRef.current.getBoundingClientRect();
+
+                                        const newTop =
+                                            event.clientY -
+                                            parentRect.top -
+                                            canvasRect.height / 2;
+                                        const newLeft =
+                                            event.clientX -
+                                            parentRect.left -
+                                            canvasRect.width / 2;
+                                        activateSpotlight(newLeft, newTop);
                                     }}
                                     onMouseMove={handleMouseMove}
                                     ref={canvasDecoyParentRef}>
@@ -332,7 +428,6 @@ const ImageEditorOverlay = (props: IProps) => {
                                             // transform: `translate(${cropOffsetX}px, ${cropOffsetY}px)`,
                                             top: `${canvasTop}px`,
                                             left: `${canvasLeft}px`,
-                                            border: '1px solid red inset',
                                         }}
                                     />
                                 </Box>
