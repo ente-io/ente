@@ -1,4 +1,10 @@
-import { Backdrop, Box, IconButton, useTheme } from '@mui/material';
+import {
+    Backdrop,
+    Box,
+    CircularProgress,
+    IconButton,
+    useTheme,
+} from '@mui/material';
 import { useEffect, useRef, useState, MouseEvent } from 'react';
 
 import PhotoSizeSelectLargeIcon from '@mui/icons-material/PhotoSizeSelectLarge';
@@ -112,7 +118,7 @@ const ImageEditorOverlay = (props: IProps) => {
     };
 
     useEffect(() => {
-        if (!props.show) return;
+        if (!props.show || !props.file) return;
         loadCanvas();
     }, [props.show, props.file]);
 
@@ -367,6 +373,7 @@ const ImageEditorOverlay = (props: IProps) => {
                                 onMouseDown={handleMouseDown}
                                 onMouseMove={handleMouseMove}
                                 onMouseUp={handleMouseUp}>
+                                {fileURL === null && <CircularProgress />}
                                 <canvas
                                     ref={canvasRef}
                                     // height={originalHeight}
@@ -374,6 +381,8 @@ const ImageEditorOverlay = (props: IProps) => {
                                     style={{
                                         maxWidth: '100%',
                                         maxHeight: '1000px',
+                                        display:
+                                            fileURL === null ? 'none' : 'block',
                                         // transform: `translate(${cropOffsetX}px, ${cropOffsetY}px)`,
                                     }}
                                 />
@@ -386,7 +395,11 @@ const ImageEditorOverlay = (props: IProps) => {
                             padding="1rem"
                             boxSizing="border-box">
                             <HorizontalFlex justifyContent={'flex-end'}>
-                                <IconButton onClick={props.onClose}>
+                                <IconButton
+                                    onClick={() => {
+                                        setFileURL(null);
+                                        props.onClose();
+                                    }}>
                                     <CloseIcon />
                                 </IconButton>
                             </HorizontalFlex>

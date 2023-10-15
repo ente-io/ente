@@ -56,6 +56,7 @@ import { FlexWrapper } from 'components/Container';
 import isElectron from 'is-electron';
 import ReplayIcon from '@mui/icons-material/Replay';
 import ImageEditorOverlay from './ImageEditorOverlay';
+import EditIcon from '@mui/icons-material/Edit';
 
 interface PhotoswipeFullscreenAPI {
     enter: () => void;
@@ -775,24 +776,34 @@ function PhotoViewer(props: Iprops) {
                             {isOwnFile &&
                                 !props.isTrashCollection &&
                                 !props.isInHiddenSection && (
-                                    <button
-                                        title={
-                                            isFav
-                                                ? t('UNFAVORITE_OPTION')
-                                                : t('FAVORITE_OPTION')
-                                        }
-                                        className="pswp__button pswp__button--custom"
-                                        onClick={() => {
-                                            onFavClick(
-                                                photoSwipe?.currItem as EnteFile
-                                            );
-                                        }}>
-                                        {isFav ? (
-                                            <FavoriteIcon />
-                                        ) : (
-                                            <FavoriteBorderIcon />
-                                        )}
-                                    </button>
+                                    <>
+                                        <button
+                                            className="pswp__button pswp__button--custom"
+                                            onClick={() => {
+                                                props.onClose(false);
+                                                setShowImageEditorOverlay(true);
+                                            }}>
+                                            <EditIcon />
+                                        </button>
+                                        <button
+                                            title={
+                                                isFav
+                                                    ? t('UNFAVORITE_OPTION')
+                                                    : t('FAVORITE_OPTION')
+                                            }
+                                            className="pswp__button pswp__button--custom"
+                                            onClick={() => {
+                                                onFavClick(
+                                                    photoSwipe?.currItem as EnteFile
+                                                );
+                                            }}>
+                                            {isFav ? (
+                                                <FavoriteIcon />
+                                            ) : (
+                                                <FavoriteBorderIcon />
+                                            )}
+                                        </button>
+                                    </>
                                 )}
                             {showConvertBtn && (
                                 <button
