@@ -164,6 +164,72 @@ const ImageEditorOverlay = (props: IProps) => {
     const [canvasTop, setCanvasTop] = useState(0);
     const [canvasLeft, setCanvasLeft] = useState(0);
 
+    const handleMouseMove = (event: MouseEvent) => {
+        if (!isDragging) return;
+
+        const canvasDecoyParent = canvasDecoyParentRef.current;
+        if (!canvasDecoyParent || !canvasRef.current) return;
+        const parentRect = canvasDecoyParent.getBoundingClientRect();
+        const canvasRect = canvasRef.current.getBoundingClientRect();
+
+        let newTop = event.clientY - parentRect.top - canvasRect.height / 2;
+        let newLeft = event.clientX - parentRect.left - canvasRect.width / 2;
+
+        if (newTop < 0) newTop = 0;
+        if (newLeft < 0) newLeft = 0;
+        if (newTop + canvasRect.height > parentRect.height)
+            newTop = parentRect.height - canvasRect.height;
+        if (newLeft + canvasRect.width > parentRect.width)
+            newLeft = parentRect.width - canvasRect.width;
+
+        setCanvasTop(newTop);
+        setCanvasLeft(newLeft);
+
+        const context = canvasRef.current?.getContext('2d');
+        const canvas = canvasRef.current;
+        if (!context || !canvas) return;
+
+        // Create an image element
+        const img = new Image();
+        img.src = fileURL;
+
+        // console.log('scaledHeight', scaledHeight);
+        // console.log('canvasHeight', canvas.height);
+        // console.log('scaledWidth', scaledWidth);
+
+        // console.log('canvasWidth', canvas.width);
+
+        // Wait for the image to load
+        img.onload = () => {
+            context.clearRect(0, 0, canvas.width, canvas.height);
+            context.save();
+            // Define the region of the image to be drawn
+            // const sourceX = 0; // X coordinate of the top-left corner of the region
+            // const sourceY = 0; // Y coordinate of the top-left corner of the region
+
+            const sourceX = newLeft;
+            const sourceY = newTop;
+
+            // const sourceWidth = canvas.width; // Width of the region
+            // const sourceHeight = canvas.height; // Height of the region
+            const sourceWidth = img.width; // Width of the region
+            const sourceHeight = img.height; // Height of the region
+
+            // Draw the region of the image onto the canvas
+            context.drawImage(
+                img, // The image element
+                sourceX,
+                sourceY,
+                sourceWidth,
+                sourceHeight, // Region coordinates and dimensions
+                0,
+                0,
+                scaledWidth,
+                scaledHeight // Destination coordinates and dimensions on the canvas
+            );
+            context.restore();
+        };
+    };
     return (
         <>
             {props.show && (
@@ -198,7 +264,7 @@ const ImageEditorOverlay = (props: IProps) => {
                                 {fileURL === null && <CircularProgress />}
                                 <Box
                                     sx={{
-                                        backgroundImage: `url(${fileURL})`,
+                                        background: `rgb(0, 0, 0, .5) url(${fileURL})`,
                                         height: `${scaledHeight}px`,
                                         width: `${scaledWidth}px`,
                                         backgroundSize: 'cover',
@@ -206,8 +272,8 @@ const ImageEditorOverlay = (props: IProps) => {
                                         display: 'flex',
                                         alignItems: 'center',
                                         justifyContent: 'center',
-                                        backgroundBlendMode: 'multiply',
-                                        backgroundColor: '#808080',
+                                        backgroundBlendMode: 'darken',
+                                        // backgroundColor: '#808080',
                                         position: 'relative',
                                     }}
                                     onMouseDown={() => {
@@ -216,50 +282,7 @@ const ImageEditorOverlay = (props: IProps) => {
                                     onMouseUp={() => {
                                         setIsDragging(false);
                                     }}
-                                    onMouseMove={(event: MouseEvent) => {
-                                        if (!isDragging) return;
-
-                                        const canvasDecoyParent =
-                                            canvasDecoyParentRef.current;
-                                        if (
-                                            !canvasDecoyParent ||
-                                            !canvasRef.current
-                                        )
-                                            return;
-                                        const parentRect =
-                                            canvasDecoyParent.getBoundingClientRect();
-                                        const canvasRect =
-                                            canvasRef.current.getBoundingClientRect();
-
-                                        let newTop =
-                                            event.clientY -
-                                            parentRect.top -
-                                            canvasRect.height / 2;
-                                        let newLeft =
-                                            event.clientX -
-                                            parentRect.left -
-                                            canvasRect.width / 2;
-
-                                        if (newTop < 0) newTop = 0;
-                                        if (newLeft < 0) newLeft = 0;
-                                        if (
-                                            newTop + canvasRect.height >
-                                            parentRect.height
-                                        )
-                                            newTop =
-                                                parentRect.height -
-                                                canvasRect.height;
-                                        if (
-                                            newLeft + canvasRect.width >
-                                            parentRect.width
-                                        )
-                                            newLeft =
-                                                parentRect.width -
-                                                canvasRect.width;
-
-                                        setCanvasTop(newTop);
-                                        setCanvasLeft(newLeft);
-                                    }}
+                                    onMouseMove={handleMouseMove}
                                     ref={canvasDecoyParentRef}>
                                     <canvas
                                         ref={canvasRef}
@@ -277,6 +300,7 @@ const ImageEditorOverlay = (props: IProps) => {
                                             // transform: `translate(${cropOffsetX}px, ${cropOffsetY}px)`,
                                             top: `${canvasTop}px`,
                                             left: `${canvasLeft}px`,
+                                            border: '1px solid red inset',
                                         }}
                                     />
                                 </Box>
