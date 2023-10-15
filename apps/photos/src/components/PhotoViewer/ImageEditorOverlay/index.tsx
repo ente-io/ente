@@ -303,45 +303,29 @@ const ImageEditorOverlay = (props: IProps) => {
 
         console.log(angle);
 
-        // let cw = canvas.width;
-        // let ch = canvas.height;
-
         image.onload = () => {
-            // reset the canvas with new dimensions
-            if (angle % 180 === 0) {
-                canvas.width = image.width;
-                canvas.height = image.height;
-            } else {
-                canvas.width = image.height;
-                canvas.height = image.width;
-            }
-            // canvas.width = image.width;
-            // canvas.height = image.height;
-            // canvas.width = scaledHeight;
-            // canvas.height = scaledWidth;
-            // cw = canvas.width;
-            // ch = canvas.height;
-            // canvas.style.height = `${ch}px`;
-            // canvas.style.width = `${cw}px`;
+            context.clearRect(0, 0, canvas.width, canvas.height);
 
             context.save();
 
-            const centerX = canvas.width / 2;
-            const centerY = canvas.height / 2;
-            context.translate(centerX, centerY);
-            context.rotate((angle * Math.PI) / 180);
-            context.translate(-centerX, -centerY);
+            // calculate the new canvas dimensions based on the rotated image
+            const radians = (angle * Math.PI) / 180;
+            const sin = Math.sin(radians);
+            const cos = Math.cos(radians);
+            const newWidth =
+                Math.abs(image.width * cos) + Math.abs(image.height * sin);
+            const newHeight =
+                Math.abs(image.width * sin) + Math.abs(image.height * cos);
+            canvas.width = newWidth;
+            canvas.height = newHeight;
 
-            // // translate and rotate according to angle
-            // context.translate(cw / 2, ch / 2);
-            // context.rotate((angle * Math.PI) / 180);
-            // draw the previous image, now rotated
-            // context.drawImage(image, -cw / 2, -ch / 2);
-            context.drawImage(image, 0, 0, canvas.width, canvas.height);
+            context.translate(newWidth / 2, newHeight / 2);
+            context.rotate(radians);
+            context.drawImage(image, -image.width / 2, -image.height / 2);
+
             context.restore();
         };
     };
-
     return (
         <>
             {props.show && (
