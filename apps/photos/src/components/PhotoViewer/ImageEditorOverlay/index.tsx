@@ -404,32 +404,37 @@ const ImageEditorOverlay = (props: IProps) => {
                                         if (!isDragging && !isResizing) return;
                                         setIsResizing(false);
                                         setIsDragging(false);
-                                        const context =
-                                            canvasRef.current?.getContext('2d');
-                                        const canvas = canvasRef.current;
-                                        if (!context || !canvas) return;
-                                        const canvasDecoyParent =
-                                            canvasDecoyParentRef.current;
-                                        if (
-                                            !canvasDecoyParent ||
-                                            !canvasRef.current
-                                        )
-                                            return;
 
-                                        const parentRect =
-                                            canvasDecoyParent.getBoundingClientRect();
-                                        const canvasRect =
-                                            canvasRef.current.getBoundingClientRect();
+                                        if (isResizing) {
+                                            const context =
+                                                canvasRef.current?.getContext(
+                                                    '2d'
+                                                );
+                                            const canvas = canvasRef.current;
+                                            if (!context || !canvas) return;
+                                            const canvasDecoyParent =
+                                                canvasDecoyParentRef.current;
+                                            if (
+                                                !canvasDecoyParent ||
+                                                !canvasRef.current
+                                            )
+                                                return;
 
-                                        const newTop =
-                                            event.clientY -
-                                            parentRect.top -
-                                            canvasRect.height / 2;
-                                        const newLeft =
-                                            event.clientX -
-                                            parentRect.left -
-                                            canvasRect.width / 2;
-                                        activateSpotlight(newLeft, newTop);
+                                            const parentRect =
+                                                canvasDecoyParent.getBoundingClientRect();
+                                            const canvasRect =
+                                                canvasRef.current.getBoundingClientRect();
+
+                                            const newTop =
+                                                event.clientY -
+                                                parentRect.top -
+                                                canvasRect.height / 2;
+                                            const newLeft =
+                                                event.clientX -
+                                                parentRect.left -
+                                                canvasRect.width / 2;
+                                            activateSpotlight(newLeft, newTop);
+                                        }
                                     }}
                                     onMouseMove={handleMouseMove}
                                     ref={canvasDecoyParentRef}>
