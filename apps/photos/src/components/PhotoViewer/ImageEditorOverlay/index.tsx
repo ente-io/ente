@@ -70,7 +70,16 @@ const ImageEditorOverlay = (props: IProps) => {
             const height = img.height * scale;
             canvasRef.current.width = width;
             canvasRef.current.height = height;
+            canvasRef.current.style.transition = 'width 0.5s, height 0.5s';
+            canvasRef.current.style.width = `${width}px`;
+            canvasRef.current.style.height = `${height}px`;
+            // Apply CSS transition to animate the resizing
+
             ctx?.drawImage(img, 0, 0, width, height);
+
+            setTimeout(() => {
+                canvasRef.current.style.transition = 'none';
+            }, 500); // Adjust the time to match your animation duration
         };
     };
 
@@ -203,6 +212,14 @@ const ImageEditorOverlay = (props: IProps) => {
                                 loadCanvas();
                             }}
                             label={'Original'}
+                        />
+                        <EnteMenuItem
+                            disabled={cropLoading}
+                            startIcon={<CropSquareIcon />}
+                            onClick={() => {
+                                cropCanvas(1, 1);
+                            }}
+                            label={'Square (1:1)'}
                         />
                     </MenuItemGroup>
                     <MenuItemGroup
