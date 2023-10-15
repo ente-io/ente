@@ -121,6 +121,8 @@ function PhotoViewer(props: Iprops) {
     const exifExtractionInProgress = useRef<string>(null);
     const shouldShowCopyOption = useMemo(() => isClipboardItemPresent(), []);
 
+    const [showImageEditorOverlay, setShowImageEditorOverlay] = useState(false);
+
     const [
         conversionFailedNotificationOpen,
         setConversionFailedNotificationOpen,
@@ -835,9 +837,13 @@ function PhotoViewer(props: Iprops) {
                 collectionNameMap={props.collectionNameMap}
                 closePhotoViewer={handleClose}
             />
-            {photoSwipe && photoSwipe.currItem && (
-                <ImageEditorOverlay file={photoSwipe?.currItem as EnteFile} />
-            )}
+            <ImageEditorOverlay
+                show={showImageEditorOverlay}
+                file={photoSwipe?.currItem as EnteFile}
+                onClose={() => {
+                    setShowImageEditorOverlay(false);
+                }}
+            />
         </>
     );
 }
