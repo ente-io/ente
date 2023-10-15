@@ -70,6 +70,8 @@ const ImageEditorOverlay = (props: IProps) => {
     const [saturation, setSaturation] = useState(100);
     const [invert, setInvert] = useState(false);
 
+    const [originalCanvasDataURL, setOriginalCanvasDataURL] = useState('');
+
     useEffect(() => {
         if (!canvasRef.current) {
             return;
@@ -136,6 +138,8 @@ const ImageEditorOverlay = (props: IProps) => {
 
             ctx?.drawImage(img, 0, 0, width, height);
 
+            setOriginalCanvasDataURL(canvasRef.current.toDataURL());
+
             setTimeout(() => {
                 canvasRef.current.style.transition = 'none';
             }, 500); // Adjust the time to match your animation duration
@@ -188,10 +192,13 @@ const ImageEditorOverlay = (props: IProps) => {
         const context = canvasRef.current?.getContext('2d');
         const canvas = canvasRef.current;
         if (!context || !canvas) return;
+        context.imageSmoothingEnabled = false;
 
-        // Create an image element
+        // // Create an image element
+        // const img = new Image();
+        // img.src = fileURL;
         const img = new Image();
-        img.src = fileURL;
+        img.src = originalCanvasDataURL;
 
         // console.log('scaledHeight', scaledHeight);
         // console.log('canvasHeight', canvas.height);
@@ -210,10 +217,12 @@ const ImageEditorOverlay = (props: IProps) => {
             const sourceX = newLeft;
             const sourceY = newTop;
 
-            // const sourceWidth = canvas.width; // Width of the region
-            // const sourceHeight = canvas.height; // Height of the region
-            const sourceWidth = img.width; // Width of the region
-            const sourceHeight = img.height; // Height of the region
+            const sourceWidth = canvas.width; // Width of the region
+            const sourceHeight = canvas.height; // Height of the region
+            // const sourceWidth = img.width; // Width of the region
+            // const sourceHeight = img.height; // Height of the region
+            // const sourceWidth = parentRect.width; // Width of the region
+            // const sourceHeight = parentRect.height; // Height of the region
 
             // Draw the region of the image onto the canvas
             context.drawImage(
@@ -224,8 +233,10 @@ const ImageEditorOverlay = (props: IProps) => {
                 sourceHeight, // Region coordinates and dimensions
                 0,
                 0,
-                scaledWidth,
-                scaledHeight // Destination coordinates and dimensions on the canvas
+                sourceWidth,
+                sourceHeight
+                // scaledWidth,
+                // scaledHeight // Destination coordinates and dimensions on the canvas
             );
             context.restore();
         };
