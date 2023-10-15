@@ -298,10 +298,10 @@ const ImageEditorOverlay = (props: IProps) => {
 
         image.onload = () => {
             // reset the canvas with new dimensions
-            // canvas.width = scaledWidth;
-            // canvas.height = scaledHeight;'
-            canvas.width = scaledHeight;
-            canvas.height = scaledWidth;
+            canvas.width = image.width;
+            canvas.height = image.height;
+            // canvas.width = scaledHeight;
+            // canvas.height = scaledWidth;
             // cw = canvas.width;
             // ch = canvas.height;
             // canvas.style.height = `${ch}px`;
@@ -362,13 +362,11 @@ const ImageEditorOverlay = (props: IProps) => {
                             ref={canvasRef}
                             // height={originalHeight}
                             // width={originalWidth}
-                            style={
-                                {
-                                    // maxWidth: '100%',
-                                    // maxHeight: '100%',
-                                    // transform: `translate(${cropOffsetX}px, ${cropOffsetY}px)`,
-                                }
-                            }
+                            style={{
+                                maxWidth: '100%',
+                                maxHeight: '1000px',
+                                // transform: `translate(${cropOffsetX}px, ${cropOffsetY}px)`,
+                            }}
                         />
                     </Box>
                 </Box>
