@@ -24,6 +24,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import RotateLeftIcon from '@mui/icons-material/RotateLeft';
 import RotateRightIcon from '@mui/icons-material/RotateRight';
 import { HorizontalFlex } from 'components/Container';
+import FlipIcon from '@mui/icons-material/Flip';
 interface IProps {
     file: EnteFile;
     show: boolean;
@@ -179,6 +180,31 @@ const ImageEditorOverlay = (props: IProps) => {
                 canvas.style.transition = 'none';
                 setCropLoading(false);
             }, 500); // Adjust the time to match your animation duration
+        };
+    };
+
+    const flipCanvas = (direction: 'vertical' | 'horizontal') => {
+        const context = canvasRef.current?.getContext('2d');
+        context.imageSmoothingEnabled = false;
+        const canvas = canvasRef.current;
+        if (!context || !canvas) return;
+        const img = new Image();
+        // img.src = fileURL;
+        img.src = canvas.toDataURL();
+
+        img.onload = () => {
+            context.save();
+
+            if (direction === 'vertical') {
+                context.translate(canvas.width, 0);
+                context.scale(-1, 1);
+            } else {
+                context.translate(0, canvas.height);
+                context.scale(1, -1);
+            }
+            context.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+            context.restore();
         };
     };
 
@@ -482,6 +508,28 @@ const ImageEditorOverlay = (props: IProps) => {
                                         rotateCanvas(90);
                                     }}
                                     label="Rotate Right 90˚"
+                                />
+                            </MenuItemGroup>
+                            <MenuSectionTitle title={'Flip'} />
+                            <MenuItemGroup
+                                style={{
+                                    marginBottom: '1rem',
+                                }}>
+                                <EnteMenuItem
+                                    disabled={cropLoading}
+                                    startIcon={<FlipIcon />}
+                                    onClick={() => {
+                                        flipCanvas('vertical');
+                                    }}
+                                    label="Flip Vertically"
+                                />
+                                <EnteMenuItem
+                                    disabled={cropLoading}
+                                    startIcon={<FlipIcon />}
+                                    onClick={() => {
+                                        flipCanvas('horizontal');
+                                    }}
+                                    label="Flip Horizontally"
                                 />
                             </MenuItemGroup>
 
