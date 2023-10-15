@@ -287,7 +287,28 @@ const ImageEditorOverlay = (props: IProps) => {
                                         // backgroundColor: '#808080',
                                         position: 'relative',
                                     }}
-                                    onMouseDown={() => {
+                                    onMouseDown={(event: MouseEvent) => {
+                                        // if the click was outside of the canvas then return
+                                        if (
+                                            !canvasRef.current ||
+                                            !canvasDecoyParentRef.current
+                                        ) {
+                                            return;
+                                        }
+
+                                        const canvas = canvasRef.current;
+
+                                        const rect =
+                                            canvas.getBoundingClientRect();
+
+                                        const x = event.clientX - rect.left;
+
+                                        const y = event.clientY - rect.top;
+
+                                        if (x < 0 || y < 0) return;
+
+                                        if (x > rect.width || y > rect.height)
+                                            return;
                                         setIsDragging(true);
                                     }}
                                     onMouseUp={() => {
@@ -322,7 +343,10 @@ const ImageEditorOverlay = (props: IProps) => {
                             width="30rem"
                             bgcolor={theme.colors.background.elevated}
                             padding="1rem"
-                            boxSizing="border-box">
+                            boxSizing="border-box"
+                            sx={{
+                                overflowY: 'auto',
+                            }}>
                             <HorizontalFlex justifyContent={'flex-end'}>
                                 <IconButton
                                     onClick={() => {
