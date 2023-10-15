@@ -213,6 +213,10 @@ const ImageEditorOverlay = (props: IProps) => {
             if (newWidth <= 0) newWidth = 1;
             if (newHeight <= 0) newHeight = 1;
 
+            // Calculate new height based on aspect ratio
+            const aspectRatio = originalCanvasWidth / originalCanvasHeight;
+            newHeight = newWidth / aspectRatio;
+
             const newTop = canvasTop;
             const newLeft = canvasLeft;
 
