@@ -11,6 +11,9 @@ import CropOriginalIcon from '@mui/icons-material/CropOriginal';
 import CropSquareIcon from '@mui/icons-material/CropSquare';
 import Crop169Icon from '@mui/icons-material/Crop169';
 import Crop32Icon from '@mui/icons-material/Crop32';
+import MenuSectionTitle from 'components/Menu/MenuSectionTitle';
+import DownloadIcon from '@mui/icons-material/Download';
+import mime from 'mime-types';
 interface IProps {
     file: EnteFile;
 }
@@ -19,7 +22,7 @@ const PRESET_ASPECT_RATIOS = [
     {
         width: 16,
         height: 9,
-        icon: <Crop169Icon />,
+        icon: <CropSquareIcon />,
     },
     {
         width: 3,
@@ -27,9 +30,9 @@ const PRESET_ASPECT_RATIOS = [
         icon: <Crop32Icon />,
     },
     {
-        width: 1,
-        height: 1,
-        icon: <CropSquareIcon />,
+        width: 16,
+        height: 10,
+        icon: <Crop169Icon />,
     },
 ];
 
@@ -40,6 +43,8 @@ const ImageEditorOverlay = (props: IProps) => {
     const parentRef = useRef<HTMLDivElement | null>(null);
 
     const [fileURL, setFileURL] = useState<string>('');
+
+    const [cropLoading, setCropLoading] = useState<boolean>(false);
 
     const loadCanvas = async () => {
         const img = new Image();
@@ -76,7 +81,7 @@ const ImageEditorOverlay = (props: IProps) => {
     const theme = useTheme();
 
     // Crops the canvas according to originalHeight and originalWidth without compounding
-    const cropCanvas = async (widthRatio: number, heightRatio: number) => {
+    const cropCanvas = (widthRatio: number, heightRatio: number) => {
         const context = canvasRef.current?.getContext('2d');
         const canvas = canvasRef.current;
 
@@ -104,6 +109,11 @@ const ImageEditorOverlay = (props: IProps) => {
 
             context.clearRect(0, 0, canvas.width, canvas.height);
 
+            setCropLoading(true);
+            // Apply CSS transition to animate the resizing
+            canvas.style.transition = 'width 0.5s, height 0.5s';
+            canvas.style.width = newWidth + 'px';
+            canvas.style.height = newHeight + 'px';
             canvas.width = newWidth;
             canvas.height = newHeight;
 
@@ -118,7 +128,23 @@ const ImageEditorOverlay = (props: IProps) => {
                 newWidth,
                 newHeight
             );
+
+            setTimeout(() => {
+                canvas.style.transition = 'none';
+                setCropLoading(false);
+            }, 500); // Adjust the time to match your animation duration
         };
+    };
+
+    const exportCanvasToBlob = (callback: (blob: Blob) => void) => {
+        const canvas = canvasRef.current;
+        if (!canvas) return new Blob();
+
+        const mimeType = mime.lookup(props.file.metadata.title);
+
+        canvas.toBlob((blob) => {
+            callback(blob);
+        }, mimeType);
     };
 
     return (
@@ -136,7 +162,9 @@ const ImageEditorOverlay = (props: IProps) => {
                     display="inline-block"
                     width="100%"
                     height="100%"
-                    overflow="hidden">
+                    overflow="hidden"
+                    padding="3rem"
+                    boxSizing={'border-box'}>
                     <Box display="flex" gap="0.5rem" alignItems="center">
                         <IconButton>
                             <PhotoSizeSelectLargeIcon />
@@ -163,17 +191,27 @@ const ImageEditorOverlay = (props: IProps) => {
                     bgcolor={theme.colors.background.elevated}
                     padding="1rem"
                     boxSizing="border-box">
-                    <MenuItemGroup>
+                    <MenuSectionTitle title={'Aspect Ratio'} />
+                    <MenuItemGroup
+                        style={{
+                            marginBottom: '0.5rem',
+                        }}>
                         <EnteMenuItem
+                            disabled={cropLoading}
                             startIcon={<CropOriginalIcon />}
                             onClick={() => {
                                 loadCanvas();
                             }}
                             label={'Original'}
                         />
-
+                    </MenuItemGroup>
+                    <MenuItemGroup
+                        style={{
+                            marginBottom: '1rem',
+                        }}>
                         {PRESET_ASPECT_RATIOS.map((ratio, index) => (
                             <EnteMenuItem
+                                disabled={cropLoading}
                                 key={index}
                                 startIcon={ratio.icon}
                                 onClick={() => {
@@ -182,6 +220,39 @@ const ImageEditorOverlay = (props: IProps) => {
                                 label={`${ratio.width}:${ratio.height}`}
                             />
                         ))}
+                    </MenuItemGroup>
+                    <MenuItemGroup
+                        style={{
+                            marginBottom: '1rem',
+                        }}>
+                        {PRESET_ASPECT_RATIOS.map((ratio, index) => (
+                            <EnteMenuItem
+                                disabled={cropLoading}
+                                key={index}
+                                startIcon={ratio.icon}
+                                onClick={() => {
+                                    cropCanvas(ratio.height, ratio.width);
+                                }}
+                                label={`${ratio.height}:${ratio.width}`}
+                            />
+                        ))}
+                    </MenuItemGroup>
+                    <MenuSectionTitle title={'Export'} />
+                    <MenuItemGroup>
+                        <EnteMenuItem
+                            startIcon={<DownloadIcon />}
+                            onClick={() => {
+                                exportCanvasToBlob((blob) => {
+                                    // create a link
+                                    const a = document.createElement('a');
+                                    a.href = URL.createObjectURL(blob);
+                                    a.download = props.file.metadata.title;
+                                    document.body.appendChild(a);
+                                    a.click();
+                                });
+                            }}
+                            label={'Download Edited'}
+                        />
                     </MenuItemGroup>
                 </Box>
             </Backdrop>
