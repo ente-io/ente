@@ -3,7 +3,8 @@ import {
     Box,
     CircularProgress,
     IconButton,
-    Tooltip,
+    Tab,
+    Tabs,
     useTheme,
 } from '@mui/material';
 import {
@@ -14,10 +15,8 @@ import {
     createContext,
     Dispatch,
     SetStateAction,
-    MutableRefObject,
 } from 'react';
 
-import PhotoSizeSelectLargeIcon from '@mui/icons-material/PhotoSizeSelectLarge';
 import { EnteFile } from 'types/file';
 import { getRenderableFileURL } from 'utils/file';
 import downloadManager from 'services/downloadManager';
@@ -29,8 +28,8 @@ import DownloadIcon from '@mui/icons-material/Download';
 import mime from 'mime-types';
 import CloseIcon from '@mui/icons-material/Close';
 import { HorizontalFlex } from 'components/Container';
-import ColorLensIcon from '@mui/icons-material/ColorLens';
 import TransformMenu from './TransformMenu';
+import ColoursMenu from './ColoursMenu';
 interface IProps {
     file: EnteFile;
     show: boolean;
@@ -39,7 +38,6 @@ interface IProps {
 
 export const ImageEditorOverlayContext = createContext(
     {} as {
-        canvasRef: MutableRefObject<HTMLCanvasElement | null>;
         cropLoading: boolean;
         setCropLoading: Dispatch<SetStateAction<boolean>>;
     }
@@ -65,6 +63,24 @@ const ImageEditorOverlay = (props: IProps) => {
 
     const [currentRotationAngle, setCurrentRotationAngle] = useState(0);
 
+    const [currentTab, setCurrentTab] = useState<'transform' | 'colours'>(
+        'transform'
+    );
+
+    const [brightness, setBrightness] = useState(100);
+    const [contrast, setContrast] = useState(100);
+    const [blur, setBlur] = useState(0);
+    const [saturation, setSaturation] = useState(100);
+    const [invert, setInvert] = useState(false);
+
+    useEffect(() => {
+        const filterString = `brightness(${brightness}%) contrast(${contrast}%) blur(${blur}px) saturate(${saturation}%) invert(${
+            invert ? 1 : 0
+        })`;
+
+        canvasRef.current.style.filter = filterString;
+    }, [brightness, contrast, blur, saturation, invert]);
+
     useEffect(() => {
         if (currentRotationAngle >= 360 || currentRotationAngle <= -360) {
             // set back to 0
@@ -72,7 +88,16 @@ const ImageEditorOverlay = (props: IProps) => {
         }
     }, [currentRotationAngle]);
 
+    const resetFilters = () => {
+        setBrightness(100);
+        setContrast(100);
+        setBlur(0);
+        setSaturation(100);
+        setInvert(false);
+    };
+
     const loadCanvas = async () => {
+        resetFilters();
         setCurrentRotationAngle(0);
         console.log(originalWidth, originalHeight);
         const img = new Image();
@@ -289,16 +314,14 @@ const ImageEditorOverlay = (props: IProps) => {
                                 </IconButton>
                             </HorizontalFlex>
                             <HorizontalFlex gap="0.5rem">
-                                <Tooltip title="Transform">
-                                    <IconButton>
-                                        <PhotoSizeSelectLargeIcon />
-                                    </IconButton>
-                                </Tooltip>
-                                <Tooltip title="Colour">
-                                    <IconButton>
-                                        <ColorLensIcon />
-                                    </IconButton>
-                                </Tooltip>
+                                <Tabs
+                                    value={currentTab}
+                                    onChange={(_, value) => {
+                                        setCurrentTab(value);
+                                    }}>
+                                    <Tab label="Transform" value="transform" />
+                                    <Tab label="Colours" value="colours" />
+                                </Tabs>
                             </HorizontalFlex>
                             <MenuSectionTitle title="Reset" />
                             <MenuItemGroup
@@ -315,14 +338,29 @@ const ImageEditorOverlay = (props: IProps) => {
                                 />
                             </MenuItemGroup>
 
-                            <ImageEditorOverlayContext.Provider
-                                value={{
-                                    canvasRef,
-                                    cropLoading,
-                                    setCropLoading,
-                                }}>
-                                <TransformMenu />
-                            </ImageEditorOverlayContext.Provider>
+                            {currentTab === 'transform' && (
+                                <ImageEditorOverlayContext.Provider
+                                    value={{
+                                        cropLoading,
+                                        setCropLoading,
+                                    }}>
+                                    <TransformMenu />
+                                </ImageEditorOverlayContext.Provider>
+                            )}
+                            {currentTab === 'colours' && (
+                                <ColoursMenu
+                                    brightness={brightness}
+                                    contrast={contrast}
+                                    saturation={saturation}
+                                    blur={blur}
+                                    invert={invert}
+                                    setBrightness={setBrightness}
+                                    setContrast={setContrast}
+                                    setSaturation={setSaturation}
+                                    setBlur={setBlur}
+                                    setInvert={setInvert}
+                                />
+                            )}
 
                             <MenuSectionTitle title={'Export'} />
                             <MenuItemGroup>
