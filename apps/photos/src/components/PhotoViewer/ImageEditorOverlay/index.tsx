@@ -15,6 +15,7 @@ import {
     createContext,
     Dispatch,
     SetStateAction,
+    MutableRefObject,
 } from 'react';
 
 import { EnteFile } from 'types/file';
@@ -38,6 +39,7 @@ interface IProps {
 
 export const ImageEditorOverlayContext = createContext(
     {} as {
+        canvasRef: MutableRefObject<HTMLCanvasElement>;
         cropLoading: boolean;
         setCropLoading: Dispatch<SetStateAction<boolean>>;
     }
@@ -341,6 +343,7 @@ const ImageEditorOverlay = (props: IProps) => {
                             {currentTab === 'transform' && (
                                 <ImageEditorOverlayContext.Provider
                                     value={{
+                                        canvasRef,
                                         cropLoading,
                                         setCropLoading,
                                     }}>
