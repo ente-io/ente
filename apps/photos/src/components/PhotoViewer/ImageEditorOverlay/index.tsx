@@ -135,7 +135,8 @@ const ImageEditorOverlay = (props: IProps) => {
         if (!context || !canvas) return;
 
         const img = new Image();
-        img.src = fileURL;
+        // img.src = fileURL;
+        img.src = canvas.toDataURL();
         img.onload = () => {
             const sourceWidth = img.width;
             const sourceHeight = img.height;
@@ -395,7 +396,7 @@ const ImageEditorOverlay = (props: IProps) => {
                                     <CloseIcon />
                                 </IconButton>
                             </HorizontalFlex>
-                            <MenuSectionTitle title={'Aspect Ratio'} />
+                            <MenuSectionTitle title="Reset" />
                             <MenuItemGroup
                                 style={{
                                     marginBottom: '0.5rem',
@@ -406,8 +407,14 @@ const ImageEditorOverlay = (props: IProps) => {
                                     onClick={() => {
                                         loadCanvas();
                                     }}
-                                    label={'Original'}
+                                    label={'Restore Original'}
                                 />
+                            </MenuItemGroup>
+                            <MenuSectionTitle title={'Aspect Ratio'} />
+                            <MenuItemGroup
+                                style={{
+                                    marginBottom: '0.5rem',
+                                }}>
                                 <EnteMenuItem
                                     disabled={cropLoading}
                                     startIcon={<CropSquareIcon />}
