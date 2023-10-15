@@ -100,6 +100,8 @@ const TransformMenu = () => {
         img.src = canvas.toDataURL();
 
         img.onload = () => {
+            context.clearRect(0, 0, canvas.width, canvas.height);
+
             context.save();
 
             if (direction === 'vertical') {
@@ -109,6 +111,7 @@ const TransformMenu = () => {
                 context.translate(0, canvas.height);
                 context.scale(1, -1);
             }
+
             context.drawImage(img, 0, 0, canvas.width, canvas.height);
 
             context.restore();
