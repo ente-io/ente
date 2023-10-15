@@ -14,6 +14,9 @@ import Crop32Icon from '@mui/icons-material/Crop32';
 import MenuSectionTitle from 'components/Menu/MenuSectionTitle';
 import DownloadIcon from '@mui/icons-material/Download';
 import mime from 'mime-types';
+
+import RotateLeftIcon from '@mui/icons-material/RotateLeft';
+import RotateRightIcon from '@mui/icons-material/RotateRight';
 interface IProps {
     file: EnteFile;
 }
@@ -54,10 +57,21 @@ const ImageEditorOverlay = (props: IProps) => {
     const [cropOffsetX, setCropOffsetX] = useState(0);
     const [cropOffsetY, setCropOffsetY] = useState(0);
 
+    const [currentRotationAngle, setCurrentRotationAngle] = useState(0);
+
+    useEffect(() => {
+        if (currentRotationAngle >= 360 || currentRotationAngle <= -360) {
+            // set back to 0
+            setCurrentRotationAngle(0);
+        }
+    }, [currentRotationAngle]);
+
     const loadCanvas = async () => {
+        setCurrentRotationAngle(0);
         console.log(originalWidth, originalHeight);
         const img = new Image();
         const ctx = canvasRef.current?.getContext('2d');
+        ctx.imageSmoothingEnabled = false;
         if (!fileURL) {
             const stream = await downloadManager.downloadFile(props.file);
             const fileBlob = await new Response(stream).blob();
@@ -81,9 +95,9 @@ const ImageEditorOverlay = (props: IProps) => {
             setScaledHeight(height);
             canvasRef.current.width = width;
             canvasRef.current.height = height;
-            canvasRef.current.style.transition = 'width 0.5s, height 0.5s';
-            canvasRef.current.style.width = `${width}px`;
-            canvasRef.current.style.height = `${height}px`;
+            // canvasRef.current.style.transition = 'width 0.5s, height 0.5s';
+            // canvasRef.current.style.width = `${width}px`;
+            // canvasRef.current.style.height = `${height}px`;
             // Apply CSS transition to animate the resizing
 
             ctx?.drawImage(img, 0, 0, width, height);
@@ -103,6 +117,7 @@ const ImageEditorOverlay = (props: IProps) => {
     // Crops the canvas according to originalHeight and originalWidth without compounding
     const cropCanvas = (widthRatio: number, heightRatio: number) => {
         const context = canvasRef.current?.getContext('2d');
+        context.imageSmoothingEnabled = false;
         const canvas = canvasRef.current;
 
         const aspectRatio = widthRatio / heightRatio;
@@ -132,8 +147,8 @@ const ImageEditorOverlay = (props: IProps) => {
             setCropLoading(true);
             // Apply CSS transition to animate the resizing
             canvas.style.transition = 'width 0.5s, height 0.5s';
-            canvas.style.width = newWidth + 'px';
-            canvas.style.height = newHeight + 'px';
+            // canvas.style.width = newWidth + 'px';
+            // canvas.style.height = newHeight + 'px';
             canvas.width = newWidth;
             canvas.height = newHeight;
 
@@ -263,6 +278,53 @@ const ImageEditorOverlay = (props: IProps) => {
         };
     }, [cropOffsetX, cropOffsetY]);
 
+    const rotateCanvas = (angle: number) => {
+        const canvas = canvasRef.current;
+        const context = canvas?.getContext('2d');
+        if (!context || !canvas) return;
+        context.imageSmoothingEnabled = false;
+
+        // store current data to an image
+        const image = new Image();
+        image.src = fileURL;
+
+        setCurrentRotationAngle(currentRotationAngle + angle);
+        angle = currentRotationAngle + angle;
+
+        console.log(angle);
+
+        // let cw = canvas.width;
+        // let ch = canvas.height;
+
+        image.onload = () => {
+            // reset the canvas with new dimensions
+            // canvas.width = scaledWidth;
+            // canvas.height = scaledHeight;'
+            canvas.width = scaledHeight;
+            canvas.height = scaledWidth;
+            // cw = canvas.width;
+            // ch = canvas.height;
+            // canvas.style.height = `${ch}px`;
+            // canvas.style.width = `${cw}px`;
+
+            context.save();
+
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            context.translate(centerX, centerY);
+            context.rotate((angle * Math.PI) / 180);
+            context.translate(-centerX, -centerY);
+
+            // // translate and rotate according to angle
+            // context.translate(cw / 2, ch / 2);
+            // context.rotate((angle * Math.PI) / 180);
+            // draw the previous image, now rotated
+            // context.drawImage(image, -cw / 2, -ch / 2);
+            context.drawImage(image, 0, 0, canvas.width, canvas.height);
+            context.restore();
+        };
+    };
+
     return (
         <>
             <Backdrop
@@ -298,13 +360,15 @@ const ImageEditorOverlay = (props: IProps) => {
                         onMouseUp={handleMouseUp}>
                         <canvas
                             ref={canvasRef}
-                            height={originalHeight}
-                            width={originalWidth}
-                            style={{
-                                maxWidth: '100%',
-                                maxHeight: '100%',
-                                // transform: `translate(${cropOffsetX}px, ${cropOffsetY}px)`,
-                            }}
+                            // height={originalHeight}
+                            // width={originalWidth}
+                            style={
+                                {
+                                    // maxWidth: '100%',
+                                    // maxHeight: '100%',
+                                    // transform: `translate(${cropOffsetX}px, ${cropOffsetY}px)`,
+                                }
+                            }
                         />
                     </Box>
                 </Box>
@@ -368,6 +432,29 @@ const ImageEditorOverlay = (props: IProps) => {
                             />
                         ))}
                     </MenuItemGroup>
+                    <MenuSectionTitle title={'Rotation'} />
+                    <MenuItemGroup
+                        style={{
+                            marginBottom: '1rem',
+                        }}>
+                        <EnteMenuItem
+                            disabled={cropLoading}
+                            startIcon={<RotateLeftIcon />}
+                            onClick={() => {
+                                rotateCanvas(-90);
+                            }}
+                            label="Rotate Left 90˚"
+                        />
+                        <EnteMenuItem
+                            disabled={cropLoading}
+                            startIcon={<RotateRightIcon />}
+                            onClick={() => {
+                                rotateCanvas(90);
+                            }}
+                            label="Rotate Right 90˚"
+                        />
+                    </MenuItemGroup>
+
                     <MenuSectionTitle title={'Export'} />
                     <MenuItemGroup>
                         <EnteMenuItem
