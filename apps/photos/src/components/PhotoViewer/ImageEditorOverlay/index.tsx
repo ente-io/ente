@@ -367,6 +367,29 @@ const ImageEditorOverlay = (props: IProps) => {
                                         // allow 10px tolerance
                                         const tolerance = 10;
                                         if (
+                                            x >
+                                                bottomRightCornerOfCanvas.x -
+                                                    tolerance &&
+                                            x <
+                                                bottomRightCornerOfCanvas.x +
+                                                    tolerance &&
+                                            y >
+                                                bottomRightCornerOfCanvas.y -
+                                                    tolerance &&
+                                            y <
+                                                bottomRightCornerOfCanvas.y +
+                                                    tolerance
+                                        ) {
+                                            setIsResizing(true);
+                                            setMouseDownX(event.clientX);
+                                            setMouseDownY(event.clientY);
+                                            setOriginalCanvasHeight(
+                                                canvas.height
+                                            );
+                                            setOriginalCanvasWidth(
+                                                canvas.width
+                                            );
+                                        } else if (
                                             x <
                                                 bottomRightCornerOfCanvas.x -
                                                     tolerance ||
@@ -375,16 +398,10 @@ const ImageEditorOverlay = (props: IProps) => {
                                                     tolerance
                                         ) {
                                             setIsDragging(true);
-                                        } else {
-                                            setIsResizing(true);
                                         }
-
-                                        setMouseDownX(event.clientX);
-                                        setMouseDownY(event.clientY);
-                                        setOriginalCanvasHeight(canvas.height);
-                                        setOriginalCanvasWidth(canvas.width);
                                     }}
                                     onMouseUp={(event) => {
+                                        if (!isDragging && !isResizing) return;
                                         setIsResizing(false);
                                         setIsDragging(false);
                                         const context =
