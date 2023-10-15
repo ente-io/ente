@@ -308,8 +308,15 @@ const ImageEditorOverlay = (props: IProps) => {
 
         image.onload = () => {
             // reset the canvas with new dimensions
-            canvas.width = image.width;
-            canvas.height = image.height;
+            if (angle % 180 === 0) {
+                canvas.width = image.width;
+                canvas.height = image.height;
+            } else {
+                canvas.width = image.height;
+                canvas.height = image.width;
+            }
+            // canvas.width = image.width;
+            // canvas.height = image.height;
             // canvas.width = scaledHeight;
             // canvas.height = scaledWidth;
             // cw = canvas.width;
