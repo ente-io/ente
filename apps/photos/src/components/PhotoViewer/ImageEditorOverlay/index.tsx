@@ -52,16 +52,11 @@ const ImageEditorOverlay = (props: IProps) => {
 
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
     const parentRef = useRef<HTMLDivElement | null>(null);
+    const canvasDecoyParentRef = useRef<HTMLDivElement | null>(null);
 
     const [fileURL, setFileURL] = useState<string>('');
 
     const [cropLoading, setCropLoading] = useState<boolean>(false);
-
-    const [isDragging, setIsDragging] = useState(false);
-    const [dragStartX, setDragStartX] = useState(0);
-    const [dragStartY, setDragStartY] = useState(0);
-    const [cropOffsetX, setCropOffsetX] = useState(0);
-    const [cropOffsetY, setCropOffsetY] = useState(0);
 
     const [currentRotationAngle, setCurrentRotationAngle] = useState(0);
 
@@ -103,6 +98,8 @@ const ImageEditorOverlay = (props: IProps) => {
     };
 
     const loadCanvas = async () => {
+        setCanvasLeft(0);
+        setCanvasTop(0);
         resetFilters();
         setCurrentRotationAngle(0);
         console.log(originalWidth, originalHeight);
@@ -163,101 +160,9 @@ const ImageEditorOverlay = (props: IProps) => {
         }, mimeType);
     };
 
-    const [initialCropOffsetX, setInitialCropOffsetX] = useState(0);
-    const [initialCropOffsetY, setInitialCropOffsetY] = useState(0);
-
-    // Update initialCropOffsetX and initialCropOffsetY when dragging starts
-    const handleMouseDown = (event: MouseEvent<HTMLDivElement>) => {
-        setDragStartX(event.clientX);
-        setDragStartY(event.clientY);
-        setInitialCropOffsetX(cropOffsetX);
-        setInitialCropOffsetY(cropOffsetY);
-        setIsDragging(true);
-    };
-
-    const handleMouseMove = (event: MouseEvent<HTMLDivElement>) => {
-        // Check if dragging is not happening, return early
-        if (!isDragging) return;
-
-        // Get the off-screen dimensions
-        const offScreenWidth = canvasRef.current.width;
-        const offScreenHeight = canvasRef.current.height;
-
-        // Calculate the offset from the drag start position to the current mouse position
-        const offsetX = dragStartX - event.clientX;
-        const offsetY = dragStartY - event.clientY;
-
-        // Calculate the new crop offset based on the drag offset and the limits of the image dimensions
-        const newCropOffsetX = Math.max(
-            Math.min(
-                initialCropOffsetX + offsetX,
-                originalWidth - offScreenWidth
-            ),
-            0
-        );
-
-        const newCropOffsetY = Math.max(
-            Math.min(
-                initialCropOffsetY + offsetY,
-                originalHeight - offScreenHeight
-            ),
-            0
-        );
-
-        // Update the crop offsets
-        setCropOffsetX(newCropOffsetX);
-        setCropOffsetY(newCropOffsetY);
-    };
-
-    const handleMouseUp = () => {
-        setIsDragging(false);
-        setDragStartX(0);
-        setDragStartY(0);
-    };
-
-    useEffect(() => {
-        const canvas = canvasRef.current;
-        const context = canvas?.getContext('2d');
-
-        if (!canvas || !context) return;
-
-        const offScreenCanvas = document.createElement('canvas');
-        const offScreenContext = offScreenCanvas.getContext('2d');
-
-        if (!offScreenContext) return;
-
-        const offScreenWidth = scaledWidth;
-        const offScreenHeight = scaledHeight;
-
-        offScreenCanvas.width = offScreenWidth;
-        offScreenCanvas.height = offScreenHeight;
-
-        offScreenContext.clearRect(0, 0, offScreenWidth, offScreenHeight);
-
-        const img = new Image();
-        img.src = fileURL;
-        img.onload = () => {
-            const sourceX = cropOffsetX;
-            const sourceY = cropOffsetY;
-            const newWidth = offScreenWidth;
-            const newHeight = offScreenHeight;
-
-            offScreenContext.drawImage(
-                img,
-                sourceX,
-                sourceY,
-                newWidth,
-                newHeight,
-                0,
-                0,
-                newWidth,
-                newHeight
-            );
-
-            context.clearRect(0, 0, canvas.width, canvas.height);
-            context.drawImage(offScreenCanvas, 0, 0);
-        };
-    }, [cropOffsetX, cropOffsetY]);
+    const [isDragging, setIsDragging] = useState(false);
+    const [canvasTop, setCanvasTop] = useState(0);
+    const [canvasLeft, setCanvasLeft] = useState(0);
 
     return (
         <>
@@ -286,22 +191,95 @@ const ImageEditorOverlay = (props: IProps) => {
                                 display="flex"
                                 alignItems="center"
                                 justifyContent="center"
-                                onMouseDown={handleMouseDown}
-                                onMouseMove={handleMouseMove}
-                                onMouseUp={handleMouseUp}>
+                                // onMouseDown={handleMouseDown}
+                                // onMouseMove={handleMouseMove}
+                                // onMouseUp={handleMouseUp}
+                            >
                                 {fileURL === null && <CircularProgress />}
-                                <canvas
-                                    ref={canvasRef}
-                                    // height={originalHeight}
-                                    // width={originalWidth}
-                                    style={{
-                                        maxWidth: '100%',
-                                        maxHeight: '1000px',
-                                        display:
-                                            fileURL === null ? 'none' : 'block',
-                                        // transform: `translate(${cropOffsetX}px, ${cropOffsetY}px)`,
+                                <Box
+                                    sx={{
+                                        backgroundImage: `url(${fileURL})`,
+                                        height: `${scaledHeight}px`,
+                                        width: `${scaledWidth}px`,
+                                        backgroundSize: 'cover',
+                                        overflow: 'hidden',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        backgroundBlendMode: 'multiply',
+                                        backgroundColor: '#808080',
+                                        position: 'relative',
                                     }}
-                                />
+                                    onMouseDown={() => {
+                                        setIsDragging(true);
+                                    }}
+                                    onMouseUp={() => {
+                                        setIsDragging(false);
+                                    }}
+                                    onMouseMove={(event: MouseEvent) => {
+                                        if (!isDragging) return;
+
+                                        const canvasDecoyParent =
+                                            canvasDecoyParentRef.current;
+                                        if (
+                                            !canvasDecoyParent ||
+                                            !canvasRef.current
+                                        )
+                                            return;
+                                        const parentRect =
+                                            canvasDecoyParent.getBoundingClientRect();
+                                        const canvasRect =
+                                            canvasRef.current.getBoundingClientRect();
+
+                                        let newTop =
+                                            event.clientY -
+                                            parentRect.top -
+                                            canvasRect.height / 2;
+                                        let newLeft =
+                                            event.clientX -
+                                            parentRect.left -
+                                            canvasRect.width / 2;
+
+                                        if (newTop < 0) newTop = 0;
+                                        if (newLeft < 0) newLeft = 0;
+                                        if (
+                                            newTop + canvasRect.height >
+                                            parentRect.height
+                                        )
+                                            newTop =
+                                                parentRect.height -
+                                                canvasRect.height;
+                                        if (
+                                            newLeft + canvasRect.width >
+                                            parentRect.width
+                                        )
+                                            newLeft =
+                                                parentRect.width -
+                                                canvasRect.width;
+
+                                        setCanvasTop(newTop);
+                                        setCanvasLeft(newLeft);
+                                    }}
+                                    ref={canvasDecoyParentRef}>
+                                    <canvas
+                                        ref={canvasRef}
+                                        // height={originalHeight}
+                                        // width={originalWidth}
+                                        style={{
+                                            objectFit: 'contain',
+                                            // maxWidth: '100%',
+                                            // maxHeight: '1000px',
+                                            display:
+                                                fileURL === null
+                                                    ? 'none'
+                                                    : 'block',
+                                            position: 'absolute',
+                                            // transform: `translate(${cropOffsetX}px, ${cropOffsetY}px)`,
+                                            top: `${canvasTop}px`,
+                                            left: `${canvasLeft}px`,
+                                        }}
+                                    />
+                                </Box>
                             </Box>
                         </Box>
                         <Box
