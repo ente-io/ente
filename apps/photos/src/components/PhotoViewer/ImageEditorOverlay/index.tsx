@@ -76,12 +76,16 @@ const ImageEditorOverlay = (props: IProps) => {
     const [invert, setInvert] = useState(false);
 
     useEffect(() => {
+        if (!canvasRef.current) {
+            return;
+        }
+
         const filterString = `brightness(${brightness}%) contrast(${contrast}%) blur(${blur}px) saturate(${saturation}%) invert(${
             invert ? 1 : 0
         })`;
 
         canvasRef.current.style.filter = filterString;
-    }, [brightness, contrast, blur, saturation, invert]);
+    }, [brightness, contrast, blur, saturation, invert, canvasRef]);
 
     useEffect(() => {
         if (currentRotationAngle >= 360 || currentRotationAngle <= -360) {
