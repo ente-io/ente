@@ -296,7 +296,8 @@ const ImageEditorOverlay = (props: IProps) => {
 
         // store current data to an image
         const image = new Image();
-        image.src = fileURL;
+        // image.src = fileURL;
+        image.src = canvas.toDataURL();
 
         setCurrentRotationAngle(currentRotationAngle + angle);
         angle = currentRotationAngle + angle;
