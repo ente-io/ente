@@ -1,5 +1,5 @@
 import { Backdrop, Box, IconButton, useTheme } from '@mui/material';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, MouseEvent } from 'react';
 
 import PhotoSizeSelectLargeIcon from '@mui/icons-material/PhotoSizeSelectLarge';
 import { EnteFile } from 'types/file';
@@ -38,6 +38,8 @@ const PRESET_ASPECT_RATIOS = [
 
 const ImageEditorOverlay = (props: IProps) => {
     const [originalWidth, originalHeight] = [props.file.w, props.file.h];
+    const [scaledWidth, setScaledWidth] = useState(0);
+    const [scaledHeight, setScaledHeight] = useState(0);
 
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
     const parentRef = useRef<HTMLDivElement | null>(null);
@@ -46,7 +48,14 @@ const ImageEditorOverlay = (props: IProps) => {
 
     const [cropLoading, setCropLoading] = useState<boolean>(false);
 
+    const [isDragging, setIsDragging] = useState(false);
+    const [dragStartX, setDragStartX] = useState(0);
+    const [dragStartY, setDragStartY] = useState(0);
+    const [cropOffsetX, setCropOffsetX] = useState(0);
+    const [cropOffsetY, setCropOffsetY] = useState(0);
+
     const loadCanvas = async () => {
+        console.log(originalWidth, originalHeight);
         const img = new Image();
         const ctx = canvasRef.current?.getContext('2d');
         if (!fileURL) {
@@ -67,7 +76,9 @@ const ImageEditorOverlay = (props: IProps) => {
                 parentRef.current?.clientHeight / img.height
             );
             const width = img.width * scale;
+            setScaledWidth(width);
             const height = img.height * scale;
+            setScaledHeight(height);
             canvasRef.current.width = width;
             canvasRef.current.height = height;
             canvasRef.current.style.transition = 'width 0.5s, height 0.5s';
@@ -156,6 +167,102 @@ const ImageEditorOverlay = (props: IProps) => {
         }, mimeType);
     };
 
+    const [initialCropOffsetX, setInitialCropOffsetX] = useState(0);
+    const [initialCropOffsetY, setInitialCropOffsetY] = useState(0);
+
+    // Update initialCropOffsetX and initialCropOffsetY when dragging starts
+    const handleMouseDown = (event: MouseEvent<HTMLDivElement>) => {
+        setDragStartX(event.clientX);
+        setDragStartY(event.clientY);
+        setInitialCropOffsetX(cropOffsetX);
+        setInitialCropOffsetY(cropOffsetY);
+        setIsDragging(true);
+    };
+
+    const handleMouseMove = (event: MouseEvent<HTMLDivElement>) => {
+        // Check if dragging is not happening, return early
+        if (!isDragging) return;
+
+        // Get the off-screen dimensions
+        const offScreenWidth = canvasRef.current.width;
+        const offScreenHeight = canvasRef.current.height;
+
+        // Calculate the offset from the drag start position to the current mouse position
+        const offsetX = dragStartX - event.clientX;
+        const offsetY = dragStartY - event.clientY;
+
+        // Calculate the new crop offset based on the drag offset and the limits of the image dimensions
+        const newCropOffsetX = Math.max(
+            Math.min(
+                initialCropOffsetX + offsetX,
+                originalWidth - offScreenWidth
+            ),
+            0
+        );
+
+        const newCropOffsetY = Math.max(
+            Math.min(
+                initialCropOffsetY + offsetY,
+                originalHeight - offScreenHeight
+            ),
+            0
+        );
+
+        // Update the crop offsets
+        setCropOffsetX(newCropOffsetX);
+        setCropOffsetY(newCropOffsetY);
+    };
+
+    const handleMouseUp = () => {
+        setIsDragging(false);
+        setDragStartX(0);
+        setDragStartY(0);
+    };
+
+    useEffect(() => {
+        const canvas = canvasRef.current;
+        const context = canvas?.getContext('2d');
+
+        if (!canvas || !context) return;
+
+        const offScreenCanvas = document.createElement('canvas');
+        const offScreenContext = offScreenCanvas.getContext('2d');
+
+        if (!offScreenContext) return;
+
+        const offScreenWidth = scaledWidth;
+        const offScreenHeight = scaledHeight;
+
+        offScreenCanvas.width = offScreenWidth;
+        offScreenCanvas.height = offScreenHeight;
+
+        offScreenContext.clearRect(0, 0, offScreenWidth, offScreenHeight);
+
+        const img = new Image();
+        img.src = fileURL;
+        img.onload = () => {
+            const sourceX = cropOffsetX;
+            const sourceY = cropOffsetY;
+            const newWidth = offScreenWidth;
+            const newHeight = offScreenHeight;
+
+            offScreenContext.drawImage(
+                img,
+                sourceX,
+                sourceY,
+                newWidth,
+                newHeight,
+                0,
+                0,
+                newWidth,
+                newHeight
+            );
+
+            context.clearRect(0, 0, canvas.width, canvas.height);
+            context.drawImage(offScreenCanvas, 0, 0);
+        };
+    }, [cropOffsetX, cropOffsetY]);
+
     return (
         <>
             <Backdrop
@@ -185,12 +292,19 @@ const ImageEditorOverlay = (props: IProps) => {
                         ref={parentRef}
                         display="flex"
                         alignItems="center"
-                        justifyContent="center">
+                        justifyContent="center"
+                        onMouseDown={handleMouseDown}
+                        onMouseMove={handleMouseMove}
+                        onMouseUp={handleMouseUp}>
                         <canvas
                             ref={canvasRef}
                             height={originalHeight}
                             width={originalWidth}
-                            style={{ maxWidth: '100%', maxHeight: '100%' }}
+                            style={{
+                                maxWidth: '100%',
+                                maxHeight: '100%',
+                                // transform: `translate(${cropOffsetX}px, ${cropOffsetY}px)`,
+                            }}
                         />
                     </Box>
                 </Box>
