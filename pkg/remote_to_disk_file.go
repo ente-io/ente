@@ -44,14 +44,13 @@ func (c *ClICtrl) syncFiles(ctx context.Context) error {
 		}
 
 		if albumInfo.IsDeleted {
-			entry.IsDeleted = true
-			putErr := c.DeleteValue(ctx, model.RemoteAlbumEntries, []byte(fmt.Sprintf("%d:%d", entry.AlbumID, entry.FileID)))
+			putErr := c.DeleteAlbumEntry(ctx, entry)
 			if putErr != nil {
 				return putErr
 			}
 			continue
 		}
-		fmt.Println("entry", i, albumInfo.AlbumName, entry.FileID, entry.SyncedLocally)
+
 		if albumDiskInfo == nil || albumDiskInfo.AlbumMeta.ID != albumInfo.ID {
 			albumDiskInfo, err = readFilesMetadata(exportRoot, albumInfo)
 			if err != nil {
@@ -69,6 +68,7 @@ func (c *ClICtrl) syncFiles(ctx context.Context) error {
 				return err
 			}
 			if existingEntry.GetFileType() != model.LivePhoto && albumDiskInfo.AlbumMeta.ID == 1580559962519759 {
+				fmt.Println("entry", i, albumInfo.AlbumName, entry.FileID, entry.SyncedLocally)
 				err = c.downloadEntry(ctx, albumDiskInfo, *existingEntry, entry)
 				if err != nil {
 					return err
@@ -84,7 +84,8 @@ func (c *ClICtrl) syncFiles(ctx context.Context) error {
 func (c *ClICtrl) downloadEntry(ctx context.Context,
 	diskInfo *albumDiskInfo,
 	file model.RemoteFile,
-	albumEntry *model.AlbumFileEntry) error {
+	albumEntry *model.AlbumFileEntry,
+) error {
 	if !diskInfo.AlbumMeta.IsDeleted && albumEntry.IsDeleted {
 		albumEntry.IsDeleted = true
 		diskFileMeta := diskInfo.GetDiskFileMetadata(file)
@@ -94,10 +95,11 @@ func (c *ClICtrl) downloadEntry(ctx context.Context,
 				return removeErr
 			}
 		}
-		putErr := c.DeleteValue(ctx, model.RemoteAlbumEntries, []byte(fmt.Sprintf("%d:%d", albumEntry.AlbumID, albumEntry.FileID)))
-		if putErr != nil {
-			return putErr
+		delErr := c.DeleteAlbumEntry(ctx, albumEntry)
+		if delErr != nil {
+			return delErr
 		}
+		return nil
 	}
 	if !diskInfo.IsFilePresent(file) {
 		decrypt, err := c.downloadAndDecrypt(ctx, file, c.KeyHolder.DeviceKey)
@@ -133,6 +135,11 @@ func (c *ClICtrl) downloadEntry(ctx context.Context,
 		err = writeJSONToFile(filepath.Join(diskInfo.ExportRoot, diskInfo.AlbumMeta.FolderName, ".meta", potentialDiskFileName), fileDiskMetadata)
 		if err != nil {
 			return err
+		}
+		albumEntry.SyncedLocally = true
+		putErr := c.UpsertAlbumEntry(ctx, albumEntry)
+		if putErr != nil {
+			return putErr
 		}
 	}
 	return nil

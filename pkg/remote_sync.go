@@ -93,8 +93,7 @@ func (c *ClICtrl) fetchRemoteFiles(ctx context.Context) error {
 					continue
 				}
 				albumEntry := model.AlbumFileEntry{AlbumID: album.ID, FileID: file.ID, IsDeleted: file.IsDeleted, SyncedLocally: false}
-				albumEntryJson := encoding.MustMarshalJSON(albumEntry)
-				putErr := c.PutValue(ctx, model.RemoteAlbumEntries, []byte(fmt.Sprintf("%d:%d", album.ID, file.ID)), albumEntryJson)
+				putErr := c.UpsertAlbumEntry(ctx, &albumEntry)
 				if putErr != nil {
 					return putErr
 				}
