@@ -101,6 +101,13 @@ func (c *ClICtrl) downloadEntry(ctx context.Context,
 		}
 		return nil
 	}
+	diskFileMeta := diskInfo.GetDiskFileMetadata(file)
+	if diskFileMeta != nil {
+		removeErr := removeDiskFile(diskFileMeta, diskInfo)
+		if removeErr != nil {
+			return removeErr
+		}
+	}
 	if !diskInfo.IsFilePresent(file) {
 		decrypt, err := c.downloadAndDecrypt(ctx, file, c.KeyHolder.DeviceKey)
 		if err != nil {
