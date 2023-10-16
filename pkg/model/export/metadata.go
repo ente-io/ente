@@ -38,6 +38,9 @@ type DiskFileMetadata struct {
 	CreationTime     time.Time `json:"creationTime"`
 	ModificationTime time.Time `json:"modificationTime"`
 	Info             *Info     `json:"info"`
+
+	// exclude this from json serialization
+	DiskFileName string `json:"-"`
 }
 
 type Info struct {

@@ -63,11 +63,6 @@ func (c *ClICtrl) SyncAccount(account model.Account) error {
 		log.Printf("Error syncing files: %s", err)
 		return err
 	}
-	downloadErr := c.initiateDownload(ctx)
-	if downloadErr != nil {
-		log.Printf("Error downloading files: %s", downloadErr)
-		return downloadErr
-	}
 	return nil
 }
 

@@ -129,8 +129,8 @@ func MapApiFileToPhotoFile(ctx context.Context, album model.RemoteAlbum, file ap
 	return &photoFile, nil
 }
 
-func MapRemoteFileToDiskMetadata(file model.RemoteFile) export.DiskFileMetadata {
-	result := export.DiskFileMetadata{
+func MapRemoteFileToDiskMetadata(file model.RemoteFile) *export.DiskFileMetadata {
+	return &export.DiskFileMetadata{
 		Title:            file.GetTitle(),
 		Description:      file.GetCaption(),
 		CreationTime:     file.GetCreationTime(),
@@ -142,5 +142,4 @@ func MapRemoteFileToDiskMetadata(file model.RemoteFile) export.DiskFileMetadata 
 			OwnerID: file.OwnerID,
 		},
 	}
-	return result
 }

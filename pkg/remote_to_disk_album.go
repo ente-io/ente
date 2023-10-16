@@ -81,7 +81,7 @@ func (c *ClICtrl) createLocalFolderForRemoteAlbums(ctx context.Context) error {
 			}
 		}
 		// Handle meta file
-		metaFilePath := filepath.Join(path, albumFolderName, ".meta", "album_meta.json")
+		metaFilePath := filepath.Join(path, albumFolderName, albumMetaFolder, albumMetaFile)
 		metaData := export.AlbumMetadata{
 			ID:              album.ID,
 			OwnerID:         album.OwnerID,
@@ -112,7 +112,7 @@ func readFolderMetadata(path string) (map[string]*export.AlbumMetadata, map[int6
 	for _, entry := range entries {
 		if entry.IsDir() {
 			dirName := entry.Name()
-			metaFilePath := filepath.Join(path, dirName, ".meta", "album_meta.json")
+			metaFilePath := filepath.Join(path, dirName, albumMetaFolder, albumMetaFile)
 			// Initialize as nil, will remain nil if JSON file is not found or not readable
 			result[dirName] = nil
 			// Read the JSON file if it exists
@@ -132,42 +132,4 @@ func readFolderMetadata(path string) (map[string]*export.AlbumMetadata, map[int6
 		}
 	}
 	return result, albumIdToMetadataMap, nil
-}
-
-func writeJSONToFile(filePath string, data interface{}) error {
-	file, err := os.Create(filePath)
-	if err != nil {
-		return err
-	}
-	defer file.Close()
-
-	encoder := json.NewEncoder(file)
-	encoder.SetIndent("", "  ")
-	return encoder.Encode(data)
-}
-
-func readJSONFromFile(filePath string, data interface{}) error {
-	file, err := os.Open(filePath)
-	if err != nil {
-		return err
-	}
-	defer file.Close()
-
-	decoder := json.NewDecoder(file)
-	return decoder.Decode(data)
-}
-
-func exportHome(ctx context.Context) (string, error) {
-	homeDir, err := os.UserHomeDir()
-	if err != nil {
-		return "", err
-	}
-	path := fmt.Sprintf("%s/%s", homeDir, "photos")
-	if _, err = os.Stat(path); os.IsNotExist(err) {
-		err = os.Mkdir(path, 0755)
-		if err != nil {
-			return "", err
-		}
-	}
-	return path, nil
 }
