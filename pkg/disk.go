@@ -130,14 +130,14 @@ func validateExportDirectory(dir string) (bool, error) {
 	}
 
 	// Check for write permission
-	file, err := os.OpenFile(dir, os.O_WRONLY, 0666)
+	// Check for write permission by creating a temp file
+	tempFile, err := os.CreateTemp(dir, "write_test_")
 	if err != nil {
-		if os.IsPermission(err) {
-			return false, fmt.Errorf("write permission denied")
-		}
-		return false, err
+		return false, fmt.Errorf("write permission denied: %v", err)
 	}
-	err = file.Close()
+
+	// Delete temp file
+	defer os.Remove(tempFile.Name())
 	if err != nil {
 		return false, err
 	}
