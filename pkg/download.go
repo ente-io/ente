@@ -4,6 +4,7 @@ import (
 	"archive/zip"
 	"cli-go/internal/crypto"
 	"cli-go/pkg/model"
+	"cli-go/utils"
 	"cli-go/utils/encoding"
 	"context"
 	"fmt"
@@ -21,7 +22,7 @@ func (c *ClICtrl) downloadAndDecrypt(
 ) (*string, error) {
 	dir := c.tempFolder
 	downloadPath := fmt.Sprintf("%s/%d", dir, file.ID)
-	log.Printf("Downloading file %d to %s", file.ID, downloadPath)
+	log.Printf("Downloading %s (%s)", file.GetTitle(), utils.ByteCountDecimal(file.Info.FileSize))
 	err := c.Client.DownloadFile(ctx, file.ID, downloadPath)
 	if err != nil {
 		return nil, fmt.Errorf("error downloading file %d: %w", file.ID, err)
