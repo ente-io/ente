@@ -69,7 +69,7 @@ func (r *RemoteFile) GetFileType() FileType {
 	if !ok {
 		panic("fileType not found in metadata")
 	}
-	switch value.(int8) {
+	switch int8(value.(float64)) {
 	case 0:
 		return Image
 	case 1:
