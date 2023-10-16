@@ -4,6 +4,7 @@ import (
 	"cli-go/pkg/mapper"
 	"cli-go/pkg/model"
 	"cli-go/pkg/model/export"
+	"cli-go/utils"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -11,6 +12,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 )
 
 func (c *ClICtrl) syncFiles(ctx context.Context) error {
@@ -29,6 +31,7 @@ func (c *ClICtrl) syncFiles(ctx context.Context) error {
 	}
 	log.Println("total entries", len(entries))
 	model.SortAlbumFileEntry(entries)
+	defer utils.TimeTrack(time.Now(), "process_files")
 	for i, entry := range entries {
 		if entry.SyncedLocally {
 			continue
