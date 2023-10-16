@@ -1,12 +1,14 @@
 package crypto
 
 import (
+	"bufio"
 	"bytes"
 	"cli-go/utils/encoding"
 	"encoding/base64"
 	"fmt"
 	"io"
 	"log"
+	"os"
 
 	"github.com/jamesruan/sodium"
 	"golang.org/x/crypto/argon2"
@@ -16,6 +18,12 @@ const (
 	loginSubKeyLen     = 32
 	loginSubKeyId      = 1
 	loginSubKeyContext = "loginctx"
+
+	// xChacha20Poly1305AdditionalBytes indicates the number of additional bytes in each ciphertext block when
+	// using the secret stream APIs for XChaCha20-Poly1305 encryption/decryption.
+	//16 bytes for the Poly1305 authentication tag and 1 byte for the chunk type.
+	xChacha20Poly1305AdditionalBytes = 17
+	decryptionBufferSize             = 4*1024*1024 + xChacha20Poly1305AdditionalBytes
 )
 
 // DeriveArgonKey generates a 32-bit cryptographic key using the Argon2id algorithm.
@@ -149,4 +157,55 @@ func SealedBoxOpen(cipherText []byte, publicKey, masterSecret []byte) ([]byte, e
 		return nil, fmt.Errorf("failed to open sealed box: %v", err)
 	}
 	return om, nil
+}
+
+func DecryptFile(encryptedFilePath string, decryptedFilePath string, key, nonce []byte) error {
+	inputFile, err := os.Open(encryptedFilePath)
+	if err != nil {
+		return err
+	}
+	defer inputFile.Close()
+
+	outputFile, err := os.Create(decryptedFilePath)
+	if err != nil {
+		return err
+	}
+	defer outputFile.Close()
+
+	reader := bufio.NewReader(inputFile)
+	writer := bufio.NewWriter(outputFile)
+
+	header := sodium.SecretStreamXCPHeader{Bytes: nonce}
+	decoder, err := sodium.MakeSecretStreamXCPDecoder(
+		sodium.SecretStreamXCPKey{Bytes: key},
+		reader,
+		header)
+	if err != nil {
+		log.Println("Failed to make secret stream decoder", err)
+		return err
+	}
+
+	buf := make([]byte, decryptionBufferSize)
+	for {
+		n, errErr := decoder.Read(buf)
+		if errErr != nil && errErr != io.EOF {
+			log.Println("Failed to read from decoder", err)
+			return errErr
+		}
+		if n == 0 {
+			break
+		}
+		if _, err := writer.Write(buf[:n]); err != nil {
+			log.Println("Failed to write to output file", err)
+			return err
+		}
+		if errErr == io.EOF {
+			break
+		}
+	}
+	if err := writer.Flush(); err != nil {
+		log.Println("Failed to flush writer", err)
+		return err
+	}
+	return nil
 }
