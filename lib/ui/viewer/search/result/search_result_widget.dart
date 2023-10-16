@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/models/search/search_result.dart';
 import "package:photos/models/search/search_types.dart";
+import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/viewer/search/result/search_result_page.dart';
 import 'package:photos/ui/viewer/search/result/search_thumbnail_widget.dart';
 import 'package:photos/utils/navigation_util.dart';
@@ -21,10 +22,12 @@ class SearchResultWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final heroTagPrefix = searchResult.heroTag();
+    final textTheme = getEnteTextTheme(context);
 
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       child: Container(
+        //todo: check and change color to figma
         color: Theme.of(context).colorScheme.searchResultsColor,
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
@@ -36,54 +39,44 @@ class SearchResultWidget extends StatelessWidget {
                 searchResult.previewThumbnail(),
                 heroTagPrefix,
               ),
-              const SizedBox(width: 16),
+              const SizedBox(width: 12),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    _resultTypeName(searchResult.type()),
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Theme.of(context).colorScheme.subTextColor,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
                   SizedBox(
                     width: 220,
                     child: Text(
                       searchResult.name(),
-                      style: const TextStyle(fontSize: 18),
+                      style: textTheme.body,
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                  const SizedBox(height: 2),
-                  FutureBuilder<int>(
-                    future: resultCount ??
-                        Future.value(searchResult.resultFiles().length),
-                    builder: (context, snapshot) {
-                      if (snapshot.hasData && snapshot.data! > 0) {
-                        final noOfMemories = snapshot.data;
-                        return RichText(
-                          text: TextSpan(
-                            style: TextStyle(
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .searchResultsCountTextColor,
-                            ),
-                            children: [
-                              TextSpan(text: noOfMemories.toString()),
-                              TextSpan(
-                                text:
-                                    noOfMemories != 1 ? ' memories' : ' memory',
-                              ),
-                            ],
-                          ),
-                        );
-                      } else {
-                        return const SizedBox.shrink();
-                      }
-                    },
+                  const SizedBox(height: 4),
+                  Row(
+                    children: [
+                      Text(
+                        _resultTypeName(searchResult.type()),
+                        style: textTheme.smallMuted,
+                      ),
+                      FutureBuilder<int>(
+                        future: resultCount ??
+                            Future.value(searchResult.resultFiles().length),
+                        builder: (context, snapshot) {
+                          if (snapshot.hasData && snapshot.data! > 0) {
+                            final noOfMemories = snapshot.data;
+
+                            return Text(
+                              " \u2022 " + noOfMemories.toString(),
+                              style: textTheme.smallMuted,
+                            );
+                          } else {
+                            return const SizedBox.shrink();
+                          }
+                        },
+                      ),
+                    ],
                   ),
+                  const SizedBox(height: 2),
                 ],
               ),
               const Spacer(),
