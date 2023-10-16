@@ -80,6 +80,10 @@ func (r *RemoteFile) GetFileType() FileType {
 	panic(fmt.Sprintf("invalid fileType %d", value.(int8)))
 }
 
+func (r *RemoteFile) IsLivePhoto() bool {
+	return r.GetFileType() == LivePhoto
+}
+
 func (r *RemoteFile) GetFileHash() *string {
 	value, ok := r.Metadata["hash"]
 	if !ok {

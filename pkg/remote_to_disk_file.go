@@ -121,7 +121,8 @@ func (c *ClICtrl) downloadEntry(ctx context.Context,
 		count := 1
 		for diskInfo.IsMetaFileNamePresent(potentialDiskFileName) {
 			// separate the file name and extension
-			potentialDiskFileName = fmt.Sprintf("%s_%d%s.json", baseFileName, count, extension)
+			baseFileName = fmt.Sprintf("%s_%d", baseFileName, count)
+			potentialDiskFileName = fmt.Sprintf("%s%s.json", baseFileName, extension)
 			count++
 			if !diskInfo.IsMetaFileNamePresent(potentialDiskFileName) {
 				break
@@ -132,13 +133,39 @@ func (c *ClICtrl) downloadEntry(ctx context.Context,
 		if err != nil {
 			return err
 		}
-		filePath := filepath.Join(diskInfo.ExportRoot, diskInfo.AlbumMeta.FolderName, strings.TrimSuffix(filepath.Base(potentialDiskFileName), ".json"))
-		// move the decrypt file to filePath
-		err = os.Rename(*decrypt, filePath)
-		if err != nil {
-			return err
+		if file.IsLivePhoto() {
+			imagePath, videoPath, err := UnpackLive(*decrypt)
+			if err != nil {
+				return err
+			}
+			imageExtn := filepath.Ext(imagePath)
+			videoExtn := filepath.Ext(videoPath)
+			imageFileName := baseFileName + imageExtn
+			videoFileName := baseFileName + videoExtn
+			imageFilePath := filepath.Join(diskInfo.ExportRoot, diskInfo.AlbumMeta.FolderName, imageFileName)
+			videoFilePath := filepath.Join(diskInfo.ExportRoot, diskInfo.AlbumMeta.FolderName, videoFileName)
+			// move the decrypt file to filePath
+			err = os.Rename(imagePath, imageFilePath)
+			if err != nil {
+				return err
+			}
+			err = os.Rename(videoPath, videoFilePath)
+			if err != nil {
+				return err
+			}
+			fileDiskMetadata.AddFileName(imageFileName)
+			fileDiskMetadata.AddFileName(videoFileName)
+		} else {
+			fileName := baseFileName + extension
+			filePath := filepath.Join(diskInfo.ExportRoot, diskInfo.AlbumMeta.FolderName, fileName)
+			// move the decrypt file to filePath
+			err = os.Rename(*decrypt, filePath)
+			if err != nil {
+				return err
+			}
+			fileDiskMetadata.AddFileName(fileName)
 		}
-		fileDiskMetadata.AddFileName(filepath.Base(filePath))
+
 		err = writeJSONToFile(filepath.Join(diskInfo.ExportRoot, diskInfo.AlbumMeta.FolderName, ".meta", potentialDiskFileName), fileDiskMetadata)
 		if err != nil {
 			return err
