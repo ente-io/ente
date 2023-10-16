@@ -9,17 +9,20 @@ import "package:photos/ui/viewer/file/no_thumbnail_widget.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 import "package:photos/ui/viewer/gallery/collection_page.dart";
 import "package:photos/ui/viewer/search/result/search_result_page.dart";
+import "package:photos/ui/viewer/search/result/search_section_all_page.dart";
 import "package:photos/ui/viewer/search/search_section_cta.dart";
 import "package:photos/utils/navigation_util.dart";
 
 class SearchSection extends StatelessWidget {
   final SectionType sectionType;
   final List<SearchResult> examples;
+  final int limit;
 
   const SearchSection({
     Key? key,
     required this.sectionType,
     required this.examples,
+    required this.limit,
   }) : super(key: key);
 
   @override
@@ -30,6 +33,7 @@ class SearchSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Padding(
               padding: const EdgeInsets.all(12),
@@ -38,6 +42,23 @@ class SearchSection extends StatelessWidget {
                 style: textTheme.largeBold,
               ),
             ),
+            examples.length < (limit - 1)
+                ? const SizedBox.shrink()
+                : GestureDetector(
+                    onTap: () {
+                      routeToPage(
+                        context,
+                        SearchSectionResultPage(sectionType: sectionType),
+                      );
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.all(12),
+                      child: Icon(
+                        Icons.chevron_right_outlined,
+                        color: getEnteColorScheme(context).strokeMuted,
+                      ),
+                    ),
+                  ),
           ],
         ),
         const SizedBox(height: 2),

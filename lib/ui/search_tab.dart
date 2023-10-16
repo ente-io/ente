@@ -50,6 +50,7 @@ class AllSearchSections extends StatefulWidget {
 class _AllSearchSectionsState extends State<AllSearchSections> {
   late Future<List<List<SearchResult>>> allSectionsExamples;
   late List<Future<List<SearchResult>>> sectionExamples;
+  static const _limit = 7;
 
   @override
   void initState() {
@@ -65,7 +66,7 @@ class _AllSearchSectionsState extends State<AllSearchSections> {
           sectionType == SectionType.content) {
         continue;
       }
-      sectionExamples.add(sectionType.getData(limit: 7, context: context));
+      sectionExamples.add(sectionType.getData(limit: _limit, context: context));
     }
     allSectionsExamples = Future.wait<List<SearchResult>>(sectionExamples);
   }
@@ -90,6 +91,7 @@ class _AllSearchSectionsState extends State<AllSearchSections> {
                 return SearchSection(
                   sectionType: searchTypes[index],
                   examples: snapshot.data!.elementAt(index),
+                  limit: _limit,
                 );
               },
             );
