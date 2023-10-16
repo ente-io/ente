@@ -3,7 +3,6 @@ package pkg
 import (
 	"cli-go/pkg/model"
 	"cli-go/pkg/model/export"
-	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -97,21 +96,6 @@ func readJSONFromFile(filePath string, data interface{}) error {
 
 	decoder := json.NewDecoder(file)
 	return decoder.Decode(data)
-}
-
-func exportHome(ctx context.Context) (string, error) {
-	homeDir, err := os.UserHomeDir()
-	if err != nil {
-		return "", err
-	}
-	path := fmt.Sprintf("%s/%s", homeDir, "photos")
-	if _, err = os.Stat(path); os.IsNotExist(err) {
-		err = os.Mkdir(path, 0755)
-		if err != nil {
-			return "", err
-		}
-	}
-	return path, nil
 }
 
 func validateExportDirectory(dir string) (bool, error) {

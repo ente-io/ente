@@ -15,12 +15,9 @@ import (
 	"time"
 )
 
-func (c *ClICtrl) syncFiles(ctx context.Context) error {
+func (c *ClICtrl) syncFiles(ctx context.Context, account model.Account) error {
 	log.Printf("Starting sync files")
-	exportRoot, err := exportHome(ctx)
-	if err != nil {
-		return err
-	}
+	exportRoot := account.ExportDir
 	_, albumIDToMetaMap, err := readFolderMetadata(exportRoot)
 	if err != nil {
 		return err

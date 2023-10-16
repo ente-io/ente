@@ -21,6 +21,15 @@ func (c *ClICtrl) StartSync() error {
 	}
 	for _, account := range accounts {
 		log.SetPrefix(fmt.Sprintf("[%s-%s] ", account.App, account.Email))
+		if account.ExportDir == "" {
+			log.Printf("Skip account %s: no export directory configured", account.Email)
+			continue
+		}
+		_, err = validateExportDirectory(account.ExportDir)
+		if err != nil {
+			log.Printf("Skip export, error: %v while validing exportDir %s\n", err, account.ExportDir)
+			continue
+		}
 		log.Println("start sync")
 		err = c.SyncAccount(account)
 		if err != nil {
@@ -53,12 +62,12 @@ func (c *ClICtrl) SyncAccount(account model.Account) error {
 	if err != nil {
 		log.Printf("Error fetching files: %s", err)
 	}
-	err = c.createLocalFolderForRemoteAlbums(ctx)
+	err = c.createLocalFolderForRemoteAlbums(ctx, account)
 	if err != nil {
 		log.Printf("Error creating local folders: %s", err)
 		return err
 	}
-	err = c.syncFiles(ctx)
+	err = c.syncFiles(ctx, account)
 	if err != nil {
 		log.Printf("Error syncing files: %s", err)
 		return err

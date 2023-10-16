@@ -1,6 +1,7 @@
 package pkg
 
 import (
+	"cli-go/pkg/model"
 	"cli-go/pkg/model/export"
 	"context"
 	"encoding/json"
@@ -12,12 +13,8 @@ import (
 	"path/filepath"
 )
 
-func (c *ClICtrl) createLocalFolderForRemoteAlbums(ctx context.Context) error {
-	path, pathErr := exportHome(ctx)
-	if pathErr != nil {
-		return pathErr
-	}
-
+func (c *ClICtrl) createLocalFolderForRemoteAlbums(ctx context.Context, account model.Account) error {
+	path := account.ExportDir
 	albums, err := c.getRemoteAlbums(ctx)
 	if err != nil {
 		return err
