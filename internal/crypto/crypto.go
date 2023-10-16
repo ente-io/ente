@@ -19,11 +19,7 @@ const (
 	loginSubKeyId      = 1
 	loginSubKeyContext = "loginctx"
 
-	// xChacha20Poly1305AdditionalBytes indicates the number of additional bytes in each ciphertext block when
-	// using the secret stream APIs for XChaCha20-Poly1305 encryption/decryption.
-	//16 bytes for the Poly1305 authentication tag and 1 byte for the chunk type.
-	xChacha20Poly1305AdditionalBytes = 17
-	decryptionBufferSize             = 4*1024*1024 + xChacha20Poly1305AdditionalBytes
+	decryptionBufferSize = 4 * 1024 * 1024
 )
 
 // DeriveArgonKey generates a 32-bit cryptographic key using the Argon2id algorithm.
@@ -189,7 +185,7 @@ func DecryptFile(encryptedFilePath string, decryptedFilePath string, key, nonce 
 	for {
 		n, errErr := decoder.Read(buf)
 		if errErr != nil && errErr != io.EOF {
-			log.Println("Failed to read from decoder", err)
+			log.Println("Failed to read from decoder", errErr)
 			return errErr
 		}
 		if n == 0 {
