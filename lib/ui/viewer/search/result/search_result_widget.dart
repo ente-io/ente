@@ -128,6 +128,8 @@ class SearchResultWidget extends StatelessWidget {
         return "File extension";
       case ResultType.fileCaption:
         return "Description";
+      case ResultType.shared:
+        return "Shared";
       default:
         return type.name.toUpperCase();
     }

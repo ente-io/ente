@@ -12,7 +12,8 @@ enum ResultType {
   fileType,
   fileExtension,
   fileCaption,
-  event
+  event,
+  shared,
 }
 
 enum SectionType {
@@ -178,7 +179,7 @@ extension SectionTypeExtensions on SectionType {
         return SearchService.instance.getAllLocationTags(limit);
 
       case SectionType.people:
-        return SearchService.instance.getAllLocationTags(limit);
+        return SearchService.instance.getPeopleSearchResults(limit);
 
       case SectionType.album:
         return SearchService.instance.getAllCollectionSearchResults(limit);

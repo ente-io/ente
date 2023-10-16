@@ -7,8 +7,10 @@ import 'package:photos/data/years.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import "package:photos/extensions/string_ext.dart";
+import "package:photos/models/api/collection/user.dart";
 import 'package:photos/models/collection/collection.dart';
 import 'package:photos/models/collection/collection_items.dart';
+import "package:photos/models/file/extensions/file_props.dart";
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file/file_type.dart';
 import "package:photos/models/local_entity_data.dart";
@@ -670,6 +672,38 @@ class SearchService {
         );
       }
     }
+    return searchResults;
+  }
+
+  Future<List<GenericSearchResult>> getPeopleSearchResults(int? limit) async {
+    final searchResults = <GenericSearchResult>[];
+    final allFiles = await getAllFiles();
+    final peopleToSharedFiles = <User, List<EnteFile>>{};
+    int peopleCount = 0;
+    for (EnteFile file in allFiles) {
+      if (file.isOwner) continue;
+
+      final fileOwner = CollectionsService.instance
+          .getFileOwner(file.ownerID!, file.collectionID);
+      if (peopleToSharedFiles.containsKey(fileOwner)) {
+        peopleToSharedFiles[fileOwner]!.add(file);
+      } else {
+        if (limit != null && limit <= peopleCount) continue;
+        peopleToSharedFiles[fileOwner] = [file];
+        peopleCount++;
+      }
+    }
+
+    peopleToSharedFiles.forEach((key, value) {
+      searchResults.add(
+        GenericSearchResult(
+          ResultType.shared,
+          key.name != null && key.name!.isNotEmpty ? key.name! : key.email,
+          value,
+        ),
+      );
+    });
+
     return searchResults;
   }
 
