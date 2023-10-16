@@ -32,16 +32,18 @@ func (c *ClICtrl) syncFiles(ctx context.Context) error {
 	log.Println("total entries", len(entries))
 	model.SortAlbumFileEntry(entries)
 	defer utils.TimeTrack(time.Now(), "process_files")
+	var albumDiskInfo *albumDiskInfo
 	for i, entry := range entries {
 		if entry.SyncedLocally {
 			continue
 		}
-		fmt.Println("entry", i, entry.AlbumID, entry.FileID, entry.SyncedLocally)
+
 		albumInfo, ok := albumIDToMetaMap[entry.AlbumID]
 		if !ok {
 			log.Printf("Album %d not found in local metadata", entry.AlbumID)
 			continue
 		}
+
 		if albumInfo.IsDeleted {
 			entry.IsDeleted = true
 			putErr := c.DeleteValue(ctx, model.RemoteAlbumEntries, []byte(fmt.Sprintf("%d:%d", entry.AlbumID, entry.FileID)))
@@ -50,9 +52,12 @@ func (c *ClICtrl) syncFiles(ctx context.Context) error {
 			}
 			continue
 		}
-		diskAlbumInfo, err := readFilesMetadata(exportRoot, albumInfo)
-		if err != nil {
-			return err
+		fmt.Println("entry", i, albumInfo.AlbumName, entry.FileID, entry.SyncedLocally)
+		if albumDiskInfo == nil || albumDiskInfo.AlbumMeta.ID != albumInfo.ID {
+			albumDiskInfo, err = readFilesMetadata(exportRoot, albumInfo)
+			if err != nil {
+				return err
+			}
 		}
 		fileBytes, err := c.GetValue(ctx, model.RemoteFiles, []byte(fmt.Sprintf("%d", entry.FileID)))
 		if err != nil {
@@ -64,7 +69,7 @@ func (c *ClICtrl) syncFiles(ctx context.Context) error {
 			if err != nil {
 				return err
 			}
-			err = c.downloadEntry(ctx, diskAlbumInfo, *existingEntry, entry)
+			err = c.downloadEntry(ctx, albumDiskInfo, *existingEntry, entry)
 			if err != nil {
 				return err
 			}
