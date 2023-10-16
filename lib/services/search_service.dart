@@ -370,7 +370,7 @@ class SearchService {
         //result will be ["hello", "world", "hello world"] for the string
         //"hello world"
 
-        if (limit != null && distinctFullDescriptionCount < limit) {
+        if (limit == null || distinctFullDescriptionCount < limit) {
           distinctFullDescriptionCount++;
           final words = file.caption!.split(" ");
           orderedSubDescriptions.add({0: <String>[], 1: <String>[]});
