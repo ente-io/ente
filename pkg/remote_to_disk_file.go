@@ -37,7 +37,6 @@ func (c *ClICtrl) syncFiles(ctx context.Context) error {
 		if entry.SyncedLocally {
 			continue
 		}
-
 		albumInfo, ok := albumIDToMetaMap[entry.AlbumID]
 		if !ok {
 			log.Printf("Album %d not found in local metadata", entry.AlbumID)
@@ -69,9 +68,11 @@ func (c *ClICtrl) syncFiles(ctx context.Context) error {
 			if err != nil {
 				return err
 			}
-			err = c.downloadEntry(ctx, albumDiskInfo, *existingEntry, entry)
-			if err != nil {
-				return err
+			if existingEntry.GetFileType() != model.LivePhoto && albumDiskInfo.AlbumMeta.ID == 1580559962519759 {
+				err = c.downloadEntry(ctx, albumDiskInfo, *existingEntry, entry)
+				if err != nil {
+					return err
+				}
 			}
 		} else {
 			log.Fatalf("remoteFile %d not found in remoteFiles", entry.FileID)
@@ -86,13 +87,11 @@ func (c *ClICtrl) downloadEntry(ctx context.Context,
 	albumEntry *model.AlbumFileEntry) error {
 	if !diskInfo.AlbumMeta.IsDeleted && albumEntry.IsDeleted {
 		albumEntry.IsDeleted = true
-		diskFile := diskInfo.GetDiskFile(file)
-		if diskFile != nil {
-			// remove the file from disk
-			log.Printf("Removing file %s from disk", diskFile.MetaFileName)
-			err := os.Remove(filepath.Join(diskInfo.ExportRoot, diskInfo.AlbumMeta.FolderName, ".meta", diskFile.MetaFileName))
-			if err != nil {
-				return err
+		diskFileMeta := diskInfo.GetDiskFileMetadata(file)
+		if diskFileMeta != nil {
+			removeErr := removeDiskFile(diskFileMeta, diskInfo)
+			if removeErr != nil {
+				return removeErr
 			}
 		}
 		putErr := c.DeleteValue(ctx, model.RemoteAlbumEntries, []byte(fmt.Sprintf("%d:%d", albumEntry.AlbumID, albumEntry.FileID)))
@@ -124,19 +123,35 @@ func (c *ClICtrl) downloadEntry(ctx context.Context,
 		if err != nil {
 			return err
 		}
-		fileName := filepath.Join(diskInfo.ExportRoot, diskInfo.AlbumMeta.FolderName, strings.TrimSuffix(filepath.Base(potentialDiskFileName), ".json"))
-		// move the decrypt file to fileName
-		err = os.Rename(*decrypt, fileName)
+		filePath := filepath.Join(diskInfo.ExportRoot, diskInfo.AlbumMeta.FolderName, strings.TrimSuffix(filepath.Base(potentialDiskFileName), ".json"))
+		// move the decrypt file to filePath
+		err = os.Rename(*decrypt, filePath)
 		if err != nil {
 			return err
 		}
+		fileDiskMetadata.AddFileName(filepath.Base(filePath))
 		err = writeJSONToFile(filepath.Join(diskInfo.ExportRoot, diskInfo.AlbumMeta.FolderName, ".meta", potentialDiskFileName), fileDiskMetadata)
 		if err != nil {
 			return err
 		}
-
 	}
 	return nil
+}
+
+func removeDiskFile(diskFileMeta *export.DiskFileMetadata, diskInfo *albumDiskInfo) error {
+	// remove the file from disk
+	log.Printf("Removing file %s from disk", diskFileMeta.MetaFileName)
+	err := os.Remove(filepath.Join(diskInfo.ExportRoot, diskInfo.AlbumMeta.FolderName, ".meta", diskFileMeta.MetaFileName))
+	if err != nil {
+		return err
+	}
+	for _, fileName := range diskFileMeta.Info.FileNames {
+		err = os.Remove(filepath.Join(diskInfo.ExportRoot, diskInfo.AlbumMeta.FolderName, fileName))
+		if err != nil {
+			return err
+		}
+	}
+	return diskInfo.RemoveEntry(diskFileMeta)
 }
 
 // readFolderMetadata reads the metadata of the files in the given path
@@ -190,7 +205,7 @@ func readFilesMetadata(home string, albumMeta *export.AlbumMetadata) (*albumDisk
 				continue // Skip this entry if reading fails
 			}
 			if err := json.Unmarshal(metaDataBytes, &metaData); err == nil {
-				metaData.DiskFileName = fileName
+				metaData.MetaFileName = fileName
 				result[fileName] = &metaData
 				fileIdToMetadata[metaData.Info.ID] = &metaData
 			}

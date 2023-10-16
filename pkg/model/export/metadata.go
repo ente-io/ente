@@ -43,8 +43,22 @@ type DiskFileMetadata struct {
 	MetaFileName string `json:"-"`
 }
 
+func (d *DiskFileMetadata) AddFileName(fileName string) {
+	if d.Info.FileNames == nil {
+		d.Info.FileNames = make([]string, 0)
+	}
+	for _, ownerID := range d.Info.FileNames {
+		if ownerID == fileName {
+			return
+		}
+	}
+	d.Info.FileNames = append(d.Info.FileNames, fileName)
+}
+
 type Info struct {
 	ID      int64   `json:"id"`
 	Hash    *string `json:"hash"`
 	OwnerID int64   `json:"ownerID"`
+	// A file can contain multiple parts (example: live photos or burst photos)
+	FileNames []string `json:"fileNames"`
 }
