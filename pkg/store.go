@@ -82,6 +82,16 @@ func (c *ClICtrl) PutValue(ctx context.Context, store model.PhotosStore, key []b
 	})
 }
 
+func (c *ClICtrl) DeleteValue(ctx context.Context, store model.PhotosStore, key []byte) error {
+	return c.DB.Update(func(tx *bolt.Tx) error {
+		kvBucket, err := getAccountStore(ctx, tx, store)
+		if err != nil {
+			return err
+		}
+		return kvBucket.Delete(key)
+	})
+}
+
 // GetValue
 func (c *ClICtrl) GetValue(ctx context.Context, store model.PhotosStore, key []byte) ([]byte, error) {
 	var value []byte
