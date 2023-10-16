@@ -113,3 +113,34 @@ func exportHome(ctx context.Context) (string, error) {
 	}
 	return path, nil
 }
+
+func validateExportDirectory(dir string) (bool, error) {
+	// Check if the path exists
+	fileInfo, err := os.Stat(dir)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return false, fmt.Errorf("path does not exist: %s", dir)
+		}
+		return false, err
+	}
+
+	// Check if the path is a directory
+	if !fileInfo.IsDir() {
+		return false, fmt.Errorf("path is not a directory")
+	}
+
+	// Check for write permission
+	file, err := os.OpenFile(dir, os.O_WRONLY, 0666)
+	if err != nil {
+		if os.IsPermission(err) {
+			return false, fmt.Errorf("write permission denied")
+		}
+		return false, err
+	}
+	err = file.Close()
+	if err != nil {
+		return false, err
+	}
+
+	return true, nil
+}

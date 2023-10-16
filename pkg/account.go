@@ -125,10 +125,49 @@ func (c *ClICtrl) ListAccounts(cxt context.Context) error {
 	fmt.Printf("Configured accounts: %d\n", len(accounts))
 	for _, acc := range accounts {
 		fmt.Println("====================================")
-		fmt.Println("Email: ", acc.Email)
-		fmt.Println("ID:    ", acc.UserID)
-		fmt.Println("App:   ", acc.App)
+		fmt.Println("Email:    ", acc.Email)
+		fmt.Println("ID:       ", acc.UserID)
+		fmt.Println("App:      ", acc.App)
+		fmt.Println("ExportDir:", acc.ExportDir)
 		fmt.Println("====================================")
 	}
 	return nil
+}
+
+func (c *ClICtrl) UpdateAccount(ctx context.Context, params model.UpdateAccountParams) error {
+	accounts, err := c.GetAccounts(ctx)
+	if err != nil {
+		return err
+	}
+	var acc *model.Account
+	for _, a := range accounts {
+		if a.Email == params.Email && a.App == params.App {
+			acc = &a
+			break
+		}
+	}
+	if acc == nil {
+		return fmt.Errorf("account not found")
+	}
+	if params.ExportDir != nil && *params.ExportDir != "" {
+		_, err := validateExportDirectory(*params.ExportDir)
+		if err != nil {
+			return err
+		}
+		acc.ExportDir = *params.ExportDir
+	}
+	err = c.DB.Update(func(tx *bolt.Tx) error {
+		b, err := tx.CreateBucketIfNotExists([]byte(AccBucket))
+		if err != nil {
+			return err
+		}
+		accInfoBytes, err := json.Marshal(acc)
+		if err != nil {
+			return err
+		}
+		accountKey := acc.AccountKey()
+		return b.Put([]byte(accountKey), accInfoBytes)
+	})
+	return err
+
 }

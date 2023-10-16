@@ -14,6 +14,13 @@ type Account struct {
 	// PublicKey corresponding to the secret key
 	PublicKey string    `json:"publicKey" binding:"required"`
 	Token     EncString `json:"token" binding:"required"`
+	ExportDir string    `json:"exportDir"`
+}
+
+type UpdateAccountParams struct {
+	Email     string
+	App       api.App
+	ExportDir *string
 }
 
 func (a *Account) AccountKey() string {
