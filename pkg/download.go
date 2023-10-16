@@ -19,13 +19,10 @@ func (c *ClICtrl) downloadAndDecrypt(
 	file model.RemoteFile,
 	deviceKey []byte,
 ) (*string, error) {
-	dir, err := os.MkdirTemp("", "ente-cli-download")
-	if err != nil {
-		return nil, err
-	}
+	dir := c.tempFolder
 	downloadPath := fmt.Sprintf("%s/%d", dir, file.ID)
 	log.Printf("Downloading file %d to %s", file.ID, downloadPath)
-	err = c.Client.DownloadFile(ctx, file.ID, downloadPath)
+	err := c.Client.DownloadFile(ctx, file.ID, downloadPath)
 	if err != nil {
 		return nil, fmt.Errorf("error downloading file %d: %w", file.ID, err)
 	}

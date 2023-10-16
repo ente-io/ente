@@ -67,12 +67,10 @@ func (c *ClICtrl) syncFiles(ctx context.Context) error {
 			if err != nil {
 				return err
 			}
-			if existingEntry.GetFileType() != model.LivePhoto && albumDiskInfo.AlbumMeta.ID == 1580559962519759 {
-				fmt.Println("entry", i, albumInfo.AlbumName, entry.FileID, entry.SyncedLocally)
-				err = c.downloadEntry(ctx, albumDiskInfo, *existingEntry, entry)
-				if err != nil {
-					return err
-				}
+			log.Printf("[%d/%d] Sync %s for album %s", i, len(entries), existingEntry.GetTitle(), albumInfo.AlbumName)
+			err = c.downloadEntry(ctx, albumDiskInfo, *existingEntry, entry)
+			if err != nil {
+				return err
 			}
 		} else {
 			log.Fatalf("remoteFile %d not found in remoteFiles", entry.FileID)

@@ -5,15 +5,22 @@ import (
 	"cli-go/pkg/secrets"
 	"fmt"
 	bolt "go.etcd.io/bbolt"
+	"os"
 )
 
 type ClICtrl struct {
-	Client    *api.Client
-	DB        *bolt.DB
-	KeyHolder *secrets.KeyHolder
+	Client     *api.Client
+	DB         *bolt.DB
+	KeyHolder  *secrets.KeyHolder
+	tempFolder string
 }
 
 func (c *ClICtrl) Init() error {
+	dir, err := os.MkdirTemp("", "ente-cli-download")
+	if err != nil {
+		return err
+	}
+	c.tempFolder = dir
 	return c.DB.Update(func(tx *bolt.Tx) error {
 		_, err := tx.CreateBucketIfNotExists([]byte(AccBucket))
 		if err != nil {
