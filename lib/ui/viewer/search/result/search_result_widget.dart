@@ -28,64 +28,68 @@ class SearchResultWidget extends StatelessWidget {
       behavior: HitTestBehavior.opaque,
       child: Container(
         //todo: check and change color to figma
-        color: Theme.of(context).colorScheme.searchResultsColor,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              SearchThumbnailWidget(
-                searchResult.previewThumbnail(),
-                heroTagPrefix,
-              ),
-              const SizedBox(width: 12),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SizedBox(
-                    width: 220,
-                    child: Text(
-                      searchResult.name(),
-                      style: textTheme.body,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Row(
-                    children: [
-                      Text(
-                        _resultTypeName(searchResult.type()),
-                        style: textTheme.smallMuted,
-                      ),
-                      FutureBuilder<int>(
-                        future: resultCount ??
-                            Future.value(searchResult.resultFiles().length),
-                        builder: (context, snapshot) {
-                          if (snapshot.hasData && snapshot.data! > 0) {
-                            final noOfMemories = snapshot.data;
+        decoration: BoxDecoration(
+          borderRadius: const BorderRadius.all(Radius.circular(4)),
+          color: Theme.of(context).colorScheme.searchResultsColor,
+        ),
 
-                            return Text(
-                              " \u2022 " + noOfMemories.toString(),
-                              style: textTheme.smallMuted,
-                            );
-                          } else {
-                            return const SizedBox.shrink();
-                          }
-                        },
-                      ),
-                    ],
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            SearchThumbnailWidget(
+              searchResult.previewThumbnail(),
+              heroTagPrefix,
+            ),
+            const SizedBox(width: 12),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(
+                  width: 220,
+                  child: Text(
+                    searchResult.name(),
+                    style: textTheme.body,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(height: 2),
-                ],
-              ),
-              const Spacer(),
-              Icon(
+                ),
+                const SizedBox(height: 4),
+                Row(
+                  children: [
+                    Text(
+                      _resultTypeName(searchResult.type()),
+                      style: textTheme.smallMuted,
+                    ),
+                    FutureBuilder<int>(
+                      future: resultCount ??
+                          Future.value(searchResult.resultFiles().length),
+                      builder: (context, snapshot) {
+                        if (snapshot.hasData && snapshot.data! > 0) {
+                          final noOfMemories = snapshot.data;
+
+                          return Text(
+                            " \u2022 " + noOfMemories.toString(),
+                            style: textTheme.smallMuted,
+                          );
+                        } else {
+                          return const SizedBox.shrink();
+                        }
+                      },
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 2),
+              ],
+            ),
+            const Spacer(),
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Icon(
                 Icons.chevron_right,
                 color: Theme.of(context).colorScheme.subTextColor,
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
       onTap: () {
