@@ -102,17 +102,25 @@ func (c *ClICtrl) downloadEntry(ctx context.Context,
 	}
 	if !diskInfo.IsFilePresent(file) {
 		fileDiskMetadata := mapper.MapRemoteFileToDiskMetadata(file)
-		potentialDiskFileName := fileDiskMetadata.Title + "." + "json"
+		// Get the extension
+		extension := filepath.Ext(fileDiskMetadata.Title)
+		baseFileName := strings.TrimSuffix(filepath.Base(fileDiskMetadata.Title), extension)
+		potentialDiskFileName := fmt.Sprintf("%s%s.json", baseFileName, extension)
 		count := 1
 		for diskInfo.IsMetaFileNamePresent(potentialDiskFileName) {
 			// separate the file name and extension
-			potentialDiskFileName = fmt.Sprintf("%s_%d.json", fileDiskMetadata.Title, count)
+			potentialDiskFileName = fmt.Sprintf("%s_%d%s.json", baseFileName, count, extension)
 			count++
 			if !diskInfo.IsMetaFileNamePresent(potentialDiskFileName) {
 				break
 			}
 		}
-		err := writeJSONToFile(filepath.Join(diskInfo.ExportRoot, diskInfo.AlbumMeta.FolderName, ".meta", potentialDiskFileName), fileDiskMetadata)
+		fileDiskMetadata.DiskFileName = potentialDiskFileName
+		err := diskInfo.AddEntry(fileDiskMetadata)
+		if err != nil {
+			return err
+		}
+		err = writeJSONToFile(filepath.Join(diskInfo.ExportRoot, diskInfo.AlbumMeta.FolderName, ".meta", potentialDiskFileName), fileDiskMetadata)
 		if err != nil {
 			return err
 		}

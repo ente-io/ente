@@ -5,6 +5,7 @@ import (
 	"cli-go/pkg/model/export"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 )
@@ -28,9 +29,22 @@ func (a *albumDiskInfo) IsFilePresent(file model.RemoteFile) bool {
 	_, ok := (*a.FileIdToDiskFileMap)[file.ID]
 	return ok
 }
+
 func (a *albumDiskInfo) IsFileNamePresent(fileName string) bool {
 	_, ok := (*a.FileNames)[fileName]
 	return ok
+}
+
+func (a *albumDiskInfo) AddEntry(metadata *export.DiskFileMetadata) error {
+	if _, ok := (*a.FileIdToDiskFileMap)[metadata.Info.ID]; ok {
+		return errors.New("fileID already present")
+	}
+	if _, ok := (*a.MetaFileNameToDiskFileMap)[metadata.DiskFileName]; ok {
+		return errors.New("fileName already present")
+	}
+	(*a.MetaFileNameToDiskFileMap)[metadata.DiskFileName] = metadata
+	(*a.FileIdToDiskFileMap)[metadata.Info.ID] = metadata
+	return nil
 }
 
 func (a *albumDiskInfo) IsMetaFileNamePresent(metaFileName string) bool {
