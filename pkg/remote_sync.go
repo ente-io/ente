@@ -55,7 +55,6 @@ func (c *ClICtrl) fetchRemoteFiles(ctx context.Context) error {
 	}
 	for _, album := range albums {
 		if album.IsDeleted {
-			log.Printf("Skipping album %s as it is deleted", album.AlbumName)
 			continue
 		}
 

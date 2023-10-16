@@ -5,7 +5,6 @@ import (
 	"cli-go/pkg/model/export"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"os"
 )
 
@@ -96,35 +95,4 @@ func readJSONFromFile(filePath string, data interface{}) error {
 
 	decoder := json.NewDecoder(file)
 	return decoder.Decode(data)
-}
-
-func validateExportDirectory(dir string) (bool, error) {
-	// Check if the path exists
-	fileInfo, err := os.Stat(dir)
-	if err != nil {
-		if os.IsNotExist(err) {
-			return false, fmt.Errorf("path does not exist: %s", dir)
-		}
-		return false, err
-	}
-
-	// Check if the path is a directory
-	if !fileInfo.IsDir() {
-		return false, fmt.Errorf("path is not a directory")
-	}
-
-	// Check for write permission
-	// Check for write permission by creating a temp file
-	tempFile, err := os.CreateTemp(dir, "write_test_")
-	if err != nil {
-		return false, fmt.Errorf("write permission denied: %v", err)
-	}
-
-	// Delete temp file
-	defer os.Remove(tempFile.Name())
-	if err != nil {
-		return false, err
-	}
-
-	return true, nil
 }

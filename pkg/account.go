@@ -24,6 +24,11 @@ func (c *ClICtrl) AddAccount(cxt context.Context) {
 	}()
 	app := internal.GetAppType()
 	cxt = context.WithValue(cxt, "app", string(app))
+	dir := internal.GetExportDir()
+	if dir == "" {
+		flowErr = fmt.Errorf("export directory not set")
+		return
+	}
 	email, flowErr := internal.GetUserInput("Enter email address")
 	if flowErr != nil {
 		return
@@ -61,7 +66,8 @@ func (c *ClICtrl) AddAccount(cxt context.Context) {
 		flowErr = decErr
 		return
 	}
-	err := c.storeAccount(cxt, email, authResponse.ID, app, secretInfo)
+
+	err := c.storeAccount(cxt, email, authResponse.ID, app, secretInfo, dir)
 	if err != nil {
 		flowErr = err
 		return
@@ -70,7 +76,7 @@ func (c *ClICtrl) AddAccount(cxt context.Context) {
 	}
 }
 
-func (c *ClICtrl) storeAccount(_ context.Context, email string, userID int64, app api.App, secretInfo *model.AccSecretInfo) error {
+func (c *ClICtrl) storeAccount(_ context.Context, email string, userID int64, app api.App, secretInfo *model.AccSecretInfo, exportDir string) error {
 	// get password
 	err := c.DB.Update(func(tx *bolt.Tx) error {
 		b, err := tx.CreateBucketIfNotExists([]byte(AccBucket))
@@ -85,6 +91,7 @@ func (c *ClICtrl) storeAccount(_ context.Context, email string, userID int64, ap
 			Token:     *model.MakeEncString(secretInfo.Token, c.KeyHolder.DeviceKey),
 			App:       app,
 			PublicKey: encoding.EncodeBase64(secretInfo.PublicKey),
+			ExportDir: exportDir,
 		}
 		accInfoBytes, err := json.Marshal(accInfo)
 		if err != nil {
@@ -150,7 +157,7 @@ func (c *ClICtrl) UpdateAccount(ctx context.Context, params model.UpdateAccountP
 		return fmt.Errorf("account not found")
 	}
 	if params.ExportDir != nil && *params.ExportDir != "" {
-		_, err := validateExportDirectory(*params.ExportDir)
+		_, err := internal.ValidateDirForWrite(*params.ExportDir)
 		if err != nil {
 			return err
 		}

@@ -1,6 +1,7 @@
 package pkg
 
 import (
+	"cli-go/internal"
 	"cli-go/pkg/model"
 	"context"
 	"encoding/base64"
@@ -25,7 +26,7 @@ func (c *ClICtrl) StartSync() error {
 			log.Printf("Skip account %s: no export directory configured", account.Email)
 			continue
 		}
-		_, err = validateExportDirectory(account.ExportDir)
+		_, err = internal.ValidateDirForWrite(account.ExportDir)
 		if err != nil {
 			log.Printf("Skip export, error: %v while validing exportDir %s\n", err, account.ExportDir)
 			continue

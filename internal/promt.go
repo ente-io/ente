@@ -75,3 +75,70 @@ func GetCode(promptText string, length int) (string, error) {
 		return ott, nil
 	}
 }
+
+func GetExportDir() string {
+	for {
+		exportDir, err := GetUserInput("Enter export directory")
+		if err != nil {
+			return ""
+		}
+		if exportDir == "" {
+			fmt.Printf("invalid export directory: %s\n", err)
+			continue
+		}
+		exportDir, err = ResolvePath(exportDir)
+		if err != nil {
+			fmt.Printf("invalid export directory: %s\n", err)
+			continue
+		}
+		_, err = ValidateDirForWrite(exportDir)
+		if err != nil {
+			fmt.Printf("invalid export directory: %s\n", err)
+			continue
+		}
+
+		return exportDir
+	}
+}
+
+func ValidateDirForWrite(dir string) (bool, error) {
+	// Check if the path exists
+	fileInfo, err := os.Stat(dir)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return false, fmt.Errorf("path does not exist: %s", dir)
+		}
+		return false, err
+	}
+
+	// Check if the path is a directory
+	if !fileInfo.IsDir() {
+		return false, fmt.Errorf("path is not a directory")
+	}
+
+	// Check for write permission
+	// Check for write permission by creating a temp file
+	tempFile, err := os.CreateTemp(dir, "write_test_")
+	if err != nil {
+		return false, fmt.Errorf("write permission denied: %v", err)
+	}
+
+	// Delete temp file
+	defer os.Remove(tempFile.Name())
+	if err != nil {
+		return false, err
+	}
+
+	return true, nil
+}
+
+func ResolvePath(path string) (string, error) {
+	if path[:2] != "~/" {
+		return path, nil
+	}
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return "", err
+	}
+	return home + path[1:], nil
+}
