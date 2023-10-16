@@ -89,8 +89,8 @@ func (c *ClICtrl) downloadEntry(ctx context.Context,
 		diskFile := diskInfo.GetDiskFile(file)
 		if diskFile != nil {
 			// remove the file from disk
-			log.Printf("Removing file %s from disk", diskFile.DiskFileName)
-			err := os.Remove(filepath.Join(diskInfo.ExportRoot, diskInfo.AlbumMeta.FolderName, ".meta", diskFile.DiskFileName))
+			log.Printf("Removing file %s from disk", diskFile.MetaFileName)
+			err := os.Remove(filepath.Join(diskInfo.ExportRoot, diskInfo.AlbumMeta.FolderName, ".meta", diskFile.MetaFileName))
 			if err != nil {
 				return err
 			}
@@ -101,6 +101,10 @@ func (c *ClICtrl) downloadEntry(ctx context.Context,
 		}
 	}
 	if !diskInfo.IsFilePresent(file) {
+		decrypt, err := c.downloadAndDecrypt(ctx, file, c.KeyHolder.DeviceKey)
+		if err != nil {
+			return err
+		}
 		fileDiskMetadata := mapper.MapRemoteFileToDiskMetadata(file)
 		// Get the extension
 		extension := filepath.Ext(fileDiskMetadata.Title)
@@ -115,8 +119,14 @@ func (c *ClICtrl) downloadEntry(ctx context.Context,
 				break
 			}
 		}
-		fileDiskMetadata.DiskFileName = potentialDiskFileName
-		err := diskInfo.AddEntry(fileDiskMetadata)
+		fileDiskMetadata.MetaFileName = potentialDiskFileName
+		err = diskInfo.AddEntry(fileDiskMetadata)
+		if err != nil {
+			return err
+		}
+		fileName := filepath.Join(diskInfo.ExportRoot, diskInfo.AlbumMeta.FolderName, strings.TrimSuffix(filepath.Base(potentialDiskFileName), ".json"))
+		// move the decrypt file to fileName
+		err = os.Rename(*decrypt, fileName)
 		if err != nil {
 			return err
 		}

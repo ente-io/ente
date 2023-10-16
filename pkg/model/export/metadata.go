@@ -40,7 +40,7 @@ type DiskFileMetadata struct {
 	Info             *Info     `json:"info"`
 
 	// exclude this from json serialization
-	DiskFileName string `json:"-"`
+	MetaFileName string `json:"-"`
 }
 
 type Info struct {

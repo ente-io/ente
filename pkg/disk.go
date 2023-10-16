@@ -39,10 +39,10 @@ func (a *albumDiskInfo) AddEntry(metadata *export.DiskFileMetadata) error {
 	if _, ok := (*a.FileIdToDiskFileMap)[metadata.Info.ID]; ok {
 		return errors.New("fileID already present")
 	}
-	if _, ok := (*a.MetaFileNameToDiskFileMap)[metadata.DiskFileName]; ok {
+	if _, ok := (*a.MetaFileNameToDiskFileMap)[metadata.MetaFileName]; ok {
 		return errors.New("fileName already present")
 	}
-	(*a.MetaFileNameToDiskFileMap)[metadata.DiskFileName] = metadata
+	(*a.MetaFileNameToDiskFileMap)[metadata.MetaFileName] = metadata
 	(*a.FileIdToDiskFileMap)[metadata.Info.ID] = metadata
 	return nil
 }
