@@ -21,9 +21,9 @@ import "package:photos/ui/components/title_bar_title_widget.dart";
 import "package:photos/ui/viewer/gallery/gallery.dart";
 
 Future<Location?> showPickCenterPointSheet(
-  BuildContext context,
+  BuildContext context, {
   String? locationTagName,
-) async {
+}) async {
   return await showBarModalBottomSheet(
     context: context,
     builder: (context) {
@@ -79,7 +79,7 @@ class PickCenterPointWidget extends StatelessWidget {
                           title: TitleBarTitleWidget(
                             title: S.of(context).pickCenterPoint,
                           ),
-                          caption: locationTagName,
+                          caption: locationTagName ?? "New location",
                         ),
                         Expanded(
                           child: Gallery(

@@ -15,40 +15,43 @@ class SearchSectionCTAIcon extends StatelessWidget {
     }
     final textTheme = getEnteTextTheme(context);
     final colorScheme = getEnteColorScheme(context);
-    return SizedBox(
-      width: 84,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            DottedBorder(
-              color: colorScheme.strokeFaint,
-              dashPattern: const [3.875, 3.875],
-              borderType: BorderType.Circle,
-              strokeWidth: 1.5,
-              radius: const Radius.circular(33.25),
-              child: SizedBox(
-                width: 62.5,
-                height: 62.5,
-                child: Icon(
-                  sectionType.getCTAIcon() ?? Icons.add,
-                  color: colorScheme.strokeFaint,
-                  size: 20,
+    return GestureDetector(
+      onTap: sectionType.ctaOnTap(context),
+      child: SizedBox(
+        width: 84,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              DottedBorder(
+                color: colorScheme.strokeFaint,
+                dashPattern: const [3.875, 3.875],
+                borderType: BorderType.Circle,
+                strokeWidth: 1.5,
+                radius: const Radius.circular(33.25),
+                child: SizedBox(
+                  width: 62.5,
+                  height: 62.5,
+                  child: Icon(
+                    sectionType.getCTAIcon() ?? Icons.add,
+                    color: colorScheme.strokeFaint,
+                    size: 20,
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(
-              height: 9.25,
-            ),
-            Text(
-              sectionType.getCTAText(context),
-              maxLines: 2,
-              textAlign: TextAlign.center,
-              overflow: TextOverflow.ellipsis,
-              style: textTheme.miniFaint,
-            ),
-          ],
+              const SizedBox(
+                height: 9.25,
+              ),
+              Text(
+                sectionType.getCTAText(context),
+                maxLines: 2,
+                textAlign: TextAlign.center,
+                overflow: TextOverflow.ellipsis,
+                style: textTheme.miniFaint,
+              ),
+            ],
+          ),
         ),
       ),
     );

@@ -1,7 +1,10 @@
 import "package:flutter/material.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/search/search_result.dart";
+import "package:photos/models/typedefs.dart";
 import "package:photos/services/search_service.dart";
+import "package:photos/ui/viewer/location/add_location_sheet.dart";
+import "package:photos/ui/viewer/location/pick_center_point_widget.dart";
 
 enum ResultType {
   collection,
@@ -158,6 +161,22 @@ extension SectionTypeExtensions on SectionType {
         return null;
       case SectionType.fileCaption:
         return null;
+    }
+  }
+
+  FutureVoidCallback ctaOnTap(BuildContext context) {
+    switch (this) {
+      case SectionType.location:
+        return () async {
+          final centerPoint = await showPickCenterPointSheet(context);
+          if (centerPoint != null) {
+            showAddLocationSheet(context, centerPoint);
+          }
+        };
+      default:
+        {
+          return () async {};
+        }
     }
   }
 
