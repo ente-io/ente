@@ -7,8 +7,8 @@ import "package:photos/core/event_bus.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/events/local_photos_updated_event.dart";
 import "package:photos/generated/l10n.dart";
-import 'package:photos/models/file/file.dart';
 import "package:photos/models/file_load_result.dart";
+import "package:photos/models/location/location.dart";
 import "package:photos/models/selected_files.dart";
 import "package:photos/services/collections_service.dart";
 import "package:photos/services/filter/db_filters.dart";
@@ -20,7 +20,7 @@ import "package:photos/ui/components/models/button_type.dart";
 import "package:photos/ui/components/title_bar_title_widget.dart";
 import "package:photos/ui/viewer/gallery/gallery.dart";
 
-Future<EnteFile?> showPickCenterPointSheet(
+Future<Location?> showPickCenterPointSheet(
   BuildContext context,
   String? locationTagName,
 ) async {
@@ -143,9 +143,9 @@ class PickCenterPointWidget extends StatelessWidget {
                                   buttonType: ButtonType.neutral,
                                   labelText: S.of(context).useSelectedPhoto,
                                   onTap: () async {
-                                    final selectedFile =
-                                        selectedFiles.files.first;
-                                    Navigator.pop(context, selectedFile);
+                                    final selectedLocation =
+                                        selectedFiles.files.first.location;
+                                    Navigator.pop(context, selectedLocation);
                                   },
                                 ),
                               );
