@@ -1,6 +1,8 @@
 import "package:flutter/material.dart";
+import "package:photos/models/search/album_search_result.dart";
 import "package:photos/models/search/search_result.dart";
 import "package:photos/models/search/search_types.dart";
+import "package:photos/services/collections_service.dart";
 import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/components/title_bar_title_widget.dart";
 import "package:photos/ui/viewer/search/result/search_result_widget.dart";
@@ -66,12 +68,25 @@ class _SearchSectionResultPageState extends State<SearchSectionResultPage> {
                     ),
                     child: ListView.separated(
                       itemBuilder: (context, index) {
+                        if (sectionResults[index] is AlbumSearchResult) {
+                          final albumSectionResult =
+                              sectionResults[index] as AlbumSearchResult;
+                          return SearchResultWidget(
+                            albumSectionResult,
+                            resultCount:
+                                CollectionsService.instance.getFileCount(
+                              albumSectionResult
+                                  .collectionWithThumbnail.collection,
+                            ),
+                          );
+                        }
                         return SearchResultWidget(sectionResults[index]);
                       },
                       separatorBuilder: (context, index) {
                         return const SizedBox(height: 10);
                       },
                       itemCount: sectionResults.length,
+                      physics: const BouncingScrollPhysics(),
                     ),
                   ),
                 ),
