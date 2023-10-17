@@ -5,7 +5,9 @@ import "package:photos/models/search/search_types.dart";
 import "package:photos/services/collections_service.dart";
 import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/components/title_bar_title_widget.dart";
+import "package:photos/ui/viewer/gallery/collection_page.dart";
 import "package:photos/ui/viewer/search/result/search_result_widget.dart";
+import "package:photos/utils/navigation_util.dart";
 
 class SearchSectionResultPage extends StatefulWidget {
   final SectionType sectionType;
@@ -77,6 +79,13 @@ class _SearchSectionResultPageState extends State<SearchSectionResultPage> {
                                 CollectionsService.instance.getFileCount(
                               albumSectionResult
                                   .collectionWithThumbnail.collection,
+                            ),
+                            onResultTap: () => routeToPage(
+                              context,
+                              CollectionPage(
+                                albumSectionResult.collectionWithThumbnail,
+                                tagPrefix: albumSectionResult.heroTag(),
+                              ),
                             ),
                           );
                         }
