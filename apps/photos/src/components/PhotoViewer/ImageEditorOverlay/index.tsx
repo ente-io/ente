@@ -50,9 +50,6 @@ export const ImageEditorOverlayContext = createContext(
 const ImageEditorOverlay = (props: IProps) => {
     // const [originalWidth, originalHeight] = [props.file?.w, props.file?.h];
 
-    const [originalWidth, setOriginalWidth] = useState(0);
-    const [originalHeight, setOriginalHeight] = useState(0);
-
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
     const originalSizeCanvasRef = useRef<HTMLCanvasElement | null>(null);
     const parentRef = useRef<HTMLDivElement | null>(null);
@@ -75,8 +72,6 @@ const ImageEditorOverlay = (props: IProps) => {
 
     const [transformationPerformed, setTransformationPerformed] =
         useState(false);
-
-    const [canvasLoading, setCanvasLoading] = useState(false);
 
     useEffect(() => {
         if (!canvasRef.current || !originalSizeCanvasRef.current) {
@@ -149,8 +144,6 @@ const ImageEditorOverlay = (props: IProps) => {
 
         // setNonFilteredFileURL(img.src);
         img.onload = () => {
-            setOriginalWidth(img.width);
-            setOriginalHeight(img.height);
             const scale = Math.min(
                 parentRef.current?.clientWidth / img.width,
                 parentRef.current?.clientHeight / img.height
@@ -190,20 +183,7 @@ const ImageEditorOverlay = (props: IProps) => {
 
         const context = canvas.getContext('2d');
         if (!context) return;
-
-        image.onload = () => {
-            context.clearRect(0, 0, canvas.width, canvas.height);
-            context.save();
-            console.log(originalWidth, originalHeight);
-            canvas.width = originalWidth;
-            canvas.height = originalHeight;
-
-            context.drawImage(image, 0, 0, originalWidth, originalHeight);
-            context.restore();
-            console.log('canvas redrawn');
-            console.log('toblobbing now');
-            canvas.toBlob(callback, mimeType);
-        };
+        canvas.toBlob(callback, mimeType);
     };
 
     return (
@@ -233,9 +213,7 @@ const ImageEditorOverlay = (props: IProps) => {
                                 display="flex"
                                 alignItems="center"
                                 justifyContent="center">
-                                {(fileURL === null || canvasLoading) && (
-                                    <CircularProgress />
-                                )}
+                                {fileURL === null && <CircularProgress />}
                                 <canvas
                                     ref={canvasRef}
                                     // height={originalHeight}
@@ -245,9 +223,7 @@ const ImageEditorOverlay = (props: IProps) => {
                                         // maxWidth: '100%',
                                         // maxHeight: '1000px',
                                         display:
-                                            fileURL === null || canvasLoading
-                                                ? 'none'
-                                                : 'block',
+                                            fileURL === null ? 'none' : 'block',
                                         position: 'absolute',
                                         // transform: `translate(${cropOffsetX}px, ${cropOffsetY}px)`,
                                     }}
@@ -341,11 +317,9 @@ const ImageEditorOverlay = (props: IProps) => {
                                     startIcon={<DownloadIcon />}
                                     onClick={() => {
                                         if (!canvasRef.current) return;
-                                        setCanvasLoading(true);
 
                                         exportCanvasToBlob((blob) => {
                                             if (!blob) {
-                                                setCanvasLoading(false);
                                                 return console.error('no blob');
                                             }
                                             // create a link
@@ -358,7 +332,6 @@ const ImageEditorOverlay = (props: IProps) => {
                                             a.click();
                                             document.body.removeChild(a);
                                             URL.revokeObjectURL(a.href);
-                                            setCanvasLoading(false);
                                         });
                                     }}
                                     label={'Download Edited'}
