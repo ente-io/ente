@@ -118,7 +118,7 @@ extension SectionTypeExtensions on SectionType {
       case SectionType.fileTypesAndExtension:
         return false;
       case SectionType.fileCaption:
-        return true;
+        return false;
     }
   }
 
@@ -152,7 +152,7 @@ extension SectionTypeExtensions on SectionType {
       case SectionType.moment:
         return null;
       case SectionType.location:
-        return Icons.add_location_alt;
+        return Icons.add_location_alt_outlined;
       case SectionType.people:
         return Icons.adaptive.share;
       case SectionType.album:

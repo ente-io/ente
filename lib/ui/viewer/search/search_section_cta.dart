@@ -57,3 +57,51 @@ class SearchSectionCTAIcon extends StatelessWidget {
     );
   }
 }
+
+class SearchSectionCTATile extends StatelessWidget {
+  final SectionType sectionType;
+  const SearchSectionCTATile(this.sectionType, {super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    if (sectionType.isCTAVisible == false) {
+      return const SizedBox.shrink();
+    }
+
+    final colorScheme = getEnteColorScheme(context);
+    final textTheme = getEnteTextTheme(context);
+    return Padding(
+      padding: const EdgeInsets.only(right: 1),
+      child: DottedBorder(
+        strokeWidth: 2,
+        borderType: BorderType.RRect,
+        radius: const Radius.circular(4),
+        padding: EdgeInsets.zero,
+        dashPattern: const [4, 4],
+        color: colorScheme.strokeFainter,
+        child: Row(
+          children: [
+            Container(
+              width: 60,
+              height: 60,
+              decoration: BoxDecoration(
+                borderRadius:
+                    const BorderRadius.horizontal(left: Radius.circular(4)),
+                color: colorScheme.fillFaint,
+              ),
+              child: Icon(
+                sectionType.getCTAIcon(),
+                color: colorScheme.strokeMuted,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Text(
+              sectionType.getCTAText(context),
+              style: textTheme.body,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}

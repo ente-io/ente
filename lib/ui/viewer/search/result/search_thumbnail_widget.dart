@@ -21,7 +21,7 @@ class SearchThumbnailWidget extends StatelessWidget {
         height: 60,
         width: 60,
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(4),
+          borderRadius: const BorderRadius.horizontal(left: Radius.circular(4)),
           child: file != null
               ? ThumbnailWidget(
                   file!,

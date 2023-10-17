@@ -7,6 +7,7 @@ import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/components/title_bar_title_widget.dart";
 import "package:photos/ui/viewer/gallery/collection_page.dart";
 import "package:photos/ui/viewer/search/result/search_result_widget.dart";
+import "package:photos/ui/viewer/search/search_section_cta.dart";
 import "package:photos/utils/navigation_util.dart";
 
 class SearchSectionResultPage extends StatefulWidget {
@@ -20,10 +21,12 @@ class SearchSectionResultPage extends StatefulWidget {
 
 class _SearchSectionResultPageState extends State<SearchSectionResultPage> {
   late final Future<List<SearchResult>> sectionData;
+  late final bool _showCTATile;
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     sectionData = widget.sectionType.getData(limit: null, context: context);
+    _showCTATile = widget.sectionType.isCTAVisible;
   }
 
   @override
@@ -70,6 +73,9 @@ class _SearchSectionResultPageState extends State<SearchSectionResultPage> {
                     ),
                     child: ListView.separated(
                       itemBuilder: (context, index) {
+                        if (sectionResults.length == index) {
+                          return SearchSectionCTATile(widget.sectionType);
+                        }
                         if (sectionResults[index] is AlbumSearchResult) {
                           final albumSectionResult =
                               sectionResults[index] as AlbumSearchResult;
@@ -94,7 +100,7 @@ class _SearchSectionResultPageState extends State<SearchSectionResultPage> {
                       separatorBuilder: (context, index) {
                         return const SizedBox(height: 10);
                       },
-                      itemCount: sectionResults.length,
+                      itemCount: sectionResults.length + (_showCTATile ? 1 : 0),
                       physics: const BouncingScrollPhysics(),
                     ),
                   ),
