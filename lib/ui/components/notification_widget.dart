@@ -33,7 +33,7 @@ class NotificationWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    EnteColorScheme colorScheme = getEnteColorScheme(context);
+    final colorScheme = getEnteColorScheme(context);
     EnteTextTheme textTheme = getEnteTextTheme(context);
     TextStyle mainTextStyle = darkTextTheme.bodyBold;
     TextStyle subTextStyle = darkTextTheme.miniMuted;
@@ -46,7 +46,6 @@ class NotificationWidget extends StatelessWidget {
         backgroundColor = warning500;
         break;
       case NotificationType.banner:
-        colorScheme = getEnteColorScheme(context);
         textTheme = getEnteTextTheme(context);
         backgroundColor = colorScheme.backgroundElevated2;
         mainTextStyle = textTheme.bodyBold;
@@ -127,6 +126,44 @@ class NotificationWidget extends StatelessWidget {
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+class NotificationTipWidget extends StatelessWidget {
+  final String name;
+  const NotificationTipWidget(this.name, {super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = getEnteColorScheme(context);
+    final textTheme = getEnteTextTheme(context);
+    return Container(
+      padding: const EdgeInsets.fromLTRB(16, 12, 12, 12),
+      decoration: BoxDecoration(
+        border: Border.all(color: colorScheme.strokeFaint),
+        borderRadius: const BorderRadius.all(Radius.circular(4)),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Flexible(
+            flex: 12,
+            child: Text(
+              name,
+              style: textTheme.miniFaint,
+            ),
+          ),
+          Flexible(
+            flex: 2,
+            child: Icon(
+              Icons.tips_and_updates_outlined,
+              color: colorScheme.strokeFaint,
+              size: 36,
+            ),
+          ),
+        ],
       ),
     );
   }
