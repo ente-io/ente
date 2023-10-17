@@ -325,9 +325,7 @@ class SearchService {
     });
 
     if (limit != null) {
-      return searchResults
-        ..shuffle()
-        ..sublist(0, limit);
+      return (searchResults..shuffle()).sublist(0, limit);
     } else {
       return searchResults;
     }
