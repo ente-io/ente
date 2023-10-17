@@ -39,15 +39,22 @@ interface IProps {
 export const ImageEditorOverlayContext = createContext(
     {} as {
         canvasRef: MutableRefObject<HTMLCanvasElement>;
+        originalSizeCanvasRef: MutableRefObject<HTMLCanvasElement>;
         cropLoading: boolean;
         setCropLoading: Dispatch<SetStateAction<boolean>>;
+        // setNonFilteredFileURL: Dispatch<SetStateAction<string>>;
+        setTransformationPerformed: Dispatch<SetStateAction<boolean>>;
     }
 );
 
 const ImageEditorOverlay = (props: IProps) => {
-    const [originalWidth, originalHeight] = [props.file?.w, props.file?.h];
+    // const [originalWidth, originalHeight] = [props.file?.w, props.file?.h];
+
+    const [originalWidth, setOriginalWidth] = useState(0);
+    const [originalHeight, setOriginalHeight] = useState(0);
 
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
+    const originalSizeCanvasRef = useRef<HTMLCanvasElement | null>(null);
     const parentRef = useRef<HTMLDivElement | null>(null);
 
     const [fileURL, setFileURL] = useState<string>('');
@@ -66,8 +73,13 @@ const ImageEditorOverlay = (props: IProps) => {
     const [saturation, setSaturation] = useState(100);
     const [invert, setInvert] = useState(false);
 
+    const [transformationPerformed, setTransformationPerformed] =
+        useState(false);
+
+    const [canvasLoading, setCanvasLoading] = useState(false);
+
     useEffect(() => {
-        if (!canvasRef.current) {
+        if (!canvasRef.current || !originalSizeCanvasRef.current) {
             return;
         }
 
@@ -75,8 +87,29 @@ const ImageEditorOverlay = (props: IProps) => {
             invert ? 1 : 0
         })`;
 
-        canvasRef.current.style.filter = filterString;
-    }, [brightness, contrast, blur, saturation, invert, canvasRef]);
+        for (const canvas of [
+            canvasRef.current,
+            originalSizeCanvasRef.current,
+        ]) {
+            const context = canvas.getContext('2d');
+            context.imageSmoothingEnabled = false;
+
+            context.filter = filterString;
+
+            const image = new Image();
+            image.src = fileURL;
+
+            image.onload = () => {
+                context.clearRect(0, 0, canvas.width, canvas.height);
+
+                context.save();
+
+                context.drawImage(image, 0, 0, canvas.width, canvas.height);
+
+                context.restore();
+            };
+        }
+    }, [brightness, contrast, blur, saturation, invert, canvasRef, fileURL]);
 
     useEffect(() => {
         if (currentRotationAngle >= 360 || currentRotationAngle <= -360) {
@@ -94,9 +127,10 @@ const ImageEditorOverlay = (props: IProps) => {
     };
 
     const loadCanvas = async () => {
+        setTransformationPerformed(false);
         resetFilters();
         setCurrentRotationAngle(0);
-        console.log(originalWidth, originalHeight);
+
         const img = new Image();
         const ctx = canvasRef.current?.getContext('2d');
         ctx.imageSmoothingEnabled = false;
@@ -112,17 +146,29 @@ const ImageEditorOverlay = (props: IProps) => {
         } else {
             img.src = fileURL;
         }
+
+        // setNonFilteredFileURL(img.src);
         img.onload = () => {
+            setOriginalWidth(img.width);
+            setOriginalHeight(img.height);
             const scale = Math.min(
                 parentRef.current?.clientWidth / img.width,
                 parentRef.current?.clientHeight / img.height
             );
+
             const width = img.width * scale;
             const height = img.height * scale;
             canvasRef.current.width = width;
             canvasRef.current.height = height;
 
             ctx?.drawImage(img, 0, 0, width, height);
+
+            originalSizeCanvasRef.current.width = img.width;
+            originalSizeCanvasRef.current.height = img.height;
+
+            const oSCtx = originalSizeCanvasRef.current.getContext('2d');
+
+            oSCtx?.drawImage(img, 0, 0, img.width, img.height);
         };
     };
 
@@ -134,14 +180,30 @@ const ImageEditorOverlay = (props: IProps) => {
     const theme = useTheme();
 
     const exportCanvasToBlob = (callback: (blob: Blob) => void) => {
-        const canvas = canvasRef.current;
-        if (!canvas) return new Blob();
+        const canvas = originalSizeCanvasRef.current;
+        if (!canvas) return;
 
         const mimeType = mime.lookup(props.file.metadata.title);
 
-        canvas.toBlob((blob) => {
-            callback(blob);
-        }, mimeType);
+        const image = new Image();
+        image.src = canvas.toDataURL();
+
+        const context = canvas.getContext('2d');
+        if (!context) return;
+
+        image.onload = () => {
+            context.clearRect(0, 0, canvas.width, canvas.height);
+            context.save();
+            console.log(originalWidth, originalHeight);
+            canvas.width = originalWidth;
+            canvas.height = originalHeight;
+
+            context.drawImage(image, 0, 0, originalWidth, originalHeight);
+            context.restore();
+            console.log('canvas redrawn');
+            console.log('toblobbing now');
+            canvas.toBlob(callback, mimeType);
+        };
     };
 
     return (
@@ -171,7 +233,9 @@ const ImageEditorOverlay = (props: IProps) => {
                                 display="flex"
                                 alignItems="center"
                                 justifyContent="center">
-                                {fileURL === null && <CircularProgress />}
+                                {(fileURL === null || canvasLoading) && (
+                                    <CircularProgress />
+                                )}
                                 <canvas
                                     ref={canvasRef}
                                     // height={originalHeight}
@@ -181,9 +245,17 @@ const ImageEditorOverlay = (props: IProps) => {
                                         // maxWidth: '100%',
                                         // maxHeight: '1000px',
                                         display:
-                                            fileURL === null ? 'none' : 'block',
+                                            fileURL === null || canvasLoading
+                                                ? 'none'
+                                                : 'block',
                                         position: 'absolute',
                                         // transform: `translate(${cropOffsetX}px, ${cropOffsetY}px)`,
+                                    }}
+                                />
+                                <canvas
+                                    ref={originalSizeCanvasRef}
+                                    style={{
+                                        display: 'none',
                                     }}
                                 />
                             </Box>
@@ -206,14 +278,18 @@ const ImageEditorOverlay = (props: IProps) => {
                                     <CloseIcon />
                                 </IconButton>
                             </HorizontalFlex>
-                            <HorizontalFlex gap="0.5rem">
+                            <HorizontalFlex gap="0.5rem" marginBottom="1rem">
                                 <Tabs
                                     value={currentTab}
                                     onChange={(_, value) => {
                                         setCurrentTab(value);
                                     }}>
                                     <Tab label="Transform" value="transform" />
-                                    <Tab label="Colours" value="colours" />
+                                    <Tab
+                                        label="Colours"
+                                        value="colours"
+                                        disabled={transformationPerformed}
+                                    />
                                 </Tabs>
                             </HorizontalFlex>
                             <MenuSectionTitle title="Reset" />
@@ -234,9 +310,12 @@ const ImageEditorOverlay = (props: IProps) => {
                             {currentTab === 'transform' && (
                                 <ImageEditorOverlayContext.Provider
                                     value={{
+                                        originalSizeCanvasRef,
                                         canvasRef,
                                         cropLoading,
                                         setCropLoading,
+                                        // setNonFilteredFileURL,
+                                        setTransformationPerformed,
                                     }}>
                                     <TransformMenu />
                                 </ImageEditorOverlayContext.Provider>
@@ -261,7 +340,14 @@ const ImageEditorOverlay = (props: IProps) => {
                                 <EnteMenuItem
                                     startIcon={<DownloadIcon />}
                                     onClick={() => {
+                                        if (!canvasRef.current) return;
+                                        setCanvasLoading(true);
+
                                         exportCanvasToBlob((blob) => {
+                                            if (!blob) {
+                                                setCanvasLoading(false);
+                                                return console.error('no blob');
+                                            }
                                             // create a link
                                             const a =
                                                 document.createElement('a');
@@ -270,6 +356,9 @@ const ImageEditorOverlay = (props: IProps) => {
                                                 props.file.metadata.title;
                                             document.body.appendChild(a);
                                             a.click();
+                                            document.body.removeChild(a);
+                                            URL.revokeObjectURL(a.href);
+                                            setCanvasLoading(false);
                                         });
                                     }}
                                     label={'Download Edited'}

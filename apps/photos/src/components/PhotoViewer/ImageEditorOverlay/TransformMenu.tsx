@@ -29,22 +29,29 @@ const PRESET_ASPECT_RATIOS = [
 ];
 
 const TransformMenu = () => {
-    const { canvasRef, cropLoading, setCropLoading } = useContext(
-        ImageEditorOverlayContext
-    );
+    const {
+        canvasRef,
+        originalSizeCanvasRef,
+        cropLoading,
+        setCropLoading,
+        // setNonFilteredFileURL
+        setTransformationPerformed,
+    } = useContext(ImageEditorOverlayContext);
 
     // Crops the canvas according to originalHeight and originalWidth without compounding
-    const cropCanvas = (widthRatio: number, heightRatio: number) => {
-        const context = canvasRef.current?.getContext('2d');
-        context.imageSmoothingEnabled = false;
-        const canvas = canvasRef.current;
+    const cropCanvas = (
+        canvas: HTMLCanvasElement,
+        widthRatio: number,
+        heightRatio: number
+    ) => {
+        const context = canvas.getContext('2d');
 
         const aspectRatio = widthRatio / heightRatio;
 
         if (!context || !canvas) return;
+        context.imageSmoothingEnabled = false;
 
         const img = new Image();
-        // img.src = fileURL;
         img.src = canvas.toDataURL();
         img.onload = () => {
             const sourceWidth = img.width;
@@ -65,10 +72,7 @@ const TransformMenu = () => {
             context.clearRect(0, 0, canvas.width, canvas.height);
 
             setCropLoading(true);
-            // Apply CSS transition to animate the resizing
-            canvas.style.transition = 'width 0.5s, height 0.5s';
-            // canvas.style.width = newWidth + 'px';
-            // canvas.style.height = newHeight + 'px';
+
             canvas.width = newWidth;
             canvas.height = newHeight;
 
@@ -84,16 +88,17 @@ const TransformMenu = () => {
                 newHeight
             );
 
-            setTimeout(() => {
-                canvas.style.transition = 'none';
-                setCropLoading(false);
-            }, 500); // Adjust the time to match your animation duration
+            setCropLoading(false);
+
+            // setNonFilteredFileURL(canvas.toDataURL());
         };
     };
-    const flipCanvas = (direction: 'vertical' | 'horizontal') => {
-        const context = canvasRef.current?.getContext('2d');
+    const flipCanvas = (
+        canvas: HTMLCanvasElement,
+        direction: 'vertical' | 'horizontal'
+    ) => {
+        const context = canvas.getContext('2d');
         context.imageSmoothingEnabled = false;
-        const canvas = canvasRef.current;
         if (!context || !canvas) return;
         const img = new Image();
         // img.src = fileURL;
@@ -115,31 +120,24 @@ const TransformMenu = () => {
             context.drawImage(img, 0, 0, canvas.width, canvas.height);
 
             context.restore();
+
+            // setNonFilteredFileURL(canvas.toDataURL());
         };
     };
 
-    const rotateCanvas = (angle: number) => {
-        const canvas = canvasRef.current;
+    const rotateCanvas = (canvas: HTMLCanvasElement, angle: number) => {
         const context = canvas?.getContext('2d');
         if (!context || !canvas) return;
         context.imageSmoothingEnabled = false;
 
-        // store current data to an image
         const image = new Image();
-        // image.src = fileURL;
         image.src = canvas.toDataURL();
-
-        // setCurrentRotationAngle(currentRotationAngle + angle);
-        // angle = currentRotationAngle + angle;
-
-        console.log(angle);
 
         image.onload = () => {
             context.clearRect(0, 0, canvas.width, canvas.height);
 
             context.save();
 
-            // calculate the new canvas dimensions based on the rotated image
             const radians = (angle * Math.PI) / 180;
             const sin = Math.sin(radians);
             const cos = Math.cos(radians);
@@ -147,14 +145,23 @@ const TransformMenu = () => {
                 Math.abs(image.width * cos) + Math.abs(image.height * sin);
             const newHeight =
                 Math.abs(image.width * sin) + Math.abs(image.height * cos);
+
             canvas.width = newWidth;
             canvas.height = newHeight;
 
-            context.translate(newWidth / 2, newHeight / 2);
+            context.translate(canvas.width / 2, canvas.height / 2);
             context.rotate(radians);
-            context.drawImage(image, -image.width / 2, -image.height / 2);
+
+            context.drawImage(
+                image,
+                -image.width / 2,
+                -image.height / 2,
+                image.width,
+                image.height
+            );
 
             context.restore();
+            // setNonFilteredFileURL(canvas.toDataURL());
         };
     };
     return (
@@ -168,7 +175,9 @@ const TransformMenu = () => {
                     disabled={cropLoading}
                     startIcon={<CropSquareIcon />}
                     onClick={() => {
-                        cropCanvas(1, 1);
+                        cropCanvas(canvasRef.current, 1, 1);
+                        cropCanvas(originalSizeCanvasRef.current, 1, 1);
+                        setTransformationPerformed(true);
                     }}
                     label={'Square (1:1)'}
                 />
@@ -183,7 +192,17 @@ const TransformMenu = () => {
                         key={index}
                         startIcon={ratio.icon}
                         onClick={() => {
-                            cropCanvas(ratio.width, ratio.height);
+                            cropCanvas(
+                                canvasRef.current,
+                                ratio.width,
+                                ratio.height
+                            );
+                            cropCanvas(
+                                originalSizeCanvasRef.current,
+                                ratio.width,
+                                ratio.height
+                            );
+                            setTransformationPerformed(true);
                         }}
                         label={`${ratio.width}:${ratio.height}`}
                     />
@@ -199,7 +218,17 @@ const TransformMenu = () => {
                         key={index}
                         startIcon={ratio.icon}
                         onClick={() => {
-                            cropCanvas(ratio.height, ratio.width);
+                            cropCanvas(
+                                canvasRef.current,
+                                ratio.height,
+                                ratio.width
+                            );
+                            cropCanvas(
+                                originalSizeCanvasRef.current,
+                                ratio.height,
+                                ratio.width
+                            );
+                            setTransformationPerformed(true);
                         }}
                         label={`${ratio.height}:${ratio.width}`}
                     />
@@ -214,7 +243,9 @@ const TransformMenu = () => {
                     disabled={cropLoading}
                     startIcon={<RotateLeftIcon />}
                     onClick={() => {
-                        rotateCanvas(-90);
+                        rotateCanvas(canvasRef.current, -90);
+                        rotateCanvas(originalSizeCanvasRef.current, -90);
+                        setTransformationPerformed(true);
                     }}
                     label="Rotate Left 90˚"
                 />
@@ -222,7 +253,9 @@ const TransformMenu = () => {
                     disabled={cropLoading}
                     startIcon={<RotateRightIcon />}
                     onClick={() => {
-                        rotateCanvas(90);
+                        rotateCanvas(canvasRef.current, 90);
+                        rotateCanvas(originalSizeCanvasRef.current, 90);
+                        setTransformationPerformed(true);
                     }}
                     label="Rotate Right 90˚"
                 />
@@ -236,7 +269,9 @@ const TransformMenu = () => {
                     disabled={cropLoading}
                     startIcon={<FlipIcon />}
                     onClick={() => {
-                        flipCanvas('vertical');
+                        flipCanvas(canvasRef.current, 'vertical');
+                        flipCanvas(originalSizeCanvasRef.current, 'vertical');
+                        setTransformationPerformed(true);
                     }}
                     label="Flip Vertically"
                 />
@@ -244,7 +279,9 @@ const TransformMenu = () => {
                     disabled={cropLoading}
                     startIcon={<FlipIcon />}
                     onClick={() => {
-                        flipCanvas('horizontal');
+                        flipCanvas(canvasRef.current, 'horizontal');
+                        flipCanvas(originalSizeCanvasRef.current, 'horizontal');
+                        setTransformationPerformed(true);
                     }}
                     label="Flip Horizontally"
                 />
