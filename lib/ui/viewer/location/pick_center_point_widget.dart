@@ -17,6 +17,7 @@ import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/bottom_of_title_bar_widget.dart";
 import "package:photos/ui/components/buttons/button_widget.dart";
 import "package:photos/ui/components/models/button_type.dart";
+import "package:photos/ui/components/notification_widget.dart";
 import "package:photos/ui/components/title_bar_title_widget.dart";
 import "package:photos/ui/viewer/gallery/gallery.dart";
 
@@ -112,6 +113,12 @@ class PickCenterPointWidget extends StatelessWidget {
                             selectedFiles: selectedFiles,
                             limitSelectionToOne: true,
                             showSelectAllByDefault: false,
+                            header: const Padding(
+                              padding: EdgeInsets.all(10),
+                              child: NotificationTipWidget(
+                                "You can also add a location centered on a photo from the photo's info screen",
+                              ),
+                            ),
                           ),
                         ),
                       ],
