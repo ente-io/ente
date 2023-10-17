@@ -98,8 +98,9 @@ const TransformMenu = () => {
         direction: 'vertical' | 'horizontal'
     ) => {
         const context = canvas.getContext('2d');
-        context.imageSmoothingEnabled = false;
         if (!context || !canvas) return;
+        context.resetTransform();
+        context.imageSmoothingEnabled = false;
         const img = new Image();
         // img.src = fileURL;
         img.src = canvas.toDataURL();
