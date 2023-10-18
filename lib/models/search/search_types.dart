@@ -1,10 +1,18 @@
 import "package:flutter/material.dart";
+import "package:logging/logging.dart";
 import "package:photos/generated/l10n.dart";
+import "package:photos/models/collection/collection.dart";
+import "package:photos/models/collection/collection_items.dart";
 import "package:photos/models/search/search_result.dart";
 import "package:photos/models/typedefs.dart";
+import "package:photos/services/collections_service.dart";
 import "package:photos/services/search_service.dart";
+import "package:photos/ui/viewer/gallery/collection_page.dart";
 import "package:photos/ui/viewer/location/add_location_sheet.dart";
 import "package:photos/ui/viewer/location/pick_center_point_widget.dart";
+import "package:photos/utils/dialog_util.dart";
+import "package:photos/utils/navigation_util.dart";
+import "package:photos/utils/share_util.dart";
 
 enum ResultType {
   collection,
@@ -166,11 +174,50 @@ extension SectionTypeExtensions on SectionType {
 
   FutureVoidCallback ctaOnTap(BuildContext context) {
     switch (this) {
+      case SectionType.people:
+        return () async {
+          shareText(
+            S.of(context).shareTextRecommendUsingEnte,
+          );
+        };
       case SectionType.location:
         return () async {
           final centerPoint = await showPickCenterPointSheet(context);
           if (centerPoint != null) {
             showAddLocationSheet(context, centerPoint);
+          }
+        };
+      case SectionType.album:
+        return () async {
+          final result = await showTextInputDialog(
+            context,
+            title: S.of(context).newAlbum,
+            submitButtonLabel: S.of(context).create,
+            hintText: S.of(context).enterAlbumName,
+            alwaysShowSuccessState: false,
+            initialValue: "",
+            textCapitalization: TextCapitalization.words,
+            onSubmit: (String text) async {
+              // indicates user cancelled the rename request
+              if (text.trim() == "") {
+                return;
+              }
+              try {
+                final Collection c =
+                    await CollectionsService.instance.createAlbum(text);
+                routeToPage(
+                  context,
+                  CollectionPage(CollectionWithThumbnail(c, null)),
+                );
+              } catch (e, s) {
+                Logger("CreateNewAlbumIcon")
+                    .severe("Failed to create a new album", e, s);
+                rethrow;
+              }
+            },
+          );
+          if (result is Exception) {
+            showGenericErrorDialog(context: context);
           }
         };
       default:
