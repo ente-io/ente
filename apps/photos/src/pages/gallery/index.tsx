@@ -148,6 +148,7 @@ const defaultGalleryContext: GalleryContextType = {
     userIDToEmailMap: null,
     emailList: null,
     openHiddenSection: () => null,
+    isClipSearchResult: null,
 };
 
 export const GalleryContext = createContext<GalleryContextType>(
@@ -282,6 +283,9 @@ export default function Gallery() {
             callback?.();
         });
     };
+
+    const [isClipSearchResult, setIsClipSearchResult] =
+        useState<boolean>(false);
 
     useEffect(() => {
         appContext.showNavBar(true);
@@ -471,9 +475,8 @@ export default function Gallery() {
                 ...files.filter((file) => deletedFileIds?.has(file.id)),
             ]);
         }
-        const sortAsc = activeCollection?.pubMagicMetadata?.data?.asc ?? false;
 
-        return getUniqueFiles(
+        const filteredFiles = getUniqueFiles(
             (isInHiddenSection ? hiddenFiles : files).filter((item) => {
                 if (deletedFileIds?.has(item.id)) {
                     return false;
@@ -532,6 +535,9 @@ export default function Gallery() {
                     ) {
                         return false;
                     }
+                    if (typeof search?.clip && search.clip.has(item.id)) {
+                        return false;
+                    }
                     return true;
                 }
 
@@ -575,9 +581,19 @@ export default function Gallery() {
                 } else {
                     return false;
                 }
-            }),
-            sortAsc
+            })
         );
+        if (search?.clip) {
+            return filteredFiles.sort((a, b) => {
+                return search.clip.get(b.id) - search.clip.get(a.id);
+            });
+        }
+        const sortAsc = activeCollection?.pubMagicMetadata?.data?.asc ?? false;
+        if (sortAsc) {
+            return sortFiles(filteredFiles, true);
+        } else {
+            return filteredFiles;
+        }
     }, [
         files,
         trashedFiles,
@@ -899,6 +915,7 @@ export default function Gallery() {
         } else {
             setSearch(newSearch);
         }
+        setIsClipSearchResult(!!newSearch.clip);
         if (!newSearch?.collection) {
             setIsInSearchMode(!!newSearch);
             setSetSearchResultSummary(summary);
@@ -948,6 +965,7 @@ export default function Gallery() {
                 user,
                 emailList,
                 openHiddenSection,
+                isClipSearchResult,
             }}>
             <FullScreenDropZone
                 getDragAndDropRootProps={getDragAndDropRootProps}>
