@@ -16,9 +16,6 @@ RUN --mount=type=cache,target=/root/.cache/go-build \
 FROM alpine:3.17
 RUN apk add libsodium-dev
 COPY --from=builder /etc/ente/ente-cli .
-#COPY configurations configurations
-#COPY migrations migrations
-#COPY mail-templates mail-templates
 
 ARG GIT_COMMIT
 ENV GIT_COMMIT=$GIT_COMMIT
