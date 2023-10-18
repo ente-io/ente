@@ -30,7 +30,9 @@ interface LivePhotoIdentifier {
 }
 
 const UNDERSCORE_THREE = '_3';
-
+// Note: The icloud-photos-downloader library appends _HVEC to the end of the filename in case of live photos
+// https://github.com/icloud-photos-downloader/icloud_photos_downloader
+const UNDERSCORE_HEVC = '_HVEC';
 const UNDERSCORE = '_';
 
 export async function getLivePhotoFileType(
@@ -223,10 +225,10 @@ function areFilesLivePhotoAssets(
         firstFileIdentifier.fileType !== secondFileIdentifier.fileType &&
         isImageOrVideo(firstFileIdentifier.fileType) &&
         isImageOrVideo(secondFileIdentifier.fileType) &&
-        removeUnderscoreThreeSuffix(
+        removePotentailLivePhotoSuffix(
             splitFilenameAndExtension(firstFileIdentifier.name)[0]
         ) ===
-            removeUnderscoreThreeSuffix(
+            removePotentailLivePhotoSuffix(
                 splitFilenameAndExtension(secondFileIdentifier.name)[0]
             )
     ) {
@@ -254,10 +256,11 @@ function areFilesLivePhotoAssets(
     return false;
 }
 
-function removeUnderscoreThreeSuffix(filename: string) {
+function removePotentailLivePhotoSuffix(filename: string) {
     if (filename.endsWith(UNDERSCORE_THREE)) {
         return filename.slice(0, filename.lastIndexOf(UNDERSCORE));
-    } else {
-        return filename;
+    } else if (filename.toLowerCase().endsWith(UNDERSCORE_HEVC)) {
+        return filename.slice(0, filename.lastIndexOf(UNDERSCORE_HEVC));
     }
+    return filename;
 }
