@@ -44,7 +44,12 @@ var updateAccCmd = &cobra.Command{
 		app, _ := cmd.Flags().GetString("app")
 		email, _ := cmd.Flags().GetString("email")
 		if email == "" {
-			fmt.Printf("email must be specified")
+			fmt.Println("email must be specified")
+			return
+		}
+		if exportDir == "" {
+			fmt.Println("dir param must be specified")
+			return
 		}
 
 		validApps := map[string]bool{
@@ -72,7 +77,7 @@ func init() {
 	// Add 'config' subcommands to the root command
 	rootCmd.AddCommand(accountCmd)
 	// Add 'config' subcommands to the 'config' command
-	updateAccCmd.Flags().String("dir", "", "Update export directory")
+	updateAccCmd.Flags().String("dir", "", "update export directory")
 	updateAccCmd.Flags().String("email", "", "email address of the account to update")
 	updateAccCmd.Flags().String("app", "photos", "Specify the app, default is 'photos'")
 	accountCmd.AddCommand(listAccCmd, addAccCmd, updateAccCmd)

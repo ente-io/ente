@@ -24,6 +24,10 @@ do
     if [ "$OS" == "darwin" ]; then
         BINARY_NAME="ente-cli-mac"
     fi
+
+    if [ "$OS" == "linux" ]; then
+        BINARY_NAME="ente-cli-linux"
+    fi
     # make bin directory if it doesn't exist
     mkdir -p bin
 

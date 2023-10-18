@@ -154,7 +154,7 @@ func (c *ClICtrl) UpdateAccount(ctx context.Context, params model.UpdateAccountP
 		}
 	}
 	if acc == nil {
-		return fmt.Errorf("account not found")
+		return fmt.Errorf("account not found, use `account list` to list accounts")
 	}
 	if params.ExportDir != nil && *params.ExportDir != "" {
 		_, err := internal.ValidateDirForWrite(*params.ExportDir)

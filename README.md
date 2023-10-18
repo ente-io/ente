@@ -15,8 +15,17 @@
     ```shell
     ente-cli account list
     ```
+  
+* Change export directory
+    ```shell
+    ente-cli account update --email yourEmail@example.com --dir ~/photos 
+    ```
 
-
+## Export
+* Start export
+    ```shell
+    ente-cli export
+    ```
 
 ## Testing
 

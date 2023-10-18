@@ -2,6 +2,7 @@ package pkg
 
 import (
 	"cli-go/internal"
+	"cli-go/internal/api"
 	"cli-go/pkg/model"
 	"context"
 	"encoding/base64"
@@ -29,6 +30,10 @@ func (c *ClICtrl) Export() error {
 		_, err = internal.ValidateDirForWrite(account.ExportDir)
 		if err != nil {
 			log.Printf("Skip export, error: %v while validing exportDir %s\n", err, account.ExportDir)
+			continue
+		}
+		if account.App == api.AppAuth {
+			log.Printf("Skip account %s: auth export is not supported", account.Email)
 			continue
 		}
 		log.Println("start sync")
