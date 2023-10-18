@@ -74,18 +74,19 @@ const ImageEditorOverlay = (props: IProps) => {
     const [canvasLoading, setCanvasLoading] = useState(false);
 
     useEffect(() => {
-        if (!canvasRef.current || !originalSizeCanvasRef.current) {
+        if (!canvasRef.current) {
             return;
         }
 
+        applyFilters([canvasRef.current]);
+    }, [brightness, contrast, blur, saturation, invert, canvasRef, fileURL]);
+
+    const applyFilters = async (canvases: HTMLCanvasElement[]) => {
         const filterString = `brightness(${brightness}%) contrast(${contrast}%) blur(${blur}px) saturate(${saturation}%) invert(${
             invert ? 1 : 0
         })`;
 
-        for (const canvas of [
-            canvasRef.current,
-            originalSizeCanvasRef.current,
-        ]) {
+        for (const canvas of canvases) {
             const context = canvas.getContext('2d');
             context.imageSmoothingEnabled = false;
 
@@ -94,17 +95,21 @@ const ImageEditorOverlay = (props: IProps) => {
             const image = new Image();
             image.src = fileURL;
 
-            image.onload = () => {
-                context.clearRect(0, 0, canvas.width, canvas.height);
+            await new Promise((resolve) => {
+                image.onload = () => {
+                    context.clearRect(0, 0, canvas.width, canvas.height);
 
-                context.save();
+                    context.save();
 
-                context.drawImage(image, 0, 0, canvas.width, canvas.height);
+                    context.drawImage(image, 0, 0, canvas.width, canvas.height);
 
-                context.restore();
-            };
+                    context.restore();
+
+                    resolve(true);
+                };
+            });
         }
-    }, [brightness, contrast, blur, saturation, invert, canvasRef, fileURL]);
+    };
 
     useEffect(() => {
         if (currentRotationAngle >= 360 || currentRotationAngle <= -360) {
@@ -222,18 +227,13 @@ const ImageEditorOverlay = (props: IProps) => {
 
                                 <canvas
                                     ref={canvasRef}
-                                    // height={originalHeight}
-                                    // width={originalWidth}
                                     style={{
                                         objectFit: 'contain',
-                                        // maxWidth: '100%',
-                                        // maxHeight: '1000px',
                                         display:
                                             fileURL === null || canvasLoading
                                                 ? 'none'
                                                 : 'block',
                                         position: 'absolute',
-                                        // transform: `translate(${cropOffsetX}px, ${cropOffsetY}px)`,
                                     }}
                                 />
                                 <canvas
@@ -323,8 +323,12 @@ const ImageEditorOverlay = (props: IProps) => {
                             <MenuItemGroup>
                                 <EnteMenuItem
                                     startIcon={<DownloadIcon />}
-                                    onClick={() => {
+                                    onClick={async () => {
                                         if (!canvasRef.current) return;
+
+                                        await applyFilters([
+                                            originalSizeCanvasRef.current,
+                                        ]);
 
                                         exportCanvasToBlob((blob) => {
                                             if (!blob) {
