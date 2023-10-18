@@ -85,6 +85,7 @@ class _AllSearchSectionsState extends State<AllSearchSections> {
         builder: (context, snapshot) {
           if (snapshot.hasData) {
             return ListView.builder(
+              padding: const EdgeInsets.only(bottom: 120),
               physics: const BouncingScrollPhysics(),
               itemCount: searchTypes.length,
               itemBuilder: (context, index) {

@@ -213,6 +213,7 @@ class _TextInputDialogState extends State<TextInputDialog> {
 
   @override
   void initState() {
+    super.initState();
     _textEditingController =
         widget.textEditingController ?? TextEditingController();
     _inputIsEmptyNotifier = widget.initialValue?.isEmpty ?? true
@@ -223,7 +224,6 @@ class _TextInputDialogState extends State<TextInputDialog> {
         _inputIsEmptyNotifier.value = _textEditingController.text.isEmpty;
       }
     });
-    super.initState();
   }
 
   @override
@@ -235,7 +235,7 @@ class _TextInputDialogState extends State<TextInputDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final widthOfScreen = MediaQuery.of(context).size.width;
+    final widthOfScreen = MediaQuery.sizeOf(context).width;
     final isMobileSmall = widthOfScreen <= mobileSmallThreshold;
     final colorScheme = getEnteColorScheme(context);
     return Container(
