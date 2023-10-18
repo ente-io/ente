@@ -393,15 +393,14 @@ const ImageEditorOverlay = (props: IProps) => {
                                                 localID: 1,
                                             };
 
-                                            uploadManager
-                                                .queueFilesForUpload(
-                                                    [file],
-                                                    [collection],
-                                                    uploadManager.getUploaderName()
-                                                )
-                                                .then(() => {
-                                                    props.onClose();
-                                                });
+                                            uploadManager.prepareForNewUpload();
+
+                                            uploadManager.queueFilesForUpload(
+                                                [file],
+                                                [collection],
+                                                uploadManager.getUploaderName()
+                                            );
+                                            props.onClose();
                                         });
                                     }}
                                     label={'Save a copy to ente'}
