@@ -145,11 +145,11 @@ func (c *ClICtrl) downloadEntry(ctx context.Context,
 			imageFilePath := filepath.Join(diskInfo.ExportRoot, diskInfo.AlbumMeta.FolderName, imageFileName)
 			videoFilePath := filepath.Join(diskInfo.ExportRoot, diskInfo.AlbumMeta.FolderName, videoFileName)
 			// move the decrypt file to filePath
-			err = os.Rename(imagePath, imageFilePath)
+			err = Move(imagePath, imageFilePath)
 			if err != nil {
 				return err
 			}
-			err = os.Rename(videoPath, videoFilePath)
+			err = Move(videoPath, videoFilePath)
 			if err != nil {
 				return err
 			}
@@ -159,7 +159,7 @@ func (c *ClICtrl) downloadEntry(ctx context.Context,
 			fileName := baseFileName + extension
 			filePath := filepath.Join(diskInfo.ExportRoot, diskInfo.AlbumMeta.FolderName, fileName)
 			// move the decrypt file to filePath
-			err = os.Rename(*decrypt, filePath)
+			err = Move(*decrypt, filePath)
 			if err != nil {
 				return err
 			}
