@@ -102,6 +102,12 @@ class _SearchSectionResultPageState extends State<SearchSectionResultPage> {
                       },
                       itemCount: sectionResults.length + (_showCTATile ? 1 : 0),
                       physics: const BouncingScrollPhysics(),
+                      //This cache extend is needed for creating a new album
+                      //using SearchSectionCTATile to work. This is so that
+                      //SearchSectionCTATile doesn't get disposed when keyboard
+                      //is open and the widget is out of view.
+                      cacheExtent:
+                          widget.sectionType == SectionType.album ? 400 : null,
                     ),
                   ),
                 ),
