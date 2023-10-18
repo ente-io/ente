@@ -110,7 +110,7 @@ const TransformMenu = () => {
 
             context.save();
 
-            if (direction === 'vertical') {
+            if (direction === 'horizontal') {
                 context.translate(canvas.width, 0);
                 context.scale(-1, 1);
             } else {
