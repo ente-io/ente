@@ -27,7 +27,33 @@
     ente-cli export
     ```
 
-## Testing
+## Docker
+
+### Configure
+Modify the `docker-compose.yml` and add volume.
+``cli-data`` volume is mandatory, you can add more volumes for your export directory.
+  * Build the docker image
+  ```shell
+  docker build -t ente-cli:latest .
+  ```
+  * Start the container in detached mode
+  ```bash 
+  docker-compose up -d
+  ```
+exec into the container
+```shell
+  docker-compose exec ente-cli /bin/sh
+```
+  
+    
+#### How to directly execute the command
+
+  ```shell
+    docker run -it --rm ente-cli:latest ls 
+  ```
+
+
+## Build locally
 
 Run the release script to build the binary and run it.
 
@@ -44,14 +70,3 @@ or you can run the following command
 ```shell
 ./bin/ente-cli --help
 ```
-
-
-## Docker
-  Build the docker image
-  ```shell
-  docker build -t ente-cli:latest .
-  ```
-  Run the commands using:
-  ```shell
-    docker run -it --rm ente-cli:latest ./ente-cli --help 
-  ```

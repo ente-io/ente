@@ -1,0 +1,11 @@
+version: '3'
+services:
+  ente-cli:
+    image: ente-cli:latest
+    command: /bin/sh
+    volumes:
+      # Replace /Volumes/Data/ with a folder path on your system, typically $HOME/.ente-cli/
+      - ~/.ente-cli/:/cli-data:rw
+#      - ~/Downloads/export-data:/data:rw
+    stdin_open: true
+    tty: true

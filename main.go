@@ -2,13 +2,25 @@ package main
 
 import (
 	"cli-go/cmd"
+	"cli-go/internal"
 	"cli-go/internal/api"
 	"cli-go/pkg"
 	"cli-go/pkg/secrets"
+	"cli-go/utils/constants"
+	"fmt"
+	"log"
 )
 
 func main() {
-	db, err := pkg.GetDB("ente-cli.db")
+	cliDBPath := ""
+	if secrets.IsRunningInContainer() {
+		cliDBPath = constants.CliDataPath
+		_, err := internal.ValidateDirForWrite(cliDBPath)
+		if err != nil {
+			log.Fatalf("Please mount a volume to %s to persist cli data\n%v\n", cliDBPath, err)
+		}
+	}
+	db, err := pkg.GetDB(fmt.Sprintf("%sente-cli.db", cliDBPath))
 	if err != nil {
 		panic(err)
 	}
