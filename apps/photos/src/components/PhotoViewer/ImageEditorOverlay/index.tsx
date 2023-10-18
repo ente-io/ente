@@ -199,6 +199,7 @@ const ImageEditorOverlay = (props: IProps) => {
                             display: 'flex',
                             width: '100%',
                             justifyContent: 'space-between',
+                            backdropFilter: 'blur(5px)',
                         }}
                         open>
                         <Box
