@@ -6,8 +6,7 @@ import "package:photos/services/collections_service.dart";
 import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/components/title_bar_title_widget.dart";
 import "package:photos/ui/viewer/gallery/collection_page.dart";
-import "package:photos/ui/viewer/search/result/search_result_widget.dart";
-import "package:photos/ui/viewer/search/search_section_cta.dart";
+import "package:photos/ui/viewer/search/result/searchable_item.dart";
 import "package:photos/utils/navigation_util.dart";
 
 class SearchSectionResultPage extends StatefulWidget {
@@ -74,12 +73,12 @@ class _SearchSectionResultPageState extends State<SearchSectionResultPage> {
                     child: ListView.separated(
                       itemBuilder: (context, index) {
                         if (sectionResults.length == index) {
-                          return SearchSectionCTATile(widget.sectionType);
+                          return SearchableItemPlaceholder(widget.sectionType);
                         }
                         if (sectionResults[index] is AlbumSearchResult) {
                           final albumSectionResult =
                               sectionResults[index] as AlbumSearchResult;
-                          return SearchResultWidget(
+                          return SearchableItemWidget(
                             albumSectionResult,
                             resultCount:
                                 CollectionsService.instance.getFileCount(
@@ -95,7 +94,7 @@ class _SearchSectionResultPageState extends State<SearchSectionResultPage> {
                             ),
                           );
                         }
-                        return SearchResultWidget(sectionResults[index]);
+                        return SearchableItemWidget(sectionResults[index]);
                       },
                       separatorBuilder: (context, index) {
                         return const SizedBox(height: 10);

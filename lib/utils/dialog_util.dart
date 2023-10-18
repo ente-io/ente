@@ -233,7 +233,7 @@ ProgressDialog createProgressDialog(
   return dialog;
 }
 
-//Can return ButtonResult? from ButtonWidget or Exception? from TextInputDialog
+///Can return ButtonResult? from ButtonWidget or Exception? from TextInputDialog
 Future<dynamic> showTextInputDialog(
   BuildContext context, {
   required String title,
