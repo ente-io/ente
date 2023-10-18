@@ -121,6 +121,7 @@ import { syncEntities } from 'services/entityService';
 import { constructUserIDToEmailMap } from 'services/collectionService';
 import { getLocalFamilyData } from 'utils/user/family';
 import InMemoryStore, { MS_KEYS } from 'services/InMemoryStore';
+import { runEmbeddingsSync } from 'services/embeddingService';
 
 export const DeadCenter = styled('div')`
     flex: 1;
@@ -692,6 +693,7 @@ export default function Gallery() {
             await syncTrash(collections, setTrashedFiles);
             await syncEntities();
             await syncMapEnabled();
+            await runEmbeddingsSync();
         } catch (e) {
             switch (e.message) {
                 case ServerErrorCodes.SESSION_EXPIRED:
