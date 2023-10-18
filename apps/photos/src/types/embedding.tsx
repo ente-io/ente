@@ -21,3 +21,10 @@ export interface Embedding
 export interface GetEmbeddingDiffResponse {
     diff: EncryptedEmbedding[];
 }
+
+export interface PutEmbeddingRequest {
+    fileID: number;
+    model: Model;
+    encryptedEmbedding: string;
+    decryptionHeader: string;
+}

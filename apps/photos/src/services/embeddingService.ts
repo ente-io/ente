@@ -1,4 +1,8 @@
-import { Embedding, GetEmbeddingDiffResponse } from 'types/embedding';
+import {
+    Embedding,
+    GetEmbeddingDiffResponse,
+    PutEmbeddingRequest,
+} from 'types/embedding';
 import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
 import { getEndpoint } from 'utils/common/apiUtil';
 import { addLogLine } from 'utils/logging';
@@ -15,7 +19,7 @@ const DIFF_LIMIT = 500;
 const EMBEDDINGS_TABLE = 'embeddings';
 const EMBEDDING_SYNC_TIME_TABLE = 'embedding_sync_time';
 
-const getLocalEmbeddings = async () => {
+export const getLocalEmbeddings = async () => {
     const entities: Array<Embedding> =
         (await localForage.getItem<Embedding[]>(EMBEDDINGS_TABLE)) || [];
     return entities;
@@ -25,31 +29,8 @@ const getEmbeddingSyncTime = async () => {
     return (await localForage.getItem<number>(EMBEDDING_SYNC_TIME_TABLE)) ?? 0;
 };
 
-export const getLatestEmbeddings = async () => {
+export const syncEmbeddings = async () => {
     try {
-        await runEmbeddingsSync();
-        return await getLocalEmbeddings();
-    } catch (e) {
-        logError(e, 'failed to get latest embeddings');
-        throw e;
-    }
-};
-
-let syncInProgress: Promise<void> = null;
-
-export const runEmbeddingsSync = async () => {
-    if (syncInProgress) {
-        return syncInProgress;
-    }
-    syncInProgress = syncEmbeddings();
-    return syncInProgress;
-};
-
-const syncEmbeddings = async () => {
-    try {
-        if (syncInProgress) {
-            return syncInProgress;
-        }
         let embeddings = await getLocalEmbeddings();
         const localFiles = await getLocalFiles();
         const fileIdToKeyMap = new Map<number, string>();
@@ -94,8 +75,6 @@ const syncEmbeddings = async () => {
         } while (response.diff.length === DIFF_LIMIT);
     } catch (e) {
         logError(e, 'Sync embeddings failed');
-    } finally {
-        syncInProgress = null;
     }
 };
 
@@ -119,6 +98,21 @@ export const getEmbeddingsDiff = async (
         return await response.data;
     } catch (e) {
         logError(e, 'get embeddings diff failed');
+        throw e;
+    }
+};
+
+export const putEmbedding = async (putEmbeddingReq: PutEmbeddingRequest) => {
+    try {
+        const token = getToken();
+        if (!token) {
+            return;
+        }
+        await HTTPService.put(`${ENDPOINT}/embeddings`, putEmbeddingReq, null, {
+            'X-Auth-Token': token,
+        });
+    } catch (e) {
+        logError(e, 'put embedding failed');
         throw e;
     }
 };
