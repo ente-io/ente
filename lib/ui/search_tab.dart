@@ -80,29 +80,33 @@ class _AllSearchSectionsState extends State<AllSearchSections> {
     searchTypes.remove(SectionType.face);
     searchTypes.remove(SectionType.content);
     return Expanded(
-      child: FutureBuilder(
-        future: allSectionsExamples,
-        builder: (context, snapshot) {
-          if (snapshot.hasData) {
-            return ListView.builder(
-              padding: const EdgeInsets.only(bottom: 120),
-              physics: const BouncingScrollPhysics(),
-              itemCount: searchTypes.length,
-              itemBuilder: (context, index) {
-                return SearchSection(
-                  sectionType: searchTypes[index],
-                  examples: snapshot.data!.elementAt(index),
-                  limit: _limit,
+      child: Stack(
+        children: [
+          FutureBuilder(
+            future: allSectionsExamples,
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                return ListView.builder(
+                  padding: const EdgeInsets.only(bottom: 180),
+                  physics: const BouncingScrollPhysics(),
+                  itemCount: searchTypes.length,
+                  itemBuilder: (context, index) {
+                    return SearchSection(
+                      sectionType: searchTypes[index],
+                      examples: snapshot.data!.elementAt(index),
+                      limit: _limit,
+                    );
+                  },
                 );
-              },
-            );
-          } else if (snapshot.hasError) {
-            //todo: Show something went wrong here
-            return const EnteLoadingWidget();
-          } else {
-            return const EnteLoadingWidget();
-          }
-        },
+              } else if (snapshot.hasError) {
+                //todo: Show something went wrong here
+                return const EnteLoadingWidget();
+              } else {
+                return const EnteLoadingWidget();
+              }
+            },
+          ),
+        ],
       ),
     );
   }

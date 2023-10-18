@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
+import "package:flutter_animate/flutter_animate.dart";
 import "package:flutter_local_notifications/flutter_local_notifications.dart";
 import 'package:logging/logging.dart';
 import 'package:media_extension/media_extension_action_types.dart';
@@ -52,6 +53,7 @@ import "package:photos/ui/settings_page.dart";
 import "package:photos/ui/tabs/shared_collections_tab.dart";
 import "package:photos/ui/tabs/user_collections_tab.dart";
 import "package:photos/ui/viewer/gallery/collection_page.dart";
+import "package:photos/ui/viewer/search/search_widget_new.dart";
 import 'package:photos/utils/dialog_util.dart';
 import "package:photos/utils/navigation_util.dart";
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
@@ -89,6 +91,7 @@ class _HomeWidgetState extends State<HomeWidget> {
   List<SharedMediaFile>? _sharedFiles;
   bool _shouldRenderCreateCollectionSheet = false;
   bool _showShowBackupHook = false;
+  final isOnSearchTabNotifier = ValueNotifier<bool>(false);
 
   late StreamSubscription<TabChangedEvent> _tabChangedEventSubscription;
   late StreamSubscription<SubscriptionPurchasedEvent>
@@ -107,6 +110,11 @@ class _HomeWidgetState extends State<HomeWidget> {
     _tabChangedEventSubscription =
         Bus.instance.on<TabChangedEvent>().listen((event) {
       if (event.source != TabChangedEventSource.pageView) {
+        if (event.selectedIndex == 3) {
+          isOnSearchTabNotifier.value = true;
+        } else {
+          isOnSearchTabNotifier.value = false;
+        }
         debugPrint(
           "TabChange going from $_selectedTabIndex to ${event.selectedIndex} souce: ${event.source}",
         );
@@ -348,6 +356,7 @@ class _HomeWidgetState extends State<HomeWidget> {
   }
 
   Widget _getBody(BuildContext context) {
+    final colorScheme = getEnteColorScheme(context);
     if (!Configuration.instance.hasConfiguredAccount()) {
       _closeDrawerIfOpen(context);
       return const LandingPageWidget();
@@ -415,9 +424,62 @@ class _HomeWidgetState extends State<HomeWidget> {
         ),
         Align(
           alignment: Alignment.bottomCenter,
-          child: HomeBottomNavigationBar(
-            _selectedFiles,
-            selectedTabIndex: _selectedTabIndex,
+          child: ValueListenableBuilder(
+            valueListenable: isOnSearchTabNotifier,
+            builder: (context, value, child) {
+              return AnimatedContainer(
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.easeInCubic,
+                // color: getEnteColorScheme(context).backgroundElevated2,
+                decoration: BoxDecoration(
+                  gradient: value
+                      ? null
+                      // ? LinearGradient(
+                      //     begin: Alignment.topCenter,
+                      //     end: Alignment.bottomCenter,
+                      //     colors: [
+                      //       colorScheme.backgroundBase,
+                      //       colorScheme.backgroundElevated2,
+                      //       // Colors.black,
+                      //     ],
+                      //   )
+                      : null,
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    value
+                        ? const SearchWidgetNew()
+                            .animate()
+                            .fadeIn(
+                              duration: const Duration(milliseconds: 175),
+                              curve: Curves.easeInOutSine,
+                            )
+                            .scale(
+                              begin: const Offset(0.6, 0.6),
+                              end: const Offset(1, 1),
+                              duration: const Duration(
+                                milliseconds: 175,
+                              ),
+                              curve: Curves.easeInOutSine,
+                            )
+                            .slide(
+                              begin: const Offset(0, 0.8),
+                              curve: Curves.easeInOutSine,
+                              duration: const Duration(
+                                milliseconds: 175,
+                              ),
+                            )
+                        : const SizedBox.shrink(),
+                    child!,
+                  ],
+                ),
+              );
+            },
+            child: HomeBottomNavigationBar(
+              _selectedFiles,
+              selectedTabIndex: _selectedTabIndex,
+            ),
           ),
         ),
       ],
