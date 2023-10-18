@@ -46,7 +46,7 @@ class UploadManager {
         ComlinkWorker<typeof DedicatedCryptoWorker>
     >(MAX_CONCURRENT_UPLOADS);
     private parsedMetadataJSONMap: ParsedMetadataJSONMap;
-    private filesToBeUploaded: FileWithCollection[];
+    private filesToBeUploaded: FileWithCollection[] = [];
     private remainingFiles: FileWithCollection[] = [];
     private failedFiles: FileWithCollection[];
     private existingFiles: EnteFile[];

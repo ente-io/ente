@@ -30,6 +30,11 @@ import CloseIcon from '@mui/icons-material/Close';
 import { HorizontalFlex } from 'components/Container';
 import TransformMenu from './TransformMenu';
 import ColoursMenu from './ColoursMenu';
+import { FileWithCollection } from 'types/upload';
+import uploadManager from 'services/upload/uploadManager';
+import { getLocalCollections } from 'services/collectionService';
+import CloudUploadIcon from '@mui/icons-material/CloudUpload';
+
 interface IProps {
     file: EnteFile;
     show: boolean;
@@ -347,6 +352,59 @@ const ImageEditorOverlay = (props: IProps) => {
                                         });
                                     }}
                                     label={'Download Edited'}
+                                />
+                                <EnteMenuItem
+                                    startIcon={<CloudUploadIcon />}
+                                    onClick={async () => {
+                                        if (!canvasRef.current) return;
+
+                                        await applyFilters([
+                                            originalSizeCanvasRef.current,
+                                        ]);
+
+                                        const collections =
+                                            await getLocalCollections();
+
+                                        const collection = collections.find(
+                                            (c) =>
+                                                c.id === props.file.collectionID
+                                        );
+
+                                        exportCanvasToBlob((blob) => {
+                                            if (!blob) {
+                                                return console.error('no blob');
+                                            }
+
+                                            const newFile = new File(
+                                                [blob],
+                                                props.file.metadata.title,
+                                                {
+                                                    type: blob.type,
+                                                    lastModified:
+                                                        new Date().getTime(),
+                                                }
+                                            );
+
+                                            const file: FileWithCollection = {
+                                                file: newFile,
+                                                collectionID:
+                                                    props.file.collectionID,
+                                                collection,
+                                                localID: 1,
+                                            };
+
+                                            uploadManager
+                                                .queueFilesForUpload(
+                                                    [file],
+                                                    [collection],
+                                                    uploadManager.getUploaderName()
+                                                )
+                                                .then(() => {
+                                                    props.onClose();
+                                                });
+                                        });
+                                    }}
+                                    label={'Save a copy to ente'}
                                 />
                             </MenuItemGroup>
                         </Box>
