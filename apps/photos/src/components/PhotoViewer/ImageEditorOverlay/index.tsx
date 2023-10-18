@@ -40,10 +40,10 @@ export const ImageEditorOverlayContext = createContext(
     {} as {
         canvasRef: MutableRefObject<HTMLCanvasElement>;
         originalSizeCanvasRef: MutableRefObject<HTMLCanvasElement>;
-        cropLoading: boolean;
-        setCropLoading: Dispatch<SetStateAction<boolean>>;
         // setNonFilteredFileURL: Dispatch<SetStateAction<string>>;
         setTransformationPerformed: Dispatch<SetStateAction<boolean>>;
+        setCanvasLoading: Dispatch<SetStateAction<boolean>>;
+        canvasLoading: boolean;
     }
 );
 
@@ -55,8 +55,6 @@ const ImageEditorOverlay = (props: IProps) => {
     const parentRef = useRef<HTMLDivElement | null>(null);
 
     const [fileURL, setFileURL] = useState<string>('');
-
-    const [cropLoading, setCropLoading] = useState<boolean>(false);
 
     const [currentRotationAngle, setCurrentRotationAngle] = useState(0);
 
@@ -72,6 +70,8 @@ const ImageEditorOverlay = (props: IProps) => {
 
     const [transformationPerformed, setTransformationPerformed] =
         useState(false);
+
+    const [canvasLoading, setCanvasLoading] = useState(false);
 
     useEffect(() => {
         if (!canvasRef.current || !originalSizeCanvasRef.current) {
@@ -122,6 +122,7 @@ const ImageEditorOverlay = (props: IProps) => {
     };
 
     const loadCanvas = async () => {
+        setCanvasLoading(true);
         setTransformationPerformed(false);
         resetFilters();
         setCurrentRotationAngle(0);
@@ -142,7 +143,6 @@ const ImageEditorOverlay = (props: IProps) => {
             img.src = fileURL;
         }
 
-        // setNonFilteredFileURL(img.src);
         img.onload = () => {
             const scale = Math.min(
                 parentRef.current?.clientWidth / img.width,
@@ -162,6 +162,8 @@ const ImageEditorOverlay = (props: IProps) => {
             const oSCtx = originalSizeCanvasRef.current.getContext('2d');
 
             oSCtx?.drawImage(img, 0, 0, img.width, img.height);
+
+            setCanvasLoading(false);
         };
     };
 
@@ -213,7 +215,10 @@ const ImageEditorOverlay = (props: IProps) => {
                                 display="flex"
                                 alignItems="center"
                                 justifyContent="center">
-                                {fileURL === null && <CircularProgress />}
+                                {(fileURL === null || canvasLoading) && (
+                                    <CircularProgress />
+                                )}
+
                                 <canvas
                                     ref={canvasRef}
                                     // height={originalHeight}
@@ -223,7 +228,9 @@ const ImageEditorOverlay = (props: IProps) => {
                                         // maxWidth: '100%',
                                         // maxHeight: '1000px',
                                         display:
-                                            fileURL === null ? 'none' : 'block',
+                                            fileURL === null || canvasLoading
+                                                ? 'none'
+                                                : 'block',
                                         position: 'absolute',
                                         // transform: `translate(${cropOffsetX}px, ${cropOffsetY}px)`,
                                     }}
@@ -274,7 +281,7 @@ const ImageEditorOverlay = (props: IProps) => {
                                     marginBottom: '0.5rem',
                                 }}>
                                 <EnteMenuItem
-                                    disabled={cropLoading}
+                                    disabled={canvasLoading}
                                     startIcon={<CropOriginalIcon />}
                                     onClick={() => {
                                         loadCanvas();
@@ -288,8 +295,8 @@ const ImageEditorOverlay = (props: IProps) => {
                                     value={{
                                         originalSizeCanvasRef,
                                         canvasRef,
-                                        cropLoading,
-                                        setCropLoading,
+                                        setCanvasLoading,
+                                        canvasLoading,
                                         // setNonFilteredFileURL,
                                         setTransformationPerformed,
                                     }}>

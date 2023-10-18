@@ -32,8 +32,8 @@ const TransformMenu = () => {
     const {
         canvasRef,
         originalSizeCanvasRef,
-        cropLoading,
-        setCropLoading,
+        canvasLoading,
+        setCanvasLoading,
         // setNonFilteredFileURL
         setTransformationPerformed,
     } = useContext(ImageEditorOverlayContext);
@@ -71,8 +71,6 @@ const TransformMenu = () => {
 
             context.clearRect(0, 0, canvas.width, canvas.height);
 
-            setCropLoading(true);
-
             canvas.width = newWidth;
             canvas.height = newHeight;
 
@@ -88,8 +86,6 @@ const TransformMenu = () => {
                 newHeight
             );
 
-            setCropLoading(false);
-
             // setNonFilteredFileURL(canvas.toDataURL());
         };
     };
@@ -102,7 +98,6 @@ const TransformMenu = () => {
         context.resetTransform();
         context.imageSmoothingEnabled = false;
         const img = new Image();
-        // img.src = fileURL;
         img.src = canvas.toDataURL();
 
         img.onload = () => {
@@ -173,11 +168,13 @@ const TransformMenu = () => {
                     marginBottom: '0.5rem',
                 }}>
                 <EnteMenuItem
-                    disabled={cropLoading}
+                    disabled={canvasLoading}
                     startIcon={<CropSquareIcon />}
                     onClick={() => {
+                        setCanvasLoading(true);
                         cropCanvas(canvasRef.current, 1, 1);
                         cropCanvas(originalSizeCanvasRef.current, 1, 1);
+                        setCanvasLoading(false);
                         setTransformationPerformed(true);
                     }}
                     label={'Square (1:1)'}
@@ -189,10 +186,12 @@ const TransformMenu = () => {
                 }}>
                 {PRESET_ASPECT_RATIOS.map((ratio, index) => (
                     <EnteMenuItem
-                        disabled={cropLoading}
+                        disabled={canvasLoading}
                         key={index}
                         startIcon={ratio.icon}
                         onClick={() => {
+                            setCanvasLoading(true);
+
                             cropCanvas(
                                 canvasRef.current,
                                 ratio.width,
@@ -203,6 +202,7 @@ const TransformMenu = () => {
                                 ratio.width,
                                 ratio.height
                             );
+                            setCanvasLoading(false);
                             setTransformationPerformed(true);
                         }}
                         label={`${ratio.width}:${ratio.height}`}
@@ -215,10 +215,11 @@ const TransformMenu = () => {
                 }}>
                 {PRESET_ASPECT_RATIOS.map((ratio, index) => (
                     <EnteMenuItem
-                        disabled={cropLoading}
+                        disabled={canvasLoading}
                         key={index}
                         startIcon={ratio.icon}
                         onClick={() => {
+                            setCanvasLoading(true);
                             cropCanvas(
                                 canvasRef.current,
                                 ratio.height,
@@ -229,6 +230,7 @@ const TransformMenu = () => {
                                 ratio.height,
                                 ratio.width
                             );
+                            setCanvasLoading(false);
                             setTransformationPerformed(true);
                         }}
                         label={`${ratio.height}:${ratio.width}`}
@@ -241,22 +243,26 @@ const TransformMenu = () => {
                     marginBottom: '1rem',
                 }}>
                 <EnteMenuItem
-                    disabled={cropLoading}
+                    disabled={canvasLoading}
                     startIcon={<RotateLeftIcon />}
                     onClick={() => {
+                        setCanvasLoading(true);
                         rotateCanvas(canvasRef.current, -90);
                         rotateCanvas(originalSizeCanvasRef.current, -90);
+                        setCanvasLoading(false);
                         setTransformationPerformed(true);
                     }}
                     label="Rotate Left 90˚"
                 />
                 <EnteMenuItem
-                    disabled={cropLoading}
+                    disabled={canvasLoading}
                     startIcon={<RotateRightIcon />}
                     onClick={() => {
+                        setCanvasLoading(true);
                         rotateCanvas(canvasRef.current, 90);
                         rotateCanvas(originalSizeCanvasRef.current, 90);
                         setTransformationPerformed(true);
+                        setCanvasLoading(false);
                     }}
                     label="Rotate Right 90˚"
                 />
@@ -267,21 +273,25 @@ const TransformMenu = () => {
                     marginBottom: '1rem',
                 }}>
                 <EnteMenuItem
-                    disabled={cropLoading}
+                    disabled={canvasLoading}
                     startIcon={<FlipIcon />}
                     onClick={() => {
+                        setCanvasLoading(true);
                         flipCanvas(canvasRef.current, 'vertical');
                         flipCanvas(originalSizeCanvasRef.current, 'vertical');
+                        setCanvasLoading(false);
                         setTransformationPerformed(true);
                     }}
                     label="Flip Vertically"
                 />
                 <EnteMenuItem
-                    disabled={cropLoading}
+                    disabled={canvasLoading}
                     startIcon={<FlipIcon />}
                     onClick={() => {
+                        setCanvasLoading(true);
                         flipCanvas(canvasRef.current, 'horizontal');
                         flipCanvas(originalSizeCanvasRef.current, 'horizontal');
+                        setCanvasLoading(false);
                         setTransformationPerformed(true);
                     }}
                     label="Flip Horizontally"
