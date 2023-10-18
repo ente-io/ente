@@ -20,7 +20,7 @@ class SearchSectionCTAIcon extends StatelessWidget {
       child: SizedBox(
         width: 84,
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 10),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -41,7 +41,7 @@ class SearchSectionCTAIcon extends StatelessWidget {
                 ),
               ),
               const SizedBox(
-                height: 9.25,
+                height: 8.5,
               ),
               Text(
                 sectionType.getCTAText(context),
