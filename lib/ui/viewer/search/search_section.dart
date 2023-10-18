@@ -8,6 +8,7 @@ import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/viewer/file/no_thumbnail_widget.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 import "package:photos/ui/viewer/gallery/collection_page.dart";
+import "package:photos/ui/viewer/search/result/go_to_map_widget.dart";
 import "package:photos/ui/viewer/search/result/search_result_page.dart";
 import 'package:photos/ui/viewer/search/result/search_section_result_page.dart';
 import "package:photos/ui/viewer/search/search_section_cta.dart";
@@ -84,6 +85,9 @@ class SearchExampleRow extends StatelessWidget {
   Widget build(BuildContext context) {
     //Cannot use listView.builder here
     final scrollableExamples = <Widget>[];
+    if (sectionType == SectionType.location) {
+      scrollableExamples.add(const GoToMapWidget());
+    }
     reccomendations.forEachIndexed((index, element) {
       scrollableExamples.add(
         SearchExample(
