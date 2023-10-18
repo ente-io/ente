@@ -7,6 +7,7 @@ import (
 	"cli-go/utils"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -67,7 +68,11 @@ func (c *ClICtrl) syncFiles(ctx context.Context, account model.Account) error {
 			log.Printf("[%d/%d] Sync %s for album %s", i, len(entries), existingEntry.GetTitle(), albumInfo.AlbumName)
 			err = c.downloadEntry(ctx, albumDiskInfo, *existingEntry, entry)
 			if err != nil {
-				return err
+				if errors.Is(err, model.ErrDecryption) {
+					continue
+				} else {
+					return err
+				}
 			}
 		} else {
 			log.Fatalf("remoteFile %d not found in remoteFiles", entry.FileID)

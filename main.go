@@ -30,5 +30,4 @@ func main() {
 		}
 	}()
 	cmd.Execute(&ctrl)
-	//ctrl.StartSync()
 }

@@ -11,13 +11,13 @@ import (
 	bolt "go.etcd.io/bbolt"
 )
 
-func (c *ClICtrl) StartSync() error {
+func (c *ClICtrl) Export() error {
 	accounts, err := c.GetAccounts(context.Background())
 	if err != nil {
 		return err
 	}
 	if len(accounts) == 0 {
-		fmt.Printf("No accounts to sync\n")
+		fmt.Printf("No accounts to sync\n Add account using `account add` cmd\n")
 		return nil
 	}
 	for _, account := range accounts {

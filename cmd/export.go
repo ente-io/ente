@@ -10,7 +10,7 @@ var exportCmd = &cobra.Command{
 	Short: "Starts the export process",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
-		ctrl.StartSync()
+		ctrl.Export()
 	},
 }
 

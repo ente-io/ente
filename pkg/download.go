@@ -30,7 +30,8 @@ func (c *ClICtrl) downloadAndDecrypt(
 	decryptedPath := fmt.Sprintf("%s/%d.decrypted", dir, file.ID)
 	err = crypto.DecryptFile(downloadPath, decryptedPath, file.Key.MustDecrypt(deviceKey), encoding.DecodeBase64(file.FileNonce))
 	if err != nil {
-		return nil, fmt.Errorf("error decrypting file %d: %w", file.ID, err)
+		log.Printf("Error decrypting file %d: %s", file.ID, err)
+		return nil, model.ErrDecryption
 	}
 	return &decryptedPath, nil
 }
