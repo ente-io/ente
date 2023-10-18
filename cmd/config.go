@@ -45,7 +45,7 @@ func init() {
 	viper.SetDefault("host", "https://api.ente.io")
 
 	// Add 'config' subcommands to the root command
-	rootCmd.AddCommand(configCmd)
+	//rootCmd.AddCommand(configCmd)
 
 	// Add flags to the 'config store' and 'config update' subcommands
 	updateCmd.Flags().StringVarP(&host, "host", "H", viper.GetString("host"), "Update the 'host' configuration")
