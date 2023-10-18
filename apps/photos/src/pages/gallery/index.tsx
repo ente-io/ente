@@ -122,6 +122,7 @@ import { constructUserIDToEmailMap } from 'services/collectionService';
 import { getLocalFamilyData } from 'utils/user/family';
 import InMemoryStore, { MS_KEYS } from 'services/InMemoryStore';
 import { syncEmbeddings } from 'services/embeddingService';
+import { ClipService } from 'services/clipService';
 
 export const DeadCenter = styled('div')`
     flex: 1;
@@ -694,6 +695,7 @@ export default function Gallery() {
             await syncEntities();
             await syncMapEnabled();
             await syncEmbeddings();
+            await ClipService.scheduleImageEmbeddingExtraction();
         } catch (e) {
             switch (e.message) {
                 case ServerErrorCodes.SESSION_EXPIRED:
