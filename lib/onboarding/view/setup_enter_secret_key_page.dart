@@ -128,6 +128,10 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
                         _showIncorrectDetailsDialog(context, message: message);
                         return;
                       }
+                      if (widget.code == null) {
+                        _saveCode();
+                        return;
+                      }
                       ButtonResult? result = await showChoiceActionSheet(
                         context,
                         title: context.l10n.warning,
@@ -139,28 +143,7 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
 
                       if (result == null) return;
                       if (result.action == ButtonAction.first) {
-                        try {
-                          final account = _accountController.text.trim();
-                          final issuer = _issuerController.text.trim();
-                          final secret =
-                              _secretController.text.trim().replaceAll(' ', '');
-                          final Code newCode = widget.code == null
-                              ? Code.fromAccountAndSecret(
-                                  account,
-                                  issuer,
-                                  secret,
-                                )
-                              : widget.code!.copyWith(
-                                  account: account,
-                                  issuer: issuer,
-                                  secret: secret,
-                                );
-                          // Verify the validity of the code
-                          getOTP(newCode);
-                          Navigator.of(context).pop(newCode);
-                        } catch (e) {
-                          _showIncorrectDetailsDialog(context);
-                        }
+                        _saveCode();
                       }
                     },
                     child: Padding(
@@ -178,6 +161,30 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
         ),
       ),
     );
+  }
+
+  void _saveCode() {
+    try {
+      final account = _accountController.text.trim();
+      final issuer = _issuerController.text.trim();
+      final secret = _secretController.text.trim().replaceAll(' ', '');
+      final Code newCode = widget.code == null
+          ? Code.fromAccountAndSecret(
+              account,
+              issuer,
+              secret,
+            )
+          : widget.code!.copyWith(
+              account: account,
+              issuer: issuer,
+              secret: secret,
+            );
+      // Verify the validity of the code
+      getOTP(newCode);
+      Navigator.of(context).pop(newCode);
+    } catch (e) {
+      _showIncorrectDetailsDialog(context);
+    }
   }
 
   void _showIncorrectDetailsDialog(

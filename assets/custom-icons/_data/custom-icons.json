@@ -25,6 +25,9 @@
       "hex": "0051FF"
     },
     {
+      "title": "Bitwarden"
+    },
+    {
       "title": "Bybit"
     },
     {
@@ -33,7 +36,11 @@
       "hex": "D14633"
     },
     {
+      "title": "Cloudflare"
+    },
+    {
       "title": "Control D",
+      "slug": "controld",
       "hex": "5FD800"
     },
     {
@@ -45,14 +52,19 @@
       "hex": "858585"
     },
     {
-      "title": "Github",
-      "hex": "858585"
+      "title": "Firefox"
+    },
+    {
+      "title": "GitHub"
     },
     {
       "title": "Google"
     },
     {
       "title": "ING"
+    },
+    {
+      "title": "Instagram"
     },
     {
       "title": "Jagex",
@@ -77,6 +89,13 @@
       "title": "KuCoin",
       "hex": "01BC8D"
     },
+	  {
+      "title": "La Poste",
+	    "slug": "laposte"
+    },
+    {
+      "title": "Microsoft"
+    },
     {
       "title": "ngrok",
       "hex": "858585"
@@ -85,10 +104,19 @@
       "title": "Njalla"
     },
     {
+      "title": "Notion"
+    },
+    {
+      "title": "NVIDIA"
+    },
+    {
       "title": "Odido"
     },
     {
       "title": "Parsec"
+    },
+    {
+      "title": "PayPal"
     },
     {
       "title": "Peerberry",
@@ -110,10 +138,15 @@
       "color": "EF8300"
     },
     {
-      "title": "Privacy Guides"
+      "title": "Privacy Guides",
+      "slug": "privacyguides"
     },
     {
-      "title": "Privacy.com"
+      "title": "Privacy.com",
+      "slug": "privacy"
+    },
+    {
+      "title": "Proton"
     },
     {
       "title": "Revolt",
@@ -123,7 +156,11 @@
       "title": "SimpleLogin"
     },
     {
+      "title": "Snapchat"
+    },
+    {
       "title": "Standard Notes",
+      "slug": "standardnotes",
       "hex": "2173E6"
     },
     {
@@ -135,6 +172,7 @@
     },
     {
       "title": "Trading 212",
+      "slug": "trading212",
       "hex": "4BA4DE"
     },
     {
@@ -154,8 +192,11 @@
       "hex": "858585"
     },
     {
-      "title": "Ubisoft",
-      "hex": "4285f4"
+      "title": "Twitter",
+      "slug": "x"
+    },
+    {
+      "title": "Ubisoft"
     },
     {
       "title": "Unity",
@@ -170,6 +211,9 @@
     },
     {
       "title": "Wise"
+    },
+    {
+      "title": "X"
     },
     {
       "title": "NextDNS"
