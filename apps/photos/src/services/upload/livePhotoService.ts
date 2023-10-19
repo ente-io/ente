@@ -284,28 +284,25 @@ function removePotentialLivePhotoSuffix(
     filenameWithoutExtension: string,
     suffix?: string
 ) {
-    let regex: RegExp;
+    let presentSuffix: string;
     if (filenameWithoutExtension.endsWith(UNDERSCORE_THREE)) {
-        regex = getCaseInsensitiveSuffixRegex(UNDERSCORE_THREE);
+        presentSuffix = UNDERSCORE_THREE;
+    } else if (filenameWithoutExtension.endsWith(UNDERSCORE_HEVC)) {
+        presentSuffix = UNDERSCORE_HEVC;
     } else if (
-        filenameWithoutExtension
-            .toLowerCase()
-            .endsWith(UNDERSCORE_HEVC.toLowerCase())
+        filenameWithoutExtension.endsWith(UNDERSCORE_HEVC.toLowerCase())
     ) {
-        regex = getCaseInsensitiveSuffixRegex(UNDERSCORE_HEVC);
-    } else if (
-        suffix &&
-        filenameWithoutExtension.toLowerCase().endsWith(suffix.toLowerCase())
-    ) {
-        regex = getCaseInsensitiveSuffixRegex(suffix);
+        presentSuffix = UNDERSCORE_HEVC.toLowerCase();
+    } else if (suffix) {
+        if (filenameWithoutExtension.endsWith(suffix)) {
+            presentSuffix = suffix;
+        } else if (filenameWithoutExtension.endsWith(suffix.toLowerCase())) {
+            presentSuffix = suffix.toLowerCase();
+        }
     }
-    if (regex) {
-        return filenameWithoutExtension.replace(regex, '');
+    if (presentSuffix) {
+        return filenameWithoutExtension.slice(0, presentSuffix.length * -1);
     } else {
         return filenameWithoutExtension;
     }
-}
-
-function getCaseInsensitiveSuffixRegex(suffix: string) {
-    return new RegExp(suffix + '$', 'i');
 }
