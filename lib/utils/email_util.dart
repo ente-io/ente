@@ -13,9 +13,11 @@ import 'package:ente_auth/ui/tools/debug/log_file_viewer.dart';
 // import 'package:ente_auth/ui/tools/debug/log_file_viewer.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
 import 'package:ente_auth/utils/toast_util.dart';
+import 'package:file_saver/file_saver.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_email_sender/flutter_email_sender.dart';
+import 'package:intl/intl.dart';
 import 'package:logging/logging.dart';
 // import 'package:open_mail_app/open_mail_app.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -199,10 +201,23 @@ Future<void> shareLogs(
   );
   if (result?.action != null && result!.action == ButtonAction.second) {
     final Size size = MediaQuery.of(context).size;
-    await Share.shareFiles(
-      [zipFilePath],
-      sharePositionOrigin: Rect.fromLTWH(0, 0, size.width, size.height / 2),
-    );
+    if (Platform.isAndroid) {
+      DateTime now = DateTime.now().toUtc();
+      String shortMonthName = DateFormat('MMM').format(now); // Short month name
+      String logFileName =
+          'ente-logs-${now.year}-$shortMonthName-${now.day}-${now.hour}-${now.minute}';
+      await FileSaver.instance.saveAs(
+        name: logFileName,
+        filePath: zipFilePath,
+        mimeType: MimeType.zip,
+        ext: 'zip',
+      );
+    } else {
+      await Share.shareXFiles(
+        [XFile(zipFilePath, mimeType: 'application/zip')],
+        sharePositionOrigin: Rect.fromLTWH(0, 0, size.width, size.height / 2),
+      );
+    }
   }
 }
 
