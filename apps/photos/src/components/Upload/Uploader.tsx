@@ -169,6 +169,7 @@ export default function Uploader(props: Props) {
                 setUploadStage,
                 setUploadFilenames: setUploadFileNames,
                 setHasLivePhotos,
+                setUploadProgressView,
             },
             props.setFiles,
             publicCollectionGalleryContext

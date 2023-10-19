@@ -394,6 +394,7 @@ const ImageEditorOverlay = (props: IProps) => {
                                             };
 
                                             uploadManager.prepareForNewUpload();
+                                            uploadManager.showUploadProgressDialog();
 
                                             uploadManager.queueFilesForUpload(
                                                 [file],

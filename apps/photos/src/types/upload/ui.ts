@@ -39,4 +39,5 @@ export interface ProgressUpdater {
     >;
     setUploadFilenames: React.Dispatch<React.SetStateAction<UploadFileNames>>;
     setHasLivePhotos: React.Dispatch<React.SetStateAction<boolean>>;
+    setUploadProgressView: React.Dispatch<React.SetStateAction<boolean>>;
 }

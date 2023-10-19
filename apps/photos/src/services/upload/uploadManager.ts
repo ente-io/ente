@@ -88,6 +88,10 @@ class UploadManager {
         UIService.setUploadStage(UPLOAD_STAGES.START);
     }
 
+    showUploadProgressDialog() {
+        UIService.setUploadProgressView(true);
+    }
+
     async updateExistingFilesAndCollections(collections: Collection[]) {
         if (this.publicUploadProps.accessedThroughSharedURL) {
             this.existingFiles = await getLocalPublicFiles(
