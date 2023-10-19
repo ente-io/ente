@@ -3,9 +3,7 @@ import "dart:async";
 import "package:flutter/material.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/event_bus.dart";
-import "package:photos/ente_theme_data.dart";
 import "package:photos/events/tab_changed_event.dart";
-import "package:photos/generated/l10n.dart";
 import "package:photos/models/search/search_result.dart";
 import "package:photos/services/search_service.dart";
 import "package:photos/theme/ente_theme.dart";
@@ -49,79 +47,80 @@ class _SearchWidgetNewState extends State<SearchWidgetNew> {
       padding: const EdgeInsets.symmetric(vertical: 12),
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 8),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(8),
-          child: Container(
-            height: 44,
-            color: colorScheme.fillFaint,
-            child: TextFormField(
-              style: Theme.of(context).textTheme.titleMedium,
-              // Below parameters are to disable auto-suggestion
-              enableSuggestions: false,
-              autocorrect: false,
-              // Above parameters are to disable auto-suggestion
-              decoration: InputDecoration(
-                hintText: S.of(context).searchHintText,
-                filled: true,
-                contentPadding: const EdgeInsets.symmetric(
-                  vertical: 10,
-                ),
-                border: const UnderlineInputBorder(
-                  borderSide: BorderSide.none,
-                ),
-                focusedBorder: const UnderlineInputBorder(
-                  borderSide: BorderSide.none,
-                ),
-                prefixIconConstraints: const BoxConstraints(
-                  maxHeight: 44,
-                  maxWidth: 44,
-                  minHeight: 44,
-                  minWidth: 44,
-                ),
-                suffixIconConstraints: const BoxConstraints(
-                  maxHeight: 44,
-                  maxWidth: 44,
-                  minHeight: 44,
-                  minWidth: 44,
-                ),
-                prefixIcon: Hero(
-                  tag: "search_icon",
-                  child: Icon(
-                    Icons.search,
-                    color: Theme.of(context)
-                        .colorScheme
-                        .iconColor
-                        .withOpacity(0.5),
+        child: Container(
+          color: colorScheme.backgroundBase,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: Container(
+              height: 44,
+              color: colorScheme.fillFaint,
+              child: TextFormField(
+                style: Theme.of(context).textTheme.titleMedium,
+                // Below parameters are to disable auto-suggestion
+                enableSuggestions: false,
+                autocorrect: false,
+                // Above parameters are to disable auto-suggestion
+                decoration: InputDecoration(
+                  // hintText: S.of(context).searchHintText,
+                  hintText: "Search",
+                  filled: true,
+                  contentPadding: const EdgeInsets.symmetric(
+                    vertical: 10,
+                  ),
+                  border: const UnderlineInputBorder(
+                    borderSide: BorderSide.none,
+                  ),
+                  focusedBorder: const UnderlineInputBorder(
+                    borderSide: BorderSide.none,
+                  ),
+                  prefixIconConstraints: const BoxConstraints(
+                    maxHeight: 44,
+                    maxWidth: 44,
+                    minHeight: 44,
+                    minWidth: 44,
+                  ),
+                  suffixIconConstraints: const BoxConstraints(
+                    maxHeight: 44,
+                    maxWidth: 44,
+                    minHeight: 44,
+                    minWidth: 44,
+                  ),
+                  prefixIcon: Hero(
+                    tag: "search_icon",
+                    child: Icon(
+                      Icons.search,
+                      color: colorScheme.strokeFaint,
+                    ),
+                  ),
+                  /*Using valueListenableBuilder inside a stateful widget because this widget is only rebuild when
+                  setState is called when deboucncing is over and the spinner needs to be shown while debouncing */
+                  suffixIcon: ValueListenableBuilder(
+                    valueListenable: _debouncer.debounceActiveNotifier,
+                    builder: (
+                      BuildContext context,
+                      bool isDebouncing,
+                      Widget? child,
+                    ) {
+                      return SearchSuffixIcon(
+                        isDebouncing,
+                      );
+                    },
                   ),
                 ),
-                /*Using valueListenableBuilder inside a stateful widget because this widget is only rebuild when
-                setState is called when deboucncing is over and the spinner needs to be shown while debouncing */
-                suffixIcon: ValueListenableBuilder(
-                  valueListenable: _debouncer.debounceActiveNotifier,
-                  builder: (
-                    BuildContext context,
-                    bool isDebouncing,
-                    Widget? child,
-                  ) {
-                    return SearchSuffixIcon(
-                      isDebouncing,
-                    );
-                  },
-                ),
+                onChanged: (value) async {
+                  _query = value;
+                  final List<SearchResult> allResults =
+                      await getSearchResultsForQuery(context, value);
+                  /*checking if _query == value to make sure that the results are from the current query
+                  and not from the previous query (race condition).*/
+                  if (mounted && _query == value) {
+                    setState(() {
+                      _results.clear();
+                      _results.addAll(allResults);
+                    });
+                  }
+                },
               ),
-              onChanged: (value) async {
-                _query = value;
-                final List<SearchResult> allResults =
-                    await getSearchResultsForQuery(context, value);
-                /*checking if _query == value to make sure that the results are from the current query
-                and not from the previous query (race condition).*/
-                if (mounted && _query == value) {
-                  setState(() {
-                    _results.clear();
-                    _results.addAll(allResults);
-                  });
-                }
-              },
             ),
           ),
         ),

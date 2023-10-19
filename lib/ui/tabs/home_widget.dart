@@ -273,6 +273,7 @@ class _HomeWidgetState extends State<HomeWidget> {
     _accountConfiguredEvent.cancel();
     _intentDataStreamSubscription?.cancel();
     _collectionUpdatedEvent.cancel();
+    isOnSearchTabNotifier.dispose();
     super.dispose();
   }
 
@@ -427,53 +428,34 @@ class _HomeWidgetState extends State<HomeWidget> {
           child: ValueListenableBuilder(
             valueListenable: isOnSearchTabNotifier,
             builder: (context, value, child) {
-              return AnimatedContainer(
-                duration: const Duration(milliseconds: 300),
-                curve: Curves.easeInCubic,
-                // color: getEnteColorScheme(context).backgroundElevated2,
-                decoration: BoxDecoration(
-                  gradient: value
-                      ? null
-                      // ? LinearGradient(
-                      //     begin: Alignment.topCenter,
-                      //     end: Alignment.bottomCenter,
-                      //     colors: [
-                      //       colorScheme.backgroundBase,
-                      //       colorScheme.backgroundElevated2,
-                      //       // Colors.black,
-                      //     ],
-                      //   )
-                      : null,
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    value
-                        ? const SearchWidgetNew()
-                            .animate()
-                            .fadeIn(
-                              duration: const Duration(milliseconds: 175),
-                              curve: Curves.easeInOutSine,
-                            )
-                            .scale(
-                              begin: const Offset(0.6, 0.6),
-                              end: const Offset(1, 1),
-                              duration: const Duration(
-                                milliseconds: 175,
-                              ),
-                              curve: Curves.easeInOutSine,
-                            )
-                            .slide(
-                              begin: const Offset(0, 0.8),
-                              curve: Curves.easeInOutSine,
-                              duration: const Duration(
-                                milliseconds: 175,
-                              ),
-                            )
-                        : const SizedBox.shrink(),
-                    child!,
-                  ],
-                ),
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  value
+                      ? const SearchWidgetNew()
+                          .animate()
+                          .fadeIn(
+                            duration: const Duration(milliseconds: 175),
+                            curve: Curves.easeInOutSine,
+                          )
+                          .scale(
+                            begin: const Offset(0.6, 0.6),
+                            end: const Offset(1, 1),
+                            duration: const Duration(
+                              milliseconds: 175,
+                            ),
+                            curve: Curves.easeInOutSine,
+                          )
+                          .slide(
+                            begin: const Offset(0, 0.8),
+                            curve: Curves.easeInOutSine,
+                            duration: const Duration(
+                              milliseconds: 175,
+                            ),
+                          )
+                      : const SizedBox.shrink(),
+                  child!,
+                ],
               );
             },
             child: HomeBottomNavigationBar(
