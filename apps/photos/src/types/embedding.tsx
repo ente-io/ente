@@ -1,5 +1,5 @@
 export enum Model {
-    GGML_CLIP = 'ggml_clip',
+    GGML_CLIP = 'ggml-clip',
 }
 
 export interface EncryptedEmbedding {

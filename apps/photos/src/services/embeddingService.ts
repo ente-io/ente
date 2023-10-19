@@ -1,5 +1,6 @@
 import {
     Embedding,
+    EncryptedEmbedding,
     GetEmbeddingDiffResponse,
     PutEmbeddingRequest,
 } from 'types/embedding';
@@ -20,9 +21,9 @@ const EMBEDDINGS_TABLE = 'embeddings';
 const EMBEDDING_SYNC_TIME_TABLE = 'embedding_sync_time';
 
 export const getLocalEmbeddings = async () => {
-    const entities: Array<Embedding> =
+    const embeddings: Array<Embedding> =
         (await localForage.getItem<Embedding[]>(EMBEDDINGS_TABLE)) || [];
-    return entities;
+    return embeddings;
 };
 
 const getEmbeddingSyncTime = async () => {
@@ -43,7 +44,7 @@ export const syncEmbeddings = async () => {
         let response: GetEmbeddingDiffResponse;
         do {
             response = await getEmbeddingsDiff(sinceTime);
-            if (response.diff?.length) {
+            if (!response.diff?.length) {
                 return;
             }
             const newEmbeddings = await Promise.all(
@@ -90,6 +91,7 @@ export const getEmbeddingsDiff = async (
             `${ENDPOINT}/embeddings/diff`,
             {
                 sinceTime,
+                limit: DIFF_LIMIT,
             },
             {
                 'X-Auth-Token': token,
@@ -102,15 +104,23 @@ export const getEmbeddingsDiff = async (
     }
 };
 
-export const putEmbedding = async (putEmbeddingReq: PutEmbeddingRequest) => {
+export const putEmbedding = async (
+    putEmbeddingReq: PutEmbeddingRequest
+): Promise<EncryptedEmbedding> => {
     try {
         const token = getToken();
         if (!token) {
             return;
         }
-        await HTTPService.put(`${ENDPOINT}/embeddings`, putEmbeddingReq, null, {
-            'X-Auth-Token': token,
-        });
+        const resp = await HTTPService.put(
+            `${ENDPOINT}/embeddings`,
+            putEmbeddingReq,
+            null,
+            {
+                'X-Auth-Token': token,
+            }
+        );
+        return resp.data;
     } catch (e) {
         logError(e, 'put embedding failed');
         throw e;

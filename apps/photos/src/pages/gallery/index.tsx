@@ -915,7 +915,7 @@ export default function Gallery() {
         } else {
             setSearch(newSearch);
         }
-        setIsClipSearchResult(!!newSearch.clip);
+        setIsClipSearchResult(!!newSearch?.clip);
         if (!newSearch?.collection) {
             setIsInSearchMode(!!newSearch);
             setSetSearchResultSummary(summary);
