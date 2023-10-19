@@ -128,23 +128,7 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
                         _showIncorrectDetailsDialog(context, message: message);
                         return;
                       }
-                      if (widget.code == null) {
-                        _saveCode();
-                        return;
-                      }
-                      ButtonResult? result = await showChoiceActionSheet(
-                        context,
-                        title: context.l10n.warning,
-                        body: context.l10n.confirmUpdatingkey,
-                        firstButtonLabel: context.l10n.yes,
-                        secondButtonAction: ButtonAction.cancel,
-                        secondButtonLabel: context.l10n.cancel,
-                      );
-
-                      if (result == null) return;
-                      if (result.action == ButtonAction.first) {
-                        _saveCode();
-                      }
+                      await _saveCode();
                     },
                     child: Padding(
                       padding: const EdgeInsets.symmetric(
@@ -163,11 +147,25 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
     );
   }
 
-  void _saveCode() {
+  Future<void> _saveCode() async {
     try {
       final account = _accountController.text.trim();
       final issuer = _issuerController.text.trim();
       final secret = _secretController.text.trim().replaceAll(' ', '');
+      if (widget.code != null && widget.code!.secret != secret) {
+        ButtonResult? result = await showChoiceActionSheet(
+          context,
+          title: context.l10n.warning,
+          body: context.l10n.confirmUpdatingkey,
+          firstButtonLabel: context.l10n.yes,
+          secondButtonAction: ButtonAction.cancel,
+          secondButtonLabel: context.l10n.cancel,
+        );
+        if (result == null) return;
+        if (result.action != ButtonAction.first) {
+          return;
+        }
+      }
       final Code newCode = widget.code == null
           ? Code.fromAccountAndSecret(
               account,

@@ -55,7 +55,8 @@
       "title": "Firefox"
     },
     {
-      "title": "GitHub"
+      "title": "GitHub",
+      "hex": "858585"
     },
     {
       "title": "Google"
@@ -196,7 +197,8 @@
       "slug": "x"
     },
     {
-      "title": "Ubisoft"
+      "title": "Ubisoft",
+      "hex": "4285f4"
     },
     {
       "title": "Unity",
