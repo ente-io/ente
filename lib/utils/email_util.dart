@@ -200,24 +200,28 @@ Future<void> shareLogs(
     ],
   );
   if (result?.action != null && result!.action == ButtonAction.second) {
-    final Size size = MediaQuery.of(context).size;
-    if (Platform.isAndroid) {
-      DateTime now = DateTime.now().toUtc();
-      String shortMonthName = DateFormat('MMM').format(now); // Short month name
-      String logFileName =
-          'ente-logs-${now.year}-$shortMonthName-${now.day}-${now.hour}-${now.minute}';
-      await FileSaver.instance.saveAs(
-        name: logFileName,
-        filePath: zipFilePath,
-        mimeType: MimeType.zip,
-        ext: 'zip',
-      );
-    } else {
-      await Share.shareXFiles(
-        [XFile(zipFilePath, mimeType: 'application/zip')],
-        sharePositionOrigin: Rect.fromLTWH(0, 0, size.width, size.height / 2),
-      );
-    }
+    await exportLogs(context, zipFilePath);
+  }
+}
+
+Future<void> exportLogs(BuildContext context, String zipFilePath) async {
+  final Size size = MediaQuery.of(context).size;
+  if (Platform.isAndroid) {
+    DateTime now = DateTime.now().toUtc();
+    String shortMonthName = DateFormat('MMM').format(now); // Short month name
+    String logFileName =
+        'ente-logs-${now.year}-$shortMonthName-${now.day}-${now.hour}-${now.minute}';
+    await FileSaver.instance.saveAs(
+      name: logFileName,
+      filePath: zipFilePath,
+      mimeType: MimeType.zip,
+      ext: 'zip',
+    );
+  } else {
+    await Share.shareXFiles(
+      [XFile(zipFilePath, mimeType: 'application/zip')],
+      sharePositionOrigin: Rect.fromLTWH(0, 0, size.width, size.height / 2),
+    );
   }
 }
 
