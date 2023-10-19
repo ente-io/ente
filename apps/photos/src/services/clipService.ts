@@ -8,10 +8,11 @@ import { Embedding, Model } from 'types/embedding';
 import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
 import { logError } from 'utils/sentry';
 import { addLogLine } from 'utils/logging';
+import { CustomError } from 'utils/error';
 
 class ClipServiceImpl {
     private electronAPIs: ElectronAPIs;
-    private embeddingExtractionInProgress = false;
+    private embeddingExtractionInProgress: AbortController = null;
     private reRunNeeded = false;
 
     constructor() {
@@ -31,12 +32,13 @@ class ClipServiceImpl {
                     'clip embedding extraction not in progress, starting clip embedding extraction'
                 );
             }
-            this.embeddingExtractionInProgress = true;
+            const canceller = new AbortController();
+            this.embeddingExtractionInProgress = canceller;
             try {
-                await this.runClipEmbeddingExtraction();
+                await this.runClipEmbeddingExtraction(canceller);
             } finally {
-                this.embeddingExtractionInProgress = false;
-                if (this.reRunNeeded) {
+                this.embeddingExtractionInProgress = null;
+                if (!canceller.signal.aborted && this.reRunNeeded) {
                     this.reRunNeeded = false;
                     addLogLine('re-running clip embedding extraction');
                     setTimeout(
@@ -46,7 +48,9 @@ class ClipServiceImpl {
                 }
             }
         } catch (e) {
-            logError(e, 'failed to schedule clip embedding extraction');
+            if (e.message !== CustomError.REQUEST_CANCELLED) {
+                logError(e, 'failed to schedule clip embedding extraction');
+            }
         }
     };
 
@@ -59,10 +63,10 @@ class ClipServiceImpl {
         }
     };
 
-    private runClipEmbeddingExtraction = async () => {
+    private runClipEmbeddingExtraction = async (canceller: AbortController) => {
         try {
             const localFiles = await getLocalFiles();
-            const existingEmbeddings = await getLocalEmbeddings();
+            const existingEmbeddings = await getAllClipImageEmbeddings();
             const pendingFiles = await getNonClipEmbeddingExtractedFiles(
                 localFiles,
                 existingEmbeddings
@@ -72,28 +76,41 @@ class ClipServiceImpl {
             }
             for (const file of pendingFiles) {
                 try {
-                    const embedding = await this.extractClipImageEmbedding(
+                    if (canceller.signal.aborted) {
+                        throw Error(CustomError.REQUEST_CANCELLED);
+                    }
+                    const embeddingData = await this.extractClipImageEmbedding(
                         file
                     );
                     const comlinkCryptoWorker =
                         await ComlinkCryptoWorker.getInstance();
-                    const { file: encryptedEmbedding } =
+                    const { file: encryptedEmbeddingData } =
                         await comlinkCryptoWorker.encryptEmbedding(
-                            embedding,
+                            embeddingData,
                             file.key
                         );
                     await putEmbedding({
                         fileID: file.id,
-                        encryptedEmbedding: encryptedEmbedding.encryptedData,
-                        decryptionHeader: encryptedEmbedding.decryptionHeader,
+                        encryptedEmbedding:
+                            encryptedEmbeddingData.encryptedData,
+                        decryptionHeader:
+                            encryptedEmbeddingData.decryptionHeader,
                         model: Model.GGML_CLIP,
                     });
                 } catch (e) {
-                    logError(e, 'failed to extract clip embedding for file');
+                    if (e.message !== CustomError.REQUEST_CANCELLED) {
+                        logError(
+                            e,
+                            'failed to extract clip embedding for file'
+                        );
+                    }
                 }
             }
         } catch (e) {
-            logError(e, 'failed to extract clip embedding');
+            if (e.message !== CustomError.REQUEST_CANCELLED) {
+                logError(e, 'failed to extract clip embedding');
+            }
+            throw e;
         }
     };
 
@@ -118,7 +135,17 @@ const getNonClipEmbeddingExtractedFiles = async (
     existingEmbeddings.forEach((embedding) =>
         existingEmbeddingFileIds.add(embedding.fileID)
     );
-    return files.filter((file) => !existingEmbeddingFileIds.has(file.id));
+    const idSet = new Set<number>();
+    return files.filter((file) => {
+        if (idSet.has(file.id)) {
+            return false;
+        }
+        if (existingEmbeddingFileIds.has(file.id)) {
+            return false;
+        }
+        idSet.add(file.id);
+        return true;
+    });
 };
 
 export const getAllClipImageEmbeddings = async () => {
