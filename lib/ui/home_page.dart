@@ -158,7 +158,7 @@ class _HomePageState extends State<HomePage> {
         }
       },
       child: Scaffold(
-        drawerEnableOpenDragGesture: true,
+        drawerEnableOpenDragGesture: !Platform.isAndroid,
         drawer: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 428),
           child: Drawer(
