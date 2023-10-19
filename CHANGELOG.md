@@ -4,7 +4,7 @@
 
 ### Bug Fixes
 
-- Fixed misaligned icons in photoviewer
+- Fixed misaligned icons in photo-viewer
 - Fixed issue with Motion photo upload
 - Fixed issue with Live-photo upload
 - other minor ux improvement
