@@ -107,21 +107,6 @@ class _AdvancedSectionWidgetState extends State<AdvancedSectionWidget> {
           ),
         ),
         sectionOptionSpacing,
-        MenuItemWidget(
-          captionedTextWidget: CaptionedTextWidget(
-            title: l10n.crashAndErrorReporting,
-          ),
-          trailingWidget: ToggleSwitchWidget(
-            value: () => SuperLogging.shouldReportErrors(),
-            onChanged: () async {
-              await SuperLogging.setShouldReportErrors(
-                !SuperLogging.shouldReportErrors(),
-              );
-              setState(() {});
-            },
-          ),
-        ),
-        sectionOptionSpacing,
         if (Platform.isAndroid) ...[
           MenuItemWidget(
             captionedTextWidget: CaptionedTextWidget(
@@ -139,6 +124,21 @@ class _AdvancedSectionWidgetState extends State<AdvancedSectionWidget> {
           ),
           sectionOptionSpacing,
         ],
+        MenuItemWidget(
+          captionedTextWidget: CaptionedTextWidget(
+            title: l10n.crashAndErrorReporting,
+          ),
+          trailingWidget: ToggleSwitchWidget(
+            value: () => SuperLogging.shouldReportErrors(),
+            onChanged: () async {
+              await SuperLogging.setShouldReportErrors(
+                !SuperLogging.shouldReportErrors(),
+              );
+              setState(() {});
+            },
+          ),
+        ),
+        sectionOptionSpacing,
       ],
     );
   }
