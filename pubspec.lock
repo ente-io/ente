@@ -492,6 +492,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "6.1.4"
+  file_saver:
+    dependency: "direct main"
+    description:
+      name: file_saver
+      sha256: "8ffd91ae9f543c5ebbfec71a814ee5aa9e21176d31335133308abf63f4c42e8a"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.2.9"
   firebase_core:
     dependency: "direct main"
     description:
