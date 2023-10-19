@@ -39,22 +39,17 @@ class IconUtils {
         width,
       );
     } else if (title.isNotEmpty) {
-      return SizedBox(
-        width: width + 6,
-        child: CircleAvatar(
-          backgroundColor: getEnteColorScheme(context).avatarColors[
-              title.hashCode % getEnteColorScheme(context).avatarColors.length],
-          child: Text(
-            title.toUpperCase()[0],
-            // fixed color
-            style: width > 24
-                ? getEnteTextTheme(context)
-                    .largeBold
-                    .copyWith(color: Colors.white)
-                : getEnteTextTheme(context)
-                    .bodyBold
-                    .copyWith(color: Colors.white),
-          ),
+      bool showLargeIcon = width > 24;
+      return CircleAvatar(
+        radius: width / 2,
+        backgroundColor: getEnteColorScheme(context).avatarColors[
+            title.hashCode % getEnteColorScheme(context).avatarColors.length],
+        child: Text(
+          title.toUpperCase()[0],
+          // fixed color
+          style: showLargeIcon
+              ? getEnteTextTheme(context).h3Bold.copyWith(color: Colors.white)
+              : getEnteTextTheme(context).body.copyWith(color: Colors.white),
         ),
       );
     } else {
