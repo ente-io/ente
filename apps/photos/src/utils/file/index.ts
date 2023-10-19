@@ -292,13 +292,13 @@ export async function decryptFile(
     }
 }
 
-export function fileNameWithoutExtension(filename: string) {
+export function getFileNameWithoutExtension(filename: string) {
     const lastDotPosition = filename.lastIndexOf('.');
     if (lastDotPosition === -1) return filename;
     else return filename.slice(0, lastDotPosition);
 }
 
-export function fileExtensionWithDot(filename: string) {
+export function getFileExtensionWithDot(filename: string) {
     const lastDotPosition = filename.lastIndexOf('.');
     if (lastDotPosition === -1) return '';
     else return filename.slice(lastDotPosition);
