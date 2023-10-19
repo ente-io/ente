@@ -25,12 +25,18 @@
       "hex": "0051FF"
     },
     {
+      "title": "Bitwarden"
+    },
+    {
       "title": "Bybit"
     },
     {
       "title": "Channel Island Hosting",
       "slug": "cih",
       "hex": "D14633"
+    },
+    {
+      "title": "Cloudflare"
     },
     {
       "title": "Control D",
@@ -48,8 +54,7 @@
       "title": "Firefox"
     },
     {
-      "title": "Github",
-      "hex": "858585"
+      "title": "GitHub"
     },
     {
       "title": "Google"
@@ -98,6 +103,12 @@
       "title": "Njalla"
     },
     {
+      "title": "Notion"
+    },
+    {
+      "title": "NVIDIA"
+    },
+    {
       "title": "Odido"
     },
     {
@@ -142,6 +153,9 @@
       "title": "SimpleLogin"
     },
     {
+      "title": "Snapchat"
+    },
+    {
       "title": "Standard Notes",
       "hex": "2173E6"
     },
@@ -177,8 +191,7 @@
       "slug": "x"
     },
     {
-      "title": "Ubisoft",
-      "hex": "4285f4"
+      "title": "Ubisoft"
     },
     {
       "title": "Unity",
