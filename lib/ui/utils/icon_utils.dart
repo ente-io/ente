@@ -1,8 +1,8 @@
 import 'dart:convert';
 
+import 'package:ente_auth/theme/ente_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/svg.dart';
 
 class IconUtils {
@@ -19,6 +19,7 @@ class IconUtils {
   }
 
   Widget getIcon(
+    BuildContext context,
     String provider, {
     double width = 24,
   }) {
@@ -36,6 +37,25 @@ class IconUtils {
         title,
         _simpleIcons[title],
         width,
+      );
+    } else if (title.isNotEmpty) {
+      return SizedBox(
+        width: width + 6,
+        child: CircleAvatar(
+          backgroundColor: getEnteColorScheme(context).avatarColors[
+              title.hashCode % getEnteColorScheme(context).avatarColors.length],
+          child: Text(
+            title.toUpperCase()[0],
+            // fixed color
+            style: width > 24
+                ? getEnteTextTheme(context)
+                    .largeBold
+                    .copyWith(color: Colors.white)
+                : getEnteTextTheme(context)
+                    .bodyBold
+                    .copyWith(color: Colors.white),
+          ),
+        ),
       );
     } else {
       return const SizedBox.shrink();

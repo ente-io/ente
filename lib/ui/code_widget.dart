@@ -325,6 +325,7 @@ class _CodeWidgetState extends State<CodeWidget> {
           ? const EdgeInsets.only(left: 16)
           : const EdgeInsets.all(0),
       child: IconUtils.instance.getIcon(
+        context,
         safeDecode(widget.code.issuer).trim(),
         width: _shouldShowLargeIcon ? 42 : 24,
       ),
