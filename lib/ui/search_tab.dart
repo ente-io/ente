@@ -3,7 +3,6 @@ import "package:photos/models/search/search_result.dart";
 import "package:photos/models/search/search_types.dart";
 import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/viewer/search/search_section.dart";
-import "package:photos/ui/viewer/search/search_widget.dart";
 
 class SearchTab extends StatefulWidget {
   const SearchTab({Key? key}) : super(key: key);
@@ -20,14 +19,18 @@ class _SearchTabState extends State<SearchTab> {
 
   @override
   Widget build(BuildContext context) {
-    return const Column(
-      children: [
-        Align(
-          alignment: Alignment.topRight,
-          child: SearchIconWidget(),
-        ),
-        AllSearchSections(),
-      ],
+    // return const Column(
+    //   children: [
+    //     Align(
+    //       alignment: Alignment.topRight,
+    //       child: SearchIconWidget(),
+    //     ),
+    //     AllSearchSections(),
+    //   ],
+    // );
+    return const Padding(
+      padding: EdgeInsets.only(top: 8),
+      child: AllSearchSections(),
     );
   }
 
