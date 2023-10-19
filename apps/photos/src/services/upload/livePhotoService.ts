@@ -12,7 +12,12 @@ import {
 } from 'types/upload';
 import { CustomError } from 'utils/error';
 import { getFileTypeFromExtensionForLivePhotoClustering } from 'utils/file/livePhoto';
-import { splitFilenameAndExtension, isImageOrVideo } from 'utils/file';
+import {
+    splitFilenameAndExtension,
+    isImageOrVideo,
+    getFileExtensionWithDot,
+    getFileNameWithoutExtension,
+} from 'utils/file';
 import { logError } from 'utils/sentry';
 import { getUint8ArrayView } from '../readerService';
 import { extractFileMetadata } from './fileService';
@@ -33,7 +38,6 @@ const UNDERSCORE_THREE = '_3';
 // Note: The icloud-photos-downloader library appends _HVEC to the end of the filename in case of live photos
 // https://github.com/icloud-photos-downloader/icloud_photos_downloader
 const UNDERSCORE_HEVC = '_HVEC';
-const UNDERSCORE = '_';
 
 export async function getLivePhotoFileType(
     livePhotoAssets: LivePhotoAssets
@@ -219,18 +223,38 @@ function areFilesLivePhotoAssets(
     firstFileIdentifier: LivePhotoIdentifier,
     secondFileIdentifier: LivePhotoIdentifier
 ) {
+    const haveSameCollectionID =
+        firstFileIdentifier.collectionID === secondFileIdentifier.collectionID;
+    const areNotSameFileType =
+        firstFileIdentifier.fileType !== secondFileIdentifier.fileType;
+
+    let firstFileNameWithoutSuffix: string;
+    let secondFileNameWithoutSuffix: string;
+    if (firstFileIdentifier.fileType === FILE_TYPE.IMAGE) {
+        firstFileNameWithoutSuffix = removePotentialLivePhotoSuffix(
+            getFileNameWithoutExtension(firstFileIdentifier.name),
+            // Note: The Google Live Photo image file can have video extension appended as suffix, passing that to removePotentialLivePhotoSuffix to remove it
+            // Example: IMG_20210630_0001.mp4.jpg (Google Live Photo image file)
+            getFileExtensionWithDot(secondFileIdentifier.name)
+        );
+        secondFileNameWithoutSuffix = removePotentialLivePhotoSuffix(
+            getFileNameWithoutExtension(firstFileIdentifier.name)
+        );
+    } else {
+        firstFileNameWithoutSuffix = removePotentialLivePhotoSuffix(
+            getFileNameWithoutExtension(firstFileIdentifier.name)
+        );
+        secondFileNameWithoutSuffix = removePotentialLivePhotoSuffix(
+            getFileNameWithoutExtension(secondFileIdentifier.name),
+            getFileExtensionWithDot(firstFileIdentifier.name)
+        );
+    }
     if (
-        firstFileIdentifier.collectionID ===
-            secondFileIdentifier.collectionID &&
-        firstFileIdentifier.fileType !== secondFileIdentifier.fileType &&
+        haveSameCollectionID &&
         isImageOrVideo(firstFileIdentifier.fileType) &&
         isImageOrVideo(secondFileIdentifier.fileType) &&
-        removePotentailLivePhotoSuffix(
-            splitFilenameAndExtension(firstFileIdentifier.name)[0]
-        ) ===
-            removePotentailLivePhotoSuffix(
-                splitFilenameAndExtension(secondFileIdentifier.name)[0]
-            )
+        areNotSameFileType &&
+        firstFileNameWithoutSuffix === secondFileNameWithoutSuffix
     ) {
         // checks size of live Photo assets are less than allowed limit
         // I did that based on the assumption that live photo assets ideally would not be larger than LIVE_PHOTO_ASSET_SIZE_LIMIT
@@ -256,11 +280,32 @@ function areFilesLivePhotoAssets(
     return false;
 }
 
-function removePotentailLivePhotoSuffix(filename: string) {
-    if (filename.endsWith(UNDERSCORE_THREE)) {
-        return filename.slice(0, filename.lastIndexOf(UNDERSCORE));
-    } else if (filename.toLowerCase().endsWith(UNDERSCORE_HEVC)) {
-        return filename.slice(0, filename.lastIndexOf(UNDERSCORE_HEVC));
+function removePotentialLivePhotoSuffix(
+    filenameWithoutExtension: string,
+    suffix?: string
+) {
+    let regex: RegExp;
+    if (filenameWithoutExtension.endsWith(UNDERSCORE_THREE)) {
+        regex = getCaseInsensitiveSuffixRegex(UNDERSCORE_THREE);
+    } else if (
+        filenameWithoutExtension
+            .toLowerCase()
+            .endsWith(UNDERSCORE_HEVC.toLowerCase())
+    ) {
+        regex = getCaseInsensitiveSuffixRegex(UNDERSCORE_HEVC);
+    } else if (
+        suffix &&
+        filenameWithoutExtension.toLowerCase().endsWith(suffix.toLowerCase())
+    ) {
+        regex = getCaseInsensitiveSuffixRegex(suffix);
     }
-    return filename;
+    if (regex) {
+        return filenameWithoutExtension.replace(regex, '');
+    } else {
+        return filenameWithoutExtension;
+    }
+}
+
+function getCaseInsensitiveSuffixRegex(suffix: string) {
+    return new RegExp(suffix + '$', 'i');
 }
