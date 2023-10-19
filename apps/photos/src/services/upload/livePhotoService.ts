@@ -238,7 +238,7 @@ function areFilesLivePhotoAssets(
             getFileExtensionWithDot(secondFileIdentifier.name)
         );
         secondFileNameWithoutSuffix = removePotentialLivePhotoSuffix(
-            getFileNameWithoutExtension(firstFileIdentifier.name)
+            getFileNameWithoutExtension(secondFileIdentifier.name)
         );
     } else {
         firstFileNameWithoutSuffix = removePotentialLivePhotoSuffix(
