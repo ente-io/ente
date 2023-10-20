@@ -6,7 +6,6 @@ import {
     Tab,
     Tabs,
     Typography,
-    useTheme,
 } from '@mui/material';
 import {
     useEffect,
@@ -38,6 +37,9 @@ import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import MenuItemDivider from 'components/Menu/MenuItemDivider';
 import AreYouSureCloseDialog from './AreYouSureCloseDialog';
 import { t } from 'i18next';
+import { EnteDrawer } from 'components/EnteDrawer';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import MenuIcon from '@mui/icons-material/Menu';
 
 interface IProps {
     file: EnteFile;
@@ -83,6 +85,8 @@ const ImageEditorOverlay = (props: IProps) => {
     const [canvasLoading, setCanvasLoading] = useState(false);
 
     const [showBeforeCloseDialog, setShowBeforeCloseDialog] = useState(false);
+
+    const [showControlsDrawer, setShowControlsDrawer] = useState(true);
 
     useEffect(() => {
         if (!canvasRef.current) {
@@ -188,8 +192,6 @@ const ImageEditorOverlay = (props: IProps) => {
         loadCanvas();
     }, [props.show, props.file]);
 
-    const theme = useTheme();
-
     const exportCanvasToBlob = (callback: (blob: Blob) => void) => {
         const canvas = originalSizeCanvasRef.current;
         if (!canvas) return;
@@ -218,10 +220,20 @@ const ImageEditorOverlay = (props: IProps) => {
                             backdropFilter: 'blur(5px)',
                         }}
                         open>
-                        <Box padding="3rem" width="100%" height="100%">
-                            <Typography variant="h2" fontWeight="bold">
-                                {t('PHOTO_EDITOR')}
-                            </Typography>
+                        <Box padding="1rem" width="100%" height="100%">
+                            <HorizontalFlex
+                                justifyContent={'space-between'}
+                                alignItems={'center'}>
+                                <Typography variant="h2" fontWeight="bold">
+                                    {t('PHOTO_EDITOR')}
+                                </Typography>
+                                <IconButton
+                                    onClick={() => {
+                                        setShowControlsDrawer(true);
+                                    }}>
+                                    <MenuIcon />
+                                </IconButton>
+                            </HorizontalFlex>
                             <Box
                                 display="inline-block"
                                 width="100%"
@@ -260,16 +272,20 @@ const ImageEditorOverlay = (props: IProps) => {
                                 </Box>
                             </Box>
                         </Box>
-                        <Box
-                            height="100%"
-                            width="30rem"
-                            bgcolor={theme.colors.background.elevated}
-                            padding="1rem"
-                            boxSizing="border-box"
-                            sx={{
-                                overflowY: 'auto',
+                        <EnteDrawer
+                            variant="persistent"
+                            anchor="right"
+                            open={showControlsDrawer}
+                            onClose={() => {
+                                setShowBeforeCloseDialog(true);
                             }}>
-                            <HorizontalFlex justifyContent={'flex-end'}>
+                            <HorizontalFlex justifyContent={'space-between'}>
+                                <IconButton
+                                    onClick={() => {
+                                        setShowControlsDrawer(false);
+                                    }}>
+                                    <ChevronRightIcon />
+                                </IconButton>
                                 <IconButton
                                     onClick={() => {
                                         setShowBeforeCloseDialog(true);
@@ -308,7 +324,6 @@ const ImageEditorOverlay = (props: IProps) => {
                                     label={t('RESTORE_ORIGINAL')}
                                 />
                             </MenuItemGroup>
-
                             {currentTab === 'transform' && (
                                 <ImageEditorOverlayContext.Provider
                                     value={{
@@ -336,7 +351,6 @@ const ImageEditorOverlay = (props: IProps) => {
                                     setInvert={setInvert}
                                 />
                             )}
-
                             <MenuSectionTitle title={t('EXPORT')} />
                             <MenuItemGroup>
                                 <EnteMenuItem
@@ -421,7 +435,9 @@ const ImageEditorOverlay = (props: IProps) => {
                                     label={t('SAVE_A_COPY_TO_ENTE')}
                                 />
                             </MenuItemGroup>
-                        </Box>
+                        </EnteDrawer>
+                        {/* <Box> */}
+                        {/* </Box> */}
                     </Backdrop>
                     <AreYouSureCloseDialog
                         open={showBeforeCloseDialog}
