@@ -3,6 +3,7 @@ package crypto
 import (
 	"encoding/base64"
 	"encoding/binary"
+	"errors"
 	"fmt"
 	"github.com/minio/blake2b-simd"
 	"golang.org/x/crypto/argon2"
@@ -20,7 +21,15 @@ const (
 	cryptoKDFBlake2bBytesMax              = 64
 	cryptoGenerichashBlake2bSaltBytes     = 16
 	cryptoGenerichashBlake2bPersonalBytes = 16
+	BoxSealBytes                          = 48 // 32 for the ephemeral public key + 16 for the MAC
 )
+
+var (
+	ErrOpenBox       = errors.New("failed to open box")
+	ErrSealedOpenBox = errors.New("failed to open sealed box")
+)
+
+const ()
 
 // DeriveArgonKey generates a 32-bit cryptographic key using the Argon2id algorithm.
 // Parameters:
