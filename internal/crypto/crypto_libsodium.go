@@ -20,7 +20,7 @@ import (
 //   - A byte slice representing the encrypted data.
 //   - A byte slice representing the header of the encrypted data.
 //   - An error object, which is nil if no error occurs.
-func EncryptChaCha20poly1305(data []byte, key []byte) ([]byte, []byte, error) {
+func EncryptChaCha20poly1305LibSodium(data []byte, key []byte) ([]byte, []byte, error) {
 	var buf bytes.Buffer
 	encoder := sodium.MakeSecretStreamXCPEncoder(sodium.SecretStreamXCPKey{Bytes: key}, &buf)
 	_, err := encoder.WriteAndClose(data)
@@ -29,6 +29,18 @@ func EncryptChaCha20poly1305(data []byte, key []byte) ([]byte, []byte, error) {
 		return nil, nil, err
 	}
 	return buf.Bytes(), encoder.Header().Bytes, nil
+}
+
+func EncryptChaCha20poly1305(data []byte, key []byte) ([]byte, []byte, error) {
+	encryptor, header, err := NewEncryptor(key)
+	if err != nil {
+		return nil, nil, err
+	}
+	encoded, err := encryptor.Push(data, TagFinal)
+	if err != nil {
+		return nil, nil, err
+	}
+	return encoded, header, nil
 }
 
 // decryptChaCha20poly1305 decrypts the given data using the ChaCha20-Poly1305 algorithm.
