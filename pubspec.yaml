@@ -37,6 +37,7 @@ dependencies:
       url: https://github.com/ente-io/plus_plugins.git
       ref: check_mobile_first
       path: packages/connectivity_plus/connectivity_plus/
+  cross_file: ^0.3.3
   crypto: ^3.0.2
   cupertino_icons: ^1.0.0
   defer_pointer: ^0.0.2

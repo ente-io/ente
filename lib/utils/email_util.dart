@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:archive/archive_io.dart';
+import "package:cross_file/cross_file.dart";
 import 'package:email_validator/email_validator.dart';
 import "package:file_saver/file_saver.dart";
 import 'package:flutter/cupertino.dart';
