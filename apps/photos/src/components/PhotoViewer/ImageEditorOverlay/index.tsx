@@ -34,6 +34,7 @@ import { FileWithCollection } from 'types/upload';
 import uploadManager from 'services/upload/uploadManager';
 import { getLocalCollections } from 'services/collectionService';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
+import MenuItemDivider from 'components/Menu/MenuItemDivider';
 
 interface IProps {
     file: EnteFile;
@@ -353,6 +354,7 @@ const ImageEditorOverlay = (props: IProps) => {
                                     }}
                                     label={'Download Edited'}
                                 />
+                                <MenuItemDivider />
                                 <EnteMenuItem
                                     startIcon={<CloudUploadIcon />}
                                     onClick={async () => {

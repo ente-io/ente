@@ -1,7 +1,7 @@
 import { EnteMenuItem } from 'components/Menu/EnteMenuItem';
 import { MenuItemGroup } from 'components/Menu/MenuItemGroup';
 import MenuSectionTitle from 'components/Menu/MenuSectionTitle';
-import { useContext } from 'react';
+import { Fragment, useContext } from 'react';
 import { ImageEditorOverlayContext } from '.';
 import CropSquareIcon from '@mui/icons-material/CropSquare';
 import Crop169Icon from '@mui/icons-material/Crop169';
@@ -9,6 +9,7 @@ import Crop32Icon from '@mui/icons-material/Crop32';
 import RotateLeftIcon from '@mui/icons-material/RotateLeft';
 import RotateRightIcon from '@mui/icons-material/RotateRight';
 import FlipIcon from '@mui/icons-material/Flip';
+import MenuItemDivider from 'components/Menu/MenuItemDivider';
 
 const PRESET_ASPECT_RATIOS = [
     {
@@ -185,28 +186,32 @@ const TransformMenu = () => {
                     marginBottom: '1rem',
                 }}>
                 {PRESET_ASPECT_RATIOS.map((ratio, index) => (
-                    <EnteMenuItem
-                        disabled={canvasLoading}
-                        key={index}
-                        startIcon={ratio.icon}
-                        onClick={() => {
-                            setCanvasLoading(true);
+                    <Fragment key={index}>
+                        <EnteMenuItem
+                            disabled={canvasLoading}
+                            startIcon={ratio.icon}
+                            onClick={() => {
+                                setCanvasLoading(true);
 
-                            cropCanvas(
-                                canvasRef.current,
-                                ratio.width,
-                                ratio.height
-                            );
-                            cropCanvas(
-                                originalSizeCanvasRef.current,
-                                ratio.width,
-                                ratio.height
-                            );
-                            setCanvasLoading(false);
-                            setTransformationPerformed(true);
-                        }}
-                        label={`${ratio.width}:${ratio.height}`}
-                    />
+                                cropCanvas(
+                                    canvasRef.current,
+                                    ratio.width,
+                                    ratio.height
+                                );
+                                cropCanvas(
+                                    originalSizeCanvasRef.current,
+                                    ratio.width,
+                                    ratio.height
+                                );
+                                setCanvasLoading(false);
+                                setTransformationPerformed(true);
+                            }}
+                            label={`${ratio.width}:${ratio.height}`}
+                        />
+                        {index !== PRESET_ASPECT_RATIOS.length - 1 && (
+                            <MenuItemDivider />
+                        )}
+                    </Fragment>
                 ))}
             </MenuItemGroup>
             <MenuItemGroup
@@ -214,27 +219,32 @@ const TransformMenu = () => {
                     marginBottom: '1rem',
                 }}>
                 {PRESET_ASPECT_RATIOS.map((ratio, index) => (
-                    <EnteMenuItem
-                        disabled={canvasLoading}
-                        key={index}
-                        startIcon={ratio.icon}
-                        onClick={() => {
-                            setCanvasLoading(true);
-                            cropCanvas(
-                                canvasRef.current,
-                                ratio.height,
-                                ratio.width
-                            );
-                            cropCanvas(
-                                originalSizeCanvasRef.current,
-                                ratio.height,
-                                ratio.width
-                            );
-                            setCanvasLoading(false);
-                            setTransformationPerformed(true);
-                        }}
-                        label={`${ratio.height}:${ratio.width}`}
-                    />
+                    <Fragment key={index}>
+                        <EnteMenuItem
+                            disabled={canvasLoading}
+                            key={index}
+                            startIcon={ratio.icon}
+                            onClick={() => {
+                                setCanvasLoading(true);
+                                cropCanvas(
+                                    canvasRef.current,
+                                    ratio.height,
+                                    ratio.width
+                                );
+                                cropCanvas(
+                                    originalSizeCanvasRef.current,
+                                    ratio.height,
+                                    ratio.width
+                                );
+                                setCanvasLoading(false);
+                                setTransformationPerformed(true);
+                            }}
+                            label={`${ratio.height}:${ratio.width}`}
+                        />
+                        {index !== PRESET_ASPECT_RATIOS.length - 1 && (
+                            <MenuItemDivider />
+                        )}
+                    </Fragment>
                 ))}
             </MenuItemGroup>
             <MenuSectionTitle title={'Rotation'} />
@@ -254,6 +264,7 @@ const TransformMenu = () => {
                     }}
                     label="Rotate Left 90˚"
                 />
+                <MenuItemDivider />
                 <EnteMenuItem
                     disabled={canvasLoading}
                     startIcon={<RotateRightIcon />}
@@ -284,6 +295,7 @@ const TransformMenu = () => {
                     }}
                     label="Flip Vertically"
                 />
+                <MenuItemDivider />
                 <EnteMenuItem
                     disabled={canvasLoading}
                     startIcon={<FlipIcon />}
