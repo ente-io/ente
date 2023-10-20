@@ -72,6 +72,7 @@ class ClipServiceImpl {
                 existingEmbeddings
             );
             if (pendingFiles.length === 0) {
+                addLogLine('no clip embedding extraction needed, all done');
                 return;
             }
             for (const file of pendingFiles) {
