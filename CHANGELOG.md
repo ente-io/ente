@@ -1,5 +1,14 @@
 # CHANGELOG
 
+## v1.6.67
+
+### Bug Fixes
+
+- Fixed misaligned icons in photo-viewer
+- Fixed issue with Motion photo upload
+- Fixed issue with Live-photo upload
+- other minor ux improvement
+
 ## v1.6.66
 
 ### Bug Fixes
