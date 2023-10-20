@@ -42,14 +42,17 @@ class _SearchWidgetNewState extends State<SearchWidgetNew> {
         focusNode.requestFocus();
       }
     });
+
     SchedulerBinding.instance.addPostFrameCallback((_) {
-      final RenderBox box =
-          widgetKey.currentContext!.findRenderObject() as RenderBox;
-      final heightOfWidget = box.size.height;
-      final offsetPosition = box.localToGlobal(Offset.zero);
-      final y = offsetPosition.dy;
-      final heightOfScreen = MediaQuery.sizeOf(context).height;
-      _distanceOfWidgetFromBottom = heightOfScreen - (y + heightOfWidget);
+      Future.delayed(const Duration(milliseconds: 200), () {
+        final RenderBox box =
+            widgetKey.currentContext!.findRenderObject() as RenderBox;
+        final heightOfWidget = box.size.height;
+        final offsetPosition = box.localToGlobal(Offset.zero);
+        final y = offsetPosition.dy;
+        final heightOfScreen = MediaQuery.sizeOf(context).height;
+        _distanceOfWidgetFromBottom = heightOfScreen - (y + heightOfWidget);
+      });
     });
   }
 

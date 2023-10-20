@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
+import "package:flutter_animate/flutter_animate.dart";
 import "package:flutter_local_notifications/flutter_local_notifications.dart";
 import 'package:logging/logging.dart';
 import 'package:media_extension/media_extension_action_types.dart';
@@ -432,26 +433,26 @@ class _HomeWidgetState extends State<HomeWidget> {
                 children: [
                   value
                       ? const SearchWidgetNew()
-                      // .animate()
-                      // .fadeIn(
-                      //   duration: const Duration(milliseconds: 175),
-                      //   curve: Curves.easeInOutSine,
-                      // )
-                      // .scale(
-                      //   begin: const Offset(0.6, 0.6),
-                      //   end: const Offset(1, 1),
-                      //   duration: const Duration(
-                      //     milliseconds: 175,
-                      //   ),
-                      //   curve: Curves.easeInOutSine,
-                      // )
-                      // .slide(
-                      //   begin: const Offset(0, 0.8),
-                      //   curve: Curves.easeInOutSine,
-                      //   duration: const Duration(
-                      //     milliseconds: 175,
-                      //   ),
-                      // )
+                          .animate()
+                          .fadeIn(
+                            duration: const Duration(milliseconds: 175),
+                            curve: Curves.easeInOutSine,
+                          )
+                          .scale(
+                            begin: const Offset(0.6, 0.6),
+                            end: const Offset(1, 1),
+                            duration: const Duration(
+                              milliseconds: 175,
+                            ),
+                            curve: Curves.easeInOutSine,
+                          )
+                          .slide(
+                            begin: const Offset(0, 0.8),
+                            curve: Curves.easeInOutSine,
+                            duration: const Duration(
+                              milliseconds: 175,
+                            ),
+                          )
                       : const SizedBox.shrink(),
                   child!,
                 ],
