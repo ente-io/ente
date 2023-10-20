@@ -27,9 +27,8 @@ class _SearchWidgetNewState extends State<SearchWidgetNew> {
   final Logger _logger = Logger((_SearchWidgetNewState).toString());
   late FocusNode focusNode;
   StreamSubscription<TabDoubleTapEvent>? _tabDoubleTapEvent;
-  final _bottomPaddingNotifier = ValueNotifier<double>(0);
+  double _bottomPadding = 0.0;
   double _distanceOfWidgetFromBottom = 0;
-  //Check if globalKey is necessary
   GlobalKey widgetKey = GlobalKey();
 
   @override
@@ -58,10 +57,10 @@ class _SearchWidgetNewState extends State<SearchWidgetNew> {
   void didChangeDependencies() {
     super.didChangeDependencies();
 
-    _bottomPaddingNotifier.value =
+    _bottomPadding =
         (MediaQuery.viewInsetsOf(context).bottom - _distanceOfWidgetFromBottom);
-    if (_bottomPaddingNotifier.value < 0) {
-      _bottomPaddingNotifier.value = 0;
+    if (_bottomPadding < 0) {
+      _bottomPadding = 0;
     }
   }
 
@@ -71,14 +70,8 @@ class _SearchWidgetNewState extends State<SearchWidgetNew> {
     return RepaintBoundary(
       //Why repaint boundary?
       key: widgetKey,
-      child: ValueListenableBuilder(
-        valueListenable: _bottomPaddingNotifier,
-        builder: (context, value, child) {
-          return Padding(
-            padding: EdgeInsets.only(bottom: value),
-            child: child,
-          );
-        },
+      child: Padding(
+        padding: EdgeInsets.only(bottom: _bottomPadding),
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 12),
           child: Padding(
