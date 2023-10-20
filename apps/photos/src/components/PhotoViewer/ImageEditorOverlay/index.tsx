@@ -243,13 +243,15 @@ const ImageEditorOverlay = (props: IProps) => {
                                 </IconButton>
                             </HorizontalFlex>
                             <Box
-                                display="inline-block"
                                 width="100%"
                                 height="100%"
                                 overflow="hidden"
-                                boxSizing={'border-box'}>
+                                boxSizing={'border-box'}
+                                display="flex"
+                                alignItems="center"
+                                justifyContent="center">
                                 <Box
-                                    height="100%"
+                                    height="90%"
                                     width="100%"
                                     ref={parentRef}
                                     display="flex"
