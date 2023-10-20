@@ -5,7 +5,9 @@ import (
 	"bytes"
 	"cli-go/utils/encoding"
 	"encoding/base64"
+	"encoding/binary"
 	"fmt"
+	blake2b "github.com/minio/blake2b-simd"
 	"io"
 	"log"
 	"os"
@@ -123,15 +125,48 @@ func EncryptChaCha20poly1305(data []byte, key []byte) ([]byte, []byte, error) {
 // This loginKey act as user provided password during SRP authentication.
 // Parameters: keyEncKey: This is the keyEncryptionKey that is derived from the user's password.
 func DeriveLoginKey(keyEncKey []byte) []byte {
-	mainKey := sodium.MasterKey{Bytes: keyEncKey}
-	subKey := mainKey.Derive(loginSubKeyLen, loginSubKeyId, loginSubKeyContext).Bytes
+	subKey, _ := deriveSubKey(keyEncKey, loginSubKeyContext, loginSubKeyId, loginSubKeyLen)
 	// return the first 16 bytes of the derived key
 	return subKey[:16]
 }
 
+const (
+	cryptoKDFBlake2bBytesMin              = 16
+	cryptoKDFBlake2bBytesMax              = 64
+	cryptoGenerichashBlake2bSaltBytes     = 16
+	cryptoGenerichashBlake2bPersonalBytes = 16
+)
+
+func deriveSubKey(masterKey []byte, context string, subKeyID uint64, subKeyLength uint32) ([]byte, error) {
+	if subKeyLength < cryptoKDFBlake2bBytesMin || subKeyLength > cryptoKDFBlake2bBytesMax {
+		return nil, fmt.Errorf("subKeyLength out of bounds")
+	}
+	// Pad the context
+	ctxPadded := make([]byte, cryptoGenerichashBlake2bPersonalBytes)
+	copy(ctxPadded, []byte(context))
+	// Convert subKeyID to byte slice and pad
+	salt := make([]byte, cryptoGenerichashBlake2bSaltBytes)
+	binary.LittleEndian.PutUint64(salt, subKeyID)
+
+	// Create a BLAKE2b configuration
+	config := &blake2b.Config{
+		Size:   uint8(subKeyLength),
+		Key:    masterKey,
+		Salt:   salt,
+		Person: ctxPadded,
+	}
+	hasher, err := blake2b.New(config)
+	if err != nil {
+		return nil, err
+	}
+	hasher.Write(nil) // No data, just using key, salt, and personalization
+	return hasher.Sum(nil), nil
+}
+
 func SecretBoxOpen(c []byte, n []byte, k []byte) ([]byte, error) {
 	var cp sodium.Bytes = c
-	return cp.SecretBoxOpen(sodium.SecretBoxNonce{Bytes: n}, sodium.SecretBoxKey{Bytes: k})
+	res, err := cp.SecretBoxOpen(sodium.SecretBoxNonce{Bytes: n}, sodium.SecretBoxKey{Bytes: k})
+	return res, err
 }
 
 func SecretBoxOpenBase64(cipher string, nonce string, k []byte) ([]byte, error) {

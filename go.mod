@@ -10,12 +10,17 @@ require (
 )
 
 require (
+	git.schwanenlied.me/yawning/chacha20.git v0.0.0-20170904085104-e3b1f968fc63 // indirect
+	github.com/Yawning/chacha20 v0.0.0-20170904085104-e3b1f968fc63 // indirect
+	github.com/Yawning/poly1305 v0.0.0-20151107134637-dfc796fe731c // indirect
 	github.com/alessio/shellescape v1.4.1 // indirect
 	github.com/danieljoos/wincred v1.2.0 // indirect
 	github.com/godbus/dbus/v5 v5.1.0 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.17 // indirect
+	github.com/minio/blake2b-simd v0.0.0-20160723061019-3f5f724cb5b1 // indirect
 	github.com/zalando/go-keyring v0.2.3 // indirect
+	go.artemisc.eu/godium v0.0.0-20201014025004-f08c318a71b3 // indirect
 )
 
 require (
