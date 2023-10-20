@@ -51,3 +51,20 @@ func TestDecryptChaCha20poly1305(t *testing.T) {
 		t.Fatalf("Decrypted text : %s does not match the expected text: %s", string(decryptedText), expectedPlainText)
 	}
 }
+
+// Write a test for SecretBoxOpenBase64
+func TestSecretBoxOpenBase64(t *testing.T) {
+	sealedCipherText := "KHwRN+RzvTu+jC7mCdkMsqnTPSLvevtZILmcR2OYFbIRPqDyjAl+m8KxD9B5fiEo"
+	sealNonce := "jgfPDOsQh2VdIHWJVSBicMPF2sQW3HIY"
+	sealKey, _ := base64.StdEncoding.DecodeString("kercNpvGufMTTHmDwAhz26DgCAvznd1+/buBqKEkWr4=")
+	expectedSealedText := "O1ObUBMv+SCE1qWHD7+WViEIZcAeTp18Y+m9eMlDE1Y="
+
+	plainText, err := SecretBoxOpenBase64(sealedCipherText, sealNonce, sealKey)
+	if err != nil {
+		t.Fatalf("Failed to decrypt: %v", err)
+	}
+
+	if expectedSealedText != base64.StdEncoding.EncodeToString(plainText) {
+		t.Fatalf("Decrypted text : %s does not match the expected text: %s", string(plainText), expectedSealedText)
+	}
+}
