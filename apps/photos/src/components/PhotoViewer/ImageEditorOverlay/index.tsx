@@ -142,13 +142,21 @@ const ImageEditorOverlay = (props: IProps) => {
     };
 
     const loadCanvas = async () => {
+        if (
+            !canvasRef.current ||
+            !parentRef.current ||
+            !originalSizeCanvasRef.current
+        ) {
+            return;
+        }
+
         setCanvasLoading(true);
         setTransformationPerformed(false);
         resetFilters();
         setCurrentRotationAngle(0);
 
         const img = new Image();
-        const ctx = canvasRef.current?.getContext('2d');
+        const ctx = canvasRef.current.getContext('2d');
         ctx.imageSmoothingEnabled = false;
         if (!fileURL) {
             const stream = await downloadManager.downloadFile(props.file);
@@ -165,8 +173,8 @@ const ImageEditorOverlay = (props: IProps) => {
 
         img.onload = () => {
             const scale = Math.min(
-                parentRef.current?.clientWidth / img.width,
-                parentRef.current?.clientHeight / img.height
+                parentRef.current.clientWidth / img.width,
+                parentRef.current.clientHeight / img.height
             );
 
             const width = img.width * scale;
