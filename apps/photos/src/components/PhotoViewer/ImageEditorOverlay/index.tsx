@@ -5,6 +5,7 @@ import {
     IconButton,
     Tab,
     Tabs,
+    Typography,
     useTheme,
 } from '@mui/material';
 import {
@@ -217,41 +218,46 @@ const ImageEditorOverlay = (props: IProps) => {
                             backdropFilter: 'blur(5px)',
                         }}
                         open>
-                        <Box
-                            display="inline-block"
-                            width="100%"
-                            height="100%"
-                            overflow="hidden"
-                            padding="3rem"
-                            boxSizing={'border-box'}>
+                        <Box padding="3rem" width="100%" height="100%">
+                            <Typography variant="h2" fontWeight="bold">
+                                {t('PHOTO_EDITOR')}
+                            </Typography>
                             <Box
-                                height="100%"
+                                display="inline-block"
                                 width="100%"
-                                ref={parentRef}
-                                display="flex"
-                                alignItems="center"
-                                justifyContent="center">
-                                {(fileURL === null || canvasLoading) && (
-                                    <CircularProgress />
-                                )}
+                                height="100%"
+                                overflow="hidden"
+                                boxSizing={'border-box'}>
+                                <Box
+                                    height="100%"
+                                    width="100%"
+                                    ref={parentRef}
+                                    display="flex"
+                                    alignItems="center"
+                                    justifyContent="center">
+                                    {(fileURL === null || canvasLoading) && (
+                                        <CircularProgress />
+                                    )}
 
-                                <canvas
-                                    ref={canvasRef}
-                                    style={{
-                                        objectFit: 'contain',
-                                        display:
-                                            fileURL === null || canvasLoading
-                                                ? 'none'
-                                                : 'block',
-                                        position: 'absolute',
-                                    }}
-                                />
-                                <canvas
-                                    ref={originalSizeCanvasRef}
-                                    style={{
-                                        display: 'none',
-                                    }}
-                                />
+                                    <canvas
+                                        ref={canvasRef}
+                                        style={{
+                                            objectFit: 'contain',
+                                            display:
+                                                fileURL === null ||
+                                                canvasLoading
+                                                    ? 'none'
+                                                    : 'block',
+                                            position: 'absolute',
+                                        }}
+                                    />
+                                    <canvas
+                                        ref={originalSizeCanvasRef}
+                                        style={{
+                                            display: 'none',
+                                        }}
+                                    />
+                                </Box>
                             </Box>
                         </Box>
                         <Box
