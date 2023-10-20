@@ -1,6 +1,7 @@
 package crypto
 
 import (
+	"crypto/rand"
 	"encoding/base64"
 	"testing"
 )
@@ -32,7 +33,6 @@ func TestDecryptChaCha20poly1305(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to derive key: %v", err)
 	}
-
 	decodedCipherText, err := base64.StdEncoding.DecodeString(cipherText)
 	if err != nil {
 		t.Fatalf("Failed to decode cipher text: %v", err)
@@ -52,7 +52,25 @@ func TestDecryptChaCha20poly1305(t *testing.T) {
 	}
 }
 
-// Write a test for SecretBoxOpenBase64
+func TestEncryptAndDecryptChaCha20Ploy1305(t *testing.T) {
+	key := make([]byte, 32)
+	_, err := rand.Read(key)
+	if err != nil {
+		t.Fatalf("Failed to generate random key: %v", err)
+	}
+	cipher, nonce, err := EncryptChaCha20poly1305([]byte("plain_text"), key)
+	if err != nil {
+		return
+	}
+	plainText, err := decryptChaCha20poly1305(cipher, key, nonce)
+	if err != nil {
+		t.Fatalf("Failed to decrypt: %v", err)
+	}
+	if string(plainText) != "plain_text" {
+		t.Fatalf("Decrypted text : %s does not match the expected text: %s", string(plainText), "plain_text")
+	}
+}
+
 func TestSecretBoxOpenBase64(t *testing.T) {
 	sealedCipherText := "KHwRN+RzvTu+jC7mCdkMsqnTPSLvevtZILmcR2OYFbIRPqDyjAl+m8KxD9B5fiEo"
 	sealNonce := "jgfPDOsQh2VdIHWJVSBicMPF2sQW3HIY"
