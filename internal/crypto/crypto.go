@@ -84,3 +84,22 @@ func deriveSubKey(masterKey []byte, context string, subKeyID uint64, subKeyLengt
 	hasher.Write(nil) // No data, just using key, salt, and personalization
 	return hasher.Sum(nil), nil
 }
+
+func DecryptChaChaBase64(data string, key []byte, nonce string) (string, []byte, error) {
+	// Decode data from base64
+	dataBytes, err := base64.StdEncoding.DecodeString(data)
+	if err != nil {
+		return "", nil, fmt.Errorf("invalid data: %v", err)
+	}
+	// Decode nonce from base64
+	nonceBytes, err := base64.StdEncoding.DecodeString(nonce)
+	if err != nil {
+		return "", nil, fmt.Errorf("invalid nonce: %v", err)
+	}
+	// Decrypt data
+	decryptedData, err := decryptChaCha20poly1305(dataBytes, key, nonceBytes)
+	if err != nil {
+		return "", nil, fmt.Errorf("failed to decrypt data: %v", err)
+	}
+	return base64.StdEncoding.EncodeToString(decryptedData), decryptedData, nil
+}

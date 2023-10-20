@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"bytes"
 	"cli-go/utils/encoding"
-	"encoding/base64"
 	"fmt"
 	"github.com/jamesruan/sodium"
 	"io"
@@ -41,8 +40,7 @@ func EncryptChaCha20poly1305(data []byte, key []byte) ([]byte, []byte, error) {
 // Returns:
 //   - A byte slice representing the decrypted data.
 //   - An error object, which is nil if no error occurs.
-
-func decryptChaCha20poly1305(data []byte, key []byte, nonce []byte) ([]byte, error) {
+func decryptChaCha20poly1305LibSodium(data []byte, key []byte, nonce []byte) ([]byte, error) {
 	reader := bytes.NewReader(data)
 	header := sodium.SecretStreamXCPHeader{Bytes: nonce}
 	decoder, err := sodium.MakeSecretStreamXCPDecoder(
@@ -63,23 +61,16 @@ func decryptChaCha20poly1305(data []byte, key []byte, nonce []byte) ([]byte, err
 	return decryptedData[:n], nil
 }
 
-func DecryptChaChaBase64(data string, key []byte, nonce string) (string, []byte, error) {
-	// Decode data from base64
-	dataBytes, err := base64.StdEncoding.DecodeString(data)
+func decryptChaCha20poly1305(data []byte, key []byte, nonce []byte) ([]byte, error) {
+	decryptor, err := NewDecryptor(key, nonce)
 	if err != nil {
-		return "", nil, fmt.Errorf("invalid data: %v", err)
+		return nil, err
 	}
-	// Decode nonce from base64
-	nonceBytes, err := base64.StdEncoding.DecodeString(nonce)
+	decoded, _, err := decryptor.Pull(data)
 	if err != nil {
-		return "", nil, fmt.Errorf("invalid nonce: %v", err)
+		return nil, err
 	}
-	// Decrypt data
-	decryptedData, err := decryptChaCha20poly1305(dataBytes, key, nonceBytes)
-	if err != nil {
-		return "", nil, fmt.Errorf("failed to decrypt data: %v", err)
-	}
-	return base64.StdEncoding.EncodeToString(decryptedData), decryptedData, nil
+	return decoded, nil
 }
 
 func SecretBoxOpen(c []byte, n []byte, k []byte) ([]byte, error) {
@@ -89,12 +80,7 @@ func SecretBoxOpen(c []byte, n []byte, k []byte) ([]byte, error) {
 }
 
 func SecretBoxOpenBase64(cipher string, nonce string, k []byte) ([]byte, error) {
-	var cp sodium.Bytes = encoding.DecodeBase64(cipher)
-	out, err := cp.SecretBoxOpen(sodium.SecretBoxNonce{Bytes: encoding.DecodeBase64(nonce)}, sodium.SecretBoxKey{Bytes: k})
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
+	return SecretBoxOpen(encoding.DecodeBase64(cipher), encoding.DecodeBase64(nonce), k)
 }
 
 func SealedBoxOpen(cipherText []byte, publicKey, masterSecret []byte) ([]byte, error) {
