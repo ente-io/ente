@@ -6,6 +6,8 @@ import StreamZip from 'node-stream-zip';
 import { Readable } from 'stream';
 import { logError } from './logging';
 import { existsSync } from 'fs';
+import { log } from 'console';
+import { convertBytesToHumanReadable } from '../utils/logging';
 
 // https://stackoverflow.com/a/63111390
 export const getDirFilePaths = async (dirPath: string) => {
@@ -226,18 +228,26 @@ export const convertBrowserStreamToNode = (
     return rs;
 };
 
-export async function writeStream(
+export async function writeNodeStream(
     filePath: string,
-    fileStream: ReadableStream<Uint8Array>
+    fileStream: NodeJS.ReadableStream,
+    enableLogging = false
 ) {
     const writeable = fs.createWriteStream(filePath);
-    const readable = convertBrowserStreamToNode(fileStream);
 
-    readable.on('error', (error) => {
+    fileStream.on('error', (error) => {
         writeable.destroy(error); // Close the writable stream with an error
     });
 
-    readable.pipe(writeable);
+    fileStream.pipe(writeable);
+
+    let downloaded = 0;
+    if (enableLogging) {
+        fileStream.on('data', (chunk) => {
+            downloaded += chunk.length;
+            log(`Received ${convertBytesToHumanReadable(downloaded)} of data.`);
+        });
+    }
 
     await new Promise((resolve, reject) => {
         writeable.on('finish', resolve);
@@ -248,6 +258,14 @@ export async function writeStream(
             reject(e);
         });
     });
+}
+
+export async function writeStream(
+    filePath: string,
+    fileStream: ReadableStream<Uint8Array>
+) {
+    const readable = convertBrowserStreamToNode(fileStream);
+    await writeNodeStream(filePath, readable);
 }
 
 export async function readTextFile(filePath: string) {
