@@ -222,9 +222,7 @@ const ImageEditorOverlay = (props: IProps) => {
                         sx={{
                             color: '#fff',
                             zIndex: '999 !important',
-                            display: 'flex',
                             width: '100%',
-                            justifyContent: 'space-between',
                             backdropFilter: 'blur(5px)',
                         }}
                         open>
