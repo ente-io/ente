@@ -35,6 +35,7 @@ import uploadManager from 'services/upload/uploadManager';
 import { getLocalCollections } from 'services/collectionService';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import MenuItemDivider from 'components/Menu/MenuItemDivider';
+import AreYouSureCloseDialog from './AreYouSureCloseDialog';
 
 interface IProps {
     file: EnteFile;
@@ -78,6 +79,8 @@ const ImageEditorOverlay = (props: IProps) => {
         useState(false);
 
     const [canvasLoading, setCanvasLoading] = useState(false);
+
+    const [showBeforeCloseDialog, setShowBeforeCloseDialog] = useState(false);
 
     useEffect(() => {
         if (!canvasRef.current) {
@@ -262,8 +265,7 @@ const ImageEditorOverlay = (props: IProps) => {
                             <HorizontalFlex justifyContent={'flex-end'}>
                                 <IconButton
                                     onClick={() => {
-                                        setFileURL(null);
-                                        props.onClose();
+                                        setShowBeforeCloseDialog(true);
                                     }}>
                                     <CloseIcon />
                                 </IconButton>
@@ -411,6 +413,17 @@ const ImageEditorOverlay = (props: IProps) => {
                             </MenuItemGroup>
                         </Box>
                     </Backdrop>
+                    <AreYouSureCloseDialog
+                        open={showBeforeCloseDialog}
+                        onClose={() => {
+                            setShowBeforeCloseDialog(false);
+                        }}
+                        doClose={() => {
+                            setFileURL(null);
+                            props.onClose();
+                            setShowBeforeCloseDialog(false);
+                        }}
+                    />
                 </>
             )}
         </>
