@@ -8,11 +8,11 @@ import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/models/code.dart';
 import 'package:ente_auth/onboarding/view/setup_enter_secret_key_page.dart';
 import 'package:ente_auth/onboarding/view/view_qr_page.dart';
+import 'package:ente_auth/services/local_authentication_service.dart';
 import 'package:ente_auth/services/preference_service.dart';
 import 'package:ente_auth/store/code_store.dart';
 import 'package:ente_auth/ui/code_timer_progress.dart';
 import 'package:ente_auth/ui/utils/icon_utils.dart';
-import 'package:ente_auth/utils/auth_util.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
 import 'package:ente_auth/utils/toast_util.dart';
 import 'package:ente_auth/utils/totp_util.dart';
@@ -325,6 +325,7 @@ class _CodeWidgetState extends State<CodeWidget> {
           ? const EdgeInsets.only(left: 16)
           : const EdgeInsets.all(0),
       child: IconUtils.instance.getIcon(
+        context,
         safeDecode(widget.code.issuer).trim(),
         width: _shouldShowLargeIcon ? 42 : 24,
       ),
@@ -371,8 +372,9 @@ class _CodeWidgetState extends State<CodeWidget> {
   }
 
   Future<void> _onEditPressed(_) async {
-    bool _isAuthSuccessful = await requestAuthentication(context.l10n.editCodeAuthMessage);
-    if(!_isAuthSuccessful) {
+    bool _isAuthSuccessful = await LocalAuthenticationService.instance
+        .requestLocalAuthentication(context, context.l10n.editCodeAuthMessage);
+    if (!_isAuthSuccessful) {
       return;
     }
     final Code? code = await Navigator.of(context).push(
@@ -388,8 +390,9 @@ class _CodeWidgetState extends State<CodeWidget> {
   }
 
   Future<void> _onShowQrPressed(_) async {
-    bool _isAuthSuccessful = await requestAuthentication(context.l10n.showQRAuthMessage);
-    if(!_isAuthSuccessful) {
+    bool _isAuthSuccessful = await LocalAuthenticationService.instance
+        .requestLocalAuthentication(context, context.l10n.showQRAuthMessage);
+    if (!_isAuthSuccessful) {
       return;
     }
     // ignore: unused_local_variable
@@ -403,8 +406,12 @@ class _CodeWidgetState extends State<CodeWidget> {
   }
 
   void _onDeletePressed(_) async {
-    bool _isAuthSuccessful = await requestAuthentication(context.l10n.deleteCodeAuthMessage);
-    if(!_isAuthSuccessful) {
+    bool _isAuthSuccessful =
+        await LocalAuthenticationService.instance.requestLocalAuthentication(
+      context,
+      context.l10n.deleteCodeAuthMessage,
+    );
+    if (!_isAuthSuccessful) {
       return;
     }
     final l10n = context.l10n;

@@ -40,6 +40,7 @@
     },
     {
       "title": "Control D",
+      "slug": "controld",
       "hex": "5FD800"
     },
     {
@@ -54,7 +55,8 @@
       "title": "Firefox"
     },
     {
-      "title": "GitHub"
+      "title": "GitHub",
+      "hex": "858585"
     },
     {
       "title": "Google"
@@ -88,9 +90,9 @@
       "title": "KuCoin",
       "hex": "01BC8D"
     },
-	{
+	  {
       "title": "La Poste",
-	  "slug": "laposte"
+	    "slug": "laposte"
     },
     {
       "title": "Microsoft"
@@ -137,10 +139,12 @@
       "color": "EF8300"
     },
     {
-      "title": "Privacy Guides"
+      "title": "Privacy Guides",
+      "slug": "privacyguides"
     },
     {
-      "title": "Privacy.com"
+      "title": "Privacy.com",
+      "slug": "privacy"
     },
     {
       "title": "Proton"
@@ -157,6 +161,7 @@
     },
     {
       "title": "Standard Notes",
+      "slug": "standardnotes",
       "hex": "2173E6"
     },
     {
@@ -168,6 +173,7 @@
     },
     {
       "title": "Trading 212",
+      "slug": "trading212",
       "hex": "4BA4DE"
     },
     {
@@ -191,7 +197,8 @@
       "slug": "x"
     },
     {
-      "title": "Ubisoft"
+      "title": "Ubisoft",
+      "hex": "4285f4"
     },
     {
       "title": "Unity",
