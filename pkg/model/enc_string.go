@@ -23,7 +23,7 @@ func MakeEncString(plainTextBytes []byte, key []byte) *EncString {
 }
 
 func (e *EncString) MustDecrypt(key []byte) []byte {
-	plainBytes, err := crypto.DecryptChaCha20poly1305(encoding.DecodeBase64(e.CipherText), key, encoding.DecodeBase64(e.Nonce))
+	_, plainBytes, err := crypto.DecryptChaChaBase64(e.CipherText, key, e.Nonce)
 	if err != nil {
 		panic(err)
 	}
