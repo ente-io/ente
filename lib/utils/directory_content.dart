@@ -53,7 +53,8 @@ void _buildPrettyString(
 
   if (relativePath.isEmpty) {
     buffer.writeln(
-        'Root: ${basename(dirStat.path)} [SubDir:${dirStat.subDirectory.length} Files:${dirStat.fileNameToSize.length}], Size:${formatBytes(dirStat.size)}');
+      'Root: ${basename(dirStat.path)} [SubDir:${dirStat.subDirectory.length} Files:${dirStat.fileNameToSize.length}], Size:${formatBytes(dirStat.size)}',
+    );
   } else {
     buffer.writeln(
       '${indent}Directory: $relativePath, [SubDir:${dirStat.subDirectory.length} Files:${dirStat.fileNameToSize.length}], Size: ${formatBytes(dirStat.size)}',
