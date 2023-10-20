@@ -8,6 +8,7 @@ import 'package:ente_auth/ui/settings/common_settings.dart';
 import 'package:ente_auth/ui/settings/faq.dart';
 import 'package:ente_auth/utils/email_util.dart';
 import 'package:flutter/material.dart';
+import 'package:logging/logging.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 class SupportSectionWidget extends StatefulWidget {
@@ -90,8 +91,12 @@ class _SupportSectionWidgetState extends State<SupportSectionWidget> {
             await sendLogs(context, l10n.reportBug, "auth@ente.io");
           },
           onDoubleTap: () async {
-            final zipFilePath = await getZippedLogsFile(context);
-            await shareLogs(context, "auth@ente.io", zipFilePath);
+            try {
+              final zipFilePath = await getZippedLogsFile(context);
+              await shareLogs(context, "auth@ente.io", zipFilePath);
+            } catch (e) {
+              Logger("SupportSectionWidget").severe("failed to export logs", e);
+            }
           },
         ),
         sectionOptionSpacing,
