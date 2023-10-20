@@ -2,6 +2,7 @@ import { Dispatch, SetStateAction } from 'react';
 import MenuSectionTitle from 'components/Menu/MenuSectionTitle';
 import { Box, Slider, Switch, Typography } from '@mui/material';
 import { SpaceBetweenFlex } from 'components/Container';
+import { t } from 'i18next';
 
 interface IProps {
     brightness: number;
@@ -19,7 +20,7 @@ interface IProps {
 const ColoursMenu = (props: IProps) => {
     return (
         <>
-            <MenuSectionTitle title="Brightness" />
+            <MenuSectionTitle title={t('BRIGHTNESS')} />
             <Slider
                 min={0}
                 max={200}
@@ -37,7 +38,7 @@ const ColoursMenu = (props: IProps) => {
                     props.setBrightness(value as number);
                 }}
             />
-            <MenuSectionTitle title="Contrast" />
+            <MenuSectionTitle title={t('CONTRAST')} />
             <Slider
                 min={0}
                 max={200}
@@ -55,7 +56,7 @@ const ColoursMenu = (props: IProps) => {
                     },
                 ]}
             />
-            <MenuSectionTitle title="Blur" />
+            <MenuSectionTitle title={t('BLUR')} />
             <Slider
                 min={0}
                 max={10}
@@ -67,7 +68,7 @@ const ColoursMenu = (props: IProps) => {
                     props.setBlur(value as number);
                 }}
             />
-            <MenuSectionTitle title="Saturation" />
+            <MenuSectionTitle title={t('SATURATION')} />
             <Slider
                 min={0}
                 max={200}
@@ -86,7 +87,7 @@ const ColoursMenu = (props: IProps) => {
                 ]}
             />
             <SpaceBetweenFlex minHeight={'48px'}>
-                <Typography color="text.muted">Invert Colours</Typography>
+                <Typography color="text.muted">{t('INVERT_COLORS')}</Typography>
                 <Box>
                     <Switch
                         value={props.invert}

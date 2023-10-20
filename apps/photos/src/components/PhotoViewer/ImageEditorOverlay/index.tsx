@@ -36,6 +36,7 @@ import { getLocalCollections } from 'services/collectionService';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import MenuItemDivider from 'components/Menu/MenuItemDivider';
 import AreYouSureCloseDialog from './AreYouSureCloseDialog';
+import { t } from 'i18next';
 
 interface IProps {
     file: EnteFile;
@@ -276,15 +277,18 @@ const ImageEditorOverlay = (props: IProps) => {
                                     onChange={(_, value) => {
                                         setCurrentTab(value);
                                     }}>
-                                    <Tab label="Transform" value="transform" />
                                     <Tab
-                                        label="Colours"
+                                        label={t('TRANSFORM')}
+                                        value="transform"
+                                    />
+                                    <Tab
+                                        label={t('COLORS')}
                                         value="colours"
                                         disabled={transformationPerformed}
                                     />
                                 </Tabs>
                             </HorizontalFlex>
-                            <MenuSectionTitle title="Reset" />
+                            <MenuSectionTitle title={t('RESET')} />
                             <MenuItemGroup
                                 style={{
                                     marginBottom: '0.5rem',
@@ -295,7 +299,7 @@ const ImageEditorOverlay = (props: IProps) => {
                                     onClick={() => {
                                         loadCanvas();
                                     }}
-                                    label={'Restore Original'}
+                                    label={t('RESTORE_ORIGINAL')}
                                 />
                             </MenuItemGroup>
 
@@ -327,7 +331,7 @@ const ImageEditorOverlay = (props: IProps) => {
                                 />
                             )}
 
-                            <MenuSectionTitle title={'Export'} />
+                            <MenuSectionTitle title={t('EXPORT')} />
                             <MenuItemGroup>
                                 <EnteMenuItem
                                     startIcon={<DownloadIcon />}
@@ -354,7 +358,7 @@ const ImageEditorOverlay = (props: IProps) => {
                                             URL.revokeObjectURL(a.href);
                                         });
                                     }}
-                                    label={'Download Edited'}
+                                    label={t('DOWNLOAD_EDITED')}
                                 />
                                 <MenuItemDivider />
                                 <EnteMenuItem
@@ -408,7 +412,7 @@ const ImageEditorOverlay = (props: IProps) => {
                                             props.onClose();
                                         });
                                     }}
-                                    label={'Save a copy to ente'}
+                                    label={t('SAVE_A_COPY_TO_ENTE')}
                                 />
                             </MenuItemGroup>
                         </Box>

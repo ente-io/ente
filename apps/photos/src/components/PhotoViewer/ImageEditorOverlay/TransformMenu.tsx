@@ -10,6 +10,7 @@ import RotateLeftIcon from '@mui/icons-material/RotateLeft';
 import RotateRightIcon from '@mui/icons-material/RotateRight';
 import FlipIcon from '@mui/icons-material/Flip';
 import MenuItemDivider from 'components/Menu/MenuItemDivider';
+import { t } from 'i18next';
 
 const PRESET_ASPECT_RATIOS = [
     {
@@ -163,7 +164,7 @@ const TransformMenu = () => {
     };
     return (
         <>
-            <MenuSectionTitle title={'Aspect Ratio'} />
+            <MenuSectionTitle title={t('ASPECT_RATIO')} />
             <MenuItemGroup
                 style={{
                     marginBottom: '0.5rem',
@@ -178,7 +179,7 @@ const TransformMenu = () => {
                         setCanvasLoading(false);
                         setTransformationPerformed(true);
                     }}
-                    label={'Square (1:1)'}
+                    label={t('SQUARE') + ' (1:1)'}
                 />
             </MenuItemGroup>
             <MenuItemGroup
@@ -247,7 +248,7 @@ const TransformMenu = () => {
                     </Fragment>
                 ))}
             </MenuItemGroup>
-            <MenuSectionTitle title={'Rotation'} />
+            <MenuSectionTitle title={t('ROTATION')} />
             <MenuItemGroup
                 style={{
                     marginBottom: '1rem',
@@ -262,7 +263,7 @@ const TransformMenu = () => {
                         setCanvasLoading(false);
                         setTransformationPerformed(true);
                     }}
-                    label="Rotate Left 90˚"
+                    label={t('ROTATE_LEFT') + ' 90˚'}
                 />
                 <MenuItemDivider />
                 <EnteMenuItem
@@ -275,10 +276,10 @@ const TransformMenu = () => {
                         setTransformationPerformed(true);
                         setCanvasLoading(false);
                     }}
-                    label="Rotate Right 90˚"
+                    label={t('ROTATE_RIGHT') + ' 90˚'}
                 />
             </MenuItemGroup>
-            <MenuSectionTitle title={'Flip'} />
+            <MenuSectionTitle title={t('FLIP')} />
             <MenuItemGroup
                 style={{
                     marginBottom: '1rem',
@@ -293,7 +294,7 @@ const TransformMenu = () => {
                         setCanvasLoading(false);
                         setTransformationPerformed(true);
                     }}
-                    label="Flip Vertically"
+                    label={t('FLIP_VERTICALLY')}
                 />
                 <MenuItemDivider />
                 <EnteMenuItem
@@ -306,7 +307,7 @@ const TransformMenu = () => {
                         setCanvasLoading(false);
                         setTransformationPerformed(true);
                     }}
-                    label="Flip Horizontally"
+                    label={t('FLIP_HORIZONTALLY')}
                 />
             </MenuItemGroup>
         </>

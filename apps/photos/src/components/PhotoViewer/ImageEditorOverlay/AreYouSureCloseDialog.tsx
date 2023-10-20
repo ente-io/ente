@@ -16,19 +16,16 @@ const AreYouSureCloseDialog = (props: IProps) => {
                 open={props.open}
                 onClose={props.onClose}
                 attributes={{
-                    title: 'Are you sure you want to close the editor?',
+                    title: t('CONFIRM_EDITOR_CLOSE_MESSAGE'),
                 }}>
-                <Typography>
-                    Download your edited image or save a copy to ente to persist
-                    your changes.
-                </Typography>
+                <Typography>{t('CONFIRM_EDITOR_CLOSE_DESCRIPTION')}</Typography>
                 <Stack spacing={'8px'}>
                     <EnteButton
                         type="submit"
                         size="large"
                         color="critical"
                         onClick={props.doClose}>
-                        Close Editor
+                        {t('CLOSE')}
                     </EnteButton>
                     <Button
                         size="large"
