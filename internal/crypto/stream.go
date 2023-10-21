@@ -25,14 +25,14 @@ const (
 
 	StreamKeyBytes    = chacha20poly1305.KeySize
 	StreamHeaderBytes = chacha20poly1305.NonceSizeX
-	// crypto_secretstream_xchacha20poly1305_ABYTES
+	// XChaCha20Poly1305IetfABYTES links to crypto_secretstream_xchacha20poly1305_ABYTES
 	XChaCha20Poly1305IetfABYTES = 16 + 1
 )
 
-const crypto_core_hchacha20_INPUTBYTES = 16
+const cryptoCoreHchacha20InputBytes = 16
 
 /* const crypto_secretstream_xchacha20poly1305_INONCEBYTES = 8 */
-const crypto_secretstream_xchacha20poly1305_COUNTERBYTES = 4
+const cryptoSecretStreamXchacha20poly1305Counterbytes = 4
 
 var pad0 [16]byte
 
@@ -98,8 +98,8 @@ func NewEncryptor(key []byte) (Encryptor, []byte, error) {
 		stream.pad[i] = 0
 	}
 
-	for i, b := range header[crypto_core_hchacha20_INPUTBYTES:] {
-		stream.nonce[i+crypto_secretstream_xchacha20poly1305_COUNTERBYTES] = b
+	for i, b := range header[cryptoCoreHchacha20InputBytes:] {
+		stream.nonce[i+cryptoSecretStreamXchacha20poly1305Counterbytes] = b
 	}
 	// fmt.Printf("stream: %+v\n", stream.streamState)
 
@@ -195,8 +195,8 @@ func (s *encryptor) Push(plain []byte, tag byte) ([]byte, error) {
 
 	//XOR_BUF(STATE_INONCE(state), mac, crypto_secretstream_xchacha20poly1305_INONCEBYTES);
 	//sodium_increment(STATE_COUNTER(state), crypto_secretstream_xchacha20poly1305_COUNTERBYTES);
-	xor_buf(s.nonce[crypto_secretstream_xchacha20poly1305_COUNTERBYTES:], mac)
-	buf_inc(s.nonce[:crypto_secretstream_xchacha20poly1305_COUNTERBYTES])
+	xorBuf(s.nonce[cryptoSecretStreamXchacha20poly1305Counterbytes:], mac)
+	bufInc(s.nonce[:cryptoSecretStreamXchacha20poly1305Counterbytes])
 
 	// TODO
 	//if ((tag & crypto_secretstream_xchacha20poly1305_TAG_REKEY) != 0 ||
@@ -229,8 +229,8 @@ func NewDecryptor(key, header []byte) (Decryptor, error) {
 
 	//memcpy(STATE_INONCE(state), in + crypto_core_hchacha20_INPUTBYTES,
 	//	crypto_secretstream_xchacha20poly1305_INONCEBYTES);
-	copy(stream.nonce[crypto_secretstream_xchacha20poly1305_COUNTERBYTES:],
-		header[crypto_core_hchacha20_INPUTBYTES:])
+	copy(stream.nonce[cryptoSecretStreamXchacha20poly1305Counterbytes:],
+		header[cryptoCoreHchacha20InputBytes:])
 
 	//memset(state->_pad, 0, sizeof state->_pad);
 	copy(stream.pad[:], pad0[:])
@@ -321,8 +321,8 @@ func (s *decryptor) Pull(cipher []byte) ([]byte, byte, error) {
 	if _, err = poly.Write(c[:mlen]); err != nil {
 		return nil, 0, err
 	}
-	padlen := (0x10 - len(block) + mlen) & 0xf
-	if _, err = poly.Write(pad0[:padlen]); err != nil {
+	padLen := (0x10 - len(block) + mlen) & 0xf
+	if _, err = poly.Write(pad0[:padLen]); err != nil {
 		return nil, 0, err
 	}
 
@@ -353,8 +353,8 @@ func (s *decryptor) Pull(cipher []byte) ([]byte, byte, error) {
 	//sodium_memzero(mac, sizeof mac);
 	//return -1;
 	//}
-	stored_mac := c[mlen:]
-	if !bytes.Equal(mac, stored_mac) {
+	storedMac := c[mlen:]
+	if !bytes.Equal(mac, storedMac) {
 		memZero(mac)
 		return nil, 0, cryptoFailure
 	}
@@ -365,8 +365,8 @@ func (s *decryptor) Pull(cipher []byte) ([]byte, byte, error) {
 	m := make([]byte, mlen)
 	chacha.XORKeyStream(m, c[:mlen])
 
-	xor_buf(s.nonce[crypto_secretstream_xchacha20poly1305_COUNTERBYTES:], mac)
-	buf_inc(s.nonce[:crypto_secretstream_xchacha20poly1305_COUNTERBYTES])
+	xorBuf(s.nonce[cryptoSecretStreamXchacha20poly1305Counterbytes:], mac)
+	bufInc(s.nonce[:cryptoSecretStreamXchacha20poly1305Counterbytes])
 
 	// TODO
 	//if ((tag & crypto_secretstream_xchacha20poly1305_TAG_REKEY) != 0 ||
@@ -383,20 +383,4 @@ func (s *decryptor) Pull(cipher []byte) ([]byte, byte, error) {
 	//}
 	//return 0;
 	return m, tag, nil
-}
-
-func xor_buf(out, in []byte) {
-	for i := range out {
-		out[i] ^= in[i]
-	}
-}
-
-func buf_inc(n []byte) {
-	c := 1
-
-	for i := range n {
-		c += int(n[i])
-		n[i] = byte(c)
-		c >>= 8
-	}
 }
