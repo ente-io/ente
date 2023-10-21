@@ -22,13 +22,19 @@ func (c *ClICtrl) downloadAndDecrypt(
 ) (*string, error) {
 	dir := c.tempFolder
 	downloadPath := fmt.Sprintf("%s/%d", dir, file.ID)
-	log.Printf("Downloading %s (%s)", file.GetTitle(), utils.ByteCountDecimal(file.Info.FileSize))
-	err := c.Client.DownloadFile(ctx, file.ID, downloadPath)
-	if err != nil {
-		return nil, fmt.Errorf("error downloading file %d: %w", file.ID, err)
+	// check if file exists
+	if _, err := os.Stat(downloadPath); err == nil {
+		log.Printf("File already exists %s (%s)", file.GetTitle(), utils.ByteCountDecimal(file.Info.FileSize))
+
+	} else {
+		log.Printf("Downloading %s (%s)", file.GetTitle(), utils.ByteCountDecimal(file.Info.FileSize))
+		err := c.Client.DownloadFile(ctx, file.ID, downloadPath)
+		if err != nil {
+			return nil, fmt.Errorf("error downloading file %d: %w", file.ID, err)
+		}
 	}
 	decryptedPath := fmt.Sprintf("%s/%d.decrypted", dir, file.ID)
-	err = crypto.DecryptFile(downloadPath, decryptedPath, file.Key.MustDecrypt(deviceKey), encoding.DecodeBase64(file.FileNonce))
+	err := crypto.DecryptFile(downloadPath, decryptedPath, file.Key.MustDecrypt(deviceKey), encoding.DecodeBase64(file.FileNonce))
 	if err != nil {
 		log.Printf("Error decrypting file %d: %s", file.ID, err)
 		return nil, model.ErrDecryption
