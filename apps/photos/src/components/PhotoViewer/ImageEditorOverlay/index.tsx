@@ -58,6 +58,14 @@ export const ImageEditorOverlayContext = createContext(
     }
 );
 
+const filterDefaultValues = {
+    brightness: 100,
+    contrast: 100,
+    blur: 0,
+    saturation: 100,
+    invert: false,
+};
+
 const ImageEditorOverlay = (props: IProps) => {
     // const [originalWidth, originalHeight] = [props.file?.w, props.file?.h];
 
@@ -73,14 +81,19 @@ const ImageEditorOverlay = (props: IProps) => {
         'transform'
     );
 
-    const [brightness, setBrightness] = useState(100);
-    const [contrast, setContrast] = useState(100);
-    const [blur, setBlur] = useState(0);
-    const [saturation, setSaturation] = useState(100);
-    const [invert, setInvert] = useState(false);
+    const [brightness, setBrightness] = useState(
+        filterDefaultValues.brightness
+    );
+    const [contrast, setContrast] = useState(filterDefaultValues.contrast);
+    const [blur, setBlur] = useState(filterDefaultValues.blur);
+    const [saturation, setSaturation] = useState(
+        filterDefaultValues.saturation
+    );
+    const [invert, setInvert] = useState(filterDefaultValues.invert);
 
     const [transformationPerformed, setTransformationPerformed] =
         useState(false);
+    const [coloursAdjusted, setColoursAdjusted] = useState(false);
 
     const [canvasLoading, setCanvasLoading] = useState(false);
 
@@ -94,6 +107,13 @@ const ImageEditorOverlay = (props: IProps) => {
         }
 
         applyFilters([canvasRef.current]);
+        setColoursAdjusted(
+            brightness !== filterDefaultValues.brightness ||
+                contrast !== filterDefaultValues.contrast ||
+                blur !== filterDefaultValues.blur ||
+                saturation !== filterDefaultValues.saturation ||
+                invert !== filterDefaultValues.invert
+        );
     }, [brightness, contrast, blur, saturation, invert, canvasRef, fileURL]);
 
     const applyFilters = async (canvases: HTMLCanvasElement[]) => {
@@ -151,7 +171,6 @@ const ImageEditorOverlay = (props: IProps) => {
         }
 
         setCanvasLoading(true);
-        setTransformationPerformed(false);
         resetFilters();
         setCurrentRotationAngle(0);
 
@@ -190,6 +209,9 @@ const ImageEditorOverlay = (props: IProps) => {
             const oSCtx = originalSizeCanvasRef.current.getContext('2d');
 
             oSCtx?.drawImage(img, 0, 0, img.width, img.height);
+
+            setTransformationPerformed(false);
+            setColoursAdjusted(false);
 
             setCanvasLoading(false);
         };
@@ -296,7 +318,15 @@ const ImageEditorOverlay = (props: IProps) => {
                                 </IconButton>
                                 <IconButton
                                     onClick={() => {
-                                        setShowBeforeCloseDialog(true);
+                                        if (
+                                            transformationPerformed ||
+                                            coloursAdjusted
+                                        ) {
+                                            setShowBeforeCloseDialog(true);
+                                            return;
+                                        }
+                                        setFileURL(null);
+                                        props.onClose();
                                     }}>
                                     <CloseIcon />
                                 </IconButton>
@@ -437,6 +467,7 @@ const ImageEditorOverlay = (props: IProps) => {
                                                 [collection],
                                                 uploadManager.getUploaderName()
                                             );
+                                            setFileURL(null);
                                             props.onClose();
                                         });
                                     }}
