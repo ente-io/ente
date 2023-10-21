@@ -10,3 +10,4 @@ main
 config.yaml
 ente-cli.db
 bin/**
+dist/
