@@ -5,7 +5,9 @@ import (
 	"cli-go/pkg/secrets"
 	"fmt"
 	bolt "go.etcd.io/bbolt"
+	"log"
 	"os"
+	"path/filepath"
 )
 
 type ClICtrl struct {
@@ -16,11 +18,16 @@ type ClICtrl struct {
 }
 
 func (c *ClICtrl) Init() error {
-	dir, err := os.MkdirTemp("", "ente-cli-download")
-	if err != nil {
-		return err
+	tempPath := filepath.Join(os.TempDir(), "ente-cli-download")
+	// create temp folder if not exists
+	if _, err := os.Stat(tempPath); os.IsNotExist(err) {
+		err = os.Mkdir(tempPath, 0755)
+		if err != nil {
+			return err
+		}
 	}
-	c.tempFolder = dir
+	log.Printf("Using temp folder %s", tempPath)
+	c.tempFolder = tempPath
 	return c.DB.Update(func(tx *bolt.Tx) error {
 		_, err := tx.CreateBucketIfNotExists([]byte(AccBucket))
 		if err != nil {
