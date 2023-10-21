@@ -1,11 +1,24 @@
-# cli tool for exporting data from ente.io
+# cli for exporting ente.io data
 
-#### You can configure multiple accounts for export
+## Install
+
+You can either download the binary from the [release page](https://github.com/ente-io/cli/releases) or build it yourself.
+
+### Build from source
+
+```shell
+ go build -o "bin/ente-cli" main.go
+```
 
 ### Getting Started
 
-#### Accounts
+Run the help command to see all available commands.
+```shell
+ente-cli --help
+```
 
+#### Accounts
+If you wish, you can add multiple accounts (your own and your family members) and export all using this tool.
 * Add an account
     ```shell
     ente-cli account add
@@ -21,7 +34,7 @@
     ente-cli account update --email yourEmail@example.com --dir ~/photos 
     ```
 
-## Export
+### Export
 * Start export
     ```shell
     ente-cli export
@@ -53,7 +66,7 @@ exec into the container
   ```
 
 
-## Build locally
+## Releases
 
 Run the release script to build the binary and run it.
 
@@ -61,12 +74,3 @@ Run the release script to build the binary and run it.
   ./release.sh
 ```
 
-or you can run the following command
-
-```shell
- go build -o "bin/ente-cli" main.go
-```
-
-```shell
-./bin/ente-cli --help
-```
