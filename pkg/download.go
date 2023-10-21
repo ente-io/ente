@@ -23,9 +23,8 @@ func (c *ClICtrl) downloadAndDecrypt(
 	dir := c.tempFolder
 	downloadPath := fmt.Sprintf("%s/%d", dir, file.ID)
 	// check if file exists
-	if _, err := os.Stat(downloadPath); err == nil {
+	if stat, err := os.Stat(downloadPath); err == nil && stat.Size() == file.Info.FileSize {
 		log.Printf("File already exists %s (%s)", file.GetTitle(), utils.ByteCountDecimal(file.Info.FileSize))
-
 	} else {
 		log.Printf("Downloading %s (%s)", file.GetTitle(), utils.ByteCountDecimal(file.Info.FileSize))
 		err := c.Client.DownloadFile(ctx, file.ID, downloadPath)
