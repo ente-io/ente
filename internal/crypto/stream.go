@@ -25,7 +25,8 @@ const (
 
 	StreamKeyBytes    = chacha20poly1305.KeySize
 	StreamHeaderBytes = chacha20poly1305.NonceSizeX
-	StreamABytes      = 16 + 1
+	// crypto_secretstream_xchacha20poly1305_ABYTES
+	XChaCha20Poly1305IetfABYTES = 16 + 1
 )
 
 const crypto_core_hchacha20_INPUTBYTES = 16
@@ -129,7 +130,7 @@ func (s *encryptor) Push(plain []byte, tag byte) ([]byte, error) {
 	//sodium_misuse();
 	//}
 
-	out := make([]byte, mlen+StreamABytes)
+	out := make([]byte, mlen+XChaCha20Poly1305IetfABYTES)
 
 	chacha, err := chacha20.NewUnauthenticatedCipher(s.k[:], s.nonce[:])
 	if err != nil {
@@ -240,7 +241,7 @@ func NewDecryptor(key, header []byte) (Decryptor, error) {
 }
 
 func (s *decryptor) Pull(cipher []byte) ([]byte, byte, error) {
-	inlen := len(cipher)
+	ciperLen := len(cipher)
 
 	//crypto_onetimeauth_poly1305_state poly1305_state;
 	var poly1305State [32]byte
@@ -253,8 +254,8 @@ func (s *decryptor) Pull(cipher []byte) ([]byte, byte, error) {
 	//unsigned char                     mac[crypto_onetimeauth_poly1305_BYTES];
 	//const unsigned char              *c;
 	//const unsigned char              *stored_mac;
-	//unsigned long long                mlen;
-	//unsigned char                     tag;
+	//unsigned long long                mlen; // length of the returned message
+	//unsigned char                     tag; // for the return value
 	//
 	//if (mlen_p != NULL) {
 	//*mlen_p = 0U;
@@ -263,24 +264,26 @@ func (s *decryptor) Pull(cipher []byte) ([]byte, byte, error) {
 	//*tag_p = 0xff;
 	//}
 
-	//if (inlen < crypto_secretstream_xchacha20poly1305_ABYTES) {
-	//return -1;
-	//}
-	if inlen < StreamABytes {
+	/*
+		if (inlen < crypto_secretstream_xchacha20poly1305_ABYTES) {
+		return -1;
+		}
+		mlen = inlen - crypto_secretstream_xchacha20poly1305_ABYTES;
+	*/
+	if ciperLen < XChaCha20Poly1305IetfABYTES {
 		return nil, 0, invalidInput
 	}
-	//mlen = inlen - crypto_secretstream_xchacha20poly1305_ABYTES;
-	mlen := inlen - StreamABytes
+	mlen := ciperLen - XChaCha20Poly1305IetfABYTES
 
 	//if (mlen > crypto_secretstream_xchacha20poly1305_MESSAGEBYTES_MAX) {
 	//sodium_misuse();
 	//}
 
+	//crypto_stream_chacha20_ietf(block, sizeof block, state->nonce, state->k);
 	chacha, err := chacha20.NewUnauthenticatedCipher(s.k[:], s.nonce[:])
 	if err != nil {
 		return nil, 0, err
 	}
-	//crypto_stream_chacha20_ietf(block, sizeof block, state->nonce, state->k);
 	chacha.XORKeyStream(block[:], block[:])
 
 	//crypto_onetimeauth_poly1305_init(&poly1305_state, block);
