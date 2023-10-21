@@ -173,7 +173,7 @@ func DecryptFile(encryptedFilePath string, decryptedFilePath string, key, nonce 
 		return err
 	}
 
-	buf := make([]byte, decryptionBufferSize)
+	buf := make([]byte, decryptionBufferSize+XChaCha20Poly1305IetfABYTES)
 	for {
 		readCount, err := reader.Read(buf)
 		if err != nil && err != io.EOF {
