@@ -12,6 +12,7 @@ import {
     copyFileToClipboard,
     getFileExtension,
     getFileFromURL,
+    isRawFileFromFileName,
 } from 'utils/file';
 import { logError } from 'utils/sentry';
 
@@ -132,6 +133,30 @@ function PhotoViewer(props: Iprops) {
     const [fileDownloadProgress, setFileDownloadProgress] = useState<
         Map<number, number>
     >(new Map());
+
+    const [showEditButton, setShowEditButton] = useState(false);
+
+    useEffect(() => {
+        const currentItem = photoSwipe?.currItem;
+
+        if (!currentItem) {
+            return;
+        }
+
+        const enteFile = currentItem as EnteFile;
+
+        const fileType = enteFile.metadata.fileType;
+
+        if (
+            fileType !== FILE_TYPE.IMAGE ||
+            isRawFileFromFileName(enteFile.metadata.title)
+        ) {
+            setShowEditButton(false);
+            return;
+        }
+
+        setShowEditButton(true);
+    }, [photoSwipe?.currItem]);
 
     useEffect(() => {
         if (publicCollectionGalleryContext.accessedThroughSharedURL) {
@@ -777,14 +802,18 @@ function PhotoViewer(props: Iprops) {
                                 !props.isTrashCollection &&
                                 !props.isInHiddenSection && (
                                     <>
-                                        <button
-                                            className="pswp__button pswp__button--custom"
-                                            onClick={() => {
-                                                props.onClose(false);
-                                                setShowImageEditorOverlay(true);
-                                            }}>
-                                            <EditIcon />
-                                        </button>
+                                        {showEditButton && (
+                                            <button
+                                                className="pswp__button pswp__button--custom"
+                                                onClick={() => {
+                                                    props.onClose(false);
+                                                    setShowImageEditorOverlay(
+                                                        true
+                                                    );
+                                                }}>
+                                                <EditIcon />
+                                            </button>
+                                        )}
                                         <button
                                             title={
                                                 isFav
