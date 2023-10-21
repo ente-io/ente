@@ -1,10 +1,14 @@
 package crypto
 
 import (
+	"bufio"
 	"cli-go/utils/encoding"
 	"errors"
 	"golang.org/x/crypto/nacl/box"
 	"golang.org/x/crypto/nacl/secretbox"
+	"io"
+	"log"
+	"os"
 )
 
 //func EncryptChaCha20poly1305LibSodium(data []byte, key []byte) ([]byte, []byte, error) {
@@ -149,7 +153,58 @@ func SealedBoxOpen(cipherText, publicKey, masterSecret []byte) ([]byte, error) {
 }
 
 func DecryptFile(encryptedFilePath string, decryptedFilePath string, key, nonce []byte) error {
-	panic("not implemented decrypt file")
+	inputFile, err := os.Open(encryptedFilePath)
+	if err != nil {
+		return err
+	}
+	defer inputFile.Close()
+
+	outputFile, err := os.Create(decryptedFilePath)
+	if err != nil {
+		return err
+	}
+	defer outputFile.Close()
+
+	reader := bufio.NewReader(inputFile)
+	writer := bufio.NewWriter(outputFile)
+
+	decryptor, err := NewDecryptor(key, nonce)
+	if err != nil {
+		return err
+	}
+
+	buf := make([]byte, decryptionBufferSize)
+	for {
+		readCount, err := reader.Read(buf)
+		if err != nil && err != io.EOF {
+			log.Println("Failed to read from input file", err)
+			return err
+		}
+		if readCount == 0 {
+			break
+		}
+		n, tag, errErr := decryptor.Pull(buf[:readCount])
+		if errErr != nil && errErr != io.EOF {
+			log.Println("Failed to read from decoder", errErr)
+			return errErr
+		}
+
+		if _, err := writer.Write(n); err != nil {
+			log.Println("Failed to write to output file", err)
+			return err
+		}
+		if errErr == io.EOF {
+			break
+		}
+		if tag == TagFinal {
+			break
+		}
+	}
+	if err := writer.Flush(); err != nil {
+		log.Println("Failed to flush writer", err)
+		return err
+	}
+	return nil
 }
 
 //func DecryptFileLib(encryptedFilePath string, decryptedFilePath string, key, nonce []byte) error {
