@@ -9,6 +9,7 @@ import (
 	"cli-go/utils/constants"
 	"fmt"
 	"log"
+	"strings"
 )
 
 func main() {
@@ -22,7 +23,11 @@ func main() {
 	}
 	db, err := pkg.GetDB(fmt.Sprintf("%sente-cli.db", cliDBPath))
 	if err != nil {
-		panic(err)
+		if strings.Contains(err.Error(), "timeout") {
+			log.Fatalf("Please close all other instances of the cli and try again\n%v\n", err)
+		} else {
+			panic(err)
+		}
 	}
 	ctrl := pkg.ClICtrl{
 		Client: api.NewClient(api.Params{
