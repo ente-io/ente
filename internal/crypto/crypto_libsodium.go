@@ -2,6 +2,7 @@ package crypto
 
 import (
 	"cli-go/utils/encoding"
+	"errors"
 	"golang.org/x/crypto/nacl/box"
 	"golang.org/x/crypto/nacl/secretbox"
 )
@@ -73,7 +74,10 @@ func decryptChaCha20poly1305(data []byte, key []byte, nonce []byte) ([]byte, err
 	if err != nil {
 		return nil, err
 	}
-	decoded, _, err := decryptor.Pull(data)
+	decoded, tag, err := decryptor.Pull(data)
+	if tag != TagFinal {
+		return nil, errors.New("invalid tag")
+	}
 	if err != nil {
 		return nil, err
 	}

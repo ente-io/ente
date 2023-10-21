@@ -241,7 +241,7 @@ func NewDecryptor(key, header []byte) (Decryptor, error) {
 }
 
 func (s *decryptor) Pull(cipher []byte) ([]byte, byte, error) {
-	ciperLen := len(cipher)
+	cipherLen := len(cipher)
 
 	//crypto_onetimeauth_poly1305_state poly1305_state;
 	var poly1305State [32]byte
@@ -270,10 +270,10 @@ func (s *decryptor) Pull(cipher []byte) ([]byte, byte, error) {
 		}
 		mlen = inlen - crypto_secretstream_xchacha20poly1305_ABYTES;
 	*/
-	if ciperLen < XChaCha20Poly1305IetfABYTES {
+	if cipherLen < XChaCha20Poly1305IetfABYTES {
 		return nil, 0, invalidInput
 	}
-	mlen := ciperLen - XChaCha20Poly1305IetfABYTES
+	mlen := cipherLen - XChaCha20Poly1305IetfABYTES
 
 	//if (mlen > crypto_secretstream_xchacha20poly1305_MESSAGEBYTES_MAX) {
 	//sodium_misuse();
@@ -299,30 +299,28 @@ func (s *decryptor) Pull(cipher []byte) ([]byte, byte, error) {
 	//
 
 	//memset(block, 0, sizeof block);
-	memZero(block[:])
 	//block[0] = in[0];
-	block[0] = cipher[0]
-
 	//crypto_stream_chacha20_ietf_xor_ic(block, block, sizeof block, state->nonce, 1U, state->k);
-	chacha.XORKeyStream(block[:], block[:])
-	//tag = block[0];
-	tag := block[0]
-	//block[0] = in[0];
+	memZero(block[:])
 	block[0] = cipher[0]
+	chacha.XORKeyStream(block[:], block[:])
+
+	//tag = block[0];
+	//block[0] = in[0];
 	//crypto_onetimeauth_poly1305_update(&poly1305_state, block, sizeof block);
+	tag := block[0]
+	block[0] = cipher[0]
 	if _, err = poly.Write(block[:]); err != nil {
 		return nil, 0, err
 	}
 
-	//
 	//c = in + (sizeof tag);
-	c := cipher[1:]
 	//crypto_onetimeauth_poly1305_update(&poly1305_state, c, mlen);
+	//crypto_onetimeauth_poly1305_update (&poly1305_state, _pad0, (0x10 - (sizeof block) + mlen) & 0xf);
+	c := cipher[1:]
 	if _, err = poly.Write(c[:mlen]); err != nil {
 		return nil, 0, err
 	}
-
-	//crypto_onetimeauth_poly1305_update (&poly1305_state, _pad0, (0x10 - (sizeof block) + mlen) & 0xf);
 	padlen := (0x10 - len(block) + mlen) & 0xf
 	if _, err = poly.Write(pad0[:padlen]); err != nil {
 		return nil, 0, err
@@ -346,24 +344,27 @@ func (s *decryptor) Pull(cipher []byte) ([]byte, byte, error) {
 	//
 	//crypto_onetimeauth_poly1305_final(&poly1305_state, mac);
 	//sodium_memzero(&poly1305_state, sizeof poly1305_state);
+
 	mac := poly.Sum(nil)
-	//
+	memZero(poly1305State[:])
+
 	//stored_mac = c + mlen;
-	stored_mac := c[mlen:]
 	//if (sodium_memcmp(mac, stored_mac, sizeof mac) != 0) {
 	//sodium_memzero(mac, sizeof mac);
 	//return -1;
 	//}
+	stored_mac := c[mlen:]
 	if !bytes.Equal(mac, stored_mac) {
+		memZero(mac)
 		return nil, 0, cryptoFailure
 	}
-	//
+
 	//crypto_stream_chacha20_ietf_xor_ic(m, c, mlen, state->nonce, 2U, state->k);
+	//XOR_BUF(STATE_INONCE(state), mac, crypto_secretstream_xchacha20poly1305_INONCEBYTES);
+	//sodium_increment(STATE_COUNTER(state), crypto_secretstream_xchacha20poly1305_COUNTERBYTES);
 	m := make([]byte, mlen)
 	chacha.XORKeyStream(m, c[:mlen])
 
-	//XOR_BUF(STATE_INONCE(state), mac, crypto_secretstream_xchacha20poly1305_INONCEBYTES);
-	//sodium_increment(STATE_COUNTER(state), crypto_secretstream_xchacha20poly1305_COUNTERBYTES);
 	xor_buf(s.nonce[crypto_secretstream_xchacha20poly1305_COUNTERBYTES:], mac)
 	buf_inc(s.nonce[:crypto_secretstream_xchacha20poly1305_COUNTERBYTES])
 
