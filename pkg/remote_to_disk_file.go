@@ -1,14 +1,14 @@
 package pkg
 
 import (
-	"cli-go/pkg/mapper"
-	"cli-go/pkg/model"
-	"cli-go/pkg/model/export"
-	"cli-go/utils"
 	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/ente-io/cli/pkg/mapper"
+	"github.com/ente-io/cli/pkg/model"
+	"github.com/ente-io/cli/pkg/model/export"
+	"github.com/ente-io/cli/utils"
 	"log"
 	"os"
 	"path/filepath"

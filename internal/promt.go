@@ -1,9 +1,9 @@
 package internal
 
 import (
-	"cli-go/internal/api"
 	"errors"
 	"fmt"
+	"github.com/ente-io/cli/internal/api"
 	"log"
 	"os"
 

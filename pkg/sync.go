@@ -1,12 +1,12 @@
 package pkg
 
 import (
-	"cli-go/internal"
-	"cli-go/internal/api"
-	"cli-go/pkg/model"
 	"context"
 	"encoding/base64"
 	"fmt"
+	"github.com/ente-io/cli/internal"
+	"github.com/ente-io/cli/internal/api"
+	"github.com/ente-io/cli/pkg/model"
 	"log"
 
 	bolt "go.etcd.io/bbolt"

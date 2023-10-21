@@ -1,10 +1,10 @@
 package pkg
 
 import (
-	"cli-go/pkg/model"
-	"cli-go/utils/encoding"
 	"context"
 	"fmt"
+	"github.com/ente-io/cli/pkg/model"
+	"github.com/ente-io/cli/utils/encoding"
 )
 
 func boltAEKey(entry *model.AlbumFileEntry) []byte {

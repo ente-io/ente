@@ -2,8 +2,8 @@ package crypto
 
 import (
 	"bufio"
-	"cli-go/utils/encoding"
 	"errors"
+	"github.com/ente-io/cli/utils/encoding"
 	"golang.org/x/crypto/nacl/box"
 	"golang.org/x/crypto/nacl/secretbox"
 	"io"

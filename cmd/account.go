@@ -1,10 +1,10 @@
 package cmd
 
 import (
-	"cli-go/internal/api"
-	"cli-go/pkg/model"
 	"context"
 	"fmt"
+	"github.com/ente-io/cli/internal/api"
+	"github.com/ente-io/cli/pkg/model"
 	"github.com/spf13/cobra"
 )
 

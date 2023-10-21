@@ -1,8 +1,8 @@
 package model
 
 import (
-	"cli-go/internal/crypto"
-	"cli-go/utils/encoding"
+	"github.com/ente-io/cli/internal/crypto"
+	"github.com/ente-io/cli/utils/encoding"
 	"log"
 )
 

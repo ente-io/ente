@@ -2,12 +2,12 @@ package pkg
 
 import (
 	"archive/zip"
-	"cli-go/internal/crypto"
-	"cli-go/pkg/model"
-	"cli-go/utils"
-	"cli-go/utils/encoding"
 	"context"
 	"fmt"
+	"github.com/ente-io/cli/internal/crypto"
+	"github.com/ente-io/cli/pkg/model"
+	"github.com/ente-io/cli/utils"
+	"github.com/ente-io/cli/utils/encoding"
 	"io"
 	"log"
 	"os"

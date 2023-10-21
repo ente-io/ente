@@ -1,15 +1,15 @@
 package mapper
 
 import (
-	"cli-go/internal/api"
-	eCrypto "cli-go/internal/crypto"
-	"cli-go/pkg/model"
-	"cli-go/pkg/model/export"
-	"cli-go/pkg/secrets"
-	"cli-go/utils/encoding"
 	"context"
 	"encoding/json"
 	"errors"
+	"github.com/ente-io/cli/internal/api"
+	eCrypto "github.com/ente-io/cli/internal/crypto"
+	"github.com/ente-io/cli/pkg/model"
+	"github.com/ente-io/cli/pkg/model/export"
+	"github.com/ente-io/cli/pkg/secrets"
+	"github.com/ente-io/cli/utils/encoding"
 	"log"
 )
 

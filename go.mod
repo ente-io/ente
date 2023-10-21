@@ -1,4 +1,4 @@
-module cli-go
+module github.com/ente-io/cli
 
 go 1.20
 

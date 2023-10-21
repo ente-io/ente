@@ -1,10 +1,10 @@
 package secrets
 
 import (
-	"cli-go/utils/constants"
 	"crypto/rand"
 	"errors"
 	"fmt"
+	"github.com/ente-io/cli/utils/constants"
 	"log"
 	"os"
 

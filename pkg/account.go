@@ -1,13 +1,13 @@
 package pkg
 
 import (
-	"cli-go/internal"
-	"cli-go/internal/api"
-	"cli-go/pkg/model"
-	"cli-go/utils/encoding"
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/ente-io/cli/internal"
+	"github.com/ente-io/cli/internal/api"
+	"github.com/ente-io/cli/pkg/model"
+	"github.com/ente-io/cli/utils/encoding"
 	"log"
 
 	bolt "go.etcd.io/bbolt"

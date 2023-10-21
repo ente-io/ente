@@ -1,11 +1,11 @@
 package pkg
 
 import (
-	"cli-go/pkg/model"
-	"cli-go/pkg/model/export"
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/ente-io/cli/pkg/model"
+	"github.com/ente-io/cli/pkg/model/export"
 	"log"
 	"os"
 	"strings"

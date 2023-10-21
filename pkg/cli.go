@@ -1,9 +1,9 @@
 package pkg
 
 import (
-	"cli-go/internal/api"
-	"cli-go/pkg/secrets"
 	"fmt"
+	"github.com/ente-io/cli/internal/api"
+	"github.com/ente-io/cli/pkg/secrets"
 	bolt "go.etcd.io/bbolt"
 	"log"
 	"os"

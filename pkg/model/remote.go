@@ -1,8 +1,8 @@
 package model
 
 import (
-	"cli-go/pkg/model/export"
 	"fmt"
+	"github.com/ente-io/cli/pkg/model/export"
 	"sort"
 	"time"
 )

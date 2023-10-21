@@ -1,13 +1,13 @@
 package main
 
 import (
-	"cli-go/cmd"
-	"cli-go/internal"
-	"cli-go/internal/api"
-	"cli-go/pkg"
-	"cli-go/pkg/secrets"
-	"cli-go/utils/constants"
 	"fmt"
+	"github.com/ente-io/cli/cmd"
+	"github.com/ente-io/cli/internal"
+	"github.com/ente-io/cli/internal/api"
+	"github.com/ente-io/cli/pkg"
+	"github.com/ente-io/cli/pkg/secrets"
+	"github.com/ente-io/cli/utils/constants"
 	"log"
 	"strings"
 )

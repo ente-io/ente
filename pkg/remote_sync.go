@@ -1,12 +1,12 @@
 package pkg
 
 import (
-	"cli-go/pkg/mapper"
-	"cli-go/pkg/model"
-	"cli-go/utils/encoding"
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/ente-io/cli/pkg/mapper"
+	"github.com/ente-io/cli/pkg/model"
+	"github.com/ente-io/cli/utils/encoding"
 	"log"
 	"strconv"
 	"time"

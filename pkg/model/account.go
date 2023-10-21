@@ -1,8 +1,8 @@
 package model
 
 import (
-	"cli-go/internal/api"
 	"fmt"
+	"github.com/ente-io/cli/internal/api"
 )
 
 type Account struct {

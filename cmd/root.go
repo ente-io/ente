@@ -1,8 +1,8 @@
 package cmd
 
 import (
-	"cli-go/pkg"
 	"fmt"
+	"github.com/ente-io/cli/pkg"
 	"os"
 	"runtime"
 

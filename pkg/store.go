@@ -1,9 +1,9 @@
 package pkg
 
 import (
-	"cli-go/pkg/model"
 	"context"
 	"fmt"
+	"github.com/ente-io/cli/pkg/model"
 	"log"
 	"strconv"
 	"time"

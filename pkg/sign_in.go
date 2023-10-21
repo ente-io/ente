@@ -1,13 +1,13 @@
 package pkg
 
 import (
-	"cli-go/internal"
-	"cli-go/internal/api"
-	eCrypto "cli-go/internal/crypto"
-	"cli-go/pkg/model"
-	"cli-go/utils/encoding"
 	"context"
 	"fmt"
+	"github.com/ente-io/cli/internal"
+	"github.com/ente-io/cli/internal/api"
+	eCrypto "github.com/ente-io/cli/internal/crypto"
+	"github.com/ente-io/cli/pkg/model"
+	"github.com/ente-io/cli/utils/encoding"
 	"log"
 
 	"github.com/kong/go-srp"

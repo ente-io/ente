@@ -1,10 +1,10 @@
 package pkg
 
 import (
-	"cli-go/pkg/model"
-	"cli-go/pkg/model/export"
 	"encoding/json"
 	"errors"
+	"github.com/ente-io/cli/pkg/model"
+	"github.com/ente-io/cli/pkg/model/export"
 	"io"
 	"os"
 	"strings"
