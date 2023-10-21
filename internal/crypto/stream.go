@@ -13,10 +13,15 @@ import (
 
 // public constants
 const (
+	//TagMessage the most common tag, that doesn't add any information about the nature of the message.
 	TagMessage = 0
-	TagPush    = 0x01
-	TagRekey   = 0x02
-	TagFinal   = TagPush | TagRekey
+	// TagPush indicates that the message marks the end of a set of messages,
+	// but not the end of the stream. For example, a huge JSON string sent as multiple chunks can use this tag to indicate to the application that the string is complete and that it can be decoded. But the stream itself is not closed, and more data may follow.
+	TagPush = 0x01
+	// TagRekey "forget" the key used to encrypt this message and the previous ones, and derive a new secret key.
+	TagRekey = 0x02
+	// TagFinal indicates that the message marks the end of the stream, and erases the secret key used to encrypt the previous sequence.
+	TagFinal = TagPush | TagRekey
 
 	StreamKeyBytes    = chacha20poly1305.KeySize
 	StreamHeaderBytes = chacha20poly1305.NonceSizeX
@@ -34,6 +39,7 @@ var invalidKey = errors.New("invalid key")
 var invalidInput = errors.New("invalid input")
 var cryptoFailure = errors.New("crypto failed")
 
+// crypto_secretstream_xchacha20poly1305_state
 type streamState struct {
 	k     [StreamKeyBytes]byte
 	nonce [chacha20poly1305.NonceSize]byte
@@ -145,7 +151,7 @@ func (s *encryptor) Push(plain []byte, tag byte) ([]byte, error) {
 
 	//memset(block, 0, sizeof block);
 	//block[0] = tag;
-	memzero(block[:])
+	memZero(block[:])
 	block[0] = tag
 
 	//
@@ -233,13 +239,14 @@ func NewDecryptor(key, header []byte) (Decryptor, error) {
 	return stream, nil
 }
 
-func (s *decryptor) Pull(in []byte) ([]byte, byte, error) {
-	inlen := len(in)
+func (s *decryptor) Pull(cipher []byte) ([]byte, byte, error) {
+	inlen := len(cipher)
+
 	//crypto_onetimeauth_poly1305_state poly1305_state;
+	var poly1305State [32]byte
 
 	//unsigned char                     block[64U];
 	var block [64]byte
-
 	//unsigned char                     slen[8U];
 	var slen [8]byte
 
@@ -277,9 +284,9 @@ func (s *decryptor) Pull(in []byte) ([]byte, byte, error) {
 	chacha.XORKeyStream(block[:], block[:])
 
 	//crypto_onetimeauth_poly1305_init(&poly1305_state, block);
-	var poly_init [32]byte
-	copy(poly_init[:], block[:])
-	poly := poly1305.New(&poly_init)
+
+	copy(poly1305State[:], block[:])
+	poly := poly1305.New(&poly1305State)
 
 	// TODO
 	//sodium_memzero(block, sizeof block);
@@ -289,16 +296,16 @@ func (s *decryptor) Pull(in []byte) ([]byte, byte, error) {
 	//
 
 	//memset(block, 0, sizeof block);
-	memzero(block[:])
+	memZero(block[:])
 	//block[0] = in[0];
-	block[0] = in[0]
+	block[0] = cipher[0]
 
 	//crypto_stream_chacha20_ietf_xor_ic(block, block, sizeof block, state->nonce, 1U, state->k);
 	chacha.XORKeyStream(block[:], block[:])
 	//tag = block[0];
 	tag := block[0]
 	//block[0] = in[0];
-	block[0] = in[0]
+	block[0] = cipher[0]
 	//crypto_onetimeauth_poly1305_update(&poly1305_state, block, sizeof block);
 	if _, err = poly.Write(block[:]); err != nil {
 		return nil, 0, err
@@ -306,7 +313,7 @@ func (s *decryptor) Pull(in []byte) ([]byte, byte, error) {
 
 	//
 	//c = in + (sizeof tag);
-	c := in[1:]
+	c := cipher[1:]
 	//crypto_onetimeauth_poly1305_update(&poly1305_state, c, mlen);
 	if _, err = poly.Write(c[:mlen]); err != nil {
 		return nil, 0, err
@@ -372,12 +379,6 @@ func (s *decryptor) Pull(in []byte) ([]byte, byte, error) {
 	//}
 	//return 0;
 	return m, tag, nil
-}
-
-func memzero(b []byte) {
-	for i := range b {
-		b[i] = 0
-	}
 }
 
 func xor_buf(out, in []byte) {
