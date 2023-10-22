@@ -44,8 +44,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "confirm": MessageLookupByLibrary.simpleMessage("Potwierdź"),
         "confirmAccountDeletion":
             MessageLookupByLibrary.simpleMessage("Potwierdź usunięcie konta"),
-        "confirmDeletePrompt": MessageLookupByLibrary.simpleMessage(
-            "Tak, chcę trwale usunąć konto i wszystkie dane z nim powiązane."),
         "confirmPassword":
             MessageLookupByLibrary.simpleMessage("Powtórz hasło"),
         "contactSupport": MessageLookupByLibrary.simpleMessage(

@@ -427,8 +427,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "Weet u zeker dat u tweestapsverificatie wilt uitschakelen?"),
         "confirmAccountDeletion": MessageLookupByLibrary.simpleMessage(
             "Account verwijderen bevestigen"),
-        "confirmDeletePrompt": MessageLookupByLibrary.simpleMessage(
-            "Ja, ik wil permanent mijn account inclusief alle gegevens verwijderen."),
         "confirmPassword":
             MessageLookupByLibrary.simpleMessage("Wachtwoord bevestigen"),
         "confirmPlanChange": MessageLookupByLibrary.simpleMessage(

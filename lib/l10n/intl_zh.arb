@@ -11,7 +11,6 @@
   "deleteAccountFeedbackPrompt": "我们很抱歉看到您离开。请分享您的反馈以帮助我们改进。",
   "feedback": "反馈",
   "kindlyHelpUsWithThisInformation": "请帮助我们了解这个信息",
-  "confirmDeletePrompt": "是的，我想永久删除此账户及其相关数据.",
   "confirmAccountDeletion": "确认删除账户",
   "deleteConfirmDialogBody": "您将要永久删除您的账户及其所有数据。\n此操作是不可逆的。",
   "deleteAccountPermanentlyButton": "永久删除账户",
@@ -1102,5 +1101,8 @@
   "successfullyUnhid": "已成功取消隐藏",
   "crashReporting": "崩溃报告",
   "addToHiddenAlbum": "添加到隐藏相册",
-  "moveToHiddenAlbum": "移至隐藏相册"
+  "moveToHiddenAlbum": "移至隐藏相册",
+  "note": "Note",
+  "photosAndAuthShareTheSameAccount": "Photos and Auth share the same account",
+  "confirmDeletePrompt": "Yes, I want to permanently delete this account and all its data (Photos and Auth)"
 }

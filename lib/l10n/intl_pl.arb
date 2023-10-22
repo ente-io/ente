@@ -11,7 +11,6 @@
   "deleteAccountFeedbackPrompt": "Przykro nam, że odchodzisz. Wyjaśnij nam, dlaczego nas opuszczasz, aby pomóc ulepszać nasze usługi.",
   "feedback": "Informacja zwrotna",
   "kindlyHelpUsWithThisInformation": "Pomóż nam z tą informacją",
-  "confirmDeletePrompt": "Tak, chcę trwale usunąć konto i wszystkie dane z nim powiązane.",
   "confirmAccountDeletion": "Potwierdź usunięcie konta",
   "deleteConfirmDialogBody": "Zamierzasz trwale usunąć swoje konto i wszystkie jego dane.\nTa akcja jest nieodwracalna.",
   "deleteAccountPermanentlyButton": "Usuń konto na stałe",
@@ -102,5 +101,8 @@
   "twofactorAuthenticationPageTitle": "Uwierzytelnianie dwuskładnikowe",
   "tryAgain": "Spróbuj ponownie",
   "addToHiddenAlbum": "Add to hidden album",
-  "moveToHiddenAlbum": "Move to hidden album"
+  "moveToHiddenAlbum": "Move to hidden album",
+  "note": "Note",
+  "photosAndAuthShareTheSameAccount": "Photos and Auth share the same account",
+  "confirmDeletePrompt": "Yes, I want to permanently delete this account and all its data (Photos and Auth)"
 }

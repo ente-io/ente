@@ -11,7 +11,6 @@
   "deleteAccountFeedbackPrompt": "We vinden het jammer je te zien gaan. Deel je feedback om ons te helpen verbeteren.",
   "feedback": "Feedback",
   "kindlyHelpUsWithThisInformation": "Help ons alsjeblieft met deze informatie",
-  "confirmDeletePrompt": "Ja, ik wil permanent mijn account inclusief alle gegevens verwijderen.",
   "confirmAccountDeletion": "Account verwijderen bevestigen",
   "deleteConfirmDialogBody": "Je staat op het punt je account en alle bijbehorende gegevens permanent te verwijderen.\nDeze actie is onomkeerbaar.",
   "deleteAccountPermanentlyButton": "Account permanent verwijderen",
@@ -1102,5 +1101,8 @@
   "successfullyUnhid": "Met succes zichtbaar gemaakt",
   "crashReporting": "Crash rapportering",
   "addToHiddenAlbum": "Toevoegen aan verborgen album",
-  "moveToHiddenAlbum": "Verplaatsen naar verborgen album"
+  "moveToHiddenAlbum": "Verplaatsen naar verborgen album",
+  "note": "Note",
+  "photosAndAuthShareTheSameAccount": "Photos and Auth share the same account",
+  "confirmDeletePrompt": "Yes, I want to permanently delete this account and all its data (Photos and Auth)"
 }

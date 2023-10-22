@@ -414,8 +414,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "Are you sure you want to disable two-factor authentication?"),
         "confirmAccountDeletion":
             MessageLookupByLibrary.simpleMessage("Confirm Account Deletion"),
-        "confirmDeletePrompt": MessageLookupByLibrary.simpleMessage(
-            "Yes, I want to permanently delete this account and all its data."),
         "confirmPassword":
             MessageLookupByLibrary.simpleMessage("Confirm password"),
         "confirmPlanChange":

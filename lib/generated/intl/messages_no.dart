@@ -31,8 +31,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "cancel": MessageLookupByLibrary.simpleMessage("Avbryt"),
         "confirmAccountDeletion":
             MessageLookupByLibrary.simpleMessage("Bekreft sletting av konto"),
-        "confirmDeletePrompt": MessageLookupByLibrary.simpleMessage(
-            "Ja, jeg ønsker å slette denne kontoen og all dataen dens permanent."),
         "deleteAccount": MessageLookupByLibrary.simpleMessage("Slett konto"),
         "deleteAccountFeedbackPrompt": MessageLookupByLibrary.simpleMessage(
             "Vi er lei oss for at du forlater oss. Gi oss gjerne en tilbakemelding så vi kan forbedre oss."),

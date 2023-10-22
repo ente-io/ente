@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import "package:photos/ente_theme_data.dart";
+import "package:photos/generated/l10n.dart";
 import 'package:photos/theme/colors.dart';
 import "package:photos/theme/ente_theme.dart";
 import 'package:photos/theme/text_style.dart';
@@ -162,7 +163,7 @@ class NotificationNoteWidget extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  "Note",
+                  S.of(context).note,
                   style: textTheme.miniFaint,
                 ),
                 const SizedBox(height: 2),
