@@ -2,7 +2,9 @@ package api
 
 import (
 	"context"
+	"fmt"
 	"github.com/go-resty/resty/v2"
+	"time"
 )
 
 const (
@@ -66,8 +68,18 @@ func NewClient(p Params) *Client {
 		enteAPI.SetBaseURL(EnteAPIEndpoint)
 	}
 	return &Client{
-		restClient:     enteAPI,
-		downloadClient: resty.New(),
+		restClient: enteAPI,
+		downloadClient: resty.New().
+			SetRetryCount(3).
+			SetRetryWaitTime(5 * time.Second).
+			SetRetryMaxWaitTime(10 * time.Second).
+			AddRetryCondition(func(r *resty.Response, err error) bool {
+				shouldRetry := r.StatusCode() == 429 || r.StatusCode() > 500
+				if shouldRetry {
+					fmt.Println(fmt.Printf("retrying download due to %d code", r.StatusCode()))
+				}
+				return shouldRetry
+			}),
 	}
 }
 
