@@ -131,3 +131,50 @@ class NotificationWidget extends StatelessWidget {
     );
   }
 }
+
+class NotificationNoteWidget extends StatelessWidget {
+  final String note;
+  const NotificationNoteWidget(this.note, {super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = getEnteColorScheme(context);
+    final textTheme = getEnteTextTheme(context);
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        border: Border.all(color: colorScheme.strokeMuted),
+        color: colorScheme.backgroundBase,
+        borderRadius: const BorderRadius.all(Radius.circular(8)),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            Icons.info,
+            color: colorScheme.strokeMuted,
+            size: 36,
+          ),
+          const SizedBox(
+            width: 12,
+          ),
+          Flexible(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "Note",
+                  style: textTheme.miniFaint,
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  note,
+                  style: textTheme.smallMuted,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
