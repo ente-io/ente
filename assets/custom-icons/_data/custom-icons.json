@@ -52,7 +52,8 @@
       "hex": "858585"
     },
     {
-      "title": "Firefox"
+      "title": "Firefox",
+      "slug": "mozilla"
     },
     {
       "title": "GitHub",
@@ -96,6 +97,9 @@
     },
     {
       "title": "Microsoft"
+    },
+    {
+      "title": "Mozilla"
     },
     {
       "title": "ngrok",
