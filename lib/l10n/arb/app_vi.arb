@@ -126,8 +126,6 @@
   "yesSendFeedbackAction": "Có, gửi phản hồi",
   "noDeleteAccountAction": "Không, xóa tài khoản",
   "initiateAccountDeleteTitle": "Vui lòng xác thực để bắt đầu xóa tài khoản",
-  "confirmAccountDeleteTitle": "Bạn có chắc rằng bạn muốn xóa tài khoản ente của bạn không?",
-  "confirmAccountDeleteMessage": "Dữ liệu đã tải lên của bạn, trên tất cả các ứng dụng (cả Ảnh và Authenticator), sẽ được lên lịch xóa và tài khoản của bạn sẽ bị xóa vĩnh viễn.",
   "sendEmail": "Gửi email",
   "createNewAccount": "Tạo tài khoản mới",
   "weakStrength": "Yếu",

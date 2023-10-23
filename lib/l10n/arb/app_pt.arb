@@ -120,8 +120,6 @@
   "yesSendFeedbackAction": "Sim, enviar feedback",
   "noDeleteAccountAction": "Não, excluir conta",
   "initiateAccountDeleteTitle": "Por favor, autentique-se para iniciar a exclusão de conta",
-  "confirmAccountDeleteTitle": "Tem certeza que deseja excluir sua conta ente?",
-  "confirmAccountDeleteMessage": "Seus dados enviados, através de todos os aplicativos (Photos e Authenticator), serão agendados para exclusão, e sua conta será permanentemente deletada.",
   "sendEmail": "Enviar e-mail",
   "createNewAccount": "Criar nova conta",
   "weakStrength": "Fraca",

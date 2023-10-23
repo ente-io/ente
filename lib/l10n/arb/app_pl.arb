@@ -122,8 +122,6 @@
   "yesSendFeedbackAction": "Tak, wyślij opinię",
   "noDeleteAccountAction": "Nie, usuń moje konto",
   "initiateAccountDeleteTitle": "Proszę uwierzytelnić, aby zainicjować usuwanie konta",
-  "confirmAccountDeleteTitle": "Na pewno chcesz usunąć swoje konto ente?",
-  "confirmAccountDeleteMessage": "Twoje przesłane dane, we wszystkich aplikacjach (zarówno Zdjęcia, jak i Authenticator), zostaną zaplanowane do usunięcia, a Twoje konto zostanie trwale usunięte.",
   "sendEmail": "Wyślij e-mail",
   "createNewAccount": "Utwórz nowe konto",
   "weakStrength": "Słabe",

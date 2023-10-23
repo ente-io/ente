@@ -157,8 +157,6 @@
   "yesSendFeedbackAction": "כן, שלח משוב",
   "noDeleteAccountAction": "לא, מחק את החשבון",
   "initiateAccountDeleteTitle": "אנא אמת על מנת להתחיל את מחיקת החשבון שלך",
-  "confirmAccountDeleteTitle": "האם אתה בטוח שברצונך למחוק את חשבונך?",
-  "confirmAccountDeleteMessage": "המידע שלך שהועלה, ברחבי כל האפליקציות (גם ב-Photos וב-Authenticator), יהיה מועמד למחיקה, וגם המחשבון שלך ימחק לצמיתות.",
   "sendEmail": "שלח אימייל",
   "createNewAccount": "צור חשבון חדש",
   "weakStrength": "חלש",

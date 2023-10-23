@@ -157,8 +157,6 @@
   "yesSendFeedbackAction": "Sì, invia un feedback",
   "noDeleteAccountAction": "No, elimina l'account",
   "initiateAccountDeleteTitle": "Si prega di autenticarsi per avviare l'eliminazione dell'account",
-  "confirmAccountDeleteTitle": "Sei sicuro di voler eliminare il tuo account?",
-  "confirmAccountDeleteMessage": "I tuoi dati caricati, in tutte le app (sia foto che autenticatore), verranno pianificati per la cancellazione, e il tuo account sarà eliminato in modo permanente.",
   "sendEmail": "Invia email",
   "createNewAccount": "Crea un nuovo account",
   "weakStrength": "Debole",

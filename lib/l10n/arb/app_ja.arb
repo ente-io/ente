@@ -122,8 +122,6 @@
   "yesSendFeedbackAction": "はい、フィードバックを送信します",
   "noDeleteAccountAction": "いいえ、アカウントを削除します",
   "initiateAccountDeleteTitle": "アカウント削除を開始するには認証してください",
-  "confirmAccountDeleteTitle": "本当に ente アカウントを削除してよろしいですか?",
-  "confirmAccountDeleteMessage": "アップロードされたデータは、すべてのアプリ(写真と認証アプリの両方) で削除がスケジュールされます。アカウントは完全に削除されます。",
   "sendEmail": "メール送信",
   "createNewAccount": "新規アカウント作成",
   "weakStrength": "脆弱",

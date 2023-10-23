@@ -156,8 +156,6 @@
   "yesSendFeedbackAction": "Ja, geef feedback",
   "noDeleteAccountAction": "Nee, verwijder account",
   "initiateAccountDeleteTitle": "Gelieve te verifiëren om het account te verwijderen",
-  "confirmAccountDeleteTitle": "Weet je zeker dat je je ente account wil verwijderen?",
-  "confirmAccountDeleteMessage": "Uw geüploade gegevens, in alle apps (Photos en Authenticator), worden ingepland voor verwijdering en uw account zal permanent worden verwijderd.",
   "sendEmail": "E-mail versturen",
   "createNewAccount": "Nieuw account aanmaken",
   "weakStrength": "Zwak",
