@@ -503,8 +503,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "deleteAlbumsDialogBody": MessageLookupByLibrary.simpleMessage(
             "Damit werden alle leeren Alben gelöscht. Dies ist nützlich, wenn du das Durcheinander in deiner Albenliste verringern möchtest."),
         "deleteAll": MessageLookupByLibrary.simpleMessage("Alle löschen"),
-        "deleteConfirmDialogBody": MessageLookupByLibrary.simpleMessage(
-            "Du bist dabei, dein Konto und alle gespeicherten Daten dauerhaft zu löschen.\nDiese Aktion ist unwiderrufbar."),
         "deleteEmailRequest": MessageLookupByLibrary.simpleMessage(
             "Bitte sende eine E-Mail an <warning>account-deletion@ente.io</warning> von Deiner bei uns hinterlegten E-Mail-Adresse."),
         "deleteEmptyAlbums":

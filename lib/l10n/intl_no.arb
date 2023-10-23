@@ -14,5 +14,6 @@
   "confirmDeletePrompt": "Ja, jeg ønsker å slette denne kontoen og all dataen dens permanent.",
   "confirmAccountDeletion": "Bekreft sletting av konto",
   "addToHiddenAlbum": "Add to hidden album",
-  "moveToHiddenAlbum": "Move to hidden album"
+  "moveToHiddenAlbum": "Move to hidden album",
+  "deleteConfirmDialogBody": "This account is linked to other ente apps, if you use any.\\n\\nYour uploaded data, across all ente apps, will be scheduled for deletion, and your account will be permanently deleted."
 }

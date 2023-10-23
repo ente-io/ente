@@ -13,7 +13,6 @@
   "kindlyHelpUsWithThisInformation": "Aiutaci con queste informazioni",
   "confirmDeletePrompt": "Sì, voglio eliminare definitivamente questo account e tutti i suoi dati.",
   "confirmAccountDeletion": "Conferma eliminazione account",
-  "deleteConfirmDialogBody": "Stai per eliminare definitivamente il tuo account e tutti i suoi dati.\nQuesta azione è irreversibile.",
   "deleteAccountPermanentlyButton": "Cancella definitivamente il tuo account",
   "yourAccountHasBeenDeleted": "Il tuo account è stato eliminato",
   "selectReason": "Seleziona un motivo",
@@ -1102,5 +1101,6 @@
   "successfullyUnhid": "Rimossa dal nascondiglio con successo",
   "crashReporting": "Segnalazione di crash",
   "addToHiddenAlbum": "Aggiungi ad album nascosto",
-  "moveToHiddenAlbum": "Sposta in album nascosto"
+  "moveToHiddenAlbum": "Sposta in album nascosto",
+  "deleteConfirmDialogBody": "This account is linked to other ente apps, if you use any.\\n\\nYour uploaded data, across all ente apps, will be scheduled for deletion, and your account will be permanently deleted."
 }

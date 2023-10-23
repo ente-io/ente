@@ -13,7 +13,6 @@
   "kindlyHelpUsWithThisInformation": "Por favor ayúdanos con esta información",
   "confirmDeletePrompt": "Sí, quiero eliminar permanentemente esta cuenta y todos sus datos.",
   "confirmAccountDeletion": "Corfirmar borrado de cuenta",
-  "deleteConfirmDialogBody": "Está a punto de eliminar permanentemente su cuenta y todos sus datos.\nEsta acción es irreversible.",
   "deleteAccountPermanentlyButton": "Eliminar Cuenta Permanentemente",
   "yourAccountHasBeenDeleted": "Su cuenta ha sido eliminada",
   "selectReason": "Seleccionar motivo",
@@ -964,5 +963,6 @@
   "familyPlanPortalTitle": "Familia",
   "familyPlanOverview": "Añada 5 familiares a su plan existente sin pagar más.\n\nCada miembro tiene su propio espacio privado y no puede ver los archivos del otro a menos que sean compartidos.\n\nLos planes familiares están disponibles para los clientes que tienen una suscripción de ente pagada.\n\n¡Suscríbete ahora para empezar!",
   "addToHiddenAlbum": "Add to hidden album",
-  "moveToHiddenAlbum": "Move to hidden album"
+  "moveToHiddenAlbum": "Move to hidden album",
+  "deleteConfirmDialogBody": "This account is linked to other ente apps, if you use any.\\n\\nYour uploaded data, across all ente apps, will be scheduled for deletion, and your account will be permanently deleted."
 }
