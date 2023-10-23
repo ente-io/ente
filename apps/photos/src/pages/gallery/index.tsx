@@ -714,7 +714,7 @@ export default function Gallery() {
             await syncEntities();
             await syncMapEnabled();
             await syncEmbeddings();
-            await ClipService.scheduleImageEmbeddingExtraction();
+            void ClipService.scheduleImageEmbeddingExtraction();
         } catch (e) {
             switch (e.message) {
                 case ServerErrorCodes.SESSION_EXPIRED:
