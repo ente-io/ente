@@ -432,6 +432,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Voulez-vous vraiment désactiver l\'authentification à deux facteurs ?"),
         "confirmAccountDeletion": MessageLookupByLibrary.simpleMessage(
             "Confirmer la suppression du compte"),
+        "confirmDeletePrompt": MessageLookupByLibrary.simpleMessage(
+            "Oui, je veux supprimer définitivement ce compte et toutes ses données."),
         "confirmPassword":
             MessageLookupByLibrary.simpleMessage("Confirmer le mot de passe"),
         "confirmPlanChange": MessageLookupByLibrary.simpleMessage(

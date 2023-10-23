@@ -11,10 +11,8 @@
   "deleteAccountFeedbackPrompt": "Vi er lei oss for at du forlater oss. Gi oss gjerne en tilbakemelding så vi kan forbedre oss.",
   "feedback": "Tilbakemelding",
   "kindlyHelpUsWithThisInformation": "Vær vennlig og hjelp oss med denne informasjonen",
+  "confirmDeletePrompt": "Ja, jeg ønsker å slette denne kontoen og all dataen dens permanent.",
   "confirmAccountDeletion": "Bekreft sletting av konto",
   "addToHiddenAlbum": "Add to hidden album",
-  "moveToHiddenAlbum": "Move to hidden album",
-  "note": "Note",
-  "photosAndAuthShareTheSameAccount": "Photos and Auth share the same account",
-  "confirmDeletePrompt": "Yes, I want to permanently delete this account and all its data (Photos and Auth)"
+  "moveToHiddenAlbum": "Move to hidden album"
 }

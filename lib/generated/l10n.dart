@@ -170,6 +170,16 @@ class S {
     );
   }
 
+  /// `Yes, I want to permanently delete this account and all its data.`
+  String get confirmDeletePrompt {
+    return Intl.message(
+      'Yes, I want to permanently delete this account and all its data.',
+      name: 'confirmDeletePrompt',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Confirm Account Deletion`
   String get confirmAccountDeletion {
     return Intl.message(
@@ -7700,36 +7710,6 @@ class S {
     return Intl.message(
       'Move to hidden album',
       name: 'moveToHiddenAlbum',
-      desc: '',
-      args: [],
-    );
-  }
-
-  ///Note
-  String get note {
-    return Intl.message(
-      'Note',
-      name: 'note',
-      desc: '',
-      args: [],
-    );
-  }
-
-  ///Photos and Auth share the same account
-  String get photosAndAuthShareTheSameAccount {
-    return Intl.message(
-      'Photos and Auth share the same account',
-      name: 'photosAndAuthShareTheSameAccount',
-      desc: '',
-      args: [],
-    );
-  }
-
-  ///Yes, I want to permanently delete this account and all its data (Photos and Auth)
-  String get confirmDeletePrompt {
-    return Intl.message(
-      'Yes, I want to permanently delete this account and all its data (Photos and Auth)',
-      name: 'confirmDeletePrompt',
       desc: '',
       args: [],
     );

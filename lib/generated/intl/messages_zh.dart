@@ -360,6 +360,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("您确定要禁用双因素认证吗？"),
         "confirmAccountDeletion":
             MessageLookupByLibrary.simpleMessage("确认删除账户"),
+        "confirmDeletePrompt":
+            MessageLookupByLibrary.simpleMessage("是的，我想永久删除此账户及其相关数据."),
         "confirmPassword": MessageLookupByLibrary.simpleMessage("请确认密码"),
         "confirmPlanChange": MessageLookupByLibrary.simpleMessage("确认更改计划"),
         "confirmRecoveryKey": MessageLookupByLibrary.simpleMessage("确认恢复密钥"),

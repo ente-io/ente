@@ -1,7 +1,4 @@
 {
   "addToHiddenAlbum": "Add to hidden album",
-  "moveToHiddenAlbum": "Move to hidden album",
-  "note": "Note",
-  "photosAndAuthShareTheSameAccount": "Photos and Auth share the same account",
-  "confirmDeletePrompt": "Yes, I want to permanently delete this account and all its data (Photos and Auth)"
+  "moveToHiddenAlbum": "Move to hidden album"
 }

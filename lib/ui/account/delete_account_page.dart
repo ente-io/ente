@@ -65,8 +65,8 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisSize: MainAxisSize.max,
             children: [
-              NotificationNoteWidget(
-                S.of(context).photosAndAuthShareTheSameAccount,
+              const NotificationNoteWidget(
+                "Photos and Auth share the same account",
               ),
               const SizedBox(height: 24),
               Padding(
@@ -189,7 +189,8 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
                       child: Padding(
                         padding: const EdgeInsets.symmetric(vertical: 12),
                         child: Text(
-                          S.of(context).confirmDeletePrompt,
+                          // S.of(context).confirmDeletePrompt,
+                          "Yes, I want to permanently delete this account and all its data (Photos and Auth)",
                           style: getEnteTextTheme(context).bodyMuted,
                           textAlign: TextAlign.left,
                         ),

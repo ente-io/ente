@@ -11,6 +11,7 @@
   "deleteAccountFeedbackPrompt": "Nous sommes désolés de vous voir partir. S'il vous plaît partagez vos commentaires pour nous aider à améliorer le service.",
   "feedback": "Commentaires",
   "kindlyHelpUsWithThisInformation": "Merci de nous aider avec cette information",
+  "confirmDeletePrompt": "Oui, je veux supprimer définitivement ce compte et toutes ses données.",
   "confirmAccountDeletion": "Confirmer la suppression du compte",
   "deleteConfirmDialogBody": "Vous allez supprimer définitivement votre compte et toutes ses données.\nCette action est irréversible.",
   "deleteAccountPermanentlyButton": "Supprimer définitivement le compte",
@@ -1101,8 +1102,5 @@
   "successfullyUnhid": "Masquage réussi",
   "crashReporting": "Rapports d'erreurs",
   "addToHiddenAlbum": "Ajouter à un album masqué",
-  "moveToHiddenAlbum": "Déplacer vers un album masqué",
-  "note": "Note",
-  "photosAndAuthShareTheSameAccount": "Photos and Auth share the same account",
-  "confirmDeletePrompt": "Yes, I want to permanently delete this account and all its data (Photos and Auth)"
+  "moveToHiddenAlbum": "Déplacer vers un album masqué"
 }
