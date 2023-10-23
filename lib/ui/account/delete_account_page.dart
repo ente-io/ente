@@ -10,7 +10,6 @@ import 'package:photos/services/user_service.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/buttons/button_widget.dart';
 import 'package:photos/ui/components/models/button_type.dart';
-import "package:photos/ui/components/notification_widget.dart";
 import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/email_util.dart';
@@ -65,9 +64,6 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisSize: MainAxisSize.max,
             children: [
-              const NotificationNoteWidget(
-                "Photos and Auth share the same account",
-              ),
               const SizedBox(height: 24),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -189,8 +185,7 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
                       child: Padding(
                         padding: const EdgeInsets.symmetric(vertical: 12),
                         child: Text(
-                          // S.of(context).confirmDeletePrompt,
-                          "Yes, I want to permanently delete this account and all its data (Photos and Auth)",
+                          S.of(context).confirmDeletePrompt,
                           style: getEnteTextTheme(context).bodyMuted,
                           textAlign: TextAlign.left,
                         ),
