@@ -58,17 +58,21 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
         ),
       ),
       body: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
         child: Center(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisSize: MainAxisSize.max,
             children: [
-              Text(
-                S.of(context).askDeleteReason,
-                style: getEnteTextTheme(context).body,
+              const SizedBox(height: 24),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                child: Text(
+                  S.of(context).askDeleteReason,
+                  style: getEnteTextTheme(context).body,
+                ),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 8),
               Container(
                 width: double.infinity,
                 height: 48,
@@ -95,9 +99,7 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
                         width: dropDownTextSize,
                         child: Text(
                           value,
-                          style: value != _defaultSelection
-                              ? getEnteTextTheme(context).small
-                              : getEnteTextTheme(context).smallMuted,
+                          style: getEnteTextTheme(context).smallMuted,
                           overflow: TextOverflow.visible,
                         ),
                       ),
@@ -106,12 +108,16 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
                 ),
               ),
               const SizedBox(height: 24),
-              Text(
-                S.of(context).deleteAccountFeedbackPrompt,
-                style: getEnteTextTheme(context).body,
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                child: Text(
+                  S.of(context).deleteAccountFeedbackPrompt,
+                  style: getEnteTextTheme(context).body,
+                ),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 8),
               TextFormField(
+                style: getEnteTextTheme(context).smallMuted,
                 decoration: InputDecoration(
                   enabledBorder: OutlineInputBorder(
                     borderSide:
@@ -139,10 +145,14 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
                 },
               ),
               _shouldAskForFeedback()
-                  ? SizedBox(
-                      height: 42,
-                      child: Padding(
-                        padding: const EdgeInsets.only(top: 4.0),
+                  ? Padding(
+                      padding: const EdgeInsets.only(
+                        top: 4.0,
+                        right: 8,
+                        left: 8,
+                      ),
+                      child: Align(
+                        alignment: Alignment.centerLeft,
                         child: Text(
                           S.of(context).kindlyHelpUsWithThisInformation,
                           style: getEnteTextTheme(context)
@@ -151,7 +161,8 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
                         ),
                       ),
                     )
-                  : const SizedBox(height: 42),
+                  : const SizedBox(height: 21),
+              const SizedBox(height: 8),
               GestureDetector(
                 onTap: () {
                   setState(() {
@@ -159,6 +170,7 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
                   });
                 },
                 child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Checkbox(
                       value: _hasConfirmedDeletion,
@@ -170,10 +182,13 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
                       },
                     ),
                     Expanded(
-                      child: Text(
-                        S.of(context).confirmDeletePrompt,
-                        style: getEnteTextTheme(context).bodyMuted,
-                        textAlign: TextAlign.left,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        child: Text(
+                          S.of(context).confirmDeletePrompt,
+                          style: getEnteTextTheme(context).bodyMuted,
+                          textAlign: TextAlign.left,
+                        ),
                       ),
                     ),
                   ],

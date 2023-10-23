@@ -13,7 +13,6 @@
   "kindlyHelpUsWithThisInformation": "Pomóż nam z tą informacją",
   "confirmDeletePrompt": "Tak, chcę trwale usunąć konto i wszystkie dane z nim powiązane.",
   "confirmAccountDeletion": "Potwierdź usunięcie konta",
-  "deleteConfirmDialogBody": "Zamierzasz trwale usunąć swoje konto i wszystkie jego dane.\nTa akcja jest nieodwracalna.",
   "deleteAccountPermanentlyButton": "Usuń konto na stałe",
   "yourAccountHasBeenDeleted": "Twoje konto zostało usunięte",
   "selectReason": "Wybierz powód",
@@ -102,5 +101,6 @@
   "twofactorAuthenticationPageTitle": "Uwierzytelnianie dwuskładnikowe",
   "tryAgain": "Spróbuj ponownie",
   "addToHiddenAlbum": "Add to hidden album",
-  "moveToHiddenAlbum": "Move to hidden album"
+  "moveToHiddenAlbum": "Move to hidden album",
+  "deleteConfirmDialogBody": "This account is linked to other ente apps, if you use any.\\n\\nYour uploaded data, across all ente apps, will be scheduled for deletion, and your account will be permanently deleted."
 }

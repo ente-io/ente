@@ -13,7 +13,6 @@
   "kindlyHelpUsWithThisInformation": "Merci de nous aider avec cette information",
   "confirmDeletePrompt": "Oui, je veux supprimer définitivement ce compte et toutes ses données.",
   "confirmAccountDeletion": "Confirmer la suppression du compte",
-  "deleteConfirmDialogBody": "Vous allez supprimer définitivement votre compte et toutes ses données.\nCette action est irréversible.",
   "deleteAccountPermanentlyButton": "Supprimer définitivement le compte",
   "yourAccountHasBeenDeleted": "Votre compte a été supprimé",
   "selectReason": "Sélectionner une raison",
@@ -1102,5 +1101,6 @@
   "successfullyUnhid": "Masquage réussi",
   "crashReporting": "Rapports d'erreurs",
   "addToHiddenAlbum": "Ajouter à un album masqué",
-  "moveToHiddenAlbum": "Déplacer vers un album masqué"
+  "moveToHiddenAlbum": "Déplacer vers un album masqué",
+  "deleteConfirmDialogBody": "This account is linked to other ente apps, if you use any.\\n\\nYour uploaded data, across all ente apps, will be scheduled for deletion, and your account will be permanently deleted."
 }

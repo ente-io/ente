@@ -13,7 +13,6 @@
   "kindlyHelpUsWithThisInformation": "Ajude-nos com esta informação",
   "confirmDeletePrompt": "Sim, desejo excluir permanentemente esta conta e todos os seus dados.",
   "confirmAccountDeletion": "Confirmar exclusão da conta",
-  "deleteConfirmDialogBody": "Você está prestes a excluir permanentemente sua conta e todos os seus dados.\nEsta ação é irreversível.",
   "deleteAccountPermanentlyButton": "Excluir conta permanentemente",
   "yourAccountHasBeenDeleted": "Sua conta foi deletada",
   "selectReason": "Selecione o motivo",
@@ -268,5 +267,6 @@
   "criticalUpdateAvailable": "Atualização crítica disponível",
   "updateAvailable": "Atualização disponível",
   "addToHiddenAlbum": "Add to hidden album",
-  "moveToHiddenAlbum": "Move to hidden album"
+  "moveToHiddenAlbum": "Move to hidden album",
+  "deleteConfirmDialogBody": "This account is linked to other ente apps, if you use any.\\n\\nYour uploaded data, across all ente apps, will be scheduled for deletion, and your account will be permanently deleted."
 }

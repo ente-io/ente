@@ -13,7 +13,6 @@
   "kindlyHelpUsWithThisInformation": "Help ons alsjeblieft met deze informatie",
   "confirmDeletePrompt": "Ja, ik wil permanent mijn account inclusief alle gegevens verwijderen.",
   "confirmAccountDeletion": "Account verwijderen bevestigen",
-  "deleteConfirmDialogBody": "Je staat op het punt je account en alle bijbehorende gegevens permanent te verwijderen.\nDeze actie is onomkeerbaar.",
   "deleteAccountPermanentlyButton": "Account permanent verwijderen",
   "yourAccountHasBeenDeleted": "Je account is verwijderd",
   "selectReason": "Selecteer reden",
@@ -1102,5 +1101,6 @@
   "successfullyUnhid": "Met succes zichtbaar gemaakt",
   "crashReporting": "Crash rapportering",
   "addToHiddenAlbum": "Toevoegen aan verborgen album",
-  "moveToHiddenAlbum": "Verplaatsen naar verborgen album"
+  "moveToHiddenAlbum": "Verplaatsen naar verborgen album",
+  "deleteConfirmDialogBody": "This account is linked to other ente apps, if you use any.\\n\\nYour uploaded data, across all ente apps, will be scheduled for deletion, and your account will be permanently deleted."
 }

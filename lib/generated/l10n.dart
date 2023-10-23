@@ -190,10 +190,11 @@ class S {
     );
   }
 
-  /// `You are about to permanently delete your account and all its data.\nThis action is irreversible.`
+  /// `This account is linked to other ente apps, if you use any.`
+  /// `Your uploaded data, across all ente apps, will be scheduled for deletion, and your account will be permanently deleted.`
   String get deleteConfirmDialogBody {
     return Intl.message(
-      'You are about to permanently delete your account and all its data.\nThis action is irreversible.',
+      'This account is linked to other ente apps, if you use any.\n\nYour uploaded data, across all ente apps, will be scheduled for deletion, and your account will be permanently deleted.',
       name: 'deleteConfirmDialogBody',
       desc: '',
       args: [],
