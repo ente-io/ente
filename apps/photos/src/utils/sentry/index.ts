@@ -10,9 +10,6 @@ export const logError = async (
     info?: Record<string, unknown>,
     skipAddLogLine = false
 ) => {
-    if (isErrorUnnecessaryForSentry(error)) {
-        return;
-    }
     const err = errorWithContext(error, msg);
     if (!skipAddLogLine) {
         addLogLine(
@@ -30,6 +27,9 @@ export const logError = async (
     }
     if (InMemoryStore.get(MS_KEYS.OPT_OUT_OF_CRASH_REPORTS)) {
         addLocalLog(() => `skipping sentry error: ${error?.name}`);
+        return;
+    }
+    if (isErrorUnnecessaryForSentry(error)) {
         return;
     }
 
