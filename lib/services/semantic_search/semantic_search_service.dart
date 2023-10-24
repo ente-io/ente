@@ -43,15 +43,17 @@ class SemanticSearchService {
   PendingQuery? _nextQuery;
 
   Future<void> init(SharedPreferences preferences) async {
-    await _loadModels();
     await EmbeddingStore.instance.init(preferences);
-    startBackFill();
-
-    await EmbeddingStore.instance.pushEmbeddings();
     Bus.instance.on<SyncStatusUpdate>().listen((event) async {
       if (event.status == SyncStatus.diffSynced) {
         await EmbeddingStore.instance.pullEmbeddings();
       }
+    });
+    if (Configuration.instance.hasConfiguredAccount()) {
+      EmbeddingStore.instance.pushEmbeddings();
+    }
+    _loadModels().then((v) {
+      startBackFill();
     });
     Bus.instance.on<FileUploadedEvent>().listen((event) async {
       addToQueue(event.file);

@@ -5,14 +5,14 @@ class RemoteEmbedding {
   final String model;
   final String encryptedEmbedding;
   final String decryptionHeader;
-  final int updationTime;
+  final int updatedAt;
 
   RemoteEmbedding({
     required this.fileID,
     required this.model,
     required this.encryptedEmbedding,
     required this.decryptionHeader,
-    required this.updationTime,
+    required this.updatedAt,
   });
 
   factory RemoteEmbedding.fromMap(Map<String, dynamic> map) {
@@ -21,7 +21,7 @@ class RemoteEmbedding {
       model: map['model'] ?? '',
       encryptedEmbedding: map['encryptedEmbedding'] ?? '',
       decryptionHeader: map['decryptionHeader'] ?? '',
-      updationTime: map['updationTime']?.toInt() ?? 0,
+      updatedAt: map['updatedAt']?.toInt() ?? 0,
     );
   }
 

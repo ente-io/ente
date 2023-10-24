@@ -34,9 +34,11 @@ class EmbeddingStore {
     }
     isSyncing = true;
     var remoteEmbeddings = await _getRemoteEmbeddings();
+    _logger.info("${remoteEmbeddings.embeddings.length} embeddings fetched");
     await _storeRemoteEmbeddings(remoteEmbeddings.embeddings);
     while (remoteEmbeddings.hasMore) {
       remoteEmbeddings = await _getRemoteEmbeddings();
+      _logger.info("${remoteEmbeddings.embeddings.length} embeddings fetched");
       await _storeRemoteEmbeddings(remoteEmbeddings.embeddings);
     }
     isSyncing = false;
@@ -132,7 +134,7 @@ class EmbeddingStore {
           embedding.fileID,
           embedding.model,
           decodedEmbedding,
-          updationTime: embedding.updationTime,
+          updationTime: embedding.updatedAt,
         ),
       );
     }
@@ -140,6 +142,7 @@ class EmbeddingStore {
       (first, second) => first.updationTime!.compareTo(second.updationTime!),
     );
     await FilesDB.instance.insertEmbeddings(embeddings);
-    _preferences.setInt(kEmbeddingsSyncTimeKey, embeddings.last.updationTime!);
+    _logger.info("${embeddings.length} embeddings stored");
+    await _preferences.setInt(kEmbeddingsSyncTimeKey, embeddings.last.updationTime!);
   }
 }
