@@ -56,7 +56,6 @@ class EmbeddingStore {
   }
 
   Future<void> _pushEmbedding(EnteFile file, Embedding embedding) async {
-    return;
     final encryptionKey = getFileKey(file);
     final embeddingData =
         Uint8List.view(Float64List.fromList(embedding.embedding).buffer);
@@ -69,7 +68,7 @@ class EmbeddingStore {
     final header = CryptoUtil.bin2base64(encryptedEmbeddingData.header!);
     try {
       final response = await _dio.put(
-        "/embeddings/",
+        "/embeddings",
         data: {
           "fileID": embedding.fileID,
           "model": embedding.model,

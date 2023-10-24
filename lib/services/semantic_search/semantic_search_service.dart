@@ -7,6 +7,7 @@ import "package:computer/computer.dart";
 import "package:flutter/services.dart";
 import "package:logging/logging.dart";
 import "package:path_provider/path_provider.dart";
+import "package:photos/core/configuration.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/events/file_indexed_event.dart";
@@ -201,6 +202,8 @@ class SemanticSearchService {
       return;
     }
     final files = await FilesDB.instance.getFilesWithoutEmbeddings();
+    final ownerID = Configuration.instance.getUserID();
+    files.removeWhere((f) => f.ownerID != ownerID);
     _logger.info(files.length.toString() + " pending to be embedded");
     _queue.addAll(files);
     _pollQueue();
