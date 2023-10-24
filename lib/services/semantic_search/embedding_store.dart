@@ -34,11 +34,9 @@ class EmbeddingStore {
     }
     isSyncing = true;
     var remoteEmbeddings = await _getRemoteEmbeddings();
-    _logger.info("${remoteEmbeddings.embeddings.length} embeddings fetched");
     await _storeRemoteEmbeddings(remoteEmbeddings.embeddings);
     while (remoteEmbeddings.hasMore) {
       remoteEmbeddings = await _getRemoteEmbeddings();
-      _logger.info("${remoteEmbeddings.embeddings.length} embeddings fetched");
       await _storeRemoteEmbeddings(remoteEmbeddings.embeddings);
     }
     isSyncing = false;
@@ -91,10 +89,12 @@ class EmbeddingStore {
   }) async {
     final remoteEmbeddings = <RemoteEmbedding>[];
     try {
+      final sinceTime = _preferences.getInt(kEmbeddingsSyncTimeKey) ?? 0;
+      _logger.info("Fetching embeddings since $sinceTime");
       final response = await _dio.get(
         "/embeddings/diff",
         queryParameters: {
-          "sinceTime": _preferences.getInt(kEmbeddingsSyncTimeKey) ?? 0,
+          "sinceTime": sinceTime,
           "limit": limit,
         },
       );
@@ -106,6 +106,8 @@ class EmbeddingStore {
     } catch (e, s) {
       _logger.severe(e, s);
     }
+
+    _logger.info("${remoteEmbeddings.length} embeddings fetched");
     return RemoteEmbeddings(
       remoteEmbeddings,
       remoteEmbeddings.length == limit,
@@ -138,11 +140,11 @@ class EmbeddingStore {
         ),
       );
     }
-    embeddings.sort(
-      (first, second) => first.updationTime!.compareTo(second.updationTime!),
-    );
     await FilesDB.instance.insertEmbeddings(embeddings);
     _logger.info("${embeddings.length} embeddings stored");
-    await _preferences.setInt(kEmbeddingsSyncTimeKey, embeddings.last.updationTime!);
+    await _preferences.setInt(
+      kEmbeddingsSyncTimeKey,
+      embeddings.last.updationTime!,
+    );
   }
 }
