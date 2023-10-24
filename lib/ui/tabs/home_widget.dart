@@ -109,17 +109,16 @@ class _HomeWidgetState extends State<HomeWidget> {
     _logger.info("Building initstate");
     _tabChangedEventSubscription =
         Bus.instance.on<TabChangedEvent>().listen((event) {
+      if (event.selectedIndex == 3) {
+        isOnSearchTabNotifier.value = true;
+      } else {
+        isOnSearchTabNotifier.value = false;
+      }
       if (event.source != TabChangedEventSource.pageView) {
-        if (event.selectedIndex == 3) {
-          isOnSearchTabNotifier.value = true;
-        } else {
-          isOnSearchTabNotifier.value = false;
-        }
         debugPrint(
           "TabChange going from $_selectedTabIndex to ${event.selectedIndex} souce: ${event.source}",
         );
         _selectedTabIndex = event.selectedIndex;
-        // _pageController.jumpToPage(_selectedTabIndex);
         _pageController.animateToPage(
           event.selectedIndex,
           duration: const Duration(milliseconds: 100),
