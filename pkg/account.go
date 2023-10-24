@@ -73,6 +73,7 @@ func (c *ClICtrl) AddAccount(cxt context.Context) {
 		return
 	} else {
 		fmt.Println("Account added successfully")
+		fmt.Println("run `ente-cli export` to initiate export of your account data")
 	}
 }
 
