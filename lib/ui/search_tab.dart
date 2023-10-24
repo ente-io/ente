@@ -3,8 +3,10 @@ import "package:photos/models/search/search_result.dart";
 import "package:photos/models/search/search_types.dart";
 import "package:photos/states/search_results_state.dart";
 import "package:photos/ui/common/loading_widget.dart";
+import "package:photos/ui/viewer/search/result/no_result_widget.dart";
 import "package:photos/ui/viewer/search/search_section.dart";
 import "package:photos/ui/viewer/search/search_suggestions.dart";
+import "package:photos/ui/viewer/search/search_widget_new.dart";
 
 class SearchTab extends StatefulWidget {
   const SearchTab({Key? key}) : super(key: key);
@@ -31,7 +33,9 @@ class _SearchTabState extends State<SearchTab> {
     return Padding(
       padding: const EdgeInsets.only(top: 8),
       child: _searchResults.isEmpty
-          ? const AllSearchSections()
+          ? isSearchQueryEmpty
+              ? const AllSearchSections()
+              : const NoResultWidget()
           : SearchSuggestionsWidget(_searchResults),
     );
   }

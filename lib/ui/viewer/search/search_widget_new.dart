@@ -13,6 +13,8 @@ import "package:photos/ui/viewer/search/search_suffix_icon_widget.dart";
 import "package:photos/utils/date_time_util.dart";
 import "package:photos/utils/debouncer.dart";
 
+bool isSearchQueryEmpty = true;
+
 class SearchWidgetNew extends StatefulWidget {
   const SearchWidgetNew({Key? key}) : super(key: key);
 
@@ -79,10 +81,10 @@ class _SearchWidgetNewState extends State<SearchWidgetNew> {
           padding: const EdgeInsets.symmetric(vertical: 12),
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 8),
-            child: Container(
-              color: colorScheme.backgroundBase,
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(8),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: Container(
+                color: colorScheme.backgroundBase,
                 child: Container(
                   height: 44,
                   color: colorScheme.fillFaint,
@@ -140,6 +142,9 @@ class _SearchWidgetNewState extends State<SearchWidgetNew> {
                       ),
                     ),
                     onChanged: (value) async {
+                      isSearchQueryEmpty = value.isEmpty;
+
+                      //Why is this required?
                       _query = value;
                       final List<SearchResult> allResults =
                           await getSearchResultsForQuery(context, value);
