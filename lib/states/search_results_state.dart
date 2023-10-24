@@ -48,6 +48,6 @@ class InheritedSearchResults extends InheritedWidget {
 
   @override
   bool updateShouldNotify(covariant InheritedSearchResults oldWidget) {
-    return results == oldWidget.results;
+    return results != oldWidget.results;
   }
 }
