@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import "package:photos/models/location/location.dart";
+import "package:photos/models/search/search_result.dart";
 
 typedef BoolCallBack = bool Function();
 
@@ -10,6 +11,7 @@ typedef VoidCallbackParamDouble = Function(double);
 typedef VoidCallbackParamBool = void Function(bool);
 typedef VoidCallbackParamListDouble = void Function(List<double>);
 typedef VoidCallbackParamLocation = void Function(Location);
+typedef VoidCallbackParamSearchResults = void Function(List<SearchResult>);
 
 typedef FutureVoidCallback = Future<void> Function();
 typedef FutureOrVoidCallback = FutureOr<void> Function();
