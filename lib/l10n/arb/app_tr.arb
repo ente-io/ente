@@ -153,8 +153,6 @@
   "yesSendFeedbackAction": "Evet, geri bildirimi gönder",
   "noDeleteAccountAction": "Hayır, hesabı sil",
   "initiateAccountDeleteTitle": "Hesap silme işlemini yapabilmek için lütfen kimliğinizi doğrulayın",
-  "confirmAccountDeleteTitle": "ente hesabınızı silmek istediğinizden emin misiniz?",
-  "confirmAccountDeleteMessage": "Tüm uygulamalarda (Fotoğraflar ve Kimlik doğrulayıcı) kaydedilen verileriniz zamanlı silinmeye ayarlanacak ve hesabınız kalıcı olarak silinecektir.",
   "sendEmail": "E-posta gönder",
   "createNewAccount": "Yeni hesap oluşturun",
   "weakStrength": "Zayıf",

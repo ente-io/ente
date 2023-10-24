@@ -110,8 +110,6 @@
   "yesSendFeedbackAction": "Kyllä, lähetä palautetta",
   "noDeleteAccountAction": "En, poista tili",
   "initiateAccountDeleteTitle": "Ole hyvä ja tee todennus käynnistääksesi tilisi poistoprosessin",
-  "confirmAccountDeleteTitle": "Haluatko varmasti poistaa Ente-tilisi?",
-  "confirmAccountDeleteMessage": "Lataamasi tiedot kaikkien sovellusten kesken (molemmat, sekä kuvat ja todenteet) ajastetaan poistettavaksi ja tilisi poistetaan pysyvästi.",
   "sendEmail": "Lähetä sähköpostia",
   "createNewAccount": "Luo uusi tili",
   "weakStrength": "Heikko salasana",

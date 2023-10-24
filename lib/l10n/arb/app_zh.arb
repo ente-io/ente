@@ -157,8 +157,6 @@
   "yesSendFeedbackAction": "是，发送反馈",
   "noDeleteAccountAction": "不，删除账户",
   "initiateAccountDeleteTitle": "请进行身份验证以启动账户删除",
-  "confirmAccountDeleteTitle": "确定要删除您的ente账户吗？",
-  "confirmAccountDeleteMessage": "您上传的数据，跨越所有应用程序(Photos 和 Authenticator 两者)，将被排定删除，您的账户将被永久删除。",
   "sendEmail": "发送电子邮件",
   "createNewAccount": "创建新账号",
   "weakStrength": "弱",

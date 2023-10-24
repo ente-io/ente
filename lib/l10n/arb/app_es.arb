@@ -157,8 +157,6 @@
   "yesSendFeedbackAction": "Sí, enviar comentarios",
   "noDeleteAccountAction": "No, eliminar cuenta",
   "initiateAccountDeleteTitle": "Por favor, autentifíquese para iniciar la eliminación de la cuenta",
-  "confirmAccountDeleteTitle": "¿Estás seguro de que quieres eliminar tu cuenta de ente?",
-  "confirmAccountDeleteMessage": "Sus datos subidos a través de todas las aplicaciones (fotos y autenticador), se programarán para su eliminación y su cuenta se eliminará permanentemente.",
   "sendEmail": "Enviar correo electrónico",
   "createNewAccount": "Crear nueva cuenta",
   "weakStrength": "Poco segura",

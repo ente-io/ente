@@ -151,8 +151,6 @@
   "yesSendFeedbackAction": "Ja, Feedback senden",
   "noDeleteAccountAction": "Nein, Konto löschen",
   "initiateAccountDeleteTitle": "Bitte authentifizieren Sie sich, um die Kontolöschung einzuleiten",
-  "confirmAccountDeleteTitle": "Sind Sie sicher, dass Sie Ihr ente Konto löschen wollen?",
-  "confirmAccountDeleteMessage": "Ihre hochgeladenen Daten werden in allen Anwendungen (sowohl Fotos als auch Authenticator) zur Löschung vorgesehen und Ihr Konto wird dauerhaft gelöscht.",
   "sendEmail": "E-Mail senden",
   "createNewAccount": "Neues Konto erstellen",
   "weakStrength": "Schwach",

@@ -157,8 +157,6 @@
   "yesSendFeedbackAction": "Oui, envoyer un commentaire",
   "noDeleteAccountAction": "Non, supprimer le compte",
   "initiateAccountDeleteTitle": "Veuillez vous authentifier pour débuter la suppression du compte",
-  "confirmAccountDeleteTitle": "Êtes-vous sûr de vouloir supprimer votre compte ente ?",
-  "confirmAccountDeleteMessage": "Vos données, à travers toutes les applications (Photos et Authenticator), seront programmées pour être supprimées et votre compte sera définitivement supprimé.",
   "sendEmail": "Envoyer un e-mail",
   "createNewAccount": "Créer un nouveau compte",
   "weakStrength": "Faible",

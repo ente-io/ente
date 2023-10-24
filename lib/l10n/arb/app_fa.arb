@@ -121,8 +121,6 @@
   "yesSendFeedbackAction": "بله، ارسال بازخورد",
   "noDeleteAccountAction": "خیر، حساب کاربری را حذف کن",
   "initiateAccountDeleteTitle": "لطفا جهت شروع فرآیند حذف حساب کاربری، اعتبارسنجی کنید",
-  "confirmAccountDeleteTitle": "آیا از حذف حساب کاربری خود اطمینان دارید؟",
-  "confirmAccountDeleteMessage": "داده‌های آپلود شده شما، در همه برنامه‌ها(هر دو برنامه عکس‌ها و احراز هویت)، طبق زمانبندی و حساب کاربری شما برای همیشه حذف خواهد شد.",
   "sendEmail": "ارسال ایمیل",
   "createNewAccount": "ایجاد حساب کاربری جدید",
   "weakStrength": "ضعیف",
