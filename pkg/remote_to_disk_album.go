@@ -38,6 +38,7 @@ func (c *ClICtrl) createLocalFolderForRemoteAlbums(ctx context.Context, account 
 			continue
 		}
 		metaByID := albumIDToMetaMap[album.ID]
+
 		if metaByID != nil {
 			if strings.EqualFold(metaByID.AlbumName, album.AlbumName) {
 				//log.Printf("Skipping album %s as it already exists", album.AlbumName)
@@ -45,7 +46,7 @@ func (c *ClICtrl) createLocalFolderForRemoteAlbums(ctx context.Context, account 
 			}
 		}
 
-		albumFolderName := album.AlbumName
+		albumFolderName := filepath.Clean(album.AlbumName)
 		albumID := album.ID
 
 		if _, ok := folderToMetaMap[albumFolderName]; ok {

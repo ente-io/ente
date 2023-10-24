@@ -116,7 +116,7 @@ func (c *ClICtrl) downloadEntry(ctx context.Context,
 		fileDiskMetadata := mapper.MapRemoteFileToDiskMetadata(file)
 		// Get the extension
 		extension := filepath.Ext(fileDiskMetadata.Title)
-		baseFileName := strings.TrimSuffix(filepath.Base(fileDiskMetadata.Title), extension)
+		baseFileName := strings.TrimSuffix(filepath.Clean(filepath.Base(fileDiskMetadata.Title)), extension)
 		potentialDiskFileName := fmt.Sprintf("%s%s.json", baseFileName, extension)
 		count := 1
 		for diskInfo.IsMetaFileNamePresent(potentialDiskFileName) {
