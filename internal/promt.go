@@ -80,20 +80,21 @@ func GetExportDir() string {
 	for {
 		exportDir, err := GetUserInput("Enter export directory")
 		if err != nil {
+			log.Printf("invalid export directory input: %s\n", err)
 			return ""
 		}
 		if exportDir == "" {
-			fmt.Printf("invalid export directory: %s\n", err)
+			log.Printf("invalid export directory: %s\n", err)
 			continue
 		}
 		exportDir, err = ResolvePath(exportDir)
 		if err != nil {
-			fmt.Printf("invalid export directory: %s\n", err)
+			log.Printf("invalid export directory: %s\n", err)
 			continue
 		}
 		_, err = ValidateDirForWrite(exportDir)
 		if err != nil {
-			fmt.Printf("invalid export directory: %s\n", err)
+			log.Printf("invalid export directory: %s\n", err)
 			continue
 		}
 
