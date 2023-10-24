@@ -1610,7 +1610,7 @@ class FilesDB {
       LEFT JOIN $embeddingsTable ON $filesTable.$columnUploadedFileID = $embeddingsTable.$columnUploadedFileID
       WHERE $filesTable.$columnUploadedFileID IS NOT NULL
       AND $filesTable.$columnUploadedFileID != -1
-      AND $embeddingsTable.$columnUploadedFileID IS NULL
+      AND $embeddingsTable.$columnUploadedFileID IS NOT NULL
       GROUP BY $filesTable.$columnUploadedFileID;
     ''');
     return convertToFiles(result);

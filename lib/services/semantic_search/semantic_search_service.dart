@@ -174,7 +174,9 @@ class SemanticSearchService {
     CLIP.loadImageModel(imageModelPath);
     final textModelPath =
         await _getAccessiblePathForAsset(kTextModelPath, "text_model.bin");
-    CLIP.loadTextModel(textModelPath);
+    final result = CLIP.loadTextModel(textModelPath);
+    _logger.info("Result of loading text model: " + result);
+
     final endTime = DateTime.now();
     _logger.info(
       "Loading model took: " +
