@@ -227,6 +227,14 @@
     {
       "title": "Skiff",
       "hex": "EF5A3C"
+    },
+    {
+      "title": "Epic Games",
+      "slug": "epicgames"
+    },
+    {
+      "title": "Rockstar Games",
+      "slug": "rockstar"
     }
     
   ]
