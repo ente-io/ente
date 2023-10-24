@@ -1,8 +1,10 @@
 import "package:flutter/material.dart";
 import "package:photos/models/search/search_result.dart";
 import "package:photos/models/search/search_types.dart";
+import "package:photos/states/search_results_state.dart";
 import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/viewer/search/search_section.dart";
+import "package:photos/ui/viewer/search/search_suggestions.dart";
 
 class SearchTab extends StatefulWidget {
   const SearchTab({Key? key}) : super(key: key);
@@ -16,21 +18,21 @@ class _SearchTabState extends State<SearchTab> {
   String _email = '';
   final textFieldFocusNode = FocusNode();
   final _textController = TextEditingController();
+  var _searchResults = <SearchResult>[];
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _searchResults = InheritedSearchResults.of(context).results;
+  }
 
   @override
   Widget build(BuildContext context) {
-    // return const Column(
-    //   children: [
-    //     Align(
-    //       alignment: Alignment.topRight,
-    //       child: SearchIconWidget(),
-    //     ),
-    //     AllSearchSections(),
-    //   ],
-    // );
-    return const Padding(
-      padding: EdgeInsets.only(top: 8),
-      child: AllSearchSections(),
+    return Padding(
+      padding: const EdgeInsets.only(top: 8),
+      child: _searchResults.isEmpty
+          ? const AllSearchSections()
+          : SearchSuggestionsWidget(_searchResults),
     );
   }
 
