@@ -273,6 +273,7 @@ class _HomeWidgetState extends State<HomeWidget> {
     _intentDataStreamSubscription?.cancel();
     _collectionUpdatedEvent.cancel();
     isOnSearchTabNotifier.dispose();
+    _pageController.dispose();
     super.dispose();
   }
 
@@ -356,7 +357,6 @@ class _HomeWidgetState extends State<HomeWidget> {
   }
 
   Widget _getBody(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
     if (!Configuration.instance.hasConfiguredAccount()) {
       _closeDrawerIfOpen(context);
       return const LandingPageWidget();
