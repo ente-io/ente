@@ -28,11 +28,6 @@ class SearchIconWidget extends StatefulWidget {
 
 class _SearchIconWidgetState extends State<SearchIconWidget> {
   @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return Hero(
       tag: "search_icon",
@@ -225,7 +220,7 @@ class _SearchWidgetState extends State<SearchWidget> {
       }
 
       final holidayResults =
-      await _searchService.getHolidaySearchResults(context, query);
+          await _searchService.getHolidaySearchResults(context, query);
       allResults.addAll(holidayResults);
 
       final fileTypeSearchResults =

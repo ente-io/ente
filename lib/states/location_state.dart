@@ -168,8 +168,6 @@ class InheritedLocationTagData extends InheritedWidget {
 
   @override
   bool updateShouldNotify(InheritedLocationTagData oldWidget) {
-    print(selectedRadius);
-    print(oldWidget.selectedRadius != selectedRadius);
     return oldWidget.selectedRadius != selectedRadius ||
         !oldWidget.radiusValues.equals(radiusValues) ||
         oldWidget.centerPoint != centerPoint ||
