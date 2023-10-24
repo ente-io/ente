@@ -33,6 +33,7 @@ import 'package:photos/services/local_sync_service.dart';
 import "package:photos/services/notification_service.dart";
 import 'package:photos/services/update_service.dart';
 import 'package:photos/services/user_service.dart';
+import "package:photos/states/search_results_state.dart";
 import 'package:photos/states/user_details_state.dart';
 import 'package:photos/theme/colors.dart';
 import 'package:photos/theme/ente_theme.dart';
@@ -391,79 +392,81 @@ class _HomeWidgetState extends State<HomeWidget> {
             !LocalSyncService.instance.hasGrantedLimitedPermissions() &&
             CollectionsService.instance.getActiveCollections().isEmpty;
 
-    return Stack(
-      children: [
-        Builder(
-          builder: (context) {
-            return ExtentsPageView(
-              onPageChanged: (page) {
-                Bus.instance.fire(
-                  TabChangedEvent(
-                    page,
-                    TabChangedEventSource.pageView,
-                  ),
-                );
-              },
-              controller: _pageController,
-              openDrawer: Scaffold.of(context).openDrawer,
-              physics: const BouncingScrollPhysics(),
-              children: [
-                _showShowBackupHook
-                    ? const StartBackupHookWidget(headerWidget: _headerWidget)
-                    : HomeGalleryWidget(
-                        header: _headerWidget,
-                        footer: const PreserveFooterWidget(),
-                        selectedFiles: _selectedFiles,
-                      ),
-                _userCollectionsTab,
-                _sharedCollectionTab,
-                _searchTab,
-              ],
-            );
-          },
-        ),
-        Align(
-          alignment: Alignment.bottomCenter,
-          child: ValueListenableBuilder(
-            valueListenable: isOnSearchTabNotifier,
-            builder: (context, value, child) {
-              return Column(
-                mainAxisSize: MainAxisSize.min,
+    return SearchResultsProvider(
+      child: Stack(
+        children: [
+          Builder(
+            builder: (context) {
+              return ExtentsPageView(
+                onPageChanged: (page) {
+                  Bus.instance.fire(
+                    TabChangedEvent(
+                      page,
+                      TabChangedEventSource.pageView,
+                    ),
+                  );
+                },
+                controller: _pageController,
+                openDrawer: Scaffold.of(context).openDrawer,
+                physics: const BouncingScrollPhysics(),
                 children: [
-                  value
-                      ? const SearchWidgetNew()
-                          .animate()
-                          .fadeIn(
-                            duration: const Duration(milliseconds: 175),
-                            curve: Curves.easeInOutSine,
-                          )
-                          .scale(
-                            begin: const Offset(0.6, 0.6),
-                            end: const Offset(1, 1),
-                            duration: const Duration(
-                              milliseconds: 175,
-                            ),
-                            curve: Curves.easeInOutSine,
-                          )
-                          .slide(
-                            begin: const Offset(0, 0.8),
-                            curve: Curves.easeInOutSine,
-                            duration: const Duration(
-                              milliseconds: 175,
-                            ),
-                          )
-                      : const SizedBox.shrink(),
-                  child!,
+                  _showShowBackupHook
+                      ? const StartBackupHookWidget(headerWidget: _headerWidget)
+                      : HomeGalleryWidget(
+                          header: _headerWidget,
+                          footer: const PreserveFooterWidget(),
+                          selectedFiles: _selectedFiles,
+                        ),
+                  _userCollectionsTab,
+                  _sharedCollectionTab,
+                  _searchTab,
                 ],
               );
             },
-            child: HomeBottomNavigationBar(
-              _selectedFiles,
-              selectedTabIndex: _selectedTabIndex,
+          ),
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: ValueListenableBuilder(
+              valueListenable: isOnSearchTabNotifier,
+              builder: (context, value, child) {
+                return Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    value
+                        ? const SearchWidgetNew()
+                            .animate()
+                            .fadeIn(
+                              duration: const Duration(milliseconds: 175),
+                              curve: Curves.easeInOutSine,
+                            )
+                            .scale(
+                              begin: const Offset(0.6, 0.6),
+                              end: const Offset(1, 1),
+                              duration: const Duration(
+                                milliseconds: 175,
+                              ),
+                              curve: Curves.easeInOutSine,
+                            )
+                            .slide(
+                              begin: const Offset(0, 0.8),
+                              curve: Curves.easeInOutSine,
+                              duration: const Duration(
+                                milliseconds: 175,
+                              ),
+                            )
+                        : const SizedBox.shrink(),
+                    child!,
+                  ],
+                );
+              },
+              child: HomeBottomNavigationBar(
+                _selectedFiles,
+                selectedTabIndex: _selectedTabIndex,
+              ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 

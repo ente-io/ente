@@ -7,6 +7,7 @@ import "package:photos/core/event_bus.dart";
 import "package:photos/events/tab_changed_event.dart";
 import "package:photos/models/search/search_result.dart";
 import "package:photos/services/search_service.dart";
+import "package:photos/states/search_results_state.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/viewer/search/search_suffix_icon_widget.dart";
 import "package:photos/utils/date_time_util.dart";
@@ -21,7 +22,6 @@ class SearchWidgetNew extends StatefulWidget {
 
 class _SearchWidgetNewState extends State<SearchWidgetNew> {
   String _query = "";
-  final List<SearchResult> _results = [];
   final _searchService = SearchService.instance;
   final _debouncer = Debouncer(const Duration(milliseconds: 100));
   final Logger _logger = Logger((_SearchWidgetNewState).toString());
@@ -146,10 +146,9 @@ class _SearchWidgetNewState extends State<SearchWidgetNew> {
                       /*checking if _query == value to make sure that the results are from the current query
                       and not from the previous query (race condition).*/
                       if (mounted && _query == value) {
-                        setState(() {
-                          _results.clear();
-                          _results.addAll(allResults);
-                        });
+                        final inheritedSearchResults =
+                            InheritedSearchResults.of(context);
+                        inheritedSearchResults.updateResults(allResults);
                       }
                     },
                   ),
