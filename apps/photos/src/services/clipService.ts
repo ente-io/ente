@@ -12,6 +12,8 @@ import { CustomError } from 'utils/error';
 import { LS_KEYS, getData } from 'utils/storage/localStorage';
 import { getPersonalFiles } from 'utils/file';
 
+const CLIP_EMBEDDING_LENGTH = 512;
+
 class ClipServiceImpl {
     private electronAPIs: ElectronAPIs;
     private embeddingExtractionInProgress: AbortController = null;
@@ -89,6 +91,11 @@ class ClipServiceImpl {
                     const embeddingData = await this.extractClipImageEmbedding(
                         file
                     );
+                    if (embeddingData?.length !== CLIP_EMBEDDING_LENGTH) {
+                        throw Error(
+                            `invalid length embedding data length: ${embeddingData?.length}`
+                        );
+                    }
                     const comlinkCryptoWorker =
                         await ComlinkCryptoWorker.getInstance();
                     const { file: encryptedEmbeddingData } =
