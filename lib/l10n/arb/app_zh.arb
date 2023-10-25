@@ -334,5 +334,7 @@
   "minimizeAppOnCopy": "复制时最小化应用",
   "editCodeAuthMessage": "编辑代码需要身份验证",
   "deleteCodeAuthMessage": "删除代码需要身份验证",
-  "showQRAuthMessage": "显示QR码需要身份验证"
+  "showQRAuthMessage": "显示QR码需要身份验证",
+  "confirmAccountDeleteTitle": "确认删除账户",
+  "confirmAccountDeleteMessage": "该账户已链接到其他ente旗下的应用程序（如果您使用任何相关的应用程序）。\n\n您在所有ente旗下应用程序中上传的数据都将被安排删除，并且您的账户将被永久删除。"
 }
