@@ -5,7 +5,6 @@ import (
 	"github.com/ente-io/cli/internal/api"
 	"github.com/ente-io/cli/pkg/secrets"
 	bolt "go.etcd.io/bbolt"
-	"log"
 	"os"
 	"path/filepath"
 )
@@ -26,7 +25,6 @@ func (c *ClICtrl) Init() error {
 			return err
 		}
 	}
-	log.Printf("Using temp folder %s", tempPath)
 	c.tempFolder = tempPath
 	return c.DB.Update(func(tx *bolt.Tx) error {
 		_, err := tx.CreateBucketIfNotExists([]byte(AccBucket))
