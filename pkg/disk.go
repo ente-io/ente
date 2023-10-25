@@ -7,7 +7,6 @@ import (
 	"github.com/ente-io/cli/pkg/model/export"
 	"io"
 	"os"
-	"strings"
 )
 
 const (
@@ -101,7 +100,7 @@ func readJSONFromFile(filePath string, data interface{}) error {
 
 func Move(source, destination string) error {
 	err := os.Rename(source, destination)
-	if err != nil && strings.Contains(err.Error(), "cross-device link") {
+	if err != nil {
 		return moveCrossDevice(source, destination)
 	}
 	return err
