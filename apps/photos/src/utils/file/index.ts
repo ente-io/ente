@@ -165,7 +165,7 @@ export async function downloadFile(
     }
 }
 
-function downloadUsingAnchor(link: string, name: string) {
+export function downloadUsingAnchor(link: string, name: string) {
     const a = document.createElement('a');
     a.style.display = 'none';
     a.href = link;

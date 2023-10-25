@@ -42,6 +42,8 @@ import MenuIcon from '@mui/icons-material/Menu';
 import { AppContext } from 'pages/_app';
 import { getEditorCloseConfirmationMessage } from 'utils/ui';
 import { logError } from 'utils/sentry';
+import { getFileType } from 'services/typeDetectionService';
+import { downloadUsingAnchor } from 'utils/file';
 
 interface IProps {
     file: EnteFile;
@@ -65,6 +67,13 @@ const filterDefaultValues = {
     blur: 0,
     saturation: 100,
     invert: false,
+};
+
+const getEditedFileName = (fileName: string) => {
+    const fileNameParts = fileName.split('.');
+    const extension = fileNameParts.pop();
+    const editedFileName = `${fileNameParts.join('.')}-edited.${extension}`;
+    return editedFileName;
 };
 
 const ImageEditorOverlay = (props: IProps) => {
@@ -271,6 +280,16 @@ const ImageEditorOverlay = (props: IProps) => {
         }
     };
 
+    const getEditedFile = async () => {
+        const blob = await exportCanvasToBlob();
+        if (!blob) {
+            throw Error('no blob');
+        }
+        const editedFileName = getEditedFileName(props.file.metadata.title);
+        const editedFile = new File([blob], editedFileName);
+        return editedFile;
+    };
+
     const handleClose = () => {
         setFileURL(null);
         props.onClose();
@@ -296,18 +315,12 @@ const ImageEditorOverlay = (props: IProps) => {
 
             await applyFilters([originalSizeCanvasRef.current]);
 
-            const blob = await exportCanvasToBlob();
-            if (!blob) {
-                throw Error('no blob');
-            }
-            // create a link
-            const a = document.createElement('a');
-            a.href = URL.createObjectURL(blob);
-            a.download = props.file.metadata.title;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(a.href);
+            const editedFile = await getEditedFile();
+            const fileType = await getFileType(editedFile);
+            const tempImgURL = URL.createObjectURL(
+                new Blob([editedFile], { type: fileType.mimeType })
+            );
+            downloadUsingAnchor(tempImgURL, editedFile.name);
         } catch (e) {
             logError(e, 'Error downloading edited photo');
         }
@@ -325,22 +338,9 @@ const ImageEditorOverlay = (props: IProps) => {
                 (c) => c.id === props.file.collectionID
             );
 
-            const blob = await exportCanvasToBlob();
-            if (!blob) {
-                throw Error('no blob');
-            }
-
-            const newFile = new File(
-                [blob],
-                `${props.file.metadata.title}-edited`,
-                {
-                    type: blob.type,
-                    lastModified: new Date().getTime(),
-                }
-            );
-
+            const editedFile = await getEditedFile();
             const file: FileWithCollection = {
-                file: newFile,
+                file: editedFile,
                 collectionID: props.file.collectionID,
                 localID: 1,
             };
