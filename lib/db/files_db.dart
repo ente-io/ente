@@ -406,6 +406,7 @@ class FilesDB {
     await db.delete("device_files");
     await db.delete("device_collections");
     await db.delete("entities");
+    await db.delete(embeddingsTable);
   }
 
   Future<void> deleteDB() async {
