@@ -217,7 +217,6 @@ flutter_native_splash:
 flutter:
   assets:
     - assets/
-    - assets/models/clip/
     - assets/models/cocossd/
     - assets/models/mobilenet/
     - assets/models/scenes/
