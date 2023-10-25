@@ -422,10 +422,10 @@ packages:
     dependency: "direct main"
     description:
       name: file_saver
-      sha256: "8ffd91ae9f543c5ebbfec71a814ee5aa9e21176d31335133308abf63f4c42e8a"
+      sha256: "591d25e750e3a4b654f7b0293abc2ed857242f82ca7334051b2a8ceeb369dac8"
       url: "https://pub.dev"
     source: hosted
-    version: "0.2.9"
+    version: "0.2.8"
   fixnum:
     dependency: transitive
     description:
