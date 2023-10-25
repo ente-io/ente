@@ -19,7 +19,6 @@ import {
 } from 'react';
 
 import { EnteFile } from 'types/file';
-import { getRenderableFileURL } from 'utils/file';
 import downloadManager from 'services/downloadManager';
 import { MenuItemGroup } from 'components/Menu/MenuItemGroup';
 import { EnteMenuItem } from 'components/Menu/EnteMenuItem';
@@ -198,14 +197,9 @@ const ImageEditorOverlay = (props: IProps) => {
             const ctx = canvasRef.current.getContext('2d');
             ctx.imageSmoothingEnabled = false;
             if (!fileURL) {
-                const stream = await downloadManager.downloadFile(props.file);
-                const fileBlob = await new Response(stream).blob();
-                const { converted } = await getRenderableFileURL(
-                    props.file,
-                    fileBlob
-                );
-                img.src = converted[0];
-                setFileURL(converted[0]);
+                const { original } = await downloadManager.getFile(props.file);
+                img.src = original[0];
+                setFileURL(original[0]);
             } else {
                 img.src = fileURL;
             }
@@ -241,6 +235,9 @@ const ImageEditorOverlay = (props: IProps) => {
                     } catch (e) {
                         reject(e);
                     }
+                };
+                img.onerror = (e) => {
+                    reject(e);
                 };
             });
         } catch (e) {
