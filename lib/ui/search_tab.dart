@@ -8,6 +8,8 @@ import "package:photos/ui/viewer/search/search_section.dart";
 import "package:photos/ui/viewer/search/search_suggestions.dart";
 import "package:photos/ui/viewer/search/search_widget_new.dart";
 
+late Future<List<List<SearchResult>>> allSectionsExamples;
+
 class SearchTab extends StatefulWidget {
   const SearchTab({Key? key}) : super(key: key);
 
@@ -57,7 +59,6 @@ class AllSearchSections extends StatefulWidget {
 }
 
 class _AllSearchSectionsState extends State<AllSearchSections> {
-  late Future<List<List<SearchResult>>> allSectionsExamples;
   late List<Future<List<SearchResult>>> sectionExamples;
   static const _limit = 7;
 
