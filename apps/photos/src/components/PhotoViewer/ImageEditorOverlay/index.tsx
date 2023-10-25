@@ -287,238 +287,225 @@ const ImageEditorOverlay = (props: IProps) => {
         }
     };
 
+    if (!props.show) {
+        return <></>;
+    }
+
     return (
         <>
-            {props.show && (
-                <>
-                    <Backdrop
-                        sx={{
-                            color: '#fff',
-                            zIndex: '999 !important',
-                            width: '100%',
-                            backdropFilter: 'blur(5px)',
-                        }}
-                        open>
-                        <Box padding="1rem" width="100%" height="100%">
-                            <HorizontalFlex
-                                justifyContent={'space-between'}
-                                alignItems={'center'}>
-                                <Typography variant="h2" fontWeight="bold">
-                                    {t('PHOTO_EDITOR')}
-                                </Typography>
-                                <IconButton
-                                    onClick={() => {
-                                        setShowControlsDrawer(true);
-                                    }}>
-                                    <MenuIcon />
-                                </IconButton>
-                            </HorizontalFlex>
-                            <Box
-                                width="100%"
-                                height="100%"
-                                overflow="hidden"
-                                boxSizing={'border-box'}
-                                display="flex"
-                                alignItems="center"
-                                justifyContent="center">
-                                <Box
-                                    height="90%"
-                                    width="100%"
-                                    ref={parentRef}
-                                    display="flex"
-                                    alignItems="center"
-                                    justifyContent="center">
-                                    {(fileURL === null || canvasLoading) && (
-                                        <CircularProgress />
-                                    )}
+            <Backdrop
+                sx={{
+                    color: '#fff',
+                    zIndex: '999 !important',
+                    width: '100%',
+                    backdropFilter: 'blur(5px)',
+                }}
+                open>
+                <Box padding="1rem" width="100%" height="100%">
+                    <HorizontalFlex
+                        justifyContent={'space-between'}
+                        alignItems={'center'}>
+                        <Typography variant="h2" fontWeight="bold">
+                            {t('PHOTO_EDITOR')}
+                        </Typography>
+                        <IconButton
+                            onClick={() => {
+                                setShowControlsDrawer(true);
+                            }}>
+                            <MenuIcon />
+                        </IconButton>
+                    </HorizontalFlex>
+                    <Box
+                        width="100%"
+                        height="100%"
+                        overflow="hidden"
+                        boxSizing={'border-box'}
+                        display="flex"
+                        alignItems="center"
+                        justifyContent="center">
+                        <Box
+                            height="90%"
+                            width="100%"
+                            ref={parentRef}
+                            display="flex"
+                            alignItems="center"
+                            justifyContent="center">
+                            {(fileURL === null || canvasLoading) && (
+                                <CircularProgress />
+                            )}
 
-                                    <canvas
-                                        ref={canvasRef}
-                                        style={{
-                                            objectFit: 'contain',
-                                            display:
-                                                fileURL === null ||
-                                                canvasLoading
-                                                    ? 'none'
-                                                    : 'block',
-                                            position: 'absolute',
-                                        }}
-                                    />
-                                    <canvas
-                                        ref={originalSizeCanvasRef}
-                                        style={{
-                                            display: 'none',
-                                        }}
-                                    />
-                                </Box>
-                            </Box>
-                        </Box>
-                        <EnteDrawer
-                            variant="persistent"
-                            anchor="right"
-                            open={showControlsDrawer}
-                            onClose={handleCloseWithConfirmation}>
-                            <HorizontalFlex justifyContent={'space-between'}>
-                                <IconButton
-                                    onClick={() => {
-                                        setShowControlsDrawer(false);
-                                    }}>
-                                    <ChevronRightIcon />
-                                </IconButton>
-                                <IconButton
-                                    onClick={handleCloseWithConfirmation}>
-                                    <CloseIcon />
-                                </IconButton>
-                            </HorizontalFlex>
-                            <HorizontalFlex gap="0.5rem" marginBottom="1rem">
-                                <Tabs
-                                    value={currentTab}
-                                    onChange={(_, value) => {
-                                        setCurrentTab(value);
-                                    }}>
-                                    <Tab
-                                        label={t('TRANSFORM')}
-                                        value="transform"
-                                    />
-                                    <Tab
-                                        label={t('COLORS')}
-                                        value="colours"
-                                        disabled={transformationPerformed}
-                                    />
-                                </Tabs>
-                            </HorizontalFlex>
-                            <MenuSectionTitle title={t('RESET')} />
-                            <MenuItemGroup
+                            <canvas
+                                ref={canvasRef}
                                 style={{
-                                    marginBottom: '0.5rem',
-                                }}>
-                                <EnteMenuItem
-                                    disabled={canvasLoading}
-                                    startIcon={<CropOriginalIcon />}
-                                    onClick={() => {
-                                        loadCanvas();
-                                    }}
-                                    label={t('RESTORE_ORIGINAL')}
-                                />
-                            </MenuItemGroup>
-                            {currentTab === 'transform' && (
-                                <ImageEditorOverlayContext.Provider
-                                    value={{
-                                        originalSizeCanvasRef,
-                                        canvasRef,
-                                        setCanvasLoading,
-                                        canvasLoading,
-                                        // setNonFilteredFileURL,
-                                        setTransformationPerformed,
-                                    }}>
-                                    <TransformMenu />
-                                </ImageEditorOverlayContext.Provider>
-                            )}
-                            {currentTab === 'colours' && (
-                                <ColoursMenu
-                                    brightness={brightness}
-                                    contrast={contrast}
-                                    saturation={saturation}
-                                    blur={blur}
-                                    invert={invert}
-                                    setBrightness={setBrightness}
-                                    setContrast={setContrast}
-                                    setSaturation={setSaturation}
-                                    setBlur={setBlur}
-                                    setInvert={setInvert}
-                                />
-                            )}
-                            <MenuSectionTitle title={t('EXPORT')} />
-                            <MenuItemGroup>
-                                <EnteMenuItem
-                                    startIcon={<DownloadIcon />}
-                                    onClick={async () => {
-                                        if (!canvasRef.current) return;
+                                    objectFit: 'contain',
+                                    display:
+                                        fileURL === null || canvasLoading
+                                            ? 'none'
+                                            : 'block',
+                                    position: 'absolute',
+                                }}
+                            />
+                            <canvas
+                                ref={originalSizeCanvasRef}
+                                style={{
+                                    display: 'none',
+                                }}
+                            />
+                        </Box>
+                    </Box>
+                </Box>
+                <EnteDrawer
+                    variant="persistent"
+                    anchor="right"
+                    open={showControlsDrawer}
+                    onClose={handleCloseWithConfirmation}>
+                    <HorizontalFlex justifyContent={'space-between'}>
+                        <IconButton
+                            onClick={() => {
+                                setShowControlsDrawer(false);
+                            }}>
+                            <ChevronRightIcon />
+                        </IconButton>
+                        <IconButton onClick={handleCloseWithConfirmation}>
+                            <CloseIcon />
+                        </IconButton>
+                    </HorizontalFlex>
+                    <HorizontalFlex gap="0.5rem" marginBottom="1rem">
+                        <Tabs
+                            value={currentTab}
+                            onChange={(_, value) => {
+                                setCurrentTab(value);
+                            }}>
+                            <Tab label={t('TRANSFORM')} value="transform" />
+                            <Tab
+                                label={t('COLORS')}
+                                value="colours"
+                                disabled={transformationPerformed}
+                            />
+                        </Tabs>
+                    </HorizontalFlex>
+                    <MenuSectionTitle title={t('RESET')} />
+                    <MenuItemGroup
+                        style={{
+                            marginBottom: '0.5rem',
+                        }}>
+                        <EnteMenuItem
+                            disabled={canvasLoading}
+                            startIcon={<CropOriginalIcon />}
+                            onClick={() => {
+                                loadCanvas();
+                            }}
+                            label={t('RESTORE_ORIGINAL')}
+                        />
+                    </MenuItemGroup>
+                    {currentTab === 'transform' && (
+                        <ImageEditorOverlayContext.Provider
+                            value={{
+                                originalSizeCanvasRef,
+                                canvasRef,
+                                setCanvasLoading,
+                                canvasLoading,
+                                // setNonFilteredFileURL,
+                                setTransformationPerformed,
+                            }}>
+                            <TransformMenu />
+                        </ImageEditorOverlayContext.Provider>
+                    )}
+                    {currentTab === 'colours' && (
+                        <ColoursMenu
+                            brightness={brightness}
+                            contrast={contrast}
+                            saturation={saturation}
+                            blur={blur}
+                            invert={invert}
+                            setBrightness={setBrightness}
+                            setContrast={setContrast}
+                            setSaturation={setSaturation}
+                            setBlur={setBlur}
+                            setInvert={setInvert}
+                        />
+                    )}
+                    <MenuSectionTitle title={t('EXPORT')} />
+                    <MenuItemGroup>
+                        <EnteMenuItem
+                            startIcon={<DownloadIcon />}
+                            onClick={async () => {
+                                if (!canvasRef.current) return;
 
-                                        await applyFilters([
-                                            originalSizeCanvasRef.current,
-                                        ]);
+                                await applyFilters([
+                                    originalSizeCanvasRef.current,
+                                ]);
 
-                                        exportCanvasToBlob((blob) => {
-                                            if (!blob) {
-                                                return console.error('no blob');
-                                            }
-                                            // create a link
-                                            const a =
-                                                document.createElement('a');
-                                            a.href = URL.createObjectURL(blob);
-                                            a.download =
-                                                props.file.metadata.title;
-                                            document.body.appendChild(a);
-                                            a.click();
-                                            document.body.removeChild(a);
-                                            URL.revokeObjectURL(a.href);
-                                        });
-                                    }}
-                                    label={t('DOWNLOAD_EDITED')}
-                                />
-                                <MenuItemDivider />
-                                <EnteMenuItem
-                                    startIcon={<CloudUploadIcon />}
-                                    onClick={async () => {
-                                        if (!canvasRef.current) return;
+                                exportCanvasToBlob((blob) => {
+                                    if (!blob) {
+                                        return console.error('no blob');
+                                    }
+                                    // create a link
+                                    const a = document.createElement('a');
+                                    a.href = URL.createObjectURL(blob);
+                                    a.download = props.file.metadata.title;
+                                    document.body.appendChild(a);
+                                    a.click();
+                                    document.body.removeChild(a);
+                                    URL.revokeObjectURL(a.href);
+                                });
+                            }}
+                            label={t('DOWNLOAD_EDITED')}
+                        />
+                        <MenuItemDivider />
+                        <EnteMenuItem
+                            startIcon={<CloudUploadIcon />}
+                            onClick={async () => {
+                                if (!canvasRef.current) return;
 
-                                        await applyFilters([
-                                            originalSizeCanvasRef.current,
-                                        ]);
+                                await applyFilters([
+                                    originalSizeCanvasRef.current,
+                                ]);
 
-                                        const collections =
-                                            await getLocalCollections();
+                                const collections = await getLocalCollections();
 
-                                        const collection = collections.find(
-                                            (c) =>
-                                                c.id === props.file.collectionID
-                                        );
+                                const collection = collections.find(
+                                    (c) => c.id === props.file.collectionID
+                                );
 
-                                        exportCanvasToBlob((blob) => {
-                                            if (!blob) {
-                                                return console.error('no blob');
-                                            }
+                                exportCanvasToBlob((blob) => {
+                                    if (!blob) {
+                                        return console.error('no blob');
+                                    }
 
-                                            const newFile = new File(
-                                                [blob],
-                                                props.file.metadata.title,
-                                                {
-                                                    type: blob.type,
-                                                    lastModified:
-                                                        new Date().getTime(),
-                                                }
-                                            );
+                                    const newFile = new File(
+                                        [blob],
+                                        props.file.metadata.title,
+                                        {
+                                            type: blob.type,
+                                            lastModified: new Date().getTime(),
+                                        }
+                                    );
 
-                                            const file: FileWithCollection = {
-                                                file: newFile,
-                                                collectionID:
-                                                    props.file.collectionID,
-                                                collection,
-                                                localID: 1,
-                                            };
+                                    const file: FileWithCollection = {
+                                        file: newFile,
+                                        collectionID: props.file.collectionID,
+                                        collection,
+                                        localID: 1,
+                                    };
 
-                                            uploadManager.prepareForNewUpload();
-                                            uploadManager.showUploadProgressDialog();
+                                    uploadManager.prepareForNewUpload();
+                                    uploadManager.showUploadProgressDialog();
 
-                                            uploadManager.queueFilesForUpload(
-                                                [file],
-                                                [collection],
-                                                uploadManager.getUploaderName()
-                                            );
-                                            setFileURL(null);
-                                            props.onClose();
-                                        });
-                                    }}
-                                    label={t('SAVE_A_COPY_TO_ENTE')}
-                                />
-                            </MenuItemGroup>
-                        </EnteDrawer>
-                        {/* <Box> */}
-                        {/* </Box> */}
-                    </Backdrop>
-                </>
-            )}
+                                    uploadManager.queueFilesForUpload(
+                                        [file],
+                                        [collection],
+                                        uploadManager.getUploaderName()
+                                    );
+                                    setFileURL(null);
+                                    props.onClose();
+                                });
+                            }}
+                            label={t('SAVE_A_COPY_TO_ENTE')}
+                        />
+                    </MenuItemGroup>
+                </EnteDrawer>
+            </Backdrop>
         </>
     );
 };
