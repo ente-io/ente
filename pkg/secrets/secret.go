@@ -17,9 +17,15 @@ func IsRunningInContainer() bool {
 	}
 	return true
 }
+
+const (
+	secretService = "ente"
+	secretUser    = "ente-cli-user"
+)
+
 func GetOrCreateClISecret() []byte {
 	// get password
-	secret, err := keyring.Get("ente-cli-cli", "ghost")
+	secret, err := keyring.Get(secretService, secretUser)
 	if err != nil {
 		if !errors.Is(err, keyring.ErrNotFound) {
 			if IsRunningInContainer() {
@@ -34,7 +40,7 @@ func GetOrCreateClISecret() []byte {
 			log.Fatal(fmt.Errorf("error generating key: %w", err))
 		}
 		secret = string(key)
-		keySetErr := keyring.Set("ente-cli-cli", "ghost", string(secret))
+		keySetErr := keyring.Set(secretService, secretUser, string(secret))
 		if keySetErr != nil {
 			log.Fatal(fmt.Errorf("error setting password in keyring: %w", keySetErr))
 		}

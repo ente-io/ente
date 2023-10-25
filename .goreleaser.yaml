@@ -5,7 +5,7 @@
 # Feel free to remove those if you don't want/need to use them.
 # yaml-language-server: $schema=https://goreleaser.com/static/schema.json
 # vim: set ts=2 sw=2 tw=0 fo=cnqoj
-project_name: ente-cli
+project_name: ente
 before:
   hooks:
     # You may remove this if you don't use go modules.

@@ -20,11 +20,11 @@ do
         export GOARCH="$ARCH"
 
         # Set the output binary name to "ente-cli" for the current OS and architecture
-        BINARY_NAME="ente-cli-$OS-$ARCH"
+        BINARY_NAME="ente-$OS-$ARCH"
 
         # Add .exe extension for Windows
         if [ "$OS" == "windows" ]; then
-            BINARY_NAME="ente-cli-$OS-$ARCH.exe"
+            BINARY_NAME="ente-$OS-$ARCH.exe"
         fi
 
         # Build the binary and place it in the "bin" directory

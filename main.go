@@ -66,8 +66,7 @@ func GetCLIConfigPath() (string, error) {
 		return "", err
 	}
 
-	// Create the path for the .ente-cli folder
-	cliDBPath := filepath.Join(homeDir, ".ente-cli")
+	cliDBPath := filepath.Join(homeDir, ".ente")
 
 	// Check if the folder already exists, if not, create it
 	if _, err := os.Stat(cliDBPath); os.IsNotExist(err) {
