@@ -30,7 +30,10 @@ class SearchResultWidget extends StatelessWidget {
         //todo: check and change color to figma
         decoration: BoxDecoration(
           borderRadius: const BorderRadius.all(Radius.circular(4)),
-          color: Theme.of(context).colorScheme.searchResultsColor,
+          // color: Theme.of(context).colorScheme.searchResultsColor,
+          border: Border.all(
+            color: getEnteColorScheme(context).strokeFainter,
+          ),
         ),
 
         child: Row(
@@ -42,44 +45,46 @@ class SearchResultWidget extends StatelessWidget {
               heroTagPrefix,
             ),
             const SizedBox(width: 12),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SizedBox(
-                  width: 220,
-                  child: Text(
-                    searchResult.name(),
-                    style: textTheme.body,
-                    overflow: TextOverflow.ellipsis,
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 2),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(
+                    width: 220,
+                    child: Text(
+                      searchResult.name(),
+                      style: textTheme.body,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 4),
-                Row(
-                  children: [
-                    Text(
-                      _resultTypeName(searchResult.type()),
-                      style: textTheme.smallMuted,
-                    ),
-                    FutureBuilder<int>(
-                      future: resultCount ??
-                          Future.value(searchResult.resultFiles().length),
-                      builder: (context, snapshot) {
-                        if (snapshot.hasData && snapshot.data! > 0) {
-                          final noOfMemories = snapshot.data;
+                  const SizedBox(height: 4),
+                  Row(
+                    children: [
+                      Text(
+                        _resultTypeName(searchResult.type()),
+                        style: textTheme.smallMuted,
+                      ),
+                      FutureBuilder<int>(
+                        future: resultCount ??
+                            Future.value(searchResult.resultFiles().length),
+                        builder: (context, snapshot) {
+                          if (snapshot.hasData && snapshot.data! > 0) {
+                            final noOfMemories = snapshot.data;
 
-                          return Text(
-                            " \u2022 " + noOfMemories.toString(),
-                            style: textTheme.smallMuted,
-                          );
-                        } else {
-                          return const SizedBox.shrink();
-                        }
-                      },
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 2),
-              ],
+                            return Text(
+                              " \u2022 " + noOfMemories.toString(),
+                              style: textTheme.smallMuted,
+                            );
+                          } else {
+                            return const SizedBox.shrink();
+                          }
+                        },
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
             const Spacer(),
             Padding(

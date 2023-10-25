@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
-import 'package:photos/ente_theme_data.dart';
 import 'package:photos/models/search/album_search_result.dart';
 import 'package:photos/models/search/generic_search_result.dart';
 import 'package:photos/models/search/search_result.dart';
 import "package:photos/services/collections_service.dart";
+import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/viewer/gallery/collection_page.dart';
 import 'package:photos/ui/viewer/search/result/search_result_widget.dart';
 import 'package:photos/utils/navigation_util.dart';
@@ -19,40 +19,28 @@ class SearchSuggestionsWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Container(
-        margin: const EdgeInsets.only(top: 6),
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.searchResultsColor,
-          borderRadius: BorderRadius.circular(8),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.2),
-              spreadRadius: -3,
-              blurRadius: 6,
-              offset: const Offset(0, 8),
-            ),
-          ],
-        ),
-        child: ClipRRect(
-          borderRadius: const BorderRadius.all(Radius.circular(8)),
-          child: Container(
-            margin: const EdgeInsets.only(top: 6),
-            constraints: const BoxConstraints(
-              maxHeight: 324,
-            ),
-            child: Scrollbar(
-              child: ListView.builder(
-                physics: const ClampingScrollPhysics(),
-                shrinkWrap: true,
-                itemCount: results.length + 1,
+    late final String title;
+    final resultsCount = results.length;
+    if (resultsCount == 1) {
+      title = "$resultsCount result found";
+    } else {
+      title = "$resultsCount results found";
+    }
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12, 32, 12, 0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: getEnteTextTheme(context).largeBold,
+          ),
+          const SizedBox(height: 20),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4),
+              child: ListView.separated(
                 itemBuilder: (context, index) {
-                  if (results.length == index) {
-                    return Container(
-                      height: 6,
-                      color: Theme.of(context).colorScheme.searchResultsColor,
-                    );
-                  }
                   final result = results[index];
                   if (result is AlbumSearchResult) {
                     final AlbumSearchResult albumSearchResult = result;
@@ -82,10 +70,15 @@ class SearchSuggestionsWidget extends StatelessWidget {
                     return const SizedBox.shrink();
                   }
                 },
+                separatorBuilder: (context, index) {
+                  return const SizedBox(height: 12);
+                },
+                itemCount: results.length,
+                physics: const BouncingScrollPhysics(),
               ),
             ),
           ),
-        ),
+        ],
       ),
     );
   }
