@@ -85,7 +85,7 @@ export async function computeImageEmbedding(
     inputFilePath: string
 ): Promise<Float32Array> {
     try {
-        const clipModelPath = getClipModelPath();
+        const clipModelPath = await getClipModelPath();
         const ggmlclipPath = getGGMLClipPath();
         const cmd = IMAGE_EMBEDDING_EXTRACT_CMD.map((cmdPart) => {
             if (cmdPart === GGMLCLIP_PATH_PLACEHOLDER) {
