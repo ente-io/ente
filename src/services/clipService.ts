@@ -120,7 +120,7 @@ export async function computeTextEmbedding(
     text: string
 ): Promise<Float32Array> {
     try {
-        const clipModelPath = getClipModelPath();
+        const clipModelPath = await getClipModelPath();
         const ggmlclipPath = getGGMLClipPath();
         const cmd = TEXT_EMBEDDING_EXTRACT_CMD.map((cmdPart) => {
             if (cmdPart === GGMLCLIP_PATH_PLACEHOLDER) {
