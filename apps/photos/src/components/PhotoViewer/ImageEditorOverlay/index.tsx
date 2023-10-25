@@ -42,6 +42,7 @@ import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import MenuIcon from '@mui/icons-material/Menu';
 import { AppContext } from 'pages/_app';
 import { getEditorCloseConfirmationMessage } from 'utils/ui';
+import { logError } from 'utils/sentry';
 
 interface IProps {
     file: EnteFile;
@@ -53,7 +54,6 @@ export const ImageEditorOverlayContext = createContext(
     {} as {
         canvasRef: MutableRefObject<HTMLCanvasElement>;
         originalSizeCanvasRef: MutableRefObject<HTMLCanvasElement>;
-        // setNonFilteredFileURL: Dispatch<SetStateAction<string>>;
         setTransformationPerformed: Dispatch<SetStateAction<boolean>>;
         setCanvasLoading: Dispatch<SetStateAction<boolean>>;
         canvasLoading: boolean;
@@ -70,7 +70,6 @@ const filterDefaultValues = {
 
 const ImageEditorOverlay = (props: IProps) => {
     const appContext = useContext(AppContext);
-    // const [originalWidth, originalHeight] = [props.file?.w, props.file?.h];
 
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
     const originalSizeCanvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -106,44 +105,63 @@ const ImageEditorOverlay = (props: IProps) => {
         if (!canvasRef.current) {
             return;
         }
-
-        applyFilters([canvasRef.current]);
-        setColoursAdjusted(
-            brightness !== filterDefaultValues.brightness ||
-                contrast !== filterDefaultValues.contrast ||
-                blur !== filterDefaultValues.blur ||
-                saturation !== filterDefaultValues.saturation ||
-                invert !== filterDefaultValues.invert
-        );
+        try {
+            applyFilters([canvasRef.current]);
+            setColoursAdjusted(
+                brightness !== filterDefaultValues.brightness ||
+                    contrast !== filterDefaultValues.contrast ||
+                    blur !== filterDefaultValues.blur ||
+                    saturation !== filterDefaultValues.saturation ||
+                    invert !== filterDefaultValues.invert
+            );
+        } catch (e) {
+            logError(e, 'Error applying filters');
+        }
     }, [brightness, contrast, blur, saturation, invert, canvasRef, fileURL]);
 
     const applyFilters = async (canvases: HTMLCanvasElement[]) => {
-        const filterString = `brightness(${brightness}%) contrast(${contrast}%) blur(${blur}px) saturate(${saturation}%) invert(${
-            invert ? 1 : 0
-        })`;
+        try {
+            const filterString = `brightness(${brightness}%) contrast(${contrast}%) blur(${blur}px) saturate(${saturation}%) invert(${
+                invert ? 1 : 0
+            })`;
 
-        for (const canvas of canvases) {
-            const context = canvas.getContext('2d');
-            context.imageSmoothingEnabled = false;
+            for (const canvas of canvases) {
+                const context = canvas.getContext('2d');
+                context.imageSmoothingEnabled = false;
 
-            context.filter = filterString;
+                context.filter = filterString;
 
-            const image = new Image();
-            image.src = fileURL;
+                const image = new Image();
+                image.src = fileURL;
 
-            await new Promise((resolve) => {
-                image.onload = () => {
-                    context.clearRect(0, 0, canvas.width, canvas.height);
-
-                    context.save();
-
-                    context.drawImage(image, 0, 0, canvas.width, canvas.height);
-
-                    context.restore();
-
-                    resolve(true);
-                };
-            });
+                await new Promise((resolve, reject) => {
+                    image.onload = () => {
+                        try {
+                            context.clearRect(
+                                0,
+                                0,
+                                canvas.width,
+                                canvas.height
+                            );
+                            context.save();
+                            context.drawImage(
+                                image,
+                                0,
+                                0,
+                                canvas.width,
+                                canvas.height
+                            );
+                            context.restore();
+                            resolve(true);
+                        } catch (e) {
+                            reject(e);
+                        }
+                    };
+                });
+            }
+        } catch (e) {
+            logError(e, 'Error applying filters');
+            throw e;
         }
     };
 
@@ -163,59 +181,71 @@ const ImageEditorOverlay = (props: IProps) => {
     };
 
     const loadCanvas = async () => {
-        if (
-            !canvasRef.current ||
-            !parentRef.current ||
-            !originalSizeCanvasRef.current
-        ) {
-            return;
+        try {
+            if (
+                !canvasRef.current ||
+                !parentRef.current ||
+                !originalSizeCanvasRef.current
+            ) {
+                return;
+            }
+
+            setCanvasLoading(true);
+            resetFilters();
+            setCurrentRotationAngle(0);
+
+            const img = new Image();
+            const ctx = canvasRef.current.getContext('2d');
+            ctx.imageSmoothingEnabled = false;
+            if (!fileURL) {
+                const stream = await downloadManager.downloadFile(props.file);
+                const fileBlob = await new Response(stream).blob();
+                const { converted } = await getRenderableFileURL(
+                    props.file,
+                    fileBlob
+                );
+                img.src = converted[0];
+                setFileURL(converted[0]);
+            } else {
+                img.src = fileURL;
+            }
+
+            await new Promise((resolve, reject) => {
+                img.onload = () => {
+                    try {
+                        const scale = Math.min(
+                            parentRef.current.clientWidth / img.width,
+                            parentRef.current.clientHeight / img.height
+                        );
+
+                        const width = img.width * scale;
+                        const height = img.height * scale;
+                        canvasRef.current.width = width;
+                        canvasRef.current.height = height;
+
+                        ctx?.drawImage(img, 0, 0, width, height);
+
+                        originalSizeCanvasRef.current.width = img.width;
+                        originalSizeCanvasRef.current.height = img.height;
+
+                        const oSCtx =
+                            originalSizeCanvasRef.current.getContext('2d');
+
+                        oSCtx?.drawImage(img, 0, 0, img.width, img.height);
+
+                        setTransformationPerformed(false);
+                        setColoursAdjusted(false);
+
+                        setCanvasLoading(false);
+                        resolve(true);
+                    } catch (e) {
+                        reject(e);
+                    }
+                };
+            });
+        } catch (e) {
+            logError(e, 'Error loading canvas');
         }
-
-        setCanvasLoading(true);
-        resetFilters();
-        setCurrentRotationAngle(0);
-
-        const img = new Image();
-        const ctx = canvasRef.current.getContext('2d');
-        ctx.imageSmoothingEnabled = false;
-        if (!fileURL) {
-            const stream = await downloadManager.downloadFile(props.file);
-            const fileBlob = await new Response(stream).blob();
-            const { converted } = await getRenderableFileURL(
-                props.file,
-                fileBlob
-            );
-            img.src = converted[0];
-            setFileURL(converted[0]);
-        } else {
-            img.src = fileURL;
-        }
-
-        img.onload = () => {
-            const scale = Math.min(
-                parentRef.current.clientWidth / img.width,
-                parentRef.current.clientHeight / img.height
-            );
-
-            const width = img.width * scale;
-            const height = img.height * scale;
-            canvasRef.current.width = width;
-            canvasRef.current.height = height;
-
-            ctx?.drawImage(img, 0, 0, width, height);
-
-            originalSizeCanvasRef.current.width = img.width;
-            originalSizeCanvasRef.current.height = img.height;
-
-            const oSCtx = originalSizeCanvasRef.current.getContext('2d');
-
-            oSCtx?.drawImage(img, 0, 0, img.width, img.height);
-
-            setTransformationPerformed(false);
-            setColoursAdjusted(false);
-
-            setCanvasLoading(false);
-        };
     };
 
     useEffect(() => {
@@ -224,17 +254,22 @@ const ImageEditorOverlay = (props: IProps) => {
     }, [props.show, props.file]);
 
     const exportCanvasToBlob = (callback: (blob: Blob) => void) => {
-        const canvas = originalSizeCanvasRef.current;
-        if (!canvas) return;
+        try {
+            const canvas = originalSizeCanvasRef.current;
+            if (!canvas) return;
 
-        const mimeType = mime.lookup(props.file.metadata.title);
+            const mimeType = mime.lookup(props.file.metadata.title);
 
-        const image = new Image();
-        image.src = canvas.toDataURL();
+            const image = new Image();
+            image.src = canvas.toDataURL();
 
-        const context = canvas.getContext('2d');
-        if (!context) return;
-        canvas.toBlob(callback, mimeType);
+            const context = canvas.getContext('2d');
+            if (!context) return;
+            canvas.toBlob(callback, mimeType);
+        } catch (e) {
+            logError(e, 'Error exporting canvas to blob');
+            throw e;
+        }
     };
 
     const handleClose = () => {
