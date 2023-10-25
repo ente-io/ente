@@ -137,28 +137,6 @@ function PhotoViewer(props: Iprops) {
     const [showEditButton, setShowEditButton] = useState(false);
 
     useEffect(() => {
-        const currentItem = photoSwipe?.currItem;
-
-        if (!currentItem) {
-            return;
-        }
-
-        const enteFile = currentItem as EnteFile;
-
-        const fileType = enteFile.metadata.fileType;
-
-        if (
-            fileType !== FILE_TYPE.IMAGE ||
-            isRawFileFromFileName(enteFile.metadata.title)
-        ) {
-            setShowEditButton(false);
-            return;
-        }
-
-        setShowEditButton(true);
-    }, [photoSwipe?.currItem]);
-
-    useEffect(() => {
         if (publicCollectionGalleryContext.accessedThroughSharedURL) {
             publicCollectionDownloadManager.setProgressUpdater(
                 setFileDownloadProgress
@@ -350,6 +328,13 @@ function PhotoViewer(props: Iprops) {
         setIsSourceLoaded(file.isSourceLoaded);
     }
 
+    function updateShowEditButton(file: EnteFile) {
+        setShowEditButton(
+            file.metadata.fileType === FILE_TYPE.IMAGE &&
+                !isRawFileFromFileName(file.metadata.title)
+        );
+    }
+
     const openPhotoSwipe = () => {
         const { items, currentIndex } = props;
         const options = {
@@ -422,6 +407,7 @@ function PhotoViewer(props: Iprops) {
             updateExif(currItem);
             updateShowConvertBtn(currItem);
             updateIsSourceLoaded(currItem);
+            updateShowEditButton(currItem);
         });
         photoSwipe.listen('resize', () => {
             if (!photoSwipe?.currItem) return;
@@ -586,6 +572,15 @@ function PhotoViewer(props: Iprops) {
     };
     const handleOpenInfo = () => {
         setShowInfo(true);
+    };
+
+    const handleOpenEditor = () => {
+        props.onClose(false);
+        setShowImageEditorOverlay(true);
+    };
+
+    const handleCloseEditor = () => {
+        setShowImageEditorOverlay(false);
     };
 
     const downloadFileHelper = async (file) => {
@@ -805,12 +800,7 @@ function PhotoViewer(props: Iprops) {
                                         {showEditButton && (
                                             <button
                                                 className="pswp__button pswp__button--custom"
-                                                onClick={() => {
-                                                    props.onClose(false);
-                                                    setShowImageEditorOverlay(
-                                                        true
-                                                    );
-                                                }}>
+                                                onClick={handleOpenEditor}>
                                                 <EditIcon />
                                             </button>
                                         )}
@@ -880,9 +870,7 @@ function PhotoViewer(props: Iprops) {
             <ImageEditorOverlay
                 show={showImageEditorOverlay}
                 file={photoSwipe?.currItem as EnteFile}
-                onClose={() => {
-                    setShowImageEditorOverlay(false);
-                }}
+                onClose={handleCloseEditor}
             />
         </>
     );
