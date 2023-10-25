@@ -1,12 +1,9 @@
 import "dart:async";
 import "dart:collection";
-import "dart:io";
 
 import "package:clip_ggml/clip_ggml.dart";
 import "package:computer/computer.dart";
-import "package:flutter/services.dart";
 import "package:logging/logging.dart";
-import "package:path_provider/path_provider.dart";
 import "package:photos/core/configuration.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/db/files_db.dart";
@@ -16,6 +13,7 @@ import "package:photos/events/sync_status_update_event.dart";
 import "package:photos/models/embedding.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/services/semantic_search/embedding_store.dart";
+import "package:photos/services/semantic_search/model_loader.dart";
 import "package:photos/utils/local_settings.dart";
 import "package:photos/utils/thumbnail_util.dart";
 import "package:shared_preferences/shared_preferences.dart";
@@ -29,10 +27,6 @@ class SemanticSearchService {
 
   static const int batchSize = 1;
   static const kModelName = "ggml-clip";
-  static const kImageModelPath =
-      "assets/models/clip/clip-vit-base-patch32_ggml-vision-model-f16.gguf";
-  static const kTextModelPath =
-      "assets/models/clip/clip-vit-base-patch32_ggml-text-model-f16.gguf";
 
   final _logger = Logger("SemanticSearchService");
   final _queue = Queue<EnteFile>();
@@ -44,6 +38,7 @@ class SemanticSearchService {
 
   Future<void> init(SharedPreferences preferences) async {
     await EmbeddingStore.instance.init(preferences);
+    await ModelLoader.instance.init(_computer);
     Bus.instance.on<SyncStatusUpdate>().listen((event) async {
       if (event.status == SyncStatus.diffSynced) {
         await EmbeddingStore.instance.pullEmbeddings();
@@ -168,46 +163,9 @@ class SemanticSearchService {
   }
 
   Future<void> _loadModels() async {
-    final startTime = DateTime.now();
-    final imageModelPath =
-        await _getAccessiblePathForAsset(kImageModelPath, "image_model.bin");
-    await _computer.compute(
-      loadModel,
-      param: {
-        "imageModelPath": imageModelPath,
-      },
-    );
-    final textModelPath =
-        await _getAccessiblePathForAsset(kTextModelPath, "text_model.bin");
-    await _computer.compute(
-      loadModel,
-      param: {
-        "textModelPath": textModelPath,
-      },
-    );
-
-    final endTime = DateTime.now();
-    _logger.info(
-      "Loading model took: " +
-          (endTime.millisecondsSinceEpoch - startTime.millisecondsSinceEpoch)
-              .toString() +
-          "ms",
-    );
+    await ModelLoader.instance.loadImageModel();
+    await ModelLoader.instance.loadTextModel();
     hasLoaded = true;
-  }
-
-  Future<String> _getAccessiblePathForAsset(
-    String assetPath,
-    String tempName,
-  ) async {
-    final byteData = await rootBundle.load(assetPath);
-    return _writeToFile(byteData.buffer.asUint8List(), tempName);
-  }
-
-  Future<String> _writeToFile(Uint8List bytes, String fileName) async {
-    final tempDir = await getTemporaryDirectory();
-    final file = await File('${tempDir.path}/$fileName').writeAsBytes(bytes);
-    return file.path;
   }
 
   Future<void> startBackFill() async {
