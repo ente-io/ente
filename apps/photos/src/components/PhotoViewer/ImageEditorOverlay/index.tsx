@@ -405,7 +405,6 @@ const ImageEditorOverlay = (props: IProps) => {
                                 canvasRef,
                                 setCanvasLoading,
                                 canvasLoading,
-                                // setNonFilteredFileURL,
                                 setTransformationPerformed,
                             }}>
                             <TransformMenu />
