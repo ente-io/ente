@@ -9,6 +9,8 @@ import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
 import { logError } from 'utils/sentry';
 import { addLogLine } from 'utils/logging';
 import { CustomError } from 'utils/error';
+import { LS_KEYS, getData } from 'utils/storage/localStorage';
+import { getPersonalFiles } from 'utils/file';
 
 class ClipServiceImpl {
     private electronAPIs: ElectronAPIs;
@@ -65,7 +67,11 @@ class ClipServiceImpl {
 
     private runClipEmbeddingExtraction = async (canceller: AbortController) => {
         try {
-            const localFiles = await getLocalFiles();
+            const user = getData(LS_KEYS.USER);
+            if (!user) {
+                return;
+            }
+            const localFiles = getPersonalFiles(await getLocalFiles(), user);
             const existingEmbeddings = await getAllClipImageEmbeddings();
             const pendingFiles = await getNonClipEmbeddingExtractedFiles(
                 localFiles,
