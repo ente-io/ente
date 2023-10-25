@@ -67,7 +67,6 @@ class _ZoomableImageState extends State<ZoomableImage>
       }
       _isZooming = value != PhotoViewScaleState.initial;
       debugPrint("isZooming = $_isZooming, currentState $value");
-      // _logger.info('is reakky zooming $_isZooming with state $value');
     };
     super.initState();
   }
