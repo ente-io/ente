@@ -68,7 +68,7 @@ export const syncEmbeddings = async () => {
             if (response.diff.length) {
                 sinceTime = response.diff.slice(-1)[0].updatedAt;
             }
-            await localForage.setItem(EMBEDDINGS_TABLE, newEmbeddings);
+            await localForage.setItem(EMBEDDINGS_TABLE, embeddings);
             await localForage.setItem(EMBEDDING_SYNC_TIME_TABLE, sinceTime);
             addLogLine(
                 `Syncing embeddings syncedEmbeddingsCount: ${newEmbeddings.length}`
