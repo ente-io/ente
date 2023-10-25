@@ -147,6 +147,6 @@ export async function computeTextEmbedding(
         const embeddingArray = new Float32Array(embedding);
         return embeddingArray;
     } catch (err) {
-        logErrorSentry(err, 'Error in computeImageEmbedding');
+        logErrorSentry(err, 'Error in computeTextEmbedding');
     }
 }
