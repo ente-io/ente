@@ -1,3 +1,4 @@
+import "dart:convert";
 import "dart:typed_data";
 
 import "package:logging/logging.dart";
@@ -57,15 +58,14 @@ class EmbeddingStore {
 
   Future<void> _pushEmbedding(EnteFile file, Embedding embedding) async {
     final encryptionKey = getFileKey(file);
-    final embeddingData =
-        Uint8List.view(Float64List.fromList(embedding.embedding).buffer);
-    final encryptedEmbeddingData = await CryptoUtil.encryptChaCha(
-      embeddingData,
+    final embeddingJSON = jsonEncode(embedding.embedding);
+    final encryptedEmbedding = CryptoUtil.encryptSync(
+      utf8.encode(embeddingJSON) as Uint8List,
       encryptionKey,
     );
     final encryptedData =
-        CryptoUtil.bin2base64(encryptedEmbeddingData.encryptedData!);
-    final header = CryptoUtil.bin2base64(encryptedEmbeddingData.header!);
+        CryptoUtil.bin2base64(encryptedEmbedding.encryptedData!);
+    final header = CryptoUtil.bin2base64(encryptedEmbedding.header!);
     try {
       final response = await _dio.put(
         "/embeddings",
@@ -129,7 +129,8 @@ class EmbeddingStore {
         fileKey,
         CryptoUtil.base642bin(embedding.decryptionHeader),
       );
-      final decodedEmbedding = Float64List.view(embeddingData.buffer);
+      final decodedEmbedding =
+          jsonDecode(utf8.decode(embeddingData)) as List<double>;
 
       embeddings.add(
         Embedding(
