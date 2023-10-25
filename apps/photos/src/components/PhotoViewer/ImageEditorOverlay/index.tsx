@@ -291,6 +291,74 @@ const ImageEditorOverlay = (props: IProps) => {
         return <></>;
     }
 
+    const downloadEditedPhoto = async () => {
+        try {
+            if (!canvasRef.current) return;
+
+            await applyFilters([originalSizeCanvasRef.current]);
+
+            exportCanvasToBlob((blob) => {
+                if (!blob) {
+                    return console.error('no blob');
+                }
+                // create a link
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = props.file.metadata.title;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(a.href);
+            });
+        } catch (e) {
+            logError(e, 'Error downloading edited photo');
+        }
+    };
+
+    const saveCopyToEnte = async () => {
+        try {
+            if (!canvasRef.current) return;
+
+            await applyFilters([originalSizeCanvasRef.current]);
+
+            const collections = await getLocalCollections();
+
+            const collection = collections.find(
+                (c) => c.id === props.file.collectionID
+            );
+
+            exportCanvasToBlob((blob) => {
+                if (!blob) {
+                    return console.error('no blob');
+                }
+
+                const newFile = new File([blob], props.file.metadata.title, {
+                    type: blob.type,
+                    lastModified: new Date().getTime(),
+                });
+
+                const file: FileWithCollection = {
+                    file: newFile,
+                    collectionID: props.file.collectionID,
+                    collection,
+                    localID: 1,
+                };
+
+                uploadManager.prepareForNewUpload();
+                uploadManager.showUploadProgressDialog();
+
+                uploadManager.queueFilesForUpload(
+                    [file],
+                    [collection],
+                    uploadManager.getUploaderName()
+                );
+                setFileURL(null);
+                props.onClose();
+            });
+        } catch (e) {
+            logError(e, 'Error saving copy to ente');
+        }
+    };
     return (
         <>
             <Backdrop
@@ -428,78 +496,13 @@ const ImageEditorOverlay = (props: IProps) => {
                     <MenuItemGroup>
                         <EnteMenuItem
                             startIcon={<DownloadIcon />}
-                            onClick={async () => {
-                                if (!canvasRef.current) return;
-
-                                await applyFilters([
-                                    originalSizeCanvasRef.current,
-                                ]);
-
-                                exportCanvasToBlob((blob) => {
-                                    if (!blob) {
-                                        return console.error('no blob');
-                                    }
-                                    // create a link
-                                    const a = document.createElement('a');
-                                    a.href = URL.createObjectURL(blob);
-                                    a.download = props.file.metadata.title;
-                                    document.body.appendChild(a);
-                                    a.click();
-                                    document.body.removeChild(a);
-                                    URL.revokeObjectURL(a.href);
-                                });
-                            }}
+                            onClick={downloadEditedPhoto}
                             label={t('DOWNLOAD_EDITED')}
                         />
                         <MenuItemDivider />
                         <EnteMenuItem
                             startIcon={<CloudUploadIcon />}
-                            onClick={async () => {
-                                if (!canvasRef.current) return;
-
-                                await applyFilters([
-                                    originalSizeCanvasRef.current,
-                                ]);
-
-                                const collections = await getLocalCollections();
-
-                                const collection = collections.find(
-                                    (c) => c.id === props.file.collectionID
-                                );
-
-                                exportCanvasToBlob((blob) => {
-                                    if (!blob) {
-                                        return console.error('no blob');
-                                    }
-
-                                    const newFile = new File(
-                                        [blob],
-                                        props.file.metadata.title,
-                                        {
-                                            type: blob.type,
-                                            lastModified: new Date().getTime(),
-                                        }
-                                    );
-
-                                    const file: FileWithCollection = {
-                                        file: newFile,
-                                        collectionID: props.file.collectionID,
-                                        collection,
-                                        localID: 1,
-                                    };
-
-                                    uploadManager.prepareForNewUpload();
-                                    uploadManager.showUploadProgressDialog();
-
-                                    uploadManager.queueFilesForUpload(
-                                        [file],
-                                        [collection],
-                                        uploadManager.getUploaderName()
-                                    );
-                                    setFileURL(null);
-                                    props.onClose();
-                                });
-                            }}
+                            onClick={saveCopyToEnte}
                             label={t('SAVE_A_COPY_TO_ENTE')}
                         />
                     </MenuItemGroup>
