@@ -59,7 +59,7 @@ func (c *ClICtrl) createLocalFolderForRemoteAlbums(ctx context.Context, account 
 			}
 		}
 		// Create album and meta folders if they don't exist
-		albumPath := filepath.Join(path, albumFolderName)
+		albumPath := filepath.Clean(filepath.Join(path, albumFolderName))
 		metaPath := filepath.Join(albumPath, ".meta")
 		if metaByID == nil {
 			log.Printf("Adding folder %s for album %s", albumFolderName, album.AlbumName)
