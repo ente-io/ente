@@ -34,11 +34,19 @@ class HTTPService {
                     // The request was made but no response was received
                     // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
                     // http.ClientRequest in node.js
-                    addLogLine('request failed- no response', error);
+                    addLogLine(
+                        'request failed- no response',
+                        `url: ${error.config.url}`,
+                        `method: ${error.config.method}`
+                    );
                     return Promise.reject(error);
                 } else {
                     // Something happened in setting up the request that triggered an Error
-                    addLogLine('request failed- axios error', error);
+                    addLogLine(
+                        'request failed- axios error',
+                        `url: ${error.config.url}`,
+                        `method: ${error.config.method}`
+                    );
                     return Promise.reject(error);
                 }
             }
