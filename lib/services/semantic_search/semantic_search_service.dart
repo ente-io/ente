@@ -233,12 +233,7 @@ class SemanticSearchService {
       }
       final endTime = DateTime.now();
       _logger.info(
-        "createImageEmbeddings took: " +
-            (endTime.millisecondsSinceEpoch - startTime.millisecondsSinceEpoch)
-                .toString() +
-            "ms for " +
-            imageEmbeddings.length.toString() +
-            " items",
+        "createImageEmbeddings took: ${(endTime.millisecondsSinceEpoch - startTime.millisecondsSinceEpoch)}ms for ${imageEmbeddings.length} items",
       );
       for (int i = 0; i < imageEmbeddings.length; i++) {
         await EmbeddingStore.instance.storeEmbedding(
@@ -275,14 +270,6 @@ double computeScore(Map args) {
     args["imageEmbedding"] as List<double>,
     args["textEmbedding"] as List<double>,
   );
-}
-
-void loadModel(Map args) {
-  if (args["imageModelPath"] != null) {
-    CLIP.loadImageModel(args["imageModelPath"]);
-  } else if (args["textModelPath"] != null) {
-    CLIP.loadTextModel(args["textModelPath"]);
-  }
 }
 
 class QueryResult {
