@@ -250,7 +250,7 @@ const ImageEditorOverlay = (props: IProps) => {
         loadCanvas();
     }, [props.show, props.file]);
 
-    const exportCanvasToBlob = (callback: (blob: Blob) => void) => {
+    const exportCanvasToBlob = (): Promise<Blob> => {
         try {
             const canvas = originalSizeCanvasRef.current;
             if (!canvas) return;
@@ -262,7 +262,9 @@ const ImageEditorOverlay = (props: IProps) => {
 
             const context = canvas.getContext('2d');
             if (!context) return;
-            canvas.toBlob(callback, mimeType);
+            return new Promise((resolve) => {
+                canvas.toBlob(resolve, mimeType);
+            });
         } catch (e) {
             logError(e, 'Error exporting canvas to blob');
             throw e;
@@ -294,19 +296,18 @@ const ImageEditorOverlay = (props: IProps) => {
 
             await applyFilters([originalSizeCanvasRef.current]);
 
-            exportCanvasToBlob((blob) => {
-                if (!blob) {
-                    return console.error('no blob');
-                }
-                // create a link
-                const a = document.createElement('a');
-                a.href = URL.createObjectURL(blob);
-                a.download = props.file.metadata.title;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(a.href);
-            });
+            const blob = await exportCanvasToBlob();
+            if (!blob) {
+                throw Error('no blob');
+            }
+            // create a link
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = props.file.metadata.title;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(a.href);
         } catch (e) {
             logError(e, 'Error downloading edited photo');
         }
@@ -324,34 +325,31 @@ const ImageEditorOverlay = (props: IProps) => {
                 (c) => c.id === props.file.collectionID
             );
 
-            exportCanvasToBlob((blob) => {
-                if (!blob) {
-                    return console.error('no blob');
-                }
+            const blob = await exportCanvasToBlob();
+            if (!blob) {
+                throw Error('no blob');
+            }
 
-                const newFile = new File([blob], props.file.metadata.title, {
+            const newFile = new File(
+                [blob],
+                `${props.file.metadata.title}-edited`,
+                {
                     type: blob.type,
                     lastModified: new Date().getTime(),
-                });
+                }
+            );
 
-                const file: FileWithCollection = {
-                    file: newFile,
-                    collectionID: props.file.collectionID,
-                    collection,
-                    localID: 1,
-                };
+            const file: FileWithCollection = {
+                file: newFile,
+                collectionID: props.file.collectionID,
+                localID: 1,
+            };
 
-                uploadManager.prepareForNewUpload();
-                uploadManager.showUploadProgressDialog();
-
-                uploadManager.queueFilesForUpload(
-                    [file],
-                    [collection],
-                    uploadManager.getUploaderName()
-                );
-                setFileURL(null);
-                props.onClose();
-            });
+            uploadManager.prepareForNewUpload();
+            uploadManager.showUploadProgressDialog();
+            uploadManager.queueFilesForUpload([file], [collection]);
+            setFileURL(null);
+            props.onClose();
         } catch (e) {
             logError(e, 'Error saving copy to ente');
         }
