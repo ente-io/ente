@@ -188,13 +188,6 @@ export default function App(props) {
     }, [appName]);
 
     useEffect(() => {
-        HTTPService.getInterceptors().response.use(
-            (resp) => resp,
-            (error) => {
-                logError(error, 'HTTP Service Error');
-                return Promise.reject(error);
-            }
-        );
         clearLogsIfLocalStorageLimitExceeded();
         const main = async () => {
             addLogLine(`userID: ${(getData(LS_KEYS.USER) as User)?.id}`);
