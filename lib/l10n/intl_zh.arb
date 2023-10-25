@@ -1102,5 +1102,5 @@
   "crashReporting": "崩溃报告",
   "addToHiddenAlbum": "添加到隐藏相册",
   "moveToHiddenAlbum": "移至隐藏相册",
-  "deleteConfirmDialogBody": "This account is linked to other ente apps, if you use any.\\n\\nYour uploaded data, across all ente apps, will be scheduled for deletion, and your account will be permanently deleted."
+  "deleteConfirmDialogBody": "此账户已链接到其他 ente 旗下的应用程序（如果您使用任何 ente 旗下的应用程序）。\\n\\n您在所有 ente 旗下的应用程序中上传的数据将被安排删除，并且您的账户将被永久删除。"
 }
