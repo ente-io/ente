@@ -11,15 +11,15 @@ jobs:
   goreleaser:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0  # Important to ensure that GoReleaser works correctly
-
       - name: Install latest Syft
         run: |
           wget $(curl -s https://api.github.com/repos/anchore/syft/releases/latest | grep 'browser_' | grep 'linux_amd64.rpm' | cut -d\" -f4) -O syft_latest_linux_amd64.rpm
           sudo rpm -i syft_latest_linux_amd64.rpm
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Important to ensure that GoReleaser works correctly
 
       - name: Set up Go
         uses: actions/setup-go@v4
