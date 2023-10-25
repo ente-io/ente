@@ -25,7 +25,6 @@ class SemanticSearchService {
       SemanticSearchService._privateConstructor();
   static final Computer _computer = Computer.shared();
 
-  static const int batchSize = 1;
   static const kModelName = "ggml-clip";
 
   final _logger = Logger("SemanticSearchService");
@@ -186,75 +185,46 @@ class SemanticSearchService {
     }
     isComputingEmbeddings = true;
 
-    final List<EnteFile> batch = [];
     while (_queue.isNotEmpty) {
-      if (batch.length < batchSize) {
-        batch.add(_queue.removeFirst());
-      } else {
-        await _computeImageEmbeddings(batch);
-        batch.clear();
-      }
+      await _computeImageEmbedding(_queue.removeFirst());
     }
-    await _computeImageEmbeddings(batch);
 
     isComputingEmbeddings = false;
   }
 
-  Future<void> _computeImageEmbeddings(List<EnteFile> files) async {
-    if (!hasLoaded || files.isEmpty) {
+  Future<void> _computeImageEmbedding(EnteFile file) async {
+    if (!hasLoaded) {
       return;
     }
-    final List<String> filePaths = [];
     try {
-      for (final file in files) {
-        filePaths.add((await getThumbnailFile(file))!.path);
-      }
-      _logger.info("Running clip over " + files.length.toString() + " items");
+      final filePath = (await getThumbnailFile(file))!.path;
+      _logger.info("Running clip over $file");
       final startTime = DateTime.now();
-      final List<List<double>> imageEmbeddings = [];
-      if (filePaths.length == 1) {
-        final result = await _computer.compute(
-          createImageEmbedding,
-          param: {
-            "imagePath": filePaths.first,
-          },
-          taskName: "createImageEmbedding",
-        ) as List<double>;
-        imageEmbeddings.add(result);
-      } else {
-        final result = await _computer.compute(
-          createImageEmbeddings,
-          param: {
-            "imagePaths": filePaths,
-          },
-          taskName: "createImageEmbeddings",
-        ) as List<List<double>>;
-        imageEmbeddings.addAll(result);
-      }
+      final result = await _computer.compute(
+        createImageEmbedding,
+        param: {
+          "imagePath": filePath,
+        },
+        taskName: "createImageEmbedding",
+      ) as List<double>;
       final endTime = DateTime.now();
       _logger.info(
-        "createImageEmbeddings took: ${(endTime.millisecondsSinceEpoch - startTime.millisecondsSinceEpoch)}ms for ${imageEmbeddings.length} items",
+        "createImageEmbedding took: ${(endTime.millisecondsSinceEpoch - startTime.millisecondsSinceEpoch)}ms",
       );
-      for (int i = 0; i < imageEmbeddings.length; i++) {
-        await EmbeddingStore.instance.storeEmbedding(
-          files[i],
-          Embedding(
-            files[i].uploadedFileID!,
-            kModelName,
-            imageEmbeddings[i],
-          ),
-        );
-      }
+      await EmbeddingStore.instance.storeEmbedding(
+        file,
+        Embedding(
+          file.uploadedFileID!,
+          kModelName,
+          result,
+        ),
+      );
 
       Bus.instance.fire(FileIndexedEvent());
     } catch (e, s) {
       _logger.severe(e, s);
     }
   }
-}
-
-List<List<double>> createImageEmbeddings(Map args) {
-  return CLIP.createBatchImageEmbedding(args["imagePaths"]);
 }
 
 List<double> createImageEmbedding(Map args) {
