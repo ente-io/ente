@@ -15,6 +15,7 @@ import {
     Dispatch,
     SetStateAction,
     MutableRefObject,
+    useContext,
 } from 'react';
 
 import { EnteFile } from 'types/file';
@@ -35,11 +36,12 @@ import uploadManager from 'services/upload/uploadManager';
 import { getLocalCollections } from 'services/collectionService';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import MenuItemDivider from 'components/Menu/MenuItemDivider';
-import AreYouSureCloseDialog from './AreYouSureCloseDialog';
 import { t } from 'i18next';
 import { EnteDrawer } from 'components/EnteDrawer';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import MenuIcon from '@mui/icons-material/Menu';
+import { AppContext } from 'pages/_app';
+import { getEditorCloseConfirmationMessage } from 'utils/ui';
 
 interface IProps {
     file: EnteFile;
@@ -67,6 +69,7 @@ const filterDefaultValues = {
 };
 
 const ImageEditorOverlay = (props: IProps) => {
+    const appContext = useContext(AppContext);
     // const [originalWidth, originalHeight] = [props.file?.w, props.file?.h];
 
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -96,8 +99,6 @@ const ImageEditorOverlay = (props: IProps) => {
     const [coloursAdjusted, setColoursAdjusted] = useState(false);
 
     const [canvasLoading, setCanvasLoading] = useState(false);
-
-    const [showBeforeCloseDialog, setShowBeforeCloseDialog] = useState(false);
 
     const [showControlsDrawer, setShowControlsDrawer] = useState(true);
 
@@ -236,6 +237,21 @@ const ImageEditorOverlay = (props: IProps) => {
         canvas.toBlob(callback, mimeType);
     };
 
+    const handleClose = () => {
+        setFileURL(null);
+        props.onClose();
+    };
+
+    const handleCloseWithConfirmation = () => {
+        if (transformationPerformed || coloursAdjusted) {
+            appContext.setDialogBoxAttributesV2(
+                getEditorCloseConfirmationMessage(handleClose)
+            );
+        } else {
+            handleClose();
+        }
+    };
+
     return (
         <>
             {props.show && (
@@ -306,9 +322,7 @@ const ImageEditorOverlay = (props: IProps) => {
                             variant="persistent"
                             anchor="right"
                             open={showControlsDrawer}
-                            onClose={() => {
-                                setShowBeforeCloseDialog(true);
-                            }}>
+                            onClose={handleCloseWithConfirmation}>
                             <HorizontalFlex justifyContent={'space-between'}>
                                 <IconButton
                                     onClick={() => {
@@ -317,17 +331,7 @@ const ImageEditorOverlay = (props: IProps) => {
                                     <ChevronRightIcon />
                                 </IconButton>
                                 <IconButton
-                                    onClick={() => {
-                                        if (
-                                            transformationPerformed ||
-                                            coloursAdjusted
-                                        ) {
-                                            setShowBeforeCloseDialog(true);
-                                            return;
-                                        }
-                                        setFileURL(null);
-                                        props.onClose();
-                                    }}>
+                                    onClick={handleCloseWithConfirmation}>
                                     <CloseIcon />
                                 </IconButton>
                             </HorizontalFlex>
@@ -478,17 +482,6 @@ const ImageEditorOverlay = (props: IProps) => {
                         {/* <Box> */}
                         {/* </Box> */}
                     </Backdrop>
-                    <AreYouSureCloseDialog
-                        open={showBeforeCloseDialog}
-                        onClose={() => {
-                            setShowBeforeCloseDialog(false);
-                        }}
-                        doClose={() => {
-                            setFileURL(null);
-                            props.onClose();
-                            setShowBeforeCloseDialog(false);
-                        }}
-                    />
                 </>
             )}
         </>
