@@ -63,7 +63,6 @@ async function downloadModel(saveLocation: string) {
 
 export async function getClipModelPath() {
     const modelSavePath = getModelSavePath();
-    log.info('clip model save path', modelSavePath);
     if (!existsSync(modelSavePath)) {
         await downloadModel(modelSavePath);
     } else {
@@ -71,8 +70,6 @@ export async function getClipModelPath() {
         if (localFileSize !== MODEL_SIZE_IN_BYTES) {
             log.info('clip model size mismatch, downloading again');
             await downloadModel(modelSavePath);
-        } else {
-            log.info('clip model already downloaded');
         }
     }
     return modelSavePath;
