@@ -10,6 +10,7 @@ const shellescape = require('any-shell-escape');
 const execAsync = util.promisify(require('child_process').exec);
 import fetch from 'node-fetch';
 import { writeNodeStream } from './fs';
+import { getPlatform } from '../utils/common/platform';
 
 const CLIP_MODEL_PATH_PLACEHOLDER = 'CLIP_MODEL';
 const GGMLCLIP_PATH_PLACEHOLDER = 'GGML_PATH';
@@ -78,7 +79,9 @@ export async function getClipModelPath() {
 }
 
 function getGGMLClipPath() {
-    return './bin/ggmlclip';
+    return isDev
+        ? path.join('./build', `ggmlclip-${getPlatform()}`)
+        : path.join(process.resourcesPath, `ggmlclip-${getPlatform()}`);
 }
 
 export async function computeImageEmbedding(
