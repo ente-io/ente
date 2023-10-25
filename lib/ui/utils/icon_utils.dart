@@ -4,6 +4,7 @@ import 'package:ente_auth/theme/ente_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:logging/logging.dart';
 
 class IconUtils {
   IconUtils._privateConstructor();
@@ -77,20 +78,24 @@ class IconUtils {
   }
 
   Future<void> _loadJson() async {
-    final simpleIconData = await rootBundle
-        .loadString('assets/simple-icons/_data/simple-icons.json');
-    final simpleIcons = json.decode(simpleIconData);
-    for (final icon in simpleIcons["icons"]) {
-      _simpleIcons[icon["title"].toString().toLowerCase()] = icon["hex"];
-    }
-    final customIconData = await rootBundle
-        .loadString('assets/custom-icons/_data/custom-icons.json');
-    final customIcons = json.decode(customIconData);
-    for (final icon in customIcons["icons"]) {
-      _customIcons[icon["title"].toString().toLowerCase()] = CustomIconData(
-        icon["slug"],
-        icon["hex"],
-      );
+    try {
+      final simpleIconData = await rootBundle
+          .loadString('assets/simple-icons/_data/simple-icons.json');
+      final simpleIcons = json.decode(simpleIconData);
+      for (final icon in simpleIcons["icons"]) {
+        _simpleIcons[icon["title"].toString().toLowerCase()] = icon["hex"];
+      }
+      final customIconData = await rootBundle
+          .loadString('assets/custom-icons/_data/custom-icons.json');
+      final customIcons = json.decode(customIconData);
+      for (final icon in customIcons["icons"]) {
+        _customIcons[icon["title"].toString().toLowerCase()] = CustomIconData(
+          icon["slug"],
+          icon["hex"],
+        );
+      }
+    } catch (e) {
+      Logger("IconUtils").severe("Error loading icons", e);
     }
   }
 
