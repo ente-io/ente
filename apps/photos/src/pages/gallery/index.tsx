@@ -535,10 +535,7 @@ export default function Gallery() {
                     ) {
                         return false;
                     }
-                    if (
-                        typeof search?.clip &&
-                        search.clip.has(item.id) === false
-                    ) {
+                    if (search?.clip && search.clip.has(item.id) === false) {
                         return false;
                     }
                     return true;
