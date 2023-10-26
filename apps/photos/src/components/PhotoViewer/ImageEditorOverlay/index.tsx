@@ -49,6 +49,7 @@ interface IProps {
     file: EnteFile;
     show: boolean;
     onClose: () => void;
+    closePhotoViewer: () => void;
 }
 
 export const ImageEditorOverlayContext = createContext(
@@ -349,6 +350,7 @@ const ImageEditorOverlay = (props: IProps) => {
             uploadManager.queueFilesForUpload([file], [collection]);
             setFileURL(null);
             props.onClose();
+            props.closePhotoViewer();
         } catch (e) {
             logError(e, 'Error saving copy to ente');
         }
@@ -357,10 +359,9 @@ const ImageEditorOverlay = (props: IProps) => {
         <>
             <Backdrop
                 sx={{
-                    color: '#fff',
-                    zIndex: '999 !important',
+                    background: '#000',
+                    zIndex: 1600,
                     width: '100%',
-                    backdropFilter: 'blur(5px)',
                 }}
                 open>
                 <Box padding="1rem" width="100%" height="100%">
