@@ -41,7 +41,7 @@ const TEXT_MODEL_NAME = 'clip-vit-base-patch32_ggml-text-model-f16.gguf';
 const IMAGE_MODEL_NAME = 'clip-vit-base-patch32_ggml-vision-model-f16.gguf';
 
 const IMAGE_MODEL_SIZE_IN_BYTES = 175957504; // 167.8 MB
-const TEXT_MODEL_SIZE_IN_BYTES = 303606311; // 289.54 MB
+const TEXT_MODEL_SIZE_IN_BYTES = 127853440; // 121.9 MB
 const MODEL_SAVE_FOLDER = 'models';
 
 function getModelSavePath(modelName: string) {
