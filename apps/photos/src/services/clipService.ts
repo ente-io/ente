@@ -14,14 +14,45 @@ import { getPersonalFiles } from 'utils/file';
 
 const CLIP_EMBEDDING_LENGTH = 512;
 
+export interface ClipExtractionStatus {
+    pending: number;
+    indexed: number;
+}
+
 class ClipServiceImpl {
     private electronAPIs: ElectronAPIs;
     private embeddingExtractionInProgress: AbortController = null;
     private reRunNeeded = false;
+    private clipExtractionStatus: ClipExtractionStatus = {
+        pending: 0,
+        indexed: 0,
+    };
+    private onUpdateHandler: (status: ClipExtractionStatus) => void = null;
 
     constructor() {
         this.electronAPIs = globalThis['ElectronAPIs'];
     }
+
+    setOnUpdateHandler = (handler: (status: ClipExtractionStatus) => void) => {
+        this.onUpdateHandler = handler;
+        handler(this.clipExtractionStatus);
+    };
+
+    private updateClipEmbeddingExtractionStatus = (
+        status: ClipExtractionStatus
+    ) => {
+        this.clipExtractionStatus = status;
+        if (this.onUpdateHandler) {
+            this.onUpdateHandler(status);
+        }
+    };
+
+    onSuccessStatusUpdater = () => {
+        this.updateClipEmbeddingExtractionStatus({
+            pending: this.clipExtractionStatus.pending - 1,
+            indexed: this.clipExtractionStatus.indexed + 1,
+        });
+    };
 
     scheduleImageEmbeddingExtraction = async () => {
         try {
@@ -79,6 +110,10 @@ class ClipServiceImpl {
                 localFiles,
                 existingEmbeddings
             );
+            this.updateClipEmbeddingExtractionStatus({
+                indexed: existingEmbeddings.length,
+                pending: pendingFiles.length,
+            });
             if (pendingFiles.length === 0) {
                 addLogLine('no clip embedding extraction needed, all done');
                 return;
@@ -120,6 +155,7 @@ class ClipServiceImpl {
                             encryptedEmbeddingData.decryptionHeader,
                         model: Model.GGML_CLIP,
                     });
+                    this.onSuccessStatusUpdater();
                     addLogLine(
                         `successfully put clip embedding to server for file: ${file.metadata.title} fileID: ${file.id}`
                     );

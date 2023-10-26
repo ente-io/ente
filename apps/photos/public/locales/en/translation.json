@@ -594,5 +594,7 @@
     "IMAGE": "Image",
     "VIDEO": "Video",
     "LIVE_PHOTO": "Live Photo",
-    "CONVERT": "Convert"
+    "CONVERT": "Convert",
+    "STATUS": "Status",
+    "INDEXED_ITEMS": "Indexed Items"
 }

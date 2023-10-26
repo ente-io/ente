@@ -72,5 +72,4 @@ export const VerticalFlex = styled(HorizontalFlex)({
 
 export const VerticallyCenteredFlex = styled(HorizontalFlex)({
     alignItems: 'center',
-    display: 'flex',
 });
