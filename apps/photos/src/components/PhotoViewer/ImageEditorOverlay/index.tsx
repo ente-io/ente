@@ -316,8 +316,6 @@ const ImageEditorOverlay = (props: IProps) => {
         try {
             if (!canvasRef.current) return;
 
-            // await applyFilters([originalSizeCanvasRef.current]);
-
             const editedFile = await getEditedFile();
             const fileType = await getFileType(editedFile);
             const tempImgURL = URL.createObjectURL(
@@ -332,8 +330,6 @@ const ImageEditorOverlay = (props: IProps) => {
     const saveCopyToEnte = async () => {
         try {
             if (!canvasRef.current) return;
-
-            // await applyFilters([originalSizeCanvasRef.current]);
 
             const collections = await getLocalCollections();
 
