@@ -85,11 +85,17 @@ class ClipServiceImpl {
             }
             for (const file of pendingFiles) {
                 try {
+                    addLogLine(
+                        `extracting clip embedding for file: ${file.metadata.title}`
+                    );
                     if (canceller.signal.aborted) {
                         throw Error(CustomError.REQUEST_CANCELLED);
                     }
                     const embeddingData = await this.extractClipImageEmbedding(
                         file
+                    );
+                    addLogLine(
+                        `successfully extracted clip embedding for file: ${file.metadata.title} fileID: ${file.id} embedding length: ${embeddingData?.length}`
                     );
                     if (embeddingData?.length !== CLIP_EMBEDDING_LENGTH) {
                         throw Error(
@@ -103,6 +109,9 @@ class ClipServiceImpl {
                             embeddingData,
                             file.key
                         );
+                    addLogLine(
+                        `putting clip embedding to server for file: ${file.metadata.title} fileID: ${file.id}`
+                    );
                     await putEmbedding({
                         fileID: file.id,
                         encryptedEmbedding:
@@ -111,6 +120,9 @@ class ClipServiceImpl {
                             encryptedEmbeddingData.decryptionHeader,
                         model: Model.GGML_CLIP,
                     });
+                    addLogLine(
+                        `successfully put clip embedding to server for file: ${file.metadata.title} fileID: ${file.id}`
+                    );
                 } catch (e) {
                     if (e.message !== CustomError.REQUEST_CANCELLED) {
                         logError(
