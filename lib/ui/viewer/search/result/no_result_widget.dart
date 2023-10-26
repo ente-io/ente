@@ -26,12 +26,11 @@ class _NoResultWidgetState extends State<NoResultWidget> {
         for (int j = 0; j < 2 && j < value[i].length; j++) {
           querySuggestions.add(value[i][j].name());
         }
-        setState(() {
-          //todo: remove keys with empty list
-          searchTypeToQuerySuggestion
-              .addAll({searchTypes[i].sectionTitle(context): querySuggestions});
-        });
+        //todo: remove keys with empty list
+        searchTypeToQuerySuggestion
+            .addAll({searchTypes[i].sectionTitle(context): querySuggestions});
       }
+      setState(() {});
     });
   }
 
@@ -49,9 +48,13 @@ class _NoResultWidgetState extends State<NoResultWidget> {
                 style: textTheme.bodyMuted,
               ),
               const SizedBox(width: 6),
-              Text(
-                formatList(value),
-                style: textTheme.miniMuted,
+              Flexible(
+                child: Text(
+                  formatList(value),
+                  style: textTheme.miniMuted,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
             ],
           ),
