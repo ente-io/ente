@@ -83,6 +83,15 @@ function convertSuggestionsToOptions(
             const resultFiles = getUniqueFiles(
                 files.filter((file) => isSearchedFile(file, searchQuery))
             );
+
+            if (searchQuery?.clip) {
+                resultFiles.sort((a, b) => {
+                    const aScore = searchQuery.clip.get(a.id);
+                    const bScore = searchQuery.clip.get(b.id);
+                    return bScore - aScore;
+                });
+            }
+
             return {
                 ...suggestion,
                 fileCount: resultFiles.length,
