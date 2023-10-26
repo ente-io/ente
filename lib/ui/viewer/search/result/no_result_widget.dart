@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import "package:flutter_animate/flutter_animate.dart";
 import "package:photos/models/search/search_types.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/search_tab.dart";
@@ -58,7 +59,16 @@ class _NoResultWidgetState extends State<NoResultWidget> {
                 ),
               ),
             ],
-          ),
+          )
+              .animate()
+              .fadeIn(
+                duration: const Duration(milliseconds: 50),
+                curve: Curves.easeInOut,
+              )
+              .slide(
+                duration: const Duration(milliseconds: 50),
+                curve: Curves.easeInOut,
+              ),
         );
       },
     );
@@ -74,13 +84,31 @@ class _NoResultWidgetState extends State<NoResultWidget> {
                 // S.of(context).noResults,
                 "No results found",
                 style: textTheme.largeBold,
-              ),
+              )
+                  .animate()
+                  .fadeIn(
+                    duration: const Duration(milliseconds: 50),
+                    curve: Curves.easeInOut,
+                  )
+                  .slide(
+                    duration: const Duration(milliseconds: 50),
+                    curve: Curves.easeInOut,
+                  ),
               const SizedBox(height: 6),
               searchTypeToQuerySuggestion.isNotEmpty
                   ? Text(
                       "Modify your query, or try searching for",
                       style: textTheme.smallMuted,
                     )
+                      .animate()
+                      .fadeIn(
+                        duration: const Duration(milliseconds: 50),
+                        curve: Curves.easeInOut,
+                      )
+                      .slide(
+                        duration: const Duration(milliseconds: 50),
+                        curve: Curves.easeInOut,
+                      )
                   : const SizedBox.shrink(),
             ],
           ),
