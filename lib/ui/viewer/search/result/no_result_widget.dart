@@ -76,10 +76,12 @@ class _NoResultWidgetState extends State<NoResultWidget> {
                 style: textTheme.largeBold,
               ),
               const SizedBox(height: 6),
-              Text(
-                "Modify your query, or try searching for",
-                style: textTheme.smallMuted,
-              ),
+              searchTypeToQuerySuggestion.isNotEmpty
+                  ? Text(
+                      "Modify your query, or try searching for",
+                      style: textTheme.smallMuted,
+                    )
+                  : const SizedBox.shrink(),
             ],
           ),
           const SizedBox(height: 20),
