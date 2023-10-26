@@ -15,11 +15,10 @@ import { getPlatform } from '../utils/common/platform';
 const CLIP_MODEL_PATH_PLACEHOLDER = 'CLIP_MODEL';
 const GGMLCLIP_PATH_PLACEHOLDER = 'GGML_PATH';
 const INPUT_PATH_PLACEHOLDER = 'INPUT';
-const MODEL_SIZE_IN_BYTES = 303606311; // 289.54 MB
 
 const IMAGE_EMBEDDING_EXTRACT_CMD: string[] = [
     GGMLCLIP_PATH_PLACEHOLDER,
-    '-m',
+    '-mv',
     CLIP_MODEL_PATH_PLACEHOLDER,
     '--image',
     INPUT_PATH_PLACEHOLDER,
@@ -27,28 +26,35 @@ const IMAGE_EMBEDDING_EXTRACT_CMD: string[] = [
 
 const TEXT_EMBEDDING_EXTRACT_CMD: string[] = [
     GGMLCLIP_PATH_PLACEHOLDER,
-    '-m',
+    '-mt',
     CLIP_MODEL_PATH_PLACEHOLDER,
     '--text',
     INPUT_PATH_PLACEHOLDER,
 ];
 
-const GGML_CLIP_MODEL_DOWNLOAD_URL =
-    'https://models.ente.io/openai_clip-vit-base-patch32.ggmlv0.f16.bin';
-const MODEL_NAME = 'openai_clip-vit-base-patch32.ggmlv0.f16.bin';
+const TEXT_MODEL_DOWNLOAD_URL =
+    'https://models.ente.io/clip-vit-base-patch32_ggml-text-model-f16.gguf';
+const IMAGE_MODEL_DOWNLOAD_URL =
+    'https://models.ente.io/clip-vit-base-patch32_ggml-vision-model-f16.gguf';
+
+const TEXT_MODEL_NAME = 'clip-vit-base-patch32_ggml-text-model-f16.gguf';
+const IMAGE_MODEL_NAME = 'clip-vit-base-patch32_ggml-vision-model-f16.gguf';
+
+const IMAGE_MODEL_SIZE_IN_BYTES = 175957504; // 167.8 MB
+const TEXT_MODEL_SIZE_IN_BYTES = 303606311; // 289.54 MB
 const MODEL_SAVE_FOLDER = 'models';
 
-function getModelSavePath() {
+function getModelSavePath(modelName: string) {
     let userDataDir: string;
     if (isDev) {
         userDataDir = '.';
     } else {
         userDataDir = app.getPath('userData');
     }
-    return path.join(userDataDir, MODEL_SAVE_FOLDER, MODEL_NAME);
+    return path.join(userDataDir, MODEL_SAVE_FOLDER, modelName);
 }
 
-async function downloadModel(saveLocation: string) {
+async function downloadModel(saveLocation: string, url: string) {
     // confirm that the save location exists
     const saveDir = path.dirname(saveLocation);
     if (!existsSync(saveDir)) {
@@ -56,20 +62,35 @@ async function downloadModel(saveLocation: string) {
         await fs.mkdir(saveDir, { recursive: true });
     }
     log.info('downloading clip model');
-    const resp = await fetch(GGML_CLIP_MODEL_DOWNLOAD_URL);
+    const resp = await fetch(url);
     await writeNodeStream(saveLocation, resp.body, true);
     log.info('clip model downloaded');
 }
 
-export async function getClipModelPath() {
-    const modelSavePath = getModelSavePath();
+export async function getClipImageModelPath() {
+    const modelSavePath = getModelSavePath(IMAGE_MODEL_NAME);
     if (!existsSync(modelSavePath)) {
-        await downloadModel(modelSavePath);
+        log.info('clip model not found, downloading');
+        await downloadModel(modelSavePath, IMAGE_MODEL_DOWNLOAD_URL);
     } else {
         const localFileSize = (await fs.stat(modelSavePath)).size;
-        if (localFileSize !== MODEL_SIZE_IN_BYTES) {
+        if (localFileSize !== IMAGE_MODEL_SIZE_IN_BYTES) {
             log.info('clip model size mismatch, downloading again');
-            await downloadModel(modelSavePath);
+            await downloadModel(modelSavePath, IMAGE_MODEL_DOWNLOAD_URL);
+        }
+    }
+    return modelSavePath;
+}
+
+export async function getClipTextModelPath() {
+    const modelSavePath = getModelSavePath(TEXT_MODEL_NAME);
+    if (!existsSync(modelSavePath)) {
+        await downloadModel(modelSavePath, TEXT_MODEL_DOWNLOAD_URL);
+    } else {
+        const localFileSize = (await fs.stat(modelSavePath)).size;
+        if (localFileSize !== TEXT_MODEL_SIZE_IN_BYTES) {
+            log.info('clip model size mismatch, downloading again');
+            await downloadModel(modelSavePath, TEXT_MODEL_DOWNLOAD_URL);
         }
     }
     return modelSavePath;
@@ -85,7 +106,7 @@ export async function computeImageEmbedding(
     inputFilePath: string
 ): Promise<Float32Array> {
     try {
-        const clipModelPath = await getClipModelPath();
+        const clipModelPath = await getClipImageModelPath();
         const ggmlclipPath = getGGMLClipPath();
         const cmd = IMAGE_EMBEDDING_EXTRACT_CMD.map((cmdPart) => {
             if (cmdPart === GGMLCLIP_PATH_PLACEHOLDER) {
@@ -122,7 +143,7 @@ export async function computeTextEmbedding(
     text: string
 ): Promise<Float32Array> {
     try {
-        const clipModelPath = await getClipModelPath();
+        const clipModelPath = await getClipTextModelPath();
         const ggmlclipPath = getGGMLClipPath();
         const cmd = TEXT_EMBEDDING_EXTRACT_CMD.map((cmdPart) => {
             if (cmdPart === GGMLCLIP_PATH_PLACEHOLDER) {
