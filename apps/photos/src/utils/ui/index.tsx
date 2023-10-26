@@ -164,3 +164,16 @@ export const getMapDisableConfirmationDialog = (
     },
     close: { text: t('CANCEL') },
 });
+
+export const getEditorCloseConfirmationMessage = (
+    doClose: () => void
+): DialogBoxAttributes => ({
+    title: t('CONFIRM_EDITOR_CLOSE_MESSAGE'),
+    content: t('CONFIRM_EDITOR_CLOSE_DESCRIPTION'),
+    proceed: {
+        action: doClose,
+        text: t('CLOSE'),
+        variant: 'critical',
+    },
+    close: { text: t('CANCEL') },
+});

@@ -22,6 +22,7 @@ class UIService {
     private uploadStage: UPLOAD_STAGES = UPLOAD_STAGES.START;
     private filenames: Map<number, string> = new Map();
     private hasLivePhoto: boolean = false;
+    private uploadProgressView: boolean = false;
 
     // STAGE LEVEL STATES
     private perFileProgress: number;
@@ -35,6 +36,7 @@ class UIService {
         this.progressUpdater.setUploadStage(this.uploadStage);
         this.progressUpdater.setUploadFilenames(this.filenames);
         this.progressUpdater.setHasLivePhotos(this.hasLivePhoto);
+        this.progressUpdater.setUploadProgressView(this.uploadProgressView);
         this.progressUpdater.setUploadCounter({
             finished: this.filesUploadedCount,
             total: this.totalFilesCount,
@@ -82,6 +84,11 @@ class UIService {
     setHasLivePhoto(hasLivePhoto: boolean) {
         this.hasLivePhoto = hasLivePhoto;
         this.progressUpdater.setHasLivePhotos(hasLivePhoto);
+    }
+
+    setUploadProgressView(uploadProgressView: boolean) {
+        this.uploadProgressView = uploadProgressView;
+        this.progressUpdater.setUploadProgressView(uploadProgressView);
     }
 
     increaseFileUploaded() {

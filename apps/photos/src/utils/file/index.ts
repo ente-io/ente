@@ -165,7 +165,7 @@ export async function downloadFile(
     }
 }
 
-function downloadUsingAnchor(link: string, name: string) {
+export function downloadUsingAnchor(link: string, name: string) {
     const a = document.createElement('a');
     a.style.display = 'none';
     a.href = link;
@@ -496,6 +496,15 @@ export function isFileHEIC(exactType: string) {
 
 export function isRawFile(exactType: string) {
     return RAW_FORMATS.includes(exactType.toLowerCase());
+}
+
+export function isRawFileFromFileName(fileName: string) {
+    for (const rawFormat of RAW_FORMATS) {
+        if (fileName.toLowerCase().endsWith(rawFormat)) {
+            return true;
+        }
+    }
+    return false;
 }
 
 export function isSupportedRawFormat(exactType: string) {
