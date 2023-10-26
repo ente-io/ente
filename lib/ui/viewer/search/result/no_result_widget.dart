@@ -12,7 +12,7 @@ class NoResultWidget extends StatefulWidget {
 
 class _NoResultWidgetState extends State<NoResultWidget> {
   late final List<SectionType> searchTypes;
-  final searchTypeToSearchSuggestion = <String, List<String>>{};
+  final searchTypeToQuerySuggestion = <String, List<String>>{};
   @override
   void initState() {
     super.initState();
@@ -28,7 +28,7 @@ class _NoResultWidgetState extends State<NoResultWidget> {
         }
         setState(() {
           //todo: remove keys with empty list
-          searchTypeToSearchSuggestion
+          searchTypeToQuerySuggestion
               .addAll({searchTypes[i].sectionTitle(context): querySuggestions});
         });
       }
@@ -38,10 +38,10 @@ class _NoResultWidgetState extends State<NoResultWidget> {
   @override
   Widget build(BuildContext context) {
     final textTheme = getEnteTextTheme(context);
-    final examples = <Widget>[];
-    searchTypeToSearchSuggestion.forEach(
+    final searchTypeAndSuggestion = <Widget>[];
+    searchTypeToQuerySuggestion.forEach(
       (key, value) {
-        examples.add(
+        searchTypeAndSuggestion.add(
           Row(
             children: [
               Text(
@@ -83,12 +83,12 @@ class _NoResultWidgetState extends State<NoResultWidget> {
             padding: const EdgeInsets.symmetric(horizontal: 4),
             child: ListView.separated(
               itemBuilder: (context, index) {
-                return examples[index];
+                return searchTypeAndSuggestion[index];
               },
               separatorBuilder: (context, index) {
                 return const SizedBox(height: 12);
               },
-              itemCount: searchTypeToSearchSuggestion.length,
+              itemCount: searchTypeToQuerySuggestion.length,
               shrinkWrap: true,
             ),
           ),
