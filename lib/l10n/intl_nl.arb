@@ -1102,5 +1102,5 @@
   "crashReporting": "Crash rapportering",
   "addToHiddenAlbum": "Toevoegen aan verborgen album",
   "moveToHiddenAlbum": "Verplaatsen naar verborgen album",
-  "deleteConfirmDialogBody": "This account is linked to other ente apps, if you use any.\\n\\nYour uploaded data, across all ente apps, will be scheduled for deletion, and your account will be permanently deleted."
+  "deleteConfirmDialogBody": "Dit account is gekoppeld aan andere ente apps, als je er gebruik van maakt.\\n\\nJe geüploade gegevens worden in alle ente apps gepland voor verwijdering, en je account wordt permanent verwijderd voor alle ente diensten."
 }
