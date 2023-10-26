@@ -128,8 +128,6 @@ const ImageEditorOverlay = (props: IProps) => {
     }, [brightness, contrast, blur, saturation, invert, canvasRef, fileURL]);
 
     const applyFilters = async (canvases: HTMLCanvasElement[]) => {
-        if (!coloursAdjusted) return;
-
         try {
             for (const canvas of canvases) {
                 const blurSizeRatio =
