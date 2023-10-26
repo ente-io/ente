@@ -114,7 +114,7 @@ const ImageEditorOverlay = (props: IProps) => {
             return;
         }
         try {
-            applyFilters([canvasRef.current]);
+            applyFilters([canvasRef.current, originalSizeCanvasRef.current]);
             setColoursAdjusted(
                 brightness !== filterDefaultValues.brightness ||
                     contrast !== filterDefaultValues.contrast ||
@@ -128,12 +128,17 @@ const ImageEditorOverlay = (props: IProps) => {
     }, [brightness, contrast, blur, saturation, invert, canvasRef, fileURL]);
 
     const applyFilters = async (canvases: HTMLCanvasElement[]) => {
-        try {
-            const filterString = `brightness(${brightness}%) contrast(${contrast}%) blur(${blur}px) saturate(${saturation}%) invert(${
-                invert ? 1 : 0
-            })`;
+        if (!coloursAdjusted) return;
 
+        try {
             for (const canvas of canvases) {
+                const blurSizeRatio =
+                    Math.min(canvas.width, canvas.height) /
+                    Math.min(canvasRef.current.width, canvasRef.current.height);
+                const blurRadius = blurSizeRatio * blur;
+                const filterString = `brightness(${brightness}%) contrast(${contrast}%) blur(${blurRadius}px) saturate(${saturation}%) invert(${
+                    invert ? 1 : 0
+                })`;
                 const context = canvas.getContext('2d');
                 context.imageSmoothingEnabled = false;
 
@@ -313,7 +318,7 @@ const ImageEditorOverlay = (props: IProps) => {
         try {
             if (!canvasRef.current) return;
 
-            await applyFilters([originalSizeCanvasRef.current]);
+            // await applyFilters([originalSizeCanvasRef.current]);
 
             const editedFile = await getEditedFile();
             const fileType = await getFileType(editedFile);
@@ -330,7 +335,7 @@ const ImageEditorOverlay = (props: IProps) => {
         try {
             if (!canvasRef.current) return;
 
-            await applyFilters([originalSizeCanvasRef.current]);
+            // await applyFilters([originalSizeCanvasRef.current]);
 
             const collections = await getLocalCollections();
 
