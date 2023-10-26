@@ -35,6 +35,8 @@ import {
 
 const DIGITS = new Set(['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']);
 
+const CLIP_SCORE_THRESHOLD = 0.25;
+
 export const getDefaultOptions = async (files: EnteFile[]) => {
     return [
         await getIndexStatusSuggestion(),
@@ -372,17 +374,19 @@ async function searchClip(searchPhrase: string): Promise<ClipSearchScores> {
     const imageEmbeddings = await getAllClipImageEmbeddings();
     const textEmbedding = await ClipService.getTextEmbedding(searchPhrase);
     const clipSearchResult = new Map<number, number>(
-        await Promise.all(
-            imageEmbeddings.map(
-                async (imageEmbedding): Promise<[number, number]> => [
-                    imageEmbedding.fileID,
-                    await computeClipMatchScore(
-                        imageEmbedding.embedding,
-                        textEmbedding
-                    ),
-                ]
+        (
+            await Promise.all(
+                imageEmbeddings.map(
+                    async (imageEmbedding): Promise<[number, number]> => [
+                        imageEmbedding.fileID,
+                        await computeClipMatchScore(
+                            imageEmbedding.embedding,
+                            textEmbedding
+                        ),
+                    ]
+                )
             )
-        )
+        ).filter(([, score]) => score >= CLIP_SCORE_THRESHOLD)
     );
 
     return clipSearchResult;
