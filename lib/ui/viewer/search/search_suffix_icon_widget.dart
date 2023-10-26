@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import "package:photos/theme/ente_theme.dart";
+import "package:photos/ui/viewer/search/search_widget_new.dart";
 
 class SearchSuffixIcon extends StatefulWidget {
   final bool shouldShowSpinner;
@@ -33,7 +34,10 @@ class _SearchSuffixIconState extends State<SearchSuffixIcon>
           : IconButton(
               visualDensity: const VisualDensity(horizontal: -1, vertical: -1),
               onPressed: () {
-                Navigator.pop(context);
+                context
+                    .findAncestorStateOfType<SearchWidgetNewState>()!
+                    .textController
+                    .clear();
               },
               icon: Icon(
                 Icons.close,

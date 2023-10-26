@@ -19,19 +19,20 @@ class SearchWidgetNew extends StatefulWidget {
   const SearchWidgetNew({Key? key}) : super(key: key);
 
   @override
-  State<SearchWidgetNew> createState() => _SearchWidgetNewState();
+  State<SearchWidgetNew> createState() => SearchWidgetNewState();
 }
 
-class _SearchWidgetNewState extends State<SearchWidgetNew> {
-  String _query = "";
+class SearchWidgetNewState extends State<SearchWidgetNew> {
+  String searchQuery = "";
   final _searchService = SearchService.instance;
   final _debouncer = Debouncer(const Duration(milliseconds: 100));
-  final Logger _logger = Logger((_SearchWidgetNewState).toString());
+  final Logger _logger = Logger((SearchWidgetNewState).toString());
   late FocusNode focusNode;
   StreamSubscription<TabDoubleTapEvent>? _tabDoubleTapEvent;
   double _bottomPadding = 0.0;
   double _distanceOfWidgetFromBottom = 0;
   GlobalKey widgetKey = GlobalKey();
+  TextEditingController textController = TextEditingController();
 
   @override
   void initState() {
@@ -69,6 +70,29 @@ class _SearchWidgetNewState extends State<SearchWidgetNew> {
     if (_bottomPadding < 0) {
       _bottomPadding = 0;
     }
+
+    ///Removing listener as there a possiblity of multiple listeners getting
+    ///added whenever didChangeDependencies() is called. Cannot move this to
+    ///initState as textContollerListener accesses an inheritedWidget, which
+    ///will throw an error in init state.
+    textController.removeListener(textControllerListener);
+    textController.addListener(textControllerListener);
+  }
+
+  Future<void> textControllerListener() async {
+    final value = textController.text;
+    isSearchQueryEmpty = value.isEmpty;
+
+    //Why is this required?
+    searchQuery = value;
+    final List<SearchResult> allResults =
+        await getSearchResultsForQuery(context, value);
+    /*checking if _query == value to make sure that the results are from the current query
+                      and not from the previous query (race condition).*/
+    if (mounted && searchQuery == value) {
+      final inheritedSearchResults = InheritedSearchResults.of(context);
+      inheritedSearchResults.updateResults(allResults);
+    }
   }
 
   @override
@@ -91,6 +115,7 @@ class _SearchWidgetNewState extends State<SearchWidgetNew> {
                   height: 44,
                   color: colorScheme.fillFaint,
                   child: TextFormField(
+                    controller: textController,
                     style: Theme.of(context).textTheme.titleMedium,
                     // Below parameters are to disable auto-suggestion
                     enableSuggestions: false,
@@ -143,21 +168,6 @@ class _SearchWidgetNewState extends State<SearchWidgetNew> {
                         },
                       ),
                     ),
-                    onChanged: (value) async {
-                      isSearchQueryEmpty = value.isEmpty;
-
-                      //Why is this required?
-                      _query = value;
-                      final List<SearchResult> allResults =
-                          await getSearchResultsForQuery(context, value);
-                      /*checking if _query == value to make sure that the results are from the current query
-                      and not from the previous query (race condition).*/
-                      if (mounted && _query == value) {
-                        final inheritedSearchResults =
-                            InheritedSearchResults.of(context);
-                        inheritedSearchResults.updateResults(allResults);
-                      }
-                    },
                   ),
                 ),
               ),
@@ -173,6 +183,8 @@ class _SearchWidgetNewState extends State<SearchWidgetNew> {
     _debouncer.cancelDebounce();
     focusNode.dispose();
     _tabDoubleTapEvent?.cancel();
+    textController.removeListener(textControllerListener);
+    textController.dispose();
     super.dispose();
   }
 
