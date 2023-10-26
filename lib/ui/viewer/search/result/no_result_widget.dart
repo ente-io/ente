@@ -26,9 +26,10 @@ class _NoResultWidgetState extends State<NoResultWidget> {
         for (int j = 0; j < 2 && j < value[i].length; j++) {
           querySuggestions.add(value[i][j].name());
         }
-        //todo: remove keys with empty list
-        searchTypeToQuerySuggestion
-            .addAll({searchTypes[i].sectionTitle(context): querySuggestions});
+        if (querySuggestions.isNotEmpty) {
+          searchTypeToQuerySuggestion
+              .addAll({searchTypes[i].sectionTitle(context): querySuggestions});
+        }
       }
       setState(() {});
     });
