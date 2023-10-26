@@ -575,7 +575,6 @@ function PhotoViewer(props: Iprops) {
     };
 
     const handleOpenEditor = () => {
-        props.onClose(false);
         setShowImageEditorOverlay(true);
     };
 
@@ -871,6 +870,7 @@ function PhotoViewer(props: Iprops) {
                 show={showImageEditorOverlay}
                 file={photoSwipe?.currItem as EnteFile}
                 onClose={handleCloseEditor}
+                closePhotoViewer={handleClose}
             />
         </>
     );
