@@ -30,7 +30,7 @@ import { FILE_TYPE } from 'constants/file';
 import {
     ClipService,
     computeClipMatchScore,
-    getAllClipImageEmbeddings,
+    getLocalClipImageEmbeddings,
 } from './clipService';
 
 const DIGITS = new Set(['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']);
@@ -374,7 +374,7 @@ async function searchThing(searchPhrase: string) {
 }
 
 async function searchClip(searchPhrase: string): Promise<ClipSearchScores> {
-    const imageEmbeddings = await getAllClipImageEmbeddings();
+    const imageEmbeddings = await getLocalClipImageEmbeddings();
     const textEmbedding = await ClipService.getTextEmbedding(searchPhrase);
     const clipSearchResult = new Map<number, number>(
         (

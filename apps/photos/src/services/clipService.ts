@@ -1,5 +1,9 @@
 import { EnteFile } from 'types/file';
-import { putEmbedding, getLocalEmbeddings } from './embeddingService';
+import {
+    putEmbedding,
+    getLatestEmbeddings,
+    getLocalEmbeddings,
+} from './embeddingService';
 import { getLocalFiles } from './fileService';
 import { ElectronAPIs } from 'types/electron';
 import downloadManager from './downloadManager';
@@ -114,7 +118,7 @@ class ClipServiceImpl {
                 return;
             }
             const localFiles = getPersonalFiles(await getLocalFiles(), user);
-            const existingEmbeddings = await getAllClipImageEmbeddings();
+            const existingEmbeddings = await getLatestClipImageEmbeddings();
             const pendingFiles = await getNonClipEmbeddingExtractedFiles(
                 localFiles,
                 existingEmbeddings
@@ -219,7 +223,7 @@ const getNonClipEmbeddingExtractedFiles = async (
     });
 };
 
-export const getAllClipImageEmbeddings = async () => {
+export const getLocalClipImageEmbeddings = async () => {
     const allEmbeddings = await getLocalEmbeddings();
     return allEmbeddings.filter(
         (embedding) => embedding.model === Model.GGML_CLIP
@@ -251,4 +255,11 @@ export const computeClipMatchScore = async (
         score += imageEmbedding[index] * textEmbedding[index];
     }
     return score;
+};
+
+const getLatestClipImageEmbeddings = async () => {
+    const allEmbeddings = await getLatestEmbeddings();
+    return allEmbeddings.filter(
+        (embedding) => embedding.model === Model.GGML_CLIP
+    );
 };

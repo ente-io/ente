@@ -32,6 +32,12 @@ const getEmbeddingSyncTime = async () => {
     return (await localForage.getItem<number>(EMBEDDING_SYNC_TIME_TABLE)) ?? 0;
 };
 
+export const getLatestEmbeddings = async () => {
+    await syncEmbeddings();
+    const embeddings = await getLocalEmbeddings();
+    return embeddings;
+};
+
 export const syncEmbeddings = async () => {
     try {
         let embeddings = await getLocalEmbeddings();
