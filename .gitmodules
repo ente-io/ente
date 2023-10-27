@@ -4,4 +4,4 @@
 	branch = stable
 [submodule "plugins/clip_ggml"]
 	path = plugins/clip_ggml
-	url = https://github.com/0nullpointer/clip_ggml.git
+	url = https://github.com/ente-io/clip_ggml.git
