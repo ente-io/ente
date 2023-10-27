@@ -7,11 +7,6 @@ import 'package:flutter/widgets.dart' hide PageView;
 ///
 /// Based on commit 3932ffb1cd5dfa0c3891c60977ee4f9cd70ade66 on channel dev
 
-// Having this global (mutable) page controller is a bit of a hack. We need it
-// to plumb in the factory for _PagePosition, but it will end up accumulating
-// a large list of scroll positions. As long as you don't try to actually
-// control the scroll positions, everything should be fine.
-final PageController _defaultPageController = PageController();
 const PageScrollPhysics _kPagePhysics = PageScrollPhysics();
 
 /// A scrollable list that works page by page.
@@ -50,15 +45,14 @@ class ExtentsPageView extends StatefulWidget {
     Key? key,
     this.scrollDirection = Axis.horizontal,
     this.reverse = false,
-    PageController? controller,
+    required this.controller,
     this.physics,
     this.pageSnapping = true,
     this.onPageChanged,
     List<Widget> children = const <Widget>[],
     this.dragStartBehavior = DragStartBehavior.start,
     this.openDrawer,
-  })  : controller = controller ?? _defaultPageController,
-        childrenDelegate = SliverChildListDelegate(children),
+  })  : childrenDelegate = SliverChildListDelegate(children),
         extents = children.length,
         super(key: key);
 
@@ -82,7 +76,7 @@ class ExtentsPageView extends StatefulWidget {
     Key? key,
     this.scrollDirection = Axis.horizontal,
     this.reverse = false,
-    PageController? controller,
+    required this.controller,
     this.physics,
     this.pageSnapping = true,
     this.onPageChanged,
@@ -90,8 +84,7 @@ class ExtentsPageView extends StatefulWidget {
     int? itemCount,
     this.dragStartBehavior = DragStartBehavior.start,
     this.openDrawer,
-  })  : controller = controller ?? _defaultPageController,
-        childrenDelegate =
+  })  : childrenDelegate =
             SliverChildBuilderDelegate(itemBuilder, childCount: itemCount),
         extents = 0,
         super(key: key);
@@ -101,7 +94,7 @@ class ExtentsPageView extends StatefulWidget {
     this.extents = 1,
     this.scrollDirection = Axis.horizontal,
     this.reverse = false,
-    PageController? controller,
+    required this.controller,
     this.physics,
     this.pageSnapping = true,
     this.onPageChanged,
@@ -109,8 +102,7 @@ class ExtentsPageView extends StatefulWidget {
     int? itemCount,
     this.dragStartBehavior = DragStartBehavior.start,
     this.openDrawer,
-  })  : controller = controller ?? _defaultPageController,
-        childrenDelegate = SliverChildBuilderDelegate(
+  })  : childrenDelegate = SliverChildBuilderDelegate(
           itemBuilder,
           childCount: itemCount,
           addAutomaticKeepAlives: false,
@@ -202,7 +194,7 @@ class ExtentsPageView extends StatefulWidget {
     Key? key,
     this.scrollDirection = Axis.horizontal,
     this.reverse = false,
-    PageController? controller,
+    required this.controller,
     this.physics,
     this.pageSnapping = true,
     this.onPageChanged,
@@ -210,7 +202,6 @@ class ExtentsPageView extends StatefulWidget {
     this.dragStartBehavior = DragStartBehavior.start,
     this.openDrawer,
   })  : extents = 0,
-        controller = controller ?? _defaultPageController,
         super(key: key);
 
   /// The number of pages to build off screen.
@@ -297,7 +288,6 @@ class _PageViewState extends State<ExtentsPageView> {
 
   @override
   void dispose() {
-    widget.controller.dispose();
     super.dispose();
   }
 

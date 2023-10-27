@@ -263,6 +263,7 @@ class _HomeWidgetState extends State<HomeWidget> {
     _accountConfiguredEvent.cancel();
     _intentDataStreamSubscription?.cancel();
     _collectionUpdatedEvent.cancel();
+    _pageController.dispose();
     super.dispose();
   }
 
