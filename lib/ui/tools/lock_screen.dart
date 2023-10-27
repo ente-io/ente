@@ -21,7 +21,7 @@ class _LockScreenState extends State<LockScreen> with WidgetsBindingObserver {
   @override
   void initState() {
     _logger.info("initState");
-    _showLockScreen();
+    _showLockScreen(source: "initState");
     WidgetsBinding.instance.addObserver(this);
     super.initState();
   }
@@ -47,7 +47,7 @@ class _LockScreenState extends State<LockScreen> with WidgetsBindingObserver {
                     text: S.of(context).unlock,
                     iconData: Icons.lock_open_outlined,
                     onTap: () async {
-                      _showLockScreen();
+                      _showLockScreen(source: "tapUnlock");
                     },
                   ),
                 ),
@@ -69,7 +69,7 @@ class _LockScreenState extends State<LockScreen> with WidgetsBindingObserver {
       if (!_hasAuthenticationFailed) {
         // Show the lock screen again only if the app is resuming from the
         // background, and not when the lock screen was explicitly dismissed
-        _showLockScreen();
+        _showLockScreen(source: "lifeCycle");
       } else {
         _hasAuthenticationFailed = false; // Reset failure state
       }
@@ -90,8 +90,8 @@ class _LockScreenState extends State<LockScreen> with WidgetsBindingObserver {
     super.dispose();
   }
 
-  Future<void> _showLockScreen() async {
-    _logger.info("Showing lock screen");
+  Future<void> _showLockScreen({String source = ''}) async {
+    _logger.info("Showing lock screen $source");
     try {
       _isShowingLockScreen = true;
       final result = await requestAuthentication(
