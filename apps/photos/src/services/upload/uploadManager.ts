@@ -340,7 +340,6 @@ class UploadManager {
                     break;
                 case UPLOAD_RESULT.UNSUPPORTED:
                 case UPLOAD_RESULT.TOO_LARGE:
-                case UPLOAD_RESULT.CANCELLED:
                     // no-op
                     break;
                 default:
