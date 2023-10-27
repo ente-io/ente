@@ -80,8 +80,9 @@ export const syncEmbeddings = async () => {
                             embedding: decryptedData,
                         } as Embedding;
                     } catch (e) {
-                        logError(e, 'Error in syncEmbeddings');
-                        throw e;
+                        logError(e, 'decryptEmbedding failed for file', {
+                            fileID: embedding.fileID,
+                        });
                     }
                 })
             );
