@@ -97,7 +97,9 @@ const ColoursMenu = (props: IProps) => {
                     variant="toggle"
                     checked={props.invert}
                     label={t('INVERT_COLORS')}
-                    onClick={() => props.setInvert((invert) => !invert)}
+                    onClick={() => {
+                        props.setInvert(!props.invert);
+                    }}
                 />
             </MenuItemGroup>
         </>
