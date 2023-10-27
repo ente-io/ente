@@ -6,7 +6,7 @@ import UIService from './uiService';
 import UploadHttpClient from './uploadHttpClient';
 import * as convert from 'xml-js';
 import { CustomError } from 'utils/error';
-import { DataStream, MultipartUploadURLs } from 'types/upload';
+import { DataStream, Logger, MultipartUploadURLs } from 'types/upload';
 import uploadCancelService from './uploadCancelService';
 import uploadService from './uploadService';
 
@@ -22,14 +22,19 @@ function calculatePartCount(chunkCount: number) {
     return partCount;
 }
 export async function uploadStreamUsingMultipart(
+    logger: Logger,
     fileLocalID: number,
     dataStream: DataStream
 ) {
     const uploadPartCount = calculatePartCount(dataStream.chunkCount);
+    logger(`fetching ${uploadPartCount} urls for multipart upload`);
     const multipartUploadURLs = await uploadService.fetchMultipartUploadURLs(
         uploadPartCount
     );
+    logger(`fetched ${uploadPartCount} urls for multipart upload`);
+
     const fileObjectKey = await uploadStreamInParts(
+        logger,
         multipartUploadURLs,
         dataStream.stream,
         fileLocalID,
@@ -39,6 +44,7 @@ export async function uploadStreamUsingMultipart(
 }
 
 export async function uploadStreamInParts(
+    logger: Logger,
     multipartUploadURLs: MultipartUploadURLs,
     dataStream: ReadableStream<Uint8Array>,
     fileLocalID: number,
@@ -46,8 +52,8 @@ export async function uploadStreamInParts(
 ) {
     const streamReader = dataStream.getReader();
     const percentPerPart = getRandomProgressPerPartUpload(uploadPartCount);
-
     const partEtags: PartEtag[] = [];
+    logger(`uploading file in chunks`);
     for (const [
         index,
         fileUploadURL,
@@ -81,7 +87,10 @@ export async function uploadStreamInParts(
     if (!done) {
         throw Error(CustomError.CHUNK_MORE_THAN_EXPECTED);
     }
+    logger(`uploading file in chunks done`);
+    logger(`completing multipart upload`);
     await completeMultipartUpload(partEtags, multipartUploadURLs.completeURL);
+    logger(`completing multipart upload done`);
     return multipartUploadURLs.objectKey;
 }
 

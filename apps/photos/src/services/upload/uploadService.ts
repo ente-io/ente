@@ -12,6 +12,7 @@ import {
     FileWithCollection,
     FileWithMetadata,
     isDataStream,
+    Logger,
     ParsedMetadataJSON,
     ParsedMetadataJSONMap,
     ProcessedFile,
@@ -154,33 +155,45 @@ class UploadService {
         return encryptFile(worker, file, encryptionKey);
     }
 
-    async uploadToBucket(file: ProcessedFile): Promise<BackupedFile> {
+    async uploadToBucket(
+        logger: Logger,
+        file: ProcessedFile
+    ): Promise<BackupedFile> {
         try {
             let fileObjectKey: string = null;
+            logger('uploading file to bucket');
             if (isDataStream(file.file.encryptedData)) {
+                logger('uploading using multipart');
                 fileObjectKey = await uploadStreamUsingMultipart(
+                    logger,
                     file.localID,
                     file.file.encryptedData
                 );
+                logger('uploading using multipart done');
             } else {
+                logger('uploading using single part');
                 const progressTracker = UIService.trackUploadProgress(
                     file.localID
                 );
                 const fileUploadURL = await this.getUploadURL();
                 if (!this.isCFUploadProxyDisabled) {
+                    logger('uploading using cf proxy');
                     fileObjectKey = await UploadHttpClient.putFileV2(
                         fileUploadURL,
                         file.file.encryptedData as Uint8Array,
                         progressTracker
                     );
                 } else {
+                    logger('uploading directly to s3');
                     fileObjectKey = await UploadHttpClient.putFile(
                         fileUploadURL,
                         file.file.encryptedData as Uint8Array,
                         progressTracker
                     );
                 }
+                logger('uploading using single part done');
             }
+            logger('uploading thumbnail to bucket');
             const thumbnailUploadURL = await this.getUploadURL();
             let thumbnailObjectKey: string = null;
             if (!this.isCFUploadProxyDisabled) {
@@ -196,6 +209,7 @@ class UploadService {
                     null
                 );
             }
+            logger('uploading thumbnail to bucket done');
 
             const backupedFile: BackupedFile = {
                 file: {
