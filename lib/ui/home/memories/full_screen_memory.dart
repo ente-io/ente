@@ -60,7 +60,6 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
 
   @override
   Widget build(BuildContext context) {
-    _pageController ??= PageController(initialPage: _index);
     final file = widget.memories[_index].file;
     return Scaffold(
       appBar: AppBar(
@@ -292,7 +291,7 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
     debugPrint(
       "FullScreenbuildSwiper: $_index and total ${widget.memories.length}",
     );
-    _pageController = PageController(initialPage: _index);
+    _pageController ??= PageController(initialPage: _index);
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
       onTapDown: (TapDownDetails details) {
@@ -343,7 +342,7 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
           );
         },
         itemCount: widget.memories.length,
-        controller: _pageController,
+        controller: _pageController!,
         onPageChanged: (index) async {
           unawaited(
             MemoriesService.instance.markMemoryAsSeen(widget.memories[index]),
