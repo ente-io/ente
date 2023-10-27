@@ -341,9 +341,10 @@ class UserService {
             } else {
               page = const PasswordReentryPage();
             }
-
           } else {
-            page = const PasswordEntryPage(mode: PasswordEntryMode.set,);
+            page = const PasswordEntryPage(
+              mode: PasswordEntryMode.set,
+            );
           }
         }
         Navigator.of(context).pushAndRemoveUntil(
@@ -530,7 +531,7 @@ class UserService {
         final clientM = client.calculateClientEvidenceMessage();
         // ignore: unused_local_variable
         late Response srpCompleteResponse;
-        if(setKeysRequest == null) {
+        if (setKeysRequest == null) {
           srpCompleteResponse = await _enteDio.post(
             "/users/srp/complete",
             data: {
@@ -551,8 +552,8 @@ class UserService {
       } else {
         throw Exception("register-srp action failed");
       }
-    } catch (e,s) {
-      _logger.severe("failed to register srp" ,e,s);
+    } catch (e, s) {
+      _logger.severe("failed to register srp", e, s);
       rethrow;
     }
   }
@@ -699,9 +700,10 @@ class UserService {
     }
   }
 
-  Future<void> updateKeyAttributes(KeyAttributes keyAttributes, Uint8List
-  loginKey,)
-  async {
+  Future<void> updateKeyAttributes(
+    KeyAttributes keyAttributes,
+    Uint8List loginKey,
+  ) async {
     try {
       final setKeyRequest = SetKeysRequest(
         kekSalt: keyAttributes.kekSalt,
@@ -1131,13 +1133,14 @@ class UserService {
   bool hasEnabledTwoFactor() {
     return _preferences.getBool(keyHasEnabledTwoFactor) ?? false;
   }
+
   bool hasEmailMFAEnabled() {
     final UserDetails? profile = getCachedUserDetails();
     if (profile != null && profile.profileData != null) {
       return profile.profileData!.isEmailMFAEnabled;
     }
     return true;
-}
+  }
 
   Future<void> updateEmailMFA(bool isEnabled) async {
     try {
@@ -1154,7 +1157,7 @@ class UserService {
         await _preferences.setString(keyUserDetails, profile.toJson());
       }
     } catch (e) {
-      _logger.severe("Failed to update email mfa",e);
+      _logger.severe("Failed to update email mfa", e);
       rethrow;
     }
   }
