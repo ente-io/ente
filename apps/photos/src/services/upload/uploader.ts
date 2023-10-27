@@ -11,6 +11,7 @@ import {
     UploadFile,
     FileWithMetadata,
     FileTypeInfo,
+    Logger,
 } from 'types/upload';
 import { addLocalLog, addLogLine } from 'utils/logging';
 import { convertBytesToHumanReadable } from 'utils/file/size';
@@ -145,8 +146,11 @@ export default async function uploader(
             throw Error(CustomError.UPLOAD_CANCELLED);
         }
         addLogLine(`uploadToBucket ${fileNameSize}`);
-
+        const logger: Logger = (message: string) => {
+            addLogLine(message, `fileNameSize: ${fileNameSize}`);
+        };
         const backupedFile: BackupedFile = await UploadService.uploadToBucket(
+            logger,
             encryptedFile.file
         );
 
@@ -155,6 +159,7 @@ export default async function uploader(
             backupedFile,
             encryptedFile.fileKey
         );
+        addLogLine(`uploading file to server ${fileNameSize}`);
 
         const uploadedFile = await UploadService.uploadFile(uploadFile);
 
