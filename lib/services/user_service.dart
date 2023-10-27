@@ -13,6 +13,7 @@ import "package:photos/core/errors.dart";
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/core/network/network.dart';
 import 'package:photos/db/public_keys_db.dart';
+import "package:photos/events/account_configured_event.dart";
 import 'package:photos/events/two_factor_status_change_event.dart';
 import 'package:photos/events/user_details_changed_event.dart';
 import "package:photos/generated/l10n.dart";
@@ -644,14 +645,19 @@ class UserService {
           }
         }
         await dialog.hide();
-        Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(
-            builder: (BuildContext context) {
-              return page;
-            },
-          ),
-              (route) => route.isFirst,
-        );
+        if (page is HomeWidget) {
+          Navigator.of(context).popUntil((route) => route.isFirst);
+          Bus.instance.fire(AccountConfiguredEvent());
+        } else {
+          Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(
+              builder: (BuildContext context) {
+                return page;
+              },
+            ),
+            (route) => route.isFirst,
+          );
+        }
       } else {
         // should never reach here
         throw Exception("unexpected response during email verification");
