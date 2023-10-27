@@ -28,6 +28,7 @@ class SemanticSearchService {
 
   static const kModelName = "ggml-clip";
   static const kEmbeddingLength = 512;
+  static const kScoreThreshold = 0.23;
 
   final _logger = Logger("SemanticSearchService");
   final _queue = Queue<EnteFile>();
@@ -124,7 +125,7 @@ class SemanticSearchService {
       queryResults.add(QueryResult(embedding.fileID, score));
     }
     queryResults.sort((first, second) => second.score.compareTo(first.score));
-    queryResults.removeWhere((element) => element.score < 0.25);
+    queryResults.removeWhere((element) => element.score < kScoreThreshold);
     endTime = DateTime.now();
     _logger.info(
       "computingScores took: " +
