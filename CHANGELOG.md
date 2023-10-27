@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## v1.6.68
+
+- Adds Photo Editor [#1396](https://github.com/ente-io/photos-web/pull/1396)
+
 ## v1.6.67
 
 ### Bug Fixes
