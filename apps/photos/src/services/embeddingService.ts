@@ -92,6 +92,7 @@ export const syncEmbeddings = async () => {
                 `Syncing embeddings syncedEmbeddingsCount: ${newEmbeddings.length}`
             );
         } while (response.diff.length === DIFF_LIMIT);
+        void cleanupDeletedEmbeddings();
     } catch (e) {
         logError(e, 'Sync embeddings failed');
     }
@@ -142,5 +143,25 @@ export const putEmbedding = async (
     } catch (e) {
         logError(e, 'put embedding failed');
         throw e;
+    }
+};
+
+export const cleanupDeletedEmbeddings = async () => {
+    const files = await getLocalFiles();
+    const trashedFiles = await getLocalTrashedFiles();
+    const activeFileIds = new Set<number>();
+    [...files, ...trashedFiles].forEach((file) => {
+        activeFileIds.add(file.id);
+    });
+    const embeddings = await getLocalEmbeddings();
+
+    const remainingEmbeddings = embeddings.filter((embedding) =>
+        activeFileIds.has(embedding.fileID)
+    );
+    if (embeddings.length !== remainingEmbeddings.length) {
+        addLogLine(
+            `cleanupDeletedEmbeddings embeddingsCount: ${embeddings.length} remainingEmbeddingsCount: ${remainingEmbeddings.length}`
+        );
+        await localForage.setItem(EMBEDDINGS_TABLE, remainingEmbeddings);
     }
 };
