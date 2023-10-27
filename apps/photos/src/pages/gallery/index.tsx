@@ -123,7 +123,6 @@ import { getLocalFamilyData } from 'utils/user/family';
 import InMemoryStore, { MS_KEYS } from 'services/InMemoryStore';
 import { syncEmbeddings } from 'services/embeddingService';
 import { ClipService } from 'services/clipService';
-import isElectron from 'is-electron';
 
 export const DeadCenter = styled('div')`
     flex: 1;
@@ -711,7 +710,7 @@ export default function Gallery() {
             await syncTrash(collections, setTrashedFiles);
             await syncEntities();
             await syncMapEnabled();
-            if (isElectron()) {
+            if (await ClipService.isClipSupported()) {
                 await syncEmbeddings();
                 void ClipService.scheduleImageEmbeddingExtraction();
             }

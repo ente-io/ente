@@ -63,7 +63,7 @@ export const getAutoCompleteSuggestions =
                 ...(await getLocationTagSuggestions(searchPhrase)),
                 ...(await getThingSuggestion(searchPhrase)),
                 await getClipSuggestion(searchPhrase),
-            ];
+            ].filter((suggestion) => !!suggestion);
 
             return convertSuggestionsToOptions(suggestions, files);
         } catch (e) {
@@ -290,6 +290,9 @@ async function getThingSuggestion(searchPhrase: string): Promise<Suggestion[]> {
 }
 
 async function getClipSuggestion(searchPhrase: string): Promise<Suggestion> {
+    if (!(await ClipService.isClipSupported())) {
+        return null;
+    }
     const clipResults = await searchClip(searchPhrase);
     return {
         type: SuggestionType.CLIP,

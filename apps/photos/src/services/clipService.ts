@@ -11,6 +11,7 @@ import { addLogLine } from 'utils/logging';
 import { CustomError } from 'utils/error';
 import { LS_KEYS, getData } from 'utils/storage/localStorage';
 import { getPersonalFiles } from 'utils/file';
+import isElectron from 'is-electron';
 
 const CLIP_EMBEDDING_LENGTH = 512;
 
@@ -32,6 +33,14 @@ class ClipServiceImpl {
     constructor() {
         this.electronAPIs = globalThis['ElectronAPIs'];
     }
+
+    isClipSupported = async () => {
+        if (!isElectron()) {
+            return false;
+        }
+        const platform = await this.electronAPIs.getPlatform();
+        return platform !== 'windows';
+    };
 
     setOnUpdateHandler = (handler: (status: ClipExtractionStatus) => void) => {
         this.onUpdateHandler = handler;
