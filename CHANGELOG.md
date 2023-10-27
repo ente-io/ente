@@ -2,7 +2,9 @@
 
 ## v1.6.68
 
-- Adds Photo Editor [#1396](https://github.com/ente-io/photos-web/pull/1396)
+### Photo Editor
+
+Check out our [blog](https://ente.io/blog/introducing-web-desktop-photo-editor/) to know about feature and functionalities.
 
 ## v1.6.67
 
