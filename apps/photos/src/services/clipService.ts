@@ -131,10 +131,13 @@ class ClipServiceImpl {
                 addLogLine('no clip embedding extraction needed, all done');
                 return;
             }
+            addLogLine(
+                `starting clip embedding extraction for ${pendingFiles.length} files`
+            );
             for (const file of pendingFiles) {
                 try {
                     addLogLine(
-                        `extracting clip embedding for file: ${file.metadata.title}`
+                        `extracting clip embedding for file: ${file.metadata.title} fileID: ${file.id}`
                     );
                     if (canceller.signal.aborted) {
                         throw Error(CustomError.REQUEST_CANCELLED);
