@@ -12,6 +12,8 @@ import localForage from 'utils/storage/localForage';
 import { getLocalFiles } from './fileService';
 import HTTPService from './HTTPService';
 import { getToken } from 'utils/common/key';
+import { getLatestVersionEmbeddings } from 'utils/embedding';
+import { getLocalTrashedFiles } from './trashService';
 
 const ENDPOINT = getEndpoint();
 
@@ -34,8 +36,9 @@ export const syncEmbeddings = async () => {
     try {
         let embeddings = await getLocalEmbeddings();
         const localFiles = await getLocalFiles();
+        const localTrashFiles = await getLocalTrashedFiles();
         const fileIdToKeyMap = new Map<number, string>();
-        localFiles.forEach((file) => {
+        [...localFiles, ...localTrashFiles].forEach((file) => {
             fileIdToKeyMap.set(file.id, file.key);
         });
         addLogLine(`Syncing embeddings localCount: ${embeddings.length}`);
@@ -49,22 +52,37 @@ export const syncEmbeddings = async () => {
             }
             const newEmbeddings = await Promise.all(
                 response.diff.map(async (embedding) => {
-                    const { encryptedEmbedding, decryptionHeader, ...rest } =
-                        embedding;
-                    const worker = await ComlinkCryptoWorker.getInstance();
-                    const decryptedData = await worker.decryptEmbedding(
-                        encryptedEmbedding,
-                        decryptionHeader,
-                        fileIdToKeyMap.get(embedding.fileID)
-                    );
+                    try {
+                        const {
+                            encryptedEmbedding,
+                            decryptionHeader,
+                            ...rest
+                        } = embedding;
+                        const worker = await ComlinkCryptoWorker.getInstance();
+                        const fileKey = fileIdToKeyMap.get(embedding.fileID);
+                        if (!fileKey) {
+                            throw Error('File key not found');
+                        }
+                        const decryptedData = await worker.decryptEmbedding(
+                            encryptedEmbedding,
+                            decryptionHeader,
+                            fileIdToKeyMap.get(embedding.fileID)
+                        );
 
-                    return {
-                        ...rest,
-                        embedding: decryptedData,
-                    } as Embedding;
+                        return {
+                            ...rest,
+                            embedding: decryptedData,
+                        } as Embedding;
+                    } catch (e) {
+                        logError(e, 'Error in syncEmbeddings');
+                        throw e;
+                    }
                 })
             );
-            embeddings = [...embeddings, ...newEmbeddings];
+            embeddings = getLatestVersionEmbeddings([
+                ...embeddings,
+                ...newEmbeddings,
+            ]);
             if (response.diff.length) {
                 sinceTime = response.diff.slice(-1)[0].updatedAt;
             }
