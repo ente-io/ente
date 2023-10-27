@@ -47,6 +47,10 @@ export const syncEmbeddings = async () => {
         [...localFiles, ...localTrashFiles].forEach((file) => {
             fileIdToKeyMap.set(file.id, file.key);
         });
+        const fileIDToNameMap = new Map<number, string>();
+        [...localFiles, ...localTrashFiles].forEach((file) => {
+            fileIDToNameMap.set(file.id, file.metadata.title);
+        });
         addLogLine(`Syncing embeddings localCount: ${embeddings.length}`);
         let sinceTime = await getEmbeddingSyncTime();
         addLogLine(`Syncing embeddings sinceTime: ${sinceTime}`);
@@ -82,6 +86,7 @@ export const syncEmbeddings = async () => {
                     } catch (e) {
                         logError(e, 'decryptEmbedding failed for file', {
                             fileID: embedding.fileID,
+                            fileName: fileIDToNameMap.get(embedding.fileID),
                         });
                     }
                 })
