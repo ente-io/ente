@@ -26,6 +26,7 @@ class SemanticSearchService {
   static final Computer _computer = Computer.shared();
 
   static const kModelName = "ggml-clip";
+  static const kEmbeddingLength = 512;
 
   final _logger = Logger("SemanticSearchService");
   final _queue = Queue<EnteFile>();
@@ -211,6 +212,10 @@ class SemanticSearchService {
       _logger.info(
         "createImageEmbedding took: ${(endTime.millisecondsSinceEpoch - startTime.millisecondsSinceEpoch)}ms",
       );
+      if (result.length != kEmbeddingLength) {
+        _logger.severe("Discovered incorrect embedding for $file - $result");
+        return;
+      }
       await EmbeddingStore.instance.storeEmbedding(
         file,
         Embedding(
