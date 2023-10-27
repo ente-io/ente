@@ -1,4 +1,4 @@
-
+import "package:flutter/foundation.dart";
 import 'package:flutter/material.dart';
 import 'package:photos/core/configuration.dart';
 import "package:photos/generated/l10n.dart";
@@ -15,14 +15,17 @@ import "package:photos/utils/dialog_util.dart";
 // volatile password.
 class LoginPasswordVerificationPage extends StatefulWidget {
   final SrpAttributes srpAttributes;
-  const LoginPasswordVerificationPage({Key? key, required this.srpAttributes}) : super(key: key);
+
+  const LoginPasswordVerificationPage({Key? key, required this.srpAttributes})
+      : super(key: key);
 
   @override
-  State<LoginPasswordVerificationPage> createState() => _LoginPasswordVerificationPageState();
+  State<LoginPasswordVerificationPage> createState() =>
+      _LoginPasswordVerificationPageState();
 }
 
-class _LoginPasswordVerificationPageState extends
-State<LoginPasswordVerificationPage> {
+class _LoginPasswordVerificationPageState
+    extends State<LoginPasswordVerificationPage> {
   final _passwordController = TextEditingController();
   final FocusNode _passwordFocusNode = FocusNode();
   String? email;
@@ -33,6 +36,9 @@ State<LoginPasswordVerificationPage> {
   void initState() {
     super.initState();
     email = Configuration.instance.getEmail();
+    if (kDebugMode) {
+      _passwordController.text = const String.fromEnvironment("password");
+    }
     _passwordFocusNode.addListener(() {
       setState(() {
         _passwordInFocus = _passwordFocusNode.hasFocus;
@@ -79,9 +85,11 @@ State<LoginPasswordVerificationPage> {
         buttonText: S.of(context).logInLabel,
         onPressedFunction: () async {
           FocusScope.of(context).unfocus();
-          await UserService.instance.verifyEmailViaPassword(context, widget
-              .srpAttributes,
-              _passwordController.text,);
+          await UserService.instance.verifyEmailViaPassword(
+            context,
+            widget.srpAttributes,
+            _passwordController.text,
+          );
         },
       ),
       floatingActionButtonLocation: fabLocation(),
@@ -97,17 +105,22 @@ State<LoginPasswordVerificationPage> {
             child: ListView(
               children: [
                 Padding(
-                  padding:
-                  const EdgeInsets.only(top: 30, left: 20, right: 20),
+                  padding: const EdgeInsets.only(top: 30, left: 20, right: 20),
                   child: Text(
                     S.of(context).enterPassword,
                     style: Theme.of(context).textTheme.headlineMedium,
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.only(bottom: 30, left: 22, right:
-                  20,),
-                  child: Text(email ?? '', style: getEnteTextTheme(context).smallMuted,),
+                  padding: const EdgeInsets.only(
+                    bottom: 30,
+                    left: 22,
+                    right: 20,
+                  ),
+                  child: Text(
+                    email ?? '',
+                    style: getEnteTextTheme(context).smallMuted,
+                  ),
                 ),
                 Visibility(
                   // hidden textForm for suggesting auto-fill service for saving
@@ -138,19 +151,19 @@ State<LoginPasswordVerificationPage> {
                       ),
                       suffixIcon: _passwordInFocus
                           ? IconButton(
-                        icon: Icon(
-                          _passwordVisible
-                              ? Icons.visibility
-                              : Icons.visibility_off,
-                          color: Theme.of(context).iconTheme.color,
-                          size: 20,
-                        ),
-                        onPressed: () {
-                          setState(() {
-                            _passwordVisible = !_passwordVisible;
-                          });
-                        },
-                      )
+                              icon: Icon(
+                                _passwordVisible
+                                    ? Icons.visibility
+                                    : Icons.visibility_off,
+                                color: Theme.of(context).iconTheme.color,
+                                size: 20,
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  _passwordVisible = !_passwordVisible;
+                                });
+                              },
+                            )
                           : null,
                     ),
                     style: const TextStyle(
@@ -181,9 +194,11 @@ State<LoginPasswordVerificationPage> {
                       GestureDetector(
                         behavior: HitTestBehavior.opaque,
                         onTap: () async {
-                          await UserService.instance
-                              .sendOtt(context, email!,
-                              isResetPasswordScreen: true,);
+                          await UserService.instance.sendOtt(
+                            context,
+                            email!,
+                            isResetPasswordScreen: true,
+                          );
                         },
                         child: Center(
                           child: Text(
@@ -192,9 +207,9 @@ State<LoginPasswordVerificationPage> {
                                 .textTheme
                                 .titleMedium!
                                 .copyWith(
-                              fontSize: 14,
-                              decoration: TextDecoration.underline,
-                            ),
+                                  fontSize: 14,
+                                  decoration: TextDecoration.underline,
+                                ),
                           ),
                         ),
                       ),
@@ -218,9 +233,9 @@ State<LoginPasswordVerificationPage> {
                                 .textTheme
                                 .titleMedium!
                                 .copyWith(
-                              fontSize: 14,
-                              decoration: TextDecoration.underline,
-                            ),
+                                  fontSize: 14,
+                                  decoration: TextDecoration.underline,
+                                ),
                           ),
                         ),
                       ),
