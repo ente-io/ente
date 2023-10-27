@@ -12,6 +12,7 @@ import { EnteMenuItem } from 'components/Menu/EnteMenuItem';
 import { MenuItemGroup } from 'components/Menu/MenuItemGroup';
 import { VerticallyCenteredFlex } from 'components/Container';
 import { ClipExtractionStatus, ClipService } from 'services/clipService';
+import { formatNumber } from 'utils/number/format';
 
 export default function AdvancedSettings({ open, onClose, onRootClose }) {
     const [mlSearchSettingsView, setMlSearchSettingsView] = useState(false);
@@ -82,7 +83,7 @@ export default function AdvancedSettings({ open, onClose, onRootClose }) {
                                         {t('INDEXED_ITEMS')}
                                     </Typography>
                                     <Typography>
-                                        {indexingStatus.indexed}
+                                        {formatNumber(indexingStatus.indexed)}
                                     </Typography>
                                 </VerticallyCenteredFlex>
                                 <VerticallyCenteredFlex
@@ -92,7 +93,7 @@ export default function AdvancedSettings({ open, onClose, onRootClose }) {
                                         {t('PENDING_ITEMS')}
                                     </Typography>
                                     <Typography>
-                                        {indexingStatus.pending}
+                                        {formatNumber(indexingStatus.pending)}
                                     </Typography>
                                 </VerticallyCenteredFlex>
                             </Stack>
