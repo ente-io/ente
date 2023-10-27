@@ -41,6 +41,7 @@ import {
     getAppVersion,
     openDirectory,
     updateOptOutOfCrashReports,
+    getPlatform,
 } from './api/common';
 import { fixHotReloadNext12 } from './utils/preload';
 import {
@@ -117,4 +118,5 @@ windowObject['ElectronAPIs'] = {
     updateOptOutOfCrashReports,
     computeImageEmbedding,
     computeTextEmbedding,
+    getPlatform,
 };

@@ -31,6 +31,7 @@ import {
     computeImageEmbedding,
     computeTextEmbedding,
 } from '../services/clipService';
+import { getPlatform } from './common/platform';
 
 export default function setupIpcComs(
     tray: Tray,
@@ -175,5 +176,8 @@ export default function setupIpcComs(
     });
     ipcMain.handle('compute-text-embedding', (_, text) => {
         return computeTextEmbedding(text);
+    });
+    ipcMain.handle('get-platform', () => {
+        return getPlatform();
     });
 }
