@@ -1,5 +1,6 @@
 import "dart:async";
 import "dart:collection";
+import "dart:io";
 
 import "package:clip_ggml/clip_ggml.dart";
 import "package:computer/computer.dart";
@@ -37,6 +38,9 @@ class SemanticSearchService {
   PendingQuery? _nextQuery;
 
   Future<void> init(SharedPreferences preferences) async {
+    if (Platform.isIOS) {
+      return;
+    }
     await EmbeddingStore.instance.init(preferences);
     await ModelLoader.instance.init(_computer);
     Bus.instance.on<SyncStatusUpdate>().listen((event) async {
@@ -56,6 +60,9 @@ class SemanticSearchService {
   }
 
   Future<List<EnteFile>> search(String query) async {
+    if (Platform.isIOS) {
+      return [];
+    }
     if (_ongoingRequest == null) {
       _ongoingRequest = getMatchingFiles(query).then((result) {
         _ongoingRequest = null;
