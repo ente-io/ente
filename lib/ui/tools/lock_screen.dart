@@ -17,6 +17,7 @@ class _LockScreenState extends State<LockScreen> with WidgetsBindingObserver {
   bool _isShowingLockScreen = false;
   bool _hasPlacedAppInBackground = false;
   bool _hasAuthenticationFailed = false;
+  int? lastAuthenticatingTime;
 
   @override
   void initState() {
@@ -66,7 +67,10 @@ class _LockScreenState extends State<LockScreen> with WidgetsBindingObserver {
       // This is triggered either when the lock screen is dismissed or when
       // the app is brought to foreground
       _hasPlacedAppInBackground = false;
-      if (!_hasAuthenticationFailed) {
+      final bool didAuthInLast5Seconds = lastAuthenticatingTime != null &&
+          DateTime.now().millisecondsSinceEpoch - lastAuthenticatingTime! <
+              5000;
+      if (!_hasAuthenticationFailed && !didAuthInLast5Seconds) {
         // Show the lock screen again only if the app is resuming from the
         // background, and not when the lock screen was explicitly dismissed
         _showLockScreen(source: "lifeCycle");
@@ -100,6 +104,7 @@ class _LockScreenState extends State<LockScreen> with WidgetsBindingObserver {
       );
       _isShowingLockScreen = false;
       if (result) {
+        lastAuthenticatingTime = DateTime.now().millisecondsSinceEpoch;
         AppLock.of(context)!.didUnlock();
       } else {
         _logger.info("Dismissed");
