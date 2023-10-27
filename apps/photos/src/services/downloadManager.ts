@@ -31,30 +31,29 @@ class DownloadManager {
 
     private progressUpdater: (value: Map<number, number>) => void = () => {};
 
+    private thumbnailCache: LimitedCache;
+
     setProgressUpdater(progressUpdater: (value: Map<number, number>) => void) {
         this.progressUpdater = progressUpdater;
     }
 
     private async getThumbnailCache() {
         try {
-            const thumbnailCache = await CacheStorageService.open(
-                CACHES.THUMBS
-            );
-            return thumbnailCache;
+            if (!this.thumbnailCache) {
+                this.thumbnailCache = await CacheStorageService.open(
+                    CACHES.THUMBS
+                );
+            }
+            return this.thumbnailCache;
         } catch (e) {
             return null;
             // ignore
         }
     }
 
-    public async getCachedThumbnail(
-        file: EnteFile,
-        thumbnailCache?: LimitedCache
-    ) {
+    public async getCachedThumbnail(file: EnteFile) {
         try {
-            if (!thumbnailCache) {
-                thumbnailCache = await this.getThumbnailCache();
-            }
+            const thumbnailCache = await this.getThumbnailCache();
             const cacheResp: Response = await thumbnailCache?.match(
                 file.id.toString()
             );
@@ -83,10 +82,7 @@ class DownloadManager {
             if (!this.thumbnailObjectURLPromise.has(file.id)) {
                 const downloadPromise = async () => {
                     const thumbnailCache = await this.getThumbnailCache();
-                    const cachedThumb = await this.getCachedThumbnail(
-                        file,
-                        thumbnailCache
-                    );
+                    const cachedThumb = await this.getCachedThumbnail(file);
                     if (cachedThumb) {
                         return cachedThumb;
                     }

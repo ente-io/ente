@@ -194,7 +194,15 @@ class ClipServiceImpl {
         if (!token) {
             return;
         }
-        const thumb = await downloadManager.downloadThumb(token, file);
+        let thumb: Uint8Array;
+        const thumbURL = await downloadManager.getCachedThumbnail(file);
+        if (thumbURL) {
+            thumb = await fetch(thumbURL)
+                .then((response) => response.arrayBuffer())
+                .then((buffer) => new Uint8Array(buffer));
+        } else {
+            thumb = await downloadManager.downloadThumb(token, file);
+        }
         const embedding = await this.electronAPIs.computeImageEmbedding(thumb);
         return embedding;
     };
