@@ -35,7 +35,7 @@ import {
 
 const DIGITS = new Set(['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']);
 
-const CLIP_SCORE_THRESHOLD = 0.25;
+const CLIP_SCORE_THRESHOLD = 0.23;
 
 export const getDefaultOptions = async (files: EnteFile[]) => {
     return [
