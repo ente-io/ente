@@ -210,7 +210,7 @@ class SemanticSearchService {
       return;
     }
     try {
-      final filePath = (await getThumbnailFile(file))!.path;
+      final filePath = (await getThumbnailForUploadedFile(file))!.path;
       _logger.info("Running clip over $file");
       final startTime = DateTime.now();
       final result = await _computer.compute(

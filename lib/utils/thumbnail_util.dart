@@ -42,7 +42,9 @@ Future<Uint8List?> getThumbnail(EnteFile file) async {
   }
 }
 
-Future<File?> getThumbnailFile(EnteFile file) async {
+// Note: This method should only be called for files that have been uploaded
+// since cachedThumbnailPath depends on the file's uploadedID
+Future<File?> getThumbnailForUploadedFile(EnteFile file) async {
   final thumbnail = await getThumbnail(file);
   if (thumbnail != null) {
     final cachedThumbnail = cachedThumbnailPath(file);
