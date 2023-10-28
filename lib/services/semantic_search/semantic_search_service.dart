@@ -122,10 +122,11 @@ class SemanticSearchService {
         "imageEmbedding": embedding.embedding,
         "textEmbedding": textEmbedding,
       });
-      queryResults.add(QueryResult(embedding.fileID, score));
+      if (score >= kScoreThreshold) {
+        queryResults.add(QueryResult(embedding.fileID, score));
+      }
     }
     queryResults.sort((first, second) => second.score.compareTo(first.score));
-    queryResults.removeWhere((element) => element.score < kScoreThreshold);
     endTime = DateTime.now();
     _logger.info(
       "computingScores took: " +
