@@ -129,8 +129,11 @@ class EmbeddingStore {
         fileKey,
         CryptoUtil.base642bin(embedding.decryptionHeader),
       );
-      final decodedEmbedding =
-          jsonDecode(utf8.decode(embeddingData)) as List<double>;
+      final List<double> decodedEmbedding =
+          jsonDecode(utf8.decode(embeddingData))
+              .map((item) => item.toDouble())
+              .cast<double>()
+              .toList();
 
       embeddings.add(
         Embedding(
