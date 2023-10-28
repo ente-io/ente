@@ -199,7 +199,7 @@ class SemanticSearchService {
     isComputingEmbeddings = true;
 
     while (_queue.isNotEmpty) {
-      await _computeImageEmbedding(_queue.removeFirst());
+      await _computeImageEmbedding(_queue.removeLast());
     }
 
     isComputingEmbeddings = false;
