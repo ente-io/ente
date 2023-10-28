@@ -37,6 +37,7 @@ class SemanticSearchService {
   bool isComputingEmbeddings = false;
   Future<List<EnteFile>>? _ongoingRequest;
   PendingQuery? _nextQuery;
+  final _cachedEmbeddings = <Embedding>[];
 
   Future<void> init(SharedPreferences preferences) async {
     if (Platform.isIOS) {
@@ -44,14 +45,17 @@ class SemanticSearchService {
     }
     await EmbeddingStore.instance.init(preferences);
     await ModelLoader.instance.init(_computer);
+    _cacheEmbeddings();
     Bus.instance.on<SyncStatusUpdate>().listen((event) async {
       if (event.status == SyncStatus.diffSynced) {
         await EmbeddingStore.instance.pullEmbeddings();
+        _cacheEmbeddings();
       }
     });
     if (Configuration.instance.hasConfiguredAccount()) {
       EmbeddingStore.instance.pushEmbeddings();
     }
+
     _loadModels().then((v) {
       startBackFill();
     });
@@ -106,18 +110,8 @@ class SemanticSearchService {
     );
 
     startTime = DateTime.now();
-    final embeddings = await FilesDB.instance.getAllEmbeddings();
-    endTime = DateTime.now();
-    _logger.info(
-      "Fetching embeddings took: " +
-          (endTime.millisecondsSinceEpoch - startTime.millisecondsSinceEpoch)
-              .toString() +
-          "ms",
-    );
-
-    startTime = DateTime.now();
     final queryResults = <QueryResult>[];
-    for (final embedding in embeddings) {
+    for (final embedding in _cachedEmbeddings) {
       final score = computeScore({
         "imageEmbedding": embedding.embedding,
         "textEmbedding": textEmbedding,
@@ -229,19 +223,32 @@ class SemanticSearchService {
         _logger.severe("Discovered incorrect embedding for $file - $result");
         return;
       }
+      final embedding = Embedding(
+        file.uploadedFileID!,
+        kModelName,
+        result,
+      );
       await EmbeddingStore.instance.storeEmbedding(
         file,
-        Embedding(
-          file.uploadedFileID!,
-          kModelName,
-          result,
-        ),
+        embedding,
       );
 
       Bus.instance.fire(FileIndexedEvent());
+      _cachedEmbeddings.add(embedding);
     } catch (e, s) {
       _logger.severe(e, s);
     }
+  }
+
+  Future<void> _cacheEmbeddings() async {
+    final startTime = DateTime.now();
+    final embeddings = await FilesDB.instance.getAllEmbeddings();
+    _cachedEmbeddings.clear();
+    _cachedEmbeddings.addAll(embeddings);
+    final endTime = DateTime.now();
+    _logger.info(
+      "loadingAllEmbeddings took: ${(endTime.millisecondsSinceEpoch - startTime.millisecondsSinceEpoch)}ms",
+    );
   }
 }
 
