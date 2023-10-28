@@ -92,6 +92,8 @@ class _MachineLearningSettingsPageState
               );
               if (LocalSettings.instance.hasEnabledMagicSearch()) {
                 await SemanticSearchService.instance.startBackFill();
+              } else {
+                await SemanticSearchService.instance.clearQueue();
               }
               setState(() {});
             },

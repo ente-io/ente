@@ -188,6 +188,10 @@ class SemanticSearchService {
     _pollQueue();
   }
 
+  Future<void> clearQueue() async {
+    _queue.clear();
+  }
+
   Future<void> _pollQueue() async {
     if (isComputingEmbeddings) {
       return;
