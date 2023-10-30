@@ -17,7 +17,7 @@ export const logError = async (
             addLogLine(`
                 error: ${error?.name} ${error?.message} ${error?.stack} 
                 msg: ${msg} errorCode: ${JSON.stringify(error?.errCode)}
-                httpCode: ${JSON.stringify(error?.httpStatus)} ${
+                httpStatusCode: ${JSON.stringify(error?.httpStatusCode)} ${
                 info ? `info: ${JSON.stringify(info)}` : ''
             }`);
         } else {
@@ -37,9 +37,6 @@ export const logError = async (
     }
     if (InMemoryStore.get(MS_KEYS.OPT_OUT_OF_CRASH_REPORTS)) {
         addLocalLog(() => `skipping sentry error: ${error?.name}`);
-        return;
-    }
-    if (isErrorUnnecessaryForSentry(error)) {
         return;
     }
 
@@ -63,13 +60,4 @@ function errorWithContext(originalError: Error, context: string) {
         '\n' +
         originalError.stack;
     return errorWithContext;
-}
-
-function isErrorUnnecessaryForSentry(error: any) {
-    if (error?.message?.includes('Network Error')) {
-        return true;
-    } else if (error?.status === 401) {
-        return true;
-    }
-    return false;
 }

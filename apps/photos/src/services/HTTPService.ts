@@ -33,7 +33,7 @@ class HTTPService {
                             url: config.url,
                             method: config.method,
                             xRequestId: response.headers['x-request-id'],
-                            httpStatusCode: response.status,
+                            httpStatus: response.status,
                             errMessage: apiError.message,
                             errCode: apiError.errCode,
                         });
@@ -49,19 +49,19 @@ class HTTPService {
                             method: config.method,
                             cfRay: response.headers['cf-ray'],
                             xRequestId: response.headers['x-request-id'],
-                            status: response.status,
+                            httpStatus: response.status,
                         });
                         if (response.status >= 400 && response.status < 500) {
                             throw new ApiError(
                                 CustomError.CLIENT_ERROR,
-                                response.status.toString(),
+                                '',
                                 response.status,
                                 response.statusText
                             );
                         } else {
                             throw new ApiError(
                                 CustomError.ServerError,
-                                response.status.toString(),
+                                '',
                                 response.status,
                                 response.statusText
                             );

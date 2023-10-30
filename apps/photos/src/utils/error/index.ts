@@ -1,5 +1,7 @@
+import { HttpStatusCode } from 'axios';
+
 export class ApiError extends Error {
-    httpStatus: number;
+    httpStatusCode: number;
     httpStatusText: string;
     errCode: string;
 
@@ -12,7 +14,7 @@ export class ApiError extends Error {
         super(message);
         this.name = 'ApiError';
         this.errCode = errCode;
-        this.httpStatus = httpStatus;
+        this.httpStatusCode = httpStatus;
         this.httpStatusText = httpStatusText;
     }
 }
@@ -20,19 +22,6 @@ export class ApiError extends Error {
 export function isApiError(object: any): object is ApiError {
     return object && 'code' in object && 'message' in object;
 }
-
-export const ServerErrorCodes = {
-    SESSION_EXPIRED: '401',
-    NO_ACTIVE_SUBSCRIPTION: '402',
-    FORBIDDEN: '403',
-    STORAGE_LIMIT_EXCEEDED: '426',
-    FILE_TOO_LARGE: '413',
-    TOKEN_EXPIRED: '410',
-    TOO_MANY_REQUEST: '429',
-    BAD_REQUEST: '400',
-    PAYMENT_REQUIRED: '402',
-    NOT_FOUND: '404',
-};
 
 export const CustomError = {
     THUMBNAIL_GENERATION_FAILED: 'thumbnail generation failed',
@@ -99,32 +88,6 @@ export const CustomError = {
     ServerError: 'server error',
 };
 
-export function parseUploadErrorCodes(error) {
-    let parsedMessage = null;
-    if (error?.status) {
-        const errorCode = error.status.toString();
-        switch (errorCode) {
-            case ServerErrorCodes.NO_ACTIVE_SUBSCRIPTION:
-                parsedMessage = CustomError.SUBSCRIPTION_EXPIRED;
-                break;
-            case ServerErrorCodes.STORAGE_LIMIT_EXCEEDED:
-                parsedMessage = CustomError.STORAGE_QUOTA_EXCEEDED;
-                break;
-            case ServerErrorCodes.SESSION_EXPIRED:
-                parsedMessage = CustomError.SESSION_EXPIRED;
-                break;
-            case ServerErrorCodes.FILE_TOO_LARGE:
-                parsedMessage = CustomError.FILE_TOO_LARGE;
-                break;
-            default:
-                parsedMessage = `${CustomError.UNKNOWN_ERROR} statusCode:${errorCode}`;
-        }
-    } else {
-        parsedMessage = error.message;
-    }
-    return new Error(parsedMessage);
-}
-
 export function handleUploadError(error): Error {
     const parsedError = parseUploadErrorCodes(error);
 
@@ -148,29 +111,53 @@ export function errorWithContext(originalError: Error, context: string) {
     return errorWithContext;
 }
 
+export function parseUploadErrorCodes(error) {
+    let parsedMessage = null;
+    if (error instanceof ApiError) {
+        switch (error.httpStatusCode) {
+            case HttpStatusCode.PaymentRequired:
+                parsedMessage = CustomError.SUBSCRIPTION_EXPIRED;
+                break;
+            case HttpStatusCode.UpgradeRequired:
+                parsedMessage = CustomError.STORAGE_QUOTA_EXCEEDED;
+                break;
+            case HttpStatusCode.Unauthorized:
+                parsedMessage = CustomError.SESSION_EXPIRED;
+                break;
+            case HttpStatusCode.PayloadTooLarge:
+                parsedMessage = CustomError.FILE_TOO_LARGE;
+                break;
+            default:
+                parsedMessage = `${CustomError.UNKNOWN_ERROR} statusCode:${error.httpStatusCode}`;
+        }
+    } else {
+        parsedMessage = error.message;
+    }
+    return new Error(parsedMessage);
+}
+
 export const parseSharingErrorCodes = (error) => {
     let parsedMessage = null;
-    if (error?.status) {
-        const errorCode = error.status.toString();
-        switch (errorCode) {
-            case ServerErrorCodes.BAD_REQUEST:
+    if (error instanceof ApiError) {
+        switch (error.httpStatusCode) {
+            case HttpStatusCode.BadRequest:
                 parsedMessage = CustomError.BAD_REQUEST;
                 break;
-            case ServerErrorCodes.PAYMENT_REQUIRED:
+            case HttpStatusCode.PaymentRequired:
                 parsedMessage = CustomError.SUBSCRIPTION_NEEDED;
                 break;
-            case ServerErrorCodes.NOT_FOUND:
+            case HttpStatusCode.NotFound:
                 parsedMessage = CustomError.NOT_FOUND;
                 break;
-            case ServerErrorCodes.SESSION_EXPIRED:
-            case ServerErrorCodes.TOKEN_EXPIRED:
+            case HttpStatusCode.Unauthorized:
+            case HttpStatusCode.Gone:
                 parsedMessage = CustomError.TOKEN_EXPIRED;
                 break;
-            case ServerErrorCodes.TOO_MANY_REQUEST:
+            case HttpStatusCode.TooManyRequests:
                 parsedMessage = CustomError.TOO_MANY_REQUESTS;
                 break;
             default:
-                parsedMessage = `${CustomError.UNKNOWN_ERROR} statusCode:${errorCode}`;
+                parsedMessage = `${CustomError.UNKNOWN_ERROR} statusCode:${error.httpStatusCode}`;
         }
     } else {
         parsedMessage = error.message;
