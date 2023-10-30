@@ -42,6 +42,12 @@ export default function AdvancedSettings({ open, onClose, onRootClose }) {
         ClipService.setOnUpdateHandler(setIndexingStatus);
     }, []);
 
+    useEffect(() => {
+        if (open) {
+            ClipService.updateIndexStatus();
+        }
+    }, [open]);
+
     return (
         <EnteDrawer
             transitionDuration={0}

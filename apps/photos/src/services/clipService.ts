@@ -16,6 +16,8 @@ import { CustomError } from 'utils/error';
 import { LS_KEYS, getData } from 'utils/storage/localStorage';
 import { getPersonalFiles } from 'utils/file';
 import isElectron from 'is-electron';
+import { Events, eventBus } from './events';
+import PQueue from 'p-queue';
 
 const CLIP_EMBEDDING_LENGTH = 512;
 
@@ -33,10 +35,52 @@ class ClipServiceImpl {
         indexed: 0,
     };
     private onUpdateHandler: (status: ClipExtractionStatus) => void = null;
+    private liveEmbeddingExtractionQueue: PQueue;
 
     constructor() {
         this.electronAPIs = globalThis['ElectronAPIs'];
+        this.liveEmbeddingExtractionQueue = new PQueue({
+            concurrency: 1,
+        });
     }
+
+    setupOnFileUploadListener = async () => {
+        try {
+            addLogLine('setting up file upload listener');
+            eventBus.on(
+                Events.FILE_UPLOADED,
+                this.onFileUploadedHandler.bind(this),
+                this
+            );
+            addLogLine('setup file upload listener successfully');
+        } catch (e) {
+            logError(e, 'failed to setup clip service');
+        }
+    };
+
+    removeOnFileUploadListener = async () => {
+        try {
+            addLogLine('removing file upload listener');
+            eventBus.removeListener(
+                Events.FILE_UPLOADED,
+                this.onFileUploadedHandler.bind(this)
+            );
+            addLogLine('removed file upload listener successfully');
+        } catch (e) {
+            logError(e, 'failed to remove clip service');
+        }
+    };
+
+    updateIndexStatus = async () => {
+        try {
+            addLogLine('loading local clip index status');
+            this.clipExtractionStatus = await getClipExtractionStatus();
+            this.onUpdateHandler(this.clipExtractionStatus);
+            addLogLine('loaded local clip index status');
+        } catch (e) {
+            logError(e, 'failed to load local clip index status');
+        }
+    };
 
     isClipSupported = async () => {
         if (!isElectron()) {
@@ -49,22 +93,6 @@ class ClipServiceImpl {
     setOnUpdateHandler = (handler: (status: ClipExtractionStatus) => void) => {
         this.onUpdateHandler = handler;
         handler(this.clipExtractionStatus);
-    };
-
-    private updateClipEmbeddingExtractionStatus = (
-        status: ClipExtractionStatus
-    ) => {
-        this.clipExtractionStatus = status;
-        if (this.onUpdateHandler) {
-            this.onUpdateHandler(status);
-        }
-    };
-
-    onSuccessStatusUpdater = () => {
-        this.updateClipEmbeddingExtractionStatus({
-            pending: this.clipExtractionStatus.pending - 1,
-            indexed: this.clipExtractionStatus.indexed + 1,
-        });
     };
 
     scheduleImageEmbeddingExtraction = async () => {
@@ -142,35 +170,12 @@ class ClipServiceImpl {
                     if (canceller.signal.aborted) {
                         throw Error(CustomError.REQUEST_CANCELLED);
                     }
-                    const embeddingData = await this.extractClipImageEmbedding(
-                        file
-                    );
+                    const embeddingData =
+                        await this.extractFileClipImageEmbedding(file);
                     addLogLine(
                         `successfully extracted clip embedding for file: ${file.metadata.title} fileID: ${file.id} embedding length: ${embeddingData?.length}`
                     );
-                    if (embeddingData?.length !== CLIP_EMBEDDING_LENGTH) {
-                        throw Error(
-                            `invalid length embedding data length: ${embeddingData?.length}`
-                        );
-                    }
-                    const comlinkCryptoWorker =
-                        await ComlinkCryptoWorker.getInstance();
-                    const { file: encryptedEmbeddingData } =
-                        await comlinkCryptoWorker.encryptEmbedding(
-                            embeddingData,
-                            file.key
-                        );
-                    addLogLine(
-                        `putting clip embedding to server for file: ${file.metadata.title} fileID: ${file.id}`
-                    );
-                    await putEmbedding({
-                        fileID: file.id,
-                        encryptedEmbedding:
-                            encryptedEmbeddingData.encryptedData,
-                        decryptionHeader:
-                            encryptedEmbeddingData.decryptionHeader,
-                        model: Model.GGML_CLIP,
-                    });
+                    await this.encryptAndUploadEmbedding(file, embeddingData);
                     this.onSuccessStatusUpdater();
                     addLogLine(
                         `successfully put clip embedding to server for file: ${file.metadata.title} fileID: ${file.id}`
@@ -192,7 +197,69 @@ class ClipServiceImpl {
         }
     };
 
-    private extractClipImageEmbedding = async (file: EnteFile) => {
+    private async onFileUploadedHandler(arg: {
+        enteFile: EnteFile;
+        localFile: globalThis.File;
+    }) {
+        const { enteFile, localFile } = arg;
+        addLogLine(
+            `clip embedding extraction onFileUploadedHandler file: ${enteFile.metadata.title} fileID: ${enteFile.id}`,
+            enteFile.id
+        );
+        try {
+            await this.liveEmbeddingExtractionQueue.add(async () => {
+                const embedding = await this.extractLocalFileClipImageEmbedding(
+                    localFile
+                );
+                await this.encryptAndUploadEmbedding(enteFile, embedding);
+            });
+            addLogLine(
+                `successfully extracted clip embedding for file: ${enteFile.metadata.title} fileID: ${enteFile.id}`
+            );
+        } catch (e) {
+            logError(e, 'Failed in ML onFileUploadedHandler');
+        }
+    }
+
+    private extractLocalFileClipImageEmbedding = async (localFile: File) => {
+        const file = await localFile
+            .arrayBuffer()
+            .then((buffer) => new Uint8Array(buffer));
+        const embedding = await this.electronAPIs.computeImageEmbedding(file);
+        return embedding;
+    };
+
+    private encryptAndUploadEmbedding = async (
+        file: EnteFile,
+        embeddingData: Float32Array
+    ) => {
+        if (embeddingData?.length !== CLIP_EMBEDDING_LENGTH) {
+            throw Error(
+                `invalid length embedding data length: ${embeddingData?.length}`
+            );
+        }
+        const comlinkCryptoWorker = await ComlinkCryptoWorker.getInstance();
+        const { file: encryptedEmbeddingData } =
+            await comlinkCryptoWorker.encryptEmbedding(embeddingData, file.key);
+        addLogLine(
+            `putting clip embedding to server for file: ${file.metadata.title} fileID: ${file.id}`
+        );
+        await putEmbedding({
+            fileID: file.id,
+            encryptedEmbedding: encryptedEmbeddingData.encryptedData,
+            decryptionHeader: encryptedEmbeddingData.decryptionHeader,
+            model: Model.GGML_CLIP,
+        });
+    };
+
+    updateClipEmbeddingExtractionStatus = (status: ClipExtractionStatus) => {
+        this.clipExtractionStatus = status;
+        if (this.onUpdateHandler) {
+            this.onUpdateHandler(status);
+        }
+    };
+
+    private extractFileClipImageEmbedding = async (file: EnteFile) => {
         const token = getToken();
         if (!token) {
             return;
@@ -208,6 +275,13 @@ class ClipServiceImpl {
         }
         const embedding = await this.electronAPIs.computeImageEmbedding(thumb);
         return embedding;
+    };
+
+    private onSuccessStatusUpdater = () => {
+        this.updateClipEmbeddingExtractionStatus({
+            pending: this.clipExtractionStatus.pending - 1,
+            indexed: this.clipExtractionStatus.indexed + 1,
+        });
     };
 }
 
@@ -273,4 +347,21 @@ const getLatestClipImageEmbeddings = async () => {
     return allEmbeddings.filter(
         (embedding) => embedding.model === Model.GGML_CLIP
     );
+};
+
+const getClipExtractionStatus = async (): Promise<ClipExtractionStatus> => {
+    const user = getData(LS_KEYS.USER);
+    if (!user) {
+        return;
+    }
+    const allEmbeddings = await getLocalClipImageEmbeddings();
+    const localFiles = getPersonalFiles(await getLocalFiles(), user);
+    const pendingFiles = await getNonClipEmbeddingExtractedFiles(
+        localFiles,
+        allEmbeddings
+    );
+    return {
+        indexed: allEmbeddings.length,
+        pending: pendingFiles.length,
+    };
 };

@@ -329,6 +329,7 @@ export default function Gallery() {
             setHiddenFiles(hiddenFiles);
             setCollections(normalCollections);
             setHiddenCollections(hiddenCollections);
+            void ClipService.setupOnFileUploadListener();
             await syncWithRemote(true);
             setIsFirstLoad(false);
             setJustSignedUp(false);
@@ -344,6 +345,7 @@ export default function Gallery() {
         return () => {
             clearInterval(syncInterval.current);
             ElectronService.registerForegroundEventListener(() => {});
+            ClipService.removeOnFileUploadListener();
         };
     }, []);
 
