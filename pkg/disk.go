@@ -3,10 +3,12 @@ package pkg
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"github.com/ente-io/cli/pkg/model"
 	"github.com/ente-io/cli/pkg/model/export"
 	"io"
 	"os"
+	"strings"
 )
 
 const (
@@ -30,7 +32,7 @@ func (a *albumDiskInfo) IsFilePresent(file model.RemoteFile) bool {
 }
 
 func (a *albumDiskInfo) IsFileNamePresent(fileName string) bool {
-	_, ok := (*a.FileNames)[fileName]
+	_, ok := (*a.FileNames)[strings.ToLower(fileName)]
 	return ok
 }
 
@@ -38,11 +40,17 @@ func (a *albumDiskInfo) AddEntry(metadata *export.DiskFileMetadata) error {
 	if _, ok := (*a.FileIdToDiskFileMap)[metadata.Info.ID]; ok {
 		return errors.New("fileID already present")
 	}
-	if _, ok := (*a.MetaFileNameToDiskFileMap)[metadata.MetaFileName]; ok {
+	if _, ok := (*a.MetaFileNameToDiskFileMap)[strings.ToLower(metadata.MetaFileName)]; ok {
 		return errors.New("fileName already present")
 	}
-	(*a.MetaFileNameToDiskFileMap)[metadata.MetaFileName] = metadata
+	(*a.MetaFileNameToDiskFileMap)[strings.ToLower(metadata.MetaFileName)] = metadata
 	(*a.FileIdToDiskFileMap)[metadata.Info.ID] = metadata
+	for _, filename := range metadata.Info.FileNames {
+		if _, ok := (*a.FileNames)[strings.ToLower(filename)]; ok {
+			return errors.New("fileName already present")
+		}
+		(*a.FileNames)[strings.ToLower(filename)] = true
+	}
 	return nil
 }
 
@@ -50,20 +58,35 @@ func (a *albumDiskInfo) RemoveEntry(metadata *export.DiskFileMetadata) error {
 	if _, ok := (*a.FileIdToDiskFileMap)[metadata.Info.ID]; !ok {
 		return errors.New("fileID not present")
 	}
-	if _, ok := (*a.MetaFileNameToDiskFileMap)[metadata.MetaFileName]; !ok {
+	if _, ok := (*a.MetaFileNameToDiskFileMap)[strings.ToLower(metadata.MetaFileName)]; !ok {
 		return errors.New("fileName not present")
 	}
-	delete(*a.MetaFileNameToDiskFileMap, metadata.MetaFileName)
+	delete(*a.MetaFileNameToDiskFileMap, strings.ToLower(metadata.MetaFileName))
 	delete(*a.FileIdToDiskFileMap, metadata.Info.ID)
 	for _, filename := range metadata.Info.FileNames {
-		delete(*a.FileNames, filename)
+		delete(*a.FileNames, strings.ToLower(filename))
 	}
 	return nil
 }
 
 func (a *albumDiskInfo) IsMetaFileNamePresent(metaFileName string) bool {
-	_, ok := (*a.MetaFileNameToDiskFileMap)[metaFileName]
+	_, ok := (*a.MetaFileNameToDiskFileMap)[strings.ToLower(metaFileName)]
 	return ok
+}
+
+// GenerateUniqueFileName generates a unique file name.
+func (a *albumDiskInfo) GenerateUniqueFileName(baseFileName, extension string) string {
+	fileName := fmt.Sprintf("%s%s", baseFileName, extension)
+	count := 1
+	for a.IsFileNamePresent(strings.ToLower(fileName)) {
+		// separate the file name and extension
+		fileName = fmt.Sprintf("%s_%d%s", baseFileName, count, extension)
+		count++
+		if !a.IsFileNamePresent(strings.ToLower(fileName)) {
+			break
+		}
+	}
+	return fileName
 }
 
 func (a *albumDiskInfo) GetDiskFileMetadata(file model.RemoteFile) *export.DiskFileMetadata {

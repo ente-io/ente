@@ -128,11 +128,6 @@ func (c *ClICtrl) downloadEntry(ctx context.Context,
 				break
 			}
 		}
-		fileDiskMetadata.MetaFileName = potentialDiskFileName
-		err = diskInfo.AddEntry(fileDiskMetadata)
-		if err != nil {
-			return err
-		}
 		if file.IsLivePhoto() {
 			imagePath, videoPath, err := UnpackLive(*decrypt)
 			if err != nil {
@@ -140,8 +135,8 @@ func (c *ClICtrl) downloadEntry(ctx context.Context,
 			}
 			imageExtn := filepath.Ext(imagePath)
 			videoExtn := filepath.Ext(videoPath)
-			imageFileName := baseFileName + imageExtn
-			videoFileName := baseFileName + videoExtn
+			imageFileName := diskInfo.GenerateUniqueFileName(baseFileName, imageExtn)
+			videoFileName := diskInfo.GenerateUniqueFileName(baseFileName, videoExtn)
 			imageFilePath := filepath.Join(diskInfo.ExportRoot, diskInfo.AlbumMeta.FolderName, imageFileName)
 			videoFilePath := filepath.Join(diskInfo.ExportRoot, diskInfo.AlbumMeta.FolderName, videoFileName)
 			// move the decrypt file to filePath
@@ -156,7 +151,7 @@ func (c *ClICtrl) downloadEntry(ctx context.Context,
 			fileDiskMetadata.AddFileName(imageFileName)
 			fileDiskMetadata.AddFileName(videoFileName)
 		} else {
-			fileName := baseFileName + extension
+			fileName := diskInfo.GenerateUniqueFileName(baseFileName, extension)
 			filePath := filepath.Join(diskInfo.ExportRoot, diskInfo.AlbumMeta.FolderName, fileName)
 			// move the decrypt file to filePath
 			err = Move(*decrypt, filePath)
@@ -164,6 +159,12 @@ func (c *ClICtrl) downloadEntry(ctx context.Context,
 				return err
 			}
 			fileDiskMetadata.AddFileName(fileName)
+		}
+
+		fileDiskMetadata.MetaFileName = potentialDiskFileName
+		err = diskInfo.AddEntry(fileDiskMetadata)
+		if err != nil {
+			return err
 		}
 
 		err = writeJSONToFile(filepath.Join(diskInfo.ExportRoot, diskInfo.AlbumMeta.FolderName, ".meta", potentialDiskFileName), fileDiskMetadata)
@@ -219,7 +220,7 @@ func readFilesMetadata(home string, albumMeta *export.AlbumMetadata) (*albumDisk
 	}
 	for _, entry := range albumFileEntries {
 		if !entry.IsDir() {
-			claimedFileName[entry.Name()] = true
+			claimedFileName[strings.ToLower(entry.Name())] = true
 		}
 	}
 	metaEntries, err := os.ReadDir(albumMetadataFolder)
@@ -238,7 +239,7 @@ func readFilesMetadata(home string, albumMeta *export.AlbumMetadata) (*albumDisk
 			}
 			fileMetadataPath := filepath.Join(albumMetadataFolder, fileName)
 			// Initialize as nil, will remain nil if JSON file is not found or not readable
-			result[fileName] = nil
+			result[strings.ToLower(fileName)] = nil
 			// Read the JSON file if it exists
 			var metaData export.DiskFileMetadata
 			metaDataBytes, err := os.ReadFile(fileMetadataPath)
@@ -247,7 +248,7 @@ func readFilesMetadata(home string, albumMeta *export.AlbumMetadata) (*albumDisk
 			}
 			if err := json.Unmarshal(metaDataBytes, &metaData); err == nil {
 				metaData.MetaFileName = fileName
-				result[fileName] = &metaData
+				result[strings.ToLower(fileName)] = &metaData
 				fileIdToMetadata[metaData.Info.ID] = &metaData
 			}
 		}
