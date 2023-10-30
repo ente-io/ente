@@ -142,9 +142,6 @@ func (r *RemoteFile) GetModificationTime() time.Time {
 }
 
 func (r *RemoteFile) GetLatlong() *export.Location {
-	if r.ID == 10698020 {
-		fmt.Println("found 10698020")
-	}
 	if r.PublicMetadata != nil {
 		// check if lat and long key exists
 		if lat, ok := r.PublicMetadata["lat"]; ok {

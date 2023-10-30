@@ -7,9 +7,9 @@ import (
 	"github.com/ente-io/cli/internal"
 	"github.com/ente-io/cli/internal/api"
 	"github.com/ente-io/cli/pkg/model"
-	"log"
-
 	bolt "go.etcd.io/bbolt"
+	"log"
+	"time"
 )
 
 func (c *ClICtrl) Export() error {
@@ -37,12 +37,23 @@ func (c *ClICtrl) Export() error {
 			continue
 		}
 		log.Println("start sync")
-		err = c.SyncAccount(account)
-		if err != nil {
-			fmt.Printf("Error syncing account %s: %s\n", account.Email, err)
-			return err
-		} else {
-			log.Println("sync done")
+		retryCount := 0
+		for {
+			err = c.SyncAccount(account)
+			if err != nil {
+				if model.ShouldRetrySync(err) && retryCount < 20 {
+					retryCount = retryCount + 1
+					timeInSecond := time.Duration(retryCount*10) * time.Second
+					log.Printf("Connection err, waiting for %s before trying again", timeInSecond.String())
+					time.Sleep(timeInSecond)
+					continue
+				}
+				fmt.Printf("Error syncing account %s: %s\n", account.Email, err)
+				return err
+			} else {
+				log.Println("sync done")
+				break
+			}
 		}
 
 	}
@@ -63,10 +74,12 @@ func (c *ClICtrl) SyncAccount(account model.Account) error {
 	err = c.fetchRemoteCollections(ctx)
 	if err != nil {
 		log.Printf("Error fetching collections: %s", err)
+		return err
 	}
 	err = c.fetchRemoteFiles(ctx)
 	if err != nil {
 		log.Printf("Error fetching files: %s", err)
+		return err
 	}
 	err = c.createLocalFolderForRemoteAlbums(ctx, account)
 	if err != nil {
