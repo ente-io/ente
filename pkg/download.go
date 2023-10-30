@@ -37,6 +37,8 @@ func (c *ClICtrl) downloadAndDecrypt(
 	if err != nil {
 		log.Printf("Error decrypting file %d: %s", file.ID, err)
 		return nil, model.ErrDecryption
+	} else {
+		_ = os.Remove(downloadPath)
 	}
 	return &decryptedPath, nil
 }
