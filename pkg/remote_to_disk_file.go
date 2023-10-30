@@ -184,12 +184,12 @@ func removeDiskFile(diskFileMeta *export.DiskFileMetadata, diskInfo *albumDiskIn
 	// remove the file from disk
 	log.Printf("Removing file %s from disk", diskFileMeta.MetaFileName)
 	err := os.Remove(filepath.Join(diskInfo.ExportRoot, diskInfo.AlbumMeta.FolderName, ".meta", diskFileMeta.MetaFileName))
-	if err != nil {
+	if err != nil && !os.IsNotExist(err) {
 		return err
 	}
 	for _, fileName := range diskFileMeta.Info.FileNames {
 		err = os.Remove(filepath.Join(diskInfo.ExportRoot, diskInfo.AlbumMeta.FolderName, fileName))
-		if err != nil {
+		if err != nil && !os.IsNotExist(err) {
 			return err
 		}
 	}
