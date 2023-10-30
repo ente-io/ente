@@ -58,7 +58,7 @@ export function getUniqueSavePath(filename: string, directory: string): string {
             extension,
         ]
             .filter((x) => x) // filters out undefined/null values
-            .join('.');
+            .join('');
         uniqueFileSavePath = path.join(directory, fileNameWithNumberedSuffix);
     }
     return uniqueFileSavePath;
