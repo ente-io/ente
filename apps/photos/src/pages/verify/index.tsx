@@ -130,8 +130,9 @@ export default function Verify() {
                 } else if (e?.httpStatusCode === HttpStatusCode.Gone) {
                     setFieldError(t('EXPIRED_CODE'));
                 }
+            } else {
+                setFieldError(`${t('UNKNOWN_ERROR')} ${e.message}`);
             }
-            setFieldError(`${t('UNKNOWN_ERROR')} ${e.message}`);
         }
     };
 

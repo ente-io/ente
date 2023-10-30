@@ -54,13 +54,14 @@ export default function Home() {
             InMemoryStore.delete(MS_KEYS.REDIRECT_URL);
             router.push(redirectURL ?? PAGES.CREDENTIALS);
         } catch (e) {
-            if (e instanceof ApiError) {
-                if (e.httpStatusCode === HttpStatusCode.NotFound) {
-                    logoutUser();
-                    return;
-                }
+            if (
+                e instanceof ApiError &&
+                e.httpStatusCode === HttpStatusCode.NotFound
+            ) {
+                logoutUser();
+            } else {
+                throw e;
             }
-            throw e;
         }
     };
     return (

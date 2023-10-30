@@ -224,12 +224,13 @@ export const isTokenValid = async (token: string) => {
         return true;
     } catch (e) {
         logError(e, 'session-validity api call failed');
-        if (e instanceof ApiError) {
-            if (e.httpStatusCode === HttpStatusCode.Unauthorized) {
-                return false;
-            } else {
-                return true;
-            }
+        if (
+            e instanceof ApiError &&
+            e.httpStatusCode === HttpStatusCode.Unauthorized
+        ) {
+            return false;
+        } else {
+            return true;
         }
     }
 };
@@ -729,12 +730,14 @@ export const verifySRPSession = async (
         return resp.data as UserVerificationResponse;
     } catch (e) {
         logError(e, 'verifySRPSession failed');
-        if (e instanceof ApiError) {
-            if (e.httpStatusCode === HttpStatusCode.Unauthorized) {
-                throw Error(CustomError.INCORRECT_PASSWORD);
-            }
+        if (
+            e instanceof ApiError &&
+            e.httpStatusCode === HttpStatusCode.Forbidden
+        ) {
+            throw Error(CustomError.INCORRECT_PASSWORD);
+        } else {
+            throw e;
         }
-        throw e;
     }
 };
 

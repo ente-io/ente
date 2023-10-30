@@ -1,25 +1,22 @@
 import { HttpStatusCode } from 'axios';
 
+export class ApiErrorResponse {
+    code: string;
+    message: string;
+}
 export class ApiError extends Error {
     httpStatusCode: number;
-    httpStatusText: string;
     errCode: string;
 
-    constructor(
-        message: string,
-        errCode: string,
-        httpStatus: number,
-        httpStatusText: string
-    ) {
+    constructor(message: string, errCode: string, httpStatus: number) {
         super(message);
         this.name = 'ApiError';
         this.errCode = errCode;
         this.httpStatusCode = httpStatus;
-        this.httpStatusText = httpStatusText;
     }
 }
 
-export function isApiError(object: any): object is ApiError {
+export function isApiErrorResponse(object: any): object is ApiErrorResponse {
     return object && 'code' in object && 'message' in object;
 }
 

@@ -14,17 +14,17 @@ export const logError = async (
     const err = errorWithContext(error, msg);
     if (!skipAddLogLine) {
         if (error instanceof ApiError) {
-            addLogLine(`
-                error: ${error?.name} ${error?.message} ${error?.stack} 
-                msg: ${msg} errorCode: ${JSON.stringify(error?.errCode)}
-                httpStatusCode: ${JSON.stringify(error?.httpStatusCode)} ${
+            addLogLine(`error: ${error?.name} ${error?.message} 
+            msg: ${msg} errorCode: ${JSON.stringify(error?.errCode)}
+            httpStatusCode: ${JSON.stringify(error?.httpStatusCode)} ${
                 info ? `info: ${JSON.stringify(info)}` : ''
-            }`);
+            }
+            ${error?.stack}`);
         } else {
             addLogLine(
-                `error: ${error?.name} ${error?.message} ${
-                    error?.stack
-                } msg: ${msg} ${info ? `info: ${JSON.stringify(info)}` : ''}`
+                `error: ${error?.name} ${error?.message} 
+                msg: ${msg} ${info ? `info: ${JSON.stringify(info)}` : ''}
+                ${error?.stack}`
             );
         }
     }
@@ -37,6 +37,9 @@ export const logError = async (
     }
     if (InMemoryStore.get(MS_KEYS.OPT_OUT_OF_CRASH_REPORTS)) {
         addLocalLog(() => `skipping sentry error: ${error?.name}`);
+        return;
+    }
+    if (isErrorUnnecessaryForSentry(error)) {
         return;
     }
 
@@ -60,4 +63,13 @@ function errorWithContext(originalError: Error, context: string) {
         '\n' +
         originalError.stack;
     return errorWithContext;
+}
+
+function isErrorUnnecessaryForSentry(error: any) {
+    if (error?.message?.includes('Network Error')) {
+        return true;
+    } else if (error?.status === 401) {
+        return true;
+    }
+    return false;
 }

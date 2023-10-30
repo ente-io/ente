@@ -1,7 +1,7 @@
 import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
 import { addLogLine } from 'utils/logging';
 import { logError } from 'utils/sentry';
-import { ApiError, CustomError, isApiError } from 'utils/error';
+import { ApiError, CustomError, isApiErrorResponse } from 'utils/error';
 
 interface IHTTPHeaders {
     [headerKey: string]: any;
@@ -24,49 +24,47 @@ class HTTPService {
                     const response = error.response as AxiosResponse<
                         ApiError | any
                     >;
-
+                    let apiError: ApiError;
                     // The request was made and the server responded with a status code
                     // that falls out of the range of 2xx
-                    if (isApiError(response.data)) {
-                        const apiError = response.data;
+                    if (isApiErrorResponse(response.data)) {
+                        const responseData = response.data;
                         logError(error, 'HTTP Service Error', {
                             url: config.url,
                             method: config.method,
                             xRequestId: response.headers['x-request-id'],
                             httpStatus: response.status,
-                            errMessage: apiError.message,
-                            errCode: apiError.errCode,
+                            errMessage: responseData.message,
+                            errCode: responseData.code,
                         });
-                        throw new ApiError(
-                            apiError.message,
-                            apiError.errCode,
-                            response.status,
-                            response.statusText
+                        apiError = new ApiError(
+                            responseData.message,
+                            responseData.code,
+                            response.status
                         );
                     } else {
-                        logError(error, 'HTTP Service Error', {
-                            url: config.url,
-                            method: config.method,
-                            cfRay: response.headers['cf-ray'],
-                            xRequestId: response.headers['x-request-id'],
-                            httpStatus: response.status,
-                        });
                         if (response.status >= 400 && response.status < 500) {
-                            throw new ApiError(
+                            apiError = new ApiError(
                                 CustomError.CLIENT_ERROR,
                                 '',
-                                response.status,
-                                response.statusText
+                                response.status
                             );
                         } else {
-                            throw new ApiError(
+                            apiError = new ApiError(
                                 CustomError.ServerError,
                                 '',
-                                response.status,
-                                response.statusText
+                                response.status
                             );
                         }
                     }
+                    logError(apiError, 'HTTP Service Error', {
+                        url: config.url,
+                        method: config.method,
+                        cfRay: response.headers['cf-ray'],
+                        xRequestId: response.headers['x-request-id'],
+                        httpStatus: response.status,
+                    });
+                    throw apiError;
                 } else if (error.request) {
                     // The request was made but no response was received
                     // `error.request` is an instance of XMLHttpRequest in the browser and an instance of

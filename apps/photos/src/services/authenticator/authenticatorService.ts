@@ -78,13 +78,15 @@ export const getAuthKey = async (): Promise<AuthKey> => {
         );
         return resp.data;
     } catch (e) {
-        logError(e, 'Get key failed');
-        if (e instanceof ApiError) {
-            if (e.httpStatusCode === HttpStatusCode.NotFound) {
-                throw Error(CustomError.AUTH_KEY_NOT_FOUND);
-            }
+        if (
+            e instanceof ApiError &&
+            e.httpStatusCode === HttpStatusCode.NotFound
+        ) {
+            throw Error(CustomError.AUTH_KEY_NOT_FOUND);
+        } else {
+            logError(e, 'Get key failed');
+            throw e;
         }
-        throw e;
     }
 };
 
