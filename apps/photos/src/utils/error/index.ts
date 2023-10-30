@@ -18,7 +18,7 @@ export class ApiError extends Error {
 }
 
 export function isApiError(object: any): object is ApiError {
-    return 'code' in object && 'message' in object;
+    return object && 'code' in object && 'message' in object;
 }
 
 export const ServerErrorCodes = {
