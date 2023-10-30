@@ -87,6 +87,14 @@ func (r *RemoteFile) IsLivePhoto() bool {
 func (r *RemoteFile) GetFileHash() *string {
 	value, ok := r.Metadata["hash"]
 	if !ok {
+		if r.IsLivePhoto() {
+			imageHash, hasImgHash := r.Metadata["imageHash"]
+			vidHash, hasVidHash := r.Metadata["videoHash"]
+			if hasImgHash && hasVidHash {
+				hash := fmt.Sprintf("%s:%s", imageHash, vidHash)
+				return &hash
+			}
+		}
 		return nil
 	}
 	if str, ok := value.(string); ok {
