@@ -1,6 +1,20 @@
-export interface ApiError {
-    code: string;
-    message: string;
+export class ApiError extends Error {
+    httpStatus: number;
+    httpStatusText: string;
+    errCode: string;
+
+    constructor(
+        message: string,
+        errCode: string,
+        httpStatus: number,
+        httpStatusText: string
+    ) {
+        super(message);
+        this.name = 'ApiError';
+        this.errCode = errCode;
+        this.httpStatus = httpStatus;
+        this.httpStatusText = httpStatusText;
+    }
 }
 
 export function isApiError(object: any): object is ApiError {

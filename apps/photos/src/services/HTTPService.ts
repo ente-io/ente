@@ -35,9 +35,14 @@ class HTTPService {
                             xRequestId: response.headers['x-request-id'],
                             httpStatusCode: response.status,
                             errMessage: apiError.message,
-                            errCode: apiError.code,
+                            errCode: apiError.errCode,
                         });
-                        return Promise.reject(response.data);
+                        throw new ApiError(
+                            apiError.message,
+                            apiError.errCode,
+                            response.status,
+                            response.statusText
+                        );
                     } else {
                         logError(error, 'HTTP Service Error', {
                             url: config.url,
@@ -46,7 +51,21 @@ class HTTPService {
                             xRequestId: response.headers['x-request-id'],
                             status: response.status,
                         });
-                        return Promise.reject(response);
+                        if (response.status >= 400 && response.status < 500) {
+                            throw new ApiError(
+                                response.statusText,
+                                'Client Error',
+                                response.status,
+                                response.statusText
+                            );
+                        } else {
+                            throw new ApiError(
+                                response.statusText,
+                                'Server Error',
+                                response.status,
+                                response.statusText
+                            );
+                        }
                     }
                 } else if (error.request) {
                     // The request was made but no response was received
