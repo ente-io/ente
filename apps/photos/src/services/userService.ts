@@ -554,11 +554,8 @@ export const getSRPAttributes = async (
         });
         return (resp.data as GetSRPAttributesResponse).attributes;
     } catch (e) {
-        if (e.status?.toString() === ServerErrorCodes.NOT_FOUND) {
-            return null;
-        }
         logError(e, 'failed to get SRP attributes');
-        throw e;
+        return null;
     }
 };
 
