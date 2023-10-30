@@ -3,6 +3,7 @@ import { addLocalLog, addLogLine } from 'utils/logging';
 import { getSentryUserID } from 'utils/user';
 import InMemoryStore, { MS_KEYS } from 'services/InMemoryStore';
 import { getHasOptedOutOfCrashReports } from 'utils/storage';
+import { ApiError } from 'utils/error';
 
 export const logError = async (
     error: any,
@@ -12,11 +13,20 @@ export const logError = async (
 ) => {
     const err = errorWithContext(error, msg);
     if (!skipAddLogLine) {
-        addLogLine(
-            `error: ${error?.name} ${error?.message} ${
-                error?.stack
-            } msg: ${msg} ${info ? `info: ${JSON.stringify(info)}` : ''}`
-        );
+        if (error instanceof ApiError) {
+            addLogLine(`
+                error: ${error?.name} ${error?.message} ${error?.stack} 
+                msg: ${msg} errorCode: ${JSON.stringify(error?.errCode)}
+                httpCode: ${JSON.stringify(error?.httpStatus)} ${
+                info ? `info: ${JSON.stringify(info)}` : ''
+            }`);
+        } else {
+            addLogLine(
+                `error: ${error?.name} ${error?.message} ${
+                    error?.stack
+                } msg: ${msg} ${info ? `info: ${JSON.stringify(info)}` : ''}`
+            );
+        }
     }
     if (!InMemoryStore.has(MS_KEYS.OPT_OUT_OF_CRASH_REPORTS)) {
         const optedOutOfCrashReports = getHasOptedOutOfCrashReports();
