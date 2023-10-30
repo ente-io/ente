@@ -21,9 +21,7 @@ class HTTPService {
             (error) => {
                 const config = error.config as AxiosRequestConfig;
                 if (error.response) {
-                    const response = error.response as AxiosResponse<
-                        ApiError | any
-                    >;
+                    const response = error.response as AxiosResponse;
                     let apiError: ApiError;
                     // The request was made and the server responded with a status code
                     // that falls out of the range of 2xx
