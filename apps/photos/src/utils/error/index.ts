@@ -1,3 +1,12 @@
+export interface ApiError {
+    code: string;
+    message: string;
+}
+
+export function isApiError(object: any): object is ApiError {
+    return 'code' in object && 'message' in object;
+}
+
 export const ServerErrorCodes = {
     SESSION_EXPIRED: '401',
     NO_ACTIVE_SUBSCRIPTION: '402',
