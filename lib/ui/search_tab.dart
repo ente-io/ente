@@ -19,9 +19,6 @@ class SearchTab extends StatefulWidget {
 
 class _SearchTabState extends State<SearchTab> {
   // Focus nodes are necessary
-  String _email = '';
-  final textFieldFocusNode = FocusNode();
-  final _textController = TextEditingController();
   var _searchResults = <SearchResult>[];
 
   @override
@@ -40,14 +37,6 @@ class _SearchTabState extends State<SearchTab> {
               : const NoResultWidget()
           : SearchSuggestionsWidget(_searchResults),
     );
-  }
-
-  void clearFocus() {
-    _textController.clear();
-    _email = _textController.text;
-
-    textFieldFocusNode.unfocus();
-    setState(() => {});
   }
 }
 
