@@ -1,7 +1,7 @@
 import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
 import { addLogLine } from 'utils/logging';
 import { logError } from 'utils/sentry';
-import { ApiError, isApiError } from 'utils/error';
+import { ApiError, CustomError, isApiError } from 'utils/error';
 
 interface IHTTPHeaders {
     [headerKey: string]: any;
@@ -53,15 +53,15 @@ class HTTPService {
                         });
                         if (response.status >= 400 && response.status < 500) {
                             throw new ApiError(
-                                response.statusText,
-                                'Client Error',
+                                CustomError.CLIENT_ERROR,
+                                response.status.toString(),
                                 response.status,
                                 response.statusText
                             );
                         } else {
                             throw new ApiError(
-                                response.statusText,
-                                'Server Error',
+                                CustomError.ServerError,
+                                response.status.toString(),
                                 response.status,
                                 response.statusText
                             );
