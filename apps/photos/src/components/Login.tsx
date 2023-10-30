@@ -35,7 +35,7 @@ export default function Login(props: LoginProps) {
                 router.push(PAGES.CREDENTIALS);
             }
         } catch (e) {
-            setFieldError(`${t('UNKNOWN_ERROR} ${e.message}')}`);
+            setFieldError(`${t('UNKNOWN_ERROR')} (reason:${e.message})`);
         }
     };
 
