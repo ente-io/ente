@@ -2,8 +2,8 @@ package api
 
 import (
 	"context"
-	"fmt"
 	"github.com/go-resty/resty/v2"
+	"log"
 	"time"
 )
 
@@ -76,7 +76,7 @@ func NewClient(p Params) *Client {
 			AddRetryCondition(func(r *resty.Response, err error) bool {
 				shouldRetry := r.StatusCode() == 429 || r.StatusCode() > 500
 				if shouldRetry {
-					fmt.Println(fmt.Printf("retrying download due to %d code", r.StatusCode()))
+					log.Printf("retrying download due to %d code", r.StatusCode())
 				}
 				return shouldRetry
 			}),
