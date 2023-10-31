@@ -20,7 +20,7 @@ class _NoResultWidgetState extends State<NoResultWidget> {
     // remove face and content sectionType
     searchTypes.remove(SectionType.face);
     searchTypes.remove(SectionType.content);
-    allSectionsExamples.then((value) {
+    allSectionsExamplesFuture.then((value) {
       for (int i = 0; i < searchTypes.length; i++) {
         final querySuggestions = <String>[];
         for (int j = 0; j < 2 && j < value[i].length; j++) {

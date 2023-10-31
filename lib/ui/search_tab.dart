@@ -8,7 +8,7 @@ import "package:photos/ui/viewer/search/search_section.dart";
 import "package:photos/ui/viewer/search/search_suggestions.dart";
 import "package:photos/ui/viewer/search/search_widget_new.dart";
 
-late Future<List<List<SearchResult>>> allSectionsExamples;
+late Future<List<List<SearchResult>>> allSectionsExamplesFuture;
 
 class SearchTab extends StatefulWidget {
   const SearchTab({Key? key}) : super(key: key);
@@ -61,13 +61,13 @@ class AllSearchSections extends StatefulWidget {
 }
 
 class _AllSearchSectionsState extends State<AllSearchSections> {
-  late List<Future<List<SearchResult>>> sectionExamples;
+  late List<Future<List<SearchResult>>> allSectionsExamples;
   static const _limit = 7;
 
   @override
   void initState() {
     super.initState();
-    sectionExamples = <Future<List<SearchResult>>>[];
+    allSectionsExamples = <Future<List<SearchResult>>>[];
   }
 
   @override
@@ -78,9 +78,11 @@ class _AllSearchSectionsState extends State<AllSearchSections> {
           sectionType == SectionType.content) {
         continue;
       }
-      sectionExamples.add(sectionType.getData(limit: _limit, context: context));
+      allSectionsExamples
+          .add(sectionType.getData(limit: _limit, context: context));
     }
-    allSectionsExamples = Future.wait<List<SearchResult>>(sectionExamples);
+    allSectionsExamplesFuture =
+        Future.wait<List<SearchResult>>(allSectionsExamples);
   }
 
   @override
@@ -95,7 +97,7 @@ class _AllSearchSectionsState extends State<AllSearchSections> {
       child: Stack(
         children: [
           FutureBuilder(
-            future: allSectionsExamples,
+            future: allSectionsExamplesFuture,
             builder: (context, snapshot) {
               if (snapshot.hasData) {
                 return ListView.builder(
