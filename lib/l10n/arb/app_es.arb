@@ -334,5 +334,7 @@
   "minimizeAppOnCopy": "Minimizar aplicación al copiar",
   "editCodeAuthMessage": "Autenticar para editar código",
   "deleteCodeAuthMessage": "Autenticar para borrar código",
-  "showQRAuthMessage": "Autenticar para mostrar código QR"
+  "showQRAuthMessage": "Autenticar para mostrar código QR",
+  "confirmAccountDeleteTitle": "Confirmar eliminación de la cuenta",
+  "confirmAccountDeleteMessage": "Esta cuenta está vinculada a otras aplicaciones de ente, si utiliza alguna.\n\nSe programará la eliminación de los datos que cargue en todas las aplicaciones de ente y su cuenta se eliminará permanentemente."
 }

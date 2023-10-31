@@ -334,5 +334,7 @@
   "minimizeAppOnCopy": "Minimalizuj aplikację przy kopiowaniu",
   "editCodeAuthMessage": "Uwierzytelnij, aby edytować kod",
   "deleteCodeAuthMessage": "Uwierzytelnij, aby usunąć kod",
-  "showQRAuthMessage": "Uwierzytelnij, aby pokazać kod QR"
+  "showQRAuthMessage": "Uwierzytelnij, aby pokazać kod QR",
+  "confirmAccountDeleteTitle": "Potwierdź usunięcie konta",
+  "confirmAccountDeleteMessage": "To konto jest połączone z innymi aplikacjami ente, jeśli ich używasz.\n\nTwoje przesłane dane, we wszystkich aplikacjach ente, zostaną zaplanowane do usunięcia, a Twoje konto zostanie trwale usunięte."
 }
