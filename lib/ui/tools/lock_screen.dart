@@ -22,9 +22,11 @@ class _LockScreenState extends State<LockScreen> with WidgetsBindingObserver {
   @override
   void initState() {
     _logger.info("initState");
-    _showLockScreen(source: "initState");
-    WidgetsBinding.instance.addObserver(this);
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    WidgetsBinding.instance!.addPostFrameCallback((_) {
+      _showLockScreen(source: "initState");
+    });
   }
 
   @override
