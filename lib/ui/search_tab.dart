@@ -7,6 +7,7 @@ import "package:photos/ui/viewer/search/result/no_result_widget.dart";
 import "package:photos/ui/viewer/search/search_section.dart";
 import "package:photos/ui/viewer/search/search_suggestions.dart";
 import "package:photos/ui/viewer/search/search_widget_new.dart";
+import "package:photos/ui/viewer/search/tab_empty_state.dart";
 
 late Future<List<List<SearchResult>>> allSectionsExamplesFuture;
 
@@ -100,6 +101,12 @@ class _AllSearchSectionsState extends State<AllSearchSections> {
             future: allSectionsExamplesFuture,
             builder: (context, snapshot) {
               if (snapshot.hasData) {
+                if (snapshot.data!.every((element) => element.isEmpty)) {
+                  return const Padding(
+                    padding: EdgeInsets.only(bottom: 72),
+                    child: SearchTabEmptyState(),
+                  );
+                }
                 return ListView.builder(
                   padding: const EdgeInsets.only(bottom: 180),
                   physics: const BouncingScrollPhysics(),
@@ -114,9 +121,15 @@ class _AllSearchSectionsState extends State<AllSearchSections> {
                 );
               } else if (snapshot.hasError) {
                 //todo: Show something went wrong here
-                return const EnteLoadingWidget();
+                return const Padding(
+                  padding: EdgeInsets.only(bottom: 72),
+                  child: EnteLoadingWidget(),
+                );
               } else {
-                return const EnteLoadingWidget();
+                return const Padding(
+                  padding: EdgeInsets.only(bottom: 72),
+                  child: EnteLoadingWidget(),
+                );
               }
             },
           ),
