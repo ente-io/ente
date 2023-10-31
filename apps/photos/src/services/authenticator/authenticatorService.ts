@@ -1,10 +1,11 @@
+import { HttpStatusCode } from 'axios';
 import HTTPService from 'services/HTTPService';
 import { AuthEntity, AuthKey } from 'types/authenticator/api';
 import { Code } from 'types/authenticator/code';
 import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
 import { getEndpoint } from 'utils/common/apiUtil';
 import { getActualKey, getToken } from 'utils/common/key';
-import { CustomError } from 'utils/error';
+import { ApiError, CustomError } from 'utils/error';
 import { logError } from 'utils/sentry';
 
 const ENDPOINT = getEndpoint();
@@ -77,7 +78,10 @@ export const getAuthKey = async (): Promise<AuthKey> => {
         );
         return resp.data;
     } catch (e) {
-        if (e.status === 404) {
+        if (
+            e instanceof ApiError &&
+            e.httpStatusCode === HttpStatusCode.NotFound
+        ) {
             throw Error(CustomError.AUTH_KEY_NOT_FOUND);
         } else {
             logError(e, 'Get key failed');

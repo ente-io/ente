@@ -12,7 +12,7 @@ import { syncFiles, trashFiles } from 'services/fileService';
 import { EnteFile } from 'types/file';
 import { SelectedState } from 'types/gallery';
 
-import { ServerErrorCodes } from 'utils/error';
+import { ApiError } from 'utils/error';
 import { constructFileToCollectionMap, getSelectedFiles } from 'utils/file';
 import {
     DeduplicateContextType,
@@ -30,6 +30,7 @@ import { VerticallyCentered } from 'components/Container';
 import Typography from '@mui/material/Typography';
 import useMemoSingleThreaded from 'hooks/useMemoSingleThreaded';
 import InMemoryStore, { MS_KEYS } from 'services/InMemoryStore';
+import { HttpStatusCode } from 'axios';
 
 export const DeduplicateContext = createContext<DeduplicateContextType>(
     DefaultDeduplicateContext
@@ -124,21 +125,24 @@ export default function Deduplicate() {
             const selectedFiles = getSelectedFiles(selected, duplicateFiles);
             await trashFiles(selectedFiles);
         } catch (e) {
-            switch (e.status?.toString()) {
-                case ServerErrorCodes.FORBIDDEN:
-                    setDialogMessage({
-                        title: t('ERROR'),
+            if (
+                e instanceof ApiError &&
+                e.httpStatusCode === HttpStatusCode.Forbidden
+            ) {
+                setDialogMessage({
+                    title: t('ERROR'),
 
-                        close: { variant: 'critical' },
-                        content: t('NOT_FILE_OWNER'),
-                    });
+                    close: { variant: 'critical' },
+                    content: t('NOT_FILE_OWNER'),
+                });
+            } else {
+                setDialogMessage({
+                    title: t('ERROR'),
+
+                    close: { variant: 'critical' },
+                    content: t('UNKNOWN_ERROR'),
+                });
             }
-            setDialogMessage({
-                title: t('ERROR'),
-
-                close: { variant: 'critical' },
-                content: t('UNKNOWN_ERROR'),
-            });
         } finally {
             await syncWithRemote();
             finishLoading();

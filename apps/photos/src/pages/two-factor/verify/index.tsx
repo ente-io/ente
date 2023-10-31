@@ -15,6 +15,8 @@ import FormTitle from 'components/Form/FormPaper/Title';
 import FormPaperFooter from 'components/Form/FormPaper/Footer';
 import { VerticallyCentered } from 'components/Container';
 import InMemoryStore, { MS_KEYS } from 'services/InMemoryStore';
+import { ApiError } from 'utils/error';
+import { HttpStatusCode } from 'axios';
 
 export default function Home() {
     const [sessionID, setSessionID] = useState('');
@@ -52,7 +54,10 @@ export default function Home() {
             InMemoryStore.delete(MS_KEYS.REDIRECT_URL);
             router.push(redirectURL ?? PAGES.CREDENTIALS);
         } catch (e) {
-            if (e.status === 404) {
+            if (
+                e instanceof ApiError &&
+                e.httpStatusCode === HttpStatusCode.NotFound
+            ) {
                 logoutUser();
             } else {
                 throw e;
