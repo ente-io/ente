@@ -20,22 +20,35 @@ class SearchTab extends StatefulWidget {
 class _SearchTabState extends State<SearchTab> {
   // Focus nodes are necessary
   var _searchResults = <SearchResult>[];
+  int index = 0;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     _searchResults = InheritedSearchResults.of(context).results;
+    if (_searchResults.isEmpty) {
+      if (isSearchQueryEmpty) {
+        index = 0;
+      } else {
+        index = 2;
+      }
+    } else {
+      index = 1;
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(top: 8),
-      child: _searchResults.isEmpty
-          ? isSearchQueryEmpty
-              ? const AllSearchSections()
-              : const NoResultWidget()
-          : SearchSuggestionsWidget(_searchResults),
+      child: IndexedStack(
+        index: index,
+        children: [
+          const AllSearchSections(),
+          SearchSuggestionsWidget(_searchResults),
+          const NoResultWidget(),
+        ],
+      ),
     );
   }
 }
