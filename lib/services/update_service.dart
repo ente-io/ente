@@ -1,5 +1,3 @@
-
-
 import 'dart:io';
 
 import 'package:ente_auth/core/constants.dart';
@@ -94,7 +92,7 @@ class UpdateService {
     // Note: in auth, currently we don't have a way to identify if the
     // app was installed from play store, f-droid or github based on pkg name
     if (Platform.isAndroid) {
-      if(flavor == "playstore") {
+      if (flavor == "playstore") {
         return const Tuple2(
           "Play Store",
           "market://details??id=io.ente.auth",
@@ -120,8 +118,7 @@ class UpdateService {
       // Fall back if we fail to open play-store market app on android
       if (Platform.isAndroid && url.startsWith("market://")) {
         launchUrlString(
-          "https://play.google.com/store/apps/details?id=io"
-              ".ente.auth",
+          "https://play.google.com/store/apps/details?id=io.ente.auth",
           mode: LaunchMode.externalApplication,
         ).ignore();
       }
@@ -129,7 +126,8 @@ class UpdateService {
   }
 
   bool isIndependent() {
-    return flavor == "independent" || _packageInfo.packageName.endsWith("independent");
+    return flavor == "independent" ||
+        _packageInfo.packageName.endsWith("independent");
   }
 }
 
