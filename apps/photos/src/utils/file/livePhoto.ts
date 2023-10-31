@@ -27,12 +27,13 @@ const VIDEO_EXTENSIONS = [
     'avi',
     'ogv',
     'mpg',
+    'mp',
 ];
 
 export function getFileTypeFromExtensionForLivePhotoClustering(
     filename: string
 ) {
-    const extension = getFileExtension(filename);
+    const extension = getFileExtension(filename)?.toLowerCase();
     if (IMAGE_EXTENSIONS.includes(extension)) {
         return FILE_TYPE.IMAGE;
     } else if (VIDEO_EXTENSIONS.includes(extension)) {
