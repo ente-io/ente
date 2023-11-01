@@ -10,7 +10,7 @@ import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 import "package:photos/ui/viewer/gallery/collection_page.dart";
 import "package:photos/ui/viewer/search/result/go_to_map_widget.dart";
 import "package:photos/ui/viewer/search/result/search_result_page.dart";
-import 'package:photos/ui/viewer/search/result/search_section_result_page.dart';
+import 'package:photos/ui/viewer/search/result/search_section_all_page.dart';
 import "package:photos/ui/viewer/search/search_section_cta.dart";
 import "package:photos/utils/navigation_util.dart";
 
@@ -52,7 +52,7 @@ class SearchSection extends StatelessWidget {
                             onTap: () {
                               routeToPage(
                                 context,
-                                SearchSectionResultPage(
+                                SearchSectionAllPage(
                                   sectionType: sectionType,
                                 ),
                               );

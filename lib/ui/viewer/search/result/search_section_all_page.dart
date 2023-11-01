@@ -9,16 +9,15 @@ import "package:photos/ui/viewer/gallery/collection_page.dart";
 import "package:photos/ui/viewer/search/result/searchable_item.dart";
 import "package:photos/utils/navigation_util.dart";
 
-class SearchSectionResultPage extends StatefulWidget {
+class SearchSectionAllPage extends StatefulWidget {
   final SectionType sectionType;
-  const SearchSectionResultPage({required this.sectionType, super.key});
+  const SearchSectionAllPage({required this.sectionType, super.key});
 
   @override
-  State<SearchSectionResultPage> createState() =>
-      _SearchSectionResultPageState();
+  State<SearchSectionAllPage> createState() => _SearchSectionAllPageState();
 }
 
-class _SearchSectionResultPageState extends State<SearchSectionResultPage> {
+class _SearchSectionAllPageState extends State<SearchSectionAllPage> {
   late final Future<List<SearchResult>> sectionData;
   late final bool _showCTATile;
   @override

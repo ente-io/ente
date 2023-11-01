@@ -19,7 +19,6 @@ class SearchTab extends StatefulWidget {
 }
 
 class _SearchTabState extends State<SearchTab> {
-  // Focus nodes are necessary
   var _searchResults = <SearchResult>[];
   int index = 0;
 
