@@ -94,51 +94,49 @@ class _AllSearchSectionsState extends State<AllSearchSections> {
     // remove face and content sectionType
     searchTypes.remove(SectionType.face);
     searchTypes.remove(SectionType.content);
-    return Expanded(
-      child: Stack(
-        children: [
-          FutureBuilder(
-            future: allSectionsExamplesFuture,
-            builder: (context, snapshot) {
-              if (snapshot.hasData) {
-                if (snapshot.data!.every((element) => element.isEmpty)) {
-                  return const Padding(
-                    padding: EdgeInsets.only(bottom: 72),
-                    child: SearchTabEmptyState(),
-                  );
-                }
-                return ListView.builder(
-                  padding: const EdgeInsets.only(bottom: 180),
-                  physics: const BouncingScrollPhysics(),
-                  itemCount: searchTypes.length,
-                  itemBuilder: (context, index) {
-                    return searchTypes[index] == SectionType.recents
-                        ? RecentSection(
-                            searches: snapshot.data!.elementAt(index),
-                          )
-                        : SearchSection(
-                            sectionType: searchTypes[index],
-                            examples: snapshot.data!.elementAt(index),
-                            limit: searchSectionLimit,
-                          );
-                  },
-                );
-              } else if (snapshot.hasError) {
-                //todo: Show something went wrong here
+    return Stack(
+      children: [
+        FutureBuilder(
+          future: allSectionsExamplesFuture,
+          builder: (context, snapshot) {
+            if (snapshot.hasData) {
+              if (snapshot.data!.every((element) => element.isEmpty)) {
                 return const Padding(
                   padding: EdgeInsets.only(bottom: 72),
-                  child: EnteLoadingWidget(),
-                );
-              } else {
-                return const Padding(
-                  padding: EdgeInsets.only(bottom: 72),
-                  child: EnteLoadingWidget(),
+                  child: SearchTabEmptyState(),
                 );
               }
-            },
-          ),
-        ],
-      ),
+              return ListView.builder(
+                padding: const EdgeInsets.only(bottom: 180),
+                physics: const BouncingScrollPhysics(),
+                itemCount: searchTypes.length,
+                itemBuilder: (context, index) {
+                  return searchTypes[index] == SectionType.recents
+                      ? RecentSection(
+                          searches: snapshot.data!.elementAt(index),
+                        )
+                      : SearchSection(
+                          sectionType: searchTypes[index],
+                          examples: snapshot.data!.elementAt(index),
+                          limit: searchSectionLimit,
+                        );
+                },
+              );
+            } else if (snapshot.hasError) {
+              //todo: Show something went wrong here
+              return const Padding(
+                padding: EdgeInsets.only(bottom: 72),
+                child: EnteLoadingWidget(),
+              );
+            } else {
+              return const Padding(
+                padding: EdgeInsets.only(bottom: 72),
+                child: EnteLoadingWidget(),
+              );
+            }
+          },
+        ),
+      ],
     );
   }
 }
