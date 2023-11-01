@@ -14,7 +14,8 @@ export const getKey = (key: SESSION_KEYS) => {
     if (typeof sessionStorage === 'undefined') {
         return null;
     }
-    return JSON.parse(sessionStorage.getItem(key));
+    const value = sessionStorage.getItem(key);
+    return value && JSON.parse(value);
 };
 
 export const removeKey = (key: SESSION_KEYS) => {
