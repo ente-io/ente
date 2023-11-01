@@ -99,7 +99,7 @@ class SearchResultWidget extends StatelessWidget {
         ),
       ),
       onTap: () {
-        RecentSearches().add(searchResult);
+        RecentSearches().add(searchResult.name());
 
         if (onResultTap != null) {
           onResultTap!();

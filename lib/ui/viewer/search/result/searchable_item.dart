@@ -28,7 +28,7 @@ class SearchableItemWidget extends StatelessWidget {
 
     return GestureDetector(
       onTap: () {
-        RecentSearches().add(searchResult);
+        RecentSearches().add(searchResult.name());
         if (onResultTap != null) {
           onResultTap!();
         } else {

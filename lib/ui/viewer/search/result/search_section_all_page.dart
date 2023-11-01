@@ -86,7 +86,8 @@ class _SearchSectionAllPageState extends State<SearchSectionAllPage> {
                                   .collectionWithThumbnail.collection,
                             ),
                             onResultTap: () {
-                              RecentSearches().add(sectionResults[index]);
+                              RecentSearches()
+                                  .add(sectionResults[index].name());
 
                               routeToPage(
                                 context,

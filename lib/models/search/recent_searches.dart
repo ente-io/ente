@@ -1,6 +1,5 @@
 import "package:flutter/material.dart";
 import "package:photos/core/constants.dart";
-import "package:photos/models/search/search_result.dart";
 
 class RecentSearches with ChangeNotifier {
   static RecentSearches? _instance;
@@ -9,10 +8,10 @@ class RecentSearches with ChangeNotifier {
 
   factory RecentSearches() => _instance ??= RecentSearches._();
 
-  final searches = <SearchResult>{};
+  final searches = <String>{};
 
-  void add(SearchResult result) {
-    searches.add(result);
+  void add(String query) {
+    searches.add(query);
     while (searches.length > searchSectionLimit) {
       searches.remove(searches.first);
     }

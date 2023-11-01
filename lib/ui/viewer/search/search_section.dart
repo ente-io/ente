@@ -105,7 +105,10 @@ class SearchSection extends StatelessWidget {
 }
 
 class RecentSection extends StatelessWidget {
+  final List<SearchResult> searches;
+
   const RecentSection({
+    required this.searches,
     Key? key,
   }) : super(key: key);
 
@@ -136,7 +139,7 @@ class RecentSection extends StatelessWidget {
                 ),
                 const SizedBox(height: 2),
                 SearchExampleRow(
-                  RecentSearches().searches.toList(),
+                  searches,
                   SectionType.recents,
                 ),
               ],
@@ -199,7 +202,7 @@ class SearchExample extends StatelessWidget {
     }
     return GestureDetector(
       onTap: () {
-        RecentSearches().add(searchResult);
+        RecentSearches().add(searchResult.name());
 
         if (searchResult is GenericSearchResult) {
           final genericSearchResult = searchResult as GenericSearchResult;
