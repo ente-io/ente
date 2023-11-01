@@ -18,6 +18,7 @@ import { getPersonalFiles } from 'utils/file';
 import isElectron from 'is-electron';
 import { Events, eventBus } from './events';
 import PQueue from 'p-queue';
+import { FILE_TYPE } from 'constants/file';
 
 const CLIP_EMBEDDING_LENGTH = 512;
 
@@ -206,6 +207,12 @@ class ClipServiceImpl {
             `clip embedding extraction onFileUploadedHandler file: ${enteFile.metadata.title} fileID: ${enteFile.id}`,
             enteFile.id
         );
+        if (enteFile.metadata.fileType === FILE_TYPE.VIDEO) {
+            addLogLine(
+                `skipping video file for clip embedding extraction file: ${enteFile.metadata.title} fileID: ${enteFile.id}`
+            );
+            return;
+        }
         try {
             await this.liveEmbeddingExtractionQueue.add(async () => {
                 const embedding = await this.extractLocalFileClipImageEmbedding(
