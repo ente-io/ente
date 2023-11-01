@@ -1,5 +1,5 @@
 {
-    "name": "@ente/storage",
+    "name": "@ente/utils",
     "version": "0.0.0",
     "scripts": {
         "lint": "eslint .",
