@@ -112,6 +112,27 @@ extension SectionTypeExtensions on SectionType {
   bool get isCTAVisible {
     switch (this) {
       case SectionType.face:
+        return false;
+      case SectionType.content:
+        return false;
+      case SectionType.moment:
+        return false;
+      case SectionType.location:
+        return true;
+      case SectionType.people:
+        return true;
+      case SectionType.album:
+        return true;
+      case SectionType.fileTypesAndExtension:
+        return false;
+      case SectionType.fileCaption:
+        return false;
+    }
+  }
+
+  bool get isEmptyCTAVisible {
+    switch (this) {
+      case SectionType.face:
         return true;
       case SectionType.content:
         return false;

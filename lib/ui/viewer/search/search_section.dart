@@ -30,47 +30,75 @@ class SearchSection extends StatelessWidget {
   Widget build(BuildContext context) {
     debugPrint("Building section for ${sectionType.name}");
     final textTheme = getEnteTextTheme(context);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(12),
-              child: Text(
-                sectionType.sectionTitle(context),
-                style: textTheme.largeBold,
-              ),
-            ),
-            examples.length < (limit - 1)
-                ? const SizedBox.shrink()
-                : GestureDetector(
-                    onTap: () {
-                      routeToPage(
-                        context,
-                        SearchSectionResultPage(sectionType: sectionType),
-                      );
-                    },
-                    child: Padding(
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: examples.isNotEmpty
+          ? Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Padding(
                       padding: const EdgeInsets.all(12),
-                      child: Icon(
-                        Icons.chevron_right_outlined,
-                        color: getEnteColorScheme(context).strokeMuted,
+                      child: Text(
+                        sectionType.sectionTitle(context),
+                        style: textTheme.largeBold,
+                      ),
+                    ),
+                    examples.length < (limit - 1)
+                        ? const SizedBox.shrink()
+                        : GestureDetector(
+                            onTap: () {
+                              routeToPage(
+                                context,
+                                SearchSectionResultPage(
+                                  sectionType: sectionType,
+                                ),
+                              );
+                            },
+                            child: Padding(
+                              padding: const EdgeInsets.all(12),
+                              child: Icon(
+                                Icons.chevron_right_outlined,
+                                color: getEnteColorScheme(context).strokeMuted,
+                              ),
+                            ),
+                          ),
+                  ],
+                ),
+                const SizedBox(height: 2),
+                SearchExampleRow(examples, sectionType),
+              ],
+            )
+          : Padding(
+              padding: const EdgeInsets.only(left: 16, right: 8),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            sectionType.sectionTitle(context),
+                            style: textTheme.largeBold,
+                          ),
+                          const SizedBox(height: 24),
+                          Text(
+                            sectionType.getEmptyStateText(context),
+                            style: textTheme.smallMuted,
+                          ),
+                        ],
                       ),
                     ),
                   ),
-          ],
-        ),
-        const SizedBox(height: 2),
-        // wrap below text in next line
-        // Text(
-        //   sectionType.getEmptyStateText(context),
-        //   style: textTheme.smallMuted,
-        //   softWrap: true,
-        // ),
-        SearchExampleRow(examples, sectionType),
-      ],
+                  const SizedBox(width: 8),
+                  SearchSectionEmptyCTAIcon(sectionType),
+                ],
+              ),
+            ),
     );
   }
 }
