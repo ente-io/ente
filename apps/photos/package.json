@@ -13,6 +13,7 @@
         "start": "next start"
     },
     "dependencies": {
+        "@ente/accounts": "*",
         "@date-io/date-fns": "^2.14.0",
         "@emotion/cache": "^11.10.5",
         "@emotion/react": "^11.10.6",
