@@ -7,7 +7,7 @@
         "apps/*"
     ],
     "scripts": {
-        "build": "turbo run build && turbo run export",
+        "build": "turbo run build",
         "dev": "turbo run dev --parallel",
         "lint": "turbo run lint",
         "albums": "turbo run albums",
