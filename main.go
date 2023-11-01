@@ -16,6 +16,14 @@ import (
 
 func main() {
 	cliDBPath, err := GetCLIConfigPath()
+	if secrets.IsRunningInContainer() {
+		cliDBPath = constants.CliDataPath
+		_, err := internal.ValidateDirForWrite(cliDBPath)
+		if err != nil {
+			log.Fatalf("Please mount a volume to %s to persist cli data\n%v\n", cliDBPath, err)
+		}
+	}
+
 	if err != nil {
 		log.Fatalf("Could not create cli config path\n%v\n", err)
 	}
@@ -28,13 +36,6 @@ func main() {
 		}
 	}
 	db, err := pkg.GetDB(newCliPath)
-	if secrets.IsRunningInContainer() {
-		cliDBPath = constants.CliDataPath
-		_, err := internal.ValidateDirForWrite(cliDBPath)
-		if err != nil {
-			log.Fatalf("Please mount a volume to %s to persist cli data\n%v\n", cliDBPath, err)
-		}
-	}
 
 	if err != nil {
 		if strings.Contains(err.Error(), "timeout") {

@@ -70,13 +70,13 @@ func (c *ClICtrl) fetchRemoteFiles(ctx context.Context) error {
 				break
 			}
 			if isFirstSync {
-				log.Printf("First sync for album %s\n", album.AlbumName)
+				log.Printf("Sync files metadata for album %s\n", album.AlbumName)
 			} else {
-				log.Printf("Syncing album %s\n from %s", album.AlbumName, time.UnixMicro(lastSyncTime))
+				log.Printf("Sync files metadata for album %s\n from %s", album.AlbumName, time.UnixMicro(lastSyncTime))
 			}
 			if !isFirstSync {
 				t := time.UnixMicro(lastSyncTime)
-				log.Printf("Fetching files for album %s from %v\n", album.AlbumName, t)
+				log.Printf("Fetching files metadata for album %s from %v\n", album.AlbumName, t)
 			}
 			files, hasMore, err := c.Client.GetFiles(ctx, album.ID, lastSyncTime)
 			if err != nil {
