@@ -12,6 +12,10 @@ class RecentSearches with ChangeNotifier {
 
   void add(SearchResult result) {
     searches.add(result);
-    notifyListeners();
+    //buffer for not surfacing a new recent search before going to the next
+    //screen
+    Future.delayed(const Duration(seconds: 1), () {
+      notifyListeners();
+    });
   }
 }

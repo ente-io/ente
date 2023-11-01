@@ -104,6 +104,52 @@ class SearchSection extends StatelessWidget {
   }
 }
 
+class RecentSection extends StatelessWidget {
+  const RecentSection({
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    debugPrint("Building section for recents");
+    final textTheme = getEnteTextTheme(context);
+    return ListenableBuilder(
+      listenable: RecentSearches(),
+      builder: (context, _) {
+        if (RecentSearches().searches.isNotEmpty) {
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(12),
+                      child: Text(
+                        SectionType.recents.sectionTitle(context),
+                        style: textTheme.largeBold,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 2),
+                SearchExampleRow(
+                  RecentSearches().searches.toList(),
+                  SectionType.recents,
+                ),
+              ],
+            ),
+          );
+        } else {
+          return const SizedBox.shrink();
+        }
+      },
+    );
+  }
+}
+
 class SearchExampleRow extends StatelessWidget {
   final SectionType sectionType;
   final List<SearchResult> reccomendations;
