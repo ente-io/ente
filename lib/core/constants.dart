@@ -62,3 +62,5 @@ const defaultRadiusValues = <double>[1, 2, 10, 20, 40, 80, 200, 400, 1200];
 const defaultRadiusValue = 40.0;
 
 const galleryGridSpacing = 2.0;
+
+const searchSectionLimit = 7;

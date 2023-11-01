@@ -1,4 +1,5 @@
 import "package:flutter/material.dart";
+import "package:photos/core/constants.dart";
 import "package:photos/models/search/search_result.dart";
 import "package:photos/models/search/search_types.dart";
 import "package:photos/states/search_results_state.dart";
@@ -62,7 +63,6 @@ class AllSearchSections extends StatefulWidget {
 
 class _AllSearchSectionsState extends State<AllSearchSections> {
   late List<Future<List<SearchResult>>> allSectionsExamples;
-  static const _limit = 7;
 
   @override
   void initState() {
@@ -78,8 +78,9 @@ class _AllSearchSectionsState extends State<AllSearchSections> {
           sectionType == SectionType.content) {
         continue;
       }
-      allSectionsExamples
-          .add(sectionType.getData(limit: _limit, context: context));
+      allSectionsExamples.add(
+        sectionType.getData(limit: searchSectionLimit, context: context),
+      );
     }
     allSectionsExamplesFuture =
         Future.wait<List<SearchResult>>(allSectionsExamples);
@@ -116,7 +117,7 @@ class _AllSearchSectionsState extends State<AllSearchSections> {
                         : SearchSection(
                             sectionType: searchTypes[index],
                             examples: snapshot.data!.elementAt(index),
-                            limit: _limit,
+                            limit: searchSectionLimit,
                           );
                   },
                 );
