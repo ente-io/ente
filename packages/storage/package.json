@@ -1,0 +1,15 @@
+{
+    "name": "@ente/storage",
+    "version": "0.0.0",
+    "scripts": {
+        "lint": "eslint .",
+        "build": "yarn lint"
+    },
+    "dependencies": {},
+    "devDependencies": {
+        "@ente/eslint-config": "*",
+        "@typescript-eslint/parser": "^5.59.2",
+        "eslint": "^8.28.0",
+        "typescript": "^5.1.3"
+    }
+}
