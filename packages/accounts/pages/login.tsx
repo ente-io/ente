@@ -1,42 +1,44 @@
-// import { useState, useEffect, useContext } from 'react';
-// import { useRouter } from 'next/router';
+import { useState, useEffect } from 'react';
 import EnteSpinner from '@ente/ui/components/EnteSpinner';
-// import { AppContext } from 'pages/_app';
 // import Login from 'components/Login';
-// import { VerticallyCentered } from 'components/Container';
-// import { getData, LS_KEYS } from 'utils/storage/localStorage';
-// import { PAGES } from 'constants/pages';
-// import FormPaper from 'components/Form/FormPaper';
+import { VerticallyCentered } from '@ente/ui/components/Container';
+import { getData, LS_KEYS } from '@ente/storage/localStorage';
+import { PAGES } from 'constants/pages';
+import FormPaper from '@ente/ui/components/Form/FormPaper';
+import { NextRouter } from 'next/router';
 
-export default function Home() {
-    // const router = useRouter();
-    // const appContext = useContext(AppContext);
-    // const [loading, setLoading] = useState(true);
+interface HomeProps {
+    appContext: {
+        showNavBar: (show: boolean) => void;
+    };
+    router: NextRouter;
+}
 
-    // useEffect(() => {
-    //     router.prefetch(PAGES.VERIFY);
-    //     router.prefetch(PAGES.SIGNUP);
-    //     const user = getData(LS_KEYS.USER);
-    //     if (user?.email) {
-    //         router.push(PAGES.VERIFY);
-    //     }
-    //     setLoading(false);
-    //     appContext.showNavBar(true);
-    // }, []);
+export default function Home({ appContext, router }: HomeProps) {
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        router.prefetch(PAGES.VERIFY);
+        router.prefetch(PAGES.SIGNUP);
+        const user = getData(LS_KEYS.USER);
+        if (user?.email) {
+            router.push(PAGES.VERIFY);
+        }
+        setLoading(false);
+        appContext?.showNavBar?.(true);
+    }, []);
 
     // const register = () => {
     //     router.push(PAGES.SIGNUP);
     // };
 
-    return (
-        // <VerticallyCentered>
-        <EnteSpinner />
-        //     </VerticallyCentered>
-        // ) : (
-        //     <VerticallyCentered>
-        //         <FormPaper>
-        //             <Login signUp={register} />
-        //         </FormPaper>
-        //     </VerticallyCentered>
+    return loading ? (
+        <VerticallyCentered>
+            <EnteSpinner />
+        </VerticallyCentered>
+    ) : (
+        <VerticallyCentered>
+            <FormPaper>{/* <Login signUp={register} /> */}</FormPaper>
+        </VerticallyCentered>
     );
 }

@@ -3,5 +3,5 @@ import CircularProgress, {
 } from '@mui/material/CircularProgress';
 
 export default function EnteSpinner(props: CircularProgressProps) {
-    return <CircularProgress color="error" size={32} {...props} />;
+    return <CircularProgress color="accent" size={32} {...props} />;
 }

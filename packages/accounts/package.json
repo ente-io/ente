@@ -6,7 +6,8 @@
         "build": "yarn lint"
     },
     "dependencies": {
-        "@ente/ui": "*"
+        "@ente/ui": "*",
+        "@ente/storage": "*"
     },
     "devDependencies": {
         "@ente/eslint-config": "*",
