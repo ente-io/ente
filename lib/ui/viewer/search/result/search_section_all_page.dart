@@ -1,5 +1,6 @@
 import "package:flutter/material.dart";
 import "package:photos/models/search/album_search_result.dart";
+import "package:photos/models/search/recent_searches.dart";
 import "package:photos/models/search/search_result.dart";
 import "package:photos/models/search/search_types.dart";
 import "package:photos/services/collections_service.dart";
@@ -84,13 +85,17 @@ class _SearchSectionAllPageState extends State<SearchSectionAllPage> {
                               albumSectionResult
                                   .collectionWithThumbnail.collection,
                             ),
-                            onResultTap: () => routeToPage(
-                              context,
-                              CollectionPage(
-                                albumSectionResult.collectionWithThumbnail,
-                                tagPrefix: albumSectionResult.heroTag(),
-                              ),
-                            ),
+                            onResultTap: () {
+                              RecentSearches().add(sectionResults[index]);
+
+                              routeToPage(
+                                context,
+                                CollectionPage(
+                                  albumSectionResult.collectionWithThumbnail,
+                                  tagPrefix: albumSectionResult.heroTag(),
+                                ),
+                              );
+                            },
                           );
                         }
                         return SearchableItemWidget(sectionResults[index]);

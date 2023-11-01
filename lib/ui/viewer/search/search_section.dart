@@ -2,6 +2,7 @@ import "package:collection/collection.dart";
 import "package:flutter/material.dart";
 import "package:photos/models/search/album_search_result.dart";
 import "package:photos/models/search/generic_search_result.dart";
+import "package:photos/models/search/recent_searches.dart";
 import "package:photos/models/search/search_result.dart";
 import "package:photos/models/search/search_types.dart";
 import "package:photos/theme/ente_theme.dart";
@@ -152,6 +153,8 @@ class SearchExample extends StatelessWidget {
     }
     return GestureDetector(
       onTap: () {
+        RecentSearches().add(searchResult);
+
         if (searchResult is GenericSearchResult) {
           final genericSearchResult = searchResult as GenericSearchResult;
           if (genericSearchResult.onResultTap != null) {

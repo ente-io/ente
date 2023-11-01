@@ -1,5 +1,6 @@
 import "package:dotted_border/dotted_border.dart";
 import "package:flutter/material.dart";
+import "package:photos/models/search/recent_searches.dart";
 import "package:photos/models/search/search_result.dart";
 import "package:photos/models/search/search_types.dart";
 import "package:photos/theme/ente_theme.dart";
@@ -27,6 +28,7 @@ class SearchableItemWidget extends StatelessWidget {
 
     return GestureDetector(
       onTap: () {
+        RecentSearches().add(searchResult);
         if (onResultTap != null) {
           onResultTap!();
         } else {
