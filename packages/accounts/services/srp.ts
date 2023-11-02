@@ -13,7 +13,7 @@ import {
 import { v4 as uuidv4 } from 'uuid';
 import ComlinkCryptoWorker from '@ente/shared/crypto';
 import { generateLoginSubKey } from '@ente/shared/crypto/helpers';
-import { UserVerificationResponse } from '@ente/shared/user/types';
+import { UserVerificationResponse } from '@ente/accounts/types/user';
 
 const SRP_PARAMS = SRP.params['4096'];
 
@@ -143,7 +143,7 @@ export const loginViaSRP = async (
 // HELPERS
 // ====================
 
-const generateSRPClient = async (
+export const generateSRPClient = async (
     srpSalt: string,
     srpUserID: string,
     loginSubKey: string

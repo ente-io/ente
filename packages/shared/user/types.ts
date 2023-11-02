@@ -21,3 +21,9 @@ export interface User {
     isTwoFactorEnabled: boolean;
     twoFactorSessionID: string;
 }
+
+export interface KEK {
+    key: string;
+    opsLimit: number;
+    memLimit: number;
+}

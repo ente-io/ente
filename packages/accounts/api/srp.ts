@@ -10,7 +10,9 @@ import {
     SRPVerificationResponse,
     SetupSRPRequest,
     SetupSRPResponse,
-} from '../types/srp';
+    UpdateSRPAndKeysRequest,
+    UpdateSRPAndKeysResponse,
+} from '@ente/accounts/types/srp';
 import { getToken } from '@ente/shared/storage/localStorage/helpers';
 import { ApiError, CustomError } from '@ente/shared/error';
 import { HttpStatusCode } from 'axios';
@@ -115,4 +117,19 @@ export const verifySRPSession = async (
             throw e;
         }
     }
+};
+
+export const updateSRPAndKeys = async (
+    token: string,
+    updateSRPAndKeyRequest: UpdateSRPAndKeysRequest
+): Promise<UpdateSRPAndKeysResponse> => {
+    const resp = await HTTPService.post(
+        `${ENDPOINT}/users/srp/update`,
+        updateSRPAndKeyRequest,
+        null,
+        {
+            'X-Auth-Token': token,
+        }
+    );
+    return resp.data as UpdateSRPAndKeysResponse;
 };

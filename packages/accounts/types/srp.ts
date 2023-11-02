@@ -1,4 +1,7 @@
-import { UserVerificationResponse } from '@ente/shared/user/types';
+import {
+    UpdatedKey,
+    UserVerificationResponse,
+} from '@ente/accounts/types/user';
 
 export interface SRPAttributes {
     srpUserID: string;
@@ -56,4 +59,15 @@ export interface SRPSetupAttributes {
     srpVerifier: string;
     srpUserID: string;
     loginSubKey: string;
+}
+
+export interface UpdateSRPAndKeysRequest {
+    srpM1: string;
+    setupID: string;
+    updatedKeyAttr: UpdatedKey;
+}
+
+export interface UpdateSRPAndKeysResponse {
+    srpM2: string;
+    setupID: string;
 }

@@ -25,3 +25,11 @@ export interface TwoFactorRecoveryResponse {
     encryptedSecret: string;
     secretDecryptionNonce: string;
 }
+
+export interface UpdatedKey {
+    kekSalt: string;
+    encryptedKey: string;
+    keyDecryptionNonce: string;
+    memLimit: number;
+    opsLimit: number;
+}

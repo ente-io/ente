@@ -10,11 +10,7 @@ import { clearFiles } from '@ente/shared/storage/localForage/helpers';
 import { setIsFirstLogin } from '@ente/shared/storage/localStorage/helpers';
 import { clearKeys } from '@ente/shared/storage/sessionStorage';
 import { PAGES } from '../constants/pages';
-import {
-    KeyAttributes,
-    UserVerificationResponse,
-    User,
-} from '@ente/shared/user/types';
+import { KeyAttributes, User } from '@ente/shared/user/types';
 import { SRPSetupAttributes } from '../types/srp';
 import { Box, Typography } from '@mui/material';
 import FormPaperTitle from '@ente/shared/components/Form/FormPaper/Title';
@@ -30,6 +26,7 @@ import InMemoryStore, { MS_KEYS } from '@ente/shared/storage/InMemoryStore';
 import { ApiError } from '@ente/shared/error';
 import { HttpStatusCode } from 'axios';
 import { PageProps } from '@ente/shared/apps/types';
+import { UserVerificationResponse } from '@ente/accounts/types/user';
 
 export default function VerifyPage({ appContext, router, appName }: PageProps) {
     const [email, setEmail] = useState('');
