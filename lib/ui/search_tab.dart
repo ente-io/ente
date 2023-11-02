@@ -1,6 +1,7 @@
 import "dart:async";
 
 import "package:flutter/material.dart";
+import "package:flutter/scheduler.dart";
 import "package:photos/core/constants.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/sync_status_update_event.dart";
@@ -14,7 +15,7 @@ import "package:photos/ui/viewer/search/search_suggestions.dart";
 import "package:photos/ui/viewer/search/search_widget_new.dart";
 import "package:photos/ui/viewer/search/tab_empty_state.dart";
 
-late Future<List<List<SearchResult>>> allSectionsExamplesFuture;
+Future<List<List<SearchResult>>> allSectionsExamplesFuture = Future.value([]);
 
 class SearchTab extends StatefulWidget {
   const SearchTab({Key? key}) : super(key: key);
@@ -66,40 +67,29 @@ class AllSearchSections extends StatefulWidget {
 }
 
 class _AllSearchSectionsState extends State<AllSearchSections> {
-  late List<Future<List<SearchResult>>> allSectionsExamples;
+  final allSectionsExamples = <Future<List<SearchResult>>>[];
   late StreamSubscription<SyncStatusUpdate> _syncStatusSubscription;
 
   @override
   void initState() {
     super.initState();
-    allSectionsExamples = <Future<List<SearchResult>>>[];
+    SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
+      _syncStatusSubscription =
+          Bus.instance.on<SyncStatusUpdate>().listen((event) {
+        if (event.status == SyncStatus.completedBackup) {
+          setState(() {
+            allSectionsExamples.clear();
+            aggregateSectionsExamples();
+          });
+        }
+      });
+      setState(() {
+        aggregateSectionsExamples();
+      });
+    });
   }
 
-  @override
-  void didChangeDependencies() {
-    //context cannot be access from init state. This is why this code is here
-    //instead of in initState(){}.
-    _syncStatusSubscription =
-        Bus.instance.on<SyncStatusUpdate>().listen((event) {
-      if (event.status == SyncStatus.completedBackup) {
-        setState(() {
-          allSectionsExamples.clear();
-
-          for (SectionType sectionType in SectionType.values) {
-            if (sectionType == SectionType.face ||
-                sectionType == SectionType.content) {
-              continue;
-            }
-            allSectionsExamples.add(
-              sectionType.getData(limit: searchSectionLimit, context: context),
-            );
-          }
-          allSectionsExamplesFuture =
-              Future.wait<List<SearchResult>>(allSectionsExamples);
-        });
-      }
-    });
-
+  void aggregateSectionsExamples() {
     for (SectionType sectionType in SectionType.values) {
       if (sectionType == SectionType.face ||
           sectionType == SectionType.content) {
@@ -111,8 +101,6 @@ class _AllSearchSectionsState extends State<AllSearchSections> {
     }
     allSectionsExamplesFuture =
         Future.wait<List<SearchResult>>(allSectionsExamples);
-
-    super.didChangeDependencies();
   }
 
   @override
