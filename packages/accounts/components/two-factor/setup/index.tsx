@@ -1,9 +1,9 @@
-import { VerticallyCentered } from 'components/Container';
-import { SetupMode } from 'pages/two-factor/setup';
-import SetupManualMode from 'pages/two-factor/setup/ManualMode';
-import SetupQRMode from 'pages/two-factor/setup/QRMode';
-import React, { useState } from 'react';
-import { TwoFactorSecret } from 'types/user';
+import { VerticallyCentered } from '@ente/shared/components/Container';
+import { SetupMode } from '@ente/accounts/pages/two-factor/setup';
+import SetupManualMode from '@ente/accounts/components/two-factor/setup/ManualMode';
+import SetupQRMode from '@ente/accounts/components/two-factor/setup/QRMode';
+import { useState } from 'react';
+import { TwoFactorSecret } from '@ente/accounts/types/user';
 
 interface Iprops {
     twoFactorSecret: TwoFactorSecret;

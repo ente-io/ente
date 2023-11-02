@@ -1,4 +1,3 @@
-import React from 'react';
 import { TypographyProps, Typography } from '@mui/material';
 import { FC } from 'react';
 

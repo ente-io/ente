@@ -9,7 +9,7 @@ import {
     CenteredFlex,
 } from '@ente/shared/components/Container';
 import { Box, Typography } from '@mui/material';
-import InvalidInputMessage from '@ente/accounts/components/TwoFactor/InvalidInputMessage';
+import InvalidInputMessage from '@ente/accounts/components/two-factor/InvalidInputMessage';
 import { sleep } from '@ente/shared/utils';
 
 interface formValues {
