@@ -1,5 +1,9 @@
+import "dart:async";
+
 import "package:flutter/material.dart";
 import "package:photos/core/constants.dart";
+import "package:photos/core/event_bus.dart";
+import "package:photos/events/sync_status_update_event.dart";
 import "package:photos/models/search/search_result.dart";
 import "package:photos/models/search/search_types.dart";
 import "package:photos/states/search_results_state.dart";
@@ -63,6 +67,7 @@ class AllSearchSections extends StatefulWidget {
 
 class _AllSearchSectionsState extends State<AllSearchSections> {
   late List<Future<List<SearchResult>>> allSectionsExamples;
+  late StreamSubscription<SyncStatusUpdate> _syncStatusSubscription;
 
   @override
   void initState() {
@@ -72,7 +77,29 @@ class _AllSearchSectionsState extends State<AllSearchSections> {
 
   @override
   void didChangeDependencies() {
-    super.didChangeDependencies();
+    //context cannot be access from init state. This is why this code is here
+    //instead of in initState(){}.
+    _syncStatusSubscription =
+        Bus.instance.on<SyncStatusUpdate>().listen((event) {
+      if (event.status == SyncStatus.completedBackup) {
+        setState(() {
+          allSectionsExamples.clear();
+
+          for (SectionType sectionType in SectionType.values) {
+            if (sectionType == SectionType.face ||
+                sectionType == SectionType.content) {
+              continue;
+            }
+            allSectionsExamples.add(
+              sectionType.getData(limit: searchSectionLimit, context: context),
+            );
+          }
+          allSectionsExamplesFuture =
+              Future.wait<List<SearchResult>>(allSectionsExamples);
+        });
+      }
+    });
+
     for (SectionType sectionType in SectionType.values) {
       if (sectionType == SectionType.face ||
           sectionType == SectionType.content) {
@@ -84,61 +111,63 @@ class _AllSearchSectionsState extends State<AllSearchSections> {
     }
     allSectionsExamplesFuture =
         Future.wait<List<SearchResult>>(allSectionsExamples);
+
+    super.didChangeDependencies();
+  }
+
+  @override
+  void dispose() {
+    _syncStatusSubscription.cancel();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    // Return a ListViewBuilder for value search_types.dart SectionType,
-    // render search section for each value
     final searchTypes = SectionType.values.toList(growable: true);
     // remove face and content sectionType
     searchTypes.remove(SectionType.face);
     searchTypes.remove(SectionType.content);
-    return Stack(
-      children: [
-        FutureBuilder(
-          future: allSectionsExamplesFuture,
-          builder: (context, snapshot) {
-            if (snapshot.hasData) {
-              if (snapshot.data!.every((element) => element.isEmpty)) {
-                return const Padding(
-                  padding: EdgeInsets.only(bottom: 72),
-                  child: SearchTabEmptyState(),
-                );
-              }
-              return ListView.builder(
-                padding: const EdgeInsets.only(bottom: 180),
-                physics: const BouncingScrollPhysics(),
-                itemCount: searchTypes.length,
-                itemBuilder: (context, index) {
-                  return searchTypes[index] == SectionType.recents
-                      ? const SizedBox.shrink()
-                      //Recents is in WIP
-                      // ? RecentSection(
-                      //     searches: snapshot.data!.elementAt(index),
-                      //   )
-                      : SearchSection(
-                          sectionType: searchTypes[index],
-                          examples: snapshot.data!.elementAt(index),
-                          limit: searchSectionLimit,
-                        );
-                },
-              );
-            } else if (snapshot.hasError) {
-              //todo: Show something went wrong here
-              return const Padding(
-                padding: EdgeInsets.only(bottom: 72),
-                child: EnteLoadingWidget(),
-              );
-            } else {
-              return const Padding(
-                padding: EdgeInsets.only(bottom: 72),
-                child: EnteLoadingWidget(),
-              );
-            }
-          },
-        ),
-      ],
+    return FutureBuilder(
+      future: allSectionsExamplesFuture,
+      builder: (context, snapshot) {
+        if (snapshot.hasData) {
+          if (snapshot.data!.every((element) => element.isEmpty)) {
+            return const Padding(
+              padding: EdgeInsets.only(bottom: 72),
+              child: SearchTabEmptyState(),
+            );
+          }
+          return ListView.builder(
+            padding: const EdgeInsets.only(bottom: 180),
+            physics: const BouncingScrollPhysics(),
+            itemCount: searchTypes.length,
+            itemBuilder: (context, index) {
+              return searchTypes[index] == SectionType.recents
+                  ? const SizedBox.shrink()
+                  //Recents is in WIP
+                  // ? RecentSection(
+                  //     searches: snapshot.data!.elementAt(index),
+                  //   )
+                  : SearchSection(
+                      sectionType: searchTypes[index],
+                      examples: snapshot.data!.elementAt(index),
+                      limit: searchSectionLimit,
+                    );
+            },
+          );
+        } else if (snapshot.hasError) {
+          //todo: Show something went wrong here
+          return const Padding(
+            padding: EdgeInsets.only(bottom: 72),
+            child: EnteLoadingWidget(),
+          );
+        } else {
+          return const Padding(
+            padding: EdgeInsets.only(bottom: 72),
+            child: EnteLoadingWidget(),
+          );
+        }
+      },
     );
   }
 }
