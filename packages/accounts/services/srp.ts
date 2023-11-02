@@ -1,4 +1,5 @@
-// import { PAGES } from 'constants/pages';
+import { PAGES } from '../constants/pages';
+import { NextRouter } from 'next/router';
 import {
     getEndpoint,
     // getFamilyPortalURL,
@@ -8,7 +9,7 @@ import {
 // import router from 'next/router';
 // import { clearData, getData, LS_KEYS } from 'utils/storage/localStorage';
 // import localForage from 'utils/storage/localForage';
-// import { getToken } from 'utils/common/key';
+import { getToken } from '@ente/shared/storage/localStorage/helper';
 import HTTPService from '@ente/shared/network/HTTPService';
 // import {
 //     computeVerifierHelper,
@@ -19,7 +20,6 @@ import HTTPService from '@ente/shared/network/HTTPService';
 // import { logError } from 'utils/sentry';
 // import { eventBus, Events } from './events';
 import {
-    // KeyAttributes,
     // RecoveryKey,
     // TwoFactorSecret,
     // TwoFactorVerificationResponse,
@@ -39,7 +39,8 @@ import {
     // UpdateSRPAndKeysRequest,
     // UpdateSRPAndKeysResponse,
     GetSRPAttributesResponse,
-} from '../types/user';
+} from '../types/srp';
+import { KeyAttributes } from '@ente/shared/user/types';
 // import { ApiError, CustomError } from 'utils/error';
 // import isElectron from 'is-electron';
 // import safeStorageService from './electron/safeStorage';
@@ -127,69 +128,74 @@ export const sendOtt = (appName: string, email: string) => {
 //     }
 // };
 
-// export const verifyOtt = (email: string, ott: string) =>
-//     HTTPService.post(`${ENDPOINT}/users/verify-email`, { email, ott });
+export const verifyOtt = (email: string, ott: string) =>
+    HTTPService.post(`${ENDPOINT}/users/verify-email`, { email, ott });
 
-// export const putAttributes = (token: string, keyAttributes: KeyAttributes) =>
-//     HTTPService.put(`${ENDPOINT}/users/attributes`, { keyAttributes }, null, {
-//         'X-Auth-Token': token,
-//     });
+export const putAttributes = (token: string, keyAttributes: KeyAttributes) =>
+    HTTPService.put(
+        `${ENDPOINT}/users/attributes`,
+        { keyAttributes },
+        undefined,
+        {
+            'X-Auth-Token': token,
+        }
+    );
 
 // export const setRecoveryKey = (token: string, recoveryKey: RecoveryKey) =>
 //     HTTPService.put(`${ENDPOINT}/users/recovery-key`, recoveryKey, null, {
 //         'X-Auth-Token': token,
 //     });
 
-// export const logoutUser = async () => {
-//     try {
-//         try {
-//             // ignore server logout result as logoutUser can be triggered before sign up or on token expiry
-//             await _logout();
-//         } catch (e) {
-//             //ignore
-//         }
-//         try {
-//             InMemoryStore.clear();
-//         } catch (e) {
-//             logError(e, 'clear InMemoryStore failed');
-//         }
-//         try {
-//             clearKeys();
-//         } catch (e) {
-//             logError(e, 'clearKeys failed');
-//         }
-//         try {
-//             clearData();
-//         } catch (e) {
-//             logError(e, 'clearData failed');
-//         }
-//         try {
-//             await deleteAllCache();
-//         } catch (e) {
-//             logError(e, 'deleteAllCache failed');
-//         }
-//         try {
-//             await clearFiles();
-//         } catch (e) {
-//             logError(e, 'clearFiles failed');
-//         }
-//         if (isElectron()) {
-//             try {
-//                 safeStorageService.clearElectronStore();
-//             } catch (e) {
-//                 logError(e, 'clearElectronStore failed');
-//             }
-//         }
-//         try {
-//             eventBus.emit(Events.LOGOUT);
-//         } catch (e) {
-//             logError(e, 'Error in logout handlers');
-//         }
-//         router.push(PAGES.ROOT);
-//     } catch (e) {
-//         logError(e, 'logoutUser failed');
-//     }
-// };
+export const logoutUser = async (router: NextRouter) => {
+    try {
+        try {
+            // ignore server logout result as logoutUser can be triggered before sign up or on token expiry
+            await _logout();
+        } catch (e) {
+            //ignore
+        }
+        // try {
+        //     InMemoryStore.clear();
+        // } catch (e) {
+        //     logError(e, 'clear InMemoryStore failed');
+        // }
+        // try {
+        //     clearKeys();
+        // } catch (e) {
+        //     logError(e, 'clearKeys failed');
+        // }
+        // try {
+        //     clearData();
+        // } catch (e) {
+        //     logError(e, 'clearData failed');
+        // }
+        // try {
+        //     await deleteAllCache();
+        // } catch (e) {
+        //     logError(e, 'deleteAllCache failed');
+        // }
+        // try {
+        //     await clearFiles();
+        // } catch (e) {
+        //     logError(e, 'clearFiles failed');
+        // }
+        // if (isElectron()) {
+        //     try {
+        //         safeStorageService.clearElectronStore();
+        //     } catch (e) {
+        //         logError(e, 'clearElectronStore failed');
+        //     }
+        // }
+        // try {
+        //     eventBus.emit(Events.LOGOUT);
+        // } catch (e) {
+        //     logError(e, 'Error in logout handlers');
+        // }
+        router.push(PAGES.ROOT);
+    } catch (e) {
+        // logError(e, 'logoutUser failed');
+    }
+};
 
 // export const clearFiles = async () => {
 //     await localForage.clear();
@@ -311,18 +317,18 @@ export const sendOtt = (appName: string, email: string) => {
 //     return resp.data['status'];
 // };
 
-// export const _logout = async () => {
-//     if (!getToken()) return true;
-//     try {
-//         await HTTPService.post(`${ENDPOINT}/users/logout`, null, null, {
-//             'X-Auth-Token': getToken(),
-//         });
-//         return true;
-//     } catch (e) {
-//         logError(e, '/users/logout failed');
-//         return false;
-//     }
-// };
+export const _logout = async () => {
+    if (!getToken()) return true;
+    try {
+        await HTTPService.post(`${ENDPOINT}/users/logout`, null, undefined, {
+            'X-Auth-Token': getToken(),
+        });
+        return true;
+    } catch (e) {
+        // logError(e, '/users/logout failed');
+        return false;
+    }
+};
 
 // export const sendOTTForEmailChange = async (email: string) => {
 //     if (!getToken()) {

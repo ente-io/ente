@@ -1,4 +1,5 @@
 export enum PAGES {
+    ROOT = '/',
     CHANGE_EMAIL = '/change-email',
     CHANGE_PASSWORD = '/change-password',
     CREDENTIALS = '/credentials',

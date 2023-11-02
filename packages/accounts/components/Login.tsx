@@ -1,5 +1,5 @@
 import { useRouter } from 'next/router';
-import { getSRPAttributes, sendOtt } from '../services/user';
+import { getSRPAttributes, sendOtt } from '../services/srp';
 import { setData, LS_KEYS } from '@ente/shared/storage/localStorage';
 import { PAGES } from '../constants/pages';
 import FormPaperTitle from '@ente/shared/components/Form/FormPaper/Title';
