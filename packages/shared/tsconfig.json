@@ -2,5 +2,11 @@
     "extends": "../../tsconfig.base.json",
     "compilerOptions": {
         "baseUrl": "."
-    }
+    },
+    "include": [
+        "**/*.ts",
+        "**/*.tsx",
+        "**/*.js",
+        "../mui-config/mui-theme.d.ts"
+    ]
 }
