@@ -50,3 +50,10 @@ export interface CreateSRPSessionResponse {
 export interface SRPVerificationResponse extends UserVerificationResponse {
     srpM2: string;
 }
+
+export interface SRPSetupAttributes {
+    srpSalt: string;
+    srpVerifier: string;
+    srpUserID: string;
+    loginSubKey: string;
+}
