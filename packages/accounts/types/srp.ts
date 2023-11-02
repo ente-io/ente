@@ -1,3 +1,5 @@
+import { UserVerificationResponse } from '@ente/shared/user/types';
+
 export interface SRPAttributes {
     srpUserID: string;
     srpSalt: string;
@@ -37,5 +39,14 @@ export interface CompleteSRPSetupRequest {
 
 export interface CompleteSRPSetupResponse {
     setupID: string;
+    srpM2: string;
+}
+
+export interface CreateSRPSessionResponse {
+    sessionID: string;
+    srpB: string;
+}
+
+export interface SRPVerificationResponse extends UserVerificationResponse {
     srpM2: string;
 }

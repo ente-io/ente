@@ -4,12 +4,16 @@ import { getEndpoint } from '@ente/shared/network/api';
 import {
     CompleteSRPSetupRequest,
     CompleteSRPSetupResponse,
+    CreateSRPSessionResponse,
     GetSRPAttributesResponse,
     SRPAttributes,
+    SRPVerificationResponse,
     SetupSRPRequest,
     SetupSRPResponse,
 } from '../types/srp';
 import { getToken } from '@ente/shared/storage/localStorage/helpers';
+import { ApiError, CustomError } from '@ente/shared/error';
+import { HttpStatusCode } from 'axios';
 
 const ENDPOINT = getEndpoint();
 
@@ -66,4 +70,49 @@ export const completeSRPSetup = async (
     //     logError(e, 'failed to complete SRP setup');
     //     throw e;
     // }
+};
+
+export const createSRPSession = async (srpUserID: string, srpA: string) => {
+    // try {
+    const resp = await HTTPService.post(
+        `${ENDPOINT}/users/srp/create-session`,
+        {
+            srpUserID,
+            srpA,
+        }
+    );
+    return resp.data as CreateSRPSessionResponse;
+    // } catch (e) {
+    //     logError(e, 'createSRPSession failed');
+    //     throw e;
+    // }
+};
+
+export const verifySRPSession = async (
+    sessionID: string,
+    srpUserID: string,
+    srpM1: string
+) => {
+    try {
+        const resp = await HTTPService.post(
+            `${ENDPOINT}/users/srp/verify-session`,
+            {
+                sessionID,
+                srpUserID,
+                srpM1,
+            },
+            undefined
+        );
+        return resp.data as SRPVerificationResponse;
+    } catch (e) {
+        // logError(e, 'verifySRPSession failed');
+        if (
+            e instanceof ApiError &&
+            e.httpStatusCode === HttpStatusCode.Forbidden
+        ) {
+            throw Error(CustomError.INCORRECT_PASSWORD);
+        } else {
+            throw e;
+        }
+    }
 };
