@@ -52,6 +52,7 @@ import { CustomError } from '@ente/shared/error';
 import InMemoryStore, { MS_KEYS } from '@ente/shared/storage/InMemoryStore';
 import { PageProps } from '@ente/shared/apps/types';
 import { APPS } from '@ente/shared/apps/constants';
+import { logError } from '@ente/shared/sentry';
 
 export default function Credentials({
     appContext,
@@ -186,7 +187,7 @@ export default function Credentials({
                     e instanceof Error &&
                     e.message !== CustomError.TWO_FACTOR_ENABLED
                 ) {
-                    // logError(e, 'getKeyAttributes failed');
+                    logError(e, 'getKeyAttributes failed');
                 }
                 throw e;
             }
@@ -227,7 +228,7 @@ export default function Credentials({
                     await configureSRP(srpSetupAttributes);
                 }
             } catch (e) {
-                // logError(e, 'migrate to srp failed');
+                logError(e, 'migrate to srp failed');
             }
             const redirectURL = InMemoryStore.get(MS_KEYS.REDIRECT_URL);
             InMemoryStore.delete(MS_KEYS.REDIRECT_URL);
@@ -237,7 +238,7 @@ export default function Credentials({
                 router.push(redirectURL ?? PAGES.GALLERY);
             }
         } catch (e) {
-            // logError(e, 'useMasterPassword failed');
+            logError(e, 'useMasterPassword failed');
         }
     };
 

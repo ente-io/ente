@@ -1,4 +1,4 @@
-// import { logError } from '@ente/shared/sentry';
+import { logError } from '@ente/shared/sentry';
 
 export enum LS_KEYS {
     USER = 'user',
@@ -55,7 +55,7 @@ export const getData = (key: LS_KEYS) => {
         const data = localStorage.getItem(key);
         return data && JSON.parse(data);
     } catch (e) {
-        // logError(e, 'Failed to Parse JSON for key ' + key);
+        logError(e, 'Failed to Parse JSON for key ' + key);
     }
 };
 

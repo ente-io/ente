@@ -4,7 +4,8 @@ import SingleInputForm, {
     SingleInputFormProps,
 } from '@ente/shared/components/SingleInputForm';
 import { VerticallyCentered } from '@ente/shared/components/Container';
-// import { logError } from 'utils/sentry';
+import { logError } from '@ente/shared/sentry';
+
 import { logoutUser } from '@ente/accounts/services/user';
 import { recoverTwoFactor, removeTwoFactor } from '@ente/accounts/api/user';
 import { PAGES } from '@ente/accounts/constants/pages';
@@ -70,7 +71,7 @@ export default function Recover({ router, appContext }: PageProps) {
                 ) {
                     logoutUser(router);
                 } else {
-                    // logError(e, 'two factor recovery page setup failed');
+                    logError(e, 'two factor recovery page setup failed');
                     setDoesHaveEncryptedRecoveryKey(false);
                     showContactSupportDialog({
                         text: t('GO_BACK'),
@@ -118,7 +119,7 @@ export default function Recover({ router, appContext }: PageProps) {
             setData(LS_KEYS.KEY_ATTRIBUTES, keyAttributes);
             router.push(PAGES.CREDENTIALS);
         } catch (e) {
-            // logError(e, 'two factor recovery failed');
+            logError(e, 'two factor recovery failed');
             setFieldError(t('INCORRECT_RECOVERY_KEY'));
         }
     };

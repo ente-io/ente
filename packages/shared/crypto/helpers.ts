@@ -5,6 +5,7 @@ import { SESSION_KEYS, setKey } from '@ente/shared/storage/sessionStorage';
 import { getActualKey } from '@ente/shared/user';
 import { KeyAttributes } from '@ente/shared/user/types';
 import { setRecoveryKey } from '@ente/accounts/api/user';
+import { logError } from '@ente/shared/sentry';
 
 const LOGIN_SUB_KEY_LENGTH = 32;
 const LOGIN_SUB_KEY_ID = 1;
@@ -143,7 +144,7 @@ export const getRecoveryKey = async () => {
         return recoveryKey;
     } catch (e) {
         console.log(e);
-        // logError(e, 'getRecoveryKey failed');
+        logError(e, 'getRecoveryKey failed');
         throw e;
     }
 };

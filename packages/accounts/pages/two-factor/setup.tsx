@@ -15,7 +15,7 @@ import { Box, CardContent, Typography } from '@mui/material';
 import { TwoFactorSetup } from '@ente/accounts/components/two-factor/Setup';
 import LinkButton from '@ente/shared/components/LinkButton';
 import { PageProps } from '@ente/shared/apps/types';
-// import { logError } from 'utils/sentry';
+import { logError } from '@ente/shared/sentry';
 
 export enum SetupMode {
     QR_CODE,
@@ -36,7 +36,7 @@ export default function SetupTwoFactor({ router }: PageProps) {
                 setTwoFactorSecret(twoFactorSecret);
             } catch (e) {
                 console.log(e);
-                // logError(e, 'failed to get two factor setup code');
+                logError(e, 'failed to get two factor setup code');
             }
         };
         main();

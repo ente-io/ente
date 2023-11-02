@@ -16,6 +16,7 @@ import {
 import { getToken } from '@ente/shared/storage/localStorage/helpers';
 import { ApiError, CustomError } from '@ente/shared/error';
 import { HttpStatusCode } from 'axios';
+import { logError } from '@ente/shared/sentry';
 
 const ENDPOINT = getEndpoint();
 
@@ -28,7 +29,7 @@ export const getSRPAttributes = async (
         });
         return (resp.data as GetSRPAttributesResponse).attributes;
     } catch (e) {
-        // logError(e, 'failed to get SRP attributes');
+        logError(e, 'failed to get SRP attributes');
         return null;
     }
 };
@@ -36,58 +37,58 @@ export const getSRPAttributes = async (
 export const startSRPSetup = async (
     setupSRPRequest: SetupSRPRequest
 ): Promise<SetupSRPResponse> => {
-    // try {
-    const token = getToken();
-    const resp = await HTTPService.post(
-        `${ENDPOINT}/users/srp/setup`,
-        setupSRPRequest,
-        undefined,
-        {
-            'X-Auth-Token': token,
-        }
-    );
+    try {
+        const token = getToken();
+        const resp = await HTTPService.post(
+            `${ENDPOINT}/users/srp/setup`,
+            setupSRPRequest,
+            undefined,
+            {
+                'X-Auth-Token': token,
+            }
+        );
 
-    return resp.data as SetupSRPResponse;
-    // }  catch (e) {
-    //      logError(e, 'failed to post SRP attributes');
-    //     throw e;
-    // }
+        return resp.data as SetupSRPResponse;
+    } catch (e) {
+        logError(e, 'failed to post SRP attributes');
+        throw e;
+    }
 };
 
 export const completeSRPSetup = async (
     completeSRPSetupRequest: CompleteSRPSetupRequest
 ) => {
-    // try {
-    const token = getToken();
-    const resp = await HTTPService.post(
-        `${ENDPOINT}/users/srp/complete`,
-        completeSRPSetupRequest,
-        undefined,
-        {
-            'X-Auth-Token': token,
-        }
-    );
-    return resp.data as CompleteSRPSetupResponse;
-    // } catch (e) {
-    //     logError(e, 'failed to complete SRP setup');
-    //     throw e;
-    // }
+    try {
+        const token = getToken();
+        const resp = await HTTPService.post(
+            `${ENDPOINT}/users/srp/complete`,
+            completeSRPSetupRequest,
+            undefined,
+            {
+                'X-Auth-Token': token,
+            }
+        );
+        return resp.data as CompleteSRPSetupResponse;
+    } catch (e) {
+        logError(e, 'failed to complete SRP setup');
+        throw e;
+    }
 };
 
 export const createSRPSession = async (srpUserID: string, srpA: string) => {
-    // try {
-    const resp = await HTTPService.post(
-        `${ENDPOINT}/users/srp/create-session`,
-        {
-            srpUserID,
-            srpA,
-        }
-    );
-    return resp.data as CreateSRPSessionResponse;
-    // } catch (e) {
-    //     logError(e, 'createSRPSession failed');
-    //     throw e;
-    // }
+    try {
+        const resp = await HTTPService.post(
+            `${ENDPOINT}/users/srp/create-session`,
+            {
+                srpUserID,
+                srpA,
+            }
+        );
+        return resp.data as CreateSRPSessionResponse;
+    } catch (e) {
+        logError(e, 'createSRPSession failed');
+        throw e;
+    }
 };
 
 export const verifySRPSession = async (
@@ -107,7 +108,7 @@ export const verifySRPSession = async (
         );
         return resp.data as SRPVerificationResponse;
     } catch (e) {
-        // logError(e, 'verifySRPSession failed');
+        logError(e, 'verifySRPSession failed');
         if (
             e instanceof ApiError &&
             e.httpStatusCode === HttpStatusCode.Forbidden
@@ -123,13 +124,18 @@ export const updateSRPAndKeys = async (
     token: string,
     updateSRPAndKeyRequest: UpdateSRPAndKeysRequest
 ): Promise<UpdateSRPAndKeysResponse> => {
-    const resp = await HTTPService.post(
-        `${ENDPOINT}/users/srp/update`,
-        updateSRPAndKeyRequest,
-        null,
-        {
-            'X-Auth-Token': token,
-        }
-    );
-    return resp.data as UpdateSRPAndKeysResponse;
+    try {
+        const resp = await HTTPService.post(
+            `${ENDPOINT}/users/srp/update`,
+            updateSRPAndKeyRequest,
+            null,
+            {
+                'X-Auth-Token': token,
+            }
+        );
+        return resp.data as UpdateSRPAndKeysResponse;
+    } catch (e) {
+        logError(e, 'updateSRPAndKeys failed');
+        throw e;
+    }
 };

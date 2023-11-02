@@ -14,7 +14,6 @@ import {
 } from '@ente/accounts/utils';
 
 import { setJustSignedUp } from '@ente/shared/storage/localStorage/helpers';
-// import { logError } from 'utils/sentry';
 import { SESSION_KEYS } from '@ente/shared/storage/sessionStorage';
 import { PAGES } from '@ente/accounts/constants/pages';
 import {
@@ -36,6 +35,7 @@ import { t } from 'i18next';
 import ShowHidePassword from '@ente/shared/components/Form/ShowHidePassword';
 import { APPS } from '@ente/shared/apps/constants';
 import { NextRouter } from 'next/router';
+import { logError } from '@ente/shared/sentry';
 
 interface FormValues {
     email: string;
@@ -104,7 +104,7 @@ export default function SignUp({ router, appName, login }: SignUpProps) {
                 throw e;
             }
         } catch (err) {
-            // logError(err, 'signup failed');
+            logError(err, 'signup failed');
         }
         setLoading(false);
     };

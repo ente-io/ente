@@ -11,7 +11,6 @@ import SingleInputForm, {
     SingleInputFormProps,
 } from '@ente/shared/components/SingleInputForm';
 import { VerticallyCentered } from '@ente/shared/components/Container';
-// import { logError } from 'utils/sentry';
 import { getKey, SESSION_KEYS } from '@ente/shared/storage/sessionStorage';
 import { KeyAttributes, User } from '@ente/shared/user/types';
 import FormPaper from '@ente/shared/components/Form/FormPaper';
@@ -22,6 +21,7 @@ import ComlinkCryptoWorker from '@ente/shared/crypto';
 import { sendOtt } from '@ente/accounts/api/user';
 import InMemoryStore, { MS_KEYS } from '@ente/shared/storage/InMemoryStore';
 import { PageProps } from '@ente/shared/apps/types';
+import { logError } from '@ente/shared/sentry';
 const bip39 = require('bip39');
 // mobile client library only supports english.
 bip39.setDefaultWordlist('english');
@@ -84,7 +84,7 @@ export default function Recover({ appContext, router, appName }: PageProps) {
             setData(LS_KEYS.SHOW_BACK_BUTTON, { value: false });
             router.push(PAGES.CHANGE_PASSWORD);
         } catch (e) {
-            // logError(e, 'password recovery failed');
+            logError(e, 'password recovery failed');
             setFieldError(t('INCORRECT_RECOVERY_KEY'));
         }
     };

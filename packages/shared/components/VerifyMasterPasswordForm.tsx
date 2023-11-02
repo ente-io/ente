@@ -1,7 +1,8 @@
 import SingleInputForm, {
     SingleInputFormProps,
 } from '../components/SingleInputForm';
-// import { logError } from 'utils/sentry';
+import { logError } from '@ente/shared/sentry';
+
 import { CustomError } from '../error';
 
 import { ButtonProps, Input } from '@mui/material';
@@ -58,7 +59,7 @@ export default function VerifyMasterPasswordForm({
                     );
                 }
             } catch (e) {
-                // logError(e, 'failed to derive key');
+                logError(e, 'failed to derive key');
                 throw Error(CustomError.WEAK_DEVICE);
             }
             if (!keyAttributes && typeof getKeyAttributes === 'function') {
@@ -75,7 +76,7 @@ export default function VerifyMasterPasswordForm({
                 );
                 callback(key, kek, keyAttributes, passphrase);
             } catch (e) {
-                // logError(e, 'user entered a wrong password');
+                logError(e, 'user entered a wrong password');
                 throw Error(CustomError.INCORRECT_PASSWORD);
             }
         } catch (e) {
@@ -84,7 +85,7 @@ export default function VerifyMasterPasswordForm({
                     // two factor enabled, user has been redirected to two factor page
                     return;
                 }
-                // logError(e, 'failed to verify passphrase');
+                logError(e, 'failed to verify passphrase');
                 switch (e.message) {
                     case CustomError.WEAK_DEVICE:
                         setFieldError(t('WEAK_DEVICE'));

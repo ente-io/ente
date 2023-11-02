@@ -13,6 +13,7 @@ import {
     RecoveryKey,
 } from '@ente/accounts/types/user';
 import { B64EncryptionResult } from '@ente/shared/crypto/types';
+import { logError } from '@ente/shared/sentry';
 
 const ENDPOINT = getEndpoint();
 
@@ -54,7 +55,7 @@ export const _logout = async () => {
         ) {
             return true;
         }
-        // logError(e, '/users/logout failed');
+        logError(e, '/users/logout failed');
         throw e;
     }
 };

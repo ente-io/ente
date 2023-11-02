@@ -18,17 +18,17 @@ export const logoutUser = async (router: NextRouter) => {
             InMemoryStore.clear();
         } catch (e) {
             // ignore
-            // logError(e, 'clear InMemoryStore failed');
+            logError(e, 'clear InMemoryStore failed');
         }
         try {
             clearKeys();
         } catch (e) {
-            // logError(e, 'clearKeys failed');
+            logError(e, 'clearKeys failed');
         }
         try {
             clearData();
         } catch (e) {
-            // logError(e, 'clearData failed');
+            logError(e, 'clearData failed');
         }
         // try {
         //     await deleteAllCache();
@@ -54,6 +54,6 @@ export const logoutUser = async (router: NextRouter) => {
         // }
         router.push(PAGES.ROOT);
     } catch (e) {
-        // logError(e, 'logoutUser failed');
+        logError(e, 'logoutUser failed');
     }
 };
