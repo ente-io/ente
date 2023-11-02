@@ -45,7 +45,7 @@ import VerifyMasterPasswordForm, {
     VerifyMasterPasswordFormProps,
 } from '@ente/shared/components/VerifyMasterPasswordForm';
 // import { APPS, getAppName } from '@ente/shared/apps';
-// import { addLocalLog } from 'utils/logging';
+import { addLocalLog } from '@ente/shared/logging';
 import ComlinkCryptoWorker from '@ente/shared/crypto';
 import { B64EncryptionResult } from '@ente/shared/crypto/types';
 import { CustomError } from '@ente/shared/error';
@@ -219,7 +219,7 @@ export default function Credentials({
                         setData(LS_KEYS.SRP_ATTRIBUTES, srpAttributes);
                     }
                 }
-                // addLocalLog(() => `userSRPSetupPending ${!srpAttributes}`);
+                addLocalLog(() => `userSRPSetupPending ${!srpAttributes}`);
                 if (!srpAttributes) {
                     const loginSubKey = await generateLoginSubKey(kek);
                     const srpSetupAttributes = await generateSRPSetupAttributes(

@@ -7,7 +7,7 @@ import FormPaperTitle from '@ente/shared/components/Form/FormPaper/Title';
 import FormPaperFooter from '@ente/shared/components/Form/FormPaper/Footer';
 import LinkButton from '@ente/shared/components/LinkButton';
 import { t } from 'i18next';
-// import { addLocalLog } from 'utils/logging';
+import { addLocalLog } from '@ente/shared/logging';
 import { Input } from '@mui/material';
 import SingleInputForm, {
     SingleInputFormProps,
@@ -28,9 +28,9 @@ export default function Login(props: LoginProps) {
         try {
             setData(LS_KEYS.USER, { email });
             const srpAttributes = await getSRPAttributes(email);
-            // addLocalLog(
-            //     () => ` srpAttributes: ${JSON.stringify(srpAttributes)}`
-            // );
+            addLocalLog(
+                () => ` srpAttributes: ${JSON.stringify(srpAttributes)}`
+            );
             if (!srpAttributes || srpAttributes.isEmailMFAEnabled) {
                 await sendOtt(props.appName, email);
                 router.push(PAGES.VERIFY);
