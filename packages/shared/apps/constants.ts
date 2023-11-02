@@ -8,6 +8,12 @@ export enum APPS {
     ALBUMS = 'ALBUMS',
 }
 
+export enum APP_ENV {
+    DEVELOPMENT = 'development',
+    PRODUCTION = 'production',
+    TEST = 'test',
+}
+
 // export const ALLOWED_APP_PAGES = new Map([
 //     [APPS.ALBUMS, [PAGES.SHARED_ALBUMS, PAGES.ROOT]],
 //     [

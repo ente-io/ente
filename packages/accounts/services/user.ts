@@ -4,6 +4,7 @@ import { PAGES } from '../constants/pages';
 import { NextRouter } from 'next/router';
 import { clearKeys } from '@ente/shared/storage/sessionStorage';
 import { clearData } from '@ente/shared/storage/localStorage';
+import { logError } from '@ente/shared/sentry';
 
 export const logoutUser = async (router: NextRouter) => {
     try {
@@ -11,7 +12,7 @@ export const logoutUser = async (router: NextRouter) => {
             await _logout();
         } catch (e) {
             // ignore
-            // logError(e, 'clear InMemoryStore failed');
+            logError(e, 'clear InMemoryStore failed');
         }
         try {
             InMemoryStore.clear();

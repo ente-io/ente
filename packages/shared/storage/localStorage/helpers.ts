@@ -42,3 +42,11 @@ export function setLocalMapEnabled(value: boolean) {
 export function getHasOptedOutOfCrashReports(): boolean {
     return getData(LS_KEYS.OPT_OUT_OF_CRASH_REPORTS)?.value ?? false;
 }
+
+export function getLocalSentryUserID() {
+    return getData(LS_KEYS.AnonymizedUserID)?.id;
+}
+
+export function setLocalSentryUserID(id: string) {
+    setData(LS_KEYS.AnonymizedUserID, { id });
+}
