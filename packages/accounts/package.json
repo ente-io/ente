@@ -3,10 +3,9 @@
     "version": "0.0.0",
     "scripts": {
         "lint": "eslint .",
-        "build": "yarn lint"
+        "build": "yarn lint && tsc"
     },
     "dependencies": {
-        "@ente/ui": "*",
         "@ente/shared": "*"
     },
     "devDependencies": {

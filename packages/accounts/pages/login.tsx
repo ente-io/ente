@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
-import EnteSpinner from '@ente/ui/components/EnteSpinner';
-// import Login from 'components/Login';
-import { VerticallyCentered } from '@ente/ui/components/Container';
+import EnteSpinner from '@ente/shared/components/EnteSpinner';
+import Login from '../components/Login';
+import { VerticallyCentered } from '@ente/shared/components/Container';
 import { getData, LS_KEYS } from '@ente/shared/storage/localStorage';
-import { PAGES } from 'constants/pages';
-import FormPaper from '@ente/ui/components/Form/FormPaper';
+import { PAGES } from '../constants/pages';
+import FormPaper from '@ente/shared/components/Form/FormPaper';
 import { NextRouter } from 'next/router';
 
 interface HomeProps {
@@ -12,9 +12,10 @@ interface HomeProps {
         showNavBar: (show: boolean) => void;
     };
     router: NextRouter;
+    appName: string;
 }
 
-export default function Home({ appContext, router }: HomeProps) {
+export default function Home({ appContext, router, appName }: HomeProps) {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -28,9 +29,9 @@ export default function Home({ appContext, router }: HomeProps) {
         appContext?.showNavBar?.(true);
     }, []);
 
-    // const register = () => {
-    //     router.push(PAGES.SIGNUP);
-    // };
+    const register = () => {
+        router.push(PAGES.SIGNUP);
+    };
 
     return loading ? (
         <VerticallyCentered>
@@ -38,7 +39,9 @@ export default function Home({ appContext, router }: HomeProps) {
         </VerticallyCentered>
     ) : (
         <VerticallyCentered>
-            <FormPaper>{/* <Login signUp={register} /> */}</FormPaper>
+            <FormPaper>
+                <Login signUp={register} appName={appName} />
+            </FormPaper>
         </VerticallyCentered>
     );
 }

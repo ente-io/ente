@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useState } from 'react';
 import Carousel from 'react-bootstrap/Carousel';
 import { styled, Button, Typography, TypographyProps } from '@mui/material';
 import { AppContext } from './_app';
-import Login from 'components/Login';
+import Login from '@ente/accounts/components/Login';
 import { useRouter } from 'next/router';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import EnteSpinner from 'components/EnteSpinner';
@@ -245,7 +245,7 @@ export default function LandingPage() {
                     <DesktopBox>
                         <SideBox>
                             {showLogin ? (
-                                <Login signUp={signUp} />
+                                <Login signUp={signUp} appName={APPS.PHOTOS} />
                             ) : (
                                 <SignUp login={login} />
                             )}
