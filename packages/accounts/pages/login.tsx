@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import EnteSpinner from '@ente/ui/components/EnteSpinner';
 // import Login from 'components/Login';
 import { VerticallyCentered } from '@ente/ui/components/Container';
-import { getData, LS_KEYS } from '@ente/utils/storage/localStorage';
+import { getData, LS_KEYS } from '@ente/shared/storage/localStorage';
 import { PAGES } from 'constants/pages';
 import FormPaper from '@ente/ui/components/Form/FormPaper';
 import { NextRouter } from 'next/router';

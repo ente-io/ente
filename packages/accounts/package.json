@@ -7,7 +7,7 @@
     },
     "dependencies": {
         "@ente/ui": "*",
-        "@ente/utils": "*"
+        "@ente/shared": "*"
     },
     "devDependencies": {
         "@ente/eslint-config": "*",
