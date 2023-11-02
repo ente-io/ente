@@ -2,13 +2,14 @@ import HTTPService from '@ente/shared/network/HTTPService';
 import { getEndpoint } from '@ente/shared/network/api';
 
 import { getToken } from '@ente/shared/storage/localStorage/helpers';
-
-import {
-    KeyAttributes,
-    UserVerificationResponse,
-} from '@ente/shared/user/types';
+import { KeyAttributes } from '@ente/shared/user/types';
 import { ApiError } from '@ente/shared/error';
 import { HttpStatusCode } from 'axios';
+import {
+    UserVerificationResponse,
+    TwoFactorRecoveryResponse,
+    TwoFactorVerificationResponse,
+} from '@ente/accounts/types/user';
 
 const ENDPOINT = getEndpoint();
 
@@ -65,4 +66,19 @@ export const verifyTwoFactor = async (code: string, sessionID: string) => {
         null
     );
     return resp.data as UserVerificationResponse;
+};
+
+export const recoverTwoFactor = async (sessionID: string) => {
+    const resp = await HTTPService.get(`${ENDPOINT}/users/two-factor/recover`, {
+        sessionID,
+    });
+    return resp.data as TwoFactorRecoveryResponse;
+};
+
+export const removeTwoFactor = async (sessionID: string, secret: string) => {
+    const resp = await HTTPService.post(`${ENDPOINT}/users/two-factor/remove`, {
+        sessionID,
+        secret,
+    });
+    return resp.data as TwoFactorVerificationResponse;
 };

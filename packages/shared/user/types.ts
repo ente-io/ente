@@ -21,11 +21,3 @@ export interface User {
     isTwoFactorEnabled: boolean;
     twoFactorSessionID: string;
 }
-export interface UserVerificationResponse {
-    id: number;
-    keyAttributes?: KeyAttributes;
-    encryptedToken?: string;
-    token?: string;
-    twoFactorSessionID: string;
-    srpM2?: string;
-}
