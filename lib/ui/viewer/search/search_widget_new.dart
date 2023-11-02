@@ -49,7 +49,7 @@ class SearchWidgetNewState extends State<SearchWidgetNew> {
     SchedulerBinding.instance.addPostFrameCallback((_) {
       //This buffer is for doing this operation only after SearchWidget's
       //animation is complete.
-      Future.delayed(const Duration(milliseconds: 250), () {
+      Future.delayed(const Duration(milliseconds: 300), () {
         final RenderBox box =
             widgetKey.currentContext!.findRenderObject() as RenderBox;
         final heightOfWidget = box.size.height;

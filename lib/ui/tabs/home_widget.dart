@@ -436,22 +436,22 @@ class _HomeWidgetState extends State<HomeWidget> {
                         ? const SearchWidgetNew()
                             .animate()
                             .fadeIn(
-                              duration: const Duration(milliseconds: 175),
+                              duration: const Duration(milliseconds: 225),
                               curve: Curves.easeInOutSine,
                             )
                             .scale(
-                              begin: const Offset(0.6, 0.6),
+                              begin: const Offset(0.8, 0.8),
                               end: const Offset(1, 1),
                               duration: const Duration(
-                                milliseconds: 175,
+                                milliseconds: 225,
                               ),
                               curve: Curves.easeInOutSine,
                             )
                             .slide(
-                              begin: const Offset(0, 0.8),
+                              begin: const Offset(0, 0.4),
                               curve: Curves.easeInOutSine,
                               duration: const Duration(
-                                milliseconds: 175,
+                                milliseconds: 225,
                               ),
                             )
                         : const SizedBox.shrink(),
