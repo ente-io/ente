@@ -1,5 +1,5 @@
 {
-    "name": "@ente/utils",
+    "name": "@ente/shared",
     "version": "0.0.0",
     "scripts": {
         "lint": "eslint .",
