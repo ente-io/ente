@@ -252,10 +252,6 @@ export default function Credentials({
         );
     }
 
-    const logoutHandler = () => {
-        logoutUser(router);
-    };
-
     return (
         <VerticallyCentered>
             <FormPaper style={{ minWidth: '320px' }}>
@@ -273,7 +269,7 @@ export default function Credentials({
                     <LinkButton onClick={redirectToRecoverPage}>
                         {t('FORGOT_PASSWORD')}
                     </LinkButton>
-                    <LinkButton onClick={logoutHandler}>
+                    <LinkButton onClick={logoutUser}>
                         {t('CHANGE_EMAIL')}
                     </LinkButton>
                 </FormPaperFooter>

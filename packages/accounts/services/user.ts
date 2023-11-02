@@ -1,12 +1,13 @@
 import InMemoryStore from '@ente/shared/storage/InMemoryStore';
 import { _logout } from '../api/user';
 import { PAGES } from '../constants/pages';
-import { NextRouter } from 'next/router';
 import { clearKeys } from '@ente/shared/storage/sessionStorage';
 import { clearData } from '@ente/shared/storage/localStorage';
 import { logError } from '@ente/shared/sentry';
+import { clearFiles } from '@ente/shared/storage/localForage/helpers';
+import router from 'next/router';
 
-export const logoutUser = async (router: NextRouter) => {
+export const logoutUser = async () => {
     try {
         try {
             await _logout();
@@ -35,11 +36,11 @@ export const logoutUser = async (router: NextRouter) => {
         // } catch (e) {
         //     logError(e, 'deleteAllCache failed');
         // }
-        // try {
-        //     await clearFiles();
-        // } catch (e) {
-        //     logError(e, 'clearFiles failed');
-        // }
+        try {
+            await clearFiles();
+        } catch (e) {
+            logError(e, 'clearFiles failed');
+        }
         // if (isElectron()) {
         //     try {
         //         safeStorageService.clearElectronStore();

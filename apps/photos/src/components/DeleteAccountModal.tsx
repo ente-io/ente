@@ -2,11 +2,7 @@ import { Button, Link, Stack } from '@mui/material';
 import { AppContext } from 'pages/_app';
 import { useContext, useEffect, useRef, useState } from 'react';
 import { preloadImage, initiateEmail } from 'utils/common';
-import {
-    deleteAccount,
-    getAccountDeleteChallenge,
-    logoutUser,
-} from 'services/userService';
+import { deleteAccount, getAccountDeleteChallenge } from 'services/userService';
 import { logError } from 'utils/sentry';
 import { decryptDeleteAccountChallenge } from 'utils/crypto';
 import { Trans } from 'react-i18next';
@@ -20,6 +16,7 @@ import MultilineInput from './MultilineInput';
 import { CheckboxInput } from './CheckboxInput';
 import EnteButton from './EnteButton';
 import { GalleryContext } from 'pages/gallery';
+import { logoutUser } from '@ente/accounts/services/user';
 
 interface Iprops {
     onClose: () => void;

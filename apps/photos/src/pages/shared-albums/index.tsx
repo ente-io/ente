@@ -47,7 +47,7 @@ import FullScreenDropZone from 'components/FullScreenDropZone';
 import useFileInput from 'hooks/useFileInput';
 import { useDropzone } from 'react-dropzone';
 import UploadSelectorInputs from 'components/UploadSelectorInputs';
-import { logoutUser } from 'services/userService';
+import { logoutUser } from '@ente/accounts/services/user';
 import UploadButton from 'components/Upload/UploadButton';
 import bs58 from 'bs58';
 import AddPhotoAlternateOutlined from '@mui/icons-material/AddPhotoAlternateOutlined';

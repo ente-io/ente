@@ -2,7 +2,7 @@ import { HorizontalFlex } from 'components/Container';
 import NavbarBase from 'components/Navbar/base';
 import React from 'react';
 import { t } from 'i18next';
-import { logoutUser } from 'services/userService';
+import { logoutUser } from '@ente/accounts/services/user';
 import { EnteLogo } from 'components/EnteLogo';
 import OverflowMenu from 'components/OverflowMenu/menu';
 import { OverflowMenuOption } from 'components/OverflowMenu/option';

@@ -69,7 +69,7 @@ export default function Recover({ router, appContext }: PageProps) {
                     e instanceof ApiError &&
                     e.httpStatusCode === HttpStatusCode.NotFound
                 ) {
-                    logoutUser(router);
+                    logoutUser();
                 } else {
                     logError(e, 'two factor recovery page setup failed');
                     setDoesHaveEncryptedRecoveryKey(false);

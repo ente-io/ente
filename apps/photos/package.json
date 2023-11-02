@@ -14,6 +14,7 @@
     },
     "dependencies": {
         "@ente/accounts": "*",
+        "@ente/shared": "*",
         "@date-io/date-fns": "^2.14.0",
         "@emotion/cache": "^11.10.5",
         "@emotion/react": "^11.10.6",

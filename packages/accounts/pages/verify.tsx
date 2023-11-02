@@ -140,10 +140,6 @@ export default function VerifyPage({ appContext, router, appName }: PageProps) {
         );
     }
 
-    const logoutHandler = async () => {
-        logoutUser(router);
-    };
-
     return (
         <VerticallyCentered>
             <FormPaper>
@@ -175,7 +171,7 @@ export default function VerifyPage({ appContext, router, appName }: PageProps) {
                     )}
                     {resend === 1 && <span>{t('SENDING')}</span>}
                     {resend === 2 && <span>{t('SENT')}</span>}
-                    <LinkButton onClick={logoutHandler}>
+                    <LinkButton onClick={logoutUser}>
                         {t('CHANGE_EMAIL')}
                     </LinkButton>
                 </FormPaperFooter>

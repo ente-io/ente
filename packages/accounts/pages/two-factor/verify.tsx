@@ -59,14 +59,12 @@ export default function TwoFactorVerify({ router }: PageProps) {
                 e instanceof ApiError &&
                 e.httpStatusCode === HttpStatusCode.NotFound
             ) {
-                logoutUser(router);
+                logoutUser();
             } else {
                 throw e;
             }
         }
     };
-
-    const logoutHandler = () => logoutUser(router);
 
     return (
         <VerticallyCentered>
@@ -79,7 +77,7 @@ export default function TwoFactorVerify({ router }: PageProps) {
                         onClick={() => router.push(PAGES.TWO_FACTOR_RECOVER)}>
                         {t('LOST_DEVICE')}
                     </LinkButton>
-                    <LinkButton onClick={logoutHandler}>
+                    <LinkButton onClick={logoutUser}>
                         {t('CHANGE_EMAIL')}
                     </LinkButton>
                 </FormPaperFooter>
