@@ -82,3 +82,31 @@ export const removeTwoFactor = async (sessionID: string, secret: string) => {
     });
     return resp.data as TwoFactorVerificationResponse;
 };
+
+export const changeEmail = async (email: string, ott: string) => {
+    if (!getToken()) {
+        return null;
+    }
+    await HTTPService.post(
+        `${ENDPOINT}/users/change-email`,
+        {
+            email,
+            ott,
+        },
+        null,
+        {
+            'X-Auth-Token': getToken(),
+        }
+    );
+};
+
+export const sendOTTForEmailChange = async (email: string) => {
+    if (!getToken()) {
+        return null;
+    }
+    await HTTPService.post(`${ENDPOINT}/users/ott`, {
+        email,
+        client: 'web',
+        purpose: 'change',
+    });
+};

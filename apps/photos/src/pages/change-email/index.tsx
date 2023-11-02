@@ -1,30 +1,17 @@
-import { VerticallyCentered } from 'components/Container';
-import React, { useEffect } from 'react';
-import { t } from 'i18next';
+import ChangeEmailPage from '@ente/accounts/pages/change-email';
+import { useRouter } from 'next/router';
+import { AppContext } from 'pages/_app';
+import { useContext } from 'react';
+import { APPS } from '@ente/shared/apps/constants';
 
-import router from 'next/router';
-import ChangeEmailForm from 'components/ChangeEmail';
-import { PAGES } from 'constants/pages';
-import { getData, LS_KEYS } from 'utils/storage/localStorage';
-import FormPaper from 'components/Form/FormPaper';
-import FormPaperTitle from 'components/Form/FormPaper/Title';
-
-function ChangeEmailPage() {
-    useEffect(() => {
-        const user = getData(LS_KEYS.USER);
-        if (!user?.token) {
-            router.push(PAGES.ROOT);
-        }
-    }, []);
-
+export default function ChangeEmail() {
+    const appContext = useContext(AppContext);
+    const router = useRouter();
     return (
-        <VerticallyCentered>
-            <FormPaper>
-                <FormPaperTitle>{t('CHANGE_EMAIL')}</FormPaperTitle>
-                <ChangeEmailForm />
-            </FormPaper>
-        </VerticallyCentered>
+        <ChangeEmailPage
+            appContext={appContext}
+            router={router}
+            appName={APPS.PHOTOS}
+        />
     );
 }
-
-export default ChangeEmailPage;
