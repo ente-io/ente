@@ -3,7 +3,10 @@ import { getEndpoint } from '@ente/shared/network/api';
 
 import { getToken } from '@ente/shared/storage/localStorage/helpers';
 
-import { KeyAttributes } from '@ente/shared/user/types';
+import {
+    KeyAttributes,
+    UserVerificationResponse,
+} from '@ente/shared/user/types';
 import { ApiError } from '@ente/shared/error';
 import { HttpStatusCode } from 'axios';
 
@@ -50,4 +53,16 @@ export const _logout = async () => {
         // logError(e, '/users/logout failed');
         throw e;
     }
+};
+
+export const verifyTwoFactor = async (code: string, sessionID: string) => {
+    const resp = await HTTPService.post(
+        `${ENDPOINT}/users/two-factor/verify`,
+        {
+            code,
+            sessionID,
+        },
+        null
+    );
+    return resp.data as UserVerificationResponse;
 };
