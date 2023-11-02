@@ -9,7 +9,10 @@ import {
     UserVerificationResponse,
     TwoFactorRecoveryResponse,
     TwoFactorVerificationResponse,
+    TwoFactorSecret,
+    RecoveryKey,
 } from '@ente/accounts/types/user';
+import { B64EncryptionResult } from '@ente/shared/crypto/types';
 
 const ENDPOINT = getEndpoint();
 
@@ -110,3 +113,40 @@ export const sendOTTForEmailChange = async (email: string) => {
         purpose: 'change',
     });
 };
+
+export const setupTwoFactor = async () => {
+    const resp = await HTTPService.post(
+        `${ENDPOINT}/users/two-factor/setup`,
+        null,
+        null,
+        {
+            'X-Auth-Token': getToken(),
+        }
+    );
+    return resp.data as TwoFactorSecret;
+};
+
+export const enableTwoFactor = async (
+    code: string,
+    recoveryEncryptedTwoFactorSecret: B64EncryptionResult
+) => {
+    await HTTPService.post(
+        `${ENDPOINT}/users/two-factor/enable`,
+        {
+            code,
+            encryptedTwoFactorSecret:
+                recoveryEncryptedTwoFactorSecret.encryptedData,
+            twoFactorSecretDecryptionNonce:
+                recoveryEncryptedTwoFactorSecret.nonce,
+        },
+        null,
+        {
+            'X-Auth-Token': getToken(),
+        }
+    );
+};
+
+export const setRecoveryKey = (token: string, recoveryKey: RecoveryKey) =>
+    HTTPService.put(`${ENDPOINT}/users/recovery-key`, recoveryKey, null, {
+        'X-Auth-Token': token,
+    });

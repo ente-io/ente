@@ -1,7 +1,10 @@
 import ComlinkCryptoWorker from '.';
-import { LS_KEYS, getData, setData } from '../storage/localStorage';
-import { SESSION_KEYS, setKey } from '../storage/sessionStorage';
-import { KeyAttributes } from '../user/types';
+import { LS_KEYS, getData, setData } from '@ente/shared/storage/localStorage';
+import { getToken } from '@ente/shared/storage/localStorage/helpers';
+import { SESSION_KEYS, setKey } from '@ente/shared/storage/sessionStorage';
+import { getActualKey } from '@ente/shared/user';
+import { KeyAttributes } from '@ente/shared/user/types';
+import { setRecoveryKey } from '@ente/accounts/api/user';
 
 const LOGIN_SUB_KEY_LENGTH = 32;
 const LOGIN_SUB_KEY_ID = 1;
@@ -107,3 +110,74 @@ export const saveKeyInSessionStore = async (
     //     safeStorageService.setEncryptionKey(key);
     // }
 };
+
+export async function encryptWithRecoveryKey(key: string) {
+    const cryptoWorker = await ComlinkCryptoWorker.getInstance();
+    const hexRecoveryKey = await getRecoveryKey();
+    const recoveryKey = await cryptoWorker.fromHex(hexRecoveryKey);
+    const encryptedKey = await cryptoWorker.encryptToB64(key, recoveryKey);
+    return encryptedKey;
+}
+
+export const getRecoveryKey = async () => {
+    let recoveryKey: string = null;
+    try {
+        const cryptoWorker = await ComlinkCryptoWorker.getInstance();
+
+        const keyAttributes: KeyAttributes = getData(LS_KEYS.KEY_ATTRIBUTES);
+        const {
+            recoveryKeyEncryptedWithMasterKey,
+            recoveryKeyDecryptionNonce,
+        } = keyAttributes;
+        const masterKey = await getActualKey();
+        if (recoveryKeyEncryptedWithMasterKey) {
+            recoveryKey = await cryptoWorker.decryptB64(
+                recoveryKeyEncryptedWithMasterKey,
+                recoveryKeyDecryptionNonce,
+                masterKey
+            );
+        } else {
+            recoveryKey = await createNewRecoveryKey();
+        }
+        recoveryKey = await cryptoWorker.toHex(recoveryKey);
+        return recoveryKey;
+    } catch (e) {
+        console.log(e);
+        // logError(e, 'getRecoveryKey failed');
+        throw e;
+    }
+};
+
+// Used only for legacy users for whom we did not generate recovery keys during
+// sign up
+async function createNewRecoveryKey() {
+    const masterKey = await getActualKey();
+    const existingAttributes = getData(LS_KEYS.KEY_ATTRIBUTES);
+
+    const cryptoWorker = await ComlinkCryptoWorker.getInstance();
+
+    const recoveryKey = await cryptoWorker.generateEncryptionKey();
+    const encryptedMasterKey = await cryptoWorker.encryptToB64(
+        masterKey,
+        recoveryKey
+    );
+    const encryptedRecoveryKey = await cryptoWorker.encryptToB64(
+        recoveryKey,
+        masterKey
+    );
+    const recoveryKeyAttributes = {
+        masterKeyEncryptedWithRecoveryKey: encryptedMasterKey.encryptedData,
+        masterKeyDecryptionNonce: encryptedMasterKey.nonce,
+        recoveryKeyEncryptedWithMasterKey: encryptedRecoveryKey.encryptedData,
+        recoveryKeyDecryptionNonce: encryptedRecoveryKey.nonce,
+    };
+    await setRecoveryKey(getToken(), recoveryKeyAttributes);
+
+    const updatedKeyAttributes = Object.assign(
+        existingAttributes,
+        recoveryKeyAttributes
+    );
+    setData(LS_KEYS.KEY_ATTRIBUTES, updatedKeyAttributes);
+
+    return recoveryKey;
+}

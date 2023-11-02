@@ -33,3 +33,10 @@ export interface UpdatedKey {
     memLimit: number;
     opsLimit: number;
 }
+
+export interface RecoveryKey {
+    masterKeyEncryptedWithRecoveryKey: string;
+    masterKeyDecryptionNonce: string;
+    recoveryKeyEncryptedWithMasterKey: string;
+    recoveryKeyDecryptionNonce: string;
+}
