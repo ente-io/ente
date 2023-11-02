@@ -32,6 +32,7 @@ import {
     SetDialogBoxAttributes,
     DialogBoxAttributes,
     DialogBoxAttributesV2,
+    SetDialogBoxAttributesV2,
 } from 'types/dialogBox';
 import {
     getFamilyPortalRedirectURL,
@@ -120,7 +121,7 @@ type AppContextType = {
     themeColor: THEME_COLOR;
     setThemeColor: SetTheme;
     somethingWentWrong: () => void;
-    setDialogBoxAttributesV2: (attributes: DialogBoxAttributesV2) => void;
+    setDialogBoxAttributesV2: SetDialogBoxAttributesV2;
 };
 
 export const AppContext = createContext<AppContextType>(null);
