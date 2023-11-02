@@ -23,10 +23,8 @@ class _LockScreenState extends State<LockScreen> with WidgetsBindingObserver {
   void initState() {
     _logger.info("initState");
     super.initState();
+    _showLockScreen(source: "initState");
     WidgetsBinding.instance.addObserver(this);
-    WidgetsBinding.instance!.addPostFrameCallback((_) {
-      _showLockScreen(source: "initState");
-    });
   }
 
   @override
@@ -65,7 +63,7 @@ class _LockScreenState extends State<LockScreen> with WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     _logger.info(state.toString());
-    if (state == AppLifecycleState.resumed) {
+    if (state == AppLifecycleState.resumed && !_isShowingLockScreen) {
       // This is triggered either when the lock screen is dismissed or when
       // the app is brought to foreground
       _hasPlacedAppInBackground = false;
@@ -97,19 +95,20 @@ class _LockScreenState extends State<LockScreen> with WidgetsBindingObserver {
   }
 
   Future<void> _showLockScreen({String source = ''}) async {
-    _logger.info("Showing lock screen $source");
+    final int id = DateTime.now().millisecondsSinceEpoch;
+    _logger.info("Showing lock screen $source $id");
     try {
       _isShowingLockScreen = true;
       final result = await requestAuthentication(
         context,
         S.of(context).authToViewYourMemories,
       );
+      _logger.finest("LockScreen Result $result $id");
       _isShowingLockScreen = false;
       if (result) {
         lastAuthenticatingTime = DateTime.now().millisecondsSinceEpoch;
         AppLock.of(context)!.didUnlock();
       } else {
-        _logger.info("Dismissed");
         if (!_hasPlacedAppInBackground) {
           // Treat this as a failure only if user did not explicitly
           // put the app in background

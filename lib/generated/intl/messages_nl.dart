@@ -501,6 +501,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "deleteAlbumsDialogBody": MessageLookupByLibrary.simpleMessage(
             "Hiermee worden alle lege albums verwijderd. Dit is handig wanneer je rommel in je albumlijst wilt verminderen."),
         "deleteAll": MessageLookupByLibrary.simpleMessage("Alles Verwijderen"),
+        "deleteConfirmDialogBody": MessageLookupByLibrary.simpleMessage(
+            "Dit account is gekoppeld aan andere ente apps, als je er gebruik van maakt.\\n\\nJe geüploade gegevens worden in alle ente apps gepland voor verwijdering, en je account wordt permanent verwijderd voor alle ente diensten."),
         "deleteEmailRequest": MessageLookupByLibrary.simpleMessage(
             "Stuur een e-mail naar <warning>account-deletion@ente.io</warning> vanaf het door jou geregistreerde e-mailadres."),
         "deleteEmptyAlbums":
