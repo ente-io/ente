@@ -5,14 +5,14 @@ import { t } from 'i18next';
 import { VerticallyCentered } from '@ente/shared/components/Container';
 import VerifyTwoFactor, {
     VerifyTwoFactorCallback,
-} from '@ente/accounts/components/TwoFactor/VerifyForm';
+} from '@ente/accounts/components/two-factor/VerifyForm';
 import { encryptWithRecoveryKey } from '@ente/shared/crypto/helpers';
 import { setData, LS_KEYS, getData } from '@ente/shared/storage/localStorage';
 import { PAGES } from '@ente/accounts/constants/pages';
 import { TwoFactorSecret } from '@ente/accounts/types/user';
 import Card from '@mui/material/Card';
 import { Box, CardContent, Typography } from '@mui/material';
-import { TwoFactorSetup } from '@ente/accounts/components/TwoFactor/Setup';
+import { TwoFactorSetup } from '@ente/accounts/components/two-factor/Setup';
 import LinkButton from '@ente/shared/components/LinkButton';
 import { PageProps } from '@ente/shared/apps/types';
 // import { logError } from 'utils/sentry';

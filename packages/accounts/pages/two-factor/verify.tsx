@@ -1,6 +1,6 @@
 import VerifyTwoFactor, {
     VerifyTwoFactorCallback,
-} from '@ente/accounts/components/TwoFactor/VerifyForm';
+} from '@ente/accounts/components/two-factor/VerifyForm';
 import { useEffect, useState } from 'react';
 import { logoutUser } from '@ente/accounts/services/user';
 import { verifyTwoFactor } from '@ente/accounts/api/user';
