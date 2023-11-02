@@ -19,7 +19,7 @@ import { t } from 'i18next';
 import { Trans } from 'react-i18next';
 import { Link } from '@mui/material';
 import { SUPPORT_EMAIL } from '@ente/shared/constants/urls';
-import { DialogBoxAttributesV2 } from '@ente/shared/components/DialogBoxV2';
+import { DialogBoxAttributesV2 } from '@ente/shared/components/DialogBoxV2/types';
 import { ApiError } from '@ente/shared/error';
 import { HttpStatusCode } from 'axios';
 import { PageProps } from '@ente/shared/apps/types';

@@ -8,10 +8,8 @@ import {
     generateAndSaveIntermediateKeyAttributes,
     saveKeyInSessionStore,
 } from '@ente/shared/crypto/helpers';
-import {
-    generateKeyAndSRPAttributes,
-    isWeakPassword,
-} from '@ente/accounts/utils';
+import { isWeakPassword } from '@ente/accounts/utils';
+import { generateKeyAndSRPAttributes } from '@ente/accounts/utils/srp';
 
 import { setJustSignedUp } from '@ente/shared/storage/localStorage/helpers';
 import { SESSION_KEYS } from '@ente/shared/storage/sessionStorage';

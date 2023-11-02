@@ -1,6 +1,6 @@
 import { FC } from 'react';
 import { BoxProps, Divider } from '@mui/material';
-import { VerticallyCentered } from '../../Container';
+import { VerticallyCentered } from '@ente/shared/components/Container';
 
 const FormPaperFooter: FC<BoxProps> = ({ sx, style, ...props }) => {
     return (

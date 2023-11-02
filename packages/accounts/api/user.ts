@@ -151,3 +151,9 @@ export const setRecoveryKey = (token: string, recoveryKey: RecoveryKey) =>
     HTTPService.put(`${ENDPOINT}/users/recovery-key`, recoveryKey, null, {
         'X-Auth-Token': token,
     });
+
+export const disableTwoFactor = async () => {
+    await HTTPService.post(`${ENDPOINT}/users/two-factor/disable`, null, null, {
+        'X-Auth-Token': getToken(),
+    });
+};

@@ -1,6 +1,6 @@
-import { FreeFlowText } from '../Container';
+import { FreeFlowText } from '@ente/shared/components/Container';
 import React from 'react';
-import EnteSpinner from '../EnteSpinner';
+import EnteSpinner from '@ente/shared/components/EnteSpinner';
 import { Wrapper, CodeWrapper, CopyButtonWrapper } from './styledComponents';
 import CopyButton from './CopyButton';
 import { BoxProps } from '@mui/material';

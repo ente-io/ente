@@ -3,8 +3,8 @@ import { Formik, FormikHelpers, FormikState } from 'formik';
 import * as Yup from 'yup';
 import SubmitButton from './SubmitButton';
 import TextField from '@mui/material/TextField';
-import ShowHidePassword from './Form/ShowHidePassword';
-import { FlexWrapper } from './Container';
+import ShowHidePassword from '@ente/shared/components/Form/ShowHidePassword';
+import { FlexWrapper } from '@ente/shared/components/Container';
 import { Button, FormHelperText } from '@mui/material';
 import { t } from 'i18next';
 
