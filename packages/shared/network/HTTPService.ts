@@ -1,5 +1,5 @@
 import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
-// import { addLogLine } from 'utils/logging';
+import { addLogLine } from '@ente/shared/logging';
 import { logError } from '@ente/shared/sentry';
 
 import { ApiError, CustomError, isApiErrorResponse } from '../error';
@@ -68,19 +68,19 @@ class HTTPService {
                     // The request was made but no response was received
                     // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
                     // http.ClientRequest in node.js
-                    // addLogLine(
-                    //     'request failed- no response',
-                    //     `url: ${config.url}`,
-                    //     `method: ${config.method}`
-                    // );
+                    addLogLine(
+                        'request failed- no response',
+                        `url: ${config.url}`,
+                        `method: ${config.method}`
+                    );
                     return Promise.reject(error);
                 } else {
                     // Something happened in setting up the request that triggered an Error
-                    // addLogLine(
-                    //     'request failed- axios error',
-                    //     `url: ${config.url}`,
-                    //     `method: ${config.method}`
-                    // );
+                    addLogLine(
+                        'request failed- axios error',
+                        `url: ${config.url}`,
+                        `method: ${config.method}`
+                    );
                     return Promise.reject(error);
                 }
             }
