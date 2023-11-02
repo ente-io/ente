@@ -7,15 +7,7 @@ import { PAGES } from '../constants/pages';
 import FormPaper from '@ente/shared/components/Form/FormPaper';
 import { PageProps } from '@ente/shared/apps/types';
 
-interface LoginPageProps extends PageProps {
-    appName: string;
-}
-
-export default function LoginPage({
-    appContext,
-    router,
-    appName,
-}: LoginPageProps) {
+export default function LoginPage({ appContext, router, appName }: PageProps) {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {

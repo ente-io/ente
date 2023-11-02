@@ -5,4 +5,5 @@ export interface PageProps {
         showNavBar: (show: boolean) => void;
     };
     router: NextRouter;
+    appName: string;
 }
