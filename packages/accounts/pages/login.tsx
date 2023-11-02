@@ -5,17 +5,17 @@ import { VerticallyCentered } from '@ente/shared/components/Container';
 import { getData, LS_KEYS } from '@ente/shared/storage/localStorage';
 import { PAGES } from '../constants/pages';
 import FormPaper from '@ente/shared/components/Form/FormPaper';
-import { NextRouter } from 'next/router';
+import { PageProps } from '@ente/shared/apps/types';
 
-interface HomeProps {
-    appContext: {
-        showNavBar: (show: boolean) => void;
-    };
-    router: NextRouter;
+interface LoginPageProps extends PageProps {
     appName: string;
 }
 
-export default function Home({ appContext, router, appName }: HomeProps) {
+export default function LoginPage({
+    appContext,
+    router,
+    appName,
+}: LoginPageProps) {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
