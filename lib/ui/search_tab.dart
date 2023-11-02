@@ -112,9 +112,11 @@ class _AllSearchSectionsState extends State<AllSearchSections> {
                 itemCount: searchTypes.length,
                 itemBuilder: (context, index) {
                   return searchTypes[index] == SectionType.recents
-                      ? RecentSection(
-                          searches: snapshot.data!.elementAt(index),
-                        )
+                      ? const SizedBox.shrink()
+                      //Recents is in WIP
+                      // ? RecentSection(
+                      //     searches: snapshot.data!.elementAt(index),
+                      //   )
                       : SearchSection(
                           sectionType: searchTypes[index],
                           examples: snapshot.data!.elementAt(index),
