@@ -61,6 +61,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Przykro nam, że odchodzisz. Wyjaśnij nam, dlaczego nas opuszczasz, aby pomóc ulepszać nasze usługi."),
         "deleteAccountPermanentlyButton":
             MessageLookupByLibrary.simpleMessage("Usuń konto na stałe"),
+        "deleteConfirmDialogBody": MessageLookupByLibrary.simpleMessage(
+            "This account is linked to other ente apps, if you use any.\\n\\nYour uploaded data, across all ente apps, will be scheduled for deletion, and your account will be permanently deleted."),
         "deleteEmailRequest": MessageLookupByLibrary.simpleMessage(
             "Wyślij wiadomość e-mail na <warning>account-deletion@ente.io</warning> z zarejestrowanego adresu e-mail."),
         "deleteReason1": MessageLookupByLibrary.simpleMessage(
