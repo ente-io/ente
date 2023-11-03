@@ -1,11 +1,14 @@
 import 'dart:io';
 
 import 'package:archive/archive_io.dart';
+import "package:cross_file/cross_file.dart";
 import 'package:email_validator/email_validator.dart';
+import "package:file_saver/file_saver.dart";
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_email_sender/flutter_email_sender.dart';
+import "package:intl/intl.dart";
 import 'package:logging/logging.dart';
 import 'package:open_mail_app/open_mail_app.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -73,6 +76,15 @@ Future<void> sendLogs(
             barrierColor: Colors.black87,
             barrierDismissible: false,
           );
+        },
+      ),
+      ButtonWidget(
+        buttonType: ButtonType.secondary,
+        labelText: S.of(context).exportLogs,
+        buttonAction: ButtonAction.third,
+        onTap: () async {
+          final zipFilePath = await getZippedLogsFile(context);
+          await exportLogs(context, zipFilePath);
         },
       ),
       ButtonWidget(
@@ -159,9 +171,26 @@ Future<void> shareLogs(
     ],
   );
   if (result?.action != null && result!.action == ButtonAction.second) {
-    final Size size = MediaQuery.of(context).size;
-    await Share.shareFiles(
-      [zipFilePath],
+    await exportLogs(context, zipFilePath);
+  }
+}
+
+Future<void> exportLogs(BuildContext context, String zipFilePath) async {
+  final Size size = MediaQuery.of(context).size;
+  if (Platform.isAndroid) {
+    final DateTime now = DateTime.now().toUtc();
+    final String shortMonthName = DateFormat('MMM').format(now); // Short month
+    final String logFileName =
+        'ente-logs-${now.year}-$shortMonthName-${now.day}-${now.hour}-${now.minute}';
+    await FileSaver.instance.saveAs(
+      name: logFileName,
+      filePath: zipFilePath,
+      mimeType: MimeType.zip,
+      ext: 'zip',
+    );
+  } else {
+    await Share.shareXFiles(
+      [XFile(zipFilePath, mimeType: 'application/zip')],
       sharePositionOrigin: Rect.fromLTWH(0, 0, size.width, size.height / 2),
     );
   }

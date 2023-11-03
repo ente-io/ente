@@ -190,16 +190,6 @@ class S {
     );
   }
 
-  /// `You are about to permanently delete your account and all its data.\nThis action is irreversible.`
-  String get deleteConfirmDialogBody {
-    return Intl.message(
-      'You are about to permanently delete your account and all its data.\nThis action is irreversible.',
-      name: 'deleteConfirmDialogBody',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `Delete Account Permanently`
   String get deleteAccountPermanentlyButton {
     return Intl.message(
@@ -7820,6 +7810,16 @@ class S {
     return Intl.message(
       'Move to hidden album',
       name: 'moveToHiddenAlbum',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `This account is linked to other ente apps, if you use any.\n\nYour uploaded data, across all ente apps, will be scheduled for deletion, and your account will be permanently deleted.`
+  String get deleteConfirmDialogBody {
+    return Intl.message(
+      'This account is linked to other ente apps, if you use any.\\n\\nYour uploaded data, across all ente apps, will be scheduled for deletion, and your account will be permanently deleted.',
+      name: 'deleteConfirmDialogBody',
       desc: '',
       args: [],
     );

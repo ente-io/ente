@@ -1,4 +1,5 @@
 import 'package:email_validator/email_validator.dart';
+import "package:flutter/foundation.dart";
 import 'package:flutter/material.dart';
 import "package:logging/logging.dart";
 import 'package:photos/core/configuration.dart';
@@ -28,7 +29,11 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   void initState() {
-    _email = _config.getEmail();
+    if ((_config.getEmail() ?? '').isNotEmpty) {
+      updateEmail(_config.getEmail()!);
+    } else if (kDebugMode) {
+      updateEmail(const String.fromEnvironment("email"));
+    }
     super.initState();
   }
 
@@ -143,19 +148,12 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                     onChanged: (value) {
                       setState(() {
-                        _email = value.trim();
-                        _emailIsValid = EmailValidator.validate(_email!);
-                        if (_emailIsValid) {
-                          _emailInputFieldColor =
-                              const Color.fromRGBO(45, 194, 98, 0.2);
-                        } else {
-                          _emailInputFieldColor = null;
-                        }
+                        updateEmail(value);
                       });
                     },
                     autocorrect: false,
                     keyboardType: TextInputType.emailAddress,
-                    //initialValue: _email,
+                    initialValue: _email,
                     autofocus: true,
                   ),
                 ),
@@ -179,31 +177,33 @@ class _LoginPageState extends State<LoginPage> {
                               .copyWith(fontSize: 12),
                           tags: {
                             'u-terms': StyledTextActionTag(
-                              (String? text, Map<String?, String?> attrs) => Navigator.of(context).push(
-                                  MaterialPageRoute(
-                                    builder: (BuildContext context) {
-                                      return WebPage(
-                                        S.of(context).termsOfServicesTitle,
-                                        "https://ente.io/terms",
-                                      );
-                                    },
-                                  ),
+                              (String? text, Map<String?, String?> attrs) =>
+                                  Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (BuildContext context) {
+                                    return WebPage(
+                                      S.of(context).termsOfServicesTitle,
+                                      "https://ente.io/terms",
+                                    );
+                                  },
                                 ),
+                              ),
                               style: const TextStyle(
                                 decoration: TextDecoration.underline,
                               ),
                             ),
                             'u-policy': StyledTextActionTag(
-                              (String? text, Map<String?, String?> attrs) => Navigator.of(context).push(
-                                  MaterialPageRoute(
-                                    builder: (BuildContext context) {
-                                      return WebPage(
-                                        S.of(context).privacyPolicyTitle,
-                                        "https://ente.io/privacy",
-                                      );
-                                    },
-                                  ),
+                              (String? text, Map<String?, String?> attrs) =>
+                                  Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (BuildContext context) {
+                                    return WebPage(
+                                      S.of(context).privacyPolicyTitle,
+                                      "https://ente.io/privacy",
+                                    );
+                                  },
                                 ),
+                              ),
                               style: const TextStyle(
                                 decoration: TextDecoration.underline,
                               ),
@@ -225,5 +225,15 @@ class _LoginPageState extends State<LoginPage> {
         const Padding(padding: EdgeInsets.all(8)),
       ],
     );
+  }
+
+  void updateEmail(String value) {
+    _email = value.trim();
+    _emailIsValid = EmailValidator.validate(_email!);
+    if (_emailIsValid) {
+      _emailInputFieldColor = const Color.fromRGBO(45, 194, 98, 0.2);
+    } else {
+      _emailInputFieldColor = null;
+    }
   }
 }

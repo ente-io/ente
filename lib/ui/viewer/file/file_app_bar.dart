@@ -85,7 +85,7 @@ class FileAppBarState extends State<FileAppBar> {
           );
         },
       ),
-      Size.fromHeight(Platform.isAndroid ? 80 : 96),
+      Size.fromHeight(Platform.isAndroid ? 84 : 96),
     );
   }
 
@@ -127,7 +127,12 @@ class FileAppBarState extends State<FileAppBar> {
     }
     // only show fav option for files owned by the user
     if (isOwnedByUser && !isFileHidden && isFileUploaded) {
-      actions.add(FavoriteWidget(widget.file));
+      actions.add(
+        Padding(
+          padding: const EdgeInsets.all(8),
+          child: FavoriteWidget(widget.file),
+        ),
+      );
     }
     if (!isFileUploaded) {
       actions.add(

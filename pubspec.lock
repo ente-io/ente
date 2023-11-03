@@ -293,7 +293,7 @@ packages:
     source: hosted
     version: "1.6.3"
   cross_file:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: cross_file
       sha256: "0b0036e8cccbfbe0555fd83c1d31a6f30b77a96b598b35a5d36dd41f718695e9"
@@ -492,6 +492,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "6.1.4"
+  file_saver:
+    dependency: "direct main"
+    description:
+      name: file_saver
+      sha256: "591d25e750e3a4b654f7b0293abc2ed857242f82ca7334051b2a8ceeb369dac8"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.2.8"
   firebase_core:
     dependency: "direct main"
     description:
@@ -1155,10 +1163,10 @@ packages:
     dependency: "direct main"
     description:
       name: media_kit
-      sha256: "1283b500341d41f033478706204a2b4ae2612e9b331c934bc4fad8c4bb869f6d"
+      sha256: "3dffc6d0c19117d51fbc42a7f89612e0595665800a596289ab7a80bdd93e0ad1"
       url: "https://pub.dev"
     source: hosted
-    version: "1.1.8+2"
+    version: "1.1.9"
   media_kit_libs_android_video:
     dependency: transitive
     description:
@@ -1260,10 +1268,10 @@ packages:
     description:
       path: "."
       ref: HEAD
-      resolved-ref: c0409b2e812c7457908a6e492abae6e4f5b457a7
+      resolved-ref: e4edd3a158c667976660a788e908d1faf5c5a4f8
       url: "https://github.com/ente-io/motion_photo.git"
     source: git
-    version: "0.0.3"
+    version: "0.0.5"
   motionphoto:
     dependency: "direct main"
     description:

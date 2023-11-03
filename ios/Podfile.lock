@@ -6,6 +6,8 @@ PODS:
     - ReachabilitySwift
   - device_info_plus (0.0.1):
     - Flutter
+  - file_saver (0.0.1):
+    - Flutter
   - Firebase/CoreOnly (10.9.0):
     - FirebaseCore (= 10.9.0)
   - Firebase/Messaging (10.9.0):
@@ -190,6 +192,7 @@ DEPENDENCIES:
   - background_fetch (from `.symlinks/plugins/background_fetch/ios`)
   - connectivity_plus (from `.symlinks/plugins/connectivity_plus/ios`)
   - device_info_plus (from `.symlinks/plugins/device_info_plus/ios`)
+  - file_saver (from `.symlinks/plugins/file_saver/ios`)
   - firebase_core (from `.symlinks/plugins/firebase_core/ios`)
   - firebase_messaging (from `.symlinks/plugins/firebase_messaging/ios`)
   - fk_user_agent (from `.symlinks/plugins/fk_user_agent/ios`)
@@ -259,6 +262,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/connectivity_plus/ios"
   device_info_plus:
     :path: ".symlinks/plugins/device_info_plus/ios"
+  file_saver:
+    :path: ".symlinks/plugins/file_saver/ios"
   firebase_core:
     :path: ".symlinks/plugins/firebase_core/ios"
   firebase_messaging:
@@ -342,6 +347,7 @@ SPEC CHECKSUMS:
   background_fetch: bc9b44b0bf8b434e282a2ac9be8662800a0296ed
   connectivity_plus: 53efb943fc2882c8512d84c45707bcabc4c36076
   device_info_plus: 7545d84d8d1b896cb16a4ff98c19f07ec4b298ea
+  file_saver: 503e386464dbe118f630e17b4c2e1190fa0cf808
   Firebase: bd152f0f3d278c4060c5c71359db08ebcfd5a3e2
   firebase_core: ce64b0941c6d87c6ef5022ae9116a158236c8c94
   firebase_messaging: 42912365e62efc1ea3e00724e5eecba6068ddb88

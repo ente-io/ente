@@ -185,6 +185,12 @@ class _ZoomableLiveImageNewState extends State<ZoomableLiveImageNew>
         return motionPhoto.getMotionVideoFile(
           index: index,
         );
+      } else if (_enteFile.isMotionPhoto && _enteFile.canEditMetaInfo) {
+        _logger.finest('Incorrectly tagged as MP, reset tag ${_enteFile.tag}');
+        FileMagicService.instance.updatePublicMagicMetadata(
+          [_enteFile],
+          {motionVideoIndexKey: 0},
+        ).ignore();
       }
     }
     return null;

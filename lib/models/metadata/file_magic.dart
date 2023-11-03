@@ -43,7 +43,7 @@ class PubMagicMetadata {
   double? lat;
   double? long;
 
-  // Motion Video Index. Positive value indicates that the file is a motion
+  // Motion Video Index. Positive value (>0) indicates that the file is a motion
   // photo
   int? mvi;
 

@@ -6,7 +6,7 @@ import "package:photos/models/file/trash_file.dart";
 extension FilePropsExtn on EnteFile {
   bool get isLivePhoto => fileType == FileType.livePhoto;
 
-  bool get isMotionPhoto => pubMagicMetadata?.mvi != null;
+  bool get isMotionPhoto => (pubMagicMetadata?.mvi ?? 0) > 0;
 
   bool get isLiveOrMotionPhoto => isLivePhoto || isMotionPhoto;
 

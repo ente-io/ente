@@ -416,7 +416,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "这将删除所有空相册。 当您想减少相册列表中的混乱时，这很有用。"),
         "deleteAll": MessageLookupByLibrary.simpleMessage("全部删除"),
         "deleteConfirmDialogBody": MessageLookupByLibrary.simpleMessage(
-            "您将要永久删除您的账户及其所有数据。\n此操作是不可逆的。"),
+            "此账户已链接到其他 ente 旗下的应用程序（如果您使用任何 ente 旗下的应用程序）。\\n\\n您在所有 ente 旗下的应用程序中上传的数据将被安排删除，并且您的账户将被永久删除。"),
         "deleteEmailRequest": MessageLookupByLibrary.simpleMessage(
             "请从您注册的电子邮件地址发送电子邮件到 <warning>account-delettion@ente.io</warning>。"),
         "deleteEmptyAlbums": MessageLookupByLibrary.simpleMessage("删除空相册"),

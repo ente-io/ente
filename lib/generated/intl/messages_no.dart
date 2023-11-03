@@ -36,6 +36,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "deleteAccount": MessageLookupByLibrary.simpleMessage("Slett konto"),
         "deleteAccountFeedbackPrompt": MessageLookupByLibrary.simpleMessage(
             "Vi er lei oss for at du forlater oss. Gi oss gjerne en tilbakemelding så vi kan forbedre oss."),
+        "deleteConfirmDialogBody": MessageLookupByLibrary.simpleMessage(
+            "This account is linked to other ente apps, if you use any.\\n\\nYour uploaded data, across all ente apps, will be scheduled for deletion, and your account will be permanently deleted."),
         "email": MessageLookupByLibrary.simpleMessage("E-post"),
         "enterValidEmail": MessageLookupByLibrary.simpleMessage(
             "Vennligst skriv inn en gyldig e-postadresse."),
