@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import "package:flutter/scheduler.dart";
 import "package:photos/models/search/search_types.dart";
+import "package:photos/states/all_sections_examples_state.dart";
 import "package:photos/theme/ente_theme.dart";
-import "package:photos/ui/search_tab.dart";
 
 class NoResultWidget extends StatefulWidget {
   const NoResultWidget({Key? key}) : super(key: key);
@@ -21,21 +20,26 @@ class _NoResultWidgetState extends State<NoResultWidget> {
     // remove face and content sectionType
     searchTypes.remove(SectionType.face);
     searchTypes.remove(SectionType.content);
-    SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
-      allSectionsExamplesFuture.then((value) {
-        for (int i = 0; i < searchTypes.length; i++) {
-          final querySuggestions = <String>[];
-          for (int j = 0; j < 2 && j < value[i].length; j++) {
-            querySuggestions.add(value[i][j].name());
-          }
-          if (querySuggestions.isNotEmpty) {
-            searchTypeToQuerySuggestion.addAll({
-              searchTypes[i].sectionTitle(context): querySuggestions,
-            });
-          }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    InheritedAllSectionsExamples.of(context)
+        .allSectionsExamplesFuture
+        .then((value) {
+      for (int i = 0; i < searchTypes.length; i++) {
+        final querySuggestions = <String>[];
+        for (int j = 0; j < 2 && j < value[i].length; j++) {
+          querySuggestions.add(value[i][j].name());
         }
-        setState(() {});
-      });
+        if (querySuggestions.isNotEmpty) {
+          searchTypeToQuerySuggestion.addAll({
+            searchTypes[i].sectionTitle(context): querySuggestions,
+          });
+        }
+      }
+      setState(() {});
     });
   }
 
