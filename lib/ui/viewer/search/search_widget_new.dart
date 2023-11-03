@@ -58,25 +58,19 @@ class SearchWidgetNewState extends State<SearchWidgetNew> {
         final heightOfScreen = MediaQuery.sizeOf(context).height;
         _distanceOfWidgetFromBottom = heightOfScreen - (y + heightOfWidget);
       });
+
+      textController.addListener(textControllerListener);
     });
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    //todo: move this to initState in addPostFrameCallback
     _bottomPadding =
         (MediaQuery.viewInsetsOf(context).bottom - _distanceOfWidgetFromBottom);
     if (_bottomPadding < 0) {
       _bottomPadding = 0;
     }
-
-    ///Removing listener as there a possiblity of multiple listeners getting
-    ///added whenever didChangeDependencies() is called. Cannot move this to
-    ///initState as textContollerListener accesses an inheritedWidget, which
-    ///will throw an error in init state.
-    textController.removeListener(textControllerListener);
-    textController.addListener(textControllerListener);
   }
 
   Future<void> textControllerListener() async {
