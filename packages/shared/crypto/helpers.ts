@@ -6,6 +6,8 @@ import { getActualKey } from '@ente/shared/user';
 import { KeyAttributes } from '@ente/shared/user/types';
 import { setRecoveryKey } from '@ente/accounts/api/user';
 import { logError } from '@ente/shared/sentry';
+import isElectron from 'is-electron';
+import ElectronAPIs from '../electron';
 
 const LOGIN_SUB_KEY_LENGTH = 32;
 const LOGIN_SUB_KEY_ID = 1;
@@ -103,13 +105,13 @@ export const saveKeyInSessionStore = async (
     );
     setKey(keyType, sessionKeyAttributes);
     console.log('fromDesktop', fromDesktop);
-    // if (
-    //     isElectron() &&
-    //     !fromDesktop &&
-    //     keyType === SESSION_KEYS.ENCRYPTION_KEY
-    // ) {
-    //     safeStorageService.setEncryptionKey(key);
-    // }
+    if (
+        isElectron() &&
+        !fromDesktop &&
+        keyType === SESSION_KEYS.ENCRYPTION_KEY
+    ) {
+        ElectronAPIs.setEncryptionKey(key);
+    }
 };
 
 export async function encryptWithRecoveryKey(key: string) {

@@ -6,6 +6,8 @@ import { clearData } from '@ente/shared/storage/localStorage';
 import { logError } from '@ente/shared/sentry';
 import { clearFiles } from '@ente/shared/storage/localForage/helpers';
 import router from 'next/router';
+import ElectronAPIs from '@ente/shared/electron';
+import isElectron from 'is-electron';
 
 export const logoutUser = async () => {
     try {
@@ -41,13 +43,13 @@ export const logoutUser = async () => {
         } catch (e) {
             logError(e, 'clearFiles failed');
         }
-        // if (isElectron()) {
-        //     try {
-        //         safeStorageService.clearElectronStore();
-        //     } catch (e) {
-        //         logError(e, 'clearElectronStore failed');
-        //     }
-        // }
+        if (isElectron()) {
+            try {
+                ElectronAPIs.clearElectronStore();
+            } catch (e) {
+                logError(e, 'clearElectronStore failed');
+            }
+        }
         // try {
         //     eventBus.emit(Events.LOGOUT);
         // } catch (e) {

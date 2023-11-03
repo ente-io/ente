@@ -37,8 +37,7 @@ import FormPaper from '@ente/shared/components/Form/FormPaper';
 import FormPaperTitle from '@ente/shared/components/Form/FormPaper/Title';
 import FormPaperFooter from '@ente/shared/components/Form/FormPaper/Footer';
 import LinkButton from '@ente/shared/components/LinkButton';
-// import isElectron from 'is-electron';
-// import safeStorageService from 'services/electron/safeStorage';
+import isElectron from 'is-electron';
 import { VerticallyCentered } from '@ente/shared/components/Container';
 import EnteSpinner from '@ente/shared/components/EnteSpinner';
 import VerifyMasterPasswordForm, {
@@ -53,6 +52,7 @@ import InMemoryStore, { MS_KEYS } from '@ente/shared/storage/InMemoryStore';
 import { PageProps } from '@ente/shared/apps/types';
 import { APPS } from '@ente/shared/apps/constants';
 import { logError } from '@ente/shared/sentry';
+import ElectronAPIs from '@ente/shared/electron';
 
 export default function Credentials({
     appContext,
@@ -78,17 +78,17 @@ export default function Credentials({
                 return;
             }
             setUser(user);
-            const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
-            // if (!key && isElectron()) {
-            //     key = await safeStorageService.getEncryptionKey();
-            //     if (key) {
-            //         await saveKeyInSessionStore(
-            //             SESSION_KEYS.ENCRYPTION_KEY,
-            //             key,
-            //             true
-            //         );
-            //     }
-            // }
+            let key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
+            if (!key && isElectron()) {
+                key = await ElectronAPIs.getEncryptionKey();
+                if (key) {
+                    await saveKeyInSessionStore(
+                        SESSION_KEYS.ENCRYPTION_KEY,
+                        key,
+                        true
+                    );
+                }
+            }
             if (key) {
                 router.push(PAGES.GALLERY);
                 return;

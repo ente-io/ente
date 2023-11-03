@@ -6,7 +6,8 @@
         "build": "yarn lint && tsc"
     },
     "dependencies": {
-        "@ente/shared": "*"
+        "@ente/shared": "*",
+        "is-electron": "^2.2.2"
     },
     "devDependencies": {
         "@ente/eslint-config": "*",
