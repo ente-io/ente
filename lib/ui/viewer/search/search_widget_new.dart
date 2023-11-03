@@ -64,7 +64,7 @@ class SearchWidgetNewState extends State<SearchWidgetNew> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-
+    //todo: move this to initState in addPostFrameCallback
     _bottomPadding =
         (MediaQuery.viewInsetsOf(context).bottom - _distanceOfWidgetFromBottom);
     if (_bottomPadding < 0) {
@@ -116,6 +116,7 @@ class SearchWidgetNewState extends State<SearchWidgetNew> {
                   color: colorScheme.fillFaint,
                   child: TextFormField(
                     controller: textController,
+                    focusNode: focusNode,
                     style: Theme.of(context).textTheme.titleMedium,
                     // Below parameters are to disable auto-suggestion
                     enableSuggestions: false,

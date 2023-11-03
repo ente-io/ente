@@ -34,10 +34,10 @@ class _SearchSuffixIconState extends State<SearchSuffixIcon>
           : IconButton(
               visualDensity: const VisualDensity(horizontal: -1, vertical: -1),
               onPressed: () {
-                context
-                    .findAncestorStateOfType<SearchWidgetNewState>()!
-                    .textController
-                    .clear();
+                final searchWidgetState =
+                    context.findAncestorStateOfType<SearchWidgetNewState>()!;
+                searchWidgetState.textController.clear();
+                searchWidgetState.focusNode.unfocus();
               },
               icon: Icon(
                 Icons.close,
