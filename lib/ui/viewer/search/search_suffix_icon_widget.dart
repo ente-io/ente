@@ -32,6 +32,7 @@ class _SearchSuffixIconState extends State<SearchSuffixIcon>
               ),
             )
           : IconButton(
+              splashRadius: 1,
               visualDensity: const VisualDensity(horizontal: -1, vertical: -1),
               onPressed: () {
                 final searchWidgetState =
