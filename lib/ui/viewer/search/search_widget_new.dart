@@ -23,6 +23,7 @@ class SearchWidgetNew extends StatefulWidget {
 }
 
 class SearchWidgetNewState extends State<SearchWidgetNew> {
+  static String query = "";
   final _searchService = SearchService.instance;
   final _debouncer = Debouncer(const Duration(milliseconds: 100));
   final Logger _logger = Logger((SearchWidgetNewState).toString());
@@ -60,6 +61,7 @@ class SearchWidgetNewState extends State<SearchWidgetNew> {
 
       textController.addListener(textControllerListener);
     });
+    textController.text = query;
   }
 
   @override
@@ -75,6 +77,7 @@ class SearchWidgetNewState extends State<SearchWidgetNew> {
   Future<void> textControllerListener() async {
     final value = textController.text;
     isSearchQueryEmpty = value.isEmpty;
+    query = textController.text;
 
     final List<SearchResult> allResults =
         await getSearchResultsForQuery(context, value);
