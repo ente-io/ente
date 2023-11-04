@@ -36,6 +36,7 @@ import 'package:photos/services/user_service.dart';
 import "package:photos/states/search_results_state.dart";
 import 'package:photos/states/user_details_state.dart';
 import 'package:photos/theme/colors.dart';
+import "package:photos/theme/effects.dart";
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/collections/collection_action_sheet.dart';
 import 'package:photos/ui/extents_page_view.dart';
@@ -429,34 +430,42 @@ class _HomeWidgetState extends State<HomeWidget> {
             child: ValueListenableBuilder(
               valueListenable: isOnSearchTabNotifier,
               builder: (context, value, child) {
-                return Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    value
-                        ? const SearchWidgetNew()
-                            .animate()
-                            .fadeIn(
-                              duration: const Duration(milliseconds: 225),
-                              curve: Curves.easeInOutSine,
-                            )
-                            .scale(
-                              begin: const Offset(0.8, 0.8),
-                              end: const Offset(1, 1),
-                              duration: const Duration(
-                                milliseconds: 225,
-                              ),
-                              curve: Curves.easeInOutSine,
-                            )
-                            .slide(
-                              begin: const Offset(0, 0.4),
-                              curve: Curves.easeInOutSine,
-                              duration: const Duration(
-                                milliseconds: 225,
-                              ),
-                            )
-                        : const SizedBox.shrink(),
-                    child!,
-                  ],
+                return Container(
+                  decoration: value
+                      ? BoxDecoration(
+                          color: getEnteColorScheme(context).backgroundElevated,
+                          boxShadow: shadowFloatFaintLight,
+                        )
+                      : null,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      value
+                          ? const SearchWidgetNew()
+                              .animate()
+                              .fadeIn(
+                                duration: const Duration(milliseconds: 225),
+                                curve: Curves.easeInOutSine,
+                              )
+                              .scale(
+                                begin: const Offset(0.8, 0.8),
+                                end: const Offset(1, 1),
+                                duration: const Duration(
+                                  milliseconds: 225,
+                                ),
+                                curve: Curves.easeInOutSine,
+                              )
+                              .slide(
+                                begin: const Offset(0, 0.4),
+                                curve: Curves.easeInOutSine,
+                                duration: const Duration(
+                                  milliseconds: 225,
+                                ),
+                              )
+                          : const SizedBox.shrink(),
+                      child!,
+                    ],
+                  ),
                 );
               },
               child: HomeBottomNavigationBar(
