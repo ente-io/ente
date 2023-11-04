@@ -23,7 +23,6 @@ class SearchWidgetNew extends StatefulWidget {
 }
 
 class SearchWidgetNewState extends State<SearchWidgetNew> {
-  String searchQuery = "";
   final _searchService = SearchService.instance;
   final _debouncer = Debouncer(const Duration(milliseconds: 100));
   final Logger _logger = Logger((SearchWidgetNewState).toString());
@@ -77,13 +76,9 @@ class SearchWidgetNewState extends State<SearchWidgetNew> {
     final value = textController.text;
     isSearchQueryEmpty = value.isEmpty;
 
-    //Why is this required?
-    searchQuery = value;
     final List<SearchResult> allResults =
         await getSearchResultsForQuery(context, value);
-    /*checking if _query == value to make sure that the results are from the current query
-                      and not from the previous query (race condition).*/
-    if (mounted && searchQuery == value) {
+    if (mounted) {
       final inheritedSearchResults = InheritedSearchResults.of(context);
       inheritedSearchResults.updateResults(allResults);
     }
