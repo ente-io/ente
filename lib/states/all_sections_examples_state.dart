@@ -86,7 +86,9 @@ class InheritedAllSectionsExamples extends InheritedWidget {
 
   @override
   bool updateShouldNotify(covariant InheritedAllSectionsExamples oldWidget) {
-    return oldWidget.allSectionsExamplesFuture.hashCode !=
-        allSectionsExamplesFuture.hashCode;
+    return !identical(
+      oldWidget.allSectionsExamplesFuture,
+      allSectionsExamplesFuture,
+    );
   }
 }
