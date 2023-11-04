@@ -70,6 +70,9 @@ class SearchSuggestionsWidget extends StatelessWidget {
                     return const SizedBox.shrink();
                   }
                 },
+                padding: EdgeInsets.only(
+                  bottom: (MediaQuery.sizeOf(context).height / 2) + 50,
+                ),
                 separatorBuilder: (context, index) {
                   return const SizedBox(height: 12);
                 },
