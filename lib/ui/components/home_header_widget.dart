@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import "package:photos/ui/collections/new_album_icon.dart";
 import 'package:photos/ui/components/buttons/icon_button_widget.dart';
-import 'package:photos/ui/viewer/search/search_widget.dart';
 
 class HomeHeaderWidget extends StatefulWidget {
   final Widget centerWidget;
@@ -33,7 +33,10 @@ class _HomeHeaderWidgetState extends State<HomeHeaderWidget> {
           duration: const Duration(milliseconds: 250),
           child: widget.centerWidget,
         ),
-        const SearchIconWidget(),
+        const NewAlbumIcon(
+          icon: Icons.add_photo_alternate_outlined,
+          iconButtonType: IconButtonType.primary,
+        ),
       ],
     );
   }

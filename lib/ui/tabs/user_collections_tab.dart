@@ -225,7 +225,10 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
       ),
       child: Row(
         children: [
-          const NewAlbumIcon(),
+          const NewAlbumIcon(
+            icon: Icons.add_rounded,
+            iconButtonType: IconButtonType.secondary,
+          ),
           GestureDetector(
             onTapDown: (TapDownDetails details) async {
               final int? selectedValue = await showMenu<int>(

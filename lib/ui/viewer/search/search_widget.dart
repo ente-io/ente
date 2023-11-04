@@ -19,6 +19,7 @@ import 'package:photos/utils/date_time_util.dart';
 import 'package:photos/utils/debouncer.dart';
 import 'package:photos/utils/navigation_util.dart';
 
+///unused widget
 class SearchIconWidget extends StatefulWidget {
   const SearchIconWidget({Key? key}) : super(key: key);
 
