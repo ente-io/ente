@@ -2,7 +2,7 @@ import { KeyAttributes, SRPSetupAttributes } from 'types/user';
 import { SESSION_KEYS, setKey } from 'utils/storage/sessionStorage';
 import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
 import { getActualKey, getToken } from 'utils/common/key';
-import { setRecoveryKey } from 'services/userService';
+import { setRecoveryKey } from '@ente/accounts/api/user';
 import { logError } from 'utils/sentry';
 import isElectron from 'is-electron';
 import safeStorageService from 'services/electron/safeStorage';

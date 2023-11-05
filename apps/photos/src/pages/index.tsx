@@ -5,8 +5,8 @@ import { AppContext } from './_app';
 import Login from '@ente/accounts/components/Login';
 import { useRouter } from 'next/router';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
+import SignUp from '@ente/accounts/components/SignUp';
 import EnteSpinner from 'components/EnteSpinner';
-import SignUp from 'components/SignUp';
 import { t } from 'i18next';
 
 import localForage from 'utils/storage/localForage';
@@ -247,7 +247,11 @@ export default function LandingPage() {
                             {showLogin ? (
                                 <Login signUp={signUp} appName={APPS.PHOTOS} />
                             ) : (
-                                <SignUp login={login} />
+                                <SignUp
+                                    router={router}
+                                    appName={APPS.PHOTOS}
+                                    login={login}
+                                />
                             )}
                         </SideBox>
                     </DesktopBox>
