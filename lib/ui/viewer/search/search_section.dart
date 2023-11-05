@@ -155,9 +155,9 @@ class RecentSection extends StatelessWidget {
 
 class SearchExampleRow extends StatelessWidget {
   final SectionType sectionType;
-  final List<SearchResult> reccomendations;
+  final List<SearchResult> examples;
 
-  const SearchExampleRow(this.reccomendations, this.sectionType, {super.key});
+  const SearchExampleRow(this.examples, this.sectionType, {super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -166,10 +166,10 @@ class SearchExampleRow extends StatelessWidget {
     if (sectionType == SectionType.location) {
       scrollableExamples.add(const GoToMapWidget());
     }
-    reccomendations.forEachIndexed((index, element) {
+    examples.forEachIndexed((index, element) {
       scrollableExamples.add(
         SearchExample(
-          searchResult: reccomendations.elementAt(index),
+          searchResult: examples.elementAt(index),
         ),
       );
     });
