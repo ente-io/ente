@@ -304,7 +304,9 @@ export function PhotoList({
                     )
                 );
             }
-            if (deduplicateContext.isOnDeduplicatePage) {
+            if (galleryContext.isClipSearchResult) {
+                noGrouping(timeStampList);
+            } else if (deduplicateContext.isOnDeduplicatePage) {
                 skipMerge = true;
                 groupByFileSize(timeStampList);
             } else {
@@ -348,6 +350,7 @@ export function PhotoList({
         deduplicateContext.clubSameTimeFilesOnly,
         galleryContext.photoListHeader,
         publicCollectionGalleryContext.photoListHeader,
+        galleryContext.isClipSearchResult,
     ]);
 
     useEffect(() => {
@@ -510,6 +513,23 @@ export function PhotoList({
                 });
                 listItemIndex = 1;
             } else if (listItemIndex < columns) {
+                timeStampList[timeStampList.length - 1].items.push(item);
+                listItemIndex++;
+            } else {
+                listItemIndex = 1;
+                timeStampList.push({
+                    itemType: ITEM_TYPE.FILE,
+                    items: [item],
+                    itemStartIndex: index,
+                });
+            }
+        });
+    };
+
+    const noGrouping = (timeStampList: TimeStampListItem[]) => {
+        let listItemIndex = columns;
+        displayFiles.forEach((item, index) => {
+            if (listItemIndex < columns) {
                 timeStampList[timeStampList.length - 1].items.push(item);
                 listItemIndex++;
             } else {

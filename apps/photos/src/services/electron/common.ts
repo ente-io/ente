@@ -68,6 +68,11 @@ class ElectronService {
             return this.electronAPIs.updateOptOutOfCrashReports(optOut);
         }
     }
+    getPlatform() {
+        if (this.electronAPIs?.getPlatform) {
+            return this.electronAPIs.getPlatform();
+        }
+    }
 }
 
 export default new ElectronService();
