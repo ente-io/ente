@@ -6,7 +6,7 @@ import StreamZip from 'node-stream-zip';
 import { Readable } from 'stream';
 import { logError } from './logging';
 import { existsSync } from 'fs';
-import { log } from 'console';
+import { log } from 'electron-log';
 import { convertBytesToHumanReadable } from '../utils/logging';
 
 // https://stackoverflow.com/a/63111390
