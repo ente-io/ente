@@ -1,5 +1,3 @@
-import "dart:math";
-
 import "package:flutter/cupertino.dart";
 import 'package:logging/logging.dart';
 import 'package:photos/core/event_bus.dart';
@@ -358,6 +356,7 @@ class SearchService {
     final orderedSubDescriptions = <Map<int, List<String>>>[];
     final descriptionAndMatchingFiles = <String, Set<EnteFile>>{};
     int distinctFullDescriptionCount = 0;
+    final allDistinctFullDescriptions = <String>[];
 
     for (EnteFile file in allFiles) {
       if (file.caption != null && file.caption!.isNotEmpty) {
@@ -371,7 +370,11 @@ class SearchService {
         //"hello world"
 
         if (limit == null || distinctFullDescriptionCount < limit) {
-          distinctFullDescriptionCount++;
+          if (!allDistinctFullDescriptions
+              .any((element) => element.contains(file.caption!.trim()))) {
+            distinctFullDescriptionCount++;
+            allDistinctFullDescriptions.add(file.caption!.trim());
+          }
           final words = file.caption!.trim().split(" ");
           orderedSubDescriptions.add({0: <String>[], 1: <String>[]});
 
@@ -461,8 +464,7 @@ class SearchService {
       );
     });
     if (limit != null && distinctFullDescriptionCount >= limit) {
-      return (searchResults..shuffle())
-          .sublist(0, min(limit, searchResults.length));
+      return (searchResults..shuffle()).sublist(0, limit);
     } else {
       return searchResults;
     }
