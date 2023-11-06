@@ -353,10 +353,10 @@ class SearchService {
     //of key 0 (x=0). If there are no substring matches from key 0, there will
     //be none from key 1 as well. So these two keys are for avoiding unnecessary
     //checking of all subDescriptions with file description.
-    final orderedSubDescriptions = <Map<int, List<String>>>[];
-    final descriptionAndMatchingFiles = <String, Set<EnteFile>>{};
-    int distinctFullDescriptionCount = 0;
-    final allDistinctFullDescriptions = <String>[];
+    final orderedSubDescs = <Map<int, List<String>>>[];
+    final descAndMatchingFiles = <String, Set<EnteFile>>{};
+    int distinctFullDescCount = 0;
+    final allDistinctFullDescs = <String>[];
 
     for (EnteFile file in allFiles) {
       if (file.caption != null && file.caption!.isNotEmpty) {
@@ -369,30 +369,31 @@ class SearchService {
         //result will be ["hello", "world", "hello world"] for the string
         //"hello world"
 
-        if (limit == null || distinctFullDescriptionCount < limit) {
-          if (!allDistinctFullDescriptions
-              .any((element) => element.contains(file.caption!.trim()))) {
-            distinctFullDescriptionCount++;
-            allDistinctFullDescriptions.add(file.caption!.trim());
-          }
-          final words = file.caption!.trim().split(" ");
-          orderedSubDescriptions.add({0: <String>[], 1: <String>[]});
+        if (limit == null || distinctFullDescCount < limit) {
+          final descAlreadyRecorded = allDistinctFullDescs
+              .any((element) => element.contains(file.caption!.trim()));
 
-          for (int i = 1; i <= words.length; i++) {
-            for (int j = 0; j <= words.length - i; j++) {
-              final subList = words.sublist(j, j + i);
-              final substring = subList.join(" ").toLowerCase();
-              if (i == 1) {
-                orderedSubDescriptions.last[0]!.add(substring);
-              } else {
-                orderedSubDescriptions.last[1]!.add(substring);
+          if (!descAlreadyRecorded) {
+            distinctFullDescCount++;
+            allDistinctFullDescs.add(file.caption!.trim());
+            final words = file.caption!.trim().split(" ");
+            orderedSubDescs.add({0: <String>[], 1: <String>[]});
+
+            for (int i = 1; i <= words.length; i++) {
+              for (int j = 0; j <= words.length - i; j++) {
+                final subList = words.sublist(j, j + i);
+                final substring = subList.join(" ").toLowerCase();
+                if (i == 1) {
+                  orderedSubDescs.last[0]!.add(substring);
+                } else {
+                  orderedSubDescs.last[1]!.add(substring);
+                }
               }
             }
           }
         }
 
-        for (Map<int, List<String>> orderedSubDescription
-            in orderedSubDescriptions) {
+        for (Map<int, List<String>> orderedSubDescription in orderedSubDescs) {
           bool matchesSingleWordSubString = false;
           for (String subDescription in orderedSubDescription[0]!) {
             if (file.caption!.toLowerCase().contains(subDescription)) {
@@ -402,10 +403,10 @@ class SearchService {
               if (subDescription.isAllConnectWords ||
                   subDescription.isLastWordConnectWord) continue;
 
-              if (descriptionAndMatchingFiles.containsKey(subDescription)) {
-                descriptionAndMatchingFiles[subDescription]!.add(file);
+              if (descAndMatchingFiles.containsKey(subDescription)) {
+                descAndMatchingFiles[subDescription]!.add(file);
               } else {
-                descriptionAndMatchingFiles[subDescription] = {file};
+                descAndMatchingFiles[subDescription] = {file};
               }
             }
           }
@@ -415,10 +416,10 @@ class SearchService {
                   subDescription.isLastWordConnectWord) continue;
 
               if (file.caption!.toLowerCase().contains(subDescription)) {
-                if (descriptionAndMatchingFiles.containsKey(subDescription)) {
-                  descriptionAndMatchingFiles[subDescription]!.add(file);
+                if (descAndMatchingFiles.containsKey(subDescription)) {
+                  descAndMatchingFiles[subDescription]!.add(file);
                 } else {
-                  descriptionAndMatchingFiles[subDescription] = {file};
+                  descAndMatchingFiles[subDescription] = {file};
                 }
               }
             }
@@ -433,13 +434,13 @@ class SearchService {
     ///description. [relevantDescAndFiles] will keep only the entry which has the
     ///longest description among enties with matching set of files.
     final relevantDescAndFiles = <String, Set<EnteFile>>{};
-    while (descriptionAndMatchingFiles.isNotEmpty) {
-      final baseEntry = descriptionAndMatchingFiles.entries.first;
+    while (descAndMatchingFiles.isNotEmpty) {
+      final baseEntry = descAndMatchingFiles.entries.first;
       final descsWithSameFiles = <String, Set<EnteFile>>{};
       final baseUploadedFileIDs =
           baseEntry.value.map((e) => e.uploadedFileID).toSet();
 
-      descriptionAndMatchingFiles.forEach((desc, files) {
+      descAndMatchingFiles.forEach((desc, files) {
         final uploadedFileIDs = files.map((e) => e.uploadedFileID).toSet();
 
         final hasSameFiles = uploadedFileIDs.containsAll(baseUploadedFileIDs) &&
@@ -448,7 +449,7 @@ class SearchService {
           descsWithSameFiles.addAll({desc: files});
         }
       });
-      descriptionAndMatchingFiles
+      descAndMatchingFiles
           .removeWhere((desc, files) => descsWithSameFiles.containsKey(desc));
       final longestDescription = descsWithSameFiles.keys.reduce(
         (desc1, desc2) => desc1.length > desc2.length ? desc1 : desc2,
@@ -463,7 +464,7 @@ class SearchService {
         GenericSearchResult(ResultType.fileCaption, key, value.toList()),
       );
     });
-    if (limit != null && distinctFullDescriptionCount >= limit) {
+    if (limit != null && distinctFullDescCount >= limit) {
       return (searchResults..shuffle()).sublist(0, limit);
     } else {
       return searchResults;
