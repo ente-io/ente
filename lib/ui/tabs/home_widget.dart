@@ -55,7 +55,7 @@ import "package:photos/ui/settings_page.dart";
 import "package:photos/ui/tabs/shared_collections_tab.dart";
 import "package:photos/ui/tabs/user_collections_tab.dart";
 import "package:photos/ui/viewer/gallery/collection_page.dart";
-import "package:photos/ui/viewer/search/search_widget_new.dart";
+import 'package:photos/ui/viewer/search/search_widget.dart';
 import 'package:photos/utils/dialog_util.dart';
 import "package:photos/utils/navigation_util.dart";
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
@@ -441,7 +441,7 @@ class _HomeWidgetState extends State<HomeWidget> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       value
-                          ? const SearchWidgetNew()
+                          ? const SearchWidget()
                               .animate()
                               .fadeIn(
                                 duration: const Duration(milliseconds: 225),

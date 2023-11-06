@@ -1,68 +1,38 @@
-import 'dart:async';
+import "dart:async";
 
-import 'package:flutter/material.dart';
-import 'package:logging/logging.dart';
+import "package:flutter/material.dart";
+import "package:flutter/scheduler.dart";
+import "package:logging/logging.dart";
 import "package:photos/core/event_bus.dart";
-import 'package:photos/ente_theme_data.dart';
 import "package:photos/events/tab_changed_event.dart";
-import "package:photos/generated/l10n.dart";
-import 'package:photos/models/search/search_result.dart';
-import 'package:photos/services/search_service.dart';
+import "package:photos/models/search/search_result.dart";
+import "package:photos/services/search_service.dart";
+import "package:photos/states/search_results_state.dart";
 import "package:photos/theme/ente_theme.dart";
-import 'package:photos/ui/components/buttons/icon_button_widget.dart';
-import "package:photos/ui/map/enable_map.dart";
-import "package:photos/ui/map/map_screen.dart";
-import 'package:photos/ui/viewer/search/result/no_result_widget.dart';
-import 'package:photos/ui/viewer/search/search_suffix_icon_widget.dart';
-import 'package:photos/ui/viewer/search/search_suggestions.dart';
-import 'package:photos/utils/date_time_util.dart';
-import 'package:photos/utils/debouncer.dart';
-import 'package:photos/utils/navigation_util.dart';
+import "package:photos/ui/viewer/search/search_suffix_icon_widget.dart";
+import "package:photos/utils/date_time_util.dart";
+import "package:photos/utils/debouncer.dart";
 
-///unused widget
-class SearchIconWidget extends StatefulWidget {
-  const SearchIconWidget({Key? key}) : super(key: key);
-
-  @override
-  State<SearchIconWidget> createState() => _SearchIconWidgetState();
-}
-
-class _SearchIconWidgetState extends State<SearchIconWidget> {
-  @override
-  Widget build(BuildContext context) {
-    return Hero(
-      tag: "search_icon",
-      child: IconButtonWidget(
-        iconButtonType: IconButtonType.primary,
-        icon: Icons.search,
-        onTap: () {
-          Navigator.push(
-            context,
-            TransparentRoute(
-              builder: (BuildContext context) => const SearchWidget(),
-            ),
-          );
-        },
-      ),
-    );
-  }
-}
+bool isSearchQueryEmpty = true;
 
 class SearchWidget extends StatefulWidget {
   const SearchWidget({Key? key}) : super(key: key);
 
   @override
-  State<SearchWidget> createState() => _SearchWidgetState();
+  State<SearchWidget> createState() => SearchWidgetState();
 }
 
-class _SearchWidgetState extends State<SearchWidget> {
-  String _query = "";
-  final List<SearchResult> _results = [];
+class SearchWidgetState extends State<SearchWidget> {
+  static String query = "";
   final _searchService = SearchService.instance;
   final _debouncer = Debouncer(const Duration(milliseconds: 100));
-  final Logger _logger = Logger((_SearchWidgetState).toString());
+  final Logger _logger = Logger((SearchWidgetState).toString());
   late FocusNode focusNode;
   StreamSubscription<TabDoubleTapEvent>? _tabDoubleTapEvent;
+  double _bottomPadding = 0.0;
+  double _distanceOfWidgetFromBottom = 0;
+  GlobalKey widgetKey = GlobalKey();
+  TextEditingController textController = TextEditingController();
 
   @override
   void initState() {
@@ -75,105 +45,124 @@ class _SearchWidgetState extends State<SearchWidget> {
         focusNode.requestFocus();
       }
     });
+
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      //This buffer is for doing this operation only after SearchWidget's
+      //animation is complete.
+      Future.delayed(const Duration(milliseconds: 300), () {
+        final RenderBox box =
+            widgetKey.currentContext!.findRenderObject() as RenderBox;
+        final heightOfWidget = box.size.height;
+        final offsetPosition = box.localToGlobal(Offset.zero);
+        final y = offsetPosition.dy;
+        final heightOfScreen = MediaQuery.sizeOf(context).height;
+        _distanceOfWidgetFromBottom = heightOfScreen - (y + heightOfWidget);
+      });
+
+      textController.addListener(textControllerListener);
+    });
+    textController.text = query;
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _bottomPadding =
+        (MediaQuery.viewInsetsOf(context).bottom - _distanceOfWidgetFromBottom);
+    if (_bottomPadding < 0) {
+      _bottomPadding = 0;
+    }
+  }
+
+  Future<void> textControllerListener() async {
+    final value = textController.text;
+    isSearchQueryEmpty = value.isEmpty;
+    query = textController.text;
+
+    final List<SearchResult> allResults =
+        await getSearchResultsForQuery(context, value);
+    if (mounted) {
+      final inheritedSearchResults = InheritedSearchResults.of(context);
+      inheritedSearchResults.updateResults(allResults);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        Navigator.pop(context);
-      },
-      child: Container(
-        color: Theme.of(context).colorScheme.searchResultsBackgroundColor,
-        child: SafeArea(
+    final colorScheme = getEnteColorScheme(context);
+    return RepaintBoundary(
+      key: widgetKey,
+      child: Padding(
+        padding: EdgeInsets.only(bottom: _bottomPadding),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 12),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: Container(
-                    height: 44,
-                    color: Theme.of(context).colorScheme.defaultBackgroundColor,
-                    child: TextFormField(
-                      style: Theme.of(context).textTheme.titleMedium,
-                      // Below parameters are to disable auto-suggestion
-                      enableSuggestions: false,
-                      autocorrect: false,
-                      // Above parameters are to disable auto-suggestion
-                      decoration: InputDecoration(
-                        hintText: S.of(context).searchHintText,
-                        filled: true,
-                        contentPadding: const EdgeInsets.symmetric(
-                          vertical: 10,
-                        ),
-                        border: const UnderlineInputBorder(
-                          borderSide: BorderSide.none,
-                        ),
-                        focusedBorder: const UnderlineInputBorder(
-                          borderSide: BorderSide.none,
-                        ),
-                        prefixIconConstraints: const BoxConstraints(
-                          maxHeight: 44,
-                          maxWidth: 44,
-                          minHeight: 44,
-                          minWidth: 44,
-                        ),
-                        suffixIconConstraints: const BoxConstraints(
-                          maxHeight: 44,
-                          maxWidth: 44,
-                          minHeight: 44,
-                          minWidth: 44,
-                        ),
-                        prefixIcon: Hero(
-                          tag: "search_icon",
-                          child: Icon(
-                            Icons.search,
-                            color: Theme.of(context)
-                                .colorScheme
-                                .iconColor
-                                .withOpacity(0.5),
-                          ),
-                        ),
-                        /*Using valueListenableBuilder inside a stateful widget because this widget is only rebuild when
-                        setState is called when deboucncing is over and the spinner needs to be shown while debouncing */
-                        suffixIcon: ValueListenableBuilder(
-                          valueListenable: _debouncer.debounceActiveNotifier,
-                          builder: (
-                            BuildContext context,
-                            bool isDebouncing,
-                            Widget? child,
-                          ) {
-                            return SearchSuffixIcon(
-                              isDebouncing,
-                            );
-                          },
+            padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 8),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: Container(
+                color: colorScheme.backgroundBase,
+                child: Container(
+                  height: 44,
+                  color: colorScheme.fillFaint,
+                  child: TextFormField(
+                    controller: textController,
+                    focusNode: focusNode,
+                    style: Theme.of(context).textTheme.titleMedium,
+                    // Below parameters are to disable auto-suggestion
+                    enableSuggestions: false,
+                    autocorrect: false,
+                    // Above parameters are to disable auto-suggestion
+                    decoration: InputDecoration(
+                      // hintText: S.of(context).searchHintText,
+                      hintText: "Search",
+                      filled: true,
+                      contentPadding: const EdgeInsets.symmetric(
+                        vertical: 10,
+                      ),
+                      border: const UnderlineInputBorder(
+                        borderSide: BorderSide.none,
+                      ),
+                      focusedBorder: const UnderlineInputBorder(
+                        borderSide: BorderSide.none,
+                      ),
+                      prefixIconConstraints: const BoxConstraints(
+                        maxHeight: 44,
+                        maxWidth: 44,
+                        minHeight: 44,
+                        minWidth: 44,
+                      ),
+                      suffixIconConstraints: const BoxConstraints(
+                        maxHeight: 44,
+                        maxWidth: 44,
+                        minHeight: 44,
+                        minWidth: 44,
+                      ),
+                      prefixIcon: Hero(
+                        tag: "search_icon",
+                        child: Icon(
+                          Icons.search,
+                          color: colorScheme.strokeFaint,
                         ),
                       ),
-                      onChanged: (value) async {
-                        _query = value;
-                        final List<SearchResult> allResults =
-                            await getSearchResultsForQuery(context, value);
-                        /*checking if _query == value to make sure that the results are from the current query
-                        and not from the previous query (race condition).*/
-                        if (mounted && _query == value) {
-                          setState(() {
-                            _results.clear();
-                            _results.addAll(allResults);
-                          });
-                        }
-                      },
-                      autofocus: true,
+                      /*Using valueListenableBuilder inside a stateful widget because this widget is only rebuild when
+                      setState is called when deboucncing is over and the spinner needs to be shown while debouncing */
+                      suffixIcon: ValueListenableBuilder(
+                        valueListenable: _debouncer.debounceActiveNotifier,
+                        builder: (
+                          BuildContext context,
+                          bool isDebouncing,
+                          Widget? child,
+                        ) {
+                          return SearchSuffixIcon(
+                            isDebouncing,
+                          );
+                        },
+                      ),
                     ),
                   ),
                 ),
-                _results.isNotEmpty
-                    ? SearchSuggestionsWidget(_results)
-                    : _query.isNotEmpty
-                        ? const NoResultWidget()
-                        : const NavigateToMap(),
-              ],
+              ),
             ),
           ),
         ),
@@ -186,6 +175,8 @@ class _SearchWidgetState extends State<SearchWidget> {
     _debouncer.cancelDebounce();
     focusNode.dispose();
     _tabDoubleTapEvent?.cancel();
+    textController.removeListener(textControllerListener);
+    textController.dispose();
     super.dispose();
   }
 
@@ -259,36 +250,5 @@ class _SearchWidgetState extends State<SearchWidget> {
   bool _isYearValid(String year) {
     final yearAsInt = int.tryParse(year); //returns null if cannot be parsed
     return yearAsInt != null && yearAsInt <= currentYear;
-  }
-}
-
-class NavigateToMap extends StatelessWidget {
-  const NavigateToMap({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: IconButtonWidget(
-        icon: Icons.map_sharp,
-        iconButtonType: IconButtonType.primary,
-        defaultColor: colorScheme.backgroundElevated,
-        pressedColor: colorScheme.backgroundElevated2,
-        size: 28,
-        onTap: () async {
-          final bool result = await requestForMapEnable(context);
-          if (result) {
-            Navigator.of(context).pushReplacement(
-              MaterialPageRoute(
-                builder: (context) => MapScreen(
-                  filesFutureFn: SearchService.instance.getAllFiles,
-                ),
-              ),
-            );
-          }
-        },
-      ),
-    );
   }
 }

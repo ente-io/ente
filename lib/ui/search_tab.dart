@@ -8,7 +8,7 @@ import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/viewer/search/result/no_result_widget.dart";
 import "package:photos/ui/viewer/search/search_section.dart";
 import "package:photos/ui/viewer/search/search_suggestions.dart";
-import "package:photos/ui/viewer/search/search_widget_new.dart";
+import 'package:photos/ui/viewer/search/search_widget.dart';
 import "package:photos/ui/viewer/search/tab_empty_state.dart";
 
 class SearchTab extends StatefulWidget {
