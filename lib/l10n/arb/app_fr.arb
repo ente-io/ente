@@ -334,5 +334,7 @@
   "minimizeAppOnCopy": "Réduire l'application après la copie",
   "editCodeAuthMessage": "Authentification requise pour modifier le code",
   "deleteCodeAuthMessage": "Authentification requise pour supprimer le code",
-  "showQRAuthMessage": "Authentification requise pour afficher le code QR"
+  "showQRAuthMessage": "Authentification requise pour afficher le code QR",
+  "confirmAccountDeleteTitle": "Confirmer la suppression du compte",
+  "confirmAccountDeleteMessage": "Ce compte peut être lié à d'autres applications ente.\n\nVos données seront bientôt effacées de toutes les applications et votre compte sera définitivement supprimé."
 }
