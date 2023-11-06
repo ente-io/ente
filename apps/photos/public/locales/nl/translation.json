@@ -617,6 +617,8 @@
     "ROTATION": "Draaiing",
     "RESET": "Herstellen",
     "PHOTO_EDITOR": "Fotobewerker",
+    "FASTER_UPLOAD": "",
+    "FASTER_UPLOAD_DESCRIPTION": "",
     "STATUS": "",
     "INDEXED_ITEMS": ""
 }

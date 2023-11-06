@@ -617,6 +617,8 @@
     "ROTATION": "回转",
     "RESET": "重设",
     "PHOTO_EDITOR": "照片编辑器",
+    "FASTER_UPLOAD": "",
+    "FASTER_UPLOAD_DESCRIPTION": "",
     "STATUS": "",
     "INDEXED_ITEMS": ""
 }
