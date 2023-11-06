@@ -1,6 +1,12 @@
 # CHANGELOG
 
-## v1.6.67
+## v1.6.49
+
+### Photo Editor
+
+Check out our [blog](https://ente.io/blog/introducing-web-desktop-photo-editor/) to know about feature and functionalities.
+
+## v1.6.47
 
 ### Bug Fixes
 
@@ -9,7 +15,7 @@
 - Fixed issue with Live-photo upload
 - other minor ux improvement
 
-## v1.6.66
+## v1.6.46
 
 ### Bug Fixes
 
