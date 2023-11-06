@@ -41,6 +41,7 @@ import {
     getAppVersion,
     openDirectory,
     updateOptOutOfCrashReports,
+    getPlatform,
 } from './api/common';
 import { fixHotReloadNext12 } from './utils/preload';
 import {
@@ -59,6 +60,7 @@ import {
     logRendererProcessMemoryUsage,
 } from './utils/processStats';
 import { runFFmpegCmd } from './api/ffmpeg';
+import { computeImageEmbedding, computeTextEmbedding } from './api/clip';
 
 fixHotReloadNext12();
 setupLogging();
@@ -114,4 +116,7 @@ windowObject['ElectronAPIs'] = {
     rename,
     deleteFile,
     updateOptOutOfCrashReports,
+    computeImageEmbedding,
+    computeTextEmbedding,
+    getPlatform,
 };

@@ -9,3 +9,4 @@ buildingSteps.md
 build/.DS_Store
 .env
 .electron-symbols/
+models/
