@@ -1594,6 +1594,31 @@ class FilesDB {
     return _convertToEmbeddings(results);
   }
 
+  Future<List<Embedding>> getAllEmbeddingsV2() async {
+    final db = await instance.database;
+    final List<Embedding> allEmbeddings = [];
+
+    int offset = 0;
+    while (true) {
+      final results = await db.query(
+        embeddingsTable,
+        orderBy: '$columnUploadedFileID ASC',
+        limit: 5000,
+        offset: offset,
+      );
+
+      if (results.isEmpty) {
+        break; // No more results left to fetch
+      }
+
+      allEmbeddings.addAll(_convertToEmbeddings(results));
+
+      offset += 5000; // Increment offset for the next batch
+    }
+
+    return allEmbeddings;
+  }
+
   Future<List<Embedding>> getUnSyncedEmbeddings() async {
     final db = await instance.database;
     final results = await db.query(

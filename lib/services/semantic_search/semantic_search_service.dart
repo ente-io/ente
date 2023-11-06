@@ -161,7 +161,7 @@ class SemanticSearchService {
   }
 
   Future<IndexStatus> getIndexStatus() async {
-    final embeddings = await FilesDB.instance.getAllEmbeddings();
+    final embeddings = await FilesDB.instance.getAllEmbeddingsV2();
     return IndexStatus(embeddings.length, _queue.length);
   }
 
@@ -242,12 +242,12 @@ class SemanticSearchService {
 
   Future<void> _cacheEmbeddings() async {
     final startTime = DateTime.now();
-    final embeddings = await FilesDB.instance.getAllEmbeddings();
+    final embeddings = await FilesDB.instance.getAllEmbeddingsV2();
     _cachedEmbeddings.clear();
     _cachedEmbeddings.addAll(embeddings);
     final endTime = DateTime.now();
     _logger.info(
-      "loadingAllEmbeddings took: ${(endTime.millisecondsSinceEpoch - startTime.millisecondsSinceEpoch)}ms",
+      "Loading ${embeddings.length} embeddings took: ${(endTime.millisecondsSinceEpoch - startTime.millisecondsSinceEpoch)}ms",
     );
   }
 }

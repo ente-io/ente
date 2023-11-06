@@ -130,7 +130,7 @@ dependencies:
   sentry_flutter: ^7.9.0
   share_plus: ^4.0.10
   shared_preferences: ^2.0.5
-  sqflite: ^2.0.0+3
+  sqflite: ^2.3.0
   sqflite_migration: ^0.3.0
   step_progress_indicator: ^1.0.2
   styled_text: ^7.0.0
