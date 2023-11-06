@@ -37,6 +37,10 @@ class ClipServiceImpl {
     };
     private onUpdateHandler: (status: ClipExtractionStatus) => void = null;
     private liveEmbeddingExtractionQueue: PQueue;
+    private onFileUploadedHandler: (arg: {
+        enteFile: EnteFile;
+        localFile: globalThis.File;
+    }) => void = null;
 
     constructor() {
         this.electronAPIs = globalThis['ElectronAPIs'];
@@ -47,12 +51,19 @@ class ClipServiceImpl {
 
     setupOnFileUploadListener = async () => {
         try {
+            const isClipSupported = await this.isClipSupported();
+            if (!isClipSupported) {
+                return;
+            }
+            if (this.onFileUploadedHandler) {
+                addLogLine('file upload listener already setup');
+                return;
+            }
             addLogLine('setting up file upload listener');
-            eventBus.on(
-                Events.FILE_UPLOADED,
-                this.onFileUploadedHandler.bind(this),
-                this
-            );
+            this.onFileUploadedHandler = (args) => {
+                this.runLocalFileClipExtraction(args);
+            };
+            eventBus.on(Events.FILE_UPLOADED, this.onFileUploadedHandler, this);
             addLogLine('setup file upload listener successfully');
         } catch (e) {
             logError(e, 'failed to setup clip service');
@@ -61,11 +72,17 @@ class ClipServiceImpl {
 
     removeOnFileUploadListener = async () => {
         try {
+            if (!this.onFileUploadedHandler) {
+                addLogLine('file upload listener already removed');
+                return;
+            }
             addLogLine('removing file upload listener');
             eventBus.removeListener(
                 Events.FILE_UPLOADED,
-                this.onFileUploadedHandler.bind(this)
+                this.onFileUploadedHandler,
+                this
             );
+            this.onFileUploadedHandler = null;
             addLogLine('removed file upload listener successfully');
         } catch (e) {
             logError(e, 'failed to remove clip service');
@@ -87,6 +104,7 @@ class ClipServiceImpl {
         if (!isElectron()) {
             return false;
         }
+        return false;
         const platform = await this.electronAPIs.getPlatform();
         return platform !== 'windows';
     };
@@ -198,10 +216,12 @@ class ClipServiceImpl {
         }
     };
 
-    private async onFileUploadedHandler(arg: {
+    private async runLocalFileClipExtraction(arg: {
         enteFile: EnteFile;
         localFile: globalThis.File;
     }) {
+        console.log('asdasd');
+        return;
         const { enteFile, localFile } = arg;
         addLogLine(
             `clip embedding extraction onFileUploadedHandler file: ${enteFile.metadata.title} fileID: ${enteFile.id}`,
