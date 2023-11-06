@@ -1,3 +1,5 @@
+import "dart:math";
+
 import "package:flutter/cupertino.dart";
 import 'package:logging/logging.dart';
 import 'package:photos/core/event_bus.dart';
@@ -370,7 +372,7 @@ class SearchService {
 
         if (limit == null || distinctFullDescriptionCount < limit) {
           distinctFullDescriptionCount++;
-          final words = file.caption!.split(" ");
+          final words = file.caption!.trim().split(" ");
           orderedSubDescriptions.add({0: <String>[], 1: <String>[]});
 
           for (int i = 1; i <= words.length; i++) {
@@ -422,13 +424,45 @@ class SearchService {
       }
     }
 
-    descriptionAndMatchingFiles.forEach((key, value) {
+    ///[relevantDescAndFiles] will be a filterd version of [descriptionAndMatchingFiles]
+    ///In [descriptionAndMatchingFiles], there will be descriptions with the same
+    ///set of matching files. These descriptions will be substrings of a full
+    ///description. [relevantDescAndFiles] will keep only the entry which has the
+    ///longest description among enties with matching set of files.
+    final relevantDescAndFiles = <String, Set<EnteFile>>{};
+    while (descriptionAndMatchingFiles.isNotEmpty) {
+      final baseEntry = descriptionAndMatchingFiles.entries.first;
+      final descsWithSameFiles = <String, Set<EnteFile>>{};
+      final baseUploadedFileIDs =
+          baseEntry.value.map((e) => e.uploadedFileID).toSet();
+
+      descriptionAndMatchingFiles.forEach((desc, files) {
+        final uploadedFileIDs = files.map((e) => e.uploadedFileID).toSet();
+
+        final hasSameFiles = uploadedFileIDs.containsAll(baseUploadedFileIDs) &&
+            baseUploadedFileIDs.containsAll(uploadedFileIDs);
+        if (hasSameFiles) {
+          descsWithSameFiles.addAll({desc: files});
+        }
+      });
+      descriptionAndMatchingFiles
+          .removeWhere((desc, files) => descsWithSameFiles.containsKey(desc));
+      final longestDescription = descsWithSameFiles.keys.reduce(
+        (desc1, desc2) => desc1.length > desc2.length ? desc1 : desc2,
+      );
+      relevantDescAndFiles.addAll(
+        {longestDescription: descsWithSameFiles[longestDescription]!},
+      );
+    }
+
+    relevantDescAndFiles.forEach((key, value) {
       searchResults.add(
         GenericSearchResult(ResultType.fileCaption, key, value.toList()),
       );
     });
     if (limit != null && distinctFullDescriptionCount >= limit) {
-      return (searchResults..shuffle()).sublist(0, limit);
+      return (searchResults..shuffle())
+          .sublist(0, min(limit, searchResults.length));
     } else {
       return searchResults;
     }
