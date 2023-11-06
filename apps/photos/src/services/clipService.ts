@@ -4,7 +4,7 @@ import {
     getLatestEmbeddings,
     getLocalEmbeddings,
 } from './embeddingService';
-import { getLocalFiles } from './fileService';
+import { getAllLocalFiles, getLocalFiles } from './fileService';
 import { ElectronAPIs } from 'types/electron';
 import downloadManager from './downloadManager';
 import { getToken } from 'utils/common/key';
@@ -146,7 +146,7 @@ class ClipServiceImpl {
             if (!user) {
                 return;
             }
-            const localFiles = getPersonalFiles(await getLocalFiles(), user);
+            const localFiles = getPersonalFiles(await getAllLocalFiles(), user);
             const existingEmbeddings = await getLatestClipImageEmbeddings();
             const pendingFiles = await getNonClipEmbeddingExtractedFiles(
                 localFiles,
