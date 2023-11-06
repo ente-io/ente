@@ -24,6 +24,8 @@ import { Trans } from 'react-i18next';
 import { Link } from '@mui/material';
 import { SUPPORT_EMAIL } from 'constants/urls';
 import { DialogBoxAttributes } from 'types/dialogBox';
+import { ApiError } from 'utils/error';
+import { HttpStatusCode } from 'axios';
 
 const bip39 = require('bip39');
 // mobile client library only supports english.
@@ -68,7 +70,10 @@ export default function Recover() {
                     });
                 }
             } catch (e) {
-                if (e.status === 404) {
+                if (
+                    e instanceof ApiError &&
+                    e.httpStatusCode === HttpStatusCode.NotFound
+                ) {
                     logoutUser();
                 } else {
                     logError(e, 'two factor recovery page setup failed');

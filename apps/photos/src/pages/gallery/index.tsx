@@ -70,7 +70,7 @@ import {
     TRASH_SECTION,
 } from 'constants/collection';
 import { AppContext } from 'pages/_app';
-import { CustomError, ServerErrorCodes } from 'utils/error';
+import { CustomError } from 'utils/error';
 import { PAGES } from 'constants/pages';
 import {
     COLLECTION_OPS_TYPE,
@@ -699,7 +699,7 @@ export default function Gallery() {
             }
             const tokenValid = await isTokenValid(token);
             if (!tokenValid) {
-                throw new Error(ServerErrorCodes.SESSION_EXPIRED);
+                throw new Error(CustomError.SESSION_EXPIRED);
             }
             !silent && startLoading();
             const collections = await getAllLatestCollections();
@@ -718,7 +718,7 @@ export default function Gallery() {
             }
         } catch (e) {
             switch (e.message) {
-                case ServerErrorCodes.SESSION_EXPIRED:
+                case CustomError.SESSION_EXPIRED:
                     showSessionExpiredMessage();
                     break;
                 case CustomError.KEY_MISSING:

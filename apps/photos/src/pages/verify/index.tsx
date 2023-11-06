@@ -33,6 +33,8 @@ import SingleInputForm, {
 import EnteSpinner from 'components/EnteSpinner';
 import { VerticallyCentered } from 'components/Container';
 import InMemoryStore, { MS_KEYS } from 'services/InMemoryStore';
+import { ApiError } from 'utils/error';
+import { HttpStatusCode } from 'axios';
 
 export default function Verify() {
     const [email, setEmail] = useState('');
@@ -122,10 +124,12 @@ export default function Verify() {
                 }
             }
         } catch (e) {
-            if (e?.status === 401) {
-                setFieldError(t('INVALID_CODE'));
-            } else if (e?.status === 410) {
-                setFieldError(t('EXPIRED_CODE'));
+            if (e instanceof ApiError) {
+                if (e?.httpStatusCode === HttpStatusCode.Unauthorized) {
+                    setFieldError(t('INVALID_CODE'));
+                } else if (e?.httpStatusCode === HttpStatusCode.Gone) {
+                    setFieldError(t('EXPIRED_CODE'));
+                }
             } else {
                 setFieldError(`${t('UNKNOWN_ERROR')} ${e.message}`);
             }

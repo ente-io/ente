@@ -40,13 +40,13 @@ import {
     UpdateSRPAndKeysResponse,
     GetSRPAttributesResponse,
 } from 'types/user';
-import { ServerErrorCodes } from 'utils/error';
+import { ApiError, CustomError } from 'utils/error';
 import isElectron from 'is-electron';
 import safeStorageService from './electron/safeStorage';
 import { deleteAllCache } from 'utils/storage/cache';
 import { B64EncryptionResult } from 'types/crypto';
 import { getLocalFamilyData, isPartOfFamily } from 'utils/user/family';
-import { AxiosResponse } from 'axios';
+import { AxiosResponse, HttpStatusCode } from 'axios';
 import { APPS, getAppName } from 'constants/apps';
 import { addLocalLog } from 'utils/logging';
 import { convertBase64ToBuffer, convertBufferToBase64 } from 'utils/user';
@@ -224,7 +224,10 @@ export const isTokenValid = async (token: string) => {
         return true;
     } catch (e) {
         logError(e, 'session-validity api call failed');
-        if (e.status?.toString() === ServerErrorCodes.SESSION_EXPIRED) {
+        if (
+            e instanceof ApiError &&
+            e.httpStatusCode === HttpStatusCode.Unauthorized
+        ) {
             return false;
         } else {
             return true;
@@ -554,11 +557,8 @@ export const getSRPAttributes = async (
         });
         return (resp.data as GetSRPAttributesResponse).attributes;
     } catch (e) {
-        if (e.status?.toString() === ServerErrorCodes.NOT_FOUND) {
-            return null;
-        }
         logError(e, 'failed to get SRP attributes');
-        throw e;
+        return null;
     }
 };
 
@@ -730,7 +730,14 @@ export const verifySRPSession = async (
         return resp.data as UserVerificationResponse;
     } catch (e) {
         logError(e, 'verifySRPSession failed');
-        throw e;
+        if (
+            e instanceof ApiError &&
+            e.httpStatusCode === HttpStatusCode.Forbidden
+        ) {
+            throw Error(CustomError.INCORRECT_PASSWORD);
+        } else {
+            throw e;
+        }
     }
 };
 

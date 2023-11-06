@@ -90,10 +90,7 @@ export function EnteMenuItem({
                 <VerticallyCenteredFlex gap={'4px'}>
                     {endIcon && endIcon}
                     {variant === 'toggle' && (
-                        <PublicShareSwitch
-                            checked={checked}
-                            onChange={handleClick}
-                        />
+                        <PublicShareSwitch checked={checked} />
                     )}
                 </VerticallyCenteredFlex>
             </SpaceBetweenFlex>

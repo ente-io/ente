@@ -1,6 +1,7 @@
-import axios, { AxiosRequestConfig } from 'axios';
+import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
 import { addLogLine } from 'utils/logging';
 import { logError } from 'utils/sentry';
+import { ApiError, CustomError, isApiErrorResponse } from 'utils/error';
 
 interface IHTTPHeaders {
     [headerKey: string]: any;
@@ -18,34 +19,66 @@ class HTTPService {
         axios.interceptors.response.use(
             (response) => Promise.resolve(response),
             (error) => {
+                const config = error.config as AxiosRequestConfig;
                 if (error.response) {
+                    const response = error.response as AxiosResponse;
+                    let apiError: ApiError;
                     // The request was made and the server responded with a status code
                     // that falls out of the range of 2xx
-                    logError(error, 'HTTP Service Error', {
-                        url: error.config.url,
-                        method: error.config.method,
-                        cfRay: error.response?.headers['cf-ray'],
-                        xRequestId: error.response?.headers['x-request-id'],
-                        status: error.response.status,
+                    if (isApiErrorResponse(response.data)) {
+                        const responseData = response.data;
+                        logError(error, 'HTTP Service Error', {
+                            url: config.url,
+                            method: config.method,
+                            xRequestId: response.headers['x-request-id'],
+                            httpStatus: response.status,
+                            errMessage: responseData.message,
+                            errCode: responseData.code,
+                        });
+                        apiError = new ApiError(
+                            responseData.message,
+                            responseData.code,
+                            response.status
+                        );
+                    } else {
+                        if (response.status >= 400 && response.status < 500) {
+                            apiError = new ApiError(
+                                CustomError.CLIENT_ERROR,
+                                '',
+                                response.status
+                            );
+                        } else {
+                            apiError = new ApiError(
+                                CustomError.ServerError,
+                                '',
+                                response.status
+                            );
+                        }
+                    }
+                    logError(apiError, 'HTTP Service Error', {
+                        url: config.url,
+                        method: config.method,
+                        cfRay: response.headers['cf-ray'],
+                        xRequestId: response.headers['x-request-id'],
+                        httpStatus: response.status,
                     });
-                    const { response } = error;
-                    return Promise.reject(response);
+                    throw apiError;
                 } else if (error.request) {
                     // The request was made but no response was received
                     // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
                     // http.ClientRequest in node.js
                     addLogLine(
                         'request failed- no response',
-                        `url: ${error.config.url}`,
-                        `method: ${error.config.method}`
+                        `url: ${config.url}`,
+                        `method: ${config.method}`
                     );
                     return Promise.reject(error);
                 } else {
                     // Something happened in setting up the request that triggered an Error
                     addLogLine(
                         'request failed- axios error',
-                        `url: ${error.config.url}`,
-                        `method: ${error.config.method}`
+                        `url: ${config.url}`,
+                        `method: ${config.method}`
                     );
                     return Promise.reject(error);
                 }

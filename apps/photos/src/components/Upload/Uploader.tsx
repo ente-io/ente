@@ -398,7 +398,7 @@ export default function Uploader(props: Props) {
                     localID: index,
                     collectionID: collection.id,
                 }));
-            waitInQueueAndUploadFiles(
+            await waitInQueueAndUploadFiles(
                 filesWithCollectionToUpload,
                 [collection],
                 uploaderName
@@ -472,14 +472,17 @@ export default function Uploader(props: Props) {
                 });
                 throw e;
             }
-            waitInQueueAndUploadFiles(filesWithCollectionToUpload, collections);
+            await waitInQueueAndUploadFiles(
+                filesWithCollectionToUpload,
+                collections
+            );
             toUploadFiles.current = null;
         } catch (e) {
             logError(e, 'Failed to upload files to new collections');
         }
     };
 
-    const waitInQueueAndUploadFiles = (
+    const waitInQueueAndUploadFiles = async (
         filesWithCollectionToUploadIn: FileWithCollection[],
         collections: Collection[],
         uploaderName?: string
@@ -494,6 +497,7 @@ export default function Uploader(props: Props) {
                     uploaderName
                 )
         );
+        await currentUploadPromise.current;
     };
 
     const preUploadAction = async () => {
