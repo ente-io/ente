@@ -46,7 +46,6 @@ import 'package:photos/ui/home/home_bottom_nav_bar.dart';
 import 'package:photos/ui/home/home_gallery_widget.dart';
 import 'package:photos/ui/home/landing_page_widget.dart';
 import "package:photos/ui/home/loading_photos_widget.dart";
-import 'package:photos/ui/home/preserve_footer_widget.dart';
 import 'package:photos/ui/home/start_backup_hook_widget.dart';
 import 'package:photos/ui/notification/update/change_log_page.dart';
 import "package:photos/ui/search_tab.dart";
@@ -415,7 +414,9 @@ class _HomeWidgetState extends State<HomeWidget> {
                       ? const StartBackupHookWidget(headerWidget: _headerWidget)
                       : HomeGalleryWidget(
                           header: _headerWidget,
-                          footer: const PreserveFooterWidget(),
+                          footer: const SizedBox(
+                            height: 160,
+                          ),
                           selectedFiles: _selectedFiles,
                         ),
                   _userCollectionsTab,
