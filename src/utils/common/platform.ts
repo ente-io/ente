@@ -1,11 +1,19 @@
 export function isPlatform(platform: 'mac' | 'windows' | 'linux') {
-    if (process.platform === 'darwin') {
-        return platform === 'mac';
-    } else if (process.platform === 'win32') {
-        return platform === 'windows';
-    } else if (process.platform === 'linux') {
-        return platform === 'linux';
-    } else {
-        return false;
+    return getPlatform() === platform;
+}
+
+export function getPlatform(): 'mac' | 'windows' | 'linux' {
+    switch (process.platform) {
+        case 'aix':
+        case 'freebsd':
+        case 'linux':
+        case 'openbsd':
+        case 'android':
+            return 'linux';
+        case 'darwin':
+        case 'sunos':
+            return 'mac';
+        case 'win32':
+            return 'windows';
     }
 }

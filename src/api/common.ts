@@ -27,6 +27,15 @@ export const openDirectory = async (dirPath: string): Promise<void> => {
     }
 };
 
+export const getPlatform = async (): Promise<'mac' | 'windows' | 'linux'> => {
+    try {
+        return await ipcRenderer.invoke('get-platform');
+    } catch (e) {
+        logError(e, 'failed to get platform');
+        throw e;
+    }
+};
+
 export {
     logToDisk,
     openLogDirectory,

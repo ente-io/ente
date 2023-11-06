@@ -27,6 +27,11 @@ import { deleteTempFile, runFFmpegCmd } from '../services/ffmpeg';
 import { generateTempFilePath } from './temp';
 import { setOptOutOfCrashReports } from '../services/userPreference';
 import { updateOptOutOfCrashReports } from '../main';
+import {
+    computeImageEmbedding,
+    computeTextEmbedding,
+} from '../services/clipService';
+import { getPlatform } from './common/platform';
 
 export default function setupIpcComs(
     tray: Tray,
@@ -165,5 +170,14 @@ export default function setupIpcComs(
     ipcMain.handle('update-opt-out-crash-reports', (_, optOut) => {
         setOptOutOfCrashReports(optOut);
         updateOptOutOfCrashReports(optOut);
+    });
+    ipcMain.handle('compute-image-embedding', (_, inputFilePath) => {
+        return computeImageEmbedding(inputFilePath);
+    });
+    ipcMain.handle('compute-text-embedding', (_, text) => {
+        return computeTextEmbedding(text);
+    });
+    ipcMain.handle('get-platform', () => {
+        return getPlatform();
     });
 }
