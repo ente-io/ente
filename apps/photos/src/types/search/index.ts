@@ -15,6 +15,7 @@ export enum SuggestionType {
     TEXT = 'TEXT',
     FILE_CAPTION = 'FILE_CAPTION',
     FILE_TYPE = 'FILE_TYPE',
+    CLIP = 'CLIP',
 }
 
 export interface DateValue {
@@ -34,7 +35,8 @@ export interface Suggestion {
         | Thing
         | WordGroup
         | LocationTagData
-        | FILE_TYPE;
+        | FILE_TYPE
+        | ClipSearchScores;
     hide?: boolean;
 }
 
@@ -47,6 +49,7 @@ export type Search = {
     thing?: Thing;
     text?: WordGroup;
     fileType?: FILE_TYPE;
+    clip?: ClipSearchScores;
 };
 
 export type SearchResultSummary = {
@@ -63,3 +66,5 @@ export type UpdateSearch = (
     search: Search,
     summary: SearchResultSummary
 ) => void;
+
+export type ClipSearchScores = Map<number, number>;

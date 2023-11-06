@@ -2,6 +2,8 @@ import * as Comlink from 'comlink';
 import { StateAddress } from 'libsodium-wrappers';
 import * as libsodium from 'utils/crypto/libsodium';
 
+const textDecoder = new TextDecoder();
+const textEncoder = new TextEncoder();
 export class DedicatedCryptoWorker {
     async decryptMetadata(
         encryptedMetadata: string,
@@ -13,7 +15,7 @@ export class DedicatedCryptoWorker {
             await libsodium.fromB64(header),
             key
         );
-        return JSON.parse(new TextDecoder().decode(encodedMetadata));
+        return JSON.parse(textDecoder.decode(encodedMetadata));
     }
 
     async decryptThumbnail(
@@ -24,14 +26,27 @@ export class DedicatedCryptoWorker {
         return libsodium.decryptChaChaOneShot(fileData, header, key);
     }
 
+    async decryptEmbedding(
+        encryptedEmbedding: string,
+        header: string,
+        key: string
+    ) {
+        const encodedEmbedding = await libsodium.decryptChaChaOneShot(
+            await libsodium.fromB64(encryptedEmbedding),
+            await libsodium.fromB64(header),
+            key
+        );
+        return Float32Array.from(
+            JSON.parse(textDecoder.decode(encodedEmbedding))
+        );
+    }
+
     async decryptFile(fileData: Uint8Array, header: Uint8Array, key: string) {
         return libsodium.decryptChaCha(fileData, header, key);
     }
 
     async encryptMetadata(metadata: Object, key: string) {
-        const encodedMetadata = new TextEncoder().encode(
-            JSON.stringify(metadata)
-        );
+        const encodedMetadata = textEncoder.encode(JSON.stringify(metadata));
 
         const { file: encryptedMetadata } =
             await libsodium.encryptChaChaOneShot(encodedMetadata, key);
@@ -47,6 +62,24 @@ export class DedicatedCryptoWorker {
 
     async encryptThumbnail(fileData: Uint8Array, key: string) {
         return libsodium.encryptChaChaOneShot(fileData, key);
+    }
+
+    async encryptEmbedding(embedding: Float32Array, key: string) {
+        const encodedEmbedding = textEncoder.encode(
+            JSON.stringify(Array.from(embedding))
+        );
+        const { file: encryptEmbedding } = await libsodium.encryptChaChaOneShot(
+            encodedEmbedding,
+            key
+        );
+        const { encryptedData, ...other } = encryptEmbedding;
+        return {
+            file: {
+                encryptedData: await libsodium.toB64(encryptedData),
+                ...other,
+            },
+            key,
+        };
     }
 
     async encryptFile(fileData: Uint8Array) {

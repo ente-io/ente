@@ -13,6 +13,7 @@ import {
     SearchOption,
     Suggestion,
     SuggestionType,
+    ClipSearchScores,
 } from 'types/search';
 import ObjectService from './machineLearning/objectService';
 import {
@@ -26,8 +27,15 @@ import { getLatestEntities } from './entityService';
 import { LocationTag, LocationTagData, EntityType } from 'types/entity';
 import { addLogLine } from 'utils/logging';
 import { FILE_TYPE } from 'constants/file';
+import {
+    ClipService,
+    computeClipMatchScore,
+    getLocalClipImageEmbeddings,
+} from './clipService';
 
 const DIGITS = new Set(['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']);
+
+const CLIP_SCORE_THRESHOLD = 0.23;
 
 export const getDefaultOptions = async (files: EnteFile[]) => {
     return [
@@ -54,7 +62,8 @@ export const getAutoCompleteSuggestions =
                 getFileCaptionSuggestion(searchPhrase, files),
                 ...(await getLocationTagSuggestions(searchPhrase)),
                 ...(await getThingSuggestion(searchPhrase)),
-            ];
+                await getClipSuggestion(searchPhrase),
+            ].filter((suggestion) => !!suggestion);
 
             return convertSuggestionsToOptions(suggestions, files);
         } catch (e) {
@@ -76,6 +85,15 @@ function convertSuggestionsToOptions(
             const resultFiles = getUniqueFiles(
                 files.filter((file) => isSearchedFile(file, searchQuery))
             );
+
+            if (searchQuery?.clip) {
+                resultFiles.sort((a, b) => {
+                    const aScore = searchQuery.clip.get(a.id);
+                    const bScore = searchQuery.clip.get(b.id);
+                    return bScore - aScore;
+                });
+            }
+
             return {
                 ...suggestion,
                 fileCount: resultFiles.length,
@@ -271,6 +289,18 @@ async function getThingSuggestion(searchPhrase: string): Promise<Suggestion[]> {
     );
 }
 
+async function getClipSuggestion(searchPhrase: string): Promise<Suggestion> {
+    if (!(await ClipService.isClipSupported())) {
+        return null;
+    }
+    const clipResults = await searchClip(searchPhrase);
+    return {
+        type: SuggestionType.CLIP,
+        value: clipResults,
+        label: searchPhrase,
+    };
+}
+
 function searchCollection(
     searchPhrase: string,
     collections: Collection[]
@@ -343,6 +373,28 @@ async function searchThing(searchPhrase: string) {
     );
 }
 
+async function searchClip(searchPhrase: string): Promise<ClipSearchScores> {
+    const imageEmbeddings = await getLocalClipImageEmbeddings();
+    const textEmbedding = await ClipService.getTextEmbedding(searchPhrase);
+    const clipSearchResult = new Map<number, number>(
+        (
+            await Promise.all(
+                imageEmbeddings.map(
+                    async (imageEmbedding): Promise<[number, number]> => [
+                        imageEmbedding.fileID,
+                        await computeClipMatchScore(
+                            imageEmbedding.embedding,
+                            textEmbedding
+                        ),
+                    ]
+                )
+            )
+        ).filter(([, score]) => score >= CLIP_SCORE_THRESHOLD)
+    );
+
+    return clipSearchResult;
+}
+
 function isSearchedFile(file: EnteFile, search: Search) {
     if (search?.collection) {
         return search.collection === file.collectionID;
@@ -379,6 +431,9 @@ function isSearchedFile(file: EnteFile, search: Search) {
     if (typeof search?.fileType !== 'undefined') {
         return search.fileType === file.metadata.fileType;
     }
+    if (typeof search?.clip !== 'undefined') {
+        return search.clip.has(file.id);
+    }
     return false;
 }
 
@@ -410,5 +465,7 @@ function convertSuggestionToSearchQuery(option: Suggestion): Search {
             return { thing: option.value as Thing };
         case SuggestionType.FILE_TYPE:
             return { fileType: option.value as FILE_TYPE };
+        case SuggestionType.CLIP:
+            return { clip: option.value as ClipSearchScores };
     }
 }
