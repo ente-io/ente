@@ -210,7 +210,8 @@
         "FILE_NAME": "Nombre del archivo",
         "THING": "Contenido",
         "FILE_CAPTION": "Descripción",
-        "FILE_TYPE": ""
+        "FILE_TYPE": "",
+        "CLIP": ""
     },
     "photos_count_zero": "No hay recuerdos",
     "photos_count_one": "1 recuerdo",
@@ -615,5 +616,7 @@
     "FLIP": "",
     "ROTATION": "",
     "RESET": "",
-    "PHOTO_EDITOR": ""
+    "PHOTO_EDITOR": "",
+    "STATUS": "",
+    "INDEXED_ITEMS": ""
 }
