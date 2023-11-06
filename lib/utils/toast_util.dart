@@ -9,6 +9,7 @@ Future showToast(
   BuildContext context,
   String message, {
   toastLength = Toast.LENGTH_LONG,
+  int iosLongToastLengthInSec = 2,
 }) async {
   if (Platform.isAndroid) {
     await Fluttertoast.cancel();
@@ -30,7 +31,10 @@ Future showToast(
       ..loadingStyle = EasyLoadingStyle.custom;
     return EasyLoading.showToast(
       message,
-      duration: Duration(seconds: (toastLength == Toast.LENGTH_LONG ? 2 : 1)),
+      duration: Duration(
+        seconds:
+            (toastLength == Toast.LENGTH_LONG ? iosLongToastLengthInSec : 1),
+      ),
       toastPosition: EasyLoadingToastPosition.bottom,
       dismissOnTap: false,
     );

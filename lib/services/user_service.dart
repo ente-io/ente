@@ -52,6 +52,7 @@ import "package:uuid/uuid.dart";
 class UserService {
   static const keyHasEnabledTwoFactor = "has_enabled_two_factor";
   static const keyUserDetails = "user_details";
+  static const kReferralSource = "referral_source";
 
   final SRP6GroupParameters kDefaultSrpGroup = SRP6StandardGroups.rfc5054_4096;
   final _dio = NetworkClient.instance.getDio();
@@ -318,13 +319,17 @@ class UserService {
   }) async {
     final dialog = createProgressDialog(context, S.of(context).pleaseWait);
     await dialog.show();
+    final verifyData = {
+      "email": _config.getEmail(),
+      "ott": ott,
+    };
+    if (!_config.isLoggedIn()) {
+      verifyData["source"] = _getRefSource();
+    }
     try {
       final response = await _dio.post(
         _config.getHttpEndpoint() + "/users/verify-email",
-        data: {
-          "email": _config.getEmail(),
-          "ott": ott,
-        },
+        data: verifyData,
       );
       await dialog.hide();
       if (response.statusCode == 200) {
@@ -390,6 +395,14 @@ class UserService {
   Future<void> setEmail(String email) async {
     await _config.setEmail(email);
     emailValueNotifier.value = email;
+  }
+
+  Future<void> setRefSource(String refSource) async {
+    await _preferences.setString(kReferralSource, refSource);
+  }
+
+  String _getRefSource() {
+    return _preferences.getString(kReferralSource) ?? "";
   }
 
   Future<void> changeEmail(
