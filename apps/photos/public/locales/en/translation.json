@@ -617,6 +617,8 @@
     "ROTATION": "Rotation",
     "RESET": "Reset",
     "PHOTO_EDITOR": "Photo Editor",
+    "FASTER_UPLOAD":"Faster uploads",
+    "FASTER_UPLOAD_DESCRIPTION":"Route uploads through nearby servers",
     "STATUS": "Status",
     "INDEXED_ITEMS": "Indexed items"
 }

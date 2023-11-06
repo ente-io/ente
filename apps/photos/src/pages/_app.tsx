@@ -121,6 +121,8 @@ type AppContextType = {
     setThemeColor: SetTheme;
     somethingWentWrong: () => void;
     setDialogBoxAttributesV2: (attributes: DialogBoxAttributesV2) => void;
+    isCFProxyDisabled: boolean;
+    setIsCFProxyDisabled: (disabled: boolean) => void;
 };
 
 export const AppContext = createContext<AppContextType>(null);
@@ -168,6 +170,10 @@ export default function App(props) {
     const [themeColor, setThemeColor] = useLocalState(
         LS_KEYS.THEME,
         THEME_COLOR.DARK
+    );
+    const [isCFProxyDisabled, setIsCFProxyDisabled] = useLocalState(
+        LS_KEYS.CF_PROXY_DISABLED,
+        false
     );
 
     const { name: appName, title: appTitle } = useMemo(() => {
@@ -502,6 +508,8 @@ export default function App(props) {
                         setDialogBoxAttributesV2,
                         mapEnabled,
                         updateMapEnabled,
+                        isCFProxyDisabled,
+                        setIsCFProxyDisabled,
                     }}>
                     {(loading || !isI18nReady) && (
                         <Overlay
