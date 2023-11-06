@@ -104,7 +104,6 @@ class ClipServiceImpl {
         if (!isElectron()) {
             return false;
         }
-        return false;
         const platform = await this.electronAPIs.getPlatform();
         return platform !== 'windows';
     };
