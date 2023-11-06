@@ -47,10 +47,6 @@ export const syncEmbeddings = async () => {
         [...localFiles, ...localTrashFiles].forEach((file) => {
             fileIdToKeyMap.set(file.id, file.key);
         });
-        const fileIDToNameMap = new Map<number, string>();
-        [...localFiles, ...localTrashFiles].forEach((file) => {
-            fileIDToNameMap.set(file.id, file.metadata.title);
-        });
         addLogLine(`Syncing embeddings localCount: ${embeddings.length}`);
         let sinceTime = await getEmbeddingSyncTime();
         addLogLine(`Syncing embeddings sinceTime: ${sinceTime}`);

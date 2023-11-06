@@ -219,8 +219,6 @@ class ClipServiceImpl {
         enteFile: EnteFile;
         localFile: globalThis.File;
     }) {
-        console.log('asdasd');
-        return;
         const { enteFile, localFile } = arg;
         addLogLine(
             `clip embedding extraction onFileUploadedHandler file: ${enteFile.metadata.title} fileID: ${enteFile.id}`,
