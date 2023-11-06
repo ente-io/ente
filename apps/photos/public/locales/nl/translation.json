@@ -210,7 +210,8 @@
         "FILE_NAME": "Bestandsnaam",
         "THING": "Inhoud",
         "FILE_CAPTION": "Omschrijving",
-        "FILE_TYPE": "Bestandstype"
+        "FILE_TYPE": "Bestandstype",
+        "CLIP": ""
     },
     "photos_count_zero": "Geen herinneringen",
     "photos_count_one": "1 herinnering",
@@ -615,5 +616,9 @@
     "FLIP": "Omdraaien",
     "ROTATION": "Draaiing",
     "RESET": "Herstellen",
-    "PHOTO_EDITOR": "Fotobewerker"
+    "PHOTO_EDITOR": "Fotobewerker",
+    "FASTER_UPLOAD": "",
+    "FASTER_UPLOAD_DESCRIPTION": "",
+    "STATUS": "",
+    "INDEXED_ITEMS": ""
 }
