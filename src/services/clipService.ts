@@ -154,12 +154,10 @@ export async function computeImageEmbedding(
         const escapedCmd = shellescape(cmd);
         log.info('running clip command', escapedCmd);
         const startTime = Date.now();
-        const { stdout, stderr } = await execAsync(escapedCmd);
+        const { stdout } = await execAsync(escapedCmd);
         log.info('clip command execution time ', Date.now() - startTime);
         // parse stdout and return embedding
         // get the last line of stdout
-        log.info('stdout', stdout);
-        log.info('stderr', stderr);
         const lines = stdout.split('\n');
         const lastLine = lines[lines.length - 1];
         const embedding = JSON.parse(lastLine);
