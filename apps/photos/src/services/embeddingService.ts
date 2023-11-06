@@ -9,7 +9,7 @@ import { getEndpoint } from 'utils/common/apiUtil';
 import { addLogLine } from 'utils/logging';
 import { logError } from 'utils/sentry';
 import localForage from 'utils/storage/localForage';
-import { getLocalFiles } from './fileService';
+import { getAllLocalFiles } from './fileService';
 import HTTPService from './HTTPService';
 import { getToken } from 'utils/common/key';
 import { getLatestVersionEmbeddings } from 'utils/embedding';
@@ -41,7 +41,7 @@ export const getLatestEmbeddings = async () => {
 export const syncEmbeddings = async () => {
     try {
         let embeddings = await getLocalEmbeddings();
-        const localFiles = await getLocalFiles();
+        const localFiles = await getAllLocalFiles();
         const localTrashFiles = await getLocalTrashedFiles();
         const fileIdToKeyMap = new Map<number, string>();
         [...localFiles, ...localTrashFiles].forEach((file) => {
@@ -159,7 +159,7 @@ export const putEmbedding = async (
 };
 
 export const cleanupDeletedEmbeddings = async () => {
-    const files = await getLocalFiles();
+    const files = await getAllLocalFiles();
     const trashedFiles = await getLocalTrashedFiles();
     const activeFileIds = new Set<number>();
     [...files, ...trashedFiles].forEach((file) => {
