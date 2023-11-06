@@ -88,13 +88,11 @@ export default function Preferences({ open, onClose, onRootClose }) {
                             endIcon={<ChevronRight />}
                             label={t('MAP')}
                         />
-                        {isElectron() && (
-                            <EnteMenuItem
-                                onClick={openAdvancedSettings}
-                                endIcon={<ChevronRight />}
-                                label={t('ADVANCED')}
-                            />
-                        )}
+                        <EnteMenuItem
+                            onClick={openAdvancedSettings}
+                            endIcon={<ChevronRight />}
+                            label={t('ADVANCED')}
+                        />
                     </Stack>
                 </Box>
             </Stack>

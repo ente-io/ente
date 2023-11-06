@@ -615,5 +615,7 @@
     "FLIP": "Flip",
     "ROTATION": "Rotation",
     "RESET": "Reset",
-    "PHOTO_EDITOR": "Photo Editor"
+    "PHOTO_EDITOR": "Photo Editor",
+    "FASTER_UPLOAD":"Faster uploads",
+    "FASTER_UPLOAD_DESCRIPTION":"Route uploads through nearby servers"
 }

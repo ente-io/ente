@@ -5,13 +5,17 @@ import { EnteDrawer } from 'components/EnteDrawer';
 import MLSearchSettings from 'components/MachineLearning/MLSearchSettings';
 import MenuSectionTitle from 'components/Menu/MenuSectionTitle';
 import Titlebar from 'components/Titlebar';
-import { useState } from 'react';
+import { useContext, useState } from 'react';
 import { t } from 'i18next';
 
 import { EnteMenuItem } from 'components/Menu/EnteMenuItem';
 import { MenuItemGroup } from 'components/Menu/MenuItemGroup';
+import isElectron from 'is-electron';
+import { logError } from 'utils/sentry';
+import { AppContext } from 'pages/_app';
 
 export default function AdvancedSettings({ open, onClose, onRootClose }) {
+    const appContext = useContext(AppContext);
     const [mlSearchSettingsView, setMlSearchSettingsView] = useState(false);
 
     const openMlSearchSettings = () => setMlSearchSettingsView(true);
@@ -27,6 +31,14 @@ export default function AdvancedSettings({ open, onClose, onRootClose }) {
             handleRootClose();
         } else {
             onClose();
+        }
+    };
+
+    const toggleCFProxy = async () => {
+        try {
+            appContext.setIsCFProxyDisabled(!appContext.isCFProxyDisabled);
+        } catch (e) {
+            logError(e, 'toggleFasterUpload failed');
         }
     };
 
@@ -47,18 +59,33 @@ export default function AdvancedSettings({ open, onClose, onRootClose }) {
 
                 <Box px={'8px'}>
                     <Stack py="20px" spacing="24px">
+                        {isElectron() && (
+                            <Box>
+                                <MenuSectionTitle
+                                    title={t('LABS')}
+                                    icon={<ScienceIcon />}
+                                />
+                                <MenuItemGroup>
+                                    <EnteMenuItem
+                                        endIcon={<ChevronRight />}
+                                        onClick={openMlSearchSettings}
+                                        label={t('ML_SEARCH')}
+                                    />
+                                </MenuItemGroup>
+                            </Box>
+                        )}
                         <Box>
-                            <MenuSectionTitle
-                                title={t('LABS')}
-                                icon={<ScienceIcon />}
-                            />
                             <MenuItemGroup>
                                 <EnteMenuItem
-                                    endIcon={<ChevronRight />}
-                                    onClick={openMlSearchSettings}
-                                    label={t('ML_SEARCH')}
+                                    variant="toggle"
+                                    checked={!appContext.isCFProxyDisabled}
+                                    onClick={toggleCFProxy}
+                                    label={t('FASTER_UPLOAD')}
                                 />
                             </MenuItemGroup>
+                            <MenuSectionTitle
+                                title={t('FASTER_UPLOAD_DESCRIPTION')}
+                            />
                         </Box>
                     </Stack>
                 </Box>
