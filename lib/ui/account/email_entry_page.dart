@@ -345,7 +345,6 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                     decoration: InputDecoration(
                       fillColor: null,
                       filled: true,
-                      hintText: S.of(context).hearUsHint,
                       contentPadding: const EdgeInsets.symmetric(
                         horizontal: 16,
                         vertical: 14,
@@ -371,10 +370,8 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                     onChanged: (value) {
                       _referralSource = value.trim();
                     },
-
                     autocorrect: false,
                     keyboardType: TextInputType.text,
-                    //initialValue: _email,
                     textInputAction: TextInputAction.next,
                   ),
                 ),
