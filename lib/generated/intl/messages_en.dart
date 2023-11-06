@@ -693,7 +693,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "groupNearbyPhotos":
             MessageLookupByLibrary.simpleMessage("Group nearby photos"),
         "hearUsExplanation": MessageLookupByLibrary.simpleMessage(
-            "We don\'t use any analytics within our app. Could you help out our marketing person?"),
+            "We don\'t track app installs. It\'d help if you told us where you found us!"),
         "hearUsHint": MessageLookupByLibrary.simpleMessage(
             "friend, reddit, ad, search, etc."),
         "hearUsWhereTitle": MessageLookupByLibrary.simpleMessage(

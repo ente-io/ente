@@ -7735,10 +7735,10 @@ class S {
     );
   }
 
-  /// `We don't use any analytics within our app. Could you help out our marketing person?`
+  /// `We don't track app installs. It'd help if you told us where you found us!`
   String get hearUsExplanation {
     return Intl.message(
-      'We don\'t use any analytics within our app. Could you help out our marketing person?',
+      'We don\'t track app installs. It\'d help if you told us where you found us!',
       name: 'hearUsExplanation',
       desc: '',
       args: [],
