@@ -120,7 +120,7 @@ class SearchService {
       return collectionSearchResults;
     } catch (e) {
       _logger.severe("error gettin allCollectionSearchResults", e);
-      return Future.value([]);
+      return [];
     }
   }
 
@@ -357,7 +357,7 @@ class SearchService {
       }
     } catch (e) {
       _logger.severe("Error getting allFileTypesAndExtensionsResults", e);
-      return Future.value([]);
+      return [];
     }
   }
 
@@ -505,7 +505,7 @@ class SearchService {
       }
     } catch (e) {
       _logger.severe("Error in getAllDescriptionSearchResults", e);
-      return Future.value([]);
+      return [];
     }
   }
 
@@ -719,7 +719,7 @@ class SearchService {
       return tagSearchResults;
     } catch (e) {
       _logger.severe("Error in getAllLocationTags", e);
-      return Future.value([]);
+      return [];
     }
   }
 
@@ -829,7 +829,7 @@ class SearchService {
       return searchResults;
     } catch (e) {
       _logger.severe("Error in getAllLocationTags", e);
-      return Future.value([]);
+      return [];
     }
   }
 
