@@ -105,6 +105,8 @@ class _AllSearchSectionsState extends State<AllSearchSections> {
           );
         } else if (snapshot.hasError) {
           //todo: Show something went wrong here
+          //Errors are handled and this else if condition will be false always
+          //is the understanding.
           return const Padding(
             padding: EdgeInsets.only(bottom: 72),
             child: EnteLoadingWidget(),
