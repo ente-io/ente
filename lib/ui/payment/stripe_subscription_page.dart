@@ -20,6 +20,7 @@ import 'package:photos/ui/common/web_page.dart';
 import 'package:photos/ui/components/buttons/button_widget.dart';
 import "package:photos/ui/components/captioned_text_widget.dart";
 import "package:photos/ui/components/menu_item_widget/menu_item_widget.dart";
+import "package:photos/ui/payment/add_on_page.dart";
 import 'package:photos/ui/payment/child_subscription_widget.dart';
 import 'package:photos/ui/payment/payment_web_page.dart';
 import 'package:photos/ui/payment/skip_subscription_widget.dart';
@@ -252,7 +253,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
     if (!widget.isOnboarding) {
       widgets.add(
         Padding(
-          padding: const EdgeInsets.fromLTRB(16, 0, 16, 80),
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
           child: MenuItemWidget(
             captionedTextWidget: CaptionedTextWidget(
               title: S.of(context).manageFamily,
@@ -270,6 +271,8 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
           ),
         ),
       );
+      widgets.add(ViewAddOnButton(_userDetails.bonusData));
+      widgets.add(const SizedBox(height: 80));
     }
 
     return SingleChildScrollView(

@@ -694,8 +694,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Group nearby photos"),
         "hearUsExplanation": MessageLookupByLibrary.simpleMessage(
             "We don\'t track app installs. It\'d help if you told us where you found us!"),
-        "hearUsHint": MessageLookupByLibrary.simpleMessage(
-            "friend, reddit, ad, search, etc."),
         "hearUsWhereTitle": MessageLookupByLibrary.simpleMessage(
             "How did you hear about Ente? (optional)"),
         "hidden": MessageLookupByLibrary.simpleMessage("Hidden"),
@@ -1342,6 +1340,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "videoSmallCase": MessageLookupByLibrary.simpleMessage("video"),
         "viewActiveSessions":
             MessageLookupByLibrary.simpleMessage("View active sessions"),
+        "viewAddOnButton": MessageLookupByLibrary.simpleMessage("View Add-ons"),
         "viewAll": MessageLookupByLibrary.simpleMessage("View all"),
         "viewAllExifData":
             MessageLookupByLibrary.simpleMessage("View all EXIF data"),

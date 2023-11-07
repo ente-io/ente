@@ -21,6 +21,7 @@ import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/common/progress_dialog.dart';
 import "package:photos/ui/components/captioned_text_widget.dart";
 import "package:photos/ui/components/menu_item_widget/menu_item_widget.dart";
+import "package:photos/ui/payment/add_on_page.dart";
 import 'package:photos/ui/payment/child_subscription_widget.dart';
 import 'package:photos/ui/payment/skip_subscription_widget.dart';
 import 'package:photos/ui/payment/subscription_common_widgets.dart';
@@ -290,7 +291,7 @@ class _StoreSubscriptionPageState extends State<StoreSubscriptionPage> {
     if (!widget.isOnboarding) {
       widgets.add(
         Padding(
-          padding: const EdgeInsets.fromLTRB(16, 0, 16, 80),
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
           child: MenuItemWidget(
             captionedTextWidget: CaptionedTextWidget(
               title: _isFreePlanUser()
@@ -310,6 +311,8 @@ class _StoreSubscriptionPageState extends State<StoreSubscriptionPage> {
           ),
         ),
       );
+      widgets.add(ViewAddOnButton(_userDetails.bonusData));
+      widgets.add(const SizedBox(height: 80));
     }
     return SingleChildScrollView(
       child: Column(
