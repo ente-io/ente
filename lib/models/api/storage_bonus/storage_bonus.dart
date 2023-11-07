@@ -1,3 +1,5 @@
+import "package:photos/models/api/storage_bonus/bonus.dart";
+
 class ReferralView {
   PlanInfo planInfo;
   String code;
@@ -82,34 +84,6 @@ class ReferralStat {
       'planType': planType,
       'totalCount': totalCount,
       'upgradedCount': upgradedCount,
-    };
-  }
-}
-
-class Bonus {
-  int storage;
-  String type;
-  int validTill;
-  bool isRevoked;
-
-  Bonus(this.storage, this.type, this.validTill, this.isRevoked);
-
-  // fromJson
-  factory Bonus.fromJson(Map<String, dynamic> json) {
-    return Bonus(
-      json['storage'],
-      json['type'],
-      json['validTill'],
-      json['isRevoked'],
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'storage': storage,
-      'type': type,
-      'validTill': validTill,
-      'isRevoked': isRevoked,
     };
   }
 }
