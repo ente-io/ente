@@ -8,11 +8,11 @@
 
 ### Bug Fixes
 
-- Fixed desktop downloaded file had extra dot in name
+- Fixed desktop downloaded file had extra dot in the name
 - Cleanup error messages
-- fix motion photo clustering issue
-- Add option to locally disable cf proxy
-- other under the hood changes to improve ux
+- fix the motion photo clustering issue
+- Add option to disable cf proxy locally
+- other under-the-hood changes to improve UX
 
 ## v1.6.49
 
