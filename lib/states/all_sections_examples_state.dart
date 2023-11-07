@@ -21,7 +21,6 @@ class _AllSectionsExamplesProviderState
     extends State<AllSectionsExamplesProvider> {
   Future<List<List<SearchResult>>> allSectionsExamplesFuture = Future.value([]);
 
-  final allSectionsExamples = <Future<List<SearchResult>>>[];
   late StreamSubscription<SyncStatusUpdate> _syncStatusSubscription;
   @override
   void initState() {
@@ -31,7 +30,6 @@ class _AllSectionsExamplesProviderState
           Bus.instance.on<SyncStatusUpdate>().listen((event) {
         if (event.status == SyncStatus.completedBackup) {
           setState(() {
-            allSectionsExamples.clear();
             aggregateSectionsExamples();
           });
         }
@@ -43,6 +41,7 @@ class _AllSectionsExamplesProviderState
   }
 
   void aggregateSectionsExamples() {
+    final allSectionsExamples = <Future<List<SearchResult>>>[];
     for (SectionType sectionType in SectionType.values) {
       if (sectionType == SectionType.face ||
           sectionType == SectionType.content) {

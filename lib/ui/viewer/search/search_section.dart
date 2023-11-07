@@ -63,6 +63,12 @@ class _SearchSectionState extends State<SearchSection> {
   }
 
   @override
+  void didUpdateWidget(covariant SearchSection oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _examples = widget.examples;
+  }
+
+  @override
   Widget build(BuildContext context) {
     debugPrint("Building section for ${widget.sectionType.name}");
     final textTheme = getEnteTextTheme(context);
@@ -82,7 +88,7 @@ class _SearchSectionState extends State<SearchSection> {
                         style: textTheme.largeBold,
                       ),
                     ),
-                    widget.examples.length < (widget.limit - 1)
+                    _examples.length < (widget.limit - 1)
                         ? const SizedBox.shrink()
                         : GestureDetector(
                             onTap: () {
