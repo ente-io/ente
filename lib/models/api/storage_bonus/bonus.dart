@@ -27,9 +27,15 @@ class Bonus {
 }
 
 class BonusData {
+  static Set<String> signUpBonusTypes = {'SIGN_UP', 'REFERRAL'};
   final List<Bonus> storageBonuses;
 
   BonusData(this.storageBonuses);
+
+  List<Bonus> getAddOnBonuses() {
+    return storageBonuses
+      ..removeWhere((b) => signUpBonusTypes.contains(b.type));
+  }
 
   factory BonusData.fromJson(Map<String, dynamic>? json) {
     if (json == null || json['storageBonuses'] == null) {

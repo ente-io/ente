@@ -13,7 +13,7 @@ class ViewAddOnButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (bonusData?.storageBonuses.isEmpty ?? true) {
+    if (bonusData?.getAddOnBonuses().isEmpty ?? true) {
       return const SizedBox.shrink();
     }
     final EnteColorScheme colorScheme = getEnteColorScheme(context);
