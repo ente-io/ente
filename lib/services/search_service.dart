@@ -796,7 +796,9 @@ class SearchService {
     );
   }
 
-  Future<List<GenericSearchResult>> getPeopleSearchResults(int? limit) async {
+  Future<List<GenericSearchResult>> getAllPeopleSearchResults(
+    int? limit,
+  ) async {
     try {
       final searchResults = <GenericSearchResult>[];
       final allFiles = await getAllFiles();

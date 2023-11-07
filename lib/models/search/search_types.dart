@@ -270,7 +270,7 @@ extension SectionTypeExtensions on SectionType {
         return SearchService.instance.getAllLocationTags(limit);
 
       case SectionType.people:
-        return SearchService.instance.getPeopleSearchResults(limit);
+        return SearchService.instance.getAllPeopleSearchResults(limit);
 
       case SectionType.album:
         return SearchService.instance.getAllCollectionSearchResults(limit);
