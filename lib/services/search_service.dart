@@ -796,6 +796,42 @@ class SearchService {
     );
   }
 
+  Future<List<GenericSearchResult>> getPeopleSearchResults(
+    String query,
+  ) async {
+    final lowerCaseQuery = query.toLowerCase();
+    final searchResults = <GenericSearchResult>[];
+    final allFiles = await getAllFiles();
+    final peopleToSharedFiles = <User, List<EnteFile>>{};
+    for (EnteFile file in allFiles) {
+      if (file.isOwner) continue;
+
+      final fileOwner = CollectionsService.instance
+          .getFileOwner(file.ownerID!, file.collectionID);
+
+      if (fileOwner.email.toLowerCase().contains(lowerCaseQuery) ||
+          ((fileOwner.name?.toLowerCase().contains(lowerCaseQuery)) ?? false)) {
+        if (peopleToSharedFiles.containsKey(fileOwner)) {
+          peopleToSharedFiles[fileOwner]!.add(file);
+        } else {
+          peopleToSharedFiles[fileOwner] = [file];
+        }
+      }
+    }
+
+    peopleToSharedFiles.forEach((key, value) {
+      searchResults.add(
+        GenericSearchResult(
+          ResultType.shared,
+          key.name != null && key.name!.isNotEmpty ? key.name! : key.email,
+          value,
+        ),
+      );
+    });
+
+    return searchResults;
+  }
+
   Future<List<GenericSearchResult>> getAllPeopleSearchResults(
     int? limit,
   ) async {

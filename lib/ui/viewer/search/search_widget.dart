@@ -241,6 +241,9 @@ class SearchWidgetState extends State<SearchWidget> {
       final possibleEvents =
           await _searchService.getDateResults(context, query);
       allResults.addAll(possibleEvents);
+
+      final peopleResults = await _searchService.getPeopleSearchResults(query);
+      allResults.addAll(peopleResults);
     } catch (e, s) {
       _logger.severe("error during search", e, s);
     }
