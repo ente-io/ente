@@ -7824,6 +7824,36 @@ class S {
       args: [],
     );
   }
+
+  /// `How did you hear about Ente? (optional)`
+  String get hearUsWhereTitle {
+    return Intl.message(
+      'How did you hear about Ente? (optional)',
+      name: 'hearUsWhereTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `friend, reddit, ad, search, etc.`
+  String get hearUsHint {
+    return Intl.message(
+      'friend, reddit, ad, search, etc.',
+      name: 'hearUsHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `We don't track app installs. It'd help if you told us where you found us!`
+  String get hearUsExplanation {
+    return Intl.message(
+      'We don\'t track app installs. It\'d help if you told us where you found us!',
+      name: 'hearUsExplanation',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

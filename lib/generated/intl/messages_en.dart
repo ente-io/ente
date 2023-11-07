@@ -694,6 +694,12 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Grant permission"),
         "groupNearbyPhotos":
             MessageLookupByLibrary.simpleMessage("Group nearby photos"),
+        "hearUsExplanation": MessageLookupByLibrary.simpleMessage(
+            "We don\'t track app installs. It\'d help if you told us where you found us!"),
+        "hearUsHint": MessageLookupByLibrary.simpleMessage(
+            "friend, reddit, ad, search, etc."),
+        "hearUsWhereTitle": MessageLookupByLibrary.simpleMessage(
+            "How did you hear about Ente? (optional)"),
         "hidden": MessageLookupByLibrary.simpleMessage("Hidden"),
         "hide": MessageLookupByLibrary.simpleMessage("Hide"),
         "hiding": MessageLookupByLibrary.simpleMessage("Hiding..."),
