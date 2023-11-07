@@ -243,8 +243,8 @@ class ExportService {
             );
             const userPersonalFiles = getPersonalFiles(
                 files,
-                collectionIdToOwnerIDMap,
-                user
+                user,
+                collectionIdToOwnerIDMap
             );
 
             const unExportedFiles = getUnExportedFiles(
@@ -367,8 +367,8 @@ class ExportService {
             );
             const personalFiles = getPersonalFiles(
                 files,
-                collectionIdToOwnerIDMap,
-                user
+                user,
+                collectionIdToOwnerIDMap
             );
 
             const nonEmptyPersonalCollections = getNonEmptyPersonalCollections(

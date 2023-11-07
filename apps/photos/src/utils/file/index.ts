@@ -825,8 +825,8 @@ export function getLatestVersionFiles(files: EnteFile[]) {
 
 export function getPersonalFiles(
     files: EnteFile[],
-    collectionIdToOwnerIDMap: Map<number, number>,
-    user: User
+    user: User,
+    collectionIdToOwnerIDMap?: Map<number, number>
 ) {
     if (!user?.id) {
         throw Error('user missing');
@@ -834,7 +834,8 @@ export function getPersonalFiles(
     return files.filter(
         (file) =>
             file.ownerID === user.id &&
-            collectionIdToOwnerIDMap.get(file.collectionID) === user.id
+            (!collectionIdToOwnerIDMap ||
+                collectionIdToOwnerIDMap.get(file.collectionID) === user.id)
     );
 }
 
