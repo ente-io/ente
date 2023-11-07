@@ -823,11 +823,19 @@ export function getLatestVersionFiles(files: EnteFile[]) {
     );
 }
 
-export function getPersonalFiles(files: EnteFile[], user: User) {
+export function getPersonalFiles(
+    files: EnteFile[],
+    collectionIdToOwnerIDMap: Map<number, number>,
+    user: User
+) {
     if (!user?.id) {
         throw Error('user missing');
     }
-    return files.filter((file) => file.ownerID === user.id);
+    return files.filter(
+        (file) =>
+            file.ownerID === user.id &&
+            collectionIdToOwnerIDMap.get(file.collectionID) === user.id
+    );
 }
 
 export function getIDBasedSortedFiles(files: EnteFile[]) {

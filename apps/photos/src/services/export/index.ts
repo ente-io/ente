@@ -234,7 +234,18 @@ class ExportService {
         try {
             const user: User = getData(LS_KEYS.USER);
             const files = await getAllLocalFiles();
-            const userPersonalFiles = getPersonalFiles(files, user);
+            const collections = await getAllLocalCollections();
+            const collectionIdToOwnerIDMap = new Map<number, number>(
+                collections.map((collection) => [
+                    collection.id,
+                    collection.owner.id,
+                ])
+            );
+            const userPersonalFiles = getPersonalFiles(
+                files,
+                collectionIdToOwnerIDMap,
+                user
+            );
 
             const unExportedFiles = getUnExportedFiles(
                 userPersonalFiles,
@@ -347,9 +358,19 @@ class ExportService {
         try {
             const user: User = getData(LS_KEYS.USER);
             const files = mergeMetadata(await getAllLocalFiles());
-            const personalFiles = getPersonalFiles(files, user);
-
             const collections = await getAllLocalCollections();
+            const collectionIdToOwnerIDMap = new Map<number, number>(
+                collections.map((collection) => [
+                    collection.id,
+                    collection.owner.id,
+                ])
+            );
+            const personalFiles = getPersonalFiles(
+                files,
+                collectionIdToOwnerIDMap,
+                user
+            );
+
             const nonEmptyPersonalCollections = getNonEmptyPersonalCollections(
                 collections,
                 personalFiles,
