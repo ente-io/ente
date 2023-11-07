@@ -90,17 +90,11 @@ class _AllSearchSectionsState extends State<AllSearchSections> {
             physics: const BouncingScrollPhysics(),
             itemCount: searchTypes.length,
             itemBuilder: (context, index) {
-              return searchTypes[index] == SectionType.recents
-                  ? const SizedBox.shrink()
-                  //Recents is in WIP
-                  // ? RecentSection(
-                  //     searches: snapshot.data!.elementAt(index),
-                  //   )
-                  : SearchSection(
-                      sectionType: searchTypes[index],
-                      examples: snapshot.data!.elementAt(index),
-                      limit: searchSectionLimit,
-                    );
+              return SearchSection(
+                sectionType: searchTypes[index],
+                examples: snapshot.data!.elementAt(index),
+                limit: searchSectionLimit,
+              );
             },
           );
         } else if (snapshot.hasError) {

@@ -32,7 +32,6 @@ enum ResultType {
 }
 
 enum SectionType {
-  recents,
   face,
   location,
   // Grouping based on ML or manual tagging
@@ -50,8 +49,6 @@ extension SectionTypeExtensions on SectionType {
   // passing context for internalization in the future
   String sectionTitle(BuildContext context) {
     switch (this) {
-      case SectionType.recents:
-        return "Recents";
       case SectionType.face:
         return "Faces";
       case SectionType.content:
@@ -74,31 +71,27 @@ extension SectionTypeExtensions on SectionType {
   // get int id to each section for ordering them
   int get orderID {
     switch (this) {
-      case SectionType.recents:
-        return 0;
       case SectionType.face:
-        return 1;
+        return 0;
       case SectionType.content:
-        return 2;
+        return 1;
       case SectionType.moment:
-        return 3;
+        return 2;
       case SectionType.location:
-        return 4;
+        return 3;
       case SectionType.people:
-        return 5;
+        return 4;
       case SectionType.album:
-        return 6;
+        return 5;
       case SectionType.fileTypesAndExtension:
-        return 7;
+        return 6;
       case SectionType.fileCaption:
-        return 8;
+        return 7;
     }
   }
 
   String getEmptyStateText(BuildContext context) {
     switch (this) {
-      case SectionType.recents:
-        return "";
       case SectionType.face:
         return S.of(context).searchFaceEmptySection;
       case SectionType.content:
@@ -122,8 +115,6 @@ extension SectionTypeExtensions on SectionType {
   // Disable the CTA for face, content, moment, fileTypesAndExtension, fileCaption
   bool get isCTAVisible {
     switch (this) {
-      case SectionType.recents:
-        return false;
       case SectionType.face:
         return false;
       case SectionType.content:
@@ -145,8 +136,6 @@ extension SectionTypeExtensions on SectionType {
 
   bool get isEmptyCTAVisible {
     switch (this) {
-      case SectionType.recents:
-        return false;
       case SectionType.face:
         return true;
       case SectionType.content:
@@ -168,8 +157,6 @@ extension SectionTypeExtensions on SectionType {
 
   String getCTAText(BuildContext context) {
     switch (this) {
-      case SectionType.recents:
-        return "";
       case SectionType.face:
         return "Setup";
       case SectionType.content:
@@ -191,8 +178,6 @@ extension SectionTypeExtensions on SectionType {
 
   IconData? getCTAIcon() {
     switch (this) {
-      case SectionType.recents:
-        return null;
       case SectionType.face:
         return Icons.adaptive.arrow_forward_outlined;
       case SectionType.content:
@@ -272,9 +257,6 @@ extension SectionTypeExtensions on SectionType {
       AssertionError("context cannot be null for SectionType.moment");
     }
     switch (this) {
-      //recents doesn't depend on this value.
-      case SectionType.recents:
-        return Future.value([]);
       case SectionType.face:
         return SearchService.instance.getAllLocationTags(limit);
 
