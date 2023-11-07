@@ -1,6 +1,7 @@
 import "dart:math";
 
 import "package:flutter/cupertino.dart";
+import "package:intl/intl.dart";
 import 'package:logging/logging.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/data/holidays.dart';
@@ -151,9 +152,10 @@ class SearchService {
     try {
       final randomYear = getRadomYearSearchResult();
       final randomMonth = getRandomMonthSearchResult(context);
+      final randomDate = getRandomDateResults(context);
       final randomHoliday = getRandomHolidaySearchResult(context);
 
-      return Future.wait([randomYear, randomMonth, randomHoliday]);
+      return Future.wait([randomYear, randomMonth, randomDate, randomHoliday]);
     } catch (e) {
       _logger.severe("Error getting RandomMomentsSearchResult", e);
       return Future.value([]);
@@ -740,6 +742,47 @@ class SearchService {
       }
     }
     return searchResults;
+  }
+
+  Future<GenericSearchResult> getRandomDateResults(
+    BuildContext context,
+  ) async {
+    final allFiles = await getAllFiles();
+    final length = allFiles.length;
+    final randomFile = allFiles[Random().nextInt(length)];
+    final creationTime = randomFile.creationTime!;
+
+    final originalDateTime = DateTime.fromMicrosecondsSinceEpoch(creationTime);
+    final startOfDay = DateTime(
+      originalDateTime.year,
+      originalDateTime.month,
+      originalDateTime.day,
+    );
+
+    final endOfDay = DateTime(
+      originalDateTime.year,
+      originalDateTime.month,
+      originalDateTime.day + 1,
+    );
+
+    final durationOfDay = [
+      startOfDay.microsecondsSinceEpoch,
+      endOfDay.microsecondsSinceEpoch,
+    ];
+
+    final matchedFiles = await FilesDB.instance.getFilesCreatedWithinDurations(
+      [durationOfDay],
+      ignoreCollections(),
+      order: 'DESC',
+    );
+
+    return GenericSearchResult(
+      ResultType.event,
+      DateFormat.yMMMd(Localizations.localeOf(context).languageCode).format(
+        DateTime.fromMicrosecondsSinceEpoch(creationTime).toLocal(),
+      ),
+      matchedFiles,
+    );
   }
 
   Future<List<GenericSearchResult>> getPeopleSearchResults(int? limit) async {
