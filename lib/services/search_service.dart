@@ -148,21 +148,32 @@ class SearchService {
 
   Future<List<GenericSearchResult>> getRandomMomentsSearchResults(
     BuildContext context,
-  ) {
+  ) async {
     try {
+      final nonNullSearchResults = <GenericSearchResult>[];
       final randomYear = getRadomYearSearchResult();
       final randomMonth = getRandomMonthSearchResult(context);
       final randomDate = getRandomDateResults(context);
       final randomHoliday = getRandomHolidaySearchResult(context);
 
-      return Future.wait([randomYear, randomMonth, randomDate, randomHoliday]);
+      final searchResults = await Future.wait(
+        [randomYear, randomMonth, randomDate, randomHoliday],
+      );
+
+      for (GenericSearchResult? searchResult in searchResults) {
+        if (searchResult != null) {
+          nonNullSearchResults.add(searchResult);
+        }
+      }
+
+      return nonNullSearchResults;
     } catch (e) {
       _logger.severe("Error getting RandomMomentsSearchResult", e);
-      return Future.value([]);
+      return [];
     }
   }
 
-  Future<GenericSearchResult> getRadomYearSearchResult() async {
+  Future<GenericSearchResult?> getRadomYearSearchResult() async {
     for (var yearData in YearsData.instance.yearsData..shuffle()) {
       final List<EnteFile> filesInYear =
           await _getFilesInYear(yearData.duration);
@@ -175,7 +186,7 @@ class SearchService {
       }
     }
     //todo this throws error
-    return GenericSearchResult(ResultType.year, "nil", []);
+    return null;
   }
 
   Future<List<GenericSearchResult>> getMonthSearchResults(
@@ -203,7 +214,7 @@ class SearchService {
     return searchResults;
   }
 
-  Future<GenericSearchResult> getRandomMonthSearchResult(
+  Future<GenericSearchResult?> getRandomMonthSearchResult(
     BuildContext context,
   ) async {
     final months = getMonthData(context)..shuffle();
@@ -222,8 +233,7 @@ class SearchService {
         );
       }
     }
-    //todo: this throws error
-    return GenericSearchResult(ResultType.month, "nil", []);
+    return null;
   }
 
   Future<List<GenericSearchResult>> getHolidaySearchResults(
@@ -254,7 +264,7 @@ class SearchService {
     return searchResults;
   }
 
-  Future<GenericSearchResult> getRandomHolidaySearchResult(
+  Future<GenericSearchResult?> getRandomHolidaySearchResult(
     BuildContext context,
   ) async {
     final holidays = getHolidays(context)..shuffle();
@@ -273,8 +283,7 @@ class SearchService {
         );
       }
     }
-    //todo: this throws an error
-    return GenericSearchResult(ResultType.event, "nil", []);
+    return null;
   }
 
   Future<List<GenericSearchResult>> getFileTypeResults(
@@ -744,10 +753,12 @@ class SearchService {
     return searchResults;
   }
 
-  Future<GenericSearchResult> getRandomDateResults(
+  Future<GenericSearchResult?> getRandomDateResults(
     BuildContext context,
   ) async {
     final allFiles = await getAllFiles();
+    if (allFiles.isEmpty) return null;
+
     final length = allFiles.length;
     final randomFile = allFiles[Random().nextInt(length)];
     final creationTime = randomFile.creationTime!;
