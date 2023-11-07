@@ -141,6 +141,7 @@ export default function Credentials() {
                     id,
                     twoFactorSessionID,
                 } = await loginViaSRP(srpAttributes, kek);
+                setIsFirstLogin(true);
                 if (twoFactorSessionID) {
                     const sessionKeyAttributes =
                         await cryptoWorker.generateKeyAndEncryptToB64(kek);
@@ -154,7 +155,6 @@ export default function Credentials() {
                         twoFactorSessionID,
                         isTwoFactorEnabled: true,
                     });
-                    setIsFirstLogin(true);
                     router.push(PAGES.TWO_FACTOR_VERIFY);
                     throw Error(CustomError.TWO_FACTOR_ENABLED);
                 } else {
