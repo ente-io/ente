@@ -1,5 +1,19 @@
 # CHANGELOG
 
+## v1.6.50
+
+### New Features
+
+- Added Clip desktop
+
+### Bug Fixes
+
+- Fixed desktop downloaded file had extra dot in the name
+- Cleanup error messages
+- fix the motion photo clustering issue
+- Add option to disable cf proxy locally
+- other under-the-hood changes to improve UX
+
 ## v1.6.49
 
 ### Photo Editor
