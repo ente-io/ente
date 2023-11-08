@@ -122,12 +122,14 @@ class _StorageDetailsScreenState extends State<StorageDetailsScreen> {
                                   leftValue: convertBytesToAbsoluteGBs(
                                     min(
                                       widget.referralView.claimedStorage,
-                                      widget.userDetails.getTotalStorage(),
+                                      widget.userDetails
+                                          .getPlanPlusAddonStorage(),
                                     ),
                                   ),
                                   leftUnitName: "GB",
                                   rightValue: convertBytesToAbsoluteGBs(
-                                    widget.userDetails.getTotalStorage(),
+                                    widget.userDetails
+                                        .getPlanPlusAddonStorage(),
                                   ),
                                   rightUnitName: "GB",
                                 ),

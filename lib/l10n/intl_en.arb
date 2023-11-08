@@ -557,6 +557,7 @@
   "faqs": "FAQs",
   "renewsOn": "Renews on {endDate}",
   "freeTrialValidTill": "Free trial valid till {endDate}",
+  "validTill": "Valid till {endDate}",
   "playStoreFreeTrialValidTill": "Free trial valid till {endDate}.\nYou can choose a paid plan afterwards.",
   "subWillBeCancelledOn": "Your subscription will be cancelled on {endDate}",
   "subscription": "Subscription",
@@ -1104,5 +1105,8 @@
   "moveToHiddenAlbum": "Move to hidden album",
   "deleteConfirmDialogBody": "This account is linked to other ente apps, if you use any.\\n\\nYour uploaded data, across all ente apps, will be scheduled for deletion, and your account will be permanently deleted.",
   "hearUsWhereTitle": "How did you hear about Ente? (optional)",
-  "hearUsExplanation": "We don't track app installs. It'd help if you told us where you found us!"
+  "hearUsExplanation": "We don't track app installs. It'd help if you told us where you found us!",
+  "viewAddOnButton": "View add-ons",
+  "addOns": "Add-ons",
+  "addOnPageSubtitle": "Details of add-ons"
 }

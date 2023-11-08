@@ -25,6 +25,8 @@ import 'package:photos/ui/payment/child_subscription_widget.dart';
 import 'package:photos/ui/payment/skip_subscription_widget.dart';
 import 'package:photos/ui/payment/subscription_common_widgets.dart';
 import 'package:photos/ui/payment/subscription_plan_widget.dart';
+import "package:photos/ui/payment/view_add_on_widget.dart";
+import "package:photos/utils/data_util.dart";
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/toast_util.dart';
 import 'package:url_launcher/url_launcher_string.dart';
@@ -290,7 +292,7 @@ class _StoreSubscriptionPageState extends State<StoreSubscriptionPage> {
     if (!widget.isOnboarding) {
       widgets.add(
         Padding(
-          padding: const EdgeInsets.fromLTRB(16, 0, 16, 80),
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
           child: MenuItemWidget(
             captionedTextWidget: CaptionedTextWidget(
               title: _isFreePlanUser()
@@ -310,6 +312,8 @@ class _StoreSubscriptionPageState extends State<StoreSubscriptionPage> {
           ),
         ),
       );
+      widgets.add(ViewAddOnButton(_userDetails.bonusData));
+      widgets.add(const SizedBox(height: 80));
     }
     return SingleChildScrollView(
       child: Column(
@@ -490,7 +494,16 @@ class _StoreSubscriptionPageState extends State<StoreSubscriptionPage> {
               if (isActive) {
                 return;
               }
-              if (_userDetails.getFamilyOrPersonalUsage() > plan.storage) {
+              final int addOnBonus =
+                  _userDetails.bonusData?.totalAddOnBonus() ?? 0;
+              if (_userDetails.getFamilyOrPersonalUsage() >
+                  (plan.storage + addOnBonus)) {
+                _logger.warning(
+                  " familyUsage ${convertBytesToReadableFormat(_userDetails.getFamilyOrPersonalUsage())}"
+                  " plan storage ${convertBytesToReadableFormat(plan.storage)} "
+                  "addOnBonus ${convertBytesToReadableFormat(addOnBonus)},"
+                  "overshooting by ${convertBytesToReadableFormat(_userDetails.getFamilyOrPersonalUsage() - (plan.storage + addOnBonus))}",
+                );
                 showErrorDialog(
                   context,
                   S.of(context).sorry,

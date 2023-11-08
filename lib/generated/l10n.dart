@@ -3914,6 +3914,16 @@ class S {
     );
   }
 
+  /// `Valid till {endDate}`
+  String validTill(Object endDate) {
+    return Intl.message(
+      'Valid till $endDate',
+      name: 'validTill',
+      desc: '',
+      args: [endDate],
+    );
+  }
+
   /// `Free trial valid till {endDate}.\nYou can choose a paid plan afterwards.`
   String playStoreFreeTrialValidTill(Object endDate) {
     return Intl.message(
@@ -7725,21 +7735,41 @@ class S {
     );
   }
 
-  /// `friend, reddit, ad, search, etc.`
-  String get hearUsHint {
-    return Intl.message(
-      'friend, reddit, ad, search, etc.',
-      name: 'hearUsHint',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `We don't track app installs. It'd help if you told us where you found us!`
   String get hearUsExplanation {
     return Intl.message(
       'We don\'t track app installs. It\'d help if you told us where you found us!',
       name: 'hearUsExplanation',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `View Add-ons`
+  String get viewAddOnButton {
+    return Intl.message(
+      'View Add-ons',
+      name: 'viewAddOnButton',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Add ons`
+  String get addOns {
+    return Intl.message(
+      'Add ons',
+      name: 'addOns',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Break up of add on storage`
+  String get addOnPageSubtitle {
+    return Intl.message(
+      'Break up of add on storage',
+      name: 'addOnPageSubtitle',
       desc: '',
       args: [],
     );
