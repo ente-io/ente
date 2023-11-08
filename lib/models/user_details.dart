@@ -58,6 +58,12 @@ class UserDetails {
         storageBonus;
   }
 
+  // This is the total storage for which user has paid for.
+  int getPlanPlusAddonStorage() {
+    return (isPartOfFamily() ? familyData!.storage : subscription.storage) +
+        bonusData!.totalAddOnBonus();
+  }
+
   factory UserDetails.fromMap(Map<String, dynamic> map) {
     return UserDetails(
       map['email'] as String,
