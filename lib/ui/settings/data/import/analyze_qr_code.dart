@@ -141,11 +141,11 @@ class _QrScannerState extends State<QrScanner> {
                             switch (state) {
                               case TorchState.on:
                                 return SvgPicture.asset(
-                                  'assets/custom-icons/icons/flash_on.svg',
+                                  'assets/simple-icons/flash_on.svg',
                                 );
                               case TorchState.off:
                                 return SvgPicture.asset(
-                                  'assets/custom-icons/icons/flash_off.svg',
+                                  'assets/simple-icons/flash_off.svg',
                                 );
                             }
                           },
@@ -157,7 +157,7 @@ class _QrScannerState extends State<QrScanner> {
                       // Gallery button
                       IconButton(
                         icon: SvgPicture.asset(
-                          'assets/custom-icons/icons/gallery.svg',
+                          'assets/simple-icons/gallery.svg',
                         ),
                         iconSize: 60,
                         onPressed: () async {
@@ -277,7 +277,7 @@ class _QrScannerState extends State<QrScanner> {
                   Navigator.pop(context);
                 },
                 child: SvgPicture.asset(
-                  'assets/custom-icons/icons/cross.svg',
+                  'assets/simple-icons/cross.svg',
                   colorFilter:
                       const ColorFilter.mode(Colors.white, BlendMode.srcATop),
                   height: 30,
