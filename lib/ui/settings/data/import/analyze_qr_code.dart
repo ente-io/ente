@@ -141,11 +141,11 @@ class _QrScannerState extends State<QrScanner> {
                             switch (state) {
                               case TorchState.on:
                                 return SvgPicture.asset(
-                                  'assets/simple-icons/flash_on.svg',
+                                  'assets/scanner-icons/flash_on.svg',
                                 );
                               case TorchState.off:
                                 return SvgPicture.asset(
-                                  'assets/simple-icons/flash_off.svg',
+                                  'assets/scanner-icons/flash_off.svg',
                                 );
                             }
                           },
@@ -157,13 +157,13 @@ class _QrScannerState extends State<QrScanner> {
                       // Gallery button
                       IconButton(
                         icon: SvgPicture.asset(
-                          'assets/simple-icons/gallery.svg',
+                          'assets/scanner-icons/gallery.svg',
                         ),
                         iconSize: 60,
                         onPressed: () async {
                           final result = await showDialogWidget(
                             context: context,
-                            title: 'Google Authenticator (saved image)',
+                            title: l10n.importFromApp("Google Authenticator (saved image)"),
                             body:
                                 'Please turn off all photo cloud sync from all apps, including iCloud, Google Photo, OneDrive, etc. \nAlso if you have a second smartphone, it is safer to import by scanning QR code.',
                             buttons: [
@@ -277,7 +277,7 @@ class _QrScannerState extends State<QrScanner> {
                   Navigator.pop(context);
                 },
                 child: SvgPicture.asset(
-                  'assets/simple-icons/cross.svg',
+                  'assets/scanner-icons/cross.svg',
                   colorFilter:
                       const ColorFilter.mode(Colors.white, BlendMode.srcATop),
                   height: 30,

@@ -1,5 +1,3 @@
-
-
 import 'package:flutter/material.dart';
 
 class QRScannerOverlay extends StatelessWidget {
@@ -13,41 +11,45 @@ class QRScannerOverlay extends StatelessWidget {
             MediaQuery.of(context).size.height < 400)
         ? 200.0
         : 330.0;
-    return Stack(children: [
-      ColorFiltered(
-        colorFilter:
-            ColorFilter.mode(Colors.black.withOpacity(0.9), BlendMode.srcOut),
-        child: Stack(
-          children: [
-            Container(
-              decoration: const BoxDecoration(
-                  color: Colors.red, backgroundBlendMode: BlendMode.dstOut,),
-            ),
-            Align(
-              alignment: Alignment.center,
-              child: Container(
-                height: scanArea,
-                width: scanArea,
-                decoration: BoxDecoration(
+    return Stack(
+      children: [
+        ColorFiltered(
+          colorFilter:
+              ColorFilter.mode(Colors.black.withOpacity(0.9), BlendMode.srcOut),
+          child: Stack(
+            children: [
+              Container(
+                decoration: const BoxDecoration(
                   color: Colors.red,
-                  borderRadius: BorderRadius.circular(20),
+                  backgroundBlendMode: BlendMode.dstOut,
                 ),
               ),
-            ),
-          ],
-        ),
-      ),
-      Align(
-        alignment: Alignment.center,
-        child: CustomPaint(
-          foregroundPainter: BorderPainter(),
-          child: SizedBox(
-            width: scanArea + 25,
-            height: scanArea + 25,
+              Align(
+                alignment: Alignment.center,
+                child: Container(
+                  height: scanArea,
+                  width: scanArea,
+                  decoration: BoxDecoration(
+                    color: Colors.red,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
-      ),
-    ],);
+        Align(
+          alignment: Alignment.center,
+          child: CustomPaint(
+            foregroundPainter: BorderPainter(),
+            child: SizedBox(
+              width: scanArea + 25,
+              height: scanArea + 25,
+            ),
+          ),
+        ),
+      ],
+    );
   }
 }
 
@@ -122,15 +124,20 @@ class OverlayWithHolePainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final paint = Paint()..color = Colors.black54;
     canvas.drawPath(
-        Path.combine(
-          PathOperation.difference,
-          Path()..addRect(Rect.fromLTWH(0, 0, size.width, size.height)),
-          Path()
-            ..addOval(Rect.fromCircle(
-                center: Offset(size.width - 44, size.height - 44), radius: 40,),)
-            ..close(),
-        ),
-        paint,);
+      Path.combine(
+        PathOperation.difference,
+        Path()..addRect(Rect.fromLTWH(0, 0, size.width, size.height)),
+        Path()
+          ..addOval(
+            Rect.fromCircle(
+              center: Offset(size.width - 44, size.height - 44),
+              radius: 40,
+            ),
+          )
+          ..close(),
+      ),
+      paint,
+    );
   }
 
   @override
