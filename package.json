@@ -27,7 +27,8 @@
         "react-dom": "18.2.0",
         "@mui/icons-material": "5.14.1",
         "@ente/accounts": "*",
-        "@ente/shared": "*"
+        "@ente/shared": "*",
+        "is-electron": "^2.2.2"
     },
     "devDependencies": {
         "@ente/eslint-config": "*",
