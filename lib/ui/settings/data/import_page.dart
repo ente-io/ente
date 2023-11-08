@@ -15,6 +15,7 @@ enum ImportType {
   ravio,
   googleAuthenticator,
   aegis,
+  googleAuthenticatorImage
 }
 
 class ImportCodePage extends StatelessWidget {
@@ -24,6 +25,7 @@ class ImportCodePage extends StatelessWidget {
     ImportType.ravio,
     ImportType.aegis,
     ImportType.googleAuthenticator,
+    ImportType.googleAuthenticatorImage,
   ];
 
   ImportCodePage({super.key});
@@ -32,6 +34,7 @@ class ImportCodePage extends StatelessWidget {
     switch (type) {
       case ImportType.plainText:
         return context.l10n.importTypePlainText;
+
       case ImportType.encrypted:
         return context.l10n.importTypeEnteEncrypted;
       case ImportType.ravio:
@@ -40,6 +43,8 @@ class ImportCodePage extends StatelessWidget {
         return 'Google Authenticator';
       case ImportType.aegis:
         return 'Aegis Authenticator';
+      case ImportType.googleAuthenticatorImage:
+        return 'Google Authenticator (saved image)';
     }
   }
 
@@ -62,7 +67,7 @@ class ImportCodePage extends StatelessWidget {
                   iconButtonType: IconButtonType.secondary,
                   onTap: () {
                     Navigator.pop(context);
-                    if(Navigator.canPop(context)) {
+                    if (Navigator.canPop(context)) {
                       Navigator.pop(context);
                     }
                   },

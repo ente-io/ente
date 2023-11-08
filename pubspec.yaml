@@ -55,6 +55,7 @@ dependencies:
   json_annotation: ^4.5.0
   local_auth: ^2.1.7
   logging: ^1.0.1
+  mobile_scanner: ^3.5.2
   modal_bottom_sheet: ^3.0.0-pre
   move_to_background: ^1.0.2
   open_filex: ^4.3.2
@@ -78,6 +79,7 @@ dependencies:
   uni_links: ^0.5.1
   url_launcher: ^6.1.5
   uuid: ^3.0.4
+  wechat_assets_picker: ^8.6.3
 
 dev_dependencies:
   bloc_test: ^9.0.3
@@ -100,6 +102,7 @@ flutter:
     - assets/simple-icons/_data/
     - assets/custom-icons/icons/
     - assets/custom-icons/_data/
+    - assets/scanner-icons/icons/
 
   fonts:
     - family: Inter
