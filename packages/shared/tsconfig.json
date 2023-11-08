@@ -12,10 +12,5 @@
         "target": "es5",
         "useUnknownInCatchVariables": false
     },
-    "include": [
-        "**/*.ts",
-        "**/*.tsx",
-        "**/*.js",
-        "../mui-config/mui-theme.d.ts"
-    ]
+    "include": ["**/*.ts", "**/*.tsx", "**/*.js"]
 }
