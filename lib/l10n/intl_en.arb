@@ -1106,7 +1106,7 @@
   "deleteConfirmDialogBody": "This account is linked to other ente apps, if you use any.\\n\\nYour uploaded data, across all ente apps, will be scheduled for deletion, and your account will be permanently deleted.",
   "hearUsWhereTitle": "How did you hear about Ente? (optional)",
   "hearUsExplanation": "We don't track app installs. It'd help if you told us where you found us!",
-  "viewAddOnButton": "View Add-ons",
-  "addOns": "Add ons",
-  "addOnPageSubtitle": "Break up of add on storage"
+  "viewAddOnButton": "View add-ons",
+  "addOns": "Add-ons",
+  "addOnPageSubtitle": "Details of add-ons"
 }
