@@ -211,7 +211,7 @@
         "THING": "内容",
         "FILE_CAPTION": "说明",
         "FILE_TYPE": "文件类型",
-        "CLIP": ""
+        "CLIP": "魔法"
     },
     "photos_count_zero": "没有回忆",
     "photos_count_one": "1个回忆",
@@ -617,8 +617,8 @@
     "ROTATION": "回转",
     "RESET": "重设",
     "PHOTO_EDITOR": "照片编辑器",
-    "FASTER_UPLOAD": "",
-    "FASTER_UPLOAD_DESCRIPTION": "",
-    "STATUS": "",
-    "INDEXED_ITEMS": ""
+    "FASTER_UPLOAD": "更快上传",
+    "FASTER_UPLOAD_DESCRIPTION": "通过附近的服务器路由上传",
+    "STATUS": "状态",
+    "INDEXED_ITEMS": "索引项目"
 }
