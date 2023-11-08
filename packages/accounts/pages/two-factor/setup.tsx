@@ -12,7 +12,7 @@ import { PAGES } from '@ente/accounts/constants/pages';
 import { TwoFactorSecret } from '@ente/accounts/types/user';
 import Card from '@mui/material/Card';
 import { Box, CardContent, Typography } from '@mui/material';
-import { TwoFactorSetup } from '@ente/accounts/components/two-factor/Setup';
+import { TwoFactorSetup } from '@ente/accounts/components/two-factor/setup';
 import LinkButton from '@ente/shared/components/LinkButton';
 import { PageProps } from '@ente/shared/apps/types';
 import { logError } from '@ente/shared/sentry';

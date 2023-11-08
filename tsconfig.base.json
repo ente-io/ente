@@ -23,7 +23,7 @@
         "paths": {
             "@ente/eslint-config/*": ["./packages/eslint-config/*"],
             "@ente/shared/*": ["./packages/shared/*"],
-            "@ente/accounts/*": ["./apps/accounts/*"]
+            "@ente/accounts/*": ["./packages/accounts/*"]
         }
     },
     "exclude": ["**/node_modules", "**/.*/"]
