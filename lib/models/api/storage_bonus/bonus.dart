@@ -6,7 +6,6 @@ class Bonus {
 
   Bonus(this.storage, this.type, this.validTill, this.isRevoked);
 
-  // fromJson
   factory Bonus.fromJson(Map<String, dynamic> json) {
     return Bonus(
       json['storage'],
@@ -34,7 +33,12 @@ class BonusData {
 
   List<Bonus> getAddOnBonuses() {
     return storageBonuses
-      ..removeWhere((b) => signUpBonusTypes.contains(b.type));
+        .where((b) => !signUpBonusTypes.contains(b.type))
+        .toList();
+  }
+
+  int totalAddOnBonus() {
+    return getAddOnBonuses().fold(0, (sum, bonus) => sum + bonus.storage);
   }
 
   factory BonusData.fromJson(Map<String, dynamic>? json) {
