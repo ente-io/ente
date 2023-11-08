@@ -1,4 +1,7 @@
+import "dart:async";
+
 import "package:flutter/material.dart";
+import "package:photos/events/event.dart";
 import "package:photos/models/search/album_search_result.dart";
 import "package:photos/models/search/recent_searches.dart";
 import "package:photos/models/search/search_result.dart";
@@ -19,13 +22,38 @@ class SearchSectionAllPage extends StatefulWidget {
 }
 
 class _SearchSectionAllPageState extends State<SearchSectionAllPage> {
-  late final Future<List<SearchResult>> sectionData;
+  late Future<List<SearchResult>> sectionData;
   late final bool _showCTATile;
+  final streamSubscriptions = <StreamSubscription>[];
+
+  @override
+  void initState() {
+    super.initState();
+    final streamsToListenTo = widget.sectionType.updateEvents();
+    for (Stream<Event> stream in streamsToListenTo) {
+      streamSubscriptions.add(
+        stream.listen((event) async {
+          setState(() {
+            sectionData = widget.sectionType.getData();
+          });
+        }),
+      );
+    }
+  }
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     sectionData = widget.sectionType.getData(limit: null, context: context);
     _showCTATile = widget.sectionType.isCTAVisible;
+  }
+
+  @override
+  void dispose() {
+    for (var subscriptions in streamSubscriptions) {
+      subscriptions.cancel();
+    }
+    super.dispose();
   }
 
   @override

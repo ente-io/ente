@@ -2,6 +2,7 @@ import "dart:async";
 
 import "package:collection/collection.dart";
 import "package:flutter/material.dart";
+import "package:photos/core/constants.dart";
 import "package:photos/events/event.dart";
 import "package:photos/models/search/album_search_result.dart";
 import "package:photos/models/search/generic_search_result.dart";
@@ -47,7 +48,8 @@ class _SearchSectionState extends State<SearchSection> {
     for (Stream<Event> stream in streamsToListenTo) {
       streamSubscriptions.add(
         stream.listen((event) async {
-          _examples = await widget.sectionType.getData();
+          _examples =
+              await widget.sectionType.getData(limit: searchSectionLimit);
           setState(() {});
         }),
       );
