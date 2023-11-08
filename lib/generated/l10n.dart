@@ -3914,6 +3914,16 @@ class S {
     );
   }
 
+  /// `Valid till {endDate}`
+  String validTill(Object endDate) {
+    return Intl.message(
+      'Valid till $endDate',
+      name: 'validTill',
+      desc: '',
+      args: [endDate],
+    );
+  }
+
   /// `Free trial valid till {endDate}.\nYou can choose a paid plan afterwards.`
   String playStoreFreeTrialValidTill(Object endDate) {
     return Intl.message(
@@ -7740,6 +7750,26 @@ class S {
     return Intl.message(
       'View Add-ons',
       name: 'viewAddOnButton',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Add ons`
+  String get addOns {
+    return Intl.message(
+      'Add ons',
+      name: 'addOns',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Break up of add on storage`
+  String get addOnPageSubtitle {
+    return Intl.message(
+      'Break up of add on storage',
+      name: 'addOnPageSubtitle',
       desc: '',
       args: [],
     );
