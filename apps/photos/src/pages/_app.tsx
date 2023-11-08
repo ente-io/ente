@@ -26,7 +26,8 @@ import {
 } from 'utils/machineLearning/config';
 import LoadingBar from 'react-top-loading-bar';
 import DialogBox from 'components/DialogBox';
-import { styled, ThemeProvider } from '@mui/material/styles';
+import { ThemeProvider } from '@mui/material/styles';
+import { MessageContainer } from '@ente/shared/components/MessageContainer';
 import { CssBaseline, useMediaQuery } from '@mui/material';
 import {
     SetDialogBoxAttributes,
@@ -84,19 +85,6 @@ const redirectMap = new Map([
     [REDIRECTS.ROADMAP, getRoadmapRedirectURL],
     [REDIRECTS.FAMILIES, getFamilyPortalRedirectURL],
 ]);
-
-export const MessageContainer = styled('div')`
-    background-color: #111;
-    padding: 0;
-    font-size: 14px;
-    text-align: center;
-    line-height: 32px;
-`;
-
-export interface BannerMessage {
-    message: string;
-    variant: string;
-}
 
 type AppContextType = {
     showNavBar: (show: boolean) => void;
