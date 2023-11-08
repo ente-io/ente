@@ -8,22 +8,10 @@ import "package:photos/ui/components/title_bar_title_widget.dart";
 import "package:photos/ui/components/title_bar_widget.dart";
 import "package:photos/utils/data_util.dart";
 
-class AddOnPage extends StatefulWidget {
+class AddOnPage extends StatelessWidget {
   final BonusData bonusData;
 
   const AddOnPage(this.bonusData, {super.key});
-
-  @override
-  State<AddOnPage> createState() => _StorageDetailsScreenState();
-}
-
-class _StorageDetailsScreenState extends State<AddOnPage> {
-  bool canApplyCode = true;
-
-  @override
-  void initState() {
-    super.initState();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -41,7 +29,7 @@ class _StorageDetailsScreenState extends State<AddOnPage> {
                 icon: Icons.close_outlined,
                 iconButtonType: IconButtonType.secondary,
                 onTap: () {
-                  Navigator.of(context)..pop();
+                  Navigator.of(context).pop();
                 },
               ),
             ],
@@ -51,7 +39,7 @@ class _StorageDetailsScreenState extends State<AddOnPage> {
             sliver: SliverList(
               delegate: SliverChildBuilderDelegate(
                 (delegateBuildContext, index) {
-                  Bonus bonus = widget.bonusData!.getAddOnBonuses()[index];
+                  Bonus bonus = bonusData.getAddOnBonuses()[index];
                   return Padding(
                     padding: const EdgeInsets.symmetric(vertical: 4),
                     child: AddOnViewSection(
@@ -62,7 +50,7 @@ class _StorageDetailsScreenState extends State<AddOnPage> {
                     ),
                   );
                 },
-                childCount: widget.bonusData?.getAddOnBonuses().length ?? 0,
+                childCount: bonusData?.getAddOnBonuses().length ?? 0,
               ),
             ),
           ),
@@ -106,7 +94,8 @@ class AddOnViewSection extends StatelessWidget {
                       )
                           .format(
                             DateTime.fromMicrosecondsSinceEpoch(
-                                bonus.validTill),
+                              bonus.validTill,
+                            ),
                           )
                           .toString(),
                     ),
