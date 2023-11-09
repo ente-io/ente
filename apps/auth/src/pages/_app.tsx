@@ -24,7 +24,6 @@ import {
 } from '@ente/shared/components/DialogBoxV2/types';
 import { addLogLine } from '@ente/shared/logging';
 import { clearLogsIfLocalStorageLimitExceeded } from '@ente/shared/logging/web';
-import isElectron from 'is-electron';
 
 import { CacheProvider } from '@emotion/react';
 import {
@@ -46,8 +45,6 @@ import '../../public/css/global.css';
 
 type AppContextType = {
     showNavBar: (show: boolean) => void;
-    sharedFiles: File[];
-    resetSharedFiles: () => void;
     startLoading: () => void;
     finishLoading: () => void;
     closeMessageDialog: () => void;
@@ -83,7 +80,6 @@ export default function App(props: EnteAppProps) {
         typeof window !== 'undefined' && !window.navigator.onLine
     );
     const [showNavbar, setShowNavBar] = useState(false);
-    const [sharedFiles, setSharedFiles] = useState<File[]>(null);
     const isLoadingBarRunning = useRef(false);
     const loadingBar = useRef(null);
     const [dialogMessage, setDialogMessage] = useState<DialogBoxAttributes>();
@@ -118,15 +114,8 @@ export default function App(props: EnteAppProps) {
         main();
     }, []);
 
-    useEffect(() => {
-        if (!isElectron()) {
-            return;
-        }
-    }, []);
-
     const setUserOnline = () => setOffline(false);
     const setUserOffline = () => setOffline(true);
-    const resetSharedFiles = () => setSharedFiles(null);
 
     useEffect(() => {
         if (isI18nReady) {
@@ -210,20 +199,7 @@ export default function App(props: EnteAppProps) {
                 <MessageContainer>
                     {offline && t('OFFLINE_MSG')}
                 </MessageContainer>
-                {sharedFiles &&
-                    (router.pathname === '/gallery' ? (
-                        <MessageContainer>
-                            {t('files_to_be_uploaded', {
-                                count: sharedFiles.length,
-                            })}
-                        </MessageContainer>
-                    ) : (
-                        <MessageContainer>
-                            {t('login_to_upload_files', {
-                                count: sharedFiles.length,
-                            })}
-                        </MessageContainer>
-                    ))}
+
                 <LoadingBar color="#51cd7c" ref={loadingBar} />
 
                 <DialogBox
@@ -243,8 +219,6 @@ export default function App(props: EnteAppProps) {
                 <AppContext.Provider
                     value={{
                         showNavBar,
-                        sharedFiles,
-                        resetSharedFiles,
                         startLoading,
                         finishLoading,
                         closeMessageDialog,
