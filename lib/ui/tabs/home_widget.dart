@@ -110,6 +110,8 @@ class _HomeWidgetState extends State<HomeWidget> {
     _logger.info("Building initstate");
     _tabChangedEventSubscription =
         Bus.instance.on<TabChangedEvent>().listen((event) {
+      _selectedTabIndex = event.selectedIndex;
+
       if (event.selectedIndex == 3) {
         isOnSearchTabNotifier.value = true;
       } else {
@@ -119,7 +121,6 @@ class _HomeWidgetState extends State<HomeWidget> {
         debugPrint(
           "TabChange going from $_selectedTabIndex to ${event.selectedIndex} souce: ${event.source}",
         );
-        _selectedTabIndex = event.selectedIndex;
         _pageController.animateToPage(
           event.selectedIndex,
           duration: const Duration(milliseconds: 100),
@@ -464,15 +465,14 @@ class _HomeWidgetState extends State<HomeWidget> {
                                 ),
                               )
                           : const SizedBox.shrink(),
-                      child!,
+                      HomeBottomNavigationBar(
+                        _selectedFiles,
+                        selectedTabIndex: _selectedTabIndex,
+                      ),
                     ],
                   ),
                 );
               },
-              child: HomeBottomNavigationBar(
-                _selectedFiles,
-                selectedTabIndex: _selectedTabIndex,
-              ),
             ),
           ),
         ],
