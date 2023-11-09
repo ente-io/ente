@@ -1,17 +1,17 @@
 import React, { useContext, useEffect, useState } from 'react';
-import OTPDisplay from 'components/Authenicator/OTPDisplay';
+import OTPDisplay from 'components/OTPDisplay';
 import { getAuthCodes } from 'services/authenticator/authenticatorService';
-import { CustomError } from 'utils/error';
+import { CustomError } from '@ente/shared/error';
 import { PHOTOS_PAGES as PAGES } from '@ente/shared/constants/pages';
 import { useRouter } from 'next/router';
-import { AuthFooter } from 'components/Authenicator/AuthFooter';
+import { AuthFooter } from 'components/AuthFooter';
 import { AppContext } from 'pages/_app';
 import { TextField } from '@mui/material';
-import AuthNavbar from 'components/pages/auth/Navbar';
+import AuthNavbar from 'components/Navbar';
 import { t } from 'i18next';
 import EnteSpinner from '@ente/shared/components/EnteSpinner';
-import { VerticallyCentered } from 'components/Container';
-import InMemoryStore, { MS_KEYS } from 'services/InMemoryStore';
+import { VerticallyCentered } from '@ente/shared/components/Container';
+import InMemoryStore, { MS_KEYS } from '@ente/shared/storage/InMemoryStore';
 
 const AuthenticatorCodesPage = () => {
     const appContext = useContext(AppContext);

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import Menu from '@mui/material/Menu';
 import { IconButton, PaperProps, styled } from '@mui/material';
-import { OverflowMenuContext } from 'contexts/overflowMenu';
+import { OverflowMenuContext } from './context';
 
 export interface Iprops {
     triggerButtonIcon: React.ReactNode;
