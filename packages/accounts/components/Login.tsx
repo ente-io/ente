@@ -58,7 +58,9 @@ export default function Login(props: LoginProps) {
                 placeholder={t('ENTER_EMAIL')}
                 buttonText={t('LOGIN')}
                 autoComplete="username"
-                hiddenPostInput={<Input hidden type="password" value="" />}
+                hiddenPostInput={
+                    <Input sx={{ display: 'none' }} type="password" value="" />
+                }
             />
 
             <FormPaperFooter>
