@@ -108,11 +108,11 @@ export default function VerifyMasterPasswordForm({
             submitButtonProps={submitButtonProps}
             hiddenPreInput={
                 <Input
+                    sx={{ display: 'none' }}
                     id="email"
                     name="email"
                     autoComplete="username"
                     type="email"
-                    hidden
                     value={user?.email}
                 />
             }
