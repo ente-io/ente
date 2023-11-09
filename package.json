@@ -8,8 +8,8 @@
     ],
     "scripts": {
         "build:photos": "turbo run build --filter=photos",
-        "build:locker": "turbo run build --filter=locker",
-        "dev:locker": "turbo run dev --filter=locker",
+        "build:auth": "turbo run build --filter=auth",
+        "dev:auth": "turbo run dev --filter=auth",
         "dev:photos": "turbo run dev --filter=photos",
         "lint": "turbo run lint",
         "albums": "turbo run albums",
