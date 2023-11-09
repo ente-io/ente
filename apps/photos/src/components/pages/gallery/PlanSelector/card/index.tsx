@@ -19,7 +19,7 @@ import { SetLoading } from 'types/gallery';
 import { logError } from 'utils/sentry';
 import { AppContext } from 'pages/_app';
 import { Link, Stack } from '@mui/material';
-import { useLocalState } from 'hooks/useLocalState';
+import { useLocalState } from '@ente/shared/hooks/useLocalState';
 import { LS_KEYS } from 'utils/storage/localStorage';
 import { getLocalUserDetails } from 'utils/user';
 import { PLAN_PERIOD } from 'constants/gallery';

@@ -3,7 +3,7 @@ import SubscriptionCard from './SubscriptionCard';
 import { getUserDetailsV2 } from 'services/userService';
 import { UserDetails } from 'types/user';
 import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
-import { useLocalState } from 'hooks/useLocalState';
+import { useLocalState } from '@ente/shared/hooks/useLocalState';
 import Typography from '@mui/material/Typography';
 import SubscriptionStatus from './SubscriptionStatus';
 import { Box, Skeleton } from '@mui/material';

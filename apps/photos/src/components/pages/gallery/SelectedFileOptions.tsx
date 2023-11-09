@@ -10,7 +10,7 @@ import {
     ARCHIVE_SECTION,
     TRASH_SECTION,
 } from 'constants/collection';
-import { SelectionBar } from '../../Navbar/SelectionBar';
+import { SelectionBar } from '@ente/shared/components/Navbar/SelectionBar';
 import { AppContext } from 'pages/_app';
 import { Box, IconButton, Stack, Tooltip } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
@@ -66,7 +66,7 @@ const SelectedFileOptions = ({
     isInSearchMode,
     isInHiddenSection,
 }: Props) => {
-    const { setDialogMessage } = useContext(AppContext);
+    const { setDialogMessage, isMobile } = useContext(AppContext);
     const addToCollection = () =>
         setCollectionSelectorAttributes({
             callback: handleCollectionOps(COLLECTION_OPS_TYPE.ADD),
@@ -155,7 +155,7 @@ const SelectedFileOptions = ({
     };
 
     return (
-        <SelectionBar>
+        <SelectionBar isMobile={isMobile}>
             <FluidContainer>
                 <IconButton onClick={clearSelection}>
                     <CloseIcon />

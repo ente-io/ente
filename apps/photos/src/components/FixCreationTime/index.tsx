@@ -1,4 +1,4 @@
-import DialogBox from '../DialogBox';
+import DialogBox from '@ente/shared/components/DialogBox/';
 import React, { useContext, useEffect, useState } from 'react';
 import { updateCreationTimeWithExif } from 'services/updateCreationTimeWithExif';
 import { GalleryContext } from 'pages/gallery';

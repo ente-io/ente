@@ -12,7 +12,7 @@ import {
     isSystemCollection,
     shouldBeShownOnCollectionBar,
 } from 'utils/collection';
-import { useLocalState } from 'hooks/useLocalState';
+import { useLocalState } from '@ente/shared/hooks/useLocalState';
 import { sortCollectionSummaries } from 'services/collectionService';
 import { LS_KEYS } from 'utils/storage/localStorage';
 import {

@@ -1,8 +1,8 @@
 import React from 'react';
-import DialogBox from './DialogBox';
+import DialogBox from '@ente/shared/components/DialogBox/';
 import AutoAwesomeOutlinedIcon from '@mui/icons-material/AutoAwesomeOutlined';
 import { Typography } from '@mui/material';
-import SingleInputForm from './SingleInputForm';
+import SingleInputForm from '@ente/shared/components/SingleInputForm';
 import { t } from 'i18next';
 
 export default function UserNameInputDialog({

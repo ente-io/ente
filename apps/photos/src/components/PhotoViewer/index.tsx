@@ -51,7 +51,7 @@ import { GalleryContext } from 'pages/gallery';
 import downloadManager from 'services/downloadManager';
 import publicCollectionDownloadManager from 'services/publicCollectionDownloadManager';
 import CircularProgressWithLabel from './styledComponents/CircularProgressWithLabel';
-import EnteSpinner from 'components/EnteSpinner';
+import EnteSpinner from '@ente/shared/components/EnteSpinner';
 import AlbumOutlined from '@mui/icons-material/AlbumOutlined';
 import { FlexWrapper } from 'components/Container';
 import isElectron from 'is-electron';

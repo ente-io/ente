@@ -10,7 +10,7 @@ import {
     showShareQuickOption,
     showEmptyTrashQuickOption,
 } from 'utils/collection';
-import EnteSpinner from 'components/EnteSpinner';
+import EnteSpinner from '@ente/shared/components/EnteSpinner';
 interface Iprops {
     handleCollectionAction: (
         action: CollectionActions,

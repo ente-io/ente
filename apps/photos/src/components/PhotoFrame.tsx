@@ -16,7 +16,7 @@ import { useRouter } from 'next/router';
 import { logError } from 'utils/sentry';
 import { addLogLine } from 'utils/logging';
 import PhotoSwipe from 'photoswipe';
-import useMemoSingleThreaded from 'hooks/useMemoSingleThreaded';
+import useMemoSingleThreaded from '@ente/shared/hooks/useMemoSingleThreaded';
 import { getPlayableVideo } from 'utils/file';
 import { FILE_TYPE } from 'constants/file';
 

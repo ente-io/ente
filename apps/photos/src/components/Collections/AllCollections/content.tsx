@@ -9,7 +9,7 @@ import {
     areEqual,
 } from 'react-window';
 import memoize from 'memoize-one';
-import useWindowSize from 'hooks/useWindowSize';
+import useWindowSize from '@ente/shared/hooks/useWindowSize';
 import { AllCollectionMobileBreakpoint } from './dialog';
 
 const MobileColumns = 2;

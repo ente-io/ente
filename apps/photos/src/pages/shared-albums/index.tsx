@@ -27,24 +27,24 @@ import {
 } from 'components/Container';
 import { t } from 'i18next';
 
-import EnteSpinner from 'components/EnteSpinner';
-import { PAGES } from 'constants/pages';
+import EnteSpinner from '@ente/shared/components/EnteSpinner';
+import { PHOTOS_PAGES as PAGES } from '@ente/shared/constants/pages';
 import { useRouter } from 'next/router';
 import SingleInputForm, {
     SingleInputFormProps,
-} from 'components/SingleInputForm';
+} from '@ente/shared/components/SingleInputForm';
 import { logError } from 'utils/sentry';
 import SharedAlbumNavbar from 'components/pages/sharedAlbum/Navbar';
 import { CollectionInfo } from 'components/Collections/CollectionInfo';
 import { CollectionInfoBarWrapper } from 'components/Collections/styledComponents';
 import { ITEM_TYPE, TimeStampListItem } from 'components/PhotoList';
-import FormPaper from 'components/Form/FormPaper';
-import FormPaperTitle from 'components/Form/FormPaper/Title';
+import FormPaper from '@ente/shared/components/Form/FormPaper';
+import FormPaperTitle from '@ente/shared/components/Form/FormPaper/Title';
 import Typography from '@mui/material/Typography';
 import Uploader from 'components/Upload/Uploader';
 import { LoadingOverlay } from 'components/LoadingOverlay';
 import FullScreenDropZone from 'components/FullScreenDropZone';
-import useFileInput from 'hooks/useFileInput';
+import useFileInput from '@ente/shared/hooks/useFileInput';
 import { useDropzone } from 'react-dropzone';
 import UploadSelectorInputs from 'components/UploadSelectorInputs';
 import { logoutUser } from '@ente/accounts/services/user';

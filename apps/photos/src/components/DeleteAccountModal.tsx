@@ -8,13 +8,13 @@ import { decryptDeleteAccountChallenge } from 'utils/crypto';
 import { Trans } from 'react-i18next';
 import { t } from 'i18next';
 import { DELETE_ACCOUNT_EMAIL } from 'constants/urls';
-import DialogBoxV2 from './DialogBoxV2';
+import DialogBoxV2 from '@ente/shared/components/DialogBoxV2';
 import * as Yup from 'yup';
 import { Formik, FormikHelpers } from 'formik';
 import DropdownInput, { DropdownOption } from './DropdownInput';
 import MultilineInput from './MultilineInput';
 import { CheckboxInput } from './CheckboxInput';
-import EnteButton from './EnteButton';
+import EnteButton from '@ente/shared/components/EnteButton';
 import { GalleryContext } from 'pages/gallery';
 import { logoutUser } from '@ente/accounts/services/user';
 

@@ -2,14 +2,14 @@ import React, { useContext, useEffect, useState } from 'react';
 import OTPDisplay from 'components/Authenicator/OTPDisplay';
 import { getAuthCodes } from 'services/authenticator/authenticatorService';
 import { CustomError } from 'utils/error';
-import { PAGES } from 'constants/pages';
+import { PHOTOS_PAGES as PAGES } from '@ente/shared/constants/pages';
 import { useRouter } from 'next/router';
 import { AuthFooter } from 'components/Authenicator/AuthFooter';
 import { AppContext } from 'pages/_app';
 import { TextField } from '@mui/material';
 import AuthNavbar from 'components/pages/auth/Navbar';
 import { t } from 'i18next';
-import EnteSpinner from 'components/EnteSpinner';
+import EnteSpinner from '@ente/shared/components/EnteSpinner';
 import { VerticallyCentered } from 'components/Container';
 import InMemoryStore, { MS_KEYS } from 'services/InMemoryStore';
 

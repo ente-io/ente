@@ -2,7 +2,7 @@ import React, { useContext } from 'react';
 import { t } from 'i18next';
 
 import { AppContext } from 'pages/_app';
-import { PAGES } from 'constants/pages';
+import { PHOTOS_PAGES as PAGES } from '@ente/shared/constants/pages';
 import router from 'next/router';
 import { disableTwoFactor } from '@ente/accounts/api/user';
 import { setData, LS_KEYS, getData } from 'utils/storage/localStorage';

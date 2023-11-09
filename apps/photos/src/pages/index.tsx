@@ -6,20 +6,20 @@ import Login from '@ente/accounts/components/Login';
 import { useRouter } from 'next/router';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import SignUp from '@ente/accounts/components/SignUp';
-import EnteSpinner from 'components/EnteSpinner';
+import EnteSpinner from '@ente/shared/components/EnteSpinner';
 import { t } from 'i18next';
 
 import localForage from 'utils/storage/localForage';
 import { logError } from 'utils/sentry';
-import { PAGES } from 'constants/pages';
-import { EnteLogo } from 'components/EnteLogo';
+import { PHOTOS_PAGES as PAGES } from '@ente/shared/constants/pages';
+import { EnteLogo } from '@ente/shared/components/EnteLogo';
 import isElectron from 'is-electron';
 import safeStorageService from 'services/electron/safeStorage';
 import { saveKeyInSessionStore } from 'utils/crypto';
 import { getKey, SESSION_KEYS } from 'utils/storage/sessionStorage';
 import { getAlbumsURL } from 'utils/common/apiUtil';
 import { Trans } from 'react-i18next';
-import { APPS, getAppName } from 'constants/apps';
+import { APPS } from '@ente/shared/apps/constants';
 
 const Container = styled('div')`
     display: flex;
@@ -129,7 +129,6 @@ export default function LandingPage() {
     };
 
     const handleNormalRedirect = async () => {
-        const appName = getAppName();
         const user = getData(LS_KEYS.USER);
         let key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
         if (!key && isElectron()) {
@@ -143,17 +142,17 @@ export default function LandingPage() {
             }
         }
         if (key) {
-            if (appName === APPS.AUTH) {
-                await router.push(PAGES.AUTH);
-            } else {
-                await router.push(PAGES.GALLERY);
-            }
+            // if (appName === APPS.AUTH) {
+            //     await router.push(PAGES.AUTH);
+            // } else {
+            await router.push(PAGES.GALLERY);
+            // }
         } else if (user?.email) {
             await router.push(PAGES.VERIFY);
         } else {
-            if (appName === APPS.AUTH) {
-                await router.push(PAGES.LOGIN);
-            }
+            // if (appName === APPS.AUTH) {
+            //     await router.push(PAGES.LOGIN);
+            // }
         }
         await initLocalForage();
         setLoading(false);

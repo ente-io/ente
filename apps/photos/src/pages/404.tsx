@@ -3,7 +3,7 @@ import React, { useContext, useEffect, useState } from 'react';
 import { t } from 'i18next';
 
 import { AppContext } from './_app';
-import EnteSpinner from 'components/EnteSpinner';
+import EnteSpinner from '@ente/shared/components/EnteSpinner';
 
 export default function NotFound() {
     const appContext = useContext(AppContext);

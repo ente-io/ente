@@ -5,10 +5,10 @@ import { AppContext } from 'pages/_app';
 import { KeyAttributes, User } from 'types/user';
 import VerifyMasterPasswordForm, {
     VerifyMasterPasswordFormProps,
-} from 'components/VerifyMasterPasswordForm';
+} from '@ente/shared/components/VerifyMasterPasswordForm';
 import { logError } from 'utils/sentry';
 import { t } from 'i18next';
-import DialogBoxV2 from './DialogBoxV2';
+import DialogBoxV2 from '@ente/shared/components/DialogBoxV2';
 interface Iprops {
     open: boolean;
     onClose: () => void;

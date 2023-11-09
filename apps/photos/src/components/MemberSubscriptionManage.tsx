@@ -5,7 +5,7 @@ import React, { useContext, useEffect } from 'react';
 import billingService from 'services/billingService';
 import { getFamilyPlanAdmin } from 'utils/user/family';
 import { preloadImage } from 'utils/common';
-import DialogTitleWithCloseButton from './DialogBox/TitleWithCloseButton';
+import DialogTitleWithCloseButton from '@ente/shared/components/DialogBox/TitleWithCloseButton';
 import { t } from 'i18next';
 
 export function MemberSubscriptionManage({ open, userDetails, onClose }) {

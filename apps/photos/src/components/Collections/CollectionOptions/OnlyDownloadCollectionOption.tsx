@@ -4,7 +4,7 @@ import React from 'react';
 import FileDownloadOutlinedIcon from '@mui/icons-material/FileDownloadOutlined';
 import { CollectionActions } from '.';
 import { t } from 'i18next';
-import EnteSpinner from 'components/EnteSpinner';
+import EnteSpinner from '@ente/shared/components/EnteSpinner';
 interface Iprops {
     handleCollectionAction: (
         action: CollectionActions,

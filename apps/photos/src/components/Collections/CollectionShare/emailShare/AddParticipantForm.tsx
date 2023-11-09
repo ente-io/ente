@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { Formik, FormikHelpers, FormikState } from 'formik';
 import * as Yup from 'yup';
-import SubmitButton from 'components/SubmitButton';
+import SubmitButton from '@ente/shared/components/SubmitButton';
 import TextField from '@mui/material/TextField';
 import { FlexWrapper } from 'components/Container';
 import { Button, FormHelperText, Stack } from '@mui/material';

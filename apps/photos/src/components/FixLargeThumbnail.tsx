@@ -1,4 +1,4 @@
-import DialogBox from './DialogBox';
+import DialogBox from '@ente/shared/components/DialogBox/';
 import React, { useEffect, useState } from 'react';
 import { ProgressBar, Button } from 'react-bootstrap';
 import { ComfySpan } from './ExportInProgress';

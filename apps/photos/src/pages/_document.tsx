@@ -10,8 +10,8 @@ import Document, {
 
 import createEmotionServer from '@emotion/server/create-instance';
 import { AppType } from 'next/app';
-import createEmotionCache from 'themes/createEmotionCache';
-import { EnteAppProps } from './_app';
+import createEmotionCache from '@ente/shared/themes/createEmotionCache';
+import { EnteAppProps } from '@ente/shared/apps/types';
 
 interface EnteDocumentProps extends DocumentProps {
     emotionStyleTags: JSX.Element[];

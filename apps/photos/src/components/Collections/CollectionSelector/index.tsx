@@ -4,7 +4,7 @@ import {
     CollectionSummaries,
     CollectionSummary,
 } from 'types/collection';
-import DialogTitleWithCloseButton from 'components/DialogBox/TitleWithCloseButton';
+import DialogTitleWithCloseButton from '@ente/shared/components/DialogBox/TitleWithCloseButton';
 import { AppContext } from 'pages/_app';
 import { AllCollectionDialog } from 'components/Collections/AllCollections/dialog';
 import { DialogContent } from '@mui/material';

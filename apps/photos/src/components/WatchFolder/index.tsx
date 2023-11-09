@@ -6,7 +6,7 @@ import { WatchMapping } from 'types/watchFolder';
 import { AppContext } from 'pages/_app';
 import { t } from 'i18next';
 
-import DialogTitleWithCloseButton from 'components/DialogBox/TitleWithCloseButton';
+import DialogTitleWithCloseButton from '@ente/shared/components/DialogBox/TitleWithCloseButton';
 import UploadStrategyChoiceModal from 'components/Upload/UploadStrategyChoiceModal';
 import { UPLOAD_STRATEGY } from 'constants/upload';
 import { getImportSuggestion } from 'utils/upload';

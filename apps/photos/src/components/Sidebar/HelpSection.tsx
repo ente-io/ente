@@ -4,7 +4,7 @@ import { t } from 'i18next';
 import exportService from 'services/export';
 import isElectron from 'is-electron';
 import { AppContext } from 'pages/_app';
-import EnteSpinner from 'components/EnteSpinner';
+import EnteSpinner from '@ente/shared/components/EnteSpinner';
 import { getDownloadAppMessage } from 'utils/ui';
 import { NoStyleAnchor } from 'components/pages/sharedAlbum/GoToEnte';
 import { openLink } from 'utils/common';

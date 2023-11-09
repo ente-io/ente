@@ -18,7 +18,7 @@
         "**/*.ts",
         "**/*.tsx",
         "**/*.js",
-        "../../packages/shared/theme/mui-theme.d.ts"
+        "../../packages/shared/themes/mui-theme.d.ts"
     ],
     "exclude": ["node_modules", "out", ".next", "thirdparty"]
 }

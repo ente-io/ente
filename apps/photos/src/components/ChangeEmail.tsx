@@ -1,15 +1,15 @@
 import { Formik, FormikHelpers } from 'formik';
 import React, { useRef, useState } from 'react';
 import * as Yup from 'yup';
-import SubmitButton from 'components/SubmitButton';
+import SubmitButton from '@ente/shared/components/SubmitButton';
 import router from 'next/router';
 import { changeEmail, sendOTTForEmailChange } from 'services/userService';
 import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
-import { PAGES } from 'constants/pages';
+import { PHOTOS_PAGES as PAGES } from '@ente/shared/constants/pages';
 import { Alert, Box, TextField } from '@mui/material';
 import { VerticallyCentered } from './Container';
 import LinkButton from './pages/gallery/LinkButton';
-import FormPaperFooter from './Form/FormPaper/Footer';
+import FormPaperFooter from '@ente/shared/components/Form/FormPaper/Footer';
 import { sleep } from 'utils/common';
 import { Trans } from 'react-i18next';
 import { t } from 'i18next';

@@ -20,15 +20,15 @@ import {
 } from 'types/deduplicate';
 import Router from 'next/router';
 import DeduplicateOptions from 'components/pages/dedupe/SelectedFileOptions';
-import { PAGES } from 'constants/pages';
+import { PHOTOS_PAGES as PAGES } from '@ente/shared/constants/pages';
 import router from 'next/router';
 import { getKey, SESSION_KEYS } from 'utils/storage/sessionStorage';
 import { styled } from '@mui/material';
 import { getLatestCollections } from 'services/collectionService';
-import EnteSpinner from 'components/EnteSpinner';
+import EnteSpinner from '@ente/shared/components/EnteSpinner';
 import { VerticallyCentered } from 'components/Container';
 import Typography from '@mui/material/Typography';
-import useMemoSingleThreaded from 'hooks/useMemoSingleThreaded';
+import useMemoSingleThreaded from '@ente/shared/hooks/useMemoSingleThreaded';
 import InMemoryStore, { MS_KEYS } from 'services/InMemoryStore';
 import { HttpStatusCode } from 'axios';
 

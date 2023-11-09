@@ -1,4 +1,4 @@
-import DialogBoxBase from 'components/DialogBox/base';
+import DialogBoxBase from '@ente/shared/components/DialogBox/base';
 import {
     DialogActions,
     Button,

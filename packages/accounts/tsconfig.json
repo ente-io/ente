@@ -16,6 +16,6 @@
         "**/*.ts",
         "**/*.tsx",
         "**/*.js",
-        "../shared/theme/mui-theme.d.ts"
+        "../shared/themes/mui-theme.d.ts"
     ]
 }

@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { downloadAsFile } from 'utils/file';
 import { getRecoveryKey } from 'utils/crypto';
-import CodeBlock from '../CodeBlock';
+import CodeBlock from '@ente/shared/components/CodeBlock';
 import {
     Button,
     Dialog,
@@ -12,7 +12,7 @@ import {
 import * as bip39 from 'bip39';
 import { DashedBorderWrapper } from './styledComponents';
 import { AppContext } from 'pages/_app';
-import DialogTitleWithCloseButton from 'components/DialogBox/TitleWithCloseButton';
+import DialogTitleWithCloseButton from '@ente/shared/components/DialogBox/TitleWithCloseButton';
 import { t } from 'i18next';
 
 // mobile client library only supports english.

@@ -5,7 +5,7 @@ export {};
 // import { useRouter } from 'next/router';
 // import { ComlinkWorker } from 'utils/comlink';
 // import { AppContext } from 'pages/_app';
-// import { PAGES } from 'constants/pages';
+// import { PHOTOS_PAGES  as PAGES } from '@ente/shared/constants/pages';
 // import * as Comlink from 'comlink';
 // import { runningInBrowser } from 'utils/common';
 // import TFJSImage from './TFJSImage';

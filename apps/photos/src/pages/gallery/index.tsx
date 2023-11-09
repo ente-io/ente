@@ -39,7 +39,7 @@ import {
     validateKey,
 } from 'services/userService';
 import { useDropzone } from 'react-dropzone';
-import EnteSpinner from 'components/EnteSpinner';
+import EnteSpinner from '@ente/shared/components/EnteSpinner';
 import { LoadingOverlay } from 'components/LoadingOverlay';
 import PhotoFrame from 'components/PhotoFrame';
 import {
@@ -71,7 +71,7 @@ import {
 } from 'constants/collection';
 import { AppContext } from 'pages/_app';
 import { CustomError } from 'utils/error';
-import { PAGES } from 'constants/pages';
+import { PHOTOS_PAGES as PAGES } from '@ente/shared/constants/pages';
 import {
     COLLECTION_OPS_TYPE,
     handleCollectionOps,
@@ -101,7 +101,7 @@ import { Search, SearchResultSummary, UpdateSearch } from 'types/search';
 import SearchResultInfo from 'components/Search/SearchResultInfo';
 import { ITEM_TYPE, TimeStampListItem } from 'components/PhotoList';
 import UploadInputs from 'components/UploadSelectorInputs';
-import useFileInput from 'hooks/useFileInput';
+import useFileInput from '@ente/shared/hooks/useFileInput';
 import { FamilyData, User } from 'types/user';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import { CenteredFlex } from 'components/Container';
@@ -113,7 +113,7 @@ import { getToken } from 'utils/common/key';
 import ExportModal from 'components/ExportModal';
 import GalleryEmptyState from 'components/GalleryEmptyState';
 import AuthenticateUserModal from 'components/AuthenticateUserModal';
-import useMemoSingleThreaded from 'hooks/useMemoSingleThreaded';
+import useMemoSingleThreaded from '@ente/shared/hooks/useMemoSingleThreaded';
 import { isArchivedFile } from 'utils/magicMetadata';
 import { isSameDayAnyYear, isInsideLocationTag } from 'utils/search';
 import { getSessionExpiredMessage } from 'utils/ui';

@@ -1,17 +1,19 @@
 import { HorizontalFlex } from 'components/Container';
-import NavbarBase from 'components/Navbar/base';
+import NavbarBase from '@ente/shared/components/Navbar/base';
 import React from 'react';
 import { t } from 'i18next';
 import { logoutUser } from '@ente/accounts/services/user';
-import { EnteLogo } from 'components/EnteLogo';
+import { EnteLogo } from '@ente/shared/components/EnteLogo';
 import OverflowMenu from 'components/OverflowMenu/menu';
 import { OverflowMenuOption } from 'components/OverflowMenu/option';
 import MoreHoriz from '@mui/icons-material/MoreHoriz';
 import LogoutOutlined from '@mui/icons-material/LogoutOutlined';
+import { AppContext } from 'pages/_app';
 
 export default function AuthNavbar() {
+    const { isMobile } = React.useContext(AppContext);
     return (
-        <NavbarBase>
+        <NavbarBase isMobile={isMobile}>
             <HorizontalFlex flex={1} justifyContent={'center'}>
                 <EnteLogo />
             </HorizontalFlex>

@@ -7,7 +7,7 @@ import FolderIcon from '@mui/icons-material/FolderOutlined';
 import { UploadTypeSelectorIntent } from 'types/gallery';
 import { Trans } from 'react-i18next';
 import { t } from 'i18next';
-import { EnteLogo } from './EnteLogo';
+import { EnteLogo } from '@ente/shared/components/EnteLogo';
 
 const Wrapper = styled(Box)`
     display: flex;

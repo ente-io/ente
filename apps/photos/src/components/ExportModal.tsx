@@ -20,7 +20,7 @@ import ExportInit from './ExportInit';
 import ExportInProgress from './ExportInProgress';
 import FolderIcon from '@mui/icons-material/Folder';
 import { ExportStage } from 'constants/export';
-import DialogTitleWithCloseButton from './DialogBox/TitleWithCloseButton';
+import DialogTitleWithCloseButton from '@ente/shared/components/DialogBox/TitleWithCloseButton';
 import MoreHoriz from '@mui/icons-material/MoreHoriz';
 import OverflowMenu from './OverflowMenu/menu';
 import { OverflowMenuOption } from './OverflowMenu/option';

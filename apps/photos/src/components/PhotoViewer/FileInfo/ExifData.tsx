@@ -4,7 +4,7 @@ import { Stack, styled, Typography } from '@mui/material';
 import { FileInfoSidebar } from '.';
 import Titlebar from 'components/Titlebar';
 import { Box } from '@mui/system';
-import CopyButton from 'components/CodeBlock/CopyButton';
+import CopyButton from '@ente/shared/components/CodeBlock/CopyButton';
 import { formatDateTimeFull } from 'utils/time/format';
 import { t } from 'i18next';
 

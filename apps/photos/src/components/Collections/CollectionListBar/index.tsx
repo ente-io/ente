@@ -19,8 +19,10 @@ import {
 } from 'react-window';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import memoize from 'memoize-one';
-import useComponentScroll, { SCROLL_DIRECTION } from 'hooks/useComponentScroll';
-import useWindowSize from 'hooks/useWindowSize';
+import useComponentScroll, {
+    SCROLL_DIRECTION,
+} from '@ente/shared/hooks/useComponentScroll';
+import useWindowSize from '@ente/shared/hooks/useWindowSize';
 import ScrollButton from './ScrollButton';
 
 interface IProps {

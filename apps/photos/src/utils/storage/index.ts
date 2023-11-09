@@ -1,4 +1,4 @@
-import { Language } from 'constants/locale';
+import { Language } from '@ente/shared/i18n/locale';
 import { getData, LS_KEYS, setData } from './localStorage';
 
 export const isFirstLogin = () =>
