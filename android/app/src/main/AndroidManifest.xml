@@ -52,8 +52,6 @@
         </intent>
     </queries>
     <uses-permission android:name="android.permission.INTERNET"/>
-    <uses-permission android:name="android.permission.MANAGE_MEDIA" />
-    <uses-permission android:name="android.permission.ACCESS_MEDIA_LOCATION" />
     <uses-permission
         android:name="android.permission.READ_MEDIA_IMAGES" />
     <uses-permission
