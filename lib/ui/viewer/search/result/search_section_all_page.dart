@@ -1,6 +1,7 @@
 import "dart:async";
 
 import "package:flutter/material.dart";
+import "package:flutter_animate/flutter_animate.dart";
 import "package:photos/events/event.dart";
 import "package:photos/models/search/album_search_result.dart";
 import "package:photos/models/search/recent_searches.dart";
@@ -87,7 +88,12 @@ class _SearchSectionAllPageState extends State<SearchSectionAllPage> {
                   builder: (context, snapshot) {
                     if (snapshot.hasData) {
                       final sectionResults = snapshot.data!;
-                      return Text(sectionResults.length.toString());
+                      return Text(sectionResults.length.toString())
+                          .animate()
+                          .fadeIn(
+                            duration: const Duration(milliseconds: 150),
+                            curve: Curves.easeIn,
+                          );
                     } else {
                       return const SizedBox.shrink();
                     }
@@ -153,7 +159,19 @@ class _SearchSectionAllPageState extends State<SearchSectionAllPage> {
                       //is open and the widget is out of view.
                       cacheExtent:
                           widget.sectionType == SectionType.album ? 400 : null,
-                    );
+                    )
+                        .animate()
+                        .fadeIn(
+                          duration: const Duration(milliseconds: 225),
+                          curve: Curves.easeIn,
+                        )
+                        .slide(
+                          begin: const Offset(0, -0.01),
+                          curve: Curves.easeIn,
+                          duration: const Duration(
+                            milliseconds: 225,
+                          ),
+                        );
                   } else {
                     return const EnteLoadingWidget();
                   }
