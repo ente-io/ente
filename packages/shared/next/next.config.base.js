@@ -55,18 +55,20 @@ module.exports = (phase) =>
                 NEXT_PUBLIC_IS_TEST_APP: process.env.IS_TEST_RELEASE || 'false',
             },
 
-            headers() {
-                return [
-                    {
-                        // Apply these headers to all routes in your application....
-                        source: ALL_ROUTES,
-                        headers: convertToNextHeaderFormat({
-                            ...WEB_SECURITY_HEADERS,
-                            ...buildCSPHeader(CSP_DIRECTIVES),
-                        }),
-                    },
-                ];
-            },
+            ...(phase === PHASE_DEVELOPMENT_SERVER && {
+                headers() {
+                    return [
+                        {
+                            // Apply these headers to all routes in your application....
+                            source: ALL_ROUTES,
+                            headers: convertToNextHeaderFormat({
+                                ...WEB_SECURITY_HEADERS,
+                                ...buildCSPHeader(CSP_DIRECTIVES),
+                            }),
+                        },
+                    ];
+                },
+            }),
             webpack: (config, { isServer }) => {
                 if (!isServer) {
                     config.resolve.fallback.fs = false;
