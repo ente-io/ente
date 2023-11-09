@@ -21,7 +21,7 @@ export const CLIENT_PACKAGE_NAMES = new Map([
 ]);
 
 export const APP_TITLES = new Map([
-    [APPS.ALBUMS, 'Albums'],
-    [APPS.PHOTOS, 'Photos'],
-    [APPS.AUTH, 'Auth'],
+    [APPS.ALBUMS, 'Ente Albums'],
+    [APPS.PHOTOS, 'Ente Photos'],
+    [APPS.AUTH, 'Ente Auth'],
 ]);
