@@ -3,7 +3,7 @@ import mlIDbStorage from 'utils/storage/mlIDbStorage';
 import * as zip from '@zip.js/zip.js';
 import { CACHES } from 'constants/cache';
 import { CacheStorageService } from 'services/cache/cacheStorageService';
-import { addLogLine } from 'utils/logging';
+import { addLogLine } from '@ente/shared/logging';
 
 class FileSystemWriter extends zip.Writer {
     writableStream: FileSystemWritableFileStream;

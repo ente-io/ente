@@ -14,7 +14,7 @@ import {
     getFileFromURL,
     isRawFileFromFileName,
 } from 'utils/file';
-import { logError } from 'utils/sentry';
+import { logError } from '@ente/shared/sentry';
 
 import { FILE_TYPE } from 'constants/file';
 import { isClipboardItemPresent } from 'utils/common';
@@ -40,7 +40,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import { trashFiles } from 'services/fileService';
 import { getTrashFileMessage } from 'utils/ui';
 import { Box, Button, styled } from '@mui/material';
-import { addLocalLog } from 'utils/logging';
+import { addLocalLog } from '@ente/shared/logging';
 import ContentCopy from '@mui/icons-material/ContentCopy';
 import ChevronLeft from '@mui/icons-material/ChevronLeft';
 import { t } from 'i18next';

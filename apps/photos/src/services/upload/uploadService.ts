@@ -1,5 +1,5 @@
 import { Collection } from 'types/collection';
-import { logError } from 'utils/sentry';
+import { logError } from '@ente/shared/sentry';
 import UploadHttpClient from './uploadHttpClient';
 import { extractFileMetadata, getFilename } from './fileService';
 import { getFileType } from '../typeDetectionService';

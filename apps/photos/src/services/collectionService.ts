@@ -6,7 +6,7 @@ import { getActualKey, getToken } from 'utils/common/key';
 import { getPublicKey } from './userService';
 import HTTPService from './HTTPService';
 import { EnteFile } from 'types/file';
-import { logError } from 'utils/sentry';
+import { logError } from '@ente/shared/sentry';
 import { CustomError } from 'utils/error';
 import {
     sortFiles,

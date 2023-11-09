@@ -10,7 +10,7 @@ import EnteSpinner from '@ente/shared/components/EnteSpinner';
 import { t } from 'i18next';
 
 import localForage from 'utils/storage/localForage';
-import { logError } from 'utils/sentry';
+import { logError } from '@ente/shared/sentry';
 import { PHOTOS_PAGES as PAGES } from '@ente/shared/constants/pages';
 import { EnteLogo } from '@ente/shared/components/EnteLogo';
 import isElectron from 'is-electron';

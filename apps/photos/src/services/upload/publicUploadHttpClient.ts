@@ -1,6 +1,6 @@
 import HTTPService from 'services/HTTPService';
 import { getEndpoint } from 'utils/common/apiUtil';
-import { logError } from 'utils/sentry';
+import { logError } from '@ente/shared/sentry';
 import { EnteFile } from 'types/file';
 import { CustomError, handleUploadError } from 'utils/error';
 import { UploadFile, UploadURL, MultipartUploadURLs } from 'types/upload';

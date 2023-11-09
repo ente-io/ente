@@ -1,5 +1,5 @@
 import { FamilyData, FamilyMember, User } from 'types/user';
-import { logError } from 'utils/sentry';
+import { logError } from '@ente/shared/sentry';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 
 export function getLocalFamilyData(): FamilyData {

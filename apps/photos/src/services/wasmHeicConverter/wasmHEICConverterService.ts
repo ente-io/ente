@@ -1,8 +1,8 @@
 import QueueProcessor from 'services/queueProcessor';
 import { CustomError } from 'utils/error';
 import { retryAsyncFunction } from 'utils/network';
-import { logError } from 'utils/sentry';
-import { addLogLine } from 'utils/logging';
+import { logError } from '@ente/shared/sentry';
+import { addLogLine } from '@ente/shared/logging';
 import { DedicatedConvertWorker } from 'worker/convert.worker';
 import { ComlinkWorker } from 'utils/comlink/comlinkWorker';
 import { convertBytesToHumanReadable } from 'utils/file/size';

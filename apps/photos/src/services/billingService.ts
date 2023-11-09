@@ -2,7 +2,7 @@ import { getEndpoint, getPaymentsURL } from 'utils/common/apiUtil';
 import { getToken } from 'utils/common/key';
 import { setData, LS_KEYS, removeData } from 'utils/storage/localStorage';
 import HTTPService from './HTTPService';
-import { logError } from 'utils/sentry';
+import { logError } from '@ente/shared/sentry';
 import { getPaymentToken } from './userService';
 import { Plan, Subscription } from 'types/billing';
 import isElectron from 'is-electron';

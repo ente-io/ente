@@ -31,8 +31,8 @@ import PeopleService from './peopleService';
 import ObjectService from './objectService';
 // import TextService from './textService';
 import ReaderService from './readerService';
-import { logError } from 'utils/sentry';
-import { addLogLine } from 'utils/logging';
+import { logError } from '@ente/shared/sentry';
+import { addLogLine } from '@ente/shared/logging';
 class MachineLearningService {
     private initialized = false;
     // private faceDetectionService: FaceDetectionService;

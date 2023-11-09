@@ -2,7 +2,7 @@ import { getEndpoint } from 'utils/common/apiUtil';
 import localForage from 'utils/storage/localForage';
 import { Collection, CollectionPublicMagicMetadata } from 'types/collection';
 import HTTPService from './HTTPService';
-import { logError } from 'utils/sentry';
+import { logError } from '@ente/shared/sentry';
 import { decryptFile, mergeMetadata, sortFiles } from 'utils/file';
 import { EncryptedEnteFile, EnteFile } from 'types/file';
 import {

@@ -6,7 +6,7 @@ import {
     updateExistingFilePubMetadata,
 } from 'utils/file';
 import { FlexWrapper } from 'components/Container';
-import { logError } from 'utils/sentry';
+import { logError } from '@ente/shared/sentry';
 import { FILE_TYPE } from 'constants/file';
 import InfoItem from './InfoItem';
 import { makeHumanReadableStorage } from 'utils/billing';

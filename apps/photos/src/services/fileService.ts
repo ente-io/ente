@@ -4,7 +4,7 @@ import localForage from 'utils/storage/localForage';
 import { getToken } from 'utils/common/key';
 import { Collection } from 'types/collection';
 import HTTPService from './HTTPService';
-import { logError } from 'utils/sentry';
+import { logError } from '@ente/shared/sentry';
 import {
     decryptFile,
     getLatestVersionFiles,
@@ -21,7 +21,7 @@ import {
 } from 'types/file';
 import { SetFiles } from 'types/gallery';
 import { BulkUpdateMagicMetadataRequest } from 'types/magicMetadata';
-import { addLogLine } from 'utils/logging';
+import { addLogLine } from '@ente/shared/logging';
 import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
 import {
     getCollectionLastSyncTime,

@@ -13,7 +13,7 @@ import {
     Tooltip,
     Typography,
 } from '@mui/material';
-import { logError } from 'utils/sentry';
+import { logError } from '@ente/shared/sentry';
 import { SpaceBetweenFlex, VerticallyCenteredFlex } from './Container';
 import ExportFinished from './ExportFinished';
 import ExportInit from './ExportInit';
@@ -29,7 +29,7 @@ import { getExportDirectoryDoesNotExistMessage } from 'utils/ui';
 import { t } from 'i18next';
 import LinkButton from './pages/gallery/LinkButton';
 import { CustomError } from 'utils/error';
-import { addLogLine } from 'utils/logging';
+import { addLogLine } from '@ente/shared/logging';
 import { EnteFile } from 'types/file';
 
 const ExportFolderPathContainer = styled(LinkButton)`

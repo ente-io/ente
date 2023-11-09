@@ -33,7 +33,7 @@ import { useRouter } from 'next/router';
 import SingleInputForm, {
     SingleInputFormProps,
 } from '@ente/shared/components/SingleInputForm';
-import { logError } from 'utils/sentry';
+import { logError } from '@ente/shared/sentry';
 import SharedAlbumNavbar from 'components/pages/sharedAlbum/Navbar';
 import { CollectionInfo } from 'components/Collections/CollectionInfo';
 import { CollectionInfoBarWrapper } from 'components/Collections/styledComponents';

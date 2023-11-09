@@ -6,13 +6,13 @@ import { FILE_TYPE } from 'constants/file';
 import { getToken, getUserID } from 'utils/common/key';
 import { logQueueStats } from 'utils/machineLearning';
 import { getMLSyncJobConfig } from 'utils/machineLearning/config';
-import { logError } from 'utils/sentry';
+import { logError } from '@ente/shared/sentry';
 import mlIDbStorage from 'utils/storage/mlIDbStorage';
 import { MLSyncJobResult, MLSyncJob } from './mlSyncJob';
 import { ComlinkWorker } from 'utils/comlink/comlinkWorker';
 import { DedicatedMLWorker } from 'worker/ml.worker';
 import { getDedicatedMLWorker } from 'utils/comlink/ComlinkMLWorker';
-import { addLogLine } from 'utils/logging';
+import { addLogLine } from '@ente/shared/logging';
 
 const LIVE_SYNC_IDLE_DEBOUNCE_SEC = 30;
 const LIVE_SYNC_QUEUE_TIMEOUT_SEC = 300;

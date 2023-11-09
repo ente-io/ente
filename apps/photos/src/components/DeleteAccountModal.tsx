@@ -3,7 +3,7 @@ import { AppContext } from 'pages/_app';
 import { useContext, useEffect, useRef, useState } from 'react';
 import { preloadImage, initiateEmail } from 'utils/common';
 import { deleteAccount, getAccountDeleteChallenge } from 'services/userService';
-import { logError } from 'utils/sentry';
+import { logError } from '@ente/shared/sentry';
 import { decryptDeleteAccountChallenge } from 'utils/crypto';
 import { Trans } from 'react-i18next';
 import { t } from 'i18next';

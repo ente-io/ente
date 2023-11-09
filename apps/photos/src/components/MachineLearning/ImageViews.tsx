@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Skeleton, styled } from '@mui/material';
 
 import { imageBitmapToBlob } from 'utils/image';
-import { logError } from 'utils/sentry';
+import { logError } from '@ente/shared/sentry';
 import { getBlobFromCache } from 'utils/storage/cache';
 
 export const FaceCropsRow = styled('div')`

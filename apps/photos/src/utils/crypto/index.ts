@@ -3,7 +3,7 @@ import { SESSION_KEYS, setKey } from 'utils/storage/sessionStorage';
 import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
 import { getActualKey, getToken } from 'utils/common/key';
 import { setRecoveryKey } from '@ente/accounts/api/user';
-import { logError } from 'utils/sentry';
+import { logError } from '@ente/shared/sentry';
 import isElectron from 'is-electron';
 import safeStorageService from 'services/electron/safeStorage';
 import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
@@ -12,7 +12,7 @@ import zxcvbn from 'zxcvbn';
 import { SRP, SrpClient } from 'fast-srp-hap';
 import { convertBase64ToBuffer, convertBufferToBase64 } from 'utils/user';
 import { v4 as uuidv4 } from 'uuid';
-import { addLocalLog } from 'utils/logging';
+import { addLocalLog } from '@ente/shared/logging';
 
 const SRP_PARAMS = SRP.params['4096'];
 

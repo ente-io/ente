@@ -41,7 +41,7 @@ import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import MenuIcon from '@mui/icons-material/Menu';
 import { AppContext } from 'pages/_app';
 import { getEditorCloseConfirmationMessage } from 'utils/ui';
-import { logError } from 'utils/sentry';
+import { logError } from '@ente/shared/sentry';
 import { getFileType } from 'services/typeDetectionService';
 import { downloadUsingAnchor } from 'utils/file';
 

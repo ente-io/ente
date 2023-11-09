@@ -16,7 +16,7 @@ import { reverseString } from 'utils/common';
 import { GalleryContext } from 'pages/gallery';
 import billingService from 'services/billingService';
 import { SetLoading } from 'types/gallery';
-import { logError } from 'utils/sentry';
+import { logError } from '@ente/shared/sentry';
 import { AppContext } from 'pages/_app';
 import { Link, Stack } from '@mui/material';
 import { useLocalState } from '@ente/shared/hooks/useLocalState';

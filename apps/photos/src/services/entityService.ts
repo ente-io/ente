@@ -2,7 +2,7 @@ import { getToken } from 'utils/common/key';
 import localForage from 'utils/storage/localForage';
 import HTTPService from './HTTPService';
 import { getEndpoint } from 'utils/common/apiUtil';
-import { logError } from 'utils/sentry';
+import { logError } from '@ente/shared/sentry';
 import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
 import { getActualKey } from 'utils/common/key';
 import {
@@ -14,7 +14,7 @@ import {
     EncryptedEntity,
 } from 'types/entity';
 import { getLatestVersionEntities } from 'utils/entity';
-import { addLogLine } from 'utils/logging';
+import { addLogLine } from '@ente/shared/logging';
 
 const ENDPOINT = getEndpoint();
 

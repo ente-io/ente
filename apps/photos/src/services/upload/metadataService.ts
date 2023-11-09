@@ -1,5 +1,5 @@
 import { FILE_TYPE } from 'constants/file';
-import { logError } from 'utils/sentry';
+import { logError } from '@ente/shared/sentry';
 import { getEXIFLocation, getEXIFTime, getParsedExifData } from './exifService';
 import {
     Metadata,

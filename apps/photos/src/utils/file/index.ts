@@ -11,7 +11,7 @@ import {
 import { decodeLivePhoto } from 'services/livePhotoService';
 import { getFileType } from 'services/typeDetectionService';
 import DownloadManager from 'services/downloadManager';
-import { logError } from 'utils/sentry';
+import { logError } from '@ente/shared/sentry';
 import { User } from 'types/user';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import { updateFileCreationDateInEXIF } from 'services/upload/exifService';
@@ -30,7 +30,7 @@ import * as ffmpegService from 'services/ffmpeg/ffmpegService';
 import { VISIBILITY_STATE } from 'types/magicMetadata';
 import { isArchivedFile, updateMagicMetadata } from 'utils/magicMetadata';
 
-import { addLocalLog, addLogLine } from 'utils/logging';
+import { addLocalLog, addLogLine } from '@ente/shared/logging';
 import { CustomError } from 'utils/error';
 import { convertBytesToHumanReadable } from './size';
 import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';

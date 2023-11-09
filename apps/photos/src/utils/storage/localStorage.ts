@@ -1,4 +1,4 @@
-import { logError } from 'utils/sentry';
+import { logError } from '@ente/shared/sentry';
 
 export enum LS_KEYS {
     USER = 'user',

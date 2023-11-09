@@ -1,13 +1,14 @@
 import { FILE_TYPE } from 'constants/file';
 import { CustomError, errorWithContext } from 'utils/error';
-import { logError } from 'utils/sentry';
+import { logError } from '@ente/shared/sentry';
 import { BLACK_THUMBNAIL_BASE64 } from 'constants/upload';
 import * as FFmpegService from 'services/ffmpeg/ffmpegService';
 import ElectronImageProcessorService from 'services/electron/imageProcessor';
 import { convertBytesToHumanReadable } from 'utils/file/size';
 import { ElectronFile, FileTypeInfo } from 'types/upload';
 import { getUint8ArrayView } from '../readerService';
-import { getFileNameSize, addLogLine } from 'utils/logging';
+import { addLogLine } from '@ente/shared/logging';
+import { getFileNameSize } from '@ente/shared/logging/web';
 import HeicConversionService from 'services/heicConversionService';
 import { isFileHEIC } from 'utils/file';
 

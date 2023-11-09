@@ -82,7 +82,7 @@ import {
     getSelectedCollection,
     getDefaultHiddenCollectionIDs,
 } from 'utils/collection';
-import { logError } from 'utils/sentry';
+import { logError } from '@ente/shared/sentry';
 import { getLocalTrashedFiles, syncTrash } from 'services/trashService';
 
 import FixCreationTime, {

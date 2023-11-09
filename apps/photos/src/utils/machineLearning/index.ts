@@ -39,7 +39,7 @@ import {
 import { CACHES } from 'constants/cache';
 import { FILE_TYPE } from 'constants/file';
 import { decodeLivePhoto } from 'services/livePhotoService';
-import { addLogLine } from 'utils/logging';
+import { addLogLine } from '@ente/shared/logging';
 import { Remote } from 'comlink';
 import { DedicatedCryptoWorker } from 'worker/crypto.worker';
 

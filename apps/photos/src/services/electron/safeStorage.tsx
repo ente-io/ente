@@ -1,5 +1,5 @@
 import { ElectronAPIs } from 'types/electron';
-import { logError } from 'utils/sentry';
+import { logError } from '@ente/shared/sentry';
 
 class SafeStorageService {
     private electronAPIs: ElectronAPIs;

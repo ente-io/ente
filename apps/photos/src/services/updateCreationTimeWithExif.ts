@@ -5,7 +5,7 @@ import {
     getFileFromURL,
     updateExistingFilePubMetadata,
 } from 'utils/file';
-import { logError } from 'utils/sentry';
+import { logError } from '@ente/shared/sentry';
 import downloadManager from './downloadManager';
 import { EnteFile } from 'types/file';
 

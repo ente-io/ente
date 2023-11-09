@@ -6,7 +6,7 @@ import { KeyAttributes, User } from 'types/user';
 import VerifyMasterPasswordForm, {
     VerifyMasterPasswordFormProps,
 } from '@ente/shared/components/VerifyMasterPasswordForm';
-import { logError } from 'utils/sentry';
+import { logError } from '@ente/shared/sentry';
 import { t } from 'i18next';
 import DialogBoxV2 from '@ente/shared/components/DialogBoxV2';
 interface Iprops {

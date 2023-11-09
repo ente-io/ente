@@ -3,7 +3,7 @@ import { EnteFile } from 'types/file';
 import { Metadata } from 'types/upload';
 import { getEndpoint } from 'utils/common/apiUtil';
 import { getToken } from 'utils/common/key';
-import { logError } from 'utils/sentry';
+import { logError } from '@ente/shared/sentry';
 import { hasFileHash } from 'utils/upload';
 import HTTPService from './HTTPService';
 

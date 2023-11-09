@@ -1,6 +1,6 @@
 import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
-import { addLogLine } from 'utils/logging';
-import { logError } from 'utils/sentry';
+import { addLogLine } from '@ente/shared/logging';
+import { logError } from '@ente/shared/sentry';
 import { ApiError, CustomError, isApiErrorResponse } from 'utils/error';
 
 interface IHTTPHeaders {

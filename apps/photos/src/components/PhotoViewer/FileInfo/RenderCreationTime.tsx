@@ -7,7 +7,7 @@ import {
 } from 'utils/file';
 import { formatDate, formatTime } from 'utils/time/format';
 import { FlexWrapper } from 'components/Container';
-import { logError } from 'utils/sentry';
+import { logError } from '@ente/shared/sentry';
 import EnteDateTimePicker from 'components/EnteDateTimePicker';
 import InfoItem from './InfoItem';
 

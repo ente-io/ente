@@ -2,7 +2,7 @@ import downloadManager from 'services/downloadManager';
 import { getLocalFiles } from 'services/fileService';
 import { generateThumbnail } from 'services/upload/thumbnailService';
 import { getToken } from 'utils/common/key';
-import { logError } from 'utils/sentry';
+import { logError } from '@ente/shared/sentry';
 import { getEndpoint } from 'utils/common/apiUtil';
 import HTTPService from 'services/HTTPService';
 import uploadHttpClient from 'services/upload/uploadHttpClient';

@@ -14,7 +14,7 @@ import { SetCollectionNamerAttributes } from '../CollectionNamer';
 import { Collection } from 'types/collection';
 import { isArchivedCollection, isPinnedCollection } from 'utils/magicMetadata';
 import { GalleryContext } from 'pages/gallery';
-import { logError } from 'utils/sentry';
+import { logError } from '@ente/shared/sentry';
 import { VISIBILITY_STATE } from 'types/magicMetadata';
 import { AppContext } from 'pages/_app';
 import OverflowMenu from 'components/OverflowMenu/menu';

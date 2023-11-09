@@ -8,7 +8,7 @@ import {
 } from 'types/machineLearning';
 import { SCENE_DETECTION_IMAGE_SIZE } from 'constants/mlConfig';
 import { resizeToSquare } from 'utils/image';
-import { addLogLine } from 'utils/logging';
+import { addLogLine } from '@ente/shared/logging';
 
 class ImageScene implements SceneDetectionService {
     method: Versioned<SceneDetectionMethod>;

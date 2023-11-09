@@ -10,7 +10,7 @@ import {
 import HTTPService from './HTTPService';
 import { EnteFile } from 'types/file';
 
-import { logError } from 'utils/sentry';
+import { logError } from '@ente/shared/sentry';
 import { FILE_TYPE } from 'constants/file';
 import { CustomError } from 'utils/error';
 import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';

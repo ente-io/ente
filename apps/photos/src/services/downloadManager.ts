@@ -8,7 +8,7 @@ import {
 import HTTPService from './HTTPService';
 import { EnteFile } from 'types/file';
 
-import { logError } from 'utils/sentry';
+import { logError } from '@ente/shared/sentry';
 import { FILE_TYPE } from 'constants/file';
 import { CustomError } from 'utils/error';
 import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
@@ -18,7 +18,7 @@ import { Remote } from 'comlink';
 import { DedicatedCryptoWorker } from 'worker/crypto.worker';
 import { LimitedCache } from 'types/cache';
 import { retryAsyncFunction } from 'utils/network';
-import { addLogLine } from 'utils/logging';
+import { addLogLine } from '@ente/shared/logging';
 
 class DownloadManager {
     private fileObjectURLPromise = new Map<

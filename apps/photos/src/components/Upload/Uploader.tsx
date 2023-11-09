@@ -15,7 +15,7 @@ import {
 } from 'types/gallery';
 import { GalleryContext } from 'pages/gallery';
 import { AppContext } from 'pages/_app';
-import { logError } from 'utils/sentry';
+import { logError } from '@ente/shared/sentry';
 import uploadManager from 'services/upload/uploadManager';
 import ImportService from 'services/importService';
 import isElectron from 'is-electron';
@@ -56,7 +56,7 @@ import {
     groupFilesBasedOnParentFolder,
 } from 'utils/upload';
 import billingService from 'services/billingService';
-import { addLogLine } from 'utils/logging';
+import { addLogLine } from '@ente/shared/logging';
 import { PublicCollectionGalleryContext } from 'utils/publicCollectionGallery';
 import UserNameInputDialog from 'components/UserNameInputDialog';
 import {

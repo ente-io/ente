@@ -1,6 +1,6 @@
 import { CACHES } from 'constants/cache';
 import { CacheStorageService } from 'services/cache/cacheStorageService';
-import { logError } from 'utils/sentry';
+import { logError } from '@ente/shared/sentry';
 
 export async function cached(
     cacheName: string,

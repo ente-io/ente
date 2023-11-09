@@ -33,7 +33,7 @@ import imageSceneService from './imageSceneService';
 import { getDedicatedCryptoWorker } from 'utils/comlink/ComlinkCryptoWorker';
 import { ComlinkWorker } from 'utils/comlink/comlinkWorker';
 import { DedicatedCryptoWorker } from 'worker/crypto.worker';
-import { addLogLine } from 'utils/logging';
+import { addLogLine } from '@ente/shared/logging';
 
 export class MLFactory {
     public static getFaceDetectionService(

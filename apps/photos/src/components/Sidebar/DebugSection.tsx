@@ -4,7 +4,8 @@ import { downloadAsFile } from 'utils/file';
 import { Trans } from 'react-i18next';
 import { t } from 'i18next';
 
-import { addLogLine, getDebugLogs } from 'utils/logging';
+import { addLogLine } from '@ente/shared/logging';
+import { getDebugLogs } from '@ente/shared/logging/web';
 import isElectron from 'is-electron';
 import ElectronService from 'services/electron/common';
 import Typography from '@mui/material/Typography';

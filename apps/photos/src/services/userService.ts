@@ -8,7 +8,7 @@ import localForage from 'utils/storage/localForage';
 import { getToken } from 'utils/common/key';
 import HTTPService from './HTTPService';
 import { getRecoveryKey } from 'utils/crypto';
-import { logError } from 'utils/sentry';
+import { logError } from '@ente/shared/sentry';
 import {
     UserDetails,
     DeleteChallengeResponse,

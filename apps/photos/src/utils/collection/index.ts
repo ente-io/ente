@@ -18,7 +18,7 @@ import { EnteFile } from 'types/file';
 import { CustomError } from 'utils/error';
 import { User } from 'types/user';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
-import { logError } from 'utils/sentry';
+import { logError } from '@ente/shared/sentry';
 import {
     COLLECTION_ROLE,
     Collection,

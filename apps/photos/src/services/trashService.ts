@@ -3,7 +3,7 @@ import { Collection } from 'types/collection';
 import { getEndpoint } from 'utils/common/apiUtil';
 import { getToken } from 'utils/common/key';
 import { decryptFile, sortTrashFiles } from 'utils/file';
-import { logError } from 'utils/sentry';
+import { logError } from '@ente/shared/sentry';
 import localForage from 'utils/storage/localForage';
 import { getCollection } from './collectionService';
 

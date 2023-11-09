@@ -1,7 +1,7 @@
 import { getLocalFiles } from '../fileService';
 import { SetFiles } from 'types/gallery';
 import { sortFiles, decryptFile, getUserOwnedFiles } from 'utils/file';
-import { logError } from 'utils/sentry';
+import { logError } from '@ente/shared/sentry';
 import { getMetadataJSONMapKey, parseMetadataJSON } from './metadataService';
 import {
     areFileWithCollectionsSame,
@@ -23,7 +23,8 @@ import {
 
 import { UPLOAD_RESULT, UPLOAD_STAGES } from 'constants/upload';
 import uiService from './uiService';
-import { addLogLine, getFileNameSize } from 'utils/logging';
+import { addLogLine } from '@ente/shared/logging';
+import { getFileNameSize } from '@ente/shared/logging/web';
 import isElectron from 'is-electron';
 import ImportService from 'services/importService';
 import watchFolderService from 'services/watchFolder/watchFolderService';

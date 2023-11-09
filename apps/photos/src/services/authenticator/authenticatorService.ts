@@ -6,7 +6,7 @@ import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
 import { getEndpoint } from 'utils/common/apiUtil';
 import { getActualKey, getToken } from 'utils/common/key';
 import { ApiError, CustomError } from 'utils/error';
-import { logError } from 'utils/sentry';
+import { logError } from '@ente/shared/sentry';
 
 const ENDPOINT = getEndpoint();
 export const getAuthCodes = async (): Promise<Code[]> => {

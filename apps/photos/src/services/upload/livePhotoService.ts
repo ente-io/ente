@@ -18,7 +18,7 @@ import {
     getFileExtensionWithDot,
     getFileNameWithoutExtension,
 } from 'utils/file';
-import { logError } from 'utils/sentry';
+import { logError } from '@ente/shared/sentry';
 import { getUint8ArrayView } from '../readerService';
 import { extractFileMetadata } from './fileService';
 import { getFileHash } from './hashService';

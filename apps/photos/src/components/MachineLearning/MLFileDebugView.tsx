@@ -16,7 +16,7 @@ import { FaceCropsRow, FaceImagesRow, ImageBitmapView } from './ImageViews';
 import ssdMobileNetV2Service from 'services/machineLearning/ssdMobileNetV2Service';
 import { DEFAULT_ML_SYNC_CONFIG } from 'constants/mlConfig';
 import imageSceneService from 'services/machineLearning/imageSceneService';
-import { addLogLine } from 'utils/logging';
+import { addLogLine } from '@ente/shared/logging';
 
 interface MLFileDebugViewProps {
     file: File;

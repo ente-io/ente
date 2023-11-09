@@ -22,7 +22,7 @@ import {
     parseLivePhotoExportName,
     getCollectionIDFromFileUID,
 } from 'utils/export';
-import { logError } from 'utils/sentry';
+import { logError } from '@ente/shared/sentry';
 import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
 import { getAllLocalCollections } from '../collectionService';
 import downloadManager from '../downloadManager';
@@ -53,7 +53,7 @@ import { FILE_TYPE } from 'constants/file';
 import { ExportStage } from 'constants/export';
 import { ElectronAPIs } from 'types/electron';
 import { CustomError } from 'utils/error';
-import { addLogLine } from 'utils/logging';
+import { addLogLine } from '@ente/shared/logging';
 import { eventBus, Events } from '../events';
 import {
     constructCollectionNameMap,

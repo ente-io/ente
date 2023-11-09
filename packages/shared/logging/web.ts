@@ -7,6 +7,7 @@ import {
     removeData,
     setData,
 } from '@ente/shared/storage/localStorage';
+import { ElectronFile } from '../upload/types';
 
 export const MAX_LOG_SIZE = 5 * 1024 * 1024; // 5MB
 export const MAX_LOG_LINES = 1000;
@@ -35,6 +36,10 @@ export function logWeb(logLine: string) {
 
 export function getDebugLogs() {
     return combineLogLines(getLogs());
+}
+
+export function getFileNameSize(file: File | ElectronFile) {
+    return `${file.name}_${convertBytesToHumanReadable(file.size)}`;
 }
 
 export const clearLogsIfLocalStorageLimitExceeded = () => {

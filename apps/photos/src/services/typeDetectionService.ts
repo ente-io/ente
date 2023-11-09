@@ -6,7 +6,7 @@ import {
 } from 'constants/upload';
 import { CustomError } from 'utils/error';
 import { getFileExtension } from 'utils/file';
-import { logError } from 'utils/sentry';
+import { logError } from '@ente/shared/sentry';
 import { getUint8ArrayView } from './readerService';
 import FileType, { FileTypeResult } from 'file-type';
 import { getFileSize } from './upload/fileService';

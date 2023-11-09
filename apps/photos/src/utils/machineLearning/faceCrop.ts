@@ -12,7 +12,7 @@ import {
     FaceDetection,
 } from 'types/machineLearning';
 import { cropWithRotation, imageBitmapToBlob } from 'utils/image';
-import { addLogLine } from 'utils/logging';
+import { addLogLine } from '@ente/shared/logging';
 import { getBlobFromCache } from 'utils/storage/cache';
 import { enlargeBox } from '.';
 import { Box } from '../../../thirdparty/face-api/classes';
