@@ -11,7 +11,7 @@ import { setIsFirstLogin } from '@ente/shared/storage/localStorage/helpers';
 import { clearKeys } from '@ente/shared/storage/sessionStorage';
 import { PAGES } from '../constants/pages';
 import { KeyAttributes, User } from '@ente/shared/user/types';
-import { SRPSetupAttributes } from '../types/srp';
+import { SRPAttributes, SRPSetupAttributes } from '../types/srp';
 import { Box, Typography } from '@mui/material';
 import FormPaperTitle from '@ente/shared/components/Form/FormPaper/Title';
 import FormPaper from '@ente/shared/components/Form/FormPaper';
@@ -41,11 +41,19 @@ export default function VerifyPage({ appContext, router, appName }: PageProps) {
             const keyAttributes: KeyAttributes = getData(
                 LS_KEYS.KEY_ATTRIBUTES
             );
+            const srpAttributes: SRPAttributes = getData(
+                LS_KEYS.SRP_ATTRIBUTES
+            );
             if (!user?.email) {
                 router.push(PAGES.ROOT);
             } else if (
                 keyAttributes?.encryptedKey &&
                 (user.token || user.encryptedToken)
+            ) {
+                router.push(PAGES.CREDENTIALS);
+            } else if (
+                srpAttributes?.srpUserID &&
+                !srpAttributes?.isEmailMFAEnabled
             ) {
                 router.push(PAGES.CREDENTIALS);
             } else {
