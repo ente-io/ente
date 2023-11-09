@@ -41,8 +41,8 @@ enum SectionType {
   // People section shows the files shared by other persons
   people,
   fileCaption,
-  fileTypesAndExtension,
   album,
+  fileTypesAndExtension,
 }
 
 extension SectionTypeExtensions on SectionType {
@@ -65,28 +65,6 @@ extension SectionTypeExtensions on SectionType {
         return S.of(context).fileTypes;
       case SectionType.fileCaption:
         return S.of(context).photoDescriptions;
-    }
-  }
-
-  // get int id to each section for ordering them
-  int get orderID {
-    switch (this) {
-      case SectionType.face:
-        return 0;
-      case SectionType.content:
-        return 1;
-      case SectionType.moment:
-        return 2;
-      case SectionType.location:
-        return 3;
-      case SectionType.people:
-        return 4;
-      case SectionType.album:
-        return 5;
-      case SectionType.fileTypesAndExtension:
-        return 6;
-      case SectionType.fileCaption:
-        return 7;
     }
   }
 
