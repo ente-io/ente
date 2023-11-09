@@ -18,7 +18,7 @@ export default function LoginPage({ appContext, router, appName }: PageProps) {
             router.push(PAGES.VERIFY);
         }
         setLoading(false);
-        appContext?.showNavBar?.(true);
+        appContext.showNavBar(true);
     }, []);
 
     const register = () => {
