@@ -232,9 +232,13 @@ class SearchExample extends StatelessWidget {
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(32),
                   child: searchResult.previewThumbnail() != null
-                      ? ThumbnailWidget(
-                          searchResult.previewThumbnail()!,
-                          shouldShowSyncStatus: false,
+                      ? Hero(
+                          tag: searchResult.heroTag() +
+                              (searchResult.previewThumbnail()?.tag ?? ""),
+                          child: ThumbnailWidget(
+                            searchResult.previewThumbnail()!,
+                            shouldShowSyncStatus: false,
+                          ),
                         )
                       : const NoThumbnailWidget(),
                 ),
