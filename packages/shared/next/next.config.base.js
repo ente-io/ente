@@ -67,6 +67,12 @@ module.exports = (phase) =>
                     },
                 ];
             },
+            webpack: (config, { isServer }) => {
+                if (!isServer) {
+                    config.resolve.fallback.fs = false;
+                }
+                return config;
+            },
         },
         {
             dryRun: phase === PHASE_DEVELOPMENT_SERVER || !IS_SENTRY_ENABLED,
