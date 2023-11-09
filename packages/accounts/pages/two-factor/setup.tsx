@@ -16,13 +16,14 @@ import { TwoFactorSetup } from '@ente/accounts/components/two-factor/setup';
 import LinkButton from '@ente/shared/components/LinkButton';
 import { PageProps } from '@ente/shared/apps/types';
 import { logError } from '@ente/shared/sentry';
+import { APPS } from '@ente/shared/apps/constants';
 
 export enum SetupMode {
     QR_CODE,
     MANUAL_CODE,
 }
 
-export default function SetupTwoFactor({ router }: PageProps) {
+export default function SetupTwoFactor({ router, appName }: PageProps) {
     const [twoFactorSecret, setTwoFactorSecret] =
         useState<TwoFactorSecret>(null);
 
@@ -55,7 +56,11 @@ export default function SetupTwoFactor({ router }: PageProps) {
             ...getData(LS_KEYS.USER),
             isTwoFactorEnabled: true,
         });
-        router.push(PAGES.GALLERY);
+        if (appName === APPS.AUTH) {
+            router.push(PAGES.AUTH);
+        } else {
+            router.push(PAGES.GALLERY);
+        }
     };
 
     return (

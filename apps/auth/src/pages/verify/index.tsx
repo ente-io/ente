@@ -11,7 +11,7 @@ export default function Verify() {
         <VerifyPage
             appContext={appContext}
             router={router}
-            appName={APPS.PHOTOS}
+            appName={APPS.AUTH}
         />
     );
 }

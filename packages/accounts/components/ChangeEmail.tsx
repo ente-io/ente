@@ -13,13 +13,14 @@ import FormPaperFooter from '@ente/shared/components/Form/FormPaper/Footer';
 import { sleep } from '@ente/shared/utils';
 import { Trans } from 'react-i18next';
 import { t } from 'i18next';
+import { APPS } from '@ente/shared/apps/constants';
 
 interface formValues {
     email: string;
     ott?: string;
 }
 
-function ChangeEmailForm() {
+function ChangeEmailForm({ appName }: { appName: string }) {
     const [loading, setLoading] = useState(false);
     const [ottInputVisible, setShowOttInputVisibility] = useState(false);
     const ottInputRef = useRef(null);
@@ -57,14 +58,20 @@ function ChangeEmailForm() {
             setLoading(false);
             setSuccess(true);
             await sleep(1000);
-            router.push(PAGES.GALLERY);
+            goToApp();
         } catch (e) {
             setLoading(false);
             setFieldError('ott', t('INCORRECT_CODE'));
         }
     };
 
-    const goToGallery = () => router.push(PAGES.GALLERY);
+    const goToApp = () => {
+        if (appName === APPS.AUTH) {
+            router.push(PAGES.AUTH);
+        } else {
+            router.push(PAGES.GALLERY);
+        }
+    };
 
     return (
         <Formik<formValues>
@@ -151,7 +158,7 @@ function ChangeEmailForm() {
                                 {t('CHANGE_EMAIL')}?
                             </LinkButton>
                         )}
-                        <LinkButton onClick={goToGallery}>
+                        <LinkButton onClick={goToApp}>
                             {t('GO_BACK')}
                         </LinkButton>
                     </FormPaperFooter>

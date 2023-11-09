@@ -11,7 +11,7 @@ export default function Recover() {
         <RecoverPage
             appContext={appContext}
             router={router}
-            appName={APPS.PHOTOS}
+            appName={APPS.AUTH}
         />
     );
 }

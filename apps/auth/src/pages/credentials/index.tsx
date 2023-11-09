@@ -11,7 +11,7 @@ export default function Credential() {
         <CredentialPage
             appContext={appContext}
             router={router}
-            appName={APPS.PHOTOS}
+            appName={APPS.AUTH}
         />
     );
 }

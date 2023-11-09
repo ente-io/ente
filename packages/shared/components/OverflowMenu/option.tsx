@@ -1,6 +1,6 @@
 import { MenuItem, ButtonProps, Typography, Box } from '@mui/material';
-import { FluidContainer } from 'components/Container';
-import { OverflowMenuContext } from 'contexts/overflowMenu';
+import { FluidContainer } from '@ente/shared/components/Container';
+import { OverflowMenuContext } from './context';
 import React, { useContext } from 'react';
 
 interface Iprops {

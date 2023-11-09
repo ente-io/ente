@@ -106,7 +106,7 @@ export default function App(props: EnteAppProps) {
         setupI18n().finally(() => setIsI18nReady(true));
         // set client package name in headers
         HTTPService.setHeaders({
-            'X-Client-Package': CLIENT_PACKAGE_NAMES.get(APPS.PHOTOS),
+            'X-Client-Package': CLIENT_PACKAGE_NAMES.get(APPS.AUTH),
         });
         // setup logging
         clearLogsIfLocalStorageLimitExceeded();
@@ -195,8 +195,8 @@ export default function App(props: EnteAppProps) {
             <Head>
                 <title>
                     {isI18nReady
-                        ? t('TITLE', { context: APPS.PHOTOS })
-                        : APP_TITLES.get(APPS.PHOTOS)}
+                        ? t('TITLE', { context: APPS.AUTH })
+                        : APP_TITLES.get(APPS.AUTH)}
                 </title>
                 <meta
                     name="viewport"
@@ -204,7 +204,7 @@ export default function App(props: EnteAppProps) {
                 />
             </Head>
 
-            <ThemeProvider theme={getTheme(themeColor, APPS.PHOTOS)}>
+            <ThemeProvider theme={getTheme(themeColor, APPS.AUTH)}>
                 <CssBaseline enableColorScheme />
                 {showNavbar && <AppNavbar isMobile={isMobile} />}
                 <MessageContainer>

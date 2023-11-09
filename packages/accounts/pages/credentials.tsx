@@ -90,7 +90,11 @@ export default function Credentials({
                 }
             }
             if (key) {
-                router.push(PAGES.GALLERY);
+                if (appName === APPS.AUTH) {
+                    router.push(PAGES.AUTH);
+                } else {
+                    router.push(PAGES.GALLERY);
+                }
                 return;
             }
             const kekEncryptedAttributes: B64EncryptionResult = getKey(

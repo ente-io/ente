@@ -22,6 +22,7 @@ import { sendOtt } from '@ente/accounts/api/user';
 import InMemoryStore, { MS_KEYS } from '@ente/shared/storage/InMemoryStore';
 import { PageProps } from '@ente/shared/apps/types';
 import { logError } from '@ente/shared/sentry';
+import { APPS } from '@ente/shared/apps/constants';
 const bip39 = require('bip39');
 // mobile client library only supports english.
 bip39.setDefaultWordlist('english');
@@ -47,7 +48,11 @@ export default function Recover({ appContext, router, appName }: PageProps) {
         if (!keyAttributes) {
             router.push(PAGES.GENERATE);
         } else if (key) {
-            router.push(PAGES.GALLERY);
+            if (appName === APPS.AUTH) {
+                router.push(PAGES.AUTH);
+            } else {
+                router.push(PAGES.GALLERY);
+            }
         } else {
             setKeyAttributes(keyAttributes);
         }

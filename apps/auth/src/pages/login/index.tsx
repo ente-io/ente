@@ -11,7 +11,7 @@ export default function Login() {
         <LoginPage
             appContext={appContext}
             router={router}
-            appName={APPS.PHOTOS}
+            appName={APPS.AUTH}
         />
     );
 }

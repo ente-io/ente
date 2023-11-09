@@ -1,11 +1,12 @@
 import { HttpStatusCode } from 'axios';
-import HTTPService from 'services/HTTPService';
+import HTTPService from '@ente/shared/network/HTTPService';
 import { AuthEntity, AuthKey } from 'types/authenticator/api';
 import { Code } from 'types/authenticator/code';
-import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
-import { getEndpoint } from 'utils/common/apiUtil';
-import { getActualKey, getToken } from 'utils/common/key';
-import { ApiError, CustomError } from 'utils/error';
+import ComlinkCryptoWorker from '@ente/shared/crypto';
+import { getEndpoint } from '@ente/shared/network/api';
+import { getActualKey } from '@ente/shared/user';
+import { getToken } from '@ente/shared/storage/localStorage/helpers';
+import { ApiError, CustomError } from '@ente/shared/error';
 import { logError } from '@ente/shared/sentry';
 
 const ENDPOINT = getEndpoint();
