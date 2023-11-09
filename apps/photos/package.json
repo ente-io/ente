@@ -7,10 +7,7 @@
         "albums": "next dev -p 3002",
         "auth": "next dev -p 3004",
         "lint": "next lint",
-        "build": "next build",
-        "export": "next export",
-        "build-analyze": "ANALYZE=true next build",
-        "start": "next start"
+        "build": "next build"
     },
     "dependencies": {
         "@date-io/date-fns": "^2.14.0",

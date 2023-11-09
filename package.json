@@ -14,9 +14,6 @@
         "lint": "turbo run lint",
         "albums": "turbo run albums",
         "auth": "turbo run auth",
-        "export": "turbo run export",
-        "build-analyze": "ANALYZE=true next build",
-        "start": "turbo run start",
         "prepare": "husky install"
     },
     "dependencies": {
@@ -41,9 +38,6 @@
         "prettier": "2.3.2",
         "turbo": "^1.10.3",
         "typescript": "^5.1.3"
-    },
-    "standard": {
-        "parser": "babel-eslint"
     },
     "lint-staged": {
         "apps/**/*.{js,jsx,ts,tsx}": [
