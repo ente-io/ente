@@ -71,37 +71,48 @@ class _SearchSectionAllPageState extends State<SearchSectionAllPage> {
           ),
         ),
       ),
-      body: FutureBuilder(
-        future: sectionData,
-        builder: (context, snapshot) {
-          if (snapshot.hasData) {
-            final sectionResults = snapshot.data;
-            return Column(
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 16),
+            child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Padding(
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 4, horizontal: 16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      TitleBarTitleWidget(
-                        title: widget.sectionType.sectionTitle(context),
-                      ),
-                      Text(sectionResults!.length.toString()),
-                    ],
-                  ),
+                TitleBarTitleWidget(
+                  title: widget.sectionType.sectionTitle(context),
                 ),
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      vertical: 20,
-                      horizontal: 16,
-                    ),
-                    child: ListView.separated(
+                FutureBuilder(
+                  future: sectionData,
+                  builder: (context, snapshot) {
+                    if (snapshot.hasData) {
+                      final sectionResults = snapshot.data!;
+                      return Text(sectionResults.length.toString());
+                    } else {
+                      return const SizedBox.shrink();
+                    }
+                  },
+                ),
+              ],
+            ),
+          ),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                vertical: 20,
+                horizontal: 16,
+              ),
+              child: FutureBuilder(
+                future: sectionData,
+                builder: (context, snapshot) {
+                  if (snapshot.hasData) {
+                    final sectionResults = snapshot.data!;
+                    return ListView.separated(
                       itemBuilder: (context, index) {
                         if (sectionResults.length == index) {
-                          return SearchableItemPlaceholder(widget.sectionType);
+                          return SearchableItemPlaceholder(
+                            widget.sectionType,
+                          );
                         }
                         if (sectionResults[index] is AlbumSearchResult) {
                           final albumSectionResult =
@@ -127,7 +138,9 @@ class _SearchSectionAllPageState extends State<SearchSectionAllPage> {
                             },
                           );
                         }
-                        return SearchableItemWidget(sectionResults[index]);
+                        return SearchableItemWidget(
+                          sectionResults[index],
+                        );
                       },
                       separatorBuilder: (context, index) {
                         return const SizedBox(height: 10);
@@ -140,15 +153,15 @@ class _SearchSectionAllPageState extends State<SearchSectionAllPage> {
                       //is open and the widget is out of view.
                       cacheExtent:
                           widget.sectionType == SectionType.album ? 400 : null,
-                    ),
-                  ),
-                ),
-              ],
-            );
-          } else {
-            return const EnteLoadingWidget();
-          }
-        },
+                    );
+                  } else {
+                    return const EnteLoadingWidget();
+                  }
+                },
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
