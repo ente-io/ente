@@ -81,7 +81,7 @@ function SetPasswordForm(props: SetPasswordFormProps) {
                     </Typography>
 
                     <Input
-                        hidden
+                        sx={{ display: 'none' }}
                         name="email"
                         id="email"
                         autoComplete="username"
