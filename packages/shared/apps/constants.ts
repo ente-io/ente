@@ -1,6 +1,4 @@
-// import { PAGES } from 'constants/pages';
-// import { runningInBrowser } from 'utils/common';
-// import { getAlbumsURL, getAuthURL } from 'utils/common/apiUtil';
+import { AUTH_PAGES, PHOTOS_PAGES } from '../constants/pages';
 
 export enum APPS {
     PHOTOS = 'PHOTOS',
@@ -24,4 +22,10 @@ export const APP_TITLES = new Map([
     [APPS.ALBUMS, 'Ente Albums'],
     [APPS.PHOTOS, 'Ente Photos'],
     [APPS.AUTH, 'Ente Auth'],
+]);
+
+export const APP_HOMES = new Map([
+    [APPS.ALBUMS, '/'],
+    [APPS.PHOTOS, PHOTOS_PAGES.GALLERY],
+    [APPS.AUTH, AUTH_PAGES.AUTH],
 ]);

@@ -22,7 +22,7 @@ import { sendOtt } from '@ente/accounts/api/user';
 import InMemoryStore, { MS_KEYS } from '@ente/shared/storage/InMemoryStore';
 import { PageProps } from '@ente/shared/apps/types';
 import { logError } from '@ente/shared/sentry';
-import { APPS } from '@ente/shared/apps/constants';
+import { APP_HOMES } from '@ente/shared/apps/constants';
 const bip39 = require('bip39');
 // mobile client library only supports english.
 bip39.setDefaultWordlist('english');
@@ -31,7 +31,6 @@ export default function Recover({ appContext, router, appName }: PageProps) {
     const [keyAttributes, setKeyAttributes] = useState<KeyAttributes>();
 
     useEffect(() => {
-        router.prefetch(PAGES.GALLERY);
         const user: User = getData(LS_KEYS.USER);
         const keyAttributes: KeyAttributes = getData(LS_KEYS.KEY_ATTRIBUTES);
         const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
@@ -48,11 +47,7 @@ export default function Recover({ appContext, router, appName }: PageProps) {
         if (!keyAttributes) {
             router.push(PAGES.GENERATE);
         } else if (key) {
-            if (appName === APPS.AUTH) {
-                router.push(PAGES.AUTH);
-            } else {
-                router.push(PAGES.GALLERY);
-            }
+            router.push(APP_HOMES.get(appName));
         } else {
             setKeyAttributes(keyAttributes);
         }

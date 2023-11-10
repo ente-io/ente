@@ -50,7 +50,7 @@ import { B64EncryptionResult } from '@ente/shared/crypto/types';
 import { CustomError } from '@ente/shared/error';
 import InMemoryStore, { MS_KEYS } from '@ente/shared/storage/InMemoryStore';
 import { PageProps } from '@ente/shared/apps/types';
-import { APPS } from '@ente/shared/apps/constants';
+import { APP_HOMES } from '@ente/shared/apps/constants';
 import { logError } from '@ente/shared/sentry';
 import ElectronAPIs from '@ente/shared/electron';
 
@@ -64,13 +64,6 @@ export default function Credentials({
     const [user, setUser] = useState<User>();
 
     useEffect(() => {
-        if (appName === APPS.AUTH) {
-            router.prefetch(PAGES.AUTH);
-        } else if (appName === APPS.PHOTOS) {
-            router.prefetch(PAGES.GALLERY);
-        } else {
-            router.prefetch(PAGES.SHARED_ALBUMS);
-        }
         const main = async () => {
             const user: User = getData(LS_KEYS.USER);
             if (!user?.email) {
@@ -90,11 +83,7 @@ export default function Credentials({
                 }
             }
             if (key) {
-                if (appName === APPS.AUTH) {
-                    router.push(PAGES.AUTH);
-                } else {
-                    router.push(PAGES.GALLERY);
-                }
+                router.push(APP_HOMES.get(appName));
                 return;
             }
             const kekEncryptedAttributes: B64EncryptionResult = getKey(
@@ -236,11 +225,7 @@ export default function Credentials({
             }
             const redirectURL = InMemoryStore.get(MS_KEYS.REDIRECT_URL);
             InMemoryStore.delete(MS_KEYS.REDIRECT_URL);
-            if (appName === APPS.AUTH) {
-                router.push(PAGES.AUTH);
-            } else {
-                router.push(redirectURL ?? PAGES.GALLERY);
-            }
+            router.push(APP_HOMES.get(redirectURL ?? appName));
         } catch (e) {
             logError(e, 'useMasterPassword failed');
         }

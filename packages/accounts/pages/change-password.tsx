@@ -28,7 +28,7 @@ import FormPaper from '@ente/shared/components/Form/FormPaper';
 import FormPaperFooter from '@ente/shared/components/Form/FormPaper/Footer';
 import FormPaperTitle from '@ente/shared/components/Form/FormPaper/Title';
 import ComlinkCryptoWorker from '@ente/shared/crypto';
-import { APPS } from '@ente/shared/apps/constants';
+import { APP_HOMES } from '@ente/shared/apps/constants';
 import {
     convertBufferToBase64,
     convertBase64ToBuffer,
@@ -121,11 +121,7 @@ export default function ChangePassword({ appName, router }: PageProps) {
 
     const redirectToAppHome = () => {
         setData(LS_KEYS.SHOW_BACK_BUTTON, { value: true });
-        if (appName === APPS.AUTH) {
-            router.push(PAGES.AUTH);
-        } else {
-            router.push(PAGES.GALLERY);
-        }
+        router.push(APP_HOMES.get(appName));
     };
 
     return (

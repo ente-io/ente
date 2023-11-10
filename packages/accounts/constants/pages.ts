@@ -11,7 +11,5 @@ export enum PAGES {
     TWO_FACTOR_VERIFY = '/two-factor/verify',
     TWO_FACTOR_RECOVER = '/two-factor/recover',
     VERIFY = '/verify',
-    GALLERY = '/gallery',
-    AUTH = '/auth',
     SHARED_ALBUMS = '/shared-albums',
 }

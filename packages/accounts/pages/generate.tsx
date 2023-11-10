@@ -25,7 +25,7 @@ import { logError } from '@ente/shared/sentry';
 import { KeyAttributes, User } from '@ente/shared/user/types';
 import FormPaper from '@ente/shared/components/Form/FormPaper';
 import FormTitle from '@ente/shared/components/Form/FormPaper/Title';
-import { APPS } from '@ente/shared/apps/constants';
+import { APP_HOMES } from '@ente/shared/apps/constants';
 import FormPaperFooter from '@ente/shared/components/Form/FormPaper/Footer';
 import LinkButton from '@ente/shared/components/LinkButton';
 import { PageProps } from '@ente/shared/apps/types';
@@ -40,8 +40,6 @@ export default function Generate({ router, appContext, appName }: PageProps) {
             const keyAttributes: KeyAttributes = getData(
                 LS_KEYS.ORIGINAL_KEY_ATTRIBUTES
             );
-            router.prefetch(PAGES.GALLERY);
-            router.prefetch(PAGES.CREDENTIALS);
             const user: User = getData(LS_KEYS.USER);
             setUser(user);
             if (!user?.token) {
@@ -51,11 +49,7 @@ export default function Generate({ router, appContext, appName }: PageProps) {
                     setRecoveryModalView(true);
                     setLoading(false);
                 } else {
-                    if (appName === APPS.AUTH) {
-                        router.push(PAGES.AUTH);
-                    } else {
-                        router.push(PAGES.GALLERY);
-                    }
+                    router.push(APP_HOMES.get(appName));
                 }
             } else if (keyAttributes?.encryptedKey) {
                 router.push(PAGES.CREDENTIALS);
@@ -100,11 +94,7 @@ export default function Generate({ router, appContext, appName }: PageProps) {
                     show={recoverModalView}
                     onHide={() => {
                         setRecoveryModalView(false);
-                        if (appName === APPS.AUTH) {
-                            router.push(PAGES.AUTH);
-                        } else {
-                            router.push(PAGES.GALLERY);
-                        }
+                        router.push(APP_HOMES.get(appName));
                     }}
                     somethingWentWrong={() => null}
                 />

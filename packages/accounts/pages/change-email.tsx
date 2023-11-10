@@ -9,7 +9,7 @@ import FormPaper from '@ente/shared/components/Form/FormPaper';
 import FormPaperTitle from '@ente/shared/components/Form/FormPaper/Title';
 import { PageProps } from '@ente/shared/apps/types';
 
-function ChangeEmailPage({ router, appName }: PageProps) {
+function ChangeEmailPage({ router, appName, appContext }: PageProps) {
     useEffect(() => {
         const user = getData(LS_KEYS.USER);
         if (!user?.token) {
@@ -21,7 +21,11 @@ function ChangeEmailPage({ router, appName }: PageProps) {
         <VerticallyCentered>
             <FormPaper>
                 <FormPaperTitle>{t('CHANGE_EMAIL')}</FormPaperTitle>
-                <ChangeEmailForm appName={appName} />
+                <ChangeEmailForm
+                    router={router}
+                    appName={appName}
+                    appContext={appContext}
+                />
             </FormPaper>
         </VerticallyCentered>
     );
