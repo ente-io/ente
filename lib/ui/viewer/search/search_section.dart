@@ -229,19 +229,18 @@ class SearchExample extends StatelessWidget {
               SizedBox(
                 width: 64,
                 height: 64,
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(32),
-                  child: searchResult.previewThumbnail() != null
-                      ? Hero(
-                          tag: searchResult.heroTag() +
-                              (searchResult.previewThumbnail()?.tag ?? ""),
+                child: searchResult.previewThumbnail() != null
+                    ? Hero(
+                        tag: searchResult.heroTag() +
+                            (searchResult.previewThumbnail()?.tag ?? ""),
+                        child: ClipOval(
                           child: ThumbnailWidget(
                             searchResult.previewThumbnail()!,
                             shouldShowSyncStatus: false,
                           ),
-                        )
-                      : const NoThumbnailWidget(),
-                ),
+                        ),
+                      )
+                    : const NoThumbnailWidget(),
               ),
               const SizedBox(
                 height: 10,
