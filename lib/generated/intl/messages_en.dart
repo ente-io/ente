@@ -221,8 +221,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "addLocationButton": MessageLookupByLibrary.simpleMessage("Add"),
         "addMore": MessageLookupByLibrary.simpleMessage("Add more"),
         "addOnPageSubtitle":
-            MessageLookupByLibrary.simpleMessage("Break up of add on storage"),
-        "addOns": MessageLookupByLibrary.simpleMessage("Add ons"),
+            MessageLookupByLibrary.simpleMessage("Details of add-ons"),
+        "addOns": MessageLookupByLibrary.simpleMessage("Add-ons"),
         "addPhotos": MessageLookupByLibrary.simpleMessage("Add photos"),
         "addSelected": MessageLookupByLibrary.simpleMessage("Add selected"),
         "addToAlbum": MessageLookupByLibrary.simpleMessage("Add to album"),
@@ -1346,7 +1346,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "videoSmallCase": MessageLookupByLibrary.simpleMessage("video"),
         "viewActiveSessions":
             MessageLookupByLibrary.simpleMessage("View active sessions"),
-        "viewAddOnButton": MessageLookupByLibrary.simpleMessage("View Add-ons"),
+        "viewAddOnButton": MessageLookupByLibrary.simpleMessage("View add-ons"),
         "viewAll": MessageLookupByLibrary.simpleMessage("View all"),
         "viewAllExifData":
             MessageLookupByLibrary.simpleMessage("View all EXIF data"),
