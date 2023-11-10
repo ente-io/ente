@@ -49,7 +49,7 @@ class SearchResultPage extends StatelessWidget {
       },
       tagPrefix: searchResult.heroTag(),
       selectedFiles: _selectedFiles,
-      initialFiles: const [],
+      initialFiles: [searchResult.resultFiles().first],
     );
     return Scaffold(
       appBar: PreferredSize(
