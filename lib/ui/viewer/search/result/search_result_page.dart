@@ -13,6 +13,7 @@ import 'package:photos/ui/viewer/gallery/gallery_app_bar_widget.dart';
 
 class SearchResultPage extends StatelessWidget {
   final SearchResult searchResult;
+  final String tagPrefix;
 
   final _selectedFiles = SelectedFiles();
   static const GalleryType appBarType = GalleryType.searchResults;
@@ -20,6 +21,7 @@ class SearchResultPage extends StatelessWidget {
 
   SearchResultPage(
     this.searchResult, {
+    this.tagPrefix = "",
     Key? key,
   }) : super(key: key);
 
@@ -47,7 +49,7 @@ class SearchResultPage extends StatelessWidget {
         EventType.deletedFromRemote,
         EventType.deletedFromEverywhere,
       },
-      tagPrefix: searchResult.heroTag(),
+      tagPrefix: tagPrefix + searchResult.heroTag(),
       selectedFiles: _selectedFiles,
       initialFiles: [searchResult.resultFiles().first],
     );

@@ -22,7 +22,12 @@ class SearchableItemWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final heroTagPrefix = searchResult.heroTag();
+    //The "searchable_item" tag is to remove hero animation between section
+    //examples and searchableItems in 'view all'. Animation should exist between
+    //searchableItems and SearchResultPages, so passing the extra prefix to
+    //SearchResultPage
+    const additionalPrefix = "searchable_item";
+    final heroTagPrefix = additionalPrefix + searchResult.heroTag();
     final textTheme = getEnteTextTheme(context);
     final colorScheme = getEnteColorScheme(context);
 
@@ -34,7 +39,10 @@ class SearchableItemWidget extends StatelessWidget {
         } else {
           routeToPage(
             context,
-            SearchResultPage(searchResult),
+            SearchResultPage(
+              searchResult,
+              tagPrefix: additionalPrefix,
+            ),
           );
         }
       },
