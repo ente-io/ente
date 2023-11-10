@@ -113,14 +113,16 @@ class _ZoomableImageState extends State<ZoomableImage>
         ? null
         : (d) => {
               if (!_isZooming)
-                if (d.delta.dy > dragSensitivity)
-                  {
-                    {Navigator.of(context).pop()},
-                  }
-                else if (d.delta.dy < (dragSensitivity * -1))
-                  {
-                    showDetailsSheet(context, widget.photo),
-                  },
+                {
+                  if (d.delta.dy > dragSensitivity)
+                    {
+                      {Navigator.of(context).pop()},
+                    }
+                  else if (d.delta.dy < (dragSensitivity * -1))
+                    {
+                      showDetailsSheet(context, widget.photo),
+                    },
+                },
             };
     return GestureDetector(
       onVerticalDragUpdate: verticalDragCallback,
