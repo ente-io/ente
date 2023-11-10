@@ -16,6 +16,7 @@ import "package:photos/models/file/extensions/file_props.dart";
 import 'package:photos/models/file/file.dart';
 import "package:photos/models/metadata/file_magic.dart";
 import "package:photos/services/file_magic_service.dart";
+import "package:photos/ui/actions/file/file_actions.dart";
 import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/utils/file_util.dart';
 import 'package:photos/utils/image_util.dart';
@@ -111,8 +112,17 @@ class _ZoomableImageState extends State<ZoomableImage>
     final GestureDragUpdateCallback? verticalDragCallback = _isZooming
         ? null
         : (d) => {
-              if (!_isZooming && d.delta.dy > dragSensitivity)
-                {Navigator.of(context).pop()},
+              if (!_isZooming)
+                {
+                  if (d.delta.dy > dragSensitivity)
+                    {
+                      {Navigator.of(context).pop()},
+                    }
+                  else if (d.delta.dy < (dragSensitivity * -1))
+                    {
+                      showDetailsSheet(context, widget.photo),
+                    },
+                },
             };
     return GestureDetector(
       onVerticalDragUpdate: verticalDragCallback,

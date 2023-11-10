@@ -164,7 +164,6 @@ class _DetailPageState extends State<DetailPage> {
   }
 
   Widget _buildPageView(BuildContext context) {
-    final bottomPadding = MediaQuery.of(context).padding.bottom;
     return PageView.builder(
       itemBuilder: (context, index) {
         final file = _files![index];
