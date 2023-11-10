@@ -9,15 +9,10 @@ import { getData, LS_KEYS } from '@ente/shared/storage/localStorage';
 import HTTPService from '@ente/shared/network/HTTPService';
 import Head from 'next/head';
 import LoadingBar from 'react-top-loading-bar';
-import DialogBox from '@ente/shared/components/DialogBox';
 import DialogBoxV2 from '@ente/shared/components/DialogBoxV2';
 import { ThemeProvider } from '@mui/material/styles';
 import { MessageContainer } from '@ente/shared/components/MessageContainer';
 import { CssBaseline, useMediaQuery } from '@mui/material';
-import {
-    SetDialogBoxAttributes,
-    DialogBoxAttributes,
-} from '@ente/shared/components/DialogBox/types';
 import {
     DialogBoxAttributesV2,
     SetDialogBoxAttributesV2,
@@ -47,14 +42,6 @@ type AppContextType = {
     showNavBar: (show: boolean) => void;
     startLoading: () => void;
     finishLoading: () => void;
-    closeMessageDialog: () => void;
-    setDialogMessage: SetDialogBoxAttributes;
-    isFolderSyncRunning: boolean;
-    setIsFolderSyncRunning: (isRunning: boolean) => void;
-    watchFolderView: boolean;
-    setWatchFolderView: (isOpen: boolean) => void;
-    watchFolderFiles: FileList;
-    setWatchFolderFiles: (files: FileList) => void;
     isMobile: boolean;
     themeColor: THEME_COLOR;
     setThemeColor: SetTheme;
@@ -82,15 +69,9 @@ export default function App(props: EnteAppProps) {
     const [showNavbar, setShowNavBar] = useState(false);
     const isLoadingBarRunning = useRef(false);
     const loadingBar = useRef(null);
-    const [dialogMessage, setDialogMessage] = useState<DialogBoxAttributes>();
     const [dialogBoxAttributeV2, setDialogBoxAttributesV2] =
         useState<DialogBoxAttributesV2>();
-    useState<DialogBoxAttributes>(null);
-    const [messageDialogView, setMessageDialogView] = useState(false);
     const [dialogBoxV2View, setDialogBoxV2View] = useState(false);
-    const [isFolderSyncRunning, setIsFolderSyncRunning] = useState(false);
-    const [watchFolderView, setWatchFolderView] = useState(false);
-    const [watchFolderFiles, setWatchFolderFiles] = useState<FileList>(null);
     const isMobile = useMediaQuery('(max-width:428px)');
     const [themeColor, setThemeColor] = useLocalState(
         LS_KEYS.THEME,
@@ -149,10 +130,6 @@ export default function App(props: EnteAppProps) {
     }, []);
 
     useEffect(() => {
-        setMessageDialogView(true);
-    }, [dialogMessage]);
-
-    useEffect(() => {
         setDialogBoxV2View(true);
     }, [dialogBoxAttributeV2]);
 
@@ -169,11 +146,10 @@ export default function App(props: EnteAppProps) {
         }, 100);
     };
 
-    const closeMessageDialog = () => setMessageDialogView(false);
     const closeDialogBoxV2 = () => setDialogBoxV2View(false);
 
     const somethingWentWrong = () =>
-        setDialogMessage({
+        setDialogBoxAttributesV2({
             title: t('ERROR'),
             close: { variant: 'critical' },
             content: t('UNKNOWN_ERROR'),
@@ -202,13 +178,6 @@ export default function App(props: EnteAppProps) {
 
                 <LoadingBar color="#51cd7c" ref={loadingBar} />
 
-                <DialogBox
-                    sx={{ zIndex: 1600 }}
-                    size="xs"
-                    open={messageDialogView}
-                    onClose={closeMessageDialog}
-                    attributes={dialogMessage}
-                />
                 <DialogBoxV2
                     sx={{ zIndex: 1600 }}
                     open={dialogBoxV2View}
@@ -221,14 +190,6 @@ export default function App(props: EnteAppProps) {
                         showNavBar,
                         startLoading,
                         finishLoading,
-                        closeMessageDialog,
-                        setDialogMessage,
-                        isFolderSyncRunning,
-                        setIsFolderSyncRunning,
-                        watchFolderView,
-                        setWatchFolderView,
-                        watchFolderFiles,
-                        setWatchFolderFiles,
                         isMobile,
                         themeColor,
                         setThemeColor,
