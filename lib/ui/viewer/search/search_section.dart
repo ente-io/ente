@@ -241,7 +241,11 @@ class SearchExample extends StatelessWidget {
                           ),
                         ),
                       )
-                    : const NoThumbnailWidget(),
+                    : const ClipOval(
+                        child: NoThumbnailWidget(
+                          addBorder: false,
+                        ),
+                      ),
               ),
               const SizedBox(
                 height: 10,

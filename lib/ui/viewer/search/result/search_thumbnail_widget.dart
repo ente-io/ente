@@ -26,7 +26,9 @@ class SearchThumbnailWidget extends StatelessWidget {
               ? ThumbnailWidget(
                   file!,
                 )
-              : const NoThumbnailWidget(),
+              : const NoThumbnailWidget(
+                  addBorder: false,
+                ),
         ),
       ),
     );
