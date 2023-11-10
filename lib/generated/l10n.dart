@@ -7745,30 +7745,30 @@ class S {
     );
   }
 
-  /// `View Add-ons`
+  /// `View add-ons`
   String get viewAddOnButton {
     return Intl.message(
-      'View Add-ons',
+      'View add-ons',
       name: 'viewAddOnButton',
       desc: '',
       args: [],
     );
   }
 
-  /// `Add ons`
+  /// `Add-ons`
   String get addOns {
     return Intl.message(
-      'Add ons',
+      'Add-ons',
       name: 'addOns',
       desc: '',
       args: [],
     );
   }
 
-  /// `Break up of add on storage`
+  /// `Details of add-ons`
   String get addOnPageSubtitle {
     return Intl.message(
-      'Break up of add on storage',
+      'Details of add-ons',
       name: 'addOnPageSubtitle',
       desc: '',
       args: [],

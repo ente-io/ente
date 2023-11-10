@@ -187,6 +187,8 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m59(count) =>
       "${Intl.plural(count, zero: '', one: '1 giorno', other: '${count} giorni')}";
 
+  static String m64(endDate) => "Valido fino al ${endDate}";
+
   static String m60(email) => "Verifica ${email}";
 
   static String m61(email) =>
@@ -220,6 +222,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "addLocation": MessageLookupByLibrary.simpleMessage("Aggiungi luogo"),
         "addLocationButton": MessageLookupByLibrary.simpleMessage("Aggiungi"),
         "addMore": MessageLookupByLibrary.simpleMessage("Aggiungi altri"),
+        "addOnPageSubtitle": MessageLookupByLibrary.simpleMessage(
+            "Dettagli dei componenti aggiuntivi"),
+        "addOns": MessageLookupByLibrary.simpleMessage("Componenti aggiuntivi"),
         "addPhotos": MessageLookupByLibrary.simpleMessage("Aggiungi foto"),
         "addSelected":
             MessageLookupByLibrary.simpleMessage("Aggiungi selezionate"),
@@ -712,6 +717,10 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Concedi il permesso"),
         "groupNearbyPhotos": MessageLookupByLibrary.simpleMessage(
             "Raggruppa foto nelle vicinanze"),
+        "hearUsExplanation": MessageLookupByLibrary.simpleMessage(
+            "Non teniamo traccia del numero di installazioni dell\'app. Sarebbe utile se ci dicesse dove ci ha trovato!"),
+        "hearUsWhereTitle": MessageLookupByLibrary.simpleMessage(
+            "Come hai sentito parlare di Ente? (opzionale)"),
         "hidden": MessageLookupByLibrary.simpleMessage("Nascosti"),
         "hide": MessageLookupByLibrary.simpleMessage("Nascondi"),
         "hiding": MessageLookupByLibrary.simpleMessage("Nascondendo..."),
@@ -1378,6 +1387,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "useSelectedPhoto":
             MessageLookupByLibrary.simpleMessage("Usa la foto selezionata"),
         "usedSpace": MessageLookupByLibrary.simpleMessage("Spazio utilizzato"),
+        "validTill": m64,
         "verificationFailedPleaseTryAgain":
             MessageLookupByLibrary.simpleMessage(
                 "Verifica fallita, per favore prova di nuovo"),
@@ -1396,6 +1406,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "videoSmallCase": MessageLookupByLibrary.simpleMessage("video"),
         "viewActiveSessions":
             MessageLookupByLibrary.simpleMessage("Visualizza sessioni attive"),
+        "viewAddOnButton": MessageLookupByLibrary.simpleMessage(
+            "Visualizza componenti aggiuntivi"),
         "viewAll": MessageLookupByLibrary.simpleMessage("Visualizza tutte"),
         "viewAllExifData":
             MessageLookupByLibrary.simpleMessage("Mostra tutti i dati EXIF"),
