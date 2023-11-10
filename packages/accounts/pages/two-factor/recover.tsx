@@ -36,7 +36,6 @@ export default function Recover({ router, appContext }: PageProps) {
         useState(false);
 
     useEffect(() => {
-        router.prefetch(PAGES.GALLERY);
         const user = getData(LS_KEYS.USER);
         if (!user || !user.email || !user.twoFactorSessionID) {
             router.push(PAGES.ROOT);

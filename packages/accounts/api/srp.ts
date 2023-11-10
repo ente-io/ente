@@ -13,7 +13,6 @@ import {
     UpdateSRPAndKeysRequest,
     UpdateSRPAndKeysResponse,
 } from '@ente/accounts/types/srp';
-import { getToken } from '@ente/shared/storage/localStorage/helpers';
 import { ApiError, CustomError } from '@ente/shared/error';
 import { HttpStatusCode } from 'axios';
 import { logError } from '@ente/shared/sentry';
@@ -35,10 +34,10 @@ export const getSRPAttributes = async (
 };
 
 export const startSRPSetup = async (
+    token: string,
     setupSRPRequest: SetupSRPRequest
 ): Promise<SetupSRPResponse> => {
     try {
-        const token = getToken();
         const resp = await HTTPService.post(
             `${ENDPOINT}/users/srp/setup`,
             setupSRPRequest,
@@ -56,10 +55,10 @@ export const startSRPSetup = async (
 };
 
 export const completeSRPSetup = async (
+    token: string,
     completeSRPSetupRequest: CompleteSRPSetupRequest
 ) => {
     try {
-        const token = getToken();
         const resp = await HTTPService.post(
             `${ENDPOINT}/users/srp/complete`,
             completeSRPSetupRequest,

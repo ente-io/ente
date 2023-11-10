@@ -12,10 +12,11 @@ import { Input } from '@mui/material';
 import SingleInputForm, {
     SingleInputFormProps,
 } from '@ente/shared/components/SingleInputForm';
+import { APPS } from '@ente/shared/apps/constants';
 
 interface LoginProps {
     signUp: () => void;
-    appName: string;
+    appName: APPS;
 }
 
 export default function Login(props: LoginProps) {

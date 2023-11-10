@@ -31,6 +31,7 @@ import LinkButton from '@ente/shared/components/LinkButton';
 import { PageProps } from '@ente/shared/apps/types';
 
 export default function Generate({ router, appContext, appName }: PageProps) {
+    const [token, setToken] = useState<string>();
     const [user, setUser] = useState<User>();
     const [recoverModalView, setRecoveryModalView] = useState(false);
     const [loading, setLoading] = useState(true);
@@ -54,6 +55,7 @@ export default function Generate({ router, appContext, appName }: PageProps) {
             } else if (keyAttributes?.encryptedKey) {
                 router.push(PAGES.CREDENTIALS);
             } else {
+                setToken(user.token);
                 setLoading(false);
             }
         };
@@ -66,7 +68,7 @@ export default function Generate({ router, appContext, appName }: PageProps) {
             const { keyAttributes, masterKey, srpSetupAttributes } =
                 await generateKeyAndSRPAttributes(passphrase);
 
-            await putAttributes(keyAttributes);
+            await putAttributes(token, keyAttributes);
             await configureSRP(srpSetupAttributes);
             await generateAndSaveIntermediateKeyAttributes(
                 passphrase,

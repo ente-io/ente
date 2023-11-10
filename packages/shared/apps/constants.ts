@@ -29,3 +29,8 @@ export const APP_HOMES = new Map([
     [APPS.PHOTOS, PHOTOS_PAGES.GALLERY],
     [APPS.AUTH, AUTH_PAGES.AUTH],
 ]);
+
+export const OTT_CLIENTS = new Map([
+    [APPS.PHOTOS, 'web'],
+    [APPS.AUTH, 'totp'],
+]);

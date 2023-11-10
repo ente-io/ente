@@ -3,7 +3,7 @@ import { getEndpoint } from '@ente/shared/network/api';
 
 import { getToken } from '@ente/shared/storage/localStorage/helpers';
 import { KeyAttributes } from '@ente/shared/user/types';
-import { ApiError } from '@ente/shared/error';
+import { ApiError, CustomError } from '@ente/shared/error';
 import { HttpStatusCode } from 'axios';
 import {
     UserVerificationResponse,
@@ -14,22 +14,22 @@ import {
 } from '@ente/accounts/types/user';
 import { B64EncryptionResult } from '@ente/shared/crypto/types';
 import { logError } from '@ente/shared/sentry';
+import { APPS, OTT_CLIENTS } from '@ente/shared/apps/constants';
 
 const ENDPOINT = getEndpoint();
 
-export const sendOtt = (appName: string, email: string) => {
+export const sendOtt = (appName: APPS, email: string) => {
     return HTTPService.post(`${ENDPOINT}/users/ott`, {
         email,
-        client: appName,
+        client: OTT_CLIENTS.get(appName),
     });
 };
 
 export const verifyOtt = (email: string, ott: string) =>
     HTTPService.post(`${ENDPOINT}/users/verify-email`, { email, ott });
 
-export const putAttributes = async (keyAttributes: KeyAttributes) => {
-    const token = getToken();
-    await HTTPService.put(
+export const putAttributes = (token: string, keyAttributes: KeyAttributes) =>
+    HTTPService.put(
         `${ENDPOINT}/users/attributes`,
         { keyAttributes },
         undefined,
@@ -37,23 +37,24 @@ export const putAttributes = async (keyAttributes: KeyAttributes) => {
             'X-Auth-Token': token,
         }
     );
-};
 
 export const _logout = async () => {
-    // ignore if token missing can be triggered during sign up.
-    if (!getToken()) return true;
     try {
+        const token = getToken();
         await HTTPService.post(`${ENDPOINT}/users/logout`, null, undefined, {
-            'X-Auth-Token': getToken(),
+            'X-Auth-Token': token,
         });
-        return true;
     } catch (e) {
+        // ignore if token missing can be triggered during sign up.
+        if (e instanceof Error && e.message === CustomError.TOKEN_MISSING) {
+            return;
+        }
         // ignore if unauthorized, can be triggered during on token expiry.
-        if (
+        else if (
             e instanceof ApiError &&
             e.httpStatusCode === HttpStatusCode.Unauthorized
         ) {
-            return true;
+            return;
         }
         logError(e, '/users/logout failed');
         throw e;
@@ -88,9 +89,6 @@ export const removeTwoFactor = async (sessionID: string, secret: string) => {
 };
 
 export const changeEmail = async (email: string, ott: string) => {
-    if (!getToken()) {
-        return null;
-    }
     await HTTPService.post(
         `${ENDPOINT}/users/change-email`,
         {
@@ -105,9 +103,6 @@ export const changeEmail = async (email: string, ott: string) => {
 };
 
 export const sendOTTForEmailChange = async (email: string) => {
-    if (!getToken()) {
-        return null;
-    }
     await HTTPService.post(`${ENDPOINT}/users/ott`, {
         email,
         client: 'web',

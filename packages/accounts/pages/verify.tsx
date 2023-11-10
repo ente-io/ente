@@ -99,6 +99,7 @@ export default function VerifyPage({ appContext, router, appName }: PageProps) {
                 } else {
                     if (getData(LS_KEYS.ORIGINAL_KEY_ATTRIBUTES)) {
                         await putAttributes(
+                            token,
                             getData(LS_KEYS.ORIGINAL_KEY_ATTRIBUTES)
                         );
                     }

@@ -7,6 +7,8 @@ import isElectron from 'is-electron';
 import { getAppEnv } from '@ente/shared/apps/env';
 import { APP_ENV } from '@ente/shared/apps/constants';
 import { isDisableSentryFlagSet } from '@ente/shared/apps/env';
+import { ApiError } from '../error';
+import { HttpStatusCode } from 'axios';
 
 export async function getSentryUserID() {
     if (isElectron()) {
@@ -37,7 +39,10 @@ function makeID(length) {
 export function isErrorUnnecessaryForSentry(error: any) {
     if (error?.message?.includes('Network Error')) {
         return true;
-    } else if (error?.status === 401) {
+    } else if (
+        error instanceof ApiError &&
+        error.httpStatusCode === HttpStatusCode.Unauthorized
+    ) {
         return true;
     }
     return false;

@@ -1,7 +1,7 @@
 import { HttpStatusCode } from 'axios';
 import HTTPService from '@ente/shared/network/HTTPService';
-import { AuthEntity, AuthKey } from 'types/authenticator/api';
-import { Code } from 'types/authenticator/code';
+import { AuthEntity, AuthKey } from 'types/api';
+import { Code } from 'types/code';
 import ComlinkCryptoWorker from '@ente/shared/crypto';
 import { getEndpoint } from '@ente/shared/network/api';
 import { getActualKey } from '@ente/shared/user';

@@ -137,9 +137,6 @@ export default function Credentials({
     const getKeyAttributes: VerifyMasterPasswordFormProps['getKeyAttributes'] =
         async (kek: string) => {
             try {
-                if (!srpAttributes) {
-                    throw Error('SRP attributes are missing');
-                }
                 const cryptoWorker = await ComlinkCryptoWorker.getInstance();
                 const response = await loginViaSRP(srpAttributes, kek);
                 if (response.twoFactorSessionID) {
@@ -176,10 +173,7 @@ export default function Credentials({
                     return keyAttributes;
                 }
             } catch (e) {
-                if (
-                    e instanceof Error &&
-                    e.message !== CustomError.TWO_FACTOR_ENABLED
-                ) {
+                if (e.message !== CustomError.TWO_FACTOR_ENABLED) {
                     logError(e, 'getKeyAttributes failed');
                 }
                 throw e;

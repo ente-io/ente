@@ -91,7 +91,7 @@ export default function ChangePassword({ appName, router }: PageProps) {
 
         const srpA = convertBufferToBase64(srpClient.computeA());
 
-        const { setupID, srpB } = await startSRPSetup({
+        const { setupID, srpB } = await startSRPSetup(token, {
             srpUserID,
             srpSalt,
             srpVerifier,

@@ -16,6 +16,7 @@ import { generateLoginSubKey } from '@ente/shared/crypto/helpers';
 import { UserVerificationResponse } from '@ente/accounts/types/user';
 import { logError } from '@ente/shared/sentry';
 import { addLocalLog } from '@ente/shared/logging';
+import { getToken } from '@ente/shared/storage/localStorage/helpers';
 
 const SRP_PARAMS = SRP.params['4096'];
 
@@ -42,7 +43,8 @@ export const configureSRP = async ({
         const srpA = convertBufferToBase64(srpClient.computeA());
 
         addLocalLog(() => `srp a: ${srpA}`);
-        const { setupID, srpB } = await startSRPSetup({
+        const token = getToken();
+        const { setupID, srpB } = await startSRPSetup(token, {
             srpA,
             srpUserID,
             srpSalt,
@@ -53,7 +55,7 @@ export const configureSRP = async ({
 
         const srpM1 = convertBufferToBase64(srpClient.computeM1());
 
-        const { srpM2 } = await completeSRPSetup({
+        const { srpM2 } = await completeSRPSetup(token, {
             srpM1,
             setupID,
         });

@@ -8,7 +8,6 @@ import VerifyTwoFactor, {
 } from '@ente/accounts/components/two-factor/VerifyForm';
 import { encryptWithRecoveryKey } from '@ente/shared/crypto/helpers';
 import { setData, LS_KEYS, getData } from '@ente/shared/storage/localStorage';
-import { PAGES } from '@ente/accounts/constants/pages';
 import { TwoFactorSecret } from '@ente/accounts/types/user';
 import Card from '@mui/material/Card';
 import { Box, CardContent, Typography } from '@mui/material';
@@ -16,7 +15,7 @@ import { TwoFactorSetup } from '@ente/accounts/components/two-factor/setup';
 import LinkButton from '@ente/shared/components/LinkButton';
 import { PageProps } from '@ente/shared/apps/types';
 import { logError } from '@ente/shared/sentry';
-import { APPS } from '@ente/shared/apps/constants';
+import { APP_HOMES } from '@ente/shared/apps/constants';
 
 export enum SetupMode {
     QR_CODE,
@@ -36,7 +35,6 @@ export default function SetupTwoFactor({ router, appName }: PageProps) {
                 const twoFactorSecret = await setupTwoFactor();
                 setTwoFactorSecret(twoFactorSecret);
             } catch (e) {
-                console.log(e);
                 logError(e, 'failed to get two factor setup code');
             }
         };
@@ -56,11 +54,7 @@ export default function SetupTwoFactor({ router, appName }: PageProps) {
             ...getData(LS_KEYS.USER),
             isTwoFactorEnabled: true,
         });
-        if (appName === APPS.AUTH) {
-            router.push(PAGES.AUTH);
-        } else {
-            router.push(PAGES.GALLERY);
-        }
+        router.push(APP_HOMES.get(appName));
     };
 
     return (

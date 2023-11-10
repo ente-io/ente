@@ -3,11 +3,13 @@ import { _logout } from '../api/user';
 import { PAGES } from '../constants/pages';
 import { clearKeys } from '@ente/shared/storage/sessionStorage';
 import { clearData } from '@ente/shared/storage/localStorage';
+import { deleteAllCache } from '@ente/shared/storage/cacheStorage/helpers';
 import { logError } from '@ente/shared/sentry';
 import { clearFiles } from '@ente/shared/storage/localForage/helpers';
 import router from 'next/router';
-import ElectronAPIs from '@ente/shared/electron';
 import isElectron from 'is-electron';
+import ElectronAPIs from '@ente/shared/electron';
+import { Events, eventBus } from '@ente/shared/events';
 
 export const logoutUser = async () => {
     try {
@@ -15,7 +17,6 @@ export const logoutUser = async () => {
             await _logout();
         } catch (e) {
             // ignore
-            logError(e, 'clear InMemoryStore failed');
         }
         try {
             InMemoryStore.clear();
@@ -33,11 +34,11 @@ export const logoutUser = async () => {
         } catch (e) {
             logError(e, 'clearData failed');
         }
-        // try {
-        //     await deleteAllCache();
-        // } catch (e) {
-        //     logError(e, 'deleteAllCache failed');
-        // }
+        try {
+            await deleteAllCache();
+        } catch (e) {
+            logError(e, 'deleteAllCache failed');
+        }
         try {
             await clearFiles();
         } catch (e) {
@@ -50,11 +51,11 @@ export const logoutUser = async () => {
                 logError(e, 'clearElectronStore failed');
             }
         }
-        // try {
-        //     eventBus.emit(Events.LOGOUT);
-        // } catch (e) {
-        //     logError(e, 'Error in logout handlers');
-        // }
+        try {
+            eventBus.emit(Events.LOGOUT);
+        } catch (e) {
+            logError(e, 'Error in logout handlers');
+        }
         router.push(PAGES.ROOT);
     } catch (e) {
         logError(e, 'logoutUser failed');

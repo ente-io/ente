@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 import OTPDisplay from 'components/OTPDisplay';
-import { getAuthCodes } from 'services/authenticator/authenticatorService';
+import { getAuthCodes } from 'services';
 import { CustomError } from '@ente/shared/error';
 import { PHOTOS_PAGES as PAGES } from '@ente/shared/constants/pages';
 import { useRouter } from 'next/router';
