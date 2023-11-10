@@ -4,19 +4,27 @@ import { getSentryUserID } from '@ente/shared/sentry/utils';
 import { runningInBrowser } from '@ente/shared/platform';
 import { getHasOptedOutOfCrashReports } from '@ente/shared/storage/localStorage/helpers';
 import { getIsSentryEnabled } from '@ente/shared/sentry/utils';
-import { getAppEnv } from '@ente/shared/apps/env';
+import {
+    getAppEnv,
+    getSentryDSN,
+    getSentryRelease,
+} from '@ente/shared/apps/env';
 
-export const setupSentry = async () => {
+export const setupSentry = async (DEFAULT_SENTRY_DSN: string) => {
     const HAS_OPTED_OUT_OF_CRASH_REPORTING =
         runningInBrowser() && getHasOptedOutOfCrashReports();
 
     if (!HAS_OPTED_OUT_OF_CRASH_REPORTING) {
+        const SENTRY_DSN = getSentryDSN() ?? DEFAULT_SENTRY_DSN;
         const APP_ENV = getAppEnv();
         const IS_ENABLED = getIsSentryEnabled();
+        const SENTRY_RELEASE = getSentryRelease();
 
         Sentry.init({
+            dsn: SENTRY_DSN,
             enabled: IS_ENABLED,
             environment: APP_ENV,
+            release: SENTRY_RELEASE,
             attachStacktrace: true,
             autoSessionTracking: false,
             tunnel: getSentryTunnelURL(),

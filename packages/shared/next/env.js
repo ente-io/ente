@@ -12,6 +12,6 @@ module.exports.getAppEnv = () => {
     return process.env.NEXT_PUBLIC_APP_ENV ?? ENV_DEVELOPMENT;
 };
 
-module.exports.isEnableSentryFlagSet = () => {
-    return process.env.NEXT_PUBLIC_ENABLE_SENTRY === 'true';
+module.exports.isDisableSentryFlagSet = () => {
+    return process.env.NEXT_PUBLIC_DISABLE_SENTRY === 'true';
 };

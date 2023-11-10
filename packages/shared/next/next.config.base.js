@@ -46,6 +46,8 @@ module.exports = (phase) =>
                 SENTRY_RELEASE: GIT_SHA,
                 NEXT_PUBLIC_IS_TEST_APP: process.env.IS_TEST_RELEASE || 'false',
             },
+
+            // https://dev.to/marcinwosinek/how-to-add-resolve-fallback-to-webpack-5-in-nextjs-10-i6j
             webpack: (config, { isServer }) => {
                 if (!isServer) {
                     config.resolve.fallback.fs = false;
