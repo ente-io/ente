@@ -3658,12 +3658,12 @@ __metadata:
 
 "ffmpeg-wasm@file:./thirdparty/ffmpeg-wasm::locator=photos%40workspace%3Aapps%2Fphotos":
   version: 0.10.1
-  resolution: "ffmpeg-wasm@file:./thirdparty/ffmpeg-wasm#./thirdparty/ffmpeg-wasm::hash=5e960c&locator=photos%40workspace%3Aapps%2Fphotos"
+  resolution: "ffmpeg-wasm@file:./thirdparty/ffmpeg-wasm#./thirdparty/ffmpeg-wasm::hash=ac7315&locator=photos%40workspace%3Aapps%2Fphotos"
   dependencies:
     is-url: "npm:^1.2.4"
     node-fetch: "npm:^2.6.1"
     regenerator-runtime: "npm:^0.13.7"
-  checksum: 4df3d57c34bb44e891dc1354097e143f93bc96b051ca5ec4c51fc62e8b6792552ec6a1b848e893cef255906e78d82e91b3576f0bb696260be4eee8813ac54f81
+  checksum: f19a9797b1e66aec25ec8f26dbc433312538b3680dbb7558d9b583d708e2e4a8ffa4d6c65933672076b3dee77b29cea782556431d2674cd49cefdbf515808186
   languageName: node
   linkType: hard
 
@@ -6113,8 +6113,8 @@ __metadata:
 
 "photoswipe@file:./thirdparty/photoswipe::locator=photos%40workspace%3Aapps%2Fphotos":
   version: 4.1.6
-  resolution: "photoswipe@file:./thirdparty/photoswipe#./thirdparty/photoswipe::hash=af0d0c&locator=photos%40workspace%3Aapps%2Fphotos"
-  checksum: b1c0ed7ca9ed19787fcf4b54f59052b0f8941a80f07595d1157de4a969b33063bd20f974400ab19b64f4ae5f59066118ab01be2d23a8a419f240eabfb5b0d169
+  resolution: "photoswipe@file:./thirdparty/photoswipe#./thirdparty/photoswipe::hash=7ff708&locator=photos%40workspace%3Aapps%2Fphotos"
+  checksum: 5f264527c31b4e33cb3e52b65652730173dac5da4872deffea8499fa83ed182fa99be4cb4e4776b62caf34ddb22928541dc88f5749cb2e2b0a264d923a125715
   languageName: node
   linkType: hard
 
