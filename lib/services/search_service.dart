@@ -708,7 +708,11 @@ class SearchService {
                   ctx,
                   LocationScreenStateProvider(
                     entry.key,
-                    const LocationScreen(),
+                    LocationScreen(
+                      //SearchResult.heroTag()
+                      tagPrefix:
+                          "${ResultType.location.toString()}_${entry.key.item.name}",
+                    ),
                   ),
                 );
               },

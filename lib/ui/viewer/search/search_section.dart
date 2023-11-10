@@ -194,6 +194,8 @@ class SearchExample extends StatelessWidget {
     } else {
       width = 85.0 + ((textScaleFactor - 1.0) * 64);
     }
+    final heroTag =
+        searchResult.heroTag() + (searchResult.previewThumbnail()?.tag ?? "");
     return GestureDetector(
       onTap: () {
         RecentSearches().add(searchResult.name());
@@ -231,8 +233,7 @@ class SearchExample extends StatelessWidget {
                 height: 64,
                 child: searchResult.previewThumbnail() != null
                     ? Hero(
-                        tag: searchResult.heroTag() +
-                            (searchResult.previewThumbnail()?.tag ?? ""),
+                        tag: heroTag,
                         child: ClipOval(
                           child: ThumbnailWidget(
                             searchResult.previewThumbnail()!,
