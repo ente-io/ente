@@ -11,8 +11,6 @@ export default function LoginPage({ appContext, router, appName }: PageProps) {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        router.prefetch(PAGES.VERIFY);
-        router.prefetch(PAGES.SIGNUP);
         const user = getData(LS_KEYS.USER);
         if (user?.email) {
             router.push(PAGES.VERIFY);

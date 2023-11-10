@@ -34,9 +34,6 @@ export default function VerifyPage({ appContext, router, appName }: PageProps) {
 
     useEffect(() => {
         const main = async () => {
-            router.prefetch(PAGES.TWO_FACTOR_VERIFY);
-            router.prefetch(PAGES.CREDENTIALS);
-            router.prefetch(PAGES.GENERATE);
             const user: User = getData(LS_KEYS.USER);
             const keyAttributes: KeyAttributes = getData(
                 LS_KEYS.KEY_ATTRIBUTES

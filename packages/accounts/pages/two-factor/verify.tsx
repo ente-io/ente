@@ -24,7 +24,6 @@ export default function TwoFactorVerify({ router }: PageProps) {
 
     useEffect(() => {
         const main = async () => {
-            router.prefetch(PAGES.CREDENTIALS);
             const user: User = getData(LS_KEYS.USER);
             if (!user?.email || !user.twoFactorSessionID) {
                 router.push(PAGES.ROOT);
