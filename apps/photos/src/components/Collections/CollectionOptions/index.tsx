@@ -17,7 +17,7 @@ import { GalleryContext } from 'pages/gallery';
 import { logError } from '@ente/shared/sentry';
 import { VISIBILITY_STATE } from 'types/magicMetadata';
 import { AppContext } from 'pages/_app';
-import OverflowMenu from 'components/OverflowMenu/menu';
+import OverflowMenu from '@ente/shared/components/OverflowMenu/menu';
 import {
     ALL_SECTION,
     CollectionSummaryType,

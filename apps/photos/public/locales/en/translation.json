@@ -210,7 +210,8 @@
         "FILE_NAME": "File name",
         "THING": "Content",
         "FILE_CAPTION": "Description",
-        "FILE_TYPE": "File type"
+        "FILE_TYPE": "File type",
+        "CLIP": "Magic"
     },
     "photos_count_zero": "No memories",
     "photos_count_one": "1 memory",
@@ -615,5 +616,9 @@
     "FLIP": "Flip",
     "ROTATION": "Rotation",
     "RESET": "Reset",
-    "PHOTO_EDITOR": "Photo Editor"
+    "PHOTO_EDITOR": "Photo Editor",
+    "FASTER_UPLOAD":"Faster uploads",
+    "FASTER_UPLOAD_DESCRIPTION":"Route uploads through nearby servers",
+    "STATUS": "Status",
+    "INDEXED_ITEMS": "Indexed items"
 }

@@ -108,6 +108,7 @@ export const isTokenValid = async (token: string) => {
             if (!resp.data['hasSetKeys']) {
                 try {
                     await putAttributes(
+                        token,
                         getData(LS_KEYS.ORIGINAL_KEY_ATTRIBUTES)
                     );
                 } catch (e) {

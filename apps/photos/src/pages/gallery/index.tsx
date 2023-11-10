@@ -121,6 +121,8 @@ import { syncEntities } from 'services/entityService';
 import { constructUserIDToEmailMap } from 'services/collectionService';
 import { getLocalFamilyData } from 'utils/user/family';
 import InMemoryStore, { MS_KEYS } from 'services/InMemoryStore';
+import { syncEmbeddings } from 'services/embeddingService';
+import { ClipService } from 'services/clipService';
 
 export const DeadCenter = styled('div')`
     flex: 1;
@@ -146,6 +148,7 @@ const defaultGalleryContext: GalleryContextType = {
     userIDToEmailMap: null,
     emailList: null,
     openHiddenSection: () => null,
+    isClipSearchResult: null,
 };
 
 export const GalleryContext = createContext<GalleryContextType>(
@@ -281,6 +284,9 @@ export default function Gallery() {
         });
     };
 
+    const [isClipSearchResult, setIsClipSearchResult] =
+        useState<boolean>(false);
+
     useEffect(() => {
         appContext.showNavBar(true);
         const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
@@ -323,6 +329,7 @@ export default function Gallery() {
             setHiddenFiles(hiddenFiles);
             setCollections(normalCollections);
             setHiddenCollections(hiddenCollections);
+            void ClipService.setupOnFileUploadListener();
             await syncWithRemote(true);
             setIsFirstLoad(false);
             setJustSignedUp(false);
@@ -338,6 +345,7 @@ export default function Gallery() {
         return () => {
             clearInterval(syncInterval.current);
             ElectronService.registerForegroundEventListener(() => {});
+            ClipService.removeOnFileUploadListener();
         };
     }, []);
 
@@ -469,9 +477,8 @@ export default function Gallery() {
                 ...files.filter((file) => deletedFileIds?.has(file.id)),
             ]);
         }
-        const sortAsc = activeCollection?.pubMagicMetadata?.data?.asc ?? false;
 
-        return getUniqueFiles(
+        const filteredFiles = getUniqueFiles(
             (isInHiddenSection ? hiddenFiles : files).filter((item) => {
                 if (deletedFileIds?.has(item.id)) {
                     return false;
@@ -530,6 +537,9 @@ export default function Gallery() {
                     ) {
                         return false;
                     }
+                    if (search?.clip && search.clip.has(item.id) === false) {
+                        return false;
+                    }
                     return true;
                 }
 
@@ -573,9 +583,19 @@ export default function Gallery() {
                 } else {
                     return false;
                 }
-            }),
-            sortAsc
+            })
         );
+        if (search?.clip) {
+            return filteredFiles.sort((a, b) => {
+                return search.clip.get(b.id) - search.clip.get(a.id);
+            });
+        }
+        const sortAsc = activeCollection?.pubMagicMetadata?.data?.asc ?? false;
+        if (sortAsc) {
+            return sortFiles(filteredFiles, true);
+        } else {
+            return filteredFiles;
+        }
     }, [
         files,
         trashedFiles,
@@ -692,6 +712,10 @@ export default function Gallery() {
             await syncTrash(collections, setTrashedFiles);
             await syncEntities();
             await syncMapEnabled();
+            if (await ClipService.isClipSupported()) {
+                await syncEmbeddings();
+                void ClipService.scheduleImageEmbeddingExtraction();
+            }
         } catch (e) {
             switch (e.message) {
                 case CustomError.SESSION_EXPIRED:
@@ -895,6 +919,7 @@ export default function Gallery() {
         } else {
             setSearch(newSearch);
         }
+        setIsClipSearchResult(!!newSearch?.clip);
         if (!newSearch?.collection) {
             setIsInSearchMode(!!newSearch);
             setSetSearchResultSummary(summary);
@@ -944,6 +969,7 @@ export default function Gallery() {
                 user,
                 emailList,
                 openHiddenSection,
+                isClipSearchResult,
             }}>
             <FullScreenDropZone
                 getDragAndDropRootProps={getDragAndDropRootProps}>

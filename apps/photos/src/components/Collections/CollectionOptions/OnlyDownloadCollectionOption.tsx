@@ -1,4 +1,4 @@
-import { OverflowMenuOption } from 'components/OverflowMenu/option';
+import { OverflowMenuOption } from '@ente/shared/components/OverflowMenu/option';
 import React from 'react';
 
 import FileDownloadOutlinedIcon from '@mui/icons-material/FileDownloadOutlined';

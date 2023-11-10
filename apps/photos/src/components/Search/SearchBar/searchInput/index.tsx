@@ -12,7 +12,13 @@ import {
     getAutoCompleteSuggestions,
     getDefaultOptions,
 } from 'services/searchService';
-import { DateValue, Search, SearchOption, SuggestionType } from 'types/search';
+import {
+    ClipSearchScores,
+    DateValue,
+    Search,
+    SearchOption,
+    SuggestionType,
+} from 'types/search';
 import { ValueContainerWithIcon } from './valueContainerWithIcon';
 import { SelectStyles } from '../../../../styles/search';
 import AsyncSelect from 'react-select/async';
@@ -122,6 +128,8 @@ export default function SearchInput(props: Iprops) {
             case SuggestionType.FILE_TYPE:
                 search = { fileType: selectedOption.value as FILE_TYPE };
                 break;
+            case SuggestionType.CLIP:
+                search = { clip: selectedOption.value as ClipSearchScores };
         }
         props.updateSearch(search, {
             optionName: selectedOption.label,

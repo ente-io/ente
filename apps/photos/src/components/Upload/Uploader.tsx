@@ -172,7 +172,8 @@ export default function Uploader(props: Props) {
                 setUploadProgressView,
             },
             props.setFiles,
-            publicCollectionGalleryContext
+            publicCollectionGalleryContext,
+            appContext.isCFProxyDisabled
         );
         if (uploadManager.isUploadRunning()) {
             setUploadProgressView(true);
@@ -198,6 +199,7 @@ export default function Uploader(props: Props) {
         publicCollectionGalleryContext.accessedThroughSharedURL,
         publicCollectionGalleryContext.token,
         publicCollectionGalleryContext.passwordToken,
+        appContext.isCFProxyDisabled,
     ]);
 
     // this handles the change of selectorFiles changes on web when user selects

@@ -45,6 +45,7 @@ export type GalleryContextType = {
     userIDToEmailMap: Map<number, string>;
     emailList: string[];
     openHiddenSection: (callback?: () => void) => void;
+    isClipSearchResult: boolean;
 };
 
 export enum CollectionSelectorIntent {

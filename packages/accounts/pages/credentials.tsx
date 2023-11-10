@@ -138,9 +138,15 @@ export default function Credentials({
         async (kek: string) => {
             try {
                 const cryptoWorker = await ComlinkCryptoWorker.getInstance();
-                const response = await loginViaSRP(srpAttributes, kek);
-                if (response.twoFactorSessionID) {
-                    const { twoFactorSessionID } = response;
+                const {
+                    keyAttributes,
+                    encryptedToken,
+                    token,
+                    id,
+                    twoFactorSessionID,
+                } = await loginViaSRP(srpAttributes, kek);
+                setIsFirstLogin(true);
+                if (twoFactorSessionID) {
                     const sessionKeyAttributes =
                         await cryptoWorker.generateKeyAndEncryptToB64(kek);
                     setKey(
@@ -153,12 +159,9 @@ export default function Credentials({
                         twoFactorSessionID,
                         isTwoFactorEnabled: true,
                     });
-                    setIsFirstLogin(true);
                     router.push(PAGES.TWO_FACTOR_VERIFY);
                     throw Error(CustomError.TWO_FACTOR_ENABLED);
                 } else {
-                    const { token, encryptedToken, id, keyAttributes } =
-                        response;
                     const user = getData(LS_KEYS.USER);
                     setData(LS_KEYS.USER, {
                         ...user,
@@ -167,9 +170,7 @@ export default function Credentials({
                         id,
                         isTwoFactorEnabled: false,
                     });
-                    if (keyAttributes) {
-                        setData(LS_KEYS.KEY_ATTRIBUTES, keyAttributes);
-                    }
+                    setData(LS_KEYS.KEY_ATTRIBUTES, keyAttributes);
                     return keyAttributes;
                 }
             } catch (e) {

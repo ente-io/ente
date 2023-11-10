@@ -626,7 +626,7 @@ export async function getFileFromURL(fileURL: string) {
     return fileFile;
 }
 
-export function getUniqueFiles(files: EnteFile[], sortAsc = false) {
+export function getUniqueFiles(files: EnteFile[]) {
     const idSet = new Set<number>();
     const uniqueFiles = files.filter((file) => {
         if (!idSet.has(file.id)) {
@@ -637,11 +637,6 @@ export function getUniqueFiles(files: EnteFile[], sortAsc = false) {
         }
     });
 
-    if (sortAsc === true) {
-        return uniqueFiles.sort(
-            (a, b) => a.metadata.creationTime - b.metadata.creationTime
-        );
-    }
     return uniqueFiles;
 }
 
@@ -828,11 +823,20 @@ export function getLatestVersionFiles(files: EnteFile[]) {
     );
 }
 
-export function getPersonalFiles(files: EnteFile[], user: User) {
+export function getPersonalFiles(
+    files: EnteFile[],
+    user: User,
+    collectionIdToOwnerIDMap?: Map<number, number>
+) {
     if (!user?.id) {
         throw Error('user missing');
     }
-    return files.filter((file) => file.ownerID === user.id);
+    return files.filter(
+        (file) =>
+            file.ownerID === user.id &&
+            (!collectionIdToOwnerIDMap ||
+                collectionIdToOwnerIDMap.get(file.collectionID) === user.id)
+    );
 }
 
 export function getIDBasedSortedFiles(files: EnteFile[]) {

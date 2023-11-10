@@ -55,8 +55,8 @@ import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
 import { UploadTypeSelectorIntent } from 'types/gallery';
 import FileDownloadOutlinedIcon from '@mui/icons-material/FileDownloadOutlined';
 import MoreHoriz from '@mui/icons-material/MoreHoriz';
-import OverflowMenu from 'components/OverflowMenu/menu';
-import { OverflowMenuOption } from 'components/OverflowMenu/option';
+import OverflowMenu from '@ente/shared/components/OverflowMenu/menu';
+import { OverflowMenuOption } from '@ente/shared/components/OverflowMenu/option';
 import { ENTE_WEBSITE_LINK } from 'constants/urls';
 
 const defaultThumbStore = new Map();

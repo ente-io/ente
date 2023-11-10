@@ -210,7 +210,8 @@
         "FILE_NAME": "Bestandsnaam",
         "THING": "Inhoud",
         "FILE_CAPTION": "Omschrijving",
-        "FILE_TYPE": "Bestandstype"
+        "FILE_TYPE": "Bestandstype",
+        "CLIP": "Magische"
     },
     "photos_count_zero": "Geen herinneringen",
     "photos_count_one": "1 herinnering",
@@ -615,5 +616,9 @@
     "FLIP": "Omdraaien",
     "ROTATION": "Draaiing",
     "RESET": "Herstellen",
-    "PHOTO_EDITOR": "Fotobewerker"
+    "PHOTO_EDITOR": "Fotobewerker",
+    "FASTER_UPLOAD": "Snellere uploads",
+    "FASTER_UPLOAD_DESCRIPTION": "Uploaden door nabije servers",
+    "STATUS": "Status",
+    "INDEXED_ITEMS": "Geïndexeerde bestanden"
 }
