@@ -1,5 +1,5 @@
 import { getEndpoint } from 'utils/common/apiUtil';
-import localForage from 'utils/storage/localForage';
+import localForage from '@ente/shared/storage/localForage';
 import { Collection, CollectionPublicMagicMetadata } from 'types/collection';
 import HTTPService from './HTTPService';
 import { logError } from '@ente/shared/sentry';
@@ -12,7 +12,7 @@ import {
 } from 'types/publicCollection';
 import { REPORT_REASON } from 'constants/publicCollection';
 import { CustomError, parseSharingErrorCodes } from 'utils/error';
-import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
+import ComlinkCryptoWorker from '@ente/shared/crypto';
 
 const ENDPOINT = getEndpoint();
 const PUBLIC_COLLECTION_FILES_TABLE = 'public-collection-files';

@@ -1,5 +1,5 @@
 import { getEndpoint } from 'utils/common/apiUtil';
-import localForage from 'utils/storage/localForage';
+import localForage from '@ente/shared/storage/localForage';
 
 import { getToken } from 'utils/common/key';
 import { Collection } from 'types/collection';
@@ -22,7 +22,7 @@ import {
 import { SetFiles } from 'types/gallery';
 import { BulkUpdateMagicMetadataRequest } from 'types/magicMetadata';
 import { addLogLine } from '@ente/shared/logging';
-import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
+import ComlinkCryptoWorker from '@ente/shared/crypto';
 import {
     getCollectionLastSyncTime,
     setCollectionLastSyncTime,

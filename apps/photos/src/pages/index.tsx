@@ -4,19 +4,19 @@ import { styled, Button, Typography, TypographyProps } from '@mui/material';
 import { AppContext } from './_app';
 import Login from '@ente/accounts/components/Login';
 import { useRouter } from 'next/router';
-import { getData, LS_KEYS } from 'utils/storage/localStorage';
+import { getData, LS_KEYS } from '@ente/shared/storage/localStorage';
 import SignUp from '@ente/accounts/components/SignUp';
 import EnteSpinner from '@ente/shared/components/EnteSpinner';
 import { t } from 'i18next';
 
-import localForage from 'utils/storage/localForage';
+import localForage from '@ente/shared/storage/localForage';
 import { logError } from '@ente/shared/sentry';
 import { PHOTOS_PAGES as PAGES } from '@ente/shared/constants/pages';
 import { EnteLogo } from '@ente/shared/components/EnteLogo';
 import isElectron from 'is-electron';
-import safeStorageService from 'services/electron/safeStorage';
+import ElectronAPIs from '@ente/shared/electron';
 import { saveKeyInSessionStore } from 'utils/crypto';
-import { getKey, SESSION_KEYS } from 'utils/storage/sessionStorage';
+import { getKey, SESSION_KEYS } from '@ente/shared/storage/sessionStorage';
 import { getAlbumsURL } from 'utils/common/apiUtil';
 import { Trans } from 'react-i18next';
 import { APPS } from '@ente/shared/apps/constants';
@@ -132,7 +132,7 @@ export default function LandingPage() {
         const user = getData(LS_KEYS.USER);
         let key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
         if (!key && isElectron()) {
-            key = await safeStorageService.getEncryptionKey();
+            key = await ElectronAPIs.getEncryptionKey();
             if (key) {
                 await saveKeyInSessionStore(
                     SESSION_KEYS.ENCRYPTION_KEY,

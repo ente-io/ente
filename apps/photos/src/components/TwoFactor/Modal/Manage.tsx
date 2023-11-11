@@ -5,7 +5,7 @@ import { AppContext } from 'pages/_app';
 import { PHOTOS_PAGES as PAGES } from '@ente/shared/constants/pages';
 import router from 'next/router';
 import { disableTwoFactor } from '@ente/accounts/api/user';
-import { setData, LS_KEYS, getData } from 'utils/storage/localStorage';
+import { setData, LS_KEYS, getData } from '@ente/shared/storage/localStorage';
 import { Button, Grid } from '@mui/material';
 
 interface Iprops {

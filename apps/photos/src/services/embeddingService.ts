@@ -4,11 +4,11 @@ import {
     GetEmbeddingDiffResponse,
     PutEmbeddingRequest,
 } from 'types/embedding';
-import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
+import ComlinkCryptoWorker from '@ente/shared/crypto';
 import { getEndpoint } from 'utils/common/apiUtil';
 import { addLogLine } from '@ente/shared/logging';
 import { logError } from '@ente/shared/sentry';
-import localForage from 'utils/storage/localForage';
+import localForage from '@ente/shared/storage/localForage';
 import { getAllLocalFiles } from './fileService';
 import HTTPService from './HTTPService';
 import { getToken } from 'utils/common/key';

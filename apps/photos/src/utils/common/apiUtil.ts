@@ -1,4 +1,4 @@
-import { getData, LS_KEYS } from 'utils/storage/localStorage';
+import { getData, LS_KEYS } from '@ente/shared/storage/localStorage';
 
 export const getEndpoint = () => {
     let endpoint = getData(LS_KEYS.API_ENDPOINT);

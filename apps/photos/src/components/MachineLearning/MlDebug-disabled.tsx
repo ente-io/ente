@@ -1,7 +1,7 @@
 export {};
 
 // import React, { useState, useEffect, useContext, ChangeEvent } from 'react';
-// import { getData, LS_KEYS } from 'utils/storage/localStorage';
+// import { getData, LS_KEYS } from '@ente/shared/storage/localStorage';
 // import { useRouter } from 'next/router';
 // import { ComlinkWorker } from 'utils/comlink';
 // import { AppContext } from 'pages/_app';

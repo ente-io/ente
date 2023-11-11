@@ -9,7 +9,7 @@ import { getMLSyncJobConfig } from 'utils/machineLearning/config';
 import { logError } from '@ente/shared/sentry';
 import mlIDbStorage from 'utils/storage/mlIDbStorage';
 import { MLSyncJobResult, MLSyncJob } from './mlSyncJob';
-import { ComlinkWorker } from 'utils/comlink/comlinkWorker';
+import { ComlinkWorker } from '@ente/shared/worker/comlinkWorker';
 import { DedicatedMLWorker } from 'worker/ml.worker';
 import { getDedicatedMLWorker } from 'utils/comlink/ComlinkMLWorker';
 import { addLogLine } from '@ente/shared/logging';

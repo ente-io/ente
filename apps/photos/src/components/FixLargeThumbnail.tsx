@@ -6,7 +6,7 @@ import {
     getLargeThumbnailFiles,
     replaceThumbnail,
 } from 'services/migrateThumbnailService';
-import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
+import { getData, LS_KEYS, setData } from '@ente/shared/storage/localStorage';
 import { logError } from '@ente/shared/sentry';
 import { t } from 'i18next';
 

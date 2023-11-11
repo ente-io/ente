@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 
-import { getData, LS_KEYS } from 'utils/storage/localStorage';
+import { getData, LS_KEYS } from '@ente/shared/storage/localStorage';
 import { AppContext } from 'pages/_app';
 import { KeyAttributes, User } from 'types/user';
 import VerifyMasterPasswordForm, {

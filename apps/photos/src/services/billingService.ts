@@ -1,6 +1,10 @@
 import { getEndpoint, getPaymentsURL } from 'utils/common/apiUtil';
 import { getToken } from 'utils/common/key';
-import { setData, LS_KEYS, removeData } from 'utils/storage/localStorage';
+import {
+    setData,
+    LS_KEYS,
+    removeData,
+} from '@ente/shared/storage/localStorage';
 import HTTPService from './HTTPService';
 import { logError } from '@ente/shared/sentry';
 import { getPaymentToken } from './userService';

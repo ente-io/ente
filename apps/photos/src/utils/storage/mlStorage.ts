@@ -1,3 +1,4 @@
+import localForage from 'localforage';
 import { EnteFile } from 'types/file';
 import {
     Face,
@@ -5,7 +6,6 @@ import {
     MLIndex,
     MLSyncContext,
 } from 'types/machineLearning';
-import localForage from './localForage';
 
 export const mlFilesStore = localForage.createInstance({
     driver: localForage.INDEXEDDB,

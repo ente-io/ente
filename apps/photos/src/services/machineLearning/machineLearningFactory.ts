@@ -30,8 +30,8 @@ import mobileFaceNetEmbeddingService from './mobileFaceNetEmbeddingService';
 import dbscanClusteringService from './dbscanClusteringService';
 import ssdMobileNetV2Service from './ssdMobileNetV2Service';
 import imageSceneService from './imageSceneService';
-import { getDedicatedCryptoWorker } from 'utils/comlink/ComlinkCryptoWorker';
-import { ComlinkWorker } from 'utils/comlink/comlinkWorker';
+import { getDedicatedCryptoWorker } from '@ente/shared/crypto';
+import { ComlinkWorker } from '@ente/shared/worker/comlinkWorker';
 import { DedicatedCryptoWorker } from 'worker/crypto.worker';
 import { addLogLine } from '@ente/shared/logging';
 

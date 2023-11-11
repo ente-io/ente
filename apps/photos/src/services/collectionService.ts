@@ -1,6 +1,6 @@
 import { getEndpoint } from 'utils/common/apiUtil';
-import { getData, LS_KEYS } from 'utils/storage/localStorage';
-import localForage from 'utils/storage/localForage';
+import { getData, LS_KEYS } from '@ente/shared/storage/localStorage';
+import localForage from '@ente/shared/storage/localForage';
 
 import { getActualKey, getToken } from 'utils/common/key';
 import { getPublicKey } from './userService';
@@ -64,7 +64,7 @@ import {
     isDefaultHiddenCollection,
     getHiddenCollections,
 } from 'utils/collection';
-import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
+import ComlinkCryptoWorker from '@ente/shared/crypto';
 import { getLocalFiles } from './fileService';
 import { REQUEST_BATCH_SIZE } from 'constants/api';
 import { batch } from 'utils/common';

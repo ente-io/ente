@@ -3,7 +3,7 @@ import { CustomError, errorWithContext } from 'utils/error';
 import { logError } from '@ente/shared/sentry';
 import { BLACK_THUMBNAIL_BASE64 } from 'constants/upload';
 import * as FFmpegService from 'services/ffmpeg/ffmpegService';
-import ElectronImageProcessorService from 'services/electron/imageProcessor';
+import ElectronAPIs from '@ente/shared/electron';
 import { convertBytesToHumanReadable } from 'utils/file/size';
 import { ElectronFile, FileTypeInfo } from 'types/upload';
 import { getUint8ArrayView } from '../readerService';
@@ -11,6 +11,7 @@ import { addLogLine } from '@ente/shared/logging';
 import { getFileNameSize } from '@ente/shared/logging/web';
 import HeicConversionService from 'services/heicConversionService';
 import { isFileHEIC } from 'utils/file';
+import isElectron from 'is-electron';
 
 const MAX_THUMBNAIL_DIMENSION = 720;
 const MIN_COMPRESSION_PERCENTAGE_SIZE_DIFF = 10;
@@ -83,9 +84,9 @@ async function generateImageThumbnail(
     file: File | ElectronFile,
     fileTypeInfo: FileTypeInfo
 ) {
-    if (ElectronImageProcessorService.generateImageThumbnailAPIExists()) {
+    if (isElectron()) {
         try {
-            return await ElectronImageProcessorService.generateImageThumbnail(
+            return await ElectronAPIs.generateImageThumbnail(
                 file,
                 MAX_THUMBNAIL_DIMENSION,
                 MAX_THUMBNAIL_SIZE

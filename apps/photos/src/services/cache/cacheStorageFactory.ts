@@ -1,5 +1,5 @@
 import { LimitedCacheStorage } from 'types/cache/index';
-import { ElectronCacheStorage } from 'services/electron/cache';
+import ElectronAPIs from '@ente/shared/electron';
 import { runningInElectron, runningInWorker } from 'utils/common';
 import { WorkerElectronCacheStorageService } from 'services/workerElectronCache/service';
 
@@ -14,7 +14,14 @@ class cacheStorageFactory {
                 }
                 return this.workerElectronCacheStorageServiceInstance;
             } else {
-                return ElectronCacheStorage;
+                return {
+                    open(cacheName) {
+                        return ElectronAPIs.openDiskCache(cacheName);
+                    },
+                    delete(cacheName) {
+                        return ElectronAPIs.deleteDiskCache(cacheName);
+                    },
+                };
             }
         } else {
             return transformBrowserCacheStorageToLimitedCacheStorage(caches);

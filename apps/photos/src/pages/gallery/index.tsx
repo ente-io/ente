@@ -7,7 +7,11 @@ import {
     useState,
 } from 'react';
 import { useRouter } from 'next/router';
-import { clearKeys, getKey, SESSION_KEYS } from 'utils/storage/sessionStorage';
+import {
+    clearKeys,
+    getKey,
+    SESSION_KEYS,
+} from '@ente/shared/storage/sessionStorage';
 import { getLocalFiles, syncFiles } from 'services/fileService';
 import { styled, Typography } from '@mui/material';
 import {
@@ -32,7 +36,7 @@ import {
     justSignedUp,
     setIsFirstLogin,
     setJustSignedUp,
-} from 'utils/storage';
+} from '@ente/shared/storage/localStorage/helpers';
 import {
     isTokenValid,
     syncMapEnabled,
@@ -103,11 +107,11 @@ import { ITEM_TYPE, TimeStampListItem } from 'components/PhotoList';
 import UploadInputs from 'components/UploadSelectorInputs';
 import useFileInput from '@ente/shared/hooks/useFileInput';
 import { FamilyData, User } from 'types/user';
-import { getData, LS_KEYS } from 'utils/storage/localStorage';
+import { getData, LS_KEYS } from '@ente/shared/storage/localStorage';
 import { CenteredFlex } from 'components/Container';
 import { checkConnectivity } from 'utils/common';
 import { SYNC_INTERVAL_IN_MICROSECONDS } from 'constants/gallery';
-import ElectronService from 'services/electron/common';
+import ElectronAPIs from '@ente/shared/electron';
 import uploadManager from 'services/upload/uploadManager';
 import { getToken } from 'utils/common/key';
 import ExportModal from 'components/ExportModal';
@@ -337,14 +341,14 @@ export default function Gallery() {
             syncInterval.current = setInterval(() => {
                 syncWithRemote(false, true);
             }, SYNC_INTERVAL_IN_MICROSECONDS);
-            ElectronService.registerForegroundEventListener(() => {
+            ElectronAPIs.registerForegroundEventListener(() => {
                 syncWithRemote(false, true);
             });
         };
         main();
         return () => {
             clearInterval(syncInterval.current);
-            ElectronService.registerForegroundEventListener(() => {});
+            ElectronAPIs.registerForegroundEventListener(() => {});
             ClipService.removeOnFileUploadListener();
         };
     }, []);

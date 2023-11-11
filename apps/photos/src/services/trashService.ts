@@ -4,7 +4,7 @@ import { getEndpoint } from 'utils/common/apiUtil';
 import { getToken } from 'utils/common/key';
 import { decryptFile, sortTrashFiles } from 'utils/file';
 import { logError } from '@ente/shared/sentry';
-import localForage from 'utils/storage/localForage';
+import localForage from '@ente/shared/storage/localForage';
 import { getCollection } from './collectionService';
 
 import HTTPService from './HTTPService';

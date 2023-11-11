@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { getTwoFactorStatus } from 'services/userService';
 import { SetLoading } from 'types/gallery';
-import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
+import { getData, LS_KEYS, setData } from '@ente/shared/storage/localStorage';
 import { t } from 'i18next';
 
 import TwoFactorModalSetupSection from './Setup';

@@ -26,7 +26,7 @@ import {
 } from 'utils/file';
 import { addLocalLog, addLogLine } from '@ente/shared/logging';
 import { logError } from '@ente/shared/sentry';
-import { getData, LS_KEYS } from 'utils/storage/localStorage';
+import { getData, LS_KEYS } from '@ente/shared/storage/localStorage';
 import exportService from './index';
 import { Collection } from 'types/collection';
 import {

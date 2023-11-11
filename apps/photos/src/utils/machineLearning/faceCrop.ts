@@ -13,7 +13,7 @@ import {
 } from 'types/machineLearning';
 import { cropWithRotation, imageBitmapToBlob } from 'utils/image';
 import { addLogLine } from '@ente/shared/logging';
-import { getBlobFromCache } from 'utils/storage/cache';
+import { getBlobFromCache } from '@ente/shared/storage/cacheStorage/helpers';
 import { enlargeBox } from '.';
 import { Box } from '../../../thirdparty/face-api/classes';
 import { getAlignedFaceBox } from './faceAlign';

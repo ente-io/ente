@@ -7,7 +7,7 @@ import { t } from 'i18next';
 import { addLogLine } from '@ente/shared/logging';
 import { getDebugLogs } from '@ente/shared/logging/web';
 import isElectron from 'is-electron';
-import ElectronService from 'services/electron/common';
+import ElectronAPIs from '@ente/shared/electron';
 import Typography from '@mui/material/Typography';
 import { isInternalUser } from 'utils/user';
 import { testUpload } from '../../../tests/upload.test';
@@ -24,7 +24,7 @@ export default function DebugSection() {
     useEffect(() => {
         const main = async () => {
             if (isElectron()) {
-                const appVersion = await ElectronService.getAppVersion();
+                const appVersion = await ElectronAPIs.getAppVersion();
                 setAppVersion(appVersion);
             }
         };
@@ -48,7 +48,7 @@ export default function DebugSection() {
     const downloadDebugLogs = () => {
         addLogLine('exporting logs');
         if (isElectron()) {
-            ElectronService.openLogDirectory();
+            ElectronAPIs.openLogDirectory();
         } else {
             const logs = getDebugLogs();
 

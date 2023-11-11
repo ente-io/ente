@@ -41,7 +41,7 @@ import { CustomError } from '@ente/shared/error';
 import { addLogLine } from '@ente/shared/logging';
 import { clearLogsIfLocalStorageLimitExceeded } from '@ente/shared/logging/web';
 import isElectron from 'is-electron';
-import ElectronUpdateService from 'services/electron/update';
+import ElectronAPIs from '@ente/shared/electron';
 import {
     getUpdateAvailableForDownloadMessage,
     getUpdateReadyToInstallMessage,
@@ -52,7 +52,6 @@ import {
     SetNotificationAttributes,
 } from 'types/Notification';
 import ArrowForward from '@mui/icons-material/ArrowForward';
-import { AppUpdateInfo } from 'types/electron';
 import { CacheProvider } from '@emotion/react';
 import {
     APP_TITLES,
@@ -76,6 +75,7 @@ import { User } from '@ente/shared/user/types';
 import { useLocalState } from '@ente/shared/hooks/useLocalState';
 import { PHOTOS_PAGES as PAGES } from '@ente/shared/constants/pages';
 import { getTheme } from '@ente/shared/themes';
+import { AppUpdateInfo } from '@ente/shared/electron/types';
 
 const redirectMap = new Map([
     [REDIRECTS.ROADMAP, getRoadmapRedirectURL],
@@ -193,7 +193,7 @@ export default function App(props: EnteAppProps) {
                     });
                 }
             };
-            ElectronUpdateService.registerUpdateEventListener(showUpdateDialog);
+            ElectronAPIs.registerUpdateEventListener(showUpdateDialog);
         }
     }, []);
 

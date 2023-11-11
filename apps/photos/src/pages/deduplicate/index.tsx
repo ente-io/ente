@@ -22,7 +22,7 @@ import Router from 'next/router';
 import DeduplicateOptions from 'components/pages/dedupe/SelectedFileOptions';
 import { PHOTOS_PAGES as PAGES } from '@ente/shared/constants/pages';
 import router from 'next/router';
-import { getKey, SESSION_KEYS } from 'utils/storage/sessionStorage';
+import { getKey, SESSION_KEYS } from '@ente/shared/storage/sessionStorage';
 import { styled } from '@mui/material';
 import { getLatestCollections } from 'services/collectionService';
 import EnteSpinner from '@ente/shared/components/EnteSpinner';

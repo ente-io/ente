@@ -31,13 +31,13 @@ import watchFolderService from 'services/watchFolder/watchFolderService';
 import { ProgressUpdater } from 'types/upload/ui';
 import uploadCancelService from './uploadCancelService';
 import { DedicatedCryptoWorker } from 'worker/crypto.worker';
-import { ComlinkWorker } from 'utils/comlink/comlinkWorker';
+import { ComlinkWorker } from '@ente/shared/worker/comlinkWorker';
 import { Remote } from 'comlink';
 import {
     getLocalPublicFiles,
     getPublicCollectionUID,
 } from 'services/publicCollectionService';
-import { getDedicatedCryptoWorker } from 'utils/comlink/ComlinkCryptoWorker';
+import { getDedicatedCryptoWorker } from '@ente/shared/crypto';
 import { getDisableCFUploadProxyFlag } from 'services/userService';
 
 const MAX_CONCURRENT_UPLOADS = 4;

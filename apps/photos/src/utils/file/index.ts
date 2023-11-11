@@ -13,7 +13,7 @@ import { getFileType } from 'services/typeDetectionService';
 import DownloadManager from 'services/downloadManager';
 import { logError } from '@ente/shared/sentry';
 import { User } from 'types/user';
-import { getData, LS_KEYS } from 'utils/storage/localStorage';
+import { getData, LS_KEYS } from '@ente/shared/storage/localStorage';
 import { updateFileCreationDateInEXIF } from 'services/upload/exifService';
 import {
     TYPE_JPEG,
@@ -33,7 +33,7 @@ import { isArchivedFile, updateMagicMetadata } from 'utils/magicMetadata';
 import { addLocalLog, addLogLine } from '@ente/shared/logging';
 import { CustomError } from 'utils/error';
 import { convertBytesToHumanReadable } from './size';
-import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
+import ComlinkCryptoWorker from '@ente/shared/crypto';
 import {
     deleteFromTrash,
     trashFiles,
@@ -41,13 +41,14 @@ import {
     updateFilePublicMagicMetadata,
 } from 'services/fileService';
 import isElectron from 'is-electron';
-import imageProcessor from 'services/electron/imageProcessor';
 import { isPlaybackPossible } from 'utils/photoFrame';
 import { FileTypeInfo } from 'types/upload';
 import { moveToHiddenCollection } from 'services/collectionService';
 
-import ElectronFSService from 'services/electron/fs';
+import ElectronFSService from '@ente/shared/electron';
 import { getFileExportPath, getUniqueFileExportName } from 'utils/export';
+import imageProcessor from 'services/imageProcessor';
+import ElectronAPIs from '@ente/shared/electron';
 
 const WAIT_TIME_IMAGE_CONVERSION = 30 * 1000;
 
@@ -712,7 +713,7 @@ export async function downloadFileDesktop(
             livePhoto.imageNameTitle
         );
         const imageStream = generateStreamFromArrayBuffer(livePhoto.image);
-        await ElectronFSService.saveMediaFile(
+        await ElectronAPIs.saveStreamToDisk(
             getFileExportPath(downloadPath, imageExportName),
             imageStream
         );
@@ -722,7 +723,7 @@ export async function downloadFileDesktop(
                 livePhoto.videoNameTitle
             );
             const videoStream = generateStreamFromArrayBuffer(livePhoto.video);
-            await ElectronFSService.saveMediaFile(
+            await ElectronAPIs.saveStreamToDisk(
                 getFileExportPath(downloadPath, videoExportName),
                 videoStream
             );
@@ -737,7 +738,7 @@ export async function downloadFileDesktop(
             downloadPath,
             file.metadata.title
         );
-        await ElectronFSService.saveMediaFile(
+        await ElectronAPIs.saveStreamToDisk(
             getFileExportPath(downloadPath, fileExportName),
             updatedFileStream
         );

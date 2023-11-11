@@ -4,7 +4,7 @@ import {
     isDevDeployment,
 } from 'utils/common/apiUtil';
 import { getData, LS_KEYS } from '@ente/shared/storage/localStorage';
-import localForage from 'utils/storage/localForage';
+import localForage from '@ente/shared/storage/localForage';
 import { getToken } from 'utils/common/key';
 import HTTPService from './HTTPService';
 import { getRecoveryKey } from 'utils/crypto';
@@ -18,7 +18,7 @@ import {
 import { ApiError } from 'utils/error';
 import { getLocalFamilyData, isPartOfFamily } from 'utils/user/family';
 import { AxiosResponse, HttpStatusCode } from 'axios';
-import { setLocalMapEnabled } from 'utils/storage';
+import { setLocalMapEnabled } from '@ente/shared/storage/localStorage/helpers';
 import { putAttributes } from '@ente/accounts/api/user';
 import { logoutUser } from '@ente/accounts/services/user';
 

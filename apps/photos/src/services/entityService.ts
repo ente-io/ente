@@ -1,9 +1,9 @@
 import { getToken } from 'utils/common/key';
-import localForage from 'utils/storage/localForage';
+import localForage from '@ente/shared/storage/localForage';
 import HTTPService from './HTTPService';
 import { getEndpoint } from 'utils/common/apiUtil';
 import { logError } from '@ente/shared/sentry';
-import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
+import ComlinkCryptoWorker from '@ente/shared/crypto';
 import { getActualKey } from 'utils/common/key';
 import {
     EntityType,

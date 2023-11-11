@@ -1,4 +1,4 @@
-import { ElectronCacheStorage } from 'services/electron/cache';
+import ElectronAPIs from '@ente/shared/electron';
 import * as Comlink from 'comlink';
 import {
     LimitedCache,
@@ -14,7 +14,7 @@ export class WorkerElectronCacheStorageClient
     implements ProxiedLimitedCacheStorage
 {
     async open(cacheName: string) {
-        const cache = await ElectronCacheStorage.open(cacheName);
+        const cache = await ElectronAPIs.openDiskCache(cacheName);
         return Comlink.proxy({
             match: Comlink.proxy(transformMatch(cache.match.bind(cache))),
             put: Comlink.proxy(transformPut(cache.put.bind(cache))),
@@ -23,7 +23,7 @@ export class WorkerElectronCacheStorageClient
     }
 
     async delete(cacheName: string) {
-        return await ElectronCacheStorage.delete(cacheName);
+        return await ElectronAPIs.deleteDiskCache(cacheName);
     }
 }
 

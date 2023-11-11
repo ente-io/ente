@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useMemo, useState } from 'react';
 import SubscriptionCard from './SubscriptionCard';
 import { getUserDetailsV2 } from 'services/userService';
 import { UserDetails } from 'types/user';
-import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
+import { getData, LS_KEYS, setData } from '@ente/shared/storage/localStorage';
 import { useLocalState } from '@ente/shared/hooks/useLocalState';
 import Typography from '@mui/material/Typography';
 import SubscriptionStatus from './SubscriptionStatus';

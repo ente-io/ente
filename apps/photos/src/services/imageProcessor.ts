@@ -1,28 +1,16 @@
-import { ElectronAPIs } from 'types/electron';
+import ElectronAPIs from '@ente/shared/electron';
+import { addLogLine } from '@ente/shared/logging';
+import { logError } from '@ente/shared/sentry';
 import { ElectronFile } from 'types/upload';
 import { CustomError } from 'utils/error';
 import { convertBytesToHumanReadable } from 'utils/file/size';
-import { addLogLine } from '@ente/shared/logging';
-import { logError } from '@ente/shared/sentry';
 
 class ElectronImageProcessorService {
-    private electronAPIs: ElectronAPIs;
-    constructor() {
-        this.electronAPIs = globalThis['ElectronAPIs'];
-    }
-
-    generateImageThumbnailAPIExists() {
-        return !!this.electronAPIs?.generateImageThumbnail;
-    }
-
     async convertToJPEG(fileBlob: Blob, filename: string): Promise<Blob> {
         try {
-            if (!this.electronAPIs?.convertToJPEG) {
-                throw new Error('convertToJPEG API not available');
-            }
             const startTime = Date.now();
             const inputFileData = new Uint8Array(await fileBlob.arrayBuffer());
-            const convertedFileData = await this.electronAPIs.convertToJPEG(
+            const convertedFileData = await ElectronAPIs.convertToJPEG(
                 inputFileData,
                 filename
             );
@@ -51,11 +39,8 @@ class ElectronImageProcessorService {
         maxSize: number
     ): Promise<Uint8Array> {
         try {
-            if (!this.electronAPIs?.generateImageThumbnail) {
-                throw new Error('generateImageThumbnail API not available');
-            }
             const startTime = Date.now();
-            const thumb = await this.electronAPIs.generateImageThumbnail(
+            const thumb = await ElectronAPIs.generateImageThumbnail(
                 inputFile,
                 maxDimension,
                 maxSize

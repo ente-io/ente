@@ -1,12 +1,13 @@
 import { KeyAttributes, SRPSetupAttributes } from 'types/user';
-import { SESSION_KEYS, setKey } from 'utils/storage/sessionStorage';
-import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
+import { SESSION_KEYS, setKey } from '@ente/shared/storage/sessionStorage';
+import { getData, LS_KEYS, setData } from '@ente/shared/storage/localStorage';
 import { getActualKey, getToken } from 'utils/common/key';
 import { setRecoveryKey } from '@ente/accounts/api/user';
 import { logError } from '@ente/shared/sentry';
 import isElectron from 'is-electron';
-import safeStorageService from 'services/electron/safeStorage';
-import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
+import ElectronAPIs from '@ente/shared/electron';
+
+import ComlinkCryptoWorker from '@ente/shared/crypto';
 import { PasswordStrength } from 'constants/crypto';
 import zxcvbn from 'zxcvbn';
 import { SRP, SrpClient } from 'fast-srp-hap';
@@ -125,7 +126,7 @@ export const saveKeyInSessionStore = async (
         !fromDesktop &&
         keyType === SESSION_KEYS.ENCRYPTION_KEY
     ) {
-        safeStorageService.setEncryptionKey(key);
+        ElectronAPIs.setEncryptionKey(key);
     }
 };
 

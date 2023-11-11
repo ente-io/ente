@@ -24,7 +24,7 @@ import {
 // import { mlFilesStore, mlPeopleStore } from 'utils/storage/mlStorage';
 import { getRenderableImage } from 'utils/file';
 import { imageBitmapToBlob } from 'utils/image';
-import { cached } from 'utils/storage/cache';
+import { cached } from '@ente/shared/storage/cacheStorage/helpers';
 import mlIDbStorage from 'utils/storage/mlIDbStorage';
 import { Box, Point } from '../../../thirdparty/face-api/classes';
 import {

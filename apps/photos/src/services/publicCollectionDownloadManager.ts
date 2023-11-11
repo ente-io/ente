@@ -13,7 +13,7 @@ import { EnteFile } from 'types/file';
 import { logError } from '@ente/shared/sentry';
 import { FILE_TYPE } from 'constants/file';
 import { CustomError } from 'utils/error';
-import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
+import ComlinkCryptoWorker from '@ente/shared/crypto';
 import { CACHES } from 'constants/cache';
 import { CacheStorageService } from './cache/cacheStorageService';
 import { LimitedCache } from 'types/cache';

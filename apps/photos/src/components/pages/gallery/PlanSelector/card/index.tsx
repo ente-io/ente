@@ -20,7 +20,7 @@ import { logError } from '@ente/shared/sentry';
 import { AppContext } from 'pages/_app';
 import { Link, Stack } from '@mui/material';
 import { useLocalState } from '@ente/shared/hooks/useLocalState';
-import { LS_KEYS } from 'utils/storage/localStorage';
+import { LS_KEYS } from '@ente/shared/storage/localStorage';
 import { getLocalUserDetails } from 'utils/user';
 import { PLAN_PERIOD } from 'constants/gallery';
 import FreeSubscriptionPlanSelectorCard from './free';

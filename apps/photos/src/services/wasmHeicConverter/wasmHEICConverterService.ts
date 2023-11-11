@@ -4,7 +4,7 @@ import { retryAsyncFunction } from 'utils/network';
 import { logError } from '@ente/shared/sentry';
 import { addLogLine } from '@ente/shared/logging';
 import { DedicatedConvertWorker } from 'worker/convert.worker';
-import { ComlinkWorker } from 'utils/comlink/comlinkWorker';
+import { ComlinkWorker } from '@ente/shared/worker/comlinkWorker';
 import { convertBytesToHumanReadable } from 'utils/file/size';
 import { getDedicatedConvertWorker } from 'utils/comlink/ComlinkConvertWorker';
 
