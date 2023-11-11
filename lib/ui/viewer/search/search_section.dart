@@ -1,9 +1,5 @@
-import "dart:async";
-
 import "package:collection/collection.dart";
 import "package:flutter/material.dart";
-import "package:photos/core/constants.dart";
-import "package:photos/events/event.dart";
 import "package:photos/models/search/album_search_result.dart";
 import "package:photos/models/search/generic_search_result.dart";
 import "package:photos/models/search/recent_searches.dart";
@@ -19,7 +15,7 @@ import 'package:photos/ui/viewer/search/result/search_section_all_page.dart';
 import "package:photos/ui/viewer/search/search_section_cta.dart";
 import "package:photos/utils/navigation_util.dart";
 
-class SearchSection extends StatefulWidget {
+class SearchSection extends StatelessWidget {
   final SectionType sectionType;
   final List<SearchResult> examples;
   final int limit;
@@ -32,51 +28,12 @@ class SearchSection extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  State<SearchSection> createState() => _SearchSectionState();
-}
-
-class _SearchSectionState extends State<SearchSection> {
-  late List<SearchResult> _examples;
-  final streamSubscriptions = <StreamSubscription>[];
-
-  @override
-  void initState() {
-    super.initState();
-    _examples = widget.examples;
-
-    final streamsToListenTo = widget.sectionType.updateEvents();
-    for (Stream<Event> stream in streamsToListenTo) {
-      streamSubscriptions.add(
-        stream.listen((event) async {
-          _examples =
-              await widget.sectionType.getData(limit: searchSectionLimit);
-          setState(() {});
-        }),
-      );
-    }
-  }
-
-  @override
-  void dispose() {
-    for (var subscriptions in streamSubscriptions) {
-      subscriptions.cancel();
-    }
-    super.dispose();
-  }
-
-  @override
-  void didUpdateWidget(covariant SearchSection oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    _examples = widget.examples;
-  }
-
-  @override
   Widget build(BuildContext context) {
-    debugPrint("Building section for ${widget.sectionType.name}");
+    debugPrint("Building section for ${sectionType.name}");
     final textTheme = getEnteTextTheme(context);
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
-      child: widget.examples.isNotEmpty
+      child: examples.isNotEmpty
           ? Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -86,18 +43,18 @@ class _SearchSectionState extends State<SearchSection> {
                     Padding(
                       padding: const EdgeInsets.all(12),
                       child: Text(
-                        widget.sectionType.sectionTitle(context),
+                        sectionType.sectionTitle(context),
                         style: textTheme.largeBold,
                       ),
                     ),
-                    _examples.length < (widget.limit - 1)
+                    examples.length < (limit - 1)
                         ? const SizedBox.shrink()
                         : GestureDetector(
                             onTap: () {
                               routeToPage(
                                 context,
                                 SearchSectionAllPage(
-                                  sectionType: widget.sectionType,
+                                  sectionType: sectionType,
                                 ),
                               );
                             },
@@ -112,7 +69,10 @@ class _SearchSectionState extends State<SearchSection> {
                   ],
                 ),
                 const SizedBox(height: 2),
-                SearchExampleRow(_examples, widget.sectionType),
+                SearchExampleRow(
+                  examples,
+                  sectionType,
+                ),
               ],
             )
           : Padding(
@@ -126,12 +86,12 @@ class _SearchSectionState extends State<SearchSection> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            widget.sectionType.sectionTitle(context),
+                            sectionType.sectionTitle(context),
                             style: textTheme.largeBold,
                           ),
                           const SizedBox(height: 24),
                           Text(
-                            widget.sectionType.getEmptyStateText(context),
+                            sectionType.getEmptyStateText(context),
                             style: textTheme.smallMuted,
                           ),
                         ],
@@ -139,7 +99,7 @@ class _SearchSectionState extends State<SearchSection> {
                     ),
                   ),
                   const SizedBox(width: 8),
-                  SearchSectionEmptyCTAIcon(widget.sectionType),
+                  SearchSectionEmptyCTAIcon(sectionType),
                 ],
               ),
             ),
