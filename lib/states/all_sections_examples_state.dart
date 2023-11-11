@@ -2,11 +2,14 @@ import "dart:async";
 
 import "package:flutter/material.dart";
 import "package:flutter/scheduler.dart";
+import "package:logging/logging.dart";
 import "package:photos/core/constants.dart";
 import "package:photos/core/event_bus.dart";
-import "package:photos/events/sync_status_update_event.dart";
+import "package:photos/events/files_updated_event.dart";
+import "package:photos/events/local_photos_updated_event.dart";
 import "package:photos/models/search/search_result.dart";
 import "package:photos/models/search/search_types.dart";
+import "package:photos/utils/debouncer.dart";
 
 class AllSectionsExamplesProvider extends StatefulWidget {
   final Widget child;
@@ -21,26 +24,34 @@ class _AllSectionsExamplesProviderState
     extends State<AllSectionsExamplesProvider> {
   Future<List<List<SearchResult>>> allSectionsExamplesFuture = Future.value([]);
 
-  late StreamSubscription<SyncStatusUpdate> _syncStatusSubscription;
+  late StreamSubscription<FilesUpdatedEvent> _filesUpdatedEvent;
+  late StreamSubscription<LocalPhotosUpdatedEvent> _localPhotosUpdatedEvent;
+  final _logger = Logger("AllSectionsExamplesProvider");
+
+  final _debouncer =
+      Debouncer(const Duration(seconds: 3), executionInterval: 6000);
   @override
   void initState() {
     super.initState();
     SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
-      _syncStatusSubscription =
-          Bus.instance.on<SyncStatusUpdate>().listen((event) {
-        if (event.status == SyncStatus.completedBackup) {
+      _filesUpdatedEvent = Bus.instance.on<FilesUpdatedEvent>().listen((event) {
+        _debouncer.run(() async {
           setState(() {
             aggregateSectionsExamples();
           });
-        }
+        });
       });
-      setState(() {
-        aggregateSectionsExamples();
+
+      _debouncer.run(() async {
+        setState(() {
+          aggregateSectionsExamples();
+        });
       });
     });
   }
 
   void aggregateSectionsExamples() {
+    _logger.info("reloading all sections in search tab");
     final allSectionsExamples = <Future<List<SearchResult>>>[];
     for (SectionType sectionType in SectionType.values) {
       if (sectionType == SectionType.face ||
@@ -57,7 +68,9 @@ class _AllSectionsExamplesProviderState
 
   @override
   void dispose() {
-    _syncStatusSubscription.cancel();
+    _filesUpdatedEvent.cancel();
+    _localPhotosUpdatedEvent.cancel();
+    _debouncer.cancelDebounce();
     super.dispose();
   }
 
