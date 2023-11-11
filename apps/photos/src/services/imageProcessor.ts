@@ -3,7 +3,7 @@ import { addLogLine } from '@ente/shared/logging';
 import { logError } from '@ente/shared/sentry';
 import { ElectronFile } from 'types/upload';
 import { CustomError } from '@ente/shared/error';
-import { convertBytesToHumanReadable } from 'utils/file/size';
+import { convertBytesToHumanReadable } from '@ente/shared/utils/size';
 
 class ElectronImageProcessorService {
     async convertToJPEG(fileBlob: Blob, filename: string): Promise<Blob> {

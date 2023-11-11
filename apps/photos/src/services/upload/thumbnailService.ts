@@ -4,7 +4,7 @@ import { logError } from '@ente/shared/sentry';
 import { BLACK_THUMBNAIL_BASE64 } from 'constants/upload';
 import * as FFmpegService from 'services/ffmpeg/ffmpegService';
 import ElectronAPIs from '@ente/shared/electron';
-import { convertBytesToHumanReadable } from 'utils/file/size';
+import { convertBytesToHumanReadable } from '@ente/shared/utils/size';
 import { ElectronFile, FileTypeInfo } from 'types/upload';
 import { getUint8ArrayView } from '../readerService';
 import { addLogLine } from '@ente/shared/logging';

@@ -2,7 +2,7 @@ import { useContext, useState } from 'react';
 import { t } from 'i18next';
 
 // import FixLargeThumbnails from 'components/FixLargeThumbnail';
-import RecoveryKey from 'components/RecoveryKey';
+import RecoveryKey from '@ente/shared/components/RecoveryKey';
 import TwoFactorModal from 'components/TwoFactor/Modal';
 import { PHOTOS_PAGES as PAGES } from '@ente/shared/constants/pages';
 import { useRouter } from 'next/router';
@@ -20,6 +20,7 @@ import { THEME_COLOR } from '@ente/shared/themes/constants';
 
 export default function UtilitySection({ closeSidebar }) {
     const router = useRouter();
+    const appContext = useContext(AppContext);
     const {
         setDialogMessage,
         startLoading,
@@ -27,7 +28,7 @@ export default function UtilitySection({ closeSidebar }) {
         setWatchFolderView,
         themeColor,
         setThemeColor,
-    } = useContext(AppContext);
+    } = appContext;
 
     const [recoverModalView, setRecoveryModalView] = useState(false);
     const [twoFactorModalView, setTwoFactorModalView] = useState(false);
@@ -144,6 +145,7 @@ export default function UtilitySection({ closeSidebar }) {
                 label={t('PREFERENCES')}
             />
             <RecoveryKey
+                appContext={appContext}
                 show={recoverModalView}
                 onHide={closeRecoveryKeyModal}
                 somethingWentWrong={somethingWentWrong}

@@ -1,6 +1,5 @@
 import { AppContext } from 'pages/_app';
 import React, { useContext, useEffect, useState } from 'react';
-import { downloadAsFile } from 'utils/file';
 import { Trans } from 'react-i18next';
 import { t } from 'i18next';
 
@@ -16,6 +15,7 @@ import {
     testZipWithRootFileReadingTest,
 } from '../../../tests/zip-file-reading.test';
 import { EnteMenuItem } from 'components/Menu/EnteMenuItem';
+import { downloadAsFile } from '@ente/shared/utils';
 
 export default function DebugSection() {
     const appContext = useContext(AppContext);

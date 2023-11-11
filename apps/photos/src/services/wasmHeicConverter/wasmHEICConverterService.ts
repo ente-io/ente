@@ -5,7 +5,7 @@ import { logError } from '@ente/shared/sentry';
 import { addLogLine } from '@ente/shared/logging';
 import { DedicatedConvertWorker } from 'worker/convert.worker';
 import { ComlinkWorker } from '@ente/shared/worker/comlinkWorker';
-import { convertBytesToHumanReadable } from 'utils/file/size';
+import { convertBytesToHumanReadable } from '@ente/shared/utils/size';
 import { getDedicatedConvertWorker } from 'utils/comlink/ComlinkConvertWorker';
 
 const WORKER_POOL_SIZE = 2;

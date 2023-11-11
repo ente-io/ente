@@ -14,7 +14,7 @@ import {
     Logger,
 } from 'types/upload';
 import { addLocalLog, addLogLine } from '@ente/shared/logging';
-import { convertBytesToHumanReadable } from 'utils/file/size';
+import { convertBytesToHumanReadable } from '@ente/shared/utils/size';
 import { sleep } from 'utils/common';
 import { addToCollection } from 'services/collectionService';
 import uploadCancelService from './uploadCancelService';

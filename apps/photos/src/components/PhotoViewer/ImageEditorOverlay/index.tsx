@@ -43,7 +43,7 @@ import { AppContext } from 'pages/_app';
 import { getEditorCloseConfirmationMessage } from 'utils/ui';
 import { logError } from '@ente/shared/sentry';
 import { getFileType } from 'services/typeDetectionService';
-import { downloadUsingAnchor } from 'utils/file';
+import { downloadUsingAnchor } from '@ente/shared/utils';
 
 interface IProps {
     file: EnteFile;

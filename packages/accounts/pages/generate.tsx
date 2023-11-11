@@ -17,7 +17,7 @@ import {
     justSignedUp,
     setJustSignedUp,
 } from '@ente/shared/storage/localStorage/helpers';
-import RecoveryKey from '@ente/accounts/components/RecoveryKey';
+import RecoveryKey from '@ente/shared/components/RecoveryKey';
 import { PAGES } from '@ente/accounts/constants/pages';
 import { VerticallyCentered } from '@ente/shared/components/Container';
 import EnteSpinner from '@ente/shared/components/EnteSpinner';

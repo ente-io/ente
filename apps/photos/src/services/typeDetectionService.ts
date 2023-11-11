@@ -10,7 +10,7 @@ import { logError } from '@ente/shared/sentry';
 import { getUint8ArrayView } from './readerService';
 import FileType, { FileTypeResult } from 'file-type';
 import { getFileSize } from './upload/fileService';
-import { convertBytesToHumanReadable } from 'utils/file/size';
+import { convertBytesToHumanReadable } from '@ente/shared/utils/size';
 
 const TYPE_VIDEO = 'video';
 const TYPE_IMAGE = 'image';

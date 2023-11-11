@@ -32,7 +32,7 @@ import { isArchivedFile, updateMagicMetadata } from 'utils/magicMetadata';
 
 import { addLocalLog, addLogLine } from '@ente/shared/logging';
 import { CustomError } from '@ente/shared/error';
-import { convertBytesToHumanReadable } from './size';
+import { convertBytesToHumanReadable } from '@ente/shared/utils/size';
 import ComlinkCryptoWorker from '@ente/shared/crypto';
 import {
     deleteFromTrash,
@@ -49,6 +49,7 @@ import ElectronFSService from '@ente/shared/electron';
 import { getFileExportPath, getUniqueFileExportName } from 'utils/export';
 import imageProcessor from 'services/imageProcessor';
 import ElectronAPIs from '@ente/shared/electron';
+import { downloadUsingAnchor } from '@ente/shared/utils';
 
 const WAIT_TIME_IMAGE_CONVERSION = 30 * 1000;
 
@@ -60,14 +61,6 @@ export enum FILE_OPS_TYPE {
     HIDE,
     TRASH,
     DELETE_PERMANENTLY,
-}
-
-export function downloadAsFile(filename: string, content: string) {
-    const file = new Blob([content], {
-        type: 'text/plain',
-    });
-    const fileURL = URL.createObjectURL(file);
-    downloadUsingAnchor(fileURL, filename);
 }
 
 export async function getUpdatedEXIFFileForDownload(
@@ -164,17 +157,6 @@ export async function downloadFile(
         logError(e, 'failed to download file');
         throw e;
     }
-}
-
-export function downloadUsingAnchor(link: string, name: string) {
-    const a = document.createElement('a');
-    a.style.display = 'none';
-    a.href = link;
-    a.download = name;
-    document.body.appendChild(a);
-    a.click();
-    URL.revokeObjectURL(link);
-    a.remove();
 }
 
 export function groupFilesBasedOnCollectionID(files: EnteFile[]) {

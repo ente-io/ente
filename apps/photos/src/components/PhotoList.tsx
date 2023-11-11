@@ -18,7 +18,7 @@ import {
 } from 'constants/gallery';
 import { PublicCollectionGalleryContext } from 'utils/publicCollectionGallery';
 import { ENTE_WEBSITE_LINK } from '@ente/shared/constants/urls';
-import { convertBytesToHumanReadable } from 'utils/file/size';
+import { convertBytesToHumanReadable } from '@ente/shared/utils/size';
 import { DeduplicateContext } from 'pages/deduplicate';
 import { FlexWrapper } from '@ente/shared/components/Container';
 import { Typography } from '@mui/material';
