@@ -11,7 +11,7 @@ import {
     ProgressUpdater,
     SegregatedFinishedUploads,
 } from 'types/upload/ui';
-import { CustomError } from 'utils/error';
+import { CustomError } from '@ente/shared/error';
 import uploadCancelService from './uploadCancelService';
 
 const REQUEST_TIMEOUT_TIME = 30 * 1000; // 30 sec;

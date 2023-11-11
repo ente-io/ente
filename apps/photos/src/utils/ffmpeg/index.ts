@@ -1,6 +1,6 @@
 import { NULL_LOCATION } from 'constants/upload';
 import { ParsedExtractedMetadata } from 'types/upload';
-import { validateAndGetCreationUnixTimeInMicroSeconds } from 'utils/time';
+import { validateAndGetCreationUnixTimeInMicroSeconds } from '@ente/shared/time';
 
 enum MetadataTags {
     CREATION_TIME = 'creation_time',

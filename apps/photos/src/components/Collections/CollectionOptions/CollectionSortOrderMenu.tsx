@@ -1,6 +1,6 @@
-import { StyledMenu } from 'components/OverflowMenu/menu';
+import { StyledMenu } from '@ente/shared/components/OverflowMenu/menu';
 import { CollectionActions } from '.';
-import { OverflowMenuOption } from 'components/OverflowMenu/option';
+import { OverflowMenuOption } from '@ente/shared/components/OverflowMenu/option';
 import { t } from 'i18next';
 
 interface Iprops {

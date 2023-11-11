@@ -1,7 +1,7 @@
 import { ElectronFile } from 'types/upload';
 import { EventQueueItem } from 'types/watchFolder';
-import { addLogLine } from 'utils/logging';
-import { logError } from 'utils/sentry';
+import { addLogLine } from '@ente/shared/logging';
+import { logError } from '@ente/shared/sentry';
 import watchFolderService from './watchFolderService';
 
 export async function diskFileAddedCallback(file: ElectronFile) {

@@ -1,7 +1,7 @@
 import React, { useContext, useState } from 'react';
 import { t } from 'i18next';
 
-import { logoutUser } from 'services/userService';
+import { logoutUser } from '@ente/accounts/services/user';
 import { AppContext } from 'pages/_app';
 import DeleteAccountModal from 'components/DeleteAccountModal';
 import { EnteMenuItem } from 'components/Menu/EnteMenuItem';

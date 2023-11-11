@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Button, Spinner } from 'react-bootstrap';
 import { EnteFile } from 'types/file';
-import { getToken, getUserID } from 'utils/common/key';
+import { getToken, getUserID } from '@ente/shared/storage/localStorage/helpers';
 import mlService from '../../services/machineLearning/machineLearningService';
 
 function MLServiceFileInfoButton({

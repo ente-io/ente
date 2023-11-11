@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Skeleton, styled } from '@mui/material';
 
 import { imageBitmapToBlob } from 'utils/image';
-import { logError } from 'utils/sentry';
-import { getBlobFromCache } from 'utils/storage/cache';
+import { logError } from '@ente/shared/sentry';
+import { getBlobFromCache } from '@ente/shared/storage/cacheStorage/helpers';
 
 export const FaceCropsRow = styled('div')`
     & > img {

@@ -1,4 +1,4 @@
-import { OverflowMenuOption } from 'components/OverflowMenu/option';
+import { OverflowMenuOption } from '@ente/shared/components/OverflowMenu/option';
 import React from 'react';
 
 import EditIcon from '@mui/icons-material/Edit';

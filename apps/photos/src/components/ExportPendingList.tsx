@@ -1,8 +1,8 @@
 import { EnteFile } from 'types/file';
 import ItemList from 'components/ItemList';
-import DialogBoxV2 from './DialogBoxV2';
+import DialogBoxV2 from '@ente/shared/components/DialogBoxV2';
 import { t } from 'i18next';
-import { FlexWrapper } from './Container';
+import { FlexWrapper } from '@ente/shared/components/Container';
 import CollectionCard from './Collections/CollectionCard';
 import { ResultPreviewTile } from './Collections/styledComponents';
 import { Box, styled } from '@mui/material';

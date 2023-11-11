@@ -1,11 +1,11 @@
 export {};
 
 // import React, { useState, useEffect, useContext, ChangeEvent } from 'react';
-// import { getData, LS_KEYS } from 'utils/storage/localStorage';
+// import { getData, LS_KEYS } from '@ente/shared/storage/localStorage';
 // import { useRouter } from 'next/router';
 // import { ComlinkWorker } from 'utils/comlink';
 // import { AppContext } from 'pages/_app';
-// import { PAGES } from 'constants/pages';
+// import { PHOTOS_PAGES  as PAGES } from '@ente/shared/constants/pages';
 // import * as Comlink from 'comlink';
 // import { runningInBrowser } from 'utils/common';
 // import TFJSImage from './TFJSImage';
@@ -43,7 +43,7 @@ export {};
 //     DEFAULT_ML_SYNC_JOB_CONFIG,
 // } from 'constants/machineLearning/config';
 // import { exportMlData, importMlData } from 'utils/machineLearning/mldataExport';
-// import { FACE_CROPS_CACHE } from 'constants/cache';
+// import { FACE_CROPS_CACHE } from '@ente/shared/storage/cacheStorage/constants';
 
 // interface TSNEProps {
 //     mlResult: MLDebugResult;

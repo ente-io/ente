@@ -6,7 +6,10 @@ import {
     CollectionListWrapper,
 } from 'components/Collections/styledComponents';
 import CollectionListBarCard from 'components/Collections/CollectionListBar/CollectionCard';
-import { IconButtonWithBG, SpaceBetweenFlex } from 'components/Container';
+import {
+    IconButtonWithBG,
+    SpaceBetweenFlex,
+} from '@ente/shared/components/Container';
 import ExpandMore from '@mui/icons-material/ExpandMore';
 import { AppContext } from 'pages/_app';
 import { CollectionSummary } from 'types/collection';
@@ -19,8 +22,10 @@ import {
 } from 'react-window';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import memoize from 'memoize-one';
-import useComponentScroll, { SCROLL_DIRECTION } from 'hooks/useComponentScroll';
-import useWindowSize from 'hooks/useWindowSize';
+import useComponentScroll, {
+    SCROLL_DIRECTION,
+} from '@ente/shared/hooks/useComponentScroll';
+import useWindowSize from '@ente/shared/hooks/useWindowSize';
 import ScrollButton from './ScrollButton';
 
 interface IProps {

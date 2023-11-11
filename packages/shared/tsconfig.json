@@ -1,0 +1,16 @@
+{
+    "extends": "../../tsconfig.base.json",
+    "compilerOptions": {
+        "downlevelIteration": true,
+        "jsx": "preserve",
+        "jsxImportSource": "@emotion/react",
+        "lib": ["dom", "dom.iterable", "esnext", "webworker"],
+        "noImplicitAny": false,
+        "noUnusedLocals": false,
+        "noUnusedParameters": false,
+        "strictNullChecks": false,
+        "target": "es5",
+        "useUnknownInCatchVariables": false
+    },
+    "include": ["**/*.ts", "**/*.tsx", "**/*.js", "themes/mui-theme.d.ts"]
+}

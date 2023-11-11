@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { EnteFile } from 'types/file';
 import { changeCaption, updateExistingFilePubMetadata } from 'utils/file';
-import { logError } from 'utils/sentry';
+import { logError } from '@ente/shared/sentry';
 import { Box, IconButton, TextField } from '@mui/material';
-import { FlexWrapper } from 'components/Container';
+import { FlexWrapper } from '@ente/shared/components/Container';
 import { MAX_CAPTION_SIZE } from 'constants/file';
 import { Formik } from 'formik';
 import { SmallLoadingSpinner } from '../styledComponents/SmallLoadingSpinner';

@@ -1,69 +1,30 @@
-import { PAGES } from 'constants/pages';
 import {
     getEndpoint,
     getFamilyPortalURL,
     isDevDeployment,
-} from 'utils/common/apiUtil';
-import { clearKeys } from 'utils/storage/sessionStorage';
-import router from 'next/router';
-import { clearData, getData, LS_KEYS } from 'utils/storage/localStorage';
-import localForage from 'utils/storage/localForage';
-import { getToken } from 'utils/common/key';
-import HTTPService from './HTTPService';
+} from '@ente/shared/network/api';
+import { getData, LS_KEYS } from '@ente/shared/storage/localStorage';
+import localForage from '@ente/shared/storage/localForage';
+import { getToken } from '@ente/shared/storage/localStorage/helpers';
+import HTTPService from '@ente/shared/network/HTTPService';
+import { getRecoveryKey } from '@ente/shared/crypto/helpers';
+import { logError } from '@ente/shared/sentry';
 import {
-    computeVerifierHelper,
-    generateLoginSubKey,
-    generateSRPClient,
-    getRecoveryKey,
-} from 'utils/crypto';
-import { logError } from 'utils/sentry';
-import { eventBus, Events } from './events';
-import {
-    KeyAttributes,
-    RecoveryKey,
-    TwoFactorSecret,
-    TwoFactorVerificationResponse,
-    TwoFactorRecoveryResponse,
     UserDetails,
     DeleteChallengeResponse,
     GetRemoteStoreValueResponse,
-    SetupSRPRequest,
-    CreateSRPSessionResponse,
-    UserVerificationResponse,
     GetFeatureFlagResponse,
-    SetupSRPResponse,
-    CompleteSRPSetupRequest,
-    CompleteSRPSetupResponse,
-    SRPSetupAttributes,
-    SRPAttributes,
-    UpdateSRPAndKeysRequest,
-    UpdateSRPAndKeysResponse,
-    GetSRPAttributesResponse,
 } from 'types/user';
-import { ApiError, CustomError } from 'utils/error';
-import isElectron from 'is-electron';
-import safeStorageService from './electron/safeStorage';
-import { deleteAllCache } from 'utils/storage/cache';
-import { B64EncryptionResult } from 'types/crypto';
+import { ApiError } from '@ente/shared/error';
 import { getLocalFamilyData, isPartOfFamily } from 'utils/user/family';
 import { AxiosResponse, HttpStatusCode } from 'axios';
-import { APPS, getAppName } from 'constants/apps';
-import { addLocalLog } from 'utils/logging';
-import { convertBase64ToBuffer, convertBufferToBase64 } from 'utils/user';
-import { setLocalMapEnabled } from 'utils/storage';
-import InMemoryStore, { MS_KEYS } from './InMemoryStore';
+import { setLocalMapEnabled } from '@ente/shared/storage/localStorage/helpers';
+import { putAttributes } from '@ente/accounts/api/user';
+import { logoutUser } from '@ente/accounts/services/user';
 
 const ENDPOINT = getEndpoint();
 
 const HAS_SET_KEYS = 'hasSetKeys';
-
-export const sendOtt = (email: string) => {
-    const appName = getAppName();
-    return HTTPService.post(`${ENDPOINT}/users/ott`, {
-        email,
-        client: appName === APPS.AUTH ? 'totp' : 'web',
-    });
-};
 
 export const getPublicKey = async (email: string) => {
     const token = getToken();
@@ -127,70 +88,6 @@ export const getRoadmapRedirectURL = async () => {
     }
 };
 
-export const verifyOtt = (email: string, ott: string) =>
-    HTTPService.post(`${ENDPOINT}/users/verify-email`, { email, ott });
-
-export const putAttributes = (token: string, keyAttributes: KeyAttributes) =>
-    HTTPService.put(`${ENDPOINT}/users/attributes`, { keyAttributes }, null, {
-        'X-Auth-Token': token,
-    });
-
-export const setRecoveryKey = (token: string, recoveryKey: RecoveryKey) =>
-    HTTPService.put(`${ENDPOINT}/users/recovery-key`, recoveryKey, null, {
-        'X-Auth-Token': token,
-    });
-
-export const logoutUser = async () => {
-    try {
-        try {
-            // ignore server logout result as logoutUser can be triggered before sign up or on token expiry
-            await _logout();
-        } catch (e) {
-            //ignore
-        }
-        try {
-            InMemoryStore.clear();
-        } catch (e) {
-            logError(e, 'clear InMemoryStore failed');
-        }
-        try {
-            clearKeys();
-        } catch (e) {
-            logError(e, 'clearKeys failed');
-        }
-        try {
-            clearData();
-        } catch (e) {
-            logError(e, 'clearData failed');
-        }
-        try {
-            await deleteAllCache();
-        } catch (e) {
-            logError(e, 'deleteAllCache failed');
-        }
-        try {
-            await clearFiles();
-        } catch (e) {
-            logError(e, 'clearFiles failed');
-        }
-        if (isElectron()) {
-            try {
-                safeStorageService.clearElectronStore();
-            } catch (e) {
-                logError(e, 'clearElectronStore failed');
-            }
-        }
-        try {
-            eventBus.emit(Events.LOGOUT);
-        } catch (e) {
-            logError(e, 'Error in logout handlers');
-        }
-        router.push(PAGES.ROOT);
-    } catch (e) {
-        logError(e, 'logoutUser failed');
-    }
-};
-
 export const clearFiles = async () => {
     await localForage.clear();
 };
@@ -235,71 +132,6 @@ export const isTokenValid = async (token: string) => {
     }
 };
 
-export const setupTwoFactor = async () => {
-    const resp = await HTTPService.post(
-        `${ENDPOINT}/users/two-factor/setup`,
-        null,
-        null,
-        {
-            'X-Auth-Token': getToken(),
-        }
-    );
-    return resp.data as TwoFactorSecret;
-};
-
-export const enableTwoFactor = async (
-    code: string,
-    recoveryEncryptedTwoFactorSecret: B64EncryptionResult
-) => {
-    await HTTPService.post(
-        `${ENDPOINT}/users/two-factor/enable`,
-        {
-            code,
-            encryptedTwoFactorSecret:
-                recoveryEncryptedTwoFactorSecret.encryptedData,
-            twoFactorSecretDecryptionNonce:
-                recoveryEncryptedTwoFactorSecret.nonce,
-        },
-        null,
-        {
-            'X-Auth-Token': getToken(),
-        }
-    );
-};
-
-export const verifyTwoFactor = async (code: string, sessionID: string) => {
-    const resp = await HTTPService.post(
-        `${ENDPOINT}/users/two-factor/verify`,
-        {
-            code,
-            sessionID,
-        },
-        null
-    );
-    return resp.data as TwoFactorVerificationResponse;
-};
-
-export const recoverTwoFactor = async (sessionID: string) => {
-    const resp = await HTTPService.get(`${ENDPOINT}/users/two-factor/recover`, {
-        sessionID,
-    });
-    return resp.data as TwoFactorRecoveryResponse;
-};
-
-export const removeTwoFactor = async (sessionID: string, secret: string) => {
-    const resp = await HTTPService.post(`${ENDPOINT}/users/two-factor/remove`, {
-        sessionID,
-        secret,
-    });
-    return resp.data as TwoFactorVerificationResponse;
-};
-
-export const disableTwoFactor = async () => {
-    await HTTPService.post(`${ENDPOINT}/users/two-factor/disable`, null, null, {
-        'X-Auth-Token': getToken(),
-    });
-};
-
 export const getTwoFactorStatus = async () => {
     const resp = await HTTPService.get(
         `${ENDPOINT}/users/two-factor/status`,
@@ -309,47 +141,6 @@ export const getTwoFactorStatus = async () => {
         }
     );
     return resp.data['status'];
-};
-
-export const _logout = async () => {
-    if (!getToken()) return true;
-    try {
-        await HTTPService.post(`${ENDPOINT}/users/logout`, null, null, {
-            'X-Auth-Token': getToken(),
-        });
-        return true;
-    } catch (e) {
-        logError(e, '/users/logout failed');
-        return false;
-    }
-};
-
-export const sendOTTForEmailChange = async (email: string) => {
-    if (!getToken()) {
-        return null;
-    }
-    await HTTPService.post(`${ENDPOINT}/users/ott`, {
-        email,
-        client: 'web',
-        purpose: 'change',
-    });
-};
-
-export const changeEmail = async (email: string, ott: string) => {
-    if (!getToken()) {
-        return null;
-    }
-    await HTTPService.post(
-        `${ENDPOINT}/users/change-email`,
-        {
-            email,
-            ott,
-        },
-        null,
-        {
-            'X-Auth-Token': getToken(),
-        }
-    );
 };
 
 export const getUserDetailsV2 = async (): Promise<UserDetails> => {
@@ -547,211 +338,3 @@ export async function getDisableCFUploadProxyFlag(): Promise<boolean> {
         return false;
     }
 }
-
-export const getSRPAttributes = async (
-    email: string
-): Promise<SRPAttributes | null> => {
-    try {
-        const resp = await HTTPService.get(`${ENDPOINT}/users/srp/attributes`, {
-            email,
-        });
-        return (resp.data as GetSRPAttributesResponse).attributes;
-    } catch (e) {
-        logError(e, 'failed to get SRP attributes');
-        return null;
-    }
-};
-
-export const configureSRP = async ({
-    srpSalt,
-    srpUserID,
-    srpVerifier,
-    loginSubKey,
-}: SRPSetupAttributes) => {
-    try {
-        const srpConfigureInProgress = InMemoryStore.get(
-            MS_KEYS.SRP_CONFIGURE_IN_PROGRESS
-        );
-        if (srpConfigureInProgress) {
-            throw Error('SRP configure already in progress');
-        }
-        InMemoryStore.set(MS_KEYS.SRP_CONFIGURE_IN_PROGRESS, true);
-        const srpClient = await generateSRPClient(
-            srpSalt,
-            srpUserID,
-            loginSubKey
-        );
-
-        const srpA = convertBufferToBase64(srpClient.computeA());
-
-        addLocalLog(() => `srp a: ${srpA}`);
-        const token = getToken();
-        const { setupID, srpB } = await startSRPSetup(token, {
-            srpA,
-            srpUserID,
-            srpSalt,
-            srpVerifier,
-        });
-
-        srpClient.setB(convertBase64ToBuffer(srpB));
-
-        const srpM1 = convertBufferToBase64(srpClient.computeM1());
-
-        const { srpM2 } = await completeSRPSetup(token, {
-            srpM1,
-            setupID,
-        });
-
-        srpClient.checkM2(convertBase64ToBuffer(srpM2));
-    } catch (e) {
-        logError(e, 'srp configure failed');
-        throw e;
-    } finally {
-        InMemoryStore.set(MS_KEYS.SRP_CONFIGURE_IN_PROGRESS, false);
-    }
-};
-
-export const startSRPSetup = async (
-    token: string,
-    setupSRPRequest: SetupSRPRequest
-): Promise<SetupSRPResponse> => {
-    try {
-        const resp = await HTTPService.post(
-            `${ENDPOINT}/users/srp/setup`,
-            setupSRPRequest,
-            null,
-            {
-                'X-Auth-Token': token,
-            }
-        );
-
-        return resp.data as SetupSRPResponse;
-    } catch (e) {
-        logError(e, 'failed to post SRP attributes');
-        throw e;
-    }
-};
-
-export const completeSRPSetup = async (
-    token: string,
-    completeSRPSetupRequest: CompleteSRPSetupRequest
-) => {
-    try {
-        const resp = await HTTPService.post(
-            `${ENDPOINT}/users/srp/complete`,
-            completeSRPSetupRequest,
-            null,
-            {
-                'X-Auth-Token': token,
-            }
-        );
-        return resp.data as CompleteSRPSetupResponse;
-    } catch (e) {
-        logError(e, 'failed to complete SRP setup');
-        throw e;
-    }
-};
-
-export const loginViaSRP = async (
-    srpAttributes: SRPAttributes,
-    kek: string
-): Promise<UserVerificationResponse> => {
-    try {
-        const loginSubKey = await generateLoginSubKey(kek);
-        const srpClient = await generateSRPClient(
-            srpAttributes.srpSalt,
-            srpAttributes.srpUserID,
-            loginSubKey
-        );
-        const srpVerifier = computeVerifierHelper(
-            srpAttributes.srpSalt,
-            srpAttributes.srpUserID,
-            loginSubKey
-        );
-        addLocalLog(() => `srp verifier: ${srpVerifier}`);
-        const srpA = srpClient.computeA();
-        const { srpB, sessionID } = await createSRPSession(
-            srpAttributes.srpUserID,
-            convertBufferToBase64(srpA)
-        );
-        srpClient.setB(convertBase64ToBuffer(srpB));
-
-        const m1 = srpClient.computeM1();
-        addLocalLog(() => `srp m1: ${convertBufferToBase64(m1)}`);
-        const { srpM2, ...rest } = await verifySRPSession(
-            sessionID,
-            srpAttributes.srpUserID,
-            convertBufferToBase64(m1)
-        );
-        addLocalLog(() => `srp verify session successful,srpM2: ${srpM2}`);
-
-        srpClient.checkM2(convertBase64ToBuffer(srpM2));
-
-        addLocalLog(() => `srp server verify successful`);
-
-        return rest;
-    } catch (e) {
-        logError(e, 'srp verify failed');
-        throw e;
-    }
-};
-
-export const createSRPSession = async (srpUserID: string, srpA: string) => {
-    try {
-        const resp = await HTTPService.post(
-            `${ENDPOINT}/users/srp/create-session`,
-            {
-                srpUserID,
-                srpA,
-            }
-        );
-        return resp.data as CreateSRPSessionResponse;
-    } catch (e) {
-        logError(e, 'createSRPSession failed');
-        throw e;
-    }
-};
-
-export const verifySRPSession = async (
-    sessionID: string,
-    srpUserID: string,
-    srpM1: string
-) => {
-    try {
-        const resp = await HTTPService.post(
-            `${ENDPOINT}/users/srp/verify-session`,
-            {
-                sessionID,
-                srpUserID,
-                srpM1,
-            },
-            null
-        );
-        return resp.data as UserVerificationResponse;
-    } catch (e) {
-        logError(e, 'verifySRPSession failed');
-        if (
-            e instanceof ApiError &&
-            e.httpStatusCode === HttpStatusCode.Unauthorized
-        ) {
-            throw Error(CustomError.INCORRECT_PASSWORD);
-        } else {
-            throw e;
-        }
-    }
-};
-
-export const updateSRPAndKeys = async (
-    token: string,
-    updateSRPAndKeyRequest: UpdateSRPAndKeysRequest
-): Promise<UpdateSRPAndKeysResponse> => {
-    const resp = await HTTPService.post(
-        `${ENDPOINT}/users/srp/update`,
-        updateSRPAndKeyRequest,
-        null,
-        {
-            'X-Auth-Token': token,
-        }
-    );
-    return resp.data as UpdateSRPAndKeysResponse;
-};

@@ -10,7 +10,7 @@ import {
 } from '@mui/material';
 import { EnteDrawer } from 'components/EnteDrawer';
 import Titlebar from 'components/Titlebar';
-import { FACE_SEARCH_PRIVACY_POLICY_LINK } from 'constants/urls';
+import { FACE_SEARCH_PRIVACY_POLICY_LINK } from '@ente/shared/constants/urls';
 import { useEffect, useState } from 'react';
 import { Trans } from 'react-i18next';
 import { t } from 'i18next';

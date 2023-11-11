@@ -13,7 +13,7 @@ import MenuItemDivider from 'components/Menu/MenuItemDivider';
 import BlockIcon from '@mui/icons-material/Block';
 import DoneIcon from '@mui/icons-material/Done';
 import { handleSharingErrors } from 'utils/error/ui';
-import { logError } from 'utils/sentry';
+import { logError } from '@ente/shared/sentry';
 import { shareCollection } from 'services/collectionService';
 import { GalleryContext } from 'pages/gallery';
 import { AppContext } from 'pages/_app';

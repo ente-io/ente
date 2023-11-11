@@ -33,7 +33,7 @@ import {
     BLAZEFACE_SCORE_THRESHOLD,
     MAX_FACE_DISTANCE_PERCENT,
 } from 'constants/mlConfig';
-import { addLogLine } from 'utils/logging';
+import { addLogLine } from '@ente/shared/logging';
 
 class BlazeFaceDetectionService implements FaceDetectionService {
     private blazeFaceModel: Promise<BlazeFaceModel>;

@@ -12,7 +12,7 @@ import {
     MLSyncContext,
     NearestCluster,
 } from 'types/machineLearning';
-import { addLogLine } from 'utils/logging';
+import { addLogLine } from '@ente/shared/logging';
 // import { getAllFacesMap } from 'utils/storage/mlStorage';
 
 // export function getClusterSummary(cluster: Cluster): FaceDescriptor {

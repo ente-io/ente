@@ -1,10 +1,10 @@
 import { Dialog, Stack, Typography } from '@mui/material';
 import SingleInputForm, {
     SingleInputFormProps,
-} from 'components/SingleInputForm';
+} from '@ente/shared/components/SingleInputForm';
 import React from 'react';
 import { t } from 'i18next';
-import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
+import ComlinkCryptoWorker from '@ente/shared/crypto';
 
 export function PublicLinkSetPassword({
     open,

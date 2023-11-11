@@ -1,5 +1,8 @@
 import { Button, Stack, styled, Typography } from '@mui/material';
-import { VerticallyCentered, FlexWrapper } from './Container';
+import {
+    VerticallyCentered,
+    FlexWrapper,
+} from '@ente/shared/components/Container';
 import { Box } from '@mui/material';
 import uploadManager from 'services/upload/uploadManager';
 import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternateOutlined';
@@ -7,7 +10,7 @@ import FolderIcon from '@mui/icons-material/FolderOutlined';
 import { UploadTypeSelectorIntent } from 'types/gallery';
 import { Trans } from 'react-i18next';
 import { t } from 'i18next';
-import { EnteLogo } from './EnteLogo';
+import { EnteLogo } from '@ente/shared/components/EnteLogo';
 
 const Wrapper = styled(Box)`
     display: flex;

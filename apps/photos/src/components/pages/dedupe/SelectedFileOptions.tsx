@@ -1,5 +1,5 @@
-import { FluidContainer } from 'components/Container';
-import { SelectionBar } from '../../Navbar/SelectionBar';
+import { FluidContainer } from '@ente/shared/components/Container';
+import { SelectionBar } from '@ente/shared/components/Navbar/SelectionBar';
 import { useContext } from 'react';
 import { Box, IconButton, Tooltip } from '@mui/material';
 import { AppContext } from 'pages/_app';
@@ -23,13 +23,13 @@ export default function DeduplicateOptions({
     count,
     clearSelection,
 }: IProps) {
-    const { setDialogMessage } = useContext(AppContext);
+    const { setDialogMessage, isMobile } = useContext(AppContext);
 
     const trashHandler = () =>
         setDialogMessage(getTrashFilesMessage(deleteFileHelper));
 
     return (
-        <SelectionBar>
+        <SelectionBar isMobile={isMobile}>
             <FluidContainer>
                 {count ? (
                     <IconButton onClick={clearSelection}>

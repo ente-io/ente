@@ -7,7 +7,7 @@ import { components } from 'react-select';
 import { SearchOption, SuggestionType } from 'types/search';
 import SearchIcon from '@mui/icons-material/SearchOutlined';
 import { SelectComponents } from 'react-select/src/components';
-import { FlexWrapper } from 'components/Container';
+import { FlexWrapper } from '@ente/shared/components/Container';
 import { Box } from '@mui/material';
 
 const { ValueContainer } = components;

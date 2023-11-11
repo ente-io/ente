@@ -1,16 +1,16 @@
 import AutoAwesomeOutlinedIcon from '@mui/icons-material/AutoAwesomeOutlined';
-import { DialogBoxAttributes } from 'types/dialogBox';
+import { DialogBoxAttributes } from '@ente/shared/components/DialogBox/types';
 import { downloadApp } from 'utils/common';
 import { t } from 'i18next';
 
-import ElectronUpdateService from 'services/electron/update';
-import { AppUpdateInfo } from 'types/electron';
+import ElectronAPIs from '@ente/shared/electron';
 import InfoOutlined from '@mui/icons-material/InfoRounded';
 import { Trans } from 'react-i18next';
 import { Subscription } from 'types/billing';
-import { logoutUser } from 'services/userService';
+import { logoutUser } from '@ente/accounts/services/user';
 import { Link } from '@mui/material';
 import { OPEN_STREET_MAP_LINK } from 'components/Sidebar/EnableMap';
+import { AppUpdateInfo } from '@ente/shared/electron/types';
 export const getDownloadAppMessage = (): DialogBoxAttributes => {
     return {
         title: t('DOWNLOAD_APP'),
@@ -58,15 +58,14 @@ export const getUpdateReadyToInstallMessage = (
     title: t('UPDATE_AVAILABLE'),
     content: t('UPDATE_INSTALLABLE_MESSAGE'),
     proceed: {
-        action: () => ElectronUpdateService.updateAndRestart(),
+        action: () => ElectronAPIs.updateAndRestart(),
         text: t('INSTALL_NOW'),
         variant: 'accent',
     },
     close: {
         text: t('INSTALL_ON_NEXT_LAUNCH'),
         variant: 'secondary',
-        action: () =>
-            ElectronUpdateService.muteUpdateNotification(updateInfo.version),
+        action: () => ElectronAPIs.muteUpdateNotification(updateInfo.version),
     },
 });
 
@@ -79,7 +78,7 @@ export const getUpdateAvailableForDownloadMessage = (
     close: {
         text: t('IGNORE_THIS_VERSION'),
         variant: 'secondary',
-        action: () => ElectronUpdateService.skipAppUpdate(updateInfo.version),
+        action: () => ElectronAPIs.skipAppUpdate(updateInfo.version),
     },
     proceed: {
         action: downloadApp,

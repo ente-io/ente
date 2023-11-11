@@ -1,22 +1,22 @@
 import {
     getPublicCollectionFileURL,
     getPublicCollectionThumbnailURL,
-} from 'utils/common/apiUtil';
+} from '@ente/shared/network/api';
 import {
     generateStreamFromArrayBuffer,
     getRenderableFileURL,
     createTypedObjectURL,
 } from 'utils/file';
-import HTTPService from './HTTPService';
+import HTTPService from '@ente/shared/network/HTTPService';
 import { EnteFile } from 'types/file';
 
-import { logError } from 'utils/sentry';
+import { logError } from '@ente/shared/sentry';
 import { FILE_TYPE } from 'constants/file';
-import { CustomError } from 'utils/error';
-import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
-import { CACHES } from 'constants/cache';
-import { CacheStorageService } from './cache/cacheStorageService';
-import { LimitedCache } from 'types/cache';
+import { CustomError } from '@ente/shared/error';
+import ComlinkCryptoWorker from '@ente/shared/crypto';
+import { CACHES } from '@ente/shared/storage/cacheStorage/constants';
+import { CacheStorageService } from '@ente/shared/storage/cacheStorage';
+import { LimitedCache } from '@ente/shared/storage/cacheStorage/types';
 
 class PublicCollectionDownloadManager {
     private fileObjectURLPromise = new Map<

@@ -12,7 +12,7 @@ import {
 import { NotificationAttributes } from 'types/Notification';
 
 import InfoIcon from '@mui/icons-material/InfoOutlined';
-import { IconButtonWithBG } from './Container';
+import { IconButtonWithBG } from '@ente/shared/components/Container';
 
 interface Iprops {
     open: boolean;

@@ -2,7 +2,7 @@ import React, { ChangeEvent } from 'react';
 import { FIX_OPTIONS } from '.';
 import { Form } from 'react-bootstrap';
 import EnteDateTimePicker from 'components/EnteDateTimePicker';
-import { Row, Value } from 'components/Container';
+import { Row, Value } from '@ente/shared/components/Container';
 import { t } from 'i18next';
 
 const Option = ({

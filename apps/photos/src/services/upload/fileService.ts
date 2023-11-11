@@ -10,8 +10,10 @@ import {
     ExtractMetadataResult,
 } from 'types/upload';
 import { splitFilenameAndExtension } from 'utils/file';
-import { logError } from 'utils/sentry';
-import { getFileNameSize, addLogLine } from 'utils/logging';
+import { logError } from '@ente/shared/sentry';
+import { addLogLine } from '@ente/shared/logging';
+import { getFileNameSize } from '@ente/shared/logging/web';
+
 import { encryptFiledata } from './encryptionService';
 import { extractMetadata, getMetadataJSONMapKey } from './metadataService';
 import {
@@ -20,7 +22,7 @@ import {
     getUint8ArrayView,
 } from '../readerService';
 import { generateThumbnail } from './thumbnailService';
-import { DedicatedCryptoWorker } from 'worker/crypto.worker';
+import { DedicatedCryptoWorker } from '@ente/shared/crypto/internal/crypto.worker';
 import { Remote } from 'comlink';
 import { EncryptedMagicMetadata } from 'types/magicMetadata';
 

@@ -1,6 +1,9 @@
 import { FILE_TYPE } from 'constants/file';
 import { Collection } from 'types/collection';
-import { B64EncryptionResult, LocalFileAttributes } from 'types/crypto';
+import {
+    B64EncryptionResult,
+    LocalFileAttributes,
+} from '@ente/shared/crypto/types';
 import {
     MetadataFileAttributes,
     S3FileAttributes,

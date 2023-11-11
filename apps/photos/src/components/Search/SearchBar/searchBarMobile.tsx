@@ -1,5 +1,5 @@
 import { IconButton } from '@mui/material';
-import { FluidContainer } from 'components/Container';
+import { FluidContainer } from '@ente/shared/components/Container';
 import React from 'react';
 import { SearchMobileBox } from './styledComponents';
 import SearchIcon from '@mui/icons-material/Search';

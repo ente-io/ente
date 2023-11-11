@@ -1,7 +1,7 @@
 import { getLocalFiles } from '../fileService';
 import { SetFiles } from 'types/gallery';
 import { sortFiles, decryptFile, getUserOwnedFiles } from 'utils/file';
-import { logError } from 'utils/sentry';
+import { logError } from '@ente/shared/sentry';
 import { getMetadataJSONMapKey, parseMetadataJSON } from './metadataService';
 import {
     areFileWithCollectionsSame,
@@ -10,8 +10,8 @@ import {
 import uploader from './uploader';
 import UIService from './uiService';
 import UploadService from './uploadService';
-import { eventBus, Events } from 'services/events';
-import { CustomError } from 'utils/error';
+import { eventBus, Events } from '@ente/shared/events';
+import { CustomError } from '@ente/shared/error';
 import { Collection } from 'types/collection';
 import { EncryptedEnteFile, EnteFile } from 'types/file';
 import {
@@ -23,20 +23,21 @@ import {
 
 import { UPLOAD_RESULT, UPLOAD_STAGES } from 'constants/upload';
 import uiService from './uiService';
-import { addLogLine, getFileNameSize } from 'utils/logging';
+import { addLogLine } from '@ente/shared/logging';
+import { getFileNameSize } from '@ente/shared/logging/web';
 import isElectron from 'is-electron';
 import ImportService from 'services/importService';
 import watchFolderService from 'services/watchFolder/watchFolderService';
 import { ProgressUpdater } from 'types/upload/ui';
 import uploadCancelService from './uploadCancelService';
-import { DedicatedCryptoWorker } from 'worker/crypto.worker';
-import { ComlinkWorker } from 'utils/comlink/comlinkWorker';
+import { DedicatedCryptoWorker } from '@ente/shared/crypto/internal/crypto.worker';
+import { ComlinkWorker } from '@ente/shared/worker/comlinkWorker';
 import { Remote } from 'comlink';
 import {
     getLocalPublicFiles,
     getPublicCollectionUID,
 } from 'services/publicCollectionService';
-import { getDedicatedCryptoWorker } from 'utils/comlink/ComlinkCryptoWorker';
+import { getDedicatedCryptoWorker } from '@ente/shared/crypto';
 import { getDisableCFUploadProxyFlag } from 'services/userService';
 
 const MAX_CONCURRENT_UPLOADS = 4;

@@ -3,13 +3,12 @@ import { EncryptedEnteFile } from 'types/file';
 import { ElectronFile, FileWithCollection } from 'types/upload';
 import { removeFromCollection } from '../collectionService';
 import { getLocalFiles } from '../fileService';
-import { logError } from 'utils/sentry';
+import { logError } from '@ente/shared/sentry';
 import {
     EventQueueItem,
     WatchMapping,
     WatchMappingSyncedFile,
 } from 'types/watchFolder';
-import { ElectronAPIs } from 'types/electron';
 import debounce from 'debounce-promise';
 import {
     diskFileAddedCallback,
@@ -19,12 +18,12 @@ import {
 import { getParentFolderName } from './utils';
 import { UPLOAD_RESULT, UPLOAD_STRATEGY } from 'constants/upload';
 import uploadManager from 'services/upload/uploadManager';
-import { addLocalLog, addLogLine } from 'utils/logging';
+import { addLocalLog, addLogLine } from '@ente/shared/logging';
 import { getValidFilesToUpload } from 'utils/watch';
 import { groupFilesBasedOnCollectionID } from 'utils/file';
+import ElectronAPIs from '@ente/shared/electron';
 
 class watchFolderService {
-    private electronAPIs: ElectronAPIs;
     private allElectronAPIsExist: boolean = false;
     private eventQueue: EventQueueItem[] = [];
     private currentEvent: EventQueueItem;
@@ -39,11 +38,6 @@ class watchFolderService {
     private setCollectionName: (collectionName: string) => void;
     private syncWithRemote: () => void;
     private setWatchFolderServiceIsRunning: (isRunning: boolean) => void;
-
-    constructor() {
-        this.electronAPIs = globalThis['ElectronAPIs'];
-        this.allElectronAPIsExist = !!this.electronAPIs?.getWatchMappings;
-    }
 
     isUploadRunning() {
         return this.uploadRunning;
@@ -88,7 +82,7 @@ class watchFolderService {
 
             for (const mapping of mappings) {
                 const filesOnDisk: ElectronFile[] =
-                    await this.electronAPIs.getDirFiles(mapping.folderPath);
+                    await ElectronAPIs.getDirFiles(mapping.folderPath);
 
                 this.uploadDiffOfFiles(mapping, filesOnDisk);
                 this.trashDiffOfFiles(mapping, filesOnDisk);
@@ -155,11 +149,11 @@ class watchFolderService {
     ): Promise<WatchMapping[]> {
         const notDeletedMappings = [];
         for (const mapping of mappings) {
-            const mappingExists = await this.electronAPIs.isFolder(
+            const mappingExists = await ElectronAPIs.isFolder(
                 mapping.folderPath
             );
             if (!mappingExists) {
-                this.electronAPIs.removeWatchMapping(mapping.folderPath);
+                ElectronAPIs.removeWatchMapping(mapping.folderPath);
             } else {
                 notDeletedMappings.push(mapping);
             }
@@ -178,7 +172,7 @@ class watchFolderService {
 
     private setupWatcherFunctions() {
         if (this.allElectronAPIsExist) {
-            this.electronAPIs.registerWatcherFunctions(
+            ElectronAPIs.registerWatcherFunctions(
                 diskFileAddedCallback,
                 diskFileRemovedCallback,
                 diskFolderRemovedCallback
@@ -193,7 +187,7 @@ class watchFolderService {
     ) {
         if (this.allElectronAPIsExist) {
             try {
-                await this.electronAPIs.addWatchMapping(
+                await ElectronAPIs.addWatchMapping(
                     rootFolderName,
                     folderPath,
                     uploadStrategy
@@ -208,7 +202,7 @@ class watchFolderService {
     async removeWatchMapping(folderPath: string) {
         if (this.allElectronAPIsExist) {
             try {
-                await this.electronAPIs.removeWatchMapping(folderPath);
+                await ElectronAPIs.removeWatchMapping(folderPath);
             } catch (e) {
                 logError(e, 'error while removing watch mapping');
             }
@@ -218,7 +212,7 @@ class watchFolderService {
     getWatchMappings(): WatchMapping[] {
         if (this.allElectronAPIsExist) {
             try {
-                return this.electronAPIs.getWatchMappings() ?? [];
+                return ElectronAPIs.getWatchMappings() ?? [];
             } catch (e) {
                 logError(e, 'error while getting watch mappings');
                 return [];
@@ -395,7 +389,7 @@ class watchFolderService {
                         ...this.currentlySyncedMapping.syncedFiles,
                         ...syncedFiles,
                     ];
-                    this.electronAPIs.updateWatchMappingSyncedFiles(
+                    ElectronAPIs.updateWatchMappingSyncedFiles(
                         this.currentlySyncedMapping.folderPath,
                         this.currentlySyncedMapping.syncedFiles
                     );
@@ -405,7 +399,7 @@ class watchFolderService {
                         ...this.currentlySyncedMapping.ignoredFiles,
                         ...ignoredFiles,
                     ];
-                    this.electronAPIs.updateWatchMappingIgnoredFiles(
+                    ElectronAPIs.updateWatchMappingIgnoredFiles(
                         this.currentlySyncedMapping.folderPath,
                         this.currentlySyncedMapping.ignoredFiles
                     );
@@ -521,7 +515,7 @@ class watchFolderService {
                 this.currentlySyncedMapping.syncedFiles.filter(
                     (file) => !filePathsToRemove.has(file.path)
                 );
-            this.electronAPIs.updateWatchMappingSyncedFiles(
+            ElectronAPIs.updateWatchMappingSyncedFiles(
                 this.currentlySyncedMapping.folderPath,
                 this.currentlySyncedMapping.syncedFiles
             );
@@ -613,7 +607,7 @@ class watchFolderService {
 
     async selectFolder(): Promise<string> {
         try {
-            const folderPath = await this.electronAPIs.selectDirectory();
+            const folderPath = await ElectronAPIs.selectDirectory();
             return folderPath;
         } catch (e) {
             logError(e, 'error while selecting folder');
@@ -641,7 +635,7 @@ class watchFolderService {
 
     async isFolder(folderPath: string) {
         try {
-            const isFolder = await this.electronAPIs.isFolder(folderPath);
+            const isFolder = await ElectronAPIs.isFolder(folderPath);
             return isFolder;
         } catch (e) {
             logError(e, 'error while checking if folder exists');

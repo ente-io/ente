@@ -1,6 +1,6 @@
 import React from 'react';
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
-import { SCROLL_DIRECTION } from 'hooks/useComponentScroll';
+import { SCROLL_DIRECTION } from '@ente/shared/hooks/useComponentScroll';
 import { css, styled } from '@mui/material';
 
 const Wrapper = styled('button')<{ direction: SCROLL_DIRECTION }>`

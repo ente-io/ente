@@ -1,8 +1,8 @@
-import { getEndpoint } from 'utils/common/apiUtil';
-import localForage from 'utils/storage/localForage';
+import { getEndpoint } from '@ente/shared/network/api';
+import localForage from '@ente/shared/storage/localForage';
 import { Collection, CollectionPublicMagicMetadata } from 'types/collection';
-import HTTPService from './HTTPService';
-import { logError } from 'utils/sentry';
+import HTTPService from '@ente/shared/network/HTTPService';
+import { logError } from '@ente/shared/sentry';
 import { decryptFile, mergeMetadata, sortFiles } from 'utils/file';
 import { EncryptedEnteFile, EnteFile } from 'types/file';
 import {
@@ -11,8 +11,8 @@ import {
     LocalSavedPublicCollectionFiles,
 } from 'types/publicCollection';
 import { REPORT_REASON } from 'constants/publicCollection';
-import { CustomError, parseSharingErrorCodes } from 'utils/error';
-import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
+import { CustomError, parseSharingErrorCodes } from '@ente/shared/error';
+import ComlinkCryptoWorker from '@ente/shared/crypto';
 
 const ENDPOINT = getEndpoint();
 const PUBLIC_COLLECTION_FILES_TABLE = 'public-collection-files';

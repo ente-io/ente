@@ -10,11 +10,11 @@ import AdvancedSettings from '../AdvancedSettings';
 import MapSettings from '../MapSetting';
 import { LanguageSelector } from './LanguageSelector';
 import { EnteMenuItem } from 'components/Menu/EnteMenuItem';
-import { LS_KEYS } from 'utils/storage/localStorage';
-import { useLocalState } from 'hooks/useLocalState';
-import ElectronService from 'services/electron/common';
-import InMemoryStore, { MS_KEYS } from 'services/InMemoryStore';
-import { logError } from 'utils/sentry';
+import { LS_KEYS } from '@ente/shared/storage/localStorage';
+import { useLocalState } from '@ente/shared/hooks/useLocalState';
+import ElectronAPIs from '@ente/shared/electron';
+import InMemoryStore, { MS_KEYS } from '@ente/shared/storage/InMemoryStore';
+import { logError } from '@ente/shared/sentry';
 
 export default function Preferences({ open, onClose, onRootClose }) {
     const [advancedSettingsView, setAdvancedSettingsView] = useState(false);
@@ -46,7 +46,7 @@ export default function Preferences({ open, onClose, onRootClose }) {
     const toggleOptOutOfCrashReports = async () => {
         try {
             if (isElectron()) {
-                await ElectronService.updateOptOutOfCrashReports(
+                await ElectronAPIs.updateOptOutOfCrashReports(
                     !optOutOfCrashReports
                 );
             }

@@ -1,4 +1,4 @@
-import { ENTE_WEBSITE_LINK } from 'constants/urls';
+import { ENTE_WEBSITE_LINK } from '@ente/shared/constants/urls';
 import React, { useEffect, useState } from 'react';
 import { Button, styled } from '@mui/material';
 import { getDeviceOS, OS } from 'utils/common/deviceDetection';

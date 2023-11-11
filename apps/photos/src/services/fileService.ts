@@ -1,17 +1,17 @@
-import { getEndpoint } from 'utils/common/apiUtil';
-import localForage from 'utils/storage/localForage';
+import { getEndpoint } from '@ente/shared/network/api';
+import localForage from '@ente/shared/storage/localForage';
 
-import { getToken } from 'utils/common/key';
+import { getToken } from '@ente/shared/storage/localStorage/helpers';
 import { Collection } from 'types/collection';
-import HTTPService from './HTTPService';
-import { logError } from 'utils/sentry';
+import HTTPService from '@ente/shared/network/HTTPService';
+import { logError } from '@ente/shared/sentry';
 import {
     decryptFile,
     getLatestVersionFiles,
     mergeMetadata,
     sortFiles,
 } from 'utils/file';
-import { eventBus, Events } from './events';
+import { eventBus, Events } from '@ente/shared/events';
 import {
     EnteFile,
     EncryptedEnteFile,
@@ -21,8 +21,8 @@ import {
 } from 'types/file';
 import { SetFiles } from 'types/gallery';
 import { BulkUpdateMagicMetadataRequest } from 'types/magicMetadata';
-import { addLogLine } from 'utils/logging';
-import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
+import { addLogLine } from '@ente/shared/logging';
+import ComlinkCryptoWorker from '@ente/shared/crypto';
 import {
     getCollectionLastSyncTime,
     setCollectionLastSyncTime,

@@ -1,42 +1,17 @@
-import React, { useState, useEffect, useContext } from 'react';
+import LoginPage from '@ente/accounts/pages/login';
 import { useRouter } from 'next/router';
-import EnteSpinner from 'components/EnteSpinner';
 import { AppContext } from 'pages/_app';
-import Login from 'components/Login';
-import { VerticallyCentered } from 'components/Container';
-import { getData, LS_KEYS } from 'utils/storage/localStorage';
-import { PAGES } from 'constants/pages';
-import FormPaper from 'components/Form/FormPaper';
+import { useContext } from 'react';
+import { APPS } from '@ente/shared/apps/constants';
 
-export default function Home() {
-    const router = useRouter();
+export default function Login() {
     const appContext = useContext(AppContext);
-    const [loading, setLoading] = useState(true);
-
-    useEffect(() => {
-        router.prefetch(PAGES.VERIFY);
-        router.prefetch(PAGES.SIGNUP);
-        const user = getData(LS_KEYS.USER);
-        if (user?.email) {
-            router.push(PAGES.VERIFY);
-        }
-        setLoading(false);
-        appContext.showNavBar(true);
-    }, []);
-
-    const register = () => {
-        router.push(PAGES.SIGNUP);
-    };
-
-    return loading ? (
-        <VerticallyCentered>
-            <EnteSpinner />
-        </VerticallyCentered>
-    ) : (
-        <VerticallyCentered>
-            <FormPaper>
-                <Login signUp={register} />
-            </FormPaper>
-        </VerticallyCentered>
+    const router = useRouter();
+    return (
+        <LoginPage
+            appContext={appContext}
+            router={router}
+            appName={APPS.PHOTOS}
+        />
     );
 }

@@ -13,10 +13,10 @@ import { MergedSourceURL, SelectedState } from 'types/gallery';
 import PublicCollectionDownloadManager from 'services/publicCollectionDownloadManager';
 import { PublicCollectionGalleryContext } from 'utils/publicCollectionGallery';
 import { useRouter } from 'next/router';
-import { logError } from 'utils/sentry';
-import { addLogLine } from 'utils/logging';
+import { logError } from '@ente/shared/sentry';
+import { addLogLine } from '@ente/shared/logging';
 import PhotoSwipe from 'photoswipe';
-import useMemoSingleThreaded from 'hooks/useMemoSingleThreaded';
+import useMemoSingleThreaded from '@ente/shared/hooks/useMemoSingleThreaded';
 import { getPlayableVideo } from 'utils/file';
 import { FILE_TYPE } from 'constants/file';
 

@@ -8,10 +8,10 @@ import {
 import { styled } from '@mui/material';
 import { EnteFile } from 'types/file';
 import { ImageCacheView } from './ImageViews';
-import { CACHES } from 'constants/cache';
+import { CACHES } from '@ente/shared/storage/cacheStorage/constants';
 import { Legend } from 'components/PhotoViewer/styledComponents/Legend';
-import { addLogLine } from 'utils/logging';
-import { logError } from 'utils/sentry';
+import { addLogLine } from '@ente/shared/logging';
+import { logError } from '@ente/shared/sentry';
 import { t } from 'i18next';
 
 const FaceChipContainer = styled('div')`
