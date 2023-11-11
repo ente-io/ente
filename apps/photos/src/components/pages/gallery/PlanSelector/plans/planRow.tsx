@@ -5,7 +5,7 @@ import {
     convertBytesToGBs,
     hasPaidSubscription,
 } from 'utils/billing';
-import { FlexWrapper, FluidContainer } from 'components/Container';
+import { FlexWrapper, FluidContainer } from '@ente/shared/components/Container';
 import ArrowForward from '@mui/icons-material/ArrowForward';
 import { PLAN_PERIOD } from 'constants/gallery';
 import Done from '@mui/icons-material/Done';

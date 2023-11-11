@@ -27,7 +27,7 @@ import MenuSectionTitle from 'components/Menu/MenuSectionTitle';
 import DownloadIcon from '@mui/icons-material/Download';
 import mime from 'mime-types';
 import CloseIcon from '@mui/icons-material/Close';
-import { HorizontalFlex } from 'components/Container';
+import { HorizontalFlex } from '@ente/shared/components/Container';
 import TransformMenu from './TransformMenu';
 import ColoursMenu from './ColoursMenu';
 import { FileWithCollection } from 'types/upload';

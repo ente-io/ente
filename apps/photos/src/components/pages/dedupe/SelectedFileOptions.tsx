@@ -1,4 +1,4 @@
-import { FluidContainer } from 'components/Container';
+import { FluidContainer } from '@ente/shared/components/Container';
 import { SelectionBar } from '@ente/shared/components/Navbar/SelectionBar';
 import { useContext } from 'react';
 import { Box, IconButton, Tooltip } from '@mui/material';

@@ -1,5 +1,5 @@
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
-import { FlexWrapper, Overlay } from 'components/Container';
+import { FlexWrapper, Overlay } from '@ente/shared/components/Container';
 import React from 'react';
 export function ClickOverlay({ onClick }) {
     return (

@@ -24,7 +24,7 @@ import {
     VerticallyCentered,
     CenteredFlex,
     SpaceBetweenFlex,
-} from 'components/Container';
+} from '@ente/shared/components/Container';
 import { t } from 'i18next';
 
 import EnteSpinner from '@ente/shared/components/EnteSpinner';

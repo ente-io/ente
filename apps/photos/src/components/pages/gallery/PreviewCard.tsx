@@ -10,7 +10,7 @@ import { PublicCollectionGalleryContext } from 'utils/publicCollectionGallery';
 import PublicCollectionDownloadManager from 'services/publicCollectionDownloadManager';
 import { DeduplicateContext } from 'pages/deduplicate';
 import { logError } from '@ente/shared/sentry';
-import { Overlay } from 'components/Container';
+import { Overlay } from '@ente/shared/components/Container';
 import { TRASH_SECTION } from 'constants/collection';
 import { formatDateRelative } from '@ente/shared/time/format';
 import {

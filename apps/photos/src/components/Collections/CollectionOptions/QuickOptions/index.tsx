@@ -1,7 +1,7 @@
 import { CollectionActions } from '..';
 import React from 'react';
 import { CollectionSummaryType } from 'constants/collection';
-import { FlexWrapper } from 'components/Container';
+import { FlexWrapper } from '@ente/shared/components/Container';
 import { EmptyTrashQuickOption } from './EmptyTrashQuickOption';
 import { DownloadQuickOption } from './DownloadQuickOption';
 import { ShareQuickOption } from './ShareQuickOption';

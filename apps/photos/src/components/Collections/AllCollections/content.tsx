@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { DialogContent } from '@mui/material';
-import { FlexWrapper } from 'components/Container';
+import { FlexWrapper } from '@ente/shared/components/Container';
 import AllCollectionCard from './collectionCard';
 import { CollectionSummary } from 'types/collection';
 import {

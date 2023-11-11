@@ -14,7 +14,10 @@ import {
     Typography,
 } from '@mui/material';
 import { logError } from '@ente/shared/sentry';
-import { SpaceBetweenFlex, VerticallyCenteredFlex } from './Container';
+import {
+    SpaceBetweenFlex,
+    VerticallyCenteredFlex,
+} from '@ente/shared/components/Container';
 import ExportFinished from './ExportFinished';
 import ExportInit from './ExportInit';
 import ExportInProgress from './ExportInProgress';

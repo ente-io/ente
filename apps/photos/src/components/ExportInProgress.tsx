@@ -8,7 +8,10 @@ import {
     styled,
 } from '@mui/material';
 import { ExportStage } from 'constants/export';
-import { VerticallyCentered, FlexWrapper } from './Container';
+import {
+    VerticallyCentered,
+    FlexWrapper,
+} from '@ente/shared/components/Container';
 import { ProgressBar } from 'react-bootstrap';
 import { t } from 'i18next';
 import { Trans } from 'react-i18next';

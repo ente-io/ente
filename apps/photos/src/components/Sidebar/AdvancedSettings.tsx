@@ -14,7 +14,7 @@ import isElectron from 'is-electron';
 import { logError } from '@ente/shared/sentry';
 import { AppContext } from 'pages/_app';
 import { ClipService } from 'services/clipService';
-import { VerticallyCenteredFlex } from 'components/Container';
+import { VerticallyCenteredFlex } from '@ente/shared/components/Container';
 import { ClipExtractionStatus } from 'services/clipService';
 import { formatNumber } from 'utils/number/format';
 

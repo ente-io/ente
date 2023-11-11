@@ -2,7 +2,7 @@ import Close from '@mui/icons-material/Close';
 import { IconButton, Stack } from '@mui/material';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
-import { SpaceBetweenFlex } from 'components/Container';
+import { SpaceBetweenFlex } from '@ente/shared/components/Container';
 import React from 'react';
 import { t } from 'i18next';
 import { convertBytesToGBs, isSubscriptionCancelled } from 'utils/billing';

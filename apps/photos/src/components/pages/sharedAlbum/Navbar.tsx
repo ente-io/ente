@@ -1,5 +1,5 @@
 import { EnteLinkLogo } from '@ente/shared/components/Navbar/EnteLinkLogo';
-import { FluidContainer } from 'components/Container';
+import { FluidContainer } from '@ente/shared/components/Container';
 import NavbarBase from '@ente/shared/components/Navbar/base';
 import UploadButton from 'components/Upload/UploadButton';
 import React, { useContext } from 'react';

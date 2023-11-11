@@ -1,7 +1,7 @@
 import { Legend } from './legend';
 import { FamilyUsageProgressBar } from './progressBar';
 import { Box, Stack, Typography } from '@mui/material';
-import { SpaceBetweenFlex } from 'components/Container';
+import { SpaceBetweenFlex } from '@ente/shared/components/Container';
 import React from 'react';
 import { t } from 'i18next';
 

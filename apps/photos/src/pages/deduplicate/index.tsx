@@ -26,7 +26,7 @@ import { getKey, SESSION_KEYS } from '@ente/shared/storage/sessionStorage';
 import { styled } from '@mui/material';
 import { getLatestCollections } from 'services/collectionService';
 import EnteSpinner from '@ente/shared/components/EnteSpinner';
-import { VerticallyCentered } from 'components/Container';
+import { VerticallyCentered } from '@ente/shared/components/Container';
 import Typography from '@mui/material/Typography';
 import useMemoSingleThreaded from '@ente/shared/hooks/useMemoSingleThreaded';
 import InMemoryStore, { MS_KEYS } from '@ente/shared/storage/InMemoryStore';

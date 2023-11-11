@@ -8,7 +8,7 @@ import { UpdateSearch } from 'types/search';
 import UploadButton from 'components/Upload/UploadButton';
 import { IconButton, Typography } from '@mui/material';
 import ArrowBack from '@mui/icons-material/ArrowBack';
-import { FlexWrapper, HorizontalFlex } from 'components/Container';
+import { FlexWrapper, HorizontalFlex } from '@ente/shared/components/Container';
 import { t } from 'i18next';
 import { AppContext } from 'pages/_app';
 

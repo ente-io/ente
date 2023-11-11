@@ -109,7 +109,7 @@ import useFileInput from '@ente/shared/hooks/useFileInput';
 import { User } from '@ente/shared/user/types';
 import { FamilyData } from 'types/user';
 import { getData, LS_KEYS } from '@ente/shared/storage/localStorage';
-import { CenteredFlex } from 'components/Container';
+import { CenteredFlex } from '@ente/shared/components/Container';
 import { checkConnectivity } from 'utils/common';
 import { SYNC_INTERVAL_IN_MICROSECONDS } from 'constants/gallery';
 import ElectronAPIs from '@ente/shared/electron';

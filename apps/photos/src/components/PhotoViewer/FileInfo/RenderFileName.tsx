@@ -5,7 +5,7 @@ import {
     splitFilenameAndExtension,
     updateExistingFilePubMetadata,
 } from 'utils/file';
-import { FlexWrapper } from 'components/Container';
+import { FlexWrapper } from '@ente/shared/components/Container';
 import { logError } from '@ente/shared/sentry';
 import { FILE_TYPE } from 'constants/file';
 import InfoItem from './InfoItem';

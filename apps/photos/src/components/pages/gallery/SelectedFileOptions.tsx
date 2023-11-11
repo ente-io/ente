@@ -3,7 +3,7 @@ import {
     CollectionSelectorIntent,
     SetCollectionSelectorAttributes,
 } from 'types/gallery';
-import { FluidContainer } from 'components/Container';
+import { FluidContainer } from '@ente/shared/components/Container';
 import { COLLECTION_OPS_TYPE } from 'utils/collection';
 import {
     ALL_SECTION,

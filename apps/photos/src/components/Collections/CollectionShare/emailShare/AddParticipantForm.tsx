@@ -3,7 +3,7 @@ import { Formik, FormikHelpers, FormikState } from 'formik';
 import * as Yup from 'yup';
 import SubmitButton from '@ente/shared/components/SubmitButton';
 import TextField from '@mui/material/TextField';
-import { FlexWrapper } from 'components/Container';
+import { FlexWrapper } from '@ente/shared/components/Container';
 import { Button, FormHelperText, Stack } from '@mui/material';
 import { t } from 'i18next';
 import { MenuItemGroup } from 'components/Menu/MenuItemGroup';

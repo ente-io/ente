@@ -6,7 +6,10 @@ import {
     CollectionListWrapper,
 } from 'components/Collections/styledComponents';
 import CollectionListBarCard from 'components/Collections/CollectionListBar/CollectionCard';
-import { IconButtonWithBG, SpaceBetweenFlex } from 'components/Container';
+import {
+    IconButtonWithBG,
+    SpaceBetweenFlex,
+} from '@ente/shared/components/Container';
 import ExpandMore from '@mui/icons-material/ExpandMore';
 import { AppContext } from 'pages/_app';
 import { CollectionSummary } from 'types/collection';

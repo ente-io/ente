@@ -9,7 +9,7 @@ import { formatDate, formatTime } from '@ente/shared/time/format';
 import Titlebar from 'components/Titlebar';
 import MapBox from './MapBox';
 import InfoItem from './InfoItem';
-import { FlexWrapper } from 'components/Container';
+import { FlexWrapper } from '@ente/shared/components/Container';
 import EnteSpinner from '@ente/shared/components/EnteSpinner';
 import { EnteFile } from 'types/file';
 import { Chip } from 'components/Chip';

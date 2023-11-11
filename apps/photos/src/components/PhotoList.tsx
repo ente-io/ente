@@ -20,7 +20,7 @@ import { PublicCollectionGalleryContext } from 'utils/publicCollectionGallery';
 import { ENTE_WEBSITE_LINK } from '@ente/shared/constants/urls';
 import { convertBytesToHumanReadable } from 'utils/file/size';
 import { DeduplicateContext } from 'pages/deduplicate';
-import { FlexWrapper } from './Container';
+import { FlexWrapper } from '@ente/shared/components/Container';
 import { Typography } from '@mui/material';
 import { GalleryContext } from 'pages/gallery';
 import { formatDate } from '@ente/shared/time/format';

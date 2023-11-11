@@ -53,7 +53,7 @@ import publicCollectionDownloadManager from 'services/publicCollectionDownloadMa
 import CircularProgressWithLabel from './styledComponents/CircularProgressWithLabel';
 import EnteSpinner from '@ente/shared/components/EnteSpinner';
 import AlbumOutlined from '@mui/icons-material/AlbumOutlined';
-import { FlexWrapper } from 'components/Container';
+import { FlexWrapper } from '@ente/shared/components/Container';
 import isElectron from 'is-electron';
 import ReplayIcon from '@mui/icons-material/Replay';
 import ImageEditorOverlay from './ImageEditorOverlay';

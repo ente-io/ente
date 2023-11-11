@@ -8,7 +8,7 @@ import DialogTitleWithCloseButton from '@ente/shared/components/DialogBox/TitleW
 import { AppContext } from 'pages/_app';
 import { AllCollectionDialog } from 'components/Collections/AllCollections/dialog';
 import { DialogContent } from '@mui/material';
-import { FlexWrapper } from 'components/Container';
+import { FlexWrapper } from '@ente/shared/components/Container';
 import CollectionSelectorCard from './CollectionCard';
 import AddCollectionButton from './AddCollectionButton';
 import { CollectionSelectorIntent } from 'types/gallery';

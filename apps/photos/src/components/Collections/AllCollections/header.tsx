@@ -4,7 +4,7 @@ import {
     FlexWrapper,
     FluidContainer,
     IconButtonWithBG,
-} from 'components/Container';
+} from '@ente/shared/components/Container';
 import CollectionListSortBy from 'components/Collections/CollectionListSortBy';
 import Close from '@mui/icons-material/Close';
 import { t } from 'i18next';

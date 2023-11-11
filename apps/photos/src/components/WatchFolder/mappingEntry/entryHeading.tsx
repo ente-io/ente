@@ -2,7 +2,7 @@ import React, { useContext } from 'react';
 import { CircularProgress, Typography } from '@mui/material';
 import watchFolderService from 'services/watchFolder/watchFolderService';
 import { AppContext } from 'pages/_app';
-import { FlexWrapper } from 'components/Container';
+import { FlexWrapper } from '@ente/shared/components/Container';
 import { WatchMapping } from 'types/watchFolder';
 
 interface Iprops {
