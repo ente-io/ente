@@ -350,8 +350,7 @@ class SearchService {
       });
 
       if (limit != null) {
-        return (searchResults..shuffle())
-            .sublist(0, min(limit, searchResults.length));
+        return searchResults.sublist(0, min(limit, searchResults.length));
       } else {
         return searchResults;
       }
@@ -498,8 +497,7 @@ class SearchService {
         );
       });
       if (limit != null) {
-        return (searchResults..shuffle())
-            .sublist(0, min(limit, searchResults.length));
+        return searchResults.sublist(0, min(limit, searchResults.length));
       } else {
         return searchResults;
       }
