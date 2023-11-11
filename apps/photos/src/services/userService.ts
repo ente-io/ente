@@ -2,12 +2,12 @@ import {
     getEndpoint,
     getFamilyPortalURL,
     isDevDeployment,
-} from 'utils/common/apiUtil';
+} from '@ente/shared/network/api';
 import { getData, LS_KEYS } from '@ente/shared/storage/localStorage';
 import localForage from '@ente/shared/storage/localForage';
-import { getToken } from 'utils/common/key';
-import HTTPService from './HTTPService';
-import { getRecoveryKey } from 'utils/crypto';
+import { getToken } from '@ente/shared/storage/localStorage/helpers';
+import HTTPService from '@ente/shared/network/HTTPService';
+import { getRecoveryKey } from '@ente/shared/crypto/helpers';
 import { logError } from '@ente/shared/sentry';
 import {
     UserDetails,
@@ -15,7 +15,7 @@ import {
     GetRemoteStoreValueResponse,
     GetFeatureFlagResponse,
 } from 'types/user';
-import { ApiError } from 'utils/error';
+import { ApiError } from '@ente/shared/error';
 import { getLocalFamilyData, isPartOfFamily } from 'utils/user/family';
 import { AxiosResponse, HttpStatusCode } from 'axios';
 import { setLocalMapEnabled } from '@ente/shared/storage/localStorage/helpers';
@@ -141,47 +141,6 @@ export const getTwoFactorStatus = async () => {
         }
     );
     return resp.data['status'];
-};
-
-export const _logout = async () => {
-    if (!getToken()) return true;
-    try {
-        await HTTPService.post(`${ENDPOINT}/users/logout`, null, null, {
-            'X-Auth-Token': getToken(),
-        });
-        return true;
-    } catch (e) {
-        logError(e, '/users/logout failed');
-        return false;
-    }
-};
-
-export const sendOTTForEmailChange = async (email: string) => {
-    if (!getToken()) {
-        return null;
-    }
-    await HTTPService.post(`${ENDPOINT}/users/ott`, {
-        email,
-        client: 'web',
-        purpose: 'change',
-    });
-};
-
-export const changeEmail = async (email: string, ott: string) => {
-    if (!getToken()) {
-        return null;
-    }
-    await HTTPService.post(
-        `${ENDPOINT}/users/change-email`,
-        {
-            email,
-            ott,
-        },
-        null,
-        {
-            'X-Auth-Token': getToken(),
-        }
-    );
 };
 
 export const getUserDetailsV2 = async (): Promise<UserDetails> => {

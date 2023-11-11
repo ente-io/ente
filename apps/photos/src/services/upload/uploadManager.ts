@@ -10,8 +10,8 @@ import {
 import uploader from './uploader';
 import UIService from './uiService';
 import UploadService from './uploadService';
-import { eventBus, Events } from 'services/events';
-import { CustomError } from 'utils/error';
+import { eventBus, Events } from '@ente/shared/events';
+import { CustomError } from '@ente/shared/error';
 import { Collection } from 'types/collection';
 import { EncryptedEnteFile, EnteFile } from 'types/file';
 import {
@@ -30,7 +30,7 @@ import ImportService from 'services/importService';
 import watchFolderService from 'services/watchFolder/watchFolderService';
 import { ProgressUpdater } from 'types/upload/ui';
 import uploadCancelService from './uploadCancelService';
-import { DedicatedCryptoWorker } from 'worker/crypto.worker';
+import { DedicatedCryptoWorker } from '@ente/shared/crypto/internal/crypto.worker';
 import { ComlinkWorker } from '@ente/shared/worker/comlinkWorker';
 import { Remote } from 'comlink';
 import {

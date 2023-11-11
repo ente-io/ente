@@ -13,7 +13,7 @@ import { EnteMenuItem } from 'components/Menu/EnteMenuItem';
 import { LS_KEYS } from '@ente/shared/storage/localStorage';
 import { useLocalState } from '@ente/shared/hooks/useLocalState';
 import ElectronAPIs from '@ente/shared/electron';
-import InMemoryStore, { MS_KEYS } from 'services/InMemoryStore';
+import InMemoryStore, { MS_KEYS } from '@ente/shared/storage/InMemoryStore';
 import { logError } from '@ente/shared/sentry';
 
 export default function Preferences({ open, onClose, onRootClose }) {

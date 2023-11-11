@@ -1,10 +1,10 @@
 import downloadManager from 'services/downloadManager';
 import { getLocalFiles } from 'services/fileService';
 import { generateThumbnail } from 'services/upload/thumbnailService';
-import { getToken } from 'utils/common/key';
+import { getToken } from '@ente/shared/storage/localStorage/helpers';
 import { logError } from '@ente/shared/sentry';
-import { getEndpoint } from 'utils/common/apiUtil';
-import HTTPService from 'services/HTTPService';
+import { getEndpoint } from '@ente/shared/network/api';
+import HTTPService from '@ente/shared/network/HTTPService';
 import uploadHttpClient from 'services/upload/uploadHttpClient';
 import { SetProgressTracker } from 'components/FixLargeThumbnail';
 import { getFileType } from 'services/typeDetectionService';
@@ -12,7 +12,7 @@ import { getLocalTrashedFiles } from './trashService';
 import { UploadURL } from 'types/upload';
 import { S3FileAttributes } from 'types/file';
 import { Remote } from 'comlink';
-import { DedicatedCryptoWorker } from 'worker/crypto.worker';
+import { DedicatedCryptoWorker } from '@ente/shared/crypto/internal/crypto.worker';
 import ComlinkCryptoWorker from '@ente/shared/crypto';
 
 const ENDPOINT = getEndpoint();

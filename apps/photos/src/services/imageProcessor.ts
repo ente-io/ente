@@ -2,7 +2,7 @@ import ElectronAPIs from '@ente/shared/electron';
 import { addLogLine } from '@ente/shared/logging';
 import { logError } from '@ente/shared/sentry';
 import { ElectronFile } from 'types/upload';
-import { CustomError } from 'utils/error';
+import { CustomError } from '@ente/shared/error';
 import { convertBytesToHumanReadable } from 'utils/file/size';
 
 class ElectronImageProcessorService {

@@ -10,7 +10,7 @@ import {
     ExportProgress,
 } from 'types/export';
 import { EnteFile } from 'types/file';
-import { User } from 'types/user';
+import { User } from '@ente/shared/user/types';
 import { getNonEmptyPersonalCollections } from 'utils/collection';
 import {
     getCollectionExportPath,

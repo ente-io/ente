@@ -1,5 +1,5 @@
 import { FILE_TYPE } from 'constants/file';
-import { CustomError, errorWithContext } from 'utils/error';
+import { CustomError, errorWithContext } from '@ente/shared/error';
 import { logError } from '@ente/shared/sentry';
 import { BLACK_THUMBNAIL_BASE64 } from 'constants/upload';
 import * as FFmpegService from 'services/ffmpeg/ffmpegService';

@@ -6,7 +6,7 @@ import { NextRouter } from 'next/router';
 import { SetLoading } from 'types/gallery';
 import { getData, LS_KEYS } from '@ente/shared/storage/localStorage';
 import { logError } from '@ente/shared/sentry';
-import { SetDialogBoxAttributes } from 'types/dialogBox';
+import { SetDialogBoxAttributes } from '@ente/shared/components/DialogBox/types';
 import { openLink } from 'utils/common';
 import { isPartOfFamily, getTotalFamilyUsage } from 'utils/user/family';
 import { UserDetails } from 'types/user';

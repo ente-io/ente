@@ -32,7 +32,7 @@ import ssdMobileNetV2Service from './ssdMobileNetV2Service';
 import imageSceneService from './imageSceneService';
 import { getDedicatedCryptoWorker } from '@ente/shared/crypto';
 import { ComlinkWorker } from '@ente/shared/worker/comlinkWorker';
-import { DedicatedCryptoWorker } from 'worker/crypto.worker';
+import { DedicatedCryptoWorker } from '@ente/shared/crypto/internal/crypto.worker';
 import { addLogLine } from '@ente/shared/logging';
 
 export class MLFactory {

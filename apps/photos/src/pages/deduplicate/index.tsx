@@ -12,7 +12,7 @@ import { syncFiles, trashFiles } from 'services/fileService';
 import { EnteFile } from 'types/file';
 import { SelectedState } from 'types/gallery';
 
-import { ApiError } from 'utils/error';
+import { ApiError } from '@ente/shared/error';
 import { constructFileToCollectionMap, getSelectedFiles } from 'utils/file';
 import {
     DeduplicateContextType,
@@ -29,7 +29,7 @@ import EnteSpinner from '@ente/shared/components/EnteSpinner';
 import { VerticallyCentered } from 'components/Container';
 import Typography from '@mui/material/Typography';
 import useMemoSingleThreaded from '@ente/shared/hooks/useMemoSingleThreaded';
-import InMemoryStore, { MS_KEYS } from 'services/InMemoryStore';
+import InMemoryStore, { MS_KEYS } from '@ente/shared/storage/InMemoryStore';
 import { HttpStatusCode } from 'axios';
 
 export const DeduplicateContext = createContext<DeduplicateContextType>(

@@ -12,7 +12,7 @@ import { logError } from '@ente/shared/sentry';
 import { getData, LS_KEYS } from '@ente/shared/storage/localStorage';
 import HTTPService from '@ente/shared/network/HTTPService';
 import Head from 'next/head';
-import { eventBus, Events } from 'services/events';
+import { eventBus, Events } from '@ente/shared/events';
 import mlWorkManager from 'services/machineLearning/mlWorkManager';
 import {
     getMLSearchConfig,

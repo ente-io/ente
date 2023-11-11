@@ -15,9 +15,9 @@ import { PHOTOS_PAGES as PAGES } from '@ente/shared/constants/pages';
 import { EnteLogo } from '@ente/shared/components/EnteLogo';
 import isElectron from 'is-electron';
 import ElectronAPIs from '@ente/shared/electron';
-import { saveKeyInSessionStore } from 'utils/crypto';
+import { saveKeyInSessionStore } from '@ente/shared/crypto/helpers';
 import { getKey, SESSION_KEYS } from '@ente/shared/storage/sessionStorage';
-import { getAlbumsURL } from 'utils/common/apiUtil';
+import { getAlbumsURL } from '@ente/shared/network/api';
 import { Trans } from 'react-i18next';
 import { APPS } from '@ente/shared/apps/constants';
 

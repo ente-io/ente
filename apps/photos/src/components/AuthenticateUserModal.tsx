@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useState } from 'react';
 
 import { getData, LS_KEYS } from '@ente/shared/storage/localStorage';
 import { AppContext } from 'pages/_app';
-import { KeyAttributes, User } from 'types/user';
+import { KeyAttributes, User } from '@ente/shared/user/types';
 import VerifyMasterPasswordForm, {
     VerifyMasterPasswordFormProps,
 } from '@ente/shared/components/VerifyMasterPasswordForm';

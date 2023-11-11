@@ -28,7 +28,7 @@ import { AppContext } from 'pages/_app';
 import { getExportDirectoryDoesNotExistMessage } from 'utils/ui';
 import { t } from 'i18next';
 import LinkButton from './pages/gallery/LinkButton';
-import { CustomError } from 'utils/error';
+import { CustomError } from '@ente/shared/error';
 import { addLogLine } from '@ente/shared/logging';
 import { EnteFile } from 'types/file';
 

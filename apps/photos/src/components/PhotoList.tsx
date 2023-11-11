@@ -17,13 +17,13 @@ import {
     IMAGE_CONTAINER_MAX_WIDTH,
 } from 'constants/gallery';
 import { PublicCollectionGalleryContext } from 'utils/publicCollectionGallery';
-import { ENTE_WEBSITE_LINK } from 'constants/urls';
+import { ENTE_WEBSITE_LINK } from '@ente/shared/constants/urls';
 import { convertBytesToHumanReadable } from 'utils/file/size';
 import { DeduplicateContext } from 'pages/deduplicate';
 import { FlexWrapper } from './Container';
 import { Typography } from '@mui/material';
 import { GalleryContext } from 'pages/gallery';
-import { formatDate } from 'utils/time/format';
+import { formatDate } from '@ente/shared/time/format';
 import { Trans } from 'react-i18next';
 import { t } from 'i18next';
 import { areFilesWithFileHashSame, hasFileHash } from 'utils/upload';

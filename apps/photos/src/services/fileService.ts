@@ -1,9 +1,9 @@
-import { getEndpoint } from 'utils/common/apiUtil';
+import { getEndpoint } from '@ente/shared/network/api';
 import localForage from '@ente/shared/storage/localForage';
 
-import { getToken } from 'utils/common/key';
+import { getToken } from '@ente/shared/storage/localStorage/helpers';
 import { Collection } from 'types/collection';
-import HTTPService from './HTTPService';
+import HTTPService from '@ente/shared/network/HTTPService';
 import { logError } from '@ente/shared/sentry';
 import {
     decryptFile,
@@ -11,7 +11,7 @@ import {
     mergeMetadata,
     sortFiles,
 } from 'utils/file';
-import { eventBus, Events } from './events';
+import { eventBus, Events } from '@ente/shared/events';
 import {
     EnteFile,
     EncryptedEnteFile,

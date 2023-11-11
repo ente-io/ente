@@ -28,7 +28,7 @@ import PaidSubscriptionPlanSelectorCard from './paid';
 import { isPartOfFamily, getTotalFamilyUsage } from 'utils/user/family';
 import { Trans } from 'react-i18next';
 import { t } from 'i18next';
-import { SUPPORT_EMAIL } from 'constants/urls';
+import { SUPPORT_EMAIL } from '@ente/shared/constants/urls';
 
 interface Props {
     closeModal: any;

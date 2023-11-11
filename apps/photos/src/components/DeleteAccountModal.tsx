@@ -7,7 +7,7 @@ import { logError } from '@ente/shared/sentry';
 import { decryptDeleteAccountChallenge } from 'utils/crypto';
 import { Trans } from 'react-i18next';
 import { t } from 'i18next';
-import { DELETE_ACCOUNT_EMAIL } from 'constants/urls';
+import { DELETE_ACCOUNT_EMAIL } from '@ente/shared/constants/urls';
 import DialogBoxV2 from '@ente/shared/components/DialogBoxV2';
 import * as Yup from 'yup';
 import { Formik, FormikHelpers } from 'formik';

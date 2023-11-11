@@ -7,7 +7,7 @@ import { PublicURL, Collection, UpdatePublicURL } from 'types/collection';
 import { shareExpiryOptions } from 'utils/collection';
 import { t } from 'i18next';
 import { MenuItemGroup } from 'components/Menu/MenuItemGroup';
-import { formatDateTime } from 'utils/time/format';
+import { formatDateTime } from '@ente/shared/time/format';
 import Titlebar from 'components/Titlebar';
 import MenuItemDivider from 'components/Menu/MenuItemDivider';
 import { isLinkExpired } from '../managePublicShare';

@@ -1,5 +1,5 @@
 import QueueProcessor from 'services/queueProcessor';
-import { CustomError } from 'utils/error';
+import { CustomError } from '@ente/shared/error';
 import { retryAsyncFunction } from 'utils/network';
 import { logError } from '@ente/shared/sentry';
 import { addLogLine } from '@ente/shared/logging';

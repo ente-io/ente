@@ -5,7 +5,7 @@ import {
     changeFileCreationTime,
     updateExistingFilePubMetadata,
 } from 'utils/file';
-import { formatDate, formatTime } from 'utils/time/format';
+import { formatDate, formatTime } from '@ente/shared/time/format';
 import { FlexWrapper } from 'components/Container';
 import { logError } from '@ente/shared/sentry';
 import EnteDateTimePicker from 'components/EnteDateTimePicker';

@@ -3,7 +3,7 @@ import { CollectionSelectorAttributes } from 'components/Collections/CollectionS
 import { TimeStampListItem } from 'components/PhotoList';
 import { Collection } from 'types/collection';
 import { EnteFile } from 'types/file';
-import { User } from 'types/user';
+import { User } from '@ente/shared/user/types';
 
 export type SelectedState = {
     [k: number]: boolean;

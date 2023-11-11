@@ -48,12 +48,12 @@ import {
     ExportSettings,
     ExportUIUpdaters,
 } from 'types/export';
-import { User } from 'types/user';
+import { User } from '@ente/shared/user/types';
 import { FILE_TYPE } from 'constants/file';
 import { ExportStage } from 'constants/export';
-import { CustomError } from 'utils/error';
+import { CustomError } from '@ente/shared/error';
 import { addLogLine } from '@ente/shared/logging';
-import { eventBus, Events } from '../events';
+import { eventBus, Events } from '@ente/shared/events';
 import {
     constructCollectionNameMap,
     getCollectionUserFacingName,

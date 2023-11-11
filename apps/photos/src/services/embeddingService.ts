@@ -5,13 +5,13 @@ import {
     PutEmbeddingRequest,
 } from 'types/embedding';
 import ComlinkCryptoWorker from '@ente/shared/crypto';
-import { getEndpoint } from 'utils/common/apiUtil';
+import { getEndpoint } from '@ente/shared/network/api';
 import { addLogLine } from '@ente/shared/logging';
 import { logError } from '@ente/shared/sentry';
 import localForage from '@ente/shared/storage/localForage';
 import { getAllLocalFiles } from './fileService';
-import HTTPService from './HTTPService';
-import { getToken } from 'utils/common/key';
+import HTTPService from '@ente/shared/network/HTTPService';
+import { getToken } from '@ente/shared/storage/localStorage/helpers';
 import { getLatestVersionEmbeddings } from 'utils/embedding';
 import { getLocalTrashedFiles } from './trashService';
 

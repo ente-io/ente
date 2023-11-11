@@ -12,7 +12,7 @@ import { DeduplicateContext } from 'pages/deduplicate';
 import { logError } from '@ente/shared/sentry';
 import { Overlay } from 'components/Container';
 import { TRASH_SECTION } from 'constants/collection';
-import { formatDateRelative } from 'utils/time/format';
+import { formatDateRelative } from '@ente/shared/time/format';
 import {
     LoadingThumbnail,
     StaticThumbnail,

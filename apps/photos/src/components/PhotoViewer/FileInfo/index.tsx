@@ -5,7 +5,7 @@ import { Box, DialogProps, Link, Stack, styled } from '@mui/material';
 import { getEXIFLocation } from 'services/upload/exifService';
 import { RenderCaption } from './RenderCaption';
 import CopyButton from '@ente/shared/components/CodeBlock/CopyButton';
-import { formatDate, formatTime } from 'utils/time/format';
+import { formatDate, formatTime } from '@ente/shared/time/format';
 import Titlebar from 'components/Titlebar';
 import MapBox from './MapBox';
 import InfoItem from './InfoItem';

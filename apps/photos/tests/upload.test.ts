@@ -3,7 +3,7 @@ import { getLocalCollections } from 'services/collectionService';
 import { getUserDetailsV2 } from 'services/userService';
 import { groupFilesBasedOnCollectionID } from 'utils/file';
 import { FILE_TYPE } from 'constants/file';
-import { tryToParseDateTime } from 'utils/time';
+import { tryToParseDateTime } from '@ente/shared/time';
 
 const DATE_TIME_PARSING_TEST_FILE_NAMES = [
     {

@@ -1,10 +1,10 @@
-import { getToken } from 'utils/common/key';
+import { getToken } from '@ente/shared/storage/localStorage/helpers';
 import localForage from '@ente/shared/storage/localForage';
-import HTTPService from './HTTPService';
-import { getEndpoint } from 'utils/common/apiUtil';
+import HTTPService from '@ente/shared/network/HTTPService';
+import { getEndpoint } from '@ente/shared/network/api';
 import { logError } from '@ente/shared/sentry';
 import ComlinkCryptoWorker from '@ente/shared/crypto';
-import { getActualKey } from 'utils/common/key';
+import { getActualKey } from '@ente/shared/user';
 import {
     EntityType,
     Entity,

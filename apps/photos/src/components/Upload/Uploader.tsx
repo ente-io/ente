@@ -19,7 +19,7 @@ import { logError } from '@ente/shared/sentry';
 import uploadManager from 'services/upload/uploadManager';
 import ImportService from 'services/importService';
 import isElectron from 'is-electron';
-import { CustomError } from 'utils/error';
+import { CustomError } from '@ente/shared/error';
 import { Collection } from 'types/collection';
 import { SetLoading, SetFiles } from 'types/gallery';
 import {

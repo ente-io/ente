@@ -15,3 +15,8 @@ export interface ElectronFile {
     blob: () => Promise<Blob>;
     arrayBuffer: () => Promise<Uint8Array>;
 }
+
+export interface DataStream {
+    stream: ReadableStream<Uint8Array>;
+    chunkCount: number;
+}

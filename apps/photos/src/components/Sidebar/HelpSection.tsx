@@ -11,7 +11,10 @@ import { openLink } from 'utils/common';
 import { EnteMenuItem } from 'components/Menu/EnteMenuItem';
 import { Typography } from '@mui/material';
 import { GalleryContext } from 'pages/gallery';
-import { DESKTOP_ROADMAP_URL, WEB_ROADMAP_URL } from 'constants/urls';
+import {
+    DESKTOP_ROADMAP_URL,
+    WEB_ROADMAP_URL,
+} from '@ente/shared/constants/urls';
 
 export default function HelpSection() {
     const { setDialogMessage } = useContext(AppContext);

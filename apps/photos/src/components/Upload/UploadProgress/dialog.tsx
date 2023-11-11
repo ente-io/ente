@@ -10,7 +10,7 @@ import { ResultSection } from './resultSection';
 import { NotUploadSectionHeader } from './styledComponents';
 import UploadProgressContext from 'contexts/uploadProgress';
 import { dialogCloseHandler } from '@ente/shared/components/DialogBox/TitleWithCloseButton';
-import { APP_DOWNLOAD_URL } from 'constants/urls';
+import { APP_DOWNLOAD_URL } from '@ente/shared/constants/urls';
 import { Trans } from 'react-i18next';
 
 export function UploadProgressDialog() {

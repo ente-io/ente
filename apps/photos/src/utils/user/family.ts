@@ -1,4 +1,5 @@
-import { FamilyData, FamilyMember, User } from 'types/user';
+import { User } from '@ente/shared/user/types';
+import { FamilyData, FamilyMember } from 'types/user';
 import { logError } from '@ente/shared/sentry';
 import { getData, LS_KEYS } from '@ente/shared/storage/localStorage';
 

@@ -19,7 +19,7 @@ import { EnteFile } from 'types/file';
 import { downloadFile, mergeMetadata, sortFiles } from 'utils/file';
 import { AppContext } from 'pages/_app';
 import { PublicCollectionGalleryContext } from 'utils/publicCollectionGallery';
-import { CustomError, parseSharingErrorCodes } from 'utils/error';
+import { CustomError, parseSharingErrorCodes } from '@ente/shared/error';
 import {
     VerticallyCentered,
     CenteredFlex,
@@ -57,7 +57,7 @@ import FileDownloadOutlinedIcon from '@mui/icons-material/FileDownloadOutlined';
 import MoreHoriz from '@mui/icons-material/MoreHoriz';
 import OverflowMenu from '@ente/shared/components/OverflowMenu/menu';
 import { OverflowMenuOption } from '@ente/shared/components/OverflowMenu/option';
-import { ENTE_WEBSITE_LINK } from 'constants/urls';
+import { ENTE_WEBSITE_LINK } from '@ente/shared/constants/urls';
 
 const defaultThumbStore = new Map();
 const defaultFileStore = new Map();

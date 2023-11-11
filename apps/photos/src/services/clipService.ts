@@ -8,7 +8,7 @@ import downloadManager from './downloadManager';
 import { logError } from '@ente/shared/sentry';
 import { addLogLine } from '@ente/shared/logging';
 import isElectron from 'is-electron';
-import { Events, eventBus } from './events';
+import { Events, eventBus } from '@ente/shared/events';
 import PQueue from 'p-queue';
 import { EnteFile } from 'types/file';
 import ElectronAPIs from '@ente/shared/electron';

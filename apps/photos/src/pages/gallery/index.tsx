@@ -74,7 +74,7 @@ import {
     TRASH_SECTION,
 } from 'constants/collection';
 import { AppContext } from 'pages/_app';
-import { CustomError } from 'utils/error';
+import { CustomError } from '@ente/shared/error';
 import { PHOTOS_PAGES as PAGES } from '@ente/shared/constants/pages';
 import {
     COLLECTION_OPS_TYPE,
@@ -106,14 +106,15 @@ import SearchResultInfo from 'components/Search/SearchResultInfo';
 import { ITEM_TYPE, TimeStampListItem } from 'components/PhotoList';
 import UploadInputs from 'components/UploadSelectorInputs';
 import useFileInput from '@ente/shared/hooks/useFileInput';
-import { FamilyData, User } from 'types/user';
+import { User } from '@ente/shared/user/types';
+import { FamilyData } from 'types/user';
 import { getData, LS_KEYS } from '@ente/shared/storage/localStorage';
 import { CenteredFlex } from 'components/Container';
 import { checkConnectivity } from 'utils/common';
 import { SYNC_INTERVAL_IN_MICROSECONDS } from 'constants/gallery';
 import ElectronAPIs from '@ente/shared/electron';
 import uploadManager from 'services/upload/uploadManager';
-import { getToken } from 'utils/common/key';
+import { getToken } from '@ente/shared/storage/localStorage/helpers';
 import ExportModal from 'components/ExportModal';
 import GalleryEmptyState from 'components/GalleryEmptyState';
 import AuthenticateUserModal from 'components/AuthenticateUserModal';
@@ -124,7 +125,7 @@ import { getSessionExpiredMessage } from 'utils/ui';
 import { syncEntities } from 'services/entityService';
 import { constructUserIDToEmailMap } from 'services/collectionService';
 import { getLocalFamilyData } from 'utils/user/family';
-import InMemoryStore, { MS_KEYS } from 'services/InMemoryStore';
+import InMemoryStore, { MS_KEYS } from '@ente/shared/storage/InMemoryStore';
 import { syncEmbeddings } from 'services/embeddingService';
 import { ClipService } from 'services/clipService';
 

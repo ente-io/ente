@@ -1,9 +1,9 @@
 import debounce from 'debounce-promise';
 import PQueue from 'p-queue';
-import { eventBus, Events } from 'services/events';
+import { eventBus, Events } from '@ente/shared/events';
 import { EnteFile } from 'types/file';
 import { FILE_TYPE } from 'constants/file';
-import { getToken, getUserID } from 'utils/common/key';
+import { getToken, getUserID } from '@ente/shared/storage/localStorage/helpers';
 import { logQueueStats } from 'utils/machineLearning';
 import { getMLSyncJobConfig } from 'utils/machineLearning/config';
 import { logError } from '@ente/shared/sentry';

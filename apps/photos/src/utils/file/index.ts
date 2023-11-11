@@ -12,7 +12,7 @@ import { decodeLivePhoto } from 'services/livePhotoService';
 import { getFileType } from 'services/typeDetectionService';
 import DownloadManager from 'services/downloadManager';
 import { logError } from '@ente/shared/sentry';
-import { User } from 'types/user';
+import { User } from '@ente/shared/user/types';
 import { getData, LS_KEYS } from '@ente/shared/storage/localStorage';
 import { updateFileCreationDateInEXIF } from 'services/upload/exifService';
 import {
@@ -31,7 +31,7 @@ import { VISIBILITY_STATE } from 'types/magicMetadata';
 import { isArchivedFile, updateMagicMetadata } from 'utils/magicMetadata';
 
 import { addLocalLog, addLogLine } from '@ente/shared/logging';
-import { CustomError } from 'utils/error';
+import { CustomError } from '@ente/shared/error';
 import { convertBytesToHumanReadable } from './size';
 import ComlinkCryptoWorker from '@ente/shared/crypto';
 import {

@@ -6,7 +6,7 @@ import {
     Typography,
 } from '@mui/material';
 import { t } from 'i18next';
-import { formatDateTime } from 'utils/time/format';
+import { formatDateTime } from '@ente/shared/time/format';
 import { SpaceBetweenFlex } from './Container';
 import { formatNumber } from 'utils/number/format';
 import ExportPendingList from './ExportPendingList';

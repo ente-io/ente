@@ -1,5 +1,5 @@
-import { CACHES } from 'constants/cache';
-import { CacheStorageService } from 'services/cache/cacheStorageService';
+import { CACHES } from '@ente/shared/storage/cacheStorage/constants';
+import { CacheStorageService } from '@ente/shared/storage/cacheStorage';
 import { compose, Matrix, scale, translate } from 'transformation-matrix';
 import { BlobOptions, Dimensions } from 'types/image';
 import {

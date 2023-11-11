@@ -1,5 +1,5 @@
 import AutoAwesomeOutlinedIcon from '@mui/icons-material/AutoAwesomeOutlined';
-import { DialogBoxAttributes } from 'types/dialogBox';
+import { DialogBoxAttributes } from '@ente/shared/components/DialogBox/types';
 import { downloadApp } from 'utils/common';
 import { t } from 'i18next';
 

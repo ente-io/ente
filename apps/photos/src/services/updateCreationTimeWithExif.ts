@@ -12,7 +12,7 @@ import { EnteFile } from 'types/file';
 import { getParsedExifData } from './upload/exifService';
 import { getFileType } from 'services/typeDetectionService';
 import { FILE_TYPE } from 'constants/file';
-import { validateAndGetCreationUnixTimeInMicroSeconds } from 'utils/time';
+import { validateAndGetCreationUnixTimeInMicroSeconds } from '@ente/shared/time';
 
 const EXIF_TIME_TAGS = [
     'DateTimeOriginal',

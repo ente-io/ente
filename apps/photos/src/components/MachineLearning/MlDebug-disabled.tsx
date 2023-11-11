@@ -43,7 +43,7 @@ export {};
 //     DEFAULT_ML_SYNC_JOB_CONFIG,
 // } from 'constants/machineLearning/config';
 // import { exportMlData, importMlData } from 'utils/machineLearning/mldataExport';
-// import { FACE_CROPS_CACHE } from 'constants/cache';
+// import { FACE_CROPS_CACHE } from '@ente/shared/storage/cacheStorage/constants';
 
 // interface TSNEProps {
 //     mlResult: MLDebugResult;

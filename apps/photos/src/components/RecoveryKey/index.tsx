@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { downloadAsFile } from 'utils/file';
-import { getRecoveryKey } from 'utils/crypto';
+import { getRecoveryKey } from '@ente/shared/crypto/helpers';
 import CodeBlock from '@ente/shared/components/CodeBlock';
 import {
     Button,

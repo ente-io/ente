@@ -16,10 +16,10 @@ import {
     parseDateFromFusedDateString,
     validateAndGetCreationUnixTimeInMicroSeconds,
     tryToParseDateTime,
-} from 'utils/time';
+} from '@ente/shared/time';
 import { getFileHash } from './hashService';
 import { Remote } from 'comlink';
-import { DedicatedCryptoWorker } from 'worker/crypto.worker';
+import { DedicatedCryptoWorker } from '@ente/shared/crypto/internal/crypto.worker';
 import { FilePublicMagicMetadataProps } from 'types/file';
 
 interface ParsedMetadataJSONWithTitle {

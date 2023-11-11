@@ -1,4 +1,4 @@
-import { ENCRYPTION_CHUNK_SIZE } from 'constants/crypto';
+import { ENCRYPTION_CHUNK_SIZE } from '@ente/shared/crypto/constants';
 import { FILE_TYPE } from 'constants/file';
 import {
     FileTypeInfo,

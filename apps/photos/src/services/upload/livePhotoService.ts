@@ -10,7 +10,7 @@ import {
     ParsedMetadataJSONMap,
     ExtractMetadataResult,
 } from 'types/upload';
-import { CustomError } from 'utils/error';
+import { CustomError } from '@ente/shared/error';
 import { getFileTypeFromExtensionForLivePhotoClustering } from 'utils/file/livePhoto';
 import {
     splitFilenameAndExtension,
@@ -25,7 +25,7 @@ import { getFileHash } from './hashService';
 import { generateThumbnail } from './thumbnailService';
 import uploadCancelService from './uploadCancelService';
 import { Remote } from 'comlink';
-import { DedicatedCryptoWorker } from 'worker/crypto.worker';
+import { DedicatedCryptoWorker } from '@ente/shared/crypto/internal/crypto.worker';
 
 interface LivePhotoIdentifier {
     collectionID: number;
