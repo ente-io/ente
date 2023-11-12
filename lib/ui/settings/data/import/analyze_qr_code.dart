@@ -9,6 +9,7 @@ import 'package:ente_auth/ui/settings/data/import/google_auth_image_import.dart'
 import 'package:ente_auth/ui/settings/data/import/qr_scanner_overlay.dart';
 import 'package:ente_auth/utils/toast_util.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:wechat_assets_picker/wechat_assets_picker.dart';
@@ -46,6 +47,7 @@ class _QrScannerState extends State<QrScanner> {
                       isNavigationPerformed = true;
                       if (capture.barcodes[0].rawValue!
                           .startsWith(kGoogleAuthExportPrefix)) {
+                        HapticFeedback.vibrate();
                         List<Code> codes =
                             parseGoogleAuth(capture.barcodes[0].rawValue!);
                         scannerController.dispose();
