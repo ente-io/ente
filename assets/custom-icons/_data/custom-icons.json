@@ -96,6 +96,16 @@
 	    "slug": "laposte"
     },
     {
+      "title": "Mastodon",
+      "slug": "mastodon",
+      "hex": "6364FF"
+    },
+    {
+      "title": "mstdn",
+      "slug": "mastodon",
+      "hex": "6364FF"
+    },
+    {
       "title": "Microsoft"
     },
     {
