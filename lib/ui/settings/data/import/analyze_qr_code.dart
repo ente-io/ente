@@ -143,11 +143,17 @@ class _QrScannerState extends State<QrScanner> {
                                   if (!mounted) return;
                                 } else {
                                   if (!mounted) return;
-                                  showToast(context, "Failed to scan image");
+                                  showToast(
+                                    context,
+                                    "Unable to recognize a valid code from the uploaded image",
+                                  );
                                 }
                               } else {
                                 if (!mounted) return;
-                                showToast(context, "Image not selected");
+                                showToast(
+                                  context,
+                                  "Qr code image not selected",
+                                );
                               }
                             }
                           }
@@ -190,12 +196,9 @@ class _QrScannerState extends State<QrScanner> {
                             height: 25,
                           ),
                           Text(
-                            l10n.scan,
+                            l10n.scanACode,
                             textAlign: TextAlign.center,
                             style: const TextStyle(
-                              letterSpacing: 0.5,
-                              fontWeight: FontWeight.w600,
-                              fontSize: 14,
                               color: Colors.black,
                             ),
                           ),
