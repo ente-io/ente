@@ -23,6 +23,7 @@ class QrScanner extends StatefulWidget {
 
 class _QrScannerState extends State<QrScanner> {
   bool isNavigationPerformed = false;
+  bool isScannedByImage = false;
 
   //Scanner Initialization
   MobileScannerController scannerController = MobileScannerController(
@@ -42,11 +43,34 @@ class _QrScannerState extends State<QrScanner> {
               children: [
                 MobileScanner(
                   controller: scannerController,
-                  onDetect: (capture) {
+                  onDetect: (capture) async {
                     if (!isNavigationPerformed) {
                       isNavigationPerformed = true;
                       if (capture.barcodes[0].rawValue!
                           .startsWith(kGoogleAuthExportPrefix)) {
+                        if (isScannedByImage) {
+                          final result = await showDialogWidget(
+                            context: context,
+                            title: l10n.importFromApp(
+                              "Reminder",
+                            ),
+                            body:
+                                'Please delete the screenshot before resuming any photo cloud sync',
+                            buttons: [
+                              const ButtonWidget(
+                                buttonType: ButtonType.primary,
+                                labelText: 'OK',
+                                isInAlert: true,
+                                buttonSize: ButtonSize.large,
+                                buttonAction: ButtonAction.first,
+                              ),
+                            ],
+                          );
+                          if (result?.action != null &&
+                              result!.action == ButtonAction.first) {
+                            isScannedByImage = false;
+                          }
+                        }
                         HapticFeedback.vibrate();
                         List<Code> codes =
                             parseGoogleAuth(capture.barcodes[0].rawValue!);
@@ -140,9 +164,11 @@ class _QrScannerState extends State<QrScanner> {
 
                                 if (await scannerController
                                     .analyzeImage(path)) {
+                                  isScannedByImage = true;
                                   if (!mounted) return;
                                 } else {
                                   if (!mounted) return;
+                                  isScannedByImage = false;
                                   showToast(
                                     context,
                                     "Unable to recognize a valid code from the uploaded image",
