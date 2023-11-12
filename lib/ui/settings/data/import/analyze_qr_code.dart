@@ -1,13 +1,14 @@
 import 'dart:io';
 
 import 'package:ente_auth/l10n/l10n.dart';
+import 'package:ente_auth/models/code.dart';
 import 'package:ente_auth/ui/components/buttons/button_widget.dart';
 import 'package:ente_auth/ui/components/dialog_widget.dart';
 import 'package:ente_auth/ui/components/models/button_type.dart';
+import 'package:ente_auth/ui/settings/data/import/google_auth_image_import.dart';
 import 'package:ente_auth/ui/settings/data/import/qr_scanner_overlay.dart';
 import 'package:ente_auth/utils/toast_util.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:wechat_assets_picker/wechat_assets_picker.dart';
@@ -43,82 +44,16 @@ class _QrScannerState extends State<QrScanner> {
                   onDetect: (capture) {
                     if (!isNavigationPerformed) {
                       isNavigationPerformed = true;
-                      HapticFeedback.vibrate();
-                      showDialog(
-                        barrierDismissible: false,
-                        context: context,
-                        builder: (BuildContext context) {
-                          return AlertDialog(
-                            backgroundColor: Colors.white,
-                            buttonPadding: const EdgeInsets.all(0),
-                            actionsAlignment: MainAxisAlignment.center,
-                            alignment: Alignment.center,
-                            insetPadding: const EdgeInsets.symmetric(
-                              vertical: 24,
-                              horizontal: 24,
-                            ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            title: const Text(
-                              'Scan result',
-                              style: TextStyle(
-                                letterSpacing: 0.5,
-                                fontWeight: FontWeight.w600,
-                                fontSize: 18,
-                                color: Colors.black,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                            content: Text(
-                              ' ${capture.barcodes[0].rawValue!}',
-                              style: const TextStyle(
-                                letterSpacing: 0.5,
-                                fontWeight: FontWeight.w600,
-                                fontSize: 15,
-                                color: Colors.black,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                            actions: [
-                              Column(
-                                children: [
-                                  GestureDetector(
-                                    onTap: () {
-                                      Navigator.pop(context);
-                                      isNavigationPerformed = false;
-                                    },
-                                    child: Container(
-                                      decoration: BoxDecoration(
-                                        color: Colors.black,
-                                        borderRadius: BorderRadius.circular(24),
-                                      ),
-                                      child: const Padding(
-                                        padding: EdgeInsets.symmetric(
-                                          horizontal: 20,
-                                          vertical: 8,
-                                        ),
-                                        child: Text(
-                                          'OK',
-                                          style: TextStyle(
-                                            letterSpacing: 0.5,
-                                            fontWeight: FontWeight.w500,
-                                            fontSize: 16,
-                                            color: Colors.white,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(
-                                    height: 30,
-                                  ),
-                                ],
-                              ),
-                            ],
-                          );
-                        },
-                      );
+                      if (capture.barcodes[0].rawValue!
+                          .startsWith(kGoogleAuthExportPrefix)) {
+                        List<Code> codes =
+                            parseGoogleAuth(capture.barcodes[0].rawValue!);
+                        scannerController.dispose();
+                        Navigator.of(context).pop(codes);
+                      } else {
+                        showToast(context, "Invalid QR code");
+                        isNavigationPerformed = false;
+                      }
                     }
                   },
                 ),
@@ -163,7 +98,9 @@ class _QrScannerState extends State<QrScanner> {
                         onPressed: () async {
                           final result = await showDialogWidget(
                             context: context,
-                            title: l10n.importFromApp("Google Authenticator (saved image)"),
+                            title: l10n.importFromApp(
+                              "Google Authenticator (saved image)",
+                            ),
                             body:
                                 'Please turn off all photo cloud sync from all apps, including iCloud, Google Photo, OneDrive, etc. \nAlso if you have a second smartphone, it is safer to import by scanning QR code.',
                             buttons: [
@@ -250,10 +187,10 @@ class _QrScannerState extends State<QrScanner> {
                           const SizedBox(
                             height: 25,
                           ),
-                          const Text(
-                            'Scan QR code',
+                          Text(
+                            l10n.scan,
                             textAlign: TextAlign.center,
-                            style: TextStyle(
+                            style: const TextStyle(
                               letterSpacing: 0.5,
                               fontWeight: FontWeight.w600,
                               fontSize: 14,
