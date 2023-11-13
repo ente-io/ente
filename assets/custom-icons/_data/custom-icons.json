@@ -97,11 +97,7 @@
     },
     {
       "title": "Mastodon",
-      "slug": "mastodon",
-      "hex": "6364FF"
-    },
-    {
-      "title": "mstdn",
+      "altNames": ["mstdn", "fediscience", "mathstodon", "fosstodon"],
       "slug": "mastodon",
       "hex": "6364FF"
     },
