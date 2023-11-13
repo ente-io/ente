@@ -51,15 +51,12 @@ class _QrScannerState extends State<QrScanner> {
                         if (isScannedByImage) {
                           final result = await showDialogWidget(
                             context: context,
-                            title: l10n.importFromApp(
-                              "Reminder",
-                            ),
-                            body:
-                                'Please delete the screenshot before resuming any photo cloud sync',
+                            title: l10n.reminderText,
+                            body: l10n.reminderPopupBody,
                             buttons: [
-                              const ButtonWidget(
+                              ButtonWidget(
                                 buttonType: ButtonType.primary,
-                                labelText: 'OK',
+                                labelText: l10n.ok,
                                 isInAlert: true,
                                 buttonSize: ButtonSize.large,
                                 buttonAction: ButtonAction.first,
@@ -77,7 +74,7 @@ class _QrScannerState extends State<QrScanner> {
                         scannerController.dispose();
                         Navigator.of(context).pop(codes);
                       } else {
-                        showToast(context, "Invalid QR code");
+                        showToast(context, l10n.invalidQrCodeText);
                         isNavigationPerformed = false;
                       }
                     }
@@ -127,12 +124,11 @@ class _QrScannerState extends State<QrScanner> {
                             title: l10n.importFromApp(
                               "Google Authenticator (saved image)",
                             ),
-                            body:
-                                'Please turn off all photo cloud sync from all apps, including iCloud, Google Photo, OneDrive, etc. \nAlso if you have a second smartphone, it is safer to import by scanning QR code.',
+                            body: l10n.googleAuthImagePopupBody,
                             buttons: [
-                              const ButtonWidget(
+                              ButtonWidget(
                                 buttonType: ButtonType.primary,
-                                labelText: 'Import from image',
+                                labelText: l10n.importGoogleAuthImageButtonText,
                                 isInAlert: true,
                                 buttonSize: ButtonSize.large,
                                 buttonAction: ButtonAction.first,
@@ -172,14 +168,14 @@ class _QrScannerState extends State<QrScanner> {
                                   isScannedByImage = false;
                                   showToast(
                                     context,
-                                    "Unable to recognize a valid code from the uploaded image",
+                                    l10n.unableToRecognizeQrCodeText,
                                   );
                                 }
                               } else {
                                 if (!mounted) return;
                                 showToast(
                                   context,
-                                  "Qr code image not selected",
+                                  l10n.qrCodeImageNotSelectedText,
                                 );
                               }
                             }

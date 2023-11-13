@@ -336,5 +336,12 @@
   "deleteCodeAuthMessage": "Authenticate to delete code",
   "showQRAuthMessage": "Authenticate to show QR code",
   "confirmAccountDeleteTitle": "Confirm account deletion",
-  "confirmAccountDeleteMessage": "This account is linked to other ente apps, if you use any.\n\nYour uploaded data, across all ente apps, will be scheduled for deletion, and your account will be permanently deleted."
+  "confirmAccountDeleteMessage": "This account is linked to other ente apps, if you use any.\n\nYour uploaded data, across all ente apps, will be scheduled for deletion, and your account will be permanently deleted.",
+  "reminderText": "Reminder",
+  "reminderPopupBody": "Please delete the screenshot before resuming any photo cloud sync",
+  "invalidQrCodeText": "Invalid QR code",
+  "googleAuthImagePopupBody": "Please turn off all photo cloud sync from all apps, including iCloud, Google Photo, OneDrive, etc. \nAlso if you have a second smartphone, it is safer to import by scanning QR code.",
+  "importGoogleAuthImageButtonText": "Import from image",
+  "unableToRecognizeQrCodeText": "Unable to recognize a valid code from the uploaded image",
+  "qrCodeImageNotSelectedText": "Qr code image not selected"
 }
