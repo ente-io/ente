@@ -154,6 +154,7 @@ class _QrScannerState extends State<QrScanner> {
                                 context,
                                 pickerConfig: const AssetPickerConfig(
                                   maxAssets: 1,
+                                  requestType: RequestType.image,
                                 ),
                               );
 
