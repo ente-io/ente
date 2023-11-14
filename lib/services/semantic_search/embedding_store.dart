@@ -20,7 +20,7 @@ class EmbeddingStore {
 
   static final EmbeddingStore instance = EmbeddingStore._privateConstructor();
 
-  static const kEmbeddingsSyncTimeKey = "embeddings_sync_time";
+  static const kEmbeddingsSyncTimeKey = "sync_time_embeddings";
 
   final _logger = Logger("EmbeddingStore");
   final _dio = NetworkClient.instance.enteDio;
