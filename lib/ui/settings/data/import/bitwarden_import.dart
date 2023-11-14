@@ -40,12 +40,12 @@ Future<void> showBitwardenImportInstruction(BuildContext context) async {
   );
   if (result?.action != null && result!.action != ButtonAction.cancel) {
     if (result.action == ButtonAction.first) {
-      await _pickRaivoJsonFile(context);
+      await _pickBitwardenJsonFile(context);
     } else {}
   }
 }
 
-Future<void> _pickRaivoJsonFile(BuildContext context) async {
+Future<void> _pickBitwardenJsonFile(BuildContext context) async {
   final l10n = context.l10n;
   FilePickerResult? result = await FilePicker.platform.pickFiles();
   if (result == null) {
@@ -55,7 +55,7 @@ Future<void> _pickRaivoJsonFile(BuildContext context) async {
   await progressDialog.show();
   try {
     String path = result.files.single.path!;
-    int? count = await _processRaivoExportFile(context, path);
+    int? count = await _processBitwardenExportFile(context, path);
     await progressDialog.hide();
     if (count != null) {
       await importSuccessDialog(context, count);
@@ -70,7 +70,10 @@ Future<void> _pickRaivoJsonFile(BuildContext context) async {
   }
 }
 
-Future<int?> _processRaivoExportFile(BuildContext context, String path) async {
+Future<int?> _processBitwardenExportFile(
+  BuildContext context,
+  String path,
+) async {
   File file = File(path);
   if (path.endsWith('.zip')) {
     await showErrorDialog(
@@ -84,28 +87,25 @@ Future<int?> _processRaivoExportFile(BuildContext context, String path) async {
   List<dynamic> jsonArray = jsonDecode(jsonString);
   final parsedCodes = [];
   for (var item in jsonArray) {
-    var kind = item['kind'];
-    var algorithm = item['algorithm'];
-    var timer = item['timer'];
-    var digits = item['digits'];
-    var issuer = item['issuer'];
-    var secret = item['secret'];
-    var account = item['account'];
-    var counter = item['counter'];
+    if (item['login']['totp'] != null) {
+      var issuer = item['name'];
+      var account = item['login']['username'];
+      var secret = item['login']['totp'];
 
-    // Build the OTP URL
-    String otpUrl;
+      // Build the OTP URL
+      String otpUrl;
 
-    if (kind.toLowerCase() == 'totp') {
-      otpUrl =
-          'otpauth://$kind/$issuer:$account?secret=$secret&issuer=$issuer&algorithm=$algorithm&digits=$digits&period=$timer';
-    } else if (kind.toLowerCase() == 'hotp') {
-      otpUrl =
-          'otpauth://$kind/$issuer:$account?secret=$secret&issuer=$issuer&algorithm=$algorithm&digits=$digits&counter=$counter';
-    } else {
-      throw Exception('Invalid OTP type');
+      if (kind.toLowerCase() == 'totp') {
+        otpUrl =
+            'otpauth://$kind/$issuer:$account?secret=$secret&issuer=$issuer&algorithm=$algorithm&digits=$digits&period=$timer';
+      } else if (kind.toLowerCase() == 'hotp') {
+        otpUrl =
+            'otpauth://$kind/$issuer:$account?secret=$secret&issuer=$issuer&algorithm=$algorithm&digits=$digits&counter=$counter';
+      } else {
+        throw Exception('Invalid OTP type');
+      }
+      parsedCodes.add(Code.fromRawData(otpUrl));
     }
-    parsedCodes.add(Code.fromRawData(otpUrl));
   }
 
   for (final code in parsedCodes) {
