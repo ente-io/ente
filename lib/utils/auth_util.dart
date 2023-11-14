@@ -34,22 +34,4 @@ Future<bool> requestAuthentication(BuildContext context, String reason) async {
       ),
     ],
   );
-  // return await LocalAuthentication().authenticate(
-  //   localizedReason: reason,
-  //   authMessages: [
-  //     const AndroidAuthMessages(
-  //       biometricHint: "Verify identity",
-  //       biometricNotRecognized: "Not recognized, try again",
-  //       biometricRequiredTitle: "Biometric required",
-  //       biometricSuccess: "Successfully verified",
-  //       cancelButton: "Cancel",
-  //       deviceCredentialsRequiredTitle: "Device credentials required",
-  //       deviceCredentialsSetupDescription: "Device credentials required",
-  //       goToSettingsButton: "Go to settings",
-  //       goToSettingsDescription:
-  //           "Authentication is not setup on your device, go to Settings > Security to set it up",
-  //       signInTitle: "Authentication required",
-  //     ),
-  //   ],
-  // );
 }
