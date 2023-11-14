@@ -46,7 +46,7 @@ class SemanticSearchService {
     }
     await EmbeddingStore.instance.init(preferences);
     await ModelLoader.instance.init(_computer);
-    _cacheEmbeddings();
+    _setupCachedEmbeddings();
     Bus.instance.on<SyncStatusUpdate>().listen((event) async {
       if (event.status == SyncStatus.diffSynced) {
         sync();
@@ -66,7 +66,6 @@ class SemanticSearchService {
 
   Future<void> sync() async {
     await EmbeddingStore.instance.pullEmbeddings();
-    _cacheEmbeddings();
     _backFill();
   }
 
@@ -98,8 +97,20 @@ class SemanticSearchService {
   }
 
   Future<IndexStatus> getIndexStatus() async {
-    final embeddings = ObjectBox.instance.getEmbeddingBox().getAll();
-    return IndexStatus(embeddings.length, _queue.length);
+    return IndexStatus(_cachedEmbeddings.length, _queue.length);
+  }
+
+  void _setupCachedEmbeddings() {
+    ObjectBox.instance
+        .getEmbeddingBox()
+        .query()
+        .watch(triggerImmediately: true)
+        .map((query) => query.find())
+        .listen((embeddings) {
+      _logger.info("Updated embeddings: " + embeddings.length.toString());
+      _cachedEmbeddings.clear();
+      _cachedEmbeddings.addAll(embeddings);
+    });
   }
 
   Future<void> _backFill() async {
@@ -205,7 +216,6 @@ class SemanticSearchService {
       );
 
       Bus.instance.fire(EmbeddingUpdatedEvent());
-      _cachedEmbeddings.add(embedding);
     } catch (e, s) {
       _logger.severe(e, s);
     }
@@ -249,17 +259,6 @@ class SemanticSearchService {
           "ms",
     );
     return queryResults;
-  }
-
-  Future<void> _cacheEmbeddings() async {
-    final startTime = DateTime.now();
-    final embeddings = ObjectBox.instance.store.box<Embedding>().getAll();
-    _cachedEmbeddings.clear();
-    _cachedEmbeddings.addAll(embeddings);
-    final endTime = DateTime.now();
-    _logger.info(
-      "Loading ${embeddings.length} embeddings took: ${(endTime.millisecondsSinceEpoch - startTime.millisecondsSinceEpoch)}ms",
-    );
   }
 }
 
