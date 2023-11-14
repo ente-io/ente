@@ -96,25 +96,8 @@ class SemanticSearchService {
   Future<List<EnteFile>> getMatchingFiles(String query) async {
     final textEmbedding = await _getTextEmbedding(query);
 
-    var startTime = DateTime.now();
-    final List<QueryResult> queryResults = await _computer.compute(
-      computeBulkScore,
-      param: {
-        "imageEmbeddings": _cachedEmbeddings,
-        "textEmbedding": textEmbedding,
-      },
-      taskName: "computeBulkScore",
-    );
+    final queryResults = await _getScores(textEmbedding);
 
-    var endTime = DateTime.now();
-    _logger.info(
-      "computingScores took: " +
-          (endTime.millisecondsSinceEpoch - startTime.millisecondsSinceEpoch)
-              .toString() +
-          "ms",
-    );
-
-    startTime = DateTime.now();
     final filesMap = await FilesDB.instance
         .getFilesFromIDs(queryResults.map((e) => e.id).toList());
     final results = <EnteFile>[];
@@ -123,13 +106,6 @@ class SemanticSearchService {
         results.add(filesMap[result.id]!);
       }
     }
-    endTime = DateTime.now();
-    _logger.info(
-      "Fetching files took: " +
-          (endTime.millisecondsSinceEpoch - startTime.millisecondsSinceEpoch)
-              .toString() +
-          "ms",
-    );
 
     _logger.info(results.length.toString() + " results");
 
@@ -247,6 +223,26 @@ class SemanticSearchService {
     return embedding;
   }
 
+  Future<List<QueryResult>> _getScores(List<double> textEmbedding) async {
+    final startTime = DateTime.now();
+    final List<QueryResult> queryResults = await _computer.compute(
+      computeBulkScore,
+      param: {
+        "imageEmbeddings": _cachedEmbeddings,
+        "textEmbedding": textEmbedding,
+      },
+      taskName: "computeBulkScore",
+    );
+    final endTime = DateTime.now();
+    _logger.info(
+      "computingScores took: " +
+          (endTime.millisecondsSinceEpoch - startTime.millisecondsSinceEpoch)
+              .toString() +
+          "ms",
+    );
+    return queryResults;
+  }
+
   Future<void> _cacheEmbeddings() async {
     final startTime = DateTime.now();
     final embeddings = ObjectBox.instance.store.box<Embedding>().getAll();
@@ -276,7 +272,7 @@ List<QueryResult> computeBulkScore(Map args) {
       imageEmbedding.embedding,
       textEmbedding,
     );
-    if (score >= 0.23) {
+    if (score >= SemanticSearchService.kScoreThreshold) {
       queryResults.add(QueryResult(imageEmbedding.fileID, score));
     }
   }
