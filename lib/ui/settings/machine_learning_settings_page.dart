@@ -164,7 +164,13 @@ class _MagicSearchIndexStatsWidgetState
     }
     return Column(
       children: [
-        MenuSectionTitle(title: S.of(context).status),
+        Row(
+          children: [
+            MenuSectionTitle(title: S.of(context).status),
+            Expanded(child: Container()),
+            EnteLoadingWidget(color: getEnteColorScheme(context).fillMuted),
+          ],
+        ),
         MenuItemWidget(
           captionedTextWidget: CaptionedTextWidget(
             title: S.of(context).indexedItems,
@@ -173,7 +179,6 @@ class _MagicSearchIndexStatsWidgetState
             NumberFormat().format(_status!.indexedItems),
             style: Theme.of(context).textTheme.bodySmall,
           ),
-          // menuItemColor: colorScheme.fillFaint,
           singleBorderRadius: 8,
           alignCaptionedTextToLeft: true,
           isGestureDetectorDisabled: true,
@@ -188,7 +193,6 @@ class _MagicSearchIndexStatsWidgetState
             NumberFormat().format(_status!.pendingItems),
             style: Theme.of(context).textTheme.bodySmall,
           ),
-          // menuItemColor: colorScheme.fillFaint,
           singleBorderRadius: 8,
           alignCaptionedTextToLeft: true,
           isGestureDetectorDisabled: true,
