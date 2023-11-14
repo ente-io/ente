@@ -14,7 +14,7 @@ class ObjectBox {
   Future<void> init() async {
     final docsDir = await getApplicationDocumentsDirectory();
     // Future<Store> openStore() {...} is defined in the generated objectbox.g.dart
-    store = await openStore(directory: p.join(docsDir.path, "obx-example"));
+    store = await openStore(directory: p.join(docsDir.path, "object-box-store"));
   }
 
   Future<void> clearTable() async {
