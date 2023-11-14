@@ -1,25 +1,37 @@
+import 'package:ente_auth/l10n/l10n.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:local_auth_android/local_auth_android.dart';
+import 'package:local_auth_ios/types/auth_messages_ios.dart';
 import 'package:logging/logging.dart';
 
-Future<bool> requestAuthentication(String reason) async {
+Future<bool> requestAuthentication(BuildContext context, String reason) async {
   Logger("AuthUtil").info("Requesting authentication");
   await LocalAuthentication().stopAuthentication();
+  final l10n = context.l10n;
   return await LocalAuthentication().authenticate(
     localizedReason: reason,
     authMessages: [
-      const AndroidAuthMessages(
-        biometricHint: "Verify identity",
-        biometricNotRecognized: "Not recognized, try again",
-        biometricRequiredTitle: "Biometric required",
-        biometricSuccess: "Successfully verified",
-        cancelButton: "Cancel",
-        deviceCredentialsRequiredTitle: "Device credentials required",
-        deviceCredentialsSetupDescription: "Device credentials required",
-        goToSettingsButton: "Go to settings",
-        goToSettingsDescription:
-            "Authentication is not setup on your device, go to Settings > Security to set it up",
-        signInTitle: "Authentication required",
+      AndroidAuthMessages(
+        biometricHint: l10n.androidBiometricHint,
+        biometricNotRecognized: l10n.androidBiometricNotRecognized,
+        biometricRequiredTitle: l10n.androidBiometricRequiredTitle,
+        biometricSuccess: l10n.androidBiometricSuccess,
+        cancelButton: l10n.androidCancelButton,
+        deviceCredentialsRequiredTitle:
+            l10n.androidDeviceCredentialsRequiredTitle,
+        deviceCredentialsSetupDescription:
+            l10n.androidDeviceCredentialsSetupDescription,
+        goToSettingsButton: l10n.goToSettings,
+        goToSettingsDescription: l10n.androidGoToSettingsDescription,
+        signInTitle: l10n.androidSignInTitle,
+      ),
+      IOSAuthMessages(
+        goToSettingsButton: l10n.goToSettings,
+        goToSettingsDescription: l10n.goToSettings,
+        lockOut: l10n.iOSLockOut,
+        // cancelButton default value is "Ok"
+        cancelButton: l10n.iOSOkButton,
       ),
     ],
   );
