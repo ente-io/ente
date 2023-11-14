@@ -59,6 +59,7 @@ class SemanticSearchService {
 
     _loadModels().then((v) {
       startBackFill();
+      _getTextEmbedding("warm up text encoder");
     });
     Bus.instance.on<FileUploadedEvent>().listen((event) async {
       addToQueue(event.file);
@@ -93,25 +94,9 @@ class SemanticSearchService {
   }
 
   Future<List<EnteFile>> getMatchingFiles(String query) async {
-    _logger.info("Searching for " + query);
+    final textEmbedding = await _getTextEmbedding(query);
+
     var startTime = DateTime.now();
-    final textEmbedding = await _computer.compute(
-      createTextEmbedding,
-      param: {
-        "text": query,
-      },
-      taskName: "createTextEmbedding",
-    );
-    var endTime = DateTime.now();
-    _logger.info(
-      "createTextEmbedding took: " +
-          (endTime.millisecondsSinceEpoch - startTime.millisecondsSinceEpoch)
-              .toString() +
-          "ms",
-    );
-
-    startTime = DateTime.now();
-
     final List<QueryResult> queryResults = await _computer.compute(
       computeBulkScore,
       param: {
@@ -121,7 +106,7 @@ class SemanticSearchService {
       taskName: "computeBulkScore",
     );
 
-    endTime = DateTime.now();
+    var endTime = DateTime.now();
     _logger.info(
       "computingScores took: " +
           (endTime.millisecondsSinceEpoch - startTime.millisecondsSinceEpoch)
@@ -240,6 +225,26 @@ class SemanticSearchService {
     } catch (e, s) {
       _logger.severe(e, s);
     }
+  }
+
+  Future<List<double>> _getTextEmbedding(String query) async {
+    _logger.info("Searching for " + query);
+    final startTime = DateTime.now();
+    final embedding = await _computer.compute(
+      createTextEmbedding,
+      param: {
+        "text": query,
+      },
+      taskName: "createTextEmbedding",
+    );
+    final endTime = DateTime.now();
+    _logger.info(
+      "createTextEmbedding took: " +
+          (endTime.millisecondsSinceEpoch - startTime.millisecondsSinceEpoch)
+              .toString() +
+          "ms",
+    );
+    return embedding;
   }
 
   Future<void> _cacheEmbeddings() async {
