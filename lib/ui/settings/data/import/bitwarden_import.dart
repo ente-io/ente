@@ -93,19 +93,13 @@ Future<int?> _processBitwardenExportFile(
       var account = item['login']['username'];
       var secret = item['login']['totp'];
 
-      // Build the OTP URL
-      String otpUrl;
-
-      if (kind.toLowerCase() == 'totp') {
-        otpUrl =
-            'otpauth://$kind/$issuer:$account?secret=$secret&issuer=$issuer&algorithm=$algorithm&digits=$digits&period=$timer';
-      } else if (kind.toLowerCase() == 'hotp') {
-        otpUrl =
-            'otpauth://$kind/$issuer:$account?secret=$secret&issuer=$issuer&algorithm=$algorithm&digits=$digits&counter=$counter';
-      } else {
-        throw Exception('Invalid OTP type');
-      }
-      parsedCodes.add(Code.fromRawData(otpUrl));
+      parsedCodes.add(
+        Code.fromAccountAndSecret(
+          account,
+          issuer,
+          secret,
+        ),
+      );
     }
   }
 
