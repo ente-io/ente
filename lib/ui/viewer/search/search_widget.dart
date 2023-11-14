@@ -61,7 +61,7 @@ class _SearchWidgetState extends State<SearchWidget> {
   String _query = "";
   final List<SearchResult> _results = [];
   final _searchService = SearchService.instance;
-  final _debouncer = Debouncer(const Duration(milliseconds: 100));
+  final _debouncer = Debouncer(const Duration(milliseconds: 200));
   final Logger _logger = Logger((_SearchWidgetState).toString());
 
   @override
