@@ -9,7 +9,7 @@ import "package:photos/core/configuration.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/db/object_box.dart";
-import "package:photos/events/file_indexed_event.dart";
+import 'package:photos/events/embedding_updated_event.dart';
 import "package:photos/events/file_uploaded_event.dart";
 import "package:photos/events/sync_status_update_event.dart";
 import "package:photos/models/embedding.dart";
@@ -128,6 +128,7 @@ class SemanticSearchService {
     final textEmbedding = await _getTextEmbedding(query);
 
     final queryResults = await _getScores(textEmbedding);
+    await _getScores2(textEmbedding);
 
     final filesMap = await FilesDB.instance
         .getFilesFromIDs(queryResults.map((e) => e.id).toList());
@@ -204,7 +205,7 @@ class SemanticSearchService {
         embedding,
       );
 
-      Bus.instance.fire(FileIndexedEvent());
+      Bus.instance.fire(EmbeddingUpdatedEvent());
       _cachedEmbeddings.add(embedding);
     } catch (e, s) {
       _logger.severe(e, s);
@@ -251,6 +252,26 @@ class SemanticSearchService {
     return queryResults;
   }
 
+  Future<List<QueryResult>> _getScores2(List<double> textEmbedding) async {
+    final startTime = DateTime.now();
+    final List<QueryResult> queryResults = await _computer.compute(
+      computeBulkScore2,
+      param: {
+        "imageEmbeddings": _cachedEmbeddings,
+        "textEmbedding": textEmbedding,
+      },
+      taskName: "computeBulkScore2",
+    );
+    final endTime = DateTime.now();
+    _logger.info(
+      "computingScores2 took: " +
+          (endTime.millisecondsSinceEpoch - startTime.millisecondsSinceEpoch)
+              .toString() +
+          "ms",
+    );
+    return queryResults;
+  }
+
   Future<void> _cacheEmbeddings() async {
     final startTime = DateTime.now();
     final embeddings = ObjectBox.instance.store.box<Embedding>().getAll();
@@ -272,6 +293,24 @@ List<double> createTextEmbedding(Map args) {
 }
 
 List<QueryResult> computeBulkScore(Map args) {
+  final queryResults = <QueryResult>[];
+  final imageEmbeddings = args["imageEmbeddings"] as List<Embedding>;
+  final textEmbedding = args["textEmbedding"] as List<double>;
+  for (final imageEmbedding in imageEmbeddings) {
+    final score = CLIP.computeScore(
+      imageEmbedding.embedding,
+      textEmbedding,
+    );
+    if (score >= SemanticSearchService.kScoreThreshold) {
+      queryResults.add(QueryResult(imageEmbedding.fileID, score));
+    }
+  }
+
+  queryResults.sort((first, second) => second.score.compareTo(first.score));
+  return queryResults;
+}
+
+List<QueryResult> computeBulkScore2(Map args) {
   final queryResults = <QueryResult>[];
   final imageEmbeddings = args["imageEmbeddings"] as List<Embedding>;
   final textEmbedding = args["textEmbedding"] as List<double>;
