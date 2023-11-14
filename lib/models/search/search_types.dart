@@ -262,6 +262,8 @@ extension SectionTypeExtensions on SectionType {
     }
   }
 
+  //Use this only for the 'view all' screens as all search section examples get
+  //reloaded on filesUpdatedEvent
   List<Stream<Event>> updateEvents() {
     switch (this) {
       case SectionType.location:
