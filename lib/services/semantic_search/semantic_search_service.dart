@@ -109,6 +109,7 @@ class SemanticSearchService {
       _logger.info("Updated embeddings: " + embeddings.length.toString());
       _cachedEmbeddings.clear();
       _cachedEmbeddings.addAll(embeddings);
+      Bus.instance.fire(EmbeddingUpdatedEvent());
     });
   }
 
@@ -213,8 +214,6 @@ class SemanticSearchService {
         file,
         embedding,
       );
-
-      Bus.instance.fire(EmbeddingUpdatedEvent());
     } catch (e, s) {
       _logger.severe(e, s);
     }

@@ -4,11 +4,9 @@ import "dart:typed_data";
 
 import "package:computer/computer.dart";
 import "package:logging/logging.dart";
-import "package:photos/core/event_bus.dart";
 import "package:photos/core/network/network.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/db/object_box.dart";
-import "package:photos/events/embedding_updated_event.dart";
 import "package:photos/models/embedding.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/objectbox.g.dart";
@@ -156,7 +154,6 @@ class EmbeddingStore {
       embeddings.last.updationTime!,
     );
     _logger.info("${embeddings.length} embeddings stored");
-    Bus.instance.fire(EmbeddingUpdatedEvent());
   }
 }
 
