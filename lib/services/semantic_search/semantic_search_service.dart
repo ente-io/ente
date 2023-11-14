@@ -106,12 +106,16 @@ class SemanticSearchService {
     if (!LocalSettings.instance.hasEnabledMagicSearch()) {
       return;
     }
+    _logger.info("Attempting backfill");
     final uploadedFileIDs = await FilesDB.instance
         .getOwnedFileIDs(Configuration.instance.getUserID()!);
     final embeddedFileIDs = _cachedEmbeddings.map((e) => e.fileID).toSet();
-    uploadedFileIDs.removeWhere((id) => embeddedFileIDs.contains(id));
+    final queuedFileIDs = _queue.map((e) => e.uploadedFileID).toSet();
+    uploadedFileIDs.removeWhere(
+      (id) => embeddedFileIDs.contains(id) || queuedFileIDs.contains(id),
+    );
     final files = await FilesDB.instance.getUploadedFiles(uploadedFileIDs);
-    _logger.info(files.length.toString() + " pending to be embedded");
+    _logger.info(files.length.toString() + " to be embedded");
     _queue.addAll(files);
     _pollQueue();
   }
