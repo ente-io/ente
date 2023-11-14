@@ -2029,14 +2029,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.5.3"
-  tflite_flutter:
-    dependency: "direct main"
-    description:
-      name: tflite_flutter
-      sha256: "88b203c6efd7f4269aa137ef31e760d53e6639e60cd17bb86602462f72d4176b"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.9.5"
   timezone:
     dependency: transitive
     description:
