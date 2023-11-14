@@ -328,10 +328,10 @@ extension GalleryAppBarExtn on GalleryType {
       case GalleryType.trash:
       case GalleryType.localFolder:
       case GalleryType.locationTag:
+      case GalleryType.searchResults:
         return false;
       case GalleryType.uncategorized:
       case GalleryType.ownedCollection:
-      case GalleryType.searchResults:
       case GalleryType.sharedCollection:
       case GalleryType.quickLink:
       case GalleryType.favorite:
