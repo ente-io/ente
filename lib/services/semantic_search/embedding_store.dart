@@ -23,6 +23,7 @@ class EmbeddingStore {
 
   final _logger = Logger("EmbeddingStore");
   final _dio = NetworkClient.instance.enteDio;
+  final _computer = Computer.shared();
 
   late SharedPreferences _preferences;
 
@@ -138,7 +139,7 @@ class EmbeddingStore {
       final input = EmbeddingsDecoderInput(embedding, fileKey);
       inputs.add(input);
     }
-    final embeddings = await Computer.shared().compute(
+    final embeddings = await _computer.compute(
       decodeEmbeddings,
       param: {
         "inputs": inputs,
@@ -160,7 +161,6 @@ Future<List<Embedding>> decodeEmbeddings(Map<String, dynamic> args) async {
   final inputs = args["inputs"] as List<EmbeddingsDecoderInput>;
 
   for (final input in inputs) {
-    ;
     final decryptArgs = <String, dynamic>{};
     decryptArgs["source"] =
         CryptoUtil.base642bin(input.embedding.encryptedEmbedding);
