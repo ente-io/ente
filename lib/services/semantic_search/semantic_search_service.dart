@@ -67,7 +67,7 @@ class SemanticSearchService {
   }
 
   Future<List<EnteFile>> search(String query) async {
-    if (Platform.isIOS) {
+    if (!LocalSettings.instance.hasEnabledMagicSearch()) {
       return [];
     }
     if (_ongoingRequest == null) {
