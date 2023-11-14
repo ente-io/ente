@@ -1,4 +1,5 @@
 import 'package:ente_auth/ui/settings/data/import/aegis_import.dart';
+import 'package:ente_auth/ui/settings/data/import/bitwarden_import.dart';
 import 'package:ente_auth/ui/settings/data/import/encrypted_ente_import.dart';
 import 'package:ente_auth/ui/settings/data/import/google_auth_import.dart';
 import 'package:ente_auth/ui/settings/data/import/plain_text_import.dart';
@@ -32,7 +33,7 @@ class ImportService {
         showAegisImportInstruction(context);
         break;
       case ImportType.bitwarden:
-        showGoogleAuthImageInstruction(context);
+        showBitwardenImportInstruction(context);
         break;
     }
   }
