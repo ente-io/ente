@@ -41,13 +41,13 @@ import {
     updateFilePublicMagicMetadata,
 } from 'services/fileService';
 import isElectron from 'is-electron';
-import imageProcessor from 'services/electron/imageProcessor';
+// import imageProcessor from 'services/electron/imageProcessor';
 import { isPlaybackPossible } from 'utils/photoFrame';
 import { FileTypeInfo } from 'types/upload';
 import { moveToHiddenCollection } from 'services/collectionService';
 
-import ElectronFSService from 'services/electron/fs';
-import { getFileExportPath, getUniqueFileExportName } from 'utils/export';
+// import ElectronFSService from 'services/electron/fs';
+// import { getFileExportPath, getUniqueFileExportName } from 'utils/export';
 
 const WAIT_TIME_IMAGE_CONVERSION = 30 * 1000;
 
@@ -454,10 +454,10 @@ export async function getRenderableImage(fileName: string, imageBlob: Blob) {
                         imageBlob.size
                     )}`
                 );
-                convertedImageBlob = await imageProcessor.convertToJPEG(
-                    imageBlob,
-                    fileName
-                );
+                // convertedImageBlob = await imageProcessor.convertToJPEG(
+                //     imageBlob,
+                //     fileName
+                // );
                 addLogLine(`${fileName} successfully converted`);
             } catch (e) {
                 try {
@@ -691,57 +691,53 @@ export async function downloadFileDesktop(
     file: EnteFile,
     downloadPath: string
 ) {
-    let fileStream: ReadableStream<Uint8Array>;
-    const fileURL = await DownloadManager.getCachedOriginalFile(file)[0];
-    if (!fileURL) {
-        fileStream = await DownloadManager.downloadFile(file);
-    } else {
-        fileStream = await fetch(fileURL).then((res) => res.body);
-    }
-    const updatedFileStream = await getUpdatedEXIFFileForDownload(
-        fileReader,
-        file,
-        fileStream
-    );
+    console.log(fileReader, file, downloadPath);
+    // let fileStream: ReadableStream<Uint8Array>;
+    // const fileURL = await DownloadManager.getCachedOriginalFile(file)[0];
+    // if (!fileURL) {
+    //     fileStream = await DownloadManager.downloadFile(file);
+    // } else {
+    //     fileStream = await fetch(fileURL).then((res) => res.body);
+    // }
 
-    if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
-        const fileBlob = await new Response(updatedFileStream).blob();
-        const livePhoto = await decodeLivePhoto(file, fileBlob);
-        const imageExportName = getUniqueFileExportName(
-            downloadPath,
-            livePhoto.imageNameTitle
-        );
-        const imageStream = generateStreamFromArrayBuffer(livePhoto.image);
-        await ElectronFSService.saveMediaFile(
-            getFileExportPath(downloadPath, imageExportName),
-            imageStream
-        );
-        try {
-            const videoExportName = getUniqueFileExportName(
-                downloadPath,
-                livePhoto.videoNameTitle
-            );
-            const videoStream = generateStreamFromArrayBuffer(livePhoto.video);
-            await ElectronFSService.saveMediaFile(
-                getFileExportPath(downloadPath, videoExportName),
-                videoStream
-            );
-        } catch (e) {
-            ElectronFSService.deleteFile(
-                getFileExportPath(downloadPath, imageExportName)
-            );
-            throw e;
-        }
-    } else {
-        const fileExportName = getUniqueFileExportName(
-            downloadPath,
-            file.metadata.title
-        );
-        await ElectronFSService.saveMediaFile(
-            getFileExportPath(downloadPath, fileExportName),
-            updatedFileStream
-        );
-    }
+    // if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
+    //     const fileBlob = await new Response(updatedFileStream).blob();
+    //     const livePhoto = await decodeLivePhoto(file, fileBlob);
+    //     const imageExportName = getUniqueFileExportName(
+    //         downloadPath,
+    //         livePhoto.imageNameTitle
+    //     );
+    //     const imageStream = generateStreamFromArrayBuffer(livePhoto.image);
+    //     await ElectronFSService.saveMediaFile(
+    //         getFileExportPath(downloadPath, imageExportName),
+    //         imageStream
+    //     );
+    //     try {
+    //         const videoExportName = getUniqueFileExportName(
+    //             downloadPath,
+    //             livePhoto.videoNameTitle
+    //         );
+    //         const videoStream = generateStreamFromArrayBuffer(livePhoto.video);
+    //         await ElectronFSService.saveMediaFile(
+    //             getFileExportPath(downloadPath, videoExportName),
+    //             videoStream
+    //         );
+    //     } catch (e) {
+    //         ElectronFSService.deleteFile(
+    //             getFileExportPath(downloadPath, imageExportName)
+    //         );
+    //         throw e;
+    //     }
+    // } else {
+    //     const fileExportName = getUniqueFileExportName(
+    //         downloadPath,
+    //         file.metadata.title
+    //     );
+    //     await ElectronFSService.saveMediaFile(
+    //         getFileExportPath(downloadPath, fileExportName),
+    //         updatedFileStream
+    //     );
+    // }
 }
 
 export const isImageOrVideo = (fileType: FILE_TYPE) =>
