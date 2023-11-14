@@ -1,6 +1,6 @@
 name: ente_auth
 description: ente two-factor authenticator
-version: 2.0.15+215
+version: 2.0.17+217
 publish_to: none
 
 environment:
@@ -54,6 +54,9 @@ dependencies:
   intl: ^0.18.0
   json_annotation: ^4.5.0
   local_auth: ^2.1.7
+
+  local_auth_android: ^1.0.31
+  local_auth_ios: ^1.1.3
   logging: ^1.0.1
   mobile_scanner: ^3.5.2
   modal_bottom_sheet: ^3.0.0-pre

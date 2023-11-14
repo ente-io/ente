@@ -93,6 +93,14 @@ class IconUtils {
           icon["slug"],
           icon["hex"],
         );
+        if (icon["altNames"] != null) {
+          for (final name in icon["altNames"]) {
+            _customIcons[name] = CustomIconData(
+              icon["slug"],
+              icon["hex"],
+            );
+          }
+        }
       }
     } catch (e) {
       Logger("IconUtils").severe("Error loading icons", e);

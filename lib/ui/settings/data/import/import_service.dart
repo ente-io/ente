@@ -1,5 +1,6 @@
 import 'package:ente_auth/ui/settings/data/import/aegis_import.dart';
 import 'package:ente_auth/ui/settings/data/import/analyze_qr_code.dart';
+import 'package:ente_auth/ui/settings/data/import/bitwarden_import.dart';
 import 'package:ente_auth/ui/settings/data/import/encrypted_ente_import.dart';
 import 'package:ente_auth/ui/settings/data/import/google_auth_import.dart';
 import 'package:ente_auth/ui/settings/data/import/plain_text_import.dart';
@@ -40,6 +41,8 @@ class ImportService {
             },
           ),
         );
+      case ImportType.bitwarden:
+        showBitwardenImportInstruction(context);
         break;
     }
   }
