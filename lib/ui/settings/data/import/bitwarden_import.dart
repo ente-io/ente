@@ -84,7 +84,8 @@ Future<int?> _processBitwardenExportFile(
     return null;
   }
   final jsonString = await file.readAsString();
-  List<dynamic> jsonArray = jsonDecode(jsonString);
+  final data = jsonDecode(jsonString);
+  List<dynamic> jsonArray = data['items'];
   final parsedCodes = [];
   for (var item in jsonArray) {
     if (item['login']['totp'] != null) {
