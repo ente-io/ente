@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
-import "package:flutter/foundation.dart";
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:media_extension/media_extension.dart';
@@ -103,14 +102,6 @@ class FileAppBarState extends State<FileAppBar> {
               .getCollectionByID(widget.file.collectionID!)
               ?.isHidden() ??
           false;
-    }
-    if (kDebugMode) {
-      actions.add(
-        Text(
-          widget.file.generatedID?.toString() ?? 'null',
-          style: const TextStyle(color: Colors.white),
-        ),
-      );
     }
     if (widget.file.isLiveOrMotionPhoto) {
       actions.add(
