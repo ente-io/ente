@@ -1,15 +1,19 @@
 import "dart:convert";
 
+import "package:objectbox/objectbox.dart";
+
+@Entity()
 class Embedding {
+  @Id(assignable: true)
   final int fileID;
   final String model;
   final List<double> embedding;
   int? updationTime;
 
-  Embedding(
-    this.fileID,
-    this.model,
-    this.embedding, {
+  Embedding({
+    required this.fileID,
+    required this.model,
+    required this.embedding,
     this.updationTime,
   });
 

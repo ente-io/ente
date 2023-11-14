@@ -6,7 +6,6 @@ import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import "package:photos/extensions/stop_watch.dart";
 import 'package:photos/models/backup_status.dart';
-import "package:photos/models/embedding.dart";
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file/file_type.dart';
 import 'package:photos/models/file_load_result.dart';
@@ -31,7 +30,6 @@ class FilesDB {
 
   static const filesTable = 'files';
   static const tempTable = 'temp_files';
-  static const embeddingsTable = 'clip_embeddings';
 
   static const columnGeneratedID = '_id';
   static const columnUploadedFileID = 'uploaded_file_id';
@@ -59,8 +57,6 @@ class FilesDB {
   static const columnThumbnailDecryptionHeader = 'thumbnail_decryption_header';
   static const columnMetadataDecryptionHeader = 'metadata_decryption_header';
   static const columnFileSize = 'file_size';
-  static const columnEmbedding = 'embedding';
-  static const columnModel = 'model';
 
   // MMD -> Magic Metadata
   static const columnMMdEncodedJson = 'mmd_encoded_json';
@@ -90,7 +86,6 @@ class FilesDB {
     ...updateIndexes(),
     ...createEntityDataTable(),
     ...addAddedTime(),
-    ...createEmbeddingsTable(),
   ];
 
   final dbConfig = MigrationConfig(
@@ -387,26 +382,12 @@ class FilesDB {
     ];
   }
 
-  static List<String> createEmbeddingsTable() {
-    return [
-      '''
-       CREATE TABLE IF NOT EXISTS $embeddingsTable (
-          $columnUploadedFileID INTEGER PRIMARY KEY,
-          $columnModel TEXT NOT NULL,
-          $columnEmbedding TEXT NOT NULL,
-          $columnUpdationTime INTEGER
-      );
-      '''
-    ];
-  }
-
   Future<void> clearTable() async {
     final db = await instance.database;
     await db.delete(filesTable);
     await db.delete("device_files");
     await db.delete("device_collections");
     await db.delete("entities");
-    await db.delete(embeddingsTable);
   }
 
   Future<void> deleteDB() async {
@@ -1557,89 +1538,38 @@ class FilesDB {
     return FileLoadResult(filteredFiles, files.length == limit);
   }
 
-  Future<void> upsertEmbedding(Embedding embedding) async {
-    final db = await instance.database;
-    await db.insert(
-      embeddingsTable,
-      _getRowForEmbedding(embedding),
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
-  }
-
-  Future<void> insertEmbeddings(List<Embedding> embeddings) async {
-    final db = await database;
-    var batch = db.batch();
-    int batchCounter = 0;
-    for (final embedding in embeddings) {
-      if (batchCounter == 400) {
-        await batch.commit(noResult: true);
-        batch = db.batch();
-        batchCounter = 0;
-      }
-      batch.insert(
-        embeddingsTable,
-        _getRowForEmbedding(embedding),
-        conflictAlgorithm: ConflictAlgorithm.replace,
-      );
-      batchCounter++;
-    }
-    await batch.commit(noResult: true);
-  }
-
-  Future<List<Embedding>> getAllEmbeddings() async {
+  Future<List<int>> getOwnedFileIDs(int ownerID) async {
     final db = await instance.database;
     final results = await db.query(
-      embeddingsTable,
+      filesTable,
+      columns: [columnUploadedFileID],
+      where:
+          '($columnOwnerID = $ownerID AND $columnUploadedFileID IS NOT NULL AND $columnUploadedFileID IS NOT -1)',
+      distinct: true,
     );
-    return _convertToEmbeddings(results);
-  }
-
-  Future<List<Embedding>> getAllEmbeddingsV2() async {
-    final db = await instance.database;
-    final List<Embedding> allEmbeddings = [];
-
-    int offset = 0;
-    while (true) {
-      final results = await db.query(
-        embeddingsTable,
-        orderBy: '$columnUploadedFileID ASC',
-        limit: 5000,
-        offset: offset,
-      );
-
-      if (results.isEmpty) {
-        break; // No more results left to fetch
-      }
-
-      allEmbeddings.addAll(_convertToEmbeddings(results));
-
-      offset += 5000; // Increment offset for the next batch
+    final ids = <int>[];
+    for (final result in results) {
+      ids.add(result[columnUploadedFileID] as int);
     }
-
-    return allEmbeddings;
+    return ids;
   }
 
-  Future<List<Embedding>> getUnSyncedEmbeddings() async {
+  Future<List<EnteFile>> getUploadedFiles(List<int> uploadedIDs) async {
     final db = await instance.database;
+    String inParam = "";
+    for (final id in uploadedIDs) {
+      inParam += "'" + id.toString() + "',";
+    }
+    inParam = inParam.substring(0, inParam.length - 1);
     final results = await db.query(
-      embeddingsTable,
-      where: '$columnUpdationTime IS NULL',
+      filesTable,
+      where: '$columnUploadedFileID IN ($inParam)',
+      groupBy: columnUploadedFileID,
     );
-    return _convertToEmbeddings(results);
-  }
-
-  Future<List<EnteFile>> getFilesWithoutEmbeddings() async {
-    final db = await instance.database;
-    final result = await db.rawQuery('''
-      SELECT $filesTable.*
-      FROM $filesTable
-      LEFT JOIN $embeddingsTable ON $filesTable.$columnUploadedFileID = $embeddingsTable.$columnUploadedFileID
-      WHERE $filesTable.$columnUploadedFileID IS NOT NULL
-      AND $filesTable.$columnUploadedFileID != -1
-      AND $embeddingsTable.$columnUploadedFileID IS NULL
-      GROUP BY $filesTable.$columnUploadedFileID;
-    ''');
-    return convertToFiles(result);
+    if (results.isEmpty) {
+      return <EnteFile>[];
+    }
+    return convertToFiles(results);
   }
 
   Map<String, dynamic> _getRowForFile(EnteFile file) {
@@ -1778,31 +1708,5 @@ class FilesDB {
     file.pubMmdVersion = row[columnPubMMdVersion] ?? 0;
     file.pubMmdEncodedJson = row[columnPubMMdEncodedJson] ?? '{}';
     return file;
-  }
-
-  Map<String, dynamic> _getRowForEmbedding(Embedding embedding) {
-    final row = <String, dynamic>{};
-    row[columnUploadedFileID] = embedding.fileID;
-    row[columnModel] = embedding.model;
-    row[columnEmbedding] = Embedding.encodeEmbedding(embedding.embedding);
-    row[columnUpdationTime] = embedding.updationTime;
-    return row;
-  }
-
-  Embedding _getEmbeddingFromRow(Map<String, dynamic> row) {
-    return Embedding(
-      row[columnUploadedFileID],
-      row[columnModel],
-      Embedding.decodeEmbedding(row[columnEmbedding]),
-      updationTime: row[columnUpdationTime],
-    );
-  }
-
-  List<Embedding> _convertToEmbeddings(List<Map<String, dynamic>> results) {
-    final List<Embedding> embeddings = [];
-    for (final result in results) {
-      embeddings.add(_getEmbeddingFromRow(result));
-    }
-    return embeddings;
   }
 }

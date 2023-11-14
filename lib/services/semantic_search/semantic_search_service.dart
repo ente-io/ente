@@ -8,6 +8,7 @@ import "package:logging/logging.dart";
 import "package:photos/core/configuration.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/db/files_db.dart";
+import "package:photos/db/object_box.dart";
 import "package:photos/events/file_indexed_event.dart";
 import "package:photos/events/file_uploaded_event.dart";
 import "package:photos/events/sync_status_update_event.dart";
@@ -65,7 +66,7 @@ class SemanticSearchService {
   }
 
   Future<List<EnteFile>> search(String query) async {
-    if (Platform.isIOS || !LocalSettings.instance.hasEnabledMagicSearch()) {
+    if (Platform.isIOS) {
       return [];
     }
     if (_ongoingRequest == null) {
@@ -160,7 +161,7 @@ class SemanticSearchService {
   }
 
   Future<IndexStatus> getIndexStatus() async {
-    final embeddings = await FilesDB.instance.getAllEmbeddingsV2();
+    final embeddings = ObjectBox.instance.getEmbeddingBox().getAll();
     return IndexStatus(embeddings.length, _queue.length);
   }
 
@@ -174,9 +175,11 @@ class SemanticSearchService {
     if (!LocalSettings.instance.hasEnabledMagicSearch()) {
       return;
     }
-    final files = await FilesDB.instance.getFilesWithoutEmbeddings();
-    final ownerID = Configuration.instance.getUserID();
-    files.removeWhere((f) => f.ownerID != ownerID);
+    final uploadedFileIDs = await FilesDB.instance
+        .getOwnedFileIDs(Configuration.instance.getUserID()!);
+    final embeddedFileIDs = _cachedEmbeddings.map((e) => e.fileID).toSet();
+    uploadedFileIDs.removeWhere((id) => embeddedFileIDs.contains(id));
+    final files = await FilesDB.instance.getUploadedFiles(uploadedFileIDs);
     _logger.info(files.length.toString() + " pending to be embedded");
     _queue.addAll(files);
     _pollQueue();
@@ -223,9 +226,9 @@ class SemanticSearchService {
         return;
       }
       final embedding = Embedding(
-        file.uploadedFileID!,
-        kModelName,
-        result,
+        fileID: file.uploadedFileID!,
+        model: kModelName,
+        embedding: result,
       );
       await EmbeddingStore.instance.storeEmbedding(
         file,
@@ -241,7 +244,7 @@ class SemanticSearchService {
 
   Future<void> _cacheEmbeddings() async {
     final startTime = DateTime.now();
-    final embeddings = await FilesDB.instance.getAllEmbeddingsV2();
+    final embeddings = ObjectBox.instance.store.box<Embedding>().getAll();
     _cachedEmbeddings.clear();
     _cachedEmbeddings.addAll(embeddings);
     final endTime = DateTime.now();

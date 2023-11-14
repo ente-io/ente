@@ -4,8 +4,10 @@ import "dart:typed_data";
 import "package:logging/logging.dart";
 import "package:photos/core/network/network.dart";
 import "package:photos/db/files_db.dart";
+import "package:photos/db/object_box.dart";
 import "package:photos/models/embedding.dart";
 import "package:photos/models/file/file.dart";
+import "package:photos/objectbox.g.dart";
 import "package:photos/services/semantic_search/remote_embedding.dart";
 import "package:photos/utils/crypto_util.dart";
 import "package:photos/utils/file_download_util.dart";
@@ -44,7 +46,12 @@ class EmbeddingStore {
   }
 
   Future<void> pushEmbeddings() async {
-    final pendingItems = await FilesDB.instance.getUnSyncedEmbeddings();
+    final query = (ObjectBox.instance
+            .getEmbeddingBox()
+            .query(Embedding_.updationTime.isNull()))
+        .build();
+    final pendingItems = query.find();
+    query.close();
     for (final item in pendingItems) {
       final file = await FilesDB.instance.getAnyUploadedFile(item.fileID);
       await _pushEmbedding(file!, item);
@@ -52,7 +59,7 @@ class EmbeddingStore {
   }
 
   Future<void> storeEmbedding(EnteFile file, Embedding embedding) async {
-    await FilesDB.instance.upsertEmbedding(embedding);
+    ObjectBox.instance.getEmbeddingBox().put(embedding);
     _pushEmbedding(file, embedding);
   }
 
@@ -78,7 +85,7 @@ class EmbeddingStore {
       );
       final updationTime = response.data["updationTime"];
       embedding.updationTime = updationTime;
-      await FilesDB.instance.upsertEmbedding(embedding);
+      ObjectBox.instance.getEmbeddingBox().put(embedding);
     } catch (e, s) {
       _logger.severe(e, s);
     }
@@ -140,14 +147,14 @@ class EmbeddingStore {
 
       embeddings.add(
         Embedding(
-          embedding.fileID,
-          embedding.model,
-          decodedEmbedding,
+          fileID: embedding.fileID,
+          model: embedding.model,
+          embedding: decodedEmbedding,
           updationTime: embedding.updatedAt,
         ),
       );
     }
-    await FilesDB.instance.insertEmbeddings(embeddings);
+    await ObjectBox.instance.getEmbeddingBox().putManyAsync(embeddings);
     _logger.info("${embeddings.length} embeddings stored");
     await _preferences.setInt(
       kEmbeddingsSyncTimeKey,
