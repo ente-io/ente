@@ -212,7 +212,6 @@ class RemoteSyncService {
       final remoteUpdateTime = idsToRemoteUpdationTimeMap[cid];
       await _collectionsService.setCollectionSyncTime(cid, remoteUpdateTime);
     }
-    Bus.instance.fire(SyncStatusUpdate(SyncStatus.diffSynced));
     _logger.info("All updated collections synced");
   }
 

@@ -37,7 +37,7 @@ class _StatusBarWidgetState extends State<StatusBarWidget> {
   @override
   void initState() {
     _subscription = Bus.instance.on<SyncStatusUpdate>().listen((event) {
-      _logger.info("Received event " + event.toString());
+      _logger.info("Received event " + event.status.toString());
       if (event.status == SyncStatus.error) {
         setState(() {
           _syncError = event.error;
@@ -164,8 +164,7 @@ class _SyncStatusWidgetState extends State<SyncStatusWidget> {
     if (_event == null ||
         isNotOutdatedEvent ||
         //sync error cases are handled in StatusBarWidget
-        _event!.status == SyncStatus.error ||
-        _event!.status == SyncStatus.diffSynced) {
+        _event!.status == SyncStatus.error) {
       return const SizedBox.shrink();
     }
     if (_event!.status == SyncStatus.completedBackup) {

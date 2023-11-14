@@ -48,7 +48,8 @@ class SemanticSearchService {
     await ModelLoader.instance.init(_computer);
     _setupCachedEmbeddings();
     Bus.instance.on<SyncStatusUpdate>().listen((event) async {
-      if (event.status == SyncStatus.diffSynced) {
+      if (event.status == SyncStatus.preparingForUpload) {
+        // Diff sync is complete, we can now pull embeddings from remote
         sync();
       }
     });
