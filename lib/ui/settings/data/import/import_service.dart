@@ -31,6 +31,9 @@ class ImportService {
       case ImportType.aegis:
         showAegisImportInstruction(context);
         break;
+      case ImportType.bitwarden:
+        showGoogleAuthImageInstruction(context);
+        break;
     }
   }
 }

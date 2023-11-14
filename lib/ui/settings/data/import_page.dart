@@ -15,6 +15,7 @@ enum ImportType {
   ravio,
   googleAuthenticator,
   aegis,
+  bitwarden,
 }
 
 class ImportCodePage extends StatelessWidget {
@@ -24,6 +25,7 @@ class ImportCodePage extends StatelessWidget {
     ImportType.ravio,
     ImportType.aegis,
     ImportType.googleAuthenticator,
+    ImportType.bitwarden,
   ];
 
   ImportCodePage({super.key});
@@ -40,6 +42,8 @@ class ImportCodePage extends StatelessWidget {
         return 'Google Authenticator';
       case ImportType.aegis:
         return 'Aegis Authenticator';
+      case ImportType.bitwarden:
+        return 'Bitwarden';
     }
   }
 
