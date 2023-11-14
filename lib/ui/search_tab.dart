@@ -74,44 +74,59 @@ class _AllSearchSectionsState extends State<AllSearchSections> {
     // remove face and content sectionType
     searchTypes.remove(SectionType.face);
     searchTypes.remove(SectionType.content);
-    return FutureBuilder(
-      future:
-          InheritedAllSectionsExamples.of(context).allSectionsExamplesFuture,
-      builder: (context, snapshot) {
-        if (snapshot.hasData) {
-          if (snapshot.data!.every((element) => element.isEmpty)) {
-            return const Padding(
-              padding: EdgeInsets.only(bottom: 72),
-              child: SearchTabEmptyState(),
-            );
-          }
-          return ListView.builder(
-            padding: const EdgeInsets.only(bottom: 180),
-            physics: const BouncingScrollPhysics(),
-            itemCount: searchTypes.length,
-            itemBuilder: (context, index) {
-              return SearchSection(
-                sectionType: searchTypes[index],
-                examples: snapshot.data!.elementAt(index),
-                limit: searchSectionLimit,
+    return Stack(
+      children: [
+        FutureBuilder(
+          future: InheritedAllSectionsExamples.of(context)
+              .allSectionsExamplesFuture,
+          builder: (context, snapshot) {
+            if (snapshot.hasData) {
+              if (snapshot.data!.every((element) => element.isEmpty)) {
+                return const Padding(
+                  padding: EdgeInsets.only(bottom: 72),
+                  child: SearchTabEmptyState(),
+                );
+              }
+              return ListView.builder(
+                padding: const EdgeInsets.only(bottom: 180),
+                physics: const BouncingScrollPhysics(),
+                itemCount: searchTypes.length,
+                itemBuilder: (context, index) {
+                  return SearchSection(
+                    sectionType: searchTypes[index],
+                    examples: snapshot.data!.elementAt(index),
+                    limit: searchSectionLimit,
+                  );
+                },
               );
-            },
-          );
-        } else if (snapshot.hasError) {
-          //todo: Show something went wrong here
-          //Errors are handled and this else if condition will be false always
-          //is the understanding.
-          return const Padding(
-            padding: EdgeInsets.only(bottom: 72),
-            child: EnteLoadingWidget(),
-          );
-        } else {
-          return const Padding(
-            padding: EdgeInsets.only(bottom: 72),
-            child: EnteLoadingWidget(),
-          );
-        }
-      },
+            } else if (snapshot.hasError) {
+              //todo: Show something went wrong here
+              //Errors are handled and this else if condition will be false always
+              //is the understanding.
+              return const Padding(
+                padding: EdgeInsets.only(bottom: 72),
+                child: EnteLoadingWidget(),
+              );
+            } else {
+              return const Padding(
+                padding: EdgeInsets.only(bottom: 72),
+                child: EnteLoadingWidget(),
+              );
+            }
+          },
+        ),
+        ValueListenableBuilder(
+          valueListenable:
+              InheritedAllSectionsExamples.of(context).isDebouncingNotifier,
+          builder: (context, value, _) {
+            return value
+                ? const EnteLoadingWidget(
+                    alignment: Alignment.topRight,
+                  )
+                : const SizedBox.shrink();
+          },
+        ),
+      ],
     );
   }
 }

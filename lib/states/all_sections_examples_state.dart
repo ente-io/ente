@@ -78,6 +78,7 @@ class _AllSectionsExamplesProviderState
   Widget build(BuildContext context) {
     return InheritedAllSectionsExamples(
       allSectionsExamplesFuture,
+      _debouncer.debounceActiveNotifier,
       child: widget.child,
     );
   }
@@ -85,8 +86,10 @@ class _AllSectionsExamplesProviderState
 
 class InheritedAllSectionsExamples extends InheritedWidget {
   final Future<List<List<SearchResult>>> allSectionsExamplesFuture;
+  final ValueNotifier<bool> isDebouncingNotifier;
   const InheritedAllSectionsExamples(
-    this.allSectionsExamplesFuture, {
+    this.allSectionsExamplesFuture,
+    this.isDebouncingNotifier, {
     super.key,
     required super.child,
   });
