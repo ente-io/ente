@@ -35,6 +35,9 @@ class ImportService {
       case ImportType.googleAuthenticatorImage:
         showGoogleAuthImageInstruction(context);
         break;
+      case ImportType.bitwarden:
+        showGoogleAuthImageInstruction(context);
+        break;
     }
   }
 }
