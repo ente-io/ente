@@ -8,7 +8,9 @@ import 'package:photos/services/deduplication_service.dart';
 import 'package:photos/services/sync_service.dart';
 import 'package:photos/services/update_service.dart';
 import 'package:photos/theme/ente_theme.dart';
+import "package:photos/ui/components/buttons/button_widget.dart";
 import "package:photos/ui/components/captioned_text_widget.dart";
+import "package:photos/ui/components/dialog_widget.dart";
 import 'package:photos/ui/components/expandable_menu_item_widget.dart';
 import 'package:photos/ui/components/menu_item_widget/menu_item_widget.dart';
 import "package:photos/ui/components/models/button_type.dart";
@@ -16,9 +18,10 @@ import 'package:photos/ui/settings/backup/backup_folder_selection_page.dart';
 import 'package:photos/ui/settings/backup/backup_settings_screen.dart';
 import 'package:photos/ui/settings/common_settings.dart';
 import 'package:photos/ui/tools/deduplicate_page.dart';
-import 'package:photos/ui/tools/free_space_page.dart';
+import "package:photos/ui/tools/free_space_page.dart";
 import 'package:photos/utils/data_util.dart';
 import 'package:photos/utils/dialog_util.dart';
+import "package:photos/utils/local_settings.dart";
 import 'package:photos/utils/navigation_util.dart';
 import 'package:photos/utils/toast_util.dart';
 
@@ -153,25 +156,55 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
   }
 
   void _showSpaceFreedDialog(BackupStatus status) {
-    showChoiceDialog(
-      context,
-      title: S.of(context).success,
-      body: S.of(context).youHaveSuccessfullyFreedUp(formatBytes(status.size)),
-      firstButtonLabel: S.of(context).rateUs,
-      firstButtonOnTap: () async {
-        UpdateService.instance.launchReviewUrl();
-      },
-      firstButtonType: ButtonType.primary,
-      secondButtonLabel: S.of(context).ok,
-      secondButtonOnTap: () async {
-        if (Platform.isIOS) {
-          showToast(
-            context,
-            S.of(context).remindToEmptyDeviceTrash,
-          );
-        }
-      },
-    );
+    if (LocalSettings.instance.shouldPromptToRateUs()) {
+      LocalSettings.instance.setRateUsShownCount(
+        LocalSettings.instance.getRateUsShownCount() + 1,
+      );
+      showChoiceDialog(
+        context,
+        title: S.of(context).success,
+        body:
+            S.of(context).youHaveSuccessfullyFreedUp(formatBytes(status.size)),
+        firstButtonLabel: S.of(context).rateUs,
+        firstButtonOnTap: () async {
+          UpdateService.instance.launchReviewUrl();
+        },
+        firstButtonType: ButtonType.primary,
+        secondButtonLabel: S.of(context).ok,
+        secondButtonOnTap: () async {
+          if (Platform.isIOS) {
+            showToast(
+              context,
+              S.of(context).remindToEmptyDeviceTrash,
+            );
+          }
+        },
+      );
+    } else {
+      showDialogWidget(
+        context: context,
+        title: S.of(context).success,
+        body:
+            S.of(context).youHaveSuccessfullyFreedUp(formatBytes(status.size)),
+        icon: Icons.download_done_rounded,
+        isDismissible: true,
+        buttons: [
+          ButtonWidget(
+            buttonType: ButtonType.neutral,
+            labelText: S.of(context).ok,
+            isInAlert: true,
+            onTap: () async {
+              if (Platform.isIOS) {
+                showToast(
+                  context,
+                  S.of(context).remindToEmptyDeviceTrash,
+                );
+              }
+            },
+          ),
+        ],
+      );
+    }
   }
 
   void _showDuplicateFilesDeletedDialog(DeduplicationResult result) {
