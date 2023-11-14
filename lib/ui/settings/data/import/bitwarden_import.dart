@@ -41,7 +41,7 @@ Future<void> showBitwardenImportInstruction(BuildContext context) async {
   if (result?.action != null && result!.action != ButtonAction.cancel) {
     if (result.action == ButtonAction.first) {
       await _pickBitwardenJsonFile(context);
-    } else {}
+    }
   }
 }
 
@@ -75,14 +75,6 @@ Future<int?> _processBitwardenExportFile(
   String path,
 ) async {
   File file = File(path);
-  if (path.endsWith('.zip')) {
-    await showErrorDialog(
-      context,
-      context.l10n.sorry,
-      "We don't support zip files yet. Please unzip the file and try again.",
-    );
-    return null;
-  }
   final jsonString = await file.readAsString();
   final data = jsonDecode(jsonString);
   List<dynamic> jsonArray = data['items'];
@@ -107,6 +99,5 @@ Future<int?> _processBitwardenExportFile(
     await CodeStore.instance.addCode(code, shouldSync: false);
   }
   unawaited(AuthenticatorService.instance.onlineSync());
-  int count = parsedCodes.length;
-  return count;
+  return parsedCodes.length;
 }
