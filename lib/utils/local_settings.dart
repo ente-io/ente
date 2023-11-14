@@ -45,7 +45,7 @@ class LocalSettings {
     if (_prefs.containsKey(kEnableMagicSearch)) {
       return _prefs.getBool(kEnableMagicSearch)!;
     }
-    return false;
+    return true;
   }
 
   Future<void> setShouldEnableMagicSearch(bool value) async {
