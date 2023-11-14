@@ -9,9 +9,9 @@ import "package:photos/core/configuration.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/db/object_box.dart";
+import "package:photos/events/diff_sync_complete_event.dart";
 import 'package:photos/events/embedding_updated_event.dart';
 import "package:photos/events/file_uploaded_event.dart";
-import "package:photos/events/sync_status_update_event.dart";
 import "package:photos/models/embedding.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/services/semantic_search/embedding_store.dart";
@@ -47,11 +47,9 @@ class SemanticSearchService {
     await EmbeddingStore.instance.init(preferences);
     await ModelLoader.instance.init(_computer);
     _setupCachedEmbeddings();
-    Bus.instance.on<SyncStatusUpdate>().listen((event) async {
-      if (event.status == SyncStatus.preparingForUpload) {
-        // Diff sync is complete, we can now pull embeddings from remote
-        sync();
-      }
+    Bus.instance.on<DiffSyncCompleteEvent>().listen((event) async {
+      // Diff sync is complete, we can now pull embeddings from remote
+      sync();
     });
     if (Configuration.instance.hasConfiguredAccount()) {
       EmbeddingStore.instance.pushEmbeddings();
