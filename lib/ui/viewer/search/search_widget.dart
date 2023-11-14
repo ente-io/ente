@@ -75,13 +75,22 @@ class SearchWidgetState extends State<SearchWidget> {
   }
 
   Future<void> textControllerListener() async {
+    //query in local varialbe
     final value = textController.text;
     isSearchQueryEmpty = value.isEmpty;
+    //latest query in global variable
     query = textController.text;
 
     final List<SearchResult> allResults =
         await getSearchResultsForQuery(context, value);
-    if (mounted) {
+    /*checking if query == value to make sure that the results are from the current query
+                      and not from the previous query (race condition).*/
+    //checking if query == value to make sure that the latest query's result
+    //(allResults) is passed to updateResult. Due to race condition, the previous
+    //query's allResults could be passed to updateResult after the lastest query's
+    //allResults is passed.
+
+    if (mounted && query == value) {
       final inheritedSearchResults = InheritedSearchResults.of(context);
       inheritedSearchResults.updateResults(allResults);
     }
