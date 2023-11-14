@@ -49,8 +49,7 @@ class SemanticSearchService {
     _cacheEmbeddings();
     Bus.instance.on<SyncStatusUpdate>().listen((event) async {
       if (event.status == SyncStatus.diffSynced) {
-        await EmbeddingStore.instance.pullEmbeddings();
-        _cacheEmbeddings();
+        sync();
       }
     });
     if (Configuration.instance.hasConfiguredAccount()) {
@@ -58,12 +57,17 @@ class SemanticSearchService {
     }
 
     _loadModels().then((v) {
-      startBackFill();
       _getTextEmbedding("warm up text encoder");
     });
     Bus.instance.on<FileUploadedEvent>().listen((event) async {
       _addToQueue(event.file);
     });
+  }
+
+  Future<void> sync() async {
+    await EmbeddingStore.instance.pullEmbeddings();
+    _cacheEmbeddings();
+    _backFill();
   }
 
   Future<List<EnteFile>> search(String query) async {
@@ -98,7 +102,7 @@ class SemanticSearchService {
     return IndexStatus(embeddings.length, _queue.length);
   }
 
-  Future<void> startBackFill() async {
+  Future<void> _backFill() async {
     if (!LocalSettings.instance.hasEnabledMagicSearch()) {
       return;
     }

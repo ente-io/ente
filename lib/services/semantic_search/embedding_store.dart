@@ -1,3 +1,4 @@
+import "dart:async";
 import "dart:convert";
 import "dart:typed_data";
 
@@ -27,24 +28,25 @@ class EmbeddingStore {
 
   late SharedPreferences _preferences;
 
-  bool isSyncing = false;
+  Completer<void>? _syncStatus;
 
   Future<void> init(SharedPreferences preferences) async {
     _preferences = preferences;
   }
 
   Future<void> pullEmbeddings() async {
-    if (isSyncing) {
-      return;
+    if (_syncStatus != null) {
+      return _syncStatus!.future;
     }
-    isSyncing = true;
+    _syncStatus = Completer();
     var remoteEmbeddings = await _getRemoteEmbeddings();
     await _storeRemoteEmbeddings(remoteEmbeddings.embeddings);
     while (remoteEmbeddings.hasMore) {
       remoteEmbeddings = await _getRemoteEmbeddings();
       await _storeRemoteEmbeddings(remoteEmbeddings.embeddings);
     }
-    isSyncing = false;
+    _syncStatus!.complete();
+    _syncStatus = null;
   }
 
   Future<void> pushEmbeddings() async {
