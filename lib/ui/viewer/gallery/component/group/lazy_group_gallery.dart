@@ -98,7 +98,6 @@ class _LazyGroupGalleryState extends State<LazyGroupGallery> {
   bool _areAllFromGroupSelected() {
     if (widget.selectedFiles != null &&
         widget.selectedFiles!.files.length >= widget.files.length) {
-      widget.selectedFiles!.files.containsAll(widget.files);
       return widget.selectedFiles!.files.containsAll(widget.files);
     } else {
       return false;
@@ -193,6 +192,7 @@ class _LazyGroupGalleryState extends State<LazyGroupGallery> {
                 timestamp: _files[0].creationTime!,
                 gridSize: widget.photoGridSize,
               ),
+            Expanded(child: Container()),
             widget.limitSelectionToOne
                 ? const SizedBox.shrink()
                 : ValueListenableBuilder(
