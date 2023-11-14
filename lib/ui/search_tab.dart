@@ -1,3 +1,4 @@
+import "package:fade_indexed_stack/fade_indexed_stack.dart";
 import "package:flutter/material.dart";
 import "package:photos/core/constants.dart";
 import "package:photos/models/search/search_result.dart";
@@ -42,7 +43,8 @@ class _SearchTabState extends State<SearchTab> {
     return Padding(
       padding: const EdgeInsets.only(top: 8),
       child: AllSectionsExamplesProvider(
-        child: IndexedStack(
+        child: FadeIndexedStack(
+          duration: const Duration(milliseconds: 150),
           index: index,
           children: [
             const AllSearchSections(),

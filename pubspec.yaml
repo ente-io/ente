@@ -53,6 +53,7 @@ dependencies:
   expandable: ^5.0.1
   expansion_tile_card: ^3.0.0
   extended_image: ^8.1.1
+  fade_indexed_stack: ^0.2.2
   fast_base58: ^0.2.1
   # https://github.com/incrediblezayed/file_saver/issues/86
   file_saver: 0.2.8
