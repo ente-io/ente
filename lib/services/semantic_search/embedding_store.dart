@@ -117,6 +117,9 @@ class EmbeddingStore {
   Future<void> _storeRemoteEmbeddings(
     List<RemoteEmbedding> remoteEmbeddings,
   ) async {
+    if (remoteEmbeddings.isEmpty) {
+      return;
+    }
     final embeddings = <Embedding>[];
     for (final embedding in remoteEmbeddings) {
       final file = await FilesDB.instance.getAnyUploadedFile(embedding.fileID);
