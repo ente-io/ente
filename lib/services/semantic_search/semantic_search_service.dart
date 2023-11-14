@@ -110,17 +110,16 @@ class SemanticSearchService {
     );
 
     startTime = DateTime.now();
-    final queryResults = <QueryResult>[];
-    for (final embedding in _cachedEmbeddings) {
-      final score = computeScore({
-        "imageEmbedding": embedding.embedding,
+
+    final List<QueryResult> queryResults = await _computer.compute(
+      computeBulkScore,
+      param: {
+        "imageEmbeddings": _cachedEmbeddings,
         "textEmbedding": textEmbedding,
-      });
-      if (score >= kScoreThreshold) {
-        queryResults.add(QueryResult(embedding.fileID, score));
-      }
-    }
-    queryResults.sort((first, second) => second.score.compareTo(first.score));
+      },
+      taskName: "computeBulkScore",
+    );
+
     endTime = DateTime.now();
     _logger.info(
       "computingScores took: " +
@@ -260,11 +259,22 @@ List<double> createTextEmbedding(Map args) {
   return CLIP.createTextEmbedding(args["text"]);
 }
 
-double computeScore(Map args) {
-  return CLIP.computeScore(
-    args["imageEmbedding"] as List<double>,
-    args["textEmbedding"] as List<double>,
-  );
+List<QueryResult> computeBulkScore(Map args) {
+  final queryResults = <QueryResult>[];
+  final imageEmbeddings = args["imageEmbeddings"] as List<Embedding>;
+  final textEmbedding = args["textEmbedding"] as List<double>;
+  for (final imageEmbedding in imageEmbeddings) {
+    final score = CLIP.computeScore(
+      imageEmbedding.embedding,
+      textEmbedding,
+    );
+    if (score >= 0.23) {
+      queryResults.add(QueryResult(imageEmbedding.fileID, score));
+    }
+  }
+
+  queryResults.sort((first, second) => second.score.compareTo(first.score));
+  return queryResults;
 }
 
 class QueryResult {
