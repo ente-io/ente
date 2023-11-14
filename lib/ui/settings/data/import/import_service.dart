@@ -1,5 +1,4 @@
 import 'package:ente_auth/ui/settings/data/import/aegis_import.dart';
-import 'package:ente_auth/ui/settings/data/import/analyze_qr_code.dart';
 import 'package:ente_auth/ui/settings/data/import/bitwarden_import.dart';
 import 'package:ente_auth/ui/settings/data/import/encrypted_ente_import.dart';
 import 'package:ente_auth/ui/settings/data/import/google_auth_image_import.dart';
@@ -35,16 +34,10 @@ class ImportService {
         showAegisImportInstruction(context);
         break;
       case ImportType.googleAuthenticatorImage:
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (BuildContext context) {
-              return const QrScanner();
-            },
-          ),
-        );
+        showGoogleAuthImageInstruction(context);
+        break;
       case ImportType.bitwarden:
         showBitwardenImportInstruction(context);
-        showGoogleAuthImageInstruction(context);
         break;
     }
   }
