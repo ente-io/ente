@@ -345,7 +345,7 @@
   "googleAuthImagePopupBody": "Please turn off all photo cloud sync from all apps, including iCloud, Google Photo, OneDrive, etc. \nAlso if you have a second smartphone, it is safer to import by scanning QR code.",
   "importGoogleAuthImageButtonText": "Import from image",
   "unableToRecognizeQrCodeText": "Unable to recognize a valid code from the uploaded image",
-  "qrCodeImageNotSelectedText": "Qr code image not selected"
+  "qrCodeImageNotSelectedText": "Qr code image not selected",
   "androidBiometricHint": "Verify identity",
   "@androidBiometricHint": {
     "description": "Hint message advising the user how to authenticate with biometrics. It is used on Android side. Maximum 60 characters."
