@@ -1,6 +1,7 @@
 import "dart:convert";
 import "dart:typed_data";
 
+import "package:computer/computer.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/network/network.dart";
 import "package:photos/db/files_db.dart";
@@ -127,38 +128,68 @@ class EmbeddingStore {
     if (remoteEmbeddings.isEmpty) {
       return;
     }
-    final embeddings = <Embedding>[];
+    final inputs = <EmbeddingsDecoderInput>[];
     for (final embedding in remoteEmbeddings) {
       final file = await FilesDB.instance.getAnyUploadedFile(embedding.fileID);
       if (file == null) {
         continue;
       }
       final fileKey = getFileKey(file);
-      final embeddingData = await CryptoUtil.decryptChaCha(
-        CryptoUtil.base642bin(embedding.encryptedEmbedding),
-        fileKey,
-        CryptoUtil.base642bin(embedding.decryptionHeader),
-      );
-      final List<double> decodedEmbedding =
-          jsonDecode(utf8.decode(embeddingData))
-              .map((item) => item.toDouble())
-              .cast<double>()
-              .toList();
-
-      embeddings.add(
-        Embedding(
-          fileID: embedding.fileID,
-          model: embedding.model,
-          embedding: decodedEmbedding,
-          updationTime: embedding.updatedAt,
-        ),
-      );
+      final input = EmbeddingsDecoderInput(embedding, fileKey);
+      inputs.add(input);
     }
+    final embeddings = await Computer.shared().compute(
+      decodeEmbeddings,
+      param: {
+        "inputs": inputs,
+      },
+    );
+    _logger.info("${embeddings.length} embeddings decoded");
     await ObjectBox.instance.getEmbeddingBox().putManyAsync(embeddings);
-    _logger.info("${embeddings.length} embeddings stored");
     await _preferences.setInt(
       kEmbeddingsSyncTimeKey,
       embeddings.last.updationTime!,
     );
+    _logger.info("${embeddings.length} embeddings stored");
   }
+}
+
+Future<List<Embedding>> decodeEmbeddings(Map<String, dynamic> args) async {
+  final embeddings = <Embedding>[];
+
+  final inputs = args["inputs"] as List<EmbeddingsDecoderInput>;
+
+  for (final input in inputs) {
+    ;
+    final decryptArgs = <String, dynamic>{};
+    decryptArgs["source"] =
+        CryptoUtil.base642bin(input.embedding.encryptedEmbedding);
+    decryptArgs["key"] = input.decryptionKey;
+    decryptArgs["header"] =
+        CryptoUtil.base642bin(input.embedding.decryptionHeader);
+    final embeddingData = chachaDecryptData(decryptArgs);
+
+    final List<double> decodedEmbedding = jsonDecode(utf8.decode(embeddingData))
+        .map((item) => item.toDouble())
+        .cast<double>()
+        .toList();
+
+    embeddings.add(
+      Embedding(
+        fileID: input.embedding.fileID,
+        model: input.embedding.model,
+        embedding: decodedEmbedding,
+        updationTime: input.embedding.updatedAt,
+      ),
+    );
+  }
+
+  return embeddings;
+}
+
+class EmbeddingsDecoderInput {
+  final RemoteEmbedding embedding;
+  final Uint8List decryptionKey;
+
+  EmbeddingsDecoderInput(this.embedding, this.decryptionKey);
 }
