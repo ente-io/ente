@@ -71,7 +71,7 @@ class SemanticSearchService {
       return [];
     }
     if (_ongoingRequest == null) {
-      _ongoingRequest = getMatchingFiles(query).then((result) {
+      _ongoingRequest = _getMatchingFiles(query).then((result) {
         _ongoingRequest = null;
         if (_nextQuery != null) {
           final next = _nextQuery;
@@ -93,7 +93,7 @@ class SemanticSearchService {
     }
   }
 
-  Future<List<EnteFile>> getMatchingFiles(String query) async {
+  Future<List<EnteFile>> _getMatchingFiles(String query) async {
     final textEmbedding = await _getTextEmbedding(query);
 
     final queryResults = await _getScores(textEmbedding);
