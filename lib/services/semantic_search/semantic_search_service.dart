@@ -62,7 +62,7 @@ class SemanticSearchService {
       _getTextEmbedding("warm up text encoder");
     });
     Bus.instance.on<FileUploadedEvent>().listen((event) async {
-      addToQueue(event.file);
+      _addToQueue(event.file);
     });
   }
 
@@ -93,6 +93,29 @@ class SemanticSearchService {
     }
   }
 
+  Future<IndexStatus> getIndexStatus() async {
+    final embeddings = ObjectBox.instance.getEmbeddingBox().getAll();
+    return IndexStatus(embeddings.length, _queue.length);
+  }
+
+  Future<void> startBackFill() async {
+    if (!LocalSettings.instance.hasEnabledMagicSearch()) {
+      return;
+    }
+    final uploadedFileIDs = await FilesDB.instance
+        .getOwnedFileIDs(Configuration.instance.getUserID()!);
+    final embeddedFileIDs = _cachedEmbeddings.map((e) => e.fileID).toSet();
+    uploadedFileIDs.removeWhere((id) => embeddedFileIDs.contains(id));
+    final files = await FilesDB.instance.getUploadedFiles(uploadedFileIDs);
+    _logger.info(files.length.toString() + " pending to be embedded");
+    _queue.addAll(files);
+    _pollQueue();
+  }
+
+  Future<void> clearQueue() async {
+    _queue.clear();
+  }
+
   Future<List<EnteFile>> _getMatchingFiles(String query) async {
     final textEmbedding = await _getTextEmbedding(query);
 
@@ -112,7 +135,7 @@ class SemanticSearchService {
     return results;
   }
 
-  void addToQueue(EnteFile file) {
+  void _addToQueue(EnteFile file) {
     if (!LocalSettings.instance.hasEnabledMagicSearch()) {
       return;
     }
@@ -121,33 +144,10 @@ class SemanticSearchService {
     _pollQueue();
   }
 
-  Future<IndexStatus> getIndexStatus() async {
-    final embeddings = ObjectBox.instance.getEmbeddingBox().getAll();
-    return IndexStatus(embeddings.length, _queue.length);
-  }
-
   Future<void> _loadModels() async {
     await ModelLoader.instance.loadImageModel();
     await ModelLoader.instance.loadTextModel();
     hasLoaded = true;
-  }
-
-  Future<void> startBackFill() async {
-    if (!LocalSettings.instance.hasEnabledMagicSearch()) {
-      return;
-    }
-    final uploadedFileIDs = await FilesDB.instance
-        .getOwnedFileIDs(Configuration.instance.getUserID()!);
-    final embeddedFileIDs = _cachedEmbeddings.map((e) => e.fileID).toSet();
-    uploadedFileIDs.removeWhere((id) => embeddedFileIDs.contains(id));
-    final files = await FilesDB.instance.getUploadedFiles(uploadedFileIDs);
-    _logger.info(files.length.toString() + " pending to be embedded");
-    _queue.addAll(files);
-    _pollQueue();
-  }
-
-  Future<void> clearQueue() async {
-    _queue.clear();
   }
 
   Future<void> _pollQueue() async {
