@@ -96,7 +96,10 @@ class SemanticSearchService {
   }
 
   Future<IndexStatus> getIndexStatus() async {
-    return IndexStatus(_cachedEmbeddings.length, _queue.length);
+    return IndexStatus(
+      _cachedEmbeddings.length,
+      (await _getFileIDsToBeIndexed()).length,
+    );
   }
 
   void _setupCachedEmbeddings() {
@@ -118,6 +121,14 @@ class SemanticSearchService {
       return;
     }
     _logger.info("Attempting backfill");
+    final fileIDs = await _getFileIDsToBeIndexed();
+    final files = await FilesDB.instance.getUploadedFiles(fileIDs);
+    _logger.info(files.length.toString() + " to be embedded");
+    _queue.addAll(files);
+    _pollQueue();
+  }
+
+  Future<List<int>> _getFileIDsToBeIndexed() async {
     final uploadedFileIDs = await FilesDB.instance
         .getOwnedFileIDs(Configuration.instance.getUserID()!);
     final embeddedFileIDs = _cachedEmbeddings.map((e) => e.fileID).toSet();
@@ -125,10 +136,7 @@ class SemanticSearchService {
     uploadedFileIDs.removeWhere(
       (id) => embeddedFileIDs.contains(id) || queuedFileIDs.contains(id),
     );
-    final files = await FilesDB.instance.getUploadedFiles(uploadedFileIDs);
-    _logger.info(files.length.toString() + " to be embedded");
-    _queue.addAll(files);
-    _pollQueue();
+    return uploadedFileIDs;
   }
 
   Future<void> clearQueue() async {
