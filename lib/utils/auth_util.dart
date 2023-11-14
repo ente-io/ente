@@ -1,8 +1,9 @@
+import 'package:flutter/cupertino.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:local_auth_android/local_auth_android.dart';
 import 'package:logging/logging.dart';
 
-Future<bool> requestAuthentication(String reason) async {
+Future<bool> requestAuthentication(BuildContext context, String reason) async {
   Logger("AuthUtil").info("Requesting authentication");
   await LocalAuthentication().stopAuthentication();
   return await LocalAuthentication().authenticate(

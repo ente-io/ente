@@ -1,5 +1,6 @@
 {
   "account": "Account",
+  "unlock": "Unlock",
   "recoveryKey": "Recovery key",
   "counterAppBarTitle": "Counter",
   "@counterAppBarTitle": {
@@ -97,6 +98,7 @@
   "authToViewYourRecoveryKey": "Please authenticate to view your recovery key",
   "authToChangeYourEmail": "Please authenticate to change your email",
   "authToChangeYourPassword": "Please authenticate to change your password",
+  "authToViewSecrets": "Please authenticate to view your secrets",
   "ok": "Ok",
   "cancel": "Cancel",
   "yes": "Yes",
