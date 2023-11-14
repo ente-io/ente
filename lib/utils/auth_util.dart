@@ -2,6 +2,7 @@ import 'package:ente_auth/l10n/l10n.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:local_auth_android/local_auth_android.dart';
+import 'package:local_auth_ios/types/auth_messages_ios.dart';
 import 'package:logging/logging.dart';
 
 Future<bool> requestAuthentication(BuildContext context, String reason) async {
