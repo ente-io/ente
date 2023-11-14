@@ -3,7 +3,7 @@ import "dart:async";
 import "package:flutter/material.dart";
 import "package:intl/intl.dart";
 import "package:photos/core/event_bus.dart";
-import "package:photos/events/file_indexed_event.dart";
+import 'package:photos/events/embedding_updated_event.dart';
 import "package:photos/generated/l10n.dart";
 import "package:photos/services/semantic_search/semantic_search_service.dart";
 import "package:photos/theme/ente_theme.dart";
@@ -91,7 +91,7 @@ class _MachineLearningSettingsPageState
                 !LocalSettings.instance.hasEnabledMagicSearch(),
               );
               if (LocalSettings.instance.hasEnabledMagicSearch()) {
-                await SemanticSearchService.instance.sync();
+                SemanticSearchService.instance.sync();
               } else {
                 await SemanticSearchService.instance.clearQueue();
               }
@@ -132,12 +132,13 @@ class MagicSearchIndexStatsWidget extends StatefulWidget {
 class _MagicSearchIndexStatsWidgetState
     extends State<MagicSearchIndexStatsWidget> {
   IndexStatus? _status;
-  late StreamSubscription<FileIndexedEvent> _eventSubscription;
+  late StreamSubscription<EmbeddingUpdatedEvent> _eventSubscription;
 
   @override
   void initState() {
     super.initState();
-    _eventSubscription = Bus.instance.on<FileIndexedEvent>().listen((event) {
+    _eventSubscription =
+        Bus.instance.on<EmbeddingUpdatedEvent>().listen((event) {
       _fetchIndexStatus();
     });
     _fetchIndexStatus();
