@@ -52,6 +52,7 @@ import "package:uuid/uuid.dart";
 class UserService {
   static const keyHasEnabledTwoFactor = "has_enabled_two_factor";
   static const keyUserDetails = "user_details";
+  static const kReferralSource = "referral_source";
 
   final SRP6GroupParameters kDefaultSrpGroup = SRP6StandardGroups.rfc5054_4096;
   final _dio = NetworkClient.instance.getDio();
@@ -318,13 +319,17 @@ class UserService {
   }) async {
     final dialog = createProgressDialog(context, S.of(context).pleaseWait);
     await dialog.show();
+    final verifyData = {
+      "email": _config.getEmail(),
+      "ott": ott,
+    };
+    if (!_config.isLoggedIn()) {
+      verifyData["source"] = _getRefSource();
+    }
     try {
       final response = await _dio.post(
         _config.getHttpEndpoint() + "/users/verify-email",
-        data: {
-          "email": _config.getEmail(),
-          "ott": ott,
-        },
+        data: verifyData,
       );
       await dialog.hide();
       if (response.statusCode == 200) {
@@ -390,6 +395,14 @@ class UserService {
   Future<void> setEmail(String email) async {
     await _config.setEmail(email);
     emailValueNotifier.value = email;
+  }
+
+  Future<void> setRefSource(String refSource) async {
+    await _preferences.setString(kReferralSource, refSource);
+  }
+
+  String _getRefSource() {
+    return _preferences.getString(kReferralSource) ?? "";
   }
 
   Future<void> changeEmail(
@@ -666,33 +679,23 @@ class UserService {
     } on DioError catch (e, s) {
       await dialog.hide();
       if (e.response != null && e.response!.statusCode == 401) {
-        final dialogChoice = await showChoiceDialog(
+        await _showContactSupportDialog(
           context,
-          title: S.of(context).incorrectPasswordTitle,
-          body: S.of(context).pleaseTryAgain,
-          firstButtonLabel: S.of(context).contactSupport,
-          secondButtonLabel: S.of(context).ok,
+          S.of(context).incorrectPasswordTitle,
+          S.of(context).pleaseTryAgain,
         );
-        if (dialogChoice!.action == ButtonAction.first) {
-          await sendLogs(
-            context,
-            S.of(context).contactSupport,
-            "support@ente.io",
-            postShare: () {},
-          );
-        }
       } else {
-        _logger.fine('failed to verify password', e, s);
-        await showErrorDialog(
+        _logger.severe('failed to verify password', e, s);
+        await _showContactSupportDialog(
           context,
           S.of(context).oops,
           S.of(context).verificationFailedPleaseTryAgain,
         );
       }
     } catch (e, s) {
-      _logger.fine('failed to verify password', e, s);
+      _logger.severe('failed to verify password', e, s);
       await dialog.hide();
-      await showErrorDialog(
+      await _showContactSupportDialog(
         context,
         S.of(context).oops,
         S.of(context).verificationFailedPleaseTryAgain,
@@ -1159,6 +1162,28 @@ class UserService {
     } catch (e) {
       _logger.severe("Failed to update email mfa", e);
       rethrow;
+    }
+  }
+
+  Future<void> _showContactSupportDialog(
+    BuildContext context,
+    String title,
+    String message,
+  ) async {
+    final dialogChoice = await showChoiceDialog(
+      context,
+      title: title,
+      body: message,
+      firstButtonLabel: S.of(context).contactSupport,
+      secondButtonLabel: S.of(context).ok,
+    );
+    if (dialogChoice!.action == ButtonAction.first) {
+      await sendLogs(
+        context,
+        S.of(context).contactSupport,
+        "support@ente.io",
+        postShare: () {},
+      );
     }
   }
 }

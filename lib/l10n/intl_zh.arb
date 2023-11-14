@@ -557,6 +557,7 @@
   "faqs": "常见问题",
   "renewsOn": "在 {endDate} 前续费",
   "freeTrialValidTill": "免费试用有效期至 {endDate}",
+  "validTill": "有效期至 {endDate}",
   "playStoreFreeTrialValidTill": "免费试用有效期至 {endDate}。\n之后您可以选择付费计划。",
   "subWillBeCancelledOn": "您的订阅将于 {endDate} 取消",
   "subscription": "订阅",
@@ -1102,5 +1103,10 @@
   "crashReporting": "崩溃报告",
   "addToHiddenAlbum": "添加到隐藏相册",
   "moveToHiddenAlbum": "移至隐藏相册",
-  "deleteConfirmDialogBody": "此账户已链接到其他 ente 旗下的应用程序（如果您使用任何 ente 旗下的应用程序）。\\n\\n您在所有 ente 旗下的应用程序中上传的数据将被安排删除，并且您的账户将被永久删除。"
+  "deleteConfirmDialogBody": "此账户已链接到其他 ente 旗下的应用程序（如果您使用任何 ente 旗下的应用程序）。\\n\\n您在所有 ente 旗下的应用程序中上传的数据将被安排删除，并且您的账户将被永久删除。",
+  "hearUsWhereTitle": "您是如何知道Ente的？ （可选的）",
+  "hearUsExplanation": "我们不跟踪应用程序安装情况。如果您告诉我们您是在哪里找到我们的，将会有所帮助！",
+  "viewAddOnButton": "查看附加组件",
+  "addOns": "附加组件",
+  "addOnPageSubtitle": "附加组件详情"
 }

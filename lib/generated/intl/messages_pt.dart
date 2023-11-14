@@ -157,6 +157,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "deleteAlbum": MessageLookupByLibrary.simpleMessage("Excluir álbum"),
         "deleteAlbumDialog": MessageLookupByLibrary.simpleMessage(
             "Também excluir as fotos (e vídeos) presentes neste álbum de <bold>todos os</bold> outros álbuns dos quais eles fazem parte?"),
+        "deleteConfirmDialogBody": MessageLookupByLibrary.simpleMessage(
+            "This account is linked to other ente apps, if you use any.\\n\\nYour uploaded data, across all ente apps, will be scheduled for deletion, and your account will be permanently deleted."),
         "deleteEmailRequest": MessageLookupByLibrary.simpleMessage(
             "Por favor, envie um e-mail para <warning>account-deletion@ente.io</warning> a partir do seu endereço de e-mail registrado."),
         "deletePhotos": MessageLookupByLibrary.simpleMessage("Excluir fotos"),

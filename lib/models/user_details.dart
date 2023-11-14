@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:math';
 
 import 'package:collection/collection.dart';
+import "package:photos/models/api/storage_bonus/bonus.dart";
 import 'package:photos/models/file/file_type.dart';
 import 'package:photos/models/subscription.dart';
 
@@ -14,6 +15,7 @@ class UserDetails {
   final Subscription subscription;
   final FamilyData? familyData;
   final ProfileData? profileData;
+  final BonusData? bonusData;
 
   const UserDetails(
     this.email,
@@ -24,6 +26,7 @@ class UserDetails {
     this.subscription,
     this.familyData,
     this.profileData,
+    this.bonusData,
   );
 
   bool isPartOfFamily() {
@@ -55,6 +58,12 @@ class UserDetails {
         storageBonus;
   }
 
+  // This is the total storage for which user has paid for.
+  int getPlanPlusAddonStorage() {
+    return (isPartOfFamily() ? familyData!.storage : subscription.storage) +
+        bonusData!.totalAddOnBonus();
+  }
+
   factory UserDetails.fromMap(Map<String, dynamic> map) {
     return UserDetails(
       map['email'] as String,
@@ -65,6 +74,7 @@ class UserDetails {
       Subscription.fromMap(map['subscription']),
       FamilyData.fromMap(map['familyData']),
       ProfileData.fromJson(map['profileData']),
+      BonusData.fromJson(map['bonusData']),
     );
   }
 
@@ -78,6 +88,7 @@ class UserDetails {
       'subscription': subscription.toMap(),
       'familyData': familyData?.toMap(),
       'profileData': profileData?.toJson(),
+      'bonusData': bonusData?.toJson(),
     };
   }
 
@@ -123,6 +134,7 @@ class FamilyMember {
   factory FamilyMember.fromJson(String source) =>
       FamilyMember.fromMap(json.decode(source));
 }
+
 class ProfileData {
   bool canDisableEmailMFA;
   bool isEmailMFAEnabled;
@@ -134,7 +146,6 @@ class ProfileData {
     this.isEmailMFAEnabled = false,
     this.isTwoFactorEnabled = false,
   });
-
 
   // Factory method to create ProfileData instance from JSON
   factory ProfileData.fromJson(Map<String, dynamic>? json) {
@@ -153,6 +164,7 @@ class ProfileData {
       'isTwoFactorEnabled': isTwoFactorEnabled,
     };
   }
+
   String toJsonString() => json.encode(toJson());
 }
 

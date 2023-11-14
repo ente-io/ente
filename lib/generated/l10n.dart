@@ -190,17 +190,6 @@ class S {
     );
   }
 
-  /// `This account is linked to other ente apps, if you use any.`
-  /// `Your uploaded data, across all ente apps, will be scheduled for deletion, and your account will be permanently deleted.`
-  String get deleteConfirmDialogBody {
-    return Intl.message(
-      'This account is linked to other ente apps, if you use any.\n\nYour uploaded data, across all ente apps, will be scheduled for deletion, and your account will be permanently deleted.',
-      name: 'deleteConfirmDialogBody',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `Delete Account Permanently`
   String get deleteAccountPermanentlyButton {
     return Intl.message(
@@ -3980,6 +3969,16 @@ class S {
     return Intl.message(
       'Free trial valid till $endDate',
       name: 'freeTrialValidTill',
+      desc: '',
+      args: [endDate],
+    );
+  }
+
+  /// `Valid till {endDate}`
+  String validTill(Object endDate) {
+    return Intl.message(
+      'Valid till $endDate',
+      name: 'validTill',
       desc: '',
       args: [endDate],
     );
@@ -7771,6 +7770,66 @@ class S {
     return Intl.message(
       'Move to hidden album',
       name: 'moveToHiddenAlbum',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `This account is linked to other ente apps, if you use any.\n\nYour uploaded data, across all ente apps, will be scheduled for deletion, and your account will be permanently deleted.`
+  String get deleteConfirmDialogBody {
+    return Intl.message(
+      'This account is linked to other ente apps, if you use any.\\n\\nYour uploaded data, across all ente apps, will be scheduled for deletion, and your account will be permanently deleted.',
+      name: 'deleteConfirmDialogBody',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `How did you hear about Ente? (optional)`
+  String get hearUsWhereTitle {
+    return Intl.message(
+      'How did you hear about Ente? (optional)',
+      name: 'hearUsWhereTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `We don't track app installs. It'd help if you told us where you found us!`
+  String get hearUsExplanation {
+    return Intl.message(
+      'We don\'t track app installs. It\'d help if you told us where you found us!',
+      name: 'hearUsExplanation',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `View add-ons`
+  String get viewAddOnButton {
+    return Intl.message(
+      'View add-ons',
+      name: 'viewAddOnButton',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Add-ons`
+  String get addOns {
+    return Intl.message(
+      'Add-ons',
+      name: 'addOns',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Details of add-ons`
+  String get addOnPageSubtitle {
+    return Intl.message(
+      'Details of add-ons',
+      name: 'addOnPageSubtitle',
       desc: '',
       args: [],
     );

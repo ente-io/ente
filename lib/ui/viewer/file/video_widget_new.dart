@@ -12,6 +12,7 @@ import "package:photos/models/file/file.dart";
 import "package:photos/services/files_service.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
+import "package:photos/ui/actions/file/file_actions.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/file_util.dart";
@@ -133,7 +134,14 @@ class _VideoWidgetNewState extends State<VideoWidgetNew>
         fullscreen: const MaterialVideoControlsThemeData(),
         child: GestureDetector(
           onVerticalDragUpdate: (d) => {
-            if (d.delta.dy > dragSensitivity) {Navigator.of(context).pop()},
+            if (d.delta.dy > dragSensitivity)
+              {
+                Navigator.of(context).pop(),
+              }
+            else if (d.delta.dy < (dragSensitivity * -1))
+              {
+                showDetailsSheet(context, widget.file),
+              },
           },
           child: Center(
             child: controller != null

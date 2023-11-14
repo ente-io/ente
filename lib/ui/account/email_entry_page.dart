@@ -6,8 +6,10 @@ import 'package:photos/core/configuration.dart';
 import 'package:photos/ente_theme_data.dart';
 import "package:photos/generated/l10n.dart";
 import 'package:photos/services/user_service.dart';
+import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/common/dynamic_fab.dart';
 import 'package:photos/ui/common/web_page.dart';
+import "package:photos/utils/toast_util.dart";
 import 'package:step_progress_indicator/step_progress_indicator.dart';
 import "package:styled_text/styled_text.dart";
 
@@ -30,6 +32,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
   String? _email;
   String? _password;
   String _cnfPassword = '';
+  String _referralSource = '';
   double _passwordStrength = 0.0;
   bool _emailIsValid = false;
   bool _hasAgreedToTOS = true;
@@ -104,6 +107,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
         onPressedFunction: () {
           _config.setVolatilePassword(_passwordController1.text);
           UserService.instance.setEmail(_email!);
+          UserService.instance.setRefSource(_referralSource);
           UserService.instance
               .sendOtt(context, _email!, isCreateAccountScreen: true);
           FocusScope.of(context).unfocus();
@@ -325,6 +329,52 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                   ),
                 ),
                 const SizedBox(height: 4),
+                Padding(
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 0, horizontal: 20),
+                  child: Text(
+                    S.of(context).hearUsWhereTitle,
+                    style: getEnteTextTheme(context).smallFaint,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
+                  child: TextFormField(
+                    style: Theme.of(context).textTheme.titleMedium,
+                    decoration: InputDecoration(
+                      fillColor: null,
+                      filled: true,
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 14,
+                      ),
+                      border: UnderlineInputBorder(
+                        borderSide: BorderSide.none,
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      suffixIcon: InkWell(
+                        onTap: () {
+                          showToast(
+                            context,
+                            S.of(context).hearUsExplanation,
+                            iosLongToastLengthInSec: 4,
+                          );
+                        },
+                        child: Icon(
+                          Icons.info_outline_rounded,
+                          color: getEnteColorScheme(context).fillStrong,
+                        ),
+                      ),
+                    ),
+                    onChanged: (value) {
+                      _referralSource = value.trim();
+                    },
+                    autocorrect: false,
+                    keyboardType: TextInputType.text,
+                    textInputAction: TextInputAction.next,
+                  ),
+                ),
                 const Divider(thickness: 1),
                 const SizedBox(height: 12),
                 _getAgreement(),
@@ -377,31 +427,33 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                   .copyWith(fontSize: 12),
               tags: {
                 'u-terms': StyledTextActionTag(
-                  (String? text, Map<String?, String?> attrs) => Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (BuildContext context) {
-                          return WebPage(
-                            S.of(context).termsOfServicesTitle,
-                            "https://ente.io/terms",
-                          );
-                        },
-                      ),
+                  (String? text, Map<String?, String?> attrs) =>
+                      Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (BuildContext context) {
+                        return WebPage(
+                          S.of(context).termsOfServicesTitle,
+                          "https://ente.io/terms",
+                        );
+                      },
                     ),
+                  ),
                   style: const TextStyle(
                     decoration: TextDecoration.underline,
                   ),
                 ),
                 'u-policy': StyledTextActionTag(
-                  (String? text, Map<String?, String?> attrs) => Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (BuildContext context) {
-                          return WebPage(
-                            S.of(context).privacyPolicyTitle,
-                            "https://ente.io/privacy",
-                          );
-                        },
-                      ),
+                  (String? text, Map<String?, String?> attrs) =>
+                      Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (BuildContext context) {
+                        return WebPage(
+                          S.of(context).privacyPolicyTitle,
+                          "https://ente.io/privacy",
+                        );
+                      },
                     ),
+                  ),
                   style: const TextStyle(
                     decoration: TextDecoration.underline,
                   ),
@@ -442,16 +494,17 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                   .copyWith(fontSize: 12),
               tags: {
                 'underline': StyledTextActionTag(
-                  (String? text, Map<String?, String?> attrs) => Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (BuildContext context) {
-                          return WebPage(
-                            S.of(context).encryption,
-                            "https://ente.io/architecture",
-                          );
-                        },
-                      ),
+                  (String? text, Map<String?, String?> attrs) =>
+                      Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (BuildContext context) {
+                        return WebPage(
+                          S.of(context).encryption,
+                          "https://ente.io/architecture",
+                        );
+                      },
                     ),
+                  ),
                   style: const TextStyle(
                     decoration: TextDecoration.underline,
                   ),

@@ -557,6 +557,7 @@
   "faqs": "FAQ",
   "renewsOn": "Si rinnova il {endDate}",
   "freeTrialValidTill": "La prova gratuita termina il {endDate}",
+  "validTill": "Valido fino al {endDate}",
   "playStoreFreeTrialValidTill": "Prova gratuita valida fino al {endDate}.\nPuoi scegliere un piano a pagamento in seguito.",
   "subWillBeCancelledOn": "L'abbonamento verrà cancellato il {endDate}",
   "subscription": "Abbonamento",
@@ -1102,5 +1103,10 @@
   "crashReporting": "Segnalazione di crash",
   "addToHiddenAlbum": "Aggiungi ad album nascosto",
   "moveToHiddenAlbum": "Sposta in album nascosto",
-  "deleteConfirmDialogBody": "Questo account è collegato ad altre app di ente, se ne utilizzi.\\n\\nI tuoi dati caricati, su tutte le app di ente, saranno pianificati per la cancellazione e il tuo account verrà eliminato definitivamente."
+  "deleteConfirmDialogBody": "Questo account è collegato ad altre app di ente, se ne utilizzi.\\n\\nI tuoi dati caricati, su tutte le app di ente, saranno pianificati per la cancellazione e il tuo account verrà eliminato definitivamente.",
+  "hearUsWhereTitle": "Come hai sentito parlare di Ente? (opzionale)",
+  "hearUsExplanation": "Non teniamo traccia del numero di installazioni dell'app. Sarebbe utile se ci dicesse dove ci ha trovato!",
+  "viewAddOnButton": "Visualizza componenti aggiuntivi",
+  "addOns": "Componenti aggiuntivi",
+  "addOnPageSubtitle": "Dettagli dei componenti aggiuntivi"
 }
