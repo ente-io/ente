@@ -13,6 +13,17 @@ export interface FamilyData {
     members: FamilyMember[];
 }
 
+export interface Bonus {
+    storage: number;
+    type: string;
+    validTill: number;
+    isRevoked: boolean;
+}
+
+export interface BonusData {
+    bonus: Bonus[];
+}
+
 export interface UserDetails {
     email: string;
     usage: number;
@@ -21,6 +32,7 @@ export interface UserDetails {
     subscription: Subscription;
     familyData?: FamilyData;
     storageBonus?: number;
+    bonusData?: BonusData;
 }
 
 export interface DeleteChallengeResponse {
