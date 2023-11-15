@@ -170,6 +170,8 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m59(count) =>
       "${Intl.plural(count, zero: '', one: '1天', other: '${count} 天')}";
 
+  static String m64(endDate) => "有效期至 ${endDate}";
+
   static String m60(email) => "验证 ${email}";
 
   static String m61(email) => "我们已经发送邮件到 <green>${email}</green>";
@@ -196,6 +198,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "addLocation": MessageLookupByLibrary.simpleMessage("添加地点"),
         "addLocationButton": MessageLookupByLibrary.simpleMessage("添加"),
         "addMore": MessageLookupByLibrary.simpleMessage("添加更多"),
+        "addOnPageSubtitle": MessageLookupByLibrary.simpleMessage("附加组件详情"),
+        "addOns": MessageLookupByLibrary.simpleMessage("附加组件"),
         "addPhotos": MessageLookupByLibrary.simpleMessage("添加照片"),
         "addSelected": MessageLookupByLibrary.simpleMessage("添加所选项"),
         "addToAlbum": MessageLookupByLibrary.simpleMessage("添加到相册"),
@@ -582,6 +586,10 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("请在“设置”应用中将权限更改为允许访问所有所有照片"),
         "grantPermission": MessageLookupByLibrary.simpleMessage("授予权限"),
         "groupNearbyPhotos": MessageLookupByLibrary.simpleMessage("将附近的照片分组"),
+        "hearUsExplanation": MessageLookupByLibrary.simpleMessage(
+            "我们不跟踪应用程序安装情况。如果您告诉我们您是在哪里找到我们的，将会有所帮助！"),
+        "hearUsWhereTitle":
+            MessageLookupByLibrary.simpleMessage("您是如何知道Ente的？ （可选的）"),
         "hidden": MessageLookupByLibrary.simpleMessage("已隐藏"),
         "hide": MessageLookupByLibrary.simpleMessage("隐藏"),
         "hiding": MessageLookupByLibrary.simpleMessage("正在隐藏..."),
@@ -1109,6 +1117,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "useRecoveryKey": MessageLookupByLibrary.simpleMessage("使用恢复密钥"),
         "useSelectedPhoto": MessageLookupByLibrary.simpleMessage("使用所选照片"),
         "usedSpace": MessageLookupByLibrary.simpleMessage("已用空间"),
+        "validTill": m64,
         "verificationFailedPleaseTryAgain":
             MessageLookupByLibrary.simpleMessage("验证失败，请重试"),
         "verificationId": MessageLookupByLibrary.simpleMessage("验证 ID"),
@@ -1122,6 +1131,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("正在验证恢复密钥..."),
         "videoSmallCase": MessageLookupByLibrary.simpleMessage("视频"),
         "viewActiveSessions": MessageLookupByLibrary.simpleMessage("查看活动会话"),
+        "viewAddOnButton": MessageLookupByLibrary.simpleMessage("查看附加组件"),
         "viewAll": MessageLookupByLibrary.simpleMessage("查看全部"),
         "viewAllExifData": MessageLookupByLibrary.simpleMessage("查看所有 EXIF 数据"),
         "viewLogs": MessageLookupByLibrary.simpleMessage("查看日志"),

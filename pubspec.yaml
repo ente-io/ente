@@ -12,7 +12,7 @@ description: ente photos application
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 
-version: 0.7.105+505
+version: 0.7.108+508
 
 environment:
   sdk: ">=3.0.0 <4.0.0"
@@ -148,7 +148,7 @@ dependencies:
     git:
       url: https://github.com/ente-io/packages.git
       ref: android_video_roation_fix
-      path: packages/video_player/video_player/p
+      path: packages/video_player/video_player/
   video_thumbnail: ^0.5.3
   visibility_detector: ^0.3.3
   wakelock_plus: ^1.1.1

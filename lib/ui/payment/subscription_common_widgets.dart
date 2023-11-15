@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import "package:intl/intl.dart";
 import 'package:photos/ente_theme_data.dart';
 import "package:photos/generated/l10n.dart";
+import "package:photos/models/api/storage_bonus/bonus.dart";
 import 'package:photos/models/subscription.dart';
 import "package:photos/services/update_service.dart";
 import "package:photos/theme/ente_theme.dart";
@@ -87,12 +88,18 @@ class _SubscriptionHeaderWidgetState extends State<SubscriptionHeaderWidget> {
 
 class ValidityWidget extends StatelessWidget {
   final Subscription? currentSubscription;
+  final BonusData? bonusData;
 
-  const ValidityWidget({Key? key, this.currentSubscription}) : super(key: key);
+  const ValidityWidget({Key? key, this.currentSubscription, this.bonusData})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     if (currentSubscription == null) {
+      return const SizedBox.shrink();
+    }
+    final bool isFreeTrialSub = currentSubscription!.productID == freeProductID;
+    if (isFreeTrialSub && (bonusData?.getAddOnBonuses().isNotEmpty ?? false)) {
       return const SizedBox.shrink();
     }
     final endDate =
@@ -101,7 +108,7 @@ class ValidityWidget extends StatelessWidget {
     );
 
     var message = S.of(context).renewsOn(endDate);
-    if (currentSubscription!.productID == freeProductID) {
+    if (isFreeTrialSub) {
       message = UpdateService.instance.isPlayStoreFlavor()
           ? S.of(context).playStoreFreeTrialValidTill(endDate)
           : S.of(context).freeTrialValidTill(endDate);

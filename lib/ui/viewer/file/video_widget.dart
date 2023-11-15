@@ -11,6 +11,7 @@ import "package:photos/models/file/extensions/file_props.dart";
 import 'package:photos/models/file/file.dart';
 import "package:photos/services/feature_flag_service.dart";
 import 'package:photos/services/files_service.dart';
+import "package:photos/ui/actions/file/file_actions.dart";
 import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
 import 'package:photos/ui/viewer/file/video_controls.dart';
 import "package:photos/utils/dialog_util.dart";
@@ -184,7 +185,14 @@ class _VideoWidgetState extends State<VideoWidget> {
     final contentWithDetector = GestureDetector(
       child: content,
       onVerticalDragUpdate: (d) => {
-        if (d.delta.dy > dragSensitivity) {Navigator.of(context).pop()},
+        if (d.delta.dy > dragSensitivity)
+          {
+            Navigator.of(context).pop(),
+          }
+        else if (d.delta.dy < (dragSensitivity * -1))
+          {
+            showDetailsSheet(context, widget.file),
+          },
       },
     );
     return VisibilityDetector(
