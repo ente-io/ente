@@ -37,6 +37,7 @@ class SemanticSearchService {
   final _cachedEmbeddings = <Embedding>[];
 
   bool _isComputingEmbeddings = false;
+  bool _isSyncing = false;
   Future<List<EnteFile>>? _ongoingRequest;
   PendingQuery? _nextQuery;
 
@@ -64,8 +65,13 @@ class SemanticSearchService {
   }
 
   Future<void> sync() async {
+    if (_isSyncing) {
+      return;
+    }
+    _isSyncing = true;
     await EmbeddingStore.instance.pullEmbeddings();
-    _backFill();
+    await _backFill();
+    _isSyncing = false;
   }
 
   Future<List<EnteFile>> search(String query) async {
