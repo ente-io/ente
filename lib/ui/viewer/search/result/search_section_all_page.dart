@@ -4,6 +4,7 @@ import "package:flutter/material.dart";
 import "package:flutter_animate/flutter_animate.dart";
 import "package:photos/events/event.dart";
 import "package:photos/models/search/album_search_result.dart";
+import "package:photos/models/search/generic_search_result.dart";
 import "package:photos/models/search/recent_searches.dart";
 import "package:photos/models/search/search_result.dart";
 import "package:photos/models/search/search_types.dart";
@@ -142,6 +143,16 @@ class _SearchSectionAllPageState extends State<SearchSectionAllPage> {
                                 ),
                               );
                             },
+                          );
+                        } else if (sectionResults[index]
+                            is GenericSearchResult) {
+                          final result =
+                              sectionResults[index] as GenericSearchResult;
+                          return SearchableItemWidget(
+                            sectionResults[index],
+                            onResultTap: result.onResultTap != null
+                                ? () => result.onResultTap!(context)
+                                : null,
                           );
                         }
                         return SearchableItemWidget(
