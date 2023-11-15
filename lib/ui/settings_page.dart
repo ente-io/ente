@@ -91,7 +91,7 @@ class SettingsPage extends StatelessWidget {
             ? RepaintBoundary(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(vertical: 8.0),
-                  child: !Platform.isIOS
+                  child: Platform.isAndroid
                       ? NotificationWidget(
                           isBlackFriday: true,
                           startIcon: Icons.celebration,
