@@ -240,7 +240,12 @@ class _StoreSubscriptionPageState extends State<StoreSubscriptionPage> {
     }
 
     if (_hasActiveSubscription) {
-      widgets.add(ValidityWidget(currentSubscription: _currentSubscription));
+      widgets.add(
+        ValidityWidget(
+          currentSubscription: _currentSubscription,
+          bonusData: _userDetails.bonusData,
+        ),
+      );
     }
 
     if (_currentSubscription!.productID == freeProductID) {
