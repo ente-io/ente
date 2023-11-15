@@ -168,7 +168,11 @@ class _MagicSearchIndexStatsWidgetState
           children: [
             MenuSectionTitle(title: S.of(context).status),
             Expanded(child: Container()),
-            EnteLoadingWidget(color: getEnteColorScheme(context).fillMuted),
+            _status!.pendingItems > 0
+                ? EnteLoadingWidget(
+                    color: getEnteColorScheme(context).fillMuted,
+                  )
+                : const SizedBox.shrink(),
           ],
         ),
         MenuItemWidget(
