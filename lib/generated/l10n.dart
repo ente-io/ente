@@ -7774,6 +7774,26 @@ class S {
       args: [],
     );
   }
+
+  /// `Black Friday Sale`
+  String get blackFridaySale {
+    return Intl.message(
+      'Black Friday Sale',
+      name: 'blackFridaySale',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Upto 50% off, until 4th Dec.`
+  String get upto50OffUntil4thDec {
+    return Intl.message(
+      'Upto 50% off, until 4th Dec.',
+      name: 'upto50OffUntil4thDec',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {
