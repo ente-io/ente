@@ -13,6 +13,8 @@ class LocalSettings {
   static final LocalSettings instance = LocalSettings._privateConstructor();
   static const kCollectionSortPref = "collection_sort_pref";
   static const kPhotoGridSize = "photo_grid_size";
+  static const kRateUsShownCount = "rate_us_shown_count";
+  static const kRateUsPromptThreshold = 2;
 
   late SharedPreferences _prefs;
 
@@ -38,5 +40,21 @@ class LocalSettings {
 
   Future<void> setPhotoGridSize(int value) async {
     await _prefs.setInt(kPhotoGridSize, value);
+  }
+
+  int getRateUsShownCount() {
+    if (_prefs.containsKey(kRateUsShownCount)) {
+      return _prefs.getInt(kRateUsShownCount)!;
+    } else {
+      return 0;
+    }
+  }
+
+  Future<void> setRateUsShownCount(int value) async {
+    await _prefs.setInt(kRateUsShownCount, value);
+  }
+
+  bool shouldPromptToRateUs() {
+    return getRateUsShownCount() < kRateUsPromptThreshold;
   }
 }
