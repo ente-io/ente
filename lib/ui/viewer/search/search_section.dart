@@ -44,7 +44,7 @@ class _SearchSectionState extends State<SearchSection> {
     super.initState();
     _examples = widget.examples;
 
-    final streamsToListenTo = widget.sectionType.updateEvents();
+    final streamsToListenTo = widget.sectionType.sectionUpdateEvents();
     for (Stream<Event> stream in streamsToListenTo) {
       streamSubscriptions.add(
         stream.listen((event) async {

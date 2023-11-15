@@ -34,6 +34,7 @@ class _AllSectionsExamplesProviderState
   void initState() {
     super.initState();
     SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
+      //add all common events for all search sections to reload to here.
       _filesUpdatedEvent = Bus.instance.on<FilesUpdatedEvent>().listen((event) {
         _debouncer.run(() async {
           setState(() {

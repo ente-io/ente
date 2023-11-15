@@ -262,14 +262,23 @@ extension SectionTypeExtensions on SectionType {
     }
   }
 
-  //Use this only for the 'view all' screens as all search section examples get
-  //reloaded on filesUpdatedEvent
-  List<Stream<Event>> updateEvents() {
+  List<Stream<Event>> viewAllUpdateEvents() {
     switch (this) {
       case SectionType.location:
         return [Bus.instance.on<LocationTagUpdatedEvent>()];
       case SectionType.album:
         return [Bus.instance.on<CollectionUpdatedEvent>()];
+      default:
+        return [];
+    }
+  }
+
+  ///Events to listen to for different search sections, different from common
+  ///events listened to in AllSectionsExampleState.
+  List<Stream<Event>> sectionUpdateEvents() {
+    switch (this) {
+      case SectionType.location:
+        return [Bus.instance.on<LocationTagUpdatedEvent>()];
       default:
         return [];
     }

@@ -30,7 +30,7 @@ class _SearchSectionAllPageState extends State<SearchSectionAllPage> {
   @override
   void initState() {
     super.initState();
-    final streamsToListenTo = widget.sectionType.updateEvents();
+    final streamsToListenTo = widget.sectionType.viewAllUpdateEvents();
     for (Stream<Event> stream in streamsToListenTo) {
       streamSubscriptions.add(
         stream.listen((event) async {
