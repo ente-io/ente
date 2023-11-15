@@ -166,7 +166,8 @@ class BillingService {
     BuildContext context,
     UserDetails userDetails,
   ) async {
-    if (userDetails.subscription.productID == freeProductID) {
+    if (userDetails.subscription.productID == freeProductID &&
+        !userDetails.hasPaidAddon()) {
       await showErrorDialog(
         context,
         S.of(context).familyPlans,
