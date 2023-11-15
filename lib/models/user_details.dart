@@ -33,6 +33,10 @@ class UserDetails {
     return familyData?.members?.isNotEmpty ?? false;
   }
 
+  bool hasPaidAddon() {
+    return bonusData?.getAddOnBonuses().isNotEmpty ?? false;
+  }
+
   bool isFamilyAdmin() {
     assert(isPartOfFamily(), "verify user is part of family before calling");
     final FamilyMember currentUserMember = familyData!.members!
