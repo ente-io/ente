@@ -347,6 +347,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "backupSettings":
             MessageLookupByLibrary.simpleMessage("Backup settings"),
         "backupVideos": MessageLookupByLibrary.simpleMessage("Backup videos"),
+        "blackFridaySale":
+            MessageLookupByLibrary.simpleMessage("Black Friday Sale"),
         "blog": MessageLookupByLibrary.simpleMessage("Blog"),
         "cachedData": MessageLookupByLibrary.simpleMessage("Cached data"),
         "calculating": MessageLookupByLibrary.simpleMessage("Calculating..."),
@@ -1318,6 +1320,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "upgrade": MessageLookupByLibrary.simpleMessage("Upgrade"),
         "uploadingFilesToAlbum":
             MessageLookupByLibrary.simpleMessage("Uploading files to album..."),
+        "upto50OffUntil4thDec": MessageLookupByLibrary.simpleMessage(
+            "Upto 50% off, until 4th Dec."),
         "usableReferralStorageInfo": MessageLookupByLibrary.simpleMessage(
             "Usable storage is limited by your current plan. Excess claimed storage will automatically become usable when you upgrade your plan."),
         "usePublicLinksForPeopleNotOnEnte":

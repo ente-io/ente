@@ -100,8 +100,8 @@ class SettingsPage extends StatelessWidget {
                           isBlackFriday: true,
                           startIcon: Icons.celebration,
                           actionIcon: Icons.arrow_forward_outlined,
-                          text: "Black Friday Sale",
-                          subText: "Upto 50% off!",
+                          text: S.of(context).blackFridaySale,
+                          subText: S.of(context).upto50OffUntil4thDec,
                           type: NotificationType.goldenBanner,
                           onTap: () async {
                             launchUrlString(
