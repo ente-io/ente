@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import "package:flutter_animate/flutter_animate.dart";
 import "package:photos/ente_theme_data.dart";
 import 'package:photos/theme/colors.dart';
 import "package:photos/theme/ente_theme.dart";
@@ -20,6 +21,7 @@ class NotificationWidget extends StatelessWidget {
   final String? subText;
   final GestureTapCallback onTap;
   final NotificationType type;
+  final bool isBlackFriday;
 
   const NotificationWidget({
     Key? key,
@@ -27,6 +29,7 @@ class NotificationWidget extends StatelessWidget {
     required this.actionIcon,
     required this.text,
     required this.onTap,
+    this.isBlackFriday = false,
     this.subText,
     this.type = NotificationType.warning,
   }) : super(key: key);
@@ -90,11 +93,34 @@ class NotificationWidget extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Icon(
-                  startIcon,
-                  size: 36,
-                  color: strokeColorScheme.strokeBase,
-                ),
+                isBlackFriday
+                    ? Icon(
+                        startIcon,
+                        size: 36,
+                        color: strokeColorScheme.strokeBase,
+                      )
+                        .animate(
+                          onPlay: (controller) =>
+                              controller.repeat(reverse: true),
+                          delay: 2000.ms,
+                        )
+                        .shake(
+                          duration: 500.ms,
+                          hz: 6,
+                          delay: 1600.ms,
+                        )
+                        .scale(
+                          duration: 500.ms,
+                          begin: const Offset(0.9, 0.9),
+                          end: const Offset(1.1, 1.1),
+                          delay: 1600.ms,
+                          // curve: Curves.easeInOut,
+                        )
+                    : Icon(
+                        startIcon,
+                        size: 36,
+                        color: strokeColorScheme.strokeBase,
+                      ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Column(
