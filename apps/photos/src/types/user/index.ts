@@ -21,7 +21,7 @@ export interface Bonus {
 }
 
 export interface BonusData {
-    bonus: Bonus[];
+    storageBonuses: Bonus[];
 }
 
 export interface UserDetails {
