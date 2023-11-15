@@ -139,7 +139,8 @@ class _SearchSectionAllPageState extends State<SearchSectionAllPage> {
                                 context,
                                 CollectionPage(
                                   albumSectionResult.collectionWithThumbnail,
-                                  tagPrefix: albumSectionResult.heroTag(),
+                                  tagPrefix: "searchable_item" +
+                                      albumSectionResult.heroTag(),
                                 ),
                               );
                             },
