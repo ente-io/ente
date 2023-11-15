@@ -33,13 +33,12 @@ class SemanticSearchService {
 
   final _logger = Logger("SemanticSearchService");
   final _queue = Queue<EnteFile>();
-
-  bool _hasLoaded = false;
   final _modelLoadFuture = Completer<void>();
+  final _cachedEmbeddings = <Embedding>[];
+
   bool _isComputingEmbeddings = false;
   Future<List<EnteFile>>? _ongoingRequest;
   PendingQuery? _nextQuery;
-  final _cachedEmbeddings = <Embedding>[];
 
   Future<void> init(SharedPreferences preferences) async {
     if (Platform.isIOS) {
@@ -57,7 +56,6 @@ class SemanticSearchService {
     }
 
     _loadModels().then((v) {
-      _modelLoadFuture.complete();
       _getTextEmbedding("warm up text encoder");
     });
     Bus.instance.on<FileUploadedEvent>().listen((event) async {
@@ -71,7 +69,8 @@ class SemanticSearchService {
   }
 
   Future<List<EnteFile>> search(String query) async {
-    if (!LocalSettings.instance.hasEnabledMagicSearch() || !_hasLoaded) {
+    if (!LocalSettings.instance.hasEnabledMagicSearch() ||
+        !_modelLoadFuture.isCompleted) {
       return [];
     }
     if (_ongoingRequest == null) {
@@ -177,7 +176,7 @@ class SemanticSearchService {
   Future<void> _loadModels() async {
     await ModelLoader.instance.loadImageModel();
     await ModelLoader.instance.loadTextModel();
-    _hasLoaded = true;
+    _modelLoadFuture.complete();
   }
 
   Future<void> _pollQueue() async {
@@ -194,7 +193,7 @@ class SemanticSearchService {
   }
 
   Future<void> _computeImageEmbedding(EnteFile file) async {
-    if (!_hasLoaded) {
+    if (!_modelLoadFuture.isCompleted) {
       return;
     }
     try {
