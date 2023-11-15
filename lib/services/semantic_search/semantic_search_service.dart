@@ -34,8 +34,9 @@ class SemanticSearchService {
   final _logger = Logger("SemanticSearchService");
   final _queue = Queue<EnteFile>();
 
-  bool hasLoaded = false;
-  bool isComputingEmbeddings = false;
+  bool _hasLoaded = false;
+  final _modelLoadFuture = Completer<void>();
+  bool _isComputingEmbeddings = false;
   Future<List<EnteFile>>? _ongoingRequest;
   PendingQuery? _nextQuery;
   final _cachedEmbeddings = <Embedding>[];
@@ -56,6 +57,7 @@ class SemanticSearchService {
     }
 
     _loadModels().then((v) {
+      _modelLoadFuture.complete();
       _getTextEmbedding("warm up text encoder");
     });
     Bus.instance.on<FileUploadedEvent>().listen((event) async {
@@ -69,7 +71,7 @@ class SemanticSearchService {
   }
 
   Future<List<EnteFile>> search(String query) async {
-    if (!LocalSettings.instance.hasEnabledMagicSearch() || !hasLoaded) {
+    if (!LocalSettings.instance.hasEnabledMagicSearch() || !_hasLoaded) {
       return [];
     }
     if (_ongoingRequest == null) {
@@ -120,6 +122,7 @@ class SemanticSearchService {
     if (!LocalSettings.instance.hasEnabledMagicSearch()) {
       return;
     }
+    await _modelLoadFuture.future;
     _logger.info("Attempting backfill");
     final fileIDs = await _getFileIDsToBeIndexed();
     final files = await FilesDB.instance.getUploadedFiles(fileIDs);
@@ -174,24 +177,24 @@ class SemanticSearchService {
   Future<void> _loadModels() async {
     await ModelLoader.instance.loadImageModel();
     await ModelLoader.instance.loadTextModel();
-    hasLoaded = true;
+    _hasLoaded = true;
   }
 
   Future<void> _pollQueue() async {
-    if (isComputingEmbeddings) {
+    if (_isComputingEmbeddings) {
       return;
     }
-    isComputingEmbeddings = true;
+    _isComputingEmbeddings = true;
 
     while (_queue.isNotEmpty) {
       await _computeImageEmbedding(_queue.removeLast());
     }
 
-    isComputingEmbeddings = false;
+    _isComputingEmbeddings = false;
   }
 
   Future<void> _computeImageEmbedding(EnteFile file) async {
-    if (!hasLoaded) {
+    if (!_hasLoaded) {
       return;
     }
     try {
