@@ -188,10 +188,10 @@ class SettingsPage extends StatelessWidget {
   }
 
   bool shouldShowBfBanner() {
-    if (!Platform.isAndroid) {
+    if (!Platform.isAndroid && !kDebugMode) {
       return false;
     }
-    // if date is after 5th of December 2023, hide banner
+    // if date is after 5th of December 2023, 00:00:00, hide banner
     if (DateTime.now().isAfter(DateTime(2023, 12, 5))) {
       return false;
     }
