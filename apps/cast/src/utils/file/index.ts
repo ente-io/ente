@@ -925,6 +925,28 @@ const deleteFileHelper = async (
     }
 };
 
+export const downloadFileAsBlob = async (file: EnteFile): Promise<Blob> => {
+    try {
+        let fileBlob: Blob;
+        // const fileReader = new FileReader();
+        const fileURL = await DownloadManager.getCachedOriginalFile(file)[0];
+        if (!fileURL) {
+            fileBlob = await new Response(
+                await DownloadManager.downloadFile(file)
+            ).blob();
+        } else {
+            fileBlob = await (await fetch(fileURL)).blob();
+        }
+        const fileType = await getFileType(
+            new File([fileBlob], file.metadata.title)
+        );
+        fileBlob = new Blob([fileBlob], { type: fileType.mimeType });
+        return fileBlob;
+    } catch (e) {
+        logError(e, 'failed to download file');
+    }
+};
+
 const hideFilesHelper = async (
     selectedFiles: EnteFile[],
     setHiddenFileIds: (
