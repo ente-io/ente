@@ -340,8 +340,13 @@ class SearchService {
       }
 
       fileTypesAndMatchingFiles.forEach((key, value) {
-        searchResults
-            .add(GenericSearchResult(ResultType.fileType, key.name, value));
+        searchResults.add(
+          GenericSearchResult(
+            ResultType.fileType,
+            getHumanReadableString(key),
+            value,
+          ),
+        );
       });
 
       extensionsAndMatchingFiles.forEach((key, value) {
