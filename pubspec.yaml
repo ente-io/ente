@@ -69,6 +69,7 @@ dependencies:
   pinput: ^1.2.2
   pointycastle: ^3.7.3
   protobuf: ^3.0.0
+  qr_code_scanner: ^1.0.1
   qr_flutter: 4.0.0
   sentry: ^7.9.0
   sentry_flutter: ^7.9.0
