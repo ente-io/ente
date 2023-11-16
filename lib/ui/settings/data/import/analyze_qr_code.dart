@@ -5,7 +5,7 @@ import 'package:ente_auth/models/code.dart';
 import 'package:ente_auth/ui/components/buttons/button_widget.dart';
 import 'package:ente_auth/ui/components/dialog_widget.dart';
 import 'package:ente_auth/ui/components/models/button_type.dart';
-import 'package:ente_auth/ui/settings/data/import/google_auth_image_import.dart';
+import 'package:ente_auth/ui/settings/data/import/google_auth_import.dart';
 import 'package:ente_auth/ui/settings/data/import/qr_scanner_overlay.dart';
 import 'package:ente_auth/utils/toast_util.dart';
 import 'package:flutter/material.dart';
