@@ -21,6 +21,7 @@ class SearchSuggestionsWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     late final String title;
     final resultsCount = results.length;
+    //todo: extract string
     if (resultsCount == 1) {
       title = "$resultsCount result found";
     } else {

@@ -74,6 +74,16 @@ class SearchWidgetState extends State<SearchWidget> {
     }
   }
 
+  @override
+  void dispose() {
+    _debouncer.cancelDebounce();
+    focusNode.dispose();
+    _tabDoubleTapEvent?.cancel();
+    textController.removeListener(textControllerListener);
+    textController.dispose();
+    super.dispose();
+  }
+
   Future<void> textControllerListener() async {
     //query in local varialbe
     final value = textController.text;
@@ -177,16 +187,6 @@ class SearchWidgetState extends State<SearchWidget> {
         ),
       ),
     );
-  }
-
-  @override
-  void dispose() {
-    _debouncer.cancelDebounce();
-    focusNode.dispose();
-    _tabDoubleTapEvent?.cancel();
-    textController.removeListener(textControllerListener);
-    textController.dispose();
-    super.dispose();
   }
 
   Future<List<SearchResult>> getSearchResultsForQuery(
