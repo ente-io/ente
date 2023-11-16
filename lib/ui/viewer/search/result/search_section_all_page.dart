@@ -25,7 +25,6 @@ class SearchSectionAllPage extends StatefulWidget {
 
 class _SearchSectionAllPageState extends State<SearchSectionAllPage> {
   late Future<List<SearchResult>> sectionData;
-  late final bool _showCTATile;
   final streamSubscriptions = <StreamSubscription>[];
 
   @override
@@ -47,7 +46,6 @@ class _SearchSectionAllPageState extends State<SearchSectionAllPage> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     sectionData = widget.sectionType.getData(limit: null, context: context);
-    _showCTATile = widget.sectionType.isCTAVisible;
   }
 
   @override
@@ -163,7 +161,8 @@ class _SearchSectionAllPageState extends State<SearchSectionAllPage> {
                       separatorBuilder: (context, index) {
                         return const SizedBox(height: 10);
                       },
-                      itemCount: sectionResults.length + (_showCTATile ? 1 : 0),
+                      itemCount: sectionResults.length +
+                          (widget.sectionType.isCTAVisible ? 1 : 0),
                       physics: const BouncingScrollPhysics(),
                       //This cache extend is needed for creating a new album
                       //using SearchSectionCTATile to work. This is so that
