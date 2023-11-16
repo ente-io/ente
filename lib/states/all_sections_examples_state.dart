@@ -6,7 +6,6 @@ import "package:logging/logging.dart";
 import "package:photos/core/constants.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/files_updated_event.dart";
-import "package:photos/events/local_photos_updated_event.dart";
 import "package:photos/models/search/search_result.dart";
 import "package:photos/models/search/search_types.dart";
 import "package:photos/utils/debouncer.dart";
@@ -25,7 +24,6 @@ class _AllSectionsExamplesProviderState
   Future<List<List<SearchResult>>> allSectionsExamplesFuture = Future.value([]);
 
   late StreamSubscription<FilesUpdatedEvent> _filesUpdatedEvent;
-  late StreamSubscription<LocalPhotosUpdatedEvent> _localPhotosUpdatedEvent;
   final _logger = Logger("AllSectionsExamplesProvider");
 
   final _debouncer =
@@ -70,7 +68,6 @@ class _AllSectionsExamplesProviderState
   @override
   void dispose() {
     _filesUpdatedEvent.cancel();
-    _localPhotosUpdatedEvent.cancel();
     _debouncer.cancelDebounce();
     super.dispose();
   }
