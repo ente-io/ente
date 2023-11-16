@@ -123,7 +123,7 @@ export const getMetadataJSONMapKeyForFile = (
     collectionID: number,
     fileName: string
 ) => {
-    return `${collectionID}-${fileName}`;
+    return `${collectionID}-${fileName.slice(0, 46)}`;
 };
 
 export async function parseMetadataJSON(receivedFile: File | ElectronFile) {
