@@ -30,6 +30,13 @@ class _QrScannerState extends State<QrScanner> {
     detectionSpeed: DetectionSpeed.normal,
     facing: CameraFacing.back,
   );
+
+  @override
+  void dispose() {
+    scannerController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
