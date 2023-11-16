@@ -7895,11 +7895,31 @@ class S {
     );
   }
 
+  /// `Black Friday Sale`
+  String get blackFridaySale {
+    return Intl.message(
+      'Black Friday Sale',
+      name: 'blackFridaySale',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Modify your query, or try searching for`
   String get modifyYourQueryOrTrySearchingFor {
     return Intl.message(
       'Modify your query, or try searching for',
       name: 'modifyYourQueryOrTrySearchingFor',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Upto 50% off, until 4th Dec.`
+  String get upto50OffUntil4thDec {
+    return Intl.message(
+      'Upto 50% off, until 4th Dec.',
+      name: 'upto50OffUntil4thDec',
       desc: '',
       args: [],
     );
