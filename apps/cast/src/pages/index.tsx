@@ -25,28 +25,29 @@ const colourPool = [
 
 export default function PairingMode() {
     // Function to generate cryptographically secure data
-    function generateSecureData(length: number): Uint8Array {
+    const generateSecureData = (length: number): Uint8Array => {
         const array = new Uint8Array(length);
         window.crypto.getRandomValues(array);
-        // Modulo operation to ensure each byte is a single digit
+        // Modulo operation to ensure each byte is a single hex digit
         for (let i = 0; i < length; i++) {
-            array[i] = array[i] % 10;
+            array[i] = array[i] % 16;
         }
         return array;
-    }
-    // Function to convert data into digits
-    function convertDataToDigits(data: Uint8Array): string {
-        let result = '';
+    };
+
+    const convertDataToHex = (data: Uint8Array): string => {
+        let hex = '';
         for (let i = 0; i < data.length; i++) {
-            result += data[i].toString();
+            hex += data[i].toString(16).padStart(2, '0');
         }
-        return result;
-    }
+        return hex;
+    };
 
     const [digits, setDigits] = useState<string[]>([]);
 
     useEffect(() => {
-        setDigits(convertDataToDigits(generateSecureData(10)).split(''));
+        const data = generateSecureData(4);
+        setDigits(convertDataToHex(data).split(''));
     }, []);
 
     return (
