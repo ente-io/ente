@@ -21,6 +21,12 @@ class AllSectionsExamplesProvider extends StatefulWidget {
 
 class _AllSectionsExamplesProviderState
     extends State<AllSectionsExamplesProvider> {
+  //Some section results in [allSectionsExamplesFuture] can be out of sync
+  //with what is displayed on UI. This happens when some section is
+  //independently listening to some set of events and is rebuilt. Sections
+  //can listen to a list of events and rebuild (see sectionUpdateEvents()
+  //in search_types.dart) and new results will not reflect in
+  //[allSectionsExamplesFuture] unless reloadAllSections() is called.
   Future<List<List<SearchResult>>> allSectionsExamplesFuture = Future.value([]);
 
   late StreamSubscription<FilesUpdatedEvent> _filesUpdatedEvent;
