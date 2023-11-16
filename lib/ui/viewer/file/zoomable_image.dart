@@ -91,13 +91,19 @@ class _ZoomableImageState extends State<ZoomableImage>
 
     if (_imageProvider != null) {
       content = PhotoViewGallery.builder(
+        gaplessPlayback: true,
+        scaleStateChangedCallback: _scaleStateChangedCallback,
+        backgroundDecoration: widget.backgroundDecoration as BoxDecoration?,
         builder: (context, index) {
           return PhotoViewGalleryPageOptions(
             imageProvider: _imageProvider!,
-            minScale: PhotoViewComputedScale.contained,
+            minScale: widget.shouldCover
+                ? PhotoViewComputedScale.covered
+                : PhotoViewComputedScale.contained,
             heroAttributes: PhotoViewHeroAttributes(
               tag: widget.tagPrefix! + _photo.tag,
             ),
+            controller: _photoViewController,
           );
         },
         itemCount: 1,
