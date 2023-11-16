@@ -1108,5 +1108,6 @@
   "hearUsExplanation": "Non teniamo traccia del numero di installazioni dell'app. Sarebbe utile se ci dicesse dove ci ha trovato!",
   "viewAddOnButton": "Visualizza componenti aggiuntivi",
   "addOns": "Componenti aggiuntivi",
-  "addOnPageSubtitle": "Dettagli dei componenti aggiuntivi"
+  "addOnPageSubtitle": "Dettagli dei componenti aggiuntivi",
+  "yourMap": "Your map"
 }

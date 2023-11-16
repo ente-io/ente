@@ -1108,5 +1108,6 @@
   "hearUsExplanation": "我们不跟踪应用程序安装情况。如果您告诉我们您是在哪里找到我们的，将会有所帮助！",
   "viewAddOnButton": "查看附加组件",
   "addOns": "附加组件",
-  "addOnPageSubtitle": "附加组件详情"
+  "addOnPageSubtitle": "附加组件详情",
+  "yourMap": "Your map"
 }

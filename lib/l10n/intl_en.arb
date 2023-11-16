@@ -1120,5 +1120,6 @@
   "hearUsExplanation": "We don't track app installs. It'd help if you told us where you found us!",
   "viewAddOnButton": "View add-ons",
   "addOns": "Add-ons",
-  "addOnPageSubtitle": "Details of add-ons"
+  "addOnPageSubtitle": "Details of add-ons",
+  "yourMap": "Your map"
 }

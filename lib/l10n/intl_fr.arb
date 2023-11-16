@@ -1103,5 +1103,6 @@
   "addToHiddenAlbum": "Ajouter à un album masqué",
   "moveToHiddenAlbum": "Déplacer vers un album masqué",
   "fileTypes": "File types",
-  "deleteConfirmDialogBody": "This account is linked to other ente apps, if you use any.\\n\\nYour uploaded data, across all ente apps, will be scheduled for deletion, and your account will be permanently deleted."
+  "deleteConfirmDialogBody": "This account is linked to other ente apps, if you use any.\\n\\nYour uploaded data, across all ente apps, will be scheduled for deletion, and your account will be permanently deleted.",
+  "yourMap": "Your map"
 }

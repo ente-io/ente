@@ -1,5 +1,6 @@
 import "package:flutter/cupertino.dart";
 import "package:flutter/material.dart";
+import "package:photos/generated/l10n.dart";
 import "package:photos/services/search_service.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/map/enable_map.dart";
@@ -52,7 +53,7 @@ class GoToMapWidget extends StatelessWidget {
                 height: 10,
               ),
               Text(
-                "Your map",
+                S.of(context).yourMap,
                 maxLines: 2,
                 textAlign: TextAlign.center,
                 overflow: TextOverflow.ellipsis,
