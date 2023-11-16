@@ -343,15 +343,20 @@ class SearchService {
         searchResults.add(
           GenericSearchResult(
             ResultType.fileType,
-            getHumanReadableString(key),
+            getHumanReadableString(key) + "s",
             value,
           ),
         );
       });
 
       extensionsAndMatchingFiles.forEach((key, value) {
-        searchResults
-            .add(GenericSearchResult(ResultType.fileExtension, key, value));
+        searchResults.add(
+          GenericSearchResult(
+            ResultType.fileExtension,
+            key + "s",
+            value,
+          ),
+        );
       });
 
       if (limit != null) {
