@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:logging/logging.dart';
 import 'package:photo_view/photo_view.dart';
+import "package:photo_view/photo_view_gallery.dart";
 import 'package:photos/core/cache/thumbnail_in_memory_cache.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/event_bus.dart';
@@ -89,21 +90,23 @@ class _ZoomableImageState extends State<ZoomableImage>
     Widget content;
 
     if (_imageProvider != null) {
-      content = PhotoViewGestureDetectorScope(
-        axis: Axis.vertical,
-        child: PhotoView(
-          imageProvider: _imageProvider,
-          controller: _photoViewController,
-          scaleStateChangedCallback: _scaleStateChangedCallback,
-          minScale: widget.shouldCover
-              ? PhotoViewComputedScale.covered
-              : PhotoViewComputedScale.contained,
-          gaplessPlayback: true,
-          heroAttributes: PhotoViewHeroAttributes(
-            tag: widget.tagPrefix! + _photo.tag,
-          ),
-          backgroundDecoration: widget.backgroundDecoration as BoxDecoration?,
-        ),
+      content = PhotoViewGallery.builder(
+        gaplessPlayback: true,
+        scaleStateChangedCallback: _scaleStateChangedCallback,
+        backgroundDecoration: widget.backgroundDecoration as BoxDecoration?,
+        builder: (context, index) {
+          return PhotoViewGalleryPageOptions(
+            imageProvider: _imageProvider!,
+            minScale: widget.shouldCover
+                ? PhotoViewComputedScale.covered
+                : PhotoViewComputedScale.contained,
+            heroAttributes: PhotoViewHeroAttributes(
+              tag: widget.tagPrefix! + _photo.tag,
+            ),
+            controller: _photoViewController,
+          );
+        },
+        itemCount: 1,
       );
     } else {
       content = const EnteLoadingWidget();
