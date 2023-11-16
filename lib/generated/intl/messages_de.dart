@@ -56,7 +56,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Bitte kontaktieren Sie uns über support@ente.io, um Ihr ${provider} Abo zu verwalten.";
 
   static String m11(count) =>
-      "${Intl.plural(count, one: 'Lösche ${count} Element', other: 'Lösche ${count} Elemente')}";
+      "${Intl.plural(count, one: 'Lösche 1 Element', other: 'Lösche ${count} Elemente')}";
 
   static String m12(currentlyDeleting, totalCount) =>
       "Lösche ${currentlyDeleting} / ${totalCount}";

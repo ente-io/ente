@@ -5,6 +5,8 @@ import "package:photos/models/typedefs.dart";
 
 class Debouncer {
   final Duration _duration;
+
+  ///in milliseconds
   final ValueNotifier<bool> _debounceActiveNotifier = ValueNotifier(false);
 
   /// If executionInterval is not null, then the debouncer will execute the

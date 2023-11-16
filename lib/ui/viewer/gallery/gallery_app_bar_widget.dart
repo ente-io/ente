@@ -113,15 +113,14 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         : AppBar(
             elevation: 0,
             centerTitle: false,
-            title: TextButton(
-              child: Text(
-                _appBarTitle!,
-                style: Theme.of(context)
-                    .textTheme
-                    .headlineSmall!
-                    .copyWith(fontSize: 16),
-              ),
-              onPressed: () => _renameAlbum(context),
+            title: Text(
+              _appBarTitle!,
+              style: Theme.of(context)
+                  .textTheme
+                  .headlineSmall!
+                  .copyWith(fontSize: 16),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
             ),
             actions: _getDefaultActions(context),
           );

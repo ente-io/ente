@@ -28,7 +28,8 @@ import "package:photos/ui/viewer/location/edit_location_sheet.dart";
 import "package:photos/utils/dialog_util.dart";
 
 class LocationScreen extends StatelessWidget {
-  const LocationScreen({super.key});
+  final String tagPrefix;
+  const LocationScreen({this.tagPrefix = "", super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -49,7 +50,9 @@ class LocationScreen extends StatelessWidget {
             height: MediaQuery.of(context).size.height -
                 (heightOfAppBar + heightOfStatusBar),
             width: double.infinity,
-            child: const LocationGalleryWidget(),
+            child: LocationGalleryWidget(
+              tagPrefix: tagPrefix,
+            ),
           ),
         ],
       ),
@@ -126,7 +129,8 @@ class LocationScreenPopUpMenu extends StatelessWidget {
 }
 
 class LocationGalleryWidget extends StatefulWidget {
-  const LocationGalleryWidget({super.key});
+  final String tagPrefix;
+  const LocationGalleryWidget({required this.tagPrefix, super.key});
 
   @override
   State<LocationGalleryWidget> createState() => _LocationGalleryWidgetState();
@@ -229,7 +233,7 @@ class _LocationGalleryWidgetState extends State<LocationGalleryWidget> {
                   EventType.deletedFromEverywhere,
                 },
                 selectedFiles: _selectedFiles,
-                tagPrefix: "location_gallery",
+                tagPrefix: widget.tagPrefix,
               ),
               FileSelectionOverlayBar(
                 GalleryType.locationTag,

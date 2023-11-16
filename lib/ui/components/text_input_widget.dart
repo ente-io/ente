@@ -90,6 +90,7 @@ class _TextInputWidgetState extends State<TextInputWidget> {
 
   @override
   void initState() {
+    super.initState();
     widget.submitNotifier?.addListener(_onSubmit);
     widget.cancelNotifier?.addListener(_onCancel);
     _textController = widget.textEditingController ?? TextEditingController();
@@ -109,7 +110,6 @@ class _TextInputWidgetState extends State<TextInputWidget> {
         widget.isEmptyNotifier!.value = _textController.text.isEmpty;
       });
     }
-    super.initState();
   }
 
   @override

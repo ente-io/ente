@@ -7,10 +7,8 @@ import "package:photos/core/event_bus.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/events/local_photos_updated_event.dart";
 import "package:photos/generated/l10n.dart";
-import 'package:photos/models/file/file.dart';
 import "package:photos/models/file_load_result.dart";
-import "package:photos/models/local_entity_data.dart";
-import "package:photos/models/location_tag/location_tag.dart";
+import "package:photos/models/location/location.dart";
 import "package:photos/models/selected_files.dart";
 import "package:photos/services/collections_service.dart";
 import "package:photos/services/filter/db_filters.dart";
@@ -19,17 +17,18 @@ import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/bottom_of_title_bar_widget.dart";
 import "package:photos/ui/components/buttons/button_widget.dart";
 import "package:photos/ui/components/models/button_type.dart";
+import "package:photos/ui/components/notification_widget.dart";
 import "package:photos/ui/components/title_bar_title_widget.dart";
 import "package:photos/ui/viewer/gallery/gallery.dart";
 
-Future<EnteFile?> showPickCenterPointSheet(
-  BuildContext context,
-  LocalEntity<LocationTag> locationTagEntity,
-) async {
+Future<Location?> showPickCenterPointSheet(
+  BuildContext context, {
+  String? locationTagName,
+}) async {
   return await showBarModalBottomSheet(
     context: context,
     builder: (context) {
-      return PickCenterPointWidget(locationTagEntity);
+      return PickCenterPointWidget(locationTagName);
     },
     shape: const RoundedRectangleBorder(
       side: BorderSide(width: 0),
@@ -45,10 +44,10 @@ Future<EnteFile?> showPickCenterPointSheet(
 }
 
 class PickCenterPointWidget extends StatelessWidget {
-  final LocalEntity<LocationTag> locationTagEntity;
+  final String? locationTagName;
 
   const PickCenterPointWidget(
-    this.locationTagEntity, {
+    this.locationTagName, {
     super.key,
   });
 
@@ -81,7 +80,7 @@ class PickCenterPointWidget extends StatelessWidget {
                           title: TitleBarTitleWidget(
                             title: S.of(context).pickCenterPoint,
                           ),
-                          caption: locationTagEntity.item.name,
+                          caption: locationTagName ?? "New location",
                         ),
                         Expanded(
                           child: Gallery(
@@ -114,6 +113,12 @@ class PickCenterPointWidget extends StatelessWidget {
                             selectedFiles: selectedFiles,
                             limitSelectionToOne: true,
                             showSelectAllByDefault: false,
+                            header: const Padding(
+                              padding: EdgeInsets.all(10),
+                              child: NotificationTipWidget(
+                                "You can also add a location centered on a photo from the photo's info screen",
+                              ),
+                            ),
                           ),
                         ),
                       ],
@@ -145,9 +150,9 @@ class PickCenterPointWidget extends StatelessWidget {
                                   buttonType: ButtonType.neutral,
                                   labelText: S.of(context).useSelectedPhoto,
                                   onTap: () async {
-                                    final selectedFile =
-                                        selectedFiles.files.first;
-                                    Navigator.pop(context, selectedFile);
+                                    final selectedLocation =
+                                        selectedFiles.files.first.location;
+                                    Navigator.pop(context, selectedLocation);
                                   },
                                 ),
                               );

@@ -347,6 +347,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "backupSettings":
             MessageLookupByLibrary.simpleMessage("Backup settings"),
         "backupVideos": MessageLookupByLibrary.simpleMessage("Backup videos"),
+        "blackFridaySale":
+            MessageLookupByLibrary.simpleMessage("Black Friday Sale"),
         "blog": MessageLookupByLibrary.simpleMessage("Blog"),
         "cachedData": MessageLookupByLibrary.simpleMessage("Cached data"),
         "calculating": MessageLookupByLibrary.simpleMessage("Calculating..."),
@@ -662,6 +664,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Add a description..."),
         "fileSavedToGallery":
             MessageLookupByLibrary.simpleMessage("File saved to gallery"),
+        "fileTypesAndNames":
+            MessageLookupByLibrary.simpleMessage("File types and names"),
         "filesBackedUpFromDevice": m19,
         "filesBackedUpInAlbum": m20,
         "filesDeleted": MessageLookupByLibrary.simpleMessage("Files deleted"),
@@ -841,6 +845,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "mobileWebDesktop":
             MessageLookupByLibrary.simpleMessage("Mobile, Web, Desktop"),
         "moderateStrength": MessageLookupByLibrary.simpleMessage("Moderate"),
+        "moments": MessageLookupByLibrary.simpleMessage("Moments"),
         "monthly": MessageLookupByLibrary.simpleMessage("Monthly"),
         "moveItem": m30,
         "moveToAlbum": MessageLookupByLibrary.simpleMessage("Move to album"),
@@ -915,6 +920,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "paymentFailedWithReason": m34,
         "pendingItems": MessageLookupByLibrary.simpleMessage("Pending items"),
         "pendingSync": MessageLookupByLibrary.simpleMessage("Pending sync"),
+        "people": MessageLookupByLibrary.simpleMessage("People"),
         "peopleUsingYourCode":
             MessageLookupByLibrary.simpleMessage("People using your code"),
         "permDeleteWarning": MessageLookupByLibrary.simpleMessage(
@@ -923,6 +929,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Permanently delete"),
         "permanentlyDeleteFromDevice": MessageLookupByLibrary.simpleMessage(
             "Permanently delete from device?"),
+        "photoDescriptions":
+            MessageLookupByLibrary.simpleMessage("Photo descriptions"),
         "photoGridSize":
             MessageLookupByLibrary.simpleMessage("Photo grid size"),
         "photoSmallCase": MessageLookupByLibrary.simpleMessage("photo"),
@@ -1083,12 +1091,26 @@ class MessageLookup extends MessageLookupByLibrary {
         "scanThisBarcodeWithnyourAuthenticatorApp":
             MessageLookupByLibrary.simpleMessage(
                 "Scan this barcode with\nyour authenticator app"),
+        "searchAlbumsEmptySection":
+            MessageLookupByLibrary.simpleMessage("Albums"),
         "searchByAlbumNameHint":
             MessageLookupByLibrary.simpleMessage("Album name"),
         "searchByExamples": MessageLookupByLibrary.simpleMessage(
             "• Album names (e.g. \"Camera\")\n• Types of files (e.g. \"Videos\", \".gif\")\n• Years and months (e.g. \"2022\", \"January\")\n• Holidays (e.g. \"Christmas\")\n• Photo descriptions (e.g. “#fun”)"),
+        "searchCaptionEmptySection": MessageLookupByLibrary.simpleMessage(
+            "Add descriptions like \"#trip\" in photo info to quickly find them here"),
+        "searchDatesEmptySection": MessageLookupByLibrary.simpleMessage(
+            "Search by a date, month or year"),
+        "searchFaceEmptySection":
+            MessageLookupByLibrary.simpleMessage("Find all photos of a person"),
+        "searchFileTypesAndNamesEmptySection":
+            MessageLookupByLibrary.simpleMessage("File types and names"),
         "searchHintText": MessageLookupByLibrary.simpleMessage(
             "Albums, months, days, years, ..."),
+        "searchLocationEmptySection": MessageLookupByLibrary.simpleMessage(
+            "Group photos that are taken within some radius of a photo"),
+        "searchPeopleEmptySection": MessageLookupByLibrary.simpleMessage(
+            "Invite people, and you\'ll see all photos shared by them here"),
         "security": MessageLookupByLibrary.simpleMessage("Security"),
         "selectAlbum": MessageLookupByLibrary.simpleMessage("Select album"),
         "selectAll": MessageLookupByLibrary.simpleMessage("Select all"),
@@ -1326,6 +1348,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "upgrade": MessageLookupByLibrary.simpleMessage("Upgrade"),
         "uploadingFilesToAlbum":
             MessageLookupByLibrary.simpleMessage("Uploading files to album..."),
+        "upto50OffUntil4thDec": MessageLookupByLibrary.simpleMessage(
+            "Upto 50% off, until 4th Dec."),
         "usableReferralStorageInfo": MessageLookupByLibrary.simpleMessage(
             "Usable storage is limited by your current plan. Excess claimed storage will automatically become usable when you upgrade your plan."),
         "usePublicLinksForPeopleNotOnEnte":

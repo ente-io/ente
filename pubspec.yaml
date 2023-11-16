@@ -55,6 +55,7 @@ dependencies:
   expandable: ^5.0.1
   expansion_tile_card: ^3.0.0
   extended_image: ^8.1.1
+  fade_indexed_stack: ^0.2.2
   fast_base58: ^0.2.1
   # https://github.com/incrediblezayed/file_saver/issues/86
   file_saver: 0.2.8
@@ -151,7 +152,7 @@ dependencies:
     git:
       url: https://github.com/ente-io/packages.git
       ref: android_video_roation_fix
-      path: packages/video_player/video_player/p
+      path: packages/video_player/video_player/
   video_thumbnail: ^0.5.3
   visibility_detector: ^0.3.3
   wakelock_plus: ^1.1.1

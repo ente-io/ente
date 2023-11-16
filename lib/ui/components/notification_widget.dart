@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import "package:flutter_animate/flutter_animate.dart";
 import "package:photos/ente_theme_data.dart";
 import 'package:photos/theme/colors.dart';
 import "package:photos/theme/ente_theme.dart";
@@ -20,6 +21,7 @@ class NotificationWidget extends StatelessWidget {
   final String? subText;
   final GestureTapCallback onTap;
   final NotificationType type;
+  final bool isBlackFriday;
 
   const NotificationWidget({
     Key? key,
@@ -27,13 +29,14 @@ class NotificationWidget extends StatelessWidget {
     required this.actionIcon,
     required this.text,
     required this.onTap,
+    this.isBlackFriday = false,
     this.subText,
     this.type = NotificationType.warning,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    EnteColorScheme colorScheme = getEnteColorScheme(context);
+    final colorScheme = getEnteColorScheme(context);
     EnteTextTheme textTheme = getEnteTextTheme(context);
     TextStyle mainTextStyle = darkTextTheme.bodyBold;
     TextStyle subTextStyle = darkTextTheme.miniMuted;
@@ -46,7 +49,6 @@ class NotificationWidget extends StatelessWidget {
         backgroundColor = warning500;
         break;
       case NotificationType.banner:
-        colorScheme = getEnteColorScheme(context);
         textTheme = getEnteTextTheme(context);
         backgroundColor = colorScheme.backgroundElevated2;
         mainTextStyle = textTheme.bodyBold;
@@ -90,11 +92,34 @@ class NotificationWidget extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Icon(
-                  startIcon,
-                  size: 36,
-                  color: strokeColorScheme.strokeBase,
-                ),
+                isBlackFriday
+                    ? Icon(
+                        startIcon,
+                        size: 36,
+                        color: strokeColorScheme.strokeBase,
+                      )
+                        .animate(
+                          onPlay: (controller) =>
+                              controller.repeat(reverse: true),
+                          delay: 2000.ms,
+                        )
+                        .shake(
+                          duration: 500.ms,
+                          hz: 6,
+                          delay: 1600.ms,
+                        )
+                        .scale(
+                          duration: 500.ms,
+                          begin: const Offset(0.9, 0.9),
+                          end: const Offset(1.1, 1.1),
+                          delay: 1600.ms,
+                          // curve: Curves.easeInOut,
+                        )
+                    : Icon(
+                        startIcon,
+                        size: 36,
+                        color: strokeColorScheme.strokeBase,
+                      ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Column(
@@ -132,10 +157,47 @@ class NotificationWidget extends StatelessWidget {
   }
 }
 
+class NotificationTipWidget extends StatelessWidget {
+  final String name;
+  const NotificationTipWidget(this.name, {super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = getEnteColorScheme(context);
+    final textTheme = getEnteTextTheme(context);
+    return Container(
+      padding: const EdgeInsets.fromLTRB(16, 12, 12, 12),
+      decoration: BoxDecoration(
+        border: Border.all(color: colorScheme.strokeFaint),
+        borderRadius: const BorderRadius.all(Radius.circular(4)),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Flexible(
+            flex: 12,
+            child: Text(
+              name,
+              style: textTheme.miniFaint,
+            ),
+          ),
+          Flexible(
+            flex: 2,
+            child: Icon(
+              Icons.tips_and_updates_outlined,
+              color: colorScheme.strokeFaint,
+              size: 36,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class NotificationNoteWidget extends StatelessWidget {
   final String note;
   const NotificationNoteWidget(this.note, {super.key});
-
   @override
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);

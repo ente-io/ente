@@ -170,7 +170,7 @@ class HugeListViewState<T> extends State<HugeListView<T>> {
             child: ScrollablePositionedList.builder(
               physics: widget.disableScroll
                   ? const NeverScrollableScrollPhysics()
-                  : null,
+                  : const BouncingScrollPhysics(),
               itemScrollController: widget.controller,
               itemPositionsListener: listener,
               initialScrollIndex: widget.startIndex,
@@ -183,6 +183,7 @@ class HugeListViewState<T> extends State<HugeListView<T>> {
             ),
           )
         : ListView.builder(
+            physics: const BouncingScrollPhysics(),
             itemCount: max(widget.totalCount, 0),
             itemBuilder: (context, index) {
               return ExcludeSemantics(

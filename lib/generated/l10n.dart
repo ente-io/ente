@@ -6859,6 +6859,126 @@ class S {
     );
   }
 
+  /// `Photo descriptions`
+  String get photoDescriptions {
+    return Intl.message(
+      'Photo descriptions',
+      name: 'photoDescriptions',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `File types and names`
+  String get fileTypes {
+    return Intl.message(
+      'File types',
+      name: 'fileTypes',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Location`
+  String get location {
+    return Intl.message(
+      'Location',
+      name: 'location',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `People`
+  String get people {
+    return Intl.message(
+      'People',
+      name: 'people',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Moments`
+  String get moments {
+    return Intl.message(
+      'Moments',
+      name: 'moments',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Find all photos of a person`
+  String get searchFaceEmptySection {
+    return Intl.message(
+      'Find all photos of a person',
+      name: 'searchFaceEmptySection',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Search by a date, month or year`
+  String get searchDatesEmptySection {
+    return Intl.message(
+      'Search by a date, month or year',
+      name: 'searchDatesEmptySection',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Group photos that are taken within some radius of a photo`
+  String get searchLocationEmptySection {
+    return Intl.message(
+      'Group photos that are taken within some radius of a photo',
+      name: 'searchLocationEmptySection',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Invite people, and you'll see all photos shared by them here`
+  String get searchPeopleEmptySection {
+    return Intl.message(
+      'Invite people, and you\'ll see all photos shared by them here',
+      name: 'searchPeopleEmptySection',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Albums`
+  String get searchAlbumsEmptySection {
+    return Intl.message(
+      'Albums',
+      name: 'searchAlbumsEmptySection',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `File types and names`
+  String get searchFileTypesAndNamesEmptySection {
+    return Intl.message(
+      'File types and names',
+      name: 'searchFileTypesAndNamesEmptySection',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Add descriptions like "#trip" in photo info to quickly find them here`
+  String get searchCaptionEmptySection {
+    return Intl.message(
+      'Add descriptions like "#trip" in photo info to quickly find them here',
+      name: 'searchCaptionEmptySection',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Language`
   String get language {
     return Intl.message(
@@ -6904,16 +7024,6 @@ class S {
     return Intl.message(
       'Group nearby photos',
       name: 'groupNearbyPhotos',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Location`
-  String get location {
-    return Intl.message(
-      'Location',
-      name: 'location',
       desc: '',
       args: [],
     );
@@ -7830,6 +7940,46 @@ class S {
     return Intl.message(
       'Details of add-ons',
       name: 'addOnPageSubtitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Your map`
+  String get yourMap {
+    return Intl.message(
+      'Your map',
+      name: 'yourMap',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Black Friday Sale`
+  String get blackFridaySale {
+    return Intl.message(
+      'Black Friday Sale',
+      name: 'blackFridaySale',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Modify your query, or try searching for`
+  String get modifyYourQueryOrTrySearchingFor {
+    return Intl.message(
+      'Modify your query, or try searching for',
+      name: 'modifyYourQueryOrTrySearchingFor',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Upto 50% off, until 4th Dec.`
+  String get upto50OffUntil4thDec {
+    return Intl.message(
+      'Upto 50% off, until 4th Dec.',
+      name: 'upto50OffUntil4thDec',
       desc: '',
       args: [],
     );
