@@ -35,7 +35,6 @@ extension StringExtensionsNullSafe on String? {
   }
 }
 
-/// If all words in the string are connect words, true is returned and else false
 extension DescriptionString on String? {
   bool get isAllConnectWords {
     if (this == null) {
