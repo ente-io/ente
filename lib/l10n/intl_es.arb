@@ -964,5 +964,8 @@
   "familyPlanOverview": "Añada 5 familiares a su plan existente sin pagar más.\n\nCada miembro tiene su propio espacio privado y no puede ver los archivos del otro a menos que sean compartidos.\n\nLos planes familiares están disponibles para los clientes que tienen una suscripción de ente pagada.\n\n¡Suscríbete ahora para empezar!",
   "addToHiddenAlbum": "Add to hidden album",
   "moveToHiddenAlbum": "Move to hidden album",
-  "deleteConfirmDialogBody": "This account is linked to other ente apps, if you use any.\\n\\nYour uploaded data, across all ente apps, will be scheduled for deletion, and your account will be permanently deleted."
+  "fileTypes": "File types",
+  "deleteConfirmDialogBody": "This account is linked to other ente apps, if you use any.\\n\\nYour uploaded data, across all ente apps, will be scheduled for deletion, and your account will be permanently deleted.",
+  "yourMap": "Your map",
+  "modifyYourQueryOrTrySearchingFor": "Modify your query, or try searching for"
 }

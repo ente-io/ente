@@ -18,15 +18,17 @@ class SearchThumbnailWidget extends StatelessWidget {
     return Hero(
       tag: tagPrefix + (file?.tag ?? ""),
       child: SizedBox(
-        height: 58,
-        width: 58,
+        height: 60,
+        width: 60,
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(3),
+          borderRadius: const BorderRadius.horizontal(left: Radius.circular(4)),
           child: file != null
               ? ThumbnailWidget(
                   file!,
                 )
-              : const NoThumbnailWidget(),
+              : const NoThumbnailWidget(
+                  addBorder: false,
+                ),
         ),
       ),
     );

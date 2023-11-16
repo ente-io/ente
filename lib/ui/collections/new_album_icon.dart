@@ -10,13 +10,21 @@ import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/navigation_util.dart";
 
 class NewAlbumIcon extends StatelessWidget {
-  const NewAlbumIcon({Key? key}) : super(key: key);
+  final IconData icon;
+  final Color? color;
+  final IconButtonType iconButtonType;
+  const NewAlbumIcon({
+    required this.icon,
+    required this.iconButtonType,
+    this.color,
+    Key? key,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return IconButtonWidget(
-      icon: Icons.add_rounded,
-      iconButtonType: IconButtonType.secondary,
+      icon: icon,
+      iconButtonType: iconButtonType,
       onTap: () async {
         final result = await showTextInputDialog(
           context,

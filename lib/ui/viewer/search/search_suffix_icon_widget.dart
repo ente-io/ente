@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:photos/ente_theme_data.dart';
+import "package:photos/theme/ente_theme.dart";
+import 'package:photos/ui/viewer/search/search_widget.dart';
 
 class SearchSuffixIcon extends StatefulWidget {
   final bool shouldShowSpinner;
@@ -13,6 +14,7 @@ class _SearchSuffixIconState extends State<SearchSuffixIcon>
     with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
+    final colorScheme = getEnteColorScheme(context);
     return AnimatedSwitcher(
       duration: const Duration(milliseconds: 175),
       child: widget.shouldShowSpinner
@@ -24,22 +26,23 @@ class _SearchSuffixIconState extends State<SearchSuffixIcon>
                 child: Center(
                   child: CircularProgressIndicator(
                     strokeWidth: 2,
-                    color: Theme.of(context)
-                        .colorScheme
-                        .iconColor
-                        .withOpacity(0.5),
+                    color: colorScheme.strokeMuted,
                   ),
                 ),
               ),
             )
           : IconButton(
+              splashRadius: 1,
               visualDensity: const VisualDensity(horizontal: -1, vertical: -1),
               onPressed: () {
-                Navigator.pop(context);
+                final searchWidgetState =
+                    context.findAncestorStateOfType<SearchWidgetState>()!;
+                searchWidgetState.textController.clear();
+                searchWidgetState.focusNode.unfocus();
               },
               icon: Icon(
                 Icons.close,
-                color: Theme.of(context).colorScheme.iconColor.withOpacity(0.5),
+                color: colorScheme.strokeMuted,
               ),
             ),
     );

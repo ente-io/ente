@@ -1,6 +1,6 @@
 import "package:flutter/cupertino.dart";
 import "package:photos/generated/l10n.dart";
-import "package:photos/models/search/button_result.dart";
+import 'package:photos/models/button_result.dart';
 import "package:photos/services/user_remote_flag_service.dart";
 import "package:photos/ui/components/buttons/button_widget.dart";
 import "package:photos/ui/components/dialog_widget.dart";

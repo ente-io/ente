@@ -2,7 +2,7 @@ import "package:dio/dio.dart";
 import 'package:flutter/material.dart';
 import "package:flutter/services.dart";
 import "package:photos/generated/l10n.dart";
-import "package:photos/models/search/button_result.dart";
+import 'package:photos/models/button_result.dart';
 import 'package:photos/models/typedefs.dart';
 import 'package:photos/theme/colors.dart';
 import 'package:photos/ui/common/loading_widget.dart';
@@ -233,7 +233,7 @@ ProgressDialog createProgressDialog(
   return dialog;
 }
 
-//Can return ButtonResult? from ButtonWidget or Exception? from TextInputDialog
+///Can return ButtonResult? from ButtonWidget or Exception? from TextInputDialog
 Future<dynamic> showTextInputDialog(
   BuildContext context, {
   required String title,

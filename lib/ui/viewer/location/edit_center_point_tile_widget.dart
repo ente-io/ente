@@ -1,6 +1,6 @@
 import "package:flutter/material.dart";
 import "package:photos/generated/l10n.dart";
-import 'package:photos/models/file/file.dart';
+import "package:photos/models/location/location.dart";
 import "package:photos/services/location_service.dart";
 import "package:photos/states/location_state.dart";
 import "package:photos/theme/ente_theme.dart";
@@ -50,13 +50,16 @@ class EditCenterPointTileWidget extends StatelessWidget {
         ),
         IconButtonWidget(
           onTap: () async {
-            final EnteFile? centerPointFile = await showPickCenterPointSheet(
+            final Location? centerPoint = await showPickCenterPointSheet(
               context,
-              InheritedLocationTagData.of(context).locationTagEntity!,
+              locationTagName: InheritedLocationTagData.of(context)
+                  .locationTagEntity!
+                  .item
+                  .name,
             );
-            if (centerPointFile != null) {
+            if (centerPoint != null) {
               InheritedLocationTagData.of(context)
-                  .updateCenterPoint(centerPointFile.location!);
+                  .updateCenterPoint(centerPoint);
             }
           },
           icon: Icons.edit,

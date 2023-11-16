@@ -53,7 +53,7 @@ const double restrictedMaxWidth = 430;
 const double mobileSmallThreshold = 336;
 
 // Note: 0 indicates no device limit
-const publicLinkDeviceLimits = [0,50, 25, 10, 5, 2, 1];
+const publicLinkDeviceLimits = [0, 50, 25, 10, 5, 2, 1];
 
 const kilometersPerDegree = 111.16;
 
@@ -62,3 +62,5 @@ const defaultRadiusValues = <double>[1, 2, 10, 20, 40, 80, 200, 400, 1200];
 const defaultRadiusValue = 40.0;
 
 const galleryGridSpacing = 2.0;
+
+const searchSectionLimit = 7;

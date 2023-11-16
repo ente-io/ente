@@ -171,6 +171,7 @@ class SettingsPage extends StatelessWidget {
     return SafeArea(
       bottom: false,
       child: SingleChildScrollView(
+        physics: const BouncingScrollPhysics(),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [

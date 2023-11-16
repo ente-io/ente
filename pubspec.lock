@@ -460,6 +460,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.6.0"
+  fade_indexed_stack:
+    dependency: "direct main"
+    description:
+      name: fade_indexed_stack
+      sha256: "0d625709d0bf6d0fa275cfa4eba84695fdea93d672c47413cdb49bcbe758a9f3"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.2.2"
   fake_async:
     dependency: transitive
     description:

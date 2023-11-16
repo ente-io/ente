@@ -1,5 +1,6 @@
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/search/search_result.dart';
+import "package:photos/models/search/search_types.dart";
 
 class FileSearchResult extends SearchResult {
   final EnteFile file;

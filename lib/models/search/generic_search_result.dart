@@ -1,6 +1,7 @@
 import "package:flutter/cupertino.dart";
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/search/search_result.dart';
+import "package:photos/models/search/search_types.dart";
 
 class GenericSearchResult extends SearchResult {
   final String _name;
