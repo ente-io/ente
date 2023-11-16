@@ -74,7 +74,9 @@ class _LockScreenState extends State<LockScreen> with WidgetsBindingObserver {
         // Show the lock screen again only if the app is resuming from the
         // background, and not when the lock screen was explicitly dismissed
         Future.delayed(
-            Duration.zero, () => _showLockScreen(source: "lifeCycle"));
+          Duration.zero,
+          () => _showLockScreen(source: "lifeCycle"),
+        );
       } else {
         _hasAuthenticationFailed = false; // Reset failure state
       }

@@ -34,6 +34,7 @@ class ImportCodePage extends StatelessWidget {
     switch (type) {
       case ImportType.plainText:
         return context.l10n.importTypePlainText;
+
       case ImportType.encrypted:
         return context.l10n.importTypeEnteEncrypted;
       case ImportType.ravio:
@@ -66,7 +67,7 @@ class ImportCodePage extends StatelessWidget {
                   iconButtonType: IconButtonType.secondary,
                   onTap: () {
                     Navigator.pop(context);
-                    if(Navigator.canPop(context)) {
+                    if (Navigator.canPop(context)) {
                       Navigator.pop(context);
                     }
                   },
