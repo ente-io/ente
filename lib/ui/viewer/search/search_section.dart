@@ -48,8 +48,10 @@ class _SearchSectionState extends State<SearchSection> {
     for (Stream<Event> stream in streamsToListenTo) {
       streamSubscriptions.add(
         stream.listen((event) async {
-          _examples =
-              await widget.sectionType.getData(limit: searchSectionLimit);
+          _examples = await widget.sectionType.getData(
+            context,
+            limit: searchSectionLimit,
+          );
           setState(() {});
         }),
       );

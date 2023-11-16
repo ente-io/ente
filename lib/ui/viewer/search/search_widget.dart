@@ -225,7 +225,7 @@ class SearchWidgetState extends State<SearchWidget> {
       allResults.addAll(holidayResults);
 
       final fileTypeSearchResults =
-          await _searchService.getFileTypeResults(query);
+          await _searchService.getFileTypeResults(context, query);
       allResults.addAll(fileTypeSearchResults);
 
       final captionAndDisplayNameResult =

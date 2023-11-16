@@ -287,12 +287,13 @@ class SearchService {
   }
 
   Future<List<GenericSearchResult>> getFileTypeResults(
+    BuildContext context,
     String query,
   ) async {
     final List<GenericSearchResult> searchResults = [];
     final List<EnteFile> allFiles = await getAllFiles();
     for (var fileType in FileType.values) {
-      final String fileTypeString = getHumanReadableString(fileType);
+      final String fileTypeString = getHumanReadableString(context, fileType);
       if (fileTypeString.toLowerCase().startsWith(query.toLowerCase())) {
         final matchedFiles =
             allFiles.where((e) => e.fileType == fileType).toList();
@@ -311,6 +312,7 @@ class SearchService {
   }
 
   Future<List<GenericSearchResult>> getAllFileTypesAndExtensionsResults(
+    BuildContext context,
     int? limit,
   ) async {
     final List<GenericSearchResult> searchResults = [];
@@ -343,7 +345,7 @@ class SearchService {
         searchResults.add(
           GenericSearchResult(
             ResultType.fileType,
-            getHumanReadableString(key) + "s",
+            getHumanReadableString(context, key),
             value,
           ),
         );

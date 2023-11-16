@@ -230,10 +230,10 @@ extension SectionTypeExtensions on SectionType {
     }
   }
 
-  Future<List<SearchResult>> getData({int? limit, BuildContext? context}) {
-    if (this == SectionType.moment && context == null) {
-      AssertionError("context cannot be null for SectionType.moment");
-    }
+  Future<List<SearchResult>> getData(
+    BuildContext context, {
+    int? limit,
+  }) {
     switch (this) {
       case SectionType.face:
         return SearchService.instance.getAllLocationTags(limit);
@@ -242,7 +242,7 @@ extension SectionTypeExtensions on SectionType {
         return SearchService.instance.getAllLocationTags(limit);
 
       case SectionType.moment:
-        return SearchService.instance.getRandomMomentsSearchResults(context!);
+        return SearchService.instance.getRandomMomentsSearchResults(context);
 
       case SectionType.location:
         return SearchService.instance.getAllLocationTags(limit);
@@ -255,7 +255,7 @@ extension SectionTypeExtensions on SectionType {
 
       case SectionType.fileTypesAndExtension:
         return SearchService.instance
-            .getAllFileTypesAndExtensionsResults(limit);
+            .getAllFileTypesAndExtensionsResults(context, limit);
 
       case SectionType.fileCaption:
         return SearchService.instance.getAllDescriptionSearchResults(limit);

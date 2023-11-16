@@ -35,7 +35,7 @@ class _SearchSectionAllPageState extends State<SearchSectionAllPage> {
       streamSubscriptions.add(
         stream.listen((event) async {
           setState(() {
-            sectionData = widget.sectionType.getData();
+            sectionData = widget.sectionType.getData(context);
           });
         }),
       );
@@ -45,7 +45,7 @@ class _SearchSectionAllPageState extends State<SearchSectionAllPage> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    sectionData = widget.sectionType.getData(limit: null, context: context);
+    sectionData = widget.sectionType.getData(context);
   }
 
   @override
