@@ -15,7 +15,10 @@ import { addLogLine } from '@ente/shared/logging';
 import { getFileNameSize } from '@ente/shared/logging/web';
 
 import { encryptFiledata } from './encryptionService';
-import { extractMetadata, getMetadataJSONMapKey } from './metadataService';
+import {
+    extractMetadata,
+    getMetadataJSONMapKeyForFile,
+} from './metadataService';
 import {
     getFileStream,
     getElectronFileStream,
@@ -80,7 +83,7 @@ export async function extractFileMetadata(
     const originalName = getFileOriginalName(rawFile);
     const googleMetadata =
         parsedMetadataJSONMap.get(
-            getMetadataJSONMapKey(collectionID, originalName)
+            getMetadataJSONMapKeyForFile(collectionID, originalName)
         ) ?? {};
 
     const { metadata, publicMagicMetadata } = await extractMetadata(

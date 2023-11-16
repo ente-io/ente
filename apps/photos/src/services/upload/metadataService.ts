@@ -22,11 +22,6 @@ import { Remote } from 'comlink';
 import { DedicatedCryptoWorker } from '@ente/shared/crypto/internal/crypto.worker';
 import { FilePublicMagicMetadataProps } from 'types/file';
 
-interface ParsedMetadataJSONWithTitle {
-    title: string;
-    parsedMetadataJSON: ParsedMetadataJSON;
-}
-
 const NULL_PARSED_METADATA_JSON: ParsedMetadataJSON = {
     creationTime: null,
     modificationTime: null,
@@ -116,11 +111,20 @@ export async function getImageMetadata(
     return imageMetadata;
 }
 
-export const getMetadataJSONMapKey = (
+export const getMetadataJSONMapKeyForJSON = (
     collectionID: number,
+    jsonFileName: string
+) => {
+    const title = jsonFileName.replace('.json', '');
+    return `${collectionID}-${title}`;
+};
 
-    title: string
-) => `${collectionID}-${title}`;
+export const getMetadataJSONMapKeyForFile = (
+    collectionID: number,
+    fileName: string
+) => {
+    return `${collectionID}-${fileName}`;
+};
 
 export async function parseMetadataJSON(receivedFile: File | ElectronFile) {
     try {
@@ -134,11 +138,10 @@ export async function parseMetadataJSON(receivedFile: File | ElectronFile) {
 
         const parsedMetadataJSON: ParsedMetadataJSON =
             NULL_PARSED_METADATA_JSON;
-        if (!metadataJSON || !metadataJSON['title']) {
+        if (!metadataJSON) {
             return;
         }
 
-        const title = metadataJSON['title'];
         if (
             metadataJSON['photoTakenTime'] &&
             metadataJSON['photoTakenTime']['timestamp']
@@ -177,7 +180,7 @@ export async function parseMetadataJSON(receivedFile: File | ElectronFile) {
             parsedMetadataJSON.latitude = locationData.latitude;
             parsedMetadataJSON.longitude = locationData.longitude;
         }
-        return { title, parsedMetadataJSON } as ParsedMetadataJSONWithTitle;
+        return parsedMetadataJSON;
     } catch (e) {
         logError(e, 'parseMetadataJSON failed');
         // ignore

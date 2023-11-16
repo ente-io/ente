@@ -2,7 +2,8 @@ import { getLocalFiles } from '../fileService';
 import { SetFiles } from 'types/gallery';
 import { sortFiles, decryptFile, getUserOwnedFiles } from 'utils/file';
 import { logError } from '@ente/shared/sentry';
-import { getMetadataJSONMapKey, parseMetadataJSON } from './metadataService';
+import { parseMetadataJSON } from './metadataService';
+import { getMetadataJSONMapKeyForJSON } from './metadataService';
 import {
     areFileWithCollectionsSame,
     segregateMetadataAndMediaFiles,
@@ -217,14 +218,13 @@ class UploadManager {
                         `parsing metadata json file ${getFileNameSize(file)}`
                     );
 
-                    const parsedMetadataJSONWithTitle = await parseMetadataJSON(
-                        file
-                    );
-                    if (parsedMetadataJSONWithTitle) {
-                        const { title, parsedMetadataJSON } =
-                            parsedMetadataJSONWithTitle;
+                    const parsedMetadataJSON = await parseMetadataJSON(file);
+                    if (parsedMetadataJSON) {
                         this.parsedMetadataJSONMap.set(
-                            getMetadataJSONMapKey(collectionID, title),
+                            getMetadataJSONMapKeyForJSON(
+                                collectionID,
+                                file.name
+                            ),
                             parsedMetadataJSON && { ...parsedMetadataJSON }
                         );
                         UIService.increaseFileUploaded();
