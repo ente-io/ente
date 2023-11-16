@@ -25,7 +25,6 @@ class _QrScannerState extends State<QrScanner> {
   bool isNavigationPerformed = false;
   bool isScannedByImage = false;
 
-  //Scanner Initialization
   MobileScannerController scannerController = MobileScannerController(
     detectionSpeed: DetectionSpeed.normal,
     facing: CameraFacing.back,
@@ -91,10 +90,7 @@ class _QrScannerState extends State<QrScanner> {
                     }
                   },
                 ),
-                // Qr code scanner overlay
                 const QRScannerOverlay(),
-
-                // Torch and gallery buttons
                 Positioned(
                   top: 150,
                   left: 0,
@@ -122,8 +118,6 @@ class _QrScannerState extends State<QrScanner> {
                         iconSize: 60,
                         onPressed: () => scannerController.toggleTorch(),
                       ),
-
-                      // Gallery button
                       IconButton(
                         icon: SvgPicture.asset(
                           'assets/scanner-icons/icons/gallery.svg',
@@ -243,8 +237,6 @@ class _QrScannerState extends State<QrScanner> {
                 ),
               ],
             ),
-
-            // Close button
             Positioned(
               left: 25,
               top: 25,
