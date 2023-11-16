@@ -11,6 +11,7 @@ import 'package:ente_auth/utils/toast_util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:logging/logging.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:wechat_assets_picker/wechat_assets_picker.dart';
 
@@ -81,7 +82,14 @@ class _QrScannerState extends State<QrScanner> {
                           scannerController.dispose();
                           Navigator.of(context).pop(codes);
                         } catch (e) {
-                          debugPrint('Error occurred while parsing: $e');
+                          showToast(context, l10n.parsingErrorText);
+                          Logger("Code parsing error").severe(
+                            "Error while parsing Google Auth QR code",
+                            e,
+                          );
+                          throw Exception(
+                            'Failed to parse Google Auth QR code \n ${e.toString()}',
+                          );
                         }
                       } else {
                         showToast(context, l10n.invalidQrCodeText);
