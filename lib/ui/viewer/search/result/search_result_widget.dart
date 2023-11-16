@@ -28,15 +28,12 @@ class SearchResultWidget extends StatelessWidget {
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       child: Container(
-        //todo: check and change color to figma
         decoration: BoxDecoration(
           borderRadius: const BorderRadius.all(Radius.circular(4)),
-          // color: Theme.of(context).colorScheme.searchResultsColor,
           border: Border.all(
             color: getEnteColorScheme(context).strokeFainter,
           ),
         ),
-
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           crossAxisAlignment: CrossAxisAlignment.center,

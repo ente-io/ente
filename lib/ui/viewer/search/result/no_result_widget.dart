@@ -111,8 +111,8 @@ class _NoResultWidgetState extends State<NoResultWidget> {
     );
   }
 
+  /// Join the strings with ', ' and wrap each element with double quotes
   String formatList(List<String> strings) {
-    // Join the strings with ', ' and wrap each element with double quotes
     return strings.map((str) => '"$str"').join(', ');
   }
 }
