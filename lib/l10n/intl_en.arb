@@ -1121,5 +1121,6 @@
   "viewAddOnButton": "View add-ons",
   "addOns": "Add-ons",
   "addOnPageSubtitle": "Details of add-ons",
-  "yourMap": "Your map"
+  "yourMap": "Your map",
+  "modifyYourQueryOrTrySearchingFor": "Modify your query, or try searching for"
 }

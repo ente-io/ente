@@ -7894,6 +7894,16 @@ class S {
       args: [],
     );
   }
+
+  /// `Modify your query, or try searching for`
+  String get modifyYourQueryOrTrySearchingFor {
+    return Intl.message(
+      'Modify your query, or try searching for',
+      name: 'modifyYourQueryOrTrySearchingFor',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

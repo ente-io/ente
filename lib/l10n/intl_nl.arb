@@ -1104,5 +1104,6 @@
   "moveToHiddenAlbum": "Verplaatsen naar verborgen album",
   "fileTypes": "File types",
   "deleteConfirmDialogBody": "Dit account is gekoppeld aan andere ente apps, als je er gebruik van maakt.\\n\\nJe geüploade gegevens worden in alle ente apps gepland voor verwijdering, en je account wordt permanent verwijderd voor alle ente diensten.",
-  "yourMap": "Your map"
+  "yourMap": "Your map",
+  "modifyYourQueryOrTrySearchingFor": "Modify your query, or try searching for"
 }

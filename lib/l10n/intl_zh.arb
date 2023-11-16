@@ -1109,5 +1109,6 @@
   "viewAddOnButton": "查看附加组件",
   "addOns": "附加组件",
   "addOnPageSubtitle": "附加组件详情",
-  "yourMap": "Your map"
+  "yourMap": "Your map",
+  "modifyYourQueryOrTrySearchingFor": "Modify your query, or try searching for"
 }

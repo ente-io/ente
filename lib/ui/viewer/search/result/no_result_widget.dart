@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import "package:photos/generated/l10n.dart";
 import "package:photos/models/search/search_types.dart";
 import "package:photos/states/all_sections_examples_state.dart";
 import "package:photos/theme/ente_theme.dart";
@@ -79,14 +80,13 @@ class _NoResultWidgetState extends State<NoResultWidget> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                // S.of(context).noResults,
-                "No results found",
+                S.of(context).noResultsFound,
                 style: textTheme.largeBold,
               ),
               const SizedBox(height: 6),
               searchTypeToQuerySuggestion.isNotEmpty
                   ? Text(
-                      "Modify your query, or try searching for",
+                      S.of(context).modifyYourQueryOrTrySearchingFor,
                       style: textTheme.smallMuted,
                     )
                   : const SizedBox.shrink(),
