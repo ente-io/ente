@@ -34,35 +34,30 @@ class _AllSectionsExamplesProviderState
     SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
       //add all common events for all search sections to reload to here.
       _filesUpdatedEvent = Bus.instance.on<FilesUpdatedEvent>().listen((event) {
-        _debouncer.run(() async {
-          setState(() {
-            aggregateSectionsExamples();
-          });
-        });
+        reloadAllSections();
       });
-
-      _debouncer.run(() async {
-        setState(() {
-          aggregateSectionsExamples();
-        });
-      });
+      reloadAllSections();
     });
   }
 
-  void aggregateSectionsExamples() {
-    _logger.info("reloading all sections in search tab");
-    final allSectionsExamples = <Future<List<SearchResult>>>[];
-    for (SectionType sectionType in SectionType.values) {
-      if (sectionType == SectionType.face ||
-          sectionType == SectionType.content) {
-        continue;
-      }
-      allSectionsExamples.add(
-        sectionType.getData(limit: searchSectionLimit, context: context),
-      );
-    }
-    allSectionsExamplesFuture =
-        Future.wait<List<SearchResult>>(allSectionsExamples);
+  void reloadAllSections() {
+    _debouncer.run(() async {
+      setState(() {
+        _logger.info("reloading all sections in search tab");
+        final allSectionsExamples = <Future<List<SearchResult>>>[];
+        for (SectionType sectionType in SectionType.values) {
+          if (sectionType == SectionType.face ||
+              sectionType == SectionType.content) {
+            continue;
+          }
+          allSectionsExamples.add(
+            sectionType.getData(limit: searchSectionLimit, context: context),
+          );
+        }
+        allSectionsExamplesFuture =
+            Future.wait<List<SearchResult>>(allSectionsExamples);
+      });
+    });
   }
 
   @override
