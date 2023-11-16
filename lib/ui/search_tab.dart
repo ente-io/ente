@@ -66,11 +66,6 @@ class AllSearchSections extends StatefulWidget {
 
 class _AllSearchSectionsState extends State<AllSearchSections> {
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-  }
-
-  @override
   Widget build(BuildContext context) {
     final searchTypes = SectionType.values.toList(growable: true);
     // remove face and content sectionType
@@ -102,7 +97,6 @@ class _AllSearchSectionsState extends State<AllSearchSections> {
                 },
               );
             } else if (snapshot.hasError) {
-              //todo: Show something went wrong here
               //Errors are handled and this else if condition will be false always
               //is the understanding.
               return const Padding(
