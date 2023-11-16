@@ -1,95 +1,128 @@
-// import { Inter } from 'next/font/google';
 import { useEffect, useState } from 'react';
-import { syncCollections } from 'services/collectionService';
-import { syncFiles } from 'services/fileService';
-import { EnteFile } from 'types/file';
-import { downloadFileAsBlob } from 'utils/file';
 
-// const inter = Inter({ subsets: ['latin'] });
+const colourPool = [
+    '#87CEFA', // Light Blue
+    '#90EE90', // Light Green
+    '#F08080', // Light Coral
+    '#FFFFE0', // Light Yellow
+    '#FFB6C1', // Light Pink
+    '#E0FFFF', // Light Cyan
+    '#FAFAD2', // Light Goldenrod
+    '#87CEFA', // Light Sky Blue
+    '#D3D3D3', // Light Gray
+    '#B0C4DE', // Light Steel Blue
+    '#FFA07A', // Light Salmon
+    '#20B2AA', // Light Sea Green
+    '#778899', // Light Slate Gray
+    '#AFEEEE', // Light Turquoise
+    '#7A58C1', // Light Violet
+    '#FFA500', // Light Orange
+    '#A0522D', // Light Brown
+    '#9370DB', // Light Purple
+    '#008080', // Light Teal
+    '#808000', // Light Olive
+];
 
-export default function Home() {
-    const [collectionFiles, setCollectionFiles] = useState<EnteFile[]>([]);
-
-    const [currentFile, setCurrentFile] = useState<EnteFile | undefined>(
-        undefined
-    );
-
-    const init = async () => {
-        const collections = await syncCollections();
-
-        // get requested collection id from fragment (this is temporary and will be changed during cast)
-        const requestedCollectionID = window.location.hash.slice(1);
-
-        const files = await syncFiles('normal', collections, () => {});
-
-        if (requestedCollectionID) {
-            const collectionFiles = files.filter(
-                (file) => file.collectionID === Number(requestedCollectionID)
-            );
-
-            setCollectionFiles(collectionFiles);
+export default function PairingMode() {
+    // Function to generate cryptographically secure data
+    function generateSecureData(length: number): Uint8Array {
+        const array = new Uint8Array(length);
+        window.crypto.getRandomValues(array);
+        // Modulo operation to ensure each byte is a single digit
+        for (let i = 0; i < length; i++) {
+            array[i] = array[i] % 10;
         }
-    };
+        return array;
+    }
+    // Function to convert data into digits
+    function convertDataToDigits(data: Uint8Array): string {
+        let result = '';
+        for (let i = 0; i < data.length; i++) {
+            result += data[i].toString();
+        }
+        return result;
+    }
+
+    const [digits, setDigits] = useState<string[]>([]);
 
     useEffect(() => {
-        init();
+        setDigits(convertDataToDigits(generateSecureData(10)).split(''));
     }, []);
-
-    useEffect(() => {
-        // create interval to change slide
-        const interval = setInterval(() => {
-            // set the currentFile to the next file in the collection for the slideshow
-            const currentIndex = collectionFiles.findIndex(
-                (file) => file.id === currentFile?.id
-            );
-
-            const nextIndex = (currentIndex + 1) % collectionFiles.length;
-
-            const nextFile = collectionFiles[nextIndex];
-
-            setCurrentFile(nextFile);
-        }, 5000);
-
-        return () => {
-            clearInterval(interval);
-        };
-    }, [collectionFiles, currentFile]);
-
-    const [renderableFileURL, setRenderableFileURL] = useState<string>('');
-
-    const getRenderableFileURL = async () => {
-        const blob = await downloadFileAsBlob(currentFile as EnteFile);
-
-        const url = URL.createObjectURL(blob);
-
-        setRenderableFileURL(url);
-    };
-
-    useEffect(() => {
-        if (currentFile) {
-            console.log(currentFile);
-            getRenderableFileURL();
-        }
-    }, [currentFile]);
 
     return (
         <>
             <div
                 style={{
-                    width: '100vw',
-                    height: '100vh',
+                    height: '100%',
                     display: 'flex',
                     justifyContent: 'center',
                     alignItems: 'center',
-                    backgroundColor: 'black',
                 }}>
-                <img
-                    src={renderableFileURL}
+                <div
                     style={{
-                        maxWidth: '100%',
-                        maxHeight: '100%',
-                    }}
-                />
+                        textAlign: 'center',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                    }}>
+                    <img width={150} src="/images/ente.svg" />
+                    <h1
+                        style={{
+                            fontWeight: 'normal',
+                        }}>
+                        Enter this code on <b>ente</b> to pair this TV
+                    </h1>
+                    <table
+                        style={{
+                            fontSize: '4rem',
+                            fontWeight: 'bold',
+                            fontFamily: 'monospace',
+                            display: 'flex',
+                        }}>
+                        {digits.map((digit, i) => (
+                            <tr
+                                key={i}
+                                style={{
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    alignItems: 'center',
+                                    padding: '0.5rem',
+                                    // alternating background
+                                    backgroundColor:
+                                        i % 2 === 0 ? '#2e2e2e' : '#5e5e5e',
+                                }}>
+                                <span
+                                    style={{
+                                        color: colourPool[
+                                            i % colourPool.length
+                                        ],
+                                    }}>
+                                    {digit}
+                                </span>
+                                <span
+                                    style={{
+                                        fontSize: '1rem',
+                                    }}>
+                                    {i + 1}
+                                </span>
+                            </tr>
+                        ))}
+                    </table>
+                    <p
+                        style={{
+                            fontSize: '1.2rem',
+                        }}>
+                        Visit{' '}
+                        <span
+                            style={{
+                                color: '#87CEFA',
+                                fontWeight: 'bold',
+                            }}>
+                            ente.io/cast
+                        </span>{' '}
+                        for help
+                    </p>
+                </div>
             </div>
         </>
     );
