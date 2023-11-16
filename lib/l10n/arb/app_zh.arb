@@ -340,6 +340,13 @@
   "showQRAuthMessage": "显示QR码需要身份验证",
   "confirmAccountDeleteTitle": "确认删除账户",
   "confirmAccountDeleteMessage": "该账户已链接到其他ente旗下的应用程序（如果您使用任何相关的应用程序）。\n\n您在所有ente旗下应用程序中上传的数据都将被安排删除，并且您的账户将被永久删除。",
+  "reminderText": "提醒",
+  "reminderPopupBody": "请先删除屏幕截图，然后再恢复任何照片的云同步",
+  "invalidQrCodeText": "二维码无效",
+  "googleAuthImagePopupBody": "请关闭所有应用程序中的所有照片云同步，包括 iCloud、Google Photo、OneDrive 等。 \n此外，如果您有第二部智能手机，通过扫描二维码导入会更安全。",
+  "importGoogleAuthImageButtonText": "从图像导入",
+  "unableToRecognizeQrCodeText": "无法从上传的图像中识别有效代码",
+  "qrCodeImageNotSelectedText": "未选择二维码图像",
   "androidBiometricHint": "验证身份",
   "@androidBiometricHint": {
     "description": "Hint message advising the user how to authenticate with biometrics. It is used on Android side. Maximum 60 characters."
@@ -391,5 +398,6 @@
   "iOSOkButton": "好的",
   "@iOSOkButton": {
     "description": "Message showed on a button that the user can click to leave the current dialog. It is used on iOS side. Maximum 30 characters."
-  }
+  },
+  "parsingErrorText": "解析谷歌验证器的二维码时出错"
 }
