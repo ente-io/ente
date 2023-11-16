@@ -129,7 +129,12 @@ export async function getClipTextModelPath() {
 
 function getGGMLClipPath() {
     return isDev
-        ? path.join('./build', `ggmlclip-${getPlatform()}`)
+        ? path.join(
+              './build',
+              `ggmlclip-${getPlatform()}${
+                  getPlatform() === 'windows' ? '.exe' : ''
+              }`
+          )
         : path.join(process.resourcesPath, `ggmlclip-${getPlatform()}`);
 }
 
