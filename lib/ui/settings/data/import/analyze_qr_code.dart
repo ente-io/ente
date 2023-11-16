@@ -76,10 +76,14 @@ class _QrScannerState extends State<QrScanner> {
                           }
                         }
                         HapticFeedback.vibrate();
-                        List<Code> codes =
-                            parseGoogleAuth(capture.barcodes[0].rawValue!);
-                        scannerController.dispose();
-                        Navigator.of(context).pop(codes);
+                        try {
+                          List<Code> codes =
+                              parseGoogleAuth(capture.barcodes[0].rawValue!);
+                          scannerController.dispose();
+                          Navigator.of(context).pop(codes);
+                        } catch (e) {
+                          debugPrint('Error occurred while parsing: $e');
+                        }
                       } else {
                         showToast(context, l10n.invalidQrCodeText);
                         isNavigationPerformed = false;
