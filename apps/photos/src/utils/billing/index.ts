@@ -9,7 +9,7 @@ import { logError } from '@ente/shared/sentry';
 import { SetDialogBoxAttributes } from '@ente/shared/components/DialogBox/types';
 import { openLink } from 'utils/common';
 import { isPartOfFamily, getTotalFamilyUsage } from 'utils/user/family';
-import { UserDetails } from 'types/user';
+import { BonusData, UserDetails } from 'types/user';
 import { getSubscriptionPurchaseSuccessMessage } from 'utils/ui';
 import { getRedirectURL, REDIRECTS } from 'constants/redirects';
 
@@ -92,6 +92,18 @@ export function isOnFreePlan(subscription: Subscription) {
         subscription &&
         isSubscriptionActive(subscription) &&
         subscription.productID === FREE_PLAN
+    );
+}
+
+// Checks if the bonus data contain any bonus whose type starts with 'ADD_ON'
+export function hasAddOnBonus(bonusData?: BonusData) {
+    return (
+        bonusData &&
+        bonusData.storageBonuses &&
+        bonusData.storageBonuses.length > 0 &&
+        bonusData.storageBonuses.some((bonus) =>
+            bonus.type.startsWith('ADD_ON')
+        )
     );
 }
 
