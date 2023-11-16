@@ -860,7 +860,9 @@ class SearchService {
         searchResults.add(
           GenericSearchResult(
             ResultType.shared,
-            key.name != null && key.name!.isNotEmpty ? key.name! : key.email,
+            key.name != null && key.name!.isNotEmpty
+                ? key.name!
+                : key.email.split("@")[0],
             value,
           ),
         );
