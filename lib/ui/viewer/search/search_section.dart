@@ -79,7 +79,7 @@ class _SearchSectionState extends State<SearchSection> {
     final textTheme = getEnteTextTheme(context);
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
-      child: widget.examples.isNotEmpty
+      child: _examples.isNotEmpty
           ? GestureDetector(
               behavior: HitTestBehavior.opaque,
               onTap: () {
@@ -146,6 +146,12 @@ class _SearchSectionState extends State<SearchSection> {
                   ),
                   const SizedBox(width: 8),
                   SearchSectionEmptyCTAIcon(widget.sectionType),
+                  widget.sectionType == SectionType.location
+                      ? const Padding(
+                          padding: EdgeInsets.fromLTRB(8, 24, 8, 0),
+                          child: GoToMapWidget(),
+                        )
+                      : const SizedBox.shrink(),
                 ],
               ),
             ),
