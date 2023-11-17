@@ -124,7 +124,7 @@ export const getMetadataJSONMapKeyForJSON = (
             -1 * endsWithNumberedSuffixWithBrackets[0].length
         );
         const [name, extension] = splitFilenameAndExtension(title);
-        return `${collectionID}-${name}${endsWithNumberedSuffixWithBrackets}.${extension}`;
+        return `${collectionID}-${name}${endsWithNumberedSuffixWithBrackets[0]}.${extension}`;
     }
     return `${collectionID}-${title}`;
 };
