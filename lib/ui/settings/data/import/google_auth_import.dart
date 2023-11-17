@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
-
 import 'package:base32/base32.dart';
 import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/models/code.dart';
@@ -11,7 +10,7 @@ import 'package:ente_auth/store/code_store.dart';
 import 'package:ente_auth/ui/components/buttons/button_widget.dart';
 import 'package:ente_auth/ui/components/dialog_widget.dart';
 import 'package:ente_auth/ui/components/models/button_type.dart';
-import 'package:ente_auth/ui/settings/data/import/analyze_qr_code.dart';
+import 'package:ente_auth/ui/scanner_gauth_page.dart';
 import 'package:ente_auth/ui/settings/data/import/import_success.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
@@ -46,7 +45,7 @@ Future<void> showGoogleAuthInstruction(BuildContext context) async {
       final List<Code>? codes = await Navigator.of(context).push(
         MaterialPageRoute(
           builder: (BuildContext context) {
-            return const QrScanner();
+            return const ScannerGoogleAuthPage();
           },
         ),
       );
