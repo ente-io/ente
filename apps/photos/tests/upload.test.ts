@@ -6,7 +6,7 @@ import { FILE_TYPE } from 'constants/file';
 import { tryToParseDateTime } from '@ente/shared/time';
 import {
     getClippedMetadataJSONMapKeyForFile,
-    getFullMetadataJSONMapKeyForFile,
+    getMetadataJSONMapKeyForFile,
     getMetadataJSONMapKeyForJSON,
 } from 'services/upload/metadataService';
 
@@ -395,10 +395,7 @@ function mappingFileAndJSONFileCheck() {
             0,
             jsonFilename
         );
-        let fileNameGeneratedKey = getFullMetadataJSONMapKeyForFile(
-            0,
-            filename
-        );
+        let fileNameGeneratedKey = getMetadataJSONMapKeyForFile(0, filename);
         if (fileNameGeneratedKey !== jsonFileNameGeneratedKey) {
             fileNameGeneratedKey = getClippedMetadataJSONMapKeyForFile(
                 0,

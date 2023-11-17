@@ -23,7 +23,7 @@ import { DedicatedCryptoWorker } from '@ente/shared/crypto/internal/crypto.worke
 import { FilePublicMagicMetadataProps } from 'types/file';
 import { splitFilenameAndExtension } from 'utils/file';
 
-const NULL_PARSED_METADATA_JSON: ParsedMetadataJSON = {
+export const NULL_PARSED_METADATA_JSON: ParsedMetadataJSON = {
     creationTime: null,
     modificationTime: null,
     ...NULL_LOCATION,
@@ -46,6 +46,8 @@ const EXIF_TAGS_NEEDED = [
     'PixelYDimension',
     'MetadataDate',
 ];
+
+export const MAX_FILE_NAME_LENGTH_GOOGLE_EXPORT = 46;
 
 export async function extractMetadata(
     worker: Remote<DedicatedCryptoWorker>,
@@ -129,14 +131,19 @@ export const getMetadataJSONMapKeyForJSON = (
     return `${collectionID}-${title}`;
 };
 
+// if the file name is greater than MAX_FILE_NAME_LENGTH_GOOGLE_EXPORT(46) , then google photos clips the file name
+// so we need to use the clipped file name to get the metadataJSON file
 export const getClippedMetadataJSONMapKeyForFile = (
     collectionID: number,
     fileName: string
 ) => {
-    return `${collectionID}-${fileName.slice(0, 46)}`;
+    return `${collectionID}-${fileName.slice(
+        0,
+        MAX_FILE_NAME_LENGTH_GOOGLE_EXPORT
+    )}`;
 };
 
-export const getFullMetadataJSONMapKeyForFile = (
+export const getMetadataJSONMapKeyForFile = (
     collectionID: number,
     fileName: string
 ) => {

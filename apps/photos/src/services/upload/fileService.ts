@@ -8,6 +8,7 @@ import {
     DataStream,
     ElectronFile,
     ExtractMetadataResult,
+    ParsedMetadataJSON,
 } from 'types/upload';
 import { logError } from '@ente/shared/sentry';
 import { addLogLine } from '@ente/shared/logging';
@@ -15,9 +16,11 @@ import { getFileNameSize } from '@ente/shared/logging/web';
 
 import { encryptFiledata } from './encryptionService';
 import {
+    MAX_FILE_NAME_LENGTH_GOOGLE_EXPORT,
+    NULL_PARSED_METADATA_JSON,
     extractMetadata,
     getClippedMetadataJSONMapKeyForFile,
-    getFullMetadataJSONMapKeyForFile,
+    getMetadataJSONMapKeyForFile,
 } from './metadataService';
 import {
     getFileStream,
@@ -78,14 +81,14 @@ export async function extractFileMetadata(
     fileTypeInfo: FileTypeInfo,
     rawFile: File | ElectronFile
 ): Promise<ExtractMetadataResult> {
-    const googleMetadata =
-        parsedMetadataJSONMap.get(
-            getFullMetadataJSONMapKeyForFile(collectionID, rawFile.name)
-        ) ??
-        parsedMetadataJSONMap.get(
-            getClippedMetadataJSONMapKeyForFile(collectionID, rawFile.name)
-        ) ??
-        {};
+    let key = getMetadataJSONMapKeyForFile(collectionID, rawFile.name);
+    let googleMetadata: ParsedMetadataJSON =
+        parsedMetadataJSONMap.get(key) ?? NULL_PARSED_METADATA_JSON;
+
+    if (!googleMetadata && key.length > MAX_FILE_NAME_LENGTH_GOOGLE_EXPORT) {
+        key = getClippedMetadataJSONMapKeyForFile(collectionID, rawFile.name);
+        googleMetadata = parsedMetadataJSONMap.get(key);
+    }
 
     const { metadata, publicMagicMetadata } = await extractMetadata(
         worker,
