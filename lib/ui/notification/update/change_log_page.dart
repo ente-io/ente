@@ -5,8 +5,10 @@ import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/buttons/button_widget.dart';
 import 'package:photos/ui/components/divider_widget.dart';
 import 'package:photos/ui/components/models/button_type.dart';
+import "package:photos/ui/components/notification_widget.dart";
 import 'package:photos/ui/components/title_bar_title_widget.dart';
 import 'package:photos/ui/notification/update/change_log_entry.dart';
+import "package:photos/utils/black_friday_util.dart";
 import "package:url_launcher/url_launcher_string.dart";
 
 class ChangeLogPage extends StatefulWidget {
@@ -64,6 +66,26 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    shouldShowBfBanner()
+                        ? Padding(
+                            padding: const EdgeInsets.only(bottom: 8),
+                            child: NotificationWidget(
+                              isBlackFriday: true,
+                              startIcon: Icons.celebration,
+                              actionIcon: Icons.arrow_forward_outlined,
+                              text: S.of(context).blackFridaySale,
+                              subText: S.of(context).upto50OffUntil4thDec,
+                              type: NotificationType.goldenBanner,
+                              onTap: () async {
+                                launchUrlString(
+                                  "https://ente.io/blackfriday",
+                                  mode: LaunchMode.platformDefault,
+                                );
+                              },
+                            ),
+                          )
+                        : const SizedBox.shrink(),
+
                     ButtonWidget(
                       buttonType: ButtonType.trailingIconPrimary,
                       buttonSize: ButtonSize.large,
@@ -89,19 +111,23 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
                     //     await UpdateService.instance.launchReviewUrl();
                     //   },
                     // ),
-                    ButtonWidget(
-                      buttonType: ButtonType.trailingIconSecondary,
-                      buttonSize: ButtonSize.large,
-                      labelText: "Join the ente community",
-                      icon: Icons.people_alt_rounded,
-                      iconColor: enteColorScheme.primary500,
-                      onTap: () async {
-                        launchUrlString(
-                          "https://ente.io/community",
-                          mode: LaunchMode.externalApplication,
-                        );
-                      },
-                    ),
+
+                    shouldShowBfBanner()
+                        ? const SizedBox.shrink()
+                        : ButtonWidget(
+                            buttonType: ButtonType.trailingIconSecondary,
+                            buttonSize: ButtonSize.large,
+                            labelText: "Join the ente community",
+                            icon: Icons.people_alt_rounded,
+                            iconColor: enteColorScheme.primary500,
+                            onTap: () async {
+                              launchUrlString(
+                                "https://ente.io/community",
+                                mode: LaunchMode.externalApplication,
+                              );
+                            },
+                          ),
+
                     const SizedBox(height: 8),
                   ],
                 ),
