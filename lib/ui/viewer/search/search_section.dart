@@ -48,8 +48,10 @@ class _SearchSectionState extends State<SearchSection> {
     for (Stream<Event> stream in streamsToListenTo) {
       streamSubscriptions.add(
         stream.listen((event) async {
-          _examples =
-              await widget.sectionType.getData(limit: searchSectionLimit);
+          _examples = await widget.sectionType.getData(
+            context,
+            limit: searchSectionLimit,
+          );
           setState(() {});
         }),
       );
@@ -73,47 +75,51 @@ class _SearchSectionState extends State<SearchSection> {
   @override
   Widget build(BuildContext context) {
     debugPrint("Building section for ${widget.sectionType.name}");
+    final shouldShowMore = _examples.length >= widget.limit - 1;
     final textTheme = getEnteTextTheme(context);
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: widget.examples.isNotEmpty
-          ? Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.all(12),
-                      child: Text(
-                        widget.sectionType.sectionTitle(context),
-                        style: textTheme.largeBold,
-                      ),
+          ? GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: () {
+                if (shouldShowMore) {
+                  routeToPage(
+                    context,
+                    SearchSectionAllPage(
+                      sectionType: widget.sectionType,
                     ),
-                    _examples.length < (widget.limit - 1)
-                        ? const SizedBox.shrink()
-                        : GestureDetector(
-                            onTap: () {
-                              routeToPage(
-                                context,
-                                SearchSectionAllPage(
-                                  sectionType: widget.sectionType,
-                                ),
-                              );
-                            },
-                            child: Padding(
+                  );
+                }
+              },
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(12),
+                        child: Text(
+                          widget.sectionType.sectionTitle(context),
+                          style: textTheme.largeBold,
+                        ),
+                      ),
+                      shouldShowMore
+                          ? Padding(
                               padding: const EdgeInsets.all(12),
                               child: Icon(
                                 Icons.chevron_right_outlined,
                                 color: getEnteColorScheme(context).strokeMuted,
                               ),
-                            ),
-                          ),
-                  ],
-                ),
-                const SizedBox(height: 2),
-                SearchExampleRow(_examples, widget.sectionType),
-              ],
+                            )
+                          : const SizedBox.shrink(),
+                    ],
+                  ),
+                  const SizedBox(height: 2),
+                  SearchExampleRow(_examples, widget.sectionType),
+                ],
+              ),
             )
           : Padding(
               padding: const EdgeInsets.only(left: 16, right: 8),

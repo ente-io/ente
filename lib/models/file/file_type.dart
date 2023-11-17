@@ -1,4 +1,6 @@
+import "package:flutter/material.dart";
 import "package:photo_manager/photo_manager.dart";
+import "package:photos/l10n/l10n.dart";
 
 enum FileType {
   image,
@@ -54,14 +56,14 @@ FileType fileTypeFromAsset(AssetEntity asset) {
   return type;
 }
 
-String getHumanReadableString(FileType fileType) {
+String getHumanReadableString(BuildContext context, FileType fileType) {
   switch (fileType) {
     case FileType.image:
-      return "Image";
+      return context.l10n.photos;
     case FileType.video:
-      return "Video";
+      return context.l10n.videos;
     case FileType.livePhoto:
-      return "Live Photo";
+      return context.l10n.livePhotos;
     default:
       return fileType.name.toUpperCase();
   }

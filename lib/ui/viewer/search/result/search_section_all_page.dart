@@ -30,22 +30,18 @@ class _SearchSectionAllPageState extends State<SearchSectionAllPage> {
   @override
   void initState() {
     super.initState();
+    sectionData = widget.sectionType.getData(context);
+
     final streamsToListenTo = widget.sectionType.viewAllUpdateEvents();
     for (Stream<Event> stream in streamsToListenTo) {
       streamSubscriptions.add(
         stream.listen((event) async {
           setState(() {
-            sectionData = widget.sectionType.getData();
+            sectionData = widget.sectionType.getData(context);
           });
         }),
       );
     }
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    sectionData = widget.sectionType.getData(limit: null, context: context);
   }
 
   @override

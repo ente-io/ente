@@ -213,6 +213,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Não foi possível buscar informações do produto. Por favor, tente novamente mais tarde."),
         "faq": MessageLookupByLibrary.simpleMessage("Perguntas frequentes"),
         "feedback": MessageLookupByLibrary.simpleMessage("Opinião"),
+        "fileTypes": MessageLookupByLibrary.simpleMessage("File types"),
         "forgotPassword":
             MessageLookupByLibrary.simpleMessage("Esqueceu sua senha"),
         "freeStorageClaimed": MessageLookupByLibrary.simpleMessage(
@@ -259,6 +260,9 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Dispositivo perdido?"),
         "manage": MessageLookupByLibrary.simpleMessage("Gerenciar"),
         "moderateStrength": MessageLookupByLibrary.simpleMessage("Moderada"),
+        "modifyYourQueryOrTrySearchingFor":
+            MessageLookupByLibrary.simpleMessage(
+                "Modify your query, or try searching for"),
         "moveToHiddenAlbum":
             MessageLookupByLibrary.simpleMessage("Move to hidden album"),
         "noRecoveryKey": MessageLookupByLibrary.simpleMessage(
@@ -426,6 +430,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "youCanAtMaxDoubleYourStorage": MessageLookupByLibrary.simpleMessage(
             "* Você pode duplicar seu armazenamento no máximo"),
         "yourAccountHasBeenDeleted":
-            MessageLookupByLibrary.simpleMessage("Sua conta foi deletada")
+            MessageLookupByLibrary.simpleMessage("Sua conta foi deletada"),
+        "yourMap": MessageLookupByLibrary.simpleMessage("Your map")
       };
 }

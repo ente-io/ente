@@ -50,9 +50,9 @@ extension SectionTypeExtensions on SectionType {
   String sectionTitle(BuildContext context) {
     switch (this) {
       case SectionType.face:
-        return "Faces";
+        return S.of(context).faces;
       case SectionType.content:
-        return "Contents";
+        return S.of(context).contents;
       case SectionType.moment:
         return S.of(context).moments;
       case SectionType.location:
@@ -136,21 +136,23 @@ extension SectionTypeExtensions on SectionType {
   String getCTAText(BuildContext context) {
     switch (this) {
       case SectionType.face:
+        // todo: later
         return "Setup";
       case SectionType.content:
+        // todo: later
         return "Add tags";
       case SectionType.moment:
-        return "Add new";
+        return S.of(context).addNew;
       case SectionType.location:
-        return "Add new";
+        return S.of(context).addNew;
       case SectionType.people:
-        return "Invite";
+        return S.of(context).invite;
       case SectionType.album:
-        return "Add new";
+        return S.of(context).addNew;
       case SectionType.fileTypesAndExtension:
         return "";
       case SectionType.fileCaption:
-        return "Add new";
+        return S.of(context).addNew;
     }
   }
 
@@ -230,10 +232,10 @@ extension SectionTypeExtensions on SectionType {
     }
   }
 
-  Future<List<SearchResult>> getData({int? limit, BuildContext? context}) {
-    if (this == SectionType.moment && context == null) {
-      AssertionError("context cannot be null for SectionType.moment");
-    }
+  Future<List<SearchResult>> getData(
+    BuildContext context, {
+    int? limit,
+  }) {
     switch (this) {
       case SectionType.face:
         return SearchService.instance.getAllLocationTags(limit);
@@ -242,7 +244,7 @@ extension SectionTypeExtensions on SectionType {
         return SearchService.instance.getAllLocationTags(limit);
 
       case SectionType.moment:
-        return SearchService.instance.getRandomMomentsSearchResults(context!);
+        return SearchService.instance.getRandomMomentsSearchResults(context);
 
       case SectionType.location:
         return SearchService.instance.getAllLocationTags(limit);
@@ -255,7 +257,7 @@ extension SectionTypeExtensions on SectionType {
 
       case SectionType.fileTypesAndExtension:
         return SearchService.instance
-            .getAllFileTypesAndExtensionsResults(limit);
+            .getAllFileTypesAndExtensionsResults(context, limit);
 
       case SectionType.fileCaption:
         return SearchService.instance.getAllDescriptionSearchResults(limit);

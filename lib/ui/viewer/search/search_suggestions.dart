@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
+import "package:photos/generated/l10n.dart";
 import 'package:photos/models/search/album_search_result.dart';
 import 'package:photos/models/search/generic_search_result.dart';
 import 'package:photos/models/search/search_result.dart';
@@ -21,12 +22,7 @@ class SearchSuggestionsWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     late final String title;
     final resultsCount = results.length;
-    //todo: extract string
-    if (resultsCount == 1) {
-      title = "$resultsCount result found";
-    } else {
-      title = "$resultsCount results found";
-    }
+    title = S.of(context).searchResultCount(resultsCount);
     return Padding(
       padding: const EdgeInsets.fromLTRB(12, 32, 12, 0),
       child: Column(
