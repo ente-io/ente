@@ -4,10 +4,10 @@
     "private": true,
     "scripts": {
         "dev": "next dev",
-        "albums": "next dev -p 3002",
-        "auth": "next dev -p 3004",
         "lint": "next lint",
-        "build": "next build"
+        "build": "next build",
+        "export": "next export",
+        "albums": "next dev -p 3002"
     },
     "dependencies": {
         "@date-io/date-fns": "^2.14.0",
