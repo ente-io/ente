@@ -1,19 +1,19 @@
 {
-    "short_name": "ente Auth",
-    "name": "ente | encrypted photo storage",
+    "short_name": "ente Photos",
+    "name": "ente Photos | encrypted photo storage",
     "icons": [
         {
-            "src": "/images/auth/192.png",
+            "src": "/images/ente/192.png",
             "type": "image/png",
             "sizes": "192x192"
         },
         {
-            "src": "/images/auth/256.png",
+            "src": "/images/ente/256.png",
             "type": "image/png",
             "sizes": "256x256"
         },
         {
-            "src": "/images/auth/512.png",
+            "src": "/images/ente/512.png",
             "type": "image/png",
             "sizes": "512x512"
         }
@@ -34,6 +34,33 @@
         {
             "platform": "itunes",
             "url": "https://apps.apple.com/in/app/ente-photos/id1542026904"
+        }
+    ],
+    "screenshots": [
+        {
+            "src": "/pwa/slide-1.jpg",
+            "type": "image/jpeg",
+            "sizes": "417x760"
+        },
+        {
+            "src": "/pwa/slide-2.jpg",
+            "type": "image/jpeg",
+            "sizes": "378x690"
+        },
+        {
+            "src": "/pwa/slide-3.jpg",
+            "type": "image/jpeg",
+            "sizes": "378x690"
+        },
+        {
+            "src": "/pwa/slide-4.jpg",
+            "type": "image/jpeg",
+            "sizes": "378x690"
+        },
+        {
+            "src": "/pwa/slide-5.jpg",
+            "type": "image/jpeg",
+            "sizes": "378x690"
         }
     ]
 }
