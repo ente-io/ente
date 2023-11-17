@@ -863,14 +863,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.4"
-  mobile_scanner:
-    dependency: "direct main"
-    description:
-      name: mobile_scanner
-      sha256: cf978740676ba5b0c17399baf117984b31190bb7a6eaa43e51229ed46abc42ee
-      url: "https://pub.dev"
-    source: hosted
-    version: "3.5.2"
   mocktail:
     dependency: "direct dev"
     description:
