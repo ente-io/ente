@@ -1,7 +1,6 @@
 import "dart:async";
 
 import "package:flutter/material.dart";
-import "package:flutter/scheduler.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/constants.dart";
 import "package:photos/core/event_bus.dart";
@@ -37,13 +36,11 @@ class _AllSectionsExamplesProviderState
   @override
   void initState() {
     super.initState();
-    SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
-      //add all common events for all search sections to reload to here.
-      _filesUpdatedEvent = Bus.instance.on<FilesUpdatedEvent>().listen((event) {
-        reloadAllSections();
-      });
+    //add all common events for all search sections to reload to here.
+    _filesUpdatedEvent = Bus.instance.on<FilesUpdatedEvent>().listen((event) {
       reloadAllSections();
     });
+    reloadAllSections();
   }
 
   void reloadAllSections() {
@@ -57,7 +54,7 @@ class _AllSectionsExamplesProviderState
             continue;
           }
           allSectionsExamples.add(
-            sectionType.getData(limit: searchSectionLimit, context: context),
+            sectionType.getData(context, limit: searchSectionLimit),
           );
         }
         allSectionsExamplesFuture =

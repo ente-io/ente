@@ -1,4 +1,5 @@
 import "package:flutter/material.dart";
+import "package:photos/generated/l10n.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/buttons/button_widget.dart";
 import "package:photos/ui/components/empty_state_item_widget.dart";
@@ -19,25 +20,25 @@ class SearchTabEmptyState extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text("Fast, on-device search", style: textStyle.h3Bold),
+            Text(S.of(context).searchHint1, style: textStyle.h3Bold),
             const SizedBox(height: 24),
-            const EmptyStateItemWidget("Photo dates, descriptions"),
+            EmptyStateItemWidget(S.of(context).searchHint2),
             const SizedBox(height: 12),
-            const EmptyStateItemWidget("Albums, file names, and types"),
+            EmptyStateItemWidget(S.of(context).searchHint3),
             const SizedBox(height: 12),
-            const EmptyStateItemWidget("Location"),
+            EmptyStateItemWidget(S.of(context).searchHint4),
             const SizedBox(height: 12),
-            const EmptyStateItemWidget("Coming soon: Photo contents, faces"),
+            EmptyStateItemWidget(S.of(context).searchHint5),
             const SizedBox(height: 32),
             ButtonWidget(
               buttonType: ButtonType.trailingIconPrimary,
-              labelText: "Add your photos now",
+              labelText: S.of(context).addYourPhotosNow,
               icon: Icons.arrow_forward_outlined,
               onTap: () async {
                 routeToPage(
                   context,
-                  const BackupFolderSelectionPage(
-                    buttonText: "Backup",
+                  BackupFolderSelectionPage(
+                    buttonText: S.of(context).backup,
                   ),
                 );
               },

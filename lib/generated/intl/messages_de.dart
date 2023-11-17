@@ -56,7 +56,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Bitte kontaktieren Sie uns über support@ente.io, um Ihr ${provider} Abo zu verwalten.";
 
   static String m11(count) =>
-      "${Intl.plural(count, one: 'Lösche 1 Element', other: 'Lösche ${count} Elemente')}";
+      "${Intl.plural(count, one: 'Lösche ${count} Element', other: 'Lösche ${count} Elemente')}";
 
   static String m12(currentlyDeleting, totalCount) =>
       "Lösche ${currentlyDeleting} / ${totalCount}";
@@ -681,6 +681,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Beschreibung hinzufügen …"),
         "fileSavedToGallery": MessageLookupByLibrary.simpleMessage(
             "Datei in Galerie gespeichert"),
+        "fileTypes": MessageLookupByLibrary.simpleMessage("File types"),
         "filesBackedUpFromDevice": m19,
         "filesBackedUpInAlbum": m20,
         "filesDeleted":
@@ -860,6 +861,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "mobileWebDesktop":
             MessageLookupByLibrary.simpleMessage("Mobil, Web, Desktop"),
         "moderateStrength": MessageLookupByLibrary.simpleMessage("Mittel"),
+        "modifyYourQueryOrTrySearchingFor":
+            MessageLookupByLibrary.simpleMessage(
+                "Modify your query, or try searching for"),
         "monthly": MessageLookupByLibrary.simpleMessage("Monatlich"),
         "moveItem": m30,
         "moveToAlbum":
@@ -1451,6 +1455,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "youHaveSuccessfullyFreedUp": m63,
         "yourAccountHasBeenDeleted": MessageLookupByLibrary.simpleMessage(
             "Dein Benutzerkonto wurde gelöscht"),
+        "yourMap": MessageLookupByLibrary.simpleMessage("Your map"),
         "yourPlanWasSuccessfullyDowngraded":
             MessageLookupByLibrary.simpleMessage(
                 "Ihr Tarif wurde erfolgreich heruntergestuft"),

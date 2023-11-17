@@ -187,7 +187,7 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m59(count) =>
       "${Intl.plural(count, zero: '', one: '1 giorno', other: '${count} giorni')}";
 
-  static String m64(endDate) => "Valido fino al ${endDate}";
+  static String m65(endDate) => "Valido fino al ${endDate}";
 
   static String m60(email) => "Verifica ${email}";
 
@@ -865,6 +865,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "mobileWebDesktop":
             MessageLookupByLibrary.simpleMessage("Mobile, Web, Desktop"),
         "moderateStrength": MessageLookupByLibrary.simpleMessage("Mediocre"),
+        "modifyYourQueryOrTrySearchingFor":
+            MessageLookupByLibrary.simpleMessage(
+                "Modify your query, or try searching for"),
         "monthly": MessageLookupByLibrary.simpleMessage("Mensile"),
         "moveItem": m30,
         "moveToAlbum":
@@ -1387,7 +1390,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "useSelectedPhoto":
             MessageLookupByLibrary.simpleMessage("Usa la foto selezionata"),
         "usedSpace": MessageLookupByLibrary.simpleMessage("Spazio utilizzato"),
-        "validTill": m64,
+        "validTill": m65,
         "verificationFailedPleaseTryAgain":
             MessageLookupByLibrary.simpleMessage(
                 "Verifica fallita, per favore prova di nuovo"),
@@ -1459,6 +1462,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "youHaveSuccessfullyFreedUp": m63,
         "yourAccountHasBeenDeleted": MessageLookupByLibrary.simpleMessage(
             "Il tuo account è stato eliminato"),
+        "yourMap": MessageLookupByLibrary.simpleMessage("Your map"),
         "yourPlanWasSuccessfullyDowngraded":
             MessageLookupByLibrary.simpleMessage(
                 "Il tuo piano è stato aggiornato con successo"),

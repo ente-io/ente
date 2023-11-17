@@ -40,7 +40,7 @@ enum SectionType {
   // includes year, month , day, event ResultType
   moment,
   // People section shows the files shared by other persons
-  people,
+  contacts,
   fileCaption,
   album,
   fileTypesAndExtension,
@@ -51,15 +51,15 @@ extension SectionTypeExtensions on SectionType {
   String sectionTitle(BuildContext context) {
     switch (this) {
       case SectionType.face:
-        return "Faces";
+        return S.of(context).faces;
       case SectionType.content:
-        return "Contents";
+        return S.of(context).contents;
       case SectionType.moment:
         return S.of(context).moments;
       case SectionType.location:
         return S.of(context).location;
-      case SectionType.people:
-        return S.of(context).people;
+      case SectionType.contacts:
+        return S.of(context).contacts;
       case SectionType.album:
         return S.of(context).albums;
       case SectionType.fileTypesAndExtension:
@@ -79,7 +79,7 @@ extension SectionTypeExtensions on SectionType {
         return S.of(context).searchDatesEmptySection;
       case SectionType.location:
         return S.of(context).searchLocationEmptySection;
-      case SectionType.people:
+      case SectionType.contacts:
         return S.of(context).searchPeopleEmptySection;
       case SectionType.album:
         return S.of(context).searchAlbumsEmptySection;
@@ -102,7 +102,7 @@ extension SectionTypeExtensions on SectionType {
         return false;
       case SectionType.location:
         return true;
-      case SectionType.people:
+      case SectionType.contacts:
         return true;
       case SectionType.album:
         return true;
@@ -123,7 +123,7 @@ extension SectionTypeExtensions on SectionType {
         return false;
       case SectionType.location:
         return true;
-      case SectionType.people:
+      case SectionType.contacts:
         return true;
       case SectionType.album:
         return true;
@@ -137,21 +137,23 @@ extension SectionTypeExtensions on SectionType {
   String getCTAText(BuildContext context) {
     switch (this) {
       case SectionType.face:
+        // todo: later
         return "Setup";
       case SectionType.content:
+        // todo: later
         return "Add tags";
       case SectionType.moment:
-        return "Add new";
+        return S.of(context).addNew;
       case SectionType.location:
-        return "Add new";
-      case SectionType.people:
-        return "Invite";
+        return S.of(context).addNew;
+      case SectionType.contacts:
+        return S.of(context).invite;
       case SectionType.album:
-        return "Add new";
+        return S.of(context).addNew;
       case SectionType.fileTypesAndExtension:
         return "";
       case SectionType.fileCaption:
-        return "Add new";
+        return S.of(context).addNew;
     }
   }
 
@@ -165,7 +167,7 @@ extension SectionTypeExtensions on SectionType {
         return null;
       case SectionType.location:
         return Icons.add_location_alt_outlined;
-      case SectionType.people:
+      case SectionType.contacts:
         return Icons.adaptive.share;
       case SectionType.album:
         return Icons.add;
@@ -178,7 +180,7 @@ extension SectionTypeExtensions on SectionType {
 
   FutureVoidCallback ctaOnTap(BuildContext context) {
     switch (this) {
-      case SectionType.people:
+      case SectionType.contacts:
         return () async {
           shareText(
             S.of(context).shareTextRecommendUsingEnte,
@@ -231,10 +233,10 @@ extension SectionTypeExtensions on SectionType {
     }
   }
 
-  Future<List<SearchResult>> getData({int? limit, BuildContext? context}) {
-    if (this == SectionType.moment && context == null) {
-      AssertionError("context cannot be null for SectionType.moment");
-    }
+  Future<List<SearchResult>> getData(
+    BuildContext context, {
+    int? limit,
+  }) {
     switch (this) {
       case SectionType.face:
         return SearchService.instance.getAllLocationTags(limit);
@@ -243,20 +245,20 @@ extension SectionTypeExtensions on SectionType {
         return SearchService.instance.getAllLocationTags(limit);
 
       case SectionType.moment:
-        return SearchService.instance.getRandomMomentsSearchResults(context!);
+        return SearchService.instance.getRandomMomentsSearchResults(context);
 
       case SectionType.location:
         return SearchService.instance.getAllLocationTags(limit);
 
-      case SectionType.people:
-        return SearchService.instance.getAllPeopleSearchResults(limit);
+      case SectionType.contacts:
+        return SearchService.instance.getAllContactsSearchResults(limit);
 
       case SectionType.album:
         return SearchService.instance.getAllCollectionSearchResults(limit);
 
       case SectionType.fileTypesAndExtension:
         return SearchService.instance
-            .getAllFileTypesAndExtensionsResults(limit);
+            .getAllFileTypesAndExtensionsResults(context, limit);
 
       case SectionType.fileCaption:
         return SearchService.instance.getAllDescriptionSearchResults(limit);

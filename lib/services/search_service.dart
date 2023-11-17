@@ -288,12 +288,13 @@ class SearchService {
   }
 
   Future<List<GenericSearchResult>> getFileTypeResults(
+    BuildContext context,
     String query,
   ) async {
     final List<GenericSearchResult> searchResults = [];
     final List<EnteFile> allFiles = await getAllFiles();
     for (var fileType in FileType.values) {
-      final String fileTypeString = getHumanReadableString(fileType);
+      final String fileTypeString = getHumanReadableString(context, fileType);
       if (fileTypeString.toLowerCase().startsWith(query.toLowerCase())) {
         final matchedFiles =
             allFiles.where((e) => e.fileType == fileType).toList();
@@ -312,6 +313,7 @@ class SearchService {
   }
 
   Future<List<GenericSearchResult>> getAllFileTypesAndExtensionsResults(
+    BuildContext context,
     int? limit,
   ) async {
     final List<GenericSearchResult> searchResults = [];
@@ -341,13 +343,23 @@ class SearchService {
       }
 
       fileTypesAndMatchingFiles.forEach((key, value) {
-        searchResults
-            .add(GenericSearchResult(ResultType.fileType, key.name, value));
+        searchResults.add(
+          GenericSearchResult(
+            ResultType.fileType,
+            getHumanReadableString(context, key),
+            value,
+          ),
+        );
       });
 
       extensionsAndMatchingFiles.forEach((key, value) {
-        searchResults
-            .add(GenericSearchResult(ResultType.fileExtension, key, value));
+        searchResults.add(
+          GenericSearchResult(
+            ResultType.fileExtension,
+            key + "s",
+            value,
+          ),
+        );
       });
 
       if (limit != null) {
@@ -811,7 +823,7 @@ class SearchService {
     );
   }
 
-  Future<List<GenericSearchResult>> getPeopleSearchResults(
+  Future<List<GenericSearchResult>> getContactSearchResults(
     String query,
   ) async {
     final lowerCaseQuery = query.toLowerCase();
@@ -847,7 +859,7 @@ class SearchService {
     return searchResults;
   }
 
-  Future<List<GenericSearchResult>> getAllPeopleSearchResults(
+  Future<List<GenericSearchResult>> getAllContactsSearchResults(
     int? limit,
   ) async {
     try {
@@ -873,7 +885,9 @@ class SearchService {
         searchResults.add(
           GenericSearchResult(
             ResultType.shared,
-            key.name != null && key.name!.isNotEmpty ? key.name! : key.email,
+            key.name != null && key.name!.isNotEmpty
+                ? key.name!
+                : key.email.split("@")[0],
             value,
           ),
         );

@@ -965,7 +965,6 @@
   "photoDescriptions": "Photo descriptions",
   "fileTypesAndNames": "File types and names",
   "location": "Location",
-  "people": "People",
   "moments": "Moments",
   "searchFaceEmptySection": "Find all photos of a person",
   "searchDatesEmptySection": "Search by a date, month or year",
@@ -1130,5 +1129,31 @@
   "yourMap": "Your map",
   "modifyYourQueryOrTrySearchingFor": "Modify your query, or try searching for",
   "blackFridaySale": "Black Friday Sale",
-  "upto50OffUntil4thDec": "Upto 50% off, until 4th Dec."
+  "upto50OffUntil4thDec": "Upto 50% off, until 4th Dec.",
+  "photos": "Photos",
+  "videos": "Videos",
+  "livePhotos": "Live Photos",
+  "searchHint1": "Fast, on-device search",
+  "searchHint2": "Photo dates, descriptions",
+  "searchHint3": "Albums, file names, and types",
+  "searchHint4": "Location",
+  "searchHint5": "Coming soon: Photo contents, faces",
+  "addYourPhotosNow": "Add your photos now",
+  "searchResultCount": "{count, plural, one{{count} result found} other{{count} results found}}",
+  "@searchResultCount": {
+    "description": "Text to tell user how many results were found for their search query",
+    "placeholders": {
+      "count": {
+        "example": "1|2|3",
+        "type": "int"
+      }
+    }
+  },
+  "faces": "Faces",
+  "contents": "Contents",
+  "addNew": "Add new",
+  "@addNew": {
+    "description": "Text to add a new item (location tag, album, caption etc)"
+  },
+  "contacts": "Contacts"
 }

@@ -1110,5 +1110,6 @@
   "addOns": "Componenti aggiuntivi",
   "addOnPageSubtitle": "Dettagli dei componenti aggiuntivi",
   "yourMap": "Your map",
-  "modifyYourQueryOrTrySearchingFor": "Modify your query, or try searching for"
+  "modifyYourQueryOrTrySearchingFor": "Modify your query, or try searching for",
+  "contacts": "Contacts"
 }

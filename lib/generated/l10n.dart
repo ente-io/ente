@@ -6870,10 +6870,10 @@ class S {
   }
 
   /// `File types and names`
-  String get fileTypes {
+  String get fileTypesAndNames {
     return Intl.message(
-      'File types',
-      name: 'fileTypes',
+      'File types and names',
+      name: 'fileTypesAndNames',
       desc: '',
       args: [],
     );
@@ -6884,16 +6884,6 @@ class S {
     return Intl.message(
       'Location',
       name: 'location',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `People`
-  String get people {
-    return Intl.message(
-      'People',
-      name: 'people',
       desc: '',
       args: [],
     );
@@ -7885,6 +7875,16 @@ class S {
     );
   }
 
+  /// `File types`
+  String get fileTypes {
+    return Intl.message(
+      'File types',
+      name: 'fileTypes',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `This account is linked to other ente apps, if you use any.\n\nYour uploaded data, across all ente apps, will be scheduled for deletion, and your account will be permanently deleted.`
   String get deleteConfirmDialogBody {
     return Intl.message(
@@ -7955,16 +7955,6 @@ class S {
     );
   }
 
-  /// `Black Friday Sale`
-  String get blackFridaySale {
-    return Intl.message(
-      'Black Friday Sale',
-      name: 'blackFridaySale',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `Modify your query, or try searching for`
   String get modifyYourQueryOrTrySearchingFor {
     return Intl.message(
@@ -7975,11 +7965,164 @@ class S {
     );
   }
 
+  /// `Black Friday Sale`
+  String get blackFridaySale {
+    return Intl.message(
+      'Black Friday Sale',
+      name: 'blackFridaySale',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Upto 50% off, until 4th Dec.`
   String get upto50OffUntil4thDec {
     return Intl.message(
       'Upto 50% off, until 4th Dec.',
       name: 'upto50OffUntil4thDec',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Photos`
+  String get photos {
+    return Intl.message(
+      'Photos',
+      name: 'photos',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Videos`
+  String get videos {
+    return Intl.message(
+      'Videos',
+      name: 'videos',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Live Photos`
+  String get livePhotos {
+    return Intl.message(
+      'Live Photos',
+      name: 'livePhotos',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Fast, on-device search`
+  String get searchHint1 {
+    return Intl.message(
+      'Fast, on-device search',
+      name: 'searchHint1',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Photo dates, descriptions`
+  String get searchHint2 {
+    return Intl.message(
+      'Photo dates, descriptions',
+      name: 'searchHint2',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Albums, file names, and types`
+  String get searchHint3 {
+    return Intl.message(
+      'Albums, file names, and types',
+      name: 'searchHint3',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Location`
+  String get searchHint4 {
+    return Intl.message(
+      'Location',
+      name: 'searchHint4',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Coming soon: Photo contents, faces`
+  String get searchHint5 {
+    return Intl.message(
+      'Coming soon: Photo contents, faces',
+      name: 'searchHint5',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Add your photos now`
+  String get addYourPhotosNow {
+    return Intl.message(
+      'Add your photos now',
+      name: 'addYourPhotosNow',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `{count, plural, one{{count} result found} other{{count} results found}}`
+  String searchResultCount(int count) {
+    return Intl.plural(
+      count,
+      one: '$count result found',
+      other: '$count results found',
+      name: 'searchResultCount',
+      desc:
+          'Text to tell user how many results were found for their search query',
+      args: [count],
+    );
+  }
+
+  /// `Faces`
+  String get faces {
+    return Intl.message(
+      'Faces',
+      name: 'faces',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Contents`
+  String get contents {
+    return Intl.message(
+      'Contents',
+      name: 'contents',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Add new`
+  String get addNew {
+    return Intl.message(
+      'Add new',
+      name: 'addNew',
+      desc: 'Text to add a new item (location tag, album, caption etc)',
+      args: [],
+    );
+  }
+
+  /// `Contacts`
+  String get contacts {
+    return Intl.message(
+      'Contacts',
+      name: 'contacts',
       desc: '',
       args: [],
     );

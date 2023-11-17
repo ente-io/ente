@@ -225,7 +225,7 @@ class SearchWidgetState extends State<SearchWidget> {
       allResults.addAll(holidayResults);
 
       final fileTypeSearchResults =
-          await _searchService.getFileTypeResults(query);
+          await _searchService.getFileTypeResults(context, query);
       allResults.addAll(fileTypeSearchResults);
 
       final captionAndDisplayNameResult =
@@ -255,8 +255,9 @@ class SearchWidgetState extends State<SearchWidget> {
           await _searchService.getMagicSearchResults(context, query);
       allResults.addAll(magicResults);
 
-      final peopleResults = await _searchService.getPeopleSearchResults(query);
-      allResults.addAll(peopleResults);
+      final contactResults =
+          await _searchService.getContactSearchResults(query);
+      allResults.addAll(contactResults);
     } catch (e, s) {
       _logger.severe("error during search", e, s);
     }

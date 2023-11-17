@@ -1,4 +1,3 @@
-import "package:flutter/cupertino.dart";
 import "package:flutter/material.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/services/search_service.dart";
@@ -19,7 +18,6 @@ class GoToMapWidget extends StatelessWidget {
       width = 85.0 + ((textScaleFactor - 1.0) * 64);
     }
 
-    final colorScheme = getEnteColorScheme(context);
     return GestureDetector(
       onTap: () async {
         final bool result = await requestForMapEnable(context);
@@ -40,14 +38,10 @@ class GoToMapWidget extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              SizedBox(
+              Image.asset(
+                "assets/map.png",
                 width: 64,
                 height: 64,
-                child: Icon(
-                  CupertinoIcons.map_fill,
-                  color: colorScheme.strokeFaint,
-                  size: 48,
-                ),
               ),
               const SizedBox(
                 height: 10,

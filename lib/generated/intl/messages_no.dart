@@ -44,12 +44,17 @@ class MessageLookup extends MessageLookupByLibrary {
         "enterYourEmailAddress": MessageLookupByLibrary.simpleMessage(
             "Skriv inn e-postadressen din"),
         "feedback": MessageLookupByLibrary.simpleMessage("Tilbakemelding"),
+        "fileTypes": MessageLookupByLibrary.simpleMessage("File types"),
         "invalidEmailAddress":
             MessageLookupByLibrary.simpleMessage("Ugyldig e-postadresse"),
         "kindlyHelpUsWithThisInformation": MessageLookupByLibrary.simpleMessage(
             "Vær vennlig og hjelp oss med denne informasjonen"),
+        "modifyYourQueryOrTrySearchingFor":
+            MessageLookupByLibrary.simpleMessage(
+                "Modify your query, or try searching for"),
         "moveToHiddenAlbum":
             MessageLookupByLibrary.simpleMessage("Move to hidden album"),
-        "verify": MessageLookupByLibrary.simpleMessage("Bekreft")
+        "verify": MessageLookupByLibrary.simpleMessage("Bekreft"),
+        "yourMap": MessageLookupByLibrary.simpleMessage("Your map")
       };
 }

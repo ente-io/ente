@@ -684,6 +684,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Voeg een beschrijving toe..."),
         "fileSavedToGallery": MessageLookupByLibrary.simpleMessage(
             "Bestand opgeslagen in galerij"),
+        "fileTypes": MessageLookupByLibrary.simpleMessage("File types"),
         "filesBackedUpFromDevice": m19,
         "filesBackedUpInAlbum": m20,
         "filesDeleted":
@@ -859,6 +860,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "mobileWebDesktop":
             MessageLookupByLibrary.simpleMessage("Mobiel, Web, Desktop"),
         "moderateStrength": MessageLookupByLibrary.simpleMessage("Matig"),
+        "modifyYourQueryOrTrySearchingFor":
+            MessageLookupByLibrary.simpleMessage(
+                "Modify your query, or try searching for"),
         "monthly": MessageLookupByLibrary.simpleMessage("Maandelijks"),
         "moveItem": m30,
         "moveToAlbum":
@@ -1444,6 +1448,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "youHaveSuccessfullyFreedUp": m63,
         "yourAccountHasBeenDeleted":
             MessageLookupByLibrary.simpleMessage("Je account is verwijderd"),
+        "yourMap": MessageLookupByLibrary.simpleMessage("Your map"),
         "yourPlanWasSuccessfullyDowngraded":
             MessageLookupByLibrary.simpleMessage(
                 "Uw abonnement is succesvol gedegradeerd"),
