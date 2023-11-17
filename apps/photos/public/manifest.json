@@ -1,6 +1,6 @@
 {
-    "short_name": "ente",
-    "name": "ente | encrypted photo storage",
+    "short_name": "ente Photos",
+    "name": "ente Photos | encrypted photo storage",
     "icons": [
         {
             "src": "/images/ente/192.png",
@@ -36,23 +36,6 @@
             "url": "https://apps.apple.com/in/app/ente-photos/id1542026904"
         }
     ],
-    "share_target": {
-        "action": "./share-target",
-        "method": "POST",
-        "enctype": "multipart/form-data",
-        "params": {
-            "files": [
-                {
-                    "name": "files",
-                    "accept": [
-                        "image/*",
-                        "video/*",
-                        "application/json"
-                    ]
-                }
-            ]
-        }
-    },
     "screenshots": [
         {
             "src": "/pwa/slide-1.jpg",

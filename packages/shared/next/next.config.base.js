@@ -15,7 +15,6 @@ module.exports = (phase) =>
                 disableServerWebpackPlugin: true,
                 autoInstrumentServerFunctions: false,
             },
-            output: 'export',
             compiler: {
                 emotion: {
                     importMap: {
