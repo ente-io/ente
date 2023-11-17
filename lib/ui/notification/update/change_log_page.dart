@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import "package:flutter_animate/flutter_animate.dart";
 import "package:photos/generated/l10n.dart";
 import 'package:photos/services/update_service.dart';
 import 'package:photos/theme/ente_theme.dart';
@@ -67,22 +68,32 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     shouldShowBfBanner()
-                        ? Padding(
-                            padding: const EdgeInsets.only(bottom: 8),
-                            child: NotificationWidget(
-                              isBlackFriday: true,
-                              startIcon: Icons.celebration,
-                              actionIcon: Icons.arrow_forward_outlined,
-                              text: S.of(context).blackFridaySale,
-                              subText: S.of(context).upto50OffUntil4thDec,
-                              type: NotificationType.goldenBanner,
-                              onTap: () async {
-                                launchUrlString(
-                                  "https://ente.io/blackfriday",
-                                  mode: LaunchMode.platformDefault,
-                                );
-                              },
-                            ),
+                        ? RepaintBoundary(
+                            child: Padding(
+                              padding: const EdgeInsets.only(bottom: 8),
+                              child: NotificationWidget(
+                                isBlackFriday: true,
+                                startIcon: Icons.celebration,
+                                actionIcon: Icons.arrow_forward_outlined,
+                                text: S.of(context).blackFridaySale,
+                                subText: S.of(context).upto50OffUntil4thDec,
+                                type: NotificationType.goldenBanner,
+                                onTap: () async {
+                                  launchUrlString(
+                                    "https://ente.io/blackfriday",
+                                    mode: LaunchMode.platformDefault,
+                                  );
+                                },
+                              ),
+                            )
+                                .animate(
+                                  onPlay: (controller) => controller.repeat(),
+                                )
+                                .shimmer(
+                                  duration: 1000.ms,
+                                  delay: 3200.ms,
+                                  size: 0.6,
+                                ),
                           )
                         : const SizedBox.shrink(),
 
