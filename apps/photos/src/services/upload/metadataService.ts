@@ -140,7 +140,7 @@ export const getFullMetadataJSONMapKeyForFile = (
     collectionID: number,
     fileName: string
 ) => {
-    return `${collectionID}-${fileName}`;
+    return `${collectionID}-${getFileOriginalName(fileName)}`;
 };
 
 export async function parseMetadataJSON(receivedFile: File | ElectronFile) {
@@ -238,4 +238,30 @@ export function extractDateFromFileName(filename: string): number {
 function convertSignalNameToFusedDateString(filename: string) {
     const dateStringParts = filename.split('-');
     return `${dateStringParts[1]}${dateStringParts[2]}${dateStringParts[3]}-${dateStringParts[4]}`;
+}
+
+const EDITED_FILE_SUFFIX = '-edited';
+
+/*
+    Get the original file name for edited file to associate it to original file's metadataJSON file 
+    as edited file doesn't have their own metadata file
+*/
+function getFileOriginalName(fileName: string) {
+    let originalName: string = null;
+    const [nameWithoutExtension, extension] =
+        splitFilenameAndExtension(fileName);
+
+    const isEditedFile = nameWithoutExtension.endsWith(EDITED_FILE_SUFFIX);
+    if (isEditedFile) {
+        originalName = nameWithoutExtension.slice(
+            0,
+            -1 * EDITED_FILE_SUFFIX.length
+        );
+    } else {
+        originalName = nameWithoutExtension;
+    }
+    if (extension) {
+        originalName += '.' + extension;
+    }
+    return originalName;
 }

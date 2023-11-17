@@ -9,7 +9,6 @@ import {
     ElectronFile,
     ExtractMetadataResult,
 } from 'types/upload';
-import { splitFilenameAndExtension } from 'utils/file';
 import { logError } from '@ente/shared/sentry';
 import { addLogLine } from '@ente/shared/logging';
 import { getFileNameSize } from '@ente/shared/logging/web';
@@ -29,8 +28,6 @@ import { generateThumbnail } from './thumbnailService';
 import { DedicatedCryptoWorker } from '@ente/shared/crypto/internal/crypto.worker';
 import { Remote } from 'comlink';
 import { EncryptedMagicMetadata } from 'types/magicMetadata';
-
-const EDITED_FILE_SUFFIX = '-edited';
 
 export function getFileSize(file: File | ElectronFile) {
     return file.size;
@@ -81,13 +78,12 @@ export async function extractFileMetadata(
     fileTypeInfo: FileTypeInfo,
     rawFile: File | ElectronFile
 ): Promise<ExtractMetadataResult> {
-    const originalName = getFileOriginalName(rawFile);
     const googleMetadata =
         parsedMetadataJSONMap.get(
-            getFullMetadataJSONMapKeyForFile(collectionID, originalName)
+            getFullMetadataJSONMapKeyForFile(collectionID, rawFile.name)
         ) ??
         parsedMetadataJSONMap.get(
-            getClippedMetadataJSONMapKeyForFile(collectionID, originalName)
+            getClippedMetadataJSONMapKeyForFile(collectionID, rawFile.name)
         ) ??
         {};
 
@@ -158,29 +154,4 @@ export async function encryptFile(
         logError(e, 'Error encrypting files');
         throw e;
     }
-}
-
-/*
-    Get the original file name for edited file to associate it to original file's metadataJSON file 
-    as edited file doesn't have their own metadata file
-*/
-function getFileOriginalName(file: File | ElectronFile) {
-    let originalName: string = null;
-    const [nameWithoutExtension, extension] = splitFilenameAndExtension(
-        file.name
-    );
-
-    const isEditedFile = nameWithoutExtension.endsWith(EDITED_FILE_SUFFIX);
-    if (isEditedFile) {
-        originalName = nameWithoutExtension.slice(
-            0,
-            -1 * EDITED_FILE_SUFFIX.length
-        );
-    } else {
-        originalName = nameWithoutExtension;
-    }
-    if (extension) {
-        originalName += '.' + extension;
-    }
-    return originalName;
 }
