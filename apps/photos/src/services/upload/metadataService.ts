@@ -47,6 +47,8 @@ const EXIF_TAGS_NEEDED = [
     'MetadataDate',
 ];
 
+export const MAX_FILE_NAME_LENGTH_GOOGLE_EXPORT = 46;
+
 export async function extractMetadata(
     worker: Remote<DedicatedCryptoWorker>,
     receivedFile: File | ElectronFile,
@@ -124,23 +126,28 @@ export const getMetadataJSONMapKeyForJSON = (
             -1 * endsWithNumberedSuffixWithBrackets[0].length
         );
         const [name, extension] = splitFilenameAndExtension(title);
-        return `${collectionID}-${name}${endsWithNumberedSuffixWithBrackets}.${extension}`;
+        return `${collectionID}-${name}${endsWithNumberedSuffixWithBrackets[0]}.${extension}`;
     }
     return `${collectionID}-${title}`;
 };
 
+// if the file name is greater than MAX_FILE_NAME_LENGTH_GOOGLE_EXPORT(46) , then google photos clips the file name
+// so we need to use the clipped file name to get the metadataJSON file
 export const getClippedMetadataJSONMapKeyForFile = (
     collectionID: number,
     fileName: string
 ) => {
-    return `${collectionID}-${fileName.slice(0, 46)}`;
+    return `${collectionID}-${fileName.slice(
+        0,
+        MAX_FILE_NAME_LENGTH_GOOGLE_EXPORT
+    )}`;
 };
 
-export const getFullMetadataJSONMapKeyForFile = (
+export const getMetadataJSONMapKeyForFile = (
     collectionID: number,
     fileName: string
 ) => {
-    return `${collectionID}-${fileName}`;
+    return `${collectionID}-${getFileOriginalName(fileName)}`;
 };
 
 export async function parseMetadataJSON(receivedFile: File | ElectronFile) {
@@ -238,4 +245,30 @@ export function extractDateFromFileName(filename: string): number {
 function convertSignalNameToFusedDateString(filename: string) {
     const dateStringParts = filename.split('-');
     return `${dateStringParts[1]}${dateStringParts[2]}${dateStringParts[3]}-${dateStringParts[4]}`;
+}
+
+const EDITED_FILE_SUFFIX = '-edited';
+
+/*
+    Get the original file name for edited file to associate it to original file's metadataJSON file 
+    as edited file doesn't have their own metadata file
+*/
+function getFileOriginalName(fileName: string) {
+    let originalName: string = null;
+    const [nameWithoutExtension, extension] =
+        splitFilenameAndExtension(fileName);
+
+    const isEditedFile = nameWithoutExtension.endsWith(EDITED_FILE_SUFFIX);
+    if (isEditedFile) {
+        originalName = nameWithoutExtension.slice(
+            0,
+            -1 * EDITED_FILE_SUFFIX.length
+        );
+    } else {
+        originalName = nameWithoutExtension;
+    }
+    if (extension) {
+        originalName += '.' + extension;
+    }
+    return originalName;
 }
