@@ -17,7 +17,8 @@ import { getFileNameSize } from '@ente/shared/logging/web';
 import { encryptFiledata } from './encryptionService';
 import {
     extractMetadata,
-    getMetadataJSONMapKeyForFile,
+    getClippedMetadataJSONMapKeyForFile,
+    getFullMetadataJSONMapKeyForFile,
 } from './metadataService';
 import {
     getFileStream,
@@ -83,8 +84,12 @@ export async function extractFileMetadata(
     const originalName = getFileOriginalName(rawFile);
     const googleMetadata =
         parsedMetadataJSONMap.get(
-            getMetadataJSONMapKeyForFile(collectionID, originalName)
-        ) ?? {};
+            getFullMetadataJSONMapKeyForFile(collectionID, originalName)
+        ) ??
+        parsedMetadataJSONMap.get(
+            getClippedMetadataJSONMapKeyForFile(collectionID, originalName)
+        ) ??
+        {};
 
     const { metadata, publicMagicMetadata } = await extractMetadata(
         worker,
