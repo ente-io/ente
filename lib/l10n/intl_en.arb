@@ -1131,7 +1131,7 @@
   "searchHint2": "Photo dates, descriptions",
   "searchHint3": "Albums, file names, and types",
   "searchHint4": "Location",
-  "searchHint5": "Coming soon: Photo contents, faces",
+  "searchHint5": "Coming soon: Faces & magic search ✨",
   "addYourPhotosNow": "Add your photos now",
   "searchResultCount": "{count, plural, one{{count} result found} other{{count} results found}}",
   "@searchResultCount": {
