@@ -21,11 +21,7 @@ import { getFileHash } from './hashService';
 import { Remote } from 'comlink';
 import { DedicatedCryptoWorker } from '@ente/shared/crypto/internal/crypto.worker';
 import { FilePublicMagicMetadataProps } from 'types/file';
-
-interface ParsedMetadataJSONWithTitle {
-    title: string;
-    parsedMetadataJSON: ParsedMetadataJSON;
-}
+import { splitFilenameAndExtension } from 'utils/file';
 
 const NULL_PARSED_METADATA_JSON: ParsedMetadataJSON = {
     creationTime: null,
@@ -116,11 +112,36 @@ export async function getImageMetadata(
     return imageMetadata;
 }
 
-export const getMetadataJSONMapKey = (
+export const getMetadataJSONMapKeyForJSON = (
     collectionID: number,
+    jsonFileName: string
+) => {
+    let title = jsonFileName.slice(0, -1 * '.json'.length);
+    const endsWithNumberedSuffixWithBrackets = title.match(/\(\d+\)$/);
+    if (endsWithNumberedSuffixWithBrackets) {
+        title = title.slice(
+            0,
+            -1 * endsWithNumberedSuffixWithBrackets[0].length
+        );
+        const [name, extension] = splitFilenameAndExtension(title);
+        return `${collectionID}-${name}${endsWithNumberedSuffixWithBrackets}.${extension}`;
+    }
+    return `${collectionID}-${title}`;
+};
 
-    title: string
-) => `${collectionID}-${title}`;
+export const getClippedMetadataJSONMapKeyForFile = (
+    collectionID: number,
+    fileName: string
+) => {
+    return `${collectionID}-${fileName.slice(0, 46)}`;
+};
+
+export const getFullMetadataJSONMapKeyForFile = (
+    collectionID: number,
+    fileName: string
+) => {
+    return `${collectionID}-${fileName}`;
+};
 
 export async function parseMetadataJSON(receivedFile: File | ElectronFile) {
     try {
@@ -134,11 +155,10 @@ export async function parseMetadataJSON(receivedFile: File | ElectronFile) {
 
         const parsedMetadataJSON: ParsedMetadataJSON =
             NULL_PARSED_METADATA_JSON;
-        if (!metadataJSON || !metadataJSON['title']) {
+        if (!metadataJSON) {
             return;
         }
 
-        const title = metadataJSON['title'];
         if (
             metadataJSON['photoTakenTime'] &&
             metadataJSON['photoTakenTime']['timestamp']
@@ -177,7 +197,7 @@ export async function parseMetadataJSON(receivedFile: File | ElectronFile) {
             parsedMetadataJSON.latitude = locationData.latitude;
             parsedMetadataJSON.longitude = locationData.longitude;
         }
-        return { title, parsedMetadataJSON } as ParsedMetadataJSONWithTitle;
+        return parsedMetadataJSON;
     } catch (e) {
         logError(e, 'parseMetadataJSON failed');
         // ignore
