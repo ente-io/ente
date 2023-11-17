@@ -9,7 +9,6 @@ import 'package:photos/events/opened_settings_event.dart';
 import "package:photos/generated/l10n.dart";
 import 'package:photos/services/feature_flag_service.dart';
 import "package:photos/services/storage_bonus_service.dart";
-import "package:photos/services/user_service.dart";
 import 'package:photos/theme/colors.dart';
 import 'package:photos/theme/ente_theme.dart';
 import "package:photos/ui/components/notification_widget.dart";
@@ -28,6 +27,7 @@ import 'package:photos/ui/settings/storage_card_widget.dart';
 import 'package:photos/ui/settings/support_section_widget.dart';
 import 'package:photos/ui/settings/theme_switch_widget.dart';
 import "package:photos/ui/sharing/verify_identity_dialog.dart";
+import "package:photos/utils/black_friday_util.dart";
 import "package:photos/utils/navigation_util.dart";
 import "package:url_launcher/url_launcher_string.dart";
 
@@ -186,23 +186,6 @@ class SettingsPage extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  bool shouldShowBfBanner() {
-    if (!Platform.isAndroid && !kDebugMode) {
-      return false;
-    }
-    // if date is after 5th of December 2023, 00:00:00, hide banner
-    if (DateTime.now().isAfter(DateTime(2023, 12, 5))) {
-      return false;
-    }
-    // if coupon is already applied, can hide the banner
-    return (UserService.instance
-            .getCachedUserDetails()
-            ?.bonusData
-            ?.getAddOnBonuses()
-            .isEmpty ??
-        true);
   }
 
   Future<void> _showVerifyIdentityDialog(BuildContext context) async {
