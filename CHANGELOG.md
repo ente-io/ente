@@ -1,6 +1,14 @@
 # CHANGELOG
 
 
+## v0.7.117
+
+### Added
+* #### Explore with the new Search Tab ✨
+
+    A dedicated search tab with distinct sections for effortless discovery. 
+
+
 ## v0.7.82
 
 ### Added

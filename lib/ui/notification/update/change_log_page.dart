@@ -118,35 +118,11 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
     final List<ChangeLogEntry> items = [];
     items.add(
       ChangeLogEntry(
-        "Hidden albums ✨",
-        'You can now hide albums, just like individual memories.\n',
-      ),
-    );
-    items.add(
-      ChangeLogEntry(
-          "Album improvements ✨",
-          'You can now pin your favourite albums, and set cover photos for them.\n'
-              '\nWe have also added a way to first create empty albums, and then add photos to it, both from ente and your device gallery.\n'),
-    );
-
-    items.add(
-      ChangeLogEntry(
-        "Email verification ✨",
-        'We have now made email verification optional, so you can sign in with'
-            ' just your email address and password, without waiting for a verification code.\n'
-            '\nYou can opt in / out of email verification from Settings > Security.\n',
+        "Explore with the new Search Tab ✨",
+        'A dedicated search tab with distinct sections for effortless discovery.\n',
       ),
     );
 
-    items.add(
-      ChangeLogEntry(
-        "Bug fixes & other enhancements",
-        'We have squashed a few pesky bugs that were reported by our community,'
-            'and have improved the experience for albums and quick links.\n'
-            '\nIf you would like to help us improve ente, come join the ente community!',
-        isFeature: false,
-      ),
-    );
     return Container(
       padding: const EdgeInsets.only(left: 16),
       child: Scrollbar(
