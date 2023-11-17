@@ -128,6 +128,7 @@ import { getLocalFamilyData } from 'utils/user/family';
 import InMemoryStore, { MS_KEYS } from '@ente/shared/storage/InMemoryStore';
 import { syncEmbeddings } from 'services/embeddingService';
 import { ClipService } from 'services/clipService';
+import isElectron from 'is-electron';
 
 export const DeadCenter = styled('div')`
     flex: 1;
@@ -342,14 +343,18 @@ export default function Gallery() {
             syncInterval.current = setInterval(() => {
                 syncWithRemote(false, true);
             }, SYNC_INTERVAL_IN_MICROSECONDS);
-            ElectronAPIs.registerForegroundEventListener(() => {
-                syncWithRemote(false, true);
-            });
+            if (isElectron()) {
+                ElectronAPIs.registerForegroundEventListener(() => {
+                    syncWithRemote(false, true);
+                });
+            }
         };
         main();
         return () => {
             clearInterval(syncInterval.current);
-            ElectronAPIs.registerForegroundEventListener(() => {});
+            if (isElectron()) {
+                ElectronAPIs.registerForegroundEventListener(() => {});
+            }
             ClipService.removeOnFileUploadListener();
         };
     }, []);
