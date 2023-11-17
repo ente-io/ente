@@ -42,6 +42,12 @@ class SemanticSearchService {
   PendingQuery? _nextQuery;
 
   Future<void> init(SharedPreferences preferences) async {
+    try {
+      final response = CLIP.ping("ping");
+      _logger.info("Ping succeeded, response: " + response);
+    } catch (e, s) {
+      _logger.severe("Ping failed", e, s);
+    }
     if (Platform.isIOS) {
       return;
     }
