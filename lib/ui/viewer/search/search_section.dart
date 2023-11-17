@@ -146,6 +146,12 @@ class _SearchSectionState extends State<SearchSection> {
                   ),
                   const SizedBox(width: 8),
                   SearchSectionEmptyCTAIcon(widget.sectionType),
+                  widget.sectionType == SectionType.location
+                      ? const Padding(
+                          padding: EdgeInsets.fromLTRB(8, 24, 8, 0),
+                          child: GoToMapWidget(),
+                        )
+                      : const SizedBox.shrink(),
                 ],
               ),
             ),
