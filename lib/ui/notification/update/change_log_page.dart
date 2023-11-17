@@ -145,7 +145,16 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
     items.add(
       ChangeLogEntry(
         "Explore with the new Search Tab ✨",
-        'A dedicated search tab with distinct sections for effortless discovery.\n',
+        'Introducing a dedicated search tab with distinct sections for effortless discovery.\n'
+            '\nYou can now discover items that come under different Locations, Moments, Contacts, Photo descriptions, Albums and File types with ease.\n',
+      ),
+    );
+    items.add(
+      ChangeLogEntry(
+        "Black Friday Sale 🎉",
+        "You can now purchase Ente's plans for 3 years at 30% off and 5 years at 50% off!\n"
+            '\nThe storage you purchase will be stacked on top of your current plan.\n'
+            '\nThis is the lowest our prices will ever be, so do consider upgrading!\n',
       ),
     );
 
