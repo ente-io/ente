@@ -53,6 +53,5 @@
         "**/*.{json,css,scss,md,html,yml,yaml}": [
             "prettier --write --ignore-unknown"
         ]
-    },
-    "packageManager": "yarn@4.0.1"
+    }
 }

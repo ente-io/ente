@@ -5,5 +5,7 @@
     "scripts": {
         "lint": "eslint .",
         "build": "yarn lint && tsc"
-    }
+    },
+    "dependencies": {},
+    "devDependencies": {}
 }
