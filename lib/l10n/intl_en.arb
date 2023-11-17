@@ -959,7 +959,6 @@
   "photoDescriptions": "Photo descriptions",
   "fileTypesAndNames": "File types and names",
   "location": "Location",
-  "people": "People",
   "moments": "Moments",
   "searchFaceEmptySection": "Find all photos of a person",
   "searchDatesEmptySection": "Search by a date, month or year",
@@ -1149,5 +1148,6 @@
   "addNew": "Add new",
   "@addNew": {
     "description": "Text to add a new item (location tag, album, caption etc)"
-  }
+  },
+  "contacts": "Contacts"
 }

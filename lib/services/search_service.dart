@@ -810,7 +810,7 @@ class SearchService {
     );
   }
 
-  Future<List<GenericSearchResult>> getPeopleSearchResults(
+  Future<List<GenericSearchResult>> getContactSearchResults(
     String query,
   ) async {
     final lowerCaseQuery = query.toLowerCase();
@@ -846,7 +846,7 @@ class SearchService {
     return searchResults;
   }
 
-  Future<List<GenericSearchResult>> getAllPeopleSearchResults(
+  Future<List<GenericSearchResult>> getAllContactsSearchResults(
     int? limit,
   ) async {
     try {

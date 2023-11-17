@@ -6829,16 +6829,6 @@ class S {
     );
   }
 
-  /// `People`
-  String get people {
-    return Intl.message(
-      'People',
-      name: 'people',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `Moments`
   String get moments {
     return Intl.message(
@@ -8064,6 +8054,16 @@ class S {
       'Add new',
       name: 'addNew',
       desc: 'Text to add a new item (location tag, album, caption etc)',
+      args: [],
+    );
+  }
+
+  /// `Contacts`
+  String get contacts {
+    return Intl.message(
+      'Contacts',
+      name: 'contacts',
+      desc: '',
       args: [],
     );
   }
