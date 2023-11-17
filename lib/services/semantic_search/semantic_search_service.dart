@@ -199,7 +199,7 @@ class SemanticSearchService {
   }
 
   Future<void> _computeImageEmbedding(EnteFile file) async {
-    if (!_modelLoadFuture.isCompleted || true) {
+    if (!_modelLoadFuture.isCompleted) {
       return;
     }
     try {
