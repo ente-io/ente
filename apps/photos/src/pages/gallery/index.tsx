@@ -722,7 +722,7 @@ export default function Gallery() {
             await syncTrash(collections, setTrashedFiles);
             await syncEntities();
             await syncMapEnabled();
-            if (await ClipService.isClipSupported()) {
+            if (isElectron()) {
                 await syncEmbeddings();
                 void ClipService.scheduleImageEmbeddingExtraction();
             }

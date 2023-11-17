@@ -49,8 +49,7 @@ class ClipServiceImpl {
 
     setupOnFileUploadListener = async () => {
         try {
-            const isClipSupported = await this.isClipSupported();
-            if (!isClipSupported) {
+            if (!isElectron()) {
                 return;
             }
             if (this.onFileUploadedHandler) {
@@ -96,14 +95,6 @@ class ClipServiceImpl {
         } catch (e) {
             logError(e, 'failed to load local clip index status');
         }
-    };
-
-    isClipSupported = async () => {
-        if (!isElectron()) {
-            return false;
-        }
-        const platform = await ElectronAPIs.getPlatform();
-        return platform !== 'windows';
     };
 
     setOnUpdateHandler = (handler: (status: ClipExtractionStatus) => void) => {
