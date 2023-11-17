@@ -110,7 +110,7 @@ export const verifySRPSession = async (
         logError(e, 'verifySRPSession failed');
         if (
             e instanceof ApiError &&
-            e.httpStatusCode === HttpStatusCode.Forbidden
+            e.httpStatusCode === HttpStatusCode.Unauthorized
         ) {
             throw Error(CustomError.INCORRECT_PASSWORD);
         } else {
