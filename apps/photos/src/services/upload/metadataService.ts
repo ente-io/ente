@@ -23,7 +23,7 @@ import { DedicatedCryptoWorker } from '@ente/shared/crypto/internal/crypto.worke
 import { FilePublicMagicMetadataProps } from 'types/file';
 import { splitFilenameAndExtension } from 'utils/file';
 
-export const NULL_PARSED_METADATA_JSON: ParsedMetadataJSON = {
+const NULL_PARSED_METADATA_JSON: ParsedMetadataJSON = {
     creationTime: null,
     modificationTime: null,
     ...NULL_LOCATION,

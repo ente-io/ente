@@ -17,7 +17,6 @@ import { getFileNameSize } from '@ente/shared/logging/web';
 import { encryptFiledata } from './encryptionService';
 import {
     MAX_FILE_NAME_LENGTH_GOOGLE_EXPORT,
-    NULL_PARSED_METADATA_JSON,
     extractMetadata,
     getClippedMetadataJSONMapKeyForFile,
     getMetadataJSONMapKeyForFile,
@@ -82,8 +81,7 @@ export async function extractFileMetadata(
     rawFile: File | ElectronFile
 ): Promise<ExtractMetadataResult> {
     let key = getMetadataJSONMapKeyForFile(collectionID, rawFile.name);
-    let googleMetadata: ParsedMetadataJSON =
-        parsedMetadataJSONMap.get(key) ?? NULL_PARSED_METADATA_JSON;
+    let googleMetadata: ParsedMetadataJSON = parsedMetadataJSONMap.get(key);
 
     if (!googleMetadata && key.length > MAX_FILE_NAME_LENGTH_GOOGLE_EXPORT) {
         key = getClippedMetadataJSONMapKeyForFile(collectionID, rawFile.name);
@@ -96,7 +94,7 @@ export async function extractFileMetadata(
         fileTypeInfo
     );
 
-    for (const [key, value] of Object.entries(googleMetadata)) {
+    for (const [key, value] of Object.entries(googleMetadata ?? {})) {
         if (!value) {
             continue;
         }

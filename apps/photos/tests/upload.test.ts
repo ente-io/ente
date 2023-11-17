@@ -5,6 +5,7 @@ import { groupFilesBasedOnCollectionID } from 'utils/file';
 import { FILE_TYPE } from 'constants/file';
 import { tryToParseDateTime } from '@ente/shared/time';
 import {
+    MAX_FILE_NAME_LENGTH_GOOGLE_EXPORT,
     getClippedMetadataJSONMapKeyForFile,
     getMetadataJSONMapKeyForFile,
     getMetadataJSONMapKeyForJSON,
@@ -82,8 +83,8 @@ const FILE_NAME_TO_JSON_NAME = [
         jsonFilename: 'IMG2021021(4455)74722.jpg(1).json',
     },
     {
-        filename: 'IMG2021021(json)74722(1).jpg',
-        jsonFilename: 'IMG2021021(json)74722.jpg(1).json',
+        filename: 'IMG2021021.json74722(1).jpg',
+        jsonFilename: 'IMG2021021.json74722.jpg(1).json',
     },
     {
         filename: 'IMG2021021(1)74722(1).jpg',
@@ -396,7 +397,10 @@ function mappingFileAndJSONFileCheck() {
             jsonFilename
         );
         let fileNameGeneratedKey = getMetadataJSONMapKeyForFile(0, filename);
-        if (fileNameGeneratedKey !== jsonFileNameGeneratedKey) {
+        if (
+            fileNameGeneratedKey !== jsonFileNameGeneratedKey &&
+            filename.length > MAX_FILE_NAME_LENGTH_GOOGLE_EXPORT
+        ) {
             fileNameGeneratedKey = getClippedMetadataJSONMapKeyForFile(
                 0,
                 filename
