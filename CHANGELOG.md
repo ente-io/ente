@@ -1,7 +1,7 @@
 # CHANGELOG
 
 
-## v0.7.117
+## v0.7.118
 
 ### Added
 * #### Explore with the new Search Tab ✨
