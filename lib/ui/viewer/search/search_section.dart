@@ -79,7 +79,7 @@ class _SearchSectionState extends State<SearchSection> {
     final textTheme = getEnteTextTheme(context);
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
-      child: widget.examples.isNotEmpty
+      child: _examples.isNotEmpty
           ? GestureDetector(
               behavior: HitTestBehavior.opaque,
               onTap: () {
