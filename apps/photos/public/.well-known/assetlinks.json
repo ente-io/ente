@@ -4,8 +4,17 @@
             "delegate_permission/common.get_login_creds"
         ],
         "target": {
-            "namespace": "web",
+            "namespace": "photos-web",
             "site": "https://web.ente.io"
+        }
+    },
+     {
+        "relation": [
+            "delegate_permission/common.get_login_creds"
+        ],
+        "target": {
+            "namespace": "auth-web",
+            "site": "https://auth.ente.io"
         }
     },
     {
@@ -29,6 +38,18 @@
             "package_name": "io.ente.photos",
             "sha256_cert_fingerprints": [
                 "35:ED:56:81:B7:0B:B3:BD:35:D9:0D:85:6A:F5:69:4C:50:4D:EF:46:AA:D8:3F:77:7B:1C:67:5C:F4:51:35:0B"
+            ]
+        }
+    },
+    {
+        "relation": [
+            "delegate_permission/common.get_login_creds"
+        ],
+        "target": {
+            "namespace": "android_app",
+            "package_name": "io.ente.auth",
+            "sha256_cert_fingerprints": [
+                "DD:CE:AA:D6:88:F0:05:D3:40:68:94:BA:00:FC:E3:FF:82:54:13:0A:10:2B:B2:52:E6:3C:D8:EA:A9:72:B2:EF"
             ]
         }
     }
