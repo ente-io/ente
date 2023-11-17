@@ -21,6 +21,7 @@ import { getFileHash } from './hashService';
 import { Remote } from 'comlink';
 import { DedicatedCryptoWorker } from '@ente/shared/crypto/internal/crypto.worker';
 import { FilePublicMagicMetadataProps } from 'types/file';
+import { splitFilenameAndExtension } from 'utils/file';
 
 const NULL_PARSED_METADATA_JSON: ParsedMetadataJSON = {
     creationTime: null,
@@ -115,7 +116,16 @@ export const getMetadataJSONMapKeyForJSON = (
     collectionID: number,
     jsonFileName: string
 ) => {
-    const title = jsonFileName.replace('.json', '');
+    let title = jsonFileName.slice(0, -1 * '.json'.length);
+    const endsWithNumberedSuffixWithBrackets = title.match(/\(\d+\)$/);
+    if (endsWithNumberedSuffixWithBrackets) {
+        title = title.slice(
+            0,
+            -1 * endsWithNumberedSuffixWithBrackets[0].length
+        );
+        const [name, extension] = splitFilenameAndExtension(title);
+        return `${collectionID}-${name}${endsWithNumberedSuffixWithBrackets}.${extension}`;
+    }
     return `${collectionID}-${title}`;
 };
 
