@@ -39,7 +39,7 @@ enum SectionType {
   // includes year, month , day, event ResultType
   moment,
   // People section shows the files shared by other persons
-  people,
+  contacts,
   fileCaption,
   album,
   fileTypesAndExtension,
@@ -57,8 +57,8 @@ extension SectionTypeExtensions on SectionType {
         return S.of(context).moments;
       case SectionType.location:
         return S.of(context).location;
-      case SectionType.people:
-        return S.of(context).people;
+      case SectionType.contacts:
+        return S.of(context).contacts;
       case SectionType.album:
         return S.of(context).albums;
       case SectionType.fileTypesAndExtension:
@@ -78,7 +78,7 @@ extension SectionTypeExtensions on SectionType {
         return S.of(context).searchDatesEmptySection;
       case SectionType.location:
         return S.of(context).searchLocationEmptySection;
-      case SectionType.people:
+      case SectionType.contacts:
         return S.of(context).searchPeopleEmptySection;
       case SectionType.album:
         return S.of(context).searchAlbumsEmptySection;
@@ -101,7 +101,7 @@ extension SectionTypeExtensions on SectionType {
         return false;
       case SectionType.location:
         return true;
-      case SectionType.people:
+      case SectionType.contacts:
         return true;
       case SectionType.album:
         return true;
@@ -122,7 +122,7 @@ extension SectionTypeExtensions on SectionType {
         return false;
       case SectionType.location:
         return true;
-      case SectionType.people:
+      case SectionType.contacts:
         return true;
       case SectionType.album:
         return true;
@@ -145,7 +145,7 @@ extension SectionTypeExtensions on SectionType {
         return S.of(context).addNew;
       case SectionType.location:
         return S.of(context).addNew;
-      case SectionType.people:
+      case SectionType.contacts:
         return S.of(context).invite;
       case SectionType.album:
         return S.of(context).addNew;
@@ -166,7 +166,7 @@ extension SectionTypeExtensions on SectionType {
         return null;
       case SectionType.location:
         return Icons.add_location_alt_outlined;
-      case SectionType.people:
+      case SectionType.contacts:
         return Icons.adaptive.share;
       case SectionType.album:
         return Icons.add;
@@ -179,7 +179,7 @@ extension SectionTypeExtensions on SectionType {
 
   FutureVoidCallback ctaOnTap(BuildContext context) {
     switch (this) {
-      case SectionType.people:
+      case SectionType.contacts:
         return () async {
           shareText(
             S.of(context).shareTextRecommendUsingEnte,
@@ -249,8 +249,8 @@ extension SectionTypeExtensions on SectionType {
       case SectionType.location:
         return SearchService.instance.getAllLocationTags(limit);
 
-      case SectionType.people:
-        return SearchService.instance.getAllPeopleSearchResults(limit);
+      case SectionType.contacts:
+        return SearchService.instance.getAllContactsSearchResults(limit);
 
       case SectionType.album:
         return SearchService.instance.getAllCollectionSearchResults(limit);
