@@ -170,7 +170,7 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m59(count) =>
       "${Intl.plural(count, zero: '', one: '1天', other: '${count} 天')}";
 
-  static String m64(endDate) => "有效期至 ${endDate}";
+  static String m65(endDate) => "有效期至 ${endDate}";
 
   static String m60(email) => "验证 ${email}";
 
@@ -709,6 +709,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "mobileWebDesktop":
             MessageLookupByLibrary.simpleMessage("移动端, 网页端, 桌面端"),
         "moderateStrength": MessageLookupByLibrary.simpleMessage("中等"),
+        "modifyYourQueryOrTrySearchingFor":
+            MessageLookupByLibrary.simpleMessage(
+                "Modify your query, or try searching for"),
         "monthly": MessageLookupByLibrary.simpleMessage("每月"),
         "moveItem": m30,
         "moveToAlbum": MessageLookupByLibrary.simpleMessage("移动到相册"),
@@ -1117,7 +1120,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "useRecoveryKey": MessageLookupByLibrary.simpleMessage("使用恢复密钥"),
         "useSelectedPhoto": MessageLookupByLibrary.simpleMessage("使用所选照片"),
         "usedSpace": MessageLookupByLibrary.simpleMessage("已用空间"),
-        "validTill": m64,
+        "validTill": m65,
         "verificationFailedPleaseTryAgain":
             MessageLookupByLibrary.simpleMessage("验证失败，请重试"),
         "verificationId": MessageLookupByLibrary.simpleMessage("验证 ID"),
@@ -1175,6 +1178,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "youHaveSuccessfullyFreedUp": m63,
         "yourAccountHasBeenDeleted":
             MessageLookupByLibrary.simpleMessage("您的账户已删除"),
+        "yourMap": MessageLookupByLibrary.simpleMessage("Your map"),
         "yourPlanWasSuccessfullyDowngraded":
             MessageLookupByLibrary.simpleMessage("您的计划已成功降级"),
         "yourPlanWasSuccessfullyUpgraded":

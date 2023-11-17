@@ -50,9 +50,9 @@ extension SectionTypeExtensions on SectionType {
   String sectionTitle(BuildContext context) {
     switch (this) {
       case SectionType.face:
-        return "Faces";
+        return S.of(context).faces;
       case SectionType.content:
-        return "Contents";
+        return S.of(context).contents;
       case SectionType.moment:
         return S.of(context).moments;
       case SectionType.location:
@@ -136,21 +136,23 @@ extension SectionTypeExtensions on SectionType {
   String getCTAText(BuildContext context) {
     switch (this) {
       case SectionType.face:
+        // todo: later
         return "Setup";
       case SectionType.content:
+        // todo: later
         return "Add tags";
       case SectionType.moment:
-        return "Add new";
+        return S.of(context).addNew;
       case SectionType.location:
-        return "Add new";
+        return S.of(context).addNew;
       case SectionType.people:
-        return "Invite";
+        return S.of(context).invite;
       case SectionType.album:
-        return "Add new";
+        return S.of(context).addNew;
       case SectionType.fileTypesAndExtension:
         return "";
       case SectionType.fileCaption:
-        return "Add new";
+        return S.of(context).addNew;
     }
   }
 

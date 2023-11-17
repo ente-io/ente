@@ -26,7 +26,12 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Add to hidden album"),
         "deleteConfirmDialogBody": MessageLookupByLibrary.simpleMessage(
             "This account is linked to other ente apps, if you use any.\\n\\nYour uploaded data, across all ente apps, will be scheduled for deletion, and your account will be permanently deleted."),
+        "fileTypes": MessageLookupByLibrary.simpleMessage("File types"),
+        "modifyYourQueryOrTrySearchingFor":
+            MessageLookupByLibrary.simpleMessage(
+                "Modify your query, or try searching for"),
         "moveToHiddenAlbum":
-            MessageLookupByLibrary.simpleMessage("Move to hidden album")
+            MessageLookupByLibrary.simpleMessage("Move to hidden album"),
+        "yourMap": MessageLookupByLibrary.simpleMessage("Your map")
       };
 }

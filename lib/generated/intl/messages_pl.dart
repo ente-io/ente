@@ -92,6 +92,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "enterYourRecoveryKey": MessageLookupByLibrary.simpleMessage(
             "Wprowadź swój klucz odzyskiwania"),
         "feedback": MessageLookupByLibrary.simpleMessage("Informacja zwrotna"),
+        "fileTypes": MessageLookupByLibrary.simpleMessage("File types"),
         "forgotPassword":
             MessageLookupByLibrary.simpleMessage("Nie pamiętam hasła"),
         "generatingEncryptionKeys": MessageLookupByLibrary.simpleMessage(
@@ -109,6 +110,9 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Pomóż nam z tą informacją"),
         "logInLabel": MessageLookupByLibrary.simpleMessage("Zaloguj się"),
         "moderateStrength": MessageLookupByLibrary.simpleMessage("Umiarkowana"),
+        "modifyYourQueryOrTrySearchingFor":
+            MessageLookupByLibrary.simpleMessage(
+                "Modify your query, or try searching for"),
         "moveToHiddenAlbum":
             MessageLookupByLibrary.simpleMessage("Move to hidden album"),
         "noRecoveryKey":
@@ -180,7 +184,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Zweryfikuj hasło"),
         "weakStrength": MessageLookupByLibrary.simpleMessage("Słabe"),
         "welcomeBack": MessageLookupByLibrary.simpleMessage("Witaj ponownie!"),
-        "yourAccountHasBeenDeleted":
-            MessageLookupByLibrary.simpleMessage("Twoje konto zostało usunięte")
+        "yourAccountHasBeenDeleted": MessageLookupByLibrary.simpleMessage(
+            "Twoje konto zostało usunięte"),
+        "yourMap": MessageLookupByLibrary.simpleMessage("Your map")
       };
 }

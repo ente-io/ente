@@ -621,6 +621,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Añadir una descripción..."),
         "fileSavedToGallery": MessageLookupByLibrary.simpleMessage(
             "Archivo guardado en la galería"),
+        "fileTypes": MessageLookupByLibrary.simpleMessage("File types"),
         "filesBackedUpFromDevice": m19,
         "filesBackedUpInAlbum": m20,
         "filesDeleted":
@@ -787,6 +788,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "mobileWebDesktop":
             MessageLookupByLibrary.simpleMessage("Celular, Web, Computadora"),
         "moderateStrength": MessageLookupByLibrary.simpleMessage("Moderada"),
+        "modifyYourQueryOrTrySearchingFor":
+            MessageLookupByLibrary.simpleMessage(
+                "Modify your query, or try searching for"),
         "monthly": MessageLookupByLibrary.simpleMessage("Mensual"),
         "moveItem": m30,
         "moveToAlbum": MessageLookupByLibrary.simpleMessage("Mover al álbum"),
@@ -1327,6 +1331,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "youHaveSuccessfullyFreedUp": m63,
         "yourAccountHasBeenDeleted":
             MessageLookupByLibrary.simpleMessage("Su cuenta ha sido eliminada"),
+        "yourMap": MessageLookupByLibrary.simpleMessage("Your map"),
         "yourPlanWasSuccessfullyDowngraded":
             MessageLookupByLibrary.simpleMessage(
                 "Tu plan ha sido degradado con éxito"),
