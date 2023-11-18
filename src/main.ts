@@ -60,12 +60,6 @@ setupNextElectronServe();
 
 setupLogging(isDev);
 
-const localHasOptedOutOfCrashReports = getOptOutOfCrashReports();
-updateOptOutOfCrashReports(localHasOptedOutOfCrashReports);
-if (!localHasOptedOutOfCrashReports) {
-    initSentry();
-}
-
 const gotTheLock = app.requestSingleInstanceLock();
 if (!gotTheLock) {
     app.quit();
@@ -89,6 +83,11 @@ if (!gotTheLock) {
     app.on('ready', async () => {
         logSystemInfo();
         setupMainProcessStatsLogger();
+        const hasOptedOutOfCrashReports = getOptOutOfCrashReports();
+        updateOptOutOfCrashReports(hasOptedOutOfCrashReports);
+        if (!hasOptedOutOfCrashReports) {
+            initSentry();
+        }
         mainWindow = await createWindow();
         const tray = setupTrayItem(mainWindow);
         const watcher = initWatcher(mainWindow);
