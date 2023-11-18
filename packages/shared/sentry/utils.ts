@@ -51,5 +51,5 @@ export function isErrorUnnecessaryForSentry(error: any) {
 export const getIsSentryEnabled = () => {
     const isAppENVDevelopment = getAppEnv() === APP_ENV.DEVELOPMENT;
     const isSentryDisabled = isDisableSentryFlagSet();
-    return !isAppENVDevelopment || !isSentryDisabled;
+    return !isAppENVDevelopment && !isSentryDisabled;
 };
