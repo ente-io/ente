@@ -4,21 +4,19 @@ import { keysStore } from '../stores/keys.store';
 import { logToDisk } from './logging';
 import { hasOptedOutOfCrashReports } from '../main';
 import {
-    getAppEnv,
+    AppEnv,
     SENTRY_DSN,
     SENTRY_RELEASE,
-    getIsSentryEnabled,
+    IS_SENTRY_ENABLED,
     SENTRY_TUNNEL_URL,
 } from '../config/sentry';
 
 export function initSentry(): void {
-    const APP_ENV = getAppEnv();
-    const IS_ENABLED = getIsSentryEnabled();
-    logToDisk(`initSentry: ${APP_ENV} ${IS_ENABLED}`);
+    logToDisk(`initSentry: ${AppEnv} ${IS_SENTRY_ENABLED}`);
     Sentry.init({
         dsn: SENTRY_DSN,
-        enabled: IS_ENABLED,
-        environment: APP_ENV,
+        enabled: IS_SENTRY_ENABLED,
+        environment: AppEnv,
         release: SENTRY_RELEASE,
         attachStacktrace: true,
         autoSessionTracking: false,
