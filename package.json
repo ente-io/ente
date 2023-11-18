@@ -70,7 +70,7 @@
         "start-main": "yarn build-main && electron app/main.js",
         "start-renderer": "cd ui && yarn install && yarn dev:photos",
         "start": "concurrently \"yarn start-main\" \"yarn start-renderer\"",
-        "build-renderer": "cd ui && yarn install && yarn build:photos",
+        "build-renderer": "cd ui && yarn install && yarn export:photos",
         "build": "yarn build-renderer && yarn build-main",
         "test-release": "cross-env IS_TEST_RELEASE=true yarn build && electron-builder --config.compression=store"
     },
