@@ -235,6 +235,7 @@ class _VideoWidgetNewState extends State<VideoWidgetNew>
   void _setVideoController(String url) {
     if (mounted) {
       setState(() {
+        player.setPlaylistMode(PlaylistMode.single);
         controller = VideoController(player);
         player.open(Media(url), play: _isAppInFG);
       });

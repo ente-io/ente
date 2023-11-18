@@ -92,9 +92,9 @@ class _MemoriesWidgetState extends State<MemoriesWidget> {
 
   bool _areMemoriesFromSameYear(Memory first, Memory second) {
     final firstDate =
-    DateTime.fromMicrosecondsSinceEpoch(first.file.creationTime!);
+        DateTime.fromMicrosecondsSinceEpoch(first.file.creationTime!);
     final secondDate =
-    DateTime.fromMicrosecondsSinceEpoch(second.file.creationTime!);
+        DateTime.fromMicrosecondsSinceEpoch(second.file.creationTime!);
     return firstDate.year == secondDate.year;
   }
 }
