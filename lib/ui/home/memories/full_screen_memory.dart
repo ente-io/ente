@@ -10,7 +10,6 @@ import "package:photos/models/memory.dart";
 import "package:photos/services/memories_service.dart";
 import "package:photos/theme/text_style.dart";
 import "package:photos/ui/actions/file/file_actions.dart";
-import "package:photos/ui/extents_page_view.dart";
 import "package:photos/ui/viewer/file/file_widget.dart";
 import "package:photos/ui/viewer/file_details/favorite_widget.dart";
 import "package:photos/utils/file_util.dart";
@@ -316,7 +315,7 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
           }
         }
       },
-      child: ExtentsPageView.extents(
+      child: PageView.builder(
         itemBuilder: (BuildContext context, int index) {
           if (index < widget.memories.length - 1) {
             final nextFile = widget.memories[index + 1].file;
