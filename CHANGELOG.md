@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## v1.6.51
+## v1.6.52
 
 ### New Features
 
