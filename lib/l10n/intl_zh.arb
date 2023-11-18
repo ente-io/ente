@@ -956,12 +956,22 @@
   "loadMessage7": "我们的移动应用程序在后台运行以加密和备份您点击的任何新照片",
   "loadMessage8": "web.ente.io 有一个巧妙的上传器",
   "loadMessage9": "我们使用 Xchacha20Poly1305 加密技术来安全地加密您的数据",
+  "photoDescriptions": "照片说明",
+  "fileTypesAndNames": "文件类型和名称",
+  "location": "地理位置",
+  "moments": "瞬间",
+  "searchFaceEmptySection": "查找一个人的所有照片",
+  "searchDatesEmptySection": "按日期搜索，月份或年份",
+  "searchLocationEmptySection": "在照片的一定半径内拍摄的几组照片",
+  "searchPeopleEmptySection": "邀请他人，您将在此看到他们分享的所有照片",
+  "searchAlbumsEmptySection": "相册",
+  "searchFileTypesAndNamesEmptySection": "文件类型和名称",
+  "searchCaptionEmptySection": "在照片信息中添加“#旅游”等描述，以便在此处快速找到它们",
   "language": "语言",
   "selectLanguage": "选择语言",
   "locationName": "地点名称",
   "addLocation": "添加地点",
   "groupNearbyPhotos": "将附近的照片分组",
-  "location": "地理位置",
   "kiloMeterUnit": "公里",
   "addLocationButton": "添加",
   "radius": "半径",
@@ -1103,13 +1113,41 @@
   "crashReporting": "崩溃报告",
   "addToHiddenAlbum": "添加到隐藏相册",
   "moveToHiddenAlbum": "移至隐藏相册",
+  "fileTypes": "文件类型",
   "deleteConfirmDialogBody": "此账户已链接到其他 ente 旗下的应用程序（如果您使用任何 ente 旗下的应用程序）。\\n\\n您在所有 ente 旗下的应用程序中上传的数据将被安排删除，并且您的账户将被永久删除。",
   "hearUsWhereTitle": "您是如何知道Ente的？ （可选的）",
   "hearUsExplanation": "我们不跟踪应用程序安装情况。如果您告诉我们您是在哪里找到我们的，将会有所帮助！",
   "viewAddOnButton": "查看附加组件",
   "addOns": "附加组件",
   "addOnPageSubtitle": "附加组件详情",
-  "yourMap": "Your map",
-  "modifyYourQueryOrTrySearchingFor": "Modify your query, or try searching for",
-  "contacts": "Contacts"
+  "yourMap": "您的地图",
+  "modifyYourQueryOrTrySearchingFor": "修改您的查询，或尝试搜索",
+  "blackFridaySale": "黑色星期五特惠",
+  "upto50OffUntil4thDec": "最高五折优惠，直至12月4日。",
+  "photos": "照片",
+  "videos": "视频",
+  "livePhotos": "实况照片",
+  "searchHint1": "在设备上快速搜索",
+  "searchHint2": "照片日期、描述",
+  "searchHint3": "相册、文件名和类型",
+  "searchHint4": "位置",
+  "searchHint5": "即将到来：面部和魔法搜索✨",
+  "addYourPhotosNow": "立即添加您的照片",
+  "searchResultCount": "{count, plural, other{已找到 {count} 个结果}}",
+  "@searchResultCount": {
+    "description": "Text to tell user how many results were found for their search query",
+    "placeholders": {
+      "count": {
+        "example": "1|2|3",
+        "type": "int"
+      }
+    }
+  },
+  "faces": "人脸",
+  "contents": "内容",
+  "addNew": "新建",
+  "@addNew": {
+    "description": "Text to add a new item (location tag, album, caption etc)"
+  },
+  "contacts": "联系人"
 }
