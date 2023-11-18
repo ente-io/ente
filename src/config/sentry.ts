@@ -1,6 +1,8 @@
+import { isDev } from '../utils/common';
 import { APP_ENV } from '../constants/env';
 
-export const getAppEnv = () => process.env.APP_ENV ?? APP_ENV.DEVELOPMENT;
+export const getAppEnv = () =>
+    process.env.APP_ENV ?? isDev ? APP_ENV.DEVELOPMENT : APP_ENV.PRODUCTION;
 
 export const isDisableSentryFlagSet = () => {
     return process.env.DISABLE_SENTRY === 'true';
@@ -16,5 +18,5 @@ export const SENTRY_TUNNEL_URL = 'https://sentry-reporter.ente.io';
 export const getIsSentryEnabled = () => {
     const isAppENVDevelopment = getAppEnv() === APP_ENV.DEVELOPMENT;
     const isSentryDisabled = isDisableSentryFlagSet();
-    return !isSentryDisabled && isAppENVDevelopment;
+    return !isSentryDisabled && !isAppENVDevelopment;
 };

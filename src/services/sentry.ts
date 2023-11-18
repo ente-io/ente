@@ -14,6 +14,7 @@ import {
 export function initSentry(): void {
     const APP_ENV = getAppEnv();
     const IS_ENABLED = getIsSentryEnabled();
+    logToDisk(`initSentry: ${APP_ENV} ${IS_ENABLED}`);
     Sentry.init({
         dsn: SENTRY_DSN,
         enabled: IS_ENABLED,
