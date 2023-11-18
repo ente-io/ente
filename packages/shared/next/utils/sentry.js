@@ -8,7 +8,7 @@ const cp = require('child_process');
 module.exports.getIsSentryEnabled = () => {
     const isAppENVDevelopment = getAppEnv() === ENV_DEVELOPMENT;
     const isSentryDisabled = isDisableSentryFlagSet();
-    return !isAppENVDevelopment || !isSentryDisabled;
+    return !isAppENVDevelopment && !isSentryDisabled;
 };
 
 module.exports.getGitSha = () =>
