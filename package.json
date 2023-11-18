@@ -72,7 +72,7 @@
         "start": "concurrently \"yarn start-main\" \"yarn start-renderer\"",
         "build-renderer": "cd ui && yarn install && yarn build:photos",
         "build": "yarn build-renderer && yarn build-main",
-        "test-release": "cross-env IS_TEST_RELEASE=true yarn build && electron-builder --config.compression=store"
+        "test-release": "cross-env IS_TEST_RELEASE=true APP_ENV=test yarn build && electron-builder --config.compression=store"
     },
     "author": "ente <code@ente.io>",
     "devDependencies": {
