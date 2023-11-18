@@ -62,8 +62,10 @@ class SemanticSearchService {
       EmbeddingStore.instance.pushEmbeddings();
     }
 
-    _loadModels().then((v) {
-      _getTextEmbedding("warm up text encoder");
+    _loadModels().then((v) async {
+      _logger.info("Getting text embedding");
+      await _getTextEmbedding("warm up text encoder");
+      _logger.info("Got text embedding");
     });
     Bus.instance.on<FileUploadedEvent>().listen((event) async {
       _addToQueue(event.file);
@@ -186,9 +188,15 @@ class SemanticSearchService {
   }
 
   Future<void> _loadModels() async {
-    await ModelLoader.instance.loadImageModel();
-    await ModelLoader.instance.loadTextModel();
-    _modelLoadFuture.complete();
+    _logger.info("Loading models");
+    try {
+      await ModelLoader.instance.loadImageModel();
+      await ModelLoader.instance.loadTextModel();
+      _modelLoadFuture.complete();
+    } catch (e, s) {
+      _logger.severe("Model loading failed", e, s);
+    }
+    _logger.info("Models loaded");
   }
 
   Future<void> _pollQueue() async {
