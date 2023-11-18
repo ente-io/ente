@@ -1,5 +1,16 @@
 # CHANGELOG
 
+## v1.6.51
+
+### New Features
+
+- Added Clip Desktop on windows
+
+### Bug Fixes
+
+- fixed google json matching issue
+- other under-the-hood changes to improve performance and bug fixes
+
 ## v1.6.50
 
 ### New Features
