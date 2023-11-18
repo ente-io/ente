@@ -1,21 +1,26 @@
-import * as Sentry from '@sentry/electron/dist/main';
+import * as Sentry from '@sentry/electron';
 import { makeID } from '../utils/logging';
 import { keysStore } from '../stores/keys.store';
-import { SENTRY_DSN, RELEASE_VERSION } from '../config';
-import { isDev } from '../utils/common';
 import { logToDisk } from './logging';
 import { hasOptedOutOfCrashReports } from '../main';
-
-const ENV_DEVELOPMENT = 'development';
-
-const isDEVSentryENV = () =>
-    process.env.NEXT_PUBLIC_SENTRY_ENV === ENV_DEVELOPMENT;
+import {
+    AppEnv,
+    SENTRY_DSN,
+    SENTRY_RELEASE,
+    IS_SENTRY_ENABLED,
+    SENTRY_TUNNEL_URL,
+} from '../config/sentry';
 
 export function initSentry(): void {
+    logToDisk(`initSentry: ${AppEnv} ${IS_SENTRY_ENABLED}`);
     Sentry.init({
         dsn: SENTRY_DSN,
-        release: RELEASE_VERSION,
-        environment: isDev ? 'development' : 'production',
+        enabled: IS_SENTRY_ENABLED,
+        environment: AppEnv,
+        release: SENTRY_RELEASE,
+        attachStacktrace: true,
+        autoSessionTracking: false,
+        tunnel: SENTRY_TUNNEL_URL,
     });
     Sentry.setUser({ id: getSentryUserID() });
 }
@@ -31,14 +36,12 @@ export function logErrorSentry(
             error?.stack
         } msg: ${msg} info: ${JSON.stringify(info)}`
     );
-    if (isDEVSentryENV()) {
-        console.log(error, { msg, info });
-    }
     if (hasOptedOutOfCrashReports()) {
+        logToDisk(`skipping sentry error: ${error?.name}`);
         return;
     }
     Sentry.captureException(err, {
-        level: Sentry.Severity.Info,
+        level: 'info',
         user: { id: getSentryUserID() },
         contexts: {
             ...(info && {
