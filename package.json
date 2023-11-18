@@ -100,7 +100,7 @@
         "typescript": "^4.2.3"
     },
     "dependencies": {
-        "@sentry/electron": "^2.5.1",
+        "@sentry/electron": "^4.14.0",
         "any-shell-escape": "^0.1.1",
         "auto-launch": "^5.0.5",
         "chokidar": "^3.5.3",

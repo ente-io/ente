@@ -1,4 +1,4 @@
-import * as Sentry from '@sentry/electron/dist/main';
+import * as Sentry from '@sentry/electron';
 import { makeID } from '../utils/logging';
 import { keysStore } from '../stores/keys.store';
 import { logToDisk } from './logging';
@@ -42,7 +42,7 @@ export function logErrorSentry(
         return;
     }
     Sentry.captureException(err, {
-        level: Sentry.Severity.Info,
+        level: 'info',
         user: { id: getSentryUserID() },
         contexts: {
             ...(info && {

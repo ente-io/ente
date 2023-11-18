@@ -16,5 +16,5 @@ export const SENTRY_TUNNEL_URL = 'https://sentry-reporter.ente.io';
 export const getIsSentryEnabled = () => {
     const isAppENVDevelopment = getAppEnv() === APP_ENV.DEVELOPMENT;
     const isSentryDisabled = isDisableSentryFlagSet();
-    return !isAppENVDevelopment && !isSentryDisabled;
+    return !isSentryDisabled && isAppENVDevelopment;
 };
