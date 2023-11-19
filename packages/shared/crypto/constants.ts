@@ -1,0 +1,1 @@
+export const ENCRYPTION_CHUNK_SIZE = 4 * 1024 * 1024;

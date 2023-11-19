@@ -9,7 +9,7 @@ import {
 import * as SSDMobileNet from '@tensorflow-models/coco-ssd';
 import { resizeToSquare } from 'utils/image';
 import { OBJECT_DETECTION_IMAGE_SIZE } from 'constants/mlConfig';
-import { addLogLine } from 'utils/logging';
+import { addLogLine } from '@ente/shared/logging';
 
 class SSDMobileNetV2 implements ObjectDetectionService {
     private ssdMobileNetV2Model: SSDMobileNet.ObjectDetection;

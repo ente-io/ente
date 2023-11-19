@@ -6,7 +6,7 @@ import mlIDbStorage from 'utils/storage/mlIDbStorage';
 import { getMLSyncConfig } from 'utils/machineLearning/config';
 import { Collection } from 'types/collection';
 import { EnteFile } from 'types/file';
-import { logError } from 'utils/sentry';
+import { logError } from '@ente/shared/sentry';
 import {
     DateValue,
     Search,
@@ -25,13 +25,14 @@ import { Person, Thing } from 'types/machineLearning';
 import { getUniqueFiles } from 'utils/file';
 import { getLatestEntities } from './entityService';
 import { LocationTag, LocationTagData, EntityType } from 'types/entity';
-import { addLogLine } from 'utils/logging';
+import { addLogLine } from '@ente/shared/logging';
 import { FILE_TYPE } from 'constants/file';
 import {
     ClipService,
     computeClipMatchScore,
     getLocalClipImageEmbeddings,
 } from './clipService';
+import isElectron from 'is-electron';
 
 const DIGITS = new Set(['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']);
 
@@ -290,7 +291,7 @@ async function getThingSuggestion(searchPhrase: string): Promise<Suggestion[]> {
 }
 
 async function getClipSuggestion(searchPhrase: string): Promise<Suggestion> {
-    if (!(await ClipService.isClipSupported())) {
+    if (!isElectron()) {
         return null;
     }
     const clipResults = await searchClip(searchPhrase);

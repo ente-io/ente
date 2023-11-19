@@ -1,24 +1,24 @@
-import { EnteFile } from 'types/file';
 import {
     putEmbedding,
     getLatestEmbeddings,
     getLocalEmbeddings,
 } from './embeddingService';
 import { getAllLocalFiles, getLocalFiles } from './fileService';
-import { ElectronAPIs } from 'types/electron';
 import downloadManager from './downloadManager';
-import { getToken } from 'utils/common/key';
-import { Embedding, Model } from 'types/embedding';
-import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
-import { logError } from 'utils/sentry';
-import { addLogLine } from 'utils/logging';
-import { CustomError } from 'utils/error';
-import { LS_KEYS, getData } from 'utils/storage/localStorage';
-import { getPersonalFiles } from 'utils/file';
+import { logError } from '@ente/shared/sentry';
+import { addLogLine } from '@ente/shared/logging';
 import isElectron from 'is-electron';
-import { Events, eventBus } from './events';
+import { Events, eventBus } from '@ente/shared/events';
 import PQueue from 'p-queue';
+import { EnteFile } from 'types/file';
+import ElectronAPIs from '@ente/shared/electron';
+import { CustomError } from '@ente/shared/error';
+import { LS_KEYS, getData } from '@ente/shared/storage/localStorage';
+import { getPersonalFiles } from 'utils/file';
 import { FILE_TYPE } from 'constants/file';
+import ComlinkCryptoWorker from '@ente/shared/crypto';
+import { Embedding, Model } from 'types/embedding';
+import { getToken } from '@ente/shared/storage/localStorage/helpers';
 
 const CLIP_EMBEDDING_LENGTH = 512;
 
@@ -28,22 +28,20 @@ export interface ClipExtractionStatus {
 }
 
 class ClipServiceImpl {
-    private electronAPIs: ElectronAPIs;
-    private embeddingExtractionInProgress: AbortController = null;
+    private embeddingExtractionInProgress: AbortController | null = null;
     private reRunNeeded = false;
     private clipExtractionStatus: ClipExtractionStatus = {
         pending: 0,
         indexed: 0,
     };
-    private onUpdateHandler: (status: ClipExtractionStatus) => void = null;
+    private onUpdateHandler: ((status: ClipExtractionStatus) => void) | null =
+        null;
     private liveEmbeddingExtractionQueue: PQueue;
-    private onFileUploadedHandler: (arg: {
-        enteFile: EnteFile;
-        localFile: globalThis.File;
-    }) => void = null;
+    private onFileUploadedHandler:
+        | ((arg: { enteFile: EnteFile; localFile: globalThis.File }) => void)
+        | null = null;
 
     constructor() {
-        this.electronAPIs = globalThis['ElectronAPIs'];
         this.liveEmbeddingExtractionQueue = new PQueue({
             concurrency: 1,
         });
@@ -51,8 +49,7 @@ class ClipServiceImpl {
 
     setupOnFileUploadListener = async () => {
         try {
-            const isClipSupported = await this.isClipSupported();
-            if (!isClipSupported) {
+            if (!isElectron()) {
                 return;
             }
             if (this.onFileUploadedHandler) {
@@ -100,14 +97,6 @@ class ClipServiceImpl {
         }
     };
 
-    isClipSupported = async () => {
-        if (!isElectron()) {
-            return false;
-        }
-        const platform = await this.electronAPIs.getPlatform();
-        return platform !== 'windows';
-    };
-
     setOnUpdateHandler = (handler: (status: ClipExtractionStatus) => void) => {
         this.onUpdateHandler = handler;
         handler(this.clipExtractionStatus);
@@ -150,7 +139,7 @@ class ClipServiceImpl {
 
     getTextEmbedding = async (text: string): Promise<Float32Array> => {
         try {
-            return this.electronAPIs.computeTextEmbedding(text);
+            return ElectronAPIs.computeTextEmbedding(text);
         } catch (e) {
             logError(e, 'failed to compute text embedding');
             throw e;
@@ -249,7 +238,7 @@ class ClipServiceImpl {
         const file = await localFile
             .arrayBuffer()
             .then((buffer) => new Uint8Array(buffer));
-        const embedding = await this.electronAPIs.computeImageEmbedding(file);
+        const embedding = await ElectronAPIs.computeImageEmbedding(file);
         return embedding;
     };
 
@@ -297,7 +286,7 @@ class ClipServiceImpl {
         } else {
             thumb = await downloadManager.downloadThumb(token, file);
         }
-        const embedding = await this.electronAPIs.computeImageEmbedding(thumb);
+        const embedding = await ElectronAPIs.computeImageEmbedding(thumb);
         return embedding;
     };
 

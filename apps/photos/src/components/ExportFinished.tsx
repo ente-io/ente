@@ -6,8 +6,8 @@ import {
     Typography,
 } from '@mui/material';
 import { t } from 'i18next';
-import { formatDateTime } from 'utils/time/format';
-import { SpaceBetweenFlex } from './Container';
+import { formatDateTime } from '@ente/shared/time/format';
+import { SpaceBetweenFlex } from '@ente/shared/components/Container';
 import { formatNumber } from 'utils/number/format';
 import ExportPendingList from './ExportPendingList';
 import { useState } from 'react';

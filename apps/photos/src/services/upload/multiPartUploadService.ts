@@ -5,7 +5,7 @@ import {
 import UIService from './uiService';
 import UploadHttpClient from './uploadHttpClient';
 import * as convert from 'xml-js';
-import { CustomError } from 'utils/error';
+import { CustomError } from '@ente/shared/error';
 import { DataStream, Logger, MultipartUploadURLs } from 'types/upload';
 import uploadCancelService from './uploadCancelService';
 import uploadService from './uploadService';

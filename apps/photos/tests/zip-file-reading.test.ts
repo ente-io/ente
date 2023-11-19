@@ -2,7 +2,7 @@ import { DataStream } from 'types/upload';
 import ImportService from 'services/importService';
 import { FILE_READER_CHUNK_SIZE, PICKED_UPLOAD_TYPE } from 'constants/upload';
 import { getFileStream, getElectronFileStream } from 'services/readerService';
-import { getFileNameSize } from 'utils/logging';
+import { getFileNameSize } from '@ente/shared/logging/web';
 import isElectron from 'is-electron';
 import { getImportSuggestion } from 'utils/upload';
 

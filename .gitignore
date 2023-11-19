@@ -24,6 +24,8 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
+tsconfig.tsbuildinfo
+
 # local env files
 .env.local
 .env.development.local

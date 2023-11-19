@@ -1,7 +1,7 @@
 import ChevronRight from '@mui/icons-material/ChevronRight';
 import Done from '@mui/icons-material/Done';
 import { Box, Button } from '@mui/material';
-import { SpaceBetweenFlex } from 'components/Container';
+import { SpaceBetweenFlex } from '@ente/shared/components/Container';
 import React from 'react';
 import { t } from 'i18next';
 export function PlanIconButton({

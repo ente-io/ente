@@ -2,7 +2,7 @@ import PhotoOutlined from '@mui/icons-material/PhotoOutlined';
 import PlayCircleOutlineOutlined from '@mui/icons-material/PlayCircleOutlineOutlined';
 import { styled } from '@mui/material';
 import { FILE_TYPE } from 'constants/file';
-import { Overlay } from './Container';
+import { Overlay } from '@ente/shared/components/Container';
 
 interface Iprops {
     fileType: FILE_TYPE;

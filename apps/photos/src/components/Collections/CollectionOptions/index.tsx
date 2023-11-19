@@ -14,10 +14,10 @@ import { SetCollectionNamerAttributes } from '../CollectionNamer';
 import { Collection } from 'types/collection';
 import { isArchivedCollection, isPinnedCollection } from 'utils/magicMetadata';
 import { GalleryContext } from 'pages/gallery';
-import { logError } from 'utils/sentry';
+import { logError } from '@ente/shared/sentry';
 import { VISIBILITY_STATE } from 'types/magicMetadata';
 import { AppContext } from 'pages/_app';
-import OverflowMenu from 'components/OverflowMenu/menu';
+import OverflowMenu from '@ente/shared/components/OverflowMenu/menu';
 import {
     ALL_SECTION,
     CollectionSummaryType,
@@ -28,7 +28,7 @@ import { SharedCollectionOption } from './SharedCollectionOption';
 import { OnlyDownloadCollectionOption } from './OnlyDownloadCollectionOption';
 import { QuickOptions } from './QuickOptions';
 import MoreHoriz from '@mui/icons-material/MoreHoriz';
-import { HorizontalFlex } from 'components/Container';
+import { HorizontalFlex } from '@ente/shared/components/Container';
 import { Trans } from 'react-i18next';
 import { t } from 'i18next';
 import { Box } from '@mui/material';

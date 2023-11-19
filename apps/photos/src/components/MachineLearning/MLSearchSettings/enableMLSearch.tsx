@@ -1,6 +1,6 @@
 import { Stack, Box, Button, Typography } from '@mui/material';
 import Titlebar from 'components/Titlebar';
-import { ML_BLOG_LINK } from 'constants/urls';
+import { ML_BLOG_LINK } from '@ente/shared/constants/urls';
 import { Trans } from 'react-i18next';
 import { t } from 'i18next';
 import { openLink } from 'utils/common';

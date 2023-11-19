@@ -1,7 +1,10 @@
 import React from 'react';
 import { SearchOption } from 'types/search';
 import { Box, Divider, Stack, Typography } from '@mui/material';
-import { FreeFlowText, SpaceBetweenFlex } from 'components/Container';
+import {
+    FreeFlowText,
+    SpaceBetweenFlex,
+} from '@ente/shared/components/Container';
 import CollectionCard from 'components/Collections/CollectionCard';
 import { ResultPreviewTile } from 'components/Collections/styledComponents';
 import { t } from 'i18next';

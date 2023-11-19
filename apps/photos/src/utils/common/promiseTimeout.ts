@@ -1,4 +1,4 @@
-import { CustomError } from 'utils/error';
+import { CustomError } from '@ente/shared/error';
 
 export const promiseWithTimeout = async (
     request: Promise<any>,

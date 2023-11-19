@@ -1,7 +1,7 @@
 import { CollectionActions } from '..';
 import React from 'react';
 import { CollectionSummaryType } from 'constants/collection';
-import { FlexWrapper } from 'components/Container';
+import { FlexWrapper } from '@ente/shared/components/Container';
 import { EmptyTrashQuickOption } from './EmptyTrashQuickOption';
 import { DownloadQuickOption } from './DownloadQuickOption';
 import { ShareQuickOption } from './ShareQuickOption';
@@ -10,7 +10,7 @@ import {
     showShareQuickOption,
     showEmptyTrashQuickOption,
 } from 'utils/collection';
-import EnteSpinner from 'components/EnteSpinner';
+import EnteSpinner from '@ente/shared/components/EnteSpinner';
 interface Iprops {
     handleCollectionAction: (
         action: CollectionActions,

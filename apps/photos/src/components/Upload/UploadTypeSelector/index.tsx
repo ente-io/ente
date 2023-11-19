@@ -6,7 +6,7 @@ import { default as FolderUploadIcon } from '@mui/icons-material/PermMediaOutlin
 import GoogleIcon from '@mui/icons-material/Google';
 import DialogTitleWithCloseButton, {
     dialogCloseHandler,
-} from 'components/DialogBox/TitleWithCloseButton';
+} from '@ente/shared/components/DialogBox/TitleWithCloseButton';
 import { Box, Dialog, Stack, Typography } from '@mui/material';
 import { PublicCollectionGalleryContext } from 'utils/publicCollectionGallery';
 import { isMobileOrTable } from 'utils/common/deviceDetection';

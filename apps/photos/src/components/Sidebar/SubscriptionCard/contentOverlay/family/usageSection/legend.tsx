@@ -1,5 +1,5 @@
 import { Typography } from '@mui/material';
-import { FlexWrapper } from 'components/Container';
+import { FlexWrapper } from '@ente/shared/components/Container';
 import React from 'react';
 import { LegendIndicator } from '../../../styledComponents';
 

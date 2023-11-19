@@ -8,7 +8,7 @@ import {
     getFaceSearchEnabledStatus,
     updateFaceSearchEnabledStatus,
 } from 'services/userService';
-import { logError } from 'utils/sentry';
+import { logError } from '@ente/shared/sentry';
 import EnableFaceSearch from './enableFaceSearch';
 import EnableMLSearch from './enableMLSearch';
 import ManageMLSearch from './manageMLSearch';

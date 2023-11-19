@@ -10,7 +10,7 @@ import {
     ExportProgress,
 } from 'types/export';
 import { EnteFile } from 'types/file';
-import { User } from 'types/user';
+import { User } from '@ente/shared/user/types';
 import { getNonEmptyPersonalCollections } from 'utils/collection';
 import {
     getCollectionExportPath,
@@ -24,9 +24,9 @@ import {
     getPersonalFiles,
     mergeMetadata,
 } from 'utils/file';
-import { addLocalLog, addLogLine } from 'utils/logging';
-import { logError } from 'utils/sentry';
-import { getData, LS_KEYS } from 'utils/storage/localStorage';
+import { addLocalLog, addLogLine } from '@ente/shared/logging';
+import { logError } from '@ente/shared/sentry';
+import { getData, LS_KEYS } from '@ente/shared/storage/localStorage';
 import exportService from './index';
 import { Collection } from 'types/collection';
 import {

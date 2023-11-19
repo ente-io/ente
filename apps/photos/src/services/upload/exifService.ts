@@ -3,9 +3,9 @@ import { Location } from 'types/upload';
 import exifr from 'exifr';
 import piexif from 'piexifjs';
 import { FileTypeInfo } from 'types/upload';
-import { logError } from 'utils/sentry';
-import { validateAndGetCreationUnixTimeInMicroSeconds } from 'utils/time';
-import { CustomError } from 'utils/error';
+import { logError } from '@ente/shared/sentry';
+import { validateAndGetCreationUnixTimeInMicroSeconds } from '@ente/shared/time';
+import { CustomError } from '@ente/shared/error';
 
 const EXIFR_UNSUPPORTED_FILE_FORMAT_MESSAGE = 'Unknown file format';
 

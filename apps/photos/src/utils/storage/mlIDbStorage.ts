@@ -23,8 +23,8 @@ import {
 } from 'types/machineLearning';
 import { IndexStatus } from 'types/machineLearning/ui';
 import { runningInBrowser, runningInElectron } from 'utils/common';
-import { addLogLine } from 'utils/logging';
-import { logError } from 'utils/sentry';
+import { addLogLine } from '@ente/shared/logging';
+import { logError } from '@ente/shared/sentry';
 
 export const ML_SYNC_JOB_CONFIG_NAME = 'ml-sync-job';
 export const ML_SYNC_CONFIG_NAME = 'ml-sync';

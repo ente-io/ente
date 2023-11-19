@@ -1,9 +1,9 @@
 import { MlFileData } from 'types/machineLearning';
 import mlIDbStorage from 'utils/storage/mlIDbStorage';
 import * as zip from '@zip.js/zip.js';
-import { CACHES } from 'constants/cache';
-import { CacheStorageService } from 'services/cache/cacheStorageService';
-import { addLogLine } from 'utils/logging';
+import { CACHES } from '@ente/shared/storage/cacheStorage/constants';
+import { CacheStorageService } from '@ente/shared/storage/cacheStorage';
+import { addLogLine } from '@ente/shared/logging';
 
 class FileSystemWriter extends zip.Writer {
     writableStream: FileSystemWritableFileStream;

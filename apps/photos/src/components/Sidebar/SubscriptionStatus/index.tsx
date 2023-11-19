@@ -7,6 +7,7 @@ import {
     isSubscriptionActive,
     isSubscriptionCancelled,
     hasStripeSubscription,
+    hasAddOnBonus,
 } from 'utils/billing';
 import Box from '@mui/material/Box';
 import { UserDetails } from 'types/user';
@@ -77,12 +78,16 @@ export default function SubscriptionStatus({
                 sx={{ cursor: handleClick && 'pointer' }}>
                 {isSubscriptionActive(userDetails.subscription) ? (
                     isOnFreePlan(userDetails.subscription) ? (
-                        <Trans
-                            i18nKey={'FREE_SUBSCRIPTION_INFO'}
-                            values={{
-                                date: userDetails.subscription?.expiryTime,
-                            }}
-                        />
+                        hasAddOnBonus(userDetails.bonusData) ? (
+                            ''
+                        ) : (
+                            <Trans
+                                i18nKey={'FREE_SUBSCRIPTION_INFO'}
+                                values={{
+                                    date: userDetails.subscription?.expiryTime,
+                                }}
+                            />
+                        )
                     ) : isSubscriptionCancelled(userDetails.subscription) ? (
                         t('RENEWAL_CANCELLED_SUBSCRIPTION_INFO', {
                             date: userDetails.subscription?.expiryTime,

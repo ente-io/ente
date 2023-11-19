@@ -1,6 +1,6 @@
 import { t } from 'i18next';
 
-import { parseSharingErrorCodes, CustomError } from '.';
+import { parseSharingErrorCodes, CustomError } from '@ente/shared/error';
 
 export const handleSharingErrors = (error) => {
     const parsedError = parseSharingErrorCodes(error);

@@ -1,4 +1,4 @@
-import DialogBoxBase from 'components/DialogBox/base';
+import DialogBoxBase from '@ente/shared/components/DialogBox/base';
 import {
     DialogActions,
     Button,
@@ -6,7 +6,7 @@ import {
     DialogContent,
     Box,
 } from '@mui/material';
-import { VerticallyCentered } from 'components/Container';
+import { VerticallyCentered } from '@ente/shared/components/Container';
 import Check from '@mui/icons-material/Check';
 import { t } from 'i18next';
 interface Iprops {

@@ -1,7 +1,7 @@
 import { FILE_TYPE } from 'constants/file';
 import { EnteFile } from 'types/file';
 import { MergedSourceURL } from 'types/gallery';
-import { logError } from 'utils/sentry';
+import { logError } from '@ente/shared/sentry';
 
 const WAIT_FOR_VIDEO_PLAYBACK = 1 * 1000;
 

@@ -11,7 +11,7 @@ import RotateRightIcon from '@mui/icons-material/RotateRight';
 import FlipIcon from '@mui/icons-material/Flip';
 import MenuItemDivider from 'components/Menu/MenuItemDivider';
 import { t } from 'i18next';
-import { logError } from 'utils/sentry';
+import { logError } from '@ente/shared/sentry';
 
 const PRESET_ASPECT_RATIOS = [
     {

@@ -3,7 +3,7 @@ import React from 'react';
 import { t } from 'i18next';
 
 import { NoMappingsContainer } from '../../styledComponents';
-import { FlexWrapper } from 'components/Container';
+import { FlexWrapper } from '@ente/shared/components/Container';
 import { CheckmarkIcon } from './checkmarkIcon';
 
 export function NoMappingsContent() {

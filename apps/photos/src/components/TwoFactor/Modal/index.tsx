@@ -1,13 +1,13 @@
 import { useEffect, useState } from 'react';
 import { getTwoFactorStatus } from 'services/userService';
 import { SetLoading } from 'types/gallery';
-import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
+import { getData, LS_KEYS, setData } from '@ente/shared/storage/localStorage';
 import { t } from 'i18next';
 
 import TwoFactorModalSetupSection from './Setup';
 import TwoFactorModalManageSection from './Manage';
 import { Dialog, DialogContent, styled } from '@mui/material';
-import DialogTitleWithCloseButton from 'components/DialogBox/TitleWithCloseButton';
+import DialogTitleWithCloseButton from '@ente/shared/components/DialogBox/TitleWithCloseButton';
 
 const TwoFactorDialog = styled(Dialog)(({ theme }) => ({
     '& .MuiDialogContent-root': {

@@ -1,6 +1,6 @@
 import { ElectronFile } from 'types/upload';
-import { convertBytesToHumanReadable } from 'utils/file/size';
-import { logError } from 'utils/sentry';
+import { convertBytesToHumanReadable } from '@ente/shared/utils/size';
+import { logError } from '@ente/shared/sentry';
 
 export async function getUint8ArrayView(
     file: Blob | ElectronFile

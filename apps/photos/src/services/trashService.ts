@@ -1,13 +1,13 @@
 import { SetFiles } from 'types/gallery';
 import { Collection } from 'types/collection';
-import { getEndpoint } from 'utils/common/apiUtil';
-import { getToken } from 'utils/common/key';
+import { getEndpoint } from '@ente/shared/network/api';
+import { getToken } from '@ente/shared/storage/localStorage/helpers';
 import { decryptFile, sortTrashFiles } from 'utils/file';
-import { logError } from 'utils/sentry';
-import localForage from 'utils/storage/localForage';
+import { logError } from '@ente/shared/sentry';
+import localForage from '@ente/shared/storage/localForage';
 import { getCollection } from './collectionService';
 
-import HTTPService from './HTTPService';
+import HTTPService from '@ente/shared/network/HTTPService';
 import { EncryptedTrashItem, Trash } from 'types/trash';
 import { EnteFile } from 'types/file';
 import { mergeMetadata } from 'utils/file';
