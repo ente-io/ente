@@ -43,7 +43,11 @@ import { AppContext } from 'pages/_app';
 import { getEditorCloseConfirmationMessage } from 'utils/ui';
 import { logError } from 'utils/sentry';
 import { getFileType } from 'services/typeDetectionService';
-import { downloadUsingAnchor, isHEICFileFromFileName } from 'utils/file';
+import {
+    downloadUsingAnchor,
+    getFileNameWithoutExtension,
+    isHEICFileFromFileName,
+} from 'utils/file';
 import { convertHEIC } from 'services/wasmHeicConverter/wasmHEICConverterClient';
 
 interface IProps {
@@ -297,9 +301,9 @@ const ImageEditorOverlay = (props: IProps) => {
 
     const initConvertHEIC = async () => {
         setCanvasLoading(true);
-        let pngFile: Blob;
+        let newFileBlob: Blob;
         try {
-            pngFile = await convertHEICToRenderableFormat();
+            newFileBlob = await convertHEICToRenderableFormat();
         } catch (e) {
             logError(e, 'initConvertHEIC failed');
             return;
@@ -307,10 +311,17 @@ const ImageEditorOverlay = (props: IProps) => {
             setCanvasLoading(false);
         }
 
-        // create url from pngFile
-        const url = URL.createObjectURL(pngFile);
+        // create url from newFileBlob
+        const url = URL.createObjectURL(newFileBlob);
 
         setFileURL(url);
+
+        // rename props.file.metadata.title with new JPEG extension for export
+        const fileName = getFileNameWithoutExtension(props.file.metadata.title);
+        const newFileName = `${fileName}.jpg`;
+
+        props.file.metadata.title = newFileName;
+
         return url;
     };
 
@@ -321,7 +332,7 @@ const ImageEditorOverlay = (props: IProps) => {
             throw Error('no original file URL');
         }
 
-        return await convertHEIC(fileBlob, 'PNG');
+        return await convertHEIC(fileBlob, 'JPEG');
     };
 
     const getEditedFile = async () => {
