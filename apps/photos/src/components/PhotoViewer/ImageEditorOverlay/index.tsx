@@ -43,7 +43,8 @@ import { AppContext } from 'pages/_app';
 import { getEditorCloseConfirmationMessage } from 'utils/ui';
 import { logError } from 'utils/sentry';
 import { getFileType } from 'services/typeDetectionService';
-import { downloadUsingAnchor } from 'utils/file';
+import { downloadUsingAnchor, isHEICFileFromFileName } from 'utils/file';
+import { convertHEIC } from 'services/wasmHeicConverter/wasmHEICConverterClient';
 
 interface IProps {
     file: EnteFile;
@@ -192,7 +193,7 @@ const ImageEditorOverlay = (props: IProps) => {
         setInvert(false);
     };
 
-    const loadCanvas = async () => {
+    const loadCanvas = async (_fileURL?: string) => {
         try {
             if (
                 !canvasRef.current ||
@@ -206,15 +207,21 @@ const ImageEditorOverlay = (props: IProps) => {
             resetFilters();
             setCurrentRotationAngle(0);
 
+            let fURL = fileURL;
+
+            if (_fileURL) {
+                fURL = _fileURL;
+            }
+
             const img = new Image();
             const ctx = canvasRef.current.getContext('2d');
             ctx.imageSmoothingEnabled = false;
-            if (!fileURL) {
+            if (!fURL) {
                 const { original } = await downloadManager.getFile(props.file);
                 img.src = original[0];
                 setFileURL(original[0]);
             } else {
-                img.src = fileURL;
+                img.src = fURL;
             }
 
             await new Promise((resolve, reject) => {
@@ -260,6 +267,10 @@ const ImageEditorOverlay = (props: IProps) => {
 
     useEffect(() => {
         if (!props.show || !props.file) return;
+        if (isHEICFileFromFileName(props.file.metadata.title)) {
+            initConvertHEIC().then((newFileURL) => loadCanvas(newFileURL));
+            return;
+        }
         loadCanvas();
     }, [props.show, props.file]);
 
@@ -282,6 +293,35 @@ const ImageEditorOverlay = (props: IProps) => {
             logError(e, 'Error exporting canvas to blob');
             throw e;
         }
+    };
+
+    const initConvertHEIC = async () => {
+        setCanvasLoading(true);
+        let pngFile: Blob;
+        try {
+            pngFile = await convertHEICToRenderableFormat();
+        } catch (e) {
+            logError(e, 'initConvertHEIC failed');
+            return;
+        } finally {
+            setCanvasLoading(false);
+        }
+
+        // create url from pngFile
+        const url = URL.createObjectURL(pngFile);
+
+        setFileURL(url);
+        return url;
+    };
+
+    const convertHEICToRenderableFormat = async () => {
+        const fileStream = await downloadManager.downloadFile(props.file);
+        const fileBlob = await new Response(fileStream).blob();
+        if (!fileBlob) {
+            throw Error('no original file URL');
+        }
+
+        return await convertHEIC(fileBlob, 'PNG');
     };
 
     const getEditedFile = async () => {

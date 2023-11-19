@@ -507,6 +507,13 @@ export function isRawFileFromFileName(fileName: string) {
     return false;
 }
 
+export function isHEICFileFromFileName(fileName: string) {
+    if (fileName.toLowerCase().endsWith(TYPE_HEIC)) {
+        return true;
+    }
+    return false;
+}
+
 export function isSupportedRawFormat(exactType: string) {
     return SUPPORTED_RAW_FORMATS.includes(exactType.toLowerCase());
 }

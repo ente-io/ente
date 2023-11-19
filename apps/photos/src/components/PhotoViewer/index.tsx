@@ -13,6 +13,7 @@ import {
     getFileExtension,
     getFileFromURL,
     isRawFileFromFileName,
+    isHEICFileFromFileName,
 } from 'utils/file';
 import { logError } from 'utils/sentry';
 
@@ -330,8 +331,9 @@ function PhotoViewer(props: Iprops) {
 
     function updateShowEditButton(file: EnteFile) {
         setShowEditButton(
-            file.metadata.fileType === FILE_TYPE.IMAGE &&
-                !isRawFileFromFileName(file.metadata.title)
+            (file.metadata.fileType === FILE_TYPE.IMAGE &&
+                !isRawFileFromFileName(file.metadata.title)) ||
+                isHEICFileFromFileName(file.metadata.title)
         );
     }
 
