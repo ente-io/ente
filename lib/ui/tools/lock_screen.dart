@@ -1,6 +1,8 @@
+import "dart:io";
+
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
-import "package:photos/generated/l10n.dart";
+import "package:photos/l10n/l10n.dart";
 import 'package:photos/ui/common/gradient_button.dart';
 import 'package:photos/ui/tools/app_lock.dart';
 import 'package:photos/utils/auth_util.dart';
@@ -21,10 +23,16 @@ class _LockScreenState extends State<LockScreen> with WidgetsBindingObserver {
 
   @override
   void initState() {
-    _logger.info("initState");
+    _logger.info("initiatingState");
     super.initState();
-    _showLockScreen(source: "initState");
     WidgetsBinding.instance.addObserver(this);
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      if (isNonMobileIOSDevice()) {
+        _logger.info('ignore init for non mobile iOS device');
+        return;
+      }
+      _showLockScreen(source: "postFrameInit");
+    });
   }
 
   @override
@@ -45,7 +53,7 @@ class _LockScreenState extends State<LockScreen> with WidgetsBindingObserver {
                 SizedBox(
                   width: 180,
                   child: GradientButton(
-                    text: S.of(context).unlock,
+                    text: context.l10n.unlock,
                     iconData: Icons.lock_open_outlined,
                     onTap: () async {
                       _showLockScreen(source: "tapUnlock");
@@ -58,6 +66,14 @@ class _LockScreenState extends State<LockScreen> with WidgetsBindingObserver {
         ),
       ),
     );
+  }
+
+  bool isNonMobileIOSDevice() {
+    if (Platform.isAndroid) {
+      return false;
+    }
+    var shortestSide = MediaQuery.of(context).size.shortestSide;
+    return shortestSide > 600 ? true : false;
   }
 
   @override
@@ -73,7 +89,10 @@ class _LockScreenState extends State<LockScreen> with WidgetsBindingObserver {
       if (!_hasAuthenticationFailed && !didAuthInLast5Seconds) {
         // Show the lock screen again only if the app is resuming from the
         // background, and not when the lock screen was explicitly dismissed
-        _showLockScreen(source: "lifeCycle");
+        Future.delayed(
+          Duration.zero,
+          () => _showLockScreen(source: "lifeCycle"),
+        );
       } else {
         _hasAuthenticationFailed = false; // Reset failure state
       }
@@ -90,6 +109,7 @@ class _LockScreenState extends State<LockScreen> with WidgetsBindingObserver {
 
   @override
   void dispose() {
+    _logger.info('disposing');
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
@@ -101,7 +121,7 @@ class _LockScreenState extends State<LockScreen> with WidgetsBindingObserver {
       _isShowingLockScreen = true;
       final result = await requestAuthentication(
         context,
-        S.of(context).authToViewYourMemories,
+        context.l10n.authToViewYourMemories,
       );
       _logger.finest("LockScreen Result $result $id");
       _isShowingLockScreen = false;
@@ -117,6 +137,7 @@ class _LockScreenState extends State<LockScreen> with WidgetsBindingObserver {
         }
       }
     } catch (e, s) {
+      _isShowingLockScreen = false;
       _logger.severe(e, s);
     }
   }
