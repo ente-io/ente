@@ -7995,10 +7995,10 @@ class S {
     );
   }
 
-  /// `Coming soon: Photo contents, faces`
+  /// `Coming soon: Faces & magic search ✨`
   String get searchHint5 {
     return Intl.message(
-      'Coming soon: Photo contents, faces',
+      'Coming soon: Faces & magic search ✨',
       name: 'searchHint5',
       desc: '',
       args: [],
@@ -8063,6 +8063,26 @@ class S {
     return Intl.message(
       'Contacts',
       name: 'contacts',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No internet connection`
+  String get noInternetConnection {
+    return Intl.message(
+      'No internet connection',
+      name: 'noInternetConnection',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please check your internet connection and try again.`
+  String get pleaseCheckYourInternetConnectionAndTryAgain {
+    return Intl.message(
+      'Please check your internet connection and try again.',
+      name: 'pleaseCheckYourInternetConnectionAndTryAgain',
       desc: '',
       args: [],
     );

@@ -441,6 +441,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "contactSupport":
             MessageLookupByLibrary.simpleMessage("Contact support"),
         "contactToManageSubscription": m10,
+        "contacts": MessageLookupByLibrary.simpleMessage("Contacts"),
         "contents": MessageLookupByLibrary.simpleMessage("Contents"),
         "continueLabel": MessageLookupByLibrary.simpleMessage("Continue"),
         "continueOnFreeTrial":
@@ -879,6 +880,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("No hidden photos or videos"),
         "noImagesWithLocation":
             MessageLookupByLibrary.simpleMessage("No images with location"),
+        "noInternetConnection":
+            MessageLookupByLibrary.simpleMessage("No internet connection"),
         "noPhotosAreBeingBackedUpRightNow":
             MessageLookupByLibrary.simpleMessage(
                 "No photos are being backed up right now"),
@@ -926,7 +929,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "paymentFailedTalkToProvider": m33,
         "paymentFailedWithReason": m34,
         "pendingSync": MessageLookupByLibrary.simpleMessage("Pending sync"),
-        "people": MessageLookupByLibrary.simpleMessage("People"),
         "peopleUsingYourCode":
             MessageLookupByLibrary.simpleMessage("People using your code"),
         "permDeleteWarning": MessageLookupByLibrary.simpleMessage(
@@ -950,6 +952,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "playStoreFreeTrialValidTill": m35,
         "playstoreSubscription":
             MessageLookupByLibrary.simpleMessage("PlayStore subscription"),
+        "pleaseCheckYourInternetConnectionAndTryAgain":
+            MessageLookupByLibrary.simpleMessage(
+                "Please check your internet connection and try again."),
         "pleaseContactSupportAndWeWillBeHappyToHelp":
             MessageLookupByLibrary.simpleMessage(
                 "Please contact support@ente.io and we will be happy to help!"),
@@ -1120,7 +1125,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Albums, file names, and types"),
         "searchHint4": MessageLookupByLibrary.simpleMessage("Location"),
         "searchHint5": MessageLookupByLibrary.simpleMessage(
-            "Coming soon: Photo contents, faces"),
+            "Coming soon: Faces & magic search ✨"),
         "searchHintText": MessageLookupByLibrary.simpleMessage(
             "Albums, months, days, years, ..."),
         "searchLocationEmptySection": MessageLookupByLibrary.simpleMessage(
