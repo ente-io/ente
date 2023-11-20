@@ -157,6 +157,7 @@
     "RENEWAL_ACTIVE_SUBSCRIPTION_STATUS": "Renews on {{date, dateTime}}",
     "RENEWAL_CANCELLED_SUBSCRIPTION_STATUS": "Ends on {{date, dateTime}}",
     "RENEWAL_CANCELLED_SUBSCRIPTION_INFO": "Your subscription will be cancelled on {{date, dateTime}}",
+    "ADD_ON_AVAILABLE_TILL": "Your {{storage, string}} add-on is valid till {{date, dateTime}}",
     "STORAGE_QUOTA_EXCEEDED_SUBSCRIPTION_INFO": "You have exceeded your storage quota, please <a>upgrade</a>",
     "SUBSCRIPTION_PURCHASE_SUCCESS": "<p>We've received your payment</p><p>Your subscription is valid till <strong>{{date, dateTime}}</strong></p>",
     "SUBSCRIPTION_PURCHASE_CANCELLED": "Your purchase was canceled, please try again if you want to subscribe",

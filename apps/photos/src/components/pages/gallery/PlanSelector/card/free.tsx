@@ -9,6 +9,7 @@ import Plans from '../plans';
 export default function FreeSubscriptionPlanSelectorCard({
     plans,
     subscription,
+    bonusData,
     closeModal,
     planPeriod,
     togglePeriod,
@@ -36,6 +37,7 @@ export default function FreeSubscriptionPlanSelectorCard({
                         planPeriod={planPeriod}
                         onPlanSelect={onPlanSelect}
                         subscription={subscription}
+                        bonusData={bonusData}
                         closeModal={closeModal}
                     />
                 </Stack>
