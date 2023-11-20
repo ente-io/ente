@@ -42,6 +42,11 @@ export const WHITELISTED_FILE_FORMATS: FileTypeInfo[] = [
         exactType: 'crw',
         mimeType: 'image/x-canon-crw',
     },
+    {
+        fileType: FILE_TYPE.VIDEO,
+        exactType: 'mov',
+        mimeType: 'video/quicktime',
+    },
 ];
 
 export const KNOWN_NON_MEDIA_FORMATS = ['xmp', 'html', 'txt'];
