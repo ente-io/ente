@@ -138,7 +138,7 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m40(userEmail) =>
       "${userEmail} will be removed from this shared album\n\nAny photos added by them will also be removed from the album";
 
-  static String m41(endDate) => "Renews on ${endDate}";
+  static String m41(endDate) => "Subscription renews on ${endDate}";
 
   static String m65(count) =>
       "${Intl.plural(count, one: '${count} result found', other: '${count} results found')}";

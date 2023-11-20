@@ -1,6 +1,7 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+
 import 'intl/messages_all.dart';
 
 // **************************************************************************
@@ -3894,10 +3895,10 @@ class S {
     );
   }
 
-  /// `Renews on {endDate}`
+  /// `Subscription renews on {endDate}`
   String renewsOn(Object endDate) {
     return Intl.message(
-      'Renews on $endDate',
+      'Subscription renews on $endDate',
       name: 'renewsOn',
       desc: '',
       args: [endDate],
