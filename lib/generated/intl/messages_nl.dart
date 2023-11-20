@@ -441,6 +441,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "contactSupport":
             MessageLookupByLibrary.simpleMessage("Contacteer klantenservice"),
         "contactToManageSubscription": m10,
+        "contacts": MessageLookupByLibrary.simpleMessage("Contacts"),
         "continueLabel": MessageLookupByLibrary.simpleMessage("Doorgaan"),
         "continueOnFreeTrial": MessageLookupByLibrary.simpleMessage(
             "Doorgaan met gratis proefversie"),

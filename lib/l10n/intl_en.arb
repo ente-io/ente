@@ -1149,5 +1149,7 @@
   "@addNew": {
     "description": "Text to add a new item (location tag, album, caption etc)"
   },
-  "contacts": "Contacts"
+  "contacts": "Contacts",
+  "noInternetConnection": "No internet connection",
+  "pleaseCheckYourInternetConnectionAndTryAgain": "Please check your internet connection and try again."
 }
