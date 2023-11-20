@@ -1149,5 +1149,7 @@
   "@addNew": {
     "description": "Text to add a new item (location tag, album, caption etc)"
   },
-  "contacts": "联系人"
+  "contacts": "联系人",
+  "noInternetConnection": "无互联网连接",
+  "pleaseCheckYourInternetConnectionAndTryAgain": "请检查您的互联网连接，然后重试。"
 }

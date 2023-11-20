@@ -555,9 +555,10 @@
     "type": "text"
   },
   "faqs": "FAQs",
-  "renewsOn": "Renews on {endDate}",
+  "renewsOn": "Subscription renews on {endDate}",
   "freeTrialValidTill": "Free trial valid till {endDate}",
   "validTill": "Valid till {endDate}",
+  "addOnValidTill": "Your {storageAmount} add-on is valid till {endDate}",
   "playStoreFreeTrialValidTill": "Free trial valid till {endDate}.\nYou can choose a paid plan afterwards.",
   "subWillBeCancelledOn": "Your subscription will be cancelled on {endDate}",
   "subscription": "Subscription",
@@ -1149,5 +1150,7 @@
   "@addNew": {
     "description": "Text to add a new item (location tag, album, caption etc)"
   },
-  "contacts": "Contacts"
+  "contacts": "Contacts",
+  "noInternetConnection": "No internet connection",
+  "pleaseCheckYourInternetConnectionAndTryAgain": "Please check your internet connection and try again."
 }

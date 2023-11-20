@@ -23,6 +23,9 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m0(count) =>
       "${Intl.plural(count, one: 'Add item', other: 'Add items')}";
 
+  static String m64(storageAmount, endDate) =>
+      "Your ${storageAmount} add-on is valid till ${endDate}";
+
   static String m1(emailOrName) => "Added by ${emailOrName}";
 
   static String m2(albumName) => "Added successfully to  ${albumName}";
@@ -135,9 +138,9 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m40(userEmail) =>
       "${userEmail} will be removed from this shared album\n\nAny photos added by them will also be removed from the album";
 
-  static String m41(endDate) => "Renews on ${endDate}";
+  static String m41(endDate) => "Subscription renews on ${endDate}";
 
-  static String m64(count) =>
+  static String m65(count) =>
       "${Intl.plural(count, one: '${count} result found', other: '${count} results found')}";
 
   static String m42(count) => "${count} selected";
@@ -190,7 +193,7 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m59(count) =>
       "${Intl.plural(count, zero: '', one: '1 day', other: '${count} days')}";
 
-  static String m65(endDate) => "Valid till ${endDate}";
+  static String m66(endDate) => "Valid till ${endDate}";
 
   static String m60(email) => "Verify ${email}";
 
@@ -226,6 +229,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "addNew": MessageLookupByLibrary.simpleMessage("Add new"),
         "addOnPageSubtitle":
             MessageLookupByLibrary.simpleMessage("Details of add-ons"),
+        "addOnValidTill": m64,
         "addOns": MessageLookupByLibrary.simpleMessage("Add-ons"),
         "addPhotos": MessageLookupByLibrary.simpleMessage("Add photos"),
         "addSelected": MessageLookupByLibrary.simpleMessage("Add selected"),
@@ -441,6 +445,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "contactSupport":
             MessageLookupByLibrary.simpleMessage("Contact support"),
         "contactToManageSubscription": m10,
+        "contacts": MessageLookupByLibrary.simpleMessage("Contacts"),
         "contents": MessageLookupByLibrary.simpleMessage("Contents"),
         "continueLabel": MessageLookupByLibrary.simpleMessage("Continue"),
         "continueOnFreeTrial":
@@ -879,6 +884,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("No hidden photos or videos"),
         "noImagesWithLocation":
             MessageLookupByLibrary.simpleMessage("No images with location"),
+        "noInternetConnection":
+            MessageLookupByLibrary.simpleMessage("No internet connection"),
         "noPhotosAreBeingBackedUpRightNow":
             MessageLookupByLibrary.simpleMessage(
                 "No photos are being backed up right now"),
@@ -926,7 +933,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "paymentFailedTalkToProvider": m33,
         "paymentFailedWithReason": m34,
         "pendingSync": MessageLookupByLibrary.simpleMessage("Pending sync"),
-        "people": MessageLookupByLibrary.simpleMessage("People"),
         "peopleUsingYourCode":
             MessageLookupByLibrary.simpleMessage("People using your code"),
         "permDeleteWarning": MessageLookupByLibrary.simpleMessage(
@@ -950,6 +956,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "playStoreFreeTrialValidTill": m35,
         "playstoreSubscription":
             MessageLookupByLibrary.simpleMessage("PlayStore subscription"),
+        "pleaseCheckYourInternetConnectionAndTryAgain":
+            MessageLookupByLibrary.simpleMessage(
+                "Please check your internet connection and try again."),
         "pleaseContactSupportAndWeWillBeHappyToHelp":
             MessageLookupByLibrary.simpleMessage(
                 "Please contact support@ente.io and we will be happy to help!"),
@@ -1120,14 +1129,14 @@ class MessageLookup extends MessageLookupByLibrary {
             "Albums, file names, and types"),
         "searchHint4": MessageLookupByLibrary.simpleMessage("Location"),
         "searchHint5": MessageLookupByLibrary.simpleMessage(
-            "Coming soon: Photo contents, faces"),
+            "Coming soon: Faces & magic search ✨"),
         "searchHintText": MessageLookupByLibrary.simpleMessage(
             "Albums, months, days, years, ..."),
         "searchLocationEmptySection": MessageLookupByLibrary.simpleMessage(
             "Group photos that are taken within some radius of a photo"),
         "searchPeopleEmptySection": MessageLookupByLibrary.simpleMessage(
             "Invite people, and you\'ll see all photos shared by them here"),
-        "searchResultCount": m64,
+        "searchResultCount": m65,
         "security": MessageLookupByLibrary.simpleMessage("Security"),
         "selectAlbum": MessageLookupByLibrary.simpleMessage("Select album"),
         "selectAll": MessageLookupByLibrary.simpleMessage("Select all"),
@@ -1376,7 +1385,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "useSelectedPhoto":
             MessageLookupByLibrary.simpleMessage("Use selected photo"),
         "usedSpace": MessageLookupByLibrary.simpleMessage("Used space"),
-        "validTill": m65,
+        "validTill": m66,
         "verificationFailedPleaseTryAgain":
             MessageLookupByLibrary.simpleMessage(
                 "Verification failed, please try again"),

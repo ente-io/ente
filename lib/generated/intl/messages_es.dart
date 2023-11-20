@@ -398,6 +398,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "contactSupport":
             MessageLookupByLibrary.simpleMessage("Contactar con soporte"),
         "contactToManageSubscription": m10,
+        "contacts": MessageLookupByLibrary.simpleMessage("Contacts"),
         "continueLabel": MessageLookupByLibrary.simpleMessage("Continuar"),
         "continueOnFreeTrial": MessageLookupByLibrary.simpleMessage(
             "Continuar con el plan gratuito"),
