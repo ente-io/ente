@@ -88,7 +88,8 @@ export default function SubscriptionStatus({
                                 }}
                             />
                         )
-                    ) : isSubscriptionCancelled(userDetails.subscription) ? (
+                    ) : isSubscriptionCancelled(userDetails.subscription) &&
+                      !hasAddOnBonus(userDetails.bonusData) ? (
                         t('RENEWAL_CANCELLED_SUBSCRIPTION_INFO', {
                             date: userDetails.subscription?.expiryTime,
                         })
@@ -105,12 +106,14 @@ export default function SubscriptionStatus({
                         )
                     )
                 ) : (
-                    <Trans
-                        i18nKey={'SUBSCRIPTION_EXPIRED_MESSAGE'}
-                        components={{
-                            a: <LinkButton onClick={handleClick} />,
-                        }}
-                    />
+                    !hasAddOnBonus(userDetails.bonusData) && (
+                        <Trans
+                            i18nKey={'SUBSCRIPTION_EXPIRED_MESSAGE'}
+                            components={{
+                                a: <LinkButton onClick={handleClick} />,
+                            }}
+                        />
+                    )
                 )}
             </Typography>
         </Box>
