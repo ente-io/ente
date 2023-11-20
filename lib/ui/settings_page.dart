@@ -3,7 +3,9 @@ import 'dart:io';
 import 'package:ente_auth/core/configuration.dart';
 import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/onboarding/view/onboarding_page.dart';
+import 'package:ente_auth/services/local_authentication_service.dart';
 import 'package:ente_auth/services/user_service.dart';
+import 'package:ente_auth/store/code_store.dart';
 import 'package:ente_auth/theme/colors.dart';
 import 'package:ente_auth/theme/ente_theme.dart';
 import 'package:ente_auth/ui/components/buttons/button_widget.dart';
@@ -99,6 +101,19 @@ class SettingsPage extends StatelessWidget {
               await handleExportClick(context);
             } else {
               if (result.action == ButtonAction.second) {
+                bool hasCodes =
+                    (await CodeStore.instance.getAllCodes()).isNotEmpty;
+                if (hasCodes) {
+                  final hasAuthenticated = await LocalAuthenticationService
+                      .instance
+                      .requestLocalAuthentication(
+                    context,
+                    context.l10n.authToInitiateSignIn,
+                  );
+                  if (!hasAuthenticated) {
+                    return;
+                  }
+                }
                 await routeToPage(
                   context,
                   const OnboardingPage(),
