@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/ui/common/gradient_button.dart';
 import 'package:ente_auth/ui/tools/app_lock.dart';
@@ -21,10 +23,14 @@ class _LockScreenState extends State<LockScreen> with WidgetsBindingObserver {
 
   @override
   void initState() {
-    _logger.info("initState");
+    _logger.info("initiatingState");
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      if (isNonMobileIOSDevice()) {
+        _logger.info('ignore init for non mobile iOS device');
+        return;
+      }
       _showLockScreen(source: "postFrameInit");
     });
   }
@@ -62,6 +68,17 @@ class _LockScreenState extends State<LockScreen> with WidgetsBindingObserver {
     );
   }
 
+  bool isNonMobileIOSDevice() {
+    if (Platform.isAndroid) {
+      return false;
+    }
+// The equivalent of the "smallestWidth" qualifier on Android.
+    var shortestSide = MediaQuery.of(context).size.shortestSide;
+    // Determine if we should use mobile layout or not, 600 here is
+// a common breakpoint for a typical 7-inch tablet.
+    return shortestSide > 600 ? true : false;
+  }
+
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     _logger.info(state.toString());
@@ -95,6 +112,7 @@ class _LockScreenState extends State<LockScreen> with WidgetsBindingObserver {
 
   @override
   void dispose() {
+    _logger.info('disposing');
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
