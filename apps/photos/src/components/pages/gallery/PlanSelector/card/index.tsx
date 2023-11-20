@@ -44,6 +44,13 @@ function PlanSelectorCard(props: Props) {
     );
     const galleryContext = useContext(GalleryContext);
     const appContext = useContext(AppContext);
+    const bonusData = useMemo(() => {
+        const userDetails = getLocalUserDetails();
+        if (!userDetails) {
+            return null;
+        }
+        return userDetails.bonusData;
+    }, []);
 
     const usage = useMemo(() => {
         const userDetails = getLocalUserDetails();
@@ -170,6 +177,7 @@ function PlanSelectorCard(props: Props) {
                     <PaidSubscriptionPlanSelectorCard
                         plans={plans}
                         subscription={subscription}
+                        bonusData={bonusData}
                         closeModal={props.closeModal}
                         planPeriod={planPeriod}
                         togglePeriod={togglePeriod}
@@ -181,6 +189,7 @@ function PlanSelectorCard(props: Props) {
                     <FreeSubscriptionPlanSelectorCard
                         plans={plans}
                         subscription={subscription}
+                        bonusData={bonusData}
                         closeModal={props.closeModal}
                         planPeriod={planPeriod}
                         togglePeriod={togglePeriod}

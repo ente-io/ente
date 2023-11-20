@@ -84,6 +84,7 @@ export const CustomError = {
     TWO_FACTOR_ENABLED: 'two factor enabled',
     CLIENT_ERROR: 'client error',
     ServerError: 'server error',
+    FILE_NOT_FOUND: 'file not found',
 };
 
 export function handleUploadError(error: any): Error {

@@ -12,16 +12,21 @@ import {
     manageFamilyMethod,
     hasStripeSubscription,
     isSubscriptionCancelled,
+    hasAddOnBonus,
 } from 'utils/billing';
 import ManageSubscriptionButton from './button';
+import { BonusData } from 'types/user';
+
 interface Iprops {
     subscription: Subscription;
+    bonusData?: BonusData;
     closeModal: () => void;
     setLoading: SetLoading;
 }
 
 export function ManageSubscription({
     subscription,
+    bonusData,
     closeModal,
     setLoading,
 }: Iprops) {
@@ -34,6 +39,7 @@ export function ManageSubscription({
             {hasStripeSubscription(subscription) && (
                 <StripeSubscriptionOptions
                     subscription={subscription}
+                    bonusData={bonusData}
                     closeModal={closeModal}
                     setLoading={setLoading}
                 />
@@ -49,6 +55,7 @@ export function ManageSubscription({
 
 function StripeSubscriptionOptions({
     subscription,
+    bonusData,
     setLoading,
     closeModal,
 }: Iprops) {
@@ -77,7 +84,11 @@ function StripeSubscriptionOptions({
     const confirmCancel = () =>
         appContext.setDialogMessage({
             title: t('CANCEL_SUBSCRIPTION'),
-            content: <Trans i18nKey={'CANCEL_SUBSCRIPTION_MESSAGE'} />,
+            content: hasAddOnBonus(bonusData) ? (
+                <Trans i18nKey={'CANCEL_SUBSCRIPTION_WITH_ADDON_MESSAGE'} />
+            ) : (
+                <Trans i18nKey={'CANCEL_SUBSCRIPTION_MESSAGE'} />
+            ),
             proceed: {
                 text: t('CANCEL_SUBSCRIPTION'),
                 action: cancelSubscription.bind(

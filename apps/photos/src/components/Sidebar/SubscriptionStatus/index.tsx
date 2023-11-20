@@ -69,6 +69,48 @@ export default function SubscriptionStatus({
         return <></>;
     }
 
+    const messages = [];
+    if (!hasAddOnBonus(userDetails.bonusData)) {
+        if (isSubscriptionActive(userDetails.subscription)) {
+            if (isOnFreePlan(userDetails.subscription)) {
+                messages.push(
+                    <Trans
+                        i18nKey={'FREE_SUBSCRIPTION_INFO'}
+                        values={{
+                            date: userDetails.subscription?.expiryTime,
+                        }}
+                    />
+                );
+            } else if (isSubscriptionCancelled(userDetails.subscription)) {
+                messages.push(
+                    t('RENEWAL_CANCELLED_SUBSCRIPTION_INFO', {
+                        date: userDetails.subscription?.expiryTime,
+                    })
+                );
+            }
+        } else {
+            messages.push(
+                <Trans
+                    i18nKey={'SUBSCRIPTION_EXPIRED_MESSAGE'}
+                    components={{
+                        a: <LinkButton onClick={handleClick} />,
+                    }}
+                />
+            );
+        }
+    }
+
+    if (hasExceededStorageQuota(userDetails) && messages.length === 0) {
+        messages.push(
+            <Trans
+                i18nKey={'STORAGE_QUOTA_EXCEEDED_SUBSCRIPTION_INFO'}
+                components={{
+                    a: <LinkButton onClick={handleClick} />,
+                }}
+            />
+        );
+    }
+
     return (
         <Box px={1} pt={0.5}>
             <Typography
@@ -76,42 +118,7 @@ export default function SubscriptionStatus({
                 color={'text.muted'}
                 onClick={handleClick && handleClick}
                 sx={{ cursor: handleClick && 'pointer' }}>
-                {isSubscriptionActive(userDetails.subscription) ? (
-                    isOnFreePlan(userDetails.subscription) ? (
-                        hasAddOnBonus(userDetails.bonusData) ? (
-                            ''
-                        ) : (
-                            <Trans
-                                i18nKey={'FREE_SUBSCRIPTION_INFO'}
-                                values={{
-                                    date: userDetails.subscription?.expiryTime,
-                                }}
-                            />
-                        )
-                    ) : isSubscriptionCancelled(userDetails.subscription) ? (
-                        t('RENEWAL_CANCELLED_SUBSCRIPTION_INFO', {
-                            date: userDetails.subscription?.expiryTime,
-                        })
-                    ) : (
-                        hasExceededStorageQuota(userDetails) && (
-                            <Trans
-                                i18nKey={
-                                    'STORAGE_QUOTA_EXCEEDED_SUBSCRIPTION_INFO'
-                                }
-                                components={{
-                                    a: <LinkButton onClick={handleClick} />,
-                                }}
-                            />
-                        )
-                    )
-                ) : (
-                    <Trans
-                        i18nKey={'SUBSCRIPTION_EXPIRED_MESSAGE'}
-                        components={{
-                            a: <LinkButton onClick={handleClick} />,
-                        }}
-                    />
-                )}
+                {messages}
             </Typography>
         </Box>
     );
