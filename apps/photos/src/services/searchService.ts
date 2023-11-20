@@ -54,6 +54,7 @@ export const getAutoCompleteSuggestions =
                 return [];
             }
             const suggestions: Suggestion[] = [
+                await getClipSuggestion(searchPhrase),
                 ...getFileTypeSuggestion(searchPhrase),
                 ...getHolidaySuggestion(searchPhrase),
                 ...getYearSuggestion(searchPhrase),
@@ -63,7 +64,6 @@ export const getAutoCompleteSuggestions =
                 getFileCaptionSuggestion(searchPhrase, files),
                 ...(await getLocationTagSuggestions(searchPhrase)),
                 ...(await getThingSuggestion(searchPhrase)),
-                await getClipSuggestion(searchPhrase),
             ].filter((suggestion) => !!suggestion);
 
             return convertSuggestionsToOptions(suggestions, files);
