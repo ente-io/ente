@@ -210,7 +210,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
 
     widgets.add(_showSubscriptionToggle());
 
-    if (_hasActiveSubscription) {
+    if (_currentSubscription != null) {
       widgets.add(
         ValidityWidget(
           currentSubscription: _currentSubscription,

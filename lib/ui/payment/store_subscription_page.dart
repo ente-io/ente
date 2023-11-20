@@ -239,7 +239,7 @@ class _StoreSubscriptionPageState extends State<StoreSubscriptionPage> {
       widgets.add(_showSubscriptionToggle());
     }
 
-    if (_hasActiveSubscription) {
+    if (_currentSubscription != null) {
       widgets.add(
         ValidityWidget(
           currentSubscription: _currentSubscription,

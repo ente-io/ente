@@ -140,6 +140,9 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m41(endDate) => "Renouvellement le ${endDate}";
 
+  static String m65(count) =>
+      "${Intl.plural(count, one: '${count} résultat trouvé', other: '${count} résultats trouvés')}";
+
   static String m42(count) => "${count} sélectionné(s)";
 
   static String m43(count, yourCount) =>
@@ -189,6 +192,8 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m59(count) =>
       "${Intl.plural(count, zero: '0 jour', one: '1 jour', other: '${count} jours')}";
 
+  static String m66(endDate) => "Valable jusqu\'au ${endDate}";
+
   static String m60(email) => "Vérifier ${email}";
 
   static String m61(email) =>
@@ -223,6 +228,11 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Ajouter la localisation"),
         "addLocationButton": MessageLookupByLibrary.simpleMessage("Ajouter"),
         "addMore": MessageLookupByLibrary.simpleMessage("Ajouter Plus"),
+        "addNew": MessageLookupByLibrary.simpleMessage("Ajouter un nouveau"),
+        "addOnPageSubtitle": MessageLookupByLibrary.simpleMessage(
+            "Détails des modules complémentaires"),
+        "addOns":
+            MessageLookupByLibrary.simpleMessage("Modules complémentaires"),
         "addPhotos": MessageLookupByLibrary.simpleMessage("Ajouter des photos"),
         "addSelected":
             MessageLookupByLibrary.simpleMessage("Ajouter la sélection"),
@@ -233,6 +243,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Ajouter à un album masqué"),
         "addViewer":
             MessageLookupByLibrary.simpleMessage("Ajouter un observateur"),
+        "addYourPhotosNow": MessageLookupByLibrary.simpleMessage(
+            "Ajoutez vos photos maintenant"),
         "addedAs": MessageLookupByLibrary.simpleMessage("Ajouté comme"),
         "addedBy": m1,
         "addedSuccessfullyTo": m2,
@@ -356,6 +368,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Paramètres de la sauvegarde"),
         "backupVideos":
             MessageLookupByLibrary.simpleMessage("Sauvegarde des vidéos"),
+        "blackFridaySale":
+            MessageLookupByLibrary.simpleMessage("Offre Black Friday"),
         "blog": MessageLookupByLibrary.simpleMessage("Blog"),
         "cachedData":
             MessageLookupByLibrary.simpleMessage("Données mises en cache"),
@@ -446,6 +460,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "contactSupport":
             MessageLookupByLibrary.simpleMessage("Contacter l\'assistance"),
         "contactToManageSubscription": m10,
+        "contacts": MessageLookupByLibrary.simpleMessage("Contacts"),
+        "contents": MessageLookupByLibrary.simpleMessage("Contenus"),
         "continueLabel": MessageLookupByLibrary.simpleMessage("Continuer"),
         "continueOnFreeTrial": MessageLookupByLibrary.simpleMessage(
             "Poursuivre avec la version d\'essai gratuite"),
@@ -510,7 +526,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Ceci supprimera tous les albums vides. Ceci est utile lorsque vous voulez réduire l\'encombrement dans votre liste d\'albums."),
         "deleteAll": MessageLookupByLibrary.simpleMessage("Tout Supprimer"),
         "deleteConfirmDialogBody": MessageLookupByLibrary.simpleMessage(
-            "This account is linked to other ente apps, if you use any.\\n\\nYour uploaded data, across all ente apps, will be scheduled for deletion, and your account will be permanently deleted."),
+            "Ce compte est lié à d\'autres applications ente, si vous en utilisez une.\\n\\nVos données téléchargées, dans toutes les applications ente, seront planifiées pour suppression, et votre compte sera définitivement supprimé."),
         "deleteEmailRequest": MessageLookupByLibrary.simpleMessage(
             "Veuillez envoyer un e-mail à <warning>account-deletion@ente.io</warning> à partir de votre adresse e-mail enregistrée."),
         "deleteEmptyAlbums":
@@ -658,6 +674,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "exportLogs": MessageLookupByLibrary.simpleMessage("Exporter les logs"),
         "exportYourData":
             MessageLookupByLibrary.simpleMessage("Exportez vos données"),
+        "faces": MessageLookupByLibrary.simpleMessage("Visages"),
         "failedToApplyCode": MessageLookupByLibrary.simpleMessage(
             "Impossible d\'appliquer le code"),
         "failedToCancel":
@@ -689,7 +706,9 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Ajouter une description..."),
         "fileSavedToGallery": MessageLookupByLibrary.simpleMessage(
             "Fichier enregistré dans la galerie"),
-        "fileTypes": MessageLookupByLibrary.simpleMessage("File types"),
+        "fileTypes": MessageLookupByLibrary.simpleMessage("Types de fichiers"),
+        "fileTypesAndNames":
+            MessageLookupByLibrary.simpleMessage("Types et noms de fichiers"),
         "filesBackedUpFromDevice": m19,
         "filesBackedUpInAlbum": m20,
         "filesDeleted":
@@ -729,6 +748,10 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Accorder la permission"),
         "groupNearbyPhotos": MessageLookupByLibrary.simpleMessage(
             "Grouper les photos à proximité"),
+        "hearUsExplanation": MessageLookupByLibrary.simpleMessage(
+            "Nous ne suivons pas les installations d\'applications. Il serait utile que vous nous disiez comment vous nous avez trouvés !"),
+        "hearUsWhereTitle": MessageLookupByLibrary.simpleMessage(
+            "Comment avez-vous entendu parler de Ente? (facultatif)"),
         "hidden": MessageLookupByLibrary.simpleMessage("Masqué"),
         "hide": MessageLookupByLibrary.simpleMessage("Masquer"),
         "hiding": MessageLookupByLibrary.simpleMessage("Masquage en cours..."),
@@ -810,6 +833,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "linkHasExpired":
             MessageLookupByLibrary.simpleMessage("Le lien a expiré"),
         "linkNeverExpires": MessageLookupByLibrary.simpleMessage("Jamais"),
+        "livePhotos": MessageLookupByLibrary.simpleMessage("Photos en direct"),
         "loadMessage1": MessageLookupByLibrary.simpleMessage(
             "Vous pouvez partager votre abonnement avec votre famille"),
         "loadMessage2": MessageLookupByLibrary.simpleMessage(
@@ -876,7 +900,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Sécurité moyenne"),
         "modifyYourQueryOrTrySearchingFor":
             MessageLookupByLibrary.simpleMessage(
-                "Modify your query, or try searching for"),
+                "Modifiez votre requête, ou essayez de rechercher"),
+        "moments": MessageLookupByLibrary.simpleMessage("Souvenirs"),
         "monthly": MessageLookupByLibrary.simpleMessage("Mensuel"),
         "moveItem": m30,
         "moveToAlbum":
@@ -966,9 +991,12 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Supprimer définitivement"),
         "permanentlyDeleteFromDevice": MessageLookupByLibrary.simpleMessage(
             "Supprimer définitivement de l\'appareil ?"),
+        "photoDescriptions":
+            MessageLookupByLibrary.simpleMessage("Descriptions de la photo"),
         "photoGridSize":
             MessageLookupByLibrary.simpleMessage("Taille de la grille photo"),
         "photoSmallCase": MessageLookupByLibrary.simpleMessage("photo"),
+        "photos": MessageLookupByLibrary.simpleMessage("Photos"),
         "photosAddedByYouWillBeRemovedFromTheAlbum":
             MessageLookupByLibrary.simpleMessage(
                 "Les photos ajoutées par vous seront retirées de l\'album"),
@@ -1136,12 +1164,36 @@ class MessageLookup extends MessageLookupByLibrary {
         "scanThisBarcodeWithnyourAuthenticatorApp":
             MessageLookupByLibrary.simpleMessage(
                 "Scannez ce code-barres avec\nvotre application d\'authentification"),
+        "searchAlbumsEmptySection":
+            MessageLookupByLibrary.simpleMessage("Albums"),
         "searchByAlbumNameHint":
             MessageLookupByLibrary.simpleMessage("Nom de l\'album"),
         "searchByExamples": MessageLookupByLibrary.simpleMessage(
             "• Noms d\'albums (par exemple \"Caméra\")\n• Types de fichiers (par exemple \"Vidéos\", \".gif\")\n• Années et mois (par exemple \"2022\", \"Janvier\")\n• Vacances (par exemple \"Noël\")\n• Descriptions de photos (par exemple \"#fun\")"),
+        "searchCaptionEmptySection": MessageLookupByLibrary.simpleMessage(
+            "Ajoutez des descriptions comme \"#trip\" dans les infos photo pour les retrouver ici plus rapidement"),
+        "searchDatesEmptySection": MessageLookupByLibrary.simpleMessage(
+            "Recherche par date, mois ou année"),
+        "searchFaceEmptySection": MessageLookupByLibrary.simpleMessage(
+            "Trouver toutes les photos d\'une personne"),
+        "searchFileTypesAndNamesEmptySection":
+            MessageLookupByLibrary.simpleMessage("Types et noms de fichiers"),
+        "searchHint1": MessageLookupByLibrary.simpleMessage(
+            "Recherche rapide, sur l\'appareil"),
+        "searchHint2": MessageLookupByLibrary.simpleMessage(
+            "Dates des photos, descriptions"),
+        "searchHint3": MessageLookupByLibrary.simpleMessage(
+            "Albums, noms de fichiers et types"),
+        "searchHint4": MessageLookupByLibrary.simpleMessage("Emplacement"),
+        "searchHint5": MessageLookupByLibrary.simpleMessage(
+            "Bientôt: Visages & recherche magique ✨"),
         "searchHintText": MessageLookupByLibrary.simpleMessage(
             "Albums, mois, jours, années, ..."),
+        "searchLocationEmptySection": MessageLookupByLibrary.simpleMessage(
+            "Grouper les photos qui sont prises dans un certain angle d\'une photo"),
+        "searchPeopleEmptySection": MessageLookupByLibrary.simpleMessage(
+            "Invitez des gens, et vous verrez ici toutes les photos qu\'ils partagent"),
+        "searchResultCount": m65,
         "security": MessageLookupByLibrary.simpleMessage("Sécurité"),
         "selectAlbum":
             MessageLookupByLibrary.simpleMessage("Sélectionner album"),
@@ -1400,6 +1452,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "upgrade": MessageLookupByLibrary.simpleMessage("Améliorer"),
         "uploadingFilesToAlbum": MessageLookupByLibrary.simpleMessage(
             "Envoi des fichiers vers l\'album..."),
+        "upto50OffUntil4thDec": MessageLookupByLibrary.simpleMessage(
+            "Jusqu\'à 50% de réduction, jusqu\'au 4ème déc."),
         "usableReferralStorageInfo": MessageLookupByLibrary.simpleMessage(
             "Le stockage utilisable est limité par votre offre actuelle. Le stockage excédentaire deviendra automatiquement utilisable lorsque vous mettez à niveau votre offre."),
         "usePublicLinksForPeopleNotOnEnte": MessageLookupByLibrary.simpleMessage(
@@ -1409,6 +1463,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "useSelectedPhoto": MessageLookupByLibrary.simpleMessage(
             "Utiliser la photo sélectionnée"),
         "usedSpace": MessageLookupByLibrary.simpleMessage("Mémoire utilisée"),
+        "validTill": m66,
         "verificationFailedPleaseTryAgain":
             MessageLookupByLibrary.simpleMessage(
                 "La vérification a échouée, veuillez réessayer"),
@@ -1426,8 +1481,11 @@ class MessageLookup extends MessageLookupByLibrary {
         "verifyingRecoveryKey": MessageLookupByLibrary.simpleMessage(
             "Vérification de la clé de récupération..."),
         "videoSmallCase": MessageLookupByLibrary.simpleMessage("vidéo"),
+        "videos": MessageLookupByLibrary.simpleMessage("Vidéos"),
         "viewActiveSessions": MessageLookupByLibrary.simpleMessage(
             "Afficher les sessions actives"),
+        "viewAddOnButton": MessageLookupByLibrary.simpleMessage(
+            "Afficher les modules complémentaires"),
         "viewAll": MessageLookupByLibrary.simpleMessage("Tout afficher"),
         "viewAllExifData": MessageLookupByLibrary.simpleMessage(
             "Visualiser toutes les données EXIF"),
@@ -1481,7 +1539,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "youHaveSuccessfullyFreedUp": m63,
         "yourAccountHasBeenDeleted":
             MessageLookupByLibrary.simpleMessage("Votre compte a été supprimé"),
-        "yourMap": MessageLookupByLibrary.simpleMessage("Your map"),
+        "yourMap": MessageLookupByLibrary.simpleMessage("Votre carte"),
         "yourPlanWasSuccessfullyDowngraded":
             MessageLookupByLibrary.simpleMessage(
                 "Votre plan a été rétrogradé avec succès"),

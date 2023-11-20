@@ -3924,6 +3924,16 @@ class S {
     );
   }
 
+  /// `Your {storageAmount} add-on is valid till {endDate}`
+  String addOnValidTill(Object storageAmount, Object endDate) {
+    return Intl.message(
+      'Your $storageAmount add-on is valid till $endDate',
+      name: 'addOnValidTill',
+      desc: '',
+      args: [storageAmount, endDate],
+    );
+  }
+
   /// `Free trial valid till {endDate}.\nYou can choose a paid plan afterwards.`
   String playStoreFreeTrialValidTill(Object endDate) {
     return Intl.message(
@@ -7995,10 +8005,10 @@ class S {
     );
   }
 
-  /// `Coming soon: Photo contents, faces`
+  /// `Coming soon: Faces & magic search ✨`
   String get searchHint5 {
     return Intl.message(
-      'Coming soon: Photo contents, faces',
+      'Coming soon: Faces & magic search ✨',
       name: 'searchHint5',
       desc: '',
       args: [],
