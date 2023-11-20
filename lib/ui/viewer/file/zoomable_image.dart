@@ -92,7 +92,6 @@ class _ZoomableImageState extends State<ZoomableImage>
     if (_imageProvider != null) {
       content = PhotoViewGallery.builder(
         gaplessPlayback: true,
-        scaleStateChangedCallback: _scaleStateChangedCallback,
         backgroundDecoration: widget.backgroundDecoration as BoxDecoration?,
         builder: (context, index) {
           return PhotoViewGalleryPageOptions(
