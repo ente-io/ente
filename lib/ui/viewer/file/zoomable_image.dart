@@ -55,6 +55,8 @@ class _ZoomableImageState extends State<ZoomableImage>
   bool _loadingFinalImage = false;
   bool _loadedFinalImage = false;
   PhotoViewController _photoViewController = PhotoViewController();
+  double? initialScale;
+  double percentage = 42.5 / 100;
 
   @override
   void initState() {
@@ -102,13 +104,17 @@ class _ZoomableImageState extends State<ZoomableImage>
     }
 
     verticalDragCallback(d) => {
-          if (d.delta.dy > dragSensitivity)
+          if (_photoViewController.scale! <=
+              (initialScale! + (initialScale! * (percentage))))
             {
-              {Navigator.of(context).pop()},
-            }
-          else if (d.delta.dy < (dragSensitivity * -1))
-            {
-              showDetailsSheet(context, widget.photo),
+              if (d.delta.dy > dragSensitivity)
+                {
+                  {Navigator.of(context).pop()},
+                }
+              else if (d.delta.dy < (dragSensitivity * -1))
+                {
+                  showDetailsSheet(context, widget.photo),
+                },
             },
         };
     return GestureDetector(
@@ -275,6 +281,9 @@ class _ZoomableImageState extends State<ZoomableImage>
         initialPosition: newPosition,
         initialScale: scale,
       );
+      setState(() {
+        initialScale = scale;
+      });
     }
     final bool canUpdateMetadata = _photo.canEditMetaInfo;
     // forcefully get finalImageInfo is dimensions are not available in metadata
