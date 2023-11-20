@@ -55,8 +55,7 @@ class _ZoomableImageState extends State<ZoomableImage>
   bool _loadingFinalImage = false;
   bool _loadedFinalImage = false;
   PhotoViewController _photoViewController = PhotoViewController();
-  double? initialScale;
-  double percentage = 42.5 / 100;
+  double? _initialScale;
 
   @override
   void initState() {
@@ -104,8 +103,7 @@ class _ZoomableImageState extends State<ZoomableImage>
     }
 
     verticalDragCallback(d) => {
-          if (_photoViewController.scale! <=
-              (initialScale! + (initialScale! * (percentage))))
+          if (_photoViewController.scale! <= _initialScale!)
             {
               if (d.delta.dy > dragSensitivity)
                 {
@@ -282,7 +280,7 @@ class _ZoomableImageState extends State<ZoomableImage>
         initialScale: scale,
       );
       setState(() {
-        initialScale = scale;
+        _initialScale = scale;
       });
     }
     final bool canUpdateMetadata = _photo.canEditMetaInfo;
