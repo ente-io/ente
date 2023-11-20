@@ -54,8 +54,8 @@ class _ZoomableImageState extends State<ZoomableImage>
   bool _loadedLargeThumbnail = false;
   bool _loadingFinalImage = false;
   bool _loadedFinalImage = false;
-  ValueChanged<PhotoViewScaleState>? _scaleStateChangedCallback;
-  bool _isZooming = false;
+  // ValueChanged<PhotoViewScaleState>? _scaleStateChangedCallback;
+  final bool _isZooming = false;
   PhotoViewController _photoViewController = PhotoViewController();
 
   @override
@@ -63,14 +63,14 @@ class _ZoomableImageState extends State<ZoomableImage>
     _photo = widget.photo;
     _logger = Logger("ZoomableImage");
     _logger.info('initState for ${_photo.generatedID} with tag ${_photo.tag}');
-    _scaleStateChangedCallback = (value) {
-      if (widget.shouldDisableScroll != null) {
-        widget.shouldDisableScroll!(value != PhotoViewScaleState.initial);
-      }
-      _isZooming = value != PhotoViewScaleState.initial;
-      debugPrint("isZooming = $_isZooming, currentState $value");
-      // _logger.info('is reakky zooming $_isZooming with state $value');
-    };
+    // _scaleStateChangedCallback = (value) {
+    //   if (widget.shouldDisableScroll != null) {
+    //     widget.shouldDisableScroll!(value != PhotoViewScaleState.initial);
+    //   }
+    //   _isZooming = value != PhotoViewScaleState.initial;
+    //   debugPrint("isZooming = $_isZooming, currentState $value");
+    //   // _logger.info('is reakky zooming $_isZooming with state $value');
+    // };
     super.initState();
   }
 
