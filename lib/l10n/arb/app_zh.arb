@@ -391,5 +391,7 @@
   "iOSOkButton": "好的",
   "@iOSOkButton": {
     "description": "Message showed on a button that the user can click to leave the current dialog. It is used on iOS side. Maximum 30 characters."
-  }
+  },
+  "noInternetConnection": "无互联网连接",
+  "pleaseCheckYourInternetConnectionAndTryAgain": "请检查您的互联网连接，然后重试。"
 }
