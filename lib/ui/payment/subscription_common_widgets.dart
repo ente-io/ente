@@ -153,7 +153,7 @@ class AddOnBonusValidity extends StatelessWidget {
         DateFormat.yMMMd(Localizations.localeOf(context).languageCode).format(
       DateTime.fromMicrosecondsSinceEpoch(bonus.validTill),
     );
-    final String storage = formatBytes(bonus.storage);
+    final String storage = convertBytesToReadableFormat(bonus.storage);
     return Padding(
       padding: const EdgeInsets.only(top: 8, bottom: 8),
       child: Text(
