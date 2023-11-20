@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/ui/common/gradient_button.dart';
 import 'package:ente_auth/ui/tools/app_lock.dart';
@@ -21,10 +23,16 @@ class _LockScreenState extends State<LockScreen> with WidgetsBindingObserver {
 
   @override
   void initState() {
-    _logger.info("initState");
+    _logger.info("initiatingState");
     super.initState();
-    _showLockScreen(source: "initState");
     WidgetsBinding.instance.addObserver(this);
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      if (isNonMobileIOSDevice()) {
+        _logger.info('ignore init for non mobile iOS device');
+        return;
+      }
+      _showLockScreen(source: "postFrameInit");
+    });
   }
 
   @override
@@ -60,6 +68,14 @@ class _LockScreenState extends State<LockScreen> with WidgetsBindingObserver {
     );
   }
 
+  bool isNonMobileIOSDevice() {
+    if (Platform.isAndroid) {
+      return false;
+    }
+    var shortestSide = MediaQuery.of(context).size.shortestSide;
+    return shortestSide > 600 ? true : false;
+  }
+
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     _logger.info(state.toString());
@@ -74,7 +90,9 @@ class _LockScreenState extends State<LockScreen> with WidgetsBindingObserver {
         // Show the lock screen again only if the app is resuming from the
         // background, and not when the lock screen was explicitly dismissed
         Future.delayed(
-            Duration.zero, () => _showLockScreen(source: "lifeCycle"));
+          Duration.zero,
+          () => _showLockScreen(source: "lifeCycle"),
+        );
       } else {
         _hasAuthenticationFailed = false; // Reset failure state
       }
@@ -91,6 +109,7 @@ class _LockScreenState extends State<LockScreen> with WidgetsBindingObserver {
 
   @override
   void dispose() {
+    _logger.info('disposing');
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
