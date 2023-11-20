@@ -44,6 +44,7 @@ export const syncEmbeddings = async () => {
     try {
         let embeddings = await getLocalEmbeddings();
         const localFiles = await getAllLocalFiles();
+        const hiddenAlbums = await getLocalCollections('hidden');
         const localTrashFiles = await getLocalTrashedFiles();
         const fileIdToKeyMap = new Map<number, string>();
         [...localFiles, ...localTrashFiles].forEach((file) => {
@@ -84,9 +85,6 @@ export const syncEmbeddings = async () => {
                     } catch (e) {
                         let info: Record<string, unknown>;
                         if (e.message === CustomError.FILE_NOT_FOUND) {
-                            const hiddenAlbums = await getLocalCollections(
-                                'hidden'
-                            );
                             const hasHiddenAlbums = hiddenAlbums?.length > 0;
                             info = {
                                 hasHiddenAlbums,
