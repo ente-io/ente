@@ -139,9 +139,19 @@ class _LoginPasswordVerificationPageState
         }
       }
     } catch (e, s) {
-      _logger.severe('error while verifying password', e, s);
+      _logger.info('error during loginViaPassword', e);
       await dialog.hide();
-      if (e is KeyDerivationError || e is LoginKeyDerivationError) {
+      if (e is LoginKeyDerivationError) {
+        _logger.severe('loginKey derivation error', e, s);
+        // LoginKey err, perform regular login via ott verification
+        await UserService.instance.sendOtt(
+          context,
+          email!,
+          isCreateAccountScreen: true,
+        );
+        return;
+      } else if (e is KeyDerivationError) {
+        // device is not powerful enough to perform derive key
         final dialogChoice = await showChoiceDialog(
           context,
           title: S.of(context).recreatePasswordTitle,
@@ -156,12 +166,14 @@ class _LoginPasswordVerificationPageState
           );
         }
         return;
+      } else {
+        _logger.severe('unexpected error while verifying password', e, s);
+        await _showContactSupportDialog(
+          context,
+          S.of(context).oops,
+          S.of(context).verificationFailedPleaseTryAgain,
+        );
       }
-      await _showContactSupportDialog(
-        context,
-        S.of(context).oops,
-        S.of(context).verificationFailedPleaseTryAgain,
-      );
     }
   }
 
