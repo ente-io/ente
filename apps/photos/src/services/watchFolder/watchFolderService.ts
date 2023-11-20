@@ -24,7 +24,6 @@ import { groupFilesBasedOnCollectionID } from 'utils/file';
 import ElectronAPIs from '@ente/shared/electron';
 
 class watchFolderService {
-    private allElectronAPIsExist: boolean = false;
     private eventQueue: EventQueueItem[] = [];
     private currentEvent: EventQueueItem;
     private currentlySyncedMapping: WatchMapping;
@@ -53,18 +52,16 @@ class watchFolderService {
         syncWithRemote: () => void,
         setWatchFolderServiceIsRunning: (isRunning: boolean) => void
     ) {
-        if (this.allElectronAPIsExist) {
-            try {
-                this.setElectronFiles = setElectronFiles;
-                this.setCollectionName = setCollectionName;
-                this.syncWithRemote = syncWithRemote;
-                this.setWatchFolderServiceIsRunning =
-                    setWatchFolderServiceIsRunning;
-                this.setupWatcherFunctions();
-                await this.getAndSyncDiffOfFiles();
-            } catch (e) {
-                logError(e, 'error while initializing watch service');
-            }
+        try {
+            this.setElectronFiles = setElectronFiles;
+            this.setCollectionName = setCollectionName;
+            this.syncWithRemote = syncWithRemote;
+            this.setWatchFolderServiceIsRunning =
+                setWatchFolderServiceIsRunning;
+            this.setupWatcherFunctions();
+            await this.getAndSyncDiffOfFiles();
+        } catch (e) {
+            logError(e, 'error while initializing watch service');
         }
     }
 
@@ -171,13 +168,11 @@ class watchFolderService {
     }
 
     private setupWatcherFunctions() {
-        if (this.allElectronAPIsExist) {
-            ElectronAPIs.registerWatcherFunctions(
-                diskFileAddedCallback,
-                diskFileRemovedCallback,
-                diskFolderRemovedCallback
-            );
-        }
+        ElectronAPIs.registerWatcherFunctions(
+            diskFileAddedCallback,
+            diskFileRemovedCallback,
+            diskFolderRemovedCallback
+        );
     }
 
     async addWatchMapping(
@@ -185,38 +180,32 @@ class watchFolderService {
         folderPath: string,
         uploadStrategy: UPLOAD_STRATEGY
     ) {
-        if (this.allElectronAPIsExist) {
-            try {
-                await ElectronAPIs.addWatchMapping(
-                    rootFolderName,
-                    folderPath,
-                    uploadStrategy
-                );
-                this.getAndSyncDiffOfFiles();
-            } catch (e) {
-                logError(e, 'error while adding watch mapping');
-            }
+        try {
+            await ElectronAPIs.addWatchMapping(
+                rootFolderName,
+                folderPath,
+                uploadStrategy
+            );
+            this.getAndSyncDiffOfFiles();
+        } catch (e) {
+            logError(e, 'error while adding watch mapping');
         }
     }
 
     async removeWatchMapping(folderPath: string) {
-        if (this.allElectronAPIsExist) {
-            try {
-                await ElectronAPIs.removeWatchMapping(folderPath);
-            } catch (e) {
-                logError(e, 'error while removing watch mapping');
-            }
+        try {
+            await ElectronAPIs.removeWatchMapping(folderPath);
+        } catch (e) {
+            logError(e, 'error while removing watch mapping');
         }
     }
 
     getWatchMappings(): WatchMapping[] {
-        if (this.allElectronAPIsExist) {
-            try {
-                return ElectronAPIs.getWatchMappings() ?? [];
-            } catch (e) {
-                logError(e, 'error while getting watch mappings');
-                return [];
-            }
+        try {
+            return ElectronAPIs.getWatchMappings() ?? [];
+        } catch (e) {
+            logError(e, 'error while getting watch mappings');
+            return [];
         }
         return [];
     }
@@ -344,71 +333,67 @@ class watchFolderService {
         filesWithCollection: FileWithCollection[],
         collections: Collection[]
     ) {
-        if (this.allElectronAPIsExist) {
-            try {
-                addLocalLog(
-                    () =>
-                        `allFileUploadsDone,${JSON.stringify(
-                            filesWithCollection
-                        )} ${JSON.stringify(collections)}`
-                );
-                const collection = collections.find(
-                    (collection) =>
-                        collection.id === filesWithCollection[0].collectionID
-                );
-                addLocalLog(() => `got collection ${!!collection}`);
-                addLocalLog(
-                    () =>
-                        `${this.isEventRunning} ${this.currentEvent.collectionName} ${collection?.name}`
-                );
-                if (
-                    !this.isEventRunning ||
-                    this.currentEvent.collectionName !== collection?.name
-                ) {
-                    return;
-                }
-
-                const syncedFiles: WatchMapping['syncedFiles'] = [];
-                const ignoredFiles: WatchMapping['ignoredFiles'] = [];
-
-                for (const fileWithCollection of filesWithCollection) {
-                    this.handleUploadedFile(
-                        fileWithCollection,
-                        syncedFiles,
-                        ignoredFiles
-                    );
-                }
-
-                addLocalLog(() => `syncedFiles ${JSON.stringify(syncedFiles)}`);
-                addLocalLog(
-                    () => `ignoredFiles ${JSON.stringify(ignoredFiles)}`
-                );
-
-                if (syncedFiles.length > 0) {
-                    this.currentlySyncedMapping.syncedFiles = [
-                        ...this.currentlySyncedMapping.syncedFiles,
-                        ...syncedFiles,
-                    ];
-                    ElectronAPIs.updateWatchMappingSyncedFiles(
-                        this.currentlySyncedMapping.folderPath,
-                        this.currentlySyncedMapping.syncedFiles
-                    );
-                }
-                if (ignoredFiles.length > 0) {
-                    this.currentlySyncedMapping.ignoredFiles = [
-                        ...this.currentlySyncedMapping.ignoredFiles,
-                        ...ignoredFiles,
-                    ];
-                    ElectronAPIs.updateWatchMappingIgnoredFiles(
-                        this.currentlySyncedMapping.folderPath,
-                        this.currentlySyncedMapping.ignoredFiles
-                    );
-                }
-
-                this.runPostUploadsAction();
-            } catch (e) {
-                logError(e, 'error while running all file uploads done');
+        try {
+            addLocalLog(
+                () =>
+                    `allFileUploadsDone,${JSON.stringify(
+                        filesWithCollection
+                    )} ${JSON.stringify(collections)}`
+            );
+            const collection = collections.find(
+                (collection) =>
+                    collection.id === filesWithCollection[0].collectionID
+            );
+            addLocalLog(() => `got collection ${!!collection}`);
+            addLocalLog(
+                () =>
+                    `${this.isEventRunning} ${this.currentEvent.collectionName} ${collection?.name}`
+            );
+            if (
+                !this.isEventRunning ||
+                this.currentEvent.collectionName !== collection?.name
+            ) {
+                return;
             }
+
+            const syncedFiles: WatchMapping['syncedFiles'] = [];
+            const ignoredFiles: WatchMapping['ignoredFiles'] = [];
+
+            for (const fileWithCollection of filesWithCollection) {
+                this.handleUploadedFile(
+                    fileWithCollection,
+                    syncedFiles,
+                    ignoredFiles
+                );
+            }
+
+            addLocalLog(() => `syncedFiles ${JSON.stringify(syncedFiles)}`);
+            addLocalLog(() => `ignoredFiles ${JSON.stringify(ignoredFiles)}`);
+
+            if (syncedFiles.length > 0) {
+                this.currentlySyncedMapping.syncedFiles = [
+                    ...this.currentlySyncedMapping.syncedFiles,
+                    ...syncedFiles,
+                ];
+                ElectronAPIs.updateWatchMappingSyncedFiles(
+                    this.currentlySyncedMapping.folderPath,
+                    this.currentlySyncedMapping.syncedFiles
+                );
+            }
+            if (ignoredFiles.length > 0) {
+                this.currentlySyncedMapping.ignoredFiles = [
+                    ...this.currentlySyncedMapping.ignoredFiles,
+                    ...ignoredFiles,
+                ];
+                ElectronAPIs.updateWatchMappingIgnoredFiles(
+                    this.currentlySyncedMapping.folderPath,
+                    this.currentlySyncedMapping.ignoredFiles
+                );
+            }
+
+            this.runPostUploadsAction();
+        } catch (e) {
+            logError(e, 'error while running all file uploads done');
         }
     }
 
