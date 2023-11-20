@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useMemo, useState } from 'react';
+import React, { useContext, useMemo, useState } from 'react';
 import { Plan } from 'types/billing';
 import {
     isUserSubscribedPlan,
@@ -47,7 +47,7 @@ function PlanSelectorCard(props: Props) {
     const bonusData = useMemo(() => {
         const userDetails = getLocalUserDetails();
         if (!userDetails) {
-            return 0;
+            return null;
         }
         return userDetails.bonusData;
     }, []);

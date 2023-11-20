@@ -1,6 +1,6 @@
 import { Stack } from '@mui/material';
 import { AppContext } from 'pages/_app';
-import React, { useContext, useEffect } from 'react';
+import React, { useContext } from 'react';
 import { Trans } from 'react-i18next';
 import { t } from 'i18next';
 import { Subscription } from 'types/billing';
@@ -33,12 +33,6 @@ export function ManageSubscription({
     const appContext = useContext(AppContext);
     const openFamilyPortal = () =>
         manageFamilyMethod(appContext.setDialogMessage, setLoading);
-
-    // define a function that will be only called once when component mounts
-    // this is to prevent the dialog from being opened on every render
-    useEffect(() => {
-        console.log('bonusData:', bonusData);
-    }, [bonusData]);
 
     return (
         <Stack spacing={1}>
