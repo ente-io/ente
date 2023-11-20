@@ -8,6 +8,7 @@ import "package:photos/events/files_updated_event.dart";
 import "package:photos/events/memories_setting_changed.dart";
 import 'package:photos/models/filters/important_items_filter.dart';
 import 'package:photos/models/memory.dart';
+import "package:photos/models/metadata/common_keys.dart";
 import 'package:photos/services/collections_service.dart';
 import "package:shared_preferences/shared_preferences.dart";
 
@@ -108,6 +109,7 @@ class MemoriesService extends ChangeNotifier {
     final files = await _filesDB.getFilesCreatedWithinDurations(
       durations,
       ignoredCollections,
+      visibility: visibleVisibility,
     );
     final seenTimes = await _memoriesDB.getSeenTimes();
     final List<Memory> memories = [];
