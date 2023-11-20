@@ -100,6 +100,7 @@
   "authToChangeYourEmail": "Please authenticate to change your email",
   "authToChangeYourPassword": "Please authenticate to change your password",
   "authToViewSecrets": "Please authenticate to view your secrets",
+  "authToInitiateSignIn": "Please authenticate to initiate sign in for backup.",
   "ok": "Ok",
   "cancel": "Cancel",
   "yes": "Yes",
