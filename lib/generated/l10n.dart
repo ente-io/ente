@@ -3894,10 +3894,10 @@ class S {
     );
   }
 
-  /// `Renews on {endDate}`
+  /// `Subscription renews on {endDate}`
   String renewsOn(Object endDate) {
     return Intl.message(
-      'Renews on $endDate',
+      'Subscription renews on $endDate',
       name: 'renewsOn',
       desc: '',
       args: [endDate],
@@ -3921,6 +3921,16 @@ class S {
       name: 'validTill',
       desc: '',
       args: [endDate],
+    );
+  }
+
+  /// `Your {storageAmount} add-on is valid till {endDate}`
+  String addOnValidTill(Object storageAmount, Object endDate) {
+    return Intl.message(
+      'Your $storageAmount add-on is valid till $endDate',
+      name: 'addOnValidTill',
+      desc: '',
+      args: [storageAmount, endDate],
     );
   }
 

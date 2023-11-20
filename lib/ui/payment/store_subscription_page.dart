@@ -52,6 +52,7 @@ class _StoreSubscriptionPageState extends State<StoreSubscriptionPage> {
   late ProgressDialog _dialog;
   late UserDetails _userDetails;
   late bool _hasActiveSubscription;
+  bool _hideCurrentPlanSelection = false;
   late FreePlan _freePlan;
   late List<BillingPlan> _plans;
   bool _hasLoadedData = false;
@@ -177,7 +178,10 @@ class _StoreSubscriptionPageState extends State<StoreSubscriptionPage> {
     _userService.getUserDetailsV2(memoryCount: false).then((userDetails) async {
       _userDetails = userDetails;
       _currentSubscription = userDetails.subscription;
+
       _hasActiveSubscription = _currentSubscription!.isValid();
+      _hideCurrentPlanSelection =
+          _currentSubscription?.attributes?.isCancelled ?? false;
       showYearlyPlan = _currentSubscription!.isYearlyPlan();
       final billingPlans = await _billingService.getBillingPlans();
       _isActiveStripeSubscriber =
@@ -239,7 +243,7 @@ class _StoreSubscriptionPageState extends State<StoreSubscriptionPage> {
       widgets.add(_showSubscriptionToggle());
     }
 
-    if (_hasActiveSubscription) {
+    if (_currentSubscription != null) {
       widgets.add(
         ValidityWidget(
           currentSubscription: _currentSubscription,
@@ -458,7 +462,7 @@ class _StoreSubscriptionPageState extends State<StoreSubscriptionPage> {
               storage: plan.storage,
               price: plan.price,
               period: plan.period,
-              isActive: isActive,
+              isActive: isActive && !_hideCurrentPlanSelection,
             ),
           ),
         ),

@@ -53,6 +53,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
 
   // indicates if user's subscription plan is still active
   late bool _hasActiveSubscription;
+  bool _hideCurrentPlanSelection = false;
   late FreePlan _freePlan;
   List<BillingPlan> _plans = [];
   bool _hasLoadedData = false;
@@ -73,7 +74,11 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
         .then((userDetails) async {
       _userDetails = userDetails;
       _currentSubscription = userDetails.subscription;
+
       _showYearlyPlan = _currentSubscription!.isYearlyPlan();
+      _hideCurrentPlanSelection =
+          (_currentSubscription?.attributes?.isCancelled ?? false) &&
+              userDetails.hasPaidAddon();
       _hasActiveSubscription = _currentSubscription!.isValid();
       _isStripeSubscriber = _currentSubscription!.paymentProvider == stripe;
       return _filterStripeForUI().then((value) {
@@ -210,7 +215,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
 
     widgets.add(_showSubscriptionToggle());
 
-    if (_hasActiveSubscription) {
+    if (_currentSubscription != null) {
       widgets.add(
         ValidityWidget(
           currentSubscription: _currentSubscription,
@@ -340,6 +345,9 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
   Widget _stripeRenewOrCancelButton() {
     final bool isRenewCancelled =
         _currentSubscription!.attributes?.isCancelled ?? false;
+    if (isRenewCancelled && _userDetails.hasPaidAddon()) {
+      return const SizedBox.shrink();
+    }
     final String title = isRenewCancelled
         ? S.of(context).renewSubscription
         : S.of(context).cancelSubscription;
@@ -503,7 +511,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
               storage: plan.storage,
               price: plan.price,
               period: plan.period,
-              isActive: isActive,
+              isActive: isActive && !_hideCurrentPlanSelection,
             ),
           ),
         ),
@@ -594,7 +602,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
             storage: _currentSubscription!.storage,
             price: _currentSubscription!.price,
             period: _currentSubscription!.period,
-            isActive: true,
+            isActive: !_hasActiveSubscription,
           ),
         ),
       ),

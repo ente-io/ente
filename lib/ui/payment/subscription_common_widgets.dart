@@ -98,9 +98,14 @@ class ValidityWidget extends StatelessWidget {
     if (currentSubscription == null) {
       return const SizedBox.shrink();
     }
+    final List<Bonus> addOnBonus = bonusData?.getAddOnBonuses() ?? <Bonus>[];
     final bool isFreeTrialSub = currentSubscription!.productID == freeProductID;
-    if (isFreeTrialSub && (bonusData?.getAddOnBonuses().isNotEmpty ?? false)) {
-      return const SizedBox.shrink();
+    bool hideSubValidityView = false;
+    if (isFreeTrialSub && addOnBonus.isNotEmpty) {
+      hideSubValidityView = true;
+    }
+    if (!currentSubscription!.isValid()) {
+      hideSubValidityView = true;
     }
     final endDate =
         DateFormat.yMMMd(Localizations.localeOf(context).languageCode).format(
@@ -114,11 +119,45 @@ class ValidityWidget extends StatelessWidget {
           : S.of(context).freeTrialValidTill(endDate);
     } else if (currentSubscription!.attributes?.isCancelled ?? false) {
       message = S.of(context).subWillBeCancelledOn(endDate);
+      if (addOnBonus.isNotEmpty) {
+        hideSubValidityView = true;
+      }
     }
+
     return Padding(
-      padding: const EdgeInsets.only(top: 8),
+      padding: const EdgeInsets.only(top: 0),
+      child: Column(
+        children: [
+          if (!hideSubValidityView)
+            Text(
+              message,
+              style: Theme.of(context).textTheme.bodySmall,
+              textAlign: TextAlign.center,
+            ),
+          if (addOnBonus.isNotEmpty)
+            ...addOnBonus.map((bonus) => AddOnBonusValidity(bonus)).toList(),
+        ],
+      ),
+    );
+  }
+}
+
+class AddOnBonusValidity extends StatelessWidget {
+  final Bonus bonus;
+
+  const AddOnBonusValidity(this.bonus, {super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final endDate =
+        DateFormat.yMMMd(Localizations.localeOf(context).languageCode).format(
+      DateTime.fromMicrosecondsSinceEpoch(bonus.validTill),
+    );
+    final String storage = convertBytesToReadableFormat(bonus.storage);
+    return Padding(
+      padding: const EdgeInsets.only(top: 8, bottom: 8),
       child: Text(
-        message,
+        S.of(context).addOnValidTill(storage, endDate),
         style: Theme.of(context).textTheme.bodySmall,
         textAlign: TextAlign.center,
       ),

@@ -555,9 +555,10 @@
     "type": "text"
   },
   "faqs": "FAQs",
-  "renewsOn": "Renews on {endDate}",
+  "renewsOn": "Subscription renews on {endDate}",
   "freeTrialValidTill": "Free trial valid till {endDate}",
   "validTill": "Valid till {endDate}",
+  "addOnValidTill": "Your {storageAmount} add-on is valid till {endDate}",
   "playStoreFreeTrialValidTill": "Free trial valid till {endDate}.\nYou can choose a paid plan afterwards.",
   "subWillBeCancelledOn": "Your subscription will be cancelled on {endDate}",
   "subscription": "Subscription",
