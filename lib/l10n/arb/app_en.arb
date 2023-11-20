@@ -129,6 +129,7 @@
   "faq_q_5": "How can I enable FaceID lock in ente Auth",
   "faq_a_5": "You can enable FaceID lock under Settings → Security → Lockscreen.",
   "somethingWentWrongMessage": "Something went wrong, please try again",
+
   "leaveFamily": "Leave family",
   "leaveFamilyMessage": "Are you sure that you want to leave the family plan?",
   "inFamilyPlanMessage": "You are on a family plan!",
@@ -391,5 +392,7 @@
   "iOSOkButton": "OK",
   "@iOSOkButton": {
     "description": "Message showed on a button that the user can click to leave the current dialog. It is used on iOS side. Maximum 30 characters."
-  }
+  },
+  "noInternetConnection": "No internet connection",
+  "pleaseCheckYourInternetConnectionAndTryAgain": "Please check your internet connection and try again."
 }

@@ -24,13 +24,12 @@ import 'package:ente_auth/ui/account/ott_verification_page.dart';
 import 'package:ente_auth/ui/account/password_entry_page.dart';
 import 'package:ente_auth/ui/account/password_reentry_page.dart';
 import 'package:ente_auth/ui/account/recovery_page.dart';
-import 'package:ente_auth/ui/components/buttons/button_widget.dart';
+import 'package:ente_auth/ui/common/progress_dialog.dart';
 import 'package:ente_auth/ui/home_page.dart';
 import 'package:ente_auth/ui/two_factor_authentication_page.dart';
 import 'package:ente_auth/ui/two_factor_recovery_page.dart';
 import 'package:ente_auth/utils/crypto_util.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
-import 'package:ente_auth/utils/email_util.dart';
 import 'package:ente_auth/utils/toast_util.dart';
 import "package:flutter/foundation.dart";
 import 'package:flutter/material.dart';
@@ -48,7 +47,7 @@ class UserService {
   static const keyUserDetails = "user_details";
   static const kCanDisableEmailMFA = "can_disable_email_mfa";
   static const kIsEmailMFAEnabled = "is_email_mfa_enabled";
-  final  SRP6GroupParameters kDefaultSrpGroup = SRP6StandardGroups.rfc5054_4096;
+  final SRP6GroupParameters kDefaultSrpGroup = SRP6StandardGroups.rfc5054_4096;
   final _dio = Network.instance.getDio();
   final _enteDio = Network.instance.enteDio;
   final _logger = Logger((UserService).toString());
@@ -68,12 +67,12 @@ class UserService {
   }
 
   Future<void> sendOtt(
-      BuildContext context,
-      String email, {
-        bool isChangeEmail = false,
-        bool isCreateAccountScreen = false,
-        bool isResetPasswordScreen = false,
-      }) async {
+    BuildContext context,
+    String email, {
+    bool isChangeEmail = false,
+    bool isCreateAccountScreen = false,
+    bool isResetPasswordScreen = false,
+  }) async {
     final dialog = createProgressDialog(context, context.l10n.pleaseWait);
     await dialog.show();
     try {
@@ -122,16 +121,15 @@ class UserService {
   }
 
   Future<void> sendFeedback(
-      BuildContext context,
-      String feedback, {
-        String type = "SubCancellation",
-      }) async {
+    BuildContext context,
+    String feedback, {
+    String type = "SubCancellation",
+  }) async {
     await _dio.post(
       _config.getHttpEndpoint() + "/anonymous/feedback",
       data: {"feedback": feedback, "type": "type"},
     );
   }
-
 
   Future<UserDetails> getUserDetailsV2({
     bool memoryCount = false,
@@ -146,9 +144,11 @@ class UserService {
       );
       final userDetails = UserDetails.fromMap(response.data);
       if (shouldCache) {
-        if(userDetails.profileData != null) {
-          _preferences.setBool(kIsEmailMFAEnabled, userDetails.profileData!.isEmailMFAEnabled);
-          _preferences.setBool(kCanDisableEmailMFA, userDetails.profileData!.canDisableEmailMFA);
+        if (userDetails.profileData != null) {
+          _preferences.setBool(
+              kIsEmailMFAEnabled, userDetails.profileData!.isEmailMFAEnabled);
+          _preferences.setBool(
+              kCanDisableEmailMFA, userDetails.profileData!.canDisableEmailMFA);
         }
         // handle email change from different client
         if (userDetails.email != _config.getEmail()) {
@@ -156,7 +156,7 @@ class UserService {
         }
       }
       return userDetails;
-    } catch(e) {
+    } catch (e) {
       _logger.warning("Failed to fetch", e);
       rethrow;
     }
@@ -210,15 +210,15 @@ class UserService {
       //to close and only then to show the error dialog.
       Future.delayed(
         const Duration(milliseconds: 150),
-            () => showGenericErrorDialog(context: context),
+        () => showGenericErrorDialog(context: context),
       );
       rethrow;
     }
   }
 
   Future<DeleteChallengeResponse?> getDeleteChallenge(
-      BuildContext context,
-      ) async {
+    BuildContext context,
+  ) async {
     try {
       final response = await _enteDio.get("/users/delete-challenge");
       if (response.statusCode == 200) {
@@ -237,8 +237,9 @@ class UserService {
   }
 
   Future<void> deleteAccount(
-      BuildContext context,
-      String challengeResponse,) async {
+    BuildContext context,
+    String challengeResponse,
+  ) async {
     try {
       final response = await _enteDio.delete(
         "/users/delete",
@@ -258,9 +259,11 @@ class UserService {
     }
   }
 
-  Future<void> verifyEmail(BuildContext context, String ott, {bool
-  isResettingPasswordScreen = false,})
-  async {
+  Future<void> verifyEmail(
+    BuildContext context,
+    String ott, {
+    bool isResettingPasswordScreen = false,
+  }) async {
     final dialog = createProgressDialog(context, context.l10n.pleaseWait);
     await dialog.show();
     try {
@@ -280,14 +283,15 @@ class UserService {
         } else {
           await _saveConfiguration(response);
           if (Configuration.instance.getEncryptedToken() != null) {
-            if(isResettingPasswordScreen) {
+            if (isResettingPasswordScreen) {
               page = const RecoveryPage();
             } else {
               page = const PasswordReentryPage();
             }
-
           } else {
-            page = const PasswordEntryPage(mode: PasswordEntryMode.set,);
+            page = const PasswordEntryPage(
+              mode: PasswordEntryMode.set,
+            );
           }
         }
         Navigator.of(context).pushAndRemoveUntil(
@@ -296,7 +300,7 @@ class UserService {
               return page;
             },
           ),
-              (route) => route.isFirst,
+          (route) => route.isFirst,
         );
       } else {
         // should never reach here
@@ -336,10 +340,10 @@ class UserService {
   }
 
   Future<void> changeEmail(
-      BuildContext context,
-      String email,
-      String ott,
-      ) async {
+    BuildContext context,
+    String email,
+    String ott,
+  ) async {
     final dialog = createProgressDialog(context, context.l10n.pleaseWait);
     await dialog.show();
     try {
@@ -431,9 +435,9 @@ class UserService {
   }
 
   Future<void> registerOrUpdateSrp(
-      Uint8List loginKey, {
-        SetKeysRequest? setKeysRequest,
-      }) async {
+    Uint8List loginKey, {
+    SetKeysRequest? setKeysRequest,
+  }) async {
     try {
       final String username = const Uuid().v4().toString();
       final SecureRandom random = _getSecureRandom();
@@ -466,14 +470,14 @@ class UserService {
       );
       if (response.statusCode == 200) {
         final SetupSRPResponse setupSRPResponse =
-        SetupSRPResponse.fromJson(response.data);
+            SetupSRPResponse.fromJson(response.data);
         final serverB =
-        SRP6Util.decodeBigInt(base64Decode(setupSRPResponse.srpB));
+            SRP6Util.decodeBigInt(base64Decode(setupSRPResponse.srpB));
         // ignore: need to calculate secret to get M1, unused_local_variable
         final clientS = client.calculateSecret(serverB);
         final clientM = client.calculateClientEvidenceMessage();
         late Response srpCompleteResponse;
-        if(setKeysRequest == null) {
+        if (setKeysRequest == null) {
           srpCompleteResponse = await _enteDio.post(
             "/users/srp/complete",
             data: {
@@ -494,8 +498,8 @@ class UserService {
       } else {
         throw Exception("register-srp action failed");
       }
-    } catch (e,s) {
-      _logger.severe("failed to register srp" ,e,s);
+    } catch (e, s) {
+      _logger.severe("failed to register srp", e, s);
       rethrow;
     }
   }
@@ -512,133 +516,96 @@ class UserService {
   }
 
   Future<void> verifyEmailViaPassword(
-      BuildContext context,
-      SrpAttributes srpAttributes,
-      String userPassword,
-      ) async {
-    final dialog = createProgressDialog(
-      context,
-      context.l10n.pleaseWait,
-      isDismissible: true,
-    );
-    await dialog.show();
+    BuildContext context,
+    SrpAttributes srpAttributes,
+    String userPassword,
+    ProgressDialog dialog,
+  ) async {
     late Uint8List keyEncryptionKey;
-    try {
-      keyEncryptionKey = await CryptoUtil.deriveKey(
-        utf8.encode(userPassword) as Uint8List,
-        CryptoUtil.base642bin(srpAttributes.kekSalt),
-        srpAttributes.memLimit,
-        srpAttributes.opsLimit,
-      );
-      final loginKey = await CryptoUtil.deriveLoginKey(keyEncryptionKey);
-      final Uint8List identity = Uint8List.fromList(
-        utf8.encode(srpAttributes.srpUserID),
-      );
-      final Uint8List salt = base64Decode(srpAttributes.srpSalt);
-      final Uint8List password = loginKey;
-      final SecureRandom random = _getSecureRandom();
+    _logger.finest('Start deriving key');
+    keyEncryptionKey = await CryptoUtil.deriveKey(
+      utf8.encode(userPassword) as Uint8List,
+      CryptoUtil.base642bin(srpAttributes.kekSalt),
+      srpAttributes.memLimit,
+      srpAttributes.opsLimit,
+    );
+    _logger.finest('keyDerivation done, derive LoginKey');
+    final loginKey = await CryptoUtil.deriveLoginKey(keyEncryptionKey);
+    final Uint8List identity = Uint8List.fromList(
+      utf8.encode(srpAttributes.srpUserID),
+    );
+    _logger.finest('longinKey derivation done');
+    final Uint8List salt = base64Decode(srpAttributes.srpSalt);
+    final Uint8List password = loginKey;
+    final SecureRandom random = _getSecureRandom();
 
-      final client = SRP6Client(
-        group: kDefaultSrpGroup,
-        digest: Digest('SHA-256'),
-        random: random,
-      );
+    final client = SRP6Client(
+      group: kDefaultSrpGroup,
+      digest: Digest('SHA-256'),
+      random: random,
+    );
 
-      final A = client.generateClientCredentials(salt, identity, password);
-      final createSessionResponse = await _dio.post(
-        _config.getHttpEndpoint() + "/users/srp/create-session",
-        data: {
-          "srpUserID": srpAttributes.srpUserID,
-          "srpA": base64Encode(SRP6Util.encodeBigInt(A!)),
-        },
-      );
-      final String sessionID = createSessionResponse.data["sessionID"];
-      final String srpB = createSessionResponse.data["srpB"];
+    final A = client.generateClientCredentials(salt, identity, password);
+    final createSessionResponse = await _dio.post(
+      _config.getHttpEndpoint() + "/users/srp/create-session",
+      data: {
+        "srpUserID": srpAttributes.srpUserID,
+        "srpA": base64Encode(SRP6Util.encodeBigInt(A!)),
+      },
+    );
+    final String sessionID = createSessionResponse.data["sessionID"];
+    final String srpB = createSessionResponse.data["srpB"];
 
-      final serverB = SRP6Util.decodeBigInt(base64Decode(srpB));
-      // ignore: need to calculate secret to get M1, unused_local_variable
-      final clientS = client.calculateSecret(serverB);
-      final clientM = client.calculateClientEvidenceMessage();
-      final response = await _dio.post(
-        _config.getHttpEndpoint() + "/users/srp/verify-session",
-        data: {
-          "sessionID": sessionID,
-          "srpUserID": srpAttributes.srpUserID,
-          "srpM1": base64Encode(SRP6Util.encodeBigInt(clientM!)),
-        },
-      );
-      if (response.statusCode == 200) {
-        Widget page;
-        final String twoFASessionID = response.data["twoFactorSessionID"];
-        Configuration.instance.setVolatilePassword(userPassword);
-        if (twoFASessionID.isNotEmpty) {
-          page = TwoFactorAuthenticationPage(twoFASessionID);
-        } else {
-          await _saveConfiguration(response);
-          if (Configuration.instance.getEncryptedToken() != null) {
-            await Configuration.instance.decryptSecretsAndGetKeyEncKey(
-              userPassword,
-              Configuration.instance.getKeyAttributes()!,
-              keyEncryptionKey: keyEncryptionKey,
-            );
-            page = const HomePage();
-          } else {
-            throw Exception("unexpected response during email verification");
-          }
-        }
-        await dialog.hide();
-        Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(
-            builder: (BuildContext context) {
-              return page;
-            },
-          ),
-              (route) => route.isFirst,
-        );
+    final serverB = SRP6Util.decodeBigInt(base64Decode(srpB));
+    // ignore: need to calculate secret to get M1, unused_local_variable
+    final clientS = client.calculateSecret(serverB);
+    final clientM = client.calculateClientEvidenceMessage();
+    final response = await _dio.post(
+      _config.getHttpEndpoint() + "/users/srp/verify-session",
+      data: {
+        "sessionID": sessionID,
+        "srpUserID": srpAttributes.srpUserID,
+        "srpM1": base64Encode(SRP6Util.encodeBigInt(clientM!)),
+      },
+    );
+    if (response.statusCode == 200) {
+      Widget page;
+      final String twoFASessionID = response.data["twoFactorSessionID"];
+      Configuration.instance.setVolatilePassword(userPassword);
+      if (twoFASessionID.isNotEmpty) {
+        page = TwoFactorAuthenticationPage(twoFASessionID);
       } else {
-        // should never reach here
-        throw Exception("unexpected response during email verification");
-      }
-    } on DioError catch (e, s) {
-      await dialog.hide();
-      if (e.response != null && e.response!.statusCode == 401) {
-        final dialogChoice = await showChoiceDialog(
-          context,
-          title: context.l10n.incorrectPasswordTitle,
-          body: context.l10n.pleaseTryAgain,
-          firstButtonLabel: context.l10n.contactSupport,
-          secondButtonLabel: context.l10n.ok,
-        );
-        if (dialogChoice!.action == ButtonAction.first) {
-          await sendLogs(
-            context,
-            context.l10n.contactSupport,
-            "support@ente.io",
-            postShare: () {},
+        await _saveConfiguration(response);
+        if (Configuration.instance.getEncryptedToken() != null) {
+          await Configuration.instance.decryptSecretsAndGetKeyEncKey(
+            userPassword,
+            Configuration.instance.getKeyAttributes()!,
+            keyEncryptionKey: keyEncryptionKey,
           );
+          page = const HomePage();
+        } else {
+          throw Exception("unexpected response during email verification");
         }
-      } else {
-        _logger.fine('failed to verify password', e, s);
-        await showErrorDialog(
-          context,
-          context.l10n.oops,
-          context.l10n.verificationFailedPleaseTryAgain,
-        );
       }
-    } catch (e, s) {
-      _logger.fine('failed to verify password', e, s);
       await dialog.hide();
-      await showErrorDialog(
-        context,
-        context.l10n.oops,
-        context.l10n.verificationFailedPleaseTryAgain,
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(
+          builder: (BuildContext context) {
+            return page;
+          },
+        ),
+        (route) => route.isFirst,
       );
+    } else {
+      // should never reach here
+      throw Exception("unexpected response during email verification");
     }
   }
 
-  Future<void> updateKeyAttributes(KeyAttributes keyAttributes, Uint8List
-  loginKey,)
-  async {
+  Future<void> updateKeyAttributes(
+    KeyAttributes keyAttributes,
+    Uint8List loginKey,
+  ) async {
     try {
       final setKeyRequest = SetKeysRequest(
         kekSalt: keyAttributes.kekSalt,
@@ -679,10 +646,10 @@ class UserService {
   }
 
   Future<void> verifyTwoFactor(
-      BuildContext context,
-      String sessionID,
-      String code,
-      ) async {
+    BuildContext context,
+    String sessionID,
+    String code,
+  ) async {
     final dialog = createProgressDialog(context, context.l10n.pleaseWait);
     await dialog.show();
     try {
@@ -703,7 +670,7 @@ class UserService {
               return const PasswordReentryPage();
             },
           ),
-              (route) => route.isFirst,
+          (route) => route.isFirst,
         );
       }
     } on DioError catch (e) {
@@ -717,7 +684,7 @@ class UserService {
               return const LoginPage();
             },
           ),
-              (route) => route.isFirst,
+          (route) => route.isFirst,
         );
       } else {
         showErrorDialog(
@@ -758,7 +725,7 @@ class UserService {
               );
             },
           ),
-              (route) => route.isFirst,
+          (route) => route.isFirst,
         );
       }
     } on DioError catch (e) {
@@ -771,7 +738,7 @@ class UserService {
               return const LoginPage();
             },
           ),
-              (route) => route.isFirst,
+          (route) => route.isFirst,
         );
       } else {
         showErrorDialog(
@@ -793,12 +760,12 @@ class UserService {
   }
 
   Future<void> removeTwoFactor(
-      BuildContext context,
-      String sessionID,
-      String recoveryKey,
-      String encryptedSecret,
-      String secretDecryptionNonce,
-      ) async {
+    BuildContext context,
+    String sessionID,
+    String recoveryKey,
+    String encryptedSecret,
+    String secretDecryptionNonce,
+  ) async {
     final dialog = createProgressDialog(context, context.l10n.pleaseWait);
     await dialog.show();
     String secret;
@@ -847,7 +814,7 @@ class UserService {
               return const PasswordReentryPage();
             },
           ),
-              (route) => route.isFirst,
+          (route) => route.isFirst,
         );
       }
     } on DioError catch (e) {
@@ -860,7 +827,7 @@ class UserService {
               return const LoginPage();
             },
           ),
-              (route) => route.isFirst,
+          (route) => route.isFirst,
         );
       } else {
         showErrorDialog(
@@ -881,13 +848,6 @@ class UserService {
     }
   }
 
-
-
-
-
-
-
-
   Future<void> _saveConfiguration(Response response) async {
     await Configuration.instance.setUserID(response.data["id"]);
     if (response.data["encryptedToken"] != null) {
@@ -904,6 +864,7 @@ class UserService {
   bool? canDisableEmailMFA() {
     return _preferences.getBool(kCanDisableEmailMFA);
   }
+
   bool hasEmailMFAEnabled() {
     return _preferences.getBool(kIsEmailMFAEnabled) ?? true;
   }
@@ -918,9 +879,8 @@ class UserService {
       );
       _preferences.setBool(kIsEmailMFAEnabled, isEnabled);
     } catch (e) {
-      _logger.severe("Failed to update email mfa",e);
+      _logger.severe("Failed to update email mfa", e);
       rethrow;
     }
   }
 }
-
