@@ -127,7 +127,7 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m41(endDate) => "在 ${endDate} 前续费";
 
-  static String m65(count) =>
+  static String m64(count) =>
       "${Intl.plural(count, other: '已找到 ${count} 个结果')}";
 
   static String m42(count) => "已选择 ${count} 个";
@@ -173,7 +173,7 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m59(count) =>
       "${Intl.plural(count, zero: '', one: '1天', other: '${count} 天')}";
 
-  static String m66(endDate) => "有效期至 ${endDate}";
+  static String m65(endDate) => "有效期至 ${endDate}";
 
   static String m60(email) => "验证 ${email}";
 
@@ -944,7 +944,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("在照片的一定半径内拍摄的几组照片"),
         "searchPeopleEmptySection":
             MessageLookupByLibrary.simpleMessage("邀请他人，您将在此看到他们分享的所有照片"),
-        "searchResultCount": m65,
+        "searchResultCount": m64,
         "security": MessageLookupByLibrary.simpleMessage("安全"),
         "selectAlbum": MessageLookupByLibrary.simpleMessage("选择相册"),
         "selectAll": MessageLookupByLibrary.simpleMessage("全选"),
@@ -1155,7 +1155,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "useRecoveryKey": MessageLookupByLibrary.simpleMessage("使用恢复密钥"),
         "useSelectedPhoto": MessageLookupByLibrary.simpleMessage("使用所选照片"),
         "usedSpace": MessageLookupByLibrary.simpleMessage("已用空间"),
-        "validTill": m66,
+        "validTill": m65,
         "verificationFailedPleaseTryAgain":
             MessageLookupByLibrary.simpleMessage("验证失败，请重试"),
         "verificationId": MessageLookupByLibrary.simpleMessage("验证 ID"),

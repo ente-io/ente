@@ -1,7 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-
 import 'intl/messages_all.dart';
 
 // **************************************************************************
@@ -8074,6 +8073,26 @@ class S {
     return Intl.message(
       'Contacts',
       name: 'contacts',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No internet connection`
+  String get noInternetConnection {
+    return Intl.message(
+      'No internet connection',
+      name: 'noInternetConnection',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please check your internet connection and try again.`
+  String get pleaseCheckYourInternetConnectionAndTryAgain {
+    return Intl.message(
+      'Please check your internet connection and try again.',
+      name: 'pleaseCheckYourInternetConnectionAndTryAgain',
       desc: '',
       args: [],
     );

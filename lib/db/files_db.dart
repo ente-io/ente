@@ -699,6 +699,7 @@ class FilesDB {
   Future<List<EnteFile>> getFilesCreatedWithinDurations(
     List<List<int>> durations,
     Set<int> ignoredCollectionIDs, {
+    int? visibility,
     String order = 'ASC',
   }) async {
     if (durations.isEmpty) {
@@ -714,6 +715,8 @@ class FilesDB {
           ")";
       if (index != durations.length - 1) {
         whereClause += " OR ";
+      } else if (visibility != null) {
+        whereClause += ' AND $columnMMdVisibility = $visibility';
       }
     }
     whereClause += ")";

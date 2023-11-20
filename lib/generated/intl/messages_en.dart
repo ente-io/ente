@@ -884,6 +884,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("No hidden photos or videos"),
         "noImagesWithLocation":
             MessageLookupByLibrary.simpleMessage("No images with location"),
+        "noInternetConnection":
+            MessageLookupByLibrary.simpleMessage("No internet connection"),
         "noPhotosAreBeingBackedUpRightNow":
             MessageLookupByLibrary.simpleMessage(
                 "No photos are being backed up right now"),
@@ -954,6 +956,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "playStoreFreeTrialValidTill": m35,
         "playstoreSubscription":
             MessageLookupByLibrary.simpleMessage("PlayStore subscription"),
+        "pleaseCheckYourInternetConnectionAndTryAgain":
+            MessageLookupByLibrary.simpleMessage(
+                "Please check your internet connection and try again."),
         "pleaseContactSupportAndWeWillBeHappyToHelp":
             MessageLookupByLibrary.simpleMessage(
                 "Please contact support@ente.io and we will be happy to help!"),

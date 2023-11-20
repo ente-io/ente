@@ -140,7 +140,7 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m41(endDate) => "Renouvellement le ${endDate}";
 
-  static String m65(count) =>
+  static String m64(count) =>
       "${Intl.plural(count, one: '${count} résultat trouvé', other: '${count} résultats trouvés')}";
 
   static String m42(count) => "${count} sélectionné(s)";
@@ -192,7 +192,7 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m59(count) =>
       "${Intl.plural(count, zero: '0 jour', one: '1 jour', other: '${count} jours')}";
 
-  static String m66(endDate) => "Valable jusqu\'au ${endDate}";
+  static String m65(endDate) => "Valable jusqu\'au ${endDate}";
 
   static String m60(email) => "Vérifier ${email}";
 
@@ -1193,7 +1193,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Grouper les photos qui sont prises dans un certain angle d\'une photo"),
         "searchPeopleEmptySection": MessageLookupByLibrary.simpleMessage(
             "Invitez des gens, et vous verrez ici toutes les photos qu\'ils partagent"),
-        "searchResultCount": m65,
+        "searchResultCount": m64,
         "security": MessageLookupByLibrary.simpleMessage("Sécurité"),
         "selectAlbum":
             MessageLookupByLibrary.simpleMessage("Sélectionner album"),
@@ -1463,7 +1463,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "useSelectedPhoto": MessageLookupByLibrary.simpleMessage(
             "Utiliser la photo sélectionnée"),
         "usedSpace": MessageLookupByLibrary.simpleMessage("Mémoire utilisée"),
-        "validTill": m66,
+        "validTill": m65,
         "verificationFailedPleaseTryAgain":
             MessageLookupByLibrary.simpleMessage(
                 "La vérification a échouée, veuillez réessayer"),
