@@ -13,6 +13,7 @@ import 'package:ente_auth/ui/components/toggle_switch_widget.dart';
 import 'package:ente_auth/ui/settings/common_settings.dart';
 import 'package:ente_auth/ui/settings/language_picker.dart';
 import 'package:ente_auth/utils/navigation_util.dart';
+import 'package:ente_auth/utils/toast_util.dart';
 import 'package:flutter/material.dart';
 
 class AdvancedSectionWidget extends StatefulWidget {
@@ -86,6 +87,9 @@ class _AdvancedSectionWidgetState extends State<AdvancedSectionWidget> {
               await PreferenceService.instance.setHideCodes(
                 !PreferenceService.instance.shouldHideCodes(),
               );
+              if(PreferenceService.instance.shouldHideCodes()) {
+                showToast(context, context.l10n.doubleTapToViewHiddenCode);
+              }
               setState(() {});
             },
           ),

@@ -334,6 +334,7 @@
   "offlineModeWarning": "You have chosen to proceed without backups. Please take manual backups to make sure your codes are safe.",
   "showLargeIcons": "Show large icons",
   "shouldHideCode": "Hide codes",
+  "doubleTapToViewHiddenCode" : "You can double tap on an entry to view code",
   "focusOnSearchBar": "Focus search on app start",
   "confirmUpdatingkey": "Are you sure you want to update the secret key?",
   "minimizeAppOnCopy":  "Minimize app on copy",
