@@ -11,7 +11,6 @@ import { PlanRow } from './planRow';
 import { Plan, Subscription } from 'types/billing';
 import { PLAN_PERIOD } from 'constants/gallery';
 import { BonusData } from 'types/user';
-import { BFAddOnRow } from './BfAddOnRow';
 
 interface Iprops {
     plans: Plan[];
@@ -45,9 +44,6 @@ const Plans = ({
             ))}
         {!hasPaidSubscription(subscription) && !hasAddOnBonus(bonusData) && (
             <FreePlanRow closeModal={closeModal} />
-        )}
-        {hasAddOnBonus(bonusData) && (
-            <BFAddOnRow bonusData={bonusData} closeModal={closeModal} />
         )}
     </Stack>
 );

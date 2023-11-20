@@ -1,6 +1,6 @@
 import { Stack } from '@mui/material';
 import { AppContext } from 'pages/_app';
-import React, { useContext } from 'react';
+import React, { useContext, useEffect } from 'react';
 import { Trans } from 'react-i18next';
 import { t } from 'i18next';
 import { Subscription } from 'types/billing';
@@ -12,16 +12,21 @@ import {
     manageFamilyMethod,
     hasStripeSubscription,
     isSubscriptionCancelled,
+    hasAddOnBonus,
 } from 'utils/billing';
 import ManageSubscriptionButton from './button';
+import { BonusData } from 'types/user';
+
 interface Iprops {
     subscription: Subscription;
+    bonusData?: BonusData;
     closeModal: () => void;
     setLoading: SetLoading;
 }
 
 export function ManageSubscription({
     subscription,
+    bonusData,
     closeModal,
     setLoading,
 }: Iprops) {
@@ -29,11 +34,18 @@ export function ManageSubscription({
     const openFamilyPortal = () =>
         manageFamilyMethod(appContext.setDialogMessage, setLoading);
 
+    // define a function that will be only called once when component mounts
+    // this is to prevent the dialog from being opened on every render
+    useEffect(() => {
+        console.log('bonusData:', bonusData);
+    }, [bonusData]);
+
     return (
         <Stack spacing={1}>
             {hasStripeSubscription(subscription) && (
                 <StripeSubscriptionOptions
                     subscription={subscription}
+                    bonusData={bonusData}
                     closeModal={closeModal}
                     setLoading={setLoading}
                 />
@@ -49,6 +61,7 @@ export function ManageSubscription({
 
 function StripeSubscriptionOptions({
     subscription,
+    bonusData,
     setLoading,
     closeModal,
 }: Iprops) {
@@ -77,7 +90,11 @@ function StripeSubscriptionOptions({
     const confirmCancel = () =>
         appContext.setDialogMessage({
             title: t('CANCEL_SUBSCRIPTION'),
-            content: <Trans i18nKey={'CANCEL_SUBSCRIPTION_MESSAGE'} />,
+            content: hasAddOnBonus(bonusData) ? (
+                <Trans i18nKey={'CANCEL_SUBSCRIPTION_WITH_ADDON_MESSAGE'} />
+            ) : (
+                <Trans i18nKey={'CANCEL_SUBSCRIPTION_MESSAGE'} />
+            ),
             proceed: {
                 text: t('CANCEL_SUBSCRIPTION'),
                 action: cancelSubscription.bind(

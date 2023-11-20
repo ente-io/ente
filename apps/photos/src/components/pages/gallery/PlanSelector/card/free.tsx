@@ -5,6 +5,8 @@ import React from 'react';
 import { t } from 'i18next';
 import { PeriodToggler } from '../periodToggler';
 import Plans from '../plans';
+import { hasAddOnBonus } from 'utils/billing';
+import { BFAddOnRow } from '../plans/BfAddOnRow';
 
 export default function FreeSubscriptionPlanSelectorCard({
     plans,
@@ -40,6 +42,12 @@ export default function FreeSubscriptionPlanSelectorCard({
                         bonusData={bonusData}
                         closeModal={closeModal}
                     />
+                    {hasAddOnBonus(bonusData) && (
+                        <BFAddOnRow
+                            bonusData={bonusData}
+                            closeModal={closeModal}
+                        />
+                    )}
                 </Stack>
             </Box>
         </>

@@ -5,15 +5,21 @@ import Typography from '@mui/material/Typography';
 import { SpaceBetweenFlex } from '@ente/shared/components/Container';
 import React from 'react';
 import { t } from 'i18next';
-import { convertBytesToGBs, isSubscriptionCancelled } from 'utils/billing';
+import {
+    convertBytesToGBs,
+    hasAddOnBonus,
+    isSubscriptionCancelled,
+} from 'utils/billing';
 import { ManageSubscription } from '../manageSubscription';
 import { PeriodToggler } from '../periodToggler';
 import Plans from '../plans';
 import { Trans } from 'react-i18next';
+import { BFAddOnRow } from '../plans/BfAddOnRow';
 
 export default function PaidSubscriptionPlanSelectorCard({
     plans,
     subscription,
+    bonusData,
     closeModal,
     usage,
     planPeriod,
@@ -71,6 +77,7 @@ export default function PaidSubscriptionPlanSelectorCard({
                         planPeriod={planPeriod}
                         onPlanSelect={onPlanSelect}
                         subscription={subscription}
+                        bonusData={bonusData}
                         closeModal={closeModal}
                     />
                 </Stack>
@@ -85,11 +92,18 @@ export default function PaidSubscriptionPlanSelectorCard({
                                   date: subscription.expiryTime,
                               })}
                     </Typography>
+                    {hasAddOnBonus(bonusData) && (
+                        <BFAddOnRow
+                            bonusData={bonusData}
+                            closeModal={closeModal}
+                        />
+                    )}
                 </Box>
             </Box>
 
             <ManageSubscription
                 subscription={subscription}
+                bonusData={bonusData}
                 closeModal={closeModal}
                 setLoading={setLoading}
             />
