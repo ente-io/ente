@@ -12,7 +12,8 @@ import {
     copyFileToClipboard,
     getFileExtension,
     getFileFromURL,
-    isRawFileFromFileName,
+    isSupportedRawFormat,
+    isRawFile,
 } from 'utils/file';
 import { logError } from '@ente/shared/sentry';
 
@@ -329,9 +330,11 @@ function PhotoViewer(props: Iprops) {
     }
 
     function updateShowEditButton(file: EnteFile) {
+        const extension = getFileExtension(file.metadata.title);
+        const isSupported =
+            !isRawFile(extension) || isSupportedRawFormat(extension);
         setShowEditButton(
-            file.metadata.fileType === FILE_TYPE.IMAGE &&
-                !isRawFileFromFileName(file.metadata.title)
+            file.metadata.fileType === FILE_TYPE.IMAGE && isSupported
         );
     }
 
