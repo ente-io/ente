@@ -335,7 +335,6 @@ export default function Gallery() {
             setHiddenFiles(hiddenFiles);
             setCollections(normalCollections);
             setHiddenCollections(hiddenCollections);
-            void ClipService.setupOnFileUploadListener();
             await syncWithRemote(true);
             setIsFirstLoad(false);
             setJustSignedUp(false);
@@ -344,6 +343,7 @@ export default function Gallery() {
                 syncWithRemote(false, true);
             }, SYNC_INTERVAL_IN_MICROSECONDS);
             if (isElectron()) {
+                void ClipService.setupOnFileUploadListener();
                 ElectronAPIs.registerForegroundEventListener(() => {
                     syncWithRemote(false, true);
                 });
@@ -354,8 +354,8 @@ export default function Gallery() {
             clearInterval(syncInterval.current);
             if (isElectron()) {
                 ElectronAPIs.registerForegroundEventListener(() => {});
+                ClipService.removeOnFileUploadListener();
             }
-            ClipService.removeOnFileUploadListener();
         };
     }, []);
 
@@ -722,8 +722,8 @@ export default function Gallery() {
             await syncTrash(collections, setTrashedFiles);
             await syncEntities();
             await syncMapEnabled();
-            if (isElectron()) {
-                await syncEmbeddings();
+            await syncEmbeddings();
+            if (ClipService.isPlatformSupported()) {
                 void ClipService.scheduleImageEmbeddingExtraction();
             }
         } catch (e) {
