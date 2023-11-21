@@ -165,6 +165,7 @@ export async function computeImageEmbedding(
         return embeddingArray;
     } catch (err) {
         logErrorSentry(err, 'Error in computeImageEmbedding');
+        throw err;
     }
 }
 
@@ -200,5 +201,6 @@ export async function computeTextEmbedding(
         return embeddingArray;
     } catch (err) {
         logErrorSentry(err, 'Error in computeTextEmbedding');
+        throw err;
     }
 }
