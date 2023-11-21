@@ -558,6 +558,7 @@
   "renewsOn": "在 {endDate} 前续费",
   "freeTrialValidTill": "免费试用有效期至 {endDate}",
   "validTill": "有效期至 {endDate}",
+  "addOnValidTill": "您的 {storageAmount} 插件有效期至 {endDate}",
   "playStoreFreeTrialValidTill": "免费试用有效期至 {endDate}。\n之后您可以选择付费计划。",
   "subWillBeCancelledOn": "您的订阅将于 {endDate} 取消",
   "subscription": "订阅",
