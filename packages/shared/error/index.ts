@@ -85,6 +85,7 @@ export const CustomError = {
     CLIENT_ERROR: 'client error',
     ServerError: 'server error',
     FILE_NOT_FOUND: 'file not found',
+    UNSUPPORTED_PLATFORM: 'Unsupported platform',
 };
 
 export function handleUploadError(error: any): Error {
