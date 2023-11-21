@@ -481,15 +481,6 @@ export function isRawFile(exactType: string) {
     return RAW_FORMATS.includes(exactType.toLowerCase());
 }
 
-export function isRawFileFromFileName(fileName: string) {
-    for (const rawFormat of RAW_FORMATS) {
-        if (fileName.toLowerCase().endsWith(rawFormat)) {
-            return true;
-        }
-    }
-    return false;
-}
-
 export function isSupportedRawFormat(exactType: string) {
     return SUPPORTED_RAW_FORMATS.includes(exactType.toLowerCase());
 }
