@@ -1,5 +1,15 @@
 # CHANGELOG
 
+## v1.6.53
+
+### Bug Fixes
+
+- Fixed watch folder disabled issue
+- Fixed BF Add on related issues
+- Fixed clip  sync issue and added better logging
+- Fixed mov file upload
+- Fixed clip extraction related issue
+
 ## v1.6.52
 
 ### New Features
