@@ -100,19 +100,26 @@ class _ZoomableImageState extends State<ZoomableImage>
       content = const EnteLoadingWidget();
     }
 
-    verticalDragCallback(d) => {
-          if (_photoViewController.scale! <= _initialScale!)
+    dragFunction(d) => {
+          if (d.delta.dy > dragSensitivity)
             {
-              if (d.delta.dy > dragSensitivity)
-                {
-                  {Navigator.of(context).pop()},
-                }
-              else if (d.delta.dy < (dragSensitivity * -1))
-                {
-                  showDetailsSheet(context, widget.photo),
-                },
+              {Navigator.of(context).pop()},
+            }
+          else if (d.delta.dy < (dragSensitivity * -1))
+            {
+              showDetailsSheet(context, widget.photo),
             },
         };
+
+    verticalDragCallback(d) {
+      if (_initialScale != null &&
+          _photoViewController.scale! <= _initialScale!) {
+        dragFunction(d);
+      } else if (_initialScale == null) {
+        dragFunction(d);
+      }
+    }
+
     return GestureDetector(
       onVerticalDragUpdate: verticalDragCallback,
       child: content,
