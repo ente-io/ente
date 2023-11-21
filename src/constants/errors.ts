@@ -3,4 +3,6 @@ export const CustomErrors = {
         'Windows native image processing is not supported',
     INVALID_OS: (os: string) => `Invalid OS - ${os}`,
     WAIT_TIME_EXCEEDED: 'Wait time exceeded',
+    UNSUPPORTED_PLATFORM: (platform: string, arch: string) =>
+        `Unsupported platform - ${platform} ${arch}`,
 };
