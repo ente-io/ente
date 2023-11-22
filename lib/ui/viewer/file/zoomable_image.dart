@@ -112,10 +112,8 @@ class _ZoomableImageState extends State<ZoomableImage>
         };
 
     verticalDragCallback(d) {
-      if (_initialScale != null &&
+      if (_initialScale == null ||
           _photoViewController.scale! <= _initialScale!) {
-        dragFunction(d);
-      } else if (_initialScale == null) {
         dragFunction(d);
       }
     }
