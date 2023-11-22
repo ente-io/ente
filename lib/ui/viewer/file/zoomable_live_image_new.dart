@@ -16,14 +16,12 @@ import 'package:photos/utils/toast_util.dart';
 
 class ZoomableLiveImageNew extends StatefulWidget {
   final EnteFile enteFile;
-  final Function(bool)? shouldDisableScroll;
   final String? tagPrefix;
   final Decoration? backgroundDecoration;
 
   const ZoomableLiveImageNew(
     this.enteFile, {
     Key? key,
-    this.shouldDisableScroll,
     required this.tagPrefix,
     this.backgroundDecoration,
   }) : super(key: key);
@@ -77,7 +75,6 @@ class _ZoomableLiveImageNewState extends State<ZoomableLiveImageNew>
       content = ZoomableImage(
         _enteFile,
         tagPrefix: widget.tagPrefix,
-        shouldDisableScroll: widget.shouldDisableScroll,
         backgroundDecoration: widget.backgroundDecoration,
       );
     }
