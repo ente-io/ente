@@ -210,10 +210,6 @@
       "hex": "858585"
     },
     {
-      "title": "Twitter",
-      "slug": "x"
-    },
-    {
       "title": "Ubisoft",
       "hex": "4285f4"
     },
@@ -232,7 +228,9 @@
       "title": "Wise"
     },
     {
-      "title": "X"
+      "title": "X",
+      "altNames": ["twitter"],
+      "slug": "x"
     },
     {
       "title": "NextDNS"
