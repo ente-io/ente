@@ -1,4 +1,5 @@
 // import { Inter } from 'next/font/google';
+import PairedSuccessfullyOverlay from 'components/PairedSuccessfullyOverlay';
 import { useEffect, useState } from 'react';
 import { syncCollections } from 'services/collectionService';
 import { syncFiles } from 'services/fileService';
@@ -11,6 +12,8 @@ export default function Slideshow() {
     const [currentFile, setCurrentFile] = useState<EnteFile | undefined>(
         undefined
     );
+
+    const [loading, setLoading] = useState(true);
 
     const init = async () => {
         const collections = await syncCollections();
@@ -62,6 +65,8 @@ export default function Slideshow() {
         const url = URL.createObjectURL(blob);
 
         setRenderableFileURL(url);
+
+        setLoading(false);
     };
 
     useEffect(() => {
@@ -89,6 +94,7 @@ export default function Slideshow() {
                     }}
                 />
             </div>
+            {loading && <PairedSuccessfullyOverlay />}
         </>
     );
 }
