@@ -9,6 +9,7 @@ import {
 import { useRouter } from 'next/router';
 import { SESSION_KEYS, setKey } from '@ente/shared/storage/sessionStorage';
 import TimerBar from 'components/TimerBar';
+import PairedSuccessfullyOverlay from 'components/PairedSuccessfullyOverlay';
 
 const colourPool = [
     '#87CEFA', // Light Blue
@@ -60,6 +61,9 @@ export default function PairingMode() {
     const [codeGeneratedAt, setCodeGeneratedAt] = useState<Date | null>(null);
 
     const [borderWidthPercentage, setBorderWidthPercentage] = useState(100);
+
+    const [showPairingCompleteOverlay, setShowPairingCompleteOverlay] =
+        useState(false);
 
     useEffect(() => {
         init();
@@ -114,8 +118,6 @@ export default function PairingMode() {
             new TextDecoder().decode(nonB64)
         );
 
-        console.log(decryptedPayloadObj);
-
         return decryptedPayloadObj;
     };
 
@@ -153,6 +155,8 @@ export default function PairingMode() {
             if (!data) return;
 
             storePayloadLocally(data);
+
+            setShowPairingCompleteOverlay(true);
 
             router.push('/slideshow');
         }, 1000);
@@ -272,6 +276,7 @@ export default function PairingMode() {
                     </p>
                 </div>
             </div>
+            {showPairingCompleteOverlay && <PairedSuccessfullyOverlay />}
         </>
     );
 }
