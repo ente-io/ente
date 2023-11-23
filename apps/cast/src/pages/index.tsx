@@ -8,6 +8,7 @@ import {
 } from '@ente/shared/crypto/internal/libsodium';
 import { useRouter } from 'next/router';
 import { SESSION_KEYS, setKey } from '@ente/shared/storage/sessionStorage';
+import TimerBar from 'components/TimerBar';
 
 const colourPool = [
     '#87CEFA', // Light Blue
@@ -55,6 +56,10 @@ export default function PairingMode() {
     const [digits, setDigits] = useState<string[]>([]);
 
     const [publicKeyB64, setPublicKeyB64] = useState('');
+
+    const [codeGeneratedAt, setCodeGeneratedAt] = useState<Date | null>(null);
+
+    const [borderWidthPercentage, setBorderWidthPercentage] = useState(100);
 
     useEffect(() => {
         init();
@@ -133,6 +138,8 @@ export default function PairingMode() {
         } catch (e) {
             return;
         }
+
+        setCodeGeneratedAt(new Date());
     };
 
     const router = useRouter();
@@ -161,6 +168,27 @@ export default function PairingMode() {
         advertisePublicKey(publicKeyB64);
     }, [publicKeyB64]);
 
+    useEffect(() => {
+        if (!codeGeneratedAt) return;
+
+        // compute border width based on time left until next code regenerates
+        const interval = setInterval(() => {
+            const now = new Date();
+            const timeLeft =
+                codeGeneratedAt.getTime() + 45 * 1000 - now.getTime();
+
+            if (timeLeft > 0) {
+                const percentage = (timeLeft / (45 * 1000)) * 100;
+
+                setBorderWidthPercentage(percentage);
+            }
+        }, 250);
+
+        return () => {
+            clearInterval(interval);
+        };
+    }, [codeGeneratedAt]);
+
     return (
         <>
             <div
@@ -184,44 +212,50 @@ export default function PairingMode() {
                         }}>
                         Enter this code on <b>ente</b> to pair this TV
                     </h1>
-                    <table
+                    <div
                         style={{
-                            fontSize: '4rem',
-                            fontWeight: 'bold',
-                            fontFamily: 'monospace',
-                            display: 'flex',
                             borderRadius: '10px',
                             overflow: 'hidden',
                         }}>
-                        {digits.map((digit, i) => (
-                            <tr
-                                key={i}
-                                style={{
-                                    display: 'flex',
-                                    flexDirection: 'column',
-                                    alignItems: 'center',
-                                    padding: '0.5rem',
-                                    // alternating background
-                                    backgroundColor:
-                                        i % 2 === 0 ? '#2e2e2e' : '#5e5e5e',
-                                }}>
-                                <span
+                        <table
+                            style={{
+                                fontSize: '4rem',
+                                fontWeight: 'bold',
+                                fontFamily: 'monospace',
+                                display: 'flex',
+                                position: 'relative',
+                            }}>
+                            {digits.map((digit, i) => (
+                                <tr
+                                    key={i}
                                     style={{
-                                        color: colourPool[
-                                            i % colourPool.length
-                                        ],
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        alignItems: 'center',
+                                        padding: '0.5rem',
+                                        // alternating background
+                                        backgroundColor:
+                                            i % 2 === 0 ? '#2e2e2e' : '#5e5e5e',
                                     }}>
-                                    {digit}
-                                </span>
-                                <span
-                                    style={{
-                                        fontSize: '1rem',
-                                    }}>
-                                    {i + 1}
-                                </span>
-                            </tr>
-                        ))}
-                    </table>
+                                    <span
+                                        style={{
+                                            color: colourPool[
+                                                i % colourPool.length
+                                            ],
+                                        }}>
+                                        {digit}
+                                    </span>
+                                    <span
+                                        style={{
+                                            fontSize: '1rem',
+                                        }}>
+                                        {i + 1}
+                                    </span>
+                                </tr>
+                            ))}
+                        </table>
+                        <TimerBar percentage={borderWidthPercentage} />
+                    </div>
                     <p
                         style={{
                             fontSize: '1.2rem',
