@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import _sodium from 'libsodium-wrappers';
 import { getKexValue, setKexValue } from 'services/kexService';
-import { boxSealOpen, toB64 } from 'utils/crypto/libsodium';
+import { boxSealOpen, fromB64, toB64 } from 'utils/crypto/libsodium';
 import { useRouter } from 'next/router';
+import { SESSION_KEYS, setKey } from 'utils/storage/sessionStorage';
 
 const colourPool = [
     '#87CEFA', // Light Blue
@@ -52,6 +53,7 @@ export default function PairingMode() {
     const [publicKeyB64, setPublicKeyB64] = useState('');
 
     useEffect(() => {
+        init();
         const interval = setInterval(() => {
             init();
         }, 45 * 1000); // the kex API deletes keys every 60s, so we'll regenerate stuff prematurely
@@ -97,7 +99,13 @@ export default function PairingMode() {
             privateKeyB64
         );
 
-        const decryptedPayloadObj = JSON.parse(decryptedPayload);
+        const nonB64 = await fromB64(decryptedPayload);
+
+        const decryptedPayloadObj = JSON.parse(
+            new TextDecoder().decode(nonB64)
+        );
+
+        console.log(decryptedPayloadObj);
 
         return decryptedPayloadObj;
     };
@@ -106,8 +114,8 @@ export default function PairingMode() {
         // iterate through all the keys in the payload object and set them in localStorage.
         // if the key is "encryptionKey", store it in session storage instead.
         for (const key in payloadObj) {
-            if (key === 'encryptionKey') {
-                window.sessionStorage.setItem(key, payloadObj[key]);
+            if (key === 'sessionKey') {
+                setKey(SESSION_KEYS.ENCRYPTION_KEY, payloadObj[key]);
             } else {
                 window.localStorage.setItem(key, payloadObj[key]);
             }

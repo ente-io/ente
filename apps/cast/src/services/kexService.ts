@@ -1,10 +1,13 @@
 import { logError } from 'utils/sentry';
 import HTTPService from './HTTPService';
+import { getEndpoint } from 'utils/common/apiUtil';
+
+const ENDPOINT = getEndpoint();
 
 export const getKexValue = async (key: string) => {
     let resp;
     try {
-        resp = await HTTPService.get(`/kex/get`, {
+        resp = await HTTPService.get(`${ENDPOINT}/kex/get`, {
             identifier: key,
         });
     } catch (e) {
@@ -17,7 +20,7 @@ export const getKexValue = async (key: string) => {
 
 export const setKexValue = async (key: string, value: string) => {
     try {
-        await HTTPService.put('/kex/add', {
+        await HTTPService.put(ENDPOINT + '/kex/add', {
             customIdentifier: key,
             wrappedKey: value,
         });

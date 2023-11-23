@@ -75,7 +75,7 @@ export default function CollectionInfoWithOptions({
                 </SpaceBetweenFlex>
             </CollectionInfoBarWrapper>
             <AlbumCastDialog
-                currentCollectionId={props.activeCollection.id}
+                currentCollectionId={props.activeCollection?.id}
                 show={showAlbumCastDialog}
                 onHide={() => setShowAlbumCastDialog(false)}
             />

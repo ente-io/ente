@@ -1,12 +1,12 @@
 import { Typography } from '@mui/material';
-import DialogBoxV2 from 'components/DialogBoxV2';
+import DialogBoxV2 from '@ente/shared/components/DialogBoxV2';
 import SingleInputForm, {
     SingleInputFormProps,
-} from 'components/SingleInputForm';
+} from '@ente/shared/components/SingleInputForm';
 import { t } from 'i18next';
 import { getKexValue, setKexValue } from 'services/kexService';
-import { boxSeal } from 'utils/crypto/libsodium';
-import { SESSION_KEYS, getKey } from 'utils/storage/sessionStorage';
+import { SESSION_KEYS, getKey } from '@ente/shared/storage/sessionStorage';
+import { boxSeal, toB64 } from '@ente/shared/crypto/internal/libsodium';
 
 interface Props {
     show: boolean;
@@ -43,9 +43,19 @@ export default function AlbumCastDialog(props: Props) {
             targetCollectionId: props.currentCollectionId,
         });
 
-        const encryptedPayload = await boxSeal(payload, tvPublicKeyB64);
+        console.log('payload created', payload);
+        console.log('tv public key b64', tvPublicKeyB64);
+
+        const encryptedPayload = await boxSeal(
+            await toB64(new TextEncoder().encode(payload)),
+            tvPublicKeyB64
+        );
+
+        console.log('payload encrypted', encryptedPayload);
 
         const encryptedPayloadForTvKexKey = `${pin}_payload`;
+
+        console.log('setting kex');
 
         // hey TV, we acknowlege you!
         await setKexValue(encryptedPayloadForTvKexKey, encryptedPayload);
