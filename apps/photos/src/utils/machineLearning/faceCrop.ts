@@ -1,5 +1,5 @@
-import { CACHES } from 'constants/cache';
-import { CacheStorageService } from 'services/cache/cacheStorageService';
+import { CACHES } from '@ente/shared/storage/cacheStorage/constants';
+import { CacheStorageService } from '@ente/shared/storage/cacheStorage';
 import { compose, Matrix, scale, translate } from 'transformation-matrix';
 import { BlobOptions, Dimensions } from 'types/image';
 import {
@@ -12,8 +12,8 @@ import {
     FaceDetection,
 } from 'types/machineLearning';
 import { cropWithRotation, imageBitmapToBlob } from 'utils/image';
-import { addLogLine } from 'utils/logging';
-import { getBlobFromCache } from 'utils/storage/cache';
+import { addLogLine } from '@ente/shared/logging';
+import { getBlobFromCache } from '@ente/shared/storage/cacheStorage/helpers';
 import { enlargeBox } from '.';
 import { Box } from '../../../thirdparty/face-api/classes';
 import { getAlignedFaceBox } from './faceAlign';

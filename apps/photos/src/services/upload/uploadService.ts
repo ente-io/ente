@@ -1,9 +1,9 @@
 import { Collection } from 'types/collection';
-import { logError } from 'utils/sentry';
+import { logError } from '@ente/shared/sentry';
 import UploadHttpClient from './uploadHttpClient';
 import { extractFileMetadata, getFilename } from './fileService';
 import { getFileType } from '../typeDetectionService';
-import { CustomError, handleUploadError } from 'utils/error';
+import { CustomError, handleUploadError } from '@ente/shared/error';
 import {
     BackupedFile,
     EncryptedFile,
@@ -33,11 +33,11 @@ import { encryptFile, getFileSize, readFile } from './fileService';
 import { uploadStreamUsingMultipart } from './multiPartUploadService';
 import UIService from './uiService';
 import { Remote } from 'comlink';
-import { DedicatedCryptoWorker } from 'worker/crypto.worker';
+import { DedicatedCryptoWorker } from '@ente/shared/crypto/internal/crypto.worker';
 import publicUploadHttpClient from './publicUploadHttpClient';
 import { constructPublicMagicMetadata } from './magicMetadataService';
 import { FilePublicMagicMetadataProps } from 'types/file';
-import { B64EncryptionResult } from 'types/crypto';
+import { B64EncryptionResult } from '@ente/shared/crypto/types';
 
 class UploadService {
     private uploadURLs: UploadURL[] = [];

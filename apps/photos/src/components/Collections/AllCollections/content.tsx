@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { DialogContent } from '@mui/material';
-import { FlexWrapper } from 'components/Container';
+import { FlexWrapper } from '@ente/shared/components/Container';
 import AllCollectionCard from './collectionCard';
 import { CollectionSummary } from 'types/collection';
 import {
@@ -9,7 +9,7 @@ import {
     areEqual,
 } from 'react-window';
 import memoize from 'memoize-one';
-import useWindowSize from 'hooks/useWindowSize';
+import useWindowSize from '@ente/shared/hooks/useWindowSize';
 import { AllCollectionMobileBreakpoint } from './dialog';
 
 const MobileColumns = 2;

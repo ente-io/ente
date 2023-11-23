@@ -13,23 +13,26 @@ import {
     Tooltip,
     Typography,
 } from '@mui/material';
-import { logError } from 'utils/sentry';
-import { SpaceBetweenFlex, VerticallyCenteredFlex } from './Container';
+import { logError } from '@ente/shared/sentry';
+import {
+    SpaceBetweenFlex,
+    VerticallyCenteredFlex,
+} from '@ente/shared/components/Container';
 import ExportFinished from './ExportFinished';
 import ExportInit from './ExportInit';
 import ExportInProgress from './ExportInProgress';
 import FolderIcon from '@mui/icons-material/Folder';
 import { ExportStage } from 'constants/export';
-import DialogTitleWithCloseButton from './DialogBox/TitleWithCloseButton';
+import DialogTitleWithCloseButton from '@ente/shared/components/DialogBox/TitleWithCloseButton';
 import MoreHoriz from '@mui/icons-material/MoreHoriz';
-import OverflowMenu from './OverflowMenu/menu';
-import { OverflowMenuOption } from './OverflowMenu/option';
+import OverflowMenu from '@ente/shared/components/OverflowMenu/menu';
+import { OverflowMenuOption } from '@ente/shared/components/OverflowMenu/option';
 import { AppContext } from 'pages/_app';
 import { getExportDirectoryDoesNotExistMessage } from 'utils/ui';
 import { t } from 'i18next';
 import LinkButton from './pages/gallery/LinkButton';
-import { CustomError } from 'utils/error';
-import { addLogLine } from 'utils/logging';
+import { CustomError } from '@ente/shared/error';
+import { addLogLine } from '@ente/shared/logging';
 import { EnteFile } from 'types/file';
 
 const ExportFolderPathContainer = styled(LinkButton)`

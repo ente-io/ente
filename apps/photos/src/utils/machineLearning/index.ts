@@ -24,7 +24,7 @@ import {
 // import { mlFilesStore, mlPeopleStore } from 'utils/storage/mlStorage';
 import { getRenderableImage } from 'utils/file';
 import { imageBitmapToBlob } from 'utils/image';
-import { cached } from 'utils/storage/cache';
+import { cached } from '@ente/shared/storage/cacheStorage/helpers';
 import mlIDbStorage from 'utils/storage/mlIDbStorage';
 import { Box, Point } from '../../../thirdparty/face-api/classes';
 import {
@@ -36,12 +36,12 @@ import {
     getFaceCropBlobFromStorage,
     ibExtractFaceImagesFromCrops,
 } from './faceCrop';
-import { CACHES } from 'constants/cache';
+import { CACHES } from '@ente/shared/storage/cacheStorage/constants';
 import { FILE_TYPE } from 'constants/file';
 import { decodeLivePhoto } from 'services/livePhotoService';
-import { addLogLine } from 'utils/logging';
+import { addLogLine } from '@ente/shared/logging';
 import { Remote } from 'comlink';
-import { DedicatedCryptoWorker } from 'worker/crypto.worker';
+import { DedicatedCryptoWorker } from '@ente/shared/crypto/internal/crypto.worker';
 
 export function f32Average(descriptors: Float32Array[]) {
     if (descriptors.length < 1) {

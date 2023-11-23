@@ -3,7 +3,13 @@ import { getLocalCollections } from 'services/collectionService';
 import { getUserDetailsV2 } from 'services/userService';
 import { groupFilesBasedOnCollectionID } from 'utils/file';
 import { FILE_TYPE } from 'constants/file';
-import { tryToParseDateTime } from 'utils/time';
+import { tryToParseDateTime } from '@ente/shared/time';
+import {
+    MAX_FILE_NAME_LENGTH_GOOGLE_EXPORT,
+    getClippedMetadataJSONMapKeyForFile,
+    getMetadataJSONMapKeyForFile,
+    getMetadataJSONMapKeyForJSON,
+} from 'services/upload/metadataService';
 
 const DATE_TIME_PARSING_TEST_FILE_NAMES = [
     {
@@ -55,6 +61,37 @@ const DATE_TIME_PARSING_TEST_FILE_NAMES = [
     },
 ];
 
+const FILE_NAME_TO_JSON_NAME = [
+    {
+        filename: 'IMG20210211125718-edited.jpg',
+        jsonFilename: 'IMG20210211125718.jpg.json',
+    },
+    {
+        filename: 'IMG20210211174722.jpg',
+        jsonFilename: 'IMG20210211174722.jpg.json',
+    },
+    {
+        filename: '21345678901234567890123456789012345678901234567.png',
+        jsonFilename: '2134567890123456789012345678901234567890123456.json',
+    },
+    {
+        filename: 'IMG20210211174722(1).jpg',
+        jsonFilename: 'IMG20210211174722.jpg(1).json',
+    },
+    {
+        filename: 'IMG2021021(4455)74722(1).jpg',
+        jsonFilename: 'IMG2021021(4455)74722.jpg(1).json',
+    },
+    {
+        filename: 'IMG2021021.json74722(1).jpg',
+        jsonFilename: 'IMG2021021.json74722.jpg(1).json',
+    },
+    {
+        filename: 'IMG2021021(1)74722(1).jpg',
+        jsonFilename: 'IMG2021021(1)74722.jpg(1).json',
+    },
+];
+
 export async function testUpload() {
     if (!process.env.NEXT_PUBLIC_EXPECTED_JSON_PATH) {
         throw Error(
@@ -78,6 +115,7 @@ export async function testUpload() {
         await googleMetadataReadingCheck(expectedState);
         await totalFileCountCheck(expectedState);
         parseDateTimeFromFileNameTest();
+        mappingFileAndJSONFileCheck();
     } catch (e) {
         console.log(e);
     }
@@ -350,6 +388,34 @@ function parseDateTimeFromFileNameTest() {
         }
     );
     console.log('parseDateTimeFromFileNameTest passed ✅');
+}
+
+function mappingFileAndJSONFileCheck() {
+    FILE_NAME_TO_JSON_NAME.forEach(({ filename, jsonFilename }) => {
+        const jsonFileNameGeneratedKey = getMetadataJSONMapKeyForJSON(
+            0,
+            jsonFilename
+        );
+        let fileNameGeneratedKey = getMetadataJSONMapKeyForFile(0, filename);
+        if (
+            fileNameGeneratedKey !== jsonFileNameGeneratedKey &&
+            filename.length > MAX_FILE_NAME_LENGTH_GOOGLE_EXPORT
+        ) {
+            fileNameGeneratedKey = getClippedMetadataJSONMapKeyForFile(
+                0,
+                filename
+            );
+        }
+
+        if (fileNameGeneratedKey !== jsonFileNameGeneratedKey) {
+            throw Error(
+                `mappingFileAndJSONFileCheck failed ❌ ,
+                    for ${filename}
+                    expected: ${jsonFileNameGeneratedKey} got: ${fileNameGeneratedKey}`
+            );
+        }
+    });
+    console.log('mappingFileAndJSONFileCheck passed ✅');
 }
 
 // format: YYYY-MM-DD HH:MM:SS

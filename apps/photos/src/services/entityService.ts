@@ -1,10 +1,10 @@
-import { getToken } from 'utils/common/key';
-import localForage from 'utils/storage/localForage';
-import HTTPService from './HTTPService';
-import { getEndpoint } from 'utils/common/apiUtil';
-import { logError } from 'utils/sentry';
-import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
-import { getActualKey } from 'utils/common/key';
+import { getToken } from '@ente/shared/storage/localStorage/helpers';
+import localForage from '@ente/shared/storage/localForage';
+import HTTPService from '@ente/shared/network/HTTPService';
+import { getEndpoint } from '@ente/shared/network/api';
+import { logError } from '@ente/shared/sentry';
+import ComlinkCryptoWorker from '@ente/shared/crypto';
+import { getActualKey } from '@ente/shared/user';
 import {
     EntityType,
     Entity,
@@ -14,7 +14,7 @@ import {
     EncryptedEntity,
 } from 'types/entity';
 import { getLatestVersionEntities } from 'utils/entity';
-import { addLogLine } from 'utils/logging';
+import { addLogLine } from '@ente/shared/logging';
 
 const ENDPOINT = getEndpoint();
 

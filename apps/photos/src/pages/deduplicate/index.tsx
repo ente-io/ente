@@ -12,7 +12,7 @@ import { syncFiles, trashFiles } from 'services/fileService';
 import { EnteFile } from 'types/file';
 import { SelectedState } from 'types/gallery';
 
-import { ApiError } from 'utils/error';
+import { ApiError } from '@ente/shared/error';
 import { constructFileToCollectionMap, getSelectedFiles } from 'utils/file';
 import {
     DeduplicateContextType,
@@ -20,16 +20,16 @@ import {
 } from 'types/deduplicate';
 import Router from 'next/router';
 import DeduplicateOptions from 'components/pages/dedupe/SelectedFileOptions';
-import { PAGES } from 'constants/pages';
+import { PHOTOS_PAGES as PAGES } from '@ente/shared/constants/pages';
 import router from 'next/router';
-import { getKey, SESSION_KEYS } from 'utils/storage/sessionStorage';
+import { getKey, SESSION_KEYS } from '@ente/shared/storage/sessionStorage';
 import { styled } from '@mui/material';
 import { getLatestCollections } from 'services/collectionService';
-import EnteSpinner from 'components/EnteSpinner';
-import { VerticallyCentered } from 'components/Container';
+import EnteSpinner from '@ente/shared/components/EnteSpinner';
+import { VerticallyCentered } from '@ente/shared/components/Container';
 import Typography from '@mui/material/Typography';
-import useMemoSingleThreaded from 'hooks/useMemoSingleThreaded';
-import InMemoryStore, { MS_KEYS } from 'services/InMemoryStore';
+import useMemoSingleThreaded from '@ente/shared/hooks/useMemoSingleThreaded';
+import InMemoryStore, { MS_KEYS } from '@ente/shared/storage/InMemoryStore';
 import { HttpStatusCode } from 'axios';
 
 export const DeduplicateContext = createContext<DeduplicateContextType>(

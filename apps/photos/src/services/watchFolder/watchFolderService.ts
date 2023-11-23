@@ -3,13 +3,12 @@ import { EncryptedEnteFile } from 'types/file';
 import { ElectronFile, FileWithCollection } from 'types/upload';
 import { removeFromCollection } from '../collectionService';
 import { getLocalFiles } from '../fileService';
-import { logError } from 'utils/sentry';
+import { logError } from '@ente/shared/sentry';
 import {
     EventQueueItem,
     WatchMapping,
     WatchMappingSyncedFile,
 } from 'types/watchFolder';
-import { ElectronAPIs } from 'types/electron';
 import debounce from 'debounce-promise';
 import {
     diskFileAddedCallback,
@@ -19,13 +18,12 @@ import {
 import { getParentFolderName } from './utils';
 import { UPLOAD_RESULT, UPLOAD_STRATEGY } from 'constants/upload';
 import uploadManager from 'services/upload/uploadManager';
-import { addLocalLog, addLogLine } from 'utils/logging';
+import { addLocalLog, addLogLine } from '@ente/shared/logging';
 import { getValidFilesToUpload } from 'utils/watch';
 import { groupFilesBasedOnCollectionID } from 'utils/file';
+import ElectronAPIs from '@ente/shared/electron';
 
 class watchFolderService {
-    private electronAPIs: ElectronAPIs;
-    private allElectronAPIsExist: boolean = false;
     private eventQueue: EventQueueItem[] = [];
     private currentEvent: EventQueueItem;
     private currentlySyncedMapping: WatchMapping;
@@ -39,11 +37,6 @@ class watchFolderService {
     private setCollectionName: (collectionName: string) => void;
     private syncWithRemote: () => void;
     private setWatchFolderServiceIsRunning: (isRunning: boolean) => void;
-
-    constructor() {
-        this.electronAPIs = globalThis['ElectronAPIs'];
-        this.allElectronAPIsExist = !!this.electronAPIs?.getWatchMappings;
-    }
 
     isUploadRunning() {
         return this.uploadRunning;
@@ -59,18 +52,16 @@ class watchFolderService {
         syncWithRemote: () => void,
         setWatchFolderServiceIsRunning: (isRunning: boolean) => void
     ) {
-        if (this.allElectronAPIsExist) {
-            try {
-                this.setElectronFiles = setElectronFiles;
-                this.setCollectionName = setCollectionName;
-                this.syncWithRemote = syncWithRemote;
-                this.setWatchFolderServiceIsRunning =
-                    setWatchFolderServiceIsRunning;
-                this.setupWatcherFunctions();
-                await this.getAndSyncDiffOfFiles();
-            } catch (e) {
-                logError(e, 'error while initializing watch service');
-            }
+        try {
+            this.setElectronFiles = setElectronFiles;
+            this.setCollectionName = setCollectionName;
+            this.syncWithRemote = syncWithRemote;
+            this.setWatchFolderServiceIsRunning =
+                setWatchFolderServiceIsRunning;
+            this.setupWatcherFunctions();
+            await this.getAndSyncDiffOfFiles();
+        } catch (e) {
+            logError(e, 'error while initializing watch service');
         }
     }
 
@@ -88,7 +79,7 @@ class watchFolderService {
 
             for (const mapping of mappings) {
                 const filesOnDisk: ElectronFile[] =
-                    await this.electronAPIs.getDirFiles(mapping.folderPath);
+                    await ElectronAPIs.getDirFiles(mapping.folderPath);
 
                 this.uploadDiffOfFiles(mapping, filesOnDisk);
                 this.trashDiffOfFiles(mapping, filesOnDisk);
@@ -155,11 +146,11 @@ class watchFolderService {
     ): Promise<WatchMapping[]> {
         const notDeletedMappings = [];
         for (const mapping of mappings) {
-            const mappingExists = await this.electronAPIs.isFolder(
+            const mappingExists = await ElectronAPIs.isFolder(
                 mapping.folderPath
             );
             if (!mappingExists) {
-                this.electronAPIs.removeWatchMapping(mapping.folderPath);
+                ElectronAPIs.removeWatchMapping(mapping.folderPath);
             } else {
                 notDeletedMappings.push(mapping);
             }
@@ -177,13 +168,11 @@ class watchFolderService {
     }
 
     private setupWatcherFunctions() {
-        if (this.allElectronAPIsExist) {
-            this.electronAPIs.registerWatcherFunctions(
-                diskFileAddedCallback,
-                diskFileRemovedCallback,
-                diskFolderRemovedCallback
-            );
-        }
+        ElectronAPIs.registerWatcherFunctions(
+            diskFileAddedCallback,
+            diskFileRemovedCallback,
+            diskFolderRemovedCallback
+        );
     }
 
     async addWatchMapping(
@@ -191,38 +180,32 @@ class watchFolderService {
         folderPath: string,
         uploadStrategy: UPLOAD_STRATEGY
     ) {
-        if (this.allElectronAPIsExist) {
-            try {
-                await this.electronAPIs.addWatchMapping(
-                    rootFolderName,
-                    folderPath,
-                    uploadStrategy
-                );
-                this.getAndSyncDiffOfFiles();
-            } catch (e) {
-                logError(e, 'error while adding watch mapping');
-            }
+        try {
+            await ElectronAPIs.addWatchMapping(
+                rootFolderName,
+                folderPath,
+                uploadStrategy
+            );
+            this.getAndSyncDiffOfFiles();
+        } catch (e) {
+            logError(e, 'error while adding watch mapping');
         }
     }
 
     async removeWatchMapping(folderPath: string) {
-        if (this.allElectronAPIsExist) {
-            try {
-                await this.electronAPIs.removeWatchMapping(folderPath);
-            } catch (e) {
-                logError(e, 'error while removing watch mapping');
-            }
+        try {
+            await ElectronAPIs.removeWatchMapping(folderPath);
+        } catch (e) {
+            logError(e, 'error while removing watch mapping');
         }
     }
 
     getWatchMappings(): WatchMapping[] {
-        if (this.allElectronAPIsExist) {
-            try {
-                return this.electronAPIs.getWatchMappings() ?? [];
-            } catch (e) {
-                logError(e, 'error while getting watch mappings');
-                return [];
-            }
+        try {
+            return ElectronAPIs.getWatchMappings() ?? [];
+        } catch (e) {
+            logError(e, 'error while getting watch mappings');
+            return [];
         }
         return [];
     }
@@ -350,71 +333,67 @@ class watchFolderService {
         filesWithCollection: FileWithCollection[],
         collections: Collection[]
     ) {
-        if (this.allElectronAPIsExist) {
-            try {
-                addLocalLog(
-                    () =>
-                        `allFileUploadsDone,${JSON.stringify(
-                            filesWithCollection
-                        )} ${JSON.stringify(collections)}`
-                );
-                const collection = collections.find(
-                    (collection) =>
-                        collection.id === filesWithCollection[0].collectionID
-                );
-                addLocalLog(() => `got collection ${!!collection}`);
-                addLocalLog(
-                    () =>
-                        `${this.isEventRunning} ${this.currentEvent.collectionName} ${collection?.name}`
-                );
-                if (
-                    !this.isEventRunning ||
-                    this.currentEvent.collectionName !== collection?.name
-                ) {
-                    return;
-                }
-
-                const syncedFiles: WatchMapping['syncedFiles'] = [];
-                const ignoredFiles: WatchMapping['ignoredFiles'] = [];
-
-                for (const fileWithCollection of filesWithCollection) {
-                    this.handleUploadedFile(
-                        fileWithCollection,
-                        syncedFiles,
-                        ignoredFiles
-                    );
-                }
-
-                addLocalLog(() => `syncedFiles ${JSON.stringify(syncedFiles)}`);
-                addLocalLog(
-                    () => `ignoredFiles ${JSON.stringify(ignoredFiles)}`
-                );
-
-                if (syncedFiles.length > 0) {
-                    this.currentlySyncedMapping.syncedFiles = [
-                        ...this.currentlySyncedMapping.syncedFiles,
-                        ...syncedFiles,
-                    ];
-                    this.electronAPIs.updateWatchMappingSyncedFiles(
-                        this.currentlySyncedMapping.folderPath,
-                        this.currentlySyncedMapping.syncedFiles
-                    );
-                }
-                if (ignoredFiles.length > 0) {
-                    this.currentlySyncedMapping.ignoredFiles = [
-                        ...this.currentlySyncedMapping.ignoredFiles,
-                        ...ignoredFiles,
-                    ];
-                    this.electronAPIs.updateWatchMappingIgnoredFiles(
-                        this.currentlySyncedMapping.folderPath,
-                        this.currentlySyncedMapping.ignoredFiles
-                    );
-                }
-
-                this.runPostUploadsAction();
-            } catch (e) {
-                logError(e, 'error while running all file uploads done');
+        try {
+            addLocalLog(
+                () =>
+                    `allFileUploadsDone,${JSON.stringify(
+                        filesWithCollection
+                    )} ${JSON.stringify(collections)}`
+            );
+            const collection = collections.find(
+                (collection) =>
+                    collection.id === filesWithCollection[0].collectionID
+            );
+            addLocalLog(() => `got collection ${!!collection}`);
+            addLocalLog(
+                () =>
+                    `${this.isEventRunning} ${this.currentEvent.collectionName} ${collection?.name}`
+            );
+            if (
+                !this.isEventRunning ||
+                this.currentEvent.collectionName !== collection?.name
+            ) {
+                return;
             }
+
+            const syncedFiles: WatchMapping['syncedFiles'] = [];
+            const ignoredFiles: WatchMapping['ignoredFiles'] = [];
+
+            for (const fileWithCollection of filesWithCollection) {
+                this.handleUploadedFile(
+                    fileWithCollection,
+                    syncedFiles,
+                    ignoredFiles
+                );
+            }
+
+            addLocalLog(() => `syncedFiles ${JSON.stringify(syncedFiles)}`);
+            addLocalLog(() => `ignoredFiles ${JSON.stringify(ignoredFiles)}`);
+
+            if (syncedFiles.length > 0) {
+                this.currentlySyncedMapping.syncedFiles = [
+                    ...this.currentlySyncedMapping.syncedFiles,
+                    ...syncedFiles,
+                ];
+                ElectronAPIs.updateWatchMappingSyncedFiles(
+                    this.currentlySyncedMapping.folderPath,
+                    this.currentlySyncedMapping.syncedFiles
+                );
+            }
+            if (ignoredFiles.length > 0) {
+                this.currentlySyncedMapping.ignoredFiles = [
+                    ...this.currentlySyncedMapping.ignoredFiles,
+                    ...ignoredFiles,
+                ];
+                ElectronAPIs.updateWatchMappingIgnoredFiles(
+                    this.currentlySyncedMapping.folderPath,
+                    this.currentlySyncedMapping.ignoredFiles
+                );
+            }
+
+            this.runPostUploadsAction();
+        } catch (e) {
+            logError(e, 'error while running all file uploads done');
         }
     }
 
@@ -521,7 +500,7 @@ class watchFolderService {
                 this.currentlySyncedMapping.syncedFiles.filter(
                     (file) => !filePathsToRemove.has(file.path)
                 );
-            this.electronAPIs.updateWatchMappingSyncedFiles(
+            ElectronAPIs.updateWatchMappingSyncedFiles(
                 this.currentlySyncedMapping.folderPath,
                 this.currentlySyncedMapping.syncedFiles
             );
@@ -613,7 +592,7 @@ class watchFolderService {
 
     async selectFolder(): Promise<string> {
         try {
-            const folderPath = await this.electronAPIs.selectDirectory();
+            const folderPath = await ElectronAPIs.selectDirectory();
             return folderPath;
         } catch (e) {
             logError(e, 'error while selecting folder');
@@ -641,7 +620,7 @@ class watchFolderService {
 
     async isFolder(folderPath: string) {
         try {
-            const isFolder = await this.electronAPIs.isFolder(folderPath);
+            const isFolder = await ElectronAPIs.isFolder(folderPath);
             return isFolder;
         } catch (e) {
             logError(e, 'error while checking if folder exists');

@@ -1,7 +1,10 @@
 import React, { useContext } from 'react';
 import Close from '@mui/icons-material/Close';
 import { DialogTitle, Box, Typography, Stack } from '@mui/material';
-import { IconButtonWithBG, SpaceBetweenFlex } from 'components/Container';
+import {
+    IconButtonWithBG,
+    SpaceBetweenFlex,
+} from '@ente/shared/components/Container';
 import { UPLOAD_STAGES } from 'constants/upload';
 import { t } from 'i18next';
 

@@ -27,7 +27,7 @@ import MenuSectionTitle from 'components/Menu/MenuSectionTitle';
 import DownloadIcon from '@mui/icons-material/Download';
 import mime from 'mime-types';
 import CloseIcon from '@mui/icons-material/Close';
-import { HorizontalFlex } from 'components/Container';
+import { HorizontalFlex } from '@ente/shared/components/Container';
 import TransformMenu from './TransformMenu';
 import ColoursMenu from './ColoursMenu';
 import { FileWithCollection } from 'types/upload';
@@ -41,9 +41,9 @@ import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import MenuIcon from '@mui/icons-material/Menu';
 import { AppContext } from 'pages/_app';
 import { getEditorCloseConfirmationMessage } from 'utils/ui';
-import { logError } from 'utils/sentry';
+import { logError } from '@ente/shared/sentry';
 import { getFileType } from 'services/typeDetectionService';
-import { downloadUsingAnchor } from 'utils/file';
+import { downloadUsingAnchor } from '@ente/shared/utils';
 
 interface IProps {
     file: EnteFile;
@@ -210,9 +210,12 @@ const ImageEditorOverlay = (props: IProps) => {
             const ctx = canvasRef.current.getContext('2d');
             ctx.imageSmoothingEnabled = false;
             if (!fileURL) {
-                const { original } = await downloadManager.getFile(props.file);
-                img.src = original[0];
-                setFileURL(original[0]);
+                const { converted } = await downloadManager.getFile(
+                    props.file,
+                    true
+                );
+                img.src = converted[0];
+                setFileURL(converted[0]);
             } else {
                 img.src = fileURL;
             }

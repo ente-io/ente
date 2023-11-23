@@ -1,8 +1,11 @@
 import { Button, Dialog, DialogContent, Typography } from '@mui/material';
-import { CenteredFlex, SpaceBetweenFlex } from 'components/Container';
+import {
+    CenteredFlex,
+    SpaceBetweenFlex,
+} from '@ente/shared/components/Container';
 import DialogTitleWithCloseButton, {
     dialogCloseHandler,
-} from 'components/DialogBox/TitleWithCloseButton';
+} from '@ente/shared/components/DialogBox/TitleWithCloseButton';
 import React from 'react';
 import { t } from 'i18next';
 

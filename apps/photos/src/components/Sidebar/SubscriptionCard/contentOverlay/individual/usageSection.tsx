@@ -1,5 +1,5 @@
 import { Box, Typography } from '@mui/material';
-import { SpaceBetweenFlex } from 'components/Container';
+import { SpaceBetweenFlex } from '@ente/shared/components/Container';
 import React from 'react';
 import { makeHumanReadableStorage } from 'utils/billing';
 import { t } from 'i18next';

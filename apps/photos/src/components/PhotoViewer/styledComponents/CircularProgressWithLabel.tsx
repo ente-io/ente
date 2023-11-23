@@ -3,7 +3,7 @@ import {
     CircularProgress,
     Typography,
 } from '@mui/material';
-import { Overlay } from 'components/Container';
+import { Overlay } from '@ente/shared/components/Container';
 
 function CircularProgressWithLabel(
     props: CircularProgressProps & { value: number }

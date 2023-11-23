@@ -4,16 +4,18 @@ import {
     GetEmbeddingDiffResponse,
     PutEmbeddingRequest,
 } from 'types/embedding';
-import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
-import { getEndpoint } from 'utils/common/apiUtil';
-import { addLogLine } from 'utils/logging';
-import { logError } from 'utils/sentry';
-import localForage from 'utils/storage/localForage';
+import ComlinkCryptoWorker from '@ente/shared/crypto';
+import { getEndpoint } from '@ente/shared/network/api';
+import { addLogLine } from '@ente/shared/logging';
+import { logError } from '@ente/shared/sentry';
+import localForage from '@ente/shared/storage/localForage';
 import { getAllLocalFiles } from './fileService';
-import HTTPService from './HTTPService';
-import { getToken } from 'utils/common/key';
+import HTTPService from '@ente/shared/network/HTTPService';
+import { getToken } from '@ente/shared/storage/localStorage/helpers';
 import { getLatestVersionEmbeddings } from 'utils/embedding';
 import { getLocalTrashedFiles } from './trashService';
+import { getLocalCollections } from './collectionService';
+import { CustomError } from '@ente/shared/error';
 
 const ENDPOINT = getEndpoint();
 
@@ -42,6 +44,7 @@ export const syncEmbeddings = async () => {
     try {
         let embeddings = await getLocalEmbeddings();
         const localFiles = await getAllLocalFiles();
+        const hiddenAlbums = await getLocalCollections('hidden');
         const localTrashFiles = await getLocalTrashedFiles();
         const fileIdToKeyMap = new Map<number, string>();
         [...localFiles, ...localTrashFiles].forEach((file) => {
@@ -67,7 +70,7 @@ export const syncEmbeddings = async () => {
                         const worker = await ComlinkCryptoWorker.getInstance();
                         const fileKey = fileIdToKeyMap.get(embedding.fileID);
                         if (!fileKey) {
-                            throw Error('File key not found');
+                            throw Error(CustomError.FILE_NOT_FOUND);
                         }
                         const decryptedData = await worker.decryptEmbedding(
                             encryptedEmbedding,
@@ -80,7 +83,14 @@ export const syncEmbeddings = async () => {
                             embedding: decryptedData,
                         } as Embedding;
                     } catch (e) {
-                        logError(e, 'decryptEmbedding failed for file');
+                        let info: Record<string, unknown>;
+                        if (e.message === CustomError.FILE_NOT_FOUND) {
+                            const hasHiddenAlbums = hiddenAlbums?.length > 0;
+                            info = {
+                                hasHiddenAlbums,
+                            };
+                        }
+                        logError(e, 'decryptEmbedding failed for file', info);
                     }
                 })
             );

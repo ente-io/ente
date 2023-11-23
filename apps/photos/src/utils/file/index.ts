@@ -11,9 +11,9 @@ import {
 import { decodeLivePhoto } from 'services/livePhotoService';
 import { getFileType } from 'services/typeDetectionService';
 import DownloadManager from 'services/downloadManager';
-import { logError } from 'utils/sentry';
-import { User } from 'types/user';
-import { getData, LS_KEYS } from 'utils/storage/localStorage';
+import { logError } from '@ente/shared/sentry';
+import { User } from '@ente/shared/user/types';
+import { getData, LS_KEYS } from '@ente/shared/storage/localStorage';
 import { updateFileCreationDateInEXIF } from 'services/upload/exifService';
 import {
     TYPE_JPEG,
@@ -30,10 +30,10 @@ import * as ffmpegService from 'services/ffmpeg/ffmpegService';
 import { VISIBILITY_STATE } from 'types/magicMetadata';
 import { isArchivedFile, updateMagicMetadata } from 'utils/magicMetadata';
 
-import { addLocalLog, addLogLine } from 'utils/logging';
-import { CustomError } from 'utils/error';
-import { convertBytesToHumanReadable } from './size';
-import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
+import { addLocalLog, addLogLine } from '@ente/shared/logging';
+import { CustomError } from '@ente/shared/error';
+import { convertBytesToHumanReadable } from '@ente/shared/utils/size';
+import ComlinkCryptoWorker from '@ente/shared/crypto';
 import {
     deleteFromTrash,
     trashFiles,
@@ -41,13 +41,15 @@ import {
     updateFilePublicMagicMetadata,
 } from 'services/fileService';
 import isElectron from 'is-electron';
-import imageProcessor from 'services/electron/imageProcessor';
 import { isPlaybackPossible } from 'utils/photoFrame';
 import { FileTypeInfo } from 'types/upload';
 import { moveToHiddenCollection } from 'services/collectionService';
 
-import ElectronFSService from 'services/electron/fs';
+import ElectronFSService from '@ente/shared/electron';
 import { getFileExportPath, getUniqueFileExportName } from 'utils/export';
+import imageProcessor from 'services/imageProcessor';
+import ElectronAPIs from '@ente/shared/electron';
+import { downloadUsingAnchor } from '@ente/shared/utils';
 
 const WAIT_TIME_IMAGE_CONVERSION = 30 * 1000;
 
@@ -59,14 +61,6 @@ export enum FILE_OPS_TYPE {
     HIDE,
     TRASH,
     DELETE_PERMANENTLY,
-}
-
-export function downloadAsFile(filename: string, content: string) {
-    const file = new Blob([content], {
-        type: 'text/plain',
-    });
-    const fileURL = URL.createObjectURL(file);
-    downloadUsingAnchor(fileURL, filename);
 }
 
 export async function getUpdatedEXIFFileForDownload(
@@ -163,17 +157,6 @@ export async function downloadFile(
         logError(e, 'failed to download file');
         throw e;
     }
-}
-
-export function downloadUsingAnchor(link: string, name: string) {
-    const a = document.createElement('a');
-    a.style.display = 'none';
-    a.href = link;
-    a.download = name;
-    document.body.appendChild(a);
-    a.click();
-    URL.revokeObjectURL(link);
-    a.remove();
 }
 
 export function groupFilesBasedOnCollectionID(files: EnteFile[]) {
@@ -498,15 +481,6 @@ export function isRawFile(exactType: string) {
     return RAW_FORMATS.includes(exactType.toLowerCase());
 }
 
-export function isRawFileFromFileName(fileName: string) {
-    for (const rawFormat of RAW_FORMATS) {
-        if (fileName.toLowerCase().endsWith(rawFormat)) {
-            return true;
-        }
-    }
-    return false;
-}
-
 export function isSupportedRawFormat(exactType: string) {
     return SUPPORTED_RAW_FORMATS.includes(exactType.toLowerCase());
 }
@@ -712,7 +686,7 @@ export async function downloadFileDesktop(
             livePhoto.imageNameTitle
         );
         const imageStream = generateStreamFromArrayBuffer(livePhoto.image);
-        await ElectronFSService.saveMediaFile(
+        await ElectronAPIs.saveStreamToDisk(
             getFileExportPath(downloadPath, imageExportName),
             imageStream
         );
@@ -722,7 +696,7 @@ export async function downloadFileDesktop(
                 livePhoto.videoNameTitle
             );
             const videoStream = generateStreamFromArrayBuffer(livePhoto.video);
-            await ElectronFSService.saveMediaFile(
+            await ElectronAPIs.saveStreamToDisk(
                 getFileExportPath(downloadPath, videoExportName),
                 videoStream
             );
@@ -737,7 +711,7 @@ export async function downloadFileDesktop(
             downloadPath,
             file.metadata.title
         );
-        await ElectronFSService.saveMediaFile(
+        await ElectronAPIs.saveStreamToDisk(
             getFileExportPath(downloadPath, fileExportName),
             updatedFileStream
         );
@@ -823,11 +797,20 @@ export function getLatestVersionFiles(files: EnteFile[]) {
     );
 }
 
-export function getPersonalFiles(files: EnteFile[], user: User) {
+export function getPersonalFiles(
+    files: EnteFile[],
+    user: User,
+    collectionIdToOwnerIDMap?: Map<number, number>
+) {
     if (!user?.id) {
         throw Error('user missing');
     }
-    return files.filter((file) => file.ownerID === user.id);
+    return files.filter(
+        (file) =>
+            file.ownerID === user.id &&
+            (!collectionIdToOwnerIDMap ||
+                collectionIdToOwnerIDMap.get(file.collectionID) === user.id)
+    );
 }
 
 export function getIDBasedSortedFiles(files: EnteFile[]) {

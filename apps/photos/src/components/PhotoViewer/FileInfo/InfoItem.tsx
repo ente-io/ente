@@ -1,6 +1,6 @@
 import Edit from '@mui/icons-material/Edit';
 import { Box, IconButton, Typography } from '@mui/material';
-import { FlexWrapper } from 'components/Container';
+import { FlexWrapper } from '@ente/shared/components/Container';
 import React from 'react';
 import { SmallLoadingSpinner } from '../styledComponents/SmallLoadingSpinner';
 

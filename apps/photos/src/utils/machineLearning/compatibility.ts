@@ -5,7 +5,7 @@ import {
 } from 'utils/common';
 
 import isElectron from 'is-electron';
-import { addLogLine } from 'utils/logging';
+import { addLogLine } from '@ente/shared/logging';
 
 export function canEnableMlSearch(): boolean {
     // check if is chrome or ente desktop

@@ -1,9 +1,9 @@
-import HTTPService from 'services/HTTPService';
-import { getEndpoint, getUploadEndpoint } from 'utils/common/apiUtil';
-import { getToken } from 'utils/common/key';
-import { logError } from 'utils/sentry';
+import HTTPService from '@ente/shared/network/HTTPService';
+import { getEndpoint, getUploadEndpoint } from '@ente/shared/network/api';
+import { getToken } from '@ente/shared/storage/localStorage/helpers';
+import { logError } from '@ente/shared/sentry';
 import { EnteFile } from 'types/file';
-import { CustomError, handleUploadError } from 'utils/error';
+import { CustomError, handleUploadError } from '@ente/shared/error';
 import { UploadFile, UploadURL, MultipartUploadURLs } from 'types/upload';
 import { retryHTTPCall } from 'utils/upload/uploadRetrier';
 

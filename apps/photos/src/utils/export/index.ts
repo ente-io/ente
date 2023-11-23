@@ -16,7 +16,7 @@ import {
     ExportStage,
 } from 'constants/export';
 import sanitize from 'sanitize-filename';
-import { formatDateTimeShort } from 'utils/time/format';
+import { formatDateTimeShort } from '@ente/shared/time/format';
 import { getCollectionUserFacingName } from 'utils/collection';
 
 export const getExportRecordFileUID = (file: EnteFile) =>

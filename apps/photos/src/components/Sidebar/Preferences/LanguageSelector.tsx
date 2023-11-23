@@ -1,10 +1,10 @@
 import DropdownInput, { DropdownOption } from 'components/DropdownInput';
-import { Language } from 'constants/locale';
-import { useLocalState } from 'hooks/useLocalState';
+import { Language } from '@ente/shared/i18n/locale';
+import { useLocalState } from '@ente/shared/hooks/useLocalState';
 import { t } from 'i18next';
 import { useRouter } from 'next/router';
-import { getBestPossibleUserLocale } from 'utils/i18n';
-import { LS_KEYS } from 'utils/storage/localStorage';
+import { getBestPossibleUserLocale } from '@ente/shared/i18n/utils';
+import { LS_KEYS } from '@ente/shared/storage/localStorage';
 
 const getLocaleDisplayName = (l: Language) => {
     switch (l) {

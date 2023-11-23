@@ -1,10 +1,10 @@
 import React from 'react';
 import { COLLECTION_LIST_SORT_BY } from 'constants/collection';
 import SortIcon from '@mui/icons-material/Sort';
-import OverflowMenu from 'components/OverflowMenu/menu';
+import OverflowMenu from '@ente/shared/components/OverflowMenu/menu';
 import SvgIcon from '@mui/material/SvgIcon';
 import TickIcon from '@mui/icons-material/Done';
-import { OverflowMenuOption } from 'components/OverflowMenu/option';
+import { OverflowMenuOption } from '@ente/shared/components/OverflowMenu/option';
 import { t } from 'i18next';
 
 interface CollectionSortProps {

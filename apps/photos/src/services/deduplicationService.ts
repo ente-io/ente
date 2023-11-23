@@ -1,11 +1,11 @@
 import { FILE_TYPE } from 'constants/file';
 import { EnteFile } from 'types/file';
 import { Metadata } from 'types/upload';
-import { getEndpoint } from 'utils/common/apiUtil';
-import { getToken } from 'utils/common/key';
-import { logError } from 'utils/sentry';
+import { getEndpoint } from '@ente/shared/network/api';
+import { getToken } from '@ente/shared/storage/localStorage/helpers';
+import { logError } from '@ente/shared/sentry';
 import { hasFileHash } from 'utils/upload';
-import HTTPService from './HTTPService';
+import HTTPService from '@ente/shared/network/HTTPService';
 
 const ENDPOINT = getEndpoint();
 

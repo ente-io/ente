@@ -2,8 +2,8 @@ import { createFFmpeg, FFmpeg } from 'ffmpeg-wasm';
 import QueueProcessor from 'services/queueProcessor';
 import { getUint8ArrayView } from 'services/readerService';
 import { promiseWithTimeout } from 'utils/common';
-import { addLogLine } from 'utils/logging';
-import { logError } from 'utils/sentry';
+import { addLogLine } from '@ente/shared/logging';
+import { logError } from '@ente/shared/sentry';
 import { generateTempName } from 'utils/temp';
 
 const INPUT_PATH_PLACEHOLDER = 'INPUT';

@@ -3,7 +3,7 @@ import { PeopleList } from 'components/MachineLearning/PeopleList';
 import { IndexStatus } from 'types/machineLearning/ui';
 import { SuggestionType, Suggestion } from 'types/search';
 import { components } from 'react-select';
-import { Row } from 'components/Container';
+import { Row } from '@ente/shared/components/Container';
 import { Col } from 'react-bootstrap';
 import { AppContext } from 'pages/_app';
 import styled from '@mui/styled-engine';

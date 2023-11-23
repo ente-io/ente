@@ -1,4 +1,4 @@
-import { ENCRYPTION_CHUNK_SIZE } from 'constants/crypto';
+import { ENCRYPTION_CHUNK_SIZE } from '@ente/shared/crypto/constants';
 import { FILE_TYPE } from 'constants/file';
 import {
     FileTypeInfo,
@@ -41,6 +41,11 @@ export const WHITELISTED_FILE_FORMATS: FileTypeInfo[] = [
         fileType: FILE_TYPE.IMAGE,
         exactType: 'crw',
         mimeType: 'image/x-canon-crw',
+    },
+    {
+        fileType: FILE_TYPE.VIDEO,
+        exactType: 'mov',
+        mimeType: 'video/quicktime',
     },
 ];
 

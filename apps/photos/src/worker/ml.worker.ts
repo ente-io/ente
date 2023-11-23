@@ -2,7 +2,7 @@ import { expose } from 'comlink';
 import { EnteFile } from 'types/file';
 import mlService from 'services/machineLearning/machineLearningService';
 import { MachineLearningWorker } from 'types/machineLearning';
-import { addLogLine } from 'utils/logging';
+import { addLogLine } from '@ente/shared/logging';
 // import ReverseProxiedElectronCacheStorageProxy from './electronCacheStorageProxy.proxy';
 // import { setupResponseComlinkTransferHandler } from 'utils/comlink';
 

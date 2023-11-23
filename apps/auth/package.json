@@ -1,0 +1,11 @@
+{
+    "name": "auth",
+    "version": "0.0.1",
+    "private": true,
+    "scripts": {
+        "dev": "next dev",
+        "build": "next build",
+        "lint": "next lint",
+        "export": "next export"
+    }
+}

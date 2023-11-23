@@ -1,10 +1,10 @@
 import React from 'react';
 import LockIcon from '@mui/icons-material/Lock';
-import { PAGES } from 'constants/pages';
+import { PHOTOS_PAGES as PAGES } from '@ente/shared/constants/pages';
 import { useRouter } from 'next/router';
 import { t } from 'i18next';
 
-import { VerticallyCentered } from 'components/Container';
+import { VerticallyCentered } from '@ente/shared/components/Container';
 import { Button, Typography } from '@mui/material';
 
 interface Iprops {

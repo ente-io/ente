@@ -1,6 +1,6 @@
 import { EnteFile } from 'types/file';
-import { handleUploadError, CustomError } from 'utils/error';
-import { logError } from 'utils/sentry';
+import { handleUploadError, CustomError } from '@ente/shared/error';
+import { logError } from '@ente/shared/sentry';
 import { findMatchingExistingFiles } from 'utils/upload';
 import UIService from './uiService';
 import UploadService from './uploadService';
@@ -13,13 +13,13 @@ import {
     FileTypeInfo,
     Logger,
 } from 'types/upload';
-import { addLocalLog, addLogLine } from 'utils/logging';
-import { convertBytesToHumanReadable } from 'utils/file/size';
+import { addLocalLog, addLogLine } from '@ente/shared/logging';
+import { convertBytesToHumanReadable } from '@ente/shared/utils/size';
 import { sleep } from 'utils/common';
 import { addToCollection } from 'services/collectionService';
 import uploadCancelService from './uploadCancelService';
 import { Remote } from 'comlink';
-import { DedicatedCryptoWorker } from 'worker/crypto.worker';
+import { DedicatedCryptoWorker } from '@ente/shared/crypto/internal/crypto.worker';
 import uploadService from './uploadService';
 
 interface UploadResponse {

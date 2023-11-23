@@ -5,7 +5,7 @@ import {
 } from 'components/Collections/styledComponents';
 import React from 'react';
 import { styled } from '@mui/material';
-import { CenteredFlex, Overlay } from 'components/Container';
+import { CenteredFlex, Overlay } from '@ente/shared/components/Container';
 import { t } from 'i18next';
 
 const ImageContainer = styled(Overlay)`

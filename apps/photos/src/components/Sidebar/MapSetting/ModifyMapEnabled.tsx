@@ -2,7 +2,7 @@ import { Box, DialogProps } from '@mui/material';
 import { EnteDrawer } from 'components/EnteDrawer';
 import { AppContext } from 'pages/_app';
 import { useContext } from 'react';
-import { logError } from 'utils/sentry';
+import { logError } from '@ente/shared/sentry';
 import EnableMap from '../EnableMap';
 import DisableMap from '../DisableMap';
 

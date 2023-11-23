@@ -6,7 +6,7 @@ import mlIDbStorage from 'utils/storage/mlIDbStorage';
 import { getMLSyncConfig } from 'utils/machineLearning/config';
 import { Collection } from 'types/collection';
 import { EnteFile } from 'types/file';
-import { logError } from 'utils/sentry';
+import { logError } from '@ente/shared/sentry';
 import {
     DateValue,
     Search,
@@ -25,7 +25,7 @@ import { Person, Thing } from 'types/machineLearning';
 import { getUniqueFiles } from 'utils/file';
 import { getLatestEntities } from './entityService';
 import { LocationTag, LocationTagData, EntityType } from 'types/entity';
-import { addLogLine } from 'utils/logging';
+import { addLogLine } from '@ente/shared/logging';
 import { FILE_TYPE } from 'constants/file';
 import {
     ClipService,
@@ -53,6 +53,7 @@ export const getAutoCompleteSuggestions =
                 return [];
             }
             const suggestions: Suggestion[] = [
+                await getClipSuggestion(searchPhrase),
                 ...getFileTypeSuggestion(searchPhrase),
                 ...getHolidaySuggestion(searchPhrase),
                 ...getYearSuggestion(searchPhrase),
@@ -62,7 +63,6 @@ export const getAutoCompleteSuggestions =
                 getFileCaptionSuggestion(searchPhrase, files),
                 ...(await getLocationTagSuggestions(searchPhrase)),
                 ...(await getThingSuggestion(searchPhrase)),
-                await getClipSuggestion(searchPhrase),
             ].filter((suggestion) => !!suggestion);
 
             return convertSuggestionsToOptions(suggestions, files);
@@ -290,7 +290,7 @@ async function getThingSuggestion(searchPhrase: string): Promise<Suggestion[]> {
 }
 
 async function getClipSuggestion(searchPhrase: string): Promise<Suggestion> {
-    if (!(await ClipService.isClipSupported())) {
+    if (!ClipService.isPlatformSupported()) {
         return null;
     }
     const clipResults = await searchClip(searchPhrase);

@@ -1,6 +1,6 @@
 import { runningInBrowser } from 'utils/common';
 import { DedicatedMLWorker } from 'worker/ml.worker';
-import { ComlinkWorker } from './comlinkWorker';
+import { ComlinkWorker } from '@ente/shared/worker/comlinkWorker';
 
 export const getDedicatedMLWorker = (name: string) => {
     if (runningInBrowser()) {

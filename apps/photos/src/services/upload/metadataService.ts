@@ -1,5 +1,5 @@
 import { FILE_TYPE } from 'constants/file';
-import { logError } from 'utils/sentry';
+import { logError } from '@ente/shared/sentry';
 import { getEXIFLocation, getEXIFTime, getParsedExifData } from './exifService';
 import {
     Metadata,
@@ -16,16 +16,12 @@ import {
     parseDateFromFusedDateString,
     validateAndGetCreationUnixTimeInMicroSeconds,
     tryToParseDateTime,
-} from 'utils/time';
+} from '@ente/shared/time';
 import { getFileHash } from './hashService';
 import { Remote } from 'comlink';
-import { DedicatedCryptoWorker } from 'worker/crypto.worker';
+import { DedicatedCryptoWorker } from '@ente/shared/crypto/internal/crypto.worker';
 import { FilePublicMagicMetadataProps } from 'types/file';
-
-interface ParsedMetadataJSONWithTitle {
-    title: string;
-    parsedMetadataJSON: ParsedMetadataJSON;
-}
+import { splitFilenameAndExtension } from 'utils/file';
 
 const NULL_PARSED_METADATA_JSON: ParsedMetadataJSON = {
     creationTime: null,
@@ -50,6 +46,8 @@ const EXIF_TAGS_NEEDED = [
     'PixelYDimension',
     'MetadataDate',
 ];
+
+export const MAX_FILE_NAME_LENGTH_GOOGLE_EXPORT = 46;
 
 export async function extractMetadata(
     worker: Remote<DedicatedCryptoWorker>,
@@ -116,11 +114,41 @@ export async function getImageMetadata(
     return imageMetadata;
 }
 
-export const getMetadataJSONMapKey = (
+export const getMetadataJSONMapKeyForJSON = (
     collectionID: number,
+    jsonFileName: string
+) => {
+    let title = jsonFileName.slice(0, -1 * '.json'.length);
+    const endsWithNumberedSuffixWithBrackets = title.match(/\(\d+\)$/);
+    if (endsWithNumberedSuffixWithBrackets) {
+        title = title.slice(
+            0,
+            -1 * endsWithNumberedSuffixWithBrackets[0].length
+        );
+        const [name, extension] = splitFilenameAndExtension(title);
+        return `${collectionID}-${name}${endsWithNumberedSuffixWithBrackets[0]}.${extension}`;
+    }
+    return `${collectionID}-${title}`;
+};
 
-    title: string
-) => `${collectionID}-${title}`;
+// if the file name is greater than MAX_FILE_NAME_LENGTH_GOOGLE_EXPORT(46) , then google photos clips the file name
+// so we need to use the clipped file name to get the metadataJSON file
+export const getClippedMetadataJSONMapKeyForFile = (
+    collectionID: number,
+    fileName: string
+) => {
+    return `${collectionID}-${fileName.slice(
+        0,
+        MAX_FILE_NAME_LENGTH_GOOGLE_EXPORT
+    )}`;
+};
+
+export const getMetadataJSONMapKeyForFile = (
+    collectionID: number,
+    fileName: string
+) => {
+    return `${collectionID}-${getFileOriginalName(fileName)}`;
+};
 
 export async function parseMetadataJSON(receivedFile: File | ElectronFile) {
     try {
@@ -134,11 +162,10 @@ export async function parseMetadataJSON(receivedFile: File | ElectronFile) {
 
         const parsedMetadataJSON: ParsedMetadataJSON =
             NULL_PARSED_METADATA_JSON;
-        if (!metadataJSON || !metadataJSON['title']) {
+        if (!metadataJSON) {
             return;
         }
 
-        const title = metadataJSON['title'];
         if (
             metadataJSON['photoTakenTime'] &&
             metadataJSON['photoTakenTime']['timestamp']
@@ -177,7 +204,7 @@ export async function parseMetadataJSON(receivedFile: File | ElectronFile) {
             parsedMetadataJSON.latitude = locationData.latitude;
             parsedMetadataJSON.longitude = locationData.longitude;
         }
-        return { title, parsedMetadataJSON } as ParsedMetadataJSONWithTitle;
+        return parsedMetadataJSON;
     } catch (e) {
         logError(e, 'parseMetadataJSON failed');
         // ignore
@@ -218,4 +245,30 @@ export function extractDateFromFileName(filename: string): number {
 function convertSignalNameToFusedDateString(filename: string) {
     const dateStringParts = filename.split('-');
     return `${dateStringParts[1]}${dateStringParts[2]}${dateStringParts[3]}-${dateStringParts[4]}`;
+}
+
+const EDITED_FILE_SUFFIX = '-edited';
+
+/*
+    Get the original file name for edited file to associate it to original file's metadataJSON file 
+    as edited file doesn't have their own metadata file
+*/
+function getFileOriginalName(fileName: string) {
+    let originalName: string = null;
+    const [nameWithoutExtension, extension] =
+        splitFilenameAndExtension(fileName);
+
+    const isEditedFile = nameWithoutExtension.endsWith(EDITED_FILE_SUFFIX);
+    if (isEditedFile) {
+        originalName = nameWithoutExtension.slice(
+            0,
+            -1 * EDITED_FILE_SUFFIX.length
+        );
+    } else {
+        originalName = nameWithoutExtension;
+    }
+    if (extension) {
+        originalName += '.' + extension;
+    }
+    return originalName;
 }

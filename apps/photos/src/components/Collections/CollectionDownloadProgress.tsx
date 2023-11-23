@@ -4,7 +4,7 @@ import isElectron from 'is-electron';
 import { AppContext } from 'pages/_app';
 import { GalleryContext } from 'pages/gallery';
 import { useContext } from 'react';
-import ElectronService from 'services/electron/common';
+import ElectronAPIs from '@ente/shared/electron';
 
 export interface CollectionDownloadProgressAttributes {
     success: number;
@@ -100,7 +100,7 @@ export const CollectionDownloadProgress: React.FC<CollectionDownloadProgressProp
                 (attr) => attr.collectionID === collectionID
             );
             if (isElectron()) {
-                ElectronService.openDirectory(attributes.downloadDirPath);
+                ElectronAPIs.openDirectory(attributes.downloadDirPath);
             } else {
                 if (attributes.isHidden) {
                     galleryContext.openHiddenSection(() => {

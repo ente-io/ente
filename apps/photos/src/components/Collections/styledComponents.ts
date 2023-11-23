@@ -1,6 +1,6 @@
 import { Box } from '@mui/material';
 import { styled } from '@mui/material';
-import { Overlay } from 'components/Container';
+import { Overlay } from '@ente/shared/components/Container';
 import { IMAGE_CONTAINER_MAX_WIDTH, MIN_COLUMNS } from 'constants/gallery';
 export const CollectionListWrapper = styled(Box)`
     position: relative;

@@ -19,45 +19,45 @@ import { EnteFile } from 'types/file';
 import { downloadFile, mergeMetadata, sortFiles } from 'utils/file';
 import { AppContext } from 'pages/_app';
 import { PublicCollectionGalleryContext } from 'utils/publicCollectionGallery';
-import { CustomError, parseSharingErrorCodes } from 'utils/error';
+import { CustomError, parseSharingErrorCodes } from '@ente/shared/error';
 import {
     VerticallyCentered,
     CenteredFlex,
     SpaceBetweenFlex,
-} from 'components/Container';
+} from '@ente/shared/components/Container';
 import { t } from 'i18next';
 
-import EnteSpinner from 'components/EnteSpinner';
-import { PAGES } from 'constants/pages';
+import EnteSpinner from '@ente/shared/components/EnteSpinner';
+import { PHOTOS_PAGES as PAGES } from '@ente/shared/constants/pages';
 import { useRouter } from 'next/router';
 import SingleInputForm, {
     SingleInputFormProps,
-} from 'components/SingleInputForm';
-import { logError } from 'utils/sentry';
+} from '@ente/shared/components/SingleInputForm';
+import { logError } from '@ente/shared/sentry';
 import SharedAlbumNavbar from 'components/pages/sharedAlbum/Navbar';
 import { CollectionInfo } from 'components/Collections/CollectionInfo';
 import { CollectionInfoBarWrapper } from 'components/Collections/styledComponents';
 import { ITEM_TYPE, TimeStampListItem } from 'components/PhotoList';
-import FormPaper from 'components/Form/FormPaper';
-import FormPaperTitle from 'components/Form/FormPaper/Title';
+import FormPaper from '@ente/shared/components/Form/FormPaper';
+import FormPaperTitle from '@ente/shared/components/Form/FormPaper/Title';
 import Typography from '@mui/material/Typography';
 import Uploader from 'components/Upload/Uploader';
 import { LoadingOverlay } from 'components/LoadingOverlay';
 import FullScreenDropZone from 'components/FullScreenDropZone';
-import useFileInput from 'hooks/useFileInput';
+import useFileInput from '@ente/shared/hooks/useFileInput';
 import { useDropzone } from 'react-dropzone';
 import UploadSelectorInputs from 'components/UploadSelectorInputs';
-import { logoutUser } from 'services/userService';
+import { logoutUser } from '@ente/accounts/services/user';
 import UploadButton from 'components/Upload/UploadButton';
 import bs58 from 'bs58';
 import AddPhotoAlternateOutlined from '@mui/icons-material/AddPhotoAlternateOutlined';
-import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
+import ComlinkCryptoWorker from '@ente/shared/crypto';
 import { UploadTypeSelectorIntent } from 'types/gallery';
 import FileDownloadOutlinedIcon from '@mui/icons-material/FileDownloadOutlined';
 import MoreHoriz from '@mui/icons-material/MoreHoriz';
-import OverflowMenu from 'components/OverflowMenu/menu';
-import { OverflowMenuOption } from 'components/OverflowMenu/option';
-import { ENTE_WEBSITE_LINK } from 'constants/urls';
+import OverflowMenu from '@ente/shared/components/OverflowMenu/menu';
+import { OverflowMenuOption } from '@ente/shared/components/OverflowMenu/option';
+import { ENTE_WEBSITE_LINK } from '@ente/shared/constants/urls';
 
 const defaultThumbStore = new Map();
 const defaultFileStore = new Map();

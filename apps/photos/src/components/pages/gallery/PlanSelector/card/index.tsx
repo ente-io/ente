@@ -16,11 +16,11 @@ import { reverseString } from 'utils/common';
 import { GalleryContext } from 'pages/gallery';
 import billingService from 'services/billingService';
 import { SetLoading } from 'types/gallery';
-import { logError } from 'utils/sentry';
+import { logError } from '@ente/shared/sentry';
 import { AppContext } from 'pages/_app';
 import { Link, Stack } from '@mui/material';
-import { useLocalState } from 'hooks/useLocalState';
-import { LS_KEYS } from 'utils/storage/localStorage';
+import { useLocalState } from '@ente/shared/hooks/useLocalState';
+import { LS_KEYS } from '@ente/shared/storage/localStorage';
 import { getLocalUserDetails } from 'utils/user';
 import { PLAN_PERIOD } from 'constants/gallery';
 import FreeSubscriptionPlanSelectorCard from './free';
@@ -28,7 +28,7 @@ import PaidSubscriptionPlanSelectorCard from './paid';
 import { isPartOfFamily, getTotalFamilyUsage } from 'utils/user/family';
 import { Trans } from 'react-i18next';
 import { t } from 'i18next';
-import { SUPPORT_EMAIL } from 'constants/urls';
+import { SUPPORT_EMAIL } from '@ente/shared/constants/urls';
 
 interface Props {
     closeModal: any;
@@ -44,6 +44,13 @@ function PlanSelectorCard(props: Props) {
     );
     const galleryContext = useContext(GalleryContext);
     const appContext = useContext(AppContext);
+    const bonusData = useMemo(() => {
+        const userDetails = getLocalUserDetails();
+        if (!userDetails) {
+            return null;
+        }
+        return userDetails.bonusData;
+    }, []);
 
     const usage = useMemo(() => {
         const userDetails = getLocalUserDetails();
@@ -170,6 +177,7 @@ function PlanSelectorCard(props: Props) {
                     <PaidSubscriptionPlanSelectorCard
                         plans={plans}
                         subscription={subscription}
+                        bonusData={bonusData}
                         closeModal={props.closeModal}
                         planPeriod={planPeriod}
                         togglePeriod={togglePeriod}
@@ -181,6 +189,7 @@ function PlanSelectorCard(props: Props) {
                     <FreeSubscriptionPlanSelectorCard
                         plans={plans}
                         subscription={subscription}
+                        bonusData={bonusData}
                         closeModal={props.closeModal}
                         planPeriod={planPeriod}
                         togglePeriod={togglePeriod}
