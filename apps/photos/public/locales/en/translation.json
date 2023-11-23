@@ -625,5 +625,6 @@
     "INDEXED_ITEMS": "Indexed items",
     "CAST_ALBUM_TO_TV": "Play album on TV",
     "ENTER_CAST_PIN_CODE": "Enter the code you see on the TV below to pair this device.",
-    "PAIR_DEVICE_TO_TV": "Pair devices"
+    "PAIR_DEVICE_TO_TV": "Pair devices",
+    "TV_NOT_FOUND": "TV not found. Did you enter the PIN correctly?"
 }

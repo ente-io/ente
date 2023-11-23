@@ -1,9 +1,13 @@
 import { useEffect, useState } from 'react';
 import _sodium from 'libsodium-wrappers';
-import { getKexValue, setKexValue } from 'services/kexService';
-import { boxSealOpen, fromB64, toB64 } from 'utils/crypto/libsodium';
+import { getKexValue, setKexValue } from '@ente/shared/network/kexService';
+import {
+    boxSealOpen,
+    fromB64,
+    toB64,
+} from '@ente/shared/crypto/internal/libsodium';
 import { useRouter } from 'next/router';
-import { SESSION_KEYS, setKey } from 'utils/storage/sessionStorage';
+import { SESSION_KEYS, setKey } from '@ente/shared/storage/sessionStorage';
 
 const colourPool = [
     '#87CEFA', // Light Blue
@@ -29,23 +33,23 @@ const colourPool = [
 ];
 
 export default function PairingMode() {
-    // Function to generate cryptographically secure data
+    // Function to generate cryptographically secure digits
     const generateSecureData = (length: number): Uint8Array => {
         const array = new Uint8Array(length);
         window.crypto.getRandomValues(array);
-        // Modulo operation to ensure each byte is a single hex digit
+        // Modulo operation to ensure each byte is a single digit
         for (let i = 0; i < length; i++) {
-            array[i] = array[i] % 16;
+            array[i] = array[i] % 10;
         }
         return array;
     };
 
-    const convertDataToHex = (data: Uint8Array): string => {
-        let hex = '';
+    const convertDataToDecimalString = (data: Uint8Array): string => {
+        let decimalString = '';
         for (let i = 0; i < data.length; i++) {
-            hex += data[i].toString(16).padStart(2, '0');
+            decimalString += data[i].toString(); // No need to pad, as each value is a single digit
         }
-        return hex;
+        return decimalString;
     };
 
     const [digits, setDigits] = useState<string[]>([]);
@@ -64,8 +68,8 @@ export default function PairingMode() {
     }, []);
 
     const init = async () => {
-        const data = generateSecureData(4);
-        setDigits(convertDataToHex(data).split(''));
+        const data = generateSecureData(6);
+        setDigits(convertDataToDecimalString(data).split(''));
 
         const keypair = await generateKeyPair();
         setPublicKeyB64(await toB64(keypair.publicKey));
@@ -186,6 +190,8 @@ export default function PairingMode() {
                             fontWeight: 'bold',
                             fontFamily: 'monospace',
                             display: 'flex',
+                            borderRadius: '10px',
+                            overflow: 'hidden',
                         }}>
                         {digits.map((digit, i) => (
                             <tr
