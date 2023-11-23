@@ -290,15 +290,21 @@ async function getThingSuggestion(searchPhrase: string): Promise<Suggestion[]> {
 }
 
 async function getClipSuggestion(searchPhrase: string): Promise<Suggestion> {
-    if (!ClipService.isPlatformSupported()) {
+    try {
+        if (!ClipService.isPlatformSupported()) {
+            return null;
+        }
+
+        const clipResults = await searchClip(searchPhrase);
+        return {
+            type: SuggestionType.CLIP,
+            value: clipResults,
+            label: searchPhrase,
+        };
+    } catch (e) {
+        logError(e, 'getClipSuggestion failed');
         return null;
     }
-    const clipResults = await searchClip(searchPhrase);
-    return {
-        type: SuggestionType.CLIP,
-        value: clipResults,
-        label: searchPhrase,
-    };
 }
 
 function searchCollection(
