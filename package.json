@@ -11,6 +11,7 @@
         "build:auth": "turbo run build --filter=auth",
         "dev:auth": "turbo run dev --filter=auth",
         "dev:photos": "turbo run dev --filter=photos",
+        "dev:cast": "turbo run dev --filter=cast",
         "export:photos": "turbo run export --filter=photos",
         "export:auth": "turbo run export --filter=auth",
         "lint": "turbo run lint",
