@@ -1,6 +1,6 @@
-import HTTPService from '@ente/shared/network/HTTPService';
-import { getEndpoint } from '@ente/shared/network/api';
-import { logError } from '@ente/shared/sentry';
+import { logError } from '../sentry';
+import HTTPService from './HTTPService';
+import { getEndpoint } from './api';
 
 const ENDPOINT = getEndpoint();
 
