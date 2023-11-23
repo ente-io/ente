@@ -10,50 +10,28 @@ import { useRouter } from 'next/router';
 import { SESSION_KEYS, setKey } from '@ente/shared/storage/sessionStorage';
 import TimerBar from 'components/TimerBar';
 import PairedSuccessfullyOverlay from 'components/PairedSuccessfullyOverlay';
+import LargeType from 'components/LargeType';
 
-const colourPool = [
-    '#87CEFA', // Light Blue
-    '#90EE90', // Light Green
-    '#F08080', // Light Coral
-    '#FFFFE0', // Light Yellow
-    '#FFB6C1', // Light Pink
-    '#E0FFFF', // Light Cyan
-    '#FAFAD2', // Light Goldenrod
-    '#87CEFA', // Light Sky Blue
-    '#D3D3D3', // Light Gray
-    '#B0C4DE', // Light Steel Blue
-    '#FFA07A', // Light Salmon
-    '#20B2AA', // Light Sea Green
-    '#778899', // Light Slate Gray
-    '#AFEEEE', // Light Turquoise
-    '#7A58C1', // Light Violet
-    '#FFA500', // Light Orange
-    '#A0522D', // Light Brown
-    '#9370DB', // Light Purple
-    '#008080', // Light Teal
-    '#808000', // Light Olive
-];
+// Function to generate cryptographically secure digits
+const generateSecureData = (length: number): Uint8Array => {
+    const array = new Uint8Array(length);
+    window.crypto.getRandomValues(array);
+    // Modulo operation to ensure each byte is a single digit
+    for (let i = 0; i < length; i++) {
+        array[i] = array[i] % 10;
+    }
+    return array;
+};
+
+const convertDataToDecimalString = (data: Uint8Array): string => {
+    let decimalString = '';
+    for (let i = 0; i < data.length; i++) {
+        decimalString += data[i].toString(); // No need to pad, as each value is a single digit
+    }
+    return decimalString;
+};
 
 export default function PairingMode() {
-    // Function to generate cryptographically secure digits
-    const generateSecureData = (length: number): Uint8Array => {
-        const array = new Uint8Array(length);
-        window.crypto.getRandomValues(array);
-        // Modulo operation to ensure each byte is a single digit
-        for (let i = 0; i < length; i++) {
-            array[i] = array[i] % 10;
-        }
-        return array;
-    };
-
-    const convertDataToDecimalString = (data: Uint8Array): string => {
-        let decimalString = '';
-        for (let i = 0; i < data.length; i++) {
-            decimalString += data[i].toString(); // No need to pad, as each value is a single digit
-        }
-        return decimalString;
-    };
-
     const [digits, setDigits] = useState<string[]>([]);
 
     const [publicKeyB64, setPublicKeyB64] = useState('');
@@ -221,43 +199,7 @@ export default function PairingMode() {
                             borderRadius: '10px',
                             overflow: 'hidden',
                         }}>
-                        <table
-                            style={{
-                                fontSize: '4rem',
-                                fontWeight: 'bold',
-                                fontFamily: 'monospace',
-                                display: 'flex',
-                                position: 'relative',
-                            }}>
-                            {digits.map((digit, i) => (
-                                <tr
-                                    key={i}
-                                    style={{
-                                        display: 'flex',
-                                        flexDirection: 'column',
-                                        alignItems: 'center',
-                                        padding: '0.5rem',
-                                        // alternating background
-                                        backgroundColor:
-                                            i % 2 === 0 ? '#2e2e2e' : '#5e5e5e',
-                                    }}>
-                                    <span
-                                        style={{
-                                            color: colourPool[
-                                                i % colourPool.length
-                                            ],
-                                        }}>
-                                        {digit}
-                                    </span>
-                                    <span
-                                        style={{
-                                            fontSize: '1rem',
-                                        }}>
-                                        {i + 1}
-                                    </span>
-                                </tr>
-                            ))}
-                        </table>
+                        <LargeType chars={digits} />
                         <TimerBar percentage={borderWidthPercentage} />
                     </div>
                     <p
@@ -265,13 +207,16 @@ export default function PairingMode() {
                             fontSize: '1.2rem',
                         }}>
                         Visit{' '}
-                        <span
+                        <a
                             style={{
+                                textDecoration: 'none',
                                 color: '#87CEFA',
                                 fontWeight: 'bold',
-                            }}>
+                            }}
+                            href="https://ente.io/cast"
+                            target="_blank">
                             ente.io/cast
-                        </span>{' '}
+                        </a>{' '}
                         for help
                     </p>
                 </div>
