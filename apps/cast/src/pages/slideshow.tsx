@@ -1,11 +1,12 @@
 // import { Inter } from 'next/font/google';
 import PairedSuccessfullyOverlay from 'components/PairedSuccessfullyOverlay';
+import { FILE_TYPE } from 'constants/file';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import { syncCollections } from 'services/collectionService';
 import { syncFiles } from 'services/fileService';
 import { EnteFile } from 'types/file';
-import { downloadFileAsBlob } from 'utils/file';
+import { downloadFileAsBlob, isRawFileFromFileName } from 'utils/file';
 
 export default function Slideshow() {
     const [collectionFiles, setCollectionFiles] = useState<EnteFile[]>([]);
@@ -32,11 +33,32 @@ export default function Slideshow() {
                         file.collectionID === Number(requestedCollectionID)
                 );
 
-                setCollectionFiles(collectionFiles);
+                setCollectionFiles(
+                    collectionFiles.filter((file) =>
+                        isFileEligibleForCast(file)
+                    )
+                );
             }
         } catch {
             router.push('/');
         }
+    };
+
+    const isFileEligibleForCast = (file: EnteFile) => {
+        const fileType = file.metadata.fileType;
+        if (fileType !== FILE_TYPE.IMAGE && fileType !== FILE_TYPE.VIDEO) {
+            return false;
+        }
+
+        const name = file.metadata.title;
+
+        if (fileType === FILE_TYPE.IMAGE) {
+            if (isRawFileFromFileName(name)) {
+                return false;
+            }
+        }
+
+        return true;
     };
 
     const router = useRouter();
@@ -73,13 +95,17 @@ export default function Slideshow() {
     const [renderableFileURL, setRenderableFileURL] = useState<string>('');
 
     const getRenderableFileURL = async () => {
-        const blob = await downloadFileAsBlob(currentFile as EnteFile);
+        try {
+            const blob = await downloadFileAsBlob(currentFile as EnteFile);
 
-        const url = URL.createObjectURL(blob);
+            const url = URL.createObjectURL(blob);
 
-        setRenderableFileURL(url);
-
-        setLoading(false);
+            setRenderableFileURL(url);
+        } catch (e) {
+            return;
+        } finally {
+            setLoading(false);
+        }
     };
 
     useEffect(() => {
