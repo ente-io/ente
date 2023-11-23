@@ -9,7 +9,6 @@ import {
 import { useRouter } from 'next/router';
 import { SESSION_KEYS, setKey } from '@ente/shared/storage/sessionStorage';
 import TimerBar from 'components/TimerBar';
-import PairedSuccessfullyOverlay from 'components/PairedSuccessfullyOverlay';
 import LargeType from 'components/LargeType';
 
 // Function to generate cryptographically secure digits
@@ -39,9 +38,6 @@ export default function PairingMode() {
     const [codeGeneratedAt, setCodeGeneratedAt] = useState<Date | null>(null);
 
     const [borderWidthPercentage, setBorderWidthPercentage] = useState(100);
-
-    const [showPairingCompleteOverlay, setShowPairingCompleteOverlay] =
-        useState(false);
 
     useEffect(() => {
         init();
@@ -134,8 +130,6 @@ export default function PairingMode() {
 
             storePayloadLocally(data);
 
-            setShowPairingCompleteOverlay(true);
-
             router.push('/slideshow');
         }, 1000);
 
@@ -221,7 +215,6 @@ export default function PairingMode() {
                     </p>
                 </div>
             </div>
-            {showPairingCompleteOverlay && <PairedSuccessfullyOverlay />}
         </>
     );
 }
