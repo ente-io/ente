@@ -1,5 +1,6 @@
 // import { Inter } from 'next/font/google';
 import PairedSuccessfullyOverlay from 'components/PairedSuccessfullyOverlay';
+import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import { syncCollections } from 'services/collectionService';
 import { syncFiles } from 'services/fileService';
@@ -16,28 +17,40 @@ export default function Slideshow() {
     const [loading, setLoading] = useState(true);
 
     const init = async () => {
-        const collections = await syncCollections();
+        try {
+            const collections = await syncCollections();
 
-        // get requested collection id from localStorage
-        const requestedCollectionID =
-            window.localStorage.getItem('targetCollectionId');
+            // get requested collection id from localStorage
+            const requestedCollectionID =
+                window.localStorage.getItem('targetCollectionId');
 
-        const files = await syncFiles('normal', collections, () => {});
+            const files = await syncFiles('normal', collections, () => {});
 
-        if (requestedCollectionID) {
-            const collectionFiles = files.filter(
-                (file) => file.collectionID === Number(requestedCollectionID)
-            );
+            if (requestedCollectionID) {
+                const collectionFiles = files.filter(
+                    (file) =>
+                        file.collectionID === Number(requestedCollectionID)
+                );
 
-            setCollectionFiles(collectionFiles);
+                setCollectionFiles(collectionFiles);
+            }
+        } catch {
+            router.push('/');
         }
     };
 
+    const router = useRouter();
+
     useEffect(() => {
-        init();
+        try {
+            init();
+        } catch (e) {
+            router.push('/');
+        }
     }, []);
 
     useEffect(() => {
+        if (collectionFiles.length < 1 || !currentFile) return;
         // create interval to change slide
         const interval = setInterval(() => {
             // set the currentFile to the next file in the collection for the slideshow
@@ -71,7 +84,6 @@ export default function Slideshow() {
 
     useEffect(() => {
         if (currentFile) {
-            console.log(currentFile);
             getRenderableFileURL();
         }
     }, [currentFile]);
