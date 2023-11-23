@@ -50,7 +50,7 @@ export default function Slideshow() {
     }, []);
 
     useEffect(() => {
-        if (collectionFiles.length < 1 || !currentFile) return;
+        if (collectionFiles.length < 1) return;
         // create interval to change slide
         const interval = setInterval(() => {
             // set the currentFile to the next file in the collection for the slideshow
