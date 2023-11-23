@@ -15,8 +15,9 @@ export default function Slideshow() {
     const init = async () => {
         const collections = await syncCollections();
 
-        // get requested collection id from fragment (this is temporary and will be changed during cast)
-        const requestedCollectionID = window.location.hash.slice(1);
+        // get requested collection id from localStorage
+        const requestedCollectionID =
+            window.localStorage.getItem('targetCollectionId');
 
         const files = await syncFiles('normal', collections, () => {});
 

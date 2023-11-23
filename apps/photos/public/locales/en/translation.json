@@ -620,5 +620,8 @@
     "FASTER_UPLOAD":"Faster uploads",
     "FASTER_UPLOAD_DESCRIPTION":"Route uploads through nearby servers",
     "STATUS": "Status",
-    "INDEXED_ITEMS": "Indexed items"
+    "INDEXED_ITEMS": "Indexed items",
+    "CAST_ALBUM_TO_TV": "Play album on TV",
+    "ENTER_CAST_PIN_CODE": "Enter the code you see on the TV below to pair this device.",
+    "PAIR_DEVICE_TO_TV": "Pair devices"
 }

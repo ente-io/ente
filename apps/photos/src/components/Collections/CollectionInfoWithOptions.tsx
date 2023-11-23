@@ -1,5 +1,5 @@
 import { CollectionInfo } from './CollectionInfo';
-import React from 'react';
+import React, { useState } from 'react';
 import { Collection, CollectionSummary } from 'types/collection';
 import CollectionOptions from 'components/Collections/CollectionOptions';
 import { SetCollectionNamerAttributes } from 'components/Collections/CollectionNamer';
@@ -12,6 +12,7 @@ import ArchiveOutlined from '@mui/icons-material/ArchiveOutlined';
 import PeopleIcon from '@mui/icons-material/People';
 import LinkIcon from '@mui/icons-material/Link';
 import { SetCollectionDownloadProgressAttributes } from 'types/gallery';
+import AlbumCastDialog from './CollectionOptions/AlbumCastDialog';
 
 interface Iprops {
     activeCollection: Collection;
@@ -52,21 +53,32 @@ export default function CollectionInfoWithOptions({
                 return <></>;
         }
     };
+
+    const [showAlbumCastDialog, setShowAlbumCastDialog] = useState(true);
+
     return (
-        <CollectionInfoBarWrapper>
-            <SpaceBetweenFlex>
-                <CollectionInfo
-                    name={name}
-                    fileCount={fileCount}
-                    endIcon={<EndIcon type={type} />}
-                />
-                {shouldShowOptions(type) && (
-                    <CollectionOptions
-                        {...props}
-                        collectionSummaryType={type}
+        <>
+            <CollectionInfoBarWrapper>
+                <SpaceBetweenFlex>
+                    <CollectionInfo
+                        name={name}
+                        fileCount={fileCount}
+                        endIcon={<EndIcon type={type} />}
                     />
-                )}
-            </SpaceBetweenFlex>
-        </CollectionInfoBarWrapper>
+                    {shouldShowOptions(type) && (
+                        <CollectionOptions
+                            {...props}
+                            setShowAlbumCastDialog={setShowAlbumCastDialog}
+                            collectionSummaryType={type}
+                        />
+                    )}
+                </SpaceBetweenFlex>
+            </CollectionInfoBarWrapper>
+            <AlbumCastDialog
+                currentCollectionId={props.activeCollection.id}
+                show={showAlbumCastDialog}
+                onHide={() => setShowAlbumCastDialog(false)}
+            />
+        </>
     );
 }

@@ -1,5 +1,4 @@
 import { OverflowMenuOption } from 'components/OverflowMenu/option';
-import React from 'react';
 
 import EditIcon from '@mui/icons-material/Edit';
 import PeopleIcon from '@mui/icons-material/People';
@@ -13,6 +12,7 @@ import PushPinOutlined from '@mui/icons-material/PushPinOutlined';
 import { UnPinIcon } from 'components/icons/UnPinIcon';
 import VisibilityOffOutlined from '@mui/icons-material/VisibilityOffOutlined';
 import VisibilityOutlined from '@mui/icons-material/VisibilityOutlined';
+import TvIcon from '@mui/icons-material/Tv';
 
 interface Iprops {
     isArchived: boolean;
@@ -122,6 +122,16 @@ export function AlbumCollectionOption({
                 )}
                 startIcon={<PeopleIcon />}>
                 {t('SHARE_COLLECTION')}
+            </OverflowMenuOption>
+            <OverflowMenuOption
+                startIcon={<TvIcon />}
+                onClick={() => {
+                    handleCollectionAction(
+                        CollectionActions.SHOW_ALBUM_CAST_DIALOG,
+                        false
+                    );
+                }}>
+                {t('CAST_ALBUM_TO_TV')}
             </OverflowMenuOption>
         </>
     );
