@@ -451,9 +451,9 @@ class CryptoUtil {
     Uint8List salt,
     int memLimit,
     int opsLimit,
-  ) {
+  ) async {
     try {
-      return _computer.compute(
+      return await _computer.compute(
         cryptoPwHash,
         param: {
           "password": password,
