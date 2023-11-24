@@ -164,6 +164,9 @@
       "title": "Proton"
     },
     {
+      "title": "Proxmox"
+    },
+    {
       "title": "Revolt",
       "hex": "858585"
     },
@@ -207,10 +210,6 @@
       "hex": "858585"
     },
     {
-      "title": "Twitter",
-      "slug": "x"
-    },
-    {
       "title": "Ubisoft",
       "hex": "4285f4"
     },
@@ -229,7 +228,9 @@
       "title": "Wise"
     },
     {
-      "title": "X"
+      "title": "X",
+      "altNames": ["twitter"],
+      "slug": "x"
     },
     {
       "title": "NextDNS"
@@ -237,9 +238,6 @@
     {
       "title": "Skiff",
       "hex": "EF5A3C"
-    },
-    {
-      "title": "zzz_dev_test_icon"
     }
   ]
 }
