@@ -126,12 +126,10 @@ export function AlbumCollectionOption({
             </OverflowMenuOption>
             <OverflowMenuOption
                 startIcon={<TvIcon />}
-                onClick={() => {
-                    handleCollectionAction(
-                        CollectionActions.SHOW_ALBUM_CAST_DIALOG,
-                        false
-                    );
-                }}>
+                onClick={handleCollectionAction(
+                    CollectionActions.SHOW_ALBUM_CAST_DIALOG,
+                    false
+                )}>
                 {t('CAST_ALBUM_TO_TV')}
             </OverflowMenuOption>
         </>
