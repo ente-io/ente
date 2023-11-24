@@ -9,6 +9,7 @@
         "lint": "next lint"
     },
     "dependencies": {
+        "mime-types": "^2.1.35",
         "next": "14.0.2",
         "react": "^18",
         "react-dom": "^18"

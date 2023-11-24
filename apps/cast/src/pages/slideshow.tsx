@@ -1,12 +1,16 @@
-// import { Inter } from 'next/font/google';
 import PairedSuccessfullyOverlay from 'components/PairedSuccessfullyOverlay';
+import Theatre from 'components/Theatre';
 import { FILE_TYPE } from 'constants/file';
 import { useRouter } from 'next/router';
-import { useEffect, useState } from 'react';
+import { createContext, useEffect, useState } from 'react';
 import { syncCollections } from 'services/collectionService';
 import { syncFiles } from 'services/fileService';
 import { EnteFile } from 'types/file';
 import { downloadFileAsBlob, isRawFileFromFileName } from 'utils/file';
+
+export const SlideshowContext = createContext<{
+    showNextSlide: () => void;
+}>(null);
 
 export default function Slideshow() {
     const [collectionFiles, setCollectionFiles] = useState<EnteFile[]>([]);
@@ -16,6 +20,10 @@ export default function Slideshow() {
     );
 
     const [loading, setLoading] = useState(true);
+
+    const [renderableFileURLCache, setRenderableFileURLCache] = useState<
+        Record<string, string>
+    >({});
 
     const init = async () => {
         try {
@@ -50,6 +58,12 @@ export default function Slideshow() {
             return false;
         }
 
+        const fileSizeLimit = 100 * 1024 * 1024;
+
+        if (file.info.fileSize > fileSizeLimit) {
+            return false;
+        }
+
         const name = file.metadata.title;
 
         if (fileType === FILE_TYPE.IMAGE) {
@@ -73,32 +87,41 @@ export default function Slideshow() {
 
     useEffect(() => {
         if (collectionFiles.length < 1) return;
-        // create interval to change slide
-        const interval = setInterval(() => {
-            // set the currentFile to the next file in the collection for the slideshow
-            const currentIndex = collectionFiles.findIndex(
-                (file) => file.id === currentFile?.id
-            );
+        showNextSlide();
+    }, [collectionFiles]);
 
-            const nextIndex = (currentIndex + 1) % collectionFiles.length;
+    const showNextSlide = () => {
+        const currentIndex = collectionFiles.findIndex(
+            (file) => file.id === currentFile?.id
+        );
 
-            const nextFile = collectionFiles[nextIndex];
+        const nextIndex = (currentIndex + 1) % collectionFiles.length;
 
-            setCurrentFile(nextFile);
-        }, 5000);
+        const nextFile = collectionFiles[nextIndex];
 
-        return () => {
-            clearInterval(interval);
-        };
-    }, [collectionFiles, currentFile]);
+        setCurrentFile(nextFile);
+    };
 
     const [renderableFileURL, setRenderableFileURL] = useState<string>('');
 
     const getRenderableFileURL = async () => {
+        if (!currentFile) return;
+
+        if (renderableFileURLCache[currentFile.id]) {
+            setRenderableFileURL(renderableFileURLCache[currentFile.id]);
+            setLoading(false);
+            return;
+        }
+
         try {
             const blob = await downloadFileAsBlob(currentFile as EnteFile);
 
             const url = URL.createObjectURL(blob);
+
+            setRenderableFileURLCache({
+                ...renderableFileURLCache,
+                [currentFile?.id]: url,
+            });
 
             setRenderableFileURL(url);
         } catch (e) {
@@ -116,22 +139,13 @@ export default function Slideshow() {
 
     return (
         <>
-            <div
-                style={{
-                    width: '100vw',
-                    height: '100vh',
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                }}>
-                <img
-                    src={renderableFileURL}
-                    style={{
-                        maxWidth: '100%',
-                        maxHeight: '100%',
-                    }}
+            <SlideshowContext.Provider value={{ showNextSlide }}>
+                <Theatre
+                    fileURL={renderableFileURL}
+                    type={currentFile?.metadata.fileType}
+                    fileName={currentFile?.metadata.title}
                 />
-            </div>
+            </SlideshowContext.Provider>
             {loading && <PairedSuccessfullyOverlay />}
         </>
     );
