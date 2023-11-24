@@ -23,6 +23,9 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m0(count) =>
       "${Intl.plural(count, one: '添加一个项目', other: '添加一些项目')}";
 
+  static String m64(storageAmount, endDate) =>
+      "您的 ${storageAmount} 插件有效期至 ${endDate}";
+
   static String m1(emailOrName) => "由 ${emailOrName} 添加";
 
   static String m2(albumName) => "成功添加到  ${albumName}";
@@ -203,6 +206,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "addMore": MessageLookupByLibrary.simpleMessage("添加更多"),
         "addNew": MessageLookupByLibrary.simpleMessage("新建"),
         "addOnPageSubtitle": MessageLookupByLibrary.simpleMessage("附加组件详情"),
+        "addOnValidTill": m64,
         "addOns": MessageLookupByLibrary.simpleMessage("附加组件"),
         "addPhotos": MessageLookupByLibrary.simpleMessage("添加照片"),
         "addSelected": MessageLookupByLibrary.simpleMessage("添加所选项"),
