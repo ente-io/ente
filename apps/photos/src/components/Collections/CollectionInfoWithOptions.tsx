@@ -54,7 +54,7 @@ export default function CollectionInfoWithOptions({
         }
     };
 
-    const [showAlbumCastDialog, setShowAlbumCastDialog] = useState(true);
+    const [showAlbumCastDialog, setShowAlbumCastDialog] = useState(false);
 
     return (
         <>
