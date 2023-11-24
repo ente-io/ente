@@ -1,5 +1,5 @@
 import { CollectionInfo } from './CollectionInfo';
-import React, { useState } from 'react';
+import React, { Dispatch, SetStateAction } from 'react';
 import { Collection, CollectionSummary } from 'types/collection';
 import CollectionOptions from 'components/Collections/CollectionOptions';
 import { SetCollectionNamerAttributes } from 'components/Collections/CollectionNamer';
@@ -12,7 +12,6 @@ import ArchiveOutlined from '@mui/icons-material/ArchiveOutlined';
 import PeopleIcon from '@mui/icons-material/People';
 import LinkIcon from '@mui/icons-material/Link';
 import { SetCollectionDownloadProgressAttributes } from 'types/gallery';
-import AlbumCastDialog from './CollectionOptions/AlbumCastDialog';
 
 interface Iprops {
     activeCollection: Collection;
@@ -24,6 +23,7 @@ interface Iprops {
     ) => SetCollectionDownloadProgressAttributes;
     isActiveCollectionDownloadInProgress: () => boolean;
     setActiveCollectionID: (collectionID: number) => void;
+    setShowAlbumCastDialog: Dispatch<SetStateAction<boolean>>;
 }
 
 export default function CollectionInfoWithOptions({
@@ -54,8 +54,6 @@ export default function CollectionInfoWithOptions({
         }
     };
 
-    const [showAlbumCastDialog, setShowAlbumCastDialog] = useState(false);
-
     return (
         <>
             <CollectionInfoBarWrapper>
@@ -68,17 +66,11 @@ export default function CollectionInfoWithOptions({
                     {shouldShowOptions(type) && (
                         <CollectionOptions
                             {...props}
-                            setShowAlbumCastDialog={setShowAlbumCastDialog}
                             collectionSummaryType={type}
                         />
                     )}
                 </SpaceBetweenFlex>
             </CollectionInfoBarWrapper>
-            <AlbumCastDialog
-                currentCollectionId={props.activeCollection?.id}
-                show={showAlbumCastDialog}
-                onHide={() => setShowAlbumCastDialog(false)}
-            />
         </>
     );
 }

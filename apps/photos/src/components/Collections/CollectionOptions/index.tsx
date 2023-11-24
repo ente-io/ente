@@ -197,7 +197,7 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
         };
     };
 
-    const showCastAlbumDialog = async () => {
+    const showCastAlbumDialog = () => {
         setShowAlbumCastDialog(true);
     };
 

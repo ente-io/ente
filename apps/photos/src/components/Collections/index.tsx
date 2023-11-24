@@ -22,6 +22,7 @@ import {
     isCollectionDownloadCompleted,
 } from './CollectionDownloadProgress';
 import { SetCollectionDownloadProgressAttributes } from 'types/gallery';
+import AlbumCastDialog from './CollectionOptions/AlbumCastDialog';
 
 interface Iprops {
     activeCollection: Collection;
@@ -56,6 +57,8 @@ export default function Collections(props: Iprops) {
         collectionDownloadProgressAttributesList,
         setCollectionDownloadProgressAttributesList,
     ] = useState<CollectionDownloadProgressAttributes[]>([]);
+
+    const [showAlbumCastDialog, setShowAlbumCastDialog] = useState(false);
 
     const [collectionListSortBy, setCollectionListSortBy] =
         useLocalState<COLLECTION_LIST_SORT_BY>(
@@ -141,6 +144,7 @@ export default function Collections(props: Iprops) {
                         isActiveCollectionDownloadInProgress
                     }
                     setActiveCollectionID={setActiveCollectionID}
+                    setShowAlbumCastDialog={setShowAlbumCastDialog}
                 />
             ),
             itemType: ITEM_TYPE.HEADER,
@@ -198,6 +202,11 @@ export default function Collections(props: Iprops) {
             <CollectionDownloadProgress
                 attributesList={collectionDownloadProgressAttributesList}
                 setAttributesList={setCollectionDownloadProgressAttributesList}
+            />
+            <AlbumCastDialog
+                currentCollectionId={props.activeCollection?.id}
+                show={showAlbumCastDialog}
+                onHide={() => setShowAlbumCastDialog(false)}
             />
         </>
     );
