@@ -87,7 +87,7 @@ Future<int?> _process2FasExportFile(
   final jsonString = await file.readAsString();
   final decodedJson = jsonDecode(jsonString);
   int version = (decodedJson['schemaVersion'] ?? 0) as int;
-  if (version != 3) {
+  if (version != 3 && version != 4) {
     await dialog.hide();
     // todo: extract strings for l10n. Use same naming format as in aegis
     // to avoid duplicate translation efforts.
