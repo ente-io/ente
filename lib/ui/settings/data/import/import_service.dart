@@ -1,3 +1,4 @@
+import 'package:ente_auth/ui/settings/data/import/2fas_import.dart';
 import 'package:ente_auth/ui/settings/data/import/aegis_import.dart';
 import 'package:ente_auth/ui/settings/data/import/bitwarden_import.dart';
 import 'package:ente_auth/ui/settings/data/import/encrypted_ente_import.dart';
@@ -31,6 +32,9 @@ class ImportService {
         break;
       case ImportType.aegis:
         showAegisImportInstruction(context);
+        break;
+      case ImportType.twoFas:
+        show2FasImportInstruction(context);
         break;
       case ImportType.bitwarden:
         showBitwardenImportInstruction(context);

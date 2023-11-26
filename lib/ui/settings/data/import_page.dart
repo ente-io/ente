@@ -15,6 +15,7 @@ enum ImportType {
   ravio,
   googleAuthenticator,
   aegis,
+  twoFas,
   bitwarden,
 }
 
@@ -22,10 +23,11 @@ class ImportCodePage extends StatelessWidget {
   late List<ImportType> importOptions = [
     ImportType.plainText,
     ImportType.encrypted,
-    ImportType.ravio,
+    ImportType.twoFas,
     ImportType.aegis,
-    ImportType.googleAuthenticator,
     ImportType.bitwarden,
+    ImportType.googleAuthenticator,
+    ImportType.ravio,
   ];
 
   ImportCodePage({super.key});
@@ -42,6 +44,8 @@ class ImportCodePage extends StatelessWidget {
         return 'Google Authenticator';
       case ImportType.aegis:
         return 'Aegis Authenticator';
+      case ImportType.twoFas:
+        return '2FAS Authenticator';
       case ImportType.bitwarden:
         return 'Bitwarden';
     }
@@ -66,7 +70,7 @@ class ImportCodePage extends StatelessWidget {
                   iconButtonType: IconButtonType.secondary,
                   onTap: () {
                     Navigator.pop(context);
-                    if(Navigator.canPop(context)) {
+                    if (Navigator.canPop(context)) {
                       Navigator.pop(context);
                     }
                   },
