@@ -8097,6 +8097,46 @@ class S {
       args: [],
     );
   }
+
+  /// `Sign out from other devices`
+  String get signOutFromOtherDevices {
+    return Intl.message(
+      'Sign out from other devices',
+      name: 'signOutFromOtherDevices',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `If you think someone might know your password, you can force all other devices using your account to sign out.`
+  String get signOutOtherBody {
+    return Intl.message(
+      'If you think someone might know your password, you can force all other devices using your account to sign out.',
+      name: 'signOutOtherBody',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Sign out other devices`
+  String get signOutOtherDevices {
+    return Intl.message(
+      'Sign out other devices',
+      name: 'signOutOtherDevices',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Do not sign out`
+  String get doNotSignOut {
+    return Intl.message(
+      'Do not sign out',
+      name: 'doNotSignOut',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

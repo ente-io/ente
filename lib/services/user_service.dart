@@ -502,6 +502,7 @@ class UserService {
   Future<void> registerOrUpdateSrp(
     Uint8List loginKey, {
     SetKeysRequest? setKeysRequest,
+    bool logOutOtherDevices = false,
   }) async {
     try {
       final String username = const Uuid().v4().toString();
@@ -558,6 +559,7 @@ class UserService {
               'setupID': setupSRPResponse.setupID,
               'srpM1': base64Encode(SRP6Util.encodeBigInt(clientM!)),
               'updatedKeyAttr': setKeysRequest.toMap(),
+              'logOutOtherDevices': logOutOtherDevices,
             },
           );
         }
@@ -676,8 +678,9 @@ class UserService {
 
   Future<void> updateKeyAttributes(
     KeyAttributes keyAttributes,
-    Uint8List loginKey,
-  ) async {
+    Uint8List loginKey, {
+    required bool logoutOtherDevices,
+  }) async {
     try {
       final setKeyRequest = SetKeysRequest(
         kekSalt: keyAttributes.kekSalt,
@@ -686,7 +689,11 @@ class UserService {
         memLimit: keyAttributes.memLimit!,
         opsLimit: keyAttributes.opsLimit!,
       );
-      await registerOrUpdateSrp(loginKey, setKeysRequest: setKeyRequest);
+      await registerOrUpdateSrp(
+        loginKey,
+        setKeysRequest: setKeyRequest,
+        logOutOtherDevices: logoutOtherDevices,
+      );
       await _config.setKeyAttributes(keyAttributes);
     } catch (e) {
       _logger.severe(e);
