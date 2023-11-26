@@ -7,6 +7,9 @@ import { t } from 'i18next';
 import { getKexValue, setKexValue } from '@ente/shared/network/kexService';
 import { SESSION_KEYS, getKey } from '@ente/shared/storage/sessionStorage';
 import { boxSeal, toB64 } from '@ente/shared/crypto/internal/libsodium';
+import { useCastSender } from '@ente/shared/hooks/useCastSender';
+import { useEffect } from 'react';
+import { logError } from '@ente/shared/sentry';
 
 interface Props {
     show: boolean;
@@ -19,6 +22,8 @@ enum AlbumCastError {
 }
 
 export default function AlbumCastDialog(props: Props) {
+    const { cast } = useCastSender();
+
     const onSubmit: SingleInputFormProps['callback'] = async (
         value,
         setFieldError
@@ -68,6 +73,17 @@ export default function AlbumCastDialog(props: Props) {
         // hey TV, we acknowlege you!
         await setKexValue(encryptedPayloadForTvKexKey, encryptedPayload);
     };
+    useEffect(() => {
+        if (!cast) return;
+        cast.framework.CastContext.getInstance()
+            .requestSession()
+            // .then(function (session) {
+            //     // Session started successfully
+            // })
+            .catch((e) => {
+                logError(e, 'Failed to start cast session');
+            });
+    }, [cast]);
 
     return (
         <DialogBoxV2

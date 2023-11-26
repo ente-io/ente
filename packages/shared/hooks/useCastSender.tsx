@@ -25,6 +25,13 @@ const load = (() => {
                     'https://www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework=1';
                 window.__onGCastApiAvailable = (isAvailable) => {
                     if (isAvailable) {
+                        cast.framework.CastContext.getInstance().setOptions({
+                            receiverApplicationId:
+                                process.env.NEXT_PUBLIC_CAST_APP_ID,
+                            autoJoinPolicy:
+                                chrome.cast.AutoJoinPolicy.ORIGIN_SCOPED,
+                        });
+
                         resolve({
                             chrome,
                             cast,
