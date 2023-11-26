@@ -10,6 +10,8 @@ A user on GitHub has written a guide to export our data from Authy (morpheus on 
 ## Exporting from Authy
 To export your data, please follow [this guide](https://gist.github.com/gboudreau/94bb0c11a6209c82418d01a59d958c93). This will create a new JSON file with all your Authy TOTP data in it. **Do not share this file with anyone!**
 
+Or, you can [use this tool by Neeraj](https://github.com/ua741/authy-export/releases/tag/v0.0.4) to simplify things and skip to importing to ente Authenticator. Do note that this tool is still experimental, though!
+
 ## Converting the export for ente Authenticator
 So now that you have the JSON file, does that mean it can be imported into ente Authenticator? Nope.
 
@@ -17,7 +19,7 @@ This is because the code in the guide exports your Authy data for Bitwarden, not
 
 <img width="454" alt="ente Authenticator Screenshot" src="https://github.com/gweeeen/auth/assets/41323182/30566a69-cfa0-4de0-9f0d-95967d4c5cad">
 
-So, this means that even if you try to import this file, nothing will happen. But don't worry, I've written a program in Python that converts the JSON file into a TXT file that ente Authenticator can use!
+So, this means that even if you try to import this file, nothing will happen. But don't worry, I've written a program in Python that converts the JSON file into a TXT file that ente Authenticator can use! (It's definitely not written **professionaly**, but hey it gets the job done so I'm happy with that.)
 
 You can download my program [here](https://github.com/gweeeen/ducky/blob/main/duckys_other_stuff/authy_to_ente.py). Or if you **really like making life hard**, then you can make a new Python file and copy this code to it:
 
