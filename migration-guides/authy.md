@@ -10,7 +10,8 @@ A user on GitHub has written a guide to export our data from Authy (morpheus on 
 ## Exporting from Authy
 To export your data, please follow [this guide](https://gist.github.com/gboudreau/94bb0c11a6209c82418d01a59d958c93). This will create a new JSON file with all your Authy TOTP data in it. **Do not share this file with anyone!**
 
-Or, you can [use this tool by Neeraj](https://github.com/ua741/authy-export/releases/tag/v0.0.4) to simplify things and skip to importing to ente Authenticator. Do note that this tool is still experimental, though!
+Or, you can [use this tool by Neeraj](https://github.com/ua741/authy-export/releases/tag/v0.0.4) to simplify things and skip to importing to ente Authenticator.
+### *Do note that these tools may not export ALL of your codes. Make sure that all your accounts have been imported successfully before deleting any codes from your Authy account!*
 
 ## Converting the export for ente Authenticator
 So now that you have the JSON file, does that mean it can be imported into ente Authenticator? Nope.
