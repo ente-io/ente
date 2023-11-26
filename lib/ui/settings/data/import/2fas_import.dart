@@ -122,7 +122,6 @@ Future<int?> _process2FasExportFile(
       }
       final content = decrypt2FasVault(decodedJson, password: password!);
       decodedServices = jsonDecode(content);
-      debugPrint("Done decrypting" + decodedServices.toString());
     } catch (e, s) {
       Logger("2FASImport").warning("exception while decrypting  backup", e, s);
       await dialog.hide();
