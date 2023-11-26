@@ -7,11 +7,13 @@ import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/account_configured_event.dart';
 import 'package:photos/events/subscription_purchased_event.dart';
 import "package:photos/generated/l10n.dart";
+import "package:photos/l10n/l10n.dart";
 import "package:photos/models/key_gen_result.dart";
 import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/account/recovery_key_page.dart';
 import 'package:photos/ui/common/dynamic_fab.dart';
 import 'package:photos/ui/common/web_page.dart';
+import "package:photos/ui/components/models/button_type.dart";
 import 'package:photos/ui/payment/subscription.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/navigation_util.dart';
@@ -27,9 +29,10 @@ enum PasswordEntryMode {
 class PasswordEntryPage extends StatefulWidget {
   final PasswordEntryMode mode;
 
-  const PasswordEntryPage({required this.mode, Key?
-  key,})
-      : super(key: key);
+  const PasswordEntryPage({
+    required this.mode,
+    Key? key,
+  }) : super(key: key);
 
   @override
   State<PasswordEntryPage> createState() => _PasswordEntryPageState();
@@ -379,13 +382,18 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
   }
 
   void _updatePassword() async {
+    final logOutFromOthers = await logOutFromOtherDevices(context);
     final dialog =
         createProgressDialog(context, S.of(context).generatingEncryptionKeys);
     await dialog.show();
     try {
       final result = await Configuration.instance
           .getAttributesForNewPassword(_passwordController1.text);
-      await UserService.instance.updateKeyAttributes(result.item1, result.item2);
+      await UserService.instance.updateKeyAttributes(
+        result.item1,
+        result.item2,
+        logoutOtherDevices: logOutFromOthers,
+      );
       await dialog.hide();
       showShortToast(context, S.of(context).passwordChangedSuccessfully);
       Navigator.of(context).pop();
@@ -400,12 +408,33 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
     }
   }
 
+  Future<bool> logOutFromOtherDevices(BuildContext context) async {
+    bool logOutFromOther = true;
+    await showChoiceDialog(
+      context,
+      title: context.l10n.signOutFromOtherDevices,
+      body: context.l10n.signOutOtherBody,
+      isDismissible: false,
+      firstButtonLabel: context.l10n.signOutOtherDevices,
+      firstButtonType: ButtonType.critical,
+      firstButtonOnTap: () async {
+        logOutFromOther = true;
+      },
+      secondButtonLabel: context.l10n.doNotSignOut,
+      secondButtonOnTap: () async {
+        logOutFromOther = false;
+      },
+    );
+    return logOutFromOther;
+  }
+
   Future<void> _showRecoveryCodeDialog(String password) async {
     final dialog =
         createProgressDialog(context, S.of(context).generatingEncryptionKeys);
     await dialog.show();
     try {
-      final KeyGenResult result = await Configuration.instance.generateKey(password);
+      final KeyGenResult result =
+          await Configuration.instance.generateKey(password);
       Configuration.instance.setVolatilePassword(null);
       await dialog.hide();
       onDone() async {

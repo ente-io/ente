@@ -564,6 +564,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "discord": MessageLookupByLibrary.simpleMessage("Discord"),
         "dismiss": MessageLookupByLibrary.simpleMessage("Dismiss"),
         "distanceInKMUnit": MessageLookupByLibrary.simpleMessage("km"),
+        "doNotSignOut": MessageLookupByLibrary.simpleMessage("Do not sign out"),
         "doThisLater": MessageLookupByLibrary.simpleMessage("Do this later"),
         "doYouWantToDiscardTheEditsYouHaveMade":
             MessageLookupByLibrary.simpleMessage(
@@ -1208,6 +1209,12 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Shared with you"),
         "sharing": MessageLookupByLibrary.simpleMessage("Sharing..."),
         "showMemories": MessageLookupByLibrary.simpleMessage("Show memories"),
+        "signOutFromOtherDevices":
+            MessageLookupByLibrary.simpleMessage("Sign out from other devices"),
+        "signOutOtherBody": MessageLookupByLibrary.simpleMessage(
+            "If you think someone might know your password, you can force all other devices using your account to sign out."),
+        "signOutOtherDevices":
+            MessageLookupByLibrary.simpleMessage("Sign out other devices"),
         "signUpTerms": MessageLookupByLibrary.simpleMessage(
             "I agree to the <u-terms>terms of service</u-terms> and <u-policy>privacy policy</u-policy>"),
         "singleFileDeleteFromDevice": m49,
