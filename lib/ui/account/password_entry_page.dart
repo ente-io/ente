@@ -5,6 +5,7 @@ import 'package:ente_auth/services/user_service.dart';
 import 'package:ente_auth/ui/account/recovery_key_page.dart';
 import 'package:ente_auth/ui/common/dynamic_fab.dart';
 import 'package:ente_auth/ui/common/web_page.dart';
+import 'package:ente_auth/ui/components/models/button_type.dart';
 import 'package:ente_auth/ui/home_page.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
 import 'package:ente_auth/utils/navigation_util.dart';
@@ -24,8 +25,7 @@ enum PasswordEntryMode {
 class PasswordEntryPage extends StatefulWidget {
   final PasswordEntryMode mode;
 
-  const PasswordEntryPage({required this.mode, Key? key})
-      : super(key: key);
+  const PasswordEntryPage({required this.mode, Key? key}) : super(key: key);
 
   @override
   State<PasswordEntryPage> createState() => _PasswordEntryPageState();
@@ -180,10 +180,11 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
                         .copyWith(fontSize: 14),
                     tags: {
                       'underline': StyledTextTag(
-                        style: Theme.of(context).textTheme.titleMedium!.copyWith(
-                              fontSize: 14,
-                              decoration: TextDecoration.underline,
-                            ),
+                        style:
+                            Theme.of(context).textTheme.titleMedium!.copyWith(
+                                  fontSize: 14,
+                                  decoration: TextDecoration.underline,
+                                ),
                       ),
                     },
                   ),
@@ -356,10 +357,11 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
                     child: RichText(
                       text: TextSpan(
                         text: context.l10n.howItWorks,
-                        style: Theme.of(context).textTheme.titleMedium!.copyWith(
-                              fontSize: 14,
-                              decoration: TextDecoration.underline,
-                            ),
+                        style:
+                            Theme.of(context).textTheme.titleMedium!.copyWith(
+                                  fontSize: 14,
+                                  decoration: TextDecoration.underline,
+                                ),
                       ),
                     ),
                   ),
@@ -374,13 +376,18 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
   }
 
   void _updatePassword() async {
+    final logOutFromOthers = await logOutFromOtherDevices(context);
     final dialog =
         createProgressDialog(context, context.l10n.generatingEncryptionKeys);
     await dialog.show();
     try {
       final result = await Configuration.instance
           .getAttributesForNewPassword(_passwordController1.text);
-      await UserService.instance.updateKeyAttributes(result.item1, result.item2);
+      await UserService.instance.updateKeyAttributes(
+        result.item1,
+        result.item2,
+        logoutOtherDevices: logOutFromOthers,
+      );
       await dialog.hide();
       showShortToast(context, context.l10n.passwordChangedSuccessfully);
       Navigator.of(context).pop();
@@ -394,13 +401,34 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
     }
   }
 
+  Future<bool> logOutFromOtherDevices(BuildContext context) async {
+    bool logOutFromOther = true;
+    await showChoiceDialog(
+      context,
+      title: context.l10n.signOutFromOtherDevices,
+      body: context.l10n.signOutOtherBody,
+      isDismissible: false,
+      firstButtonLabel: context.l10n.signOutOtherDevices,
+      firstButtonType: ButtonType.critical,
+      firstButtonOnTap: () async {
+        logOutFromOther = true;
+      },
+      secondButtonLabel: context.l10n.doNotSignOut,
+      secondButtonOnTap: () async {
+        logOutFromOther = false;
+      },
+    );
+    return logOutFromOther;
+  }
+
   Future<void> _showRecoveryCodeDialog(String password) async {
     final l10n = context.l10n;
     final dialog =
         createProgressDialog(context, l10n.generatingEncryptionKeysTitle);
     await dialog.show();
     try {
-      final KeyGenResult result = await Configuration.instance.generateKey(password);
+      final KeyGenResult result =
+          await Configuration.instance.generateKey(password);
       Configuration.instance.setVolatilePassword(null);
       await dialog.hide();
       onDone() async {

@@ -398,5 +398,9 @@
     "description": "Message showed on a button that the user can click to leave the current dialog. It is used on iOS side. Maximum 30 characters."
   },
   "noInternetConnection": "No internet connection",
-  "pleaseCheckYourInternetConnectionAndTryAgain": "Please check your internet connection and try again."
+  "pleaseCheckYourInternetConnectionAndTryAgain": "Please check your internet connection and try again.",
+  "signOutFromOtherDevices": "Sign out from other devices",
+  "signOutOtherBody": "If you think someone might know your password, you can force all other devices using your account to sign out.",
+  "signOutOtherDevices": "Sign out other devices",
+  "doNotSignOut": "Do not sign out"
 }
