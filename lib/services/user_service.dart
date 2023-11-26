@@ -146,9 +146,13 @@ class UserService {
       if (shouldCache) {
         if (userDetails.profileData != null) {
           _preferences.setBool(
-              kIsEmailMFAEnabled, userDetails.profileData!.isEmailMFAEnabled);
+            kIsEmailMFAEnabled,
+            userDetails.profileData!.isEmailMFAEnabled,
+          );
           _preferences.setBool(
-              kCanDisableEmailMFA, userDetails.profileData!.canDisableEmailMFA);
+            kCanDisableEmailMFA,
+            userDetails.profileData!.canDisableEmailMFA,
+          );
         }
         // handle email change from different client
         if (userDetails.email != _config.getEmail()) {
