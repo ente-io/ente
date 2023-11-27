@@ -114,17 +114,29 @@ class LocalFileUpdateService {
   Future<void> _checkAndMarkFilesWithDifferentHashForFileUpdate(
     List<String> localIDsToProcess,
   ) async {
-    _logger.info("files to process ${localIDsToProcess.length} for reupload");
     final int userID = Configuration.instance.getUserID()!;
     final List<EnteFile> result =
         await FilesDB.instance.getLocalFiles(localIDsToProcess);
     final List<EnteFile> localFilesForUser = [];
+    final Set<String> localIDsWithFile = {};
     for (EnteFile file in result) {
       if (file.ownerID == null || file.ownerID == userID) {
         localFilesForUser.add(file);
+        localIDsWithFile.add(file.localID!);
       }
     }
+
     final Set<String> processedIDs = {};
+    // if a file for localID doesn't exist, then mark it as processed
+    // otherwise the app will be stuck in retrying same set of ids
+    for (String localID in localIDsToProcess) {
+      if (!localIDsWithFile.contains(localID)) {
+        processedIDs.add(localID);
+      }
+    }
+    _logger.info("files to process ${localIDsToProcess.length} for reupload, "
+        "missing localFile cnt ${processedIDs.length}");
+
     for (EnteFile file in localFilesForUser) {
       if (processedIDs.contains(file.localID)) {
         continue;
@@ -156,7 +168,6 @@ class LocalFileUpdateService {
       } on InvalidFileError catch (e) {
         if (e.reason == InvalidReason.livePhotoToImageTypeChanged ||
             e.reason == InvalidReason.imageToLivePhotoTypeChanged) {
-
           late FileType fileType;
           if (e.reason == InvalidReason.livePhotoToImageTypeChanged) {
             fileType = FileType.image;
