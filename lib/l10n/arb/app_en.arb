@@ -402,5 +402,7 @@
   "signOutFromOtherDevices": "Sign out from other devices",
   "signOutOtherBody": "If you think someone might know your password, you can force all other devices using your account to sign out.",
   "signOutOtherDevices": "Sign out other devices",
-  "doNotSignOut": "Do not sign out"
+  "doNotSignOut": "Do not sign out",
+  "hearUsWhereTitle": "How did you hear about Ente? (optional)",
+  "hearUsExplanation": "We don't track app installs. It'd help if you told us where you found us!"
 }

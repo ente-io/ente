@@ -3,8 +3,10 @@ import 'package:ente_auth/core/configuration.dart';
 import 'package:ente_auth/ente_theme_data.dart';
 import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/services/user_service.dart';
+import 'package:ente_auth/theme/ente_theme.dart';
 import 'package:ente_auth/ui/common/dynamic_fab.dart';
 import 'package:ente_auth/ui/common/web_page.dart';
+import 'package:ente_auth/utils/toast_util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:password_strength/password_strength.dart';
@@ -30,6 +32,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
   String? _email;
   String? _password;
   String _cnfPassword = '';
+  String _referralSource = '';
   double _passwordStrength = 0.0;
   bool _emailIsValid = false;
   bool _hasAgreedToTOS = true;
@@ -104,6 +107,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
         onPressedFunction: () {
           _config.setVolatilePassword(_passwordController1.text);
           UserService.instance.setEmail(_email!);
+          UserService.instance.setRefSource(_referralSource);
           UserService.instance
               .sendOtt(context, _email!, isCreateAccountScreen: true);
           FocusScope.of(context).unfocus();
@@ -325,6 +329,51 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                   ),
                 ),
                 const SizedBox(height: 4),
+                Padding(
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 0, horizontal: 20),
+                  child: Text(
+                    context.l10n.hearUsWhereTitle,
+                    style: getEnteTextTheme(context).smallFaint,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
+                  child: TextFormField(
+                    style: Theme.of(context).textTheme.titleMedium,
+                    decoration: InputDecoration(
+                      fillColor: null,
+                      filled: true,
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 14,
+                      ),
+                      border: UnderlineInputBorder(
+                        borderSide: BorderSide.none,
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      suffixIcon: InkWell(
+                        onTap: () {
+                          showToast(
+                            context,
+                            context.l10n.hearUsExplanation,
+                          );
+                        },
+                        child: Icon(
+                          Icons.info_outline_rounded,
+                          color: getEnteColorScheme(context).strokeMuted,
+                        ),
+                      ),
+                    ),
+                    onChanged: (value) {
+                      _referralSource = value.trim();
+                    },
+                    autocorrect: false,
+                    keyboardType: TextInputType.text,
+                    textInputAction: TextInputAction.next,
+                  ),
+                ),
                 const Divider(thickness: 1),
                 const SizedBox(height: 12),
                 _getAgreement(),

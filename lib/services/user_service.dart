@@ -45,6 +45,7 @@ import "package:uuid/uuid.dart";
 class UserService {
   static const keyHasEnabledTwoFactor = "has_enabled_two_factor";
   static const keyUserDetails = "user_details";
+  static const kReferralSource = "referral_source";
   static const kCanDisableEmailMFA = "can_disable_email_mfa";
   static const kIsEmailMFAEnabled = "is_email_mfa_enabled";
   final SRP6GroupParameters kDefaultSrpGroup = SRP6StandardGroups.rfc5054_4096;
@@ -270,13 +271,17 @@ class UserService {
   }) async {
     final dialog = createProgressDialog(context, context.l10n.pleaseWait);
     await dialog.show();
+    final verifyData = {
+      "email": _config.getEmail(),
+      "ott": ott,
+    };
+    if (!_config.isLoggedIn()) {
+      verifyData["source"] = 'auth:' + _getRefSource();
+    }
     try {
       final response = await _dio.post(
         _config.getHttpEndpoint() + "/users/verify-email",
-        data: {
-          "email": _config.getEmail(),
-          "ott": ott,
-        },
+        data: verifyData,
       );
       await dialog.hide();
       if (response.statusCode == 200) {
@@ -889,5 +894,13 @@ class UserService {
       _logger.severe("Failed to update email mfa", e);
       rethrow;
     }
+  }
+
+  Future<void> setRefSource(String refSource) async {
+    await _preferences.setString(kReferralSource, refSource);
+  }
+
+  String _getRefSource() {
+    return _preferences.getString(kReferralSource) ?? "";
   }
 }
