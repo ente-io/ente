@@ -96,7 +96,7 @@
   "importCodeDelimiterInfo": "The codes can be separated by a comma or a new line",
   "selectFile": "Select file",
   "emailVerificationToggle": "Email verification",
-  "emailVerificationEnableWarning": "If you are storing the 2FA to your email with us, turning on email verification could result in a deadlock. If you are locked out of one service, you might not be able to log in to the other.",
+  "emailVerificationEnableWarning": "To avoid getting locked out of your account, be sure to store a copy of your email 2FA outside of Ente Auth before enabling email verification.",
   "authToChangeEmailVerificationSetting": "Please authenticate to change email verification",
   "authToViewYourRecoveryKey": "Please authenticate to view your recovery key",
   "authToChangeYourEmail": "Please authenticate to change your email",
