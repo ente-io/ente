@@ -401,5 +401,7 @@
   "signOutFromOtherDevices": "从其他设备退出登录",
   "signOutOtherBody": "如果你认为有人可能知道你的密码，你可以强制所有使用你账户的其他设备退出登录。",
   "signOutOtherDevices": "登出其他设备",
-  "doNotSignOut": "不要退登"
+  "doNotSignOut": "不要退登",
+  "hearUsWhereTitle": "您是如何知道Ente的？ （可选的）",
+  "hearUsExplanation": "我们不跟踪应用程序安装情况。如果您告诉我们您是在哪里找到我们的，将会有所帮助！"
 }
