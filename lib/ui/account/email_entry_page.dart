@@ -362,7 +362,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                         },
                         child: Icon(
                           Icons.info_outline_rounded,
-                          color: getEnteColorScheme(context).fillBase,
+                          color: getEnteColorScheme(context).strokeMuted,
                         ),
                       ),
                     ),
