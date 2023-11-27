@@ -84,10 +84,12 @@
   "importFromApp": "从 {appName} 导入代码",
   "importGoogleAuthGuide": "使用“转移帐户”选项将您的帐户从 Google 身份验证器导出到二维码。然后使用另一台设备扫描二维码。\n\n提示：您可以使用笔记本电脑的网络摄像头拍摄二维码的照片。",
   "importSelectJsonFile": "选择 JSON 文件",
+  "importSelectAppExport": "选择 {appName} 的导出文件",
   "importEnteEncGuide": "选择从ente导出的加密JSON文件",
   "importRaivoGuide": "使用 Raivo 设置中的“将 OTP 导出到 Zip 存档”选项。\n\n解压 zip 文件并导入 JSON 文件。",
   "importBitwardenGuide": "使用 Bitwarden 工具中的“导出保管库”选项并导入未加密的 JSON 文件。",
   "importAegisGuide": "在Aegis的设置中使用\"导出密码库\"选项。\n\n如果您的密码库已加密，您需要输入密码才能解密密码库。",
+  "import2FasGuide": "使用 2FAS 中的“设置 -> 备份 - 导出”选项。\n\n如果您的备份已被加密，则需要输入密码才能解密备份",
   "exportCodes": "导出代码",
   "importLabel": "导入",
   "importInstruction": "请以以下格式选择包含代码列表的文件",
@@ -395,5 +397,9 @@
     "description": "Message showed on a button that the user can click to leave the current dialog. It is used on iOS side. Maximum 30 characters."
   },
   "noInternetConnection": "无互联网连接",
-  "pleaseCheckYourInternetConnectionAndTryAgain": "请检查您的互联网连接，然后重试。"
+  "pleaseCheckYourInternetConnectionAndTryAgain": "请检查您的互联网连接，然后重试。",
+  "signOutFromOtherDevices": "从其他设备退出登录",
+  "signOutOtherBody": "如果你认为有人可能知道你的密码，你可以强制所有使用你账户的其他设备退出登录。",
+  "signOutOtherDevices": "登出其他设备",
+  "doNotSignOut": "不要退登"
 }
