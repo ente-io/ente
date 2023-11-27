@@ -1152,5 +1152,9 @@
   },
   "contacts": "联系人",
   "noInternetConnection": "无互联网连接",
-  "pleaseCheckYourInternetConnectionAndTryAgain": "请检查您的互联网连接，然后重试。"
+  "pleaseCheckYourInternetConnectionAndTryAgain": "请检查您的互联网连接，然后重试。",
+  "signOutFromOtherDevices": "从其他设备退出登录",
+  "signOutOtherBody": "如果你认为有人可能知道你的密码，你可以强制所有使用你账户的其他设备退出登录。",
+  "signOutOtherDevices": "登出其他设备",
+  "doNotSignOut": "不要退登"
 }
