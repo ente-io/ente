@@ -33,7 +33,7 @@ const TOTPDisplay = ({ issuer, account, code, nextCode, period }) => {
                     <p
                         style={{
                             fontWeight: 'bold',
-                            marginBottom: '0px',
+                            margin: '0px',
                             fontSize: '14px',
                             textAlign: 'left',
                         }}>
@@ -41,6 +41,7 @@ const TOTPDisplay = ({ issuer, account, code, nextCode, period }) => {
                     </p>
                     <p
                         style={{
+                            marginTop: '0px',
                             marginBottom: '8px',
                             textAlign: 'left',
                             fontSize: '12px',
@@ -52,6 +53,8 @@ const TOTPDisplay = ({ issuer, account, code, nextCode, period }) => {
                     </p>
                     <p
                         style={{
+                            margin: '0px',
+                            marginBottom: '1rem',
                             fontSize: '24px',
                             fontWeight: 'bold',
                             textAlign: 'left',
