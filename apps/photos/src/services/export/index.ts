@@ -1061,7 +1061,7 @@ class ExportService {
     ): Promise<void> {
         try {
             const fileUID = getExportRecordFileUID(file);
-            const originalFileStream = await downloadManager.downloadFile(file);
+            const originalFileStream = await downloadManager.getFile(file);
             if (!this.fileReader) {
                 this.fileReader = new FileReader();
             }

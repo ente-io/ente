@@ -2,7 +2,6 @@ import { FIX_OPTIONS } from 'components/FixCreationTime';
 import { SetProgressTracker } from 'components/FixLargeThumbnail';
 import {
     changeFileCreationTime,
-    getFileFromURL,
     updateExistingFilePubMetadata,
 } from 'utils/file';
 import { logError } from '@ente/shared/sentry';
@@ -43,9 +42,12 @@ export async function updateCreationTimeWithExif(
                     if (file.metadata.fileType !== FILE_TYPE.IMAGE) {
                         continue;
                     }
-                    const fileURL = (await downloadManager.getFile(file))
-                        .original[0];
-                    const fileObject = await getFileFromURL(fileURL);
+                    const fileStream = await downloadManager.getFile(file);
+                    const fileBlob = await new Response(fileStream).blob();
+                    const fileObject = new File(
+                        [fileBlob],
+                        file.metadata.title
+                    );
                     const fileTypeInfo = await getFileType(fileObject);
                     const exifData = await getParsedExifData(
                         fileObject,

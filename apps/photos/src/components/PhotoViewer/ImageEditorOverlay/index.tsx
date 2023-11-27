@@ -210,9 +210,8 @@ const ImageEditorOverlay = (props: IProps) => {
             const ctx = canvasRef.current.getContext('2d');
             ctx.imageSmoothingEnabled = false;
             if (!fileURL) {
-                const { converted } = await downloadManager.getFile(
-                    props.file,
-                    true
+                const { converted } = await downloadManager.getFileForPreview(
+                    props.file
                 );
                 img.src = converted[0];
                 setFileURL(converted[0]);

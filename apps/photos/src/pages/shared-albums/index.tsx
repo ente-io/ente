@@ -218,12 +218,7 @@ export default function PublicCollectionGallery() {
         appContext.startLoading();
         for (const file of publicFiles) {
             try {
-                await downloadFile(
-                    file,
-                    true,
-                    token.current,
-                    passwordJWTToken.current
-                );
+                await downloadFile(file);
             } catch (e) {
                 // do nothing
             }

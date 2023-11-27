@@ -6,8 +6,6 @@ import DownloadManager from 'services/downloadManager';
 import useLongPress from '@ente/shared/hooks/useLongPress';
 import { GalleryContext } from 'pages/gallery';
 import { GAP_BTW_TILES, IMAGE_CONTAINER_MAX_WIDTH } from 'constants/gallery';
-import { PublicCollectionGalleryContext } from 'utils/publicCollectionGallery';
-import PublicCollectionDownloadManager from 'services/publicCollectionDownloadManager';
 import { DeduplicateContext } from 'pages/deduplicate';
 import { logError } from '@ente/shared/sentry';
 import { Overlay } from '@ente/shared/components/Container';
@@ -217,14 +215,7 @@ const Cont = styled('div')<{ disabled: boolean }>`
 
 export default function PreviewCard(props: IProps) {
     const galleryContext = useContext(GalleryContext);
-    const publicCollectionGalleryContext = useContext(
-        PublicCollectionGalleryContext
-    );
     const deduplicateContext = useContext(DeduplicateContext);
-
-    const thumbsStore = publicCollectionGalleryContext?.accessedThroughSharedURL
-        ? publicCollectionGalleryContext.thumbs
-        : galleryContext.thumbs;
 
     const {
         file,
@@ -256,44 +247,9 @@ export default function PreviewCard(props: IProps) {
                 if (file.msrc) {
                     return;
                 }
-                let url: string;
-                // check in in-memory cache
-                if (thumbsStore.has(file.id)) {
-                    url = thumbsStore.get(file.id);
-                } else {
-                    // check in cacheStorage
-                    if (
-                        publicCollectionGalleryContext.accessedThroughSharedURL
-                    ) {
-                        url =
-                            await PublicCollectionDownloadManager.getCachedThumbnail(
-                                file
-                            );
-                    } else {
-                        url = await DownloadManager.getCachedThumbnail(file);
-                    }
-                    if (url) {
-                        thumbsStore.set(file.id, url);
-                    } else {
-                        // download thumbnail
-                        if (props.showPlaceholder) {
-                            return;
-                        }
-                        if (
-                            publicCollectionGalleryContext.accessedThroughSharedURL
-                        ) {
-                            url =
-                                await PublicCollectionDownloadManager.getThumbnail(
-                                    file,
-                                    publicCollectionGalleryContext.token,
-                                    publicCollectionGalleryContext.passwordToken
-                                );
-                        } else {
-                            url = await DownloadManager.getThumbnail(file);
-                        }
-                        thumbsStore.set(file.id, url);
-                    }
-                }
+                const url: string =
+                    await DownloadManager.getThumbnailForPreview(file);
+
                 if (!isMounted.current) {
                     return;
                 }

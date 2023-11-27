@@ -50,7 +50,6 @@ import { getFileType } from 'services/typeDetectionService';
 import { ConversionFailedNotification } from './styledComponents/ConversionFailedNotification';
 import { GalleryContext } from 'pages/gallery';
 import downloadManager from 'services/downloadManager';
-import publicCollectionDownloadManager from 'services/publicCollectionDownloadManager';
 import CircularProgressWithLabel from './styledComponents/CircularProgressWithLabel';
 import EnteSpinner from '@ente/shared/components/EnteSpinner';
 import AlbumOutlined from '@mui/icons-material/AlbumOutlined';
@@ -138,13 +137,7 @@ function PhotoViewer(props: Iprops) {
     const [showEditButton, setShowEditButton] = useState(false);
 
     useEffect(() => {
-        if (publicCollectionGalleryContext.accessedThroughSharedURL) {
-            publicCollectionDownloadManager.setProgressUpdater(
-                setFileDownloadProgress
-            );
-        } else {
-            downloadManager.setProgressUpdater(setFileDownloadProgress);
-        }
+        downloadManager.setProgressUpdater(setFileDownloadProgress);
     }, []);
 
     useEffect(() => {
@@ -589,12 +582,7 @@ function PhotoViewer(props: Iprops) {
         if (file && props.enableDownload) {
             appContext.startLoading();
             try {
-                await downloadFile(
-                    file,
-                    publicCollectionGalleryContext.accessedThroughSharedURL,
-                    publicCollectionGalleryContext.token,
-                    publicCollectionGalleryContext.passwordToken
-                );
+                await downloadFile(file);
             } catch (e) {
                 // do nothing
             }

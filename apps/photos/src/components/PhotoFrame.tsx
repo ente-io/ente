@@ -10,7 +10,6 @@ import { TRASH_SECTION } from 'constants/collection';
 import { updateFileMsrcProps, updateFileSrcProps } from 'utils/photoFrame';
 import { PhotoList } from './PhotoList';
 import { MergedSourceURL, SelectedState } from 'types/gallery';
-import PublicCollectionDownloadManager from 'services/publicCollectionDownloadManager';
 import { PublicCollectionGalleryContext } from 'utils/publicCollectionGallery';
 import { useRouter } from 'next/router';
 import { logError } from '@ente/shared/sentry';
@@ -383,30 +382,7 @@ const PhotoFrame = ({
         if (!item.msrc) {
             addLogLine(`[${item.id}] doesn't have thumbnail`);
             try {
-                let url: string;
-                if (thumbsStore.has(item.id)) {
-                    addLogLine(
-                        `[${item.id}] gallery context cache hit, using cached thumb`
-                    );
-                    url = thumbsStore.get(item.id);
-                } else {
-                    addLogLine(
-                        `[${item.id}] gallery context cache miss, calling downloadManager to get thumb`
-                    );
-                    if (
-                        publicCollectionGalleryContext.accessedThroughSharedURL
-                    ) {
-                        url =
-                            await PublicCollectionDownloadManager.getThumbnail(
-                                item,
-                                publicCollectionGalleryContext.token,
-                                publicCollectionGalleryContext.passwordToken
-                            );
-                    } else {
-                        url = await DownloadManager.getThumbnail(item);
-                    }
-                    thumbsStore.set(item.id, url);
-                }
+                const url = await DownloadManager.getThumbnailForPreview(item);
                 updateURL(index)(item.id, url);
                 try {
                     addLogLine(
@@ -457,21 +433,9 @@ const PhotoFrame = ({
                 addLogLine(
                     `[${item.id}] gallery context cache miss, calling downloadManager to get file`
                 );
-                let downloadedURL: {
-                    original: string[];
-                    converted: string[];
-                };
-                if (publicCollectionGalleryContext.accessedThroughSharedURL) {
-                    downloadedURL =
-                        await PublicCollectionDownloadManager.getFile(
-                            item,
-                            publicCollectionGalleryContext.token,
-                            publicCollectionGalleryContext.passwordToken,
-                            true
-                        );
-                } else {
-                    downloadedURL = await DownloadManager.getFile(item, true);
-                }
+                const downloadedURL = await DownloadManager.getFileForPreview(
+                    item
+                );
                 const mergedURL: MergedSourceURL = {
                     original: downloadedURL.original.join(','),
                     converted: downloadedURL.converted.join(','),

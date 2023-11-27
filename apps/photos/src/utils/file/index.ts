@@ -24,7 +24,6 @@ import {
     SUPPORTED_RAW_FORMATS,
     RAW_FORMATS,
 } from 'constants/file';
-import PublicCollectionDownloadManager from 'services/publicCollectionDownloadManager';
 import heicConversionService from 'services/heicConversionService';
 import * as ffmpegService from 'services/ffmpeg/ffmpegService';
 import { VISIBILITY_STATE } from 'types/magicMetadata';
@@ -86,44 +85,12 @@ export async function getUpdatedEXIFFileForDownload(
     }
 }
 
-export async function downloadFile(
-    file: EnteFile,
-    accessedThroughSharedURL: boolean,
-    token?: string,
-    passwordToken?: string
-) {
+export async function downloadFile(file: EnteFile) {
     try {
-        let fileBlob: Blob;
         const fileReader = new FileReader();
-        if (accessedThroughSharedURL) {
-            const fileURL =
-                await PublicCollectionDownloadManager.getCachedOriginalFile(
-                    file
-                )[0];
-            if (!fileURL) {
-                fileBlob = await new Response(
-                    await PublicCollectionDownloadManager.downloadFile(
-                        token,
-                        passwordToken,
-                        file
-                    )
-                ).blob();
-            } else {
-                fileBlob = await (await fetch(fileURL)).blob();
-            }
-        } else {
-            const fileURL = await DownloadManager.getCachedOriginalFile(
-                file
-            )[0];
-            if (!fileURL) {
-                fileBlob = await new Response(
-                    await DownloadManager.downloadFile(file)
-                ).blob();
-            } else {
-                fileBlob = await (await fetch(fileURL)).blob();
-            }
-        }
-
+        let fileBlob = await new Response(
+            await DownloadManager.getFile(file)
+        ).blob();
         if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
             const livePhoto = await decodeLivePhoto(file, fileBlob);
             const image = new File([livePhoto.image], livePhoto.imageNameTitle);
@@ -627,7 +594,7 @@ export async function downloadFiles(
             if (progressBarUpdater?.isCancelled()) {
                 return;
             }
-            await downloadFile(file, false);
+            await downloadFile(file);
             progressBarUpdater?.increaseSuccess();
         } catch (e) {
             logError(e, 'download fail for file');
@@ -665,13 +632,7 @@ export async function downloadFileDesktop(
     file: EnteFile,
     downloadPath: string
 ) {
-    let fileStream: ReadableStream<Uint8Array>;
-    const fileURL = await DownloadManager.getCachedOriginalFile(file)[0];
-    if (!fileURL) {
-        fileStream = await DownloadManager.downloadFile(file);
-    } else {
-        fileStream = await fetch(fileURL).then((res) => res.body);
-    }
+    const fileStream = await DownloadManager.getFile(file);
     const updatedFileStream = await getUpdatedEXIFFileForDownload(
         fileReader,
         file,

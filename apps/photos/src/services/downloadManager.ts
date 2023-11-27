@@ -1,7 +1,6 @@
 import {
     generateStreamFromArrayBuffer,
     getRenderableFileURL,
-    createTypedObjectURL,
 } from 'utils/file';
 import { EnteFile } from 'types/file';
 
@@ -48,8 +47,8 @@ class DownloadManager {
     private thumbnailCache: LimitedCache;
     private cryptoWorker: Remote<DedicatedCryptoWorker>;
 
-    private fileObjectURLPromise = new Map<string, Promise<SourceURLs>>();
-    private thumbnailObjectURLPromise = new Map<number, Promise<string>>();
+    private fileObjectURLPromises = new Map<number, Promise<SourceURLs>>();
+    private thumbnailObjectURLPromises = new Map<number, Promise<string>>();
 
     private fileDownloadProgress = new Map<number, number>();
 
@@ -87,63 +86,20 @@ class DownloadManager {
         this.progressUpdater = progressUpdater;
     }
 
-    public async getInMemoryCachedThumbnailURL(fileID: number) {
-        return this.thumbnailObjectURLPromise.get(fileID);
-    }
-
-    public async getInMemoryCachedFileURL(fileID: number) {
-        return this.fileObjectURLPromise.get(fileID.toString());
-    }
-
-    public async getCachedThumbnail(fileID: number) {
+    private async getCachedThumbnail(fileID: number) {
         try {
             const cacheResp: Response = await this.thumbnailCache?.match(
                 fileID.toString()
             );
-
-            if (cacheResp) {
-                return URL.createObjectURL(await cacheResp.blob());
-            }
-            return null;
+            return await cacheResp.blob();
         } catch (e) {
             logError(e, 'failed to get cached thumbnail');
             throw e;
         }
     }
 
-    public async getThumbnail(file: EnteFile) {
-        try {
-            if (!this.thumbnailObjectURLPromise.has(file.id)) {
-                const downloadPromise = async () => {
-                    const cachedThumb = await this.getCachedThumbnail(file.id);
-                    if (cachedThumb) {
-                        return cachedThumb;
-                    }
-                    const thumb = await this.downloadThumb(file);
-                    const thumbBlob = new Blob([thumb]);
-
-                    this.thumbnailCache
-                        ?.put(file.id.toString(), new Response(thumbBlob))
-                        .catch((e) => {
-                            logError(e, 'cache put failed');
-                            // TODO: handle storage full exception.
-                        });
-                    return URL.createObjectURL(thumbBlob);
-                };
-                this.thumbnailObjectURLPromise.set(file.id, downloadPromise());
-            }
-
-            return await this.thumbnailObjectURLPromise.get(file.id);
-        } catch (e) {
-            this.thumbnailObjectURLPromise.delete(file.id);
-            logError(e, 'get DownloadManager preview Failed');
-            throw e;
-        }
-    }
-
-    downloadThumb = async (file: EnteFile) => {
+    private downloadThumb = async (file: EnteFile) => {
         const encrypted = await this.downloadClient.downloadThumbnail(file);
-
         const decrypted = await this.cryptoWorker.decryptThumbnail(
             encrypted,
             await this.cryptoWorker.fromB64(file.thumbnail.decryptionHeader),
@@ -152,35 +108,73 @@ class DownloadManager {
         return decrypted;
     };
 
-    getFile = async (file: EnteFile, forPreview = false) => {
-        const fileKey = forPreview ? `${file.id}_preview` : `${file.id}`;
+    public async getThumbnail(file: EnteFile) {
+        try {
+            const cachedThumb = await this.getCachedThumbnail(file.id);
+            if (cachedThumb) {
+                return cachedThumb;
+            }
+            const thumb = await this.downloadThumb(file);
+            const thumbBlob = new Blob([thumb]);
+
+            this.thumbnailCache
+                ?.put(file.id.toString(), new Response(thumbBlob))
+                .catch((e) => {
+                    logError(e, 'cache put failed');
+                    // TODO: handle storage full exception.
+                });
+            return thumbBlob;
+        } catch (e) {
+            logError(e, 'get DownloadManager preview Failed');
+            throw e;
+        }
+    }
+
+    public async getThumbnailForPreview(file: EnteFile) {
+        try {
+            if (!this.thumbnailObjectURLPromises.has(file.id)) {
+                await this.thumbnailObjectURLPromises.get(file.id);
+                const thumbBlobPromise = this.getThumbnail(file);
+                const thumbURLPromise = thumbBlobPromise.then((blob) =>
+                    URL.createObjectURL(blob)
+                );
+                this.thumbnailObjectURLPromises.set(file.id, thumbURLPromise);
+            }
+            return await this.thumbnailObjectURLPromises.get(file.id);
+        } catch (e) {
+            this.thumbnailObjectURLPromises.delete(file.id);
+            logError(e, 'get DownloadManager preview Failed');
+            throw e;
+        }
+    }
+
+    getFileForPreview = async (file: EnteFile): Promise<SourceURLs> => {
         try {
             const getFilePromise = async () => {
                 const fileStream = await this.downloadFile(file);
                 const fileBlob = await new Response(fileStream).blob();
-                if (forPreview) {
-                    return await getRenderableFileURL(file, fileBlob);
-                } else {
-                    const fileURL = await createTypedObjectURL(
-                        fileBlob,
-                        file.metadata.title
-                    );
-                    return { converted: [fileURL], original: [fileURL] };
-                }
+                return await getRenderableFileURL(file, fileBlob);
             };
-            if (!this.fileObjectURLPromise.get(fileKey)) {
-                this.fileObjectURLPromise.set(fileKey, getFilePromise());
+            if (!this.fileObjectURLPromises.get(file.id)) {
+                const fileURLs = getFilePromise() as Promise<SourceURLs>;
+                this.fileObjectURLPromises.set(file.id, fileURLs);
             }
-            const fileURLs = await this.fileObjectURLPromise.get(fileKey);
+            const fileURLs = await this.fileObjectURLPromises.get(file.id);
             return fileURLs;
         } catch (e) {
-            this.fileObjectURLPromise.delete(fileKey);
+            this.fileObjectURLPromises.delete(file.id);
             logError(e, 'download manager Failed to get File');
             throw e;
         }
     };
 
-    async downloadFile(file: EnteFile) {
+    getFile(file: EnteFile) {
+        return this.downloadFile(file);
+    }
+
+    private async downloadFile(
+        file: EnteFile
+    ): Promise<ReadableStream<Uint8Array>> {
         try {
             const onDownloadProgress = this.trackDownloadProgress(
                 file.id,
