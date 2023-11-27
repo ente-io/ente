@@ -9,6 +9,7 @@
     "scripts": {
         "build:photos": "turbo run build --filter=photos",
         "build:auth": "turbo run build --filter=auth",
+        "build:cast": "turbo run build --filter=cast",
         "dev:auth": "turbo run dev --filter=auth",
         "dev:photos": "turbo run dev --filter=photos",
         "dev:cast": "turbo run dev --filter=cast",
