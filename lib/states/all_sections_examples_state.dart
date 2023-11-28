@@ -1,10 +1,12 @@
 import "dart:async";
 
+import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/constants.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/files_updated_event.dart";
+import "package:photos/events/tab_changed_event.dart";
 import "package:photos/models/search/search_result.dart";
 import "package:photos/models/search/search_types.dart";
 import "package:photos/utils/debouncer.dart";
@@ -29,6 +31,9 @@ class _AllSectionsExamplesProviderState
   Future<List<List<SearchResult>>> allSectionsExamplesFuture = Future.value([]);
 
   late StreamSubscription<FilesUpdatedEvent> _filesUpdatedEvent;
+  late StreamSubscription<TabChangedEvent> _tabChangeEvent;
+  bool hasPendingUpdate = false;
+  bool isOnSearchTab = false;
   final _logger = Logger("AllSectionsExamplesProvider");
 
   final _debouncer = Debouncer(
@@ -41,13 +46,34 @@ class _AllSectionsExamplesProviderState
     super.initState();
     //add all common events for all search sections to reload to here.
     _filesUpdatedEvent = Bus.instance.on<FilesUpdatedEvent>().listen((event) {
-      reloadAllSections();
+      if (!isOnSearchTab) {
+        if (kDebugMode) {
+          _logger.finest('Skip reload till user clicks on search tab');
+        }
+        hasPendingUpdate = true;
+        return;
+      } else {
+        hasPendingUpdate = false;
+        reloadAllSections();
+      }
+    });
+    _tabChangeEvent = Bus.instance.on<TabChangedEvent>().listen((event) {
+      if (event.source == TabChangedEventSource.pageView &&
+          event.selectedIndex == 3) {
+        isOnSearchTab = true;
+        if (hasPendingUpdate) {
+          hasPendingUpdate = false;
+          reloadAllSections();
+        }
+      } else {
+        isOnSearchTab = false;
+      }
     });
     reloadAllSections();
   }
 
   void reloadAllSections() {
-    _logger.info('_debounceTimer: queue timer');
+    _logger.info('queue reload all sections');
     _debouncer.run(() async {
       setState(() {
         _logger.info("'_debounceTimer: reloading all sections in search tab");
@@ -70,6 +96,7 @@ class _AllSectionsExamplesProviderState
   @override
   void dispose() {
     _filesUpdatedEvent.cancel();
+    _tabChangeEvent.cancel();
     _debouncer.cancelDebounce();
     super.dispose();
   }
