@@ -31,8 +31,11 @@ class _AllSectionsExamplesProviderState
   late StreamSubscription<FilesUpdatedEvent> _filesUpdatedEvent;
   final _logger = Logger("AllSectionsExamplesProvider");
 
-  final _debouncer =
-      Debouncer(const Duration(seconds: 3), executionIntervalInSeconds: 6000);
+  final _debouncer = Debouncer(
+    const Duration(seconds: 5),
+    executionIntervalInMilliSeconds: 15000,
+  );
+
   @override
   void initState() {
     super.initState();
@@ -44,9 +47,10 @@ class _AllSectionsExamplesProviderState
   }
 
   void reloadAllSections() {
+    _logger.info('_debounceTimer: queue timer');
     _debouncer.run(() async {
       setState(() {
-        _logger.info("reloading all sections in search tab");
+        _logger.info("'_debounceTimer: reloading all sections in search tab");
         final allSectionsExamples = <Future<List<SearchResult>>>[];
         for (SectionType sectionType in SectionType.values) {
           if (sectionType == SectionType.face ||
