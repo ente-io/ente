@@ -478,6 +478,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "discord": MessageLookupByLibrary.simpleMessage("Discord"),
         "dismiss": MessageLookupByLibrary.simpleMessage("忽略"),
         "distanceInKMUnit": MessageLookupByLibrary.simpleMessage("公里"),
+        "doNotSignOut": MessageLookupByLibrary.simpleMessage("不要退登"),
         "doThisLater": MessageLookupByLibrary.simpleMessage("稍后再做"),
         "doYouWantToDiscardTheEditsYouHaveMade":
             MessageLookupByLibrary.simpleMessage("您想要放弃您所做的编辑吗？"),
@@ -1013,6 +1014,11 @@ class MessageLookup extends MessageLookupByLibrary {
         "sharedWithYou": MessageLookupByLibrary.simpleMessage("已与您共享"),
         "sharing": MessageLookupByLibrary.simpleMessage("正在分享..."),
         "showMemories": MessageLookupByLibrary.simpleMessage("显示回忆"),
+        "signOutFromOtherDevices":
+            MessageLookupByLibrary.simpleMessage("从其他设备退出登录"),
+        "signOutOtherBody": MessageLookupByLibrary.simpleMessage(
+            "如果你认为有人可能知道你的密码，你可以强制所有使用你账户的其他设备退出登录。"),
+        "signOutOtherDevices": MessageLookupByLibrary.simpleMessage("登出其他设备"),
         "signUpTerms": MessageLookupByLibrary.simpleMessage(
             "我同意 <u-terms>服务条款</u-terms> 和 <u-policy>隐私政策</u-policy>"),
         "singleFileDeleteFromDevice": m49,
