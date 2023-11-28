@@ -3,7 +3,7 @@ import Theatre from 'components/Theatre';
 import { FILE_TYPE } from 'constants/file';
 import { useRouter } from 'next/router';
 import { createContext, useEffect, useState } from 'react';
-import { syncCollections } from 'services/collectionService';
+import { getCollection } from 'services/collectionService';
 import { syncFiles } from 'services/fileService';
 import { EnteFile } from 'types/file';
 import { downloadFileAsBlob, isRawFileFromFileName } from 'utils/file';
@@ -26,29 +26,18 @@ export default function Slideshow() {
     >({});
 
     const init = async () => {
-        try {
-            const collections = await syncCollections();
+        // get requested collection id from localStorage
+        const requestedCollectionID =
+            window.localStorage.getItem('targetCollectionId');
 
-            // get requested collection id from localStorage
-            const requestedCollectionID =
-                window.localStorage.getItem('targetCollectionId');
+        const collection = await getCollection(Number(requestedCollectionID));
 
-            const files = await syncFiles('normal', collections, () => {});
+        const files = await syncFiles('normal', [collection], () => {});
 
-            if (requestedCollectionID) {
-                const collectionFiles = files.filter(
-                    (file) =>
-                        file.collectionID === Number(requestedCollectionID)
-                );
-
-                setCollectionFiles(
-                    collectionFiles.filter((file) =>
-                        isFileEligibleForCast(file)
-                    )
-                );
-            }
-        } catch {
-            router.push('/');
+        if (requestedCollectionID) {
+            setCollectionFiles(
+                files.filter((file) => isFileEligibleForCast(file))
+            );
         }
     };
 
