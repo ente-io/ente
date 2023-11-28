@@ -9,17 +9,18 @@ class Debouncer {
   ///in milliseconds
   final ValueNotifier<bool> _debounceActiveNotifier = ValueNotifier(false);
 
-  /// If executionInterval is not null, then the debouncer will execute the
+  /// If executionIntervalInSeconds is not null, then the debouncer will execute the
   /// current callback it has in run() method repeatedly in the given interval.
-  final int? executionInterval;
+  /// This is useful for example when you want to execute a callback every 5 seconds
+  final int? executionIntervalInSeconds;
   Timer? _debounceTimer;
 
-  Debouncer(this._duration, {this.executionInterval});
+  Debouncer(this._duration, {this.executionIntervalInSeconds});
 
   final Stopwatch _stopwatch = Stopwatch();
 
   void run(FutureVoidCallback fn) {
-    if (executionInterval != null) {
+    if (executionIntervalInSeconds != null) {
       runCallbackIfIntervalTimeElapses(fn);
     }
 
@@ -41,7 +42,7 @@ class Debouncer {
 
   runCallbackIfIntervalTimeElapses(FutureVoidCallback fn) {
     _stopwatch.isRunning ? null : _stopwatch.start();
-    if (_stopwatch.elapsedMilliseconds > executionInterval!) {
+    if (_stopwatch.elapsedMilliseconds > executionIntervalInSeconds!) {
       _stopwatch.reset();
       fn();
     }

@@ -32,7 +32,7 @@ class _AllSectionsExamplesProviderState
   final _logger = Logger("AllSectionsExamplesProvider");
 
   final _debouncer =
-      Debouncer(const Duration(seconds: 3), executionInterval: 6000);
+      Debouncer(const Duration(seconds: 3), executionIntervalInSeconds: 6000);
   @override
   void initState() {
     super.initState();

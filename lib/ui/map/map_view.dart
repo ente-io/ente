@@ -40,8 +40,8 @@ class MapView extends StatefulWidget {
 
 class _MapViewState extends State<MapView> {
   late List<Marker> _markers;
-  final _debouncer =
-      Debouncer(const Duration(milliseconds: 300), executionInterval: 750);
+  final _debouncer = Debouncer(const Duration(milliseconds: 300),
+      executionIntervalInSeconds: 750);
 
   @override
   void initState() {
