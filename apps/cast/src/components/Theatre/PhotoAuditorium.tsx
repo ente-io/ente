@@ -12,33 +12,39 @@ export default function PhotoAuditorium({
 
     const [showPreloadedNextSlide, setShowPreloadedNextSlide] = useState(false);
     const [nextSlidePrerendered, setNextSlidePrerendered] = useState(false);
+    const [prerenderTime, setPrerenderTime] = useState<number | null>(null);
 
     useEffect(() => {
-        let timeout;
-        let prerenderTimeout;
-        if (nextSlidePrerendered) {
-            timeout = setTimeout(() => {
-                setShowPreloadedNextSlide(true);
+        let timeout: NodeJS.Timeout;
+        let timeout2: NodeJS.Timeout;
 
-                if (showNextSlide) {
-                    // wait 5s before showing next slide
-                    prerenderTimeout = setTimeout(() => {
-                        showNextSlide();
-                    }, 5000);
-                }
-            }, 5000);
+        if (nextSlidePrerendered) {
+            const elapsedTime = prerenderTime ? Date.now() - prerenderTime : 0;
+            const delayTime = Math.max(5000 - elapsedTime, 0);
+
+            if (elapsedTime >= 5000) {
+                setShowPreloadedNextSlide(true);
+            } else {
+                timeout = setTimeout(() => {
+                    setShowPreloadedNextSlide(true);
+                }, delayTime);
+            }
+
+            if (showNextSlide) {
+                timeout2 = setTimeout(() => {
+                    showNextSlide();
+                    setNextSlidePrerendered(false);
+                    setPrerenderTime(null);
+                    setShowPreloadedNextSlide(false);
+                }, delayTime);
+            }
         }
 
         return () => {
-            if (timeout) {
-                clearTimeout(timeout);
-
-                if (prerenderTimeout) {
-                    clearTimeout(prerenderTimeout);
-                }
-            }
+            if (timeout) clearTimeout(timeout);
+            if (timeout2) clearTimeout(timeout2);
         };
-    }, [nextSlidePrerendered, showNextSlide]);
+    }, [nextSlidePrerendered, showNextSlide, prerenderTime]);
 
     return (
         <div
@@ -78,6 +84,7 @@ export default function PhotoAuditorium({
                     }}
                     onLoad={() => {
                         setNextSlidePrerendered(true);
+                        setPrerenderTime(Date.now());
                     }}
                 />
             </div>
