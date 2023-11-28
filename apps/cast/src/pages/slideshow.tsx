@@ -26,18 +26,24 @@ export default function Slideshow() {
     >({});
 
     const init = async () => {
-        // get requested collection id from localStorage
-        const requestedCollectionID =
-            window.localStorage.getItem('targetCollectionId');
+        try {
+            // get requested collection id from localStorage
+            const requestedCollectionID =
+                window.localStorage.getItem('targetCollectionId');
 
-        const collection = await getCollection(Number(requestedCollectionID));
-
-        const files = await syncFiles('normal', [collection], () => {});
-
-        if (requestedCollectionID) {
-            setCollectionFiles(
-                files.filter((file) => isFileEligibleForCast(file))
+            const collection = await getCollection(
+                Number(requestedCollectionID)
             );
+
+            const files = await syncFiles('normal', [collection], () => {});
+
+            if (requestedCollectionID) {
+                setCollectionFiles(
+                    files.filter((file) => isFileEligibleForCast(file))
+                );
+            }
+        } catch {
+            router.push('/');
         }
     };
 
@@ -70,11 +76,7 @@ export default function Slideshow() {
     const router = useRouter();
 
     useEffect(() => {
-        try {
-            init();
-        } catch (e) {
-            router.push('/');
-        }
+        init();
     }, []);
 
     useEffect(() => {
