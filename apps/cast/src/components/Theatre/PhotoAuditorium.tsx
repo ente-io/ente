@@ -19,9 +19,6 @@ export default function PhotoAuditorium({ url }: { url: string }) {
             style={{
                 width: '100vw',
                 height: '100vh',
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
                 backgroundImage: `url(${url})`,
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
@@ -29,13 +26,23 @@ export default function PhotoAuditorium({ url }: { url: string }) {
                 backgroundBlendMode: 'multiply',
                 backgroundColor: 'rgba(0, 0, 0, 0.5)',
             }}>
-            <img
-                src={url}
+            <div
                 style={{
-                    maxWidth: '100%',
-                    maxHeight: '100%',
-                }}
-            />
+                    height: '100%',
+                    width: '100%',
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    backdropFilter: 'blur(10px)',
+                }}>
+                <img
+                    src={url}
+                    style={{
+                        maxWidth: '100%',
+                        maxHeight: '100%',
+                    }}
+                />
+            </div>
         </div>
     );
 }
