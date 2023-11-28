@@ -18,6 +18,7 @@ export default function Slideshow() {
     const [currentFile, setCurrentFile] = useState<EnteFile | undefined>(
         undefined
     );
+    const [nextFile, setNextFile] = useState<EnteFile | undefined>(undefined);
 
     const [loading, setLoading] = useState(true);
 
@@ -90,10 +91,13 @@ export default function Slideshow() {
         );
 
         const nextIndex = (currentIndex + 1) % collectionFiles.length;
+        const nextNextIndex = (nextIndex + 1) % collectionFiles.length;
 
         const nextFile = collectionFiles[nextIndex];
+        const nextNextFile = collectionFiles[nextNextIndex];
 
         setCurrentFile(nextFile);
+        setNextFile(nextNextFile);
     };
 
     const [renderableFileURL, setRenderableFileURL] = useState<string>('');
@@ -135,9 +139,16 @@ export default function Slideshow() {
         <>
             <SlideshowContext.Provider value={{ showNextSlide }}>
                 <Theatre
-                    fileURL={renderableFileURL}
-                    type={currentFile?.metadata.fileType}
-                    fileName={currentFile?.metadata.title}
+                    file1={{
+                        fileName: currentFile?.metadata.title,
+                        fileURL: renderableFileURL,
+                        type: currentFile?.metadata.fileType,
+                    }}
+                    file2={{
+                        fileName: nextFile?.metadata.title,
+                        fileURL: renderableFileURL,
+                        type: nextFile?.metadata.fileType,
+                    }}
                 />
             </SlideshowContext.Provider>
             {loading && <PairedSuccessfullyOverlay />}

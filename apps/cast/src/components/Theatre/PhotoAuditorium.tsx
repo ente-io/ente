@@ -1,18 +1,44 @@
 import { SlideshowContext } from 'pages/slideshow';
-import { useContext, useEffect } from 'react';
+import { useContext, useEffect, useState } from 'react';
 
-export default function PhotoAuditorium({ url }: { url: string }) {
+export default function PhotoAuditorium({
+    url,
+    nextSlideUrl,
+}: {
+    url: string;
+    nextSlideUrl: string;
+}) {
     const { showNextSlide } = useContext(SlideshowContext);
 
+    const [showPreloadedNextSlide, setShowPreloadedNextSlide] = useState(false);
+    const [nextSlidePrerendered, setNextSlidePrerendered] = useState(false);
+
     useEffect(() => {
-        const timeout = setTimeout(() => {
-            showNextSlide();
-        }, 5000);
+        let timeout;
+        let prerenderTimeout;
+        if (nextSlidePrerendered) {
+            timeout = setTimeout(() => {
+                setShowPreloadedNextSlide(true);
+
+                if (showNextSlide) {
+                    // wait 5s before showing next slide
+                    prerenderTimeout = setTimeout(() => {
+                        showNextSlide();
+                    }, 5000);
+                }
+            }, 5000);
+        }
 
         return () => {
-            clearTimeout(timeout);
+            if (timeout) {
+                clearTimeout(timeout);
+
+                if (prerenderTimeout) {
+                    clearTimeout(prerenderTimeout);
+                }
+            }
         };
-    }, [url]);
+    }, [nextSlidePrerendered, showNextSlide]);
 
     return (
         <div
@@ -40,6 +66,18 @@ export default function PhotoAuditorium({ url }: { url: string }) {
                     style={{
                         maxWidth: '100%',
                         maxHeight: '100%',
+                        display: showPreloadedNextSlide ? 'none' : 'block',
+                    }}
+                />
+                <img
+                    src={nextSlideUrl}
+                    style={{
+                        maxWidth: '100%',
+                        maxHeight: '100%',
+                        display: showPreloadedNextSlide ? 'block' : 'none',
+                    }}
+                    onLoad={() => {
+                        setNextSlidePrerendered(true);
                     }}
                 />
             </div>
