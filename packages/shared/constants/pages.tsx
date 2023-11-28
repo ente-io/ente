@@ -15,8 +15,6 @@ export enum PHOTOS_PAGES {
     SHARED_ALBUMS = '/shared-albums',
     // ML_DEBUG = '/ml-debug',
     DEDUPLICATE = '/deduplicate',
-    // AUTH page is used to show (auth)enticator codes
-    AUTH = '/auth',
 }
 
 export enum AUTH_PAGES {
