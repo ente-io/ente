@@ -64,8 +64,6 @@ export default function UtilitySection({ closeSidebar }) {
 
     const redirectToDeduplicatePage = () => router.push(PAGES.DEDUPLICATE);
 
-    const redirectToAuthenticatorPage = () => router.push(PAGES.AUTH);
-
     const somethingWentWrong = () =>
         setDialogMessage({
             title: t('ERROR'),
@@ -132,13 +130,6 @@ export default function UtilitySection({ closeSidebar }) {
                 label={t('DEDUPLICATE_FILES')}
             />
 
-            {isInternalUser() && (
-                <EnteMenuItem
-                    variant="secondary"
-                    onClick={redirectToAuthenticatorPage}
-                    label={t('AUTHENTICATOR_SECTION')}
-                />
-            )}
             <EnteMenuItem
                 variant="secondary"
                 onClick={openPreferencesOptions}
