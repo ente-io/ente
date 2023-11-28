@@ -74,7 +74,7 @@ export default function AlbumCastDialog(props: Props) {
         await setKexValue(encryptedPayloadForTvKexKey, encryptedPayload);
     };
     useEffect(() => {
-        if (!cast) return;
+        if (!cast || !props.show) return;
         cast.framework.CastContext.getInstance()
             .requestSession()
             // .then(function (session) {
@@ -83,7 +83,7 @@ export default function AlbumCastDialog(props: Props) {
             .catch((e) => {
                 logError(e, 'Failed to start cast session');
             });
-    }, [cast]);
+    }, [cast, props.show]);
 
     return (
         <DialogBoxV2
