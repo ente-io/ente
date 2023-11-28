@@ -7,7 +7,6 @@ import 'package:photos/ui/components/divider_widget.dart';
 import 'package:photos/ui/components/models/button_type.dart';
 import 'package:photos/ui/components/title_bar_title_widget.dart';
 import 'package:photos/ui/notification/update/change_log_entry.dart';
-import "package:photos/utils/black_friday_util.dart";
 
 class ChangeLogPage extends StatefulWidget {
   const ChangeLogPage({
