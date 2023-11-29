@@ -57,3 +57,11 @@ export function getLocalSentryUserID() {
 export function setLocalSentryUserID(id: string) {
     setData(LS_KEYS.AnonymizedUserID, { id });
 }
+
+export function getLocalReferralSource() {
+    return getData(LS_KEYS.REFERRAL_SOURCE)?.source;
+}
+
+export function setLocalReferralSource(source: string) {
+    setData(LS_KEYS.REFERRAL_SOURCE, { source });
+}
