@@ -38,6 +38,8 @@
     "KEY_GENERATION_IN_PROGRESS_MESSAGE": "正在生成加密密钥...",
     "PASSPHRASE_HINT": "密码",
     "CONFIRM_PASSPHRASE": "请确认密码",
+    "REFERRAL_CODE_HINT": "",
+    "REFERRAL_INFO": "",
     "PASSPHRASE_MATCH_ERROR": "两次输入的密码不一致",
     "CONSOLE_WARNING_STOP": "停止！",
     "CONSOLE_WARNING_DESC": "这是专为开发人员设计的浏览器功能。 请不要在此处复制粘贴未经验证的代码。",
