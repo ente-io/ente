@@ -20,7 +20,6 @@ export default defineConfig({
       '/common/': sidebarphotos(),
       '/authenticator/': sidebarAuth()
   },
-
     socialLinks: [
       { icon: 'github', link: 'https://github.com/ente-io/docs/' }
     ]
@@ -36,7 +35,6 @@ function sidebarphotos() {
       items: [
         { text: 'Files not uploading', link: '/photos/troubleshooting/files-not-uploading' },
         { text: 'Failed to play video', link: '/photos/troubleshooting/video-not-playing' },
-      
         { text: 'Report bug', link: '/photos/troubleshooting/report-bug' },
       ]
     },
@@ -82,10 +80,6 @@ function sidebarAuth() {
     {
       text: 'FAQ',
       link: '/authenticator/faq/faq',
-      // items: [
-      //   { text: 'Contribute', link: '/authenticator/support/contribute' },
-      //   { text: 'Report bug', link: '/authenticator/contribute/report-bug' },
-      // ]
       
     },
     {
