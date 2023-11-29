@@ -37,6 +37,11 @@ class watchFolderService {
     private setCollectionName: (collectionName: string) => void;
     private syncWithRemote: () => void;
     private setWatchFolderServiceIsRunning: (isRunning: boolean) => void;
+    private debouncedRunNextEvent: () => void;
+
+    constructor() {
+        this.debouncedRunNextEvent = debounce(() => this.runNextEvent(), 1000);
+    }
 
     isUploadRunning() {
         return this.uploadRunning;
@@ -160,7 +165,7 @@ class watchFolderService {
 
     pushEvent(event: EventQueueItem) {
         this.eventQueue.push(event);
-        debounce(async () => await this.runNextEvent(), 300)();
+        this.debouncedRunNextEvent();
     }
 
     async pushTrashedDir(path: string) {
