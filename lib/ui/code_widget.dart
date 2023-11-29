@@ -108,6 +108,20 @@ class _CodeWidgetState extends State<CodeWidget> {
               width: 4,
             ),
             SlidableAction(
+              onPressed: _onPinPressed,
+              backgroundColor: Colors.grey.withOpacity(0.1),
+              borderRadius: const BorderRadius.all(Radius.circular(12.0)),
+              foregroundColor:
+                  Theme.of(context).colorScheme.inverseBackgroundColor,
+              icon: Icons.push_pin,
+              label: "Pin",
+              padding: const EdgeInsets.only(left: 4, right: 0),
+              spacing: 8,
+            ),
+            const SizedBox(
+              width: 4,
+            ),
+            SlidableAction(
               onPressed: _onEditPressed,
               backgroundColor: Colors.grey.withOpacity(0.1),
               borderRadius: const BorderRadius.all(Radius.circular(12.0)),
@@ -404,6 +418,8 @@ class _CodeWidgetState extends State<CodeWidget> {
       ),
     );
   }
+
+  Future<void> _onPinPressed(_) async {}
 
   void _onDeletePressed(_) async {
     bool _isAuthSuccessful =
