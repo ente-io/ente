@@ -5,6 +5,9 @@ export default defineConfig({
   title: "Ente Docs",
   description: "Guide for ente.io apps",
   themeConfig: {
+    editLink: {
+      pattern: 'https://github.com/ente-io/docs/edit/main/docs/:path'
+    },
     // https://vitepress.dev/reference/default-theme-config
     nav: [
       { text: 'Photos', link: '/photos/index' },
@@ -17,7 +20,6 @@ export default defineConfig({
       '/common/': sidebarphotos(),
       '/authenticator/': sidebarAuth()
   },
-
 
     socialLinks: [
       { icon: 'github', link: 'https://github.com/ente-io/docs/' }
