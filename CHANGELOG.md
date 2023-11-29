@@ -1,5 +1,19 @@
 # CHANGELOG
 
+### v1.6.54
+
+### New Features
+
+- Added support for HEIC and raw image in photo editor
+
+### Bug Fixes
+
+- Fixed 16bit HDR HEIC images support
+- Fixed blocked login due safe storage issue
+- Fixed Search related issues
+- Fixed issue of watch folder not cleared on logout
+- other under the hood ui/ux improvements
+
 ## v1.6.53
 
 ### Bug Fixes

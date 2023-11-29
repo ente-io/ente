@@ -26,7 +26,7 @@ export async function getEncryptionKey(): Promise<string> {
             return await ipcRenderer.invoke('safeStorage-decrypt', keyBuffer);
         }
     } catch (e) {
-        logError(e, 'setEncryptionKey failed');
+        logError(e, 'getEncryptionKey failed');
         throw e;
     }
 }
