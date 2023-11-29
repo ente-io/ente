@@ -2,8 +2,8 @@ import { defineConfig } from 'vitepress'
 
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
-  title: "Ente Photos Help",
-  description: "Ente Product Documentation",
+  title: "Ente Docs",
+  description: "Guide for ente.io apps",
   themeConfig: {
     // https://vitepress.dev/reference/default-theme-config
     nav: [
@@ -28,10 +28,14 @@ export default defineConfig({
 function sidebarphotos() {
   return [
     {
-      text: 'Examples',
+      text: 'Troubleshoot',
+      collapsed: true,
+      link: '/photos/troubleshooting/files-not-uploading',
       items: [
-        { text: 'Markdown Examples', link: '/markdown-examples' },
-        { text: 'Runtime API Examples', link: '/api-examples' }
+        { text: 'Files not uploading', link: '/photos/troubleshooting/files-not-uploading' },
+        { text: 'Failed to play video', link: '/photos/troubleshooting/video-not-playing' },
+      
+        { text: 'Report bug', link: '/photos/troubleshooting/report-bug' },
       ]
     },
     {
@@ -40,7 +44,7 @@ function sidebarphotos() {
            {
               text: 'Features',
               collapsed: true,
-              // link: '/photos/features/',
+              link: '/photos/features/archive',
               items: [
                   { text: 'Archive', link: '/photos/features/archive' },
                   { text: 'Hidden', link: '/photos/features/hidden' },
@@ -63,11 +67,19 @@ function sidebarphotos() {
 function sidebarAuth() {
   return [
     {
-      text: 'Examples',
-      items: [
-        { text: 'Markdown Examples', link: '/markdown-examples' },
-        { text: 'Runtime API Examples', link: '/api-examples' }
-      ]
+      text: 'FAQ',
+      link: '/authenticator/faq/faq',
+      // items: [
+      //   { text: 'Contribute', link: '/authenticator/support/contribute' },
+      //   { text: 'Report bug', link: '/authenticator/contribute/report-bug' },
+      // ]
+      
+    },
+    {
+      text: 'Contribute',
+      link: '/authenticator/support/contribute'
+  
+      
     }
   ]
 }
