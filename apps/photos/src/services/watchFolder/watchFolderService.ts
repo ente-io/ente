@@ -260,7 +260,7 @@ class watchFolderService {
             } else {
                 await this.processTrashEvent();
                 this.setIsEventRunning(false);
-                this.runNextEvent();
+                setTimeout(() => this.runNextEvent(), 0);
             }
         } catch (e) {
             logError(e, 'runNextEvent failed');
