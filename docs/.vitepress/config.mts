@@ -20,7 +20,7 @@ export default defineConfig({
 
 
     socialLinks: [
-      { icon: 'github', link: 'https://github.com/ente-io/' }
+      { icon: 'github', link: 'https://github.com/ente-io/docs/' }
     ]
   }
 })
@@ -46,19 +46,30 @@ function sidebarphotos() {
               collapsed: true,
               link: '/photos/features/archive',
               items: [
+                { text: 'Family Plan', link: '/photos/features/family-plan' },
                   { text: 'Archive', link: '/photos/features/archive' },
                   { text: 'Hidden', link: '/photos/features/hidden' },
-                  { text: 'Family Plan', link: '/photos/features/family-plan' },
                   { text: 'Map', link: '/photos/features/map' },
                   { text: 'Location Tags', link: '/photos/features/location' },
                   { text: 'Collect Photos', link: '/photos/features/collect' },
                   { text: 'Public link', link: '/photos/features/public-link' },
                   { text: 'Quick link', link: '/photos/features/quick-link' },
+                  { text: 'Watch folder', link: '/photos/features/watch-folder' },
+                  { text: 'Trash', link: '/photos/features/trash' },
+                  { text: 'Uncategorized', link: '/photos/features/uncategorized' },
                   { text: 'Referral Plan', link: '/photos/features/referral' },
                   { text: 'Live & Motion Photos', link: '/photos/features/live-photos' },
-
               ]
           },
+          {
+            text: 'Import',
+            collapsed: true,
+            link: '/photos/import/index',
+            items: [
+                { text: 'Watch folder', link: '/photos/features/watch-folder' },
+                
+            ]
+        },
         ]
     },
   ]
