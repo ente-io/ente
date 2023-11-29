@@ -1,1 +1,1 @@
-docs/photos/index.md
+photos/index.md
