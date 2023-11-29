@@ -38,6 +38,8 @@
     "KEY_GENERATION_IN_PROGRESS_MESSAGE": "Génération des clés de chiffrement...",
     "PASSPHRASE_HINT": "Mot de passe",
     "CONFIRM_PASSPHRASE": "Confirmer le mot de passe",
+    "REFERRAL_CODE_HINT": "",
+    "REFERRAL_INFO": "",
     "PASSPHRASE_MATCH_ERROR": "Les mots de passe ne correspondent pas",
     "CONSOLE_WARNING_STOP": "STOP!",
     "CONSOLE_WARNING_DESC": "Ceci est une fonction de navigateur dédiée aux développeurs. Veuillez ne pas copier-coller un code non vérifié à cet endroit.",
