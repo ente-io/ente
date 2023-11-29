@@ -1,4 +1,4 @@
-import debounce from 'debounce-promise';
+import debounce from 'debounce';
 import PQueue from 'p-queue';
 import { eventBus, Events } from '@ente/shared/events';
 import { EnteFile } from 'types/file';

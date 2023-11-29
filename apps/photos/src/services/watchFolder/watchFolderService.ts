@@ -9,7 +9,7 @@ import {
     WatchMapping,
     WatchMappingSyncedFile,
 } from 'types/watchFolder';
-import debounce from 'debounce-promise';
+import debounce from 'debounce';
 import {
     diskFileAddedCallback,
     diskFileRemovedCallback,
@@ -37,6 +37,11 @@ class watchFolderService {
     private setCollectionName: (collectionName: string) => void;
     private syncWithRemote: () => void;
     private setWatchFolderServiceIsRunning: (isRunning: boolean) => void;
+    private debouncedRunNextEvent: () => void;
+
+    constructor() {
+        this.debouncedRunNextEvent = debounce(() => this.runNextEvent(), 1000);
+    }
 
     isUploadRunning() {
         return this.uploadRunning;
@@ -160,7 +165,7 @@ class watchFolderService {
 
     pushEvent(event: EventQueueItem) {
         this.eventQueue.push(event);
-        debounce(this.runNextEvent.bind(this), 300)();
+        this.debouncedRunNextEvent();
     }
 
     async pushTrashedDir(path: string) {
@@ -255,7 +260,7 @@ class watchFolderService {
             } else {
                 await this.processTrashEvent();
                 this.setIsEventRunning(false);
-                this.runNextEvent();
+                setTimeout(() => this.runNextEvent(), 0);
             }
         } catch (e) {
             logError(e, 'runNextEvent failed');
