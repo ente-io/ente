@@ -1,5 +1,5 @@
 import { IconButton } from '@mui/material';
-import debounce from 'debounce-promise';
+import debounce from 'debounce';
 import { AppContext } from 'pages/_app';
 import React, {
     useCallback,

@@ -9,7 +9,7 @@ import {
     WatchMapping,
     WatchMappingSyncedFile,
 } from 'types/watchFolder';
-import debounce from 'debounce-promise';
+import debounce from 'debounce';
 import {
     diskFileAddedCallback,
     diskFileRemovedCallback,
@@ -160,7 +160,7 @@ class watchFolderService {
 
     pushEvent(event: EventQueueItem) {
         this.eventQueue.push(event);
-        debounce(this.runNextEvent.bind(this), 300)();
+        debounce(async () => await this.runNextEvent(), 300)();
     }
 
     async pushTrashedDir(path: string) {
