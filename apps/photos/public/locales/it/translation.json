@@ -38,6 +38,8 @@
     "KEY_GENERATION_IN_PROGRESS_MESSAGE": "Generazione delle chiavi di crittografia...",
     "PASSPHRASE_HINT": "Password",
     "CONFIRM_PASSPHRASE": "Conferma la password",
+    "REFERRAL_CODE_HINT": "",
+    "REFERRAL_INFO": "",
     "PASSPHRASE_MATCH_ERROR": "Le password non corrispondono",
     "CONSOLE_WARNING_STOP": "STOP!",
     "CONSOLE_WARNING_DESC": "Questa è una funzionalità del browser destinata agli sviluppatori. Non copiare né incollare codice non verificato qui.",

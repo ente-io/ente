@@ -11,7 +11,10 @@ import {
 import { isWeakPassword } from '@ente/accounts/utils';
 import { generateKeyAndSRPAttributes } from '@ente/accounts/utils/srp';
 
-import { setJustSignedUp } from '@ente/shared/storage/localStorage/helpers';
+import {
+    setJustSignedUp,
+    setLocalReferralSource,
+} from '@ente/shared/storage/localStorage/helpers';
 import { SESSION_KEYS } from '@ente/shared/storage/sessionStorage';
 import { PAGES } from '@ente/accounts/constants/pages';
 import {
@@ -19,8 +22,11 @@ import {
     Checkbox,
     FormControlLabel,
     FormGroup,
+    IconButton,
+    InputAdornment,
     Link,
     TextField,
+    Tooltip,
     Typography,
 } from '@mui/material';
 import FormPaperTitle from '@ente/shared/components/Form/FormPaper/Title';
@@ -34,11 +40,13 @@ import ShowHidePassword from '@ente/shared/components/Form/ShowHidePassword';
 import { APPS } from '@ente/shared/apps/constants';
 import { NextRouter } from 'next/router';
 import { logError } from '@ente/shared/sentry';
+import InfoOutlined from '@mui/icons-material/InfoOutlined';
 
 interface FormValues {
     email: string;
     passphrase: string;
     confirm: string;
+    referral: string;
 }
 
 interface SignUpProps {
@@ -63,7 +71,7 @@ export default function SignUp({ router, appName, login }: SignUpProps) {
     };
 
     const registerUser = async (
-        { email, passphrase, confirm }: FormValues,
+        { email, passphrase, confirm, referral }: FormValues,
         { setFieldError }: FormikHelpers<FormValues>
     ) => {
         try {
@@ -74,6 +82,7 @@ export default function SignUp({ router, appName, login }: SignUpProps) {
             setLoading(true);
             try {
                 setData(LS_KEYS.USER, { email });
+                setLocalReferralSource(referral);
                 await sendOtt(appName, email);
             } catch (e) {
                 setFieldError('confirm', `${t('UNKNOWN_ERROR')} ${e.message}`);
@@ -115,6 +124,7 @@ export default function SignUp({ router, appName, login }: SignUpProps) {
                     email: '',
                     passphrase: '',
                     confirm: '',
+                    referral: '',
                 }}
                 validationSchema={Yup.object().shape({
                     email: Yup.string()
@@ -192,12 +202,47 @@ export default function SignUp({ router, appName, login }: SignUpProps) {
                             <PasswordStrengthHint
                                 password={values.passphrase}
                             />
+
+                            <Box sx={{ width: '100%' }}>
+                                <Typography
+                                    textAlign={'left'}
+                                    color="text.secondary"
+                                    mt={'24px'}>
+                                    {t('REFERRAL_CODE_HINT')}
+                                </Typography>
+                                <TextField
+                                    hiddenLabel
+                                    InputProps={{
+                                        endAdornment: (
+                                            <InputAdornment position="end">
+                                                <Tooltip
+                                                    title={t('REFERRAL_INFO')}>
+                                                    <IconButton
+                                                        tabIndex={-1}
+                                                        color="secondary"
+                                                        edge={'end'}>
+                                                        <InfoOutlined />
+                                                    </IconButton>
+                                                </Tooltip>
+                                            </InputAdornment>
+                                        ),
+                                    }}
+                                    fullWidth
+                                    name="referral"
+                                    type="text"
+                                    value={values.referral}
+                                    onChange={handleChange('referral')}
+                                    error={Boolean(errors.referral)}
+                                    disabled={loading}
+                                />
+                            </Box>
                             <FormGroup sx={{ width: '100%' }}>
                                 <FormControlLabel
                                     sx={{
                                         color: 'text.muted',
                                         ml: 0,
                                         mt: 2,
+                                        mb: 0,
                                     }}
                                     control={
                                         <Checkbox
@@ -234,7 +279,7 @@ export default function SignUp({ router, appName, login }: SignUpProps) {
                                 />
                             </FormGroup>
                         </VerticallyCentered>
-                        <Box my={4}>
+                        <Box mb={4}>
                             <SubmitButton
                                 sx={{ my: 0 }}
                                 buttonText={t('CREATE_ACCOUNT')}
