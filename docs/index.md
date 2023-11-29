@@ -9,10 +9,10 @@ hero:
   actions:
     - theme: brand
       text: Photos
-      link: /markdown-examples
+      link: /photos/
     - theme: brand
       text: Authenticator
-      link: /api-examples
+      link: /authenticator/
 
 features:
   - title: Private
