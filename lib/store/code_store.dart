@@ -29,10 +29,18 @@ class CodeStore {
     final List<Code> codes = [];
     for (final entity in entities) {
       final decodeJson = jsonDecode(entity.rawData);
-      final code = Code.fromRawData(decodeJson);
-      code.generatedID = entity.generatedID;
-      code.hasSynced = entity.hasSynced;
-      codes.add(code);
+      if (decodeJson.startsWith('otpauth://')) {
+        final code = Code.fromRawData(decodeJson);
+        code.generatedID = entity.generatedID;
+        code.hasSynced = entity.hasSynced;
+        codes.add(code);
+      } else {
+        final decodedMap = jsonDecode(decodeJson);
+        final code = Code.fromRawData(decodedMap['code']);
+        code.generatedID = entity.generatedID;
+        code.hasSynced = entity.hasSynced;
+        codes.add(code);
+      }
     }
 
     // sort codes by issuer,account
@@ -93,7 +101,7 @@ class CodeStore {
   bool _isOfflineImportRunning = false;
 
   Future<void> importOfflineCodes() async {
-    if(_isOfflineImportRunning) {
+    if (_isOfflineImportRunning) {
       return;
     }
     _isOfflineImportRunning = true;
