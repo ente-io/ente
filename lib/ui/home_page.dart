@@ -232,10 +232,29 @@ class _HomePageState extends State<HomePage> {
           onManuallySetupTap: _redirectToManualEntryPage,
         );
       } else {
+        _filteredCodes.sort((a, b) {
+          if (b.isPinned! && !a.isPinned!) return 1;
+          if (!b.isPinned! && a.isPinned!) return -1;
+          return 0;
+        });
         final list = ListView.builder(
           itemBuilder: ((context, index) {
             try {
-              return CodeWidget(_filteredCodes[index]);
+              if (index > 0 &&
+                  _filteredCodes[index - 1].isPinned! &&
+                  !_filteredCodes[index].isPinned!) {
+                return Column(
+                  children: [
+                    const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 16),
+                      child: Divider(color: Colors.grey),
+                    ),
+                    CodeWidget(_filteredCodes[index]),
+                  ],
+                );
+              } else {
+                return CodeWidget(_filteredCodes[index]);
+              }
             } catch (e) {
               return const Text("Failed");
             }
