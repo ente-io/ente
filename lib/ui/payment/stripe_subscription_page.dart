@@ -337,7 +337,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
       ).then((value) => onWebPaymentGoBack);
     } catch (e) {
       await _dialog.hide();
-      showGenericErrorDialog(context: context);
+      showGenericErrorDialog(context: context, error: e);
     }
     await _dialog.hide();
   }

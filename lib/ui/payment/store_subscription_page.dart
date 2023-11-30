@@ -524,11 +524,14 @@ class _StoreSubscriptionPageState extends State<StoreSubscriptionPage> {
               final ProductDetailsResponse response =
                   await InAppPurchase.instance.queryProductDetails({productID});
               if (response.notFoundIDs.isNotEmpty) {
-                _logger.severe(
-                  "Could not find products: " + response.notFoundIDs.toString(),
-                );
+                final errMsg = "Could not find products: " +
+                    response.notFoundIDs.toString();
+                _logger.severe(errMsg);
                 await _dialog.hide();
-                showGenericErrorDialog(context: context);
+                showGenericErrorDialog(
+                  context: context,
+                  error: Exception(errMsg),
+                );
                 return;
               }
               final isCrossGradingOnAndroid = Platform.isAndroid &&

@@ -89,7 +89,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
                 try {
                   recoveryKey = await _getOrCreateRecoveryKey(context);
                 } catch (e) {
-                  await showGenericErrorDialog(context: context);
+                  await showGenericErrorDialog(context: context, error: e);
                   return;
                 }
                 unawaited(
@@ -260,14 +260,22 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
       await UserService.instance.getOrCreateRecoveryKey(context),
     );
   }
+
   Future<void> updateEmailMFA(bool isEnabled) async {
     try {
-      final UserDetails details = await UserService.instance.getUserDetailsV2(memoryCount: false);
-      if((details.profileData?.canDisableEmailMFA ?? false) == false) {
-        await routeToPage(context, RequestPasswordVerificationPage(onPasswordVerified: (Uint8List keyEncryptionKey) async {
-          final Uint8List loginKey = await CryptoUtil.deriveLoginKey(keyEncryptionKey);
-          await UserService.instance.registerOrUpdateSrp(loginKey);
-        },),);
+      final UserDetails details =
+          await UserService.instance.getUserDetailsV2(memoryCount: false);
+      if ((details.profileData?.canDisableEmailMFA ?? false) == false) {
+        await routeToPage(
+          context,
+          RequestPasswordVerificationPage(
+            onPasswordVerified: (Uint8List keyEncryptionKey) async {
+              final Uint8List loginKey =
+                  await CryptoUtil.deriveLoginKey(keyEncryptionKey);
+              await UserService.instance.registerOrUpdateSrp(loginKey);
+            },
+          ),
+        );
       }
       await UserService.instance.updateEmailMFA(isEnabled);
     } catch (e) {

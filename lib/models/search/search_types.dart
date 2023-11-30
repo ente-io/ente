@@ -222,7 +222,7 @@ extension SectionTypeExtensions on SectionType {
             },
           );
           if (result is Exception) {
-            showGenericErrorDialog(context: context);
+            showGenericErrorDialog(context: context, error: result);
           }
         };
       default:

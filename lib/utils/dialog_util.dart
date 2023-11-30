@@ -121,7 +121,7 @@ String parseErrorForUI(
 Future<ButtonResult?> showGenericErrorDialog({
   required BuildContext context,
   bool isDismissible = true,
-  Object? error,
+  required Object? error,
 }) async {
   final errorBody = parseErrorForUI(
     context,

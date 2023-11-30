@@ -196,7 +196,7 @@ class BillingService {
       );
     } catch (e) {
       await dialog.hide();
-      showGenericErrorDialog(context: context);
+      showGenericErrorDialog(context: context, error: e);
     }
     await dialog.hide();
   }

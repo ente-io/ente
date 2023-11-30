@@ -94,7 +94,7 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
             try {
               status = await SyncService.instance.getBackupStatus();
             } catch (e) {
-              showGenericErrorDialog(context: context);
+              showGenericErrorDialog(context: context, error: e);
               return;
             }
 
@@ -128,7 +128,7 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
               duplicates =
                   await DeduplicationService.instance.getDuplicateFiles();
             } catch (e) {
-              showGenericErrorDialog(context: context);
+              showGenericErrorDialog(context: context, error: e);
               return;
             }
 
