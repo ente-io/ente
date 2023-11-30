@@ -929,6 +929,8 @@
   "itLooksLikeSomethingWentWrongPleaseRetryAfterSome": "看起来出了点问题。 请稍后重试。 如果错误仍然存在，请联系我们的支持团队。",
   "error": "错误",
   "tempErrorContactSupportIfPersists": "看起来出了点问题。 请稍后重试。 如果错误仍然存在，请联系我们的支持团队。",
+  "networkHostLookUpErr": "无法连接到 Ente，请检查您的网络设置，如果错误仍然存在，请联系支持人员。",
+  "networkConnectionRefusedErr": "无法连接到 Ente，请稍后重试。如果错误仍然存在，请联系支持人员。",
   "cachedData": "缓存数据",
   "clearCaches": "清除缓存",
   "remoteImages": "远程图像",
