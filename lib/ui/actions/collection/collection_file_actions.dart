@@ -73,7 +73,7 @@ extension CollectionFileActions on CollectionActions {
     );
     if (actionResult?.action != null &&
         actionResult!.action == ButtonAction.error) {
-      showGenericErrorDialog(context: bContext);
+      showGenericErrorDialog(context: bContext, error: actionResult.exception);
     } else {
       selectedFiles.clearAll();
     }
@@ -187,7 +187,7 @@ extension CollectionFileActions on CollectionActions {
     } catch (e, s) {
       logger.severe("Failed to add to album", e, s);
       await dialog?.hide();
-      showGenericErrorDialog(context: context);
+      showGenericErrorDialog(context: context, error: e);
       rethrow;
     }
   }

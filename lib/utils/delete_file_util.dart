@@ -102,7 +102,7 @@ Future<void> deleteFilesFromEverywhere(
       await FilesDB.instance.deleteMultipleUploadedFiles(fileIDs);
     } catch (e) {
       _logger.severe(e);
-      showGenericErrorDialog(context: context);
+      showGenericErrorDialog(context: context, error: e);
       rethrow;
     }
     for (final collectionID in updatedCollectionIDs) {
@@ -163,7 +163,7 @@ Future<void> deleteFilesFromRemoteOnly(
     await FilesDB.instance.deleteMultipleUploadedFiles(uploadedFileIDs);
   } catch (e, s) {
     _logger.severe("Failed to delete files from remote", e, s);
-    showGenericErrorDialog(context: context);
+    showGenericErrorDialog(context: context, error: e);
     rethrow;
   }
   for (final collectionID in updatedCollectionIDs) {
@@ -279,7 +279,10 @@ Future<bool> deleteFromTrash(BuildContext context, List<EnteFile> files) async {
       actionResult!.action == ButtonAction.cancel) {
     return didDeletionStart ? true : false;
   } else if (actionResult.action == ButtonAction.error) {
-    await showGenericErrorDialog(context: context);
+    await showGenericErrorDialog(
+      context: context,
+      error: actionResult.exception,
+    );
     return false;
   } else {
     return true;
@@ -306,7 +309,10 @@ Future<bool> emptyTrash(BuildContext context) async {
       actionResult!.action == ButtonAction.cancel) {
     return false;
   } else if (actionResult.action == ButtonAction.error) {
-    await showGenericErrorDialog(context: context);
+    await showGenericErrorDialog(
+      context: context,
+      error: actionResult.exception,
+    );
     return false;
   } else {
     return true;
@@ -555,7 +561,7 @@ Future<void> showDeleteSheet(
               showShortToast(context, S.of(context).movedToTrash);
             },
             onError: (e, s) {
-              showGenericErrorDialog(context: context);
+              showGenericErrorDialog(context: context, error: e);
             },
           );
         },
@@ -620,7 +626,7 @@ Future<void> showDeleteSheet(
   );
   if (actionResult?.action != null &&
       actionResult!.action == ButtonAction.error) {
-    showGenericErrorDialog(context: context);
+    showGenericErrorDialog(context: context, error: actionResult.exception);
   } else {
     selectedFiles.clearAll();
   }

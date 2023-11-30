@@ -113,8 +113,9 @@ class UserService {
           ),
         );
         return;
+      } else {
+        throw Exception("send-ott action failed, non-200");
       }
-      unawaited(showGenericErrorDialog(context: context));
     } on DioError catch (e) {
       await dialog.hide();
       _logger.info(e);
@@ -127,12 +128,14 @@ class UserService {
           ),
         );
       } else {
-        unawaited(showGenericErrorDialog(context: context));
+        unawaited(showGenericErrorDialog(context: context, error: e));
       }
-    } catch (e) {
+    } catch (e, s) {
       await dialog.hide();
-      _logger.severe(e);
-      unawaited(showGenericErrorDialog(context: context));
+      _logger.severe(e, s);
+      unawaited(
+        showGenericErrorDialog(context: context, error: e),
+      );
     }
   }
 
@@ -259,7 +262,7 @@ class UserService {
       //to close and only then to show the error dialog.
       Future.delayed(
         const Duration(milliseconds: 150),
-        () => showGenericErrorDialog(context: context),
+        () => showGenericErrorDialog(context: context, error: null),
       );
     }
   }
@@ -279,7 +282,7 @@ class UserService {
       }
     } catch (e) {
       _logger.severe(e);
-      await showGenericErrorDialog(context: context);
+      await showGenericErrorDialog(context: context, error: e);
       return null;
     }
   }
@@ -956,7 +959,7 @@ class UserService {
     try {
       recoveryKey = await getOrCreateRecoveryKey(context);
     } catch (e) {
-      showGenericErrorDialog(context: context);
+      showGenericErrorDialog(context: context, error: e);
       return false;
     }
     final dialog = createProgressDialog(context, S.of(context).verifying);

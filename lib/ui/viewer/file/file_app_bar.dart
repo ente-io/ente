@@ -288,7 +288,7 @@ class FileAppBarState extends State<FileAppBar> {
       }
     } catch (e, s) {
       _logger.severe("failed to update file visibility", e, s);
-      await showGenericErrorDialog(context: context);
+      await showGenericErrorDialog(context: context, error: e);
     }
   }
 
@@ -371,7 +371,7 @@ class FileAppBarState extends State<FileAppBar> {
     } catch (e) {
       _logger.warning("Failed to save file", e);
       await dialog.hide();
-      showGenericErrorDialog(context: context);
+      showGenericErrorDialog(context: context, error: e);
     } finally {
       PhotoManager.startChangeNotify();
       LocalSyncService.instance.checkAndSync().ignore();
@@ -432,7 +432,7 @@ class FileAppBarState extends State<FileAppBar> {
     } catch (e) {
       dialog.hide();
       _logger.severe("Failed to use as", e);
-      showGenericErrorDialog(context: context);
+      showGenericErrorDialog(context: context, error: e);
     }
   }
 }
