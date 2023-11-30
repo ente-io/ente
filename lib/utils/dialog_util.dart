@@ -108,8 +108,6 @@ String parseErrorForUI(
     } else {
       errorInfo = "Reason: " + dioError.type.toString();
     }
-  } else if (!kDebugMode) {
-    errorInfo = error.toString();
   } else {
     errorInfo = error.toString().split('Source stack')[0];
   }
