@@ -422,7 +422,17 @@ class _CodeWidgetState extends State<CodeWidget> {
     );
   }
 
-  Future<void> _onPinPressed(_) async {}
+  Future<void> _onPinPressed(_) async {
+    final Code? code = widget.code.copyWith(
+      account: widget.code.account,
+      issuer: widget.code.issuer,
+      secret: widget.code.secret,
+      isPinned: !widget.code.isPinned!,
+    );
+    if (code != null) {
+      CodeStore.instance.addCode(code);
+    }
+  }
 
   void _onDeletePressed(_) async {
     bool _isAuthSuccessful =
