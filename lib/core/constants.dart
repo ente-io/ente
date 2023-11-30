@@ -64,3 +64,5 @@ const defaultRadiusValue = 40.0;
 const galleryGridSpacing = 2.0;
 
 const searchSectionLimit = 7;
+
+bool isInternalUser = false;

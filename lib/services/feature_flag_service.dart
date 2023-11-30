@@ -71,9 +71,10 @@ class FeatureFlagService {
   bool isInternalUserOrDebugBuild() {
     final String? email = Configuration.instance.getEmail();
     final userID = Configuration.instance.getUserID();
-    return (email != null && email.endsWith("@ente.io")) ||
+    isInternalUser = (email != null && email.endsWith("@ente.io")) ||
         _internalUserIDs.contains(userID) ||
         kDebugMode;
+    return isInternalUser;
   }
 
   Future<void> fetchFeatureFlags() async {

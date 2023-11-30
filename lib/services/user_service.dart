@@ -127,12 +127,14 @@ class UserService {
           ),
         );
       } else {
-        unawaited(showGenericErrorDialog(context: context));
+        unawaited(showGenericErrorDialog(context: context, error: e));
       }
-    } catch (e) {
+    } catch (e, s) {
       await dialog.hide();
-      _logger.severe(e);
-      unawaited(showGenericErrorDialog(context: context));
+      _logger.severe(e, s);
+      unawaited(
+        showGenericErrorDialog(context: context, error: e),
+      );
     }
   }
 

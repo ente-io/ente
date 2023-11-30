@@ -869,6 +869,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "movingFilesToAlbum":
             MessageLookupByLibrary.simpleMessage("Moving files to album..."),
         "name": MessageLookupByLibrary.simpleMessage("Name"),
+        "networkConnectionRefusedErr": MessageLookupByLibrary.simpleMessage(
+            "Unable to connect to Ente, please retry after sometime. If the error persists, please contact support."),
+        "networkHostLookUpErr": MessageLookupByLibrary.simpleMessage(
+            "Unable to connect to Ente, please check your network settings and contact support if the error persists."),
         "never": MessageLookupByLibrary.simpleMessage("Never"),
         "newAlbum": MessageLookupByLibrary.simpleMessage("New album"),
         "newToEnte": MessageLookupByLibrary.simpleMessage("New to ente"),

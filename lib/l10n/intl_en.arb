@@ -929,6 +929,8 @@
   "itLooksLikeSomethingWentWrongPleaseRetryAfterSome": "It looks like something went wrong. Please retry after some time. If the error persists, please contact our support team.",
   "error": "Error",
   "tempErrorContactSupportIfPersists": "It looks like something went wrong. Please retry after some time. If the error persists, please contact our support team.",
+  "networkHostLookUpErr" : "Unable to connect to Ente, please check your network settings and contact support if the error persists.",
+  "networkConnectionRefusedErr" : "Unable to connect to Ente, please retry after sometime. If the error persists, please contact support.",
   "cachedData": "Cached data",
   "clearCaches": "Clear caches",
   "remoteImages": "Remote images",

@@ -6529,6 +6529,26 @@ class S {
     );
   }
 
+  /// `Unable to connect to Ente, please check your network settings and contact support if the error persists.`
+  String get networkHostLookUpErr {
+    return Intl.message(
+      'Unable to connect to Ente, please check your network settings and contact support if the error persists.',
+      name: 'networkHostLookUpErr',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Unable to connect to Ente, please retry after sometime. If the error persists, please contact support.`
+  String get networkConnectionRefusedErr {
+    return Intl.message(
+      'Unable to connect to Ente, please retry after sometime. If the error persists, please contact support.',
+      name: 'networkConnectionRefusedErr',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Cached data`
   String get cachedData {
     return Intl.message(
