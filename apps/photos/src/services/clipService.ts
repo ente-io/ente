@@ -17,6 +17,7 @@ import { getPersonalFiles } from 'utils/file';
 import { FILE_TYPE } from 'constants/file';
 import ComlinkCryptoWorker from '@ente/shared/crypto';
 import { Embedding, Model } from 'types/embedding';
+import isElectron from 'is-electron';
 
 const CLIP_EMBEDDING_LENGTH = 512;
 
@@ -47,7 +48,7 @@ class ClipServiceImpl {
     }
 
     isPlatformSupported = () => {
-        return !this.unsupportedPlatform;
+        return isElectron() && !this.unsupportedPlatform;
     };
 
     setupOnFileUploadListener = async () => {
@@ -144,6 +145,9 @@ class ClipServiceImpl {
         try {
             return ElectronAPIs.computeTextEmbedding(text);
         } catch (e) {
+            if (e?.message?.includes(CustomError.UNSUPPORTED_PLATFORM)) {
+                this.unsupportedPlatform = true;
+            }
             logError(e, 'failed to compute text embedding');
             throw e;
         }

@@ -38,6 +38,8 @@
     "KEY_GENERATION_IN_PROGRESS_MESSAGE": "Encryptiecodes worden gegenereerd...",
     "PASSPHRASE_HINT": "Wachtwoord",
     "CONFIRM_PASSPHRASE": "Wachtwoord bevestigen",
+    "REFERRAL_CODE_HINT": "",
+    "REFERRAL_INFO": "",
     "PASSPHRASE_MATCH_ERROR": "Wachtwoorden komen niet overeen",
     "CONSOLE_WARNING_STOP": "STOP!",
     "CONSOLE_WARNING_DESC": "Dit is een browserfunctie bedoeld voor ontwikkelaars. Gelieve hier geen niet-geverifieerde code te kopiëren/plakken.",

@@ -38,6 +38,8 @@
     "KEY_GENERATION_IN_PROGRESS_MESSAGE": "Generierung von Verschlüsselungsschlüsseln...",
     "PASSPHRASE_HINT": "Passwort",
     "CONFIRM_PASSPHRASE": "Passwort bestätigen",
+    "REFERRAL_CODE_HINT": "",
+    "REFERRAL_INFO": "",
     "PASSPHRASE_MATCH_ERROR": "Die Passwörter stimmen nicht überein",
     "CONSOLE_WARNING_STOP": "STOPP!",
     "CONSOLE_WARNING_DESC": "",

@@ -7,12 +7,14 @@ import { PeriodToggler } from '../periodToggler';
 import Plans from '../plans';
 import { hasAddOnBonus } from 'utils/billing';
 import { BFAddOnRow } from '../plans/BfAddOnRow';
+import { ManageSubscription } from '../manageSubscription';
 
 export default function FreeSubscriptionPlanSelectorCard({
     plans,
     subscription,
     bonusData,
     closeModal,
+    setLoading,
     planPeriod,
     togglePeriod,
     onPlanSelect,
@@ -46,6 +48,14 @@ export default function FreeSubscriptionPlanSelectorCard({
                         <BFAddOnRow
                             bonusData={bonusData}
                             closeModal={closeModal}
+                        />
+                    )}
+                    {hasAddOnBonus(bonusData) && (
+                        <ManageSubscription
+                            subscription={subscription}
+                            bonusData={bonusData}
+                            closeModal={closeModal}
+                            setLoading={setLoading}
                         />
                     )}
                 </Stack>

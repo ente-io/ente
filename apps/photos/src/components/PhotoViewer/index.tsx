@@ -136,6 +136,8 @@ function PhotoViewer(props: Iprops) {
 
     const [showEditButton, setShowEditButton] = useState(false);
 
+    const [showZoomButton, setShowZoomButton] = useState(false);
+
     useEffect(() => {
         downloadManager.setProgressUpdater(setFileDownloadProgress);
     }, []);
@@ -331,6 +333,10 @@ function PhotoViewer(props: Iprops) {
         );
     }
 
+    function updateShowZoomButton(file: EnteFile) {
+        setShowZoomButton(file.metadata.fileType === FILE_TYPE.IMAGE);
+    }
+
     const openPhotoSwipe = () => {
         const { items, currentIndex } = props;
         const options = {
@@ -404,6 +410,7 @@ function PhotoViewer(props: Iprops) {
             updateShowConvertBtn(currItem);
             updateIsSourceLoaded(currItem);
             updateShowEditButton(currItem);
+            updateShowZoomButton(currItem);
         });
         photoSwipe.listen('resize', () => {
             if (!photoSwipe?.currItem) return;
@@ -754,12 +761,14 @@ function PhotoViewer(props: Iprops) {
                                     <DeleteIcon />
                                 </button>
                             )}
-                            <button
-                                className="pswp__button pswp__button--custom"
-                                onClick={toggleZoomInAndOut}
-                                title={t('ZOOM_IN_OUT')}>
-                                <ZoomInOutlinedIcon />
-                            </button>
+                            {showZoomButton && (
+                                <button
+                                    className="pswp__button pswp__button--custom"
+                                    onClick={toggleZoomInAndOut}
+                                    title={t('ZOOM_IN_OUT')}>
+                                    <ZoomInOutlinedIcon />
+                                </button>
+                            )}
                             <button
                                 className="pswp__button pswp__button--custom"
                                 onClick={() => {
