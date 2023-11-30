@@ -36,7 +36,7 @@ class CodeStore {
         codes.add(code);
       } else {
         final decodedMap = jsonDecode(decodeJson);
-        final code = Code.fromRawData(decodedMap['code']);
+        final code = Code.fromRawJson(decodedMap);
         code.generatedID = entity.generatedID;
         code.hasSynced = entity.hasSynced;
         codes.add(code);

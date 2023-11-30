@@ -90,6 +90,7 @@ Future<int?> _processBitwardenExportFile(
           account,
           issuer,
           secret,
+          false,
         ),
       );
     }

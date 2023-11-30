@@ -76,7 +76,6 @@ class _CodeWidgetState extends State<CodeWidget> {
     _shouldShowLargeIcon = PreferenceService.instance.shouldShowLargeIcons();
     if (!_isInitialized) {
       _currentCode.value = _getCurrentOTP();
-       //print("Hello ${widget.code.jsonData}");
       if (widget.code.type == Type.totp) {
         _nextCode.value = _getNextTotp();
       }
@@ -395,7 +394,10 @@ class _CodeWidgetState extends State<CodeWidget> {
     final Code? code = await Navigator.of(context).push(
       MaterialPageRoute(
         builder: (BuildContext context) {
-          return SetupEnterSecretKeyPage(code: widget.code);
+          return SetupEnterSecretKeyPage(
+            code: widget.code,
+            isPinned: widget.code.isPinned,
+          );
         },
       ),
     );
