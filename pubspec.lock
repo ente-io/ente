@@ -1276,10 +1276,10 @@ packages:
     description:
       path: "."
       ref: HEAD
-      resolved-ref: e4edd3a158c667976660a788e908d1faf5c5a4f8
+      resolved-ref: f1ec3d35d5cee2ec1c098b5ca276f311a96d800a
       url: "https://github.com/ente-io/motion_photo.git"
     source: git
-    version: "0.0.5"
+    version: "0.0.6"
   motionphoto:
     dependency: "direct main"
     description:
