@@ -245,9 +245,10 @@ class _HomePageState extends State<HomePage> {
                   !_filteredCodes[index].isPinned!) {
                 return Column(
                   children: [
-                    const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 16),
-                      child: Divider(color: Colors.grey),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 10,),
+                      child: Divider(color: Colors.grey[300]),
                     ),
                     CodeWidget(_filteredCodes[index]),
                   ],
