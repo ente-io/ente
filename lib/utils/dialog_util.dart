@@ -1,4 +1,5 @@
 import "package:dio/dio.dart";
+import "package:flutter/foundation.dart";
 import 'package:flutter/material.dart';
 import "package:flutter/services.dart";
 import "package:photos/generated/l10n.dart";
@@ -72,12 +73,19 @@ Future<ButtonResult?> showErrorDialogForException({
 Future<ButtonResult?> showGenericErrorDialog({
   required BuildContext context,
   bool isDismissible = true,
+  Exception? error,
+  bool surfaceError = kDebugMode,
 }) async {
+  String errorBody =
+      S.of(context).itLooksLikeSomethingWentWrongPleaseRetryAfterSome;
+  if (surfaceError && error != null) {
+    errorBody = '$errorBody\n\n${error.toString()}';
+  }
   return showDialogWidget(
     context: context,
     title: S.of(context).error,
     icon: Icons.error_outline_outlined,
-    body: S.of(context).itLooksLikeSomethingWentWrongPleaseRetryAfterSome,
+    body: errorBody,
     isDismissible: isDismissible,
     buttons: const [
       ButtonWidget(
