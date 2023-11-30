@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:ente_auth/utils/totp_util.dart';
 
 class Code {
@@ -13,7 +15,6 @@ class Code {
   final Algorithm algorithm;
   final Type type;
   final String rawData;
-  final Map jsonData;
   final int counter;
   bool? hasSynced;
 
@@ -26,8 +27,7 @@ class Code {
     this.algorithm,
     this.type,
     this.counter,
-    this.rawData,
-    this.jsonData, {
+    this.rawData, {
     this.generatedID,
   });
 
@@ -68,18 +68,6 @@ class Code {
           "&period=$updatePeriod&secret=" +
           updatedSecret +
           (updatedType == Type.hotp ? "&counter=$updatedCounter" : ""),
-      {
-        "code": "otpauth://${updatedType.name}/" +
-            updateIssuer +
-            ":" +
-            updateAccount +
-            "?algorithm=${updatedAlgo.name}&digits=$updatedDigits&issuer=" +
-            updateIssuer +
-            "&period=$updatePeriod&secret=" +
-            updatedSecret +
-            (updatedType == Type.hotp ? "&counter=$updatedCounter" : ""),
-        "pinned": false,
-      },
       generatedID: generatedID,
     );
   }
@@ -90,15 +78,16 @@ class Code {
     String secret,
   ) {
     return Code(
-        account,
-        issuer,
-        defaultDigits,
-        defaultPeriod,
-        secret,
-        Algorithm.sha1,
-        Type.totp,
-        0,
-        "otpauth://totp/" +
+      account,
+      issuer,
+      defaultDigits,
+      defaultPeriod,
+      secret,
+      Algorithm.sha1,
+      Type.totp,
+      0,
+      jsonEncode({
+        "code": "otpauth://totp/" +
             issuer +
             ":" +
             account +
@@ -106,17 +95,9 @@ class Code {
             issuer +
             "&period=30&secret=" +
             secret,
-        {
-          "code": "otpauth://totp/" +
-              issuer +
-              ":" +
-              account +
-              "?algorithm=SHA1&digits=6&issuer=" +
-              issuer +
-              "&period=30&secret=" +
-              secret,
-          "pinned": false,
-        });
+        "pinned": false,
+      }),
+    );
   }
 
   static Code fromRawData(String rawData) {
@@ -132,7 +113,6 @@ class Code {
         _getType(uri),
         _getCounter(uri),
         rawData,
-        {},
       );
     } catch (e) {
       // if account name contains # without encoding,
@@ -146,33 +126,33 @@ class Code {
   }
 
   //json data
-  static Code fromRawJson(Map rawJson) {
-    Uri uri = Uri.parse(rawJson['code']);
-    try {
-      return Code(
-        _getAccount(uri),
-        _getIssuer(uri),
-        _getDigits(uri),
-        _getPeriod(uri),
-        getSanitizedSecret(uri.queryParameters['secret']!),
-        _getAlgorithm(uri),
-        _getType(uri),
-        _getCounter(uri),
-        rawJson['code'],
-        rawJson,
-      );
-    } catch (e) {
-      // if account name contains # without encoding,
-      // rest of the url are treated as url fragment
-      if (rawJson['code'].contains("#")) {
-        String newCode = rawJson['code'].replaceAll("#", '%23');
-        rawJson['code'] = newCode;
-        return Code.fromRawJson(rawJson);
-      } else {
-        rethrow;
-      }
-    }
-  }
+  // static Code fromRawJson(Map rawJson) {
+  //   Uri uri = Uri.parse(rawJson['code']);
+  //   try {
+  //     return Code(
+  //       _getAccount(uri),
+  //       _getIssuer(uri),
+  //       _getDigits(uri),
+  //       _getPeriod(uri),
+  //       getSanitizedSecret(uri.queryParameters['secret']!),
+  //       _getAlgorithm(uri),
+  //       _getType(uri),
+  //       _getCounter(uri),
+  //       rawJson['code'],
+  //       rawJson,
+  //     );
+  //   } catch (e) {
+  //     // if account name contains # without encoding,
+  //     // rest of the url are treated as url fragment
+  //     if (rawJson['code'].contains("#")) {
+  //       String newCode = rawJson['code'].replaceAll("#", '%23');
+  //       rawJson['code'] = newCode;
+  //       return Code.fromRawJson(rawJson);
+  //     } else {
+  //       rethrow;
+  //     }
+  //   }
+  // }
 
   static String _getAccount(Uri uri) {
     try {
