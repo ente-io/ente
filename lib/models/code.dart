@@ -17,6 +17,7 @@ class Code {
   final String rawData;
   final int counter;
   bool? hasSynced;
+  bool? isPinned;
 
   Code(
     this.account,
@@ -27,7 +28,8 @@ class Code {
     this.algorithm,
     this.type,
     this.counter,
-    this.rawData, {
+    this.rawData,
+    this.isPinned, {
     this.generatedID,
   });
 
@@ -40,6 +42,7 @@ class Code {
     Algorithm? algorithm,
     Type? type,
     int? counter,
+    bool? isPinned,
   }) {
     final String updateAccount = account ?? this.account;
     final String updateIssuer = issuer ?? this.issuer;
@@ -49,6 +52,7 @@ class Code {
     final Algorithm updatedAlgo = algorithm ?? this.algorithm;
     final Type updatedType = type ?? this.type;
     final int updatedCounter = counter ?? this.counter;
+    final bool? updatedIsPinned = isPinned ?? this.isPinned;
 
     return Code(
       updateAccount,
@@ -59,15 +63,19 @@ class Code {
       updatedAlgo,
       updatedType,
       updatedCounter,
-      "otpauth://${updatedType.name}/" +
-          updateIssuer +
-          ":" +
-          updateAccount +
-          "?algorithm=${updatedAlgo.name}&digits=$updatedDigits&issuer=" +
-          updateIssuer +
-          "&period=$updatePeriod&secret=" +
-          updatedSecret +
-          (updatedType == Type.hotp ? "&counter=$updatedCounter" : ""),
+      jsonEncode({
+        "code": "otpauth://${updatedType.name}/" +
+            updateIssuer +
+            ":" +
+            updateAccount +
+            "?algorithm=${updatedAlgo.name}&digits=$updatedDigits&issuer=" +
+            updateIssuer +
+            "&period=$updatePeriod&secret=" +
+            updatedSecret +
+            (updatedType == Type.hotp ? "&counter=$updatedCounter" : ""),
+        "pinned": updatedIsPinned,
+      }),
+      updatedIsPinned,
       generatedID: generatedID,
     );
   }
@@ -76,6 +84,7 @@ class Code {
     String account,
     String issuer,
     String secret,
+    bool isPinned,
   ) {
     return Code(
       account,
@@ -95,8 +104,9 @@ class Code {
             issuer +
             "&period=30&secret=" +
             secret,
-        "pinned": false,
+        "pinned": isPinned,
       }),
+      isPinned,
     );
   }
 
@@ -113,6 +123,7 @@ class Code {
         _getType(uri),
         _getCounter(uri),
         rawData,
+        false,
       );
     } catch (e) {
       // if account name contains # without encoding,
@@ -125,34 +136,33 @@ class Code {
     }
   }
 
-  //json data
-  // static Code fromRawJson(Map rawJson) {
-  //   Uri uri = Uri.parse(rawJson['code']);
-  //   try {
-  //     return Code(
-  //       _getAccount(uri),
-  //       _getIssuer(uri),
-  //       _getDigits(uri),
-  //       _getPeriod(uri),
-  //       getSanitizedSecret(uri.queryParameters['secret']!),
-  //       _getAlgorithm(uri),
-  //       _getType(uri),
-  //       _getCounter(uri),
-  //       rawJson['code'],
-  //       rawJson,
-  //     );
-  //   } catch (e) {
-  //     // if account name contains # without encoding,
-  //     // rest of the url are treated as url fragment
-  //     if (rawJson['code'].contains("#")) {
-  //       String newCode = rawJson['code'].replaceAll("#", '%23');
-  //       rawJson['code'] = newCode;
-  //       return Code.fromRawJson(rawJson);
-  //     } else {
-  //       rethrow;
-  //     }
-  //   }
-  // }
+  static Code fromRawJson(Map rawJson) {
+    Uri uri = Uri.parse(rawJson['code']);
+    try {
+      return Code(
+        _getAccount(uri),
+        _getIssuer(uri),
+        _getDigits(uri),
+        _getPeriod(uri),
+        getSanitizedSecret(uri.queryParameters['secret']!),
+        _getAlgorithm(uri),
+        _getType(uri),
+        _getCounter(uri),
+        rawJson['code'],
+        rawJson['pinned'],
+      );
+    } catch (e) {
+      // if account name contains # without encoding,
+      // rest of the url are treated as url fragment
+      if (rawJson['code'].contains("#")) {
+        String newCode = rawJson['code'].replaceAll("#", '%23');
+        rawJson['code'] = newCode;
+        return Code.fromRawJson(rawJson);
+      } else {
+        rethrow;
+      }
+    }
+  }
 
   static String _getAccount(Uri uri) {
     try {
