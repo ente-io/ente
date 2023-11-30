@@ -76,6 +76,7 @@ class _CodeWidgetState extends State<CodeWidget> {
     _shouldShowLargeIcon = PreferenceService.instance.shouldShowLargeIcons();
     if (!_isInitialized) {
       _currentCode.value = _getCurrentOTP();
+       print("Hello ${widget.code.jsonData}");
       if (widget.code.type == Type.totp) {
         _nextCode.value = _getNextTotp();
       }
@@ -114,7 +115,7 @@ class _CodeWidgetState extends State<CodeWidget> {
               foregroundColor:
                   Theme.of(context).colorScheme.inverseBackgroundColor,
               icon: Icons.push_pin,
-              label: "Pin",
+              label: l10n.pinText,
               padding: const EdgeInsets.only(left: 4, right: 0),
               spacing: 8,
             ),

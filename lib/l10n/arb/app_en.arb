@@ -404,5 +404,6 @@
   "signOutOtherDevices": "Sign out other devices",
   "doNotSignOut": "Do not sign out",
   "hearUsWhereTitle": "How did you hear about Ente? (optional)",
-  "hearUsExplanation": "We don't track app installs. It'd help if you told us where you found us!"
+  "hearUsExplanation": "We don't track app installs. It'd help if you told us where you found us!",
+  "pinText": "Pin"
 }
