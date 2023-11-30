@@ -38,7 +38,7 @@ class _AllSectionsExamplesProviderState
 
   final _debouncer = Debouncer(
     const Duration(seconds: 4),
-    executionIntervalInMilliSeconds: 15000,
+    executionInterval: const Duration(seconds: 15),
   );
 
   @override

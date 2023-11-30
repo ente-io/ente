@@ -42,7 +42,7 @@ class _MapViewState extends State<MapView> {
   late List<Marker> _markers;
   final _debouncer = Debouncer(
     const Duration(milliseconds: 300),
-    executionIntervalInMilliSeconds: 750,
+    executionInterval: const Duration(milliseconds: 750),
   );
 
   @override
