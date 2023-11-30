@@ -738,6 +738,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "movingFilesToAlbum":
             MessageLookupByLibrary.simpleMessage("正在将文件移动到相册..."),
         "name": MessageLookupByLibrary.simpleMessage("名称"),
+        "networkConnectionRefusedErr": MessageLookupByLibrary.simpleMessage(
+            "无法连接到 Ente，请稍后重试。如果错误仍然存在，请联系支持人员。"),
+        "networkHostLookUpErr": MessageLookupByLibrary.simpleMessage(
+            "无法连接到 Ente，请检查您的网络设置，如果错误仍然存在，请联系支持人员。"),
         "never": MessageLookupByLibrary.simpleMessage("永不"),
         "newAlbum": MessageLookupByLibrary.simpleMessage("新建相册"),
         "newToEnte": MessageLookupByLibrary.simpleMessage("刚来到ente"),
