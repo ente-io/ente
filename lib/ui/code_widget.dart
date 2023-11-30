@@ -76,7 +76,7 @@ class _CodeWidgetState extends State<CodeWidget> {
     _shouldShowLargeIcon = PreferenceService.instance.shouldShowLargeIcons();
     if (!_isInitialized) {
       _currentCode.value = _getCurrentOTP();
-       print("Hello ${widget.code.jsonData}");
+       //print("Hello ${widget.code.jsonData}");
       if (widget.code.type == Type.totp) {
         _nextCode.value = _getNextTotp();
       }

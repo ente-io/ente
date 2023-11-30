@@ -165,7 +165,9 @@ class Code {
       // if account name contains # without encoding,
       // rest of the url are treated as url fragment
       if (rawJson['code'].contains("#")) {
-        return Code.fromRawData(rawJson['code'].replaceAll("#", '%23'));
+        String newCode = rawJson['code'].replaceAll("#", '%23');
+        rawJson['code'] = newCode;
+        return Code.fromRawJson(rawJson);
       } else {
         rethrow;
       }
