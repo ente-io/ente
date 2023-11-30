@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'dart:ui';
 
@@ -48,9 +49,7 @@ class PlainTextImport extends StatelessWidget {
       ],
     );
   }
-
 }
-
 
 Future<void> showImportInstructionDialog(BuildContext context) async {
   final l10n = context.l10n;
@@ -94,7 +93,6 @@ Future<void> showImportInstructionDialog(BuildContext context) async {
   );
 }
 
-
 Future<void> _pickImportFile(BuildContext context) async {
   final l10n = context.l10n;
   FilePickerResult? result = await FilePicker.platform.pickFiles();
@@ -105,15 +103,14 @@ Future<void> _pickImportFile(BuildContext context) async {
   await progressDialog.show();
   try {
     File file = File(result.files.single.path!);
-    final codes = await file.readAsString();
-    List<String> splitCodes = codes.split(",");
-    if (splitCodes.length == 1) {
-      splitCodes = codes.split("\n");
-    }
+    final codes = jsonDecode(await file.readAsString());
+
+    List<Map> splitCodes = List.from(codes["items"]);
+
     final parsedCodes = [];
     for (final code in splitCodes) {
       try {
-        parsedCodes.add(Code.fromRawData(code));
+        parsedCodes.add(Code.fromRawJson(code));
       } catch (e) {
         Logger('PlainText').severe("Could not parse code", e);
       }
