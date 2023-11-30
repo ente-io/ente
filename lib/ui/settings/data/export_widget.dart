@@ -135,7 +135,10 @@ Future<void> _exportCodes(BuildContext context, String fileContent) async {
   }
   _codeFile.writeAsStringSync(fileContent);
   final Size size = MediaQuery.of(context).size;
-  await Share.shareFiles([_codeFile.path], sharePositionOrigin: Rect.fromLTWH(0, 0, size.width, size.height / 2),);
+  await Share.shareFiles(
+    [_codeFile.path],
+    sharePositionOrigin: Rect.fromLTWH(0, 0, size.width, size.height / 2),
+  );
   Future.delayed(const Duration(seconds: 15), () async {
     if (_codeFile.existsSync()) {
       _codeFile.deleteSync();
@@ -145,9 +148,15 @@ Future<void> _exportCodes(BuildContext context, String fileContent) async {
 
 Future<String> _getAuthDataForExport() async {
   final codes = await CodeStore.instance.getAllCodes();
-  String data = "";
+  List items = [];
   for (final code in codes) {
-    data += code.rawData + "\n";
+    items.add({
+      "code": code.rawData,
+      "pinned": code.isPinned,
+    });
   }
-  return data;
+  Map data = {
+    "items": items,
+  };
+  return jsonEncode(data);
 }
