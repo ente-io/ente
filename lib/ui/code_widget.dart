@@ -113,7 +113,9 @@ class _CodeWidgetState extends State<CodeWidget> {
               borderRadius: const BorderRadius.all(Radius.circular(12.0)),
               foregroundColor:
                   Theme.of(context).colorScheme.inverseBackgroundColor,
-              icon: Icons.push_pin,
+              icon: widget.code.isPinned!
+                  ? Icons.push_pin
+                  : Icons.push_pin_outlined,
               label: l10n.pinText,
               padding: const EdgeInsets.only(left: 4, right: 0),
               spacing: 8,
