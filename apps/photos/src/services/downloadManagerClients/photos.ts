@@ -6,7 +6,7 @@ import { CustomError } from '@ente/shared/error';
 import { retryAsyncFunction } from 'utils/network';
 
 export class PhotosDownloadClient implements DownloadClient {
-    constructor(private token: string, private timeout) {}
+    constructor(private token: string, private timeout: number) {}
     updateTokens(token: string) {
         this.token = token;
     }
@@ -15,15 +15,17 @@ export class PhotosDownloadClient implements DownloadClient {
         this.timeout = timeout;
     }
 
-    async downloadThumbnail(file: EnteFile) {
+    async downloadThumbnail(file: EnteFile): Promise<Uint8Array> {
         if (!this.token) {
             return;
         }
-        const resp = await HTTPService.get(
-            getThumbnailURL(file.id),
-            null,
-            { 'X-Auth-Token': this.token },
-            { responseType: 'arraybuffer', timeout: this.timeout }
+        const resp = await retryAsyncFunction(() =>
+            HTTPService.get(
+                getThumbnailURL(file.id),
+                null,
+                { 'X-Auth-Token': this.token },
+                { responseType: 'arraybuffer', timeout: this.timeout }
+            )
         );
         if (typeof resp.data === 'undefined') {
             throw Error(CustomError.REQUEST_FAILED);

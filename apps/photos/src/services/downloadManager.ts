@@ -56,16 +56,10 @@ class DownloadManager {
 
     async init(
         app: APPS,
-        token: string,
-        passwordToken?: string,
+        tokens: { token: string; passwordToken?: string } | { token: string },
         timeout?: number
     ) {
-        this.downloadClient = createDownloadClient(
-            app,
-            token,
-            passwordToken,
-            timeout
-        );
+        this.downloadClient = createDownloadClient(app, tokens, timeout);
         this.thumbnailCache = await openThumbnailCache();
         this.cryptoWorker = await ComlinkCryptoWorker.getInstance();
     }
@@ -405,13 +399,20 @@ async function openThumbnailCache() {
 
 function createDownloadClient(
     app: APPS,
-    token: string,
-    passwordToken?: string,
+    tokens: { token: string; passwordToken?: string } | { token: string },
     timeout?: number
 ): DownloadClient {
+    if (!timeout) {
+        timeout = 300000; // 5 minute
+    }
     if (app === APPS.ALBUMS) {
+        const { token, passwordToken } = tokens as {
+            token: string;
+            passwordToken: string;
+        };
         return new PublicAlbumsDownloadClient(token, passwordToken, timeout);
     } else {
+        const { token } = tokens;
         return new PhotosDownloadClient(token, timeout);
     }
 }
