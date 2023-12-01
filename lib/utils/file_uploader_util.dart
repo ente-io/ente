@@ -129,8 +129,8 @@ Future<MediaUploadData> _getMediaUploadDataFromAssetFile(EnteFile file) async {
     _logger.fine("Uploading zipped live photo from " + livePhotoPath);
     final encoder = ZipFileEncoder();
     encoder.create(livePhotoPath);
-    encoder.addFile(videoUrl, "video" + extension(videoUrl.path));
-    encoder.addFile(sourceFile, "image" + extension(sourceFile.path));
+    await encoder.addFile(videoUrl, "video" + extension(videoUrl.path));
+    await encoder.addFile(sourceFile, "image" + extension(sourceFile.path));
     encoder.close();
     // delete the temporary video and image copy (only in IOS)
     if (Platform.isIOS) {
