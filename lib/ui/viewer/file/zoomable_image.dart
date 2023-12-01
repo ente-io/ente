@@ -262,8 +262,7 @@ class _ZoomableImageState extends State<ZoomableImage>
     required ImageProvider? previewImageProvider,
     required ImageProvider finalImageProvider,
   }) async {
-    final bool shouldFixPosition =
-        previewImageProvider != null && _photoViewController.scale != null;
+    final bool shouldFixPosition = previewImageProvider != null && _isZooming;
     ImageInfo? finalImageInfo;
     if (shouldFixPosition) {
       if (kDebugMode) {
