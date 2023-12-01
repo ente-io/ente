@@ -27,12 +27,14 @@ func main() {
 	if err != nil {
 		log.Fatalf("Could not create cli config path\n%v\n", err)
 	}
-	oldCliPath := fmt.Sprintf("%sente-cli.db", cliDBPath)
 	newCliPath := fmt.Sprintf("%s/ente-cli.db", cliDBPath)
-	if _, err := os.Stat(oldCliPath); err == nil {
-		log.Printf("migrating old cli db from %s to %s\n", oldCliPath, newCliPath)
-		if err := os.Rename(oldCliPath, newCliPath); err != nil {
-			log.Fatalf("Could not rename old cli db\n%v\n", err)
+	if !strings.HasPrefix(cliDBPath, "/") {
+		oldCliPath := fmt.Sprintf("%sente-cli.db", cliDBPath)
+		if _, err := os.Stat(oldCliPath); err == nil {
+			log.Printf("migrating old cli db from %s to %s\n", oldCliPath, newCliPath)
+			if err := os.Rename(oldCliPath, newCliPath); err != nil {
+				log.Fatalf("Could not rename old cli db\n%v\n", err)
+			}
 		}
 	}
 	db, err := pkg.GetDB(newCliPath)
