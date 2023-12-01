@@ -51,6 +51,7 @@ export interface DownloadClient {
 class DownloadManager {
     private downloadClient: DownloadClient;
     private thumbnailCache: LimitedCache;
+    private fileCache: LimitedCache;
     private cryptoWorker: Remote<DedicatedCryptoWorker>;
 
     private fileObjectURLPromises = new Map<number, Promise<SourceURLs>>();
@@ -68,6 +69,7 @@ class DownloadManager {
     ) {
         this.downloadClient = createDownloadClient(app, tokens, timeout);
         this.thumbnailCache = await openThumbnailCache();
+        this.fileCache = await openFileCache();
         this.cryptoWorker = await ComlinkCryptoWorker.getInstance();
     }
 
@@ -93,6 +95,17 @@ class DownloadManager {
                 fileID.toString()
             );
             return await cacheResp.blob();
+        } catch (e) {
+            logError(e, 'failed to get cached thumbnail');
+            throw e;
+        }
+    }
+    private async getCachedFile(fileID: number) {
+        try {
+            const cacheResp: Response = await this.fileCache?.match(
+                fileID.toString()
+            );
+            return new Uint8Array(await cacheResp.arrayBuffer());
         } catch (e) {
             logError(e, 'failed to get cached thumbnail');
             throw e;
@@ -232,14 +245,23 @@ class DownloadManager {
                 file.metadata.fileType === FILE_TYPE.IMAGE ||
                 file.metadata.fileType === FILE_TYPE.LIVE_PHOTO
             ) {
-                const encrypted = await this.downloadClient.downloadFile(
-                    file,
-                    onDownloadProgress
-                );
+                const encrypted = await this.getCachedFile(file.id);
+                if (!encrypted) {
+                    const encrypted = await this.downloadClient.downloadFile(
+                        file,
+                        onDownloadProgress
+                    );
+                    this.fileCache
+                        ?.put(file.id.toString(), new Response(encrypted))
+                        .catch((e) => {
+                            logError(e, 'cache put failed');
+                            // TODO: handle storage full exception.
+                        });
+                }
                 this.clearDownloadProgress(file.id);
                 try {
                     const decrypted = await this.cryptoWorker.decryptFile(
-                        new Uint8Array(encrypted),
+                        encrypted,
                         await this.cryptoWorker.fromB64(
                             file.file.decryptionHeader
                         ),
@@ -447,6 +469,15 @@ async function openThumbnailCache() {
         return await CacheStorageService.open(CACHES.THUMBS);
     } catch (e) {
         logError(e, 'Failed to open thumbnail cache');
+        return null;
+    }
+}
+
+async function openFileCache() {
+    try {
+        return await CacheStorageService.open(CACHES.FACE_CROPS);
+    } catch (e) {
+        logError(e, 'Failed to open file cache');
         return null;
     }
 }
