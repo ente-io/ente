@@ -3,20 +3,19 @@ import PreviewCard from './pages/gallery/PreviewCard';
 import { useContext, useEffect, useState } from 'react';
 import { EnteFile } from 'types/file';
 import { styled } from '@mui/material';
-import DownloadManager from 'services/downloadManager';
+import DownloadManager, { SourceURLs } from 'services/downloadManager';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import PhotoViewer from 'components/PhotoViewer';
 import { TRASH_SECTION } from 'constants/collection';
 import { updateFileMsrcProps, updateFileSrcProps } from 'utils/photoFrame';
 import { PhotoList } from './PhotoList';
-import { MergedSourceURL, SelectedState } from 'types/gallery';
+import { SelectedState } from 'types/gallery';
 import { PublicCollectionGalleryContext } from 'utils/publicCollectionGallery';
 import { useRouter } from 'next/router';
 import { logError } from '@ente/shared/sentry';
 import { addLogLine } from '@ente/shared/logging';
 import PhotoSwipe from 'photoswipe';
 import useMemoSingleThreaded from '@ente/shared/hooks/useMemoSingleThreaded';
-import { getPlayableVideo } from 'utils/file';
 import { FILE_TYPE } from 'constants/file';
 
 const Container = styled('div')`
@@ -81,14 +80,6 @@ const PhotoFrame = ({
     const [isShiftKeyPressed, setIsShiftKeyPressed] = useState(false);
     const router = useRouter();
 
-    const thumbsStore = publicCollectionGalleryContext?.accessedThroughSharedURL
-        ? publicCollectionGalleryContext.thumbs
-        : galleryContext.thumbs;
-
-    const filesStore = publicCollectionGalleryContext?.accessedThroughSharedURL
-        ? publicCollectionGalleryContext.files
-        : galleryContext.files;
-
     const displayFiles = useMemoSingleThreaded(() => {
         return files.map((item) => {
             const filteredItem = {
@@ -97,16 +88,16 @@ const PhotoFrame = ({
                 h: window.innerHeight,
                 title: item.pubMagicMetadata?.data.caption,
             };
-            try {
-                if (thumbsStore.has(item.id)) {
-                    updateFileMsrcProps(filteredItem, thumbsStore.get(item.id));
-                }
-                if (filesStore.has(item.id)) {
-                    updateFileSrcProps(filteredItem, filesStore.get(item.id));
-                }
-            } catch (e) {
-                logError(e, 'PhotoFrame url prefill failed');
-            }
+            // try {
+            //     if (thumbsStore.has(item.id)) {
+            //         updateFileMsrcProps(filteredItem, thumbsStore.get(item.id));
+            //     }
+            //     if (filesStore.has(item.id)) {
+            //         updateFileSrcProps(filteredItem, filesStore.get(item.id));
+            //     }
+            // } catch (e) {
+            //     logError(e, 'PhotoFrame url prefill failed');
+            // }
             return filteredItem;
         });
     }, [files]);
@@ -203,7 +194,7 @@ const PhotoFrame = ({
     const updateSrcURL = async (
         index: number,
         id: number,
-        mergedSrcURL: MergedSourceURL,
+        srcURLs: SourceURLs,
         forceUpdate?: boolean
     ) => {
         const file = displayFiles[index];
@@ -238,7 +229,7 @@ const PhotoFrame = ({
             return;
         }
 
-        await updateFileSrcProps(file, mergedSrcURL);
+        await updateFileSrcProps(file, srcURLs);
     };
 
     const handleClose = (needUpdate) => {
@@ -423,27 +414,10 @@ const PhotoFrame = ({
         try {
             addLogLine(`[${item.id}] new file src request`);
             fetching[item.id] = true;
-            let srcURL: MergedSourceURL;
-            if (filesStore.has(item.id)) {
-                addLogLine(
-                    `[${item.id}] gallery context cache hit, using cached file`
-                );
-                srcURL = filesStore.get(item.id);
-            } else {
-                addLogLine(
-                    `[${item.id}] gallery context cache miss, calling downloadManager to get file`
-                );
-                const downloadedURL = await DownloadManager.getFileForPreview(
-                    item
-                );
-                const mergedURL: MergedSourceURL = {
-                    original: downloadedURL.original.join(','),
-                    converted: downloadedURL.converted.join(','),
-                };
-                filesStore.set(item.id, mergedURL);
-                srcURL = mergedURL;
-            }
-            await updateSrcURL(index, item.id, srcURL);
+
+            const srcURLs = await DownloadManager.getFileForPreview(item);
+
+            await updateSrcURL(index, item.id, srcURLs);
 
             try {
                 addLogLine(
@@ -506,44 +480,8 @@ const PhotoFrame = ({
                 `[${item.id}] new file getConvertedVideo request- ${item.metadata.title}}`
             );
             fetching[item.id] = true;
-            if (!filesStore.has(item.id)) {
-                addLogLine(
-                    `[${item.id}] getConvertedVideo called for file that is not downloaded`
-                );
-                logError(
-                    new Error(),
-                    'getConvertedVideo called for file that is not downloaded'
-                );
-                // this should never happen, convert video button should not be visible if file is not downloaded
-                return;
-            }
 
-            const srcURL = filesStore.get(item.id);
-            let originalVideoURL;
-            if (item.metadata.fileType === FILE_TYPE.VIDEO) {
-                originalVideoURL = srcURL.original;
-            } else {
-                originalVideoURL = srcURL.original.split(',')[1];
-            }
-            const playableVideo = await getPlayableVideo(
-                item.metadata.title,
-                await (await fetch(originalVideoURL)).blob(),
-                true
-            );
-            const convertedVideoURL = playableVideo
-                ? URL.createObjectURL(playableVideo)
-                : '';
-            if (item.metadata.fileType === FILE_TYPE.VIDEO) {
-                srcURL.converted = convertedVideoURL;
-            } else {
-                const prvConvertedImageURL = srcURL.converted.split(',')[0];
-                srcURL.converted = [
-                    prvConvertedImageURL,
-                    convertedVideoURL,
-                ].join(',');
-            }
-
-            filesStore.set(item.id, srcURL);
+            const srcURL = await DownloadManager.getFileForPreview(item, true);
 
             await updateSrcURL(index, item.id, srcURL, true);
 

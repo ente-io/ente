@@ -61,9 +61,6 @@ import { ENTE_WEBSITE_LINK } from '@ente/shared/constants/urls';
 import { APPS } from '@ente/shared/apps/constants';
 import downloadManager from 'services/downloadManager';
 
-const defaultThumbStore = new Map();
-const defaultFileStore = new Map();
-
 export default function PublicCollectionGallery() {
     const token = useRef<string>(null);
     // passwordJWTToken refers to the jwt token which is used for album protected by password.
@@ -447,8 +444,6 @@ export default function PublicCollectionGallery() {
                 accessedThroughSharedURL: true,
                 photoListHeader,
                 photoListFooter,
-                thumbs: defaultThumbStore,
-                files: defaultFileStore,
             }}>
             <FullScreenDropZone
                 getDragAndDropRootProps={getDragAndDropRootProps}>

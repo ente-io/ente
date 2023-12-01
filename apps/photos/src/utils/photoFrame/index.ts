@@ -1,7 +1,7 @@
 import { FILE_TYPE } from 'constants/file';
 import { EnteFile } from 'types/file';
-import { MergedSourceURL } from 'types/gallery';
 import { logError } from '@ente/shared/sentry';
+import { SourceURLs } from 'services/downloadManager';
 
 const WAIT_FOR_VIDEO_PLAYBACK = 1 * 1000;
 
@@ -67,82 +67,40 @@ export function updateFileMsrcProps(file: EnteFile, url: string) {
     }
 }
 
-export async function updateFileSrcProps(
-    file: EnteFile,
-    mergedURL: MergedSourceURL
-) {
-    const urls = {
-        original: mergedURL.original.split(','),
-        converted: mergedURL.converted.split(','),
-    };
-    let originalImageURL;
-    let originalVideoURL;
-    let convertedImageURL;
-    let convertedVideoURL;
-    let originalURL;
-    let isConverted;
-    let conversionFailed;
-    if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
-        [originalImageURL, originalVideoURL] = urls.original;
-        [convertedImageURL, convertedVideoURL] = urls.converted;
-        isConverted =
-            originalVideoURL !== convertedVideoURL ||
-            originalImageURL !== convertedImageURL;
-        conversionFailed = !convertedVideoURL || !convertedImageURL;
-    } else if (file.metadata.fileType === FILE_TYPE.VIDEO) {
-        [originalVideoURL] = urls.original;
-        [convertedVideoURL] = urls.converted;
-        isConverted = originalVideoURL !== convertedVideoURL;
-        conversionFailed = !convertedVideoURL;
-    } else if (file.metadata.fileType === FILE_TYPE.IMAGE) {
-        [originalImageURL] = urls.original;
-        [convertedImageURL] = urls.converted;
-        isConverted = originalImageURL !== convertedImageURL;
-        conversionFailed = !convertedImageURL;
-    } else {
-        [originalURL] = urls.original;
-        isConverted = false;
-        conversionFailed = false;
-    }
-
-    const isPlayable = !isConverted || (isConverted && !conversionFailed);
-
-    file.w = window.innerWidth;
-    file.h = window.innerHeight;
-    file.isSourceLoaded = true;
-    file.originalImageURL = originalImageURL;
-    file.originalVideoURL = originalVideoURL;
-    file.isConverted = isConverted;
-    file.conversionFailed = conversionFailed;
-
-    if (!isPlayable) {
+export async function updateFileSrcProps(file: EnteFile, srcURLs: SourceURLs) {
+    const { url, isRenderable } = srcURLs;
+    if (!isRenderable) {
         return;
     }
 
     if (file.metadata.fileType === FILE_TYPE.VIDEO) {
         file.html = `
                 <video controls onContextMenu="return false;">
-                    <source src="${convertedVideoURL}" />
+                    <source src="${url}" />
                     Your browser does not support the video tag.
                 </video>
                 `;
     } else if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
+        const { image: imageURL, video: videoURL } = url as {
+            image: string;
+            video: string;
+        };
         file.html = `
                 <div class = 'pswp-item-container'>
-                    <img id = "live-photo-image-${file.id}" src="${convertedImageURL}" onContextMenu="return false;"/>
+                    <img id = "live-photo-image-${file.id}" src="${imageURL}" onContextMenu="return false;"/>
                     <video id = "live-photo-video-${file.id}" loop muted onContextMenu="return false;">
-                        <source src="${convertedVideoURL}" />
+                        <source src="${videoURL}" />
                         Your browser does not support the video tag.
                     </video>
                 </div>
                 `;
     } else if (file.metadata.fileType === FILE_TYPE.IMAGE) {
-        file.src = convertedImageURL;
+        file.src = url as string;
     } else {
         logError(
             Error(`unknown file type - ${file.metadata.fileType}`),
             'Unknown file type'
         );
-        file.src = originalURL;
+        file.src = url as string;
     }
 }

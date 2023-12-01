@@ -19,8 +19,14 @@ import { PhotosDownloadClient } from './downloadManagerClients/photos';
 import { PublicAlbumsDownloadClient } from './downloadManagerClients/publicAlbums';
 
 export type SourceURLs = {
-    original: string[];
-    converted: string[];
+    url:
+        | {
+              image: string;
+              video: string;
+          }
+        | string;
+    isOriginal: boolean;
+    isRenderable: boolean;
 };
 
 export type OnDownloadProgress = (event: {
@@ -48,6 +54,7 @@ class DownloadManager {
     private cryptoWorker: Remote<DedicatedCryptoWorker>;
 
     private fileObjectURLPromises = new Map<number, Promise<SourceURLs>>();
+    private fileConversionPromises = new Map<number, Promise<SourceURLs>>();
     private thumbnailObjectURLPromises = new Map<number, Promise<string>>();
 
     private fileDownloadProgress = new Map<number, number>();
@@ -142,28 +149,75 @@ class DownloadManager {
         }
     }
 
-    getFileForPreview = async (file: EnteFile): Promise<SourceURLs> => {
+    getFileForPreview = async (
+        file: EnteFile,
+        forceConvert = false
+    ): Promise<SourceURLs> => {
         try {
-            const getFilePromise = async () => {
-                const fileStream = await this.downloadFile(file);
-                const fileBlob = await new Response(fileStream).blob();
-                return await getRenderableFileURL(file, fileBlob);
+            const getFileForPreviewPromise = async () => {
+                const fileBlob = await new Response(
+                    await this.getFile(file, true)
+                ).blob();
+                const fileOriginalURL = URL.createObjectURL(fileBlob);
+
+                const converted = await getRenderableFileURL(
+                    file,
+                    fileBlob,
+                    fileOriginalURL as string,
+                    forceConvert
+                );
+                return converted;
             };
-            if (!this.fileObjectURLPromises.get(file.id)) {
-                const fileURLs = getFilePromise() as Promise<SourceURLs>;
-                this.fileObjectURLPromises.set(file.id, fileURLs);
+            if (!this.fileConversionPromises.has(file.id)) {
+                const fileURLs =
+                    getFileForPreviewPromise() as Promise<SourceURLs>;
+                this.fileConversionPromises.set(file.id, fileURLs);
             }
-            const fileURLs = await this.fileObjectURLPromises.get(file.id);
+            const fileURLs = await this.fileConversionPromises.get(file.id);
             return fileURLs;
         } catch (e) {
             this.fileObjectURLPromises.delete(file.id);
-            logError(e, 'download manager Failed to get File');
+            logError(e, 'download manager getFileForPreview Failed');
             throw e;
         }
     };
 
-    getFile(file: EnteFile) {
-        return this.downloadFile(file);
+    async getFile(
+        file: EnteFile,
+        useCache = false
+    ): Promise<ReadableStream<Uint8Array>> {
+        try {
+            if (!useCache) {
+                return await this.downloadFile(file);
+            }
+            const getFilePromise = async (): Promise<SourceURLs> => {
+                const fileStream = await this.downloadFile(file);
+                const fileBlob = await new Response(fileStream).blob();
+                return {
+                    url: URL.createObjectURL(fileBlob),
+                    isOriginal: true,
+                    isRenderable: false,
+                };
+            };
+
+            if (this.fileObjectURLPromises.has(file.id)) {
+                const fileURLs = await this.fileObjectURLPromises.get(file.id);
+                if (fileURLs.isOriginal) {
+                    const fileStream = (await fetch(fileURLs.url as string))
+                        .body;
+                    return fileStream;
+                } else {
+                    return await this.downloadFile(file);
+                }
+            } else {
+                const fileURLs = getFilePromise();
+                this.fileObjectURLPromises.set(file.id, fileURLs);
+            }
+        } catch (e) {
+            this.fileObjectURLPromises.delete(file.id);
+            logError(e, 'download manager getFile Failed');
+            throw e;
+        }
     }
 
     private async downloadFile(
