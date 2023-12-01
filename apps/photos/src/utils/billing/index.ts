@@ -140,11 +140,12 @@ export function hasMobileSubscription(subscription: Subscription) {
 }
 
 export function hasExceededStorageQuota(userDetails: UserDetails) {
+    const bonusStorage = userDetails.storageBonus ?? 0;
     if (isPartOfFamily(userDetails.familyData)) {
         const usage = getTotalFamilyUsage(userDetails.familyData);
-        return usage > userDetails.familyData.storage;
+        return usage > (userDetails.familyData.storage + bonusStorage);
     } else {
-        return userDetails.usage > userDetails.subscription.storage;
+        return userDetails.usage > (userDetails.subscription.storage + bonusStorage);
     }
 }
 
