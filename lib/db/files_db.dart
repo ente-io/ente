@@ -789,7 +789,7 @@ class FilesDB {
     return uploadedFileIDs;
   }
 
-  Future<EnteFile?> getUploadedLocalFileInAnyCollection(
+  Future<List<EnteFile>> getFilesInAllCollection(
     int uploadedFileID,
     int userID,
   ) async {
@@ -802,12 +802,11 @@ class FilesDB {
         userID,
         uploadedFileID,
       ],
-      limit: 1,
     );
     if (results.isEmpty) {
-      return null;
+      return <EnteFile>[];
     }
-    return convertToFiles(results)[0];
+    return convertToFiles(results);
   }
 
   Future<Set<String>> getExistingLocalFileIDs(int ownerID) async {

@@ -552,12 +552,27 @@ class RemoteSyncService {
             .info("Skipping some updated files as we are throttling uploads");
         break;
       }
-      final file = await _db.getUploadedLocalFileInAnyCollection(
+      final allFiles = await _db.getFilesInAllCollection(
         uploadedFileID,
         ownerID,
       );
-      if (file != null) {
-        _uploadFile(file, file.collectionID!, futures);
+      if (allFiles.isEmpty) {
+        _logger.warning("No files found for uploadedFileID $uploadedFileID");
+        continue;
+      }
+      EnteFile? fileInCollectionOwnedByUser;
+      for (final file in allFiles) {
+        if (file.canReUpload(ownerID)) {
+          fileInCollectionOwnedByUser = file;
+          break;
+        }
+      }
+      if (fileInCollectionOwnedByUser != null) {
+        _uploadFile(
+          fileInCollectionOwnedByUser,
+          fileInCollectionOwnedByUser.collectionID!,
+          futures,
+        );
       }
     }
 
