@@ -81,6 +81,8 @@ class HomeGalleryWidget extends StatelessWidget {
       footer: footer,
       // scrollSafe area -> SafeArea + Preserver more + Nav Bar buttons
       scrollBottomSafeArea: bottomSafeArea + 180,
+      reloadDebounceTime: const Duration(seconds: 2),
+      reloadDebounceExecutionInterval: const Duration(seconds: 5),
     );
     return Stack(
       alignment: Alignment.bottomCenter,
