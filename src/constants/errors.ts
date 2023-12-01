@@ -5,4 +5,6 @@ export const CustomErrors = {
     WAIT_TIME_EXCEEDED: 'Wait time exceeded',
     UNSUPPORTED_PLATFORM: (platform: string, arch: string) =>
         `Unsupported platform - ${platform} ${arch}`,
+    MODEL_DOWNLOAD_PENDING:
+        'Model download pending, skipping clip search request',
 };
