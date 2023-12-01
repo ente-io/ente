@@ -48,6 +48,8 @@ export interface DownloadClient {
     downloadFileStream: (file: EnteFile) => Promise<Response>;
 }
 
+const FILE_CACHE_LIMIT = 5 * 1024 * 1024 * 1024; // 5GB
+
 class DownloadManager {
     private downloadClient: DownloadClient;
     private thumbnailCache: LimitedCache;
@@ -475,7 +477,7 @@ async function openThumbnailCache() {
 
 async function openFileCache() {
     try {
-        return await CacheStorageService.open(CACHES.FACE_CROPS);
+        return await CacheStorageService.open(CACHES.FILES, FILE_CACHE_LIMIT);
     } catch (e) {
         logError(e, 'Failed to open file cache');
         return null;

@@ -1,5 +1,5 @@
 export interface LimitedCacheStorage {
-    open: (cacheName: string) => Promise<LimitedCache>;
+    open: (cacheName: string, cacheLimit?: number) => Promise<LimitedCache>;
     delete: (cacheName: string) => Promise<boolean>;
 }
 
