@@ -233,6 +233,7 @@ class GalleryState extends State<Gallery> {
     for (final subscription in _forceReloadEventSubscriptions) {
       subscription.cancel();
     }
+    _debouncer.cancelDebounce();
     super.dispose();
   }
 

@@ -102,6 +102,7 @@ class _DeviceFoldersGridViewState extends State<DeviceFoldersGridView> {
   void dispose() {
     _backupFoldersUpdatedEvent?.cancel();
     _localFilesSubscription?.cancel();
+    _debouncer.cancelDebounce();
     super.dispose();
   }
 }

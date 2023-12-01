@@ -281,6 +281,7 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
     _collectionUpdatesSubscription.cancel();
     _loggedOutEvent.cancel();
     _scrollController.dispose();
+    _debouncer.cancelDebounce();
     super.dispose();
   }
 

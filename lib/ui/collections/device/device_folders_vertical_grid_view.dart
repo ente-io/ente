@@ -158,6 +158,7 @@ class _DeviceFolderVerticalGridViewBodyState
   void dispose() {
     _backupFoldersUpdatedEvent?.cancel();
     _localFilesSubscription?.cancel();
+    _debouncer.cancelDebounce();
     super.dispose();
   }
 }
