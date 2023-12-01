@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:ente_auth/l10n/l10n.dart';
@@ -66,9 +67,16 @@ class ScannerPageState extends State<ScannerPage> {
     }
     controller.scannedDataStream.listen((scanData) {
       try {
-        final code = Code.fromRawData(scanData.code!);
-        controller.dispose();
-        Navigator.of(context).pop(code);
+        if (scanData.code!.startsWith('otpauth://')) {
+          final code = Code.fromRawData(scanData.code!);
+          controller.dispose();
+          Navigator.of(context).pop(code);
+        } else {
+          final decodedMap = jsonDecode(scanData.code!);
+          final code = Code.fromRawJson(decodedMap);
+          controller.dispose();
+          Navigator.of(context).pop(code);
+        }
       } catch (e) {
         // Log
       }
