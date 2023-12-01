@@ -1,6 +1,7 @@
 package pkg
 
 import (
+	"archive/zip"
 	"context"
 	"encoding/json"
 	"errors"
@@ -69,6 +70,9 @@ func (c *ClICtrl) syncFiles(ctx context.Context, account model.Account) error {
 			err = c.downloadEntry(ctx, albumDiskInfo, *existingEntry, entry)
 			if err != nil {
 				if errors.Is(err, model.ErrDecryption) {
+					continue
+				} else if existingEntry.IsLivePhoto() && errors.Is(err, zip.ErrFormat) {
+					log.Printf(fmt.Sprintf("err processing live photo %s (%d), %s", existingEntry.GetTitle(), existingEntry.ID, err.Error()))
 					continue
 				} else {
 					return err
