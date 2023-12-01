@@ -53,7 +53,6 @@ class _ZoomableImageState extends State<ZoomableImage>
   bool _loadingFinalImage = false;
   bool _loadedFinalImage = false;
   PhotoViewController _photoViewController = PhotoViewController();
-  double? _initialScale;
   bool _isZooming = false;
   ValueChanged<PhotoViewScaleState>? _scaleStateChangedCallback;
 
@@ -285,9 +284,6 @@ class _ZoomableImageState extends State<ZoomableImage>
         initialPosition: newPosition,
         initialScale: scale,
       );
-      setState(() {
-        _initialScale = scale;
-      });
     }
     final bool canUpdateMetadata = _photo.canEditMetaInfo;
     // forcefully get finalImageInfo is dimensions are not available in metadata
