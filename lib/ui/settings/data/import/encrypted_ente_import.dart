@@ -106,16 +106,30 @@ Future<void> _decryptExportData(
             });
             return;
           }
-          final content = jsonDecode(utf8.decode(decryptedContent!));
-          List<Map> splitCodes = List.from(content["items"]);
+          String content = utf8.decode(decryptedContent!);
           final parsedCodes = [];
-          for (final code in splitCodes) {
-            try {
-              parsedCodes.add(Code.fromRawJson(code));
-            } catch (e) {
-              Logger('EncryptedText').severe("Could not parse code", e);
+          if (content.startsWith('otpauth://')) {
+            List<String> splitCodes = content.split("\n");
+            for (final code in splitCodes) {
+              try {
+                parsedCodes.add(Code.fromRawData(code));
+              } catch (e) {
+                Logger('EncryptedText').severe("Could not parse code", e);
+              }
+            }
+          } else {
+            final decodedContent = jsonDecode(content);
+            List<Map> splitCodes = List.from(decodedContent["items"]);
+
+            for (final code in splitCodes) {
+              try {
+                parsedCodes.add(Code.fromRawJson(code));
+              } catch (e) {
+                Logger('EncryptedText').severe("Could not parse code", e);
+              }
             }
           }
+
           for (final code in parsedCodes) {
             await CodeStore.instance.addCode(code, shouldSync: false);
           }
