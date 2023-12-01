@@ -123,6 +123,9 @@ function validateAndGetDateFromComponents(
     if (!isDatePartValid(date, dateComponent)) {
         return null;
     }
+    if (date.getFullYear() < 1800) {
+        return null;
+    }
     return date;
 }
 
