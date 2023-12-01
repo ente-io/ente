@@ -37,8 +37,8 @@ class _AllSectionsExamplesProviderState
   final _logger = Logger("AllSectionsExamplesProvider");
 
   final _debouncer = Debouncer(
-    const Duration(seconds: 4),
-    executionIntervalInMilliSeconds: 15000,
+    const Duration(seconds: 3),
+    executionInterval: const Duration(seconds: 12),
   );
 
   @override

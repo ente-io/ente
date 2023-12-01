@@ -16,6 +16,7 @@ import "package:photos/ui/viewer/gallery/component/multiple_groups_gallery_view.
 import 'package:photos/ui/viewer/gallery/empty_state.dart';
 import "package:photos/ui/viewer/gallery/state/gallery_context_state.dart";
 import 'package:photos/utils/date_time_util.dart';
+import "package:photos/utils/debouncer.dart";
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
 typedef GalleryLoader = Future<FileLoadResult> Function(
@@ -43,6 +44,8 @@ class Gallery extends StatefulWidget {
   final bool enableFileGrouping;
   final Widget loadingWidget;
   final bool disableScroll;
+  final Duration reloadDebounceTime;
+  final Duration reloadDebounceExecutionInterval;
 
   /// When true, selection will be limited to one item. Tapping on any item
   /// will select even when no other item is selected.
@@ -78,6 +81,8 @@ class Gallery extends StatefulWidget {
     this.sortAsyncFn,
     this.showSelectAllByDefault = true,
     this.isScrollablePositionedList = true,
+    this.reloadDebounceTime = const Duration(milliseconds: 500),
+    this.reloadDebounceExecutionInterval = const Duration(seconds: 2),
     Key? key,
   }) : super(key: key);
 
@@ -89,6 +94,7 @@ class Gallery extends StatefulWidget {
 
 class GalleryState extends State<Gallery> {
   static const int kInitialLoadLimit = 100;
+  late final Debouncer _debouncer;
 
   late Logger _logger;
   List<List<EnteFile>> currentGroupedFiles = [];
@@ -106,20 +112,26 @@ class GalleryState extends State<Gallery> {
         "Gallery_${widget.tagPrefix}${kDebugMode ? "_" + widget.albumName! : ""}";
     _logger = Logger(_logTag);
     _logger.finest("init Gallery");
+    _debouncer = Debouncer(
+      widget.reloadDebounceTime,
+      executionInterval: widget.reloadDebounceExecutionInterval,
+    );
     _sortOrderAsc = widget.sortAsyncFn != null ? widget.sortAsyncFn!() : false;
     _itemScroller = ItemScrollController();
     if (widget.reloadEvent != null) {
       _reloadEventSubscription = widget.reloadEvent!.listen((event) async {
-        // In soft refresh, setState is called for entire gallery only when
-        // number of child change
-        _logger.finest("Soft refresh all files on ${event.reason} ");
-        final result = await _loadFiles();
-        final bool hasReloaded = _onFilesLoaded(result.files);
-        if (hasReloaded && kDebugMode) {
-          _logger.finest(
-            "Reloaded gallery on soft refresh all files on ${event.reason}",
-          );
-        }
+        _debouncer.run(() async {
+          // In soft refresh, setState is called for entire gallery only when
+          // number of child change
+          _logger.finest("Soft refresh all files on ${event.reason} ");
+          final result = await _loadFiles();
+          final bool hasReloaded = _onFilesLoaded(result.files);
+          if (hasReloaded && kDebugMode) {
+            _logger.finest(
+              "Reloaded gallery on soft refresh all files on ${event.reason}",
+            );
+          }
+        });
       });
     }
     _tabDoubleTapEvent =
@@ -137,11 +149,13 @@ class GalleryState extends State<Gallery> {
       for (final event in widget.forceReloadEvents!) {
         _forceReloadEventSubscriptions.add(
           event.listen((event) async {
-            _logger.finest("Force refresh all files on ${event.reason}");
-            _sortOrderAsc =
-                widget.sortAsyncFn != null ? widget.sortAsyncFn!() : false;
-            final result = await _loadFiles();
-            _setFilesAndReload(result.files);
+            _debouncer.run(() async {
+              _logger.finest("Force refresh all files on ${event.reason}");
+              _sortOrderAsc =
+                  widget.sortAsyncFn != null ? widget.sortAsyncFn!() : false;
+              final result = await _loadFiles();
+              _setFilesAndReload(result.files);
+            });
           }),
         );
       }
@@ -219,6 +233,7 @@ class GalleryState extends State<Gallery> {
     for (final subscription in _forceReloadEventSubscriptions) {
       subscription.cancel();
     }
+    _debouncer.cancelDebounce();
     super.dispose();
   }
 

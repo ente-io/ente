@@ -13,6 +13,7 @@ import 'package:photos/models/device_collection.dart';
 import "package:photos/ui/collections/device/device_folder_item.dart";
 import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/viewer/gallery/empty_state.dart';
+import "package:photos/utils/debouncer.dart";
 
 class DeviceFolderVerticalGridView extends StatelessWidget {
   final Widget? appTitle;
@@ -58,6 +59,10 @@ class _DeviceFolderVerticalGridViewBodyState
   StreamSubscription<LocalPhotosUpdatedEvent>? _localFilesSubscription;
   String _loadReason = "init";
   final logger = Logger((_DeviceFolderVerticalGridViewBodyState).toString());
+  final _debouncer = Debouncer(
+    const Duration(milliseconds: 1500),
+    executionInterval: const Duration(seconds: 4),
+  );
   /*
   Aspect ratio 1:1 Max width 224 Fixed gap 8
   Width changes dynamically with screen width such that we can fit 2 in one row.
@@ -78,8 +83,12 @@ class _DeviceFolderVerticalGridViewBodyState
     });
     _localFilesSubscription =
         Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) {
-      _loadReason = event.reason;
-      setState(() {});
+      _debouncer.run(() async {
+        if (mounted) {
+          _loadReason = event.reason;
+          setState(() {});
+        }
+      });
     });
     super.initState();
   }
@@ -149,6 +158,7 @@ class _DeviceFolderVerticalGridViewBodyState
   void dispose() {
     _backupFoldersUpdatedEvent?.cancel();
     _localFilesSubscription?.cancel();
+    _debouncer.cancelDebounce();
     super.dispose();
   }
 }

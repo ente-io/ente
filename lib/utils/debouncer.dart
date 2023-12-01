@@ -12,19 +12,19 @@ class Debouncer {
   /// If executionIntervalInSeconds is not null, then the debouncer will execute the
   /// current callback it has in run() method repeatedly in the given interval.
   /// This is useful for example when you want to execute a callback every 5 seconds
-  final int? executionIntervalInMilliSeconds;
+  final Duration? executionInterval;
   Timer? _debounceTimer;
 
-  Debouncer(this._duration, {this.executionIntervalInMilliSeconds});
+  Debouncer(this._duration, {this.executionInterval});
 
   final Stopwatch _stopwatch = Stopwatch();
 
   void run(FutureVoidCallback fn) {
     bool shouldRunImmediately = false;
-    if (executionIntervalInMilliSeconds != null) {
+    if (executionInterval != null) {
       // ensure the stop watch is running
       _stopwatch.start();
-      if (_stopwatch.elapsedMilliseconds > executionIntervalInMilliSeconds!) {
+      if (_stopwatch.elapsedMilliseconds > executionInterval!.inMilliseconds) {
         shouldRunImmediately = true;
         _stopwatch.stop();
         _stopwatch.reset();
