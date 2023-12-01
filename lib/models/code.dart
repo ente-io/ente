@@ -148,7 +148,7 @@ class Code {
         _getAlgorithm(uri),
         _getType(uri),
         _getCounter(uri),
-        rawJson['code'],
+        jsonEncode(rawJson),
         rawJson['pinned'],
       );
     } catch (e) {
