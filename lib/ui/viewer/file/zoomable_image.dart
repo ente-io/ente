@@ -54,12 +54,18 @@ class _ZoomableImageState extends State<ZoomableImage>
   bool _loadedFinalImage = false;
   PhotoViewController _photoViewController = PhotoViewController();
   double? _initialScale;
+  bool _isZooming = false;
+  ValueChanged<PhotoViewScaleState>? _scaleStateChangedCallback;
 
   @override
   void initState() {
     _photo = widget.photo;
     _logger = Logger("ZoomableImage");
     _logger.info('initState for ${_photo.generatedID} with tag ${_photo.tag}');
+    _scaleStateChangedCallback = (value) {
+      _isZooming = value != PhotoViewScaleState.initial;
+      debugPrint("isZooming = $_isZooming, currentState $value");
+    };
     super.initState();
   }
 
@@ -81,6 +87,7 @@ class _ZoomableImageState extends State<ZoomableImage>
     if (_imageProvider != null) {
       content = PhotoViewGallery.builder(
         gaplessPlayback: true,
+        scaleStateChangedCallback: _scaleStateChangedCallback,
         backgroundDecoration: widget.backgroundDecoration as BoxDecoration?,
         builder: (context, index) {
           return PhotoViewGalleryPageOptions(
@@ -99,24 +106,21 @@ class _ZoomableImageState extends State<ZoomableImage>
     } else {
       content = const EnteLoadingWidget();
     }
-
-    dragFunction(d) => {
-          if (d.delta.dy > dragSensitivity)
-            {
-              {Navigator.of(context).pop()},
-            }
-          else if (d.delta.dy < (dragSensitivity * -1))
-            {
-              showDetailsSheet(context, widget.photo),
-            },
-        };
-
-    verticalDragCallback(d) {
-      if (_initialScale == null ||
-          _photoViewController.scale! <= _initialScale!) {
-        dragFunction(d);
-      }
-    }
+    final GestureDragUpdateCallback? verticalDragCallback = _isZooming
+        ? null
+        : (d) => {
+              if (!_isZooming)
+                {
+                  if (d.delta.dy > dragSensitivity)
+                    {
+                      {Navigator.of(context).pop()},
+                    }
+                  else if (d.delta.dy < (dragSensitivity * -1))
+                    {
+                      showDetailsSheet(context, widget.photo),
+                    },
+                },
+            };
 
     return GestureDetector(
       onVerticalDragUpdate: verticalDragCallback,
