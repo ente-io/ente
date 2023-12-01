@@ -49,6 +49,7 @@ func (c *ClICtrl) createLocalFolderForRemoteAlbums(ctx context.Context, account 
 		albumFolderName := filepath.Clean(album.AlbumName)
 		// replace : with _
 		albumFolderName = strings.ReplaceAll(albumFolderName, ":", "_")
+		albumFolderName = strings.ReplaceAll(albumFolderName, "/", "_")
 		albumID := album.ID
 
 		if _, ok := folderToMetaMap[albumFolderName]; ok {
