@@ -93,8 +93,8 @@ Future<void> _decryptExportData(
               derivedKey,
               Sodium.base642bin(enteAuthExport.encryptionNonce),
             );
-          } catch (e,s) {
-            Logger("encryptedImport").warning('failed to decrypt',e,s);
+          } catch (e, s) {
+            Logger("encryptedImport").warning('failed to decrypt', e, s);
             showToast(context, l10n.incorrectPasswordTitle);
             isPasswordIncorrect = true;
           }
@@ -106,12 +106,12 @@ Future<void> _decryptExportData(
             });
             return;
           }
-          String content = utf8.decode(decryptedContent!);
-          List<String> splitCodes = content.split("\n");
+          final content = jsonDecode(utf8.decode(decryptedContent!));
+          List<Map> splitCodes = List.from(content["items"]);
           final parsedCodes = [];
           for (final code in splitCodes) {
             try {
-              parsedCodes.add(Code.fromRawData(code));
+              parsedCodes.add(Code.fromRawJson(code));
             } catch (e) {
               Logger('EncryptedText').severe("Could not parse code", e);
             }
