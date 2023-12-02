@@ -94,7 +94,7 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
             try {
               status = await SyncService.instance.getBackupStatus();
             } catch (e) {
-              showGenericErrorDialog(context: context, error: e);
+              await showGenericErrorDialog(context: context, error: e);
               return;
             }
 
@@ -128,7 +128,7 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
               duplicates =
                   await DeduplicationService.instance.getDuplicateFiles();
             } catch (e) {
-              showGenericErrorDialog(context: context, error: e);
+              await showGenericErrorDialog(context: context, error: e);
               return;
             }
 
@@ -217,7 +217,7 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
           ),
       firstButtonLabel: S.of(context).rateUs,
       firstButtonOnTap: () async {
-        UpdateService.instance.launchReviewUrl();
+        await UpdateService.instance.launchReviewUrl();
       },
       firstButtonType: ButtonType.primary,
       secondButtonLabel: S.of(context).ok,
@@ -225,7 +225,7 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
         showShortToast(
           context,
           S.of(context).remindToEmptyEnteTrash,
-        );
+        ).ignore();
       },
     );
   }

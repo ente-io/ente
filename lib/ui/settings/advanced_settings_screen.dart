@@ -1,3 +1,5 @@
+import "dart:async";
+
 import 'package:flutter/material.dart';
 import "package:photos/core/error-reporting/super_logging.dart";
 import "package:photos/generated/l10n.dart";
@@ -106,8 +108,10 @@ class _AdvancedSettingsScreenState extends State<AdvancedSettingsScreen> {
                                 value: () =>
                                     MemoriesService.instance.showMemories,
                                 onChanged: () async {
-                                  MemoriesService.instance.setShowMemories(
-                                    !MemoriesService.instance.showMemories,
+                                  unawaited(
+                                    MemoriesService.instance.setShowMemories(
+                                      !MemoriesService.instance.showMemories,
+                                    ),
                                   );
                                 },
                               ),

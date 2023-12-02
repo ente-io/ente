@@ -171,7 +171,7 @@ class Configuration {
       SearchService.instance.clearCache();
       Bus.instance.fire(UserLoggedOutEvent());
     } else {
-      _preferences.setBool("auto_logout", true);
+      await _preferences.setBool("auto_logout", true);
     }
   }
 

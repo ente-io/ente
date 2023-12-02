@@ -528,7 +528,7 @@ class _StoreSubscriptionPageState extends State<StoreSubscriptionPage> {
                     response.notFoundIDs.toString();
                 _logger.severe(errMsg);
                 await _dialog.hide();
-                showGenericErrorDialog(
+                await showGenericErrorDialog(
                   context: context,
                   error: Exception(errMsg),
                 );

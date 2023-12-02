@@ -257,15 +257,15 @@ class FileAppBarState extends State<FileAppBar> {
         },
         onSelected: (dynamic value) async {
           if (value == 1) {
-            _download(widget.file);
+            await _download(widget.file);
           } else if (value == 2) {
             await _toggleFileArchiveStatus(widget.file);
           } else if (value == 3) {
-            _setAs(widget.file);
+            await _setAs(widget.file);
           } else if (value == 4) {
-            _handleHideRequest(context);
+            await _handleHideRequest(context);
           } else if (value == 5) {
-            _handleUnHideRequest(context);
+            await _handleUnHideRequest(context);
           }
         },
       ),
@@ -371,7 +371,7 @@ class FileAppBarState extends State<FileAppBar> {
     } catch (e) {
       _logger.warning("Failed to save file", e);
       await dialog.hide();
-      showGenericErrorDialog(context: context, error: e);
+      await showGenericErrorDialog(context: context, error: e);
     } finally {
       PhotoManager.startChangeNotify();
       LocalSyncService.instance.checkAndSync().ignore();
@@ -432,7 +432,7 @@ class FileAppBarState extends State<FileAppBar> {
     } catch (e) {
       dialog.hide();
       _logger.severe("Failed to use as", e);
-      showGenericErrorDialog(context: context, error: e);
+      await showGenericErrorDialog(context: context, error: e);
     }
   }
 }

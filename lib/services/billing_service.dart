@@ -184,7 +184,7 @@ class BillingService {
     try {
       final String jwtToken = await UserService.instance.getFamiliesToken();
       final bool familyExist = userDetails.isPartOfFamily();
-      Navigator.of(context).push(
+      await Navigator.of(context).push(
         MaterialPageRoute(
           builder: (BuildContext context) {
             return WebPage(
@@ -196,7 +196,7 @@ class BillingService {
       );
     } catch (e) {
       await dialog.hide();
-      showGenericErrorDialog(context: context, error: e);
+      await showGenericErrorDialog(context: context, error: e);
     }
     await dialog.hide();
   }

@@ -163,7 +163,7 @@ class EntityService {
         encryptedKey = response.encryptedKey;
         header = response.header;
         await _prefs.setString(_getEntityKeyPrefix(type), encryptedKey);
-        _prefs.setString(_getEntityHeaderPrefix(type), header);
+        await _prefs.setString(_getEntityHeaderPrefix(type), header);
       }
       final entityKey = CryptoUtil.decryptSync(
         Sodium.base642bin(encryptedKey),

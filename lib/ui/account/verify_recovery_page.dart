@@ -109,7 +109,7 @@ class _VerifyRecoveryPageState extends State<VerifyRecoveryPage> {
           ),
         );
       } catch (e) {
-        showGenericErrorDialog(context: context, error: e);
+        await showGenericErrorDialog(context: context, error: e);
         return;
       }
     }

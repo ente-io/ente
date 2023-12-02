@@ -31,7 +31,7 @@ class EmptyAlbumState extends StatelessWidget {
               try {
                 await showAddPhotosSheet(context, c);
               } catch (e) {
-                showGenericErrorDialog(context: context, error: e);
+                await showGenericErrorDialog(context: context, error: e);
               }
             },
           ),
