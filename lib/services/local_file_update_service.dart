@@ -295,7 +295,8 @@ class LocalFileUpdateService {
       try {
         final MediaUploadData uploadData = await getUploadData(file);
         _logger.info(
-            'Found livePhoto on local with hash ${uploadData.hashData?.fileHash ?? "null"} and existing hash ${file.hash ?? "null"}');
+          'Found livePhoto on local with hash ${uploadData.hashData?.fileHash ?? "null"} and existing hash ${file.hash ?? "null"}',
+        );
         await clearCache(file);
         await FilesDB.instance.markFilesForReUpload(
           userID,
