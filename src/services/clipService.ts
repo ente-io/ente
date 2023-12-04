@@ -11,6 +11,7 @@ const execAsync = util.promisify(require('child_process').exec);
 import fetch from 'node-fetch';
 import { writeNodeStream } from './fs';
 import { getPlatform } from '../utils/common/platform';
+import { CustomErrors } from '../constants/errors';
 
 const CLIP_MODEL_PATH_PLACEHOLDER = 'CLIP_MODEL';
 const GGMLCLIP_PATH_PLACEHOLDER = 'GGML_PATH';
@@ -70,57 +71,68 @@ async function downloadModel(saveLocation: string, url: string) {
 let imageModelDownloadInProgress: Promise<void> = null;
 
 export async function getClipImageModelPath() {
-    const modelSavePath = getModelSavePath(IMAGE_MODEL_NAME);
-    if (imageModelDownloadInProgress) {
-        log.info('waiting for image model download to finish');
-        await imageModelDownloadInProgress;
-    } else {
-        if (!existsSync(modelSavePath)) {
-            log.info('clip image model not found, downloading');
-            imageModelDownloadInProgress = downloadModel(
-                modelSavePath,
-                IMAGE_MODEL_DOWNLOAD_URL
-            );
+    try {
+        const modelSavePath = getModelSavePath(IMAGE_MODEL_NAME);
+        if (imageModelDownloadInProgress) {
+            log.info('waiting for image model download to finish');
             await imageModelDownloadInProgress;
         } else {
-            const localFileSize = (await fs.stat(modelSavePath)).size;
-            if (localFileSize !== IMAGE_MODEL_SIZE_IN_BYTES) {
-                log.info('clip model size mismatch, downloading again');
+            if (!existsSync(modelSavePath)) {
+                log.info('clip image model not found, downloading');
                 imageModelDownloadInProgress = downloadModel(
                     modelSavePath,
                     IMAGE_MODEL_DOWNLOAD_URL
                 );
                 await imageModelDownloadInProgress;
+            } else {
+                const localFileSize = (await fs.stat(modelSavePath)).size;
+                if (localFileSize !== IMAGE_MODEL_SIZE_IN_BYTES) {
+                    log.info('clip model size mismatch, downloading again');
+                    imageModelDownloadInProgress = downloadModel(
+                        modelSavePath,
+                        IMAGE_MODEL_DOWNLOAD_URL
+                    );
+                    await imageModelDownloadInProgress;
+                }
             }
         }
+        return modelSavePath;
+    } finally {
+        imageModelDownloadInProgress = null;
     }
-    return modelSavePath;
 }
 
-let textModelDownloadInProgress: Promise<void> = null;
+let textModelDownloadInProgress: boolean = false;
 
 export async function getClipTextModelPath() {
     const modelSavePath = getModelSavePath(TEXT_MODEL_NAME);
     if (textModelDownloadInProgress) {
-        log.info('waiting for text model download to finish');
-        await textModelDownloadInProgress;
+        throw Error(CustomErrors.MODEL_DOWNLOAD_PENDING);
     } else {
         if (!existsSync(modelSavePath)) {
             log.info('clip text model not found, downloading');
-            textModelDownloadInProgress = downloadModel(
-                modelSavePath,
-                TEXT_MODEL_DOWNLOAD_URL
-            );
-            await textModelDownloadInProgress;
+            textModelDownloadInProgress = true;
+            downloadModel(modelSavePath, TEXT_MODEL_DOWNLOAD_URL)
+                .catch(() => {
+                    // ignore
+                })
+                .finally(() => {
+                    textModelDownloadInProgress = false;
+                });
+            throw Error(CustomErrors.MODEL_DOWNLOAD_PENDING);
         } else {
             const localFileSize = (await fs.stat(modelSavePath)).size;
             if (localFileSize !== TEXT_MODEL_SIZE_IN_BYTES) {
                 log.info('clip model size mismatch, downloading again');
-                textModelDownloadInProgress = downloadModel(
-                    modelSavePath,
-                    TEXT_MODEL_DOWNLOAD_URL
-                );
-                await textModelDownloadInProgress;
+                textModelDownloadInProgress = true;
+                downloadModel(modelSavePath, TEXT_MODEL_DOWNLOAD_URL)
+                    .catch(() => {
+                        // ignore
+                    })
+                    .finally(() => {
+                        textModelDownloadInProgress = false;
+                    });
+                throw Error(CustomErrors.MODEL_DOWNLOAD_PENDING);
             }
         }
     }
@@ -200,7 +212,11 @@ export async function computeTextEmbedding(
         const embeddingArray = new Float32Array(embedding);
         return embeddingArray;
     } catch (err) {
-        logErrorSentry(err, 'Error in computeTextEmbedding');
+        if (err.message === CustomErrors.MODEL_DOWNLOAD_PENDING) {
+            log.info(CustomErrors.MODEL_DOWNLOAD_PENDING);
+        } else {
+            logErrorSentry(err, 'Error in computeTextEmbedding');
+        }
         throw err;
     }
 }
