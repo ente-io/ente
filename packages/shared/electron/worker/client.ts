@@ -1,16 +1,21 @@
 import * as Comlink from 'comlink';
-import {
-    LimitedCache,
-    ProxiedLimitedCacheStorage,
-    ProxiedWorkerLimitedCache,
-} from '@ente/shared/storage/cacheStorage/types';
+import { LimitedCache } from '@ente/shared/storage/cacheStorage/types';
 import { serializeResponse, deserializeToResponse } from './utils/proxy';
 import ElectronAPIs from '@ente/shared/electron';
 
-export class WorkerElectronCacheStorageClient
-    implements ProxiedLimitedCacheStorage
-{
-    async open(cacheName: string) {
+export interface ProxiedLimitedElectronAPIs {
+    openDiskCache: (cacheName: string) => Promise<ProxiedWorkerLimitedCache>;
+    deleteDiskCache: (cacheName: string) => Promise<boolean>;
+    getSentryUserID: () => Promise<string>;
+}
+export interface ProxiedWorkerLimitedCache {
+    match: (key: string) => Promise<ArrayBuffer>;
+    put: (key: string, data: ArrayBuffer) => Promise<void>;
+    delete: (key: string) => Promise<boolean>;
+}
+
+export class WorkerSafeElectronClient implements ProxiedLimitedElectronAPIs {
+    async openDiskCache(cacheName: string) {
         const cache = await ElectronAPIs.openDiskCache(cacheName);
         return Comlink.proxy({
             match: Comlink.proxy(transformMatch(cache.match.bind(cache))),
@@ -19,8 +24,12 @@ export class WorkerElectronCacheStorageClient
         });
     }
 
-    async delete(cacheName: string) {
+    async deleteDiskCache(cacheName: string) {
         return await ElectronAPIs.deleteDiskCache(cacheName);
+    }
+
+    async getSentryUserID() {
+        return await ElectronAPIs.getSentryUserID();
     }
 }
 
