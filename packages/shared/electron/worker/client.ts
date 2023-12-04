@@ -7,6 +7,10 @@ export interface ProxiedLimitedElectronAPIs {
     openDiskCache: (cacheName: string) => Promise<ProxiedWorkerLimitedCache>;
     deleteDiskCache: (cacheName: string) => Promise<boolean>;
     getSentryUserID: () => Promise<string>;
+    convertToJPEG: (
+        inputFileData: Uint8Array,
+        filename: string
+    ) => Promise<Uint8Array>;
 }
 export interface ProxiedWorkerLimitedCache {
     match: (key: string) => Promise<ArrayBuffer>;
@@ -30,6 +34,13 @@ export class WorkerSafeElectronClient implements ProxiedLimitedElectronAPIs {
 
     async getSentryUserID() {
         return await ElectronAPIs.getSentryUserID();
+    }
+
+    async convertToJPEG(
+        inputFileData: Uint8Array,
+        filename: string
+    ): Promise<Uint8Array> {
+        return await ElectronAPIs.convertToJPEG(inputFileData, filename);
     }
 }
 

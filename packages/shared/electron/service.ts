@@ -7,12 +7,16 @@ import {
 import { wrap } from 'comlink';
 import { deserializeToResponse, serializeResponse } from './worker/utils/proxy';
 import { runningInWorker } from '@ente/shared/platform';
+import { ElectronAPIsType } from './types';
 
-export interface LimitedElectronAPIs {
-    openDiskCache: (cacheName: string) => Promise<LimitedCache>;
-    deleteDiskCache: (cacheName: string) => Promise<boolean>;
-    getSentryUserID: () => Promise<string>;
-}
+export interface LimitedElectronAPIs
+    extends Pick<
+        ElectronAPIsType,
+        | 'openDiskCache'
+        | 'deleteDiskCache'
+        | 'getSentryUserID'
+        | 'convertToJPEG'
+    > {}
 
 class WorkerSafeElectronServiceImpl implements LimitedElectronAPIs {
     proxiedElectron:
@@ -51,6 +55,13 @@ class WorkerSafeElectronServiceImpl implements LimitedElectronAPIs {
     async getSentryUserID() {
         await this.ready;
         return this.proxiedElectron.getSentryUserID();
+    }
+    async convertToJPEG(
+        inputFileData: Uint8Array,
+        filename: string
+    ): Promise<Uint8Array> {
+        await this.ready;
+        return this.proxiedElectron.convertToJPEG(inputFileData, filename);
     }
 }
 
