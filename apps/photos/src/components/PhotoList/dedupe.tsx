@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect, useState, useMemo } from 'react';
 import {
     VariableSizeList as List,
     ListChildComponentProps,
@@ -196,7 +196,7 @@ const PhotoListRow = React.memo(
     areEqual
 );
 
-const getTimeStampListFromDuplicates = (duplicates: Duplicate[]) => {
+const getTimeStampListFromDuplicates = (duplicates: Duplicate[], columns) => {
     const timeStampList: TimeStampListItem[] = [];
     for (let index = 0; index < duplicates.length; index++) {
         const dupes = duplicates[index];
@@ -205,11 +205,15 @@ const getTimeStampListFromDuplicates = (duplicates: Duplicate[]) => {
             fileSize: dupes.size,
             fileCount: dupes.files.length,
         });
-        timeStampList.push({
-            itemType: ITEM_TYPE.FILE,
-            items: dupes.files,
-            itemStartIndex: index,
-        });
+        let lastIndex = 0;
+        while (lastIndex < dupes.files.length) {
+            timeStampList.push({
+                itemType: ITEM_TYPE.FILE,
+                items: dupes.files.slice(lastIndex, lastIndex + columns),
+                itemStartIndex: index,
+            });
+            lastIndex += columns;
+        }
     }
     return timeStampList;
 };
@@ -226,12 +230,15 @@ export function DedupePhotoList({
     const shouldRefresh = useRef(false);
     const listRef = useRef(null);
 
-    const fittableColumns = getFractionFittableColumns(width);
-    let columns = Math.floor(fittableColumns);
+    const columns = useMemo(() => {
+        const fittableColumns = getFractionFittableColumns(width);
+        let columns = Math.floor(fittableColumns);
+        if (columns < MIN_COLUMNS) {
+            columns = MIN_COLUMNS;
+        }
+        return columns;
+    }, [width]);
 
-    if (columns < MIN_COLUMNS) {
-        columns = MIN_COLUMNS;
-    }
     const shrinkRatio = getShrinkRatio(width, columns);
     const listItemHeight =
         IMAGE_CONTAINER_MAX_HEIGHT * shrinkRatio + GAP_BTW_TILES;
@@ -247,7 +254,10 @@ export function DedupePhotoList({
                 return;
             }
             refreshInProgress.current = true;
-            const timeStampList = getTimeStampListFromDuplicates(duplicates);
+            const timeStampList = getTimeStampListFromDuplicates(
+                duplicates,
+                columns
+            );
             setTimeStampList(timeStampList);
             refreshInProgress.current = false;
             if (shouldRefresh.current) {
@@ -256,7 +266,7 @@ export function DedupePhotoList({
             }
         };
         main();
-    }, [width, height, duplicates]);
+    }, [columns, duplicates]);
 
     useEffect(() => {
         refreshList();

@@ -65,16 +65,6 @@ export default function Deduplicate() {
         syncWithRemote();
     }, []);
 
-    const duplicateFiles = useMemoSingleThreaded(() => {
-        return (duplicates ?? []).reduce((acc, dupe) => {
-            return [...acc, ...dupe.files];
-        }, []);
-    }, [duplicates]);
-
-    const fileToCollectionsMap = useMemoSingleThreaded(() => {
-        return constructFileToCollectionMap(duplicateFiles);
-    }, [duplicateFiles]);
-
     const syncWithRemote = async () => {
         startLoading();
         const collections = await getLocalCollections();
@@ -113,6 +103,16 @@ export default function Deduplicate() {
         finishLoading();
     };
 
+    const duplicateFiles = useMemoSingleThreaded(() => {
+        return (duplicates ?? []).reduce((acc, dupe) => {
+            return [...acc, ...dupe.files];
+        }, []);
+    }, [duplicates]);
+
+    const fileToCollectionsMap = useMemoSingleThreaded(() => {
+        return constructFileToCollectionMap(duplicateFiles);
+    }, [duplicateFiles]);
+
     const deleteFileHelper = async () => {
         try {
             startLoading();
@@ -147,7 +147,7 @@ export default function Deduplicate() {
         setSelected({ count: 0, collectionID: 0, ownCount: 0 });
     };
 
-    if (!duplicates) {
+    if (!duplicateFiles) {
         return (
             <VerticallyCentered>
                 <EnteSpinner />
@@ -161,10 +161,10 @@ export default function Deduplicate() {
                 ...DefaultDeduplicateContext,
                 collectionNameMap,
             }}>
-            {duplicates.length > 0 && (
+            {duplicateFiles.length > 0 && (
                 <Info>{t('DEDUPLICATE_BASED_ON_SIZE')}</Info>
             )}
-            {duplicates.length === 0 ? (
+            {duplicateFiles.length === 0 ? (
                 <VerticallyCentered>
                     <Typography variant="large" color="text.muted">
                         {t('NO_DUPLICATES_FOUND')}
