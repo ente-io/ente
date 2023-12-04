@@ -4,16 +4,18 @@ import { logError } from '@ente/shared/sentry';
 import { ElectronFile } from 'types/upload';
 import { CustomError } from '@ente/shared/error';
 import { convertBytesToHumanReadable } from '@ente/shared/utils/size';
+import { WorkerSafeElectronService } from '@ente/shared/electron/service';
 
 class ElectronImageProcessorService {
     async convertToJPEG(fileBlob: Blob, filename: string): Promise<Blob> {
         try {
             const startTime = Date.now();
             const inputFileData = new Uint8Array(await fileBlob.arrayBuffer());
-            const convertedFileData = await ElectronAPIs.convertToJPEG(
-                inputFileData,
-                filename
-            );
+            const convertedFileData =
+                await WorkerSafeElectronService.convertToJPEG(
+                    inputFileData,
+                    filename
+                );
             addLogLine(
                 `originalFileSize:${convertBytesToHumanReadable(
                     fileBlob?.size
