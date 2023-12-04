@@ -5,11 +5,11 @@ import { ALL_SECTION } from 'constants/collection';
 import { AppContext } from 'pages/_app';
 import { createContext, useContext, useEffect, useState } from 'react';
 import {
-    getDuplicateFiles,
-    clubDuplicatesByTime,
+    getDuplicates,
+    deClubDuplicatesWithDifferentTime,
+    Duplicate,
 } from 'services/deduplicationService';
 import { syncFiles, trashFiles } from 'services/fileService';
-import { EnteFile } from 'types/file';
 import { SelectedState } from 'types/gallery';
 
 import { ApiError } from '@ente/shared/error';
@@ -43,7 +43,7 @@ export const Info = styled('div')`
 export default function Deduplicate() {
     const { setDialogMessage, startLoading, finishLoading, showNavBar } =
         useContext(AppContext);
-    const [duplicateFiles, setDuplicateFiles] = useState<EnteFile[]>(null);
+    const [duplicates, setDuplicates] = useState<Duplicate[]>(null);
     const [clubSameTimeFilesOnly, setClubSameTimeFilesOnly] = useState(false);
     const [fileSizeMap, setFileSizeMap] = useState(new Map<number, number>());
     const [collectionNameMap, setCollectionNameMap] = useState(
@@ -71,6 +71,12 @@ export default function Deduplicate() {
         syncWithRemote();
     }, [clubSameTimeFilesOnly]);
 
+    const duplicateFiles = useMemoSingleThreaded(() => {
+        return (duplicates ?? []).reduce((acc, dupe) => {
+            return [...acc, ...dupe.files];
+        }, []);
+    }, [duplicates]);
+
     const fileToCollectionsMap = useMemoSingleThreaded(() => {
         return constructFileToCollectionMap(duplicateFiles);
     }, [duplicateFiles]);
@@ -84,16 +90,14 @@ export default function Deduplicate() {
         }
         setCollectionNameMap(collectionNameMap);
         const files = await syncFiles('normal', collections, () => null);
-        let duplicates = await getDuplicateFiles(files, collectionNameMap);
+        let duplicateFiles = await getDuplicates(files, collectionNameMap);
         if (clubSameTimeFilesOnly) {
-            duplicates = clubDuplicatesByTime(duplicates);
+            duplicateFiles = deClubDuplicatesWithDifferentTime(duplicateFiles);
         }
         const currFileSizeMap = new Map<number, number>();
-        let allDuplicateFiles: EnteFile[] = [];
         let toSelectFileIDs: number[] = [];
         let count = 0;
-        for (const dupe of duplicates) {
-            allDuplicateFiles = [...allDuplicateFiles, ...dupe.files];
+        for (const dupe of duplicateFiles) {
             // select all except first file
             toSelectFileIDs = [
                 ...toSelectFileIDs,
@@ -105,7 +109,7 @@ export default function Deduplicate() {
                 currFileSizeMap.set(file.id, dupe.size);
             }
         }
-        setDuplicateFiles(allDuplicateFiles);
+        setDuplicates(duplicateFiles);
         setFileSizeMap(currFileSizeMap);
         const selectedFiles = {
             count: count,
@@ -153,7 +157,7 @@ export default function Deduplicate() {
         setSelected({ count: 0, collectionID: 0, ownCount: 0 });
     };
 
-    if (!duplicateFiles) {
+    if (!duplicates) {
         return (
             <VerticallyCentered>
                 <EnteSpinner />
@@ -171,7 +175,7 @@ export default function Deduplicate() {
                 fileSizeMap,
                 isOnDeduplicatePage: true,
             }}>
-            {duplicateFiles.length > 0 && (
+            {duplicates.length > 0 && (
                 <Info>
                     {t('DEDUPLICATE_BASED_ON', {
                         context: clubSameTimeFilesOnly
@@ -180,7 +184,7 @@ export default function Deduplicate() {
                     })}
                 </Info>
             )}
-            {duplicateFiles.length === 0 ? (
+            {duplicates.length === 0 ? (
                 <VerticallyCentered>
                     <Typography variant="large" color="text.muted">
                         {t('NO_DUPLICATES_FOUND')}
@@ -188,7 +192,9 @@ export default function Deduplicate() {
                 </VerticallyCentered>
             ) : (
                 <PhotoFrame
+                    page={PAGES.DEDUPLICATE}
                     files={duplicateFiles}
+                    duplicates={duplicates}
                     syncWithRemote={syncWithRemote}
                     setSelected={setSelected}
                     selected={selected}

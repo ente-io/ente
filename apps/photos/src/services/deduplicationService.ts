@@ -16,12 +16,12 @@ interface DuplicatesResponse {
     }>;
 }
 
-interface DuplicateFiles {
+export interface Duplicate {
     files: EnteFile[];
     size: number;
 }
 
-export async function getDuplicateFiles(
+export async function getDuplicates(
     files: EnteFile[],
     collectionNameMap: Map<number, string>
 ) {
@@ -33,7 +33,7 @@ export async function getDuplicateFiles(
             fileMap.set(file.id, file);
         }
 
-        let result: DuplicateFiles[] = [];
+        let result: Duplicate[] = [];
 
         for (const dupe of dupes) {
             let duplicateFiles: EnteFile[] = [];
@@ -64,8 +64,8 @@ export async function getDuplicateFiles(
     }
 }
 
-function getDupesGroupedBySameFileHashes(dupe: DuplicateFiles) {
-    const result: DuplicateFiles[] = [];
+function getDupesGroupedBySameFileHashes(dupe: Duplicate) {
+    const result: Duplicate[] = [];
 
     const fileWithHashes: EnteFile[] = [];
     const fileWithoutHashes: EnteFile[] = [];
@@ -95,8 +95,8 @@ function getDupesGroupedBySameFileHashes(dupe: DuplicateFiles) {
     return result;
 }
 
-function groupDupesByFileHashes(dupe: DuplicateFiles) {
-    const result: DuplicateFiles[] = [];
+function groupDupesByFileHashes(dupe: Duplicate) {
+    const result: Duplicate[] = [];
 
     const filesSortedByFileHash = dupe.files
         .map((file) => {
@@ -141,8 +141,8 @@ function groupDupesByFileHashes(dupe: DuplicateFiles) {
     return result;
 }
 
-export function clubDuplicatesByTime(dupes: DuplicateFiles[]) {
-    const result: DuplicateFiles[] = [];
+export function deClubDuplicatesWithDifferentTime(dupes: Duplicate[]) {
+    const result: Duplicate[] = [];
     for (const dupe of dupes) {
         let files: EnteFile[] = [];
         const creationTimeCounter = new Map<number, number>();
