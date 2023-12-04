@@ -4,12 +4,8 @@ import PhotoFrame from 'components/PhotoFrame';
 import { ALL_SECTION } from 'constants/collection';
 import { AppContext } from 'pages/_app';
 import { createContext, useContext, useEffect, useState } from 'react';
-import {
-    getDuplicates,
-    deClubDuplicatesWithDifferentTime,
-    Duplicate,
-} from 'services/deduplicationService';
-import { syncFiles, trashFiles } from 'services/fileService';
+import { getDuplicates, Duplicate } from 'services/deduplicationService';
+import { getLocalFiles, trashFiles } from 'services/fileService';
 import { SelectedState } from 'types/gallery';
 
 import { ApiError } from '@ente/shared/error';
@@ -24,7 +20,7 @@ import { PHOTOS_PAGES as PAGES } from '@ente/shared/constants/pages';
 import router from 'next/router';
 import { getKey, SESSION_KEYS } from '@ente/shared/storage/sessionStorage';
 import { styled } from '@mui/material';
-import { getLatestCollections } from 'services/collectionService';
+import { getLocalCollections } from 'services/collectionService';
 import EnteSpinner from '@ente/shared/components/EnteSpinner';
 import { VerticallyCentered } from '@ente/shared/components/Container';
 import Typography from '@mui/material/Typography';
@@ -44,8 +40,6 @@ export default function Deduplicate() {
     const { setDialogMessage, startLoading, finishLoading, showNavBar } =
         useContext(AppContext);
     const [duplicates, setDuplicates] = useState<Duplicate[]>(null);
-    const [clubSameTimeFilesOnly, setClubSameTimeFilesOnly] = useState(false);
-    const [fileSizeMap, setFileSizeMap] = useState(new Map<number, number>());
     const [collectionNameMap, setCollectionNameMap] = useState(
         new Map<number, string>()
     );
@@ -69,7 +63,7 @@ export default function Deduplicate() {
 
     useEffect(() => {
         syncWithRemote();
-    }, [clubSameTimeFilesOnly]);
+    }, []);
 
     const duplicateFiles = useMemoSingleThreaded(() => {
         return (duplicates ?? []).reduce((acc, dupe) => {
@@ -83,17 +77,14 @@ export default function Deduplicate() {
 
     const syncWithRemote = async () => {
         startLoading();
-        const collections = await getLatestCollections();
+        const collections = await getLocalCollections();
         const collectionNameMap = new Map<number, string>();
         for (const collection of collections) {
             collectionNameMap.set(collection.id, collection.name);
         }
         setCollectionNameMap(collectionNameMap);
-        const files = await syncFiles('normal', collections, () => null);
-        let duplicateFiles = await getDuplicates(files, collectionNameMap);
-        if (clubSameTimeFilesOnly) {
-            duplicateFiles = deClubDuplicatesWithDifferentTime(duplicateFiles);
-        }
+        const files = await getLocalFiles();
+        const duplicateFiles = await getDuplicates(files, collectionNameMap);
         const currFileSizeMap = new Map<number, number>();
         let toSelectFileIDs: number[] = [];
         let count = 0;
@@ -110,7 +101,6 @@ export default function Deduplicate() {
             }
         }
         setDuplicates(duplicateFiles);
-        setFileSizeMap(currFileSizeMap);
         const selectedFiles = {
             count: count,
             ownCount: count,
@@ -170,19 +160,9 @@ export default function Deduplicate() {
             value={{
                 ...DefaultDeduplicateContext,
                 collectionNameMap,
-                clubSameTimeFilesOnly,
-                setClubSameTimeFilesOnly,
-                fileSizeMap,
-                isOnDeduplicatePage: true,
             }}>
             {duplicates.length > 0 && (
-                <Info>
-                    {t('DEDUPLICATE_BASED_ON', {
-                        context: clubSameTimeFilesOnly
-                            ? 'SIZE_AND_CAPTURE_TIME'
-                            : 'SIZE',
-                    })}
-                </Info>
+                <Info>{t('DEDUPLICATE_BASED_ON_SIZE')}</Info>
             )}
             {duplicates.length === 0 ? (
                 <VerticallyCentered>
