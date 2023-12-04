@@ -425,7 +425,6 @@
     "FILES": "Bestanden",
     "EACH": "Elke",
     "DEDUPLICATE_BASED_ON_SIZE": "De volgende bestanden zijn samengevoegd op basis van hun groottes. Controleer en verwijder items waarvan je denkt dat ze dubbel zijn",
-    "DEDUPLICATE_BASED_ON_SIZE_AND_CAPTURE_TIME": "De volgende bestanden zijn samengevoegd op basis van hun groottes en opnametijd, bekijk en verwijder items waarvan je denkt dat ze dubbel zijn",
     "STOP_ALL_UPLOADS_MESSAGE": "Weet u zeker dat u wilt stoppen met alle uploads die worden uitgevoerd?",
     "STOP_UPLOADS_HEADER": "Stoppen met uploaden?",
     "YES_STOP_UPLOADS": "Ja, stop uploaden",
