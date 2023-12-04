@@ -1,4 +1,5 @@
 export type DeduplicateContextType = {
+    isOnDeduplicatePage: boolean;
     collectionNameMap: Map<number, string>;
 };
 

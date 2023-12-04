@@ -160,6 +160,7 @@ export default function Deduplicate() {
             value={{
                 ...DefaultDeduplicateContext,
                 collectionNameMap,
+                isOnDeduplicatePage: true,
             }}>
             {duplicateFiles.length > 0 && (
                 <Info>{t('DEDUPLICATE_BASED_ON_SIZE')}</Info>
