@@ -66,9 +66,6 @@ func (c *ClICtrl) syncFiles(ctx context.Context, account model.Account) error {
 			if err != nil {
 				return err
 			}
-			if !existingEntry.IsLivePhoto() {
-				continue
-			}
 			log.Printf("[%d/%d] Sync %s for album %s", i, len(entries), existingEntry.GetTitle(), albumInfo.AlbumName)
 			err = c.downloadEntry(ctx, albumDiskInfo, *existingEntry, entry)
 			if err != nil {
