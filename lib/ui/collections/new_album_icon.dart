@@ -55,7 +55,7 @@ class NewAlbumIcon extends StatelessWidget {
           },
         );
         if (result is Exception) {
-          showGenericErrorDialog(context: context, error: result);
+          await showGenericErrorDialog(context: context, error: result);
         }
       },
     );

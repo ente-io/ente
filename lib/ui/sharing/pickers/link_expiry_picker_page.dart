@@ -180,7 +180,7 @@ class _ItemsWidgetState extends State<ItemsWidget> {
     try {
       await CollectionsService.instance.updateShareUrl(widget.collection, prop);
     } catch (e) {
-      showGenericErrorDialog(context: context, error: e);
+      await showGenericErrorDialog(context: context, error: e);
       rethrow;
     }
   }

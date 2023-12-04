@@ -171,7 +171,7 @@ class SuperLogging {
       await setupLogDir();
     }
     if (sentryIsEnabled) {
-      setupSentry();
+      setupSentry().ignore();
     }
 
     Logger.root.level = Level.ALL;
@@ -266,7 +266,7 @@ class SuperLogging {
 
     // add error to sentry queue
     if (sentryIsEnabled && rec.error != null) {
-      _sendErrorToSentry(rec.error!, null);
+      _sendErrorToSentry(rec.error!, null).ignore();
     }
   }
 
@@ -303,7 +303,7 @@ class SuperLogging {
   static Future<void> setupSentry() async {
     await for (final error in sentryQueueControl.stream.asBroadcastStream()) {
       try {
-        Sentry.captureException(
+        await Sentry.captureException(
           error,
         );
       } catch (e) {

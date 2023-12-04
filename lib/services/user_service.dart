@@ -338,7 +338,7 @@ class UserService {
         Widget page;
         final String twoFASessionID = response.data["twoFactorSessionID"];
         if (twoFASessionID.isNotEmpty) {
-          setTwoFactor(value: true);
+          await setTwoFactor(value: true);
           page = TwoFactorAuthenticationPage(twoFASessionID);
         } else {
           await _saveConfiguration(response);
@@ -354,7 +354,7 @@ class UserService {
             );
           }
         }
-        Navigator.of(context).pushAndRemoveUntil(
+        await Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(
             builder: (BuildContext context) {
               return page;
@@ -740,9 +740,10 @@ class UserService {
       );
       await dialog.hide();
       if (response.statusCode == 200) {
-        showShortToast(context, S.of(context).authenticationSuccessful);
+        showShortToast(context, S.of(context).authenticationSuccessful)
+            .ignore();
         await _saveConfiguration(response);
-        Navigator.of(context).pushAndRemoveUntil(
+        await Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(
             builder: (BuildContext context) {
               return const PasswordReentryPage();
@@ -755,8 +756,8 @@ class UserService {
       await dialog.hide();
       _logger.severe(e);
       if (e.response != null && e.response!.statusCode == 404) {
-        showToast(context, "Session expired");
-        Navigator.of(context).pushAndRemoveUntil(
+        showToast(context, "Session expired").ignore();
+        await Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(
             builder: (BuildContext context) {
               return const LoginPage();
@@ -809,7 +810,7 @@ class UserService {
     } on DioError catch (e) {
       _logger.severe(e);
       if (e.response != null && e.response!.statusCode == 404) {
-        showToast(context, S.of(context).sessionExpired);
+        showToast(context, S.of(context).sessionExpired).ignore();
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(
             builder: (BuildContext context) {
@@ -959,7 +960,7 @@ class UserService {
     try {
       recoveryKey = await getOrCreateRecoveryKey(context);
     } catch (e) {
-      showGenericErrorDialog(context: context, error: e);
+      await showGenericErrorDialog(context: context, error: e);
       return false;
     }
     final dialog = createProgressDialog(context, S.of(context).verifying);

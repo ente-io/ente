@@ -404,7 +404,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
     } catch (e, s) {
       _logger.severe(e, s);
       await dialog.hide();
-      showGenericErrorDialog(context: context, error: e);
+      await showGenericErrorDialog(context: context, error: e);
     }
   }
 
@@ -456,7 +456,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
         } catch (e, s) {
           _logger.severe(e, s);
           await dialog.hide();
-          showGenericErrorDialog(context: context, error: e);
+          await showGenericErrorDialog(context: context, error: e);
         }
       }
 
@@ -481,7 +481,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
           S.of(context).sorryWeCouldNotGenerateSecureKeysOnThisDevicennplease,
         );
       } else {
-        showGenericErrorDialog(context: context, error: e);
+        await showGenericErrorDialog(context: context, error: e);
       }
     }
   }

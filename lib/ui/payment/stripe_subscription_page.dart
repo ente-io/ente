@@ -303,20 +303,22 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
         await _launchStripePortal();
         break;
       case playStore:
-        launchUrlString(
-          "https://play.google.com/store/account/subscriptions?sku=" +
-              _currentSubscription!.productID +
-              "&package=io.ente.photos",
+        unawaited(
+          launchUrlString(
+            "https://play.google.com/store/account/subscriptions?sku=" +
+                _currentSubscription!.productID +
+                "&package=io.ente.photos",
+          ),
         );
         break;
       case appStore:
-        launchUrlString("https://apps.apple.com/account/billing");
+        unawaited(launchUrlString("https://apps.apple.com/account/billing"));
         break;
       default:
         final String capitalizedWord = paymentProvider.isNotEmpty
             ? '${paymentProvider[0].toUpperCase()}${paymentProvider.substring(1).toLowerCase()}'
             : '';
-        showErrorDialog(
+        await showErrorDialog(
           context,
           S.of(context).sorry,
           S.of(context).contactToManageSubscription(capitalizedWord),
@@ -328,7 +330,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
     await _dialog.show();
     try {
       final String url = await _billingService.getStripeCustomerPortalUrl();
-      Navigator.of(context).push(
+      await Navigator.of(context).push(
         MaterialPageRoute(
           builder: (BuildContext context) {
             return WebPage(S.of(context).paymentDetails, url);
@@ -337,7 +339,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
       ).then((value) => onWebPaymentGoBack);
     } catch (e) {
       await _dialog.hide();
-      showGenericErrorDialog(context: context, error: e);
+      await showGenericErrorDialog(context: context, error: e);
     }
     await _dialog.hide();
   }
@@ -382,7 +384,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
           confirmAction = choice!.action == ButtonAction.first;
         }
         if (confirmAction) {
-          toggleStripeSubscription(isRenewCancelled);
+          await toggleStripeSubscription(isRenewCancelled);
         }
       },
     );
@@ -398,11 +400,13 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
           : await _billingService.cancelStripeSubscription();
       await _fetchSub();
     } catch (e) {
-      showShortToast(
-        context,
-        isAutoRenewDisabled
-            ? S.of(context).failedToRenew
-            : S.of(context).failedToCancel,
+      unawaited(
+        showShortToast(
+          context,
+          isAutoRenewDisabled
+              ? S.of(context).failedToRenew
+              : S.of(context).failedToCancel,
+        ),
       );
     }
     await _dialog.hide();
@@ -454,7 +458,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
               if (!_isStripeSubscriber &&
                   _hasActiveSubscription &&
                   _currentSubscription!.productID != freeProductID) {
-                showErrorDialog(
+                await showErrorDialog(
                   context,
                   S.of(context).sorry,
                   S.of(context).cancelOtherSubscription(
@@ -473,7 +477,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
                   "addOnBonus ${convertBytesToReadableFormat(addOnBonus)},"
                   "overshooting by ${convertBytesToReadableFormat(_userDetails.getFamilyOrPersonalUsage() - (plan.storage + addOnBonus))}",
                 );
-                showErrorDialog(
+                await showErrorDialog(
                   context,
                   S.of(context).sorry,
                   S.of(context).youCannotDowngradeToThisPlan,
@@ -495,7 +499,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
                   return;
                 }
               }
-              Navigator.push(
+              await Navigator.push(
                 context,
                 MaterialPageRoute(
                   builder: (BuildContext context) {

@@ -1,3 +1,5 @@
+import "dart:async";
+
 import "package:flutter/material.dart";
 import "package:like_button/like_button.dart";
 import "package:logging/logging.dart";
@@ -77,9 +79,11 @@ class _FavoriteWidgetState extends State<FavoriteWidget> {
               } catch (e, s) {
                 _logger.severe(e, s);
                 hasError = true;
-                showToast(
-                  context,
-                  S.of(context).sorryCouldNotRemoveFromFavorites,
+                unawaited(
+                  showToast(
+                    context,
+                    S.of(context).sorryCouldNotRemoveFromFavorites,
+                  ),
                 );
               }
             }

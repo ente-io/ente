@@ -205,7 +205,7 @@ class AddPhotosPhotoWidget extends StatelessWidget {
       if (e is StateError) {
         final PermissionState ps = await PhotoManager.requestPermissionExtend();
         if (ps != PermissionState.authorized && ps != PermissionState.limited) {
-          showChoiceDialog(
+          await showChoiceDialog(
             context,
             title: context.l10n.grantPermission,
             body: context.l10n.pleaseGrantPermissions,

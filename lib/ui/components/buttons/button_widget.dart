@@ -498,7 +498,7 @@ class _ButtonChildWidgetState extends State<ButtonChildWidget> {
       } else if (exception != null) {
         //This is to show the execution was unsuccessful if the dialog is manually
         //closed before the execution completes.
-        showGenericErrorDialog(context: context, error: exception);
+        showGenericErrorDialog(context: context, error: exception).ignore();
       }
     }
   }

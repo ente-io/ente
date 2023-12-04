@@ -1,3 +1,5 @@
+import "dart:async";
+
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:path/path.dart';
@@ -134,7 +136,7 @@ Future<void> updateOrder(
     );
   } catch (e, s) {
     _logger.severe("failed to update order", e, s);
-    showShortToast(context, S.of(context).somethingWentWrong);
+    unawaited(showShortToast(context, S.of(context).somethingWentWrong));
     rethrow;
   }
 }
@@ -160,7 +162,7 @@ Future<void> changeCoverPhoto(
     );
   } catch (e, s) {
     _logger.severe("failed to update cover", e, s);
-    showShortToast(context, S.of(context).somethingWentWrong);
+    unawaited(showShortToast(context, S.of(context).somethingWentWrong));
     rethrow;
   }
 }
@@ -179,7 +181,7 @@ Future<bool> editTime(
     );
     return true;
   } catch (e) {
-    showShortToast(context, S.of(context).somethingWentWrong);
+    showShortToast(context, S.of(context).somethingWentWrong).ignore();
     return false;
   }
 }
@@ -218,7 +220,7 @@ Future<void> editFilename(
   );
   if (result is Exception) {
     _logger.severe("Failed to rename file");
-    showGenericErrorDialog(context: context, error: result);
+    await showGenericErrorDialog(context: context, error: result);
   }
 }
 
@@ -238,7 +240,7 @@ Future<bool> editFileCaption(
     return true;
   } catch (e) {
     if (context != null) {
-      showShortToast(context, S.of(context).somethingWentWrong);
+      unawaited(showShortToast(context, S.of(context).somethingWentWrong));
     }
     return false;
   }
@@ -265,7 +267,7 @@ Future<void> _updatePublicMetadata(
     await FileMagicService.instance.updatePublicMagicMetadata(files, update);
     if (context != null) {
       if (showDoneToast) {
-        showShortToast(context, S.of(context).done);
+        await showShortToast(context, S.of(context).done);
       }
       await dialog?.hide();
     }

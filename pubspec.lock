@@ -503,11 +503,12 @@ packages:
   file_saver:
     dependency: "direct main"
     description:
-      name: file_saver
-      sha256: "591d25e750e3a4b654f7b0293abc2ed857242f82ca7334051b2a8ceeb369dac8"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.2.8"
+      path: "."
+      ref: HEAD
+      resolved-ref: "01b2e6b6fe520cfa5d2d91342ccbfbaefa8f6482"
+      url: "https://github.com/jesims/file_saver.git"
+    source: git
+    version: "0.2.9"
   firebase_core:
     dependency: "direct main"
     description:

@@ -65,8 +65,8 @@ void main() async {
   MediaKit.ensureInitialized();
   final savedThemeMode = await AdaptiveTheme.getThemeMode();
   await _runInForeground(savedThemeMode);
-  BackgroundFetch.registerHeadlessTask(_headlessTaskHandler);
-  FlutterDisplayMode.setHighRefreshRate();
+  unawaited(BackgroundFetch.registerHeadlessTask(_headlessTaskHandler));
+  FlutterDisplayMode.setHighRefreshRate().ignore();
 }
 
 Future<void> _runInForeground(AdaptiveThemeMode? savedThemeMode) async {
@@ -129,7 +129,7 @@ Future<void> _runInBackground(String taskId) async {
     _scheduleSuicide(kBGTaskTimeout, taskId); // To prevent OS from punishing us
   }
   await _init(true, via: 'runViaBackgroundTask');
-  UpdateService.instance.showUpdateNotification();
+  UpdateService.instance.showUpdateNotification().ignore();
   await _sync('bgSync');
   BackgroundFetch.finish(taskId);
 }
@@ -158,7 +158,7 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     AppLifecycleService.instance.onAppInForeground('init via: $via');
   }
   // Start workers asynchronously. No need to wait for them to start
-  Computer.shared().turnOn(workersCount: 4, verbose: kDebugMode);
+  Computer.shared().turnOn(workersCount: 4, verbose: kDebugMode).ignore();
   CryptoUtil.init();
   await NetworkClient.instance.init();
   await Configuration.instance.init();

@@ -102,7 +102,7 @@ Future<void> deleteFilesFromEverywhere(
       await FilesDB.instance.deleteMultipleUploadedFiles(fileIDs);
     } catch (e) {
       _logger.severe(e);
-      showGenericErrorDialog(context: context, error: e);
+      await showGenericErrorDialog(context: context, error: e);
       rethrow;
     }
     for (final collectionID in updatedCollectionIDs) {
@@ -127,9 +127,9 @@ Future<void> deleteFilesFromEverywhere(
       ),
     );
     if (hasLocalOnlyFiles && Platform.isAndroid) {
-      showShortToast(context, S.of(context).filesDeleted);
+      await showShortToast(context, S.of(context).filesDeleted);
     } else {
-      showShortToast(context, S.of(context).movedToTrash);
+      await showShortToast(context, S.of(context).movedToTrash);
     }
   }
   if (uploadedFilesToBeTrashed.isNotEmpty) {
@@ -163,7 +163,7 @@ Future<void> deleteFilesFromRemoteOnly(
     await FilesDB.instance.deleteMultipleUploadedFiles(uploadedFileIDs);
   } catch (e, s) {
     _logger.severe("Failed to delete files from remote", e, s);
-    showGenericErrorDialog(context: context, error: e);
+    await showGenericErrorDialog(context: context, error: e);
     rethrow;
   }
   for (final collectionID in updatedCollectionIDs) {
@@ -626,7 +626,10 @@ Future<void> showDeleteSheet(
   );
   if (actionResult?.action != null &&
       actionResult!.action == ButtonAction.error) {
-    showGenericErrorDialog(context: context, error: actionResult.exception);
+    await showGenericErrorDialog(
+      context: context,
+      error: actionResult.exception,
+    );
   } else {
     selectedFiles.clearAll();
   }

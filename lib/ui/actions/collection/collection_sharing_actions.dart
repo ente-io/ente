@@ -52,7 +52,7 @@ class CollectionActions {
         _showUnSupportedAlert(context);
       } else {
         logger.severe("Failed to update shareUrl collection", e);
-        showGenericErrorDialog(context: context, error: e);
+        await showGenericErrorDialog(context: context, error: e);
       }
       return false;
     }
@@ -93,7 +93,10 @@ class CollectionActions {
     );
     if (actionResult?.action != null) {
       if (actionResult!.action == ButtonAction.error) {
-        showGenericErrorDialog(context: context, error: actionResult.exception);
+        await showGenericErrorDialog(
+          context: context,
+          error: actionResult.exception,
+        );
       }
       return actionResult.action == ButtonAction.first;
     } else {
@@ -142,7 +145,7 @@ class CollectionActions {
       return collection;
     } catch (e, s) {
       dialog.hide();
-      showGenericErrorDialog(context: context, error: e);
+      await showGenericErrorDialog(context: context, error: e);
       logger.severe("Failing to create link for selected files", e, s);
     }
     return null;
@@ -183,7 +186,10 @@ class CollectionActions {
     );
     if (actionResult?.action != null) {
       if (actionResult!.action == ButtonAction.error) {
-        showGenericErrorDialog(context: context, error: actionResult.exception);
+        await showGenericErrorDialog(
+          context: context,
+          error: actionResult.exception,
+        );
       }
       return actionResult.action == ButtonAction.first;
     }
@@ -230,7 +236,7 @@ class CollectionActions {
     } catch (e) {
       await dialog?.hide();
       logger.severe("Failed to get public key", e);
-      showGenericErrorDialog(context: context, error: e);
+      await showGenericErrorDialog(context: context, error: e);
       return false;
     }
     // getPublicKey can return null when no user is associated with given
@@ -272,7 +278,7 @@ class CollectionActions {
           _showUnSupportedAlert(context);
         } else {
           logger.severe("failed to share collection", e);
-          showGenericErrorDialog(context: context, error: e);
+          await showGenericErrorDialog(context: context, error: e);
         }
         return false;
       }
@@ -353,7 +359,10 @@ class CollectionActions {
     );
     if (actionResult?.action != null &&
         actionResult!.action == ButtonAction.error) {
-      showGenericErrorDialog(context: bContext, error: actionResult.exception);
+      await showGenericErrorDialog(
+        context: bContext,
+        error: actionResult.exception,
+      );
       return false;
     }
     if ((actionResult?.action != null) &&

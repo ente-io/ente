@@ -154,7 +154,7 @@ extension HiddenService on CollectionsService {
     } catch (e, s) {
       _logger.severe("Could not hide", e, s);
       await dialog.hide();
-      showGenericErrorDialog(context: context, error: e);
+      await showGenericErrorDialog(context: context, error: e);
       return false;
     } finally {
       await dialog.hide();

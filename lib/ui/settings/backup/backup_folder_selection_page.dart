@@ -232,7 +232,7 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
     } catch (e, s) {
       _logger.severe("Failed to updated backup folder", e, s);
       await dialog.hide();
-      showGenericErrorDialog(context: context, error: e);
+      await showGenericErrorDialog(context: context, error: e);
     }
   }
 

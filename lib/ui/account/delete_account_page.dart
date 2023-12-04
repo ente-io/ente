@@ -289,7 +289,7 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
       showShortToast(context, S.of(context).yourAccountHasBeenDeleted);
     } catch (e, s) {
       Logger("DeleteAccount").severe("failed to delete", e, s);
-      showGenericErrorDialog(context: context, error: e);
+      await showGenericErrorDialog(context: context, error: e);
     }
   }
 

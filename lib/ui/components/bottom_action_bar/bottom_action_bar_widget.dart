@@ -49,13 +49,12 @@ class BottomActionBarWidget extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const SizedBox(height: 12),
+          const SizedBox(height: 8),
           FileSelectionActionsWidget(
             galleryType,
             selectedFiles,
             collection: collection,
           ),
-          const SizedBox(height: 20),
           const DividerWidget(dividerType: DividerType.bottomBar),
           ActionBarWidget(
             selectedFiles: selectedFiles,

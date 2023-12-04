@@ -118,7 +118,7 @@ class LocationScreenPopUpMenu extends StatelessWidget {
                 );
                 Navigator.of(context).pop();
               } catch (e) {
-                showGenericErrorDialog(context: context, error: e);
+                await showGenericErrorDialog(context: context, error: e);
               }
             }
           },

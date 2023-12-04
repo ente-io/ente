@@ -55,8 +55,10 @@ dependencies:
   extended_image: ^8.1.1
   fade_indexed_stack: ^0.2.2
   fast_base58: ^0.2.1
-  # https://github.com/incrediblezayed/file_saver/issues/86
-  file_saver: 0.2.8
+
+  file_saver:
+    # Use forked version till this PR is merged: https://github.com/incrediblezayed/file_saver/pull/87
+    git: https://github.com/jesims/file_saver.git
   firebase_core: ^2.13.1
   firebase_messaging: ^14.6.2
   fk_user_agent: ^2.0.1

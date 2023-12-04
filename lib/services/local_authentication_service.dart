@@ -1,3 +1,5 @@
+import "dart:async";
+
 import 'package:flutter/material.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:photos/core/configuration.dart';
@@ -22,7 +24,7 @@ class LocalAuthenticationService {
         Configuration.instance.shouldShowLockScreen(),
       );
       if (!result) {
-        showToast(context, infoMessage);
+        unawaited(showToast(context, infoMessage));
         return false;
       } else {
         return true;
@@ -54,10 +56,12 @@ class LocalAuthenticationService {
             .setEnabled(Configuration.instance.shouldShowLockScreen());
       }
     } else {
-      showErrorDialog(
-        context,
-        errorDialogTitle,
-        errorDialogContent,
+      unawaited(
+        showErrorDialog(
+          context,
+          errorDialogTitle,
+          errorDialogContent,
+        ),
       );
     }
     return false;
