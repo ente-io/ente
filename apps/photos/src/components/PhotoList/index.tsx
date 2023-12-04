@@ -19,14 +19,12 @@ import {
 import { PublicCollectionGalleryContext } from 'utils/publicCollectionGallery';
 import { ENTE_WEBSITE_LINK } from '@ente/shared/constants/urls';
 import { convertBytesToHumanReadable } from '@ente/shared/utils/size';
-import { DeduplicateContext } from 'pages/deduplicate';
 import { FlexWrapper } from '@ente/shared/components/Container';
 import { Typography } from '@mui/material';
 import { GalleryContext } from 'pages/gallery';
 import { formatDate } from '@ente/shared/time/format';
 import { Trans } from 'react-i18next';
 import { t } from 'i18next';
-import { areFilesWithFileHashSame, hasFileHash } from 'utils/upload';
 import memoize from 'memoize-one';
 
 const A_DAY = 24 * 60 * 60 * 1000;
@@ -261,7 +259,6 @@ export function PhotoList({
     const publicCollectionGalleryContext = useContext(
         PublicCollectionGalleryContext
     );
-    const deduplicateContext = useContext(DeduplicateContext);
 
     const [timeStampList, setTimeStampList] = useState<TimeStampListItem[]>([]);
     const refreshInProgress = useRef(false);
@@ -306,9 +303,6 @@ export function PhotoList({
             }
             if (galleryContext.isClipSearchResult) {
                 noGrouping(timeStampList);
-            } else if (deduplicateContext.isOnDeduplicatePage) {
-                skipMerge = true;
-                groupByFileSize(timeStampList);
             } else {
                 groupByTime(timeStampList);
             }
@@ -345,9 +339,6 @@ export function PhotoList({
         width,
         height,
         displayFiles,
-        deduplicateContext.isOnDeduplicatePage,
-        deduplicateContext.fileSizeMap,
-        deduplicateContext.clubSameTimeFilesOnly,
         galleryContext.photoListHeader,
         publicCollectionGalleryContext.photoListHeader,
         galleryContext.isClipSearchResult,
@@ -419,67 +410,6 @@ export function PhotoList({
     useEffect(() => {
         refreshList();
     }, [timeStampList]);
-
-    const groupByFileSize = (timeStampList: TimeStampListItem[]) => {
-        let index = 0;
-        while (index < displayFiles.length) {
-            const firstFile = displayFiles[index];
-            const firstFileSize = deduplicateContext.fileSizeMap.get(
-                firstFile.id
-            );
-            const firstFileCreationTime = firstFile.metadata.creationTime;
-            let lastFileIndex = index;
-
-            while (lastFileIndex < displayFiles.length) {
-                const lastFile = displayFiles[lastFileIndex];
-
-                const lastFileSize = deduplicateContext.fileSizeMap.get(
-                    lastFile.id
-                );
-                if (lastFileSize !== firstFileSize) {
-                    break;
-                }
-
-                const lastFileCreationTime = lastFile.metadata.creationTime;
-                if (
-                    deduplicateContext.clubSameTimeFilesOnly &&
-                    lastFileCreationTime !== firstFileCreationTime
-                ) {
-                    break;
-                }
-
-                const eitherFileHasFileHash =
-                    hasFileHash(lastFile.metadata) ||
-                    hasFileHash(firstFile.metadata);
-                if (
-                    eitherFileHasFileHash &&
-                    !areFilesWithFileHashSame(
-                        lastFile.metadata,
-                        firstFile.metadata
-                    )
-                ) {
-                    break;
-                }
-                lastFileIndex++;
-            }
-            lastFileIndex--;
-            timeStampList.push({
-                itemType: ITEM_TYPE.SIZE_AND_COUNT,
-                fileSize: firstFileSize,
-                fileCount: lastFileIndex - index + 1,
-            });
-
-            while (index <= lastFileIndex) {
-                const tileSize = Math.min(columns, lastFileIndex - index + 1);
-                timeStampList.push({
-                    itemType: ITEM_TYPE.FILE,
-                    items: displayFiles.slice(index, index + tileSize),
-                    itemStartIndex: index,
-                });
-                index += tileSize;
-            }
-        }
-    };
 
     const groupByTime = (timeStampList: TimeStampListItem[]) => {
         let listItemIndex = 0;

@@ -463,6 +463,7 @@ export default function PublicCollectionGallery() {
                     openUploader={openUploader}
                 />
                 <PhotoFrame
+                    page={PAGES.SHARED_ALBUMS}
                     files={publicFiles}
                     syncWithRemote={syncWithRemote}
                     setSelected={() => null}

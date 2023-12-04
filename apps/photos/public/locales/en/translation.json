@@ -425,7 +425,6 @@
     "FILES": "Files",
     "EACH": "Each",
     "DEDUPLICATE_BASED_ON_SIZE": "The following files were clubbed based on their sizes, please review and delete items you believe are duplicates",
-    "DEDUPLICATE_BASED_ON_SIZE_AND_CAPTURE_TIME": "The following files were clubbed based on their sizes and capture time, please review and delete items you believe are duplicates",
     "STOP_ALL_UPLOADS_MESSAGE": "Are you sure that you want to stop all the uploads in progress?",
     "STOP_UPLOADS_HEADER": "Stop uploads?",
     "YES_STOP_UPLOADS": "Yes, stop uploads",
