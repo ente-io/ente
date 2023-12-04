@@ -131,11 +131,8 @@ class GalleryState extends State<Gallery> {
               "Reloaded gallery on soft refresh all files on ${event.reason}",
             );
           }
-          if (event.type == EventType.deletedFromDevice ||
-              event.type == EventType.deletedFromEverywhere ||
-              event.type == EventType.deletedFromRemote) {
-            setState(() {});
-          }
+
+          setState(() {});
         });
       });
     }
