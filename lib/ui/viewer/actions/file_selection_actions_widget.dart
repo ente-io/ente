@@ -325,6 +325,8 @@ class _FileSelectionActionsWidgetState
         data: MediaQuery.of(context).removePadding(removeBottom: true),
         child: SafeArea(
           child: Scrollbar(
+            radius: const Radius.circular(1),
+            thickness: 2,
             controller: scrollController,
             thumbVisibility: true,
             child: SingleChildScrollView(
