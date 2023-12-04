@@ -425,7 +425,6 @@
     "FILES": "Archivos",
     "EACH": "Cada",
     "DEDUPLICATE_BASED_ON_SIZE": "Los siguientes archivos fueron organizados en base a sus tamaños, por favor revise y elimine elementos que cree que son duplicados",
-    "DEDUPLICATE_BASED_ON_SIZE_AND_CAPTURE_TIME": "Los siguientes archivos fueron organizados en base a sus tamaños y tiempo de captura, por favor revise y elimine elementos que cree que son duplicados",
     "STOP_ALL_UPLOADS_MESSAGE": "¿Está seguro que desea detener todas las subidas en curso?",
     "STOP_UPLOADS_HEADER": "Detener las subidas?",
     "YES_STOP_UPLOADS": "Sí, detener las subidas",
