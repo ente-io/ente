@@ -14,6 +14,7 @@ class FileUpdationDB {
   static const tableName = 're_upload_tracker';
   static const columnLocalID = 'local_id';
   static const columnReason = 'reason';
+  static const livePhotoSize = 'livePhotoSize';
 
   static const modificationTimeUpdated = 'modificationTimeUpdated';
 

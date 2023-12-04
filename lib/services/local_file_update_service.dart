@@ -7,8 +7,10 @@ import "package:photos/core/configuration.dart";
 import 'package:photos/core/errors.dart';
 import 'package:photos/db/file_updation_db.dart';
 import 'package:photos/db/files_db.dart';
+import "package:photos/extensions/stop_watch.dart";
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file/file_type.dart';
+import "package:photos/services/files_service.dart";
 import 'package:photos/utils/file_uploader_util.dart';
 import 'package:photos/utils/file_util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -19,6 +21,9 @@ class LocalFileUpdateService {
   late FileUpdationDB _fileUpdationDB;
   late SharedPreferences _prefs;
   late Logger _logger;
+  final String _iosLivePhotoSizeMigrationDone = 'fm_ios_live_photo_size';
+  final String _doneLivePhotoImport = 'fm_import_ios_live_photo_size';
+  static int fourMBWithChunkSize = 4194338;
   final List<String> _oldMigrationKeys = [
     'fm_badCreationTime',
     'fm_badCreationTimeCompleted',
@@ -52,6 +57,8 @@ class LocalFileUpdateService {
       await _markFilesWhichAreActuallyUpdated();
       if (Platform.isAndroid) {
         _cleanUpOlderMigration().ignore();
+      } else {
+        await _handleLivePhotosSizedCheck();
       }
     } catch (e, s) {
       _logger.severe('failed to perform migration', e, s);
@@ -197,6 +204,146 @@ class LocalFileUpdateService {
       processedIDs.toList(),
       FileUpdationDB.modificationTimeUpdated,
     );
+  }
+
+  Future<void> _handleLivePhotosSizedCheck() async {
+    try {
+      if (_prefs.containsKey(_iosLivePhotoSizeMigrationDone)) {
+        return;
+      }
+      await _importLivePhotoReUploadCandidates();
+      final sTime = DateTime.now().microsecondsSinceEpoch;
+      // singleRunLimit indicates number of files to check during single
+      // invocation of this method. The limit act as a crude way to limit the
+      // resource consumed by the method
+      const int singleRunLimit = 50;
+      final localIDsToProcess =
+          await _fileUpdationDB.getLocalIDsForPotentialReUpload(
+        singleRunLimit,
+        FileUpdationDB.livePhotoSize,
+      );
+      if (localIDsToProcess.isNotEmpty) {
+        await _checkLivePhotoWithLowOrUnknownSize(
+          localIDsToProcess,
+        );
+        final eTime = DateTime.now().microsecondsSinceEpoch;
+        final d = Duration(microseconds: eTime - sTime);
+        _logger.info(
+          'Performed hashCheck for ${localIDsToProcess.length} livePhoto files '
+          'completed in ${d.inSeconds.toString()} secs',
+        );
+      } else {
+        _prefs.setBool(_iosLivePhotoSizeMigrationDone, true);
+      }
+    } catch (e, s) {
+      _logger.severe('error while checking livePhotoSize check', e, s);
+    }
+  }
+
+  Future<void> _checkLivePhotoWithLowOrUnknownSize(
+    List<String> localIDsToProcess,
+  ) async {
+    final int userID = Configuration.instance.getUserID()!;
+    final List<EnteFile> result =
+        await FilesDB.instance.getLocalFiles(localIDsToProcess);
+    final List<EnteFile> localFilesForUser = [];
+    final Set<String> localIDsWithFile = {};
+    final Set<int> missingSizeIDs = {};
+    for (EnteFile file in result) {
+      if (file.ownerID == null || file.ownerID == userID) {
+        localFilesForUser.add(file);
+        localIDsWithFile.add(file.localID!);
+        if (file.isUploaded && file.fileSize == null) {
+          missingSizeIDs.add(file.uploadedFileID!);
+        }
+      }
+    }
+    if (missingSizeIDs.isNotEmpty) {
+      await FilesService.instance.backFillSizes(missingSizeIDs.toList());
+      _logger.info('sizes back fill for ${missingSizeIDs.length} files');
+      // return early, let the check run in the next batch
+      return;
+    }
+
+    final Set<String> processedIDs = {};
+    // if a file for localID doesn't exist, then mark it as processed
+    // otherwise the app will be stuck in retrying same set of ids
+
+    for (String localID in localIDsToProcess) {
+      if (!localIDsWithFile.contains(localID)) {
+        processedIDs.add(localID);
+      }
+    }
+    _logger.info(" check ${localIDsToProcess.length} files for livePhotoSize, "
+        "missing file cnt ${processedIDs.length}");
+
+    for (EnteFile file in localFilesForUser) {
+      if (file.fileSize == null) {
+        _logger.info('fileSize still null, skip this file');
+        continue;
+      } else if (file.fileType != FileType.livePhoto) {
+        _logger.severe('fileType is not livePhoto, skip this file');
+        continue;
+      } else if (file.fileSize! != fourMBWithChunkSize) {
+        // back-filled size is not of our interest
+        processedIDs.add(file.localID!);
+        continue;
+      }
+      if (processedIDs.contains(file.localID)) {
+        continue;
+      }
+      try {
+        final MediaUploadData uploadData = await getUploadData(file);
+        _logger.info(
+            'Found livePhoto on local with hash ${uploadData.hashData?.fileHash ?? "null"} and existing hash ${file.hash ?? "null"}');
+        await clearCache(file);
+        await FilesDB.instance.markFilesForReUpload(
+          userID,
+          file.localID!,
+          file.title,
+          file.location,
+          file.creationTime!,
+          file.modificationTime!,
+          file.fileType,
+        );
+        processedIDs.add(file.localID!);
+      } on InvalidFileError catch (e) {
+        if (e.reason == InvalidReason.livePhotoToImageTypeChanged ||
+            e.reason == InvalidReason.imageToLivePhotoTypeChanged) {
+          // let existing file update check handle this case
+          _fileUpdationDB.insertMultiple(
+            [file.localID!],
+            FileUpdationDB.modificationTimeUpdated,
+          ).ignore();
+        } else {
+          _logger.severe("livePhoto check failed: invalid file ${file.tag}", e);
+        }
+        processedIDs.add(file.localID!);
+      } catch (e) {
+        _logger.severe("livePhoto check failed", e);
+      } finally {}
+    }
+    await _fileUpdationDB.deleteByLocalIDs(
+      processedIDs.toList(),
+      FileUpdationDB.livePhotoSize,
+    );
+  }
+
+  Future<void> _importLivePhotoReUploadCandidates() async {
+    if (_prefs.containsKey(_doneLivePhotoImport)) {
+      return;
+    }
+    _logger.info('_importLivePhotoReUploadCandidates');
+    final EnteWatch watch = EnteWatch("_importLivePhotoReUploadCandidates");
+    final int ownerID = Configuration.instance.getUserID()!;
+    final List<String> localIDs = await FilesDB.instance
+        .getLivePhotosWithBadSize(ownerID, fourMBWithChunkSize);
+    await _fileUpdationDB.insertMultiple(
+      localIDs,
+      FileUpdationDB.livePhotoSize,
+    );
+    watch.log("imported ${localIDs.length} files");
+    await _prefs.setBool(_doneLivePhotoImport, true);
   }
 
   Future<MediaUploadData> getUploadData(EnteFile file) async {

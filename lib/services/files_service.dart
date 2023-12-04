@@ -49,15 +49,19 @@ class FilesService {
       if (uploadIDsWithMissingSize.isEmpty) {
         return Future.value(true);
       }
-      final batchedFiles = uploadIDsWithMissingSize.chunks(1000);
-      for (final batch in batchedFiles) {
-        final Map<int, int> uploadIdToSize = await getFilesSizeFromInfo(batch);
-        await _filesDB.updateSizeForUploadIDs(uploadIdToSize);
-      }
+      await backFillSizes(uploadIDsWithMissingSize);
       return Future.value(true);
     } catch (e, s) {
       _logger.severe("error during has migrated sizes", e, s);
       return Future.value(false);
+    }
+  }
+
+  Future<void> backFillSizes(List<int> uploadIDsWithMissingSize) async {
+    final batchedFiles = uploadIDsWithMissingSize.chunks(1000);
+    for (final batch in batchedFiles) {
+      final Map<int, int> uploadIdToSize = await getFilesSizeFromInfo(batch);
+      await _filesDB.updateSizeForUploadIDs(uploadIdToSize);
     }
   }
 
