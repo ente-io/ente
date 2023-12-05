@@ -90,10 +90,11 @@ class _VideoWidgetNewState extends State<VideoWidgetNew>
 
   @override
   void dispose() {
+    removeCallBack(widget.file);
+    _progressNotifier.dispose();
     WidgetsBinding.instance.removeObserver(this);
     playingStreamSubscription.cancel();
     player.dispose();
-    _progressNotifier.dispose();
     super.dispose();
   }
 
