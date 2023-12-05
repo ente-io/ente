@@ -159,6 +159,9 @@ class _VideoWidgetNewState extends State<VideoWidgetNew>
     getFileFromServer(
       widget.file,
       progressCallback: (count, total) {
+        if(!mounted) {
+          return;
+        }
         _progressNotifier.value = count / (widget.file.fileSize ?? total);
         if (_progressNotifier.value == 1) {
           if (mounted) {
