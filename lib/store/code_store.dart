@@ -61,14 +61,19 @@ class CodeStore {
     final mode = accountMode ?? _authenticatorService.getAccountMode();
     final codes = await getAllCodes(accountMode: mode);
     bool isExistingCode = false;
+    bool hasSameCode = false;
     for (final existingCode in codes) {
-      if (existingCode == code) {
-        _logger.info("Found duplicate code, skipping add");
-        return AddResult.duplicate;
-      } else if (existingCode.generatedID == code.generatedID) {
+      if (code.generatedID != null &&
+          existingCode.generatedID == code.generatedID) {
         isExistingCode = true;
         break;
       }
+      if (existingCode == code) {
+        hasSameCode = true;
+      }
+    }
+    if (!isExistingCode && hasSameCode) {
+      return AddResult.duplicate;
     }
     late AddResult result;
     if (isExistingCode) {

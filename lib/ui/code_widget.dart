@@ -114,7 +114,7 @@ class _CodeWidgetState extends State<CodeWidget> {
               borderRadius: const BorderRadius.all(Radius.circular(12.0)),
               foregroundColor:
                   Theme.of(context).colorScheme.inverseBackgroundColor,
-              icon: widget.code.isPinned!
+              icon: widget.code.isPinned
                   ? Icons.push_pin
                   : Icons.push_pin_outlined,
               label: l10n.pinText,
@@ -425,12 +425,10 @@ class _CodeWidgetState extends State<CodeWidget> {
   Future<void> _onPinPressed(_) async {
     bool currentlyPinned = widget.code.isPinned;
     CodeDisplay display = widget.code.display ?? CodeDisplay();
-    final Code? code = widget.code.copyWith(
+    final Code code = widget.code.copyWith(
       display: display.copyWith(pinned: !currentlyPinned),
     );
-    if (code != null) {
-      CodeStore.instance.addCode(code);
-    }
+    unawaited(CodeStore.instance.addCode(code));
   }
 
   void _onDeletePressed(_) async {
