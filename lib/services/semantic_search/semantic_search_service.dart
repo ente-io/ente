@@ -303,7 +303,7 @@ List<QueryResult> computeBulkScore(Map args) {
   final imageEmbeddings = args["imageEmbeddings"] as List<Embedding>;
   final textEmbedding = args["textEmbedding"] as List<double>;
   for (final imageEmbedding in imageEmbeddings) {
-    final score = CLIP.computeScore(
+    final score = computeScore(
       imageEmbedding.embedding,
       textEmbedding,
     );
@@ -314,6 +314,18 @@ List<QueryResult> computeBulkScore(Map args) {
 
   queryResults.sort((first, second) => second.score.compareTo(first.score));
   return queryResults;
+}
+
+double computeScore(List<double> imageEmbedding, List<double> textEmbedding) {
+  assert(
+    imageEmbedding.length == textEmbedding.length,
+    "The two embeddings should have the same length",
+  );
+  double score = 0;
+  for (int index = 0; index < imageEmbedding.length; index++) {
+    score += imageEmbedding[index] * textEmbedding[index];
+  }
+  return score;
 }
 
 class QueryResult {
