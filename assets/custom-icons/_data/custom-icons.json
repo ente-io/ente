@@ -91,9 +91,9 @@
       "title": "KuCoin",
       "hex": "01BC8D"
     },
-	  {
+    {
       "title": "La Poste",
-	    "slug": "laposte"
+      "slug": "laposte"
     },
     {
       "title": "Mastodon",
