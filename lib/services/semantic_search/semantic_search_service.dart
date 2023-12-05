@@ -14,8 +14,7 @@ import "package:photos/events/file_uploaded_event.dart";
 import "package:photos/models/embedding.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/services/semantic_search/embedding_store.dart";
-import "package:photos/services/semantic_search/ggml_service.dart";
-import "package:photos/services/semantic_search/model_loader.dart";
+import 'package:photos/services/semantic_search/frameworks/ggml.dart';
 import "package:photos/utils/local_settings.dart";
 import "package:photos/utils/thumbnail_util.dart";
 import "package:shared_preferences/shared_preferences.dart";
@@ -33,9 +32,9 @@ class SemanticSearchService {
 
   final _logger = Logger("SemanticSearchService");
   final _queue = Queue<EnteFile>();
-  final _modelLoadFuture = Completer<void>();
   final _cachedEmbeddings = <Embedding>[];
-  final _embeddingService = GGMLService();
+  final _mlFramework = GGML();
+  final _frameworkInitialization = Completer<void>();
 
   bool _isComputingEmbeddings = false;
   bool _isSyncing = false;
@@ -46,9 +45,7 @@ class SemanticSearchService {
     if (Platform.isIOS) {
       return;
     }
-    await _embeddingService.init();
     await EmbeddingStore.instance.init(preferences);
-    await ModelLoader.instance.init(_computer);
     _setupCachedEmbeddings();
     Bus.instance.on<DiffSyncCompleteEvent>().listen((event) async {
       // Diff sync is complete, we can now pull embeddings from remote
@@ -80,7 +77,7 @@ class SemanticSearchService {
 
   Future<List<EnteFile>> search(String query) async {
     if (!LocalSettings.instance.hasEnabledMagicSearch() ||
-        !_modelLoadFuture.isCompleted) {
+        !_frameworkInitialization.isCompleted) {
       return [];
     }
     if (_ongoingRequest == null) {
@@ -131,7 +128,7 @@ class SemanticSearchService {
     if (!LocalSettings.instance.hasEnabledMagicSearch()) {
       return;
     }
-    await _modelLoadFuture.future;
+    await _frameworkInitialization.future;
     _logger.info("Attempting backfill");
     final fileIDs = await _getFileIDsToBeIndexed();
     final files = await FilesDB.instance.getUploadedFiles(fileIDs);
@@ -184,15 +181,14 @@ class SemanticSearchService {
   }
 
   Future<void> _loadModels() async {
-    _logger.info("Loading models");
+    _logger.info("Initializing ML framework");
     try {
-      await ModelLoader.instance.loadImageModel();
-      await ModelLoader.instance.loadTextModel();
-      _modelLoadFuture.complete();
+      await _mlFramework.init();
+      _frameworkInitialization.complete();
     } catch (e, s) {
-      _logger.severe("Model loading failed", e, s);
+      _logger.severe("ML framework initialization failed", e, s);
     }
-    _logger.info("Models loaded");
+    _logger.info("ML framework initialized");
   }
 
   Future<void> _pollQueue() async {
@@ -209,13 +205,13 @@ class SemanticSearchService {
   }
 
   Future<void> _computeImageEmbedding(EnteFile file) async {
-    if (!_modelLoadFuture.isCompleted) {
+    if (!_frameworkInitialization.isCompleted) {
       return;
     }
     try {
       final filePath = (await getThumbnailForUploadedFile(file))!.path;
       _logger.info("Running clip over $file");
-      final result = await _embeddingService.getImageEmbedding(filePath);
+      final result = await _mlFramework.getImageEmbedding(filePath);
       if (result.length != kEmbeddingLength) {
         _logger.severe("Discovered incorrect embedding for $file - $result");
         return;
@@ -237,7 +233,7 @@ class SemanticSearchService {
   Future<List<double>> _getTextEmbedding(String query) async {
     _logger.info("Searching for " + query);
     try {
-      final result = await _embeddingService.getTextEmbedding(query);
+      final result = await _mlFramework.getTextEmbedding(query);
       return result;
     } catch (e) {
       _logger.severe("Could not get text embedding", e);
