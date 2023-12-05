@@ -82,6 +82,8 @@ class _HomePageState extends State<HomePage> {
       _codes = codes;
       _hasLoaded = true;
       _applyFilteringAndRefresh();
+    }).onError((error, stackTrace) {
+      _logger.severe('Error while loading codes', error, stackTrace);
     });
   }
 

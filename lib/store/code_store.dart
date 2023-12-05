@@ -29,14 +29,13 @@ class CodeStore {
     final List<Code> codes = [];
     for (final entity in entities) {
       final decodeJson = jsonDecode(entity.rawData);
-      if (decodeJson.startsWith('otpauth://')) {
+      if (decodeJson is String && decodeJson.startsWith('otpauth://')) {
         final code = Code.fromOTPAuthUrl(decodeJson);
         code.generatedID = entity.generatedID;
         code.hasSynced = entity.hasSynced;
         codes.add(code);
       } else {
-        final decodedMap = jsonDecode(decodeJson);
-        final code = Code.fromExportJson(decodedMap);
+        final code = Code.fromExportJson(decodeJson);
         code.generatedID = entity.generatedID;
         code.hasSynced = entity.hasSynced;
         codes.add(code);

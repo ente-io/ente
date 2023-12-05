@@ -33,7 +33,10 @@ class CodeDisplay {
     );
   }
 
-  factory CodeDisplay.fromJson(Map<String, dynamic> json) {
+  factory CodeDisplay.fromJson(Map<String, dynamic>? json) {
+    if (json == null) {
+      return CodeDisplay();
+    }
     return CodeDisplay(
       pinned: json['pinned'] ?? false,
       trashed: json['trashed'] ?? false,
