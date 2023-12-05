@@ -46,6 +46,7 @@ class SemanticSearchService {
     if (Platform.isIOS) {
       return;
     }
+    await _embeddingService.init();
     await EmbeddingStore.instance.init(preferences);
     await ModelLoader.instance.init(_computer);
     _setupCachedEmbeddings();

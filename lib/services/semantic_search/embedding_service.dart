@@ -1,4 +1,5 @@
 abstract class EmbeddingService {
+  Future<void> init();
   Future<List<double>> getImageEmbedding(String imagePath);
   Future<List<double>> getTextEmbedding(String text);
 

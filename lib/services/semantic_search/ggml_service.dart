@@ -8,6 +8,11 @@ class GGMLService extends EmbeddingService {
   final _logger = Logger("GGMLService");
 
   @override
+  Future<void> init() async {
+    
+  }
+
+  @override
   Future<List<double>> getImageEmbedding(String imagePath) async {
     try {
       final startTime = DateTime.now();
