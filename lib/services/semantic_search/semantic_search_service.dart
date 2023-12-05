@@ -2,7 +2,6 @@ import "dart:async";
 import "dart:collection";
 import "dart:io";
 
-import "package:clip_ggml/clip_ggml.dart";
 import "package:computer/computer.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/configuration.dart";
@@ -15,6 +14,7 @@ import "package:photos/events/file_uploaded_event.dart";
 import "package:photos/models/embedding.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/services/semantic_search/embedding_store.dart";
+import "package:photos/services/semantic_search/ggml_service.dart";
 import "package:photos/services/semantic_search/model_loader.dart";
 import "package:photos/utils/local_settings.dart";
 import "package:photos/utils/thumbnail_util.dart";
@@ -35,6 +35,7 @@ class SemanticSearchService {
   final _queue = Queue<EnteFile>();
   final _modelLoadFuture = Completer<void>();
   final _cachedEmbeddings = <Embedding>[];
+  final _embeddingService = GGMLService();
 
   bool _isComputingEmbeddings = false;
   bool _isSyncing = false;
@@ -42,12 +43,6 @@ class SemanticSearchService {
   PendingQuery? _nextQuery;
 
   Future<void> init(SharedPreferences preferences) async {
-    try {
-      final response = CLIP.ping("ping");
-      _logger.info("Ping succeeded, response: " + response);
-    } catch (e, s) {
-      _logger.severe("Ping failed", e, s);
-    }
     if (Platform.isIOS) {
       return;
     }
@@ -219,18 +214,7 @@ class SemanticSearchService {
     try {
       final filePath = (await getThumbnailForUploadedFile(file))!.path;
       _logger.info("Running clip over $file");
-      final startTime = DateTime.now();
-      final result = await _computer.compute(
-        createImageEmbedding,
-        param: {
-          "imagePath": filePath,
-        },
-        taskName: "createImageEmbedding",
-      ) as List<double>;
-      final endTime = DateTime.now();
-      _logger.info(
-        "createImageEmbedding took: ${(endTime.millisecondsSinceEpoch - startTime.millisecondsSinceEpoch)}ms",
-      );
+      final result = await _embeddingService.getImageEmbedding(filePath);
       if (result.length != kEmbeddingLength) {
         _logger.severe("Discovered incorrect embedding for $file - $result");
         return;
@@ -251,22 +235,13 @@ class SemanticSearchService {
 
   Future<List<double>> _getTextEmbedding(String query) async {
     _logger.info("Searching for " + query);
-    final startTime = DateTime.now();
-    final embedding = await _computer.compute(
-      createTextEmbedding,
-      param: {
-        "text": query,
-      },
-      taskName: "createTextEmbedding",
-    );
-    final endTime = DateTime.now();
-    _logger.info(
-      "createTextEmbedding took: " +
-          (endTime.millisecondsSinceEpoch - startTime.millisecondsSinceEpoch)
-              .toString() +
-          "ms",
-    );
-    return embedding;
+    try {
+      final result = await _embeddingService.getTextEmbedding(query);
+      return result;
+    } catch (e) {
+      _logger.severe("Could not get text embedding", e);
+      return [];
+    }
   }
 
   Future<List<QueryResult>> _getScores(List<double> textEmbedding) async {
@@ -288,14 +263,6 @@ class SemanticSearchService {
     );
     return queryResults;
   }
-}
-
-List<double> createImageEmbedding(Map args) {
-  return CLIP.createImageEmbedding(args["imagePath"]);
-}
-
-List<double> createTextEmbedding(Map args) {
-  return CLIP.createTextEmbedding(args["text"]);
 }
 
 List<QueryResult> computeBulkScore(Map args) {
