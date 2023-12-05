@@ -9,7 +9,7 @@ class GGML extends MLFramework {
   static const kTextModel = "clip-vit-base-patch32_ggml-text-model-f16.gguf";
 
   final _computer = Computer.shared();
-  final _logger = Logger("GGMLService");
+  final _logger = Logger("GGML");
 
   @override
   String getImageModelRemotePath() {
