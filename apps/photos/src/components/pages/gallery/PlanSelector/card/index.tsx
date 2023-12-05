@@ -191,6 +191,7 @@ function PlanSelectorCard(props: Props) {
                         subscription={subscription}
                         bonusData={bonusData}
                         closeModal={props.closeModal}
+                        setLoading={props.setLoading}
                         planPeriod={planPeriod}
                         togglePeriod={togglePeriod}
                         onPlanSelect={onPlanSelect}

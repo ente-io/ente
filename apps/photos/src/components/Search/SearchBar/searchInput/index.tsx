@@ -1,5 +1,5 @@
 import { IconButton } from '@mui/material';
-import debounce from 'debounce-promise';
+import pDebounce from 'p-debounce';
 import { AppContext } from 'pages/_app';
 import React, {
     useCallback,
@@ -83,7 +83,7 @@ export default function SearchInput(props: Iprops) {
         }
     };
 
-    const getOptions = debounce(
+    const getOptions = pDebounce(
         getAutoCompleteSuggestions(props.files, props.collections),
         250
     );

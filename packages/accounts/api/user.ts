@@ -25,8 +25,14 @@ export const sendOtt = (appName: APPS, email: string) => {
     });
 };
 
-export const verifyOtt = (email: string, ott: string) =>
-    HTTPService.post(`${ENDPOINT}/users/verify-email`, { email, ott });
+export const verifyOtt = (email: string, ott: string, referral: string) => {
+    const cleanedReferral = `web:${referral?.trim() || ''}`;
+    return HTTPService.post(`${ENDPOINT}/users/verify-email`, {
+        email,
+        ott,
+        source: cleanedReferral,
+    });
+};
 
 export const putAttributes = (token: string, keyAttributes: KeyAttributes) =>
     HTTPService.put(

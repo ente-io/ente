@@ -27,6 +27,7 @@ export enum LS_KEYS {
     SRP_ATTRIBUTES = 'srpAttributes',
     OPT_OUT_OF_CRASH_REPORTS = 'optOutOfCrashReports',
     CF_PROXY_DISABLED = 'cfProxyDisabled',
+    REFERRAL_SOURCE = 'referralSource',
 }
 
 export const setData = (key: LS_KEYS, value: object) => {

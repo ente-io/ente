@@ -132,7 +132,11 @@ export default function LandingPage() {
         const user = getData(LS_KEYS.USER);
         let key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
         if (!key && isElectron()) {
-            key = await ElectronAPIs.getEncryptionKey();
+            try {
+                key = await ElectronAPIs.getEncryptionKey();
+            } catch (e) {
+                logError(e, 'getEncryptionKey failed');
+            }
             if (key) {
                 await saveKeyInSessionStore(
                     SESSION_KEYS.ENCRYPTION_KEY,
