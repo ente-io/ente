@@ -9,7 +9,7 @@ module.exports = {
 };
 
 module.exports.getAppEnv = () => {
-    return process.env.NEXT_PUBLIC_APP_ENV ?? ENV_DEVELOPMENT;
+    return process.env.NEXT_PUBLIC_APP_ENV ?? ENV_PRODUCTION;
 };
 
 module.exports.isDisableSentryFlagSet = () => {
