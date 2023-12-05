@@ -74,7 +74,7 @@ Future<void> share(
       s,
     );
     await dialog.hide();
-    await showGenericErrorDialog(context: context);
+    await showGenericErrorDialog(context: context, error: e);
   }
 }
 

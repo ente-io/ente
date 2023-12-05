@@ -36,7 +36,7 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
   bool _showCounter = false;
   bool _showStepIndicator = true;
   PageController? _pageController;
-  bool _shouldDisableScroll = false;
+  final bool _shouldDisableScroll = false;
   late int currentUserID;
   final GlobalKey shareButtonKey = GlobalKey();
 
@@ -327,14 +327,6 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
             file,
             autoPlay: false,
             tagPrefix: "memories",
-            shouldDisableScroll: (value) {
-              if (value == _shouldDisableScroll) {
-                return;
-              }
-              setState(() {
-                _shouldDisableScroll = value;
-              });
-            },
             backgroundDecoration: const BoxDecoration(
               color: Colors.transparent,
             ),

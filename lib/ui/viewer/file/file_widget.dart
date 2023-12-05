@@ -8,7 +8,6 @@ import "package:photos/ui/viewer/file/zoomable_live_image_new.dart";
 class FileWidget extends StatelessWidget {
   final EnteFile file;
   final String? tagPrefix;
-  final Function(bool)? shouldDisableScroll;
   final Function(bool)? playbackCallback;
   final BoxDecoration? backgroundDecoration;
   final bool? autoPlay;
@@ -16,7 +15,6 @@ class FileWidget extends StatelessWidget {
   const FileWidget(
     this.file, {
     this.autoPlay,
-    this.shouldDisableScroll,
     this.playbackCallback,
     this.tagPrefix,
     this.backgroundDecoration,
@@ -32,7 +30,6 @@ class FileWidget extends StatelessWidget {
         file.fileType == FileType.image) {
       return ZoomableLiveImageNew(
         file,
-        shouldDisableScroll: shouldDisableScroll,
         tagPrefix: tagPrefix,
         backgroundDecoration: backgroundDecoration,
         key: key ?? ValueKey(fileKey),

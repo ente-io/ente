@@ -12,6 +12,7 @@ import 'package:photos/models/device_collection.dart';
 import "package:photos/ui/collections/device/device_folder_item.dart";
 import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/viewer/gallery/empty_state.dart';
+import "package:photos/utils/debouncer.dart";
 
 class DeviceFoldersGridView extends StatefulWidget {
   const DeviceFoldersGridView({
@@ -27,6 +28,10 @@ class _DeviceFoldersGridViewState extends State<DeviceFoldersGridView> {
   StreamSubscription<LocalPhotosUpdatedEvent>? _localFilesSubscription;
   String _loadReason = "init";
   final _logger = Logger((_DeviceFoldersGridViewState).toString());
+  final _debouncer = Debouncer(
+    const Duration(seconds: 2),
+    executionInterval: const Duration(seconds: 5),
+  );
 
   @override
   void initState() {
@@ -39,8 +44,12 @@ class _DeviceFoldersGridViewState extends State<DeviceFoldersGridView> {
     });
     _localFilesSubscription =
         Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) {
-      _loadReason = event.reason;
-      setState(() {});
+      _debouncer.run(() async {
+        if (mounted) {
+          _loadReason = event.reason;
+          setState(() {});
+        }
+      });
     });
 
     super.initState();
@@ -93,6 +102,7 @@ class _DeviceFoldersGridViewState extends State<DeviceFoldersGridView> {
   void dispose() {
     _backupFoldersUpdatedEvent?.cancel();
     _localFilesSubscription?.cancel();
+    _debouncer.cancelDebounce();
     super.dispose();
   }
 }

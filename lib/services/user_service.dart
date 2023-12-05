@@ -34,11 +34,10 @@ import "package:photos/ui/account/recovery_page.dart";
 import 'package:photos/ui/account/two_factor_authentication_page.dart';
 import 'package:photos/ui/account/two_factor_recovery_page.dart';
 import 'package:photos/ui/account/two_factor_setup_page.dart';
-import "package:photos/ui/components/buttons/button_widget.dart";
+import "package:photos/ui/common/progress_dialog.dart";
 import "package:photos/ui/tabs/home_widget.dart";
 import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/dialog_util.dart';
-import "package:photos/utils/email_util.dart";
 import 'package:photos/utils/navigation_util.dart';
 import 'package:photos/utils/toast_util.dart';
 import "package:pointycastle/export.dart";
@@ -114,8 +113,9 @@ class UserService {
           ),
         );
         return;
+      } else {
+        throw Exception("send-ott action failed, non-200");
       }
-      unawaited(showGenericErrorDialog(context: context));
     } on DioError catch (e) {
       await dialog.hide();
       _logger.info(e);
@@ -128,12 +128,14 @@ class UserService {
           ),
         );
       } else {
-        unawaited(showGenericErrorDialog(context: context));
+        unawaited(showGenericErrorDialog(context: context, error: e));
       }
-    } catch (e) {
+    } catch (e, s) {
       await dialog.hide();
-      _logger.severe(e);
-      unawaited(showGenericErrorDialog(context: context));
+      _logger.severe(e, s);
+      unawaited(
+        showGenericErrorDialog(context: context, error: e),
+      );
     }
   }
 
@@ -260,7 +262,7 @@ class UserService {
       //to close and only then to show the error dialog.
       Future.delayed(
         const Duration(milliseconds: 150),
-        () => showGenericErrorDialog(context: context),
+        () => showGenericErrorDialog(context: context, error: null),
       );
     }
   }
@@ -280,7 +282,7 @@ class UserService {
       }
     } catch (e) {
       _logger.severe(e);
-      await showGenericErrorDialog(context: context);
+      await showGenericErrorDialog(context: context, error: e);
       return null;
     }
   }
@@ -503,6 +505,7 @@ class UserService {
   Future<void> registerOrUpdateSrp(
     Uint8List loginKey, {
     SetKeysRequest? setKeysRequest,
+    bool logOutOtherDevices = false,
   }) async {
     try {
       final String username = const Uuid().v4().toString();
@@ -559,6 +562,7 @@ class UserService {
               'setupID': setupSRPResponse.setupID,
               'srpM1': base64Encode(SRP6Util.encodeBigInt(clientM!)),
               'updatedKeyAttr': setKeysRequest.toMap(),
+              'logOutOtherDevices': logOutOtherDevices,
             },
           );
         }
@@ -586,127 +590,100 @@ class UserService {
     BuildContext context,
     SrpAttributes srpAttributes,
     String userPassword,
+    ProgressDialog dialog,
   ) async {
-    final dialog = createProgressDialog(
-      context,
-      S.of(context).pleaseWait,
-      isDismissible: true,
-    );
-    await dialog.show();
     late Uint8List keyEncryptionKey;
-    try {
-      keyEncryptionKey = await CryptoUtil.deriveKey(
-        utf8.encode(userPassword) as Uint8List,
-        CryptoUtil.base642bin(srpAttributes.kekSalt),
-        srpAttributes.memLimit,
-        srpAttributes.opsLimit,
-      );
-      final loginKey = await CryptoUtil.deriveLoginKey(keyEncryptionKey);
-      final Uint8List identity = Uint8List.fromList(
-        utf8.encode(srpAttributes.srpUserID),
-      );
-      final Uint8List salt = base64Decode(srpAttributes.srpSalt);
-      final Uint8List password = loginKey;
-      final SecureRandom random = _getSecureRandom();
+    _logger.finest('Start deriving key');
+    keyEncryptionKey = await CryptoUtil.deriveKey(
+      utf8.encode(userPassword) as Uint8List,
+      CryptoUtil.base642bin(srpAttributes.kekSalt),
+      srpAttributes.memLimit,
+      srpAttributes.opsLimit,
+    );
+    _logger.finest('keyDerivation done, derive LoginKey');
+    final loginKey = await CryptoUtil.deriveLoginKey(keyEncryptionKey);
+    final Uint8List identity = Uint8List.fromList(
+      utf8.encode(srpAttributes.srpUserID),
+    );
+    _logger.finest('longinKey derivation done');
+    final Uint8List salt = base64Decode(srpAttributes.srpSalt);
+    final Uint8List password = loginKey;
+    final SecureRandom random = _getSecureRandom();
 
-      final client = SRP6Client(
-        group: kDefaultSrpGroup,
-        digest: Digest('SHA-256'),
-        random: random,
-      );
+    final client = SRP6Client(
+      group: kDefaultSrpGroup,
+      digest: Digest('SHA-256'),
+      random: random,
+    );
 
-      final A = client.generateClientCredentials(salt, identity, password);
-      final createSessionResponse = await _dio.post(
-        _config.getHttpEndpoint() + "/users/srp/create-session",
-        data: {
-          "srpUserID": srpAttributes.srpUserID,
-          "srpA": base64Encode(SRP6Util.encodeBigInt(A!)),
-        },
-      );
-      final String sessionID = createSessionResponse.data["sessionID"];
-      final String srpB = createSessionResponse.data["srpB"];
+    final A = client.generateClientCredentials(salt, identity, password);
+    final createSessionResponse = await _dio.post(
+      _config.getHttpEndpoint() + "/users/srp/create-session",
+      data: {
+        "srpUserID": srpAttributes.srpUserID,
+        "srpA": base64Encode(SRP6Util.encodeBigInt(A!)),
+      },
+    );
+    final String sessionID = createSessionResponse.data["sessionID"];
+    final String srpB = createSessionResponse.data["srpB"];
 
-      final serverB = SRP6Util.decodeBigInt(base64Decode(srpB));
-      // ignore: need to calculate secret to get M1, unused_local_variable
-      final clientS = client.calculateSecret(serverB);
-      final clientM = client.calculateClientEvidenceMessage();
-      final response = await _dio.post(
-        _config.getHttpEndpoint() + "/users/srp/verify-session",
-        data: {
-          "sessionID": sessionID,
-          "srpUserID": srpAttributes.srpUserID,
-          "srpM1": base64Encode(SRP6Util.encodeBigInt(clientM!)),
-        },
-      );
-      if (response.statusCode == 200) {
-        Widget page;
-        final String twoFASessionID = response.data["twoFactorSessionID"];
-        Configuration.instance.setVolatilePassword(userPassword);
-        if (twoFASessionID.isNotEmpty) {
-          setTwoFactor(value: true);
-          page = TwoFactorAuthenticationPage(twoFASessionID);
-        } else {
-          await _saveConfiguration(response);
-          if (Configuration.instance.getEncryptedToken() != null) {
-            await Configuration.instance.decryptSecretsAndGetKeyEncKey(
-              userPassword,
-              Configuration.instance.getKeyAttributes()!,
-              keyEncryptionKey: keyEncryptionKey,
-            );
-            page = const HomeWidget();
-          } else {
-            throw Exception("unexpected response during email verification");
-          }
-        }
-        await dialog.hide();
-        if (page is HomeWidget) {
-          Navigator.of(context).popUntil((route) => route.isFirst);
-          Bus.instance.fire(AccountConfiguredEvent());
-        } else {
-          Navigator.of(context).pushAndRemoveUntil(
-            MaterialPageRoute(
-              builder: (BuildContext context) {
-                return page;
-              },
-            ),
-            (route) => route.isFirst,
+    final serverB = SRP6Util.decodeBigInt(base64Decode(srpB));
+    // ignore: need to calculate secret to get M1, unused_local_variable
+    final clientS = client.calculateSecret(serverB);
+    final clientM = client.calculateClientEvidenceMessage();
+    final response = await _dio.post(
+      _config.getHttpEndpoint() + "/users/srp/verify-session",
+      data: {
+        "sessionID": sessionID,
+        "srpUserID": srpAttributes.srpUserID,
+        "srpM1": base64Encode(SRP6Util.encodeBigInt(clientM!)),
+      },
+    );
+    if (response.statusCode == 200) {
+      Widget page;
+      final String twoFASessionID = response.data["twoFactorSessionID"];
+      Configuration.instance.setVolatilePassword(userPassword);
+      if (twoFASessionID.isNotEmpty) {
+        setTwoFactor(value: true);
+        page = TwoFactorAuthenticationPage(twoFASessionID);
+      } else {
+        await _saveConfiguration(response);
+        if (Configuration.instance.getEncryptedToken() != null) {
+          await Configuration.instance.decryptSecretsAndGetKeyEncKey(
+            userPassword,
+            Configuration.instance.getKeyAttributes()!,
+            keyEncryptionKey: keyEncryptionKey,
           );
+          page = const HomeWidget();
+        } else {
+          throw Exception("unexpected response during email verification");
         }
-      } else {
-        // should never reach here
-        throw Exception("unexpected response during email verification");
       }
-    } on DioError catch (e, s) {
       await dialog.hide();
-      if (e.response != null && e.response!.statusCode == 401) {
-        await _showContactSupportDialog(
-          context,
-          S.of(context).incorrectPasswordTitle,
-          S.of(context).pleaseTryAgain,
-        );
+      if (page is HomeWidget) {
+        Navigator.of(context).popUntil((route) => route.isFirst);
+        Bus.instance.fire(AccountConfiguredEvent());
       } else {
-        _logger.severe('failed to verify password', e, s);
-        await _showContactSupportDialog(
-          context,
-          S.of(context).oops,
-          S.of(context).verificationFailedPleaseTryAgain,
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(
+            builder: (BuildContext context) {
+              return page;
+            },
+          ),
+          (route) => route.isFirst,
         );
       }
-    } catch (e, s) {
-      _logger.severe('failed to verify password', e, s);
-      await dialog.hide();
-      await _showContactSupportDialog(
-        context,
-        S.of(context).oops,
-        S.of(context).verificationFailedPleaseTryAgain,
-      );
+    } else {
+      // should never reach here
+      throw Exception("unexpected response during email verification");
     }
   }
 
   Future<void> updateKeyAttributes(
     KeyAttributes keyAttributes,
-    Uint8List loginKey,
-  ) async {
+    Uint8List loginKey, {
+    required bool logoutOtherDevices,
+  }) async {
     try {
       final setKeyRequest = SetKeysRequest(
         kekSalt: keyAttributes.kekSalt,
@@ -715,7 +692,11 @@ class UserService {
         memLimit: keyAttributes.memLimit!,
         opsLimit: keyAttributes.opsLimit!,
       );
-      await registerOrUpdateSrp(loginKey, setKeysRequest: setKeyRequest);
+      await registerOrUpdateSrp(
+        loginKey,
+        setKeysRequest: setKeyRequest,
+        logOutOtherDevices: logoutOtherDevices,
+      );
       await _config.setKeyAttributes(keyAttributes);
     } catch (e) {
       _logger.severe(e);
@@ -978,7 +959,7 @@ class UserService {
     try {
       recoveryKey = await getOrCreateRecoveryKey(context);
     } catch (e) {
-      showGenericErrorDialog(context: context);
+      showGenericErrorDialog(context: context, error: e);
       return false;
     }
     final dialog = createProgressDialog(context, S.of(context).verifying);
@@ -1162,28 +1143,6 @@ class UserService {
     } catch (e) {
       _logger.severe("Failed to update email mfa", e);
       rethrow;
-    }
-  }
-
-  Future<void> _showContactSupportDialog(
-    BuildContext context,
-    String title,
-    String message,
-  ) async {
-    final dialogChoice = await showChoiceDialog(
-      context,
-      title: title,
-      body: message,
-      firstButtonLabel: S.of(context).contactSupport,
-      secondButtonLabel: S.of(context).ok,
-    );
-    if (dialogChoice!.action == ButtonAction.first) {
-      await sendLogs(
-        context,
-        S.of(context).contactSupport,
-        "support@ente.io",
-        postShare: () {},
-      );
     }
   }
 }

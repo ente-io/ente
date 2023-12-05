@@ -561,9 +561,10 @@
     "type": "text"
   },
   "faqs": "FAQs",
-  "renewsOn": "Renews on {endDate}",
+  "renewsOn": "Subscription renews on {endDate}",
   "freeTrialValidTill": "Free trial valid till {endDate}",
   "validTill": "Valid till {endDate}",
+  "addOnValidTill": "Your {storageAmount} add-on is valid till {endDate}",
   "playStoreFreeTrialValidTill": "Free trial valid till {endDate}.\nYou can choose a paid plan afterwards.",
   "subWillBeCancelledOn": "Your subscription will be cancelled on {endDate}",
   "subscription": "Subscription",
@@ -934,6 +935,8 @@
   "itLooksLikeSomethingWentWrongPleaseRetryAfterSome": "It looks like something went wrong. Please retry after some time. If the error persists, please contact our support team.",
   "error": "Error",
   "tempErrorContactSupportIfPersists": "It looks like something went wrong. Please retry after some time. If the error persists, please contact our support team.",
+  "networkHostLookUpErr" : "Unable to connect to Ente, please check your network settings and contact support if the error persists.",
+  "networkConnectionRefusedErr" : "Unable to connect to Ente, please retry after sometime. If the error persists, please contact support.",
   "cachedData": "Cached data",
   "clearCaches": "Clear caches",
   "remoteImages": "Remote images",
@@ -1155,5 +1158,12 @@
   "@addNew": {
     "description": "Text to add a new item (location tag, album, caption etc)"
   },
-  "contacts": "Contacts"
+  "contacts": "Contacts",
+  "noInternetConnection": "No internet connection",
+  "pleaseCheckYourInternetConnectionAndTryAgain": "Please check your internet connection and try again.",
+
+  "signOutFromOtherDevices": "Sign out from other devices",
+  "signOutOtherBody": "If you think someone might know your password, you can force all other devices using your account to sign out.",
+  "signOutOtherDevices": "Sign out other devices",
+  "doNotSignOut": "Do not sign out"
 }

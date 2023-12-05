@@ -19,6 +19,7 @@ import "package:photos/ui/components/models/button_type.dart";
 import 'package:photos/ui/tabs/section_title.dart';
 import "package:photos/ui/tabs/shared/empty_state.dart";
 import "package:photos/ui/tabs/shared/quick_link_album_item.dart";
+import "package:photos/utils/debouncer.dart";
 import "package:photos/utils/navigation_util.dart";
 import "package:photos/utils/share_util.dart";
 
@@ -36,18 +37,31 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
   late StreamSubscription<CollectionUpdatedEvent>
       _collectionUpdatesSubscription;
   late StreamSubscription<UserLoggedOutEvent> _loggedOutEvent;
+  final _debouncer = Debouncer(
+    const Duration(seconds: 2),
+    executionInterval: const Duration(seconds: 5),
+  );
 
   @override
   void initState() {
     super.initState();
     _localFilesSubscription =
         Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) {
-      debugPrint("SetState Shared Collections on ${event.reason}");
-      setState(() {});
+      _debouncer.run(() async {
+        if (mounted) {
+          debugPrint("SetState Shared Collections on ${event.reason}");
+          setState(() {});
+        }
+      });
     });
     _collectionUpdatesSubscription =
         Bus.instance.on<CollectionUpdatedEvent>().listen((event) {
-      setState(() {});
+      _debouncer.run(() async {
+        if (mounted) {
+          debugPrint("SetState Shared Collections on ${event.reason}");
+          setState(() {});
+        }
+      });
     });
     _loggedOutEvent = Bus.instance.on<UserLoggedOutEvent>().listen((event) {
       setState(() {});
@@ -262,6 +276,7 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
     _localFilesSubscription.cancel();
     _collectionUpdatesSubscription.cancel();
     _loggedOutEvent.cancel();
+    _debouncer.cancelDebounce();
     super.dispose();
   }
 

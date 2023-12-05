@@ -716,6 +716,7 @@ class FilesDB {
   Future<List<EnteFile>> getFilesCreatedWithinDurations(
     List<List<int>> durations,
     Set<int> ignoredCollectionIDs, {
+    int? visibility,
     String order = 'ASC',
   }) async {
     if (durations.isEmpty) {
@@ -731,6 +732,8 @@ class FilesDB {
           ")";
       if (index != durations.length - 1) {
         whereClause += " OR ";
+      } else if (visibility != null) {
+        whereClause += ' AND $columnMMdVisibility = $visibility';
       }
     }
     whereClause += ")";
@@ -803,7 +806,7 @@ class FilesDB {
     return uploadedFileIDs;
   }
 
-  Future<EnteFile?> getUploadedLocalFileInAnyCollection(
+  Future<List<EnteFile>> getFilesInAllCollection(
     int uploadedFileID,
     int userID,
   ) async {
@@ -816,12 +819,11 @@ class FilesDB {
         userID,
         uploadedFileID,
       ],
-      limit: 1,
     );
     if (results.isEmpty) {
-      return null;
+      return <EnteFile>[];
     }
-    return convertToFiles(results)[0];
+    return convertToFiles(results);
   }
 
   Future<Set<String>> getExistingLocalFileIDs(int ownerID) async {

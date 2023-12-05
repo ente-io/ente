@@ -23,6 +23,9 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m0(count) =>
       "${Intl.plural(count, one: '添加一个项目', other: '添加一些项目')}";
 
+  static String m64(storageAmount, endDate) =>
+      "您的 ${storageAmount} 插件有效期至 ${endDate}";
+
   static String m1(emailOrName) => "由 ${emailOrName} 添加";
 
   static String m2(albumName) => "成功添加到  ${albumName}";
@@ -127,6 +130,9 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m41(endDate) => "在 ${endDate} 前续费";
 
+  static String m65(count) =>
+      "${Intl.plural(count, other: '已找到 ${count} 个结果')}";
+
   static String m42(count) => "已选择 ${count} 个";
 
   static String m43(count, yourCount) => "选择了 ${count} 个 (您的 ${yourCount} 个)";
@@ -170,7 +176,7 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m59(count) =>
       "${Intl.plural(count, zero: '', one: '1天', other: '${count} 天')}";
 
-  static String m65(endDate) => "有效期至 ${endDate}";
+  static String m66(endDate) => "有效期至 ${endDate}";
 
   static String m60(email) => "验证 ${email}";
 
@@ -198,7 +204,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "addLocation": MessageLookupByLibrary.simpleMessage("添加地点"),
         "addLocationButton": MessageLookupByLibrary.simpleMessage("添加"),
         "addMore": MessageLookupByLibrary.simpleMessage("添加更多"),
+        "addNew": MessageLookupByLibrary.simpleMessage("新建"),
         "addOnPageSubtitle": MessageLookupByLibrary.simpleMessage("附加组件详情"),
+        "addOnValidTill": m64,
         "addOns": MessageLookupByLibrary.simpleMessage("附加组件"),
         "addPhotos": MessageLookupByLibrary.simpleMessage("添加照片"),
         "addSelected": MessageLookupByLibrary.simpleMessage("添加所选项"),
@@ -206,6 +214,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "addToEnte": MessageLookupByLibrary.simpleMessage("添加到 ente"),
         "addToHiddenAlbum": MessageLookupByLibrary.simpleMessage("添加到隐藏相册"),
         "addViewer": MessageLookupByLibrary.simpleMessage("添加查看者"),
+        "addYourPhotosNow": MessageLookupByLibrary.simpleMessage("立即添加您的照片"),
         "addedAs": MessageLookupByLibrary.simpleMessage("已添加为"),
         "addedBy": m1,
         "addedSuccessfullyTo": m2,
@@ -308,6 +317,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("通过移动数据备份"),
         "backupSettings": MessageLookupByLibrary.simpleMessage("备份设置"),
         "backupVideos": MessageLookupByLibrary.simpleMessage("备份视频"),
+        "blackFridaySale": MessageLookupByLibrary.simpleMessage("黑色星期五特惠"),
         "blog": MessageLookupByLibrary.simpleMessage("博客"),
         "cachedData": MessageLookupByLibrary.simpleMessage("缓存数据"),
         "calculating": MessageLookupByLibrary.simpleMessage("正在计算..."),
@@ -374,6 +384,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "contactFamilyAdmin": m9,
         "contactSupport": MessageLookupByLibrary.simpleMessage("联系支持"),
         "contactToManageSubscription": m10,
+        "contacts": MessageLookupByLibrary.simpleMessage("联系人"),
+        "contents": MessageLookupByLibrary.simpleMessage("内容"),
         "continueLabel": MessageLookupByLibrary.simpleMessage("继续"),
         "continueOnFreeTrial": MessageLookupByLibrary.simpleMessage("继续免费试用"),
         "convertToAlbum": MessageLookupByLibrary.simpleMessage("转换为相册"),
@@ -466,6 +478,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "discord": MessageLookupByLibrary.simpleMessage("Discord"),
         "dismiss": MessageLookupByLibrary.simpleMessage("忽略"),
         "distanceInKMUnit": MessageLookupByLibrary.simpleMessage("公里"),
+        "doNotSignOut": MessageLookupByLibrary.simpleMessage("不要退登"),
         "doThisLater": MessageLookupByLibrary.simpleMessage("稍后再做"),
         "doYouWantToDiscardTheEditsYouHaveMade":
             MessageLookupByLibrary.simpleMessage("您想要放弃您所做的编辑吗？"),
@@ -535,6 +548,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("此链接已过期。请选择新的过期时间或禁用链接过期。"),
         "exportLogs": MessageLookupByLibrary.simpleMessage("导出日志"),
         "exportYourData": MessageLookupByLibrary.simpleMessage("导出您的数据"),
+        "faces": MessageLookupByLibrary.simpleMessage("人脸"),
         "failedToApplyCode": MessageLookupByLibrary.simpleMessage("无法应用代码"),
         "failedToCancel": MessageLookupByLibrary.simpleMessage("取消失败"),
         "failedToDownloadVideo": MessageLookupByLibrary.simpleMessage("视频下载失败"),
@@ -558,6 +572,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("无法将文件保存到相册"),
         "fileInfoAddDescHint": MessageLookupByLibrary.simpleMessage("添加说明..."),
         "fileSavedToGallery": MessageLookupByLibrary.simpleMessage("文件已保存到相册"),
+        "fileTypes": MessageLookupByLibrary.simpleMessage("文件类型"),
+        "fileTypesAndNames": MessageLookupByLibrary.simpleMessage("文件类型和名称"),
         "filesBackedUpFromDevice": m19,
         "filesBackedUpInAlbum": m20,
         "filesDeleted": MessageLookupByLibrary.simpleMessage("文件已删除"),
@@ -655,6 +671,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "linkExpiry": MessageLookupByLibrary.simpleMessage("链接过期"),
         "linkHasExpired": MessageLookupByLibrary.simpleMessage("链接已过期"),
         "linkNeverExpires": MessageLookupByLibrary.simpleMessage("永不"),
+        "livePhotos": MessageLookupByLibrary.simpleMessage("实况照片"),
         "loadMessage1": MessageLookupByLibrary.simpleMessage("您可以与家庭分享您的订阅"),
         "loadMessage2":
             MessageLookupByLibrary.simpleMessage("到目前为止，我们已经保存了1 000多万个回忆"),
@@ -710,8 +727,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("移动端, 网页端, 桌面端"),
         "moderateStrength": MessageLookupByLibrary.simpleMessage("中等"),
         "modifyYourQueryOrTrySearchingFor":
-            MessageLookupByLibrary.simpleMessage(
-                "Modify your query, or try searching for"),
+            MessageLookupByLibrary.simpleMessage("修改您的查询，或尝试搜索"),
+        "moments": MessageLookupByLibrary.simpleMessage("瞬间"),
         "monthly": MessageLookupByLibrary.simpleMessage("每月"),
         "moveItem": m30,
         "moveToAlbum": MessageLookupByLibrary.simpleMessage("移动到相册"),
@@ -721,6 +738,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "movingFilesToAlbum":
             MessageLookupByLibrary.simpleMessage("正在将文件移动到相册..."),
         "name": MessageLookupByLibrary.simpleMessage("名称"),
+        "networkConnectionRefusedErr": MessageLookupByLibrary.simpleMessage(
+            "无法连接到 Ente，请稍后重试。如果错误仍然存在，请联系支持人员。"),
+        "networkHostLookUpErr": MessageLookupByLibrary.simpleMessage(
+            "无法连接到 Ente，请检查您的网络设置，如果错误仍然存在，请联系支持人员。"),
         "never": MessageLookupByLibrary.simpleMessage("永不"),
         "newAlbum": MessageLookupByLibrary.simpleMessage("新建相册"),
         "newToEnte": MessageLookupByLibrary.simpleMessage("刚来到ente"),
@@ -737,6 +758,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("没有隐藏的照片或视频"),
         "noImagesWithLocation":
             MessageLookupByLibrary.simpleMessage("没有带有位置的图像"),
+        "noInternetConnection": MessageLookupByLibrary.simpleMessage("无互联网连接"),
         "noPhotosAreBeingBackedUpRightNow":
             MessageLookupByLibrary.simpleMessage("目前没有照片正在备份"),
         "noPhotosFoundHere": MessageLookupByLibrary.simpleMessage("这里没有找到照片"),
@@ -784,8 +806,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "permanentlyDelete": MessageLookupByLibrary.simpleMessage("永久删除"),
         "permanentlyDeleteFromDevice":
             MessageLookupByLibrary.simpleMessage("要从设备中永久删除吗？"),
+        "photoDescriptions": MessageLookupByLibrary.simpleMessage("照片说明"),
         "photoGridSize": MessageLookupByLibrary.simpleMessage("照片网格大小"),
         "photoSmallCase": MessageLookupByLibrary.simpleMessage("照片"),
+        "photos": MessageLookupByLibrary.simpleMessage("照片"),
         "photosAddedByYouWillBeRemovedFromTheAlbum":
             MessageLookupByLibrary.simpleMessage("您添加的照片将从相册中移除"),
         "pickCenterPoint": MessageLookupByLibrary.simpleMessage("选择中心点"),
@@ -793,6 +817,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "playStoreFreeTrialValidTill": m35,
         "playstoreSubscription":
             MessageLookupByLibrary.simpleMessage("PlayStore 订阅"),
+        "pleaseCheckYourInternetConnectionAndTryAgain":
+            MessageLookupByLibrary.simpleMessage("请检查您的互联网连接，然后重试。"),
         "pleaseContactSupportAndWeWillBeHappyToHelp":
             MessageLookupByLibrary.simpleMessage(
                 "请用英语联系 support@ente.io ，我们将乐意提供帮助！"),
@@ -908,10 +934,29 @@ class MessageLookup extends MessageLookupByLibrary {
         "scanCode": MessageLookupByLibrary.simpleMessage("扫描代码"),
         "scanThisBarcodeWithnyourAuthenticatorApp":
             MessageLookupByLibrary.simpleMessage("用您的身份验证器应用\n扫描此条码"),
+        "searchAlbumsEmptySection": MessageLookupByLibrary.simpleMessage("相册"),
         "searchByAlbumNameHint": MessageLookupByLibrary.simpleMessage("相册名称"),
         "searchByExamples": MessageLookupByLibrary.simpleMessage(
             "• 相册名称（例如“相机”）\n• 文件类型（例如“视频”、“.gif”）\n• 年份和月份（例如“2022”、“一月”）\n• 假期（例如“圣诞节”）\n• 照片说明（例如“#和女儿独居，好开心啊”）"),
+        "searchCaptionEmptySection": MessageLookupByLibrary.simpleMessage(
+            "在照片信息中添加“#旅游”等描述，以便在此处快速找到它们"),
+        "searchDatesEmptySection":
+            MessageLookupByLibrary.simpleMessage("按日期搜索，月份或年份"),
+        "searchFaceEmptySection":
+            MessageLookupByLibrary.simpleMessage("查找一个人的所有照片"),
+        "searchFileTypesAndNamesEmptySection":
+            MessageLookupByLibrary.simpleMessage("文件类型和名称"),
+        "searchHint1": MessageLookupByLibrary.simpleMessage("在设备上快速搜索"),
+        "searchHint2": MessageLookupByLibrary.simpleMessage("照片日期、描述"),
+        "searchHint3": MessageLookupByLibrary.simpleMessage("相册、文件名和类型"),
+        "searchHint4": MessageLookupByLibrary.simpleMessage("位置"),
+        "searchHint5": MessageLookupByLibrary.simpleMessage("即将到来：面部和魔法搜索✨"),
         "searchHintText": MessageLookupByLibrary.simpleMessage("相册，月，日，年，..."),
+        "searchLocationEmptySection":
+            MessageLookupByLibrary.simpleMessage("在照片的一定半径内拍摄的几组照片"),
+        "searchPeopleEmptySection":
+            MessageLookupByLibrary.simpleMessage("邀请他人，您将在此看到他们分享的所有照片"),
+        "searchResultCount": m65,
         "security": MessageLookupByLibrary.simpleMessage("安全"),
         "selectAlbum": MessageLookupByLibrary.simpleMessage("选择相册"),
         "selectAll": MessageLookupByLibrary.simpleMessage("全选"),
@@ -973,6 +1018,11 @@ class MessageLookup extends MessageLookupByLibrary {
         "sharedWithYou": MessageLookupByLibrary.simpleMessage("已与您共享"),
         "sharing": MessageLookupByLibrary.simpleMessage("正在分享..."),
         "showMemories": MessageLookupByLibrary.simpleMessage("显示回忆"),
+        "signOutFromOtherDevices":
+            MessageLookupByLibrary.simpleMessage("从其他设备退出登录"),
+        "signOutOtherBody": MessageLookupByLibrary.simpleMessage(
+            "如果你认为有人可能知道你的密码，你可以强制所有使用你账户的其他设备退出登录。"),
+        "signOutOtherDevices": MessageLookupByLibrary.simpleMessage("登出其他设备"),
         "signUpTerms": MessageLookupByLibrary.simpleMessage(
             "我同意 <u-terms>服务条款</u-terms> 和 <u-policy>隐私政策</u-policy>"),
         "singleFileDeleteFromDevice": m49,
@@ -1113,6 +1163,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "upgrade": MessageLookupByLibrary.simpleMessage("升级"),
         "uploadingFilesToAlbum":
             MessageLookupByLibrary.simpleMessage("正在将文件上传到相册..."),
+        "upto50OffUntil4thDec":
+            MessageLookupByLibrary.simpleMessage("最高五折优惠，直至12月4日。"),
         "usableReferralStorageInfo": MessageLookupByLibrary.simpleMessage(
             "可用存储空间受您当前计划的限制。 当您升级您的计划时，超出要求的存储空间将自动变为可用。"),
         "usePublicLinksForPeopleNotOnEnte":
@@ -1120,7 +1172,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "useRecoveryKey": MessageLookupByLibrary.simpleMessage("使用恢复密钥"),
         "useSelectedPhoto": MessageLookupByLibrary.simpleMessage("使用所选照片"),
         "usedSpace": MessageLookupByLibrary.simpleMessage("已用空间"),
-        "validTill": m65,
+        "validTill": m66,
         "verificationFailedPleaseTryAgain":
             MessageLookupByLibrary.simpleMessage("验证失败，请重试"),
         "verificationId": MessageLookupByLibrary.simpleMessage("验证 ID"),
@@ -1133,6 +1185,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "verifyingRecoveryKey":
             MessageLookupByLibrary.simpleMessage("正在验证恢复密钥..."),
         "videoSmallCase": MessageLookupByLibrary.simpleMessage("视频"),
+        "videos": MessageLookupByLibrary.simpleMessage("视频"),
         "viewActiveSessions": MessageLookupByLibrary.simpleMessage("查看活动会话"),
         "viewAddOnButton": MessageLookupByLibrary.simpleMessage("查看附加组件"),
         "viewAll": MessageLookupByLibrary.simpleMessage("查看全部"),
@@ -1178,7 +1231,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "youHaveSuccessfullyFreedUp": m63,
         "yourAccountHasBeenDeleted":
             MessageLookupByLibrary.simpleMessage("您的账户已删除"),
-        "yourMap": MessageLookupByLibrary.simpleMessage("Your map"),
+        "yourMap": MessageLookupByLibrary.simpleMessage("您的地图"),
         "yourPlanWasSuccessfullyDowngraded":
             MessageLookupByLibrary.simpleMessage("您的计划已成功降级"),
         "yourPlanWasSuccessfullyUpgraded":

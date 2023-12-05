@@ -558,6 +558,7 @@
   "renewsOn": "在 {endDate} 前续费",
   "freeTrialValidTill": "免费试用有效期至 {endDate}",
   "validTill": "有效期至 {endDate}",
+  "addOnValidTill": "您的 {storageAmount} 插件有效期至 {endDate}",
   "playStoreFreeTrialValidTill": "免费试用有效期至 {endDate}。\n之后您可以选择付费计划。",
   "subWillBeCancelledOn": "您的订阅将于 {endDate} 取消",
   "subscription": "订阅",
@@ -928,6 +929,8 @@
   "itLooksLikeSomethingWentWrongPleaseRetryAfterSome": "看起来出了点问题。 请稍后重试。 如果错误仍然存在，请联系我们的支持团队。",
   "error": "错误",
   "tempErrorContactSupportIfPersists": "看起来出了点问题。 请稍后重试。 如果错误仍然存在，请联系我们的支持团队。",
+  "networkHostLookUpErr": "无法连接到 Ente，请检查您的网络设置，如果错误仍然存在，请联系支持人员。",
+  "networkConnectionRefusedErr": "无法连接到 Ente，请稍后重试。如果错误仍然存在，请联系支持人员。",
   "cachedData": "缓存数据",
   "clearCaches": "清除缓存",
   "remoteImages": "远程图像",
@@ -1149,5 +1152,11 @@
   "@addNew": {
     "description": "Text to add a new item (location tag, album, caption etc)"
   },
-  "contacts": "联系人"
+  "contacts": "联系人",
+  "noInternetConnection": "无互联网连接",
+  "pleaseCheckYourInternetConnectionAndTryAgain": "请检查您的互联网连接，然后重试。",
+  "signOutFromOtherDevices": "从其他设备退出登录",
+  "signOutOtherBody": "如果你认为有人可能知道你的密码，你可以强制所有使用你账户的其他设备退出登录。",
+  "signOutOtherDevices": "登出其他设备",
+  "doNotSignOut": "不要退登"
 }

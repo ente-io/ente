@@ -26,7 +26,6 @@ import "package:photos/utils/toast_util.dart";
 
 class ZoomableImage extends StatefulWidget {
   final EnteFile photo;
-  final Function(bool)? shouldDisableScroll;
   final String? tagPrefix;
   final Decoration? backgroundDecoration;
   final bool shouldCover;
@@ -34,7 +33,6 @@ class ZoomableImage extends StatefulWidget {
   const ZoomableImage(
     this.photo, {
     Key? key,
-    this.shouldDisableScroll,
     required this.tagPrefix,
     this.backgroundDecoration,
     this.shouldCover = false,
@@ -54,9 +52,9 @@ class _ZoomableImageState extends State<ZoomableImage>
   bool _loadedLargeThumbnail = false;
   bool _loadingFinalImage = false;
   bool _loadedFinalImage = false;
-  ValueChanged<PhotoViewScaleState>? _scaleStateChangedCallback;
-  bool _isZooming = false;
   PhotoViewController _photoViewController = PhotoViewController();
+  bool _isZooming = false;
+  ValueChanged<PhotoViewScaleState>? _scaleStateChangedCallback;
 
   @override
   void initState() {
@@ -64,9 +62,6 @@ class _ZoomableImageState extends State<ZoomableImage>
     _logger = Logger("ZoomableImage");
     _logger.info('initState for ${_photo.generatedID} with tag ${_photo.tag}');
     _scaleStateChangedCallback = (value) {
-      if (widget.shouldDisableScroll != null) {
-        widget.shouldDisableScroll!(value != PhotoViewScaleState.initial);
-      }
       _isZooming = value != PhotoViewScaleState.initial;
       debugPrint("isZooming = $_isZooming, currentState $value");
     };
@@ -110,7 +105,6 @@ class _ZoomableImageState extends State<ZoomableImage>
     } else {
       content = const EnteLoadingWidget();
     }
-
     final GestureDragUpdateCallback? verticalDragCallback = _isZooming
         ? null
         : (d) => {
@@ -126,6 +120,7 @@ class _ZoomableImageState extends State<ZoomableImage>
                     },
                 },
             };
+
     return GestureDetector(
       onVerticalDragUpdate: verticalDragCallback,
       child: content,
@@ -266,15 +261,13 @@ class _ZoomableImageState extends State<ZoomableImage>
     required ImageProvider? previewImageProvider,
     required ImageProvider finalImageProvider,
   }) async {
-    final bool shouldFixPosition = previewImageProvider != null &&
-        _isZooming &&
-        _photoViewController.scale != null;
+    final bool shouldFixPosition = previewImageProvider != null && _isZooming;
     ImageInfo? finalImageInfo;
     if (shouldFixPosition) {
       if (kDebugMode) {
         showToast(
           context,
-          'Updating photo scale zooming: $_isZooming and scale: ${_photoViewController.scale}',
+          'Updating photo scale zooming and scale: ${_photoViewController.scale}',
         );
       }
       final prevImageInfo = await getImageInfo(previewImageProvider);

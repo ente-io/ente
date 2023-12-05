@@ -3954,10 +3954,10 @@ class S {
     );
   }
 
-  /// `Renews on {endDate}`
+  /// `Subscription renews on {endDate}`
   String renewsOn(Object endDate) {
     return Intl.message(
-      'Renews on $endDate',
+      'Subscription renews on $endDate',
       name: 'renewsOn',
       desc: '',
       args: [endDate],
@@ -3981,6 +3981,16 @@ class S {
       name: 'validTill',
       desc: '',
       args: [endDate],
+    );
+  }
+
+  /// `Your {storageAmount} add-on is valid till {endDate}`
+  String addOnValidTill(Object storageAmount, Object endDate) {
+    return Intl.message(
+      'Your $storageAmount add-on is valid till $endDate',
+      name: 'addOnValidTill',
+      desc: '',
+      args: [storageAmount, endDate],
     );
   }
 
@@ -6579,6 +6589,26 @@ class S {
     );
   }
 
+  /// `Unable to connect to Ente, please check your network settings and contact support if the error persists.`
+  String get networkHostLookUpErr {
+    return Intl.message(
+      'Unable to connect to Ente, please check your network settings and contact support if the error persists.',
+      name: 'networkHostLookUpErr',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Unable to connect to Ente, please retry after sometime. If the error persists, please contact support.`
+  String get networkConnectionRefusedErr {
+    return Intl.message(
+      'Unable to connect to Ente, please retry after sometime. If the error persists, please contact support.',
+      name: 'networkConnectionRefusedErr',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Cached data`
   String get cachedData {
     return Intl.message(
@@ -8055,10 +8085,10 @@ class S {
     );
   }
 
-  /// `Coming soon: Photo contents, faces`
+  /// `Coming soon: Faces & magic search ✨`
   String get searchHint5 {
     return Intl.message(
-      'Coming soon: Photo contents, faces',
+      'Coming soon: Faces & magic search ✨',
       name: 'searchHint5',
       desc: '',
       args: [],
@@ -8123,6 +8153,66 @@ class S {
     return Intl.message(
       'Contacts',
       name: 'contacts',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No internet connection`
+  String get noInternetConnection {
+    return Intl.message(
+      'No internet connection',
+      name: 'noInternetConnection',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please check your internet connection and try again.`
+  String get pleaseCheckYourInternetConnectionAndTryAgain {
+    return Intl.message(
+      'Please check your internet connection and try again.',
+      name: 'pleaseCheckYourInternetConnectionAndTryAgain',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Sign out from other devices`
+  String get signOutFromOtherDevices {
+    return Intl.message(
+      'Sign out from other devices',
+      name: 'signOutFromOtherDevices',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `If you think someone might know your password, you can force all other devices using your account to sign out.`
+  String get signOutOtherBody {
+    return Intl.message(
+      'If you think someone might know your password, you can force all other devices using your account to sign out.',
+      name: 'signOutOtherBody',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Sign out other devices`
+  String get signOutOtherDevices {
+    return Intl.message(
+      'Sign out other devices',
+      name: 'signOutOtherDevices',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Do not sign out`
+  String get doNotSignOut {
+    return Intl.message(
+      'Do not sign out',
+      name: 'doNotSignOut',
       desc: '',
       args: [],
     );

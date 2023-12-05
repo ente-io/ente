@@ -83,6 +83,8 @@ class _SearchSectionAllPageState extends State<SearchSectionAllPage> {
                   builder: (context, snapshot) {
                     if (snapshot.hasData) {
                       final sectionResults = snapshot.data!;
+                      sectionResults
+                          .sort((a, b) => a.name().compareTo(b.name()));
                       return Text(sectionResults.length.toString())
                           .animate()
                           .fadeIn(

@@ -28,7 +28,7 @@ class HomeGalleryWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double bottomSafeArea = MediaQuery.of(context).padding.bottom;
+    final double bottomSafeArea = MediaQuery.paddingOf(context).bottom;
     final gallery = Gallery(
       asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) async {
         final ownerID = Configuration.instance.getUserID();
@@ -81,6 +81,8 @@ class HomeGalleryWidget extends StatelessWidget {
       footer: footer,
       // scrollSafe area -> SafeArea + Preserver more + Nav Bar buttons
       scrollBottomSafeArea: bottomSafeArea + 180,
+      reloadDebounceTime: const Duration(seconds: 2),
+      reloadDebounceExecutionInterval: const Duration(seconds: 5),
     );
     return Stack(
       alignment: Alignment.bottomCenter,

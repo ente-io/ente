@@ -9,7 +9,7 @@ class MapGalleryTileBadge extends StatelessWidget {
     if (number <= 99) {
       return number.toString();
     } else if (number <= 999) {
-      return '${(number / 100).toStringAsFixed(0)}00+';
+      return '${(number / 100).floor().toStringAsFixed(0)}00+';
     } else if (number >= 1000 && number < 2000) {
       return '1K+';
     } else {

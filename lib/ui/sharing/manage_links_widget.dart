@@ -347,7 +347,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
       }
     } catch (e) {
       await dialog?.hide();
-      await showGenericErrorDialog(context: context);
+      await showGenericErrorDialog(context: context, error: e);
       rethrow;
     }
   }

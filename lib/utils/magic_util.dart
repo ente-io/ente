@@ -218,7 +218,7 @@ Future<void> editFilename(
   );
   if (result is Exception) {
     _logger.severe("Failed to rename file");
-    showGenericErrorDialog(context: context);
+    showGenericErrorDialog(context: context, error: result);
   }
 }
 

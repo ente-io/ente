@@ -132,7 +132,7 @@ class _ManageIndividualParticipantState
                               CollectionParticipantRole.viewer,
                             );
                           } catch (e) {
-                            showGenericErrorDialog(context: context);
+                            showGenericErrorDialog(context: context, error: e);
                           }
                           if (isConvertToViewSuccess && mounted) {
                             // reset value

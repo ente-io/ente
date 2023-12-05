@@ -136,6 +136,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Confirme sua chave de recuperação"),
         "contactSupport":
             MessageLookupByLibrary.simpleMessage("Falar com o suporte"),
+        "contacts": MessageLookupByLibrary.simpleMessage("Contacts"),
         "continueLabel": MessageLookupByLibrary.simpleMessage("Continuar"),
         "copypasteThisCodentoYourAuthenticatorApp":
             MessageLookupByLibrary.simpleMessage(

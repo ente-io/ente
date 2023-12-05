@@ -24,6 +24,7 @@ import 'package:photos/ui/components/buttons/icon_button_widget.dart';
 import "package:photos/ui/tabs/section_title.dart";
 import "package:photos/ui/viewer/actions/delete_empty_albums.dart";
 import "package:photos/ui/viewer/gallery/empty_state.dart";
+import "package:photos/utils/debouncer.dart";
 import 'package:photos/utils/local_settings.dart';
 import "package:photos/utils/navigation_util.dart";
 
@@ -44,19 +45,31 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
   AlbumSortKey? sortKey;
   String _loadReason = "init";
   final _scrollController = ScrollController();
+  final _debouncer = Debouncer(
+    const Duration(seconds: 2),
+    executionInterval: const Duration(seconds: 5),
+  );
 
   static const int _kOnEnteItemLimitCount = 10;
   @override
   void initState() {
     _localFilesSubscription =
         Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) {
-      _loadReason = event.reason;
-      setState(() {});
+      _debouncer.run(() async {
+        if (mounted) {
+          _loadReason = event.reason;
+          setState(() {});
+        }
+      });
     });
     _collectionUpdatesSubscription =
         Bus.instance.on<CollectionUpdatedEvent>().listen((event) {
-      _loadReason = event.reason;
-      setState(() {});
+      _debouncer.run(() async {
+        if (mounted) {
+          _loadReason = event.reason;
+          setState(() {});
+        }
+      });
     });
     _loggedOutEvent = Bus.instance.on<UserLoggedOutEvent>().listen((event) {
       _loadReason = event.reason;
@@ -268,6 +281,7 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
     _collectionUpdatesSubscription.cancel();
     _loggedOutEvent.cancel();
     _scrollController.dispose();
+    _debouncer.cancelDebounce();
     super.dispose();
   }
 
