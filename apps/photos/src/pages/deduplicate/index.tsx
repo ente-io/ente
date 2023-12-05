@@ -147,7 +147,7 @@ export default function Deduplicate() {
         setSelected({ count: 0, collectionID: 0, ownCount: 0 });
     };
 
-    if (!duplicateFiles) {
+    if (!duplicates) {
         return (
             <VerticallyCentered>
                 <EnteSpinner />
