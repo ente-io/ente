@@ -1,6 +1,17 @@
 # CHANGELOG
 
-### v1.6.54
+## v1.6.55
+
+### Bug Fixes
+
+- Added manage family portal option if add-on is active
+- Fixed filename date parsing issue
+- Fixed storage limit ui glitch
+- Fixed dedupe page layout issue
+- Fixed ElectronAPI refactoring issue
+- Fixed Search related issues
+
+## v1.6.54
 
 ### New Features
 
