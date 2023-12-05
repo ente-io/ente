@@ -112,7 +112,7 @@ Future<void> _decryptExportData(
             List<String> splitCodes = content.split("\n");
             for (final code in splitCodes) {
               try {
-                parsedCodes.add(Code.fromRawData(code));
+                parsedCodes.add(Code.fromOTPAuthUrl(code));
               } catch (e) {
                 Logger('EncryptedText').severe("Could not parse code", e);
               }

@@ -159,10 +159,7 @@ Future<int?> _process2FasExportFile(
       throw Exception('Invalid OTP type');
     }
     parsedCodes.add(
-      Code.fromRawJson({
-        "code": otpUrl,
-        "pinned": false,
-      }),
+      Code.fromOTPAuthUrl(otpUrl),
     );
   }
 

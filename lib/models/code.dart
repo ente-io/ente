@@ -1,5 +1,4 @@
-import 'dart:convert';
-
+import 'package:ente_auth/models/code_display.dart';
 import 'package:ente_auth/utils/totp_util.dart';
 
 class Code {
@@ -14,10 +13,13 @@ class Code {
   final String secret;
   final Algorithm algorithm;
   final Type type;
+  // note: rawData corresponds to the otp-auth url in the code
   final String rawData;
   final int counter;
   bool? hasSynced;
-  bool? isPinned;
+  CodeDisplay? display;
+
+  bool get isPinned => display?.pinned ?? false;
 
   Code(
     this.account,
@@ -28,8 +30,8 @@ class Code {
     this.algorithm,
     this.type,
     this.counter,
-    this.rawData,
-    this.isPinned, {
+    this.rawData, {
+    this.display,
     this.generatedID,
   });
 
@@ -42,7 +44,7 @@ class Code {
     Algorithm? algorithm,
     Type? type,
     int? counter,
-    bool? isPinned,
+    CodeDisplay? display,
   }) {
     final String updateAccount = account ?? this.account;
     final String updateIssuer = issuer ?? this.issuer;
@@ -52,8 +54,7 @@ class Code {
     final Algorithm updatedAlgo = algorithm ?? this.algorithm;
     final Type updatedType = type ?? this.type;
     final int updatedCounter = counter ?? this.counter;
-    final bool? updatedIsPinned = isPinned ?? this.isPinned;
-
+    final CodeDisplay? codeDisplay = display ?? this.display;
     return Code(
       updateAccount,
       updateIssuer,
@@ -63,20 +64,17 @@ class Code {
       updatedAlgo,
       updatedType,
       updatedCounter,
-      jsonEncode({
-        "code": "otpauth://${updatedType.name}/" +
-            updateIssuer +
-            ":" +
-            updateAccount +
-            "?algorithm=${updatedAlgo.name}&digits=$updatedDigits&issuer=" +
-            updateIssuer +
-            "&period=$updatePeriod&secret=" +
-            updatedSecret +
-            (updatedType == Type.hotp ? "&counter=$updatedCounter" : ""),
-        "pinned": updatedIsPinned,
-      }),
-      updatedIsPinned,
+      "otpauth://${updatedType.name}/" +
+          updateIssuer +
+          ":" +
+          updateAccount +
+          "?algorithm=${updatedAlgo.name}&digits=$updatedDigits&issuer=" +
+          updateIssuer +
+          "&period=$updatePeriod&secret=" +
+          updatedSecret +
+          (updatedType == Type.hotp ? "&counter=$updatedCounter" : ""),
       generatedID: generatedID,
+      display: codeDisplay,
     );
   }
 
@@ -84,7 +82,6 @@ class Code {
     String account,
     String issuer,
     String secret,
-    bool isPinned,
   ) {
     return Code(
       account,
@@ -95,22 +92,18 @@ class Code {
       Algorithm.sha1,
       Type.totp,
       0,
-      jsonEncode({
-        "code": "otpauth://totp/" +
-            issuer +
-            ":" +
-            account +
-            "?algorithm=SHA1&digits=6&issuer=" +
-            issuer +
-            "&period=30&secret=" +
-            secret,
-        "pinned": isPinned,
-      }),
-      isPinned,
+      "otpauth://totp/" +
+          issuer +
+          ":" +
+          account +
+          "?algorithm=SHA1&digits=6&issuer=" +
+          issuer +
+          "&period=30&secret=" +
+          secret,
     );
   }
 
-  static Code fromRawData(String rawData) {
+  static Code fromOTPAuthUrl(String rawData) {
     Uri uri = Uri.parse(rawData);
     try {
       return Code(
@@ -123,13 +116,12 @@ class Code {
         _getType(uri),
         _getCounter(uri),
         rawData,
-        false,
       );
     } catch (e) {
       // if account name contains # without encoding,
       // rest of the url are treated as url fragment
       if (rawData.contains("#")) {
-        return Code.fromRawData(rawData.replaceAll("#", '%23'));
+        return Code.fromOTPAuthUrl(rawData.replaceAll("#", '%23'));
       } else {
         rethrow;
       }
@@ -137,31 +129,9 @@ class Code {
   }
 
   static Code fromRawJson(Map rawJson) {
-    Uri uri = Uri.parse(rawJson['code']);
-    try {
-      return Code(
-        _getAccount(uri),
-        _getIssuer(uri),
-        _getDigits(uri),
-        _getPeriod(uri),
-        getSanitizedSecret(uri.queryParameters['secret']!),
-        _getAlgorithm(uri),
-        _getType(uri),
-        _getCounter(uri),
-        jsonEncode(rawJson),
-        rawJson['pinned'],
-      );
-    } catch (e) {
-      // if account name contains # without encoding,
-      // rest of the url are treated as url fragment
-      if (rawJson['code'].contains("#")) {
-        String newCode = rawJson['code'].replaceAll("#", '%23');
-        rawJson['code'] = newCode;
-        return Code.fromRawJson(rawJson);
-      } else {
-        rethrow;
-      }
-    }
+    Code resultCode = Code.fromOTPAuthUrl(rawJson['code']);
+    resultCode.display = CodeDisplay.fromJson(rawJson['display']);
+    return resultCode;
   }
 
   static String _getAccount(Uri uri) {

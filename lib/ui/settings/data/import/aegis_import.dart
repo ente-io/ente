@@ -151,10 +151,7 @@ Future<int?> _processAegisExportFile(
       throw Exception('Invalid OTP type');
     }
     parsedCodes.add(
-      Code.fromRawJson({
-        "code": otpUrl,
-        "pinned": false,
-      }),
+      Code.fromOTPAuthUrl(otpUrl),
     );
   }
 

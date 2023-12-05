@@ -152,7 +152,7 @@ Future<String> _getAuthDataForExport() async {
   for (final code in codes) {
     items.add({
       "code": code.rawData,
-      "pinned": code.isPinned,
+      "display": code.display,
     });
   }
   Map data = {

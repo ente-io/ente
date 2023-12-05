@@ -6,6 +6,7 @@ import 'package:ente_auth/core/configuration.dart';
 import 'package:ente_auth/ente_theme_data.dart';
 import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/models/code.dart';
+import 'package:ente_auth/models/code_display.dart';
 import 'package:ente_auth/onboarding/view/setup_enter_secret_key_page.dart';
 import 'package:ente_auth/onboarding/view/view_qr_page.dart';
 import 'package:ente_auth/services/local_authentication_service.dart';
@@ -396,10 +397,7 @@ class _CodeWidgetState extends State<CodeWidget> {
     final Code? code = await Navigator.of(context).push(
       MaterialPageRoute(
         builder: (BuildContext context) {
-          return SetupEnterSecretKeyPage(
-            code: widget.code,
-            isPinned: widget.code.isPinned,
-          );
+          return SetupEnterSecretKeyPage(code: widget.code);
         },
       ),
     );
@@ -425,11 +423,10 @@ class _CodeWidgetState extends State<CodeWidget> {
   }
 
   Future<void> _onPinPressed(_) async {
+    bool currentlyPinned = widget.code.isPinned;
+    CodeDisplay display = widget.code.display ?? CodeDisplay();
     final Code? code = widget.code.copyWith(
-      account: widget.code.account,
-      issuer: widget.code.issuer,
-      secret: widget.code.secret,
-      isPinned: !widget.code.isPinned!,
+      display: display.copyWith(pinned: !currentlyPinned),
     );
     if (code != null) {
       CodeStore.instance.addCode(code);

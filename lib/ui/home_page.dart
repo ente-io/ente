@@ -247,7 +247,9 @@ class _HomePageState extends State<HomePage> {
                   children: [
                     Padding(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 10,),
+                        horizontal: 16,
+                        vertical: 10,
+                      ),
                       child: Divider(color: Colors.grey[300]),
                     ),
                     CodeWidget(_filteredCodes[index]),
@@ -343,7 +345,7 @@ class _HomePageState extends State<HomePage> {
     }
     if (mounted && link.toLowerCase().startsWith("otpauth://")) {
       try {
-        final newCode = Code.fromRawData(link);
+        final newCode = Code.fromOTPAuthUrl(link);
         getNextTotp(newCode);
         CodeStore.instance.addCode(newCode);
         _focusNewCode(newCode);

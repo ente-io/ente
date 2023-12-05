@@ -30,7 +30,7 @@ class CodeStore {
     for (final entity in entities) {
       final decodeJson = jsonDecode(entity.rawData);
       if (decodeJson.startsWith('otpauth://')) {
-        final code = Code.fromRawData(decodeJson);
+        final code = Code.fromOTPAuthUrl(decodeJson);
         code.generatedID = entity.generatedID;
         code.hasSynced = entity.hasSynced;
         codes.add(code);

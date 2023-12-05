@@ -113,7 +113,7 @@ Future<void> _pickImportFile(BuildContext context) async {
       }
       for (final code in splitCodes) {
         try {
-          parsedCodes.add(Code.fromRawData(code));
+          parsedCodes.add(Code.fromOTPAuthUrl(code));
         } catch (e) {
           Logger('PlainText').severe("Could not parse code", e);
         }

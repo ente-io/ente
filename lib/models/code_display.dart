@@ -14,6 +14,25 @@ class CodeDisplay {
     this.tapCount = 0,
   });
 
+  // copyWith
+  CodeDisplay copyWith({
+    bool? pinned,
+    bool? trashed,
+    int? lastUsedAt,
+    int? tapCount,
+  }) {
+    final bool updatedPinned = pinned ?? this.pinned;
+    final bool updatedTrashed = trashed ?? this.trashed;
+    final int updatedLastUsedAt = lastUsedAt ?? this.lastUsedAt;
+    final int updatedTapCount = tapCount ?? this.tapCount;
+    return CodeDisplay(
+      pinned: updatedPinned,
+      trashed: updatedTrashed,
+      lastUsedAt: updatedLastUsedAt,
+      tapCount: updatedTapCount,
+    );
+  }
+
   factory CodeDisplay.fromJson(Map<String, dynamic> json) {
     return CodeDisplay(
       pinned: json['pinned'] ?? false,

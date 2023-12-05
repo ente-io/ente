@@ -122,12 +122,7 @@ List<Code> parseGoogleAuth(String qrCodeData) {
       } else {
         throw Exception('Invalid OTP type');
       }
-      codes.add(
-        Code.fromRawJson({
-          "code": otpUrl,
-          "pinned": false,
-        }),
-      );
+      codes.add(Code.fromOTPAuthUrl(otpUrl));
     }
     return codes;
   } catch (e, s) {

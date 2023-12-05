@@ -8,10 +8,8 @@ import "package:flutter/material.dart";
 
 class SetupEnterSecretKeyPage extends StatefulWidget {
   final Code? code;
-  final bool? isPinned;
 
-  SetupEnterSecretKeyPage({this.code, this.isPinned, Key? key})
-      : super(key: key);
+  SetupEnterSecretKeyPage({this.code, Key? key}) : super(key: key);
 
   @override
   State<SetupEnterSecretKeyPage> createState() =>
@@ -154,7 +152,6 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
       final account = _accountController.text.trim();
       final issuer = _issuerController.text.trim();
       final secret = _secretController.text.trim().replaceAll(' ', '');
-      final isPinned = widget.isPinned ?? false;
       if (widget.code != null && widget.code!.secret != secret) {
         ButtonResult? result = await showChoiceActionSheet(
           context,
@@ -174,13 +171,11 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
               account,
               issuer,
               secret,
-              isPinned,
             )
           : widget.code!.copyWith(
               account: account,
               issuer: issuer,
               secret: secret,
-              isPinned: isPinned,
             );
       // Verify the validity of the code
       getOTP(newCode);
