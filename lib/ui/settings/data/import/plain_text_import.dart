@@ -124,7 +124,7 @@ Future<void> _pickImportFile(BuildContext context) async {
 
       for (final code in splitCodes) {
         try {
-          parsedCodes.add(Code.fromRawJson(code));
+          parsedCodes.add(Code.fromExportJson(code));
         } catch (e) {
           Logger('PlainText').severe("Could not parse code", e);
         }

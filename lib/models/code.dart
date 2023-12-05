@@ -128,10 +128,17 @@ class Code {
     }
   }
 
-  static Code fromRawJson(Map rawJson) {
-    Code resultCode = Code.fromOTPAuthUrl(rawJson['code']);
+  static Code fromExportJson(Map rawJson) {
+    Code resultCode = Code.fromOTPAuthUrl(rawJson['rawData']);
     resultCode.display = CodeDisplay.fromJson(rawJson['display']);
     return resultCode;
+  }
+
+  Map<String, dynamic> toExportJson() {
+    return {
+      'rawData': rawData,
+      'display': display?.toJson(),
+    };
   }
 
   static String _getAccount(Uri uri) {

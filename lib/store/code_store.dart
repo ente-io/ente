@@ -36,7 +36,7 @@ class CodeStore {
         codes.add(code);
       } else {
         final decodedMap = jsonDecode(decodeJson);
-        final code = Code.fromRawJson(decodedMap);
+        final code = Code.fromExportJson(decodedMap);
         code.generatedID = entity.generatedID;
         code.hasSynced = entity.hasSynced;
         codes.add(code);
@@ -76,14 +76,14 @@ class CodeStore {
       result = AddResult.updateCode;
       await _authenticatorService.updateEntry(
         code.generatedID!,
-        jsonEncode(code.rawData),
+        jsonEncode(code.toExportJson()),
         shouldSync,
         mode,
       );
     } else {
       result = AddResult.newCode;
       code.generatedID = await _authenticatorService.addEntry(
-        jsonEncode(code.rawData),
+        jsonEncode(code.toExportJson()),
         shouldSync,
         mode,
       );

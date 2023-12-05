@@ -119,11 +119,10 @@ Future<void> _decryptExportData(
             }
           } else {
             final decodedContent = jsonDecode(content);
-            List<Map> splitCodes = List.from(decodedContent["items"]);
-
-            for (final code in splitCodes) {
+            List<Map> exportedItems = List.from(decodedContent["items"]);
+            for (final item in exportedItems) {
               try {
-                parsedCodes.add(Code.fromRawJson(code));
+                parsedCodes.add(Code.fromExportJson(item));
               } catch (e) {
                 Logger('EncryptedText').severe("Could not parse code", e);
               }

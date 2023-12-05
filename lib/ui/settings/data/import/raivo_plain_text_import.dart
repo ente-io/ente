@@ -105,12 +105,7 @@ Future<int?> _processRaivoExportFile(BuildContext context, String path) async {
     } else {
       throw Exception('Invalid OTP type');
     }
-    parsedCodes.add(
-      Code.fromRawJson({
-        "code": otpUrl,
-        "pinned": false,
-      }),
-    );
+    parsedCodes.add(Code.fromOTPAuthUrl(otpUrl));
   }
 
   for (final code in parsedCodes) {
