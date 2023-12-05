@@ -15,6 +15,7 @@ import 'package:ente_auth/services/user_service.dart';
 import 'package:ente_auth/store/code_store.dart';
 import 'package:ente_auth/ui/account/logout_dialog.dart';
 import 'package:ente_auth/ui/code_widget.dart';
+import 'package:ente_auth/ui/common/DividerWithPadding.dart';
 import 'package:ente_auth/ui/common/loading_widget.dart';
 import 'package:ente_auth/ui/home/coach_mark_widget.dart';
 import 'package:ente_auth/ui/home/home_empty_state.dart';
@@ -235,30 +236,29 @@ class _HomePageState extends State<HomePage> {
         );
       } else {
         _filteredCodes.sort((a, b) {
-          if (b.isPinned! && !a.isPinned!) return 1;
-          if (!b.isPinned! && a.isPinned!) return -1;
+          if (b.isPinned && !a.isPinned) return 1;
+          if (!b.isPinned && a.isPinned) return -1;
           return 0;
         });
         final list = ListView.builder(
           itemBuilder: ((context, index) {
             try {
+              Code code = _filteredCodes[index];
               if (index > 0 &&
-                  _filteredCodes[index - 1].isPinned! &&
-                  !_filteredCodes[index].isPinned!) {
+                  _filteredCodes[index - 1].isPinned &&
+                  !code.isPinned) {
                 return Column(
                   children: [
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 10,
-                      ),
-                      child: Divider(color: Colors.grey[300]),
+                    const DividerWithPadding(
+                      thinckness: 0.75,
+                      left: 16,
+                      right: 16,
                     ),
-                    CodeWidget(_filteredCodes[index]),
+                    CodeWidget(code),
                   ],
                 );
               } else {
-                return CodeWidget(_filteredCodes[index]);
+                return CodeWidget(code);
               }
             } catch (e) {
               return const Text("Failed");
