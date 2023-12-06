@@ -6,6 +6,7 @@ enum InvalidReason {
   imageToLivePhotoTypeChanged,
   livePhotoVideoMissing,
   thumbnailMissing,
+  tooLargeFile,
   unknown,
 }
 
