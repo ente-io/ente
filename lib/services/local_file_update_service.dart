@@ -7,6 +7,7 @@ import "package:photos/core/configuration.dart";
 import 'package:photos/core/errors.dart';
 import 'package:photos/db/file_updation_db.dart';
 import 'package:photos/db/files_db.dart';
+import "package:photos/extensions/list.dart";
 import "package:photos/extensions/stop_watch.dart";
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file/file_type.dart';
@@ -214,26 +215,30 @@ class LocalFileUpdateService {
         return;
       }
       await _importLivePhotoReUploadCandidates();
-      final sTime = DateTime.now().microsecondsSinceEpoch;
+
       // singleRunLimit indicates number of files to check during single
       // invocation of this method. The limit act as a crude way to limit the
       // resource consumed by the method
-      const int singleRunLimit = 75;
+      const int singleRunLimit = 500;
       final localIDsToProcess =
           await _fileUpdationDB.getLocalIDsForPotentialReUpload(
         singleRunLimit,
         FileUpdationDB.livePhotoCheck,
       );
       if (localIDsToProcess.isNotEmpty) {
-        await _checkLivePhotoWithLowOrUnknownSize(
-          localIDsToProcess,
-        );
-        final eTime = DateTime.now().microsecondsSinceEpoch;
-        final d = Duration(microseconds: eTime - sTime);
-        _logger.info(
-          'Performed hashCheck for ${localIDsToProcess.length} livePhoto files '
-          'completed in ${d.inSeconds.toString()} secs',
-        );
+        final chunks = localIDsToProcess.chunks(10);
+        for (final chunk in chunks) {
+          final sTime = DateTime.now().microsecondsSinceEpoch;
+          await _checkLivePhotoWithLowOrUnknownSize(
+            chunk,
+          );
+          final eTime = DateTime.now().microsecondsSinceEpoch;
+          final d = Duration(microseconds: eTime - sTime);
+          _logger.info(
+            'Performed hashCheck for ${chunk.length} livePhoto files '
+            'completed in ${d.inSeconds.toString()} secs',
+          );
+        }
       } else {
         await _prefs.setBool(_iosLivePhotoSizeMigrationDone, true);
       }
