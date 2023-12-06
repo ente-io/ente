@@ -45,6 +45,7 @@ class RemoteSyncService {
   final LocalFileUpdateService _localFileUpdateService =
       LocalFileUpdateService.instance;
   int _completedUploads = 0;
+  int _ignoredUploads = 0;
   late SharedPreferences _prefs;
   Completer<void>? _existingSync;
   bool _isExistingSyncSilent = false;
@@ -122,7 +123,13 @@ class RemoteSyncService {
       }
       final filesToBeUploaded = await _getFilesToBeUploaded();
       final hasUploadedFiles = await _uploadFiles(filesToBeUploaded);
-      _logger.info("File upload complete");
+      if (filesToBeUploaded.isNotEmpty) {
+        _logger.info(
+            "Files ${filesToBeUploaded.length} queued for upload, completed: "
+            "$_completedUploads, ignored $_ignoredUploads");
+      } else {
+        _logger.info("No files to upload for this session");
+      }
       if (hasUploadedFiles) {
         await _pullDiff();
         _existingSync?.complete();
@@ -144,6 +151,11 @@ class RemoteSyncService {
         if (filesToBeUploaded.isEmpty) {
           await _uploader.removeStaleFiles();
         }
+        if (_ignoredUploads > 0) {
+          _logger.info("Ignored $_ignoredUploads files for upload, fire "
+              "backup done");
+          Bus.instance.fire(SyncStatusUpdate(SyncStatus.completedBackup));
+        }
         _existingSync?.complete();
         _existingSync = null;
       }
@@ -156,7 +168,7 @@ class RemoteSyncService {
           e is WiFiUnavailableError ||
           e is StorageLimitExceededError ||
           e is SyncStopRequestedError) {
-        _logger.warning("Error executing remote sync", e);
+        _logger.warning("Error executing remote sync", e, s);
         rethrow;
       } else {
         _logger.severe("Error executing remote sync ", e, s);
@@ -535,6 +547,7 @@ class RemoteSyncService {
     }
 
     _completedUploads = 0;
+    _ignoredUploads = 0;
     final int toBeUploaded = filesToBeUploaded.length + updatedFileIDs.length;
     if (toBeUploaded > 0) {
       Bus.instance.fire(SyncStatusUpdate(SyncStatus.preparingForUpload));
@@ -614,7 +627,10 @@ class RemoteSyncService {
   void _uploadFile(EnteFile file, int collectionID, List<Future> futures) {
     final future = _uploader
         .upload(file, collectionID)
-        .then((uploadedFile) => _onFileUploaded(uploadedFile));
+        .then((uploadedFile) => _onFileUploaded(uploadedFile))
+        .onError(
+          (error, stackTrace) => _onFileUploadError(error, stackTrace, file),
+        );
     futures.add(future);
   }
 
@@ -646,6 +662,22 @@ class RemoteSyncService {
         total: toBeUploadedInThisSession,
       ),
     );
+  }
+
+  void _onFileUploadError(
+    Object? error,
+    StackTrace stackTrace,
+    EnteFile file,
+  ) {
+    if (error == null) {
+      return;
+    }
+    if (error is InvalidFileError) {
+      _ignoredUploads++;
+      _logger.warning("Invalid file error", error);
+    } else {
+      throw (error as Error);
+    }
   }
 
   /* _storeDiff maps each remoteFile to existing
