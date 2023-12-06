@@ -36,12 +36,10 @@ void main() async {
     iosOptions: const PrivacyIosOptions(
       enablePrivacy: true,
       privacyImageName: "LaunchImage",
-      autoLockAfterSeconds: 5,
       lockTrigger: IosLockTrigger.didEnterBackground,
     ),
     androidOptions: const PrivacyAndroidOptions(
       enableSecure: true,
-      autoLockAfterSeconds: 5,
     ),
     backgroundColor: Colors.white.withOpacity(0),
     blurEffect: PrivacyBlurEffect.extraLight,
