@@ -123,9 +123,13 @@ class RemoteSyncService {
       }
       final filesToBeUploaded = await _getFilesToBeUploaded();
       final hasUploadedFiles = await _uploadFiles(filesToBeUploaded);
-      _logger.info(
-        "Files ${filesToBeUploaded.length} upload complete for this session",
-      );
+      if (filesToBeUploaded.isNotEmpty) {
+        _logger.info(
+            "Files ${filesToBeUploaded.length} queued for upload, completed: "
+            "$_completedUploads, ignored $_ignoredUploads");
+      } else {
+        _logger.info("No files to upload for this session");
+      }
       if (hasUploadedFiles) {
         await _pullDiff();
         _existingSync?.complete();
