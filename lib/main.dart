@@ -42,7 +42,9 @@ void main() async {
       enableSecure: true,
     ),
     backgroundColor: Colors.white.withOpacity(0),
-    blurEffect: PrivacyBlurEffect.extraLight,
+    blurEffect: savedThemeMode == AdaptiveThemeMode.dark
+        ? PrivacyBlurEffect.dark
+        : PrivacyBlurEffect.extraLight,
   );
   FlutterDisplayMode.setHighRefreshRate();
 }
