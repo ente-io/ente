@@ -310,7 +310,7 @@ export default function Gallery() {
             if (!valid) {
                 return;
             }
-            downloadManager.init(APPS.PHOTOS, { token });
+            await downloadManager.init(APPS.PHOTOS, { token });
             setupSelectAllKeyBoardShortcutHandler();
             setActiveCollectionID(ALL_SECTION);
             setIsFirstLoad(isFirstLogin());

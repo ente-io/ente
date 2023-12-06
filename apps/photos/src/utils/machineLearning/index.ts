@@ -363,10 +363,10 @@ export async function getOriginalImageBitmap(
 }
 
 export async function getThumbnailImageBitmap(file: EnteFile) {
-    const thumbBlob = await DownloadManager.getThumbnail(file);
+    const thumb = await DownloadManager.getThumbnail(file);
     addLogLine('[MLService] Got thumbnail: ', file.id.toString());
 
-    return getImageBlobBitmap(thumbBlob);
+    return getImageBlobBitmap(new Blob([thumb]));
 }
 
 export async function getLocalFileImageBitmap(

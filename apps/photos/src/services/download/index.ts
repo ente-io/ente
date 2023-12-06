@@ -98,7 +98,7 @@ class DownloadManager {
             );
 
             if (cacheResp) {
-                return cacheResp.blob();
+                return new Uint8Array(await cacheResp.arrayBuffer());
             }
         } catch (e) {
             logError(e, 'failed to get cached thumbnail');

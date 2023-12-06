@@ -297,11 +297,7 @@ class ClipServiceImpl {
     };
 
     private extractFileClipImageEmbedding = async (file: EnteFile) => {
-        const thumb = await downloadManager
-            .getThumbnail(file)
-            .then((fileBlob) =>
-                fileBlob.arrayBuffer().then((buffer) => new Uint8Array(buffer))
-            );
+        const thumb = await downloadManager.getThumbnail(file);
         const embedding = await ElectronAPIs.computeImageEmbedding(thumb);
         return embedding;
     };

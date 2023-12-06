@@ -197,7 +197,7 @@ export default function PublicCollectionGallery() {
                     setPublicFiles(localPublicFiles);
                     passwordJWTToken.current =
                         await getLocalPublicCollectionPassword(collectionUID);
-                    downloadManager.init(APPS.PHOTOS, {
+                    await downloadManager.init(APPS.PHOTOS, {
                         token: token.current,
                         passwordToken: passwordJWTToken.current,
                     });
@@ -386,7 +386,11 @@ export default function PublicCollectionGallery() {
                     hashedPassword
                 );
                 passwordJWTToken.current = jwtToken;
-                savePublicCollectionPassword(collectionUID, jwtToken);
+                await downloadManager.init(APPS.PHOTOS, {
+                    token: token.current,
+                    passwordToken: passwordJWTToken.current,
+                });
+                await savePublicCollectionPassword(collectionUID, jwtToken);
             } catch (e) {
                 const parsedError = parseSharingErrorCodes(e);
                 if (parsedError.message === CustomError.TOKEN_EXPIRED) {

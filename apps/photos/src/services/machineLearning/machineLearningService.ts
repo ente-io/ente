@@ -63,7 +63,7 @@ class MachineLearningService {
             throw Error('Token needed by ml service to sync file');
         }
 
-        downloadManager.init(APPS.PHOTOS, { token });
+        await downloadManager.init(APPS.PHOTOS, { token });
         // await this.init();
 
         // Used to debug tf memory leak, all tf memory
