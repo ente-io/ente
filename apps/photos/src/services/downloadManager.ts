@@ -96,7 +96,10 @@ class DownloadManager {
             const cacheResp: Response = await this.thumbnailCache?.match(
                 fileID.toString()
             );
-            return await cacheResp.blob();
+
+            if (cacheResp) {
+                return cacheResp.blob();
+            }
         } catch (e) {
             logError(e, 'failed to get cached thumbnail');
             throw e;
@@ -123,17 +126,16 @@ class DownloadManager {
                 return cachedThumb;
             }
             const thumb = await this.downloadThumb(file);
-            const thumbBlob = new Blob([thumb]);
 
             this.thumbnailCache
-                ?.put(file.id.toString(), new Response(thumbBlob))
+                ?.put(file.id.toString(), new Response(thumb))
                 .catch((e) => {
                     logError(e, 'cache put failed');
                     // TODO: handle storage full exception.
                 });
-            return thumbBlob;
+            return thumb;
         } catch (e) {
-            logError(e, 'get DownloadManager preview Failed');
+            logError(e, 'getThumbnail failed');
             throw e;
         }
     }
@@ -144,10 +146,9 @@ class DownloadManager {
                 throw Error(CustomError.DOWNLOAD_MANAGER_NOT_READY);
             }
             if (!this.thumbnailObjectURLPromises.has(file.id)) {
-                await this.thumbnailObjectURLPromises.get(file.id);
-                const thumbBlobPromise = this.getThumbnail(file);
-                const thumbURLPromise = thumbBlobPromise.then((blob) =>
-                    URL.createObjectURL(blob)
+                const thumbPromise = this.getThumbnail(file);
+                const thumbURLPromise = thumbPromise.then((thumb) =>
+                    URL.createObjectURL(new Blob([thumb]))
                 );
                 this.thumbnailObjectURLPromises.set(file.id, thumbURLPromise);
             }
@@ -170,8 +171,7 @@ class DownloadManager {
                 return await getRenderableFileURL(file, fileBlob);
             };
             if (!this.fileObjectURLPromises.get(file.id)) {
-                const fileURLs = getFilePromise() as Promise<SourceURLs>;
-                this.fileObjectURLPromises.set(file.id, fileURLs);
+                this.fileObjectURLPromises.set(file.id, getFilePromise());
             }
             const fileURLs = await this.fileObjectURLPromises.get(file.id);
             return fileURLs;
