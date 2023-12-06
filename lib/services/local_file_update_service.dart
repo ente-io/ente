@@ -218,7 +218,7 @@ class LocalFileUpdateService {
       // singleRunLimit indicates number of files to check during single
       // invocation of this method. The limit act as a crude way to limit the
       // resource consumed by the method
-      const int singleRunLimit = 50;
+      const int singleRunLimit = 75;
       final localIDsToProcess =
           await _fileUpdationDB.getLocalIDsForPotentialReUpload(
         singleRunLimit,
@@ -251,12 +251,17 @@ class LocalFileUpdateService {
     final List<EnteFile> localFilesForUser = [];
     final Set<String> localIDsWithFile = {};
     final Set<int> missingSizeIDs = {};
+    final Set<String> processedIDs = {};
     for (EnteFile file in result) {
       if (file.ownerID == null || file.ownerID == userID) {
         localFilesForUser.add(file);
         localIDsWithFile.add(file.localID!);
         if (file.isUploaded && file.fileSize == null) {
           missingSizeIDs.add(file.uploadedFileID!);
+        }
+        if (file.isUploaded && file.updationTime == null) {
+          // file already queued for re-upload
+          processedIDs.add(file.localID!);
         }
       }
     }
@@ -267,7 +272,6 @@ class LocalFileUpdateService {
       return;
     }
 
-    final Set<String> processedIDs = {};
     // if a file for localID doesn't exist, then mark it as processed
     // otherwise the app will be stuck in retrying same set of ids
 
