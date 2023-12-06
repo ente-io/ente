@@ -37,7 +37,7 @@ class _StatusBarWidgetState extends State<StatusBarWidget> {
   @override
   void initState() {
     _subscription = Bus.instance.on<SyncStatusUpdate>().listen((event) {
-      _logger.info("Received event " + event.toString());
+      _logger.info("Received event " + event.status.toString());
       if (event.status == SyncStatus.error) {
         setState(() {
           _syncError = event.error;
