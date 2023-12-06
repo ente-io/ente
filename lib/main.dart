@@ -41,7 +41,9 @@ void main() async {
     androidOptions: const PrivacyAndroidOptions(
       enableSecure: true,
     ),
-    backgroundColor: Colors.white.withOpacity(0),
+    backgroundColor: savedThemeMode == AdaptiveThemeMode.dark
+        ? Colors.black.withOpacity(0)
+        : Colors.white.withOpacity(0),
     blurEffect: savedThemeMode == AdaptiveThemeMode.dark
         ? PrivacyBlurEffect.dark
         : PrivacyBlurEffect.extraLight,
