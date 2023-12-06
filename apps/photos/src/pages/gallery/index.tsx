@@ -129,7 +129,7 @@ import InMemoryStore, { MS_KEYS } from '@ente/shared/storage/InMemoryStore';
 import { syncEmbeddings } from 'services/embeddingService';
 import { ClipService } from 'services/clipService';
 import isElectron from 'is-electron';
-import downloadManager from 'services/downloadManager';
+import downloadManager from 'services/download';
 import { APPS } from '@ente/shared/apps/constants';
 
 export const DeadCenter = styled('div')`

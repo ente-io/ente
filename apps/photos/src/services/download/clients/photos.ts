@@ -1,7 +1,7 @@
 import HTTPService from '@ente/shared/network/HTTPService';
 import { getFileURL, getThumbnailURL } from '@ente/shared/network/api';
 import { EnteFile } from 'types/file';
-import { DownloadClient } from 'services/downloadManager';
+import { DownloadClient } from 'services/download';
 import { CustomError } from '@ente/shared/error';
 import { retryAsyncFunction } from 'utils/network';
 

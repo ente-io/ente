@@ -15,8 +15,8 @@ import { DedicatedCryptoWorker } from '@ente/shared/crypto/internal/crypto.worke
 import { LimitedCache } from '@ente/shared/storage/cacheStorage/types';
 import { addLogLine } from '@ente/shared/logging';
 import { APPS } from '@ente/shared/apps/constants';
-import { PhotosDownloadClient } from './downloadManagerClients/photos';
-import { PublicAlbumsDownloadClient } from './downloadManagerClients/publicAlbums';
+import { PhotosDownloadClient } from './clients/photos';
+import { PublicAlbumsDownloadClient } from './clients/publicAlbums';
 
 export type SourceURLs = {
     original: string[];

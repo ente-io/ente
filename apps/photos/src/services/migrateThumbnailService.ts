@@ -1,4 +1,4 @@
-import downloadManager from 'services/downloadManager';
+import downloadManager from 'services/download';
 import { getLocalFiles } from 'services/fileService';
 import { generateThumbnail } from 'services/upload/thumbnailService';
 import { getToken } from '@ente/shared/storage/localStorage/helpers';

@@ -19,7 +19,7 @@ import {
 } from 'react';
 
 import { EnteFile } from 'types/file';
-import downloadManager from 'services/downloadManager';
+import downloadManager from 'services/download';
 import { MenuItemGroup } from 'components/Menu/MenuItemGroup';
 import { EnteMenuItem } from 'components/Menu/EnteMenuItem';
 import CropOriginalIcon from '@mui/icons-material/CropOriginal';

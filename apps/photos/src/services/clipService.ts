@@ -4,7 +4,7 @@ import {
     getLocalEmbeddings,
 } from './embeddingService';
 import { getAllLocalFiles, getLocalFiles } from './fileService';
-import downloadManager from './downloadManager';
+import downloadManager from './download';
 import { logError } from '@ente/shared/sentry';
 import { addLogLine } from '@ente/shared/logging';
 import { Events, eventBus } from '@ente/shared/events';

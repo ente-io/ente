@@ -59,7 +59,7 @@ import OverflowMenu from '@ente/shared/components/OverflowMenu/menu';
 import { OverflowMenuOption } from '@ente/shared/components/OverflowMenu/option';
 import { ENTE_WEBSITE_LINK } from '@ente/shared/constants/urls';
 import { APPS } from '@ente/shared/apps/constants';
-import downloadManager from 'services/downloadManager';
+import downloadManager from 'services/download';
 
 const defaultThumbStore = new Map();
 const defaultFileStore = new Map();

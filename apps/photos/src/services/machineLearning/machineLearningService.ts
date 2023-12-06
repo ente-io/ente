@@ -33,7 +33,7 @@ import ObjectService from './objectService';
 import ReaderService from './readerService';
 import { logError } from '@ente/shared/sentry';
 import { addLogLine } from '@ente/shared/logging';
-import downloadManager from 'services/downloadManager';
+import downloadManager from 'services/download';
 import { APPS } from '@ente/shared/apps/constants';
 
 class MachineLearningService {

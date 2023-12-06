@@ -1,7 +1,7 @@
 import React from 'react';
 import { GalleryContext } from 'pages/gallery';
 import { useState, useContext, useEffect } from 'react';
-import downloadManager from 'services/downloadManager';
+import downloadManager from 'services/download';
 import { EnteFile } from 'types/file';
 import { StaticThumbnail } from 'components/PlaceholderThumbnails';
 import { LoadingThumbnail } from 'components/PlaceholderThumbnails';

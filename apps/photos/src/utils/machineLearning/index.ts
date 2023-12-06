@@ -3,7 +3,7 @@ import * as tf from '@tensorflow/tfjs-core';
 import { BLAZEFACE_FACE_SIZE } from 'constants/mlConfig';
 import { euclidean } from 'hdbscan';
 import PQueue from 'p-queue';
-import DownloadManager from 'services/downloadManager';
+import DownloadManager from 'services/download';
 import { getLocalFiles } from 'services/fileService';
 import { EnteFile } from 'types/file';
 import { Dimensions } from 'types/image';
