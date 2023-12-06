@@ -43,6 +43,7 @@ export interface DownloadClient {
 }
 
 class DownloadManager {
+    private ready: boolean = false;
     private downloadClient: DownloadClient;
     private thumbnailCache: LimitedCache;
     private cryptoWorker: Remote<DedicatedCryptoWorker>;
@@ -59,9 +60,19 @@ class DownloadManager {
         tokens: { token: string; passwordToken?: string } | { token: string },
         timeout?: number
     ) {
-        this.downloadClient = createDownloadClient(app, tokens, timeout);
-        this.thumbnailCache = await openThumbnailCache();
-        this.cryptoWorker = await ComlinkCryptoWorker.getInstance();
+        try {
+            if (this.ready) {
+                addLogLine('DownloadManager already initialized');
+                return;
+            }
+            this.downloadClient = createDownloadClient(app, tokens, timeout);
+            this.thumbnailCache = await openThumbnailCache();
+            this.cryptoWorker = await ComlinkCryptoWorker.getInstance();
+            this.ready = true;
+        } catch (e) {
+            logError(e, 'DownloadManager init failed');
+            throw e;
+        }
     }
 
     updateToken(token: string, passwordToken?: string) {
@@ -102,8 +113,11 @@ class DownloadManager {
         return decrypted;
     };
 
-    public async getThumbnail(file: EnteFile) {
+    async getThumbnail(file: EnteFile) {
         try {
+            if (!this.ready) {
+                throw Error(CustomError.DOWNLOAD_MANAGER_NOT_READY);
+            }
             const cachedThumb = await this.getCachedThumbnail(file.id);
             if (cachedThumb) {
                 return cachedThumb;
@@ -124,8 +138,11 @@ class DownloadManager {
         }
     }
 
-    public async getThumbnailForPreview(file: EnteFile) {
+    async getThumbnailForPreview(file: EnteFile) {
         try {
+            if (!this.ready) {
+                throw Error(CustomError.DOWNLOAD_MANAGER_NOT_READY);
+            }
             if (!this.thumbnailObjectURLPromises.has(file.id)) {
                 await this.thumbnailObjectURLPromises.get(file.id);
                 const thumbBlobPromise = this.getThumbnail(file);
@@ -144,6 +161,9 @@ class DownloadManager {
 
     getFileForPreview = async (file: EnteFile): Promise<SourceURLs> => {
         try {
+            if (!this.ready) {
+                throw Error(CustomError.DOWNLOAD_MANAGER_NOT_READY);
+            }
             const getFilePromise = async () => {
                 const fileStream = await this.downloadFile(file);
                 const fileBlob = await new Response(fileStream).blob();
@@ -163,6 +183,9 @@ class DownloadManager {
     };
 
     getFile(file: EnteFile) {
+        if (!this.ready) {
+            throw Error(CustomError.DOWNLOAD_MANAGER_NOT_READY);
+        }
         return this.downloadFile(file);
     }
 

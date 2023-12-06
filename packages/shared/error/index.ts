@@ -86,6 +86,7 @@ export const CustomError = {
     ServerError: 'server error',
     FILE_NOT_FOUND: 'file not found',
     UNSUPPORTED_PLATFORM: 'Unsupported platform',
+    DOWNLOAD_MANAGER_NOT_READY: 'Download manager not initialized',
 };
 
 export function handleUploadError(error: any): Error {
