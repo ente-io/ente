@@ -42,8 +42,8 @@ void main() async {
       enableSecure: true,
     ),
     backgroundColor: savedThemeMode == AdaptiveThemeMode.dark
-        ? Colors.black.withOpacity(0)
-        : Colors.white.withOpacity(0),
+        ? Colors.black
+        : Colors.white,
     blurEffect: savedThemeMode == AdaptiveThemeMode.dark
         ? PrivacyBlurEffect.dark
         : PrivacyBlurEffect.extraLight,
