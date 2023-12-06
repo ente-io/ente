@@ -539,7 +539,7 @@ class FileUploader {
         _logger.severe("File upload failed for " + file.toString(), e, s);
       }
       if (e is InvalidFileError) {
-        _logger.severe("File upload ignored for " + file.toString(), e, s);
+        _logger.severe("File upload ignored for " + file.toString(), e);
         await _onInvalidFileError(file, e);
       }
       if ((e is StorageLimitExceededError ||
