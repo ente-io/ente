@@ -22,6 +22,7 @@ import "package:photos/models/metadata/file_magic.dart";
 import "package:photos/services/file_magic_service.dart";
 import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/file_util.dart';
+import "package:uuid/uuid.dart";
 import 'package:video_thumbnail/video_thumbnail.dart';
 
 final _logger = Logger("FileUtil");
@@ -125,9 +126,9 @@ Future<MediaUploadData> _getMediaUploadDataFromAssetFile(EnteFile file) async {
     // imgHash:vidHash
     fileHash = '$fileHash$kLivePhotoHashSeparator$livePhotoVideoHash';
     final tempPath = Configuration.instance.getTempDirectory();
-
     // .elp -> ente live photo
-    final livePhotoPath = tempPath + file.generatedID.toString() + ".elp";
+    final uniqueId = const Uuid().v4().toString();
+    final livePhotoPath = tempPath + uniqueId + "_${file.generatedID}.elp";
     _logger.fine("Creating zip for live photo from " + livePhotoPath);
     await zip(
       zipPath: livePhotoPath,
