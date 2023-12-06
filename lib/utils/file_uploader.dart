@@ -68,6 +68,11 @@ class FileUploader {
   late ProcessType _processType;
   late bool _isBackground;
   late SharedPreferences _prefs;
+  // _hasInitiatedForceUpload is used to track if user attempted force upload
+  // where files are uploaded directly (without adding them to DB). In such
+  // cases, we don't want to clear the stale upload files. See #removeStaleFiles
+  // as it can result in clearing files which are still being force uploaded.
+  bool _hasInitiatedForceUpload = false;
 
   FileUploader._privateConstructor() {
     Bus.instance.on<SubscriptionPurchasedEvent>().listen((event) {
@@ -285,6 +290,12 @@ class FileUploader {
   }
 
   Future<void> removeStaleFiles() async {
+    if (_hasInitiatedForceUpload) {
+      _logger.info(
+        "Force upload was initiated, skipping stale file cleanup",
+      );
+      return;
+    }
     try {
       final String dir = Configuration.instance.getTempDirectory();
       // delete all files in the temp directory that start with upload_ and
@@ -324,6 +335,7 @@ class FileUploader {
   }
 
   Future<EnteFile> forceUpload(EnteFile file, int collectionID) async {
+    _hasInitiatedForceUpload = true;
     return _tryToUpload(file, collectionID, true);
   }
 
