@@ -17,7 +17,7 @@ export class PhotosDownloadClient implements DownloadClient {
 
     async downloadThumbnail(file: EnteFile): Promise<Uint8Array> {
         if (!this.token) {
-            return;
+            throw Error(CustomError.TOKEN_MISSING);
         }
         const resp = await retryAsyncFunction(() =>
             HTTPService.get(
@@ -37,6 +37,9 @@ export class PhotosDownloadClient implements DownloadClient {
         file: EnteFile,
         onDownloadProgress: (event: { loaded: number; total: number }) => void
     ): Promise<Uint8Array> {
+        if (!this.token) {
+            throw Error(CustomError.TOKEN_MISSING);
+        }
         const resp = await retryAsyncFunction(() =>
             HTTPService.get(
                 getFileURL(file.id),
@@ -56,6 +59,9 @@ export class PhotosDownloadClient implements DownloadClient {
     }
 
     async downloadFileStream(file: EnteFile): Promise<Response> {
+        if (!this.token) {
+            throw Error(CustomError.TOKEN_MISSING);
+        }
         return retryAsyncFunction(() =>
             fetch(getFileURL(file.id), {
                 headers: {

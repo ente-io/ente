@@ -25,6 +25,9 @@ export class PublicAlbumsDownloadClient implements DownloadClient {
     }
 
     downloadThumbnail = async (file: EnteFile) => {
+        if (!this.token) {
+            throw Error(CustomError.TOKEN_MISSING);
+        }
         const resp = await HTTPService.get(
             getPublicCollectionThumbnailURL(file.id),
             null,
@@ -47,6 +50,9 @@ export class PublicAlbumsDownloadClient implements DownloadClient {
         file: EnteFile,
         onDownloadProgress: (event: { loaded: number; total: number }) => void
     ) => {
+        if (!this.token) {
+            throw Error(CustomError.TOKEN_MISSING);
+        }
         const resp = await retryAsyncFunction(() =>
             HTTPService.get(
                 getPublicCollectionFileURL(file.id),
@@ -67,6 +73,9 @@ export class PublicAlbumsDownloadClient implements DownloadClient {
     };
 
     async downloadFileStream(file: EnteFile): Promise<Response> {
+        if (!this.token) {
+            throw Error(CustomError.TOKEN_MISSING);
+        }
         return retryAsyncFunction(() =>
             fetch(getPublicCollectionFileURL(file.id), {
                 headers: {
