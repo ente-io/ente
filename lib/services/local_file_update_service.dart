@@ -9,6 +9,7 @@ import 'package:photos/db/file_updation_db.dart';
 import 'package:photos/db/files_db.dart';
 import "package:photos/extensions/list.dart";
 import "package:photos/extensions/stop_watch.dart";
+import "package:photos/models/file/extensions/file_props.dart";
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file/file_type.dart';
 import "package:photos/services/files_service.dart";
@@ -209,6 +210,27 @@ class LocalFileUpdateService {
     );
   }
 
+  Future<void> checkLivePhoto(EnteFile file) async {
+    if (file.localID == null ||
+        file.localID!.isEmpty ||
+        !file.isUploaded ||
+        file.fileType != FileType.livePhoto ||
+        !file.isOwner) {
+      return;
+    }
+    if (_prefs.containsKey(_iosLivePhotoSizeMigrationDone)) {
+      return;
+    }
+    bool hasEntry = await _fileUpdationDB.isExisting(
+      file.localID!,
+      FileUpdationDB.livePhotoCheck,
+    );
+    if (hasEntry) {
+      _logger.info('eager checkLivePhoto ${file.tag}');
+      await _checkLivePhotoWithLowOrUnknownSize([file.localID!]);
+    }
+  }
+
   Future<void> _handleLivePhotosSizedCheck() async {
     try {
       if (_prefs.containsKey(_iosLivePhotoSizeMigrationDone)) {
@@ -226,12 +248,15 @@ class LocalFileUpdateService {
         FileUpdationDB.livePhotoCheck,
       );
       if (localIDsToProcess.isNotEmpty) {
-        final chunks = localIDsToProcess.chunks(10);
-        for (final chunk in chunks) {
+        final chunksOf50 = localIDsToProcess.chunks(50);
+        for (final chunk in chunksOf50) {
           final sTime = DateTime.now().microsecondsSinceEpoch;
-          await _checkLivePhotoWithLowOrUnknownSize(
-            chunk,
-          );
+          final List<Future> futures = [];
+          final chunkOf10 = chunk.chunks(10);
+          for (final smallChunk in chunkOf10) {
+            futures.add(_checkLivePhotoWithLowOrUnknownSize(smallChunk));
+          }
+          await Future.wait(futures);
           final eTime = DateTime.now().microsecondsSinceEpoch;
           final d = Duration(microseconds: eTime - sTime);
           _logger.info(

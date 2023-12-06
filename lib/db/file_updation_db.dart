@@ -128,6 +128,18 @@ class FileUpdationDB {
     );
   }
 
+  // check if entry existing for given localID and reason
+  Future<bool> isExisting(String localID, String reason) async {
+    final db = await instance.database;
+    final String whereClause =
+        '$columnLocalID = "$localID" AND $columnReason = "$reason"';
+    final rows = await db.query(
+      tableName,
+      where: whereClause,
+    );
+    return rows.isNotEmpty;
+  }
+
   Future<List<String>> getLocalIDsForPotentialReUpload(
     int limit,
     String reason,
