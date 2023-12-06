@@ -1,5 +1,6 @@
 {
   "account": "Konto",
+  "unlock": "Odblokuj",
   "recoveryKey": "Klucz odzyskiwania",
   "counterAppBarTitle": "Licznik",
   "@counterAppBarTitle": {
