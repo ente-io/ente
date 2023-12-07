@@ -4,7 +4,7 @@ import {
     getLocalEmbeddings,
 } from './embeddingService';
 import { getAllLocalFiles, getLocalFiles } from './fileService';
-import downloadManager from './downloadManager';
+import downloadManager from './download';
 import { logError } from '@ente/shared/sentry';
 import { addLogLine } from '@ente/shared/logging';
 import { Events, eventBus } from '@ente/shared/events';
@@ -297,11 +297,7 @@ class ClipServiceImpl {
     };
 
     private extractFileClipImageEmbedding = async (file: EnteFile) => {
-        const thumb = await downloadManager
-            .getThumbnail(file)
-            .then((fileBlob) =>
-                fileBlob.arrayBuffer().then((buffer) => new Uint8Array(buffer))
-            );
+        const thumb = await downloadManager.getThumbnail(file);
         const embedding = await ElectronAPIs.computeImageEmbedding(thumb);
         return embedding;
     };

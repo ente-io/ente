@@ -43,7 +43,7 @@ import {
 } from 'utils/export/migration';
 import { FILE_TYPE } from 'constants/file';
 import { decodeLivePhoto } from 'services/livePhotoService';
-import downloadManager from 'services/downloadManager';
+import downloadManager from 'services/download';
 import { sleep } from 'utils/common';
 
 export async function migrateExport(

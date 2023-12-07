@@ -1,4 +1,4 @@
-import ElectronAPIs from '@ente/shared/electron';
+import { WorkerSafeElectronService } from '@ente/shared/electron/service';
 import {
     getLocalSentryUserID,
     setLocalSentryUserID,
@@ -12,7 +12,7 @@ import { HttpStatusCode } from 'axios';
 
 export async function getSentryUserID() {
     if (isElectron()) {
-        return await ElectronAPIs.getSentryUserID();
+        return await WorkerSafeElectronService.getSentryUserID();
     } else {
         let anonymizeUserID = getLocalSentryUserID();
         if (!anonymizeUserID) {

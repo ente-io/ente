@@ -10,7 +10,7 @@ import {
 } from 'types/file';
 import { decodeLivePhoto } from 'services/livePhotoService';
 import { getFileType } from 'services/typeDetectionService';
-import DownloadManager, { SourceURLs } from 'services/downloadManager';
+import DownloadManager, { SourceURLs } from 'services/download';
 import { logError } from '@ente/shared/sentry';
 import { User } from '@ente/shared/user/types';
 import { getData, LS_KEYS } from '@ente/shared/storage/localStorage';
@@ -280,7 +280,7 @@ export function generateStreamFromArrayBuffer(data: Uint8Array) {
 export async function getRenderableFileURL(
     file: EnteFile,
     fileBlob: Blob,
-    fileOriginalURL: string,
+    originalFileURL: string,
     forceConvert: boolean
 ): Promise<SourceURLs> {
     let srcURLs: SourceURLs['url'];
@@ -290,8 +290,8 @@ export async function getRenderableFileURL(
                 file.metadata.title,
                 fileBlob
             );
-            const convertedURL = getFileObjectURLs(
-                fileOriginalURL,
+            const convertedURL = getFileObjectURL(
+                originalFileURL,
                 fileBlob,
                 convertedBlob
             );
@@ -312,8 +312,8 @@ export async function getRenderableFileURL(
                 fileBlob,
                 forceConvert
             );
-            const convertedURL = getFileObjectURLs(
-                fileOriginalURL,
+            const convertedURL = getFileObjectURL(
+                originalFileURL,
                 fileBlob,
                 convertedBlob
             );
@@ -321,16 +321,16 @@ export async function getRenderableFileURL(
             break;
         }
         default: {
-            srcURLs = fileOriginalURL;
+            srcURLs = originalFileURL;
             break;
         }
     }
 
-    let isOriginal = false;
+    let isOriginal: boolean;
     if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
         isOriginal = false;
     } else {
-        isOriginal = (srcURLs as string) === (fileOriginalURL as string);
+        isOriginal = (srcURLs as string) === (originalFileURL as string);
     }
 
     return {
@@ -577,9 +577,9 @@ export function updateExistingFilePubMetadata(
     existingFile.metadata = mergeMetadata([existingFile])[0].metadata;
 }
 
-export async function getFileFromURL(fileURL: string) {
+export async function getFileFromURL(fileURL: string, name: string) {
     const fileBlob = await (await fetch(fileURL)).blob();
-    const fileFile = new File([fileBlob], 'temp');
+    const fileFile = new File([fileBlob], name);
     return fileFile;
 }
 
@@ -918,7 +918,7 @@ const fixTimeHelper = async (
     setFixCreationTimeAttributes({ files: selectedFiles });
 };
 
-const getFileObjectURLs = (
+const getFileObjectURL = (
     originalFileURL: string,
     originalBlob: Blob,
     convertedBlob: Blob

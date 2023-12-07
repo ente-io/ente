@@ -425,7 +425,6 @@
     "FILES": "Dateien",
     "EACH": "",
     "DEDUPLICATE_BASED_ON_SIZE": "",
-    "DEDUPLICATE_BASED_ON_SIZE_AND_CAPTURE_TIME": "",
     "STOP_ALL_UPLOADS_MESSAGE": "",
     "STOP_UPLOADS_HEADER": "Hochladen stoppen?",
     "YES_STOP_UPLOADS": "Ja, Hochladen stoppen",

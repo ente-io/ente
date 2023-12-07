@@ -425,7 +425,6 @@
     "FILES": "Fichiers",
     "EACH": "Chacun",
     "DEDUPLICATE_BASED_ON_SIZE": "Les fichiers suivants ont été clubbed, basé sur leurs tailles, veuillez corriger et supprimer les objets que vous pensez être dupliqués",
-    "DEDUPLICATE_BASED_ON_SIZE_AND_CAPTURE_TIME": "Les fichiers suivants ont été clubbed, basé sur leurs tailles et de l'heure de capture, veuillez corriger et supprimer les objets que vous pensez être dupliqués",
     "STOP_ALL_UPLOADS_MESSAGE": "Êtes-vous certains de vouloir arrêter tous les chargements en cours?",
     "STOP_UPLOADS_HEADER": "Arrêter les chargements ?",
     "YES_STOP_UPLOADS": "Oui, arrêter tout",

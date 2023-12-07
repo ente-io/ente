@@ -61,6 +61,13 @@ const DATE_TIME_PARSING_TEST_FILE_NAMES = [
     },
 ];
 
+const DATE_TIME_PARSING_TEST_FILE_NAMES_MUST_FAIL = [
+    'Snapchat-431959199.mp4.',
+    'Snapchat-400000000.mp4',
+    'Snapchat-900000000.mp4',
+    'Snapchat-100-10-20-19-15-12',
+];
+
 const FILE_NAME_TO_JSON_NAME = [
     {
         filename: 'IMG20210211125718-edited.jpg',
@@ -387,6 +394,16 @@ function parseDateTimeFromFileNameTest() {
             }
         }
     );
+    DATE_TIME_PARSING_TEST_FILE_NAMES_MUST_FAIL.forEach((fileName) => {
+        const dateTime = tryToParseDateTime(fileName);
+        if (dateTime) {
+            throw Error(
+                `parseDateTimeFromFileNameTest failed ❌ ,
+                for ${fileName}
+                expected: null got: ${dateTime}`
+            );
+        }
+    });
     console.log('parseDateTimeFromFileNameTest passed ✅');
 }
 

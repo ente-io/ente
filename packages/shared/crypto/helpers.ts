@@ -8,6 +8,7 @@ import { setRecoveryKey } from '@ente/accounts/api/user';
 import { logError } from '@ente/shared/sentry';
 import isElectron from 'is-electron';
 import ElectronAPIs from '../electron';
+import { addLogLine } from '../logging';
 
 const LOGIN_SUB_KEY_LENGTH = 32;
 const LOGIN_SUB_KEY_ID = 1;
@@ -104,7 +105,7 @@ export const saveKeyInSessionStore = async (
         key
     );
     setKey(keyType, sessionKeyAttributes);
-    console.log('fromDesktop', fromDesktop);
+    addLogLine('fromDesktop', fromDesktop);
     if (
         isElectron() &&
         !fromDesktop &&

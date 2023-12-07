@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useRef, useState } from 'react';
 import { EnteFile } from 'types/file';
 import { styled } from '@mui/material';
 import PlayCircleOutlineOutlinedIcon from '@mui/icons-material/PlayCircleOutlineOutlined';
-import DownloadManager from 'services/downloadManager';
+import DownloadManager from 'services/download';
 import useLongPress from '@ente/shared/hooks/useLongPress';
 import { GalleryContext } from 'pages/gallery';
 import { GAP_BTW_TILES, IMAGE_CONTAINER_MAX_WIDTH } from 'constants/gallery';
@@ -19,6 +19,7 @@ import { FILE_TYPE } from 'constants/file';
 import AlbumOutlined from '@mui/icons-material/AlbumOutlined';
 import Avatar from './Avatar';
 import { shouldShowAvatar } from 'utils/file';
+import { CustomError } from '@ente/shared/error';
 
 interface IProps {
     file: EnteFile;
@@ -248,15 +249,20 @@ export default function PreviewCard(props: IProps) {
                     return;
                 }
                 const url: string =
-                    await DownloadManager.getThumbnailForPreview(file);
+                    await DownloadManager.getThumbnailForPreview(
+                        file,
+                        props.showPlaceholder
+                    );
 
-                if (!isMounted.current) {
+                if (!isMounted.current || !url) {
                     return;
                 }
                 setImgSrc(url);
                 updateURL(file.id, url);
             } catch (e) {
-                logError(e, 'preview card useEffect failed');
+                if (e.message !== CustomError.URL_ALREADY_SET) {
+                    logError(e, 'preview card useEffect failed');
+                }
                 // no-op
             }
         };
@@ -294,7 +300,7 @@ export default function PreviewCard(props: IProps) {
 
     return (
         <Cont
-            key={`thumb-${file.id}-${props.showPlaceholder}`}
+            key={`thumb-${file.id}}`}
             onClick={handleClick}
             onMouseEnter={handleHover}
             disabled={!file?.msrc && !imgSrc}

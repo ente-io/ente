@@ -1,7 +1,7 @@
 import { FILE_TYPE } from 'constants/file';
 import { EnteFile } from 'types/file';
 import { logError } from '@ente/shared/sentry';
-import { SourceURLs } from 'services/downloadManager';
+import { SourceURLs } from 'services/download';
 
 const WAIT_FOR_VIDEO_PLAYBACK = 1 * 1000;
 
@@ -52,6 +52,8 @@ export async function pauseVideo(livePhotoVideo, livePhotoImage) {
 }
 
 export function updateFileMsrcProps(file: EnteFile, url: string) {
+    file.w = window.innerWidth;
+    file.h = window.innerHeight;
     file.msrc = url;
     file.isSourceLoaded = false;
     file.conversionFailed = false;
@@ -69,6 +71,12 @@ export function updateFileMsrcProps(file: EnteFile, url: string) {
 
 export async function updateFileSrcProps(file: EnteFile, srcURLs: SourceURLs) {
     const { url, isRenderable } = srcURLs;
+    file.w = window.innerWidth;
+    file.h = window.innerHeight;
+    file.isSourceLoaded = true;
+    file.isConverted = !srcURLs.isOriginal;
+    file.conversionFailed = !srcURLs.isRenderable;
+    file.srcURLs = srcURLs;
     if (!isRenderable) {
         return;
     }
