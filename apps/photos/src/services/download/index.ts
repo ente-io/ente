@@ -228,6 +228,9 @@ class DownloadManager {
             if (!this.ready) {
                 throw Error(CustomError.DOWNLOAD_MANAGER_NOT_READY);
             }
+            if (!cacheInMemory) {
+                return await this.downloadFile(file);
+            }
             const getFilePromise = async (): Promise<SourceURLs> => {
                 const fileStream = await this.downloadFile(file);
                 const fileBlob = await new Response(fileStream).blob();
@@ -237,21 +240,15 @@ class DownloadManager {
                     isRenderable: false,
                 };
             };
-
-            if (this.fileObjectURLPromises.has(file.id)) {
-                const fileURLs = await this.fileObjectURLPromises.get(file.id);
-                if (fileURLs.isOriginal) {
-                    const fileStream = (await fetch(fileURLs.url as string))
-                        .body;
-                    return fileStream;
-                } else {
-                    return await this.downloadFile(file);
-                }
-            } else if (!cacheInMemory) {
-                return await this.downloadFile(file);
+            if (!this.fileObjectURLPromises.has(file.id)) {
+                this.fileObjectURLPromises.set(file.id, getFilePromise());
+            }
+            const fileURLs = await this.fileObjectURLPromises.get(file.id);
+            if (fileURLs.isOriginal) {
+                const fileStream = (await fetch(fileURLs.url as string)).body;
+                return fileStream;
             } else {
-                const fileURLs = getFilePromise();
-                this.fileObjectURLPromises.set(file.id, fileURLs);
+                return await this.downloadFile(file);
             }
         } catch (e) {
             this.fileObjectURLPromises.delete(file.id);
