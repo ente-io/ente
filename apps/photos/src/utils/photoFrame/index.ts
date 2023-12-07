@@ -52,6 +52,8 @@ export async function pauseVideo(livePhotoVideo, livePhotoImage) {
 }
 
 export function updateFileMsrcProps(file: EnteFile, url: string) {
+    file.w = window.innerWidth;
+    file.h = window.innerHeight;
     file.msrc = url;
     file.isSourceLoaded = false;
     file.conversionFailed = false;
