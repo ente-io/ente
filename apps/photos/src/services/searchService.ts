@@ -32,6 +32,7 @@ import {
     computeClipMatchScore,
     getLocalClipImageEmbeddings,
 } from './clipService';
+import { CustomError } from '@ente/shared/error';
 
 const DIGITS = new Set(['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']);
 
@@ -302,7 +303,9 @@ async function getClipSuggestion(searchPhrase: string): Promise<Suggestion> {
             label: searchPhrase,
         };
     } catch (e) {
-        logError(e, 'getClipSuggestion failed');
+        if (!e.message?.includes(CustomError.MODEL_DOWNLOAD_PENDING)) {
+            logError(e, 'getClipSuggestion failed');
+        }
         return null;
     }
 }

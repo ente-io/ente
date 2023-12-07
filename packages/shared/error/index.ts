@@ -86,6 +86,8 @@ export const CustomError = {
     ServerError: 'server error',
     FILE_NOT_FOUND: 'file not found',
     UNSUPPORTED_PLATFORM: 'Unsupported platform',
+    MODEL_DOWNLOAD_PENDING:
+        'Model download pending, skipping clip search request',
     DOWNLOAD_MANAGER_NOT_READY: 'Download manager not initialized',
 };
 
