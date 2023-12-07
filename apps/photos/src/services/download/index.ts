@@ -55,11 +55,6 @@ class DownloadManager {
 
     private progressUpdater: (value: Map<number, number>) => void = () => {};
 
-    constructor() {
-        const main = async () => {};
-        main();
-    }
-
     async init(
         app: APPS,
         tokens?: { token: string; passwordToken?: string } | { token: string },
