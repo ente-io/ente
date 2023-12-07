@@ -98,16 +98,6 @@ const PhotoFrame = ({
                 h: window.innerHeight,
                 title: item.pubMagicMetadata?.data.caption,
             };
-            // try {
-            //     if (thumbsStore.has(item.id)) {
-            //         updateFileMsrcProps(filteredItem, thumbsStore.get(item.id));
-            //     }
-            //     if (filesStore.has(item.id)) {
-            //         updateFileSrcProps(filteredItem, filesStore.get(item.id));
-            //     }
-            // } catch (e) {
-            //     logError(e, 'PhotoFrame url prefill failed');
-            // }
             return filteredItem;
         });
     }, [files]);
