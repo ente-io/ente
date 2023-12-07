@@ -280,7 +280,7 @@ export function generateStreamFromArrayBuffer(data: Uint8Array) {
 export async function getRenderableFileURL(
     file: EnteFile,
     fileBlob: Blob,
-    fileOriginalURL: string,
+    originalFileURL: string,
     forceConvert: boolean
 ): Promise<SourceURLs> {
     let srcURLs: SourceURLs['url'];
@@ -290,8 +290,8 @@ export async function getRenderableFileURL(
                 file.metadata.title,
                 fileBlob
             );
-            const convertedURL = getFileObjectURLs(
-                fileOriginalURL,
+            const convertedURL = getFileObjectURL(
+                originalFileURL,
                 fileBlob,
                 convertedBlob
             );
@@ -312,8 +312,8 @@ export async function getRenderableFileURL(
                 fileBlob,
                 forceConvert
             );
-            const convertedURL = getFileObjectURLs(
-                fileOriginalURL,
+            const convertedURL = getFileObjectURL(
+                originalFileURL,
                 fileBlob,
                 convertedBlob
             );
@@ -321,16 +321,16 @@ export async function getRenderableFileURL(
             break;
         }
         default: {
-            srcURLs = fileOriginalURL;
+            srcURLs = originalFileURL;
             break;
         }
     }
 
-    let isOriginal = false;
+    let isOriginal: boolean;
     if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
         isOriginal = false;
     } else {
-        isOriginal = (srcURLs as string) === (fileOriginalURL as string);
+        isOriginal = (srcURLs as string) === (originalFileURL as string);
     }
 
     return {
@@ -918,7 +918,7 @@ const fixTimeHelper = async (
     setFixCreationTimeAttributes({ files: selectedFiles });
 };
 
-const getFileObjectURLs = (
+const getFileObjectURL = (
     originalFileURL: string,
     originalBlob: Blob,
     convertedBlob: Blob

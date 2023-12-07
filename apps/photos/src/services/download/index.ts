@@ -192,26 +192,29 @@ class DownloadManager {
                 const fileBlob = await new Response(
                     await this.getFile(file, true)
                 ).blob();
-                const fileOriginalURL = URL.createObjectURL(fileBlob);
+                const { url: originalFileURL } =
+                    await this.fileObjectURLPromises.get(file.id);
 
                 const converted = await getRenderableFileURL(
                     file,
                     fileBlob,
-                    fileOriginalURL as string,
+                    originalFileURL as string,
                     forceConvert
                 );
                 return converted;
             };
             if (!this.fileConversionPromises.has(file.id)) {
-                this.fileObjectURLPromises.set(
+                this.fileConversionPromises.set(
                     file.id,
                     getFileForPreviewPromise()
                 );
             }
             const fileURLs = await this.fileConversionPromises.get(file.id);
+            this.fileConversionPromises.delete(file.id);
+            this.fileObjectURLPromises.set(file.id, Promise.resolve(fileURLs));
             return fileURLs;
         } catch (e) {
-            this.fileObjectURLPromises.delete(file.id);
+            this.fileConversionPromises.delete(file.id);
             logError(e, 'download manager getFileForPreview Failed');
             throw e;
         }
@@ -252,7 +255,9 @@ class DownloadManager {
                 this.fileObjectURLPromises.set(file.id, fileURLs);
             }
         } catch (e) {
-            this.fileObjectURLPromises.delete(file.id);
+            if (useCache) {
+                this.fileObjectURLPromises.delete(file.id);
+            }
             logError(e, 'download manager getFile Failed');
             throw e;
         }
