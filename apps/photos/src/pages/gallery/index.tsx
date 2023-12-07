@@ -129,7 +129,7 @@ import InMemoryStore, { MS_KEYS } from '@ente/shared/storage/InMemoryStore';
 import { syncEmbeddings } from 'services/embeddingService';
 import { ClipService } from 'services/clipService';
 import isElectron from 'is-electron';
-import downloadManager from 'services/downloadManager';
+import downloadManager from 'services/download';
 import { APPS } from '@ente/shared/apps/constants';
 
 export const DeadCenter = styled('div')`
@@ -308,7 +308,7 @@ export default function Gallery() {
             if (!valid) {
                 return;
             }
-            downloadManager.init(APPS.PHOTOS, { token });
+            await downloadManager.init(APPS.PHOTOS, { token });
             setupSelectAllKeyBoardShortcutHandler();
             setActiveCollectionID(ALL_SECTION);
             setIsFirstLoad(isFirstLogin());
@@ -1098,6 +1098,7 @@ export default function Gallery() {
                     <GalleryEmptyState openUploader={openUploader} />
                 ) : (
                     <PhotoFrame
+                        page={PAGES.GALLERY}
                         files={filteredData}
                         syncWithRemote={syncWithRemote}
                         favItemIds={favItemIds}

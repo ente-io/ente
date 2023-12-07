@@ -3,12 +3,11 @@ import PreviewCard from './pages/gallery/PreviewCard';
 import { useContext, useEffect, useState } from 'react';
 import { EnteFile } from 'types/file';
 import { styled } from '@mui/material';
-import DownloadManager, { SourceURLs } from 'services/downloadManager';
+import DownloadManager, { SourceURLs } from 'services/download';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import PhotoViewer from 'components/PhotoViewer';
 import { TRASH_SECTION } from 'constants/collection';
 import { updateFileMsrcProps, updateFileSrcProps } from 'utils/photoFrame';
-import { PhotoList } from './PhotoList';
 import { SelectedState } from 'types/gallery';
 import { PublicCollectionGalleryContext } from 'utils/publicCollectionGallery';
 import { useRouter } from 'next/router';
@@ -17,6 +16,10 @@ import { addLogLine } from '@ente/shared/logging';
 import PhotoSwipe from 'photoswipe';
 import useMemoSingleThreaded from '@ente/shared/hooks/useMemoSingleThreaded';
 import { FILE_TYPE } from 'constants/file';
+import { PHOTOS_PAGES } from '@ente/shared/constants/pages';
+import { PhotoList } from './PhotoList';
+import { DedupePhotoList } from './PhotoList/dedupe';
+import { Duplicate } from 'services/deduplicationService';
 
 const Container = styled('div')`
     display: block;
@@ -34,7 +37,12 @@ const Container = styled('div')`
 const PHOTOSWIPE_HASH_SUFFIX = '&opened';
 
 interface Props {
+    page:
+        | PHOTOS_PAGES.GALLERY
+        | PHOTOS_PAGES.DEDUPLICATE
+        | PHOTOS_PAGES.SHARED_ALBUMS;
     files: EnteFile[];
+    duplicates?: Duplicate[];
     syncWithRemote: () => Promise<void>;
     favItemIds?: Set<number>;
     setSelected: (
@@ -53,6 +61,8 @@ interface Props {
 }
 
 const PhotoFrame = ({
+    page,
+    duplicates,
     files,
     syncWithRemote,
     favItemIds,
@@ -507,16 +517,27 @@ const PhotoFrame = ({
     return (
         <Container>
             <AutoSizer>
-                {({ height, width }) => (
-                    <PhotoList
-                        width={width}
-                        height={height}
-                        getThumbnail={getThumbnail}
-                        displayFiles={displayFiles}
-                        activeCollectionID={activeCollectionID}
-                        showAppDownloadBanner={showAppDownloadBanner}
-                    />
-                )}
+                {({ height, width }) =>
+                    page === PHOTOS_PAGES.DEDUPLICATE ? (
+                        <DedupePhotoList
+                            width={width}
+                            height={height}
+                            getThumbnail={getThumbnail}
+                            duplicates={duplicates}
+                            activeCollectionID={activeCollectionID}
+                            showAppDownloadBanner={showAppDownloadBanner}
+                        />
+                    ) : (
+                        <PhotoList
+                            width={width}
+                            height={height}
+                            getThumbnail={getThumbnail}
+                            displayFiles={displayFiles}
+                            activeCollectionID={activeCollectionID}
+                            showAppDownloadBanner={showAppDownloadBanner}
+                        />
+                    )
+                }
             </AutoSizer>
             <PhotoViewer
                 isOpen={open}

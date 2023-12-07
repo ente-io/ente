@@ -1,7 +1,7 @@
 import { FILE_TYPE } from 'constants/file';
 import { EnteFile } from 'types/file';
 import { logError } from '@ente/shared/sentry';
-import { SourceURLs } from 'services/downloadManager';
+import { SourceURLs } from 'services/download';
 
 const WAIT_FOR_VIDEO_PLAYBACK = 1 * 1000;
 

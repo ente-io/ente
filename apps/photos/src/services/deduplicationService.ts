@@ -16,12 +16,12 @@ interface DuplicatesResponse {
     }>;
 }
 
-interface DuplicateFiles {
+export interface Duplicate {
     files: EnteFile[];
     size: number;
 }
 
-export async function getDuplicateFiles(
+export async function getDuplicates(
     files: EnteFile[],
     collectionNameMap: Map<number, string>
 ) {
@@ -33,7 +33,7 @@ export async function getDuplicateFiles(
             fileMap.set(file.id, file);
         }
 
-        let result: DuplicateFiles[] = [];
+        let result: Duplicate[] = [];
 
         for (const dupe of dupes) {
             let duplicateFiles: EnteFile[] = [];
@@ -64,8 +64,8 @@ export async function getDuplicateFiles(
     }
 }
 
-function getDupesGroupedBySameFileHashes(dupe: DuplicateFiles) {
-    const result: DuplicateFiles[] = [];
+function getDupesGroupedBySameFileHashes(dupe: Duplicate) {
+    const result: Duplicate[] = [];
 
     const fileWithHashes: EnteFile[] = [];
     const fileWithoutHashes: EnteFile[] = [];
@@ -95,8 +95,8 @@ function getDupesGroupedBySameFileHashes(dupe: DuplicateFiles) {
     return result;
 }
 
-function groupDupesByFileHashes(dupe: DuplicateFiles) {
-    const result: DuplicateFiles[] = [];
+function groupDupesByFileHashes(dupe: Duplicate) {
+    const result: Duplicate[] = [];
 
     const filesSortedByFileHash = dupe.files
         .map((file) => {
@@ -136,51 +136,6 @@ function groupDupesByFileHashes(dupe: DuplicateFiles) {
             files: sameHashFiles,
             size: dupe.size,
         });
-    }
-
-    return result;
-}
-
-export function clubDuplicatesByTime(dupes: DuplicateFiles[]) {
-    const result: DuplicateFiles[] = [];
-    for (const dupe of dupes) {
-        let files: EnteFile[] = [];
-        const creationTimeCounter = new Map<number, number>();
-
-        let mostFreqCreationTime = 0;
-        let mostFreqCreationTimeCount = 0;
-        for (const file of dupe.files) {
-            const creationTime = file.metadata.creationTime;
-            if (creationTimeCounter.has(creationTime)) {
-                creationTimeCounter.set(
-                    creationTime,
-                    creationTimeCounter.get(creationTime) + 1
-                );
-            } else {
-                creationTimeCounter.set(creationTime, 1);
-            }
-            if (
-                creationTimeCounter.get(creationTime) >
-                mostFreqCreationTimeCount
-            ) {
-                mostFreqCreationTime = creationTime;
-                mostFreqCreationTimeCount =
-                    creationTimeCounter.get(creationTime);
-            }
-
-            files.push(file);
-        }
-
-        files = files.filter((file) => {
-            return file.metadata.creationTime === mostFreqCreationTime;
-        });
-
-        if (files.length > 1) {
-            result.push({
-                files,
-                size: dupe.size,
-            });
-        }
     }
 
     return result;

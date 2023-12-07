@@ -5,7 +5,7 @@ import {
     updateExistingFilePubMetadata,
 } from 'utils/file';
 import { logError } from '@ente/shared/sentry';
-import downloadManager from './downloadManager';
+import downloadManager from './download';
 import { EnteFile } from 'types/file';
 
 import { getParsedExifData } from './upload/exifService';

@@ -15,8 +15,8 @@ import { DedicatedCryptoWorker } from '@ente/shared/crypto/internal/crypto.worke
 import { LimitedCache } from '@ente/shared/storage/cacheStorage/types';
 import { addLogLine } from '@ente/shared/logging';
 import { APPS } from '@ente/shared/apps/constants';
-import { PhotosDownloadClient } from './downloadManagerClients/photos';
-import { PublicAlbumsDownloadClient } from './downloadManagerClients/publicAlbums';
+import { PhotosDownloadClient } from './clients/photos';
+import { PublicAlbumsDownloadClient } from './clients/publicAlbums';
 
 export type SourceURLs = {
     url:
@@ -49,6 +49,7 @@ export interface DownloadClient {
 }
 
 class DownloadManager {
+    private ready: boolean = false;
     private downloadClient: DownloadClient;
     private thumbnailCache: LimitedCache;
     private cryptoWorker: Remote<DedicatedCryptoWorker>;
@@ -61,14 +62,29 @@ class DownloadManager {
 
     private progressUpdater: (value: Map<number, number>) => void = () => {};
 
+    constructor() {
+        const main = async () => {};
+        main();
+    }
+
     async init(
         app: APPS,
-        tokens: { token: string; passwordToken?: string } | { token: string },
+        tokens?: { token: string; passwordToken?: string } | { token: string },
         timeout?: number
     ) {
-        this.downloadClient = createDownloadClient(app, tokens, timeout);
-        this.thumbnailCache = await openThumbnailCache();
-        this.cryptoWorker = await ComlinkCryptoWorker.getInstance();
+        try {
+            if (this.ready) {
+                addLogLine('DownloadManager already initialized');
+                return;
+            }
+            this.downloadClient = createDownloadClient(app, tokens, timeout);
+            this.thumbnailCache = await openThumbnailCache();
+            this.cryptoWorker = await ComlinkCryptoWorker.getInstance();
+            this.ready = true;
+        } catch (e) {
+            logError(e, 'DownloadManager init failed');
+            throw e;
+        }
     }
 
     updateToken(token: string, passwordToken?: string) {
@@ -92,7 +108,10 @@ class DownloadManager {
             const cacheResp: Response = await this.thumbnailCache?.match(
                 fileID.toString()
             );
-            return await cacheResp.blob();
+
+            if (cacheResp) {
+                return new Uint8Array(await cacheResp.arrayBuffer());
+            }
         } catch (e) {
             logError(e, 'failed to get cached thumbnail');
             throw e;
@@ -109,35 +128,39 @@ class DownloadManager {
         return decrypted;
     };
 
-    public async getThumbnail(file: EnteFile) {
+    async getThumbnail(file: EnteFile) {
         try {
+            if (!this.ready) {
+                throw Error(CustomError.DOWNLOAD_MANAGER_NOT_READY);
+            }
             const cachedThumb = await this.getCachedThumbnail(file.id);
             if (cachedThumb) {
                 return cachedThumb;
             }
             const thumb = await this.downloadThumb(file);
-            const thumbBlob = new Blob([thumb]);
 
             this.thumbnailCache
-                ?.put(file.id.toString(), new Response(thumbBlob))
+                ?.put(file.id.toString(), new Response(thumb))
                 .catch((e) => {
                     logError(e, 'cache put failed');
                     // TODO: handle storage full exception.
                 });
-            return thumbBlob;
+            return thumb;
         } catch (e) {
-            logError(e, 'get DownloadManager preview Failed');
+            logError(e, 'getThumbnail failed');
             throw e;
         }
     }
 
-    public async getThumbnailForPreview(file: EnteFile) {
+    async getThumbnailForPreview(file: EnteFile) {
         try {
+            if (!this.ready) {
+                throw Error(CustomError.DOWNLOAD_MANAGER_NOT_READY);
+            }
             if (!this.thumbnailObjectURLPromises.has(file.id)) {
-                await this.thumbnailObjectURLPromises.get(file.id);
-                const thumbBlobPromise = this.getThumbnail(file);
-                const thumbURLPromise = thumbBlobPromise.then((blob) =>
-                    URL.createObjectURL(blob)
+                const thumbPromise = this.getThumbnail(file);
+                const thumbURLPromise = thumbPromise.then((thumb) =>
+                    URL.createObjectURL(new Blob([thumb]))
                 );
                 this.thumbnailObjectURLPromises.set(file.id, thumbURLPromise);
             }
@@ -154,6 +177,9 @@ class DownloadManager {
         forceConvert = false
     ): Promise<SourceURLs> => {
         try {
+            if (!this.ready) {
+                throw Error(CustomError.DOWNLOAD_MANAGER_NOT_READY);
+            }
             const getFileForPreviewPromise = async () => {
                 const fileBlob = await new Response(
                     await this.getFile(file, true)
@@ -169,9 +195,10 @@ class DownloadManager {
                 return converted;
             };
             if (!this.fileConversionPromises.has(file.id)) {
-                const fileURLs =
-                    getFileForPreviewPromise() as Promise<SourceURLs>;
-                this.fileConversionPromises.set(file.id, fileURLs);
+                this.fileObjectURLPromises.set(
+                    file.id,
+                    getFileForPreviewPromise()
+                );
             }
             const fileURLs = await this.fileConversionPromises.get(file.id);
             return fileURLs;
@@ -187,6 +214,9 @@ class DownloadManager {
         useCache = false
     ): Promise<ReadableStream<Uint8Array>> {
         try {
+            if (!this.ready) {
+                throw Error(CustomError.DOWNLOAD_MANAGER_NOT_READY);
+            }
             if (!useCache) {
                 return await this.downloadFile(file);
             }
@@ -453,13 +483,16 @@ async function openThumbnailCache() {
 
 function createDownloadClient(
     app: APPS,
-    tokens: { token: string; passwordToken?: string } | { token: string },
+    tokens?: { token: string; passwordToken?: string } | { token: string },
     timeout?: number
 ): DownloadClient {
     if (!timeout) {
         timeout = 300000; // 5 minute
     }
     if (app === APPS.ALBUMS) {
+        if (!tokens) {
+            tokens = { token: undefined, passwordToken: undefined };
+        }
         const { token, passwordToken } = tokens as {
             token: string;
             passwordToken: string;

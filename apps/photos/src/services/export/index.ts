@@ -25,7 +25,7 @@ import {
 import { logError } from '@ente/shared/sentry';
 import { getData, LS_KEYS, setData } from '@ente/shared/storage/localStorage';
 import { getAllLocalCollections } from '../collectionService';
-import downloadManager from '../downloadManager';
+import downloadManager from '../download';
 import { getAllLocalFiles } from '../fileService';
 import { EnteFile } from 'types/file';
 
