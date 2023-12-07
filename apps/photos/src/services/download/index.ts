@@ -228,9 +228,6 @@ class DownloadManager {
             if (!this.ready) {
                 throw Error(CustomError.DOWNLOAD_MANAGER_NOT_READY);
             }
-            if (!cacheInMemory) {
-                return await this.downloadFile(file);
-            }
             const getFilePromise = async (): Promise<SourceURLs> => {
                 const fileStream = await this.downloadFile(file);
                 const fileBlob = await new Response(fileStream).blob();
@@ -241,6 +238,9 @@ class DownloadManager {
                 };
             };
             if (!this.fileObjectURLPromises.has(file.id)) {
+                if (!cacheInMemory) {
+                    return await this.downloadFile(file);
+                }
                 this.fileObjectURLPromises.set(file.id, getFilePromise());
             }
             const fileURLs = await this.fileObjectURLPromises.get(file.id);
