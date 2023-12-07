@@ -12,11 +12,11 @@
   "importScanQrCode": "QR კოდის დასკანერება",
   "qrCode": "QR კოდი",
   "importEnterSetupKey": "შეიყვანეთ დაყენების კოდი",
-  "importAccountPageTitle": "შეიყვანეთ ანგარიშის დეტალები",
+  "importAccountPageTitle": "შეიყვანეთ ანგარიშის მონაცემები",
   "secretCanNotBeEmpty": "გასაღების ველი არ შეიძლება ცარიელი იყოს",
-  "bothIssuerAndAccountCanNotBeEmpty": "ანგარიშის მომწოდებლისა და ანგარიშის ველი არ შეიძლება ცარიელი იყოს",
+  "bothIssuerAndAccountCanNotBeEmpty": "მომწოდებლისა და ანგარიშის ველი არ შეიძლება ცარიელი იყოს",
   "incorrectDetails": "არასწორი მონაცემები",
-  "pleaseVerifyDetails": "გთხოვთ, გადაამოწმოთ დეტალები და სცადოთ ხელახლა",
+  "pleaseVerifyDetails": "გთხოვთ, გადაამოწმოთ მონაცემები და სცადოთ ხელახლა",
   "codeIssuerHint": "მომწოდებელი",
   "codeSecretKeyHint": "გასაღები",
   "codeAccountHint": "ანგარიში (you@domain.com)",
@@ -88,5 +88,29 @@
   "copied": "დაკოპირებულია",
   "pleaseTryAgain": "გთხოვთ, სცადოთ ხელახლა",
   "existingUser": "არსებული მომხმარებელი",
-  "delete": "წაშლა"
+  "delete": "წაშლა",
+  "androidBiometricNotRecognized": "ამოცნობა ვერ მოხერხდა. გთხოვთ, სცადოთ ხელახლა.",
+  "@androidBiometricNotRecognized": {
+    "description": "Message to let the user know that authentication was failed. It is used on Android side. Maximum 60 characters."
+  },
+  "androidBiometricSuccess": "წარმატებით",
+  "@androidBiometricSuccess": {
+    "description": "Message to let the user know that authentication was successful. It is used on Android side. Maximum 60 characters."
+  },
+  "androidCancelButton": "გაუქმება",
+  "@androidCancelButton": {
+    "description": "Message showed on a button that the user can click to leave the current dialog. It is used on Android side. Maximum 30 characters."
+  },
+  "androidSignInTitle": "საჭიროა აუთენთიფიკაცია",
+  "@androidSignInTitle": {
+    "description": "Message showed as a title in a dialog which indicates the user that they need to scan biometric to continue. It is used on Android side. Maximum 60 characters."
+  },
+  "noInternetConnection": "ინტერნეტთან კავშირი არ არის",
+  "pleaseCheckYourInternetConnectionAndTryAgain": "გთხოვთ, შეამოწმოთ თქვენი ინტერნეტ კავშირი და სცადოთ ხელახლა.",
+  "signOutFromOtherDevices": "ყველა მოწყობილობიდან გამოსვლა",
+  "signOutOtherBody": "თუ ფიქრობთ, რომ ვინმემ შესაძლოა იცოდეს თქვენი პაროლი, შეგიძლიათ ყველა მოწყობილობაზე იძულებითი გამოსვლა, რომელიც იყენებს თქვენს ანგარიშს.",
+  "signOutOtherDevices": "სხვა მოწყობილობებიდან გამოსვლა",
+  "doNotSignOut": "არ მოხდეს გამოსვლა",
+  "hearUsWhereTitle": "როგორ შეიტყვეთ Ente-ს შესახებ? (არასავალდებულო)",
+  "hearUsExplanation": "ჩვენ არ ვაკონტროლებთ აპლიკაციის ინსტალაციას. სასარგებლო იქნებოდა, თუ გვეტყოდით, სად გვიპოვეთ!"
 }
