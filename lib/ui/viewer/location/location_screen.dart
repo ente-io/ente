@@ -198,9 +198,10 @@ class _LocationGalleryWidgetState extends State<LocationGalleryWidget> {
         .locationTagEntity
         .item
         .centerPoint;
+
     Future<FileLoadResult> filterFiles() async {
-      final FileLoadResult result = await fileLoadResult;
-      //wait for ignored files to be removed after init
+      //waiting for allFilesWithLocation to be initialized
+      await fileLoadResult;
       final stopWatch = Stopwatch()..start();
       final filesInLocation = allFilesWithLocation;
       filesInLocation.removeWhere((f) {
@@ -220,7 +221,7 @@ class _LocationGalleryWidgetState extends State<LocationGalleryWidget> {
       return Future.value(
         FileLoadResult(
           filesInLocation,
-          result.hasMore,
+          false,
         ),
       );
     }
