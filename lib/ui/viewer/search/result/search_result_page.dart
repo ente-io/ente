@@ -1,3 +1,5 @@
+import "dart:async";
+
 import 'package:flutter/material.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/files_updated_event.dart';
@@ -11,23 +13,54 @@ import 'package:photos/ui/viewer/actions/file_selection_overlay_bar.dart';
 import 'package:photos/ui/viewer/gallery/gallery.dart';
 import 'package:photos/ui/viewer/gallery/gallery_app_bar_widget.dart';
 
-class SearchResultPage extends StatelessWidget {
+class SearchResultPage extends StatefulWidget {
   final SearchResult searchResult;
   final String tagPrefix;
 
-  final _selectedFiles = SelectedFiles();
   static const GalleryType appBarType = GalleryType.searchResults;
   static const GalleryType overlayType = GalleryType.searchResults;
 
-  SearchResultPage(
+  const SearchResultPage(
     this.searchResult, {
     this.tagPrefix = "",
     Key? key,
   }) : super(key: key);
 
   @override
+  State<SearchResultPage> createState() => _SearchResultPageState();
+}
+
+class _SearchResultPageState extends State<SearchResultPage> {
+  final _selectedFiles = SelectedFiles();
+  late final List<EnteFile> files;
+  late final StreamSubscription<LocalPhotosUpdatedEvent> _filesUpdatedEvent;
+
+  @override
+  void initState() {
+    super.initState();
+    files = widget.searchResult.resultFiles();
+    _filesUpdatedEvent =
+        Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) {
+      if (event.type == EventType.deletedFromDevice ||
+          event.type == EventType.deletedFromEverywhere ||
+          event.type == EventType.deletedFromRemote ||
+          event.type == EventType.hide) {
+        for (var updatedFile in event.updatedFiles) {
+          files.remove(updatedFile);
+        }
+        setState(() {});
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _filesUpdatedEvent.cancel();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final List<EnteFile> files = searchResult.resultFiles();
     final gallery = Gallery(
       asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) {
         final result = files
@@ -48,17 +81,18 @@ class SearchResultPage extends StatelessWidget {
       removalEventTypes: const {
         EventType.deletedFromRemote,
         EventType.deletedFromEverywhere,
+        EventType.hide,
       },
-      tagPrefix: tagPrefix + searchResult.heroTag(),
+      tagPrefix: widget.tagPrefix + widget.searchResult.heroTag(),
       selectedFiles: _selectedFiles,
-      initialFiles: [searchResult.resultFiles().first],
+      initialFiles: [widget.searchResult.resultFiles().first],
     );
     return Scaffold(
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(50.0),
         child: GalleryAppBarWidget(
-          appBarType,
-          searchResult.name(),
+          SearchResultPage.appBarType,
+          widget.searchResult.name(),
           _selectedFiles,
         ),
       ),
@@ -67,7 +101,7 @@ class SearchResultPage extends StatelessWidget {
         children: [
           gallery,
           FileSelectionOverlayBar(
-            overlayType,
+            SearchResultPage.overlayType,
             _selectedFiles,
           ),
         ],
