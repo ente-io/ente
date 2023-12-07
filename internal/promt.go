@@ -1,11 +1,13 @@
 package internal
 
 import (
+	"bufio"
 	"errors"
 	"fmt"
 	"github.com/ente-io/cli/internal/api"
 	"log"
 	"os"
+	"strings"
 
 	"golang.org/x/term"
 )
@@ -22,10 +24,13 @@ func GetSensitiveField(label string) (string, error) {
 func GetUserInput(label string) (string, error) {
 	fmt.Printf("%s: ", label)
 	var input string
-	_, err := fmt.Scanln(&input)
+	reader := bufio.NewReader(os.Stdin)
+	input, err := reader.ReadString('\n')
+	//_, err := fmt.Scanln(&input)
 	if err != nil {
 		return "", err
 	}
+	input = strings.TrimSpace(input)
 	if input == "" {
 		return "", errors.New("input cannot be empty")
 	}
