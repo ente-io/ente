@@ -50,6 +50,8 @@ func (c *ClICtrl) createLocalFolderForRemoteAlbums(ctx context.Context, account 
 		// replace : with _
 		albumFolderName = strings.ReplaceAll(albumFolderName, ":", "_")
 		albumFolderName = strings.ReplaceAll(albumFolderName, "/", "_")
+		albumFolderName = strings.TrimSpace(albumFolderName)
+
 		albumID := album.ID
 
 		if _, ok := folderToMetaMap[albumFolderName]; ok {
