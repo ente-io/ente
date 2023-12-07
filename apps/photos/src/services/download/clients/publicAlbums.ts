@@ -57,7 +57,12 @@ export class PublicAlbumsDownloadClient implements DownloadClient {
             HTTPService.get(
                 getPublicCollectionFileURL(file.id),
                 null,
-                { 'X-Auth-Token': this.token },
+                {
+                    'X-Auth-Access-Token': this.token,
+                    ...(this.passwordToken && {
+                        'X-Auth-Access-Token-JWT': this.passwordToken,
+                    }),
+                },
                 {
                     responseType: 'arraybuffer',
                     timeout: this.timeout,
@@ -79,7 +84,10 @@ export class PublicAlbumsDownloadClient implements DownloadClient {
         return retryAsyncFunction(() =>
             fetch(getPublicCollectionFileURL(file.id), {
                 headers: {
-                    'X-Auth-Token': this.token,
+                    'X-Auth-Access-Token': this.token,
+                    ...(this.passwordToken && {
+                        'X-Auth-Access-Token-JWT': this.passwordToken,
+                    }),
                 },
             })
         );

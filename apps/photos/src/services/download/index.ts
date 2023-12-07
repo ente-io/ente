@@ -55,9 +55,14 @@ class DownloadManager {
 
     private progressUpdater: (value: Map<number, number>) => void = () => {};
 
+    constructor() {
+        const main = async () => {};
+        main();
+    }
+
     async init(
         app: APPS,
-        tokens: { token: string; passwordToken?: string } | { token: string },
+        tokens?: { token: string; passwordToken?: string } | { token: string },
         timeout?: number
     ) {
         try {
@@ -422,13 +427,16 @@ async function openThumbnailCache() {
 
 function createDownloadClient(
     app: APPS,
-    tokens: { token: string; passwordToken?: string } | { token: string },
+    tokens?: { token: string; passwordToken?: string } | { token: string },
     timeout?: number
 ): DownloadClient {
     if (!timeout) {
         timeout = 300000; // 5 minute
     }
     if (app === APPS.ALBUMS) {
+        if (!tokens) {
+            tokens = { token: undefined, passwordToken: undefined };
+        }
         const { token, passwordToken } = tokens as {
             token: string;
             passwordToken: string;
