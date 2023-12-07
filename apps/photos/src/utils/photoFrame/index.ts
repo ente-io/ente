@@ -76,6 +76,7 @@ export async function updateFileSrcProps(file: EnteFile, srcURLs: SourceURLs) {
     file.isSourceLoaded = true;
     file.isConverted = !srcURLs.isOriginal;
     file.conversionFailed = !srcURLs.isRenderable;
+    file.srcURLs = srcURLs;
     if (!isRenderable) {
         return;
     }
