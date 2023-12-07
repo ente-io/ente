@@ -19,6 +19,7 @@ import { FILE_TYPE } from 'constants/file';
 import AlbumOutlined from '@mui/icons-material/AlbumOutlined';
 import Avatar from './Avatar';
 import { shouldShowAvatar } from 'utils/file';
+import { CustomError } from '@ente/shared/error';
 
 interface IProps {
     file: EnteFile;
@@ -259,7 +260,9 @@ export default function PreviewCard(props: IProps) {
                 setImgSrc(url);
                 updateURL(file.id, url);
             } catch (e) {
-                logError(e, 'preview card useEffect failed');
+                if (e.message !== CustomError.URL_ALREADY_SET) {
+                    logError(e, 'preview card useEffect failed');
+                }
                 // no-op
             }
         };

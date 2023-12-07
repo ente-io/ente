@@ -20,6 +20,7 @@ import { PHOTOS_PAGES } from '@ente/shared/constants/pages';
 import { PhotoList } from './PhotoList';
 import { DedupePhotoList } from './PhotoList/dedupe';
 import { Duplicate } from 'services/deduplicationService';
+import { CustomError } from '@ente/shared/error';
 
 const Container = styled('div')`
     display: block;
@@ -176,21 +177,12 @@ const PhotoFrame = ({
             // this is to prevent outdated updateURL call from updating the wrong file
             if (file.id !== id) {
                 addLogLine(
-                    `PhotoSwipe: updateURL: file id mismatch: ${file.id} !== ${id}`
+                    `[${id}]PhotoSwipe: updateURL: file id mismatch: ${file.id} !== ${id}`
                 );
-                return;
+                throw Error(CustomError.UPDATE_URL_FILE_ID_MISMATCH);
             }
-            if (file.msrc && file.msrc !== url && !forceUpdate) {
-                addLogLine(
-                    `PhotoSwipe: updateURL: msrc already set: ${file.msrc}`
-                );
-                logError(
-                    new Error(
-                        `PhotoSwipe: updateURL: msrc already set: ${file.msrc}`
-                    ),
-                    'PhotoSwipe: updateURL called with msrc already set'
-                );
-                return;
+            if (file.msrc && !forceUpdate) {
+                throw Error(CustomError.URL_ALREADY_SET);
             }
             updateFileMsrcProps(file, url);
         };
@@ -205,32 +197,17 @@ const PhotoFrame = ({
         // this is to prevent outdate updateSrcURL call from updating the wrong file
         if (file.id !== id) {
             addLogLine(
-                `PhotoSwipe: updateSrcURL: file id mismatch: ${file.id} !== ${id}`
+                `[${id}]PhotoSwipe: updateSrcURL: file id mismatch: ${file.id} !== ${id}`
             );
-            return;
+            throw Error(CustomError.UPDATE_URL_FILE_ID_MISMATCH);
         }
         if (file.isSourceLoaded && !forceUpdate) {
-            addLogLine(
-                `PhotoSwipe: updateSrcURL: source already loaded: ${file.id}`
-            );
-            logError(
-                new Error(
-                    `PhotoSwipe: updateSrcURL: source already loaded: ${file.id}`
-                ),
-                'PhotoSwipe updateSrcURL called when source already loaded'
-            );
-            return;
+            throw Error(CustomError.URL_ALREADY_SET);
         } else if (file.conversionFailed) {
             addLogLine(
-                `PhotoSwipe: updateSrcURL: conversion failed: ${file.id}`
+                `[${id}]PhotoSwipe: updateSrcURL: conversion failed: ${file.id}`
             );
-            logError(
-                new Error(
-                    `PhotoSwipe: updateSrcURL: conversion failed: ${file.id}`
-                ),
-                'PhotoSwipe updateSrcURL called when conversion failed'
-            );
-            return;
+            throw Error(CustomError.FILE_CONVERSION_FAILED);
         }
 
         await updateFileSrcProps(file, srcURLs);
@@ -386,8 +363,8 @@ const PhotoFrame = ({
                 addLogLine(`[${item.id}] doesn't have thumbnail`);
                 thumbFetching[item.id] = true;
                 const url = await DownloadManager.getThumbnailForPreview(item);
-                updateURL(index)(item.id, url);
                 try {
+                    updateURL(index)(item.id, url);
                     addLogLine(
                         `[${
                             item.id
@@ -398,10 +375,12 @@ const PhotoFrame = ({
                         instance.updateSize(true);
                     }
                 } catch (e) {
-                    logError(
-                        e,
-                        'updating photoswipe after msrc url update failed'
-                    );
+                    if (e.message !== CustomError.URL_ALREADY_SET) {
+                        logError(
+                            e,
+                            'updating photoswipe after msrc url update failed'
+                        );
+                    }
                     // ignore
                 }
             } catch (e) {
@@ -427,12 +406,9 @@ const PhotoFrame = ({
         try {
             addLogLine(`[${item.id}] new file src request`);
             fetching[item.id] = true;
-
             const srcURLs = await DownloadManager.getFileForPreview(item);
-
-            await updateSrcURL(index, item.id, srcURLs);
-
             try {
+                await updateSrcURL(index, item.id, srcURLs);
                 addLogLine(
                     `[${item.id}] calling invalidateCurrItems for src, source loaded :${item.isSourceLoaded}`
                 );
@@ -441,7 +417,12 @@ const PhotoFrame = ({
                     instance.updateSize(true);
                 }
             } catch (e) {
-                logError(e, 'updating photoswipe after src url update failed');
+                if (e.message !== CustomError.URL_ALREADY_SET) {
+                    logError(
+                        e,
+                        'updating photoswipe after src url update failed'
+                    );
+                }
                 throw e;
             }
         } catch (e) {
@@ -473,8 +454,8 @@ const PhotoFrame = ({
             );
             return;
         }
-        updateURL(index)(item.id, item.msrc, true);
         try {
+            updateURL(index)(item.id, item.msrc, true);
             addLogLine(
                 `[${
                     item.id
@@ -485,7 +466,9 @@ const PhotoFrame = ({
                 instance.updateSize(true);
             }
         } catch (e) {
-            logError(e, 'updating photoswipe after msrc url update failed');
+            if (e.message !== CustomError.URL_ALREADY_SET) {
+                logError(e, 'updating photoswipe after msrc url update failed');
+            }
             // ignore
         }
         try {
@@ -496,9 +479,8 @@ const PhotoFrame = ({
 
             const srcURL = await DownloadManager.getFileForPreview(item, true);
 
-            await updateSrcURL(index, item.id, srcURL, true);
-
             try {
+                await updateSrcURL(index, item.id, srcURL, true);
                 addLogLine(
                     `[${item.id}] calling invalidateCurrItems for src, source loaded :${item.isSourceLoaded}`
                 );
@@ -507,7 +489,12 @@ const PhotoFrame = ({
                     instance.updateSize(true);
                 }
             } catch (e) {
-                logError(e, 'updating photoswipe after src url update failed');
+                if (e.message !== CustomError.URL_ALREADY_SET) {
+                    logError(
+                        e,
+                        'updating photoswipe after src url update failed'
+                    );
+                }
                 throw e;
             }
         } catch (e) {
