@@ -222,14 +222,11 @@ class DownloadManager {
 
     async getFile(
         file: EnteFile,
-        useCache = false
+        cacheInMemory = false
     ): Promise<ReadableStream<Uint8Array>> {
         try {
             if (!this.ready) {
                 throw Error(CustomError.DOWNLOAD_MANAGER_NOT_READY);
-            }
-            if (!useCache) {
-                return await this.downloadFile(file);
             }
             const getFilePromise = async (): Promise<SourceURLs> => {
                 const fileStream = await this.downloadFile(file);
@@ -250,14 +247,14 @@ class DownloadManager {
                 } else {
                     return await this.downloadFile(file);
                 }
+            } else if (!cacheInMemory) {
+                return await this.downloadFile(file);
             } else {
                 const fileURLs = getFilePromise();
                 this.fileObjectURLPromises.set(file.id, fileURLs);
             }
         } catch (e) {
-            if (useCache) {
-                this.fileObjectURLPromises.delete(file.id);
-            }
+            this.fileObjectURLPromises.delete(file.id);
             logError(e, 'download manager getFile Failed');
             throw e;
         }
@@ -267,6 +264,7 @@ class DownloadManager {
         file: EnteFile
     ): Promise<ReadableStream<Uint8Array>> {
         try {
+            addLogLine(`download attempted for fileID:${file.id}`);
             const onDownloadProgress = this.trackDownloadProgress(
                 file.id,
                 file.info?.fileSize
