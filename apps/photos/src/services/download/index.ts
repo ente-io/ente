@@ -128,7 +128,7 @@ class DownloadManager {
         return decrypted;
     };
 
-    async getThumbnail(file: EnteFile) {
+    async getThumbnail(file: EnteFile, localOnly = false) {
         try {
             if (!this.ready) {
                 throw Error(CustomError.DOWNLOAD_MANAGER_NOT_READY);
@@ -136,6 +136,9 @@ class DownloadManager {
             const cachedThumb = await this.getCachedThumbnail(file.id);
             if (cachedThumb) {
                 return cachedThumb;
+            }
+            if (localOnly) {
+                return null;
             }
             const thumb = await this.downloadThumb(file);
 
@@ -152,19 +155,24 @@ class DownloadManager {
         }
     }
 
-    async getThumbnailForPreview(file: EnteFile) {
+    async getThumbnailForPreview(file: EnteFile, localOnly = false) {
         try {
             if (!this.ready) {
                 throw Error(CustomError.DOWNLOAD_MANAGER_NOT_READY);
             }
             if (!this.thumbnailObjectURLPromises.has(file.id)) {
-                const thumbPromise = this.getThumbnail(file);
-                const thumbURLPromise = thumbPromise.then((thumb) =>
-                    URL.createObjectURL(new Blob([thumb]))
+                const thumbPromise = this.getThumbnail(file, localOnly);
+                const thumbURLPromise = thumbPromise.then(
+                    (thumb) => thumb && URL.createObjectURL(new Blob([thumb]))
                 );
                 this.thumbnailObjectURLPromises.set(file.id, thumbURLPromise);
             }
-            return await this.thumbnailObjectURLPromises.get(file.id);
+            let thumb = await this.thumbnailObjectURLPromises.get(file.id);
+            if (!thumb) {
+                this.thumbnailObjectURLPromises.delete(file.id);
+                thumb = await this.getThumbnailForPreview(file, localOnly);
+            }
+            return thumb;
         } catch (e) {
             this.thumbnailObjectURLPromises.delete(file.id);
             logError(e, 'get DownloadManager preview Failed');

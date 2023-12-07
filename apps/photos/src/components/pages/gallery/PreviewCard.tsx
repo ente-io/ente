@@ -248,9 +248,12 @@ export default function PreviewCard(props: IProps) {
                     return;
                 }
                 const url: string =
-                    await DownloadManager.getThumbnailForPreview(file);
+                    await DownloadManager.getThumbnailForPreview(
+                        file,
+                        props.showPlaceholder
+                    );
 
-                if (!isMounted.current) {
+                if (!isMounted.current || !url) {
                     return;
                 }
                 setImgSrc(url);

@@ -26,8 +26,13 @@ export default function CollectionCard(props: {
             if (!file) {
                 return;
             }
-            const url = await downloadManager.getThumbnailForPreview(file);
-            setCoverImageURL(url);
+            const url = await downloadManager.getThumbnailForPreview(
+                file,
+                isScrolling
+            );
+            if (url) {
+                setCoverImageURL(url);
+            }
         };
         main();
     }, [file, isScrolling]);
