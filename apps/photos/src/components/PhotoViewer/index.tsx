@@ -543,7 +543,8 @@ function PhotoViewer(props: Iprops) {
                 if (file.isSourceLoaded) {
                     exifExtractionInProgress.current = file.src;
                     const fileObject = await getFileFromURL(
-                        file.originalImageURL
+                        file.src as string,
+                        file.metadata.title
                     );
                     const fileTypeInfo = await getFileType(fileObject);
                     const exifData = await getParsedExifData(

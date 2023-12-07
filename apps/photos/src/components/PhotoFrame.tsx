@@ -81,6 +81,9 @@ const PhotoFrame = ({
     const [open, setOpen] = useState(false);
     const [currentIndex, setCurrentIndex] = useState<number>(0);
     const [fetching, setFetching] = useState<{ [k: number]: boolean }>({});
+    const [thumbFetching, setThumbFetching] = useState<{
+        [k: number]: boolean;
+    }>({});
     const galleryContext = useContext(GalleryContext);
     const publicCollectionGalleryContext = useContext(
         PublicCollectionGalleryContext
@@ -104,6 +107,7 @@ const PhotoFrame = ({
 
     useEffect(() => {
         setFetching({});
+        setThumbFetching({});
     }, [displayFiles]);
 
     useEffect(() => {
@@ -370,9 +374,17 @@ const PhotoFrame = ({
                 item.isSourceLoaded
             } fetching:${fetching[item.id]}`
         );
+
         if (!item.msrc) {
-            addLogLine(`[${item.id}] doesn't have thumbnail`);
             try {
+                if (thumbFetching[item.id]) {
+                    addLogLine(
+                        `[${item.id}] thumb download already in progress`
+                    );
+                    return;
+                }
+                addLogLine(`[${item.id}] doesn't have thumbnail`);
+                thumbFetching[item.id] = true;
                 const url = await DownloadManager.getThumbnailForPreview(item);
                 updateURL(index)(item.id, url);
                 try {
@@ -394,6 +406,7 @@ const PhotoFrame = ({
                 }
             } catch (e) {
                 logError(e, 'getSlideData failed get msrc url failed');
+                thumbFetching[item.id] = false;
             }
         }
 

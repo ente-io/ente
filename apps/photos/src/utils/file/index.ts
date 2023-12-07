@@ -577,9 +577,9 @@ export function updateExistingFilePubMetadata(
     existingFile.metadata = mergeMetadata([existingFile])[0].metadata;
 }
 
-export async function getFileFromURL(fileURL: string) {
+export async function getFileFromURL(fileURL: string, name: string) {
     const fileBlob = await (await fetch(fileURL)).blob();
-    const fileFile = new File([fileBlob], 'temp');
+    const fileFile = new File([fileBlob], name);
     return fileFile;
 }
 

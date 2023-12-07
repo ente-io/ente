@@ -69,6 +69,11 @@ export function updateFileMsrcProps(file: EnteFile, url: string) {
 
 export async function updateFileSrcProps(file: EnteFile, srcURLs: SourceURLs) {
     const { url, isRenderable } = srcURLs;
+    file.w = window.innerWidth;
+    file.h = window.innerHeight;
+    file.isSourceLoaded = true;
+    file.isConverted = !srcURLs.isOriginal;
+    file.conversionFailed = !srcURLs.isRenderable;
     if (!isRenderable) {
         return;
     }
