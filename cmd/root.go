@@ -11,7 +11,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-const AppVersion = "0.1.8"
+const AppVersion = "0.1.9"
 
 var ctrl *pkg.ClICtrl
 
