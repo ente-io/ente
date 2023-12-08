@@ -412,7 +412,7 @@ export default function Gallery() {
     }, [fixCreationTimeAttributes]);
 
     useEffect(() => {
-        if (typeof activeCollectionID === 'undefined') {
+        if (typeof activeCollectionID === 'undefined' || !router.isReady) {
             return;
         }
         let collectionURL = '';
@@ -431,14 +431,8 @@ export default function Gallery() {
             }
         }
         const href = `/gallery${collectionURL}`;
-        const delayRouteChange = () => {
-            setTimeout(() => {
-                router.push(href, undefined, { shallow: true });
-            }, 1000);
-        };
-
-        delayRouteChange();
-    }, [activeCollectionID]);
+        router.push(href, undefined, { shallow: true });
+    }, [activeCollectionID, router.isReady]);
 
     useEffect(() => {
         const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
