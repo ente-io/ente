@@ -18,15 +18,21 @@ import { APPS } from '@ente/shared/apps/constants';
 import { PhotosDownloadClient } from './clients/photos';
 import { PublicAlbumsDownloadClient } from './clients/publicAlbums';
 
-export type SourceURLs = {
-    url:
-        | {
-              image: string;
-              video: string;
-          }
-        | string;
+export type LivePhotoSourceURL = {
+    image: Promise<string>;
+    video: Promise<string>;
+};
+
+export type LoadedLivePhotoSourceURL = {
+    image: string;
+    video: string;
+};
+
+export type SourceURL = {
+    url: string | LivePhotoSourceURL | LoadedLivePhotoSourceURL;
     isOriginal: boolean;
     isRenderable: boolean;
+    type: 'normal' | 'livePhoto';
 };
 
 export type OnDownloadProgress = (event: {
@@ -54,8 +60,8 @@ class DownloadManager {
     private thumbnailCache: LimitedCache;
     private cryptoWorker: Remote<DedicatedCryptoWorker>;
 
-    private fileObjectURLPromises = new Map<number, Promise<SourceURLs>>();
-    private fileConversionPromises = new Map<number, Promise<SourceURLs>>();
+    private fileObjectURLPromises = new Map<number, Promise<SourceURL>>();
+    private fileConversionPromises = new Map<number, Promise<SourceURL>>();
     private thumbnailObjectURLPromises = new Map<number, Promise<string>>();
 
     private fileDownloadProgress = new Map<number, number>();
@@ -183,7 +189,7 @@ class DownloadManager {
     getFileForPreview = async (
         file: EnteFile,
         forceConvert = false
-    ): Promise<SourceURLs> => {
+    ): Promise<SourceURL> => {
         try {
             if (!this.ready) {
                 throw Error(CustomError.DOWNLOAD_MANAGER_NOT_READY);
@@ -228,13 +234,14 @@ class DownloadManager {
             if (!this.ready) {
                 throw Error(CustomError.DOWNLOAD_MANAGER_NOT_READY);
             }
-            const getFilePromise = async (): Promise<SourceURLs> => {
+            const getFilePromise = async (): Promise<SourceURL> => {
                 const fileStream = await this.downloadFile(file);
                 const fileBlob = await new Response(fileStream).blob();
                 return {
                     url: URL.createObjectURL(fileBlob),
                     isOriginal: true,
                     isRenderable: false,
+                    type: 'normal',
                 };
             };
             if (!this.fileObjectURLPromises.has(file.id)) {

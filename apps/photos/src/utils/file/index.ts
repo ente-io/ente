@@ -10,7 +10,10 @@ import {
 } from 'types/file';
 import { decodeLivePhoto } from 'services/livePhotoService';
 import { getFileType } from 'services/typeDetectionService';
-import DownloadManager, { SourceURLs } from 'services/download';
+import DownloadManager, {
+    LivePhotoSourceURL,
+    SourceURL,
+} from 'services/download';
 import { logError } from '@ente/shared/sentry';
 import { User } from '@ente/shared/user/types';
 import { getData, LS_KEYS } from '@ente/shared/storage/localStorage';
@@ -282,8 +285,8 @@ export async function getRenderableFileURL(
     fileBlob: Blob,
     originalFileURL: string,
     forceConvert: boolean
-): Promise<SourceURLs> {
-    let srcURLs: SourceURLs['url'];
+): Promise<SourceURL> {
+    let srcURLs: SourceURL['url'];
     switch (file.metadata.fileType) {
         case FILE_TYPE.IMAGE: {
             const convertedBlob = await getRenderableImage(
@@ -337,6 +340,10 @@ export async function getRenderableFileURL(
         url: srcURLs,
         isOriginal,
         isRenderable: !!srcURLs,
+        type:
+            file.metadata.fileType === FILE_TYPE.LIVE_PHOTO
+                ? 'livePhoto'
+                : 'normal',
     };
 }
 
@@ -344,25 +351,43 @@ async function getRenderableLivePhotoURL(
     file: EnteFile,
     fileBlob: Blob,
     forceConvert: boolean
-): Promise<{ image: string; video: string }> {
+): Promise<LivePhotoSourceURL> {
     const livePhoto = await decodeLivePhoto(file, fileBlob);
-    const imageBlob = new Blob([livePhoto.image]);
-    const videoBlob = new Blob([livePhoto.video]);
-    const convertedImageBlob = await getRenderableImage(
-        livePhoto.imageNameTitle,
-        imageBlob
-    );
-    const convertedVideoBlob = await getPlayableVideo(
-        livePhoto.videoNameTitle,
-        videoBlob,
-        forceConvert
-    );
-    const convertedImageURL = URL.createObjectURL(convertedImageBlob);
-    const convertedVideoURL = URL.createObjectURL(convertedVideoBlob);
+
+    const getRenderableLivePhotoImageURL = async () => {
+        try {
+            const imageBlob = new Blob([livePhoto.image]);
+            const convertedImageBlob = await getRenderableImage(
+                livePhoto.imageNameTitle,
+                imageBlob
+            );
+
+            return URL.createObjectURL(convertedImageBlob);
+        } catch (e) {
+            //ignore and return null
+            return null;
+        }
+    };
+
+    const getRenderableLivePhotoVideoURL = async () => {
+        try {
+            const videoBlob = new Blob([livePhoto.video]);
+
+            const convertedVideoBlob = await getPlayableVideo(
+                livePhoto.videoNameTitle,
+                videoBlob,
+                forceConvert
+            );
+            return URL.createObjectURL(convertedVideoBlob);
+        } catch (e) {
+            //ignore and return null
+            return null;
+        }
+    };
 
     return {
-        image: convertedImageURL,
-        video: convertedVideoURL,
+        image: getRenderableLivePhotoImageURL(),
+        video: getRenderableLivePhotoVideoURL(),
     };
 }
 

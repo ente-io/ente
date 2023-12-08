@@ -3,7 +3,10 @@ import PreviewCard from './pages/gallery/PreviewCard';
 import { useContext, useEffect, useState } from 'react';
 import { EnteFile } from 'types/file';
 import { styled } from '@mui/material';
-import DownloadManager, { SourceURLs } from 'services/download';
+import DownloadManager, {
+    LivePhotoSourceURL,
+    SourceURL,
+} from 'services/download';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import PhotoViewer from 'components/PhotoViewer';
 import { TRASH_SECTION } from 'constants/collection';
@@ -190,7 +193,7 @@ const PhotoFrame = ({
     const updateSrcURL = async (
         index: number,
         id: number,
-        srcURLs: SourceURLs,
+        srcURLs: SourceURL,
         forceUpdate?: boolean
     ) => {
         const file = displayFiles[index];
@@ -407,23 +410,81 @@ const PhotoFrame = ({
             addLogLine(`[${item.id}] new file src request`);
             fetching[item.id] = true;
             const srcURLs = await DownloadManager.getFileForPreview(item);
-            try {
-                await updateSrcURL(index, item.id, srcURLs);
-                addLogLine(
-                    `[${item.id}] calling invalidateCurrItems for src, source loaded :${item.isSourceLoaded}`
-                );
-                instance.invalidateCurrItems();
-                if ((instance as any).isOpen()) {
-                    instance.updateSize(true);
-                }
-            } catch (e) {
-                if (e.message !== CustomError.URL_ALREADY_SET) {
-                    logError(
-                        e,
-                        'updating photoswipe after src url update failed'
+            if (item.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
+                const srcImgURL = srcURLs.url as LivePhotoSourceURL;
+                const imageURL = await srcImgURL.image;
+
+                const dummyImgSrcUrl: SourceURL = {
+                    url: imageURL,
+                    isOriginal: false,
+                    isRenderable: !!imageURL,
+                    type: 'normal',
+                };
+                try {
+                    await updateSrcURL(index, item.id, dummyImgSrcUrl);
+                    addLogLine(
+                        `[${item.id}] calling invalidateCurrItems for src, source loaded :${item.isSourceLoaded}`
                     );
+                    instance.invalidateCurrItems();
+                    if ((instance as any).isOpen()) {
+                        instance.updateSize(true);
+                    }
+                } catch (e) {
+                    if (e.message !== CustomError.URL_ALREADY_SET) {
+                        logError(
+                            e,
+                            'updating photoswipe after src url update failed'
+                        );
+                    }
                 }
-                throw e;
+
+                const videoURL = await srcImgURL.video;
+                const loadedLivePhotoSrcURL: SourceURL = {
+                    url: { video: videoURL, image: imageURL },
+                    isOriginal: false,
+                    isRenderable: !!videoURL,
+                    type: 'livePhoto',
+                };
+                try {
+                    await updateSrcURL(
+                        index,
+                        item.id,
+                        loadedLivePhotoSrcURL,
+                        true
+                    );
+                    addLogLine(
+                        `[${item.id}] calling invalidateCurrItems for src, source loaded :${item.isSourceLoaded}`
+                    );
+                    instance.invalidateCurrItems();
+                    if ((instance as any).isOpen()) {
+                        instance.updateSize(true);
+                    }
+                } catch (e) {
+                    if (e.message !== CustomError.URL_ALREADY_SET) {
+                        logError(
+                            e,
+                            'updating photoswipe after src url update failed'
+                        );
+                    }
+                }
+            } else {
+                try {
+                    await updateSrcURL(index, item.id, srcURLs);
+                    addLogLine(
+                        `[${item.id}] calling invalidateCurrItems for src, source loaded :${item.isSourceLoaded}`
+                    );
+                    instance.invalidateCurrItems();
+                    if ((instance as any).isOpen()) {
+                        instance.updateSize(true);
+                    }
+                } catch (e) {
+                    if (e.message !== CustomError.URL_ALREADY_SET) {
+                        logError(
+                            e,
+                            'updating photoswipe after src url update failed'
+                        );
+                    }
+                }
             }
         } catch (e) {
             logError(e, 'getSlideData failed get src url failed');
