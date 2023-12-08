@@ -209,7 +209,7 @@ class DownloadManager {
                 );
                 return converted;
             };
-            if (!this.fileConversionPromises.has(file.id)) {
+            if (forceConvert || !this.fileConversionPromises.has(file.id)) {
                 this.fileConversionPromises.set(
                     file.id,
                     getFileForPreviewPromise()
