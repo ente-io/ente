@@ -19,8 +19,8 @@ import { PhotosDownloadClient } from './clients/photos';
 import { PublicAlbumsDownloadClient } from './clients/publicAlbums';
 
 export type LivePhotoSourceURL = {
-    image: Promise<string>;
-    video: Promise<string>;
+    image: () => Promise<string>;
+    video: () => Promise<string>;
 };
 
 export type LoadedLivePhotoSourceURL = {
@@ -216,13 +216,6 @@ class DownloadManager {
                 );
             }
             const fileURLs = await this.fileConversionPromises.get(file.id);
-            this.fileConversionPromises.delete(file.id);
-            if (fileURLs.isRenderable) {
-                this.fileObjectURLPromises.set(
-                    file.id,
-                    Promise.resolve(fileURLs)
-                );
-            }
             return fileURLs;
         } catch (e) {
             this.fileConversionPromises.delete(file.id);

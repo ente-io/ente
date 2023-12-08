@@ -70,17 +70,18 @@ export function updateFileMsrcProps(file: EnteFile, url: string) {
 }
 
 export async function updateFileSrcProps(file: EnteFile, srcURLs: SourceURL) {
-    const { url, isRenderable } = srcURLs;
+    const { url, isRenderable, isOriginal } = srcURLs;
     file.w = window.innerWidth;
     file.h = window.innerHeight;
     file.isSourceLoaded =
         file.metadata.fileType === FILE_TYPE.LIVE_PHOTO
             ? srcURLs.type === 'livePhoto'
             : true;
-    file.isConverted = !srcURLs.isOriginal;
-    file.conversionFailed = !srcURLs.isRenderable;
+    file.isConverted = !isOriginal;
+    file.conversionFailed = !isRenderable;
     file.srcURLs = srcURLs;
     if (!isRenderable) {
+        file.isSourceLoaded = true;
         return;
     }
 

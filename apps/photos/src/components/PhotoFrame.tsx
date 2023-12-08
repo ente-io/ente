@@ -200,16 +200,14 @@ const PhotoFrame = ({
         // this is to prevent outdate updateSrcURL call from updating the wrong file
         if (file.id !== id) {
             addLogLine(
-                `[${id}]PhotoSwipe: updateSrcURL: file id mismatch: ${file.id} !== ${id}`
+                `[${id}]PhotoSwipe: updateSrcURL: file id mismatch: ${file.id}`
             );
             throw Error(CustomError.UPDATE_URL_FILE_ID_MISMATCH);
         }
         if (file.isSourceLoaded && !forceUpdate) {
             throw Error(CustomError.URL_ALREADY_SET);
         } else if (file.conversionFailed) {
-            addLogLine(
-                `[${id}]PhotoSwipe: updateSrcURL: conversion failed: ${file.id}`
-            );
+            addLogLine(`[${id}]PhotoSwipe: updateSrcURL: conversion failed`);
             throw Error(CustomError.FILE_CONVERSION_FAILED);
         }
 
@@ -412,7 +410,7 @@ const PhotoFrame = ({
             const srcURLs = await DownloadManager.getFileForPreview(item);
             if (item.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
                 const srcImgURL = srcURLs.url as LivePhotoSourceURL;
-                const imageURL = await srcImgURL.image;
+                const imageURL = await srcImgURL.image();
 
                 const dummyImgSrcUrl: SourceURL = {
                     url: imageURL,
@@ -438,7 +436,7 @@ const PhotoFrame = ({
                     }
                 }
 
-                const videoURL = await srcImgURL.video;
+                const videoURL = imageURL ? await srcImgURL.video() : null;
                 const loadedLivePhotoSrcURL: SourceURL = {
                     url: { video: videoURL, image: imageURL },
                     isOriginal: false,

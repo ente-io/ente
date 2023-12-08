@@ -339,7 +339,8 @@ export async function getRenderableFileURL(
     return {
         url: srcURLs,
         isOriginal,
-        isRenderable: !!srcURLs,
+        isRenderable:
+            file.metadata.fileType !== FILE_TYPE.LIVE_PHOTO && !!srcURLs,
         type:
             file.metadata.fileType === FILE_TYPE.LIVE_PHOTO
                 ? 'livePhoto'
@@ -387,8 +388,8 @@ async function getRenderableLivePhotoURL(
     };
 
     return {
-        image: getRenderableLivePhotoImageURL(),
-        video: getRenderableLivePhotoVideoURL(),
+        image: getRenderableLivePhotoImageURL,
+        video: getRenderableLivePhotoVideoURL,
     };
 }
 
