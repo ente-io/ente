@@ -217,7 +217,12 @@ class DownloadManager {
             }
             const fileURLs = await this.fileConversionPromises.get(file.id);
             this.fileConversionPromises.delete(file.id);
-            this.fileObjectURLPromises.set(file.id, Promise.resolve(fileURLs));
+            if (fileURLs.isRenderable) {
+                this.fileObjectURLPromises.set(
+                    file.id,
+                    Promise.resolve(fileURLs)
+                );
+            }
             return fileURLs;
         } catch (e) {
             this.fileConversionPromises.delete(file.id);
