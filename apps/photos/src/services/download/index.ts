@@ -28,7 +28,7 @@ export type LoadedLivePhotoSourceURL = {
     video: string;
 };
 
-export type SourceURL = {
+export type SourceURLs = {
     url: string | LivePhotoSourceURL | LoadedLivePhotoSourceURL;
     isOriginal: boolean;
     isRenderable: boolean;
@@ -60,8 +60,8 @@ class DownloadManager {
     private thumbnailCache: LimitedCache;
     private cryptoWorker: Remote<DedicatedCryptoWorker>;
 
-    private fileObjectURLPromises = new Map<number, Promise<SourceURL>>();
-    private fileConversionPromises = new Map<number, Promise<SourceURL>>();
+    private fileObjectURLPromises = new Map<number, Promise<SourceURLs>>();
+    private fileConversionPromises = new Map<number, Promise<SourceURLs>>();
     private thumbnailObjectURLPromises = new Map<number, Promise<string>>();
 
     private fileDownloadProgress = new Map<number, number>();
@@ -189,7 +189,7 @@ class DownloadManager {
     getFileForPreview = async (
         file: EnteFile,
         forceConvert = false
-    ): Promise<SourceURL> => {
+    ): Promise<SourceURLs> => {
         try {
             if (!this.ready) {
                 throw Error(CustomError.DOWNLOAD_MANAGER_NOT_READY);
@@ -232,7 +232,7 @@ class DownloadManager {
             if (!this.ready) {
                 throw Error(CustomError.DOWNLOAD_MANAGER_NOT_READY);
             }
-            const getFilePromise = async (): Promise<SourceURL> => {
+            const getFilePromise = async (): Promise<SourceURLs> => {
                 const fileStream = await this.downloadFile(file);
                 const fileBlob = await new Response(fileStream).blob();
                 return {

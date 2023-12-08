@@ -12,7 +12,7 @@ import { decodeLivePhoto } from 'services/livePhotoService';
 import { getFileType } from 'services/typeDetectionService';
 import DownloadManager, {
     LivePhotoSourceURL,
-    SourceURL,
+    SourceURLs,
 } from 'services/download';
 import { logError } from '@ente/shared/sentry';
 import { User } from '@ente/shared/user/types';
@@ -285,8 +285,8 @@ export async function getRenderableFileURL(
     fileBlob: Blob,
     originalFileURL: string,
     forceConvert: boolean
-): Promise<SourceURL> {
-    let srcURLs: SourceURL['url'];
+): Promise<SourceURLs> {
+    let srcURLs: SourceURLs['url'];
     switch (file.metadata.fileType) {
         case FILE_TYPE.IMAGE: {
             const convertedBlob = await getRenderableImage(

@@ -5,7 +5,7 @@ import { EnteFile } from 'types/file';
 import { styled } from '@mui/material';
 import DownloadManager, {
     LivePhotoSourceURL,
-    SourceURL,
+    SourceURLs,
 } from 'services/download';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import PhotoViewer from 'components/PhotoViewer';
@@ -193,7 +193,7 @@ const PhotoFrame = ({
     const updateSrcURL = async (
         index: number,
         id: number,
-        srcURLs: SourceURL,
+        srcURLs: SourceURLs,
         forceUpdate?: boolean
     ) => {
         const file = displayFiles[index];
@@ -412,7 +412,7 @@ const PhotoFrame = ({
                 const srcImgURL = srcURLs.url as LivePhotoSourceURL;
                 const imageURL = await srcImgURL.image();
 
-                const dummyImgSrcUrl: SourceURL = {
+                const dummyImgSrcUrl: SourceURLs = {
                     url: imageURL,
                     isOriginal: false,
                     isRenderable: !!imageURL,
@@ -435,9 +435,13 @@ const PhotoFrame = ({
                         );
                     }
                 }
+                if (!imageURL) {
+                    // no image url, no need to load video
+                    return;
+                }
 
-                const videoURL = imageURL ? await srcImgURL.video() : null;
-                const loadedLivePhotoSrcURL: SourceURL = {
+                const videoURL = await srcImgURL.video();
+                const loadedLivePhotoSrcURL: SourceURLs = {
                     url: { video: videoURL, image: imageURL },
                     isOriginal: false,
                     isRenderable: !!videoURL,

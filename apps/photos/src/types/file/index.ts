@@ -1,4 +1,4 @@
-import { SourceURL } from 'services/download';
+import { SourceURLs } from 'services/download';
 import {
     EncryptedMagicMetadata,
     MagicMetadataCore,
@@ -51,7 +51,7 @@ export interface EnteFile
     isTrashed?: boolean;
     key: string;
     src?: string;
-    srcURLs?: SourceURL;
+    srcURLs?: SourceURLs;
     msrc?: string;
     html?: string;
     w?: number;
