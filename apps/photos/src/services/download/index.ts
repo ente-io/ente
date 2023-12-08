@@ -127,12 +127,12 @@ class DownloadManager {
             throw e;
         }
     }
-    private async getCachedFile(fileID: number) {
+    private async getCachedFile(fileID: number): Promise<Response> {
         try {
             const cacheResp: Response = await this.fileCache?.match(
                 fileID.toString()
             );
-            return new Uint8Array(await cacheResp.arrayBuffer());
+            return cacheResp;
         } catch (e) {
             logError(e, 'failed to get cached thumbnail');
             throw e;
@@ -290,14 +290,16 @@ class DownloadManager {
                 file.metadata.fileType === FILE_TYPE.IMAGE ||
                 file.metadata.fileType === FILE_TYPE.LIVE_PHOTO
             ) {
-                const encrypted = await this.getCachedFile(file.id);
+                let encrypted = await this.getCachedFile(file.id);
                 if (!encrypted) {
-                    const encrypted = await this.downloadClient.downloadFile(
-                        file,
-                        onDownloadProgress
+                    encrypted = new Response(
+                        await this.downloadClient.downloadFile(
+                            file,
+                            onDownloadProgress
+                        )
                     );
                     this.fileCache
-                        ?.put(file.id.toString(), new Response(encrypted))
+                        ?.put(file.id.toString(), encrypted.clone())
                         .catch((e) => {
                             logError(e, 'cache put failed');
                             // TODO: handle storage full exception.
@@ -306,7 +308,7 @@ class DownloadManager {
                 this.clearDownloadProgress(file.id);
                 try {
                     const decrypted = await this.cryptoWorker.decryptFile(
-                        encrypted,
+                        new Uint8Array(await encrypted.arrayBuffer()),
                         await this.cryptoWorker.fromB64(
                             file.file.decryptionHeader
                         ),
@@ -329,7 +331,12 @@ class DownloadManager {
                     throw e;
                 }
             }
-            const resp = await this.downloadClient.downloadFileStream(file);
+
+            let resp: Response = await this.getCachedFile(file.id);
+            if (!resp) {
+                resp = await this.downloadClient.downloadFileStream(file);
+                void this.fileCache.put(file.id.toString(), resp.clone());
+            }
             const reader = resp.body.getReader();
 
             const contentLength = +resp.headers.get('Content-Length') ?? 0;
