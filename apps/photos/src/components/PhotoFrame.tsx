@@ -423,7 +423,7 @@ const PhotoFrame = ({
                 try {
                     await updateSrcURL(index, item.id, dummyImgSrcUrl);
                     addLogLine(
-                        `[${item.id}] calling invalidateCurrItems for src, source loaded :${item.isSourceLoaded}`
+                        `[${item.id}] calling invalidateCurrItems for live photo imgSrc, source loaded :${item.isSourceLoaded}`
                     );
                     instance.invalidateCurrItems();
                     if ((instance as any).isOpen()) {
@@ -433,7 +433,7 @@ const PhotoFrame = ({
                     if (e.message !== CustomError.URL_ALREADY_SET) {
                         logError(
                             e,
-                            'updating photoswipe after src url update failed'
+                            'updating photoswipe after for live photo imgSrc update failed'
                         );
                     }
                 }
@@ -453,7 +453,7 @@ const PhotoFrame = ({
                         true
                     );
                     addLogLine(
-                        `[${item.id}] calling invalidateCurrItems for src, source loaded :${item.isSourceLoaded}`
+                        `[${item.id}] calling invalidateCurrItems for live photo complete, source loaded :${item.isSourceLoaded}`
                     );
                     instance.invalidateCurrItems();
                     if ((instance as any).isOpen()) {
@@ -463,7 +463,7 @@ const PhotoFrame = ({
                     if (e.message !== CustomError.URL_ALREADY_SET) {
                         logError(
                             e,
-                            'updating photoswipe after src url update failed'
+                            'updating photoswipe for live photo complete update failed'
                         );
                     }
                 }

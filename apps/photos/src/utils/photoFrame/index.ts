@@ -73,7 +73,10 @@ export async function updateFileSrcProps(file: EnteFile, srcURLs: SourceURL) {
     const { url, isRenderable } = srcURLs;
     file.w = window.innerWidth;
     file.h = window.innerHeight;
-    file.isSourceLoaded = true;
+    file.isSourceLoaded =
+        file.metadata.fileType === FILE_TYPE.LIVE_PHOTO
+            ? srcURLs.type === 'livePhoto'
+            : true;
     file.isConverted = !srcURLs.isOriginal;
     file.conversionFailed = !srcURLs.isRenderable;
     file.srcURLs = srcURLs;
