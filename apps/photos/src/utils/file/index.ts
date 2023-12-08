@@ -376,7 +376,8 @@ async function getRenderableLivePhotoURL(
             const convertedVideoBlob = await getPlayableVideo(
                 livePhoto.videoNameTitle,
                 videoBlob,
-                forceConvert
+                forceConvert,
+                true
             );
             return URL.createObjectURL(convertedVideoBlob);
         } catch (e) {
@@ -394,7 +395,8 @@ async function getRenderableLivePhotoURL(
 export async function getPlayableVideo(
     videoNameTitle: string,
     videoBlob: Blob,
-    forceConvert = false
+    forceConvert = false,
+    runOnWeb = false
 ) {
     try {
         const isPlayable = await isPlaybackPossible(
@@ -403,7 +405,7 @@ export async function getPlayableVideo(
         if (isPlayable && !forceConvert) {
             return videoBlob;
         } else {
-            if (!forceConvert && !isElectron()) {
+            if (!forceConvert && !runOnWeb && !isElectron()) {
                 return null;
             }
             addLogLine(
