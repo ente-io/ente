@@ -10,7 +10,7 @@ import {
 } from 'types/file';
 import { decodeLivePhoto } from 'services/livePhotoService';
 import { getFileType } from 'services/typeDetectionService';
-import DownloadManager from 'services/download';
+import DownloadManager, { SourceURLs } from 'services/download';
 import { logError } from '@ente/shared/sentry';
 import { User } from '@ente/shared/user/types';
 import { getData, LS_KEYS } from '@ente/shared/storage/localStorage';
@@ -277,56 +277,74 @@ export function generateStreamFromArrayBuffer(data: Uint8Array) {
     });
 }
 
-export async function getRenderableFileURL(file: EnteFile, fileBlob: Blob) {
+export async function getRenderableFileURL(
+    file: EnteFile,
+    fileBlob: Blob,
+    originalFileURL: string,
+    forceConvert: boolean
+): Promise<SourceURLs> {
+    let srcURLs: SourceURLs['url'];
     switch (file.metadata.fileType) {
         case FILE_TYPE.IMAGE: {
             const convertedBlob = await getRenderableImage(
                 file.metadata.title,
                 fileBlob
             );
-            const { originalURL, convertedURL } = getFileObjectURLs(
+            const convertedURL = getFileObjectURL(
+                originalFileURL,
                 fileBlob,
                 convertedBlob
             );
-            return {
-                converted: [convertedURL],
-                original: [originalURL],
-            };
+            srcURLs = convertedURL;
+            break;
         }
         case FILE_TYPE.LIVE_PHOTO: {
-            return await getRenderableLivePhotoURL(file, fileBlob);
+            srcURLs = await getRenderableLivePhotoURL(
+                file,
+                fileBlob,
+                forceConvert
+            );
+            break;
         }
         case FILE_TYPE.VIDEO: {
             const convertedBlob = await getPlayableVideo(
                 file.metadata.title,
-                fileBlob
+                fileBlob,
+                forceConvert
             );
-            const { originalURL, convertedURL } = getFileObjectURLs(
+            const convertedURL = getFileObjectURL(
+                originalFileURL,
                 fileBlob,
                 convertedBlob
             );
-            return {
-                converted: [convertedURL],
-                original: [originalURL],
-            };
+            srcURLs = convertedURL;
+            break;
         }
         default: {
-            const previewURL = await createTypedObjectURL(
-                fileBlob,
-                file.metadata.title
-            );
-            return {
-                converted: [previewURL],
-                original: [previewURL],
-            };
+            srcURLs = originalFileURL;
+            break;
         }
     }
+
+    let isOriginal: boolean;
+    if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
+        isOriginal = false;
+    } else {
+        isOriginal = (srcURLs as string) === (originalFileURL as string);
+    }
+
+    return {
+        url: srcURLs,
+        isOriginal,
+        isRenderable: !!srcURLs,
+    };
 }
 
 async function getRenderableLivePhotoURL(
     file: EnteFile,
-    fileBlob: Blob
-): Promise<{ original: string[]; converted: string[] }> {
+    fileBlob: Blob,
+    forceConvert: boolean
+): Promise<{ image: string; video: string }> {
     const livePhoto = await decodeLivePhoto(file, fileBlob);
     const imageBlob = new Blob([livePhoto.image]);
     const videoBlob = new Blob([livePhoto.video]);
@@ -337,16 +355,14 @@ async function getRenderableLivePhotoURL(
     const convertedVideoBlob = await getPlayableVideo(
         livePhoto.videoNameTitle,
         videoBlob,
-        true
+        forceConvert
     );
-    const { originalURL: originalImageURL, convertedURL: convertedImageURL } =
-        getFileObjectURLs(imageBlob, convertedImageBlob);
+    const convertedImageURL = URL.createObjectURL(convertedImageBlob);
+    const convertedVideoURL = URL.createObjectURL(convertedVideoBlob);
 
-    const { originalURL: originalVideoURL, convertedURL: convertedVideoURL } =
-        getFileObjectURLs(videoBlob, convertedVideoBlob);
     return {
-        converted: [convertedImageURL, convertedVideoURL],
-        original: [originalImageURL, originalVideoURL],
+        image: convertedImageURL,
+        video: convertedVideoURL,
     };
 }
 
@@ -561,9 +577,9 @@ export function updateExistingFilePubMetadata(
     existingFile.metadata = mergeMetadata([existingFile])[0].metadata;
 }
 
-export async function getFileFromURL(fileURL: string) {
+export async function getFileFromURL(fileURL: string, name: string) {
     const fileBlob = await (await fetch(fileURL)).blob();
-    const fileFile = new File([fileBlob], 'temp');
+    const fileFile = new File([fileBlob], name);
     return fileFile;
 }
 
@@ -632,7 +648,9 @@ export async function downloadFileDesktop(
     file: EnteFile,
     downloadPath: string
 ) {
-    const fileStream = await DownloadManager.getFile(file);
+    const fileStream = (await DownloadManager.getFile(
+        file
+    )) as ReadableStream<Uint8Array>;
     const updatedFileStream = await getUpdatedEXIFFileForDownload(
         fileReader,
         file,
@@ -900,12 +918,15 @@ const fixTimeHelper = async (
     setFixCreationTimeAttributes({ files: selectedFiles });
 };
 
-const getFileObjectURLs = (originalBlob: Blob, convertedBlob: Blob) => {
-    const originalURL = URL.createObjectURL(originalBlob);
+const getFileObjectURL = (
+    originalFileURL: string,
+    originalBlob: Blob,
+    convertedBlob: Blob
+) => {
     const convertedURL = convertedBlob
         ? convertedBlob === originalBlob
-            ? originalURL
+            ? originalFileURL
             : URL.createObjectURL(convertedBlob)
         : null;
-    return { originalURL, convertedURL };
+    return convertedURL;
 };

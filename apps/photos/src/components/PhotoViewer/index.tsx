@@ -290,18 +290,25 @@ function PhotoViewer(props: Iprops) {
     }
 
     function updateExif(file: EnteFile) {
-        if (file.metadata.fileType !== FILE_TYPE.IMAGE) {
+        if (file.metadata.fileType === FILE_TYPE.VIDEO) {
             setExif({ key: file.src, value: null });
             return;
         }
+        if (!file.isSourceLoaded) {
+            return;
+        }
+        const key =
+            file.metadata.fileType === FILE_TYPE.IMAGE
+                ? file.src
+                : (file.srcURLs.url as any).image;
         if (
             !file ||
             !exifCopy?.current?.value === null ||
-            exifCopy?.current?.key === file.src
+            exifCopy?.current?.key === key
         ) {
             return;
         }
-        setExif({ key: file.src, value: undefined });
+        setExif({ key, value: undefined });
         checkExifAvailable(file);
     }
 
@@ -540,22 +547,29 @@ function PhotoViewer(props: Iprops) {
                 return;
             }
             try {
-                if (file.isSourceLoaded) {
-                    exifExtractionInProgress.current = file.src;
-                    const fileObject = await getFileFromURL(
-                        file.originalImageURL
+                exifExtractionInProgress.current = file.src;
+                let fileObject: File;
+                if (file.metadata.fileType === FILE_TYPE.IMAGE) {
+                    fileObject = await getFileFromURL(
+                        file.src as string,
+                        file.metadata.title
                     );
-                    const fileTypeInfo = await getFileType(fileObject);
-                    const exifData = await getParsedExifData(
-                        fileObject,
-                        fileTypeInfo
-                    );
-                    if (exifExtractionInProgress.current === file.src) {
-                        if (exifData) {
-                            setExif({ key: file.src, value: exifData });
-                        } else {
-                            setExif({ key: file.src, value: null });
-                        }
+                } else {
+                    const url = (
+                        file.srcURLs.url as { image: string; video: string }
+                    ).image;
+                    fileObject = await getFileFromURL(url, file.metadata.title);
+                }
+                const fileTypeInfo = await getFileType(fileObject);
+                const exifData = await getParsedExifData(
+                    fileObject,
+                    fileTypeInfo
+                );
+                if (exifExtractionInProgress.current === file.src) {
+                    if (exifData) {
+                        setExif({ key: file.src, value: exifData });
+                    } else {
+                        setExif({ key: file.src, value: null });
                     }
                 }
             } finally {

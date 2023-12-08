@@ -142,8 +142,6 @@ export const DeadCenter = styled('div')`
 `;
 
 const defaultGalleryContext: GalleryContextType = {
-    thumbs: new Map(),
-    files: new Map(),
     showPlanSelectorModal: () => null,
     setActiveCollectionID: () => null,
     syncWithRemote: () => null,
