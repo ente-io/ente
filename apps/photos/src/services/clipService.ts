@@ -4,7 +4,7 @@ import {
     getLocalEmbeddings,
 } from './embeddingService';
 import { getAllLocalFiles, getLocalFiles } from './fileService';
-import downloadManager from './downloadManager';
+import downloadManager from './download';
 import { logError } from '@ente/shared/sentry';
 import { addLogLine } from '@ente/shared/logging';
 import { Events, eventBus } from '@ente/shared/events';
@@ -17,7 +17,6 @@ import { getPersonalFiles } from 'utils/file';
 import { FILE_TYPE } from 'constants/file';
 import ComlinkCryptoWorker from '@ente/shared/crypto';
 import { Embedding, Model } from 'types/embedding';
-import { getToken } from '@ente/shared/storage/localStorage/helpers';
 import isElectron from 'is-electron';
 
 const CLIP_EMBEDDING_LENGTH = 512;
@@ -298,19 +297,7 @@ class ClipServiceImpl {
     };
 
     private extractFileClipImageEmbedding = async (file: EnteFile) => {
-        const token = getToken();
-        if (!token) {
-            return;
-        }
-        let thumb: Uint8Array;
-        const thumbURL = await downloadManager.getCachedThumbnail(file);
-        if (thumbURL) {
-            thumb = await fetch(thumbURL)
-                .then((response) => response.arrayBuffer())
-                .then((buffer) => new Uint8Array(buffer));
-        } else {
-            thumb = await downloadManager.downloadThumb(token, file);
-        }
+        const thumb = await downloadManager.getThumbnail(file);
         const embedding = await ElectronAPIs.computeImageEmbedding(thumb);
         return embedding;
     };

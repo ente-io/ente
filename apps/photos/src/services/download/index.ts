@@ -1,11 +1,7 @@
-import { getToken } from '@ente/shared/storage/localStorage/helpers';
-import { getFileURL, getThumbnailURL } from '@ente/shared/network/api';
 import {
     generateStreamFromArrayBuffer,
     getRenderableFileURL,
-    createTypedObjectURL,
 } from 'utils/file';
-import HTTPService from '@ente/shared/network/HTTPService';
 import { EnteFile } from 'types/file';
 
 import { logError } from '@ente/shared/sentry';
@@ -17,173 +13,186 @@ import { CACHES } from '@ente/shared/storage/cacheStorage/constants';
 import { Remote } from 'comlink';
 import { DedicatedCryptoWorker } from '@ente/shared/crypto/internal/crypto.worker';
 import { LimitedCache } from '@ente/shared/storage/cacheStorage/types';
-import { retryAsyncFunction } from 'utils/network';
 import { addLogLine } from '@ente/shared/logging';
+import { APPS } from '@ente/shared/apps/constants';
+import { PhotosDownloadClient } from './clients/photos';
+import { PublicAlbumsDownloadClient } from './clients/publicAlbums';
+
+export type SourceURLs = {
+    original: string[];
+    converted: string[];
+};
+
+export type OnDownloadProgress = (event: {
+    loaded: number;
+    total: number;
+}) => void;
+
+export interface DownloadClient {
+    updateTokens: (token: string, passwordToken?: string) => void;
+    updateTimeout: (timeout: number) => void;
+    downloadThumbnail: (
+        file: EnteFile,
+        timeout?: number
+    ) => Promise<Uint8Array>;
+    downloadFile: (
+        file: EnteFile,
+        onDownloadProgress: OnDownloadProgress
+    ) => Promise<Uint8Array>;
+    downloadFileStream: (file: EnteFile) => Promise<Response>;
+}
 
 class DownloadManager {
-    private fileObjectURLPromise = new Map<
-        string,
-        Promise<{ original: string[]; converted: string[] }>
-    >();
-    private thumbnailObjectURLPromise = new Map<number, Promise<string>>();
+    private ready: boolean = false;
+    private downloadClient: DownloadClient;
+    private thumbnailCache: LimitedCache;
+    private cryptoWorker: Remote<DedicatedCryptoWorker>;
+
+    private fileObjectURLPromises = new Map<number, Promise<SourceURLs>>();
+    private thumbnailObjectURLPromises = new Map<number, Promise<string>>();
 
     private fileDownloadProgress = new Map<number, number>();
 
     private progressUpdater: (value: Map<number, number>) => void = () => {};
 
-    private thumbnailCache: LimitedCache;
+    async init(
+        app: APPS,
+        tokens?: { token: string; passwordToken?: string } | { token: string },
+        timeout?: number
+    ) {
+        try {
+            if (this.ready) {
+                addLogLine('DownloadManager already initialized');
+                return;
+            }
+            this.downloadClient = createDownloadClient(app, tokens, timeout);
+            this.thumbnailCache = await openThumbnailCache();
+            this.cryptoWorker = await ComlinkCryptoWorker.getInstance();
+            this.ready = true;
+        } catch (e) {
+            logError(e, 'DownloadManager init failed');
+            throw e;
+        }
+    }
+
+    updateToken(token: string, passwordToken?: string) {
+        this.downloadClient.updateTokens(token, passwordToken);
+    }
+
+    updateCryptoWorker(cryptoWorker: Remote<DedicatedCryptoWorker>) {
+        this.cryptoWorker = cryptoWorker;
+    }
+
+    updateTimeout(timeout: number) {
+        this.downloadClient.updateTimeout(timeout);
+    }
 
     setProgressUpdater(progressUpdater: (value: Map<number, number>) => void) {
         this.progressUpdater = progressUpdater;
     }
 
-    private async getThumbnailCache() {
+    private async getCachedThumbnail(fileID: number) {
         try {
-            if (!this.thumbnailCache) {
-                this.thumbnailCache = await CacheStorageService.open(
-                    CACHES.THUMBS
-                );
-            }
-            return this.thumbnailCache;
-        } catch (e) {
-            return null;
-            // ignore
-        }
-    }
-
-    public async getCachedThumbnail(file: EnteFile) {
-        try {
-            const thumbnailCache = await this.getThumbnailCache();
-            const cacheResp: Response = await thumbnailCache?.match(
-                file.id.toString()
+            const cacheResp: Response = await this.thumbnailCache?.match(
+                fileID.toString()
             );
 
             if (cacheResp) {
-                return URL.createObjectURL(await cacheResp.blob());
+                return new Uint8Array(await cacheResp.arrayBuffer());
             }
-            return null;
         } catch (e) {
             logError(e, 'failed to get cached thumbnail');
             throw e;
         }
     }
 
-    public async getThumbnail(
-        file: EnteFile,
-        tokenOverride?: string,
-        usingWorker?: Remote<DedicatedCryptoWorker>,
-        timeout?: number
-    ) {
-        try {
-            const token = tokenOverride || getToken();
-            if (!token) {
-                return null;
-            }
-            if (!this.thumbnailObjectURLPromise.has(file.id)) {
-                const downloadPromise = async () => {
-                    const thumbnailCache = await this.getThumbnailCache();
-                    const cachedThumb = await this.getCachedThumbnail(file);
-                    if (cachedThumb) {
-                        return cachedThumb;
-                    }
-                    const thumb = await this.downloadThumb(
-                        token,
-                        file,
-                        usingWorker,
-                        timeout
-                    );
-                    const thumbBlob = new Blob([thumb]);
-
-                    thumbnailCache
-                        ?.put(file.id.toString(), new Response(thumbBlob))
-                        .catch((e) => {
-                            logError(e, 'cache put failed');
-                            // TODO: handle storage full exception.
-                        });
-                    return URL.createObjectURL(thumbBlob);
-                };
-                this.thumbnailObjectURLPromise.set(file.id, downloadPromise());
-            }
-
-            return await this.thumbnailObjectURLPromise.get(file.id);
-        } catch (e) {
-            this.thumbnailObjectURLPromise.delete(file.id);
-            logError(e, 'get DownloadManager preview Failed');
-            throw e;
-        }
-    }
-
-    downloadThumb = async (
-        token: string,
-        file: EnteFile,
-        usingWorker?: Remote<DedicatedCryptoWorker>,
-        timeout?: number
-    ) => {
-        const resp = await HTTPService.get(
-            getThumbnailURL(file.id),
-            null,
-            { 'X-Auth-Token': token },
-            { responseType: 'arraybuffer', timeout }
-        );
-        if (typeof resp.data === 'undefined') {
-            throw Error(CustomError.REQUEST_FAILED);
-        }
-        const cryptoWorker =
-            usingWorker || (await ComlinkCryptoWorker.getInstance());
-        const decrypted = await cryptoWorker.decryptThumbnail(
-            new Uint8Array(resp.data),
-            await cryptoWorker.fromB64(file.thumbnail.decryptionHeader),
+    private downloadThumb = async (file: EnteFile) => {
+        const encrypted = await this.downloadClient.downloadThumbnail(file);
+        const decrypted = await this.cryptoWorker.decryptThumbnail(
+            encrypted,
+            await this.cryptoWorker.fromB64(file.thumbnail.decryptionHeader),
             file.key
         );
         return decrypted;
     };
 
-    getFile = async (file: EnteFile, forPreview = false) => {
-        const fileKey = forPreview ? `${file.id}_preview` : `${file.id}`;
+    async getThumbnail(file: EnteFile) {
         try {
+            if (!this.ready) {
+                throw Error(CustomError.DOWNLOAD_MANAGER_NOT_READY);
+            }
+            const cachedThumb = await this.getCachedThumbnail(file.id);
+            if (cachedThumb) {
+                return cachedThumb;
+            }
+            const thumb = await this.downloadThumb(file);
+
+            this.thumbnailCache
+                ?.put(file.id.toString(), new Response(thumb))
+                .catch((e) => {
+                    logError(e, 'cache put failed');
+                    // TODO: handle storage full exception.
+                });
+            return thumb;
+        } catch (e) {
+            logError(e, 'getThumbnail failed');
+            throw e;
+        }
+    }
+
+    async getThumbnailForPreview(file: EnteFile) {
+        try {
+            if (!this.ready) {
+                throw Error(CustomError.DOWNLOAD_MANAGER_NOT_READY);
+            }
+            if (!this.thumbnailObjectURLPromises.has(file.id)) {
+                const thumbPromise = this.getThumbnail(file);
+                const thumbURLPromise = thumbPromise.then((thumb) =>
+                    URL.createObjectURL(new Blob([thumb]))
+                );
+                this.thumbnailObjectURLPromises.set(file.id, thumbURLPromise);
+            }
+            return await this.thumbnailObjectURLPromises.get(file.id);
+        } catch (e) {
+            this.thumbnailObjectURLPromises.delete(file.id);
+            logError(e, 'get DownloadManager preview Failed');
+            throw e;
+        }
+    }
+
+    getFileForPreview = async (file: EnteFile): Promise<SourceURLs> => {
+        try {
+            if (!this.ready) {
+                throw Error(CustomError.DOWNLOAD_MANAGER_NOT_READY);
+            }
             const getFilePromise = async () => {
                 const fileStream = await this.downloadFile(file);
                 const fileBlob = await new Response(fileStream).blob();
-                if (forPreview) {
-                    return await getRenderableFileURL(file, fileBlob);
-                } else {
-                    const fileURL = await createTypedObjectURL(
-                        fileBlob,
-                        file.metadata.title
-                    );
-                    return { converted: [fileURL], original: [fileURL] };
-                }
+                return await getRenderableFileURL(file, fileBlob);
             };
-            if (!this.fileObjectURLPromise.get(fileKey)) {
-                this.fileObjectURLPromise.set(fileKey, getFilePromise());
+            if (!this.fileObjectURLPromises.get(file.id)) {
+                this.fileObjectURLPromises.set(file.id, getFilePromise());
             }
-            const fileURLs = await this.fileObjectURLPromise.get(fileKey);
+            const fileURLs = await this.fileObjectURLPromises.get(file.id);
             return fileURLs;
         } catch (e) {
-            this.fileObjectURLPromise.delete(fileKey);
+            this.fileObjectURLPromises.delete(file.id);
             logError(e, 'download manager Failed to get File');
             throw e;
         }
     };
 
-    public async getCachedOriginalFile(file: EnteFile) {
-        return (await this.fileObjectURLPromise.get(file.id.toString()))
-            ?.original;
+    getFile(file: EnteFile) {
+        if (!this.ready) {
+            throw Error(CustomError.DOWNLOAD_MANAGER_NOT_READY);
+        }
+        return this.downloadFile(file);
     }
 
-    async downloadFile(
-        file: EnteFile,
-        tokenOverride?: string,
-        usingWorker?: Remote<DedicatedCryptoWorker>,
-        timeout?: number
-    ) {
+    private async downloadFile(
+        file: EnteFile
+    ): Promise<ReadableStream<Uint8Array>> {
         try {
-            const cryptoWorker =
-                usingWorker || (await ComlinkCryptoWorker.getInstance());
-            const token = tokenOverride || getToken();
-            if (!token) {
-                return null;
-            }
             const onDownloadProgress = this.trackDownloadProgress(
                 file.id,
                 file.info?.fileSize
@@ -192,26 +201,17 @@ class DownloadManager {
                 file.metadata.fileType === FILE_TYPE.IMAGE ||
                 file.metadata.fileType === FILE_TYPE.LIVE_PHOTO
             ) {
-                const resp = await retryAsyncFunction(() =>
-                    HTTPService.get(
-                        getFileURL(file.id),
-                        null,
-                        { 'X-Auth-Token': token },
-                        {
-                            responseType: 'arraybuffer',
-                            timeout,
-                            onDownloadProgress,
-                        }
-                    )
+                const encrypted = await this.downloadClient.downloadFile(
+                    file,
+                    onDownloadProgress
                 );
                 this.clearDownloadProgress(file.id);
-                if (typeof resp.data === 'undefined') {
-                    throw Error(CustomError.REQUEST_FAILED);
-                }
                 try {
-                    const decrypted = await cryptoWorker.decryptFile(
-                        new Uint8Array(resp.data),
-                        await cryptoWorker.fromB64(file.file.decryptionHeader),
+                    const decrypted = await this.cryptoWorker.decryptFile(
+                        new Uint8Array(encrypted),
+                        await this.cryptoWorker.fromB64(
+                            file.file.decryptionHeader
+                        ),
                         file.key
                     );
                     return generateStreamFromArrayBuffer(decrypted);
@@ -231,27 +231,24 @@ class DownloadManager {
                     throw e;
                 }
             }
-            const resp = await retryAsyncFunction(() =>
-                fetch(getFileURL(file.id), {
-                    headers: {
-                        'X-Auth-Token': token,
-                    },
-                })
-            );
+            const resp = await this.downloadClient.downloadFileStream(file);
             const reader = resp.body.getReader();
 
             const contentLength = +resp.headers.get('Content-Length') ?? 0;
             let downloadedBytes = 0;
 
             const stream = new ReadableStream({
-                async start(controller) {
+                start: async (controller) => {
                     try {
-                        const decryptionHeader = await cryptoWorker.fromB64(
-                            file.file.decryptionHeader
+                        const decryptionHeader =
+                            await this.cryptoWorker.fromB64(
+                                file.file.decryptionHeader
+                            );
+                        const fileKey = await this.cryptoWorker.fromB64(
+                            file.key
                         );
-                        const fileKey = await cryptoWorker.fromB64(file.key);
                         const { pullState, decryptionChunkSize } =
-                            await cryptoWorker.initChunkDecryption(
+                            await this.cryptoWorker.initChunkDecryption(
                                 decryptionHeader,
                                 fileKey
                             );
@@ -285,7 +282,7 @@ class DownloadManager {
                                             );
                                             try {
                                                 const { decryptedData } =
-                                                    await cryptoWorker.decryptFileChunk(
+                                                    await this.cryptoWorker.decryptFileChunk(
                                                         fileData,
                                                         pullState
                                                     );
@@ -329,7 +326,7 @@ class DownloadManager {
                                         if (data) {
                                             try {
                                                 const { decryptedData } =
-                                                    await cryptoWorker.decryptFileChunk(
+                                                    await this.cryptoWorker.decryptFileChunk(
                                                         data,
                                                         pullState
                                                     );
@@ -413,3 +410,35 @@ class DownloadManager {
 }
 
 export default new DownloadManager();
+
+async function openThumbnailCache() {
+    try {
+        return await CacheStorageService.open(CACHES.THUMBS);
+    } catch (e) {
+        logError(e, 'Failed to open thumbnail cache');
+        return null;
+    }
+}
+
+function createDownloadClient(
+    app: APPS,
+    tokens?: { token: string; passwordToken?: string } | { token: string },
+    timeout?: number
+): DownloadClient {
+    if (!timeout) {
+        timeout = 300000; // 5 minute
+    }
+    if (app === APPS.ALBUMS) {
+        if (!tokens) {
+            tokens = { token: undefined, passwordToken: undefined };
+        }
+        const { token, passwordToken } = tokens as {
+            token: string;
+            passwordToken: string;
+        };
+        return new PublicAlbumsDownloadClient(token, passwordToken, timeout);
+    } else {
+        const { token } = tokens;
+        return new PhotosDownloadClient(token, timeout);
+    }
+}

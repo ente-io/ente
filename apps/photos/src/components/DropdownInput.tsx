@@ -20,7 +20,7 @@ interface Iprops<T> {
     options: DropdownOption<T>[];
     message?: string;
     messageProps?: TypographyProps;
-    selected: string;
+    selected: T;
     setSelected: (selectedValue: T) => void;
     placeholder?: string;
 }

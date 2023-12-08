@@ -88,6 +88,7 @@ export const CustomError = {
     UNSUPPORTED_PLATFORM: 'Unsupported platform',
     MODEL_DOWNLOAD_PENDING:
         'Model download pending, skipping clip search request',
+    DOWNLOAD_MANAGER_NOT_READY: 'Download manager not initialized',
 };
 
 export function handleUploadError(error: any): Error {

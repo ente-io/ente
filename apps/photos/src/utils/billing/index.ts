@@ -143,9 +143,11 @@ export function hasExceededStorageQuota(userDetails: UserDetails) {
     const bonusStorage = userDetails.storageBonus ?? 0;
     if (isPartOfFamily(userDetails.familyData)) {
         const usage = getTotalFamilyUsage(userDetails.familyData);
-        return usage > (userDetails.familyData.storage + bonusStorage);
+        return usage > userDetails.familyData.storage + bonusStorage;
     } else {
-        return userDetails.usage > (userDetails.subscription.storage + bonusStorage);
+        return (
+            userDetails.usage > userDetails.subscription.storage + bonusStorage
+        );
     }
 }
 

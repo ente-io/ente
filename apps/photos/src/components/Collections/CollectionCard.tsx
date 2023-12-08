@@ -1,7 +1,7 @@
 import React from 'react';
 import { GalleryContext } from 'pages/gallery';
 import { useState, useContext, useEffect } from 'react';
-import downloadManager from 'services/downloadManager';
+import downloadManager from 'services/download';
 import { EnteFile } from 'types/file';
 import { StaticThumbnail } from 'components/PlaceholderThumbnails';
 import { LoadingThumbnail } from 'components/PlaceholderThumbnails';
@@ -41,7 +41,7 @@ export default function CollectionCard(props: {
                 if (isScrolling) {
                     return;
                 }
-                const url = await downloadManager.getThumbnail(file);
+                const url = await downloadManager.getThumbnailForPreview(file);
                 thumbsStore.set(file.id, url);
             }
             setCoverImageURL(thumbsStore.get(file.id));

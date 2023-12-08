@@ -129,6 +129,8 @@ import InMemoryStore, { MS_KEYS } from '@ente/shared/storage/InMemoryStore';
 import { syncEmbeddings } from 'services/embeddingService';
 import { ClipService } from 'services/clipService';
 import isElectron from 'is-electron';
+import downloadManager from 'services/download';
+import { APPS } from '@ente/shared/apps/constants';
 
 export const DeadCenter = styled('div')`
     flex: 1;
@@ -296,7 +298,8 @@ export default function Gallery() {
     useEffect(() => {
         appContext.showNavBar(true);
         const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
-        if (!key) {
+        const token = getToken();
+        if (!key || !token) {
             InMemoryStore.set(MS_KEYS.REDIRECT_URL, PAGES.GALLERY);
             router.push(PAGES.ROOT);
             return;
@@ -307,6 +310,7 @@ export default function Gallery() {
             if (!valid) {
                 return;
             }
+            await downloadManager.init(APPS.PHOTOS, { token });
             setupSelectAllKeyBoardShortcutHandler();
             setActiveCollectionID(ALL_SECTION);
             setIsFirstLoad(isFirstLogin());

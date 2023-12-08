@@ -64,10 +64,7 @@ class PeopleService {
 
             if (personFace && !personFace.crop?.imageUrl) {
                 const file = await getLocalFile(personFace.fileId);
-                const imageBitmap = await getOriginalImageBitmap(
-                    file,
-                    syncContext.token
-                );
+                const imageBitmap = await getOriginalImageBitmap(file);
                 await FaceService.saveFaceCrop(
                     imageBitmap,
                     personFace,

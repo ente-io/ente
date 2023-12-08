@@ -1,12 +1,9 @@
 import { NormalizedFace } from 'blazeface-back';
 import * as tf from '@tensorflow/tfjs-core';
-import {
-    BLAZEFACE_FACE_SIZE,
-    ML_SYNC_DOWNLOAD_TIMEOUT_MS,
-} from 'constants/mlConfig';
+import { BLAZEFACE_FACE_SIZE } from 'constants/mlConfig';
 import { euclidean } from 'hdbscan';
 import PQueue from 'p-queue';
-import DownloadManager from 'services/downloadManager';
+import DownloadManager from 'services/download';
 import { getLocalFiles } from 'services/fileService';
 import { EnteFile } from 'types/file';
 import { Dimensions } from 'types/image';
@@ -40,8 +37,6 @@ import { CACHES } from '@ente/shared/storage/cacheStorage/constants';
 import { FILE_TYPE } from 'constants/file';
 import { decodeLivePhoto } from 'services/livePhotoService';
 import { addLogLine } from '@ente/shared/logging';
-import { Remote } from 'comlink';
-import { DedicatedCryptoWorker } from '@ente/shared/crypto/internal/crypto.worker';
 
 export function f32Average(descriptors: Float32Array[]) {
     if (descriptors.length < 1) {
@@ -229,7 +224,7 @@ export async function getFaceImage(
         file = await getLocalFile(face.fileId);
     }
 
-    const imageBitmap = await getOriginalImageBitmap(file, token);
+    const imageBitmap = await getOriginalImageBitmap(file);
     const faceImageBitmap = ibExtractFaceImage(
         imageBitmap,
         face.alignment,
@@ -325,39 +320,18 @@ export async function getImageBlobBitmap(blob: Blob): Promise<ImageBitmap> {
 //     return new TFImageBitmap(undefined, tfImage);
 // }
 
-async function getOriginalFile(
-    file: EnteFile,
-    token: string,
-    enteWorker?: Remote<DedicatedCryptoWorker>,
-    queue?: PQueue
-) {
+async function getOriginalFile(file: EnteFile, queue?: PQueue) {
     let fileStream;
     if (queue) {
-        fileStream = await queue.add(() =>
-            DownloadManager.downloadFile(
-                file,
-                token,
-                enteWorker,
-                ML_SYNC_DOWNLOAD_TIMEOUT_MS
-            )
-        );
+        fileStream = await queue.add(() => DownloadManager.getFile(file));
     } else {
-        fileStream = await DownloadManager.downloadFile(
-            file,
-            token,
-            enteWorker
-        );
+        fileStream = await DownloadManager.getFile(file);
     }
     return new Response(fileStream).blob();
 }
 
-async function getOriginalConvertedFile(
-    file: EnteFile,
-    token: string,
-    enteWorker?: Remote<DedicatedCryptoWorker>,
-    queue?: PQueue
-) {
-    const fileBlob = await getOriginalFile(file, token, enteWorker, queue);
+async function getOriginalConvertedFile(file: EnteFile, queue?: PQueue) {
+    const fileBlob = await getOriginalFile(file, queue);
     if (file.metadata.fileType === FILE_TYPE.IMAGE) {
         return await getRenderableImage(file.metadata.title, fileBlob);
     } else {
@@ -371,8 +345,6 @@ async function getOriginalConvertedFile(
 
 export async function getOriginalImageBitmap(
     file: EnteFile,
-    token: string,
-    enteWorker?: Remote<DedicatedCryptoWorker>,
     queue?: PQueue,
     useCache: boolean = false
 ) {
@@ -380,37 +352,21 @@ export async function getOriginalImageBitmap(
 
     if (useCache) {
         fileBlob = await cached(CACHES.FILES, file.id.toString(), () => {
-            return getOriginalConvertedFile(file, token, enteWorker, queue);
+            return getOriginalConvertedFile(file, queue);
         });
     } else {
-        fileBlob = await getOriginalConvertedFile(
-            file,
-            token,
-            enteWorker,
-            queue
-        );
+        fileBlob = await getOriginalConvertedFile(file, queue);
     }
     addLogLine('[MLService] Got file: ', file.id.toString());
 
     return getImageBlobBitmap(fileBlob);
 }
 
-export async function getThumbnailImageBitmap(
-    file: EnteFile,
-    token: string,
-    enteWorker?: Remote<DedicatedCryptoWorker>
-) {
-    const fileUrl = await DownloadManager.getThumbnail(
-        file,
-        token,
-        enteWorker,
-        ML_SYNC_DOWNLOAD_TIMEOUT_MS
-    );
+export async function getThumbnailImageBitmap(file: EnteFile) {
+    const thumb = await DownloadManager.getThumbnail(file);
     addLogLine('[MLService] Got thumbnail: ', file.id.toString());
 
-    const thumbFile = await fetch(fileUrl);
-
-    return getImageBlobBitmap(await thumbFile.blob());
+    return getImageBlobBitmap(new Blob([thumb]));
 }
 
 export async function getLocalFileImageBitmap(
