@@ -49,7 +49,7 @@ import { getParsedExifData } from 'services/upload/exifService';
 import { getFileType } from 'services/typeDetectionService';
 import { ConversionFailedNotification } from './styledComponents/ConversionFailedNotification';
 import { GalleryContext } from 'pages/gallery';
-import downloadManager from 'services/download';
+import downloadManager, { LoadedLivePhotoSourceURL } from 'services/download';
 import CircularProgressWithLabel from './styledComponents/CircularProgressWithLabel';
 import EnteSpinner from '@ente/shared/components/EnteSpinner';
 import AlbumOutlined from '@mui/icons-material/AlbumOutlined';
@@ -294,18 +294,19 @@ function PhotoViewer(props: Iprops) {
             setExif({ key: file.src, value: null });
             return;
         }
-        if (!file.isSourceLoaded) {
+        if (!file.isSourceLoaded || file.conversionFailed) {
+            return;
+        }
+
+        if (!file || !exifCopy?.current?.value === null) {
             return;
         }
         const key =
             file.metadata.fileType === FILE_TYPE.IMAGE
                 ? file.src
-                : (file.srcURLs.url as any).image;
-        if (
-            !file ||
-            !exifCopy?.current?.value === null ||
-            exifCopy?.current?.key === key
-        ) {
+                : (file.srcURLs.url as LoadedLivePhotoSourceURL).image;
+
+        if (exifCopy?.current?.key === key) {
             return;
         }
         setExif({ key, value: undefined });
@@ -555,9 +556,8 @@ function PhotoViewer(props: Iprops) {
                         file.metadata.title
                     );
                 } else {
-                    const url = (
-                        file.srcURLs.url as { image: string; video: string }
-                    ).image;
+                    const url = (file.srcURLs.url as LoadedLivePhotoSourceURL)
+                        .image;
                     fileObject = await getFileFromURL(url, file.metadata.title);
                 }
                 const fileTypeInfo = await getFileType(fileObject);

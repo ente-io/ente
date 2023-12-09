@@ -18,15 +18,21 @@ import { APPS } from '@ente/shared/apps/constants';
 import { PhotosDownloadClient } from './clients/photos';
 import { PublicAlbumsDownloadClient } from './clients/publicAlbums';
 
+export type LivePhotoSourceURL = {
+    image: () => Promise<string>;
+    video: () => Promise<string>;
+};
+
+export type LoadedLivePhotoSourceURL = {
+    image: string;
+    video: string;
+};
+
 export type SourceURLs = {
-    url:
-        | {
-              image: string;
-              video: string;
-          }
-        | string;
+    url: string | LivePhotoSourceURL | LoadedLivePhotoSourceURL;
     isOriginal: boolean;
     isRenderable: boolean;
+    type: 'normal' | 'livePhoto';
 };
 
 export type OnDownloadProgress = (event: {
@@ -198,15 +204,13 @@ class DownloadManager {
                 );
                 return converted;
             };
-            if (!this.fileConversionPromises.has(file.id)) {
+            if (forceConvert || !this.fileConversionPromises.has(file.id)) {
                 this.fileConversionPromises.set(
                     file.id,
                     getFileForPreviewPromise()
                 );
             }
             const fileURLs = await this.fileConversionPromises.get(file.id);
-            this.fileConversionPromises.delete(file.id);
-            this.fileObjectURLPromises.set(file.id, Promise.resolve(fileURLs));
             return fileURLs;
         } catch (e) {
             this.fileConversionPromises.delete(file.id);
@@ -230,6 +234,7 @@ class DownloadManager {
                     url: URL.createObjectURL(fileBlob),
                     isOriginal: true,
                     isRenderable: false,
+                    type: 'normal',
                 };
             };
             if (!this.fileObjectURLPromises.has(file.id)) {
