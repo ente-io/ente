@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import "package:intl/intl.dart";
 import "package:logging/logging.dart";
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/ente_theme_data.dart';
@@ -229,7 +230,11 @@ class RefreshIndicatorWidget extends StatelessWidget {
       return S.of(context).encryptingBackup;
     }
     if (event!.status == SyncStatus.inProgress) {
-      return S.of(context).syncProgress(event!.completed!, event!.total!);
+      final format = NumberFormat();
+      return S.of(context).syncProgress(
+            format.format(event!.completed!),
+            format.format(event!.total!),
+          );
     }
     if (event!.status == SyncStatus.paused) {
       return event!.reason;
