@@ -32,7 +32,7 @@ export class DiskCache implements LimitedCache {
             return new Response(await readFile(cachePath));
         } else {
             // add fallback for old cache keys
-            const oldCachePath = getAssetCachePath(
+            const oldCachePath = getOldAssetCachePath(
                 this.cacheBucketDir,
                 cacheKey
             );
@@ -55,7 +55,7 @@ export class DiskCache implements LimitedCache {
     }
 }
 
-function getAssetCachePath(cacheDir: string, cacheKey: string) {
+function getOldAssetCachePath(cacheDir: string, cacheKey: string) {
     // hashing the key to prevent illegal filenames
     const cacheKeyHash = crypto
         .createHash('sha256')
