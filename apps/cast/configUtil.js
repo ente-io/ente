@@ -30,6 +30,7 @@ module.exports = {
         'form-action': "'none'",
         'report-uri': ' https://csp-reporter.ente.io/local',
         'report-to': ' https://csp-reporter.ente.io/local',
+        'script-src-elem': "'self' https://www.gstatic.com",
     },
 
     ALL_ROUTES: '/(.*)',
