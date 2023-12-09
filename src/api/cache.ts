@@ -16,12 +16,15 @@ const getCacheBucketDir = async (cacheName: string) => {
     return cacheBucketDir;
 };
 
-export async function openDiskCache(cacheName: string, cacheLimit?: number) {
+export async function openDiskCache(
+    cacheName: string,
+    cacheLimitInBytes?: number
+) {
     const cacheBucketDir = await getCacheBucketDir(cacheName);
     if (!existsSync(cacheBucketDir)) {
         await mkdir(cacheBucketDir, { recursive: true });
     }
-    return new DiskCache(cacheBucketDir, cacheLimit);
+    return new DiskCache(cacheBucketDir, cacheLimitInBytes);
 }
 
 export async function deleteDiskCache(cacheName: string) {
