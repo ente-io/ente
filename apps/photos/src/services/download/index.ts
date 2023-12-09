@@ -1,6 +1,7 @@
 import {
     generateStreamFromArrayBuffer,
     getRenderableFileURL,
+    getStreamLength,
 } from 'utils/file';
 import { EnteFile } from 'types/file';
 
@@ -127,12 +128,29 @@ class DownloadManager {
             throw e;
         }
     }
-    private async getCachedFile(fileID: number): Promise<Response> {
+    private async getCachedFile(file: EnteFile): Promise<Response> {
         try {
             const cacheResp: Response = await this.fileCache?.match(
-                fileID.toString()
+                file.id.toString()
             );
-            return cacheResp;
+            // check if cached file size is same as file size
+            if (cacheResp) {
+                const fileSize = file.info?.fileSize;
+                if (!fileSize) {
+                    return cacheResp;
+                }
+                const contentLength = await getStreamLength(
+                    cacheResp.clone().body
+                );
+                if (file.info?.fileSize === contentLength) {
+                    return cacheResp;
+                } else {
+                    addLogLine(
+                        `mismatch in file size, delete the cache, {actualSize: ${contentLength}, expectedSize: ${fileSize}`
+                    );
+                    this.fileCache?.delete(file.id.toString());
+                }
+            }
         } catch (e) {
             logError(e, 'failed to get cached thumbnail');
             throw e;
@@ -290,7 +308,7 @@ class DownloadManager {
                 file.metadata.fileType === FILE_TYPE.IMAGE ||
                 file.metadata.fileType === FILE_TYPE.LIVE_PHOTO
             ) {
-                let encrypted = await this.getCachedFile(file.id);
+                let encrypted = await this.getCachedFile(file);
                 if (!encrypted) {
                     encrypted = new Response(
                         await this.downloadClient.downloadFile(
@@ -332,7 +350,7 @@ class DownloadManager {
                 }
             }
 
-            let resp: Response = await this.getCachedFile(file.id);
+            let resp: Response = await this.getCachedFile(file);
             if (!resp) {
                 resp = await this.downloadClient.downloadFileStream(file);
                 void this.fileCache.put(file.id.toString(), resp.clone());
