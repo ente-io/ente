@@ -61,7 +61,7 @@ export interface ElectronAPIsType {
     getEncryptionKey: () => Promise<string>;
     openDiskCache: (
         cacheName: string,
-        cacheLimit?: number
+        cacheLimitInBytes?: number
     ) => Promise<LimitedCache>;
     deleteDiskCache: (cacheName: string) => Promise<boolean>;
     logToDisk: (msg: string) => void;
