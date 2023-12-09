@@ -18,6 +18,8 @@ import { addLogLine } from '@ente/shared/logging';
 import { APPS } from '@ente/shared/apps/constants';
 import { PhotosDownloadClient } from './clients/photos';
 import { PublicAlbumsDownloadClient } from './clients/publicAlbums';
+import isElectron from 'is-electron';
+import { isInternalUser } from 'utils/user';
 
 export type LivePhotoSourceURL = {
     image: () => Promise<string>;
@@ -60,8 +62,8 @@ const FILE_CACHE_LIMIT = 5 * 1024 * 1024 * 1024; // 5GB
 class DownloadManager {
     private ready: boolean = false;
     private downloadClient: DownloadClient;
-    private thumbnailCache: LimitedCache;
-    private fileCache: LimitedCache;
+    private thumbnailCache?: LimitedCache;
+    private diskFileCache?: LimitedCache;
     private cryptoWorker: Remote<DedicatedCryptoWorker>;
 
     private fileObjectURLPromises = new Map<number, Promise<SourceURLs>>();
@@ -89,7 +91,7 @@ class DownloadManager {
             }
             this.downloadClient = createDownloadClient(app, tokens, timeout);
             this.thumbnailCache = await openThumbnailCache();
-            this.fileCache = await openFileCache();
+            this.diskFileCache = isElectron() && (await openDiskFileCache());
             this.cryptoWorker = await ComlinkCryptoWorker.getInstance();
             this.ready = true;
         } catch (e) {
@@ -130,26 +132,28 @@ class DownloadManager {
     }
     private async getCachedFile(file: EnteFile): Promise<Response> {
         try {
-            const cacheResp: Response = await this.fileCache?.match(
+            if (!this.diskFileCache) {
+                return null;
+            }
+            const cacheResp: Response = await this.diskFileCache?.match(
                 file.id.toString()
             );
+            if (!cacheResp) {
+                return null;
+            }
             // check if cached file size is same as file size
-            if (cacheResp) {
-                const fileSize = file.info?.fileSize;
-                if (!fileSize) {
-                    return cacheResp;
-                }
-                const contentLength = await getStreamLength(
-                    cacheResp.clone().body
+            const fileSize = file.info?.fileSize;
+            if (!fileSize) {
+                return cacheResp;
+            }
+            const contentLength = await getStreamLength(cacheResp.clone().body);
+            if (file.info?.fileSize === contentLength) {
+                return cacheResp;
+            } else {
+                addLogLine(
+                    `mismatch in file size, delete the cache, {actualSize: ${contentLength}, expectedSize: ${fileSize}`
                 );
-                if (file.info?.fileSize === contentLength) {
-                    return cacheResp;
-                } else {
-                    addLogLine(
-                        `mismatch in file size, delete the cache, {actualSize: ${contentLength}, expectedSize: ${fileSize}`
-                    );
-                    this.fileCache?.delete(file.id.toString());
-                }
+                this.diskFileCache?.delete(file.id.toString());
             }
         } catch (e) {
             logError(e, 'failed to get cached thumbnail');
@@ -316,7 +320,7 @@ class DownloadManager {
                             onDownloadProgress
                         )
                     );
-                    this.fileCache
+                    this.diskFileCache
                         ?.put(file.id.toString(), encrypted.clone())
                         .catch((e) => {
                             logError(e, 'cache put failed');
@@ -353,7 +357,7 @@ class DownloadManager {
             let resp: Response = await this.getCachedFile(file);
             if (!resp) {
                 resp = await this.downloadClient.downloadFileStream(file);
-                void this.fileCache.put(file.id.toString(), resp.clone());
+                void this.diskFileCache.put(file.id.toString(), resp.clone());
             }
             const reader = resp.body.getReader();
 
@@ -539,16 +543,27 @@ async function openThumbnailCache() {
         return await CacheStorageService.open(CACHES.THUMBS);
     } catch (e) {
         logError(e, 'Failed to open thumbnail cache');
-        return null;
+        if (isInternalUser()) {
+            throw e;
+        } else {
+            return null;
+        }
     }
 }
 
-async function openFileCache() {
+async function openDiskFileCache() {
     try {
+        if (!isElectron()) {
+            throw Error(CustomError.NOT_AVAILABLE_ON_WEB);
+        }
         return await CacheStorageService.open(CACHES.FILES, FILE_CACHE_LIMIT);
     } catch (e) {
         logError(e, 'Failed to open file cache');
-        return null;
+        if (isInternalUser()) {
+            throw e;
+        } else {
+            return null;
+        }
     }
 }
 
