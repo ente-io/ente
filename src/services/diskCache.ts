@@ -1,9 +1,10 @@
 import DiskLRUService from '../services/diskLRU';
 import crypto from 'crypto';
-import { existsSync, readFile, writeFile, unlink } from 'promise-fs';
+import { existsSync, readFile, unlink } from 'promise-fs';
 import path from 'path';
 import { LimitedCache } from '../types/cache';
 import { logError } from './logging';
+import { writeStream } from './fs';
 
 const DEFAULT_CACHE_LIMIT = 1000 * 1000 * 1000; // 1GB
 
@@ -15,10 +16,7 @@ export class DiskCache implements LimitedCache {
 
     async put(cacheKey: string, response: Response): Promise<void> {
         const cachePath = path.join(this.cacheBucketDir, cacheKey);
-        await writeFile(
-            cachePath,
-            new Uint8Array(await response.arrayBuffer())
-        );
+        await writeStream(cachePath, response.body);
         DiskLRUService.enforceCacheSizeLimit(
             this.cacheBucketDir,
             this.cacheLimit
