@@ -35,10 +35,7 @@ export default function Slideshow() {
 
             options.disableIdleTimeout = true;
 
-            console.log('starting now');
             cast.framework.CastReceiverContext.getInstance().start(options);
-
-            console.log('adfslasdfasdf');
 
             // get requested collection id from localStorage
             const requestedCollectionID =
