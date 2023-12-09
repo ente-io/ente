@@ -1,11 +1,5 @@
 declare const cast: any;
 
-declare global {
-    interface Window {
-        __onGCastApiAvailable: (isAvailable: boolean) => void;
-    }
-}
-
 import { useEffect, useState } from 'react';
 
 type Receiver = {
@@ -22,13 +16,12 @@ const load = (() => {
                 script.src =
                     'https://www.gstatic.com/cast/sdk/libs/caf_receiver/v3/cast_receiver_framework.js';
 
-                window.__onGCastApiAvailable = (isAvailable) => {
-                    if (isAvailable) {
-                        resolve({
-                            cast,
-                        });
-                    }
-                };
+                script.addEventListener('load', () => {
+                    resolve({
+                        cast,
+                    });
+                });
+
                 document.body.appendChild(script);
             });
         }
