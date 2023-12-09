@@ -1,5 +1,11 @@
 declare const cast: any;
 
+declare global {
+    interface Window {
+        __onGCastApiAvailable: (isAvailable: boolean) => void;
+    }
+}
+
 import { useEffect, useState } from 'react';
 
 type Receiver = {
