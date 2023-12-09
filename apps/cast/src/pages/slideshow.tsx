@@ -88,8 +88,9 @@ export default function Slideshow() {
     const router = useRouter();
 
     useEffect(() => {
+        if (!cast) return;
         init();
-    }, []);
+    }, [cast]);
 
     useEffect(() => {
         if (collectionFiles.length < 1) return;
