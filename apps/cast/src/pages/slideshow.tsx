@@ -7,6 +7,7 @@ import { getCollection } from 'services/collectionService';
 import { syncFiles } from 'services/fileService';
 import { EnteFile } from 'types/file';
 import { downloadFileAsBlob, isRawFileFromFileName } from 'utils/file';
+import { useCastSender } from '@ente/shared/hooks/useCastSender';
 
 export const SlideshowContext = createContext<{
     showNextSlide: () => void;
@@ -26,7 +27,17 @@ export default function Slideshow() {
         Record<string, string>
     >({});
 
+    const { cast } = useCastSender();
+
     const init = async () => {
+        const options = new cast.framework.CastReceiverOptions();
+
+        options.disableIdleTimeout = true;
+
+        const context = cast.framework.CastReceiverContext.getInstance();
+
+        context.start(options);
+
         try {
             // get requested collection id from localStorage
             const requestedCollectionID =
