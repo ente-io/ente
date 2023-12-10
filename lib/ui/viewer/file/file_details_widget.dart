@@ -11,6 +11,7 @@ import "package:photos/services/update_service.dart";
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/buttons/icon_button_widget.dart';
 import "package:photos/ui/components/divider_widget.dart";
+import "package:photos/ui/components/info_item_widget.dart";
 import 'package:photos/ui/components/title_bar_widget.dart';
 import 'package:photos/ui/viewer/file/file_caption_widget.dart';
 import "package:photos/ui/viewer/file_details/added_by_widget.dart";
@@ -157,7 +158,25 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
                     const FileDetailsDivider(),
                   ],
                 )
-              : const SizedBox.shrink();
+              : Column(
+                  children: [
+                    InfoItemWidget(
+                      leadingIcon: Icons.pin_drop_outlined,
+                      title: "No location data",
+                      subtitleSection: Future.value(
+                        [
+                          Text(
+                            "Add location data",
+                            style: getEnteTextTheme(context).miniBoldMuted,
+                          ),
+                        ],
+                      ),
+                      hasChipButtons: false,
+                      onTap: () {},
+                    ),
+                    const FileDetailsDivider(),
+                  ],
+                );
         },
       ),
     ]);
@@ -280,7 +299,8 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
     if (imageWidth != null && imageLength != null) {
       _exifData["resolution"] = '$imageWidth x $imageLength';
       final double megaPixels =
-          (imageWidth.values.firstAsInt() * imageLength.values.firstAsInt()) / 1000000;
+          (imageWidth.values.firstAsInt() * imageLength.values.firstAsInt()) /
+              1000000;
       final double roundedMegaPixels = (megaPixels * 10).round() / 10.0;
       _exifData['megaPixels'] = roundedMegaPixels..toStringAsFixed(1);
     } else {
