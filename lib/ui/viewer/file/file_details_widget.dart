@@ -1,6 +1,7 @@
 import "package:exif/exif.dart";
 import "package:flutter/material.dart";
 import "package:logging/logging.dart";
+import "package:modal_bottom_sheet/modal_bottom_sheet.dart";
 import "package:photos/core/configuration.dart";
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/file/file.dart';
@@ -8,6 +9,7 @@ import 'package:photos/models/file/file_type.dart';
 import "package:photos/models/metadata/file_magic.dart";
 import "package:photos/services/file_magic_service.dart";
 import "package:photos/services/update_service.dart";
+import "package:photos/theme/colors.dart";
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/buttons/icon_button_widget.dart';
 import "package:photos/ui/components/divider_widget.dart";
@@ -22,6 +24,7 @@ import 'package:photos/ui/viewer/file_details/exif_item_widgets.dart';
 import "package:photos/ui/viewer/file_details/file_properties_item_widget.dart";
 import "package:photos/ui/viewer/file_details/location_tags_widget.dart";
 import "package:photos/ui/viewer/file_details/objects_item_widget.dart";
+import 'package:photos/ui/viewer/location/add_location_data_widget.dart';
 import "package:photos/utils/exif_util.dart";
 
 class FileDetailsWidget extends StatefulWidget {
@@ -87,6 +90,7 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
     getExif(widget.file).then((exif) {
       _exifNotifier.value = exif;
     });
+
     super.initState();
   }
 
@@ -172,7 +176,22 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
                         ],
                       ),
                       hasChipButtons: false,
-                      onTap: () {},
+                      onTap: () {
+                        showBarModalBottomSheet(
+                          shape: const RoundedRectangleBorder(
+                            borderRadius: BorderRadius.vertical(
+                              top: Radius.circular(5),
+                            ),
+                          ),
+                          backgroundColor:
+                              getEnteColorScheme(context).backgroundElevated,
+                          barrierColor: backdropFaintDark,
+                          context: context,
+                          builder: (context) {
+                            return const AddLocationDataWidget();
+                          },
+                        );
+                      },
                     ),
                     const FileDetailsDivider(),
                   ],
