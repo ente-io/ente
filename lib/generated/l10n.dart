@@ -6300,7 +6300,7 @@ class S {
   }
 
   /// `{completed}/{total} memories preserved`
-  String syncProgress(int completed, int total) {
+  String syncProgress(String completed, String total) {
     return Intl.message(
       '$completed/$total memories preserved',
       name: 'syncProgress',
