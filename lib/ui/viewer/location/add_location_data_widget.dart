@@ -1,5 +1,6 @@
 import "package:flutter/material.dart";
 import "package:flutter_map/flutter_map.dart";
+import "package:latlong2/latlong.dart";
 import "package:photos/ui/map/map_button.dart";
 import "package:photos/ui/map/tile/layers.dart";
 
@@ -12,6 +13,7 @@ class AddLocationDataWidget extends StatefulWidget {
 
 class _AddLocationDataWidgetState extends State<AddLocationDataWidget> {
   final MapController _mapController = MapController();
+  ValueNotifier<LatLng?> selectedLocation = ValueNotifier(null);
 
   @override
   void initState() {
@@ -21,6 +23,8 @@ class _AddLocationDataWidgetState extends State<AddLocationDataWidget> {
   @override
   void dispose() {
     super.dispose();
+    selectedLocation.dispose();
+
     _mapController.dispose();
   }
 
@@ -35,7 +39,17 @@ class _AddLocationDataWidgetState extends State<AddLocationDataWidget> {
             maxZoom: 18.0,
             minZoom: 2.8,
             onTap: (tapPosition, latlng) {
-              print(latlng);
+              final zoom = selectedLocation.value == null
+                  ? _mapController.zoom + 2.0
+                  : _mapController.zoom;
+              _mapController.move(latlng, zoom);
+
+              selectedLocation.value = latlng;
+            },
+            onPositionChanged: (position, hasGesture) {
+              if (selectedLocation.value != null) {
+                selectedLocation.value = position.center;
+              }
             },
           ),
           children: const [
@@ -71,6 +85,45 @@ class _AddLocationDataWidgetState extends State<AddLocationDataWidget> {
               ),
             ],
           ),
+        ),
+        ValueListenableBuilder(
+          valueListenable: selectedLocation,
+          builder: (context, value, _) {
+            return value != null
+                ? const Positioned(
+                    bottom: 20,
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    child: Icon(
+                      Icons.location_pin,
+                      color: Color.fromARGB(255, 250, 34, 19),
+                      size: 40,
+                    ),
+                  )
+                : const SizedBox.shrink();
+          },
+        ),
+        ValueListenableBuilder(
+          valueListenable: selectedLocation,
+          builder: (context, value, _) {
+            return value != null
+                ? Positioned(
+                    left: 0,
+                    right: 0,
+                    child: Row(
+                      children: [
+                        Text(
+                          selectedLocation.value.toString(),
+                          style: const TextStyle(
+                            color: Colors.black,
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                : const SizedBox.shrink();
+          },
         ),
       ],
     );
