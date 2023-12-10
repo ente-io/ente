@@ -1,3 +1,5 @@
+import "dart:async";
+
 import "package:flutter/material.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/services/search_service.dart";
@@ -22,10 +24,12 @@ class GoToMapWidget extends StatelessWidget {
       onTap: () async {
         final bool result = await requestForMapEnable(context);
         if (result) {
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) => MapScreen(
-                filesFutureFn: SearchService.instance.getAllFiles,
+          unawaited(
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => MapScreen(
+                  filesFutureFn: SearchService.instance.getAllFiles,
+                ),
               ),
             ),
           );
