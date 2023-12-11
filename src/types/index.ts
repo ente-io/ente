@@ -59,6 +59,7 @@ export interface UserPreferencesType {
     skipAppVersion: string;
     muteUpdateNotificationVersion: string;
     optOutOfCrashReports: boolean;
+    userCacheDirectory: string;
 }
 
 export interface AppUpdateInfo {
