@@ -35,7 +35,7 @@ import { CustomError } from '@ente/shared/error';
 import { addLogLine } from '@ente/shared/logging';
 import { EnteFile } from 'types/file';
 
-const ExportFolderPathContainer = styled(LinkButton)`
+export const ExportFolderPathContainer = styled(LinkButton)`
     width: 262px;
     white-space: nowrap;
     overflow: hidden;
@@ -269,7 +269,7 @@ function ExportDirectory({
     );
 }
 
-function ExportDirectoryOption({ changeExportDirectory }) {
+export function ExportDirectoryOption({ changeExportDirectory }) {
     return (
         <OverflowMenu
             triggerButtonProps={{

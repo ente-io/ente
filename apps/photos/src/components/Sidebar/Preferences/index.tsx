@@ -1,9 +1,9 @@
 import ChevronRight from '@mui/icons-material/ChevronRight';
-import { Box, DialogProps, Stack } from '@mui/material';
+import { Box, Button, DialogProps, Stack, Tooltip } from '@mui/material';
 import { EnteDrawer } from 'components/EnteDrawer';
 import Titlebar from 'components/Titlebar';
 import isElectron from 'is-electron';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { t } from 'i18next';
 
 import AdvancedSettings from '../AdvancedSettings';
@@ -15,6 +15,10 @@ import { useLocalState } from '@ente/shared/hooks/useLocalState';
 import ElectronAPIs from '@ente/shared/electron';
 import InMemoryStore, { MS_KEYS } from '@ente/shared/storage/InMemoryStore';
 import { logError } from '@ente/shared/sentry';
+import { ExportDirectoryOption } from 'components/ExportModal';
+import { MenuItemGroup } from 'components/Menu/MenuItemGroup';
+import MenuSectionTitle from 'components/Menu/MenuSectionTitle';
+import { addLogLine } from '@ente/shared/logging';
 
 export default function Preferences({ open, onClose, onRootClose }) {
     const [advancedSettingsView, setAdvancedSettingsView] = useState(false);
@@ -23,6 +27,21 @@ export default function Preferences({ open, onClose, onRootClose }) {
         LS_KEYS.OPT_OUT_OF_CRASH_REPORTS,
         false
     );
+    const [customCacheDirectory, setCustomCacheDirectory] = useLocalState(
+        LS_KEYS.CUSTOM_CACHE_DIRECTORY,
+        undefined
+    );
+
+    useEffect(() => {
+        const main = async () => {
+            if (isElectron()) {
+                const customCacheDirectory =
+                    await ElectronAPIs.getCustomCacheDirectory();
+                setCustomCacheDirectory(customCacheDirectory);
+            }
+        };
+        main();
+    }, []);
 
     const openAdvancedSettings = () => setAdvancedSettingsView(true);
     const closeAdvancedSettings = () => setAdvancedSettingsView(false);
@@ -60,6 +79,23 @@ export default function Preferences({ open, onClose, onRootClose }) {
         }
     };
 
+    const handleCustomCacheDirectoryChange = async () => {
+        try {
+            if (!isElectron()) {
+                return;
+            }
+            const newFolder = await ElectronAPIs.selectDirectory();
+            if (!newFolder) {
+                return;
+            }
+            addLogLine(`Export folder changed to ${newFolder}`);
+            await ElectronAPIs.setCustomCacheDirectory(newFolder);
+            setCustomCacheDirectory(newFolder);
+        } catch (e) {
+            logError(e, 'changeCustomCacheDirectory failed');
+        }
+    };
+
     return (
         <EnteDrawer
             transitionDuration={0}
@@ -82,7 +118,34 @@ export default function Preferences({ open, onClose, onRootClose }) {
                             checked={!optOutOfCrashReports}
                             onClick={toggleOptOutOfCrashReports}
                             label={t('CRASH_REPORTING')}
-                        />{' '}
+                        />
+
+                        <Box>
+                            <MenuSectionTitle
+                                title={t('CUSTOM_CACHE_DIRECTORY')}
+                            />
+                            <MenuItemGroup>
+                                {customCacheDirectory ? (
+                                    <Tooltip title={customCacheDirectory}>
+                                        <span>{customCacheDirectory}</span>
+                                    </Tooltip>
+                                ) : (
+                                    <Button
+                                        color={'accent'}
+                                        onClick={
+                                            handleCustomCacheDirectoryChange
+                                        }>
+                                        {t('SELECT_FOLDER')}
+                                    </Button>
+                                )}
+                                <ExportDirectoryOption
+                                    changeExportDirectory={
+                                        handleCustomCacheDirectoryChange
+                                    }
+                                />
+                            </MenuItemGroup>
+                        </Box>
+
                         <EnteMenuItem
                             onClick={openMapSettings}
                             endIcon={<ChevronRight />}
