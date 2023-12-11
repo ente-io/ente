@@ -25,7 +25,11 @@ import {
 } from '../services/appUpdater';
 import { deleteTempFile, runFFmpegCmd } from '../services/ffmpeg';
 import { generateTempFilePath } from './temp';
-import { setOptOutOfCrashReports } from '../services/userPreference';
+import {
+    getCustomCacheDirectory,
+    setCustomCacheDirectory,
+    setOptOutOfCrashReports,
+} from '../services/userPreference';
 import { updateOptOutOfCrashReports } from '../main';
 import {
     computeImageEmbedding,
@@ -179,5 +183,13 @@ export default function setupIpcComs(
     });
     ipcMain.handle('get-platform', () => {
         return getPlatform();
+    });
+
+    ipcMain.handle('set-custom-cache-directory', (_, directory: string) => {
+        setCustomCacheDirectory(directory);
+    });
+
+    ipcMain.handle('get-custom-cache-directory', async () => {
+        return getCustomCacheDirectory();
     });
 }

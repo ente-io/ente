@@ -26,7 +26,12 @@ import {
 } from './api/watch';
 import { getEncryptionKey, setEncryptionKey } from './api/safeStorage';
 import { clearElectronStore } from './api/electronStore';
-import { openDiskCache, deleteDiskCache } from './api/cache';
+import {
+    openDiskCache,
+    deleteDiskCache,
+    getCacheDirectory,
+    setCustomCacheDirectory,
+} from './api/cache';
 import {
     checkExistsAndCreateDir,
     saveStreamToDisk,
@@ -119,4 +124,6 @@ windowObject['ElectronAPIs'] = {
     computeImageEmbedding,
     computeTextEmbedding,
     getPlatform,
+    getCacheDirectory,
+    setCustomCacheDirectory,
 };
