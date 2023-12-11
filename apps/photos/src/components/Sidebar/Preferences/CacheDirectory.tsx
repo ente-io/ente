@@ -17,7 +17,7 @@ export default function CacheDirectory() {
         const main = async () => {
             if (isElectron()) {
                 const customCacheDirectory =
-                    await ElectronAPIs.getUserCacheDirectory();
+                    await ElectronAPIs.getCacheDirectory();
                 setCacheDirectory(customCacheDirectory);
             }
         };
@@ -34,7 +34,7 @@ export default function CacheDirectory() {
                 return;
             }
             addLogLine(`Export folder changed to ${newFolder}`);
-            await ElectronAPIs.setUserCacheDirectory(newFolder);
+            await ElectronAPIs.setCustomCacheDirectory(newFolder);
             setCacheDirectory(newFolder);
         } catch (e) {
             logError(e, 'handleCacheDirectoryChange failed');
