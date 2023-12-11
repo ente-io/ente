@@ -1,6 +1,7 @@
 import {
     generateStreamFromArrayBuffer,
     getRenderableFileURL,
+    getStreamLength,
 } from 'utils/file';
 import { EnteFile } from 'types/file';
 
@@ -17,6 +18,8 @@ import { addLogLine } from '@ente/shared/logging';
 import { APPS } from '@ente/shared/apps/constants';
 import { PhotosDownloadClient } from './clients/photos';
 import { PublicAlbumsDownloadClient } from './clients/publicAlbums';
+import isElectron from 'is-electron';
+import { isInternalUser } from 'utils/user';
 
 export type LivePhotoSourceURL = {
     image: () => Promise<string>;
@@ -54,10 +57,13 @@ export interface DownloadClient {
     downloadFileStream: (file: EnteFile) => Promise<Response>;
 }
 
+const FILE_CACHE_LIMIT = 5 * 1024 * 1024 * 1024; // 5GB
+
 class DownloadManager {
     private ready: boolean = false;
     private downloadClient: DownloadClient;
-    private thumbnailCache: LimitedCache;
+    private thumbnailCache?: LimitedCache;
+    private diskFileCache?: LimitedCache;
     private cryptoWorker: Remote<DedicatedCryptoWorker>;
 
     private fileObjectURLPromises = new Map<number, Promise<SourceURLs>>();
@@ -80,6 +86,7 @@ class DownloadManager {
             }
             this.downloadClient = createDownloadClient(app, tokens, timeout);
             this.thumbnailCache = await openThumbnailCache();
+            this.diskFileCache = isElectron() && (await openDiskFileCache());
             this.cryptoWorker = await ComlinkCryptoWorker.getInstance();
             this.ready = true;
         } catch (e) {
@@ -112,6 +119,36 @@ class DownloadManager {
 
             if (cacheResp) {
                 return new Uint8Array(await cacheResp.arrayBuffer());
+            }
+        } catch (e) {
+            logError(e, 'failed to get cached thumbnail');
+            throw e;
+        }
+    }
+    private async getCachedFile(file: EnteFile): Promise<Response> {
+        try {
+            if (!this.diskFileCache) {
+                return null;
+            }
+            const cacheResp: Response = await this.diskFileCache?.match(
+                file.id.toString()
+            );
+            if (!cacheResp) {
+                return null;
+            }
+            // check if cached file size is same as file size
+            const fileSize = file.info?.fileSize;
+            if (!fileSize) {
+                return cacheResp;
+            }
+            const contentLength = await getStreamLength(cacheResp.clone().body);
+            if (file.info?.fileSize === contentLength) {
+                return cacheResp;
+            } else {
+                addLogLine(
+                    `mismatch in file size, delete the cache, {actualSize: ${contentLength}, expectedSize: ${fileSize}`
+                );
+                this.diskFileCache?.delete(file.id.toString());
             }
         } catch (e) {
             logError(e, 'failed to get cached thumbnail');
@@ -270,14 +307,25 @@ class DownloadManager {
                 file.metadata.fileType === FILE_TYPE.IMAGE ||
                 file.metadata.fileType === FILE_TYPE.LIVE_PHOTO
             ) {
-                const encrypted = await this.downloadClient.downloadFile(
-                    file,
-                    onDownloadProgress
-                );
+                let encrypted = await this.getCachedFile(file);
+                if (!encrypted) {
+                    encrypted = new Response(
+                        await this.downloadClient.downloadFile(
+                            file,
+                            onDownloadProgress
+                        )
+                    );
+                    this.diskFileCache
+                        ?.put(file.id.toString(), encrypted.clone())
+                        .catch((e) => {
+                            logError(e, 'cache put failed');
+                            // TODO: handle storage full exception.
+                        });
+                }
                 this.clearDownloadProgress(file.id);
                 try {
                     const decrypted = await this.cryptoWorker.decryptFile(
-                        new Uint8Array(encrypted),
+                        new Uint8Array(await encrypted.arrayBuffer()),
                         await this.cryptoWorker.fromB64(
                             file.file.decryptionHeader
                         ),
@@ -300,7 +348,12 @@ class DownloadManager {
                     throw e;
                 }
             }
-            const resp = await this.downloadClient.downloadFileStream(file);
+
+            let resp: Response = await this.getCachedFile(file);
+            if (!resp) {
+                resp = await this.downloadClient.downloadFileStream(file);
+                void this.diskFileCache.put(file.id.toString(), resp.clone());
+            }
             const reader = resp.body.getReader();
 
             const contentLength = +resp.headers.get('Content-Length') ?? 0;
@@ -485,7 +538,27 @@ async function openThumbnailCache() {
         return await CacheStorageService.open(CACHES.THUMBS);
     } catch (e) {
         logError(e, 'Failed to open thumbnail cache');
-        return null;
+        if (isInternalUser()) {
+            throw e;
+        } else {
+            return null;
+        }
+    }
+}
+
+async function openDiskFileCache() {
+    try {
+        if (!isElectron()) {
+            throw Error(CustomError.NOT_AVAILABLE_ON_WEB);
+        }
+        return await CacheStorageService.open(CACHES.FILES, FILE_CACHE_LIMIT);
+    } catch (e) {
+        logError(e, 'Failed to open file cache');
+        if (isInternalUser()) {
+            throw e;
+        } else {
+            return null;
+        }
     }
 }
 

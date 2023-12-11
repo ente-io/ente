@@ -5,8 +5,11 @@ class cacheStorageFactory {
     getCacheStorage(): LimitedCacheStorage {
         if (runningInElectron()) {
             return {
-                open(cacheName) {
-                    return WorkerSafeElectronService.openDiskCache(cacheName);
+                open(cacheName, cacheLimitInBytes?: number) {
+                    return WorkerSafeElectronService.openDiskCache(
+                        cacheName,
+                        cacheLimitInBytes
+                    );
                 },
                 delete(cacheName) {
                     return WorkerSafeElectronService.deleteDiskCache(cacheName);

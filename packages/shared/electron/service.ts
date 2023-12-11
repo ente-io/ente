@@ -37,9 +37,12 @@ class WorkerSafeElectronServiceImpl implements LimitedElectronAPIs {
             this.proxiedElectron = new WorkerSafeElectronClient();
         }
     }
-    async openDiskCache(cacheName: string) {
+    async openDiskCache(cacheName: string, cacheLimitInBytes?: number) {
         await this.ready;
-        const cache = await this.proxiedElectron.openDiskCache(cacheName);
+        const cache = await this.proxiedElectron.openDiskCache(
+            cacheName,
+            cacheLimitInBytes
+        );
         return {
             match: transformMatch(cache.match.bind(cache)),
             put: transformPut(cache.put.bind(cache)),

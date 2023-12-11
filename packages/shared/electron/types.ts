@@ -59,7 +59,10 @@ export interface ElectronAPIsType {
     clearElectronStore: () => void;
     setEncryptionKey: (encryptionKey: string) => Promise<void>;
     getEncryptionKey: () => Promise<string>;
-    openDiskCache: (cacheName: string) => Promise<LimitedCache>;
+    openDiskCache: (
+        cacheName: string,
+        cacheLimitInBytes?: number
+    ) => Promise<LimitedCache>;
     deleteDiskCache: (cacheName: string) => Promise<boolean>;
     logToDisk: (msg: string) => void;
     convertToJPEG: (
