@@ -3,15 +3,19 @@ import path from 'path';
 import { existsSync, mkdir, rmSync } from 'promise-fs';
 import { DiskCache } from '../services/diskCache';
 
-const CACHE_DIR = 'ente';
+const ENTE_CACHE_DIR_NAME = 'ente';
 
-const getCacheDir = async () => {
-    const systemCacheDir = await ipcRenderer.invoke('get-path', 'cache');
-    return path.join(systemCacheDir, CACHE_DIR);
+export const getCacheDirectory = async () => {
+    const customCacheDir = await getCustomCacheDirectory();
+    if (customCacheDir && existsSync(customCacheDir)) {
+        return customCacheDir;
+    }
+    const defaultSystemCacheDir = await ipcRenderer.invoke('get-path', 'cache');
+    return path.join(defaultSystemCacheDir, ENTE_CACHE_DIR_NAME);
 };
 
 const getCacheBucketDir = async (cacheName: string) => {
-    const cacheDir = await getCacheDir();
+    const cacheDir = await getCacheDirectory();
     const cacheBucketDir = path.join(cacheDir, cacheName);
     return cacheBucketDir;
 };
@@ -35,4 +39,14 @@ export async function deleteDiskCache(cacheName: string) {
     } else {
         return false;
     }
+}
+
+export async function setCustomCacheDirectory(
+    directory: string
+): Promise<void> {
+    await ipcRenderer.invoke('set-custom-cache-directory', directory);
+}
+
+async function getCustomCacheDirectory(): Promise<string> {
+    return await ipcRenderer.invoke('get-custom-cache-directory');
 }
