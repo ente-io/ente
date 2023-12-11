@@ -1,3 +1,5 @@
+import "dart:async";
+
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
@@ -257,8 +259,10 @@ class CollectionActions {
             labelText: S.of(context).sendInvite,
             isInAlert: true,
             onTap: () async {
-              shareText(
-                S.of(context).shareTextRecommendUsingEnte,
+              unawaited(
+                shareText(
+                  S.of(context).shareTextRecommendUsingEnte,
+                ),
               );
             },
           ),
@@ -384,6 +388,23 @@ class CollectionActions {
     await collectionsService.trashEmptyCollection(collection);
   }
 
+  Future<void> removeFromUncatIfPresentInOtherAlbum(
+    Collection collection,
+    BuildContext bContext,
+  ) async {
+    try {
+      final List<EnteFile> files =
+          await FilesDB.instance.getAllFilesCollection(collection.id);
+      await moveFilesFromCurrentCollection(bContext, collection, files);
+    } catch (e) {
+      logger.severe("Failed to remove files from uncategorized", e);
+      await showErrorDialogForException(
+        context: bContext,
+        exception: e as Exception,
+      );
+    }
+  }
+
   // _confirmSharedAlbumDeletion should be shown when user tries to delete an
   // album shared with other ente users.
   Future<bool> _confirmSharedAlbumDeletion(
@@ -446,7 +467,9 @@ class CollectionActions {
     }
 
     if (!isCollectionOwner && split.ownedByOtherUsers.isNotEmpty) {
-      showShortToast(context, S.of(context).canOnlyRemoveFilesOwnedByYou);
+      unawaited(
+        showShortToast(context, S.of(context).canOnlyRemoveFilesOwnedByYou),
+      );
       return;
     }
 
@@ -528,7 +551,20 @@ class CollectionActions {
 
     for (MapEntry<int, List<EnteFile>> entry
         in destCollectionToFilesMap.entries) {
-      await collectionsService.move(entry.key, collection.id, entry.value);
+      if (collection.type == CollectionType.uncategorized &&
+          entry.key == collection.id) {
+        // skip moving files to uncategorized collection from uncategorized
+        // this flow is triggered while cleaning up uncategerized collection
+        logger.info(
+          'skipping moving ${entry.value.length} files to uncategorized collection',
+        );
+      } else {
+        await collectionsService.move(
+          entry.key,
+          collection.id,
+          entry.value,
+        );
+      }
     }
   }
 
