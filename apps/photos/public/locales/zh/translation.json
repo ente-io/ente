@@ -623,5 +623,6 @@
     "FASTER_UPLOAD": "更快上传",
     "FASTER_UPLOAD_DESCRIPTION": "通过附近的服务器路由上传",
     "STATUS": "状态",
-    "INDEXED_ITEMS": "索引项目"
+    "INDEXED_ITEMS": "索引项目",
+    "CACHE_DIRECTORY": ""
 }

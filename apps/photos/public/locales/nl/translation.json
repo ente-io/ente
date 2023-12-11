@@ -623,5 +623,6 @@
     "FASTER_UPLOAD": "Snellere uploads",
     "FASTER_UPLOAD_DESCRIPTION": "Uploaden door nabije servers",
     "STATUS": "Status",
-    "INDEXED_ITEMS": "Geïndexeerde bestanden"
+    "INDEXED_ITEMS": "Geïndexeerde bestanden",
+    "CACHE_DIRECTORY": ""
 }
