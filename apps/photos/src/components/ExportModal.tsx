@@ -1,5 +1,5 @@
 import isElectron from 'is-electron';
-import React, { useEffect, useState, useContext } from 'react';
+import { useEffect, useState, useContext } from 'react';
 import exportService from 'services/export';
 import { ExportProgress, ExportSettings } from 'types/export';
 import {
@@ -8,7 +8,6 @@ import {
     Dialog,
     DialogContent,
     Divider,
-    styled,
     Switch,
     Tooltip,
     Typography,
@@ -21,29 +20,16 @@ import {
 import ExportFinished from './ExportFinished';
 import ExportInit from './ExportInit';
 import ExportInProgress from './ExportInProgress';
-import FolderIcon from '@mui/icons-material/Folder';
 import { ExportStage } from 'constants/export';
 import DialogTitleWithCloseButton from '@ente/shared/components/DialogBox/TitleWithCloseButton';
-import MoreHoriz from '@mui/icons-material/MoreHoriz';
-import OverflowMenu from '@ente/shared/components/OverflowMenu/menu';
-import { OverflowMenuOption } from '@ente/shared/components/OverflowMenu/option';
 import { AppContext } from 'pages/_app';
 import { getExportDirectoryDoesNotExistMessage } from 'utils/ui';
 import { t } from 'i18next';
-import LinkButton from './pages/gallery/LinkButton';
 import { CustomError } from '@ente/shared/error';
 import { addLogLine } from '@ente/shared/logging';
 import { EnteFile } from 'types/file';
-
-export const ExportFolderPathContainer = styled(LinkButton)`
-    width: 262px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    /* Beginning of string */
-    direction: rtl;
-    text-align: left;
-`;
+import ChangeDirectoryOption from './Directory/changeOption';
+import { FolderPathContainer } from './Directory/container';
 
 interface Props {
     show: boolean;
@@ -247,16 +233,17 @@ function ExportDirectory({
                     </Button>
                 ) : (
                     <VerticallyCenteredFlex>
-                        <ExportFolderPathContainer
-                            onClick={openExportDirectory}>
+                        <FolderPathContainer
+                            onClick={openExportDirectory}
+                            width={262}>
                             <Tooltip title={exportFolder}>
                                 <span>{exportFolder}</span>
                             </Tooltip>
-                        </ExportFolderPathContainer>
+                        </FolderPathContainer>
 
                         {exportStage === ExportStage.FINISHED ||
                         exportStage === ExportStage.INIT ? (
-                            <ExportDirectoryOption
+                            <ChangeDirectoryOption
                                 changeExportDirectory={changeExportDirectory}
                             />
                         ) : (
@@ -266,25 +253,6 @@ function ExportDirectory({
                 )}
             </>
         </SpaceBetweenFlex>
-    );
-}
-
-export function ExportDirectoryOption({ changeExportDirectory }) {
-    return (
-        <OverflowMenu
-            triggerButtonProps={{
-                sx: {
-                    ml: 1,
-                },
-            }}
-            ariaControls={'export-option'}
-            triggerButtonIcon={<MoreHoriz />}>
-            <OverflowMenuOption
-                onClick={changeExportDirectory}
-                startIcon={<FolderIcon />}>
-                {t('CHANGE_FOLDER')}
-            </OverflowMenuOption>
-        </OverflowMenu>
     );
 }
 
