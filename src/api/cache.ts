@@ -47,6 +47,6 @@ export async function setCustomCacheDirectory(
     await ipcRenderer.invoke('set-custom-cache-directory', directory);
 }
 
-export async function getCustomCacheDirectory(): Promise<string> {
+async function getCustomCacheDirectory(): Promise<string> {
     return await ipcRenderer.invoke('get-custom-cache-directory');
 }
