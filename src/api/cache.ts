@@ -6,9 +6,7 @@ import { DiskCache } from '../services/diskCache';
 const ENTE_CACHE_DIR_NAME = 'ente';
 
 const getCacheDir = async () => {
-    const customCacheDir = await ipcRenderer.invoke(
-        'get-custom-cache-directory'
-    );
+    const customCacheDir = await getCustomCacheDirectory();
     if (customCacheDir && existsSync(customCacheDir)) {
         return customCacheDir;
     }
@@ -43,6 +41,12 @@ export async function deleteDiskCache(cacheName: string) {
     }
 }
 
-export async function setCustomCacheDirectory(directory: string) {
+export async function setCustomCacheDirectory(
+    directory: string
+): Promise<void> {
     await ipcRenderer.invoke('set-custom-cache-directory', directory);
+}
+
+export async function getCustomCacheDirectory(): Promise<string> {
+    return await ipcRenderer.invoke('get-custom-cache-directory');
 }

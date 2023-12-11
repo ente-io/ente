@@ -30,6 +30,7 @@ import {
     openDiskCache,
     deleteDiskCache,
     setCustomCacheDirectory,
+    getCustomCacheDirectory,
 } from './api/cache';
 import {
     checkExistsAndCreateDir,
@@ -124,4 +125,5 @@ windowObject['ElectronAPIs'] = {
     computeTextEmbedding,
     getPlatform,
     setCustomCacheDirectory,
+    getCustomCacheDirectory,
 };
