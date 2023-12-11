@@ -12,11 +12,18 @@ import {
     VerticallyCenteredFlex,
 } from '@ente/shared/components/Container';
 import React from 'react';
+import ChangeDirectoryOption from 'components/Directory/changeOption';
 
 interface Iprops {
     onClick: () => void;
     color?: ButtonProps['color'];
-    variant?: 'primary' | 'captioned' | 'toggle' | 'secondary' | 'mini';
+    variant?:
+        | 'primary'
+        | 'captioned'
+        | 'toggle'
+        | 'secondary'
+        | 'mini'
+        | 'path';
     fontWeight?: TypographyProps['fontWeight'];
     startIcon?: React.ReactNode;
     endIcon?: React.ReactNode;
@@ -41,14 +48,24 @@ export function EnteMenuItem({
     labelComponent,
     disabled = false,
 }: Iprops) {
-    const handleClick = () => {
+    const handleButtonClick = () => {
+        if (variant === 'path' || variant === 'toggle') {
+            return;
+        }
+        onClick();
+    };
+
+    const handleIconClick = () => {
+        if (variant !== 'path' && variant !== 'toggle') {
+            return;
+        }
         onClick();
     };
 
     return (
         <MenuItem
             disabled={disabled}
-            onClick={handleClick}
+            onClick={handleButtonClick}
             sx={{
                 width: '100%',
                 color: (theme) =>
@@ -93,7 +110,15 @@ export function EnteMenuItem({
                 <VerticallyCenteredFlex gap={'4px'}>
                     {endIcon && endIcon}
                     {variant === 'toggle' && (
-                        <PublicShareSwitch checked={checked} />
+                        <PublicShareSwitch
+                            checked={checked}
+                            onClick={handleIconClick}
+                        />
+                    )}
+                    {variant === 'path' && (
+                        <ChangeDirectoryOption
+                            changeExportDirectory={handleIconClick}
+                        />
                     )}
                 </VerticallyCenteredFlex>
             </SpaceBetweenFlex>

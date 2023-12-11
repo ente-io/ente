@@ -624,5 +624,5 @@
     "FASTER_UPLOAD_DESCRIPTION": "Route uploads through nearby servers",
     "STATUS": "Status",
     "INDEXED_ITEMS": "Indexed items",
-    "CUSTOM_CACHE_DIRECTORY": "Cache folder"
+    "CACHE_DIRECTORY": "Cache folder"
 }

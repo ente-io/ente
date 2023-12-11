@@ -9,7 +9,6 @@ import {
     DialogContent,
     Divider,
     Switch,
-    Tooltip,
     Typography,
 } from '@mui/material';
 import { logError } from '@ente/shared/sentry';
@@ -29,7 +28,7 @@ import { CustomError } from '@ente/shared/error';
 import { addLogLine } from '@ente/shared/logging';
 import { EnteFile } from 'types/file';
 import ChangeDirectoryOption from './Directory/changeOption';
-import { FolderPathContainer } from './Directory/container';
+import { DirectoryPath } from './Directory';
 
 interface Props {
     show: boolean;
@@ -149,10 +148,6 @@ export default function ExportModal(props: Props) {
         }
     };
 
-    const handleOpenExportDirectoryClick = () => {
-        void exportService.openExportDirectory(exportFolder);
-    };
-
     const toggleContinuousExport = () => {
         try {
             verifyExportFolderExists();
@@ -193,7 +188,6 @@ export default function ExportModal(props: Props) {
                     exportFolder={exportFolder}
                     changeExportDirectory={handleChangeExportDirectoryClick}
                     exportStage={exportStage}
-                    openExportDirectory={handleOpenExportDirectoryClick}
                 />
                 <ContinuousExport
                     continuousExport={continuousExport}
@@ -215,12 +209,7 @@ export default function ExportModal(props: Props) {
     );
 }
 
-function ExportDirectory({
-    exportFolder,
-    changeExportDirectory,
-    exportStage,
-    openExportDirectory,
-}) {
+function ExportDirectory({ exportFolder, changeExportDirectory, exportStage }) {
     return (
         <SpaceBetweenFlex minHeight={'48px'}>
             <Typography color="text.muted" mr={'16px'}>
@@ -233,14 +222,7 @@ function ExportDirectory({
                     </Button>
                 ) : (
                     <VerticallyCenteredFlex>
-                        <FolderPathContainer
-                            onClick={openExportDirectory}
-                            width={262}>
-                            <Tooltip title={exportFolder}>
-                                <span>{exportFolder}</span>
-                            </Tooltip>
-                        </FolderPathContainer>
-
+                        <DirectoryPath width={262} path={exportFolder} />
                         {exportStage === ExportStage.FINISHED ||
                         exportStage === ExportStage.INIT ? (
                             <ChangeDirectoryOption
