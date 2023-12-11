@@ -40,10 +40,10 @@ export function clearMuteUpdateNotificationVersion() {
     userPreferencesStore.delete('muteUpdateNotificationVersion');
 }
 
-export function setUserCacheDirectory(directory: string) {
-    userPreferencesStore.set('userCacheDirectory', directory);
+export function setCustomCacheDirectory(directory: string) {
+    userPreferencesStore.set('customCacheDirectory', directory);
 }
 
-export function getUserCacheDirectory() {
-    return userPreferencesStore.get('userCacheDirectory');
+export function getCustomCacheDirectory(): string {
+    return userPreferencesStore.get('customCacheDirectory');
 }

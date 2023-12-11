@@ -29,8 +29,8 @@ import { clearElectronStore } from './api/electronStore';
 import {
     openDiskCache,
     deleteDiskCache,
-    setUserCacheDirectory,
-    getUserCacheDirectory,
+    getCacheDirectory,
+    setCustomCacheDirectory,
 } from './api/cache';
 import {
     checkExistsAndCreateDir,
@@ -124,6 +124,6 @@ windowObject['ElectronAPIs'] = {
     computeImageEmbedding,
     computeTextEmbedding,
     getPlatform,
-    setUserCacheDirectory,
-    getUserCacheDirectory,
+    getCacheDirectory,
+    setCustomCacheDirectory,
 };

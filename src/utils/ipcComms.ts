@@ -26,8 +26,8 @@ import {
 import { deleteTempFile, runFFmpegCmd } from '../services/ffmpeg';
 import { generateTempFilePath } from './temp';
 import {
-    getUserCacheDirectory,
-    setUserCacheDirectory,
+    getCustomCacheDirectory,
+    setCustomCacheDirectory,
     setOptOutOfCrashReports,
 } from '../services/userPreference';
 import { updateOptOutOfCrashReports } from '../main';
@@ -185,11 +185,11 @@ export default function setupIpcComs(
         return getPlatform();
     });
 
-    ipcMain.handle('set-user-cache-directory', (_, directory: string) => {
-        setUserCacheDirectory(directory);
+    ipcMain.handle('set-custom-cache-directory', (_, directory: string) => {
+        setCustomCacheDirectory(directory);
     });
 
-    ipcMain.handle('get-user-cache-directory', async () => {
-        return getUserCacheDirectory();
+    ipcMain.handle('get-custom-cache-directory', async () => {
+        return getCustomCacheDirectory();
     });
 }

@@ -14,7 +14,7 @@ const userPreferencesSchema: Schema<UserPreferencesType> = {
     optOutOfCrashReports: {
         type: 'boolean',
     },
-    userCacheDirectory: {
+    customCacheDirectory: {
         type: 'string',
     },
 };
