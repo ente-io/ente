@@ -130,11 +130,14 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     if (galleryType != GalleryType.ownedCollection &&
         galleryType != GalleryType.hiddenOwnedCollection &&
         galleryType != GalleryType.quickLink) {
-      showToast(
-        context,
-        'Type of galler $galleryType is not supported for '
-        'rename',
+      unawaited(
+        showToast(
+          context,
+          'Type of galler $galleryType is not supported for '
+          'rename',
+        ),
       );
+
       return;
     }
     final result = await showTextInputDialog(
@@ -233,7 +236,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
 
     await dialog.hide();
     if (status.localIDs.isEmpty) {
-      showErrorDialog(
+      await showErrorDialog(
         context,
         S.of(context).allClear,
         S.of(context).youveNoFilesInThisAlbumThatCanBeDeleted,
@@ -256,7 +259,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
       body: S.of(context).youHaveSuccessfullyFreedUp(formatBytes(status.size)),
       firstButtonLabel: S.of(context).rateUs,
       firstButtonOnTap: () async {
-        UpdateService.instance.launchReviewUrl();
+        await UpdateService.instance.launchReviewUrl();
       },
       firstButtonType: ButtonType.primary,
       secondButtonLabel: S.of(context).ok,
@@ -265,7 +268,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
           showToast(
             context,
             S.of(context).remindToEmptyDeviceTrash,
-          );
+          ).ignore();
         }
       },
     );
@@ -586,7 +589,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
             } else if (value == AlbumPopupAction.map) {
               await showOnMap();
             } else {
-              showToast(context, S.of(context).somethingWentWrong);
+              unawaited(showToast(context, S.of(context).somethingWentWrong));
             }
           },
         ),
@@ -602,21 +605,23 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
       widget.collection!,
     );
     if (coverPhotoID != null) {
-      changeCoverPhoto(context, widget.collection!, coverPhotoID);
+      unawaited(changeCoverPhoto(context, widget.collection!, coverPhotoID));
     }
   }
 
   Future<void> showOnMap() async {
     final bool result = await requestForMapEnable(context);
     if (result) {
-      Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (context) => MapScreen(
-            filesFutureFn: () async {
-              return FilesDB.instance.getAllFilesCollection(
-                widget.collection!.id,
-              );
-            },
+      unawaited(
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => MapScreen(
+              filesFutureFn: () async {
+                return FilesDB.instance.getAllFilesCollection(
+                  widget.collection!.id,
+                );
+              },
+            ),
           ),
         ),
       );
@@ -644,7 +649,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
       ],
     );
     if (sortByAsc != null) {
-      changeSortOrder(bContext, widget.collection!, sortByAsc);
+      unawaited(changeSortOrder(bContext, widget.collection!, sortByAsc));
     }
   }
 
