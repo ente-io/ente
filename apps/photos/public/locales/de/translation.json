@@ -623,5 +623,6 @@
     "FASTER_UPLOAD": "",
     "FASTER_UPLOAD_DESCRIPTION": "",
     "STATUS": "",
-    "INDEXED_ITEMS": ""
+    "INDEXED_ITEMS": "",
+    "CACHE_DIRECTORY": ""
 }

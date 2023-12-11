@@ -623,5 +623,6 @@
     "FASTER_UPLOAD": "Chargements plus rapides",
     "FASTER_UPLOAD_DESCRIPTION": "Router les chargements vers les serveurs à proximité",
     "STATUS": "État",
-    "INDEXED_ITEMS": "Éléments indexés"
+    "INDEXED_ITEMS": "Éléments indexés",
+    "CACHE_DIRECTORY": ""
 }
