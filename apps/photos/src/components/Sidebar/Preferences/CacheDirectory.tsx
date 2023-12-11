@@ -9,6 +9,7 @@ import MenuSectionTitle from 'components/Menu/MenuSectionTitle';
 import { t } from 'i18next';
 import isElectron from 'is-electron';
 import { useEffect, useState } from 'react';
+import DownloadManager from 'services/download';
 
 export default function CacheDirectory() {
     const [cacheDirectory, setCacheDirectory] = useState(undefined);
@@ -36,6 +37,7 @@ export default function CacheDirectory() {
             addLogLine(`Export folder changed to ${newFolder}`);
             await ElectronAPIs.setCustomCacheDirectory(newFolder);
             setCacheDirectory(newFolder);
+            await DownloadManager.reloadCaches();
         } catch (e) {
             logError(e, 'handleCacheDirectoryChange failed');
         }

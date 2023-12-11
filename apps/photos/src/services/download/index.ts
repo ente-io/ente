@@ -59,7 +59,7 @@ export interface DownloadClient {
 
 const FILE_CACHE_LIMIT = 5 * 1024 * 1024 * 1024; // 5GB
 
-class DownloadManager {
+class DownloadManagerImpl {
     private ready: boolean = false;
     private downloadClient: DownloadClient;
     private thumbnailCache?: LimitedCache;
@@ -109,6 +109,11 @@ class DownloadManager {
 
     setProgressUpdater(progressUpdater: (value: Map<number, number>) => void) {
         this.progressUpdater = progressUpdater;
+    }
+
+    async reloadCaches() {
+        this.thumbnailCache = await openThumbnailCache();
+        this.diskFileCache = isElectron() && (await openDiskFileCache());
     }
 
     private async getCachedThumbnail(fileID: number) {
@@ -531,7 +536,9 @@ class DownloadManager {
     };
 }
 
-export default new DownloadManager();
+const DownloadManager = new DownloadManagerImpl();
+
+export default DownloadManager;
 
 async function openThumbnailCache() {
     try {
