@@ -1,5 +1,5 @@
 import isElectron from 'is-electron';
-import React, { useEffect, useState, useContext } from 'react';
+import { useEffect, useState, useContext } from 'react';
 import exportService from 'services/export';
 import { ExportProgress, ExportSettings } from 'types/export';
 import {
@@ -8,9 +8,7 @@ import {
     Dialog,
     DialogContent,
     Divider,
-    styled,
     Switch,
-    Tooltip,
     Typography,
 } from '@mui/material';
 import { logError } from '@ente/shared/sentry';
@@ -21,29 +19,16 @@ import {
 import ExportFinished from './ExportFinished';
 import ExportInit from './ExportInit';
 import ExportInProgress from './ExportInProgress';
-import FolderIcon from '@mui/icons-material/Folder';
 import { ExportStage } from 'constants/export';
 import DialogTitleWithCloseButton from '@ente/shared/components/DialogBox/TitleWithCloseButton';
-import MoreHoriz from '@mui/icons-material/MoreHoriz';
-import OverflowMenu from '@ente/shared/components/OverflowMenu/menu';
-import { OverflowMenuOption } from '@ente/shared/components/OverflowMenu/option';
 import { AppContext } from 'pages/_app';
 import { getExportDirectoryDoesNotExistMessage } from 'utils/ui';
 import { t } from 'i18next';
-import LinkButton from './pages/gallery/LinkButton';
 import { CustomError } from '@ente/shared/error';
 import { addLogLine } from '@ente/shared/logging';
 import { EnteFile } from 'types/file';
-
-const ExportFolderPathContainer = styled(LinkButton)`
-    width: 262px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    /* Beginning of string */
-    direction: rtl;
-    text-align: left;
-`;
+import ChangeDirectoryOption from './Directory/changeOption';
+import { DirectoryPath } from './Directory';
 
 interface Props {
     show: boolean;
@@ -163,10 +148,6 @@ export default function ExportModal(props: Props) {
         }
     };
 
-    const handleOpenExportDirectoryClick = () => {
-        void exportService.openExportDirectory(exportFolder);
-    };
-
     const toggleContinuousExport = () => {
         try {
             verifyExportFolderExists();
@@ -207,7 +188,6 @@ export default function ExportModal(props: Props) {
                     exportFolder={exportFolder}
                     changeExportDirectory={handleChangeExportDirectoryClick}
                     exportStage={exportStage}
-                    openExportDirectory={handleOpenExportDirectoryClick}
                 />
                 <ContinuousExport
                     continuousExport={continuousExport}
@@ -229,12 +209,7 @@ export default function ExportModal(props: Props) {
     );
 }
 
-function ExportDirectory({
-    exportFolder,
-    changeExportDirectory,
-    exportStage,
-    openExportDirectory,
-}) {
+function ExportDirectory({ exportFolder, changeExportDirectory, exportStage }) {
     return (
         <SpaceBetweenFlex minHeight={'48px'}>
             <Typography color="text.muted" mr={'16px'}>
@@ -247,16 +222,10 @@ function ExportDirectory({
                     </Button>
                 ) : (
                     <VerticallyCenteredFlex>
-                        <ExportFolderPathContainer
-                            onClick={openExportDirectory}>
-                            <Tooltip title={exportFolder}>
-                                <span>{exportFolder}</span>
-                            </Tooltip>
-                        </ExportFolderPathContainer>
-
+                        <DirectoryPath width={262} path={exportFolder} />
                         {exportStage === ExportStage.FINISHED ||
                         exportStage === ExportStage.INIT ? (
-                            <ExportDirectoryOption
+                            <ChangeDirectoryOption
                                 changeExportDirectory={changeExportDirectory}
                             />
                         ) : (
@@ -266,25 +235,6 @@ function ExportDirectory({
                 )}
             </>
         </SpaceBetweenFlex>
-    );
-}
-
-function ExportDirectoryOption({ changeExportDirectory }) {
-    return (
-        <OverflowMenu
-            triggerButtonProps={{
-                sx: {
-                    ml: 1,
-                },
-            }}
-            ariaControls={'export-option'}
-            triggerButtonIcon={<MoreHoriz />}>
-            <OverflowMenuOption
-                onClick={changeExportDirectory}
-                startIcon={<FolderIcon />}>
-                {t('CHANGE_FOLDER')}
-            </OverflowMenuOption>
-        </OverflowMenu>
     );
 }
 

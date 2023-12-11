@@ -38,8 +38,8 @@
     "KEY_GENERATION_IN_PROGRESS_MESSAGE": "Generating encryption keys...",
     "PASSPHRASE_HINT": "Password",
     "CONFIRM_PASSPHRASE": "Confirm password",
-    "REFERRAL_CODE_HINT":"How did you hear about Ente? (optional)",
-    "REFERRAL_INFO":"We don't track app installs, It'd help us if you told us where you found us!",
+    "REFERRAL_CODE_HINT": "How did you hear about Ente? (optional)",
+    "REFERRAL_INFO": "We don't track app installs, It'd help us if you told us where you found us!",
     "PASSPHRASE_MATCH_ERROR": "Passwords don't match",
     "CONSOLE_WARNING_STOP": "STOP!",
     "CONSOLE_WARNING_DESC": "This is a browser feature intended for developers. Please don't copy-paste unverified code here.",
@@ -620,8 +620,9 @@
     "ROTATION": "Rotation",
     "RESET": "Reset",
     "PHOTO_EDITOR": "Photo Editor",
-    "FASTER_UPLOAD":"Faster uploads",
-    "FASTER_UPLOAD_DESCRIPTION":"Route uploads through nearby servers",
+    "FASTER_UPLOAD": "Faster uploads",
+    "FASTER_UPLOAD_DESCRIPTION": "Route uploads through nearby servers",
     "STATUS": "Status",
-    "INDEXED_ITEMS": "Indexed items"
+    "INDEXED_ITEMS": "Indexed items",
+    "CACHE_DIRECTORY": "Cache folder"
 }
