@@ -39,3 +39,11 @@ export function clearSkipAppVersion() {
 export function clearMuteUpdateNotificationVersion() {
     userPreferencesStore.delete('muteUpdateNotificationVersion');
 }
+
+export function setCustomCacheDirectory(directory: string) {
+    userPreferencesStore.set('customCacheDirectory', directory);
+}
+
+export function getCustomCacheDirectory() {
+    return userPreferencesStore.get('customCacheDirectory');
+}

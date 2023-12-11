@@ -6,8 +6,14 @@ import { DiskCache } from '../services/diskCache';
 const ENTE_CACHE_DIR_NAME = 'ente';
 
 const getCacheDir = async () => {
-    const systemCacheDir = await ipcRenderer.invoke('get-path', 'cache');
-    return path.join(systemCacheDir, ENTE_CACHE_DIR_NAME);
+    const customCacheDir = await ipcRenderer.invoke(
+        'get-custom-cache-directory'
+    );
+    if (customCacheDir && existsSync(customCacheDir)) {
+        return customCacheDir;
+    }
+    const defaultSystemCacheDir = await ipcRenderer.invoke('get-path', 'cache');
+    return path.join(defaultSystemCacheDir, ENTE_CACHE_DIR_NAME);
 };
 
 const getCacheBucketDir = async (cacheName: string) => {
@@ -35,4 +41,8 @@ export async function deleteDiskCache(cacheName: string) {
     } else {
         return false;
     }
+}
+
+export async function setCustomCacheDirectory(directory: string) {
+    await ipcRenderer.invoke('set-custom-cache-directory', directory);
 }
