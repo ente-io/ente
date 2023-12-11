@@ -3,11 +3,11 @@ import path from 'path';
 import { existsSync, mkdir, rmSync } from 'promise-fs';
 import { DiskCache } from '../services/diskCache';
 
-const CACHE_DIR = 'ente';
+const ENTE_CACHE_DIR_NAME = 'ente';
 
 const getCacheDir = async () => {
     const systemCacheDir = await ipcRenderer.invoke('get-path', 'cache');
-    return path.join(systemCacheDir, CACHE_DIR);
+    return path.join(systemCacheDir, ENTE_CACHE_DIR_NAME);
 };
 
 const getCacheBucketDir = async (cacheName: string) => {
