@@ -71,6 +71,7 @@ enum AlbumPopupAction {
   addPhotos,
   pinAlbum,
   removeLink,
+  cleanUncategorized,
 }
 
 class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
@@ -385,6 +386,25 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         ),
       );
     }
+
+    if (galleryType == GalleryType.uncategorized) {
+      items.add(
+        PopupMenuItem(
+          value: AlbumPopupAction.cleanUncategorized,
+          child: Row(
+            children: [
+              const Icon(Icons.crop_original_outlined),
+              const Padding(
+                padding: EdgeInsets.all(8),
+              ),
+              Text(
+                "Clean Uncategorized",
+              ),
+            ],
+          ),
+        ),
+      );
+    }
     if (galleryType.canPin()) {
       items.add(
         PopupMenuItem(
@@ -588,6 +608,11 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
               }
             } else if (value == AlbumPopupAction.map) {
               await showOnMap();
+            } else if (value == AlbumPopupAction.cleanUncategorized) {
+              await collectionActions.removeFromUncatIfPresentInOtherAlbum(
+                widget.collection!,
+                context,
+              );
             } else {
               unawaited(showToast(context, S.of(context).somethingWentWrong));
             }
