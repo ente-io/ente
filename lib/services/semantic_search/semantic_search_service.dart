@@ -1,6 +1,5 @@
 import "dart:async";
 import "dart:collection";
-import "dart:io";
 
 import "package:computer/computer.dart";
 import "package:logging/logging.dart";
@@ -14,7 +13,7 @@ import "package:photos/events/file_uploaded_event.dart";
 import "package:photos/models/embedding.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/services/semantic_search/embedding_store.dart";
-import 'package:photos/services/semantic_search/frameworks/ggml.dart';
+import "package:photos/services/semantic_search/frameworks/onnx.dart";
 import "package:photos/utils/local_settings.dart";
 import "package:photos/utils/thumbnail_util.dart";
 import "package:shared_preferences/shared_preferences.dart";
@@ -26,14 +25,14 @@ class SemanticSearchService {
       SemanticSearchService._privateConstructor();
   static final Computer _computer = Computer.shared();
 
-  static const kModelName = "ggml-clip";
+  static const kModelName = "onnx-clip";
   static const kEmbeddingLength = 512;
   static const kScoreThreshold = 0.23;
 
   final _logger = Logger("SemanticSearchService");
   final _queue = Queue<EnteFile>();
   final _cachedEmbeddings = <Embedding>[];
-  final _mlFramework = GGML();
+  final _mlFramework = ONNX();
   final _frameworkInitialization = Completer<void>();
 
   bool _isComputingEmbeddings = false;
@@ -42,9 +41,6 @@ class SemanticSearchService {
   PendingQuery? _nextQuery;
 
   Future<void> init(SharedPreferences preferences) async {
-    if (Platform.isIOS) {
-      return;
-    }
     await EmbeddingStore.instance.init(preferences);
     _setupCachedEmbeddings();
     Bus.instance.on<DiffSyncCompleteEvent>().listen((event) async {
