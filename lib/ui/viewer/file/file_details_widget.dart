@@ -162,40 +162,42 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
                     const FileDetailsDivider(),
                   ],
                 )
-              : Column(
-                  children: [
-                    InfoItemWidget(
-                      leadingIcon: Icons.pin_drop_outlined,
-                      title: "No location data",
-                      subtitleSection: Future.value(
-                        [
-                          Text(
-                            "Add location data",
-                            style: getEnteTextTheme(context).miniBoldMuted,
+              : file.fileType != FileType.video
+                  ? Column(
+                      children: [
+                        InfoItemWidget(
+                          leadingIcon: Icons.pin_drop_outlined,
+                          title: "No location data",
+                          subtitleSection: Future.value(
+                            [
+                              Text(
+                                "Add location data",
+                                style: getEnteTextTheme(context).miniBoldMuted,
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
-                      hasChipButtons: false,
-                      onTap: () {
-                        showBarModalBottomSheet(
-                          shape: const RoundedRectangleBorder(
-                            borderRadius: BorderRadius.vertical(
-                              top: Radius.circular(5),
-                            ),
-                          ),
-                          backgroundColor:
-                              getEnteColorScheme(context).backgroundElevated,
-                          barrierColor: backdropFaintDark,
-                          context: context,
-                          builder: (context) {
-                            return UpdateLocationDataWidget([file]);
+                          hasChipButtons: false,
+                          onTap: () async {
+                            await showBarModalBottomSheet(
+                              shape: const RoundedRectangleBorder(
+                                borderRadius: BorderRadius.vertical(
+                                  top: Radius.circular(5),
+                                ),
+                              ),
+                              backgroundColor: getEnteColorScheme(context)
+                                  .backgroundElevated,
+                              barrierColor: backdropFaintDark,
+                              context: context,
+                              builder: (context) {
+                                return UpdateLocationDataWidget([file]);
+                              },
+                            );
                           },
-                        );
-                      },
-                    ),
-                    const FileDetailsDivider(),
-                  ],
-                );
+                        ),
+                        const FileDetailsDivider(),
+                      ],
+                    )
+                  : const SizedBox.shrink();
         },
       ),
     ]);
