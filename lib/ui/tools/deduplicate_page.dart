@@ -48,8 +48,6 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
   final Set<EnteFile> _selectedFiles = <EnteFile>{};
   final Map<int?, int> _fileSizeMap = {};
   late List<DuplicateFiles> _duplicates;
-  bool _shouldClubByCaptureTime = false;
-  bool _shouldClubByFileName = false;
   bool toastShown = false;
 
   SortKey sortKey = SortKey.size;
@@ -198,89 +196,6 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
               ),
       ],
     );
-  }
-
-  @Deprecated('Remove options for club by name, clean code in 2024')
-  Padding _getHeader() {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            S.of(context).reviewDeduplicateItems,
-            style: Theme.of(context).textTheme.titleSmall,
-          ),
-          const Padding(
-            padding: EdgeInsets.all(12),
-          ),
-          const Divider(
-            height: 0,
-          ),
-        ],
-      ),
-    );
-  }
-
-  @Deprecated('Remove options for clubbing, clean code in 2024')
-  Widget _getClubbingConfig() {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(12, 0, 12, 4),
-      child: Column(
-        children: [
-          CheckboxListTile(
-            value: _shouldClubByFileName,
-            onChanged: (value) {
-              _shouldClubByFileName = value!;
-              if (_shouldClubByFileName) {
-                _shouldClubByCaptureTime = false;
-              }
-              _resetEntriesAndSelection();
-              setState(() {});
-            },
-            title: Text(S.of(context).clubByFileName),
-          ),
-          CheckboxListTile(
-            value: _shouldClubByCaptureTime,
-            onChanged: (value) {
-              _shouldClubByCaptureTime = value!;
-              if (_shouldClubByCaptureTime) {
-                _shouldClubByFileName = false;
-              }
-              _resetEntriesAndSelection();
-              setState(() {});
-            },
-            title: Text(S.of(context).clubByCaptureTime),
-          ),
-          const Padding(
-            padding: EdgeInsets.all(8),
-          ),
-          const Divider(
-            height: 0,
-          ),
-          const Padding(
-            padding: EdgeInsets.all(4),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _resetEntriesAndSelection() {
-    _duplicates = widget.duplicates;
-    late String? Function(EnteFile) clubbingKeyFn;
-    if (_shouldClubByCaptureTime) {
-      clubbingKeyFn = (EnteFile f) => f.creationTime?.toString() ?? '';
-    } else if (_shouldClubByFileName) {
-      clubbingKeyFn = (EnteFile f) => f.displayName;
-    } else {
-      clubbingKeyFn = (EnteFile f) => f.hash;
-    }
-    _duplicates = DeduplicationService.instance.clubDuplicates(
-      _duplicates,
-      clubbingKey: clubbingKeyFn,
-    );
-    _selectAllFilesButFirst();
   }
 
   Widget _getSortMenu(BuildContext context) {
