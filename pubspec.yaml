@@ -71,7 +71,7 @@ dependencies:
   flutter_easyloading: ^3.0.0
   flutter_email_sender: ^5.2.0
   flutter_image_compress: ^1.1.0
-  flutter_inappwebview: ^5.5.0+2
+  flutter_inappwebview: ^5.8.0
   flutter_launcher_icons: ^0.13.1
   flutter_local_notifications: ^12.0.4
   flutter_localizations:
