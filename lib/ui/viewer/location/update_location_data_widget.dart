@@ -1,17 +1,20 @@
 import "package:flutter/material.dart";
 import "package:flutter_map/flutter_map.dart";
 import "package:latlong2/latlong.dart";
+import "package:photos/models/file/file.dart";
 import "package:photos/ui/map/map_button.dart";
 import "package:photos/ui/map/tile/layers.dart";
 
-class AddLocationDataWidget extends StatefulWidget {
-  const AddLocationDataWidget({super.key});
+class UpdateLocationDataWidget extends StatefulWidget {
+  final List<EnteFile> files;
+  const UpdateLocationDataWidget(this.files, {super.key});
 
   @override
-  State<AddLocationDataWidget> createState() => _AddLocationDataWidgetState();
+  State<UpdateLocationDataWidget> createState() =>
+      _UpdateLocationDataWidgetState();
 }
 
-class _AddLocationDataWidgetState extends State<AddLocationDataWidget> {
+class _UpdateLocationDataWidgetState extends State<UpdateLocationDataWidget> {
   final MapController _mapController = MapController();
   LatLng? selectedLocation;
   ValueNotifier hasSelectedLocation = ValueNotifier(false);
@@ -24,7 +27,7 @@ class _AddLocationDataWidgetState extends State<AddLocationDataWidget> {
   @override
   void dispose() {
     super.dispose();
-
+    hasSelectedLocation.dispose();
     _mapController.dispose();
   }
 
@@ -69,7 +72,7 @@ class _AddLocationDataWidgetState extends State<AddLocationDataWidget> {
                 icon: Icons.check,
 
                 onPressed: () {},
-                heroTag: 'zoom-in',
+                heroTag: 'add-location',
               ),
               const SizedBox(height: 16),
               MapButton(

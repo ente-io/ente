@@ -24,7 +24,7 @@ import 'package:photos/ui/viewer/file_details/exif_item_widgets.dart';
 import "package:photos/ui/viewer/file_details/file_properties_item_widget.dart";
 import "package:photos/ui/viewer/file_details/location_tags_widget.dart";
 import "package:photos/ui/viewer/file_details/objects_item_widget.dart";
-import 'package:photos/ui/viewer/location/add_location_data_widget.dart';
+import 'package:photos/ui/viewer/location/update_location_data_widget.dart';
 import "package:photos/utils/exif_util.dart";
 
 class FileDetailsWidget extends StatefulWidget {
@@ -188,7 +188,7 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
                           barrierColor: backdropFaintDark,
                           context: context,
                           builder: (context) {
-                            return const AddLocationDataWidget();
+                            return UpdateLocationDataWidget([file]);
                           },
                         );
                       },
