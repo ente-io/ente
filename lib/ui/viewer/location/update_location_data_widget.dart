@@ -75,7 +75,9 @@ class _UpdateLocationDataWidgetState extends State<UpdateLocationDataWidget> {
                 onPressed: () async {
                   await FilesService.instance
                       .bulkEditLocationData(widget.files, selectedLocation!);
+                  Navigator.of(context).pop();
                 },
+
                 heroTag: 'add-location',
               ),
               const SizedBox(height: 16),
