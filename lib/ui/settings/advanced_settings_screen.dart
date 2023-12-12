@@ -2,6 +2,8 @@ import "dart:async";
 
 import 'package:flutter/material.dart';
 import "package:photos/core/error-reporting/super_logging.dart";
+import "package:photos/core/event_bus.dart";
+import "package:photos/events/force_reload_home_gallery_event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/services/memories_service.dart";
 import "package:photos/services/user_remote_flag_service.dart";
@@ -111,6 +113,32 @@ class _AdvancedSettingsScreenState extends State<AdvancedSettingsScreen> {
                                   unawaited(
                                     MemoriesService.instance.setShowMemories(
                                       !MemoriesService.instance.showMemories,
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+                            const SizedBox(
+                              height: 24,
+                            ),
+                            MenuItemWidget(
+                              captionedTextWidget: CaptionedTextWidget(
+                                title: S.of(context).hideSharedItems,
+                              ),
+                              menuItemColor: colorScheme.fillFaint,
+                              singleBorderRadius: 8,
+                              alignCaptionedTextToLeft: true,
+                              trailingWidget: ToggleSwitchWidget(
+                                value: () =>
+                                  LocalSettings.instance.getHideSharedItem(),
+                                onChanged: () async {
+                                  await LocalSettings.instance
+                                      .setHideSharedItem(
+                                    !LocalSettings.instance.getHideSharedItem(),
+                                  );
+                                  Bus.instance.fire(
+                                    ForceReloadHomeGalleryEvent(
+                                      "Hide/show shared items",
                                     ),
                                   );
                                 },
