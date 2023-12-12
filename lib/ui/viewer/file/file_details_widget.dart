@@ -157,7 +157,7 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
               ? Column(
                   children: [
                     LocationTagsWidget(
-                      widget.file.location!,
+                      widget.file,
                     ),
                     const FileDetailsDivider(),
                   ],

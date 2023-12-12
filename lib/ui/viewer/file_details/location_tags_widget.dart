@@ -1,22 +1,25 @@
 import "dart:async";
 
 import "package:flutter/material.dart";
+import "package:modal_bottom_sheet/modal_bottom_sheet.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/location_tag_updated_event.dart";
 import "package:photos/generated/l10n.dart";
-import "package:photos/models/location/location.dart";
+import "package:photos/models/file/file.dart";
 import "package:photos/services/location_service.dart";
 import "package:photos/states/location_screen_state.dart";
+import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/buttons/chip_button_widget.dart";
 import "package:photos/ui/components/info_item_widget.dart";
 import 'package:photos/ui/viewer/location/add_location_sheet.dart';
 import "package:photos/ui/viewer/location/location_screen.dart";
+import "package:photos/ui/viewer/location/update_location_data_widget.dart";
 import "package:photos/utils/navigation_util.dart";
 
 class LocationTagsWidget extends StatefulWidget {
-  final Location centerPoint;
-  const LocationTagsWidget(this.centerPoint, {super.key});
+  final EnteFile file;
+  const LocationTagsWidget(this.file, {super.key});
 
   @override
   State<LocationTagsWidget> createState() => _LocationTagsWidgetState();
@@ -58,13 +61,28 @@ class _LocationTagsWidgetState extends State<LocationTagsWidget> {
         subtitleSection: locationTagChips,
         hasChipButtons: hasChipButtons ?? true,
         onTap: onTap,
+        editOnTap: () {
+          showBarModalBottomSheet(
+            shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.vertical(
+                top: Radius.circular(5),
+              ),
+            ),
+            backgroundColor: getEnteColorScheme(context).backgroundElevated,
+            barrierColor: backdropFaintDark,
+            context: context,
+            builder: (context) {
+              return UpdateLocationDataWidget([widget.file]);
+            },
+          );
+        },
       ),
     );
   }
 
   Future<List<Widget>> _getLocationTags() async {
     final locationTags = await LocationService.instance
-        .enclosingLocationTags(widget.centerPoint);
+        .enclosingLocationTags(widget.file.location!);
     if (locationTags.isEmpty) {
       if (mounted) {
         setState(() {
@@ -73,7 +91,7 @@ class _LocationTagsWidgetState extends State<LocationTagsWidget> {
           hasChipButtons = false;
           onTap = () => showAddLocationSheet(
                 context,
-                widget.centerPoint,
+                widget.file.location!,
               );
         });
       }
@@ -112,7 +130,7 @@ class _LocationTagsWidgetState extends State<LocationTagsWidget> {
         ChipButtonWidget(
           null,
           leadingIcon: Icons.add_outlined,
-          onTap: () => showAddLocationSheet(context, widget.centerPoint),
+          onTap: () => showAddLocationSheet(context, widget.file.location!),
         ),
       );
       return result;
