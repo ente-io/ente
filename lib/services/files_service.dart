@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import "package:latlong2/latlong.dart";
 import 'package:logging/logging.dart';
 import 'package:path/path.dart';
 import 'package:photos/core/configuration.dart';
@@ -82,6 +83,38 @@ class FilesService {
     } catch (e, s) {
       _logger.severe("failed to fetch size from fileInfo", e, s);
       rethrow;
+    }
+  }
+
+  Future<void> bulkEditLocationData(
+    List<EnteFile> files,
+    LatLng location,
+  ) async {
+    final List<EnteFile> uploadedFiles =
+        files.where((element) => element.uploadedFileID != null).toList();
+
+    final List<EnteFile> remoteFilesToUpdate = [];
+    final Map<int, Map<String, dynamic>> fileIDToUpdateMetadata = {};
+    for (EnteFile remoteFile in uploadedFiles) {
+      // discard files not owned by user and also dedupe already processed
+      // files
+      if (remoteFile.ownerID != _config.getUserID()! ||
+          fileIDToUpdateMetadata.containsKey(remoteFile.uploadedFileID!)) {
+        continue;
+      }
+
+      remoteFilesToUpdate.add(remoteFile);
+      fileIDToUpdateMetadata[remoteFile.uploadedFileID!] = {
+        latKey: location.latitude,
+        longKey: location.longitude,
+      };
+    }
+    if (remoteFilesToUpdate.isNotEmpty) {
+      await FileMagicService.instance.updatePublicMagicMetadata(
+        remoteFilesToUpdate,
+        null,
+        metadataUpdateMap: fileIDToUpdateMetadata,
+      );
     }
   }
 

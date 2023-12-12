@@ -2,6 +2,7 @@ import "package:flutter/material.dart";
 import "package:flutter_map/flutter_map.dart";
 import "package:latlong2/latlong.dart";
 import "package:photos/models/file/file.dart";
+import "package:photos/services/files_service.dart";
 import "package:photos/ui/map/map_button.dart";
 import "package:photos/ui/map/tile/layers.dart";
 
@@ -71,7 +72,10 @@ class _UpdateLocationDataWidgetState extends State<UpdateLocationDataWidget> {
                 // icon: Icons.add_location_alt_outlined,
                 icon: Icons.check,
 
-                onPressed: () {},
+                onPressed: () async {
+                  await FilesService.instance
+                      .bulkEditLocationData(widget.files, selectedLocation!);
+                },
                 heroTag: 'add-location',
               ),
               const SizedBox(height: 16),
