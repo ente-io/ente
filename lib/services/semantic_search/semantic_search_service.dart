@@ -28,7 +28,7 @@ class SemanticSearchService {
 
   static const kModelName = "clip";
   static const kEmbeddingLength = 512;
-  static const kScoreThreshold = 0.23;
+  static const kScoreThreshold = 0.0;
 
   final _logger = Logger("SemanticSearchService");
   final _queue = Queue<EnteFile>();
