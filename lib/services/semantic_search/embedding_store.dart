@@ -68,6 +68,8 @@ class EmbeddingStore {
   }
 
   Future<void> _pushEmbedding(EnteFile file, Embedding embedding) async {
+    // TODO: Remove early return
+    return;
     final encryptionKey = getFileKey(file);
     final embeddingJSON = jsonEncode(embedding.embedding);
     final encryptedEmbedding = await CryptoUtil.encryptChaCha(
