@@ -13,7 +13,7 @@ import "package:photos/events/file_uploaded_event.dart";
 import "package:photos/models/embedding.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/services/semantic_search/embedding_store.dart";
-import "package:photos/services/semantic_search/frameworks/onnx.dart";
+import 'package:photos/services/semantic_search/frameworks/onnx/onnx.dart';
 import "package:photos/utils/local_settings.dart";
 import "package:photos/utils/thumbnail_util.dart";
 import "package:shared_preferences/shared_preferences.dart";
