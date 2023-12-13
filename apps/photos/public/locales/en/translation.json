@@ -226,7 +226,7 @@
     "VIDEO_PLAYBACK_FAILED_DOWNLOAD_INSTEAD": "This video cannot be played on your browser",
     "PEOPLE": "People",
     "INDEXING_SCHEDULED": "indexing is scheduled...",
-    "ANALYZING_PHOTOS": "analyzing new photos {{indexStatus.nSyncedFiles}} of {{indexStatus.nTotalFiles}} done)...",
+    "ANALYZING_PHOTOS": "analyzing new photos {{indexStatus.nSyncedFiles}} of {{indexStatus.nTotalFiles}} done...",
     "INDEXING_PEOPLE": "indexing people in {{indexStatus.nSyncedFiles}} photos...",
     "INDEXING_DONE": "indexed {{indexStatus.nSyncedFiles}} photos",
     "UNIDENTIFIED_FACES": "unidentified faces",
