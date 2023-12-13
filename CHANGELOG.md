@@ -1,5 +1,16 @@
 # CHANGELOG
 
+## v1.6.56
+
+### New Features
+
+- Added encrypted Disk caching for files
+- Added option to customize cache folder location
+
+### Bug Fixes
+
+- Fixed caching issue,causing multiple download of file during ml sync
+
 ## v1.6.55
 
 ### Bug Fixes

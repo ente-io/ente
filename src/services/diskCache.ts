@@ -1,10 +1,10 @@
 import DiskLRUService from '../services/diskLRU';
 import crypto from 'crypto';
-import { existsSync, readFile, unlink } from 'promise-fs';
+import { existsSync, unlink, rename, stat } from 'promise-fs';
 import path from 'path';
 import { LimitedCache } from '../types/cache';
 import { logError } from './logging';
-import { writeStream } from './fs';
+import { getFileStream, writeStream } from './fs';
 
 const DEFAULT_CACHE_LIMIT = 1000 * 1000 * 1000; // 1GB
 
@@ -23,20 +23,38 @@ export class DiskCache implements LimitedCache {
         );
     }
 
-    async match(cacheKey: string): Promise<Response> {
+    async match(
+        cacheKey: string,
+        { sizeInBytes }: { sizeInBytes?: number } = {}
+    ): Promise<Response> {
         const cachePath = path.join(this.cacheBucketDir, cacheKey);
+
         if (existsSync(cachePath)) {
+            const fileStats = await stat(cachePath);
+            if (sizeInBytes && fileStats.size !== sizeInBytes) {
+                logError(
+                    Error(),
+                    'Cache key exists but size does not match. Deleting cache key.'
+                );
+                unlink(cachePath);
+                return undefined;
+            }
             DiskLRUService.touch(cachePath);
-            return new Response(await readFile(cachePath));
+            return new Response(await getFileStream(cachePath));
         } else {
             // add fallback for old cache keys
             const oldCachePath = getOldAssetCachePath(
                 this.cacheBucketDir,
                 cacheKey
             );
-            if (existsSync(cachePath)) {
-                const match = new Response(await readFile(oldCachePath));
-                void migrateOldCacheKey(oldCachePath, cachePath, match);
+            if (existsSync(oldCachePath)) {
+                const fileStats = await stat(oldCachePath);
+                if (sizeInBytes && fileStats.size !== sizeInBytes) {
+                    unlink(oldCachePath);
+                    return undefined;
+                }
+                const match = new Response(await getFileStream(oldCachePath));
+                void migrateOldCacheKey(oldCachePath, cachePath);
                 return match;
             }
             return undefined;
@@ -62,14 +80,9 @@ function getOldAssetCachePath(cacheDir: string, cacheKey: string) {
     return path.join(cacheDir, cacheKeyHash);
 }
 
-async function migrateOldCacheKey(
-    oldCacheKey: string,
-    newCacheKey: string,
-    value: Response
-) {
+async function migrateOldCacheKey(oldCacheKey: string, newCacheKey: string) {
     try {
-        await this.put(newCacheKey, value);
-        await this.delete(oldCacheKey);
+        await rename(oldCacheKey, newCacheKey);
     } catch (e) {
         logError(e, 'Failed to move cache key to new cache key');
     }
