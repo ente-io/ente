@@ -281,7 +281,7 @@ class CLIPTokenizer {
   late int sot;
   late int eot;
 
-  CLIPTokenizer();
+  CLIPTokenizer(this.bpePath);
 
   // Async method since the loadFile returns a Future and dart constructor cannot be async
   Future init() async {
