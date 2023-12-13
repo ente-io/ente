@@ -5,6 +5,7 @@ import path from 'path';
 import { LimitedCache } from '../types/cache';
 import { logError } from './logging';
 import { getFileStream, writeStream } from './fs';
+import log from 'electron-log';
 
 const DEFAULT_CACHE_LIMIT = 1000 * 1000 * 1000; // 1GB
 
@@ -28,9 +29,13 @@ export class DiskCache implements LimitedCache {
         { sizeInBytes }: { sizeInBytes?: number } = {}
     ): Promise<Response> {
         const cachePath = path.join(this.cacheBucketDir, cacheKey);
-
+        log.info(`Checking cache key: ${cacheKey}`);
         if (existsSync(cachePath)) {
+            log.info(`Cache key exists: ${cacheKey}`);
             const fileStats = await stat(cachePath);
+            log.info(
+                `Cache key size: ${fileStats.size} , expected: ${sizeInBytes}`
+            );
             if (sizeInBytes && fileStats.size !== sizeInBytes) {
                 logError(
                     Error(),
@@ -39,21 +44,29 @@ export class DiskCache implements LimitedCache {
                 unlink(cachePath);
                 return undefined;
             }
+            log.info(`Cache key size matches: ${cacheKey}`);
             DiskLRUService.touch(cachePath);
             return new Response(await getFileStream(cachePath));
         } else {
+            log.info(`Cache key does not exist: ${cacheKey}`);
             // add fallback for old cache keys
             const oldCachePath = getOldAssetCachePath(
                 this.cacheBucketDir,
                 cacheKey
             );
             if (existsSync(oldCachePath)) {
+                log.info(`Old cache key exists: ${cacheKey}`);
                 const fileStats = await stat(oldCachePath);
                 if (sizeInBytes && fileStats.size !== sizeInBytes) {
+                    logError(
+                        Error(),
+                        'Old cache key exists but size does not match. Deleting cache key.'
+                    );
                     unlink(oldCachePath);
                     return undefined;
                 }
                 const match = new Response(await getFileStream(oldCachePath));
+                log.info(`Old cache key size matches: ${cacheKey}`);
                 void migrateOldCacheKey(oldCachePath, cachePath);
                 return match;
             }
