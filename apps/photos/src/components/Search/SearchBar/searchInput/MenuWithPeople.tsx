@@ -1,32 +1,27 @@
-import React, { useContext } from 'react';
+import { useContext } from 'react';
 import { PeopleList } from 'components/MachineLearning/PeopleList';
 import { IndexStatus } from 'types/machineLearning/ui';
 import { SuggestionType, Suggestion } from 'types/search';
 import { components } from 'react-select';
 import { Row } from '@ente/shared/components/Container';
-import { Col } from 'react-bootstrap';
 import { AppContext } from 'pages/_app';
 import styled from '@mui/styled-engine';
 import { t } from 'i18next';
+import { Box } from '@mui/material';
 
 const { Menu } = components;
-
-const LegendRow = styled(Row)`
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 0px;
-`;
 
 const Legend = styled('span')`
     font-size: 20px;
     color: #ddd;
     display: inline;
+    padding: 0px 12px;
 `;
 
 const Caption = styled('span')`
     font-size: 12px;
     display: inline;
-    padding: 8px 12px;
+    padding: 0px 12px;
 `;
 
 const MenuWithPeople = (props) => {
@@ -44,17 +39,17 @@ const MenuWithPeople = (props) => {
     const indexStatus = indexStatusSuggestion?.value as IndexStatus;
     return (
         <Menu {...props}>
-            <Col>
+            <Box my={1}>
                 {((appContext.mlSearchEnabled && indexStatus) ||
                     (people && people.length > 0)) && (
-                    <LegendRow>
+                    <Box>
                         <Legend>{t('PEOPLE')}</Legend>
-                    </LegendRow>
+                    </Box>
                 )}
                 {appContext.mlSearchEnabled && indexStatus && (
-                    <LegendRow>
+                    <Box>
                         <Caption>{indexStatusSuggestion.label}</Caption>
-                    </LegendRow>
+                    </Box>
                 )}
                 {people && people.length > 0 && (
                     <Row>
@@ -68,7 +63,7 @@ const MenuWithPeople = (props) => {
                         />
                     </Row>
                 )}
-            </Col>
+            </Box>
             {props.children}
         </Menu>
     );
