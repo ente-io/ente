@@ -24,6 +24,7 @@ import "package:flutter/material.dart";
 import 'package:flutter_displaymode/flutter_displaymode.dart';
 import 'package:logging/logging.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:privacy_screen/privacy_screen.dart';
 
 final _logger = Logger("main");
 
@@ -31,6 +32,22 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final savedThemeMode = await AdaptiveTheme.getThemeMode();
   await _runInForeground(savedThemeMode);
+  await PrivacyScreen.instance.enable(
+    iosOptions: const PrivacyIosOptions(
+      enablePrivacy: true,
+      privacyImageName: "LaunchImage",
+      lockTrigger: IosLockTrigger.didEnterBackground,
+    ),
+    androidOptions: const PrivacyAndroidOptions(
+      enableSecure: true,
+    ),
+    backgroundColor: savedThemeMode == AdaptiveThemeMode.dark
+        ? Colors.black
+        : Colors.white,
+    blurEffect: savedThemeMode == AdaptiveThemeMode.dark
+        ? PrivacyBlurEffect.dark
+        : PrivacyBlurEffect.extraLight,
+  );
   FlutterDisplayMode.setHighRefreshRate();
 }
 
