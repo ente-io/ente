@@ -1,6 +1,6 @@
 import DiskLRUService from '../services/diskLRU';
 import crypto from 'crypto';
-import { existsSync, unlink, rename } from 'promise-fs';
+import { existsSync, unlink, rename, stat } from 'promise-fs';
 import path from 'path';
 import { LimitedCache } from '../types/cache';
 import { logError } from './logging';
@@ -23,9 +23,18 @@ export class DiskCache implements LimitedCache {
         );
     }
 
-    async match(cacheKey: string): Promise<Response> {
+    async match(
+        cacheKey: string,
+        { sizeInBytes }: { sizeInBytes?: number } = {}
+    ): Promise<Response> {
         const cachePath = path.join(this.cacheBucketDir, cacheKey);
+
         if (existsSync(cachePath)) {
+            const fileStats = await stat(cachePath);
+            if (sizeInBytes && fileStats.size !== sizeInBytes) {
+                unlink(cachePath);
+                return undefined;
+            }
             DiskLRUService.touch(cachePath);
             return new Response(await getFileStream(cachePath));
         } else {
@@ -35,6 +44,11 @@ export class DiskCache implements LimitedCache {
                 cacheKey
             );
             if (existsSync(oldCachePath)) {
+                const fileStats = await stat(oldCachePath);
+                if (sizeInBytes && fileStats.size !== sizeInBytes) {
+                    unlink(oldCachePath);
+                    return undefined;
+                }
                 const match = new Response(await getFileStream(oldCachePath));
                 void migrateOldCacheKey(oldCachePath, cachePath);
                 return match;
