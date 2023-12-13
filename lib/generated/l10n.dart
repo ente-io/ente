@@ -2950,6 +2950,16 @@ class S {
     );
   }
 
+  /// `Hide Shared Items`
+  String get archiveSharedItems {
+    return Intl.message(
+      'Hide Shared Items',
+      name: 'archiveSharedItems',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `{count, plural, one{{count} year ago} other{{count} years ago}}`
   String yearsAgo(num count) {
     return Intl.plural(

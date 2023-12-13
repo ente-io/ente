@@ -147,7 +147,7 @@ class CollectionsService {
       );
     }
     await _updateDB(updatedCollections);
-    _prefs.setInt(_collectionsSyncTimeKey, maxUpdationTime);
+    await _prefs.setInt(_collectionsSyncTimeKey, maxUpdationTime);
     watch.logAndReset("till DB insertion ${updatedCollections.length}");
     for (final collection in fetchedCollections) {
       _cacheLocalPathAndCollection(collection);
@@ -222,7 +222,8 @@ class CollectionsService {
   }
 
   Set<int> archivedOrHiddenCollectionIds() {
-    final bool archiveIncomingCollections = LocalSettings.instance.archiveSharedItems;
+    final bool archiveIncomingCollections =
+        LocalSettings.instance.archiveSharedItems;
     final int ownerID = _config.getUserID()!;
     final Set<int> result = <int>{};
     for (final collection in _collectionIDToCollections.values) {

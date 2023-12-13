@@ -123,18 +123,18 @@ class _AdvancedSettingsScreenState extends State<AdvancedSettingsScreen> {
                             ),
                             MenuItemWidget(
                               captionedTextWidget: CaptionedTextWidget(
-                                title: S.of(context).hideSharedItems,
+                                title: S.of(context).archiveSharedItems,
                               ),
                               menuItemColor: colorScheme.fillFaint,
                               singleBorderRadius: 8,
                               alignCaptionedTextToLeft: true,
                               trailingWidget: ToggleSwitchWidget(
                                 value: () =>
-                                  LocalSettings.instance.hideSharedItems,
+                                    LocalSettings.instance.archiveSharedItems,
                                 onChanged: () async {
                                   await LocalSettings.instance
-                                      .setHideSharedItems(
-                                    !LocalSettings.instance.hideSharedItems,
+                                      .setArchiveSharedItems(
+                                    !LocalSettings.instance.archiveSharedItems,
                                   );
                                   Bus.instance.fire(
                                     ForceReloadHomeGalleryEvent(
@@ -159,7 +159,8 @@ class _AdvancedSettingsScreenState extends State<AdvancedSettingsScreen> {
                               singleBorderRadius: 8,
                               alignCaptionedTextToLeft: true,
                               onTap: () async {
-                                routeToPage(context, const AppStorageViewer());
+                                await routeToPage(
+                                    context, const AppStorageViewer());
                               },
                             ),
                             const SizedBox(

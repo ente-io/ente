@@ -13,7 +13,6 @@ import 'package:photos/services/collections_service.dart';
 import "package:photos/services/filter/db_filters.dart";
 import 'package:photos/ui/viewer/actions/file_selection_overlay_bar.dart';
 import 'package:photos/ui/viewer/gallery/gallery.dart';
-import "package:photos/utils/local_settings.dart";
 
 class HomeGalleryWidget extends StatelessWidget {
   final Widget? header;
@@ -35,20 +34,8 @@ class HomeGalleryWidget extends StatelessWidget {
         final ownerID = Configuration.instance.getUserID();
         final hasSelectedAllForBackup =
             Configuration.instance.hasSelectedAllFoldersForBackup();
-        final archivedOrHiddenCollectionIDs =
+        final collectionsToHide =
             CollectionsService.instance.archivedOrHiddenCollectionIds();
-        final Set<int> collectionsToHide;
-        if (LocalSettings.instance.hideSharedItems) {
-          final incomingSharedCollectionIDs = CollectionsService.instance
-              .getSharedCollections()
-              .incoming
-              .map((e) => e.id)
-              .toSet();
-          collectionsToHide =
-              archivedOrHiddenCollectionIDs.union(incomingSharedCollectionIDs);
-        } else {
-          collectionsToHide = archivedOrHiddenCollectionIDs;
-        }
         FileLoadResult result;
         final DBFilterOptions filterOptions = DBFilterOptions(
           hideIgnoredForUpload: true,
