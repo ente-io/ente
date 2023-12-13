@@ -2,7 +2,6 @@ import "dart:io";
 import "dart:math";
 import "dart:typed_data";
 
-import "package:flutter/services.dart";
 import 'package:image/image.dart' as img;
 import "package:logging/logging.dart";
 import "package:onnxruntime/onnxruntime.dart";
@@ -24,16 +23,13 @@ class OnnxImageEncoder {
     OrtEnv.instance.release();
   }
 
-  loadModel(Map args) async {
+  Future<void> loadModel(Map args) async {
     _sessionOptions = OrtSessionOptions()
       ..setInterOpNumThreads(1)
       ..setIntraOpNumThreads(1)
       ..setSessionGraphOptimizationLevel(GraphOptimizationLevel.ortEnableAll);
     try {
-      //const assetFileName = 'assets/models/clip-image-vit-32-float32.onnx';
-      // Check if the path exists locally
-      final rawAssetFile = await rootBundle.load(args["imageModelPath"]);
-      final bytes = rawAssetFile.buffer.asUint8List();
+      final bytes = File(args["imageModelPath"]).readAsBytesSync();
       _session = OrtSession.fromBuffer(bytes, _sessionOptions!);
       _logger.info('image model loaded');
     } catch (e, s) {

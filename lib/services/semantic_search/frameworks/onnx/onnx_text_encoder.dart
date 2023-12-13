@@ -1,7 +1,7 @@
+import "dart:io";
 import "dart:math";
 import "dart:typed_data";
 
-import "package:flutter/services.dart";
 import "package:logging/logging.dart";
 import "package:onnxruntime/onnxruntime.dart";
 import "package:photos/services/semantic_search/frameworks/onnx/onnx_text_tokenizer.dart";
@@ -27,17 +27,14 @@ class OnnxTextEncoder {
     OrtEnv.instance.release();
   }
 
-  loadModel(Map args) async {
+  Future<void> loadModel(Map args) async {
     _sessionOptions = OrtSessionOptions()
       ..setInterOpNumThreads(1)
       ..setIntraOpNumThreads(1)
       ..setSessionGraphOptimizationLevel(GraphOptimizationLevel.ortEnableAll);
 
     try {
-      //const assetFileName = 'assets/models/clip-text-vit-32-float32-int32.onnx';
-      // Check if path exists locally
-      final rawAssetFile = await rootBundle.load(args["textModelPath"]);
-      final bytes = rawAssetFile.buffer.asUint8List();
+      final bytes = File(args["textModelPath"]).readAsBytesSync();
       _session = OrtSession.fromBuffer(bytes, _sessionOptions!);
       _logger.info('text model loaded');
     } catch (e, s) {

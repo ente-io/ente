@@ -1,5 +1,6 @@
 import "dart:io";
 
+import "package:flutter/services.dart";
 import "package:logging/logging.dart";
 import "package:path/path.dart";
 import "package:path_provider/path_provider.dart";
@@ -53,9 +54,14 @@ abstract class MLFramework {
   // ---
 
   Future<void> _initImageModel() async {
+    const assetPath = "assets/models/clip/clip-image-vit-32-float32.onnx";
+    await loadImageModel(
+      await getAccessiblePathForAsset(
+        assetPath,
+        "clip-image-vit-32-float32.onnx",
+      ),
+    );
     //final path = await _getLocalImageModelPath();
-    const path = "assets/models/clip/clip-image-vit-32-float32.onnx";
-    await loadImageModel(path);
     // if (File(path).existsSync()) {
     //   await loadImageModel(path);
     // } else {
@@ -67,9 +73,14 @@ abstract class MLFramework {
   }
 
   Future<void> _initTextModel() async {
+    const assetPath = "assets/models/clip/clip-text-vit-32-float32.onnx";
+    await loadTextModel(
+      await getAccessiblePathForAsset(
+        assetPath,
+        "clip-text-vit-32-float32.onnx",
+      ),
+    );
     //final path = await _getLocalTextModelPath();
-    const path = "assets/models/clip/clip-text-vit-32-float32.onnx";
-    await loadTextModel(path);
     // if (File(path).existsSync()) {
     //   await loadTextModel(path);
     // } else {
@@ -99,5 +110,16 @@ abstract class MLFramework {
       await existingFile.delete();
     }
     await NetworkClient.instance.getDio().download(url, savePath);
+  }
+
+  Future<String> getAccessiblePathForAsset(
+    String assetPath,
+    String tempName,
+  ) async {
+    final byteData = await rootBundle.load(assetPath);
+    final tempDir = await getTemporaryDirectory();
+    final file = await File('${tempDir.path}/$tempName')
+        .writeAsBytes(byteData.buffer.asUint8List());
+    return file.path;
   }
 }
