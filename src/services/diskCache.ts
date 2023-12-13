@@ -32,6 +32,10 @@ export class DiskCache implements LimitedCache {
         if (existsSync(cachePath)) {
             const fileStats = await stat(cachePath);
             if (sizeInBytes && fileStats.size !== sizeInBytes) {
+                logError(
+                    Error(),
+                    'Cache key exists but size does not match. Deleting cache key.'
+                );
                 unlink(cachePath);
                 return undefined;
             }
