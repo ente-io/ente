@@ -12,6 +12,7 @@ class ONNX extends MLFramework {
   final _logger = Logger("ONNX");
   final _clipImage = OnnxImageEncoder();
   final _clipText = OnnxTextEncoder();
+  int _textEncoderAddress = 0;
 
   @override
   String getImageModelRemotePath() {
@@ -41,7 +42,8 @@ class ONNX extends MLFramework {
   @override
   Future<void> loadTextModel(String path) async {
     final startTime = DateTime.now();
-    await _computer.compute(
+    await _clipText.init();
+    _textEncoderAddress = await _computer.compute(
       _clipText.loadModel,
       param: {
         "textModelPath": path,
@@ -83,6 +85,7 @@ class ONNX extends MLFramework {
         _clipText.infer,
         param: {
           "text": text,
+          "address": _textEncoderAddress,
         },
         taskName: "createTextEmbedding",
       ) as List<double>;
