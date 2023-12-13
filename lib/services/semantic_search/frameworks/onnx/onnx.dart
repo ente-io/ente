@@ -15,6 +15,11 @@ class ONNX extends MLFramework {
   int _textEncoderAddress = 0;
 
   @override
+  String getFrameworkName() {
+    return "onnx";
+  }
+
+  @override
   String getImageModelRemotePath() {
     return "";
   }

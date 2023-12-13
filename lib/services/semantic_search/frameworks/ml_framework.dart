@@ -9,6 +9,9 @@ import "package:photos/core/network/network.dart";
 abstract class MLFramework {
   final _logger = Logger("MLFramework");
 
+  /// Returns the name of the framework
+  String getFrameworkName();
+
   /// Returns the path of the Image Model hosted remotely
   String getImageModelRemotePath();
 

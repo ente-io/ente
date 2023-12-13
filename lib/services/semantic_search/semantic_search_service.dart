@@ -25,7 +25,7 @@ class SemanticSearchService {
       SemanticSearchService._privateConstructor();
   static final Computer _computer = Computer.shared();
 
-  static const kModelName = "onnx-clip";
+  static const kModelName = "clip";
   static const kEmbeddingLength = 512;
   static const kScoreThreshold = 0.23;
 
@@ -214,7 +214,7 @@ class SemanticSearchService {
       }
       final embedding = Embedding(
         fileID: file.uploadedFileID!,
-        model: kModelName,
+        model: _mlFramework.getFrameworkName() + "-" + kModelName,
         embedding: result,
       );
       await EmbeddingStore.instance.storeEmbedding(
