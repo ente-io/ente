@@ -2,6 +2,8 @@ import "dart:async";
 
 import 'package:flutter/material.dart';
 import "package:photos/core/error-reporting/super_logging.dart";
+import "package:photos/core/event_bus.dart";
+import "package:photos/events/force_reload_home_gallery_event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/services/memories_service.dart";
 import "package:photos/services/user_remote_flag_service.dart";
@@ -121,6 +123,32 @@ class _AdvancedSettingsScreenState extends State<AdvancedSettingsScreen> {
                             ),
                             MenuItemWidget(
                               captionedTextWidget: CaptionedTextWidget(
+                                title: S.of(context).archiveSharedAlbums,
+                              ),
+                              menuItemColor: colorScheme.fillFaint,
+                              singleBorderRadius: 8,
+                              alignCaptionedTextToLeft: true,
+                              trailingWidget: ToggleSwitchWidget(
+                                value: () =>
+                                    LocalSettings.instance.archiveSharedAlbums,
+                                onChanged: () async {
+                                  await LocalSettings.instance
+                                      .setArchiveSharedAlbums(
+                                    !LocalSettings.instance.archiveSharedAlbums,
+                                  );
+                                  Bus.instance.fire(
+                                    ForceReloadHomeGalleryEvent(
+                                      "Hide/show shared albums",
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+                            const SizedBox(
+                              height: 24,
+                            ),
+                            MenuItemWidget(
+                              captionedTextWidget: CaptionedTextWidget(
                                 title: S.of(context).manageDeviceStorage,
                               ),
                               menuItemColor: colorScheme.fillFaint,
@@ -131,7 +159,8 @@ class _AdvancedSettingsScreenState extends State<AdvancedSettingsScreen> {
                               singleBorderRadius: 8,
                               alignCaptionedTextToLeft: true,
                               onTap: () async {
-                                routeToPage(context, const AppStorageViewer());
+                                await routeToPage(
+                                    context, const AppStorageViewer());
                               },
                             ),
                             const SizedBox(

@@ -147,7 +147,7 @@ class CollectionsService {
       );
     }
     await _updateDB(updatedCollections);
-    _prefs.setInt(_collectionsSyncTimeKey, maxUpdationTime);
+    await _prefs.setInt(_collectionsSyncTimeKey, maxUpdationTime);
     watch.logAndReset("till DB insertion ${updatedCollections.length}");
     for (final collection in fetchedCollections) {
       _cacheLocalPathAndCollection(collection);
@@ -222,16 +222,24 @@ class CollectionsService {
   }
 
   Set<int> archivedOrHiddenCollectionIds() {
-    return _collectionIDToCollections.values
-        .toList()
-        .where(
-          (element) =>
-              element.hasShareeArchived() ||
-              element.isHidden() ||
-              element.isArchived(),
-        )
-        .map((e) => e.id)
-        .toSet();
+    final bool archiveIncomingCollections =
+        LocalSettings.instance.archiveSharedAlbums;
+    final int ownerID = _config.getUserID()!;
+    final Set<int> result = <int>{};
+    for (final collection in _collectionIDToCollections.values) {
+      if (collection.isHidden() ||
+          collection.isArchived() ||
+          collection.hasShareeArchived()) {
+        result.add(collection.id);
+        continue;
+      }
+      if (archiveIncomingCollections) {
+        if (collection.owner?.id != ownerID) {
+          result.add(collection.id);
+        }
+      }
+    }
+    return result;
   }
 
   int getCollectionSyncTime(int collectionID) {
