@@ -34,7 +34,7 @@ export class DiskCache implements LimitedCache {
                 this.cacheBucketDir,
                 cacheKey
             );
-            if (existsSync(cachePath)) {
+            if (existsSync(oldCachePath)) {
                 const match = new Response(await readFile(oldCachePath));
                 void migrateOldCacheKey(oldCachePath, cachePath, match);
                 return match;
