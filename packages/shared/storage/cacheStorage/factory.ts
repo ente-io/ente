@@ -30,7 +30,10 @@ function transformBrowserCacheStorageToLimitedCacheStorage(
         async open(cacheName) {
             const cache = await caches.open(cacheName);
             return {
-                match: cache.match.bind(cache),
+                match: (key) => {
+                    // options are not supported in the browser
+                    return cache.match(key);
+                },
                 put: cache.put.bind(cache),
                 delete: cache.delete.bind(cache),
             };
