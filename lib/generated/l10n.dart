@@ -2950,16 +2950,6 @@ class S {
     );
   }
 
-  /// `Archive Shared Albums`
-  String get archiveSharedAlbums {
-    return Intl.message(
-      'Archive Shared Albums',
-      name: 'archiveSharedAlbums',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `{count, plural, one{{count} year ago} other{{count} years ago}}`
   String yearsAgo(num count) {
     return Intl.plural(
@@ -8163,6 +8153,16 @@ class S {
     return Intl.message(
       'Do not sign out',
       name: 'doNotSignOut',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Archive shared albums`
+  String get archiveSharedAlbums {
+    return Intl.message(
+      'Archive shared albums',
+      name: 'archiveSharedAlbums',
       desc: '',
       args: [],
     );
