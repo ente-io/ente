@@ -9,7 +9,7 @@
 
 ### Bug Fixes
 
-- Fixed issue with needing to download file multiple times during ml sync
+- Fixed caching issue,causing multiple download of file during ml sync
 
 ## v1.6.55
 
