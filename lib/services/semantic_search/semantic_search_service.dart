@@ -12,6 +12,7 @@ import 'package:photos/events/embedding_updated_event.dart';
 import "package:photos/events/file_uploaded_event.dart";
 import "package:photos/models/embedding.dart";
 import "package:photos/models/file/file.dart";
+import "package:photos/objectbox.g.dart";
 import "package:photos/services/semantic_search/embedding_store.dart";
 import 'package:photos/services/semantic_search/frameworks/onnx/onnx.dart';
 import "package:photos/utils/local_settings.dart";
@@ -109,7 +110,11 @@ class SemanticSearchService {
   void _setupCachedEmbeddings() {
     ObjectBox.instance
         .getEmbeddingBox()
-        .query()
+        .query(
+          Embedding_.model.equals(
+            _mlFramework.getFrameworkName() + "-" + kModelName,
+          ),
+        )
         .watch(triggerImmediately: true)
         .map((query) => query.find())
         .listen((embeddings) {
