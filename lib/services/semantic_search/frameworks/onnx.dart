@@ -224,6 +224,7 @@ class ClipImageEncoder {
 }
 
 class ClipTextEncoder {
+  static const vocabFilePath = "assets/clip/bpe_simple_vocab_16e6.txt";
   final _logger = Logger("CLIPTextEncoder");
   OrtSessionOptions? _sessionOptions;
   OrtSession? _session;
@@ -264,7 +265,7 @@ class ClipTextEncoder {
   Future<List<double>> infer(Map args) async {
     final text = args["text"];
     final runOptions = OrtRunOptions();
-    final tokenizer = CLIPTokenizer();
+    final tokenizer = CLIPTokenizer(vocabFilePath);
     await tokenizer.init();
     final data = List.filled(1, Int32List.fromList(tokenizer.tokenize(text)));
     final inputOrt = OrtValueTensor.createTensorWithDataList(data, [1, 77]);
@@ -288,7 +289,7 @@ class ClipTextEncoder {
 }
 
 class CLIPTokenizer {
-  String bpePath = "assets/vocab/bpe_simple_vocab_16e6.txt";
+  final String bpePath;
   late Map<int, String> byteEncoder;
   late Map<String, int> byteDecoder;
   late Map<int, String> decoder;
