@@ -201,35 +201,39 @@ class MLWorkManager {
     }
 
     private async runMLSyncJob(): Promise<MLSyncJobResult> {
-        // TODO: skipping is not required if we are caching chunks through service worker
-        // currently worker chunk itself is not loaded when network is not there
-        if (!navigator.onLine) {
-            addLogLine(
-                'Skipping ml-sync job run as not connected to internet.'
-            );
-            return {
-                shouldBackoff: true,
-                mlSyncResult: undefined,
+        try {
+            // TODO: skipping is not required if we are caching chunks through service worker
+            // currently worker chunk itself is not loaded when network is not there
+            if (!navigator.onLine) {
+                addLogLine(
+                    'Skipping ml-sync job run as not connected to internet.'
+                );
+                return {
+                    shouldBackoff: true,
+                    mlSyncResult: undefined,
+                };
+            }
+
+            const token = getToken();
+            const userID = getUserID();
+            const jobWorkerProxy = await this.getSyncJobWorker();
+
+            const mlSyncResult = await jobWorkerProxy.sync(token, userID);
+
+            // this.terminateSyncJobWorker();
+            const jobResult: MLSyncJobResult = {
+                shouldBackoff:
+                    !!mlSyncResult.error || mlSyncResult.nOutOfSyncFiles < 1,
+                mlSyncResult,
             };
+            addLogLine('ML Sync Job result: ', JSON.stringify(jobResult));
+
+            // TODO: redirect/refresh to gallery in case of session_expired, stop ml sync job
+
+            return jobResult;
+        } catch (e) {
+            logError(e, 'Failed to run MLSync Job');
         }
-
-        const token = getToken();
-        const userID = getUserID();
-        const jobWorkerProxy = await this.getSyncJobWorker();
-
-        const mlSyncResult = await jobWorkerProxy.sync(token, userID);
-
-        // this.terminateSyncJobWorker();
-        const jobResult: MLSyncJobResult = {
-            shouldBackoff:
-                !!mlSyncResult.error || mlSyncResult.nOutOfSyncFiles < 1,
-            mlSyncResult,
-        };
-        addLogLine('ML Sync Job result: ', JSON.stringify(jobResult));
-
-        // TODO: redirect/refresh to gallery in case of session_expired, stop ml sync job
-
-        return jobResult;
     }
 
     public async startSyncJob() {

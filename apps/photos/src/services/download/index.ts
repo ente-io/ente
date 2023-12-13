@@ -211,7 +211,7 @@ class DownloadManagerImpl {
                 this.thumbnailObjectURLPromises.set(file.id, thumbURLPromise);
             }
             let thumb = await this.thumbnailObjectURLPromises.get(file.id);
-            if (!thumb) {
+            if (!thumb && !localOnly) {
                 this.thumbnailObjectURLPromises.delete(file.id);
                 thumb = await this.getThumbnailForPreview(file, localOnly);
             }
