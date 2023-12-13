@@ -175,7 +175,7 @@ class DownloadManagerImpl {
             this.thumbnailCache
                 ?.put(file.id.toString(), new Response(thumb))
                 .catch((e) => {
-                    logError(e, 'cache put failed');
+                    logError(e, 'thumb cache put failed');
                     // TODO: handle storage full exception.
                 });
             return thumb;
@@ -311,7 +311,7 @@ class DownloadManagerImpl {
                         this.diskFileCache
                             .put(file.id.toString(), encrypted.clone())
                             .catch((e) => {
-                                logError(e, 'cache put failed');
+                                logError(e, 'file cache put failed');
                                 // TODO: handle storage full exception.
                             });
                     }
