@@ -2950,11 +2950,11 @@ class S {
     );
   }
 
-  /// `Hide Shared Items`
-  String get archiveSharedItems {
+  /// `Archive Shared Albums`
+  String get archiveSharedAlbums {
     return Intl.message(
-      'Hide Shared Items',
-      name: 'archiveSharedItems',
+      'Archive Shared Albums',
+      name: 'archiveSharedAlbums',
       desc: '',
       args: [],
     );

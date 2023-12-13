@@ -223,7 +223,7 @@ class CollectionsService {
 
   Set<int> archivedOrHiddenCollectionIds() {
     final bool archiveIncomingCollections =
-        LocalSettings.instance.archiveSharedItems;
+        LocalSettings.instance.archiveSharedAlbums;
     final int ownerID = _config.getUserID()!;
     final Set<int> result = <int>{};
     for (final collection in _collectionIDToCollections.values) {

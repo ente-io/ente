@@ -13,7 +13,7 @@ class LocalSettings {
   static final LocalSettings instance = LocalSettings._privateConstructor();
   static const kCollectionSortPref = "collection_sort_pref";
   static const kPhotoGridSize = "photo_grid_size";
-  static const kArchiveSharedItems = "archive_shared_items";
+  static const kArchiveSharedAlbums = "archive_shared_albums";
   static const kRateUsShownCount = "rate_us_shown_count";
   static const kRateUsPromptThreshold = 2;
 
@@ -39,16 +39,16 @@ class LocalSettings {
     }
   }
 
-  bool get archiveSharedItems {
-    return _prefs.getBool(kArchiveSharedItems) ?? false;
+  bool get archiveSharedAlbums {
+    return _prefs.getBool(kArchiveSharedAlbums) ?? false;
   }
 
   Future<void> setPhotoGridSize(int value) async {
     await _prefs.setInt(kPhotoGridSize, value);
   }
 
-  Future<void> setArchiveSharedItems(bool value) async {
-    await _prefs.setBool(kArchiveSharedItems, value);
+  Future<void> setArchiveSharedAlbums(bool value) async {
+    await _prefs.setBool(kArchiveSharedAlbums, value);
   }
 
   int getRateUsShownCount() {
