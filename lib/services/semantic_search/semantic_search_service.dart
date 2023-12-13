@@ -134,8 +134,22 @@ class SemanticSearchService {
     final fileIDs = await _getFileIDsToBeIndexed();
     final files = await FilesDB.instance.getUploadedFiles(fileIDs);
     _logger.info(files.length.toString() + " to be embedded");
+    await _cacheThumbnails(files);
     _queue.addAll(files);
     _pollQueue();
+  }
+
+  Future<void> _cacheThumbnails(List<EnteFile> files) async {
+    int counter = 0;
+    for (final file in files) {
+      final future1 = getThumbnail(file);
+      final future2 = getThumbnail(file);
+      final future3 = getThumbnail(file);
+      final future4 = getThumbnail(file);
+      await Future.wait([future1, future2, future3, future4]);
+      counter += 4;
+      _logger.info("$counter/${files.length} thumbnails cached");
+    }
   }
 
   Future<List<int>> _getFileIDsToBeIndexed() async {
