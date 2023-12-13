@@ -9,7 +9,7 @@ import "package:onnxruntime/onnxruntime.dart";
 class OnnxImageEncoder {
   OrtSessionOptions? _sessionOptions;
   OrtSession? _session;
-  final _logger = Logger("CLIPImageEncoder");
+  final _logger = Logger("OnnxImageEncoder");
 
   OnnxImageEncoder() {
     OrtEnv.instance.init();
