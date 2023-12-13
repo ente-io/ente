@@ -62,6 +62,7 @@ class DownloadManagerImpl {
     private ready: boolean = false;
     private downloadClient: DownloadClient;
     private thumbnailCache?: LimitedCache;
+    // disk cache is only available on electron
     private diskFileCache?: LimitedCache;
     private cryptoWorker: Remote<DedicatedCryptoWorker>;
 
@@ -306,12 +307,14 @@ class DownloadManagerImpl {
                             onDownloadProgress
                         )
                     );
-                    this.diskFileCache
-                        ?.put(file.id.toString(), encrypted.clone())
-                        .catch((e) => {
-                            logError(e, 'cache put failed');
-                            // TODO: handle storage full exception.
-                        });
+                    if (this.diskFileCache) {
+                        this.diskFileCache
+                            .put(file.id.toString(), encrypted.clone())
+                            .catch((e) => {
+                                logError(e, 'cache put failed');
+                                // TODO: handle storage full exception.
+                            });
+                    }
                 }
                 this.clearDownloadProgress(file.id);
                 try {
@@ -343,7 +346,13 @@ class DownloadManagerImpl {
             let resp: Response = await this.getCachedFile(file);
             if (!resp) {
                 resp = await this.downloadClient.downloadFileStream(file);
-                void this.diskFileCache.put(file.id.toString(), resp.clone());
+                if (this.diskFileCache) {
+                    this.diskFileCache
+                        .put(file.id.toString(), resp.clone())
+                        .catch((e) => {
+                            logError(e, 'file cache put failed');
+                        });
+                }
             }
             const reader = resp.body.getReader();
 
