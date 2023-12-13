@@ -73,7 +73,7 @@ abstract class MLFramework {
   }
 
   Future<void> _initTextModel() async {
-    const assetPath = "assets/models/clip/clip-text-vit-32-float32.onnx";
+    const assetPath = "assets/models/clip/clip-text-vit-32-int32.onnx";
     await loadTextModel(
       await getAccessiblePathForAsset(
         assetPath,
