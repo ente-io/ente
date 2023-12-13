@@ -73,8 +73,8 @@ export const WorkerSafeElectronService = new WorkerSafeElectronServiceImpl();
 function transformMatch(
     fn: ProxiedWorkerLimitedCache['match']
 ): LimitedCache['match'] {
-    return async (key: string) => {
-        return deserializeToResponse(await fn(key));
+    return async (key: string, options) => {
+        return deserializeToResponse(await fn(key, options));
     };
 }
 

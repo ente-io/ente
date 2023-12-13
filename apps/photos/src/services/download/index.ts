@@ -1,7 +1,6 @@
 import {
     generateStreamFromArrayBuffer,
     getRenderableFileURL,
-    getStreamLength,
 } from 'utils/file';
 import { EnteFile } from 'types/file';
 
@@ -136,24 +135,11 @@ class DownloadManagerImpl {
                 return null;
             }
             const cacheResp: Response = await this.diskFileCache?.match(
-                file.id.toString()
+                file.id.toString(),
+                { sizeInBytes: file.info?.fileSize }
             );
             if (!cacheResp) {
                 return null;
-            }
-            // check if cached file size is same as file size
-            const fileSize = file.info?.fileSize;
-            if (!fileSize) {
-                return cacheResp;
-            }
-            const contentLength = await getStreamLength(cacheResp.clone().body);
-            if (file.info?.fileSize === contentLength) {
-                return cacheResp;
-            } else {
-                addLogLine(
-                    `mismatch in file size, delete the cache, {actualSize: ${contentLength}, expectedSize: ${fileSize}`
-                );
-                this.diskFileCache?.delete(file.id.toString());
             }
         } catch (e) {
             logError(e, 'failed to get cached thumbnail');

@@ -16,7 +16,10 @@ export interface ProxiedLimitedElectronAPIs {
     ) => Promise<Uint8Array>;
 }
 export interface ProxiedWorkerLimitedCache {
-    match: (key: string) => Promise<ArrayBuffer>;
+    match: (
+        key: string,
+        options?: { sizeInBytes?: number }
+    ) => Promise<ArrayBuffer>;
     put: (key: string, data: ArrayBuffer) => Promise<void>;
     delete: (key: string) => Promise<boolean>;
 }
@@ -53,8 +56,8 @@ export class WorkerSafeElectronClient implements ProxiedLimitedElectronAPIs {
 function transformMatch(
     fn: LimitedCache['match']
 ): ProxiedWorkerLimitedCache['match'] {
-    return async (key: string) => {
-        return serializeResponse(await fn(key));
+    return async (key: string, options: { sizeInBytes?: number }) => {
+        return serializeResponse(await fn(key, options));
     };
 }
 
