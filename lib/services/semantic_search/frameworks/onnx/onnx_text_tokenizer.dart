@@ -1,12 +1,11 @@
 import "dart:convert";
 import "dart:math";
 
-import "package:flutter/services.dart";
 import "package:html_unescape/html_unescape.dart";
 import "package:tuple/tuple.dart";
 
 class OnnxTextTokenizer {
-  final String bpePath;
+  late String vocabulary;
   late Map<int, String> byteEncoder;
   late Map<String, int> byteDecoder;
   late Map<int, String> decoder;
@@ -27,15 +26,15 @@ class OnnxTextTokenizer {
   late int sot;
   late int eot;
 
-  OnnxTextTokenizer(this.bpePath);
+  OnnxTextTokenizer();
 
   // Async method since the loadFile returns a Future and dart constructor cannot be async
-  Future init() async {
-    final bpe = await loadFile();
+  Future<void> init(String vocabulary) async {
+    this.vocabulary = vocabulary;
     byteEncoder = bytesToUnicode();
     byteDecoder = byteEncoder.map((k, v) => MapEntry(v, k));
 
-    var split = bpe.split('\n');
+    var split = vocabulary.split('\n');
     split = split.sublist(1, 49152 - 256 - 2 + 1);
     final merges = split
         .map((merge) => Tuple2(merge.split(' ')[0], merge.split(' ')[1]))
@@ -59,10 +58,6 @@ class OnnxTextTokenizer {
 
     sot = encoder['<|startoftext|>']!;
     eot = encoder['<|endoftext|>']!;
-  }
-
-  Future<String> loadFile() async {
-    return await rootBundle.loadString(bpePath);
   }
 
   List<int> encode(String text) {
