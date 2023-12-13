@@ -141,13 +141,14 @@ class SemanticSearchService {
 
   Future<void> _cacheThumbnails(List<EnteFile> files) async {
     int counter = 0;
-    for (final file in files) {
-      final future1 = getThumbnail(file);
-      final future2 = getThumbnail(file);
-      final future3 = getThumbnail(file);
-      final future4 = getThumbnail(file);
-      await Future.wait([future1, future2, future3, future4]);
-      counter += 4;
+    const batchSize = 10;
+    for (var i = 0; i < files.length;) {
+      final futures = <Future>[];
+      for (var j = 0; j < batchSize && i < files.length; j++, i++) {
+        futures.add(getThumbnail(files[i]));
+      }
+      await Future.wait(futures);
+      counter += futures.length;
       _logger.info("$counter/${files.length} thumbnails cached");
     }
   }
