@@ -13,6 +13,7 @@ class ONNX extends MLFramework {
   final _clipImage = OnnxImageEncoder();
   final _clipText = OnnxTextEncoder();
   int _textEncoderAddress = 0;
+  int _imageEncoderAddress = 0;
 
   @override
   String getFrameworkName() {
@@ -32,7 +33,7 @@ class ONNX extends MLFramework {
   @override
   Future<void> loadImageModel(String path) async {
     final startTime = DateTime.now();
-    await _computer.compute(
+    _imageEncoderAddress = await _computer.compute(
       _clipImage.loadModel,
       param: {
         "imageModelPath": path,
@@ -68,6 +69,7 @@ class ONNX extends MLFramework {
         _clipImage.inferByImage,
         param: {
           "imagePath": imagePath,
+          "address": _imageEncoderAddress,
         },
         taskName: "createImageEmbedding",
       ) as List<double>;
