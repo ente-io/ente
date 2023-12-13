@@ -23,12 +23,12 @@ class ONNX extends MLFramework {
 
   @override
   String getImageModelRemotePath() {
-    return kModelBucketEndpoint + kImageModel;
+    return "";
   }
 
   @override
   String getTextModelRemotePath() {
-    return kModelBucketEndpoint + kTextModel;
+    return "";
   }
 
   @override
@@ -110,6 +110,7 @@ class ONNX extends MLFramework {
 class ClipImageEncoder {
   OrtSessionOptions? _sessionOptions;
   OrtSession? _session;
+  final Logger _logger = Logger("CLIPImageEncoder");
 
   ClipImageEncoder() {
     OrtEnv.instance.init();
@@ -136,7 +137,9 @@ class ClipImageEncoder {
       _session = OrtSession.fromBuffer(bytes, _sessionOptions!);
       print('image model loaded');
     } catch (e, s) {
+      _logger.severe(e, s);
       print('image model not loaded');
+      rethrow;
     }
   }
 

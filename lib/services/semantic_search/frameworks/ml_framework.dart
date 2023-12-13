@@ -53,27 +53,31 @@ abstract class MLFramework {
   // ---
 
   Future<void> _initImageModel() async {
-    final path = await _getLocalImageModelPath();
-    if (File(path).existsSync()) {
-      await loadImageModel(path);
-    } else {
-      final tempFile = File(path + ".temp");
-      await _downloadFile(getImageModelRemotePath(), tempFile.path);
-      await tempFile.rename(path);
-      await loadImageModel(path);
-    }
+    //final path = await _getLocalImageModelPath();
+    const path = "assets/models/clip/clip-image-vit-32-float32.onnx";
+    await loadImageModel(path);
+    // if (File(path).existsSync()) {
+    //   await loadImageModel(path);
+    // } else {
+    //   final tempFile = File(path + ".temp");
+    //   await _downloadFile(getImageModelRemotePath(), tempFile.path);
+    //   await tempFile.rename(path);
+    //   await loadImageModel(path);
+    // }
   }
 
   Future<void> _initTextModel() async {
-    final path = await _getLocalTextModelPath();
-    if (File(path).existsSync()) {
-      await loadTextModel(path);
-    } else {
-      final tempFile = File(path + ".temp");
-      await _downloadFile(getTextModelRemotePath(), tempFile.path);
-      await tempFile.rename(path);
-      await loadTextModel(path);
-    }
+    //final path = await _getLocalTextModelPath();
+    const path = "assets/models/clip/clip-text-vit-32-float32.onnx";
+    await loadTextModel(path);
+    // if (File(path).existsSync()) {
+    //   await loadTextModel(path);
+    // } else {
+    //   final tempFile = File(path + ".temp");
+    //   await _downloadFile(getTextModelRemotePath(), tempFile.path);
+    //   await tempFile.rename(path);
+    //   await loadTextModel(path);
+    // }
   }
 
   Future<String> _getLocalImageModelPath() async {
