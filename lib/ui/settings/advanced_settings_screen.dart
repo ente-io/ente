@@ -1,5 +1,3 @@
-import "dart:io";
-
 import 'package:flutter/material.dart';
 import "package:photos/core/error-reporting/super_logging.dart";
 import "package:photos/generated/l10n.dart";
@@ -68,34 +66,31 @@ class _AdvancedSettingsScreenState extends State<AdvancedSettingsScreen> {
                       children: [
                         Column(
                           children: [
-                            !Platform.isIOS
-                                ? Column(
-                                    children: [
-                                      MenuItemWidget(
-                                        captionedTextWidget:
-                                            CaptionedTextWidget(
-                                          title: S.of(context).machineLearning,
-                                        ),
-                                        menuItemColor: colorScheme.fillFaint,
-                                        trailingWidget: Icon(
-                                          Icons.chevron_right_outlined,
-                                          color: colorScheme.strokeBase,
-                                        ),
-                                        singleBorderRadius: 8,
-                                        alignCaptionedTextToLeft: true,
-                                        onTap: () async {
-                                          routeToPage(
-                                            context,
-                                            const MachineLearningSettingsPage(),
-                                          );
-                                        },
-                                      ),
-                                      const SizedBox(
-                                        height: 24,
-                                      ),
-                                    ],
-                                  )
-                                : const SizedBox.shrink(),
+                            Column(
+                              children: [
+                                MenuItemWidget(
+                                  captionedTextWidget: CaptionedTextWidget(
+                                    title: S.of(context).machineLearning,
+                                  ),
+                                  menuItemColor: colorScheme.fillFaint,
+                                  trailingWidget: Icon(
+                                    Icons.chevron_right_outlined,
+                                    color: colorScheme.strokeBase,
+                                  ),
+                                  singleBorderRadius: 8,
+                                  alignCaptionedTextToLeft: true,
+                                  onTap: () async {
+                                    routeToPage(
+                                      context,
+                                      const MachineLearningSettingsPage(),
+                                    );
+                                  },
+                                ),
+                                const SizedBox(
+                                  height: 24,
+                                ),
+                              ],
+                            ),
                             GestureDetector(
                               onTap: () {
                                 routeToPage(
