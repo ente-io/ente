@@ -106,11 +106,10 @@ class ONNX extends MLFramework {
   }
 }
 
-
 class ClipImageEncoder {
   OrtSessionOptions? _sessionOptions;
   OrtSession? _session;
-  final Logger _logger = Logger("CLIPImageEncoder");
+  final _logger = Logger("CLIPImageEncoder");
 
   ClipImageEncoder() {
     OrtEnv.instance.init();
@@ -135,10 +134,9 @@ class ClipImageEncoder {
       final rawAssetFile = await rootBundle.load(args["imageModelPath"]);
       final bytes = rawAssetFile.buffer.asUint8List();
       _session = OrtSession.fromBuffer(bytes, _sessionOptions!);
-      print('image model loaded');
+      _logger.info('image model loaded');
     } catch (e, s) {
       _logger.severe(e, s);
-      print('image model not loaded');
       rethrow;
     }
   }
@@ -150,15 +148,31 @@ class ClipImageEncoder {
 
     dynamic inputImage;
     if (rgb.height >= rgb.width) {
-      inputImage = img.copyResize(rgb,
-          width: 224, interpolation: img.Interpolation.linear,);
-      inputImage = img.copyCrop(inputImage,
-          x: 0, y: (inputImage.height - 224) ~/ 2, width: 224, height: 224,);
+      inputImage = img.copyResize(
+        rgb,
+        width: 224,
+        interpolation: img.Interpolation.linear,
+      );
+      inputImage = img.copyCrop(
+        inputImage,
+        x: 0,
+        y: (inputImage.height - 224) ~/ 2,
+        width: 224,
+        height: 224,
+      );
     } else {
-      inputImage = img.copyResize(rgb,
-          height: 224, interpolation: img.Interpolation.linear,);
-      inputImage = img.copyCrop(inputImage,
-          x: (inputImage.width - 224) ~/ 2, y: 0, width: 224, height: 224,);
+      inputImage = img.copyResize(
+        rgb,
+        height: 224,
+        interpolation: img.Interpolation.linear,
+      );
+      inputImage = img.copyCrop(
+        inputImage,
+        x: (inputImage.width - 224) ~/ 2,
+        y: 0,
+        width: 224,
+        height: 224,
+      );
     }
 
     final mean = [0.48145466, 0.4578275, 0.40821073];
@@ -166,31 +180,37 @@ class ClipImageEncoder {
     final processedImage = imageToByteListFloat32(rgb, 224, mean, std);
 
     final inputOrt = OrtValueTensor.createTensorWithDataList(
-        processedImage, [1, 3, 224, 224],);
+      processedImage,
+      [1, 3, 224, 224],
+    );
     final inputs = {'input': inputOrt};
     final outputs = _session?.run(runOptions, inputs);
-    final finalembedding = (outputs?[0]?.value as List<List<double>>)[0];
+    final embedding = (outputs?[0]?.value as List<List<double>>)[0];
     double imageNormalization = 0;
     for (int i = 0; i < 512; i++) {
-      imageNormalization += finalembedding[i] * finalembedding[i];
+      imageNormalization += embedding[i] * embedding[i];
     }
     for (int i = 0; i < 512; i++) {
-      finalembedding[i] = finalembedding[i] / sqrt(imageNormalization);
+      embedding[i] = embedding[i] / sqrt(imageNormalization);
     }
     inputOrt.release();
     runOptions.release();
-    return finalembedding;
+    return embedding;
   }
 
   Float32List imageToByteListFloat32(
-      img.Image image, int inputSize, List<double> mean, List<double> std,) {
+    img.Image image,
+    int inputSize,
+    List<double> mean,
+    List<double> std,
+  ) {
     final convertedBytes = Float32List(1 * inputSize * inputSize * 3);
     final buffer = Float32List.view(convertedBytes.buffer);
     int pixelIndex = 0;
     assert(mean.length == 3);
     assert(std.length == 3);
 
-    //TODO: rewrite this part 
+    //TODO: rewrite this part
     for (var i = 0; i < inputSize; i++) {
       for (var j = 0; j < inputSize; j++) {
         final pixel = image.getPixel(i, j);
@@ -204,6 +224,7 @@ class ClipImageEncoder {
 }
 
 class ClipTextEncoder {
+  final _logger = Logger("CLIPTextEncoder");
   OrtSessionOptions? _sessionOptions;
   OrtSession? _session;
 
@@ -227,16 +248,16 @@ class ClipTextEncoder {
       ..setInterOpNumThreads(1)
       ..setIntraOpNumThreads(1)
       ..setSessionGraphOptimizationLevel(GraphOptimizationLevel.ortEnableAll);
-    
+
     try {
       //const assetFileName = 'assets/models/clip-text-vit-32-float32-int32.onnx';
       // Check if path exists locally
       final rawAssetFile = await rootBundle.load(args["textModelPath"]);
       final bytes = rawAssetFile.buffer.asUint8List();
       _session = OrtSession.fromBuffer(bytes, _sessionOptions!);
-      print('text model loaded');
+      _logger.info('text model loaded');
     } catch (e, s) {
-      print('text model not loaded');
+      _logger.severe('text model not loaded', e, s);
     }
   }
 
@@ -249,20 +270,20 @@ class ClipTextEncoder {
     final inputOrt = OrtValueTensor.createTensorWithDataList(data, [1, 77]);
     final inputs = {'input': inputOrt};
     final outputs = _session?.run(runOptions, inputs);
-    final finalembedding = (outputs?[0]?.value as List<List<double>>)[0];
+    final embedding = (outputs?[0]?.value as List<List<double>>)[0];
     double textNormalization = 0;
     for (int i = 0; i < 512; i++) {
-      textNormalization += finalembedding[i] * finalembedding[i];
+      textNormalization += embedding[i] * embedding[i];
     }
 
     for (int i = 0; i < 512; i++) {
-      finalembedding[i] = finalembedding[i] / sqrt(textNormalization);
+      embedding[i] = embedding[i] / sqrt(textNormalization);
     }
-    
+
     inputOrt.release();
     runOptions.release();
     _session?.release();
-    return(finalembedding);
+    return (embedding);
   }
 }
 
@@ -273,11 +294,18 @@ class CLIPTokenizer {
   late Map<int, String> decoder;
   late Map<String, int> encoder;
   late Map<Tuple2<String, String>, int> bpeRanks;
-  Map<String, String> cache = <String, String>{'<|startoftext|>':'<|startoftext|>', '<|endoftext|>':'<|endoftext|>'};
+  Map<String, String> cache = <String, String>{
+    '<|startoftext|>': '<|startoftext|>',
+    '<|endoftext|>': '<|endoftext|>',
+  };
 
   // Dart RegExpt does not support Unicode identifiers (\p{L} and \p{N})
-  RegExp pat = RegExp(r"""<\|startoftext\|>|<\|endoftext\|>|'s|'t|'re|'ve|'m|'ll|'d|[a-zA-Z]+|[0-9]+|[^\s\p{L}\p{N}]+""", caseSensitive: false, multiLine: false);
-  
+  RegExp pat = RegExp(
+    r"""<\|startoftext\|>|<\|endoftext\|>|'s|'t|'re|'ve|'m|'ll|'d|[a-zA-Z]+|[0-9]+|[^\s\p{L}\p{N}]+""",
+    caseSensitive: false,
+    multiLine: false,
+  );
+
   late int sot;
   late int eot;
 
@@ -285,23 +313,24 @@ class CLIPTokenizer {
 
   // Async method since the loadFile returns a Future and dart constructor cannot be async
   Future init() async {
-    
     final bpe = await loadFile();
     byteEncoder = bytesToUnicode();
     byteDecoder = byteEncoder.map((k, v) => MapEntry(v, k));
 
-    var _merges = bpe.split('\n');
-    _merges = _merges.sublist(1, 49152 - 256 - 2 + 1);
-    final merges = _merges.map((merge) => Tuple2(merge.split(' ')[0], merge.split(' ')[1])).toList();
+    var split = bpe.split('\n');
+    split = split.sublist(1, 49152 - 256 - 2 + 1);
+    final merges = split
+        .map((merge) => Tuple2(merge.split(' ')[0], merge.split(' ')[1]))
+        .toList();
 
     final vocab = byteEncoder.values.toList();
     vocab.addAll(vocab.map((v) => '$v</w>').toList());
 
-    for(var merge = 0; merge < merges.length; merge++) {
+    for (var merge = 0; merge < merges.length; merge++) {
       vocab.add(merges[merge].item1 + merges[merge].item2);
     }
     vocab.addAll(['<|startoftext|>', '<|endoftext|>']);
-    
+
     // asMap returns the map as a Map<int, String>
     decoder = vocab.asMap();
     encoder = decoder.map((k, v) => MapEntry(v, k));
@@ -324,7 +353,9 @@ class CLIPTokenizer {
     for (Match match in pat.allMatches(text)) {
       String token = match[0]!;
       token = utf8.encode(token).map((b) => byteEncoder[b]).join();
-      bpe(token).split(' ').forEach((bpeToken) => bpeTokens.add(encoder[bpeToken]!));
+      bpe(token)
+          .split(' ')
+          .forEach((bpeToken) => bpeTokens.add(encoder[bpeToken]!));
     }
     return bpeTokens;
   }
@@ -341,26 +372,25 @@ class CLIPTokenizer {
     }
 
     while (true) {
-
       Tuple2<String, String> bigram = pairs.first;
       for (var pair in pairs) {
-        var rank1 = bpeRanks[pair] ?? double.infinity;
-        var rank2 = bpeRanks[bigram] ?? double.infinity;
+        final rank1 = bpeRanks[pair] ?? double.infinity;
+        final rank2 = bpeRanks[bigram] ?? double.infinity;
 
         if (rank1 < rank2) {
           bigram = pair;
         }
       }
-    
+
       if (!bpeRanks.containsKey(bigram)) {
         break;
       }
-      var first = bigram.item1;
-      var second = bigram.item2;
-      var newWord = <String>[];
+      final first = bigram.item1;
+      final second = bigram.item2;
+      final newWord = <String>[];
       var i = 0;
       while (i < word.length) {
-        var j = word.sublist(i).indexOf(first);
+        final j = word.sublist(i).indexOf(first);
         if (j == -1) {
           newWord.addAll(word.sublist(i));
           break;
@@ -383,7 +413,7 @@ class CLIPTokenizer {
         pairs = getPairs(word);
       }
     }
-    var wordStr = word.join(' ');
+    final wordStr = word.join(' ');
     cache[token] = wordStr;
     return wordStr;
   }
@@ -398,12 +428,12 @@ class CLIPTokenizer {
     }
   }
 
-  List<int> pad (List<int> x, int padLength){
+  List<int> pad(List<int> x, int padLength) {
     return x + List.filled(padLength - x.length, 0);
   }
 
   Map<int, String> bytesToUnicode() {
-    List<int> bs = [];
+    final List<int> bs = [];
     for (int i = '!'.codeUnitAt(0); i <= '~'.codeUnitAt(0); i++) {
       bs.add(i);
     }
@@ -414,7 +444,7 @@ class CLIPTokenizer {
       bs.add(i);
     }
 
-    List<int> cs = List.from(bs);
+    final List<int> cs = List.from(bs);
     int n = 0;
     for (int b = 0; b < 256; b++) {
       if (!bs.contains(b)) {
@@ -424,12 +454,12 @@ class CLIPTokenizer {
       }
     }
 
-    List<String> ds = cs.map((n) => String.fromCharCode(n)).toList();
+    final List<String> ds = cs.map((n) => String.fromCharCode(n)).toList();
     return Map.fromIterables(bs, ds);
   }
 
   Set<Tuple2<String, String>> getPairs(List<String> word) {
-    Set<Tuple2<String, String>> pairs = {};
+    final Set<Tuple2<String, String>> pairs = {};
     String prevChar = word[0];
     for (var i = 1; i < word.length; i++) {
       pairs.add(Tuple2(prevChar, word[i]));
@@ -439,15 +469,13 @@ class CLIPTokenizer {
   }
 
   String basicClean(String text) {
-    var unescape = HtmlUnescape();
+    final unescape = HtmlUnescape();
     text = unescape.convert(unescape.convert(text));
     return text.trim();
   }
-  
+
   String whitespaceClean(String text) {
     text = text.replaceAll(RegExp(r'\s+'), ' ');
     return text.trim();
   }
-
-
 }
