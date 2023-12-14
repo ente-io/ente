@@ -70,17 +70,17 @@ export default function PairingMode() {
         senderId: string;
         data: any;
     }) => {
-        if (message.type === 'urn:x-cast:pair-request') {
-            // send the 6 digit code to the sender
+        // if (message.type === 'urn:x-cast:pair-request') {
+        // send the 6 digit code to the sender
 
-            cast.framework.CastReceiverContext.getInstance().sendCustomMessage(
-                'urn:x-cast:pair-response',
-                message.senderId,
-                {
-                    code: digits.join(''),
-                }
-            );
-        }
+        cast.framework.CastReceiverContext.getInstance().sendCustomMessage(
+            'urn:x-cast:pair-response',
+            message.senderId,
+            {
+                code: digits.join(''),
+            }
+        );
+        // }
     };
 
     const init = async () => {
