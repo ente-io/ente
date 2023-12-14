@@ -8,7 +8,6 @@ import "package:photos/generated/l10n.dart";
 import 'package:photos/models/duplicate_files.dart';
 import 'package:photos/models/file/file.dart';
 import 'package:photos/services/collections_service.dart';
-import 'package:photos/services/deduplication_service.dart';
 import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/viewer/file/detail_page.dart';
 import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
@@ -55,10 +54,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
 
   @override
   void initState() {
-    _duplicates = DeduplicationService.instance.clubDuplicates(
-      widget.duplicates,
-      clubbingKey: (EnteFile f) => f.hash,
-    );
+    _duplicates = widget.duplicates;
     unselectedGrids.clear();
     _selectAllFilesButFirst();
 
