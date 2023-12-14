@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import "package:flutter/material.dart";
 import "package:latlong2/latlong.dart";
 import 'package:logging/logging.dart';
 import 'package:path/path.dart';
@@ -6,12 +7,17 @@ import 'package:photos/core/configuration.dart';
 import 'package:photos/core/network/network.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/extensions/list.dart';
+import "package:photos/generated/l10n.dart";
 import 'package:photos/models/file/file.dart';
 import "package:photos/models/file_load_result.dart";
 import "package:photos/models/metadata/file_magic.dart";
 import 'package:photos/services/file_magic_service.dart';
 import "package:photos/services/ignored_files_service.dart";
+import "package:photos/ui/components/action_sheet_widget.dart";
+import "package:photos/ui/components/buttons/button_widget.dart";
+import "package:photos/ui/components/models/button_type.dart";
 import 'package:photos/utils/date_time_util.dart';
+import "package:photos/utils/exif_util.dart";
 
 class FilesService {
   late Dio _enteDio;
@@ -88,33 +94,133 @@ class FilesService {
 
   Future<void> bulkEditLocationData(
     List<EnteFile> files,
-    LatLng location,
+    LatLng? location,
+    BuildContext context,
   ) async {
     final List<EnteFile> uploadedFiles =
         files.where((element) => element.uploadedFileID != null).toList();
 
     final List<EnteFile> remoteFilesToUpdate = [];
     final Map<int, Map<String, dynamic>> fileIDToUpdateMetadata = {};
-    for (EnteFile remoteFile in uploadedFiles) {
-      // discard files not owned by user and also dedupe already processed
-      // files
-      if (remoteFile.ownerID != _config.getUserID()! ||
-          fileIDToUpdateMetadata.containsKey(remoteFile.uploadedFileID!)) {
-        continue;
-      }
 
-      remoteFilesToUpdate.add(remoteFile);
-      fileIDToUpdateMetadata[remoteFile.uploadedFileID!] = {
-        latKey: location.latitude,
-        longKey: location.longitude,
-      };
+    if (location == null) {
+      await _processFilesForBulkRemoveLocation(
+        remoteFilesToUpdate,
+        uploadedFiles,
+        fileIDToUpdateMetadata,
+        context,
+      );
+    } else {
+      for (EnteFile remoteFile in uploadedFiles) {
+        // discard files not owned by user and also dedupe already processed
+        // files
+        if (remoteFile.ownerID != _config.getUserID()! ||
+            fileIDToUpdateMetadata.containsKey(remoteFile.uploadedFileID!)) {
+          continue;
+        }
+
+        remoteFilesToUpdate.add(remoteFile);
+        fileIDToUpdateMetadata[remoteFile.uploadedFileID!] = {
+          latKey: location.latitude,
+          longKey: location.longitude,
+        };
+      }
     }
+
     if (remoteFilesToUpdate.isNotEmpty) {
       await FileMagicService.instance.updatePublicMagicMetadata(
         remoteFilesToUpdate,
         null,
         metadataUpdateMap: fileIDToUpdateMetadata,
       );
+    }
+  }
+
+  Future<void> _processFilesForBulkRemoveLocation(
+    List<EnteFile> remoteFilesToUpdate,
+    List<EnteFile> uploadedFiles,
+    Map<int, Map<String, dynamic>> fileIDToUpdateMetadata,
+    BuildContext context,
+  ) async {
+    final filesWithOgLocation = <EnteFile>[];
+    final filesWithoutOgLocation = <EnteFile>[];
+    for (EnteFile remoteFile in uploadedFiles) {
+      // discard files not owned by user and also dedupe files
+      if (remoteFile.ownerID != _config.getUserID()! ||
+          filesWithoutOgLocation.any(
+            (file) => file.uploadedFileID == remoteFile.uploadedFileID,
+          ) ||
+          filesWithOgLocation.any(
+            (file) => file.uploadedFileID == remoteFile.uploadedFileID,
+          )) {
+        continue;
+      }
+      final exif = await getExif(remoteFile);
+      final locationFromExif = gpsDataFromExif(exif).toLocationObj();
+      locationFromExif == null
+          ? filesWithoutOgLocation.add(remoteFile)
+          : filesWithOgLocation.add(remoteFile);
+    }
+    if (filesWithOgLocation.isEmpty && filesWithoutOgLocation.isEmpty) {
+      _logger.info(
+        "Skipping bulkRemoveLocation, no owned files to remove location data from",
+      );
+      return;
+    }
+    if (filesWithoutOgLocation.isEmpty) {
+      remoteFilesToUpdate.addAll(filesWithOgLocation);
+    } else {
+      final buttons = <ButtonWidget>[
+        ButtonWidget(
+          labelText: "All items",
+          buttonType: ButtonType.neutral,
+          buttonSize: ButtonSize.large,
+          shouldStickToDarkTheme: true,
+          buttonAction: ButtonAction.first,
+          shouldSurfaceExecutionStates: true,
+          isInAlert: true,
+          onTap: () async {
+            remoteFilesToUpdate.addAll(
+              [...filesWithOgLocation, ...filesWithoutOgLocation],
+            );
+          },
+        ),
+        ButtonWidget(
+          labelText: "Items with location data",
+          buttonType: ButtonType.neutral,
+          buttonSize: ButtonSize.large,
+          shouldStickToDarkTheme: true,
+          buttonAction: ButtonAction.first,
+          shouldSurfaceExecutionStates: true,
+          isInAlert: true,
+          onTap: () async {
+            remoteFilesToUpdate.addAll(filesWithOgLocation);
+          },
+        ),
+        ButtonWidget(
+          labelText: S.of(context).cancel,
+          buttonType: ButtonType.secondary,
+          buttonSize: ButtonSize.large,
+          shouldStickToDarkTheme: true,
+          buttonAction: ButtonAction.fourth,
+          isInAlert: true,
+        ),
+      ];
+
+      await showActionSheet(
+        context: context,
+        buttons: buttons,
+        title: "Choose items to reset",
+        body:
+            "Some items selected never had location data in the first place.\n\nResetting location data for such items will delete its custom location data",
+      );
+    }
+
+    for (var element in remoteFilesToUpdate) {
+      fileIDToUpdateMetadata[element.uploadedFileID!] = {
+        latKey: null,
+        longKey: null,
+      };
     }
   }
 

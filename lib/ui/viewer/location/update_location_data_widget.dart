@@ -69,12 +69,24 @@ class _UpdateLocationDataWidgetState extends State<UpdateLocationDataWidget> {
           child: Column(
             children: [
               MapButton(
+                icon: Icons.undo,
+                onPressed: () async {
+                  await FilesService.instance
+                      .bulkEditLocationData(widget.files, null, context);
+                  Navigator.of(context).pop();
+                },
+                heroTag: "revert-to-og-location",
+              ),
+              MapButton(
                 // icon: Icons.add_location_alt_outlined,
                 icon: Icons.check,
 
                 onPressed: () async {
-                  await FilesService.instance
-                      .bulkEditLocationData(widget.files, selectedLocation!);
+                  await FilesService.instance.bulkEditLocationData(
+                    widget.files,
+                    selectedLocation!,
+                    context,
+                  );
                   Navigator.of(context).pop();
                 },
 
