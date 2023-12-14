@@ -1188,6 +1188,64 @@ class CollectionsService {
     }
   }
 
+  // This method is used to add files to a collection without firing any events.
+  // Unlike `addToCollection`, this method does not update the `FilesDB` or modify
+  // the `EnteFile` objects passed to it. This is only used during dedupe process
+  // for adding files to a collection without firing any events.
+  Future<void> addSilentlyToCollection(
+    int collectionID,
+    List<EnteFile> files,
+  ) async {
+    if (files.isEmpty) {
+      return;
+    }
+    // as any non uploaded file
+    final pendingUpload = files.any(
+      (element) => element.uploadedFileID != null,
+    );
+    if (pendingUpload) {
+      throw ArgumentError('Can only add uploaded files silently');
+    }
+    final existingFileIDsInCollection =
+        await FilesDB.instance.getUploadedFileIDs(collectionID);
+    files.removeWhere(
+      (element) => existingFileIDsInCollection.contains(element.uploadedFileID),
+    );
+    if (files.isEmpty) {
+      _logger.info("nothing to add to the collection");
+      return;
+    }
+    final params = <String, dynamic>{};
+    params["collectionID"] = collectionID;
+    final batchedFiles = files.chunks(batchSize);
+    for (final batch in batchedFiles) {
+      params["files"] = [];
+      for (final file in batch) {
+        final int uploadedFileID = file.uploadedFileID!;
+        final fileKey = getFileKey(file);
+        final encryptedKeyData =
+            CryptoUtil.encryptSync(fileKey, getCollectionKey(collectionID));
+        final String encryptedKey =
+            CryptoUtil.bin2base64(encryptedKeyData.encryptedData!);
+        final String keyDecryptionNonce =
+            CryptoUtil.bin2base64(encryptedKeyData.nonce!);
+        params["files"].add(
+          CollectionFileItem(uploadedFileID, encryptedKey, keyDecryptionNonce)
+              .toMap(),
+        );
+      }
+      try {
+        await _enteDio.post(
+          "/collections/add-files",
+          data: params,
+        );
+      } catch (e) {
+        _logger.warning('failed to add files to collection', e);
+        rethrow;
+      }
+    }
+  }
+
   Future<EnteFile> linkLocalFileToExistingUploadedFileInAnotherCollection(
     int destCollectionID, {
     required EnteFile localFileToUpload,
