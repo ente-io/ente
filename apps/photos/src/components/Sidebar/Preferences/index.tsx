@@ -15,7 +15,6 @@ import { useLocalState } from '@ente/shared/hooks/useLocalState';
 import ElectronAPIs from '@ente/shared/electron';
 import InMemoryStore, { MS_KEYS } from '@ente/shared/storage/InMemoryStore';
 import { logError } from '@ente/shared/sentry';
-import CacheDirectory from './CacheDirectory';
 
 export default function Preferences({ open, onClose, onRootClose }) {
     const [advancedSettingsView, setAdvancedSettingsView] = useState(false);
@@ -84,8 +83,6 @@ export default function Preferences({ open, onClose, onRootClose }) {
                             onClick={toggleOptOutOfCrashReports}
                             label={t('CRASH_REPORTING')}
                         />
-
-                        <CacheDirectory />
 
                         <EnteMenuItem
                             onClick={openMapSettings}
