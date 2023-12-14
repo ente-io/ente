@@ -1325,7 +1325,6 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Verrai disconnesso dai seguenti dispositivi:"),
         "thisWillLogYouOutOfThisDevice": MessageLookupByLibrary.simpleMessage(
             "Verrai disconnesso dal tuo dispositivo!"),
-        "time": MessageLookupByLibrary.simpleMessage("Ora"),
         "toHideAPhotoOrVideo": MessageLookupByLibrary.simpleMessage(
             "Per nascondere una foto o un video"),
         "toResetVerifyEmail": MessageLookupByLibrary.simpleMessage(

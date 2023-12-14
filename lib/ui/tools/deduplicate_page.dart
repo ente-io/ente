@@ -109,15 +109,15 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
 
   void _sortDuplicates() {
     _duplicates.sort((first, second) {
-      if (sortKey == SortKey.size) {
-        final aSize = first.files.length * first.size;
-        final bSize = second.files.length * second.size;
-        return bSize - aSize;
-      } else if (sortKey == SortKey.count) {
-        return second.files.length - first.files.length;
-      } else {
-        return second.files.first.creationTime! -
-            first.files.first.creationTime!;
+      switch (sortKey) {
+        case SortKey.size:
+          final aSize = first.files.length * first.size;
+          final bSize = second.files.length * second.size;
+          return bSize - aSize;
+        case SortKey.count:
+          return second.files.length - first.files.length;
+        default:
+          throw Exception("Unexpected sort key $sortKey");
       }
     });
   }
@@ -177,9 +177,6 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
           break;
         case SortKey.size:
           text = S.of(context).totalSize;
-          break;
-        case SortKey.time:
-          text = S.of(context).time;
           break;
       }
       return Text(
@@ -471,11 +468,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
   }
 }
 
-enum SortKey {
-  size,
-  count,
-  time,
-}
+enum SortKey { size, count }
 
 class DeduplicationResult {
   final int count;

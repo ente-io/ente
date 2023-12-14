@@ -1121,7 +1121,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("这将使您在以下设备中退出登录："),
         "thisWillLogYouOutOfThisDevice":
             MessageLookupByLibrary.simpleMessage("这将使您在此设备上退出登录！"),
-        "time": MessageLookupByLibrary.simpleMessage("时间"),
         "toHideAPhotoOrVideo": MessageLookupByLibrary.simpleMessage("隐藏照片或视频"),
         "toResetVerifyEmail":
             MessageLookupByLibrary.simpleMessage("要重置您的密码，请先验证您的电子邮件。"),

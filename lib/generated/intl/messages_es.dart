@@ -1208,7 +1208,6 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Esto cerrará la sesión del siguiente dispositivo:"),
         "thisWillLogYouOutOfThisDevice": MessageLookupByLibrary.simpleMessage(
             "¡Esto cerrará la sesión de este dispositivo!"),
-        "time": MessageLookupByLibrary.simpleMessage("Tiempo"),
         "toHideAPhotoOrVideo": MessageLookupByLibrary.simpleMessage(
             "Para ocultar una foto o video"),
         "todaysLogs": MessageLookupByLibrary.simpleMessage("Registros de hoy"),

@@ -1396,7 +1396,6 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Cela vous déconnectera de l\'appareil suivant :"),
         "thisWillLogYouOutOfThisDevice": MessageLookupByLibrary.simpleMessage(
             "Cela vous déconnectera de cet appareil !"),
-        "time": MessageLookupByLibrary.simpleMessage("Date et heure"),
         "toHideAPhotoOrVideo": MessageLookupByLibrary.simpleMessage(
             "Cacher une photo ou une vidéo"),
         "toResetVerifyEmail": MessageLookupByLibrary.simpleMessage(

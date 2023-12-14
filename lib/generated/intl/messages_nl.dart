@@ -1387,7 +1387,6 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Dit zal je uitloggen van het volgende apparaat:"),
         "thisWillLogYouOutOfThisDevice": MessageLookupByLibrary.simpleMessage(
             "Dit zal je uitloggen van dit apparaat!"),
-        "time": MessageLookupByLibrary.simpleMessage("Tijd"),
         "toHideAPhotoOrVideo": MessageLookupByLibrary.simpleMessage(
             "Om een foto of video te verbergen"),
         "toResetVerifyEmail": MessageLookupByLibrary.simpleMessage(

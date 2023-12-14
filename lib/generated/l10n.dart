@@ -5965,16 +5965,6 @@ class S {
     );
   }
 
-  /// `Time`
-  String get time {
-    return Intl.message(
-      'Time',
-      name: 'time',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `Long-press on an item to view in full-screen`
   String get longpressOnAnItemToViewInFullscreen {
     return Intl.message(
