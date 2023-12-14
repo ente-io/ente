@@ -49,7 +49,8 @@ class OnnxTextEncoder {
     final text = args["text"];
     final address = args["address"] as int;
     final runOptions = OrtRunOptions();
-    final data = List.filled(1, Int32List.fromList(_tokenizer.tokenize(text)));
+    final tokenize = _tokenizer.tokenize(text);
+    final data = List.filled(1, Int32List.fromList(tokenize));
     final inputOrt = OrtValueTensor.createTensorWithDataList(data, [1, 77]);
     final inputs = {'input': inputOrt};
     final session = OrtSession.fromAddress(address);
