@@ -7,7 +7,7 @@
     "main": "app/main.js",
     "build": {
         "appId": "io.ente.bhari-frame",
-        "artifactName": "${productName}-${version}.${ext}",
+        "artifactName": "${productName}-${version}-${arch}.${ext}",
         "nsis": {
             "deleteAppDataOnUninstall": true
         },
