@@ -141,7 +141,7 @@ class DownloadManagerImpl {
             );
             return cacheResp?.clone();
         } catch (e) {
-            logError(e, 'failed to get cached thumbnail');
+            logError(e, 'failed to get cached file');
             throw e;
         }
     }
