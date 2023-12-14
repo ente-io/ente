@@ -4,7 +4,7 @@
 
 ### Bug Fixes
 
-- Fix image load issue
+- Fix File load issue
 
 ## v1.6.57
 
