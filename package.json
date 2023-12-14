@@ -1,7 +1,7 @@
 {
     "name": "ente",
     "productName": "ente",
-    "version": "1.6.58",
+    "version": "1.6.59-alpha.0",
     "private": true,
     "description": "Desktop client for ente.io",
     "main": "app/main.js",
@@ -19,7 +19,10 @@
                 "pacman",
                 "tar.gz"
             ],
-            "arch":["x64","arm64"],
+            "arch": [
+                "x64",
+                "arm64"
+            ],
             "icon": "./build/icon.icns",
             "category": "Photography"
         },
