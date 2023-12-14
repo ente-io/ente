@@ -141,7 +141,7 @@ class SemanticSearchService {
 
   Future<void> _cacheThumbnails(List<EnteFile> files) async {
     int counter = 0;
-    const batchSize = 50;
+    const batchSize = 100;
     for (var i = 0; i < files.length;) {
       final futures = <Future>[];
       for (var j = 0; j < batchSize && i < files.length; j++, i++) {
