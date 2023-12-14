@@ -33,20 +33,6 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
   static const crossAxisCount = 4;
   static const crossAxisSpacing = 4.0;
   static const headerRowCount = 3;
-  static final selectedOverlay = Container(
-    color: Colors.black.withOpacity(0.4),
-    child: const Align(
-      alignment: Alignment.bottomRight,
-      child: Padding(
-        padding: EdgeInsets.only(right: 4, bottom: 4),
-        child: Icon(
-          Icons.check_circle,
-          size: 24,
-          color: Colors.white,
-        ),
-      ),
-    ),
-  );
 
   final Set<int> selectedGrids = <int>{};
 
