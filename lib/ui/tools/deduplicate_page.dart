@@ -39,10 +39,12 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
   late List<DuplicateFiles> _duplicates;
 
   SortKey sortKey = SortKey.size;
+  late ValueNotifier<String> _deleteProgress;
 
   @override
   void initState() {
     _duplicates = widget.duplicates;
+    _deleteProgress = ValueNotifier("");
     _selectAllGrids();
     super.initState();
   }
@@ -214,7 +216,15 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
           ),
           onSelected: (int index) {
             setState(() {
-              sortKey = SortKey.values[index];
+              final newKey = SortKey.values[index];
+              if (newKey == sortKey) {
+                return;
+              } else {
+                sortKey = newKey;
+                if (selectedGrids.length != _duplicates.length) {
+                  selectedGrids.clear();
+                }
+              }
             });
           },
           itemBuilder: (context) {
