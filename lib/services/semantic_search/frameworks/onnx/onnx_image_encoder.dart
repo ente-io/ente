@@ -69,16 +69,39 @@ class OnnxImageEncoder {
 
     final mean = [0.48145466, 0.4578275, 0.40821073];
     final std = [0.26862954, 0.26130258, 0.27577711];
-    final processedImage = imageToByteListFloat32(rgb, 224, mean, std);
+    //final processedImage = imageToByteListFloat32(rgb, 224, mean, std);
+    final rgbData = [[], [], []]; // [1, 3, 224, 224
+    rgbData[0] = List.filled(224, List.filled(224, 0.0));
+    rgbData[1] = List.filled(224, List.filled(224, 0.0));
+    rgbData[2] = List.filled(224, List.filled(224, 0.0));
 
-    final inputOrt = OrtValueTensor.createTensorWithDataList(
-      processedImage,
-      [1, 3, 224, 224],
-    );
+    // [3, 224*224] -> [3, 224, 224]
+    for (int i = 0; i < 224; i++) {
+      for (int j = 0; j < 224; j++) {
+        rgbData[0][i][j] = (inputImage.getPixel(i, j).r / 255 - mean[0]) / std[0];
+        rgbData[1][i][j] = (inputImage.getPixel(i, j).g / 255 - mean[1]) / std[1];
+        rgbData[2][i][j] = (inputImage.getPixel(i, j).g / 255 - mean[2]) / std[2];
+      }
+    }
+
+    final flattenedList = [
+      for (final subList in rgbData)
+        for (final innerList in subList)
+          for (final element in innerList)
+            element,
+    ];
+
+    final floatList = Float32List(flattenedList.length);
+    for (int i = 0; i < flattenedList.length; i++) {
+      floatList[i] = flattenedList[i];
+    }
+
+    final inputOrt = OrtValueTensor.createTensorWithDataList(floatList, [1, 3, 224, 224]);
     final inputs = {'input': inputOrt};
     final session = OrtSession.fromAddress(args["address"]);
     final outputs = session.run(runOptions, inputs);
     final embedding = (outputs[0]?.value as List<List<double>>)[0];
+
     double imageNormalization = 0;
     for (int i = 0; i < 512; i++) {
       imageNormalization += embedding[i] * embedding[i];
