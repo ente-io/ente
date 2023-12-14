@@ -167,6 +167,7 @@ class FilesService {
       );
       return;
     }
+
     if (filesWithoutOgLocation.isEmpty) {
       remoteFilesToUpdate.addAll(filesWithOgLocation);
     } else {
@@ -211,8 +212,9 @@ class FilesService {
         context: context,
         buttons: buttons,
         title: "Choose items to reset",
-        body:
-            "Some items selected never had location data in the first place.\n\nResetting location data for such items will delete its custom location data",
+        body: "Some items selected never had location data in the first place",
+        bodyHighlight:
+            "Resetting location data for such items will delete its custom location data",
       );
     }
 
