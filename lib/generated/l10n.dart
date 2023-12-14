@@ -8157,16 +8157,6 @@ class S {
       args: [],
     );
   }
-
-  /// `Archive shared albums`
-  String get archiveSharedAlbums {
-    return Intl.message(
-      'Archive shared albums',
-      name: 'archiveSharedAlbums',
-      desc: '',
-      args: [],
-    );
-  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {
