@@ -43,12 +43,11 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
   @override
   void initState() {
     _duplicates = widget.duplicates;
-    _selectAllFilesButFirst();
-
+    _selectAllGrids();
     super.initState();
   }
 
-  void _selectAllFilesButFirst() {
+  void _selectAllGrids() {
     selectedGrids.clear();
     for (int idx = 0; idx < _duplicates.length; idx++) {
       selectedGrids.add(idx);
