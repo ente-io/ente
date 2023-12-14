@@ -162,6 +162,22 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
             ? const SizedBox.shrink()
             : Column(
                 children: [
+                  ValueListenableBuilder(
+                    valueListenable: _deleteProgress,
+                    builder: (BuildContext context, value, Widget? child) {
+                      if (value.isEmpty) {
+                        return const SizedBox.shrink();
+                      } else {
+                        return Padding(
+                          padding: const EdgeInsets.all(4),
+                          child: Text(
+                            value, // Show the value
+                            style: getEnteTextTheme(context).bodyMuted,
+                          ),
+                        );
+                      }
+                    },
+                  ),
                   _getDeleteButton(),
                   const SizedBox(height: crossAxisSpacing / 2),
                 ],
@@ -288,7 +304,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
                     fontSize: 12,
                   ),
                 ),
-                const Padding(padding: EdgeInsets.all(2)),
+                const Padding(padding: EdgeInsets.all(4)),
               ],
             ),
             onPressed: () async {
@@ -314,27 +330,36 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
         final EnteFile fileToKeep = sortedFiles.first;
         filesToDelele.addAll(sortedFiles.sublist(1));
         for (final collectionID in _duplicates[index].collectionIDs) {
+          if (fileToKeep.collectionID == collectionID) {
+            continue;
+          }
           if (!collectionToFilesToAddMap.containsKey(collectionID)) {
             collectionToFilesToAddMap[collectionID] = [];
           }
-          if (fileToKeep.collectionID != collectionID) {
-            collectionToFilesToAddMap[collectionID]!.add(fileToKeep);
-          }
+          collectionToFilesToAddMap[collectionID]!.add(fileToKeep);
         }
       }
     }
+    final int collectionCnt = collectionToFilesToAddMap.keys.length;
+    int progress = 0;
     for (final collectionID in collectionToFilesToAddMap.keys) {
+      if (!mounted) {
+        return;
+      }
+      if (collectionCnt > 0) {
+        progress++;
+        // calculate progress percentage upto 2 decimal places
+        final double percentage = (progress / collectionCnt) * 100;
+        _deleteProgress.value = '$percentage%';
+      }
       log("AddingNow ${collectionToFilesToAddMap[collectionID]!.length} files to $collectionID");
       await CollectionsService.instance.addSilentlyToCollection(
         collectionID,
         collectionToFilesToAddMap[collectionID]!,
       );
     }
-    showToast(
-      context,
-      'Should move & delete ${filesToDelele.length} files} ',
-    ).ignore();
-    if (filesToDelele.isEmpty) {
+    _deleteProgress.value = "";
+    if (filesToDelele.isNotEmpty) {
       await deleteFilesFromRemoteOnly(context, filesToDelele);
       Bus.instance.fire(UserDetailsChangedEvent());
       Navigator.of(context)

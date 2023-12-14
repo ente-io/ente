@@ -4906,6 +4906,16 @@ class S {
     );
   }
 
+  /// `Processing {currentlyProcessing} / {totalCount}`
+  String genericProgress(int currentlyProcessing, int totalCount) {
+    return Intl.message(
+      'Processing $currentlyProcessing / $totalCount',
+      name: 'genericProgress',
+      desc: 'Generic progress text to display when processing multiple items',
+      args: [currentlyProcessing, totalCount],
+    );
+  }
+
   /// `Permanently delete`
   String get permanentlyDelete {
     return Intl.message(
