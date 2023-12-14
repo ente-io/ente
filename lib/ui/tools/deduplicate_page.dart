@@ -1,3 +1,5 @@
+import "dart:developer";
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:photos/core/constants.dart';
@@ -14,6 +16,7 @@ import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
 import 'package:photos/ui/viewer/gallery/empty_state.dart';
 import 'package:photos/utils/data_util.dart';
 import 'package:photos/utils/delete_file_util.dart';
+import "package:photos/utils/dialog_util.dart";
 import 'package:photos/utils/navigation_util.dart';
 import "package:photos/utils/toast_util.dart";
 
@@ -297,28 +300,54 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
               ],
             ),
             onPressed: () async {
-              final List<EnteFile> filesToDelele = [];
-              for (int index = 0; index < _duplicates.length; index++) {
-                if (selectedGrids.contains(index)) {
-                  filesToDelele.addAll(_duplicates[index].files.sublist(1));
-                }
-              }
-
-              showToast(
-                context,
-                'Should move & delete ${filesToDelele.length} files}',
-              ).ignore();
-              if (filesToDelele.isEmpty) {
-                await deleteFilesFromRemoteOnly(context, filesToDelele);
-                Bus.instance.fire(UserDetailsChangedEvent());
-                Navigator.of(context)
-                    .pop(DeduplicationResult(filesToDelele.length, totalSize));
+              try {
+                await deleteDuplicates(totalSize);
+              } catch (e) {
+                log("Failed to delete duplicates", error: e);
+                showGenericErrorDialog(context: context, error: e).ignore();
               }
             },
           ),
         ),
       ),
     );
+  }
+
+  Future<void> deleteDuplicates(int totalSize) async {
+    final List<EnteFile> filesToDelele = [];
+    final Map<int, List<EnteFile>> collectionToFilesToAddMap = {};
+    for (int index = 0; index < _duplicates.length; index++) {
+      if (selectedGrids.contains(index)) {
+        final sortedFiles = _duplicates[index].sortByLocalIDs();
+        final EnteFile fileToKeep = sortedFiles.first;
+        filesToDelele.addAll(sortedFiles.sublist(1));
+        for (final collectionID in _duplicates[index].collectionIDs) {
+          if (!collectionToFilesToAddMap.containsKey(collectionID)) {
+            collectionToFilesToAddMap[collectionID] = [];
+          }
+          if (fileToKeep.collectionID != collectionID) {
+            collectionToFilesToAddMap[collectionID]!.add(fileToKeep);
+          }
+        }
+      }
+    }
+    for (final collectionID in collectionToFilesToAddMap.keys) {
+      log("AddingNow ${collectionToFilesToAddMap[collectionID]!.length} files to $collectionID");
+      await CollectionsService.instance.addSilentlyToCollection(
+        collectionID,
+        collectionToFilesToAddMap[collectionID]!,
+      );
+    }
+    showToast(
+      context,
+      'Should move & delete ${filesToDelele.length} files} ',
+    ).ignore();
+    if (filesToDelele.isEmpty) {
+      await deleteFilesFromRemoteOnly(context, filesToDelele);
+      Bus.instance.fire(UserDetailsChangedEvent());
+      Navigator.of(context)
+          .pop(DeduplicationResult(filesToDelele.length, totalSize));
+    }
   }
 
   Widget _getGridView(DuplicateFiles duplicates, int itemIndex) {

@@ -64,6 +64,20 @@ class DuplicateFiles {
   ) {
     sortByCollectionName();
   }
+  // sortByLocalIDs sorts the files such that files with localID are at the top
+  List<EnteFile> sortByLocalIDs() {
+    final List<EnteFile> filesWithoutLocalID = [];
+    final List<EnteFile> localFiles = [];
+    for (final file in files) {
+      if ((file.localID ?? '').isEmpty) {
+        localFiles.add(file);
+      } else {
+        filesWithoutLocalID.add(file);
+      }
+    }
+    localFiles.addAll(filesWithoutLocalID);
+    return localFiles;
+  }
 
   @override
   String toString() => 'DuplicateFiles(files: $files, size: $size)';
