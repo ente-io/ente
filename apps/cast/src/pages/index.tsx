@@ -10,6 +10,7 @@ import { useRouter } from 'next/router';
 import { SESSION_KEYS, setKey } from '@ente/shared/storage/sessionStorage';
 import TimerBar from 'components/TimerBar';
 import LargeType from 'components/LargeType';
+import { useCastReceiver } from '@ente/shared/hooks/useCastReceiver';
 
 // Function to generate cryptographically secure digits
 const generateSecureData = (length: number): Uint8Array => {
@@ -39,6 +40,8 @@ export default function PairingMode() {
 
     const [borderWidthPercentage, setBorderWidthPercentage] = useState(100);
 
+    const { cast } = useCastReceiver();
+
     useEffect(() => {
         init();
         const interval = setInterval(() => {
@@ -49,6 +52,32 @@ export default function PairingMode() {
             clearInterval(interval);
         };
     }, []);
+
+    useEffect(() => {
+        if (!cast) return;
+        cast.framework.CastReceiverContext.getInstance().addCustomMessageListener(
+            'urn:x-cast:pair-request',
+            messageReceiveHandler
+        );
+    }, [cast]);
+
+    const messageReceiveHandler = (message: {
+        type: string;
+        senderId: string;
+        data: any;
+    }) => {
+        if (message.type === 'urn:x-cast:pair-request') {
+            // send the 6 digit code to the sender
+
+            cast.framework.CastReceiverContext.getInstance().sendCustomMessage(
+                'urn:x-cast:pair-response',
+                message.senderId,
+                {
+                    code: digits.join(''),
+                }
+            );
+        }
+    };
 
     const init = async () => {
         const data = generateSecureData(6);
