@@ -26,13 +26,13 @@ class DeduplicationService {
       }
       final DuplicateFilesResponse dupes = await _fetchDuplicateFileIDs();
       final ids = <int>[];
-      for (final dupe in dupes.duplicates) {
+      for (final dupe in dupes.sameSizeFiles) {
         ids.addAll(dupe.fileIDs);
       }
       final fileMap = await FilesDB.instance.getFilesFromIDs(ids);
       final result = <DuplicateFiles>[];
       final missingFileIDs = <int>[];
-      for (final dupe in dupes.duplicates) {
+      for (final dupe in dupes.sameSizeFiles) {
         final files = <EnteFile>[];
         for (final id in dupe.fileIDs) {
           final file = fileMap[id];
