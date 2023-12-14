@@ -19,62 +19,7 @@ class DeduplicationService {
 
   Future<List<DuplicateFiles>> getDuplicateFiles() async {
     try {
-      final bool hasFileSizes = await FilesService.instance.hasMigratedSizes();
-      if (hasFileSizes) {
-        final List<DuplicateFiles> result = await _getDuplicateFilesFromLocal();
-        return result;
-      }
-      final DuplicateFilesResponse dupes = await _fetchDuplicateFileIDs();
-      final ids = <int>[];
-      for (final dupe in dupes.sameSizeFiles) {
-        ids.addAll(dupe.fileIDs);
-      }
-      final fileMap = await FilesDB.instance.getFilesFromIDs(ids);
-      final result = <DuplicateFiles>[];
-      final missingFileIDs = <int>[];
-      for (final dupe in dupes.sameSizeFiles) {
-        final Map<String, List<EnteFile>> sizeHashToFilesMap = {};
-        final fileSize = dupe.size;
-        final filesWithHash = <EnteFile>[];
-        for (final id in dupe.fileIDs) {
-          final file = fileMap[id];
-          if (file != null && file.hash != null && file.hash!.isNotEmpty) {
-            filesWithHash.add(file);
-          } else if (file == null) {
-            missingFileIDs.add(id);
-          } else {
-            _logger.info("File with ID $id has no hash");
-          }
-        }
-        // Group by size and hash
-        for (final file in filesWithHash) {
-          final key = '$fileSize-${file.hash}';
-          _logger.info('FileUploadID ${file.uploadedFileID} has hash ${key}');
-          if (!sizeHashToFilesMap.containsKey(key)) {
-            sizeHashToFilesMap[key] = <EnteFile>[];
-          }
-          sizeHashToFilesMap[key]!.add(file);
-        }
-        for (final key in sizeHashToFilesMap.keys) {
-          final files = sizeHashToFilesMap[key]!;
-          if (files.length > 1) {
-            // todo: add logic to put candidate to keep first
-            result.add(DuplicateFiles(files, fileSize));
-          }
-        }
-      }
-
-      if (missingFileIDs.isNotEmpty) {
-        _logger.severe(
-          "Missing files",
-          InvalidStateError(
-            "Could not find " +
-                missingFileIDs.length.toString() +
-                " files in local DB: " +
-                missingFileIDs.toString(),
-          ),
-        );
-      }
+      final List<DuplicateFiles> result = await _getDuplicateFiles();
       return result;
     } catch (e, s) {
       _logger.severe("failed to get dedupeFile", e, s);
@@ -84,20 +29,36 @@ class DeduplicationService {
 
   // Returns a list of DuplicateFiles, where each DuplicateFiles object contains
   // a list of files that have the same size and hash
-  Future<List<DuplicateFiles>> _getDuplicateFilesFromLocal() async {
+  Future<List<DuplicateFiles>> _getDuplicateFiles() async {
+    Map<int, int> uploadIDToSize = {};
+    final bool hasFileSizes = await FilesService.instance.hasMigratedSizes();
+    if (hasFileSizes) {
+      final DuplicateFilesResponse dupes = await _fetchDuplicateFileIDs();
+      uploadIDToSize = dupes.toUploadIDToSize();
+    }
+
     final List<EnteFile> allFiles = await FilesDB.instance.getAllFilesFromDB(
       CollectionsService.instance.getHiddenCollectionIds(),
     );
     final int ownerID = Configuration.instance.getUserID()!;
-    allFiles.removeWhere(
-      (f) =>
-          !f.isUploaded ||
-          (f.hash ?? '').isEmpty ||
-          (f.ownerID ?? 0) != ownerID ||
-          (f.fileSize ?? 0) <= 0,
-    );
-    final Map<String, List<EnteFile>> sizeHashToFilesMap = {};
+    final List<EnteFile> filteredFiles = [];
     for (final file in allFiles) {
+      if (!file.isUploaded ||
+          (file.hash ?? '').isEmpty ||
+          (file.ownerID ?? 0) != ownerID) {
+        continue;
+      }
+      if ((file.fileSize ?? 0) <= 0) {
+        file.fileSize = uploadIDToSize[file.uploadedFileID!] ?? 0;
+      }
+      if ((file.fileSize ?? 0) <= 0) {
+        continue;
+      }
+      filteredFiles.add(file);
+    }
+
+    final Map<String, List<EnteFile>> sizeHashToFilesMap = {};
+    for (final file in filteredFiles) {
       final key = '${file.fileSize}-${file.hash}';
       if (!sizeHashToFilesMap.containsKey(key)) {
         sizeHashToFilesMap[key] = <EnteFile>[];

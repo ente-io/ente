@@ -15,6 +15,16 @@ class DuplicateFilesResponse {
     );
   }
 
+  Map<int, int> toUploadIDToSize() {
+    final Map<int, int> result = {};
+    for (final filesWithSameSize in sameSizeFiles) {
+      for (final uploadID in filesWithSameSize.fileIDs) {
+        result[uploadID] = filesWithSameSize.size;
+      }
+    }
+    return result;
+  }
+
   factory DuplicateFilesResponse.fromJson(String source) =>
       DuplicateFilesResponse.fromMap(json.decode(source));
 
