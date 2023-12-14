@@ -9,13 +9,13 @@ import 'package:photos/models/duplicate_files.dart';
 import 'package:photos/models/file/file.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/deduplication_service.dart';
+import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/viewer/file/detail_page.dart';
 import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
 import 'package:photos/ui/viewer/gallery/empty_state.dart';
 import 'package:photos/utils/data_util.dart';
 import 'package:photos/utils/delete_file_util.dart';
 import 'package:photos/utils/navigation_util.dart';
-import 'package:photos/utils/toast_util.dart';
 
 class DeduplicatePage extends StatefulWidget {
   final List<DuplicateFiles> duplicates;
@@ -46,9 +46,10 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
   );
 
   final Set<EnteFile> _selectedFiles = <EnteFile>{};
+  final Set<int> unselectedGrids = <int>{};
   final Map<int?, int> _fileSizeMap = {};
+
   late List<DuplicateFiles> _duplicates;
-  bool toastShown = false;
 
   SortKey sortKey = SortKey.size;
 
@@ -58,6 +59,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
       widget.duplicates,
       clubbingKey: (EnteFile f) => f.hash,
     );
+    unselectedGrids.clear();
     _selectAllFilesButFirst();
 
     super.initState();
@@ -65,6 +67,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
 
   void _selectAllFilesButFirst() {
     _selectedFiles.clear();
+
     for (final duplicate in _duplicates) {
       for (int index = 0; index < duplicate.files.length; index++) {
         // Select all items but the first
@@ -79,13 +82,6 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
 
   @override
   Widget build(BuildContext context) {
-    if (!toastShown) {
-      toastShown = true;
-      showShortToast(
-        context,
-        S.of(context).longpressOnAnItemToViewInFullscreen,
-      );
-    }
     _sortDuplicates();
     return Scaffold(
       appBar: AppBar(
@@ -326,13 +322,38 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.fromLTRB(2, 4, 4, 12),
-          child: Text(
-            S.of(context).duplicateItemsGroup(
-                  duplicates.files.length,
-                  formatBytes(duplicates.size),
+          padding: const EdgeInsets.fromLTRB(2, 4, 2, 12),
+          child: GestureDetector(
+            onTap: () {
+              if (unselectedGrids.contains(itemIndex)) {
+                unselectedGrids.remove(itemIndex);
+              } else {
+                unselectedGrids.add(itemIndex);
+              }
+              setState(() {});
+            },
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  S.of(context).duplicateItemsGroup(
+                        duplicates.files.length,
+                        formatBytes(duplicates.size),
+                      ),
+                  style: Theme.of(context).textTheme.titleSmall,
                 ),
-            style: Theme.of(context).textTheme.titleSmall,
+                unselectedGrids.contains(itemIndex)
+                    ? Icon(
+                        Icons.check_circle_outlined,
+                        color: getEnteColorScheme(context).strokeMuted,
+                        size: 24,
+                      )
+                    : const Icon(
+                        Icons.check_circle,
+                        size: 24,
+                      ),
+              ],
+            ),
           ),
         ),
         Padding(
@@ -360,12 +381,20 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
   Widget _buildFile(BuildContext context, EnteFile file, int index) {
     return GestureDetector(
       onTap: () {
-        if (_selectedFiles.contains(file)) {
-          _selectedFiles.remove(file);
-        } else {
-          _selectedFiles.add(file);
-        }
-        setState(() {});
+        final files = _duplicates[index].files;
+        routeToPage(
+          context,
+          DetailPage(
+            DetailPageConfiguration(
+              files,
+              null,
+              files.indexOf(file),
+              "deduplicate_",
+              mode: DetailPageMode.minimalistic,
+            ),
+          ),
+          forceCustomPageRoute: true,
+        );
       },
       onLongPress: () {
         HapticFeedback.lightImpact();
@@ -392,28 +421,18 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
             height: (MediaQuery.of(context).size.width -
                     (crossAxisSpacing * crossAxisCount)) /
                 crossAxisCount,
-            child: Stack(
-              children: [
-                Hero(
-                  tag: "deduplicate_" + file.tag,
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(4),
-                    child: ThumbnailWidget(
-                      file,
-                      diskLoadDeferDuration: thumbnailDiskLoadDeferDuration,
-                      serverLoadDeferDuration: thumbnailServerLoadDeferDuration,
-                      shouldShowLivePhotoOverlay: true,
-                      key: Key("deduplicate_" + file.tag),
-                    ),
-                  ),
+            child: Hero(
+              tag: "deduplicate_" + file.tag,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(4),
+                child: ThumbnailWidget(
+                  file,
+                  diskLoadDeferDuration: thumbnailDiskLoadDeferDuration,
+                  serverLoadDeferDuration: thumbnailServerLoadDeferDuration,
+                  shouldShowLivePhotoOverlay: true,
+                  key: Key("deduplicate_" + file.tag),
                 ),
-                _selectedFiles.contains(file)
-                    ? ClipRRect(
-                        borderRadius: BorderRadius.circular(4),
-                        child: selectedOverlay,
-                      )
-                    : const SizedBox.shrink(),
-              ],
+              ),
             ),
           ),
           const SizedBox(height: 6),
