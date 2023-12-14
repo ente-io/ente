@@ -396,6 +396,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "claimed": MessageLookupByLibrary.simpleMessage("Claimed"),
         "claimedStorageSoFar": m7,
         "clearCaches": MessageLookupByLibrary.simpleMessage("Clear caches"),
+        "clearIndexes": MessageLookupByLibrary.simpleMessage("Clear indexes"),
         "click": MessageLookupByLibrary.simpleMessage("• Click"),
         "clickOnTheOverflowMenu": MessageLookupByLibrary.simpleMessage(
             "• Click on the overflow menu"),

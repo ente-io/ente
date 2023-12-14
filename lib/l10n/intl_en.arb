@@ -412,6 +412,7 @@
   "status": "Status",
   "indexedItems": "Indexed items",
   "pendingItems": "Pending items",
+  "clearIndexes": "Clear indexes",
   "selectFoldersForBackup": "Select folders for backup",
   "selectedFoldersWillBeEncryptedAndBackedUp": "Selected folders will be encrypted and backed up",
   "unselectAll": "Unselect all",

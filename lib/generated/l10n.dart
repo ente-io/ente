@@ -2906,6 +2906,16 @@ class S {
     );
   }
 
+  /// `Clear indexes`
+  String get clearIndexes {
+    return Intl.message(
+      'Clear indexes',
+      name: 'clearIndexes',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Select folders for backup`
   String get selectFoldersForBackup {
     return Intl.message(

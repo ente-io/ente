@@ -107,6 +107,19 @@ class SemanticSearchService {
     );
   }
 
+  Future<void> clearIndexes() async {
+    await ObjectBox.instance
+        .getEmbeddingBox()
+        .query(
+          Embedding_.model.equals(
+            _mlFramework.getFrameworkName() + "-" + kModelName,
+          ),
+        )
+        .build()
+        .removeAsync();
+    _logger.info("Indexes cleared for ${_mlFramework.getFrameworkName()}");
+  }
+
   void _setupCachedEmbeddings() {
     ObjectBox.instance
         .getEmbeddingBox()
