@@ -17,6 +17,7 @@ import { ClipService } from 'services/clipService';
 import { VerticallyCenteredFlex } from '@ente/shared/components/Container';
 import { ClipExtractionStatus } from 'services/clipService';
 import { formatNumber } from 'utils/number/format';
+import CacheDirectory from './Preferences/CacheDirectory';
 
 export default function AdvancedSettings({ open, onClose, onRootClose }) {
     const appContext = useContext(AppContext);
@@ -77,6 +78,8 @@ export default function AdvancedSettings({ open, onClose, onRootClose }) {
 
                 <Box px={'8px'}>
                     <Stack py="20px" spacing="24px">
+                        <CacheDirectory />
+
                         {isElectron() && (
                             <Box>
                                 <MenuSectionTitle
