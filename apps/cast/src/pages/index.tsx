@@ -55,10 +55,14 @@ export default function PairingMode() {
 
     useEffect(() => {
         if (!cast) return;
-        cast.framework.CastReceiverContext.getInstance().addCustomMessageListener(
+        const context = cast.framework.CastReceiverContext.getInstance();
+
+        context.addCustomMessageListener(
             'urn:x-cast:pair-request',
             messageReceiveHandler
         );
+
+        context.start();
     }, [cast]);
 
     const messageReceiveHandler = (message: {
