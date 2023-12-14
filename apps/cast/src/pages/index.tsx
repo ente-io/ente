@@ -57,12 +57,17 @@ export default function PairingMode() {
         if (!cast) return;
         const context = cast.framework.CastReceiverContext.getInstance();
 
+        const options = new cast.framework.CastReceiverOptions();
+        options.customNamespaces = Object.assign({});
+        options.customNamespaces['urn:x-cast:pair-request'] =
+            cast.framework.system.MessageType.JSON;
+
         context.addCustomMessageListener(
             'urn:x-cast:pair-request',
             messageReceiveHandler
         );
 
-        context.start();
+        context.start(options);
     }, [cast]);
 
     const messageReceiveHandler = (message: {
@@ -74,7 +79,7 @@ export default function PairingMode() {
         // send the 6 digit code to the sender
 
         cast.framework.CastReceiverContext.getInstance().sendCustomMessage(
-            'urn:x-cast:pair-response',
+            'urn:x-cast:pair-request',
             message.senderId,
             {
                 code: digits.join(''),
