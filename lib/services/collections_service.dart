@@ -1201,7 +1201,7 @@ class CollectionsService {
     }
     // as any non uploaded file
     final pendingUpload = files.any(
-      (element) => element.uploadedFileID != null,
+      (element) => element.uploadedFileID == null,
     );
     if (pendingUpload) {
       throw ArgumentError('Can only add uploaded files silently');
