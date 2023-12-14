@@ -557,6 +557,8 @@
   "faqs": "FAQs",
   "renewsOn": "Erneuert am {endDate}",
   "freeTrialValidTill": "Kostenlose Demo verfügbar bis zum {endDate}",
+  "validTill": "Gültig bis {endDate}",
+  "addOnValidTill": "Dein {storageAmount} Add-on ist gültig bis {endDate}",
   "playStoreFreeTrialValidTill": "Kostenlose Testversion gültig bis {endDate}.\nSie können anschließend ein bezahltes Paket auswählen.",
   "subWillBeCancelledOn": "Ihr Abo endet am {endDate}",
   "subscription": "Abonnement",
@@ -898,10 +900,10 @@
     "description": "Text to tell user how many memories have been preserved",
     "placeholders": {
       "completed": {
-        "type": "int"
+        "type": "String"
       },
       "total": {
-        "type": "int"
+        "type": "String"
       }
     }
   },
@@ -927,6 +929,8 @@
   "itLooksLikeSomethingWentWrongPleaseRetryAfterSome": "Etwas ist schiefgelaufen. Bitte versuche es später noch einmal. Sollte der Fehler weiter bestehen, kontaktiere unser Supportteam.",
   "error": "Fehler",
   "tempErrorContactSupportIfPersists": "Etwas ist schiefgelaufen. Bitte versuche es später noch einmal. Sollte der Fehler weiter bestehen, kontaktiere unser Supportteam.",
+  "networkHostLookUpErr": "Ente ist im Moment nicht erreichbar. Bitte überprüfen Sie Ihre Netzwerkeinstellungen. Sollte das Problem bestehen bleiben, wenden Sie sich bitte an den Support.",
+  "networkConnectionRefusedErr": "Ente ist im Moment nicht erreichbar. Bitte versuchen Sie es später erneut. Sollte das Problem bestehen bleiben, wenden Sie sich bitte an den Support.",
   "cachedData": "Daten im Cache",
   "clearCaches": "Cache löschen",
   "remoteImages": "Grafiken aus externen Quellen",
@@ -955,12 +959,22 @@
   "loadMessage7": "Unsere mobilen Apps laufen im Hintergrund, um neue Fotos zu verschlüsseln und zu sichern",
   "loadMessage8": "web.ente.io hat einen Spitzen-Uploader",
   "loadMessage9": "Wir verwenden Xchacha20Poly1305, um Ihre Daten sicher zu verschlüsseln",
+  "photoDescriptions": "Foto Beschreibungen",
+  "fileTypesAndNames": "Dateitypen und -namen",
+  "location": "Standort",
+  "moments": "Momente",
+  "searchFaceEmptySection": "Finde alle Foto von einer Person",
+  "searchDatesEmptySection": "Suche nach Datum, Monat oder Jahr",
+  "searchLocationEmptySection": "Gruppiere Fotos, die innerhalb des Radius eines bestimmten Fotos aufgenommen wurden",
+  "searchPeopleEmptySection": "Laden Sie Personen ein, damit Sie geteilte Fotos hier einsehen können",
+  "searchAlbumsEmptySection": "Alben",
+  "searchFileTypesAndNamesEmptySection": "Dateitypen und -namen",
+  "searchCaptionEmptySection": "Füge Beschreibungen wie \"#trip\" in der Fotoinfo hinzu um diese schnell hier wiederzufinden",
   "language": "Sprache",
   "selectLanguage": "Sprache auswählen",
   "locationName": "Standortname",
   "addLocation": "Ort hinzufügen",
   "groupNearbyPhotos": "Fotos in der Nähe gruppieren",
-  "location": "Standort",
   "kiloMeterUnit": "km",
   "addLocationButton": "Hinzufügen",
   "radius": "Umkreis",
@@ -1102,9 +1116,47 @@
   "crashReporting": "Absturzbericht",
   "addToHiddenAlbum": "Zum versteckten Album hinzufügen",
   "moveToHiddenAlbum": "Zu verstecktem Album verschieben",
-  "fileTypes": "File types",
-  "deleteConfirmDialogBody": "This account is linked to other ente apps, if you use any.\\n\\nYour uploaded data, across all ente apps, will be scheduled for deletion, and your account will be permanently deleted.",
-  "yourMap": "Your map",
-  "modifyYourQueryOrTrySearchingFor": "Modify your query, or try searching for",
-  "contacts": "Contacts"
+  "fileTypes": "Dateitypen",
+  "deleteConfirmDialogBody": "Dieses Konto ist mit anderen ente Apps verknüpft, sofern du diese benutzt.\\n\\nDeine hochgeladenen Daten werden zur permanenten Löschung freigegeben. Dies gilt für alle ente Apps.",
+  "hearUsWhereTitle": "Wie hast du von Ente erfahren? (optional)",
+  "hearUsExplanation": "Wir tracken keine App-Installationen. Es würde uns jedoch helfen, wenn du uns mitteilst, wie du von uns erfahren hast!",
+  "viewAddOnButton": "Zeige Add-ons",
+  "addOns": "Add-ons",
+  "addOnPageSubtitle": "Details der Add-ons",
+  "yourMap": "Deine Karte",
+  "modifyYourQueryOrTrySearchingFor": "Ändere deine Suchanfrage oder suche nach",
+  "blackFridaySale": "Black-Friday-Aktion",
+  "upto50OffUntil4thDec": "Bis zu 50% Rabatt bis zum 4. Dezember.",
+  "photos": "Fotos",
+  "videos": "Videos",
+  "livePhotos": "Live-Fotos",
+  "searchHint1": "Schnell auf dem Gerät suchen",
+  "searchHint2": "Fotodaten, Beschreibungen",
+  "searchHint3": "Alben, Dateinamen und -typen",
+  "searchHint4": "Ort",
+  "searchHint5": "Demnächst: Gesichter & magische Suche ✨",
+  "addYourPhotosNow": "Füge deine Foto jetzt hinzu",
+  "searchResultCount": "{count, plural, one{{count} Ergebnis gefunden} other{{count} Ergebnisse gefunden}}",
+  "@searchResultCount": {
+    "description": "Text to tell user how many results were found for their search query",
+    "placeholders": {
+      "count": {
+        "example": "1|2|3",
+        "type": "int"
+      }
+    }
+  },
+  "faces": "Gesichter",
+  "contents": "Inhalte",
+  "addNew": "Hinzufügen",
+  "@addNew": {
+    "description": "Text to add a new item (location tag, album, caption etc)"
+  },
+  "contacts": "Kontakte",
+  "noInternetConnection": "Keine Internetverbindung",
+  "pleaseCheckYourInternetConnectionAndTryAgain": "Bitte überprüfe deine Internetverbindung und versuche es erneut.",
+  "signOutFromOtherDevices": "Von anderen Geräten abmelden",
+  "signOutOtherBody": "Falls du denkst, dass jemand dein Passwort kennen könnte, kannst du alle anderen Geräte von deinem Account abmelden.",
+  "signOutOtherDevices": "Andere Geräte abmelden",
+  "doNotSignOut": "Melde dich nicht ab"
 }
