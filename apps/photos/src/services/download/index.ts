@@ -139,7 +139,7 @@ class DownloadManagerImpl {
                 file.id.toString(),
                 { sizeInBytes: file.info?.fileSize }
             );
-            return cacheResp.clone();
+            return cacheResp?.clone();
         } catch (e) {
             logError(e, 'failed to get cached thumbnail');
             throw e;
