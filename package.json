@@ -13,15 +13,35 @@
         },
         "linux": {
             "target": [
-                "AppImage",
-                "deb",
-                "rpm",
-                "pacman",
+                {
+                    "target": "AppImage",
+                    "arch": [
+                        "x64",
+                        "arm64"
+                    ]
+                },
+                {
+                    "target": "deb",
+                    "arch": [
+                        "x64",
+                        "arm64"
+                    ]
+                },
+                {
+                    "target": "rpm",
+                    "arch": [
+                        "x64",
+                        "arm64"
+                    ]
+                },
+                {
+                    "target": "pacman",
+                    "arch": [
+                        "x64",
+                        "arm64"
+                    ]
+                },
                 "tar.gz"
-            ],
-            "arch": [
-                "x64",
-                "arm64"
             ],
             "icon": "./build/icon.icns",
             "category": "Photography"
