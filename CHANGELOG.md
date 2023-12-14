@@ -1,6 +1,12 @@
 # CHANGELOG
 
-## v1.6.56
+## v1.6.58
+
+### Bug Fixes
+
+- Fix File load issue
+
+## v1.6.57
 
 ### New Features
 
