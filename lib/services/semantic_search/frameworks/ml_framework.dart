@@ -57,41 +57,49 @@ abstract class MLFramework {
   // ---
 
   Future<void> _initImageModel() async {
-    const assetPath = "assets/models/clip/clip-image-vit-32-float32.onnx";
-    await loadImageModel(
-      await getAccessiblePathForAsset(
-        assetPath,
-        "clip-image-vit-32-float32.onnx",
-      ),
-    );
-    //final path = await _getLocalImageModelPath();
-    // if (File(path).existsSync()) {
-    //   await loadImageModel(path);
-    // } else {
-    //   final tempFile = File(path + ".temp");
-    //   await _downloadFile(getImageModelRemotePath(), tempFile.path);
-    //   await tempFile.rename(path);
-    //   await loadImageModel(path);
-    // }
+    // TODO: remove hardcoding
+    if (getFrameworkName() == "ggml") {
+      final path = await _getLocalImageModelPath();
+      if (File(path).existsSync()) {
+        await loadImageModel(path);
+      } else {
+        final tempFile = File(path + ".temp");
+        await _downloadFile(getImageModelRemotePath(), tempFile.path);
+        await tempFile.rename(path);
+        await loadImageModel(path);
+      }
+    } else {
+      const assetPath = "assets/models/clip/clip-image-vit-32-float32.onnx";
+      await loadImageModel(
+        await getAccessiblePathForAsset(
+          assetPath,
+          "clip-image-vit-32-float32.onnx",
+        ),
+      );
+    }
   }
 
   Future<void> _initTextModel() async {
-    const assetPath = "assets/models/clip/clip-text-vit-32-int32.onnx";
-    await loadTextModel(
-      await getAccessiblePathForAsset(
-        assetPath,
-        "clip-text-vit-32-float32.onnx",
-      ),
-    );
-    //final path = await _getLocalTextModelPath();
-    // if (File(path).existsSync()) {
-    //   await loadTextModel(path);
-    // } else {
-    //   final tempFile = File(path + ".temp");
-    //   await _downloadFile(getTextModelRemotePath(), tempFile.path);
-    //   await tempFile.rename(path);
-    //   await loadTextModel(path);
-    // }
+    // TODO: remove hardcoding
+    if (getFrameworkName() == "ggml") {
+      final path = await _getLocalTextModelPath();
+      if (File(path).existsSync()) {
+        await loadTextModel(path);
+      } else {
+        final tempFile = File(path + ".temp");
+        await _downloadFile(getTextModelRemotePath(), tempFile.path);
+        await tempFile.rename(path);
+        await loadTextModel(path);
+      }
+    } else {
+      const assetPath = "assets/models/clip/clip-text-vit-32-int32.onnx";
+      await loadTextModel(
+        await getAccessiblePathForAsset(
+          assetPath,
+          "clip-text-vit-32-float32.onnx",
+        ),
+      );
+    }
   }
 
   Future<String> _getLocalImageModelPath() async {
