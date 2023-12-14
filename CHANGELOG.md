@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v1.6.58
+
+### Bug Fixes
+
+- Fix image load issue
+
 ## v1.6.57
 
 ### New Features
