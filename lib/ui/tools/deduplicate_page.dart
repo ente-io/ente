@@ -15,6 +15,7 @@ import 'package:photos/ui/viewer/gallery/empty_state.dart';
 import 'package:photos/utils/data_util.dart';
 import 'package:photos/utils/delete_file_util.dart';
 import 'package:photos/utils/navigation_util.dart';
+import "package:photos/utils/toast_util.dart";
 
 class DeduplicatePage extends StatefulWidget {
   final List<DuplicateFiles> duplicates;
@@ -44,9 +45,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
     ),
   );
 
-  final Set<EnteFile> _selectedFiles = <EnteFile>{};
-  final Set<int> unselectedGrids = <int>{};
-  final Map<int?, int> _fileSizeMap = {};
+  final Set<int> selectedGrids = <int>{};
 
   late List<DuplicateFiles> _duplicates;
 
@@ -55,24 +54,15 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
   @override
   void initState() {
     _duplicates = widget.duplicates;
-    unselectedGrids.clear();
     _selectAllFilesButFirst();
 
     super.initState();
   }
 
   void _selectAllFilesButFirst() {
-    _selectedFiles.clear();
-
-    for (final duplicate in _duplicates) {
-      for (int index = 0; index < duplicate.files.length; index++) {
-        // Select all items but the first
-        if (index != 0) {
-          _selectedFiles.add(duplicate.files[index]);
-        }
-        // Maintain a map of fileID to fileSize for quick "space freed" computation
-        _fileSizeMap[duplicate.files[index].uploadedFileID] = duplicate.size;
-      }
+    selectedGrids.clear();
+    for (int idx = 0; idx < _duplicates.length; idx++) {
+      selectedGrids.add(idx);
     }
   }
 
@@ -93,7 +83,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
             ),
             onSelected: (dynamic value) {
               setState(() {
-                _selectedFiles.clear();
+                selectedGrids.clear();
               });
             },
             offset: const Offset(0, 50),
@@ -178,7 +168,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
             shrinkWrap: true,
           ),
         ),
-        _selectedFiles.isEmpty
+        selectedGrids.isEmpty
             ? const SizedBox.shrink()
             : Column(
                 children: [
@@ -259,11 +249,16 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
   }
 
   Widget _getDeleteButton() {
-    final String text = S.of(context).deleteItemCount(_selectedFiles.length);
-    int size = 0;
-    for (final file in _selectedFiles) {
-      size += _fileSizeMap[file.uploadedFileID]!;
+    int fileCount = 0;
+    int totalSize = 0;
+    for (int index = 0; index < _duplicates.length; index++) {
+      if (selectedGrids.contains(index)) {
+        final int toDeleteCount = _duplicates[index].files.length - 1;
+        fileCount += toDeleteCount;
+        totalSize += toDeleteCount * _duplicates[index].size;
+      }
     }
+    final String text = S.of(context).deleteItemCount(fileCount);
     return SizedBox(
       width: double.infinity,
       child: SafeArea(
@@ -289,7 +284,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
                 ),
                 const Padding(padding: EdgeInsets.all(2)),
                 Text(
-                  formatBytes(size),
+                  formatBytes(totalSize),
                   style: TextStyle(
                     color: Theme.of(context)
                         .colorScheme
@@ -302,10 +297,23 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
               ],
             ),
             onPressed: () async {
-              await deleteFilesFromRemoteOnly(context, _selectedFiles.toList());
-              Bus.instance.fire(UserDetailsChangedEvent());
-              Navigator.of(context)
-                  .pop(DeduplicationResult(_selectedFiles.length, size));
+              final List<EnteFile> filesToDelele = [];
+              for (int index = 0; index < _duplicates.length; index++) {
+                if (selectedGrids.contains(index)) {
+                  filesToDelele.addAll(_duplicates[index].files.sublist(1));
+                }
+              }
+
+              showToast(
+                context,
+                'Should move & delete ${filesToDelele.length} files}',
+              ).ignore();
+              if (filesToDelele.isEmpty) {
+                await deleteFilesFromRemoteOnly(context, filesToDelele);
+                Bus.instance.fire(UserDetailsChangedEvent());
+                Navigator.of(context)
+                    .pop(DeduplicationResult(filesToDelele.length, totalSize));
+              }
             },
           ),
         ),
@@ -321,10 +329,10 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
           padding: const EdgeInsets.fromLTRB(2, 4, 2, 12),
           child: GestureDetector(
             onTap: () {
-              if (unselectedGrids.contains(itemIndex)) {
-                unselectedGrids.remove(itemIndex);
+              if (selectedGrids.contains(itemIndex)) {
+                selectedGrids.remove(itemIndex);
               } else {
-                unselectedGrids.add(itemIndex);
+                selectedGrids.add(itemIndex);
               }
               setState(() {});
             },
@@ -338,7 +346,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
                       ),
                   style: Theme.of(context).textTheme.titleSmall,
                 ),
-                unselectedGrids.contains(itemIndex)
+                !selectedGrids.contains(itemIndex)
                     ? Icon(
                         Icons.check_circle_outlined,
                         color: getEnteColorScheme(context).strokeMuted,

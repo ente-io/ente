@@ -54,9 +54,14 @@ class FileWithSameSize {
 class DuplicateFiles {
   final List<EnteFile> files;
   final int size;
+  final Set<int> collectionIDs;
   static final collectionsService = CollectionsService.instance;
 
-  DuplicateFiles(this.files, this.size) {
+  DuplicateFiles(
+    this.files,
+    this.size,
+    this.collectionIDs,
+  ) {
     sortByCollectionName();
   }
 

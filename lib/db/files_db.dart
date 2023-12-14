@@ -1488,14 +1488,20 @@ class FilesDB {
     await batch.commit(noResult: true);
   }
 
-  Future<List<EnteFile>> getAllFilesFromDB(Set<int> collectionsToIgnore) async {
+  Future<List<EnteFile>> getAllFilesFromDB(
+    Set<int> collectionsToIgnore, {
+    bool dedupeByUploadId = true,
+  }) async {
     final db = await instance.database;
     final List<Map<String, dynamic>> result =
         await db.query(filesTable, orderBy: '$columnCreationTime DESC');
     final List<EnteFile> files = convertToFiles(result);
     final List<EnteFile> deduplicatedFiles = await applyDBFilters(
       files,
-      DBFilterOptions(ignoredCollectionIDs: collectionsToIgnore),
+      DBFilterOptions(
+        ignoredCollectionIDs: collectionsToIgnore,
+        dedupeUploadID: dedupeByUploadId,
+      ),
     );
     return deduplicatedFiles;
   }

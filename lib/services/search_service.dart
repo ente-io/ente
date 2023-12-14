@@ -55,8 +55,10 @@ class SearchService {
       return _cachedFilesFuture!;
     }
     _logger.fine("Reading all files from db");
-    _cachedFilesFuture =
-        FilesDB.instance.getAllFilesFromDB(ignoreCollections());
+    _cachedFilesFuture = FilesDB.instance.getAllFilesFromDB(
+      ignoreCollections(),
+      dedupeByUploadId: true,
+    );
     return _cachedFilesFuture!;
   }
 

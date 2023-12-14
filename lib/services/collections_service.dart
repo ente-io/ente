@@ -310,6 +310,21 @@ class CollectionsService {
         .toList();
   }
 
+  // getActiveCollections returns list of collections which are not deleted yet
+  Set<int> nonHiddenOwnedCollections() {
+    final int ownerID = _config.getUserID()!;
+    return _collectionIDToCollections.values
+        .toList()
+        .where(
+          (element) =>
+              !element.isDeleted &&
+              !element.isHidden() &&
+              element.isOwner(ownerID),
+        )
+        .map((e) => e.id)
+        .toSet();
+  }
+
   // returns collections after removing deleted,uncategorized, and hidden
   // collections
   List<Collection> getCollectionsForUI({
