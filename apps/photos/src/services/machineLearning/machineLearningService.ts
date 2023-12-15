@@ -119,12 +119,11 @@ class MachineLearningService {
     public async regenerateFaceCrop(
         token: string,
         userID: number,
-        fileID: number,
         faceID: string
     ) {
         await downloadManager.init(APPS.PHOTOS, { token });
         const syncContext = await this.getSyncContext(token, userID);
-        return FaceService.regenerateFaceCrop(syncContext, fileID, faceID);
+        return FaceService.regenerateFaceCrop(syncContext, faceID);
     }
 
     private newMlData(fileId: number) {

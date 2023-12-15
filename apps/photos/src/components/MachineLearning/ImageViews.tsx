@@ -7,6 +7,7 @@ import { cached } from '@ente/shared/storage/cacheStorage/helpers';
 import machineLearningService from 'services/machineLearning/machineLearningService';
 import { LS_KEYS, getData } from '@ente/shared/storage/localStorage';
 import { User } from '@ente/shared/user/types';
+import { addLogLine } from '@ente/shared/logging';
 
 export const FaceCropsRow = styled('div')`
     & > img {
@@ -26,7 +27,6 @@ export function ImageCacheView(props: {
     url: string;
     cacheName: string;
     faceID: string;
-    fileID: number;
 }) {
     const [imageBlob, setImageBlob] = useState<Blob>();
 
@@ -43,12 +43,22 @@ export function ImageCacheView(props: {
                         props.cacheName,
                         props.url,
                         async () => {
-                            return machineLearningService.regenerateFaceCrop(
-                                user.token,
-                                user.id,
-                                props.fileID,
-                                props.faceID
-                            );
+                            try {
+                                addLogLine(
+                                    'ImageCacheView: regenerate face crop',
+                                    props.faceID
+                                );
+                                return machineLearningService.regenerateFaceCrop(
+                                    user.token,
+                                    user.id,
+                                    props.faceID
+                                );
+                            } catch (e) {
+                                logError(
+                                    e,
+                                    'ImageCacheView: regenerate face crop failed'
+                                );
+                            }
                         }
                     );
                 }

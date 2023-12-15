@@ -65,6 +65,7 @@ export const PeopleList = React.memo((props: PeopleListProps) => {
                     <ImageCacheView
                         url={person.displayImageUrl}
                         cacheName={CACHES.FACE_CROPS}
+                        faceID={person.displayFaceId}
                     />
                 </FaceChip>
             ))}
@@ -173,7 +174,6 @@ export function UnidentifiedFaces(props: {
                         <FaceChip key={index}>
                             <ImageCacheView
                                 faceID={face.id}
-                                fileID={face.fileId}
                                 url={face.crop?.imageUrl}
                                 cacheName={CACHES.FACE_CROPS}
                             />

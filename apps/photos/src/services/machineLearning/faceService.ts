@@ -248,12 +248,12 @@ class FaceService {
 
     public async regenerateFaceCrop(
         syncContext: MLSyncContext,
-        fileID: number,
         faceID: string
     ) {
+        const fileID = Number(faceID.split('-')[0]);
         const personFace = await mlIDbStorage.getFace(fileID, faceID);
         if (!personFace) {
-            return;
+            throw Error('Face not found');
         }
 
         const file = await getLocalFile(personFace.fileId);
