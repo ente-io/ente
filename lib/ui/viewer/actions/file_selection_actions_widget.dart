@@ -134,18 +134,6 @@ class _FileSelectionActionsWidgetState
       }
     }
 
-    items.add(
-      SelectionActionButton(
-        labelText: S.of(context).share,
-        icon: Icons.adaptive.share_outlined,
-        onTap: () => shareSelected(
-          context,
-          shareButtonKey,
-          widget.selectedFiles.files.toList(),
-        ),
-      ),
-    );
-
     final showUploadIcon = widget.type == GalleryType.localFolder &&
         split.ownedByCurrentUser.isEmpty;
     if (widget.type.showAddToAlbum()) {
@@ -319,6 +307,18 @@ class _FileSelectionActionsWidgetState
         ),
       );
     }
+
+    items.add(
+      SelectionActionButton(
+        labelText: S.of(context).share,
+        icon: Icons.adaptive.share_outlined,
+        onTap: () => shareSelected(
+          context,
+          shareButtonKey,
+          widget.selectedFiles.files.toList(),
+        ),
+      ),
+    );
 
     if (items.isNotEmpty) {
       final scrollController = ScrollController();
