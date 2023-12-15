@@ -2,6 +2,7 @@ import "dart:async";
 
 import "package:flutter/material.dart";
 import "package:modal_bottom_sheet/modal_bottom_sheet.dart";
+import "package:photos/core/configuration.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/location_tag_updated_event.dart";
 import "package:photos/generated/l10n.dart";
@@ -61,21 +62,24 @@ class _LocationTagsWidgetState extends State<LocationTagsWidget> {
         subtitleSection: locationTagChips,
         hasChipButtons: hasChipButtons ?? true,
         onTap: onTap,
-        editOnTap: () {
-          showBarModalBottomSheet(
-            shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.vertical(
-                top: Radius.circular(5),
-              ),
-            ),
-            backgroundColor: getEnteColorScheme(context).backgroundElevated,
-            barrierColor: backdropFaintDark,
-            context: context,
-            builder: (context) {
-              return UpdateLocationDataWidget([widget.file]);
-            },
-          );
-        },
+        editOnTap: widget.file.ownerID == Configuration.instance.getUserID()!
+            ? () {
+                showBarModalBottomSheet(
+                  shape: const RoundedRectangleBorder(
+                    borderRadius: BorderRadius.vertical(
+                      top: Radius.circular(5),
+                    ),
+                  ),
+                  backgroundColor:
+                      getEnteColorScheme(context).backgroundElevated,
+                  barrierColor: backdropFaintDark,
+                  context: context,
+                  builder: (context) {
+                    return UpdateLocationDataWidget([widget.file]);
+                  },
+                );
+              }
+            : null,
       ),
     );
   }

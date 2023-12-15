@@ -18,7 +18,6 @@ import "package:photos/ui/components/action_sheet_widget.dart";
 import "package:photos/ui/components/buttons/button_widget.dart";
 import "package:photos/ui/components/models/button_type.dart";
 import 'package:photos/utils/date_time_util.dart';
-import "package:photos/utils/exif_util.dart";
 
 class FilesService {
   late Dio _enteDio;
@@ -109,27 +108,100 @@ class FilesService {
     final List<EnteFile> remoteFilesToUpdate = [];
     final Map<int, Map<String, dynamic>> fileIDToUpdateMetadata = {};
     if (location == null) {
-      await _processFilesForBulkRemoveLocation(
-        remoteFilesToUpdate,
-        uploadedFiles,
-        fileIDToUpdateMetadata,
-        context,
-      );
-    } else {
-      for (EnteFile remoteFile in uploadedFiles) {
-        // discard files not owned by user and also dedupe already processed
-        // files
-        if (remoteFile.ownerID != _config.getUserID()! ||
-            fileIDToUpdateMetadata.containsKey(remoteFile.uploadedFileID!)) {
-          continue;
-        }
+      final buttonResult = (await showActionSheet(
+        context: context,
+        body: "Revert to original location for all items?",
+        buttons: [
+          ButtonWidget(
+            labelText: "Yes",
+            buttonType: ButtonType.neutral,
+            buttonSize: ButtonSize.large,
+            shouldStickToDarkTheme: true,
+            buttonAction: ButtonAction.first,
+            shouldSurfaceExecutionStates: true,
+            isInAlert: true,
+            onTap: () async {
+              await _editLocationData(
+                uploadedFiles,
+                fileIDToUpdateMetadata,
+                remoteFilesToUpdate,
+                location,
+              );
+            },
+          ),
+          ButtonWidget(
+            labelText: S.of(context).cancel,
+            buttonType: ButtonType.secondary,
+            buttonSize: ButtonSize.large,
+            shouldStickToDarkTheme: true,
+            buttonAction: ButtonAction.cancel,
+            isInAlert: true,
+          ),
+        ],
+      ))!;
 
-        remoteFilesToUpdate.add(remoteFile);
-        fileIDToUpdateMetadata[remoteFile.uploadedFileID!] = {
-          latKey: location.latitude,
-          longKey: location.longitude,
-        };
+      if (buttonResult.action == ButtonAction.cancel) {
+        return;
       }
+    } else {
+      final buttonResult = (await showActionSheet(
+        context: context,
+        body: "Change location of selected items?",
+        bodyHighlight: "You can revert back to the original location anytime",
+        buttons: [
+          ButtonWidget(
+            labelText: "Yes",
+            buttonType: ButtonType.neutral,
+            buttonSize: ButtonSize.large,
+            shouldStickToDarkTheme: true,
+            buttonAction: ButtonAction.first,
+            shouldSurfaceExecutionStates: true,
+            isInAlert: true,
+            onTap: () async {
+              await _editLocationData(
+                uploadedFiles,
+                fileIDToUpdateMetadata,
+                remoteFilesToUpdate,
+                location,
+              );
+            },
+          ),
+          ButtonWidget(
+            labelText: S.of(context).cancel,
+            buttonType: ButtonType.secondary,
+            buttonSize: ButtonSize.large,
+            shouldStickToDarkTheme: true,
+            buttonAction: ButtonAction.cancel,
+            isInAlert: true,
+          ),
+        ],
+      ))!;
+
+      if (buttonResult.action == ButtonAction.cancel) {
+        return;
+      }
+    }
+  }
+
+  Future<void> _editLocationData(
+    List<EnteFile> uploadedFiles,
+    Map<int, Map<String, dynamic>> fileIDToUpdateMetadata,
+    List<EnteFile> remoteFilesToUpdate,
+    LatLng? location,
+  ) async {
+    for (EnteFile remoteFile in uploadedFiles) {
+      // discard files not owned by user and also dedupe already processed
+      // files
+      if (remoteFile.ownerID != _config.getUserID()! ||
+          fileIDToUpdateMetadata.containsKey(remoteFile.uploadedFileID!)) {
+        continue;
+      }
+
+      remoteFilesToUpdate.add(remoteFile);
+      fileIDToUpdateMetadata[remoteFile.uploadedFileID!] = {
+        latKey: location?.latitude,
+        longKey: location?.longitude,
+      };
     }
 
     if (remoteFilesToUpdate.isNotEmpty) {
@@ -138,93 +210,6 @@ class FilesService {
         null,
         metadataUpdateMap: fileIDToUpdateMetadata,
       );
-    }
-  }
-
-  Future<void> _processFilesForBulkRemoveLocation(
-    List<EnteFile> remoteFilesToUpdate,
-    List<EnteFile> uploadedFiles,
-    Map<int, Map<String, dynamic>> fileIDToUpdateMetadata,
-    BuildContext context,
-  ) async {
-    final filesWithOgLocation = <EnteFile>[];
-    final filesWithoutOgLocation = <EnteFile>[];
-    for (EnteFile remoteFile in uploadedFiles) {
-      // discard files not owned by user and also dedupe files
-      if (remoteFile.ownerID != _config.getUserID()! ||
-          filesWithoutOgLocation.any(
-            (file) => file.uploadedFileID == remoteFile.uploadedFileID,
-          ) ||
-          filesWithOgLocation.any(
-            (file) => file.uploadedFileID == remoteFile.uploadedFileID,
-          )) {
-        continue;
-      }
-      final exif = await getExif(remoteFile);
-      final locationFromExif = gpsDataFromExif(exif).toLocationObj();
-      locationFromExif == null
-          ? filesWithoutOgLocation.add(remoteFile)
-          : filesWithOgLocation.add(remoteFile);
-    }
-    if (filesWithOgLocation.isEmpty && filesWithoutOgLocation.isEmpty) {
-      return;
-    }
-
-    if (filesWithoutOgLocation.isEmpty) {
-      remoteFilesToUpdate.addAll(filesWithOgLocation);
-    } else {
-      final buttons = <ButtonWidget>[
-        ButtonWidget(
-          labelText: "All items",
-          buttonType: ButtonType.neutral,
-          buttonSize: ButtonSize.large,
-          shouldStickToDarkTheme: true,
-          buttonAction: ButtonAction.first,
-          shouldSurfaceExecutionStates: true,
-          isInAlert: true,
-          onTap: () async {
-            remoteFilesToUpdate.addAll(
-              [...filesWithOgLocation, ...filesWithoutOgLocation],
-            );
-          },
-        ),
-        ButtonWidget(
-          labelText: "Items with location data",
-          buttonType: ButtonType.neutral,
-          buttonSize: ButtonSize.large,
-          shouldStickToDarkTheme: true,
-          buttonAction: ButtonAction.first,
-          shouldSurfaceExecutionStates: true,
-          isInAlert: true,
-          onTap: () async {
-            remoteFilesToUpdate.addAll(filesWithOgLocation);
-          },
-        ),
-        ButtonWidget(
-          labelText: S.of(context).cancel,
-          buttonType: ButtonType.secondary,
-          buttonSize: ButtonSize.large,
-          shouldStickToDarkTheme: true,
-          buttonAction: ButtonAction.fourth,
-          isInAlert: true,
-        ),
-      ];
-
-      await showActionSheet(
-        context: context,
-        buttons: buttons,
-        title: "Choose items to reset",
-        body: "Some items selected never had location data in the first place",
-        bodyHighlight:
-            "Resetting location data for such items will delete its custom location data",
-      );
-    }
-
-    for (var element in remoteFilesToUpdate) {
-      fileIDToUpdateMetadata[element.uploadedFileID!] = {
-        latKey: null,
-        longKey: null,
-      };
     }
   }
 

@@ -162,7 +162,8 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
                     const FileDetailsDivider(),
                   ],
                 )
-              : file.fileType != FileType.video
+              : file.fileType != FileType.video &&
+                      file.ownerID == _currentUserID
                   ? Column(
                       children: [
                         InfoItemWidget(
