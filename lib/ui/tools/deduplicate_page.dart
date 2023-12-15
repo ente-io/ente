@@ -303,7 +303,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
                     fontSize: 12,
                   ),
                 ),
-                const Padding(padding: EdgeInsets.all(4)),
+                const Padding(padding: EdgeInsets.all(2)),
               ],
             ),
             onPressed: () async {
