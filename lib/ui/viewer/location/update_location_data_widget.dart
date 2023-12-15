@@ -26,6 +26,7 @@ class _UpdateLocationDataWidgetState extends State<UpdateLocationDataWidget> {
   final MapController _mapController = MapController();
   ValueNotifier hasSelectedLocation = ValueNotifier(false);
   final selectedLocation = ValueNotifier<LatLng?>(null);
+  final isDragging = ValueNotifier(false);
 
   @override
   void initState() {
@@ -38,6 +39,7 @@ class _UpdateLocationDataWidgetState extends State<UpdateLocationDataWidget> {
     hasSelectedLocation.dispose();
     selectedLocation.dispose();
     _mapController.dispose();
+    isDragging.dispose();
   }
 
   @override
@@ -49,9 +51,17 @@ class _UpdateLocationDataWidgetState extends State<UpdateLocationDataWidget> {
         FlutterMap(
           mapController: _mapController,
           options: MapOptions(
+            enableMultiFingerGestureRace: true,
             zoom: 3,
             maxZoom: 18.0,
             minZoom: 2.8,
+            onMapEvent: (p0) {
+              if (p0.source == MapEventSource.onDrag) {
+                isDragging.value = true;
+              } else if (p0.source == MapEventSource.dragEnd) {
+                isDragging.value = false;
+              }
+            },
             onTap: (tapPosition, latlng) {
               final zoom = selectedLocation.value == null
                   ? _mapController.zoom + 2.0
@@ -84,6 +94,7 @@ class _UpdateLocationDataWidgetState extends State<UpdateLocationDataWidget> {
               boxShadow: shadowFloatFaintLight,
             ),
             child: ValueListenableBuilder(
+              valueListenable: selectedLocation,
               builder: (context, value, _) {
                 final locationInDMS =
                     LocationService.instance.convertLocationToDMS(
@@ -114,7 +125,6 @@ class _UpdateLocationDataWidgetState extends State<UpdateLocationDataWidget> {
                         style: textTheme.mini,
                       );
               },
-              valueListenable: selectedLocation,
             ),
           ),
         ),
@@ -177,15 +187,43 @@ class _UpdateLocationDataWidgetState extends State<UpdateLocationDataWidget> {
           valueListenable: hasSelectedLocation,
           builder: (context, value, _) {
             return value
-                ? const Positioned(
-                    bottom: 16,
+                ? Positioned(
+                    bottom: 32,
                     top: 0,
                     left: 0,
                     right: 0,
-                    child: Icon(
-                      Icons.location_pin,
-                      color: Color.fromARGB(255, 250, 34, 19),
-                      size: 32,
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        ValueListenableBuilder(
+                          valueListenable: isDragging,
+                          builder: (context, value, child) {
+                            return AnimatedContainer(
+                              duration: const Duration(milliseconds: 200),
+                              height: value ? 32 : 16,
+                              // color: Colors.yellow,
+                              child: child,
+                            );
+                          },
+                          child: const Icon(
+                            Icons.location_on,
+                            color: Color.fromARGB(255, 250, 34, 19),
+                            size: 32,
+                          ),
+                        ),
+                        Transform(
+                          transform: Matrix4.translationValues(0, 21, 0),
+                          child: Container(
+                            height: 2,
+                            width: 12,
+                            decoration: BoxDecoration(
+                              boxShadow: shadowMenuDark,
+                              // borderRadius: BorderRadius.circular(2),
+                              // color: Colors.yellow,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   )
                 : const SizedBox.shrink();
