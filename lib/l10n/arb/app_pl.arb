@@ -98,6 +98,7 @@
   "authToViewYourRecoveryKey": "Proszę uwierzytelnić, aby wyświetlić swój klucz odzyskiwania",
   "authToChangeYourEmail": "Proszę uwierzytelnić, aby zmienić swój adres e-mail",
   "authToChangeYourPassword": "Proszę uwierzytelnić, aby zmienić hasło",
+  "authToViewSecrets": "Proszę uwierzytelnić, aby wyświetlić swoje sekrety",
   "ok": "Ok",
   "cancel": "Anuluj",
   "yes": "Tak",
