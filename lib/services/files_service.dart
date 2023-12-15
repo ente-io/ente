@@ -9,7 +9,6 @@ import 'package:photos/db/files_db.dart';
 import 'package:photos/extensions/list.dart';
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/file/file.dart';
-import "package:photos/models/file/file_type.dart";
 import "package:photos/models/file_load_result.dart";
 import "package:photos/models/metadata/file_magic.dart";
 import 'package:photos/services/file_magic_service.dart';
@@ -97,13 +96,8 @@ class FilesService {
     LatLng? location,
     BuildContext context,
   ) async {
-    final List<EnteFile> uploadedFiles = files
-        .where(
-          (element) =>
-              element.uploadedFileID != null &&
-              element.fileType != FileType.video,
-        )
-        .toList();
+    final List<EnteFile> uploadedFiles =
+        files.where((element) => element.uploadedFileID != null).toList();
 
     final List<EnteFile> remoteFilesToUpdate = [];
     final Map<int, Map<String, dynamic>> fileIDToUpdateMetadata = {};

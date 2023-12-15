@@ -316,8 +316,7 @@ class _FileSelectionActionsWidgetState
       items.add(
         SelectionActionButton(
           shouldShow: widget.selectedFiles.files.any(
-            (element) => (element.fileType != FileType.video &&
-                element.ownerID == currentUserID),
+            (element) => (element.ownerID == currentUserID),
           ),
           labelText: "Edit location",
           icon: Icons.edit_location_alt_outlined,
