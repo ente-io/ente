@@ -1,7 +1,6 @@
 import "package:exif/exif.dart";
 import "package:flutter/material.dart";
 import "package:logging/logging.dart";
-import "package:modal_bottom_sheet/modal_bottom_sheet.dart";
 import "package:photos/core/configuration.dart";
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/file/file.dart';
@@ -9,11 +8,9 @@ import 'package:photos/models/file/file_type.dart';
 import "package:photos/models/metadata/file_magic.dart";
 import "package:photos/services/file_magic_service.dart";
 import "package:photos/services/update_service.dart";
-import "package:photos/theme/colors.dart";
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/buttons/icon_button_widget.dart';
 import "package:photos/ui/components/divider_widget.dart";
-import "package:photos/ui/components/info_item_widget.dart";
 import 'package:photos/ui/components/title_bar_widget.dart';
 import 'package:photos/ui/viewer/file/file_caption_widget.dart';
 import "package:photos/ui/viewer/file_details/added_by_widget.dart";
@@ -24,7 +21,6 @@ import 'package:photos/ui/viewer/file_details/exif_item_widgets.dart';
 import "package:photos/ui/viewer/file_details/file_properties_item_widget.dart";
 import "package:photos/ui/viewer/file_details/location_tags_widget.dart";
 import "package:photos/ui/viewer/file_details/objects_item_widget.dart";
-import 'package:photos/ui/viewer/location/update_location_data_widget.dart';
 import "package:photos/utils/exif_util.dart";
 
 class FileDetailsWidget extends StatefulWidget {
@@ -162,43 +158,47 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
                     const FileDetailsDivider(),
                   ],
                 )
-              : file.fileType != FileType.video &&
-                      file.ownerID == _currentUserID
-                  ? Column(
-                      children: [
-                        InfoItemWidget(
-                          leadingIcon: Icons.pin_drop_outlined,
-                          title: "No location data",
-                          subtitleSection: Future.value(
-                            [
-                              Text(
-                                "Add location data",
-                                style: getEnteTextTheme(context).miniBoldMuted,
-                              ),
-                            ],
-                          ),
-                          hasChipButtons: false,
-                          onTap: () async {
-                            await showBarModalBottomSheet(
-                              shape: const RoundedRectangleBorder(
-                                borderRadius: BorderRadius.vertical(
-                                  top: Radius.circular(5),
-                                ),
-                              ),
-                              backgroundColor: getEnteColorScheme(context)
-                                  .backgroundElevated,
-                              barrierColor: backdropFaintDark,
-                              context: context,
-                              builder: (context) {
-                                return UpdateLocationDataWidget([file]);
-                              },
-                            );
-                          },
-                        ),
-                        const FileDetailsDivider(),
-                      ],
-                    )
-                  : const SizedBox.shrink();
+              : const SizedBox.shrink();
+
+          ///To be used when state issues are fixed when location is updated.
+          //
+          //  file.fileType != FileType.video &&
+          //         file.ownerID == _currentUserID
+          //     ? Column(
+          //         children: [
+          //           InfoItemWidget(
+          //             leadingIcon: Icons.pin_drop_outlined,
+          //             title: "No location data",
+          //             subtitleSection: Future.value(
+          //               [
+          //                 Text(
+          //                   "Add location data",
+          //                   style: getEnteTextTheme(context).miniBoldMuted,
+          //                 ),
+          //               ],
+          //             ),
+          //             hasChipButtons: false,
+          //             onTap: () async {
+          //               await showBarModalBottomSheet(
+          //                 shape: const RoundedRectangleBorder(
+          //                   borderRadius: BorderRadius.vertical(
+          //                     top: Radius.circular(5),
+          //                   ),
+          //                 ),
+          //                 backgroundColor: getEnteColorScheme(context)
+          //                     .backgroundElevated,
+          //                 barrierColor: backdropFaintDark,
+          //                 context: context,
+          //                 builder: (context) {
+          //                   return UpdateLocationDataWidget([file]);
+          //                 },
+          //               );
+          //             },
+          //           ),
+          //           const FileDetailsDivider(),
+          //         ],
+          //       )
+          //     : const SizedBox.shrink();
         },
       ),
     ]);
