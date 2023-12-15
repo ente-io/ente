@@ -48,6 +48,12 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
     super.initState();
   }
 
+  @override
+  void dispose() {
+    _deleteProgress.dispose();
+    super.dispose();
+  }
+
   void _selectAllGrids() {
     selectedGrids.clear();
     for (int idx = 0; idx < _duplicates.length; idx++) {
