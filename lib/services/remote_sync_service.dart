@@ -676,7 +676,7 @@ class RemoteSyncService {
       _ignoredUploads++;
       _logger.warning("Invalid file error", error);
     } else {
-      throw (error as Error);
+      throw error;
     }
   }
 

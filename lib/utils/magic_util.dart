@@ -116,7 +116,7 @@ Future<void> changeSortOrder(
     );
   } catch (e, s) {
     _logger.severe("failed to update collection visibility", e, s);
-    showShortToast(context, S.of(context).somethingWentWrong);
+    unawaited(showShortToast(context, S.of(context).somethingWentWrong));
     rethrow;
   }
 }

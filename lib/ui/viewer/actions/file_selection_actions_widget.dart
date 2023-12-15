@@ -1,3 +1,5 @@
+import "dart:async";
+
 import 'package:fast_base58/fast_base58.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -136,18 +138,6 @@ class _FileSelectionActionsWidgetState
       }
     }
 
-    items.add(
-      SelectionActionButton(
-        labelText: S.of(context).share,
-        icon: Icons.adaptive.share_outlined,
-        onTap: () => shareSelected(
-          context,
-          shareButtonKey,
-          widget.selectedFiles.files.toList(),
-        ),
-      ),
-    );
-
     final showUploadIcon = widget.type == GalleryType.localFolder &&
         split.ownedByCurrentUser.isEmpty;
     if (widget.type.showAddToAlbum()) {
@@ -223,17 +213,6 @@ class _FileSelectionActionsWidgetState
       );
     }
 
-    if (widget.type.showDeleteOption()) {
-      items.add(
-        SelectionActionButton(
-          icon: Icons.delete_outline,
-          labelText: S.of(context).delete,
-          onTap: anyOwnedFiles ? _onDeleteClick : null,
-          shouldShow: ownedAndPendingUploadFilesCount > 0,
-        ),
-      );
-    }
-
     if (widget.type.showFavoriteOption()) {
       items.add(
         SelectionActionButton(
@@ -250,6 +229,26 @@ class _FileSelectionActionsWidgetState
           labelText: S.of(context).removeFromFavorite,
           onTap: _onUnFavoriteClick,
           shouldShow: ownedFilesCount > 0,
+        ),
+      );
+    }
+
+    items.add(
+      SelectionActionButton(
+        icon: Icons.grid_view_outlined,
+        labelText: S.of(context).createCollage,
+        onTap: _onCreateCollageClicked,
+        shouldShow: showCollageOption,
+      ),
+    );
+
+    if (widget.type.showDeleteOption()) {
+      items.add(
+        SelectionActionButton(
+          icon: Icons.delete_outline,
+          labelText: S.of(context).delete,
+          onTap: anyOwnedFiles ? _onDeleteClick : null,
+          shouldShow: ownedAndPendingUploadFilesCount > 0,
         ),
       );
     }
@@ -345,10 +344,13 @@ class _FileSelectionActionsWidgetState
 
     items.add(
       SelectionActionButton(
-        icon: Icons.grid_view_outlined,
-        labelText: S.of(context).createCollage,
-        onTap: _onCreateCollageClicked,
-        shouldShow: showCollageOption,
+        labelText: S.of(context).share,
+        icon: Icons.adaptive.share_outlined,
+        onTap: () => shareSelected(
+          context,
+          shareButtonKey,
+          widget.selectedFiles.files.toList(),
+        ),
       ),
     );
 
@@ -534,9 +536,11 @@ class _FileSelectionActionsWidgetState
 
   Future<void> _onCreatedSharedLinkClicked() async {
     if (split.ownedByCurrentUser.isEmpty) {
-      showShortToast(
-        context,
-        S.of(context).canOnlyCreateLinkForFilesOwnedByYou,
+      unawaited(
+        showShortToast(
+          context,
+          S.of(context).canOnlyCreateLinkForFilesOwnedByYou,
+        ),
       );
       return;
     }
@@ -579,7 +583,7 @@ class _FileSelectionActionsWidgetState
         await _copyLink();
       }
       if (actionResult.action == ButtonAction.second) {
-        routeToPage(
+        await routeToPage(
           context,
           ManageSharedLinkWidget(collection: _cachedCollectionForSharedLink),
         );
@@ -600,7 +604,7 @@ class _FileSelectionActionsWidgetState
       final String url =
           "${_cachedCollectionForSharedLink!.publicURLs?.first?.url}#$collectionKey";
       await Clipboard.setData(ClipboardData(text: url));
-      showShortToast(context, S.of(context).linkCopiedToClipboard);
+      unawaited(showShortToast(context, S.of(context).linkCopiedToClipboard));
     }
   }
 
