@@ -14,6 +14,9 @@ class EditCenterPointTileWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final textTheme = getEnteTextTheme(context);
     final colorScheme = getEnteColorScheme(context);
+    final centerPointInDMS = LocationService.instance.convertLocationToDMS(
+      InheritedLocationTagData.of(context).centerPoint,
+    );
     return Row(
       children: [
         Container(
@@ -39,9 +42,7 @@ class EditCenterPointTileWidget extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  LocationService.instance.convertLocationToDMS(
-                    InheritedLocationTagData.of(context).centerPoint,
-                  ),
+                  "${centerPointInDMS![0]}, ${centerPointInDMS[1]}",
                   style: textTheme.miniMuted,
                 ),
               ],

@@ -1,10 +1,17 @@
+import "dart:async";
+
 import "package:flutter/material.dart";
 import "package:flutter_map/flutter_map.dart";
 import "package:latlong2/latlong.dart";
 import "package:photos/models/file/file.dart";
+import "package:photos/models/location/location.dart";
 import "package:photos/services/files_service.dart";
+import "package:photos/services/location_service.dart";
+import "package:photos/theme/effects.dart";
+import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/map/map_button.dart";
 import "package:photos/ui/map/tile/layers.dart";
+import "package:photos/utils/toast_util.dart";
 
 class UpdateLocationDataWidget extends StatefulWidget {
   final List<EnteFile> files;
@@ -17,8 +24,8 @@ class UpdateLocationDataWidget extends StatefulWidget {
 
 class _UpdateLocationDataWidgetState extends State<UpdateLocationDataWidget> {
   final MapController _mapController = MapController();
-  LatLng? selectedLocation;
   ValueNotifier hasSelectedLocation = ValueNotifier(false);
+  final selectedLocation = ValueNotifier<LatLng?>(null);
 
   @override
   void initState() {
@@ -29,12 +36,15 @@ class _UpdateLocationDataWidgetState extends State<UpdateLocationDataWidget> {
   void dispose() {
     super.dispose();
     hasSelectedLocation.dispose();
+    selectedLocation.dispose();
     _mapController.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final textTheme = getEnteTextTheme(context);
     return Stack(
+      alignment: Alignment.topCenter,
       children: [
         FlutterMap(
           mapController: _mapController,
@@ -43,17 +53,17 @@ class _UpdateLocationDataWidgetState extends State<UpdateLocationDataWidget> {
             maxZoom: 18.0,
             minZoom: 2.8,
             onTap: (tapPosition, latlng) {
-              final zoom = selectedLocation == null
+              final zoom = selectedLocation.value == null
                   ? _mapController.zoom + 2.0
                   : _mapController.zoom;
               _mapController.move(latlng, zoom);
 
-              selectedLocation = latlng;
+              selectedLocation.value = latlng;
               hasSelectedLocation.value = true;
             },
             onPositionChanged: (position, hasGesture) {
-              if (selectedLocation != null) {
-                selectedLocation = position.center;
+              if (selectedLocation.value != null) {
+                selectedLocation.value = position.center;
               }
             },
           ),
@@ -62,25 +72,61 @@ class _UpdateLocationDataWidgetState extends State<UpdateLocationDataWidget> {
           ],
         ),
         Positioned(
+          top: 24,
+          child: Container(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 10,
+            ),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(8),
+              color: getEnteColorScheme(context).backgroundElevated,
+              boxShadow: shadowFloatFaintLight,
+            ),
+            child: ValueListenableBuilder(
+              builder: (context, value, _) {
+                final locationInDMS =
+                    LocationService.instance.convertLocationToDMS(
+                  Location(
+                    latitude: value?.latitude,
+                    longitude: value?.longitude,
+                  ),
+                );
+                return locationInDMS != null
+                    ? SizedBox(
+                        width: 80 * MediaQuery.textScaleFactorOf(context),
+                        child: Column(
+                          children: [
+                            Text(
+                              locationInDMS[0],
+                              style: textTheme.mini,
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              locationInDMS[1],
+                              style: textTheme.mini,
+                            ),
+                          ],
+                        ),
+                      )
+                    : Text(
+                        "Select a location",
+                        style: textTheme.mini,
+                      );
+              },
+              valueListenable: selectedLocation,
+            ),
+          ),
+        ),
+        Positioned(
           // bottom: widget.bottomSheetDraggableAreaHeight + 10,
-          bottom: 30,
+          bottom: 48,
 
-          right: 10,
+          right: 24,
+          left: 24,
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              MapButton(
-                icon: Icons.check,
-                onPressed: () async {
-                  await FilesService.instance.bulkEditLocationData(
-                    widget.files,
-                    selectedLocation!,
-                    context,
-                  );
-                  Navigator.of(context).pop();
-                },
-                heroTag: 'add-location',
-              ),
-              const SizedBox(height: 16),
               MapButton(
                 icon: Icons.add,
                 onPressed: () {
@@ -91,6 +137,7 @@ class _UpdateLocationDataWidgetState extends State<UpdateLocationDataWidget> {
                 },
                 heroTag: 'zoom-in',
               ),
+              const SizedBox(height: 8),
               MapButton(
                 icon: Icons.remove,
                 onPressed: () {
@@ -100,6 +147,28 @@ class _UpdateLocationDataWidgetState extends State<UpdateLocationDataWidget> {
                   );
                 },
                 heroTag: 'zoom-out',
+              ),
+              const SizedBox(height: 8),
+              MapButton(
+                icon: Icons.check,
+                onPressed: () async {
+                  if (selectedLocation.value == null) {
+                    unawaited(
+                      showShortToast(
+                        context,
+                        "Select a location first",
+                      ),
+                    );
+                    return;
+                  }
+                  await FilesService.instance.bulkEditLocationData(
+                    widget.files,
+                    selectedLocation.value,
+                    context,
+                  );
+                  Navigator.of(context).pop();
+                },
+                heroTag: 'add-location',
               ),
             ],
           ),
