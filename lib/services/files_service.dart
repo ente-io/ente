@@ -107,80 +107,37 @@ class FilesService {
 
     final List<EnteFile> remoteFilesToUpdate = [];
     final Map<int, Map<String, dynamic>> fileIDToUpdateMetadata = {};
-    if (location == null) {
-      final buttonResult = (await showActionSheet(
-        context: context,
-        body: "Revert to original location for all items?",
-        buttons: [
-          ButtonWidget(
-            labelText: "Yes",
-            buttonType: ButtonType.neutral,
-            buttonSize: ButtonSize.large,
-            shouldStickToDarkTheme: true,
-            buttonAction: ButtonAction.first,
-            shouldSurfaceExecutionStates: true,
-            isInAlert: true,
-            onTap: () async {
-              await _editLocationData(
-                uploadedFiles,
-                fileIDToUpdateMetadata,
-                remoteFilesToUpdate,
-                location,
-              );
-            },
-          ),
-          ButtonWidget(
-            labelText: S.of(context).cancel,
-            buttonType: ButtonType.secondary,
-            buttonSize: ButtonSize.large,
-            shouldStickToDarkTheme: true,
-            buttonAction: ButtonAction.cancel,
-            isInAlert: true,
-          ),
-        ],
-      ))!;
-
-      if (buttonResult.action == ButtonAction.cancel) {
-        return;
-      }
-    } else {
-      final buttonResult = (await showActionSheet(
-        context: context,
-        body: "Change location of selected items?",
-        bodyHighlight: "You can revert back to the original location anytime",
-        buttons: [
-          ButtonWidget(
-            labelText: "Yes",
-            buttonType: ButtonType.neutral,
-            buttonSize: ButtonSize.large,
-            shouldStickToDarkTheme: true,
-            buttonAction: ButtonAction.first,
-            shouldSurfaceExecutionStates: true,
-            isInAlert: true,
-            onTap: () async {
-              await _editLocationData(
-                uploadedFiles,
-                fileIDToUpdateMetadata,
-                remoteFilesToUpdate,
-                location,
-              );
-            },
-          ),
-          ButtonWidget(
-            labelText: S.of(context).cancel,
-            buttonType: ButtonType.secondary,
-            buttonSize: ButtonSize.large,
-            shouldStickToDarkTheme: true,
-            buttonAction: ButtonAction.cancel,
-            isInAlert: true,
-          ),
-        ],
-      ))!;
-
-      if (buttonResult.action == ButtonAction.cancel) {
-        return;
-      }
-    }
+    await showActionSheet(
+      context: context,
+      body: "Change location of selected items?",
+      buttons: [
+        ButtonWidget(
+          labelText: "Yes",
+          buttonType: ButtonType.neutral,
+          buttonSize: ButtonSize.large,
+          shouldStickToDarkTheme: true,
+          buttonAction: ButtonAction.first,
+          shouldSurfaceExecutionStates: true,
+          isInAlert: true,
+          onTap: () async {
+            await _editLocationData(
+              uploadedFiles,
+              fileIDToUpdateMetadata,
+              remoteFilesToUpdate,
+              location,
+            );
+          },
+        ),
+        ButtonWidget(
+          labelText: S.of(context).cancel,
+          buttonType: ButtonType.secondary,
+          buttonSize: ButtonSize.large,
+          shouldStickToDarkTheme: true,
+          buttonAction: ButtonAction.cancel,
+          isInAlert: true,
+        ),
+      ],
+    );
   }
 
   Future<void> _editLocationData(
