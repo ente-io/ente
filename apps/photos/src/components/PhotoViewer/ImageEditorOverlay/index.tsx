@@ -214,9 +214,10 @@ const ImageEditorOverlay = (props: IProps) => {
                     props.file
                 );
                 img.src = srcURLs.url as string;
-                setFileURL(fileURL);
+                setFileURL(srcURLs.url as string);
+            } else {
+                img.src = fileURL;
             }
-            img.src = fileURL;
 
             await new Promise((resolve, reject) => {
                 img.onload = () => {
