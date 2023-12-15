@@ -10,10 +10,13 @@ import {
     getFaceId,
     areFaceIdsSame,
     extractFaceImages,
+    getLocalFile,
+    getOriginalImageBitmap,
 } from 'utils/machineLearning';
 import { storeFaceCrop } from 'utils/machineLearning/faceCrop';
 import mlIDbStorage from 'utils/storage/mlIDbStorage';
 import ReaderService from './readerService';
+import { imageBitmapToBlob } from 'utils/image';
 
 class FaceService {
     async syncFileFaceDetections(
@@ -172,7 +175,10 @@ class FaceService {
     async saveFaceCrop(
         imageBitmap: ImageBitmap,
         face: Face,
-        syncContext: MLSyncContext
+        syncContext: MLSyncContext,
+        options?: {
+            returnCrop: boolean;
+        }
     ) {
         const faceCrop = await syncContext.faceCropService.getFaceCrop(
             imageBitmap,
@@ -184,7 +190,12 @@ class FaceService {
             faceCrop,
             syncContext.config.faceCrop.blobOptions
         );
+        let blob: Blob;
+        if (options?.returnCrop) {
+            blob = await imageBitmapToBlob(faceCrop.image);
+        }
         faceCrop.image.close();
+        return blob;
     }
 
     async getAllSyncedFacesMap(syncContext: MLSyncContext) {
@@ -233,6 +244,23 @@ class FaceService {
         //     ),
         //     noise: syncContext.faceClusteringResults.noise,
         // };
+    }
+
+    public async regenerateFaceCrop(
+        syncContext: MLSyncContext,
+        fileID: number,
+        faceID: string
+    ) {
+        const personFace = await mlIDbStorage.getFace(fileID, faceID);
+        if (!personFace) {
+            return;
+        }
+
+        const file = await getLocalFile(personFace.fileId);
+        const imageBitmap = await getOriginalImageBitmap(file);
+        return await this.saveFaceCrop(imageBitmap, personFace, syncContext, {
+            returnCrop: true,
+        });
     }
 }
 

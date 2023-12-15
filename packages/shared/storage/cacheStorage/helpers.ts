@@ -33,7 +33,9 @@ export async function getBlobFromCache(
 ): Promise<Blob> {
     const cache = await CacheStorageService.open(cacheName);
     const response = await cache.match(url);
-
+    if (!response) {
+        return undefined;
+    }
     return response.blob();
 }
 

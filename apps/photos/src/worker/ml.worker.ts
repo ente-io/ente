@@ -37,6 +37,15 @@ export class DedicatedMLWorker implements MachineLearningWorker {
         return mlService.sync(token, userID);
     }
 
+    public async regenerateFaceCrop(
+        token: string,
+        userID: number,
+        fileID: number,
+        faceID: string
+    ) {
+        return mlService.regenerateFaceCrop(token, userID, fileID, faceID);
+    }
+
     public close() {
         self.close();
     }

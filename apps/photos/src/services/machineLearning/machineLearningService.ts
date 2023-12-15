@@ -116,6 +116,17 @@ class MachineLearningService {
         return mlSyncResult;
     }
 
+    public async regenerateFaceCrop(
+        token: string,
+        userID: number,
+        fileID: number,
+        faceID: string
+    ) {
+        await downloadManager.init(APPS.PHOTOS, { token });
+        const syncContext = await this.getSyncContext(token, userID);
+        return FaceService.regenerateFaceCrop(syncContext, fileID, faceID);
+    }
+
     private newMlData(fileId: number) {
         return {
             fileId,

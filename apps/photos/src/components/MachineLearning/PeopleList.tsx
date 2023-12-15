@@ -172,6 +172,8 @@ export function UnidentifiedFaces(props: {
                     faces.map((face, index) => (
                         <FaceChip key={index}>
                             <ImageCacheView
+                                faceID={face.id}
+                                fileID={face.fileId}
                                 url={face.crop?.imageUrl}
                                 cacheName={CACHES.FACE_CROPS}
                             />
