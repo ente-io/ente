@@ -170,6 +170,9 @@ export default function AlbumCastDialog(props: Props) {
                         }}>
                         {t('PAIR_WITH_PIN')}
                     </EnteButton>
+                    <Typography color="text.muted">
+                        {t('PAIR_WITH_PIN_WORKS_FOR_ANY_LARGE_SCREEN_DEVICE')}
+                    </Typography>
                 </>
             )}
             {view === 'auto' && (
@@ -199,6 +202,7 @@ export default function AlbumCastDialog(props: Props) {
             )}
             {view === 'pin' && (
                 <>
+                    <Typography>{t('VISIT_CAST_ENTE_IO')}</Typography>
                     <Typography>{t('ENTER_CAST_PIN_CODE')}</Typography>
                     <SingleInputForm
                         callback={onSubmit}

@@ -630,5 +630,7 @@
     "AUTO_CAST_PAIR": "Auto Pair",
     "AUTO_CAST_PAIR_REQUIRES_CONNECTION_TO_GOOGLE": "Auto Pair requires connecting to Google servers and only works with Chromecast supported devices. Google will not receive sensitive data, such as your photos.",
     "PAIR_WITH_PIN": "Pair with PIN",
-    "CHOOSE_DEVICE_FROM_BROWSER": "Choose a cast-compatible device from the browser popup."
+    "CHOOSE_DEVICE_FROM_BROWSER": "Choose a cast-compatible device from the browser popup.",
+    "PAIR_WITH_PIN_WORKS_FOR_ANY_LARGE_SCREEN_DEVICE": "Pair with PIN works for any large screen device you want to play your album on.",
+    "VISIT_CAST_ENTE_IO": "Visit cast.ente.io on the device you want to pair."
 }
