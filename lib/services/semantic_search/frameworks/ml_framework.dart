@@ -80,25 +80,14 @@ abstract class MLFramework {
   }
 
   Future<void> _initTextModel() async {
-    // TODO: remove hardcoding
-    if (getFrameworkName() == "ggml") {
-      final path = await _getLocalTextModelPath();
-      if (File(path).existsSync()) {
-        await loadTextModel(path);
-      } else {
-        final tempFile = File(path + ".temp");
-        await _downloadFile(getTextModelRemotePath(), tempFile.path);
-        await tempFile.rename(path);
-        await loadTextModel(path);
-      }
+    final path = await _getLocalTextModelPath();
+    if (File(path).existsSync()) {
+      await loadTextModel(path);
     } else {
-      const assetPath = "assets/models/clip/clip-text-vit-32-int32.onnx";
-      await loadTextModel(
-        await getAccessiblePathForAsset(
-          assetPath,
-          "clip-text-vit-32-float32.onnx",
-        ),
-      );
+      final tempFile = File(path + ".temp");
+      await _downloadFile(getTextModelRemotePath(), tempFile.path);
+      await tempFile.rename(path);
+      await loadTextModel(path);
     }
   }
 

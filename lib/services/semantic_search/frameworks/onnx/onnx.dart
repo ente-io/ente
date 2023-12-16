@@ -6,8 +6,9 @@ import "package:photos/services/semantic_search/frameworks/onnx/onnx_text_encode
 
 class ONNX extends MLFramework {
   static const kModelBucketEndpoint = "https://models.ente.io/";
-  static const kImageModel = "clip-vit-base-patch32_ggml-vision-model-f16.gguf";
-  static const kTextModel = "clip-vit-base-patch32_ggml-text-model-f16.gguf";
+  static const kImageModel = "clip-image-vit-32-float32.onnx";
+  static const kTextModel = "clip-text-vit-32-float32-int32.onnx";
+
   final _computer = Computer.shared();
   final _logger = Logger("ONNX");
   final _clipImage = OnnxImageEncoder();
@@ -27,11 +28,12 @@ class ONNX extends MLFramework {
 
   @override
   String getTextModelRemotePath() {
-    return "";
+    return kModelBucketEndpoint + kTextModel;
   }
 
   @override
   Future<void> loadImageModel(String path) async {
+    return;
     final startTime = DateTime.now();
     _imageEncoderAddress = await _computer.compute(
       _clipImage.loadModel,

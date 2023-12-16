@@ -1,5 +1,6 @@
 import "dart:async";
 import "dart:collection";
+import "dart:math";
 
 import "package:computer/computer.dart";
 import "package:logging/logging.dart";
@@ -15,6 +16,7 @@ import "package:photos/models/file/file.dart";
 import "package:photos/objectbox.g.dart";
 import "package:photos/services/semantic_search/embedding_store.dart";
 import 'package:photos/services/semantic_search/frameworks/onnx/onnx.dart';
+import "package:photos/utils/file_util.dart";
 import "package:photos/utils/local_settings.dart";
 import "package:photos/utils/thumbnail_util.dart";
 import "package:shared_preferences/shared_preferences.dart";
@@ -28,7 +30,7 @@ class SemanticSearchService {
 
   static const kModelName = "clip";
   static const kEmbeddingLength = 512;
-  static const kScoreThreshold = 0.0;
+  static const kScoreThreshold = 0.23;
 
   final _logger = Logger("SemanticSearchService");
   final _queue = Queue<EnteFile>();
@@ -68,7 +70,7 @@ class SemanticSearchService {
     }
     _isSyncing = true;
     await EmbeddingStore.instance.pullEmbeddings();
-    await _backFill();
+    // await _backFill();
     _isSyncing = false;
   }
 
@@ -125,7 +127,7 @@ class SemanticSearchService {
         .getEmbeddingBox()
         .query(
           Embedding_.model.equals(
-            _mlFramework.getFrameworkName() + "-" + kModelName,
+            "ggml" + "-" + kModelName,
           ),
         )
         .watch(triggerImmediately: true)
@@ -147,7 +149,7 @@ class SemanticSearchService {
     final fileIDs = await _getFileIDsToBeIndexed();
     final files = await FilesDB.instance.getUploadedFiles(fileIDs);
     _logger.info(files.length.toString() + " to be embedded");
-    await _cacheThumbnails(files);
+    // await _cacheThumbnails(files);
     _queue.addAll(files);
     _pollQueue();
   }
@@ -227,33 +229,38 @@ class SemanticSearchService {
     _isComputingEmbeddings = true;
 
     while (_queue.isNotEmpty) {
-      await _computeImageEmbedding(_queue.removeLast());
+      await computeImageEmbedding(_queue.removeLast());
     }
 
     _isComputingEmbeddings = false;
   }
 
-  Future<void> _computeImageEmbedding(EnteFile file) async {
+  Future<void> computeImageEmbedding(EnteFile file) async {
     if (!_frameworkInitialization.isCompleted) {
       return;
     }
     try {
-      final filePath = (await getThumbnailForUploadedFile(file))!.path;
+      final filePath = (await getFile(file))!.path;
       _logger.info("Running clip over $file");
       final result = await _mlFramework.getImageEmbedding(filePath);
       if (result.length != kEmbeddingLength) {
         _logger.severe("Discovered incorrect embedding for $file - $result");
         return;
       }
-      final embedding = Embedding(
-        fileID: file.uploadedFileID!,
-        model: _mlFramework.getFrameworkName() + "-" + kModelName,
-        embedding: result,
-      );
-      await EmbeddingStore.instance.storeEmbedding(
-        file,
-        embedding,
-      );
+      // dev.log(result.toString());
+      // dev.log(computeScore(result, webEmbedding).toString());
+      // dev.log(computeScore(result, pyEmbedding).toString());
+      // dev.log(computeScore(pyEmbedding, webEmbedding).toString());
+
+      // final embedding = Embedding(
+      //   fileID: file.uploadedFileID!,
+      //   model: _mlFramework.getFrameworkName() + "-" + kModelName,
+      //   embedding: result,
+      // );
+      // await EmbeddingStore.instance.storeEmbedding(
+      //   file,
+      //   embedding,
+      // );
     } catch (e, s) {
       _logger.severe(e, s);
     }
@@ -315,9 +322,13 @@ double computeScore(List<double> imageEmbedding, List<double> textEmbedding) {
     "The two embeddings should have the same length",
   );
   double score = 0;
+  double normalization = 0, normalization2 = 0;
   for (int index = 0; index < imageEmbedding.length; index++) {
     score += imageEmbedding[index] * textEmbedding[index];
+    normalization += imageEmbedding[index] * imageEmbedding[index];
+    normalization2 += textEmbedding[index] * textEmbedding[index];
   }
+  score /= sqrt((normalization * normalization2));
   return score;
 }
 
