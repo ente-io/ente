@@ -46,6 +46,7 @@ function sidebarphotos() {
               collapsed: true,
               items: [
                   { text: 'Family Plan', link: '/photos/features/family-plan' },
+                  { text: 'Albums', link: '/photos/features/albums' },
                   { text: 'Archive', link: '/photos/features/archive' },
                   { text: 'Hidden', link: '/photos/features/hidden' },
                   { text: 'Map', link: '/photos/features/map' },
