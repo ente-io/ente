@@ -318,7 +318,7 @@ class _FileSelectionActionsWidgetState
           shouldShow: widget.selectedFiles.files.any(
             (element) => (element.ownerID == currentUserID),
           ),
-          labelText: "Edit location",
+          labelText: S.of(context).editLocation,
           icon: Icons.edit_location_alt_outlined,
           onTap: () async {
             await showBarModalBottomSheet(

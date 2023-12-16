@@ -8157,6 +8157,46 @@ class S {
       args: [],
     );
   }
+
+  /// `Edit location`
+  String get editLocation {
+    return Intl.message(
+      'Edit location',
+      name: 'editLocation',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Select a location`
+  String get selectALocation {
+    return Intl.message(
+      'Select a location',
+      name: 'selectALocation',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Select a location first`
+  String get selectALocationFirst {
+    return Intl.message(
+      'Select a location first',
+      name: 'selectALocationFirst',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Change location of selected items?`
+  String get changeLocationOfSelectedItems {
+    return Intl.message(
+      'Change location of selected items?',
+      name: 'changeLocationOfSelectedItems',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

@@ -103,10 +103,10 @@ class FilesService {
     final Map<int, Map<String, dynamic>> fileIDToUpdateMetadata = {};
     await showActionSheet(
       context: context,
-      body: "Change location of selected items?",
+      body: S.of(context).changeLocationOfSelectedItems,
       buttons: [
         ButtonWidget(
-          labelText: "Yes",
+          labelText: S.of(context).yes,
           buttonType: ButtonType.neutral,
           buttonSize: ButtonSize.large,
           shouldStickToDarkTheme: true,

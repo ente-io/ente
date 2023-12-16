@@ -3,6 +3,7 @@ import "dart:async";
 import "package:flutter/material.dart";
 import "package:flutter_map/flutter_map.dart";
 import "package:latlong2/latlong.dart";
+import "package:photos/generated/l10n.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/location/location.dart";
 import "package:photos/services/files_service.dart";
@@ -116,7 +117,7 @@ class _UpdateLocationDataWidgetState extends State<UpdateLocationDataWidget> {
                         ),
                       )
                     : Text(
-                        "Select a location",
+                        S.of(context).selectALocation,
                         style: textTheme.mini,
                       );
               },
@@ -159,7 +160,7 @@ class _UpdateLocationDataWidgetState extends State<UpdateLocationDataWidget> {
                     unawaited(
                       showShortToast(
                         context,
-                        "Select a location first",
+                        S.of(context).selectALocationFirst,
                       ),
                     );
                     return;
@@ -192,6 +193,7 @@ class _UpdateLocationDataWidgetState extends State<UpdateLocationDataWidget> {
                           valueListenable: isDragging,
                           builder: (context, value, child) {
                             return AnimatedContainer(
+                              curve: Curves.easeInOut,
                               duration: const Duration(milliseconds: 200),
                               height: value ? 32 : 16,
                               child: child,
