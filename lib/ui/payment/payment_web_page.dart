@@ -190,7 +190,7 @@ class _PaymentWebPageState extends State<PaymentWebPage> {
     } else {
       // should never reach here
       _logger.severe("unexpected status", uri.toString());
-      showGenericErrorDialog(
+      await showGenericErrorDialog(
         context: context,
         error: Exception("expected payment status $paymentStatus"),
       );

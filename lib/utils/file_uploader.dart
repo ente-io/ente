@@ -43,6 +43,7 @@ class FileUploader {
   static const kMaximumConcurrentVideoUploads = 2;
   static const kMaximumThumbnailCompressionAttempts = 2;
   static const kMaximumUploadAttempts = 4;
+  static const kMaxFileSize5Gib = 5368709120;
   static const kBlockedUploadsPollFrequency = Duration(seconds: 2);
   static const kFileUploadTimeout = Duration(minutes: 50);
   static const k20MBStorageBuffer = 20 * 1024 * 1024;
@@ -68,6 +69,11 @@ class FileUploader {
   late ProcessType _processType;
   late bool _isBackground;
   late SharedPreferences _prefs;
+  // _hasInitiatedForceUpload is used to track if user attempted force upload
+  // where files are uploaded directly (without adding them to DB). In such
+  // cases, we don't want to clear the stale upload files. See #removeStaleFiles
+  // as it can result in clearing files which are still being force uploaded.
+  bool _hasInitiatedForceUpload = false;
 
   FileUploader._privateConstructor() {
     Bus.instance.on<SubscriptionPurchasedEvent>().listen((event) {
@@ -285,6 +291,12 @@ class FileUploader {
   }
 
   Future<void> removeStaleFiles() async {
+    if (_hasInitiatedForceUpload) {
+      _logger.info(
+        "Force upload was initiated, skipping stale file cleanup",
+      );
+      return;
+    }
     try {
       final String dir = Configuration.instance.getTempDirectory();
       // delete all files in the temp directory that start with upload_ and
@@ -324,6 +336,7 @@ class FileUploader {
   }
 
   Future<EnteFile> forceUpload(EnteFile file, int collectionID) async {
+    _hasInitiatedForceUpload = true;
     return _tryToUpload(file, collectionID, true);
   }
 
@@ -381,15 +394,9 @@ class FileUploader {
         'starting ${forcedUpload ? 'forced' : ''} '
         '${isUpdatedFile ? 're-upload' : 'upload'} of ${file.toString()}',
       );
-      try {
-        mediaUploadData = await getUploadDataFromEnteFile(file);
-      } catch (e) {
-        if (e is InvalidFileError) {
-          await _onInvalidFileError(file, e);
-        } else {
-          rethrow;
-        }
-      }
+
+      mediaUploadData = await getUploadDataFromEnteFile(file);
+
       Uint8List? key;
       if (isUpdatedFile) {
         key = getFileKey(file);
@@ -399,7 +406,7 @@ class FileUploader {
         // uploaded file. If map is found, it also returns the corresponding
         // mapped or update file entry.
         final result = await _mapToExistingUploadWithSameHash(
-          mediaUploadData!,
+          mediaUploadData,
           file,
           collectionID,
         );
@@ -416,7 +423,7 @@ class FileUploader {
       if (File(encryptedFilePath).existsSync()) {
         await File(encryptedFilePath).delete();
       }
-      await _checkIfWithinStorageLimit(mediaUploadData!.sourceFile!);
+      await _checkIfWithinStorageLimit(mediaUploadData.sourceFile!);
       final encryptedFile = File(encryptedFilePath);
       final EncryptionResult fileAttributes = await CryptoUtil.encryptFile(
         mediaUploadData.sourceFile!.path,
@@ -541,8 +548,13 @@ class FileUploader {
           e is StorageLimitExceededError ||
           e is WiFiUnavailableError ||
           e is SilentlyCancelUploadsError ||
+          e is InvalidFileError ||
           e is FileTooLargeForPlanError)) {
         _logger.severe("File upload failed for " + file.toString(), e, s);
+      }
+      if (e is InvalidFileError) {
+        _logger.severe("File upload ignored for " + file.toString(), e);
+        await _onInvalidFileError(file, e);
       }
       if ((e is StorageLimitExceededError ||
           e is FileTooLargeForPlanError ||
@@ -749,8 +761,15 @@ class FileUploader {
             'freeStorage $freeStorage');
         throw StorageLimitExceededError();
       }
+      if (fileSize > kMaxFileSize5Gib) {
+        _logger.warning('File size exceeds 5GiB fileSize $fileSize');
+        throw InvalidFileError(
+          'file size above 5GiB',
+          InvalidReason.tooLargeFile,
+        );
+      }
     } catch (e) {
-      if (e is StorageLimitExceededError) {
+      if (e is StorageLimitExceededError || e is InvalidFileError) {
         rethrow;
       } else {
         _logger.severe('Error checking storage limit', e);
@@ -759,28 +778,31 @@ class FileUploader {
   }
 
   Future _onInvalidFileError(EnteFile file, InvalidFileError e) async {
-    final bool canIgnoreFile = file.localID != null &&
-        file.deviceFolder != null &&
-        file.title != null &&
-        !file.isSharedMediaToAppSandbox;
-    // If the file is not uploaded yet and either it can not be ignored or the
-    // err is related to live photo media, delete the local entry
-    final bool deleteEntry =
-        !file.isUploaded && (!canIgnoreFile || e.reason.isLivePhotoErr);
+    try {
+      final bool canIgnoreFile = file.localID != null &&
+          file.deviceFolder != null &&
+          file.title != null &&
+          !file.isSharedMediaToAppSandbox;
+      // If the file is not uploaded yet and either it can not be ignored or the
+      // err is related to live photo media, delete the local entry
+      final bool deleteEntry =
+          !file.isUploaded && (!canIgnoreFile || e.reason.isLivePhotoErr);
 
-    if (e.reason != InvalidReason.thumbnailMissing || !canIgnoreFile) {
-      _logger.severe(
-        "Invalid file, localDelete: $deleteEntry, ignored: $canIgnoreFile",
-        e,
-      );
+      if (e.reason != InvalidReason.thumbnailMissing || !canIgnoreFile) {
+        _logger.severe(
+          "Invalid file, localDelete: $deleteEntry, ignored: $canIgnoreFile",
+          e,
+        );
+      }
+      if (deleteEntry) {
+        await FilesDB.instance.deleteLocalFile(file);
+      }
+      if (canIgnoreFile) {
+        await LocalSyncService.instance.ignoreUpload(file, e);
+      }
+    } catch (e, s) {
+      _logger.severe("Failed to handle invalid file error", e, s);
     }
-    if (deleteEntry) {
-      await FilesDB.instance.deleteLocalFile(file);
-    }
-    if (canIgnoreFile) {
-      await LocalSyncService.instance.ignoreUpload(file, e);
-    }
-    throw e;
   }
 
   Future<EnteFile> _uploadFile(

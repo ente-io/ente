@@ -90,10 +90,11 @@ class _VideoWidgetNewState extends State<VideoWidgetNew>
 
   @override
   void dispose() {
+    removeCallBack(widget.file);
+    _progressNotifier.dispose();
     WidgetsBinding.instance.removeObserver(this);
     playingStreamSubscription.cancel();
     player.dispose();
-    _progressNotifier.dispose();
     super.dispose();
   }
 
@@ -159,6 +160,9 @@ class _VideoWidgetNewState extends State<VideoWidgetNew>
     getFileFromServer(
       widget.file,
       progressCallback: (count, total) {
+        if(!mounted) {
+          return;
+        }
         _progressNotifier.value = count / (widget.file.fileSize ?? total);
         if (_progressNotifier.value == 1) {
           if (mounted) {

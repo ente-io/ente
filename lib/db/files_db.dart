@@ -1466,6 +1466,24 @@ class FilesDB {
     return result;
   }
 
+  // For a given userID, return unique localID for all uploaded live photos
+  Future<List<String>> getLivePhotosForUser(int userId) async {
+    final db = await instance.database;
+    final rows = await db.query(
+      filesTable,
+      columns: [columnLocalID],
+      distinct: true,
+      where: '$columnOwnerID = ? AND '
+          '$columnFileType = ? AND $columnLocalID IS NOT NULL',
+      whereArgs: [userId, getInt(FileType.livePhoto)],
+    );
+    final result = <String>[];
+    for (final row in rows) {
+      result.add(row[columnLocalID] as String);
+    }
+    return result;
+  }
+
   // updateSizeForUploadIDs takes a map of upploadedFileID and fileSize and
   // update the fileSize for the given uploadedFileID
   Future<void> updateSizeForUploadIDs(

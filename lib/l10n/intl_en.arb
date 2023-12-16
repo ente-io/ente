@@ -907,10 +907,10 @@
     "description": "Text to tell user how many memories have been preserved",
     "placeholders": {
       "completed": {
-        "type": "int"
+        "type": "String"
       },
       "total": {
-        "type": "int"
+        "type": "String"
       }
     }
   },

@@ -33,7 +33,7 @@ class ViewAddOnButton extends StatelessWidget {
         singleBorderRadius: 4,
         alignCaptionedTextToLeft: true,
         onTap: () async {
-          routeToPage(context, AddOnPage(bonusData!));
+          await routeToPage(context, AddOnPage(bonusData!));
         },
       ),
     );

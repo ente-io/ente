@@ -105,21 +105,19 @@ class _ZoomableImageState extends State<ZoomableImage>
     } else {
       content = const EnteLoadingWidget();
     }
-    final GestureDragUpdateCallback? verticalDragCallback = _isZooming
-        ? null
-        : (d) => {
-              if (!_isZooming)
+    verticalDragCallback(d) => {
+          if (!_isZooming)
+            {
+              if (d.delta.dy > dragSensitivity)
                 {
-                  if (d.delta.dy > dragSensitivity)
-                    {
-                      {Navigator.of(context).pop()},
-                    }
-                  else if (d.delta.dy < (dragSensitivity * -1))
-                    {
-                      showDetailsSheet(context, widget.photo),
-                    },
+                  {Navigator.of(context).pop()},
+                }
+              else if (d.delta.dy < (dragSensitivity * -1))
+                {
+                  showDetailsSheet(context, widget.photo),
                 },
-            };
+            },
+        };
 
     return GestureDetector(
       onVerticalDragUpdate: verticalDragCallback,
@@ -268,7 +266,7 @@ class _ZoomableImageState extends State<ZoomableImage>
         showToast(
           context,
           'Updating photo scale zooming and scale: ${_photoViewController.scale}',
-        );
+        ).ignore();
       }
       final prevImageInfo = await getImageInfo(previewImageProvider);
       finalImageInfo = await getImageInfo(finalImageProvider);
@@ -303,10 +301,12 @@ class _ZoomableImageState extends State<ZoomableImage>
   ) async {
     final int h = imageInfo.image.height, w = imageInfo.image.width;
     if (h != enteFile.height || w != enteFile.width) {
-      if (kDebugMode) {
-        showToast(context, 'Updating aspect ratio');
+      final logMessage =
+          'Updating aspect ratio for from ${enteFile.height}x${enteFile.width} to ${h}x$w';
+      if (kDebugMode && (enteFile.height != 0 || enteFile.width != 0)) {
+        showToast(context, logMessage).ignore();
       }
-      _logger.info('Updating aspect ratio for $enteFile to $h:$w');
+      _logger.info(logMessage);
       await FileMagicService.instance.updatePublicMagicMetadata([
         enteFile,
       ], {

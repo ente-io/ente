@@ -131,6 +131,8 @@ class GalleryState extends State<Gallery> {
               "Reloaded gallery on soft refresh all files on ${event.reason}",
             );
           }
+
+          setState(() {});
         });
       });
     }

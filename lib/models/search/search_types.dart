@@ -182,7 +182,7 @@ extension SectionTypeExtensions on SectionType {
     switch (this) {
       case SectionType.contacts:
         return () async {
-          shareText(
+          await shareText(
             S.of(context).shareTextRecommendUsingEnte,
           );
         };
@@ -211,7 +211,7 @@ extension SectionTypeExtensions on SectionType {
               try {
                 final Collection c =
                     await CollectionsService.instance.createAlbum(text);
-                routeToPage(
+                await routeToPage(
                   context,
                   CollectionPage(CollectionWithThumbnail(c, null)),
                 );
@@ -223,7 +223,7 @@ extension SectionTypeExtensions on SectionType {
             },
           );
           if (result is Exception) {
-            showGenericErrorDialog(context: context, error: result);
+            await showGenericErrorDialog(context: context, error: result);
           }
         };
       default:

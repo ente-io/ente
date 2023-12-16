@@ -5,6 +5,7 @@ import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import "package:archive/archive_io.dart";
+import "package:computer/computer.dart";
 import 'package:logging/logging.dart';
 import "package:motion_photos/motion_photos.dart";
 import 'package:motionphoto/motionphoto.dart';
@@ -21,6 +22,7 @@ import "package:photos/models/metadata/file_magic.dart";
 import "package:photos/services/file_magic_service.dart";
 import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/file_util.dart';
+import "package:uuid/uuid.dart";
 import 'package:video_thumbnail/video_thumbnail.dart';
 
 final _logger = Logger("FileUtil");
@@ -125,13 +127,14 @@ Future<MediaUploadData> _getMediaUploadDataFromAssetFile(EnteFile file) async {
     fileHash = '$fileHash$kLivePhotoHashSeparator$livePhotoVideoHash';
     final tempPath = Configuration.instance.getTempDirectory();
     // .elp -> ente live photo
-    final livePhotoPath = tempPath + file.generatedID.toString() + ".elp";
-    _logger.fine("Uploading zipped live photo from " + livePhotoPath);
-    final encoder = ZipFileEncoder();
-    encoder.create(livePhotoPath);
-    await encoder.addFile(videoUrl, "video" + extension(videoUrl.path));
-    await encoder.addFile(sourceFile, "image" + extension(sourceFile.path));
-    encoder.close();
+    final uniqueId = const Uuid().v4().toString();
+    final livePhotoPath = tempPath + uniqueId + "_${file.generatedID}.elp";
+    _logger.fine("Creating zip for live photo from " + livePhotoPath);
+    await zip(
+      zipPath: livePhotoPath,
+      imagePath: sourceFile.path,
+      videoPath: videoUrl.path,
+    );
     // delete the temporary video and image copy (only in IOS)
     if (Platform.isIOS) {
       await sourceFile.delete();
@@ -165,6 +168,33 @@ Future<MediaUploadData> _getMediaUploadDataFromAssetFile(EnteFile file) async {
     height: h,
     width: w,
     motionPhotoStartIndex: motionPhotoStartingIndex,
+  );
+}
+
+Future<void> _computeZip(Map<String, dynamic> args) async {
+  final String zipPath = args['zipPath'];
+  final String imagePath = args['imagePath'];
+  final String videoPath = args['videoPath'];
+  final encoder = ZipFileEncoder();
+  encoder.create(zipPath);
+  await encoder.addFile(File(imagePath), "image" + extension(imagePath));
+  await encoder.addFile(File(videoPath), "video" + extension(videoPath));
+  encoder.close();
+}
+
+Future<void> zip({
+  required String zipPath,
+  required String imagePath,
+  required String videoPath,
+}) {
+  return Computer.shared().compute(
+    _computeZip,
+    param: {
+      'zipPath': zipPath,
+      'imagePath': imagePath,
+      'videoPath': videoPath,
+    },
+    taskName: 'zip',
   );
 }
 
