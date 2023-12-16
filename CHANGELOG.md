@@ -1,5 +1,16 @@
 # CHANGELOG
 
+## v1.6.59
+
+### New
+
+- Added arm64 builds for linux
+
+### Bug Fixes
+
+- Fix Editor file not loading issue
+- Fix ML results missing thumbnail issue
+
 ## v1.6.58
 
 ### Bug Fixes
