@@ -35,7 +35,10 @@ export class DiskCache implements LimitedCache {
                     Error(),
                     'Cache key exists but size does not match. Deleting cache key.'
                 );
-                unlink(cachePath);
+                unlink(cachePath).catch((e) => {
+                    if (e.code === 'ENOENT') return;
+                    logError(e, 'Failed to delete cache key');
+                });
                 return undefined;
             }
             DiskLRUService.touch(cachePath);
@@ -53,7 +56,10 @@ export class DiskCache implements LimitedCache {
                         Error(),
                         'Old cache key exists but size does not match. Deleting cache key.'
                     );
-                    unlink(oldCachePath);
+                    unlink(oldCachePath).catch((e) => {
+                        if (e.code === 'ENOENT') return;
+                        logError(e, 'Failed to delete cache key');
+                    });
                     return undefined;
                 }
                 const match = new Response(await getFileStream(oldCachePath));
