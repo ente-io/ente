@@ -8,6 +8,9 @@
       "slug": "addy_io"
     },
     {
+      "title": "Airtable"
+    },
+    {
       "title": "Anycoin Direct",
       "slug": "anycoindirect"
     },
@@ -44,6 +47,13 @@
       "hex": "5FD800"
     },
     {
+      "title": "Discourse"
+    },
+    {
+      "title": "dus.net",
+      "slug": "dusnet"
+    },
+    {
       "title": "ente",
       "hex": "1DB954"
     },
@@ -64,6 +74,9 @@
     },
     {
       "title": "ING"
+    },
+    {
+      "title": "INWX"
     },
     {
       "title": "Instagram"
@@ -171,7 +184,13 @@
       "hex": "858585"
     },
     {
+      "title": "service-bw"
+    },
+    {
       "title": "SimpleLogin"
+    },
+    {
+      "title": "Sipgate"
     },
     {
       "title": "Snapchat"
