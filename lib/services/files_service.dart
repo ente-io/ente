@@ -93,7 +93,7 @@ class FilesService {
 
   Future<void> bulkEditLocationData(
     List<EnteFile> files,
-    LatLng? location,
+    LatLng location,
     BuildContext context,
   ) async {
     final List<EnteFile> uploadedFiles =
@@ -138,7 +138,7 @@ class FilesService {
     List<EnteFile> uploadedFiles,
     Map<int, Map<String, dynamic>> fileIDToUpdateMetadata,
     List<EnteFile> remoteFilesToUpdate,
-    LatLng? location,
+    LatLng location,
   ) async {
     for (EnteFile remoteFile in uploadedFiles) {
       // discard files not owned by user and also dedupe already processed
@@ -150,8 +150,8 @@ class FilesService {
 
       remoteFilesToUpdate.add(remoteFile);
       fileIDToUpdateMetadata[remoteFile.uploadedFileID!] = {
-        latKey: location?.latitude,
-        longKey: location?.longitude,
+        latKey: location.latitude,
+        longKey: location.longitude,
       };
     }
 

@@ -173,7 +173,7 @@ class _UpdateLocationDataWidgetState extends State<UpdateLocationDataWidget> {
                   }
                   await FilesService.instance.bulkEditLocationData(
                     widget.files,
-                    selectedLocation.value,
+                    selectedLocation.value!,
                     context,
                   );
                   Navigator.of(context).pop();
