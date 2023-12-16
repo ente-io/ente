@@ -62,21 +62,14 @@ export default function PairingMode() {
         options.customNamespaces['urn:x-cast:pair-request'] =
             cast.framework.system.MessageType.JSON;
 
+        options.disableIdleTimeout = true;
+
         context.addCustomMessageListener(
             'urn:x-cast:pair-request',
             messageReceiveHandler
         );
 
         context.start(options);
-
-        return () => {
-            context.removeCustomMessageListener(
-                'urn:x-cast:pair-request',
-                messageReceiveHandler
-            );
-
-            context.stop();
-        };
     }, [cast]);
 
     const messageReceiveHandler = (message: {
