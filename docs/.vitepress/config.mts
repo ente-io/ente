@@ -76,7 +76,7 @@ function sidebarPhotos() {
       ],
     },
     {
-      text: "User Guide",
+      text: "Welcome",
       items: [
         {
           text: "Features",
