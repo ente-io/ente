@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## v1.6.59
+
+### Bug Fixes
+
+- Fix Editor file not loading issue
+- Fix ML results missing thumbnail issue
+
 ## v1.6.58
 
 ### Bug Fixes
