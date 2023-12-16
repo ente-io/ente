@@ -7,7 +7,6 @@ import { getCollection } from 'services/collectionService';
 import { syncFiles } from 'services/fileService';
 import { EnteFile } from 'types/file';
 import { downloadFileAsBlob, isRawFileFromFileName } from 'utils/file';
-import { useCastReceiver } from '@ente/shared/hooks/useCastReceiver';
 
 export const SlideshowContext = createContext<{
     showNextSlide: () => void;
@@ -26,8 +25,6 @@ export default function Slideshow() {
     const [renderableFileURLCache, setRenderableFileURLCache] = useState<
         Record<string, string>
     >({});
-
-    const { cast } = useCastReceiver();
 
     const init = async () => {
         try {
@@ -80,9 +77,8 @@ export default function Slideshow() {
     const router = useRouter();
 
     useEffect(() => {
-        if (!cast) return;
         init();
-    }, [cast]);
+    }, []);
 
     useEffect(() => {
         if (collectionFiles.length < 1) return;

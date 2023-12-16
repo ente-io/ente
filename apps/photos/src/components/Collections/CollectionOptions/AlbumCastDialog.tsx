@@ -1,4 +1,4 @@
-import { Button, Typography } from '@mui/material';
+import { Typography } from '@mui/material';
 import DialogBoxV2 from '@ente/shared/components/DialogBoxV2';
 import SingleInputForm, {
     SingleInputFormProps,
@@ -12,6 +12,7 @@ import { useEffect, useState } from 'react';
 import EnteButton from '@ente/shared/components/EnteButton';
 import EnteSpinner from '@ente/shared/components/EnteSpinner';
 import { VerticallyCentered } from '@ente/shared/components/Container';
+import { logError } from '@ente/shared/sentry';
 
 interface Props {
     show: boolean;
@@ -87,7 +88,8 @@ export default function AlbumCastDialog(props: Props) {
                 try {
                     await instance.requestSession();
                 } catch (e) {
-                    console.log('Error requesting session:', e);
+                    setView('auto-cast-error');
+                    logError(e, 'Error requesting session');
                     return;
                 }
                 const session = instance.getCurrentSession();
@@ -107,20 +109,19 @@ export default function AlbumCastDialog(props: Props) {
                                 })
                                 .catch((e) => {
                                     setView('auto-cast-error');
-                                    console.error(e);
+                                    logError(e, 'Error casting to TV');
                                 });
                         }
                     }
                 );
 
-                console.log('sending message');
                 session
                     .sendMessage('urn:x-cast:pair-request', {})
                     .then(() => {
                         console.log('Message sent successfully');
                     })
                     .catch((error) => {
-                        console.log('Error sending message:', error);
+                        logError(error, 'Error sending message');
                     });
             });
         }
@@ -136,21 +137,21 @@ export default function AlbumCastDialog(props: Props) {
             }}>
             {view === 'choose' && (
                 <>
-                    <Button
+                    <EnteButton
                         onClick={() => {
                             setView('auto');
                         }}>
                         {t('AUTO_CAST_PAIR')}
-                    </Button>
+                    </EnteButton>
                     <Typography color={'text.muted'}>
                         {t('AUTO_CAST_PAIR_REQUIRES_CONNECTION_TO_GOOGLE')}
                     </Typography>
-                    <Button
+                    <EnteButton
                         onClick={() => {
                             setView('pin');
                         }}>
                         {t('PAIR_WITH_PIN')}
-                    </Button>
+                    </EnteButton>
                 </>
             )}
             {view === 'auto' && (
