@@ -29,11 +29,6 @@ class _UpdateLocationDataWidgetState extends State<UpdateLocationDataWidget> {
   final isDragging = ValueNotifier(false);
 
   @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
   void dispose() {
     super.dispose();
     hasSelectedLocation.dispose();
@@ -129,9 +124,7 @@ class _UpdateLocationDataWidgetState extends State<UpdateLocationDataWidget> {
           ),
         ),
         Positioned(
-          // bottom: widget.bottomSheetDraggableAreaHeight + 10,
           bottom: 48,
-
           right: 24,
           left: 24,
           child: Column(
@@ -201,7 +194,6 @@ class _UpdateLocationDataWidgetState extends State<UpdateLocationDataWidget> {
                             return AnimatedContainer(
                               duration: const Duration(milliseconds: 200),
                               height: value ? 32 : 16,
-                              // color: Colors.yellow,
                               child: child,
                             );
                           },
@@ -218,8 +210,6 @@ class _UpdateLocationDataWidgetState extends State<UpdateLocationDataWidget> {
                             width: 12,
                             decoration: BoxDecoration(
                               boxShadow: shadowMenuDark,
-                              // borderRadius: BorderRadius.circular(2),
-                              // color: Colors.yellow,
                             ),
                           ),
                         ),
