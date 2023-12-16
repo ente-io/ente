@@ -32,11 +32,11 @@ export function ImageCacheView(props: {
 
     useEffect(() => {
         let didCancel = false;
-        const user: User = getData(LS_KEYS.USER);
         async function loadImage() {
             try {
+                const user: User = getData(LS_KEYS.USER);
                 let blob: Blob;
-                if (!props.url || !props.cacheName) {
+                if (!props.url || !props.cacheName || !user) {
                     blob = undefined;
                 } else {
                     blob = await cached(
