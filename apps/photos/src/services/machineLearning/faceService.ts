@@ -175,10 +175,7 @@ class FaceService {
     async saveFaceCrop(
         imageBitmap: ImageBitmap,
         face: Face,
-        syncContext: MLSyncContext,
-        options?: {
-            returnCrop: boolean;
-        }
+        syncContext: MLSyncContext
     ) {
         const faceCrop = await syncContext.faceCropService.getFaceCrop(
             imageBitmap,
@@ -190,10 +187,7 @@ class FaceService {
             faceCrop,
             syncContext.config.faceCrop.blobOptions
         );
-        let blob: Blob;
-        if (options?.returnCrop) {
-            blob = await imageBitmapToBlob(faceCrop.image);
-        }
+        const blob = await imageBitmapToBlob(faceCrop.image);
         faceCrop.image.close();
         return blob;
     }
@@ -258,9 +252,7 @@ class FaceService {
 
         const file = await getLocalFile(personFace.fileId);
         const imageBitmap = await getOriginalImageBitmap(file);
-        return await this.saveFaceCrop(imageBitmap, personFace, syncContext, {
-            returnCrop: true,
-        });
+        return await this.saveFaceCrop(imageBitmap, personFace, syncContext);
     }
 }
 
