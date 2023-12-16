@@ -502,11 +502,9 @@ class _FileSelectionActionsWidgetState
 
   Future<void> _onCreatedSharedLinkClicked() async {
     if (split.ownedByCurrentUser.isEmpty) {
-      unawaited(
-        showShortToast(
-          context,
-          S.of(context).canOnlyCreateLinkForFilesOwnedByYou,
-        ),
+      showShortToast(
+        context,
+        S.of(context).canOnlyCreateLinkForFilesOwnedByYou,
       );
       return;
     }
@@ -570,7 +568,7 @@ class _FileSelectionActionsWidgetState
       final String url =
           "${_cachedCollectionForSharedLink!.publicURLs?.first?.url}#$collectionKey";
       await Clipboard.setData(ClipboardData(text: url));
-      unawaited(showShortToast(context, S.of(context).linkCopiedToClipboard));
+      showShortToast(context, S.of(context).linkCopiedToClipboard);
     }
   }
 

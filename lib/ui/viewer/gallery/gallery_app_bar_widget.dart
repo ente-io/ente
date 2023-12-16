@@ -131,12 +131,10 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     if (galleryType != GalleryType.ownedCollection &&
         galleryType != GalleryType.hiddenOwnedCollection &&
         galleryType != GalleryType.quickLink) {
-      unawaited(
-        showToast(
-          context,
-          'Type of galler $galleryType is not supported for '
-          'rename',
-        ),
+      showToast(
+        context,
+        'Type of galler $galleryType is not supported for '
+        'rename',
       );
 
       return;
@@ -269,7 +267,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
           showToast(
             context,
             S.of(context).remindToEmptyDeviceTrash,
-          ).ignore();
+          );
         }
       },
     );
@@ -614,7 +612,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
                 context,
               );
             } else {
-              unawaited(showToast(context, S.of(context).somethingWentWrong));
+              showToast(context, S.of(context).somethingWentWrong);
             }
           },
         ),

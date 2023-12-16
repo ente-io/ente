@@ -116,7 +116,7 @@ Future<void> changeSortOrder(
     );
   } catch (e, s) {
     _logger.severe("failed to update collection visibility", e, s);
-    unawaited(showShortToast(context, S.of(context).somethingWentWrong));
+    showShortToast(context, S.of(context).somethingWentWrong);
     rethrow;
   }
 }
@@ -136,7 +136,7 @@ Future<void> updateOrder(
     );
   } catch (e, s) {
     _logger.severe("failed to update order", e, s);
-    unawaited(showShortToast(context, S.of(context).somethingWentWrong));
+    showShortToast(context, S.of(context).somethingWentWrong);
     rethrow;
   }
 }
@@ -162,7 +162,7 @@ Future<void> changeCoverPhoto(
     );
   } catch (e, s) {
     _logger.severe("failed to update cover", e, s);
-    unawaited(showShortToast(context, S.of(context).somethingWentWrong));
+    showShortToast(context, S.of(context).somethingWentWrong);
     rethrow;
   }
 }
@@ -181,7 +181,7 @@ Future<bool> editTime(
     );
     return true;
   } catch (e) {
-    showShortToast(context, S.of(context).somethingWentWrong).ignore();
+    showShortToast(context, S.of(context).somethingWentWrong);
     return false;
   }
 }
@@ -240,7 +240,7 @@ Future<bool> editFileCaption(
     return true;
   } catch (e) {
     if (context != null) {
-      unawaited(showShortToast(context, S.of(context).somethingWentWrong));
+      showShortToast(context, S.of(context).somethingWentWrong);
     }
     return false;
   }
@@ -267,7 +267,7 @@ Future<void> _updatePublicMetadata(
     await FileMagicService.instance.updatePublicMagicMetadata(files, update);
     if (context != null) {
       if (showDoneToast) {
-        await showShortToast(context, S.of(context).done);
+        showShortToast(context, S.of(context).done);
       }
       await dialog?.hide();
     }

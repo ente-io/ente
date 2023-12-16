@@ -142,7 +142,7 @@ class EntityService {
         await _db.upsertEntities(entities);
       }
     }
-    _prefs.setInt(_getEntityLastSyncTimePrefix(type), maxSyncTime);
+    await _prefs.setInt(_getEntityLastSyncTimePrefix(type), maxSyncTime);
     if (hasMoreItems) {
       _logger.info("Diff limit reached, pulling again");
       await _remoteToLocalSync(type);

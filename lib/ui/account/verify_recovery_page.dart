@@ -97,6 +97,7 @@ class _VerifyRecoveryPageState extends State<VerifyRecoveryPage> {
         recoveryKey = CryptoUtil.bin2hex(
           await UserService.instance.getOrCreateRecoveryKey(context),
         );
+        // ignore: unawaited_futures
         routeToPage(
           context,
           RecoveryKeyPage(

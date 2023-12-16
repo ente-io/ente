@@ -106,6 +106,7 @@ class FileUploader {
         );
         _logger.info("BG task was found dead, cleared all locks");
       }
+      // ignore: unawaited_futures
       _pollBackgroundUploadStatus();
     }
     Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) {

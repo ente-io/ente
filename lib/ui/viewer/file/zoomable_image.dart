@@ -22,7 +22,6 @@ import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/utils/file_util.dart';
 import 'package:photos/utils/image_util.dart';
 import 'package:photos/utils/thumbnail_util.dart';
-import "package:photos/utils/toast_util.dart";
 
 class ZoomableImage extends StatefulWidget {
   final EnteFile photo;
@@ -262,12 +261,6 @@ class _ZoomableImageState extends State<ZoomableImage>
     final bool shouldFixPosition = previewImageProvider != null && _isZooming;
     ImageInfo? finalImageInfo;
     if (shouldFixPosition) {
-      if (kDebugMode) {
-        showToast(
-          context,
-          'Updating photo scale zooming and scale: ${_photoViewController.scale}',
-        ).ignore();
-      }
       final prevImageInfo = await getImageInfo(previewImageProvider);
       finalImageInfo = await getImageInfo(finalImageProvider);
       final scale = _photoViewController.scale! /
@@ -303,9 +296,6 @@ class _ZoomableImageState extends State<ZoomableImage>
     if (h != enteFile.height || w != enteFile.width) {
       final logMessage =
           'Updating aspect ratio for from ${enteFile.height}x${enteFile.width} to ${h}x$w';
-      if (kDebugMode && (enteFile.height != 0 || enteFile.width != 0)) {
-        showToast(context, logMessage).ignore();
-      }
       _logger.info(logMessage);
       await FileMagicService.instance.updatePublicMagicMetadata([
         enteFile,
