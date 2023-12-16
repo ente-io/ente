@@ -68,6 +68,15 @@ export default function PairingMode() {
         );
 
         context.start(options);
+
+        return () => {
+            context.removeCustomMessageListener(
+                'urn:x-cast:pair-request',
+                messageReceiveHandler
+            );
+
+            context.stop();
+        };
     }, [cast]);
 
     const messageReceiveHandler = (message: {

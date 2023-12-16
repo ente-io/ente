@@ -31,12 +31,6 @@ export default function Slideshow() {
 
     const init = async () => {
         try {
-            const options = new cast.framework.CastReceiverOptions();
-
-            options.disableIdleTimeout = true;
-
-            cast.framework.CastReceiverContext.getInstance().start(options);
-
             // get requested collection id from localStorage
             const requestedCollectionID =
                 window.localStorage.getItem('targetCollectionId');
