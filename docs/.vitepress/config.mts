@@ -44,9 +44,8 @@ function sidebarphotos() {
            {
               text: 'Features',
               collapsed: true,
-              link: '/photos/features/archive',
               items: [
-                { text: 'Family Plan', link: '/photos/features/family-plan' },
+                  { text: 'Family Plan', link: '/photos/features/family-plan' },
                   { text: 'Archive', link: '/photos/features/archive' },
                   { text: 'Hidden', link: '/photos/features/hidden' },
                   { text: 'Map', link: '/photos/features/map' },
