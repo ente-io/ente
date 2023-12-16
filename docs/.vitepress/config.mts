@@ -13,7 +13,9 @@ export default defineConfig({
       { text: "Photos", link: "/photos/index" },
       { text: "Authenticator", link: "/authenticator/index" },
     ],
-
+    search: {
+      provider: 'local',
+    },
     sidebar: {
       "/": sidebarPhotos(),
       "/photos/": sidebarPhotos(),
