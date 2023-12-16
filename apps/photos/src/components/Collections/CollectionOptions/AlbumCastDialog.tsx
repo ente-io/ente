@@ -24,10 +24,18 @@ enum AlbumCastError {
     TV_NOT_FOUND = 'TV_NOT_FOUND',
 }
 
+declare global {
+    interface Window {
+        chrome: any;
+    }
+}
+
 export default function AlbumCastDialog(props: Props) {
     const [view, setView] = useState<
         'choose' | 'auto' | 'pin' | 'auto-cast-error'
     >('choose');
+
+    const [browserCanCast, setBrowserCanCast] = useState(false);
 
     const onSubmit: SingleInputFormProps['callback'] = async (
         value,
@@ -127,6 +135,10 @@ export default function AlbumCastDialog(props: Props) {
         }
     }, [view]);
 
+    useEffect(() => {
+        setBrowserCanCast(!!window.chrome);
+    }, [props.show]);
+
     return (
         <DialogBoxV2
             sx={{ zIndex: 1600 }}
@@ -137,15 +149,21 @@ export default function AlbumCastDialog(props: Props) {
             }}>
             {view === 'choose' && (
                 <>
-                    <EnteButton
-                        onClick={() => {
-                            setView('auto');
-                        }}>
-                        {t('AUTO_CAST_PAIR')}
-                    </EnteButton>
-                    <Typography color={'text.muted'}>
-                        {t('AUTO_CAST_PAIR_REQUIRES_CONNECTION_TO_GOOGLE')}
-                    </Typography>
+                    {browserCanCast && (
+                        <>
+                            <EnteButton
+                                onClick={() => {
+                                    setView('auto');
+                                }}>
+                                {t('AUTO_CAST_PAIR')}
+                            </EnteButton>
+                            <Typography color={'text.muted'}>
+                                {t(
+                                    'AUTO_CAST_PAIR_REQUIRES_CONNECTION_TO_GOOGLE'
+                                )}
+                            </Typography>
+                        </>
+                    )}
                     <EnteButton
                         onClick={() => {
                             setView('pin');
