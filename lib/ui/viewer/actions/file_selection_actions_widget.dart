@@ -329,6 +329,27 @@ class _FileSelectionActionsWidgetState
               ),
               backgroundColor: getEnteColorScheme(context).backgroundElevated,
               barrierColor: backdropFaintDark,
+              topControl: Stack(
+                alignment: Alignment.bottomCenter,
+                children: [
+                  // This container is for increasing the tap area
+                  Container(
+                    width: double.infinity,
+                    height: 36,
+                    color: Colors.transparent,
+                  ),
+                  Container(
+                    height: 5,
+                    width: 40,
+                    decoration: const BoxDecoration(
+                      color: backgroundElevated2Light,
+                      borderRadius: BorderRadius.all(
+                        Radius.circular(5),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
               context: context,
               builder: (context) {
                 return UpdateLocationDataWidget(
