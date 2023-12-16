@@ -626,5 +626,9 @@
     "CAST_ALBUM_TO_TV": "Play album on TV",
     "ENTER_CAST_PIN_CODE": "Enter the code you see on the TV below to pair this device.",
     "PAIR_DEVICE_TO_TV": "Pair devices",
-    "TV_NOT_FOUND": "TV not found. Did you enter the PIN correctly?"
+    "TV_NOT_FOUND": "TV not found. Did you enter the PIN correctly?",
+    "AUTO_CAST_PAIR": "Auto Pair",
+    "AUTO_CAST_PAIR_REQUIRES_CONNECTION_TO_GOOGLE": "Auto Pair requires connecting to Google servers. They will not receive sensitive data, such as your photos.",
+    "PAIR_WITH_PIN": "Pair with PIN",
+    "CHOOSE_DEVICE_FROM_BROWSER": "Choose a cast-compatible device from the browser popup."
 }

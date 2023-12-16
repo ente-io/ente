@@ -14,7 +14,7 @@ type Sender = {
     cast: typeof cast;
 };
 
-const load = (() => {
+export const loadSender = (() => {
     let promise: Promise<Sender> | null = null;
 
     return () => {
@@ -54,7 +54,7 @@ export const useCastSender = () => {
     );
 
     useEffect(() => {
-        load().then((sender) => {
+        loadSender().then((sender) => {
             setSender(sender);
         });
     }, []);
