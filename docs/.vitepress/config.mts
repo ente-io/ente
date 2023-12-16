@@ -14,7 +14,10 @@ export default defineConfig({
       { text: "Authenticator", link: "/authenticator/index" },
     ],
     search: {
-      provider: 'local',
+      provider: "local",
+      options: {
+        detailedView: true, 
+      },
     },
     sidebar: {
       "/": sidebarPhotos(),
