@@ -57,6 +57,7 @@ abstract class MLFramework {
   // ---
 
   Future<void> _initImageModel() async {
+    return;
     // TODO: remove hardcoding
     if (getFrameworkName() == "ggml") {
       final path = await _getLocalImageModelPath();

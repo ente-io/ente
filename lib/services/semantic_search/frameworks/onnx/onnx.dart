@@ -33,7 +33,6 @@ class ONNX extends MLFramework {
 
   @override
   Future<void> loadImageModel(String path) async {
-    return;
     final startTime = DateTime.now();
     _imageEncoderAddress = await _computer.compute(
       _clipImage.loadModel,
