@@ -8197,6 +8197,16 @@ class S {
       args: [],
     );
   }
+
+  /// `Edits to location will only be seen within Ente`
+  String get editsToLocationWillOnlyBeSeenWithinEnte {
+    return Intl.message(
+      'Edits to location will only be seen within Ente',
+      name: 'editsToLocationWillOnlyBeSeenWithinEnte',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

@@ -75,6 +75,9 @@ class _UpdateLocationDataWidgetState extends State<UpdateLocationDataWidget> {
               }
             },
           ),
+          nonRotatedChildren: const [
+            OSMFranceTileAttributes(),
+          ],
           children: const [
             OSMFranceTileLayer(),
           ],
@@ -102,8 +105,10 @@ class _UpdateLocationDataWidgetState extends State<UpdateLocationDataWidget> {
                   ),
                 );
                 return locationInDMS != null
-                    ? SizedBox(
-                        width: 80 * MediaQuery.textScaleFactorOf(context),
+                    ? ConstrainedBox(
+                        constraints: BoxConstraints(
+                          minWidth: 80 * MediaQuery.textScaleFactorOf(context),
+                        ),
                         child: Column(
                           children: [
                             Text(
@@ -118,10 +123,7 @@ class _UpdateLocationDataWidgetState extends State<UpdateLocationDataWidget> {
                           ],
                         ),
                       )
-                    : Text(
-                        S.of(context).selectALocation,
-                        style: textTheme.mini,
-                      );
+                    : const UpdateLocationInfo();
               },
             ),
           ),
@@ -224,6 +226,65 @@ class _UpdateLocationDataWidgetState extends State<UpdateLocationDataWidget> {
           },
         ),
       ],
+    );
+  }
+}
+
+class UpdateLocationInfo extends StatefulWidget {
+  const UpdateLocationInfo({super.key});
+
+  @override
+  State<UpdateLocationInfo> createState() => _UpdateLocationInfoState();
+}
+
+class _UpdateLocationInfoState extends State<UpdateLocationInfo> {
+  bool showSelectLocationText = false;
+
+  @override
+  initState() {
+    super.initState();
+    Future.delayed(const Duration(seconds: 3), () {
+      setState(() {
+        showSelectLocationText = true;
+      });
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedCrossFade(
+      duration: const Duration(milliseconds: 200),
+      firstCurve: Curves.easeInOutExpo,
+      secondCurve: Curves.easeInOutExpo,
+      sizeCurve: Curves.easeInOutExpo,
+      crossFadeState: showSelectLocationText
+          ? CrossFadeState.showFirst
+          : CrossFadeState.showSecond,
+      firstChild: Text(
+        S.of(context).selectALocation,
+        style: getEnteTextTheme(context).mini,
+      ),
+      secondChild: Text(
+        S.of(context).editsToLocationWillOnlyBeSeenWithinEnte,
+        style: getEnteTextTheme(context).mini,
+      ),
+      layoutBuilder: (topChild, topChildKey, bottomChild, bottomChildKey) {
+        return Stack(
+          alignment: Alignment.center,
+          children: [
+            Positioned(
+              top: 0,
+              key: bottomChildKey,
+              child: bottomChild,
+              // top: 0,
+            ),
+            Positioned(
+              key: topChildKey,
+              child: topChild,
+            ),
+          ],
+        );
+      },
     );
   }
 }
