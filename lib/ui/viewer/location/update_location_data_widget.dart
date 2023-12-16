@@ -3,6 +3,7 @@ import "dart:async";
 import "package:flutter/material.dart";
 import "package:flutter_map/flutter_map.dart";
 import "package:latlong2/latlong.dart";
+import "package:logging/logging.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/location/location.dart";
@@ -40,6 +41,7 @@ class _UpdateLocationDataWidgetState extends State<UpdateLocationDataWidget> {
 
   @override
   Widget build(BuildContext context) {
+    Logger("UpdateLocationDataWiget").info("building");
     final textTheme = getEnteTextTheme(context);
     return Stack(
       alignment: Alignment.topCenter,
@@ -78,7 +80,7 @@ class _UpdateLocationDataWidgetState extends State<UpdateLocationDataWidget> {
           ],
         ),
         Positioned(
-          top: 24,
+          top: 20,
           child: Container(
             padding: const EdgeInsets.symmetric(
               horizontal: 16,
