@@ -10,12 +10,12 @@ Feedback about this Ente Photos documentation can be shared on our [Discord Serv
 
 ## About Ente Photos
 
-Ente Photos is safe home for your photos. You can Store, share, and rediscover your memories with absolute privacy.
+Ente Photos is safe home for your photos. You can store, share, and rediscover your memories with absolute privacy.
 
 
 ## About Ente Authenticator
 
-Ente Authenticator is a secure,end-to-end encrypted Authenticator app, with cross device sync. Learn more about [Ente Authenticator](https://ente.io/auth) or check [Authenticator documentation](../authenticator/).
+Ente Authenticator is a secure, end-to-end encrypted Authenticator app with cross device sync. Learn more about [Ente Authenticator](https://ente.io/auth) or check [Authenticator documentation](../authenticator/).
 
 ## Contributing
 
