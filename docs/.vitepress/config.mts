@@ -15,9 +15,9 @@ export default defineConfig({
     ],
 
     sidebar: {
-      '/': sidebarphotos(),
-      '/photos/': sidebarphotos(),
-      '/common/': sidebarphotos(),
+      '/': sidebarPhotos(),
+      '/photos/': sidebarPhotos(),
+      '/common/': sidebarPhotos(),
       '/authenticator/': sidebarAuth()
   },
     socialLinks: [
@@ -26,7 +26,7 @@ export default defineConfig({
   }
 })
 
-function sidebarphotos() {
+function sidebarPhotos() {
   return [
     {
       text: 'Troubleshoot',
@@ -52,7 +52,7 @@ function sidebarphotos() {
                   { text: 'Map', link: '/photos/features/map' },
                   { text: 'Location Tags', link: '/photos/features/location' },
                   { text: 'Collect Photos', link: '/photos/features/collect' },
-                  { text: 'Public link', link: '/photos/features/public-link' },
+                  { text: 'Public links', link: '/photos/features/public-links' },
                   { text: 'Quick link', link: '/photos/features/quick-link' },
                   { text: 'Watch folder', link: '/photos/features/watch-folder' },
                   { text: 'Trash', link: '/photos/features/trash' },
