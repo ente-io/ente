@@ -101,9 +101,9 @@ class OnnxImageEncoder {
     final int inputSize = 3 * nx * ny;
     final inputImage = List.filled(inputSize, 0.toDouble());
   
-    final int nx2 = 224;
-    final int ny2 = 224;
-    final int totalSize = 3 * nx2 * ny2;
+    const int nx2 = 224;
+    const int ny2 = 224;
+    const int totalSize = 3 * nx2 * ny2;
 
     // Load image into List<double> inputImage
     for (int y = 0; y < ny; y++) {
