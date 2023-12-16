@@ -10,10 +10,13 @@ import {
     getFaceId,
     areFaceIdsSame,
     extractFaceImages,
+    getLocalFile,
+    getOriginalImageBitmap,
 } from 'utils/machineLearning';
 import { storeFaceCrop } from 'utils/machineLearning/faceCrop';
 import mlIDbStorage from 'utils/storage/mlIDbStorage';
 import ReaderService from './readerService';
+import { imageBitmapToBlob } from 'utils/image';
 
 class FaceService {
     async syncFileFaceDetections(
@@ -184,7 +187,9 @@ class FaceService {
             faceCrop,
             syncContext.config.faceCrop.blobOptions
         );
+        const blob = await imageBitmapToBlob(faceCrop.image);
         faceCrop.image.close();
+        return blob;
     }
 
     async getAllSyncedFacesMap(syncContext: MLSyncContext) {
@@ -233,6 +238,21 @@ class FaceService {
         //     ),
         //     noise: syncContext.faceClusteringResults.noise,
         // };
+    }
+
+    public async regenerateFaceCrop(
+        syncContext: MLSyncContext,
+        faceID: string
+    ) {
+        const fileID = Number(faceID.split('-')[0]);
+        const personFace = await mlIDbStorage.getFace(fileID, faceID);
+        if (!personFace) {
+            throw Error('Face not found');
+        }
+
+        const file = await getLocalFile(personFace.fileId);
+        const imageBitmap = await getOriginalImageBitmap(file);
+        return await this.saveFaceCrop(imageBitmap, personFace, syncContext);
     }
 }
 

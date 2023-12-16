@@ -3,7 +3,11 @@ import { Skeleton, styled } from '@mui/material';
 
 import { imageBitmapToBlob } from 'utils/image';
 import { logError } from '@ente/shared/sentry';
-import { getBlobFromCache } from '@ente/shared/storage/cacheStorage/helpers';
+import { cached } from '@ente/shared/storage/cacheStorage/helpers';
+import machineLearningService from 'services/machineLearning/machineLearningService';
+import { LS_KEYS, getData } from '@ente/shared/storage/localStorage';
+import { User } from '@ente/shared/user/types';
+import { addLogLine } from '@ente/shared/logging';
 
 export const FaceCropsRow = styled('div')`
     & > img {
@@ -19,19 +23,44 @@ export const FaceImagesRow = styled('div')`
     }
 `;
 
-export function ImageCacheView(props: { url: string; cacheName: string }) {
+export function ImageCacheView(props: {
+    url: string;
+    cacheName: string;
+    faceID: string;
+}) {
     const [imageBlob, setImageBlob] = useState<Blob>();
 
     useEffect(() => {
         let didCancel = false;
-
         async function loadImage() {
             try {
+                const user: User = getData(LS_KEYS.USER);
                 let blob: Blob;
-                if (!props.url || !props.cacheName) {
+                if (!props.url || !props.cacheName || !user) {
                     blob = undefined;
                 } else {
-                    blob = await getBlobFromCache(props.cacheName, props.url);
+                    blob = await cached(
+                        props.cacheName,
+                        props.url,
+                        async () => {
+                            try {
+                                addLogLine(
+                                    'ImageCacheView: regenerate face crop',
+                                    props.faceID
+                                );
+                                return machineLearningService.regenerateFaceCrop(
+                                    user.token,
+                                    user.id,
+                                    props.faceID
+                                );
+                            } catch (e) {
+                                logError(
+                                    e,
+                                    'ImageCacheView: regenerate face crop failed'
+                                );
+                            }
+                        }
+                    );
                 }
 
                 !didCancel && setImageBlob(blob);
