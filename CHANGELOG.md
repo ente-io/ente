@@ -2,6 +2,10 @@
 
 ## v1.6.59
 
+### New
+
+- Added arm64 builds for linux
+
 ### Bug Fixes
 
 - Fix Editor file not loading issue
