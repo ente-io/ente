@@ -120,6 +120,7 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
           firstButtonLabel: S.of(context).useRecoveryKey,
         );
         if (dialogChoice!.action == ButtonAction.first) {
+          // ignore: unawaited_futures
           Navigator.of(context).push(
             MaterialPageRoute(
               builder: (BuildContext context) {

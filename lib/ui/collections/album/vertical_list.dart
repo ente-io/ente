@@ -120,7 +120,7 @@ class AlbumVerticalListWidget extends StatelessWidget {
       }
     } else {
       Navigator.pop(context);
-      await showToast(
+      showToast(
         context,
         S.of(context).createAlbumActionHint,
       );

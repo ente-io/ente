@@ -1,3 +1,5 @@
+import "dart:async";
+
 import 'package:flutter/cupertino.dart';
 import "package:photo_manager/photo_manager.dart";
 import "package:photos/core/configuration.dart";
@@ -184,7 +186,7 @@ extension CollectionFileActions on CollectionActions {
       if (files.isNotEmpty) {
         await CollectionsService.instance.addToCollection(collectionID, files);
       }
-      RemoteSyncService.instance.sync(silently: true);
+      unawaited(RemoteSyncService.instance.sync(silently: true));
       await dialog?.hide();
       return true;
     } catch (e, s) {
@@ -214,11 +216,11 @@ extension CollectionFileActions on CollectionActions {
       return true;
     } catch (e, s) {
       logger.severe(e, s);
-      showShortToast(
-        context,
-        markAsFavorite
-            ? S.of(context).sorryCouldNotAddToFavorites
-            : S.of(context).sorryCouldNotRemoveFromFavorites,
+        showShortToast(
+          context,
+          markAsFavorite
+              ? S.of(context).sorryCouldNotAddToFavorites
+              : S.of(context).sorryCouldNotRemoveFromFavorites,
       );
     } finally {
       await dialog.hide();

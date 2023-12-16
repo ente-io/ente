@@ -1,3 +1,4 @@
+import "dart:async";
 import 'dart:convert';
 
 import "package:dropdown_button2/dropdown_button2.dart";
@@ -344,6 +345,7 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
       ],
     );
 
+    // ignore: unawaited_futures
     showDialog(
       context: context,
       builder: (BuildContext context) {

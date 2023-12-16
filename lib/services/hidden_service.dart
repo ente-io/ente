@@ -1,3 +1,4 @@
+import "dart:async";
 import 'dart:convert';
 import 'dart:typed_data';
 
@@ -149,7 +150,7 @@ extension HiddenService on CollectionsService {
       await dialog.hide();
     } on AssertionError catch (e) {
       await dialog.hide();
-      showErrorDialog(context, "Oops", e.message as String);
+      unawaited(showErrorDialog(context, "Oops", e.message as String));
       return false;
     } catch (e, s) {
       _logger.severe("Could not hide", e, s);

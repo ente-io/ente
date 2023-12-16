@@ -35,6 +35,7 @@ class SearchTabEmptyState extends StatelessWidget {
               labelText: S.of(context).addYourPhotosNow,
               icon: Icons.arrow_forward_outlined,
               onTap: () async {
+                // ignore: unawaited_futures
                 routeToPage(
                   context,
                   BackupFolderSelectionPage(

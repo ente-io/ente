@@ -1,3 +1,4 @@
+import "dart:async";
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -5,7 +6,7 @@ import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:photos/ente_theme_data.dart';
 
-Future showToast(
+void showToast(
   BuildContext context,
   String message, {
   toastLength = Toast.LENGTH_LONG,
@@ -13,14 +14,16 @@ Future showToast(
 }) async {
   if (Platform.isAndroid) {
     await Fluttertoast.cancel();
-    return Fluttertoast.showToast(
-      msg: message,
-      toastLength: toastLength,
-      gravity: ToastGravity.BOTTOM,
-      timeInSecForIosWeb: 1,
-      backgroundColor: Theme.of(context).colorScheme.toastBackgroundColor,
-      textColor: Theme.of(context).colorScheme.toastTextColor,
-      fontSize: 16.0,
+    unawaited(
+      Fluttertoast.showToast(
+        msg: message,
+        toastLength: toastLength,
+        gravity: ToastGravity.BOTTOM,
+        timeInSecForIosWeb: 1,
+        backgroundColor: Theme.of(context).colorScheme.toastBackgroundColor,
+        textColor: Theme.of(context).colorScheme.toastTextColor,
+        fontSize: 16.0,
+      ),
     );
   } else {
     EasyLoading.instance
@@ -29,18 +32,20 @@ Future showToast(
       ..textColor = Theme.of(context).colorScheme.toastTextColor
       ..userInteractions = true
       ..loadingStyle = EasyLoadingStyle.custom;
-    return EasyLoading.showToast(
-      message,
-      duration: Duration(
-        seconds:
-            (toastLength == Toast.LENGTH_LONG ? iosLongToastLengthInSec : 1),
+    unawaited(
+      EasyLoading.showToast(
+        message,
+        duration: Duration(
+          seconds:
+              (toastLength == Toast.LENGTH_LONG ? iosLongToastLengthInSec : 1),
+        ),
+        toastPosition: EasyLoadingToastPosition.bottom,
+        dismissOnTap: false,
       ),
-      toastPosition: EasyLoadingToastPosition.bottom,
-      dismissOnTap: false,
     );
   }
 }
 
-Future<void> showShortToast(context, String message) {
-  return showToast(context, message, toastLength: Toast.LENGTH_SHORT);
+void showShortToast(context, String message) {
+  showToast(context, message, toastLength: Toast.LENGTH_SHORT);
 }

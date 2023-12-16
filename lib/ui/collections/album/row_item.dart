@@ -189,6 +189,7 @@ class AlbumRowItemWidget extends StatelessWidget {
       ),
       onTap: () async {
         final thumbnail = await CollectionsService.instance.getCover(c);
+        // ignore: unawaited_futures
         routeToPage(
           context,
           CollectionPage(

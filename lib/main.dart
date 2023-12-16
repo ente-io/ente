@@ -104,9 +104,11 @@ Future<void> _runBackgroundTask(String taskId, {String mode = 'normal'}) async {
     await _sync('bgTaskActiveProcess');
     BackgroundFetch.finish(taskId);
   } else {
+    // ignore: unawaited_futures
     _runWithLogs(
       () async {
         _logger.info("Starting background task in $mode mode");
+        // ignore: unawaited_futures
         _runInBackground(taskId);
       },
       prefix: "[bg]",
@@ -150,7 +152,7 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
   _logger.info("Initializing...  inBG =$isBackground via: $via");
   final SharedPreferences preferences = await SharedPreferences.getInstance();
   await _logFGHeartBeatInfo();
-  _scheduleHeartBeat(preferences, isBackground);
+  unawaited(_scheduleHeartBeat(preferences, isBackground));
   AppLifecycleService.instance.init(preferences);
   if (isBackground) {
     AppLifecycleService.instance.onAppInBackground('init via: $via');
@@ -182,13 +184,14 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
   SearchService.instance.init();
   StorageBonusService.instance.init(preferences);
   if (Platform.isIOS) {
+    // ignore: unawaited_futures
     PushService.instance.init().then((_) {
       FirebaseMessaging.onBackgroundMessage(
         _firebaseMessagingBackgroundHandler,
       );
     });
   }
-  FeatureFlagService.instance.init();
+  unawaited(FeatureFlagService.instance.init());
 
   // Can not including existing tf/ml binaries as they are not being built
   // from source.
@@ -238,6 +241,7 @@ Future<void> _scheduleHeartBeat(
     DateTime.now().microsecondsSinceEpoch,
   );
   Future.delayed(kHeartBeatFrequency, () async {
+    // ignore: unawaited_futures
     _scheduleHeartBeat(prefs, isBackground);
   });
 }
@@ -277,7 +281,7 @@ Future<void> _killBGTask([String? taskId]) async {
     DateTime.now().microsecondsSinceEpoch,
   );
   final prefs = await SharedPreferences.getInstance();
-  prefs.remove(kLastBGTaskHeartBeatTime);
+  await prefs.remove(kLastBGTaskHeartBeatTime);
   if (taskId != null) {
     BackgroundFetch.finish(taskId);
   }
@@ -295,6 +299,7 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
     }
   } else {
     // App is dead
+    // ignore: unawaited_futures
     _runWithLogs(
       () async {
         _logger.info("Background push received");
