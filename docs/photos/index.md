@@ -10,8 +10,7 @@ Feedback about this Ente Photos documentation can be shared on our [Discord Serv
 
 ## About Ente Photos
 
-Ente Photos is safe home for your photos. You can store, share, and rediscover your memories with absolute privacy.
-
+Ente Photos is the safe home for your photos. You can store, share, and rediscover your memories with absolute privacy.
 
 ## About Ente Authenticator
 
