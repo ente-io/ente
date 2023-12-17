@@ -1,4 +1,4 @@
-# Welcome to Ente Photos Help!
+# Welcome to Help!
 
 Welcome to Ente Photos Help! If you're new to Ente Photos, our [Quick Start](./getting-started/index.md) and [FAQs](./faq/faq.md) are great places to begin. If you can’t find an answer to your question, [ask the community](https://ente.io/discord) or email us at **support@ente.io**.
 
@@ -18,9 +18,12 @@ Ente Authenticator is a secure, end-to-end encrypted Authenticator app with cros
 
 ## Contributing
 
-This documentation is open source at our [Ente Docs](https://github.com/ente-io/docs) repo.
+This documentation is open source at our [Ente
+Docs](https://github.com/ente-io/docs) repo.
 
-We gladly welcome any fixes & improvements! Please see our [contribution guide](https://github.com/ente-io/docs#contributing)
-before making a Pull Request.
+We gladly welcome any fixes & improvements! Please see our [contribution
+guide](https://github.com/ente-io/docs#contributing) before making a Pull
+Request.
 
-Once your contributions are accepted, make sure to add yourself to the list of [Contributors](./misc/contributors.md). Thank you!
+Once your contributions are accepted, make sure to add yourself to the list of
+[Contributors](./misc/contributors.md). Thank you!

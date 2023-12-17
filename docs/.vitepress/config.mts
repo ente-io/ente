@@ -2,18 +2,51 @@ import { defineConfig } from "vitepress";
 
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
-  title: "Ente Docs",
-  description: "Guide for ente.io apps",
+  title: "Ente's Docs",
+  description: "Help guide for apps from Ente",
+  head: [
+    [
+      "link",
+      {
+        rel: "apple-touch-icon",
+        sizes: "180x180",
+        href: "/apple-touch-icon.png",
+      },
+    ],
+    [
+      "link",
+      {
+        rel: "icon",
+        type: "image/png",
+        sizes: "32x32",
+        href: "/favicon-32x32.png",
+      },
+    ],
+    [
+      "link",
+      {
+        rel: "icon",
+        type: "image/png",
+        sizes: "16x16",
+        href: "/favicon-16x16.png",
+      },
+    ],
+  ],
   themeConfig: {
+    // https://vitepress.dev/reference/default-theme-config
     editLink: {
       pattern: "https://github.com/ente-io/docs/edit/main/docs/:path",
     },
-    // https://vitepress.dev/reference/default-theme-config
     nav: [
       { text: "Photos", link: "/photos/index" },
       { text: "Authenticator", link: "/authenticator/index" },
     ],
-
+    search: {
+      provider: "local",
+      options: {
+        detailedView: true,
+      },
+    },
     sidebar: {
       "/": sidebarPhotos(),
       "/photos/": sidebarPhotos(),
@@ -43,7 +76,7 @@ function sidebarPhotos() {
       ],
     },
     {
-      text: "User Guide",
+      text: "Welcome",
       items: [
         {
           text: "Features",
