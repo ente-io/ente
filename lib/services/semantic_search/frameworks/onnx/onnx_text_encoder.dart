@@ -24,10 +24,6 @@ class OnnxTextEncoder {
     await _tokenizer.init(vocab);
   }
 
-  release() {
-    OrtEnv.instance.release();
-  }
-
   Future<int> loadModel(Map args) async {
     final sessionOptions = OrtSessionOptions()
       ..setInterOpNumThreads(1)
@@ -65,8 +61,6 @@ class OnnxTextEncoder {
       embedding[i] = embedding[i] / sqrt(textNormalization);
     }
 
-    inputOrt.release();
-    runOptions.release();
     return (embedding);
   }
 }

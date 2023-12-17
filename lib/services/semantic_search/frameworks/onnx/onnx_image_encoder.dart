@@ -13,10 +13,6 @@ class OnnxImageEncoder {
     OrtEnv.instance.init();
   }
 
-  release() {
-    OrtEnv.instance.release();
-  }
-
   Future<int> loadModel(Map args) async {
     final sessionOptions = OrtSessionOptions()
       ..setInterOpNumThreads(1)
@@ -180,8 +176,6 @@ class OnnxImageEncoder {
     for (int i = 0; i < 512; i++) {
       embedding[i] = embedding[i] / sqrt(imageNormalization);
     }
-    inputOrt.release();
-    runOptions.release();
     return embedding;
   }
 
