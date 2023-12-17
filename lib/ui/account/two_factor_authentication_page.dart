@@ -114,7 +114,7 @@ class _TwoFactorAuthenticationPageState
           child: OutlinedButton(
             onPressed: _code.length == 6
                 ? () async {
-                    _verifyTwoFactorCode(_code);
+                    await _verifyTwoFactorCode(_code);
                   }
                 : null,
             child: Text(S.of(context).verify),

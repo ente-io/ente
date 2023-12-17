@@ -115,7 +115,7 @@ class CollectionActions {
       S.of(context).creatingLink,
       isDismissible: true,
     );
-    dialog.show();
+    await dialog.show();
     try {
       // create album with emptyName, use collectionCreationTime on UI to
       // show name
@@ -143,10 +143,10 @@ class CollectionActions {
       await collectionsService.addToCollection(collection.id, files);
       logger.finest("creating public link for the newly created album");
       await CollectionsService.instance.createShareUrl(collection);
-      dialog.hide();
+      await dialog.hide();
       return collection;
     } catch (e, s) {
-      dialog.hide();
+      await dialog.hide();
       await showGenericErrorDialog(context: context, error: e);
       logger.severe("Failing to create link for selected files", e, s);
     }
@@ -467,9 +467,7 @@ class CollectionActions {
     }
 
     if (!isCollectionOwner && split.ownedByOtherUsers.isNotEmpty) {
-      unawaited(
-        showShortToast(context, S.of(context).canOnlyRemoveFilesOwnedByYou),
-      );
+      showShortToast(context, S.of(context).canOnlyRemoveFilesOwnedByYou);
       return;
     }
 

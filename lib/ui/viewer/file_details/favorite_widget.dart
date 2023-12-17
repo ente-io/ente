@@ -79,11 +79,9 @@ class _FavoriteWidgetState extends State<FavoriteWidget> {
               } catch (e, s) {
                 _logger.severe(e, s);
                 hasError = true;
-                unawaited(
-                  showToast(
-                    context,
-                    S.of(context).sorryCouldNotRemoveFromFavorites,
-                  ),
+                showToast(
+                  context,
+                  S.of(context).sorryCouldNotRemoveFromFavorites,
                 );
               }
             }

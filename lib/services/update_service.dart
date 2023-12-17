@@ -86,6 +86,7 @@ class UpdateService {
     if (shouldUpdate &&
         hasBeen3DaysSinceLastNotification &&
         _latestVersion!.shouldNotify) {
+      // ignore: unawaited_futures
       NotificationService.instance.showNotification(
         "Update available",
         "Click to install our best version yet",

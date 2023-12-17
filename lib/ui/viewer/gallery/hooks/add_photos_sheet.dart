@@ -216,7 +216,7 @@ class AddPhotosPhotoWidget extends StatelessWidget {
             },
           );
         } else {
-          showErrorDialog(
+          await showErrorDialog(
             context,
             context.l10n.oops,
             context.l10n.somethingWentWrong + (kDebugMode ? "\n$e" : ""),

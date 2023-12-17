@@ -75,7 +75,7 @@ class NotificationService {
           ?.requestPermission();
     }
     if (result != null) {
-      _preferences.setBool(keyGrantedNotificationPermission, result);
+      await _preferences.setBool(keyGrantedNotificationPermission, result);
     }
   }
 

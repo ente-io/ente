@@ -147,7 +147,7 @@ class CollectionsService {
       );
     }
     await _updateDB(updatedCollections);
-    _prefs.setInt(_collectionsSyncTimeKey, maxUpdationTime);
+    await _prefs.setInt(_collectionsSyncTimeKey, maxUpdationTime);
     watch.logAndReset("till DB insertion ${updatedCollections.length}");
     for (final collection in fetchedCollections) {
       _cacheLocalPathAndCollection(collection);

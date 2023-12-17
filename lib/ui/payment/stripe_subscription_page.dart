@@ -400,13 +400,11 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
           : await _billingService.cancelStripeSubscription();
       await _fetchSub();
     } catch (e) {
-      unawaited(
-        showShortToast(
-          context,
-          isAutoRenewDisabled
-              ? S.of(context).failedToRenew
-              : S.of(context).failedToCancel,
-        ),
+      showShortToast(
+        context,
+        isAutoRenewDisabled
+            ? S.of(context).failedToRenew
+            : S.of(context).failedToCancel,
       );
     }
     await _dialog.hide();
