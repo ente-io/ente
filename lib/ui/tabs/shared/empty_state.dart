@@ -139,7 +139,7 @@ class OutgoingAlbumEmptyState extends StatelessWidget {
             labelText: S.of(context).shareYourFirstAlbum,
             icon: Icons.add,
             onTap: () async {
-              await showToast(
+              showToast(
                 context,
                 S.of(context).shareAlbumHint,
               );

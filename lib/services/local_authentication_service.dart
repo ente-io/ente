@@ -24,7 +24,7 @@ class LocalAuthenticationService {
         Configuration.instance.shouldShowLockScreen(),
       );
       if (!result) {
-        unawaited(showToast(context, infoMessage));
+        showToast(context, infoMessage);
         return false;
       } else {
         return true;

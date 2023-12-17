@@ -352,7 +352,7 @@ class LocalSyncService {
     PhotoManager.addChangeCallback((value) async {
       _logger.info("Something changed on disk");
       _changeCallbackDebouncer.run(() async {
-        checkAndSync();
+        unawaited(checkAndSync());
       });
     });
     PhotoManager.startChangeNotify();
@@ -363,9 +363,9 @@ class LocalSyncService {
       await _existingSync!.future;
     }
     if (hasGrantedLimitedPermissions()) {
-      syncAll();
+      unawaited(syncAll());
     } else {
-      sync().then((value) => _refreshDeviceFolderCountAndCover());
+      unawaited(sync().then((value) => _refreshDeviceFolderCountAndCover()));
     }
   }
 }

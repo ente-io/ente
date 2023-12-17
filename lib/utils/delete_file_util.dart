@@ -127,9 +127,9 @@ Future<void> deleteFilesFromEverywhere(
       ),
     );
     if (hasLocalOnlyFiles && Platform.isAndroid) {
-      await showShortToast(context, S.of(context).filesDeleted);
+      showShortToast(context, S.of(context).filesDeleted);
     } else {
-      await showShortToast(context, S.of(context).movedToTrash);
+      showShortToast(context, S.of(context).movedToTrash);
     }
   }
   if (uploadedFilesToBeTrashed.isNotEmpty) {

@@ -225,7 +225,7 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
         showShortToast(
           context,
           S.of(context).remindToEmptyEnteTrash,
-        ).ignore();
+        );
       },
     );
   }

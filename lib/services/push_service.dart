@@ -35,6 +35,7 @@ class PushService {
         await _configurePushToken();
       } else {
         Bus.instance.on<SignedInEvent>().listen((_) async {
+          // ignore: unawaited_futures
           _configurePushToken();
         });
       }

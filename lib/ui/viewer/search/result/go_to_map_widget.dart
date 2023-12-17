@@ -24,12 +24,11 @@ class GoToMapWidget extends StatelessWidget {
       onTap: () async {
         final bool result = await requestForMapEnable(context);
         if (result) {
-          unawaited(
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (context) => MapScreen(
-                  filesFutureFn: SearchService.instance.getAllFiles,
-                ),
+          // ignore: unawaited_futures
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => MapScreen(
+                filesFutureFn: SearchService.instance.getAllFiles,
               ),
             ),
           );
