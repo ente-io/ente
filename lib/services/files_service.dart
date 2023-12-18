@@ -1,15 +1,21 @@
 import 'package:dio/dio.dart';
+import "package:flutter/material.dart";
+import "package:latlong2/latlong.dart";
 import 'package:logging/logging.dart';
 import 'package:path/path.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/network/network.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/extensions/list.dart';
+import "package:photos/generated/l10n.dart";
 import 'package:photos/models/file/file.dart';
 import "package:photos/models/file_load_result.dart";
 import "package:photos/models/metadata/file_magic.dart";
 import 'package:photos/services/file_magic_service.dart';
 import "package:photos/services/ignored_files_service.dart";
+import "package:photos/ui/components/action_sheet_widget.dart";
+import "package:photos/ui/components/buttons/button_widget.dart";
+import "package:photos/ui/components/models/button_type.dart";
 import 'package:photos/utils/date_time_util.dart';
 
 class FilesService {
@@ -82,6 +88,79 @@ class FilesService {
     } catch (e, s) {
       _logger.severe("failed to fetch size from fileInfo", e, s);
       rethrow;
+    }
+  }
+
+  Future<void> bulkEditLocationData(
+    List<EnteFile> files,
+    LatLng location,
+    BuildContext context,
+  ) async {
+    final List<EnteFile> uploadedFiles =
+        files.where((element) => element.uploadedFileID != null).toList();
+
+    final List<EnteFile> remoteFilesToUpdate = [];
+    final Map<int, Map<String, dynamic>> fileIDToUpdateMetadata = {};
+    await showActionSheet(
+      context: context,
+      body: S.of(context).changeLocationOfSelectedItems,
+      buttons: [
+        ButtonWidget(
+          labelText: S.of(context).yes,
+          buttonType: ButtonType.neutral,
+          buttonSize: ButtonSize.large,
+          shouldStickToDarkTheme: true,
+          buttonAction: ButtonAction.first,
+          shouldSurfaceExecutionStates: true,
+          isInAlert: true,
+          onTap: () async {
+            await _editLocationData(
+              uploadedFiles,
+              fileIDToUpdateMetadata,
+              remoteFilesToUpdate,
+              location,
+            );
+          },
+        ),
+        ButtonWidget(
+          labelText: S.of(context).cancel,
+          buttonType: ButtonType.secondary,
+          buttonSize: ButtonSize.large,
+          shouldStickToDarkTheme: true,
+          buttonAction: ButtonAction.cancel,
+          isInAlert: true,
+        ),
+      ],
+    );
+  }
+
+  Future<void> _editLocationData(
+    List<EnteFile> uploadedFiles,
+    Map<int, Map<String, dynamic>> fileIDToUpdateMetadata,
+    List<EnteFile> remoteFilesToUpdate,
+    LatLng location,
+  ) async {
+    for (EnteFile remoteFile in uploadedFiles) {
+      // discard files not owned by user and also dedupe already processed
+      // files
+      if (remoteFile.ownerID != _config.getUserID()! ||
+          fileIDToUpdateMetadata.containsKey(remoteFile.uploadedFileID!)) {
+        continue;
+      }
+
+      remoteFilesToUpdate.add(remoteFile);
+      fileIDToUpdateMetadata[remoteFile.uploadedFileID!] = {
+        latKey: location.latitude,
+        longKey: location.longitude,
+      };
+    }
+
+    if (remoteFilesToUpdate.isNotEmpty) {
+      await FileMagicService.instance.updatePublicMagicMetadata(
+        remoteFilesToUpdate,
+        null,
+        metadataUpdateMap: fileIDToUpdateMetadata,
+      );
     }
   }
 

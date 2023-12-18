@@ -14,6 +14,7 @@ import 'package:photos/utils/date_time_util.dart';
 import 'package:photos/utils/exif_util.dart';
 import 'package:photos/utils/file_uploader_util.dart';
 
+//Todo: files with no location data have lat and long set to 0.0. This should ideally be null.
 class EnteFile {
   int? generatedID;
   int? uploadedFileID;
@@ -271,6 +272,7 @@ class EnteFile {
   int get width {
     return pubMagicMetadata?.w ?? 0;
   }
+
   bool get hasDimensions {
     return height != 0 && width != 0;
   }

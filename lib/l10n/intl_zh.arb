@@ -1173,5 +1173,10 @@
   "signOutOtherBody": "如果你认为有人可能知道你的密码，你可以强制所有使用你账户的其他设备退出登录。",
   "signOutOtherDevices": "登出其他设备",
   "doNotSignOut": "不要退登",
+  "editLocation": "Edit location",
+  "selectALocation": "Select a location",
+  "selectALocationFirst": "Select a location first",
+  "changeLocationOfSelectedItems": "Change location of selected items?",
+  "editsToLocationWillOnlyBeSeenWithinEnte": "Edits to location will only be seen within Ente",
   "cleanUncategorized": "清除未分类的"
 }

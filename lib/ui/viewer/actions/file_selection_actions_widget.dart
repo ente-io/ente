@@ -3,6 +3,7 @@ import "dart:async";
 import 'package:fast_base58/fast_base58.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import "package:modal_bottom_sheet/modal_bottom_sheet.dart";
 import 'package:photos/core/configuration.dart';
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/collection/collection.dart';
@@ -15,6 +16,8 @@ import "package:photos/models/metadata/common_keys.dart";
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/hidden_service.dart';
+import "package:photos/theme/colors.dart";
+import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/actions/collection/collection_file_actions.dart';
 import 'package:photos/ui/actions/collection/collection_sharing_actions.dart';
 import 'package:photos/ui/collections/collection_action_sheet.dart';
@@ -24,6 +27,7 @@ import 'package:photos/ui/components/buttons/button_widget.dart';
 import 'package:photos/ui/components/models/button_type.dart';
 import 'package:photos/ui/sharing/manage_links_widget.dart';
 import "package:photos/ui/tools/collage/collage_creator_page.dart";
+import "package:photos/ui/viewer/location/update_location_data_widget.dart";
 import 'package:photos/utils/delete_file_util.dart';
 import 'package:photos/utils/magic_util.dart';
 import 'package:photos/utils/navigation_util.dart';
@@ -304,6 +308,56 @@ class _FileSelectionActionsWidgetState
           icon: Icons.delete_forever_outlined,
           labelText: S.of(context).permanentlyDelete,
           onTap: _permanentlyDelete,
+        ),
+      );
+    }
+
+    if (widget.type.showEditLocation()) {
+      items.add(
+        SelectionActionButton(
+          shouldShow: widget.selectedFiles.files.any(
+            (element) => (element.ownerID == currentUserID),
+          ),
+          labelText: S.of(context).editLocation,
+          icon: Icons.edit_location_alt_outlined,
+          onTap: () async {
+            await showBarModalBottomSheet(
+              shape: const RoundedRectangleBorder(
+                borderRadius: BorderRadius.vertical(
+                  top: Radius.circular(5),
+                ),
+              ),
+              backgroundColor: getEnteColorScheme(context).backgroundElevated,
+              barrierColor: backdropFaintDark,
+              topControl: Stack(
+                alignment: Alignment.bottomCenter,
+                children: [
+                  // This container is for increasing the tap area
+                  Container(
+                    width: double.infinity,
+                    height: 36,
+                    color: Colors.transparent,
+                  ),
+                  Container(
+                    height: 5,
+                    width: 40,
+                    decoration: const BoxDecoration(
+                      color: backgroundElevated2Light,
+                      borderRadius: BorderRadius.all(
+                        Radius.circular(5),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              context: context,
+              builder: (context) {
+                return UpdateLocationDataWidget(
+                  widget.selectedFiles.files.toList(),
+                );
+              },
+            );
+          },
         ),
       );
     }

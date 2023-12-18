@@ -944,8 +944,8 @@
   "itLooksLikeSomethingWentWrongPleaseRetryAfterSome": "It looks like something went wrong. Please retry after some time. If the error persists, please contact our support team.",
   "error": "Error",
   "tempErrorContactSupportIfPersists": "It looks like something went wrong. Please retry after some time. If the error persists, please contact our support team.",
-  "networkHostLookUpErr" : "Unable to connect to Ente, please check your network settings and contact support if the error persists.",
-  "networkConnectionRefusedErr" : "Unable to connect to Ente, please retry after sometime. If the error persists, please contact support.",
+  "networkHostLookUpErr": "Unable to connect to Ente, please check your network settings and contact support if the error persists.",
+  "networkConnectionRefusedErr": "Unable to connect to Ente, please retry after sometime. If the error persists, please contact support.",
   "cachedData": "Cached data",
   "clearCaches": "Clear caches",
   "remoteImages": "Remote images",
@@ -1170,10 +1170,14 @@
   "contacts": "Contacts",
   "noInternetConnection": "No internet connection",
   "pleaseCheckYourInternetConnectionAndTryAgain": "Please check your internet connection and try again.",
-
   "signOutFromOtherDevices": "Sign out from other devices",
   "signOutOtherBody": "If you think someone might know your password, you can force all other devices using your account to sign out.",
   "signOutOtherDevices": "Sign out other devices",
   "doNotSignOut": "Do not sign out",
+  "editLocation": "Edit location",
+  "selectALocation": "Select a location",
+  "selectALocationFirst": "Select a location first",
+  "changeLocationOfSelectedItems": "Change location of selected items?",
+  "editsToLocationWillOnlyBeSeenWithinEnte": "Edits to location will only be seen within Ente",
   "cleanUncategorized": "Clean Uncategorized"
 }

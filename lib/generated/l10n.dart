@@ -8158,6 +8158,56 @@ class S {
     );
   }
 
+  /// `Edit location`
+  String get editLocation {
+    return Intl.message(
+      'Edit location',
+      name: 'editLocation',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Select a location`
+  String get selectALocation {
+    return Intl.message(
+      'Select a location',
+      name: 'selectALocation',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Select a location first`
+  String get selectALocationFirst {
+    return Intl.message(
+      'Select a location first',
+      name: 'selectALocationFirst',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Change location of selected items?`
+  String get changeLocationOfSelectedItems {
+    return Intl.message(
+      'Change location of selected items?',
+      name: 'changeLocationOfSelectedItems',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Edits to location will only be seen within Ente`
+  String get editsToLocationWillOnlyBeSeenWithinEnte {
+    return Intl.message(
+      'Edits to location will only be seen within Ente',
+      name: 'editsToLocationWillOnlyBeSeenWithinEnte',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Clean Uncategorized`
   String get cleanUncategorized {
     return Intl.message(

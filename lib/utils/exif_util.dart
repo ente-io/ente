@@ -66,7 +66,7 @@ Future<DateTime?> getCreationTimeFromEXIF(
 
 Location? locationFromExif(Map<String, IfdTag> exif) {
   try {
-    return _gpsDataFromExif(exif).toLocationObj();
+    return gpsDataFromExif(exif).toLocationObj();
   } catch (e, s) {
     _logger.severe("failed to get location from exif", e, s);
     return null;
@@ -85,7 +85,7 @@ Future<Map<String, IfdTag>> readExifAsync(File file) async {
   );
 }
 
-GPSData _gpsDataFromExif(Map<String, IfdTag> exif) {
+GPSData gpsDataFromExif(Map<String, IfdTag> exif) {
   final Map<String, dynamic> exifLocationData = {
     "lat": null,
     "long": null,
