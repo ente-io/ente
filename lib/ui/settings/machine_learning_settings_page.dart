@@ -112,28 +112,30 @@ class _MachineLearningSettingsPageState
         const SizedBox(
           height: 12,
         ),
-        hasEnabled && kDebugMode
+        hasEnabled
             ? Column(
                 children: [
                   const MagicSearchIndexStatsWidget(),
                   const SizedBox(
                     height: 12,
                   ),
-                  MenuItemWidget(
-                    leadingIcon: Icons.delete_sweep_outlined,
-                    captionedTextWidget: CaptionedTextWidget(
-                      title: S.of(context).clearIndexes,
-                    ),
-                    menuItemColor: getEnteColorScheme(context).fillFaint,
-                    singleBorderRadius: 8,
-                    alwaysShowSuccessState: true,
-                    onTap: () async {
-                      await SemanticSearchService.instance.clearIndexes();
-                      if (mounted) {
-                        setState(() => {});
-                      }
-                    },
-                  ),
+                  kDebugMode
+                      ? MenuItemWidget(
+                          leadingIcon: Icons.delete_sweep_outlined,
+                          captionedTextWidget: CaptionedTextWidget(
+                            title: S.of(context).clearIndexes,
+                          ),
+                          menuItemColor: getEnteColorScheme(context).fillFaint,
+                          singleBorderRadius: 8,
+                          alwaysShowSuccessState: true,
+                          onTap: () async {
+                            await SemanticSearchService.instance.clearIndexes();
+                            if (mounted) {
+                              setState(() => {});
+                            }
+                          },
+                        )
+                      : const SizedBox.shrink(),
                 ],
               )
             : const SizedBox.shrink(),
