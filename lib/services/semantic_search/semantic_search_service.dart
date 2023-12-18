@@ -28,7 +28,7 @@ class SemanticSearchService {
   static final SemanticSearchService instance =
       SemanticSearchService._privateConstructor();
   static final Computer _computer = Computer.shared();
-  static final LRUMap<String, List<double>> _queryCache = LRUMap(50);
+  static final LRUMap<String, List<double>> _queryCache = LRUMap(20);
 
   static const kModelName = "clip";
   static const kEmbeddingLength = 512;
