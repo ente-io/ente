@@ -175,9 +175,8 @@ class SemanticSearchService {
     final uploadedFileIDs = await FilesDB.instance
         .getOwnedFileIDs(Configuration.instance.getUserID()!);
     final embeddedFileIDs = _cachedEmbeddings.map((e) => e.fileID).toSet();
-    final queuedFileIDs = _queue.map((e) => e.uploadedFileID).toSet();
     uploadedFileIDs.removeWhere(
-      (id) => embeddedFileIDs.contains(id) || queuedFileIDs.contains(id),
+      (id) => embeddedFileIDs.contains(id),
     );
     return uploadedFileIDs;
   }
