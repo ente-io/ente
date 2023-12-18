@@ -378,6 +378,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Impossibile eliminare i file condivisi"),
         "centerPoint": MessageLookupByLibrary.simpleMessage("Punto centrale"),
         "changeEmail": MessageLookupByLibrary.simpleMessage("Modifica email"),
+        "changeLocationOfSelectedItems": MessageLookupByLibrary.simpleMessage(
+            "Change location of selected items?"),
         "changePassword":
             MessageLookupByLibrary.simpleMessage("Cambia password"),
         "changePasswordTitle":
@@ -583,9 +585,13 @@ class MessageLookup extends MessageLookupByLibrary {
         "duplicateFileCountWithStorageSaved": m16,
         "duplicateItemsGroup": m17,
         "edit": MessageLookupByLibrary.simpleMessage("Modifica"),
+        "editLocation": MessageLookupByLibrary.simpleMessage("Edit location"),
         "editLocationTagTitle":
             MessageLookupByLibrary.simpleMessage("Modifica luogo"),
         "editsSaved": MessageLookupByLibrary.simpleMessage("Modifiche salvate"),
+        "editsToLocationWillOnlyBeSeenWithinEnte":
+            MessageLookupByLibrary.simpleMessage(
+                "Edits to location will only be seen within Ente"),
         "eligible": MessageLookupByLibrary.simpleMessage("idoneo"),
         "email": MessageLookupByLibrary.simpleMessage("Email"),
         "emailChangedTo": m18,
@@ -1126,6 +1132,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "searchHintText": MessageLookupByLibrary.simpleMessage(
             "Album, mesi, giorni, anni, ..."),
         "security": MessageLookupByLibrary.simpleMessage("Sicurezza"),
+        "selectALocation":
+            MessageLookupByLibrary.simpleMessage("Select a location"),
+        "selectALocationFirst":
+            MessageLookupByLibrary.simpleMessage("Select a location first"),
         "selectAlbum": MessageLookupByLibrary.simpleMessage("Seleziona album"),
         "selectAll": MessageLookupByLibrary.simpleMessage("Seleziona tutto"),
         "selectFoldersForBackup": MessageLookupByLibrary.simpleMessage(

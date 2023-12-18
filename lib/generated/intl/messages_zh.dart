@@ -96,6 +96,9 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m27(count, formattedSize) =>
       "${Intl.plural(count, one: '它可以从设备中删除以释放 ${formattedSize}', other: '它们可以从设备中删除以释放 ${formattedSize}')}";
 
+  static String m67(currentlyProcessing, totalCount) =>
+      "正在处理 ${currentlyProcessing} / ${totalCount}";
+
   static String m28(count) =>
       "${Intl.plural(count, one: '${count} 个项目', other: '${count} 个项目')}";
 
@@ -335,6 +338,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("无法删除共享文件"),
         "centerPoint": MessageLookupByLibrary.simpleMessage("中心点"),
         "changeEmail": MessageLookupByLibrary.simpleMessage("修改邮箱"),
+        "changeLocationOfSelectedItems": MessageLookupByLibrary.simpleMessage(
+            "Change location of selected items?"),
         "changePassword": MessageLookupByLibrary.simpleMessage("修改密码"),
         "changePasswordTitle": MessageLookupByLibrary.simpleMessage("修改密码"),
         "changePermissions": MessageLookupByLibrary.simpleMessage("要修改权限吗？"),
@@ -346,6 +351,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "claimMore": MessageLookupByLibrary.simpleMessage("领取更多！"),
         "claimed": MessageLookupByLibrary.simpleMessage("已领取"),
         "claimedStorageSoFar": m8,
+        "cleanUncategorized": MessageLookupByLibrary.simpleMessage("清除未分类的"),
         "clearCaches": MessageLookupByLibrary.simpleMessage("清除缓存"),
         "click": MessageLookupByLibrary.simpleMessage("• 点击"),
         "clickOnTheOverflowMenu":
@@ -492,8 +498,12 @@ class MessageLookup extends MessageLookupByLibrary {
         "duplicateFileCountWithStorageSaved": m16,
         "duplicateItemsGroup": m17,
         "edit": MessageLookupByLibrary.simpleMessage("编辑"),
+        "editLocation": MessageLookupByLibrary.simpleMessage("Edit location"),
         "editLocationTagTitle": MessageLookupByLibrary.simpleMessage("编辑位置"),
         "editsSaved": MessageLookupByLibrary.simpleMessage("已保存编辑"),
+        "editsToLocationWillOnlyBeSeenWithinEnte":
+            MessageLookupByLibrary.simpleMessage(
+                "Edits to location will only be seen within Ente"),
         "eligible": MessageLookupByLibrary.simpleMessage("符合资格"),
         "email": MessageLookupByLibrary.simpleMessage("电子邮件地址"),
         "emailChangedTo": m18,
@@ -596,6 +606,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "general": MessageLookupByLibrary.simpleMessage("通用"),
         "generatingEncryptionKeys":
             MessageLookupByLibrary.simpleMessage("正在生成加密密钥..."),
+        "genericProgress": m67,
         "goToSettings": MessageLookupByLibrary.simpleMessage("前往设置"),
         "googlePlayId": MessageLookupByLibrary.simpleMessage("Google Play ID"),
         "grantFullAccessPrompt":
@@ -958,6 +969,10 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("邀请他人，您将在此看到他们分享的所有照片"),
         "searchResultCount": m43,
         "security": MessageLookupByLibrary.simpleMessage("安全"),
+        "selectALocation":
+            MessageLookupByLibrary.simpleMessage("Select a location"),
+        "selectALocationFirst":
+            MessageLookupByLibrary.simpleMessage("Select a location first"),
         "selectAlbum": MessageLookupByLibrary.simpleMessage("选择相册"),
         "selectAll": MessageLookupByLibrary.simpleMessage("全选"),
         "selectFoldersForBackup":
