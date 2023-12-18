@@ -33,7 +33,7 @@ class ZoomableLiveImageNew extends StatefulWidget {
 
 class _ZoomableLiveImageNewState extends State<ZoomableLiveImageNew>
     with SingleTickerProviderStateMixin {
-  final Logger _logger = Logger("ZoomableLiveImage");
+  final Logger _logger = Logger("ZoomableLiveImageNew");
   late EnteFile _enteFile;
   bool _showVideo = false;
   bool _isLoadingVideoPlayer = false;

@@ -35,6 +35,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "cancel": MessageLookupByLibrary.simpleMessage("Anuluj"),
         "changeEmail":
             MessageLookupByLibrary.simpleMessage("Zmień adres e-mail"),
+        "changeLocationOfSelectedItems": MessageLookupByLibrary.simpleMessage(
+            "Change location of selected items?"),
         "changePasswordTitle":
             MessageLookupByLibrary.simpleMessage("Zmień hasło"),
         "checkInboxAndSpamFolder": MessageLookupByLibrary.simpleMessage(
@@ -77,6 +79,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "deleteRequestSLAText": MessageLookupByLibrary.simpleMessage(
             "Twoje żądanie zostanie przetworzone w ciągu 72 godzin."),
         "doThisLater": MessageLookupByLibrary.simpleMessage("Spróbuj później"),
+        "editLocation": MessageLookupByLibrary.simpleMessage("Edit location"),
+        "editsToLocationWillOnlyBeSeenWithinEnte":
+            MessageLookupByLibrary.simpleMessage(
+                "Edits to location will only be seen within Ente"),
         "email": MessageLookupByLibrary.simpleMessage("Adres e-mail"),
         "encryption": MessageLookupByLibrary.simpleMessage("Szyfrowanie"),
         "enterCode": MessageLookupByLibrary.simpleMessage("Wprowadź kod"),
@@ -149,6 +155,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "resetPasswordTitle":
             MessageLookupByLibrary.simpleMessage("Zresetuj hasło"),
         "saveKey": MessageLookupByLibrary.simpleMessage("Zapisz klucz"),
+        "selectALocation":
+            MessageLookupByLibrary.simpleMessage("Select a location"),
+        "selectALocationFirst":
+            MessageLookupByLibrary.simpleMessage("Select a location first"),
         "selectReason": MessageLookupByLibrary.simpleMessage("Wybierz powód"),
         "sendEmail": MessageLookupByLibrary.simpleMessage("Wyślij e-mail"),
         "setPasswordTitle": MessageLookupByLibrary.simpleMessage("Ustaw hasło"),

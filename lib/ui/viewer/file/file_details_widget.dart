@@ -86,6 +86,7 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
     getExif(widget.file).then((exif) {
       _exifNotifier.value = exif;
     });
+
     super.initState();
   }
 
@@ -152,12 +153,52 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
               ? Column(
                   children: [
                     LocationTagsWidget(
-                      widget.file.location!,
+                      widget.file,
                     ),
                     const FileDetailsDivider(),
                   ],
                 )
               : const SizedBox.shrink();
+
+          ///To be used when state issues are fixed when location is updated.
+          //
+          //  file.fileType != FileType.video &&
+          //         file.ownerID == _currentUserID
+          //     ? Column(
+          //         children: [
+          //           InfoItemWidget(
+          //             leadingIcon: Icons.pin_drop_outlined,
+          //             title: "No location data",
+          //             subtitleSection: Future.value(
+          //               [
+          //                 Text(
+          //                   "Add location data",
+          //                   style: getEnteTextTheme(context).miniBoldMuted,
+          //                 ),
+          //               ],
+          //             ),
+          //             hasChipButtons: false,
+          //             onTap: () async {
+          //               await showBarModalBottomSheet(
+          //                 shape: const RoundedRectangleBorder(
+          //                   borderRadius: BorderRadius.vertical(
+          //                     top: Radius.circular(5),
+          //                   ),
+          //                 ),
+          //                 backgroundColor: getEnteColorScheme(context)
+          //                     .backgroundElevated,
+          //                 barrierColor: backdropFaintDark,
+          //                 context: context,
+          //                 builder: (context) {
+          //                   return UpdateLocationDataWidget([file]);
+          //                 },
+          //               );
+          //             },
+          //           ),
+          //           const FileDetailsDivider(),
+          //         ],
+          //       )
+          //     : const SizedBox.shrink();
         },
       ),
     ]);
@@ -280,7 +321,8 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
     if (imageWidth != null && imageLength != null) {
       _exifData["resolution"] = '$imageWidth x $imageLength';
       final double megaPixels =
-          (imageWidth.values.firstAsInt() * imageLength.values.firstAsInt()) / 1000000;
+          (imageWidth.values.firstAsInt() * imageLength.values.firstAsInt()) /
+              1000000;
       final double roundedMegaPixels = (megaPixels * 10).round() / 10.0;
       _exifData['megaPixels'] = roundedMegaPixels..toStringAsFixed(1);
     } else {

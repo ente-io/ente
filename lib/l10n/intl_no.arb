@@ -19,5 +19,10 @@
   "deleteConfirmDialogBody": "This account is linked to other ente apps, if you use any.\\n\\nYour uploaded data, across all ente apps, will be scheduled for deletion, and your account will be permanently deleted.",
   "yourMap": "Your map",
   "modifyYourQueryOrTrySearchingFor": "Modify your query, or try searching for",
-  "contacts": "Contacts"
+  "contacts": "Contacts",
+  "editLocation": "Edit location",
+  "selectALocation": "Select a location",
+  "selectALocationFirst": "Select a location first",
+  "changeLocationOfSelectedItems": "Change location of selected items?",
+  "editsToLocationWillOnlyBeSeenWithinEnte": "Edits to location will only be seen within Ente"
 }

@@ -101,6 +101,9 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m27(count, formattedSize) =>
       "${Intl.plural(count, one: 'It can be deleted from the device to free up ${formattedSize}', other: 'They can be deleted from the device to free up ${formattedSize}')}";
 
+  static String m67(currentlyProcessing, totalCount) =>
+      "Processing ${currentlyProcessing} / ${totalCount}";
+
   static String m28(count) =>
       "${Intl.plural(count, one: '${count} item', other: '${count} items')}";
 
@@ -379,6 +382,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Cannot delete shared files"),
         "centerPoint": MessageLookupByLibrary.simpleMessage("Center point"),
         "changeEmail": MessageLookupByLibrary.simpleMessage("Change email"),
+        "changeLocationOfSelectedItems": MessageLookupByLibrary.simpleMessage(
+            "Change location of selected items?"),
         "changePassword":
             MessageLookupByLibrary.simpleMessage("Change password"),
         "changePasswordTitle":
@@ -395,6 +400,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "claimMore": MessageLookupByLibrary.simpleMessage("Claim more!"),
         "claimed": MessageLookupByLibrary.simpleMessage("Claimed"),
         "claimedStorageSoFar": m8,
+        "cleanUncategorized":
+            MessageLookupByLibrary.simpleMessage("Clean Uncategorized"),
         "clearCaches": MessageLookupByLibrary.simpleMessage("Clear caches"),
         "clearIndexes": MessageLookupByLibrary.simpleMessage("Clear indexes"),
         "click": MessageLookupByLibrary.simpleMessage("• Click"),
@@ -581,9 +588,13 @@ class MessageLookup extends MessageLookupByLibrary {
         "duplicateFileCountWithStorageSaved": m16,
         "duplicateItemsGroup": m17,
         "edit": MessageLookupByLibrary.simpleMessage("Edit"),
+        "editLocation": MessageLookupByLibrary.simpleMessage("Edit location"),
         "editLocationTagTitle":
             MessageLookupByLibrary.simpleMessage("Edit location"),
         "editsSaved": MessageLookupByLibrary.simpleMessage("Edits saved"),
+        "editsToLocationWillOnlyBeSeenWithinEnte":
+            MessageLookupByLibrary.simpleMessage(
+                "Edits to location will only be seen within Ente"),
         "eligible": MessageLookupByLibrary.simpleMessage("eligible"),
         "email": MessageLookupByLibrary.simpleMessage("Email"),
         "emailChangedTo": m18,
@@ -709,6 +720,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "general": MessageLookupByLibrary.simpleMessage("General"),
         "generatingEncryptionKeys": MessageLookupByLibrary.simpleMessage(
             "Generating encryption keys..."),
+        "genericProgress": m67,
         "goToSettings": MessageLookupByLibrary.simpleMessage("Go to settings"),
         "googlePlayId": MessageLookupByLibrary.simpleMessage("Google Play ID"),
         "grantFullAccessPrompt": MessageLookupByLibrary.simpleMessage(
@@ -1151,6 +1163,10 @@ class MessageLookup extends MessageLookupByLibrary {
             "Invite people, and you\'ll see all photos shared by them here"),
         "searchResultCount": m43,
         "security": MessageLookupByLibrary.simpleMessage("Security"),
+        "selectALocation":
+            MessageLookupByLibrary.simpleMessage("Select a location"),
+        "selectALocationFirst":
+            MessageLookupByLibrary.simpleMessage("Select a location first"),
         "selectAlbum": MessageLookupByLibrary.simpleMessage("Select album"),
         "selectAll": MessageLookupByLibrary.simpleMessage("Select all"),
         "selectFoldersForBackup":
@@ -1344,7 +1360,6 @@ class MessageLookup extends MessageLookupByLibrary {
                 "This will log you out of the following device:"),
         "thisWillLogYouOutOfThisDevice": MessageLookupByLibrary.simpleMessage(
             "This will log you out of this device!"),
-        "time": MessageLookupByLibrary.simpleMessage("Time"),
         "toHideAPhotoOrVideo":
             MessageLookupByLibrary.simpleMessage("To hide a photo or video"),
         "toResetVerifyEmail": MessageLookupByLibrary.simpleMessage(

@@ -1158,5 +1158,10 @@
   "signOutFromOtherDevices": "Log uit op andere apparaten",
   "signOutOtherBody": "Als je denkt dat iemand je wachtwoord zou kunnen kennen, kun je alle andere apparaten die je account gebruiken dwingen om uit te loggen.",
   "signOutOtherDevices": "Log uit op andere apparaten",
-  "doNotSignOut": "Niet uitloggen"
+  "doNotSignOut": "Niet uitloggen",
+  "editLocation": "Edit location",
+  "selectALocation": "Select a location",
+  "selectALocationFirst": "Select a location first",
+  "changeLocationOfSelectedItems": "Change location of selected items?",
+  "editsToLocationWillOnlyBeSeenWithinEnte": "Edits to location will only be seen within Ente"
 }

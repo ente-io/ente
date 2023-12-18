@@ -242,6 +242,10 @@ extension GalleyTypeExtension on GalleryType {
   bool showRemoveFromHiddenAlbum() {
     return this == GalleryType.hiddenOwnedCollection;
   }
+
+  bool showEditLocation() {
+    return this != GalleryType.sharedCollection;
+  }
 }
 
 extension GalleryAppBarExtn on GalleryType {

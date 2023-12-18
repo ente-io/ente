@@ -1158,5 +1158,10 @@
   "signOutFromOtherDevices": "Von anderen Geräten abmelden",
   "signOutOtherBody": "Falls du denkst, dass jemand dein Passwort kennen könnte, kannst du alle anderen Geräte von deinem Account abmelden.",
   "signOutOtherDevices": "Andere Geräte abmelden",
-  "doNotSignOut": "Melde dich nicht ab"
+  "doNotSignOut": "Melde dich nicht ab",
+  "editLocation": "Edit location",
+  "selectALocation": "Select a location",
+  "selectALocationFirst": "Select a location first",
+  "changeLocationOfSelectedItems": "Change location of selected items?",
+  "editsToLocationWillOnlyBeSeenWithinEnte": "Edits to location will only be seen within Ente"
 }

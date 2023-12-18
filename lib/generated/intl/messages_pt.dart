@@ -102,6 +102,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "cancel": MessageLookupByLibrary.simpleMessage("Cancelar"),
         "cannotAddMorePhotosAfterBecomingViewer": m7,
         "changeEmail": MessageLookupByLibrary.simpleMessage("Mudar e-mail"),
+        "changeLocationOfSelectedItems": MessageLookupByLibrary.simpleMessage(
+            "Change location of selected items?"),
         "changePassword":
             MessageLookupByLibrary.simpleMessage("Mude sua senha"),
         "changePasswordTitle":
@@ -186,6 +188,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "doThisLater":
             MessageLookupByLibrary.simpleMessage("Fazer isso mais tarde"),
         "dropSupportEmail": m15,
+        "editLocation": MessageLookupByLibrary.simpleMessage("Edit location"),
+        "editsToLocationWillOnlyBeSeenWithinEnte":
+            MessageLookupByLibrary.simpleMessage(
+                "Edits to location will only be seen within Ente"),
         "eligible": MessageLookupByLibrary.simpleMessage("elegível"),
         "email": MessageLookupByLibrary.simpleMessage("E-mail"),
         "encryption": MessageLookupByLibrary.simpleMessage("Criptografia"),
@@ -350,6 +356,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "scanThisBarcodeWithnyourAuthenticatorApp":
             MessageLookupByLibrary.simpleMessage(
                 "Escaneie este código de barras com\nseu aplicativo autenticador"),
+        "selectALocation":
+            MessageLookupByLibrary.simpleMessage("Select a location"),
+        "selectALocationFirst":
+            MessageLookupByLibrary.simpleMessage("Select a location first"),
         "selectReason":
             MessageLookupByLibrary.simpleMessage("Selecione o motivo"),
         "sendEmail": MessageLookupByLibrary.simpleMessage("Enviar e-mail"),

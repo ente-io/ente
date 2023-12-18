@@ -45,7 +45,7 @@ class _MapScreenState extends State<MapScreen> {
   double maxZoom = 18.0;
   double minZoom = 2.8;
   int debounceDuration = 500;
-  LatLng center = LatLng(46.7286, 4.8614);
+  LatLng center = const LatLng(46.7286, 4.8614);
   final Logger _logger = Logger("_MapScreenState");
   StreamSubscription? _mapMoveSubscription;
   Isolate? isolate;

@@ -392,6 +392,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "centerPoint": MessageLookupByLibrary.simpleMessage("Point central"),
         "changeEmail":
             MessageLookupByLibrary.simpleMessage("Modifier l\'e-mail"),
+        "changeLocationOfSelectedItems": MessageLookupByLibrary.simpleMessage(
+            "Change location of selected items?"),
         "changePassword":
             MessageLookupByLibrary.simpleMessage("Modifier le mot de passe"),
         "changePasswordTitle":
@@ -603,10 +605,14 @@ class MessageLookup extends MessageLookupByLibrary {
         "duplicateFileCountWithStorageSaved": m16,
         "duplicateItemsGroup": m17,
         "edit": MessageLookupByLibrary.simpleMessage("Éditer"),
+        "editLocation": MessageLookupByLibrary.simpleMessage("Edit location"),
         "editLocationTagTitle":
             MessageLookupByLibrary.simpleMessage("Modifier l’emplacement"),
         "editsSaved":
             MessageLookupByLibrary.simpleMessage("Modification sauvegardée"),
+        "editsToLocationWillOnlyBeSeenWithinEnte":
+            MessageLookupByLibrary.simpleMessage(
+                "Edits to location will only be seen within Ente"),
         "eligible": MessageLookupByLibrary.simpleMessage("éligible"),
         "email": MessageLookupByLibrary.simpleMessage("E-mail"),
         "emailChangedTo": m18,
@@ -1195,6 +1201,10 @@ class MessageLookup extends MessageLookupByLibrary {
             "Invitez des gens, et vous verrez ici toutes les photos qu\'ils partagent"),
         "searchResultCount": m43,
         "security": MessageLookupByLibrary.simpleMessage("Sécurité"),
+        "selectALocation":
+            MessageLookupByLibrary.simpleMessage("Select a location"),
+        "selectALocationFirst":
+            MessageLookupByLibrary.simpleMessage("Select a location first"),
         "selectAlbum":
             MessageLookupByLibrary.simpleMessage("Sélectionner album"),
         "selectAll": MessageLookupByLibrary.simpleMessage("Tout sélectionner"),
@@ -1396,7 +1406,6 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Cela vous déconnectera de l\'appareil suivant :"),
         "thisWillLogYouOutOfThisDevice": MessageLookupByLibrary.simpleMessage(
             "Cela vous déconnectera de cet appareil !"),
-        "time": MessageLookupByLibrary.simpleMessage("Date et heure"),
         "toHideAPhotoOrVideo": MessageLookupByLibrary.simpleMessage(
             "Cacher une photo ou une vidéo"),
         "toResetVerifyEmail": MessageLookupByLibrary.simpleMessage(
