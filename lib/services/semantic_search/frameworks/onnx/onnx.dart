@@ -7,7 +7,7 @@ import "package:photos/services/semantic_search/frameworks/onnx/onnx_text_encode
 class ONNX extends MLFramework {
   static const kModelBucketEndpoint = "https://models.ente.io/";
   static const kImageModel = "clip-image-vit-32-float32.onnx";
-  static const kTextModel = "clip-text-vit-32-float32-int32.onnx";
+  static const kTextModel = "clip-text-vit-32-uint8.onnx";
 
   final _computer = Computer.shared();
   final _logger = Logger("ONNX");
