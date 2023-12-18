@@ -7,6 +7,8 @@ import "package:path_provider/path_provider.dart";
 import "package:photos/core/network/network.dart";
 
 abstract class MLFramework {
+  static const kImageEncoderEnabled = false;
+
   final _logger = Logger("MLFramework");
 
   /// Returns the name of the framework
@@ -57,26 +59,17 @@ abstract class MLFramework {
   // ---
 
   Future<void> _initImageModel() async {
-    return;
-    // TODO: remove hardcoding
-    if (getFrameworkName() == "ggml") {
-      final path = await _getLocalImageModelPath();
-      if (File(path).existsSync()) {
-        await loadImageModel(path);
-      } else {
-        final tempFile = File(path + ".temp");
-        await _downloadFile(getImageModelRemotePath(), tempFile.path);
-        await tempFile.rename(path);
-        await loadImageModel(path);
-      }
+    if (!kImageEncoderEnabled) {
+      return;
+    }
+    final path = await _getLocalImageModelPath();
+    if (File(path).existsSync()) {
+      await loadImageModel(path);
     } else {
-      const assetPath = "assets/models/clip/clip-image-vit-32-float32.onnx";
-      await loadImageModel(
-        await getAccessiblePathForAsset(
-          assetPath,
-          "clip-image-vit-32-float32.onnx",
-        ),
-      );
+      final tempFile = File(path + ".temp");
+      await _downloadFile(getImageModelRemotePath(), tempFile.path);
+      await tempFile.rename(path);
+      await loadImageModel(path);
     }
   }
 

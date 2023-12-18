@@ -16,6 +16,7 @@ import "package:photos/models/embedding.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/objectbox.g.dart";
 import "package:photos/services/semantic_search/embedding_store.dart";
+import "package:photos/services/semantic_search/frameworks/ml_framework.dart";
 import 'package:photos/services/semantic_search/frameworks/onnx/onnx.dart';
 import "package:photos/utils/file_util.dart";
 import "package:photos/utils/local_settings.dart";
@@ -32,7 +33,6 @@ class SemanticSearchService {
   static const kModelName = "clip";
   static const kEmbeddingLength = 512;
   static const kScoreThreshold = 0.23;
-  static const kImageEncoderEnabled = false;
   static const kShouldPushEmbeddings = false;
 
   final _logger = Logger("SemanticSearchService");
@@ -156,7 +156,7 @@ class SemanticSearchService {
 
   Future<void> _backFill() async {
     if (!LocalSettings.instance.hasEnabledMagicSearch() ||
-        !kImageEncoderEnabled) {
+        !MLFramework.kImageEncoderEnabled) {
       return;
     }
     await _frameworkInitialization.future;
@@ -250,7 +250,7 @@ class SemanticSearchService {
   }
 
   Future<void> computeImageEmbedding(EnteFile file) async {
-    if (!kImageEncoderEnabled) {
+    if (!MLFramework.kImageEncoderEnabled) {
       return;
     }
     if (!_frameworkInitialization.isCompleted) {
@@ -269,15 +269,15 @@ class SemanticSearchService {
       // dev.log(computeScore(result, pyEmbedding).toString());
       // dev.log(computeScore(pyEmbedding, webEmbedding).toString());
 
-      // final embedding = Embedding(
-      //   fileID: file.uploadedFileID!,
-      //   model: _mlFramework.getFrameworkName() + "-" + kModelName,
-      //   embedding: result,
-      // );
-      // await EmbeddingStore.instance.storeEmbedding(
-      //   file,
-      //   embedding,
-      // );
+      final embedding = Embedding(
+        fileID: file.uploadedFileID!,
+        model: _mlFramework.getFrameworkName() + "-" + kModelName,
+        embedding: result,
+      );
+      await EmbeddingStore.instance.storeEmbedding(
+        file,
+        embedding,
+      );
     } catch (e, s) {
       _logger.severe(e, s);
     }
