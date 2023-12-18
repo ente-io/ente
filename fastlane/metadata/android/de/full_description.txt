@@ -1,10 +1,10 @@
 ente ist eine einfache App, um Ihre Fotos und Videos automatisch zu sichern und zu organisieren.
 
-Wenn Sie auf der Suche nach einer privaten Alternative sind, um Ihre Erinnerungen zu bewahren, sind Sie an der richtigen Stelle. Mit Ente werden sie Ende-zu-Ende-verschlüsselt gespeichert (e2ee). Dies bedeutet, dass nur Sie sie sehen können.
+Wenn Sie auf der Suche nach einer privaten Alternative sind, um Ihre Erinnerungen zu bewahren, sind Sie an der richtigen Stelle. Die müssen nicht mal ente haben. ente benötigt bestimmte Berechtigungen um als Anbieter eines Fotospeichers fungieren zu können. Mit Ente werden sie Ende-zu-Ende-verschlüsselt gespeichert (e2ee). Dies bedeutet, dass nur Sie sie sehen können.
 
 Wir haben Open-Source Apps auf allen Plattformen, und Ihre Fotos werden nahtlos zwischen all Ihren Geräten verschlüsselt (e2ee) synchronisiert.
 
-ente ermöglicht es deine Alben simpel & schnell mit deinen Geliebten zu teilen. Die müssen nicht mal ente haben. Du kannst öffentlich einsehbare Links teilen, wo sie dein Album sehen und zusammenarbeiten können, indem sie Fotos hinzufügen, sogar ohne einen Account oder eine App.
+ente ermöglicht es deine Alben simpel & schnell mit deinen Geliebten zu teilen. Du kannst öffentlich einsehbare Links teilen, wo sie dein Album sehen und zusammenarbeiten können, indem sie Fotos hinzufügen, sogar ohne einen Account oder eine App.
 
 Ihre verschlüsselten Daten werden zu 3 verschiedenen Orten repliziert, unter anderem zu einem Schutzbunker in Paris. Wir nehmen die Erhaltung der Nachwelt ernst und machen es Dir leicht, dafür zu sorgen, dass Deine Erinnerungen Dich überdauern.
 
@@ -27,7 +27,7 @@ FEATURES
 - und noch VIELES mehr!
 
 BERECHTIGUNGEN
-ente benötigt bestimmte Berechtigungen um als Anbieter eines Fotospeichers fungieren zu können. Diese können unter folgendem Link betrachtet werden: https://github.com/ente-io/photos-app/blob/f-droid/android/permissions.md
+Diese können unter folgendem Link betrachtet werden: https://github.com/ente-io/photos-app/blob/f-droid/android/permissions.md
 
 PREIS
 Wir bieten keine lebenslang kostenlosen Abonnements an, da es für uns wichtig ist, einen nachhaltigen Service anzubieten. Wir bieten jedoch bezahlbare Abonemments an, welche auch mit der Familie geteilt werden können. Mehr Informationen sind auf ente.io zu finden.
