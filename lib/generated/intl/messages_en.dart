@@ -398,6 +398,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "claimMore": MessageLookupByLibrary.simpleMessage("Claim more!"),
         "claimed": MessageLookupByLibrary.simpleMessage("Claimed"),
         "claimedStorageSoFar": m8,
+        "cleanUncategorized":
+            MessageLookupByLibrary.simpleMessage("Clean Uncategorized"),
         "clearCaches": MessageLookupByLibrary.simpleMessage("Clear caches"),
         "click": MessageLookupByLibrary.simpleMessage("• Click"),
         "clickOnTheOverflowMenu": MessageLookupByLibrary.simpleMessage(

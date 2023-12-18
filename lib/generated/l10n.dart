@@ -8157,6 +8157,16 @@ class S {
       args: [],
     );
   }
+
+  /// `Clean Uncategorized`
+  String get cleanUncategorized {
+    return Intl.message(
+      'Clean Uncategorized',
+      name: 'cleanUncategorized',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {
