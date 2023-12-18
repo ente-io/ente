@@ -844,7 +844,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Machine learning"),
         "magicSearch": MessageLookupByLibrary.simpleMessage("Magic search"),
         "magicSearchDescription": MessageLookupByLibrary.simpleMessage(
-            "Please note that this will result in a higher bandwidth and battery usage until all items are indexed."),
+            "Please use our Desktop app to index the pending items in your library."),
         "manage": MessageLookupByLibrary.simpleMessage("Manage"),
         "manageDeviceStorage":
             MessageLookupByLibrary.simpleMessage("Manage device storage"),

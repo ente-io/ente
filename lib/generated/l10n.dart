@@ -2866,10 +2866,10 @@ class S {
     );
   }
 
-  /// `Please note that this will result in a higher bandwidth and battery usage until all items are indexed.`
+  /// `Please use our Desktop app to index the pending items in your library.`
   String get magicSearchDescription {
     return Intl.message(
-      'Please note that this will result in a higher bandwidth and battery usage until all items are indexed.',
+      'Please use our Desktop app to index the pending items in your library.',
       name: 'magicSearchDescription',
       desc: '',
       args: [],
