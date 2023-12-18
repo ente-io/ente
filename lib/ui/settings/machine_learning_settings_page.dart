@@ -1,5 +1,6 @@
 import "dart:async";
 
+import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:intl/intl.dart";
 import "package:photos/core/event_bus.dart";
@@ -91,7 +92,7 @@ class _MachineLearningSettingsPageState
                 !LocalSettings.instance.hasEnabledMagicSearch(),
               );
               if (LocalSettings.instance.hasEnabledMagicSearch()) {
-                SemanticSearchService.instance.sync();
+                unawaited(SemanticSearchService.instance.sync());
               } else {
                 await SemanticSearchService.instance.clearQueue();
               }
@@ -111,7 +112,7 @@ class _MachineLearningSettingsPageState
         const SizedBox(
           height: 12,
         ),
-        hasEnabled
+        hasEnabled && kDebugMode
             ? Column(
                 children: [
                   const MagicSearchIndexStatsWidget(),
