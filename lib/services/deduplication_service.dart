@@ -1,6 +1,5 @@
 import 'package:logging/logging.dart';
 import "package:photos/core/configuration.dart";
-import 'package:photos/core/errors.dart';
 import 'package:photos/core/network/network.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/models/duplicate_files.dart';
@@ -19,54 +18,7 @@ class DeduplicationService {
 
   Future<List<DuplicateFiles>> getDuplicateFiles() async {
     try {
-      final bool hasFileSizes = await FilesService.instance.hasMigratedSizes();
-      if (hasFileSizes) {
-        final List<DuplicateFiles> result = await _getDuplicateFilesFromLocal();
-        return result;
-      }
-      final DuplicateFilesResponse dupes = await _fetchDuplicateFileIDs();
-      final ids = <int>[];
-      for (final dupe in dupes.duplicates) {
-        ids.addAll(dupe.fileIDs);
-      }
-      final fileMap = await FilesDB.instance.getFilesFromIDs(ids);
-      final result = <DuplicateFiles>[];
-      final missingFileIDs = <int>[];
-      for (final dupe in dupes.duplicates) {
-        final files = <EnteFile>[];
-        for (final id in dupe.fileIDs) {
-          final file = fileMap[id];
-          if (file != null) {
-            files.add(file);
-          } else {
-            missingFileIDs.add(id);
-          }
-        }
-        // Place files that are available locally at first to minimize the chances
-        // of a deletion followed by a re-upload
-        files.sort((first, second) {
-          if (first.localID != null && second.localID == null) {
-            return -1;
-          } else if (first.localID == null && second.localID != null) {
-            return 1;
-          }
-          return 0;
-        });
-        if (files.length > 1) {
-          result.add(DuplicateFiles(files, dupe.size));
-        }
-      }
-      if (missingFileIDs.isNotEmpty) {
-        _logger.severe(
-          "Missing files",
-          InvalidStateError(
-            "Could not find " +
-                missingFileIDs.length.toString() +
-                " files in local DB: " +
-                missingFileIDs.toString(),
-          ),
-        );
-      }
+      final List<DuplicateFiles> result = await _getDuplicateFiles();
       return result;
     } catch (e, s) {
       _logger.severe("failed to get dedupeFile", e, s);
@@ -74,61 +26,65 @@ class DeduplicationService {
     }
   }
 
-  List<DuplicateFiles> clubDuplicates(
-    List<DuplicateFiles> dupesBySize, {
-    required String? Function(EnteFile) clubbingKey,
-  }) {
-    final dupesBySizeAndClubKey = <DuplicateFiles>[];
-    for (final sizeBasedDupe in dupesBySize) {
-      final Map<String, List<EnteFile>> clubKeyToFilesMap = {};
-      for (final file in sizeBasedDupe.files) {
-        final String? clubKey = clubbingKey(file);
-        if (clubKey == null || clubKey.isEmpty) {
-          continue;
-        }
-        if (!clubKeyToFilesMap.containsKey(clubKey)) {
-          clubKeyToFilesMap[clubKey] = <EnteFile>[];
-        }
-        clubKeyToFilesMap[clubKey]!.add(file);
-      }
-      for (final clubbingKey in clubKeyToFilesMap.keys) {
-        final clubbedFiles = clubKeyToFilesMap[clubbingKey]!;
-        if (clubbedFiles.length > 1) {
-          dupesBySizeAndClubKey.add(
-            DuplicateFiles(clubbedFiles, sizeBasedDupe.size),
-          );
-        }
-      }
+  // Returns a list of DuplicateFiles, where each DuplicateFiles object contains
+  // a list of files that have the same size and hash
+  Future<List<DuplicateFiles>> _getDuplicateFiles() async {
+    Map<int, int> uploadIDToSize = {};
+    final bool hasFileSizes = await FilesService.instance.hasMigratedSizes();
+    if (!hasFileSizes) {
+      final DuplicateFilesResponse dupes = await _fetchDuplicateFileIDs();
+      uploadIDToSize = dupes.toUploadIDToSize();
     }
-    return dupesBySizeAndClubKey;
-  }
+    final Set<int> allowedCollectionIDs =
+        CollectionsService.instance.nonHiddenOwnedCollections();
 
-  Future<List<DuplicateFiles>> _getDuplicateFilesFromLocal() async {
     final List<EnteFile> allFiles = await FilesDB.instance.getAllFilesFromDB(
       CollectionsService.instance.getHiddenCollectionIds(),
+      dedupeByUploadId: false,
     );
     final int ownerID = Configuration.instance.getUserID()!;
-    allFiles.removeWhere(
-      (f) =>
-          !f.isUploaded ||
-          (f.ownerID ?? 0) != ownerID ||
-          (f.fileSize ?? 0) <= 0,
-    );
-    final Map<int, List<EnteFile>> sizeToFilesMap = {};
+    final List<EnteFile> filteredFiles = [];
     for (final file in allFiles) {
-      if (!sizeToFilesMap.containsKey(file.fileSize)) {
-        sizeToFilesMap[file.fileSize!] = <EnteFile>[];
+      if (!file.isUploaded ||
+          (file.hash ?? '').isEmpty ||
+          (file.ownerID ?? 0) != ownerID ||
+          (!allowedCollectionIDs.contains(file.collectionID!))) {
+        continue;
       }
-      sizeToFilesMap[file.fileSize]!.add(file);
+      if ((file.fileSize ?? 0) <= 0) {
+        file.fileSize = uploadIDToSize[file.uploadedFileID!] ?? 0;
+      }
+      if ((file.fileSize ?? 0) <= 0) {
+        continue;
+      }
+      filteredFiles.add(file);
     }
-    final List<DuplicateFiles> dupesBySize = [];
-    for (final size in sizeToFilesMap.keys) {
-      final List<EnteFile> files = sizeToFilesMap[size]!;
+
+    final Map<String, List<EnteFile>> sizeHashToFilesMap = {};
+    final Map<String, Set<int>> sizeHashToCollectionsSet = {};
+    final Set<int> processedFileIds = <int>{};
+    for (final file in filteredFiles) {
+      final key = '${file.fileSize}-${file.hash}';
+      if (!sizeHashToFilesMap.containsKey(key)) {
+        sizeHashToFilesMap[key] = <EnteFile>[];
+        sizeHashToCollectionsSet[key] = <int>{};
+      }
+      sizeHashToCollectionsSet[key]!.add(file.collectionID!);
+      if (!processedFileIds.contains(file.uploadedFileID)) {
+        sizeHashToFilesMap[key]!.add(file);
+        processedFileIds.add(file.uploadedFileID!);
+      }
+    }
+    final List<DuplicateFiles> dupesBySizeHash = [];
+    for (final key in sizeHashToFilesMap.keys) {
+      final List<EnteFile> files = sizeHashToFilesMap[key]!;
+      final Set<int> collectionIds = sizeHashToCollectionsSet[key]!;
       if (files.length > 1) {
-        dupesBySize.add(DuplicateFiles(files, size));
+        final size = files[0].fileSize!;
+        dupesBySizeHash.add(DuplicateFiles(files, size, collectionIds));
       }
     }
-    return dupesBySize;
+    return dupesBySizeHash;
   }
 
   Future<DuplicateFilesResponse> _fetchDuplicateFileIDs() async {

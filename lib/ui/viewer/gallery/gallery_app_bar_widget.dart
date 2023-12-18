@@ -395,9 +395,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
               const Padding(
                 padding: EdgeInsets.all(8),
               ),
-              Text(
-                "Clean Uncategorized",
-              ),
+              Text(S.of(context).cleanUncategorized),
             ],
           ),
         ),

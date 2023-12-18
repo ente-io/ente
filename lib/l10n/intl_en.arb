@@ -696,6 +696,22 @@
   "deleteEmptyAlbumsWithQuestionMark": "Delete empty albums?",
   "deleteAlbumsDialogBody": "This will delete all empty albums. This is useful when you want to reduce the clutter in your album list.",
   "deleteProgress": "Deleting {currentlyDeleting} / {totalCount}",
+  "genericProgress": "Processing {currentlyProcessing} / {totalCount}",
+  "@genericProgress" : {
+    "description": "Generic progress text to display when processing multiple items",
+    "type": "text",
+    "placeholders": {
+      "currentlyProcessing": {
+        "example": "1",
+        "type": "int"
+      },
+      "totalCount": {
+        "example": "10",
+        "type": "int"
+      }
+    }
+  },
+
   "permanentlyDelete": "Permanently delete",
   "canOnlyCreateLinkForFilesOwnedByYou": "Can only create link for files owned by you",
   "publicLinkCreated": "Public link created",
@@ -823,7 +839,6 @@
   "clubByFileName": "Club by file name",
   "count": "Count",
   "totalSize": "Total size",
-  "time": "Time",
   "longpressOnAnItemToViewInFullscreen": "Long-press on an item to view in full-screen",
   "decryptingVideo": "Decrypting video...",
   "authToViewYourMemories": "Please authenticate to view your memories",
@@ -1159,5 +1174,6 @@
   "signOutFromOtherDevices": "Sign out from other devices",
   "signOutOtherBody": "If you think someone might know your password, you can force all other devices using your account to sign out.",
   "signOutOtherDevices": "Sign out other devices",
-  "doNotSignOut": "Do not sign out"
+  "doNotSignOut": "Do not sign out",
+  "cleanUncategorized": "Clean Uncategorized"
 }

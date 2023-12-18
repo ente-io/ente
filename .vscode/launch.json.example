@@ -26,6 +26,8 @@
                 "independent",
                 "--dart-define",
                 "endpoint=http://localhost:8080",
+                "--dart-define",
+                "web-family=http://localhost:3003",
             ]
         },
         {
@@ -41,10 +43,12 @@
             "type": "dart",
             "flutterMode": "debug",
             "program": "lib/main.dart",
-            "args": [
-                "--dart-define",
-                "endpoint=http://localhost:8080",
-            ]
+              "args": [
+                    "--dart-define",
+                    "endpoint=http://localhost:8080",
+                    "--dart-define",
+                    "web-family=http://localhost:3003"
+  ]
         },
     ]
 }
