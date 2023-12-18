@@ -279,7 +279,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
       }
       await UserService.instance.updateEmailMFA(isEnabled);
     } catch (e) {
-      showToast(context, S.of(context).somethingWentWrong).ignore();
+      showToast(context, S.of(context).somethingWentWrong);
     }
   }
 }

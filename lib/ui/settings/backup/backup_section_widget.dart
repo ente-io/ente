@@ -176,12 +176,7 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
         secondButtonLabel: S.of(context).ok,
         secondButtonOnTap: () async {
           if (Platform.isIOS) {
-            unawaited(
-              showToast(
-                context,
-                S.of(context).remindToEmptyDeviceTrash,
-              ),
-            );
+            showToast(context, S.of(context).remindToEmptyDeviceTrash);
           }
         },
       );
@@ -200,12 +195,7 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
             isInAlert: true,
             onTap: () async {
               if (Platform.isIOS) {
-                unawaited(
-                  showToast(
-                    context,
-                    S.of(context).remindToEmptyDeviceTrash,
-                  ),
-                );
+                showToast(context, S.of(context).remindToEmptyDeviceTrash);
               }
             },
           ),
@@ -229,11 +219,9 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
       firstButtonType: ButtonType.primary,
       secondButtonLabel: S.of(context).ok,
       secondButtonOnTap: () async {
-        unawaited(
-          showShortToast(
-            context,
-            S.of(context).remindToEmptyEnteTrash,
-          ),
+        showShortToast(
+          context,
+          S.of(context).remindToEmptyEnteTrash,
         );
       },
     );

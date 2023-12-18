@@ -165,9 +165,10 @@ Future<File?> getFileFromServer(
         },
       );
     }
-    downloadFuture.then((downloadedFile) {
+    // ignore: unawaited_futures
+    downloadFuture.then((downloadedFile) async {
       completer.complete(downloadedFile);
-      _fileDownloadsInProgress.remove(downloadID);
+      await _fileDownloadsInProgress.remove(downloadID);
       _progressCallbacks.remove(downloadID);
     });
   }
@@ -197,7 +198,7 @@ Future<File?> _getLivePhotoFromServer(
           _downloadLivePhoto(file, progressCallback: progressCallback);
     }
     final livePhoto = await _livePhotoDownloadsTracker[file.uploadedFileID];
-    _livePhotoDownloadsTracker.remove(downloadID);
+    await _livePhotoDownloadsTracker.remove(downloadID);
     if (livePhoto == null) {
       return null;
     }

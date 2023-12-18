@@ -22,6 +22,7 @@ class GoToMapWidget extends StatelessWidget {
       onTap: () async {
         final bool result = await requestForMapEnable(context);
         if (result) {
+          // ignore: unawaited_futures
           Navigator.of(context).push(
             MaterialPageRoute(
               builder: (context) => MapScreen(

@@ -121,6 +121,7 @@ class _SessionsPageState extends State<SessionsPage> {
     } catch (e) {
       await dialog.hide();
       _logger.severe('failed to terminate');
+      // ignore: unawaited_futures
       showErrorDialog(
         context,
         S.of(context).oops,
@@ -184,7 +185,7 @@ class _SessionsPageState extends State<SessionsPage> {
             if (isLoggingOutFromThisDevice) {
               await UserService.instance.logout(context);
             } else {
-              _terminateSession(session);
+              await _terminateSession(session);
             }
           },
         ),

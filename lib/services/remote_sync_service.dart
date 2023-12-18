@@ -73,6 +73,7 @@ class RemoteSyncService {
     Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) async {
       if (event.type == EventType.addedOrUpdated) {
         if (_existingSync == null) {
+          // ignore: unawaited_futures
           sync();
         }
       }
@@ -140,6 +141,7 @@ class RemoteSyncService {
         if (hasMoreFilesToBackup && !_shouldThrottleSync()) {
           // Skipping a resync to ensure that files that were ignored in this
           // session are not processed now
+          // ignore: unawaited_futures
           sync();
         } else {
           _logger.info("Fire backup completed event");
@@ -676,7 +678,7 @@ class RemoteSyncService {
       _ignoredUploads++;
       _logger.warning("Invalid file error", error);
     } else {
-      throw (error as Error);
+      throw error;
     }
   }
 
@@ -957,6 +959,7 @@ class RemoteSyncService {
           'creating notification for ${collection?.displayName} '
           'shared: $sharedFilesIDs, collected: $collectedFilesIDs files',
         );
+        // ignore: unawaited_futures
         NotificationService.instance.showNotification(
           collection!.displayName,
           totalCount.toString() + " new 📸",

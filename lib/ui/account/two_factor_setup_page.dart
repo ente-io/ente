@@ -251,7 +251,7 @@ class _TwoFactorSetupPageState extends State<TwoFactorSetupPage>
         OutlinedButton(
           onPressed: _code.length == 6
               ? () async {
-                  _enableTwoFactor(_code);
+                  await _enableTwoFactor(_code);
                 }
               : null,
           child: Text(S.of(context).confirm),

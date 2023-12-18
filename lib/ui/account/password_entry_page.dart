@@ -1,3 +1,5 @@
+import "dart:async";
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:logging/logging.dart';
@@ -445,6 +447,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
           await dialog.hide();
           Configuration.instance.setVolatilePassword(null);
           Bus.instance.fire(AccountConfiguredEvent());
+          // ignore: unawaited_futures
           Navigator.of(context).pushAndRemoveUntil(
             MaterialPageRoute(
               builder: (BuildContext context) {
@@ -460,6 +463,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
         }
       }
 
+      // ignore: unawaited_futures
       routeToPage(
         context,
         RecoveryKeyPage(
@@ -475,6 +479,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
       _logger.severe(e);
       await dialog.hide();
       if (e is UnsupportedError) {
+        // ignore: unawaited_futures
         showErrorDialog(
           context,
           S.of(context).insecureDevice,

@@ -54,6 +54,7 @@ class _RecoveryPageState extends State<RecoveryPage> {
             await Configuration.instance.recover(_recoveryKey.text.trim());
             await dialog.hide();
             showShortToast(context, S.of(context).recoverySuccessful);
+            // ignore: unawaited_futures
             Navigator.of(context).pushReplacement(
               MaterialPageRoute(
                 builder: (BuildContext context) {
@@ -72,6 +73,7 @@ class _RecoveryPageState extends State<RecoveryPage> {
             if (e is AssertionError) {
               errMessage = '$errMessage : ${e.message}';
             }
+            // ignore: unawaited_futures
             showErrorDialog(
               context,
               S.of(context).incorrectRecoveryKeyTitle,
