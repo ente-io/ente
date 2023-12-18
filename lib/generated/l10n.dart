@@ -4906,6 +4906,16 @@ class S {
     );
   }
 
+  /// `Processing {currentlyProcessing} / {totalCount}`
+  String genericProgress(int currentlyProcessing, int totalCount) {
+    return Intl.message(
+      'Processing $currentlyProcessing / $totalCount',
+      name: 'genericProgress',
+      desc: 'Generic progress text to display when processing multiple items',
+      args: [currentlyProcessing, totalCount],
+    );
+  }
+
   /// `Permanently delete`
   String get permanentlyDelete {
     return Intl.message(
@@ -5960,16 +5970,6 @@ class S {
     return Intl.message(
       'Total size',
       name: 'totalSize',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Time`
-  String get time {
-    return Intl.message(
-      'Time',
-      name: 'time',
       desc: '',
       args: [],
     );
@@ -8203,6 +8203,16 @@ class S {
     return Intl.message(
       'Edits to location will only be seen within Ente',
       name: 'editsToLocationWillOnlyBeSeenWithinEnte',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Clean Uncategorized`
+  String get cleanUncategorized {
+    return Intl.message(
+      'Clean Uncategorized',
+      name: 'cleanUncategorized',
       desc: '',
       args: [],
     );

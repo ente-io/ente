@@ -1,3 +1,5 @@
+import "dart:developer";
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:photos/core/constants.dart';
@@ -8,14 +10,14 @@ import "package:photos/generated/l10n.dart";
 import 'package:photos/models/duplicate_files.dart';
 import 'package:photos/models/file/file.dart';
 import 'package:photos/services/collections_service.dart';
-import 'package:photos/services/deduplication_service.dart';
+import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/viewer/file/detail_page.dart';
 import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
 import 'package:photos/ui/viewer/gallery/empty_state.dart';
 import 'package:photos/utils/data_util.dart';
 import 'package:photos/utils/delete_file_util.dart';
+import "package:photos/utils/dialog_util.dart";
 import 'package:photos/utils/navigation_util.dart';
-import 'package:photos/utils/toast_util.dart';
 
 class DeduplicatePage extends StatefulWidget {
   final List<DuplicateFiles> duplicates;
@@ -30,64 +32,37 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
   static const crossAxisCount = 4;
   static const crossAxisSpacing = 4.0;
   static const headerRowCount = 3;
-  static final selectedOverlay = Container(
-    color: Colors.black.withOpacity(0.4),
-    child: const Align(
-      alignment: Alignment.bottomRight,
-      child: Padding(
-        padding: EdgeInsets.only(right: 4, bottom: 4),
-        child: Icon(
-          Icons.check_circle,
-          size: 24,
-          color: Colors.white,
-        ),
-      ),
-    ),
-  );
 
-  final Set<EnteFile> _selectedFiles = <EnteFile>{};
-  final Map<int?, int> _fileSizeMap = {};
+  final Set<int> selectedGrids = <int>{};
+
   late List<DuplicateFiles> _duplicates;
-  bool _shouldClubByCaptureTime = false;
-  bool _shouldClubByFileName = false;
-  bool toastShown = false;
 
   SortKey sortKey = SortKey.size;
+  late ValueNotifier<String> _deleteProgress;
 
   @override
   void initState() {
-    _duplicates = DeduplicationService.instance.clubDuplicates(
-      widget.duplicates,
-      clubbingKey: (EnteFile f) => f.hash,
-    );
-    _selectAllFilesButFirst();
-
+    _duplicates = widget.duplicates;
+    _deleteProgress = ValueNotifier("");
+    _selectAllGrids();
     super.initState();
   }
 
-  void _selectAllFilesButFirst() {
-    _selectedFiles.clear();
-    for (final duplicate in _duplicates) {
-      for (int index = 0; index < duplicate.files.length; index++) {
-        // Select all items but the first
-        if (index != 0) {
-          _selectedFiles.add(duplicate.files[index]);
-        }
-        // Maintain a map of fileID to fileSize for quick "space freed" computation
-        _fileSizeMap[duplicate.files[index].uploadedFileID] = duplicate.size;
-      }
+  @override
+  void dispose() {
+    _deleteProgress.dispose();
+    super.dispose();
+  }
+
+  void _selectAllGrids() {
+    selectedGrids.clear();
+    for (int idx = 0; idx < _duplicates.length; idx++) {
+      selectedGrids.add(idx);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    if (!toastShown) {
-      toastShown = true;
-      showShortToast(
-        context,
-        S.of(context).longpressOnAnItemToViewInFullscreen,
-      );
-    }
     _sortDuplicates();
     return Scaffold(
       appBar: AppBar(
@@ -103,7 +78,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
             ),
             onSelected: (dynamic value) {
               setState(() {
-                _selectedFiles.clear();
+                selectedGrids.clear();
               });
             },
             offset: const Offset(0, 50),
@@ -141,15 +116,15 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
 
   void _sortDuplicates() {
     _duplicates.sort((first, second) {
-      if (sortKey == SortKey.size) {
-        final aSize = first.files.length * first.size;
-        final bSize = second.files.length * second.size;
-        return bSize - aSize;
-      } else if (sortKey == SortKey.count) {
-        return second.files.length - first.files.length;
-      } else {
-        return second.files.first.creationTime! -
-            first.files.first.creationTime!;
+      switch (sortKey) {
+        case SortKey.size:
+          final aSize = first.files.length * first.size;
+          final bSize = second.files.length * second.size;
+          return bSize - aSize;
+        case SortKey.count:
+          return second.files.length - first.files.length;
+        default:
+          throw Exception("Unexpected sort key $sortKey");
       }
     });
   }
@@ -188,99 +163,32 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
             shrinkWrap: true,
           ),
         ),
-        _selectedFiles.isEmpty
+        selectedGrids.isEmpty
             ? const SizedBox.shrink()
             : Column(
                 children: [
+                  ValueListenableBuilder(
+                    valueListenable: _deleteProgress,
+                    builder: (BuildContext context, value, Widget? child) {
+                      if (value.isEmpty) {
+                        return const SizedBox.shrink();
+                      } else {
+                        return Padding(
+                          padding: const EdgeInsets.all(4),
+                          child: Text(
+                            value, // Show the value
+                            style: getEnteTextTheme(context).bodyMuted,
+                          ),
+                        );
+                      }
+                    },
+                  ),
                   _getDeleteButton(),
                   const SizedBox(height: crossAxisSpacing / 2),
                 ],
               ),
       ],
     );
-  }
-
-  @Deprecated('Remove options for club by name, clean code in 2024')
-  Padding _getHeader() {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            S.of(context).reviewDeduplicateItems,
-            style: Theme.of(context).textTheme.titleSmall,
-          ),
-          const Padding(
-            padding: EdgeInsets.all(12),
-          ),
-          const Divider(
-            height: 0,
-          ),
-        ],
-      ),
-    );
-  }
-
-  @Deprecated('Remove options for clubbing, clean code in 2024')
-  Widget _getClubbingConfig() {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(12, 0, 12, 4),
-      child: Column(
-        children: [
-          CheckboxListTile(
-            value: _shouldClubByFileName,
-            onChanged: (value) {
-              _shouldClubByFileName = value!;
-              if (_shouldClubByFileName) {
-                _shouldClubByCaptureTime = false;
-              }
-              _resetEntriesAndSelection();
-              setState(() {});
-            },
-            title: Text(S.of(context).clubByFileName),
-          ),
-          CheckboxListTile(
-            value: _shouldClubByCaptureTime,
-            onChanged: (value) {
-              _shouldClubByCaptureTime = value!;
-              if (_shouldClubByCaptureTime) {
-                _shouldClubByFileName = false;
-              }
-              _resetEntriesAndSelection();
-              setState(() {});
-            },
-            title: Text(S.of(context).clubByCaptureTime),
-          ),
-          const Padding(
-            padding: EdgeInsets.all(8),
-          ),
-          const Divider(
-            height: 0,
-          ),
-          const Padding(
-            padding: EdgeInsets.all(4),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _resetEntriesAndSelection() {
-    _duplicates = widget.duplicates;
-    late String? Function(EnteFile) clubbingKeyFn;
-    if (_shouldClubByCaptureTime) {
-      clubbingKeyFn = (EnteFile f) => f.creationTime?.toString() ?? '';
-    } else if (_shouldClubByFileName) {
-      clubbingKeyFn = (EnteFile f) => f.displayName;
-    } else {
-      clubbingKeyFn = (EnteFile f) => f.hash;
-    }
-    _duplicates = DeduplicationService.instance.clubDuplicates(
-      _duplicates,
-      clubbingKey: clubbingKeyFn,
-    );
-    _selectAllFilesButFirst();
   }
 
   Widget _getSortMenu(BuildContext context) {
@@ -292,9 +200,6 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
           break;
         case SortKey.size:
           text = S.of(context).totalSize;
-          break;
-        case SortKey.time:
-          text = S.of(context).time;
           break;
       }
       return Text(
@@ -332,7 +237,15 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
           ),
           onSelected: (int index) {
             setState(() {
-              sortKey = SortKey.values[index];
+              final newKey = SortKey.values[index];
+              if (newKey == sortKey) {
+                return;
+              } else {
+                sortKey = newKey;
+                if (selectedGrids.length != _duplicates.length) {
+                  selectedGrids.clear();
+                }
+              }
             });
           },
           itemBuilder: (context) {
@@ -352,11 +265,16 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
   }
 
   Widget _getDeleteButton() {
-    final String text = S.of(context).deleteItemCount(_selectedFiles.length);
-    int size = 0;
-    for (final file in _selectedFiles) {
-      size += _fileSizeMap[file.uploadedFileID]!;
+    int fileCount = 0;
+    int totalSize = 0;
+    for (int index = 0; index < _duplicates.length; index++) {
+      if (selectedGrids.contains(index)) {
+        final int toDeleteCount = _duplicates[index].files.length - 1;
+        fileCount += toDeleteCount;
+        totalSize += toDeleteCount * _duplicates[index].size;
+      }
     }
+    final String text = S.of(context).deleteItemCount(fileCount);
     return SizedBox(
       width: double.infinity,
       child: SafeArea(
@@ -382,7 +300,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
                 ),
                 const Padding(padding: EdgeInsets.all(2)),
                 Text(
-                  formatBytes(size),
+                  formatBytes(totalSize),
                   style: TextStyle(
                     color: Theme.of(context)
                         .colorScheme
@@ -395,10 +313,12 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
               ],
             ),
             onPressed: () async {
-              await deleteFilesFromRemoteOnly(context, _selectedFiles.toList());
-              Bus.instance.fire(UserDetailsChangedEvent());
-              Navigator.of(context)
-                  .pop(DeduplicationResult(_selectedFiles.length, size));
+              try {
+                await deleteDuplicates(totalSize);
+              } catch (e) {
+                log("Failed to delete duplicates", error: e);
+                showGenericErrorDialog(context: context, error: e).ignore();
+              }
             },
           ),
         ),
@@ -406,18 +326,89 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
     );
   }
 
+  Future<void> deleteDuplicates(int totalSize) async {
+    final List<EnteFile> filesToDelele = [];
+    final Map<int, List<EnteFile>> collectionToFilesToAddMap = {};
+    for (int index = 0; index < _duplicates.length; index++) {
+      if (selectedGrids.contains(index)) {
+        final sortedFiles = _duplicates[index].sortByLocalIDs();
+        final EnteFile fileToKeep = sortedFiles.first;
+        filesToDelele.addAll(sortedFiles.sublist(1));
+        for (final collectionID in _duplicates[index].collectionIDs) {
+          if (fileToKeep.collectionID == collectionID) {
+            continue;
+          }
+          if (!collectionToFilesToAddMap.containsKey(collectionID)) {
+            collectionToFilesToAddMap[collectionID] = [];
+          }
+          collectionToFilesToAddMap[collectionID]!.add(fileToKeep);
+        }
+      }
+    }
+    final int collectionCnt = collectionToFilesToAddMap.keys.length;
+    int progress = 0;
+    for (final collectionID in collectionToFilesToAddMap.keys) {
+      if (!mounted) {
+        return;
+      }
+      if (collectionCnt > 0) {
+        progress++;
+        // calculate progress percentage upto 2 decimal places
+        final double percentage = (progress / collectionCnt) * 100;
+        _deleteProgress.value = '$percentage%';
+      }
+      log("AddingNow ${collectionToFilesToAddMap[collectionID]!.length} files to $collectionID");
+      await CollectionsService.instance.addSilentlyToCollection(
+        collectionID,
+        collectionToFilesToAddMap[collectionID]!,
+      );
+    }
+    _deleteProgress.value = "";
+    if (filesToDelele.isNotEmpty) {
+      await deleteFilesFromRemoteOnly(context, filesToDelele);
+      Bus.instance.fire(UserDetailsChangedEvent());
+      Navigator.of(context)
+          .pop(DeduplicationResult(filesToDelele.length, totalSize));
+    }
+  }
+
   Widget _getGridView(DuplicateFiles duplicates, int itemIndex) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.fromLTRB(2, 4, 4, 12),
-          child: Text(
-            S.of(context).duplicateItemsGroup(
-                  duplicates.files.length,
-                  formatBytes(duplicates.size),
+          padding: const EdgeInsets.fromLTRB(2, 4, 2, 12),
+          child: GestureDetector(
+            onTap: () {
+              if (selectedGrids.contains(itemIndex)) {
+                selectedGrids.remove(itemIndex);
+              } else {
+                selectedGrids.add(itemIndex);
+              }
+              setState(() {});
+            },
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  S.of(context).duplicateItemsGroup(
+                        duplicates.files.length,
+                        formatBytes(duplicates.size),
+                      ),
+                  style: Theme.of(context).textTheme.titleSmall,
                 ),
-            style: Theme.of(context).textTheme.titleSmall,
+                !selectedGrids.contains(itemIndex)
+                    ? Icon(
+                        Icons.check_circle_outlined,
+                        color: getEnteColorScheme(context).strokeMuted,
+                        size: 24,
+                      )
+                    : const Icon(
+                        Icons.check_circle,
+                        size: 24,
+                      ),
+              ],
+            ),
           ),
         ),
         Padding(
@@ -445,12 +436,20 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
   Widget _buildFile(BuildContext context, EnteFile file, int index) {
     return GestureDetector(
       onTap: () {
-        if (_selectedFiles.contains(file)) {
-          _selectedFiles.remove(file);
-        } else {
-          _selectedFiles.add(file);
-        }
-        setState(() {});
+        final files = _duplicates[index].files;
+        routeToPage(
+          context,
+          DetailPage(
+            DetailPageConfiguration(
+              files,
+              null,
+              files.indexOf(file),
+              "deduplicate_",
+              mode: DetailPageMode.minimalistic,
+            ),
+          ),
+          forceCustomPageRoute: true,
+        );
       },
       onLongPress: () {
         HapticFeedback.lightImpact();
@@ -477,28 +476,18 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
             height: (MediaQuery.of(context).size.width -
                     (crossAxisSpacing * crossAxisCount)) /
                 crossAxisCount,
-            child: Stack(
-              children: [
-                Hero(
-                  tag: "deduplicate_" + file.tag,
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(4),
-                    child: ThumbnailWidget(
-                      file,
-                      diskLoadDeferDuration: thumbnailDiskLoadDeferDuration,
-                      serverLoadDeferDuration: thumbnailServerLoadDeferDuration,
-                      shouldShowLivePhotoOverlay: true,
-                      key: Key("deduplicate_" + file.tag),
-                    ),
-                  ),
+            child: Hero(
+              tag: "deduplicate_" + file.tag,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(4),
+                child: ThumbnailWidget(
+                  file,
+                  diskLoadDeferDuration: thumbnailDiskLoadDeferDuration,
+                  serverLoadDeferDuration: thumbnailServerLoadDeferDuration,
+                  shouldShowLivePhotoOverlay: true,
+                  key: Key("deduplicate_" + file.tag),
                 ),
-                _selectedFiles.contains(file)
-                    ? ClipRRect(
-                        borderRadius: BorderRadius.circular(4),
-                        child: selectedOverlay,
-                      )
-                    : const SizedBox.shrink(),
-              ],
+              ),
             ),
           ),
           const SizedBox(height: 6),
@@ -519,11 +508,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
   }
 }
 
-enum SortKey {
-  size,
-  count,
-  time,
-}
+enum SortKey { size, count }
 
 class DeduplicationResult {
   final int count;

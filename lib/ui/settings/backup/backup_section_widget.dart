@@ -1,3 +1,4 @@
+import "dart:async";
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -53,7 +54,7 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
         trailingIcon: Icons.chevron_right_outlined,
         trailingIconIsMuted: true,
         onTap: () async {
-          routeToPage(
+          await routeToPage(
             context,
             BackupFolderSelectionPage(
               buttonText: S.of(context).backup,
@@ -70,7 +71,7 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
         trailingIcon: Icons.chevron_right_outlined,
         trailingIconIsMuted: true,
         onTap: () async {
-          routeToPage(
+          await routeToPage(
             context,
             const BackupSettingsScreen(),
           );
@@ -133,10 +134,12 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
             }
 
             if (duplicates.isEmpty) {
-              showErrorDialog(
-                context,
-                S.of(context).noDuplicates,
-                S.of(context).youveNoDuplicateFilesThatCanBeCleared,
+              unawaited(
+                showErrorDialog(
+                  context,
+                  S.of(context).noDuplicates,
+                  S.of(context).youveNoDuplicateFilesThatCanBeCleared,
+                ),
               );
             } else {
               final DeduplicationResult? result =
@@ -167,16 +170,13 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
             S.of(context).youHaveSuccessfullyFreedUp(formatBytes(status.size)),
         firstButtonLabel: S.of(context).rateUs,
         firstButtonOnTap: () async {
-          UpdateService.instance.launchReviewUrl();
+          await UpdateService.instance.launchReviewUrl();
         },
         firstButtonType: ButtonType.primary,
         secondButtonLabel: S.of(context).ok,
         secondButtonOnTap: () async {
           if (Platform.isIOS) {
-            showToast(
-              context,
-              S.of(context).remindToEmptyDeviceTrash,
-            );
+            showToast(context, S.of(context).remindToEmptyDeviceTrash);
           }
         },
       );
@@ -195,10 +195,7 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
             isInAlert: true,
             onTap: () async {
               if (Platform.isIOS) {
-                showToast(
-                  context,
-                  S.of(context).remindToEmptyDeviceTrash,
-                );
+                showToast(context, S.of(context).remindToEmptyDeviceTrash);
               }
             },
           ),
