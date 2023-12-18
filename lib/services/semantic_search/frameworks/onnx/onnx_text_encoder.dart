@@ -31,8 +31,8 @@ class OnnxTextEncoder {
       ..setSessionGraphOptimizationLevel(GraphOptimizationLevel.ortEnableAll);
     try {
       _logger.info("Loading text model");
-      final bytes = File(args["textModelPath"]).readAsBytesSync();
-      final session = OrtSession.fromBuffer(bytes, sessionOptions);
+      final session =
+          OrtSession.fromFile(File(args["textModelPath"]), sessionOptions);
       _logger.info('text model loaded');
       return session.address;
     } catch (e, s) {
