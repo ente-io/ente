@@ -46,14 +46,15 @@ class SemanticSearchService {
   Future<void> init(SharedPreferences preferences) async {
     await EmbeddingStore.instance.init(preferences);
     _setupCachedEmbeddings();
-    Bus.instance.on<DiffSyncCompleteEvent>().listen((event) async {
+    Bus.instance.on<DiffSyncCompleteEvent>().listen((event) {
       // Diff sync is complete, we can now pull embeddings from remote
-      sync();
+      unawaited(sync());
     });
     if (Configuration.instance.hasConfiguredAccount()) {
-      EmbeddingStore.instance.pushEmbeddings();
+      unawaited(EmbeddingStore.instance.pushEmbeddings());
     }
 
+    // ignore: unawaited_futures
     _loadModels().then((v) async {
       _logger.info("Getting text embedding");
       await _getTextEmbedding("warm up text encoder");
@@ -95,7 +96,7 @@ class SemanticSearchService {
       return _ongoingRequest!;
     } else {
       // If there's an ongoing request, create or replace the nextCompleter.
-      _nextQuery?.completer.future
+      await _nextQuery?.completer.future
           .timeout(const Duration(seconds: 0)); // Cancels the previous future.
       _nextQuery = PendingQuery(query, Completer<List<EnteFile>>());
       return _nextQuery!.completer.future;
@@ -151,7 +152,7 @@ class SemanticSearchService {
     _logger.info(files.length.toString() + " to be embedded");
     // await _cacheThumbnails(files);
     _queue.addAll(files);
-    _pollQueue();
+    unawaited(_pollQueue());
   }
 
   Future<void> _cacheThumbnails(List<EnteFile> files) async {
