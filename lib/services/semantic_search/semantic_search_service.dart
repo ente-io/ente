@@ -20,7 +20,6 @@ import 'package:photos/services/semantic_search/frameworks/onnx/onnx.dart';
 import "package:photos/utils/file_util.dart";
 import "package:photos/utils/local_settings.dart";
 import "package:photos/utils/thumbnail_util.dart";
-import "package:shared_preferences/shared_preferences.dart";
 
 class SemanticSearchService {
   SemanticSearchService._privateConstructor();
@@ -33,6 +32,8 @@ class SemanticSearchService {
   static const kModelName = "clip";
   static const kEmbeddingLength = 512;
   static const kScoreThreshold = 0.23;
+  static const kImageEncoderEnabled = false;
+  static const kShouldPushEmbeddings = false;
 
   final _logger = Logger("SemanticSearchService");
   final _queue = Queue<EnteFile>();
@@ -40,19 +41,29 @@ class SemanticSearchService {
   final _mlFramework = ONNX();
   final _frameworkInitialization = Completer<void>();
 
+  bool _hasInitialized = false;
   bool _isComputingEmbeddings = false;
   bool _isSyncing = false;
   Future<List<EnteFile>>? _ongoingRequest;
   PendingQuery? _nextQuery;
 
-  Future<void> init(SharedPreferences preferences) async {
-    await EmbeddingStore.instance.init(preferences);
+  Future<void> init() async {
+    if (!LocalSettings.instance.hasEnabledMagicSearch()) {
+      return;
+    }
+    if (_hasInitialized) {
+      _logger.info("Initialized already");
+      return;
+    }
+    _hasInitialized = true;
+    await EmbeddingStore.instance.init();
     _setupCachedEmbeddings();
     Bus.instance.on<DiffSyncCompleteEvent>().listen((event) {
       // Diff sync is complete, we can now pull embeddings from remote
       unawaited(sync());
     });
-    if (Configuration.instance.hasConfiguredAccount()) {
+    if (Configuration.instance.hasConfiguredAccount() &&
+        kShouldPushEmbeddings) {
       unawaited(EmbeddingStore.instance.pushEmbeddings());
     }
 
@@ -73,7 +84,7 @@ class SemanticSearchService {
     }
     _isSyncing = true;
     await EmbeddingStore.instance.pullEmbeddings();
-    // await _backFill();
+    await _backFill();
     _isSyncing = false;
   }
 
@@ -144,7 +155,8 @@ class SemanticSearchService {
   }
 
   Future<void> _backFill() async {
-    if (!LocalSettings.instance.hasEnabledMagicSearch()) {
+    if (!LocalSettings.instance.hasEnabledMagicSearch() ||
+        !kImageEncoderEnabled) {
       return;
     }
     await _frameworkInitialization.future;
@@ -238,6 +250,9 @@ class SemanticSearchService {
   }
 
   Future<void> computeImageEmbedding(EnteFile file) async {
+    if (!kImageEncoderEnabled) {
+      return;
+    }
     if (!_frameworkInitialization.isCompleted) {
       return;
     }

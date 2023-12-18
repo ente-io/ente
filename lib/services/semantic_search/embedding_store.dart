@@ -30,8 +30,8 @@ class EmbeddingStore {
 
   Completer<void>? _syncStatus;
 
-  Future<void> init(SharedPreferences preferences) async {
-    _preferences = preferences;
+  Future<void> init() async {
+    _preferences = await SharedPreferences.getInstance();
   }
 
   Future<void> pullEmbeddings() async {
@@ -64,12 +64,10 @@ class EmbeddingStore {
 
   Future<void> storeEmbedding(EnteFile file, Embedding embedding) async {
     ObjectBox.instance.getEmbeddingBox().put(embedding);
-    _pushEmbedding(file, embedding);
+    unawaited(_pushEmbedding(file, embedding));
   }
 
   Future<void> _pushEmbedding(EnteFile file, Embedding embedding) async {
-    // TODO: Remove early return
-    return;
     final encryptionKey = getFileKey(file);
     final embeddingJSON = jsonEncode(embedding.embedding);
     final encryptedEmbedding = await CryptoUtil.encryptChaCha(
