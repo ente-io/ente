@@ -11,4 +11,4 @@ Note: This does not include photos uploaded by others.
 
 ### Clean up Uncategorized
 
-In the mobile app, you can click on the overflow menu
+In the mobile app, you can click on the overflow menu and click `Clean Uncategorized` option. All files that are also present in another album, that is owned by the user, will be removed from the Uncategorized section.
