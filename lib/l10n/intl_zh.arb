@@ -696,6 +696,21 @@
   "deleteEmptyAlbumsWithQuestionMark": "要删除空相册吗？",
   "deleteAlbumsDialogBody": "这将删除所有空相册。 当您想减少相册列表中的混乱时，这很有用。",
   "deleteProgress": "正在删除 {currentlyDeleting} /共 {totalCount}",
+  "genericProgress": "正在处理 {currentlyProcessing} / {totalCount}",
+  "@genericProgress": {
+    "description": "Generic progress text to display when processing multiple items",
+    "type": "text",
+    "placeholders": {
+      "currentlyProcessing": {
+        "example": "1",
+        "type": "int"
+      },
+      "totalCount": {
+        "example": "10",
+        "type": "int"
+      }
+    }
+  },
   "permanentlyDelete": "永久删除",
   "canOnlyCreateLinkForFilesOwnedByYou": "只能为您拥有的文件创建链接",
   "publicLinkCreated": "公共链接已创建",
@@ -823,7 +838,6 @@
   "clubByFileName": "按文件名排序",
   "count": "计数",
   "totalSize": "总大小",
-  "time": "时间",
   "longpressOnAnItemToViewInFullscreen": "长按一个项目来全屏查看",
   "decryptingVideo": "正在解密视频...",
   "authToViewYourMemories": "请验证以查看您的回忆",
@@ -1158,5 +1172,6 @@
   "signOutFromOtherDevices": "从其他设备退出登录",
   "signOutOtherBody": "如果你认为有人可能知道你的密码，你可以强制所有使用你账户的其他设备退出登录。",
   "signOutOtherDevices": "登出其他设备",
-  "doNotSignOut": "不要退登"
+  "doNotSignOut": "不要退登",
+  "cleanUncategorized": "清除未分类的"
 }
