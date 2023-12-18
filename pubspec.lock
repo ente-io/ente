@@ -1388,10 +1388,11 @@ packages:
   onnxruntime:
     dependency: "direct main"
     description:
-      name: onnxruntime
-      sha256: "56d0a16c24f4d1be4cf976cdc6321fb33d81515429e6e81c58d02e77d8631e0f"
-      url: "https://pub.dev"
-    source: hosted
+      path: "."
+      ref: HEAD
+      resolved-ref: "1318dce97f3aae5ec9bdf7491d5eff0ad6beb378"
+      url: "https://github.com/ente-io/onnxruntime.git"
+    source: git
     version: "1.1.0"
   open_mail_app:
     dependency: "direct main"

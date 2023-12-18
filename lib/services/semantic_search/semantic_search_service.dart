@@ -78,6 +78,12 @@ class SemanticSearchService {
     });
   }
 
+  Future<void> release() async {
+    if (_frameworkInitialization.isCompleted) {
+      await _mlFramework.release();
+    }
+  }
+
   Future<void> sync() async {
     if (_isSyncing) {
       return;

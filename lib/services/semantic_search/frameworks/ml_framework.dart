@@ -41,6 +41,9 @@ abstract class MLFramework {
     await _initTextModel();
   }
 
+  // Releases any resources held by the framework
+  Future<void> release() async {}
+
   /// Returns the cosine similarity between [imageEmbedding] and [textEmbedding]
   double computeScore(List<double> imageEmbedding, List<double> textEmbedding) {
     assert(

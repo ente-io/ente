@@ -1,5 +1,6 @@
 import "package:computer/computer.dart";
 import "package:logging/logging.dart";
+import "package:onnxruntime/onnxruntime.dart";
 import "package:photos/services/semantic_search/frameworks/ml_framework.dart";
 import "package:photos/services/semantic_search/frameworks/onnx/onnx_image_encoder.dart";
 import "package:photos/services/semantic_search/frameworks/onnx/onnx_text_encoder.dart";
@@ -106,5 +107,13 @@ class ONNX extends MLFramework {
       _logger.severe(e, s);
       rethrow;
     }
+  }
+
+  @override
+  Future<void> release() async {
+    final session = OrtSession.fromAddress(_textEncoderAddress);
+    session.release();
+    OrtEnv.instance.release();
+    _logger.info('Released');
   }
 }

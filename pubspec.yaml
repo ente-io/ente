@@ -117,7 +117,8 @@ dependencies:
   # open_file: ^3.2.1
   objectbox: ^2.3.1
   objectbox_flutter_libs: any
-  onnxruntime: ^1.1.0
+  onnxruntime:
+    git: "https://github.com/ente-io/onnxruntime.git"
   open_mail_app: ^0.4.5
   package_info_plus: ^4.1.0
   page_transition: ^2.0.2
