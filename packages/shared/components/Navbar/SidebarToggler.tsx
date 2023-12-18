@@ -6,7 +6,7 @@ interface Iprops {
 }
 export default function SidebarToggler({ openSidebar }: Iprops) {
     return (
-        <IconButton onClick={openSidebar}>
+        <IconButton onClick={openSidebar} sx={{ pl: 0 }}>
             <MenuIcon />
         </IconButton>
     );

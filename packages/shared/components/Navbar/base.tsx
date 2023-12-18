@@ -10,7 +10,9 @@ const NavbarBase = styled(FlexWrapper)<{ isMobile: boolean }>`
     background-color: ${({ theme }) => theme.colors.background.base};
     margin-bottom: 16px;
     padding: 0 24px;
-    padding: ${(props) => (props.isMobile ? '0 16px;' : '0 4px;')};
+    @media (max-width: 720px) {
+        padding: 0 4px;
+    }
 `;
 
 export default NavbarBase;
