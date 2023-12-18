@@ -3,6 +3,7 @@ import "dart:io";
 
 import "package:flutter/cupertino.dart";
 import "package:flutter/material.dart";
+import "package:logging/logging.dart";
 import "package:media_kit/media_kit.dart";
 import "package:media_kit_video/media_kit_video.dart";
 import "package:photos/core/constants.dart";
@@ -35,6 +36,7 @@ class VideoWidgetNew extends StatefulWidget {
 
 class _VideoWidgetNewState extends State<VideoWidgetNew>
     with WidgetsBindingObserver {
+  final Logger _logger = Logger("VideoWidgetNew");
   static const verticalMargin = 72.0;
   late final player = Player();
   VideoController? controller;
@@ -44,6 +46,9 @@ class _VideoWidgetNewState extends State<VideoWidgetNew>
 
   @override
   void initState() {
+    _logger.info(
+      'initState for ${widget.file.generatedID} with tag ${widget.file.tag} and name ${widget.file.displayName}',
+    );
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     if (widget.file.isRemoteFile) {
@@ -160,7 +165,7 @@ class _VideoWidgetNewState extends State<VideoWidgetNew>
     getFileFromServer(
       widget.file,
       progressCallback: (count, total) {
-        if(!mounted) {
+        if (!mounted) {
           return;
         }
         _progressNotifier.value = count / (widget.file.fileSize ?? total);
