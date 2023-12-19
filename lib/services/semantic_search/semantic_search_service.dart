@@ -56,6 +56,7 @@ class SemanticSearchService {
       return;
     }
     _hasInitialized = true;
+    await ObjectBox.instance.init();
     await EmbeddingStore.instance.init();
     _setupCachedEmbeddings();
     Bus.instance.on<DiffSyncCompleteEvent>().listen((event) {

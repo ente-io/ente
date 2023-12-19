@@ -18,7 +18,6 @@ import 'package:photos/core/constants.dart';
 import 'package:photos/core/error-reporting/super_logging.dart';
 import 'package:photos/core/errors.dart';
 import 'package:photos/core/network/network.dart';
-import "package:photos/db/object_box.dart";
 import 'package:photos/db/upload_locks_db.dart';
 import 'package:photos/ente_theme_data.dart';
 import "package:photos/l10n/l10n.dart";
@@ -164,7 +163,6 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
   // Start workers asynchronously. No need to wait for them to start
   Computer.shared().turnOn(workersCount: 4).ignore();
   CryptoUtil.init();
-  await ObjectBox.instance.init();
   await NetworkClient.instance.init();
   await Configuration.instance.init();
   await UserService.instance.init();
