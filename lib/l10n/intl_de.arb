@@ -23,7 +23,7 @@
   "sendEmail": "E-Mail senden",
   "deleteRequestSLAText": "Deine Anfrage wird innerhalb von 72 Stunden bearbeitet.",
   "deleteEmailRequest": "Bitte sende eine E-Mail an <warning>account-deletion@ente.io</warning> von Deiner bei uns hinterlegten E-Mail-Adresse.",
-  "entePhotosPerm": "ente <i>benötigt die Erlaubnis</i> Ihre Fotos zu bewahren",
+  "entePhotosPerm": "ente <i>benötigt die Erlaubnis</i>, deine Fotos aufzubewahren",
   "ok": "Ok",
   "createAccount": "Konto erstellen",
   "createNewAccount": "Neues Konto erstellen",
@@ -112,7 +112,7 @@
   "recoveryKey": "Wiederherstellungs-Schlüssel",
   "recoveryKeyOnForgotPassword": "Falls du dein Passwort vergisst, kannst du deine Daten allein mit diesem Schlüssel wiederherstellen.",
   "recoveryKeySaveDescription": "Wir speichern diesen Schlüssel nicht. Bitte speichere diese Schlüssel aus 24 Wörtern an einem sicheren Ort.",
-  "doThisLater": "Später machen",
+  "doThisLater": "Später erledigen",
   "saveKey": "Schlüssel speichern",
   "recoveryKeyCopiedToClipboard": "Wiederherstellungs-Schlüssel in die Zwischenablage kopiert",
   "recoverAccount": "Konto wiederherstellen",
@@ -696,6 +696,21 @@
   "deleteEmptyAlbumsWithQuestionMark": "Leere Alben löschen?",
   "deleteAlbumsDialogBody": "Damit werden alle leeren Alben gelöscht. Dies ist nützlich, wenn du das Durcheinander in deiner Albenliste verringern möchtest.",
   "deleteProgress": "Lösche {currentlyDeleting} / {totalCount}",
+  "genericProgress": "Verarbeite {currentlyProcessing} / {totalCount}",
+  "@genericProgress": {
+    "description": "Generic progress text to display when processing multiple items",
+    "type": "text",
+    "placeholders": {
+      "currentlyProcessing": {
+        "example": "1",
+        "type": "int"
+      },
+      "totalCount": {
+        "example": "10",
+        "type": "int"
+      }
+    }
+  },
   "permanentlyDelete": "Dauerhaft löschen",
   "canOnlyCreateLinkForFilesOwnedByYou": "Sie können nur Links für Dateien erstellen, die Ihnen gehören",
   "publicLinkCreated": "Öffentlicher Link erstellt",
@@ -823,7 +838,6 @@
   "clubByFileName": "Nach Dateiname gruppieren",
   "count": "Anzahl",
   "totalSize": "Gesamtgröße",
-  "time": "Zeit",
   "longpressOnAnItemToViewInFullscreen": "Drücken Sie lange auf ein Element, um es im Vollbildmodus anzuzeigen",
   "decryptingVideo": "Entschlüssele Video …",
   "authToViewYourMemories": "Bitte authentifizieren, um deine Erinnerungsstücke anzusehen",
@@ -1159,9 +1173,10 @@
   "signOutOtherBody": "Falls du denkst, dass jemand dein Passwort kennen könnte, kannst du alle anderen Geräte von deinem Account abmelden.",
   "signOutOtherDevices": "Andere Geräte abmelden",
   "doNotSignOut": "Melde dich nicht ab",
-  "editLocation": "Edit location",
-  "selectALocation": "Select a location",
-  "selectALocationFirst": "Select a location first",
-  "changeLocationOfSelectedItems": "Change location of selected items?",
-  "editsToLocationWillOnlyBeSeenWithinEnte": "Edits to location will only be seen within Ente"
+  "editLocation": "Standort bearbeiten",
+  "selectALocation": "Standort auswählen",
+  "selectALocationFirst": "Wähle zuerst einen Standort",
+  "changeLocationOfSelectedItems": "Standort der gewählten Elemente ändern?",
+  "editsToLocationWillOnlyBeSeenWithinEnte": "Änderungen des Standorts werden nur in ente sichtbar sein",
+  "cleanUncategorized": "Unkategorisiert leeren"
 }
