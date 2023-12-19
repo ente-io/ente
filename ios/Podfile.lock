@@ -79,6 +79,8 @@ PODS:
   - path_provider_foundation (0.0.1):
     - Flutter
     - FlutterMacOS
+  - privacy_screen (0.0.1):
+    - Flutter
   - qr_code_scanner (0.2.0):
     - Flutter
     - MTBBarcodeScanner
@@ -127,6 +129,7 @@ DEPENDENCIES:
   - open_filex (from `.symlinks/plugins/open_filex/ios`)
   - package_info_plus (from `.symlinks/plugins/package_info_plus/ios`)
   - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/darwin`)
+  - privacy_screen (from `.symlinks/plugins/privacy_screen/ios`)
   - qr_code_scanner (from `.symlinks/plugins/qr_code_scanner/ios`)
   - sentry_flutter (from `.symlinks/plugins/sentry_flutter/ios`)
   - share_plus (from `.symlinks/plugins/share_plus/ios`)
@@ -186,6 +189,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/package_info_plus/ios"
   path_provider_foundation:
     :path: ".symlinks/plugins/path_provider_foundation/darwin"
+  privacy_screen:
+    :path: ".symlinks/plugins/privacy_screen/ios"
   qr_code_scanner:
     :path: ".symlinks/plugins/qr_code_scanner/ios"
   sentry_flutter:
@@ -225,6 +230,7 @@ SPEC CHECKSUMS:
   OrderedSet: aaeb196f7fef5a9edf55d89760da9176ad40b93c
   package_info_plus: fd030dabf36271f146f1f3beacd48f564b0f17f7
   path_provider_foundation: 29f094ae23ebbca9d3d0cec13889cd9060c0e943
+  privacy_screen: 1a131c052ceb3c3659934b003b0d397c2381a24e
   qr_code_scanner: bb67d64904c3b9658ada8c402e8b4d406d5d796e
   Reachability: 33e18b67625424e47b6cde6d202dce689ad7af96
   SDWebImage: 750adf017a315a280c60fde706ab1e552a3ae4e9
