@@ -336,6 +336,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "centerPoint": MessageLookupByLibrary.simpleMessage("Punto central"),
         "changeEmail":
             MessageLookupByLibrary.simpleMessage("Cambiar correo electrónico"),
+        "changeLocationOfSelectedItems": MessageLookupByLibrary.simpleMessage(
+            "Change location of selected items?"),
         "changePassword":
             MessageLookupByLibrary.simpleMessage("Cambiar contraseña"),
         "changePasswordTitle":
@@ -527,10 +529,14 @@ class MessageLookup extends MessageLookupByLibrary {
         "dropSupportEmail": m15,
         "duplicateFileCountWithStorageSaved": m16,
         "edit": MessageLookupByLibrary.simpleMessage("Editar"),
+        "editLocation": MessageLookupByLibrary.simpleMessage("Edit location"),
         "editLocationTagTitle":
             MessageLookupByLibrary.simpleMessage("Editar la ubicación"),
         "editsSaved":
             MessageLookupByLibrary.simpleMessage("Ediciones guardadas"),
+        "editsToLocationWillOnlyBeSeenWithinEnte":
+            MessageLookupByLibrary.simpleMessage(
+                "Edits to location will only be seen within Ente"),
         "eligible": MessageLookupByLibrary.simpleMessage("elegible"),
         "email": MessageLookupByLibrary.simpleMessage("Correo electrónico"),
         "emailChangedTo": m18,
@@ -1032,6 +1038,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "searchHintText": MessageLookupByLibrary.simpleMessage(
             "Álbunes, meses, días, años, ..."),
         "security": MessageLookupByLibrary.simpleMessage("Seguridad"),
+        "selectALocation":
+            MessageLookupByLibrary.simpleMessage("Select a location"),
+        "selectALocationFirst":
+            MessageLookupByLibrary.simpleMessage("Select a location first"),
         "selectAlbum":
             MessageLookupByLibrary.simpleMessage("Seleccionar álbum"),
         "selectAll": MessageLookupByLibrary.simpleMessage("Seleccionar todos"),

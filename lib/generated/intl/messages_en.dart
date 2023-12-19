@@ -382,6 +382,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Cannot delete shared files"),
         "centerPoint": MessageLookupByLibrary.simpleMessage("Center point"),
         "changeEmail": MessageLookupByLibrary.simpleMessage("Change email"),
+        "changeLocationOfSelectedItems": MessageLookupByLibrary.simpleMessage(
+            "Change location of selected items?"),
         "changePassword":
             MessageLookupByLibrary.simpleMessage("Change password"),
         "changePasswordTitle":
@@ -585,9 +587,13 @@ class MessageLookup extends MessageLookupByLibrary {
         "duplicateFileCountWithStorageSaved": m16,
         "duplicateItemsGroup": m17,
         "edit": MessageLookupByLibrary.simpleMessage("Edit"),
+        "editLocation": MessageLookupByLibrary.simpleMessage("Edit location"),
         "editLocationTagTitle":
             MessageLookupByLibrary.simpleMessage("Edit location"),
         "editsSaved": MessageLookupByLibrary.simpleMessage("Edits saved"),
+        "editsToLocationWillOnlyBeSeenWithinEnte":
+            MessageLookupByLibrary.simpleMessage(
+                "Edits to location will only be seen within Ente"),
         "eligible": MessageLookupByLibrary.simpleMessage("eligible"),
         "email": MessageLookupByLibrary.simpleMessage("Email"),
         "emailChangedTo": m18,
@@ -1149,6 +1155,10 @@ class MessageLookup extends MessageLookupByLibrary {
             "Invite people, and you\'ll see all photos shared by them here"),
         "searchResultCount": m43,
         "security": MessageLookupByLibrary.simpleMessage("Security"),
+        "selectALocation":
+            MessageLookupByLibrary.simpleMessage("Select a location"),
+        "selectALocationFirst":
+            MessageLookupByLibrary.simpleMessage("Select a location first"),
         "selectAlbum": MessageLookupByLibrary.simpleMessage("Select album"),
         "selectAll": MessageLookupByLibrary.simpleMessage("Select all"),
         "selectFoldersForBackup":

@@ -24,15 +24,25 @@ class MessageLookup extends MessageLookupByLibrary {
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
         "addToHiddenAlbum":
             MessageLookupByLibrary.simpleMessage("Add to hidden album"),
+        "changeLocationOfSelectedItems": MessageLookupByLibrary.simpleMessage(
+            "Change location of selected items?"),
         "contacts": MessageLookupByLibrary.simpleMessage("Contacts"),
         "deleteConfirmDialogBody": MessageLookupByLibrary.simpleMessage(
             "This account is linked to other ente apps, if you use any.\\n\\nYour uploaded data, across all ente apps, will be scheduled for deletion, and your account will be permanently deleted."),
+        "editLocation": MessageLookupByLibrary.simpleMessage("Edit location"),
+        "editsToLocationWillOnlyBeSeenWithinEnte":
+            MessageLookupByLibrary.simpleMessage(
+                "Edits to location will only be seen within Ente"),
         "fileTypes": MessageLookupByLibrary.simpleMessage("File types"),
         "modifyYourQueryOrTrySearchingFor":
             MessageLookupByLibrary.simpleMessage(
                 "Modify your query, or try searching for"),
         "moveToHiddenAlbum":
             MessageLookupByLibrary.simpleMessage("Move to hidden album"),
+        "selectALocation":
+            MessageLookupByLibrary.simpleMessage("Select a location"),
+        "selectALocationFirst":
+            MessageLookupByLibrary.simpleMessage("Select a location first"),
         "yourMap": MessageLookupByLibrary.simpleMessage("Your map")
       };
 }

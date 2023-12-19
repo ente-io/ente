@@ -391,6 +391,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Kan gedeelde bestanden niet verwijderen"),
         "centerPoint": MessageLookupByLibrary.simpleMessage("Middelpunt"),
         "changeEmail": MessageLookupByLibrary.simpleMessage("E-mail wijzigen"),
+        "changeLocationOfSelectedItems": MessageLookupByLibrary.simpleMessage(
+            "Change location of selected items?"),
         "changePassword":
             MessageLookupByLibrary.simpleMessage("Wachtwoord wijzigen"),
         "changePasswordTitle":
@@ -597,10 +599,14 @@ class MessageLookup extends MessageLookupByLibrary {
         "duplicateFileCountWithStorageSaved": m16,
         "duplicateItemsGroup": m17,
         "edit": MessageLookupByLibrary.simpleMessage("Bewerken"),
+        "editLocation": MessageLookupByLibrary.simpleMessage("Edit location"),
         "editLocationTagTitle":
             MessageLookupByLibrary.simpleMessage("Locatie bewerken"),
         "editsSaved":
             MessageLookupByLibrary.simpleMessage("Bewerkingen opgeslagen"),
+        "editsToLocationWillOnlyBeSeenWithinEnte":
+            MessageLookupByLibrary.simpleMessage(
+                "Edits to location will only be seen within Ente"),
         "eligible": MessageLookupByLibrary.simpleMessage("gerechtigd"),
         "email": MessageLookupByLibrary.simpleMessage("E-mail"),
         "emailChangedTo": m18,
@@ -1190,6 +1196,10 @@ class MessageLookup extends MessageLookupByLibrary {
             "Nodig mensen uit, en je ziet alle foto\'s die door hen worden gedeeld hier"),
         "searchResultCount": m43,
         "security": MessageLookupByLibrary.simpleMessage("Beveiliging"),
+        "selectALocation":
+            MessageLookupByLibrary.simpleMessage("Select a location"),
+        "selectALocationFirst":
+            MessageLookupByLibrary.simpleMessage("Select a location first"),
         "selectAlbum": MessageLookupByLibrary.simpleMessage("Album selecteren"),
         "selectAll": MessageLookupByLibrary.simpleMessage("Selecteer alles"),
         "selectFoldersForBackup": MessageLookupByLibrary.simpleMessage(
