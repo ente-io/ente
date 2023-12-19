@@ -83,13 +83,19 @@ class IconUtils {
           .loadString('assets/simple-icons/_data/simple-icons.json');
       final simpleIcons = json.decode(simpleIconData);
       for (final icon in simpleIcons["icons"]) {
-        _simpleIcons[icon["title"].toString().toLowerCase()] = icon["hex"];
+        _simpleIcons[icon["title"]
+            .toString()
+            .replaceAll(' ', '')
+            .toLowerCase()] = icon["hex"];
       }
       final customIconData = await rootBundle
           .loadString('assets/custom-icons/_data/custom-icons.json');
       final customIcons = json.decode(customIconData);
       for (final icon in customIcons["icons"]) {
-        _customIcons[icon["title"].toString().toLowerCase()] = CustomIconData(
+        _customIcons[icon["title"]
+            .toString()
+            .replaceAll(' ', '')
+            .toLowerCase()] = CustomIconData(
           icon["slug"],
           icon["hex"],
         );
@@ -108,7 +114,7 @@ class IconUtils {
   }
 
   String _getProviderTitle(String provider) {
-    return provider.split(RegExp(r'[.(]'))[0].trim().toLowerCase();
+    return provider.split(RegExp(r'[.(]'))[0].replaceAll(' ', '').toLowerCase();
   }
 }
 

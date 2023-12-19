@@ -1,5 +1,6 @@
 {
   "account": "Konto",
+  "unlock": "Entsperren",
   "recoveryKey": "Wiederherstellungsschlüssel",
   "counterAppBarTitle": "Zähler",
   "@counterAppBarTitle": {
@@ -60,6 +61,7 @@
   "contactSupport": "Support kontaktieren",
   "rateUsOnStore": "Bewerte uns auf {storeName}",
   "blog": "Blog",
+  "merchandise": "Merchandise",
   "verifyPassword": "Passwort überprüfen",
   "pleaseWait": "Bitte warten...",
   "generatingEncryptionKeysTitle": "Generierung von Verschlüsselungsschlüsseln...",
@@ -75,12 +77,14 @@
   "changePassword": "Passwort ändern",
   "data": "Datei",
   "importCodes": "Codes importieren",
+  "importTypePlainText": "Klartext",
   "importTypeEnteEncrypted": "ente verschlüsselt exportieren",
   "passwordForDecryptingExport": "Passwort um den Export zu entschlüsseln",
   "passwordEmptyError": "Passwort kann nicht leer sein",
   "importFromApp": "Importiere Codes von {appName}",
   "importGoogleAuthGuide": "Exportiere deine Accounts von Google Authenticator zu einem QR-Code, durch die \"Konten übertragen\" Option. Scanne den QR-Code danach mit einem anderen Gerät.\n\nTipp: Du kannst die Kamera eines Laptops verwenden, um ein Foto den dem QR-Code zu erstellen.",
   "importSelectJsonFile": "Wähle eine JSON-Datei",
+  "importSelectAppExport": "{appName} Exportdatei auswählen",
   "importEnteEncGuide": "Wähle die von ente exportierte, verschlüsselte JSON-Datei",
   "exportCodes": "Codes exportieren",
   "importLabel": "Importieren",
@@ -92,6 +96,7 @@
   "authToViewYourRecoveryKey": "Bitte authentifizieren um ihren Wiederherstellungscode anzuzeigen",
   "authToChangeYourEmail": "Bitte authentifizieren um ihre Emailadresse zu ändern",
   "authToChangeYourPassword": "Bitte authentifizieren um ihr Passwort zu ändern",
+  "authToViewSecrets": "Bitte authentifizieren Sie sich, um ihren Wiederherstellungscode anzuzeigen",
   "ok": "Ok",
   "cancel": "Abbrechen",
   "yes": "Ja",
@@ -177,6 +182,7 @@
   "enterDetailsManually": "Details manuell hinzufügen",
   "edit": "Editieren",
   "copiedToClipboard": "In die Zwischenablage kopieren",
+  "copiedNextToClipboard": "Nächster Code wurde in die Zwischenablage kopiert",
   "error": "Fehler",
   "recoveryKeyCopiedToClipboard": "Wiederherstellungsschlüssel in die Zwischenablage kopiert",
   "recoveryKeyOnForgotPassword": "Sollten sie ihr Passwort vergessen, dann ist dieser Schlüssel die einzige Möglichkeit ihre Daten wiederherzustellen.",
@@ -309,7 +315,68 @@
   "incorrectRecoveryKey": "Falscher Wiederherstellungs-Schlüssel",
   "theRecoveryKeyYouEnteredIsIncorrect": "Der eingegebene Wiederherstellungs-Schlüssel ist ungültig",
   "enterPassword": "Passwort eingeben",
+  "selectExportFormat": "Exportformat auswählen",
+  "encrypted": "Verschlüsselt",
+  "plainText": "Klartext",
+  "passwordToEncryptExport": "Passwort zum Verschlüssen des Exports",
+  "export": "Export",
+  "useOffline": "Ohne Backup verwenden",
+  "signInToBackup": "Melde dich an, um deine Codes zu sichern",
+  "singIn": "Anmelden",
+  "showLargeIcons": "Große Symbole anzeigen",
+  "shouldHideCode": "Codes ausblenden",
+  "doubleTapToViewHiddenCode": "Sie können auf einen Eintrag doppelt tippen, um den Code anzuzeigen",
+  "minimizeAppOnCopy": "Beim Kopieren App minimieren",
   "editCodeAuthMessage": "Authentifizieren, um Code zu bearbeiten",
   "deleteCodeAuthMessage": "Authentifizieren, um Code zu löschen",
-  "showQRAuthMessage": "Authentifizieren, um QR-Code anzuzeigen"
+  "showQRAuthMessage": "Authentifizieren, um QR-Code anzuzeigen",
+  "confirmAccountDeleteTitle": "Kontolöschung bestätigen",
+  "androidBiometricHint": "Identität bestätigen",
+  "@androidBiometricHint": {
+    "description": "Hint message advising the user how to authenticate with biometrics. It is used on Android side. Maximum 60 characters."
+  },
+  "androidBiometricNotRecognized": "Nicht erkannt. Versuchen Sie es erneut.",
+  "@androidBiometricNotRecognized": {
+    "description": "Message to let the user know that authentication was failed. It is used on Android side. Maximum 60 characters."
+  },
+  "androidBiometricSuccess": "Erfolgreich",
+  "@androidBiometricSuccess": {
+    "description": "Message to let the user know that authentication was successful. It is used on Android side. Maximum 60 characters."
+  },
+  "androidCancelButton": "Abbrechen",
+  "@androidCancelButton": {
+    "description": "Message showed on a button that the user can click to leave the current dialog. It is used on Android side. Maximum 30 characters."
+  },
+  "androidSignInTitle": "Authentifizierung erforderlich",
+  "@androidSignInTitle": {
+    "description": "Message showed as a title in a dialog which indicates the user that they need to scan biometric to continue. It is used on Android side. Maximum 60 characters."
+  },
+  "androidBiometricRequiredTitle": "Biometrie erforderlich",
+  "@androidBiometricRequiredTitle": {
+    "description": "Message showed as a title in a dialog which indicates the user has not set up biometric authentication on their device. It is used on Android side. Maximum 60 characters."
+  },
+  "androidDeviceCredentialsRequiredTitle": "Geräteanmeldeinformationen erforderlich",
+  "@androidDeviceCredentialsRequiredTitle": {
+    "description": "Message showed as a title in a dialog which indicates the user has not set up credentials authentication on their device. It is used on Android side. Maximum 60 characters."
+  },
+  "androidDeviceCredentialsSetupDescription": "Geräteanmeldeinformationen erforderlich",
+  "@androidDeviceCredentialsSetupDescription": {
+    "description": "Message advising the user to go to the settings and configure device credentials on their device. It shows in a dialog on Android side."
+  },
+  "goToSettings": "Zu den Einstellungen",
+  "@goToSettings": {
+    "description": "Message showed on a button that the user can click to go to settings pages from the current dialog. It is used on both Android and iOS side. Maximum 30 characters."
+  },
+  "iOSOkButton": "OK",
+  "@iOSOkButton": {
+    "description": "Message showed on a button that the user can click to leave the current dialog. It is used on iOS side. Maximum 30 characters."
+  },
+  "noInternetConnection": "Keine Internetverbindung",
+  "pleaseCheckYourInternetConnectionAndTryAgain": "Bitte überprüfe deine Internetverbindung und versuche es erneut.",
+  "signOutFromOtherDevices": "Von anderen Geräten abmelden",
+  "signOutOtherBody": "Falls du denkst, dass jemand dein Passwort kennen könnte, kannst du alle anderen Geräte von deinem Account abmelden.",
+  "signOutOtherDevices": "Andere Geräte abmelden",
+  "doNotSignOut": "Nicht abmelden",
+  "hearUsWhereTitle": "Wie hast du von Ente erfahren? (optional)",
+  "hearUsExplanation": "Wir tracken keine App-Installationen. Es würde uns jedoch helfen, wenn du uns mitteilst, wie du von uns erfahren hast!"
 }
