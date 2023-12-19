@@ -29,6 +29,7 @@ enum ResultType {
   fileCaption,
   event,
   shared,
+  magic,
 }
 
 enum SectionType {

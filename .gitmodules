@@ -2,3 +2,6 @@
 	path = thirdparty/flutter
 	url = https://github.com/flutter/flutter.git
 	branch = stable
+[submodule "plugins/clip_ggml"]
+	path = plugins/clip_ggml
+	url = https://github.com/ente-io/clip-ggml.git

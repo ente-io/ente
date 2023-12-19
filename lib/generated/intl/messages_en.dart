@@ -403,6 +403,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "cleanUncategorized":
             MessageLookupByLibrary.simpleMessage("Clean Uncategorized"),
         "clearCaches": MessageLookupByLibrary.simpleMessage("Clear caches"),
+        "clearIndexes": MessageLookupByLibrary.simpleMessage("Clear indexes"),
         "click": MessageLookupByLibrary.simpleMessage("• Click"),
         "clickOnTheOverflowMenu": MessageLookupByLibrary.simpleMessage(
             "• Click on the overflow menu"),
@@ -758,6 +759,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "The recovery key you entered is incorrect"),
         "incorrectRecoveryKeyTitle":
             MessageLookupByLibrary.simpleMessage("Incorrect recovery key"),
+        "indexedItems": MessageLookupByLibrary.simpleMessage("Indexed items"),
         "insecureDevice":
             MessageLookupByLibrary.simpleMessage("Insecure device"),
         "installManually":
@@ -850,6 +852,11 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage(
                 "Long-press on an item to view in full-screen"),
         "lostDevice": MessageLookupByLibrary.simpleMessage("Lost device?"),
+        "machineLearning":
+            MessageLookupByLibrary.simpleMessage("Machine learning"),
+        "magicSearch": MessageLookupByLibrary.simpleMessage("Magic search"),
+        "magicSearchDescription": MessageLookupByLibrary.simpleMessage(
+            "Please use our Desktop app to index the pending items in your library."),
         "manage": MessageLookupByLibrary.simpleMessage("Manage"),
         "manageDeviceStorage":
             MessageLookupByLibrary.simpleMessage("Manage device storage"),
@@ -949,6 +956,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "paymentFailed": MessageLookupByLibrary.simpleMessage("Payment failed"),
         "paymentFailedTalkToProvider": m34,
         "paymentFailedWithReason": m35,
+        "pendingItems": MessageLookupByLibrary.simpleMessage("Pending items"),
         "pendingSync": MessageLookupByLibrary.simpleMessage("Pending sync"),
         "peopleUsingYourCode":
             MessageLookupByLibrary.simpleMessage("People using your code"),
@@ -1275,6 +1283,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "sortOldestFirst": MessageLookupByLibrary.simpleMessage("Oldest first"),
         "sparkleSuccess": MessageLookupByLibrary.simpleMessage("✨ Success"),
         "startBackup": MessageLookupByLibrary.simpleMessage("Start backup"),
+        "status": MessageLookupByLibrary.simpleMessage("Status"),
         "storage": MessageLookupByLibrary.simpleMessage("Storage"),
         "storageBreakupFamily": MessageLookupByLibrary.simpleMessage("Family"),
         "storageBreakupYou": MessageLookupByLibrary.simpleMessage("You"),

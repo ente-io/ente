@@ -182,21 +182,7 @@ class _DetailPageState extends State<DetailPage> {
           onTap: () {
             file.fileType != FileType.video ? _toggleFullScreen() : null;
           },
-          child: kDebugMode
-              ? Stack(
-                  children: [
-                    fileContent,
-                    Positioned(
-                      top: 80,
-                      right: 80,
-                      child: Text(
-                        file.generatedID?.toString() ?? 'null',
-                        style: const TextStyle(color: Colors.white),
-                      ),
-                    ),
-                  ],
-                )
-              : fileContent,
+          child: fileContent,
         );
       },
       onPageChanged: (index) {

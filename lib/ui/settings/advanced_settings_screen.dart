@@ -12,6 +12,7 @@ import 'package:photos/ui/components/menu_item_widget/menu_item_widget.dart';
 import 'package:photos/ui/components/title_bar_title_widget.dart';
 import 'package:photos/ui/components/title_bar_widget.dart';
 import "package:photos/ui/components/toggle_switch_widget.dart";
+import "package:photos/ui/settings/machine_learning_settings_page.dart";
 import 'package:photos/ui/tools/debug/app_storage_viewer.dart';
 import 'package:photos/ui/viewer/gallery/photo_grid_size_picker_page.dart';
 import 'package:photos/utils/local_settings.dart';
@@ -67,6 +68,31 @@ class _AdvancedSettingsScreenState extends State<AdvancedSettingsScreen> {
                       children: [
                         Column(
                           children: [
+                            Column(
+                              children: [
+                                MenuItemWidget(
+                                  captionedTextWidget: CaptionedTextWidget(
+                                    title: S.of(context).machineLearning,
+                                  ),
+                                  menuItemColor: colorScheme.fillFaint,
+                                  trailingWidget: Icon(
+                                    Icons.chevron_right_outlined,
+                                    color: colorScheme.strokeBase,
+                                  ),
+                                  singleBorderRadius: 8,
+                                  alignCaptionedTextToLeft: true,
+                                  onTap: () async {
+                                    routeToPage(
+                                      context,
+                                      const MachineLearningSettingsPage(),
+                                    );
+                                  },
+                                ),
+                                const SizedBox(
+                                  height: 24,
+                                ),
+                              ],
+                            ),
                             GestureDetector(
                               onTap: () {
                                 routeToPage(
@@ -99,6 +125,24 @@ class _AdvancedSettingsScreenState extends State<AdvancedSettingsScreen> {
                             ),
                             MenuItemWidget(
                               captionedTextWidget: CaptionedTextWidget(
+                                title: S.of(context).manageDeviceStorage,
+                              ),
+                              menuItemColor: colorScheme.fillFaint,
+                              trailingWidget: Icon(
+                                Icons.chevron_right_outlined,
+                                color: colorScheme.strokeBase,
+                              ),
+                              singleBorderRadius: 8,
+                              alignCaptionedTextToLeft: true,
+                              onTap: () async {
+                                routeToPage(context, const AppStorageViewer());
+                              },
+                            ),
+                            const SizedBox(
+                              height: 24,
+                            ),
+                            MenuItemWidget(
+                              captionedTextWidget: CaptionedTextWidget(
                                 title: S.of(context).showMemories,
                               ),
                               menuItemColor: colorScheme.fillFaint,
@@ -115,24 +159,6 @@ class _AdvancedSettingsScreenState extends State<AdvancedSettingsScreen> {
                                   );
                                 },
                               ),
-                            ),
-                            const SizedBox(
-                              height: 24,
-                            ),
-                            MenuItemWidget(
-                              captionedTextWidget: CaptionedTextWidget(
-                                title: S.of(context).manageDeviceStorage,
-                              ),
-                              menuItemColor: colorScheme.fillFaint,
-                              trailingWidget: Icon(
-                                Icons.chevron_right_outlined,
-                                color: colorScheme.strokeBase,
-                              ),
-                              singleBorderRadius: 8,
-                              alignCaptionedTextToLeft: true,
-                              onTap: () async {
-                                routeToPage(context, const AppStorageViewer());
-                              },
                             ),
                             const SizedBox(
                               height: 24,

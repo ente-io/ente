@@ -2846,6 +2846,76 @@ class S {
     );
   }
 
+  /// `Machine learning`
+  String get machineLearning {
+    return Intl.message(
+      'Machine learning',
+      name: 'machineLearning',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Magic search`
+  String get magicSearch {
+    return Intl.message(
+      'Magic search',
+      name: 'magicSearch',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please use our Desktop app to index the pending items in your library.`
+  String get magicSearchDescription {
+    return Intl.message(
+      'Please use our Desktop app to index the pending items in your library.',
+      name: 'magicSearchDescription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Status`
+  String get status {
+    return Intl.message(
+      'Status',
+      name: 'status',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Indexed items`
+  String get indexedItems {
+    return Intl.message(
+      'Indexed items',
+      name: 'indexedItems',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Pending items`
+  String get pendingItems {
+    return Intl.message(
+      'Pending items',
+      name: 'pendingItems',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Clear indexes`
+  String get clearIndexes {
+    return Intl.message(
+      'Clear indexes',
+      name: 'clearIndexes',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Select folders for backup`
   String get selectFoldersForBackup {
     return Intl.message(

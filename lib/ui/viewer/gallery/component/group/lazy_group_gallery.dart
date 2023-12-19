@@ -52,7 +52,7 @@ class LazyGroupGallery extends StatefulWidget {
 class _LazyGroupGalleryState extends State<LazyGroupGallery> {
   static const numberOfGroupsToRenderBeforeAndAfter = 8;
   late final ValueNotifier<bool> _showSelectAllButtonNotifier;
-  late final ValueNotifier<bool> _areAllFromGroupSelectedNotifer;
+  late final ValueNotifier<bool> _areAllFromGroupSelectedNotifier;
 
   late Logger _logger;
 
@@ -65,7 +65,7 @@ class _LazyGroupGalleryState extends State<LazyGroupGallery> {
   @override
   void initState() {
     super.initState();
-    _areAllFromGroupSelectedNotifer = ValueNotifier(_areAllFromGroupSelected());
+    _areAllFromGroupSelectedNotifier = ValueNotifier(_areAllFromGroupSelected());
 
     widget.selectedFiles?.addListener(_selectedFilesListener);
     _showSelectAllButtonNotifier = ValueNotifier(widget.showSelectAllByDefault);
@@ -76,6 +76,7 @@ class _LazyGroupGalleryState extends State<LazyGroupGallery> {
     _logger = Logger("LazyLoading_${widget.logTag}");
     _shouldRender = true;
     _files = widget.files;
+    _areAllFromGroupSelectedNotifier.value = _areAllFromGroupSelected();
     _reloadEventSubscription = widget.reloadEvent?.listen((e) => _onReload(e));
 
     _currentIndexSubscription =
@@ -98,7 +99,6 @@ class _LazyGroupGalleryState extends State<LazyGroupGallery> {
   bool _areAllFromGroupSelected() {
     if (widget.selectedFiles != null &&
         widget.selectedFiles!.files.length >= widget.files.length) {
-      widget.selectedFiles!.files.containsAll(widget.files);
       return widget.selectedFiles!.files.containsAll(widget.files);
     } else {
       return false;
@@ -164,7 +164,7 @@ class _LazyGroupGalleryState extends State<LazyGroupGallery> {
   void dispose() {
     _reloadEventSubscription?.cancel();
     _currentIndexSubscription.cancel();
-    _areAllFromGroupSelectedNotifer.dispose();
+    _areAllFromGroupSelectedNotifier.dispose();
     widget.selectedFiles?.removeListener(_selectedFilesListener);
     super.dispose();
   }
@@ -193,6 +193,7 @@ class _LazyGroupGalleryState extends State<LazyGroupGallery> {
                 timestamp: _files[0].creationTime!,
                 gridSize: widget.photoGridSize,
               ),
+            Expanded(child: Container()),
             widget.limitSelectionToOne
                 ? const SizedBox.shrink()
                 : ValueListenableBuilder(
@@ -207,7 +208,7 @@ class _LazyGroupGalleryState extends State<LazyGroupGallery> {
                                 height: 44,
                                 child: ValueListenableBuilder(
                                   valueListenable:
-                                      _areAllFromGroupSelectedNotifer,
+                                      _areAllFromGroupSelectedNotifier,
                                   builder: (context, dynamic value, _) {
                                     return value
                                         ? const Icon(
@@ -254,7 +255,7 @@ class _LazyGroupGalleryState extends State<LazyGroupGallery> {
 
   void _selectedFilesListener() {
     if (widget.selectedFiles == null) return;
-    _areAllFromGroupSelectedNotifer.value =
+    _areAllFromGroupSelectedNotifier.value =
         widget.selectedFiles!.files.containsAll(_setOfFiles);
 
     //Can remove this if we decide to show select all by default for all galleries

@@ -12,7 +12,7 @@ description: ente photos application
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 
-version: 0.8.13+533
+version: 0.8.17+537
 
 environment:
   sdk: ">=3.0.0 <4.0.0"
@@ -22,13 +22,15 @@ dependencies:
   animate_do: ^2.0.0
   animated_list_plus: ^0.4.5
   archive: ^3.1.2
-  background_fetch: ^1.1.1
+  background_fetch: ^1.2.1
   bip39: ^1.0.6
   cached_network_image: ^3.0.0
   chewie:
     git:
       url: https://github.com/ente-io/chewie.git
       ref: forked_video_player_plus
+  clip_ggml:
+    path: plugins/clip_ggml
   collection: # dart
   computer:
     git: "https://github.com/ente-io/computer.git"
@@ -71,7 +73,7 @@ dependencies:
   flutter_easyloading: ^3.0.0
   flutter_email_sender: ^5.2.0
   flutter_image_compress: ^1.1.0
-  flutter_inappwebview: ^5.5.0+2
+  flutter_inappwebview: ^5.8.0
   flutter_launcher_icons: ^0.13.1
   flutter_local_notifications: ^12.0.4
   flutter_localizations:
@@ -86,6 +88,7 @@ dependencies:
   fluttertoast: ^8.0.6
   freezed_annotation: ^2.2.0
   google_nav_bar: ^5.0.5
+  html_unescape: ^2.0.0
   http: ^1.1.0
   image: ^4.0.17
   image_editor: ^1.3.0
@@ -112,6 +115,10 @@ dependencies:
   move_to_background: ^1.0.2
 
   # open_file: ^3.2.1
+  objectbox: ^2.3.1
+  objectbox_flutter_libs: any
+  onnxruntime:
+    git: "https://github.com/ente-io/onnxruntime.git"
   open_mail_app: ^0.4.5
   package_info_plus: ^4.1.0
   page_transition: ^2.0.2
@@ -131,13 +138,13 @@ dependencies:
   sentry_flutter: ^7.9.0
   share_plus: ^4.0.10
   shared_preferences: ^2.0.5
-  sqflite: ^2.0.0+3
+  sqflite: ^2.3.0
   sqflite_migration: ^0.3.0
   step_progress_indicator: ^1.0.2
   styled_text: ^7.0.0
   syncfusion_flutter_core: ^19.2.49
   syncfusion_flutter_sliders: ^19.2.49
-  tflite_flutter: ^0.9.0
+  # tflite_flutter: ^0.9.0
   # tflite_flutter_helper:
   #   git:
   #     url: https://github.com/pnyompen/tflite_flutter_helper.git
@@ -185,6 +192,7 @@ dev_dependencies:
   integration_test:
     sdk: flutter
   json_serializable: ^6.6.1
+  objectbox_generator: any
   test: ^1.22.0
 
 flutter_icons:
@@ -221,6 +229,7 @@ flutter:
     - assets/models/cocossd/
     - assets/models/mobilenet/
     - assets/models/scenes/
+    - assets/models/clip/
   fonts:
   - family: Inter
     fonts:

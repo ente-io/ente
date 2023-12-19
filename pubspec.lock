@@ -85,10 +85,10 @@ packages:
     dependency: "direct main"
     description:
       name: background_fetch
-      sha256: "50ca2971ba35bb29c2533bb3ea9ad88058008d458075558a3786e8a628e23b48"
+      sha256: f70b28a0f7a3156195e9742229696f004ea3bf10f74039b7bf4c78a74fbda8a4
       url: "https://pub.dev"
     source: hosted
-    version: "1.1.6"
+    version: "1.2.1"
   bip39:
     dependency: "direct main"
     description:
@@ -226,6 +226,13 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.4.0"
+  clip_ggml:
+    dependency: "direct main"
+    description:
+      path: "plugins/clip_ggml"
+      relative: true
+    source: path
+    version: "0.0.1"
   clock:
     dependency: transitive
     description:
@@ -308,6 +315,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.2"
+  cryptography:
+    dependency: transitive
+    description:
+      name: cryptography
+      sha256: df156c5109286340817d21fa7b62f9140f17915077127dd70f8bd7a2a0997a35
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.5.0"
   csslib:
     dependency: transitive
     description:
@@ -573,6 +588,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.0"
+  flat_buffers:
+    dependency: transitive
+    description:
+      name: flat_buffers
+      sha256: "23e2ced0d8e8ecdffbd9f267f49a668c74438393b9acaeac1c724123e3764263"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.5"
   flutter:
     dependency: "direct main"
     description: flutter
@@ -651,10 +674,10 @@ packages:
     dependency: "direct main"
     description:
       name: flutter_inappwebview
-      sha256: f73505c792cf083d5566e1a94002311be497d984b5607f25be36d685cf6361cf
+      sha256: d198297060d116b94048301ee6749cd2e7d03c1f2689783f52d210a6b7aba350
       url: "https://pub.dev"
     source: hosted
-    version: "5.7.2+3"
+    version: "5.8.0"
   flutter_launcher_icons:
     dependency: "direct main"
     description:
@@ -907,6 +930,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.15.3"
+  html_unescape:
+    dependency: "direct main"
+    description:
+      name: html_unescape
+      sha256: "15362d7a18f19d7b742ef8dcb811f5fd2a2df98db9f80ea393c075189e0b61e3"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.0"
   http:
     dependency: "direct main"
     description:
@@ -1322,6 +1353,30 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.2"
+  objectbox:
+    dependency: "direct main"
+    description:
+      name: objectbox
+      sha256: "4b645c71771b87188442143a50c55ab238a8e60fe367b6a0968c0842292ffb30"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.3.1"
+  objectbox_flutter_libs:
+    dependency: "direct main"
+    description:
+      name: objectbox_flutter_libs
+      sha256: e9a3d8e3ce0d47d6fc942921ef0444a238cd4258e8fcefe13b994cf984a8bf61
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.3.1"
+  objectbox_generator:
+    dependency: "direct dev"
+    description:
+      name: objectbox_generator
+      sha256: aaffef7eb51b4d911bb00a7c52b19b55fe3e5a69de8ec56552cf35550a1e9beb
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.3.1"
   octo_image:
     dependency: transitive
     description:
@@ -1330,6 +1385,15 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.2"
+  onnxruntime:
+    dependency: "direct main"
+    description:
+      path: "."
+      ref: HEAD
+      resolved-ref: "1318dce97f3aae5ec9bdf7491d5eff0ad6beb378"
+      url: "https://github.com/ente-io/onnxruntime.git"
+    source: git
+    version: "1.1.0"
   open_mail_app:
     dependency: "direct main"
     description:
@@ -1867,18 +1931,18 @@ packages:
     dependency: "direct main"
     description:
       name: sqflite
-      sha256: b4d6710e1200e96845747e37338ea8a819a12b51689a3bcf31eff0003b37a0b9
+      sha256: "591f1602816e9c31377d5f008c2d9ef7b8aca8941c3f89cc5fd9d84da0c38a9a"
       url: "https://pub.dev"
     source: hosted
-    version: "2.2.8+4"
+    version: "2.3.0"
   sqflite_common:
     dependency: transitive
     description:
       name: sqflite_common
-      sha256: e77abf6ff961d69dfef41daccbb66b51e9983cdd5cb35bf30733598057401555
+      sha256: "8ed044102f3135add97be8653662052838859f5400075ef227f8ad72ae320803"
       url: "https://pub.dev"
     source: hosted
-    version: "2.4.5"
+    version: "2.5.0+1"
   sqflite_migration:
     dependency: "direct main"
     description:
@@ -1999,14 +2063,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.5.3"
-  tflite_flutter:
-    dependency: "direct main"
-    description:
-      name: tflite_flutter
-      sha256: "79e3271acd223e36c724fa6708e356191851011dbcddc2149f0e644a4879e055"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.9.1"
   timezone:
     dependency: transitive
     description:

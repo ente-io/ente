@@ -13,6 +13,7 @@ import 'package:photos/db/file_updation_db.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/events/backup_folders_updated_event.dart';
 import 'package:photos/events/collection_updated_event.dart';
+import "package:photos/events/diff_sync_complete_event.dart";
 import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/events/force_reload_home_gallery_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
@@ -227,6 +228,7 @@ class RemoteSyncService {
       await _collectionsService.setCollectionSyncTime(cid, remoteUpdateTime);
     }
     _logger.info("All updated collections synced");
+    Bus.instance.fire(DiffSyncCompleteEvent());
   }
 
   Future<void> _resetAllCollectionsSyncTime() async {

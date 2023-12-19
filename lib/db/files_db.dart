@@ -70,7 +70,9 @@ class FilesDB {
   // we need to write query based on that field
   static const columnMMdVisibility = 'mmd_visibility';
 
-  static final initializationScript = [...createTable(filesTable)];
+  static final initializationScript = [
+    ...createTable(filesTable),
+  ];
   static final migrationScripts = [
     ...alterDeviceFolderToAllowNULL(),
     ...alterTimestampColumnTypes(),
@@ -465,6 +467,21 @@ class FilesDB {
       whereArgs: [
         uploadedID,
         collectionID,
+      ],
+    );
+    if (results.isEmpty) {
+      return null;
+    }
+    return convertToFiles(results)[0];
+  }
+
+  Future<EnteFile?> getAnyUploadedFile(int uploadedID) async {
+    final db = await instance.database;
+    final results = await db.query(
+      filesTable,
+      where: '$columnUploadedFileID = ?',
+      whereArgs: [
+        uploadedID,
       ],
     );
     if (results.isEmpty) {
@@ -1545,6 +1562,40 @@ class FilesDB {
     final List<EnteFile> filteredFiles =
         await applyDBFilters(files, filterOptions);
     return FileLoadResult(filteredFiles, files.length == limit);
+  }
+
+  Future<List<int>> getOwnedFileIDs(int ownerID) async {
+    final db = await instance.database;
+    final results = await db.query(
+      filesTable,
+      columns: [columnUploadedFileID],
+      where:
+          '($columnOwnerID = $ownerID AND $columnUploadedFileID IS NOT NULL AND $columnUploadedFileID IS NOT -1)',
+      distinct: true,
+    );
+    final ids = <int>[];
+    for (final result in results) {
+      ids.add(result[columnUploadedFileID] as int);
+    }
+    return ids;
+  }
+
+  Future<List<EnteFile>> getUploadedFiles(List<int> uploadedIDs) async {
+    final db = await instance.database;
+    String inParam = "";
+    for (final id in uploadedIDs) {
+      inParam += "'" + id.toString() + "',";
+    }
+    inParam = inParam.substring(0, inParam.length - 1);
+    final results = await db.query(
+      filesTable,
+      where: '$columnUploadedFileID IN ($inParam)',
+      groupBy: columnUploadedFileID,
+    );
+    if (results.isEmpty) {
+      return <EnteFile>[];
+    }
+    return convertToFiles(results);
   }
 
   Map<String, dynamic> _getRowForFile(EnteFile file) {

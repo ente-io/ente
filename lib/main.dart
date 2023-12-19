@@ -18,6 +18,7 @@ import 'package:photos/core/constants.dart';
 import 'package:photos/core/error-reporting/super_logging.dart';
 import 'package:photos/core/errors.dart';
 import 'package:photos/core/network/network.dart';
+import "package:photos/db/object_box.dart";
 import 'package:photos/db/upload_locks_db.dart';
 import 'package:photos/ente_theme_data.dart';
 import "package:photos/l10n/l10n.dart";
@@ -34,6 +35,7 @@ import 'package:photos/services/memories_service.dart';
 import 'package:photos/services/push_service.dart';
 import 'package:photos/services/remote_sync_service.dart';
 import 'package:photos/services/search_service.dart';
+import 'package:photos/services/semantic_search/semantic_search_service.dart';
 import "package:photos/services/storage_bonus_service.dart";
 import 'package:photos/services/sync_service.dart';
 import 'package:photos/services/trash_sync_service.dart';
@@ -160,8 +162,9 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     AppLifecycleService.instance.onAppInForeground('init via: $via');
   }
   // Start workers asynchronously. No need to wait for them to start
-  Computer.shared().turnOn(workersCount: 4, verbose: kDebugMode).ignore();
+  Computer.shared().turnOn(workersCount: 4).ignore();
   CryptoUtil.init();
+  await ObjectBox.instance.init();
   await NetworkClient.instance.init();
   await Configuration.instance.init();
   await UserService.instance.init();
@@ -192,7 +195,9 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     });
   }
   unawaited(FeatureFlagService.instance.init());
-
+  if (!isBackground) {
+    unawaited(SemanticSearchService.instance.init());
+  }
   // Can not including existing tf/ml binaries as they are not being built
   // from source.
   // See https://gitlab.com/fdroid/fdroiddata/-/merge_requests/12671#note_1294346819

@@ -42,6 +42,24 @@ Future<Uint8List?> getThumbnail(EnteFile file) async {
   }
 }
 
+// Note: This method should only be called for files that have been uploaded
+// since cachedThumbnailPath depends on the file's uploadedID
+Future<File?> getThumbnailForUploadedFile(EnteFile file) async {
+  final cachedThumbnail = cachedThumbnailPath(file);
+  if (await cachedThumbnail.exists()) {
+    return cachedThumbnail;
+  }
+  final thumbnail = await getThumbnail(file);
+  if (thumbnail != null) {
+    // it might be already written to this path during `getThumbnail(file)`
+    if (!await cachedThumbnail.exists()) {
+      await cachedThumbnail.writeAsBytes(thumbnail, flush: true);
+    }
+    return cachedThumbnail;
+  }
+  return null;
+}
+
 Future<Uint8List> getThumbnailFromServer(EnteFile file) async {
   final cachedThumbnail = cachedThumbnailPath(file);
   if (await cachedThumbnail.exists()) {

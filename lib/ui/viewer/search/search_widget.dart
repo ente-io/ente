@@ -25,7 +25,7 @@ class SearchWidget extends StatefulWidget {
 class SearchWidgetState extends State<SearchWidget> {
   static String query = "";
   final _searchService = SearchService.instance;
-  final _debouncer = Debouncer(const Duration(milliseconds: 100));
+  final _debouncer = Debouncer(const Duration(milliseconds: 200));
   final Logger _logger = Logger((SearchWidgetState).toString());
   late FocusNode focusNode;
   StreamSubscription<TabDoubleTapEvent>? _tabDoubleTapEvent;
@@ -250,6 +250,10 @@ class SearchWidgetState extends State<SearchWidget> {
       final possibleEvents =
           await _searchService.getDateResults(context, query);
       allResults.addAll(possibleEvents);
+
+      final magicResults =
+          await _searchService.getMagicSearchResults(context, query);
+      allResults.addAll(magicResults);
 
       final contactResults =
           await _searchService.getContactSearchResults(query);

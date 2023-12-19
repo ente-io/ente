@@ -1,5 +1,5 @@
 PODS:
-  - background_fetch (1.1.6):
+  - background_fetch (1.2.1):
     - Flutter
   - connectivity_plus (0.0.1):
     - Flutter
@@ -24,9 +24,9 @@ PODS:
     - FirebaseCoreInternal (~> 10.0)
     - GoogleUtilities/Environment (~> 7.8)
     - GoogleUtilities/Logger (~> 7.8)
-  - FirebaseCoreInternal (10.13.0):
+  - FirebaseCoreInternal (10.19.0):
     - "GoogleUtilities/NSData+zlib (~> 7.8)"
-  - FirebaseInstallations (10.13.0):
+  - FirebaseInstallations (10.19.0):
     - FirebaseCore (~> 10.0)
     - GoogleUtilities/Environment (~> 7.8)
     - GoogleUtilities/UserDefaults (~> 7.8)
@@ -71,26 +71,26 @@ PODS:
   - FMDB (2.7.5):
     - FMDB/standard (= 2.7.5)
   - FMDB/standard (2.7.5)
-  - GoogleDataTransport (9.2.5):
+  - GoogleDataTransport (9.3.0):
     - GoogleUtilities/Environment (~> 7.7)
     - nanopb (< 2.30910.0, >= 2.30908.0)
     - PromisesObjC (< 3.0, >= 1.2)
-  - GoogleUtilities/AppDelegateSwizzler (7.11.5):
+  - GoogleUtilities/AppDelegateSwizzler (7.12.0):
     - GoogleUtilities/Environment
     - GoogleUtilities/Logger
     - GoogleUtilities/Network
-  - GoogleUtilities/Environment (7.11.5):
+  - GoogleUtilities/Environment (7.12.0):
     - PromisesObjC (< 3.0, >= 1.2)
-  - GoogleUtilities/Logger (7.11.5):
+  - GoogleUtilities/Logger (7.12.0):
     - GoogleUtilities/Environment
-  - GoogleUtilities/Network (7.11.5):
+  - GoogleUtilities/Network (7.12.0):
     - GoogleUtilities/Logger
     - "GoogleUtilities/NSData+zlib"
     - GoogleUtilities/Reachability
-  - "GoogleUtilities/NSData+zlib (7.11.5)"
-  - GoogleUtilities/Reachability (7.11.5):
+  - "GoogleUtilities/NSData+zlib (7.12.0)"
+  - GoogleUtilities/Reachability (7.12.0):
     - GoogleUtilities/Logger
-  - GoogleUtilities/UserDefaults (7.11.5):
+  - GoogleUtilities/UserDefaults (7.12.0):
     - GoogleUtilities/Logger
   - image_editor_common (1.0.0):
     - Flutter
@@ -99,17 +99,17 @@ PODS:
     - FlutterMacOS
   - integration_test (0.0.1):
     - Flutter
-  - libwebp (1.3.1):
-    - libwebp/demux (= 1.3.1)
-    - libwebp/mux (= 1.3.1)
-    - libwebp/sharpyuv (= 1.3.1)
-    - libwebp/webp (= 1.3.1)
-  - libwebp/demux (1.3.1):
+  - libwebp (1.3.2):
+    - libwebp/demux (= 1.3.2)
+    - libwebp/mux (= 1.3.2)
+    - libwebp/sharpyuv (= 1.3.2)
+    - libwebp/webp (= 1.3.2)
+  - libwebp/demux (1.3.2):
     - libwebp/webp
-  - libwebp/mux (1.3.1):
+  - libwebp/mux (1.3.2):
     - libwebp/demux
-  - libwebp/sharpyuv (1.3.1)
-  - libwebp/webp (1.3.1):
+  - libwebp/sharpyuv (1.3.2)
+  - libwebp/webp (1.3.2):
     - libwebp/sharpyuv
   - local_auth_ios (0.0.1):
     - Flutter
@@ -128,11 +128,23 @@ PODS:
     - Flutter
   - move_to_background (0.0.1):
     - Flutter
-  - nanopb (2.30909.0):
-    - nanopb/decode (= 2.30909.0)
-    - nanopb/encode (= 2.30909.0)
-  - nanopb/decode (2.30909.0)
-  - nanopb/encode (2.30909.0)
+  - nanopb (2.30909.1):
+    - nanopb/decode (= 2.30909.1)
+    - nanopb/encode (= 2.30909.1)
+  - nanopb/decode (2.30909.1)
+  - nanopb/encode (2.30909.1)
+  - ObjectBox (1.9.0)
+  - objectbox_flutter_libs (0.0.1):
+    - Flutter
+    - ObjectBox (= 1.9.0)
+  - onnxruntime (0.0.1):
+    - Flutter
+    - onnxruntime-objc (= 1.15.1)
+  - onnxruntime-c (1.15.1)
+  - onnxruntime-objc (1.15.1):
+    - onnxruntime-objc/Core (= 1.15.1)
+  - onnxruntime-objc/Core (1.15.1):
+    - onnxruntime-c (= 1.15.1)
   - open_mail_app (0.0.1):
     - Flutter
   - OrderedSet (5.0.0)
@@ -150,10 +162,10 @@ PODS:
     - Flutter
   - screen_brightness_ios (0.1.0):
     - Flutter
-  - SDWebImage (5.17.0):
-    - SDWebImage/Core (= 5.17.0)
-  - SDWebImage/Core (5.17.0)
-  - SDWebImageWebPCoder (0.13.0):
+  - SDWebImage (5.18.7):
+    - SDWebImage/Core (= 5.18.7)
+  - SDWebImage/Core (5.18.7)
+  - SDWebImageWebPCoder (0.14.2):
     - libwebp (~> 1.0)
     - SDWebImage/Core (~> 5.17)
   - Sentry/HybridSDK (8.9.1):
@@ -171,8 +183,6 @@ PODS:
   - sqflite (0.0.3):
     - Flutter
     - FMDB (>= 2.7.5)
-  - tflite_flutter (0.1.0):
-    - Flutter
   - Toast (4.0.0)
   - uni_links (0.0.1):
     - Flutter
@@ -215,6 +225,8 @@ DEPENDENCIES:
   - media_kit_video (from `.symlinks/plugins/media_kit_video/ios`)
   - motionphoto (from `.symlinks/plugins/motionphoto/ios`)
   - move_to_background (from `.symlinks/plugins/move_to_background/ios`)
+  - objectbox_flutter_libs (from `.symlinks/plugins/objectbox_flutter_libs/ios`)
+  - onnxruntime (from `.symlinks/plugins/onnxruntime/ios`)
   - open_mail_app (from `.symlinks/plugins/open_mail_app/ios`)
   - package_info_plus (from `.symlinks/plugins/package_info_plus/ios`)
   - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/darwin`)
@@ -225,7 +237,6 @@ DEPENDENCIES:
   - share_plus (from `.symlinks/plugins/share_plus/ios`)
   - shared_preferences_foundation (from `.symlinks/plugins/shared_preferences_foundation/darwin`)
   - sqflite (from `.symlinks/plugins/sqflite/ios`)
-  - tflite_flutter (from `.symlinks/plugins/tflite_flutter/ios`)
   - uni_links (from `.symlinks/plugins/uni_links/ios`)
   - url_launcher_ios (from `.symlinks/plugins/url_launcher_ios/ios`)
   - video_player_avfoundation (from `.symlinks/plugins/video_player_avfoundation/ios`)
@@ -246,6 +257,9 @@ SPEC REPOS:
     - libwebp
     - Mantle
     - nanopb
+    - ObjectBox
+    - onnxruntime-c
+    - onnxruntime-objc
     - OrderedSet
     - PromisesObjC
     - ReachabilitySwift
@@ -308,6 +322,10 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/motionphoto/ios"
   move_to_background:
     :path: ".symlinks/plugins/move_to_background/ios"
+  objectbox_flutter_libs:
+    :path: ".symlinks/plugins/objectbox_flutter_libs/ios"
+  onnxruntime:
+    :path: ".symlinks/plugins/onnxruntime/ios"
   open_mail_app:
     :path: ".symlinks/plugins/open_mail_app/ios"
   package_info_plus:
@@ -328,8 +346,6 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/shared_preferences_foundation/darwin"
   sqflite:
     :path: ".symlinks/plugins/sqflite/ios"
-  tflite_flutter:
-    :path: ".symlinks/plugins/tflite_flutter/ios"
   uni_links:
     :path: ".symlinks/plugins/uni_links/ios"
   url_launcher_ios:
@@ -344,7 +360,7 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/wakelock_plus/ios"
 
 SPEC CHECKSUMS:
-  background_fetch: bc9b44b0bf8b434e282a2ac9be8662800a0296ed
+  background_fetch: 896944864b038d2837fc750d470e9841e1e6a363
   connectivity_plus: 53efb943fc2882c8512d84c45707bcabc4c36076
   device_info_plus: 7545d84d8d1b896cb16a4ff98c19f07ec4b298ea
   file_saver: 503e386464dbe118f630e17b4c2e1190fa0cf808
@@ -352,26 +368,26 @@ SPEC CHECKSUMS:
   firebase_core: ce64b0941c6d87c6ef5022ae9116a158236c8c94
   firebase_messaging: 42912365e62efc1ea3e00724e5eecba6068ddb88
   FirebaseCore: b68d3616526ec02e4d155166bbafb8eca64af557
-  FirebaseCoreInternal: b342e37cd4f5b4454ec34308f073420e7920858e
-  FirebaseInstallations: b28af1b9f997f1a799efe818c94695a3728c352f
+  FirebaseCoreInternal: b444828ea7cfd594fca83046b95db98a2be4f290
+  FirebaseInstallations: 033d199474164db20c8350736842a94fe717b960
   FirebaseMessaging: 6b7052cc3da7bc8e5f72bef871243e8f04a14eed
   fk_user_agent: 1f47ec39291e8372b1d692b50084b0d54103c545
   Flutter: f04841e97a9d0b0a8025694d0796dd46242b2854
   flutter_email_sender: 02d7443217d8c41483223627972bfdc09f74276b
   flutter_image_compress: 5a5e9aee05b6553048b8df1c3bc456d0afaac433
-  flutter_inappwebview: bfd58618f49dc62f2676de690fc6dcda1d6c3721
+  flutter_inappwebview: 3d32228f1304635e7c028b0d4252937730bbc6cf
   flutter_local_notifications: 0c0b1ae97e741e1521e4c1629a459d04b9aec743
   flutter_native_splash: 52501b97d1c0a5f898d687f1646226c1f93c56ef
   flutter_secure_storage: 23fc622d89d073675f2eaa109381aefbcf5a49be
   flutter_sodium: c84426b4de738514b5b66cfdeb8a06634e72fe0b
-  fluttertoast: fafc4fa4d01a6a9e4f772ecd190ffa525e9e2d9c
+  fluttertoast: 31b00dabfa7fb7bacd9e7dbee580d7a2ff4bf265
   FMDB: 2ce00b547f966261cd18927a3ddb07cb6f3db82a
-  GoogleDataTransport: 54dee9d48d14580407f8f5fbf2f496e92437a2f2
-  GoogleUtilities: 13e2c67ede716b8741c7989e26893d151b2b2084
+  GoogleDataTransport: 57c22343ab29bc686febbf7cbb13bad167c2d8fe
+  GoogleUtilities: 0759d1a57ebb953965c2dfe0ba4c82e95ccc2e34
   image_editor_common: d6f6644ae4a6de80481e89fe6d0a8c49e30b4b43
   in_app_purchase_storekit: 4fb7ee9e824b1f09107fbfbbce8c4b276366dc43
   integration_test: 13825b8a9334a850581300559b8839134b124670
-  libwebp: 33dc822fbbf4503668d09f7885bbfedc76c45e96
+  libwebp: 1786c9f4ff8a279e4dac1e8f385004d5fc253009
   local_auth_ios: c6cf091ded637a88f24f86a8875d8b0f526e2605
   Mantle: c5aa8794a29a022dfbbfc9799af95f477a69b62d
   media_extension: 6d30dc1431ebaa63f43c397c37917b1a0a597a4c
@@ -380,7 +396,12 @@ SPEC CHECKSUMS:
   media_kit_video: 5da63f157170e5bf303bf85453b7ef6971218a2e
   motionphoto: d4a432b8c8f22fb3ad966258597c0103c9c5ff16
   move_to_background: 39a5b79b26d577b0372cbe8a8c55e7aa9fcd3a2d
-  nanopb: b552cce312b6c8484180ef47159bc0f65a1f0431
+  nanopb: d4d75c12cd1316f4a64e3c6963f879ecd4b5e0d5
+  ObjectBox: e7ff611291a0663380e0736b46786bcd077294ff
+  objectbox_flutter_libs: 0948d6feb7de4f7edaebc7a898b9e85b7fc2bc89
+  onnxruntime: e9346181d75b8dea8733bdae512a22c298962e00
+  onnxruntime-c: ebdcfd8650bcbd10121c125262f99dea681b92a3
+  onnxruntime-objc: ae7acec7a3d03eaf072d340afed7a35635c1c2a6
   open_mail_app: 794172f6a22cd16319d3ddaf45e945b2f74952b0
   OrderedSet: aaeb196f7fef5a9edf55d89760da9176ad40b93c
   package_info_plus: fd030dabf36271f146f1f3beacd48f564b0f17f7
@@ -390,15 +411,14 @@ SPEC CHECKSUMS:
   ReachabilitySwift: 985039c6f7b23a1da463388634119492ff86c825
   receive_sharing_intent: c0d87310754e74c0f9542947e7cbdf3a0335a3b1
   screen_brightness_ios: 715ca807df953bf676d339f11464e438143ee625
-  SDWebImage: 750adf017a315a280c60fde706ab1e552a3ae4e9
-  SDWebImageWebPCoder: af09429398d99d524cae2fe00f6f0f6e491ed102
+  SDWebImage: f9258c58221ed854cfa0e2b80ee4033710b1c6d3
+  SDWebImageWebPCoder: 633b813fca24f1de5e076bcd7f720c038b23892b
   Sentry: e3203780941722a1fcfee99e351de14244c7f806
   sentry_flutter: 8f0ffd53088e6a4d50c095852c5cad9e4405025c
   SentryPrivate: 5e3683390f66611fc7c6215e27645873adb55d13
   share_plus: 056a1e8ac890df3e33cb503afffaf1e9b4fbae68
   shared_preferences_foundation: e2dae3258e06f44cc55f49d42024fd8dd03c590c
   sqflite: 31f7eba61e3074736dff8807a9b41581e4f7f15a
-  tflite_flutter: 9157a660578930a99728974f247369af1c3595d5
   Toast: 91b396c56ee72a5790816f40d3a94dd357abc196
   uni_links: d97da20c7701486ba192624d99bffaaffcfc298a
   url_launcher_ios: 08a3dfac5fb39e8759aeb0abbd5d9480f30fc8b4
@@ -409,4 +429,4 @@ SPEC CHECKSUMS:
 
 PODFILE CHECKSUM: c1a8f198a245ed1f10e40b617efdb129b021b225
 
-COCOAPODS: 1.12.1
+COCOAPODS: 1.14.3

@@ -161,11 +161,9 @@ class _UpdateLocationDataWidgetState extends State<UpdateLocationDataWidget> {
                 icon: Icons.check,
                 onPressed: () async {
                   if (selectedLocation.value == null) {
-                    unawaited(
-                      showShortToast(
-                        context,
-                        S.of(context).selectALocationFirst,
-                      ),
+                    showShortToast(
+                      context,
+                      S.of(context).selectALocationFirst,
                     );
                     return;
                   }

@@ -15,6 +15,7 @@ import 'package:photos/ui/viewer/gallery/gallery_app_bar_widget.dart';
 
 class SearchResultPage extends StatefulWidget {
   final SearchResult searchResult;
+  final bool enableGrouping;
   final String tagPrefix;
 
   static const GalleryType appBarType = GalleryType.searchResults;
@@ -22,6 +23,7 @@ class SearchResultPage extends StatefulWidget {
 
   const SearchResultPage(
     this.searchResult, {
+    this.enableGrouping = true,
     this.tagPrefix = "",
     Key? key,
   }) : super(key: key);
@@ -85,6 +87,7 @@ class _SearchResultPageState extends State<SearchResultPage> {
       },
       tagPrefix: widget.tagPrefix + widget.searchResult.heroTag(),
       selectedFiles: _selectedFiles,
+      enableFileGrouping: widget.enableGrouping,
       initialFiles: [widget.searchResult.resultFiles().first],
     );
     return Scaffold(
