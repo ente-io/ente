@@ -18,72 +18,81 @@ class HomeEmptyStateWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    return Center(
-      child: ConstrainedBox(
-        constraints: const BoxConstraints.tightFor(height: 800, width: 450),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 40.0, horizontal: 40),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Column(
-                children: [
-                  Image.asset(
-                    "assets/wallet-front-gradient.png",
-                    width: 200,
-                    height: 200,
-                  ),
-                  Text(
-                    l10n.setupFirstAccount,
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.headlineMedium,
-                  ),
-                  const SizedBox(height: 64),
-                  SizedBox(
-                    width: 400,
-                    child: OutlinedButton(
-                      onPressed: onScanTap,
-                      child: Text(l10n.importScanQrCode),
+    return SingleChildScrollView(
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints.tightFor(height: 800, width: 450),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 40.0, horizontal: 40),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Column(
+                  children: [
+                    Image.asset(
+                      "assets/wallet-front-gradient.png",
+                      width: 200,
+                      height: 200,
                     ),
-                  ),
-                  const SizedBox(height: 18),
-                  SizedBox(
-                    width: 400,
-                    child: OutlinedButton(
-                      onPressed: onManuallySetupTap,
-                      child: Text(l10n.importEnterSetupKey),
+                    Text(
+                      l10n.setupFirstAccount,
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.headlineMedium,
                     ),
-                  ),
-                  const SizedBox(height: 54),
-                  InkWell(
-                    onTap: () {
-                      routeToPage(context, ImportCodePage());
-                    },
-                    child: Text(
-                      l10n.importCodes,
-                      textAlign: TextAlign.center,
-                      style: getEnteTextTheme(context).bodyFaint.copyWith(decoration: TextDecoration.underline),
-                    ),),
-                  const SizedBox(height: 18),
-                  InkWell(
-                    onTap: () {
-                      showModalBottomSheet<void>(
-                        backgroundColor: Theme.of(context).colorScheme.background,
-                        barrierColor: Colors.black87,
-                        context: context,
-                        builder: (context) {
-                          return const FAQQuestionsWidget();
-                        },
-                      );
-                    },
-                    child: Text(
-                      l10n.faq,
-                      textAlign: TextAlign.center,
-                      style: getEnteTextTheme(context).bodyFaint.copyWith(decoration: TextDecoration.underline),
-                    ),),
-                ],
-              ),
-            ],
+                    const SizedBox(height: 64),
+                    SizedBox(
+                      width: 400,
+                      child: OutlinedButton(
+                        onPressed: onScanTap,
+                        child: Text(l10n.importScanQrCode),
+                      ),
+                    ),
+                    const SizedBox(height: 18),
+                    SizedBox(
+                      width: 400,
+                      child: OutlinedButton(
+                        onPressed: onManuallySetupTap,
+                        child: Text(l10n.importEnterSetupKey),
+                      ),
+                    ),
+                    const SizedBox(height: 54),
+                    InkWell(
+                      onTap: () {
+                        routeToPage(context, ImportCodePage());
+                      },
+                      child: Text(
+                        l10n.importCodes,
+                        textAlign: TextAlign.center,
+                        style: getEnteTextTheme(context)
+                            .bodyFaint
+                            .copyWith(decoration: TextDecoration.underline),
+                      ),
+                    ),
+                    const SizedBox(height: 18),
+                    InkWell(
+                      onTap: () {
+                        showModalBottomSheet<void>(
+                          backgroundColor:
+                              Theme.of(context).colorScheme.background,
+                          barrierColor: Colors.black87,
+                          context: context,
+                          builder: (context) {
+                            return const FAQQuestionsWidget();
+                          },
+                        );
+                      },
+                      child: Text(
+                        l10n.faq,
+                        textAlign: TextAlign.center,
+                        style: getEnteTextTheme(context)
+                            .bodyFaint
+                            .copyWith(decoration: TextDecoration.underline),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),
