@@ -79,6 +79,20 @@ function sidebarPhotos() {
       text: "Welcome",
       items: [
         {
+          text: "About",
+          collapsed: true,
+          link: "/about/company",
+          items: [
+            { text: "Company", link: "/about/company" },
+            { text: "Products", link: "/about/products" },
+            { text: "Plans", link: "/about/plans" },
+            { text: "Support", link: "/about/support" },
+            { text: "Community", link: "/about/community" },
+            { text: "Open source", link: "/about/open-source" },
+            { text: "Contribute", link: "/about/contribute" },
+          ],
+        },
+        {
           text: "Features",
           collapsed: true,
           items: [
@@ -116,6 +130,18 @@ function sidebarPhotos() {
 
 function sidebarAuth() {
   return [
+    {
+      text: "About",
+      collapsed: true,
+      link: "/about/company",
+      items: [
+        { text: "Company", link: "/about/company" },
+        { text: "Products", link: "/about/products" },
+        { text: "Community", link: "/about/community" },
+        { text: "Open source", link: "/about/open-source" },
+        { text: "Contribute", link: "/about/contribute" },
+      ],
+    }, 
     {
       text: "FAQ",
       link: "/authenticator/faq/faq",
