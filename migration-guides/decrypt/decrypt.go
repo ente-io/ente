@@ -1,4 +1,4 @@
-package main
+package crypto
 
 import (
 	"encoding/base64"
@@ -90,7 +90,7 @@ func main() {
 		return
 	}
 
-	decryptedData, err := decryptChaCha20poly1305(encryptedData, key, nonce)
+	decryptedData, err := decryptChaCha20poly13052(encryptedData, key, nonce)
 	if err != nil {
 		fmt.Println("Error decrypting data:", err)
 		return

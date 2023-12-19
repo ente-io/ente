@@ -1,13 +1,10 @@
-package main
+package crypto
 
 import (
-	"bytes"
 	"encoding/base64"
+	"errors"
 	"fmt"
-	"io"
-	"log"
 
-	"github.com/jamesruan/sodium"
 	"golang.org/x/crypto/argon2"
 )
 
@@ -48,23 +45,38 @@ func deriveArgonKey(password, salt string, memLimit, opsLimit int) ([]byte, erro
 // Returns:
 //   - A byte slice representing the decrypted data.
 //   - An error object, which is nil if no error occurs.
-func decryptChaCha20poly1305(data []byte, key []byte, nonce []byte) ([]byte, error) {
-	reader := bytes.NewReader(data)
-	header := sodium.SecretStreamXCPHeader{Bytes: nonce}
-	decoder, err := sodium.MakeSecretStreamXCPDecoder(
-		sodium.SecretStreamXCPKey{Bytes: key},
-		reader,
-		header)
+// func decryptChaCha20poly13052(data []byte, key []byte, nonce []byte) ([]byte, error) {
+// 	reader := bytes.NewReader(data)
+// 	header := sodium.SecretStreamXCPHeader{Bytes: nonce}
+// 	decoder, err := sodium.MakeSecretStreamXCPDecoder(
+// 		sodium.SecretStreamXCPKey{Bytes: key},
+// 		reader,
+// 		header)
+// 	if err != nil {
+// 		log.Println("Failed to make secret stream decoder", err)
+// 		return nil, err
+// 	}
+// 	// Buffer to store the decrypted data
+// 	decryptedData := make([]byte, len(data))
+// 	n, err := decoder.Read(decryptedData)
+// 	if err != nil && err != io.EOF {
+// 		log.Println("Failed to read from decoder", err)
+// 		return nil, err
+// 	}
+// 	return decryptedData[:n], nil
+// }
+
+func decryptChaCha20poly13052(data []byte, key []byte, nonce []byte) ([]byte, error) {
+	decryptor, err := NewDecryptor(key, nonce)
 	if err != nil {
-		log.Println("Failed to make secret stream decoder", err)
 		return nil, err
 	}
-	// Buffer to store the decrypted data
-	decryptedData := make([]byte, len(data))
-	n, err := decoder.Read(decryptedData)
-	if err != nil && err != io.EOF {
-		log.Println("Failed to read from decoder", err)
+	decoded, tag, err := decryptor.Pull(data)
+	if tag != TagFinal {
+		return nil, errors.New("invalid tag")
+	}
+	if err != nil {
 		return nil, err
 	}
-	return decryptedData[:n], nil
+	return decoded, nil
 }
