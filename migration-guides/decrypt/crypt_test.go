@@ -1,4 +1,4 @@
-package crypto
+package main
 
 import (
 	"encoding/base64"
@@ -43,7 +43,7 @@ func TestDecryptChaCha20poly1305(t *testing.T) {
 		t.Fatalf("Failed to decode cipher nonce: %v", err)
 	}
 
-	decryptedText, err := decryptChaCha20poly1305(decodedCipherText, derivedKey, decodedCipherNonce)
+	decryptedText, err := decryptChaCha20poly13052(decodedCipherText, derivedKey, decodedCipherNonce)
 	if err != nil {
 		t.Fatalf("Failed to decrypt: %v", err)
 	}
