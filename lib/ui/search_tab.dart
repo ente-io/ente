@@ -40,18 +40,15 @@ class _SearchTabState extends State<SearchTab> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(top: 8),
-      child: AllSectionsExamplesProvider(
-        child: FadeIndexedStack(
-          duration: const Duration(milliseconds: 150),
-          index: index,
-          children: [
-            const AllSearchSections(),
-            SearchSuggestionsWidget(_searchResults),
-            const NoResultWidget(),
-          ],
-        ),
+    return AllSectionsExamplesProvider(
+      child: FadeIndexedStack(
+        duration: const Duration(milliseconds: 150),
+        index: index,
+        children: [
+          const AllSearchSections(),
+          SearchSuggestionsWidget(_searchResults),
+          const NoResultWidget(),
+        ],
       ),
     );
   }
@@ -71,58 +68,61 @@ class _AllSearchSectionsState extends State<AllSearchSections> {
     // remove face and content sectionType
     searchTypes.remove(SectionType.face);
     searchTypes.remove(SectionType.content);
-    return Stack(
-      children: [
-        FutureBuilder(
-          future: InheritedAllSectionsExamples.of(context)
-              .allSectionsExamplesFuture,
-          builder: (context, snapshot) {
-            if (snapshot.hasData) {
-              if (snapshot.data!.every((element) => element.isEmpty)) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 8),
+      child: Stack(
+        children: [
+          FutureBuilder(
+            future: InheritedAllSectionsExamples.of(context)
+                .allSectionsExamplesFuture,
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                if (snapshot.data!.every((element) => element.isEmpty)) {
+                  return const Padding(
+                    padding: EdgeInsets.only(bottom: 72),
+                    child: SearchTabEmptyState(),
+                  );
+                }
+                return ListView.builder(
+                  padding: const EdgeInsets.only(bottom: 180),
+                  physics: const BouncingScrollPhysics(),
+                  itemCount: searchTypes.length,
+                  itemBuilder: (context, index) {
+                    return SearchSection(
+                      sectionType: searchTypes[index],
+                      examples: snapshot.data!.elementAt(index),
+                      limit: searchSectionLimit,
+                    );
+                  },
+                );
+              } else if (snapshot.hasError) {
+                //Errors are handled and this else if condition will be false always
+                //is the understanding.
                 return const Padding(
                   padding: EdgeInsets.only(bottom: 72),
-                  child: SearchTabEmptyState(),
+                  child: EnteLoadingWidget(),
+                );
+              } else {
+                return const Padding(
+                  padding: EdgeInsets.only(bottom: 72),
+                  child: EnteLoadingWidget(),
                 );
               }
-              return ListView.builder(
-                padding: const EdgeInsets.only(bottom: 180),
-                physics: const BouncingScrollPhysics(),
-                itemCount: searchTypes.length,
-                itemBuilder: (context, index) {
-                  return SearchSection(
-                    sectionType: searchTypes[index],
-                    examples: snapshot.data!.elementAt(index),
-                    limit: searchSectionLimit,
-                  );
-                },
-              );
-            } else if (snapshot.hasError) {
-              //Errors are handled and this else if condition will be false always
-              //is the understanding.
-              return const Padding(
-                padding: EdgeInsets.only(bottom: 72),
-                child: EnteLoadingWidget(),
-              );
-            } else {
-              return const Padding(
-                padding: EdgeInsets.only(bottom: 72),
-                child: EnteLoadingWidget(),
-              );
-            }
-          },
-        ),
-        ValueListenableBuilder(
-          valueListenable:
-              InheritedAllSectionsExamples.of(context).isDebouncingNotifier,
-          builder: (context, value, _) {
-            return value
-                ? const EnteLoadingWidget(
-                    alignment: Alignment.topRight,
-                  )
-                : const SizedBox.shrink();
-          },
-        ),
-      ],
+            },
+          ),
+          ValueListenableBuilder(
+            valueListenable:
+                InheritedAllSectionsExamples.of(context).isDebouncingNotifier,
+            builder: (context, value, _) {
+              return value
+                  ? const EnteLoadingWidget(
+                      alignment: Alignment.topRight,
+                    )
+                  : const SizedBox.shrink();
+            },
+          ),
+        ],
+      ),
     );
   }
 }
