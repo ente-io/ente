@@ -1,6 +1,5 @@
 import "dart:async";
 import "dart:collection";
-import "dart:math";
 
 import "package:computer/computer.dart";
 import "package:logging/logging.dart";
@@ -351,13 +350,9 @@ double computeScore(List<double> imageEmbedding, List<double> textEmbedding) {
     "The two embeddings should have the same length",
   );
   double score = 0;
-  double normalization = 0, normalization2 = 0;
   for (int index = 0; index < imageEmbedding.length; index++) {
     score += imageEmbedding[index] * textEmbedding[index];
-    normalization += imageEmbedding[index] * imageEmbedding[index];
-    normalization2 += textEmbedding[index] * textEmbedding[index];
   }
-  score /= sqrt((normalization * normalization2));
   return score;
 }
 
