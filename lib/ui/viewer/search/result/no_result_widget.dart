@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import "package:photos/core/event_bus.dart";
+import "package:photos/events/clear_and_unfocus_search_bar_event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/search/search_types.dart";
 import "package:photos/states/all_sections_examples_state.dart";
@@ -71,42 +73,51 @@ class _NoResultWidgetState extends State<NoResultWidget> {
         );
       },
     );
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 32),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                S.of(context).noResultsFound,
-                style: textTheme.largeBold,
-              ),
-              const SizedBox(height: 6),
-              searchTypeToQuerySuggestion.isNotEmpty
-                  ? Text(
-                      S.of(context).modifyYourQueryOrTrySearchingFor,
-                      style: textTheme.smallMuted,
-                    )
-                  : const SizedBox.shrink(),
-            ],
-          ),
-          const SizedBox(height: 20),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 4),
-            child: ListView.separated(
-              itemBuilder: (context, index) {
-                return searchTypeAndSuggestion[index];
-              },
-              separatorBuilder: (context, index) {
-                return const SizedBox(height: 12);
-              },
-              itemCount: searchTypeToQuerySuggestion.length,
-              shrinkWrap: true,
+    return Scaffold(
+      appBar: AppBar(
+        leading: BackButton(
+          onPressed: () {
+            Bus.instance.fire(ClearAndUnfocusSearchBar());
+          },
+        ),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  S.of(context).noResultsFound,
+                  style: textTheme.largeBold,
+                ),
+                const SizedBox(height: 6),
+                searchTypeToQuerySuggestion.isNotEmpty
+                    ? Text(
+                        S.of(context).modifyYourQueryOrTrySearchingFor,
+                        style: textTheme.smallMuted,
+                      )
+                    : const SizedBox.shrink(),
+              ],
             ),
-          ),
-        ],
+            const SizedBox(height: 20),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4),
+              child: ListView.separated(
+                itemBuilder: (context, index) {
+                  return searchTypeAndSuggestion[index];
+                },
+                separatorBuilder: (context, index) {
+                  return const SizedBox(height: 12);
+                },
+                itemCount: searchTypeToQuerySuggestion.length,
+                shrinkWrap: true,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
