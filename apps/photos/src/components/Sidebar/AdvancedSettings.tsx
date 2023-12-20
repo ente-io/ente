@@ -78,22 +78,23 @@ export default function AdvancedSettings({ open, onClose, onRootClose }) {
 
                 <Box px={'8px'}>
                     <Stack py="20px" spacing="24px">
-                        <CacheDirectory />
-
                         {isElectron() && (
-                            <Box>
-                                <MenuSectionTitle
-                                    title={t('LABS')}
-                                    icon={<ScienceIcon />}
-                                />
-                                <MenuItemGroup>
-                                    <EnteMenuItem
-                                        endIcon={<ChevronRight />}
-                                        onClick={openMlSearchSettings}
-                                        label={t('ML_SEARCH')}
+                            <>
+                                <CacheDirectory />
+                                <Box>
+                                    <MenuSectionTitle
+                                        title={t('LABS')}
+                                        icon={<ScienceIcon />}
                                     />
-                                </MenuItemGroup>
-                            </Box>
+                                    <MenuItemGroup>
+                                        <EnteMenuItem
+                                            endIcon={<ChevronRight />}
+                                            onClick={openMlSearchSettings}
+                                            label={t('ML_SEARCH')}
+                                        />
+                                    </MenuItemGroup>
+                                </Box>
+                            </>
                         )}
                         <Box>
                             <MenuItemGroup>
