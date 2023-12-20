@@ -76,7 +76,7 @@ class _AllSearchSectionsState extends State<AllSearchSections> {
             future: InheritedAllSectionsExamples.of(context)
                 .allSectionsExamplesFuture,
             builder: (context, snapshot) {
-              if (snapshot.hasData) {
+              if (snapshot.hasData && snapshot.data!.isNotEmpty) {
                 if (snapshot.data!.every((element) => element.isEmpty)) {
                   return const Padding(
                     padding: EdgeInsets.only(bottom: 72),
