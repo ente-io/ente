@@ -1,5 +1,6 @@
 import "package:fade_indexed_stack/fade_indexed_stack.dart";
 import "package:flutter/material.dart";
+import "package:flutter_animate/flutter_animate.dart";
 import "package:photos/core/constants.dart";
 import "package:photos/models/search/search_result.dart";
 import "package:photos/models/search/search_types.dart";
@@ -94,7 +95,20 @@ class _AllSearchSectionsState extends State<AllSearchSections> {
                       limit: searchSectionLimit,
                     );
                   },
-                );
+                )
+                    .animate(
+                      delay: const Duration(milliseconds: 150),
+                    )
+                    .slide(
+                      begin: const Offset(0, -0.015),
+                      end: const Offset(0, 0),
+                      duration: const Duration(milliseconds: 300),
+                      curve: Curves.easeOut,
+                    )
+                    .fadeIn(
+                      duration: const Duration(milliseconds: 150),
+                      curve: Curves.easeOut,
+                    );
               } else if (snapshot.hasError) {
                 //Errors are handled and this else if condition will be false always
                 //is the understanding.
