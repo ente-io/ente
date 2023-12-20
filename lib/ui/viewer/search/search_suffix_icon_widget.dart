@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import "package:photos/core/event_bus.dart";
+import "package:photos/events/clear_and_unfocus_search_bar_event.dart";
 import "package:photos/theme/ente_theme.dart";
-import 'package:photos/ui/viewer/search/search_widget.dart';
 
 class SearchSuffixIcon extends StatefulWidget {
   final bool shouldShowSpinner;
@@ -35,10 +36,7 @@ class _SearchSuffixIconState extends State<SearchSuffixIcon>
               splashRadius: 1,
               visualDensity: const VisualDensity(horizontal: -1, vertical: -1),
               onPressed: () {
-                final searchWidgetState =
-                    context.findAncestorStateOfType<SearchWidgetState>()!;
-                searchWidgetState.textController.clear();
-                searchWidgetState.focusNode.unfocus();
+                Bus.instance.fire(ClearAndUnfocusSearchBar());
               },
               icon: Icon(
                 Icons.close,
