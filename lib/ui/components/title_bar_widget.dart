@@ -60,7 +60,7 @@ class TitleBarWidget extends StatelessWidget {
             ? null
             : leading ??
                 IconButtonWidget(
-                  icon: Icons.arrow_back_outlined,
+                  icon: Icons.adaptive.arrow_back_outlined,
                   iconButtonType: IconButtonType.primary,
                   onTap: () {
                     Navigator.pop(context);
@@ -100,7 +100,7 @@ class TitleBarWidget extends StatelessWidget {
             ? null
             : leading ??
                 IconButtonWidget(
-                  icon: Icons.arrow_back_outlined,
+                  icon: Icons.adaptive.arrow_back_outlined,
                   iconButtonType: IconButtonType.primary,
                   onTap: () {
                     Navigator.pop(context);
