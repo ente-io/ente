@@ -4,6 +4,7 @@ import "package:flutter/material.dart";
 import "package:flutter/scheduler.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/event_bus.dart";
+import "package:photos/events/clear_and_unfocus_search_bar_event.dart";
 import "package:photos/events/tab_changed_event.dart";
 import "package:photos/models/search/search_result.dart";
 import "package:photos/services/search_service.dart";
@@ -33,6 +34,8 @@ class SearchWidgetState extends State<SearchWidget> {
   double _distanceOfWidgetFromBottom = 0;
   GlobalKey widgetKey = GlobalKey();
   TextEditingController textController = TextEditingController();
+  late final StreamSubscription<ClearAndUnfocusSearchBar>
+      _clearAndUnfocusSearchBar;
 
   @override
   void initState() {
@@ -62,6 +65,12 @@ class SearchWidgetState extends State<SearchWidget> {
       textController.addListener(textControllerListener);
     });
     textController.text = query;
+
+    _clearAndUnfocusSearchBar =
+        Bus.instance.on<ClearAndUnfocusSearchBar>().listen((event) {
+      textController.clear();
+      focusNode.unfocus();
+    });
   }
 
   @override
@@ -81,6 +90,7 @@ class SearchWidgetState extends State<SearchWidget> {
     _tabDoubleTapEvent?.cancel();
     textController.removeListener(textControllerListener);
     textController.dispose();
+    _clearAndUnfocusSearchBar.cancel();
     super.dispose();
   }
 
