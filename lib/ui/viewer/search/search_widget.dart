@@ -103,13 +103,13 @@ class SearchWidgetState extends State<SearchWidget> {
 
     final List<SearchResult> allResults =
         await getSearchResultsForQuery(context, value);
+
     /*checking if query == value to make sure that the results are from the current query
                       and not from the previous query (race condition).*/
     //checking if query == value to make sure that the latest query's result
     //(allResults) is passed to updateResult. Due to race condition, the previous
     //query's allResults could be passed to updateResult after the lastest query's
     //allResults is passed.
-
     if (mounted && query == value) {
       final inheritedSearchResults = InheritedSearchResults.of(context);
       inheritedSearchResults.updateResults(allResults);
@@ -272,6 +272,132 @@ class SearchWidgetState extends State<SearchWidget> {
       _logger.severe("error during search", e, s);
     }
     completer.complete(allResults);
+  }
+
+  Stream<List<SearchResult>> _getSearchResultsStream(
+    BuildContext context,
+    String query,
+  ) {
+    int resultCount = 0;
+    final maxResultCount = _isYearValid(query) ? 11 : 10;
+    final searchResultsStream = StreamController<List<SearchResult>>();
+
+    if (query.isEmpty) {
+      searchResultsStream.sink.add([]);
+      searchResultsStream.close();
+      return searchResultsStream.stream;
+    }
+    if (_isYearValid(query)) {
+      _searchService.getYearSearchResults(query).then((yearSearchResults) {
+        searchResultsStream.sink.add(yearSearchResults);
+        resultCount++;
+        if (resultCount == maxResultCount) {
+          searchResultsStream.close();
+        }
+      });
+    }
+
+    _searchService.getHolidaySearchResults(context, query).then(
+      (holidayResults) {
+        searchResultsStream.sink.add(holidayResults);
+        resultCount++;
+        if (resultCount == maxResultCount) {
+          searchResultsStream.close();
+        }
+      },
+    );
+
+    _searchService.getFileTypeResults(context, query).then(
+      (fileTypeSearchResults) {
+        searchResultsStream.sink.add(fileTypeSearchResults);
+        resultCount++;
+        if (resultCount == maxResultCount) {
+          searchResultsStream.close();
+        }
+      },
+    );
+
+    _searchService.getCaptionAndNameResults(query).then(
+      (captionAndDisplayNameResult) {
+        searchResultsStream.sink.add(captionAndDisplayNameResult);
+        resultCount++;
+        if (resultCount == maxResultCount) {
+          searchResultsStream.close();
+        }
+      },
+    );
+
+    _searchService.getFileExtensionResults(query).then(
+      (fileExtnResult) {
+        searchResultsStream.sink.add(fileExtnResult);
+        resultCount++;
+        if (resultCount == maxResultCount) {
+          searchResultsStream.close();
+        }
+      },
+    );
+
+    _searchService.getLocationResults(query).then(
+      (locationResult) {
+        searchResultsStream.sink.add(locationResult);
+        resultCount++;
+        if (resultCount == maxResultCount) {
+          searchResultsStream.close();
+        }
+      },
+    );
+
+    _searchService.getCollectionSearchResults(query).then(
+      (collectionResults) {
+        searchResultsStream.sink.add(collectionResults);
+        resultCount++;
+        if (resultCount == maxResultCount) {
+          searchResultsStream.close();
+        }
+      },
+    );
+
+    _searchService.getMonthSearchResults(context, query).then(
+      (monthResults) {
+        searchResultsStream.sink.add(monthResults);
+        resultCount++;
+        if (resultCount == maxResultCount) {
+          searchResultsStream.close();
+        }
+      },
+    );
+
+    _searchService.getDateResults(context, query).then(
+      (possibleEvents) {
+        searchResultsStream.sink.add(possibleEvents);
+        resultCount++;
+        if (resultCount == maxResultCount) {
+          searchResultsStream.close();
+        }
+      },
+    );
+
+    _searchService.getMagicSearchResults(context, query).then(
+      (magicResults) {
+        searchResultsStream.sink.add(magicResults);
+        resultCount++;
+        if (resultCount == maxResultCount) {
+          searchResultsStream.close();
+        }
+      },
+    );
+
+    _searchService.getContactSearchResults(query).then(
+      (contactResults) {
+        searchResultsStream.sink.add(contactResults);
+        resultCount++;
+        if (resultCount == maxResultCount) {
+          searchResultsStream.close();
+        }
+      },
+    );
+
+    return searchResultsStream.stream;
   }
 
   bool _isYearValid(String year) {
