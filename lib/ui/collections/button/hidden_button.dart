@@ -78,6 +78,7 @@ class HiddenCollectionsButtonWidget extends StatelessWidget {
           S.of(context).authToViewYourHiddenFiles,
         );
         if (hasAuthenticated) {
+          // ignore: unawaited_futures
           routeToPage(
             context,
             const HiddenPage(),

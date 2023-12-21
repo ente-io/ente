@@ -211,7 +211,7 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
   }
 
   Future _getThumbnailFromDisk() async {
-    getThumbnailFromLocal(
+    return getThumbnailFromLocal(
       widget.file,
       size: widget.thumbnailSize,
     ).then((thumbData) async {
@@ -220,15 +220,15 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
           _logger.fine("Removing localID reference for " + widget.file.tag);
           widget.file.localID = null;
           if (widget.file.isTrash) {
-            TrashDB.instance.update(widget.file as TrashFile);
+            await TrashDB.instance.update(widget.file as TrashFile);
           } else {
-            FilesDB.instance.update(widget.file);
+            await FilesDB.instance.update(widget.file);
           }
           _loadNetworkImage();
         } else {
           if (await doesLocalFileExist(widget.file) == false) {
             _logger.info("Deleting file " + widget.file.tag);
-            FilesDB.instance.deleteLocalFile(widget.file);
+            await FilesDB.instance.deleteLocalFile(widget.file);
             Bus.instance.fire(
               LocalPhotosUpdatedEvent(
                 [widget.file],

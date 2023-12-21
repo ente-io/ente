@@ -1,3 +1,5 @@
+import "dart:async";
+
 import 'package:flutter/material.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/subscription_purchased_event.dart';
@@ -32,6 +34,7 @@ class SkipSubscriptionWidget extends StatelessWidget {
         ),
         onPressed: () async {
           Bus.instance.fire(SubscriptionPurchasedEvent());
+          // ignore: unawaited_futures
           Navigator.of(context).pushAndRemoveUntil(
             MaterialPageRoute(
               builder: (BuildContext context) {
@@ -40,8 +43,10 @@ class SkipSubscriptionWidget extends StatelessWidget {
             ),
             (route) => false,
           );
-          BillingService.instance
-              .verifySubscription(freeProductID, "", paymentProvider: "ente");
+          unawaited(
+            BillingService.instance
+                .verifySubscription(freeProductID, "", paymentProvider: "ente"),
+          );
         },
         child: Text(S.of(context).continueOnFreeTrial),
       ),

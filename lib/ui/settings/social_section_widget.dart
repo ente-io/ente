@@ -99,6 +99,7 @@ class SocialsMenuItemWidget extends StatelessWidget {
       trailingIcon: Icons.chevron_right_outlined,
       trailingIconIsMuted: true,
       onTap: () async {
+        // ignore: unawaited_futures
         launchUrlString(
           url,
           mode: launchInExternalApp

@@ -62,6 +62,7 @@ class _StorageCardWidgetState extends State<StorageCardWidget> {
       return GestureDetector(
         behavior: HitTestBehavior.translucent,
         onTap: () async {
+          // ignore: unawaited_futures
           Navigator.of(context).push(
             MaterialPageRoute(
               builder: (BuildContext context) {

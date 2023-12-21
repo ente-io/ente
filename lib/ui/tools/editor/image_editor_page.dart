@@ -1,3 +1,4 @@
+import "dart:async";
 import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
@@ -349,7 +350,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
               ".JPEG";
       //Disabling notifications for assets changing to insert the file into
       //files db before triggering a sync.
-      PhotoManager.stopChangeNotify();
+      await PhotoManager.stopChangeNotify();
       final AssetEntity? newAsset =
           await (PhotoManager.editor.saveImage(result, title: fileName));
       final newFile = await ente.EnteFile.fromAsset(
@@ -372,7 +373,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
       }
       newFile.generatedID = await FilesDB.instance.insert(newFile);
       Bus.instance.fire(LocalPhotosUpdatedEvent([newFile], source: "editSave"));
-      SyncService.instance.sync();
+      unawaited(SyncService.instance.sync());
       showShortToast(context, S.of(context).editsSaved);
       _logger.info("Original file " + widget.originalFile.toString());
       _logger.info("Saved edits to file " + newFile.toString());
@@ -403,7 +404,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
       showToast(context, S.of(context).oopsCouldNotSaveEdits);
       _logger.severe(e, s);
     } finally {
-      PhotoManager.startChangeNotify();
+      await PhotoManager.startChangeNotify();
     }
     await dialog.hide();
   }

@@ -1,3 +1,5 @@
+import "dart:async";
+
 import 'package:flutter/material.dart';
 import "package:photos/app.dart";
 import "package:photos/generated/l10n.dart";
@@ -39,6 +41,7 @@ class GeneralSectionWidget extends StatelessWidget {
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
           onTap: () async {
+            // ignore: unawaited_futures
             routeToPage(
               context,
               const ReferralScreen(),
@@ -75,7 +78,7 @@ class GeneralSectionWidget extends StatelessWidget {
                 (locale) async {
                   await setLocale(locale);
                   EnteApp.setLocale(context, locale);
-                  S.load(locale);
+                  unawaited(S.load(locale));
                 },
                 locale,
               ),
@@ -114,6 +117,7 @@ class GeneralSectionWidget extends StatelessWidget {
   Future<void> _onFamilyPlansTapped(BuildContext context) async {
     final userDetails =
         await UserService.instance.getUserDetailsV2(memoryCount: false);
+    // ignore: unawaited_futures
     BillingService.instance.launchFamilyPortal(context, userDetails);
   }
 

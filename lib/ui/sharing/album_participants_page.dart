@@ -165,6 +165,7 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
                           onTap: isOwner
                               ? () async {
                                   if (isOwner) {
+                                    // ignore: unawaited_futures
                                     _navigateToManageUser(currentUser);
                                   }
                                 }
@@ -192,6 +193,7 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
                       leadingIcon: Icons.add_outlined,
                       menuItemColor: getEnteColorScheme(context).fillFaint,
                       onTap: () async {
+                        // ignore: unawaited_futures
                         _navigateToAddUser(false);
                       },
                       isTopBorderRadiusRemoved: collaborators.isNotEmpty,
@@ -241,6 +243,7 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
                           onTap: isOwner
                               ? () async {
                                   if (isOwner) {
+                                    // ignore: unawaited_futures
                                     _navigateToManageUser(currentUser);
                                   }
                                 }
@@ -268,6 +271,7 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
                       leadingIcon: Icons.add_outlined,
                       menuItemColor: getEnteColorScheme(context).fillFaint,
                       onTap: () async {
+                        // ignore: unawaited_futures
                         _navigateToAddUser(true);
                       },
                       isTopBorderRadiusRemoved: viewers.isNotEmpty,

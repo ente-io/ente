@@ -133,6 +133,7 @@ Future<void> deleteFilesFromEverywhere(
     }
   }
   if (uploadedFilesToBeTrashed.isNotEmpty) {
+    // ignore: unawaited_futures
     RemoteSyncService.instance.sync(silently: true);
   }
 }
@@ -183,7 +184,9 @@ Future<void> deleteFilesFromRemoteOnly(
       source: "deleteFromRemoteOnly",
     ),
   );
+  // ignore: unawaited_futures
   SyncService.instance.sync();
+  // ignore: unawaited_futures
   RemoteSyncService.instance.sync(silently: true);
 }
 
@@ -232,7 +235,7 @@ Future<void> deleteFilesOnDeviceOnly(
         alreadyDeletedIDs.contains(file.localID)) {
       deletedFiles.add(file);
       file.localID = null;
-      FilesDB.instance.update(file);
+      await FilesDB.instance.update(file);
     }
   }
   if (deletedFiles.isNotEmpty || alreadyDeletedIDs.isNotEmpty) {
@@ -411,6 +414,7 @@ Future<List<String>> deleteLocalFilesInBatches(
     "Deleting " + localIDs.length.toString() + " backed up files...",
     key: dialogKey,
   );
+  // ignore: unawaited_futures
   showDialog(
     context: context,
     builder: (context) {

@@ -39,6 +39,7 @@ class _LoadingPhotosWidgetState extends State<LoadingPhotosWidget> {
         if (LocalSyncService.instance.hasGrantedLimitedPermissions()) {
           // Do nothing, let HomeWidget refresh
         } else {
+          // ignore: unawaited_futures
           routeToPage(
             context,
             BackupFolderSelectionPage(

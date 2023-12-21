@@ -253,6 +253,7 @@ class _ResetIgnoredFilesWidgetState extends State<ResetIgnoredFilesWidget> {
             await _removeFilesFromIgnoredFiles(
               widget.filesInDeviceCollection,
             );
+            // ignore: unawaited_futures
             RemoteSyncService.instance.sync(silently: true).then((value) {
               if (mounted) {
                 widget.parentSetState.call();

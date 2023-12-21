@@ -343,7 +343,7 @@ class _HomeWidgetState extends State<HomeWidget> {
               return false;
             }
             if (Platform.isAndroid && action == IntentAction.main) {
-              MoveToBackground.moveTaskToBack();
+              unawaited(MoveToBackground.moveTaskToBack());
               return false;
             } else {
               return true;
@@ -570,6 +570,7 @@ class _HomeWidgetState extends State<HomeWidget> {
             .getCollectionByID(int.parse(collectionID))!;
         final thumbnail =
             await CollectionsService.instance.getCover(collection);
+        // ignore: unawaited_futures
         routeToPage(
           context,
           CollectionPage(

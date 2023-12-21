@@ -45,7 +45,7 @@ class _CollectionListPageState extends State<CollectionListPage> {
     collections = widget.collections;
     _collectionUpdatesSubscription =
         Bus.instance.on<CollectionUpdatedEvent>().listen((event) async {
-      refreshCollections();
+      unawaited(refreshCollections());
     });
   }
 

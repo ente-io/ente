@@ -39,7 +39,7 @@ class AddOnPage extends StatelessWidget {
             sliver: SliverList(
               delegate: SliverChildBuilderDelegate(
                 (delegateBuildContext, index) {
-                  Bonus bonus = bonusData.getAddOnBonuses()[index];
+                  final bonus = bonusData.getAddOnBonuses()[index];
                   return Padding(
                     padding: const EdgeInsets.symmetric(vertical: 4),
                     child: AddOnViewSection(
@@ -50,7 +50,7 @@ class AddOnPage extends StatelessWidget {
                     ),
                   );
                 },
-                childCount: bonusData?.getAddOnBonuses().length ?? 0,
+                childCount: bonusData.getAddOnBonuses().length,
               ),
             ),
           ),

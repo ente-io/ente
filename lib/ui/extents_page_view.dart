@@ -190,7 +190,7 @@ class ExtentsPageView extends StatefulWidget {
   /// }
   /// ```
   /// {@end-tool}
-  ExtentsPageView.custom({
+  const ExtentsPageView.custom({
     Key? key,
     this.scrollDirection = Axis.horizontal,
     this.reverse = false,
