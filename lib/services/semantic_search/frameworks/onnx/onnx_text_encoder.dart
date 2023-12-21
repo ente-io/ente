@@ -8,19 +8,17 @@ import "package:onnxruntime/onnxruntime.dart";
 import "package:photos/services/semantic_search/frameworks/onnx/onnx_text_tokenizer.dart";
 
 class OnnxTextEncoder {
-  static const vocabFilePath = "assets/models/clip/bpe_simple_vocab_16e6.txt";
+  static const kVocabFilePath = "assets/models/clip/bpe_simple_vocab_16e6.txt";
   final _logger = Logger("OnnxTextEncoder");
   final OnnxTextTokenizer _tokenizer = OnnxTextTokenizer();
 
-  OnnxTextEncoder() {
+  Future<void> init() async {
     OrtEnv.instance.init();
-    OrtEnv.instance.availableProviders().forEach((element) {
-      _logger.info('onnx provider=$element');
-    });
   }
 
-  Future<void> init() async {
-    final vocab = await rootBundle.loadString(vocabFilePath);
+  // Do not run in an isolate since rootBundle can only be accessed in the main isolate
+  Future<void> initTokenizer() async {
+    final vocab = await rootBundle.loadString(kVocabFilePath);
     await _tokenizer.init(vocab);
   }
 
