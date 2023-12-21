@@ -101,8 +101,29 @@ class SearchWidgetState extends State<SearchWidget> {
     //latest query in global variable
     query = textController.text;
 
-    final List<SearchResult> allResults =
-        await getSearchResultsForQuery(context, value);
+    // final List<SearchResult> allResults =
+    //     await getSearchResultsForQuery(context, value);
+
+    _debouncer.run(() async {
+      final Stream<List<SearchResult>> searchResultsStream =
+          _getSearchResultsStream(context, query);
+
+      if (mounted && query == value) {
+        final inheritedSearchResults = InheritedSearchResults.of(context);
+        inheritedSearchResults.updateStream(searchResultsStream);
+      }
+
+      // await for (final value in searchResultsStream) {
+      //   value.forEach((element) {
+      //     print(
+      //       "----------------" +
+      //           element.name() +
+      //           "      " +
+      //           element.type().toString(),
+      //     );
+      //   });
+      // }
+    });
 
     /*checking if query == value to make sure that the results are from the current query
                       and not from the previous query (race condition).*/
@@ -110,10 +131,11 @@ class SearchWidgetState extends State<SearchWidget> {
     //(allResults) is passed to updateResult. Due to race condition, the previous
     //query's allResults could be passed to updateResult after the lastest query's
     //allResults is passed.
-    if (mounted && query == value) {
-      final inheritedSearchResults = InheritedSearchResults.of(context);
-      inheritedSearchResults.updateResults(allResults);
-    }
+
+    // if (mounted && query == value) {
+    //   final inheritedSearchResults = InheritedSearchResults.of(context);
+    //   inheritedSearchResults.updateStream(allResults);
+    // }
   }
 
   @override

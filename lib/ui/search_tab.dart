@@ -10,7 +10,6 @@ import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/viewer/search/result/no_result_widget.dart";
 import "package:photos/ui/viewer/search/search_section.dart";
 import "package:photos/ui/viewer/search/search_suggestions.dart";
-import 'package:photos/ui/viewer/search/search_widget.dart';
 import "package:photos/ui/viewer/search/tab_empty_state.dart";
 
 class SearchTab extends StatefulWidget {
@@ -21,22 +20,24 @@ class SearchTab extends StatefulWidget {
 }
 
 class _SearchTabState extends State<SearchTab> {
-  var _searchResults = <SearchResult>[];
+  // var _searchResults = <SearchResult>[];
+  late Stream<List<SearchResult>>? _searchResults;
   int index = 0;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _searchResults = InheritedSearchResults.of(context).results;
-    if (_searchResults.isEmpty) {
-      if (isSearchQueryEmpty) {
-        index = 0;
-      } else {
-        index = 2;
-      }
-    } else {
-      index = 1;
-    }
+    _searchResults = InheritedSearchResults.of(context).searchResultsStream;
+    // if (_searchResults.isEmpty) {
+    //   if (isSearchQueryEmpty) {
+    //     index = 0;
+    //   } else {
+    //     index = 2;
+    //   }
+    // } else {
+    //   index = 1;
+    // }
+    index = 1;
   }
 
   @override

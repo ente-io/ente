@@ -14,29 +14,29 @@ class SearchResultsProvider extends StatefulWidget {
 }
 
 class _SearchResultsProviderState extends State<SearchResultsProvider> {
-  var searchResults = <SearchResult>[];
+  Stream<List<SearchResult>>? searchResultsStream;
   @override
   Widget build(BuildContext context) {
     return InheritedSearchResults(
-      searchResults,
+      searchResultsStream,
       updateSearchResults,
       child: widget.child,
     );
   }
 
-  void updateSearchResults(List<SearchResult> newResult) {
+  void updateSearchResults(Stream<List<SearchResult>> newStream) {
     setState(() {
-      searchResults = newResult;
+      searchResultsStream = newStream;
     });
   }
 }
 
 class InheritedSearchResults extends InheritedWidget {
-  final List<SearchResult> results;
-  final VoidCallbackParamSearchResults updateResults;
+  final Stream<List<SearchResult>>? searchResultsStream;
+  final VoidCallbackParamSearchResutlsStream updateStream;
   const InheritedSearchResults(
-    this.results,
-    this.updateResults, {
+    this.searchResultsStream,
+    this.updateStream, {
     required super.child,
     super.key,
   });
@@ -48,6 +48,6 @@ class InheritedSearchResults extends InheritedWidget {
 
   @override
   bool updateShouldNotify(covariant InheritedSearchResults oldWidget) {
-    return results != oldWidget.results;
+    return searchResultsStream != oldWidget.searchResultsStream;
   }
 }
