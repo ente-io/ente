@@ -146,8 +146,8 @@ class OnnxImageEncoder {
           final double v10 = inputImage[j10];
           final double v11 = inputImage[j11];
 
-          final double v0 = v00 + (1 - dx) + v01 * dx;
-          final double v1 = v10 + (1 - dx) + v11 * dx;
+          final double v0 = v00 * (1 - dx) + v01 * dx;
+          final double v1 = v10 * (1 - dx) + v11 * dx;
 
           final double v = v0 * (1 - dy) + v1 * dy;
 
