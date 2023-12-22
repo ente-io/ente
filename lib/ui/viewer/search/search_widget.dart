@@ -108,20 +108,27 @@ class SearchWidgetState extends State<SearchWidget> {
       final Stream<List<SearchResult>> searchResultsStream =
           _getSearchResultsStream(context, query);
 
-      if (mounted && query == value) {
+      if (mounted) {
+        print(
+          "Updating to new stream (${searchResultsStream.hashCode}) with query: $query",
+        );
         final inheritedSearchResults = InheritedSearchResults.of(context);
         inheritedSearchResults.updateStream(searchResultsStream);
       }
 
       // await for (final value in searchResultsStream) {
+      //   print(
+      //     "Recieved event from stream ${searchResultsStream.hashCode} --------------  --------------  --------------  --------------  --------------",
+      //   );
+
       //   value.forEach((element) {
       //     print(
-      //       "----------------" +
-      //           element.name() +
-      //           "      " +
-      //           element.type().toString(),
+      //       "---------" + element.name() + "      " + element.type().toString(),
       //     );
       //   });
+      //   print(
+      //     "End --------------  --------------  --------------  --------------  --------------",
+      //   );
       // }
     });
 
@@ -302,124 +309,140 @@ class SearchWidgetState extends State<SearchWidget> {
   ) {
     int resultCount = 0;
     final maxResultCount = _isYearValid(query) ? 11 : 10;
-    final searchResultsStream = StreamController<List<SearchResult>>();
+    final streamController = StreamController<List<SearchResult>>();
 
     if (query.isEmpty) {
-      searchResultsStream.sink.add([]);
-      searchResultsStream.close();
-      return searchResultsStream.stream;
+      streamController.sink.add([]);
+      streamController.close();
+      return streamController.stream;
     }
     if (_isYearValid(query)) {
       _searchService.getYearSearchResults(query).then((yearSearchResults) {
-        searchResultsStream.sink.add(yearSearchResults);
+        streamController.sink.add(yearSearchResults);
         resultCount++;
+
         if (resultCount == maxResultCount) {
-          searchResultsStream.close();
+          streamController.close();
         }
       });
     }
 
     _searchService.getHolidaySearchResults(context, query).then(
       (holidayResults) {
-        searchResultsStream.sink.add(holidayResults);
+        streamController.sink.add(holidayResults);
         resultCount++;
+
         if (resultCount == maxResultCount) {
-          searchResultsStream.close();
+          streamController.close();
         }
       },
     );
 
     _searchService.getFileTypeResults(context, query).then(
       (fileTypeSearchResults) {
-        searchResultsStream.sink.add(fileTypeSearchResults);
+        streamController.sink.add(fileTypeSearchResults);
         resultCount++;
+
         if (resultCount == maxResultCount) {
-          searchResultsStream.close();
+          streamController.close();
         }
       },
     );
 
     _searchService.getCaptionAndNameResults(query).then(
       (captionAndDisplayNameResult) {
-        searchResultsStream.sink.add(captionAndDisplayNameResult);
+        streamController.sink.add(captionAndDisplayNameResult);
         resultCount++;
+
         if (resultCount == maxResultCount) {
-          searchResultsStream.close();
+          streamController.close();
         }
       },
     );
 
     _searchService.getFileExtensionResults(query).then(
       (fileExtnResult) {
-        searchResultsStream.sink.add(fileExtnResult);
+        streamController.sink.add(fileExtnResult);
         resultCount++;
+
         if (resultCount == maxResultCount) {
-          searchResultsStream.close();
+          streamController.close();
         }
       },
     );
 
     _searchService.getLocationResults(query).then(
       (locationResult) {
-        searchResultsStream.sink.add(locationResult);
+        streamController.sink.add(locationResult);
         resultCount++;
+
         if (resultCount == maxResultCount) {
-          searchResultsStream.close();
+          streamController.close();
         }
       },
     );
 
     _searchService.getCollectionSearchResults(query).then(
       (collectionResults) {
-        searchResultsStream.sink.add(collectionResults);
+        print("is stream closed : ${streamController.isClosed}");
+
+        streamController.sink.add(collectionResults);
         resultCount++;
+        print("------ $resultCount  $maxResultCount");
+        print(
+          "results for collection search: ${collectionResults.length}, query : $query",
+        );
         if (resultCount == maxResultCount) {
-          searchResultsStream.close();
+          streamController.close();
         }
       },
     );
 
     _searchService.getMonthSearchResults(context, query).then(
       (monthResults) {
-        searchResultsStream.sink.add(monthResults);
+        streamController.sink.add(monthResults);
         resultCount++;
+
         if (resultCount == maxResultCount) {
-          searchResultsStream.close();
+          streamController.close();
         }
       },
     );
 
     _searchService.getDateResults(context, query).then(
       (possibleEvents) {
-        searchResultsStream.sink.add(possibleEvents);
+        streamController.sink.add(possibleEvents);
         resultCount++;
+
         if (resultCount == maxResultCount) {
-          searchResultsStream.close();
+          streamController.close();
         }
       },
     );
 
     _searchService.getMagicSearchResults(context, query).then(
       (magicResults) {
-        searchResultsStream.sink.add(magicResults);
+        streamController.sink.add(magicResults);
         resultCount++;
+
         if (resultCount == maxResultCount) {
-          searchResultsStream.close();
+          streamController.close();
         }
       },
     );
 
     _searchService.getContactSearchResults(query).then(
       (contactResults) {
-        searchResultsStream.sink.add(contactResults);
+        streamController.sink.add(contactResults);
         resultCount++;
+
         if (resultCount == maxResultCount) {
-          searchResultsStream.close();
+          streamController.close();
         }
       },
     );
 
-    return searchResultsStream.stream;
+    return streamController.stream;
   }
 
   bool _isYearValid(String year) {
