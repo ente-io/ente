@@ -12,7 +12,7 @@ import "package:photos/ui/viewer/gallery/collection_page.dart";
 import "package:photos/ui/viewer/search/result/search_result_widget.dart";
 import "package:photos/utils/navigation_util.dart";
 
-class SearchSuggestionsWidget extends StatelessWidget {
+class SearchSuggestionsWidget extends StatefulWidget {
   // final List<SearchResult> results;
   final Stream<List<SearchResult>>? results;
 
@@ -22,11 +22,42 @@ class SearchSuggestionsWidget extends StatelessWidget {
   }) : super(key: key);
 
   @override
+  State<SearchSuggestionsWidget> createState() =>
+      _SearchSuggestionsWidgetState();
+}
+
+class _SearchSuggestionsWidgetState extends State<SearchSuggestionsWidget> {
+  var searchResultWidgets = <Widget>[];
+  late Stream<List<SearchResult>>? resultsStream;
+  @override
+  initState() {
+    super.initState();
+    resultsStream = widget.results;
+  }
+
+  @override
+  didUpdateWidget(SearchSuggestionsWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.results != oldWidget.results) {
+      setState(() {
+        print(
+          "____ in didUpdateWidget. Updating stream from ${resultsStream.hashCode} to ${widget.results.hashCode}",
+        );
+        searchResultWidgets.clear();
+        resultsStream = widget.results!;
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    print(
+      "_______ rebuiding SearchSuggestionWidget with stream : ${resultsStream.hashCode}",
+    );
+    // return const SizedBox.shrink();
     // late final String title;
     // final resultsCount = results.length;
     // title = S.of(context).searchResultCount(resultsCount);
-    final searchResultWidgets = <Widget>[];
     return Scaffold(
       appBar: AppBar(
         leading: BackButton(
@@ -38,9 +69,16 @@ class SearchSuggestionsWidget extends StatelessWidget {
       body: Padding(
         padding: const EdgeInsets.fromLTRB(12, 0, 12, 0),
         child: StreamBuilder(
-          stream: results,
+          key: UniqueKey(),
+          stream: resultsStream,
           builder: (context, snapshot) {
+            print("-----------  ${snapshot.connectionState}");
             if (snapshot.hasData) {
+              if (snapshot.data!.isNotEmpty) {
+                print("---------- ${snapshot.data!.first.name()}");
+              } else {
+                print("---------- empty data");
+              }
               final results = snapshot.data as List<SearchResult>;
               for (SearchResult result in results) {
                 searchResultWidgets.add(SearchResultsWidgetGenerator(result));
