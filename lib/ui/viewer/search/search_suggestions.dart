@@ -1,6 +1,7 @@
 import "dart:async";
 
 import 'package:flutter/material.dart';
+import "package:flutter_animate/flutter_animate.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/clear_and_unfocus_search_bar_event.dart";
@@ -73,12 +74,15 @@ class _SearchSuggestionsWidgetState extends State<SearchSuggestionsWidget> {
   ///every 60ms if the queue is empty or not. If the queue is not empty, it
   ///generates the widgets and clears the queue and updates the UI.
   void generateResultWidgetsInIntervalsFromQueue() {
-    timer = Timer.periodic(const Duration(milliseconds: 60), (timer) {
+    timer = Timer.periodic(const Duration(milliseconds: 50), (timer) {
       if (queueOfEvents.isNotEmpty) {
         for (List<SearchResult> event in queueOfEvents) {
           for (SearchResult result in event) {
             searchResultWidgets.add(
-              SearchResultsWidgetGenerator(result),
+              SearchResultsWidgetGenerator(result).animate().fadeIn(
+                    duration: const Duration(milliseconds: 80),
+                    curve: Curves.easeIn,
+                  ),
             );
           }
         }
