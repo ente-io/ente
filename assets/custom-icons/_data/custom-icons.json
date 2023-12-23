@@ -1,285 +1,285 @@
 {
-    "icons": [
-        {
-            "title": "3Commas"
-        },
-        {
-            "title": "Addy.io",
-            "slug": "addy_io"
-        },
-        {
-            "title": "Airtable"
-        },
-        {
-            "title": "Anycoin Direct",
-            "slug": "anycoindirect"
-        },
-        {
-            "title": "AscendEX"
-        },
-        {
-            "title": "BitMEX"
-        },
-        {
-            "title": "Bitfinex"
-        },
-        {
-            "title": "Bitvavo",
-            "hex": "0051FF"
-        },
-        {
-            "title": "Bitwarden"
-        },
-        {
-            "title": "Brave Creators",
-            "slug": "brave"
-        },
-        {
-            "title": "Bybit"
-        },
-        {
-            "title": "Channel Island Hosting",
-            "slug": "cih",
-            "hex": "D14633"
-        },
-        {
-            "title": "Cloudflare"
-        },
-        {
-            "title": "Control D",
-            "slug": "controld",
-            "hex": "5FD800"
-        },
-        {
-            "title": "Discourse"
-        },
-        {
-            "title": "dus.net",
-            "slug": "dusnet"
-        },
-        {
-            "title": "ente",
-            "hex": "1DB954"
-        },
-        {
-            "title": "Epic Games",
-            "slug": "epicgames",
-            "hex": "000000"
-        },
-        {
-            "title": "Filen",
-            "hex": "858585"
-        },
-        {
-            "title": "Firefox",
-            "slug": "mozilla"
-        },
-        {
-            "title": "GitHub",
-            "hex": "858585"
-        },
-        {
-            "title": "GitLab",
-            "slug": "gitlab"
-        },
-        {
-            "title": "Google"
-        },
-        {
-            "title": "ING"
-        },
-        {
-            "title": "INWX"
-        },
-        {
-            "title": "Instagram"
-        },
-        {
-            "title": "Jagex",
-            "hex": "D3D800"
-        },
-        {
-            "title": "KPN",
-            "color": "00CC00"
-        },
-        {
-            "title": "Kick",
-            "hex": "53FC19"
-        },
-        {
-            "title": "Kraken",
-            "hex": "5848D5"
-        },
-        {
-            "title": "Kronos"
-        },
-        {
-            "title": "KuCoin",
-            "hex": "01BC8D"
-        },
-        {
-            "title": "La Poste",
-            "slug": "laposte"
-        },
-        {
-            "title": "Mastodon",
-            "altNames": ["mstdn", "fediscience", "mathstodon", "fosstodon"],
-            "slug": "mastodon",
-            "hex": "6364FF"
-        },
-        {
-            "title": "Microsoft"
-        },
-        {
-            "title": "Mozilla"
-        },
-        {
-            "title": "ngrok",
-            "hex": "858585"
-        },
-        {
-            "title": "Njalla"
-        },
-        {
-            "title": "Notion"
-        },
-        {
-            "title": "NVIDIA"
-        },
-        {
-            "title": "Odido"
-        },
-        {
-            "title": "Parsec"
-        },
-        {
-            "title": "PayPal"
-        },
-        {
-            "title": "Peerberry",
-            "hex": "03E5A5"
-        },
-        {
-            "title": "Pingvin Share",
-            "hex": "485099"
-        },
-        {
-            "title": "Plutus",
-            "hex": "DEC685"
-        },
-        {
-            "title": "Poloniex"
-        },
-        {
-            "title": "Porkbun",
-            "hex": "F27777"
-        },
-        {
-            "title": "PostNL",
-            "color": "EF8300"
-        },
-        {
-            "title": "Privacy Guides",
-            "slug": "privacyguides"
-        },
-        {
-            "title": "Privacy.com",
-            "slug": "privacy"
-        },
-        {
-            "title": "Proton"
-        },
-        {
-            "title": "Proxmox"
-        },
-        {
-            "title": "Revolt",
-            "hex": "858585"
-        },
-        {
-            "title": "Rust Language Forum",
-            "slug": "rust",
-            "hex": "000000"
-        },
-        {
-            "title": "service-bw"
-        },
-        {
-            "title": "SimpleLogin"
-        },
-        {
-            "title": "Sipgate"
-        },
-        {
-            "title": "Snapchat"
-        },
-        {
-            "title": "Standard Notes",
-            "slug": "standardnotes",
-            "hex": "2173E6"
-        },
-        {
-            "title": "Techlore"
-        },
-        {
-            "title": "Termius",
-            "hex": "858585"
-        },
-        {
-            "title": "Trading 212",
-            "slug": "trading212",
-            "hex": "4BA4DE"
-        },
-        {
-            "title": "TradingView"
-        },
-        {
-            "title": "TransIP"
-        },
-        {
-            "title": "Tresorit"
-        },
-        {
-            "title": "Tweakers"
-        },
-        {
-            "title": "Twingate",
-            "hex": "858585"
-        },
-        {
-            "title": "Ubisoft",
-            "hex": "4285f4"
-        },
-        {
-            "title": "Unity",
-            "hex": "858585"
-        },
-        {
-            "title": "Uphold",
-            "slug": "uphold",
-            "hex":"6FE68A"
-        },
-        {
-            "title": "WHMCS"
-        },
-        {
-            "title": "Windscribe",
-            "hex": "858585"
-        },
-        {
-            "title": "Wise"
-        },
-        {
-            "title": "X",
-            "altNames": ["twitter"],
-            "slug": "x"
-        },
-        {
-            "title": "NextDNS"
-        },
-        {
-            "title": "Skiff",
-            "hex": "EF5A3C"
-        }
-    ]
+  "icons": [
+    {
+      "title": "3Commas"
+    },
+    {
+      "title": "Addy.io",
+      "slug": "addy_io"
+    },
+    {
+      "title": "Airtable"
+    },
+    {
+      "title": "Anycoin Direct",
+      "slug": "anycoindirect"
+    },
+    {
+      "title": "AscendEX"
+    },
+    {
+      "title": "BitMEX"
+    },
+    {
+      "title": "Bitfinex"
+    },
+    {
+      "title": "Bitvavo",
+      "hex": "0051FF"
+    },
+    {
+      "title": "Bitwarden"
+    },
+    {
+      "title": "Brave Creators",
+      "slug": "brave"
+    },
+    {
+      "title": "Bybit"
+    },
+    {
+      "title": "Channel Island Hosting",
+      "slug": "cih",
+      "hex": "D14633"
+    },
+    {
+      "title": "Cloudflare"
+    },
+    {
+      "title": "Control D",
+      "slug": "controld",
+      "hex": "5FD800"
+    },
+    {
+      "title": "Discourse"
+    },
+    {
+      "title": "dus.net",
+      "slug": "dusnet"
+    },
+    {
+      "title": "ente",
+      "hex": "1DB954"
+    },
+    {
+      "title": "Epic Games",
+      "slug": "epicgames",
+      "hex": "000000"
+    },
+    {
+      "title": "Filen",
+      "hex": "858585"
+    },
+    {
+      "title": "Firefox",
+      "slug": "mozilla"
+    },
+    {
+      "title": "GitHub",
+      "hex": "858585"
+    },
+    {
+      "title": "GitLab",
+      "slug": "gitlab"
+    },
+    {
+      "title": "Google"
+    },
+    {
+      "title": "ING"
+    },
+    {
+      "title": "INWX"
+    },
+    {
+      "title": "Instagram"
+    },
+    {
+      "title": "Jagex",
+      "hex": "D3D800"
+    },
+    {
+      "title": "KPN",
+      "color": "00CC00"
+    },
+    {
+      "title": "Kick",
+      "hex": "53FC19"
+    },
+    {
+      "title": "Kraken",
+      "hex": "5848D5"
+    },
+    {
+      "title": "Kronos"
+    },
+    {
+      "title": "KuCoin",
+      "hex": "01BC8D"
+    },
+    {
+      "title": "La Poste",
+      "slug": "laposte"
+    },
+    {
+      "title": "Mastodon",
+      "altNames": ["mstdn", "fediscience", "mathstodon", "fosstodon"],
+      "slug": "mastodon",
+      "hex": "6364FF"
+    },
+    {
+      "title": "Microsoft"
+    },
+    {
+      "title": "Mozilla"
+    },
+    {
+      "title": "ngrok",
+      "hex": "858585"
+    },
+    {
+      "title": "Njalla"
+    },
+    {
+      "title": "Notion"
+    },
+    {
+      "title": "NVIDIA"
+    },
+    {
+      "title": "Odido"
+    },
+    {
+      "title": "Parsec"
+    },
+    {
+      "title": "PayPal"
+    },
+    {
+      "title": "Peerberry",
+      "hex": "03E5A5"
+    },
+    {
+      "title": "Pingvin Share",
+      "hex": "485099"
+    },
+    {
+      "title": "Plutus",
+      "hex": "DEC685"
+    },
+    {
+      "title": "Poloniex"
+    },
+    {
+      "title": "Porkbun",
+      "hex": "F27777"
+    },
+    {
+      "title": "PostNL",
+      "color": "EF8300"
+    },
+    {
+      "title": "Privacy Guides",
+      "slug": "privacyguides"
+    },
+    {
+      "title": "Privacy.com",
+      "slug": "privacy"
+    },
+    {
+      "title": "Proton"
+    },
+    {
+      "title": "Proxmox"
+    },
+    {
+      "title": "Revolt",
+      "hex": "858585"
+    },
+    {
+      "title": "Rust Language Forum",
+      "slug": "rust",
+      "hex": "000000"
+    },
+    {
+      "title": "service-bw"
+    },
+    {
+      "title": "SimpleLogin"
+    },
+    {
+      "title": "Sipgate"
+    },
+    {
+      "title": "Snapchat"
+    },
+    {
+      "title": "Standard Notes",
+      "slug": "standardnotes",
+      "hex": "2173E6"
+    },
+    {
+      "title": "Techlore"
+    },
+    {
+      "title": "Termius",
+      "hex": "858585"
+    },
+    {
+      "title": "Trading 212",
+      "slug": "trading212",
+      "hex": "4BA4DE"
+    },
+    {
+      "title": "TradingView"
+    },
+    {
+      "title": "TransIP"
+    },
+    {
+      "title": "Tresorit"
+    },
+    {
+      "title": "Tweakers"
+    },
+    {
+      "title": "Twingate",
+      "hex": "858585"
+    },
+    {
+      "title": "Ubisoft",
+      "hex": "4285f4"
+    },
+    {
+      "title": "Unity",
+      "hex": "858585"
+    },
+    {
+      "title": "Uphold",
+      "slug": "uphold",
+      "hex": "6FE68A"
+    },
+    {
+      "title": "WHMCS"
+    },
+    {
+      "title": "Windscribe",
+      "hex": "858585"
+    },
+    {
+      "title": "Wise"
+    },
+    {
+      "title": "X",
+      "altNames": ["twitter"],
+      "slug": "x"
+    },
+    {
+      "title": "NextDNS"
+    },
+    {
+      "title": "Skiff",
+      "hex": "EF5A3C"
+    }
+  ]
 }
