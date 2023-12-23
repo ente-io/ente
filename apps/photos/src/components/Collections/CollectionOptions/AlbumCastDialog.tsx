@@ -151,32 +151,33 @@ export default function AlbumCastDialog(props: Props) {
                 <>
                     {browserCanCast && (
                         <>
+                            <Typography color={'text.muted'}>
+                                {t(
+                                    'AUTO_CAST_PAIR_REQUIRES_CONNECTION_TO_GOOGLE'
+                                )}
+                            </Typography>
+
                             <EnteButton
+                                style={{
+                                    marginBottom: '1rem',
+                                }}
                                 onClick={() => {
                                     setView('auto');
                                 }}>
                                 {t('AUTO_CAST_PAIR')}
                             </EnteButton>
-                            <Typography
-                                color={'text.muted'}
-                                style={{
-                                    marginBottom: '1rem',
-                                }}>
-                                {t(
-                                    'AUTO_CAST_PAIR_REQUIRES_CONNECTION_TO_GOOGLE'
-                                )}
-                            </Typography>
                         </>
                     )}
+                    <Typography color="text.muted">
+                        {t('PAIR_WITH_PIN_WORKS_FOR_ANY_LARGE_SCREEN_DEVICE')}
+                    </Typography>
+
                     <EnteButton
                         onClick={() => {
                             setView('pin');
                         }}>
                         {t('PAIR_WITH_PIN')}
                     </EnteButton>
-                    <Typography color="text.muted">
-                        {t('PAIR_WITH_PIN_WORKS_FOR_ANY_LARGE_SCREEN_DEVICE')}
-                    </Typography>
                 </>
             )}
             {view === 'auto' && (
@@ -194,7 +195,7 @@ export default function AlbumCastDialog(props: Props) {
             )}
             {view === 'auto-cast-error' && (
                 <VerticallyCentered gap="1rem">
-                    <Typography>{t('TV_NOT_FOUND')}</Typography>
+                    <Typography>{t('CAST_AUTO_PAIR_FAILED')}</Typography>
                     <EnteButton
                         variant="text"
                         onClick={() => {
