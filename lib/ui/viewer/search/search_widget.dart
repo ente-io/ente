@@ -8,7 +8,6 @@ import "package:photos/events/clear_and_unfocus_search_bar_event.dart";
 import "package:photos/events/tab_changed_event.dart";
 import "package:photos/models/search/search_result.dart";
 import "package:photos/services/search_service.dart";
-import "package:photos/states/search_results_state.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/viewer/search/search_suffix_icon_widget.dart";
 import "package:photos/utils/date_time_util.dart";
@@ -24,6 +23,8 @@ class SearchWidget extends StatefulWidget {
 }
 
 class SearchWidgetState extends State<SearchWidget> {
+  static ValueNotifier<Stream<List<SearchResult>>?>
+      searchResultsStreamNotifier = ValueNotifier(null);
   static String query = "";
   final _searchService = SearchService.instance;
   final _debouncer = Debouncer(const Duration(milliseconds: 200));
@@ -105,15 +106,9 @@ class SearchWidgetState extends State<SearchWidget> {
     //     await getSearchResultsForQuery(context, value);
 
     _debouncer.run(() async {
-      final Stream<List<SearchResult>> searchResultsStream =
-          _getSearchResultsStream(context, query);
-
       if (mounted) {
-        print(
-          "Updating to new stream (${searchResultsStream.hashCode}) with query: $query",
-        );
-        final inheritedSearchResults = InheritedSearchResults.of(context);
-        inheritedSearchResults.updateStream(searchResultsStream);
+        searchResultsStreamNotifier.value =
+            _getSearchResultsStream(context, query);
       }
 
       // await for (final value in searchResultsStream) {

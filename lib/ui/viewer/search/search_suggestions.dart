@@ -11,6 +11,7 @@ import 'package:photos/models/search/search_result.dart';
 import "package:photos/services/collections_service.dart";
 import "package:photos/ui/viewer/gallery/collection_page.dart";
 import "package:photos/ui/viewer/search/result/search_result_widget.dart";
+import "package:photos/ui/viewer/search/search_widget.dart";
 import "package:photos/utils/navigation_util.dart";
 
 ///Not using StreamBuilder in this widget for rebuilding on every new event as
@@ -18,10 +19,7 @@ import "package:photos/utils/navigation_util.dart";
 ///fast. Instead, we usi a queue to store the events and then generate the
 ///widgets from the queue at regular intervals.
 class SearchSuggestionsWidget extends StatefulWidget {
-  final Stream<List<SearchResult>>? results;
-
-  const SearchSuggestionsWidget(
-    this.results, {
+  const SearchSuggestionsWidget({
     Key? key,
   }) : super(key: key);
 
@@ -31,38 +29,46 @@ class SearchSuggestionsWidget extends StatefulWidget {
 }
 
 class _SearchSuggestionsWidgetState extends State<SearchSuggestionsWidget> {
-  late Stream<List<SearchResult>>? resultsStream;
+  Stream<List<SearchResult>>? resultsStream;
   final queueOfEvents = <List<SearchResult>>[];
   var searchResultWidgets = <Widget>[];
   StreamSubscription<List<SearchResult>>? subscription;
   Timer? timer;
-  @override
-  initState() {
-    super.initState();
-    resultsStream = widget.results;
-    subscription = resultsStream?.listen((event) {
-      queueOfEvents.add(event);
-    });
-    //ondone, cancel subscription, get the total number of results and show in UI
-  }
+
+  // @override
+  // void didChangeDependencies() {
+  //   super.didChangeDependencies();
+
+  //   searchResultWidgets.clear();
+  //   releaseResources();
+  //   resultsStream = InheritedSearchResults.of(context).searchResultsStream;
+  //   subscription = resultsStream?.listen((event) {
+  //     if (event.isNotEmpty) {
+  //       //update a index value notifier for indexed stack here and rebuild the indexedStack widget.
+  //       //Also, add dependecy to inherited widget on changing stream in this widget and not on the serach tab.
+  //       queueOfEvents.add(event);
+  //     }
+  //   });
+  //   generateResultWidgetsInIntervalsFromQueue();
+  // }
 
   @override
-  didUpdateWidget(SearchSuggestionsWidget oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget.results != oldWidget.results) {
-      setState(() {
-        print(
-          "____ in didUpdateWidget. Updating stream from ${resultsStream.hashCode} to ${widget.results.hashCode}",
-        );
-        searchResultWidgets.clear();
-        releaseResources();
-        resultsStream = widget.results;
-        subscription = resultsStream?.listen((event) {
+  void initState() {
+    super.initState();
+    SearchWidgetState.searchResultsStreamNotifier.addListener(() {
+      final value = SearchWidgetState.searchResultsStreamNotifier.value;
+      searchResultWidgets.clear();
+      releaseResources();
+      resultsStream = value;
+      subscription = resultsStream?.listen((event) {
+        if (event.isNotEmpty) {
+          //update a index value notifier for indexed stack here and rebuild the indexedStack widget.
+          //Also, add dependecy to inherited widget on changing stream in this widget and not on the serach tab.
           queueOfEvents.add(event);
-        });
-        generateResultWidgetsInIntervalsFromQueue();
+        }
       });
-    }
+      generateResultWidgetsInIntervalsFromQueue();
+    });
   }
 
   void releaseResources() {
