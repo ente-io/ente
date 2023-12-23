@@ -13,7 +13,6 @@ import "package:photos/ui/viewer/search/result/search_result_widget.dart";
 import "package:photos/utils/navigation_util.dart";
 
 class SearchSuggestionsWidget extends StatefulWidget {
-  // final List<SearchResult> results;
   final Stream<List<SearchResult>>? results;
 
   const SearchSuggestionsWidget(
@@ -27,12 +26,19 @@ class SearchSuggestionsWidget extends StatefulWidget {
 }
 
 class _SearchSuggestionsWidgetState extends State<SearchSuggestionsWidget> {
-  var searchResultWidgets = <Widget>[];
   late Stream<List<SearchResult>>? resultsStream;
+  final queueOfEvents = <List<SearchResult>>[];
+  var searchResultWidgets = <Widget>[];
+  StreamSubscription<List<SearchResult>>? subscription;
+  Timer? timer;
   @override
   initState() {
     super.initState();
     resultsStream = widget.results;
+    subscription = resultsStream?.listen((event) {
+      queueOfEvents.add(event);
+    });
+    //ondone, cancel subscription, get the total number of results and show in UI
   }
 
   @override
@@ -44,9 +50,44 @@ class _SearchSuggestionsWidgetState extends State<SearchSuggestionsWidget> {
           "____ in didUpdateWidget. Updating stream from ${resultsStream.hashCode} to ${widget.results.hashCode}",
         );
         searchResultWidgets.clear();
-        resultsStream = widget.results!;
+        releaseResources();
+        resultsStream = widget.results;
+        subscription = resultsStream?.listen((event) {
+          queueOfEvents.add(event);
+        });
+        generateResultWidgetsInIntervalsFromQueue();
       });
     }
+  }
+
+  void releaseResources() {
+    subscription?.cancel();
+    timer?.cancel();
+  }
+
+  ///This method generates searchResultsWidgets from the queueOfEvents by checking
+  ///every 40ms if the queue is empty or not. If the queue is not empty, it
+  ///generates the widgets and clears the queue and updates the UI.
+  void generateResultWidgetsInIntervalsFromQueue() {
+    timer = Timer.periodic(const Duration(milliseconds: 40), (timer) {
+      if (queueOfEvents.isNotEmpty) {
+        for (List<SearchResult> event in queueOfEvents) {
+          for (SearchResult result in event) {
+            searchResultWidgets.add(
+              SearchResultsWidgetGenerator(result),
+            );
+          }
+        }
+        queueOfEvents.clear();
+        setState(() {});
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    releaseResources();
+    super.dispose();
   }
 
   @override
@@ -68,53 +109,33 @@ class _SearchSuggestionsWidgetState extends State<SearchSuggestionsWidget> {
       ),
       body: Padding(
         padding: const EdgeInsets.fromLTRB(12, 0, 12, 0),
-        child: StreamBuilder(
-          key: UniqueKey(),
-          stream: resultsStream,
-          builder: (context, snapshot) {
-            print("-----------  ${snapshot.connectionState}");
-            if (snapshot.hasData) {
-              if (snapshot.data!.isNotEmpty) {
-                print("---------- ${snapshot.data!.first.name()}");
-              } else {
-                print("---------- empty data");
-              }
-              final results = snapshot.data as List<SearchResult>;
-              for (SearchResult result in results) {
-                searchResultWidgets.add(SearchResultsWidgetGenerator(result));
-              }
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  //     // Text(
-                  //     //   title,
-                  //     //   style: getEnteTextTheme(context).largeBold,
-                  //     // ),
-                  //     const SizedBox(height: 20),
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 4),
-                      child: ListView.separated(
-                        itemBuilder: (context, index) {
-                          return searchResultWidgets[index];
-                        },
-                        separatorBuilder: (context, index) {
-                          return const SizedBox(height: 12);
-                        },
-                        itemCount: searchResultWidgets.length,
-                        physics: const BouncingScrollPhysics(),
-                        padding: EdgeInsets.only(
-                          bottom: (MediaQuery.sizeOf(context).height / 2) + 50,
-                        ),
-                      ),
-                    ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            //     // Text(
+            //     //   title,
+            //     //   style: getEnteTextTheme(context).largeBold,
+            //     // ),
+            //     const SizedBox(height: 20),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 4),
+                child: ListView.separated(
+                  itemBuilder: (context, index) {
+                    return searchResultWidgets[index];
+                  },
+                  separatorBuilder: (context, index) {
+                    return const SizedBox(height: 12);
+                  },
+                  itemCount: searchResultWidgets.length,
+                  physics: const BouncingScrollPhysics(),
+                  padding: EdgeInsets.only(
+                    bottom: (MediaQuery.sizeOf(context).height / 2) + 50,
                   ),
-                ],
-              );
-            } else {
-              return const SizedBox.shrink();
-            }
-          },
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
