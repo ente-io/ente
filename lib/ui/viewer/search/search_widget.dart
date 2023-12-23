@@ -97,7 +97,7 @@ class SearchWidgetState extends State<SearchWidget> {
   Future<void> textControllerListener() async {
     //query in local varialbe
     final value = textController.text;
-    IndexOfStackNotifier().isSearchResultsEmpty = value.isEmpty;
+    IndexOfStackNotifier().isSearchQueryEmpty = value.isEmpty;
     //latest query in global variable
     query = textController.text;
 
