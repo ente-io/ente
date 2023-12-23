@@ -157,7 +157,11 @@ export default function AlbumCastDialog(props: Props) {
                                 }}>
                                 {t('AUTO_CAST_PAIR')}
                             </EnteButton>
-                            <Typography color={'text.muted'}>
+                            <Typography
+                                color={'text.muted'}
+                                style={{
+                                    marginBottom: '1rem',
+                                }}>
                                 {t(
                                     'AUTO_CAST_PAIR_REQUIRES_CONNECTION_TO_GOOGLE'
                                 )}
