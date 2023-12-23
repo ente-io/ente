@@ -28,6 +28,9 @@ class _SearchTabState extends State<SearchTab> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     _searchResults = InheritedSearchResults.of(context).searchResultsStream;
+    print(
+      "____ Updating dependencies for SearchTabState. New stream : ${_searchResults.hashCode}",
+    );
     // if (_searchResults.isEmpty) {
     //   if (isSearchQueryEmpty) {
     //     index = 0;
@@ -42,6 +45,7 @@ class _SearchTabState extends State<SearchTab> {
 
   @override
   Widget build(BuildContext context) {
+    print("_____ rebuilding SearchTab with stream: ${_searchResults.hashCode}");
     return AllSectionsExamplesProvider(
       child: FadeIndexedStack(
         duration: const Duration(milliseconds: 150),

@@ -26,6 +26,10 @@ class _SearchResultsProviderState extends State<SearchResultsProvider> {
 
   void updateSearchResults(Stream<List<SearchResult>> newStream) {
     setState(() {
+      print(
+        "_____updating stream from ${searchResultsStream.hashCode} to ${newStream.hashCode} in inherited widget",
+      );
+      searchResultsStream = null;
       searchResultsStream = newStream;
     });
   }
