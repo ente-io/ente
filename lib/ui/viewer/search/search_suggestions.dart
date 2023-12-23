@@ -12,6 +12,10 @@ import "package:photos/ui/viewer/gallery/collection_page.dart";
 import "package:photos/ui/viewer/search/result/search_result_widget.dart";
 import "package:photos/utils/navigation_util.dart";
 
+///Not using StreamBuilder in this widget for rebuilding on every new event as
+///StreamBuilder is not lossless. It misses some events if the stream fires too
+///fast. Instead, we usi a queue to store the events and then generate the
+///widgets from the queue at regular intervals.
 class SearchSuggestionsWidget extends StatefulWidget {
   final Stream<List<SearchResult>>? results;
 
@@ -66,10 +70,10 @@ class _SearchSuggestionsWidgetState extends State<SearchSuggestionsWidget> {
   }
 
   ///This method generates searchResultsWidgets from the queueOfEvents by checking
-  ///every 40ms if the queue is empty or not. If the queue is not empty, it
+  ///every 60ms if the queue is empty or not. If the queue is not empty, it
   ///generates the widgets and clears the queue and updates the UI.
   void generateResultWidgetsInIntervalsFromQueue() {
-    timer = Timer.periodic(const Duration(milliseconds: 40), (timer) {
+    timer = Timer.periodic(const Duration(milliseconds: 60), (timer) {
       if (queueOfEvents.isNotEmpty) {
         for (List<SearchResult> event in queueOfEvents) {
           for (SearchResult result in event) {
