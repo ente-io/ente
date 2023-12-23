@@ -6,14 +6,13 @@ import "package:logging/logging.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/clear_and_unfocus_search_bar_event.dart";
 import "package:photos/events/tab_changed_event.dart";
+import "package:photos/models/search/index_of_indexed_stack.dart";
 import "package:photos/models/search/search_result.dart";
 import "package:photos/services/search_service.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/viewer/search/search_suffix_icon_widget.dart";
 import "package:photos/utils/date_time_util.dart";
 import "package:photos/utils/debouncer.dart";
-
-bool isSearchQueryEmpty = true;
 
 class SearchWidget extends StatefulWidget {
   const SearchWidget({Key? key}) : super(key: key);
@@ -98,7 +97,7 @@ class SearchWidgetState extends State<SearchWidget> {
   Future<void> textControllerListener() async {
     //query in local varialbe
     final value = textController.text;
-    isSearchQueryEmpty = value.isEmpty;
+    IndexOfStackNotifier().isSearchResultsEmpty = value.isEmpty;
     //latest query in global variable
     query = textController.text;
 

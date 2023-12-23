@@ -2,6 +2,7 @@ import "package:fade_indexed_stack/fade_indexed_stack.dart";
 import "package:flutter/material.dart";
 import "package:flutter_animate/flutter_animate.dart";
 import "package:photos/core/constants.dart";
+import "package:photos/models/search/index_of_indexed_stack.dart";
 import "package:photos/models/search/search_types.dart";
 import "package:photos/states/all_sections_examples_state.dart";
 import "package:photos/ui/common/loading_widget.dart";
@@ -18,7 +19,28 @@ class SearchTab extends StatefulWidget {
 }
 
 class _SearchTabState extends State<SearchTab> {
-  int index = 1;
+  late int index;
+  final indexOfStackNotifier = IndexOfStackNotifier();
+
+  @override
+  void initState() {
+    super.initState();
+    index = indexOfStackNotifier.index;
+    indexOfStackNotifier.addListener(indexNotifierListener);
+  }
+
+  void indexNotifierListener() {
+    setState(() {
+      index = indexOfStackNotifier.index;
+    });
+  }
+
+  @override
+  void dispose() {
+    indexOfStackNotifier.removeListener(indexNotifierListener);
+    indexOfStackNotifier.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
