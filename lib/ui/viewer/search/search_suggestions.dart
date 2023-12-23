@@ -30,43 +30,30 @@ class SearchSuggestionsWidget extends StatefulWidget {
 
 class _SearchSuggestionsWidgetState extends State<SearchSuggestionsWidget> {
   Stream<List<SearchResult>>? resultsStream;
-  final queueOfEvents = <List<SearchResult>>[];
+  final queueOfSearchResults = <List<SearchResult>>[];
   var searchResultWidgets = <Widget>[];
   StreamSubscription<List<SearchResult>>? subscription;
   Timer? timer;
-
-  // @override
-  // void didChangeDependencies() {
-  //   super.didChangeDependencies();
-
-  //   searchResultWidgets.clear();
-  //   releaseResources();
-  //   resultsStream = InheritedSearchResults.of(context).searchResultsStream;
-  //   subscription = resultsStream?.listen((event) {
-  //     if (event.isNotEmpty) {
-  //       //update a index value notifier for indexed stack here and rebuild the indexedStack widget.
-  //       //Also, add dependecy to inherited widget on changing stream in this widget and not on the serach tab.
-  //       queueOfEvents.add(event);
-  //     }
-  //   });
-  //   generateResultWidgetsInIntervalsFromQueue();
-  // }
 
   @override
   void initState() {
     super.initState();
     SearchWidgetState.searchResultsStreamNotifier.addListener(() {
-      final value = SearchWidgetState.searchResultsStreamNotifier.value;
+      final resultsStream = SearchWidgetState.searchResultsStreamNotifier.value;
+
       searchResultWidgets.clear();
       releaseResources();
-      resultsStream = value;
-      subscription = resultsStream?.listen((event) {
-        if (event.isNotEmpty) {
-          //update a index value notifier for indexed stack here and rebuild the indexedStack widget.
-          //Also, add dependecy to inherited widget on changing stream in this widget and not on the serach tab.
-          queueOfEvents.add(event);
-        }
+
+      subscription = resultsStream!.listen((searchResults) {
+        //Currently, we add searchResults even if the list is empty. So we are adding
+        //empty list to the queue, which will trigger rebuilds with no change in UI
+        //(see [generateResultWidgetsInIntervalsFromQueue]'s setState()).
+        //This is needed to clear the search results in this widget when the
+        //search bar is cleared, and the event fired by the stream will be an
+        //empty list. Can optimize rebuilds if there are performance issues in future.
+        queueOfSearchResults.add(searchResults);
       });
+
       generateResultWidgetsInIntervalsFromQueue();
     });
   }
@@ -81,8 +68,8 @@ class _SearchSuggestionsWidgetState extends State<SearchSuggestionsWidget> {
   ///generates the widgets and clears the queue and updates the UI.
   void generateResultWidgetsInIntervalsFromQueue() {
     timer = Timer.periodic(const Duration(milliseconds: 50), (timer) {
-      if (queueOfEvents.isNotEmpty) {
-        for (List<SearchResult> event in queueOfEvents) {
+      if (queueOfSearchResults.isNotEmpty) {
+        for (List<SearchResult> event in queueOfSearchResults) {
           for (SearchResult result in event) {
             searchResultWidgets.add(
               SearchResultsWidgetGenerator(result).animate().fadeIn(
@@ -92,7 +79,7 @@ class _SearchSuggestionsWidgetState extends State<SearchSuggestionsWidget> {
             );
           }
         }
-        queueOfEvents.clear();
+        queueOfSearchResults.clear();
         setState(() {});
       }
     });
