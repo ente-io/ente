@@ -113,6 +113,7 @@ function sidebarPhotos() {
               text: "Live & Motion Photos",
               link: "/photos/features/live-photos",
             },
+            { text: "Cast", link: "/photos/features/cast" },
           ],
         },
         {
@@ -141,7 +142,7 @@ function sidebarAuth() {
         { text: "Open source", link: "/about/open-source" },
         { text: "Contribute", link: "/about/contribute" },
       ],
-    }, 
+    },
     {
       text: "FAQ",
       link: "/authenticator/faq/faq",
