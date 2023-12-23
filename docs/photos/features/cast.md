@@ -10,7 +10,7 @@ With ente Cast, you can play a slideshow of your favourite albums on your Google
 
 On the web, you can find this menu in the balls menu on the right hand side. ![Balls menu](/assets/cast/web-play-album-on-tv.webp)
 
-1. Choose how you want to pair your device with your large screen device. ![Pairing options](/assets/cast/web-pairing-options.webp)
+4. Choose how you want to pair your device with your large screen device. ![Pairing options](/assets/cast/web-pairing-options.webp)
 
 On Chromium browsers, you will see a button labeled "Auto Pair". This option will prompt you to select a Chromecast supported device on your local network. Note: this option requires connecting to Google servers to load necessary dependencies. This option does not transmit any sensitive data through Google servers, such as your photos. Once your Chromecast device is connected, you're all set.
 
