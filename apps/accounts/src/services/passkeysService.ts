@@ -21,6 +21,23 @@ export const getPasskeys = async () => {
     }
 };
 
+export const renamePasskey = async (id: string, name: string) => {
+    try {
+        const token = getToken();
+        if (!token) return;
+        const response = await HTTPService.patch(
+            `${ENDPOINT}/passkeys/${id}`,
+            {},
+            { friendlyName: name },
+            { 'X-Auth-Token': token }
+        );
+        return await response.data;
+    } catch (e) {
+        logError(e, 'rename passkey failed');
+        throw e;
+    }
+};
+
 export const deletePasskey = async (id: string) => {
     try {
         const token = getToken();

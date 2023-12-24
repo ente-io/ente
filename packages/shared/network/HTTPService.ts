@@ -192,6 +192,28 @@ class HTTPService {
     }
 
     /**
+     * Patch request
+     */
+    public patch(
+        url: string,
+        data?: any,
+        params?: IQueryPrams,
+        headers?: IHTTPHeaders,
+        customConfig?: any
+    ) {
+        return this.request(
+            {
+                data,
+                headers,
+                method: 'PATCH',
+                params,
+                url,
+            },
+            customConfig
+        );
+    }
+
+    /**
      * Put request
      */
     public put(

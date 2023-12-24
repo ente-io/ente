@@ -9,6 +9,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import MenuItemDivider from '@ente/shared/components/Menu/MenuItemDivider';
 import DeletePasskeyModal from './DeletePasskeyModal';
+import RenamePasskeyModal from './RenamePasskeyModal';
 
 interface IProps {
     open: boolean;
@@ -18,6 +19,7 @@ const ManagePasskeyDrawer = (props: IProps) => {
     const { setShowPasskeyDrawer } = useContext(PasskeysContext);
 
     const [showDeletePasskeyModal, setShowDeletePasskeyModal] = useState(false);
+    const [showRenamePasskeyModal, setShowRenamePasskeyModal] = useState(false);
 
     return (
         <>
@@ -39,7 +41,9 @@ const ManagePasskeyDrawer = (props: IProps) => {
                     />
                     <MenuItemGroup>
                         <EnteMenuItem
-                            onClick={() => {}}
+                            onClick={() => {
+                                setShowRenamePasskeyModal(true);
+                            }}
                             startIcon={<EditIcon />}
                             label={'Rename Passkey'}
                         />
@@ -58,6 +62,12 @@ const ManagePasskeyDrawer = (props: IProps) => {
                 open={showDeletePasskeyModal}
                 onClose={() => {
                     setShowDeletePasskeyModal(false);
+                }}
+            />
+            <RenamePasskeyModal
+                open={showRenamePasskeyModal}
+                onClose={() => {
+                    setShowRenamePasskeyModal(false);
                 }}
             />
         </>

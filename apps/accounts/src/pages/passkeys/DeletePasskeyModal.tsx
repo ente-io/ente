@@ -5,6 +5,7 @@ import { AppContext } from 'pages/_app';
 import { useContext, useState } from 'react';
 import { deletePasskey } from 'services/passkeysService';
 import { PasskeysContext } from '.';
+import { t } from 'i18next';
 
 interface IProps {
     open: boolean;
@@ -37,30 +38,27 @@ const DeletePasskeyModal = (props: IProps) => {
             onClose={props.onClose}
             fullScreen={isMobile}
             attributes={{
-                title: 'Delete Passkey',
+                title: t('DELETE_PASSKEY'),
                 secondary: {
                     action: props.onClose,
-                    text: 'Cancel',
+                    text: t('CANCEL'),
                 },
             }}>
             <Stack spacing={'8px'}>
-                <Typography>
-                    Are you sure you want to delete this passkey? This action is
-                    irreversible.
-                </Typography>
+                <Typography>{t('DELETE_PASSKEY_CONFIRMATION')}</Typography>
                 <EnteButton
                     type="submit"
                     size="large"
                     color="critical"
                     loading={loading}
                     onClick={doDelete}>
-                    Delete Passkey
+                    {t('DELETE')}
                 </EnteButton>
                 <Button
                     size="large"
                     color={'secondary'}
                     onClick={props.onClose}>
-                    Cancel
+                    {t('CANCEL')}
                 </Button>
             </Stack>
         </DialogBoxV2>
