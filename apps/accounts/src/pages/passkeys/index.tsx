@@ -11,6 +11,7 @@ import { Dispatch, SetStateAction, createContext, useState } from 'react';
 import { Passkey } from 'types/passkey';
 import PasskeysList from './PasskeysList';
 import ManagePasskeyDrawer from './ManagePasskeyDrawer';
+import { t } from 'i18next';
 
 export const PasskeysContext = createContext(
     {} as {
@@ -57,13 +58,11 @@ const Passkeys = () => {
             return logError(e, 'Error creating credential');
         }
 
-        const finishResponse = await finishPasskeyRegistration(
+        await finishPasskeyRegistration(
             inputValue,
             newCredential,
             response.sessionID
         );
-
-        console.log(finishResponse);
     };
 
     return (
@@ -78,8 +77,8 @@ const Passkeys = () => {
                     <Box>
                         <SingleInputForm
                             fieldType="text"
-                            placeholder="Passkey Name"
-                            buttonText="Add Passkey"
+                            placeholder={t('ENTER_PASSKEY_NAME')}
+                            buttonText={t('ADD_PASSKEY')}
                             initialValue={''}
                             blockButton
                             callback={handleSubmit}

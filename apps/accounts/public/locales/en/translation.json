@@ -628,5 +628,6 @@
     "DELETE_PASSKEY": "Delete passkey",
     "DELETE_PASSKEY_CONFIRMATION": "Are you sure you want to delete this passkey? This action is irreversible.",
     "RENAME_PASSKEY": "Rename passkey",
+    "ADD_PASSKEY": "Add passkey",
     "ENTER_PASSKEY_NAME": "Enter passkey name"
 }
