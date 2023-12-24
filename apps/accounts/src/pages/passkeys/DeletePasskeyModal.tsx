@@ -14,7 +14,8 @@ interface IProps {
 
 const DeletePasskeyModal = (props: IProps) => {
     const { isMobile } = useContext(AppContext);
-    const { selectedPasskey } = useContext(PasskeysContext);
+    const { selectedPasskey, setShowPasskeyDrawer } =
+        useContext(PasskeysContext);
 
     const [loading, setLoading] = useState(false);
 
@@ -29,6 +30,7 @@ const DeletePasskeyModal = (props: IProps) => {
             setLoading(false);
         }
         props.onClose();
+        setShowPasskeyDrawer(false);
     };
 
     return (
