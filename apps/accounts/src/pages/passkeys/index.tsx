@@ -82,6 +82,8 @@ const Passkeys = () => {
             newCredential,
             response.sessionID
         );
+
+        init();
     };
 
     return (
