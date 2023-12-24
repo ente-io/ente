@@ -1,25 +1,16 @@
 import { MenuItemGroup } from '@ente/shared/components/Menu/MenuItemGroup';
-import { useEffect, useState } from 'react';
-import { getPasskeys } from 'services/passkeysService';
 import { Passkey } from 'types/passkey';
 import PasskeyListItem from './PasskeyListItem';
 
-const PasskeyComponent = () => {
-    const [passkeys, setPasskeys] = useState<Passkey[]>([]);
+interface IProps {
+    passkeys: Passkey[];
+}
 
-    const init = async () => {
-        const data = await getPasskeys();
-        setPasskeys(data.passkeys || []);
-    };
-
-    useEffect(() => {
-        init();
-    }, []);
-
+const PasskeyComponent = (props: IProps) => {
     return (
         <>
             <MenuItemGroup>
-                {passkeys.map((passkey) => (
+                {props.passkeys.map((passkey) => (
                     <PasskeyListItem key={passkey.id} passkey={passkey} />
                 ))}
             </MenuItemGroup>

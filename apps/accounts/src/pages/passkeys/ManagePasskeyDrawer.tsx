@@ -16,7 +16,8 @@ interface IProps {
 }
 
 const ManagePasskeyDrawer = (props: IProps) => {
-    const { setShowPasskeyDrawer } = useContext(PasskeysContext);
+    const { setShowPasskeyDrawer, refreshPasskeys } =
+        useContext(PasskeysContext);
 
     const [showDeletePasskeyModal, setShowDeletePasskeyModal] = useState(false);
     const [showRenamePasskeyModal, setShowRenamePasskeyModal] = useState(false);
@@ -62,12 +63,14 @@ const ManagePasskeyDrawer = (props: IProps) => {
                 open={showDeletePasskeyModal}
                 onClose={() => {
                     setShowDeletePasskeyModal(false);
+                    refreshPasskeys();
                 }}
             />
             <RenamePasskeyModal
                 open={showRenamePasskeyModal}
                 onClose={() => {
                     setShowRenamePasskeyModal(false);
+                    refreshPasskeys();
                 }}
             />
         </>

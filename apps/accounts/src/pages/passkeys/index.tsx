@@ -4,10 +4,17 @@ import { Box } from '@mui/material';
 import {
     finishPasskeyRegistration,
     getPasskeyRegistrationOptions,
+    getPasskeys,
 } from '../../services/passkeysService';
 import { logError } from '@ente/shared/sentry';
 import _sodium from 'libsodium-wrappers';
-import { Dispatch, SetStateAction, createContext, useState } from 'react';
+import {
+    Dispatch,
+    SetStateAction,
+    createContext,
+    useEffect,
+    useState,
+} from 'react';
 import { Passkey } from 'types/passkey';
 import PasskeysList from './PasskeysList';
 import ManagePasskeyDrawer from './ManagePasskeyDrawer';
@@ -18,6 +25,7 @@ export const PasskeysContext = createContext(
         selectedPasskey: Passkey | null;
         setSelectedPasskey: Dispatch<SetStateAction<Passkey | null>>;
         setShowPasskeyDrawer: Dispatch<SetStateAction<boolean>>;
+        refreshPasskeys: () => void;
     }
 );
 
@@ -27,6 +35,17 @@ const Passkeys = () => {
     );
 
     const [showPasskeyDrawer, setShowPasskeyDrawer] = useState(false);
+
+    const [passkeys, setPasskeys] = useState<Passkey[]>([]);
+
+    const init = async () => {
+        const data = await getPasskeys();
+        setPasskeys(data.passkeys || []);
+    };
+
+    useEffect(() => {
+        init();
+    }, []);
 
     const handleSubmit = async (inputValue: string) => {
         const response: {
@@ -72,6 +91,7 @@ const Passkeys = () => {
                     selectedPasskey,
                     setSelectedPasskey,
                     setShowPasskeyDrawer,
+                    refreshPasskeys: init,
                 }}>
                 <CenteredFlex>
                     <Box>
@@ -84,7 +104,7 @@ const Passkeys = () => {
                             callback={handleSubmit}
                         />
                         <Box>
-                            <PasskeysList />
+                            <PasskeysList passkeys={passkeys} />
                         </Box>
                     </Box>
                 </CenteredFlex>
