@@ -9,7 +9,7 @@ const PasskeyComponent = () => {
 
     const init = async () => {
         const data = await getPasskeys();
-        setPasskeys(data.passkeys);
+        setPasskeys(data.passkeys || []);
     };
 
     useEffect(() => {

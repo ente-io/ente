@@ -21,6 +21,23 @@ export const getPasskeys = async () => {
     }
 };
 
+export const deletePasskey = async (id: string) => {
+    try {
+        const token = getToken();
+        if (!token) return;
+        const response = await HTTPService.delete(
+            `${ENDPOINT}/passkeys/${id}`,
+            {},
+            {},
+            { 'X-Auth-Token': token }
+        );
+        return await response.data;
+    } catch (e) {
+        logError(e, 'delete passkey failed');
+        throw e;
+    }
+};
+
 export const getPasskeyRegistrationOptions = async () => {
     try {
         const token = getToken();
