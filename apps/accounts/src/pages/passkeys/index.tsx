@@ -7,8 +7,26 @@ import {
 } from '../../services/passkeysService';
 import { logError } from '@ente/shared/sentry';
 import _sodium from 'libsodium-wrappers';
+import { Dispatch, SetStateAction, createContext, useState } from 'react';
+import { Passkey } from 'types/passkey';
+import PasskeysList from './PasskeysList';
+import ManagePasskeyDrawer from './ManagePasskeyDrawer';
+
+export const PasskeysContext = createContext(
+    {} as {
+        selectedPasskey: Passkey | null;
+        setSelectedPasskey: Dispatch<SetStateAction<Passkey | null>>;
+        setShowPasskeyDrawer: Dispatch<SetStateAction<boolean>>;
+    }
+);
 
 const Passkeys = () => {
+    const [selectedPasskey, setSelectedPasskey] = useState<Passkey | null>(
+        null
+    );
+
+    const [showPasskeyDrawer, setShowPasskeyDrawer] = useState(false);
+
     const handleSubmit = async (inputValue: string) => {
         const response: {
             options: {
@@ -50,18 +68,29 @@ const Passkeys = () => {
 
     return (
         <>
-            <CenteredFlex>
-                <Box>
-                    <SingleInputForm
-                        fieldType="text"
-                        placeholder="Passkey Name"
-                        buttonText="Add Passkey"
-                        initialValue={''}
-                        blockButton
-                        callback={handleSubmit}
-                    />
-                </Box>
-            </CenteredFlex>
+            <PasskeysContext.Provider
+                value={{
+                    selectedPasskey,
+                    setSelectedPasskey,
+                    setShowPasskeyDrawer,
+                }}>
+                <CenteredFlex>
+                    <Box>
+                        <SingleInputForm
+                            fieldType="text"
+                            placeholder="Passkey Name"
+                            buttonText="Add Passkey"
+                            initialValue={''}
+                            blockButton
+                            callback={handleSubmit}
+                        />
+                        <Box>
+                            <PasskeysList />
+                        </Box>
+                    </Box>
+                </CenteredFlex>
+                <ManagePasskeyDrawer open={showPasskeyDrawer} />
+            </PasskeysContext.Provider>
         </>
     );
 };
