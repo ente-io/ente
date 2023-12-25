@@ -72,6 +72,7 @@ const ManagePasskeyDrawer = (props: IProps) => {
                                     }}
                                     startIcon={<DeleteIcon />}
                                     label={'Delete Passkey'}
+                                    color="error"
                                 />
                             </MenuItemGroup>
                         </Stack>
