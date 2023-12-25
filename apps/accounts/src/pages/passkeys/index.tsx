@@ -1,6 +1,6 @@
 import { CenteredFlex } from '@ente/shared/components/Container';
 import SingleInputForm from '@ente/shared/components/SingleInputForm';
-import { Box } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import {
     finishPasskeyRegistration,
     getPasskeyRegistrationOptions,
@@ -12,6 +12,7 @@ import {
     Dispatch,
     SetStateAction,
     createContext,
+    useContext,
     useEffect,
     useState,
 } from 'react';
@@ -19,6 +20,8 @@ import { Passkey } from 'types/passkey';
 import PasskeysList from './PasskeysList';
 import ManagePasskeyDrawer from './ManagePasskeyDrawer';
 import { t } from 'i18next';
+import { AppContext } from 'pages/_app';
+import FormPaper from '@ente/shared/components/Form/FormPaper';
 
 export const PasskeysContext = createContext(
     {} as {
@@ -30,6 +33,8 @@ export const PasskeysContext = createContext(
 );
 
 const Passkeys = () => {
+    const { showNavBar } = useContext(AppContext);
+
     const [selectedPasskey, setSelectedPasskey] = useState<Passkey | null>(
         null
     );
@@ -44,16 +49,27 @@ const Passkeys = () => {
     };
 
     useEffect(() => {
+        showNavBar(true);
         init();
     }, []);
 
-    const handleSubmit = async (inputValue: string) => {
-        const response: {
+    const handleSubmit = async (
+        inputValue: string,
+        setFieldError: (errorMessage: string) => void
+    ) => {
+        let response: {
             options: {
                 publicKey: PublicKeyCredentialCreationOptions;
             };
             sessionID: string;
-        } = await getPasskeyRegistrationOptions();
+        };
+
+        try {
+            response = await getPasskeyRegistrationOptions();
+        } catch {
+            setFieldError('Failed to begin registration');
+            return;
+        }
 
         const options = response.options;
 
@@ -74,14 +90,21 @@ const Passkeys = () => {
         try {
             newCredential = await navigator.credentials.create(options);
         } catch (e) {
-            return logError(e, 'Error creating credential');
+            logError(e, 'Error creating credential');
+            setFieldError('Failed to create credential');
+            return;
         }
 
-        await finishPasskeyRegistration(
-            inputValue,
-            newCredential,
-            response.sessionID
-        );
+        try {
+            await finishPasskeyRegistration(
+                inputValue,
+                newCredential,
+                response.sessionID
+            );
+        } catch {
+            setFieldError('Failed to finish registration');
+            return;
+        }
 
         init();
     };
@@ -96,16 +119,28 @@ const Passkeys = () => {
                     refreshPasskeys: init,
                 }}>
                 <CenteredFlex>
-                    <Box>
-                        <SingleInputForm
-                            fieldType="text"
-                            placeholder={t('ENTER_PASSKEY_NAME')}
-                            buttonText={t('ADD_PASSKEY')}
-                            initialValue={''}
-                            blockButton
-                            callback={handleSubmit}
-                        />
-                        <Box>
+                    <Box maxWidth="20rem">
+                        <Box marginBottom="1rem">
+                            <Typography>{t('PASSKEYS_DESCRIPTION')}</Typography>
+                        </Box>
+                        <FormPaper
+                            style={{
+                                padding: '1rem',
+                            }}>
+                            <SingleInputForm
+                                fieldType="text"
+                                placeholder={t('ENTER_PASSKEY_NAME')}
+                                buttonText={t('ADD_PASSKEY')}
+                                initialValue={''}
+                                callback={handleSubmit}
+                                submitButtonProps={{
+                                    sx: {
+                                        marginBottom: 1,
+                                    },
+                                }}
+                            />
+                        </FormPaper>
+                        <Box marginTop="1rem">
                             <PasskeysList passkeys={passkeys} />
                         </Box>
                     </Box>

@@ -13,10 +13,18 @@ import 'styles/global.css';
 import { setupI18n } from '@ente/shared/i18n';
 import { Overlay } from '@ente/shared/components/Container';
 import EnteSpinner from '@ente/shared/components/EnteSpinner';
+import AppNavbar from '@ente/shared/components/Navbar/app';
+import {
+    DialogBoxAttributesV2,
+    SetDialogBoxAttributesV2,
+} from '@ente/shared/components/DialogBoxV2/types';
+import DialogBoxV2 from '@ente/shared/components/DialogBoxV2';
 
 export const AppContext = createContext(
     {} as {
         isMobile: boolean;
+        showNavBar: (show: boolean) => void;
+        setDialogBoxAttributesV2: SetDialogBoxAttributesV2;
     }
 );
 
@@ -25,6 +33,19 @@ const clientSideEmotionCache = createEmotionCache();
 
 export default function App(props: EnteAppProps) {
     const [isI18nReady, setIsI18nReady] = useState<boolean>(false);
+
+    const [showNavbar, setShowNavBar] = useState(false);
+
+    const [dialogBoxAttributeV2, setDialogBoxAttributesV2] =
+        useState<DialogBoxAttributesV2>();
+
+    const [dialogBoxV2View, setDialogBoxV2View] = useState(false);
+
+    useEffect(() => {
+        setDialogBoxV2View(true);
+    }, [dialogBoxAttributeV2]);
+
+    const showNavBar = (show: boolean) => setShowNavBar(show);
 
     const isMobile = useMediaQuery('(max-width:428px)');
 
@@ -40,11 +61,21 @@ export default function App(props: EnteAppProps) {
         setupI18n().finally(() => setIsI18nReady(true));
     }, []);
 
+    const closeDialogBoxV2 = () => setDialogBoxV2View(false);
+
     return (
         <CacheProvider value={emotionCache}>
             <ThemeProvider theme={getTheme(themeColor, APPS.PHOTOS)}>
                 <CssBaseline enableColorScheme />
-                <AppContext.Provider value={{ isMobile }}>
+                <DialogBoxV2
+                    sx={{ zIndex: 1600 }}
+                    open={dialogBoxV2View}
+                    onClose={closeDialogBoxV2}
+                    attributes={dialogBoxAttributeV2}
+                />
+
+                <AppContext.Provider
+                    value={{ isMobile, showNavBar, setDialogBoxAttributesV2 }}>
                     {!isI18nReady && (
                         <Overlay
                             sx={(theme) => ({
@@ -57,6 +88,7 @@ export default function App(props: EnteAppProps) {
                             <EnteSpinner />
                         </Overlay>
                     )}
+                    {showNavbar && <AppNavbar isMobile={isMobile} />}
                     <Component {...pageProps} />
                 </AppContext.Provider>
             </ThemeProvider>

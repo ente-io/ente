@@ -33,3 +33,16 @@ export enum AUTH_PAGES {
     ROOT = '/',
     AUTH = '/auth',
 }
+
+export enum ACCOUNTS_PAGES {
+    CREDENTIALS = '/credentials',
+    LOGIN = '/login',
+    RECOVER = '/recover',
+    SIGNUP = '/signup',
+    TWO_FACTOR_SETUP = '/two-factor/setup',
+    TWO_FACTOR_VERIFY = '/two-factor/verify',
+    TWO_FACTOR_RECOVER = '/two-factor/recover',
+    VERIFY = '/verify',
+    ROOT = '/',
+    PASSKEYS = '/passkeys',
+}
