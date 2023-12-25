@@ -74,6 +74,22 @@ func (a *albumDiskInfo) IsMetaFileNamePresent(metaFileName string) bool {
 	return ok
 }
 
+// GenerateUniqueMetaFileName generates a unique metafile name.
+func (a *albumDiskInfo) GenerateUniqueMetaFileName(baseFileName, extension string) string {
+	potentialDiskFileName := fmt.Sprintf("%s%s.json", baseFileName, extension)
+	count := 1
+	for a.IsMetaFileNamePresent(potentialDiskFileName) {
+		// separate the file name and extension
+		fileName := fmt.Sprintf("%s_%d", baseFileName, count)
+		potentialDiskFileName = fmt.Sprintf("%s%s.json", fileName, extension)
+		count++
+		if !a.IsMetaFileNamePresent(potentialDiskFileName) {
+			break
+		}
+	}
+	return potentialDiskFileName
+}
+
 // GenerateUniqueFileName generates a unique file name.
 func (a *albumDiskInfo) GenerateUniqueFileName(baseFileName, extension string) string {
 	fileName := fmt.Sprintf("%s%s", baseFileName, extension)

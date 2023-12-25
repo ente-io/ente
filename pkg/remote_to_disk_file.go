@@ -124,17 +124,7 @@ func (c *ClICtrl) downloadEntry(ctx context.Context,
 		// Get the extension
 		extension := filepath.Ext(fileDiskMetadata.Title)
 		baseFileName := strings.TrimSuffix(filepath.Clean(filepath.Base(fileDiskMetadata.Title)), extension)
-		potentialDiskFileName := fmt.Sprintf("%s%s.json", baseFileName, extension)
-		count := 1
-		for diskInfo.IsMetaFileNamePresent(potentialDiskFileName) {
-			// separate the file name and extension
-			baseFileName = fmt.Sprintf("%s_%d", baseFileName, count)
-			potentialDiskFileName = fmt.Sprintf("%s%s.json", baseFileName, extension)
-			count++
-			if !diskInfo.IsMetaFileNamePresent(potentialDiskFileName) {
-				break
-			}
-		}
+		diskMetaFileName := diskInfo.GenerateUniqueMetaFileName(baseFileName, extension)
 		if file.IsLivePhoto() {
 			imagePath, videoPath, err := UnpackLive(*decrypt)
 			if err != nil {
@@ -176,13 +166,13 @@ func (c *ClICtrl) downloadEntry(ctx context.Context,
 			fileDiskMetadata.AddFileName(fileName)
 		}
 
-		fileDiskMetadata.MetaFileName = potentialDiskFileName
+		fileDiskMetadata.MetaFileName = diskMetaFileName
 		err = diskInfo.AddEntry(fileDiskMetadata)
 		if err != nil {
 			return err
 		}
 
-		err = writeJSONToFile(filepath.Join(diskInfo.ExportRoot, diskInfo.AlbumMeta.FolderName, ".meta", potentialDiskFileName), fileDiskMetadata)
+		err = writeJSONToFile(filepath.Join(diskInfo.ExportRoot, diskInfo.AlbumMeta.FolderName, ".meta", diskMetaFileName), fileDiskMetadata)
 		if err != nil {
 			return err
 		}
