@@ -630,5 +630,7 @@
     "RENAME_PASSKEY": "Rename passkey",
     "ADD_PASSKEY": "Add passkey",
     "ENTER_PASSKEY_NAME": "Enter passkey name",
-    "PASSKEYS_DESCRIPTION": "Passkeys are a modern and secure second-factor for your Ente account. They use on-device biometric authentication for convenience and security."
+    "PASSKEYS_DESCRIPTION": "Passkeys are a modern and secure second-factor for your Ente account. They use on-device biometric authentication for convenience and security.",
+    "CREATED_AT": "Created at"
+
 }

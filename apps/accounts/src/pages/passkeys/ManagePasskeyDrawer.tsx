@@ -10,13 +10,17 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import MenuItemDivider from '@ente/shared/components/Menu/MenuItemDivider';
 import DeletePasskeyModal from './DeletePasskeyModal';
 import RenamePasskeyModal from './RenamePasskeyModal';
+import InfoItem from '@ente/shared/components/Info/InfoItem';
+import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
+import { formatDateTimeFull } from '@ente/shared/time/format';
+import { t } from 'i18next';
 
 interface IProps {
     open: boolean;
 }
 
 const ManagePasskeyDrawer = (props: IProps) => {
-    const { setShowPasskeyDrawer, refreshPasskeys } =
+    const { setShowPasskeyDrawer, refreshPasskeys, selectedPasskey } =
         useContext(PasskeysContext);
 
     const [showDeletePasskeyModal, setShowDeletePasskeyModal] = useState(false);
@@ -30,34 +34,49 @@ const ManagePasskeyDrawer = (props: IProps) => {
                 onClose={() => {
                     setShowPasskeyDrawer(false);
                 }}>
-                <Stack spacing={'4px'} py={'12px'}>
-                    <Titlebar
-                        onClose={() => {
-                            setShowPasskeyDrawer(false);
-                        }}
-                        title="Manage Passkey"
-                        onRootClose={() => {
-                            setShowPasskeyDrawer(false);
-                        }}
-                    />
-                    <MenuItemGroup>
-                        <EnteMenuItem
-                            onClick={() => {
-                                setShowRenamePasskeyModal(true);
-                            }}
-                            startIcon={<EditIcon />}
-                            label={'Rename Passkey'}
-                        />
-                        <MenuItemDivider />
-                        <EnteMenuItem
-                            onClick={() => {
-                                setShowDeletePasskeyModal(true);
-                            }}
-                            startIcon={<DeleteIcon />}
-                            label={'Delete Passkey'}
-                        />
-                    </MenuItemGroup>
-                </Stack>
+                {selectedPasskey && (
+                    <>
+                        <Stack spacing={'4px'} py={'12px'}>
+                            <Titlebar
+                                onClose={() => {
+                                    setShowPasskeyDrawer(false);
+                                }}
+                                title="Manage Passkey"
+                                onRootClose={() => {
+                                    setShowPasskeyDrawer(false);
+                                }}
+                            />
+                            <InfoItem
+                                icon={<CalendarTodayIcon />}
+                                title={t('CREATED_AT')}
+                                caption={
+                                    `${formatDateTimeFull(
+                                        selectedPasskey.createdAt / 1000
+                                    )}` || ''
+                                }
+                                loading={!selectedPasskey}
+                                hideEditOption
+                            />
+                            <MenuItemGroup>
+                                <EnteMenuItem
+                                    onClick={() => {
+                                        setShowRenamePasskeyModal(true);
+                                    }}
+                                    startIcon={<EditIcon />}
+                                    label={'Rename Passkey'}
+                                />
+                                <MenuItemDivider />
+                                <EnteMenuItem
+                                    onClick={() => {
+                                        setShowDeletePasskeyModal(true);
+                                    }}
+                                    startIcon={<DeleteIcon />}
+                                    label={'Delete Passkey'}
+                                />
+                            </MenuItemGroup>
+                        </Stack>
+                    </>
+                )}
             </EnteDrawer>
             <DeletePasskeyModal
                 open={showDeletePasskeyModal}
