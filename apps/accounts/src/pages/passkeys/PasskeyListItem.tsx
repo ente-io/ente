@@ -3,6 +3,7 @@ import { Passkey } from 'types/passkey';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { useContext } from 'react';
 import { PasskeysContext } from '.';
+import KeyIcon from '@mui/icons-material/Key';
 
 interface IProps {
     passkey: Passkey;
@@ -18,7 +19,7 @@ const PasskeyListItem = (props: IProps) => {
                 setSelectedPasskey(props.passkey);
                 setShowPasskeyDrawer(true);
             }}
-            key={props.passkey.id}
+            startIcon={<KeyIcon />}
             endIcon={<ChevronRightIcon />}
             label={props.passkey.friendlyName}
         />
