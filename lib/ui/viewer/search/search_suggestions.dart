@@ -5,11 +5,14 @@ import "package:flutter_animate/flutter_animate.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/clear_and_unfocus_search_bar_event.dart";
+import "package:photos/generated/l10n.dart";
 import "package:photos/models/search/album_search_result.dart";
 import "package:photos/models/search/generic_search_result.dart";
 import "package:photos/models/search/index_of_indexed_stack.dart";
 import 'package:photos/models/search/search_result.dart';
 import "package:photos/services/collections_service.dart";
+import "package:photos/theme/ente_theme.dart";
+import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/viewer/gallery/collection_page.dart";
 import "package:photos/ui/viewer/search/result/search_result_widget.dart";
 import "package:photos/ui/viewer/search/search_widget.dart";
@@ -115,13 +118,9 @@ class _SearchSuggestionsWidgetState extends State<SearchSuggestionsWidget> {
 
   @override
   Widget build(BuildContext context) {
-    print(
-      "_______ rebuiding SearchSuggestionWidget with stream : ${resultsStream.hashCode}",
-    );
-    // return const SizedBox.shrink();
-    // late final String title;
-    // final resultsCount = results.length;
-    // title = S.of(context).searchResultCount(resultsCount);
+    String title;
+    final resultsCount = searchResultWidgets.length;
+    title = S.of(context).searchResultCount(resultsCount);
     return Scaffold(
       appBar: AppBar(
         leading: BackButton(
@@ -135,11 +134,24 @@ class _SearchSuggestionsWidgetState extends State<SearchSuggestionsWidget> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            //     // Text(
-            //     //   title,
-            //     //   style: getEnteTextTheme(context).largeBold,
-            //     // ),
-            //     const SizedBox(height: 20),
+            AnimatedContainer(
+              duration: const Duration(seconds: 2),
+              child: SearchWidgetState.isLoading.value
+                  ? EnteLoadingWidget(
+                      size: 14,
+                      padding: 4,
+                      color: getEnteColorScheme(context).strokeMuted,
+                      alignment: Alignment.centerLeft,
+                    )
+                  : Text(
+                      title,
+                      style: getEnteTextTheme(context).largeBold,
+                    ).animate().fadeIn(
+                        duration: const Duration(milliseconds: 60),
+                        curve: Curves.easeIn,
+                      ),
+            ),
+            const SizedBox(height: 20),
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 4),
