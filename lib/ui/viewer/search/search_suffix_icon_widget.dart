@@ -11,8 +11,7 @@ class SearchSuffixIcon extends StatefulWidget {
   State<SearchSuffixIcon> createState() => _SearchSuffixIconState();
 }
 
-class _SearchSuffixIconState extends State<SearchSuffixIcon>
-    with TickerProviderStateMixin {
+class _SearchSuffixIconState extends State<SearchSuffixIcon> {
   @override
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);

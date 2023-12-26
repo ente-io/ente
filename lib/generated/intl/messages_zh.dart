@@ -338,8 +338,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("无法删除共享文件"),
         "centerPoint": MessageLookupByLibrary.simpleMessage("中心点"),
         "changeEmail": MessageLookupByLibrary.simpleMessage("修改邮箱"),
-        "changeLocationOfSelectedItems": MessageLookupByLibrary.simpleMessage(
-            "Change location of selected items?"),
+        "changeLocationOfSelectedItems":
+            MessageLookupByLibrary.simpleMessage("确定要更改所选项目的位置吗？"),
         "changePassword": MessageLookupByLibrary.simpleMessage("修改密码"),
         "changePasswordTitle": MessageLookupByLibrary.simpleMessage("修改密码"),
         "changePermissions": MessageLookupByLibrary.simpleMessage("要修改权限吗？"),
@@ -353,6 +353,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "claimedStorageSoFar": m8,
         "cleanUncategorized": MessageLookupByLibrary.simpleMessage("清除未分类的"),
         "clearCaches": MessageLookupByLibrary.simpleMessage("清除缓存"),
+        "clearIndexes": MessageLookupByLibrary.simpleMessage("清空索引"),
         "click": MessageLookupByLibrary.simpleMessage("• 点击"),
         "clickOnTheOverflowMenu":
             MessageLookupByLibrary.simpleMessage("• 点击溢出菜单"),
@@ -498,12 +499,11 @@ class MessageLookup extends MessageLookupByLibrary {
         "duplicateFileCountWithStorageSaved": m16,
         "duplicateItemsGroup": m17,
         "edit": MessageLookupByLibrary.simpleMessage("编辑"),
-        "editLocation": MessageLookupByLibrary.simpleMessage("Edit location"),
+        "editLocation": MessageLookupByLibrary.simpleMessage("编辑位置"),
         "editLocationTagTitle": MessageLookupByLibrary.simpleMessage("编辑位置"),
         "editsSaved": MessageLookupByLibrary.simpleMessage("已保存编辑"),
         "editsToLocationWillOnlyBeSeenWithinEnte":
-            MessageLookupByLibrary.simpleMessage(
-                "Edits to location will only be seen within Ente"),
+            MessageLookupByLibrary.simpleMessage("对位置的编辑只能在 Ente 内看到"),
         "eligible": MessageLookupByLibrary.simpleMessage("符合资格"),
         "email": MessageLookupByLibrary.simpleMessage("电子邮件地址"),
         "emailChangedTo": m18,
@@ -641,6 +641,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("您输入的恢复密钥不正确"),
         "incorrectRecoveryKeyTitle":
             MessageLookupByLibrary.simpleMessage("不正确的恢复密钥"),
+        "indexedItems": MessageLookupByLibrary.simpleMessage("已索引项目"),
         "insecureDevice": MessageLookupByLibrary.simpleMessage("设备不安全"),
         "installManually": MessageLookupByLibrary.simpleMessage("手动安装"),
         "invalidEmailAddress":
@@ -722,6 +723,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "longpressOnAnItemToViewInFullscreen":
             MessageLookupByLibrary.simpleMessage("长按一个项目来全屏查看"),
         "lostDevice": MessageLookupByLibrary.simpleMessage("丢失了设备吗？"),
+        "machineLearning": MessageLookupByLibrary.simpleMessage("机器学习"),
+        "magicSearch": MessageLookupByLibrary.simpleMessage("魔法搜索"),
+        "magicSearchDescription": MessageLookupByLibrary.simpleMessage(
+            "请使用我们的桌面应用程序来为您库中的待处理项目建立索引。"),
         "manage": MessageLookupByLibrary.simpleMessage("管理"),
         "manageDeviceStorage": MessageLookupByLibrary.simpleMessage("管理设备存储"),
         "manageFamily": MessageLookupByLibrary.simpleMessage("管理家庭计划"),
@@ -810,6 +815,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "paymentFailed": MessageLookupByLibrary.simpleMessage("支付失败"),
         "paymentFailedTalkToProvider": m35,
         "paymentFailedWithReason": m36,
+        "pendingItems": MessageLookupByLibrary.simpleMessage("待处理项目"),
         "pendingSync": MessageLookupByLibrary.simpleMessage("正在等待同步"),
         "peopleUsingYourCode": MessageLookupByLibrary.simpleMessage("使用您的代码的人"),
         "permDeleteWarning":
@@ -969,10 +975,9 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("邀请他人，您将在此看到他们分享的所有照片"),
         "searchResultCount": m44,
         "security": MessageLookupByLibrary.simpleMessage("安全"),
-        "selectALocation":
-            MessageLookupByLibrary.simpleMessage("Select a location"),
+        "selectALocation": MessageLookupByLibrary.simpleMessage("选择一个位置"),
         "selectALocationFirst":
-            MessageLookupByLibrary.simpleMessage("Select a location first"),
+            MessageLookupByLibrary.simpleMessage("首先选择一个位置"),
         "selectAlbum": MessageLookupByLibrary.simpleMessage("选择相册"),
         "selectAll": MessageLookupByLibrary.simpleMessage("全选"),
         "selectFoldersForBackup":
@@ -1071,6 +1076,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "sortOldestFirst": MessageLookupByLibrary.simpleMessage("最旧在前"),
         "sparkleSuccess": MessageLookupByLibrary.simpleMessage("✨ 成功"),
         "startBackup": MessageLookupByLibrary.simpleMessage("开始备份"),
+        "status": MessageLookupByLibrary.simpleMessage("状态"),
         "storage": MessageLookupByLibrary.simpleMessage("存储空间"),
         "storageBreakupFamily": MessageLookupByLibrary.simpleMessage("家庭"),
         "storageBreakupYou": MessageLookupByLibrary.simpleMessage("您"),

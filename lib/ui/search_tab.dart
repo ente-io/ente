@@ -2,15 +2,13 @@ import "package:fade_indexed_stack/fade_indexed_stack.dart";
 import "package:flutter/material.dart";
 import "package:flutter_animate/flutter_animate.dart";
 import "package:photos/core/constants.dart";
-import "package:photos/models/search/search_result.dart";
+import "package:photos/models/search/index_of_indexed_stack.dart";
 import "package:photos/models/search/search_types.dart";
 import "package:photos/states/all_sections_examples_state.dart";
-import "package:photos/states/search_results_state.dart";
 import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/viewer/search/result/no_result_widget.dart";
 import "package:photos/ui/viewer/search/search_section.dart";
 import "package:photos/ui/viewer/search/search_suggestions.dart";
-import 'package:photos/ui/viewer/search/search_widget.dart';
 import "package:photos/ui/viewer/search/tab_empty_state.dart";
 
 class SearchTab extends StatefulWidget {
@@ -21,34 +19,40 @@ class SearchTab extends StatefulWidget {
 }
 
 class _SearchTabState extends State<SearchTab> {
-  var _searchResults = <SearchResult>[];
-  int index = 0;
+  late int index;
+  final indexOfStackNotifier = IndexOfStackNotifier();
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _searchResults = InheritedSearchResults.of(context).results;
-    if (_searchResults.isEmpty) {
-      if (isSearchQueryEmpty) {
-        index = 0;
-      } else {
-        index = 2;
-      }
-    } else {
-      index = 1;
-    }
+  void initState() {
+    super.initState();
+    index = indexOfStackNotifier.index;
+    indexOfStackNotifier.addListener(indexNotifierListener);
+  }
+
+  void indexNotifierListener() {
+    setState(() {
+      index = indexOfStackNotifier.index;
+    });
+  }
+
+  @override
+  void dispose() {
+    indexOfStackNotifier.removeListener(indexNotifierListener);
+    indexOfStackNotifier.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return AllSectionsExamplesProvider(
       child: FadeIndexedStack(
+        lazy: false,
         duration: const Duration(milliseconds: 150),
         index: index,
-        children: [
-          const AllSearchSections(),
-          SearchSuggestionsWidget(_searchResults),
-          const NoResultWidget(),
+        children: const [
+          AllSearchSections(),
+          SearchSuggestionsWidget(),
+          NoResultWidget(),
         ],
       ),
     );
