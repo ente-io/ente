@@ -23,6 +23,8 @@ class LocationService {
 
   static final LocationService instance = LocationService._privateConstructor();
 
+  static const kCitiesRemotePath = "https://assets.ente.io/world_cities.json";
+
   void init(SharedPreferences preferences) {
     prefs = preferences;
     if (FeatureFlagService.instance.isInternalUserOrDebugBuild()) {
@@ -216,8 +218,8 @@ class LocationService {
 
   Future<void> _loadCities() async {
     try {
-      final data = await RemoteAssetsService.instance
-          .getAsset("https://assets.ente.io/world_cities.json");
+      final data =
+          await RemoteAssetsService.instance.getAsset(kCitiesRemotePath);
       final citiesJson = json.decode(await data.readAsString());
       final List<dynamic> jsonData = citiesJson['data'];
       final cities =
