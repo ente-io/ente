@@ -299,9 +299,7 @@ class SearchWidgetState extends State<SearchWidget> {
     _searchService.getHolidaySearchResults(context, query).then(
       (holidayResults) {
         streamController.sink.add(holidayResults);
-
         resultCount++;
-
         if (resultCount == maxResultCount) {
           streamController.close();
         }
@@ -312,7 +310,6 @@ class SearchWidgetState extends State<SearchWidget> {
       (fileTypeSearchResults) {
         streamController.sink.add(fileTypeSearchResults);
         resultCount++;
-
         if (resultCount == maxResultCount) {
           streamController.close();
         }
@@ -323,7 +320,6 @@ class SearchWidgetState extends State<SearchWidget> {
       (captionAndDisplayNameResult) {
         streamController.sink.add(captionAndDisplayNameResult);
         resultCount++;
-
         if (resultCount == maxResultCount) {
           streamController.close();
         }
@@ -354,7 +350,6 @@ class SearchWidgetState extends State<SearchWidget> {
       (collectionResults) {
         streamController.sink.add(collectionResults);
         resultCount++;
-
         if (resultCount == maxResultCount) {
           streamController.close();
         }

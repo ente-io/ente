@@ -88,8 +88,9 @@ class _SearchSuggestionsWidgetState extends State<SearchSuggestionsWidget> {
   }
 
   ///This method generates searchResultsWidgets from the queueOfEvents by checking
-  ///every 60ms if the queue is empty or not. If the queue is not empty, it
-  ///generates the widgets and clears the queue and updates the UI.
+  ///every [_surfaceNewResultsInterval] if the queue is empty or not. If the
+  ///queue is not empty, it generates the widgets and clears the queue and
+  ///updates the UI.
   void generateResultWidgetsInIntervalsFromQueue() {
     timer = Timer.periodic(
         const Duration(milliseconds: _surfaceNewResultsInterval), (timer) {
