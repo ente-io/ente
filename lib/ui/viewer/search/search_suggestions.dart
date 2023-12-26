@@ -36,6 +36,10 @@ class _SearchSuggestionsWidgetState extends State<SearchSuggestionsWidget> {
   StreamSubscription<List<SearchResult>>? subscription;
   Timer? timer;
 
+  ///This is the interval at which the queue is checked for new events and
+  ///the search result widgets are generated from the queue.
+  static const _surfaceNewResultsInterval = 50;
+
   @override
   void initState() {
     super.initState();
@@ -59,9 +63,13 @@ class _SearchSuggestionsWidgetState extends State<SearchSuggestionsWidget> {
           queueOfSearchResults.add(searchResults);
         },
         onDone: () {
-          if (!queueOfSearchResults.any((element) => element.isNotEmpty)) {
-            IndexOfStackNotifier().isSearchResultsEmpty = true;
-          }
+          Future.delayed(
+              const Duration(milliseconds: _surfaceNewResultsInterval + 20),
+              () {
+            if (searchResultWidgets.isEmpty) {
+              IndexOfStackNotifier().isSearchResultsEmpty = true;
+            }
+          });
         },
       );
 
@@ -78,7 +86,8 @@ class _SearchSuggestionsWidgetState extends State<SearchSuggestionsWidget> {
   ///every 60ms if the queue is empty or not. If the queue is not empty, it
   ///generates the widgets and clears the queue and updates the UI.
   void generateResultWidgetsInIntervalsFromQueue() {
-    timer = Timer.periodic(const Duration(milliseconds: 50), (timer) {
+    timer = Timer.periodic(
+        const Duration(milliseconds: _surfaceNewResultsInterval), (timer) {
       if (queueOfSearchResults.isNotEmpty) {
         for (List<SearchResult> event in queueOfSearchResults) {
           for (SearchResult result in event) {
