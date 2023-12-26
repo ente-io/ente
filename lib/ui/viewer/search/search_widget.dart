@@ -24,6 +24,11 @@ class SearchWidget extends StatefulWidget {
 class SearchWidgetState extends State<SearchWidget> {
   static ValueNotifier<Stream<List<SearchResult>>?>
       searchResultsStreamNotifier = ValueNotifier(null);
+
+  ///This stores the query that is being searched for. When going to other tabs
+  ///when searching, this state gets disposed and when coming back to the
+  ///search tab, this query is used to populate the search bar.
+  static String query = "";
   final _searchService = SearchService.instance;
   final _debouncer = Debouncer(const Duration(milliseconds: 200));
   final Logger _logger = Logger((SearchWidgetState).toString());
@@ -64,6 +69,10 @@ class SearchWidgetState extends State<SearchWidget> {
       textController.addListener(textControllerListener);
     });
 
+    //Populate the serach tab with the latest query when coming back
+    //to the serach tab.
+    textController.text = query;
+
     _clearAndUnfocusSearchBar =
         Bus.instance.on<ClearAndUnfocusSearchBar>().listen((event) {
       textController.clear();
@@ -95,7 +104,7 @@ class SearchWidgetState extends State<SearchWidget> {
   Future<void> textControllerListener() async {
     _debouncer.run(() async {
       if (mounted) {
-        final query = textController.text;
+        query = textController.text;
         IndexOfStackNotifier().isSearchQueryEmpty = query.isEmpty;
         searchResultsStreamNotifier.value =
             _getSearchResultsStream(context, query);
