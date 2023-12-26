@@ -9,7 +9,7 @@ import "package:onnxruntime/onnxruntime.dart";
 class OnnxImageEncoder {
   final _logger = Logger("OnnxImageEncoder");
 
-  OnnxImageEncoder() {
+  Future<void> init() async {
     OrtEnv.instance.init();
   }
 
@@ -96,14 +96,14 @@ class OnnxImageEncoder {
     final int ny = rgb.height;
     final int inputSize = 3 * nx * ny;
     final inputImage = List.filled(inputSize, 0.toDouble());
-  
+
     const int nx2 = 224;
     const int ny2 = 224;
     const int totalSize = 3 * nx2 * ny2;
 
     // Load image into List<double> inputImage
     for (int y = 0; y < ny; y++) {
-      for (int x = 0; x < nx; x ++) {
+      for (int x = 0; x < nx; x++) {
         final int i = 3 * (y * nx + x);
         inputImage[i] = rgb.getPixel(x, y).r.toDouble();
         inputImage[i + 1] = rgb.getPixel(x, y).g.toDouble();
@@ -121,7 +121,7 @@ class OnnxImageEncoder {
     final std = [0.26862954, 0.26130258, 0.27577711];
 
     for (int y = 0; y < ny3; y++) {
-      for (int x = 0; x < nx3; x ++) {
+      for (int x = 0; x < nx3; x++) {
         for (int c = 0; c < 3; c++) {
           //linear interpolation
           final double sx = (x + 0.5) * scale - 0.5;
@@ -146,24 +146,23 @@ class OnnxImageEncoder {
           final double v10 = inputImage[j10];
           final double v11 = inputImage[j11];
 
-          final double v0 = v00 + (1 - dx) + v01 * dx;
-          final double v1 = v10 + (1 - dx) + v11 * dx;
+          final double v0 = v00 * (1 - dx) + v01 * dx;
+          final double v1 = v10 * (1 - dx) + v11 * dx;
 
           final double v = v0 * (1 - dy) + v1 * dy;
 
           final int v2 = min(max(v.round(), 0), 255);
-          
+
           final int i = 3 * (y * nx3 + x) + c;
 
           result[i] = ((v2 / 255) - mean[c]) / std[c];
-
         }
       }
     }
     final floatList = Float32List.fromList(result);
 
-
-    final inputOrt = OrtValueTensor.createTensorWithDataList(floatList, [1, 3, 224, 224]);
+    final inputOrt =
+        OrtValueTensor.createTensorWithDataList(floatList, [1, 3, 224, 224]);
     final inputs = {'input': inputOrt};
     final session = OrtSession.fromAddress(args["address"]);
     final outputs = session.run(runOptions, inputs);
