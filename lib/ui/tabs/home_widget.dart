@@ -33,7 +33,6 @@ import 'package:photos/services/local_sync_service.dart';
 import "package:photos/services/notification_service.dart";
 import 'package:photos/services/update_service.dart';
 import 'package:photos/services/user_service.dart';
-import "package:photos/states/search_results_state.dart";
 import 'package:photos/states/user_details_state.dart';
 import 'package:photos/theme/colors.dart';
 import "package:photos/theme/effects.dart";
@@ -393,90 +392,88 @@ class _HomeWidgetState extends State<HomeWidget> {
             !LocalSyncService.instance.hasGrantedLimitedPermissions() &&
             CollectionsService.instance.getActiveCollections().isEmpty;
 
-    return SearchResultsProvider(
-      child: Stack(
-        children: [
-          Builder(
-            builder: (context) {
-              return ExtentsPageView(
-                onPageChanged: (page) {
-                  Bus.instance.fire(
-                    TabChangedEvent(
-                      page,
-                      TabChangedEventSource.pageView,
-                    ),
-                  );
-                },
-                controller: _pageController,
-                openDrawer: Scaffold.of(context).openDrawer,
-                physics: const BouncingScrollPhysics(),
-                children: [
-                  _showShowBackupHook
-                      ? const StartBackupHookWidget(headerWidget: _headerWidget)
-                      : HomeGalleryWidget(
-                          header: _headerWidget,
-                          footer: const SizedBox(
-                            height: 160,
-                          ),
-                          selectedFiles: _selectedFiles,
-                        ),
-                  _userCollectionsTab,
-                  _sharedCollectionTab,
-                  _searchTab,
-                ],
-              );
-            },
-          ),
-          Align(
-            alignment: Alignment.bottomCenter,
-            child: ValueListenableBuilder(
-              valueListenable: isOnSearchTabNotifier,
-              builder: (context, value, child) {
-                return Container(
-                  decoration: value
-                      ? BoxDecoration(
-                          color: getEnteColorScheme(context).backgroundElevated,
-                          boxShadow: shadowFloatFaintLight,
-                        )
-                      : null,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      value
-                          ? const SearchWidget()
-                              .animate()
-                              .fadeIn(
-                                duration: const Duration(milliseconds: 225),
-                                curve: Curves.easeInOutSine,
-                              )
-                              .scale(
-                                begin: const Offset(0.8, 0.8),
-                                end: const Offset(1, 1),
-                                duration: const Duration(
-                                  milliseconds: 225,
-                                ),
-                                curve: Curves.easeInOutSine,
-                              )
-                              .slide(
-                                begin: const Offset(0, 0.4),
-                                curve: Curves.easeInOutSine,
-                                duration: const Duration(
-                                  milliseconds: 225,
-                                ),
-                              )
-                          : const SizedBox.shrink(),
-                      HomeBottomNavigationBar(
-                        _selectedFiles,
-                        selectedTabIndex: _selectedTabIndex,
-                      ),
-                    ],
+    return Stack(
+      children: [
+        Builder(
+          builder: (context) {
+            return ExtentsPageView(
+              onPageChanged: (page) {
+                Bus.instance.fire(
+                  TabChangedEvent(
+                    page,
+                    TabChangedEventSource.pageView,
                   ),
                 );
               },
-            ),
+              controller: _pageController,
+              openDrawer: Scaffold.of(context).openDrawer,
+              physics: const BouncingScrollPhysics(),
+              children: [
+                _showShowBackupHook
+                    ? const StartBackupHookWidget(headerWidget: _headerWidget)
+                    : HomeGalleryWidget(
+                        header: _headerWidget,
+                        footer: const SizedBox(
+                          height: 160,
+                        ),
+                        selectedFiles: _selectedFiles,
+                      ),
+                _userCollectionsTab,
+                _sharedCollectionTab,
+                _searchTab,
+              ],
+            );
+          },
+        ),
+        Align(
+          alignment: Alignment.bottomCenter,
+          child: ValueListenableBuilder(
+            valueListenable: isOnSearchTabNotifier,
+            builder: (context, value, child) {
+              return Container(
+                decoration: value
+                    ? BoxDecoration(
+                        color: getEnteColorScheme(context).backgroundElevated,
+                        boxShadow: shadowFloatFaintLight,
+                      )
+                    : null,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    value
+                        ? const SearchWidget()
+                            .animate()
+                            .fadeIn(
+                              duration: const Duration(milliseconds: 225),
+                              curve: Curves.easeInOutSine,
+                            )
+                            .scale(
+                              begin: const Offset(0.8, 0.8),
+                              end: const Offset(1, 1),
+                              duration: const Duration(
+                                milliseconds: 225,
+                              ),
+                              curve: Curves.easeInOutSine,
+                            )
+                            .slide(
+                              begin: const Offset(0, 0.4),
+                              curve: Curves.easeInOutSine,
+                              duration: const Duration(
+                                milliseconds: 225,
+                              ),
+                            )
+                        : const SizedBox.shrink(),
+                    HomeBottomNavigationBar(
+                      _selectedFiles,
+                      selectedTabIndex: _selectedTabIndex,
+                    ),
+                  ],
+                ),
+              );
+            },
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 

@@ -6,15 +6,13 @@ import "package:logging/logging.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/clear_and_unfocus_search_bar_event.dart";
 import "package:photos/events/tab_changed_event.dart";
+import "package:photos/models/search/index_of_indexed_stack.dart";
 import "package:photos/models/search/search_result.dart";
 import "package:photos/services/search_service.dart";
-import "package:photos/states/search_results_state.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/viewer/search/search_suffix_icon_widget.dart";
 import "package:photos/utils/date_time_util.dart";
 import "package:photos/utils/debouncer.dart";
-
-bool isSearchQueryEmpty = true;
 
 class SearchWidget extends StatefulWidget {
   const SearchWidget({Key? key}) : super(key: key);
@@ -24,7 +22,15 @@ class SearchWidget extends StatefulWidget {
 }
 
 class SearchWidgetState extends State<SearchWidget> {
+  static final ValueNotifier<Stream<List<SearchResult>>?>
+      searchResultsStreamNotifier = ValueNotifier(null);
+
+  ///This stores the query that is being searched for. When going to other tabs
+  ///when searching, this state gets disposed and when coming back to the
+  ///search tab, this query is used to populate the search bar.
   static String query = "";
+  //Debouncing + querying
+  static final isLoading = ValueNotifier(false);
   final _searchService = SearchService.instance;
   final _debouncer = Debouncer(const Duration(milliseconds: 200));
   final Logger _logger = Logger((SearchWidgetState).toString());
@@ -64,6 +70,9 @@ class SearchWidgetState extends State<SearchWidget> {
 
       textController.addListener(textControllerListener);
     });
+
+    //Populate the serach tab with the latest query when coming back
+    //to the serach tab.
     textController.text = query;
 
     _clearAndUnfocusSearchBar =
@@ -95,25 +104,15 @@ class SearchWidgetState extends State<SearchWidget> {
   }
 
   Future<void> textControllerListener() async {
-    //query in local varialbe
-    final value = textController.text;
-    isSearchQueryEmpty = value.isEmpty;
-    //latest query in global variable
-    query = textController.text;
-
-    final List<SearchResult> allResults =
-        await getSearchResultsForQuery(context, value);
-    /*checking if query == value to make sure that the results are from the current query
-                      and not from the previous query (race condition).*/
-    //checking if query == value to make sure that the latest query's result
-    //(allResults) is passed to updateResult. Due to race condition, the previous
-    //query's allResults could be passed to updateResult after the lastest query's
-    //allResults is passed.
-
-    if (mounted && query == value) {
-      final inheritedSearchResults = InheritedSearchResults.of(context);
-      inheritedSearchResults.updateResults(allResults);
-    }
+    isLoading.value = true;
+    _debouncer.run(() async {
+      if (mounted) {
+        query = textController.text;
+        IndexOfStackNotifier().isSearchQueryEmpty = query.isEmpty;
+        searchResultsStreamNotifier.value =
+            _getSearchResultsStream(context, query);
+      }
+    });
   }
 
   @override
@@ -177,14 +176,14 @@ class SearchWidgetState extends State<SearchWidget> {
                       /*Using valueListenableBuilder inside a stateful widget because this widget is only rebuild when
                       setState is called when deboucncing is over and the spinner needs to be shown while debouncing */
                       suffixIcon: ValueListenableBuilder(
-                        valueListenable: _debouncer.debounceActiveNotifier,
+                        valueListenable: isLoading,
                         builder: (
                           BuildContext context,
-                          bool isDebouncing,
+                          bool isSearching,
                           Widget? child,
                         ) {
                           return SearchSuffixIcon(
-                            isDebouncing,
+                            isSearching,
                           );
                         },
                       ),
@@ -272,6 +271,132 @@ class SearchWidgetState extends State<SearchWidget> {
       _logger.severe("error during search", e, s);
     }
     completer.complete(allResults);
+  }
+
+  Stream<List<SearchResult>> _getSearchResultsStream(
+    BuildContext context,
+    String query,
+  ) {
+    int resultCount = 0;
+    final maxResultCount = _isYearValid(query) ? 11 : 10;
+    final streamController = StreamController<List<SearchResult>>();
+
+    if (query.isEmpty) {
+      streamController.sink.add([]);
+      streamController.close();
+      return streamController.stream;
+    }
+    if (_isYearValid(query)) {
+      _searchService.getYearSearchResults(query).then((yearSearchResults) {
+        streamController.sink.add(yearSearchResults);
+        resultCount++;
+        if (resultCount == maxResultCount) {
+          streamController.close();
+        }
+      });
+    }
+
+    _searchService.getHolidaySearchResults(context, query).then(
+      (holidayResults) {
+        streamController.sink.add(holidayResults);
+        resultCount++;
+        if (resultCount == maxResultCount) {
+          streamController.close();
+        }
+      },
+    );
+
+    _searchService.getFileTypeResults(context, query).then(
+      (fileTypeSearchResults) {
+        streamController.sink.add(fileTypeSearchResults);
+        resultCount++;
+        if (resultCount == maxResultCount) {
+          streamController.close();
+        }
+      },
+    );
+
+    _searchService.getCaptionAndNameResults(query).then(
+      (captionAndDisplayNameResult) {
+        streamController.sink.add(captionAndDisplayNameResult);
+        resultCount++;
+        if (resultCount == maxResultCount) {
+          streamController.close();
+        }
+      },
+    );
+
+    _searchService.getFileExtensionResults(query).then(
+      (fileExtnResult) {
+        streamController.sink.add(fileExtnResult);
+        resultCount++;
+        if (resultCount == maxResultCount) {
+          streamController.close();
+        }
+      },
+    );
+
+    _searchService.getLocationResults(query).then(
+      (locationResult) {
+        streamController.sink.add(locationResult);
+        resultCount++;
+        if (resultCount == maxResultCount) {
+          streamController.close();
+        }
+      },
+    );
+
+    _searchService.getCollectionSearchResults(query).then(
+      (collectionResults) {
+        streamController.sink.add(collectionResults);
+        resultCount++;
+        if (resultCount == maxResultCount) {
+          streamController.close();
+        }
+      },
+    );
+
+    _searchService.getMonthSearchResults(context, query).then(
+      (monthResults) {
+        streamController.sink.add(monthResults);
+        resultCount++;
+        if (resultCount == maxResultCount) {
+          streamController.close();
+        }
+      },
+    );
+
+    _searchService.getDateResults(context, query).then(
+      (possibleEvents) {
+        streamController.sink.add(possibleEvents);
+        resultCount++;
+        if (resultCount == maxResultCount) {
+          streamController.close();
+        }
+      },
+    );
+
+    _searchService.getMagicSearchResults(context, query).then(
+      (magicResults) {
+        streamController.sink.add(magicResults);
+        resultCount++;
+        if (resultCount == maxResultCount) {
+          streamController.close();
+        }
+      },
+    );
+
+    _searchService.getContactSearchResults(query).then(
+      (contactResults) {
+        streamController.sink.add(contactResults);
+        resultCount++;
+        if (resultCount == maxResultCount) {
+          streamController.close();
+        }
+      },
+    );
+
+    return streamController.stream;
   }
 
   bool _isYearValid(String year) {
