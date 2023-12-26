@@ -22,7 +22,7 @@ class SearchWidget extends StatefulWidget {
 }
 
 class SearchWidgetState extends State<SearchWidget> {
-  static ValueNotifier<Stream<List<SearchResult>>?>
+  static final ValueNotifier<Stream<List<SearchResult>>?>
       searchResultsStreamNotifier = ValueNotifier(null);
 
   ///This stores the query that is being searched for. When going to other tabs
