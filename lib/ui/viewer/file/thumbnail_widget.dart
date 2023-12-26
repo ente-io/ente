@@ -1,3 +1,5 @@
+import "dart:async";
+
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/cache/thumbnail_in_memory_cache.dart';
@@ -220,9 +222,9 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
           _logger.fine("Removing localID reference for " + widget.file.tag);
           widget.file.localID = null;
           if (widget.file.isTrash) {
-            await TrashDB.instance.update(widget.file as TrashFile);
+            unawaited(TrashDB.instance.update(widget.file as TrashFile));
           } else {
-            await FilesDB.instance.update(widget.file);
+            unawaited(FilesDB.instance.update(widget.file));
           }
           _loadNetworkImage();
         } else {
