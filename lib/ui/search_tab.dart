@@ -69,7 +69,6 @@ class AllSearchSections extends StatefulWidget {
 class _AllSearchSectionsState extends State<AllSearchSections> {
   @override
   Widget build(BuildContext context) {
-    print("In initState of AllSearchSections -----------------");
     final searchTypes = SectionType.values.toList(growable: true);
     // remove face and content sectionType
     searchTypes.remove(SectionType.face);

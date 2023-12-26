@@ -290,7 +290,6 @@ class SearchWidgetState extends State<SearchWidget> {
       _searchService.getYearSearchResults(query).then((yearSearchResults) {
         streamController.sink.add(yearSearchResults);
         resultCount++;
-        print('-----------yearSearchResults: ${yearSearchResults.length}');
         if (resultCount == maxResultCount) {
           streamController.close();
         }
@@ -303,10 +302,7 @@ class SearchWidgetState extends State<SearchWidget> {
 
         resultCount++;
 
-        print('------------holidayResults: ${holidayResults.length}');
-
         if (resultCount == maxResultCount) {
-          print("------- closing stream from holiday results");
           streamController.close();
         }
       },
@@ -316,11 +312,8 @@ class SearchWidgetState extends State<SearchWidget> {
       (fileTypeSearchResults) {
         streamController.sink.add(fileTypeSearchResults);
         resultCount++;
-        print(
-          '----------fileTypeSearchResults: ${fileTypeSearchResults.length}',
-        );
+
         if (resultCount == maxResultCount) {
-          print("------- closing stream from file type results");
           streamController.close();
         }
       },
@@ -330,11 +323,8 @@ class SearchWidgetState extends State<SearchWidget> {
       (captionAndDisplayNameResult) {
         streamController.sink.add(captionAndDisplayNameResult);
         resultCount++;
-        print(
-          '--------------captionAndDisplayNameResult: ${captionAndDisplayNameResult.length}',
-        );
+
         if (resultCount == maxResultCount) {
-          print("------- closing stream from caption results");
           streamController.close();
         }
       },
@@ -344,9 +334,7 @@ class SearchWidgetState extends State<SearchWidget> {
       (fileExtnResult) {
         streamController.sink.add(fileExtnResult);
         resultCount++;
-        print('-----------fileExtnResult: ${fileExtnResult.length}');
         if (resultCount == maxResultCount) {
-          print("------- closing stream from file extn results");
           streamController.close();
         }
       },
@@ -356,9 +344,7 @@ class SearchWidgetState extends State<SearchWidget> {
       (locationResult) {
         streamController.sink.add(locationResult);
         resultCount++;
-        print('-------------locationResult: ${locationResult.length}');
         if (resultCount == maxResultCount) {
-          print("------- closing stream from location results");
           streamController.close();
         }
       },
@@ -369,12 +355,7 @@ class SearchWidgetState extends State<SearchWidget> {
         streamController.sink.add(collectionResults);
         resultCount++;
 
-        print('--------------collectionResults: ${collectionResults.length}');
-        print(
-          "results for collection search: ${collectionResults.length}, query : $query",
-        );
         if (resultCount == maxResultCount) {
-          print("------- closing stream from collection results");
           streamController.close();
         }
       },
@@ -384,9 +365,7 @@ class SearchWidgetState extends State<SearchWidget> {
       (monthResults) {
         streamController.sink.add(monthResults);
         resultCount++;
-        print('-------------monthResults: ${monthResults.length}');
         if (resultCount == maxResultCount) {
-          print("------- closing stream from month results");
           streamController.close();
         }
       },
@@ -396,9 +375,7 @@ class SearchWidgetState extends State<SearchWidget> {
       (possibleEvents) {
         streamController.sink.add(possibleEvents);
         resultCount++;
-        print('-------------possibleEvents: ${possibleEvents.length}');
         if (resultCount == maxResultCount) {
-          print("------- closing stream from possible events results");
           streamController.close();
         }
       },
@@ -408,9 +385,7 @@ class SearchWidgetState extends State<SearchWidget> {
       (magicResults) {
         streamController.sink.add(magicResults);
         resultCount++;
-        print('------------magicResults: ${magicResults.length}');
         if (resultCount == maxResultCount) {
-          print("------- closing stream from magic results");
           streamController.close();
         }
       },
@@ -420,9 +395,7 @@ class SearchWidgetState extends State<SearchWidget> {
       (contactResults) {
         streamController.sink.add(contactResults);
         resultCount++;
-        print('-------------contactResults: ${contactResults.length}');
         if (resultCount == maxResultCount) {
-          print("------- closing stream from contact results");
           streamController.close();
         }
       },
