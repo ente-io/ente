@@ -135,14 +135,14 @@ class _SearchSuggestionsWidgetState extends State<SearchSuggestionsWidget> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            AnimatedContainer(
-              duration: const Duration(seconds: 2),
+            SizedBox(
+              height: 44,
               child: SearchWidgetState.isLoading.value
                   ? EnteLoadingWidget(
                       size: 14,
                       padding: 4,
                       color: getEnteColorScheme(context).strokeMuted,
-                      alignment: Alignment.centerLeft,
+                      alignment: Alignment.topLeft,
                     )
                   : Text(
                       title,
@@ -152,7 +152,6 @@ class _SearchSuggestionsWidgetState extends State<SearchSuggestionsWidget> {
                         curve: Curves.easeIn,
                       ),
             ),
-            const SizedBox(height: 20),
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 4),
