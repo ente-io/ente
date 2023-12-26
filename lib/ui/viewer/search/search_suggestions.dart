@@ -7,6 +7,7 @@ import "package:photos/core/event_bus.dart";
 import "package:photos/events/clear_and_unfocus_search_bar_event.dart";
 import "package:photos/models/search/album_search_result.dart";
 import "package:photos/models/search/generic_search_result.dart";
+import "package:photos/models/search/index_of_indexed_stack.dart";
 import 'package:photos/models/search/search_result.dart';
 import "package:photos/services/collections_service.dart";
 import "package:photos/ui/viewer/gallery/collection_page.dart";
@@ -44,15 +45,25 @@ class _SearchSuggestionsWidgetState extends State<SearchSuggestionsWidget> {
       searchResultWidgets.clear();
       releaseResources();
 
-      subscription = resultsStream!.listen((searchResults) {
-        //Currently, we add searchResults even if the list is empty. So we are adding
-        //empty list to the queue, which will trigger rebuilds with no change in UI
-        //(see [generateResultWidgetsInIntervalsFromQueue]'s setState()).
-        //This is needed to clear the search results in this widget when the
-        //search bar is cleared, and the event fired by the stream will be an
-        //empty list. Can optimize rebuilds if there are performance issues in future.
-        queueOfSearchResults.add(searchResults);
-      });
+      subscription = resultsStream!.listen(
+        (searchResults) {
+          //Currently, we add searchResults even if the list is empty. So we are adding
+          //empty list to the queue, which will trigger rebuilds with no change in UI
+          //(see [generateResultWidgetsInIntervalsFromQueue]'s setState()).
+          //This is needed to clear the search results in this widget when the
+          //search bar is cleared, and the event fired by the stream will be an
+          //empty list. Can optimize rebuilds if there are performance issues in future.
+          if (searchResults.isNotEmpty) {
+            IndexOfStackNotifier().isSearchResultsEmpty = false;
+          }
+          queueOfSearchResults.add(searchResults);
+        },
+        onDone: () {
+          if (!queueOfSearchResults.any((element) => element.isNotEmpty)) {
+            IndexOfStackNotifier().isSearchResultsEmpty = true;
+          }
+        },
+      );
 
       generateResultWidgetsInIntervalsFromQueue();
     });
