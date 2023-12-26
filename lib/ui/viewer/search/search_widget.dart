@@ -29,6 +29,8 @@ class SearchWidgetState extends State<SearchWidget> {
   ///when searching, this state gets disposed and when coming back to the
   ///search tab, this query is used to populate the search bar.
   static String query = "";
+  //Debouncing + querying
+  static final isLoading = ValueNotifier(false);
   final _searchService = SearchService.instance;
   final _debouncer = Debouncer(const Duration(milliseconds: 200));
   final Logger _logger = Logger((SearchWidgetState).toString());
@@ -102,6 +104,7 @@ class SearchWidgetState extends State<SearchWidget> {
   }
 
   Future<void> textControllerListener() async {
+    isLoading.value = true;
     _debouncer.run(() async {
       if (mounted) {
         query = textController.text;
@@ -173,14 +176,14 @@ class SearchWidgetState extends State<SearchWidget> {
                       /*Using valueListenableBuilder inside a stateful widget because this widget is only rebuild when
                       setState is called when deboucncing is over and the spinner needs to be shown while debouncing */
                       suffixIcon: ValueListenableBuilder(
-                        valueListenable: _debouncer.debounceActiveNotifier,
+                        valueListenable: isLoading,
                         builder: (
                           BuildContext context,
-                          bool isDebouncing,
+                          bool isSearching,
                           Widget? child,
                         ) {
                           return SearchSuffixIcon(
-                            isDebouncing,
+                            isSearching,
                           );
                         },
                       ),

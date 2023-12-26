@@ -71,6 +71,7 @@ class _SearchSuggestionsWidgetState extends State<SearchSuggestionsWidget> {
               IndexOfStackNotifier().searchState = SearchState.empty;
             }
           });
+          SearchWidgetState.isLoading.value = false;
         },
       );
 
