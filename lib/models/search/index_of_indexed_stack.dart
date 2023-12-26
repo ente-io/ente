@@ -1,9 +1,15 @@
 import "package:flutter/material.dart";
 
+enum SearchState {
+  empty,
+  searching,
+  notEmpty,
+}
+
 class IndexOfStackNotifier with ChangeNotifier {
   int _index = 0;
   bool _isSearchQueryEmpty = true;
-  bool _isSearchResultsEmpty = true;
+  SearchState _searchState = SearchState.empty;
 
   static IndexOfStackNotifier? _instance;
 
@@ -16,20 +22,20 @@ class IndexOfStackNotifier with ChangeNotifier {
     setIndex();
   }
 
-  set isSearchResultsEmpty(bool value) {
-    _isSearchResultsEmpty = value;
+  set searchState(SearchState value) {
+    _searchState = value;
     setIndex();
   }
 
   setIndex() {
-    if (_isSearchResultsEmpty) {
-      if (_isSearchQueryEmpty) {
-        _index = 0;
-      } else {
-        _index = 2;
-      }
+    if (_isSearchQueryEmpty) {
+      _index = 0;
     } else {
-      _index = 1;
+      if (_searchState == SearchState.empty) {
+        _index = 2;
+      } else {
+        _index = 1;
+      }
     }
     notifyListeners();
   }

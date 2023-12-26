@@ -93,11 +93,10 @@ class SearchWidgetState extends State<SearchWidget> {
   }
 
   Future<void> textControllerListener() async {
-    final query = textController.text;
-    IndexOfStackNotifier().isSearchQueryEmpty = query.isEmpty;
-
     _debouncer.run(() async {
       if (mounted) {
+        final query = textController.text;
+        IndexOfStackNotifier().isSearchQueryEmpty = query.isEmpty;
         searchResultsStreamNotifier.value =
             _getSearchResultsStream(context, query);
       }

@@ -44,6 +44,7 @@ class _SearchSuggestionsWidgetState extends State<SearchSuggestionsWidget> {
   void initState() {
     super.initState();
     SearchWidgetState.searchResultsStreamNotifier.addListener(() {
+      IndexOfStackNotifier().searchState = SearchState.searching;
       final resultsStream = SearchWidgetState.searchResultsStreamNotifier.value;
 
       searchResultWidgets.clear();
@@ -58,7 +59,7 @@ class _SearchSuggestionsWidgetState extends State<SearchSuggestionsWidget> {
           //search bar is cleared, and the event fired by the stream will be an
           //empty list. Can optimize rebuilds if there are performance issues in future.
           if (searchResults.isNotEmpty) {
-            IndexOfStackNotifier().isSearchResultsEmpty = false;
+            IndexOfStackNotifier().searchState = SearchState.notEmpty;
           }
           queueOfSearchResults.add(searchResults);
         },
@@ -67,7 +68,7 @@ class _SearchSuggestionsWidgetState extends State<SearchSuggestionsWidget> {
               const Duration(milliseconds: _surfaceNewResultsInterval + 20),
               () {
             if (searchResultWidgets.isEmpty) {
-              IndexOfStackNotifier().isSearchResultsEmpty = true;
+              IndexOfStackNotifier().searchState = SearchState.empty;
             }
           });
         },
