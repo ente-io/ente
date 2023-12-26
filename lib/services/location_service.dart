@@ -25,7 +25,7 @@ class LocationService {
 
   void init(SharedPreferences preferences) {
     prefs = preferences;
-    if (!FeatureFlagService.instance.isInternalUserOrDebugBuild()) {
+    if (FeatureFlagService.instance.isInternalUserOrDebugBuild()) {
       _loadCities();
     }
   }
