@@ -3,6 +3,7 @@ import "dart:math";
 import "package:flutter/cupertino.dart";
 import "package:intl/intl.dart";
 import 'package:logging/logging.dart';
+import "package:photos/core/constants.dart";
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/data/holidays.dart';
 import 'package:photos/data/months.dart';
@@ -17,6 +18,7 @@ import "package:photos/models/file/extensions/file_props.dart";
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file/file_type.dart';
 import "package:photos/models/local_entity_data.dart";
+import "package:photos/models/location/location.dart";
 import "package:photos/models/location_tag/location_tag.dart";
 import 'package:photos/models/search/album_search_result.dart';
 import 'package:photos/models/search/generic_search_result.dart';
@@ -678,6 +680,52 @@ class SearchService {
         );
       }
     }
+    return searchResults;
+  }
+
+  Future<List<GenericSearchResult>> getCityResults(String query) async {
+    final startTime = DateTime.now().microsecondsSinceEpoch;
+    final List<GenericSearchResult> searchResults = [];
+    final cities = LocationService.instance.getAllCities();
+    final matchingCities = <City>[];
+    final queryLower = query.toLowerCase();
+    for (City city in cities) {
+      if (city.city.toLowerCase().startsWith(queryLower)) {
+        matchingCities.add(city);
+      }
+    }
+    final files = await getAllFiles();
+    final Map<City, List<EnteFile>> results = {};
+    for (final city in matchingCities) {
+      final List<EnteFile> matchingFiles = [];
+      final cityLocation = Location(latitude: city.lat, longitude: city.lng);
+      for (final file in files) {
+        if (file.hasLocation) {
+          if (LocationService.instance.isFileInsideLocationTag(
+            cityLocation,
+            file.location!,
+            defaultCityRadius,
+          )) {
+            matchingFiles.add(file);
+          }
+        }
+      }
+      if (matchingFiles.isNotEmpty) {
+        results[city] = matchingFiles;
+      }
+    }
+    for (final entry in results.entries) {
+      searchResults.add(
+        GenericSearchResult(
+          ResultType.location,
+          entry.key.city,
+          entry.value,
+        ),
+      );
+    }
+    final endTime = DateTime.now().microsecondsSinceEpoch;
+    _logger
+        .info("Time taken " + ((endTime - startTime) / 1000).toString() + "ms");
     return searchResults;
   }
 

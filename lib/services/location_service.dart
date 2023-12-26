@@ -10,6 +10,7 @@ import "package:photos/models/local_entity_data.dart";
 import "package:photos/models/location/location.dart";
 import 'package:photos/models/location_tag/location_tag.dart';
 import "package:photos/services/entity_service.dart";
+import "package:photos/services/feature_flag_service.dart";
 import "package:photos/services/remote_assets_service.dart";
 import "package:shared_preferences/shared_preferences.dart";
 
@@ -24,7 +25,9 @@ class LocationService {
 
   void init(SharedPreferences preferences) {
     prefs = preferences;
-    _loadCities();
+    if (!FeatureFlagService.instance.isInternalUserOrDebugBuild()) {
+      _loadCities();
+    }
   }
 
   Future<Iterable<LocalEntity<LocationTag>>> _getStoredLocationTags() async {
@@ -32,6 +35,10 @@ class LocationService {
     return data.map(
       (e) => LocalEntity(LocationTag.fromJson(json.decode(e.data)), e.id),
     );
+  }
+
+  List<City> getAllCities() {
+    return _cities;
   }
 
   Future<Iterable<LocalEntity<LocationTag>>> getLocationTags() {

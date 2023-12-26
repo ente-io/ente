@@ -278,7 +278,7 @@ class SearchWidgetState extends State<SearchWidget> {
     String query,
   ) {
     int resultCount = 0;
-    final maxResultCount = _isYearValid(query) ? 11 : 10;
+    final maxResultCount = _isYearValid(query) ? 12 : 11;
     final streamController = StreamController<List<SearchResult>>();
 
     if (query.isEmpty) {
@@ -339,6 +339,16 @@ class SearchWidgetState extends State<SearchWidget> {
     _searchService.getLocationResults(query).then(
       (locationResult) {
         streamController.sink.add(locationResult);
+        resultCount++;
+        if (resultCount == maxResultCount) {
+          streamController.close();
+        }
+      },
+    );
+
+    _searchService.getCityResults(query).then(
+      (results) {
+        streamController.sink.add(results);
         resultCount++;
         if (resultCount == maxResultCount) {
           streamController.close();
