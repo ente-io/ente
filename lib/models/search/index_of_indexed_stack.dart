@@ -7,6 +7,7 @@ enum SearchState {
 }
 
 class IndexOfStackNotifier with ChangeNotifier {
+  int _prevIndex = 0;
   int _index = 0;
   bool _isSearchQueryEmpty = true;
   SearchState _searchState = SearchState.empty;
@@ -28,6 +29,8 @@ class IndexOfStackNotifier with ChangeNotifier {
   }
 
   setIndex() {
+    _prevIndex = _index;
+
     if (_isSearchQueryEmpty) {
       _index = 0;
     } else {
@@ -37,7 +40,7 @@ class IndexOfStackNotifier with ChangeNotifier {
         _index = 1;
       }
     }
-    notifyListeners();
+    _prevIndex != _index ? notifyListeners() : null;
   }
 
   get index => _index;

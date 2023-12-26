@@ -44,7 +44,6 @@ class _SearchTabState extends State<SearchTab> {
 
   @override
   Widget build(BuildContext context) {
-    // print("_____ rebuilding SearchTab with stream: ${_searchResults.hashCode}");
     return AllSectionsExamplesProvider(
       child: FadeIndexedStack(
         lazy: false,
