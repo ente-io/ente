@@ -24,7 +24,6 @@ class SearchWidget extends StatefulWidget {
 class SearchWidgetState extends State<SearchWidget> {
   static ValueNotifier<Stream<List<SearchResult>>?>
       searchResultsStreamNotifier = ValueNotifier(null);
-  static String query = "";
   final _searchService = SearchService.instance;
   final _debouncer = Debouncer(const Duration(milliseconds: 200));
   final Logger _logger = Logger((SearchWidgetState).toString());
@@ -64,7 +63,6 @@ class SearchWidgetState extends State<SearchWidget> {
 
       textController.addListener(textControllerListener);
     });
-    textController.text = query;
 
     _clearAndUnfocusSearchBar =
         Bus.instance.on<ClearAndUnfocusSearchBar>().listen((event) {
@@ -95,48 +93,15 @@ class SearchWidgetState extends State<SearchWidget> {
   }
 
   Future<void> textControllerListener() async {
-    //query in local varialbe
-    final value = textController.text;
-    IndexOfStackNotifier().isSearchQueryEmpty = value.isEmpty;
-    //latest query in global variable
-    query = textController.text;
-
-    // final List<SearchResult> allResults =
-    //     await getSearchResultsForQuery(context, value);
+    final query = textController.text;
+    IndexOfStackNotifier().isSearchQueryEmpty = query.isEmpty;
 
     _debouncer.run(() async {
       if (mounted) {
         searchResultsStreamNotifier.value =
             _getSearchResultsStream(context, query);
       }
-
-      // await for (final value in searchResultsStream) {
-      //   print(
-      //     "Recieved event from stream ${searchResultsStream.hashCode} --------------  --------------  --------------  --------------  --------------",
-      //   );
-
-      //   value.forEach((element) {
-      //     print(
-      //       "---------" + element.name() + "      " + element.type().toString(),
-      //     );
-      //   });
-      //   print(
-      //     "End --------------  --------------  --------------  --------------  --------------",
-      //   );
-      // }
     });
-
-    /*checking if query == value to make sure that the results are from the current query
-                      and not from the previous query (race condition).*/
-    //checking if query == value to make sure that the latest query's result
-    //(allResults) is passed to updateResult. Due to race condition, the previous
-    //query's allResults could be passed to updateResult after the lastest query's
-    //allResults is passed.
-
-    // if (mounted && query == value) {
-    //   final inheritedSearchResults = InheritedSearchResults.of(context);
-    //   inheritedSearchResults.updateStream(allResults);
-    // }
   }
 
   @override
