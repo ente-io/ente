@@ -46,6 +46,8 @@ class SemanticSearchService {
   Future<List<EnteFile>>? _ongoingRequest;
   PendingQuery? _nextQuery;
 
+  get hasInitialized => _hasInitialized;
+
   Future<void> init() async {
     if (!LocalSettings.instance.hasEnabledMagicSearch()) {
       return;
