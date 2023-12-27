@@ -10,18 +10,26 @@ import "package:photos/models/local_entity_data.dart";
 import "package:photos/models/location/location.dart";
 import 'package:photos/models/location_tag/location_tag.dart';
 import "package:photos/services/entity_service.dart";
+import "package:photos/services/feature_flag_service.dart";
+import "package:photos/services/remote_assets_service.dart";
 import "package:shared_preferences/shared_preferences.dart";
 
 class LocationService {
   late SharedPreferences prefs;
   final Logger _logger = Logger((LocationService).toString());
+  final List<City> _cities = [];
 
   LocationService._privateConstructor();
 
   static final LocationService instance = LocationService._privateConstructor();
 
+  static const kCitiesRemotePath = "https://assets.ente.io/world_cities.json";
+
   void init(SharedPreferences preferences) {
     prefs = preferences;
+    if (FeatureFlagService.instance.isInternalUserOrDebugBuild()) {
+      _loadCities();
+    }
   }
 
   Future<Iterable<LocalEntity<LocationTag>>> _getStoredLocationTags() async {
@@ -29,6 +37,10 @@ class LocationService {
     return data.map(
       (e) => LocalEntity(LocationTag.fromJson(json.decode(e.data)), e.id),
     );
+  }
+
+  List<City> getAllCities() {
+    return _cities;
   }
 
   Future<Iterable<LocalEntity<LocationTag>>> getLocationTags() {
@@ -202,6 +214,52 @@ class LocationService {
       _logger.severe("Failed to delete location tag", e, s);
       rethrow;
     }
+  }
+
+  Future<void> _loadCities() async {
+    try {
+      final data =
+          await RemoteAssetsService.instance.getAsset(kCitiesRemotePath);
+      final citiesJson = json.decode(await data.readAsString());
+      final List<dynamic> jsonData = citiesJson['data'];
+      final cities =
+          jsonData.map<City>((jsonItem) => City.fromMap(jsonItem)).toList();
+      _cities.clear();
+      _cities.addAll(cities);
+      _logger.info("Loaded cities");
+    } catch (e, s) {
+      _logger.severe("Failed to load cities", e, s);
+    }
+  }
+}
+
+class City {
+  final String city;
+  final String country;
+  final double lat;
+  final double lng;
+
+  City({
+    required this.city,
+    required this.country,
+    required this.lat,
+    required this.lng,
+  });
+
+  factory City.fromMap(Map<String, dynamic> map) {
+    return City(
+      city: map['city'] ?? '',
+      country: map['country'] ?? '',
+      lat: map['lat']?.toDouble() ?? 0.0,
+      lng: map['lng']?.toDouble() ?? 0.0,
+    );
+  }
+
+  factory City.fromJson(String source) => City.fromMap(json.decode(source));
+
+  @override
+  String toString() {
+    return 'City(city: $city, country: $country, lat: $lat, lng: $lng)';
   }
 }
 

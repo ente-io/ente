@@ -105,3 +105,7 @@ If you're interested in helping out with translation, please visit our [Crowdin 
 Follow us on [Twitter](https://twitter.com/enteio), join [r/enteio](https://reddit.com/r/enteio) or hang out on our [Discord](https://ente.io/discord) to get regular updates, connect with other customers, and discuss your ideas.
 
 An important part of our journey is to build better software by consistently listening to community feedback. Please feel free to [share your thoughts](mailto:feedback@ente.io) with us at any time.
+
+## 🙇 Attributions
+
+- [Simple Maps](https://simplemaps.com/data/world-cities)

@@ -278,7 +278,7 @@ class SearchWidgetState extends State<SearchWidget> {
     String query,
   ) {
     int resultCount = 0;
-    final maxResultCount = _isYearValid(query) ? 11 : 10;
+    final maxResultCount = _isYearValid(query) ? 12 : 11;
     final streamController = StreamController<List<SearchResult>>();
 
     if (query.isEmpty) {
@@ -286,113 +286,84 @@ class SearchWidgetState extends State<SearchWidget> {
       streamController.close();
       return streamController.stream;
     }
+
+    void onResultsReceived(List<SearchResult> results) {
+      streamController.sink.add(results);
+      resultCount++;
+      if (resultCount == maxResultCount) {
+        streamController.close();
+      }
+    }
+
     if (_isYearValid(query)) {
       _searchService.getYearSearchResults(query).then((yearSearchResults) {
-        streamController.sink.add(yearSearchResults);
-        resultCount++;
-        if (resultCount == maxResultCount) {
-          streamController.close();
-        }
+        onResultsReceived(yearSearchResults);
       });
     }
 
     _searchService.getHolidaySearchResults(context, query).then(
       (holidayResults) {
-        streamController.sink.add(holidayResults);
-        resultCount++;
-        if (resultCount == maxResultCount) {
-          streamController.close();
-        }
+        onResultsReceived(holidayResults);
       },
     );
 
     _searchService.getFileTypeResults(context, query).then(
       (fileTypeSearchResults) {
-        streamController.sink.add(fileTypeSearchResults);
-        resultCount++;
-        if (resultCount == maxResultCount) {
-          streamController.close();
-        }
+        onResultsReceived(fileTypeSearchResults);
       },
     );
 
     _searchService.getCaptionAndNameResults(query).then(
       (captionAndDisplayNameResult) {
-        streamController.sink.add(captionAndDisplayNameResult);
-        resultCount++;
-        if (resultCount == maxResultCount) {
-          streamController.close();
-        }
+        onResultsReceived(captionAndDisplayNameResult);
       },
     );
 
     _searchService.getFileExtensionResults(query).then(
       (fileExtnResult) {
-        streamController.sink.add(fileExtnResult);
-        resultCount++;
-        if (resultCount == maxResultCount) {
-          streamController.close();
-        }
+        onResultsReceived(fileExtnResult);
       },
     );
 
     _searchService.getLocationResults(query).then(
       (locationResult) {
-        streamController.sink.add(locationResult);
-        resultCount++;
-        if (resultCount == maxResultCount) {
-          streamController.close();
-        }
+        onResultsReceived(locationResult);
+      },
+    );
+
+    _searchService.getCityResults(query).then(
+      (results) {
+        onResultsReceived(results);
       },
     );
 
     _searchService.getCollectionSearchResults(query).then(
       (collectionResults) {
-        streamController.sink.add(collectionResults);
-        resultCount++;
-        if (resultCount == maxResultCount) {
-          streamController.close();
-        }
+        onResultsReceived(collectionResults);
       },
     );
 
     _searchService.getMonthSearchResults(context, query).then(
       (monthResults) {
-        streamController.sink.add(monthResults);
-        resultCount++;
-        if (resultCount == maxResultCount) {
-          streamController.close();
-        }
+        onResultsReceived(monthResults);
       },
     );
 
     _searchService.getDateResults(context, query).then(
       (possibleEvents) {
-        streamController.sink.add(possibleEvents);
-        resultCount++;
-        if (resultCount == maxResultCount) {
-          streamController.close();
-        }
+        onResultsReceived(possibleEvents);
       },
     );
 
     _searchService.getMagicSearchResults(context, query).then(
       (magicResults) {
-        streamController.sink.add(magicResults);
-        resultCount++;
-        if (resultCount == maxResultCount) {
-          streamController.close();
-        }
+        onResultsReceived(magicResults);
       },
     );
 
     _searchService.getContactSearchResults(query).then(
       (contactResults) {
-        streamController.sink.add(contactResults);
-        resultCount++;
-        if (resultCount == maxResultCount) {
-          streamController.close();
-        }
+        onResultsReceived(contactResults);
       },
     );
 
