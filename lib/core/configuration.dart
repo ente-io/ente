@@ -27,6 +27,7 @@ import 'package:photos/services/favorites_service.dart';
 import 'package:photos/services/ignored_files_service.dart';
 import 'package:photos/services/memories_service.dart';
 import 'package:photos/services/search_service.dart';
+import "package:photos/services/semantic_search/semantic_search_service.dart";
 import 'package:photos/services/sync_service.dart';
 import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/file_uploader.dart';
@@ -157,7 +158,9 @@ class Configuration {
     _cachedToken = null;
     _secretKey = null;
     await FilesDB.instance.clearTable();
-    await ObjectBox.instance.clearTable();
+    SemanticSearchService.instance.hasInitialized
+        ? await ObjectBox.instance.clearTable()
+        : null;
     await CollectionsDB.instance.clearTable();
     await MemoriesDB.instance.clearTable();
     await PublicKeysDB.instance.clearTable();
