@@ -164,7 +164,7 @@ const PasskeysFlow = () => {
                             padding: '1rem',
                         }}>
                         <InfoIcon />
-                        <Typography fontWeight="bold" variant="h4">
+                        <Typography fontWeight="bold" variant="h1">
                             {t('PASSKEY_LOGIN_FAILED')}
                         </Typography>
                         <Typography marginTop="1rem">
@@ -189,7 +189,7 @@ const PasskeysFlow = () => {
                             padding: '1rem',
                         }}>
                         <InfoIcon />
-                        <Typography fontWeight="bold" variant="h4">
+                        <Typography fontWeight="bold" variant="h1">
                             {t('PASSKEY_LOGIN_FAILED')}
                         </Typography>
                         <Typography marginTop="1rem">
@@ -228,7 +228,7 @@ const PasskeysFlow = () => {
                             padding: '1rem',
                         }}>
                         <InfoIcon />
-                        <Typography fontWeight="bold" variant="h4">
+                        <Typography fontWeight="bold" variant="h1">
                             {t('LOGIN_WITH_PASSKEY')}
                         </Typography>
                         <Typography marginTop="1rem">

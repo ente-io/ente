@@ -20,13 +20,13 @@ import {
 } from '@ente/shared/components/DialogBoxV2/types';
 import DialogBoxV2 from '@ente/shared/components/DialogBoxV2';
 
-export const AppContext = createContext(
-    {} as {
-        isMobile: boolean;
-        showNavBar: (show: boolean) => void;
-        setDialogBoxAttributesV2: SetDialogBoxAttributesV2;
-    }
-);
+interface AppContextProps {
+    isMobile: boolean;
+    showNavBar: (show: boolean) => void;
+    setDialogBoxAttributesV2: SetDialogBoxAttributesV2;
+}
+
+export const AppContext = createContext<AppContextProps>({} as AppContextProps);
 
 // Client-side cache, shared for the whole session of the user in the browser.
 const clientSideEmotionCache = createEmotionCache();
