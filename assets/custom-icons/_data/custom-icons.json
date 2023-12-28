@@ -31,6 +31,10 @@
       "title": "Bitwarden"
     },
     {
+      "title": "Brave Creators",
+      "slug": "brave_creators"
+    },
+    {
       "title": "Bybit"
     },
     {
@@ -58,6 +62,11 @@
       "hex": "1DB954"
     },
     {
+      "title": "Epic Games",
+      "slug": "epic_games",
+      "hex": "000000"
+    },
+    {
       "title": "Filen",
       "hex": "858585"
     },
@@ -68,6 +77,10 @@
     {
       "title": "GitHub",
       "hex": "858585"
+    },
+    {
+      "title": "GitLab",
+      "slug": "gitlab"
     },
     {
       "title": "Google"
@@ -184,6 +197,11 @@
       "hex": "858585"
     },
     {
+      "title": "Rust Language Forum",
+      "slug": "rust_language_forum",
+      "hex": "000000"
+    },
+    {
       "title": "service-bw"
     },
     {
@@ -235,6 +253,11 @@
     {
       "title": "Unity",
       "hex": "858585"
+    },
+    {
+      "title": "Uphold",
+      "slug": "uphold",
+      "hex": "6FE68A"
     },
     {
       "title": "WHMCS"
