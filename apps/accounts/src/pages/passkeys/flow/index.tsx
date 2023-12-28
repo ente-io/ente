@@ -31,15 +31,9 @@ const PasskeysFlow = () => {
         // get redirect from the query params
         const redirect = searchParams.get('redirect');
 
-        if (!redirect) {
-            setInvalidInfo(true);
-            setLoading(false);
-            return;
-        }
-
         const redirectURL = new URL(redirect);
         if (process.env.NEXT_PUBLIC_DISABLE_REDIRECT_CHECK !== 'true') {
-            if (!redirectURL.host.endsWith('ente.io')) {
+            if (redirect !== '' && !redirectURL.host.endsWith('ente.io')) {
                 setInvalidInfo(true);
                 setLoading(false);
                 return;
