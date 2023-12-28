@@ -32,7 +32,7 @@
     },
     {
       "title": "Brave Creators",
-      "slug": "brave"
+      "slug": "brave_creators"
     },
     {
       "title": "Bybit"
@@ -63,7 +63,7 @@
     },
     {
       "title": "Epic Games",
-      "slug": "epicgames",
+      "slug": "epic_games",
       "hex": "000000"
     },
     {
@@ -198,7 +198,7 @@
     },
     {
       "title": "Rust Language Forum",
-      "slug": "rust",
+      "slug": "rust_language_forum",
       "hex": "000000"
     },
     {
