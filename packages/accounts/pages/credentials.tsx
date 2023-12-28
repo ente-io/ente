@@ -167,7 +167,7 @@ export default function Credentials({
                     });
                     InMemoryStore.set(MS_KEYS.REDIRECT_URL, PAGES.ROOT);
                     window.location.href = `${process.env.NEXT_PUBLIC_ACCOUNTS_ENDPOINT}/passkeys/flow?passkeySessionID=${passkeySessionID}&redirect=${window.location.origin}/passkeys/finish`;
-                    throw Error(CustomError.PASSKEYS_TWO_FACTOR_ENABLED);
+                    return;
                 } else if (twoFactorSessionID) {
                     const sessionKeyAttributes =
                         await cryptoWorker.generateKeyAndEncryptToB64(kek);
