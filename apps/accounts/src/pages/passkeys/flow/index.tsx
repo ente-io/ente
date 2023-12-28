@@ -33,7 +33,7 @@ const PasskeysFlow = () => {
 
         const redirectURL = new URL(redirect);
         if (process.env.NEXT_PUBLIC_DISABLE_REDIRECT_CHECK !== 'true') {
-            if (redirect !== '' && !redirectURL.host.endsWith('ente.io')) {
+            if (redirect !== '' && !redirectURL.host.endsWith('.ente.io')) {
                 setInvalidInfo(true);
                 setLoading(false);
                 return;
