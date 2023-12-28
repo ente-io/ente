@@ -12,7 +12,7 @@ const PasskeyComponent = (props: IProps) => {
     return (
         <>
             <MenuItemGroup>
-                {props.passkeys.map((passkey, i) => (
+                {props.passkeys?.map((passkey, i) => (
                     <Fragment key={passkey.id}>
                         <PasskeyListItem passkey={passkey} />
                         {i < props.passkeys.length - 1 && <MenuItemDivider />}

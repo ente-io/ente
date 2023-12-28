@@ -21,7 +21,7 @@ const PasskeyListItem = (props: IProps) => {
             }}
             startIcon={<KeyIcon />}
             endIcon={<ChevronRightIcon />}
-            label={props.passkey.friendlyName}
+            label={props.passkey?.friendlyName}
         />
     );
 };
