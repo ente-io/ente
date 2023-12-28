@@ -50,7 +50,11 @@ const PasskeysFlow = () => {
         }
 
         const encodedResponse = _sodium.to_base64(JSON.stringify(finishData));
-        console.log(encodedResponse);
+
+        // get redirect from the query params
+        const redirect = searchParams.get('redirect');
+
+        window.location.href = `${redirect}?response=${encodedResponse}`;
     };
 
     const beginAuthentication = async (sessionId: string) => {
