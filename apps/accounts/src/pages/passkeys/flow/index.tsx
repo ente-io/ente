@@ -20,6 +20,8 @@ import EnteSpinner from '@ente/shared/components/EnteSpinner';
 const PasskeysFlow = () => {
     const [errored, setErrored] = useState(false);
 
+    const [invalidInfo, setInvalidInfo] = useState(false);
+
     const [loading, setLoading] = useState(true);
 
     const init = async () => {
@@ -29,14 +31,16 @@ const PasskeysFlow = () => {
         const redirect = searchParams.get('redirect');
 
         if (!redirect) {
-            setErrored(true);
+            setInvalidInfo(true);
+            setLoading(false);
             return;
         }
 
         const redirectURL = new URL(redirect);
         if (process.env.NEXT_PUBLIC_DISABLE_REDIRECT_CHECK !== 'true') {
             if (!redirectURL.host.endsWith('ente.io')) {
-                setErrored(true);
+                setInvalidInfo(true);
+                setLoading(false);
                 return;
             }
         }
@@ -149,6 +153,31 @@ const PasskeysFlow = () => {
             <VerticallyCentered>
                 <EnteSpinner />
             </VerticallyCentered>
+        );
+    }
+
+    if (invalidInfo) {
+        return (
+            <Box
+                display="flex"
+                justifyContent="center"
+                alignItems="center"
+                height="100%">
+                <Box maxWidth="30rem">
+                    <FormPaper
+                        style={{
+                            padding: '1rem',
+                        }}>
+                        <InfoIcon />
+                        <Typography fontWeight="bold" variant="h4">
+                            Passkey Login Failed
+                        </Typography>
+                        <Typography marginTop="1rem">
+                            The login URL is invalid and we cannot recover.
+                        </Typography>
+                    </FormPaper>
+                </Box>
+            </Box>
         );
     }
 
