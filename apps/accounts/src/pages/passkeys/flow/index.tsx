@@ -1,9 +1,12 @@
-import { CenteredFlex } from '@ente/shared/components/Container';
+import {
+    CenteredFlex,
+    VerticallyCentered,
+} from '@ente/shared/components/Container';
 import FormPaper from '@ente/shared/components/Form/FormPaper';
 import { Box, Typography } from '@mui/material';
 import InfoIcon from '@mui/icons-material/Info';
 import Image from 'next/image';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import {
     BeginPasskeyAuthenticationResponse,
     beginPasskeyAuthentication,
@@ -11,12 +14,20 @@ import {
 } from 'services/passkeysService';
 import { logError } from '@ente/shared/sentry';
 import _sodium from 'libsodium-wrappers';
+import EnteButton from '@ente/shared/components/EnteButton';
+import EnteSpinner from '@ente/shared/components/EnteSpinner';
 
 const PasskeysFlow = () => {
+    const [errored, setErrored] = useState(false);
+
+    const [loading, setLoading] = useState(true);
+
     const init = async () => {
         // get passkeySessionID from the query params
         const searchParams = new URLSearchParams(window.location.search);
         const passkeySessionID = searchParams.get('passkeySessionID');
+
+        setLoading(true);
 
         let beginData: BeginPasskeyAuthenticationResponse;
 
@@ -24,17 +35,36 @@ const PasskeysFlow = () => {
             beginData = await beginAuthentication(passkeySessionID);
         } catch (e) {
             logError(e, "Couldn't begin passkey authentication");
+            setErrored(true);
             return;
+        } finally {
+            setLoading(false);
         }
 
         let credential: Credential;
 
-        try {
-            credential = await getCredential(beginData.options.publicKey);
-        } catch (e) {
-            logError(e, "Couldn't get credential");
+        let tries = 0;
+        const maxTries = 3;
+
+        while (tries < maxTries) {
+            try {
+                credential = await getCredential(beginData.options.publicKey);
+            } catch (e) {
+                logError(e, "Couldn't get credential");
+                continue;
+            } finally {
+                tries++;
+            }
+
+            break;
+        }
+
+        if (!credential) {
+            setErrored(true);
             return;
         }
+
+        setLoading(true);
 
         let finishData;
 
@@ -46,6 +76,8 @@ const PasskeysFlow = () => {
             );
         } catch (e) {
             logError(e, "Couldn't finish passkey authentication");
+            setErrored(true);
+            setLoading(false);
             return;
         }
 
@@ -97,6 +129,53 @@ const PasskeysFlow = () => {
     useEffect(() => {
         init();
     }, []);
+
+    if (loading) {
+        return (
+            <VerticallyCentered>
+                <EnteSpinner />
+            </VerticallyCentered>
+        );
+    }
+
+    if (errored) {
+        return (
+            <Box
+                display="flex"
+                justifyContent="center"
+                alignItems="center"
+                height="100%">
+                <Box maxWidth="30rem">
+                    <FormPaper
+                        style={{
+                            padding: '1rem',
+                        }}>
+                        <InfoIcon />
+                        <Typography fontWeight="bold" variant="h4">
+                            Passkey Login Failed
+                        </Typography>
+                        <Typography marginTop="1rem">
+                            An error occurred while logging in with passkey.
+                        </Typography>
+                        <EnteButton
+                            onClick={() => {
+                                setErrored(false);
+                                init();
+                            }}
+                            fullWidth
+                            style={{
+                                marginTop: '1rem',
+                            }}
+                            color="accent"
+                            type="button"
+                            variant="contained">
+                            Try Again
+                        </EnteButton>
+                    </FormPaper>
+                </Box>
+            </Box>
+        );
+    }
 
     return (
         <>
