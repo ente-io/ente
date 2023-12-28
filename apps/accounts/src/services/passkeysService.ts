@@ -126,3 +126,86 @@ export const finishPasskeyRegistration = async (
         throw e;
     }
 };
+
+export interface BeginPasskeyAuthenticationResponse {
+    ceremonySessionID: string;
+    options: Options;
+}
+interface Options {
+    publicKey: PublicKeyCredentialRequestOptions;
+}
+
+export const beginPasskeyAuthentication = async (
+    sessionId: string
+): Promise<BeginPasskeyAuthenticationResponse> => {
+    try {
+        const data = await HTTPService.post(
+            `${ENDPOINT}/users/two-factor/passkeys/begin`,
+            {
+                sessionID: sessionId,
+            }
+        );
+
+        return data.data;
+    } catch (e) {
+        logError(e, 'begin passkey authentication failed');
+        throw e;
+    }
+};
+
+export const finishPasskeyAuthentication = async (
+    credential: Credential,
+    sessionId: string,
+    ceremonySessionId: string
+) => {
+    try {
+        const data = await HTTPService.post(
+            `${ENDPOINT}/users/two-factor/passkeys/finish`,
+            {
+                id: credential.id,
+                rawId: _sodium.to_base64(
+                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                    // @ts-ignore
+                    new Uint8Array(credential.rawId),
+                    _sodium.base64_variants.URLSAFE_NO_PADDING
+                ),
+                type: credential.type,
+                response: {
+                    authenticatorData: _sodium.to_base64(
+                        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                        // @ts-ignore
+                        new Uint8Array(credential.response.authenticatorData),
+                        _sodium.base64_variants.URLSAFE_NO_PADDING
+                    ),
+                    clientDataJSON: _sodium.to_base64(
+                        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                        // @ts-ignore
+                        new Uint8Array(credential.response.clientDataJSON),
+                        _sodium.base64_variants.URLSAFE_NO_PADDING
+                    ),
+                    signature: _sodium.to_base64(
+                        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                        // @ts-ignore
+                        new Uint8Array(credential.response.signature),
+                        _sodium.base64_variants.URLSAFE_NO_PADDING
+                    ),
+                    userHandle: _sodium.to_base64(
+                        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                        // @ts-ignore
+                        new Uint8Array(credential.response.userHandle),
+                        _sodium.base64_variants.URLSAFE_NO_PADDING
+                    ),
+                },
+            },
+            {
+                sessionID: sessionId,
+                ceremonySessionID: ceremonySessionId,
+            }
+        );
+
+        return data.data;
+    } catch (e) {
+        logError(e, 'finish passkey authentication failed');
+        throw e;
+    }
+};

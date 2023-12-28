@@ -148,9 +148,26 @@ export default function Credentials({
                     token,
                     id,
                     twoFactorSessionID,
+                    passkeySessionID,
                 } = await loginViaSRP(srpAttributes, kek);
                 setIsFirstLogin(true);
-                if (twoFactorSessionID) {
+                if (passkeySessionID) {
+                    const sessionKeyAttributes =
+                        await cryptoWorker.generateKeyAndEncryptToB64(kek);
+                    setKey(
+                        SESSION_KEYS.KEY_ENCRYPTION_KEY,
+                        sessionKeyAttributes
+                    );
+                    const user = getData(LS_KEYS.USER);
+                    setData(LS_KEYS.USER, {
+                        ...user,
+                        passkeySessionID,
+                        isTwoFactorEnabled: true,
+                        isTwoFactorPasskeysEnabled: true,
+                    });
+                    window.location.href = `${process.env.NEXT_PUBLIC_ACCOUNTS_ENDPOINT}/passkeys/flow?passkeySessionID=${passkeySessionID}`;
+                    throw Error(CustomError.PASSKEYS_TWO_FACTOR_ENABLED);
+                } else if (twoFactorSessionID) {
                     const sessionKeyAttributes =
                         await cryptoWorker.generateKeyAndEncryptToB64(kek);
                     setKey(
