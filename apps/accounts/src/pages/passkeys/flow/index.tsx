@@ -23,8 +23,25 @@ const PasskeysFlow = () => {
     const [loading, setLoading] = useState(true);
 
     const init = async () => {
-        // get passkeySessionID from the query params
         const searchParams = new URLSearchParams(window.location.search);
+
+        // get redirect from the query params
+        const redirect = searchParams.get('redirect');
+
+        if (!redirect) {
+            setErrored(true);
+            return;
+        }
+
+        const redirectURL = new URL(redirect);
+        if (process.env.NEXT_PUBLIC_DISABLE_REDIRECT_CHECK !== 'true') {
+            if (!redirectURL.host.endsWith('ente.io')) {
+                setErrored(true);
+                return;
+            }
+        }
+
+        // get passkeySessionID from the query params
         const passkeySessionID = searchParams.get('passkeySessionID');
 
         setLoading(true);
@@ -82,9 +99,6 @@ const PasskeysFlow = () => {
         }
 
         const encodedResponse = _sodium.to_base64(JSON.stringify(finishData));
-
-        // get redirect from the query params
-        const redirect = searchParams.get('redirect');
 
         window.location.href = `${redirect}?response=${encodedResponse}`;
     };
