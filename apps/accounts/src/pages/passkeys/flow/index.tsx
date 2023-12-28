@@ -16,6 +16,7 @@ import { logError } from '@ente/shared/sentry';
 import _sodium from 'libsodium-wrappers';
 import EnteButton from '@ente/shared/components/EnteButton';
 import EnteSpinner from '@ente/shared/components/EnteSpinner';
+import { t } from 'i18next';
 
 const PasskeysFlow = () => {
     const [errored, setErrored] = useState(false);
@@ -170,10 +171,10 @@ const PasskeysFlow = () => {
                         }}>
                         <InfoIcon />
                         <Typography fontWeight="bold" variant="h4">
-                            Passkey Login Failed
+                            {t('PASSKEY_LOGIN_FAILED')}
                         </Typography>
                         <Typography marginTop="1rem">
-                            The login URL is invalid and we cannot recover.
+                            {t('PASSKEY_LOGIN_URL_INVALID')}
                         </Typography>
                     </FormPaper>
                 </Box>
@@ -195,10 +196,10 @@ const PasskeysFlow = () => {
                         }}>
                         <InfoIcon />
                         <Typography fontWeight="bold" variant="h4">
-                            Passkey Login Failed
+                            {t('PASSKEY_LOGIN_FAILED')}
                         </Typography>
                         <Typography marginTop="1rem">
-                            An error occurred while logging in with passkey.
+                            {t('PASSKEY_LOGIN_ERRORED')}
                         </Typography>
                         <EnteButton
                             onClick={() => {
@@ -212,7 +213,7 @@ const PasskeysFlow = () => {
                             color="accent"
                             type="button"
                             variant="contained">
-                            Try Again
+                            {t('TRY_AGAIN')}
                         </EnteButton>
                     </FormPaper>
                 </Box>
@@ -234,11 +235,10 @@ const PasskeysFlow = () => {
                         }}>
                         <InfoIcon />
                         <Typography fontWeight="bold" variant="h4">
-                            Login with Passkey
+                            {t('LOGIN_WITH_PASSKEY')}
                         </Typography>
                         <Typography marginTop="1rem">
-                            Follow the steps from your browser to continue
-                            logging into Ente
+                            {t('PASSKEY_FOLLOW_THE_STEPS_FROM_YOUR_BROWSER')}
                         </Typography>
                         <CenteredFlex marginTop="1rem">
                             <Image
