@@ -85,7 +85,7 @@ const Passkeys = () => {
         );
 
         // create new credential
-        let newCredential: Credential;
+        let newCredential: Credential | null = null;
 
         try {
             newCredential = await navigator.credentials.create(options);

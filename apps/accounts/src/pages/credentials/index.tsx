@@ -1,6 +1,6 @@
 import CredentialPage from '@ente/accounts/pages/credentials';
 import { useRouter } from 'next/router';
-import { AppContext } from 'pages/_app';
+import { AppContext } from '../_app';
 import { useContext } from 'react';
 import { APPS } from '@ente/shared/apps/constants';
 

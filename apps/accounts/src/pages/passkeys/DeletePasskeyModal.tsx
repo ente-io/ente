@@ -20,6 +20,7 @@ const DeletePasskeyModal = (props: IProps) => {
     const [loading, setLoading] = useState(false);
 
     const doDelete = async () => {
+        if (!selectedPasskey) return;
         setLoading(true);
         try {
             await deletePasskey(selectedPasskey.id);

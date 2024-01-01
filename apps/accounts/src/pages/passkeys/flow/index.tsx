@@ -29,7 +29,7 @@ const PasskeysFlow = () => {
         const searchParams = new URLSearchParams(window.location.search);
 
         // get redirect from the query params
-        const redirect = searchParams.get('redirect');
+        const redirect = searchParams.get('redirect') as string;
 
         const redirectURL = new URL(redirect);
         if (process.env.NEXT_PUBLIC_DISABLE_REDIRECT_CHECK !== 'true') {
@@ -41,7 +41,7 @@ const PasskeysFlow = () => {
         }
 
         // get passkeySessionID from the query params
-        const passkeySessionID = searchParams.get('passkeySessionID');
+        const passkeySessionID = searchParams.get('passkeySessionID') as string;
 
         setLoading(true);
 
@@ -57,7 +57,7 @@ const PasskeysFlow = () => {
             setLoading(false);
         }
 
-        let credential: Credential;
+        let credential: Credential | null = null;
 
         let tries = 0;
         const maxTries = 3;
@@ -107,12 +107,14 @@ const PasskeysFlow = () => {
         return data;
     };
 
-    const getCredential = async (publicKey: any): Promise<Credential> => {
+    const getCredential = async (
+        publicKey: any
+    ): Promise<Credential | null> => {
         publicKey.challenge = _sodium.from_base64(
             publicKey.challenge,
             _sodium.base64_variants.URLSAFE_NO_PADDING
         );
-        publicKey.allowCredentials?.forEach(function (listItem) {
+        publicKey.allowCredentials?.forEach(function (listItem: any) {
             listItem.id = _sodium.from_base64(
                 listItem.id,
                 _sodium.base64_variants.URLSAFE_NO_PADDING
@@ -204,7 +206,7 @@ const PasskeysFlow = () => {
                             style={{
                                 marginTop: '1rem',
                             }}
-                            color="accent"
+                            color="primary"
                             type="button"
                             variant="contained">
                             {t('TRY_AGAIN')}

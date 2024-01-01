@@ -16,6 +16,7 @@ const RenamePasskeyModal = (props: IProps) => {
     const { selectedPasskey } = useContext(PasskeysContext);
 
     const onSubmit = async (inputValue: string) => {
+        if (!selectedPasskey) return;
         try {
             await renamePasskey(selectedPasskey.id, inputValue);
         } catch (error) {
