@@ -40,6 +40,7 @@ module.exports = (phase) =>
                 '@mui/material',
                 '@mui/system',
                 '@mui/icons-material',
+                '@ente/accounts',
             ],
             env: {
                 SENTRY_RELEASE: GIT_SHA,
