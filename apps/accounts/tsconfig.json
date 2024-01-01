@@ -11,10 +11,7 @@
         "noUnusedParameters": false,
         "strictNullChecks": false,
         "target": "es5",
-        "useUnknownInCatchVariables": false,
-        "paths": {
-            "*": ["*"]
-        }
+        "useUnknownInCatchVariables": false
     },
     "include": [
         "next-env.d.ts",

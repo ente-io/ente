@@ -63,19 +63,26 @@ export default function App(props: EnteAppProps) {
 
     const closeDialogBoxV2 = () => setDialogBoxV2View(false);
 
+    const theme = getTheme(themeColor, APPS.PHOTOS);
+
     return (
         <CacheProvider value={emotionCache}>
-            <ThemeProvider theme={getTheme(themeColor, APPS.PHOTOS)}>
+            <ThemeProvider theme={theme}>
                 <CssBaseline enableColorScheme />
                 <DialogBoxV2
                     sx={{ zIndex: 1600 }}
                     open={dialogBoxV2View}
                     onClose={closeDialogBoxV2}
-                    attributes={dialogBoxAttributeV2}
+                    attributes={dialogBoxAttributeV2 as any}
                 />
 
                 <AppContext.Provider
-                    value={{ isMobile, showNavBar, setDialogBoxAttributesV2 }}>
+                    value={{
+                        isMobile,
+                        showNavBar,
+                        setDialogBoxAttributesV2:
+                            setDialogBoxAttributesV2 as any,
+                    }}>
                     {!isI18nReady && (
                         <Overlay
                             sx={(theme) => ({
@@ -83,7 +90,8 @@ export default function App(props: EnteAppProps) {
                                 justifyContent: 'center',
                                 alignItems: 'center',
                                 zIndex: 2000,
-                                backgroundColor: theme.colors.background.base,
+                                backgroundColor: (theme as any).colors
+                                    .background.base,
                             })}>
                             <EnteSpinner />
                         </Overlay>
