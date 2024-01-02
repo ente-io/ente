@@ -137,6 +137,7 @@
         "next-electron-server": "file:./thirdparty/next-electron-server",
         "node-fetch": "^2.6.7",
         "node-stream-zip": "^1.15.0",
+        "onnxruntime-node": "^1.16.3",
         "promise-fs": "^2.1.1"
     },
     "standard": {
