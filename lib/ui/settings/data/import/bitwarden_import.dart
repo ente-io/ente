@@ -60,7 +60,7 @@ Future<void> _pickBitwardenJsonFile(BuildContext context) async {
     if (count != null) {
       await importSuccessDialog(context, count);
     }
-  } catch (e, stacktrace) {
+  } catch (e) {
     await progressDialog.hide();
     await showErrorDialog(
       context,
