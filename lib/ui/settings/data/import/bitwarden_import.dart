@@ -80,18 +80,25 @@ Future<int?> _processBitwardenExportFile(
   List<dynamic> jsonArray = data['items'];
   final parsedCodes = [];
   for (var item in jsonArray) {
-    if (item['login']['totp'] != null) {
-      var issuer = item['name'];
-      var account = item['login']['username'];
-      var secret = item['login']['totp'];
+    if (item['login'] != null && item['login']['totp'] != null) {
+      var totp = item['login']['totp'];
 
-      parsedCodes.add(
-        Code.fromAccountAndSecret(
+      Code code;
+
+      if (totp.contains("otpauth://")) {
+        code = Code.fromRawData(totp);
+      } else {
+        var issuer = item['name'];
+        var account = item['login']['username'];
+
+        code = Code.fromAccountAndSecret(
           account,
           issuer,
-          secret,
-        ),
-      );
+          totp,
+        );
+      }
+
+      parsedCodes.add(code);
     }
   }
 
