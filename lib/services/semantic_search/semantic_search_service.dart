@@ -75,6 +75,7 @@ class SemanticSearchService {
       await _getTextEmbedding("warm up text encoder");
       _logger.info("Got text embedding");
     });
+    // Adding to queue only on init?
     Bus.instance.on<FileUploadedEvent>().listen((event) async {
       _addToQueue(event.file);
     });
@@ -168,7 +169,7 @@ class SemanticSearchService {
       return;
     }
     await _frameworkInitialization.future;
-    _logger.info("Attempting backfill");
+    _logger.info("Attempting backfill for image embeddings");
     final fileIDs = await _getFileIDsToBeIndexed();
     final files = await FilesDB.instance.getUploadedFiles(fileIDs);
     _logger.info(files.length.toString() + " to be embedded");

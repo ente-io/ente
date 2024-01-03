@@ -120,28 +120,4 @@ class OnnxImageEncoder {
     }
     return embedding;
   }
-
-  Float32List imageToByteListFloat32(
-    img.Image image,
-    int inputSize,
-    List<double> mean,
-    List<double> std,
-  ) {
-    final convertedBytes = Float32List(1 * inputSize * inputSize * 3);
-    final buffer = Float32List.view(convertedBytes.buffer);
-    int pixelIndex = 0;
-    assert(mean.length == 3);
-    assert(std.length == 3);
-
-    //TODO: rewrite this part
-    for (var i = 0; i < inputSize; i++) {
-      for (var j = 0; j < inputSize; j++) {
-        final pixel = image.getPixel(i, j);
-        buffer[pixelIndex++] = ((pixel.r / 255) - mean[0]) / std[0];
-        buffer[pixelIndex++] = ((pixel.g / 255) - mean[1]) / std[1];
-        buffer[pixelIndex++] = ((pixel.b / 255) - mean[2]) / std[2];
-      }
-    }
-    return convertedBytes.buffer.asFloat32List();
-  }
 }

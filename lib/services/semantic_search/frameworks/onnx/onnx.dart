@@ -24,7 +24,7 @@ class ONNX extends MLFramework {
 
   @override
   String getImageModelRemotePath() {
-    return "";
+    return kModelBucketEndpoint + kImageModel;
   }
 
   @override
@@ -35,7 +35,7 @@ class ONNX extends MLFramework {
   @override
   Future<void> loadImageModel(String path) async {
     final startTime = DateTime.now();
-    await _clipImage.init();
+    await _computer.compute(_clipImage.init);
     _imageEncoderAddress = await _computer.compute(
       _clipImage.loadModel,
       param: {
