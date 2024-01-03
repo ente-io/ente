@@ -227,7 +227,8 @@
     },
     {
       "title": "TCPShield",
-      "slug": "tcpshield"
+      "slug": "tcpshield",
+      "hex": "FFFFFF"
     },
     {
       "title": "Techlore"
