@@ -134,6 +134,7 @@
         "electron-updater": "^4.3.8",
         "ffmpeg-static": "^5.1.0",
         "get-folder-size": "^2.0.1",
+        "gpt-3-encoder": "^1.1.4",
         "next-electron-server": "file:./thirdparty/next-electron-server",
         "node-fetch": "^2.6.7",
         "node-stream-zip": "^1.15.0",
