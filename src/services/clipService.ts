@@ -207,7 +207,7 @@ export async function computeImageEmbedding(
         ggmlImageEmbedding,
         onnxImageEmbedding
     );
-    console.log('imageEmbeddingScore', score);
+    log.info('imageEmbeddingScore', score);
     return onnxImageEmbedding;
 }
 
@@ -268,14 +268,14 @@ export async function computeONNXImageEmbedding(
 export async function computeTextEmbedding(
     inputFilePath: string
 ): Promise<Float32Array> {
-    const ggmlImageEmbedding = await computeGGMLTextEmbedding(inputFilePath);
-    const onnxImageEmbedding = await computeONNXTextEmbedding(inputFilePath);
+    const ggmlTextEmbedding = await computeGGMLTextEmbedding(inputFilePath);
+    const onnxTextEmbedding = await computeONNXTextEmbedding(inputFilePath);
     const score = await computeClipMatchScore(
-        ggmlImageEmbedding,
-        onnxImageEmbedding
+        ggmlTextEmbedding,
+        onnxTextEmbedding
     );
     console.log('textEmbeddingScore', score);
-    return onnxImageEmbedding;
+    return onnxTextEmbedding;
 }
 
 export async function computeGGMLTextEmbedding(
