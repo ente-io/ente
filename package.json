@@ -126,6 +126,7 @@
         "@sentry/electron": "^2.5.1",
         "any-shell-escape": "^0.1.1",
         "auto-launch": "^5.0.5",
+        "canvas": "^2.11.2",
         "chokidar": "^3.5.3",
         "compare-versions": "^6.1.0",
         "electron-log": "^4.3.5",

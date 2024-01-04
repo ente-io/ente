@@ -8,9 +8,9 @@ import fs from 'fs/promises';
 import fetch from 'node-fetch';
 import { writeNodeStream } from './fs';
 import { CustomErrors } from '../constants/errors';
-import { readFile } from 'promise-fs';
 const ort = require('onnxruntime-node');
 const { encode } = require('gpt-3-encoder');
+const { createCanvas, Image } = require('canvas');
 
 const TEXT_MODEL_DOWNLOAD_URL =
     'https://huggingface.co/rocca/openai-clip-js/resolve/main/clip-text-vit-32-float32-int32.onnx';
@@ -156,11 +156,13 @@ export async function computeImageEmbedding(
 ): Promise<Float32Array> {
     try {
         const imageSession = await getOnnxImageSession();
-        const inputDataBuffer = await readFile(inputFilePath);
-
-        console.log('imageSession', imageSession);
-        console.log('inputDataBuffer.length', inputDataBuffer.length);
-        return new Float32Array();
+        const rgbData = await getRgbData(inputFilePath);
+        const feeds = {
+            input: new ort.Tensor('float32', rgbData, [1, 3, 224, 224]),
+        };
+        const results = await imageSession.run(feeds);
+        const embedVec = results['output'].data; // Float32Array
+        return embedVec;
     } catch (err) {
         logErrorSentry(err, 'Error in computeImageEmbedding');
         throw err;
@@ -187,4 +189,53 @@ export async function computeTextEmbedding(
         }
         throw err;
     }
+}
+
+async function getRgbData(inputFilePath: string) {
+    const width = 224;
+    const height = 224;
+    // let blob = await fetch(imgUrl, {referrer:""}).then(r => r.blob());
+
+    const img = new Image();
+    img.src = inputFilePath;
+
+    const canvas = createCanvas(width, height);
+    const ctx = canvas.getContext('2d');
+
+    // scale img to fit the shorter side to the canvas size
+    const scale = Math.max(
+        canvas.width / img.width,
+        canvas.height / img.height
+    );
+
+    // compute new image dimensions that would maintain the original aspect ratio
+    const scaledW = img.width * scale;
+    const scaledH = img.height * scale;
+
+    // compute position to center the image
+    const posX = (canvas.width - scaledW) / 2;
+    const posY = (canvas.height - scaledH) / 2;
+
+    // draw the image centered and scaled on the canvas
+    ctx.drawImage(img, posX, posY, scaledW, scaledH);
+
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const rgbData: [number[][], number[][], number[][]] = [[], [], []]; // [r, g, b]
+    // remove alpha and put into correct shape:
+    const d = imageData.data;
+    for (let i = 0; i < d.length; i += 4) {
+        const x = (i / 4) % width;
+        const y = Math.floor(i / 4 / width);
+        if (!rgbData[0][y]) rgbData[0][y] = [];
+        if (!rgbData[1][y]) rgbData[1][y] = [];
+        if (!rgbData[2][y]) rgbData[2][y] = [];
+        rgbData[0][y][x] = d[i + 0] / 255;
+        rgbData[1][y][x] = d[i + 1] / 255;
+        rgbData[2][y][x] = d[i + 2] / 255;
+        // From CLIP repo: Normalize(mean=(0.48145466, 0.4578275, 0.40821073), std=(0.26862954, 0.26130258, 0.27577711))
+        rgbData[0][y][x] = (rgbData[0][y][x] - 0.48145466) / 0.26862954;
+        rgbData[1][y][x] = (rgbData[1][y][x] - 0.4578275) / 0.26130258;
+        rgbData[2][y][x] = (rgbData[2][y][x] - 0.40821073) / 0.27577711;
+    }
+    return Float32Array.from(rgbData.flat().flat());
 }
