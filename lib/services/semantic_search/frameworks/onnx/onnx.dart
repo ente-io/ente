@@ -18,11 +18,6 @@ class ONNX extends MLFramework {
   int _imageEncoderAddress = 0;
 
   @override
-  String getFrameworkName() {
-    return "onnx";
-  }
-
-  @override
   String getImageModelRemotePath() {
     return kModelBucketEndpoint + kImageModel;
   }

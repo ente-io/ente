@@ -117,8 +117,6 @@ dependencies:
   move_to_background: ^1.0.2
 
   # open_file: ^3.2.1
-  objectbox: ^2.3.1
-  objectbox_flutter_libs: any
   onnxruntime:
     git: "https://github.com/ente-io/onnxruntime.git"
   open_mail_app: ^0.4.5
@@ -196,7 +194,6 @@ dev_dependencies:
     sdk: flutter
   isar_generator: ^3.1.0+1
   json_serializable: ^6.6.1
-  objectbox_generator: any
   test: ^1.22.0
 
 flutter_icons:

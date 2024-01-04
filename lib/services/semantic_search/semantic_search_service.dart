@@ -6,15 +6,15 @@ import "package:logging/logging.dart";
 import "package:photos/core/cache/lru_map.dart";
 import "package:photos/core/configuration.dart";
 import "package:photos/core/event_bus.dart";
+import "package:photos/db/embeddings_db.dart";
 import "package:photos/db/files_db.dart";
-import "package:photos/db/object_box.dart";
 import "package:photos/events/diff_sync_complete_event.dart";
 import 'package:photos/events/embedding_updated_event.dart';
 import "package:photos/events/file_uploaded_event.dart";
 import "package:photos/models/embedding.dart";
 import "package:photos/models/file/file.dart";
-import "package:photos/objectbox.g.dart";
 import "package:photos/services/semantic_search/embedding_store.dart";
+import "package:photos/services/semantic_search/frameworks/ggml.dart";
 import "package:photos/services/semantic_search/frameworks/ml_framework.dart";
 import 'package:photos/services/semantic_search/frameworks/onnx/onnx.dart';
 import "package:photos/utils/local_settings.dart";
@@ -32,11 +32,12 @@ class SemanticSearchService {
   static const kEmbeddingLength = 512;
   static const kScoreThreshold = 0.23;
   static const kShouldPushEmbeddings = true;
+  static const kCurrentModel = Model.onnxClip;
 
   final _logger = Logger("SemanticSearchService");
   final _queue = Queue<EnteFile>();
   final _cachedEmbeddings = <Embedding>[];
-  final _mlFramework = ONNX();
+  final _mlFramework = kCurrentModel == Model.onnxClip ? ONNX() : GGML();
   final _frameworkInitialization = Completer<void>();
 
   bool _hasInitialized = false;
@@ -56,9 +57,9 @@ class SemanticSearchService {
       return;
     }
     _hasInitialized = true;
-    await ObjectBox.instance.init();
+    await EmbeddingsDB.instance.init();
     await EmbeddingStore.instance.init();
-    _setupCachedEmbeddings();
+    await _setupCachedEmbeddings();
     Bus.instance.on<DiffSyncCompleteEvent>().listen((event) {
       // Diff sync is complete, we can now pull embeddings from remote
       unawaited(sync());
@@ -132,29 +133,21 @@ class SemanticSearchService {
   }
 
   Future<void> clearIndexes() async {
-    await ObjectBox.instance
-        .getEmbeddingBox()
-        .query(
-          Embedding_.model.equals(
-            _mlFramework.getFrameworkName() + "-" + kModelName,
-          ),
-        )
-        .build()
-        .removeAsync();
-    _logger.info("Indexes cleared for ${_mlFramework.getFrameworkName()}");
+    await EmbeddingsDB.instance.deleteAllForModel(kCurrentModel);
+    _logger.info("Indexes cleared for $kCurrentModel");
   }
 
-  void _setupCachedEmbeddings() {
-    ObjectBox.instance
-        .getEmbeddingBox()
-        .query(
-          Embedding_.model.equals(
-            _mlFramework.getFrameworkName() + "-" + kModelName,
-          ),
-        )
-        .watch(triggerImmediately: true)
-        .map((query) => query.find())
-        .listen((embeddings) {
+  Future<void> _setupCachedEmbeddings() async {
+    _logger.info("Setting up cached embeddings");
+    final startTime = DateTime.now();
+    final cachedEmbeddings = await EmbeddingsDB.instance.getAll(kCurrentModel);
+    final endTime = DateTime.now();
+    _logger.info(
+      "Loading ${cachedEmbeddings.length} took: ${(endTime.millisecondsSinceEpoch - startTime.millisecondsSinceEpoch)}ms",
+    );
+    _cachedEmbeddings.addAll(cachedEmbeddings);
+    _logger.info("Cached embeddings: " + _cachedEmbeddings.length.toString());
+    EmbeddingsDB.instance.getStream(kCurrentModel).listen((embeddings) {
       _logger.info("Updated embeddings: " + embeddings.length.toString());
       _cachedEmbeddings.clear();
       _cachedEmbeddings.addAll(embeddings);
@@ -279,7 +272,7 @@ class SemanticSearchService {
 
       final embedding = Embedding(
         fileID: file.uploadedFileID!,
-        model: _mlFramework.getFrameworkName() + "-" + kModelName,
+        model: kCurrentModel,
         embedding: result,
       );
       await EmbeddingStore.instance.storeEmbedding(
