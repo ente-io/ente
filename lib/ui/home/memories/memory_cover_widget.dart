@@ -21,6 +21,11 @@ class MemoryCovertWidget extends StatefulWidget {
 class _MemoryCovertWidgetState extends State<MemoryCovertWidget> {
   @override
   Widget build(BuildContext context) {
+    //memories will be empty if all memories are deleted and setState is called
+    //after FullScreenMemory screen is popped
+    if (widget.memories.isEmpty) {
+      return const SizedBox.shrink();
+    }
     final index = _getNextMemoryIndex();
     final title = _getTitle(widget.memories[index]);
     return GestureDetector(
