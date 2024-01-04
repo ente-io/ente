@@ -27,7 +27,11 @@ class _MemoryCovertWidgetState extends State<MemoryCovertWidget> {
       onTap: () async {
         await routeToPage(
           context,
-          FullScreenMemoryNew(title, widget.memories, index),
+          FullScreenMemoryDataUpdater(
+            initialIndex: index,
+            memories: widget.memories,
+            child: FullScreenMemoryNew(title, index),
+          ),
           forceCustomPageRoute: true,
         );
         setState(() {});
