@@ -134,6 +134,9 @@
       "title": "Mozilla"
     },
     {
+      "title": "NextDNS"
+    },
+    {
       "title": "ngrok",
       "hex": "858585"
     },
@@ -211,12 +214,21 @@
       "title": "Sipgate"
     },
     {
+      "title": "Skiff",
+      "hex": "EF5A3C"
+    },
+    {
       "title": "Snapchat"
     },
     {
       "title": "Standard Notes",
       "slug": "standardnotes",
       "hex": "2173E6"
+    },
+    {
+      "title": "TCPShield",
+      "slug": "tcpshield",
+      "hex": "FFFFFF"
     },
     {
       "title": "Techlore"
@@ -273,13 +285,6 @@
       "title": "X",
       "altNames": ["twitter"],
       "slug": "x"
-    },
-    {
-      "title": "NextDNS"
-    },
-    {
-      "title": "Skiff",
-      "hex": "EF5A3C"
     }
   ]
 }
