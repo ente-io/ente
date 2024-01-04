@@ -9,10 +9,6 @@ import "package:onnxruntime/onnxruntime.dart";
 class OnnxImageEncoder {
   final _logger = Logger("OnnxImageEncoder");
 
-  Future<void> init() async {
-    OrtEnv.instance.init();
-  }
-
   Future<int> loadModel(Map args) async {
     final sessionOptions = OrtSessionOptions()
       ..setInterOpNumThreads(1)
