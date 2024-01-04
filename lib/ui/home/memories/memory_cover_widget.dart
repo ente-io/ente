@@ -2,7 +2,7 @@ import "package:flutter/material.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/memory.dart";
 import "package:photos/theme/ente_theme.dart";
-import "package:photos/ui/home/memories/full_screen_memory.dart";
+import "package:photos/ui/home/memories/full_screen_memory_new.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 import "package:photos/utils/navigation_util.dart";
 
@@ -27,7 +27,7 @@ class _MemoryCovertWidgetState extends State<MemoryCovertWidget> {
       onTap: () async {
         await routeToPage(
           context,
-          FullScreenMemory(title, widget.memories, index),
+          FullScreenMemoryNew(title, widget.memories, index),
           forceCustomPageRoute: true,
         );
         setState(() {});
