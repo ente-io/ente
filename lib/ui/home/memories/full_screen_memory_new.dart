@@ -193,6 +193,10 @@ class BottomIcons extends StatelessWidget {
               inheritedData.memories[inheritedData.indexNotifier.value].file,
               onFileRemoved: (file) => {
                 inheritedData.removeCurrentMemory.call(),
+                if (inheritedData.memories.isEmpty)
+                  {
+                    Navigator.of(context).pop(),
+                  },
               },
             );
           },
