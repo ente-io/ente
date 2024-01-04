@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## v1.6.60
+
+### Bug Fixes
+
+- Fix Thumbnail Orientation issue
+- Fix ML logging issue
+
 ## v1.6.59
 
 ### New
