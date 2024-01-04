@@ -6,6 +6,8 @@ import "package:photos/core/configuration.dart";
 import "package:photos/models/memory.dart";
 import "package:photos/ui/actions/file/file_actions.dart";
 import "package:photos/ui/viewer/file/file_widget.dart";
+import "package:photos/ui/viewer/file_details/favorite_widget.dart";
+import "package:photos/utils/share_util.dart";
 
 class FullScreenMemoryDataUpdater extends StatefulWidget {
   final List<Memory> memories;
@@ -95,9 +97,16 @@ class FullScreenMemoryNew extends StatefulWidget {
 }
 
 class _FullScreenMemoryNewState extends State<FullScreenMemoryNew> {
+  PageController? _pageController;
   @override
   void initState() {
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    _pageController?.dispose();
+    super.dispose();
   }
 
   @override
@@ -107,6 +116,9 @@ class _FullScreenMemoryNewState extends State<FullScreenMemoryNew> {
       extendBodyBehindAppBar: true,
       appBar: AppBar(),
       body: PageView.builder(
+        controller: _pageController ??= PageController(
+          initialPage: widget.initialIndex,
+        ),
         itemBuilder: (context, index) {
           return Stack(
             alignment: Alignment.bottomCenter,
@@ -119,18 +131,16 @@ class _FullScreenMemoryNewState extends State<FullScreenMemoryNew> {
                   color: Colors.transparent,
                 ),
               ),
-              Configuration.instance.getUserID() !=
-                      inheritedData.memories[index].file.ownerID
-                  ? Padding(
-                      padding: const EdgeInsets.all(64.0),
-                      child: Container(
-                        color: Colors.red,
-                        height: 30,
-                        width: 30,
-                      ),
-                    )
-                  : const SizedBox.shrink(),
-              const BottomIcons(),
+              BottomIcons(index),
+              Padding(
+                padding: const EdgeInsets.all(120),
+                child: Container(
+                  color: Colors.black,
+                  child: Text(
+                    inheritedData.memories[index].file.generatedID.toString(),
+                  ),
+                ),
+              ),
             ],
           );
         },
@@ -144,25 +154,76 @@ class _FullScreenMemoryNewState extends State<FullScreenMemoryNew> {
 }
 
 class BottomIcons extends StatelessWidget {
-  const BottomIcons({super.key});
+  final int pageViewIndex;
+  const BottomIcons(this.pageViewIndex, {super.key});
 
   @override
   Widget build(BuildContext context) {
     final inheritedData = FullScreenMemoryData.of(context)!;
-    return IconButton(
-      icon: Icon(
-        Platform.isAndroid ? Icons.delete_outline : CupertinoIcons.delete,
-        color: Colors.white, //same for both themes
+    final currentFile = inheritedData.memories[pageViewIndex].file;
+
+    final List<Widget> rowChildren = [
+      IconButton(
+        icon: Icon(
+          Platform.isAndroid ? Icons.info_outline : CupertinoIcons.info,
+          color: Colors.white, //same for both themes
+        ),
+        onPressed: () {
+          showDetailsSheet(context, currentFile);
+        },
       ),
-      onPressed: () async {
-        await showSingleFileDeleteSheet(
-          context,
-          inheritedData.memories[inheritedData.indexNotifier.value].file,
-          onFileRemoved: (file) => {
-            inheritedData.removeCurrentMemory.call(),
+    ];
+    rowChildren.add(
+      Padding(
+        padding: const EdgeInsets.all(8),
+        child: Text(currentFile.generatedID.toString()),
+      ),
+    );
+    if (currentFile.ownerID == null ||
+        (Configuration.instance.getUserID() ?? 0) == currentFile.ownerID) {
+      rowChildren.addAll([
+        IconButton(
+          icon: Icon(
+            Platform.isAndroid ? Icons.delete_outline : CupertinoIcons.delete,
+            color: Colors.white, //same for both themes
+          ),
+          onPressed: () async {
+            await showSingleFileDeleteSheet(
+              context,
+              inheritedData.memories[inheritedData.indexNotifier.value].file,
+              onFileRemoved: (file) => {
+                inheritedData.removeCurrentMemory.call(),
+              },
+            );
           },
-        );
-      },
+        ),
+        SizedBox(
+          height: 32,
+          child: FavoriteWidget(currentFile),
+        ),
+      ]);
+    }
+    rowChildren.add(
+      IconButton(
+        icon: Icon(
+          Icons.adaptive.share,
+          color: Colors.white, //same for both themes
+        ),
+        onPressed: () {
+          share(context, [currentFile]);
+        },
+      ),
+    );
+
+    return SafeArea(
+      child: Container(
+        alignment: Alignment.bottomCenter,
+        padding: const EdgeInsets.fromLTRB(12, 0, 12, 20),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: rowChildren,
+        ),
+      ),
     );
   }
 }
