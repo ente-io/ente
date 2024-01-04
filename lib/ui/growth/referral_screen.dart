@@ -250,6 +250,7 @@ class ReferralWidget extends StatelessWidget {
           isTopBorderRadiusRemoved: referralView.enableApplyCode,
           alignCaptionedTextToLeft: true,
           onTap: () async {
+            // ignore: unawaited_futures
             routeToPage(
               context,
               WebPage(
@@ -287,6 +288,7 @@ class ReferralWidget extends StatelessWidget {
           singleBorderRadius: 8,
           alignCaptionedTextToLeft: true,
           onTap: () async {
+            // ignore: unawaited_futures
             routeToPage(
               context,
               StorageDetailsScreen(referralView, userDetails),

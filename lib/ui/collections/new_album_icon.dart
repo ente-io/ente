@@ -43,6 +43,7 @@ class NewAlbumIcon extends StatelessWidget {
             try {
               final Collection c =
                   await CollectionsService.instance.createAlbum(text);
+              // ignore: unawaited_futures
               routeToPage(
                 context,
                 CollectionPage(CollectionWithThumbnail(c, null)),

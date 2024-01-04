@@ -1,3 +1,5 @@
+import "dart:async";
+
 import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/generated/l10n.dart';
@@ -42,8 +44,9 @@ class StartBackupHookWidget extends StatelessWidget {
                 onTap: () async {
                   if (LocalSyncService.instance
                       .hasGrantedLimitedPermissions()) {
-                    PhotoManager.presentLimited();
+                    unawaited(PhotoManager.presentLimited());
                   } else {
+                    // ignore: unawaited_futures
                     routeToPage(
                       context,
                       BackupFolderSelectionPage(

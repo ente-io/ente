@@ -101,6 +101,7 @@ class UnCategorizedCollections extends StatelessWidget {
       ),
       onPressed: () async {
         if (collection != null) {
+          // ignore: unawaited_futures
           routeToPage(
             context,
             UnCategorizedPage(collection),

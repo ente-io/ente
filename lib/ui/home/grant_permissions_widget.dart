@@ -119,7 +119,7 @@ class GrantPermissionsWidget extends StatelessWidget {
                   ),
                 ],
               );
-
+              // ignore: unawaited_futures
               showDialog(
                 context: context,
                 builder: (BuildContext context) {

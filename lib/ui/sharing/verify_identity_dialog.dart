@@ -79,6 +79,7 @@ class _VerifyIdentifyDialogState extends State<VerifyIdentifyDialog> {
                         labelText: S.of(context).sendInvite,
                         isInAlert: true,
                         onTap: () async {
+                          // ignore: unawaited_futures
                           shareText(
                             S.of(context).shareTextRecommendUsingEnte,
                           );
@@ -167,6 +168,7 @@ class _VerifyIdentifyDialogState extends State<VerifyIdentifyDialog> {
               await Clipboard.setData(
                 ClipboardData(text: verificationID),
               );
+              // ignore: unawaited_futures
               shareText(
                 widget.self
                     ? S.of(context).shareMyVerificationID(verificationID)

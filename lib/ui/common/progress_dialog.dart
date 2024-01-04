@@ -1,3 +1,5 @@
+import "dart:async";
+
 import 'package:flutter/material.dart';
 
 enum ProgressDialogType { normal, download }
@@ -146,27 +148,29 @@ class ProgressDialog {
     try {
       if (!_isShowing) {
         _dialog = _Body();
-        showDialog<dynamic>(
-          context: _context!,
-          barrierDismissible: _barrierDismissible,
-          barrierColor: _barrierColor,
-          builder: (BuildContext context) {
-            _dismissingContext = context;
-            return WillPopScope(
-              onWillPop: () async => _barrierDismissible,
-              child: Dialog(
-                backgroundColor: _backgroundColor,
-                insetAnimationCurve: _insetAnimCurve,
-                insetAnimationDuration: const Duration(milliseconds: 100),
-                elevation: _dialogElevation,
-                shape: RoundedRectangleBorder(
-                  borderRadius:
-                      BorderRadius.all(Radius.circular(_borderRadius)),
+        unawaited(
+          showDialog<dynamic>(
+            context: _context!,
+            barrierDismissible: _barrierDismissible,
+            barrierColor: _barrierColor,
+            builder: (BuildContext context) {
+              _dismissingContext = context;
+              return WillPopScope(
+                onWillPop: () async => _barrierDismissible,
+                child: Dialog(
+                  backgroundColor: _backgroundColor,
+                  insetAnimationCurve: _insetAnimCurve,
+                  insetAnimationDuration: const Duration(milliseconds: 100),
+                  elevation: _dialogElevation,
+                  shape: RoundedRectangleBorder(
+                    borderRadius:
+                        BorderRadius.all(Radius.circular(_borderRadius)),
+                  ),
+                  child: _dialog,
                 ),
-                child: _dialog,
-              ),
-            );
-          },
+              );
+            },
+          ),
         );
         // Delaying the function for 200 milliseconds
         // [Default transitionDuration of DialogRoute]

@@ -119,11 +119,13 @@ class _StoreSubscriptionPageState extends State<StoreSubscriptionPage> {
                 ? S.of(context).googlePlayId
                 : S.of(context).appleId;
             final String message = S.of(context).subAlreadyLinkedErrMessage(id);
+            // ignore: unawaited_futures
             showErrorDialog(context, title, message);
             return;
           } catch (e) {
             _logger.warning("Could not complete payment ", e);
             await _dialog.hide();
+            // ignore: unawaited_futures
             showErrorDialog(
               context,
               S.of(context).paymentFailed,
@@ -175,6 +177,7 @@ class _StoreSubscriptionPageState extends State<StoreSubscriptionPage> {
   }
 
   Future<void> _fetchSubData() async {
+    // ignore: unawaited_futures
     _userService.getUserDetailsV2(memoryCount: false).then((userDetails) async {
       _userDetails = userDetails;
       _currentSubscription = userDetails.subscription;
@@ -316,7 +319,9 @@ class _StoreSubscriptionPageState extends State<StoreSubscriptionPage> {
             singleBorderRadius: 4,
             alignCaptionedTextToLeft: true,
             onTap: () async {
-              _billingService.launchFamilyPortal(context, _userDetails);
+              unawaited(
+                _billingService.launchFamilyPortal(context, _userDetails),
+              );
             },
           ),
         ),
@@ -452,6 +457,7 @@ class _StoreSubscriptionPageState extends State<StoreSubscriptionPage> {
               if (isActive) {
                 return;
               }
+              // ignore: unawaited_futures
               showErrorDialog(
                 context,
                 S.of(context).sorry,
@@ -513,6 +519,7 @@ class _StoreSubscriptionPageState extends State<StoreSubscriptionPage> {
                   "addOnBonus ${convertBytesToReadableFormat(addOnBonus)},"
                   "overshooting by ${convertBytesToReadableFormat(_userDetails.getFamilyOrPersonalUsage() - (plan.storage + addOnBonus))}",
                 );
+                // ignore: unawaited_futures
                 showErrorDialog(
                   context,
                   S.of(context).sorry,
@@ -540,6 +547,7 @@ class _StoreSubscriptionPageState extends State<StoreSubscriptionPage> {
                   _currentSubscription!.productID != plan.androidID;
               if (isCrossGradingOnAndroid) {
                 await _dialog.hide();
+                // ignore: unawaited_futures
                 showErrorDialog(
                   context,
                   S.of(context).couldNotUpdateSubscription,

@@ -221,7 +221,7 @@ class LocalFileUpdateService {
     if (_prefs.containsKey(_iosLivePhotoSizeMigrationDone)) {
       return;
     }
-    bool hasEntry = await _fileUpdationDB.isExisting(
+    final hasEntry = await _fileUpdationDB.isExisting(
       file.localID!,
       FileUpdationDB.livePhotoCheck,
     );

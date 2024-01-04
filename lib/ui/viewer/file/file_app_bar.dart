@@ -321,7 +321,7 @@ class FileAppBarState extends State<FileAppBar> {
       final File? fileToSave = await getFile(file);
       //Disabling notifications for assets changing to insert the file into
       //files db before triggering a sync.
-      PhotoManager.stopChangeNotify();
+      await PhotoManager.stopChangeNotify();
       if (type == FileType.image) {
         savedAsset = await PhotoManager.editor
             .saveImageWithPath(fileToSave!.path, title: file.title!);
@@ -364,7 +364,7 @@ class FileAppBarState extends State<FileAppBar> {
       await dialog.hide();
       await showGenericErrorDialog(context: context, error: e);
     } finally {
-      PhotoManager.startChangeNotify();
+      await PhotoManager.startChangeNotify();
       LocalSyncService.instance.checkAndSync().ignore();
     }
   }
@@ -419,9 +419,9 @@ class FileAppBarState extends State<FileAppBar> {
       if (result == false) {
         showShortToast(context, S.of(context).somethingWentWrong);
       }
-      dialog.hide();
+      await dialog.hide();
     } catch (e) {
-      dialog.hide();
+      await dialog.hide();
       _logger.severe("Failed to use as", e);
       await showGenericErrorDialog(context: context, error: e);
     }

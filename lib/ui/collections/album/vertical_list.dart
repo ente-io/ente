@@ -302,6 +302,7 @@ class AlbumVerticalListWidget extends StatelessWidget {
               ShareCollectionPage(collection),
             ),
           );
+          // ignore: unawaited_futures
           CollectionsService.instance
               .updateShareUrl(collection, {'enableCollect': true}).then(
             (value) => showShortToast(
@@ -402,12 +403,13 @@ class AlbumVerticalListWidget extends StatelessWidget {
         selectedFiles!.files.toList(),
       );
       await dialog.hide();
-      RemoteSyncService.instance.sync(silently: true);
+      unawaited(RemoteSyncService.instance.sync(silently: true));
       selectedFiles?.clearAll();
 
       return true;
     } on AssertionError catch (e) {
       await dialog.hide();
+      // ignore: unawaited_futures
       showErrorDialog(context, S.of(context).oops, e.message as String?);
       return false;
     } catch (e, s) {
@@ -431,12 +433,13 @@ class AlbumVerticalListWidget extends StatelessWidget {
     try {
       await CollectionsService.instance
           .restore(toCollectionID, selectedFiles!.files.toList());
-      RemoteSyncService.instance.sync(silently: true);
+      unawaited(RemoteSyncService.instance.sync(silently: true));
       selectedFiles?.clearAll();
       await dialog.hide();
       return true;
     } on AssertionError catch (e) {
       await dialog.hide();
+      // ignore: unawaited_futures
       showErrorDialog(context, S.of(context).oops, e.message as String?);
       return false;
     } catch (e, s) {

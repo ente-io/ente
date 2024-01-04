@@ -122,7 +122,7 @@ class _ApplyCodeScreenState extends State<ApplyCodeScreen> {
                           await StorageBonusService.instance
                               .getGateway()
                               .claimReferralCode(code.trim().toUpperCase());
-
+                          // ignore: unawaited_futures
                           Navigator.of(context).pushReplacement(
                             MaterialPageRoute(
                               builder: (context) => CodeSuccessScreen(
@@ -134,6 +134,7 @@ class _ApplyCodeScreenState extends State<ApplyCodeScreen> {
                         } catch (e) {
                           Logger('$runtimeType')
                               .severe("failed to apply referral", e);
+                          // ignore: unawaited_futures
                           showErrorDialogForException(
                             context: context,
                             exception: e as Exception,

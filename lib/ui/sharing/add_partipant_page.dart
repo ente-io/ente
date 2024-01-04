@@ -219,6 +219,7 @@ class _AddParticipantPage extends State<AddParticipantPage> {
                       }
                       final emailToAdd =
                           selectedEmail == '' ? _email : selectedEmail;
+                      // ignore: unawaited_futures
                       showDialog(
                         context: context,
                         builder: (BuildContext context) {
