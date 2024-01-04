@@ -1,3 +1,5 @@
+import "dart:io";
+
 import "package:isar/isar.dart";
 import 'package:path_provider/path_provider.dart';
 import "package:photos/models/embedding.dart";
@@ -15,6 +17,7 @@ class EmbeddingsDB {
       [EmbeddingSchema],
       directory: dir.path,
     );
+    // TODO: _clearDeprecatedStore(dir);
   }
 
   Future<void> clearTable() async {
@@ -51,5 +54,12 @@ class EmbeddingsDB {
           await _isar.embeddings.filter().modelEqualTo(model).findAll();
       await _isar.embeddings.deleteAll(embeddings.map((e) => e.id).toList());
     });
+  }
+
+  Future<void> _clearDeprecatedStore(Directory dir) async {
+    final deprecatedStore = Directory(dir.path + "/object-box-store");
+    if (await deprecatedStore.exists()) {
+      await deprecatedStore.delete(recursive: true);
+    }
   }
 }
