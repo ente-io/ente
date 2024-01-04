@@ -17,7 +17,6 @@ import "package:photos/objectbox.g.dart";
 import "package:photos/services/semantic_search/embedding_store.dart";
 import "package:photos/services/semantic_search/frameworks/ml_framework.dart";
 import 'package:photos/services/semantic_search/frameworks/onnx/onnx.dart';
-import "package:photos/utils/file_util.dart";
 import "package:photos/utils/local_settings.dart";
 import "package:photos/utils/thumbnail_util.dart";
 
@@ -32,7 +31,7 @@ class SemanticSearchService {
   static const kModelName = "clip";
   static const kEmbeddingLength = 512;
   static const kScoreThreshold = 0.23;
-  static const kShouldPushEmbeddings = false;
+  static const kShouldPushEmbeddings = true;
 
   final _logger = Logger("SemanticSearchService");
   final _queue = Queue<EnteFile>();
@@ -75,6 +74,7 @@ class SemanticSearchService {
       await _getTextEmbedding("warm up text encoder");
       _logger.info("Got text embedding");
     });
+    // Adding to queue only on init?
     Bus.instance.on<FileUploadedEvent>().listen((event) async {
       _addToQueue(event.file);
     });
@@ -149,7 +149,7 @@ class SemanticSearchService {
         .getEmbeddingBox()
         .query(
           Embedding_.model.equals(
-            "ggml" + "-" + kModelName,
+            _mlFramework.getFrameworkName() + "-" + kModelName,
           ),
         )
         .watch(triggerImmediately: true)
@@ -168,7 +168,7 @@ class SemanticSearchService {
       return;
     }
     await _frameworkInitialization.future;
-    _logger.info("Attempting backfill");
+    _logger.info("Attempting backfill for image embeddings");
     final fileIDs = await _getFileIDsToBeIndexed();
     final files = await FilesDB.instance.getUploadedFiles(fileIDs);
     _logger.info(files.length.toString() + " to be embedded");
@@ -265,7 +265,7 @@ class SemanticSearchService {
       return;
     }
     try {
-      final filePath = (await getFile(file))!.path;
+      final filePath = (await getThumbnailForUploadedFile(file))!.path;
       _logger.info("Running clip over $file");
       final result = await _mlFramework.getImageEmbedding(filePath);
       if (result.length != kEmbeddingLength) {

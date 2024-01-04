@@ -24,7 +24,7 @@ class ONNX extends MLFramework {
 
   @override
   String getImageModelRemotePath() {
-    return "";
+    return kModelBucketEndpoint + kImageModel;
   }
 
   @override
@@ -33,9 +33,14 @@ class ONNX extends MLFramework {
   }
 
   @override
+  Future<void> init() async {
+    await _computer.compute(initOrtEnv);
+    await super.init();
+  }
+
+  @override
   Future<void> loadImageModel(String path) async {
     final startTime = DateTime.now();
-    await _clipImage.init();
     _imageEncoderAddress = await _computer.compute(
       _clipImage.loadModel,
       param: {
@@ -51,7 +56,6 @@ class ONNX extends MLFramework {
   @override
   Future<void> loadTextModel(String path) async {
     final startTime = DateTime.now();
-    await _computer.compute(_clipText.init);
     // Doing this from main isolate since `rootBundle` cannot be accessed outside it
     await _clipText.initTokenizer();
     _textEncoderAddress = await _computer.compute(
@@ -119,4 +123,8 @@ class ONNX extends MLFramework {
     OrtEnv.instance.release();
     _logger.info('Released');
   }
+}
+
+void initOrtEnv() async {
+  OrtEnv.instance.init();
 }

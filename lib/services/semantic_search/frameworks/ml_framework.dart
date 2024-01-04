@@ -7,7 +7,7 @@ import "package:path_provider/path_provider.dart";
 import "package:photos/core/network/network.dart";
 
 abstract class MLFramework {
-  static const kImageEncoderEnabled = false;
+  static const kImageEncoderEnabled = true;
 
   final _logger = Logger("MLFramework");
 
