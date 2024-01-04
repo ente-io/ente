@@ -16,6 +16,7 @@ export interface LimitedElectronAPIs
         | 'deleteDiskCache'
         | 'getSentryUserID'
         | 'convertToJPEG'
+        | 'logToDisk'
     > {}
 
 class WorkerSafeElectronServiceImpl implements LimitedElectronAPIs {
@@ -65,6 +66,10 @@ class WorkerSafeElectronServiceImpl implements LimitedElectronAPIs {
     ): Promise<Uint8Array> {
         await this.ready;
         return this.proxiedElectron.convertToJPEG(inputFileData, filename);
+    }
+    async logToDisk(message: string) {
+        await this.ready;
+        return this.proxiedElectron.logToDisk(message);
     }
 }
 
