@@ -33,7 +33,8 @@ const TEXT_EMBEDDING_EXTRACT_CMD: string[] = [
     INPUT_PATH_PLACEHOLDER,
 ];
 const ort = require('onnxruntime-node');
-const { encode } = require('gpt-3-encoder');
+import Tokenizer from '../utils/clip-bpe-ts/mod';
+
 const { createCanvas, Image } = require('canvas');
 
 const TEXT_MODEL_DOWNLOAD_URL = {
@@ -198,6 +199,14 @@ async function getOnnxTextSession() {
     return onnxTextSession;
 }
 
+let tokenizer: Tokenizer = null;
+function getTokenizer() {
+    if (!tokenizer) {
+        tokenizer = new Tokenizer();
+    }
+    return tokenizer;
+}
+
 export async function computeImageEmbedding(
     inputFilePath: string
 ): Promise<Float32Array> {
@@ -274,7 +283,7 @@ export async function computeTextEmbedding(
         ggmlTextEmbedding,
         onnxTextEmbedding
     );
-    console.log('textEmbeddingScore', score);
+    log.info('textEmbeddingScore', score);
     return onnxTextEmbedding;
 }
 
@@ -323,13 +332,14 @@ export async function computeONNXTextEmbedding(
 ): Promise<Float32Array> {
     try {
         const imageSession = await getOnnxTextSession();
-        const tokenizedText = Int32Array.from(encode(text));
+        const tokenizer = getTokenizer();
+        const tokenizedText = Int32Array.from(tokenizer.encodeForCLIP(text));
         const feeds = {
             input: new ort.Tensor('int32', tokenizedText, [1, 77]),
         };
         const results = await imageSession.run(feeds);
-        console.log('result', results);
-        return new Float32Array();
+        const embedVec = results['output'].data; // Float32Array
+        return embedVec;
     } catch (err) {
         if (err.message === CustomErrors.MODEL_DOWNLOAD_PENDING) {
             log.info(CustomErrors.MODEL_DOWNLOAD_PENDING);

@@ -1,5 +1,5 @@
 import * as htmlEntities from 'html-entities';
-import bpeVocabData from './bpe_simple_vocab_16e6.mjs';
+import bpeVocabData from './bpe_simple_vocab_16e6';
 // import ftfy from "https://deno.land/x/ftfy_pyodide@v0.1.1/mod.js";
 
 function ord(c: string) {
