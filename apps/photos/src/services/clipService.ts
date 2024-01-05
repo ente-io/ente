@@ -106,7 +106,9 @@ class ClipServiceImpl {
         handler(this.clipExtractionStatus);
     };
 
-    scheduleImageEmbeddingExtraction = async () => {
+    scheduleImageEmbeddingExtraction = async (
+        model: Model = Model.ONNX_CLIP
+    ) => {
         try {
             if (this.embeddingExtractionInProgress) {
                 addLogLine(
@@ -122,7 +124,7 @@ class ClipServiceImpl {
             const canceller = new AbortController();
             this.embeddingExtractionInProgress = canceller;
             try {
-                await this.runClipEmbeddingExtraction(canceller);
+                await this.runClipEmbeddingExtraction(canceller, model);
             } finally {
                 this.embeddingExtractionInProgress = null;
                 if (!canceller.signal.aborted && this.reRunNeeded) {
@@ -153,7 +155,10 @@ class ClipServiceImpl {
         }
     };
 
-    private runClipEmbeddingExtraction = async (canceller: AbortController) => {
+    private runClipEmbeddingExtraction = async (
+        canceller: AbortController,
+        model: Model
+    ) => {
         try {
             if (this.unsupportedPlatform) {
                 addLogLine(
@@ -166,7 +171,9 @@ class ClipServiceImpl {
                 return;
             }
             const localFiles = getPersonalFiles(await getAllLocalFiles(), user);
-            const existingEmbeddings = await getLatestClipImageEmbeddings();
+            const existingEmbeddings = await getLatestClipImageEmbeddings(
+                model
+            );
             const pendingFiles = await getNonClipEmbeddingExtractedFiles(
                 localFiles,
                 existingEmbeddings
@@ -191,7 +198,7 @@ class ClipServiceImpl {
                         throw Error(CustomError.REQUEST_CANCELLED);
                     }
                     const embeddingData =
-                        await this.extractFileClipImageEmbedding(file);
+                        await this.extractFileClipImageEmbedding(model, file);
                     addLogLine(
                         `successfully extracted clip embedding for file: ${file.metadata.title} fileID: ${file.id} embedding length: ${embeddingData?.length}`
                     );
@@ -228,10 +235,13 @@ class ClipServiceImpl {
         }
     };
 
-    private async runLocalFileClipExtraction(arg: {
-        enteFile: EnteFile;
-        localFile: globalThis.File;
-    }) {
+    private async runLocalFileClipExtraction(
+        arg: {
+            enteFile: EnteFile;
+            localFile: globalThis.File;
+        },
+        model: Model = Model.ONNX_CLIP
+    ) {
         const { enteFile, localFile } = arg;
         addLogLine(
             `clip embedding extraction onFileUploadedHandler file: ${enteFile.metadata.title} fileID: ${enteFile.id}`,
@@ -246,6 +256,7 @@ class ClipServiceImpl {
         try {
             await this.liveEmbeddingExtractionQueue.add(async () => {
                 const embedding = await this.extractLocalFileClipImageEmbedding(
+                    model,
                     localFile
                 );
                 await this.encryptAndUploadEmbedding(enteFile, embedding);
@@ -258,11 +269,14 @@ class ClipServiceImpl {
         }
     }
 
-    private extractLocalFileClipImageEmbedding = async (localFile: File) => {
+    private extractLocalFileClipImageEmbedding = async (
+        model: Model,
+        localFile: File
+    ) => {
         const file = await localFile
             .arrayBuffer()
             .then((buffer) => new Uint8Array(buffer));
-        const embedding = await ElectronAPIs.computeImageEmbedding(file);
+        const embedding = await ElectronAPIs.computeImageEmbedding(model, file);
         return embedding;
     };
 
@@ -296,9 +310,15 @@ class ClipServiceImpl {
         }
     };
 
-    private extractFileClipImageEmbedding = async (file: EnteFile) => {
+    private extractFileClipImageEmbedding = async (
+        model: Model,
+        file: EnteFile
+    ) => {
         const thumb = await downloadManager.getThumbnail(file);
-        const embedding = await ElectronAPIs.computeImageEmbedding(thumb);
+        const embedding = await ElectronAPIs.computeImageEmbedding(
+            model,
+            thumb
+        );
         return embedding;
     };
 
@@ -333,11 +353,9 @@ const getNonClipEmbeddingExtractedFiles = async (
     });
 };
 
-export const getLocalClipImageEmbeddings = async () => {
+export const getLocalClipImageEmbeddings = async (model: Model) => {
     const allEmbeddings = await getLocalEmbeddings();
-    return allEmbeddings.filter(
-        (embedding) => embedding.model === Model.GGML_CLIP
-    );
+    return allEmbeddings.filter((embedding) => embedding.model === model);
 };
 
 export const computeClipMatchScore = async (
@@ -367,19 +385,19 @@ export const computeClipMatchScore = async (
     return score;
 };
 
-const getLatestClipImageEmbeddings = async () => {
+const getLatestClipImageEmbeddings = async (model: Model) => {
     const allEmbeddings = await getLatestEmbeddings();
-    return allEmbeddings.filter(
-        (embedding) => embedding.model === Model.GGML_CLIP
-    );
+    return allEmbeddings.filter((embedding) => embedding.model === model);
 };
 
-const getClipExtractionStatus = async (): Promise<ClipExtractionStatus> => {
+const getClipExtractionStatus = async (
+    model: Model = Model.ONNX_CLIP
+): Promise<ClipExtractionStatus> => {
     const user = getData(LS_KEYS.USER);
     if (!user) {
         return;
     }
-    const allEmbeddings = await getLocalClipImageEmbeddings();
+    const allEmbeddings = await getLocalClipImageEmbeddings(model);
     const localFiles = getPersonalFiles(await getLocalFiles(), user);
     const pendingFiles = await getNonClipEmbeddingExtractedFiles(
         localFiles,
