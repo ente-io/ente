@@ -8,6 +8,7 @@ import "package:photos/core/network/network.dart";
 
 abstract class MLFramework {
   static const kImageEncoderEnabled = true;
+  static const kMaximumRetrials = 3;
 
   final _logger = Logger("MLFramework");
 
@@ -97,13 +98,26 @@ abstract class MLFramework {
         basename(getTextModelRemotePath());
   }
 
-  Future<void> _downloadFile(String url, String savePath) async {
+  Future<void> _downloadFile(
+    String url,
+    String savePath, {
+    int trialCount = 1,
+  }) async {
     _logger.info("Downloading " + url);
     final existingFile = File(savePath);
     if (await existingFile.exists()) {
       await existingFile.delete();
     }
-    await NetworkClient.instance.getDio().download(url, savePath);
+    try {
+      await NetworkClient.instance.getDio().download(url, savePath);
+    } catch (e, s) {
+      _logger.severe(e, s);
+      if (trialCount < kMaximumRetrials) {
+        return _downloadFile(url, savePath, trialCount: trialCount + 1);
+      } else {
+        rethrow;
+      }
+    }
   }
 
   Future<String> getAccessiblePathForAsset(
