@@ -275,12 +275,12 @@ export async function computeONNXImageEmbedding(
 
 export async function computeTextEmbedding(
     model: Model,
-    inputFilePath: string
+    text: string
 ): Promise<Float32Array> {
     if (model === Model.GGML_CLIP) {
-        return await computeGGMLTextEmbedding(inputFilePath);
+        return await computeGGMLTextEmbedding(text);
     } else {
-        return await computeONNXTextEmbedding(inputFilePath);
+        return await computeONNXTextEmbedding(text);
     }
 }
 

@@ -16,7 +16,7 @@ export async function computeImageEmbedding(
         const embedding = await ipcRenderer.invoke(
             'compute-image-embedding',
             model,
-            imageData
+            tempInputFilePath
         );
         return embedding;
     } catch (err) {
