@@ -1,3 +1,4 @@
+import "dart:async";
 import "dart:io";
 
 import "package:flutter/cupertino.dart";
@@ -266,6 +267,10 @@ class _FullScreenMemoryNewState extends State<FullScreenMemoryNew> {
               );
             },
             onPageChanged: (index) {
+              unawaited(
+                MemoriesService.instance
+                    .markMemoryAsSeen(inheritedData.memories[index]),
+              );
               inheritedData.indexNotifier.value = index;
             },
             itemCount: inheritedData.memories.length,
@@ -281,9 +286,12 @@ class _FullScreenMemoryNewState extends State<FullScreenMemoryNew> {
                     switchInCurve: Curves.easeIn,
                     switchOutCurve: Curves.easeOut,
                     child: value
-                        ? Text(
-                            widget.title,
-                            style: darkTextTheme.h2,
+                        ? Hero(
+                            tag: widget.title,
+                            child: Text(
+                              widget.title,
+                              style: darkTextTheme.h2,
+                            ),
                           )
                         : showStepProgressIndicator
                             ? const SizedBox.shrink()
