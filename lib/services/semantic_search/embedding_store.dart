@@ -10,6 +10,7 @@ import "package:photos/db/files_db.dart";
 import "package:photos/models/embedding.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/services/semantic_search/remote_embedding.dart";
+import "package:photos/services/semantic_search/semantic_search_service.dart";
 import "package:photos/utils/crypto_util.dart";
 import "package:photos/utils/file_download_util.dart";
 import "package:shared_preferences/shared_preferences.dart";
@@ -99,6 +100,7 @@ class EmbeddingStore {
       final response = await _dio.get(
         "/embeddings/diff",
         queryParameters: {
+          "model": SemanticSearchService.kCurrentModel.name,
           "sinceTime": sinceTime,
           "limit": limit,
         },
