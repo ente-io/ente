@@ -36,7 +36,6 @@ class SemanticSearchService {
 
   final _logger = Logger("SemanticSearchService");
   final _queue = Queue<EnteFile>();
-  final _cachedEmbeddings = <Embedding>[];
   final _mlFramework = kCurrentModel == Model.onnxClip ? ONNX() : GGML();
   final _frameworkInitialization = Completer<void>();
 
@@ -44,6 +43,7 @@ class SemanticSearchService {
   bool _isComputingEmbeddings = false;
   bool _isSyncing = false;
   Future<List<EnteFile>>? _ongoingRequest;
+  List<Embedding> _cachedEmbeddings = <Embedding>[];
   PendingQuery? _nextQuery;
 
   get hasInitialized => _hasInitialized;
@@ -140,18 +140,16 @@ class SemanticSearchService {
   Future<void> _setupCachedEmbeddings(bool shouldListenForUpdates) async {
     _logger.info("Setting up cached embeddings");
     final startTime = DateTime.now();
-    final cachedEmbeddings = await EmbeddingsDB.instance.getAll(kCurrentModel);
+    _cachedEmbeddings = await EmbeddingsDB.instance.getAll(kCurrentModel);
     final endTime = DateTime.now();
     _logger.info(
-      "Loading ${cachedEmbeddings.length} took: ${(endTime.millisecondsSinceEpoch - startTime.millisecondsSinceEpoch)}ms",
+      "Loading ${_cachedEmbeddings.length} took: ${(endTime.millisecondsSinceEpoch - startTime.millisecondsSinceEpoch)}ms",
     );
-    _cachedEmbeddings.addAll(cachedEmbeddings);
     _logger.info("Cached embeddings: " + _cachedEmbeddings.length.toString());
     if (shouldListenForUpdates) {
       EmbeddingsDB.instance.getStream(kCurrentModel).listen((embeddings) {
         _logger.info("Updated embeddings: " + embeddings.length.toString());
-        _cachedEmbeddings.clear();
-        _cachedEmbeddings.addAll(embeddings);
+        _cachedEmbeddings = embeddings;
         Bus.instance.fire(EmbeddingUpdatedEvent());
       });
     }
