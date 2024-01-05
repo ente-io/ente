@@ -175,8 +175,8 @@ export default function setupIpcComs(
         setOptOutOfCrashReports(optOut);
         updateOptOutOfCrashReports(optOut);
     });
-    ipcMain.handle('compute-image-embedding', (_, inputFilePath) => {
-        return computeImageEmbedding(inputFilePath);
+    ipcMain.handle('compute-image-embedding', (_, model, inputFilePath) => {
+        return computeImageEmbedding(model, inputFilePath);
     });
     ipcMain.handle('compute-text-embedding', (_, text) => {
         return computeTextEmbedding(text);

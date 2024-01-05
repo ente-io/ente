@@ -36,6 +36,7 @@ const TEXT_EMBEDDING_EXTRACT_CMD: string[] = [
 const ort = require('onnxruntime-node');
 import Tokenizer from '../utils/clip-bpe-ts/mod';
 import { readFile } from 'promise-fs';
+import { Model } from '../types';
 
 const TEXT_MODEL_DOWNLOAD_URL = {
     ggml: 'https://models.ente.io/clip-vit-base-patch32_ggml-text-model-f16.gguf',
@@ -208,16 +209,14 @@ function getTokenizer() {
 }
 
 export async function computeImageEmbedding(
+    model: Model,
     inputFilePath: string
 ): Promise<Float32Array> {
-    const ggmlImageEmbedding = await computeGGMLImageEmbedding(inputFilePath);
-    const onnxImageEmbedding = await computeONNXImageEmbedding(inputFilePath);
-    const score = await computeClipMatchScore(
-        ggmlImageEmbedding,
-        onnxImageEmbedding
-    );
-    log.info('imageEmbeddingScore', score);
-    return onnxImageEmbedding;
+    if (model === Model.GGML_CLIP) {
+        return await computeGGMLImageEmbedding(inputFilePath);
+    } else {
+        return await computeONNXImageEmbedding(inputFilePath);
+    }
 }
 
 export async function computeGGMLImageEmbedding(
