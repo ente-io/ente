@@ -7,6 +7,7 @@ import "package:photos/models/memory.dart";
 import "package:photos/ui/actions/file/file_actions.dart";
 import "package:photos/ui/viewer/file/file_widget.dart";
 import "package:photos/ui/viewer/file_details/favorite_widget.dart";
+import "package:photos/utils/file_util.dart";
 import "package:photos/utils/share_util.dart";
 
 class FullScreenMemoryDataUpdater extends StatefulWidget {
@@ -120,6 +121,11 @@ class _FullScreenMemoryNewState extends State<FullScreenMemoryNew> {
           initialPage: widget.initialIndex,
         ),
         itemBuilder: (context, index) {
+          if (index < inheritedData.memories.length - 1) {
+            final nextFile = inheritedData.memories[index + 1].file;
+            preloadThumbnail(nextFile);
+            preloadFile(nextFile);
+          }
           return Stack(
             alignment: Alignment.bottomCenter,
             children: [
