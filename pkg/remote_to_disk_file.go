@@ -32,18 +32,17 @@ func (c *ClICtrl) syncFiles(ctx context.Context, account model.Account) error {
 	model.SortAlbumFileEntry(entries)
 	defer utils.TimeTrack(time.Now(), "process_files")
 	var albumDiskInfo *albumDiskInfo
-	for i, entry := range entries {
-		if entry.SyncedLocally {
+	for i, albumFileEntry := range entries {
+		if albumFileEntry.SyncedLocally {
 			continue
 		}
-		albumInfo, ok := albumIDToMetaMap[entry.AlbumID]
+		albumInfo, ok := albumIDToMetaMap[albumFileEntry.AlbumID]
 		if !ok {
-			log.Printf("Album %d not found in local metadata", entry.AlbumID)
+			log.Printf("Album %d not found in local metadata", albumFileEntry.AlbumID)
 			continue
 		}
-
 		if albumInfo.IsDeleted {
-			putErr := c.DeleteAlbumEntry(ctx, entry)
+			putErr := c.DeleteAlbumEntry(ctx, albumFileEntry)
 			if putErr != nil {
 				return putErr
 			}
@@ -56,7 +55,7 @@ func (c *ClICtrl) syncFiles(ctx context.Context, account model.Account) error {
 				return err
 			}
 		}
-		fileBytes, err := c.GetValue(ctx, model.RemoteFiles, []byte(fmt.Sprintf("%d", entry.FileID)))
+		fileBytes, err := c.GetValue(ctx, model.RemoteFiles, []byte(fmt.Sprintf("%d", albumFileEntry.FileID)))
 		if err != nil {
 			return err
 		}
@@ -67,7 +66,7 @@ func (c *ClICtrl) syncFiles(ctx context.Context, account model.Account) error {
 				return err
 			}
 			log.Printf("[%d/%d] Sync %s for album %s", i, len(entries), existingEntry.GetTitle(), albumInfo.AlbumName)
-			err = c.downloadEntry(ctx, albumDiskInfo, *existingEntry, entry)
+			err = c.downloadEntry(ctx, albumDiskInfo, *existingEntry, albumFileEntry)
 			if err != nil {
 				if errors.Is(err, model.ErrDecryption) {
 					continue
@@ -81,7 +80,15 @@ func (c *ClICtrl) syncFiles(ctx context.Context, account model.Account) error {
 				}
 			}
 		} else {
-			log.Fatalf("File %d not found in remote", entry.FileID)
+			// file metadata is missing in the localDB
+			if albumFileEntry.IsDeleted {
+				delErr := c.DeleteAlbumEntry(ctx, albumFileEntry)
+				if delErr != nil {
+					log.Fatalf("Error deleting album entry %d (deleted: %v)  %v", albumFileEntry.FileID, albumFileEntry.IsDeleted, delErr)
+				}
+			} else {
+				log.Fatalf("Failed to find entry in db for file %d (deleted: %v)", albumFileEntry.FileID, albumFileEntry.IsDeleted)
+			}
 		}
 	}
 
