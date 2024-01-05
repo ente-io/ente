@@ -258,7 +258,12 @@ class SemanticSearchService {
       return;
     }
     try {
-      final filePath = (await getThumbnailForUploadedFile(file))!.path;
+      final thumbnail = await getThumbnailForUploadedFile(file);
+      if (thumbnail == null) {
+        _logger.warning("Could not get thumbnail for $file");
+        return;
+      }
+      final filePath = thumbnail.path;
       _logger.info("Running clip over $file");
       final result = await _mlFramework.getImageEmbedding(filePath);
       if (result.length != kEmbeddingLength) {
