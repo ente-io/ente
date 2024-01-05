@@ -244,7 +244,9 @@ class _FullScreenMemoryNewState extends State<FullScreenMemoryNew> {
                             widget.title,
                             style: darkTextTheme.h2,
                           )
-                        : const MemoryCounter(),
+                        : showStepProgressIndicator
+                            ? const SizedBox.shrink()
+                            : const MemoryCounter(),
                   );
                 },
                 valueListenable: _showTitle,
