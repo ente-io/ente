@@ -38,7 +38,7 @@ class SemanticSearchService {
   final _logger = Logger("SemanticSearchService");
   final _queue = Queue<EnteFile>();
   final _mlFramework = kCurrentModel == Model.onnxClip ? ONNX() : GGML();
-  final _frameworkInitialization = Completer<void>();
+  final _frameworkInitialization = Completer<bool>();
   final _embeddingLoaderDebouncer =
       Debouncer(kDebounceDuration, executionInterval: kDebounceDuration);
 
@@ -141,6 +141,10 @@ class SemanticSearchService {
     );
   }
 
+  Future<bool> getFrameworkInitializationStatus() {
+    return _frameworkInitialization.future;
+  }
+
   Future<void> clearIndexes() async {
     await EmbeddingsDB.instance.deleteAllForModel(kCurrentModel);
     _logger.info("Indexes cleared for $kCurrentModel");
@@ -232,7 +236,7 @@ class SemanticSearchService {
     _logger.info("Initializing ML framework");
     try {
       await _mlFramework.init();
-      _frameworkInitialization.complete();
+      _frameworkInitialization.complete(true);
     } catch (e, s) {
       _logger.severe("ML framework initialization failed", e, s);
     }

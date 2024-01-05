@@ -2876,6 +2876,16 @@ class S {
     );
   }
 
+  /// `Downloading models...`
+  String get loadingModel {
+    return Intl.message(
+      'Downloading models...',
+      name: 'loadingModel',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Status`
   String get status {
     return Intl.message(

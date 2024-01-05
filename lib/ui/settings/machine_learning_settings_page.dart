@@ -115,7 +115,17 @@ class _MachineLearningSettingsPageState
         hasEnabled
             ? Column(
                 children: [
-                  const MagicSearchIndexStatsWidget(),
+                  FutureBuilder(
+                    future: SemanticSearchService.instance
+                        .getFrameworkInitializationStatus(),
+                    builder: (BuildContext context, AsyncSnapshot snapshot) {
+                      if (snapshot.hasData) {
+                        return const MagicSearchIndexStatsWidget();
+                      } else {
+                        return const ModelLoadingState();
+                      }
+                    },
+                  ),
                   const SizedBox(
                     height: 12,
                   ),
@@ -139,6 +149,31 @@ class _MachineLearningSettingsPageState
                 ],
               )
             : const SizedBox.shrink(),
+      ],
+    );
+  }
+}
+
+class ModelLoadingState extends StatelessWidget {
+  const ModelLoadingState({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        MenuSectionTitle(title: S.of(context).status),
+        MenuItemWidget(
+          captionedTextWidget: CaptionedTextWidget(
+            title: S.of(context).loadingModel,
+          ),
+          trailingWidget: EnteLoadingWidget(
+            size: 12,
+            color: getEnteColorScheme(context).fillMuted,
+          ),
+          singleBorderRadius: 8,
+          alignCaptionedTextToLeft: true,
+          isGestureDetectorDisabled: true,
+        ),
       ],
     );
   }

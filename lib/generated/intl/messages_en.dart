@@ -832,6 +832,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Loading gallery..."),
         "loadingMessage":
             MessageLookupByLibrary.simpleMessage("Loading your photos..."),
+        "loadingModel":
+            MessageLookupByLibrary.simpleMessage("Downloading models..."),
         "localGallery": MessageLookupByLibrary.simpleMessage("Local gallery"),
         "location": MessageLookupByLibrary.simpleMessage("Location"),
         "locationName": MessageLookupByLibrary.simpleMessage("Location name"),
