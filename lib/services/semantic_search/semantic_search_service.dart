@@ -17,6 +17,7 @@ import "package:photos/services/semantic_search/embedding_store.dart";
 import "package:photos/services/semantic_search/frameworks/ggml.dart";
 import "package:photos/services/semantic_search/frameworks/ml_framework.dart";
 import 'package:photos/services/semantic_search/frameworks/onnx/onnx.dart';
+import "package:photos/utils/debouncer.dart";
 import "package:photos/utils/local_settings.dart";
 import "package:photos/utils/thumbnail_util.dart";
 
@@ -32,11 +33,14 @@ class SemanticSearchService {
   static const kScoreThreshold = 0.23;
   static const kShouldPushEmbeddings = true;
   static const kCurrentModel = Model.onnxClip;
+  static const kDebounceDuration = Duration(milliseconds: 10000);
 
   final _logger = Logger("SemanticSearchService");
   final _queue = Queue<EnteFile>();
   final _mlFramework = kCurrentModel == Model.onnxClip ? ONNX() : GGML();
   final _frameworkInitialization = Completer<void>();
+  final _embeddingLoaderDebouncer =
+      Debouncer(kDebounceDuration, executionInterval: kDebounceDuration);
 
   bool _hasInitialized = false;
   bool _isComputingEmbeddings = false;
@@ -47,7 +51,7 @@ class SemanticSearchService {
 
   get hasInitialized => _hasInitialized;
 
-  Future<void> init({bool isAppInForeground = true}) async {
+  Future<void> init() async {
     if (!LocalSettings.instance.hasEnabledMagicSearch()) {
       return;
     }
@@ -58,7 +62,12 @@ class SemanticSearchService {
     _hasInitialized = true;
     await EmbeddingsDB.instance.init();
     await EmbeddingStore.instance.init();
-    await _setupCachedEmbeddings(isAppInForeground);
+    await _loadEmbeddings();
+    Bus.instance.on<EmbeddingUpdatedEvent>().listen((event) {
+      _embeddingLoaderDebouncer.run(() async {
+        await _loadEmbeddings();
+      });
+    });
     Bus.instance.on<DiffSyncCompleteEvent>().listen((event) {
       // Diff sync is complete, we can now pull embeddings from remote
       unawaited(sync());
@@ -137,8 +146,8 @@ class SemanticSearchService {
     _logger.info("Indexes cleared for $kCurrentModel");
   }
 
-  Future<void> _setupCachedEmbeddings(bool shouldListenForUpdates) async {
-    _logger.info("Setting up cached embeddings");
+  Future<void> _loadEmbeddings() async {
+    _logger.info("Pulling cached embeddings");
     final startTime = DateTime.now();
     _cachedEmbeddings = await EmbeddingsDB.instance.getAll(kCurrentModel);
     final endTime = DateTime.now();
@@ -146,13 +155,6 @@ class SemanticSearchService {
       "Loading ${_cachedEmbeddings.length} took: ${(endTime.millisecondsSinceEpoch - startTime.millisecondsSinceEpoch)}ms",
     );
     _logger.info("Cached embeddings: " + _cachedEmbeddings.length.toString());
-    if (shouldListenForUpdates) {
-      EmbeddingsDB.instance.getStream(kCurrentModel).listen((embeddings) {
-        _logger.info("Updated embeddings: " + embeddings.length.toString());
-        _cachedEmbeddings = embeddings;
-        Bus.instance.fire(EmbeddingUpdatedEvent());
-      });
-    }
   }
 
   Future<void> _backFill() async {

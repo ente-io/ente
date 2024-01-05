@@ -2,6 +2,8 @@ import "dart:io";
 
 import "package:isar/isar.dart";
 import 'package:path_provider/path_provider.dart';
+import "package:photos/core/event_bus.dart";
+import "package:photos/events/embedding_updated_event.dart";
 import "package:photos/models/embedding.dart";
 
 class EmbeddingsDB {
@@ -24,10 +26,6 @@ class EmbeddingsDB {
     await _isar.clear();
   }
 
-  Stream<List<Embedding>> getStream(Model model) {
-    return _isar.embeddings.filter().modelEqualTo(model).watch();
-  }
-
   Future<List<Embedding>> getAll(Model model) async {
     return _isar.embeddings.filter().modelEqualTo(model).findAll();
   }
@@ -35,12 +33,14 @@ class EmbeddingsDB {
   Future<void> put(Embedding embedding) {
     return _isar.writeTxn(() async {
       await _isar.embeddings.put(embedding);
+      Bus.instance.fire(EmbeddingUpdatedEvent());
     });
   }
 
   Future<void> putMany(List<Embedding> embeddings) {
     return _isar.writeTxn(() async {
       await _isar.embeddings.putAll(embeddings);
+      Bus.instance.fire(EmbeddingUpdatedEvent());
     });
   }
 
