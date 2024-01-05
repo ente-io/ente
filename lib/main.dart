@@ -193,7 +193,9 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     });
   }
   unawaited(FeatureFlagService.instance.init());
-  unawaited(SemanticSearchService.instance.init());
+  unawaited(
+    SemanticSearchService.instance.init(isAppInForeground: !isBackground),
+  );
   // Can not including existing tf/ml binaries as they are not being built
   // from source.
   // See https://gitlab.com/fdroid/fdroiddata/-/merge_requests/12671#note_1294346819

@@ -48,7 +48,7 @@ class SemanticSearchService {
 
   get hasInitialized => _hasInitialized;
 
-  Future<void> init() async {
+  Future<void> init({bool isAppInForeground = true}) async {
     if (!LocalSettings.instance.hasEnabledMagicSearch()) {
       return;
     }
@@ -59,7 +59,7 @@ class SemanticSearchService {
     _hasInitialized = true;
     await EmbeddingsDB.instance.init();
     await EmbeddingStore.instance.init();
-    await _setupCachedEmbeddings();
+    await _setupCachedEmbeddings(isAppInForeground);
     Bus.instance.on<DiffSyncCompleteEvent>().listen((event) {
       // Diff sync is complete, we can now pull embeddings from remote
       unawaited(sync());
@@ -137,7 +137,7 @@ class SemanticSearchService {
     _logger.info("Indexes cleared for $kCurrentModel");
   }
 
-  Future<void> _setupCachedEmbeddings() async {
+  Future<void> _setupCachedEmbeddings(bool shouldListenForUpdates) async {
     _logger.info("Setting up cached embeddings");
     final startTime = DateTime.now();
     final cachedEmbeddings = await EmbeddingsDB.instance.getAll(kCurrentModel);
@@ -147,12 +147,14 @@ class SemanticSearchService {
     );
     _cachedEmbeddings.addAll(cachedEmbeddings);
     _logger.info("Cached embeddings: " + _cachedEmbeddings.length.toString());
-    EmbeddingsDB.instance.getStream(kCurrentModel).listen((embeddings) {
-      _logger.info("Updated embeddings: " + embeddings.length.toString());
-      _cachedEmbeddings.clear();
-      _cachedEmbeddings.addAll(embeddings);
-      Bus.instance.fire(EmbeddingUpdatedEvent());
-    });
+    if (shouldListenForUpdates) {
+      EmbeddingsDB.instance.getStream(kCurrentModel).listen((embeddings) {
+        _logger.info("Updated embeddings: " + embeddings.length.toString());
+        _cachedEmbeddings.clear();
+        _cachedEmbeddings.addAll(embeddings);
+        Bus.instance.fire(EmbeddingUpdatedEvent());
+      });
+    }
   }
 
   Future<void> _backFill() async {
