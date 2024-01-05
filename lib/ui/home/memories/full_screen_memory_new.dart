@@ -201,12 +201,34 @@ class _FullScreenMemoryNewState extends State<FullScreenMemoryNew> {
               return Stack(
                 alignment: Alignment.bottomCenter,
                 children: [
-                  FileWidget(
-                    inheritedData.memories[index].file,
-                    autoPlay: false,
-                    tagPrefix: "memories",
-                    backgroundDecoration: const BoxDecoration(
-                      color: Colors.transparent,
+                  GestureDetector(
+                    onTapDown: (TapDownDetails details) {
+                      final screenWidth = MediaQuery.of(context).size.width;
+                      final edgeWidth = screenWidth * 0.33;
+                      if (details.localPosition.dx < edgeWidth) {
+                        if (index > 0) {
+                          _pageController!.previousPage(
+                            duration: const Duration(milliseconds: 250),
+                            curve: Curves.ease,
+                          );
+                        }
+                      } else if (details.localPosition.dx >
+                          screenWidth - edgeWidth) {
+                        if (index < (inheritedData.memories.length - 1)) {
+                          _pageController!.nextPage(
+                            duration: const Duration(milliseconds: 250),
+                            curve: Curves.ease,
+                          );
+                        }
+                      }
+                    },
+                    child: FileWidget(
+                      inheritedData.memories[index].file,
+                      autoPlay: false,
+                      tagPrefix: "memories",
+                      backgroundDecoration: const BoxDecoration(
+                        color: Colors.transparent,
+                      ),
                     ),
                   ),
                   const BottomGradient(),
