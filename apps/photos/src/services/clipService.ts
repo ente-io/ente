@@ -1,8 +1,4 @@
-import {
-    putEmbedding,
-    getLatestEmbeddings,
-    getLocalEmbeddings,
-} from './embeddingService';
+import { putEmbedding, getLocalEmbeddings } from './embeddingService';
 import { getAllLocalFiles, getLocalFiles } from './fileService';
 import downloadManager from './download';
 import { logError } from '@ente/shared/sentry';
@@ -174,9 +170,7 @@ class ClipServiceImpl {
                 return;
             }
             const localFiles = getPersonalFiles(await getAllLocalFiles(), user);
-            const existingEmbeddings = await getLatestClipImageEmbeddings(
-                model
-            );
+            const existingEmbeddings = await getLocalClipImageEmbeddings(model);
             const pendingFiles = await getNonClipEmbeddingExtractedFiles(
                 localFiles,
                 existingEmbeddings
@@ -205,7 +199,11 @@ class ClipServiceImpl {
                     addLogLine(
                         `successfully extracted clip embedding for file: ${file.metadata.title} fileID: ${file.id} embedding length: ${embeddingData?.length}`
                     );
-                    await this.encryptAndUploadEmbedding(file, embeddingData);
+                    await this.encryptAndUploadEmbedding(
+                        model,
+                        file,
+                        embeddingData
+                    );
                     this.onSuccessStatusUpdater();
                     addLogLine(
                         `successfully put clip embedding to server for file: ${file.metadata.title} fileID: ${file.id}`
@@ -262,7 +260,11 @@ class ClipServiceImpl {
                     model,
                     localFile
                 );
-                await this.encryptAndUploadEmbedding(enteFile, embedding);
+                await this.encryptAndUploadEmbedding(
+                    model,
+                    enteFile,
+                    embedding
+                );
             });
             addLogLine(
                 `successfully extracted clip embedding for file: ${enteFile.metadata.title} fileID: ${enteFile.id}`
@@ -284,6 +286,7 @@ class ClipServiceImpl {
     };
 
     private encryptAndUploadEmbedding = async (
+        model: Model,
         file: EnteFile,
         embeddingData: Float32Array
     ) => {
@@ -302,7 +305,7 @@ class ClipServiceImpl {
             fileID: file.id,
             encryptedEmbedding: encryptedEmbeddingData.encryptedData,
             decryptionHeader: encryptedEmbeddingData.decryptionHeader,
-            model: Model.GGML_CLIP,
+            model,
         });
     };
 
@@ -386,11 +389,6 @@ export const computeClipMatchScore = async (
         score += imageEmbedding[index] * textEmbedding[index];
     }
     return score;
-};
-
-const getLatestClipImageEmbeddings = async (model: Model) => {
-    const allEmbeddings = await getLatestEmbeddings();
-    return allEmbeddings.filter((embedding) => embedding.model === model);
 };
 
 const getClipExtractionStatus = async (

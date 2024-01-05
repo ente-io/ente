@@ -21,23 +21,25 @@ const ENDPOINT = getEndpoint();
 
 const DIFF_LIMIT = 500;
 
-const EMBEDDINGS_TABLE = 'embeddings';
+const EMBEDDINGS_TABLE_V1 = 'embeddings';
+const EMBEDDINGS_TABLE = 'embeddings_v2';
 const EMBEDDING_SYNC_TIME_TABLE = 'embedding_sync_time';
 
 export const getLocalEmbeddings = async () => {
-    const embeddings: Array<Embedding> =
-        (await localForage.getItem<Embedding[]>(EMBEDDINGS_TABLE)) || [];
+    const embeddings: Array<Embedding> = await localForage.getItem<Embedding[]>(
+        EMBEDDINGS_TABLE
+    );
+    if (!embeddings) {
+        await localForage.removeItem(EMBEDDINGS_TABLE_V1);
+        await localForage.setItem(EMBEDDINGS_TABLE, []);
+        await localForage.setItem(EMBEDDING_SYNC_TIME_TABLE, 0);
+        return [];
+    }
     return embeddings;
 };
 
 const getEmbeddingSyncTime = async () => {
     return (await localForage.getItem<number>(EMBEDDING_SYNC_TIME_TABLE)) ?? 0;
-};
-
-export const getLatestEmbeddings = async () => {
-    await syncEmbeddings();
-    const embeddings = await getLocalEmbeddings();
-    return embeddings;
 };
 
 export const syncEmbeddings = async () => {
