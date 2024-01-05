@@ -143,9 +143,12 @@ class ClipServiceImpl {
         }
     };
 
-    getTextEmbedding = async (text: string): Promise<Float32Array> => {
+    getTextEmbedding = async (
+        text: string,
+        model: Model = Model.ONNX_CLIP
+    ): Promise<Float32Array> => {
         try {
-            return ElectronAPIs.computeTextEmbedding(text);
+            return ElectronAPIs.computeTextEmbedding(model, text);
         } catch (e) {
             if (e?.message?.includes(CustomError.UNSUPPORTED_PLATFORM)) {
                 this.unsupportedPlatform = true;
