@@ -265,10 +265,6 @@ class SemanticSearchService {
         _logger.severe("Discovered incorrect embedding for $file - $result");
         return;
       }
-      // dev.log(result.toString());
-      // dev.log(computeScore(result, webEmbedding).toString());
-      // dev.log(computeScore(result, pyEmbedding).toString());
-      // dev.log(computeScore(pyEmbedding, webEmbedding).toString());
 
       final embedding = Embedding(
         fileID: file.uploadedFileID!,
