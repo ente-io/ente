@@ -152,6 +152,7 @@ class _FullScreenMemoryNewState extends State<FullScreenMemoryNew> {
                       color: Colors.transparent,
                     ),
                   ),
+                  const BottomGradient(),
                   BottomIcons(index),
                   Padding(
                     padding: const EdgeInsets.only(bottom: 120, right: 240),
@@ -174,7 +175,7 @@ class _FullScreenMemoryNewState extends State<FullScreenMemoryNew> {
           SafeArea(
             top: false,
             child: Padding(
-              padding: const EdgeInsets.only(bottom: 84),
+              padding: const EdgeInsets.only(bottom: 72),
               child: ValueListenableBuilder(
                 builder: (context, value, _) {
                   return AnimatedSwitcher(
@@ -293,6 +294,31 @@ class MemoryCounter extends StatelessWidget {
           style: darkTextTheme.bodyMuted,
         );
       },
+    );
+  }
+}
+
+class BottomGradient extends StatelessWidget {
+  const BottomGradient({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return IgnorePointer(
+      child: Container(
+        height: 124,
+        width: double.infinity,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.bottomCenter,
+            end: Alignment.topCenter,
+            colors: [
+              Colors.black.withOpacity(0.5), //same for both themes
+              Colors.transparent,
+            ],
+            stops: const [0, 0.8],
+          ),
+        ),
+      ),
     );
   }
 }
