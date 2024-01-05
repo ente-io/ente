@@ -68,6 +68,7 @@ class _VideoWidgetNewState extends State<VideoWidgetNew>
             _loadNetworkVideo();
           }
         } else {
+          // ignore: unawaited_futures
           asset.getMediaUrl().then((url) {
             _setVideoController(
               url ??

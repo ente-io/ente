@@ -56,6 +56,7 @@ class _LockScreenState extends State<LockScreen> with WidgetsBindingObserver {
                     text: context.l10n.unlock,
                     iconData: Icons.lock_open_outlined,
                     onTap: () async {
+                      // ignore: unawaited_futures
                       _showLockScreen(source: "tapUnlock");
                     },
                   ),
@@ -72,7 +73,7 @@ class _LockScreenState extends State<LockScreen> with WidgetsBindingObserver {
     if (Platform.isAndroid) {
       return false;
     }
-    var shortestSide = MediaQuery.of(context).size.shortestSide;
+    final shortestSide = MediaQuery.of(context).size.shortestSide;
     return shortestSide > 600 ? true : false;
   }
 

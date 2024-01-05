@@ -87,6 +87,7 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
         isTopBorderRadiusRemoved: _sharees.isNotEmpty,
         isBottomBorderRadiusRemoved: true,
         onTap: () async {
+          // ignore: unawaited_futures
           routeToPage(
             context,
             AddParticipantPage(widget.collection, true),
@@ -114,6 +115,7 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
         menuItemColor: getEnteColorScheme(context).fillFaint,
         isTopBorderRadiusRemoved: true,
         onTap: () async {
+          // ignore: unawaited_futures
           routeToPage(context, AddParticipantPage(widget.collection, false))
               .then(
             (value) => {
@@ -191,6 +193,7 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
               leadingIcon: Icons.adaptive.share,
               menuItemColor: getEnteColorScheme(context).fillFaint,
               onTap: () async {
+                // ignore: unawaited_futures
                 shareText(url);
               },
               isTopBorderRadiusRemoved: true,
@@ -216,6 +219,7 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
             menuItemColor: getEnteColorScheme(context).fillFaint,
             trailingIconIsMuted: true,
             onTap: () async {
+              // ignore: unawaited_futures
               routeToPage(
                 context,
                 ManageSharedLinkWidget(collection: widget.collection),

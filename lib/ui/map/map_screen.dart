@@ -68,7 +68,7 @@ class _MapScreenState extends State<MapScreen> {
   Future<void> initialize() async {
     try {
       allImages = await widget.filesFutureFn();
-      processFiles(allImages);
+      unawaited(processFiles(allImages));
     } catch (e, s) {
       _logger.severe("Error initializing map screen", e, s);
     }
@@ -157,7 +157,7 @@ class _MapScreenState extends State<MapScreen> {
 
         prevMessage = message;
       } else {
-        _mapMoveSubscription?.cancel();
+        await _mapMoveSubscription?.cancel();
         isolate?.kill();
       }
     });

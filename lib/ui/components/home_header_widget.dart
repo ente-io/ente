@@ -62,6 +62,7 @@ class _HomeHeaderWidgetState extends State<HomeHeaderWidget> {
               } else {
                 final bool hasGrantedLimit =
                     LocalSyncService.instance.hasGrantedLimitedPermissions();
+                // ignore: unawaited_futures
                 showChoiceActionSheet(
                   context,
                   title: S.of(context).preserveMore,

@@ -1,3 +1,4 @@
+import "dart:async";
 import 'dart:io';
 
 import 'package:dots_indicator/dots_indicator.dart';
@@ -55,6 +56,7 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
                     ),
                     onTap: () async {
                       final locale = await getLocale();
+                      // ignore: unawaited_futures
                       routeToPage(
                         context,
                         LanguageSelectorPage(
@@ -62,7 +64,7 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
                           (locale) async {
                             await setLocale(locale);
                             EnteApp.setLocale(context, locale);
-                            S.delegate.load(locale);
+                            unawaited(S.delegate.load(locale));
                           },
                           locale,
                         ),
@@ -202,6 +204,7 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
         page = getSubscriptionPage(isOnBoarding: true);
       }
     }
+    // ignore: unawaited_futures
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (BuildContext context) {

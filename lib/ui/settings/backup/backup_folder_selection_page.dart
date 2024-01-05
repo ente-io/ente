@@ -227,7 +227,7 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
         _allDevicePathIDs.length == _selectedDevicePathIDs.length,
       );
       await RemoteSyncService.instance.updateDeviceFolderSyncStatus(syncStatus);
-      dialog.hide();
+      await dialog.hide();
       Navigator.of(context).pop();
     } catch (e, s) {
       _logger.severe("Failed to updated backup folder", e, s);

@@ -97,6 +97,7 @@ class ArchivedCollectionsButton extends StatelessWidget {
         ),
       ),
       onPressed: () async {
+        // ignore: unawaited_futures
         routeToPage(
           context,
           ArchivePage(),

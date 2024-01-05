@@ -100,6 +100,7 @@ class SettingsPage extends StatelessWidget {
                     type: NotificationType.goldenBanner,
                     onTap: () async {
                       StorageBonusService.instance.markStorageBonusAsDone();
+                      // ignore: unawaited_futures
                       routeToPage(context, const ReferralScreen());
                     },
                   ),

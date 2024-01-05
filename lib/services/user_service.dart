@@ -21,7 +21,7 @@ import "package:photos/models/api/user/srp.dart";
 import 'package:photos/models/delete_account.dart';
 import 'package:photos/models/key_attributes.dart';
 import 'package:photos/models/key_gen_result.dart';
-import 'package:photos/models/public_key.dart' as ePublicKey;
+import 'package:photos/models/public_key.dart' as public_key;
 import 'package:photos/models/sessions.dart';
 import 'package:photos/models/set_keys_request.dart';
 import 'package:photos/models/set_recovery_key_request.dart';
@@ -160,7 +160,7 @@ class UserService {
       );
       final publicKey = response.data["publicKey"];
       await PublicKeysDB.instance.setKey(
-        ePublicKey.PublicKey(
+        public_key.PublicKey(
           email,
           publicKey,
         ),
@@ -198,7 +198,7 @@ class UserService {
         await _preferences.setString(keyUserDetails, userDetails.toJson());
         // handle email change from different client
         if (userDetails.email != _config.getEmail()) {
-          setEmail(userDetails.email);
+          await setEmail(userDetails.email);
         }
       }
       return userDetails;
@@ -377,6 +377,7 @@ class UserService {
         );
         Navigator.of(context).pop();
       } else {
+        // ignore: unawaited_futures
         showErrorDialog(
           context,
           S.of(context).incorrectCode,
@@ -386,6 +387,7 @@ class UserService {
     } catch (e) {
       await dialog.hide();
       _logger.severe(e);
+      // ignore: unawaited_futures
       showErrorDialog(
         context,
         S.of(context).oops,
@@ -430,6 +432,7 @@ class UserService {
         Bus.instance.fire(UserDetailsChangedEvent());
         return;
       }
+      // ignore: unawaited_futures
       showErrorDialog(
         context,
         S.of(context).oops,
@@ -438,12 +441,14 @@ class UserService {
     } on DioError catch (e) {
       await dialog.hide();
       if (e.response != null && e.response!.statusCode == 403) {
+        // ignore: unawaited_futures
         showErrorDialog(
           context,
           S.of(context).oops,
           S.of(context).thisEmailIsAlreadyInUse,
         );
       } else {
+        // ignore: unawaited_futures
         showErrorDialog(
           context,
           S.of(context).incorrectCode,
@@ -453,6 +458,7 @@ class UserService {
     } catch (e) {
       await dialog.hide();
       _logger.severe(e);
+      // ignore: unawaited_futures
       showErrorDialog(
         context,
         S.of(context).oops,
@@ -605,7 +611,7 @@ class UserService {
     final Uint8List identity = Uint8List.fromList(
       utf8.encode(srpAttributes.srpUserID),
     );
-    _logger.finest('longinKey derivation done');
+    _logger.finest('loginKey derivation done');
     final Uint8List salt = base64Decode(srpAttributes.srpSalt);
     final Uint8List password = loginKey;
     final SecureRandom random = _getSecureRandom();
@@ -644,7 +650,7 @@ class UserService {
       final String twoFASessionID = response.data["twoFactorSessionID"];
       Configuration.instance.setVolatilePassword(userPassword);
       if (twoFASessionID.isNotEmpty) {
-        setTwoFactor(value: true);
+        await setTwoFactor(value: true);
         page = TwoFactorAuthenticationPage(twoFASessionID);
       } else {
         await _saveConfiguration(response);
@@ -664,6 +670,7 @@ class UserService {
         Navigator.of(context).popUntil((route) => route.isFirst);
         Bus.instance.fire(AccountConfiguredEvent());
       } else {
+        // ignore: unawaited_futures
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(
             builder: (BuildContext context) {
@@ -765,6 +772,7 @@ class UserService {
           (route) => route.isFirst,
         );
       } else {
+        // ignore: unawaited_futures
         showErrorDialog(
           context,
           S.of(context).incorrectCode,
@@ -774,6 +782,7 @@ class UserService {
     } catch (e) {
       await dialog.hide();
       _logger.severe(e);
+      // ignore: unawaited_futures
       showErrorDialog(
         context,
         S.of(context).oops,
@@ -793,6 +802,7 @@ class UserService {
         },
       );
       if (response.statusCode == 200) {
+        // ignore: unawaited_futures
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(
             builder: (BuildContext context) {
@@ -810,6 +820,7 @@ class UserService {
       _logger.severe(e);
       if (e.response != null && e.response!.statusCode == 404) {
         showToast(context, S.of(context).sessionExpired);
+        // ignore: unawaited_futures
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(
             builder: (BuildContext context) {
@@ -819,6 +830,7 @@ class UserService {
           (route) => route.isFirst,
         );
       } else {
+        // ignore: unawaited_futures
         showErrorDialog(
           context,
           S.of(context).oops,
@@ -827,6 +839,7 @@ class UserService {
       }
     } catch (e) {
       _logger.severe(e);
+      // ignore: unawaited_futures
       showErrorDialog(
         context,
         S.of(context).oops,
@@ -886,6 +899,7 @@ class UserService {
           S.of(context).twofactorAuthenticationSuccessfullyReset,
         );
         await _saveConfiguration(response);
+        // ignore: unawaited_futures
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(
             builder: (BuildContext context) {
@@ -899,6 +913,7 @@ class UserService {
       _logger.severe(e);
       if (e.response != null && e.response!.statusCode == 404) {
         showToast(context, "Session expired");
+        // ignore: unawaited_futures
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(
             builder: (BuildContext context) {
@@ -908,6 +923,7 @@ class UserService {
           (route) => route.isFirst,
         );
       } else {
+        // ignore: unawaited_futures
         showErrorDialog(
           context,
           S.of(context).oops,
@@ -916,6 +932,7 @@ class UserService {
       }
     } catch (e) {
       _logger.severe(e);
+      // ignore: unawaited_futures
       showErrorDialog(
         context,
         S.of(context).oops,
@@ -986,6 +1003,7 @@ class UserService {
       _logger.severe(e, s);
       if (e is DioError) {
         if (e.response != null && e.response!.statusCode == 401) {
+          // ignore: unawaited_futures
           showErrorDialog(
             context,
             S.of(context).incorrectCode,
@@ -994,6 +1012,7 @@ class UserService {
           return false;
         }
       }
+      // ignore: unawaited_futures
       showErrorDialog(
         context,
         S.of(context).somethingWentWrong,
@@ -1033,7 +1052,7 @@ class UserService {
   Future<bool> fetchTwoFactorStatus() async {
     try {
       final response = await _enteDio.get("/users/two-factor/status");
-      setTwoFactor(value: response.data["status"]);
+      await setTwoFactor(value: response.data["status"]);
       return response.data["status"];
     } catch (e) {
       _logger.severe("Failed to fetch 2FA status", e);
@@ -1109,7 +1128,7 @@ class UserService {
     if (fetchTwoFactorStatus) {
       value = await UserService.instance.fetchTwoFactorStatus();
     }
-    _preferences.setBool(keyHasEnabledTwoFactor, value);
+    await _preferences.setBool(keyHasEnabledTwoFactor, value);
   }
 
   bool hasEnabledTwoFactor() {

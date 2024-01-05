@@ -36,6 +36,7 @@ class AboutSectionWidget extends StatelessWidget {
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
           onTap: () async {
+            // ignore: unawaited_futures
             launchUrl(Uri.parse("https://github.com/ente-io/photos-app"));
           },
         ),
@@ -68,6 +69,7 @@ class AboutSectionWidget extends StatelessWidget {
                           await UpdateService.instance.shouldUpdate();
                       await dialog.hide();
                       if (shouldUpdate) {
+                        // ignore: unawaited_futures
                         showDialog(
                           context: context,
                           builder: (BuildContext context) {
@@ -115,6 +117,7 @@ class AboutMenuItemWidget extends StatelessWidget {
       trailingIcon: Icons.chevron_right_outlined,
       trailingIconIsMuted: true,
       onTap: () async {
+        // ignore: unawaited_futures
         Navigator.of(context).push(
           MaterialPageRoute(
             builder: (BuildContext context) {
