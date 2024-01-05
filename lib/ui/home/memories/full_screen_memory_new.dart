@@ -187,6 +187,22 @@ class _FullScreenMemoryNewState extends State<FullScreenMemoryNew> {
             );
           },
         ),
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Colors.black.withOpacity(0.6),
+                Colors.black.withOpacity(0.5),
+                Colors.transparent,
+              ],
+              stops: const [0, 0.6, 1],
+            ),
+          ),
+        ),
+        backgroundColor: const Color(0x00000000),
+        elevation: 0,
       ),
       body: Stack(
         alignment: Alignment.bottomCenter,
