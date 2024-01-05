@@ -224,7 +224,7 @@ export default function Credentials({
             }
             const redirectURL = InMemoryStore.get(MS_KEYS.REDIRECT_URL);
             InMemoryStore.delete(MS_KEYS.REDIRECT_URL);
-            router.push(APP_HOMES.get(redirectURL ?? appName));
+            router.push(redirectURL ?? APP_HOMES.get(appName));
         } catch (e) {
             logError(e, 'useMasterPassword failed');
         }
