@@ -4,6 +4,7 @@ import "package:flutter/cupertino.dart";
 import "package:flutter/material.dart";
 import "package:photos/core/configuration.dart";
 import "package:photos/models/memory.dart";
+import "package:photos/theme/text_style.dart";
 import "package:photos/ui/actions/file/file_actions.dart";
 import "package:photos/ui/viewer/file/file_widget.dart";
 import "package:photos/ui/viewer/file_details/favorite_widget.dart";
@@ -99,6 +100,7 @@ class FullScreenMemoryNew extends StatefulWidget {
 
 class _FullScreenMemoryNewState extends State<FullScreenMemoryNew> {
   PageController? _pageController;
+
   @override
   void initState() {
     super.initState();
@@ -113,47 +115,61 @@ class _FullScreenMemoryNewState extends State<FullScreenMemoryNew> {
   @override
   Widget build(BuildContext context) {
     final inheritedData = FullScreenMemoryData.of(context)!;
+
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(),
-      body: PageView.builder(
-        controller: _pageController ??= PageController(
-          initialPage: widget.initialIndex,
-        ),
-        itemBuilder: (context, index) {
-          if (index < inheritedData.memories.length - 1) {
-            final nextFile = inheritedData.memories[index + 1].file;
-            preloadThumbnail(nextFile);
-            preloadFile(nextFile);
-          }
-          return Stack(
-            alignment: Alignment.bottomCenter,
-            children: [
-              FileWidget(
-                inheritedData.memories[index].file,
-                autoPlay: false,
-                tagPrefix: "memories",
-                backgroundDecoration: const BoxDecoration(
-                  color: Colors.transparent,
-                ),
-              ),
-              BottomIcons(index),
-              Padding(
-                padding: const EdgeInsets.all(120),
-                child: Container(
-                  color: Colors.black,
-                  child: Text(
-                    inheritedData.memories[index].file.generatedID.toString(),
+      body: Stack(
+        alignment: Alignment.bottomCenter,
+        children: [
+          PageView.builder(
+            controller: _pageController ??= PageController(
+              initialPage: widget.initialIndex,
+            ),
+            itemBuilder: (context, index) {
+              if (index < inheritedData.memories.length - 1) {
+                final nextFile = inheritedData.memories[index + 1].file;
+                preloadThumbnail(nextFile);
+                preloadFile(nextFile);
+              }
+              return Stack(
+                alignment: Alignment.bottomCenter,
+                children: [
+                  FileWidget(
+                    inheritedData.memories[index].file,
+                    autoPlay: false,
+                    tagPrefix: "memories",
+                    backgroundDecoration: const BoxDecoration(
+                      color: Colors.transparent,
+                    ),
                   ),
-                ),
-              ),
-            ],
-          );
-        },
-        onPageChanged: (index) {
-          inheritedData.indexNotifier.value = index;
-        },
-        itemCount: inheritedData.memories.length,
+                  BottomIcons(index),
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 120, right: 240),
+                    child: Container(
+                      color: Colors.black,
+                      child: Text(
+                        inheritedData.memories[index].file.generatedID
+                            .toString(),
+                      ),
+                    ),
+                  ),
+                ],
+              );
+            },
+            onPageChanged: (index) {
+              inheritedData.indexNotifier.value = index;
+            },
+            itemCount: inheritedData.memories.length,
+          ),
+          const SafeArea(
+            top: false,
+            child: Padding(
+              padding: EdgeInsets.only(bottom: 84),
+              child: MemoryCounter(),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -226,6 +242,7 @@ class BottomIcons extends StatelessWidget {
     );
 
     return SafeArea(
+      top: false,
       child: Container(
         alignment: Alignment.bottomCenter,
         padding: const EdgeInsets.fromLTRB(12, 0, 12, 20),
@@ -234,6 +251,24 @@ class BottomIcons extends StatelessWidget {
           children: rowChildren,
         ),
       ),
+    );
+  }
+}
+
+class MemoryCounter extends StatelessWidget {
+  const MemoryCounter({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final inheritedData = FullScreenMemoryData.of(context)!;
+    return ValueListenableBuilder(
+      valueListenable: inheritedData.indexNotifier,
+      builder: (context, value, _) {
+        return Text(
+          "${value + 1}/${inheritedData.memories.length}",
+          style: darkTextTheme.bodyMuted,
+        );
+      },
     );
   }
 }
