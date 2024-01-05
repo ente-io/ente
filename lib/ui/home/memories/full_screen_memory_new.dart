@@ -5,6 +5,7 @@ import "package:flutter/material.dart";
 import "package:intl/intl.dart";
 import "package:photos/core/configuration.dart";
 import "package:photos/models/memory.dart";
+import "package:photos/services/memories_service.dart";
 import "package:photos/theme/text_style.dart";
 import "package:photos/ui/actions/file/file_actions.dart";
 import "package:photos/ui/viewer/file/file_widget.dart";
@@ -37,6 +38,8 @@ class _FullScreenMemoryDataUpdaterState
   void initState() {
     super.initState();
     indexNotifier = ValueNotifier(widget.initialIndex);
+    MemoriesService.instance
+        .markMemoryAsSeen(widget.memories[widget.initialIndex]);
   }
 
   @override
@@ -106,6 +109,7 @@ class _FullScreenMemoryNewState extends State<FullScreenMemoryNew> {
 
   @override
   void initState() {
+    super.initState();
     Future.delayed(const Duration(seconds: 3), () {
       if (mounted) {
         setState(() {
@@ -113,7 +117,6 @@ class _FullScreenMemoryNewState extends State<FullScreenMemoryNew> {
         });
       }
     });
-    super.initState();
   }
 
   @override
