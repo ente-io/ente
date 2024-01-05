@@ -100,15 +100,24 @@ class FullScreenMemoryNew extends StatefulWidget {
 
 class _FullScreenMemoryNewState extends State<FullScreenMemoryNew> {
   PageController? _pageController;
+  final _showTitle = ValueNotifier<bool>(true);
 
   @override
   void initState() {
+    Future.delayed(const Duration(seconds: 3), () {
+      if (mounted) {
+        setState(() {
+          _showTitle.value = false;
+        });
+      }
+    });
     super.initState();
   }
 
   @override
   void dispose() {
     _pageController?.dispose();
+    _showTitle.dispose();
     super.dispose();
   }
 
@@ -162,11 +171,26 @@ class _FullScreenMemoryNewState extends State<FullScreenMemoryNew> {
             },
             itemCount: inheritedData.memories.length,
           ),
-          const SafeArea(
+          SafeArea(
             top: false,
             child: Padding(
-              padding: EdgeInsets.only(bottom: 84),
-              child: MemoryCounter(),
+              padding: const EdgeInsets.only(bottom: 84),
+              child: ValueListenableBuilder(
+                builder: (context, value, _) {
+                  return AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 250),
+                    switchInCurve: Curves.easeIn,
+                    switchOutCurve: Curves.easeOut,
+                    child: value
+                        ? Text(
+                            widget.title,
+                            style: darkTextTheme.h2,
+                          )
+                        : const MemoryCounter(),
+                  );
+                },
+                valueListenable: _showTitle,
+              ),
             ),
           ),
         ],
