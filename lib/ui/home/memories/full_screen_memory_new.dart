@@ -253,16 +253,6 @@ class _FullScreenMemoryNewState extends State<FullScreenMemoryNew> {
                   ),
                   const BottomGradient(),
                   BottomIcons(index),
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 120, right: 240),
-                    child: Container(
-                      color: Colors.black,
-                      child: Text(
-                        inheritedData.memories[index].file.generatedID
-                            .toString(),
-                      ),
-                    ),
-                  ),
                 ],
               );
             },
@@ -283,8 +273,8 @@ class _FullScreenMemoryNewState extends State<FullScreenMemoryNew> {
                 builder: (context, value, _) {
                   return AnimatedSwitcher(
                     duration: const Duration(milliseconds: 250),
-                    switchInCurve: Curves.easeIn,
-                    switchOutCurve: Curves.easeOut,
+                    switchInCurve: Curves.easeOut,
+                    switchOutCurve: Curves.easeIn,
                     child: value
                         ? Hero(
                             tag: widget.title,
@@ -328,12 +318,7 @@ class BottomIcons extends StatelessWidget {
         },
       ),
     ];
-    rowChildren.add(
-      Padding(
-        padding: const EdgeInsets.all(8),
-        child: Text(currentFile.generatedID.toString()),
-      ),
-    );
+
     if (currentFile.ownerID == null ||
         (Configuration.instance.getUserID() ?? 0) == currentFile.ownerID) {
       rowChildren.addAll([
