@@ -34,11 +34,13 @@ export async function computeImageEmbedding(
 }
 
 export async function computeTextEmbedding(
+    model: Model,
     text: string
 ): Promise<Float32Array> {
     try {
         const embedding = await ipcRenderer.invoke(
             'compute-text-embedding',
+            model,
             text
         );
         return embedding;

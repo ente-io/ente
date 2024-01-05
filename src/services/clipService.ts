@@ -274,16 +274,14 @@ export async function computeONNXImageEmbedding(
 }
 
 export async function computeTextEmbedding(
+    model: Model,
     inputFilePath: string
 ): Promise<Float32Array> {
-    const ggmlTextEmbedding = await computeGGMLTextEmbedding(inputFilePath);
-    const onnxTextEmbedding = await computeONNXTextEmbedding(inputFilePath);
-    const score = await computeClipMatchScore(
-        ggmlTextEmbedding,
-        onnxTextEmbedding
-    );
-    log.info('textEmbeddingScore', score);
-    return onnxTextEmbedding;
+    if (model === Model.GGML_CLIP) {
+        return await computeGGMLTextEmbedding(inputFilePath);
+    } else {
+        return await computeONNXTextEmbedding(inputFilePath);
+    }
 }
 
 export async function computeGGMLTextEmbedding(
