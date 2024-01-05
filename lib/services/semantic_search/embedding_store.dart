@@ -10,7 +10,6 @@ import "package:photos/db/files_db.dart";
 import "package:photos/models/embedding.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/services/semantic_search/remote_embedding.dart";
-import "package:photos/services/semantic_search/semantic_search_service.dart";
 import "package:photos/utils/crypto_util.dart";
 import "package:photos/utils/file_download_util.dart";
 import "package:shared_preferences/shared_preferences.dart";
@@ -34,15 +33,15 @@ class EmbeddingStore {
     _preferences = await SharedPreferences.getInstance();
   }
 
-  Future<void> pullEmbeddings() async {
+  Future<void> pullEmbeddings(Model model) async {
     if (_syncStatus != null) {
       return _syncStatus!.future;
     }
     _syncStatus = Completer();
-    var remoteEmbeddings = await _getRemoteEmbeddings();
+    var remoteEmbeddings = await _getRemoteEmbeddings(model);
     await _storeRemoteEmbeddings(remoteEmbeddings.embeddings);
     while (remoteEmbeddings.hasMore) {
-      remoteEmbeddings = await _getRemoteEmbeddings();
+      remoteEmbeddings = await _getRemoteEmbeddings(model);
       await _storeRemoteEmbeddings(remoteEmbeddings.embeddings);
     }
     _syncStatus!.complete();
@@ -90,7 +89,8 @@ class EmbeddingStore {
     }
   }
 
-  Future<RemoteEmbeddings> _getRemoteEmbeddings({
+  Future<RemoteEmbeddings> _getRemoteEmbeddings(
+    Model model, {
     int limit = 500,
   }) async {
     final remoteEmbeddings = <RemoteEmbedding>[];
@@ -100,7 +100,7 @@ class EmbeddingStore {
       final response = await _dio.get(
         "/embeddings/diff",
         queryParameters: {
-          "model": SemanticSearchService.kCurrentModel.name,
+          "model": model.name,
           "sinceTime": sinceTime,
           "limit": limit,
         },

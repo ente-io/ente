@@ -92,7 +92,7 @@ class SemanticSearchService {
       return;
     }
     _isSyncing = true;
-    await EmbeddingStore.instance.pullEmbeddings();
+    await EmbeddingStore.instance.pullEmbeddings(kCurrentModel);
     await _backFill();
     _isSyncing = false;
   }
