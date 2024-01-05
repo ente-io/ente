@@ -42,3 +42,23 @@ func (c *Client) GetFiles(ctx context.Context, collectionID, sinceTime int64) ([
 	}
 	return res.Files, res.HasMore, err
 }
+
+// GetFile ..
+func (c *Client) GetFile(ctx context.Context, collectionID, fileID int64) (*File, error) {
+	var res struct {
+		File File `json:"file"`
+	}
+	r, err := c.restClient.R().
+		SetContext(ctx).
+		SetQueryParam("collectionID", strconv.FormatInt(collectionID, 10)).
+		SetQueryParam("fileID", strconv.FormatInt(fileID, 10)).
+		SetResult(&res).
+		Get("/collections/file")
+	if r.IsError() {
+		return nil, &ApiError{
+			StatusCode: r.StatusCode(),
+			Message:    r.String(),
+		}
+	}
+	return &res.File, err
+}

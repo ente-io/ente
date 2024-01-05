@@ -1,8 +1,6 @@
 package api
 
 import (
-	"fmt"
-
 	"github.com/google/uuid"
 )
 
@@ -13,15 +11,6 @@ type SRPAttributes struct {
 	OpsLimit          int       `json:"opsLimit" binding:"required"`
 	KekSalt           string    `json:"kekSalt" binding:"required"`
 	IsEmailMFAEnabled bool      `json:"isEmailMFAEnabled" binding:"required"`
-}
-
-type ApiError struct {
-	Message    string
-	StatusCode int
-}
-
-func (e *ApiError) Error() string {
-	return fmt.Sprintf("status %d with err: %s", e.StatusCode, e.Message)
 }
 
 type CreateSRPSessionResponse struct {
