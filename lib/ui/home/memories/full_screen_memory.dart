@@ -15,6 +15,22 @@ import "package:photos/utils/file_util.dart";
 import "package:photos/utils/share_util.dart";
 import "package:step_progress_indicator/step_progress_indicator.dart";
 
+//There are two states of variables that FullScreenMemory depends on:
+//1. The list of memories
+//2. The current index of the page view
+
+//1
+//Only when items are deleted will list of memories change and this requires the
+//whole screen to be rebuild. So the InheritedWidget is updated using the Updater
+//widget which will then lead to a rebuild of all widgets that call
+//InheritedWidget.of(context).
+
+//2
+//There are widgets that doesn't come inside the PageView that needs to rebuild
+//with new state when page index is changed. So the index is stored in a
+//ValueNotifier inside the InheritedWidget and the widgets that need to change
+//are wrapped in a ValueListenableBuilder.
+
 class FullScreenMemoryDataUpdater extends StatefulWidget {
   final List<Memory> memories;
   final int initialIndex;
