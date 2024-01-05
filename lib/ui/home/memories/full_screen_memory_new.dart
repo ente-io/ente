@@ -2,6 +2,7 @@ import "dart:io";
 
 import "package:flutter/cupertino.dart";
 import "package:flutter/material.dart";
+import "package:intl/intl.dart";
 import "package:photos/core/configuration.dart";
 import "package:photos/models/memory.dart";
 import "package:photos/theme/text_style.dart";
@@ -10,6 +11,7 @@ import "package:photos/ui/viewer/file/file_widget.dart";
 import "package:photos/ui/viewer/file_details/favorite_widget.dart";
 import "package:photos/utils/file_util.dart";
 import "package:photos/utils/share_util.dart";
+import "package:step_progress_indicator/step_progress_indicator.dart";
 
 class FullScreenMemoryDataUpdater extends StatefulWidget {
   final List<Memory> memories;
@@ -124,10 +126,65 @@ class _FullScreenMemoryNewState extends State<FullScreenMemoryNew> {
   @override
   Widget build(BuildContext context) {
     final inheritedData = FullScreenMemoryData.of(context)!;
-
+    final showStepProgressIndicator = inheritedData.memories.length < 60;
     return Scaffold(
       extendBodyBehindAppBar: true,
-      appBar: AppBar(),
+      appBar: AppBar(
+        toolbarHeight: 84,
+        automaticallyImplyLeading: false,
+        title: ValueListenableBuilder(
+          valueListenable: inheritedData.indexNotifier,
+          child: Padding(
+            padding: const EdgeInsets.only(right: 16),
+            child: InkWell(
+              onTap: () {
+                Navigator.pop(context);
+              },
+              child: const Icon(
+                Icons.close,
+                color: Colors.white, //same for both themes
+              ),
+            ),
+          ),
+          builder: (context, value, child) {
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                showStepProgressIndicator
+                    ? StepProgressIndicator(
+                        totalSteps: inheritedData.memories.length,
+                        currentStep: value + 1,
+                        size: 2,
+                        selectedColor: Colors.white, //same for both themes
+                        unselectedColor: Colors.white.withOpacity(0.4),
+                      )
+                    : const SizedBox.shrink(),
+                const SizedBox(
+                  height: 18,
+                ),
+                Row(
+                  children: [
+                    child!,
+                    Text(
+                      DateFormat.yMMMd(
+                        Localizations.localeOf(context).languageCode,
+                      ).format(
+                        DateTime.fromMicrosecondsSinceEpoch(
+                          inheritedData.memories[value].file.creationTime!,
+                        ),
+                      ),
+                      style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                            fontSize: 14,
+                            color: Colors.white,
+                          ), //same for both themes
+                    ),
+                  ],
+                ),
+              ],
+            );
+          },
+        ),
+      ),
       body: Stack(
         alignment: Alignment.bottomCenter,
         children: [
