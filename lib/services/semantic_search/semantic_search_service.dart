@@ -33,7 +33,7 @@ class SemanticSearchService {
   static const kScoreThreshold = 0.23;
   static const kShouldPushEmbeddings = true;
   static const kCurrentModel = Model.onnxClip;
-  static const kDebounceDuration = Duration(milliseconds: 10000);
+  static const kDebounceDuration = Duration(milliseconds: 4000);
 
   final _logger = Logger("SemanticSearchService");
   final _queue = Queue<EnteFile>();
