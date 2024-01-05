@@ -117,6 +117,7 @@ class SemanticSearchService {
       return _ongoingRequest!;
     } else {
       // If there's an ongoing request, create or replace the nextCompleter.
+      _logger.info("Queuing query $query");
       await _nextQuery?.completer.future
           .timeout(const Duration(seconds: 0)); // Cancels the previous future.
       _nextQuery = PendingQuery(query, Completer<List<EnteFile>>());
