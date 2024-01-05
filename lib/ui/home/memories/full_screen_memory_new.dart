@@ -223,7 +223,7 @@ class _FullScreenMemoryNewState extends State<FullScreenMemoryNew> {
                   GestureDetector(
                     onTapDown: (TapDownDetails details) {
                       final screenWidth = MediaQuery.of(context).size.width;
-                      final edgeWidth = screenWidth * 0.33;
+                      final edgeWidth = screenWidth * 0.20;
                       if (details.localPosition.dx < edgeWidth) {
                         if (index > 0) {
                           _pageController!.previousPage(
