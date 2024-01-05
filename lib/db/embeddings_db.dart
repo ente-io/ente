@@ -53,6 +53,7 @@ class EmbeddingsDB {
       final embeddings =
           await _isar.embeddings.filter().modelEqualTo(model).findAll();
       await _isar.embeddings.deleteAll(embeddings.map((e) => e.id).toList());
+      Bus.instance.fire(EmbeddingUpdatedEvent());
     });
   }
 
