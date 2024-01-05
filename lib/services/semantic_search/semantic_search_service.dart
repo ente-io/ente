@@ -28,7 +28,6 @@ class SemanticSearchService {
   static final Computer _computer = Computer.shared();
   static final LRUMap<String, List<double>> _queryCache = LRUMap(20);
 
-  static const kModelName = "clip";
   static const kEmbeddingLength = 512;
   static const kScoreThreshold = 0.23;
   static const kShouldPushEmbeddings = true;
