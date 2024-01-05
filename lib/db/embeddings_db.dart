@@ -19,7 +19,7 @@ class EmbeddingsDB {
       [EmbeddingSchema],
       directory: dir.path,
     );
-    // TODO: _clearDeprecatedStore(dir);
+    await _clearDeprecatedStore(dir);
   }
 
   Future<void> clearTable() async {
