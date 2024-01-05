@@ -12,10 +12,6 @@ class OnnxTextEncoder {
   final _logger = Logger("OnnxTextEncoder");
   final OnnxTextTokenizer _tokenizer = OnnxTextTokenizer();
 
-  Future<void> init() async {
-    OrtEnv.instance.init();
-  }
-
   // Do not run in an isolate since rootBundle can only be accessed in the main isolate
   Future<void> initTokenizer() async {
     final vocab = await rootBundle.loadString(kVocabFilePath);
