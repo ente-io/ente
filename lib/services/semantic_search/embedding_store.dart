@@ -5,11 +5,10 @@ import "dart:typed_data";
 import "package:computer/computer.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/network/network.dart";
+import "package:photos/db/embeddings_db.dart";
 import "package:photos/db/files_db.dart";
-import "package:photos/db/object_box.dart";
 import "package:photos/models/embedding.dart";
 import "package:photos/models/file/file.dart";
-import "package:photos/objectbox.g.dart";
 import "package:photos/services/semantic_search/remote_embedding.dart";
 import "package:photos/utils/crypto_util.dart";
 import "package:photos/utils/file_download_util.dart";
@@ -20,7 +19,7 @@ class EmbeddingStore {
 
   static final EmbeddingStore instance = EmbeddingStore._privateConstructor();
 
-  static const kEmbeddingsSyncTimeKey = "sync_time_embeddings";
+  static const kEmbeddingsSyncTimeKey = "sync_time_embeddings_v2";
 
   final _logger = Logger("EmbeddingStore");
   final _dio = NetworkClient.instance.enteDio;
@@ -34,15 +33,15 @@ class EmbeddingStore {
     _preferences = await SharedPreferences.getInstance();
   }
 
-  Future<void> pullEmbeddings() async {
+  Future<void> pullEmbeddings(Model model) async {
     if (_syncStatus != null) {
       return _syncStatus!.future;
     }
     _syncStatus = Completer();
-    var remoteEmbeddings = await _getRemoteEmbeddings();
+    var remoteEmbeddings = await _getRemoteEmbeddings(model);
     await _storeRemoteEmbeddings(remoteEmbeddings.embeddings);
     while (remoteEmbeddings.hasMore) {
-      remoteEmbeddings = await _getRemoteEmbeddings();
+      remoteEmbeddings = await _getRemoteEmbeddings(model);
       await _storeRemoteEmbeddings(remoteEmbeddings.embeddings);
     }
     _syncStatus!.complete();
@@ -50,12 +49,7 @@ class EmbeddingStore {
   }
 
   Future<void> pushEmbeddings() async {
-    final query = (ObjectBox.instance
-            .getEmbeddingBox()
-            .query(Embedding_.updationTime.isNull()))
-        .build();
-    final pendingItems = query.find();
-    query.close();
+    final pendingItems = await EmbeddingsDB.instance.getUnsyncedEmbeddings();
     for (final item in pendingItems) {
       final file = await FilesDB.instance.getAnyUploadedFile(item.fileID);
       await _pushEmbedding(file!, item);
@@ -63,7 +57,7 @@ class EmbeddingStore {
   }
 
   Future<void> storeEmbedding(EnteFile file, Embedding embedding) async {
-    ObjectBox.instance.getEmbeddingBox().put(embedding);
+    await EmbeddingsDB.instance.put(embedding);
     unawaited(_pushEmbedding(file, embedding));
   }
 
@@ -82,20 +76,21 @@ class EmbeddingStore {
         "/embeddings",
         data: {
           "fileID": embedding.fileID,
-          "model": embedding.model,
+          "model": embedding.model.name,
           "encryptedEmbedding": encryptedData,
           "decryptionHeader": header,
         },
       );
       final updationTime = response.data["updationTime"];
       embedding.updationTime = updationTime;
-      ObjectBox.instance.getEmbeddingBox().put(embedding);
+      await EmbeddingsDB.instance.put(embedding);
     } catch (e, s) {
       _logger.severe(e, s);
     }
   }
 
-  Future<RemoteEmbeddings> _getRemoteEmbeddings({
+  Future<RemoteEmbeddings> _getRemoteEmbeddings(
+    Model model, {
     int limit = 500,
   }) async {
     final remoteEmbeddings = <RemoteEmbedding>[];
@@ -105,6 +100,7 @@ class EmbeddingStore {
       final response = await _dio.get(
         "/embeddings/diff",
         queryParameters: {
+          "model": model.name,
           "sinceTime": sinceTime,
           "limit": limit,
         },
@@ -148,7 +144,7 @@ class EmbeddingStore {
       },
     );
     _logger.info("${embeddings.length} embeddings decoded");
-    await ObjectBox.instance.getEmbeddingBox().putManyAsync(embeddings);
+    await EmbeddingsDB.instance.putMany(embeddings);
     await _preferences.setInt(
       kEmbeddingsSyncTimeKey,
       embeddings.last.updationTime!,
@@ -179,7 +175,7 @@ Future<List<Embedding>> decodeEmbeddings(Map<String, dynamic> args) async {
     embeddings.add(
       Embedding(
         fileID: input.embedding.fileID,
-        model: input.embedding.model,
+        model: deserialize(input.embedding.model),
         embedding: decodedEmbedding,
         updationTime: input.embedding.updatedAt,
       ),

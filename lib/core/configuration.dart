@@ -10,9 +10,9 @@ import 'package:photos/core/constants.dart';
 import 'package:photos/core/error-reporting/super_logging.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/collections_db.dart';
+import "package:photos/db/embeddings_db.dart";
 import 'package:photos/db/files_db.dart';
 import 'package:photos/db/memories_db.dart';
-import "package:photos/db/object_box.dart";
 import 'package:photos/db/public_keys_db.dart';
 import 'package:photos/db/trash_db.dart';
 import 'package:photos/db/upload_locks_db.dart';
@@ -159,7 +159,7 @@ class Configuration {
     _secretKey = null;
     await FilesDB.instance.clearTable();
     SemanticSearchService.instance.hasInitialized
-        ? await ObjectBox.instance.clearTable()
+        ? await EmbeddingsDB.instance.clearTable()
         : null;
     await CollectionsDB.instance.clearTable();
     await MemoriesDB.instance.clearTable();

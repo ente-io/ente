@@ -2866,11 +2866,21 @@ class S {
     );
   }
 
-  /// `Please use our Desktop app to index the pending items in your library.`
+  /// `Please note that this will result in a higher bandwidth and battery usage until all items are indexed.`
   String get magicSearchDescription {
     return Intl.message(
-      'Please use our Desktop app to index the pending items in your library.',
+      'Please note that this will result in a higher bandwidth and battery usage until all items are indexed.',
       name: 'magicSearchDescription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Downloading models...`
+  String get loadingModel {
+    return Intl.message(
+      'Downloading models...',
+      name: 'loadingModel',
       desc: '',
       args: [],
     );

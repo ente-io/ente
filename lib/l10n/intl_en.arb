@@ -408,7 +408,8 @@
   "manageDeviceStorage": "Manage device storage",
   "machineLearning": "Machine learning",
   "magicSearch": "Magic search",
-  "magicSearchDescription": "Please use our Desktop app to index the pending items in your library.",
+  "magicSearchDescription": "Please note that this will result in a higher bandwidth and battery usage until all items are indexed.",
+  "loadingModel": "Downloading models...",
   "status": "Status",
   "indexedItems": "Indexed items",
   "pendingItems": "Pending items",
@@ -704,7 +705,7 @@
   "deleteAlbumsDialogBody": "This will delete all empty albums. This is useful when you want to reduce the clutter in your album list.",
   "deleteProgress": "Deleting {currentlyDeleting} / {totalCount}",
   "genericProgress": "Processing {currentlyProcessing} / {totalCount}",
-  "@genericProgress" : {
+  "@genericProgress": {
     "description": "Generic progress text to display when processing multiple items",
     "type": "text",
     "placeholders": {
@@ -718,7 +719,6 @@
       }
     }
   },
-
   "permanentlyDelete": "Permanently delete",
   "canOnlyCreateLinkForFilesOwnedByYou": "Can only create link for files owned by you",
   "publicLinkCreated": "Public link created",
