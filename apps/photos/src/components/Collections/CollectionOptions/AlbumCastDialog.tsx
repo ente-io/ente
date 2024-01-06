@@ -15,6 +15,7 @@ import { VerticallyCentered } from '@ente/shared/components/Container';
 import { logError } from '@ente/shared/sentry';
 import { LS_KEYS, getData } from '@ente/shared/storage/localStorage';
 import { Collection } from 'types/collection';
+import { SESSION_KEYS, getKey } from '@ente/shared/storage/sessionStorage';
 
 interface Props {
     show: boolean;
@@ -73,9 +74,9 @@ export default function AlbumCastDialog(props: Props) {
 
         // ok, they exist. let's give them the good stuff.
         const payload = JSON.stringify({
-            user: getData(LS_KEYS.USER),
+            user: JSON.stringify(getData(LS_KEYS.USER)),
+            sessionKey: getKey(SESSION_KEYS.ENCRYPTION_KEY),
             targetCollectionId: props.currentCollection.id,
-            targetCollectionKey: props.currentCollection.key,
         });
 
         const encryptedPayload = await boxSeal(
