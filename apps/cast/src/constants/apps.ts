@@ -1,6 +1,6 @@
+import { runningInBrowser } from '@ente/shared/apps/browser';
+import { getAlbumsURL, getAuthURL } from '@ente/shared/network/api';
 import { PAGES } from 'constants/pages';
-import { runningInBrowser } from 'utils/common';
-import { getAlbumsURL, getAuthURL } from 'utils/common/apiUtil';
 
 export enum APPS {
     PHOTOS = 'PHOTOS',
