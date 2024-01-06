@@ -149,7 +149,7 @@ class SemanticSearchService {
   }
 
   Future<void> clearIndexes() async {
-    await EmbeddingsDB.instance.deleteAllForModel(kCurrentModel);
+    await EmbeddingStore.instance.clearEmbeddings(kCurrentModel);
     _logger.info("Indexes cleared for $kCurrentModel");
   }
 
