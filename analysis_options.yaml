@@ -41,8 +41,8 @@ analyzer:
     use_rethrow_when_possible: info
     require_trailing_commas: error
 
-    prefer_const_constructors: error # too many warnings
-    prefer_const_declarations: error # too many warnings
+    prefer_const_constructors: warning
+    prefer_const_declarations: warning
     prefer_const_constructors_in_immutables: ignore # too many warnings
 
     avoid_renaming_method_parameters: ignore # incorrect warnings for `equals` overrides
