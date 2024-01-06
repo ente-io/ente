@@ -2,7 +2,7 @@ import "package:flutter/material.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/memory.dart";
 import "package:photos/theme/ente_theme.dart";
-import "package:photos/ui/home/memories/full_screen_memory.dart";
+import 'package:photos/ui/home/memories/full_screen_memory.dart';
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 import "package:photos/utils/navigation_util.dart";
 
@@ -21,13 +21,22 @@ class MemoryCovertWidget extends StatefulWidget {
 class _MemoryCovertWidgetState extends State<MemoryCovertWidget> {
   @override
   Widget build(BuildContext context) {
+    //memories will be empty if all memories are deleted and setState is called
+    //after FullScreenMemory screen is popped
+    if (widget.memories.isEmpty) {
+      return const SizedBox.shrink();
+    }
     final index = _getNextMemoryIndex();
     final title = _getTitle(widget.memories[index]);
     return GestureDetector(
       onTap: () async {
         await routeToPage(
           context,
-          FullScreenMemory(title, widget.memories, index),
+          FullScreenMemoryDataUpdater(
+            initialIndex: index,
+            memories: widget.memories,
+            child: FullScreenMemory(title, index),
+          ),
           forceCustomPageRoute: true,
         );
         setState(() {});

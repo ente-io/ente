@@ -64,6 +64,7 @@ class _MemoriesWidgetState extends State<MemoriesWidget> {
     }
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
+      physics: const BouncingScrollPhysics(),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: memoryWidgets,

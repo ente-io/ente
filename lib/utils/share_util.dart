@@ -119,9 +119,33 @@ Future<List<EnteFile>> convertIncomingSharedMediaToFile(
     // fileName: img_x.jpg
     enteFile.title = basename(media.path);
     var ioFile = File(media.path);
-    ioFile = ioFile.renameSync(
-      Configuration.instance.getSharedMediaDirectory() + "/" + enteFile.title!,
-    );
+    try {
+      ioFile = ioFile.renameSync(
+        Configuration.instance.getSharedMediaDirectory() +
+            "/" +
+            enteFile.title!,
+      );
+    } catch (e) {
+      if (e is FileSystemException) {
+        //from renameSync docs:
+        //On some platforms, a rename operation cannot move a file between
+        //different file systems. If that is the case, instead copySync the
+        //file to the new location and then deleteSync the original.
+        _logger.info("Creating new copy of file in path ${ioFile.path}");
+        final newIoFile = ioFile.copySync(
+          Configuration.instance.getSharedMediaDirectory() +
+              "/" +
+              enteFile.title!,
+        );
+        if (media.path.contains("io.ente.photos")) {
+          _logger.info("delete original file in path ${ioFile.path}");
+          ioFile.deleteSync();
+        }
+        ioFile = newIoFile;
+      } else {
+        rethrow;
+      }
+    }
     enteFile.localID = sharedMediaIdentifier + enteFile.title!;
     enteFile.collectionID = collectionID;
     enteFile.fileType =
