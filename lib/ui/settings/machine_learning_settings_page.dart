@@ -92,7 +92,10 @@ class _MachineLearningSettingsPageState
                 !LocalSettings.instance.hasEnabledMagicSearch(),
               );
               if (LocalSettings.instance.hasEnabledMagicSearch()) {
-                unawaited(SemanticSearchService.instance.init());
+                unawaited(
+                  SemanticSearchService.instance
+                      .init(shouldSyncImmediately: true),
+                );
               } else {
                 await SemanticSearchService.instance.clearQueue();
               }
