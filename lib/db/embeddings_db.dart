@@ -30,17 +30,16 @@ class EmbeddingsDB {
     return _isar.embeddings.filter().modelEqualTo(model).findAll();
   }
 
-  Future<int> put(Embedding embedding) {
+  Future<void> put(Embedding embedding) {
     return _isar.writeTxn(() async {
-      final id = await _isar.embeddings.put(embedding);
+      await _isar.embeddings.putByIndex(Embedding.index, embedding);
       Bus.instance.fire(EmbeddingUpdatedEvent());
-      return id;
     });
   }
 
   Future<void> putMany(List<Embedding> embeddings) {
     return _isar.writeTxn(() async {
-      await _isar.embeddings.putAll(embeddings);
+      await _isar.embeddings.putAllByIndex(Embedding.index, embeddings);
       Bus.instance.fire(EmbeddingUpdatedEvent());
     });
   }

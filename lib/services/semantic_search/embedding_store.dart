@@ -57,7 +57,7 @@ class EmbeddingStore {
   }
 
   Future<void> storeEmbedding(EnteFile file, Embedding embedding) async {
-    embedding.id = await EmbeddingsDB.instance.put(embedding);
+    await EmbeddingsDB.instance.put(embedding);
     unawaited(_pushEmbedding(file, embedding));
   }
 
