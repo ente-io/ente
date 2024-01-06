@@ -5,7 +5,7 @@ import SingleInputForm, {
 } from '@ente/shared/components/SingleInputForm';
 import { t } from 'i18next';
 import { getKexValue, setKexValue } from '@ente/shared/network/kexService';
-import { SESSION_KEYS, getKey } from '@ente/shared/storage/sessionStorage';
+// import { SESSION_KEYS, getKey } from '@ente/shared/storage/sessionStorage';
 import { boxSeal, toB64 } from '@ente/shared/crypto/internal/libsodium';
 import { loadSender } from '@ente/shared/hooks/useCastSender';
 import { useEffect, useState } from 'react';
@@ -13,11 +13,13 @@ import EnteButton from '@ente/shared/components/EnteButton';
 import EnteSpinner from '@ente/shared/components/EnteSpinner';
 import { VerticallyCentered } from '@ente/shared/components/Container';
 import { logError } from '@ente/shared/sentry';
+import { LS_KEYS, getData } from '@ente/shared/storage/localStorage';
+import { Collection } from 'types/collection';
 
 interface Props {
     show: boolean;
     onHide: () => void;
-    currentCollectionId: number;
+    currentCollection: Collection;
 }
 
 enum AlbumCastError {
@@ -71,9 +73,9 @@ export default function AlbumCastDialog(props: Props) {
 
         // ok, they exist. let's give them the good stuff.
         const payload = JSON.stringify({
-            ...window.localStorage,
-            sessionKey: getKey(SESSION_KEYS.ENCRYPTION_KEY),
-            targetCollectionId: props.currentCollectionId,
+            user: getData(LS_KEYS.USER),
+            targetCollectionId: props.currentCollection.id,
+            targetCollectionKey: props.currentCollection.key,
         });
 
         const encryptedPayload = await boxSeal(

@@ -204,7 +204,7 @@ export default function Collections(props: Iprops) {
                 setAttributesList={setCollectionDownloadProgressAttributesList}
             />
             <AlbumCastDialog
-                currentCollectionId={props.activeCollection?.id}
+                currentCollection={props.activeCollection}
                 show={showAlbumCastDialog}
                 onHide={() => setShowAlbumCastDialog(false)}
             />
