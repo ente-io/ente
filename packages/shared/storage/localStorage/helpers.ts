@@ -3,9 +3,9 @@ import { LS_KEYS, getData, setData } from '.';
 import { Language } from '@ente/shared/i18n/locale';
 
 export const getToken = () => {
-    const token = getData(LS_KEYS.USER)?.token;
+    const token = getData(LS_KEYS.TOKEN) || getData(LS_KEYS.USER)?.token;
     if (!token) {
-        throw Error(CustomError.TOKEN_MISSING);
+        throw new Error(CustomError.TOKEN_MISSING);
     }
     return token;
 };

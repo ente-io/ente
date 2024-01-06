@@ -2,6 +2,8 @@ import { logError } from '@ente/shared/sentry';
 
 export enum LS_KEYS {
     USER = 'user',
+    // ONLY RECOMMENDED FOR APPS LIKE CAST WHERE OTHER USER INFO ISN'T NECESSARY
+    TOKEN = 'token',
     SESSION = 'session',
     KEY_ATTRIBUTES = 'keyAttributes',
     ORIGINAL_KEY_ATTRIBUTES = 'originalKeyAttributes',

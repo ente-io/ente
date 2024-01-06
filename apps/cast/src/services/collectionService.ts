@@ -1,8 +1,7 @@
-import { getEndpoint } from 'utils/common/apiUtil';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import localForage from 'utils/storage/localForage';
-
-import { getActualKey, getToken } from 'utils/common/key';
+import { getActualKey } from '@ente/shared/user';
+import { batch } from '@ente/shared/batch';
 import { getPublicKey } from './userService';
 import HTTPService from './HTTPService';
 import { EnteFile } from 'types/file';
@@ -67,10 +66,11 @@ import {
 import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
 import { getLocalFiles } from './fileService';
 import { REQUEST_BATCH_SIZE } from 'constants/api';
-import { batch } from 'utils/common';
 import { t } from 'i18next';
 import { EncryptedMagicMetadata } from 'types/magicMetadata';
 import { VISIBILITY_STATE } from 'types/magicMetadata';
+import { getEndpoint } from '@ente/shared/network/api';
+import { getToken } from '@ente/shared/storage/localStorage/helpers';
 
 const ENDPOINT = getEndpoint();
 const COLLECTION_TABLE = 'collections';
