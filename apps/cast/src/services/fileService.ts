@@ -1,7 +1,7 @@
-import { getEndpoint } from 'utils/common/apiUtil';
+import { getEndpoint } from '@ente/shared/network/api';
 import localForage from 'utils/storage/localForage';
 
-import { getToken } from 'utils/common/key';
+import { getToken } from '@ente/shared/storage/localStorage/helpers';
 import { Collection } from 'types/collection';
 import HTTPService from './HTTPService';
 import { logError } from 'utils/sentry';
@@ -28,7 +28,7 @@ import {
     setCollectionLastSyncTime,
 } from './collectionService';
 import { REQUEST_BATCH_SIZE } from 'constants/api';
-import { batch } from 'utils/common';
+import { batch } from '@ente/shared/batch';
 
 const ENDPOINT = getEndpoint();
 const FILES_TABLE = 'files';

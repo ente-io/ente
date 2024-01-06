@@ -35,9 +35,9 @@ import {
 import { getUnixTimeInMicroSecondsWithDelta } from 'utils/time';
 import { SUB_TYPE, VISIBILITY_STATE } from 'types/magicMetadata';
 import { isArchivedCollection, updateMagicMetadata } from 'utils/magicMetadata';
-import { getAlbumsURL } from 'utils/common/apiUtil';
 import bs58 from 'bs58';
 import { t } from 'i18next';
+import { getAlbumsURL } from '@ente/shared/network/api';
 // import { SetCollectionDownloadProgressAttributes } from 'types/gallery';
 // import ElectronService from 'services/electron/common';
 // import {

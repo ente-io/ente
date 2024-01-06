@@ -1,6 +1,6 @@
 import { logError } from 'utils/sentry';
 import HTTPService from './HTTPService';
-import { getEndpoint } from 'utils/common/apiUtil';
+import { getEndpoint } from '@ente/shared/network/api';
 
 const ENDPOINT = getEndpoint();
 

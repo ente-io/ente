@@ -1,7 +1,6 @@
 import { KeyAttributes, SRPSetupAttributes } from 'types/user';
 import { SESSION_KEYS, setKey } from 'utils/storage/sessionStorage';
 import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
-import { getActualKey, getToken } from 'utils/common/key';
 import { setRecoveryKey } from 'services/userService';
 import { logError } from 'utils/sentry';
 import isElectron from 'is-electron';
@@ -13,6 +12,8 @@ import { SRP, SrpClient } from 'fast-srp-hap';
 import { convertBase64ToBuffer, convertBufferToBase64 } from 'utils/user';
 import { v4 as uuidv4 } from 'uuid';
 import { addLocalLog } from 'utils/logging';
+import { getActualKey } from '@ente/shared/user';
+import { getToken } from '@ente/shared/storage/localStorage/helpers';
 
 const SRP_PARAMS = SRP.params['4096'];
 

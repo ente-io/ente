@@ -1,14 +1,9 @@
 import { PAGES } from 'constants/pages';
-import {
-    getEndpoint,
-    getFamilyPortalURL,
-    isDevDeployment,
-} from 'utils/common/apiUtil';
 import { clearKeys } from 'utils/storage/sessionStorage';
 import router from 'next/router';
 import { clearData, getData, LS_KEYS } from 'utils/storage/localStorage';
 import localForage from 'utils/storage/localForage';
-import { getToken } from 'utils/common/key';
+import { getToken } from '@ente/shared/storage/localStorage/helpers';
 import HTTPService from './HTTPService';
 import {
     computeVerifierHelper,
@@ -52,6 +47,11 @@ import { addLocalLog } from 'utils/logging';
 import { convertBase64ToBuffer, convertBufferToBase64 } from 'utils/user';
 import { setLocalMapEnabled } from 'utils/storage';
 import InMemoryStore, { MS_KEYS } from './InMemoryStore';
+import {
+    getEndpoint,
+    getFamilyPortalURL,
+    isDevDeployment,
+} from '@ente/shared/network/api';
 
 const ENDPOINT = getEndpoint();
 

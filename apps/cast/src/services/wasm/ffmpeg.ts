@@ -1,7 +1,7 @@
+import { promiseWithTimeout } from '@ente/shared/promise';
 import { createFFmpeg, FFmpeg } from 'ffmpeg-wasm';
 import QueueProcessor from 'services/queueProcessor';
 import { getUint8ArrayView } from 'services/readerService';
-import { promiseWithTimeout } from 'utils/common';
 import { addLogLine } from 'utils/logging';
 import { logError } from 'utils/sentry';
 import { generateTempName } from 'utils/temp';

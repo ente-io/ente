@@ -1,5 +1,3 @@
-import { getToken } from 'utils/common/key';
-import { getFileURL, getThumbnailURL } from 'utils/common/apiUtil';
 import {
     generateStreamFromArrayBuffer,
     getRenderableFileURL,
@@ -19,6 +17,8 @@ import { DedicatedCryptoWorker } from 'worker/crypto.worker';
 import { LimitedCache } from 'types/cache';
 import { retryAsyncFunction } from 'utils/network';
 import { addLogLine } from 'utils/logging';
+import { getToken } from '@ente/shared/storage/localStorage/helpers';
+import { getFileURL, getThumbnailURL } from '@ente/shared/network/api';
 
 class DownloadManager {
     private fileObjectURLPromise = new Map<

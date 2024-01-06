@@ -1,5 +1,4 @@
-import { runningInBrowser } from 'utils/common';
-
+import { runningInBrowser } from '@ente/shared/apps/browser';
 import localForage from 'localforage';
 
 if (runningInBrowser()) {

@@ -1,4 +1,4 @@
-import { sleep } from 'utils/common';
+import { sleep } from '@ente/shared/sleep';
 
 const waitTimeBeforeNextAttemptInMilliSeconds = [2000, 5000, 10000];
 

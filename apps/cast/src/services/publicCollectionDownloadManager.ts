@@ -1,8 +1,4 @@
 import {
-    getPublicCollectionFileURL,
-    getPublicCollectionThumbnailURL,
-} from 'utils/common/apiUtil';
-import {
     generateStreamFromArrayBuffer,
     getRenderableFileURL,
     createTypedObjectURL,
@@ -17,6 +13,10 @@ import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
 import { CACHES } from 'constants/cache';
 import { CacheStorageService } from './cache/cacheStorageService';
 import { LimitedCache } from 'types/cache';
+import {
+    getPublicCollectionFileURL,
+    getPublicCollectionThumbnailURL,
+} from '@ente/shared/network/api';
 
 class PublicCollectionDownloadManager {
     private fileObjectURLPromise = new Map<
