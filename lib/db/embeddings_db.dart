@@ -30,10 +30,11 @@ class EmbeddingsDB {
     return _isar.embeddings.filter().modelEqualTo(model).findAll();
   }
 
-  Future<void> put(Embedding embedding) {
+  Future<int> put(Embedding embedding) {
     return _isar.writeTxn(() async {
-      await _isar.embeddings.put(embedding);
+      final id = await _isar.embeddings.put(embedding);
       Bus.instance.fire(EmbeddingUpdatedEvent());
+      return id;
     });
   }
 
