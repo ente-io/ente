@@ -82,6 +82,7 @@ class _AdvancedSettingsScreenState extends State<AdvancedSettingsScreen> {
                                   singleBorderRadius: 8,
                                   alignCaptionedTextToLeft: true,
                                   onTap: () async {
+                                    // ignore: unawaited_futures
                                     routeToPage(
                                       context,
                                       const MachineLearningSettingsPage(),
@@ -135,6 +136,7 @@ class _AdvancedSettingsScreenState extends State<AdvancedSettingsScreen> {
                               singleBorderRadius: 8,
                               alignCaptionedTextToLeft: true,
                               onTap: () async {
+                                // ignore: unawaited_futures
                                 routeToPage(context, const AppStorageViewer());
                               },
                             ),

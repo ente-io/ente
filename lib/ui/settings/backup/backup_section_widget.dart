@@ -100,6 +100,7 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
             }
 
             if (status.localIDs.isEmpty) {
+              // ignore: unawaited_futures
               showErrorDialog(
                 context,
                 S.of(context).allClear,

@@ -123,7 +123,7 @@ class _UpdateIconWidgetState extends State<UploadIconWidget> {
                   widget.file.collectionID = (await CollectionsService.instance
                           .getUncategorizedCollection())
                       .id;
-                  FilesDB.instance.insert(widget.file);
+                  await FilesDB.instance.insert(widget.file);
                 }
                 RemoteSyncService.instance.sync().ignore();
                 if (mounted) {

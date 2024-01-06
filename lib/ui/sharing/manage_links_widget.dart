@@ -109,6 +109,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                     menuItemColor: enteColorScheme.fillFaint,
                     surfaceExecutionStates: false,
                     onTap: () async {
+                      // ignore: unawaited_futures
                       routeToPage(
                         context,
                         LinkExpiryPickerPage(widget.collection!),
@@ -144,6 +145,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                     alignCaptionedTextToLeft: true,
                     isBottomBorderRadiusRemoved: true,
                     onTap: () async {
+                      // ignore: unawaited_futures
                       routeToPage(
                         context,
                         DeviceLimitPickerPage(widget.collection!),
@@ -174,6 +176,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                           {'enableDownload': value},
                         );
                         if (!value) {
+                          // ignore: unawaited_futures
                           showErrorDialog(
                             context,
                             S.of(context).disableDownloadWarningTitle,
@@ -199,6 +202,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                       value: isPasswordEnabled,
                       onChanged: (enablePassword) async {
                         if (enablePassword) {
+                          // ignore: unawaited_futures
                           showTextInputDialog(
                             context,
                             title: S.of(context).setAPassword,
@@ -275,6 +279,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                       leadingIcon: Icons.adaptive.share,
                       menuItemColor: getEnteColorScheme(context).fillFaint,
                       onTap: () async {
+                        // ignore: unawaited_futures
                         shareText(urlValue);
                       },
                       isTopBorderRadiusRemoved: true,

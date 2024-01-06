@@ -187,6 +187,7 @@ class SubFaqWidget extends StatelessWidget {
         singleBorderRadius: 4,
         alignCaptionedTextToLeft: true,
         onTap: () async {
+          // ignore: unawaited_futures
           showModalBottomSheet<void>(
             backgroundColor: Theme.of(context).colorScheme.bgColorForQuestions,
             barrierColor: Colors.black87,

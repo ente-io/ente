@@ -92,6 +92,7 @@ class CodeSuccessScreen extends StatelessWidget {
                           singleBorderRadius: 8,
                           alignCaptionedTextToLeft: true,
                           onTap: () async {
+                            // ignore: unawaited_futures
                             routeToPage(
                               context,
                               StorageDetailsScreen(referralView, userDetails),

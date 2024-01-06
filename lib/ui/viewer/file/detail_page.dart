@@ -324,7 +324,7 @@ class _DetailPageState extends State<DetailPage> {
         ? currentPageIndex
         : currentPageIndex - 1;
     if (_files!.isNotEmpty) {
-      _pageController.animateToPage(
+      await _pageController.animateToPage(
         targetPageIndex,
         duration: const Duration(milliseconds: 200),
         curve: Curves.easeInOut,
@@ -340,6 +340,7 @@ class _DetailPageState extends State<DetailPage> {
         UnauthorizedEditError(),
         StackTrace.current,
       );
+      // ignore: unawaited_futures
       showErrorDialog(
         context,
         S.of(context).sorry,

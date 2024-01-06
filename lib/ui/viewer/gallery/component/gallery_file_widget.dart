@@ -124,7 +124,7 @@ class GalleryFileWidget extends StatelessWidget {
       if (AppLifecycleService.instance.mediaExtensionAction.action ==
           IntentAction.pick) {
         final ioFile = await getFile(file);
-        MediaExtension().setResult("file://${ioFile!.path}");
+        await MediaExtension().setResult("file://${ioFile!.path}");
       } else {
         _routeToDetailPage(file, context);
       }
@@ -148,7 +148,7 @@ class GalleryFileWidget extends StatelessWidget {
     if (AppLifecycleService.instance.mediaExtensionAction.action ==
         IntentAction.pick) {
       final ioFile = await getFile(file);
-      MediaExtension().setResult("file://${ioFile!.path}");
+      await MediaExtension().setResult("file://${ioFile!.path}");
     } else {
       _routeToDetailPage(file, context);
     }

@@ -122,6 +122,7 @@ class QuickLinkAlbumItem extends StatelessWidget {
           ),
           tagPrefix: heroTagPrefix,
         );
+        // ignore: unawaited_futures
         routeToPage(context, page);
       },
     );

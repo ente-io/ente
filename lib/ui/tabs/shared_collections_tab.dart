@@ -255,6 +255,7 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
                           labelText: S.of(context).inviteYourFriendsToEnte,
                           icon: Icons.ios_share_outlined,
                           onTap: () async {
+                            // ignore: unawaited_futures
                             shareText(
                               S.of(context).shareTextRecommendUsingEnte,
                             );

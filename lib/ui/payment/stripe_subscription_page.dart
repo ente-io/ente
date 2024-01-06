@@ -277,6 +277,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
             singleBorderRadius: 4,
             alignCaptionedTextToLeft: true,
             onTap: () async {
+              // ignore: unawaited_futures
               _billingService.launchFamilyPortal(context, _userDetails);
             },
           ),
