@@ -21,6 +21,7 @@ import 'package:ente_auth/ui/utils/icon_utils.dart';
 import 'package:ente_auth/utils/crypto_util.dart';
 import 'package:flutter/foundation.dart';
 import "package:flutter/material.dart";
+import 'package:flutter/scheduler.dart';
 import 'package:flutter_displaymode/flutter_displaymode.dart';
 import 'package:logging/logging.dart';
 import 'package:path_provider/path_provider.dart';
@@ -30,28 +31,13 @@ final _logger = Logger("main");
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  final savedThemeMode = await AdaptiveTheme.getThemeMode();
-  await _runInForeground(savedThemeMode);
-  await PrivacyScreen.instance.enable(
-    iosOptions: const PrivacyIosOptions(
-      enablePrivacy: true,
-      privacyImageName: "LaunchImage",
-      lockTrigger: IosLockTrigger.didEnterBackground,
-    ),
-    androidOptions: const PrivacyAndroidOptions(
-      enableSecure: true,
-    ),
-    backgroundColor: savedThemeMode == AdaptiveThemeMode.dark
-        ? Colors.black
-        : Colors.white,
-    blurEffect: savedThemeMode == AdaptiveThemeMode.dark
-        ? PrivacyBlurEffect.dark
-        : PrivacyBlurEffect.extraLight,
-  );
+  await _runInForeground();
+  await _setupPrivacyScreen();
   FlutterDisplayMode.setHighRefreshRate();
 }
 
-Future<void> _runInForeground(AdaptiveThemeMode? savedThemeMode) async {
+Future<void> _runInForeground() async {
+  final savedThemeMode = _themeMode(await AdaptiveTheme.getThemeMode());
   return await _runWithLogs(() async {
     _logger.info("Starting app in foreground");
     await _init(false, via: 'mainMethod');
@@ -65,7 +51,7 @@ Future<void> _runInForeground(AdaptiveThemeMode? savedThemeMode) async {
         locale: locale,
         lightTheme: lightThemeData,
         darkTheme: darkThemeData,
-        savedThemeMode: _themeMode(savedThemeMode),
+        savedThemeMode: savedThemeMode,
       ),
     );
   });
@@ -106,4 +92,23 @@ Future<void> _init(bool bool, {String? via}) async {
   await NotificationService.instance.init();
   await UpdateService.instance.init();
   await IconUtils.instance.init();
+}
+
+Future<void> _setupPrivacyScreen() async {
+  final brightness =
+      SchedulerBinding.instance.platformDispatcher.platformBrightness;
+  bool isInDarkMode = brightness == Brightness.dark;
+  await PrivacyScreen.instance.enable(
+    iosOptions: const PrivacyIosOptions(
+      enablePrivacy: true,
+      privacyImageName: "LaunchImage",
+      lockTrigger: IosLockTrigger.didEnterBackground,
+    ),
+    androidOptions: const PrivacyAndroidOptions(
+      enableSecure: true,
+    ),
+    backgroundColor: isInDarkMode ? Colors.black : Colors.white,
+    blurEffect:
+        isInDarkMode ? PrivacyBlurEffect.dark : PrivacyBlurEffect.extraLight,
+  );
 }
