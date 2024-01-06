@@ -1,11 +1,11 @@
 import "dart:async";
 
-import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:intl/intl.dart";
 import "package:photos/core/event_bus.dart";
 import 'package:photos/events/embedding_updated_event.dart';
 import "package:photos/generated/l10n.dart";
+import "package:photos/services/feature_flag_service.dart";
 import "package:photos/services/semantic_search/semantic_search_service.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/common/loading_widget.dart";
@@ -92,7 +92,10 @@ class _MachineLearningSettingsPageState
                 !LocalSettings.instance.hasEnabledMagicSearch(),
               );
               if (LocalSettings.instance.hasEnabledMagicSearch()) {
-                unawaited(SemanticSearchService.instance.init());
+                unawaited(
+                  SemanticSearchService.instance
+                      .init(shouldSyncImmediately: true),
+                );
               } else {
                 await SemanticSearchService.instance.clearQueue();
               }
@@ -129,7 +132,7 @@ class _MachineLearningSettingsPageState
                   const SizedBox(
                     height: 12,
                   ),
-                  kDebugMode
+                  FeatureFlagService.instance.isInternalUserOrDebugBuild()
                       ? MenuItemWidget(
                           leadingIcon: Icons.delete_sweep_outlined,
                           captionedTextWidget: CaptionedTextWidget(

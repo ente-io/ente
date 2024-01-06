@@ -51,7 +51,7 @@ class SemanticSearchService {
 
   get hasInitialized => _hasInitialized;
 
-  Future<void> init() async {
+  Future<void> init({bool shouldSyncImmediately = false}) async {
     if (!LocalSettings.instance.hasEnabledMagicSearch()) {
       return;
     }
@@ -87,6 +87,9 @@ class SemanticSearchService {
     Bus.instance.on<FileUploadedEvent>().listen((event) async {
       _addToQueue(event.file);
     });
+    if (shouldSyncImmediately) {
+      unawaited(sync());
+    }
   }
 
   Future<void> release() async {
@@ -146,7 +149,7 @@ class SemanticSearchService {
   }
 
   Future<void> clearIndexes() async {
-    await EmbeddingsDB.instance.deleteAllForModel(kCurrentModel);
+    await EmbeddingStore.instance.clearEmbeddings(kCurrentModel);
     _logger.info("Indexes cleared for $kCurrentModel");
   }
 

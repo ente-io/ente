@@ -61,6 +61,11 @@ class EmbeddingStore {
     unawaited(_pushEmbedding(file, embedding));
   }
 
+  Future<void> clearEmbeddings(Model model) async {
+    await EmbeddingsDB.instance.deleteAllForModel(model);
+    await _preferences.remove(kEmbeddingsSyncTimeKey);
+  }
+
   Future<void> _pushEmbedding(EnteFile file, Embedding embedding) async {
     final encryptionKey = getFileKey(file);
     final embeddingJSON = jsonEncode(embedding.embedding);
