@@ -1,8 +1,8 @@
 import * as Sentry from '@sentry/nextjs';
-import { getSentryTunnelURL } from 'utils/common/apiUtil';
 import { getSentryUserID } from 'utils/user';
-import { runningInBrowser } from 'utils/common';
 import { getHasOptedOutOfCrashReports } from 'utils/storage/index';
+import { runningInBrowser } from '@ente/shared/apps/browser';
+import { getSentryTunnelURL } from '@ente/shared/network/api';
 import {
     getSentryDSN,
     getSentryENV,
