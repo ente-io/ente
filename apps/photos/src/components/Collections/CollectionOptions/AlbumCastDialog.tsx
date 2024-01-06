@@ -5,7 +5,6 @@ import SingleInputForm, {
 } from '@ente/shared/components/SingleInputForm';
 import { t } from 'i18next';
 import { getKexValue, setKexValue } from '@ente/shared/network/kexService';
-// import { SESSION_KEYS, getKey } from '@ente/shared/storage/sessionStorage';
 import { boxSeal, toB64 } from '@ente/shared/crypto/internal/libsodium';
 import { loadSender } from '@ente/shared/hooks/useCastSender';
 import { useEffect, useState } from 'react';
@@ -15,7 +14,6 @@ import { VerticallyCentered } from '@ente/shared/components/Container';
 import { logError } from '@ente/shared/sentry';
 import { LS_KEYS, getData } from '@ente/shared/storage/localStorage';
 import { Collection } from 'types/collection';
-import { SESSION_KEYS, getKey } from '@ente/shared/storage/sessionStorage';
 
 interface Props {
     show: boolean;
@@ -75,8 +73,8 @@ export default function AlbumCastDialog(props: Props) {
         // ok, they exist. let's give them the good stuff.
         const payload = JSON.stringify({
             user: JSON.stringify(getData(LS_KEYS.USER)),
-            sessionKey: getKey(SESSION_KEYS.ENCRYPTION_KEY),
             targetCollectionId: props.currentCollection.id,
+            targetCollectionKey: props.currentCollection.key,
         });
 
         const encryptedPayload = await boxSeal(

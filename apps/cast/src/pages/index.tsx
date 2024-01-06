@@ -7,7 +7,6 @@ import {
     toB64,
 } from '@ente/shared/crypto/internal/libsodium';
 import { useRouter } from 'next/router';
-import { SESSION_KEYS, setKey } from '@ente/shared/storage/sessionStorage';
 import TimerBar from 'components/TimerBar';
 import LargeType from 'components/LargeType';
 import { useCastReceiver } from '@ente/shared/hooks/useCastReceiver';
@@ -137,13 +136,8 @@ export default function PairingMode() {
 
     const storePayloadLocally = (payloadObj: Object) => {
         // iterate through all the keys in the payload object and set them in localStorage.
-        // if the key is "encryptionKey", store it in session storage instead.
         for (const key in payloadObj) {
-            if (key === 'sessionKey') {
-                setKey(SESSION_KEYS.ENCRYPTION_KEY, payloadObj[key]);
-            } else {
-                window.localStorage.setItem(key, payloadObj[key]);
-            }
+            window.localStorage.setItem(key, payloadObj[key]);
         }
     };
 

@@ -3,7 +3,7 @@ import Theatre from 'components/Theatre';
 import { FILE_TYPE } from 'constants/file';
 import { useRouter } from 'next/router';
 import { createContext, useEffect, useState } from 'react';
-import { getCollection } from 'services/collectionService';
+import { getCollectionWithKey } from 'services/collectionService';
 import { syncFiles } from 'services/fileService';
 import { EnteFile } from 'types/file';
 import { downloadFileAsBlob, isRawFileFromFileName } from 'utils/file';
@@ -32,8 +32,13 @@ export default function Slideshow() {
             const requestedCollectionID =
                 window.localStorage.getItem('targetCollectionId');
 
-            const collection = await getCollection(
-                Number(requestedCollectionID)
+            const requestedCollectionKey = window.localStorage.getItem(
+                'targetCollectionKey'
+            );
+
+            const collection = await getCollectionWithKey(
+                Number(requestedCollectionID),
+                requestedCollectionKey
             );
 
             const files = await syncFiles('normal', [collection], () => {});

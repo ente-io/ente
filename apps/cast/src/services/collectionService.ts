@@ -94,29 +94,34 @@ export const removeCollectionLastSyncTime = async (collection: Collection) =>
 
 const getCollectionWithSecrets = async (
     collection: EncryptedCollection,
-    masterKey: string
+    key: string,
+    type: 'master' | 'collection' = 'master'
 ): Promise<Collection> => {
     const cryptoWorker = await ComlinkCryptoWorker.getInstance();
     const userID = getData(LS_KEYS.USER).id;
     let collectionKey: string;
-    if (collection.owner.id === userID) {
-        collectionKey = await cryptoWorker.decryptB64(
-            collection.encryptedKey,
-            collection.keyDecryptionNonce,
-            masterKey
-        );
+    if (type === 'master') {
+        if (collection.owner.id === userID) {
+            collectionKey = await cryptoWorker.decryptB64(
+                collection.encryptedKey,
+                collection.keyDecryptionNonce,
+                key
+            );
+        } else {
+            const keyAttributes = getData(LS_KEYS.KEY_ATTRIBUTES);
+            const secretKey = await cryptoWorker.decryptB64(
+                keyAttributes.encryptedSecretKey,
+                keyAttributes.secretKeyDecryptionNonce,
+                key
+            );
+            collectionKey = await cryptoWorker.boxSealOpen(
+                collection.encryptedKey,
+                keyAttributes.publicKey,
+                secretKey
+            );
+        }
     } else {
-        const keyAttributes = getData(LS_KEYS.KEY_ATTRIBUTES);
-        const secretKey = await cryptoWorker.decryptB64(
-            keyAttributes.encryptedSecretKey,
-            keyAttributes.secretKeyDecryptionNonce,
-            masterKey
-        );
-        collectionKey = await cryptoWorker.boxSealOpen(
-            collection.encryptedKey,
-            keyAttributes.publicKey,
-            secretKey
-        );
+        collectionKey = key;
     }
     const collectionName =
         collection.name ||
@@ -332,6 +337,32 @@ export const getCollection = async (
         const collectionWithSecrets = await getCollectionWithSecrets(
             resp.data?.collection,
             key
+        );
+        return collectionWithSecrets;
+    } catch (e) {
+        logError(e, 'failed to get collection');
+        throw e;
+    }
+};
+
+export const getCollectionWithKey = async (
+    collectionID: number,
+    key: string
+): Promise<Collection> => {
+    try {
+        const token = getToken();
+        if (!token) {
+            return;
+        }
+        const resp = await HTTPService.get(
+            `${ENDPOINT}/collections/${collectionID}`,
+            null,
+            { 'X-Auth-Token': token }
+        );
+        const collectionWithSecrets = await getCollectionWithSecrets(
+            resp.data?.collection,
+            key,
+            'collection'
         );
         return collectionWithSecrets;
     } catch (e) {
