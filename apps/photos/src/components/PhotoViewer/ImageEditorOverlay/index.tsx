@@ -47,6 +47,10 @@ import { getFileType } from 'services/typeDetectionService';
 import { downloadUsingAnchor } from '@ente/shared/utils';
 import { CORNER_THRESHOLD, FILTER_DEFAULT_VALUES } from 'constants/photoEditor';
 import FreehandCropRegion from './FreehandCropRegion';
+import EnteButton from '@ente/shared/components/EnteButton';
+import { CenteredFlex } from '@ente/shared/components/Container';
+import CropIcon from '@mui/icons-material/Crop';
+import { cropRegionOfCanvas, getCropRegionArgs } from './CropMenu';
 
 interface IProps {
     file: EnteFile;
@@ -591,6 +595,48 @@ const ImageEditorOverlay = (props: IProps) => {
                                     />
                                 )}
                             </Box>
+                            {currentTab === 'crop' && (
+                                <CenteredFlex marginTop="1rem">
+                                    <EnteButton
+                                        color="accent"
+                                        startIcon={<CropIcon />}
+                                        onClick={() => {
+                                            if (
+                                                !cropBoxRef.current ||
+                                                !canvasRef.current
+                                            )
+                                                return;
+
+                                            const { x1, x2, y1, y2 } =
+                                                getCropRegionArgs(
+                                                    cropBoxRef.current,
+                                                    canvasRef.current
+                                                );
+                                            setCanvasLoading(true);
+                                            setTransformationPerformed(true);
+                                            cropRegionOfCanvas(
+                                                canvasRef.current,
+                                                x1,
+                                                y1,
+                                                x2,
+                                                y2
+                                            );
+                                            cropRegionOfCanvas(
+                                                originalSizeCanvasRef.current,
+                                                x1 / previewCanvasScale,
+                                                y1 / previewCanvasScale,
+                                                x2 / previewCanvasScale,
+                                                y2 / previewCanvasScale
+                                            );
+                                            resetCropBox();
+                                            setCanvasLoading(false);
+
+                                            setCurrentTab('transform');
+                                        }}>
+                                        {t('APPLY_CROP')}
+                                    </EnteButton>
+                                </CenteredFlex>
+                            )}
                         </Box>
                     </Box>
                 </Box>

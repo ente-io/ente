@@ -15,6 +15,71 @@ interface IProps {
     resetCropBox: () => void;
 }
 
+export const cropRegionOfCanvas = (
+    canvas: HTMLCanvasElement,
+    topLeftX: number,
+    topLeftY: number,
+    bottomRightX: number,
+    bottomRightY: number,
+    scale: number = 1
+) => {
+    const context = canvas.getContext('2d');
+    if (!context || !canvas) return;
+    context.imageSmoothingEnabled = false;
+
+    const width = (bottomRightX - topLeftX) * scale;
+    const height = (bottomRightY - topLeftY) * scale;
+
+    const img = new Image();
+    img.src = canvas.toDataURL();
+    img.onload = () => {
+        context.clearRect(0, 0, canvas.width, canvas.height);
+
+        canvas.width = width;
+        canvas.height = height;
+
+        context.drawImage(
+            img,
+            topLeftX,
+            topLeftY,
+            width,
+            height,
+            0,
+            0,
+            width,
+            height
+        );
+    };
+};
+
+export const getCropRegionArgs = (
+    cropBoxEle: HTMLDivElement,
+    canvasEle: HTMLCanvasElement
+) => {
+    // get the bounding rectangle of the crop box
+    const cropBoxRect = cropBoxEle.getBoundingClientRect();
+    // Get the bounding rectangle of the canvas
+    const canvasRect = canvasEle.getBoundingClientRect();
+
+    // calculate the scale of the canvas display relative to its actual dimensions
+    const displayScale = canvasEle.width / canvasRect.width;
+
+    // calculate the coordinates of the crop box relative to the canvas and adjust for any scrolling by adding scroll offsets
+    const x1 =
+        (cropBoxRect.left - canvasRect.left + window.scrollX) * displayScale;
+    const y1 =
+        (cropBoxRect.top - canvasRect.top + window.scrollY) * displayScale;
+    const x2 = x1 + cropBoxRect.width * displayScale;
+    const y2 = y1 + cropBoxRect.height * displayScale;
+
+    return {
+        x1,
+        x2,
+        y1,
+        y2,
+    };
+};
+
 const CropMenu = (props: IProps) => {
     const {
         canvasRef,
@@ -24,46 +89,6 @@ const CropMenu = (props: IProps) => {
         setTransformationPerformed,
         setCurrentTab,
     } = useContext(ImageEditorOverlayContext);
-
-    const cropRegionOfCanvas = (
-        canvas: HTMLCanvasElement,
-        topLeftX: number,
-        topLeftY: number,
-        bottomRightX: number,
-        bottomRightY: number,
-        scale: number = 1
-    ) => {
-        setTransformationPerformed(true);
-        const context = canvas.getContext('2d');
-        if (!context || !canvas) return;
-        context.imageSmoothingEnabled = false;
-
-        const width = (bottomRightX - topLeftX) * scale;
-        const height = (bottomRightY - topLeftY) * scale;
-
-        const img = new Image();
-        img.src = canvas.toDataURL();
-        img.onload = () => {
-            context.clearRect(0, 0, canvas.width, canvas.height);
-
-            canvas.width = width;
-            canvas.height = height;
-
-            context.drawImage(
-                img,
-                topLeftX,
-                topLeftY,
-                width,
-                height,
-                0,
-                0,
-                width,
-                height
-            );
-
-            props.resetCropBox();
-        };
-    };
 
     return (
         <>
@@ -79,32 +104,12 @@ const CropMenu = (props: IProps) => {
                         if (!props.cropBoxRef.current || !canvasRef.current)
                             return;
 
-                        // get the bounding rectangle of the crop box
-                        const cropBoxRect =
-                            props.cropBoxRef.current.getBoundingClientRect();
-                        // Get the bounding rectangle of the canvas
-                        const canvasRect =
-                            canvasRef.current.getBoundingClientRect();
-
-                        // calculate the scale of the canvas display relative to its actual dimensions
-                        const displayScale =
-                            canvasRef.current.width / canvasRect.width;
-
-                        // calculate the coordinates of the crop box relative to the canvas and adjust for any scrolling by adding scroll offsets
-                        const x1 =
-                            (cropBoxRect.left -
-                                canvasRect.left +
-                                window.scrollX) *
-                            displayScale;
-                        const y1 =
-                            (cropBoxRect.top -
-                                canvasRect.top +
-                                window.scrollY) *
-                            displayScale;
-                        const x2 = x1 + cropBoxRect.width * displayScale;
-                        const y2 = y1 + cropBoxRect.height * displayScale;
-
+                        const { x1, x2, y1, y2 } = getCropRegionArgs(
+                            props.cropBoxRef.current,
+                            canvasRef.current
+                        );
                         setCanvasLoading(true);
+                        setTransformationPerformed(true);
                         cropRegionOfCanvas(canvasRef.current, x1, y1, x2, y2);
                         cropRegionOfCanvas(
                             originalSizeCanvasRef.current,
@@ -113,11 +118,12 @@ const CropMenu = (props: IProps) => {
                             x2 / props.previewScale,
                             y2 / props.previewScale
                         );
+                        props.resetCropBox();
                         setCanvasLoading(false);
 
                         setCurrentTab('transform');
                     }}
-                    label={t('APPLY')}
+                    label={t('APPLY_CROP')}
                 />
             </MenuItemGroup>
         </>
