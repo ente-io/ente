@@ -177,6 +177,22 @@ const ImageEditorOverlay = (props: IProps) => {
 
     const cropBoxRef = useRef<HTMLDivElement>(null);
 
+    const getCanvasBoundsOffsets = () => {
+        const canvasBounds = canvasRef.current.getBoundingClientRect();
+        const parentBounds = parentRef.current.getBoundingClientRect();
+
+        // calculate the offset created by centering the canvas in its parent
+        const offsetX = (parentBounds.width - canvasBounds.width) / 2;
+        const offsetY = (parentBounds.height - canvasBounds.height) / 2;
+
+        return {
+            offsetY,
+            offsetX,
+            canvasBounds,
+            parentBounds,
+        };
+    };
+
     const handleDragStart = (e) => {
         if (currentTab !== 'crop') return;
 
@@ -214,12 +230,8 @@ const ImageEditorOverlay = (props: IProps) => {
         const dx = e.pageX - startX;
         const dy = e.pageY - startY;
 
-        const canvasBounds = canvasRef.current.getBoundingClientRect();
-        const parentBounds = parentRef.current.getBoundingClientRect();
-
-        // calculate the offset created by centering the canvas in its parent
-        const offsetX = (parentBounds.width - canvasBounds.width) / 2;
-        const offsetY = (parentBounds.height - canvasBounds.height) / 2;
+        const { offsetX, offsetY, canvasBounds, parentBounds } =
+            getCanvasBoundsOffsets();
 
         if (isGrowing) {
             setCropBox((prev) => {
@@ -271,6 +283,24 @@ const ImageEditorOverlay = (props: IProps) => {
         setIsGrowing(false);
         setIsDragging(false);
     };
+
+    const moveCropBoxToTopLeft = () => {
+        const { offsetX, offsetY, canvasBounds, parentBounds } =
+            getCanvasBoundsOffsets();
+
+        // Set the crop box position to the top-left corner of the canvas, accounting for the offset
+        setCropBox((prev) => ({
+            ...prev,
+            x: offsetX,
+            y: offsetY,
+        }));
+    };
+
+    useEffect(() => {
+        if (!canvasRef.current || !parentRef.current || !cropBoxRef.current)
+            return;
+        moveCropBoxToTopLeft();
+    }, [canvasRef.current, parentRef.current, cropBoxRef.current]);
 
     useEffect(() => {
         if (!canvasRef.current) {
