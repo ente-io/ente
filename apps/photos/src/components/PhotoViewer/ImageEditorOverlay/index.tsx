@@ -562,7 +562,10 @@ const ImageEditorOverlay = (props: IProps) => {
                         display="flex"
                         alignItems="center"
                         justifyContent="center"
-                        position="relative">
+                        position="relative"
+                        onMouseUp={handleDragEnd}
+                        onMouseMove={isDragging ? handleDrag : null}
+                        onMouseDown={handleDragStart}>
                         <Box
                             height="90%"
                             width="100%"
@@ -570,9 +573,6 @@ const ImageEditorOverlay = (props: IProps) => {
                             display="flex"
                             alignItems="center"
                             justifyContent="center"
-                            onMouseUp={handleDragEnd}
-                            onMouseMove={isDragging ? handleDrag : null}
-                            onMouseDown={handleDragStart}
                             position="relative">
                             {(fileURL === null || canvasLoading) && (
                                 <CircularProgress />
