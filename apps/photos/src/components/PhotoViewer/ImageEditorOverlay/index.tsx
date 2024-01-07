@@ -50,6 +50,7 @@ import {
     DEFAULT_CROPBOX_DIMENSIONS,
     FILTER_DEFAULT_VALUES,
 } from 'constants/photoEditor';
+import type { CSSProperties } from 'react';
 
 interface IProps {
     file: EnteFile;
@@ -78,7 +79,7 @@ const getEditedFileName = (fileName: string) => {
     return editedFileName;
 };
 
-const handleStyle = {
+const handleStyle: CSSProperties = {
     position: 'absolute',
     height: '10px',
     width: '10px',
@@ -86,7 +87,7 @@ const handleStyle = {
     border: '1px solid black',
 };
 
-const seHandleStyle = {
+const seHandleStyle: CSSProperties = {
     ...handleStyle,
     right: '-5px',
     bottom: '-5px',
