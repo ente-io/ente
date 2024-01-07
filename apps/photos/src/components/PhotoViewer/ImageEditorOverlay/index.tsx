@@ -278,6 +278,11 @@ const ImageEditorOverlay = (props: IProps) => {
         }
     }, [brightness, contrast, blur, saturation, invert, canvasRef, fileURL]);
 
+    useEffect(() => {
+        if (currentTab !== 'crop') return;
+        resetCropBox();
+    }, [currentTab]);
+
     const applyFilters = async (canvases: HTMLCanvasElement[]) => {
         try {
             for (const canvas of canvases) {
