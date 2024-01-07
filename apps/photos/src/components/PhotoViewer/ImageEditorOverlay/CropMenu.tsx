@@ -1,7 +1,7 @@
 import { EnteMenuItem } from 'components/Menu/EnteMenuItem';
 import { MenuItemGroup } from 'components/Menu/MenuItemGroup';
 import MenuSectionTitle from 'components/Menu/MenuSectionTitle';
-import { useState, useContext, useEffect } from 'react';
+import { useContext } from 'react';
 import { ImageEditorOverlayContext } from './';
 import CropSquareIcon from '@mui/icons-material/CropSquare';
 import { CropBoxProps } from './';
@@ -23,28 +23,21 @@ const CropMenu = (props: IProps) => {
         setCurrentTab,
     } = useContext(ImageEditorOverlayContext);
 
-    const [selectedRegionOfPreviewCanvas, setSelectedRegionOfPreviewCanvas] =
-        useState({
-            topLeftX: 0,
-            topLeftY: 0,
-            bottomLeftX: 0,
-            bottomRightY: 0,
-        });
-
     const cropRegionOfCanvas = (
         canvas: HTMLCanvasElement,
         topLeftX: number,
         topLeftY: number,
         bottomRightX: number,
-        bottomRightY: number
+        bottomRightY: number,
+        scale: number = 1
     ) => {
         setTransformationPerformed(true);
         const context = canvas.getContext('2d');
         if (!context || !canvas) return;
         context.imageSmoothingEnabled = false;
 
-        const width = bottomRightX - topLeftX;
-        const height = bottomRightY - topLeftY;
+        const width = (bottomRightX - topLeftX) * scale;
+        const height = (bottomRightY - topLeftY) * scale;
 
         const img = new Image();
         img.src = canvas.toDataURL();
@@ -82,20 +75,41 @@ const CropMenu = (props: IProps) => {
                         if (!props.cropBoxRef.current || !canvasRef.current)
                             return;
 
-                        // Get the bounding rectangle of the crop box
+                        // get the bounding rectangle of the crop box
                         const cropBoxRect =
                             props.cropBoxRef.current.getBoundingClientRect();
                         // Get the bounding rectangle of the canvas
                         const canvasRect =
                             canvasRef.current.getBoundingClientRect();
 
-                        // Calculate the coordinates of the crop box relative to the canvas
-                        const x1 = cropBoxRect.left - canvasRect.left;
-                        const y1 = cropBoxRect.top - canvasRect.top;
-                        const x2 = x1 + cropBoxRect.width;
-                        const y2 = y1 + cropBoxRect.height;
+                        // calculate the scale of the canvas display relative to its actual dimensions
+                        const displayScale =
+                            canvasRef.current.width / canvasRect.width;
 
+                        // calculate the coordinates of the crop box relative to the canvas and adjust for any scrolling by adding scroll offsets
+                        const x1 =
+                            (cropBoxRect.left -
+                                canvasRect.left +
+                                window.scrollX) *
+                            displayScale;
+                        const y1 =
+                            (cropBoxRect.top -
+                                canvasRect.top +
+                                window.scrollY) *
+                            displayScale;
+                        const x2 = x1 + cropBoxRect.width * displayScale;
+                        const y2 = y1 + cropBoxRect.height * displayScale;
+
+                        setCanvasLoading(true);
                         cropRegionOfCanvas(canvasRef.current, x1, y1, x2, y2);
+                        cropRegionOfCanvas(
+                            originalSizeCanvasRef.current,
+                            x1 / props.previewScale,
+                            y1 / props.previewScale,
+                            x2 / props.previewScale,
+                            y2 / props.previewScale
+                        );
+                        setCanvasLoading(false);
 
                         setCurrentTab('transform');
                     }}
