@@ -1,7 +1,7 @@
 import { EnteMenuItem } from 'components/Menu/EnteMenuItem';
 import { MenuItemGroup } from 'components/Menu/MenuItemGroup';
 import MenuSectionTitle from 'components/Menu/MenuSectionTitle';
-import { useContext } from 'react';
+import { useState, useContext, useEffect } from 'react';
 import { ImageEditorOverlayContext } from './';
 import CropSquareIcon from '@mui/icons-material/CropSquare';
 import { CropBoxProps } from './';
@@ -22,6 +22,14 @@ const CropMenu = (props: IProps) => {
         setTransformationPerformed,
     } = useContext(ImageEditorOverlayContext);
 
+    const [selectedRegionOfPreviewCanvas, setSelectedRegionOfPreviewCanvas] =
+        useState({
+            topLeftX: 0,
+            topLeftY: 0,
+            bottomLeftX: 0,
+            bottomRightY: 0,
+        });
+
     const cropRegionOfCanvas = (
         canvas: HTMLCanvasElement,
         topLeftX: number,
@@ -29,8 +37,10 @@ const CropMenu = (props: IProps) => {
         bottomRightX: number,
         bottomRightY: number
     ) => {
+        setTransformationPerformed(true);
         const context = canvas.getContext('2d');
         if (!context || !canvas) return;
+        context.imageSmoothingEnabled = false;
 
         const width = bottomRightX - topLeftX;
         const height = bottomRightY - topLeftY;
@@ -68,7 +78,23 @@ const CropMenu = (props: IProps) => {
                     disabled={canvasLoading}
                     startIcon={<CropSquareIcon />}
                     onClick={() => {
-                        cropRegionOfCanvas();
+                        if (!props.cropBoxRef.current || !canvasRef.current)
+                            return;
+
+                        // Get the bounding rectangle of the crop box
+                        const cropBoxRect =
+                            props.cropBoxRef.current.getBoundingClientRect();
+                        // Get the bounding rectangle of the canvas
+                        const canvasRect =
+                            canvasRef.current.getBoundingClientRect();
+
+                        // Calculate the coordinates of the crop box relative to the canvas
+                        const x1 = cropBoxRect.left - canvasRect.left;
+                        const y1 = cropBoxRect.top - canvasRect.top;
+                        const x2 = x1 + cropBoxRect.width;
+                        const y2 = y1 + cropBoxRect.height;
+
+                        cropRegionOfCanvas(canvasRef.current, x1, y1, x2, y2);
                     }}
                     label="Apply"
                 />
