@@ -45,11 +45,7 @@ import { getEditorCloseConfirmationMessage } from 'utils/ui';
 import { logError } from '@ente/shared/sentry';
 import { getFileType } from 'services/typeDetectionService';
 import { downloadUsingAnchor } from '@ente/shared/utils';
-import {
-    CORNER_THRESHOLD,
-    DEFAULT_CROPBOX_DIMENSIONS,
-    FILTER_DEFAULT_VALUES,
-} from 'constants/photoEditor';
+import { CORNER_THRESHOLD, FILTER_DEFAULT_VALUES } from 'constants/photoEditor';
 import type { CSSProperties } from 'react';
 
 interface IProps {
@@ -153,7 +149,10 @@ const ImageEditorOverlay = (props: IProps) => {
     const cropBoxRef = useRef<HTMLDivElement>(null);
 
     const getCanvasBoundsOffsets = () => {
-        const canvasBounds = canvasRef.current.getBoundingClientRect();
+        const canvasBounds = {
+            height: canvasRef.current.height,
+            width: canvasRef.current.width,
+        };
         const parentBounds = parentRef.current.getBoundingClientRect();
 
         // calculate the offset created by centering the canvas in its parent
@@ -260,14 +259,14 @@ const ImageEditorOverlay = (props: IProps) => {
 
     const resetCropBox = () => {
         setCropBox((prev) => {
-            const { offsetX, offsetY } = getCanvasBoundsOffsets();
+            const { offsetX, offsetY, canvasBounds } = getCanvasBoundsOffsets();
 
             return {
                 ...prev,
                 x: offsetX,
                 y: offsetY,
-                height: DEFAULT_CROPBOX_DIMENSIONS.height,
-                width: DEFAULT_CROPBOX_DIMENSIONS.width,
+                height: canvasBounds.height,
+                width: canvasBounds.width,
             };
         });
     };
@@ -364,13 +363,8 @@ const ImageEditorOverlay = (props: IProps) => {
                 return;
             }
 
-            resetCropBox();
-            setStartX(0);
-            setStartY(0);
-            setIsDragging(false);
-            setIsGrowing(false);
-
             setCanvasLoading(true);
+
             resetFilters();
             setCurrentRotationAngle(0);
 
@@ -415,6 +409,13 @@ const ImageEditorOverlay = (props: IProps) => {
                         setColoursAdjusted(false);
 
                         setCanvasLoading(false);
+
+                        resetCropBox();
+                        setStartX(0);
+                        setStartY(0);
+                        setIsDragging(false);
+                        setIsGrowing(false);
+
                         resolve(true);
                     } catch (e) {
                         reject(e);
