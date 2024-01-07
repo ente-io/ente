@@ -45,6 +45,7 @@ export default function LargeType({ chars }: { chars: string[] }) {
                     <span
                         style={{
                             color: colourPool[i % colourPool.length],
+                            lineHeight: 1.2,
                         }}>
                         {char}
                     </span>
