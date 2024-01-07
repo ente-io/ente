@@ -45,6 +45,11 @@ import { getEditorCloseConfirmationMessage } from 'utils/ui';
 import { logError } from '@ente/shared/sentry';
 import { getFileType } from 'services/typeDetectionService';
 import { downloadUsingAnchor } from '@ente/shared/utils';
+import {
+    CORNER_THRESHOLD,
+    DEFAULT_CROPBOX_DIMENSIONS,
+    FILTER_DEFAULT_VALUES,
+} from 'constants/photoEditor';
 
 interface IProps {
     file: EnteFile;
@@ -66,27 +71,11 @@ export const ImageEditorOverlayContext = createContext(
 
 type OperationTab = 'crop' | 'transform' | 'colours';
 
-const filterDefaultValues = {
-    brightness: 100,
-    contrast: 100,
-    blur: 0,
-    saturation: 100,
-    invert: false,
-};
-
 const getEditedFileName = (fileName: string) => {
     const fileNameParts = fileName.split('.');
     const extension = fileNameParts.pop();
     const editedFileName = `${fileNameParts.join('.')}-edited.${extension}`;
     return editedFileName;
-};
-
-// CORNER_THRESHOLD defines the threshold near the corners of the crop box in which dragging is assumed as not the intention
-const CORNER_THRESHOLD = 20;
-
-const DEFAULT_CROPBOX_DIMENSIONS = {
-    height: 100,
-    width: 100,
 };
 
 const handleStyle = {
@@ -97,32 +86,11 @@ const handleStyle = {
     border: '1px solid black',
 };
 
-const nwHandleStyle = {
-    ...handleStyle,
-    left: '-5px',
-    top: '-5px',
-    cursor: 'nw-resize',
-};
-
-const neHandleStyle = {
-    ...handleStyle,
-    right: '-5px',
-    top: '-5px',
-    cursor: 'ne-resize',
-};
-
 const seHandleStyle = {
     ...handleStyle,
     right: '-5px',
     bottom: '-5px',
     cursor: 'se-resize',
-};
-
-const swHandleStyle = {
-    ...handleStyle,
-    left: '-5px',
-    bottom: '-5px',
-    cursor: 'sw-resize',
 };
 
 export interface CropBoxProps {
@@ -146,14 +114,14 @@ const ImageEditorOverlay = (props: IProps) => {
     const [currentTab, setCurrentTab] = useState<OperationTab>('transform');
 
     const [brightness, setBrightness] = useState(
-        filterDefaultValues.brightness
+        FILTER_DEFAULT_VALUES.brightness
     );
-    const [contrast, setContrast] = useState(filterDefaultValues.contrast);
-    const [blur, setBlur] = useState(filterDefaultValues.blur);
+    const [contrast, setContrast] = useState(FILTER_DEFAULT_VALUES.contrast);
+    const [blur, setBlur] = useState(FILTER_DEFAULT_VALUES.blur);
     const [saturation, setSaturation] = useState(
-        filterDefaultValues.saturation
+        FILTER_DEFAULT_VALUES.saturation
     );
-    const [invert, setInvert] = useState(filterDefaultValues.invert);
+    const [invert, setInvert] = useState(FILTER_DEFAULT_VALUES.invert);
 
     const [transformationPerformed, setTransformationPerformed] =
         useState(false);
@@ -310,11 +278,11 @@ const ImageEditorOverlay = (props: IProps) => {
         try {
             applyFilters([canvasRef.current, originalSizeCanvasRef.current]);
             setColoursAdjusted(
-                brightness !== filterDefaultValues.brightness ||
-                    contrast !== filterDefaultValues.contrast ||
-                    blur !== filterDefaultValues.blur ||
-                    saturation !== filterDefaultValues.saturation ||
-                    invert !== filterDefaultValues.invert
+                brightness !== FILTER_DEFAULT_VALUES.brightness ||
+                    contrast !== FILTER_DEFAULT_VALUES.contrast ||
+                    blur !== FILTER_DEFAULT_VALUES.blur ||
+                    saturation !== FILTER_DEFAULT_VALUES.saturation ||
+                    invert !== FILTER_DEFAULT_VALUES.invert
             );
         } catch (e) {
             logError(e, 'Error applying filters');
