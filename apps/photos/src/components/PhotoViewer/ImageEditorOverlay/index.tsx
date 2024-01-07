@@ -281,6 +281,7 @@ const ImageEditorOverlay = (props: IProps) => {
     useEffect(() => {
         if (currentTab !== 'crop') return;
         resetCropBox();
+        setShowControlsDrawer(false);
     }, [currentTab]);
 
     const applyFilters = async (canvases: HTMLCanvasElement[]) => {
