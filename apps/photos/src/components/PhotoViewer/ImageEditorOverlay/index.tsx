@@ -46,7 +46,7 @@ import { logError } from '@ente/shared/sentry';
 import { getFileType } from 'services/typeDetectionService';
 import { downloadUsingAnchor } from '@ente/shared/utils';
 import { CORNER_THRESHOLD, FILTER_DEFAULT_VALUES } from 'constants/photoEditor';
-import type { CSSProperties } from 'react';
+import FreehandCropRegion from './FreehandCropRegion';
 
 interface IProps {
     file: EnteFile;
@@ -73,21 +73,6 @@ const getEditedFileName = (fileName: string) => {
     const extension = fileNameParts.pop();
     const editedFileName = `${fileNameParts.join('.')}-edited.${extension}`;
     return editedFileName;
-};
-
-const handleStyle: CSSProperties = {
-    position: 'absolute',
-    height: '10px',
-    width: '10px',
-    backgroundColor: 'white',
-    border: '1px solid black',
-};
-
-const seHandleStyle: CSSProperties = {
-    ...handleStyle,
-    right: '-5px',
-    bottom: '-5px',
-    cursor: 'se-resize',
 };
 
 export interface CropBoxProps {
@@ -599,101 +584,11 @@ const ImageEditorOverlay = (props: IProps) => {
                                 />
 
                                 {currentTab === 'crop' && (
-                                    <>
-                                        {/* Top overlay */}
-                                        <div
-                                            style={{
-                                                position: 'absolute',
-                                                top: 0,
-                                                left: 0,
-                                                right: 0,
-                                                height: cropBox.y + 'px', // height up to the top of the crop box
-                                                backgroundColor:
-                                                    'rgba(0,0,0,0.5)',
-                                                pointerEvents: 'none',
-                                            }}></div>
-
-                                        {/* Bottom overlay */}
-                                        <div
-                                            style={{
-                                                position: 'absolute',
-                                                bottom: 0,
-                                                left: 0,
-                                                right: 0,
-                                                height: `calc(100% - ${
-                                                    cropBox.y + cropBox.height
-                                                }px)`, // height from the bottom of the crop box to the bottom of the canvas
-                                                backgroundColor:
-                                                    'rgba(0,0,0,0.5)',
-                                                pointerEvents: 'none',
-                                            }}></div>
-
-                                        {/* Left overlay */}
-                                        <div
-                                            style={{
-                                                position: 'absolute',
-                                                top: cropBox.y + 'px',
-                                                left: 0,
-                                                width: cropBox.x + 'px', // width up to the left side of the crop box
-                                                height: cropBox.height + 'px', // same height as the crop box
-                                                backgroundColor:
-                                                    'rgba(0,0,0,0.5)',
-                                                pointerEvents: 'none',
-                                            }}></div>
-
-                                        {/* Right overlay */}
-                                        <div
-                                            style={{
-                                                position: 'absolute',
-                                                top: cropBox.y + 'px',
-                                                right: 0,
-                                                width: `calc(100% - ${
-                                                    cropBox.x + cropBox.width
-                                                }px)`, // width from the right side of the crop box to the right side of the canvas
-                                                height: cropBox.height + 'px', // same height as the crop box
-                                                backgroundColor:
-                                                    'rgba(0,0,0,0.5)',
-                                                pointerEvents: 'none',
-                                            }}></div>
-
-                                        <div
-                                            style={{
-                                                display: 'grid',
-                                                position: 'absolute',
-                                                left: cropBox.x + 'px',
-                                                top: cropBox.y + 'px',
-                                                width: cropBox.width + 'px',
-                                                height: cropBox.height + 'px',
-                                                border: '1px solid white',
-                                                gridTemplateColumns:
-                                                    '1fr 1fr 1fr',
-                                                gridTemplateRows: '1fr 1fr 1fr',
-                                                gap: '0px',
-                                                zIndex: 30, // make sure the crop box is above the overlays
-                                            }}
-                                            ref={cropBoxRef}>
-                                            {Array.from({ length: 9 }).map(
-                                                (_, index) => (
-                                                    <div
-                                                        key={index}
-                                                        style={{
-                                                            border: '1px solid white',
-                                                            boxSizing:
-                                                                'border-box',
-                                                            pointerEvents:
-                                                                'none',
-                                                        }}></div>
-                                                )
-                                            )}
-
-                                            <div
-                                                style={seHandleStyle}
-                                                onMouseDown={(e) => {
-                                                    e.preventDefault();
-                                                    setIsDragging(true);
-                                                }}></div>
-                                        </div>
-                                    </>
+                                    <FreehandCropRegion
+                                        cropBox={cropBox}
+                                        ref={cropBoxRef}
+                                        setIsDragging={setIsDragging}
+                                    />
                                 )}
                             </Box>
                         </Box>
