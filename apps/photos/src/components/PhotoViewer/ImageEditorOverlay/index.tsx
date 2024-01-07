@@ -394,12 +394,7 @@ const ImageEditorOverlay = (props: IProps) => {
                 return;
             }
 
-            setCropBox({
-                x: 0,
-                y: 0,
-                width: 100,
-                height: 100,
-            });
+            moveCropBoxToTopLeft();
             setStartX(0);
             setStartY(0);
             setIsDragging(false);
