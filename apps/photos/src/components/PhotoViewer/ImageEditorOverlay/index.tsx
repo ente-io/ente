@@ -623,9 +623,7 @@ const ImageEditorOverlay = (props: IProps) => {
                             <div
                                 style={{
                                     display:
-                                        currentTab === 'crop'
-                                            ? 'inline-block'
-                                            : 'none',
+                                        currentTab === 'crop' ? 'grid' : 'none',
                                     position: 'absolute',
                                     left: cropBox.x + 'px',
                                     top: cropBox.y + 'px',
@@ -633,8 +631,21 @@ const ImageEditorOverlay = (props: IProps) => {
                                     height: cropBox.height + 'px',
                                     backgroundColor: 'rgba(0,0,0,0.5)',
                                     border: '1px solid white',
+                                    gridTemplateColumns: '1fr 1fr 1fr',
+                                    gridTemplateRows: '1fr 1fr 1fr',
+                                    gap: '0px',
                                 }}
                                 ref={cropBoxRef}>
+                                {Array.from({ length: 9 }).map((_, index) => (
+                                    <div
+                                        key={index}
+                                        style={{
+                                            border: '1px solid white',
+                                            boxSizing: 'border-box',
+                                            pointerEvents: 'none',
+                                        }}></div>
+                                ))}
+
                                 <div
                                     style={seHandleStyle}
                                     onMouseDown={(e) => {
