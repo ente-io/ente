@@ -77,6 +77,45 @@ const getEditedFileName = (fileName: string) => {
     return editedFileName;
 };
 
+// CORNER_THRESHOLD defines the threshold near the corners of the crop box in which dragging is assumed as not the intention
+const CORNER_THRESHOLD = 20;
+
+const handleStyle = {
+    position: 'absolute',
+    height: '10px',
+    width: '10px',
+    backgroundColor: 'white',
+    border: '1px solid black',
+};
+
+const nwHandleStyle = {
+    ...handleStyle,
+    left: '-5px',
+    top: '-5px',
+    cursor: 'nw-resize',
+};
+
+const neHandleStyle = {
+    ...handleStyle,
+    right: '-5px',
+    top: '-5px',
+    cursor: 'ne-resize',
+};
+
+const seHandleStyle = {
+    ...handleStyle,
+    right: '-5px',
+    bottom: '-5px',
+    cursor: 'se-resize',
+};
+
+const swHandleStyle = {
+    ...handleStyle,
+    left: '-5px',
+    bottom: '-5px',
+    cursor: 'sw-resize',
+};
+
 const ImageEditorOverlay = (props: IProps) => {
     const appContext = useContext(AppContext);
 
@@ -109,6 +148,103 @@ const ImageEditorOverlay = (props: IProps) => {
     const [canvasLoading, setCanvasLoading] = useState(false);
 
     const [showControlsDrawer, setShowControlsDrawer] = useState(true);
+
+    const [cropBox, setCropBox] = useState({
+        x: 0,
+        y: 0,
+        width: 100,
+        height: 100,
+    });
+
+    const [startX, setStartX] = useState(0);
+    const [startY, setStartY] = useState(0);
+
+    const [beforeGrowthHeight, setBeforeGrowthHeight] = useState(0);
+    const [beforeGrowthWidth, setBeforeGrowthWidth] = useState(0);
+
+    const [isDragging, setIsDragging] = useState(false);
+    const [isGrowing, setIsGrowing] = useState(false);
+
+    const cropBoxRef = useRef<HTMLDivElement>(null);
+
+    const handleDragStart = (e) => {
+        const rect = cropBoxRef.current.getBoundingClientRect();
+        const offsetX = e.pageX - rect.left - rect.width / 2;
+        const offsetY = e.pageY - rect.top - rect.height / 2;
+
+        // check if the cursor is near the corners of the box
+        const isNearLeftOrRightEdge =
+            e.pageX < rect.left + CORNER_THRESHOLD ||
+            e.pageX > rect.right - CORNER_THRESHOLD;
+        const isNearTopOrBottomEdge =
+            e.pageY < rect.top + CORNER_THRESHOLD ||
+            e.pageY > rect.bottom - CORNER_THRESHOLD;
+
+        if (isNearLeftOrRightEdge && isNearTopOrBottomEdge) {
+            // cursor is near a corner, do not initiate dragging
+            setIsGrowing(true);
+            setStartX(e.pageX);
+            setStartY(e.pageY);
+            setBeforeGrowthWidth(cropBox.width);
+            setBeforeGrowthHeight(cropBox.height);
+            return;
+        }
+
+        setIsDragging(true);
+        setStartX(e.pageX - offsetX);
+        setStartY(e.pageY - offsetY);
+    };
+
+    const handleDrag = (e) => {
+        if (!isDragging && !isGrowing) return;
+
+        // d- variables are the delta change between start and now
+        const dx = e.pageX - startX;
+        const dy = e.pageY - startY;
+
+        if (isGrowing) {
+            setCropBox((prev) => {
+                return {
+                    ...prev,
+                    width: beforeGrowthWidth + dx,
+                    height: beforeGrowthHeight + dy,
+                };
+            });
+        } else {
+            setCropBox((prev) => {
+                let newX = prev.x + dx;
+                let newY = prev.y + dy;
+
+                const parentRect = parentRef.current.getBoundingClientRect();
+
+                // constrain the new position to the parent element's boundaries
+                newX = Math.max(
+                    0,
+                    Math.min(newX, parentRect.width - prev.width)
+                );
+                newY = Math.max(
+                    0,
+                    Math.min(newY, parentRect.height - prev.height)
+                );
+
+                return {
+                    ...prev,
+                    x: newX,
+                    y: newY,
+                };
+            });
+            setStartX(e.pageX);
+            setStartY(e.pageY);
+        }
+    };
+
+    const handleDragEnd = () => {
+        setStartX(0);
+        setStartY(0);
+
+        setIsGrowing(false);
+        setIsDragging(false);
+    };
 
     useEffect(() => {
         if (!canvasRef.current) {
@@ -201,6 +337,17 @@ const ImageEditorOverlay = (props: IProps) => {
             ) {
                 return;
             }
+
+            setCropBox({
+                x: 0,
+                y: 0,
+                width: 100,
+                height: 100,
+            });
+            setStartX(0);
+            setStartY(0);
+            setIsDragging(false);
+            setIsGrowing(false);
 
             setCanvasLoading(true);
             resetFilters();
@@ -387,14 +534,18 @@ const ImageEditorOverlay = (props: IProps) => {
                         boxSizing={'border-box'}
                         display="flex"
                         alignItems="center"
-                        justifyContent="center">
+                        justifyContent="center"
+                        position="relative">
                         <Box
                             height="90%"
                             width="100%"
                             ref={parentRef}
                             display="flex"
                             alignItems="center"
-                            justifyContent="center">
+                            justifyContent="center"
+                            onMouseUp={handleDragEnd}
+                            onMouseMove={isDragging ? handleDrag : null}
+                            onMouseDown={handleDragStart}>
                             {(fileURL === null || canvasLoading) && (
                                 <CircularProgress />
                             )}
@@ -416,6 +567,24 @@ const ImageEditorOverlay = (props: IProps) => {
                                     display: 'none',
                                 }}
                             />
+                            <div
+                                style={{
+                                    position: 'absolute',
+                                    left: cropBox.x + 'px',
+                                    top: cropBox.y + 'px',
+                                    width: cropBox.width + 'px',
+                                    height: cropBox.height + 'px',
+                                    backgroundColor: 'rgba(0,0,0,0.5)',
+                                    border: '1px solid white',
+                                }}
+                                ref={cropBoxRef}>
+                                <div
+                                    style={seHandleStyle}
+                                    onMouseDown={(e) => {
+                                        e.preventDefault();
+                                        setIsDragging(true);
+                                    }}></div>
+                            </div>
                         </Box>
                     </Box>
                 </Box>
