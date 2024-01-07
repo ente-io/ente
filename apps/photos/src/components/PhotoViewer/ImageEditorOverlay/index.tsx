@@ -60,8 +60,11 @@ export const ImageEditorOverlayContext = createContext(
         setTransformationPerformed: Dispatch<SetStateAction<boolean>>;
         setCanvasLoading: Dispatch<SetStateAction<boolean>>;
         canvasLoading: boolean;
+        setCurrentTab: Dispatch<SetStateAction<OperationTab>>;
     }
 );
+
+type OperationTab = 'crop' | 'transform' | 'colours';
 
 const filterDefaultValues = {
     brightness: 100,
@@ -80,6 +83,11 @@ const getEditedFileName = (fileName: string) => {
 
 // CORNER_THRESHOLD defines the threshold near the corners of the crop box in which dragging is assumed as not the intention
 const CORNER_THRESHOLD = 20;
+
+const DEFAULT_CROPBOX_DIMENSIONS = {
+    height: 100,
+    width: 100,
+};
 
 const handleStyle = {
     position: 'absolute',
@@ -135,9 +143,7 @@ const ImageEditorOverlay = (props: IProps) => {
 
     const [currentRotationAngle, setCurrentRotationAngle] = useState(0);
 
-    const [currentTab, setCurrentTab] = useState<
-        'crop' | 'transform' | 'colours'
-    >('transform');
+    const [currentTab, setCurrentTab] = useState<OperationTab>('transform');
 
     const [brightness, setBrightness] = useState(
         filterDefaultValues.brightness
@@ -230,8 +236,7 @@ const ImageEditorOverlay = (props: IProps) => {
         const dx = e.pageX - startX;
         const dy = e.pageY - startY;
 
-        const { offsetX, offsetY, canvasBounds, parentBounds } =
-            getCanvasBoundsOffsets();
+        const { offsetX, offsetY, canvasBounds } = getCanvasBoundsOffsets();
 
         if (isGrowing) {
             setCropBox((prev) => {
@@ -284,23 +289,19 @@ const ImageEditorOverlay = (props: IProps) => {
         setIsDragging(false);
     };
 
-    const moveCropBoxToTopLeft = () => {
-        const { offsetX, offsetY, canvasBounds, parentBounds } =
-            getCanvasBoundsOffsets();
+    const resetCropBox = () => {
+        setCropBox((prev) => {
+            const { offsetX, offsetY } = getCanvasBoundsOffsets();
 
-        // Set the crop box position to the top-left corner of the canvas, accounting for the offset
-        setCropBox((prev) => ({
-            ...prev,
-            x: offsetX,
-            y: offsetY,
-        }));
+            return {
+                ...prev,
+                x: offsetX,
+                y: offsetY,
+                height: DEFAULT_CROPBOX_DIMENSIONS.height,
+                width: DEFAULT_CROPBOX_DIMENSIONS.width,
+            };
+        });
     };
-
-    useEffect(() => {
-        if (!canvasRef.current || !parentRef.current || !cropBoxRef.current)
-            return;
-        moveCropBoxToTopLeft();
-    }, [canvasRef.current, parentRef.current, cropBoxRef.current]);
 
     useEffect(() => {
         if (!canvasRef.current) {
@@ -394,7 +395,7 @@ const ImageEditorOverlay = (props: IProps) => {
                 return;
             }
 
-            moveCropBoxToTopLeft();
+            resetCropBox();
             setStartX(0);
             setStartY(0);
             setIsDragging(false);
@@ -780,6 +781,7 @@ const ImageEditorOverlay = (props: IProps) => {
                             setCanvasLoading,
                             canvasLoading,
                             setTransformationPerformed,
+                            setCurrentTab,
                         }}>
                         {currentTab === 'crop' && (
                             <CropMenu

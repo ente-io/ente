@@ -20,6 +20,7 @@ const CropMenu = (props: IProps) => {
         canvasLoading,
         setCanvasLoading,
         setTransformationPerformed,
+        setCurrentTab,
     } = useContext(ImageEditorOverlayContext);
 
     const [selectedRegionOfPreviewCanvas, setSelectedRegionOfPreviewCanvas] =
@@ -95,6 +96,8 @@ const CropMenu = (props: IProps) => {
                         const y2 = y1 + cropBoxRect.height;
 
                         cropRegionOfCanvas(canvasRef.current, x1, y1, x2, y2);
+
+                        setCurrentTab('transform');
                     }}
                     label="Apply"
                 />
