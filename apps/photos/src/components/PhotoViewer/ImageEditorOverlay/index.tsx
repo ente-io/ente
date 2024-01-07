@@ -783,14 +783,25 @@ const ImageEditorOverlay = (props: IProps) => {
                             startIcon={<DownloadIcon />}
                             onClick={downloadEditedPhoto}
                             label={t('DOWNLOAD_EDITED')}
+                            disabled={
+                                !transformationPerformed && !coloursAdjusted
+                            }
                         />
                         <MenuItemDivider />
                         <EnteMenuItem
                             startIcon={<CloudUploadIcon />}
                             onClick={saveCopyToEnte}
                             label={t('SAVE_A_COPY_TO_ENTE')}
+                            disabled={
+                                !transformationPerformed && !coloursAdjusted
+                            }
                         />
                     </MenuItemGroup>
+                    {!transformationPerformed && !coloursAdjusted && (
+                        <MenuSectionTitle
+                            title={t('PHOTO_EDIT_REQUIRED_TO_SAVE')}
+                        />
+                    )}
                 </EnteDrawer>
             </Backdrop>
         </>
