@@ -788,6 +788,7 @@ const ImageEditorOverlay = (props: IProps) => {
                                 previewScale={previewCanvasScale}
                                 cropBoxProps={cropBox}
                                 cropBoxRef={cropBoxRef}
+                                resetCropBox={resetCropBox}
                             />
                         )}
                         {currentTab === 'transform' && <TransformMenu />}

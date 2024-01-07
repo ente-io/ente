@@ -12,6 +12,7 @@ interface IProps {
     previewScale: number;
     cropBoxProps: CropBoxProps;
     cropBoxRef: MutableRefObject<HTMLDivElement>;
+    resetCropBox: () => void;
 }
 
 const CropMenu = (props: IProps) => {
@@ -59,6 +60,8 @@ const CropMenu = (props: IProps) => {
                 width,
                 height
             );
+
+            props.resetCropBox();
         };
     };
 
