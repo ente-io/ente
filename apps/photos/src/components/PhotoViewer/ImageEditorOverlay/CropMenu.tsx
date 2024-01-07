@@ -3,9 +3,10 @@ import { MenuItemGroup } from 'components/Menu/MenuItemGroup';
 import MenuSectionTitle from 'components/Menu/MenuSectionTitle';
 import { useContext } from 'react';
 import { ImageEditorOverlayContext } from './';
-import CropSquareIcon from '@mui/icons-material/CropSquare';
 import { CropBoxProps } from './';
 import type { MutableRefObject } from 'react';
+import { t } from 'i18next';
+import CropIcon from '@mui/icons-material/Crop';
 
 interface IProps {
     previewScale: number;
@@ -63,14 +64,14 @@ const CropMenu = (props: IProps) => {
 
     return (
         <>
-            <MenuSectionTitle title={'freehand'} />
+            <MenuSectionTitle title={t('FREEHAND')} />
             <MenuItemGroup
                 style={{
                     marginBottom: '0.5rem',
                 }}>
                 <EnteMenuItem
                     disabled={canvasLoading}
-                    startIcon={<CropSquareIcon />}
+                    startIcon={<CropIcon />}
                     onClick={() => {
                         if (!props.cropBoxRef.current || !canvasRef.current)
                             return;
@@ -113,7 +114,7 @@ const CropMenu = (props: IProps) => {
 
                         setCurrentTab('transform');
                     }}
-                    label="Apply"
+                    label={t('APPLY')}
                 />
             </MenuItemGroup>
         </>
