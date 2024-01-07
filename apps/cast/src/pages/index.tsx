@@ -10,6 +10,7 @@ import { useRouter } from 'next/router';
 import TimerBar from 'components/TimerBar';
 import LargeType from 'components/LargeType';
 import { useCastReceiver } from '@ente/shared/hooks/useCastReceiver';
+import EnteSpinner from '@ente/shared/components/EnteSpinner';
 
 // Function to generate cryptographically secure digits
 const generateSecureData = (length: number): Uint8Array => {
@@ -39,11 +40,14 @@ export default function PairingMode() {
 
     const [borderWidthPercentage, setBorderWidthPercentage] = useState(100);
 
+    const [codePending, setCodePending] = useState(true);
+
     const { cast } = useCastReceiver();
 
     useEffect(() => {
         init();
         const interval = setInterval(() => {
+            setCodePending(true);
             init();
         }, 45 * 1000); // the kex API deletes keys every 60s, so we'll regenerate stuff prematurely
 
@@ -69,6 +73,10 @@ export default function PairingMode() {
         );
 
         context.start(options);
+
+        return () => {
+            context.stop(options);
+        };
     }, [cast]);
 
     const messageReceiveHandler = (message: {
@@ -76,9 +84,6 @@ export default function PairingMode() {
         senderId: string;
         data: any;
     }) => {
-        // if (message.type === 'urn:x-cast:pair-request') {
-        // send the 6 digit code to the sender
-
         cast.framework.CastReceiverContext.getInstance().sendCustomMessage(
             'urn:x-cast:pair-request',
             message.senderId,
@@ -86,7 +91,6 @@ export default function PairingMode() {
                 code: digits.join(''),
             }
         );
-        // }
     };
 
     const init = async () => {
@@ -150,6 +154,7 @@ export default function PairingMode() {
         }
 
         setCodeGeneratedAt(new Date());
+        setCodePending(false);
     };
 
     const router = useRouter();
@@ -227,8 +232,14 @@ export default function PairingMode() {
                             borderRadius: '10px',
                             overflow: 'hidden',
                         }}>
-                        <LargeType chars={digits} />
-                        <TimerBar percentage={borderWidthPercentage} />
+                        {codePending ? (
+                            <EnteSpinner />
+                        ) : (
+                            <>
+                                <LargeType chars={digits} />
+                                <TimerBar percentage={borderWidthPercentage} />
+                            </>
+                        )}
                     </div>
                     <p
                         style={{
