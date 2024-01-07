@@ -31,6 +31,8 @@ const convertDataToDecimalString = (data: Uint8Array): string => {
     return decimalString;
 };
 
+const REFRESH_INTERVAL = 3600 * 1000;
+
 export default function PairingMode() {
     const [digits, setDigits] = useState<string[]>([]);
 
@@ -49,7 +51,7 @@ export default function PairingMode() {
         const interval = setInterval(() => {
             setCodePending(true);
             init();
-        }, 45 * 1000); // the kex API deletes keys every 60s, so we'll regenerate stuff prematurely
+        }, REFRESH_INTERVAL); // the kex API deletes keys every 60s, so we'll regenerate stuff prematurely
 
         return () => {
             clearInterval(interval);
@@ -190,14 +192,14 @@ export default function PairingMode() {
         const interval = setInterval(() => {
             const now = new Date();
             const timeLeft =
-                codeGeneratedAt.getTime() + 45 * 1000 - now.getTime();
+                codeGeneratedAt.getTime() + REFRESH_INTERVAL - now.getTime();
 
             if (timeLeft > 0) {
-                const percentage = (timeLeft / (45 * 1000)) * 100;
+                const percentage = (timeLeft / REFRESH_INTERVAL) * 100;
 
                 setBorderWidthPercentage(percentage);
             }
-        }, 250);
+        }, 1000);
 
         return () => {
             clearInterval(interval);
