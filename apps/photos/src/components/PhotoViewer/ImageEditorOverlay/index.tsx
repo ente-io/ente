@@ -29,6 +29,7 @@ import mime from 'mime-types';
 import CloseIcon from '@mui/icons-material/Close';
 import { HorizontalFlex } from '@ente/shared/components/Container';
 import TransformMenu from './TransformMenu';
+import CropMenu from './CropMenu';
 import ColoursMenu from './ColoursMenu';
 import { FileWithCollection } from 'types/upload';
 import uploadManager from 'services/upload/uploadManager';
@@ -116,6 +117,13 @@ const swHandleStyle = {
     cursor: 'sw-resize',
 };
 
+export interface CropBoxProps {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+}
+
 const ImageEditorOverlay = (props: IProps) => {
     const appContext = useContext(AppContext);
 
@@ -127,9 +135,9 @@ const ImageEditorOverlay = (props: IProps) => {
 
     const [currentRotationAngle, setCurrentRotationAngle] = useState(0);
 
-    const [currentTab, setCurrentTab] = useState<'transform' | 'colours'>(
-        'transform'
-    );
+    const [currentTab, setCurrentTab] = useState<
+        'crop' | 'transform' | 'colours'
+    >('transform');
 
     const [brightness, setBrightness] = useState(
         filterDefaultValues.brightness
@@ -149,7 +157,9 @@ const ImageEditorOverlay = (props: IProps) => {
 
     const [showControlsDrawer, setShowControlsDrawer] = useState(true);
 
-    const [cropBox, setCropBox] = useState({
+    const [previewCanvasScale, setPreviewCanvasScale] = useState(0);
+
+    const [cropBox, setCropBox] = useState<CropBoxProps>({
         x: 0,
         y: 0,
         width: 100,
@@ -168,6 +178,8 @@ const ImageEditorOverlay = (props: IProps) => {
     const cropBoxRef = useRef<HTMLDivElement>(null);
 
     const handleDragStart = (e) => {
+        if (currentTab !== 'crop') return;
+
         const rect = cropBoxRef.current.getBoundingClientRect();
         const offsetX = e.pageX - rect.left - rect.width / 2;
         const offsetY = e.pageY - rect.top - rect.height / 2;
@@ -202,12 +214,28 @@ const ImageEditorOverlay = (props: IProps) => {
         const dx = e.pageX - startX;
         const dy = e.pageY - startY;
 
+        const canvasBounds = canvasRef.current.getBoundingClientRect();
+        const parentBounds = parentRef.current.getBoundingClientRect();
+
+        // calculate the offset created by centering the canvas in its parent
+        const offsetX = (parentBounds.width - canvasBounds.width) / 2;
+        const offsetY = (parentBounds.height - canvasBounds.height) / 2;
+
         if (isGrowing) {
             setCropBox((prev) => {
+                const newWidth = Math.min(
+                    beforeGrowthWidth + dx,
+                    canvasBounds.width - prev.x + offsetX
+                );
+                const newHeight = Math.min(
+                    beforeGrowthHeight + dy,
+                    canvasBounds.height - prev.y + offsetY
+                );
+
                 return {
                     ...prev,
-                    width: beforeGrowthWidth + dx,
-                    height: beforeGrowthHeight + dy,
+                    width: newWidth,
+                    height: newHeight,
                 };
             });
         } else {
@@ -215,16 +243,14 @@ const ImageEditorOverlay = (props: IProps) => {
                 let newX = prev.x + dx;
                 let newY = prev.y + dy;
 
-                const parentRect = parentRef.current.getBoundingClientRect();
-
-                // constrain the new position to the parent element's boundaries
+                // constrain the new position to the canvas boundaries, accounting for the offset
                 newX = Math.max(
-                    0,
-                    Math.min(newX, parentRect.width - prev.width)
+                    offsetX,
+                    Math.min(newX, offsetX + canvasBounds.width - prev.width)
                 );
                 newY = Math.max(
-                    0,
-                    Math.min(newY, parentRect.height - prev.height)
+                    offsetY,
+                    Math.min(newY, offsetY + canvasBounds.height - prev.height)
                 );
 
                 return {
@@ -373,6 +399,7 @@ const ImageEditorOverlay = (props: IProps) => {
                             parentRef.current.clientWidth / img.width,
                             parentRef.current.clientHeight / img.height
                         );
+                        setPreviewCanvasScale(scale);
 
                         const width = img.width * scale;
                         const height = img.height * scale;
@@ -545,7 +572,8 @@ const ImageEditorOverlay = (props: IProps) => {
                             justifyContent="center"
                             onMouseUp={handleDragEnd}
                             onMouseMove={isDragging ? handleDrag : null}
-                            onMouseDown={handleDragStart}>
+                            onMouseDown={handleDragStart}
+                            position="relative">
                             {(fileURL === null || canvasLoading) && (
                                 <CircularProgress />
                             )}
@@ -569,6 +597,10 @@ const ImageEditorOverlay = (props: IProps) => {
                             />
                             <div
                                 style={{
+                                    display:
+                                        currentTab === 'crop'
+                                            ? 'inline-block'
+                                            : 'none',
                                     position: 'absolute',
                                     left: cropBox.x + 'px',
                                     top: cropBox.y + 'px',
@@ -610,6 +642,7 @@ const ImageEditorOverlay = (props: IProps) => {
                             onChange={(_, value) => {
                                 setCurrentTab(value);
                             }}>
+                            <Tab label={t('CROP')} value="crop" />
                             <Tab label={t('TRANSFORM')} value="transform" />
                             <Tab
                                 label={t('COLORS')}
@@ -632,18 +665,23 @@ const ImageEditorOverlay = (props: IProps) => {
                             label={t('RESTORE_ORIGINAL')}
                         />
                     </MenuItemGroup>
-                    {currentTab === 'transform' && (
-                        <ImageEditorOverlayContext.Provider
-                            value={{
-                                originalSizeCanvasRef,
-                                canvasRef,
-                                setCanvasLoading,
-                                canvasLoading,
-                                setTransformationPerformed,
-                            }}>
-                            <TransformMenu />
-                        </ImageEditorOverlayContext.Provider>
-                    )}
+                    <ImageEditorOverlayContext.Provider
+                        value={{
+                            originalSizeCanvasRef,
+                            canvasRef,
+                            setCanvasLoading,
+                            canvasLoading,
+                            setTransformationPerformed,
+                        }}>
+                        {currentTab === 'crop' && (
+                            <CropMenu
+                                previewScale={previewCanvasScale}
+                                cropBoxProps={cropBox}
+                                cropBoxRef={cropBoxRef}
+                            />
+                        )}
+                        {currentTab === 'transform' && <TransformMenu />}
+                    </ImageEditorOverlayContext.Provider>
                     {currentTab === 'colours' && (
                         <ColoursMenu
                             brightness={brightness}
