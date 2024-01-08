@@ -2,6 +2,7 @@ import {
     Embedding,
     EncryptedEmbedding,
     GetEmbeddingDiffResponse,
+    Model,
     PutEmbeddingRequest,
 } from 'types/embedding';
 import ComlinkCryptoWorker from '@ente/shared/crypto';
@@ -128,6 +129,7 @@ export const getEmbeddingsDiff = async (
             {
                 sinceTime,
                 limit: DIFF_LIMIT,
+                model: Model.ONNX_CLIP,
             },
             {
                 'X-Auth-Token': token,
