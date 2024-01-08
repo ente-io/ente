@@ -133,12 +133,12 @@ class EmbeddingStore {
       return;
     }
     final inputs = <EmbeddingsDecoderInput>[];
+    final fileMap = await FilesDB.instance
+        .getFilesFromIDs(remoteEmbeddings.map((e) => e.fileID).toList());
+
     for (final embedding in remoteEmbeddings) {
-      final file = await FilesDB.instance.getAnyUploadedFile(embedding.fileID);
-      if (file == null) {
-        continue;
-      }
-      final fileKey = getFileKey(file);
+      final file = fileMap[embedding.fileID];
+      final fileKey = getFileKey(file!);
       final input = EmbeddingsDecoderInput(embedding, fileKey);
       inputs.add(input);
     }
