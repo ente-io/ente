@@ -1,6 +1,8 @@
 import "dart:convert";
+import "dart:io";
 import "dart:math";
 
+import "package:computer/computer.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/constants.dart";
 import "package:photos/core/event_bus.dart";
@@ -17,13 +19,15 @@ import "package:shared_preferences/shared_preferences.dart";
 class LocationService {
   late SharedPreferences prefs;
   final Logger _logger = Logger((LocationService).toString());
-  final List<City> _cities = [];
+  final Computer _computer = Computer.shared();
 
   LocationService._privateConstructor();
 
   static final LocationService instance = LocationService._privateConstructor();
 
   static const kCitiesRemotePath = "https://assets.ente.io/world_cities.json";
+
+  List<City> _cities = [];
 
   void init(SharedPreferences preferences) {
     prefs = preferences;
@@ -218,19 +222,30 @@ class LocationService {
 
   Future<void> _loadCities() async {
     try {
-      final data =
+      final file =
           await RemoteAssetsService.instance.getAsset(kCitiesRemotePath);
-      final citiesJson = json.decode(await data.readAsString());
-      final List<dynamic> jsonData = citiesJson['data'];
-      final cities =
-          jsonData.map<City>((jsonItem) => City.fromMap(jsonItem)).toList();
-      _cities.clear();
-      _cities.addAll(cities);
+      final startTime = DateTime.now();
+      _cities =
+          await _computer.compute(parseCities, param: {"filePath": file.path});
+      final endTime = DateTime.now();
+      _logger.info(
+        "Loaded cities in ${(endTime.millisecondsSinceEpoch - startTime.millisecondsSinceEpoch)}ms",
+      );
       _logger.info("Loaded cities");
     } catch (e, s) {
       _logger.severe("Failed to load cities", e, s);
     }
   }
+}
+
+Future<List<City>> parseCities(Map args) async {
+  final file = File(args["filePath"]);
+  final citiesJson = json.decode(await file.readAsString());
+
+  final List<dynamic> jsonData = citiesJson['data'];
+  final cities =
+      jsonData.map<City>((jsonItem) => City.fromMap(jsonItem)).toList();
+  return cities;
 }
 
 class City {
