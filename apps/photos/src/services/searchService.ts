@@ -33,6 +33,7 @@ import {
     getLocalClipImageEmbeddings,
 } from './clipService';
 import { CustomError } from '@ente/shared/error';
+import { Model } from 'types/embedding';
 
 const DIGITS = new Set(['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']);
 
@@ -383,7 +384,7 @@ async function searchThing(searchPhrase: string) {
 }
 
 async function searchClip(searchPhrase: string): Promise<ClipSearchScores> {
-    const imageEmbeddings = await getLocalClipImageEmbeddings();
+    const imageEmbeddings = await getLocalClipImageEmbeddings(Model.ONNX_CLIP);
     const textEmbedding = await ClipService.getTextEmbedding(searchPhrase);
     const clipSearchResult = new Map<number, number>(
         (
