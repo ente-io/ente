@@ -13,6 +13,7 @@ import 'package:photos/events/embedding_updated_event.dart';
 import "package:photos/events/file_uploaded_event.dart";
 import "package:photos/models/embedding.dart";
 import "package:photos/models/file/file.dart";
+import "package:photos/services/collections_service.dart";
 import "package:photos/services/semantic_search/embedding_store.dart";
 import "package:photos/services/semantic_search/frameworks/ggml.dart";
 import "package:photos/services/semantic_search/frameworks/ml_framework.dart";
@@ -215,8 +216,12 @@ class SemanticSearchService {
     final filesMap = await FilesDB.instance
         .getFilesFromIDs(queryResults.map((e) => e.id).toList());
     final results = <EnteFile>[];
+
+    final ignoredCollections =
+        CollectionsService.instance.getHiddenCollectionIds();
     for (final result in queryResults) {
-      if (filesMap.containsKey(result.id)) {
+      final file = filesMap[result.id];
+      if (file != null && !ignoredCollections.contains(file.collectionID)) {
         results.add(filesMap[result.id]!);
       }
     }
