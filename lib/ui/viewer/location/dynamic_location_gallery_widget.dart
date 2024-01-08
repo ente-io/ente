@@ -62,7 +62,7 @@ class _DynamicLocationGalleryWidgetState
       final stopWatch = Stopwatch()..start();
       final copyOfFiles = List<EnteFile>.from(result.files);
       copyOfFiles.removeWhere((f) {
-        return !LocationService.instance.isFileInsideLocationTag(
+        return !isFileInsideLocationTag(
           InheritedLocationTagData.of(context).centerPoint,
           f.location!,
           selectedRadius,

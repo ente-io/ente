@@ -205,7 +205,7 @@ class _LocationGalleryWidgetState extends State<LocationGalleryWidget> {
       final stopWatch = Stopwatch()..start();
       final filesInLocation = allFilesWithLocation;
       filesInLocation.removeWhere((f) {
-        return !LocationService.instance.isFileInsideLocationTag(
+        return !isFileInsideLocationTag(
           centerPoint,
           f.location!,
           selectedRadius,
