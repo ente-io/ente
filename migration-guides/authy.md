@@ -14,8 +14,8 @@ Or, you can [use this tool by Neeraj](https://github.com/ua741/authy-export/rele
 ### *Do note that these tools may not export ALL of your codes. Make sure that all your accounts have been imported successfully before deleting any codes from your Authy account!*
 
 ## Converting the export for ente Authenticator
-### Update: You can now directly import from Bitwarden JSON export! If that doesn't work, though, then continue with this step.
-So now that you have the JSON file, does that mean it can be imported into ente Authenticator? Yes, but if it doesn't work for some reason, then nope. If you have a TXT file in the format ente Authenticator asked you for instead, then you probably used Neeraj's tool, so you can skip this step.
+### Update: You can now directly import from Bitwarden JSON export, meaning you can skip this step! If it doesn't work for some reason, though, then continue with this step.
+So now that you have the JSON file, does that mean it can be imported into ente Authenticator? Yes, but if it doesn't work for some reason, then nope. (If you have a TXT file in the format ente Authenticator asked you for instead, then you probably used Neeraj's tool, so you can skip this step.)
 
 This is because the code in the guide exports your Authy data for Bitwarden, not ente Authenticator. If you have opened the JSON file, you might have noticed that the file created is not in a format that ente Authenticator asks for:
 
