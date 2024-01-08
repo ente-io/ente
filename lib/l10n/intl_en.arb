@@ -497,7 +497,7 @@
   },
   "remindToEmptyEnteTrash": "Also empty your \"Trash\" to claim the freed up space",
   "sparkleSuccess": "✨ Success",
-  "duplicateFileCountWithStorageSaved": "Your have cleaned up {count, plural, one{{count} duplicate file} other{{count} duplicate files}}, saving ({storageSaved}!)",
+  "duplicateFileCountWithStorageSaved": "You have cleaned up {count, plural, one{{count} duplicate file} other{{count} duplicate files}}, saving ({storageSaved}!)",
   "@duplicateFileCountWithStorageSaved": {
     "description": "The text to display when the user has successfully cleaned up duplicate files",
     "type": "text",
