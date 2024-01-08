@@ -1,11 +1,8 @@
-import React from 'react';
-import { GalleryContext } from 'pages/gallery';
-import { useState, useContext, useEffect } from 'react';
-import downloadManager from 'services/downloadManager';
+import { useState, useEffect } from 'react';
+import downloadManager from 'services/download';
 import { EnteFile } from 'types/file';
 import { StaticThumbnail } from 'components/PlaceholderThumbnails';
 import { LoadingThumbnail } from 'components/PlaceholderThumbnails';
-import { PublicCollectionGalleryContext } from 'utils/publicCollectionGallery';
 
 export default function CollectionCard(props: {
     children?: any;
@@ -23,28 +20,19 @@ export default function CollectionCard(props: {
     } = props;
 
     const [coverImageURL, setCoverImageURL] = useState(null);
-    const galleryContext = useContext(GalleryContext);
-    const publicCollectionGalleryContext = useContext(
-        PublicCollectionGalleryContext
-    );
-
-    const thumbsStore = publicCollectionGalleryContext?.accessedThroughSharedURL
-        ? publicCollectionGalleryContext.thumbs
-        : galleryContext.thumbs;
 
     useEffect(() => {
         const main = async () => {
             if (!file) {
                 return;
             }
-            if (!thumbsStore.has(file.id)) {
-                if (isScrolling) {
-                    return;
-                }
-                const url = await downloadManager.getThumbnail(file);
-                thumbsStore.set(file.id, url);
+            const url = await downloadManager.getThumbnailForPreview(
+                file,
+                isScrolling
+            );
+            if (url) {
+                setCoverImageURL(url);
             }
-            setCoverImageURL(thumbsStore.get(file.id));
         };
         main();
     }, [file, isScrolling]);

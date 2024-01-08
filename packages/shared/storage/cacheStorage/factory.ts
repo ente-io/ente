@@ -1,28 +1,20 @@
 import { LimitedCacheStorage } from './types';
-import { runningInElectron, runningInWorker } from '@ente/shared/platform';
-import { WorkerElectronCacheStorageService } from './workerElectron/service';
-import ElectronAPIs from '@ente/shared/electron';
-
+import { runningInElectron } from '@ente/shared/platform';
+import { WorkerSafeElectronService } from '@ente/shared/electron/service';
 class cacheStorageFactory {
-    workerElectronCacheStorageServiceInstance: WorkerElectronCacheStorageService;
     getCacheStorage(): LimitedCacheStorage {
         if (runningInElectron()) {
-            if (runningInWorker()) {
-                if (!this.workerElectronCacheStorageServiceInstance) {
-                    this.workerElectronCacheStorageServiceInstance =
-                        new WorkerElectronCacheStorageService();
-                }
-                return this.workerElectronCacheStorageServiceInstance;
-            } else {
-                return {
-                    open(cacheName) {
-                        return ElectronAPIs.openDiskCache(cacheName);
-                    },
-                    delete(cacheName) {
-                        return ElectronAPIs.deleteDiskCache(cacheName);
-                    },
-                };
-            }
+            return {
+                open(cacheName, cacheLimitInBytes?: number) {
+                    return WorkerSafeElectronService.openDiskCache(
+                        cacheName,
+                        cacheLimitInBytes
+                    );
+                },
+                delete(cacheName) {
+                    return WorkerSafeElectronService.deleteDiskCache(cacheName);
+                },
+            };
         } else {
             return transformBrowserCacheStorageToLimitedCacheStorage(caches);
         }
@@ -38,7 +30,10 @@ function transformBrowserCacheStorageToLimitedCacheStorage(
         async open(cacheName) {
             const cache = await caches.open(cacheName);
             return {
-                match: cache.match.bind(cache),
+                match: (key) => {
+                    // options are not supported in the browser
+                    return cache.match(key);
+                },
                 put: cache.put.bind(cache),
                 delete: cache.delete.bind(cache),
             };

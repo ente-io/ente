@@ -4,12 +4,8 @@ import PhotoFrame from 'components/PhotoFrame';
 import { ALL_SECTION } from 'constants/collection';
 import { AppContext } from 'pages/_app';
 import { createContext, useContext, useEffect, useState } from 'react';
-import {
-    getDuplicateFiles,
-    clubDuplicatesByTime,
-} from 'services/deduplicationService';
-import { syncFiles, trashFiles } from 'services/fileService';
-import { EnteFile } from 'types/file';
+import { getDuplicates, Duplicate } from 'services/deduplicationService';
+import { getLocalFiles, trashFiles } from 'services/fileService';
 import { SelectedState } from 'types/gallery';
 
 import { ApiError } from '@ente/shared/error';
@@ -24,7 +20,7 @@ import { PHOTOS_PAGES as PAGES } from '@ente/shared/constants/pages';
 import router from 'next/router';
 import { getKey, SESSION_KEYS } from '@ente/shared/storage/sessionStorage';
 import { styled } from '@mui/material';
-import { getLatestCollections } from 'services/collectionService';
+import { getLocalCollections } from 'services/collectionService';
 import EnteSpinner from '@ente/shared/components/EnteSpinner';
 import { VerticallyCentered } from '@ente/shared/components/Container';
 import Typography from '@mui/material/Typography';
@@ -43,9 +39,7 @@ export const Info = styled('div')`
 export default function Deduplicate() {
     const { setDialogMessage, startLoading, finishLoading, showNavBar } =
         useContext(AppContext);
-    const [duplicateFiles, setDuplicateFiles] = useState<EnteFile[]>(null);
-    const [clubSameTimeFilesOnly, setClubSameTimeFilesOnly] = useState(false);
-    const [fileSizeMap, setFileSizeMap] = useState(new Map<number, number>());
+    const [duplicates, setDuplicates] = useState<Duplicate[]>(null);
     const [collectionNameMap, setCollectionNameMap] = useState(
         new Map<number, string>()
     );
@@ -69,31 +63,22 @@ export default function Deduplicate() {
 
     useEffect(() => {
         syncWithRemote();
-    }, [clubSameTimeFilesOnly]);
-
-    const fileToCollectionsMap = useMemoSingleThreaded(() => {
-        return constructFileToCollectionMap(duplicateFiles);
-    }, [duplicateFiles]);
+    }, []);
 
     const syncWithRemote = async () => {
         startLoading();
-        const collections = await getLatestCollections();
+        const collections = await getLocalCollections();
         const collectionNameMap = new Map<number, string>();
         for (const collection of collections) {
             collectionNameMap.set(collection.id, collection.name);
         }
         setCollectionNameMap(collectionNameMap);
-        const files = await syncFiles('normal', collections, () => null);
-        let duplicates = await getDuplicateFiles(files, collectionNameMap);
-        if (clubSameTimeFilesOnly) {
-            duplicates = clubDuplicatesByTime(duplicates);
-        }
+        const files = await getLocalFiles();
+        const duplicateFiles = await getDuplicates(files, collectionNameMap);
         const currFileSizeMap = new Map<number, number>();
-        let allDuplicateFiles: EnteFile[] = [];
         let toSelectFileIDs: number[] = [];
         let count = 0;
-        for (const dupe of duplicates) {
-            allDuplicateFiles = [...allDuplicateFiles, ...dupe.files];
+        for (const dupe of duplicateFiles) {
             // select all except first file
             toSelectFileIDs = [
                 ...toSelectFileIDs,
@@ -105,8 +90,7 @@ export default function Deduplicate() {
                 currFileSizeMap.set(file.id, dupe.size);
             }
         }
-        setDuplicateFiles(allDuplicateFiles);
-        setFileSizeMap(currFileSizeMap);
+        setDuplicates(duplicateFiles);
         const selectedFiles = {
             count: count,
             ownCount: count,
@@ -118,6 +102,16 @@ export default function Deduplicate() {
         setSelected(selectedFiles);
         finishLoading();
     };
+
+    const duplicateFiles = useMemoSingleThreaded(() => {
+        return (duplicates ?? []).reduce((acc, dupe) => {
+            return [...acc, ...dupe.files];
+        }, []);
+    }, [duplicates]);
+
+    const fileToCollectionsMap = useMemoSingleThreaded(() => {
+        return constructFileToCollectionMap(duplicateFiles);
+    }, [duplicateFiles]);
 
     const deleteFileHelper = async () => {
         try {
@@ -153,7 +147,7 @@ export default function Deduplicate() {
         setSelected({ count: 0, collectionID: 0, ownCount: 0 });
     };
 
-    if (!duplicateFiles) {
+    if (!duplicates) {
         return (
             <VerticallyCentered>
                 <EnteSpinner />
@@ -166,19 +160,10 @@ export default function Deduplicate() {
             value={{
                 ...DefaultDeduplicateContext,
                 collectionNameMap,
-                clubSameTimeFilesOnly,
-                setClubSameTimeFilesOnly,
-                fileSizeMap,
                 isOnDeduplicatePage: true,
             }}>
             {duplicateFiles.length > 0 && (
-                <Info>
-                    {t('DEDUPLICATE_BASED_ON', {
-                        context: clubSameTimeFilesOnly
-                            ? 'SIZE_AND_CAPTURE_TIME'
-                            : 'SIZE',
-                    })}
-                </Info>
+                <Info>{t('DEDUPLICATE_BASED_ON_SIZE')}</Info>
             )}
             {duplicateFiles.length === 0 ? (
                 <VerticallyCentered>
@@ -188,7 +173,9 @@ export default function Deduplicate() {
                 </VerticallyCentered>
             ) : (
                 <PhotoFrame
+                    page={PAGES.DEDUPLICATE}
                     files={duplicateFiles}
+                    duplicates={duplicates}
                     syncWithRemote={syncWithRemote}
                     setSelected={setSelected}
                     selected={selected}

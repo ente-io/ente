@@ -10,7 +10,10 @@ import {
 } from 'types/file';
 import { decodeLivePhoto } from 'services/livePhotoService';
 import { getFileType } from 'services/typeDetectionService';
-import DownloadManager from 'services/downloadManager';
+import DownloadManager, {
+    LivePhotoSourceURL,
+    SourceURLs,
+} from 'services/download';
 import { logError } from '@ente/shared/sentry';
 import { User } from '@ente/shared/user/types';
 import { getData, LS_KEYS } from '@ente/shared/storage/localStorage';
@@ -24,7 +27,6 @@ import {
     SUPPORTED_RAW_FORMATS,
     RAW_FORMATS,
 } from 'constants/file';
-import PublicCollectionDownloadManager from 'services/publicCollectionDownloadManager';
 import heicConversionService from 'services/heicConversionService';
 import * as ffmpegService from 'services/ffmpeg/ffmpegService';
 import { VISIBILITY_STATE } from 'types/magicMetadata';
@@ -86,44 +88,12 @@ export async function getUpdatedEXIFFileForDownload(
     }
 }
 
-export async function downloadFile(
-    file: EnteFile,
-    accessedThroughSharedURL: boolean,
-    token?: string,
-    passwordToken?: string
-) {
+export async function downloadFile(file: EnteFile) {
     try {
-        let fileBlob: Blob;
         const fileReader = new FileReader();
-        if (accessedThroughSharedURL) {
-            const fileURL =
-                await PublicCollectionDownloadManager.getCachedOriginalFile(
-                    file
-                )[0];
-            if (!fileURL) {
-                fileBlob = await new Response(
-                    await PublicCollectionDownloadManager.downloadFile(
-                        token,
-                        passwordToken,
-                        file
-                    )
-                ).blob();
-            } else {
-                fileBlob = await (await fetch(fileURL)).blob();
-            }
-        } else {
-            const fileURL = await DownloadManager.getCachedOriginalFile(
-                file
-            )[0];
-            if (!fileURL) {
-                fileBlob = await new Response(
-                    await DownloadManager.downloadFile(file)
-                ).blob();
-            } else {
-                fileBlob = await (await fetch(fileURL)).blob();
-            }
-        }
-
+        let fileBlob = await new Response(
+            await DownloadManager.getFile(file)
+        ).blob();
         if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
             const livePhoto = await decodeLivePhoto(file, fileBlob);
             const image = new File([livePhoto.image], livePhoto.imageNameTitle);
@@ -310,83 +280,124 @@ export function generateStreamFromArrayBuffer(data: Uint8Array) {
     });
 }
 
-export async function getRenderableFileURL(file: EnteFile, fileBlob: Blob) {
+export async function getRenderableFileURL(
+    file: EnteFile,
+    fileBlob: Blob,
+    originalFileURL: string,
+    forceConvert: boolean
+): Promise<SourceURLs> {
+    let srcURLs: SourceURLs['url'];
     switch (file.metadata.fileType) {
         case FILE_TYPE.IMAGE: {
             const convertedBlob = await getRenderableImage(
                 file.metadata.title,
                 fileBlob
             );
-            const { originalURL, convertedURL } = getFileObjectURLs(
+            const convertedURL = getFileObjectURL(
+                originalFileURL,
                 fileBlob,
                 convertedBlob
             );
-            return {
-                converted: [convertedURL],
-                original: [originalURL],
-            };
+            srcURLs = convertedURL;
+            break;
         }
         case FILE_TYPE.LIVE_PHOTO: {
-            return await getRenderableLivePhotoURL(file, fileBlob);
+            srcURLs = await getRenderableLivePhotoURL(
+                file,
+                fileBlob,
+                forceConvert
+            );
+            break;
         }
         case FILE_TYPE.VIDEO: {
             const convertedBlob = await getPlayableVideo(
                 file.metadata.title,
-                fileBlob
+                fileBlob,
+                forceConvert
             );
-            const { originalURL, convertedURL } = getFileObjectURLs(
+            const convertedURL = getFileObjectURL(
+                originalFileURL,
                 fileBlob,
                 convertedBlob
             );
-            return {
-                converted: [convertedURL],
-                original: [originalURL],
-            };
+            srcURLs = convertedURL;
+            break;
         }
         default: {
-            const previewURL = await createTypedObjectURL(
-                fileBlob,
-                file.metadata.title
-            );
-            return {
-                converted: [previewURL],
-                original: [previewURL],
-            };
+            srcURLs = originalFileURL;
+            break;
         }
     }
+
+    let isOriginal: boolean;
+    if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
+        isOriginal = false;
+    } else {
+        isOriginal = (srcURLs as string) === (originalFileURL as string);
+    }
+
+    return {
+        url: srcURLs,
+        isOriginal,
+        isRenderable:
+            file.metadata.fileType !== FILE_TYPE.LIVE_PHOTO && !!srcURLs,
+        type:
+            file.metadata.fileType === FILE_TYPE.LIVE_PHOTO
+                ? 'livePhoto'
+                : 'normal',
+    };
 }
 
 async function getRenderableLivePhotoURL(
     file: EnteFile,
-    fileBlob: Blob
-): Promise<{ original: string[]; converted: string[] }> {
+    fileBlob: Blob,
+    forceConvert: boolean
+): Promise<LivePhotoSourceURL> {
     const livePhoto = await decodeLivePhoto(file, fileBlob);
-    const imageBlob = new Blob([livePhoto.image]);
-    const videoBlob = new Blob([livePhoto.video]);
-    const convertedImageBlob = await getRenderableImage(
-        livePhoto.imageNameTitle,
-        imageBlob
-    );
-    const convertedVideoBlob = await getPlayableVideo(
-        livePhoto.videoNameTitle,
-        videoBlob,
-        true
-    );
-    const { originalURL: originalImageURL, convertedURL: convertedImageURL } =
-        getFileObjectURLs(imageBlob, convertedImageBlob);
 
-    const { originalURL: originalVideoURL, convertedURL: convertedVideoURL } =
-        getFileObjectURLs(videoBlob, convertedVideoBlob);
+    const getRenderableLivePhotoImageURL = async () => {
+        try {
+            const imageBlob = new Blob([livePhoto.image]);
+            const convertedImageBlob = await getRenderableImage(
+                livePhoto.imageNameTitle,
+                imageBlob
+            );
+
+            return URL.createObjectURL(convertedImageBlob);
+        } catch (e) {
+            //ignore and return null
+            return null;
+        }
+    };
+
+    const getRenderableLivePhotoVideoURL = async () => {
+        try {
+            const videoBlob = new Blob([livePhoto.video]);
+
+            const convertedVideoBlob = await getPlayableVideo(
+                livePhoto.videoNameTitle,
+                videoBlob,
+                forceConvert,
+                true
+            );
+            return URL.createObjectURL(convertedVideoBlob);
+        } catch (e) {
+            //ignore and return null
+            return null;
+        }
+    };
+
     return {
-        converted: [convertedImageURL, convertedVideoURL],
-        original: [originalImageURL, originalVideoURL],
+        image: getRenderableLivePhotoImageURL,
+        video: getRenderableLivePhotoVideoURL,
     };
 }
 
 export async function getPlayableVideo(
     videoNameTitle: string,
     videoBlob: Blob,
-    forceConvert = false
+    forceConvert = false,
+    runOnWeb = false
 ) {
     try {
         const isPlayable = await isPlaybackPossible(
@@ -395,7 +406,7 @@ export async function getPlayableVideo(
         if (isPlayable && !forceConvert) {
             return videoBlob;
         } else {
-            if (!forceConvert && !isElectron()) {
+            if (!forceConvert && !runOnWeb && !isElectron()) {
                 return null;
             }
             addLogLine(
@@ -594,9 +605,9 @@ export function updateExistingFilePubMetadata(
     existingFile.metadata = mergeMetadata([existingFile])[0].metadata;
 }
 
-export async function getFileFromURL(fileURL: string) {
+export async function getFileFromURL(fileURL: string, name: string) {
     const fileBlob = await (await fetch(fileURL)).blob();
-    const fileFile = new File([fileBlob], 'temp');
+    const fileFile = new File([fileBlob], name);
     return fileFile;
 }
 
@@ -627,7 +638,7 @@ export async function downloadFiles(
             if (progressBarUpdater?.isCancelled()) {
                 return;
             }
-            await downloadFile(file, false);
+            await downloadFile(file);
             progressBarUpdater?.increaseSuccess();
         } catch (e) {
             logError(e, 'download fail for file');
@@ -665,13 +676,9 @@ export async function downloadFileDesktop(
     file: EnteFile,
     downloadPath: string
 ) {
-    let fileStream: ReadableStream<Uint8Array>;
-    const fileURL = await DownloadManager.getCachedOriginalFile(file)[0];
-    if (!fileURL) {
-        fileStream = await DownloadManager.downloadFile(file);
-    } else {
-        fileStream = await fetch(fileURL).then((res) => res.body);
-    }
+    const fileStream = (await DownloadManager.getFile(
+        file
+    )) as ReadableStream<Uint8Array>;
     const updatedFileStream = await getUpdatedEXIFFileForDownload(
         fileReader,
         file,
@@ -939,12 +946,15 @@ const fixTimeHelper = async (
     setFixCreationTimeAttributes({ files: selectedFiles });
 };
 
-const getFileObjectURLs = (originalBlob: Blob, convertedBlob: Blob) => {
-    const originalURL = URL.createObjectURL(originalBlob);
+const getFileObjectURL = (
+    originalFileURL: string,
+    originalBlob: Blob,
+    convertedBlob: Blob
+) => {
     const convertedURL = convertedBlob
         ? convertedBlob === originalBlob
-            ? originalURL
+            ? originalFileURL
             : URL.createObjectURL(convertedBlob)
         : null;
-    return { originalURL, convertedURL };
+    return convertedURL;
 };

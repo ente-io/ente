@@ -58,9 +58,8 @@ import MoreHoriz from '@mui/icons-material/MoreHoriz';
 import OverflowMenu from '@ente/shared/components/OverflowMenu/menu';
 import { OverflowMenuOption } from '@ente/shared/components/OverflowMenu/option';
 import { ENTE_WEBSITE_LINK } from '@ente/shared/constants/urls';
-
-const defaultThumbStore = new Map();
-const defaultFileStore = new Map();
+import { APPS } from '@ente/shared/apps/constants';
+import downloadManager from 'services/download';
 
 export default function PublicCollectionGallery() {
     const token = useRef<string>(null);
@@ -156,6 +155,7 @@ export default function PublicCollectionGallery() {
             let redirectingToWebsite = false;
             try {
                 const cryptoWorker = await ComlinkCryptoWorker.getInstance();
+                await downloadManager.init(APPS.ALBUMS);
 
                 url.current = window.location.href;
                 const currentURL = new URL(url.current);
@@ -173,6 +173,7 @@ export default function PublicCollectionGallery() {
                         ? await cryptoWorker.toB64(bs58.decode(ck))
                         : await cryptoWorker.fromHex(ck);
                 token.current = t;
+                downloadManager.updateToken(token.current);
                 collectionKey.current = dck;
                 url.current = window.location.href;
                 const localCollection = await getLocalPublicCollection(
@@ -195,6 +196,10 @@ export default function PublicCollectionGallery() {
                     setPublicFiles(localPublicFiles);
                     passwordJWTToken.current =
                         await getLocalPublicCollectionPassword(collectionUID);
+                    downloadManager.updateToken(
+                        token.current,
+                        passwordJWTToken.current
+                    );
                 }
                 await syncWithRemote();
             } finally {
@@ -218,12 +223,7 @@ export default function PublicCollectionGallery() {
         appContext.startLoading();
         for (const file of publicFiles) {
             try {
-                await downloadFile(
-                    file,
-                    true,
-                    token.current,
-                    passwordJWTToken.current
-                );
+                await downloadFile(file);
             } catch (e) {
                 // do nothing
             }
@@ -385,7 +385,11 @@ export default function PublicCollectionGallery() {
                     hashedPassword
                 );
                 passwordJWTToken.current = jwtToken;
-                savePublicCollectionPassword(collectionUID, jwtToken);
+                downloadManager.updateToken(
+                    token.current,
+                    passwordJWTToken.current
+                );
+                await savePublicCollectionPassword(collectionUID, jwtToken);
             } catch (e) {
                 const parsedError = parseSharingErrorCodes(e);
                 if (parsedError.message === CustomError.TOKEN_EXPIRED) {
@@ -446,8 +450,6 @@ export default function PublicCollectionGallery() {
                 accessedThroughSharedURL: true,
                 photoListHeader,
                 photoListFooter,
-                thumbs: defaultThumbStore,
-                files: defaultFileStore,
             }}>
             <FullScreenDropZone
                 getDragAndDropRootProps={getDragAndDropRootProps}>
@@ -463,6 +465,7 @@ export default function PublicCollectionGallery() {
                     openUploader={openUploader}
                 />
                 <PhotoFrame
+                    page={PAGES.SHARED_ALBUMS}
                     files={publicFiles}
                     syncWithRemote={syncWithRemote}
                     setSelected={() => null}

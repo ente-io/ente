@@ -36,15 +36,11 @@ class ReaderService {
                 )
             ) {
                 fileContext.imageBitmap = await getOriginalImageBitmap(
-                    fileContext.enteFile,
-                    syncContext.token,
-                    await syncContext.getEnteWorker(fileContext.enteFile.id)
+                    fileContext.enteFile
                 );
             } else {
                 fileContext.imageBitmap = await getThumbnailImageBitmap(
-                    fileContext.enteFile,
-                    syncContext.token,
-                    await syncContext.getEnteWorker(fileContext.enteFile.id)
+                    fileContext.enteFile
                 );
             }
 

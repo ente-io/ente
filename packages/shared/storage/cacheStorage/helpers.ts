@@ -1,6 +1,7 @@
 import { CACHES } from './constants';
 import { CacheStorageService } from '.';
 import { logError } from '@ente/shared/sentry';
+import { LimitedCache } from './types';
 
 export async function cached(
     cacheName: string,
@@ -27,13 +28,19 @@ export async function cached(
     return result;
 }
 
+let thumbCache: LimitedCache;
+
 export async function getBlobFromCache(
     cacheName: string,
     url: string
 ): Promise<Blob> {
-    const cache = await CacheStorageService.open(cacheName);
-    const response = await cache.match(url);
-
+    if (!thumbCache) {
+        thumbCache = await CacheStorageService.open(cacheName);
+    }
+    const response = await thumbCache.match(url);
+    if (!response) {
+        return undefined;
+    }
     return response.blob();
 }
 

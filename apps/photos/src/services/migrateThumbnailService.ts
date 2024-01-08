@@ -1,4 +1,4 @@
-import downloadManager from 'services/downloadManager';
+import downloadManager from 'services/download';
 import { getLocalFiles } from 'services/fileService';
 import { generateThumbnail } from 'services/upload/thumbnailService';
 import { getToken } from '@ente/shared/storage/localStorage/helpers';
@@ -44,7 +44,6 @@ export async function replaceThumbnail(
 ) {
     let completedWithError = false;
     try {
-        const token = getToken();
         const cryptoWorker = await ComlinkCryptoWorker.getInstance();
         const files = await getLocalFiles();
         const trashFiles = await getLocalTrashedFiles();
@@ -69,8 +68,7 @@ export async function replaceThumbnail(
                     current: idx,
                     total: largeThumbnailFiles.length,
                 });
-                const originalThumbnail = await downloadManager.downloadThumb(
-                    token,
+                const originalThumbnail = await downloadManager.getThumbnail(
                     file
                 );
                 const dummyImageFile = new File(

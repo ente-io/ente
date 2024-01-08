@@ -1,9 +1,9 @@
 import isElectron from 'is-electron';
-import ElectronAPIs from '@ente/shared/electron';
 import { logError } from '@ente/shared/sentry';
 import { getAppEnv } from '../apps/env';
 import { APP_ENV } from '../apps/constants';
 import { formatLog, logWeb } from './web';
+import { WorkerSafeElectronService } from '../electron/service';
 
 export const MAX_LOG_SIZE = 5 * 1024 * 1024; // 5MB
 export const MAX_LOG_LINES = 1000;
@@ -18,7 +18,7 @@ export function addLogLine(
             console.log(completeLog);
         }
         if (isElectron()) {
-            ElectronAPIs.logToDisk(completeLog);
+            WorkerSafeElectronService.logToDisk(completeLog);
         } else {
             logWeb(completeLog);
         }

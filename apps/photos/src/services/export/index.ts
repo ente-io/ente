@@ -25,7 +25,7 @@ import {
 import { logError } from '@ente/shared/sentry';
 import { getData, LS_KEYS, setData } from '@ente/shared/storage/localStorage';
 import { getAllLocalCollections } from '../collectionService';
-import downloadManager from '../downloadManager';
+import downloadManager from '../download';
 import { getAllLocalFiles } from '../fileService';
 import { EnteFile } from 'types/file';
 
@@ -172,14 +172,6 @@ class ExportService {
                 logError(e, 'changeExportDirectory failed');
             }
             throw e;
-        }
-    }
-
-    async openExportDirectory(exportFolder: string) {
-        try {
-            await ElectronAPIs.openDirectory(exportFolder);
-        } catch (e) {
-            logError(e, 'openExportDirectory failed');
         }
     }
 
@@ -1061,7 +1053,7 @@ class ExportService {
     ): Promise<void> {
         try {
             const fileUID = getExportRecordFileUID(file);
-            const originalFileStream = await downloadManager.downloadFile(file);
+            const originalFileStream = await downloadManager.getFile(file);
             if (!this.fileReader) {
                 this.fileReader = new FileReader();
             }

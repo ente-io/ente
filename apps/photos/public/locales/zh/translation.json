@@ -38,6 +38,8 @@
     "KEY_GENERATION_IN_PROGRESS_MESSAGE": "正在生成加密密钥...",
     "PASSPHRASE_HINT": "密码",
     "CONFIRM_PASSPHRASE": "请确认密码",
+    "REFERRAL_CODE_HINT": "您是如何知道Ente的？ （可选的）",
+    "REFERRAL_INFO": "我们不跟踪应用程序安装情况，如果您告诉我们您是在哪里找到我们的，将会有所帮助！",
     "PASSPHRASE_MATCH_ERROR": "两次输入的密码不一致",
     "CONSOLE_WARNING_STOP": "停止！",
     "CONSOLE_WARNING_DESC": "这是专为开发人员设计的浏览器功能。 请不要在此处复制粘贴未经验证的代码。",
@@ -423,7 +425,6 @@
     "FILES": "文件",
     "EACH": "每个",
     "DEDUPLICATE_BASED_ON_SIZE": "以下文件根据大小进行了合并，请检查并删除您认为重复的项目",
-    "DEDUPLICATE_BASED_ON_SIZE_AND_CAPTURE_TIME": "以下文件是根据它们的大小和捕获时间合并的，请检查并删除您认为重复的项目",
     "STOP_ALL_UPLOADS_MESSAGE": "您确定要停止所有正在进行的上传吗？",
     "STOP_UPLOADS_HEADER": "要停止上传吗？",
     "YES_STOP_UPLOADS": "是的，停止上传",
@@ -622,5 +623,6 @@
     "FASTER_UPLOAD": "更快上传",
     "FASTER_UPLOAD_DESCRIPTION": "通过附近的服务器路由上传",
     "STATUS": "状态",
-    "INDEXED_ITEMS": "索引项目"
+    "INDEXED_ITEMS": "索引项目",
+    "CACHE_DIRECTORY": "缓存文件夹"
 }

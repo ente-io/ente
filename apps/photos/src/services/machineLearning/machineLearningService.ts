@@ -33,6 +33,9 @@ import ObjectService from './objectService';
 import ReaderService from './readerService';
 import { logError } from '@ente/shared/sentry';
 import { addLogLine } from '@ente/shared/logging';
+import downloadManager from 'services/download';
+import { APPS } from '@ente/shared/apps/constants';
+
 class MachineLearningService {
     private initialized = false;
     // private faceDetectionService: FaceDetectionService;
@@ -60,6 +63,7 @@ class MachineLearningService {
             throw Error('Token needed by ml service to sync file');
         }
 
+        await downloadManager.init(APPS.PHOTOS, { token });
         // await this.init();
 
         // Used to debug tf memory leak, all tf memory
@@ -110,6 +114,16 @@ class MachineLearningService {
         addLogLine('Final TF Memory stats: ', JSON.stringify(tf.memory()));
 
         return mlSyncResult;
+    }
+
+    public async regenerateFaceCrop(
+        token: string,
+        userID: number,
+        faceID: string
+    ) {
+        await downloadManager.init(APPS.PHOTOS, { token });
+        const syncContext = await this.getSyncContext(token, userID);
+        return FaceService.regenerateFaceCrop(syncContext, faceID);
     }
 
     private newMlData(fileId: number) {

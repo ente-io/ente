@@ -2,12 +2,10 @@ import React, { useContext, useEffect, useRef, useState } from 'react';
 import { EnteFile } from 'types/file';
 import { styled } from '@mui/material';
 import PlayCircleOutlineOutlinedIcon from '@mui/icons-material/PlayCircleOutlineOutlined';
-import DownloadManager from 'services/downloadManager';
+import DownloadManager from 'services/download';
 import useLongPress from '@ente/shared/hooks/useLongPress';
 import { GalleryContext } from 'pages/gallery';
 import { GAP_BTW_TILES, IMAGE_CONTAINER_MAX_WIDTH } from 'constants/gallery';
-import { PublicCollectionGalleryContext } from 'utils/publicCollectionGallery';
-import PublicCollectionDownloadManager from 'services/publicCollectionDownloadManager';
 import { DeduplicateContext } from 'pages/deduplicate';
 import { logError } from '@ente/shared/sentry';
 import { Overlay } from '@ente/shared/components/Container';
@@ -21,6 +19,7 @@ import { FILE_TYPE } from 'constants/file';
 import AlbumOutlined from '@mui/icons-material/AlbumOutlined';
 import Avatar from './Avatar';
 import { shouldShowAvatar } from 'utils/file';
+import { CustomError } from '@ente/shared/error';
 
 interface IProps {
     file: EnteFile;
@@ -217,14 +216,7 @@ const Cont = styled('div')<{ disabled: boolean }>`
 
 export default function PreviewCard(props: IProps) {
     const galleryContext = useContext(GalleryContext);
-    const publicCollectionGalleryContext = useContext(
-        PublicCollectionGalleryContext
-    );
     const deduplicateContext = useContext(DeduplicateContext);
-
-    const thumbsStore = publicCollectionGalleryContext?.accessedThroughSharedURL
-        ? publicCollectionGalleryContext.thumbs
-        : galleryContext.thumbs;
 
     const {
         file,
@@ -256,51 +248,21 @@ export default function PreviewCard(props: IProps) {
                 if (file.msrc) {
                     return;
                 }
-                let url: string;
-                // check in in-memory cache
-                if (thumbsStore.has(file.id)) {
-                    url = thumbsStore.get(file.id);
-                } else {
-                    // check in cacheStorage
-                    if (
-                        publicCollectionGalleryContext.accessedThroughSharedURL
-                    ) {
-                        url =
-                            await PublicCollectionDownloadManager.getCachedThumbnail(
-                                file
-                            );
-                    } else {
-                        url = await DownloadManager.getCachedThumbnail(file);
-                    }
-                    if (url) {
-                        thumbsStore.set(file.id, url);
-                    } else {
-                        // download thumbnail
-                        if (props.showPlaceholder) {
-                            return;
-                        }
-                        if (
-                            publicCollectionGalleryContext.accessedThroughSharedURL
-                        ) {
-                            url =
-                                await PublicCollectionDownloadManager.getThumbnail(
-                                    file,
-                                    publicCollectionGalleryContext.token,
-                                    publicCollectionGalleryContext.passwordToken
-                                );
-                        } else {
-                            url = await DownloadManager.getThumbnail(file);
-                        }
-                        thumbsStore.set(file.id, url);
-                    }
-                }
-                if (!isMounted.current) {
+                const url: string =
+                    await DownloadManager.getThumbnailForPreview(
+                        file,
+                        props.showPlaceholder
+                    );
+
+                if (!isMounted.current || !url) {
                     return;
                 }
                 setImgSrc(url);
                 updateURL(file.id, url);
             } catch (e) {
-                logError(e, 'preview card useEffect failed');
+                if (e.message !== CustomError.URL_ALREADY_SET) {
+                    logError(e, 'preview card useEffect failed');
+                }
                 // no-op
             }
         };
@@ -338,7 +300,7 @@ export default function PreviewCard(props: IProps) {
 
     return (
         <Cont
-            key={`thumb-${file.id}-${props.showPlaceholder}`}
+            key={`thumb-${file.id}}`}
             onClick={handleClick}
             onMouseEnter={handleHover}
             disabled={!file?.msrc && !imgSrc}

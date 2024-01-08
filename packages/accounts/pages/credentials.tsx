@@ -73,7 +73,11 @@ export default function Credentials({
             setUser(user);
             let key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
             if (!key && isElectron()) {
-                key = await ElectronAPIs.getEncryptionKey();
+                try {
+                    key = await ElectronAPIs.getEncryptionKey();
+                } catch (e) {
+                    logError(e, 'getEncryptionKey failed');
+                }
                 if (key) {
                     await saveKeyInSessionStore(
                         SESSION_KEYS.ENCRYPTION_KEY,
@@ -220,7 +224,7 @@ export default function Credentials({
             }
             const redirectURL = InMemoryStore.get(MS_KEYS.REDIRECT_URL);
             InMemoryStore.delete(MS_KEYS.REDIRECT_URL);
-            router.push(APP_HOMES.get(redirectURL ?? appName));
+            router.push(redirectURL ?? APP_HOMES.get(appName));
         } catch (e) {
             logError(e, 'useMasterPassword failed');
         }

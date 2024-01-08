@@ -31,8 +31,6 @@ export enum UploadTypeSelectorIntent {
     collectPhotos,
 }
 export type GalleryContextType = {
-    thumbs: Map<number, string>;
-    files: Map<number, MergedSourceURL>;
     showPlanSelectorModal: () => void;
     setActiveCollectionID: (collectionID: number) => void;
     syncWithRemote: (force?: boolean, silent?: boolean) => Promise<void>;

@@ -129,6 +129,8 @@ import InMemoryStore, { MS_KEYS } from '@ente/shared/storage/InMemoryStore';
 import { syncEmbeddings } from 'services/embeddingService';
 import { ClipService } from 'services/clipService';
 import isElectron from 'is-electron';
+import downloadManager from 'services/download';
+import { APPS } from '@ente/shared/apps/constants';
 
 export const DeadCenter = styled('div')`
     flex: 1;
@@ -140,8 +142,6 @@ export const DeadCenter = styled('div')`
 `;
 
 const defaultGalleryContext: GalleryContextType = {
-    thumbs: new Map(),
-    files: new Map(),
     showPlanSelectorModal: () => null,
     setActiveCollectionID: () => null,
     syncWithRemote: () => null,
@@ -296,7 +296,8 @@ export default function Gallery() {
     useEffect(() => {
         appContext.showNavBar(true);
         const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
-        if (!key) {
+        const token = getToken();
+        if (!key || !token) {
             InMemoryStore.set(MS_KEYS.REDIRECT_URL, PAGES.GALLERY);
             router.push(PAGES.ROOT);
             return;
@@ -307,6 +308,7 @@ export default function Gallery() {
             if (!valid) {
                 return;
             }
+            await downloadManager.init(APPS.PHOTOS, { token });
             setupSelectAllKeyBoardShortcutHandler();
             setActiveCollectionID(ALL_SECTION);
             setIsFirstLoad(isFirstLogin());
@@ -408,7 +410,7 @@ export default function Gallery() {
     }, [fixCreationTimeAttributes]);
 
     useEffect(() => {
-        if (typeof activeCollectionID === 'undefined') {
+        if (typeof activeCollectionID === 'undefined' || !router.isReady) {
             return;
         }
         let collectionURL = '';
@@ -427,14 +429,8 @@ export default function Gallery() {
             }
         }
         const href = `/gallery${collectionURL}`;
-        const delayRouteChange = () => {
-            setTimeout(() => {
-                router.push(href, undefined, { shallow: true });
-            }, 1000);
-        };
-
-        delayRouteChange();
-    }, [activeCollectionID]);
+        router.push(href, undefined, { shallow: true });
+    }, [activeCollectionID, router.isReady]);
 
     useEffect(() => {
         const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
@@ -1096,6 +1092,7 @@ export default function Gallery() {
                     <GalleryEmptyState openUploader={openUploader} />
                 ) : (
                     <PhotoFrame
+                        page={PAGES.GALLERY}
                         files={filteredData}
                         syncWithRemote={syncWithRemote}
                         favItemIds={favItemIds}

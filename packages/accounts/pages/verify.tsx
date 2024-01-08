@@ -7,7 +7,10 @@ import { verifyOtt, sendOtt, putAttributes } from '../api/user';
 import { logoutUser } from '../services/user';
 import { configureSRP } from '../services/srp';
 import { clearFiles } from '@ente/shared/storage/localForage/helpers';
-import { setIsFirstLogin } from '@ente/shared/storage/localStorage/helpers';
+import {
+    getLocalReferralSource,
+    setIsFirstLogin,
+} from '@ente/shared/storage/localStorage/helpers';
 import { clearKeys } from '@ente/shared/storage/sessionStorage';
 import { PAGES } from '../constants/pages';
 import { KeyAttributes, User } from '@ente/shared/user/types';
@@ -58,7 +61,8 @@ export default function VerifyPage({ appContext, router, appName }: PageProps) {
         setFieldError
     ) => {
         try {
-            const resp = await verifyOtt(email, ott);
+            const referralSource = getLocalReferralSource();
+            const resp = await verifyOtt(email, ott, referralSource);
             const {
                 keyAttributes,
                 encryptedToken,

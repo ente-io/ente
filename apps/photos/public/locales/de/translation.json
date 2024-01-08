@@ -38,6 +38,8 @@
     "KEY_GENERATION_IN_PROGRESS_MESSAGE": "Generierung von Verschlüsselungsschlüsseln...",
     "PASSPHRASE_HINT": "Passwort",
     "CONFIRM_PASSPHRASE": "Passwort bestätigen",
+    "REFERRAL_CODE_HINT": "",
+    "REFERRAL_INFO": "",
     "PASSPHRASE_MATCH_ERROR": "Die Passwörter stimmen nicht überein",
     "CONSOLE_WARNING_STOP": "STOPP!",
     "CONSOLE_WARNING_DESC": "",
@@ -83,9 +85,9 @@
     "ZOOM_IN_OUT": "Herein-/Herauszoomen",
     "PREVIOUS": "",
     "NEXT": "",
-    "TITLE_PHOTOS": "ente Photos",
-    "TITLE_ALBUMS": "ente Photos",
-    "TITLE_AUTH": "ente Auth",
+    "TITLE_PHOTOS": "",
+    "TITLE_ALBUMS": "",
+    "TITLE_AUTH": "",
     "UPLOAD_FIRST_PHOTO": "Lade dein erstes Foto hoch",
     "IMPORT_YOUR_FOLDERS": "Importiere deiner Ordner",
     "UPLOAD_DROPZONE_MESSAGE": "",
@@ -423,7 +425,6 @@
     "FILES": "Dateien",
     "EACH": "",
     "DEDUPLICATE_BASED_ON_SIZE": "",
-    "DEDUPLICATE_BASED_ON_SIZE_AND_CAPTURE_TIME": "",
     "STOP_ALL_UPLOADS_MESSAGE": "",
     "STOP_UPLOADS_HEADER": "Hochladen stoppen?",
     "YES_STOP_UPLOADS": "Ja, Hochladen stoppen",
@@ -622,5 +623,6 @@
     "FASTER_UPLOAD": "",
     "FASTER_UPLOAD_DESCRIPTION": "",
     "STATUS": "",
-    "INDEXED_ITEMS": ""
+    "INDEXED_ITEMS": "",
+    "CACHE_DIRECTORY": ""
 }

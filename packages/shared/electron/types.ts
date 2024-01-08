@@ -59,7 +59,10 @@ export interface ElectronAPIsType {
     clearElectronStore: () => void;
     setEncryptionKey: (encryptionKey: string) => Promise<void>;
     getEncryptionKey: () => Promise<string>;
-    openDiskCache: (cacheName: string) => Promise<LimitedCache>;
+    openDiskCache: (
+        cacheName: string,
+        cacheLimitInBytes?: number
+    ) => Promise<LimitedCache>;
     deleteDiskCache: (cacheName: string) => Promise<boolean>;
     logToDisk: (msg: string) => void;
     convertToJPEG: (
@@ -97,4 +100,6 @@ export interface ElectronAPIsType {
     computeImageEmbedding: (imageData: Uint8Array) => Promise<Float32Array>;
     computeTextEmbedding: (text: string) => Promise<Float32Array>;
     getPlatform: () => Promise<'mac' | 'windows' | 'linux'>;
+    setCustomCacheDirectory: (directory: string) => Promise<void>;
+    getCacheDirectory: () => Promise<string>;
 }

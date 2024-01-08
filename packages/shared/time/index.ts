@@ -14,6 +14,8 @@ interface DateComponent<T = number> {
     second: T;
 }
 
+const currentYear = new Date().getFullYear();
+
 export function getUnixTimeInMicroSecondsWithDelta(delta: TimeDelta): number {
     let currentDate = new Date();
     if (delta?.hours) {
@@ -112,7 +114,8 @@ function getDateComponentsFromSymbolJoinedString(
 }
 
 function validateAndGetDateFromComponents(
-    dateComponent: DateComponent<number>
+    dateComponent: DateComponent<number>,
+    options = { minYear: 1990, maxYear: currentYear + 1 }
 ) {
     let date = getDateFromComponents(dateComponent);
     if (hasTimeValues(dateComponent) && !isTimePartValid(date, dateComponent)) {
@@ -121,6 +124,12 @@ function validateAndGetDateFromComponents(
         date = getDateFromComponents(removeTimeValues(dateComponent));
     }
     if (!isDatePartValid(date, dateComponent)) {
+        return null;
+    }
+    if (
+        date.getFullYear() < options.minYear ||
+        date.getFullYear() > options.maxYear
+    ) {
         return null;
     }
     return date;

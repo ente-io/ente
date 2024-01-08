@@ -82,7 +82,8 @@ export default function Preferences({ open, onClose, onRootClose }) {
                             checked={!optOutOfCrashReports}
                             onClick={toggleOptOutOfCrashReports}
                             label={t('CRASH_REPORTING')}
-                        />{' '}
+                        />
+
                         <EnteMenuItem
                             onClick={openMapSettings}
                             endIcon={<ChevronRight />}

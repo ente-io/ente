@@ -12,6 +12,7 @@ import { UPLOAD_STRATEGY } from 'constants/upload';
 import { getImportSuggestion } from 'utils/upload';
 import ElectronAPIs from '@ente/shared/electron';
 import { PICKED_UPLOAD_TYPE } from 'constants/upload';
+import isElectron from 'is-electron';
 
 interface Iprops {
     open: boolean;
@@ -25,6 +26,9 @@ export default function WatchFolder({ open, onClose }: Iprops) {
     const appContext = useContext(AppContext);
 
     useEffect(() => {
+        if (!isElectron()) {
+            return;
+        }
         setMappings(watchFolderService.getWatchMappings());
     }, []);
 

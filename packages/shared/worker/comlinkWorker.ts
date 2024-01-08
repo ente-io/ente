@@ -1,6 +1,7 @@
 import { expose, Remote, wrap } from 'comlink';
-import { WorkerElectronCacheStorageClient } from '@ente/shared/storage/cacheStorage/workerElectron/client';
+import { WorkerSafeElectronClient } from '@ente/shared/electron/worker/client';
 import { addLocalLog } from '@ente/shared/logging';
+import { logError } from '../sentry';
 
 export class ComlinkWorker<T extends new () => InstanceType<T>> {
     public remote: Promise<Remote<InstanceType<T>>>;
@@ -12,12 +13,15 @@ export class ComlinkWorker<T extends new () => InstanceType<T>> {
         this.worker = worker;
 
         this.worker.onerror = (errorEvent) => {
-            console.error('Got error event from worker', errorEvent);
+            logError(Error(errorEvent.message), 'Got error event from worker', {
+                errorEvent: JSON.stringify(errorEvent),
+                name: this.name,
+            });
         };
         addLocalLog(() => `Initiated ${this.name}`);
         const comlink = wrap<T>(this.worker);
         this.remote = new comlink() as Promise<Remote<InstanceType<T>>>;
-        expose(WorkerElectronCacheStorageClient, this.worker);
+        expose(WorkerSafeElectronClient, this.worker);
     }
 
     public getName() {
