@@ -40,16 +40,16 @@ import { Model } from '../types';
 
 const TEXT_MODEL_DOWNLOAD_URL = {
     ggml: 'https://models.ente.io/clip-vit-base-patch32_ggml-text-model-f16.gguf',
-    onnx: 'https://huggingface.co/rocca/openai-clip-js/resolve/main/clip-text-vit-32-float32-int32.onnx',
+    onnx: 'https://models.ente.io/clip-text-vit-32-uint8.onnx',
 };
 const IMAGE_MODEL_DOWNLOAD_URL = {
     ggml: 'https://models.ente.io/clip-vit-base-patch32_ggml-vision-model-f16.gguf',
-    onnx: 'https://huggingface.co/rocca/openai-clip-js/resolve/main/clip-image-vit-32-float32.onnx',
+    onnx: 'https://models.ente.io/clip-image-vit-32-float32.onnx',
 };
 
 const TEXT_MODEL_NAME = {
     ggml: 'clip-vit-base-patch32_ggml-text-model-f16.gguf',
-    onnx: 'clip-text-vit-32-float32-int32.onnx',
+    onnx: 'clip-text-vit-32-uint8.onnx',
 };
 const IMAGE_MODEL_NAME = {
     ggml: 'clip-vit-base-patch32_ggml-vision-model-f16.gguf',
