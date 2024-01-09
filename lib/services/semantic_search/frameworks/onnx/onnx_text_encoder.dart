@@ -51,9 +51,8 @@ class OnnxTextEncoder {
       textNormalization += embedding[i] * embedding[i];
     }
 
-    final double sqrtTexteNormalization = sqrt(textNormalization);
     for (int i = 0; i < 512; i++) {
-      embedding[i] = embedding[i] / sqrtTexteNormalization;
+      embedding[i] = embedding[i] / sqrt(textNormalization);
     }
 
     return (embedding);
