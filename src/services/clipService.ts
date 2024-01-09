@@ -265,8 +265,16 @@ export async function computeONNXImageEmbedding(
             input: new ort.Tensor('float32', rgbData, [1, 3, 224, 224]),
         };
         const results = await imageSession.run(feeds);
-        const embedVec = results['output'].data; // Float32Array
-        return embedVec;
+        const imageEmbedding = results['output'].data; // Float32Array
+        let imageNormalization = 0;
+        for (let index = 0; index < imageEmbedding.length; index++) {
+            imageNormalization += imageEmbedding[index] * imageEmbedding[index];
+        }
+        for (let index = 0; index < imageEmbedding.length; index++) {
+            imageEmbedding[index] =
+                imageEmbedding[index] / Math.sqrt(imageNormalization);
+        }
+        return imageEmbedding;
     } catch (err) {
         logErrorSentry(err, 'Error in computeImageEmbedding');
         throw err;
