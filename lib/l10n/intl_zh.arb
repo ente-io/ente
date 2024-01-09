@@ -409,6 +409,7 @@
   "machineLearning": "机器学习",
   "magicSearch": "魔法搜索",
   "magicSearchDescription": "请使用我们的桌面应用程序来为您库中的待处理项目建立索引。",
+  "loadingModel": "正在下载模型...",
   "status": "状态",
   "indexedItems": "已索引项目",
   "pendingItems": "待处理项目",
