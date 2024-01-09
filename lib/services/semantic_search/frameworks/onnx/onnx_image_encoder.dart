@@ -43,9 +43,10 @@ class OnnxImageEncoder {
     for (int y = 0; y < ny; y++) {
       for (int x = 0; x < nx; x++) {
         final int i = 3 * (y * nx + x);
-        inputImage[i] = rgb.getPixel(x, y).r.toDouble();
-        inputImage[i + 1] = rgb.getPixel(x, y).g.toDouble();
-        inputImage[i + 2] = rgb.getPixel(x, y).b.toDouble();
+        final pixel = rgb.getPixel(x, y);
+        inputImage[i] = pixel.r.toDouble();
+        inputImage[i + 1] = pixel.g.toDouble();
+        inputImage[i + 2] = pixel.b.toDouble();
       }
     }
 
@@ -111,8 +112,9 @@ class OnnxImageEncoder {
     for (int i = 0; i < 512; i++) {
       imageNormalization += embedding[i] * embedding[i];
     }
+    final double sqrtImageNormalization = sqrt(imageNormalization);
     for (int i = 0; i < 512; i++) {
-      embedding[i] = embedding[i] / sqrt(imageNormalization);
+      embedding[i] = embedding[i] / sqrtImageNormalization;
     }
     return embedding;
   }
