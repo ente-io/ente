@@ -170,7 +170,7 @@ class ClipServiceImpl {
                 return;
             }
             const localFiles = getPersonalFiles(await getAllLocalFiles(), user);
-            const existingEmbeddings = await getLocalClipImageEmbeddings(model);
+            const existingEmbeddings = await getLocalEmbeddings(model);
             const pendingFiles = await getNonClipEmbeddingExtractedFiles(
                 localFiles,
                 existingEmbeddings
@@ -359,11 +359,6 @@ const getNonClipEmbeddingExtractedFiles = async (
     });
 };
 
-export const getLocalClipImageEmbeddings = async (model: Model) => {
-    const allEmbeddings = await getLocalEmbeddings();
-    return allEmbeddings.filter((embedding) => embedding.model === model);
-};
-
 export const computeClipMatchScore = async (
     imageEmbedding: Float32Array,
     textEmbedding: Float32Array
@@ -398,7 +393,7 @@ const getClipExtractionStatus = async (
     if (!user) {
         return;
     }
-    const allEmbeddings = await getLocalClipImageEmbeddings(model);
+    const allEmbeddings = await getLocalEmbeddings(model);
     const localFiles = getPersonalFiles(await getLocalFiles(), user);
     const pendingFiles = await getNonClipEmbeddingExtractedFiles(
         localFiles,
