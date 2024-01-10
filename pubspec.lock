@@ -1026,6 +1026,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.3.6+4"
+  infinite_carousel:
+    dependency: "direct main"
+    description:
+      name: infinite_carousel
+      sha256: fe04c3b08adad2ee00c9bf40b46e0ff7944d206081392c4ae0f6b82c89c6e70d
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.3"
   integration_test:
     dependency: "direct dev"
     description: flutter

@@ -1,6 +1,8 @@
 import "dart:async";
 
 import 'package:flutter/material.dart';
+import "package:flutter/rendering.dart";
+import "package:infinite_carousel/infinite_carousel.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/memories_setting_changed.dart";
 import 'package:photos/models/memory.dart';
@@ -15,6 +17,8 @@ class MemoriesWidget extends StatefulWidget {
 }
 
 class _MemoriesWidgetState extends State<MemoriesWidget> {
+  final double _itemExtent = 120;
+  late InfiniteScrollController _controller;
   late StreamSubscription<MemoriesSettingChanged> _subscription;
 
   @override
@@ -25,11 +29,13 @@ class _MemoriesWidgetState extends State<MemoriesWidget> {
         setState(() {});
       }
     });
+    _controller = InfiniteScrollController();
   }
 
   @override
   void dispose() {
     _subscription.cancel();
+    _controller.dispose();
     super.dispose();
   }
 
@@ -60,14 +66,51 @@ class _MemoriesWidgetState extends State<MemoriesWidget> {
     final collatedMemories = _collateMemories(memories);
     final List<Widget> memoryWidgets = [];
     for (final memories in collatedMemories) {
-      memoryWidgets.add(MemoryCovertWidget(memories: memories));
+      memoryWidgets.add(
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Container(
+            color: Colors.yellow,
+            child: MemoryCovertWidget(memories: memories),
+          ),
+        ),
+      );
     }
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      physics: const BouncingScrollPhysics(),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: memoryWidgets,
+    return SizedBox(
+      height: 150,
+      child: InfiniteCarousel.builder(
+        controller: _controller,
+        itemCount: memoryWidgets.length,
+        itemExtent: _itemExtent,
+        itemBuilder: (context, itemIndex, realIndex) {
+          final currentOffset = _itemExtent * realIndex;
+          return AnimatedBuilder(
+            animation: _controller,
+            builder: (context, child) {
+              final diff = (_controller.offset - currentOffset);
+              const maxPadding = 10.0;
+              final carouselRatio = _itemExtent / maxPadding;
+
+              return Padding(
+                padding: EdgeInsets.only(
+                  top: (diff / carouselRatio).abs(),
+                  bottom: (diff / carouselRatio).abs(),
+                ),
+                child: child,
+              );
+            },
+            child: Padding(
+              padding: const EdgeInsets.all(2.0),
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(5),
+                  boxShadow: kElevationToShadow[2],
+                ),
+                child: memoryWidgets[itemIndex],
+              ),
+            ),
+          );
+        },
       ),
     );
   }
