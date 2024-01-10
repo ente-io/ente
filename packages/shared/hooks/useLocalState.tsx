@@ -9,7 +9,7 @@ export function useLocalState<T>(
 
     useEffect(() => {
         const { value } = getData(key) ?? {};
-        if (value) {
+        if (typeof value !== 'undefined') {
             setValue(value);
         }
     }, []);
