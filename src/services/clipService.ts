@@ -149,7 +149,7 @@ export async function getClipTextModelPath(type: 'ggml' | 'onnx') {
             const localFileSize = (await fs.stat(modelSavePath)).size;
             if (localFileSize !== TEXT_MODEL_SIZE_IN_BYTES[type]) {
                 log.info(
-                    'clip text model size mismatch, downloading again',
+                    'clip text model size mismatch, downloading again got:',
                     localFileSize
                 );
                 textModelDownloadInProgress = true;
@@ -250,7 +250,7 @@ export async function computeGGMLImageEmbedding(
         const embeddingArray = new Float32Array(embedding);
         return embeddingArray;
     } catch (err) {
-        logErrorSentry(err, 'Error in computeImageEmbedding');
+        logErrorSentry(err, 'Error in computeGGMLImageEmbedding');
         throw err;
     }
 }
@@ -268,7 +268,7 @@ export async function computeONNXImageEmbedding(
         const imageEmbedding = results['output'].data; // Float32Array
         return normalizeEmbedding(imageEmbedding);
     } catch (err) {
-        logErrorSentry(err, 'Error in computeImageEmbedding');
+        logErrorSentry(err, 'Error in computeONNXImageEmbedding');
         throw err;
     }
 }
@@ -318,7 +318,7 @@ export async function computeGGMLTextEmbedding(
         if (err.message === CustomErrors.MODEL_DOWNLOAD_PENDING) {
             log.info(CustomErrors.MODEL_DOWNLOAD_PENDING);
         } else {
-            logErrorSentry(err, 'Error in computeTextEmbedding');
+            logErrorSentry(err, 'Error in computeGGMLTextEmbedding');
         }
         throw err;
     }
@@ -335,13 +335,13 @@ export async function computeONNXTextEmbedding(
             input: new ort.Tensor('int32', tokenizedText, [1, 77]),
         };
         const results = await imageSession.run(feeds);
-        const embedVec = results['output'].data; // Float32Array
-        return normalizeEmbedding(embedVec);
+        const textEmbedding = results['output'].data; // Float32Array
+        return normalizeEmbedding(textEmbedding);
     } catch (err) {
         if (err.message === CustomErrors.MODEL_DOWNLOAD_PENDING) {
             log.info(CustomErrors.MODEL_DOWNLOAD_PENDING);
         } else {
-            logErrorSentry(err, 'Error in computeTextEmbedding');
+            logErrorSentry(err, 'Error in computeONNXTextEmbedding');
         }
         throw err;
     }
@@ -434,8 +434,9 @@ export const normalizeEmbedding = (embedding: Float32Array) => {
     for (let index = 0; index < embedding.length; index++) {
         normalization += embedding[index] * embedding[index];
     }
+    const sqrtNormalization = Math.sqrt(normalization);
     for (let index = 0; index < embedding.length; index++) {
-        embedding[index] = embedding[index] / Math.sqrt(normalization);
+        embedding[index] = embedding[index] / sqrtNormalization;
     }
     return embedding;
 };
