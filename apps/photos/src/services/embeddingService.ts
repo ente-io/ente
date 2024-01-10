@@ -26,7 +26,7 @@ const EMBEDDINGS_TABLE_V1 = 'embeddings';
 const EMBEDDINGS_TABLE = 'embeddings_v2';
 const EMBEDDING_SYNC_TIME_TABLE = 'embedding_sync_time';
 
-export const getLocalEmbeddings = async () => {
+export const getLocalEmbeddings = async (model?: Model) => {
     const embeddings: Array<Embedding> = await localForage.getItem<Embedding[]>(
         EMBEDDINGS_TABLE
     );
@@ -36,14 +36,18 @@ export const getLocalEmbeddings = async () => {
         await localForage.setItem(EMBEDDING_SYNC_TIME_TABLE, 0);
         return [];
     }
-    return embeddings;
+    if (model) {
+        return embeddings.filter((embedding) => embedding.model === model);
+    } else {
+        return embeddings;
+    }
 };
 
 const getEmbeddingSyncTime = async () => {
     return (await localForage.getItem<number>(EMBEDDING_SYNC_TIME_TABLE)) ?? 0;
 };
 
-export const syncEmbeddings = async () => {
+export const syncEmbeddings = async (model: Model = Model.ONNX_CLIP) => {
     try {
         let embeddings = await getLocalEmbeddings();
         const localFiles = await getAllLocalFiles();
@@ -58,7 +62,7 @@ export const syncEmbeddings = async () => {
         addLogLine(`Syncing embeddings sinceTime: ${sinceTime}`);
         let response: GetEmbeddingDiffResponse;
         do {
-            response = await getEmbeddingsDiff(sinceTime);
+            response = await getEmbeddingsDiff(sinceTime, model);
             if (!response.diff?.length) {
                 return;
             }
@@ -117,7 +121,8 @@ export const syncEmbeddings = async () => {
 };
 
 export const getEmbeddingsDiff = async (
-    sinceTime: number
+    sinceTime: number,
+    model: Model
 ): Promise<GetEmbeddingDiffResponse> => {
     try {
         const token = getToken();
@@ -129,7 +134,7 @@ export const getEmbeddingsDiff = async (
             {
                 sinceTime,
                 limit: DIFF_LIMIT,
-                model: Model.ONNX_CLIP,
+                model,
             },
             {
                 'X-Auth-Token': token,
