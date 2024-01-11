@@ -1,5 +1,4 @@
 import "dart:async";
-import "dart:math";
 
 import 'package:flutter/material.dart';
 import "package:flutter/rendering.dart";
@@ -7,7 +6,9 @@ import "package:photos/core/event_bus.dart";
 import "package:photos/events/memories_setting_changed.dart";
 import 'package:photos/models/memory.dart';
 import 'package:photos/services/memories_service.dart';
+import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/home/memories/memory_cover_widget.dart";
+import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 
 class MemoriesWidget extends StatefulWidget {
   const MemoriesWidget({Key? key}) : super(key: key);
@@ -83,7 +84,7 @@ class _MemoriesWidgetState extends State<MemoriesWidget> {
       );
     }
     return SizedBox(
-      height: 150,
+      height: 125,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         controller: _controller,
@@ -95,37 +96,41 @@ class _MemoriesWidgetState extends State<MemoriesWidget> {
             builder: (context, child) {
               final diff =
                   (_controller.offset - offsetOfItem) + widthOfScreen / 7;
+              final scale = 1 - (diff / widthOfScreen).abs() / 3;
 
-              return Transform.scale(
-                scale: 1 - (diff / widthOfScreen).abs() / 3,
-                child: child,
-              );
-            },
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(5),
-              child: SizedBox(
-                width: 85,
-                height: 125,
-                child: Stack(
-                  fit: StackFit.expand,
-                  alignment: Alignment.bottomCenter,
-                  children: [
-                    Image.asset(
-                      _assetPaths[Random().nextInt(_assetPaths.length)],
-                      fit: BoxFit.cover,
-                    ),
-                    Positioned(
-                      bottom: 8,
-                      child: SizedBox(
-                        width: _widthOfItem - 16,
-                        child: const Text(
-                          "1 year ago",
+              return SizedBox(
+                height: 125 * scale,
+                width: 85 * scale,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(5),
+                  child: Stack(
+                    fit: StackFit.expand,
+                    alignment: Alignment.bottomCenter,
+                    children: [
+                      child!,
+                      Positioned(
+                        bottom: 8,
+                        child: SizedBox(
+                          width: 85 * scale,
+                          child: Padding(
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 8.0),
+                            child: Text(
+                              "1 year ago",
+                              style: getEnteTextTheme(context).miniBold,
+                              textScaleFactor: 1 * scale,
+                            ),
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
+              );
+            },
+            child: ThumbnailWidget(
+              memories[0].file,
+              shouldShowArchiveStatus: false,
             ),
           );
         },
@@ -141,6 +146,7 @@ class _MemoriesWidgetState extends State<MemoriesWidget> {
           !_areMemoriesFromSameYear(memories[index - 1], memories[index])) {
         final List<Memory> collatedYearlyMemories = [];
         collatedYearlyMemories.addAll(yearlyMemories);
+        collatedMemories.add(collatedYearlyMemories);
         collatedMemories.add(collatedYearlyMemories);
 
         yearlyMemories.clear();
