@@ -180,24 +180,28 @@ async function createOnnxSession(modelPath: string) {
     });
 }
 
-let onnxImageSession: any = null;
+let onnxImageSessionPromise: Promise<any> = null;
 
 async function getOnnxImageSession() {
-    if (!onnxImageSession) {
-        const clipModelPath = await getClipImageModelPath('onnx');
-        onnxImageSession = createOnnxSession(clipModelPath);
+    if (!onnxImageSessionPromise) {
+        onnxImageSessionPromise = (async () => {
+            const clipModelPath = await getClipImageModelPath('onnx');
+            return createOnnxSession(clipModelPath);
+        })();
     }
-    return onnxImageSession;
+    return onnxImageSessionPromise;
 }
 
-let onnxTextSession: any = null;
+let onnxTextSessionPromise: Promise<any> = null;
 
 async function getOnnxTextSession() {
-    if (!onnxTextSession) {
-        const clipModelPath = await getClipTextModelPath('onnx');
-        onnxTextSession = createOnnxSession(clipModelPath);
+    if (!onnxTextSessionPromise) {
+        onnxTextSessionPromise = (async () => {
+            const clipModelPath = await getClipTextModelPath('onnx');
+            onnxTextSessionPromise = createOnnxSession(clipModelPath);
+        })();
     }
-    return onnxTextSession;
+    return onnxTextSessionPromise;
 }
 
 let tokenizer: Tokenizer = null;
