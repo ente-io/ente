@@ -56,8 +56,14 @@ class DiskLRUService {
                         try {
                             await unlink(leastRecentlyUsed.path);
                         } catch (e) {
-                            if (e.code === 'ENOENT') return;
-                            logError(e, 'Failed to evict least recently used');
+                            // ENOENT: File not found
+                            // which can be ignored as we are trying to delete the file anyway
+                            if (e.code !== 'ENOENT') {
+                                logError(
+                                    e,
+                                    'Failed to evict least recently used'
+                                );
+                            }
                             // ignoring the error, as it would get retried on the next run
                         }
                         this.evictLeastRecentlyUsed(cacheDir, maxSize);
