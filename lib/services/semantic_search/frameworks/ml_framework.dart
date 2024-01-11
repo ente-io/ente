@@ -47,8 +47,7 @@ abstract class MLFramework {
   /// initialization. For eg. if you wish to load the model from `/assets`
   /// instead of a CDN.
   Future<void> init() async {
-    await _initImageModel();
-    await _initTextModel();
+    await Future.wait([_initImageModel(), _initTextModel()]);
     _initState = InitializationState.initialized;
   }
 
