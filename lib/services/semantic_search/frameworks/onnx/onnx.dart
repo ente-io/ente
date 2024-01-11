@@ -17,6 +17,8 @@ class ONNX extends MLFramework {
   int _textEncoderAddress = 0;
   int _imageEncoderAddress = 0;
 
+  ONNX(super.shouldDownloadOverMobileData);
+
   @override
   String getImageModelRemotePath() {
     return kModelBucketEndpoint + kImageModel;
