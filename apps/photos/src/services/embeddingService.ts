@@ -26,7 +26,7 @@ const EMBEDDINGS_TABLE_V1 = 'embeddings';
 const EMBEDDINGS_TABLE = 'embeddings_v2';
 const EMBEDDING_SYNC_TIME_TABLE = 'embedding_sync_time';
 
-export const getLocalEmbeddings = async (model?: Model) => {
+export const getAllLocalEmbeddings = async () => {
     const embeddings: Array<Embedding> =
         (await localForage.getItem<Embedding[]>(EMBEDDINGS_TABLE)) ?? [];
     if (!embeddings) {
@@ -35,11 +35,12 @@ export const getLocalEmbeddings = async (model?: Model) => {
         await localForage.setItem(EMBEDDING_SYNC_TIME_TABLE, 0);
         return [];
     }
-    if (model) {
-        return embeddings.filter((embedding) => embedding.model === model);
-    } else {
-        return embeddings;
-    }
+    return embeddings;
+};
+
+export const getLocalEmbeddings = async (model: Model) => {
+    const embeddings = await getAllLocalEmbeddings();
+    return embeddings.filter((embedding) => embedding.model === model);
 };
 
 const getEmbeddingSyncTime = async () => {
@@ -48,7 +49,7 @@ const getEmbeddingSyncTime = async () => {
 
 export const syncEmbeddings = async (model: Model = Model.ONNX_CLIP) => {
     try {
-        let embeddings = await getLocalEmbeddings();
+        let embeddings = await getAllLocalEmbeddings();
         const localFiles = await getAllLocalFiles();
         const hiddenAlbums = await getLocalCollections('hidden');
         const localTrashFiles = await getLocalTrashedFiles();
@@ -110,7 +111,7 @@ export const syncEmbeddings = async (model: Model = Model.ONNX_CLIP) => {
             await localForage.setItem(EMBEDDINGS_TABLE, embeddings);
             await localForage.setItem(EMBEDDING_SYNC_TIME_TABLE, sinceTime);
             addLogLine(
-                `Syncing embeddings syncedEmbeddingsCount: ${newEmbeddings.length}`
+                `Syncing embeddings syncedEmbeddingsCount: ${embeddings.length}`
             );
         } while (response.diff.length === DIFF_LIMIT);
         void cleanupDeletedEmbeddings();
@@ -176,7 +177,7 @@ export const cleanupDeletedEmbeddings = async () => {
     [...files, ...trashedFiles].forEach((file) => {
         activeFileIds.add(file.id);
     });
-    const embeddings = await getLocalEmbeddings();
+    const embeddings = await getAllLocalEmbeddings();
 
     const remainingEmbeddings = embeddings.filter((embedding) =>
         activeFileIds.has(embedding.fileID)
