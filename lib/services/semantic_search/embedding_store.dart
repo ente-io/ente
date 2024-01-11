@@ -138,7 +138,10 @@ class EmbeddingStore {
 
     for (final embedding in remoteEmbeddings) {
       final file = fileMap[embedding.fileID];
-      final fileKey = getFileKey(file!);
+      if (file == null) {
+        continue;
+      }
+      final fileKey = getFileKey(file);
       final input = EmbeddingsDecoderInput(embedding, fileKey);
       inputs.add(input);
     }
