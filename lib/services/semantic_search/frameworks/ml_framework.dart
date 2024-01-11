@@ -4,13 +4,25 @@ import "package:flutter/services.dart";
 import "package:logging/logging.dart";
 import "package:path/path.dart";
 import "package:path_provider/path_provider.dart";
+import "package:photos/core/event_bus.dart";
 import "package:photos/core/network/network.dart";
+import "package:photos/events/event.dart";
 
 abstract class MLFramework {
   static const kImageEncoderEnabled = true;
   static const kMaximumRetrials = 3;
 
+  InitializationState _state = InitializationState.notInitialized;
+
   final _logger = Logger("MLFramework");
+
+  InitializationState get initializationState => _state;
+
+  set _initState(InitializationState state) {
+    Bus.instance.fire(MLFrameworkInitializationEvent(state));
+    _logger.info("Init state is $state");
+    _state = state;
+  }
 
   /// Returns the path of the Image Model hosted remotely
   String getImageModelRemotePath();
@@ -37,6 +49,7 @@ abstract class MLFramework {
   Future<void> init() async {
     await _initImageModel();
     await _initTextModel();
+    _initState = InitializationState.initialized;
   }
 
   // Releases any resources held by the framework
@@ -65,8 +78,10 @@ abstract class MLFramework {
     }
     final path = await _getLocalImageModelPath();
     if (File(path).existsSync()) {
+      _initState = InitializationState.initializingImageModel;
       await loadImageModel(path);
     } else {
+      _initState = InitializationState.downloadingImageModel;
       final tempFile = File(path + ".temp");
       await _downloadFile(getImageModelRemotePath(), tempFile.path);
       await tempFile.rename(path);
@@ -77,8 +92,10 @@ abstract class MLFramework {
   Future<void> _initTextModel() async {
     final path = await _getLocalTextModelPath();
     if (File(path).existsSync()) {
+      _initState = InitializationState.initializingTextModel;
       await loadTextModel(path);
     } else {
+      _initState = InitializationState.downloadingTextModel;
       final tempFile = File(path + ".temp");
       await _downloadFile(getTextModelRemotePath(), tempFile.path);
       await tempFile.rename(path);
@@ -130,4 +147,20 @@ abstract class MLFramework {
         .writeAsBytes(byteData.buffer.asUint8List());
     return file.path;
   }
+}
+
+class MLFrameworkInitializationEvent extends Event {
+  final InitializationState state;
+
+  MLFrameworkInitializationEvent(this.state);
+}
+
+enum InitializationState {
+  notInitialized,
+  waitingForNetwork,
+  downloadingImageModel,
+  downloadingTextModel,
+  initializingImageModel,
+  initializingTextModel,
+  initialized,
 }
