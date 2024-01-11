@@ -74,6 +74,7 @@ export class DiskCache implements LimitedCache {
         if (existsSync(cachePath)) {
             try {
                 await unlink(cachePath);
+                return true;
             } catch (e) {
                 if (e.code === 'ENOENT') {
                     return true;
