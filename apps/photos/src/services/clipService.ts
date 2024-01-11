@@ -45,10 +45,20 @@ class ClipServiceImpl {
         this.liveEmbeddingExtractionQueue = new PQueue({
             concurrency: 1,
         });
+        eventBus.on(Events.LOGOUT, this.logoutHandler, this);
     }
 
     isPlatformSupported = () => {
         return isElectron() && !this.unsupportedPlatform;
+    };
+
+    private logoutHandler = async () => {
+        if (this.embeddingExtractionInProgress) {
+            this.embeddingExtractionInProgress?.abort();
+        }
+        if (this.onFileUploadedHandler) {
+            await this.removeOnFileUploadListener();
+        }
     };
 
     setupOnFileUploadListener = async () => {
