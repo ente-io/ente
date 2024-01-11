@@ -50,9 +50,15 @@ class EmbeddingStore {
 
   Future<void> pushEmbeddings() async {
     final pendingItems = await EmbeddingsDB.instance.getUnsyncedEmbeddings();
+    final fileMap = await FilesDB.instance
+        .getFilesFromIDs(pendingItems.map((e) => e.fileID).toList());
+    _logger.info("Pushing ${pendingItems.length} embeddings");
     for (final item in pendingItems) {
-      final file = await FilesDB.instance.getAnyUploadedFile(item.fileID);
-      await _pushEmbedding(file!, item);
+      try {
+        await _pushEmbedding(fileMap[item.fileID]!, item);
+      } catch (e, s) {
+        _logger.severe(e, s);
+      }
     }
   }
 
@@ -67,6 +73,7 @@ class EmbeddingStore {
   }
 
   Future<void> _pushEmbedding(EnteFile file, Embedding embedding) async {
+    _logger.info("Pushing embedding for $file");
     final encryptionKey = getFileKey(file);
     final embeddingJSON = jsonEncode(embedding.embedding);
     final encryptedEmbedding = await CryptoUtil.encryptChaCha(
@@ -86,7 +93,7 @@ class EmbeddingStore {
           "decryptionHeader": header,
         },
       );
-      final updationTime = response.data["updationTime"];
+      final updationTime = response.data["updatedAt"];
       embedding.updationTime = updationTime;
       await EmbeddingsDB.instance.put(embedding);
     } catch (e, s) {
