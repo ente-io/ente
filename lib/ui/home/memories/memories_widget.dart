@@ -1,8 +1,8 @@
 import "dart:async";
+import "dart:math";
 
 import 'package:flutter/material.dart';
 import "package:flutter/rendering.dart";
-import "package:infinite_carousel/infinite_carousel.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/memories_setting_changed.dart";
 import 'package:photos/models/memory.dart';
@@ -17,9 +17,14 @@ class MemoriesWidget extends StatefulWidget {
 }
 
 class _MemoriesWidgetState extends State<MemoriesWidget> {
-  final double _itemExtent = 120;
-  late InfiniteScrollController _controller;
+  final double _widthOfItem = 85;
+  late ScrollController _controller;
   late StreamSubscription<MemoriesSettingChanged> _subscription;
+
+  final _assetPaths = <String>[
+    "assets/onboarding_safe.png",
+    "assets/gallery_locked.png",
+  ];
 
   @override
   void initState() {
@@ -29,7 +34,7 @@ class _MemoriesWidgetState extends State<MemoriesWidget> {
         setState(() {});
       }
     });
-    _controller = InfiniteScrollController();
+    _controller = ScrollController();
   }
 
   @override
@@ -63,6 +68,7 @@ class _MemoriesWidgetState extends State<MemoriesWidget> {
   }
 
   Widget _buildMemories(List<Memory> memories) {
+    final widthOfScreen = MediaQuery.sizeOf(context).width;
     final collatedMemories = _collateMemories(memories);
     final List<Widget> memoryWidgets = [];
     for (final memories in collatedMemories) {
@@ -78,48 +84,47 @@ class _MemoriesWidgetState extends State<MemoriesWidget> {
     }
     return SizedBox(
       height: 150,
-      child: InfiniteCarousel.builder(
-        loop: false,
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
         controller: _controller,
         itemCount: memoryWidgets.length,
-        itemExtent: _itemExtent,
-        itemBuilder: (context, itemIndex, realIndex) {
-          final currentOffset = _itemExtent * realIndex;
+        itemBuilder: (context, itemIndex) {
+          final offsetOfItem = _widthOfItem * itemIndex;
           return AnimatedBuilder(
             animation: _controller,
             builder: (context, child) {
-              final diff = (_controller.offset - currentOffset);
-              const maxPadding = 10.0;
-              final carouselRatio = _itemExtent / maxPadding;
+              final diff =
+                  (_controller.offset - offsetOfItem) + widthOfScreen / 7;
 
-              return Padding(
-                padding: EdgeInsets.only(
-                  top: (diff / carouselRatio).abs(),
-                  bottom: (diff / carouselRatio).abs(),
-                ),
+              return Transform.scale(
+                scale: 1 - (diff / widthOfScreen).abs() / 3,
                 child: child,
               );
             },
-            child: Padding(
-              padding: const EdgeInsets.all(2.0),
-              child: Stack(
-                fit: StackFit.expand,
-                alignment: Alignment.bottomCenter,
-                children: [
-                  Image.asset(
-                    "assets/onboarding_safe.png",
-                    fit: BoxFit.cover,
-                  ),
-                  Positioned(
-                    bottom: 8,
-                    child: SizedBox(
-                      width: _itemExtent - 16,
-                      child: const Text(
-                        "1 year ago",
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(5),
+              child: SizedBox(
+                width: 85,
+                height: 125,
+                child: Stack(
+                  fit: StackFit.expand,
+                  alignment: Alignment.bottomCenter,
+                  children: [
+                    Image.asset(
+                      _assetPaths[Random().nextInt(_assetPaths.length)],
+                      fit: BoxFit.cover,
+                    ),
+                    Positioned(
+                      bottom: 8,
+                      child: SizedBox(
+                        width: _widthOfItem - 16,
+                        child: const Text(
+                          "1 year ago",
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           );
@@ -137,6 +142,7 @@ class _MemoriesWidgetState extends State<MemoriesWidget> {
         final List<Memory> collatedYearlyMemories = [];
         collatedYearlyMemories.addAll(yearlyMemories);
         collatedMemories.add(collatedYearlyMemories);
+
         yearlyMemories.clear();
       }
       yearlyMemories.add(memories[index]);

@@ -93,7 +93,6 @@ dependencies:
   image: ^4.0.17
   image_editor: ^1.3.0
   in_app_purchase: ^3.0.7
-  infinite_carousel: ^1.0.3
   intl: ^0.18.0
   isar: ^3.1.0+1
   isar_flutter_libs: ^3.1.0+1
