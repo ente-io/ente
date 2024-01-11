@@ -110,9 +110,14 @@ class _MemoriesWidgetState extends State<MemoriesWidget> {
                     "assets/onboarding_safe.png",
                     fit: BoxFit.cover,
                   ),
-                  const Positioned(
+                  Positioned(
                     bottom: 8,
-                    child: Text("1 year ago"),
+                    child: SizedBox(
+                      width: _itemExtent - 16,
+                      child: const Text(
+                        "1 year ago",
+                      ),
+                    ),
                   ),
                 ],
               ),
