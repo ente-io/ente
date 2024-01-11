@@ -7,7 +7,6 @@ import 'package:photos/models/memory.dart';
 import 'package:photos/services/memories_service.dart';
 import "package:photos/ui/home/memories/memory_cover_widget.dart";
 import "package:photos/ui/home/memories/memory_cover_widget_new.dart";
-import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 
 class MemoriesWidget extends StatefulWidget {
   const MemoriesWidget({Key? key}) : super(key: key);
@@ -63,7 +62,6 @@ class _MemoriesWidgetState extends State<MemoriesWidget> {
   }
 
   Widget _buildMemories(List<Memory> memories) {
-    final widthOfScreen = MediaQuery.sizeOf(context).width;
     final collatedMemories = _collateMemories(memories);
     final List<Widget> memoryWidgets = [];
     for (final memories in collatedMemories) {
@@ -82,32 +80,10 @@ class _MemoriesWidgetState extends State<MemoriesWidget> {
         itemCount: memoryWidgets.length,
         itemBuilder: (context, itemIndex) {
           final offsetOfItem = _widthOfItem * itemIndex;
-          return AnimatedBuilder(
-            animation: _controller,
-            builder: (context, child) {
-              final diff =
-                  (_controller.offset - offsetOfItem) + widthOfScreen / 7;
-              final scale = 1 - (diff / widthOfScreen).abs() / 3;
-              //Adding this row is a workaround for making height of memory cover
-              //render as 125 * scale. Without this, height of rendered memory
-              //cover will be 125.
-              return Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 2.5),
-                child: Row(
-                  children: [
-                    MemoryCoverWidgetNew(
-                      memories: memories,
-                      thumbnailWidget: child!,
-                      scale: scale,
-                    ),
-                  ],
-                ),
-              );
-            },
-            child: ThumbnailWidget(
-              memories[0].file,
-              shouldShowArchiveStatus: false,
-            ),
+          return MemoryCoverWidgetNew(
+            memories: memories,
+            controller: _controller,
+            offsetOfItem: offsetOfItem,
           );
         },
       ),
