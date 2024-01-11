@@ -1,4 +1,4 @@
-<svg width="500" height="500" fill="none">
+<svg fill="none" viewBox="0 0 500 500">
   <defs>
     <linearGradient id="a" x1="0" x2="1" y1="1.007" y2="1.007">
       <stop stop-color="#F50"/>
