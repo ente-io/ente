@@ -192,22 +192,13 @@ async function getOnnxImageSession() {
     return onnxImageSessionPromise;
 }
 
-let onnxTextSessionPromise: Promise<any> = null;
 let onnxTextSession: any = null;
 
 async function getOnnxTextSession() {
-    if (onnxTextSession) {
-        return onnxTextSession;
-    }
-    if (onnxTextSessionPromise) {
-        throw Error(CustomErrors.MODEL_DOWNLOAD_PENDING);
-    }
-    onnxTextSessionPromise = (async () => {
+    if (!onnxTextSession) {
         const clipModelPath = await getClipTextModelPath('onnx');
-        return createOnnxSession(clipModelPath);
-    })();
-    onnxTextSession = await onnxTextSessionPromise;
-    onnxTextSessionPromise = null;
+        onnxTextSession = await createOnnxSession(clipModelPath);
+    }
     return onnxTextSession;
 }
 
