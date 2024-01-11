@@ -40,7 +40,7 @@ export const getDefaultOptions = async (files: EnteFile[]) => {
     return [
         await getIndexStatusSuggestion(),
         ...convertSuggestionsToOptions(await getAllPeopleSuggestion(), files),
-    ];
+    ].filter((t) => !!t);
 };
 
 export const getAutoCompleteSuggestions =
@@ -174,7 +174,9 @@ function getYearSuggestion(searchPhrase: string): Suggestion[] {
 
 export async function getAllPeopleSuggestion(): Promise<Array<Suggestion>> {
     try {
+        addLogLine('getAllPeopleSuggestion called');
         const people = await getAllPeople(200);
+        addLogLine(`found people: ${people?.length ?? 0}`);
         return people.map((person) => ({
             label: person.name,
             type: SuggestionType.PERSON,
@@ -188,28 +190,32 @@ export async function getAllPeopleSuggestion(): Promise<Array<Suggestion>> {
 }
 
 export async function getIndexStatusSuggestion(): Promise<Suggestion> {
-    const config = await getMLSyncConfig();
-    const indexStatus = await mlIDbStorage.getIndexStatus(config.mlVersion);
+    try {
+        const config = await getMLSyncConfig();
+        const indexStatus = await mlIDbStorage.getIndexStatus(config.mlVersion);
 
-    let label;
-    if (!indexStatus.localFilesSynced) {
-        label = t('INDEXING_SCHEDULED');
-    } else if (indexStatus.outOfSyncFilesExists) {
-        label = t('ANALYZING_PHOTOS', {
-            indexStatus,
-        });
-    } else if (!indexStatus.peopleIndexSynced) {
-        label = t('INDEXING_PEOPLE', { indexStatus });
-    } else {
-        label = t('INDEXING_DONE', { indexStatus });
+        let label;
+        if (!indexStatus.localFilesSynced) {
+            label = t('INDEXING_SCHEDULED');
+        } else if (indexStatus.outOfSyncFilesExists) {
+            label = t('ANALYZING_PHOTOS', {
+                indexStatus,
+            });
+        } else if (!indexStatus.peopleIndexSynced) {
+            label = t('INDEXING_PEOPLE', { indexStatus });
+        } else {
+            label = t('INDEXING_DONE', { indexStatus });
+        }
+
+        return {
+            label,
+            type: SuggestionType.INDEX_STATUS,
+            value: indexStatus,
+            hide: true,
+        };
+    } catch (e) {
+        logError(e, 'getIndexStatusSuggestion failed');
     }
-
-    return {
-        label,
-        type: SuggestionType.INDEX_STATUS,
-        value: indexStatus,
-        hide: true,
-    };
 }
 
 function getDateSuggestion(searchPhrase: string): Suggestion[] {
