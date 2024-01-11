@@ -173,11 +173,8 @@ abstract class MLFramework {
 
   Future<bool> _canDownload() async {
     final connectivityResult = await (Connectivity().checkConnectivity());
-    bool canDownloadUnderCurrentNetworkConditions = true;
-    if (connectivityResult == ConnectivityResult.mobile) {
-      canDownloadUnderCurrentNetworkConditions = shouldDownloadOverMobileData;
-    }
-    return canDownloadUnderCurrentNetworkConditions;
+    return connectivityResult != ConnectivityResult.mobile ||
+        shouldDownloadOverMobileData;
   }
 
   Future<String> getAccessiblePathForAsset(
