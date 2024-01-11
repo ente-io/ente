@@ -358,10 +358,16 @@ export async function computeONNXTextEmbedding(
 
 async function getRGBData(inputFilePath: string) {
     const jpegData = await readFile(inputFilePath);
-    const rawImageData = jpeg.decode(jpegData, {
-        useTArray: true,
-        formatAsRGBA: false,
-    });
+    let rawImageData;
+    try {
+        rawImageData = jpeg.decode(jpegData, {
+            useTArray: true,
+            formatAsRGBA: false,
+        });
+    } catch (err) {
+        logErrorSentry(err, 'JPEG decode error');
+        throw err;
+    }
 
     const nx: number = rawImageData.width;
     const ny: number = rawImageData.height;
