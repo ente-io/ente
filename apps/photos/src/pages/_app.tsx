@@ -241,7 +241,7 @@ export default function App(props: EnteAppProps) {
                     );
                     return;
                 }
-                DownloadManager.init(APPS.PHOTOS, { token });
+                await DownloadManager.init(APPS.PHOTOS, { token });
                 const exportSettings = exportService.getExportSettings();
                 if (!exportService.exportFolderExists(exportSettings?.folder)) {
                     return;
