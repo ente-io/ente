@@ -38,7 +38,7 @@ abstract class MLFramework {
   InitializationState get initializationState => _state;
 
   set _initState(InitializationState state) {
-    Bus.instance.fire(MLFrameworkInitializationEvent(state));
+    Bus.instance.fire(MLFrameworkInitializationUpdateEvent(state));
     _logger.info("Init state is $state");
     _state = state;
   }
@@ -192,10 +192,10 @@ abstract class MLFramework {
   }
 }
 
-class MLFrameworkInitializationEvent extends Event {
+class MLFrameworkInitializationUpdateEvent extends Event {
   final InitializationState state;
 
-  MLFrameworkInitializationEvent(this.state);
+  MLFrameworkInitializationUpdateEvent(this.state);
 }
 
 enum InitializationState {

@@ -6,6 +6,7 @@ import "package:photos/core/event_bus.dart";
 import 'package:photos/events/embedding_updated_event.dart';
 import "package:photos/generated/l10n.dart";
 import "package:photos/services/feature_flag_service.dart";
+import "package:photos/services/semantic_search/frameworks/ml_framework.dart";
 import "package:photos/services/semantic_search/semantic_search_service.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/common/loading_widget.dart";
@@ -29,6 +30,32 @@ class MachineLearningSettingsPage extends StatefulWidget {
 
 class _MachineLearningSettingsPageState
     extends State<MachineLearningSettingsPage> {
+  late InitializationState _state;
+
+  late StreamSubscription<MLFrameworkInitializationUpdateEvent>
+      _eventSubscription;
+
+  @override
+  void initState() {
+    super.initState();
+    _eventSubscription =
+        Bus.instance.on<MLFrameworkInitializationUpdateEvent>().listen((event) {
+      _fetchState();
+      setState(() {});
+    });
+    _fetchState();
+  }
+
+  void _fetchState() {
+    _state = SemanticSearchService.instance.getFrameworkInitializationState();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _eventSubscription.cancel();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -118,17 +145,9 @@ class _MachineLearningSettingsPageState
         hasEnabled
             ? Column(
                 children: [
-                  FutureBuilder(
-                    future: SemanticSearchService.instance
-                        .getFrameworkInitializationStatus(),
-                    builder: (BuildContext context, AsyncSnapshot snapshot) {
-                      if (snapshot.hasData) {
-                        return const MagicSearchIndexStatsWidget();
-                      } else {
-                        return const ModelLoadingState();
-                      }
-                    },
-                  ),
+                  _state == InitializationState.initialized
+                      ? const MagicSearchIndexStatsWidget()
+                      : ModelLoadingState(_state),
                   const SizedBox(
                     height: 12,
                   ),
@@ -158,7 +177,12 @@ class _MachineLearningSettingsPageState
 }
 
 class ModelLoadingState extends StatelessWidget {
-  const ModelLoadingState({super.key});
+  final InitializationState state;
+
+  const ModelLoadingState(
+    this.state, {
+    Key? key,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -167,7 +191,7 @@ class ModelLoadingState extends StatelessWidget {
         MenuSectionTitle(title: S.of(context).status),
         MenuItemWidget(
           captionedTextWidget: CaptionedTextWidget(
-            title: S.of(context).loadingModel,
+            title: _getTitle(context),
           ),
           trailingWidget: EnteLoadingWidget(
             size: 12,
@@ -179,6 +203,15 @@ class ModelLoadingState extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  String _getTitle(BuildContext context) {
+    switch (state) {
+      case InitializationState.waitingForNetwork:
+        return S.of(context).waitingForWifi;
+      default:
+        return S.of(context).loadingModel;
+    }
   }
 }
 

@@ -1451,6 +1451,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "viewer": MessageLookupByLibrary.simpleMessage("Viewer"),
         "visitWebToManage": MessageLookupByLibrary.simpleMessage(
             "Please visit web.ente.io to manage your subscription"),
+        "waitingForWifi":
+            MessageLookupByLibrary.simpleMessage("Waiting for WiFi..."),
         "weAreOpenSource":
             MessageLookupByLibrary.simpleMessage("We are open source!"),
         "weDontSupportEditingPhotosAndAlbumsThatYouDont":

@@ -410,6 +410,7 @@
   "magicSearch": "Magic search",
   "magicSearchDescription": "Please note that this will result in a higher bandwidth and battery usage until all items are indexed.",
   "loadingModel": "Downloading models...",
+  "waitingForWifi": "Waiting for WiFi...",
   "status": "Status",
   "indexedItems": "Indexed items",
   "pendingItems": "Pending items",

@@ -2886,6 +2886,16 @@ class S {
     );
   }
 
+  /// `Waiting for WiFi...`
+  String get waitingForWifi {
+    return Intl.message(
+      'Waiting for WiFi...',
+      name: 'waitingForWifi',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Status`
   String get status {
     return Intl.message(

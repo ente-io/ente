@@ -150,8 +150,8 @@ class SemanticSearchService {
     );
   }
 
-  Future<bool> getFrameworkInitializationStatus() {
-    return _frameworkInitialization.future;
+  InitializationState getFrameworkInitializationState() {
+    return _mlFramework.initializationState;
   }
 
   Future<void> clearIndexes() async {
