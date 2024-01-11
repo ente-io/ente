@@ -58,6 +58,7 @@ class DiskLRUService {
                         } catch (e) {
                             if (e.code === 'ENOENT') return;
                             logError(e, 'Failed to evict least recently used');
+                            // ignoring the error, as it would retried on the next run
                         }
                         this.evictLeastRecentlyUsed(cacheDir, maxSize);
                     }
