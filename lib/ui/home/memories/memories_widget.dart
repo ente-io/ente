@@ -97,35 +97,41 @@ class _MemoriesWidgetState extends State<MemoriesWidget> {
               final diff =
                   (_controller.offset - offsetOfItem) + widthOfScreen / 7;
               final scale = 1 - (diff / widthOfScreen).abs() / 3;
-
-              return SizedBox(
-                height: 125 * scale,
-                width: 85 * scale,
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(5),
-                  child: Stack(
-                    fit: StackFit.expand,
-                    alignment: Alignment.bottomCenter,
-                    children: [
-                      child!,
-                      Positioned(
-                        bottom: 8,
-                        child: SizedBox(
-                          width: 85 * scale,
-                          child: Padding(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 8.0),
-                            child: Text(
-                              "1 year ago",
-                              style: getEnteTextTheme(context).miniBold,
-                              textScaleFactor: 1 * scale,
+              //Adding this row is a workaround for making height of memory cover
+              //render as 125 * scale. Without this, height of rendered memory
+              //cover will be 125
+              return Row(
+                children: [
+                  SizedBox(
+                    height: 125 * scale,
+                    width: 85 * scale,
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(5),
+                      child: Stack(
+                        fit: StackFit.expand,
+                        alignment: Alignment.bottomCenter,
+                        children: [
+                          child!,
+                          Positioned(
+                            bottom: 8,
+                            child: SizedBox(
+                              width: 85 * scale,
+                              child: Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 8.0),
+                                child: Text(
+                                  "1 year ago",
+                                  style: getEnteTextTheme(context).miniBold,
+                                  textScaleFactor: 1 * scale,
+                                ),
+                              ),
                             ),
                           ),
-                        ),
+                        ],
                       ),
-                    ],
+                    ),
                   ),
-                ),
+                ],
               );
             },
             child: ThumbnailWidget(
