@@ -17,6 +17,7 @@ import { getLatestVersionEmbeddings } from 'utils/embedding';
 import { getLocalTrashedFiles } from './trashService';
 import { getLocalCollections } from './collectionService';
 import { CustomError } from '@ente/shared/error';
+import { EnteFile } from 'types/file';
 
 const ENDPOINT = getEndpoint();
 
@@ -49,15 +50,17 @@ const getEmbeddingSyncTime = async () => {
 
 export const syncEmbeddings = async (model: Model = Model.ONNX_CLIP) => {
     try {
-        let embeddings = await getAllLocalEmbeddings();
+        let allEmbeddings = await getAllLocalEmbeddings();
         const localFiles = await getAllLocalFiles();
         const hiddenAlbums = await getLocalCollections('hidden');
         const localTrashFiles = await getLocalTrashedFiles();
         const fileIdToKeyMap = new Map<number, string>();
-        [...localFiles, ...localTrashFiles].forEach((file) => {
+        const allLocalFiles = [...localFiles, ...localTrashFiles];
+        allLocalFiles.forEach((file) => {
             fileIdToKeyMap.set(file.id, file.key);
         });
-        addLogLine(`Syncing embeddings localCount: ${embeddings.length}`);
+        await cleanupDeletedEmbeddings(allLocalFiles, allEmbeddings);
+        addLogLine(`Syncing embeddings localCount: ${allEmbeddings.length}`);
         let sinceTime = await getEmbeddingSyncTime();
         addLogLine(`Syncing embeddings sinceTime: ${sinceTime}`);
         let response: GetEmbeddingDiffResponse;
@@ -101,20 +104,19 @@ export const syncEmbeddings = async (model: Model = Model.ONNX_CLIP) => {
                     }
                 })
             );
-            embeddings = getLatestVersionEmbeddings([
-                ...embeddings,
+            allEmbeddings = getLatestVersionEmbeddings([
+                ...allEmbeddings,
                 ...newEmbeddings,
             ]);
             if (response.diff.length) {
                 sinceTime = response.diff.slice(-1)[0].updatedAt;
             }
-            await localForage.setItem(EMBEDDINGS_TABLE, embeddings);
+            await localForage.setItem(EMBEDDINGS_TABLE, allEmbeddings);
             await localForage.setItem(EMBEDDING_SYNC_TIME_TABLE, sinceTime);
             addLogLine(
-                `Syncing embeddings syncedEmbeddingsCount: ${embeddings.length}`
+                `Syncing embeddings syncedEmbeddingsCount: ${allEmbeddings.length}`
             );
         } while (response.diff.length === DIFF_LIMIT);
-        void cleanupDeletedEmbeddings();
     } catch (e) {
         logError(e, 'Sync embeddings failed');
     }
@@ -170,21 +172,21 @@ export const putEmbedding = async (
     }
 };
 
-export const cleanupDeletedEmbeddings = async () => {
-    const files = await getAllLocalFiles();
-    const trashedFiles = await getLocalTrashedFiles();
+export const cleanupDeletedEmbeddings = async (
+    allLocalFiles: EnteFile[],
+    allLocalEmbeddings: Embedding[]
+) => {
     const activeFileIds = new Set<number>();
-    [...files, ...trashedFiles].forEach((file) => {
+    allLocalFiles.forEach((file) => {
         activeFileIds.add(file.id);
     });
-    const embeddings = await getAllLocalEmbeddings();
 
-    const remainingEmbeddings = embeddings.filter((embedding) =>
+    const remainingEmbeddings = allLocalEmbeddings.filter((embedding) =>
         activeFileIds.has(embedding.fileID)
     );
-    if (embeddings.length !== remainingEmbeddings.length) {
+    if (allLocalEmbeddings.length !== remainingEmbeddings.length) {
         addLogLine(
-            `cleanupDeletedEmbeddings embeddingsCount: ${embeddings.length} remainingEmbeddingsCount: ${remainingEmbeddings.length}`
+            `cleanupDeletedEmbeddings embeddingsCount: ${allLocalEmbeddings.length} remainingEmbeddingsCount: ${remainingEmbeddings.length}`
         );
         await localForage.setItem(EMBEDDINGS_TABLE, remainingEmbeddings);
     }
