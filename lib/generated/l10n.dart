@@ -3533,10 +3533,10 @@ class S {
     );
   }
 
-  /// `Your have cleaned up {count, plural, one{{count} duplicate file} other{{count} duplicate files}}, saving ({storageSaved}!)`
+  /// `You have cleaned up {count, plural, one{{count} duplicate file} other{{count} duplicate files}}, saving ({storageSaved}!)`
   String duplicateFileCountWithStorageSaved(int count, String storageSaved) {
     return Intl.message(
-      'Your have cleaned up ${Intl.plural(count, one: '$count duplicate file', other: '$count duplicate files')}, saving ($storageSaved!)',
+      'You have cleaned up ${Intl.plural(count, one: '$count duplicate file', other: '$count duplicate files')}, saving ($storageSaved!)',
       name: 'duplicateFileCountWithStorageSaved',
       desc:
           'The text to display when the user has successfully cleaned up duplicate files',

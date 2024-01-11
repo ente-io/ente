@@ -69,7 +69,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Please drop an email to ${supportEmail} from your registered email address";
 
   static String m16(count, storageSaved) =>
-      "Your have cleaned up ${Intl.plural(count, one: '${count} duplicate file', other: '${count} duplicate files')}, saving (${storageSaved}!)";
+      "You have cleaned up ${Intl.plural(count, one: '${count} duplicate file', other: '${count} duplicate files')}, saving (${storageSaved}!)";
 
   static String m17(count, formattedSize) =>
       "${count} files, ${formattedSize} each";
