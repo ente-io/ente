@@ -86,14 +86,18 @@ class ClipServiceImpl {
         }
     };
 
-    updateIndexStatus = async () => {
+    getIndexingStatus = async () => {
         try {
-            addLogLine('loading local clip index status');
-            this.clipExtractionStatus = await getClipExtractionStatus();
-            this.onUpdateHandler(this.clipExtractionStatus);
-            addLogLine('loaded local clip index status');
+            if (
+                !this.clipExtractionStatus ||
+                (this.clipExtractionStatus.pending === 0 &&
+                    this.clipExtractionStatus.indexed === 0)
+            ) {
+                this.clipExtractionStatus = await getClipExtractionStatus();
+            }
+            return this.clipExtractionStatus;
         } catch (e) {
-            logError(e, 'failed to load local clip index status');
+            logError(e, 'failed to get clip indexing status');
         }
     };
 

@@ -52,14 +52,12 @@ export default function AdvancedSettings({ open, onClose, onRootClose }) {
     });
 
     useEffect(() => {
-        ClipService.setOnUpdateHandler(setIndexingStatus);
+        const main = async () => {
+            setIndexingStatus(await ClipService.getIndexingStatus());
+            ClipService.setOnUpdateHandler(setIndexingStatus);
+        };
+        main();
     }, []);
-
-    useEffect(() => {
-        if (open) {
-            ClipService.updateIndexStatus();
-        }
-    }, [open]);
 
     return (
         <EnteDrawer
