@@ -622,7 +622,7 @@
     "PHOTO_EDITOR": "Éditeur de photos",
     "FASTER_UPLOAD": "Chargements plus rapides",
     "FASTER_UPLOAD_DESCRIPTION": "Router les chargements vers les serveurs à proximité",
-    "STATUS": "État",
+    "MAGIC_SEARCH_STATUS": "",
     "INDEXED_ITEMS": "Éléments indexés",
     "CACHE_DIRECTORY": ""
 }
