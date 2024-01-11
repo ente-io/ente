@@ -79,6 +79,7 @@ class _MemoriesWidgetState extends State<MemoriesWidget> {
     return SizedBox(
       height: 150,
       child: InfiniteCarousel.builder(
+        loop: false,
         controller: _controller,
         itemCount: memoryWidgets.length,
         itemExtent: _itemExtent,
@@ -101,12 +102,19 @@ class _MemoriesWidgetState extends State<MemoriesWidget> {
             },
             child: Padding(
               padding: const EdgeInsets.all(2.0),
-              child: Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(5),
-                  boxShadow: kElevationToShadow[2],
-                ),
-                child: memoryWidgets[itemIndex],
+              child: Stack(
+                fit: StackFit.expand,
+                alignment: Alignment.bottomCenter,
+                children: [
+                  Image.asset(
+                    "assets/onboarding_safe.png",
+                    fit: BoxFit.cover,
+                  ),
+                  const Positioned(
+                    bottom: 8,
+                    child: Text("1 year ago"),
+                  ),
+                ],
               ),
             ),
           );
