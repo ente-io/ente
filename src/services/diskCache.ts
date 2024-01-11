@@ -70,21 +70,20 @@ export class DiskCache implements LimitedCache {
         }
     }
     async delete(cacheKey: string): Promise<boolean> {
-        try {
-            const cachePath = path.join(this.cacheBucketDir, cacheKey);
-            if (existsSync(cachePath)) {
+        const cachePath = path.join(this.cacheBucketDir, cacheKey);
+        if (existsSync(cachePath)) {
+            try {
                 await unlink(cachePath);
-                return true;
-            } else {
-                return false;
+            } catch (e) {
+                if (e.code === 'ENOENT') {
+                    return true;
+                } else {
+                    logError(e, 'Failed to delete cache key');
+                    throw e;
+                }
             }
-        } catch (e) {
-            if (e.code === 'ENOENT') {
-                return true;
-            } else {
-                logError(e, 'Failed to evict least recently used');
-                throw e;
-            }
+        } else {
+            return false;
         }
     }
 }
