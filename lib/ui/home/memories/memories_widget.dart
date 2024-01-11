@@ -1,13 +1,12 @@
 import "dart:async";
 
 import 'package:flutter/material.dart';
-import "package:flutter/rendering.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/memories_setting_changed.dart";
 import 'package:photos/models/memory.dart';
 import 'package:photos/services/memories_service.dart';
-import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/home/memories/memory_cover_widget.dart";
+import "package:photos/ui/home/memories/memory_cover_widget_new.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 
 class MemoriesWidget extends StatefulWidget {
@@ -21,11 +20,6 @@ class _MemoriesWidgetState extends State<MemoriesWidget> {
   final double _widthOfItem = 85;
   late ScrollController _controller;
   late StreamSubscription<MemoriesSettingChanged> _subscription;
-
-  final _assetPaths = <String>[
-    "assets/onboarding_safe.png",
-    "assets/gallery_locked.png",
-  ];
 
   @override
   void initState() {
@@ -76,10 +70,7 @@ class _MemoriesWidgetState extends State<MemoriesWidget> {
       memoryWidgets.add(
         Padding(
           padding: const EdgeInsets.all(8.0),
-          child: Container(
-            color: Colors.yellow,
-            child: MemoryCovertWidget(memories: memories),
-          ),
+          child: MemoryCovertWidget(memories: memories),
         ),
       );
     }
@@ -99,39 +90,18 @@ class _MemoriesWidgetState extends State<MemoriesWidget> {
               final scale = 1 - (diff / widthOfScreen).abs() / 3;
               //Adding this row is a workaround for making height of memory cover
               //render as 125 * scale. Without this, height of rendered memory
-              //cover will be 125
-              return Row(
-                children: [
-                  SizedBox(
-                    height: 125 * scale,
-                    width: 85 * scale,
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(5),
-                      child: Stack(
-                        fit: StackFit.expand,
-                        alignment: Alignment.bottomCenter,
-                        children: [
-                          child!,
-                          Positioned(
-                            bottom: 8,
-                            child: SizedBox(
-                              width: 85 * scale,
-                              child: Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 8.0),
-                                child: Text(
-                                  "1 year ago",
-                                  style: getEnteTextTheme(context).miniBold,
-                                  textScaleFactor: 1 * scale,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
+              //cover will be 125.
+              return Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 2.5),
+                child: Row(
+                  children: [
+                    MemoryCoverWidgetNew(
+                      memories: memories,
+                      thumbnailWidget: child!,
+                      scale: scale,
                     ),
-                  ),
-                ],
+                  ],
+                ),
               );
             },
             child: ThumbnailWidget(
