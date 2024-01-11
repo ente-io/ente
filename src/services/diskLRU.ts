@@ -54,7 +54,10 @@ class DiskLRUService {
                         const leastRecentlyUsed =
                             await this.findLeastRecentlyUsed(cacheDir);
 
-                        await unlink(leastRecentlyUsed.path);
+                        await unlink(leastRecentlyUsed.path).catch((e) => {
+                            if (e.code === 'ENOENT') return;
+                            logError(e, 'Failed to evict least recently used');
+                        });
                         this.evictLeastRecentlyUsed(cacheDir, maxSize);
                     }
                     resolve(null);
