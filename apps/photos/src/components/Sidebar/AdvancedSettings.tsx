@@ -110,7 +110,9 @@ export default function AdvancedSettings({ open, onClose, onRootClose }) {
 
                         {isElectron() && (
                             <Box>
-                                <MenuSectionTitle title={t('STATUS')} />
+                                <MenuSectionTitle
+                                    title={t('MAGIC_SEARCH_STATUS')}
+                                />
                                 <Stack py={'12px'} px={'12px'} spacing={'24px'}>
                                     <VerticallyCenteredFlex
                                         justifyContent="space-between"
