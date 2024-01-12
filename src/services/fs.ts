@@ -6,8 +6,6 @@ import StreamZip from 'node-stream-zip';
 import { Readable } from 'stream';
 import { logError } from './logging';
 import { existsSync } from 'fs';
-import { log } from 'electron-log';
-import { convertBytesToHumanReadable } from '../utils/logging';
 
 // https://stackoverflow.com/a/63111390
 export const getDirFilePaths = async (dirPath: string) => {
@@ -230,8 +228,7 @@ export const convertBrowserStreamToNode = (
 
 export async function writeNodeStream(
     filePath: string,
-    fileStream: NodeJS.ReadableStream,
-    enableLogging = false
+    fileStream: NodeJS.ReadableStream
 ) {
     const writeable = fs.createWriteStream(filePath);
 
@@ -240,14 +237,6 @@ export async function writeNodeStream(
     });
 
     fileStream.pipe(writeable);
-
-    let downloaded = 0;
-    if (enableLogging) {
-        fileStream.on('data', (chunk) => {
-            downloaded += chunk.length;
-            log(`Received ${convertBytesToHumanReadable(downloaded)} of data.`);
-        });
-    }
 
     await new Promise((resolve, reject) => {
         writeable.on('finish', resolve);
