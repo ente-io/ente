@@ -54,7 +54,7 @@ class ClipServiceImpl {
 
     private logoutHandler = async () => {
         if (this.embeddingExtractionInProgress) {
-            this.embeddingExtractionInProgress?.abort();
+            this.embeddingExtractionInProgress.abort();
         }
         if (this.onFileUploadedHandler) {
             await this.removeOnFileUploadListener();
