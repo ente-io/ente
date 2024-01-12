@@ -102,6 +102,7 @@ class DownloadManagerImpl {
             addLogLine('downloadManger logoutHandler started');
             this.ready = false;
             this.cryptoWorker = null;
+            this.downloadClient = null;
             this.fileObjectURLPromises.clear();
             this.fileConversionPromises.clear();
             this.thumbnailObjectURLPromises.clear();
