@@ -36,6 +36,8 @@ class _MemoryCoverWidgetNewState extends State<MemoryCoverWidgetNew> {
     final index = _getNextMemoryIndex();
     final title = _getTitle(widget.memories[index]);
     final memory = widget.memories[index];
+    final isSeen = memory.isSeen();
+
     return AnimatedBuilder(
       animation: widget.controller,
       builder: (context, child) {
@@ -66,9 +68,11 @@ class _MemoryCoverWidgetNewState extends State<MemoryCoverWidgetNew> {
                   height: 125 * scale,
                   width: 85 * scale,
                   decoration: BoxDecoration(
-                    boxShadow: const [
+                    boxShadow: [
                       BoxShadow(
-                        color: Color.fromRGBO(1, 222, 77, 0.11),
+                        color: isSeen
+                            ? Colors.transparent
+                            : const Color.fromRGBO(1, 222, 77, 0.11),
                         spreadRadius: MemoryCoverWidgetNew.centerStrokeWidth,
                         blurRadius: 0,
                       ),
@@ -82,14 +86,18 @@ class _MemoryCoverWidgetNewState extends State<MemoryCoverWidgetNew> {
                       alignment: Alignment.bottomCenter,
                       children: [
                         child!,
-                        Container(
-                          decoration: BoxDecoration(
-                            border: Border.all(
-                              color: const Color.fromRGBO(1, 222, 77, 0.11),
-                              width: MemoryCoverWidgetNew.centerStrokeWidth,
-                            ),
-                          ),
-                        ),
+                        isSeen
+                            ? const SizedBox.shrink()
+                            : Container(
+                                decoration: BoxDecoration(
+                                  border: Border.all(
+                                    color:
+                                        const Color.fromRGBO(1, 222, 77, 0.11),
+                                    width:
+                                        MemoryCoverWidgetNew.centerStrokeWidth,
+                                  ),
+                                ),
+                              ),
                         Container(
                           decoration: BoxDecoration(
                             gradient: LinearGradient(
@@ -103,50 +111,52 @@ class _MemoryCoverWidgetNewState extends State<MemoryCoverWidgetNew> {
                             ),
                           ),
                         ),
-                        Container(
-                          decoration: const BoxDecoration(
-                            gradient: LinearGradient(
-                              stops: [0, 0.35, 0.5],
-                              // stops: [0, 0.5],
-
-                              colors: [
-                                Color.fromARGB(71, 1, 222, 78),
-                                Color(0x1901DE4D),
-                                Color(0x0001DE4D),
-                              ],
-                              transform: GradientRotation(-1.2),
-                            ),
-                          ),
-                        ),
-                        Stack(
-                          fit: StackFit.expand,
-                          alignment: Alignment.bottomCenter,
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              children: [
-                                Transform.scale(
-                                  scale: scale,
-                                  child: Container(
-                                    decoration: const BoxDecoration(
-                                      gradient: LinearGradient(
-                                        stops: [0, 0.5, 1],
-                                        colors: [
-                                          Colors.transparent,
-                                          Color(0xFF01DE4D),
-                                          Colors.transparent,
-                                        ],
-                                      ),
-                                    ),
-                                    height: 1 * scale,
-                                    width: 68 * scale,
+                        isSeen
+                            ? const SizedBox.shrink()
+                            : Container(
+                                decoration: const BoxDecoration(
+                                  gradient: LinearGradient(
+                                    stops: [0, 0.35, 0.5],
+                                    colors: [
+                                      Color.fromARGB(71, 1, 222, 78),
+                                      Color(0x1901DE4D),
+                                      Color(0x0001DE4D),
+                                    ],
+                                    transform: GradientRotation(-1.2),
                                   ),
                                 ),
-                              ],
-                            ),
-                          ],
-                        ),
+                              ),
+                        isSeen
+                            ? const SizedBox.shrink()
+                            : Stack(
+                                fit: StackFit.expand,
+                                alignment: Alignment.bottomCenter,
+                                children: [
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment: CrossAxisAlignment.end,
+                                    children: [
+                                      Transform.scale(
+                                        scale: scale,
+                                        child: Container(
+                                          decoration: const BoxDecoration(
+                                            gradient: LinearGradient(
+                                              stops: [0, 0.5, 1],
+                                              colors: [
+                                                Colors.transparent,
+                                                Color(0xFF01DE4D),
+                                                Colors.transparent,
+                                              ],
+                                            ),
+                                          ),
+                                          height: 1 * scale,
+                                          width: 68 * scale,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
                         Positioned(
                           bottom: 8 * scale,
                           child: Transform.scale(
