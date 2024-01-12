@@ -71,6 +71,63 @@ class _MemoryCoverWidgetNewState extends State<MemoryCoverWidgetNew> {
                       alignment: Alignment.bottomCenter,
                       children: [
                         child!,
+                        Container(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [
+                                Colors.black.withOpacity(0.5),
+                                Colors.transparent,
+                              ],
+                              stops: const [0, 0.85],
+                              begin: Alignment.bottomCenter,
+                              end: Alignment.topCenter,
+                            ),
+                          ),
+                        ),
+                        Container(
+                          decoration: const BoxDecoration(
+                            gradient: LinearGradient(
+                              stops: [0, 0.35, 0.5],
+                              // stops: [0, 0.5],
+
+                              colors: [
+                                Color.fromARGB(58, 1, 222, 78),
+                                Color(0x1901DE4D),
+                                Color(0x0001DE4D),
+                              ],
+                              transform: GradientRotation(-1.2),
+                            ),
+                          ),
+                        ),
+                        Stack(
+                          fit: StackFit.expand,
+                          alignment: Alignment.bottomCenter,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                Transform.scale(
+                                  scale: scale,
+                                  child: Container(
+                                    decoration: const BoxDecoration(
+                                      gradient: LinearGradient(
+                                        stops: [0, 0.5, 1],
+                                        colors: [
+                                          Colors.transparent,
+                                          Color(0xFF01DE4D),
+                                          Colors.transparent,
+                                        ],
+                                      ),
+                                    ),
+                                    height: 1,
+                                    width: 68,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
                         Positioned(
                           bottom: 8 * scale,
                           child: Transform.scale(
@@ -105,42 +162,10 @@ class _MemoryCoverWidgetNewState extends State<MemoryCoverWidgetNew> {
           ),
         );
       },
-      child: Hero(
-        tag: "memories" + memory.file.tag,
-        child: Stack(
-          children: [
-            ThumbnailWidget(
-              memory.file,
-              shouldShowArchiveStatus: false,
-              key: Key("memories" + memory.file.tag),
-            ),
-            Container(
-              decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  stops: [0, 0.35, 0.5],
-                  // stops: [0, 0.5],
-
-                  colors: [
-                    Color.fromARGB(96, 1, 222, 78),
-                    Color(0x1901DE4D),
-                    Color(0x0001DE4D),
-                  ],
-                  transform: GradientRotation(-1.2),
-                ),
-              ),
-              child: Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [Colors.black.withOpacity(0.5), Colors.transparent],
-                    stops: const [0, 0.85],
-                    begin: Alignment.bottomCenter,
-                    end: Alignment.topCenter,
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
+      child: ThumbnailWidget(
+        memory.file,
+        shouldShowArchiveStatus: false,
+        key: Key("memories" + memory.file.tag),
       ),
     );
   }
