@@ -10,6 +10,7 @@ class MemoryCoverWidgetNew extends StatefulWidget {
   final List<Memory> memories;
   final ScrollController controller;
   final double offsetOfItem;
+  static const centerStrokeWidth = 0.5;
 
   const MemoryCoverWidgetNew({
     required this.memories,
@@ -61,9 +62,19 @@ class _MemoryCoverWidgetNewState extends State<MemoryCoverWidgetNew> {
             },
             child: Row(
               children: [
-                SizedBox(
+                Container(
                   height: 125 * scale,
                   width: 85 * scale,
+                  decoration: BoxDecoration(
+                    boxShadow: const [
+                      BoxShadow(
+                        color: Color.fromRGBO(1, 222, 77, 0.11),
+                        spreadRadius: MemoryCoverWidgetNew.centerStrokeWidth,
+                        blurRadius: 0,
+                      ),
+                    ],
+                    borderRadius: BorderRadius.circular(5),
+                  ),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(5),
                     child: Stack(
@@ -71,6 +82,14 @@ class _MemoryCoverWidgetNewState extends State<MemoryCoverWidgetNew> {
                       alignment: Alignment.bottomCenter,
                       children: [
                         child!,
+                        Container(
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              color: const Color.fromRGBO(1, 222, 77, 0.11),
+                              width: MemoryCoverWidgetNew.centerStrokeWidth,
+                            ),
+                          ),
+                        ),
                         Container(
                           decoration: BoxDecoration(
                             gradient: LinearGradient(
@@ -91,7 +110,7 @@ class _MemoryCoverWidgetNewState extends State<MemoryCoverWidgetNew> {
                               // stops: [0, 0.5],
 
                               colors: [
-                                Color.fromARGB(58, 1, 222, 78),
+                                Color.fromARGB(71, 1, 222, 78),
                                 Color(0x1901DE4D),
                                 Color(0x0001DE4D),
                               ],
