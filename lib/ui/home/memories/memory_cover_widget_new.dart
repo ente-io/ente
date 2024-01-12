@@ -82,7 +82,7 @@ class _MemoryCoverWidgetNewState extends State<MemoryCoverWidgetNew> {
                                   horizontal: 8.0,
                                 ),
                                 child: Text(
-                                  "1 year ago",
+                                  title,
                                   style: getEnteTextTheme(context).miniBold,
                                 ),
                               ),

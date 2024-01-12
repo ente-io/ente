@@ -75,6 +75,7 @@ class _MemoriesWidgetState extends State<MemoriesWidget> {
     return SizedBox(
       height: 125,
       child: ListView.builder(
+        physics: const BouncingScrollPhysics(),
         scrollDirection: Axis.horizontal,
         controller: _controller,
         itemCount: memoryWidgets.length,
