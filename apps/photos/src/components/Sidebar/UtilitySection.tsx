@@ -4,14 +4,17 @@ import { t } from 'i18next';
 // import FixLargeThumbnails from 'components/FixLargeThumbnail';
 import RecoveryKey from '@ente/shared/components/RecoveryKey';
 import TwoFactorModal from 'components/TwoFactor/Modal';
-import { PHOTOS_PAGES as PAGES } from '@ente/shared/constants/pages';
+import {
+    PHOTOS_PAGES as PAGES,
+    ACCOUNTS_PAGES,
+} from '@ente/shared/constants/pages';
 import { useRouter } from 'next/router';
 import { AppContext } from 'pages/_app';
 // import mlIDbStorage from 'utils/storage/mlIDbStorage';
 import isElectron from 'is-electron';
 import WatchFolder from 'components/WatchFolder';
 import { getDownloadAppMessage } from 'utils/ui';
-
+import { getData, LS_KEYS } from '@ente/shared/storage/localStorage';
 import { isInternalUser } from 'utils/user';
 import Preferences from './Preferences';
 import { EnteMenuItem } from 'components/Menu/EnteMenuItem';
@@ -62,6 +65,17 @@ export default function UtilitySection({ closeSidebar }) {
         router.push(PAGES.CHANGE_EMAIL);
     };
 
+    const redirectToAccountsPage = () => {
+        closeSidebar();
+
+        // serialize the user data to pass it over to accounts
+        const userData = getData(LS_KEYS.USER);
+        const serialized = JSON.stringify(userData);
+        const serializeB64 = window.btoa(serialized);
+
+        window.location.href = `${process.env.NEXT_PUBLIC_ACCOUNTS_ENDPOINT}${ACCOUNTS_PAGES.ACCOUNT_HANDOFF}#${serializeB64}`;
+    };
+
     const redirectToDeduplicatePage = () => router.push(PAGES.DEDUPLICATE);
 
     const somethingWentWrong = () =>
@@ -110,6 +124,12 @@ export default function UtilitySection({ closeSidebar }) {
                 variant="secondary"
                 onClick={openTwoFactorModal}
                 label={t('TWO_FACTOR')}
+            />
+
+            <EnteMenuItem
+                variant="secondary"
+                onClick={redirectToAccountsPage}
+                label={t('PASSKEYS')}
             />
 
             <EnteMenuItem

@@ -615,5 +615,6 @@
     "FLIP": "Flip",
     "ROTATION": "Rotation",
     "RESET": "Reset",
-    "PHOTO_EDITOR": "Photo Editor"
+    "PHOTO_EDITOR": "Photo Editor",
+    "PASSKEYS": "Passkeys"
 }

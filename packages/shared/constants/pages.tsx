@@ -45,4 +45,5 @@ export enum ACCOUNTS_PAGES {
     VERIFY = '/verify',
     ROOT = '/',
     PASSKEYS = '/passkeys',
+    ACCOUNT_HANDOFF = '/account-handoff',
 }
