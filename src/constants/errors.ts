@@ -7,4 +7,6 @@ export const CustomErrors = {
         `Unsupported platform - ${platform} ${arch}`,
     MODEL_DOWNLOAD_PENDING:
         'Model download pending, skipping clip search request',
+    INVALID_FILE_PATH: 'Invalid file path',
+    INVALID_CLIP_MODEL: (model: string) => `Invalid Clip model - ${model}`,
 };

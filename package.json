@@ -1,7 +1,7 @@
 {
     "name": "ente",
     "productName": "ente",
-    "version": "1.6.61-alpha.3",
+    "version": "1.6.61-alpha.6",
     "private": true,
     "description": "Desktop client for ente.io",
     "main": "app/main.js",
@@ -134,9 +134,12 @@
         "electron-updater": "^4.3.8",
         "ffmpeg-static": "^5.1.0",
         "get-folder-size": "^2.0.1",
+        "html-entities": "^2.4.0",
+        "jpeg-js": "^0.4.4",
         "next-electron-server": "file:./thirdparty/next-electron-server",
         "node-fetch": "^2.6.7",
         "node-stream-zip": "^1.15.0",
+        "onnxruntime-node": "^1.16.3",
         "promise-fs": "^2.1.1"
     },
     "standard": {
