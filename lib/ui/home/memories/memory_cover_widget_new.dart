@@ -1,4 +1,5 @@
 import "package:flutter/material.dart";
+import "package:photos/generated/l10n.dart";
 import "package:photos/models/memory.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/home/memories/full_screen_memory.dart";
@@ -31,6 +32,9 @@ class _MemoryCoverWidgetNewState extends State<MemoryCoverWidgetNew> {
     }
 
     final widthOfScreen = MediaQuery.sizeOf(context).width;
+    final index = _getNextMemoryIndex();
+    final title = _getTitle(widget.memories[index]);
+    final memory = widget.memories[index];
     return AnimatedBuilder(
       animation: widget.controller,
       builder: (context, child) {
@@ -47,9 +51,9 @@ class _MemoryCoverWidgetNewState extends State<MemoryCoverWidgetNew> {
               await routeToPage(
                 context,
                 FullScreenMemoryDataUpdater(
-                  initialIndex: 0,
+                  initialIndex: index,
                   memories: widget.memories,
-                  child: FullScreenMemory("title", 0),
+                  child: FullScreenMemory(title, index),
                 ),
                 forceCustomPageRoute: true,
               );
@@ -94,10 +98,43 @@ class _MemoryCoverWidgetNewState extends State<MemoryCoverWidgetNew> {
           ),
         );
       },
-      child: ThumbnailWidget(
-        widget.memories[0].file,
-        shouldShowArchiveStatus: false,
+      child: Hero(
+        tag: "memories" + memory.file.tag,
+        child: ThumbnailWidget(
+          memory.file,
+          shouldShowArchiveStatus: false,
+          key: Key("memories" + memory.file.tag),
+        ),
       ),
     );
+  }
+
+  // Returns either the first unseen memory or the memory that succeeds the
+  // last seen memory
+  int _getNextMemoryIndex() {
+    int lastSeenIndex = 0;
+    int lastSeenTimestamp = 0;
+    for (var index = 0; index < widget.memories.length; index++) {
+      final memory = widget.memories[index];
+      if (!memory.isSeen()) {
+        return index;
+      } else {
+        if (memory.seenTime() > lastSeenTimestamp) {
+          lastSeenIndex = index;
+          lastSeenTimestamp = memory.seenTime();
+        }
+      }
+    }
+    if (lastSeenIndex == widget.memories.length - 1) {
+      return 0;
+    }
+    return lastSeenIndex + 1;
+  }
+
+  String _getTitle(Memory memory) {
+    final present = DateTime.now();
+    final then = DateTime.fromMicrosecondsSinceEpoch(memory.file.creationTime!);
+    final diffInYears = present.year - then.year;
+    return S.of(context).yearsAgo(diffInYears);
   }
 }
