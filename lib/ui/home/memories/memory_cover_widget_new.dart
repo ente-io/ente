@@ -85,7 +85,11 @@ class _MemoryCoverWidgetNewState extends State<MemoryCoverWidgetNew> {
                                   tag: title,
                                   child: Text(
                                     title,
-                                    style: getEnteTextTheme(context).miniBold,
+                                    style: getEnteTextTheme(context)
+                                        .miniBold
+                                        .copyWith(
+                                          color: Colors.white,
+                                        ),
                                   ),
                                 ),
                               ),
@@ -113,12 +117,25 @@ class _MemoryCoverWidgetNewState extends State<MemoryCoverWidgetNew> {
             Container(
               decoration: const BoxDecoration(
                 gradient: LinearGradient(
-                  stops: [0, 0.5],
+                  stops: [0, 0.35, 0.5],
+                  // stops: [0, 0.5],
+
                   colors: [
-                    Color(0x6601DE4D),
+                    Color.fromARGB(96, 1, 222, 78),
+                    Color(0x1901DE4D),
                     Color(0x0001DE4D),
                   ],
                   transform: GradientRotation(-1.2),
+                ),
+              ),
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Colors.black.withOpacity(0.5), Colors.transparent],
+                    stops: const [0, 0.85],
+                    begin: Alignment.bottomCenter,
+                    end: Alignment.topCenter,
+                  ),
                 ),
               ),
             ),
