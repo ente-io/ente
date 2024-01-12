@@ -60,22 +60,6 @@ export default defineConfig({
 function sidebarPhotos() {
   return [
     {
-      text: "Troubleshoot",
-      collapsed: true,
-      link: "/photos/troubleshooting/files-not-uploading",
-      items: [
-        {
-          text: "Files not uploading",
-          link: "/photos/troubleshooting/files-not-uploading",
-        },
-        {
-          text: "Failed to play video",
-          link: "/photos/troubleshooting/video-not-playing",
-        },
-        { text: "Report bug", link: "/photos/troubleshooting/report-bug" },
-      ],
-    },
-    {
       text: "Welcome",
       items: [
         {
@@ -117,11 +101,19 @@ function sidebarPhotos() {
           ],
         },
         {
-          text: "Import",
+          text: "Troubleshoot",
           collapsed: true,
-          link: "/photos/import/index",
+          link: "/photos/troubleshooting/files-not-uploading",
           items: [
-            { text: "Watch folder", link: "/photos/features/watch-folder" },
+            {
+              text: "Files not uploading",
+              link: "/photos/troubleshooting/files-not-uploading",
+            },
+            {
+              text: "Failed to play video",
+              link: "/photos/troubleshooting/video-not-playing",
+            },
+            { text: "Report bug", link: "/photos/troubleshooting/report-bug" },
           ],
         },
       ],
