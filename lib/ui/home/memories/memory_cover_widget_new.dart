@@ -81,9 +81,12 @@ class _MemoryCoverWidgetNewState extends State<MemoryCoverWidgetNew> {
                                 padding: const EdgeInsets.symmetric(
                                   horizontal: 8.0,
                                 ),
-                                child: Text(
-                                  title,
-                                  style: getEnteTextTheme(context).miniBold,
+                                child: Hero(
+                                  tag: title,
+                                  child: Text(
+                                    title,
+                                    style: getEnteTextTheme(context).miniBold,
+                                  ),
                                 ),
                               ),
                             ),
@@ -100,10 +103,26 @@ class _MemoryCoverWidgetNewState extends State<MemoryCoverWidgetNew> {
       },
       child: Hero(
         tag: "memories" + memory.file.tag,
-        child: ThumbnailWidget(
-          memory.file,
-          shouldShowArchiveStatus: false,
-          key: Key("memories" + memory.file.tag),
+        child: Stack(
+          children: [
+            ThumbnailWidget(
+              memory.file,
+              shouldShowArchiveStatus: false,
+              key: Key("memories" + memory.file.tag),
+            ),
+            Container(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  stops: [0, 0.5],
+                  colors: [
+                    Color(0x6601DE4D),
+                    Color(0x0001DE4D),
+                  ],
+                  transform: GradientRotation(-1.2),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
