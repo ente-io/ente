@@ -11,6 +11,8 @@ class GGML extends MLFramework {
   final _computer = Computer.shared();
   final _logger = Logger("GGML");
 
+  GGML(super.shouldDownloadOverMobileData);
+
   @override
   String getImageModelRemotePath() {
     return kModelBucketEndpoint + kImageModel;

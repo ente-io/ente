@@ -704,6 +704,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("正在加载 EXIF 数据..."),
         "loadingGallery": MessageLookupByLibrary.simpleMessage("正在加载图库..."),
         "loadingMessage": MessageLookupByLibrary.simpleMessage("正在加载您的照片..."),
+        "loadingModel": MessageLookupByLibrary.simpleMessage("正在下载模型..."),
         "localGallery": MessageLookupByLibrary.simpleMessage("本地相册"),
         "location": MessageLookupByLibrary.simpleMessage("地理位置"),
         "locationName": MessageLookupByLibrary.simpleMessage("地点名称"),
