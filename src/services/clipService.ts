@@ -86,7 +86,7 @@ async function downloadModel(saveLocation: string, url: string) {
     }
     log.info('downloading clip model');
     const resp = await fetch(url);
-    await writeNodeStream(saveLocation, resp.body, true);
+    await writeNodeStream(saveLocation, resp.body);
     log.info('clip model downloaded');
 }
 
