@@ -80,7 +80,7 @@ class _MemoriesWidgetState extends State<MemoriesWidget> {
                 height: 12,
               ),
               _buildMemories(snapshot.data!),
-              const Divider(),
+              const SizedBox(height: 10),
             ],
           );
         }
