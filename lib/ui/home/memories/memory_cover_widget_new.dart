@@ -11,6 +11,8 @@ class MemoryCoverWidgetNew extends StatefulWidget {
   final ScrollController controller;
   final double offsetOfItem;
   static const centerStrokeWidth = 1.0;
+  static const width = 85.0;
+  static const height = 125.0;
 
   const MemoryCoverWidgetNew({
     required this.memories,
@@ -48,8 +50,8 @@ class _MemoryCoverWidgetNewState extends State<MemoryCoverWidgetNew> {
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: 2.5),
           //Adding this row is a workaround for making height of memory cover
-          //render as 125 * scale. Without this, height of rendered memory
-          //cover will be 125.
+          //render as [MemoryCoverWidgetNew.height] * scale. Without this, height of rendered memory
+          //cover will be [MemoryCoverWidgetNew.height].
           child: GestureDetector(
             onTap: () async {
               await routeToPage(
@@ -66,8 +68,8 @@ class _MemoryCoverWidgetNewState extends State<MemoryCoverWidgetNew> {
             child: Row(
               children: [
                 Container(
-                  height: 125 * scale,
-                  width: 85 * scale,
+                  height: MemoryCoverWidgetNew.height * scale,
+                  width: MemoryCoverWidgetNew.width * scale,
                   decoration: BoxDecoration(
                     boxShadow: [
                       BoxShadow(
@@ -177,7 +179,7 @@ class _MemoryCoverWidgetNewState extends State<MemoryCoverWidgetNew> {
                           child: Transform.scale(
                             scale: scale,
                             child: SizedBox(
-                              width: 85,
+                              width: MemoryCoverWidgetNew.width,
                               child: Padding(
                                 padding: const EdgeInsets.symmetric(
                                   horizontal: 8.0,
