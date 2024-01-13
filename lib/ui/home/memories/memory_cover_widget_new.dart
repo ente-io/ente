@@ -76,6 +76,7 @@ class _MemoryCoverWidgetNewState extends State<MemoryCoverWidgetNew> {
                         spreadRadius: MemoryCoverWidgetNew.centerStrokeWidth,
                         blurRadius: 0,
                       ),
+                      // ...shadowFloatLight,
                     ],
                     borderRadius: BorderRadius.circular(5),
                   ),
@@ -191,10 +192,13 @@ class _MemoryCoverWidgetNewState extends State<MemoryCoverWidgetNew> {
           ),
         );
       },
-      child: ThumbnailWidget(
-        memory.file,
-        shouldShowArchiveStatus: false,
-        key: Key("memories" + memory.file.tag),
+      child: Hero(
+        tag: "memories" + memory.file.tag,
+        child: ThumbnailWidget(
+          memory.file,
+          shouldShowArchiveStatus: false,
+          key: Key("memories" + memory.file.tag),
+        ),
       ),
     );
   }
