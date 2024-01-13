@@ -76,7 +76,11 @@ class _MemoryCoverWidgetNewState extends State<MemoryCoverWidgetNew> {
                         spreadRadius: MemoryCoverWidgetNew.centerStrokeWidth,
                         blurRadius: 0,
                       ),
-                      // ...shadowFloatLight,
+                      const BoxShadow(
+                        color: Color.fromRGBO(0, 0, 0, 0.13),
+                        blurRadius: 3,
+                        offset: Offset(1, 1),
+                      ),
                     ],
                     borderRadius: BorderRadius.circular(5),
                   ),
