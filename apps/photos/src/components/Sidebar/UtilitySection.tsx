@@ -1,25 +1,26 @@
-import { useContext, useState } from 'react';
 import { t } from 'i18next';
+import { useContext, useState } from 'react';
 
 // import FixLargeThumbnails from 'components/FixLargeThumbnail';
 import RecoveryKey from '@ente/shared/components/RecoveryKey';
-import TwoFactorModal from 'components/TwoFactor/Modal';
 import {
-    PHOTOS_PAGES as PAGES,
     ACCOUNTS_PAGES,
+    PHOTOS_PAGES as PAGES,
 } from '@ente/shared/constants/pages';
+import TwoFactorModal from 'components/TwoFactor/Modal';
 import { useRouter } from 'next/router';
 import { AppContext } from 'pages/_app';
 // import mlIDbStorage from 'utils/storage/mlIDbStorage';
-import isElectron from 'is-electron';
-import WatchFolder from 'components/WatchFolder';
-import { getDownloadAppMessage } from 'utils/ui';
+import { APPS, CLIENT_PACKAGE_NAMES } from '@ente/shared/apps/constants';
+import ThemeSwitcher from '@ente/shared/components/ThemeSwitcher';
 import { getData, LS_KEYS } from '@ente/shared/storage/localStorage';
+import { THEME_COLOR } from '@ente/shared/themes/constants';
+import { EnteMenuItem } from 'components/Menu/EnteMenuItem';
+import WatchFolder from 'components/WatchFolder';
+import isElectron from 'is-electron';
+import { getDownloadAppMessage } from 'utils/ui';
 import { isInternalUser } from 'utils/user';
 import Preferences from './Preferences';
-import { EnteMenuItem } from 'components/Menu/EnteMenuItem';
-import ThemeSwitcher from '@ente/shared/components/ThemeSwitcher';
-import { THEME_COLOR } from '@ente/shared/themes/constants';
 
 export default function UtilitySection({ closeSidebar }) {
     const router = useRouter();
@@ -73,7 +74,8 @@ export default function UtilitySection({ closeSidebar }) {
         const serialized = JSON.stringify(userData);
         const serializeB64 = window.btoa(serialized);
 
-        window.location.href = `${process.env.NEXT_PUBLIC_ACCOUNTS_ENDPOINT}${ACCOUNTS_PAGES.ACCOUNT_HANDOFF}#${serializeB64}`;
+        window.location.href = `${process.env.NEXT_PUBLIC_ACCOUNTS_ENDPOINT}${ACCOUNTS_PAGES.ACCOUNT_HANDOFF
+            }?package=${CLIENT_PACKAGE_NAMES.get(APPS.PHOTOS)}#${serializeB64}`;
     };
 
     const redirectToDeduplicatePage = () => router.push(PAGES.DEDUPLICATE);

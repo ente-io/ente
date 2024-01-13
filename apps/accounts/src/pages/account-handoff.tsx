@@ -1,10 +1,11 @@
-import EnteSpinner from '@ente/shared/components/EnteSpinner';
 import { VerticallyCentered } from '@ente/shared/components/Container';
-import { setData, LS_KEYS } from '@ente/shared/storage/localStorage';
-import { useRouter } from 'next/router';
+import EnteSpinner from '@ente/shared/components/EnteSpinner';
 import { ACCOUNTS_PAGES } from '@ente/shared/constants/pages';
-import { useEffect } from 'react';
+import HTTPService from '@ente/shared/network/HTTPService';
 import { logError } from '@ente/shared/sentry';
+import { LS_KEYS, setData } from '@ente/shared/storage/localStorage';
+import { useRouter } from 'next/router';
+import { useEffect } from 'react';
 
 const AccountHandoff = () => {
     const router = useRouter();
@@ -27,7 +28,17 @@ const AccountHandoff = () => {
         }
     };
 
+    const getClientPackageName = () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const pkg = urlParams.get('package');
+        if (!pkg) return;
+        HTTPService.setHeaders({
+            'X-Client-Package': pkg,
+        });
+    };
+
     useEffect(() => {
+        getClientPackageName();
         retrieveAccountData();
     }, []);
 
