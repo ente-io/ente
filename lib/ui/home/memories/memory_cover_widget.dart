@@ -2,23 +2,30 @@ import "package:flutter/material.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/memory.dart";
 import "package:photos/theme/ente_theme.dart";
-import 'package:photos/ui/home/memories/full_screen_memory.dart';
+import "package:photos/ui/home/memories/full_screen_memory.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 import "package:photos/utils/navigation_util.dart";
 
-class MemoryCovertWidget extends StatefulWidget {
-  const MemoryCovertWidget({
-    Key? key,
-    required this.memories,
-  }) : super(key: key);
-
+class MemoryCoverWidget extends StatefulWidget {
   final List<Memory> memories;
+  final ScrollController controller;
+  final double offsetOfItem;
+  static const centerStrokeWidth = 1.0;
+  static const width = 85.0;
+  static const height = 125.0;
+
+  const MemoryCoverWidget({
+    required this.memories,
+    required this.controller,
+    required this.offsetOfItem,
+    super.key,
+  });
 
   @override
-  State<MemoryCovertWidget> createState() => _MemoryCovertWidgetState();
+  State<MemoryCoverWidget> createState() => _MemoryCoverWidgetState();
 }
 
-class _MemoryCovertWidgetState extends State<MemoryCovertWidget> {
+class _MemoryCoverWidgetState extends State<MemoryCoverWidget> {
   @override
   Widget build(BuildContext context) {
     //memories will be empty if all memories are deleted and setState is called
@@ -26,75 +33,186 @@ class _MemoryCovertWidgetState extends State<MemoryCovertWidget> {
     if (widget.memories.isEmpty) {
       return const SizedBox.shrink();
     }
+
+    final widthOfScreen = MediaQuery.sizeOf(context).width;
     final index = _getNextMemoryIndex();
     final title = _getTitle(widget.memories[index]);
-    return GestureDetector(
-      onTap: () async {
-        await routeToPage(
-          context,
-          FullScreenMemoryDataUpdater(
-            initialIndex: index,
-            memories: widget.memories,
-            child: FullScreenMemory(title, index),
-          ),
-          forceCustomPageRoute: true,
-        );
-        setState(() {});
-      },
-      child: Row(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Column(
+    final memory = widget.memories[index];
+    final isSeen = memory.isSeen();
+    final currentTheme = MediaQuery.platformBrightnessOf(context);
+
+    return AnimatedBuilder(
+      animation: widget.controller,
+      builder: (context, child) {
+        final diff = (widget.controller.offset - widget.offsetOfItem) +
+            widthOfScreen / 7;
+        final scale = 1 - (diff / widthOfScreen).abs() / 3;
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 2.5),
+          //Adding this row is a workaround for making height of memory cover
+          //render as [MemoryCoverWidgetNew.height] * scale. Without this, height of rendered memory
+          //cover will be [MemoryCoverWidgetNew.height].
+          child: GestureDetector(
+            onTap: () async {
+              await routeToPage(
+                context,
+                FullScreenMemoryDataUpdater(
+                  initialIndex: index,
+                  memories: widget.memories,
+                  child: FullScreenMemory(title, index),
+                ),
+                forceCustomPageRoute: true,
+              );
+              setState(() {});
+            },
+            child: Row(
               children: [
-                _buildMemoryItem(context, index),
-                const Padding(padding: EdgeInsets.all(4)),
-                Hero(
-                  tag: title,
-                  child: Material(
-                    type: MaterialType.transparency,
-                    child: ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: 84),
-                      child: Text(
-                        title,
-                        style: getEnteTextTheme(context).mini,
-                        textAlign: TextAlign.center,
+                Container(
+                  height: MemoryCoverWidget.height * scale,
+                  width: MemoryCoverWidget.width * scale,
+                  decoration: BoxDecoration(
+                    boxShadow: [
+                      BoxShadow(
+                        color: isSeen
+                            ? currentTheme == Brightness.dark
+                                ? const Color.fromRGBO(104, 104, 104, 0.32)
+                                : Colors.transparent
+                            : const Color.fromRGBO(1, 222, 77, 0.11),
+                        spreadRadius: MemoryCoverWidget.centerStrokeWidth / 2,
+                        blurRadius: 0,
                       ),
+                      const BoxShadow(
+                        color: Color.fromRGBO(0, 0, 0, 0.13),
+                        blurRadius: 3,
+                        offset: Offset(1, 1),
+                      ),
+                    ],
+                    borderRadius: BorderRadius.circular(5),
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(5),
+                    child: Stack(
+                      fit: StackFit.expand,
+                      alignment: Alignment.bottomCenter,
+                      children: [
+                        child!,
+                        Container(
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              color: isSeen
+                                  ? currentTheme == Brightness.dark
+                                      ? const Color.fromRGBO(
+                                          104,
+                                          104,
+                                          104,
+                                          0.32,
+                                        )
+                                      : Colors.transparent
+                                  : const Color.fromRGBO(1, 222, 77, 0.11),
+                              width: MemoryCoverWidget.centerStrokeWidth / 2,
+                            ),
+                            borderRadius: BorderRadius.circular(5),
+                          ),
+                        ),
+                        Container(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [
+                                Colors.black.withOpacity(0.5),
+                                Colors.transparent,
+                              ],
+                              stops: const [0, 0.85],
+                              begin: Alignment.bottomCenter,
+                              end: Alignment.topCenter,
+                            ),
+                          ),
+                        ),
+                        isSeen
+                            ? const SizedBox.shrink()
+                            : Container(
+                                decoration: const BoxDecoration(
+                                  gradient: LinearGradient(
+                                    stops: [0, 0.35, 0.5],
+                                    colors: [
+                                      Color.fromARGB(71, 1, 222, 78),
+                                      Color(0x1901DE4D),
+                                      Color(0x0001DE4D),
+                                    ],
+                                    transform: GradientRotation(-1.2),
+                                  ),
+                                ),
+                              ),
+                        isSeen
+                            ? const SizedBox.shrink()
+                            : Stack(
+                                fit: StackFit.expand,
+                                alignment: Alignment.bottomCenter,
+                                children: [
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment: CrossAxisAlignment.end,
+                                    children: [
+                                      Transform.scale(
+                                        scale: scale,
+                                        child: Container(
+                                          decoration: const BoxDecoration(
+                                            gradient: LinearGradient(
+                                              stops: [0, 0.5, 1],
+                                              colors: [
+                                                Colors.transparent,
+                                                Color(0xFF01DE4D),
+                                                Colors.transparent,
+                                              ],
+                                            ),
+                                          ),
+                                          height: 1 * scale,
+                                          width: 68 * scale,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                        Positioned(
+                          bottom: 8 * scale,
+                          child: Transform.scale(
+                            scale: scale,
+                            child: SizedBox(
+                              width: MemoryCoverWidget.width,
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8.0,
+                                ),
+                                child: Hero(
+                                  tag: title,
+                                  child: Text(
+                                    title,
+                                    style: getEnteTextTheme(context)
+                                        .miniBold
+                                        .copyWith(
+                                          color: Colors.white,
+                                        ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
               ],
             ),
           ),
-        ],
-      ),
-    );
-  }
-
-  Container _buildMemoryItem(BuildContext context, int index) {
-    final colorScheme = getEnteColorScheme(context);
-    final memory = widget.memories[index];
-    final isSeen = memory.isSeen();
-    return Container(
-      decoration: BoxDecoration(
-        border: Border.all(
-          color: isSeen ? colorScheme.strokeFaint : colorScheme.primary500,
-          width: 2,
-        ),
-        borderRadius: BorderRadius.circular(40),
-      ),
-      child: ClipOval(
-        child: SizedBox(
-          width: 56,
-          height: 56,
-          child: Hero(
-            tag: "memories" + memory.file.tag,
-            child: ThumbnailWidget(
-              memory.file,
-              shouldShowSyncStatus: false,
-              key: Key("memories" + memory.file.tag),
-            ),
-          ),
+        );
+      },
+      child: Hero(
+        tag: "memories" + memory.file.tag,
+        child: ThumbnailWidget(
+          memory.file,
+          shouldShowArchiveStatus: false,
+          key: Key("memories" + memory.file.tag),
         ),
       ),
     );

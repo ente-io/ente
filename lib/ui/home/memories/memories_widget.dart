@@ -3,9 +3,11 @@ import "dart:async";
 import 'package:flutter/material.dart';
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/memories_setting_changed.dart";
+import "package:photos/generated/l10n.dart";
 import 'package:photos/models/memory.dart';
 import 'package:photos/services/memories_service.dart';
-import "package:photos/ui/home/memories/memory_cover_widget.dart";
+import "package:photos/theme/ente_theme.dart";
+import 'package:photos/ui/home/memories/memory_cover_widget.dart';
 
 class MemoriesWidget extends StatefulWidget {
   const MemoriesWidget({Key? key}) : super(key: key);
@@ -15,6 +17,8 @@ class MemoriesWidget extends StatefulWidget {
 }
 
 class _MemoriesWidgetState extends State<MemoriesWidget> {
+  final double _widthOfItem = 85;
+  late ScrollController _controller;
   late StreamSubscription<MemoriesSettingChanged> _subscription;
 
   @override
@@ -25,11 +29,13 @@ class _MemoriesWidgetState extends State<MemoriesWidget> {
         setState(() {});
       }
     });
+    _controller = ScrollController();
   }
 
   @override
   void dispose() {
     _subscription.cancel();
+    _controller.dispose();
     super.dispose();
   }
 
@@ -47,8 +53,34 @@ class _MemoriesWidgetState extends State<MemoriesWidget> {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                child: Stack(
+                  alignment: Alignment.centerRight,
+                  children: [
+                    const RotationTransition(
+                      turns: AlwaysStoppedAnimation(20 / 360),
+                      child: Icon(
+                        Icons.favorite_rounded,
+                        color: Color.fromRGBO(0, 179, 60, 0.3),
+                        size: 32,
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(right: 16),
+                      child: Text(
+                        S.of(context).memories,
+                        style: getEnteTextTheme(context).body,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(
+                height: 12,
+              ),
               _buildMemories(snapshot.data!),
-              const Divider(),
+              const SizedBox(height: 10),
             ],
           );
         }
@@ -58,16 +90,22 @@ class _MemoriesWidgetState extends State<MemoriesWidget> {
 
   Widget _buildMemories(List<Memory> memories) {
     final collatedMemories = _collateMemories(memories);
-    final List<Widget> memoryWidgets = [];
-    for (final memories in collatedMemories) {
-      memoryWidgets.add(MemoryCovertWidget(memories: memories));
-    }
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      physics: const BouncingScrollPhysics(),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: memoryWidgets,
+
+    return SizedBox(
+      height: MemoryCoverWidget.height,
+      child: ListView.builder(
+        physics: const BouncingScrollPhysics(),
+        scrollDirection: Axis.horizontal,
+        controller: _controller,
+        itemCount: collatedMemories.length,
+        itemBuilder: (context, itemIndex) {
+          final offsetOfItem = _widthOfItem * itemIndex;
+          return MemoryCoverWidget(
+            memories: collatedMemories[itemIndex],
+            controller: _controller,
+            offsetOfItem: offsetOfItem,
+          );
+        },
       ),
     );
   }
@@ -81,6 +119,7 @@ class _MemoriesWidgetState extends State<MemoriesWidget> {
         final List<Memory> collatedYearlyMemories = [];
         collatedYearlyMemories.addAll(yearlyMemories);
         collatedMemories.add(collatedYearlyMemories);
+
         yearlyMemories.clear();
       }
       yearlyMemories.add(memories[index]);
