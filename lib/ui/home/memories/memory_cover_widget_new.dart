@@ -10,7 +10,7 @@ class MemoryCoverWidgetNew extends StatefulWidget {
   final List<Memory> memories;
   final ScrollController controller;
   final double offsetOfItem;
-  static const centerStrokeWidth = 0.5;
+  static const centerStrokeWidth = 1.0;
 
   const MemoryCoverWidgetNew({
     required this.memories,
@@ -37,6 +37,7 @@ class _MemoryCoverWidgetNewState extends State<MemoryCoverWidgetNew> {
     final title = _getTitle(widget.memories[index]);
     final memory = widget.memories[index];
     final isSeen = memory.isSeen();
+    final currentTheme = MediaQuery.platformBrightnessOf(context);
 
     return AnimatedBuilder(
       animation: widget.controller,
@@ -71,9 +72,12 @@ class _MemoryCoverWidgetNewState extends State<MemoryCoverWidgetNew> {
                     boxShadow: [
                       BoxShadow(
                         color: isSeen
-                            ? Colors.transparent
+                            ? currentTheme == Brightness.dark
+                                ? const Color.fromRGBO(104, 104, 104, 0.32)
+                                : Colors.transparent
                             : const Color.fromRGBO(1, 222, 77, 0.11),
-                        spreadRadius: MemoryCoverWidgetNew.centerStrokeWidth,
+                        spreadRadius:
+                            MemoryCoverWidgetNew.centerStrokeWidth / 2,
                         blurRadius: 0,
                       ),
                       const BoxShadow(
@@ -91,18 +95,24 @@ class _MemoryCoverWidgetNewState extends State<MemoryCoverWidgetNew> {
                       alignment: Alignment.bottomCenter,
                       children: [
                         child!,
-                        isSeen
-                            ? const SizedBox.shrink()
-                            : Container(
-                                decoration: BoxDecoration(
-                                  border: Border.all(
-                                    color:
-                                        const Color.fromRGBO(1, 222, 77, 0.11),
-                                    width:
-                                        MemoryCoverWidgetNew.centerStrokeWidth,
-                                  ),
-                                ),
-                              ),
+                        Container(
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              color: isSeen
+                                  ? currentTheme == Brightness.dark
+                                      ? const Color.fromRGBO(
+                                          104,
+                                          104,
+                                          104,
+                                          0.32,
+                                        )
+                                      : Colors.transparent
+                                  : const Color.fromRGBO(1, 222, 77, 0.11),
+                              width: MemoryCoverWidgetNew.centerStrokeWidth / 2,
+                            ),
+                            borderRadius: BorderRadius.circular(5),
+                          ),
+                        ),
                         Container(
                           decoration: BoxDecoration(
                             gradient: LinearGradient(
