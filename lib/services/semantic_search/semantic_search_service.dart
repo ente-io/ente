@@ -38,11 +38,11 @@ class SemanticSearchService {
 
   final _logger = Logger("SemanticSearchService");
   final _queue = Queue<EnteFile>();
-  final _mlFramework = kCurrentModel == Model.onnxClip ? ONNX() : GGML();
   final _frameworkInitialization = Completer<bool>();
   final _embeddingLoaderDebouncer =
       Debouncer(kDebounceDuration, executionInterval: kDebounceDuration);
 
+  late MLFramework _mlFramework;
   bool _hasInitialized = false;
   bool _isComputingEmbeddings = false;
   bool _isSyncing = false;
@@ -61,6 +61,11 @@ class SemanticSearchService {
       return;
     }
     _hasInitialized = true;
+    final shouldDownloadOverMobileData =
+        Configuration.instance.shouldBackupOverMobileData();
+    _mlFramework = kCurrentModel == Model.onnxClip
+        ? ONNX(shouldDownloadOverMobileData)
+        : GGML(shouldDownloadOverMobileData);
     await EmbeddingsDB.instance.init();
     await EmbeddingStore.instance.init();
     await _loadEmbeddings();
@@ -145,8 +150,8 @@ class SemanticSearchService {
     );
   }
 
-  Future<bool> getFrameworkInitializationStatus() {
-    return _frameworkInitialization.future;
+  InitializationState getFrameworkInitializationState() {
+    return _mlFramework.initializationState;
   }
 
   Future<void> clearIndexes() async {
