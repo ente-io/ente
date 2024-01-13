@@ -1,13 +1,15 @@
 import { CenteredFlex } from '@ente/shared/components/Container';
+import FormPaper from '@ente/shared/components/Form/FormPaper';
 import SingleInputForm from '@ente/shared/components/SingleInputForm';
-import { Box, Typography } from '@mui/material';
-import {
-    finishPasskeyRegistration,
-    getPasskeyRegistrationOptions,
-    getPasskeys,
-} from '../../services/passkeysService';
+import { ACCOUNTS_PAGES } from '@ente/shared/constants/pages';
 import { logError } from '@ente/shared/sentry';
+import { getToken } from '@ente/shared/storage/localStorage/helpers';
+import { SESSION_KEYS, getKey } from '@ente/shared/storage/sessionStorage';
+import { Box, Typography } from '@mui/material';
+import { t } from 'i18next';
 import _sodium from 'libsodium-wrappers';
+import { useRouter } from 'next/router';
+import { AppContext } from 'pages/_app';
 import {
     Dispatch,
     SetStateAction,
@@ -17,11 +19,13 @@ import {
     useState,
 } from 'react';
 import { Passkey } from 'types/passkey';
-import PasskeysList from './PasskeysList';
+import {
+    finishPasskeyRegistration,
+    getPasskeyRegistrationOptions,
+    getPasskeys,
+} from '../../services/passkeysService';
 import ManagePasskeyDrawer from './ManagePasskeyDrawer';
-import { t } from 'i18next';
-import { AppContext } from 'pages/_app';
-import FormPaper from '@ente/shared/components/Form/FormPaper';
+import PasskeysList from './PasskeysList';
 
 export const PasskeysContext = createContext(
     {} as {
@@ -43,7 +47,18 @@ const Passkeys = () => {
 
     const [passkeys, setPasskeys] = useState<Passkey[]>([]);
 
+    const router = useRouter();
+
+    const checkLoggedIn = () => {
+        const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
+        const token = getToken();
+        if (!key || !token) {
+            router.push(ACCOUNTS_PAGES.LOGIN);
+        }
+    };
+
     const init = async () => {
+        checkLoggedIn();
         const data = await getPasskeys();
         setPasskeys(data.passkeys || []);
     };
