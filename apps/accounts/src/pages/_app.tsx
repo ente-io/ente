@@ -1,5 +1,5 @@
 import { CacheProvider } from '@emotion/react';
-import { APPS, CLIENT_PACKAGE_NAMES } from '@ente/shared/apps/constants';
+import { APPS } from '@ente/shared/apps/constants';
 import { EnteAppProps } from '@ente/shared/apps/types';
 import { Overlay } from '@ente/shared/components/Container';
 import DialogBoxV2 from '@ente/shared/components/DialogBoxV2';
@@ -69,7 +69,7 @@ export default function App(props: EnteAppProps) {
         const pkg = getData(LS_KEYS.CLIENT_PACKAGE);
         if (!pkg) return;
         HTTPService.setHeaders({
-            'X-Client-Package': CLIENT_PACKAGE_NAMES.get(APPS.AUTH),
+            'X-Client-Package': pkg.name,
         });
     };
 
