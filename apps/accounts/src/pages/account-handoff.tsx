@@ -13,7 +13,7 @@ const AccountHandoff = () => {
     const retrieveAccountData = () => {
         try {
             // get the data from the fragment
-            const fragment = window.location.hash;
+            const fragment = window.location.hash.substring(1);
 
             const stringified = window.atob(fragment);
 

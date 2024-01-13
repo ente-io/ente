@@ -13,7 +13,7 @@ import { AppContext } from 'pages/_app';
 // import mlIDbStorage from 'utils/storage/mlIDbStorage';
 import { APPS, CLIENT_PACKAGE_NAMES } from '@ente/shared/apps/constants';
 import ThemeSwitcher from '@ente/shared/components/ThemeSwitcher';
-import { getData, LS_KEYS } from '@ente/shared/storage/localStorage';
+import { LS_KEYS, getData } from '@ente/shared/storage/localStorage';
 import { THEME_COLOR } from '@ente/shared/themes/constants';
 import { EnteMenuItem } from 'components/Menu/EnteMenuItem';
 import WatchFolder from 'components/WatchFolder';
@@ -72,10 +72,10 @@ export default function UtilitySection({ closeSidebar }) {
         // serialize the user data to pass it over to accounts
         const userData = getData(LS_KEYS.USER);
         const serialized = JSON.stringify(userData);
-        const serializeB64 = window.btoa(serialized);
+        const serializedB64 = window.btoa(serialized);
 
         window.location.href = `${process.env.NEXT_PUBLIC_ACCOUNTS_ENDPOINT}${ACCOUNTS_PAGES.ACCOUNT_HANDOFF
-            }?package=${CLIENT_PACKAGE_NAMES.get(APPS.PHOTOS)}#${serializeB64}`;
+            }?package=${CLIENT_PACKAGE_NAMES.get(APPS.PHOTOS)}#${serializedB64}`;
     };
 
     const redirectToDeduplicatePage = () => router.push(PAGES.DEDUPLICATE);
