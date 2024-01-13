@@ -3,6 +3,7 @@ import "dart:async";
 import 'package:flutter/material.dart';
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/memories_setting_changed.dart";
+import "package:photos/generated/l10n.dart";
 import 'package:photos/models/memory.dart';
 import 'package:photos/services/memories_service.dart';
 import "package:photos/theme/ente_theme.dart";
@@ -68,7 +69,7 @@ class _MemoriesWidgetState extends State<MemoriesWidget> {
                     Padding(
                       padding: const EdgeInsets.only(right: 16),
                       child: Text(
-                        "Memories",
+                        S.of(context).memories,
                         style: getEnteTextTheme(context).body,
                       ),
                     ),
