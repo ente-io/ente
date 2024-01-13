@@ -6,7 +6,7 @@ import "package:photos/events/memories_setting_changed.dart";
 import 'package:photos/models/memory.dart';
 import 'package:photos/services/memories_service.dart';
 import "package:photos/theme/ente_theme.dart";
-import "package:photos/ui/home/memories/memory_cover_widget_new.dart";
+import 'package:photos/ui/home/memories/memory_cover_widget.dart';
 
 class MemoriesWidget extends StatefulWidget {
   const MemoriesWidget({Key? key}) : super(key: key);
@@ -91,7 +91,7 @@ class _MemoriesWidgetState extends State<MemoriesWidget> {
     final collatedMemories = _collateMemories(memories);
 
     return SizedBox(
-      height: MemoryCoverWidgetNew.height,
+      height: MemoryCoverWidget.height,
       child: ListView.builder(
         physics: const BouncingScrollPhysics(),
         scrollDirection: Axis.horizontal,
@@ -99,7 +99,7 @@ class _MemoriesWidgetState extends State<MemoriesWidget> {
         itemCount: collatedMemories.length,
         itemBuilder: (context, itemIndex) {
           final offsetOfItem = _widthOfItem * itemIndex;
-          return MemoryCoverWidgetNew(
+          return MemoryCoverWidget(
             memories: collatedMemories[itemIndex],
             controller: _controller,
             offsetOfItem: offsetOfItem,

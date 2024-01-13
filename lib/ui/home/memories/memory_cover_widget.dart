@@ -6,7 +6,7 @@ import "package:photos/ui/home/memories/full_screen_memory.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 import "package:photos/utils/navigation_util.dart";
 
-class MemoryCoverWidgetNew extends StatefulWidget {
+class MemoryCoverWidget extends StatefulWidget {
   final List<Memory> memories;
   final ScrollController controller;
   final double offsetOfItem;
@@ -14,7 +14,7 @@ class MemoryCoverWidgetNew extends StatefulWidget {
   static const width = 85.0;
   static const height = 125.0;
 
-  const MemoryCoverWidgetNew({
+  const MemoryCoverWidget({
     required this.memories,
     required this.controller,
     required this.offsetOfItem,
@@ -22,10 +22,10 @@ class MemoryCoverWidgetNew extends StatefulWidget {
   });
 
   @override
-  State<MemoryCoverWidgetNew> createState() => _MemoryCoverWidgetNewState();
+  State<MemoryCoverWidget> createState() => _MemoryCoverWidgetState();
 }
 
-class _MemoryCoverWidgetNewState extends State<MemoryCoverWidgetNew> {
+class _MemoryCoverWidgetState extends State<MemoryCoverWidget> {
   @override
   Widget build(BuildContext context) {
     //memories will be empty if all memories are deleted and setState is called
@@ -68,8 +68,8 @@ class _MemoryCoverWidgetNewState extends State<MemoryCoverWidgetNew> {
             child: Row(
               children: [
                 Container(
-                  height: MemoryCoverWidgetNew.height * scale,
-                  width: MemoryCoverWidgetNew.width * scale,
+                  height: MemoryCoverWidget.height * scale,
+                  width: MemoryCoverWidget.width * scale,
                   decoration: BoxDecoration(
                     boxShadow: [
                       BoxShadow(
@@ -78,8 +78,7 @@ class _MemoryCoverWidgetNewState extends State<MemoryCoverWidgetNew> {
                                 ? const Color.fromRGBO(104, 104, 104, 0.32)
                                 : Colors.transparent
                             : const Color.fromRGBO(1, 222, 77, 0.11),
-                        spreadRadius:
-                            MemoryCoverWidgetNew.centerStrokeWidth / 2,
+                        spreadRadius: MemoryCoverWidget.centerStrokeWidth / 2,
                         blurRadius: 0,
                       ),
                       const BoxShadow(
@@ -110,7 +109,7 @@ class _MemoryCoverWidgetNewState extends State<MemoryCoverWidgetNew> {
                                         )
                                       : Colors.transparent
                                   : const Color.fromRGBO(1, 222, 77, 0.11),
-                              width: MemoryCoverWidgetNew.centerStrokeWidth / 2,
+                              width: MemoryCoverWidget.centerStrokeWidth / 2,
                             ),
                             borderRadius: BorderRadius.circular(5),
                           ),
@@ -179,7 +178,7 @@ class _MemoryCoverWidgetNewState extends State<MemoryCoverWidgetNew> {
                           child: Transform.scale(
                             scale: scale,
                             child: SizedBox(
-                              width: MemoryCoverWidgetNew.width,
+                              width: MemoryCoverWidget.width,
                               child: Padding(
                                 padding: const EdgeInsets.symmetric(
                                   horizontal: 8.0,
