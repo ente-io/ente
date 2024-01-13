@@ -5,7 +5,6 @@ import "package:photos/core/event_bus.dart";
 import "package:photos/events/memories_setting_changed.dart";
 import 'package:photos/models/memory.dart';
 import 'package:photos/services/memories_service.dart';
-import "package:photos/ui/home/memories/memory_cover_widget.dart";
 import "package:photos/ui/home/memories/memory_cover_widget_new.dart";
 
 class MemoriesWidget extends StatefulWidget {
@@ -63,26 +62,18 @@ class _MemoriesWidgetState extends State<MemoriesWidget> {
 
   Widget _buildMemories(List<Memory> memories) {
     final collatedMemories = _collateMemories(memories);
-    final List<Widget> memoryWidgets = [];
-    for (final memories in collatedMemories) {
-      memoryWidgets.add(
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: MemoryCovertWidget(memories: memories),
-        ),
-      );
-    }
+
     return SizedBox(
       height: 125 + MemoryCoverWidgetNew.centerStrokeWidth * 2,
       child: ListView.builder(
         physics: const BouncingScrollPhysics(),
         scrollDirection: Axis.horizontal,
         controller: _controller,
-        itemCount: memoryWidgets.length,
+        itemCount: collatedMemories.length,
         itemBuilder: (context, itemIndex) {
           final offsetOfItem = _widthOfItem * itemIndex;
           return MemoryCoverWidgetNew(
-            memories: memories,
+            memories: collatedMemories[itemIndex],
             controller: _controller,
             offsetOfItem: offsetOfItem,
           );
@@ -99,7 +90,6 @@ class _MemoriesWidgetState extends State<MemoriesWidget> {
           !_areMemoriesFromSameYear(memories[index - 1], memories[index])) {
         final List<Memory> collatedYearlyMemories = [];
         collatedYearlyMemories.addAll(yearlyMemories);
-        collatedMemories.add(collatedYearlyMemories);
         collatedMemories.add(collatedYearlyMemories);
 
         yearlyMemories.clear();
