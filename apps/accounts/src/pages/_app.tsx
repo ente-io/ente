@@ -1,24 +1,26 @@
-import React, { createContext, useState, useEffect } from 'react';
-import { ThemeProvider } from '@mui/material/styles';
-import { getTheme } from '@ente/shared/themes';
-import { useLocalState } from '@ente/shared/hooks/useLocalState';
-import { LS_KEYS } from '@ente/shared/storage/localStorage';
-import { THEME_COLOR } from '@ente/shared/themes/constants';
-import { APPS } from '@ente/shared/apps/constants';
-import { CssBaseline, useMediaQuery } from '@mui/material';
-import { EnteAppProps } from '@ente/shared/apps/types';
-import createEmotionCache from '@ente/shared/themes/createEmotionCache';
 import { CacheProvider } from '@emotion/react';
-import 'styles/global.css';
-import { setupI18n } from '@ente/shared/i18n';
+import { APPS, CLIENT_PACKAGE_NAMES } from '@ente/shared/apps/constants';
+import { EnteAppProps } from '@ente/shared/apps/types';
 import { Overlay } from '@ente/shared/components/Container';
-import EnteSpinner from '@ente/shared/components/EnteSpinner';
-import AppNavbar from '@ente/shared/components/Navbar/app';
+import DialogBoxV2 from '@ente/shared/components/DialogBoxV2';
 import {
     DialogBoxAttributesV2,
     SetDialogBoxAttributesV2,
 } from '@ente/shared/components/DialogBoxV2/types';
-import DialogBoxV2 from '@ente/shared/components/DialogBoxV2';
+import EnteSpinner from '@ente/shared/components/EnteSpinner';
+import AppNavbar from '@ente/shared/components/Navbar/app';
+import { useLocalState } from '@ente/shared/hooks/useLocalState';
+import { setupI18n } from '@ente/shared/i18n';
+import HTTPService from '@ente/shared/network/HTTPService';
+import { LS_KEYS, getData } from '@ente/shared/storage/localStorage';
+import { getTheme } from '@ente/shared/themes';
+import { THEME_COLOR } from '@ente/shared/themes/constants';
+import createEmotionCache from '@ente/shared/themes/createEmotionCache';
+import { CssBaseline, useMediaQuery } from '@mui/material';
+import { ThemeProvider } from '@mui/material/styles';
+import { useRouter } from 'next/router';
+import { createContext, useEffect, useState } from 'react';
+import 'styles/global.css';
 
 interface AppContextProps {
     isMobile: boolean;
@@ -49,6 +51,8 @@ export default function App(props: EnteAppProps) {
 
     const isMobile = useMediaQuery('(max-width:428px)');
 
+    const router = useRouter();
+
     const {
         Component,
         emotionCache = clientSideEmotionCache,
@@ -60,6 +64,21 @@ export default function App(props: EnteAppProps) {
     useEffect(() => {
         setupI18n().finally(() => setIsI18nReady(true));
     }, []);
+
+    const setupPackageName = () => {
+        const pkg = getData(LS_KEYS.CLIENT_PACKAGE);
+        if (!pkg) return;
+        HTTPService.setHeaders({
+            'X-Client-Package': CLIENT_PACKAGE_NAMES.get(APPS.AUTH),
+        });
+    };
+
+    useEffect(() => {
+        router.events.on('routeChangeComplete', setupPackageName);
+        return () => {
+            router.events.off('routeChangeComplete', setupPackageName);
+        };
+    }, [router.events]);
 
     const closeDialogBoxV2 = () => setDialogBoxV2View(false);
 
@@ -103,3 +122,4 @@ export default function App(props: EnteAppProps) {
         </CacheProvider>
     );
 }
+a;

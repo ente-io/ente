@@ -32,6 +32,7 @@ const AccountHandoff = () => {
         const urlParams = new URLSearchParams(window.location.search);
         const pkg = urlParams.get('package');
         if (!pkg) return;
+        setData(LS_KEYS.CLIENT_PACKAGE, { name: pkg });
         HTTPService.setHeaders({
             'X-Client-Package': pkg,
         });
