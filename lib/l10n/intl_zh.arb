@@ -1186,6 +1186,5 @@
   "selectALocationFirst": "首先选择一个位置",
   "changeLocationOfSelectedItems": "确定要更改所选项目的位置吗？",
   "editsToLocationWillOnlyBeSeenWithinEnte": "对位置的编辑只能在 Ente 内看到",
-  "cleanUncategorized": "清除未分类的",
-  "memories": "Memories"
+  "cleanUncategorized": "清除未分类的"
 }
