@@ -410,6 +410,7 @@
   "magicSearch": "魔法搜索",
   "magicSearchDescription": "请使用我们的桌面应用程序来为您库中的待处理项目建立索引。",
   "loadingModel": "正在下载模型...",
+  "waitingForWifi": "正在等待 WiFi...",
   "status": "状态",
   "indexedItems": "已索引项目",
   "pendingItems": "待处理项目",
@@ -1187,5 +1188,5 @@
   "changeLocationOfSelectedItems": "确定要更改所选项目的位置吗？",
   "editsToLocationWillOnlyBeSeenWithinEnte": "对位置的编辑只能在 Ente 内看到",
   "cleanUncategorized": "清除未分类的",
-  "memories": "Memories"
+  "memories": "回忆"
 }
