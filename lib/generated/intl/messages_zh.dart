@@ -738,6 +738,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "maps": MessageLookupByLibrary.simpleMessage("地图"),
         "mastodon": MessageLookupByLibrary.simpleMessage("Mastodon"),
         "matrix": MessageLookupByLibrary.simpleMessage("Matrix"),
+        "memories": MessageLookupByLibrary.simpleMessage("Memories"),
         "memoryCount": m31,
         "merchandise": MessageLookupByLibrary.simpleMessage("商品"),
         "mobileWebDesktop":
