@@ -132,10 +132,10 @@ class _MemoryCoverWidgetState extends State<MemoryCoverWidget> {
                             : Container(
                                 decoration: const BoxDecoration(
                                   gradient: LinearGradient(
-                                    stops: [0, 0.35, 0.5],
+                                    stops: [0, 0.27, 0.4],
                                     colors: [
-                                      Color.fromRGBO(1, 222, 78, 0.392),
-                                      Color.fromRGBO(1, 222, 77, 0.1),
+                                      Color.fromRGBO(1, 222, 78, 0.293),
+                                      Color.fromRGBO(1, 222, 77, 0.07),
                                       Colors.transparent,
                                     ],
                                     transform: GradientRotation(-1.1),
