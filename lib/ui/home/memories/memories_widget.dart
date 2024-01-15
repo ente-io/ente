@@ -5,7 +5,6 @@ import "package:photos/core/event_bus.dart";
 import "package:photos/events/memories_setting_changed.dart";
 import 'package:photos/models/memory.dart';
 import 'package:photos/services/memories_service.dart';
-import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/home/memories/memory_cover_widget.dart';
 
 class MemoriesWidget extends StatefulWidget {
@@ -52,29 +51,6 @@ class _MemoriesWidgetState extends State<MemoriesWidget> {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                child: Stack(
-                  alignment: Alignment.centerRight,
-                  children: [
-                    const RotationTransition(
-                      turns: AlwaysStoppedAnimation(20 / 360),
-                      child: Icon(
-                        Icons.favorite_rounded,
-                        color: Color.fromRGBO(0, 179, 60, 0.3),
-                        size: 32,
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(right: 16),
-                      child: Text(
-                        "Memories",
-                        style: getEnteTextTheme(context).body,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
               const SizedBox(
                 height: 12,
               ),
