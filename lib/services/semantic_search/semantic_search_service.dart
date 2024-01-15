@@ -151,6 +151,9 @@ class SemanticSearchService {
   }
 
   InitializationState getFrameworkInitializationState() {
+    if (!_hasInitialized) {
+      return InitializationState.notInitialized;
+    }
     return _mlFramework.initializationState;
   }
 
