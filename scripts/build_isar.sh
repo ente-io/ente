@@ -1,4 +1,4 @@
-# TODO: add `rustup@1.25.2` to `srclibs``
+# TODO: add `rustup@1.25.2` to `srclibs`
 # TODO: verify is `gcc-multilib` or `libc-dev` is needed
 $$rustup$$/rustup-init.sh -y
 source $HOME/.cargo/env
