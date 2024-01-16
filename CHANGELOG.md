@@ -1,5 +1,21 @@
 # CHANGELOG
 
+## v1.6.61
+
+### New
+
+- Integrated onnx clip runner
+
+### Bug Fixes
+
+- Fixes login button requiring double click issue
+- Fixes Collection sort state not preserved issue
+- Fixes continuous export causing app crash
+- Improves ML related copies for better distinction from clip
+- Added Better favicon for light mode
+- Fixed face indexing issues
+- Fixed thumbnail load issue
+
 ## v1.6.60
 
 ### Bug Fixes
