@@ -70,3 +70,8 @@ export interface AppUpdateInfo {
 export interface GetFeatureFlagResponse {
     desktopCutoffVersion?: string;
 }
+
+export enum Model {
+    GGML_CLIP = 'ggml-clip',
+    ONNX_CLIP = 'onnx-clip',
+}
