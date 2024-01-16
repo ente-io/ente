@@ -52,14 +52,12 @@ export default function AdvancedSettings({ open, onClose, onRootClose }) {
     });
 
     useEffect(() => {
-        ClipService.setOnUpdateHandler(setIndexingStatus);
+        const main = async () => {
+            setIndexingStatus(await ClipService.getIndexingStatus());
+            ClipService.setOnUpdateHandler(setIndexingStatus);
+        };
+        main();
     }, []);
-
-    useEffect(() => {
-        if (open) {
-            ClipService.updateIndexStatus();
-        }
-    }, [open]);
 
     return (
         <EnteDrawer
@@ -112,7 +110,9 @@ export default function AdvancedSettings({ open, onClose, onRootClose }) {
 
                         {isElectron() && (
                             <Box>
-                                <MenuSectionTitle title={t('STATUS')} />
+                                <MenuSectionTitle
+                                    title={t('MAGIC_SEARCH_STATUS')}
+                                />
                                 <Stack py={'12px'} px={'12px'} spacing={'24px'}>
                                     <VerticallyCenteredFlex
                                         justifyContent="space-between"

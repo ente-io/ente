@@ -1,8 +1,4 @@
-import {
-    putEmbedding,
-    getLatestEmbeddings,
-    getLocalEmbeddings,
-} from './embeddingService';
+import { putEmbedding, getLocalEmbeddings } from './embeddingService';
 import { getAllLocalFiles, getLocalFiles } from './fileService';
 import downloadManager from './download';
 import { logError } from '@ente/shared/sentry';
@@ -100,14 +96,18 @@ class ClipServiceImpl {
         }
     };
 
-    updateIndexStatus = async () => {
+    getIndexingStatus = async () => {
         try {
-            addLogLine('loading local clip index status');
-            this.clipExtractionStatus = await getClipExtractionStatus();
-            this.onUpdateHandler(this.clipExtractionStatus);
-            addLogLine('loaded local clip index status');
+            if (
+                !this.clipExtractionStatus ||
+                (this.clipExtractionStatus.pending === 0 &&
+                    this.clipExtractionStatus.indexed === 0)
+            ) {
+                this.clipExtractionStatus = await getClipExtractionStatus();
+            }
+            return this.clipExtractionStatus;
         } catch (e) {
-            logError(e, 'failed to load local clip index status');
+            logError(e, 'failed to get clip indexing status');
         }
     };
 
@@ -116,7 +116,9 @@ class ClipServiceImpl {
         handler(this.clipExtractionStatus);
     };
 
-    scheduleImageEmbeddingExtraction = async () => {
+    scheduleImageEmbeddingExtraction = async (
+        model: Model = Model.ONNX_CLIP
+    ) => {
         try {
             if (this.embeddingExtractionInProgress) {
                 addLogLine(
@@ -132,7 +134,7 @@ class ClipServiceImpl {
             const canceller = new AbortController();
             this.embeddingExtractionInProgress = canceller;
             try {
-                await this.runClipEmbeddingExtraction(canceller);
+                await this.runClipEmbeddingExtraction(canceller, model);
             } finally {
                 this.embeddingExtractionInProgress = null;
                 if (!canceller.signal.aborted && this.reRunNeeded) {
@@ -151,9 +153,12 @@ class ClipServiceImpl {
         }
     };
 
-    getTextEmbedding = async (text: string): Promise<Float32Array> => {
+    getTextEmbedding = async (
+        text: string,
+        model: Model = Model.ONNX_CLIP
+    ): Promise<Float32Array> => {
         try {
-            return ElectronAPIs.computeTextEmbedding(text);
+            return ElectronAPIs.computeTextEmbedding(model, text);
         } catch (e) {
             if (e?.message?.includes(CustomError.UNSUPPORTED_PLATFORM)) {
                 this.unsupportedPlatform = true;
@@ -163,7 +168,10 @@ class ClipServiceImpl {
         }
     };
 
-    private runClipEmbeddingExtraction = async (canceller: AbortController) => {
+    private runClipEmbeddingExtraction = async (
+        canceller: AbortController,
+        model: Model
+    ) => {
         try {
             if (this.unsupportedPlatform) {
                 addLogLine(
@@ -176,7 +184,7 @@ class ClipServiceImpl {
                 return;
             }
             const localFiles = getPersonalFiles(await getAllLocalFiles(), user);
-            const existingEmbeddings = await getLatestClipImageEmbeddings();
+            const existingEmbeddings = await getLocalEmbeddings(model);
             const pendingFiles = await getNonClipEmbeddingExtractedFiles(
                 localFiles,
                 existingEmbeddings
@@ -201,11 +209,15 @@ class ClipServiceImpl {
                         throw Error(CustomError.REQUEST_CANCELLED);
                     }
                     const embeddingData =
-                        await this.extractFileClipImageEmbedding(file);
+                        await this.extractFileClipImageEmbedding(model, file);
                     addLogLine(
                         `successfully extracted clip embedding for file: ${file.metadata.title} fileID: ${file.id} embedding length: ${embeddingData?.length}`
                     );
-                    await this.encryptAndUploadEmbedding(file, embeddingData);
+                    await this.encryptAndUploadEmbedding(
+                        model,
+                        file,
+                        embeddingData
+                    );
                     this.onSuccessStatusUpdater();
                     addLogLine(
                         `successfully put clip embedding to server for file: ${file.metadata.title} fileID: ${file.id}`
@@ -238,10 +250,13 @@ class ClipServiceImpl {
         }
     };
 
-    private async runLocalFileClipExtraction(arg: {
-        enteFile: EnteFile;
-        localFile: globalThis.File;
-    }) {
+    private async runLocalFileClipExtraction(
+        arg: {
+            enteFile: EnteFile;
+            localFile: globalThis.File;
+        },
+        model: Model = Model.ONNX_CLIP
+    ) {
         const { enteFile, localFile } = arg;
         addLogLine(
             `clip embedding extraction onFileUploadedHandler file: ${enteFile.metadata.title} fileID: ${enteFile.id}`,
@@ -256,9 +271,14 @@ class ClipServiceImpl {
         try {
             await this.liveEmbeddingExtractionQueue.add(async () => {
                 const embedding = await this.extractLocalFileClipImageEmbedding(
+                    model,
                     localFile
                 );
-                await this.encryptAndUploadEmbedding(enteFile, embedding);
+                await this.encryptAndUploadEmbedding(
+                    model,
+                    enteFile,
+                    embedding
+                );
             });
             addLogLine(
                 `successfully extracted clip embedding for file: ${enteFile.metadata.title} fileID: ${enteFile.id}`
@@ -268,15 +288,19 @@ class ClipServiceImpl {
         }
     }
 
-    private extractLocalFileClipImageEmbedding = async (localFile: File) => {
+    private extractLocalFileClipImageEmbedding = async (
+        model: Model,
+        localFile: File
+    ) => {
         const file = await localFile
             .arrayBuffer()
             .then((buffer) => new Uint8Array(buffer));
-        const embedding = await ElectronAPIs.computeImageEmbedding(file);
+        const embedding = await ElectronAPIs.computeImageEmbedding(model, file);
         return embedding;
     };
 
     private encryptAndUploadEmbedding = async (
+        model: Model,
         file: EnteFile,
         embeddingData: Float32Array
     ) => {
@@ -295,7 +319,7 @@ class ClipServiceImpl {
             fileID: file.id,
             encryptedEmbedding: encryptedEmbeddingData.encryptedData,
             decryptionHeader: encryptedEmbeddingData.decryptionHeader,
-            model: Model.GGML_CLIP,
+            model,
         });
     };
 
@@ -306,9 +330,15 @@ class ClipServiceImpl {
         }
     };
 
-    private extractFileClipImageEmbedding = async (file: EnteFile) => {
+    private extractFileClipImageEmbedding = async (
+        model: Model,
+        file: EnteFile
+    ) => {
         const thumb = await downloadManager.getThumbnail(file);
-        const embedding = await ElectronAPIs.computeImageEmbedding(thumb);
+        const embedding = await ElectronAPIs.computeImageEmbedding(
+            model,
+            thumb
+        );
         return embedding;
     };
 
@@ -343,13 +373,6 @@ const getNonClipEmbeddingExtractedFiles = async (
     });
 };
 
-export const getLocalClipImageEmbeddings = async () => {
-    const allEmbeddings = await getLocalEmbeddings();
-    return allEmbeddings.filter(
-        (embedding) => embedding.model === Model.GGML_CLIP
-    );
-};
-
 export const computeClipMatchScore = async (
     imageEmbedding: Float32Array,
     textEmbedding: Float32Array
@@ -377,19 +400,14 @@ export const computeClipMatchScore = async (
     return score;
 };
 
-const getLatestClipImageEmbeddings = async () => {
-    const allEmbeddings = await getLatestEmbeddings();
-    return allEmbeddings.filter(
-        (embedding) => embedding.model === Model.GGML_CLIP
-    );
-};
-
-const getClipExtractionStatus = async (): Promise<ClipExtractionStatus> => {
+const getClipExtractionStatus = async (
+    model: Model = Model.ONNX_CLIP
+): Promise<ClipExtractionStatus> => {
     const user = getData(LS_KEYS.USER);
     if (!user) {
         return;
     }
-    const allEmbeddings = await getLocalClipImageEmbeddings();
+    const allEmbeddings = await getLocalEmbeddings(model);
     const localFiles = getPersonalFiles(await getLocalFiles(), user);
     const pendingFiles = await getNonClipEmbeddingExtractedFiles(
         localFiles,

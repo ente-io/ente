@@ -7,6 +7,11 @@ export interface AppUpdateInfo {
     version: string;
 }
 
+export enum Model {
+    GGML_CLIP = 'ggml-clip',
+    ONNX_CLIP = 'onnx-clip',
+}
+
 export interface ElectronAPIsType {
     exists: (path: string) => boolean;
     checkExistsAndCreateDir: (dirPath: string) => Promise<void>;
@@ -97,8 +102,11 @@ export interface ElectronAPIsType {
     deleteFile: (path: string) => void;
     rename: (oldPath: string, newPath: string) => Promise<void>;
     updateOptOutOfCrashReports: (optOut: boolean) => Promise<void>;
-    computeImageEmbedding: (imageData: Uint8Array) => Promise<Float32Array>;
-    computeTextEmbedding: (text: string) => Promise<Float32Array>;
+    computeImageEmbedding: (
+        model: Model,
+        imageData: Uint8Array
+    ) => Promise<Float32Array>;
+    computeTextEmbedding: (model: Model, text: string) => Promise<Float32Array>;
     getPlatform: () => Promise<'mac' | 'windows' | 'linux'>;
     setCustomCacheDirectory: (directory: string) => Promise<void>;
     getCacheDirectory: () => Promise<string>;
