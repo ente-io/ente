@@ -8,8 +8,8 @@
 
 ### Bug Fixes
 
-- Fixes login button requiring double click
-- Fixes Collection sort state not saved
+- Fixes login button requiring double click issue
+- Fixes Collection sort state not preserved issue
 - Fixes continuous export causing app crash
 - Improves ML related copies for better distinction from clip
 - Added Better favicon for light mode
