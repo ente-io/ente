@@ -140,6 +140,7 @@ dependencies:
   shared_preferences: ^2.0.5
   sqflite: ^2.3.0
   sqflite_migration: ^0.3.0
+  sqlite3: ^2.1.0
   step_progress_indicator: ^1.0.2
   styled_text: ^7.0.0
   syncfusion_flutter_core: ^19.2.49
