@@ -295,6 +295,11 @@
       "title": "X",
       "altNames": ["twitter"],
       "slug": "x"
+    },
+    {
+      "title": "Yandex",
+      "altNames": ["Яндекс"],
+      "slug": "Yandex"
     }
   ]
 }
