@@ -266,7 +266,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "lostDevice":
             MessageLookupByLibrary.simpleMessage("Dispositivo perdido?"),
         "manage": MessageLookupByLibrary.simpleMessage("Gerenciar"),
-        "memories": MessageLookupByLibrary.simpleMessage("Memories"),
         "moderateStrength": MessageLookupByLibrary.simpleMessage("Moderada"),
         "modifyYourQueryOrTrySearchingFor":
             MessageLookupByLibrary.simpleMessage(

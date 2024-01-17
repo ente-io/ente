@@ -738,7 +738,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "maps": MessageLookupByLibrary.simpleMessage("地图"),
         "mastodon": MessageLookupByLibrary.simpleMessage("Mastodon"),
         "matrix": MessageLookupByLibrary.simpleMessage("Matrix"),
-        "memories": MessageLookupByLibrary.simpleMessage("Memories"),
         "memoryCount": m31,
         "merchandise": MessageLookupByLibrary.simpleMessage("商品"),
         "mobileWebDesktop":
@@ -1217,6 +1216,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "viewer": MessageLookupByLibrary.simpleMessage("查看者"),
         "visitWebToManage":
             MessageLookupByLibrary.simpleMessage("请访问 web.ente.io 来管理您的订阅"),
+        "waitingForWifi": MessageLookupByLibrary.simpleMessage("正在等待 WiFi..."),
         "weAreOpenSource": MessageLookupByLibrary.simpleMessage("我们是开源的 ！"),
         "weDontSupportEditingPhotosAndAlbumsThatYouDont":
             MessageLookupByLibrary.simpleMessage("我们不支持编辑您尚未拥有的照片和相册"),
