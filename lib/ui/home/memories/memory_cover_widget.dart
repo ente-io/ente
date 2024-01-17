@@ -10,14 +10,17 @@ class MemoryCoverWidget extends StatefulWidget {
   final List<Memory> memories;
   final ScrollController controller;
   final double offsetOfItem;
+  final double maxHeight;
+  final double maxWidth;
   static const centerStrokeWidth = 1.0;
-  static const width = 85.0;
-  static const height = 125.0;
+  static const aspectRatio = 0.68;
 
   const MemoryCoverWidget({
     required this.memories,
     required this.controller,
     required this.offsetOfItem,
+    required this.maxHeight,
+    required this.maxWidth,
     super.key,
   });
 
@@ -46,7 +49,7 @@ class _MemoryCoverWidgetState extends State<MemoryCoverWidget> {
       builder: (context, child) {
         final diff = (widget.controller.offset - widget.offsetOfItem) +
             widthOfScreen / 7;
-        final scale = 1 - (diff / widthOfScreen).abs() / 3;
+        final scale = 1 - (diff / widthOfScreen).abs() / 3.7;
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: 2.5),
           //Adding this row is a workaround for making height of memory cover
@@ -68,8 +71,8 @@ class _MemoryCoverWidgetState extends State<MemoryCoverWidget> {
             child: Row(
               children: [
                 Container(
-                  height: MemoryCoverWidget.height * scale,
-                  width: MemoryCoverWidget.width * scale,
+                  height: widget.maxHeight * scale,
+                  width: widget.maxWidth * scale,
                   decoration: BoxDecoration(
                     boxShadow: [
                       BoxShadow(
@@ -132,13 +135,13 @@ class _MemoryCoverWidgetState extends State<MemoryCoverWidget> {
                             : Container(
                                 decoration: const BoxDecoration(
                                   gradient: LinearGradient(
-                                    stops: [0, 0.35, 0.5],
+                                    stops: [0, 0.27, 0.4],
                                     colors: [
-                                      Color.fromARGB(71, 1, 222, 78),
-                                      Color(0x1901DE4D),
-                                      Color(0x0001DE4D),
+                                      Color.fromRGBO(1, 222, 78, 0.293),
+                                      Color.fromRGBO(1, 222, 77, 0.07),
+                                      Colors.transparent,
                                     ],
-                                    transform: GradientRotation(-1.2),
+                                    transform: GradientRotation(-1.1),
                                   ),
                                 ),
                               ),
@@ -157,16 +160,18 @@ class _MemoryCoverWidgetState extends State<MemoryCoverWidget> {
                                         child: Container(
                                           decoration: const BoxDecoration(
                                             gradient: LinearGradient(
-                                              stops: [0, 0.5, 1],
+                                              stops: [0, 0.1, 0.5, 0.9, 1],
                                               colors: [
                                                 Colors.transparent,
-                                                Color(0xFF01DE4D),
+                                                Color.fromRGBO(1, 222, 77, 0.1),
+                                                Color.fromRGBO(1, 222, 77, 1),
+                                                Color.fromRGBO(1, 222, 77, 0.1),
                                                 Colors.transparent,
                                               ],
                                             ),
                                           ),
                                           height: 1 * scale,
-                                          width: 68 * scale,
+                                          width: (widget.maxWidth - 16) * scale,
                                         ),
                                       ),
                                     ],
@@ -178,7 +183,7 @@ class _MemoryCoverWidgetState extends State<MemoryCoverWidget> {
                           child: Transform.scale(
                             scale: scale,
                             child: SizedBox(
-                              width: MemoryCoverWidget.width,
+                              width: widget.maxWidth,
                               child: Padding(
                                 padding: const EdgeInsets.symmetric(
                                   horizontal: 8.0,

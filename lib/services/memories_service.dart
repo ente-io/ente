@@ -85,6 +85,7 @@ class MemoriesService extends ChangeNotifier {
   }
 
   Future<List<Memory>> _fetchMemories() async {
+    final stopWatch = Stopwatch()..start();
     _logger.info("Fetching memories");
     final presentTime = DateTime.now();
     final present = presentTime.subtract(
@@ -121,6 +122,8 @@ class MemoriesService extends ChangeNotifier {
       }
     }
     _cachedMemories = memories;
+    stopWatch.stop();
+    _logger.info("Fetched memories, duration: ${stopWatch.elapsed}");
     return _cachedMemories!;
   }
 

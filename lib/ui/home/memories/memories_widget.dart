@@ -1,12 +1,12 @@
 import "dart:async";
 
 import 'package:flutter/material.dart';
+import "package:flutter_animate/flutter_animate.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/memories_setting_changed.dart";
-import "package:photos/generated/l10n.dart";
 import 'package:photos/models/memory.dart';
 import 'package:photos/services/memories_service.dart';
-import "package:photos/theme/ente_theme.dart";
+import "package:photos/ui/common/loading_widget.dart";
 import 'package:photos/ui/home/memories/memory_cover_widget.dart';
 
 class MemoriesWidget extends StatefulWidget {
@@ -17,9 +17,10 @@ class MemoriesWidget extends StatefulWidget {
 }
 
 class _MemoriesWidgetState extends State<MemoriesWidget> {
-  final double _widthOfItem = 85;
   late ScrollController _controller;
   late StreamSubscription<MemoriesSettingChanged> _subscription;
+  late double _maxHeight;
+  late double _maxWidth;
 
   @override
   void initState() {
@@ -30,6 +31,16 @@ class _MemoriesWidgetState extends State<MemoriesWidget> {
       }
     });
     _controller = ScrollController();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final screenWidth = MediaQuery.sizeOf(context).width;
+    //factor will be 2 for most phones in portrait mode
+    final factor = (screenWidth / 220).ceil();
+    _maxWidth = screenWidth / (factor * 2);
+    _maxHeight = _maxWidth / MemoryCoverWidget.aspectRatio;
   }
 
   @override
@@ -48,34 +59,14 @@ class _MemoriesWidgetState extends State<MemoriesWidget> {
       future: MemoriesService.instance.getMemories(),
       builder: (context, snapshot) {
         if (snapshot.hasError || !snapshot.hasData || snapshot.data!.isEmpty) {
-          return const SizedBox.shrink();
+          return SizedBox(
+            height: _maxHeight + 12 + 10,
+            child: const EnteLoadingWidget(),
+          );
         } else {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                child: Stack(
-                  alignment: Alignment.centerRight,
-                  children: [
-                    const RotationTransition(
-                      turns: AlwaysStoppedAnimation(20 / 360),
-                      child: Icon(
-                        Icons.favorite_rounded,
-                        color: Color.fromRGBO(0, 179, 60, 0.3),
-                        size: 32,
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(right: 16),
-                      child: Text(
-                        S.of(context).memories,
-                        style: getEnteTextTheme(context).body,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
               const SizedBox(
                 height: 12,
               ),
@@ -92,19 +83,27 @@ class _MemoriesWidgetState extends State<MemoriesWidget> {
     final collatedMemories = _collateMemories(memories);
 
     return SizedBox(
-      height: MemoryCoverWidget.height,
+      height: _maxHeight,
       child: ListView.builder(
         physics: const BouncingScrollPhysics(),
         scrollDirection: Axis.horizontal,
         controller: _controller,
         itemCount: collatedMemories.length,
         itemBuilder: (context, itemIndex) {
-          final offsetOfItem = _widthOfItem * itemIndex;
+          final offsetOfItem = _maxWidth * itemIndex;
           return MemoryCoverWidget(
             memories: collatedMemories[itemIndex],
             controller: _controller,
             offsetOfItem: offsetOfItem,
-          );
+            maxHeight: _maxHeight,
+            maxWidth: _maxWidth,
+          )
+              .animate(delay: Duration(milliseconds: 75 * itemIndex))
+              .fadeIn(
+                duration: const Duration(milliseconds: 250),
+                curve: Curves.easeInOutCubic,
+              )
+              .slideX(begin: 0.04, end: 0);
         },
       ),
     );
