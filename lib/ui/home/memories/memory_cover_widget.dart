@@ -49,7 +49,7 @@ class _MemoryCoverWidgetState extends State<MemoryCoverWidget> {
       builder: (context, child) {
         final diff = (widget.controller.offset - widget.offsetOfItem) +
             widthOfScreen / 7;
-        final scale = 1 - (diff / widthOfScreen).abs() / 3;
+        final scale = 1 - (diff / widthOfScreen).abs() / 3.7;
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: 2.5),
           //Adding this row is a workaround for making height of memory cover

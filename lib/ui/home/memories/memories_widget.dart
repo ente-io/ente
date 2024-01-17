@@ -36,6 +36,7 @@ class _MemoriesWidgetState extends State<MemoriesWidget> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     final screenWidth = MediaQuery.sizeOf(context).width;
+    //factor will be 2 for most phones in portrait mode
     final factor = (screenWidth / 220).ceil();
     _maxWidth = screenWidth / (factor * 2);
     _maxHeight = _maxWidth / MemoryCoverWidget.aspectRatio;
