@@ -16,9 +16,10 @@ class MemoriesWidget extends StatefulWidget {
 }
 
 class _MemoriesWidgetState extends State<MemoriesWidget> {
-  final double _widthOfItem = 85;
   late ScrollController _controller;
   late StreamSubscription<MemoriesSettingChanged> _subscription;
+  double _maxHeight = 0;
+  double _maxWidth = 0;
 
   @override
   void initState() {
@@ -29,6 +30,14 @@ class _MemoriesWidgetState extends State<MemoriesWidget> {
       }
     });
     _controller = ScrollController();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final screenWidth = MediaQuery.sizeOf(context).width;
+    _maxWidth = screenWidth / 4;
+    _maxHeight = _maxWidth / MemoryCoverWidget.aspectRatio;
   }
 
   @override
@@ -68,18 +77,20 @@ class _MemoriesWidgetState extends State<MemoriesWidget> {
     final collatedMemories = _collateMemories(memories);
 
     return SizedBox(
-      height: MemoryCoverWidget.height,
+      height: _maxHeight,
       child: ListView.builder(
         physics: const BouncingScrollPhysics(),
         scrollDirection: Axis.horizontal,
         controller: _controller,
         itemCount: collatedMemories.length,
         itemBuilder: (context, itemIndex) {
-          final offsetOfItem = _widthOfItem * itemIndex;
+          final offsetOfItem = _maxWidth * itemIndex;
           return MemoryCoverWidget(
             memories: collatedMemories[itemIndex],
             controller: _controller,
             offsetOfItem: offsetOfItem,
+            maxHeight: _maxHeight,
+            maxWidth: _maxWidth,
           )
               .animate(delay: Duration(milliseconds: 75 * itemIndex))
               .fadeIn(

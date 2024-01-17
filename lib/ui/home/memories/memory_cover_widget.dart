@@ -10,14 +10,17 @@ class MemoryCoverWidget extends StatefulWidget {
   final List<Memory> memories;
   final ScrollController controller;
   final double offsetOfItem;
+  final double maxHeight;
+  final double maxWidth;
   static const centerStrokeWidth = 1.0;
-  static const width = 85.0;
-  static const height = 125.0;
+  static const aspectRatio = 0.68;
 
   const MemoryCoverWidget({
     required this.memories,
     required this.controller,
     required this.offsetOfItem,
+    required this.maxHeight,
+    required this.maxWidth,
     super.key,
   });
 
@@ -68,8 +71,8 @@ class _MemoryCoverWidgetState extends State<MemoryCoverWidget> {
             child: Row(
               children: [
                 Container(
-                  height: MemoryCoverWidget.height * scale,
-                  width: MemoryCoverWidget.width * scale,
+                  height: widget.maxHeight * scale,
+                  width: widget.maxWidth * scale,
                   decoration: BoxDecoration(
                     boxShadow: [
                       BoxShadow(
@@ -168,7 +171,7 @@ class _MemoryCoverWidgetState extends State<MemoryCoverWidget> {
                                             ),
                                           ),
                                           height: 1 * scale,
-                                          width: 68 * scale,
+                                          width: (widget.maxWidth - 16) * scale,
                                         ),
                                       ),
                                     ],
@@ -180,7 +183,7 @@ class _MemoryCoverWidgetState extends State<MemoryCoverWidget> {
                           child: Transform.scale(
                             scale: scale,
                             child: SizedBox(
-                              width: MemoryCoverWidget.width,
+                              width: widget.maxWidth,
                               child: Padding(
                                 padding: const EdgeInsets.symmetric(
                                   horizontal: 8.0,
