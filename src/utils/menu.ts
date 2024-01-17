@@ -200,7 +200,7 @@ export async function buildMenuBar(mainWindow: BrowserWindow): Promise<Menu> {
                 },
                 { type: 'separator' },
                 {
-                    label: 'View Crash Reports',
+                    label: 'View crash reports',
                     click: () => {
                         shell.openPath(app.getPath('crashDumps'));
                     },
