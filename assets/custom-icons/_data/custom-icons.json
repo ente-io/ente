@@ -134,6 +134,12 @@
       "title": "Mozilla"
     },
     {
+      "title": "Murena",
+      "altNames": ["ecloud"],
+      "slug": "ecloud",
+      "hex": "EC6A55"
+    },
+    {
       "title": "NextDNS"
     },
     {
