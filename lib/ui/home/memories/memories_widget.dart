@@ -18,8 +18,8 @@ class MemoriesWidget extends StatefulWidget {
 class _MemoriesWidgetState extends State<MemoriesWidget> {
   late ScrollController _controller;
   late StreamSubscription<MemoriesSettingChanged> _subscription;
-  double _maxHeight = 0;
-  double _maxWidth = 0;
+  late double _maxHeight;
+  late double _maxWidth;
 
   @override
   void initState() {
@@ -36,7 +36,8 @@ class _MemoriesWidgetState extends State<MemoriesWidget> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     final screenWidth = MediaQuery.sizeOf(context).width;
-    _maxWidth = screenWidth / 4;
+    final factor = (screenWidth / 220).ceil();
+    _maxWidth = screenWidth / (factor * 2);
     _maxHeight = _maxWidth / MemoryCoverWidget.aspectRatio;
   }
 
