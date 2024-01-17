@@ -87,6 +87,7 @@ class FilesDB {
     ...updateIndexes(),
     ...createEntityDataTable(),
     ...addAddedTime(),
+    ...addIndexOnUploadedID(),
   ];
 
   final dbConfig = MigrationConfig(
@@ -393,6 +394,14 @@ class FilesDB {
       ''',
       '''
         CREATE INDEX IF NOT EXISTS added_time_index ON $filesTable($columnAddedTime);
+      '''
+    ];
+  }
+
+  static List<String> addIndexOnUploadedID() {
+    return [
+      '''
+        CREATE INDEX IF NOT EXISTS uploaded_file_id_index ON $filesTable($columnUploadedFileID);
       '''
     ];
   }
