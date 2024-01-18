@@ -116,7 +116,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "kindlyHelpUsWithThisInformation":
             MessageLookupByLibrary.simpleMessage("Pomóż nam z tą informacją"),
         "logInLabel": MessageLookupByLibrary.simpleMessage("Zaloguj się"),
-        "memories": MessageLookupByLibrary.simpleMessage("Memories"),
         "moderateStrength": MessageLookupByLibrary.simpleMessage("Umiarkowana"),
         "modifyYourQueryOrTrySearchingFor":
             MessageLookupByLibrary.simpleMessage(

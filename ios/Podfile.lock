@@ -181,6 +181,21 @@ PODS:
   - sqflite (0.0.3):
     - Flutter
     - FMDB (>= 2.7.5)
+  - sqlite3 (3.45.0):
+    - sqlite3/common (= 3.45.0)
+  - sqlite3/common (3.45.0)
+  - sqlite3/fts5 (3.45.0):
+    - sqlite3/common
+  - sqlite3/perf-threadsafe (3.45.0):
+    - sqlite3/common
+  - sqlite3/rtree (3.45.0):
+    - sqlite3/common
+  - sqlite3_flutter_libs (0.0.1):
+    - Flutter
+    - sqlite3 (~> 3.45.0)
+    - sqlite3/fts5
+    - sqlite3/perf-threadsafe
+    - sqlite3/rtree
   - Toast (4.0.0)
   - uni_links (0.0.1):
     - Flutter
@@ -235,6 +250,7 @@ DEPENDENCIES:
   - share_plus (from `.symlinks/plugins/share_plus/ios`)
   - shared_preferences_foundation (from `.symlinks/plugins/shared_preferences_foundation/darwin`)
   - sqflite (from `.symlinks/plugins/sqflite/ios`)
+  - sqlite3_flutter_libs (from `.symlinks/plugins/sqlite3_flutter_libs/ios`)
   - uni_links (from `.symlinks/plugins/uni_links/ios`)
   - url_launcher_ios (from `.symlinks/plugins/url_launcher_ios/ios`)
   - video_player_avfoundation (from `.symlinks/plugins/video_player_avfoundation/ios`)
@@ -264,6 +280,7 @@ SPEC REPOS:
     - SDWebImageWebPCoder
     - Sentry
     - SentryPrivate
+    - sqlite3
     - Toast
 
 EXTERNAL SOURCES:
@@ -343,6 +360,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/shared_preferences_foundation/darwin"
   sqflite:
     :path: ".symlinks/plugins/sqflite/ios"
+  sqlite3_flutter_libs:
+    :path: ".symlinks/plugins/sqlite3_flutter_libs/ios"
   uni_links:
     :path: ".symlinks/plugins/uni_links/ios"
   url_launcher_ios:
@@ -415,6 +434,8 @@ SPEC CHECKSUMS:
   share_plus: 056a1e8ac890df3e33cb503afffaf1e9b4fbae68
   shared_preferences_foundation: e2dae3258e06f44cc55f49d42024fd8dd03c590c
   sqflite: 31f7eba61e3074736dff8807a9b41581e4f7f15a
+  sqlite3: f307b6291c4db7b5086c38d6237446b98a738581
+  sqlite3_flutter_libs: aeb4d37509853dfa79d9b59386a2dac5dd079428
   Toast: 91b396c56ee72a5790816f40d3a94dd357abc196
   uni_links: d97da20c7701486ba192624d99bffaaffcfc298a
   url_launcher_ios: 08a3dfac5fb39e8759aeb0abbd5d9480f30fc8b4

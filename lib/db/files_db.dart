@@ -15,6 +15,7 @@ import "package:photos/services/filter/db_filters.dart";
 import 'package:photos/utils/file_uploader_util.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:sqflite_migration/sqflite_migration.dart';
+import 'package:sqlite3/sqlite3.dart' as sqlite3;
 
 class FilesDB {
   /*
@@ -100,11 +101,17 @@ class FilesDB {
 
   // only have a single app-wide reference to the database
   static Future<Database>? _dbFuture;
+  static Future<sqlite3.Database>? _ffiDBFuture;
 
   Future<Database> get database async {
     // lazily instantiate the db the first time it is accessed
     _dbFuture ??= _initDatabase();
     return _dbFuture!;
+  }
+
+  Future<sqlite3.Database> get ffiDB async {
+    _ffiDBFuture ??= _initFFIDatabase();
+    return _ffiDBFuture!;
   }
 
   // this opens the database (and creates it if it doesn't exist)
@@ -114,6 +121,14 @@ class FilesDB {
     final String path = join(documentsDirectory.path, _databaseName);
     _logger.info("DB path " + path);
     return await openDatabaseWithMigration(path, dbConfig);
+  }
+
+  Future<sqlite3.Database> _initFFIDatabase() async {
+    final Directory documentsDirectory =
+        await getApplicationDocumentsDirectory();
+    final String path = join(documentsDirectory.path, _databaseName);
+    _logger.info("DB path " + path);
+    return sqlite3.sqlite3.open(path);
   }
 
   // SQL code to create the database table
@@ -741,6 +756,40 @@ class FilesDB {
       filesTable,
       where: whereClause,
       orderBy: '$columnCreationTime ' + order,
+    );
+    final files = convertToFiles(results);
+    return applyDBFilters(
+      files,
+      DBFilterOptions(ignoredCollectionIDs: ignoredCollectionIDs),
+    );
+  }
+
+  Future<List<EnteFile>> getFilesCreatedWithinDurationsSync(
+    List<List<int>> durations,
+    Set<int> ignoredCollectionIDs, {
+    int? visibility,
+    String order = 'ASC',
+  }) async {
+    if (durations.isEmpty) {
+      return <EnteFile>[];
+    }
+    final db = await instance.ffiDB;
+    String whereClause = "( ";
+    for (int index = 0; index < durations.length; index++) {
+      whereClause += "($columnCreationTime >= " +
+          durations[index][0].toString() +
+          " AND $columnCreationTime < " +
+          durations[index][1].toString() +
+          ")";
+      if (index != durations.length - 1) {
+        whereClause += " OR ";
+      } else if (visibility != null) {
+        whereClause += ' AND $columnMMdVisibility = $visibility';
+      }
+    }
+    whereClause += ")";
+    final results = db.select(
+      'select * from $filesTable where $whereClause order by $columnCreationTime $order',
     );
     final files = convertToFiles(results);
     return applyDBFilters(
