@@ -56,6 +56,7 @@ import { getFileExportPath, getUniqueFileExportName } from 'utils/export';
 import imageProcessor from 'services/imageProcessor';
 import ElectronAPIs from '@ente/shared/electron';
 import { downloadUsingAnchor } from '@ente/shared/utils';
+import { t } from 'i18next';
 
 const WAIT_TIME_IMAGE_CONVERSION = 30 * 1000;
 
@@ -976,7 +977,7 @@ export const handleFileOps = async (
         case FILE_OPS_TYPE.DOWNLOAD: {
             const setSelectedFileDownloadProgressAttributes =
                 setFilesDownloadProgressAttributesCreator(
-                    `${files.length} files`
+                    `${files.length} ${t('FILES')}`
                 );
             await downloadSelectedFiles(
                 files,

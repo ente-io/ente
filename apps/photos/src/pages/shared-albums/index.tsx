@@ -16,7 +16,12 @@ import {
 } from 'services/publicCollectionService';
 import { Collection } from 'types/collection';
 import { EnteFile } from 'types/file';
-import { mergeMetadata, sortFiles } from 'utils/file';
+import {
+    downloadSelectedFiles,
+    getSelectedFiles,
+    mergeMetadata,
+    sortFiles,
+} from 'utils/file';
 import { AppContext } from 'pages/_app';
 import { PublicCollectionGalleryContext } from 'utils/publicCollectionGallery';
 import { CustomError, parseSharingErrorCodes } from '@ente/shared/error';
@@ -53,6 +58,7 @@ import bs58 from 'bs58';
 import AddPhotoAlternateOutlined from '@mui/icons-material/AddPhotoAlternateOutlined';
 import ComlinkCryptoWorker from '@ente/shared/crypto';
 import {
+    SelectedState,
     SetFilesDownloadProgressAttributes,
     SetFilesDownloadProgressAttributesCreator,
     UploadTypeSelectorIntent,
@@ -69,6 +75,7 @@ import {
     FilesDownloadProgressAttributes,
 } from 'components/FilesDownloadProgress';
 import { downloadCollectionFiles, isHiddenCollection } from 'utils/collection';
+import SelectedFileOptions from 'components/pages/sharedAlbum/SelectedFileOptions';
 
 export default function PublicCollectionGallery() {
     const token = useRef<string>(null);
@@ -95,6 +102,11 @@ export default function PublicCollectionGallery() {
     const [uploadTypeSelectorView, setUploadTypeSelectorView] = useState(false);
     const [blockingLoad, setBlockingLoad] = useState(false);
     const [shouldDisableDropzone, setShouldDisableDropzone] = useState(false);
+    const [selected, setSelected] = useState<SelectedState>({
+        ownCount: 0,
+        count: 0,
+        collectionID: 0,
+    });
 
     const {
         getRootProps: getDragAndDropRootProps,
@@ -495,6 +507,29 @@ export default function PublicCollectionGallery() {
         }
     }
 
+    const downloadFilesHelper = async () => {
+        try {
+            const selectedFiles = getSelectedFiles(selected, publicFiles);
+            const setFilesDownloadProgressAttributes =
+                setFilesDownloadProgressAttributesCreator(
+                    `${selectedFiles.length} ${t('FILES')}`
+                );
+            await downloadSelectedFiles(
+                selectedFiles,
+                setFilesDownloadProgressAttributes
+            );
+        } catch (e) {
+            logError(e, 'failed to download selected files');
+        }
+    };
+
+    const clearSelection = () => {
+        if (!selected?.count) {
+            return;
+        }
+        setSelected({ ownCount: 0, count: 0, collectionID: 0 });
+    };
+
     return (
         <PublicCollectionGalleryContext.Provider
             value={{
@@ -522,8 +557,8 @@ export default function PublicCollectionGallery() {
                     page={PAGES.SHARED_ALBUMS}
                     files={publicFiles}
                     syncWithRemote={syncWithRemote}
-                    setSelected={() => null}
-                    selected={{ count: 0, collectionID: null, ownCount: 0 }}
+                    setSelected={setSelected}
+                    selected={selected}
                     activeCollectionID={ALL_SECTION}
                     enableDownload={downloadEnabled}
                     fileToCollectionsMap={null}
@@ -559,6 +594,14 @@ export default function PublicCollectionGallery() {
                     attributesList={filesDownloadProgressAttributesList}
                     setAttributesList={setFilesDownloadProgressAttributesList}
                 />
+                {selected.count > 0 && (
+                    <SelectedFileOptions
+                        downloadFilesHelper={downloadFilesHelper}
+                        clearSelection={clearSelection}
+                        count={selected.count}
+                        ownCount={selected.ownCount}
+                    />
+                )}
             </FullScreenDropZone>
         </PublicCollectionGalleryContext.Provider>
     );
