@@ -11,7 +11,10 @@ import AutoSizer from 'react-virtualized-auto-sizer';
 import PhotoViewer from 'components/PhotoViewer';
 import { TRASH_SECTION } from 'constants/collection';
 import { updateFileMsrcProps, updateFileSrcProps } from 'utils/photoFrame';
-import { SelectedState } from 'types/gallery';
+import {
+    SelectedState,
+    SetFilesDownloadProgressAttributesCreator,
+} from 'types/gallery';
 import { PublicCollectionGalleryContext } from 'utils/publicCollectionGallery';
 import { useRouter } from 'next/router';
 import { logError } from '@ente/shared/sentry';
@@ -62,6 +65,7 @@ interface Props {
     showAppDownloadBanner?: boolean;
     setIsPhotoSwipeOpen?: (value: boolean) => void;
     isInHiddenSection?: boolean;
+    setFilesDownloadProgressAttributesCreator?: SetFilesDownloadProgressAttributesCreator;
 }
 
 const PhotoFrame = ({
@@ -81,6 +85,7 @@ const PhotoFrame = ({
     showAppDownloadBanner,
     setIsPhotoSwipeOpen,
     isInHiddenSection,
+    setFilesDownloadProgressAttributesCreator,
 }: Props) => {
     const [open, setOpen] = useState(false);
     const [currentIndex, setCurrentIndex] = useState<number>(0);
@@ -607,6 +612,9 @@ const PhotoFrame = ({
                 enableDownload={enableDownload}
                 fileToCollectionsMap={fileToCollectionsMap}
                 collectionNameMap={collectionNameMap}
+                setFilesDownloadProgressAttributesCreator={
+                    setFilesDownloadProgressAttributesCreator
+                }
             />
         </Container>
     );

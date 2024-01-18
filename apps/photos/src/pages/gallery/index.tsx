@@ -1165,6 +1165,9 @@ export default function Gallery() {
                             files.length < 30 && !isInSearchMode
                         }
                         isInHiddenSection={isInHiddenSection}
+                        setFilesDownloadProgressAttributesCreator={
+                            setFilesDownloadProgressAttributesCreator
+                        }
                     />
                 )}
                 {selected.count > 0 &&

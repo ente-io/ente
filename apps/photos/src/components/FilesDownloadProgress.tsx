@@ -128,7 +128,10 @@ export const FilesDownloadProgress: React.FC<FilesDownloadProgressProps> = ({
                 <Notification
                     key={attributes.collectionID}
                     horizontal="left"
-                    sx={{ '&&': { bottom: `${index * 80 + 20}px` } }}
+                    sx={{
+                        '&&': { bottom: `${index * 80 + 20}px` },
+                        zIndex: 1600,
+                    }}
                     open={isFilesDownloadStarted(attributes)}
                     onClose={handleClose(attributes)}
                     keepOpenOnClick
