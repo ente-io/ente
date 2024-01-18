@@ -192,6 +192,12 @@ function PhotoViewer(props: Iprops) {
                 case 'L':
                     onFavClick(photoSwipe?.currItem as EnteFile);
                     break;
+                case 'ArrowLeft':
+                    handleArrowClick(event, 'left');
+                    break;
+                case 'ArrowRight':
+                    handleArrowClick(event, 'right');
+                    break;
                 default:
                     break;
             }
@@ -352,6 +358,7 @@ function PhotoViewer(props: Iprops) {
             maxSpreadZoom: 5,
             index: currentIndex,
             showHideOpacity: true,
+            arrowKeys: false,
             getDoubleTapZoom(isMouseClick, item) {
                 if (isMouseClick) {
                     return 2.5;
@@ -503,6 +510,24 @@ function PhotoViewer(props: Iprops) {
             return;
         }
         appContext.setDialogMessage(getTrashFileMessage(() => trashFile(file)));
+    };
+
+    const handleArrowClick = (
+        e: KeyboardEvent,
+        direction: 'left' | 'right'
+    ) => {
+        // ignore ctrl/cmd + a if the user is typing in a text field
+        if (
+            e.target instanceof HTMLInputElement ||
+            e.target instanceof HTMLTextAreaElement
+        ) {
+            return;
+        }
+        if (direction === 'left') {
+            photoSwipe.prev();
+        } else {
+            photoSwipe.next();
+        }
     };
 
     const updateItems = (items: EnteFile[]) => {
