@@ -602,7 +602,11 @@ function PhotoViewer(props: Iprops) {
     };
 
     const downloadFileHelper = async (file: EnteFile) => {
-        if (file && props.enableDownload) {
+        if (
+            file &&
+            props.enableDownload &&
+            props.setFilesDownloadProgressAttributesCreator
+        ) {
             try {
                 const setSingleFileDownloadProgress =
                     props.setFilesDownloadProgressAttributesCreator(

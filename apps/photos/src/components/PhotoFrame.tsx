@@ -56,7 +56,6 @@ interface Props {
         selected: SelectedState | ((selected: SelectedState) => SelectedState)
     ) => void;
     selected: SelectedState;
-    setFilesDownloadProgressAttributesCreator: SetFilesDownloadProgressAttributesCreator;
     deletedFileIds?: Set<number>;
     setDeletedFileIds?: (value: Set<number>) => void;
     activeCollectionID: number;
@@ -66,6 +65,7 @@ interface Props {
     showAppDownloadBanner?: boolean;
     setIsPhotoSwipeOpen?: (value: boolean) => void;
     isInHiddenSection?: boolean;
+    setFilesDownloadProgressAttributesCreator?: SetFilesDownloadProgressAttributesCreator;
 }
 
 const PhotoFrame = ({
