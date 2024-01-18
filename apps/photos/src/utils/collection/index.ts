@@ -143,7 +143,7 @@ export async function downloadDefaultHiddenCollectionHelper(
     }
 }
 
-async function downloadCollectionFiles(
+export async function downloadCollectionFiles(
     collectionName: string,
     collectionFiles: EnteFile[],
     setFilesDownloadProgressAttributes: SetFilesDownloadProgressAttributes
