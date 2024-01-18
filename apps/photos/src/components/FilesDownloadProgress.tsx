@@ -120,8 +120,6 @@ export const FilesDownloadProgress: React.FC<FilesDownloadProgressProps> = ({
         }
     };
 
-    console.log('attributesList', attributesList);
-
     return (
         <>
             {attributesList.map((attributes, index) => (
