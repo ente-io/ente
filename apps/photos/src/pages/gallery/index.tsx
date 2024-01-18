@@ -97,6 +97,8 @@ import { EnteFile } from 'types/file';
 import {
     GalleryContextType,
     SelectedState,
+    SetFilesDownloadProgressAttributes,
+    SetFilesDownloadProgressAttributesCreator,
     UploadTypeSelectorIntent,
 } from 'types/gallery';
 import Collections from 'components/Collections';
@@ -131,6 +133,10 @@ import { ClipService } from 'services/clipService';
 import isElectron from 'is-electron';
 import downloadManager from 'services/download';
 import { APPS } from '@ente/shared/apps/constants';
+import {
+    FilesDownloadProgress,
+    FilesDownloadProgressAttributes,
+} from 'components/FilesDownloadProgress';
 
 export const DeadCenter = styled('div')`
     flex: 1;
@@ -279,6 +285,11 @@ export default function Gallery() {
         setAuthenticateUserModalView(false);
 
     const [isInHiddenSection, setIsInHiddenSection] = useState(false);
+
+    const [
+        filesDownloadProgressAttributesList,
+        setFilesDownloadProgressAttributesList,
+    ] = useState<FilesDownloadProgressAttributes[]>([]);
 
     const openHiddenSection: GalleryContextType['openHiddenSection'] = (
         callback
@@ -816,6 +827,40 @@ export default function Gallery() {
         return <div />;
     }
 
+    const setFilesDownloadProgressAttributesCreator: SetFilesDownloadProgressAttributesCreator =
+        (folderName, collectionID, isHidden) => {
+            const id = filesDownloadProgressAttributesList?.length ?? 0;
+            const updater: SetFilesDownloadProgressAttributes = (value) => {
+                setFilesDownloadProgressAttributesList((prev) => {
+                    const attributes = prev?.find((attr) => attr.id === id);
+                    const updatedAttributes =
+                        typeof value === 'function'
+                            ? value(attributes)
+                            : { ...attributes, ...value };
+                    console.log('value', attributes, updatedAttributes);
+                    const updatedAttributesList = attributes
+                        ? prev.map((attr) =>
+                              attr.id === id ? updatedAttributes : attr
+                          )
+                        : [...prev, updatedAttributes];
+
+                    return updatedAttributesList;
+                });
+            };
+            updater({
+                id,
+                folderName,
+                collectionID,
+                isHidden,
+                canceller: null,
+                total: 0,
+                success: 0,
+                failed: 0,
+                downloadDirPath: null,
+            });
+            return updater;
+        };
+
     const collectionOpsHelper =
         (ops: COLLECTION_OPS_TYPE) => async (collection: Collection) => {
             startLoading();
@@ -874,7 +919,8 @@ export default function Gallery() {
                     toProcessFiles,
                     setDeletedFileIds,
                     setHiddenFileIds,
-                    setFixCreationTimeAttributes
+                    setFixCreationTimeAttributes,
+                    setFilesDownloadProgressAttributesCreator
                 );
             }
             clearSelection();
@@ -1013,6 +1059,10 @@ export default function Gallery() {
                     attributes={collectionSelectorAttributes}
                     collections={collections}
                 />
+                <FilesDownloadProgress
+                    attributesList={filesDownloadProgressAttributesList}
+                    setAttributesList={setFilesDownloadProgressAttributesList}
+                />
                 <FixCreationTime
                     isOpen={fixCreationTimeView}
                     hide={() => setFixCreationTimeView(false)}
@@ -1042,6 +1092,12 @@ export default function Gallery() {
                     hiddenCollectionSummaries={hiddenCollectionSummaries}
                     setCollectionNamerAttributes={setCollectionNamerAttributes}
                     setPhotoListHeader={setPhotoListHeader}
+                    setFilesDownloadProgressAttributesCreator={
+                        setFilesDownloadProgressAttributesCreator
+                    }
+                    filesDownloadProgressAttributesList={
+                        filesDownloadProgressAttributesList
+                    }
                 />
 
                 <Uploader

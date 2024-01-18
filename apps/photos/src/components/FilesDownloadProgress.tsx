@@ -23,6 +23,12 @@ interface FilesDownloadProgressProps {
     setAttributesList: (value: FilesDownloadProgressAttributes[]) => void;
 }
 
+export const isFilesDownloadStarted = (
+    attributes: FilesDownloadProgressAttributes
+) => {
+    return attributes && attributes.total > 0;
+};
+
 export const isFilesDownloadCompleted = (
     attributes: FilesDownloadProgressAttributes
 ) => {
@@ -114,6 +120,8 @@ export const FilesDownloadProgress: React.FC<FilesDownloadProgressProps> = ({
         }
     };
 
+    console.log('attributesList', attributesList);
+
     return (
         <>
             {attributesList.map((attributes, index) => (
@@ -121,7 +129,7 @@ export const FilesDownloadProgress: React.FC<FilesDownloadProgressProps> = ({
                     key={attributes.collectionID}
                     horizontal="left"
                     sx={{ '&&': { bottom: `${index * 80 + 20}px` } }}
-                    open
+                    open={isFilesDownloadStarted(attributes)}
                     onClose={handleClose(attributes)}
                     keepOpenOnClick
                     attributes={{
