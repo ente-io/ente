@@ -10,7 +10,6 @@ import { formatNumber } from 'utils/number/format';
 
 interface Props {
     count: number;
-    ownCount: number;
     clearSelection: () => void;
     downloadFilesHelper: () => void;
 }
@@ -18,7 +17,6 @@ interface Props {
 const SelectedFileOptions = ({
     downloadFilesHelper,
     count,
-    ownCount,
     clearSelection,
 }: Props) => {
     const { isMobile } = useContext(AppContext);
@@ -31,8 +29,6 @@ const SelectedFileOptions = ({
                 </IconButton>
                 <Box ml={1.5}>
                     {formatNumber(count)} {t('SELECTED')}{' '}
-                    {ownCount !== count &&
-                        `(${formatNumber(ownCount)} ${t('YOURS')})`}
                 </Box>
             </FluidContainer>
             <Stack spacing={2} direction="row" mr={2}>

@@ -599,7 +599,6 @@ export default function PublicCollectionGallery() {
                         downloadFilesHelper={downloadFilesHelper}
                         clearSelection={clearSelection}
                         count={selected.count}
-                        ownCount={selected.ownCount}
                     />
                 )}
             </FullScreenDropZone>
