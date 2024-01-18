@@ -154,13 +154,13 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
         automaticallyImplyLeading: false,
         title: ValueListenableBuilder(
           valueListenable: inheritedData.indexNotifier,
-          child: Padding(
-            padding: const EdgeInsets.only(right: 16),
-            child: InkWell(
-              onTap: () {
-                Navigator.pop(context);
-              },
-              child: const Icon(
+          child: InkWell(
+            onTap: () {
+              Navigator.pop(context);
+            },
+            child: const Padding(
+              padding: EdgeInsets.fromLTRB(4, 8, 8, 8),
+              child: Icon(
                 Icons.close,
                 color: Colors.white, //same for both themes
               ),
@@ -180,7 +180,7 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
                       )
                     : const SizedBox.shrink(),
                 const SizedBox(
-                  height: 18,
+                  height: 10,
                 ),
                 Row(
                   children: [
