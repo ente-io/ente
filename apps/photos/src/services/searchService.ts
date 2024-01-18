@@ -174,9 +174,7 @@ function getYearSuggestion(searchPhrase: string): Suggestion[] {
 
 export async function getAllPeopleSuggestion(): Promise<Array<Suggestion>> {
     try {
-        addLogLine('getAllPeopleSuggestion called');
         const people = await getAllPeople(200);
-        addLogLine(`found people: ${people?.length ?? 0}`);
         return people.map((person) => ({
             label: person.name,
             type: SuggestionType.PERSON,
