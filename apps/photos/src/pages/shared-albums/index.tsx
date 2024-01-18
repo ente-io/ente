@@ -507,6 +507,13 @@ export default function PublicCollectionGallery() {
         }
     }
 
+    const clearSelection = () => {
+        if (!selected?.count) {
+            return;
+        }
+        setSelected({ ownCount: 0, count: 0, collectionID: 0 });
+    };
+
     const downloadFilesHelper = async () => {
         try {
             const selectedFiles = getSelectedFiles(selected, publicFiles);
@@ -518,16 +525,10 @@ export default function PublicCollectionGallery() {
                 selectedFiles,
                 setFilesDownloadProgressAttributes
             );
+            clearSelection();
         } catch (e) {
             logError(e, 'failed to download selected files');
         }
-    };
-
-    const clearSelection = () => {
-        if (!selected?.count) {
-            return;
-        }
-        setSelected({ ownCount: 0, count: 0, collectionID: 0 });
     };
 
     return (

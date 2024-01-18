@@ -218,6 +218,12 @@ export default function PreviewCard(props: IProps) {
     const galleryContext = useContext(GalleryContext);
     const deduplicateContext = useContext(DeduplicateContext);
 
+    const longPressCallback = () => {
+        onSelect(!selected);
+    };
+
+    const longPress = useLongPress(longPressCallback, 500);
+
     const {
         file,
         onClick,
@@ -289,9 +295,6 @@ export default function PreviewCard(props: IProps) {
         }
     };
 
-    const longPressCallback = () => {
-        onSelect(!selected);
-    };
     const handleHover = () => {
         if (isRangeSelectActive) {
             onHover();
@@ -304,7 +307,7 @@ export default function PreviewCard(props: IProps) {
             onClick={handleClick}
             onMouseEnter={handleHover}
             disabled={!file?.msrc && !imgSrc}
-            {...(selectable ? useLongPress(longPressCallback, 500) : {})}>
+            {...(selectable ? longPress : {})}>
             {selectable && (
                 <Check
                     type="checkbox"
