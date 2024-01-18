@@ -65,10 +65,8 @@ export const FilesDownloadProgress: React.FC<FilesDownloadProgressProps> = ({
         return <></>;
     }
 
-    const onClose = (collectionID: number) => {
-        setAttributesList(
-            attributesList.filter((attr) => attr.collectionID !== collectionID)
-        );
+    const onClose = (id: number) => {
+        setAttributesList(attributesList.filter((attr) => attr.id !== id));
     };
 
     const confirmCancelUpload = (
@@ -82,7 +80,7 @@ export const FilesDownloadProgress: React.FC<FilesDownloadProgressProps> = ({
                 variant: 'critical',
                 action: () => {
                     attributes?.canceller.abort();
-                    onClose(attributes.collectionID);
+                    onClose(attributes.id);
                 },
             },
             close: {
@@ -95,16 +93,14 @@ export const FilesDownloadProgress: React.FC<FilesDownloadProgressProps> = ({
 
     const handleClose = (attributes: FilesDownloadProgressAttributes) => () => {
         if (isFilesDownloadCompleted(attributes)) {
-            onClose(attributes.collectionID);
+            onClose(attributes.id);
         } else {
             confirmCancelUpload(attributes);
         }
     };
 
-    const handleOnClick = (collectionID: number) => () => {
-        const attributes = attributesList.find(
-            (attr) => attr.collectionID === collectionID
-        );
+    const handleOnClick = (id: number) => () => {
+        const attributes = attributesList.find((attr) => attr.id === id);
         if (isElectron()) {
             ElectronAPIs.openDirectory(attributes.downloadDirPath);
         } else {
@@ -124,7 +120,7 @@ export const FilesDownloadProgress: React.FC<FilesDownloadProgressProps> = ({
         <>
             {attributesList.map((attributes, index) => (
                 <Notification
-                    key={attributes.collectionID}
+                    key={attributes.id}
                     horizontal="left"
                     sx={{
                         '&&': { bottom: `${index * 80 + 20}px` },
@@ -154,7 +150,7 @@ export const FilesDownloadProgress: React.FC<FilesDownloadProgressProps> = ({
                                       total: attributes.total,
                                   },
                               }),
-                        onClick: handleOnClick(attributes.collectionID),
+                        onClick: handleOnClick(attributes.id),
                     }}
                 />
             ))}
