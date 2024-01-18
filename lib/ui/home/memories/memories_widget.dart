@@ -1,7 +1,6 @@
 import "dart:async";
 
 import 'package:flutter/material.dart';
-import "package:flutter_animate/flutter_animate.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/memories_setting_changed.dart";
 import 'package:photos/models/memory.dart';
@@ -97,13 +96,7 @@ class _MemoriesWidgetState extends State<MemoriesWidget> {
             offsetOfItem: offsetOfItem,
             maxHeight: _maxHeight,
             maxWidth: _maxWidth,
-          )
-              .animate(delay: Duration(milliseconds: 75 * itemIndex))
-              .fadeIn(
-                duration: const Duration(milliseconds: 250),
-                curve: Curves.easeInOutCubic,
-              )
-              .slideX(begin: 0.04, end: 0);
+          );
         },
       ),
     );
