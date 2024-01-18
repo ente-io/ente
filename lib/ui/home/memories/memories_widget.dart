@@ -1,11 +1,11 @@
 import "dart:async";
 
 import 'package:flutter/material.dart';
+import "package:flutter_animate/flutter_animate.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/memories_setting_changed.dart";
 import 'package:photos/models/memory.dart';
 import 'package:photos/services/memories_service.dart';
-import "package:photos/ui/common/loading_widget.dart";
 import 'package:photos/ui/home/memories/memory_cover_widget.dart';
 
 class MemoriesWidget extends StatefulWidget {
@@ -57,10 +57,12 @@ class _MemoriesWidgetState extends State<MemoriesWidget> {
     return FutureBuilder<List<Memory>>(
       future: MemoriesService.instance.getMemories(),
       builder: (context, snapshot) {
-        if (snapshot.hasError || !snapshot.hasData || snapshot.data!.isEmpty) {
+        if (snapshot.hasData && snapshot.data!.isEmpty) {
+          return const SizedBox.shrink();
+        }
+        if (snapshot.hasError || !snapshot.hasData) {
           return SizedBox(
             height: _maxHeight + 12 + 10,
-            child: const EnteLoadingWidget(),
           );
         } else {
           return Column(
@@ -72,7 +74,10 @@ class _MemoriesWidgetState extends State<MemoriesWidget> {
               _buildMemories(snapshot.data!),
               const SizedBox(height: 10),
             ],
-          );
+          ).animate().fadeIn(
+                duration: const Duration(milliseconds: 250),
+                curve: Curves.easeInOutCirc,
+              );
         }
       },
     );
