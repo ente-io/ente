@@ -34,7 +34,6 @@ import { t } from 'i18next';
 import memoize from 'memoize-one';
 import { LocationTagData } from 'types/entity';
 import { FILE_TYPE } from 'constants/file';
-import { addLogLine } from '@ente/shared/logging';
 
 interface Iprops {
     isOpen: boolean;
@@ -70,10 +69,7 @@ export default function SearchInput(props: Iprops) {
     }, []);
 
     async function refreshDefaultOptions() {
-        const t = Date.now();
-        addLogLine('refreshDefaultOptions called');
         const defaultOptions = await getDefaultOptions(props.files);
-        addLogLine(`refreshDefaultOptions end time: ${Date.now() - t}ms`);
         setDefaultOptions(defaultOptions);
     }
 
