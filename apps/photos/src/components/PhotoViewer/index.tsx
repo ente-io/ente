@@ -516,7 +516,7 @@ function PhotoViewer(props: Iprops) {
         e: KeyboardEvent,
         direction: 'left' | 'right'
     ) => {
-        // ignore ctrl/cmd + a if the user is typing in a text field
+        // ignore arrow clicks if the user is typing in a text field
         if (
             e.target instanceof HTMLInputElement ||
             e.target instanceof HTMLTextAreaElement
