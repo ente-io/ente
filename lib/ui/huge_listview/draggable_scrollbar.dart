@@ -103,16 +103,14 @@ class DraggableScrollbarState extends State<DraggableScrollbar>
 
   @override
   Widget build(BuildContext context) {
-    if (widget.isEnabled) {
-      return Stack(
-        children: [
-          RepaintBoundary(child: widget.child),
-          RepaintBoundary(child: buildThumb()),
-        ],
-      );
-    } else {
-      return widget.child;
-    }
+    return Stack(
+      children: [
+        RepaintBoundary(child: widget.child),
+        widget.isEnabled
+            ? RepaintBoundary(child: buildThumb())
+            : const SizedBox.shrink(),
+      ],
+    );
   }
 
   Widget buildThumb() => Padding(
