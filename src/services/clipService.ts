@@ -267,11 +267,18 @@ export async function computeONNXImageEmbedding(
 ): Promise<Float32Array> {
     try {
         const imageSession = await getOnnxImageSession();
+        const t1 = Date.now();
         const rgbData = await getRGBData(inputFilePath);
         const feeds = {
             input: new ort.Tensor('float32', rgbData, [1, 3, 224, 224]),
         };
+        const t2 = Date.now();
         const results = await imageSession.run(feeds);
+        log.info(
+            `onnx image embedding time: ${Date.now() - t1} ms (prep:${
+                t2 - t1
+            } ms, extraction: ${Date.now() - t2} ms)`
+        );
         const imageEmbedding = results['output'].data; // Float32Array
         return normalizeEmbedding(imageEmbedding);
     } catch (err) {
@@ -336,12 +343,19 @@ export async function computeONNXTextEmbedding(
 ): Promise<Float32Array> {
     try {
         const imageSession = await getOnnxTextSession();
+        const t1 = Date.now();
         const tokenizer = getTokenizer();
         const tokenizedText = Int32Array.from(tokenizer.encodeForCLIP(text));
         const feeds = {
             input: new ort.Tensor('int32', tokenizedText, [1, 77]),
         };
+        const t2 = Date.now();
         const results = await imageSession.run(feeds);
+        log.info(
+            `onnx text embedding time: ${Date.now() - t1} ms (prep:${
+                t2 - t1
+            } ms, extraction: ${Date.now() - t2} ms)`
+        );
         const textEmbedding = results['output'].data; // Float32Array
         return normalizeEmbedding(textEmbedding);
     } catch (err) {
