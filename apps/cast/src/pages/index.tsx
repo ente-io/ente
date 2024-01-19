@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import _sodium from 'libsodium-wrappers';
-import { getKexValue, setKexValue } from '@ente/shared/network/kexService';
+import castGateway from '@ente/shared/network/cast';
 import {
     boxSealOpen,
     fromB64,
@@ -120,7 +120,7 @@ export default function PairingMode() {
         // then, we can decrypt this and store all the necessary info locally so we can play the collection slideshow.
         let devicePayload = '';
         try {
-            devicePayload = await getKexValue(`${digits.join('')}_payload`);
+            devicePayload = await castGateway.getCastData(`${digits.join('')}`);
         } catch (e) {
             return;
         }
@@ -150,7 +150,10 @@ export default function PairingMode() {
     const advertisePublicKey = async (publicKeyB64: string) => {
         // hey client, we exist!
         try {
-            await setKexValue(`${digits.join('')}_pubkey`, publicKeyB64);
+            await castGateway.advertisePublicKey(
+                `${digits.join('')}`,
+                publicKeyB64
+            );
         } catch (e) {
             return;
         }
@@ -170,8 +173,7 @@ export default function PairingMode() {
             if (!data) return;
 
             storePayloadLocally(data);
-
-            router.push('/slideshow');
+            await router.push('/slideshow');
         }, 1000);
 
         return () => {
