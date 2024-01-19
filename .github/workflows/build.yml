@@ -56,3 +56,10 @@ jobs:
         with:
           name: release-checksum
           path: build/app/outputs/flutter-apk/checksum
+
+      # Create a draft release
+      - uses: ncipollo/release-action@v1
+        with:
+          artifacts: "build/app/outputs/flutter-apk/ente.apk,build/app/outputs/flutter-apk/sha256sum"
+          token: ${{ secrets.GITHUB_TOKEN }}
+          draft: true
