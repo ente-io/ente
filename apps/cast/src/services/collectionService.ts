@@ -1,11 +1,6 @@
-import { getData, LS_KEYS } from 'utils/storage/localStorage';
-import localForage from 'utils/storage/localForage';
 import { getActualKey } from '@ente/shared/user';
 import { batch } from '@ente/shared/batch';
-import { getPublicKey } from './userService';
-import HTTPService from './HTTPService';
 import { EnteFile } from 'types/file';
-import { logError } from 'utils/sentry';
 import { CustomError } from 'utils/error';
 import {
     sortFiles,
@@ -71,6 +66,10 @@ import { EncryptedMagicMetadata } from 'types/magicMetadata';
 import { VISIBILITY_STATE } from 'types/magicMetadata';
 import { getEndpoint } from '@ente/shared/network/api';
 import { getToken } from '@ente/shared/storage/localStorage/helpers';
+import HTTPService from '@ente/shared/network/HTTPService';
+import { logError } from '@ente/shared/sentry';
+import { LS_KEYS, getData } from '@ente/shared/storage/localStorage';
+import localForage from '@ente/shared/storage/localForage';
 
 const ENDPOINT = getEndpoint();
 const COLLECTION_TABLE = 'collections';
@@ -347,10 +346,17 @@ export const getCollection = async (
 
 export const getCollectionWithKey = async (
     collectionID: number,
-    key: string
+    key: string,
+    tokenType: 'user' | 'cast' = 'user',
+    castToken?: string
 ): Promise<Collection> => {
     try {
-        const token = getToken();
+        let token;
+        if (tokenType === 'user') {
+            token = getToken();
+        } else {
+            token = castToken!;
+        }
         if (!token) {
             return;
         }
@@ -972,39 +978,6 @@ export const renameCollection = async (
             'X-Auth-Token': token,
         }
     );
-};
-
-export const shareCollection = async (
-    collection: Collection,
-    withUserEmail: string,
-    role: string
-) => {
-    try {
-        const cryptoWorker = await ComlinkCryptoWorker.getInstance();
-        const token = getToken();
-        const publicKey: string = await getPublicKey(withUserEmail);
-        const encryptedKey = await cryptoWorker.boxSeal(
-            collection.key,
-            publicKey
-        );
-        const shareCollectionRequest = {
-            collectionID: collection.id,
-            email: withUserEmail,
-            role: role,
-            encryptedKey,
-        };
-        await HTTPService.post(
-            `${ENDPOINT}/collections/share`,
-            shareCollectionRequest,
-            null,
-            {
-                'X-Auth-Token': token,
-            }
-        );
-    } catch (e) {
-        logError(e, 'share collection failed ');
-        throw e;
-    }
 };
 
 export const unshareCollection = async (

@@ -3,7 +3,7 @@ import localForage from 'utils/storage/localForage';
 
 import { getToken } from '@ente/shared/storage/localStorage/helpers';
 import { Collection } from 'types/collection';
-import HTTPService from './HTTPService';
+
 import { logError } from 'utils/sentry';
 import {
     decryptFile,
@@ -29,6 +29,7 @@ import {
 } from './collectionService';
 import { REQUEST_BATCH_SIZE } from 'constants/api';
 import { batch } from '@ente/shared/batch';
+import HTTPService from '@ente/shared/network/HTTPService';
 
 const ENDPOINT = getEndpoint();
 const FILES_TABLE = 'files';

@@ -7,6 +7,7 @@ import { getCollectionWithKey } from 'services/collectionService';
 import { syncFiles } from 'services/fileService';
 import { EnteFile } from 'types/file';
 import { downloadFileAsBlob, isRawFileFromFileName } from 'utils/file';
+import { logError } from 'utils/sentry';
 
 export const SlideshowContext = createContext<{
     showNextSlide: () => void;
@@ -36,9 +37,13 @@ export default function Slideshow() {
                 'targetCollectionKey'
             );
 
+            const castToken = window.localStorage.getItem('token');
+
             const collection = await getCollectionWithKey(
                 Number(requestedCollectionID),
-                requestedCollectionKey
+                requestedCollectionKey,
+                'cast',
+                castToken
             );
 
             const files = await syncFiles('normal', [collection], () => {});
@@ -48,7 +53,9 @@ export default function Slideshow() {
                     files.filter((file) => isFileEligibleForCast(file))
                 );
             }
-        } catch {
+        } catch (e) {
+            logError(e, 'error during sync');
+            alert('error, redirect to home' + e);
             router.push('/');
         }
     };
