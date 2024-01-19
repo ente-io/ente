@@ -1,4 +1,4 @@
-name: Manual Build
+name: Manual build
 
 on:
   workflow_dispatch: # Enable manual run only
@@ -55,11 +55,11 @@ jobs:
       - uses: actions/upload-artifact@v2
         with:
           name: release-checksum
-          path: build/app/outputs/flutter-apk/checksum
+          path: build/app/outputs/flutter-apk/sha256sum
 
-      # Create a draft release
+      # Create a pre-release
       - uses: ncipollo/release-action@v1
         with:
           artifacts: "build/app/outputs/flutter-apk/ente.apk,build/app/outputs/flutter-apk/sha256sum"
           token: ${{ secrets.GITHUB_TOKEN }}
-          draft: true
+          prerelease: true
