@@ -99,7 +99,7 @@ export const syncFiles = async (
     return files;
 };
 
-export const getFiles = async (
+const getFiles = async (
     collection: Collection,
     sinceTime: number,
     setFiles: SetFiles
