@@ -521,7 +521,8 @@ export function isValidReplacementAlbum(
     return (
         collection.name === wantedCollectionName &&
         (collection.type === CollectionType.album ||
-            collection.type === CollectionType.folder) &&
+            collection.type === CollectionType.folder ||
+            collection.type === CollectionType.uncategorized) &&
         !isHiddenCollection(collection) &&
         !isQuickLinkCollection(collection) &&
         !isIncomingShare(collection, user)
