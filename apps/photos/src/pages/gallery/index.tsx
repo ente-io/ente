@@ -839,9 +839,6 @@ export default function Gallery() {
 
                 clearSelection();
                 await syncWithRemote(false, true);
-                if (isInHiddenSection && ops === COLLECTION_OPS_TYPE.UNHIDE) {
-                    exitHiddenSection();
-                }
             } catch (e) {
                 logError(e, 'collection ops failed', { ops });
                 setDialogMessage({
