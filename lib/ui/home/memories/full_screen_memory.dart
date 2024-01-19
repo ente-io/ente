@@ -234,42 +234,35 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
                 preloadThumbnail(nextFile);
                 preloadFile(nextFile);
               }
-              return Stack(
-                alignment: Alignment.bottomCenter,
-                children: [
-                  GestureDetector(
-                    onTapDown: (TapDownDetails details) {
-                      final screenWidth = MediaQuery.of(context).size.width;
-                      final edgeWidth = screenWidth * 0.20;
-                      if (details.localPosition.dx < edgeWidth) {
-                        if (index > 0) {
-                          _pageController!.previousPage(
-                            duration: const Duration(milliseconds: 250),
-                            curve: Curves.ease,
-                          );
-                        }
-                      } else if (details.localPosition.dx >
-                          screenWidth - edgeWidth) {
-                        if (index < (inheritedData.memories.length - 1)) {
-                          _pageController!.nextPage(
-                            duration: const Duration(milliseconds: 250),
-                            curve: Curves.ease,
-                          );
-                        }
-                      }
-                    },
-                    child: FileWidget(
-                      inheritedData.memories[index].file,
-                      autoPlay: false,
-                      tagPrefix: "memories",
-                      backgroundDecoration: const BoxDecoration(
-                        color: Colors.transparent,
-                      ),
-                    ),
+              return GestureDetector(
+                onTapDown: (TapDownDetails details) {
+                  final screenWidth = MediaQuery.of(context).size.width;
+                  final edgeWidth = screenWidth * 0.20;
+                  if (details.localPosition.dx < edgeWidth) {
+                    if (index > 0) {
+                      _pageController!.previousPage(
+                        duration: const Duration(milliseconds: 250),
+                        curve: Curves.ease,
+                      );
+                    }
+                  } else if (details.localPosition.dx >
+                      screenWidth - edgeWidth) {
+                    if (index < (inheritedData.memories.length - 1)) {
+                      _pageController!.nextPage(
+                        duration: const Duration(milliseconds: 250),
+                        curve: Curves.ease,
+                      );
+                    }
+                  }
+                },
+                child: FileWidget(
+                  inheritedData.memories[index].file,
+                  autoPlay: false,
+                  tagPrefix: "memories",
+                  backgroundDecoration: const BoxDecoration(
+                    color: Colors.transparent,
                   ),
-                  const BottomGradient(),
-                  BottomIcons(index),
-                ],
+                ),
               );
             },
             onPageChanged: (index) {
@@ -308,6 +301,8 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
               ),
             ),
           ),
+          const BottomGradient(),
+          const BottomIcons(),
         ],
       ),
     );
@@ -315,76 +310,83 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
 }
 
 class BottomIcons extends StatelessWidget {
-  final int pageViewIndex;
-  const BottomIcons(this.pageViewIndex, {super.key});
+  const BottomIcons({super.key});
 
   @override
   Widget build(BuildContext context) {
     final inheritedData = FullScreenMemoryData.of(context)!;
-    final currentFile = inheritedData.memories[pageViewIndex].file;
 
-    final List<Widget> rowChildren = [
-      IconButton(
-        icon: Icon(
-          Platform.isAndroid ? Icons.info_outline : CupertinoIcons.info,
-          color: Colors.white, //same for both themes
-        ),
-        onPressed: () {
-          showDetailsSheet(context, currentFile);
-        },
-      ),
-    ];
-
-    if (currentFile.ownerID == null ||
-        (Configuration.instance.getUserID() ?? 0) == currentFile.ownerID) {
-      rowChildren.addAll([
-        IconButton(
-          icon: Icon(
-            Platform.isAndroid ? Icons.delete_outline : CupertinoIcons.delete,
-            color: Colors.white, //same for both themes
+    return ValueListenableBuilder(
+      valueListenable: inheritedData.indexNotifier,
+      builder: (context, value, _) {
+        final currentFile = inheritedData.memories[value].file;
+        final List<Widget> rowChildren = [
+          IconButton(
+            icon: Icon(
+              Platform.isAndroid ? Icons.info_outline : CupertinoIcons.info,
+              color: Colors.white, //same for both themes
+            ),
+            onPressed: () {
+              showDetailsSheet(context, currentFile);
+            },
           ),
-          onPressed: () async {
-            await showSingleFileDeleteSheet(
-              context,
-              inheritedData.memories[inheritedData.indexNotifier.value].file,
-              onFileRemoved: (file) => {
-                inheritedData.removeCurrentMemory.call(),
-                if (inheritedData.memories.isEmpty)
-                  {
-                    Navigator.of(context).pop(),
-                  },
-              },
-            );
-          },
-        ),
-        SizedBox(
-          height: 32,
-          child: FavoriteWidget(currentFile),
-        ),
-      ]);
-    }
-    rowChildren.add(
-      IconButton(
-        icon: Icon(
-          Icons.adaptive.share,
-          color: Colors.white, //same for both themes
-        ),
-        onPressed: () {
-          share(context, [currentFile]);
-        },
-      ),
-    );
+        ];
 
-    return SafeArea(
-      top: false,
-      child: Container(
-        alignment: Alignment.bottomCenter,
-        padding: const EdgeInsets.fromLTRB(12, 0, 12, 20),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: rowChildren,
-        ),
-      ),
+        if (currentFile.ownerID == null ||
+            (Configuration.instance.getUserID() ?? 0) == currentFile.ownerID) {
+          rowChildren.addAll([
+            IconButton(
+              icon: Icon(
+                Platform.isAndroid
+                    ? Icons.delete_outline
+                    : CupertinoIcons.delete,
+                color: Colors.white, //same for both themes
+              ),
+              onPressed: () async {
+                await showSingleFileDeleteSheet(
+                  context,
+                  inheritedData
+                      .memories[inheritedData.indexNotifier.value].file,
+                  onFileRemoved: (file) => {
+                    inheritedData.removeCurrentMemory.call(),
+                    if (inheritedData.memories.isEmpty)
+                      {
+                        Navigator.of(context).pop(),
+                      },
+                  },
+                );
+              },
+            ),
+            SizedBox(
+              height: 32,
+              child: FavoriteWidget(currentFile),
+            ),
+          ]);
+        }
+        rowChildren.add(
+          IconButton(
+            icon: Icon(
+              Icons.adaptive.share,
+              color: Colors.white, //same for both themes
+            ),
+            onPressed: () {
+              share(context, [currentFile]);
+            },
+          ),
+        );
+
+        return SafeArea(
+          top: false,
+          child: Container(
+            alignment: Alignment.bottomCenter,
+            padding: const EdgeInsets.fromLTRB(12, 0, 12, 20),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: rowChildren,
+            ),
+          ),
+        );
+      },
     );
   }
 }
