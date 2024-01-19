@@ -12,6 +12,7 @@ import UploadProgressContext from 'contexts/uploadProgress';
 import { t } from 'i18next';
 
 import { UPLOAD_STAGES } from 'constants/upload';
+import { CaptionedText } from 'components/CaptionedText';
 
 export const InProgressSection = () => {
     const { inProgressUploads, hasLivePhotos, uploadFileNames, uploadStage } =
@@ -44,9 +45,14 @@ export const InProgressSection = () => {
     return (
         <UploadProgressSection>
             <UploadProgressSectionTitle expandIcon={<ExpandMoreIcon />}>
-                {uploadStage === UPLOAD_STAGES.EXTRACTING_METADATA
-                    ? t('INPROGRESS_METADATA_EXTRACTION')
-                    : t('INPROGRESS_UPLOADS')}
+                <CaptionedText
+                    mainText={
+                        uploadStage === UPLOAD_STAGES.EXTRACTING_METADATA
+                            ? t('INPROGRESS_METADATA_EXTRACTION')
+                            : t('INPROGRESS_UPLOADS')
+                    }
+                    subText={String(inProgressUploads?.length ?? 0)}
+                />
             </UploadProgressSectionTitle>
             <UploadProgressSectionContent>
                 {hasLivePhotos && (
