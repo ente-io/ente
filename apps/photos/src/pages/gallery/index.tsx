@@ -836,7 +836,17 @@ export default function Gallery() {
                         selected.collectionID
                     );
                 }
-
+                if (selected?.ownCount === filteredData?.length) {
+                    if (
+                        ops === COLLECTION_OPS_TYPE.REMOVE ||
+                        ops === COLLECTION_OPS_TYPE.RESTORE ||
+                        ops === COLLECTION_OPS_TYPE.MOVE
+                    ) {
+                        setActiveCollectionID(ALL_SECTION);
+                    } else if (ops === COLLECTION_OPS_TYPE.UNHIDE) {
+                        exitHiddenSection();
+                    }
+                }
                 clearSelection();
                 await syncWithRemote(false, true);
             } catch (e) {
@@ -872,6 +882,14 @@ export default function Gallery() {
                     setHiddenFileIds,
                     setFixCreationTimeAttributes
                 );
+            }
+            if (
+                selected?.ownCount === filteredData?.length &&
+                ops !== FILE_OPS_TYPE.ARCHIVE &&
+                ops !== FILE_OPS_TYPE.DOWNLOAD &&
+                ops !== FILE_OPS_TYPE.FIX_TIME
+            ) {
+                setActiveCollectionID(ALL_SECTION);
             }
             clearSelection();
             await syncWithRemote(false, true);
