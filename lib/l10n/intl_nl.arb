@@ -406,6 +406,15 @@
   },
   "photoGridSize": "Foto raster grootte",
   "manageDeviceStorage": "Apparaatopslag beheren",
+  "machineLearning": "Machine Learning",
+  "magicSearch": "Magische zoekfunctie",
+  "magicSearchDescription": "Houd er rekening mee dat dit zal resulteren in een hoger internet- en batterijverbruik totdat alle items zijn geïndexeerd.",
+  "loadingModel": "Modellen downloaden...",
+  "waitingForWifi": "Wachten op WiFi...",
+  "status": "Status",
+  "indexedItems": "Geïndexeerde bestanden",
+  "pendingItems": "Bestanden in behandeling",
+  "clearIndexes": "Index wissen",
   "selectFoldersForBackup": "Selecteer mappen voor back-up",
   "selectedFoldersWillBeEncryptedAndBackedUp": "Geselecteerde mappen worden versleuteld en geback-upt",
   "unselectAll": "Deselecteer alles",
@@ -696,6 +705,21 @@
   "deleteEmptyAlbumsWithQuestionMark": "Lege albums verwijderen?",
   "deleteAlbumsDialogBody": "Hiermee worden alle lege albums verwijderd. Dit is handig wanneer je rommel in je albumlijst wilt verminderen.",
   "deleteProgress": "Verwijderen van {currentlyDeleting} / {totalCount}",
+  "genericProgress": "Verwerken van {currentlyProcessing} / {totalCount}",
+  "@genericProgress": {
+    "description": "Generic progress text to display when processing multiple items",
+    "type": "text",
+    "placeholders": {
+      "currentlyProcessing": {
+        "example": "1",
+        "type": "int"
+      },
+      "totalCount": {
+        "example": "10",
+        "type": "int"
+      }
+    }
+  },
   "permanentlyDelete": "Permanent verwijderen",
   "canOnlyCreateLinkForFilesOwnedByYou": "Kan alleen een link maken voor bestanden die van u zijn",
   "publicLinkCreated": "Publieke link aangemaakt",
@@ -823,7 +847,6 @@
   "clubByFileName": "Samenvoegen op bestandsnaam",
   "count": "Aantal",
   "totalSize": "Totale grootte",
-  "time": "Tijd",
   "longpressOnAnItemToViewInFullscreen": "Houd een bestand lang ingedrukt om te bekijken op volledig scherm",
   "decryptingVideo": "Video ontsleutelen...",
   "authToViewYourMemories": "Graag verifiëren om uw herinneringen te bekijken",
@@ -1159,9 +1182,10 @@
   "signOutOtherBody": "Als je denkt dat iemand je wachtwoord zou kunnen kennen, kun je alle andere apparaten die je account gebruiken dwingen om uit te loggen.",
   "signOutOtherDevices": "Log uit op andere apparaten",
   "doNotSignOut": "Niet uitloggen",
-  "editLocation": "Edit location",
-  "selectALocation": "Select a location",
-  "selectALocationFirst": "Select a location first",
-  "changeLocationOfSelectedItems": "Change location of selected items?",
-  "editsToLocationWillOnlyBeSeenWithinEnte": "Edits to location will only be seen within Ente"
+  "editLocation": "Locatie bewerken",
+  "selectALocation": "Selecteer een locatie",
+  "selectALocationFirst": "Selecteer eerst een locatie",
+  "changeLocationOfSelectedItems": "Locatie van geselecteerde items wijzigen?",
+  "editsToLocationWillOnlyBeSeenWithinEnte": "Bewerkte locatie wordt alleen gezien binnen Ente",
+  "cleanUncategorized": "Ongecategoriseerd opschonen"
 }
