@@ -1,3 +1,5 @@
+import "dart:async";
+
 import "package:flutter/material.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/event_bus.dart";
@@ -211,9 +213,11 @@ extension SectionTypeExtensions on SectionType {
               try {
                 final Collection c =
                     await CollectionsService.instance.createAlbum(text);
-                await routeToPage(
-                  context,
-                  CollectionPage(CollectionWithThumbnail(c, null)),
+                unawaited(
+                  routeToPage(
+                    context,
+                    CollectionPage(CollectionWithThumbnail(c, null)),
+                  ),
                 );
               } catch (e, s) {
                 Logger("CreateNewAlbumIcon")
