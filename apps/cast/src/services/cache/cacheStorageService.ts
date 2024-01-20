@@ -1,4 +1,4 @@
-import { logError } from 'utils/sentry';
+import { logError } from '@ente/shared/sentry';
 import { CacheStorageFactory } from './cacheStorageFactory';
 
 const SecurityError = 'SecurityError';

@@ -1,10 +1,8 @@
 import { getEndpoint } from '@ente/shared/network/api';
-import localForage from 'utils/storage/localForage';
 
 import { getToken } from '@ente/shared/storage/localStorage/helpers';
 import { Collection } from 'types/collection';
 
-import { logError } from 'utils/sentry';
 import {
     decryptFile,
     getLatestVersionFiles,
@@ -21,7 +19,6 @@ import {
 } from 'types/file';
 import { SetFiles } from 'types/gallery';
 import { BulkUpdateMagicMetadataRequest } from 'types/magicMetadata';
-import { addLogLine } from 'utils/logging';
 import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
 import {
     getCollectionLastSyncTime,
@@ -30,6 +27,9 @@ import {
 import { REQUEST_BATCH_SIZE } from 'constants/api';
 import { batch } from '@ente/shared/batch';
 import HTTPService from '@ente/shared/network/HTTPService';
+import localForage from '@ente/shared/storage/localForage';
+import { logError } from '@ente/shared/sentry';
+import { addLogLine } from '@ente/shared/logging';
 
 const ENDPOINT = getEndpoint();
 const FILES_TABLE = 'files';

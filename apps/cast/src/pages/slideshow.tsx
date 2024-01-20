@@ -1,3 +1,4 @@
+import { logError } from '@ente/shared/sentry';
 import PairedSuccessfullyOverlay from 'components/PairedSuccessfullyOverlay';
 import Theatre from 'components/Theatre';
 import { FILE_TYPE } from 'constants/file';
@@ -7,7 +8,6 @@ import { getCollectionWithKey } from 'services/collectionService';
 import { syncFiles } from 'services/fileService';
 import { EnteFile } from 'types/file';
 import { downloadFileAsBlob, isRawFileFromFileName } from 'utils/file';
-import { logError } from 'utils/sentry';
 
 export const SlideshowContext = createContext<{
     showNextSlide: () => void;
@@ -31,13 +31,11 @@ export default function Slideshow() {
         try {
             // get requested collection id from localStorage
             const requestedCollectionID =
-                window.localStorage.getItem('targetCollectionId');
+                window.localStorage.getItem('collectionID');
 
-            const requestedCollectionKey = window.localStorage.getItem(
-                'targetCollectionKey'
-            );
-
-            const castToken = window.localStorage.getItem('token');
+            const requestedCollectionKey =
+                window.localStorage.getItem('collectionKey');
+            const castToken = window.localStorage.getItem('castToken');
 
             const collection = await getCollectionWithKey(
                 Number(requestedCollectionID),

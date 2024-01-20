@@ -1,12 +1,12 @@
 import QueueProcessor from 'services/queueProcessor';
 import { CustomError } from 'utils/error';
 import { retryAsyncFunction } from 'utils/network';
-import { addLogLine } from 'utils/logging';
 import { DedicatedConvertWorker } from 'worker/convert.worker';
 import { ComlinkWorker } from 'utils/comlink/comlinkWorker';
 import { convertBytesToHumanReadable } from 'utils/file/size';
 import { getDedicatedConvertWorker } from 'utils/comlink/ComlinkConvertWorker';
 import { logError } from '@ente/shared/sentry';
+import { addLogLine } from '@ente/shared/logging';
 
 const WORKER_POOL_SIZE = 2;
 const MAX_CONVERSION_IN_PARALLEL = 1;

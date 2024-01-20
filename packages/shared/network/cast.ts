@@ -3,9 +3,7 @@ import HTTPService from './HTTPService';
 import { getEndpoint } from './api';
 
 class CastGateway {
-    constructor() {
-        console.log('CastGateway');
-    }
+    constructor() {}
 
     public async getCastData(code: string): Promise<string> {
         let resp;

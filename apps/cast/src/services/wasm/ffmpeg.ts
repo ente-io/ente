@@ -2,9 +2,9 @@ import { promiseWithTimeout } from '@ente/shared/promise';
 import { createFFmpeg, FFmpeg } from 'ffmpeg-wasm';
 import QueueProcessor from 'services/queueProcessor';
 import { getUint8ArrayView } from 'services/readerService';
-import { addLogLine } from 'utils/logging';
-import { logError } from 'utils/sentry';
+import { logError } from '@ente/shared/sentry';
 import { generateTempName } from 'utils/temp';
+import { addLogLine } from '@ente/shared/logging';
 
 const INPUT_PATH_PLACEHOLDER = 'INPUT';
 const FFMPEG_PLACEHOLDER = 'FFMPEG';

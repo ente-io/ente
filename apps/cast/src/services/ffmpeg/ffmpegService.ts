@@ -5,8 +5,8 @@ import {
 } from 'constants/ffmpeg';
 import { ElectronFile } from 'types/upload';
 import { parseFFmpegExtractedMetadata } from 'utils/ffmpeg';
-import { logError } from 'utils/sentry';
 import ffmpegFactory from './ffmpegFactory';
+import { logError } from '@ente/shared/sentry';
 
 export async function generateVideoThumbnail(
     file: File | ElectronFile

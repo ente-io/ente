@@ -12,9 +12,7 @@ import {
 } from 'services/collectionService';
 import { EnteFile } from 'types/file';
 import { CustomError } from 'utils/error';
-import { User } from 'types/user';
-import { getData, LS_KEYS } from 'utils/storage/localStorage';
-import { logError } from 'utils/sentry';
+import { logError } from '@ente/shared/sentry';
 import {
     COLLECTION_ROLE,
     Collection,
@@ -38,6 +36,8 @@ import { isArchivedCollection, updateMagicMetadata } from 'utils/magicMetadata';
 import bs58 from 'bs58';
 import { t } from 'i18next';
 import { getAlbumsURL } from '@ente/shared/network/api';
+import { User } from '@ente/shared/user/types';
+import { getData, LS_KEYS } from '@ente/shared/storage/localStorage';
 // import { SetCollectionDownloadProgressAttributes } from 'types/gallery';
 // import ElectronService from 'services/electron/common';
 // import {

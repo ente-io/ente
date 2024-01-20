@@ -1,6 +1,6 @@
+import { addLocalLog } from '@ente/shared/logging';
 import { Remote, wrap } from 'comlink';
 // import { WorkerElectronCacheStorageClient } from 'services/workerElectronCache/client';
-import { addLocalLog } from 'utils/logging';
 
 export class ComlinkWorker<T extends new () => InstanceType<T>> {
     public remote: Promise<Remote<InstanceType<T>>>;

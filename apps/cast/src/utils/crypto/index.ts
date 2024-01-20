@@ -2,7 +2,7 @@ import { KeyAttributes, SRPSetupAttributes } from 'types/user';
 import { SESSION_KEYS, setKey } from 'utils/storage/sessionStorage';
 import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
 import { setRecoveryKey } from 'services/userService';
-import { logError } from 'utils/sentry';
+import { logError } from '@ente/shared/sentry';
 import isElectron from 'is-electron';
 // import safeStorageService from 'services/electron/safeStorage';
 import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';

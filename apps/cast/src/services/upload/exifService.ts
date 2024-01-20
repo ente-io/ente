@@ -3,7 +3,7 @@ import { Location } from 'types/upload';
 import exifr from 'exifr';
 import piexif from 'piexifjs';
 import { FileTypeInfo } from 'types/upload';
-import { logError } from 'utils/sentry';
+import { logError } from '@ente/shared/sentry';
 import { validateAndGetCreationUnixTimeInMicroSeconds } from 'utils/time';
 import { CustomError } from 'utils/error';
 

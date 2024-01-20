@@ -72,9 +72,9 @@ export default function AlbumCastDialog(props: Props) {
 
         // ok, they exist. let's give them the good stuff.
         const payload = JSON.stringify({
-            token: getToken(),
-            targetCollectionId: props.currentCollection.id,
-            targetCollectionKey: props.currentCollection.key,
+            castToken: getToken(),
+            collectionID: props.currentCollection.id,
+            collectionKey: props.currentCollection.key,
         });
 
         const encryptedPayload = await boxSeal(
