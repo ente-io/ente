@@ -3,10 +3,10 @@ import { CustomError } from 'utils/error';
 import { retryAsyncFunction } from 'utils/network';
 import { DedicatedConvertWorker } from 'worker/convert.worker';
 import { ComlinkWorker } from 'utils/comlink/comlinkWorker';
-import { convertBytesToHumanReadable } from 'utils/file/size';
 import { getDedicatedConvertWorker } from 'utils/comlink/ComlinkConvertWorker';
 import { logError } from '@ente/shared/sentry';
 import { addLogLine } from '@ente/shared/logging';
+import { convertBytesToHumanReadable } from '@ente/shared/utils/size';
 
 const WORKER_POOL_SIZE = 2;
 const MAX_CONVERSION_IN_PARALLEL = 1;

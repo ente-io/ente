@@ -9,7 +9,7 @@ import { getFileExtension } from 'utils/file';
 import { logError } from '@ente/shared/sentry';
 import { getUint8ArrayView } from './readerService';
 import FileType, { FileTypeResult } from 'file-type';
-import { convertBytesToHumanReadable } from 'utils/file/size';
+import { convertBytesToHumanReadable } from '@ente/shared/utils/size';
 
 function getFileSize(file: File | ElectronFile) {
     return file.size;
