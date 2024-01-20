@@ -32,7 +32,7 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
           widget.code != null ? safeDecode(widget.code!.account).trim() : null,
     );
     _secretController = TextEditingController(
-      text: widget.code != null ? widget.code!.secret : null,
+      text: widget.code?.secret,
     );
     _secretKeyObscured = widget.code != null;
     super.initState();

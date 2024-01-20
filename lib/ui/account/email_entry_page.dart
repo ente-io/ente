@@ -5,7 +5,7 @@ import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/services/user_service.dart';
 import 'package:ente_auth/theme/ente_theme.dart';
 import 'package:ente_auth/ui/common/dynamic_fab.dart';
-import 'package:ente_auth/ui/common/web_page.dart';
+import 'package:ente_auth/utils/platform_util.dart';
 import 'package:ente_auth/utils/toast_util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -427,15 +427,10 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
               tags: {
                 'u-terms': StyledTextActionTag(
                   (String? text, Map<String?, String?> attrs) =>
-                      Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (BuildContext context) {
-                        return WebPage(
-                          context.l10n.termsOfServicesTitle,
-                          "https://ente.io/terms",
-                        );
-                      },
-                    ),
+                      PlatformUtil.openWebView(
+                    context,
+                    context.l10n.termsOfServicesTitle,
+                    "https://ente.io/terms",
                   ),
                   style: const TextStyle(
                     decoration: TextDecoration.underline,
@@ -443,15 +438,10 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                 ),
                 'u-policy': StyledTextActionTag(
                   (String? text, Map<String?, String?> attrs) =>
-                      Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (BuildContext context) {
-                        return WebPage(
-                          context.l10n.privacyPolicyTitle,
-                          "https://ente.io/privacy",
-                        );
-                      },
-                    ),
+                      PlatformUtil.openWebView(
+                    context,
+                    context.l10n.privacyPolicyTitle,
+                    "https://ente.io/privacy",
                   ),
                   style: const TextStyle(
                     decoration: TextDecoration.underline,
@@ -494,15 +484,10 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
               tags: {
                 'underline': StyledTextActionTag(
                   (String? text, Map<String?, String?> attrs) =>
-                      Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (BuildContext context) {
-                        return WebPage(
-                          context.l10n.encryption,
-                          "https://ente.io/architecture",
-                        );
-                      },
-                    ),
+                      PlatformUtil.openWebView(
+                    context,
+                    context.l10n.encryption,
+                    "https://ente.io/architecture",
                   ),
                   style: const TextStyle(
                     decoration: TextDecoration.underline,

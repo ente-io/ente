@@ -7,6 +7,7 @@ import 'package:flutter/foundation.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 class AuthenticatorDB {
   static const _databaseName = "ente.authenticator.db";
@@ -25,6 +26,18 @@ class AuthenticatorDB {
   }
 
   Future<Database> _initDatabase() async {
+    if (Platform.isWindows || Platform.isLinux) {
+      var databaseFactory = databaseFactoryFfi;
+      return await databaseFactory.openDatabase(
+        (await getDownloadsDirectory())!
+            .path
+            .replaceFirst('Downloads', '.$_databaseName'),
+        options: OpenDatabaseOptions(
+          version: _databaseVersion,
+          onCreate: _onCreate,
+        ),
+      );
+    }
     final Directory documentsDirectory =
         await getApplicationDocumentsDirectory();
     final String path = join(documentsDirectory.path, _databaseName);
@@ -166,7 +179,7 @@ class AuthenticatorDB {
         batch.delete(entityTable, where: whereID, whereArgs: [id]);
       }
     }
-    final result = await batch.commit();
+    final _ = await batch.commit();
     debugPrint("Done");
   }
 

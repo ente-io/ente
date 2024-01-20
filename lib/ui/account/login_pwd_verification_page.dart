@@ -1,6 +1,5 @@
 import "package:dio/dio.dart";
 import 'package:ente_auth/core/configuration.dart';
-import "package:ente_auth/core/errors.dart";
 import "package:ente_auth/l10n/l10n.dart";
 import "package:ente_auth/models/api/user/srp.dart";
 import "package:ente_auth/services/user_service.dart";
@@ -9,6 +8,7 @@ import 'package:ente_auth/ui/common/dynamic_fab.dart';
 import "package:ente_auth/ui/components/buttons/button_widget.dart";
 import "package:ente_auth/utils/dialog_util.dart";
 import "package:ente_auth/utils/email_util.dart";
+import "package:ente_crypto_dart/ente_crypto_dart.dart";
 import 'package:flutter/material.dart';
 import "package:logging/logging.dart";
 

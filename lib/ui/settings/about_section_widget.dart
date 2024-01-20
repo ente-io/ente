@@ -1,13 +1,13 @@
 import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/services/update_service.dart';
 import 'package:ente_auth/theme/ente_theme.dart';
-import 'package:ente_auth/ui/common/web_page.dart';
 import 'package:ente_auth/ui/components/captioned_text_widget.dart';
 import 'package:ente_auth/ui/components/expandable_menu_item_widget.dart';
 import 'package:ente_auth/ui/components/menu_item_widget.dart';
 import 'package:ente_auth/ui/settings/app_update_dialog.dart';
 import 'package:ente_auth/ui/settings/common_settings.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
+import 'package:ente_auth/utils/platform_util.dart';
 import 'package:ente_auth/utils/toast_util.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -115,12 +115,10 @@ class AboutMenuItemWidget extends StatelessWidget {
       trailingIcon: Icons.chevron_right_outlined,
       trailingIconIsMuted: true,
       onTap: () async {
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (BuildContext context) {
-              return WebPage(webPageTitle ?? title, url);
-            },
-          ),
+        await PlatformUtil.openWebView(
+          context,
+          webPageTitle ?? title,
+          url,
         );
       },
     );

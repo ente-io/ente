@@ -3,6 +3,7 @@ import 'package:ente_auth/theme/ente_theme.dart';
 import 'package:ente_auth/ui/settings/data/import_page.dart';
 import 'package:ente_auth/ui/settings/faq.dart';
 import 'package:ente_auth/utils/navigation_util.dart';
+import 'package:ente_auth/utils/platform_util.dart';
 import 'package:flutter/material.dart';
 
 class HomeEmptyStateWidget extends StatelessWidget {
@@ -43,7 +44,7 @@ class HomeEmptyStateWidget extends StatelessWidget {
                     SizedBox(
                       width: 400,
                       child: OutlinedButton(
-                        onPressed: onScanTap,
+                        onPressed: PlatformUtil.isMobile() ? onScanTap : null,
                         child: Text(l10n.importScanQrCode),
                       ),
                     ),

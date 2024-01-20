@@ -6,7 +6,7 @@ import 'package:ente_auth/models/api/user/srp.dart';
 import 'package:ente_auth/services/user_service.dart';
 import 'package:ente_auth/ui/account/login_pwd_verification_page.dart';
 import 'package:ente_auth/ui/common/dynamic_fab.dart';
-import 'package:ente_auth/ui/common/web_page.dart';
+import 'package:ente_auth/utils/platform_util.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import "package:styled_text/styled_text.dart";
@@ -176,31 +176,23 @@ class _LoginPageState extends State<LoginPage> {
                               .copyWith(fontSize: 12),
                           tags: {
                             'u-terms': StyledTextActionTag(
-                              (String? text, Map<String?, String?> attrs) => Navigator.of(context).push(
-                                  MaterialPageRoute(
-                                    builder: (BuildContext context) {
-                                      return WebPage(
-                                        context.l10n.termsOfServicesTitle,
-                                        "https://ente.io/terms",
-                                      );
-                                    },
-                                  ),
-                                ),
+                              (String? text, Map<String?, String?> attrs) =>
+                                  PlatformUtil.openWebView(
+                                context,
+                                context.l10n.termsOfServicesTitle,
+                                "https://ente.io/terms",
+                              ),
                               style: const TextStyle(
                                 decoration: TextDecoration.underline,
                               ),
                             ),
                             'u-policy': StyledTextActionTag(
-                              (String? text, Map<String?, String?> attrs) => Navigator.of(context).push(
-                                  MaterialPageRoute(
-                                    builder: (BuildContext context) {
-                                      return WebPage(
-                                        context.l10n.privacyPolicyTitle,
-                                        "https://ente.io/privacy",
-                                      );
-                                    },
-                                  ),
-                                ),
+                              (String? text, Map<String?, String?> attrs) =>
+                                  PlatformUtil.openWebView(
+                                context,
+                                context.l10n.privacyPolicyTitle,
+                                "https://ente.io/privacy",
+                              ),
                               style: const TextStyle(
                                 decoration: TextDecoration.underline,
                               ),

@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.14)
-project(ente_auth LANGUAGES CXX)
+project(auth LANGUAGES CXX)
 
-set(BINARY_NAME "ente_auth")
+set(BINARY_NAME "auth")
 
 cmake_policy(SET CMP0063 NEW)
 

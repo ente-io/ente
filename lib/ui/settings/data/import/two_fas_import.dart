@@ -170,8 +170,8 @@ Future<int?> _process2FasExportFile(
 }
 
 String decrypt2FasVault(dynamic data, {required String password}) {
-  int ITERATION_COUNT = 10000;
-  int KEY_SIZE = 256;
+  int iterationCount = 10000;
+  int keySize = 256;
   final String encryptedServices = data["servicesEncrypted"];
   var split = encryptedServices.split(":");
   final encryptedData = base64.decode(split[0]);
@@ -181,11 +181,11 @@ String decrypt2FasVault(dynamic data, {required String password}) {
   final pbkdf2 = PBKDF2KeyDerivator(HMac(SHA256Digest(), 64));
   final params = Pbkdf2Parameters(
     salt,
-    ITERATION_COUNT,
-    KEY_SIZE ~/ 8,
+    iterationCount,
+    keySize ~/ 8,
   );
   pbkdf2.init(params);
-  Uint8List key = Uint8List(KEY_SIZE ~/ 8);
+  Uint8List key = Uint8List(keySize ~/ 8);
   pbkdf2.deriveKey(Uint8List.fromList(utf8.encode(password)), 0, key, 0);
   final decrypted = decrypt(key, iv, encryptedData);
   final utf8Decode = utf8.decode(decrypted);

@@ -1,0 +1,26 @@
+display_name: Auth
+package_name: auth
+maintainer:
+  name: Ente.io Developers
+  email: human@ente.io
+priority: optional
+section: x11
+essential: false
+license: GPLv3
+icon: assets/icon-light.png
+installed_size: 36000
+
+dependencies:
+  # - webkit2gtk-4.0
+  - libsqlite3
+
+keywords:
+  - Authentication
+  - 2FA
+
+generic_name: Ente Authentication
+
+categories:
+  - Utility
+
+startup_notify: false

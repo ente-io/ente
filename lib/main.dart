@@ -1,5 +1,6 @@
+import 'dart:io';
+
 import 'package:adaptive_theme/adaptive_theme.dart';
-import 'package:computer/computer.dart';
 import "package:ente_auth/app/view/app.dart";
 import 'package:ente_auth/core/configuration.dart';
 import 'package:ente_auth/core/constants.dart';
@@ -18,14 +19,15 @@ import 'package:ente_auth/store/code_store.dart';
 import 'package:ente_auth/ui/tools/app_lock.dart';
 import 'package:ente_auth/ui/tools/lock_screen.dart';
 import 'package:ente_auth/ui/utils/icon_utils.dart';
-import 'package:ente_auth/utils/crypto_util.dart';
-import 'package:flutter/foundation.dart';
+import 'package:ente_auth/utils/platform_util.dart';
+import 'package:ente_crypto_dart/ente_crypto_dart.dart';
 import "package:flutter/material.dart";
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_displaymode/flutter_displaymode.dart';
 import 'package:logging/logging.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:privacy_screen/privacy_screen.dart';
+import 'package:uni_links_desktop/uni_links_desktop.dart';
 
 final _logger = Logger("main");
 
@@ -78,9 +80,11 @@ Future _runWithLogs(Function() function, {String prefix = ""}) async {
 }
 
 Future<void> _init(bool bool, {String? via}) async {
-  // Start workers asynchronously. No need to wait for them to start
-  Computer.shared().turnOn(workersCount: 4, verbose: kDebugMode);
-  CryptoUtil.init();
+  if (Platform.isWindows) {
+    registerProtocol('unilinks');
+  }
+  await initCryptoUtil();
+
   await PreferenceService.instance.init();
   await CodeStore.instance.init();
   await Configuration.instance.init();
@@ -95,6 +99,7 @@ Future<void> _init(bool bool, {String? via}) async {
 }
 
 Future<void> _setupPrivacyScreen() async {
+  if (!PlatformUtil.isMobile()) return;
   final brightness =
       SchedulerBinding.instance.platformDispatcher.platformBrightness;
   bool isInDarkMode = brightness == Brightness.dark;

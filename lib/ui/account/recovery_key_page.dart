@@ -1,13 +1,17 @@
+import 'dart:convert';
 import 'dart:io' as io;
 
 import 'package:bip39/bip39.dart' as bip39;
+import 'package:document_file_save_plus/document_file_save_plus.dart';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:ente_auth/core/configuration.dart';
 import 'package:ente_auth/core/constants.dart';
 import 'package:ente_auth/ente_theme_data.dart';
 import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/ui/common/gradient_button.dart';
+import 'package:ente_auth/utils/platform_util.dart';
 import 'package:ente_auth/utils/toast_util.dart';
+import 'package:file_saver/file_saver.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:share_plus/share_plus.dart';
@@ -61,6 +65,21 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
             ? 32
             : 120;
 
+    Future<void> copy() async {
+      await Clipboard.setData(
+        ClipboardData(
+          text: recoveryKey,
+        ),
+      );
+      showShortToast(
+        context,
+        context.l10n.recoveryKeyCopiedToClipboard,
+      );
+      setState(() {
+        _hasTriedToSave = true;
+      });
+    }
+
     return Scaffold(
       appBar: widget.showProgressBar
           ? AppBar(
@@ -113,62 +132,73 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
                         style: Theme.of(context).textTheme.titleMedium,
                       ),
                       const Padding(padding: EdgeInsets.only(top: 24)),
-                      DottedBorder(
-                        color: const Color.fromARGB(255, 105, 17, 127),
-                        //color of dotted/dash line
-                        strokeWidth: 1,
-                        //thickness of dash/dots
-                        dashPattern: const [6, 6],
-                        radius: const Radius.circular(8),
-                        //dash patterns, 10 is dash width, 6 is space width
-                        child: SizedBox(
-                          //inner container
-                          // height: 120, //height of inner container
-                          width: double
-                              .infinity, //width to 100% match to parent container.
-                          // ignore: prefer_const_literals_to_create_immutables
-                          child: Column(
-                            children: [
-                              GestureDetector(
-                                onTap: () async {
-                                  await Clipboard.setData(
-                                    ClipboardData(text: recoveryKey),
-                                  );
-                                  showShortToast(
-                                    context,
-                                    context.l10n.recoveryKeyCopiedToClipboard,
-                                  );
-                                  setState(() {
-                                    _hasTriedToSave = true;
-                                  });
-                                },
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    border: Border.all(
-                                      color: const Color.fromRGBO(
-                                        49,
-                                        155,
-                                        86,
-                                        .2,
-                                      ),
+                      Container(
+                        padding: const EdgeInsets.all(1),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(8),
+                          gradient: const LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [
+                              Color(0x8E9610D6),
+                              Color(0x8E9F4FC6),
+                            ],
+                            stops: [0.0, 0.9753],
+                          ),
+                        ),
+                        child: DottedBorder(
+                          padding: EdgeInsets.zero,
+                          borderType: BorderType.RRect,
+                          strokeWidth: 1,
+                          color: const Color(0xFF6B6B6B),
+                          dashPattern: const [6, 6],
+                          radius: const Radius.circular(8),
+                          child: SizedBox(
+                            width: double.infinity,
+                            child: Stack(
+                              children: [
+                                Column(
+                                  children: [
+                                    Builder(
+                                      builder: (context) {
+                                        final content = Container(
+                                          padding: const EdgeInsets.all(20),
+                                          width: double.infinity,
+                                          child: Text(
+                                            recoveryKey,
+                                            textAlign: TextAlign.justify,
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .bodyLarge,
+                                          ),
+                                        );
+
+                                        if (PlatformUtil.isMobile()) {
+                                          return GestureDetector(
+                                            onTap: () async => await copy(),
+                                            child: content,
+                                          );
+                                        } else {
+                                          return SelectableRegion(
+                                            focusNode: FocusNode(),
+                                            selectionControls:
+                                                PlatformUtil.selectionControls,
+                                            child: content,
+                                          );
+                                        }
+                                      },
                                     ),
-                                    borderRadius: const BorderRadius.all(
-                                      Radius.circular(2),
-                                    ),
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .recoveryKeyBoxColor,
-                                  ),
-                                  padding: const EdgeInsets.all(20),
-                                  width: double.infinity,
-                                  child: Text(
-                                    recoveryKey,
-                                    style:
-                                        Theme.of(context).textTheme.bodyLarge,
+                                  ],
+                                ),
+                                Positioned(
+                                  right: 0,
+                                  top: 0,
+                                  child: PlatformCopy(
+                                    onPressed: copy,
                                   ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         ),
                       ),
@@ -193,7 +223,7 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
                         ),
                       ),
                     ],
-                  ), // columnEnds
+                  ),
                 ),
               ),
             );
@@ -207,38 +237,88 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
     final List<Widget> childrens = [];
     if (!_hasTriedToSave) {
       childrens.add(
-        ElevatedButton(
-          style: Theme.of(context).colorScheme.optionalActionButtonStyle,
-          onPressed: () async {
-            await _saveKeys();
-          },
-          child: Text(context.l10n.doThisLater),
+        SizedBox(
+          height: 56,
+          child: ElevatedButton(
+            style: Theme.of(context).colorScheme.optionalActionButtonStyle,
+            onPressed: () async {
+              await _saveKeys();
+            },
+            child: Text(context.l10n.doThisLater),
+          ),
         ),
       );
       childrens.add(const SizedBox(height: 10));
     }
 
     childrens.add(
-      GradientButton(
-        onTap: () async {
-          await _shareRecoveryKey(recoveryKey);
-        },
-        text: context.l10n.saveKey,
+      Row(
+        children: [
+          Expanded(
+            child: GradientButton(
+              onTap: () async {
+                await _saveRecoveryKey(recoveryKey);
+              },
+              text: context.l10n.saveKey,
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: GradientButton(
+              reversedGradient: true,
+              onTap: () async {
+                await _shareRecoveryKey(recoveryKey);
+              },
+              text: context.l10n.sendKey,
+            ),
+          ),
+        ],
       ),
     );
+
     if (_hasTriedToSave) {
       childrens.add(const SizedBox(height: 10));
       childrens.add(
-        ElevatedButton(
-          child: Text(widget.doneText),
-          onPressed: () async {
-            await _saveKeys();
-          },
+        SizedBox(
+          height: 56,
+          child: ElevatedButton(
+            child: Text(widget.doneText),
+            onPressed: () async {
+              await _saveKeys();
+            },
+          ),
         ),
       );
     }
     childrens.add(const SizedBox(height: 12));
     return childrens;
+  }
+
+  Future _saveRecoveryKey(String recoveryKey) async {
+    final bytes = utf8.encode(recoveryKey);
+    final time = DateTime.now().millisecondsSinceEpoch;
+
+    if (PlatformUtil.isMobile()) {
+      await DocumentFileSavePlus()
+          .saveFile(bytes, "ente_recovery_key_$time.txt", "text/plain");
+    } else {
+      await FileSaver.instance.saveFile(
+        name: "ente_recovery_key_$time",
+        ext: ".txt",
+        bytes: bytes,
+        mimeType: MimeType.text,
+      );
+    }
+
+    if (mounted) {
+      showToast(
+        context,
+        context.l10n.recoveryKeySaved,
+      );
+      setState(() {
+        _hasTriedToSave = true;
+      });
+    }
   }
 
   Future _shareRecoveryKey(String recoveryKey) async {
@@ -262,5 +342,26 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
       await _recoveryKeyFile.delete();
     }
     widget.onDone!();
+  }
+}
+
+class PlatformCopy extends StatelessWidget {
+  const PlatformCopy({
+    super.key,
+    required this.onPressed,
+  });
+
+  final void Function() onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      onPressed: () => onPressed(),
+      visualDensity: VisualDensity.compact,
+      icon: const Icon(
+        Icons.copy,
+        size: 16,
+      ),
+    );
   }
 }

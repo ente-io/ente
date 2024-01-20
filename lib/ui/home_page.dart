@@ -23,6 +23,7 @@ import 'package:ente_auth/ui/scanner_page.dart';
 import 'package:ente_auth/ui/settings_page.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
 import 'package:ente_auth/utils/totp_util.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
@@ -290,7 +291,11 @@ class _HomePageState extends State<HomePage> {
   Future<bool> _initDeepLinks() async {
     // Platform messages may fail, so we use a try/catch PlatformException.
     try {
-      final String? initialLink = await getInitialLink();
+      String? initialLink;
+      if (!kIsWeb && !Platform.isLinux) {
+        // uni_links doesn't work on desktop for now
+        initialLink = await getInitialLink();
+      }
       // Parse the link and warn the user, if it is not correct,
       // but keep in mind it could be `null`.
       if (initialLink != null) {
@@ -306,14 +311,16 @@ class _HomePageState extends State<HomePage> {
     }
 
     // Attach a listener to the stream
-    linkStream.listen(
-      (String? link) {
-        _handleDeeplink(context, link);
-      },
-      onError: (err) {
-        _logger.severe(err);
-      },
-    );
+    if (!kIsWeb && !Platform.isLinux) {
+      linkStream.listen(
+        (String? link) {
+          _handleDeeplink(context, link);
+        },
+        onError: (err) {
+          _logger.severe(err);
+        },
+      );
+    }
     return false;
   }
 

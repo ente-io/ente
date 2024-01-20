@@ -1,0 +1,24 @@
+icon: assets/icon-light.png
+summary: 2FA app with free end-to-end encrypted backup and sync
+group: Application/Utility
+vendor: Ente.io
+packager: Ente.io Developers
+packagerEmail: human@ente.io
+license: GPLv3
+url: https://github.com/ente-io/auth
+
+display_name: Auth
+
+dependencies:
+  - libsqlite3x
+
+keywords:
+  - Authentication
+  - 2FA
+
+generic_name: Ente Authentication
+
+categories:
+  - Utility
+
+startup_notify: false

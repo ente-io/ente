@@ -4,6 +4,7 @@ import 'package:ente_auth/utils/auth_util.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
 import 'package:ente_auth/utils/toast_util.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:local_auth/local_auth.dart';
 
 class LocalAuthenticationService {
@@ -64,6 +65,10 @@ class LocalAuthenticationService {
   }
 
   Future<bool> _isLocalAuthSupportedOnDevice() async {
-    return await LocalAuthentication().isDeviceSupported();
+    try {
+      return await LocalAuthentication().isDeviceSupported();
+    } on MissingPluginException catch (_) {
+      return false;
+    }
   }
 }

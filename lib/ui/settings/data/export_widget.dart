@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:ente_auth/core/configuration.dart';
 import 'package:ente_auth/l10n/l10n.dart';
@@ -9,13 +10,11 @@ import 'package:ente_auth/store/code_store.dart';
 import 'package:ente_auth/ui/components/buttons/button_widget.dart';
 import 'package:ente_auth/ui/components/dialog_widget.dart';
 import 'package:ente_auth/ui/components/models/button_type.dart';
-import 'package:ente_auth/utils/crypto_util.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
 import 'package:ente_auth/utils/toast_util.dart';
+import 'package:ente_crypto_dart/ente_crypto_dart.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:logging/logging.dart';
 import 'package:share_plus/share_plus.dart';
 
@@ -79,12 +78,12 @@ Future<void> _requestForEncryptionPassword(
           );
           String exportPlainText = await _getAuthDataForExport();
           // Encrypt the key with this derived key
-          final encResult = await CryptoUtil.encryptChaCha(
+          final encResult = await CryptoUtil.encryptData(
             utf8.encode(exportPlainText) as Uint8List,
             derivedKeyResult.key,
           );
-          final encContent = Sodium.bin2base64(encResult.encryptedData!);
-          final encNonce = Sodium.bin2base64(encResult.header!);
+          final encContent = CryptoUtil.bin2base64(encResult.encryptedData!);
+          final encNonce = CryptoUtil.bin2base64(encResult.header!);
           final EnteAuthExport data = EnteAuthExport(
             version: 1,
             encryptedData: encContent,
@@ -92,7 +91,7 @@ Future<void> _requestForEncryptionPassword(
             kdfParams: KDFParams(
               memLimit: derivedKeyResult.memLimit,
               opsLimit: derivedKeyResult.opsLimit,
-              salt: Sodium.bin2base64(kekSalt),
+              salt: CryptoUtil.bin2base64(kekSalt),
             ),
           );
           // get json value of data
@@ -135,7 +134,10 @@ Future<void> _exportCodes(BuildContext context, String fileContent) async {
   }
   _codeFile.writeAsStringSync(fileContent);
   final Size size = MediaQuery.of(context).size;
-  await Share.shareFiles([_codeFile.path], sharePositionOrigin: Rect.fromLTWH(0, 0, size.width, size.height / 2),);
+  await Share.shareFiles(
+    [_codeFile.path],
+    sharePositionOrigin: Rect.fromLTWH(0, 0, size.width, size.height / 2),
+  );
   Future.delayed(const Duration(seconds: 15), () async {
     if (_codeFile.existsSync()) {
       _codeFile.deleteSync();

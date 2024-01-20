@@ -20,6 +20,7 @@ import 'package:ente_auth/ui/home_page.dart';
 import 'package:ente_auth/ui/settings/language_picker.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
 import 'package:ente_auth/utils/navigation_util.dart';
+import 'package:ente_auth/utils/platform_util.dart';
 import 'package:ente_auth/utils/toast_util.dart';
 import 'package:flutter/foundation.dart';
 import "package:flutter/material.dart";
@@ -182,14 +183,20 @@ class _OnboardingPageState extends State<OnboardingPage> {
   }
 
   Future<void> _optForOfflineMode() async {
-    bool canCheckBio = await LocalAuthentication().canCheckBiometrics;
-    if(!canCheckBio) {
-      showToast(context, "Sorry, biometric authentication is not supported on this device.");
-      return;
+    if (PlatformUtil.isMobile()) {
+      final canCheckBio = await LocalAuthentication().canCheckBiometrics;
+
+      if (!canCheckBio) {
+        showToast(
+          context,
+          "Sorry, biometric authentication is not supported on this device.",
+        );
+        return;
+      }
     }
     final bool hasOptedBefore = Configuration.instance.hasOptedForOfflineMode();
     ButtonResult? result;
-    if(!hasOptedBefore) {
+    if (!hasOptedBefore) {
       result = await showChoiceActionSheet(
         context,
         title: context.l10n.warning,
@@ -208,7 +215,6 @@ class _OnboardingPageState extends State<OnboardingPage> {
         ),
       );
     }
-
   }
 
   void _navigateToSignUpPage() {

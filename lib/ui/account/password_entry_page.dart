@@ -4,11 +4,11 @@ import 'package:ente_auth/models/key_gen_result.dart';
 import 'package:ente_auth/services/user_service.dart';
 import 'package:ente_auth/ui/account/recovery_key_page.dart';
 import 'package:ente_auth/ui/common/dynamic_fab.dart';
-import 'package:ente_auth/ui/common/web_page.dart';
 import 'package:ente_auth/ui/components/models/button_type.dart';
 import 'package:ente_auth/ui/home_page.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
 import 'package:ente_auth/utils/navigation_util.dart';
+import 'package:ente_auth/utils/platform_util.dart';
 import 'package:ente_auth/utils/toast_util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -314,8 +314,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
                     onChanged: (cnfPassword) {
                       setState(() {
                         _passwordInInputConfirmationBox = cnfPassword;
-                        if (_passwordInInputBox != null ||
-                            _passwordInInputBox != '') {
+                        if (_passwordInInputBox != '') {
                           _passwordsMatch = _passwordInInputBox ==
                               _passwordInInputConfirmationBox;
                         }
@@ -341,15 +340,10 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
                 GestureDetector(
                   behavior: HitTestBehavior.translucent,
                   onTap: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (BuildContext context) {
-                          return WebPage(
-                            context.l10n.howItWorks,
-                            "https://ente.io/architecture",
-                          );
-                        },
-                      ),
+                    PlatformUtil.openWebView(
+                      context,
+                      context.l10n.howItWorks,
+                      "https://ente.io/architecture",
                     );
                   },
                   child: Container(

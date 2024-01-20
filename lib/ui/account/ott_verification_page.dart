@@ -68,7 +68,7 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
       body: _getBody(),
       floatingActionButton: DynamicFAB(
         isKeypadOpen: isKeypadOpen,
-        isFormValid: !(_verificationCodeController.text.isEmpty),
+        isFormValid: _verificationCodeController.text.isNotEmpty,
         buttonText: l10n.verify,
         onPressedFunction: () {
           if (widget.isChangeEmail) {
@@ -78,9 +78,11 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
               _verificationCodeController.text,
             );
           } else {
-            UserService.instance
-                .verifyEmail(context, _verificationCodeController.text,
-              isResettingPasswordScreen: widget.isResetPasswordScreen,);
+            UserService.instance.verifyEmail(
+              context,
+              _verificationCodeController.text,
+              isResettingPasswordScreen: widget.isResetPasswordScreen,
+            );
           }
           FocusScope.of(context).unfocus();
         },

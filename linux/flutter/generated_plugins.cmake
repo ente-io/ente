@@ -3,9 +3,12 @@
 #
 
 list(APPEND FLUTTER_PLUGIN_LIST
+  desktop_webview_window
   file_saver
   flutter_secure_storage_linux
   sentry_flutter
+  sodium_libs
+  sqlite3_flutter_libs
   url_launcher_linux
 )
 

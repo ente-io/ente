@@ -1,4 +1,3 @@
-
 import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/theme/ente_theme.dart';
 import 'package:ente_auth/ui/components/captioned_text_widget.dart';
@@ -9,10 +8,9 @@ import 'package:ente_auth/ui/settings/data/export_widget.dart';
 import 'package:ente_auth/ui/settings/data/import_page.dart';
 import 'package:ente_auth/utils/navigation_util.dart';
 import 'package:flutter/material.dart';
-import 'package:logging/logging.dart';
 
 class DataSectionWidget extends StatelessWidget {
-  final _logger = Logger("AccountSectionWidget");
+  // final _logger = Logger("AccountSectionWidget");
 
   DataSectionWidget({Key? key}) : super(key: key);
 
