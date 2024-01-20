@@ -23,7 +23,7 @@ class EmbeddingsDB {
   }
 
   Future<void> clearTable() async {
-    await _isar.clear();
+    await _isar.writeTxn(() => _isar.clear());
   }
 
   Future<List<Embedding>> getAll(Model model) async {
