@@ -193,25 +193,25 @@ class AuthenticatorService {
   Future<void> _remoteToLocalSync() async {
     _logger.info('Initiating remote to local sync');
     final int lastSyncTime = _prefs.getInt(_lastEntitySyncTime) ?? 0;
-    _logger.info("Current sync is " + lastSyncTime.toString());
+    _logger.info("Current sync is $lastSyncTime");
     const int fetchLimit = 500;
     final List<AuthEntity> result =
         await _gateway.getDiff(lastSyncTime, limit: fetchLimit);
-    _logger.info(result.length.toString() + " entries fetched from remote");
+    _logger.info("${result.length} entries fetched from remote");
     if (result.isEmpty) {
       return;
     }
     final maxSyncTime = result.map((e) => e.updatedAt).reduce(max);
     List<String> deletedIDs =
         result.where((element) => element.isDeleted).map((e) => e.id).toList();
-    _logger.info(deletedIDs.length.toString() + " entries deleted");
+    _logger.info("${deletedIDs.length} entries deleted");
     result.removeWhere((element) => element.isDeleted);
     await _db.insertOrReplace(result);
     if (deletedIDs.isNotEmpty) {
       await _db.deleteByIDs(ids: deletedIDs);
     }
     _prefs.setInt(_lastEntitySyncTime, maxSyncTime);
-    _logger.info("Setting synctime to " + maxSyncTime.toString());
+    _logger.info("Setting synctime to $maxSyncTime");
     if (result.length == fetchLimit) {
       _logger.info("Diff limit reached, pulling again");
       await _remoteToLocalSync();
@@ -225,7 +225,7 @@ class AuthenticatorService {
         .where((element) => element.shouldSync || element.id == null)
         .toList();
     _logger.info(
-      pendingUpdate.length.toString() + " entries to be updated at remote",
+      "${pendingUpdate.length} entries to be updated at remote",
     );
     for (LocalAuthEntity entity in pendingUpdate) {
       if (entity.id == null) {

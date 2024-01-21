@@ -13,6 +13,7 @@
 #include <local_auth_windows/local_auth_plugin.h>
 #include <sentry_flutter/sentry_flutter_plugin.h>
 #include <share_plus/share_plus_windows_plugin_c_api.h>
+#include <smart_auth/smart_auth_plugin.h>
 #include <sodium_libs/sodium_libs_plugin_c_api.h>
 #include <sqlite3_flutter_libs/sqlite3_flutter_libs_plugin.h>
 #include <uni_links_desktop/uni_links_desktop_plugin.h>
@@ -33,6 +34,8 @@ void RegisterPlugins(flutter::PluginRegistry* registry) {
       registry->GetRegistrarForPlugin("SentryFlutterPlugin"));
   SharePlusWindowsPluginCApiRegisterWithRegistrar(
       registry->GetRegistrarForPlugin("SharePlusWindowsPluginCApi"));
+  SmartAuthPluginRegisterWithRegistrar(
+      registry->GetRegistrarForPlugin("SmartAuthPlugin"));
   SodiumLibsPluginCApiRegisterWithRegistrar(
       registry->GetRegistrarForPlugin("SodiumLibsPluginCApi"));
   Sqlite3FlutterLibsPluginRegisterWithRegistrar(

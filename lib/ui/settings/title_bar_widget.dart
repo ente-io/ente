@@ -2,7 +2,7 @@ import 'package:ente_auth/l10n/l10n.dart';
 import 'package:flutter/material.dart';
 
 class SettingsTitleBarWidget extends StatelessWidget {
-  const SettingsTitleBarWidget({Key? key}) : super(key: key);
+  const SettingsTitleBarWidget({super.key});
 
   @override
   Widget build(BuildContext context) {

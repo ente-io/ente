@@ -31,7 +31,7 @@ class RecoveryKeyPage extends StatefulWidget {
   const RecoveryKeyPage(
     this.recoveryKey,
     this.doneText, {
-    Key? key,
+    super.key,
     this.showAppBar,
     this.onDone,
     this.isDismissible,
@@ -39,7 +39,7 @@ class RecoveryKeyPage extends StatefulWidget {
     this.text,
     this.subText,
     this.showProgressBar = false,
-  }) : super(key: key);
+  });
 
   @override
   State<RecoveryKeyPage> createState() => _RecoveryKeyPageState();
@@ -48,7 +48,7 @@ class RecoveryKeyPage extends StatefulWidget {
 class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
   bool _hasTriedToSave = false;
   final _recoveryKeyFile = io.File(
-    Configuration.instance.getTempDirectory() + "ente-recovery-key.txt",
+    "${Configuration.instance.getTempDirectory()}ente-recovery-key.txt",
   );
 
   @override
@@ -299,13 +299,16 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
     final time = DateTime.now().millisecondsSinceEpoch;
 
     if (PlatformUtil.isMobile()) {
-      await DocumentFileSavePlus()
-          .saveFile(bytes, "ente_recovery_key_$time.txt", "text/plain");
+      await DocumentFileSavePlus().saveFile(
+        bytes as Uint8List,
+        "ente_recovery_key_$time.txt",
+        "text/plain",
+      );
     } else {
       await FileSaver.instance.saveFile(
         name: "ente_recovery_key_$time",
         ext: ".txt",
-        bytes: bytes,
+        bytes: bytes as Uint8List,
         mimeType: MimeType.text,
       );
     }
@@ -326,6 +329,7 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
       await _recoveryKeyFile.delete();
     }
     _recoveryKeyFile.writeAsStringSync(recoveryKey);
+    // ignore: deprecated_member_use
     await Share.shareFiles([_recoveryKeyFile.path]);
     Future.delayed(const Duration(milliseconds: 500), () {
       if (mounted) {

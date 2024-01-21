@@ -16,7 +16,7 @@ import 'package:ente_auth/utils/navigation_util.dart';
 import 'package:flutter/material.dart';
 
 class AccountSectionWidget extends StatelessWidget {
-  AccountSectionWidget({Key? key}) : super(key: key);
+  AccountSectionWidget({super.key});
 
   @override
   Widget build(BuildContext context) {

@@ -20,7 +20,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 
 class App extends StatefulWidget {
   final Locale locale;
-  const App({Key? key, this.locale = const Locale("en")}) : super(key: key);
+  const App({super.key, this.locale = const Locale("en")});
 
   static void setLocale(BuildContext context, Locale newLocale) {
     _AppState state = context.findAncestorStateOfType<_AppState>()!;

@@ -13,7 +13,7 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class AboutSectionWidget extends StatelessWidget {
-  const AboutSectionWidget({Key? key}) : super(key: key);
+  const AboutSectionWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -102,8 +102,8 @@ class AboutMenuItemWidget extends StatelessWidget {
     required this.title,
     required this.url,
     this.webPageTitle,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {

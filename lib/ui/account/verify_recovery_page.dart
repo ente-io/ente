@@ -17,7 +17,7 @@ import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 
 class VerifyRecoveryPage extends StatefulWidget {
-  const VerifyRecoveryPage({Key? key}) : super(key: key);
+  const VerifyRecoveryPage({super.key});
 
   @override
   State<VerifyRecoveryPage> createState() => _VerifyRecoveryPageState();
@@ -41,7 +41,7 @@ class _VerifyRecoveryPageState extends State<VerifyRecoveryPage> {
           await UserRemoteFlagService.instance.markRecoveryVerificationAsDone();
         } catch (e) {
           await dialog.hide();
-          if (e is DioError && e.type == DioErrorType.other) {
+          if (e is DioException && e.type == DioExceptionType.unknown) {
             await showErrorDialog(
               context,
               "No internet connection",

@@ -6,12 +6,12 @@ class CodeTimerProgress extends StatefulWidget {
   final int period;
 
   CodeTimerProgress({
-    Key? key,
+    super.key,
     required this.period,
-  }) : super(key: key);
+  });
 
   @override
-  _CodeTimerProgressState createState() => _CodeTimerProgressState();
+  State createState() => _CodeTimerProgressState();
 }
 
 class _CodeTimerProgressState extends State<CodeTimerProgress>

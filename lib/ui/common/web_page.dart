@@ -6,7 +6,7 @@ class WebPage extends StatefulWidget {
   final String title;
   final String url;
 
-  const WebPage(this.title, this.url, {Key? key}) : super(key: key);
+  const WebPage(this.title, this.url, {super.key});
 
   @override
   State<WebPage> createState() => _WebPageState();

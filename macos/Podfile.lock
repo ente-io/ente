@@ -38,6 +38,8 @@ PODS:
   - shared_preferences_foundation (0.0.1):
     - Flutter
     - FlutterMacOS
+  - smart_auth (0.0.1):
+    - FlutterMacOS
   - sodium_libs (2.2.0):
     - FlutterMacOS
   - sqflite (0.0.2):
@@ -77,6 +79,7 @@ DEPENDENCIES:
   - sentry_flutter (from `Flutter/ephemeral/.symlinks/plugins/sentry_flutter/macos`)
   - share_plus (from `Flutter/ephemeral/.symlinks/plugins/share_plus/macos`)
   - shared_preferences_foundation (from `Flutter/ephemeral/.symlinks/plugins/shared_preferences_foundation/darwin`)
+  - smart_auth (from `Flutter/ephemeral/.symlinks/plugins/smart_auth/macos`)
   - sodium_libs (from `Flutter/ephemeral/.symlinks/plugins/sodium_libs/macos`)
   - sqflite (from `Flutter/ephemeral/.symlinks/plugins/sqflite/macos`)
   - sqlite3_flutter_libs (from `Flutter/ephemeral/.symlinks/plugins/sqlite3_flutter_libs/macos`)
@@ -119,6 +122,8 @@ EXTERNAL SOURCES:
     :path: Flutter/ephemeral/.symlinks/plugins/share_plus/macos
   shared_preferences_foundation:
     :path: Flutter/ephemeral/.symlinks/plugins/shared_preferences_foundation/darwin
+  smart_auth:
+    :path: Flutter/ephemeral/.symlinks/plugins/smart_auth/macos
   sodium_libs:
     :path: Flutter/ephemeral/.symlinks/plugins/sodium_libs/macos
   sqflite:
@@ -149,6 +154,7 @@ SPEC CHECKSUMS:
   SentryPrivate: 024c6fed507ac39ae98e6d087034160f942920d5
   share_plus: 76dd39142738f7a68dd57b05093b5e8193f220f7
   shared_preferences_foundation: b4c3b4cddf1c21f02770737f147a3f5da9d39695
+  smart_auth: b38e3ab4bfe089eacb1e233aca1a2340f96c28e9
   sodium_libs: 72d908a356801223ec77444e67844b3fe87d996a
   sqflite: a5789cceda41d54d23f31d6de539d65bb14100ea
   sqlite3: f307b6291c4db7b5086c38d6237446b98a738581

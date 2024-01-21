@@ -12,12 +12,12 @@ class DynamicFAB extends StatelessWidget {
   final Function? onPressedFunction;
 
   const DynamicFAB({
-    Key? key,
+    super.key,
     this.isKeypadOpen,
     this.buttonText,
     this.isFormValid,
     this.onPressedFunction,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

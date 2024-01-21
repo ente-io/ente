@@ -9,7 +9,7 @@ import "package:flutter/material.dart";
 class SetupEnterSecretKeyPage extends StatefulWidget {
   final Code? code;
 
-  SetupEnterSecretKeyPage({this.code, Key? key}) : super(key: key);
+  SetupEnterSecretKeyPage({this.code, super.key});
 
   @override
   State<SetupEnterSecretKeyPage> createState() =>

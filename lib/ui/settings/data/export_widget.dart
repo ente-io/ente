@@ -121,26 +121,27 @@ Future<void> _showExportWarningDialog(BuildContext context) async {
 }
 
 Future<void> _exportCodes(BuildContext context, String fileContent) async {
-  final _codeFile = File(
-    Configuration.instance.getTempDirectory() + "ente-authenticator-codes.txt",
+  final codeFile = File(
+    "${Configuration.instance.getTempDirectory()}ente-authenticator-codes.txt",
   );
   final hasAuthenticated = await LocalAuthenticationService.instance
       .requestLocalAuthentication(context, context.l10n.authToExportCodes);
   if (!hasAuthenticated) {
     return;
   }
-  if (_codeFile.existsSync()) {
-    await _codeFile.delete();
+  if (codeFile.existsSync()) {
+    await codeFile.delete();
   }
-  _codeFile.writeAsStringSync(fileContent);
+  codeFile.writeAsStringSync(fileContent);
   final Size size = MediaQuery.of(context).size;
+  // ignore: deprecated_member_use
   await Share.shareFiles(
-    [_codeFile.path],
+    [codeFile.path],
     sharePositionOrigin: Rect.fromLTWH(0, 0, size.width, size.height / 2),
   );
   Future.delayed(const Duration(seconds: 15), () async {
-    if (_codeFile.existsSync()) {
-      _codeFile.deleteSync();
+    if (codeFile.existsSync()) {
+      codeFile.deleteSync();
     }
   });
 }
@@ -149,7 +150,7 @@ Future<String> _getAuthDataForExport() async {
   final codes = await CodeStore.instance.getAllCodes();
   String data = "";
   for (final code in codes) {
-    data += code.rawData + "\n";
+    data += "${code.rawData}\n";
   }
   return data;
 }

@@ -19,8 +19,7 @@ import "package:logging/logging.dart";
 // volatile password.
 class LoginPasswordVerificationPage extends StatefulWidget {
   final SrpAttributes srpAttributes;
-  const LoginPasswordVerificationPage({Key? key, required this.srpAttributes})
-      : super(key: key);
+  const LoginPasswordVerificationPage({super.key, required this.srpAttributes});
 
   @override
   State<LoginPasswordVerificationPage> createState() =>
@@ -101,7 +100,7 @@ class _LoginPasswordVerificationPageState
         password,
         dialog,
       );
-    } on DioError catch (e, s) {
+    } on DioException catch (e, s) {
       await dialog.hide();
       if (e.response != null && e.response!.statusCode == 401) {
         _logger.severe('server reject, failed verify SRP login', e, s);
@@ -112,7 +111,7 @@ class _LoginPasswordVerificationPageState
         );
       } else {
         _logger.severe('API failure during SRP login', e, s);
-        if (e.type == DioErrorType.other) {
+        if (e.type == DioExceptionType.unknown) {
           await _showContactSupportDialog(
             context,
             context.l10n.noInternetConnection,

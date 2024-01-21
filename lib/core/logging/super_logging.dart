@@ -235,14 +235,14 @@ class SuperLogging {
       extraLines = null;
     }
 
-    final str = (config.prefix) + " " + rec.toPrettyString(extraLines);
+    final str = "${config.prefix} ${rec.toPrettyString(extraLines)}";
 
     // write to stdout
     printLog(str);
 
     // push to log queue
     if (fileIsEnabled) {
-      fileQueueEntries.add(str + '\n');
+      fileQueueEntries.add('$str\n');
       if (fileQueueEntries.length == 1) {
         flushQueue();
       }

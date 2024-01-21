@@ -11,7 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 class ThemeSwitchWidget extends StatefulWidget {
-  const ThemeSwitchWidget({Key? key}) : super(key: key);
+  const ThemeSwitchWidget({super.key});
 
   @override
   State<ThemeSwitchWidget> createState() => _ThemeSwitchWidgetState();

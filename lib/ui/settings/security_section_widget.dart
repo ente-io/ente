@@ -22,7 +22,7 @@ import 'package:ente_crypto_dart/ente_crypto_dart.dart';
 import 'package:flutter/material.dart';
 
 class SecuritySectionWidget extends StatefulWidget {
-  const SecuritySectionWidget({Key? key}) : super(key: key);
+  const SecuritySectionWidget({super.key});
 
   @override
   State<SecuritySectionWidget> createState() => _SecuritySectionWidgetState();

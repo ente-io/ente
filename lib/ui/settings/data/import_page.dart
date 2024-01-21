@@ -20,7 +20,9 @@ enum ImportType {
 }
 
 class ImportCodePage extends StatelessWidget {
-  late List<ImportType> importOptions = [
+  const ImportCodePage({super.key});
+
+  static const List<ImportType> importOptions = [
     ImportType.plainText,
     ImportType.encrypted,
     ImportType.twoFas,
@@ -29,8 +31,6 @@ class ImportCodePage extends StatelessWidget {
     ImportType.googleAuthenticator,
     ImportType.ravio,
   ];
-
-  ImportCodePage({super.key});
 
   String getTitle(BuildContext context, ImportType type) {
     switch (type) {

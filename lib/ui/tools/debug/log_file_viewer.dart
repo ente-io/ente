@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 
 class LogFileViewer extends StatefulWidget {
   final File file;
-  const LogFileViewer(this.file, {Key? key}) : super(key: key);
+  const LogFileViewer(this.file, {super.key});
 
   @override
   State<LogFileViewer> createState() => _LogFileViewerState();

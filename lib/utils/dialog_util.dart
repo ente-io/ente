@@ -47,11 +47,11 @@ Future<ButtonResult?> showErrorDialogForException({
   String apiErrorPrefix = "It looks like something went wrong.",
 }) async {
   String errorMessage = context.l10n.tempErrorContactSupportIfPersists;
-  if (exception is DioError &&
+  if (exception is DioException &&
       exception.response != null &&
       exception.response!.data["code"] != null) {
     errorMessage =
-        "$apiErrorPrefix\n\nReason: " + exception.response!.data["code"];
+        "$apiErrorPrefix\n\nReason: ${exception.response!.data["code"]}";
   }
   return showDialogWidget(
     context: context,

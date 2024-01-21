@@ -4,8 +4,7 @@ import 'package:flutter/material.dart';
 
 class HomeHeaderWidget extends StatefulWidget {
   final Widget centerWidget;
-  const HomeHeaderWidget({required this.centerWidget, Key? key})
-      : super(key: key);
+  const HomeHeaderWidget({required this.centerWidget, super.key});
 
   @override
   State<HomeHeaderWidget> createState() => _HomeHeaderWidgetState();

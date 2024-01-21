@@ -31,7 +31,7 @@ class Network {
 
     _dio = Dio(
       BaseOptions(
-        connectTimeout: kConnectTimeout,
+        connectTimeout: Duration(milliseconds: kConnectTimeout),
         headers: {
           if (PlatformUtil.isMobile())
             HttpHeaders.userAgentHeader: FkUserAgent.userAgent
@@ -46,7 +46,7 @@ class Network {
     _enteDio = Dio(
       BaseOptions(
         baseUrl: apiEndpoint,
-        connectTimeout: kConnectTimeout,
+        connectTimeout: Duration(milliseconds: kConnectTimeout),
         headers: {
           if (PlatformUtil.isMobile())
             HttpHeaders.userAgentHeader: FkUserAgent.userAgent

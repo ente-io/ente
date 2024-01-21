@@ -10,6 +10,7 @@ list(APPEND FLUTTER_PLUGIN_LIST
   local_auth_windows
   sentry_flutter
   share_plus
+  smart_auth
   sodium_libs
   sqlite3_flutter_libs
   uni_links_desktop

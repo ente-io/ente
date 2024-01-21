@@ -7,6 +7,7 @@ list(APPEND FLUTTER_PLUGIN_LIST
   file_saver
   flutter_secure_storage_linux
   sentry_flutter
+  smart_auth
   sodium_libs
   sqlite3_flutter_libs
   url_launcher_linux

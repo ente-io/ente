@@ -16,7 +16,7 @@ import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 
 class PasswordReentryPage extends StatefulWidget {
-  const PasswordReentryPage({Key? key}) : super(key: key);
+  const PasswordReentryPage({super.key});
 
   @override
   State<PasswordReentryPage> createState() => _PasswordReentryPageState();

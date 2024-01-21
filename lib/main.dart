@@ -67,10 +67,14 @@ ThemeMode _themeMode(AdaptiveThemeMode? savedThemeMode) {
 }
 
 Future _runWithLogs(Function() function, {String prefix = ""}) async {
+  String dir = "";
+  try {
+    dir = "${(await getApplicationSupportDirectory()).path}/logs";
+  } catch (_) {}
   await SuperLogging.main(
     LogConfig(
       body: function,
-      logDirPath: (await getApplicationSupportDirectory()).path + "/logs",
+      logDirPath: dir,
       maxLogFiles: 5,
       sentryDsn: sentryDSN,
       enableInDebugMode: true,

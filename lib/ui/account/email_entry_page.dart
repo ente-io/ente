@@ -14,7 +14,7 @@ import 'package:step_progress_indicator/step_progress_indicator.dart';
 import "package:styled_text/styled_text.dart";
 
 class EmailEntryPage extends StatefulWidget {
-  const EmailEntryPage({Key? key}) : super(key: key);
+  const EmailEntryPage({super.key});
 
   @override
   State<EmailEntryPage> createState() => _EmailEntryPageState();

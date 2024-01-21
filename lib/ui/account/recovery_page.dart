@@ -10,7 +10,7 @@ import 'package:ente_auth/utils/toast_util.dart';
 import 'package:flutter/material.dart';
 
 class RecoveryPage extends StatefulWidget {
-  const RecoveryPage({Key? key}) : super(key: key);
+  const RecoveryPage({super.key});
 
   @override
   State<RecoveryPage> createState() => _RecoveryPageState();

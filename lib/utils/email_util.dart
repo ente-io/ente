@@ -12,7 +12,6 @@ import 'package:ente_auth/ui/tools/debug/log_file_viewer.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
 import 'package:ente_auth/utils/toast_util.dart';
 import "package:file_saver/file_saver.dart";
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_email_sender/flutter_email_sender.dart';
@@ -124,10 +123,10 @@ Future<String> getZippedLogsFile(BuildContext context) async {
   final dialog = createProgressDialog(context, l10n.preparingLogsTitle);
   await dialog.show();
   final logsPath = (await getApplicationSupportDirectory()).path;
-  final logsDirectory = Directory(logsPath + "/logs");
+  final logsDirectory = Directory("$logsPath/logs");
   final tempPath = (await getTemporaryDirectory()).path;
   final zipFilePath =
-      tempPath + "/logs-${Configuration.instance.getUserID() ?? 0}.zip";
+      "$tempPath/logs-${Configuration.instance.getUserID() ?? 0}.zip";
   final encoder = ZipFileEncoder();
   encoder.create(zipFilePath);
   await encoder.addDirectory(logsDirectory);
@@ -205,8 +204,8 @@ Future<void> sendEmail(
 }) async {
   try {
     final String clientDebugInfo = await _clientInfo();
-    final String _subject = subject ?? '[Support]';
-    final String _body = (body ?? '') + clientDebugInfo;
+    final String subject0 = subject ?? '[Support]';
+    final String body0 = (body ?? '') + clientDebugInfo;
     // final EmailContent email = EmailContent(
     //   to: [
     //     to,
@@ -220,7 +219,7 @@ Future<void> sendEmail(
       final Uri params = Uri(
         scheme: 'mailto',
         path: to,
-        query: 'subject=$_subject&body=$_body',
+        query: 'subject=$subject0&body=$body0',
       );
       if (await canLaunchUrl(params)) {
         await launchUrl(params);

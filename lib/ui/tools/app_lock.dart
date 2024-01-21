@@ -37,7 +37,7 @@ class AppLock extends StatefulWidget {
   final Locale locale;
 
   const AppLock({
-    Key? key,
+    super.key,
     required this.builder,
     required this.lockScreen,
     required this.savedThemeMode,
@@ -46,7 +46,7 @@ class AppLock extends StatefulWidget {
     this.backgroundLockLatency = const Duration(seconds: 0),
     this.darkTheme,
     this.lightTheme,
-  }) : super(key: key);
+  });
 
   static _AppLockState? of(BuildContext context) =>
       context.findAncestorStateOfType<_AppLockState>();

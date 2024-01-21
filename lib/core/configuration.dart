@@ -73,7 +73,7 @@ class Configuration {
     sqfliteFfiInit();
     _secureStorage = const FlutterSecureStorage();
     _documentsDirectory = (await getApplicationDocumentsDirectory()).path;
-    _tempDirectory = _documentsDirectory + "/temp/";
+    _tempDirectory = "$_documentsDirectory/temp/";
     final tempDirectory = io.Directory(_tempDirectory);
     try {
       final currentTime = DateTime.now().microsecondsSinceEpoch;
@@ -171,7 +171,7 @@ class Configuration {
         CryptoUtil.encryptSync(masterKey, derivedKeyResult.key);
 
     // Generate a public-private keypair and encrypt the latter
-    final keyPair = await CryptoUtil.generateKeyPair();
+    final keyPair = CryptoUtil.generateKeyPair();
     final encryptedSecretKeyData =
         CryptoUtil.encryptSync(keyPair.secretKey.extractBytes(), masterKey);
 

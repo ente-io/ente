@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 class LinearProgressDialog extends StatefulWidget {
   final String message;
 
-  const LinearProgressDialog(this.message, {Key? key}) : super(key: key);
+  const LinearProgressDialog(this.message, {super.key});
 
   @override
   LinearProgressDialogState createState() => LinearProgressDialogState();

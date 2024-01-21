@@ -12,7 +12,7 @@ import 'package:flutter/material.dart';
 class DataSectionWidget extends StatelessWidget {
   // final _logger = Logger("AccountSectionWidget");
 
-  DataSectionWidget({Key? key}) : super(key: key);
+  DataSectionWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -37,7 +37,7 @@ class DataSectionWidget extends StatelessWidget {
         trailingIcon: Icons.chevron_right_outlined,
         trailingIconIsMuted: true,
         onTap: () async {
-          routeToPage(context, ImportCodePage());
+          routeToPage(context, const ImportCodePage());
         },
       ),
       sectionOptionSpacing,

@@ -11,10 +11,10 @@ class HomeEmptyStateWidget extends StatelessWidget {
   final VoidCallback? onManuallySetupTap;
 
   const HomeEmptyStateWidget({
-    Key? key,
+    super.key,
     required this.onScanTap,
     required this.onManuallySetupTap,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -59,7 +59,7 @@ class HomeEmptyStateWidget extends StatelessWidget {
                     const SizedBox(height: 54),
                     InkWell(
                       onTap: () {
-                        routeToPage(context, ImportCodePage());
+                        routeToPage(context, const ImportCodePage());
                       },
                       child: Text(
                         l10n.importCodes,

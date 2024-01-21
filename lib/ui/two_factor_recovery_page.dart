@@ -14,8 +14,8 @@ class TwoFactorRecoveryPage extends StatefulWidget {
     this.sessionID,
     this.encryptedSecret,
     this.secretDecryptionNonce, {
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   State<TwoFactorRecoveryPage> createState() => _TwoFactorRecoveryPageState();
