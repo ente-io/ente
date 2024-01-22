@@ -98,13 +98,17 @@ class _MemoriesWidgetState extends State<MemoriesWidget> {
         controller: _controller,
         itemCount: collatedMemories.length,
         itemBuilder: (context, itemIndex) {
-          final offsetOfItem = _maxWidth * itemIndex;
+          final maxScaleOffsetX =
+              _maxWidth + MemoryCoverWidget.horizontalPadding * 2;
+          final offsetOfItem =
+              (_maxWidth + MemoryCoverWidget.horizontalPadding * 2) * itemIndex;
           return MemoryCoverWidget(
             memories: collatedMemories[itemIndex],
             controller: _controller,
             offsetOfItem: offsetOfItem,
             maxHeight: _maxHeight,
             maxWidth: _maxWidth,
+            maxScaleOffsetX: maxScaleOffsetX,
           );
         },
       ),
