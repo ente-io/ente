@@ -842,6 +842,7 @@ export default function Gallery() {
                         ops === COLLECTION_OPS_TYPE.RESTORE ||
                         ops === COLLECTION_OPS_TYPE.MOVE
                     ) {
+                        // redirect to all section when no items are left in the current collection.
                         setActiveCollectionID(ALL_SECTION);
                     } else if (ops === COLLECTION_OPS_TYPE.UNHIDE) {
                         exitHiddenSection();
