@@ -72,6 +72,10 @@ jobs:
         run: |
           flutter pub get
 
+      - uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: "14.3.1"
+
       # - name: Get certificates
       #   env:
       #     BUILD_CERTIFICATE_BASE64: ${{ secrets.MAC_OS_CERTIFICATE }}
