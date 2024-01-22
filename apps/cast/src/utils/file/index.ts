@@ -35,7 +35,6 @@ import {
     updateFileMagicMetadata,
 } from 'services/fileService';
 import isElectron from 'is-electron';
-// import imageProcessor from 'services/electron/imageProcessor';
 import { isPlaybackPossible } from 'utils/photoFrame';
 import { FileTypeInfo } from 'types/upload';
 import { moveToHiddenCollection } from 'services/collectionService';
@@ -43,9 +42,6 @@ import { getData, LS_KEYS } from '@ente/shared/storage/localStorage';
 import { User } from '@ente/shared/user/types';
 import { addLogLine, addLocalLog } from '@ente/shared/logging';
 import { convertBytesToHumanReadable } from '@ente/shared/utils/size';
-
-// import ElectronFSService from 'services/electron/fs';
-// import { getFileExportPath, getUniqueFileExportName } from 'utils/export';
 
 const WAIT_TIME_IMAGE_CONVERSION = 30 * 1000;
 

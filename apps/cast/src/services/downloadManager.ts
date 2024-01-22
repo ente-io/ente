@@ -18,6 +18,7 @@ import { getToken } from '@ente/shared/storage/localStorage/helpers';
 import { getFileURL, getThumbnailURL } from '@ente/shared/network/api';
 import HTTPService from '@ente/shared/network/HTTPService';
 import { logError } from '@ente/shared/sentry';
+import { addLogLine } from '@ente/shared/logging';
 
 class DownloadManager {
     private fileObjectURLPromise = new Map<
