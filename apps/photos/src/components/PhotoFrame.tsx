@@ -12,7 +12,6 @@ import PhotoViewer from 'components/PhotoViewer';
 import { TRASH_SECTION } from 'constants/collection';
 import { updateFileMsrcProps, updateFileSrcProps } from 'utils/photoFrame';
 import { SelectedState } from 'types/gallery';
-import { PublicCollectionGalleryContext } from 'utils/publicCollectionGallery';
 import { useRouter } from 'next/router';
 import { logError } from '@ente/shared/sentry';
 import { addLogLine } from '@ente/shared/logging';
@@ -89,9 +88,6 @@ const PhotoFrame = ({
         [k: number]: boolean;
     }>({});
     const galleryContext = useContext(GalleryContext);
-    const publicCollectionGalleryContext = useContext(
-        PublicCollectionGalleryContext
-    );
     const [rangeStart, setRangeStart] = useState(null);
     const [currentHover, setCurrentHover] = useState(null);
     const [isShiftKeyPressed, setIsShiftKeyPressed] = useState(false);
@@ -315,9 +311,7 @@ const PhotoFrame = ({
             file={item}
             updateURL={updateURL(index)}
             onClick={onThumbnailClick(index)}
-            selectable={
-                !publicCollectionGalleryContext?.accessedThroughSharedURL
-            }
+            selectable={enableDownload}
             onSelect={handleSelect(
                 item.id,
                 item.ownerID === galleryContext.user?.id,
