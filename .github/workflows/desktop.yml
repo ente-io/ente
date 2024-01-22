@@ -57,7 +57,7 @@ jobs:
 
   build-macos:
     name: Macos
-    runs-on: macos-latest
+    runs-on: macos-13
     steps:
       - uses: actions/checkout@v4
       - name: Setup flutter
@@ -71,10 +71,6 @@ jobs:
       - name: Get dependencies
         run: |
           flutter pub get
-
-      - uses: maxim-lobanov/setup-xcode@v1
-        with:
-          xcode-version: "14.2"
 
       # - name: Get certificates
       #   env:
