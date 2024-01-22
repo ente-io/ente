@@ -10,6 +10,8 @@ import 'package:ente_auth/ui/components/dialog_widget.dart';
 import 'package:ente_auth/ui/components/models/button_type.dart';
 import 'package:ente_auth/ui/tools/debug/log_file_viewer.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
+import 'package:ente_auth/utils/platform_util.dart';
+import 'package:ente_auth/utils/share_utils.dart';
 import 'package:ente_auth/utils/toast_util.dart';
 import "package:file_saver/file_saver.dart";
 import 'package:flutter/material.dart';
@@ -77,12 +79,26 @@ Future<void> sendLogs(
         },
       ),
       ButtonWidget(
+        isInAlert: true,
         buttonType: ButtonType.secondary,
         labelText: l10n.exportLogs,
         buttonAction: ButtonAction.third,
         onTap: () async {
-          final zipFilePath = await getZippedLogsFile(context);
-          await exportLogs(context, zipFilePath);
+          Future.delayed(
+            const Duration(milliseconds: 200),
+            () => shareDialog(
+              context,
+              title,
+              saveAction: () async {
+                final zipFilePath = await getZippedLogsFile(context);
+                await exportLogs(context, zipFilePath);
+              },
+              sendAction: () async {
+                final zipFilePath = await getZippedLogsFile(context);
+                await exportLogs(context, zipFilePath, true);
+              },
+            ),
+          );
         },
       ),
       ButtonWidget(
@@ -175,18 +191,24 @@ Future<void> shareLogs(
   }
 }
 
-Future<void> exportLogs(BuildContext context, String zipFilePath) async {
+Future<void> exportLogs(
+  BuildContext context,
+  String zipFilePath, [
+  bool isSharing = false,
+]) async {
   final Size size = MediaQuery.of(context).size;
-  if (Platform.isAndroid) {
+  if (!isSharing) {
     final DateTime now = DateTime.now().toUtc();
     final String shortMonthName = DateFormat('MMM').format(now); // Short month
     final String logFileName =
         'ente-logs-${now.year}-$shortMonthName-${now.day}-${now.hour}-${now.minute}';
-    await FileSaver.instance.saveAs(
-      name: logFileName,
-      filePath: zipFilePath,
-      mimeType: MimeType.zip,
-      ext: 'zip',
+
+    final bytes = await File(zipFilePath).readAsBytes();
+    await PlatformUtil.shareFile(
+      logFileName,
+      'zip',
+      bytes,
+      MimeType.zip,
     );
   } else {
     await Share.shareXFiles(

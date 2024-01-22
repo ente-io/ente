@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:ente_auth/core/configuration.dart';
 import 'package:ente_auth/l10n/l10n.dart';
@@ -11,8 +10,11 @@ import 'package:ente_auth/ui/components/buttons/button_widget.dart';
 import 'package:ente_auth/ui/components/dialog_widget.dart';
 import 'package:ente_auth/ui/components/models/button_type.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
+import 'package:ente_auth/utils/platform_util.dart';
+import 'package:ente_auth/utils/share_utils.dart';
 import 'package:ente_auth/utils/toast_util.dart';
 import 'package:ente_crypto_dart/ente_crypto_dart.dart';
+import 'package:file_saver/file_saver.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
@@ -73,13 +75,13 @@ Future<void> _requestForEncryptionPassword(
         try {
           final kekSalt = CryptoUtil.getSaltToDeriveKey();
           final derivedKeyResult = await CryptoUtil.deriveSensitiveKey(
-            utf8.encode(password) as Uint8List,
+            utf8.encode(password),
             kekSalt,
           );
           String exportPlainText = await _getAuthDataForExport();
           // Encrypt the key with this derived key
           final encResult = await CryptoUtil.encryptData(
-            utf8.encode(exportPlainText) as Uint8List,
+            utf8.encode(exportPlainText),
             derivedKeyResult.key,
           );
           final encContent = CryptoUtil.bin2base64(encResult.encryptedData!);
@@ -95,7 +97,7 @@ Future<void> _requestForEncryptionPassword(
             ),
           );
           // get json value of data
-          _exportCodes(context, jsonEncode(data.toJson()));
+          await _exportCodes(context, jsonEncode(data.toJson()));
         } catch (e, s) {
           Logger("ExportWidget").severe(e, s);
           showToast(context, "Error while exporting codes.");
@@ -129,21 +131,38 @@ Future<void> _exportCodes(BuildContext context, String fileContent) async {
   if (!hasAuthenticated) {
     return;
   }
-  if (codeFile.existsSync()) {
-    await codeFile.delete();
-  }
-  codeFile.writeAsStringSync(fileContent);
-  final Size size = MediaQuery.of(context).size;
-  // ignore: deprecated_member_use
-  await Share.shareFiles(
-    [codeFile.path],
-    sharePositionOrigin: Rect.fromLTWH(0, 0, size.width, size.height / 2),
+  Future.delayed(
+    const Duration(milliseconds: 1200),
+    () async => await shareDialog(
+      context,
+      context.l10n.exportCodes,
+      saveAction: () async {
+        final time = DateTime.now().millisecondsSinceEpoch;
+        await PlatformUtil.shareFile(
+          "ente-authenticator-codes-$time",
+          "txt",
+          CryptoUtil.strToBin(fileContent),
+          MimeType.text,
+        );
+      },
+      sendAction: () async {
+        if (codeFile.existsSync()) {
+          await codeFile.delete();
+        }
+        codeFile.writeAsStringSync(fileContent);
+        final Size size = MediaQuery.of(context).size;
+        await Share.shareFiles(
+          [codeFile.path],
+          sharePositionOrigin: Rect.fromLTWH(0, 0, size.width, size.height / 2),
+        );
+        Future.delayed(const Duration(seconds: 15), () async {
+          if (codeFile.existsSync()) {
+            codeFile.deleteSync();
+          }
+        });
+      },
+    ),
   );
-  Future.delayed(const Duration(seconds: 15), () async {
-    if (codeFile.existsSync()) {
-      codeFile.deleteSync();
-    }
-  });
 }
 
 Future<String> _getAuthDataForExport() async {

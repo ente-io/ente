@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'dart:io' as io;
 
 import 'package:bip39/bip39.dart' as bip39;
-import 'package:document_file_save_plus/document_file_save_plus.dart';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:ente_auth/core/configuration.dart';
 import 'package:ente_auth/core/constants.dart';
@@ -10,6 +9,7 @@ import 'package:ente_auth/ente_theme_data.dart';
 import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/ui/common/gradient_button.dart';
 import 'package:ente_auth/utils/platform_util.dart';
+import 'package:ente_auth/utils/share_utils.dart';
 import 'package:ente_auth/utils/toast_util.dart';
 import 'package:file_saver/file_saver.dart';
 import 'package:flutter/material.dart';
@@ -252,27 +252,20 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
     }
 
     childrens.add(
-      Row(
-        children: [
-          Expanded(
-            child: GradientButton(
-              onTap: () async {
-                await _saveRecoveryKey(recoveryKey);
-              },
-              text: context.l10n.saveKey,
-            ),
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: GradientButton(
-              reversedGradient: true,
-              onTap: () async {
-                await _shareRecoveryKey(recoveryKey);
-              },
-              text: context.l10n.sendKey,
-            ),
-          ),
-        ],
+      GradientButton(
+        onTap: () async {
+          shareDialog(
+            context,
+            context.l10n.recoveryKey,
+            saveAction: () async {
+              await _saveRecoveryKey(recoveryKey);
+            },
+            sendAction: () async {
+              await _shareRecoveryKey(recoveryKey);
+            },
+          );
+        },
+        text: context.l10n.saveKey,
       ),
     );
 
@@ -298,20 +291,12 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
     final bytes = utf8.encode(recoveryKey);
     final time = DateTime.now().millisecondsSinceEpoch;
 
-    if (PlatformUtil.isMobile()) {
-      await DocumentFileSavePlus().saveFile(
-        bytes as Uint8List,
-        "ente_recovery_key_$time.txt",
-        "text/plain",
-      );
-    } else {
-      await FileSaver.instance.saveFile(
-        name: "ente_recovery_key_$time",
-        ext: ".txt",
-        bytes: bytes as Uint8List,
-        mimeType: MimeType.text,
-      );
-    }
+    await PlatformUtil.shareFile(
+      "ente_recovery_key_$time",
+      "txt",
+      bytes,
+      MimeType.text,
+    );
 
     if (mounted) {
       showToast(
