@@ -103,7 +103,7 @@ class EmbeddingStore {
 
   Future<RemoteEmbeddings> _getRemoteEmbeddings(
     Model model, {
-    int limit = 500,
+    int limit = 200,
   }) async {
     final remoteEmbeddings = <RemoteEmbedding>[];
     try {
