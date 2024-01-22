@@ -101,6 +101,11 @@ jobs:
       #     mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
       #     cp $PP_PATH ~/Library/MobileDevice/Provisioning\ Profiles
 
+      - name: Dmg dependencies
+        run: |
+          python3 -m pip install setuptools
+          npm install -g appdmg
+
       - name: Build Macos App
         run: |
           flutter config --enable-macos-desktop
