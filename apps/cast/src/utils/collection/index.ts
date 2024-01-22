@@ -1,5 +1,4 @@
 import {
-    createAlbum,
     getNonEmptyCollections,
     updateCollectionMagicMetadata,
     updatePublicCollectionMagicMetadata,
@@ -22,7 +21,6 @@ import {
     SYSTEM_COLLECTION_TYPES,
     MOVE_TO_NOT_ALLOWED_COLLECTION,
     ADD_TO_NOT_ALLOWED_COLLECTION,
-    DEFAULT_HIDDEN_COLLECTION_USER_FACING_NAME,
 } from 'constants/collection';
 import { getUnixTimeInMicroSecondsWithDelta } from 'utils/time';
 import { SUB_TYPE, VISIBILITY_STATE } from 'types/magicMetadata';
@@ -32,14 +30,6 @@ import { t } from 'i18next';
 import { getAlbumsURL } from '@ente/shared/network/api';
 import { User } from '@ente/shared/user/types';
 import { getData, LS_KEYS } from '@ente/shared/storage/localStorage';
-// import { SetCollectionDownloadProgressAttributes } from 'types/gallery';
-// import ElectronService from 'services/electron/common';
-// import {
-//     getCollectionExportPath,
-//     getUniqueCollectionExportName,
-// } from 'utils/export';
-// import exportService from 'services/export';
-// import { CollectionDownloadProgressAttributes } from 'components/Collections/CollectionDownloadProgress';
 
 export enum COLLECTION_OPS_TYPE {
     ADD,
@@ -521,55 +511,3 @@ export function getNonHiddenCollections(
 export function getHiddenCollections(collections: Collection[]): Collection[] {
     return collections.filter((collection) => isHiddenCollection(collection));
 }
-
-export async function splitNormalAndHiddenCollections(
-    collections: Collection[]
-): Promise<{
-    normalCollections: Collection[];
-    hiddenCollections: Collection[];
-}> {
-    const normalCollections = [];
-    const hiddenCollections = [];
-    for (const collection of collections) {
-        if (isHiddenCollection(collection)) {
-            hiddenCollections.push(collection);
-        } else {
-            normalCollections.push(collection);
-        }
-    }
-    return { normalCollections, hiddenCollections };
-}
-
-export function constructCollectionNameMap(
-    collections: Collection[]
-): Map<number, string> {
-    return new Map<number, string>(
-        (collections ?? []).map((collection) => [
-            collection.id,
-            getCollectionUserFacingName(collection),
-        ])
-    );
-}
-
-export const getCollectionUserFacingName = (collection: Collection) => {
-    if (isDefaultHiddenCollection(collection)) {
-        return DEFAULT_HIDDEN_COLLECTION_USER_FACING_NAME;
-    }
-    return collection.name;
-};
-
-export const getOrCreateAlbum = async (
-    albumName: string,
-    existingCollections: Collection[]
-) => {
-    const user: User = getData(LS_KEYS.USER);
-    if (!user?.id) {
-        throw Error('user missing');
-    }
-    for (const collection of existingCollections) {
-        if (isValidReplacementAlbum(collection, user, albumName)) {
-            return collection;
-        }
-    }
-    return createAlbum(albumName);
-};
