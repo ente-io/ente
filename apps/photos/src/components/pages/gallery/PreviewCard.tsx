@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import { EnteFile } from 'types/file';
-import { styled } from '@mui/material';
+import { Tooltip, styled } from '@mui/material';
 import PlayCircleOutlineOutlinedIcon from '@mui/icons-material/PlayCircleOutlineOutlined';
 import DownloadManager from 'services/download';
 import useLongPress from '@ente/shared/hooks/useLongPress';
@@ -298,7 +298,7 @@ export default function PreviewCard(props: IProps) {
         }
     };
 
-    return (
+    const renderFn = () => (
         <Cont
             key={`thumb-${file.id}}`}
             onClick={handleClick}
@@ -360,4 +360,22 @@ export default function PreviewCard(props: IProps) {
             )}
         </Cont>
     );
+
+    if (deduplicateContext.isOnDeduplicatePage) {
+        return (
+            <Tooltip
+                placement="bottom-start"
+                enterDelay={300}
+                enterNextDelay={100}
+                title={`${
+                    file.metadata.title
+                } - ${deduplicateContext.collectionNameMap.get(
+                    file.collectionID
+                )}`}>
+                {renderFn()}
+            </Tooltip>
+        );
+    } else {
+        return renderFn();
+    }
 }
