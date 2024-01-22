@@ -89,6 +89,7 @@ const TransformMenu = () => {
             );
         };
     };
+
     const flipCanvas = (
         canvas: HTMLCanvasElement,
         direction: 'vertical' | 'horizontal'
