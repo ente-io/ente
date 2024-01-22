@@ -41,5 +41,7 @@
 			</array>
 		</dict>
 	</array>
+	<key>LSApplicationCategoryType</key>
+	<string>public.app-category.security</string>
 </dict>
 </plist>
