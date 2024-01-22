@@ -103,6 +103,9 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m27(count, formattedSize) =>
       "${Intl.plural(count, one: 'Het kan verwijderd worden van het apparaat om ${formattedSize} vrij te maken', other: 'Ze kunnen verwijderd worden van het apparaat om ${formattedSize} vrij te maken')}";
 
+  static String m28(currentlyProcessing, totalCount) =>
+      "Verwerken van ${currentlyProcessing} / ${totalCount}";
+
   static String m29(count) =>
       "${Intl.plural(count, one: '${count} item', other: '${count} items')}";
 
@@ -392,7 +395,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "centerPoint": MessageLookupByLibrary.simpleMessage("Middelpunt"),
         "changeEmail": MessageLookupByLibrary.simpleMessage("E-mail wijzigen"),
         "changeLocationOfSelectedItems": MessageLookupByLibrary.simpleMessage(
-            "Change location of selected items?"),
+            "Locatie van geselecteerde items wijzigen?"),
         "changePassword":
             MessageLookupByLibrary.simpleMessage("Wachtwoord wijzigen"),
         "changePasswordTitle":
@@ -409,7 +412,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "claimMore": MessageLookupByLibrary.simpleMessage("Claim meer!"),
         "claimed": MessageLookupByLibrary.simpleMessage("Geclaimd"),
         "claimedStorageSoFar": m8,
+        "cleanUncategorized":
+            MessageLookupByLibrary.simpleMessage("Ongecategoriseerd opschonen"),
         "clearCaches": MessageLookupByLibrary.simpleMessage("Cache legen"),
+        "clearIndexes": MessageLookupByLibrary.simpleMessage("Index wissen"),
         "click": MessageLookupByLibrary.simpleMessage("• Click"),
         "clickOnTheOverflowMenu":
             MessageLookupByLibrary.simpleMessage("• Klik op het menu"),
@@ -599,14 +605,15 @@ class MessageLookup extends MessageLookupByLibrary {
         "duplicateFileCountWithStorageSaved": m16,
         "duplicateItemsGroup": m17,
         "edit": MessageLookupByLibrary.simpleMessage("Bewerken"),
-        "editLocation": MessageLookupByLibrary.simpleMessage("Edit location"),
+        "editLocation":
+            MessageLookupByLibrary.simpleMessage("Locatie bewerken"),
         "editLocationTagTitle":
             MessageLookupByLibrary.simpleMessage("Locatie bewerken"),
         "editsSaved":
             MessageLookupByLibrary.simpleMessage("Bewerkingen opgeslagen"),
         "editsToLocationWillOnlyBeSeenWithinEnte":
             MessageLookupByLibrary.simpleMessage(
-                "Edits to location will only be seen within Ente"),
+                "Bewerkte locatie wordt alleen gezien binnen Ente"),
         "eligible": MessageLookupByLibrary.simpleMessage("gerechtigd"),
         "email": MessageLookupByLibrary.simpleMessage("E-mail"),
         "emailChangedTo": m18,
@@ -742,6 +749,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "general": MessageLookupByLibrary.simpleMessage("Algemeen"),
         "generatingEncryptionKeys": MessageLookupByLibrary.simpleMessage(
             "Encryptiesleutels genereren..."),
+        "genericProgress": m28,
         "goToSettings":
             MessageLookupByLibrary.simpleMessage("Ga naar instellingen"),
         "googlePlayId": MessageLookupByLibrary.simpleMessage("Google Play ID"),
@@ -781,6 +789,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "De ingevoerde herstelsleutel is onjuist"),
         "incorrectRecoveryKeyTitle":
             MessageLookupByLibrary.simpleMessage("Onjuiste herstelsleutel"),
+        "indexedItems":
+            MessageLookupByLibrary.simpleMessage("Geïndexeerde bestanden"),
         "insecureDevice":
             MessageLookupByLibrary.simpleMessage("Onveilig apparaat"),
         "installManually":
@@ -856,6 +866,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Laden van gallerij..."),
         "loadingMessage":
             MessageLookupByLibrary.simpleMessage("Uw foto\'s laden..."),
+        "loadingModel":
+            MessageLookupByLibrary.simpleMessage("Modellen downloaden..."),
         "localGallery": MessageLookupByLibrary.simpleMessage("Lokale galerij"),
         "location": MessageLookupByLibrary.simpleMessage("Locatie"),
         "locationName": MessageLookupByLibrary.simpleMessage("Locatie naam"),
@@ -876,6 +888,12 @@ class MessageLookup extends MessageLookupByLibrary {
             "Houd een bestand lang ingedrukt om te bekijken op volledig scherm"),
         "lostDevice":
             MessageLookupByLibrary.simpleMessage("Apparaat verloren?"),
+        "machineLearning":
+            MessageLookupByLibrary.simpleMessage("Machine Learning"),
+        "magicSearch":
+            MessageLookupByLibrary.simpleMessage("Magische zoekfunctie"),
+        "magicSearchDescription": MessageLookupByLibrary.simpleMessage(
+            "Houd er rekening mee dat dit zal resulteren in een hoger internet- en batterijverbruik totdat alle items zijn geïndexeerd."),
         "manage": MessageLookupByLibrary.simpleMessage("Beheren"),
         "manageDeviceStorage":
             MessageLookupByLibrary.simpleMessage("Apparaatopslag beheren"),
@@ -982,6 +1000,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Betaling mislukt"),
         "paymentFailedTalkToProvider": m35,
         "paymentFailedWithReason": m36,
+        "pendingItems":
+            MessageLookupByLibrary.simpleMessage("Bestanden in behandeling"),
         "pendingSync": MessageLookupByLibrary.simpleMessage(
             "Synchronisatie in behandeling"),
         "peopleUsingYourCode": MessageLookupByLibrary.simpleMessage(
@@ -1197,9 +1217,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "searchResultCount": m44,
         "security": MessageLookupByLibrary.simpleMessage("Beveiliging"),
         "selectALocation":
-            MessageLookupByLibrary.simpleMessage("Select a location"),
+            MessageLookupByLibrary.simpleMessage("Selecteer een locatie"),
         "selectALocationFirst":
-            MessageLookupByLibrary.simpleMessage("Select a location first"),
+            MessageLookupByLibrary.simpleMessage("Selecteer eerst een locatie"),
         "selectAlbum": MessageLookupByLibrary.simpleMessage("Album selecteren"),
         "selectAll": MessageLookupByLibrary.simpleMessage("Selecteer alles"),
         "selectFoldersForBackup": MessageLookupByLibrary.simpleMessage(
@@ -1319,6 +1339,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "sortOldestFirst": MessageLookupByLibrary.simpleMessage("Oudste eerst"),
         "sparkleSuccess": MessageLookupByLibrary.simpleMessage("✨ Succes"),
         "startBackup": MessageLookupByLibrary.simpleMessage("Back-up starten"),
+        "status": MessageLookupByLibrary.simpleMessage("Status"),
         "storage": MessageLookupByLibrary.simpleMessage("Opslagruimte"),
         "storageBreakupFamily": MessageLookupByLibrary.simpleMessage("Familie"),
         "storageBreakupYou": MessageLookupByLibrary.simpleMessage("Jij"),
@@ -1492,6 +1513,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "viewer": MessageLookupByLibrary.simpleMessage("Kijker"),
         "visitWebToManage": MessageLookupByLibrary.simpleMessage(
             "Bezoek alstublieft web.ente.io om uw abonnement te beheren"),
+        "waitingForWifi":
+            MessageLookupByLibrary.simpleMessage("Wachten op WiFi..."),
         "weAreOpenSource":
             MessageLookupByLibrary.simpleMessage("We zijn open source!"),
         "weDontSupportEditingPhotosAndAlbumsThatYouDont":
