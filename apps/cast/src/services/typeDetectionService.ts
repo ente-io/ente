@@ -4,7 +4,7 @@ import {
     WHITELISTED_FILE_FORMATS,
     KNOWN_NON_MEDIA_FORMATS,
 } from 'constants/upload';
-import { CustomError } from 'utils/error';
+import { CustomError } from '@ente/shared/error';
 import { getFileExtension } from 'utils/file';
 import { logError } from '@ente/shared/sentry';
 import { getUint8ArrayView } from './readerService';

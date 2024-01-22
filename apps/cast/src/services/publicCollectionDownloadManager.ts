@@ -6,7 +6,7 @@ import {
 import { EnteFile } from 'types/file';
 
 import { FILE_TYPE } from 'constants/file';
-import { CustomError } from 'utils/error';
+import { CustomError } from '@ente/shared/error';
 import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
 import { CACHES } from 'constants/cache';
 import { CacheStorageService } from './cache/cacheStorageService';

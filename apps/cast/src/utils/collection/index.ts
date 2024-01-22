@@ -1,17 +1,11 @@
 import {
-    addToCollection,
     createAlbum,
     getNonEmptyCollections,
-    moveToCollection,
-    removeFromCollection,
-    restoreToCollection,
-    unhideToCollection,
     updateCollectionMagicMetadata,
     updatePublicCollectionMagicMetadata,
     updateSharedCollectionMagicMetadata,
 } from 'services/collectionService';
 import { EnteFile } from 'types/file';
-import { CustomError } from 'utils/error';
 import { logError } from '@ente/shared/sentry';
 import {
     COLLECTION_ROLE,
@@ -53,36 +47,6 @@ export enum COLLECTION_OPS_TYPE {
     REMOVE,
     RESTORE,
     UNHIDE,
-}
-export async function handleCollectionOps(
-    type: COLLECTION_OPS_TYPE,
-    collection: Collection,
-    selectedFiles: EnteFile[],
-    selectedCollectionID: number
-) {
-    switch (type) {
-        case COLLECTION_OPS_TYPE.ADD:
-            await addToCollection(collection, selectedFiles);
-            break;
-        case COLLECTION_OPS_TYPE.MOVE:
-            await moveToCollection(
-                selectedCollectionID,
-                collection,
-                selectedFiles
-            );
-            break;
-        case COLLECTION_OPS_TYPE.REMOVE:
-            await removeFromCollection(collection.id, selectedFiles);
-            break;
-        case COLLECTION_OPS_TYPE.RESTORE:
-            await restoreToCollection(collection, selectedFiles);
-            break;
-        case COLLECTION_OPS_TYPE.UNHIDE:
-            await unhideToCollection(collection, selectedFiles);
-            break;
-        default:
-            throw Error(CustomError.INVALID_COLLECTION_OPERATION);
-    }
 }
 
 export function getSelectedCollection(

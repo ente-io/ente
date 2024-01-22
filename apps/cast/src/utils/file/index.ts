@@ -28,7 +28,7 @@ import * as ffmpegService from 'services/ffmpeg/ffmpegService';
 import { VISIBILITY_STATE } from 'types/magicMetadata';
 import { isArchivedFile, updateMagicMetadata } from 'utils/magicMetadata';
 
-import { CustomError } from 'utils/error';
+import { CustomError } from '@ente/shared/error';
 import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
 import {
     deleteFromTrash,

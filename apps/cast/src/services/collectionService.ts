@@ -1,7 +1,7 @@
 import { getActualKey } from '@ente/shared/user';
 import { batch } from '@ente/shared/batch';
 import { EnteFile } from 'types/file';
-import { CustomError } from 'utils/error';
+import { CustomError } from '@ente/shared/error';
 import {
     sortFiles,
     groupFilesBasedOnCollectionID,
