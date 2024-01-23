@@ -256,12 +256,6 @@ class SearchWidgetState extends State<SearchWidget> {
       },
     );
 
-    _searchService.getCityResults(query).then(
-      (results) {
-        onResultsReceived(results);
-      },
-    );
-
     _searchService.getCollectionSearchResults(query).then(
       (collectionResults) {
         onResultsReceived(collectionResults);
