@@ -10,6 +10,7 @@ export interface City {
 }
 
 const DEFAULT_CITY_RADIUS = 10;
+const KMS_PER_DEGREE = 111.16;
 
 class LocationSearchService {
     private cities: Array<City> = [];
@@ -44,26 +45,40 @@ export function isInsideLocationTag(
     location: Location,
     locationTag: LocationTagData
 ) {
-    const { centerPoint, aSquare, bSquare } = locationTag;
-    const { latitude, longitude } = location;
-    const x = Math.abs(centerPoint.latitude - latitude);
-    const y = Math.abs(centerPoint.longitude - longitude);
-    if ((x * x) / aSquare + (y * y) / bSquare <= 1) {
-        return true;
-    } else {
-        return false;
-    }
+    return isLocationCloseToPoint(
+        location,
+        locationTag.centerPoint,
+        locationTag.radius
+    );
 }
 
-// TODO: Verify correctness
 export function isInsideCity(location: Location, city: City) {
-    const { lat, lng } = city;
-    const { latitude, longitude } = location;
-    const x = Math.abs(lat - latitude);
-    const y = Math.abs(lng - longitude);
-    if (x * x + y * y <= DEFAULT_CITY_RADIUS * DEFAULT_CITY_RADIUS) {
+    return isLocationCloseToPoint(
+        { latitude: city.lat, longitude: city.lng },
+        location,
+        DEFAULT_CITY_RADIUS
+    );
+}
+
+function isLocationCloseToPoint(
+    centerPoint: Location,
+    location: Location,
+    radius: number
+) {
+    const a = (radius * _scaleFactor(centerPoint.latitude!)) / KMS_PER_DEGREE;
+    const b = radius / KMS_PER_DEGREE;
+    const x = centerPoint.latitude! - location.latitude!;
+    const y = centerPoint.longitude! - location.longitude!;
+    if ((x * x) / (a * a) + (y * y) / (b * b) <= 1) {
         return true;
-    } else {
-        return false;
     }
+    return false;
+}
+
+///The area bounded by the location tag becomes more elliptical with increase
+///in the magnitude of the latitude on the caritesian plane. When latitude is
+///0 degrees, the ellipse is a circle with a = b = r. When latitude incrases,
+///the major axis (a) has to be scaled by the secant of the latitude.
+function _scaleFactor(lat: number) {
+    return 1 / Math.cos(lat * (Math.PI / 180));
 }
