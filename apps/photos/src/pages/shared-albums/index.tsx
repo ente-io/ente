@@ -16,7 +16,13 @@ import {
 } from 'services/publicCollectionService';
 import { Collection } from 'types/collection';
 import { EnteFile } from 'types/file';
-import { downloadFile, mergeMetadata, sortFiles } from 'utils/file';
+import {
+    downloadFile,
+    downloadFiles,
+    getSelectedFiles,
+    mergeMetadata,
+    sortFiles,
+} from 'utils/file';
 import { AppContext } from 'pages/_app';
 import { PublicCollectionGalleryContext } from 'utils/publicCollectionGallery';
 import { CustomError, parseSharingErrorCodes } from '@ente/shared/error';
@@ -52,7 +58,7 @@ import UploadButton from 'components/Upload/UploadButton';
 import bs58 from 'bs58';
 import AddPhotoAlternateOutlined from '@mui/icons-material/AddPhotoAlternateOutlined';
 import ComlinkCryptoWorker from '@ente/shared/crypto';
-import { UploadTypeSelectorIntent } from 'types/gallery';
+import { SelectedState, UploadTypeSelectorIntent } from 'types/gallery';
 import FileDownloadOutlinedIcon from '@mui/icons-material/FileDownloadOutlined';
 import MoreHoriz from '@mui/icons-material/MoreHoriz';
 import OverflowMenu from '@ente/shared/components/OverflowMenu/menu';
@@ -60,6 +66,7 @@ import { OverflowMenuOption } from '@ente/shared/components/OverflowMenu/option'
 import { ENTE_WEBSITE_LINK } from '@ente/shared/constants/urls';
 import { APPS } from '@ente/shared/apps/constants';
 import downloadManager from 'services/download';
+import SelectedFileOptions from 'components/pages/sharedAlbum/SelectedFileOptions';
 
 export default function PublicCollectionGallery() {
     const token = useRef<string>(null);
@@ -86,6 +93,12 @@ export default function PublicCollectionGallery() {
     const [uploadTypeSelectorView, setUploadTypeSelectorView] = useState(false);
     const [blockingLoad, setBlockingLoad] = useState(false);
     const [shouldDisableDropzone, setShouldDisableDropzone] = useState(false);
+
+    const [selected, setSelected] = useState<SelectedState>({
+        ownCount: 0,
+        count: 0,
+        collectionID: 0,
+    });
 
     const {
         getRootProps: getDragAndDropRootProps,
@@ -441,6 +454,22 @@ export default function PublicCollectionGallery() {
         }
     }
 
+    const downloadFilesHelper = async () => {
+        try {
+            const selectedFiles = getSelectedFiles(selected, publicFiles);
+            await downloadFiles(selectedFiles);
+        } catch (e) {
+            logError(e, 'failed to download selected files');
+        }
+    };
+
+    const clearSelection = () => {
+        if (!selected?.count) {
+            return;
+        }
+        setSelected({ ownCount: 0, count: 0, collectionID: 0 });
+    };
+
     return (
         <PublicCollectionGalleryContext.Provider
             value={{
@@ -468,8 +497,8 @@ export default function PublicCollectionGallery() {
                     page={PAGES.SHARED_ALBUMS}
                     files={publicFiles}
                     syncWithRemote={syncWithRemote}
-                    setSelected={() => null}
-                    selected={{ count: 0, collectionID: null, ownCount: 0 }}
+                    setSelected={setSelected}
+                    selected={selected}
                     activeCollectionID={ALL_SECTION}
                     enableDownload={downloadEnabled}
                     fileToCollectionsMap={null}
@@ -498,6 +527,14 @@ export default function PublicCollectionGallery() {
                         UploadTypeSelectorIntent.collectPhotos
                     }
                 />
+                {selected.count > 0 && (
+                    <SelectedFileOptions
+                        downloadFilesHelper={downloadFilesHelper}
+                        clearSelection={clearSelection}
+                        count={selected.count}
+                        ownCount={selected.ownCount}
+                    />
+                )}
             </FullScreenDropZone>
         </PublicCollectionGalleryContext.Provider>
     );
