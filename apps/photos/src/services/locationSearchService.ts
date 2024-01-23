@@ -65,10 +65,10 @@ function isLocationCloseToPoint(
     location: Location,
     radius: number
 ) {
-    const a = (radius * _scaleFactor(centerPoint.latitude!)) / KMS_PER_DEGREE;
+    const a = (radius * _scaleFactor(centerPoint.latitude)) / KMS_PER_DEGREE;
     const b = radius / KMS_PER_DEGREE;
-    const x = centerPoint.latitude! - location.latitude!;
-    const y = centerPoint.longitude! - location.longitude!;
+    const x = centerPoint.latitude - location.latitude;
+    const y = centerPoint.longitude - location.longitude;
     if ((x * x) / (a * a) + (y * y) / (b * b) <= 1) {
         return true;
     }
