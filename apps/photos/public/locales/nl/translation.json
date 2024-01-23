@@ -624,5 +624,8 @@
     "FASTER_UPLOAD_DESCRIPTION": "Uploaden door nabije servers",
     "MAGIC_SEARCH_STATUS": "Magische Zoekfunctie Status",
     "INDEXED_ITEMS": "Geïndexeerde bestanden",
-    "CACHE_DIRECTORY": "Cache map"
+    "CACHE_DIRECTORY": "Cache map",
+    "FREEHAND": "",
+    "APPLY_CROP": "",
+    "PHOTO_EDIT_REQUIRED_TO_SAVE": ""
 }
