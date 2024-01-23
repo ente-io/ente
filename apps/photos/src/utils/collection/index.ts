@@ -52,6 +52,7 @@ import {
 } from 'utils/export';
 import exportService from 'services/export';
 import { CollectionDownloadProgressAttributes } from 'components/Collections/CollectionDownloadProgress';
+import { addLogLine } from '@ente/shared/logging';
 
 export enum COLLECTION_OPS_TYPE {
     ADD,
@@ -521,7 +522,8 @@ export function isValidReplacementAlbum(
     return (
         collection.name === wantedCollectionName &&
         (collection.type === CollectionType.album ||
-            collection.type === CollectionType.folder) &&
+            collection.type === CollectionType.folder ||
+            collection.type === CollectionType.uncategorized) &&
         !isHiddenCollection(collection) &&
         !isQuickLinkCollection(collection) &&
         !isIncomingShare(collection, user)
@@ -610,8 +612,13 @@ export const getOrCreateAlbum = async (
     }
     for (const collection of existingCollections) {
         if (isValidReplacementAlbum(collection, user, albumName)) {
+            addLogLine(
+                `Found existing album ${albumName} with id ${collection.id}`
+            );
             return collection;
         }
     }
-    return createAlbum(albumName);
+    const album = await createAlbum(albumName);
+    addLogLine(`Created new album ${albumName} with id ${album.id}`);
+    return album;
 };
