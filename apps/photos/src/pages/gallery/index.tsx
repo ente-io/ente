@@ -131,6 +131,7 @@ import { ClipService } from 'services/clipService';
 import isElectron from 'is-electron';
 import downloadManager from 'services/download';
 import { APPS } from '@ente/shared/apps/constants';
+import locationSearchService from 'services/locationSearchService';
 
 export const DeadCenter = styled('div')`
     flex: 1;
@@ -341,6 +342,7 @@ export default function Gallery() {
             setIsFirstLoad(false);
             setJustSignedUp(false);
             setIsFirstFetch(false);
+            locationSearchService.loadCities();
             syncInterval.current = setInterval(() => {
                 syncWithRemote(false, true);
             }, SYNC_INTERVAL_IN_MICROSECONDS);
