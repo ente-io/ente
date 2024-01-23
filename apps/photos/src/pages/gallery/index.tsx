@@ -120,7 +120,7 @@ import GalleryEmptyState from 'components/GalleryEmptyState';
 import AuthenticateUserModal from 'components/AuthenticateUserModal';
 import useMemoSingleThreaded from '@ente/shared/hooks/useMemoSingleThreaded';
 import { isArchivedFile } from 'utils/magicMetadata';
-import { isSameDayAnyYear, isInsideLocationTag } from 'utils/search';
+import { isSameDayAnyYear } from 'utils/search';
 import { getSessionExpiredMessage } from 'utils/ui';
 import { syncEntities } from 'services/entityService';
 import { constructUserIDToEmailMap } from 'services/collectionService';
@@ -131,7 +131,10 @@ import { ClipService } from 'services/clipService';
 import isElectron from 'is-electron';
 import downloadManager from 'services/download';
 import { APPS } from '@ente/shared/apps/constants';
-import locationSearchService from 'services/locationSearchService';
+import locationSearchService, {
+    isInsideCity,
+    isInsideLocationTag,
+} from 'services/locationSearchService';
 
 export const DeadCenter = styled('div')`
     flex: 1;
@@ -514,6 +517,18 @@ export default function Gallery() {
                                 longitude: item.metadata.longitude,
                             },
                             search.location
+                        )
+                    ) {
+                        return false;
+                    }
+                    if (
+                        search?.city &&
+                        !isInsideCity(
+                            {
+                                latitude: item.metadata.latitude,
+                                longitude: item.metadata.longitude,
+                            },
+                            search.city
                         )
                     ) {
                         return false;

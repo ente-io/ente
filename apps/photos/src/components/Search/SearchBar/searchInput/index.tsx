@@ -30,6 +30,7 @@ import { LocationTagData } from 'types/entity';
 import { FILE_TYPE } from 'constants/file';
 import { InputActionMeta } from 'react-select/src/types';
 import { components } from 'react-select';
+import { City } from 'services/locationSearchService';
 
 interface Iprops {
     isOpen: boolean;
@@ -119,6 +120,12 @@ export default function SearchInput(props: Iprops) {
             case SuggestionType.LOCATION:
                 search = {
                     location: selectedOption.value as LocationTagData,
+                };
+                props.setIsOpen(true);
+                break;
+            case SuggestionType.CITY:
+                search = {
+                    city: selectedOption.value as City,
                 };
                 props.setIsOpen(true);
                 break;

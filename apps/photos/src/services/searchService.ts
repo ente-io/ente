@@ -16,11 +16,7 @@ import {
     ClipSearchScores,
 } from 'types/search';
 import ObjectService from './machineLearning/objectService';
-import {
-    getFormattedDate,
-    isInsideLocationTag,
-    isSameDayAnyYear,
-} from 'utils/search';
+import { getFormattedDate, isSameDayAnyYear } from 'utils/search';
 import { Person, Thing } from 'types/machineLearning';
 import { getUniqueFiles } from 'utils/file';
 import { getLatestEntities } from './entityService';
@@ -31,6 +27,11 @@ import { ClipService, computeClipMatchScore } from './clipService';
 import { CustomError } from '@ente/shared/error';
 import { Model } from 'types/embedding';
 import { getLocalEmbeddings } from './embeddingService';
+import locationSearchService, {
+    City,
+    isInsideCity,
+    isInsideLocationTag,
+} from './locationSearchService';
 
 const DIGITS = new Set(['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']);
 
@@ -61,6 +62,7 @@ export const getAutoCompleteSuggestions =
                 getFileNameSuggestion(searchPhrase, files),
                 getFileCaptionSuggestion(searchPhrase, files),
                 ...(await getLocationTagSuggestions(searchPhrase)),
+                ...(await getCitySuggestions(searchPhrase)),
                 ...(await getThingSuggestion(searchPhrase)),
             ].filter((suggestion) => !!suggestion);
 
@@ -279,6 +281,21 @@ async function getLocationTagSuggestions(searchPhrase: string) {
     );
 }
 
+async function getCitySuggestions(searchPhrase: string) {
+    const searchResults = await locationSearchService.searchCities(
+        searchPhrase
+    );
+
+    return searchResults.map(
+        (city) =>
+            ({
+                type: SuggestionType.CITY,
+                value: city,
+                label: city.city,
+            } as Suggestion)
+    );
+}
+
 async function getThingSuggestion(searchPhrase: string): Promise<Suggestion[]> {
     const thingResults = await searchThing(searchPhrase);
 
@@ -425,6 +442,15 @@ function isSearchedFile(file: EnteFile, search: Search) {
             search.location
         );
     }
+    if (search?.city) {
+        return isInsideCity(
+            {
+                latitude: file.metadata.latitude,
+                longitude: file.metadata.longitude,
+            },
+            search.city
+        );
+    }
     if (search?.files) {
         return search.files.indexOf(file.id) !== -1;
     }
@@ -459,6 +485,9 @@ function convertSuggestionToSearchQuery(option: Suggestion): Search {
             return {
                 location: option.value as LocationTagData,
             };
+
+        case SuggestionType.CITY:
+            return { city: option.value as City };
 
         case SuggestionType.COLLECTION:
             return { collection: option.value as number };
