@@ -33,7 +33,7 @@ class LocationSearchService {
         }
         await this.citiesPromise;
         return this.cities.filter((city) => {
-            return city.city.toLowerCase().includes(searchTerm.toLowerCase());
+            return city.city.toLowerCase().startsWith(searchTerm.toLowerCase());
         });
     }
 }
