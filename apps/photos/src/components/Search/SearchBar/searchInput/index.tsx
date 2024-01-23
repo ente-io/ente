@@ -96,9 +96,12 @@ export default function SearchInput(props: Iprops) {
         }
     };
 
-    const getOptions = pDebounce(
-        getAutoCompleteSuggestions(props.files, props.collections),
-        250
+    const getOptions = useCallback(
+        pDebounce(
+            getAutoCompleteSuggestions(props.files, props.collections),
+            250
+        ),
+        [props.files, props.collections]
     );
 
     const blur = () => {
