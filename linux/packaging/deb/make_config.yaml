@@ -13,6 +13,7 @@ installed_size: 36000
 dependencies:
   - libwebkit2gtk-4.0-37
   - libsqlite3-0
+  - libsodium23_1.0.18
 
 keywords:
   - Authentication
