@@ -20,7 +20,6 @@ class LocationSearchService {
         if (this.citiesPromise) {
             return;
         }
-        // TODO: Ensure the response is cached on the client
         this.citiesPromise = fetch(CITIES_URL).then((response) => {
             return response.json().then((data) => {
                 this.cities = data['data'];
