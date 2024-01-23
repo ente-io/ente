@@ -120,7 +120,6 @@ import GalleryEmptyState from 'components/GalleryEmptyState';
 import AuthenticateUserModal from 'components/AuthenticateUserModal';
 import useMemoSingleThreaded from '@ente/shared/hooks/useMemoSingleThreaded';
 import { isArchivedFile } from 'utils/magicMetadata';
-import { isSameDayAnyYear } from 'utils/search';
 import { getSessionExpiredMessage } from 'utils/ui';
 import { syncEntities } from 'services/entityService';
 import { constructUserIDToEmailMap } from 'services/collectionService';
@@ -131,10 +130,8 @@ import { ClipService } from 'services/clipService';
 import isElectron from 'is-electron';
 import downloadManager from 'services/download';
 import { APPS } from '@ente/shared/apps/constants';
-import locationSearchService, {
-    isInsideCity,
-    isInsideLocationTag,
-} from 'services/locationSearchService';
+import locationSearchService from 'services/locationSearchService';
+import ComlinkSearchWorker from 'utils/comlink/ComlinkSearchWorker';
 
 export const DeadCenter = styled('div')`
     flex: 1;
@@ -471,7 +468,9 @@ export default function Gallery() {
         );
     }, [collections, activeCollectionID]);
 
-    const filteredData = useMemoSingleThreaded((): EnteFile[] => {
+    const filteredData = useMemoSingleThreaded(async (): Promise<
+        EnteFile[]
+    > => {
         if (
             !files ||
             !user ||
@@ -489,125 +488,67 @@ export default function Gallery() {
             ]);
         }
 
-        const filteredFiles = getUniqueFiles(
-            (isInHiddenSection ? hiddenFiles : files).filter((item) => {
-                if (deletedFileIds?.has(item.id)) {
-                    return false;
-                }
+        const searchWorker = await ComlinkSearchWorker.getInstance();
 
-                if (!isInHiddenSection && hiddenFileIds?.has(item.id)) {
-                    return false;
-                }
+        let filteredFiles: EnteFile[] = [];
+        if (isInSearchMode) {
+            filteredFiles = getUniqueFiles(
+                await searchWorker.search(files, search)
+            );
+        } else {
+            filteredFiles = getUniqueFiles(
+                (isInHiddenSection ? hiddenFiles : files).filter((item) => {
+                    if (deletedFileIds?.has(item.id)) {
+                        return false;
+                    }
 
-                // SEARCH MODE
-                if (isInSearchMode) {
-                    if (
-                        search?.date &&
-                        !isSameDayAnyYear(search.date)(
-                            new Date(item.metadata.creationTime / 1000)
-                        )
-                    ) {
+                    if (!isInHiddenSection && hiddenFileIds?.has(item.id)) {
                         return false;
                     }
-                    if (
-                        search?.location &&
-                        !isInsideLocationTag(
-                            {
-                                latitude: item.metadata.latitude,
-                                longitude: item.metadata.longitude,
-                            },
-                            search.location
-                        )
-                    ) {
-                        return false;
-                    }
-                    if (
-                        search?.city &&
-                        !isInsideCity(
-                            {
-                                latitude: item.metadata.latitude,
-                                longitude: item.metadata.longitude,
-                            },
-                            search.city
-                        )
-                    ) {
-                        return false;
-                    }
-                    if (
-                        search?.person &&
-                        search.person.files.indexOf(item.id) === -1
-                    ) {
-                        return false;
-                    }
-                    if (
-                        search?.thing &&
-                        search.thing.files.indexOf(item.id) === -1
-                    ) {
-                        return false;
-                    }
-                    if (
-                        search?.text &&
-                        search.text.files.indexOf(item.id) === -1
-                    ) {
-                        return false;
-                    }
-                    if (search?.files && search.files.indexOf(item.id) === -1) {
-                        return false;
-                    }
-                    if (
-                        typeof search?.fileType !== 'undefined' &&
-                        search.fileType !== item.metadata.fileType
-                    ) {
-                        return false;
-                    }
-                    if (search?.clip && search.clip.has(item.id) === false) {
-                        return false;
-                    }
-                    return true;
-                }
 
-                // archived collections files can only be seen in their respective collection
-                if (archivedCollections.has(item.collectionID)) {
+                    // archived collections files can only be seen in their respective collection
+                    if (archivedCollections.has(item.collectionID)) {
+                        if (activeCollectionID === item.collectionID) {
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    }
+
+                    // HIDDEN ITEMS SECTION - show all individual hidden files
+                    if (
+                        activeCollectionID === HIDDEN_ITEMS_SECTION &&
+                        defaultHiddenCollectionIDs.has(item.collectionID)
+                    ) {
+                        return true;
+                    }
+
+                    // Archived files can only be seen in archive section or their respective collection
+                    if (isArchivedFile(item)) {
+                        if (
+                            activeCollectionID === ARCHIVE_SECTION ||
+                            activeCollectionID === item.collectionID
+                        ) {
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    }
+
+                    // ALL SECTION - show all files
+                    if (activeCollectionID === ALL_SECTION) {
+                        return true;
+                    }
+
+                    // COLLECTION SECTION - show files in the active collection
                     if (activeCollectionID === item.collectionID) {
                         return true;
                     } else {
                         return false;
                     }
-                }
-
-                // HIDDEN ITEMS SECTION - show all individual hidden files
-                if (
-                    activeCollectionID === HIDDEN_ITEMS_SECTION &&
-                    defaultHiddenCollectionIDs.has(item.collectionID)
-                ) {
-                    return true;
-                }
-
-                // Archived files can only be seen in archive section or their respective collection
-                if (isArchivedFile(item)) {
-                    if (
-                        activeCollectionID === ARCHIVE_SECTION ||
-                        activeCollectionID === item.collectionID
-                    ) {
-                        return true;
-                    } else {
-                        return false;
-                    }
-                }
-
-                // ALL SECTION - show all files
-                if (activeCollectionID === ALL_SECTION) {
-                    return true;
-                }
-
-                // COLLECTION SECTION - show files in the active collection
-                if (activeCollectionID === item.collectionID) {
-                    return true;
-                } else {
-                    return false;
-                }
-            })
-        );
+                })
+            );
+        }
         if (search?.clip) {
             return filteredFiles.sort((a, b) => {
                 return search.clip.get(b.id) - search.clip.get(a.id);
