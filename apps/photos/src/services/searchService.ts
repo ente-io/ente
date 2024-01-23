@@ -58,8 +58,7 @@ export const getAutoCompleteSuggestions =
                 ...getCollectionSuggestion(searchPhrase, collections),
                 getFileNameSuggestion(searchPhrase, files),
                 getFileCaptionSuggestion(searchPhrase, files),
-                ...(await getLocationTagSuggestions(searchPhrase)),
-                ...(await getCitySuggestions(searchPhrase)),
+                ...(await getLocationSuggestions(searchPhrase)),
                 ...(await getThingSuggestion(searchPhrase)),
             ].filter((suggestion) => !!suggestion);
 
@@ -265,10 +264,8 @@ function getFileCaptionSuggestion(
     };
 }
 
-async function getLocationTagSuggestions(searchPhrase: string) {
-    const searchResults = await searchLocationTag(searchPhrase);
-
-    return searchResults.map(
+async function getLocationSuggestions(searchPhrase: string) {
+    const locationTagResults = (await searchLocationTag(searchPhrase)).map(
         (locationTag) =>
             ({
                 type: SuggestionType.LOCATION,
@@ -276,21 +273,27 @@ async function getLocationTagSuggestions(searchPhrase: string) {
                 label: locationTag.data.name,
             } as Suggestion)
     );
-}
 
-async function getCitySuggestions(searchPhrase: string) {
-    const searchResults = await locationSearchService.searchCities(
+    const locationTagNames = new Set();
+    locationTagResults.forEach((result) => {
+        locationTagNames.add(result.label);
+    });
+
+    const citySearchResults = await locationSearchService.searchCities(
         searchPhrase
     );
-
-    return searchResults.map(
-        (city) =>
-            ({
-                type: SuggestionType.CITY,
-                value: city,
-                label: city.city,
-            } as Suggestion)
-    );
+    return [
+        ...locationTagResults,
+        ...citySearchResults
+            .filter((city) => !locationTagNames.has(city.city))
+            .map(function (city) {
+                return {
+                    type: SuggestionType.CITY,
+                    value: city,
+                    label: city.city,
+                } as Suggestion;
+            }),
+    ];
 }
 
 async function getThingSuggestion(searchPhrase: string): Promise<Suggestion[]> {
