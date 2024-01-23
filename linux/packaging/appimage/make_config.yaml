@@ -25,4 +25,3 @@ startup_notify: false
 #   - libcurl.so.4
 include:
   - libsqlite3-0.so.0
-  - libwebkit2gtk-4.0.so.0
