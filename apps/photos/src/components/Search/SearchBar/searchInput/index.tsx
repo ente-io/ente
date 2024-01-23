@@ -79,7 +79,7 @@ export default function SearchInput(props: Iprops) {
     }, []);
 
     async function refreshDefaultOptions() {
-        const defaultOptions = await getDefaultOptions(props.files);
+        const defaultOptions = await getDefaultOptions();
         setDefaultOptions(defaultOptions);
     }
 

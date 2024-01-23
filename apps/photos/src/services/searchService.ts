@@ -34,13 +34,10 @@ const DIGITS = new Set(['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']);
 
 const CLIP_SCORE_THRESHOLD = 0.23;
 
-export const getDefaultOptions = async (files: EnteFile[]) => {
+export const getDefaultOptions = async () => {
     return [
         await getIndexStatusSuggestion(),
-        ...(await convertSuggestionsToOptions(
-            await getAllPeopleSuggestion(),
-            files
-        )),
+        ...(await convertSuggestionsToOptions(await getAllPeopleSuggestion())),
     ].filter((t) => !!t);
 };
 
@@ -66,7 +63,7 @@ export const getAutoCompleteSuggestions =
                 ...(await getThingSuggestion(searchPhrase)),
             ].filter((suggestion) => !!suggestion);
 
-            return convertSuggestionsToOptions(suggestions, files);
+            return convertSuggestionsToOptions(suggestions);
         } catch (e) {
             logError(e, 'getAutoCompleteSuggestions failed');
             return [];
@@ -74,15 +71,14 @@ export const getAutoCompleteSuggestions =
     };
 
 async function convertSuggestionsToOptions(
-    suggestions: Suggestion[],
-    files: EnteFile[]
+    suggestions: Suggestion[]
 ): Promise<SearchOption[]> {
     const searchWorker = await ComlinkSearchWorker.getInstance();
     const previewImageAppendedOptions: SearchOption[] = await Promise.all(
         suggestions.map(async (suggestion) => {
             const searchQuery = convertSuggestionToSearchQuery(suggestion);
             const resultFiles = getUniqueFiles(
-                await searchWorker.search(files, searchQuery)
+                await searchWorker.search(searchQuery)
             );
 
             if (searchQuery?.clip) {

@@ -364,6 +364,14 @@ export default function Gallery() {
     }, []);
 
     useEffect(() => {
+        const main = async () => {
+            const searchWorker = await ComlinkSearchWorker.getInstance();
+            searchWorker.setFiles(files);
+        };
+        main();
+    }, [files]);
+
+    useEffect(() => {
         if (!user || !files || !collections || !hiddenFiles || !trashedFiles) {
             return;
         }
@@ -492,9 +500,7 @@ export default function Gallery() {
 
         let filteredFiles: EnteFile[] = [];
         if (isInSearchMode) {
-            filteredFiles = getUniqueFiles(
-                await searchWorker.search(files, search)
-            );
+            filteredFiles = getUniqueFiles(await searchWorker.search(search));
         } else {
             filteredFiles = getUniqueFiles(
                 (isInHiddenSection ? hiddenFiles : files).filter((item) => {

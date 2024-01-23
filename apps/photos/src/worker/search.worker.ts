@@ -8,8 +8,14 @@ import { isSameDayAnyYear } from 'utils/search';
 import { Search } from 'types/search';
 
 export class DedicatedSearchWorker {
-    async search(files: EnteFile[], search: Search) {
-        return files.filter((file) => {
+    private files: EnteFile[] = [];
+
+    setFiles(files: EnteFile[]) {
+        this.files = files;
+    }
+
+    search(search: Search) {
+        return this.files.filter((file) => {
             return isSearchedFile(file, search);
         });
     }
