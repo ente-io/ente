@@ -268,6 +268,13 @@ class ClipServiceImpl {
             );
             return;
         }
+        const extension = enteFile.metadata.title.split('.').pop();
+        if (!extension || !['jpg', 'jpeg'].includes(extension)) {
+            addLogLine(
+                `skipping non jpg file for clip embedding extraction file: ${enteFile.metadata.title} fileID: ${enteFile.id}`
+            );
+            return;
+        }
         try {
             await this.liveEmbeddingExtractionQueue.add(async () => {
                 const embedding = await this.extractLocalFileClipImageEmbedding(
