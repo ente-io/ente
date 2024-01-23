@@ -275,6 +275,9 @@ class ClipServiceImpl {
             );
             return;
         }
+        addLogLine(
+            `queuing up for local clip embedding extraction for file: ${enteFile.metadata.title} fileID: ${enteFile.id}`
+        );
         try {
             await this.liveEmbeddingExtractionQueue.add(async () => {
                 const embedding = await this.extractLocalFileClipImageEmbedding(
