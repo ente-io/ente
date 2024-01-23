@@ -1,7 +1,7 @@
 import HTTPService from '@ente/shared/network/HTTPService';
-import { getToken } from '@ente/shared/storage/localStorage/helpers';
 import { getEndpoint } from '@ente/shared/network/api';
 import { logError } from '@ente/shared/sentry';
+import { getToken } from '@ente/shared/storage/localStorage/helpers';
 import _sodium from 'libsodium-wrappers';
 const ENDPOINT = getEndpoint();
 
@@ -79,12 +79,6 @@ export const finishPasskeyRegistration = async (
     sessionId: string
 ) => {
     try {
-        const rawIdB64 = _sodium.to_base64(
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore
-            new Uint8Array(credential.rawId),
-            _sodium.base64_variants.URLSAFE_NO_PADDING
-        );
         const attestationObjectB64 = _sodium.to_base64(
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-ignore
@@ -105,7 +99,7 @@ export const finishPasskeyRegistration = async (
             `${ENDPOINT}/passkeys/registration/finish`,
             JSON.stringify({
                 id: credential.id,
-                rawId: rawIdB64,
+                rawId: credential.id,
                 type: credential.type,
                 response: {
                     attestationObject: attestationObjectB64,
@@ -163,12 +157,7 @@ export const finishPasskeyAuthentication = async (
             `${ENDPOINT}/users/two-factor/passkeys/finish`,
             {
                 id: credential.id,
-                rawId: _sodium.to_base64(
-                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                    // @ts-ignore
-                    new Uint8Array(credential.rawId),
-                    _sodium.base64_variants.URLSAFE_NO_PADDING
-                ),
+                rawId: credential.id,
                 type: credential.type,
                 response: {
                     authenticatorData: _sodium.to_base64(
