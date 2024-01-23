@@ -11,7 +11,7 @@ icon: assets/icon-light.png
 installed_size: 36000
 
 dependencies:
-  - webkit2gtk-4.0
+  - libwebkit2gtk-4.0-37
   - libsqlite3-0
 
 keywords:
