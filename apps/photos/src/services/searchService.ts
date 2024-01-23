@@ -16,7 +16,7 @@ import {
     ClipSearchScores,
 } from 'types/search';
 import ObjectService from './machineLearning/objectService';
-import { getFormattedDate, isSameDayAnyYear } from 'utils/search';
+import { getFormattedDate } from 'utils/search';
 import { Person, Thing } from 'types/machineLearning';
 import { getUniqueFiles } from 'utils/file';
 import { getLatestEntities } from './entityService';
@@ -27,11 +27,8 @@ import { ClipService, computeClipMatchScore } from './clipService';
 import { CustomError } from '@ente/shared/error';
 import { Model } from 'types/embedding';
 import { getLocalEmbeddings } from './embeddingService';
-import locationSearchService, {
-    City,
-    isInsideCity,
-    isInsideLocationTag,
-} from './locationSearchService';
+import locationSearchService, { City } from './locationSearchService';
+import ComlinkSearchWorker from 'utils/comlink/ComlinkSearchWorker';
 
 const DIGITS = new Set(['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']);
 
@@ -40,7 +37,10 @@ const CLIP_SCORE_THRESHOLD = 0.23;
 export const getDefaultOptions = async (files: EnteFile[]) => {
     return [
         await getIndexStatusSuggestion(),
-        ...convertSuggestionsToOptions(await getAllPeopleSuggestion(), files),
+        ...(await convertSuggestionsToOptions(
+            await getAllPeopleSuggestion(),
+            files
+        )),
     ].filter((t) => !!t);
 };
 
@@ -73,18 +73,16 @@ export const getAutoCompleteSuggestions =
         }
     };
 
-function convertSuggestionsToOptions(
+async function convertSuggestionsToOptions(
     suggestions: Suggestion[],
     files: EnteFile[]
-) {
-    const previewImageAppendedOptions: SearchOption[] = suggestions
-        .map((suggestion) => ({
-            suggestion,
-            searchQuery: convertSuggestionToSearchQuery(suggestion),
-        }))
-        .map(({ suggestion, searchQuery }) => {
+): Promise<SearchOption[]> {
+    const searchWorker = await ComlinkSearchWorker.getInstance();
+    const previewImageAppendedOptions: SearchOption[] = await Promise.all(
+        suggestions.map(async (suggestion) => {
+            const searchQuery = convertSuggestionToSearchQuery(suggestion);
             const resultFiles = getUniqueFiles(
-                files.filter((file) => isSearchedFile(file, searchQuery))
+                await searchWorker.search(files, searchQuery)
             );
 
             if (searchQuery?.clip) {
@@ -101,9 +99,12 @@ function convertSuggestionsToOptions(
                 previewFiles: resultFiles.slice(0, 3),
             };
         })
-        .filter((option) => option.fileCount);
+    );
+    const nonEmptyOptions = previewImageAppendedOptions.filter(
+        (option) => option.fileCount
+    );
 
-    return previewImageAppendedOptions;
+    return nonEmptyOptions;
 }
 function getFileTypeSuggestion(searchPhrase: string): Suggestion[] {
     return [
@@ -421,57 +422,6 @@ async function searchClip(searchPhrase: string): Promise<ClipSearchScores> {
     );
 
     return clipSearchResult;
-}
-
-function isSearchedFile(file: EnteFile, search: Search) {
-    if (search?.collection) {
-        return search.collection === file.collectionID;
-    }
-
-    if (search?.date) {
-        return isSameDayAnyYear(search.date)(
-            new Date(file.metadata.creationTime / 1000)
-        );
-    }
-    if (search?.location) {
-        return isInsideLocationTag(
-            {
-                latitude: file.metadata.latitude,
-                longitude: file.metadata.longitude,
-            },
-            search.location
-        );
-    }
-    if (search?.city) {
-        return isInsideCity(
-            {
-                latitude: file.metadata.latitude,
-                longitude: file.metadata.longitude,
-            },
-            search.city
-        );
-    }
-    if (search?.files) {
-        return search.files.indexOf(file.id) !== -1;
-    }
-    if (search?.person) {
-        return search.person.files.indexOf(file.id) !== -1;
-    }
-
-    if (search?.thing) {
-        return search.thing.files.indexOf(file.id) !== -1;
-    }
-
-    if (search?.text) {
-        return search.text.files.indexOf(file.id) !== -1;
-    }
-    if (typeof search?.fileType !== 'undefined') {
-        return search.fileType === file.metadata.fileType;
-    }
-    if (typeof search?.clip !== 'undefined') {
-        return search.clip.has(file.id);
-    }
-    return false;
 }
 
 function convertSuggestionToSearchQuery(option: Suggestion): Search {
