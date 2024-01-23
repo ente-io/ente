@@ -7,6 +7,7 @@ list(APPEND FLUTTER_PLUGIN_LIST
   desktop_webview_window
   file_saver
   flutter_secure_storage_windows
+  fullscreen_window
   local_auth_windows
   sentry_flutter
   share_plus
@@ -15,6 +16,8 @@ list(APPEND FLUTTER_PLUGIN_LIST
   sqlite3_flutter_libs
   uni_links_desktop
   url_launcher_windows
+  webf
+  webview_win_floating
 )
 
 list(APPEND FLUTTER_FFI_PLUGIN_LIST

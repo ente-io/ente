@@ -17,7 +17,10 @@ dependencies:
   confetti: ^0.7.0
   connectivity_plus: ^5.0.2
   convert: ^3.1.1
-  desktop_webview_window: ^0.2.3
+  desktop_webview_window:
+    git:
+      url: https://github.com/ente-io/flutter-desktop-plugins
+      path: packages/desktop_webview_window
   device_info_plus: ^9.1.1
   dio: ^5.4.0
   document_file_save_plus: ^2.0.0
@@ -91,6 +94,7 @@ dependencies:
   uni_links_desktop: ^0.1.6
   url_launcher: ^6.1.5
   uuid: ^4.2.2
+  webview_all: ^0.4.1
 
 dev_dependencies:
   build_runner: ^2.1.11

@@ -10,6 +10,7 @@
 #include <desktop_webview_window/desktop_webview_window_plugin.h>
 #include <file_saver/file_saver_plugin.h>
 #include <flutter_secure_storage_windows/flutter_secure_storage_windows_plugin.h>
+#include <fullscreen_window/fullscreen_window_plugin_c_api.h>
 #include <local_auth_windows/local_auth_plugin.h>
 #include <sentry_flutter/sentry_flutter_plugin.h>
 #include <share_plus/share_plus_windows_plugin_c_api.h>
@@ -18,6 +19,8 @@
 #include <sqlite3_flutter_libs/sqlite3_flutter_libs_plugin.h>
 #include <uni_links_desktop/uni_links_desktop_plugin.h>
 #include <url_launcher_windows/url_launcher_windows.h>
+#include <webf/webf_plugin.h>
+#include <webview_win_floating/webview_win_floating_plugin_c_api.h>
 
 void RegisterPlugins(flutter::PluginRegistry* registry) {
   ConnectivityPlusWindowsPluginRegisterWithRegistrar(
@@ -28,6 +31,8 @@ void RegisterPlugins(flutter::PluginRegistry* registry) {
       registry->GetRegistrarForPlugin("FileSaverPlugin"));
   FlutterSecureStorageWindowsPluginRegisterWithRegistrar(
       registry->GetRegistrarForPlugin("FlutterSecureStorageWindowsPlugin"));
+  FullscreenWindowPluginCApiRegisterWithRegistrar(
+      registry->GetRegistrarForPlugin("FullscreenWindowPluginCApi"));
   LocalAuthPluginRegisterWithRegistrar(
       registry->GetRegistrarForPlugin("LocalAuthPlugin"));
   SentryFlutterPluginRegisterWithRegistrar(
@@ -44,4 +49,8 @@ void RegisterPlugins(flutter::PluginRegistry* registry) {
       registry->GetRegistrarForPlugin("UniLinksDesktopPlugin"));
   UrlLauncherWindowsRegisterWithRegistrar(
       registry->GetRegistrarForPlugin("UrlLauncherWindows"));
+  WebfPluginRegisterWithRegistrar(
+      registry->GetRegistrarForPlugin("WebfPlugin"));
+  WebviewWinFloatingPluginCApiRegisterWithRegistrar(
+      registry->GetRegistrarForPlugin("WebviewWinFloatingPluginCApi"));
 }
