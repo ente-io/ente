@@ -85,8 +85,8 @@ interface Iprops {
     id?: string;
     className?: string;
     favItemIds: Set<number>;
-    deletedFileIds: Set<number>;
-    setDeletedFileIds?: (value: Set<number>) => void;
+    tempDeletedFileIds: Set<number>;
+    setTempDeletedFileIds?: (value: Set<number>) => void;
     isTrashCollection: boolean;
     isInHiddenSection: boolean;
     enableDownload: boolean;
@@ -491,13 +491,13 @@ function PhotoViewer(props: Iprops) {
     };
 
     const trashFile = async (file: EnteFile) => {
-        const { deletedFileIds, setDeletedFileIds } = props;
+        const { tempDeletedFileIds, setTempDeletedFileIds } = props;
         try {
             appContext.startLoading();
             await trashFiles([file]);
             appContext.finishLoading();
-            deletedFileIds.add(file.id);
-            setDeletedFileIds(new Set(deletedFileIds));
+            tempDeletedFileIds.add(file.id);
+            setTempDeletedFileIds(new Set(tempDeletedFileIds));
             updateItems(props.items.filter((item) => item.id !== file.id));
             needUpdate.current = true;
         } catch (e) {

@@ -225,10 +225,11 @@ export default function Gallery() {
     const syncInProgress = useRef(true);
     const syncInterval = useRef<NodeJS.Timeout>();
     const resync = useRef<{ force: boolean; silent: boolean }>();
-    const [deletedFileIds, setDeletedFileIds] = useState<Set<number>>(
+    // tempDeletedFileIds and tempHiddenFileIds are used to keep track of files that are deleted/hidden in the current session but not yet synced with the server.
+    const [tempDeletedFileIds, setTempDeletedFileIds] = useState<Set<number>>(
         new Set<number>()
     );
-    const [hiddenFileIds, setHiddenFileIds] = useState<Set<number>>(
+    const [tempHiddenFileIds, setTempHiddenFileIds] = useState<Set<number>>(
         new Set<number>()
     );
     const { startLoading, finishLoading, setDialogMessage, ...appContext } =
@@ -480,17 +481,17 @@ export default function Gallery() {
         if (activeCollectionID === TRASH_SECTION && !isInSearchMode) {
             return getUniqueFiles([
                 ...trashedFiles,
-                ...files.filter((file) => deletedFileIds?.has(file.id)),
+                ...files.filter((file) => tempDeletedFileIds?.has(file.id)),
             ]);
         }
 
         const filteredFiles = getUniqueFiles(
             (isInHiddenSection ? hiddenFiles : files).filter((item) => {
-                if (deletedFileIds?.has(item.id)) {
+                if (tempDeletedFileIds?.has(item.id)) {
                     return false;
                 }
 
-                if (!isInHiddenSection && hiddenFileIds?.has(item.id)) {
+                if (!isInHiddenSection && tempHiddenFileIds?.has(item.id)) {
                     return false;
                 }
 
@@ -606,8 +607,8 @@ export default function Gallery() {
         files,
         trashedFiles,
         hiddenFiles,
-        deletedFileIds,
-        hiddenFileIds,
+        tempDeletedFileIds,
+        tempHiddenFileIds,
         search,
         activeCollectionID,
         archivedCollections,
@@ -737,8 +738,8 @@ export default function Gallery() {
                     logError(e, 'syncWithRemote failed');
             }
         } finally {
-            setDeletedFileIds(new Set());
-            setHiddenFileIds(new Set());
+            setTempDeletedFileIds(new Set());
+            setTempHiddenFileIds(new Set());
             !silent && finishLoading();
         }
         syncInProgress.current = false;
@@ -879,8 +880,8 @@ export default function Gallery() {
                 await handleFileOps(
                     ops,
                     toProcessFiles,
-                    setDeletedFileIds,
-                    setHiddenFileIds,
+                    setTempDeletedFileIds,
+                    setTempHiddenFileIds,
                     setFixCreationTimeAttributes
                 );
             }
@@ -1113,8 +1114,8 @@ export default function Gallery() {
                         favItemIds={favItemIds}
                         setSelected={setSelected}
                         selected={selected}
-                        deletedFileIds={deletedFileIds}
-                        setDeletedFileIds={setDeletedFileIds}
+                        tempDeletedFileIds={tempDeletedFileIds}
+                        setTempDeletedFileIds={setTempDeletedFileIds}
                         setIsPhotoSwipeOpen={setIsPhotoSwipeOpen}
                         activeCollectionID={activeCollectionID}
                         enableDownload={true}
