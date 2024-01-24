@@ -132,6 +132,7 @@ import downloadManager from 'services/download';
 import { APPS } from '@ente/shared/apps/constants';
 import locationSearchService from 'services/locationSearchService';
 import ComlinkSearchWorker from 'utils/comlink/ComlinkSearchWorker';
+import useEffectSingleThreaded from '@ente/shared/hooks/useEffectSingleThreaded';
 
 export const DeadCenter = styled('div')`
     flex: 1;
@@ -363,13 +364,13 @@ export default function Gallery() {
         };
     }, []);
 
-    useEffect(() => {
-        const main = async () => {
+    useEffectSingleThreaded(
+        async ([files]: [files: EnteFile[]]) => {
             const searchWorker = await ComlinkSearchWorker.getInstance();
-            searchWorker.setFiles(files);
-        };
-        main();
-    }, [files]);
+            await searchWorker.setFiles(files);
+        },
+        [files]
+    );
 
     useEffect(() => {
         if (!user || !files || !collections || !hiddenFiles || !trashedFiles) {
