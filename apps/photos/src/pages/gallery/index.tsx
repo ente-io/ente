@@ -591,6 +591,13 @@ export default function Gallery() {
                         return true;
                     }
                 }
+
+                // COLLECTION SECTION - show files in the active collection
+                if (activeCollectionID === item.collectionID) {
+                    return true;
+                } else {
+                    return false;
+                }
             })
         );
         if (search?.clip) {
