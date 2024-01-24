@@ -48,7 +48,11 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   flutter_native_splash: ^2.2.13
-  flutter_secure_storage: ^9.0.0
+  flutter_secure_storage:
+    git:
+      url: https://github.com/tomekit/flutter_secure_storage.git
+      ref: develop
+      path: flutter_secure_storage
   flutter_slidable: ^3.0.1
   flutter_speed_dial: ^7.0.0
   flutter_svg: ^2.0.5

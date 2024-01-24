@@ -26,7 +26,7 @@ jobs:
       - run: git submodule update --init --recursive
 
       - name: Install dependencies
-        run: sudo apt-get update -y && sudo apt-get install -y libsodium-dev libwebkit2gtk-4.0-dev libfuse2 ninja-build libgtk-3-dev dpkg-dev pkg-config rpm libsqlite3-dev locate
+        run: sudo apt-get update -y && sudo apt-get install -y libsecret-1-dev libsodium-dev libwebkit2gtk-4.0-dev libfuse2 ninja-build libgtk-3-dev dpkg-dev pkg-config rpm libsqlite3-dev locate
 
       - name: Install appimagetool
         run: |

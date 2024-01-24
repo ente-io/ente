@@ -576,18 +576,20 @@ packages:
   flutter_secure_storage:
     dependency: "direct main"
     description:
-      name: flutter_secure_storage
-      sha256: ffdbb60130e4665d2af814a0267c481bcf522c41ae2e43caf69fa0146876d685
-      url: "https://pub.dev"
-    source: hosted
+      path: flutter_secure_storage
+      ref: develop
+      resolved-ref: "162022e82fdd4cecf4a1d5ae5ff54471c11d60d2"
+      url: "https://github.com/tomekit/flutter_secure_storage.git"
+    source: git
     version: "9.0.0"
   flutter_secure_storage_linux:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
-      name: flutter_secure_storage_linux
-      sha256: "3d5032e314774ee0e1a7d0a9f5e2793486f0dff2dd9ef5a23f4e3fb2a0ae6a9e"
-      url: "https://pub.dev"
-    source: hosted
+      path: flutter_secure_storage_linux
+      ref: develop
+      resolved-ref: "162022e82fdd4cecf4a1d5ae5ff54471c11d60d2"
+      url: "https://github.com/tomekit/flutter_secure_storage.git"
+    source: git
     version: "1.2.0"
   flutter_secure_storage_macos:
     dependency: transitive
