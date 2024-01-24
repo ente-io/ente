@@ -8,12 +8,12 @@ import {
 } from 'services/collectionService';
 import { EnteFile } from 'types/file';
 import {
-    downloadFile,
     copyFileToClipboard,
     getFileExtension,
     getFileFromURL,
     isSupportedRawFormat,
     isRawFile,
+    downloadSingleFile,
 } from 'utils/file';
 import { logError } from '@ente/shared/sentry';
 
@@ -58,6 +58,7 @@ import isElectron from 'is-electron';
 import ReplayIcon from '@mui/icons-material/Replay';
 import ImageEditorOverlay from './ImageEditorOverlay';
 import EditIcon from '@mui/icons-material/Edit';
+import { SetFilesDownloadProgressAttributesCreator } from 'types/gallery';
 
 interface PhotoswipeFullscreenAPI {
     enter: () => void;
@@ -92,6 +93,7 @@ interface Iprops {
     enableDownload: boolean;
     fileToCollectionsMap: Map<number, number[]>;
     collectionNameMap: Map<number, string>;
+    setFilesDownloadProgressAttributesCreator: SetFilesDownloadProgressAttributesCreator;
 }
 
 function PhotoViewer(props: Iprops) {
@@ -265,7 +267,7 @@ function PhotoViewer(props: Iprops) {
             `download-btn-${item.id}`
         ) as HTMLButtonElement;
         const downloadFile = () => {
-            downloadFileHelper(photoSwipe.currItem);
+            downloadFileHelper(photoSwipe.currItem as unknown as EnteFile);
         };
 
         if (downloadLivePhotoBtn) {
@@ -624,15 +626,21 @@ function PhotoViewer(props: Iprops) {
         setShowImageEditorOverlay(false);
     };
 
-    const downloadFileHelper = async (file) => {
-        if (file && props.enableDownload) {
-            appContext.startLoading();
+    const downloadFileHelper = async (file: EnteFile) => {
+        if (
+            file &&
+            props.enableDownload &&
+            props.setFilesDownloadProgressAttributesCreator
+        ) {
             try {
-                await downloadFile(file);
+                const setSingleFileDownloadProgress =
+                    props.setFilesDownloadProgressAttributesCreator(
+                        file.metadata.title
+                    );
+                await downloadSingleFile(file, setSingleFileDownloadProgress);
             } catch (e) {
                 // do nothing
             }
-            appContext.finishLoading();
         }
     };
 
@@ -727,7 +735,9 @@ function PhotoViewer(props: Iprops) {
                         onClose={() =>
                             setConversionFailedNotificationOpen(false)
                         }
-                        onClick={() => downloadFileHelper(photoSwipe.currItem)}
+                        onClick={() =>
+                            downloadFileHelper(photoSwipe.currItem as EnteFile)
+                        }
                     />
 
                     <Box
@@ -771,7 +781,9 @@ function PhotoViewer(props: Iprops) {
                                     className="pswp__button pswp__button--custom"
                                     title={t('DOWNLOAD_OPTION')}
                                     onClick={() =>
-                                        downloadFileHelper(photoSwipe.currItem)
+                                        downloadFileHelper(
+                                            photoSwipe.currItem as EnteFile
+                                        )
                                     }>
                                     <DownloadIcon />
                                 </button>

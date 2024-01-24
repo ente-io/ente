@@ -33,13 +33,11 @@ import { Trans } from 'react-i18next';
 import { t } from 'i18next';
 import { Box } from '@mui/material';
 import CollectionSortOrderMenu from './CollectionSortOrderMenu';
-import { SetCollectionDownloadProgressAttributes } from 'types/gallery';
+import { SetFilesDownloadProgressAttributesCreator } from 'types/gallery';
 
 interface CollectionOptionsProps {
     setCollectionNamerAttributes: SetCollectionNamerAttributes;
-    setCollectionDownloadProgressAttributesCreator: (
-        collectionID: number
-    ) => SetCollectionDownloadProgressAttributes;
+    setFilesDownloadProgressAttributesCreator: SetFilesDownloadProgressAttributesCreator;
     isActiveCollectionDownloadInProgress: () => boolean;
     activeCollection: Collection;
     collectionSummaryType: CollectionSummaryType;
@@ -76,7 +74,7 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
         setActiveCollectionID,
         setCollectionNamerAttributes,
         showCollectionShareModal,
-        setCollectionDownloadProgressAttributesCreator,
+        setFilesDownloadProgressAttributesCreator,
         isActiveCollectionDownloadInProgress,
     } = props;
 
@@ -219,21 +217,25 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
             return;
         }
         if (collectionSummaryType === CollectionSummaryType.hiddenItems) {
-            const setCollectionDownloadProgressAttributes =
-                setCollectionDownloadProgressAttributesCreator(
-                    HIDDEN_ITEMS_SECTION
+            const setFilesDownloadProgressAttributes =
+                setFilesDownloadProgressAttributesCreator(
+                    activeCollection.name,
+                    HIDDEN_ITEMS_SECTION,
+                    true
                 );
             downloadDefaultHiddenCollectionHelper(
-                setCollectionDownloadProgressAttributes
+                setFilesDownloadProgressAttributes
             );
         } else {
-            const setCollectionDownloadProgressAttributes =
-                setCollectionDownloadProgressAttributesCreator(
-                    activeCollection.id
+            const setFilesDownloadProgressAttributes =
+                setFilesDownloadProgressAttributesCreator(
+                    activeCollection.name,
+                    activeCollection.id,
+                    isHiddenCollection(activeCollection)
                 );
             downloadCollectionHelper(
                 activeCollection.id,
-                setCollectionDownloadProgressAttributes
+                setFilesDownloadProgressAttributes
             );
         }
     };
