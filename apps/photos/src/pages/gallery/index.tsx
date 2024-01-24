@@ -227,10 +227,11 @@ export default function Gallery() {
     const syncInProgress = useRef(true);
     const syncInterval = useRef<NodeJS.Timeout>();
     const resync = useRef<{ force: boolean; silent: boolean }>();
-    const [deletedFileIds, setDeletedFileIds] = useState<Set<number>>(
+    // tempDeletedFileIds and tempHiddenFileIds are used to keep track of files that are deleted/hidden in the current session but not yet synced with the server.
+    const [tempDeletedFileIds, setTempDeletedFileIds] = useState<Set<number>>(
         new Set<number>()
     );
-    const [hiddenFileIds, setHiddenFileIds] = useState<Set<number>>(
+    const [tempHiddenFileIds, setTempHiddenFileIds] = useState<Set<number>>(
         new Set<number>()
     );
     const { startLoading, finishLoading, setDialogMessage, ...appContext } =
@@ -493,7 +494,7 @@ export default function Gallery() {
         if (activeCollectionID === TRASH_SECTION && !isInSearchMode) {
             return getUniqueFiles([
                 ...trashedFiles,
-                ...files.filter((file) => deletedFileIds?.has(file.id)),
+                ...files.filter((file) => tempDeletedFileIds?.has(file.id)),
             ]);
         }
 
@@ -505,11 +506,11 @@ export default function Gallery() {
         } else {
             filteredFiles = getUniqueFiles(
                 (isInHiddenSection ? hiddenFiles : files).filter((item) => {
-                    if (deletedFileIds?.has(item.id)) {
+                    if (tempDeletedFileIds?.has(item.id)) {
                         return false;
                     }
 
-                    if (!isInHiddenSection && hiddenFileIds?.has(item.id)) {
+                    if (!isInHiddenSection && tempHiddenFileIds?.has(item.id)) {
                         return false;
                     }
 
@@ -571,8 +572,8 @@ export default function Gallery() {
         files,
         trashedFiles,
         hiddenFiles,
-        deletedFileIds,
-        hiddenFileIds,
+        tempDeletedFileIds,
+        tempHiddenFileIds,
         search,
         activeCollectionID,
         archivedCollections,
@@ -702,8 +703,8 @@ export default function Gallery() {
                     logError(e, 'syncWithRemote failed');
             }
         } finally {
-            setDeletedFileIds(new Set());
-            setHiddenFileIds(new Set());
+            setTempDeletedFileIds(new Set());
+            setTempHiddenFileIds(new Set());
             !silent && finishLoading();
         }
         syncInProgress.current = false;
@@ -801,13 +802,20 @@ export default function Gallery() {
                         selected.collectionID
                     );
                 }
-
+                if (selected?.ownCount === filteredData?.length) {
+                    if (
+                        ops === COLLECTION_OPS_TYPE.REMOVE ||
+                        ops === COLLECTION_OPS_TYPE.RESTORE ||
+                        ops === COLLECTION_OPS_TYPE.MOVE
+                    ) {
+                        // redirect to all section when no items are left in the current collection.
+                        setActiveCollectionID(ALL_SECTION);
+                    } else if (ops === COLLECTION_OPS_TYPE.UNHIDE) {
+                        exitHiddenSection();
+                    }
+                }
                 clearSelection();
                 await syncWithRemote(false, true);
-                if (isInHiddenSection && ops === COLLECTION_OPS_TYPE.UNHIDE) {
-                    exitHiddenSection();
-                }
-                setActiveCollectionID(collection.id);
             } catch (e) {
                 logError(e, 'collection ops failed', { ops });
                 setDialogMessage({
@@ -837,10 +845,18 @@ export default function Gallery() {
                 await handleFileOps(
                     ops,
                     toProcessFiles,
-                    setDeletedFileIds,
-                    setHiddenFileIds,
+                    setTempDeletedFileIds,
+                    setTempHiddenFileIds,
                     setFixCreationTimeAttributes
                 );
+            }
+            if (
+                selected?.ownCount === filteredData?.length &&
+                ops !== FILE_OPS_TYPE.ARCHIVE &&
+                ops !== FILE_OPS_TYPE.DOWNLOAD &&
+                ops !== FILE_OPS_TYPE.FIX_TIME
+            ) {
+                setActiveCollectionID(ALL_SECTION);
             }
             clearSelection();
             await syncWithRemote(false, true);
@@ -1063,8 +1079,8 @@ export default function Gallery() {
                         favItemIds={favItemIds}
                         setSelected={setSelected}
                         selected={selected}
-                        deletedFileIds={deletedFileIds}
-                        setDeletedFileIds={setDeletedFileIds}
+                        tempDeletedFileIds={tempDeletedFileIds}
+                        setTempDeletedFileIds={setTempDeletedFileIds}
                         setIsPhotoSwipeOpen={setIsPhotoSwipeOpen}
                         activeCollectionID={activeCollectionID}
                         enableDownload={true}
