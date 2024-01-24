@@ -243,6 +243,9 @@ export default function Gallery() {
     const [emailList, setEmailList] = useState<string[]>(null);
     const [activeCollectionID, setActiveCollectionID] =
         useState<number>(undefined);
+    const [hiddenFileIds, setHiddenFileIds] = useState<Set<number>>(
+        new Set<number>()
+    );
     const [fixCreationTimeView, setFixCreationTimeView] = useState(false);
     const [fixCreationTimeAttributes, setFixCreationTimeAttributes] =
         useState<FixCreationTimeAttributes>(null);
@@ -581,7 +584,12 @@ export default function Gallery() {
 
                 // ALL SECTION - show all files
                 if (activeCollectionID === ALL_SECTION) {
-                    return true;
+                    // show all files except the ones in hidden collections
+                    if (hiddenFileIds.has(item.id)) {
+                        return false;
+                    } else {
+                        return true;
+                    }
                 }
 
                 // COLLECTION SECTION - show files in the active collection
@@ -609,6 +617,7 @@ export default function Gallery() {
         hiddenFiles,
         tempDeletedFileIds,
         tempHiddenFileIds,
+        hiddenFileIds,
         search,
         activeCollectionID,
         archivedCollections,
@@ -784,6 +793,8 @@ export default function Gallery() {
         const defaultHiddenCollectionIDs =
             getDefaultHiddenCollectionIDs(hiddenCollections);
         setDefaultHiddenCollectionIDs(defaultHiddenCollectionIDs);
+        const hiddenFileIds = new Set<number>(hiddenFiles.map((f) => f.id));
+        setHiddenFileIds(hiddenFileIds);
         const collectionSummaries = getCollectionSummaries(
             user,
             collections,
