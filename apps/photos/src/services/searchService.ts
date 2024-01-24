@@ -73,33 +73,28 @@ async function convertSuggestionsToOptions(
     suggestions: Suggestion[]
 ): Promise<SearchOption[]> {
     const searchWorker = await ComlinkSearchWorker.getInstance();
-    const previewImageAppendedOptions: SearchOption[] = await Promise.all(
-        suggestions.map(async (suggestion) => {
-            const searchQuery = convertSuggestionToSearchQuery(suggestion);
-            const resultFiles = getUniqueFiles(
-                await searchWorker.search(searchQuery)
-            );
-
-            if (searchQuery?.clip) {
-                resultFiles.sort((a, b) => {
-                    const aScore = searchQuery.clip.get(a.id);
-                    const bScore = searchQuery.clip.get(b.id);
-                    return bScore - aScore;
-                });
-            }
-
-            return {
+    const previewImageAppendedOptions: SearchOption[] = [];
+    for (const suggestion of suggestions) {
+        const searchQuery = convertSuggestionToSearchQuery(suggestion);
+        const resultFiles = getUniqueFiles(
+            await searchWorker.search(searchQuery)
+        );
+        if (searchQuery?.clip) {
+            resultFiles.sort((a, b) => {
+                const aScore = searchQuery.clip.get(a.id);
+                const bScore = searchQuery.clip.get(b.id);
+                return bScore - aScore;
+            });
+        }
+        if (resultFiles.length) {
+            previewImageAppendedOptions.push({
                 ...suggestion,
                 fileCount: resultFiles.length,
                 previewFiles: resultFiles.slice(0, 3),
-            };
-        })
-    );
-    const nonEmptyOptions = previewImageAppendedOptions.filter(
-        (option) => option.fileCount
-    );
-
-    return nonEmptyOptions;
+            });
+        }
+    }
+    return previewImageAppendedOptions;
 }
 function getFileTypeSuggestion(searchPhrase: string): Suggestion[] {
     return [
