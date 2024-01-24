@@ -48,11 +48,7 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   flutter_native_splash: ^2.2.13
-  flutter_secure_storage:
-    git:
-      url: https://github.com/tomekit/flutter_secure_storage.git
-      ref: develop
-      path: flutter_secure_storage
+  flutter_secure_storage: ^9.0.0
   flutter_slidable: ^3.0.1
   flutter_speed_dial: ^7.0.0
   flutter_svg: ^2.0.5
@@ -103,30 +99,9 @@ dependencies:
 dependency_overrides:
   flutter_secure_storage_linux:
     git:
-      url: https://github.com/tomekit/flutter_secure_storage.git
-      ref: develop
+      url: https://github.com/prateekmedia/flutter_secure_storage.git
+      ref: patch-1
       path: flutter_secure_storage_linux
-  flutter_secure_storage_macos:
-    git:
-      url: https://github.com/tomekit/flutter_secure_storage.git
-      ref: develop
-      path: flutter_secure_storage_macos
-  flutter_secure_storage_platform_interface:
-    git:
-      url: https://github.com/tomekit/flutter_secure_storage.git
-      ref: develop
-      path: flutter_secure_storage_platform_interface
-  flutter_secure_storage_web:
-    git:
-      url: https://github.com/tomekit/flutter_secure_storage.git
-      ref: develop
-      path: flutter_secure_storage_web
-  flutter_secure_storage_windows:
-    git:
-      url: https://github.com/tomekit/flutter_secure_storage.git
-      ref: develop
-      path: flutter_secure_storage_windows
-
 dev_dependencies:
   build_runner: ^2.1.11
   flutter_test:

@@ -576,56 +576,51 @@ packages:
   flutter_secure_storage:
     dependency: "direct main"
     description:
-      path: flutter_secure_storage
-      ref: develop
-      resolved-ref: "162022e82fdd4cecf4a1d5ae5ff54471c11d60d2"
-      url: "https://github.com/tomekit/flutter_secure_storage.git"
-    source: git
+      name: flutter_secure_storage
+      sha256: ffdbb60130e4665d2af814a0267c481bcf522c41ae2e43caf69fa0146876d685
+      url: "https://pub.dev"
+    source: hosted
     version: "9.0.0"
   flutter_secure_storage_linux:
     dependency: "direct overridden"
     description:
       path: flutter_secure_storage_linux
-      ref: develop
-      resolved-ref: "162022e82fdd4cecf4a1d5ae5ff54471c11d60d2"
-      url: "https://github.com/tomekit/flutter_secure_storage.git"
+      ref: patch-1
+      resolved-ref: fc9afe9a86c112531445670c136073a8ba0d5dd1
+      url: "https://github.com/prateekmedia/flutter_secure_storage.git"
     source: git
     version: "1.2.0"
   flutter_secure_storage_macos:
-    dependency: "direct overridden"
+    dependency: transitive
     description:
-      path: flutter_secure_storage_macos
-      ref: develop
-      resolved-ref: "162022e82fdd4cecf4a1d5ae5ff54471c11d60d2"
-      url: "https://github.com/tomekit/flutter_secure_storage.git"
-    source: git
+      name: flutter_secure_storage_macos
+      sha256: bd33935b4b628abd0b86c8ca20655c5b36275c3a3f5194769a7b3f37c905369c
+      url: "https://pub.dev"
+    source: hosted
     version: "3.0.1"
   flutter_secure_storage_platform_interface:
-    dependency: "direct overridden"
+    dependency: transitive
     description:
-      path: flutter_secure_storage_platform_interface
-      ref: develop
-      resolved-ref: "162022e82fdd4cecf4a1d5ae5ff54471c11d60d2"
-      url: "https://github.com/tomekit/flutter_secure_storage.git"
-    source: git
+      name: flutter_secure_storage_platform_interface
+      sha256: "0d4d3a5dd4db28c96ae414d7ba3b8422fd735a8255642774803b2532c9a61d7e"
+      url: "https://pub.dev"
+    source: hosted
     version: "1.0.2"
   flutter_secure_storage_web:
-    dependency: "direct overridden"
+    dependency: transitive
     description:
-      path: flutter_secure_storage_web
-      ref: develop
-      resolved-ref: "162022e82fdd4cecf4a1d5ae5ff54471c11d60d2"
-      url: "https://github.com/tomekit/flutter_secure_storage.git"
-    source: git
+      name: flutter_secure_storage_web
+      sha256: "30f84f102df9dcdaa2241866a958c2ec976902ebdaa8883fbfe525f1f2f3cf20"
+      url: "https://pub.dev"
+    source: hosted
     version: "1.1.2"
   flutter_secure_storage_windows:
-    dependency: "direct overridden"
+    dependency: transitive
     description:
-      path: flutter_secure_storage_windows
-      ref: develop
-      resolved-ref: "162022e82fdd4cecf4a1d5ae5ff54471c11d60d2"
-      url: "https://github.com/tomekit/flutter_secure_storage.git"
-    source: git
+      name: flutter_secure_storage_windows
+      sha256: "5809c66f9dd3b4b93b0a6e2e8561539405322ee767ac2f64d084e2ab5429d108"
+      url: "https://pub.dev"
+    source: hosted
     version: "3.0.0"
   flutter_slidable:
     dependency: "direct main"

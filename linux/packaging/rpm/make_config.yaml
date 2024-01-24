@@ -14,7 +14,6 @@ dependencies:
   - webkit2gtk-4.0
   - libsodium
   - libsecret
-  - libjsoncpp
 
 keywords:
   - Authentication
