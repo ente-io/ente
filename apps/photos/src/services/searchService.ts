@@ -260,7 +260,8 @@ function getFileCaptionSuggestion(
 }
 
 async function getLocationSuggestions(searchPhrase: string) {
-    const locationTagResults = (await searchLocationTag(searchPhrase)).map(
+    const locationTagResults = await searchLocationTag(searchPhrase);
+    const locationTagSuggestions = locationTagResults.map(
         (locationTag) =>
             ({
                 type: SuggestionType.LOCATION,
@@ -268,27 +269,28 @@ async function getLocationSuggestions(searchPhrase: string) {
                 label: locationTag.data.name,
             } as Suggestion)
     );
-
-    const locationTagNames = new Set();
-    locationTagResults.forEach((result) => {
-        locationTagNames.add(result.label);
-    });
+    const locationTagNames = new Set(
+        locationTagSuggestions.map((result) => result.label)
+    );
 
     const citySearchResults = await locationSearchService.searchCities(
         searchPhrase
     );
-    return [
-        ...locationTagResults,
-        ...citySearchResults
-            .filter((city) => !locationTagNames.has(city.city))
-            .map(function (city) {
-                return {
-                    type: SuggestionType.CITY,
-                    value: city,
-                    label: city.city,
-                } as Suggestion;
-            }),
-    ];
+
+    const nonConflictingCityResult = citySearchResults.filter(
+        (city) => !locationTagNames.has(city.city)
+    );
+
+    const citySearchSuggestions = nonConflictingCityResult.map(
+        (city) =>
+            ({
+                type: SuggestionType.CITY,
+                value: city,
+                label: city.city,
+            } as Suggestion)
+    );
+
+    return [...locationTagSuggestions, ...citySearchSuggestions];
 }
 
 async function getThingSuggestion(searchPhrase: string): Promise<Suggestion[]> {
