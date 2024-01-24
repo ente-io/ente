@@ -15,7 +15,7 @@ class OnnxImageEncoder {
       ..setIntraOpNumThreads(1)
       ..setSessionGraphOptimizationLevel(GraphOptimizationLevel.ortEnableAll);
     try {
-      final bytes = File(args["imageModelPath"]).readAsBytesSync();
+      final bytes = await File(args["imageModelPath"]).readAsBytes();
       final session = OrtSession.fromBuffer(bytes, sessionOptions);
       _logger.info('image model loaded');
       return session.address;
@@ -25,10 +25,10 @@ class OnnxImageEncoder {
     return -1;
   }
 
-  List<double> inferByImage(Map args) {
+  Future<List<double>> inferByImage(Map args) async {
     final runOptions = OrtRunOptions();
     //Check the existence of imagePath locally
-    final rgb = img.decodeImage(File(args["imagePath"]).readAsBytesSync())!;
+    final rgb = img.decodeImage(await File(args["imagePath"]).readAsBytes())!;
 
     final int nx = rgb.width;
     final int ny = rgb.height;
