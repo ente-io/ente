@@ -13,6 +13,7 @@ dependencies:
   - libsqlite3x
   - webkit2gtk-4.0
   - libsodium
+  - libsecret
 
 keywords:
   - Authentication

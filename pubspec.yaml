@@ -96,6 +96,13 @@ dependencies:
   uuid: ^4.2.2
   webview_all: ^0.4.1
 
+dependency_overrides:
+  flutter_secure_storage_linux:
+    git:
+      url: https://github.com/tomekit/flutter_secure_storage.git
+      ref: develop
+      path: flutter_secure_storage_linux
+
 dev_dependencies:
   build_runner: ^2.1.11
   flutter_test:

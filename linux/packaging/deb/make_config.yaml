@@ -14,6 +14,7 @@ dependencies:
   - libwebkit2gtk-4.0-37
   - libsqlite3-0
   - libsodium23
+  - libsecret-1-0
 
 keywords:
   - Authentication
