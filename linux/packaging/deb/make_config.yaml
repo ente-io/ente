@@ -15,6 +15,7 @@ dependencies:
   - libsqlite3-0
   - libsodium23
   - libsecret-1-0
+  - libjsoncpp1
 
 keywords:
   - Authentication
