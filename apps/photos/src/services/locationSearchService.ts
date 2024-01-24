@@ -1,4 +1,5 @@
 import { CITIES_URL } from '@ente/shared/constants/urls';
+import { logError } from '@ente/shared/sentry';
 import { LocationTagData } from 'types/entity';
 import { Location } from 'types/upload';
 
@@ -16,25 +17,38 @@ class LocationSearchService {
     private cities: Array<City> = [];
     private citiesPromise: Promise<void>;
 
-    loadCities() {
-        if (this.citiesPromise) {
-            return;
-        }
-        this.citiesPromise = fetch(CITIES_URL).then((response) => {
-            return response.json().then((data) => {
-                this.cities = data['data'];
+    async loadCities() {
+        try {
+            if (this.citiesPromise) {
+                return;
+            }
+            this.citiesPromise = fetch(CITIES_URL).then((response) => {
+                return response.json().then((data) => {
+                    this.cities = data['data'];
+                });
             });
-        });
+            await this.citiesPromise;
+        } catch (e) {
+            logError(e, 'LocationSearchService loadCities failed');
+            this.citiesPromise = null;
+        }
     }
 
     async searchCities(searchTerm: string) {
-        if (!this.citiesPromise) {
-            this.loadCities();
+        try {
+            if (!this.citiesPromise) {
+                this.loadCities();
+            }
+            await this.citiesPromise;
+            return this.cities.filter((city) => {
+                return city.city
+                    .toLowerCase()
+                    .startsWith(searchTerm.toLowerCase());
+            });
+        } catch (e) {
+            logError(e, 'LocationSearchService searchCities failed');
+            throw e;
         }
-        await this.citiesPromise;
-        return this.cities.filter((city) => {
-            return city.city.toLowerCase().startsWith(searchTerm.toLowerCase());
-        });
     }
 }
 
