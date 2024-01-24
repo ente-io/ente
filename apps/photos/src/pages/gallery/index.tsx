@@ -1125,8 +1125,8 @@ export default function Gallery() {
                         favItemIds={favItemIds}
                         setSelected={setSelected}
                         selected={selected}
-                        deletedFileIds={tempDeletedFileIds}
-                        setDeletedFileIds={setTempDeletedFileIds}
+                        tempDeletedFileIds={tempDeletedFileIds}
+                        setTempDeletedFileIds={setTempDeletedFileIds}
                         setIsPhotoSwipeOpen={setIsPhotoSwipeOpen}
                         activeCollectionID={activeCollectionID}
                         enableDownload={true}
