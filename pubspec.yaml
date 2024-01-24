@@ -106,6 +106,26 @@ dependency_overrides:
       url: https://github.com/tomekit/flutter_secure_storage.git
       ref: develop
       path: flutter_secure_storage_linux
+  flutter_secure_storage_macos:
+    git:
+      url: https://github.com/tomekit/flutter_secure_storage.git
+      ref: develop
+      path: flutter_secure_storage_macos
+  flutter_secure_storage_platform_interface:
+    git:
+      url: https://github.com/tomekit/flutter_secure_storage.git
+      ref: develop
+      path: flutter_secure_storage_platform_interface
+  flutter_secure_storage_web:
+    git:
+      url: https://github.com/tomekit/flutter_secure_storage.git
+      ref: develop
+      path: flutter_secure_storage_web
+  flutter_secure_storage_windows:
+    git:
+      url: https://github.com/tomekit/flutter_secure_storage.git
+      ref: develop
+      path: flutter_secure_storage_windows
 
 dev_dependencies:
   build_runner: ^2.1.11
