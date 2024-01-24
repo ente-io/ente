@@ -586,7 +586,7 @@ packages:
     description:
       path: flutter_secure_storage_linux
       ref: patch-1
-      resolved-ref: fc9afe9a86c112531445670c136073a8ba0d5dd1
+      resolved-ref: da8ab43bc51c8c3249a261c33b27aa6f018f819b
       url: "https://github.com/prateekmedia/flutter_secure_storage.git"
     source: git
     version: "1.2.0"
@@ -1346,10 +1346,10 @@ packages:
     description:
       path: sqflite
       ref: HEAD
-      resolved-ref: "70d127224b33594963f2df51157ad4481d41a5a4"
+      resolved-ref: "8bc5379a0d13bd1b5a64174d4c1e6e3fe8d6e10c"
       url: "https://github.com/tekartik/sqflite"
     source: git
-    version: "2.3.0"
+    version: "2.3.1"
   sqflite_common:
     dependency: transitive
     description:
