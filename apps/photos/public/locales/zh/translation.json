@@ -625,7 +625,7 @@
     "MAGIC_SEARCH_STATUS": "魔法搜索状态",
     "INDEXED_ITEMS": "索引项目",
     "CACHE_DIRECTORY": "缓存文件夹",
-    "FREEHAND": "",
-    "APPLY_CROP": "",
-    "PHOTO_EDIT_REQUIRED_TO_SAVE": ""
+    "FREEHAND": "手画",
+    "APPLY_CROP": "应用裁剪",
+    "PHOTO_EDIT_REQUIRED_TO_SAVE": "保存之前必须至少执行一项转换或颜色调整。"
 }
