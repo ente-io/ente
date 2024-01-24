@@ -595,9 +595,7 @@ class SearchService {
     return searchResults;
   }
 
-  Future<List<GenericSearchResult>> getLocationResults(
-    String query,
-  ) async {
+  Future<List<GenericSearchResult>> getLocationResults(String query) async {
     final locationTagEntities =
         (await LocationService.instance.getLocationTags());
     final Map<LocalEntity<LocationTag>, List<EnteFile>> result = {};
@@ -657,13 +655,16 @@ class SearchService {
         );
       }
     }
+    final locationTagNames = <String>{};
     for (MapEntry<LocalEntity<LocationTag>, List<EnteFile>> entry
         in result.entries) {
       if (entry.value.isNotEmpty) {
+        final name = entry.key.item.name;
+        locationTagNames.add(name);
         searchResults.add(
           GenericSearchResult(
             ResultType.location,
-            entry.key.item.name,
+            name,
             entry.value,
             onResultTap: (ctx) {
               routeToPage(
@@ -678,21 +679,20 @@ class SearchService {
         );
       }
     }
-    return searchResults;
-  }
 
-  Future<List<GenericSearchResult>> getCityResults(String query) async {
-    final files = await getAllFiles();
-    final results = await LocationService.instance.getFilesInCity(files, query);
-    final List<GenericSearchResult> searchResults = [];
+    final results =
+        await LocationService.instance.getFilesInCity(allFiles, query);
     for (final entry in results.entries) {
-      searchResults.add(
-        GenericSearchResult(
-          ResultType.location,
-          entry.key.city,
-          entry.value,
-        ),
-      );
+      // If the location tag already exists for a city, don't add it again
+      if (!locationTagNames.contains(entry.key.city)) {
+        searchResults.add(
+          GenericSearchResult(
+            ResultType.location,
+            entry.key.city,
+            entry.value,
+          ),
+        );
+      }
     }
     return searchResults;
   }

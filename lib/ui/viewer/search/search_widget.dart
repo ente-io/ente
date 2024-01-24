@@ -2,7 +2,6 @@ import "dart:async";
 
 import "package:flutter/material.dart";
 import "package:flutter/scheduler.dart";
-import "package:logging/logging.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/clear_and_unfocus_search_bar_event.dart";
 import "package:photos/events/tab_changed_event.dart";
@@ -33,7 +32,6 @@ class SearchWidgetState extends State<SearchWidget> {
   static final isLoading = ValueNotifier(false);
   final _searchService = SearchService.instance;
   final _debouncer = Debouncer(const Duration(milliseconds: 200));
-  final Logger _logger = Logger((SearchWidgetState).toString());
   late FocusNode focusNode;
   StreamSubscription<TabDoubleTapEvent>? _tabDoubleTapEvent;
   double _bottomPadding = 0.0;
@@ -253,12 +251,6 @@ class SearchWidgetState extends State<SearchWidget> {
     _searchService.getLocationResults(query).then(
       (locationResult) {
         onResultsReceived(locationResult);
-      },
-    );
-
-    _searchService.getCityResults(query).then(
-      (results) {
-        onResultsReceived(results);
       },
     );
 

@@ -26,7 +26,7 @@ class LocationService {
 
   static final LocationService instance = LocationService._privateConstructor();
 
-  static const kCitiesRemotePath = "https://assets.ente.io/world_cities.json";
+  static const kCitiesRemotePath = "https://static.ente.io/world_cities.json";
 
   List<City> _cities = [];
 
