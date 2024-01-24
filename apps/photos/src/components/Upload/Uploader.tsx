@@ -391,7 +391,7 @@ export default function Uploader(props: Props) {
     ) => {
         try {
             addLogLine(
-                `upload file to an existing collection - "${collection.name}"`
+                `upload file to an existing collection name:${collection.name}, collectionID:${collection.id}`
             );
             await preCollectionCreationAction();
             const filesWithCollectionToUpload: FileWithCollection[] =

@@ -624,5 +624,8 @@
     "FASTER_UPLOAD_DESCRIPTION": "Router les chargements vers les serveurs à proximité",
     "MAGIC_SEARCH_STATUS": "",
     "INDEXED_ITEMS": "Éléments indexés",
-    "CACHE_DIRECTORY": ""
+    "CACHE_DIRECTORY": "",
+    "FREEHAND": "",
+    "APPLY_CROP": "",
+    "PHOTO_EDIT_REQUIRED_TO_SAVE": ""
 }

@@ -3,6 +3,7 @@ import { IndexStatus } from 'types/machineLearning/ui';
 import { EnteFile } from 'types/file';
 import { LocationTagData } from 'types/entity';
 import { FILE_TYPE } from 'constants/file';
+import { City } from 'services/locationSearchService';
 
 export enum SuggestionType {
     DATE = 'DATE',
@@ -16,6 +17,7 @@ export enum SuggestionType {
     FILE_CAPTION = 'FILE_CAPTION',
     FILE_TYPE = 'FILE_TYPE',
     CLIP = 'CLIP',
+    CITY = 'CITY',
 }
 
 export interface DateValue {
@@ -35,6 +37,7 @@ export interface Suggestion {
         | Thing
         | WordGroup
         | LocationTagData
+        | City
         | FILE_TYPE
         | ClipSearchScores;
     hide?: boolean;
@@ -43,6 +46,7 @@ export interface Suggestion {
 export type Search = {
     date?: DateValue;
     location?: LocationTagData;
+    city?: City;
     collection?: number;
     files?: number[];
     person?: Person;

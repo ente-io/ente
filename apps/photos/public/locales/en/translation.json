@@ -210,6 +210,7 @@
     "SEARCH_TYPE": {
         "COLLECTION": "Album",
         "LOCATION": "Location",
+        "CITY": "Location",
         "DATE": "Date",
         "FILE_NAME": "File name",
         "THING": "Content",
@@ -624,5 +625,8 @@
     "FASTER_UPLOAD_DESCRIPTION": "Route uploads through nearby servers",
     "MAGIC_SEARCH_STATUS": "Magic Search Status",
     "INDEXED_ITEMS": "Indexed items",
-    "CACHE_DIRECTORY": "Cache folder"
+    "CACHE_DIRECTORY": "Cache folder",
+    "FREEHAND": "Freehand",
+    "APPLY_CROP": "Apply Crop",
+    "PHOTO_EDIT_REQUIRED_TO_SAVE": "At least one transformation or color adjustment must be performed before saving."
 }

@@ -55,8 +55,8 @@ interface Props {
         selected: SelectedState | ((selected: SelectedState) => SelectedState)
     ) => void;
     selected: SelectedState;
-    deletedFileIds?: Set<number>;
-    setDeletedFileIds?: (value: Set<number>) => void;
+    tempDeletedFileIds?: Set<number>;
+    setTempDeletedFileIds?: (value: Set<number>) => void;
     activeCollectionID: number;
     enableDownload?: boolean;
     fileToCollectionsMap: Map<number, number[]>;
@@ -75,8 +75,8 @@ const PhotoFrame = ({
     favItemIds,
     setSelected,
     selected,
-    deletedFileIds,
-    setDeletedFileIds,
+    tempDeletedFileIds,
+    setTempDeletedFileIds,
     activeCollectionID,
     enableDownload,
     fileToCollectionsMap,
@@ -599,8 +599,8 @@ const PhotoFrame = ({
                 gettingData={getSlideData}
                 getConvertedItem={getConvertedItem}
                 favItemIds={favItemIds}
-                deletedFileIds={deletedFileIds}
-                setDeletedFileIds={setDeletedFileIds}
+                tempDeletedFileIds={tempDeletedFileIds}
+                setTempDeletedFileIds={setTempDeletedFileIds}
                 isTrashCollection={activeCollectionID === TRASH_SECTION}
                 isInHiddenSection={isInHiddenSection}
                 enableDownload={enableDownload}
