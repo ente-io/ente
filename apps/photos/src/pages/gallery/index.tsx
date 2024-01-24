@@ -225,10 +225,11 @@ export default function Gallery() {
     const syncInProgress = useRef(true);
     const syncInterval = useRef<NodeJS.Timeout>();
     const resync = useRef<{ force: boolean; silent: boolean }>();
-    const [deletedFileIds, setDeletedFileIds] = useState<Set<number>>(
+    // tempDeletedFileIds and tempHiddenFileIds are used to keep track of files that are deleted/hidden in the current session but not yet synced with the server.
+    const [tempDeletedFileIds, setTempDeletedFileIds] = useState<Set<number>>(
         new Set<number>()
     );
-    const [hiddenFileIds, setHiddenFileIds] = useState<Set<number>>(
+    const [tempHiddenFileIds, setTempHiddenFileIds] = useState<Set<number>>(
         new Set<number>()
     );
     const { startLoading, finishLoading, setDialogMessage, ...appContext } =
@@ -242,6 +243,9 @@ export default function Gallery() {
     const [emailList, setEmailList] = useState<string[]>(null);
     const [activeCollectionID, setActiveCollectionID] =
         useState<number>(undefined);
+    const [hiddenFileIds, setHiddenFileIds] = useState<Set<number>>(
+        new Set<number>()
+    );
     const [fixCreationTimeView, setFixCreationTimeView] = useState(false);
     const [fixCreationTimeAttributes, setFixCreationTimeAttributes] =
         useState<FixCreationTimeAttributes>(null);
@@ -480,17 +484,17 @@ export default function Gallery() {
         if (activeCollectionID === TRASH_SECTION && !isInSearchMode) {
             return getUniqueFiles([
                 ...trashedFiles,
-                ...files.filter((file) => deletedFileIds?.has(file.id)),
+                ...files.filter((file) => tempDeletedFileIds?.has(file.id)),
             ]);
         }
 
         const filteredFiles = getUniqueFiles(
             (isInHiddenSection ? hiddenFiles : files).filter((item) => {
-                if (deletedFileIds?.has(item.id)) {
+                if (tempDeletedFileIds?.has(item.id)) {
                     return false;
                 }
 
-                if (!isInHiddenSection && hiddenFileIds?.has(item.id)) {
+                if (!isInHiddenSection && tempHiddenFileIds?.has(item.id)) {
                     return false;
                 }
 
@@ -580,14 +584,12 @@ export default function Gallery() {
 
                 // ALL SECTION - show all files
                 if (activeCollectionID === ALL_SECTION) {
-                    return true;
-                }
-
-                // COLLECTION SECTION - show files in the active collection
-                if (activeCollectionID === item.collectionID) {
-                    return true;
-                } else {
-                    return false;
+                    // show all files except the ones in hidden collections
+                    if (hiddenFileIds.has(item.id)) {
+                        return false;
+                    } else {
+                        return true;
+                    }
                 }
             })
         );
@@ -606,7 +608,8 @@ export default function Gallery() {
         files,
         trashedFiles,
         hiddenFiles,
-        deletedFileIds,
+        tempDeletedFileIds,
+        tempHiddenFileIds,
         hiddenFileIds,
         search,
         activeCollectionID,
@@ -737,8 +740,8 @@ export default function Gallery() {
                     logError(e, 'syncWithRemote failed');
             }
         } finally {
-            setDeletedFileIds(new Set());
-            setHiddenFileIds(new Set());
+            setTempDeletedFileIds(new Set());
+            setTempHiddenFileIds(new Set());
             !silent && finishLoading();
         }
         syncInProgress.current = false;
@@ -783,6 +786,8 @@ export default function Gallery() {
         const defaultHiddenCollectionIDs =
             getDefaultHiddenCollectionIDs(hiddenCollections);
         setDefaultHiddenCollectionIDs(defaultHiddenCollectionIDs);
+        const hiddenFileIds = new Set<number>(hiddenFiles.map((f) => f.id));
+        setHiddenFileIds(hiddenFileIds);
         const collectionSummaries = getCollectionSummaries(
             user,
             collections,
@@ -879,8 +884,8 @@ export default function Gallery() {
                 await handleFileOps(
                     ops,
                     toProcessFiles,
-                    setDeletedFileIds,
-                    setHiddenFileIds,
+                    setTempDeletedFileIds,
+                    setTempHiddenFileIds,
                     setFixCreationTimeAttributes
                 );
             }
@@ -1113,8 +1118,8 @@ export default function Gallery() {
                         favItemIds={favItemIds}
                         setSelected={setSelected}
                         selected={selected}
-                        deletedFileIds={deletedFileIds}
-                        setDeletedFileIds={setDeletedFileIds}
+                        deletedFileIds={tempDeletedFileIds}
+                        setDeletedFileIds={setTempDeletedFileIds}
                         setIsPhotoSwipeOpen={setIsPhotoSwipeOpen}
                         activeCollectionID={activeCollectionID}
                         enableDownload={true}
