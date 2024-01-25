@@ -93,7 +93,6 @@ dependencies:
   uni_links_desktop: ^0.1.6
   url_launcher: ^6.1.5
   uuid: ^4.2.2
-  webview_all: ^0.4.1
 
 dependency_overrides:
   flutter_secure_storage_linux:

@@ -16,7 +16,9 @@ Future<void> shareDialog(
   showDialogWidget(
     context: context,
     title: title,
-    body: l10n.saveOrSendDescription,
+    body: Platform.isLinux || Platform.isWindows
+        ? l10n.saveOnlyDescription
+        : l10n.saveOrSendDescription,
     buttons: [
       ButtonWidget(
         isInAlert: true,

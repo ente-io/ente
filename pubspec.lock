@@ -9,14 +9,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "64.0.0"
-  abutil:
-    dependency: transitive
-    description:
-      name: abutil
-      sha256: db3c333aa2a2387e82777c456cf2829ab9d359a6b40540b338d1a9e20b8cb65f
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.1.2"
   adaptive_theme:
     dependency: "direct main"
     description:
@@ -672,14 +664,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.2.0"
-  fullscreen_window:
-    dependency: transitive
-    description:
-      name: fullscreen_window
-      sha256: fe3014f91bff16a82d142ba9d834980b8a84b4bb03347a92588d389ad92bd1d3
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.0.4"
   glob:
     dependency: transitive
     description:
@@ -712,14 +696,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.2.0"
-  hive:
-    dependency: transitive
-    description:
-      name: hive
-      sha256: "8dcf6db979d7933da8217edcec84e9df1bdb4e4edc7fc77dbd5aa74356d6d941"
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.2.3"
   html:
     dependency: transitive
     description:
@@ -1160,14 +1136,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.1.0"
-  quiver:
-    dependency: transitive
-    description:
-      name: quiver
-      sha256: b1c1ac5ce6688d77f65f3375a9abb9319b3cb32486bdc7a1e0fdf004d7ba4e47
-      url: "https://pub.dev"
-    source: hosted
-    version: "3.2.1"
   sentry:
     dependency: "direct main"
     description:
@@ -1654,70 +1622,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.4.0"
-  webf:
-    dependency: transitive
-    description:
-      name: webf
-      sha256: "55e69ad0d56c79f33c9c1ac011051d20f2b2d7722542a729119586b40648381e"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.16.0-beta.3"
-  webview_all:
-    dependency: "direct main"
-    description:
-      name: webview_all
-      sha256: "748ded65c1606316c62928bfd9058a4c70d1df434653be729bc1ad7911c535b0"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.4.1"
-  webview_flutter:
-    dependency: transitive
-    description:
-      name: webview_flutter
-      sha256: "71e1bfaef41016c8d5954291df5e9f8c6172f1f6ff3af01b5656456ddb11f94c"
-      url: "https://pub.dev"
-    source: hosted
-    version: "4.4.4"
-  webview_flutter_android:
-    dependency: transitive
-    description:
-      name: webview_flutter_android
-      sha256: "161af93c2abaf94ef2192bffb53a3658b2d721a3bf99b69aa1e47814ee18cc96"
-      url: "https://pub.dev"
-    source: hosted
-    version: "3.13.2"
-  webview_flutter_platform_interface:
-    dependency: transitive
-    description:
-      name: webview_flutter_platform_interface
-      sha256: d937581d6e558908d7ae3dc1989c4f87b786891ab47bb9df7de548a151779d8d
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.10.0"
-  webview_flutter_web:
-    dependency: transitive
-    description:
-      name: webview_flutter_web
-      sha256: "7f7cb8cfe5a5dee3b55d660a367c00838be56540ccb4097e84601bb6cb354af3"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.2.2+4"
-  webview_flutter_wkwebview:
-    dependency: transitive
-    description:
-      name: webview_flutter_wkwebview
-      sha256: b99ca8d8bae9c6b43d568218691aa537fb0aeae1d7d34eadf112a6aa36d26506
-      url: "https://pub.dev"
-    source: hosted
-    version: "3.11.0"
-  webview_win_floating:
-    dependency: transitive
-    description:
-      name: webview_win_floating
-      sha256: cb1bff0fcfca9b7aa5159b95c96b8810ccd1c2c9feee1666549f5910c87c4b1a
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.2.2"
   win32:
     dependency: transitive
     description:
@@ -1767,5 +1671,5 @@ packages:
     source: hosted
     version: "3.1.2"
 sdks:
-  dart: ">=3.2.3 <4.0.0"
-  flutter: ">=3.16.6"
+  dart: ">=3.2.0 <4.0.0"
+  flutter: ">=3.16.0"
