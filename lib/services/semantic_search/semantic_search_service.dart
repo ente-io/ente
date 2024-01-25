@@ -52,6 +52,10 @@ class SemanticSearchService {
 
   get hasInitialized => _hasInitialized;
 
+  void resumeIndexing() {}
+
+  void pauseIndexing() {}
+
   Future<void> init({bool shouldSyncImmediately = false}) async {
     if (!LocalSettings.instance.hasEnabledMagicSearch()) {
       return;

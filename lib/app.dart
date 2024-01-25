@@ -13,6 +13,7 @@ import 'package:photos/ente_theme_data.dart';
 import "package:photos/generated/l10n.dart";
 import "package:photos/l10n/l10n.dart";
 import 'package:photos/services/app_lifecycle_service.dart';
+import "package:photos/services/semantic_search/semantic_search_service.dart";
 import 'package:photos/services/sync_service.dart';
 import 'package:photos/ui/tabs/home_widget.dart';
 import "package:photos/ui/viewer/actions/file_viewer.dart";
@@ -54,7 +55,7 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
     setupIntentAction();
     WidgetsBinding.instance.addObserver(this);
     _userInteractionTimer = Timer(const Duration(seconds: 2), () {
-      //start indexing
+      SemanticSearchService.instance.resumeIndexing();
     });
   }
 
@@ -77,7 +78,7 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
   resetTimer() {
     _userInteractionTimer.cancel();
     _userInteractionTimer = Timer(const Duration(seconds: 2), () {
-      //resume indexing
+      SemanticSearchService.instance.resumeIndexing();
     });
   }
 
@@ -86,7 +87,7 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
     if (Platform.isAndroid || kDebugMode) {
       return Listener(
         onPointerDown: (event) {
-          //pause indexing
+          SemanticSearchService.instance.pauseIndexing();
           resetTimer();
         },
         child: AdaptiveTheme(
