@@ -121,9 +121,9 @@ jobs:
       - name: Sign App
         env:
           DMG_PATH: auth-macos-${{ github.event_name == 'release' && github.event.release.tag_name || 'nightly' }}-universal.dmg
-          KEYCHAIN_PASSWORD: ${{ secrets.MAC_OS_KEYCHAIN_PASSWORD }}
+          CODESIGN_IDENTITY: ${{ secrets.MAC_OS_CODESIGN_IDENTITY }}
         run: |
-          /usr/bin/codesign --force -s "$KEYCHAIN_PASSWORD" "$DMG_PATH" -v
+          /usr/bin/codesign --force -s "$CODESIGN_IDENTITY" "$DMG_PATH" -v
 
       - uses: svenstaro/upload-release-action@latest
         with:

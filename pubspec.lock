@@ -860,10 +860,10 @@ packages:
     dependency: transitive
     description:
       name: mime
-      sha256: e4ff8e8564c03f255408decd16e7899da1733852a9110a58fe6d1b817684a63e
+      sha256: "2e123074287cc9fd6c09de8336dae606d1ddb88d9ac47358826db698c176a1f2"
       url: "https://pub.dev"
     source: hosted
-    version: "1.0.4"
+    version: "1.0.5"
   mocktail:
     dependency: "direct dev"
     description:
@@ -1172,10 +1172,10 @@ packages:
     dependency: "direct main"
     description:
       name: shared_preferences
-      sha256: "0344316c947ffeb3a529eac929e1978fcd37c26be4e8468628bac399365a3ca1"
+      sha256: "81429e4481e1ccfb51ede496e916348668fd0921627779233bd24cc3ff6abd02"
       url: "https://pub.dev"
     source: hosted
-    version: "2.2.0"
+    version: "2.2.2"
   shared_preferences_android:
     dependency: transitive
     description:
@@ -1265,10 +1265,10 @@ packages:
     dependency: transitive
     description:
       name: sodium_libs
-      sha256: "8c6a1ed2b62425d6f3558bfe450ad0d42d1ca7c6bc8a431639b2e9bb437c437a"
+      sha256: "7f5ae3442242dfb2945980306dd2d3eff365c9f65b3df32eadbd4b53eb7b7e75"
       url: "https://pub.dev"
     source: hosted
-    version: "2.2.0+9"
+    version: "2.2.0+10"
   source_gen:
     dependency: transitive
     description:
