@@ -1,3 +1,4 @@
+import "dart:async";
 import 'dart:io';
 
 import 'package:adaptive_theme/adaptive_theme.dart';
@@ -43,6 +44,7 @@ class EnteApp extends StatefulWidget {
 class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
   final _logger = Logger("EnteAppState");
   late Locale locale;
+  late Timer _userInteractionTimer;
 
   @override
   void initState() {
@@ -51,6 +53,9 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
     locale = widget.locale;
     setupIntentAction();
     WidgetsBinding.instance.addObserver(this);
+    _userInteractionTimer = Timer(const Duration(seconds: 2), () {
+      //start indexing
+    });
   }
 
   setLocale(Locale newLocale) {
@@ -69,31 +74,44 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
     }
   }
 
+  resetTimer() {
+    _userInteractionTimer.cancel();
+    _userInteractionTimer = Timer(const Duration(seconds: 2), () {
+      //resume indexing
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     if (Platform.isAndroid || kDebugMode) {
-      return AdaptiveTheme(
-        light: lightThemeData,
-        dark: darkThemeData,
-        initial: widget.savedThemeMode ?? AdaptiveThemeMode.system,
-        builder: (lightTheme, dartTheme) => MaterialApp(
-          title: "ente",
-          themeMode: ThemeMode.system,
-          theme: lightTheme,
-          darkTheme: dartTheme,
-          home: AppLifecycleService.instance.mediaExtensionAction.action ==
-                  IntentAction.view
-              ? const FileViewer()
-              : const HomeWidget(),
-          debugShowCheckedModeBanner: false,
-          builder: EasyLoading.init(),
-          locale: locale,
-          supportedLocales: appSupportedLocales,
-          localeListResolutionCallback: localResolutionCallBack,
-          localizationsDelegates: const [
-            ...AppLocalizations.localizationsDelegates,
-            S.delegate,
-          ],
+      return Listener(
+        onPointerDown: (event) {
+          //pause indexing
+          resetTimer();
+        },
+        child: AdaptiveTheme(
+          light: lightThemeData,
+          dark: darkThemeData,
+          initial: widget.savedThemeMode ?? AdaptiveThemeMode.system,
+          builder: (lightTheme, dartTheme) => MaterialApp(
+            title: "ente",
+            themeMode: ThemeMode.system,
+            theme: lightTheme,
+            darkTheme: dartTheme,
+            home: AppLifecycleService.instance.mediaExtensionAction.action ==
+                    IntentAction.view
+                ? const FileViewer()
+                : const HomeWidget(),
+            debugShowCheckedModeBanner: false,
+            builder: EasyLoading.init(),
+            locale: locale,
+            supportedLocales: appSupportedLocales,
+            localeListResolutionCallback: localResolutionCallBack,
+            localizationsDelegates: const [
+              ...AppLocalizations.localizationsDelegates,
+              S.delegate,
+            ],
+          ),
         ),
       );
     } else {
@@ -119,6 +137,7 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    _userInteractionTimer.cancel();
     super.dispose();
   }
 
