@@ -2,9 +2,14 @@ import {
     CenteredFlex,
     VerticallyCentered,
 } from '@ente/shared/components/Container';
+import EnteButton from '@ente/shared/components/EnteButton';
+import EnteSpinner from '@ente/shared/components/EnteSpinner';
 import FormPaper from '@ente/shared/components/Form/FormPaper';
-import { Box, Typography } from '@mui/material';
+import { logError } from '@ente/shared/sentry';
 import InfoIcon from '@mui/icons-material/Info';
+import { Box, Typography } from '@mui/material';
+import { t } from 'i18next';
+import _sodium from 'libsodium-wrappers';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import {
@@ -12,11 +17,6 @@ import {
     beginPasskeyAuthentication,
     finishPasskeyAuthentication,
 } from 'services/passkeysService';
-import { logError } from '@ente/shared/sentry';
-import _sodium from 'libsodium-wrappers';
-import EnteButton from '@ente/shared/components/EnteButton';
-import EnteSpinner from '@ente/shared/components/EnteSpinner';
-import { t } from 'i18next';
 
 const PasskeysFlow = () => {
     const [errored, setErrored] = useState(false);
@@ -33,7 +33,11 @@ const PasskeysFlow = () => {
 
         const redirectURL = new URL(redirect);
         if (process.env.NEXT_PUBLIC_DISABLE_REDIRECT_CHECK !== 'true') {
-            if (redirect !== '' && !redirectURL.host.endsWith('.ente.io')) {
+            if (
+                redirect !== '' &&
+                !redirectURL.host.endsWith('.ente.io') &&
+                redirectURL.protocol !== 'ente:'
+            ) {
                 setInvalidInfo(true);
                 setLoading(false);
                 return;
@@ -114,7 +118,7 @@ const PasskeysFlow = () => {
             publicKey.challenge,
             _sodium.base64_variants.URLSAFE_NO_PADDING
         );
-        publicKey.allowCredentials?.forEach(function (listItem: any) {
+        publicKey.allowCredentials?.forEach(function(listItem: any) {
             listItem.id = _sodium.from_base64(
                 listItem.id,
                 _sodium.base64_variants.URLSAFE_NO_PADDING
