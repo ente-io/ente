@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:desktop_webview_window/desktop_webview_window.dart';
-import 'package:document_file_save_plus/document_file_save_plus.dart';
 import 'package:ente_auth/ui/common/web_page.dart';
 import 'package:file_saver/file_saver.dart';
 import 'package:flutter/cupertino.dart';
@@ -62,14 +61,15 @@ class PlatformUtil {
     Uint8List bytes,
     MimeType type,
   ) async {
-    if (Platform.isIOS) {
-      await DocumentFileSavePlus().saveFile(
-        bytes,
-        "$fileName.$extension",
-        type.type,
+    if (Platform.isAndroid || Platform.isIOS || Platform.isMacOS) {
+      await FileSaver.instance.saveAs(
+        name: fileName,
+        ext: extension,
+        bytes: bytes,
+        mimeType: type,
       );
     } else {
-      await FileSaver.instance.saveAs(
+      await FileSaver.instance.saveFile(
         name: fileName,
         ext: extension,
         bytes: bytes,

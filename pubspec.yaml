@@ -23,7 +23,6 @@ dependencies:
       path: packages/desktop_webview_window
   device_info_plus: ^9.1.1
   dio: ^5.4.0
-  document_file_save_plus: ^2.0.0
   dotted_border: ^2.0.0+2
   email_validator: ^2.0.1
   ente_crypto_dart:

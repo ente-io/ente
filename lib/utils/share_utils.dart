@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/ui/components/buttons/button_widget.dart';
 import 'package:ente_auth/ui/components/dialog_widget.dart';
@@ -26,15 +28,16 @@ Future<void> shareDialog(
           await saveAction();
         },
       ),
-      ButtonWidget(
-        isInAlert: true,
-        buttonType: ButtonType.secondary,
-        labelText: l10n.send,
-        buttonAction: ButtonAction.second,
-        onTap: () async {
-          await sendAction();
-        },
-      ),
+      if (!Platform.isWindows && !Platform.isLinux)
+        ButtonWidget(
+          isInAlert: true,
+          buttonType: ButtonType.secondary,
+          labelText: l10n.send,
+          buttonAction: ButtonAction.second,
+          onTap: () async {
+            await sendAction();
+          },
+        ),
       ButtonWidget(
         isInAlert: true,
         buttonType: ButtonType.secondary,

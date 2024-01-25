@@ -322,14 +322,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "5.4.0"
-  document_file_save_plus:
-    dependency: "direct main"
-    description:
-      name: document_file_save_plus
-      sha256: ff05c6a3b072377566e8e92666db38eb277786f90c0ac267ea47dc22725c1df3
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.0.0"
   dotted_border:
     dependency: "direct main"
     description:
