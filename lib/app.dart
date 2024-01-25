@@ -43,6 +43,9 @@ class EnteApp extends StatefulWidget {
 }
 
 class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
+  static const initialInteractionTimeout = Duration(seconds: 10);
+  static const defaultInteractionTimeout = Duration(seconds: 5);
+
   final _logger = Logger("EnteAppState");
   late Locale locale;
   late Timer _userInteractionTimer;
@@ -54,10 +57,7 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
     locale = widget.locale;
     setupIntentAction();
     WidgetsBinding.instance.addObserver(this);
-    _userInteractionTimer = Timer(const Duration(seconds: 2), () {
-      debugPrint("user is not interacting with the app");
-      SemanticSearchService.instance.resumeIndexing();
-    });
+    _setupInteractionTimer(timeout: initialInteractionTimeout);
   }
 
   setLocale(Locale newLocale) {
@@ -76,9 +76,13 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
     }
   }
 
-  resetTimer() {
+  void _resetTimer() {
     _userInteractionTimer.cancel();
-    _userInteractionTimer = Timer(const Duration(seconds: 5), () {
+    _setupInteractionTimer();
+  }
+
+  void _setupInteractionTimer({Duration timeout = defaultInteractionTimeout}) {
+    _userInteractionTimer = Timer(timeout, () {
       debugPrint("user is not interacting with the app");
       SemanticSearchService.instance.resumeIndexing();
     });
@@ -91,7 +95,7 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
         onPointerDown: (event) {
           SemanticSearchService.instance.pauseIndexing();
           debugPrint("user is interacting with the app");
-          resetTimer();
+          _resetTimer();
         },
         child: AdaptiveTheme(
           light: lightThemeData,
