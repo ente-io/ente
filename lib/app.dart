@@ -78,7 +78,7 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
 
   resetTimer() {
     _userInteractionTimer.cancel();
-    _userInteractionTimer = Timer(const Duration(seconds: 2), () {
+    _userInteractionTimer = Timer(const Duration(seconds: 5), () {
       debugPrint("user is not interacting with the app");
       SemanticSearchService.instance.resumeIndexing();
     });
