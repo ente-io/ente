@@ -6,11 +6,13 @@ import 'package:ente_auth/utils/toast_util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:local_auth/local_auth.dart';
+import 'package:logging/logging.dart';
 
 class LocalAuthenticationService {
   LocalAuthenticationService._privateConstructor();
   static final LocalAuthenticationService instance =
       LocalAuthenticationService._privateConstructor();
+  final logger = Logger((LocalAuthenticationService).toString());
 
   Future<bool> requestLocalAuthentication(
     BuildContext context,
@@ -67,7 +69,8 @@ class LocalAuthenticationService {
   Future<bool> _isLocalAuthSupportedOnDevice() async {
     try {
       return await LocalAuthentication().isDeviceSupported();
-    } on MissingPluginException catch (_) {
+    } on MissingPluginException catch (e, s) {
+      logger.log(Level.WARNING, e, s);
       return false;
     }
   }
