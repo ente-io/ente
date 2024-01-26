@@ -12,7 +12,7 @@ description: ente photos application
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 
-version: 0.8.47+567
+version: 0.8.48+568
 
 environment:
   sdk: ">=3.0.0 <4.0.0"
