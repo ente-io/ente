@@ -66,9 +66,14 @@ class _FullScreenMemoryDataUpdaterState
   }
 
   void removeCurrentMemory() {
-    setState(() {
-      widget.memories.removeAt(indexNotifier.value);
-    });
+    widget.memories.removeAt(indexNotifier.value);
+    if (widget.memories.isNotEmpty) {
+      setState(() {
+        if (widget.memories.length == indexNotifier.value) {
+          indexNotifier.value -= 1;
+        }
+      });
+    }
   }
 
   @override
