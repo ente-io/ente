@@ -25,11 +25,11 @@ apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
 
-// def keystoreProperties = new Properties()
-// def keystorePropertiesFile = rootProject.file('key.properties')
-// if (keystorePropertiesFile.exists()) {
-//     keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
-// }
+def keystoreProperties = new Properties()
+def keystorePropertiesFile = rootProject.file('key.properties')
+if (keystorePropertiesFile.exists()) {
+    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+}
 
 android {
     compileSdkVersion 34
@@ -56,10 +56,10 @@ android {
 
     signingConfigs {
        release {
-        //    storeFile keystoreProperties['storeFile'] ? file(keystoreProperties['storeFile']) : file(System.getenv("SIGNING_KEY_PATH"))
-        //    keyAlias keystoreProperties['keyAlias'] ? keystoreProperties['keyAlias'] : System.getenv("SIGNING_KEY_ALIAS")
-        //    keyPassword keystoreProperties['keyPassword'] ? keystoreProperties['keyPassword'] : System.getenv("SIGNING_KEY_PASSWORD")
-        //    storePassword keystoreProperties['storePassword'] ? keystoreProperties['storePassword'] : System.getenv("SIGNING_STORE_PASSWORD")
+           storeFile keystoreProperties['storeFile'] ? file(keystoreProperties['storeFile']) : file(System.getenv("SIGNING_KEY_PATH"))
+           keyAlias keystoreProperties['keyAlias'] ? keystoreProperties['keyAlias'] : System.getenv("SIGNING_KEY_ALIAS")
+           keyPassword keystoreProperties['keyPassword'] ? keystoreProperties['keyPassword'] : System.getenv("SIGNING_KEY_PASSWORD")
+           storePassword keystoreProperties['storePassword'] ? keystoreProperties['storePassword'] : System.getenv("SIGNING_STORE_PASSWORD")
        }
     }
     
