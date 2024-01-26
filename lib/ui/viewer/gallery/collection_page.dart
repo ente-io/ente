@@ -31,8 +31,6 @@ class CollectionPage extends StatelessWidget {
 
   final _selectedFiles = SelectedFiles();
 
-  final GlobalKey shareButtonKey = GlobalKey();
-
   @override
   Widget build(BuildContext context) {
     if (hasVerifiedLock == false && c.collection.isHidden()) {
