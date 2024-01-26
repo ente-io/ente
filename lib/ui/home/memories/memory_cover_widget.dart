@@ -14,6 +14,8 @@ class MemoryCoverWidget extends StatefulWidget {
   final double maxWidth;
   static const centerStrokeWidth = 1.0;
   static const aspectRatio = 0.68;
+  static const horizontalPadding = 2.5;
+  final double maxScaleOffsetX;
 
   const MemoryCoverWidget({
     required this.memories,
@@ -21,6 +23,7 @@ class MemoryCoverWidget extends StatefulWidget {
     required this.offsetOfItem,
     required this.maxHeight,
     required this.maxWidth,
+    required this.maxScaleOffsetX,
     super.key,
   });
 
@@ -48,13 +51,12 @@ class _MemoryCoverWidgetState extends State<MemoryCoverWidget> {
       animation: widget.controller,
       builder: (context, child) {
         final diff = (widget.controller.offset - widget.offsetOfItem) +
-            widthOfScreen / 7;
+            widget.maxScaleOffsetX;
         final scale = 1 - (diff / widthOfScreen).abs() / 3.7;
         return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 2.5),
-          //Adding this row is a workaround for making height of memory cover
-          //render as [MemoryCoverWidgetNew.height] * scale. Without this, height of rendered memory
-          //cover will be [MemoryCoverWidgetNew.height].
+          padding: const EdgeInsets.symmetric(
+            horizontal: MemoryCoverWidget.horizontalPadding,
+          ),
           child: GestureDetector(
             onTap: () async {
               await routeToPage(
@@ -67,7 +69,9 @@ class _MemoryCoverWidgetState extends State<MemoryCoverWidget> {
                 forceCustomPageRoute: true,
               );
               setState(() {});
-            },
+            }, //Adding this row is a workaround for making height of memory cover
+            //render as [MemoryCoverWidgetNew.height] * scale. Without this, height of rendered memory
+            //cover will be [MemoryCoverWidgetNew.height].
             child: Row(
               children: [
                 Container(

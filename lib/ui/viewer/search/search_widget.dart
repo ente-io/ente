@@ -201,7 +201,7 @@ class SearchWidgetState extends State<SearchWidget> {
     String query,
   ) {
     int resultCount = 0;
-    final maxResultCount = _isYearValid(query) ? 12 : 11;
+    final maxResultCount = _isYearValid(query) ? 11 : 10;
     final streamController = StreamController<List<SearchResult>>();
 
     if (query.isEmpty) {
