@@ -814,7 +814,6 @@ export default function Gallery() {
                         typeof value === 'function'
                             ? value(attributes)
                             : { ...attributes, ...value };
-                    console.log('value', attributes, updatedAttributes);
                     const updatedAttributesList = attributes
                         ? prev.map((attr) =>
                               attr.id === id ? updatedAttributes : attr
