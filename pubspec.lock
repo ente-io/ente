@@ -286,7 +286,7 @@ packages:
     description:
       path: "packages/desktop_webview_window"
       ref: HEAD
-      resolved-ref: "62c88e0c6a4928669f79554c4ce5501c8d147784"
+      resolved-ref: "9cde1078c1bf8395b50275f1da67d9efdf33e2ae"
       url: "https://github.com/ente-io/flutter-desktop-plugins"
     source: git
     version: "0.2.4"
