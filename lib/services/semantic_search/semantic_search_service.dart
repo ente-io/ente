@@ -49,8 +49,21 @@ class SemanticSearchService {
   Future<List<EnteFile>>? _ongoingRequest;
   List<Embedding> _cachedEmbeddings = <Embedding>[];
   PendingQuery? _nextQuery;
+  Completer<void> _userInteraction = Completer<void>();
 
   get hasInitialized => _hasInitialized;
+
+  void resumeIndexing() {
+    _logger.info("Resuming indexing");
+    _userInteraction.complete();
+  }
+
+  void pauseIndexing() {
+    if (_userInteraction.isCompleted) {
+      _logger.info("Pausing indexing");
+      _userInteraction = Completer<void>();
+    }
+  }
 
   Future<void> init({bool shouldSyncImmediately = false}) async {
     if (!LocalSettings.instance.hasEnabledMagicSearch()) {
@@ -278,6 +291,10 @@ class SemanticSearchService {
     }
     if (!_frameworkInitialization.isCompleted) {
       return;
+    }
+    if (!_userInteraction.isCompleted) {
+      _logger.info("Waiting for user interactions to stop...");
+      await _userInteraction.future;
     }
     try {
       final thumbnail = await getThumbnailForUploadedFile(file);

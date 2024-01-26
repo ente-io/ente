@@ -1,3 +1,4 @@
+import "dart:async";
 import 'dart:io';
 
 import 'package:adaptive_theme/adaptive_theme.dart';
@@ -12,6 +13,7 @@ import 'package:photos/ente_theme_data.dart';
 import "package:photos/generated/l10n.dart";
 import "package:photos/l10n/l10n.dart";
 import 'package:photos/services/app_lifecycle_service.dart';
+import "package:photos/services/semantic_search/semantic_search_service.dart";
 import 'package:photos/services/sync_service.dart';
 import 'package:photos/ui/tabs/home_widget.dart';
 import "package:photos/ui/viewer/actions/file_viewer.dart";
@@ -41,8 +43,12 @@ class EnteApp extends StatefulWidget {
 }
 
 class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
+  static const initialInteractionTimeout = Duration(seconds: 10);
+  static const defaultInteractionTimeout = Duration(seconds: 5);
+
   final _logger = Logger("EnteAppState");
   late Locale locale;
+  late Timer _userInteractionTimer;
 
   @override
   void initState() {
@@ -51,6 +57,7 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
     locale = widget.locale;
     setupIntentAction();
     WidgetsBinding.instance.addObserver(this);
+    _setupInteractionTimer(timeout: initialInteractionTimeout);
   }
 
   setLocale(Locale newLocale) {
@@ -69,22 +76,65 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
     }
   }
 
+  void _resetTimer() {
+    _userInteractionTimer.cancel();
+    _setupInteractionTimer();
+  }
+
+  void _setupInteractionTimer({Duration timeout = defaultInteractionTimeout}) {
+    _userInteractionTimer = Timer(timeout, () {
+      debugPrint("user is not interacting with the app");
+      SemanticSearchService.instance.resumeIndexing();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     if (Platform.isAndroid || kDebugMode) {
-      return AdaptiveTheme(
-        light: lightThemeData,
-        dark: darkThemeData,
-        initial: widget.savedThemeMode ?? AdaptiveThemeMode.system,
-        builder: (lightTheme, dartTheme) => MaterialApp(
+      return Listener(
+        onPointerDown: (event) {
+          SemanticSearchService.instance.pauseIndexing();
+          debugPrint("user is interacting with the app");
+          _resetTimer();
+        },
+        child: AdaptiveTheme(
+          light: lightThemeData,
+          dark: darkThemeData,
+          initial: widget.savedThemeMode ?? AdaptiveThemeMode.system,
+          builder: (lightTheme, dartTheme) => MaterialApp(
+            title: "ente",
+            themeMode: ThemeMode.system,
+            theme: lightTheme,
+            darkTheme: dartTheme,
+            home: AppLifecycleService.instance.mediaExtensionAction.action ==
+                    IntentAction.view
+                ? const FileViewer()
+                : const HomeWidget(),
+            debugShowCheckedModeBanner: false,
+            builder: EasyLoading.init(),
+            locale: locale,
+            supportedLocales: appSupportedLocales,
+            localeListResolutionCallback: localResolutionCallBack,
+            localizationsDelegates: const [
+              ...AppLocalizations.localizationsDelegates,
+              S.delegate,
+            ],
+          ),
+        ),
+      );
+    } else {
+      return Listener(
+        onPointerDown: (event) {
+          SemanticSearchService.instance.pauseIndexing();
+          debugPrint("user is interacting with the app");
+          _resetTimer();
+        },
+        child: MaterialApp(
           title: "ente",
           themeMode: ThemeMode.system,
-          theme: lightTheme,
-          darkTheme: dartTheme,
-          home: AppLifecycleService.instance.mediaExtensionAction.action ==
-                  IntentAction.view
-              ? const FileViewer()
-              : const HomeWidget(),
+          theme: lightThemeData,
+          darkTheme: darkThemeData,
+          home: const HomeWidget(),
           debugShowCheckedModeBanner: false,
           builder: EasyLoading.init(),
           locale: locale,
@@ -96,29 +146,13 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
           ],
         ),
       );
-    } else {
-      return MaterialApp(
-        title: "ente",
-        themeMode: ThemeMode.system,
-        theme: lightThemeData,
-        darkTheme: darkThemeData,
-        home: const HomeWidget(),
-        debugShowCheckedModeBanner: false,
-        builder: EasyLoading.init(),
-        locale: locale,
-        supportedLocales: appSupportedLocales,
-        localeListResolutionCallback: localResolutionCallBack,
-        localizationsDelegates: const [
-          ...AppLocalizations.localizationsDelegates,
-          S.delegate,
-        ],
-      );
     }
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    _userInteractionTimer.cancel();
     super.dispose();
   }
 
