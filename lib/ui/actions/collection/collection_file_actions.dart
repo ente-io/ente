@@ -122,7 +122,7 @@ extension CollectionFileActions on CollectionActions {
         for (final file in selectedFiles!) {
           EnteFile? currentFile;
           if (file.uploadedFileID != null) {
-            currentFile = file;
+            currentFile = file.copyWith();
           } else if (file.generatedID != null) {
             // when file is not uploaded, refresh the state from the db to
             // ensure we have latest upload status for given file before
@@ -216,11 +216,11 @@ extension CollectionFileActions on CollectionActions {
       return true;
     } catch (e, s) {
       logger.severe(e, s);
-        showShortToast(
-          context,
-          markAsFavorite
-              ? S.of(context).sorryCouldNotAddToFavorites
-              : S.of(context).sorryCouldNotRemoveFromFavorites,
+      showShortToast(
+        context,
+        markAsFavorite
+            ? S.of(context).sorryCouldNotAddToFavorites
+            : S.of(context).sorryCouldNotRemoveFromFavorites,
       );
     } finally {
       await dialog.hide();

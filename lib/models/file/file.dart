@@ -332,4 +332,71 @@ class EnteFile {
     // todo: Neeraj: 19thJuly'22: evaluate and add fileHash as the key?
     return localID ?? uploadedFileID?.toString() ?? generatedID.toString();
   }
+
+  EnteFile copyWith({
+    int? generatedID,
+    int? uploadedFileID,
+    int? ownerID,
+    int? collectionID,
+    String? localID,
+    String? title,
+    String? deviceFolder,
+    int? creationTime,
+    int? modificationTime,
+    int? updationTime,
+    int? addedTime,
+    Location? location,
+    FileType? fileType,
+    int? fileSubType,
+    int? duration,
+    String? exif,
+    String? hash,
+    int? metadataVersion,
+    String? encryptedKey,
+    String? keyDecryptionNonce,
+    String? fileDecryptionHeader,
+    String? thumbnailDecryptionHeader,
+    String? metadataDecryptionHeader,
+    int? fileSize,
+    String? mMdEncodedJson,
+    int? mMdVersion,
+    MagicMetadata? magicMetadata,
+    String? pubMmdEncodedJson,
+    int? pubMmdVersion,
+    PubMagicMetadata? pubMagicMetadata,
+  }) {
+    return EnteFile()
+      ..generatedID = generatedID ?? this.generatedID
+      ..uploadedFileID = uploadedFileID ?? this.uploadedFileID
+      ..ownerID = ownerID ?? this.ownerID
+      ..collectionID = collectionID ?? this.collectionID
+      ..localID = localID ?? this.localID
+      ..title = title ?? this.title
+      ..deviceFolder = deviceFolder ?? this.deviceFolder
+      ..creationTime = creationTime ?? this.creationTime
+      ..modificationTime = modificationTime ?? this.modificationTime
+      ..updationTime = updationTime ?? this.updationTime
+      ..addedTime = addedTime ?? this.addedTime
+      ..location = location ?? this.location
+      ..fileType = fileType ?? this.fileType
+      ..fileSubType = fileSubType ?? this.fileSubType
+      ..duration = duration ?? this.duration
+      ..exif = exif ?? this.exif
+      ..hash = hash ?? this.hash
+      ..metadataVersion = metadataVersion ?? this.metadataVersion
+      ..encryptedKey = encryptedKey ?? this.encryptedKey
+      ..keyDecryptionNonce = keyDecryptionNonce ?? this.keyDecryptionNonce
+      ..fileDecryptionHeader = fileDecryptionHeader ?? this.fileDecryptionHeader
+      ..thumbnailDecryptionHeader =
+          thumbnailDecryptionHeader ?? this.thumbnailDecryptionHeader
+      ..metadataDecryptionHeader =
+          metadataDecryptionHeader ?? this.metadataDecryptionHeader
+      ..fileSize = fileSize ?? this.fileSize
+      ..mMdEncodedJson = mMdEncodedJson ?? this.mMdEncodedJson
+      ..mMdVersion = mMdVersion ?? this.mMdVersion
+      ..magicMetadata = magicMetadata ?? this.magicMetadata
+      ..pubMmdEncodedJson = pubMmdEncodedJson ?? this.pubMmdEncodedJson
+      ..pubMmdVersion = pubMmdVersion ?? this.pubMmdVersion
+      ..pubMagicMetadata = pubMagicMetadata ?? this.pubMagicMetadata;
+  }
 }
