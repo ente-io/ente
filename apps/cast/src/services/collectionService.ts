@@ -1,7 +1,6 @@
 import { getActualKey } from '@ente/shared/user';
 import { batch } from '@ente/shared/batch';
 import { EnteFile } from 'types/file';
-import { CustomError } from '@ente/shared/error';
 import {
     sortFiles,
     groupFilesBasedOnCollectionID,
@@ -44,7 +43,6 @@ import {
     isPinnedCollection,
     updateMagicMetadata,
 } from 'utils/magicMetadata';
-import { FamilyData, User } from 'types/user';
 import {
     isQuickLinkCollection,
     isOutgoingShare,
@@ -70,6 +68,7 @@ import HTTPService from '@ente/shared/network/HTTPService';
 import { logError } from '@ente/shared/sentry';
 import { LS_KEYS, getData } from '@ente/shared/storage/localStorage';
 import localForage from '@ente/shared/storage/localForage';
+import { User } from '@ente/shared/user/types';
 
 const ENDPOINT = getEndpoint();
 const COLLECTION_TABLE = 'collections';
@@ -78,7 +77,6 @@ const HIDDEN_COLLECTION_IDS = 'hidden-collection-ids';
 
 const UNCATEGORIZED_COLLECTION_NAME = 'Uncategorized';
 export const HIDDEN_COLLECTION_NAME = '.hidden';
-const FAVORITE_COLLECTION_NAME = 'Favorites';
 
 export const getCollectionLastSyncTime = async (collection: Collection) =>
     (await localForage.getItem<number>(`${collection.id}-time`)) ?? 0;
@@ -513,34 +511,6 @@ const postCollection = async (
         return response.data.collection;
     } catch (e) {
         logError(e, 'post Collection failed ');
-    }
-};
-
-export const createFavoritesCollection = () => {
-    return createCollection(FAVORITE_COLLECTION_NAME, CollectionType.favorites);
-};
-
-export const addToFavorites = async (file: EnteFile) => {
-    try {
-        let favCollection = await getFavCollection();
-        if (!favCollection) {
-            favCollection = await createFavoritesCollection();
-        }
-        await addToCollection(favCollection, [file]);
-    } catch (e) {
-        logError(e, 'failed to add to favorite');
-    }
-};
-
-export const removeFromFavorites = async (file: EnteFile) => {
-    try {
-        const favCollection = await getFavCollection();
-        if (!favCollection) {
-            throw Error(CustomError.FAV_COLLECTION_MISSING);
-        }
-        await removeFromCollection(favCollection.id, [file]);
-    } catch (e) {
-        logError(e, 'remove from favorite failed');
     }
 };
 
@@ -1395,77 +1365,3 @@ export async function moveToHiddenCollection(files: EnteFile[]) {
         throw e;
     }
 }
-
-export async function unhideToCollection(
-    collection: Collection,
-    files: EnteFile[]
-) {
-    try {
-        const groupiedFiles = groupFilesBasedOnCollectionID(files);
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        for (const [collectionID, files] of groupiedFiles.entries()) {
-            if (collectionID === collection.id) {
-                continue;
-            }
-            await moveToCollection(collectionID, collection, files);
-        }
-    } catch (e) {
-        logError(e, 'unhide to collection failed ');
-        throw e;
-    }
-}
-
-export const constructUserIDToEmailMap = (
-    user: User,
-    collections: Collection[]
-): Map<number, string> => {
-    try {
-        const userIDToEmailMap = new Map<number, string>();
-        collections.forEach((item) => {
-            const { owner, sharees } = item;
-            if (user.id !== owner.id && owner.email) {
-                userIDToEmailMap.set(owner.id, owner.email);
-            }
-            if (sharees) {
-                sharees.forEach((item) => {
-                    if (item.id !== user.id)
-                        userIDToEmailMap.set(item.id, item.email);
-                });
-            }
-        });
-        return userIDToEmailMap;
-    } catch (e) {
-        logError('Error Mapping UserId to email:', e);
-        return new Map<number, string>();
-    }
-};
-
-export const constructEmailList = (
-    user: User,
-    collections: Collection[],
-    familyData: FamilyData
-): string[] => {
-    const emails = collections
-        .map((item) => {
-            const { owner, sharees } = item;
-            if (owner.email && item.owner.id !== user.id) {
-                return [item.owner.email];
-            } else {
-                if (!sharees?.length) {
-                    return [];
-                }
-                const shareeEmails = item.sharees
-                    .filter((sharee) => sharee.email !== user.email)
-                    .map((sharee) => sharee.email);
-                return shareeEmails;
-            }
-        })
-        .flat();
-
-    // adding family members
-    if (familyData) {
-        const family = familyData.members.map((member) => member.email);
-        emails.push(...family);
-    }
-    return Array.from(new Set(emails));
-};

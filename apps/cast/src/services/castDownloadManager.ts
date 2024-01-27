@@ -18,7 +18,7 @@ import {
 import HTTPService from '@ente/shared/network/HTTPService';
 import { logError } from '@ente/shared/sentry';
 
-class PublicCollectionDownloadManager {
+class CastDownloadManager {
     private fileObjectURLPromise = new Map<
         string,
         Promise<{ original: string[]; converted: string[] }>
@@ -311,4 +311,4 @@ class PublicCollectionDownloadManager {
     };
 }
 
-export default new PublicCollectionDownloadManager();
+export default new CastDownloadManager();

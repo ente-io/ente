@@ -4,7 +4,8 @@ import SingleInputForm, {
     SingleInputFormProps,
 } from '@ente/shared/components/SingleInputForm';
 import { t } from 'i18next';
-import { getKexValue, setKexValue } from '@ente/shared/network/kexService';
+import { v4 as uuidv4 } from 'uuid';
+import castGateway from '@ente/shared/network/cast';
 import { boxSeal, toB64 } from '@ente/shared/crypto/internal/libsodium';
 import { loadSender } from '@ente/shared/hooks/useCastSender';
 import { useEffect, useState } from 'react';
@@ -13,7 +14,6 @@ import EnteSpinner from '@ente/shared/components/EnteSpinner';
 import { VerticallyCentered } from '@ente/shared/components/Container';
 import { logError } from '@ente/shared/sentry';
 import { Collection } from 'types/collection';
-import { getToken } from '@ente/shared/storage/localStorage/helpers';
 
 interface Props {
     show: boolean;
@@ -63,16 +63,16 @@ export default function AlbumCastDialog(props: Props) {
 
     const doCast = async (pin: string) => {
         // does the TV exist? have they advertised their existence?
-        const tvPublicKeyKexKey = `${pin}_pubkey`;
-
-        const tvPublicKeyB64 = await getKexValue(tvPublicKeyKexKey);
+        const tvPublicKeyB64 = await castGateway.getPublicKey(pin);
         if (!tvPublicKeyB64) {
             throw new Error(AlbumCastError.TV_NOT_FOUND);
         }
+        // generate random uuid string
+        const castToken = uuidv4();
 
         // ok, they exist. let's give them the good stuff.
         const payload = JSON.stringify({
-            castToken: getToken(),
+            castToken: castToken,
             collectionID: props.currentCollection.id,
             collectionKey: props.currentCollection.key,
         });
@@ -82,10 +82,13 @@ export default function AlbumCastDialog(props: Props) {
             tvPublicKeyB64
         );
 
-        const encryptedPayloadForTvKexKey = `${pin}_payload`;
-
         // hey TV, we acknowlege you!
-        await setKexValue(encryptedPayloadForTvKexKey, encryptedPayload);
+        await castGateway.publishCastPayload(
+            pin,
+            encryptedPayload,
+            props.currentCollection.id,
+            castToken
+        );
     };
 
     useEffect(() => {

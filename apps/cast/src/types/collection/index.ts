@@ -58,6 +58,9 @@ export interface Collection
     sharedMagicMetadata: CollectionShareeMagicMetadata;
 }
 
+// define a method on Collection interface to return the sync key as collection.id-time
+// this is used to store the last sync time of a collection in local storage
+
 export interface PublicURL {
     url: string;
     deviceLimit: number;

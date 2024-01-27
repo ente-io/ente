@@ -2,7 +2,6 @@ import {
     getNonEmptyCollections,
     updateCollectionMagicMetadata,
     updatePublicCollectionMagicMetadata,
-    updateSharedCollectionMagicMetadata,
 } from 'services/collectionService';
 import { EnteFile } from 'types/file';
 import { logError } from '@ente/shared/sentry';
@@ -98,44 +97,6 @@ export const shareExpiryOptions = () => [
         value: () => getUnixTimeInMicroSecondsWithDelta({ years: 1 }),
     },
 ];
-
-export const changeCollectionVisibility = async (
-    collection: Collection,
-    visibility: VISIBILITY_STATE
-) => {
-    try {
-        const updatedMagicMetadataProps: CollectionMagicMetadataProps = {
-            visibility,
-        };
-
-        const user: User = getData(LS_KEYS.USER);
-        if (collection.owner.id === user.id) {
-            const updatedMagicMetadata = await updateMagicMetadata(
-                updatedMagicMetadataProps,
-                collection.magicMetadata,
-                collection.key
-            );
-
-            await updateCollectionMagicMetadata(
-                collection,
-                updatedMagicMetadata
-            );
-        } else {
-            const updatedMagicMetadata = await updateMagicMetadata(
-                updatedMagicMetadataProps,
-                collection.sharedMagicMetadata,
-                collection.key
-            );
-            await updateSharedCollectionMagicMetadata(
-                collection,
-                updatedMagicMetadata
-            );
-        }
-    } catch (e) {
-        logError(e, 'change collection visibility failed');
-        throw e;
-    }
-};
 
 export const changeCollectionSortOrder = async (
     collection: Collection,

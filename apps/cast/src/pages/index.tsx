@@ -150,7 +150,7 @@ export default function PairingMode() {
     const advertisePublicKey = async (publicKeyB64: string) => {
         // hey client, we exist!
         try {
-            await castGateway.advertisePublicKey(
+            await castGateway.registerDevice(
                 `${digits.join('')}`,
                 publicKeyB64
             );
@@ -171,7 +171,6 @@ export default function PairingMode() {
             const data = await pollForCastData();
 
             if (!data) return;
-
             storePayloadLocally(data);
             await router.push('/slideshow');
         }, 1000);

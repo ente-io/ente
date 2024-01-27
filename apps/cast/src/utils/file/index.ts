@@ -21,7 +21,7 @@ import {
     SUPPORTED_RAW_FORMATS,
     RAW_FORMATS,
 } from 'constants/file';
-import PublicCollectionDownloadManager from 'services/publicCollectionDownloadManager';
+import CastDownloadManager from 'services/castDownloadManager';
 import heicConversionService from 'services/heicConversionService';
 import * as ffmpegService from 'services/ffmpeg/ffmpegService';
 import { VISIBILITY_STATE } from 'types/magicMetadata';
@@ -96,13 +96,12 @@ export async function downloadFile(
         let fileBlob: Blob;
         const fileReader = new FileReader();
         if (accessedThroughSharedURL) {
-            const fileURL =
-                await PublicCollectionDownloadManager.getCachedOriginalFile(
-                    file
-                )[0];
+            const fileURL = await CastDownloadManager.getCachedOriginalFile(
+                file
+            )[0];
             if (!fileURL) {
                 fileBlob = await new Response(
-                    await PublicCollectionDownloadManager.downloadFile(
+                    await CastDownloadManager.downloadFile(
                         token,
                         passwordToken,
                         file
