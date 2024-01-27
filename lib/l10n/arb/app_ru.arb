@@ -6,9 +6,9 @@
   "@counterAppBarTitle": {
     "description": "Text shown in the AppBar of the Counter Page"
   },
-  "onBoardingBody": "Защитите ваши 2FA коды",
+  "onBoardingBody": "Храните ваши коды двухфакторной аутентификации в безопасности",
   "onBoardingGetStarted": "Начать",
-  "setupFirstAccount": "Настройте свой первый аккаунт",
+  "setupFirstAccount": "Настройте свою первую учетную запись",
   "importScanQrCode": "Сканировать QR-код",
   "qrCode": "QR-код",
   "importEnterSetupKey": "Ввести ключ настройки",
@@ -116,7 +116,7 @@
   "enterYourPasswordHint": "Введите пароль",
   "forgotPassword": "Забыл пароль",
   "oops": "Ой",
-  "suggestFeatures": "Предложить улучшения",
+  "suggestFeatures": "Предложить идеи",
   "faq": "FAQ",
   "faq_q_1": "Насколько безопасен ente Auth?",
   "faq_a_1": "Все коды, которые вы резервируете с помощью ente, хранятся в зашифрованном виде. Это означает, что только вы можете получить доступ к своим кодам. Наши приложения имеют открытый исходный код, а наша криптография прошла внешний аудит.",
@@ -170,7 +170,7 @@
   "oopsSomethingWentWrong": "Ой, что-то пошло не так.",
   "selectLanguage": "Выберите язык",
   "language": "Язык",
-  "social": "Соцсети",
+  "social": "Социальные сети",
   "security": "Безопасность",
   "lockscreen": "Экран блокировки",
   "authToChangeLockscreenSetting": "Пожалуйста, авторизуйтесь, чтобы изменить настройки экрана блокировки",
@@ -306,7 +306,7 @@
   "terminateSession": "Завершить сеанс?",
   "terminate": "Завершить",
   "thisDevice": "Это устройство",
-  "toResetVerifyEmail": "Чтобы сбросить пароль, сначала подтвердите свой адрес электронной почты.",
+  "toResetVerifyEmail": "Подтвердите адрес электронной почты, чтобы сбросить пароль.",
   "thisEmailIsAlreadyInUse": "Этот адрес электронной почты уже используется",
   "verificationFailedPleaseTryAgain": "Проверка не удалась, попробуйте еще раз",
   "yourVerificationCodeHasExpired": "Срок действия вашего проверочного кода истек",
@@ -330,11 +330,12 @@
   "singIn": "Войти",
   "sigInBackupReminder": "Экспортируйте свои коды, чтобы убедиться, что у вас есть резервная копия, из которой можно восстановить.",
   "offlineModeWarning": "Вы решили продолжить без резервных копий. Пожалуйста, создайте резервные копии вручную, чтобы убедиться, что ваши коды в безопасности.",
-  "showLargeIcons": "Показать большие значки",
+  "showLargeIcons": "Использовать большие значки",
   "shouldHideCode": "Скрыть коды",
+  "doubleTapToViewHiddenCode": "Вы можете нажать дважды на запись для просмотра кода",
   "focusOnSearchBar": "Фокусировать поиск при запуске приложения",
   "confirmUpdatingkey": "Вы уверены, что хотите обновить секретный ключ?",
-  "minimizeAppOnCopy": "Свернуть приложение при копировании",
+  "minimizeAppOnCopy": "Сворачивать приложение при копировании",
   "editCodeAuthMessage": "Аутентификация для редактирования кода",
   "deleteCodeAuthMessage": "Аутентификация для удаления кода",
   "showQRAuthMessage": "Аутентификация для отображения QR-кода",
@@ -348,7 +349,7 @@
   "@androidBiometricNotRecognized": {
     "description": "Message to let the user know that authentication was failed. It is used on Android side. Maximum 60 characters."
   },
-  "androidBiometricSuccess": "Успех",
+  "androidBiometricSuccess": "Успешно",
   "@androidBiometricSuccess": {
     "description": "Message to let the user know that authentication was successful. It is used on Android side. Maximum 60 characters."
   },
@@ -393,5 +394,11 @@
     "description": "Message showed on a button that the user can click to leave the current dialog. It is used on iOS side. Maximum 30 characters."
   },
   "noInternetConnection": "Нет подключения к Интернету",
-  "pleaseCheckYourInternetConnectionAndTryAgain": "Проверьте подключение к Интернету и повторите попытку."
+  "pleaseCheckYourInternetConnectionAndTryAgain": "Проверьте подключение к Интернету и повторите попытку.",
+  "signOutFromOtherDevices": "Выйти из других устройств",
+  "signOutOtherBody": "Если вы думаете, что кто-то может знать ваш пароль, вы можете принудительно выйти из всех устройств.",
+  "signOutOtherDevices": "Выйти из других устройств",
+  "doNotSignOut": "Не выходить",
+  "hearUsWhereTitle": "Как вы узнали о Ente? (необязательно)",
+  "hearUsExplanation": "Будет полезно, если вы укажете, где нашли нас, так как мы не отслеживаем установки приложения"
 }
