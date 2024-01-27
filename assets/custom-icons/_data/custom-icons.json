@@ -31,6 +31,12 @@
       "title": "Bitwarden"
     },
     {
+      "title": "BorgBase",
+      "altNames": ["borg"],
+      "slug": "BorgBase",
+      "hex": "222C31"
+    },
+    {
       "title": "Brave Creators",
       "slug": "brave_creators"
     },
@@ -85,6 +91,12 @@
       "title": "Google"
     },
     {
+      "title": "Gosuslugi",
+      "altNames": ["Госуслуги"],
+      "slug": "Gosuslugi",
+      "hex": "EE2F53"
+    },
+    {
       "title": "ING"
     },
     {
@@ -92,6 +104,16 @@
     },
     {
       "title": "Instagram"
+    },
+    {
+      "title": "IVPN",
+      "slug": "IVPN",
+      "hex": "FA3243"
+    },
+    {
+      "title": "IceDrive",
+      "slug": "Icedrive",
+      "hex": "1F4FD0"
     },
     {
       "title": "Jagex",
@@ -104,6 +126,9 @@
     {
       "title": "Kick",
       "hex": "53FC19"
+    },
+    {
+      "title": "Kite"
     },
     {
       "title": "Koofr",
@@ -129,6 +154,12 @@
       "altNames": ["mstdn", "fediscience", "mathstodon", "fosstodon"],
       "slug": "mastodon",
       "hex": "6364FF"
+    },
+    {
+      "title": "Murena",
+      "altNames": ["eCloud"],
+      "slug": "ecloud",
+      "hex": "EC6A55"
     },
     {
       "title": "Microsoft"
@@ -160,6 +191,11 @@
     },
     {
       "title": "PayPal"
+    },
+    {
+      "title": "pCloud",
+      "slug": "pCloud",
+      "hex": "1EBCC5"
     },
     {
       "title": "Peerberry",
@@ -288,6 +324,12 @@
       "title": "X",
       "altNames": ["twitter"],
       "slug": "x"
+    },
+    {
+      "title": "Yandex",
+      "altNames": ["Ya", "Яндекс"],
+      "slug": "Yandex",
+      "hex": "FC3F1D"
     }
   ]
 }
