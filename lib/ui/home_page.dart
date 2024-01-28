@@ -310,9 +310,9 @@ class _HomePageState extends State<HomePage> {
 
     // Attach a listener to the stream
     if (!kIsWeb && !Platform.isLinux) {
-      _appLinks.uriLinkStream.listen(
+      _appLinks.stringLinkStream.listen(
         (link) {
-          _handleDeeplink(context, link.toString());
+          _handleDeeplink(context, link);
         },
         onError: (err) {
           _logger.severe(err);
