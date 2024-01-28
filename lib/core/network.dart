@@ -33,10 +33,9 @@ class Network {
       BaseOptions(
         connectTimeout: Duration(milliseconds: kConnectTimeout),
         headers: {
-          if (PlatformUtil.isMobile())
-            HttpHeaders.userAgentHeader: FkUserAgent.userAgent
-          else
-            HttpHeaders.userAgentHeader: Platform.operatingSystem,
+          HttpHeaders.userAgentHeader: PlatformUtil.isMobile()
+              ? FkUserAgent.userAgent
+              : Platform.operatingSystem,
           'X-Client-Version': version,
           'X-Client-Package': packageName,
         },

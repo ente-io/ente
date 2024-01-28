@@ -41,13 +41,14 @@ class HomeEmptyStateWidget extends StatelessWidget {
                       style: Theme.of(context).textTheme.headlineMedium,
                     ),
                     const SizedBox(height: 64),
-                    SizedBox(
-                      width: 400,
-                      child: OutlinedButton(
-                        onPressed: PlatformUtil.isMobile() ? onScanTap : null,
-                        child: Text(l10n.importScanQrCode),
+                    if (PlatformUtil.isDesktop())
+                      SizedBox(
+                        width: 400,
+                        child: OutlinedButton(
+                          onPressed: onScanTap,
+                          child: Text(l10n.importScanQrCode),
+                        ),
                       ),
-                    ),
                     const SizedBox(height: 18),
                     SizedBox(
                       width: 400,

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:app_links/app_links.dart';
 import 'package:ente_auth/core/configuration.dart';
 import 'package:ente_auth/core/event_bus.dart';
 import 'package:ente_auth/ente_theme_data.dart';
@@ -29,7 +30,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:logging/logging.dart';
 import 'package:move_to_background/move_to_background.dart';
-import 'package:uni_links/uni_links.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -290,12 +290,10 @@ class _HomePageState extends State<HomePage> {
 
   Future<bool> _initDeepLinks() async {
     // Platform messages may fail, so we use a try/catch PlatformException.
+    final _appLinks = AppLinks();
     try {
       String? initialLink;
-      if (!kIsWeb && !Platform.isLinux) {
-        // uni_links doesn't work on desktop for now
-        initialLink = await getInitialLink();
-      }
+      initialLink = await _appLinks.getInitialAppLinkString();
       // Parse the link and warn the user, if it is not correct,
       // but keep in mind it could be `null`.
       if (initialLink != null) {
@@ -312,9 +310,9 @@ class _HomePageState extends State<HomePage> {
 
     // Attach a listener to the stream
     if (!kIsWeb && !Platform.isLinux) {
-      linkStream.listen(
-        (String? link) {
-          _handleDeeplink(context, link);
+      _appLinks.uriLinkStream.listen(
+        (link) {
+          _handleDeeplink(context, link.toString());
         },
         onError: (err) {
           _logger.severe(err);

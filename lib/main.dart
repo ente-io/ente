@@ -20,14 +20,15 @@ import 'package:ente_auth/ui/tools/app_lock.dart';
 import 'package:ente_auth/ui/tools/lock_screen.dart';
 import 'package:ente_auth/ui/utils/icon_utils.dart';
 import 'package:ente_auth/utils/platform_util.dart';
+import 'package:ente_auth/utils/window_protocol_handler.dart';
 import 'package:ente_crypto_dart/ente_crypto_dart.dart';
+import 'package:flutter/foundation.dart';
 import "package:flutter/material.dart";
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_displaymode/flutter_displaymode.dart';
 import 'package:logging/logging.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:privacy_screen/privacy_screen.dart';
-import 'package:uni_links_desktop/uni_links_desktop.dart';
 
 final _logger = Logger("main");
 
@@ -83,10 +84,17 @@ Future _runWithLogs(Function() function, {String prefix = ""}) async {
   );
 }
 
-Future<void> _init(bool bool, {String? via}) async {
-  if (Platform.isWindows) {
-    registerProtocol('unilinks');
+void _registerWindowsProtocol() {
+  const kWindowsScheme = 'ente';
+  // Register our protocol only on Windows platform
+  if (!kIsWeb && Platform.isWindows) {
+    WindowsProtocolHandler()
+        .register(kWindowsScheme, executable: null, arguments: null);
   }
+}
+
+Future<void> _init(bool bool, {String? via}) async {
+  _registerWindowsProtocol();
   await initCryptoUtil();
 
   await PreferenceService.instance.init();

@@ -1,4 +1,6 @@
 PODS:
+  - app_links (1.0.0):
+    - FlutterMacOS
   - connectivity_plus (0.0.1):
     - FlutterMacOS
     - ReachabilitySwift
@@ -60,14 +62,11 @@ PODS:
     - sqlite3/fts5
     - sqlite3/perf-threadsafe
     - sqlite3/rtree
-  - uni_links_desktop (0.0.1):
-    - FlutterMacOS
   - url_launcher_macos (0.0.1):
-    - FlutterMacOS
-  - webf (0.1.0):
     - FlutterMacOS
 
 DEPENDENCIES:
+  - app_links (from `Flutter/ephemeral/.symlinks/plugins/app_links/macos`)
   - connectivity_plus (from `Flutter/ephemeral/.symlinks/plugins/connectivity_plus/macos`)
   - desktop_webview_window (from `Flutter/ephemeral/.symlinks/plugins/desktop_webview_window/macos`)
   - device_info_plus (from `Flutter/ephemeral/.symlinks/plugins/device_info_plus/macos`)
@@ -85,9 +84,7 @@ DEPENDENCIES:
   - sodium_libs (from `Flutter/ephemeral/.symlinks/plugins/sodium_libs/macos`)
   - sqflite (from `Flutter/ephemeral/.symlinks/plugins/sqflite/macos`)
   - sqlite3_flutter_libs (from `Flutter/ephemeral/.symlinks/plugins/sqlite3_flutter_libs/macos`)
-  - uni_links_desktop (from `Flutter/ephemeral/.symlinks/plugins/uni_links_desktop/macos`)
   - url_launcher_macos (from `Flutter/ephemeral/.symlinks/plugins/url_launcher_macos/macos`)
-  - webf (from `Flutter/ephemeral/.symlinks/plugins/webf/macos`)
 
 SPEC REPOS:
   trunk:
@@ -99,6 +96,8 @@ SPEC REPOS:
     - sqlite3
 
 EXTERNAL SOURCES:
+  app_links:
+    :path: Flutter/ephemeral/.symlinks/plugins/app_links/macos
   connectivity_plus:
     :path: Flutter/ephemeral/.symlinks/plugins/connectivity_plus/macos
   desktop_webview_window:
@@ -133,14 +132,11 @@ EXTERNAL SOURCES:
     :path: Flutter/ephemeral/.symlinks/plugins/sqflite/macos
   sqlite3_flutter_libs:
     :path: Flutter/ephemeral/.symlinks/plugins/sqlite3_flutter_libs/macos
-  uni_links_desktop:
-    :path: Flutter/ephemeral/.symlinks/plugins/uni_links_desktop/macos
   url_launcher_macos:
     :path: Flutter/ephemeral/.symlinks/plugins/url_launcher_macos/macos
-  webf:
-    :path: Flutter/ephemeral/.symlinks/plugins/webf/macos
 
 SPEC CHECKSUMS:
+  app_links: 4481ed4d71f384b0c3ae5016f4633aa73d32ff67
   connectivity_plus: 18d3c32514c886e046de60e9c13895109866c747
   desktop_webview_window: d4365e71bcd4e1aa0c14cf0377aa24db0c16a7e2
   device_info_plus: 5401765fde0b8d062a2f8eb65510fb17e77cf07f
@@ -164,9 +160,7 @@ SPEC CHECKSUMS:
   sqflite: d0307f984e859ce2bd39b230d672a448ea3f47b4
   sqlite3: f307b6291c4db7b5086c38d6237446b98a738581
   sqlite3_flutter_libs: 6b9913d8fbb718e5ebf23658aa6934a0fb509c0f
-  uni_links_desktop: 45900fb319df48fcdea2df0756e9c2626696b026
   url_launcher_macos: d2691c7dd33ed713bf3544850a623080ec693d95
-  webf: 607b0efed07d1fad2650083942ce108e2de6dd9e
 
 PODFILE CHECKSUM: f401c31c8f7c5571f6f565c78915d54338812dab
 
