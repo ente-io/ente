@@ -10,12 +10,14 @@ import app_links
   ) -> Bool {
     GeneratedPluginRegistrant.register(with: self)
 
-    // Retrieve the link from the parameters
+    super.application(application, didFinishLaunchingWithOptions: launchOptions)
+
     if let url = AppLinks.shared.getLink(launchOptions: launchOptions) {
-      // We have a link, propagate it to your Flutter app
       AppLinks.shared.handleLink(url: url)
     }
 
-    return super.application(application, didFinishLaunchingWithOptions: launchOptions)
+    return false
+
+    // return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
 }
