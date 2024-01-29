@@ -12,7 +12,7 @@ import {
     updatePublicCollectionMagicMetadata,
     updateSharedCollectionMagicMetadata,
 } from 'services/collectionService';
-import { downloadFiles, downloadFilesDesktop } from 'utils/file';
+import { downloadFilesWithProgress } from 'utils/file';
 import { getAllLocalFiles, getLocalFiles } from 'services/fileService';
 import { EnteFile } from 'types/file';
 import { CustomError } from '@ente/shared/error';
@@ -34,7 +34,6 @@ import {
     SYSTEM_COLLECTION_TYPES,
     MOVE_TO_NOT_ALLOWED_COLLECTION,
     ADD_TO_NOT_ALLOWED_COLLECTION,
-    HIDDEN_ITEMS_SECTION,
     DEFAULT_HIDDEN_COLLECTION_USER_FACING_NAME,
 } from 'constants/collection';
 import { getUnixTimeInMicroSecondsWithDelta } from '@ente/shared/time';
@@ -44,14 +43,14 @@ import { getAlbumsURL } from '@ente/shared/network/api';
 import bs58 from 'bs58';
 import { t } from 'i18next';
 import isElectron from 'is-electron';
-import { SetCollectionDownloadProgressAttributes } from 'types/gallery';
+import { SetFilesDownloadProgressAttributes } from 'types/gallery';
 import ElectronAPIs from '@ente/shared/electron';
 import {
     getCollectionExportPath,
     getUniqueCollectionExportName,
 } from 'utils/export';
 import exportService from 'services/export';
-import { CollectionDownloadProgressAttributes } from 'components/Collections/CollectionDownloadProgress';
+import { addLogLine } from '@ente/shared/logging';
 
 export enum COLLECTION_OPS_TYPE {
     ADD,
@@ -100,7 +99,7 @@ export function getSelectedCollection(
 
 export async function downloadCollectionHelper(
     collectionID: number,
-    setCollectionDownloadProgressAttributes: SetCollectionDownloadProgressAttributes
+    setFilesDownloadProgressAttributes: SetFilesDownloadProgressAttributes
 ) {
     try {
         const allFiles = await getAllLocalFiles();
@@ -116,10 +115,8 @@ export async function downloadCollectionHelper(
         }
         await downloadCollectionFiles(
             collection.name,
-            collection.id,
-            isHiddenCollection(collection),
             collectionFiles,
-            setCollectionDownloadProgressAttributes
+            setFilesDownloadProgressAttributes
         );
     } catch (e) {
         logError(e, 'download collection failed ');
@@ -127,7 +124,7 @@ export async function downloadCollectionHelper(
 }
 
 export async function downloadDefaultHiddenCollectionHelper(
-    setCollectionDownloadProgressAttributes: SetCollectionDownloadProgressAttributes
+    setFilesDownloadProgressAttributes: SetFilesDownloadProgressAttributes
 ) {
     try {
         const hiddenCollections = await getLocalCollections('hidden');
@@ -139,78 +136,38 @@ export async function downloadDefaultHiddenCollectionHelper(
         );
         await downloadCollectionFiles(
             DEFAULT_HIDDEN_COLLECTION_USER_FACING_NAME,
-            HIDDEN_ITEMS_SECTION,
-            true,
             defaultHiddenCollectionFiles,
-            setCollectionDownloadProgressAttributes
+            setFilesDownloadProgressAttributes
         );
     } catch (e) {
         logError(e, 'download hidden files failed ');
     }
 }
 
-async function downloadCollectionFiles(
+export async function downloadCollectionFiles(
     collectionName: string,
-    collectionID: number,
-    isHidden: boolean,
     collectionFiles: EnteFile[],
-    setCollectionDownloadProgressAttributes: SetCollectionDownloadProgressAttributes
+    setFilesDownloadProgressAttributes: SetFilesDownloadProgressAttributes
 ) {
     if (!collectionFiles.length) {
         return;
     }
-    const canceller = new AbortController();
-    const increaseSuccess = () => {
-        if (canceller.signal.aborted) return;
-        setCollectionDownloadProgressAttributes((prev) => ({
-            ...prev,
-            success: prev.success + 1,
-        }));
-    };
-    const increaseFailed = () => {
-        if (canceller.signal.aborted) return;
-        setCollectionDownloadProgressAttributes((prev) => ({
-            ...prev,
-            failed: prev.failed + 1,
-        }));
-    };
-    const isCancelled = () => canceller.signal.aborted;
-    const initialProgressAttributes: CollectionDownloadProgressAttributes = {
-        collectionName,
-        collectionID,
-        isHidden,
-        canceller,
-        total: collectionFiles.length,
-        success: 0,
-        failed: 0,
-        downloadDirPath: null,
-    };
+    let downloadDirPath: string;
     if (isElectron()) {
         const selectedDir = await ElectronAPIs.selectDirectory();
         if (!selectedDir) {
             return;
         }
-        const downloadDirPath = await createCollectionDownloadFolder(
+        downloadDirPath = await createCollectionDownloadFolder(
             selectedDir,
             collectionName
         );
-        setCollectionDownloadProgressAttributes({
-            ...initialProgressAttributes,
-            downloadDirPath,
-        });
-        await downloadFilesDesktop(
-            collectionFiles,
-            { increaseSuccess, increaseFailed, isCancelled },
-            downloadDirPath
-        );
-    } else {
-        setCollectionDownloadProgressAttributes(initialProgressAttributes);
-        await downloadFiles(collectionFiles, {
-            increaseSuccess,
-            increaseFailed,
-            isCancelled,
-        });
     }
+    await downloadFilesWithProgress(
+        collectionFiles,
+        downloadDirPath,
+        setFilesDownloadProgressAttributes
+    );
 }
 
 async function createCollectionDownloadFolder(
@@ -521,7 +478,8 @@ export function isValidReplacementAlbum(
     return (
         collection.name === wantedCollectionName &&
         (collection.type === CollectionType.album ||
-            collection.type === CollectionType.folder) &&
+            collection.type === CollectionType.folder ||
+            collection.type === CollectionType.uncategorized) &&
         !isHiddenCollection(collection) &&
         !isQuickLinkCollection(collection) &&
         !isIncomingShare(collection, user)
@@ -610,8 +568,13 @@ export const getOrCreateAlbum = async (
     }
     for (const collection of existingCollections) {
         if (isValidReplacementAlbum(collection, user, albumName)) {
+            addLogLine(
+                `Found existing album ${albumName} with id ${collection.id}`
+            );
             return collection;
         }
     }
-    return createAlbum(albumName);
+    const album = await createAlbum(albumName);
+    addLogLine(`Created new album ${albumName} with id ${album.id}`);
+    return album;
 };

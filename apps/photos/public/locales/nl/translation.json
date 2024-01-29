@@ -85,9 +85,9 @@
     "ZOOM_IN_OUT": "In/uitzoomen",
     "PREVIOUS": "Vorige (←)",
     "NEXT": "Volgende (→)",
-    "TITLE_PHOTOS": "",
-    "TITLE_ALBUMS": "",
-    "TITLE_AUTH": "",
+    "TITLE_PHOTOS": "Ente Foto's",
+    "TITLE_ALBUMS": "Ente Foto's",
+    "TITLE_AUTH": "Ente Auth",
     "UPLOAD_FIRST_PHOTO": "Je eerste foto uploaden",
     "IMPORT_YOUR_FOLDERS": "Importeer uw mappen",
     "UPLOAD_DROPZONE_MESSAGE": "Sleep om een back-up van je bestanden te maken",
@@ -210,6 +210,7 @@
     "SEARCH_TYPE": {
         "COLLECTION": "Album",
         "LOCATION": "Locatie",
+        "CITY": "",
         "DATE": "Datum",
         "FILE_NAME": "Bestandsnaam",
         "THING": "Inhoud",
@@ -622,7 +623,10 @@
     "PHOTO_EDITOR": "Fotobewerker",
     "FASTER_UPLOAD": "Snellere uploads",
     "FASTER_UPLOAD_DESCRIPTION": "Uploaden door nabije servers",
-    "STATUS": "Status",
+    "MAGIC_SEARCH_STATUS": "Magische Zoekfunctie Status",
     "INDEXED_ITEMS": "Geïndexeerde bestanden",
-    "CACHE_DIRECTORY": "Cache map"
+    "CACHE_DIRECTORY": "Cache map",
+    "FREEHAND": "",
+    "APPLY_CROP": "",
+    "PHOTO_EDIT_REQUIRED_TO_SAVE": ""
 }

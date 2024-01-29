@@ -26,7 +26,11 @@ export async function getDuplicates(
     collectionNameMap: Map<number, string>
 ) {
     try {
-        const dupes = await fetchDuplicateFileIDs();
+        const ascDupes = await fetchDuplicateFileIDs();
+
+        const descSortedDupes = ascDupes.sort((firstDupe, secondDupe) => {
+            return secondDupe.size - firstDupe.size;
+        });
 
         const fileMap = new Map<number, EnteFile>();
         for (const file of files) {
@@ -35,7 +39,7 @@ export async function getDuplicates(
 
         let result: Duplicate[] = [];
 
-        for (const dupe of dupes) {
+        for (const dupe of descSortedDupes) {
             let duplicateFiles: EnteFile[] = [];
             for (const fileID of dupe.fileIDs) {
                 if (fileMap.has(fileID)) {

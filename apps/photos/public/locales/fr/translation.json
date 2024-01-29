@@ -210,6 +210,7 @@
     "SEARCH_TYPE": {
         "COLLECTION": "l'album",
         "LOCATION": "Emplacement",
+        "CITY": "",
         "DATE": "Date",
         "FILE_NAME": "Nom de fichier",
         "THING": "Chose",
@@ -622,7 +623,10 @@
     "PHOTO_EDITOR": "Éditeur de photos",
     "FASTER_UPLOAD": "Chargements plus rapides",
     "FASTER_UPLOAD_DESCRIPTION": "Router les chargements vers les serveurs à proximité",
-    "STATUS": "État",
+    "MAGIC_SEARCH_STATUS": "",
     "INDEXED_ITEMS": "Éléments indexés",
-    "CACHE_DIRECTORY": ""
+    "CACHE_DIRECTORY": "",
+    "FREEHAND": "",
+    "APPLY_CROP": "",
+    "PHOTO_EDIT_REQUIRED_TO_SAVE": ""
 }

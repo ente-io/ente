@@ -16,12 +16,11 @@ import { useLocalState } from '@ente/shared/hooks/useLocalState';
 import { sortCollectionSummaries } from 'services/collectionService';
 import { LS_KEYS } from '@ente/shared/storage/localStorage';
 import {
-    CollectionDownloadProgress,
-    CollectionDownloadProgressAttributes,
-    isCollectionDownloadCancelled,
-    isCollectionDownloadCompleted,
-} from './CollectionDownloadProgress';
-import { SetCollectionDownloadProgressAttributes } from 'types/gallery';
+    FilesDownloadProgressAttributes,
+    isFilesDownloadCancelled,
+    isFilesDownloadCompleted,
+} from '../FilesDownloadProgress';
+import { SetFilesDownloadProgressAttributesCreator } from 'types/gallery';
 import AlbumCastDialog from './CollectionOptions/AlbumCastDialog';
 
 interface Iprops {
@@ -34,6 +33,8 @@ interface Iprops {
     hiddenCollectionSummaries: CollectionSummaries;
     setCollectionNamerAttributes: SetCollectionNamerAttributes;
     setPhotoListHeader: (value: TimeStampListItem) => void;
+    filesDownloadProgressAttributesList: FilesDownloadProgressAttributes[];
+    setFilesDownloadProgressAttributesCreator: SetFilesDownloadProgressAttributesCreator;
 }
 
 export default function Collections(props: Iprops) {
@@ -47,16 +48,13 @@ export default function Collections(props: Iprops) {
         hiddenCollectionSummaries,
         setCollectionNamerAttributes,
         setPhotoListHeader,
+        filesDownloadProgressAttributesList,
+        setFilesDownloadProgressAttributesCreator,
     } = props;
 
     const [allCollectionView, setAllCollectionView] = useState(false);
     const [collectionShareModalView, setCollectionShareModalView] =
         useState(false);
-
-    const [
-        collectionDownloadProgressAttributesList,
-        setCollectionDownloadProgressAttributesList,
-    ] = useState<CollectionDownloadProgressAttributes[]>([]);
 
     const [showAlbumCastDialog, setShowAlbumCastDialog] = useState(false);
 
@@ -89,38 +87,16 @@ export default function Collections(props: Iprops) {
         [collectionListSortBy, toShowCollectionSummaries]
     );
 
-    const setCollectionDownloadProgressAttributesCreator =
-        (collectionID: number): SetCollectionDownloadProgressAttributes =>
-        (value) => {
-            setCollectionDownloadProgressAttributesList((prev) => {
-                const attributes = prev?.find(
-                    (attr) => attr.collectionID === collectionID
-                );
-                const updatedAttributes =
-                    typeof value === 'function' ? value(attributes) : value;
-
-                const updatedAttributesList = attributes
-                    ? prev.map((attr) =>
-                          attr.collectionID === collectionID
-                              ? updatedAttributes
-                              : attr
-                      )
-                    : [...prev, updatedAttributes];
-
-                return updatedAttributesList;
-            });
-        };
-
     const isActiveCollectionDownloadInProgress = useCallback(() => {
-        const attributes = collectionDownloadProgressAttributesList.find(
+        const attributes = filesDownloadProgressAttributesList.find(
             (attr) => attr.collectionID === activeCollectionID
         );
         return (
             attributes &&
-            !isCollectionDownloadCancelled(attributes) &&
-            !isCollectionDownloadCompleted(attributes)
+            !isFilesDownloadCancelled(attributes) &&
+            !isFilesDownloadCompleted(attributes)
         );
-    }, [activeCollectionID, collectionDownloadProgressAttributesList]);
+    }, [activeCollectionID, filesDownloadProgressAttributesList]);
 
     useEffect(() => {
         if (isInSearchMode) {
@@ -137,8 +113,8 @@ export default function Collections(props: Iprops) {
                     showCollectionShareModal={() =>
                         setCollectionShareModalView(true)
                     }
-                    setCollectionDownloadProgressAttributesCreator={
-                        setCollectionDownloadProgressAttributesCreator
+                    setFilesDownloadProgressAttributesCreator={
+                        setFilesDownloadProgressAttributesCreator
                     }
                     isActiveCollectionDownloadInProgress={
                         isActiveCollectionDownloadInProgress
@@ -198,10 +174,6 @@ export default function Collections(props: Iprops) {
                 open={collectionShareModalView}
                 onClose={closeCollectionShare}
                 collection={activeCollection}
-            />
-            <CollectionDownloadProgress
-                attributesList={collectionDownloadProgressAttributesList}
-                setAttributesList={setCollectionDownloadProgressAttributesList}
             />
             <AlbumCastDialog
                 currentCollection={props.activeCollection}

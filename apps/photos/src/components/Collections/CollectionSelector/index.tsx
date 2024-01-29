@@ -140,8 +140,8 @@ function CollectionSelector({
                     ? t('UNHIDE_TO_COLLECTION')
                     : t('SELECT_COLLECTION')}
             </DialogTitleWithCloseButton>
-            <DialogContent>
-                <FlexWrapper flexWrap="wrap" gap={0.5}>
+            <DialogContent sx={{ '&&&': { padding: 0 } }}>
+                <FlexWrapper flexWrap="wrap" gap={'4px'} padding={'16px'}>
                     <AddCollectionButton
                         showNextModal={attributes.showNextModal}
                     />

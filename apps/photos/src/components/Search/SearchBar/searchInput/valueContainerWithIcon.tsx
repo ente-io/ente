@@ -17,6 +17,7 @@ const getIconByType = (type: SuggestionType) => {
         case SuggestionType.DATE:
             return <CalendarIcon />;
         case SuggestionType.LOCATION:
+        case SuggestionType.CITY:
             return <LocationIcon />;
         case SuggestionType.COLLECTION:
             return <FolderIcon />;

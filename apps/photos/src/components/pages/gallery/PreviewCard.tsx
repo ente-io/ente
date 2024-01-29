@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import { EnteFile } from 'types/file';
-import { styled } from '@mui/material';
+import { Tooltip, styled } from '@mui/material';
 import PlayCircleOutlineOutlinedIcon from '@mui/icons-material/PlayCircleOutlineOutlined';
 import DownloadManager from 'services/download';
 import useLongPress from '@ente/shared/hooks/useLongPress';
@@ -218,6 +218,12 @@ export default function PreviewCard(props: IProps) {
     const galleryContext = useContext(GalleryContext);
     const deduplicateContext = useContext(DeduplicateContext);
 
+    const longPressCallback = () => {
+        onSelect(!selected);
+    };
+
+    const longPress = useLongPress(longPressCallback, 500);
+
     const {
         file,
         onClick,
@@ -289,22 +295,19 @@ export default function PreviewCard(props: IProps) {
         }
     };
 
-    const longPressCallback = () => {
-        onSelect(!selected);
-    };
     const handleHover = () => {
         if (isRangeSelectActive) {
             onHover();
         }
     };
 
-    return (
+    const renderFn = () => (
         <Cont
             key={`thumb-${file.id}}`}
             onClick={handleClick}
             onMouseEnter={handleHover}
             disabled={!file?.msrc && !imgSrc}
-            {...(selectable ? useLongPress(longPressCallback, 500) : {})}>
+            {...(selectable ? longPress : {})}>
             {selectable && (
                 <Check
                     type="checkbox"
@@ -360,4 +363,22 @@ export default function PreviewCard(props: IProps) {
             )}
         </Cont>
     );
+
+    if (deduplicateContext.isOnDeduplicatePage) {
+        return (
+            <Tooltip
+                placement="bottom-start"
+                enterDelay={300}
+                enterNextDelay={100}
+                title={`${
+                    file.metadata.title
+                } - ${deduplicateContext.collectionNameMap.get(
+                    file.collectionID
+                )}`}>
+                {renderFn()}
+            </Tooltip>
+        );
+    } else {
+        return renderFn();
+    }
 }

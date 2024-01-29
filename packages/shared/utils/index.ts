@@ -22,3 +22,7 @@ export function downloadUsingAnchor(link: string, name: string) {
     URL.revokeObjectURL(link);
     a.remove();
 }
+
+export function isPromise<T>(obj: T | Promise<T>): obj is Promise<T> {
+    return obj && typeof (obj as any).then === 'function';
+}

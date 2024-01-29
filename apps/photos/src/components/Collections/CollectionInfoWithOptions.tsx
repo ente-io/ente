@@ -11,16 +11,14 @@ import Favorite from '@mui/icons-material/FavoriteRounded';
 import ArchiveOutlined from '@mui/icons-material/ArchiveOutlined';
 import PeopleIcon from '@mui/icons-material/People';
 import LinkIcon from '@mui/icons-material/Link';
-import { SetCollectionDownloadProgressAttributes } from 'types/gallery';
+import { SetFilesDownloadProgressAttributesCreator } from 'types/gallery';
 
 interface Iprops {
     activeCollection: Collection;
     collectionSummary: CollectionSummary;
     setCollectionNamerAttributes: SetCollectionNamerAttributes;
     showCollectionShareModal: () => void;
-    setCollectionDownloadProgressAttributesCreator: (
-        collectionID: number
-    ) => SetCollectionDownloadProgressAttributes;
+    setFilesDownloadProgressAttributesCreator: SetFilesDownloadProgressAttributesCreator;
     isActiveCollectionDownloadInProgress: () => boolean;
     setActiveCollectionID: (collectionID: number) => void;
     setShowAlbumCastDialog: Dispatch<SetStateAction<boolean>>;

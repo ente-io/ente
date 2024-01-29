@@ -1,13 +1,7 @@
 import { IconButton } from '@mui/material';
 import pDebounce from 'p-debounce';
 import { AppContext } from 'pages/_app';
-import React, {
-    useCallback,
-    useContext,
-    useEffect,
-    useRef,
-    useState,
-} from 'react';
+import { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import {
     getAutoCompleteSuggestions,
     getDefaultOptions,
@@ -34,6 +28,9 @@ import { t } from 'i18next';
 import memoize from 'memoize-one';
 import { LocationTagData } from 'types/entity';
 import { FILE_TYPE } from 'constants/file';
+import { InputActionMeta } from 'react-select/src/types';
+import { components } from 'react-select';
+import { City } from 'services/locationSearchService';
 
 interface Iprops {
     isOpen: boolean;
@@ -43,11 +40,16 @@ interface Iprops {
     collections: Collection[];
 }
 
-const createComponents = memoize((Option, ValueContainer, Menu) => ({
+const createComponents = memoize((Option, ValueContainer, Menu, Input) => ({
     Option,
     ValueContainer,
     Menu,
+    Input,
 }));
+
+const VisibleInput = (props) => (
+    <components.Input {...props} isHidden={false} />
+);
 
 export default function SearchInput(props: Iprops) {
     const selectRef = useRef(null);
@@ -55,8 +57,16 @@ export default function SearchInput(props: Iprops) {
     const appContext = useContext(AppContext);
     const handleChange = (value: SearchOption) => {
         setValue(value);
+        setQuery(value.label);
+        blur();
+    };
+    const handleInputChange = (value: string, actionMeta: InputActionMeta) => {
+        if (actionMeta.action === 'input-change') {
+            setQuery(value);
+        }
     };
     const [defaultOptions, setDefaultOptions] = useState([]);
+    const [query, setQuery] = useState('');
 
     useEffect(() => {
         search(value);
@@ -64,10 +74,12 @@ export default function SearchInput(props: Iprops) {
 
     useEffect(() => {
         refreshDefaultOptions();
+        const t = setInterval(() => refreshDefaultOptions(), 2000);
+        return () => clearInterval(t);
     }, []);
 
     async function refreshDefaultOptions() {
-        const defaultOptions = await getDefaultOptions(props.files);
+        const defaultOptions = await getDefaultOptions();
         setDefaultOptions(defaultOptions);
     }
 
@@ -80,13 +92,21 @@ export default function SearchInput(props: Iprops) {
             }, 10);
             props.setIsOpen(false);
             setValue(null);
+            setQuery('');
         }
     };
 
-    const getOptions = pDebounce(
-        getAutoCompleteSuggestions(props.files, props.collections),
-        250
+    const getOptions = useCallback(
+        pDebounce(
+            getAutoCompleteSuggestions(props.files, props.collections),
+            250
+        ),
+        [props.files, props.collections]
     );
+
+    const blur = () => {
+        selectRef.current?.blur();
+    };
 
     const search = (selectedOption: SearchOption) => {
         if (!selectedOption) {
@@ -106,9 +126,16 @@ export default function SearchInput(props: Iprops) {
                 };
                 props.setIsOpen(true);
                 break;
+            case SuggestionType.CITY:
+                search = {
+                    city: selectedOption.value as City,
+                };
+                props.setIsOpen(true);
+                break;
             case SuggestionType.COLLECTION:
                 search = { collection: selectedOption.value as number };
                 setValue(null);
+                setQuery('');
                 break;
             case SuggestionType.FILE_NAME:
                 search = { files: selectedOption.value as number[] };
@@ -159,7 +186,8 @@ export default function SearchInput(props: Iprops) {
     const components = createComponents(
         OptionWithInfo,
         ValueContainerWithIcon,
-        MemoizedMenuWithPeople
+        MemoizedMenuWithPeople,
+        VisibleInput
     );
 
     return (
@@ -173,6 +201,8 @@ export default function SearchInput(props: Iprops) {
                 onChange={handleChange}
                 onFocus={handleOnFocus}
                 isClearable
+                inputValue={query}
+                onInputChange={handleInputChange}
                 escapeClearsValue
                 styles={SelectStyles}
                 defaultOptions={

@@ -210,6 +210,7 @@
     "SEARCH_TYPE": {
         "COLLECTION": "相册",
         "LOCATION": "地理位置",
+        "CITY": "位置",
         "DATE": "日期",
         "FILE_NAME": "文件名",
         "THING": "内容",
@@ -622,7 +623,10 @@
     "PHOTO_EDITOR": "照片编辑器",
     "FASTER_UPLOAD": "更快上传",
     "FASTER_UPLOAD_DESCRIPTION": "通过附近的服务器路由上传",
-    "STATUS": "状态",
+    "MAGIC_SEARCH_STATUS": "魔法搜索状态",
     "INDEXED_ITEMS": "索引项目",
-    "CACHE_DIRECTORY": "缓存文件夹"
+    "CACHE_DIRECTORY": "缓存文件夹",
+    "FREEHAND": "手画",
+    "APPLY_CROP": "应用裁剪",
+    "PHOTO_EDIT_REQUIRED_TO_SAVE": "保存之前必须至少执行一项转换或颜色调整。"
 }
