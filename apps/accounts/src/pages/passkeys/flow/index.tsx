@@ -36,7 +36,8 @@ const PasskeysFlow = () => {
             if (
                 redirect !== '' &&
                 !redirectURL.host.endsWith('.ente.io') &&
-                redirectURL.protocol !== 'ente:'
+                redirectURL.protocol !== 'ente:' &&
+                redirectURL.protocol !== 'enteauth:'
             ) {
                 setInvalidInfo(true);
                 setLoading(false);
