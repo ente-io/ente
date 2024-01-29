@@ -7,8 +7,5 @@
         "build": "next build",
         "lint": "next lint",
         "export": "next export"
-    },
-    "dependencies": {
-        "@next/font": "13.1.3"
     }
 }
