@@ -1,5 +1,5 @@
-import { runningInBrowser } from '@ente/shared/apps/browser';
 import { getAlbumsURL, getAuthURL } from '@ente/shared/network/api';
+import { runningInBrowser } from '@ente/shared/platform';
 import { PAGES } from 'constants/pages';
 
 export enum APPS {
