@@ -51,13 +51,13 @@ class _FilePropertiesItemWidgetState extends State<FilePropertiesItemWidget> {
     final StringBuffer dimString = StringBuffer();
     if (widget.exifData["resolution"] != null &&
         widget.exifData["megaPixels"] != null) {
-      dimString.write('${widget.exifData["megaPixels"]}MP ');
+      dimString.write('${widget.exifData["megaPixels"]}MP   ');
       dimString.write('${widget.exifData["resolution"]}');
     } else if (widget.file.hasDimensions) {
       final double megaPixels =
           (widget.file.width * widget.file.height) / 1000000;
       final double roundedMegaPixels = (megaPixels * 10).round() / 10.0;
-      dimString.write('${roundedMegaPixels.toStringAsFixed(1)}MP ');
+      dimString.write('${roundedMegaPixels.toStringAsFixed(1)}MP   ');
       dimString.write('${widget.file.width} x ${widget.file.height}');
     }
     final subSectionWidgets = <Widget>[];
