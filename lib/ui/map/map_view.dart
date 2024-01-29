@@ -20,6 +20,8 @@ class MapView extends StatefulWidget {
   final double initialZoom;
   final int debounceDuration;
   final double bottomSheetDraggableAreaHeight;
+  final bool showControls;
+  final int interactiveFlags;
 
   const MapView({
     Key? key,
@@ -32,6 +34,8 @@ class MapView extends StatefulWidget {
     required this.initialZoom,
     required this.debounceDuration,
     required this.bottomSheetDraggableAreaHeight,
+    this.interactiveFlags = InteractiveFlag.all,
+    this.showControls = true,
   }) : super(key: key);
 
   @override
@@ -85,6 +89,7 @@ class _MapViewState extends State<MapView> {
                 onChange(position.bounds!);
               }
             },
+            interactiveFlags: widget.interactiveFlags,
           ),
           nonRotatedChildren: [
             Padding(
@@ -133,47 +138,51 @@ class _MapViewState extends State<MapView> {
             ),
           ],
         ),
-        Positioned(
-          top: 4,
-          left: 10,
-          child: SafeArea(
-            child: MapButton(
-              icon: Icons.arrow_back,
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              heroTag: 'back',
-            ),
-          ),
-        ),
-        Positioned(
-          bottom: widget.bottomSheetDraggableAreaHeight + 10,
-          right: 10,
-          child: Column(
-            children: [
-              MapButton(
-                icon: Icons.add,
-                onPressed: () {
-                  widget.controller.move(
-                    widget.controller.center,
-                    widget.controller.zoom + 1,
-                  );
-                },
-                heroTag: 'zoom-in',
-              ),
-              MapButton(
-                icon: Icons.remove,
-                onPressed: () {
-                  widget.controller.move(
-                    widget.controller.center,
-                    widget.controller.zoom - 1,
-                  );
-                },
-                heroTag: 'zoom-out',
-              ),
-            ],
-          ),
-        ),
+        widget.showControls
+            ? Positioned(
+                top: 4,
+                left: 10,
+                child: SafeArea(
+                  child: MapButton(
+                    icon: Icons.arrow_back,
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    heroTag: 'back',
+                  ),
+                ),
+              )
+            : const SizedBox.shrink(),
+        widget.showControls
+            ? Positioned(
+                bottom: widget.bottomSheetDraggableAreaHeight + 10,
+                right: 10,
+                child: Column(
+                  children: [
+                    MapButton(
+                      icon: Icons.add,
+                      onPressed: () {
+                        widget.controller.move(
+                          widget.controller.center,
+                          widget.controller.zoom + 1,
+                        );
+                      },
+                      heroTag: 'zoom-in',
+                    ),
+                    MapButton(
+                      icon: Icons.remove,
+                      onPressed: () {
+                        widget.controller.move(
+                          widget.controller.center,
+                          widget.controller.zoom - 1,
+                        );
+                      },
+                      heroTag: 'zoom-out',
+                    ),
+                  ],
+                ),
+              )
+            : const SizedBox.shrink(),
       ],
     );
   }
@@ -181,7 +190,10 @@ class _MapViewState extends State<MapView> {
   List<Marker> _buildMakers() {
     return List<Marker>.generate(widget.imageMarkers.length, (index) {
       final imageMarker = widget.imageMarkers[index];
-      return mapMarker(imageMarker, index.toString());
+      return mapMarker(
+        imageMarker,
+        index.toString(),
+      );
     });
   }
 }

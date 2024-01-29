@@ -1,6 +1,8 @@
 import "dart:async";
 
 import "package:flutter/material.dart";
+import "package:flutter_map/flutter_map.dart";
+import "package:latlong2/latlong.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/location_tag_updated_event.dart";
 import "package:photos/generated/l10n.dart";
@@ -10,6 +12,8 @@ import "package:photos/states/location_screen_state.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/buttons/chip_button_widget.dart";
 import "package:photos/ui/components/info_item_widget.dart";
+import "package:photos/ui/map/image_marker.dart";
+import "package:photos/ui/map/map_view.dart";
 import 'package:photos/ui/viewer/location/add_location_sheet.dart';
 import "package:photos/ui/viewer/location/location_screen.dart";
 import "package:photos/utils/navigation_util.dart";
@@ -58,6 +62,40 @@ class _LocationTagsWidgetState extends State<LocationTagsWidget> {
         subtitleSection: locationTagChips,
         hasChipButtons: hasChipButtons ?? true,
         onTap: onTap,
+        // middleSection: SizedBox(
+        //   height: 150,
+        //   width: 300,
+        //   child: MapScreen(
+        //     filesFutureFn: () => Future.value([widget.file]),
+        //     showGallery: false,
+        //   ),
+        // ),
+        middleSection: SizedBox(
+          height: 150,
+          width: 300,
+          child: MapView(
+            updateVisibleImages: () {},
+            imageMarkers: [
+              ImageMarker(
+                imageFile: widget.file,
+                latitude: widget.file.location!.latitude!,
+                longitude: widget.file.location!.longitude!,
+              ),
+            ],
+            controller: MapController(),
+            center: LatLng(
+              widget.file.location!.latitude!,
+              widget.file.location!.longitude!,
+            ),
+            minZoom: 7,
+            maxZoom: 7,
+            initialZoom: 7,
+            debounceDuration: 0,
+            bottomSheetDraggableAreaHeight: 0,
+            showControls: false,
+            interactiveFlags: InteractiveFlag.none,
+          ),
+        ),
 
         /// to be used when state issues are fixed when location is updated
         // editOnTap: widget.file.ownerID == Configuration.instance.getUserID()!
