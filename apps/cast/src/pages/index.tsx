@@ -61,24 +61,23 @@ export default function PairingMode() {
     useEffect(() => {
         if (!cast) return;
         const context = cast.framework.CastReceiverContext.getInstance();
+        if (!context.isInitialized) {
+            const options = new cast.framework.CastReceiverOptions();
+            options.customNamespaces = Object.assign({});
+            options.customNamespaces['urn:x-cast:pair-request'] =
+                cast.framework.system.MessageType.JSON;
 
-        const options = new cast.framework.CastReceiverOptions();
-        options.customNamespaces = Object.assign({});
-        options.customNamespaces['urn:x-cast:pair-request'] =
-            cast.framework.system.MessageType.JSON;
+            options.disableIdleTimeout = true;
 
-        options.disableIdleTimeout = true;
-
-        context.addCustomMessageListener(
-            'urn:x-cast:pair-request',
-            messageReceiveHandler
-        );
-
-        context.start(options);
-
-        return () => {
-            context.stop(options);
-        };
+            context.addCustomMessageListener(
+                'urn:x-cast:pair-request',
+                messageReceiveHandler
+            );
+            context.start(options);
+            return () => {
+                context.stop(options);
+            };
+        }
     }, [cast]);
 
     const messageReceiveHandler = (message: {
@@ -115,13 +114,20 @@ export default function PairingMode() {
     };
 
     const pollForCastData = async () => {
-        if (codePending) return;
+        if (codePending) {
+            console.log('code pending');
+            return;
+        }
         // see if we were acknowledged on the client.
         // the client will send us the encrypted payload using our public key that we advertised.
         // then, we can decrypt this and store all the necessary info locally so we can play the collection slideshow.
         let devicePayload = '';
         try {
-            devicePayload = await castGateway.getCastData(`${digits.join('')}`);
+            const encDastData = await castGateway.getCastData(
+                `${digits.join('')}`
+            );
+            if (!encDastData) return;
+            devicePayload = encDastData;
         } catch (e) {
             return;
         }
@@ -155,6 +161,8 @@ export default function PairingMode() {
                 `${digits.join('')}`,
                 publicKeyB64
             );
+            setCodeGeneratedAt(new Date());
+            setCodePending(false);
         } catch (e) {
             // schedule init after 5 seconds
             setTimeout(() => {
@@ -162,9 +170,6 @@ export default function PairingMode() {
             }, 5000);
             return;
         }
-
-        setCodeGeneratedAt(new Date());
-        setCodePending(false);
     };
 
     const router = useRouter();
@@ -174,7 +179,6 @@ export default function PairingMode() {
 
         const interval = setInterval(async () => {
             const data = await pollForCastData();
-
             if (!data) return;
             storePayloadLocally(data);
             await router.push('/slideshow');
@@ -183,7 +187,7 @@ export default function PairingMode() {
         return () => {
             clearInterval(interval);
         };
-    }, [digits, publicKeyB64, privateKeyB64]);
+    }, [digits, publicKeyB64, privateKeyB64, codePending]);
 
     useEffect(() => {
         if (!publicKeyB64) return;

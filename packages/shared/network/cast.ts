@@ -6,7 +6,7 @@ import { getEndpoint } from './api';
 class CastGateway {
     constructor() {}
 
-    public async getCastData(code: string): Promise<string> {
+    public async getCastData(code: string): Promise<string | null> {
         let resp;
         try {
             resp = await HTTPService.get(
@@ -16,7 +16,7 @@ class CastGateway {
             logError(e, 'failed to getCastData');
             throw e;
         }
-        return resp.data.encPayload;
+        return resp.data.encCastData;
     }
 
     public async getPublicKey(code: string): Promise<string> {
