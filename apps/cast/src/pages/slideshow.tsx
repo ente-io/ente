@@ -4,8 +4,11 @@ import Theatre from 'components/Theatre';
 import { FILE_TYPE } from 'constants/file';
 import { useRouter } from 'next/router';
 import { createContext, useEffect, useState } from 'react';
-import { getCollectionWithKey } from 'services/collectionService';
-import { syncFiles } from 'services/fileService';
+import {
+    getCastCollection,
+    getLocalFiles,
+    syncPublicFiles,
+} from 'services/cast/castService';
 import { EnteFile } from 'types/file';
 import { downloadFileAsBlob, isRawFileFromFileName } from 'utils/file';
 
@@ -22,6 +25,7 @@ export default function Slideshow() {
     const [nextFile, setNextFile] = useState<EnteFile | undefined>(undefined);
 
     const [loading, setLoading] = useState(true);
+    const [castToken, setCastToken] = useState<string>('');
 
     const [renderableFileURLCache, setRenderableFileURLCache] = useState<
         Record<string, string>
@@ -29,28 +33,21 @@ export default function Slideshow() {
 
     const init = async () => {
         try {
-            // get requested collection id from localStorage
-            const requestedCollectionID =
-                window.localStorage.getItem('collectionID');
-
             const requestedCollectionKey =
                 window.localStorage.getItem('collectionKey');
             const castToken = window.localStorage.getItem('castToken');
+            setCastToken(castToken);
 
-            const collection = await getCollectionWithKey(
-                Number(requestedCollectionID),
-                requestedCollectionKey,
-                'cast',
-                castToken
+            const collection = await getCastCollection(
+                castToken,
+                requestedCollectionKey
             );
 
-            const files = await syncFiles('normal', [collection], () => {});
-
-            if (requestedCollectionID) {
-                setCollectionFiles(
-                    files.filter((file) => isFileEligibleForCast(file))
-                );
-            }
+            await syncPublicFiles(castToken, collection, () => {});
+            const files = await getLocalFiles(String(collection.id));
+            setCollectionFiles(
+                files.filter((file) => isFileEligibleForCast(file))
+            );
         } catch (e) {
             logError(e, 'error during sync');
             alert('error, redirect to home' + e);
@@ -122,7 +119,10 @@ export default function Slideshow() {
         }
 
         try {
-            const blob = await downloadFileAsBlob(currentFile as EnteFile);
+            const blob = await downloadFileAsBlob(
+                currentFile as EnteFile,
+                castToken
+            );
 
             const url = URL.createObjectURL(blob);
 

@@ -1,23 +1,21 @@
 import { getEndpoint } from '@ente/shared/network/api';
 import localForage from '@ente/shared/storage/localForage';
-import { Collection, CollectionPublicMagicMetadata } from 'types/collection';
 import HTTPService from '@ente/shared/network/HTTPService';
 import { logError } from '@ente/shared/sentry';
-import { decryptFile, mergeMetadata, sortFiles } from 'utils/file';
-import { EncryptedEnteFile, EnteFile } from 'types/file';
-
 import { CustomError, parseSharingErrorCodes } from '@ente/shared/error';
 import ComlinkCryptoWorker from '@ente/shared/crypto';
 
+import { Collection, CollectionPublicMagicMetadata } from 'types/collection';
+import { EncryptedEnteFile, EnteFile } from 'types/file';
+import { decryptFile, mergeMetadata, sortFiles } from 'utils/file';
+
 export interface SavedCollectionFiles {
-    collectionUID: string;
+    collectionLocalID: string;
     files: EnteFile[];
 }
 const ENDPOINT = getEndpoint();
 const COLLECTION_FILES_TABLE = 'collection-files';
 const COLLECTIONS_TABLE = 'collections';
-
-export const getPublicCollectionUID = (token: string) => `${token}`;
 
 const getLastSyncKey = (collectionUID: string) => `${collectionUID}-time`;
 
@@ -29,11 +27,12 @@ export const getLocalFiles = async (
             COLLECTION_FILES_TABLE
         )) || [];
     const matchedCollection = localSavedcollectionFiles.find(
-        (item) => item.collectionUID === collectionUID
+        (item) => item.collectionLocalID === collectionUID
     );
     return matchedCollection?.files || [];
 };
-export const savecollectionFiles = async (
+
+const savecollectionFiles = async (
     collectionUID: string,
     files: EnteFile[]
 ) => {
@@ -43,7 +42,10 @@ export const savecollectionFiles = async (
         )) || [];
     await localForage.setItem(
         COLLECTION_FILES_TABLE,
-        dedupeCollectionFiles([{ collectionUID, files }, ...collectionFiles])
+        dedupeCollectionFiles([
+            { collectionLocalID: collectionUID, files },
+            ...collectionFiles,
+        ])
     );
 };
 
@@ -58,7 +60,7 @@ export const getLocalCollections = async (collectionKey: string) => {
     return collection;
 };
 
-export const saveCollection = async (collection: Collection) => {
+const saveCollection = async (collection: Collection) => {
     const collections =
         (await localForage.getItem<Collection[]>(COLLECTIONS_TABLE)) ?? [];
     await localForage.setItem(
@@ -81,7 +83,7 @@ const dedupeCollections = (collections: Collection[]) => {
 
 const dedupeCollectionFiles = (collectionFiles: SavedCollectionFiles[]) => {
     const keySet = new Set([]);
-    return collectionFiles.filter(({ collectionUID }) => {
+    return collectionFiles.filter(({ collectionLocalID: collectionUID }) => {
         if (!keySet.has(collectionUID)) {
             keySet.add(collectionUID);
             return true;
@@ -108,14 +110,11 @@ export const syncPublicFiles = async (
     try {
         let files: EnteFile[] = [];
         const sortAsc = collection?.pubMagicMetadata?.data.asc ?? false;
-        const collectionUID = getPublicCollectionUID(token);
+        const collectionUID = String(collection.id);
         const localFiles = await getLocalFiles(collectionUID);
-
         files = [...files, ...localFiles];
+        console.log('found local files', files);
         try {
-            if (!token) {
-                return sortFiles(files, sortAsc);
-            }
             const lastSyncTime = await getSyncTime(collectionUID);
             if (collection.updationTime === lastSyncTime) {
                 return sortFiles(files, sortAsc);
@@ -165,7 +164,7 @@ export const syncPublicFiles = async (
 };
 
 const fetchFiles = async (
-    token: string,
+    castToken: string,
     collection: Collection,
     sinceTime: number,
     files: EnteFile[],
@@ -177,17 +176,17 @@ const fetchFiles = async (
         let resp;
         const sortAsc = collection?.pubMagicMetadata?.data.asc ?? false;
         do {
-            if (!token) {
+            if (!castToken) {
                 break;
             }
             resp = await HTTPService.get(
-                `${ENDPOINT}/public-collection/diff`,
+                `${ENDPOINT}/cast/diff`,
                 {
                     sinceTime: time,
                 },
                 {
                     'Cache-Control': 'no-cache',
-                    'X-Auth-Access-Token': token,
+                    'X-Cast-Access-Token': castToken,
                 }
             );
             decryptedFiles = [
@@ -225,18 +224,14 @@ const fetchFiles = async (
 };
 
 export const getCastCollection = async (
-    token: string,
+    castToken: string,
     collectionKey: string
-): Promise<[Collection]> => {
+): Promise<Collection> => {
     try {
-        if (!token) {
-            return;
-        }
-        const resp = await HTTPService.get(
-            `${ENDPOINT}/public-collection/info`,
-            null,
-            { 'Cache-Control': 'no-cache', 'X-Auth-Access-Token': token }
-        );
+        const resp = await HTTPService.get(`${ENDPOINT}/cast/info`, null, {
+            'Cache-Control': 'no-cache',
+            'X-Cast-Access-Token': castToken,
+        });
         const fetchedCollection = resp.data.collection;
 
         const cryptoWorker = await ComlinkCryptoWorker.getInstance();
@@ -268,9 +263,9 @@ export const getCastCollection = async (
             pubMagicMetadata: collectionPublicMagicMetadata,
         };
         await saveCollection(collection);
-        return [collection];
+        return collection;
     } catch (e) {
-        logError(e, 'failed to get public collection');
+        logError(e, 'failed to get cast collection');
         throw e;
     }
 };
@@ -297,7 +292,8 @@ export const removeCollectionFiles = async (collectionUID: string) => {
     await localForage.setItem(
         COLLECTION_FILES_TABLE,
         collectionFiles.filter(
-            (collectionFiles) => collectionFiles.collectionUID !== collectionUID
+            (collectionFiles) =>
+                collectionFiles.collectionLocalID !== collectionUID
         )
     );
 };

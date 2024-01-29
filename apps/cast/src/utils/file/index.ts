@@ -9,7 +9,6 @@ import {
 } from 'types/file';
 import { decodeLivePhoto } from 'services/livePhotoService';
 import { getFileType } from 'services/typeDetectionService';
-import DownloadManager from 'services/downloadManager';
 import { logError } from '@ente/shared/sentry';
 import { updateFileCreationDateInEXIF } from 'services/upload/exifService';
 import {
@@ -88,39 +87,25 @@ export async function getUpdatedEXIFFileForDownload(
 
 export async function downloadFile(
     file: EnteFile,
-    accessedThroughSharedURL: boolean,
     token?: string,
     passwordToken?: string
 ) {
     try {
         let fileBlob: Blob;
         const fileReader = new FileReader();
-        if (accessedThroughSharedURL) {
-            const fileURL = await CastDownloadManager.getCachedOriginalFile(
-                file
-            )[0];
-            if (!fileURL) {
-                fileBlob = await new Response(
-                    await CastDownloadManager.downloadFile(
-                        token,
-                        passwordToken,
-                        file
-                    )
-                ).blob();
-            } else {
-                fileBlob = await (await fetch(fileURL)).blob();
-            }
+        const fileURL = await CastDownloadManager.getCachedOriginalFile(
+            file
+        )[0];
+        if (!fileURL) {
+            fileBlob = await new Response(
+                await CastDownloadManager.downloadFile(
+                    token,
+                    passwordToken,
+                    file
+                )
+            ).blob();
         } else {
-            const fileURL = await DownloadManager.getCachedOriginalFile(
-                file
-            )[0];
-            if (!fileURL) {
-                fileBlob = await new Response(
-                    await DownloadManager.downloadFile(file)
-                ).blob();
-            } else {
-                fileBlob = await (await fetch(fileURL)).blob();
-            }
+            fileBlob = await (await fetch(fileURL)).blob();
         }
 
         if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
@@ -844,14 +829,18 @@ const deleteFileHelper = async (
     }
 };
 
-export const downloadFileAsBlob = async (file: EnteFile): Promise<Blob> => {
+export const downloadFileAsBlob = async (
+    file: EnteFile,
+    castToken: string
+): Promise<Blob> => {
     try {
         let fileBlob: Blob;
-        // const fileReader = new FileReader();
-        const fileURL = await DownloadManager.getCachedOriginalFile(file)[0];
+        const fileURL = await CastDownloadManager.getCachedOriginalFile(
+            file
+        )[0];
         if (!fileURL) {
             fileBlob = await new Response(
-                await DownloadManager.downloadFile(file)
+                await CastDownloadManager.downloadFile(castToken, file)
             ).blob();
         } else {
             fileBlob = await (await fetch(fileURL)).blob();

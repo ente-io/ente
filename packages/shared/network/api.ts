@@ -28,6 +28,14 @@ export const getPublicCollectionFileURL = (id: number) => {
     return `https://public-albums.ente.io/download/?fileID=${id}`;
 };
 
+export const getCastFileURL = (id: number) => {
+    const endpoint = process.env.NEXT_PUBLIC_ENTE_ENDPOINT;
+    if (isDevDeployment() && endpoint) {
+        return `${endpoint}/cast/files/download/${id}`;
+    }
+    return `https://cast-albums.ente.io/download/?fileID=${id}`;
+};
+
 export const getThumbnailURL = (id: number) => {
     const endpoint = process.env.NEXT_PUBLIC_ENTE_ENDPOINT;
     if (isDevDeployment() && endpoint) {

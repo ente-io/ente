@@ -12,7 +12,7 @@ import { CACHES } from 'constants/cache';
 import { CacheStorageService } from './cache/cacheStorageService';
 import { LimitedCache } from 'types/cache';
 import {
-    getPublicCollectionFileURL,
+    getCastFileURL,
     getPublicCollectionThumbnailURL,
 } from '@ente/shared/network/api';
 import HTTPService from '@ente/shared/network/HTTPService';
@@ -185,11 +185,8 @@ class CastDownloadManager {
         return await this.fileObjectURLPromise.get(file.id.toString());
     }
 
-    async downloadFile(token: string, passwordToken: string, file: EnteFile) {
+    async downloadFile(castToken: string, file: EnteFile) {
         const cryptoWorker = await ComlinkCryptoWorker.getInstance();
-        if (!token) {
-            return null;
-        }
         const onDownloadProgress = this.trackDownloadProgress(file.id);
 
         if (
@@ -197,14 +194,10 @@ class CastDownloadManager {
             file.metadata.fileType === FILE_TYPE.LIVE_PHOTO
         ) {
             const resp = await HTTPService.get(
-                getPublicCollectionFileURL(file.id),
+                getCastFileURL(file.id),
                 null,
                 {
-                    'X-Auth-Access-Token': token,
-                    ...(passwordToken && {
-                        'X-Auth-Access-Token-JWT': passwordToken,
-                        onDownloadProgress,
-                    }),
+                    'X-Cast-Access-Token': castToken,
                 },
                 { responseType: 'arraybuffer' }
             );
@@ -218,12 +211,9 @@ class CastDownloadManager {
             );
             return generateStreamFromArrayBuffer(decrypted);
         }
-        const resp = await fetch(getPublicCollectionFileURL(file.id), {
+        const resp = await fetch(getCastFileURL(file.id), {
             headers: {
-                'X-Auth-Access-Token': token,
-                ...(passwordToken && {
-                    'X-Auth-Access-Token-JWT': passwordToken,
-                }),
+                'X-Cast-Access-Token': castToken,
             },
         });
         const reader = resp.body.getReader();
