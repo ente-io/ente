@@ -113,7 +113,6 @@ export const syncPublicFiles = async (
         const collectionUID = String(collection.id);
         const localFiles = await getLocalFiles(collectionUID);
         files = [...files, ...localFiles];
-        console.log('found local files', files);
         try {
             const lastSyncTime = await getSyncTime(collectionUID);
             if (collection.updationTime === lastSyncTime) {
@@ -177,6 +176,7 @@ const fetchFiles = async (
         const sortAsc = collection?.pubMagicMetadata?.data.asc ?? false;
         do {
             if (!castToken) {
+                console.log('WTF no token');
                 break;
             }
             resp = await HTTPService.get(

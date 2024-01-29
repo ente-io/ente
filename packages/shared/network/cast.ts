@@ -26,6 +26,7 @@ class CastGateway {
             await HTTPService.delete(
                 getEndpoint() + '/cast/revoke-all-tokens/',
                 undefined,
+                undefined,
                 {
                     'X-Auth-Token': token,
                 }

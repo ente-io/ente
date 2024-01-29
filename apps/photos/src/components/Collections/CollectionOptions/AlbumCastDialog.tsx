@@ -39,10 +39,9 @@ export default function AlbumCastDialog(props: Props) {
     const [browserCanCast, setBrowserCanCast] = useState(false);
     // Make API call on component mount
     useEffect(() => {
-        (async () => {
-            await castGateway.revokeAllTokens();
-        })();
+        castGateway.revokeAllTokens();
     }, []);
+
     const onSubmit: SingleInputFormProps['callback'] = async (
         value,
         setFieldError
@@ -145,6 +144,9 @@ export default function AlbumCastDialog(props: Props) {
     }, [view]);
 
     useEffect(() => {
+        if (props.show) {
+            castGateway.revokeAllTokens();
+        }
         setBrowserCanCast(!!window.chrome);
     }, [props.show]);
 

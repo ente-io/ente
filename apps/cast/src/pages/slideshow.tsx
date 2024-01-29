@@ -9,6 +9,7 @@ import {
     getLocalFiles,
     syncPublicFiles,
 } from 'services/cast/castService';
+import { Collection } from 'types/collection';
 import { EnteFile } from 'types/file';
 import { downloadFileAsBlob, isRawFileFromFileName } from 'utils/file';
 
@@ -26,34 +27,59 @@ export default function Slideshow() {
 
     const [loading, setLoading] = useState(true);
     const [castToken, setCastToken] = useState<string>('');
+    const [castCollection, setCastCollection] = useState<
+        Collection | undefined
+    >(undefined);
 
     const [renderableFileURLCache, setRenderableFileURLCache] = useState<
         Record<string, string>
     >({});
 
-    const init = async () => {
+    const syncCastFiles = async (token: string) => {
         try {
+            const castToken = window.localStorage.getItem('castToken');
             const requestedCollectionKey =
                 window.localStorage.getItem('collectionKey');
-            const castToken = window.localStorage.getItem('castToken');
-            setCastToken(castToken);
-
             const collection = await getCastCollection(
                 castToken,
                 requestedCollectionKey
             );
-
-            await syncPublicFiles(castToken, collection, () => {});
-            const files = await getLocalFiles(String(collection.id));
-            setCollectionFiles(
-                files.filter((file) => isFileEligibleForCast(file))
-            );
+            if (
+                castCollection === undefined ||
+                castCollection.updationTime !== collection.updationTime
+            ) {
+                setCastCollection(collection);
+                await syncPublicFiles(token, collection, () => {});
+                const files = await getLocalFiles(String(collection.id));
+                setCollectionFiles(
+                    files.filter((file) => isFileEligibleForCast(file))
+                );
+            }
         } catch (e) {
             logError(e, 'error during sync');
-            alert('error, redirect to home' + e);
             router.push('/');
         }
     };
+
+    const init = async () => {
+        try {
+            const castToken = window.localStorage.getItem('castToken');
+            setCastToken(castToken);
+        } catch (e) {
+            logError(e, 'error during sync');
+            router.push('/');
+        }
+    };
+
+    useEffect(() => {
+        if (castToken) {
+            const intervalId = setInterval(() => {
+                syncCastFiles(castToken);
+            }, 5000);
+
+            return () => clearInterval(intervalId);
+        }
+    }, [castToken]);
 
     const isFileEligibleForCast = (file: EnteFile) => {
         const fileType = file.metadata.fileType;
