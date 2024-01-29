@@ -7,7 +7,6 @@ import {
     toB64,
 } from '@ente/shared/crypto/internal/libsodium';
 import { useRouter } from 'next/router';
-import TimerBar from 'components/TimerBar';
 import LargeType from 'components/LargeType';
 import { useCastReceiver } from '@ente/shared/hooks/useCastReceiver';
 import EnteSpinner from '@ente/shared/components/EnteSpinner';
@@ -31,16 +30,10 @@ const convertDataToDecimalString = (data: Uint8Array): string => {
     return decimalString;
 };
 
-const REFRESH_INTERVAL = 3600 * 1000;
-
 export default function PairingMode() {
     const [digits, setDigits] = useState<string[]>([]);
 
     const [publicKeyB64, setPublicKeyB64] = useState('');
-
-    const [codeGeneratedAt, setCodeGeneratedAt] = useState<Date | null>(null);
-
-    const [borderWidthPercentage, setBorderWidthPercentage] = useState(100);
 
     const [codePending, setCodePending] = useState(true);
 
@@ -48,14 +41,6 @@ export default function PairingMode() {
 
     useEffect(() => {
         init();
-        const interval = setInterval(() => {
-            setCodePending(true);
-            init();
-        }, REFRESH_INTERVAL); // the kex API deletes keys every 60s, so we'll regenerate stuff prematurely
-
-        return () => {
-            clearInterval(interval);
-        };
     }, []);
 
     useEffect(() => {
@@ -115,7 +100,6 @@ export default function PairingMode() {
 
     const pollForCastData = async () => {
         if (codePending) {
-            console.log('code pending');
             return;
         }
         // see if we were acknowledged on the client.
@@ -195,27 +179,6 @@ export default function PairingMode() {
         advertisePublicKey(publicKeyB64);
     }, [publicKeyB64]);
 
-    useEffect(() => {
-        if (!codeGeneratedAt) return;
-
-        // compute border width based on time left until next code regenerates
-        const interval = setInterval(() => {
-            const now = new Date();
-            const timeLeft =
-                codeGeneratedAt.getTime() + REFRESH_INTERVAL - now.getTime();
-
-            if (timeLeft > 0) {
-                const percentage = (timeLeft / REFRESH_INTERVAL) * 100;
-
-                setBorderWidthPercentage(percentage);
-            }
-        }, 1000);
-
-        return () => {
-            clearInterval(interval);
-        };
-    }, [codeGeneratedAt]);
-
     return (
         <>
             <div
@@ -249,7 +212,6 @@ export default function PairingMode() {
                         ) : (
                             <>
                                 <LargeType chars={digits} />
-                                <TimerBar percentage={borderWidthPercentage} />
                             </>
                         )}
                     </div>
