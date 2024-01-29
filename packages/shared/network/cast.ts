@@ -1,3 +1,4 @@
+import { ApiError } from '../error';
 import { logError } from '../sentry';
 import { getToken } from '../storage/localStorage/helpers';
 import HTTPService from './HTTPService';
@@ -31,6 +32,9 @@ class CastGateway {
                 }
             );
         } catch (e) {
+            if (e instanceof ApiError && e.httpStatusCode === 404) {
+                return '';
+            }
             logError(e, 'failed to getPublicKey');
             throw e;
         }
