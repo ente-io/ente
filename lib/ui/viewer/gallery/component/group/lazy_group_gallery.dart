@@ -57,7 +57,6 @@ class _LazyGroupGalleryState extends State<LazyGroupGallery> {
   late Logger _logger;
 
   late List<EnteFile> _files;
-  Set<EnteFile>? _filesAsSet;
   late StreamSubscription<FilesUpdatedEvent>? _reloadEventSubscription;
   late StreamSubscription<int> _currentIndexSubscription;
   bool? _shouldRender;
@@ -65,7 +64,8 @@ class _LazyGroupGalleryState extends State<LazyGroupGallery> {
   @override
   void initState() {
     super.initState();
-    _areAllFromGroupSelectedNotifier = ValueNotifier(_areAllFromGroupSelected());
+    _areAllFromGroupSelectedNotifier =
+        ValueNotifier(_areAllFromGroupSelected());
 
     widget.selectedFiles?.addListener(_selectedFilesListener);
     _showSelectAllButtonNotifier = ValueNotifier(widget.showSelectAllByDefault);
@@ -89,11 +89,6 @@ class _LazyGroupGalleryState extends State<LazyGroupGallery> {
         });
       }
     });
-  }
-
-  Set<EnteFile> get _setOfFiles {
-    _filesAsSet ??= _files.toSet();
-    return _filesAsSet!;
   }
 
   bool _areAllFromGroupSelected() {
@@ -226,7 +221,7 @@ class _LazyGroupGalleryState extends State<LazyGroupGallery> {
                               ),
                               onTap: () {
                                 widget.selectedFiles?.toggleGroupSelection(
-                                  _setOfFiles,
+                                  _files.toSet(),
                                 );
                               },
                             );
@@ -256,7 +251,7 @@ class _LazyGroupGalleryState extends State<LazyGroupGallery> {
   void _selectedFilesListener() {
     if (widget.selectedFiles == null) return;
     _areAllFromGroupSelectedNotifier.value =
-        widget.selectedFiles!.files.containsAll(_setOfFiles);
+        widget.selectedFiles!.files.containsAll(_files.toSet());
 
     //Can remove this if we decide to show select all by default for all galleries
     if (widget.selectedFiles!.files.isEmpty && !widget.showSelectAllByDefault) {
