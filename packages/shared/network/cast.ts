@@ -20,6 +20,22 @@ class CastGateway {
         return resp.data.encCastData;
     }
 
+    public async revokeAllTokens() {
+        try {
+            const token = getToken();
+            await HTTPService.delete(
+                getEndpoint() + '/cast/revoke-all-tokens/',
+                undefined,
+                {
+                    'X-Auth-Token': token,
+                }
+            );
+        } catch (e) {
+            logError(e, 'removeAllTokens failed');
+            // swallow error
+        }
+    }
+
     public async getPublicKey(code: string): Promise<string> {
         let resp;
         try {
@@ -42,7 +58,7 @@ class CastGateway {
     }
 
     public async registerDevice(code: string, publicKey: string) {
-        await HTTPService.put(getEndpoint() + '/cast/device-info/', {
+        await HTTPService.post(getEndpoint() + '/cast/device-info/', {
             deviceCode: `${code}`,
             publicKey: publicKey,
         });
