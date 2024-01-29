@@ -1,6 +1,5 @@
 import {
     getNonEmptyCollections,
-    updateCollectionMagicMetadata,
     updatePublicCollectionMagicMetadata,
 } from 'services/collectionService';
 import { EnteFile } from 'types/file';
@@ -8,25 +7,16 @@ import { logError } from '@ente/shared/sentry';
 import {
     COLLECTION_ROLE,
     Collection,
-    CollectionMagicMetadataProps,
     CollectionPublicMagicMetadataProps,
-    CollectionSummaries,
 } from 'types/collection';
 import {
     CollectionSummaryType,
     CollectionType,
     HIDE_FROM_COLLECTION_BAR_TYPES,
     OPTIONS_NOT_HAVING_COLLECTION_TYPES,
-    SYSTEM_COLLECTION_TYPES,
-    MOVE_TO_NOT_ALLOWED_COLLECTION,
-    ADD_TO_NOT_ALLOWED_COLLECTION,
 } from 'constants/collection';
-import { getUnixTimeInMicroSecondsWithDelta } from 'utils/time';
 import { SUB_TYPE, VISIBILITY_STATE } from 'types/magicMetadata';
-import { isArchivedCollection, updateMagicMetadata } from 'utils/magicMetadata';
-import bs58 from 'bs58';
-import { t } from 'i18next';
-import { getAlbumsURL } from '@ente/shared/network/api';
+import { updateMagicMetadata } from 'utils/magicMetadata';
 import { User } from '@ente/shared/user/types';
 import { getData, LS_KEYS } from '@ente/shared/storage/localStorage';
 
@@ -44,59 +34,6 @@ export function getSelectedCollection(
 ) {
     return collections.find((collection) => collection.id === collectionID);
 }
-
-export function appendCollectionKeyToShareURL(
-    url: string,
-    collectionKey: string
-) {
-    if (!url) {
-        return null;
-    }
-
-    const sharableURL = new URL(url);
-    const albumsURL = new URL(getAlbumsURL());
-
-    sharableURL.protocol = albumsURL.protocol;
-    sharableURL.host = albumsURL.host;
-    sharableURL.pathname = albumsURL.pathname;
-
-    const bytes = Buffer.from(collectionKey, 'base64');
-    sharableURL.hash = bs58.encode(bytes);
-    return sharableURL.href;
-}
-
-const _intSelectOption = (i: number) => {
-    const label = i === 0 ? t('NO_DEVICE_LIMIT') : i.toString();
-    return { label, value: i };
-};
-
-export function getDeviceLimitOptions() {
-    return [0, 2, 5, 10, 25, 50].map((i) => _intSelectOption(i));
-}
-
-export const shareExpiryOptions = () => [
-    { label: t('NEVER'), value: () => 0 },
-    {
-        label: t('AFTER_TIME.HOUR'),
-        value: () => getUnixTimeInMicroSecondsWithDelta({ hours: 1 }),
-    },
-    {
-        label: t('AFTER_TIME.DAY'),
-        value: () => getUnixTimeInMicroSecondsWithDelta({ days: 1 }),
-    },
-    {
-        label: t('AFTER_TIME.WEEK'),
-        value: () => getUnixTimeInMicroSecondsWithDelta({ days: 7 }),
-    },
-    {
-        label: t('AFTER_TIME.MONTH'),
-        value: () => getUnixTimeInMicroSecondsWithDelta({ months: 1 }),
-    },
-    {
-        label: t('AFTER_TIME.YEAR'),
-        value: () => getUnixTimeInMicroSecondsWithDelta({ years: 1 }),
-    },
-];
 
 export const changeCollectionSortOrder = async (
     collection: Collection,
@@ -121,85 +58,6 @@ export const changeCollectionSortOrder = async (
     } catch (e) {
         logError(e, 'change collection sort order failed');
     }
-};
-
-export const changeCollectionOrder = async (
-    collection: Collection,
-    order: number
-) => {
-    try {
-        const updatedMagicMetadataProps: CollectionMagicMetadataProps = {
-            order,
-        };
-
-        const updatedMagicMetadata = await updateMagicMetadata(
-            updatedMagicMetadataProps,
-            collection.magicMetadata,
-            collection.key
-        );
-
-        await updateCollectionMagicMetadata(collection, updatedMagicMetadata);
-    } catch (e) {
-        logError(e, 'change collection order failed');
-    }
-};
-
-export const changeCollectionSubType = async (
-    collection: Collection,
-    subType: SUB_TYPE
-) => {
-    try {
-        const updatedMagicMetadataProps: CollectionMagicMetadataProps = {
-            subType: subType,
-        };
-
-        const updatedMagicMetadata = await updateMagicMetadata(
-            updatedMagicMetadataProps,
-            collection.magicMetadata,
-            collection.key
-        );
-        await updateCollectionMagicMetadata(collection, updatedMagicMetadata);
-    } catch (e) {
-        logError(e, 'change collection subType failed');
-        throw e;
-    }
-};
-
-export const getArchivedCollections = (collections: Collection[]) => {
-    return new Set<number>(
-        collections
-            .filter(isArchivedCollection)
-            .map((collection) => collection.id)
-    );
-};
-
-export const getDefaultHiddenCollectionIDs = (collections: Collection[]) => {
-    return new Set<number>(
-        collections
-            .filter(isDefaultHiddenCollection)
-            .map((collection) => collection.id)
-    );
-};
-
-export const hasNonSystemCollections = (
-    collectionSummaries: CollectionSummaries
-) => {
-    for (const collectionSummary of collectionSummaries.values()) {
-        if (!isSystemCollection(collectionSummary.type)) return true;
-    }
-    return false;
-};
-
-export const isMoveToAllowedCollection = (type: CollectionSummaryType) => {
-    return !MOVE_TO_NOT_ALLOWED_COLLECTION.has(type);
-};
-
-export const isAddToAllowedCollection = (type: CollectionSummaryType) => {
-    return !ADD_TO_NOT_ALLOWED_COLLECTION.has(type);
-};
-
-export const isSystemCollection = (type: CollectionSummaryType) => {
-    return SYSTEM_COLLECTION_TYPES.has(type);
 };
 
 export const shouldShowOptions = (type: CollectionSummaryType) => {

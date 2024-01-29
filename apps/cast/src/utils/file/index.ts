@@ -10,7 +10,6 @@ import {
 import { decodeLivePhoto } from 'services/livePhotoService';
 import { getFileType } from 'services/typeDetectionService';
 import { logError } from '@ente/shared/sentry';
-import { updateFileCreationDateInEXIF } from 'services/upload/exifService';
 import {
     TYPE_JPEG,
     TYPE_JPG,
@@ -28,15 +27,10 @@ import { isArchivedFile, updateMagicMetadata } from 'utils/magicMetadata';
 
 import { CustomError } from '@ente/shared/error';
 import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
-import {
-    deleteFromTrash,
-    trashFiles,
-    updateFileMagicMetadata,
-} from 'services/fileService';
+import { updateFileMagicMetadata } from 'services/fileService';
 import isElectron from 'is-electron';
 import { isPlaybackPossible } from 'utils/photoFrame';
 import { FileTypeInfo } from 'types/upload';
-import { moveToHiddenCollection } from 'services/collectionService';
 import { getData, LS_KEYS } from '@ente/shared/storage/localStorage';
 import { User } from '@ente/shared/user/types';
 import { addLogLine, addLocalLog } from '@ente/shared/logging';
@@ -83,75 +77,6 @@ export async function getUpdatedEXIFFileForDownload(
     } else {
         return fileStream;
     }
-}
-
-export async function downloadFile(
-    file: EnteFile,
-    token?: string,
-    passwordToken?: string
-) {
-    try {
-        let fileBlob: Blob;
-        const fileReader = new FileReader();
-        const fileURL = await CastDownloadManager.getCachedOriginalFile(
-            file
-        )[0];
-        if (!fileURL) {
-            fileBlob = await new Response(
-                await CastDownloadManager.downloadFile(
-                    token,
-                    passwordToken,
-                    file
-                )
-            ).blob();
-        } else {
-            fileBlob = await (await fetch(fileURL)).blob();
-        }
-
-        if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
-            const livePhoto = await decodeLivePhoto(file, fileBlob);
-            const image = new File([livePhoto.image], livePhoto.imageNameTitle);
-            const imageType = await getFileType(image);
-            const tempImageURL = URL.createObjectURL(
-                new Blob([livePhoto.image], { type: imageType.mimeType })
-            );
-            const video = new File([livePhoto.video], livePhoto.videoNameTitle);
-            const videoType = await getFileType(video);
-            const tempVideoURL = URL.createObjectURL(
-                new Blob([livePhoto.video], { type: videoType.mimeType })
-            );
-            downloadUsingAnchor(tempImageURL, livePhoto.imageNameTitle);
-            downloadUsingAnchor(tempVideoURL, livePhoto.videoNameTitle);
-        } else {
-            const fileType = await getFileType(
-                new File([fileBlob], file.metadata.title)
-            );
-            fileBlob = await new Response(
-                await getUpdatedEXIFFileForDownload(
-                    fileReader,
-                    file,
-                    fileBlob.stream()
-                )
-            ).blob();
-            fileBlob = new Blob([fileBlob], { type: fileType.mimeType });
-            const tempURL = URL.createObjectURL(fileBlob);
-            downloadUsingAnchor(tempURL, file.metadata.title);
-        }
-    } catch (e) {
-        logError(e, 'failed to download file');
-        throw e;
-    }
-}
-
-export function downloadUsingAnchor(link: string, name: string) {
-    const a = document.createElement('a');
-    a.style.display = 'none';
-    a.href = link;
-    a.download = name;
-    document.body.appendChild(a);
-    a.click();
-    URL.revokeObjectURL(link);
-    a.remove();
 }
 
 export function groupFilesBasedOnCollectionID(files: EnteFile[]) {
@@ -544,106 +469,6 @@ export function getUniqueFiles(files: EnteFile[]) {
     return uniqueFiles;
 }
 
-export async function downloadFiles(
-    files: EnteFile[],
-    progressBarUpdater?: {
-        increaseSuccess: () => void;
-        increaseFailed: () => void;
-        isCancelled: () => boolean;
-    }
-) {
-    for (const file of files) {
-        try {
-            if (progressBarUpdater?.isCancelled()) {
-                return;
-            }
-            await downloadFile(file, false);
-            progressBarUpdater?.increaseSuccess();
-        } catch (e) {
-            logError(e, 'download fail for file');
-            progressBarUpdater?.increaseFailed();
-        }
-    }
-}
-
-export async function downloadFilesDesktop(
-    files: EnteFile[],
-    progressBarUpdater: {
-        increaseSuccess: () => void;
-        increaseFailed: () => void;
-        isCancelled: () => boolean;
-    },
-    downloadPath: string
-) {
-    const fileReader = new FileReader();
-    for (const file of files) {
-        try {
-            if (progressBarUpdater?.isCancelled()) {
-                return;
-            }
-            await downloadFileDesktop(fileReader, file, downloadPath);
-            progressBarUpdater?.increaseSuccess();
-        } catch (e) {
-            logError(e, 'download fail for file');
-            progressBarUpdater?.increaseFailed();
-        }
-    }
-}
-
-export async function downloadFileDesktop(
-    fileReader: FileReader,
-    file: EnteFile,
-    downloadPath: string
-) {
-    console.log(fileReader, file, downloadPath);
-    // let fileStream: ReadableStream<Uint8Array>;
-    // const fileURL = await DownloadManager.getCachedOriginalFile(file)[0];
-    // if (!fileURL) {
-    //     fileStream = await DownloadManager.downloadFile(file);
-    // } else {
-    //     fileStream = await fetch(fileURL).then((res) => res.body);
-    // }
-
-    // if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
-    //     const fileBlob = await new Response(updatedFileStream).blob();
-    //     const livePhoto = await decodeLivePhoto(file, fileBlob);
-    //     const imageExportName = getUniqueFileExportName(
-    //         downloadPath,
-    //         livePhoto.imageNameTitle
-    //     );
-    //     const imageStream = generateStreamFromArrayBuffer(livePhoto.image);
-    //     await ElectronFSService.saveMediaFile(
-    //         getFileExportPath(downloadPath, imageExportName),
-    //         imageStream
-    //     );
-    //     try {
-    //         const videoExportName = getUniqueFileExportName(
-    //             downloadPath,
-    //             livePhoto.videoNameTitle
-    //         );
-    //         const videoStream = generateStreamFromArrayBuffer(livePhoto.video);
-    //         await ElectronFSService.saveMediaFile(
-    //             getFileExportPath(downloadPath, videoExportName),
-    //             videoStream
-    //         );
-    //     } catch (e) {
-    //         ElectronFSService.deleteFile(
-    //             getFileExportPath(downloadPath, imageExportName)
-    //         );
-    //         throw e;
-    //     }
-    // } else {
-    //     const fileExportName = getUniqueFileExportName(
-    //         downloadPath,
-    //         file.metadata.title
-    //     );
-    //     await ElectronFSService.saveMediaFile(
-    //         getFileExportPath(downloadPath, fileExportName),
-    //         updatedFileStream
-    //     );
-    // }
-}
-
 export const isImageOrVideo = (fileType: FILE_TYPE) =>
     [FILE_TYPE.IMAGE, FILE_TYPE.VIDEO].includes(fileType);
 
@@ -764,71 +589,6 @@ export const shouldShowAvatar = (file: EnteFile, user: User) => {
     }
 };
 
-export const handleFileOps = async (
-    ops: FILE_OPS_TYPE,
-    files: EnteFile[],
-    setDeletedFileIds: (
-        deletedFileIds: Set<number> | ((prev: Set<number>) => Set<number>)
-    ) => void,
-    setHiddenFileIds: (
-        hiddenFileIds: Set<number> | ((prev: Set<number>) => Set<number>)
-    ) => void,
-    setFixCreationTimeAttributes: (
-        fixCreationTimeAttributes:
-            | {
-                  files: EnteFile[];
-              }
-            | ((prev: { files: EnteFile[] }) => { files: EnteFile[] })
-    ) => void
-) => {
-    switch (ops) {
-        case FILE_OPS_TYPE.TRASH:
-            await deleteFileHelper(files, false, setDeletedFileIds);
-            break;
-        case FILE_OPS_TYPE.DELETE_PERMANENTLY:
-            await deleteFileHelper(files, true, setDeletedFileIds);
-            break;
-        case FILE_OPS_TYPE.HIDE:
-            await hideFilesHelper(files, setHiddenFileIds);
-            break;
-        case FILE_OPS_TYPE.DOWNLOAD:
-            await downloadFiles(files);
-            break;
-        case FILE_OPS_TYPE.FIX_TIME:
-            fixTimeHelper(files, setFixCreationTimeAttributes);
-            break;
-        case FILE_OPS_TYPE.ARCHIVE:
-            await changeFilesVisibility(files, VISIBILITY_STATE.ARCHIVED);
-            break;
-        case FILE_OPS_TYPE.UNARCHIVE:
-            await changeFilesVisibility(files, VISIBILITY_STATE.VISIBLE);
-            break;
-    }
-};
-
-const deleteFileHelper = async (
-    selectedFiles: EnteFile[],
-    permanent: boolean,
-    setDeletedFileIds: (
-        deletedFileIds: Set<number> | ((prev: Set<number>) => Set<number>)
-    ) => void
-) => {
-    try {
-        setDeletedFileIds((deletedFileIds) => {
-            selectedFiles.forEach((file) => deletedFileIds.add(file.id));
-            return new Set(deletedFileIds);
-        });
-        if (permanent) {
-            await deleteFromTrash(selectedFiles.map((file) => file.id));
-        } else {
-            await trashFiles(selectedFiles);
-        }
-    } catch (e) {
-        setDeletedFileIds(new Set());
-        throw e;
-    }
-};
-
 export const downloadFileAsBlob = async (
     file: EnteFile,
     castToken: string
@@ -853,33 +613,6 @@ export const downloadFileAsBlob = async (
     } catch (e) {
         logError(e, 'failed to download file');
     }
-};
-
-const hideFilesHelper = async (
-    selectedFiles: EnteFile[],
-    setHiddenFileIds: (
-        hiddenFileIds: Set<number> | ((prev: Set<number>) => Set<number>)
-    ) => void
-) => {
-    try {
-        setHiddenFileIds((hiddenFileIds) => {
-            selectedFiles.forEach((file) => hiddenFileIds.add(file.id));
-            return new Set(hiddenFileIds);
-        });
-        await moveToHiddenCollection(selectedFiles);
-    } catch (e) {
-        setHiddenFileIds(new Set());
-        throw e;
-    }
-};
-
-const fixTimeHelper = async (
-    selectedFiles: EnteFile[],
-    setFixCreationTimeAttributes: (fixCreationTimeAttributes: {
-        files: EnteFile[];
-    }) => void
-) => {
-    setFixCreationTimeAttributes({ files: selectedFiles });
 };
 
 const getFileObjectURLs = (originalBlob: Blob, convertedBlob: Blob) => {
