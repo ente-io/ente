@@ -109,10 +109,9 @@ export default function AlbumCastDialog(props: Props) {
                     return;
                 }
                 const session = instance.getCurrentSession();
-                console.log(session);
                 session.addMessageListener(
                     'urn:x-cast:pair-request',
-                    (namespace, message) => {
+                    (_, message) => {
                         const data = message;
                         const obj = JSON.parse(data);
                         const code = obj.code;
