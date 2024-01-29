@@ -1,5 +1,21 @@
 # CHANGELOG
 
+## v1.6.63
+
+### New
+
+- Option to select file download location.
+- Add support for searching popular cities
+- Sorted duplicates in desecending order of size
+- Add Counter to upload section
+- Display full name and collection name on hover on dedupe screen photos
+
+### Bug Fixes
+
+- Fix add to album padding issue
+- Fix double uncategorized album issue
+- Hide Hidden collection files from all section
+
 ## v1.6.62
 
 ### New
