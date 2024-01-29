@@ -115,6 +115,7 @@ export default function PairingMode() {
     };
 
     const pollForCastData = async () => {
+        if (codePending) return;
         // see if we were acknowledged on the client.
         // the client will send us the encrypted payload using our public key that we advertised.
         // then, we can decrypt this and store all the necessary info locally so we can play the collection slideshow.
@@ -155,6 +156,10 @@ export default function PairingMode() {
                 publicKeyB64
             );
         } catch (e) {
+            // schedule init after 5 seconds
+            setTimeout(() => {
+                init();
+            }, 5000);
             return;
         }
 
