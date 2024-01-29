@@ -32,10 +32,10 @@ const convertDataToDecimalString = (data: Uint8Array): string => {
 
 export default function PairingMode() {
     const [digits, setDigits] = useState<string[]>([]);
-
     const [publicKeyB64, setPublicKeyB64] = useState('');
-
+    const [privateKeyB64, setPrivateKeyB64] = useState('');
     const [codePending, setCodePending] = useState(true);
+    const [isCastReady, setIsCastReady] = useState(false);
 
     const { cast } = useCastReceiver();
 
@@ -45,24 +45,25 @@ export default function PairingMode() {
 
     useEffect(() => {
         if (!cast) return;
+        if (isCastReady) return;
         const context = cast.framework.CastReceiverContext.getInstance();
-        if (!context.isInitialized) {
-            const options = new cast.framework.CastReceiverOptions();
-            options.customNamespaces = Object.assign({});
-            options.customNamespaces['urn:x-cast:pair-request'] =
-                cast.framework.system.MessageType.JSON;
 
-            options.disableIdleTimeout = true;
+        const options = new cast.framework.CastReceiverOptions();
+        options.customNamespaces = Object.assign({});
+        options.customNamespaces['urn:x-cast:pair-request'] =
+            cast.framework.system.MessageType.JSON;
 
-            context.addCustomMessageListener(
-                'urn:x-cast:pair-request',
-                messageReceiveHandler
-            );
-            context.start(options);
-            return () => {
-                context.stop(options);
-            };
-        }
+        options.disableIdleTimeout = true;
+
+        context.addCustomMessageListener(
+            'urn:x-cast:pair-request',
+            messageReceiveHandler
+        );
+        context.start(options);
+        setIsCastReady(true);
+        return () => {
+            context.stop(options);
+        };
     }, [cast]);
 
     const messageReceiveHandler = (message: {
@@ -82,13 +83,10 @@ export default function PairingMode() {
     const init = async () => {
         const data = generateSecureData(6);
         setDigits(convertDataToDecimalString(data).split(''));
-
         const keypair = await generateKeyPair();
         setPublicKeyB64(await toB64(keypair.publicKey));
         setPrivateKeyB64(await toB64(keypair.privateKey));
     };
-
-    const [privateKeyB64, setPrivateKeyB64] = useState('');
 
     const generateKeyPair = async () => {
         await _sodium.ready;
@@ -113,6 +111,8 @@ export default function PairingMode() {
             if (!encDastData) return;
             devicePayload = encDastData;
         } catch (e) {
+            setCodePending(true);
+            init();
             return;
         }
 
@@ -145,10 +145,9 @@ export default function PairingMode() {
                 `${digits.join('')}`,
                 publicKeyB64
             );
-            setCodeGeneratedAt(new Date());
             setCodePending(false);
         } catch (e) {
-            // schedule init after 5 seconds
+            // schedule re-try after 5 seconds
             setTimeout(() => {
                 init();
             }, 5000);
@@ -175,7 +174,6 @@ export default function PairingMode() {
 
     useEffect(() => {
         if (!publicKeyB64) return;
-
         advertisePublicKey(publicKeyB64);
     }, [publicKeyB64]);
 
