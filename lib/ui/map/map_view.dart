@@ -22,6 +22,7 @@ class MapView extends StatefulWidget {
   final double bottomSheetDraggableAreaHeight;
   final bool showControls;
   final int interactiveFlags;
+  final VoidCallback? onTap;
 
   const MapView({
     Key? key,
@@ -34,6 +35,7 @@ class MapView extends StatefulWidget {
     required this.initialZoom,
     required this.debounceDuration,
     required this.bottomSheetDraggableAreaHeight,
+    this.onTap,
     this.interactiveFlags = InteractiveFlag.all,
     this.showControls = true,
   }) : super(key: key);
@@ -75,6 +77,11 @@ class _MapViewState extends State<MapView> {
         FlutterMap(
           mapController: widget.controller,
           options: MapOptions(
+            onTap: widget.onTap != null
+                ? (_, __) {
+                    widget.onTap!.call();
+                  }
+                : null,
             center: widget.center,
             minZoom: widget.minZoom,
             maxZoom: widget.maxZoom,

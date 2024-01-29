@@ -8,11 +8,13 @@ import "package:photos/events/location_tag_updated_event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/services/location_service.dart";
+import "package:photos/services/search_service.dart";
 import "package:photos/states/location_screen_state.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/buttons/chip_button_widget.dart";
 import "package:photos/ui/components/info_item_widget.dart";
 import "package:photos/ui/map/image_marker.dart";
+import "package:photos/ui/map/map_screen.dart";
 import "package:photos/ui/map/map_view.dart";
 import 'package:photos/ui/viewer/location/add_location_sheet.dart';
 import "package:photos/ui/viewer/location/location_screen.dart";
@@ -27,6 +29,7 @@ class LocationTagsWidget extends StatefulWidget {
 }
 
 class _LocationTagsWidgetState extends State<LocationTagsWidget> {
+  static const mapZoom = 7.0;
   String? title;
   IconData? leadingIcon;
   bool? hasChipButtons;
@@ -87,13 +90,27 @@ class _LocationTagsWidgetState extends State<LocationTagsWidget> {
               widget.file.location!.latitude!,
               widget.file.location!.longitude!,
             ),
-            minZoom: 7,
-            maxZoom: 7,
+            minZoom: mapZoom,
+            maxZoom: mapZoom,
             initialZoom: 7,
             debounceDuration: 0,
             bottomSheetDraggableAreaHeight: 0,
             showControls: false,
             interactiveFlags: InteractiveFlag.none,
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => MapScreen(
+                    filesFutureFn: SearchService.instance.getAllFiles,
+                    center: LatLng(
+                      widget.file.location!.latitude!,
+                      widget.file.location!.longitude!,
+                    ),
+                    initialZoom: mapZoom + 1,
+                  ),
+                ),
+              );
+            },
           ),
         ),
 
