@@ -53,22 +53,20 @@ export default function CollectionInfoWithOptions({
     };
 
     return (
-        <>
-            <CollectionInfoBarWrapper>
-                <SpaceBetweenFlex>
-                    <CollectionInfo
-                        name={name}
-                        fileCount={fileCount}
-                        endIcon={<EndIcon type={type} />}
+        <CollectionInfoBarWrapper>
+            <SpaceBetweenFlex>
+                <CollectionInfo
+                    name={name}
+                    fileCount={fileCount}
+                    endIcon={<EndIcon type={type} />}
+                />
+                {shouldShowOptions(type) && (
+                    <CollectionOptions
+                        {...props}
+                        collectionSummaryType={type}
                     />
-                    {shouldShowOptions(type) && (
-                        <CollectionOptions
-                            {...props}
-                            collectionSummaryType={type}
-                        />
-                    )}
-                </SpaceBetweenFlex>
-            </CollectionInfoBarWrapper>
-        </>
+                )}
+            </SpaceBetweenFlex>
+        </CollectionInfoBarWrapper>
     );
 }
