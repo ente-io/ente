@@ -1,3 +1,4 @@
+import { APPS, CLIENT_PACKAGE_NAMES } from '@ente/shared/apps/constants';
 import {
     CenteredFlex,
     VerticallyCentered,
@@ -6,6 +7,7 @@ import EnteButton from '@ente/shared/components/EnteButton';
 import EnteSpinner from '@ente/shared/components/EnteSpinner';
 import FormPaper from '@ente/shared/components/Form/FormPaper';
 import { logError } from '@ente/shared/sentry';
+import { LS_KEYS, setData } from '@ente/shared/storage/localStorage';
 import InfoIcon from '@mui/icons-material/Info';
 import { Box, Typography } from '@mui/material';
 import { t } from 'i18next';
@@ -44,6 +46,15 @@ const PasskeysFlow = () => {
                 return;
             }
         }
+
+        let pkg = CLIENT_PACKAGE_NAMES.get(APPS.PHOTOS);
+        if (redirectURL.protocol === 'enteauth:') {
+            pkg = CLIENT_PACKAGE_NAMES.get(APPS.AUTH);
+        } else if (redirectURL.hostname.startsWith('accounts')) {
+            pkg = CLIENT_PACKAGE_NAMES.get(APPS.ACCOUNTS);
+        }
+
+        setData(LS_KEYS.CLIENT_PACKAGE, { name: pkg });
 
         // get passkeySessionID from the query params
         const passkeySessionID = searchParams.get('passkeySessionID') as string;
