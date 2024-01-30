@@ -212,7 +212,7 @@ const PhotoFrame = ({
             throw Error(CustomError.FILE_CONVERSION_FAILED);
         }
 
-        await updateFileSrcProps(file, srcURLs);
+        await updateFileSrcProps(file, srcURLs, enableDownload);
     };
 
     const handleClose = (needUpdate) => {

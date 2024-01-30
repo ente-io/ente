@@ -69,7 +69,11 @@ export function updateFileMsrcProps(file: EnteFile, url: string) {
     }
 }
 
-export async function updateFileSrcProps(file: EnteFile, srcURLs: SourceURLs) {
+export async function updateFileSrcProps(
+    file: EnteFile,
+    srcURLs: SourceURLs,
+    enableDownload: boolean
+) {
     const { url, isRenderable, isOriginal } = srcURLs;
     file.w = window.innerWidth;
     file.h = window.innerHeight;
@@ -87,7 +91,9 @@ export async function updateFileSrcProps(file: EnteFile, srcURLs: SourceURLs) {
 
     if (file.metadata.fileType === FILE_TYPE.VIDEO) {
         file.html = `
-                <video controls onContextMenu="return false;">
+                <video controls ${
+                    !enableDownload && 'controlsList="nodownload"'
+                } onContextMenu="return false;">
                     <source src="${url}" />
                     Your browser does not support the video tag.
                 </video>
