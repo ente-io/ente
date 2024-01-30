@@ -87,6 +87,8 @@ class MapAttributionWidget extends StatefulWidget {
   ///
   /// Read the documentation on the individual properties for more information
   /// and customizability.
+
+  final double iconSize;
   const MapAttributionWidget({
     super.key,
     required this.attributions,
@@ -99,6 +101,7 @@ class MapAttributionWidget extends StatefulWidget {
     this.showFlutterMapAttribution = true,
     this.animationConfig = const FadeRAWA(),
     this.popupInitialDisplayDuration = Duration.zero,
+    this.iconSize = 20,
   });
 
   @override
@@ -169,7 +172,7 @@ class MapAttributionWidgetState extends State<MapAttributionWidget> {
         child: popupExpanded
             ? (widget.closeButton ??
                 (context, close) => IconButtonWidget(
-                      size: 16,
+                      size: widget.iconSize,
                       onTap: close,
                       icon: Icons.cancel_outlined,
                       iconButtonType: IconButtonType.primary,
@@ -179,7 +182,7 @@ class MapAttributionWidgetState extends State<MapAttributionWidget> {
               )
             : (widget.openButton ??
                 (context, open) => IconButtonWidget(
-                      size: 16,
+                      size: widget.iconSize,
                       onTap: open,
                       icon: Icons.info_outlined,
                       iconButtonType: IconButtonType.primary,

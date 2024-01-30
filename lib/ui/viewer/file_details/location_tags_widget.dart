@@ -99,6 +99,7 @@ class _LocationTagsWidgetState extends State<LocationTagsWidget> {
                 mapAttributionOptions: MapAttributionOptions(
                   permanentHeight: 16,
                   popupBorderRadius: BorderRadius.circular(4),
+                  iconSize: 16,
                 ),
                 onTap: () {
                   Navigator.of(context).push(

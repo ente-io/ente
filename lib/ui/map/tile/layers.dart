@@ -12,10 +12,12 @@ const String _userAgent = "io.ente.photos";
 class MapAttributionOptions {
   final double permanentHeight;
   final BorderRadius popupBorderRadius;
+  final double iconSize;
 
   const MapAttributionOptions({
     this.permanentHeight = 24,
     this.popupBorderRadius = const BorderRadius.all(Radius.circular(12)),
+    this.iconSize = 20,
   });
 }
 
@@ -67,6 +69,7 @@ class OSMFranceTileAttributes extends StatelessWidget {
       permanentHeight: options.permanentHeight,
       popupBackgroundColor: getEnteColorScheme(context).backgroundElevated2,
       popupBorderRadius: options.popupBorderRadius,
+      iconSize: options.iconSize,
       attributions: [
         TextSourceAttribution(
           S.of(context).openstreetmapContributors,
