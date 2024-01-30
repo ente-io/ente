@@ -24,6 +24,7 @@ class MapView extends StatefulWidget {
   final int interactiveFlags;
   final VoidCallback? onTap;
   final Size markerSize;
+  final MapAttributionOptions mapAttributionOptions;
   static const defaultMarkerSize = Size(75, 75);
 
   const MapView({
@@ -37,6 +38,7 @@ class MapView extends StatefulWidget {
     required this.initialZoom,
     required this.debounceDuration,
     required this.bottomSheetDraggableAreaHeight,
+    this.mapAttributionOptions = const MapAttributionOptions(),
     this.markerSize = MapView.defaultMarkerSize,
     this.onTap,
     this.interactiveFlags = InteractiveFlag.all,
@@ -106,7 +108,9 @@ class _MapViewState extends State<MapView> {
               padding: EdgeInsets.only(
                 bottom: widget.bottomSheetDraggableAreaHeight,
               ),
-              child: const OSMFranceTileAttributes(),
+              child: OSMFranceTileAttributes(
+                options: widget.mapAttributionOptions,
+              ),
             ),
           ],
           children: [
