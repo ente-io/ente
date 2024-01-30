@@ -17,6 +17,7 @@ import "package:photos/ui/components/info_item_widget.dart";
 import "package:photos/ui/map/image_marker.dart";
 import "package:photos/ui/map/map_screen.dart";
 import "package:photos/ui/map/map_view.dart";
+import "package:photos/ui/map/tile/layers.dart";
 
 import 'package:photos/ui/viewer/location/add_location_sheet.dart';
 import "package:photos/ui/viewer/location/location_screen.dart";
@@ -71,7 +72,7 @@ class _LocationTagsWidgetState extends State<LocationTagsWidget> {
         endSection: Padding(
           padding: const EdgeInsets.only(top: 8),
           child: ClipRRect(
-            borderRadius: const BorderRadius.all(Radius.circular(12)),
+            borderRadius: const BorderRadius.all(Radius.circular(8)),
             child: SizedBox(
               height: 120,
               child: MapView(
@@ -95,6 +96,10 @@ class _LocationTagsWidgetState extends State<LocationTagsWidget> {
                 bottomSheetDraggableAreaHeight: 0,
                 showControls: false,
                 interactiveFlags: InteractiveFlag.none,
+                mapAttributionOptions: MapAttributionOptions(
+                  permanentHeight: 16,
+                  popupBorderRadius: BorderRadius.circular(4),
+                ),
                 onTap: () {
                   Navigator.of(context).push(
                     MaterialPageRoute(
