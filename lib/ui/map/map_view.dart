@@ -23,6 +23,8 @@ class MapView extends StatefulWidget {
   final bool showControls;
   final int interactiveFlags;
   final VoidCallback? onTap;
+  final Size markerSize;
+  static const defaultMarkerSize = Size(75, 75);
 
   const MapView({
     Key? key,
@@ -35,6 +37,7 @@ class MapView extends StatefulWidget {
     required this.initialZoom,
     required this.debounceDuration,
     required this.bottomSheetDraggableAreaHeight,
+    this.markerSize = MapView.defaultMarkerSize,
     this.onTap,
     this.interactiveFlags = InteractiveFlag.all,
     this.showControls = true,
@@ -113,7 +116,7 @@ class _MapViewState extends State<MapView> {
                 anchorPos: AnchorPos.align(AnchorAlign.top),
                 maxClusterRadius: 100,
                 showPolygon: false,
-                size: const Size(75, 75),
+                size: widget.markerSize,
                 fitBoundsOptions: const FitBoundsOptions(
                   padding: EdgeInsets.all(80),
                 ),
@@ -200,6 +203,7 @@ class _MapViewState extends State<MapView> {
       return mapMarker(
         imageMarker,
         index.toString(),
+        markerSize: widget.markerSize,
       );
     });
   }
