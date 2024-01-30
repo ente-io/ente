@@ -140,6 +140,7 @@ export default function Collections(props: Iprops) {
     const closeAllCollections = () => setAllCollectionView(false);
     const openAllCollections = () => setAllCollectionView(true);
     const closeCollectionShare = () => setCollectionShareModalView(false);
+    const closeAlbumCastDialog = () => setShowAlbumCastDialog(false);
 
     return (
         <>
@@ -176,9 +177,9 @@ export default function Collections(props: Iprops) {
                 collection={activeCollection}
             />
             <AlbumCastDialog
-                currentCollection={props.activeCollection}
+                currentCollection={activeCollection}
                 show={showAlbumCastDialog}
-                onHide={() => setShowAlbumCastDialog(false)}
+                onHide={closeAlbumCastDialog}
             />
         </>
     );
