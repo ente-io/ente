@@ -169,6 +169,8 @@ class MapAttributionWidgetState extends State<MapAttributionWidget> {
         child: popupExpanded
             ? (widget.closeButton ??
                 (context, close) => IconButton(
+                      visualDensity:
+                          const VisualDensity(horizontal: -2, vertical: -2),
                       onPressed: close,
                       icon: Icon(
                         Icons.cancel_outlined,
@@ -182,6 +184,8 @@ class MapAttributionWidgetState extends State<MapAttributionWidget> {
               )
             : (widget.openButton ??
                 (context, open) => IconButton(
+                      visualDensity:
+                          const VisualDensity(horizontal: -2, vertical: -2),
                       onPressed: open,
                       tooltip: 'Attributions',
                       icon: Icon(
