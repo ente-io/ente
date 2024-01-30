@@ -5,7 +5,7 @@ import "dart:async";
 import "package:flutter/material.dart";
 import "package:flutter_map/plugin_api.dart";
 import "package:photos/extensions/list.dart";
-import "package:photos/theme/ente_theme.dart";
+import "package:photos/ui/components/buttons/icon_button_widget.dart";
 
 // Credit: This code is based on the Rich Attribution widget from the flutter_map
 class MapAttributionWidget extends StatefulWidget {
@@ -168,31 +168,21 @@ class MapAttributionWidgetState extends State<MapAttributionWidget> {
         duration: widget.animationConfig.buttonDuration,
         child: popupExpanded
             ? (widget.closeButton ??
-                (context, close) => IconButton(
-                      visualDensity:
-                          const VisualDensity(horizontal: -2, vertical: -2),
-                      onPressed: close,
-                      icon: Icon(
-                        Icons.cancel_outlined,
-                        color: Theme.of(context).textTheme.titleSmall?.color ??
-                            Colors.black,
-                        size: widget.permanentHeight,
-                      ),
+                (context, close) => IconButtonWidget(
+                      size: 16,
+                      onTap: close,
+                      icon: Icons.cancel_outlined,
+                      iconButtonType: IconButtonType.primary,
                     ))(
                 context,
                 () => setState(() => popupExpanded = false),
               )
             : (widget.openButton ??
-                (context, open) => IconButton(
-                      visualDensity:
-                          const VisualDensity(horizontal: -2, vertical: -2),
-                      onPressed: open,
-                      tooltip: 'Attributions',
-                      icon: Icon(
-                        Icons.info_outlined,
-                        size: widget.permanentHeight,
-                        color: getEnteColorScheme(context).backgroundElevated,
-                      ),
+                (context, open) => IconButtonWidget(
+                      size: 16,
+                      onTap: open,
+                      icon: Icons.info_outlined,
+                      iconButtonType: IconButtonType.primary,
                     ))(
                 context,
                 () {
