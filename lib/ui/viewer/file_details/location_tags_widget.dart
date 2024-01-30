@@ -3,12 +3,14 @@ import "dart:async";
 import "package:flutter/material.dart";
 import "package:flutter_map/flutter_map.dart";
 import "package:latlong2/latlong.dart";
+
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/location_tag_updated_event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/services/location_service.dart";
 import "package:photos/services/search_service.dart";
+
 import "package:photos/states/location_screen_state.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/buttons/chip_button_widget.dart";
@@ -16,6 +18,7 @@ import "package:photos/ui/components/info_item_widget.dart";
 import "package:photos/ui/map/image_marker.dart";
 import "package:photos/ui/map/map_screen.dart";
 import "package:photos/ui/map/map_view.dart";
+
 import 'package:photos/ui/viewer/location/add_location_sheet.dart';
 import "package:photos/ui/viewer/location/location_screen.dart";
 import "package:photos/utils/navigation_util.dart";
@@ -29,7 +32,6 @@ class LocationTagsWidget extends StatefulWidget {
 }
 
 class _LocationTagsWidgetState extends State<LocationTagsWidget> {
-  static const mapZoom = 7.0;
   String? title;
   IconData? leadingIcon;
   bool? hasChipButtons;
@@ -65,52 +67,49 @@ class _LocationTagsWidgetState extends State<LocationTagsWidget> {
         subtitleSection: locationTagChips,
         hasChipButtons: hasChipButtons ?? true,
         onTap: onTap,
-        // middleSection: SizedBox(
-        //   height: 150,
-        //   width: 300,
-        //   child: MapScreen(
-        //     filesFutureFn: () => Future.value([widget.file]),
-        //     showGallery: false,
-        //   ),
-        // ),
-        middleSection: SizedBox(
-          height: 150,
-          width: 300,
-          child: MapView(
-            updateVisibleImages: () {},
-            imageMarkers: [
-              ImageMarker(
-                imageFile: widget.file,
-                latitude: widget.file.location!.latitude!,
-                longitude: widget.file.location!.longitude!,
-              ),
-            ],
-            controller: MapController(),
-            center: LatLng(
-              widget.file.location!.latitude!,
-              widget.file.location!.longitude!,
-            ),
-            minZoom: mapZoom,
-            maxZoom: mapZoom,
-            initialZoom: 7,
-            debounceDuration: 0,
-            bottomSheetDraggableAreaHeight: 0,
-            showControls: false,
-            interactiveFlags: InteractiveFlag.none,
-            onTap: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => MapScreen(
-                    filesFutureFn: SearchService.instance.getAllFiles,
-                    center: LatLng(
-                      widget.file.location!.latitude!,
-                      widget.file.location!.longitude!,
-                    ),
-                    initialZoom: mapZoom + 1,
+        endSection: Padding(
+          padding: const EdgeInsets.only(top: 8),
+          child: ClipRRect(
+            borderRadius: const BorderRadius.all(Radius.circular(12)),
+            child: SizedBox(
+              height: 120,
+              child: MapView(
+                updateVisibleImages: () {},
+                imageMarkers: [
+                  ImageMarker(
+                    imageFile: widget.file,
+                    latitude: widget.file.location!.latitude!,
+                    longitude: widget.file.location!.longitude!,
                   ),
+                ],
+                controller: MapController(),
+                center: LatLng(
+                  widget.file.location!.latitude!,
+                  widget.file.location!.longitude!,
                 ),
-              );
-            },
+                minZoom: 7,
+                maxZoom: 7,
+                initialZoom: 7,
+                debounceDuration: 0,
+                bottomSheetDraggableAreaHeight: 0,
+                showControls: false,
+                interactiveFlags: InteractiveFlag.none,
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => MapScreen(
+                        filesFutureFn: SearchService.instance.getAllFiles,
+                        center: LatLng(
+                          widget.file.location!.latitude!,
+                          widget.file.location!.longitude!,
+                        ),
+                        initialZoom: 7 + 1,
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
           ),
         ),
 

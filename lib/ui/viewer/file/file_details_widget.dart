@@ -145,6 +145,7 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
         },
       ),
     );
+
     fileDetailsTiles.addAll([
       ValueListenableBuilder(
         valueListenable: hasLocationData,
