@@ -109,6 +109,7 @@ class _LocationTagsWidgetState extends State<LocationTagsWidget> {
                     ),
                   );
                 },
+                markerSize: const Size(45, 45),
               ),
             ),
           ),
