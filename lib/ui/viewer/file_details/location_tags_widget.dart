@@ -10,7 +10,6 @@ import "package:photos/generated/l10n.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/services/location_service.dart";
 import "package:photos/services/search_service.dart";
-
 import "package:photos/states/location_screen_state.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/buttons/chip_button_widget.dart";
@@ -38,6 +37,7 @@ class _LocationTagsWidgetState extends State<LocationTagsWidget> {
   late Future<List<Widget>> locationTagChips;
   late StreamSubscription<LocationTagUpdatedEvent> _locTagUpdateListener;
   VoidCallback? onTap;
+  final _mapController = MapController();
   @override
   void initState() {
     locationTagChips = _getLocationTags();
@@ -51,6 +51,7 @@ class _LocationTagsWidgetState extends State<LocationTagsWidget> {
   @override
   void dispose() {
     _locTagUpdateListener.cancel();
+    _mapController.dispose();
     super.dispose();
   }
 
@@ -82,7 +83,7 @@ class _LocationTagsWidgetState extends State<LocationTagsWidget> {
                     longitude: widget.file.location!.longitude!,
                   ),
                 ],
-                controller: MapController(),
+                controller: _mapController,
                 center: LatLng(
                   widget.file.location!.latitude!,
                   widget.file.location!.longitude!,
@@ -111,27 +112,27 @@ class _LocationTagsWidgetState extends State<LocationTagsWidget> {
               ),
             ),
           ),
-        ),
 
-        /// to be used when state issues are fixed when location is updated
-        // editOnTap: widget.file.ownerID == Configuration.instance.getUserID()!
-        //     ? () {
-        //         showBarModalBottomSheet(
-        //           shape: const RoundedRectangleBorder(
-        //             borderRadius: BorderRadius.vertical(
-        //               top: Radius.circular(5),
-        //             ),
-        //           ),
-        //           backgroundColor:
-        //               getEnteColorScheme(context).backgroundElevated,
-        //           barrierColor: backdropFaintDark,
-        //           context: context,
-        //           builder: (context) {
-        //             return UpdateLocationDataWidget([widget.file]);
-        //           },
-        //         );
-        //       }
-        //     : null,
+          /// to be used when state issues are fixed when location is updated
+          // editOnTap: widget.file.ownerID == Configuration.instance.getUserID()!
+          //     ? () {
+          //         showBarModalBottomSheet(
+          //           shape: const RoundedRectangleBorder(
+          //             borderRadius: BorderRadius.vertical(
+          //               top: Radius.circular(5),
+          //             ),
+          //           ),
+          //           backgroundColor:
+          //               getEnteColorScheme(context).backgroundElevated,
+          //           barrierColor: backdropFaintDark,
+          //           context: context,
+          //           builder: (context) {
+          //             return UpdateLocationDataWidget([widget.file]);
+          //           },
+          //         );
+          //       }
+          //     : null,
+        ),
       ),
     );
   }
