@@ -10,7 +10,6 @@
         "export": "next export"
     },
     "dependencies": {
-        "@next/font": "^14.0.4",
         "mime-types": "^2.1.35"
     },
     "devDependencies": {
