@@ -176,7 +176,6 @@ const fetchFiles = async (
         const sortAsc = collection?.pubMagicMetadata?.data.asc ?? false;
         do {
             if (!castToken) {
-                console.log('WTF no token');
                 break;
             }
             resp = await HTTPService.get(
@@ -218,7 +217,7 @@ const fetchFiles = async (
         } while (resp.data.hasMore);
         return decryptedFiles;
     } catch (e) {
-        logError(e, 'Get public  files failed');
+        logError(e, 'Get cast files failed');
         throw e;
     }
 };
