@@ -1,14 +1,4 @@
-import {
-    getNonEmptyCollections,
-    updatePublicCollectionMagicMetadata,
-} from 'services/collectionService';
-import { EnteFile } from 'types/file';
-import { logError } from '@ente/shared/sentry';
-import {
-    COLLECTION_ROLE,
-    Collection,
-    CollectionPublicMagicMetadataProps,
-} from 'types/collection';
+import { COLLECTION_ROLE, Collection } from 'types/collection';
 import {
     CollectionSummaryType,
     CollectionType,
@@ -16,7 +6,6 @@ import {
     OPTIONS_NOT_HAVING_COLLECTION_TYPES,
 } from 'constants/collection';
 import { SUB_TYPE, VISIBILITY_STATE } from 'types/magicMetadata';
-import { updateMagicMetadata } from 'utils/magicMetadata';
 import { User } from '@ente/shared/user/types';
 import { getData, LS_KEYS } from '@ente/shared/storage/localStorage';
 
@@ -34,31 +23,6 @@ export function getSelectedCollection(
 ) {
     return collections.find((collection) => collection.id === collectionID);
 }
-
-export const changeCollectionSortOrder = async (
-    collection: Collection,
-    asc: boolean
-) => {
-    try {
-        const updatedPublicMagicMetadataProps: CollectionPublicMagicMetadataProps =
-            {
-                asc,
-            };
-
-        const updatedPubMagicMetadata = await updateMagicMetadata(
-            updatedPublicMagicMetadataProps,
-            collection.pubMagicMetadata,
-            collection.key
-        );
-
-        await updatePublicCollectionMagicMetadata(
-            collection,
-            updatedPubMagicMetadata
-        );
-    } catch (e) {
-        logError(e, 'change collection sort order failed');
-    }
-};
 
 export const shouldShowOptions = (type: CollectionSummaryType) => {
     return !OPTIONS_NOT_HAVING_COLLECTION_TYPES.has(type);
@@ -170,24 +134,6 @@ export function getCollectionNameMap(
     return new Map<number, string>(
         collections.map((collection) => [collection.id, collection.name])
     );
-}
-
-export function getNonEmptyPersonalCollections(
-    collections: Collection[],
-    personalFiles: EnteFile[],
-    user: User
-): Collection[] {
-    if (!user?.id) {
-        throw Error('user missing');
-    }
-    const nonEmptyCollections = getNonEmptyCollections(
-        collections,
-        personalFiles
-    );
-    const personalCollections = nonEmptyCollections.filter(
-        (collection) => collection.owner.id === user?.id
-    );
-    return personalCollections;
 }
 
 export function getNonHiddenCollections(

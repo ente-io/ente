@@ -143,20 +143,11 @@ class CastDownloadManager {
         return decrypted;
     };
 
-    getFile = async (
-        file: EnteFile,
-        token: string,
-        passwordToken: string,
-        forPreview = false
-    ) => {
+    getFile = async (file: EnteFile, castToken: string, forPreview = false) => {
         const fileKey = forPreview ? `${file.id}_preview` : `${file.id}`;
         try {
             const getFilePromise = async () => {
-                const fileStream = await this.downloadFile(
-                    token,
-                    passwordToken,
-                    file
-                );
+                const fileStream = await this.downloadFile(castToken, file);
                 const fileBlob = await new Response(fileStream).blob();
                 if (forPreview) {
                     return await getRenderableFileURL(file, fileBlob);
