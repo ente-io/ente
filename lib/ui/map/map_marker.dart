@@ -6,6 +6,7 @@ import "package:photos/ui/map/marker_image.dart";
 
 Marker mapMarker(ImageMarker imageMarker, String key) {
   return Marker(
+    anchorPos: AnchorPos.align(AnchorAlign.top),
     key: Key(key),
     width: 75,
     height: 75,
