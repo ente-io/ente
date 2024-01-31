@@ -39,30 +39,38 @@ export default function AddParticipant({
         [emailList, collection.sharees]
     );
 
-    const collectionShare: AddParticipantFormProps['callback'] = async (
+    const collectionShare: AddParticipantFormProps['callback'] = async ({
+        email,
         emails,
-        setFieldError,
-        resetForm
-    ) => {
-        try {
-            for (const email of emails) {
-                if (email === user.email) {
-                    setFieldError(t('SHARE_WITH_SELF'));
-                    break;
-                } else if (
-                    collection?.sharees?.find((value) => value.email === email)
-                ) {
-                    setFieldError(t('ALREADY_SHARED', { email }));
-                    break;
-                } else {
-                    await shareCollection(collection, email, type);
-                    await syncWithRemote(false, true);
-                }
+    }) => {
+        // if email is provided, means user has custom entered email, so, will need to validate for self sharing
+        // and already shared
+        if (email) {
+            if (email === user.email) {
+                throw new Error(t('SHARE_WITH_SELF'));
+            } else if (
+                collection?.sharees?.find((value) => value.email === email)
+            ) {
+                throw new Error(t('ALREADY_SHARED', { email: email }));
             }
-            resetForm();
-        } catch (e) {
-            const errorMessage = handleSharingErrors(e);
-            setFieldError(errorMessage);
+            // set emails to array of one email
+            emails = [email];
+        }
+        for (const email of emails) {
+            if (
+                email === user.email ||
+                collection?.sharees?.find((value) => value.email === email)
+            ) {
+                // can just skip this email
+                continue;
+            }
+            try {
+                await shareCollection(collection, email, type);
+                await syncWithRemote(false, true);
+            } catch (e) {
+                const errorMessage = handleSharingErrors(e);
+                throw new Error(errorMessage);
+            }
         }
     };
 
