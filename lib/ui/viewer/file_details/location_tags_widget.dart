@@ -78,6 +78,7 @@ class _LocationTagsWidgetState extends State<LocationTagsWidget> {
         endSection: Padding(
           padding: const EdgeInsets.only(top: 8),
           child: ClipRRect(
+            clipBehavior: Clip.antiAliasWithSaveLayer,
             borderRadius: const BorderRadius.all(Radius.circular(8)),
             child: SizedBox(
               height: 120,
