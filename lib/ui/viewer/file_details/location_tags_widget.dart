@@ -121,7 +121,7 @@ class _LocationTagsWidgetState extends State<LocationTagsWidget> {
                                     widget.file.location!.latitude!,
                                     widget.file.location!.longitude!,
                                   ),
-                                  initialZoom: 9 + 1,
+                                  initialZoom: 9 + 1.5,
                                 ),
                               ),
                             );
@@ -163,7 +163,10 @@ class _LocationTagsWidgetState extends State<LocationTagsWidget> {
                           ),
                         ),
                         BackdropFilter(
-                          filter: ImageFilter.blur(sigmaX: 2.8, sigmaY: 2.8),
+                          filter: ImageFilter.blur(
+                            sigmaX: 2.8,
+                            sigmaY: 2.8,
+                          ),
                           child: Container(
                             color: getEnteColorScheme(context)
                                 .backgroundElevated
