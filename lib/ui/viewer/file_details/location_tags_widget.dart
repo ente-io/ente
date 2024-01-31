@@ -72,6 +72,9 @@ class _LocationTagsWidgetState extends State<LocationTagsWidget> {
         key: ValueKey(title),
         leadingIcon: leadingIcon ?? Icons.pin_drop_outlined,
         title: title,
+        editOnTap: () {
+          disableMap();
+        },
         subtitleSection: locationTagChips,
         hasChipButtons: hasChipButtons ?? true,
         onTap: onTap,
@@ -128,11 +131,13 @@ class _LocationTagsWidgetState extends State<LocationTagsWidget> {
                           },
                           markerSize: const Size(45, 45),
                         ),
-                        Container(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(
-                              color: getEnteColorScheme(context).strokeFaint,
+                        IgnorePointer(
+                          child: Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(
+                                color: getEnteColorScheme(context).strokeFaint,
+                              ),
                             ),
                           ),
                         ),
