@@ -84,6 +84,7 @@ class _LocationTagsWidgetState extends State<LocationTagsWidget> {
               height: 120,
               child: _hasEnabledMap
                   ? Stack(
+                      clipBehavior: Clip.none,
                       key: ValueKey(_hasEnabledMap),
                       children: [
                         MapView(
@@ -143,6 +144,7 @@ class _LocationTagsWidgetState extends State<LocationTagsWidget> {
                     )
                   : Stack(
                       key: ValueKey(_hasEnabledMap),
+                      clipBehavior: Clip.none,
                       children: [
                         MapView(
                           updateVisibleImages: () {},
