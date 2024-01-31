@@ -6,6 +6,7 @@ import "package:flutter/material.dart";
 import "package:flutter_map/plugin_api.dart";
 import "package:photos/extensions/list.dart";
 import "package:photos/theme/colors.dart";
+import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/buttons/icon_button_widget.dart";
 
 // Credit: This code is based on the Rich Attribution widget from the flutter_map
@@ -177,7 +178,7 @@ class MapAttributionWidgetState extends State<MapAttributionWidget> {
                       onTap: close,
                       icon: Icons.cancel_outlined,
                       iconButtonType: IconButtonType.primary,
-                      iconColor: strokeBaseLight,
+                      iconColor: getEnteColorScheme(context).strokeBase,
                     ))(
                 context,
                 () => setState(() => popupExpanded = false),
