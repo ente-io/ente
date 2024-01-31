@@ -6,6 +6,7 @@ import {
 import EnteButton from '@ente/shared/components/EnteButton';
 import EnteSpinner from '@ente/shared/components/EnteSpinner';
 import FormPaper from '@ente/shared/components/Form/FormPaper';
+import HTTPService from '@ente/shared/network/HTTPService';
 import { logError } from '@ente/shared/sentry';
 import { LS_KEYS, setData } from '@ente/shared/storage/localStorage';
 import InfoIcon from '@mui/icons-material/Info';
@@ -55,6 +56,9 @@ const PasskeysFlow = () => {
         }
 
         setData(LS_KEYS.CLIENT_PACKAGE, { name: pkg });
+        HTTPService.setHeaders({
+            'X-Client-Package': pkg,
+        });
 
         // get passkeySessionID from the query params
         const passkeySessionID = searchParams.get('passkeySessionID') as string;
