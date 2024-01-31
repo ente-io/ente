@@ -22,10 +22,14 @@ class MapScreen extends StatefulWidget {
   // Add a function parameter where the function returns a Future<List<File>>
 
   final Future<List<EnteFile>> Function() filesFutureFn;
+  final LatLng? center;
+  final double initialZoom;
 
   const MapScreen({
     super.key,
     required this.filesFutureFn,
+    this.center,
+    this.initialZoom = 4.5,
   });
 
   @override
@@ -41,7 +45,6 @@ class _MapScreenState extends State<MapScreen> {
       StreamController<List<EnteFile>>.broadcast();
   MapController mapController = MapController();
   bool isLoading = true;
-  double initialZoom = 4.5;
   double maxZoom = 18.0;
   double minZoom = 2.8;
   int debounceDuration = 500;
@@ -109,13 +112,16 @@ class _MapScreenState extends State<MapScreen> {
     }
 
     if (hasAnyLocation) {
-      center = LatLng(
-        mostRecentFile!.location!.latitude!,
-        mostRecentFile.location!.longitude!,
-      );
+      center = widget.center ??
+          LatLng(
+            mostRecentFile!.location!.latitude!,
+            mostRecentFile.location!.longitude!,
+          );
 
       if (kDebugMode) {
-        debugPrint("Info for map: center $center, initialZoom $initialZoom");
+        debugPrint(
+          "Info for map: center $center, initialZoom ${widget.initialZoom}",
+        );
       }
     } else {
       showShortToast(context, S.of(context).noImagesWithLocation);
@@ -127,7 +133,7 @@ class _MapScreenState extends State<MapScreen> {
 
     mapController.move(
       center,
-      initialZoom,
+      widget.initialZoom,
     );
 
     Timer(Duration(milliseconds: debounceDuration), () {
@@ -211,7 +217,7 @@ class _MapScreenState extends State<MapScreen> {
                       imageMarkers: imageMarkers,
                       updateVisibleImages: calculateVisibleMarkers,
                       center: center,
-                      initialZoom: initialZoom,
+                      initialZoom: widget.initialZoom,
                       minZoom: minZoom,
                       maxZoom: maxZoom,
                       debounceDuration: debounceDuration,

@@ -5,7 +5,9 @@ import "dart:async";
 import "package:flutter/material.dart";
 import "package:flutter_map/plugin_api.dart";
 import "package:photos/extensions/list.dart";
+import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
+import "package:photos/ui/components/buttons/icon_button_widget.dart";
 
 // Credit: This code is based on the Rich Attribution widget from the flutter_map
 class MapAttributionWidget extends StatefulWidget {
@@ -87,6 +89,8 @@ class MapAttributionWidget extends StatefulWidget {
   ///
   /// Read the documentation on the individual properties for more information
   /// and customizability.
+
+  final double iconSize;
   const MapAttributionWidget({
     super.key,
     required this.attributions,
@@ -99,6 +103,7 @@ class MapAttributionWidget extends StatefulWidget {
     this.showFlutterMapAttribution = true,
     this.animationConfig = const FadeRAWA(),
     this.popupInitialDisplayDuration = Duration.zero,
+    this.iconSize = 20,
   });
 
   @override
@@ -168,27 +173,23 @@ class MapAttributionWidgetState extends State<MapAttributionWidget> {
         duration: widget.animationConfig.buttonDuration,
         child: popupExpanded
             ? (widget.closeButton ??
-                (context, close) => IconButton(
-                      onPressed: close,
-                      icon: Icon(
-                        Icons.cancel_outlined,
-                        color: Theme.of(context).textTheme.titleSmall?.color ??
-                            Colors.black,
-                        size: widget.permanentHeight,
-                      ),
+                (context, close) => IconButtonWidget(
+                      size: widget.iconSize,
+                      onTap: close,
+                      icon: Icons.cancel_outlined,
+                      iconButtonType: IconButtonType.primary,
+                      iconColor: getEnteColorScheme(context).strokeBase,
                     ))(
                 context,
                 () => setState(() => popupExpanded = false),
               )
             : (widget.openButton ??
-                (context, open) => IconButton(
-                      onPressed: open,
-                      tooltip: 'Attributions',
-                      icon: Icon(
-                        Icons.info_outlined,
-                        size: widget.permanentHeight,
-                        color: getEnteColorScheme(context).backgroundElevated,
-                      ),
+                (context, open) => IconButtonWidget(
+                      size: widget.iconSize,
+                      onTap: open,
+                      icon: Icons.info_outlined,
+                      iconButtonType: IconButtonType.primary,
+                      iconColor: strokeBaseLight,
                     ))(
                 context,
                 () {

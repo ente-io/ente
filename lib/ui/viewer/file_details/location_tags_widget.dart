@@ -1,15 +1,27 @@
 import "dart:async";
+import "dart:ui";
 
 import "package:flutter/material.dart";
+import "package:flutter_map/flutter_map.dart";
+import "package:latlong2/latlong.dart";
+
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/location_tag_updated_event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/services/location_service.dart";
+import "package:photos/services/search_service.dart";
+import "package:photos/services/user_remote_flag_service.dart";
 import "package:photos/states/location_screen_state.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/buttons/chip_button_widget.dart";
 import "package:photos/ui/components/info_item_widget.dart";
+import "package:photos/ui/map/enable_map.dart";
+import "package:photos/ui/map/image_marker.dart";
+import "package:photos/ui/map/map_screen.dart";
+import "package:photos/ui/map/map_view.dart";
+import "package:photos/ui/map/tile/layers.dart";
+
 import 'package:photos/ui/viewer/location/add_location_sheet.dart';
 import "package:photos/ui/viewer/location/location_screen.dart";
 import "package:photos/utils/navigation_util.dart";
@@ -36,6 +48,7 @@ class _LocationTagsWidgetState extends State<LocationTagsWidget> {
         Bus.instance.on<LocationTagUpdatedEvent>().listen((event) {
       locationTagChips = _getLocationTags();
     });
+
     super.initState();
   }
 
@@ -58,6 +71,7 @@ class _LocationTagsWidgetState extends State<LocationTagsWidget> {
         subtitleSection: locationTagChips,
         hasChipButtons: hasChipButtons ?? true,
         onTap: onTap,
+        endSection: InfoMap(widget.file),
 
         /// to be used when state issues are fixed when location is updated
         // editOnTap: widget.file.ownerID == Configuration.instance.getUserID()!
@@ -137,5 +151,174 @@ class _LocationTagsWidgetState extends State<LocationTagsWidget> {
       );
       return result;
     }
+  }
+}
+
+class InfoMap extends StatefulWidget {
+  final EnteFile file;
+  const InfoMap(this.file, {super.key});
+
+  @override
+  State<InfoMap> createState() => _InfoMapState();
+}
+
+class _InfoMapState extends State<InfoMap> {
+  final _mapController = MapController();
+  late bool _hasEnabledMap;
+  late double _fileLat;
+  late double _fileLng;
+  static const _enabledMapZoom = 12.0;
+  static const _disabledMapZoom = 9.0;
+
+  @override
+  void initState() {
+    super.initState();
+    _hasEnabledMap = UserRemoteFlagService.instance
+        .getCachedBoolValue(UserRemoteFlagService.mapEnabled);
+    _fileLat = widget.file.location!.latitude!;
+    _fileLng = widget.file.location!.longitude!;
+  }
+
+  @override
+  void dispose() {
+    _mapController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 8),
+      child: ClipRRect(
+        clipBehavior: Clip.antiAliasWithSaveLayer,
+        borderRadius: const BorderRadius.all(Radius.circular(8)),
+        child: SizedBox(
+          height: 124,
+          child: _hasEnabledMap
+              ? Stack(
+                  clipBehavior: Clip.none,
+                  key: ValueKey(_hasEnabledMap),
+                  children: [
+                    MapView(
+                      updateVisibleImages: () {},
+                      imageMarkers: [
+                        ImageMarker(
+                          imageFile: widget.file,
+                          latitude: _fileLat,
+                          longitude: _fileLng,
+                        ),
+                      ],
+                      controller: _mapController,
+                      center: LatLng(
+                        _fileLat,
+                        _fileLng,
+                      ),
+                      minZoom: _enabledMapZoom,
+                      maxZoom: _enabledMapZoom,
+                      initialZoom: _enabledMapZoom,
+                      debounceDuration: 0,
+                      bottomSheetDraggableAreaHeight: 0,
+                      showControls: false,
+                      interactiveFlags: InteractiveFlag.none,
+                      mapAttributionOptions: MapAttributionOptions(
+                        permanentHeight: 16,
+                        popupBorderRadius: BorderRadius.circular(4),
+                        iconSize: 16,
+                      ),
+                      onTap: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => MapScreen(
+                              filesFutureFn: SearchService.instance.getAllFiles,
+                              center: LatLng(
+                                _fileLat,
+                                _fileLng,
+                              ),
+                              initialZoom: 16,
+                            ),
+                          ),
+                        );
+                      },
+                      markerSize: const Size(45, 45),
+                    ),
+                    IgnorePointer(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: getEnteColorScheme(context).strokeFaint,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                )
+              : Stack(
+                  key: ValueKey(_hasEnabledMap),
+                  clipBehavior: Clip.none,
+                  children: [
+                    MapView(
+                      updateVisibleImages: () {},
+                      imageMarkers: const [],
+                      controller: _mapController,
+                      center: const LatLng(
+                        13.041599,
+                        77.594566,
+                      ),
+                      minZoom: _disabledMapZoom,
+                      maxZoom: _disabledMapZoom,
+                      initialZoom: _disabledMapZoom,
+                      debounceDuration: 0,
+                      bottomSheetDraggableAreaHeight: 0,
+                      showControls: false,
+                      interactiveFlags: InteractiveFlag.none,
+                      mapAttributionOptions: const MapAttributionOptions(
+                        iconSize: 0,
+                      ),
+                    ),
+                    BackdropFilter(
+                      filter: ImageFilter.blur(
+                        sigmaX: 2.8,
+                        sigmaY: 2.8,
+                      ),
+                      child: Container(
+                        color: getEnteColorScheme(context)
+                            .backgroundElevated
+                            .withOpacity(0.5),
+                      ),
+                    ),
+                    Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: getEnteColorScheme(context).strokeFaint,
+                        ),
+                      ),
+                    ),
+                    GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onTap: () async {
+                        unawaited(
+                          requestForMapEnable(context).then((value) {
+                            if (value) {
+                              setState(() {
+                                _hasEnabledMap = true;
+                              });
+                            }
+                          }),
+                        );
+                      },
+                      child: Center(
+                        child: Text(
+                          S.of(context).enableMaps,
+                          style: getEnteTextTheme(context).small,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+        ),
+      ),
+    );
   }
 }
