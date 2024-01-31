@@ -165,12 +165,18 @@ class InfoMap extends StatefulWidget {
 class _InfoMapState extends State<InfoMap> {
   final _mapController = MapController();
   late bool _hasEnabledMap;
+  late double _fileLat;
+  late double _fileLng;
+  static const _enabledMapZoom = 12.0;
+  static const _disabledMapZoom = 9.0;
 
   @override
   void initState() {
     super.initState();
     _hasEnabledMap = UserRemoteFlagService.instance
         .getCachedBoolValue(UserRemoteFlagService.mapEnabled);
+    _fileLat = widget.file.location!.latitude!;
+    _fileLng = widget.file.location!.longitude!;
   }
 
   @override
@@ -198,18 +204,18 @@ class _InfoMapState extends State<InfoMap> {
                       imageMarkers: [
                         ImageMarker(
                           imageFile: widget.file,
-                          latitude: widget.file.location!.latitude!,
-                          longitude: widget.file.location!.longitude!,
+                          latitude: _fileLat,
+                          longitude: _fileLng,
                         ),
                       ],
                       controller: _mapController,
                       center: LatLng(
-                        widget.file.location!.latitude!,
-                        widget.file.location!.longitude!,
+                        _fileLat,
+                        _fileLng,
                       ),
-                      minZoom: 12,
-                      maxZoom: 12,
-                      initialZoom: 12,
+                      minZoom: _enabledMapZoom,
+                      maxZoom: _enabledMapZoom,
+                      initialZoom: _enabledMapZoom,
                       debounceDuration: 0,
                       bottomSheetDraggableAreaHeight: 0,
                       showControls: false,
@@ -225,8 +231,8 @@ class _InfoMapState extends State<InfoMap> {
                             builder: (context) => MapScreen(
                               filesFutureFn: SearchService.instance.getAllFiles,
                               center: LatLng(
-                                widget.file.location!.latitude!,
-                                widget.file.location!.longitude!,
+                                _fileLat,
+                                _fileLng,
                               ),
                               initialZoom: 16,
                             ),
@@ -259,9 +265,9 @@ class _InfoMapState extends State<InfoMap> {
                         13.041599,
                         77.594566,
                       ),
-                      minZoom: 9,
-                      maxZoom: 9,
-                      initialZoom: 9,
+                      minZoom: _disabledMapZoom,
+                      maxZoom: _disabledMapZoom,
+                      initialZoom: _disabledMapZoom,
                       debounceDuration: 0,
                       bottomSheetDraggableAreaHeight: 0,
                       showControls: false,
