@@ -18,7 +18,7 @@ interface formValues {
     selectedOptions: string[];
 }
 export interface AddParticipantFormProps {
-    callback: (emails: string[]) => Promise<void>;
+    callback: (props: { email?: string; emails?: string[] }) => Promise<void>;
     fieldType: 'text' | 'email' | 'password';
     placeholder: string;
     buttonText: string;
@@ -49,9 +49,9 @@ export default function AddParticipantForm(props: AddParticipantFormProps) {
         try {
             SetLoading(true);
             if (values.inputValue !== '') {
-                await props.callback([values.inputValue]);
+                await props.callback({ email: values.inputValue });
             } else if (values.selectedOptions.length !== 0) {
-                await props.callback(values.selectedOptions);
+                await props.callback({ emails: values.selectedOptions });
             }
             SetLoading(false);
             props.onClose();

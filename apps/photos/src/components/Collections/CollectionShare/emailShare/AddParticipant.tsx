@@ -39,23 +39,29 @@ export default function AddParticipant({
         [emailList, collection.sharees]
     );
 
-    const collectionShare: AddParticipantFormProps['callback'] = async (
-        emails
-    ) => {
-        if (emails.length === 1) {
-            if (emails[0] === user.email) {
+    const collectionShare: AddParticipantFormProps['callback'] = async ({
+        email,
+        emails,
+    }) => {
+        // if email is provided, means user has custom entered email, so, will need to validate for self sharing
+        // and already shared
+        if (email) {
+            if (email === user.email) {
                 throw new Error(t('SHARE_WITH_SELF'));
             } else if (
-                collection?.sharees?.find((value) => value.email === emails[0])
+                collection?.sharees?.find((value) => value.email === email)
             ) {
-                throw new Error(t('ALREADY_SHARED', { email: emails[0] }));
+                throw new Error(t('ALREADY_SHARED', { email: email }));
             }
+            // set emails to array of one email
+            emails = [email];
         }
         for (const email of emails) {
             if (
                 email === user.email ||
                 collection?.sharees?.find((value) => value.email === email)
             ) {
+                // can just skip this email
                 continue;
             }
             try {
