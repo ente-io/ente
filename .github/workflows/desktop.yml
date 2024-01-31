@@ -157,7 +157,6 @@ jobs:
           make innoinstall
           flutter_distributor package --platform=windows --targets=exe --skip-clean
           cp dist/**/* ./auth-windows-${{ github.event_name == 'release' && github.event.release.tag_name || 'nightly' }}.exe
-          cp build/
 
       - run: cp -r build/windows/x64/runner/Release auth-windows-exe
       - run: tar.exe -a -c -f auth-windows-${{ github.event_name == 'release' && github.event.release.tag_name || 'nightly' }}.zip auth-windows-exe
