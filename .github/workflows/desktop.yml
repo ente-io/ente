@@ -7,7 +7,7 @@ on:
       - "v*"
 
 env:
-  FLUTTER_VERSION: "3.16.7"
+  FLUTTER_VERSION: "3.13.4"
 
 jobs:
   build-linux:

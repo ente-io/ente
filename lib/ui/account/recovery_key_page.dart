@@ -294,7 +294,7 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
     await PlatformUtil.shareFile(
       "ente_recovery_key_$time",
       "txt",
-      bytes,
+      bytes as Uint8List,
       MimeType.text,
     );
 

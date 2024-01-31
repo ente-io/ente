@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:ente_auth/core/configuration.dart';
 import 'package:ente_auth/l10n/l10n.dart';
@@ -75,13 +76,13 @@ Future<void> _requestForEncryptionPassword(
         try {
           final kekSalt = CryptoUtil.getSaltToDeriveKey();
           final derivedKeyResult = await CryptoUtil.deriveSensitiveKey(
-            utf8.encode(password),
+            utf8.encode(password) as Uint8List,
             kekSalt,
           );
           String exportPlainText = await _getAuthDataForExport();
           // Encrypt the key with this derived key
           final encResult = await CryptoUtil.encryptData(
-            utf8.encode(exportPlainText),
+            utf8.encode(exportPlainText) as Uint8List,
             derivedKeyResult.key,
           );
           final encContent = CryptoUtil.bin2base64(encResult.encryptedData!);

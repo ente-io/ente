@@ -20,7 +20,7 @@ dependencies:
   convert: ^3.1.1
   desktop_webview_window:
     git:
-      url: https://github.com/ente-io/flutter-desktop-plugins
+      url: https://github.com/MixinNetwork/flutter-plugins
       path: packages/desktop_webview_window
   device_info_plus: ^9.1.1
   dio: ^5.4.0
@@ -93,7 +93,7 @@ dependencies:
   tuple: ^2.0.0
   url_launcher: ^6.1.5
   uuid: ^4.2.2
-  win32: ^5.2.0
+  win32: ^5.1.1
 
 dependency_overrides:
   flutter_secure_storage_linux:

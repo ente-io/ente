@@ -861,7 +861,6 @@ class UserService {
   }
 
   Future<void> _saveConfiguration(Response response) async {
-    print(response.data);
     await Configuration.instance.setUserID(response.data["id"]);
     if (response.data["encryptedToken"] != null) {
       await Configuration.instance

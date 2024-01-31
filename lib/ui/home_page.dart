@@ -290,10 +290,10 @@ class _HomePageState extends State<HomePage> {
 
   Future<bool> _initDeepLinks() async {
     // Platform messages may fail, so we use a try/catch PlatformException.
-    final _appLinks = AppLinks();
+    final appLinks = AppLinks();
     try {
       String? initialLink;
-      initialLink = await _appLinks.getInitialAppLinkString();
+      initialLink = await appLinks.getInitialAppLinkString();
       // Parse the link and warn the user, if it is not correct,
       // but keep in mind it could be `null`.
       if (initialLink != null) {
@@ -310,7 +310,7 @@ class _HomePageState extends State<HomePage> {
 
     // Attach a listener to the stream
     if (!kIsWeb && !Platform.isLinux) {
-      _appLinks.stringLinkStream.listen(
+      appLinks.stringLinkStream.listen(
         (link) {
           _handleDeeplink(context, link);
         },
