@@ -72,20 +72,17 @@ class _LocationTagsWidgetState extends State<LocationTagsWidget> {
         key: ValueKey(title),
         leadingIcon: leadingIcon ?? Icons.pin_drop_outlined,
         title: title,
-        editOnTap: () {
-          disableMap();
-        },
         subtitleSection: locationTagChips,
         hasChipButtons: hasChipButtons ?? true,
         onTap: onTap,
         endSection: Padding(
           padding: const EdgeInsets.only(top: 8),
-          child: _hasEnabledMap
-              ? ClipRRect(
-                  borderRadius: const BorderRadius.all(Radius.circular(8)),
-                  child: SizedBox(
-                    height: 120,
-                    child: Stack(
+          child: ClipRRect(
+            borderRadius: const BorderRadius.all(Radius.circular(8)),
+            child: SizedBox(
+              height: 120,
+              child: _hasEnabledMap
+                  ? Stack(
                       key: ValueKey(_hasEnabledMap),
                       children: [
                         MapView(
@@ -142,14 +139,8 @@ class _LocationTagsWidgetState extends State<LocationTagsWidget> {
                           ),
                         ),
                       ],
-                    ),
-                  ),
-                )
-              : ClipRRect(
-                  borderRadius: const BorderRadius.all(Radius.circular(8)),
-                  child: SizedBox(
-                    height: 120,
-                    child: Stack(
+                    )
+                  : Stack(
                       key: ValueKey(_hasEnabledMap),
                       children: [
                         MapView(
@@ -209,28 +200,28 @@ class _LocationTagsWidgetState extends State<LocationTagsWidget> {
                         ),
                       ],
                     ),
-                  ),
-                ),
 
-          /// to be used when state issues are fixed when location is updated
-          // editOnTap: widget.file.ownerID == Configuration.instance.getUserID()!
-          //     ? () {
-          //         showBarModalBottomSheet(
-          //           shape: const RoundedRectangleBorder(
-          //             borderRadius: BorderRadius.vertical(
-          //               top: Radius.circular(5),
-          //             ),
-          //           ),
-          //           backgroundColor:
-          //               getEnteColorScheme(context).backgroundElevated,
-          //           barrierColor: backdropFaintDark,
-          //           context: context,
-          //           builder: (context) {
-          //             return UpdateLocationDataWidget([widget.file]);
-          //           },
-          //         );
-          //       }
-          //     : null,
+              /// to be used when state issues are fixed when location is updated
+              // editOnTap: widget.file.ownerID == Configuration.instance.getUserID()!
+              //     ? () {
+              //         showBarModalBottomSheet(
+              //           shape: const RoundedRectangleBorder(
+              //             borderRadius: BorderRadius.vertical(
+              //               top: Radius.circular(5),
+              //             ),
+              //           ),
+              //           backgroundColor:
+              //               getEnteColorScheme(context).backgroundElevated,
+              //           barrierColor: backdropFaintDark,
+              //           context: context,
+              //           builder: (context) {
+              //             return UpdateLocationDataWidget([widget.file]);
+              //           },
+              //         );
+              //       }
+              //     : null,
+            ),
+          ),
         ),
       ),
     );
