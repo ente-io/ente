@@ -71,51 +71,64 @@ class _LocationTagsWidgetState extends State<LocationTagsWidget> {
         onTap: onTap,
         endSection: Padding(
           padding: const EdgeInsets.only(top: 8),
+
           child: ClipRRect(
             borderRadius: const BorderRadius.all(Radius.circular(8)),
             child: SizedBox(
               height: 120,
-              child: MapView(
-                updateVisibleImages: () {},
-                imageMarkers: [
-                  ImageMarker(
-                    imageFile: widget.file,
-                    latitude: widget.file.location!.latitude!,
-                    longitude: widget.file.location!.longitude!,
-                  ),
-                ],
-                controller: _mapController,
-                center: LatLng(
-                  widget.file.location!.latitude!,
-                  widget.file.location!.longitude!,
-                ),
-                minZoom: 7,
-                maxZoom: 7,
-                initialZoom: 7,
-                debounceDuration: 0,
-                bottomSheetDraggableAreaHeight: 0,
-                showControls: false,
-                interactiveFlags: InteractiveFlag.none,
-                mapAttributionOptions: MapAttributionOptions(
-                  permanentHeight: 16,
-                  popupBorderRadius: BorderRadius.circular(4),
-                  iconSize: 16,
-                ),
-                onTap: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (context) => MapScreen(
-                        filesFutureFn: SearchService.instance.getAllFiles,
-                        center: LatLng(
-                          widget.file.location!.latitude!,
-                          widget.file.location!.longitude!,
+              child: Stack(
+                children: [
+                  MapView(
+                    updateVisibleImages: () {},
+                    imageMarkers: [
+                      ImageMarker(
+                        imageFile: widget.file,
+                        latitude: widget.file.location!.latitude!,
+                        longitude: widget.file.location!.longitude!,
+                      ),
+                    ],
+                    controller: _mapController,
+                    center: LatLng(
+                      widget.file.location!.latitude!,
+                      widget.file.location!.longitude!,
+                    ),
+                    minZoom: 7,
+                    maxZoom: 7,
+                    initialZoom: 7,
+                    debounceDuration: 0,
+                    bottomSheetDraggableAreaHeight: 0,
+                    showControls: false,
+                    interactiveFlags: InteractiveFlag.none,
+                    mapAttributionOptions: MapAttributionOptions(
+                      permanentHeight: 16,
+                      popupBorderRadius: BorderRadius.circular(4),
+                      iconSize: 16,
+                    ),
+                    onTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => MapScreen(
+                            filesFutureFn: SearchService.instance.getAllFiles,
+                            center: LatLng(
+                              widget.file.location!.latitude!,
+                              widget.file.location!.longitude!,
+                            ),
+                            initialZoom: 7 + 1,
+                          ),
                         ),
-                        initialZoom: 7 + 1,
+                      );
+                    },
+                    markerSize: const Size(45, 45),
+                  ),
+                  Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: getEnteColorScheme(context).strokeFaint,
                       ),
                     ),
-                  );
-                },
-                markerSize: const Size(45, 45),
+                  ),
+                ],
               ),
             ),
           ),
