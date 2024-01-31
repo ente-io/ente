@@ -16,6 +16,7 @@ import "package:photos/states/location_screen_state.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/buttons/chip_button_widget.dart";
 import "package:photos/ui/components/info_item_widget.dart";
+import "package:photos/ui/map/enable_map.dart";
 import "package:photos/ui/map/image_marker.dart";
 import "package:photos/ui/map/map_screen.dart";
 import "package:photos/ui/map/map_view.dart";
@@ -82,6 +83,7 @@ class _LocationTagsWidgetState extends State<LocationTagsWidget> {
                   child: SizedBox(
                     height: 120,
                     child: Stack(
+                      key: ValueKey(_hasEnabledMap),
                       children: [
                         MapView(
                           updateVisibleImages: () {},
@@ -143,6 +145,7 @@ class _LocationTagsWidgetState extends State<LocationTagsWidget> {
                   child: SizedBox(
                     height: 120,
                     child: Stack(
+                      key: ValueKey(_hasEnabledMap),
                       children: [
                         MapView(
                           updateVisibleImages: () {},
@@ -167,7 +170,7 @@ class _LocationTagsWidgetState extends State<LocationTagsWidget> {
                           filter: ImageFilter.blur(sigmaX: 2.8, sigmaY: 2.8),
                           child: Container(
                             color: getEnteColorScheme(context)
-                                .backgroundElevated2
+                                .backgroundElevated
                                 .withOpacity(0.5),
                           ),
                         ),
@@ -176,6 +179,26 @@ class _LocationTagsWidgetState extends State<LocationTagsWidget> {
                             borderRadius: BorderRadius.circular(8),
                             border: Border.all(
                               color: getEnteColorScheme(context).strokeFaint,
+                            ),
+                          ),
+                        ),
+                        GestureDetector(
+                          behavior: HitTestBehavior.opaque,
+                          onTap: () async {
+                            unawaited(
+                              requestForMapEnable(context).then((value) {
+                                if (value) {
+                                  setState(() {
+                                    _hasEnabledMap = true;
+                                  });
+                                }
+                              }),
+                            );
+                          },
+                          child: Center(
+                            child: Text(
+                              "Enable Maps",
+                              style: getEnteTextTheme(context).small,
                             ),
                           ),
                         ),
