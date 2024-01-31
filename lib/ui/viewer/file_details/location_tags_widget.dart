@@ -187,7 +187,7 @@ class _InfoMapState extends State<InfoMap> {
         clipBehavior: Clip.antiAliasWithSaveLayer,
         borderRadius: const BorderRadius.all(Radius.circular(8)),
         child: SizedBox(
-          height: 120,
+          height: 124,
           child: _hasEnabledMap
               ? Stack(
                   clipBehavior: Clip.none,
@@ -304,7 +304,7 @@ class _InfoMapState extends State<InfoMap> {
                       },
                       child: Center(
                         child: Text(
-                          "Enable Maps",
+                          S.of(context).enableMaps,
                           style: getEnteTextTheme(context).small,
                         ),
                       ),
