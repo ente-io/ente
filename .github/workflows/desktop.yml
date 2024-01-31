@@ -41,9 +41,9 @@ jobs:
         run: |
           flutter config --enable-linux-desktop
           dart pub global activate flutter_distributor
-          flutter_distributor package --platform=linux --targets=deb --skip-clean --flutter-build-args=verbose
-          flutter_distributor package --platform=linux --targets=rpm --skip-clean --flutter-build-args=verbose
-          flutter_distributor package --platform=linux --targets=appimage --skip-clean --flutter-build-args=verbose
+          flutter_distributor package --platform=linux --targets=deb --skip-clean
+          flutter_distributor package --platform=linux --targets=rpm --skip-clean
+          flutter_distributor package --platform=linux --targets=appimage --skip-clean
           mv dist/**/*-*-linux.deb auth-linux-${{ github.event_name == 'release' && github.event.release.tag_name || 'nightly' }}-x86_64.deb
           mv dist/**/*-*-linux.rpm auth-linux-${{ github.event_name == 'release' && github.event.release.tag_name || 'nightly' }}-x86_64.rpm
           mv dist/**/*-*-linux.AppImage auth-linux-${{ github.event_name == 'release' && github.event.release.tag_name || 'nightly' }}-x86_64.AppImage
@@ -115,7 +115,7 @@ jobs:
         run: |
           flutter config --enable-macos-desktop
           dart pub global activate flutter_distributor
-          flutter_distributor package --platform=macos --targets=dmg --skip-clean --flutter-build-args=verbose
+          flutter_distributor package --platform=macos --targets=dmg --skip-clean
           mv dist/**/ente_auth-*-macos.dmg auth-macos-${{ github.event_name == 'release' && github.event.release.tag_name || 'nightly' }}-universal.dmg
 
       - name: Sign App
@@ -155,7 +155,7 @@ jobs:
           flutter config --enable-windows-desktop
           dart pub global activate flutter_distributor
           make innoinstall
-          flutter_distributor package --platform=windows --targets=exe --skip-clean --flutter-build-args=verbose
+          flutter_distributor package --platform=windows --targets=exe --skip-clean
           cp dist/**/* ./auth-windows-${{ github.event_name == 'release' && github.event.release.tag_name || 'nightly' }}.exe
           cp build/
 
