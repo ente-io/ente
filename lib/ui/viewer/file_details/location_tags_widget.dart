@@ -1,4 +1,5 @@
 import "dart:async";
+import "dart:ui";
 
 import "package:flutter/material.dart";
 import "package:flutter_map/flutter_map.dart";
@@ -10,6 +11,7 @@ import "package:photos/generated/l10n.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/services/location_service.dart";
 import "package:photos/services/search_service.dart";
+import "package:photos/services/user_remote_flag_service.dart";
 import "package:photos/states/location_screen_state.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/buttons/chip_button_widget.dart";
@@ -39,6 +41,7 @@ class _LocationTagsWidgetState extends State<LocationTagsWidget> {
   late StreamSubscription<LocationTagUpdatedEvent> _locTagUpdateListener;
   VoidCallback? onTap;
   final _mapController = MapController();
+  late bool _hasEnabledMap;
   @override
   void initState() {
     locationTagChips = _getLocationTags();
@@ -46,6 +49,8 @@ class _LocationTagsWidgetState extends State<LocationTagsWidget> {
         Bus.instance.on<LocationTagUpdatedEvent>().listen((event) {
       locationTagChips = _getLocationTags();
     });
+    _hasEnabledMap = UserRemoteFlagService.instance
+        .getCachedBoolValue(UserRemoteFlagService.mapEnabled);
     super.initState();
   }
 
@@ -71,67 +76,113 @@ class _LocationTagsWidgetState extends State<LocationTagsWidget> {
         onTap: onTap,
         endSection: Padding(
           padding: const EdgeInsets.only(top: 8),
-
-          child: ClipRRect(
-            borderRadius: const BorderRadius.all(Radius.circular(8)),
-            child: SizedBox(
-              height: 120,
-              child: Stack(
-                children: [
-                  MapView(
-                    updateVisibleImages: () {},
-                    imageMarkers: [
-                      ImageMarker(
-                        imageFile: widget.file,
-                        latitude: widget.file.location!.latitude!,
-                        longitude: widget.file.location!.longitude!,
-                      ),
-                    ],
-                    controller: _mapController,
-                    center: LatLng(
-                      widget.file.location!.latitude!,
-                      widget.file.location!.longitude!,
-                    ),
-                    minZoom: 7,
-                    maxZoom: 7,
-                    initialZoom: 7,
-                    debounceDuration: 0,
-                    bottomSheetDraggableAreaHeight: 0,
-                    showControls: false,
-                    interactiveFlags: InteractiveFlag.none,
-                    mapAttributionOptions: MapAttributionOptions(
-                      permanentHeight: 16,
-                      popupBorderRadius: BorderRadius.circular(4),
-                      iconSize: 16,
-                    ),
-                    onTap: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) => MapScreen(
-                            filesFutureFn: SearchService.instance.getAllFiles,
-                            center: LatLng(
-                              widget.file.location!.latitude!,
-                              widget.file.location!.longitude!,
+          child: _hasEnabledMap
+              ? ClipRRect(
+                  borderRadius: const BorderRadius.all(Radius.circular(8)),
+                  child: SizedBox(
+                    height: 120,
+                    child: Stack(
+                      children: [
+                        MapView(
+                          updateVisibleImages: () {},
+                          imageMarkers: [
+                            ImageMarker(
+                              imageFile: widget.file,
+                              latitude: widget.file.location!.latitude!,
+                              longitude: widget.file.location!.longitude!,
                             ),
-                            initialZoom: 7 + 1,
+                          ],
+                          controller: _mapController,
+                          center: LatLng(
+                            widget.file.location!.latitude!,
+                            widget.file.location!.longitude!,
+                          ),
+                          minZoom: 9,
+                          maxZoom: 9,
+                          initialZoom: 9,
+                          debounceDuration: 0,
+                          bottomSheetDraggableAreaHeight: 0,
+                          showControls: false,
+                          interactiveFlags: InteractiveFlag.none,
+                          mapAttributionOptions: MapAttributionOptions(
+                            permanentHeight: 16,
+                            popupBorderRadius: BorderRadius.circular(4),
+                            iconSize: 16,
+                          ),
+                          onTap: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) => MapScreen(
+                                  filesFutureFn:
+                                      SearchService.instance.getAllFiles,
+                                  center: LatLng(
+                                    widget.file.location!.latitude!,
+                                    widget.file.location!.longitude!,
+                                  ),
+                                  initialZoom: 9 + 1,
+                                ),
+                              ),
+                            );
+                          },
+                          markerSize: const Size(45, 45),
+                        ),
+                        Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(
+                              color: getEnteColorScheme(context).strokeFaint,
+                            ),
                           ),
                         ),
-                      );
-                    },
-                    markerSize: const Size(45, 45),
-                  ),
-                  Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(
-                        color: getEnteColorScheme(context).strokeFaint,
-                      ),
+                      ],
                     ),
                   ),
-                ],
-              ),
-            ),
-          ),
+                )
+              : ClipRRect(
+                  borderRadius: const BorderRadius.all(Radius.circular(8)),
+                  child: SizedBox(
+                    height: 120,
+                    child: Stack(
+                      children: [
+                        MapView(
+                          updateVisibleImages: () {},
+                          imageMarkers: const [],
+                          controller: _mapController,
+                          center: const LatLng(
+                            13.041599,
+                            77.594566,
+                          ),
+                          minZoom: 9,
+                          maxZoom: 9,
+                          initialZoom: 9,
+                          debounceDuration: 0,
+                          bottomSheetDraggableAreaHeight: 0,
+                          showControls: false,
+                          interactiveFlags: InteractiveFlag.none,
+                          mapAttributionOptions: const MapAttributionOptions(
+                            iconSize: 0,
+                          ),
+                        ),
+                        BackdropFilter(
+                          filter: ImageFilter.blur(sigmaX: 2.8, sigmaY: 2.8),
+                          child: Container(
+                            color: getEnteColorScheme(context)
+                                .backgroundElevated2
+                                .withOpacity(0.5),
+                          ),
+                        ),
+                        Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(
+                              color: getEnteColorScheme(context).strokeFaint,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
 
           /// to be used when state issues are fixed when location is updated
           // editOnTap: widget.file.ownerID == Configuration.instance.getUserID()!
