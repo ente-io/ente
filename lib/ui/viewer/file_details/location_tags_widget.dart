@@ -41,8 +41,6 @@ class _LocationTagsWidgetState extends State<LocationTagsWidget> {
   late Future<List<Widget>> locationTagChips;
   late StreamSubscription<LocationTagUpdatedEvent> _locTagUpdateListener;
   VoidCallback? onTap;
-  final _mapController = MapController();
-  late bool _hasEnabledMap;
   @override
   void initState() {
     locationTagChips = _getLocationTags();
@@ -50,15 +48,13 @@ class _LocationTagsWidgetState extends State<LocationTagsWidget> {
         Bus.instance.on<LocationTagUpdatedEvent>().listen((event) {
       locationTagChips = _getLocationTags();
     });
-    _hasEnabledMap = UserRemoteFlagService.instance
-        .getCachedBoolValue(UserRemoteFlagService.mapEnabled);
+
     super.initState();
   }
 
   @override
   void dispose() {
     _locTagUpdateListener.cancel();
-    _mapController.dispose();
     super.dispose();
   }
 
@@ -75,160 +71,27 @@ class _LocationTagsWidgetState extends State<LocationTagsWidget> {
         subtitleSection: locationTagChips,
         hasChipButtons: hasChipButtons ?? true,
         onTap: onTap,
-        endSection: Padding(
-          padding: const EdgeInsets.only(top: 8),
-          child: ClipRRect(
-            clipBehavior: Clip.antiAliasWithSaveLayer,
-            borderRadius: const BorderRadius.all(Radius.circular(8)),
-            child: SizedBox(
-              height: 120,
-              child: _hasEnabledMap
-                  ? Stack(
-                      clipBehavior: Clip.none,
-                      key: ValueKey(_hasEnabledMap),
-                      children: [
-                        MapView(
-                          updateVisibleImages: () {},
-                          imageMarkers: [
-                            ImageMarker(
-                              imageFile: widget.file,
-                              latitude: widget.file.location!.latitude!,
-                              longitude: widget.file.location!.longitude!,
-                            ),
-                          ],
-                          controller: _mapController,
-                          center: LatLng(
-                            widget.file.location!.latitude!,
-                            widget.file.location!.longitude!,
-                          ),
-                          minZoom: 9,
-                          maxZoom: 9,
-                          initialZoom: 9,
-                          debounceDuration: 0,
-                          bottomSheetDraggableAreaHeight: 0,
-                          showControls: false,
-                          interactiveFlags: InteractiveFlag.none,
-                          mapAttributionOptions: MapAttributionOptions(
-                            permanentHeight: 16,
-                            popupBorderRadius: BorderRadius.circular(4),
-                            iconSize: 16,
-                          ),
-                          onTap: () {
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (context) => MapScreen(
-                                  filesFutureFn:
-                                      SearchService.instance.getAllFiles,
-                                  center: LatLng(
-                                    widget.file.location!.latitude!,
-                                    widget.file.location!.longitude!,
-                                  ),
-                                  initialZoom: 9 + 1.5,
-                                ),
-                              ),
-                            );
-                          },
-                          markerSize: const Size(45, 45),
-                        ),
-                        IgnorePointer(
-                          child: Container(
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(8),
-                              border: Border.all(
-                                color: getEnteColorScheme(context).strokeFaint,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    )
-                  : Stack(
-                      key: ValueKey(_hasEnabledMap),
-                      clipBehavior: Clip.none,
-                      children: [
-                        MapView(
-                          updateVisibleImages: () {},
-                          imageMarkers: const [],
-                          controller: _mapController,
-                          center: const LatLng(
-                            13.041599,
-                            77.594566,
-                          ),
-                          minZoom: 9,
-                          maxZoom: 9,
-                          initialZoom: 9,
-                          debounceDuration: 0,
-                          bottomSheetDraggableAreaHeight: 0,
-                          showControls: false,
-                          interactiveFlags: InteractiveFlag.none,
-                          mapAttributionOptions: const MapAttributionOptions(
-                            iconSize: 0,
-                          ),
-                        ),
-                        BackdropFilter(
-                          filter: ImageFilter.blur(
-                            sigmaX: 2.8,
-                            sigmaY: 2.8,
-                          ),
-                          child: Container(
-                            color: getEnteColorScheme(context)
-                                .backgroundElevated
-                                .withOpacity(0.5),
-                          ),
-                        ),
-                        Container(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(
-                              color: getEnteColorScheme(context).strokeFaint,
-                            ),
-                          ),
-                        ),
-                        GestureDetector(
-                          behavior: HitTestBehavior.opaque,
-                          onTap: () async {
-                            unawaited(
-                              requestForMapEnable(context).then((value) {
-                                if (value) {
-                                  setState(() {
-                                    _hasEnabledMap = true;
-                                  });
-                                }
-                              }),
-                            );
-                          },
-                          child: Center(
-                            child: Text(
-                              "Enable Maps",
-                              style: getEnteTextTheme(context).small,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
+        endSection: InfoMap(widget.file),
 
-              /// to be used when state issues are fixed when location is updated
-              // editOnTap: widget.file.ownerID == Configuration.instance.getUserID()!
-              //     ? () {
-              //         showBarModalBottomSheet(
-              //           shape: const RoundedRectangleBorder(
-              //             borderRadius: BorderRadius.vertical(
-              //               top: Radius.circular(5),
-              //             ),
-              //           ),
-              //           backgroundColor:
-              //               getEnteColorScheme(context).backgroundElevated,
-              //           barrierColor: backdropFaintDark,
-              //           context: context,
-              //           builder: (context) {
-              //             return UpdateLocationDataWidget([widget.file]);
-              //           },
-              //         );
-              //       }
-              //     : null,
-            ),
-          ),
-        ),
+        /// to be used when state issues are fixed when location is updated
+        // editOnTap: widget.file.ownerID == Configuration.instance.getUserID()!
+        //     ? () {
+        //         showBarModalBottomSheet(
+        //           shape: const RoundedRectangleBorder(
+        //             borderRadius: BorderRadius.vertical(
+        //               top: Radius.circular(5),
+        //             ),
+        //           ),
+        //           backgroundColor:
+        //               getEnteColorScheme(context).backgroundElevated,
+        //           barrierColor: backdropFaintDark,
+        //           context: context,
+        //           builder: (context) {
+        //             return UpdateLocationDataWidget([widget.file]);
+        //           },
+        //         );
+        //       }
+        //     : null,
       ),
     );
   }
@@ -288,5 +151,168 @@ class _LocationTagsWidgetState extends State<LocationTagsWidget> {
       );
       return result;
     }
+  }
+}
+
+class InfoMap extends StatefulWidget {
+  final EnteFile file;
+  const InfoMap(this.file, {super.key});
+
+  @override
+  State<InfoMap> createState() => _InfoMapState();
+}
+
+class _InfoMapState extends State<InfoMap> {
+  final _mapController = MapController();
+  late bool _hasEnabledMap;
+
+  @override
+  void initState() {
+    super.initState();
+    _hasEnabledMap = UserRemoteFlagService.instance
+        .getCachedBoolValue(UserRemoteFlagService.mapEnabled);
+  }
+
+  @override
+  void dispose() {
+    _mapController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 8),
+      child: ClipRRect(
+        clipBehavior: Clip.antiAliasWithSaveLayer,
+        borderRadius: const BorderRadius.all(Radius.circular(8)),
+        child: SizedBox(
+          height: 120,
+          child: _hasEnabledMap
+              ? Stack(
+                  clipBehavior: Clip.none,
+                  key: ValueKey(_hasEnabledMap),
+                  children: [
+                    MapView(
+                      updateVisibleImages: () {},
+                      imageMarkers: [
+                        ImageMarker(
+                          imageFile: widget.file,
+                          latitude: widget.file.location!.latitude!,
+                          longitude: widget.file.location!.longitude!,
+                        ),
+                      ],
+                      controller: _mapController,
+                      center: LatLng(
+                        widget.file.location!.latitude!,
+                        widget.file.location!.longitude!,
+                      ),
+                      minZoom: 9,
+                      maxZoom: 9,
+                      initialZoom: 9,
+                      debounceDuration: 0,
+                      bottomSheetDraggableAreaHeight: 0,
+                      showControls: false,
+                      interactiveFlags: InteractiveFlag.none,
+                      mapAttributionOptions: MapAttributionOptions(
+                        permanentHeight: 16,
+                        popupBorderRadius: BorderRadius.circular(4),
+                        iconSize: 16,
+                      ),
+                      onTap: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => MapScreen(
+                              filesFutureFn: SearchService.instance.getAllFiles,
+                              center: LatLng(
+                                widget.file.location!.latitude!,
+                                widget.file.location!.longitude!,
+                              ),
+                              initialZoom: 9 + 1.5,
+                            ),
+                          ),
+                        );
+                      },
+                      markerSize: const Size(45, 45),
+                    ),
+                    IgnorePointer(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: getEnteColorScheme(context).strokeFaint,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                )
+              : Stack(
+                  key: ValueKey(_hasEnabledMap),
+                  clipBehavior: Clip.none,
+                  children: [
+                    MapView(
+                      updateVisibleImages: () {},
+                      imageMarkers: const [],
+                      controller: _mapController,
+                      center: const LatLng(
+                        13.041599,
+                        77.594566,
+                      ),
+                      minZoom: 9,
+                      maxZoom: 9,
+                      initialZoom: 9,
+                      debounceDuration: 0,
+                      bottomSheetDraggableAreaHeight: 0,
+                      showControls: false,
+                      interactiveFlags: InteractiveFlag.none,
+                      mapAttributionOptions: const MapAttributionOptions(
+                        iconSize: 0,
+                      ),
+                    ),
+                    BackdropFilter(
+                      filter: ImageFilter.blur(
+                        sigmaX: 2.8,
+                        sigmaY: 2.8,
+                      ),
+                      child: Container(
+                        color: getEnteColorScheme(context)
+                            .backgroundElevated
+                            .withOpacity(0.5),
+                      ),
+                    ),
+                    Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: getEnteColorScheme(context).strokeFaint,
+                        ),
+                      ),
+                    ),
+                    GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onTap: () async {
+                        unawaited(
+                          requestForMapEnable(context).then((value) {
+                            if (value) {
+                              setState(() {
+                                _hasEnabledMap = true;
+                              });
+                            }
+                          }),
+                        );
+                      },
+                      child: Center(
+                        child: Text(
+                          "Enable Maps",
+                          style: getEnteTextTheme(context).small,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+        ),
+      ),
+    );
   }
 }
