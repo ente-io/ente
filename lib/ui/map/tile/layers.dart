@@ -67,7 +67,7 @@ class OSMFranceTileAttributes extends StatelessWidget {
       alignment: AttributionAlignment.bottomLeft,
       showFlutterMapAttribution: false,
       permanentHeight: options.permanentHeight,
-      popupBackgroundColor: getEnteColorScheme(context).backgroundElevated2,
+      popupBackgroundColor: getEnteColorScheme(context).backgroundElevated,
       popupBorderRadius: options.popupBorderRadius,
       iconSize: options.iconSize,
       attributions: [
