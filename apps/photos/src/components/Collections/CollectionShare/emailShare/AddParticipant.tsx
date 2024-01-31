@@ -40,29 +40,31 @@ export default function AddParticipant({
     );
 
     const collectionShare: AddParticipantFormProps['callback'] = async (
-        emails,
-        setFieldError,
-        resetForm
+        emails
     ) => {
-        try {
-            for (const email of emails) {
-                if (email === user.email) {
-                    setFieldError(t('SHARE_WITH_SELF'));
-                    break;
-                } else if (
-                    collection?.sharees?.find((value) => value.email === email)
-                ) {
-                    setFieldError(t('ALREADY_SHARED', { email }));
-                    break;
-                } else {
-                    await shareCollection(collection, email, type);
-                    await syncWithRemote(false, true);
-                }
+        if (emails.length === 1) {
+            if (emails[0] === user.email) {
+                throw new Error(t('SHARE_WITH_SELF'));
+            } else if (
+                collection?.sharees?.find((value) => value.email === emails[0])
+            ) {
+                throw new Error(t('ALREADY_SHARED', { email: emails[0] }));
             }
-            resetForm();
-        } catch (e) {
-            const errorMessage = handleSharingErrors(e);
-            setFieldError(errorMessage);
+        }
+        for (const email of emails) {
+            if (
+                email === user.email ||
+                collection?.sharees?.find((value) => value.email === email)
+            ) {
+                continue;
+            }
+            try {
+                await shareCollection(collection, email, type);
+                await syncWithRemote(false, true);
+            } catch (e) {
+                const errorMessage = handleSharingErrors(e);
+                throw new Error(errorMessage);
+            }
         }
     };
 
