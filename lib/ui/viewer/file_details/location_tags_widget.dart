@@ -244,9 +244,9 @@ class _InfoMapState extends State<InfoMap> {
                     ),
                     _tappedToOpenMap
                         ? const EnteLoadingWidget(
-                            alignment: Alignment.topRight,
-                            padding: 10,
-                            size: 12,
+                            alignment: Alignment.topLeft,
+                            padding: 19,
+                            size: 11,
                             color: strokeSolidMutedLight,
                           )
                         : const SizedBox.shrink(),
