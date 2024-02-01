@@ -18,7 +18,6 @@ class MapView extends StatefulWidget {
   final double minZoom;
   final double maxZoom;
   final double initialZoom;
-  final int debounceDuration;
   final double bottomSheetDraggableAreaHeight;
   final bool showControls;
   final int interactiveFlags;
@@ -36,7 +35,6 @@ class MapView extends StatefulWidget {
     required this.minZoom,
     required this.maxZoom,
     required this.initialZoom,
-    required this.debounceDuration,
     required this.bottomSheetDraggableAreaHeight,
     this.mapAttributionOptions = const MapAttributionOptions(),
     this.markerSize = MapView.defaultMarkerSize,

@@ -221,7 +221,6 @@ class _MapScreenState extends State<MapScreen> {
                       initialZoom: widget.initialZoom,
                       minZoom: minZoom,
                       maxZoom: maxZoom,
-                      debounceDuration: debounceDuration,
                       bottomSheetDraggableAreaHeight:
                           bottomSheetDraggableAreaHeight,
                     ),
