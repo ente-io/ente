@@ -320,7 +320,7 @@ class _InfoMapState extends State<InfoMap> {
       ),
     ).animate(target: _tappedToOpenMap ? 1 : 0).scaleXY(
           end: 1.025,
-          duration: const Duration(milliseconds: 250),
+          duration: const Duration(milliseconds: 220),
           curve: Curves.easeInOut,
         );
   }
@@ -329,7 +329,6 @@ class _InfoMapState extends State<InfoMap> {
     setState(() {
       _tappedToOpenMap = true;
     });
-
     unawaited(
       Navigator.of(context)
           .push(
