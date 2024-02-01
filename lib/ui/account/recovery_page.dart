@@ -1,5 +1,3 @@
-
-
 import 'dart:ui';
 
 import 'package:ente_auth/core/configuration.dart';
@@ -139,11 +137,13 @@ class _RecoveryPageState extends State<RecoveryPage> {
                         child: Center(
                           child: Text(
                             "No recovery key?",
-                            style:
-                                Theme.of(context).textTheme.titleMedium!.copyWith(
-                                      fontSize: 14,
-                                      decoration: TextDecoration.underline,
-                                    ),
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleMedium!
+                                .copyWith(
+                                  fontSize: 14,
+                                  decoration: TextDecoration.underline,
+                                ),
                           ),
                         ),
                       ),
