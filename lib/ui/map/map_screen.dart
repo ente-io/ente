@@ -80,7 +80,6 @@ class _MapScreenState extends State<MapScreen> {
 
   Future<void> processFiles(List<EnteFile> files) async {
     final List<ImageMarker> tempMarkers = [];
-    bool hasAnyLocation = false;
     EnteFile? mostRecentFile;
     for (var file in files) {
       if (file.hasLocation) {
@@ -93,7 +92,6 @@ class _MapScreenState extends State<MapScreen> {
           );
           continue;
         }
-        hasAnyLocation = true;
 
         if (widget.center == null) {
           if (mostRecentFile == null) {
@@ -115,7 +113,7 @@ class _MapScreenState extends State<MapScreen> {
       }
     }
 
-    if (hasAnyLocation) {
+    if (tempMarkers.isNotEmpty) {
       center = widget.center ??
           LatLng(
             mostRecentFile!.location!.latitude!,
