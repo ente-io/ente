@@ -1,20 +1,20 @@
-import { Typography } from '@mui/material';
+import { VerticallyCentered } from '@ente/shared/components/Container';
 import DialogBoxV2 from '@ente/shared/components/DialogBoxV2';
+import EnteButton from '@ente/shared/components/EnteButton';
+import EnteSpinner from '@ente/shared/components/EnteSpinner';
 import SingleInputForm, {
     SingleInputFormProps,
 } from '@ente/shared/components/SingleInputForm';
-import { t } from 'i18next';
-import { v4 as uuidv4 } from 'uuid';
-import castGateway from '@ente/shared/network/cast';
 import { boxSeal, toB64 } from '@ente/shared/crypto/internal/libsodium';
 import { loadSender } from '@ente/shared/hooks/useCastSender';
-import { useEffect, useState } from 'react';
-import EnteButton from '@ente/shared/components/EnteButton';
-import EnteSpinner from '@ente/shared/components/EnteSpinner';
-import { VerticallyCentered } from '@ente/shared/components/Container';
-import { logError } from '@ente/shared/sentry';
-import { Collection } from 'types/collection';
 import { addLogLine } from '@ente/shared/logging';
+import castGateway from '@ente/shared/network/cast';
+import { logError } from '@ente/shared/sentry';
+import { Typography } from '@mui/material';
+import { t } from 'i18next';
+import { useEffect, useState } from 'react';
+import { Collection } from 'types/collection';
+import { v4 as uuidv4 } from 'uuid';
 
 interface Props {
     show: boolean;
@@ -41,6 +41,8 @@ export default function AlbumCastDialog(props: Props) {
     // Make API call on component mount
     useEffect(() => {
         castGateway.revokeAllTokens();
+
+        setBrowserCanCast(!!window.chrome);
     }, []);
 
     const onSubmit: SingleInputFormProps['callback'] = async (
@@ -147,7 +149,6 @@ export default function AlbumCastDialog(props: Props) {
         if (props.show) {
             castGateway.revokeAllTokens();
         }
-        setBrowserCanCast(!!window.chrome);
     }, [props.show]);
 
     return (
