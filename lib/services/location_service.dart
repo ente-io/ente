@@ -32,9 +32,7 @@ class LocationService {
 
   void init(SharedPreferences preferences) {
     prefs = preferences;
-    if (FeatureFlagService.instance.isInternalUserOrDebugBuild()) {
-      _loadCities();
-    }
+    _loadCities();
   }
 
   Future<Iterable<LocalEntity<LocationTag>>> _getStoredLocationTags() async {
