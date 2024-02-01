@@ -2,6 +2,7 @@ import "dart:async";
 import "dart:ui";
 
 import "package:flutter/material.dart";
+import "package:flutter_animate/flutter_animate.dart";
 import "package:flutter_map/flutter_map.dart";
 import "package:latlong2/latlong.dart";
 
@@ -13,7 +14,9 @@ import "package:photos/services/location_service.dart";
 import "package:photos/services/search_service.dart";
 import "package:photos/services/user_remote_flag_service.dart";
 import "package:photos/states/location_screen_state.dart";
+import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
+import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/components/buttons/chip_button_widget.dart";
 import "package:photos/ui/components/info_item_widget.dart";
 import "package:photos/ui/map/enable_map.dart";
@@ -169,6 +172,7 @@ class _InfoMapState extends State<InfoMap> {
   late double _fileLng;
   static const _enabledMapZoom = 12.0;
   static const _disabledMapZoom = 9.0;
+  bool _tappedToOpenMap = false;
 
   @override
   void initState() {
@@ -225,20 +229,7 @@ class _InfoMapState extends State<InfoMap> {
                         popupBorderRadius: BorderRadius.circular(4),
                         iconSize: 16,
                       ),
-                      onTap: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (context) => MapScreen(
-                              filesFutureFn: SearchService.instance.getAllFiles,
-                              center: LatLng(
-                                _fileLat,
-                                _fileLng,
-                              ),
-                              initialZoom: 16,
-                            ),
-                          ),
-                        );
-                      },
+                      onTap: enabledMapOnTap,
                       markerSize: const Size(45, 45),
                     ),
                     IgnorePointer(
@@ -251,6 +242,14 @@ class _InfoMapState extends State<InfoMap> {
                         ),
                       ),
                     ),
+                    _tappedToOpenMap
+                        ? const EnteLoadingWidget(
+                            alignment: Alignment.topRight,
+                            padding: 10,
+                            size: 12,
+                            color: strokeSolidMutedLight,
+                          )
+                        : const SizedBox.shrink(),
                   ],
                 )
               : Stack(
@@ -319,6 +318,37 @@ class _InfoMapState extends State<InfoMap> {
                 ),
         ),
       ),
+    ).animate(target: _tappedToOpenMap ? 1 : 0).scaleXY(
+          end: 1.025,
+          duration: const Duration(milliseconds: 250),
+          curve: Curves.easeInOut,
+        );
+  }
+
+  void enabledMapOnTap() async {
+    setState(() {
+      _tappedToOpenMap = true;
+    });
+
+    unawaited(
+      Navigator.of(context)
+          .push(
+        MaterialPageRoute(
+          builder: (context) => MapScreen(
+            filesFutureFn: SearchService.instance.getAllFiles,
+            center: LatLng(
+              _fileLat,
+              _fileLng,
+            ),
+            initialZoom: 16,
+          ),
+        ),
+      )
+          .then((value) {
+        setState(() {
+          _tappedToOpenMap = false;
+        });
+      }),
     );
   }
 }
