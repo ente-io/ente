@@ -14,9 +14,7 @@ import "package:photos/services/location_service.dart";
 import "package:photos/services/search_service.dart";
 import "package:photos/services/user_remote_flag_service.dart";
 import "package:photos/states/location_screen_state.dart";
-import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
-import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/components/buttons/chip_button_widget.dart";
 import "package:photos/ui/components/info_item_widget.dart";
 import "package:photos/ui/map/enable_map.dart";
@@ -255,14 +253,6 @@ class _InfoMapState extends State<InfoMap> {
                         ),
                       ),
                     ),
-                    _tappedToOpenMap
-                        ? const EnteLoadingWidget(
-                            alignment: Alignment.topLeft,
-                            padding: 19,
-                            size: 11,
-                            color: strokeSolidMutedLight,
-                          )
-                        : const SizedBox.shrink(),
                   ],
                 )
               : ValueListenableBuilder(
