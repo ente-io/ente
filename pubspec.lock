@@ -343,7 +343,7 @@ packages:
     description:
       path: "."
       ref: HEAD
-      resolved-ref: "9b71b218c10818c6dc5c7c17b95c7529698383dd"
+      resolved-ref: "7a70e0b04fc5827b7677ccb4978d8b3ed14ee45b"
       url: "https://github.com/ente-io/ente_crypto_dart.git"
     source: git
     version: "1.0.0"
@@ -748,10 +748,10 @@ packages:
     dependency: transitive
     description:
       name: image
-      sha256: "004a2e90ce080f8627b5a04aecb4cdfac87d2c3f3b520aa291260be5a32c033d"
+      sha256: "49a0d4b0c12402853d3f227fe7c315601b238d126aa4caa5dbb2dcf99421aa4a"
       url: "https://pub.dev"
     source: hosted
-    version: "4.1.4"
+    version: "4.1.6"
   intl:
     dependency: "direct main"
     description:
@@ -1322,7 +1322,7 @@ packages:
     description:
       path: sqflite
       ref: HEAD
-      resolved-ref: d2903f4fd5f629327dae81bd6c720cc1f28b9af4
+      resolved-ref: "426e7f25569fee9cfc8ea17fd56c2f405b17f828"
       url: "https://github.com/tekartik/sqflite"
     source: git
     version: "2.3.2"
@@ -1354,10 +1354,10 @@ packages:
     dependency: "direct main"
     description:
       name: sqlite3_flutter_libs
-      sha256: "90963b515721d6a71e96f438175cf43c979493ed14822860a300b69694c74eb6"
+      sha256: d6c31c8511c441d1f12f20b607343df1afe4eddf24a1cf85021677c8eea26060
       url: "https://pub.dev"
     source: hosted
-    version: "0.5.19+1"
+    version: "0.5.20"
   stack_trace:
     dependency: transitive
     description:
