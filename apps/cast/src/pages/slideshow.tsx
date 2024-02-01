@@ -17,6 +17,8 @@ export const SlideshowContext = createContext<{
     showNextSlide: () => void;
 }>(null);
 
+const renderableFileURLCache = new Map<number, string>();
+
 export default function Slideshow() {
     const [collectionFiles, setCollectionFiles] = useState<EnteFile[]>([]);
 
@@ -30,10 +32,6 @@ export default function Slideshow() {
     const [castCollection, setCastCollection] = useState<
         Collection | undefined
     >(undefined);
-
-    const [renderableFileURLCache, setRenderableFileURLCache] = useState<
-        Record<string, string>
-    >({});
 
     const syncCastFiles = async (token: string) => {
         try {
@@ -49,7 +47,7 @@ export default function Slideshow() {
                 castCollection.updationTime !== collection.updationTime
             ) {
                 setCastCollection(collection);
-                await syncPublicFiles(token, collection, () => {});
+                await syncPublicFiles(token, collection, () => { });
                 const files = await getLocalFiles(String(collection.id));
                 setCollectionFiles(
                     files.filter((file) => isFileEligibleForCast(file))
@@ -135,8 +133,9 @@ export default function Slideshow() {
     const getRenderableFileURL = async () => {
         if (!currentFile) return;
 
-        if (renderableFileURLCache[currentFile.id]) {
-            setRenderableFileURL(renderableFileURLCache[currentFile.id]);
+        const cacheValue = renderableFileURLCache.get(currentFile.id);
+        if (cacheValue) {
+            setRenderableFileURL(cacheValue);
             setLoading(false);
             return;
         }
@@ -149,10 +148,7 @@ export default function Slideshow() {
 
             const url = URL.createObjectURL(blob);
 
-            setRenderableFileURLCache({
-                ...renderableFileURLCache,
-                [currentFile?.id]: url,
-            });
+            renderableFileURLCache.set(currentFile?.id, url);
 
             setRenderableFileURL(url);
         } catch (e) {
