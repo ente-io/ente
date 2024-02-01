@@ -94,11 +94,14 @@ class _MapScreenState extends State<MapScreen> {
           continue;
         }
         hasAnyLocation = true;
-        if (mostRecentFile == null) {
-          mostRecentFile = file;
-        } else {
-          if ((mostRecentFile.creationTime ?? 0) < (file.creationTime ?? 0)) {
+
+        if (widget.center == null) {
+          if (mostRecentFile == null) {
             mostRecentFile = file;
+          } else {
+            if ((mostRecentFile.creationTime ?? 0) < (file.creationTime ?? 0)) {
+              mostRecentFile = file;
+            }
           }
         }
 
