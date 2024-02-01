@@ -333,7 +333,10 @@ class _InfoMapState extends State<InfoMap> {
                                 ),
                               ),
                             ],
-                          )
+                          ).animate().fadeIn(
+                              duration: const Duration(milliseconds: 90),
+                              curve: Curves.easeIn,
+                            )
                         : const SizedBox.shrink();
                   },
                 ),
