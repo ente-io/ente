@@ -11,10 +11,7 @@ import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
 import { CACHES } from 'constants/cache';
 import { CacheStorageService } from './cache/cacheStorageService';
 import { LimitedCache } from 'types/cache';
-import {
-    getCastFileURL,
-    getPublicCollectionThumbnailURL,
-} from '@ente/shared/network/api';
+import { getCastFileURL, getCastThumbnailURL } from '@ente/shared/network/api';
 import HTTPService from '@ente/shared/network/HTTPService';
 import { logError } from '@ente/shared/sentry';
 
@@ -67,16 +64,8 @@ class CastDownloadManager {
         }
     }
 
-    public async getThumbnail(
-        file: EnteFile,
-        token: string,
-        passwordToken: string
-    ) {
+    public async getThumbnail(file: EnteFile, castToken: string) {
         try {
-            if (!token) {
-                return null;
-            }
-
             if (!this.thumbnailObjectURLPromise.has(file.id)) {
                 const downloadPromise = async () => {
                     const thumbnailCache = await this.getThumbnailCache();
@@ -88,11 +77,7 @@ class CastDownloadManager {
                         return cachedThumb;
                     }
 
-                    const thumb = await this.downloadThumb(
-                        token,
-                        passwordToken,
-                        file
-                    );
+                    const thumb = await this.downloadThumb(castToken, file);
                     const thumbBlob = new Blob([thumb]);
                     try {
                         await thumbnailCache?.put(
@@ -110,24 +95,17 @@ class CastDownloadManager {
             return await this.thumbnailObjectURLPromise.get(file.id);
         } catch (e) {
             this.thumbnailObjectURLPromise.delete(file.id);
-            logError(e, 'get publicDownloadManger preview Failed');
+            logError(e, 'get castDownloadManager preview Failed');
             throw e;
         }
     }
 
-    private downloadThumb = async (
-        token: string,
-        passwordToken: string,
-        file: EnteFile
-    ) => {
+    private downloadThumb = async (castToken: string, file: EnteFile) => {
         const resp = await HTTPService.get(
-            getPublicCollectionThumbnailURL(file.id),
+            getCastThumbnailURL(file.id),
             null,
             {
-                'X-Auth-Access-Token': token,
-                ...(passwordToken && {
-                    'X-Auth-Access-Token-JWT': passwordToken,
-                }),
+                'X-Cast-Access-Token': castToken,
             },
             { responseType: 'arraybuffer' }
         );
@@ -167,7 +145,7 @@ class CastDownloadManager {
             return fileURLs;
         } catch (e) {
             this.fileObjectURLPromise.delete(fileKey);
-            logError(e, 'public download manager Failed to get File');
+            logError(e, 'castDownloadManager failed to get file');
             throw e;
         }
     };
