@@ -296,3 +296,10 @@ export const removeCollectionFiles = async (collectionUID: string) => {
         )
     );
 };
+
+export const storeCastData = (payloadObj: Object) => {
+    // iterate through all the keys in the payload object and set them in localStorage.
+    for (const key in payloadObj) {
+        window.localStorage.setItem(key, payloadObj[key]);
+    }
+};

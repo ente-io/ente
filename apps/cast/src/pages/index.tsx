@@ -10,6 +10,7 @@ import { useRouter } from 'next/router';
 import LargeType from 'components/LargeType';
 import { useCastReceiver } from '@ente/shared/hooks/useCastReceiver';
 import EnteSpinner from '@ente/shared/components/EnteSpinner';
+import { storeCastData } from 'services/cast/castService';
 
 // Function to generate cryptographically secure digits
 const generateSecureData = (length: number): Uint8Array => {
@@ -131,13 +132,6 @@ export default function PairingMode() {
         return decryptedPayloadObj;
     };
 
-    const storePayloadLocally = (payloadObj: Object) => {
-        // iterate through all the keys in the payload object and set them in localStorage.
-        for (const key in payloadObj) {
-            window.localStorage.setItem(key, payloadObj[key]);
-        }
-    };
-
     const advertisePublicKey = async (publicKeyB64: string) => {
         // hey client, we exist!
         try {
@@ -163,7 +157,7 @@ export default function PairingMode() {
         const interval = setInterval(async () => {
             const data = await pollForCastData();
             if (!data) return;
-            storePayloadLocally(data);
+            storeCastData(data);
             await router.push('/slideshow');
         }, 1000);
 

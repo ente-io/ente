@@ -530,7 +530,7 @@ export const shouldShowAvatar = (file: EnteFile, user: User) => {
     }
 };
 
-export const downloadFileAsBlob = async (
+export const getPreviewableImage = async (
     file: EnteFile,
     castToken: string
 ): Promise<Blob> => {

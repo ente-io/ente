@@ -11,7 +11,7 @@ import {
 } from 'services/cast/castService';
 import { Collection } from 'types/collection';
 import { EnteFile } from 'types/file';
-import { downloadFileAsBlob, isRawFileFromFileName } from 'utils/file';
+import { getPreviewableImage, isRawFileFromFileName } from 'utils/file';
 
 export const SlideshowContext = createContext<{
     showNextSlide: () => void;
@@ -142,7 +142,7 @@ export default function Slideshow() {
         }
 
         try {
-            const blob = await downloadFileAsBlob(
+            const blob = await getPreviewableImage(
                 currentFile as EnteFile,
                 castToken
             );

@@ -14,6 +14,7 @@ import EnteSpinner from '@ente/shared/components/EnteSpinner';
 import { VerticallyCentered } from '@ente/shared/components/Container';
 import { logError } from '@ente/shared/sentry';
 import { Collection } from 'types/collection';
+import { addLogLine } from '@ente/shared/logging';
 
 interface Props {
     show: boolean;
@@ -133,7 +134,7 @@ export default function AlbumCastDialog(props: Props) {
                 session
                     .sendMessage('urn:x-cast:pair-request', {})
                     .then(() => {
-                        console.log('Message sent successfully');
+                        addLogLine('Message sent successfully');
                     })
                     .catch((error) => {
                         logError(error, 'Error sending message');
