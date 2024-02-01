@@ -65,7 +65,7 @@ export default function PairingMode() {
         return () => {
             context.stop();
         };
-    }, [cast]);
+    }, [cast, isCastReady]);
 
     const messageReceiveHandler = (message: {
         type: string;
