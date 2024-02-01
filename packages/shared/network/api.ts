@@ -36,6 +36,14 @@ export const getCastFileURL = (id: number) => {
     return `https://cast-albums.ente.io/download/?fileID=${id}`;
 };
 
+export const getCastThumbnailURL = (id: number) => {
+    const endpoint = process.env.NEXT_PUBLIC_ENTE_ENDPOINT;
+    if (isDevDeployment() && endpoint) {
+        return `${endpoint}/cast/files/preview/${id}`;
+    }
+    return `https://cast-albums.ente.io/preview/?fileID=${id}`;
+};
+
 export const getThumbnailURL = (id: number) => {
     const endpoint = process.env.NEXT_PUBLIC_ENTE_ENDPOINT;
     if (isDevDeployment() && endpoint) {
