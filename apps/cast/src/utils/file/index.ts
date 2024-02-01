@@ -546,9 +546,19 @@ export const downloadFileAsBlob = async (
         } else {
             fileBlob = await (await fetch(fileURL)).blob();
         }
+        if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
+            const livePhoto = await decodeLivePhoto(file, fileBlob);
+            fileBlob = new Blob([livePhoto.image]);
+        }
+        const convertedBlob = await getRenderableImage(
+            file.metadata.title,
+            fileBlob
+        );
+        fileBlob = convertedBlob;
         const fileType = await getFileType(
             new File([fileBlob], file.metadata.title)
         );
+
         fileBlob = new Blob([fileBlob], { type: fileType.mimeType });
         return fileBlob;
     } catch (e) {

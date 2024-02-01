@@ -83,10 +83,7 @@ export default function Slideshow() {
 
     const isFileEligibleForCast = (file: EnteFile) => {
         const fileType = file.metadata.fileType;
-        if (
-            fileType !== FILE_TYPE.IMAGE
-            // && fileType !== FILE_TYPE.VIDEO
-        ) {
+        if (fileType !== FILE_TYPE.IMAGE && fileType !== FILE_TYPE.LIVE_PHOTO) {
             return false;
         }
 

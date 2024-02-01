@@ -10,7 +10,8 @@
         "export": "next export"
     },
     "dependencies": {
-        "mime-types": "^2.1.35"
+        "mime-types": "^2.1.35",
+        "jszip": "3.10.1"
     },
     "devDependencies": {
         "sass": "^1.69.5"
