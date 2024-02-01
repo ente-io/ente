@@ -48,7 +48,7 @@ class _MapScreenState extends State<MapScreen> {
   double maxZoom = 18.0;
   double minZoom = 2.8;
   int debounceDuration = 500;
-  LatLng center = const LatLng(46.7286, 4.8614);
+  late LatLng center;
   final Logger _logger = Logger("_MapScreenState");
   StreamSubscription? _mapMoveSubscription;
   Isolate? isolate;
@@ -70,6 +70,7 @@ class _MapScreenState extends State<MapScreen> {
 
   Future<void> initialize() async {
     try {
+      center = widget.center ?? const LatLng(46.7286, 4.8614);
       allImages = await widget.filesFutureFn();
       unawaited(processFiles(allImages));
     } catch (e, s) {
@@ -93,11 +94,14 @@ class _MapScreenState extends State<MapScreen> {
           continue;
         }
         hasAnyLocation = true;
-        if (mostRecentFile == null) {
-          mostRecentFile = file;
-        } else {
-          if ((mostRecentFile.creationTime ?? 0) < (file.creationTime ?? 0)) {
+
+        if (widget.center == null) {
+          if (mostRecentFile == null) {
             mostRecentFile = file;
+          } else {
+            if ((mostRecentFile.creationTime ?? 0) < (file.creationTime ?? 0)) {
+              mostRecentFile = file;
+            }
           }
         }
 
@@ -220,7 +224,6 @@ class _MapScreenState extends State<MapScreen> {
                       initialZoom: widget.initialZoom,
                       minZoom: minZoom,
                       maxZoom: maxZoom,
-                      debounceDuration: debounceDuration,
                       bottomSheetDraggableAreaHeight:
                           bottomSheetDraggableAreaHeight,
                     ),
