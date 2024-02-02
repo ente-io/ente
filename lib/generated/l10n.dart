@@ -8347,6 +8347,16 @@ class S {
       args: [],
     );
   }
+
+  /// `Enter the code`
+  String get deviceCodeHint {
+    return Intl.message(
+      'Enter the code',
+      name: 'deviceCodeHint',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

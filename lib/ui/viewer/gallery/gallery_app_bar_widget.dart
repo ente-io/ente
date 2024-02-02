@@ -832,7 +832,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
       body: S.of(context).castInstruction,
       submitButtonLabel: S.of(context).pair,
       textInputType: TextInputType.streetAddress,
-      hintText: "Enter the code",
+      hintText: context.l10n.deviceCodeHint,
       onSubmit: (String text) async {
         try {
           String code = text.trim();
