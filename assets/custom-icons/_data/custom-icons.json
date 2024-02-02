@@ -57,6 +57,12 @@
       "hex": "5FD800"
     },
     {
+      "title": "Crowdpear"
+    },
+    {
+      "title": "DEGIRO"
+    },
+    {
       "title": "Discourse"
     },
     {
@@ -71,6 +77,12 @@
       "title": "Epic Games",
       "slug": "epic_games",
       "hex": "000000"
+    },
+    {
+      "title": "Esketit"
+    },
+    {
+      "title": "Estateguru"
     },
     {
       "title": "Filen",
@@ -120,6 +132,9 @@
       "hex": "D3D800"
     },
     {
+      "title": "Kagi"
+    },
+    {
       "title": "KPN",
       "color": "00CC00"
     },
@@ -163,6 +178,9 @@
     },
     {
       "title": "Microsoft"
+    },
+    {
+      "title": "Mintos"
     },
     {
       "title": "Mozilla"
