@@ -1,9 +1,5 @@
 import EnteSpinner from '@ente/shared/components/EnteSpinner';
-import {
-    boxSealOpen,
-    fromB64,
-    toB64,
-} from '@ente/shared/crypto/internal/libsodium';
+import { boxSealOpen, toB64 } from '@ente/shared/crypto/internal/libsodium';
 import { useCastReceiver } from '@ente/shared/hooks/useCastReceiver';
 import castGateway from '@ente/shared/network/cast';
 import LargeType from 'components/LargeType';
@@ -123,11 +119,7 @@ export default function PairingMode() {
             privateKeyB64
         );
 
-        const nonB64 = await fromB64(decryptedPayload);
-
-        const decryptedPayloadObj = JSON.parse(
-            new TextDecoder().decode(nonB64)
-        );
+        const decryptedPayloadObj = JSON.parse(atob(decryptedPayload));
 
         return decryptedPayloadObj;
     };

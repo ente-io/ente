@@ -13,5 +13,8 @@
     "editor.codeActionsOnSave": {
         "source.fixAll": "explicit"
     },
-    "typescript.enablePromptUseWorkspaceTsdk": true
+    "typescript.enablePromptUseWorkspaceTsdk": true,
+    "[typescript]": {
+        "editor.defaultFormatter": "vscode.typescript-language-features"
+    }
 }

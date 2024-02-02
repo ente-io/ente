@@ -5,7 +5,7 @@ import EnteSpinner from '@ente/shared/components/EnteSpinner';
 import SingleInputForm, {
     SingleInputFormProps,
 } from '@ente/shared/components/SingleInputForm';
-import { boxSeal, toB64 } from '@ente/shared/crypto/internal/libsodium';
+import { boxSeal } from '@ente/shared/crypto/internal/libsodium';
 import { loadSender } from '@ente/shared/hooks/useCastSender';
 import { addLogLine } from '@ente/shared/logging';
 import castGateway from '@ente/shared/network/cast';
@@ -83,11 +83,7 @@ export default function AlbumCastDialog(props: Props) {
             collectionID: props.currentCollection.id,
             collectionKey: props.currentCollection.key,
         });
-
-        const encryptedPayload = await boxSeal(
-            await toB64(new TextEncoder().encode(payload)),
-            tvPublicKeyB64
-        );
+        const encryptedPayload = await boxSeal(btoa(payload), tvPublicKeyB64);
 
         // hey TV, we acknowlege you!
         await castGateway.publishCastPayload(
