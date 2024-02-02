@@ -817,7 +817,6 @@
   "nothingToSeeHere": "Nothing to see here! 👀",
   "unarchiveAlbum": "Unarchive album",
   "archiveAlbum": "Archive album",
-  "playOnTv": "Play album on TV",
   "calculating": "Calculating...",
   "pleaseWaitDeletingAlbum": "Please wait, deleting album",
   "searchHintText": "Albums, months, days, years, ...",
@@ -1188,5 +1187,9 @@
   "selectALocationFirst": "Select a location first",
   "changeLocationOfSelectedItems": "Change location of selected items?",
   "editsToLocationWillOnlyBeSeenWithinEnte": "Edits to location will only be seen within Ente",
-  "cleanUncategorized": "Clean Uncategorized"
+  "cleanUncategorized": "Clean Uncategorized",
+  "playOnTv": "Play album on TV",
+  "pair": "Pair",
+  "deviceNotFound": "Device not found",
+  "castInstruction": "Visit cast.ente.io on the device you want to pair.\n\nEnter the code below to play the album on your TV."
 }

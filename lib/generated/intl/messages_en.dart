@@ -380,6 +380,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "cannotAddMorePhotosAfterBecomingViewer": m7,
         "cannotDeleteSharedFiles":
             MessageLookupByLibrary.simpleMessage("Cannot delete shared files"),
+        "castInstruction": MessageLookupByLibrary.simpleMessage(
+            "Visit cast.ente.io on the device you want to pair.\n\nEnter the code below to play the album on your TV."),
         "centerPoint": MessageLookupByLibrary.simpleMessage("Center point"),
         "changeEmail": MessageLookupByLibrary.simpleMessage("Change email"),
         "changeLocationOfSelectedItems": MessageLookupByLibrary.simpleMessage(
@@ -556,6 +558,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Files added to this device album will automatically get uploaded to ente."),
         "deviceLockExplanation": MessageLookupByLibrary.simpleMessage(
             "Disable the device screen lock when ente is in the foreground and there is a backup in progress. This is normally not needed, but may help big uploads and initial imports of large libraries complete faster."),
+        "deviceNotFound":
+            MessageLookupByLibrary.simpleMessage("Device not found"),
         "didYouKnow": MessageLookupByLibrary.simpleMessage("Did you know?"),
         "disableAutoLock":
             MessageLookupByLibrary.simpleMessage("Disable auto lock"),
@@ -946,6 +950,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Optional, as short as you like..."),
         "orPickAnExistingOne":
             MessageLookupByLibrary.simpleMessage("Or pick an existing one"),
+        "pair": MessageLookupByLibrary.simpleMessage("Pair"),
         "password": MessageLookupByLibrary.simpleMessage("Password"),
         "passwordChangedSuccessfully": MessageLookupByLibrary.simpleMessage(
             "Password changed successfully"),

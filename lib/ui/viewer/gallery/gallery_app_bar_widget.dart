@@ -827,10 +827,9 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     gw.revokeAllTokens().ignore();
     await showTextInputDialog(
       context,
-      title: "Play album on TV",
-      body: "Visit cast.ente.io on the device you want to pair.\n\n"
-          "Enter the code below to play the album on your TV.\n",
-      submitButtonLabel: "Pair",
+      title: context.l10n.playOnTv,
+      body: S.of(context).castInstruction,
+      submitButtonLabel: S.of(context).pair,
       textInputType: TextInputType.streetAddress,
       hintText: "Enter the code",
       onSubmit: (String text) async {
@@ -838,7 +837,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
           String code = text.trim();
           final String? publicKey = await gw.getPublicKey(code);
           if (publicKey == null) {
-            showToast(context, "Device not found");
+            showToast(context, S.of(context).deviceNotFound);
             return;
           }
           final String castToken = Uuid().v4().toString();
