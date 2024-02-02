@@ -2,6 +2,7 @@ import "dart:async";
 import "dart:isolate";
 
 import "package:collection/collection.dart";
+import "package:computer/computer.dart";
 import "package:flutter/foundation.dart";
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -48,7 +49,7 @@ class _MapScreenState extends State<MapScreen> {
   double maxZoom = 18.0;
   double minZoom = 2.8;
   int debounceDuration = 500;
-  LatLng center = const LatLng(46.7286, 4.8614);
+  late LatLng center;
   final Logger _logger = Logger("_MapScreenState");
   StreamSubscription? _mapMoveSubscription;
   Isolate? isolate;
@@ -70,6 +71,7 @@ class _MapScreenState extends State<MapScreen> {
 
   Future<void> initialize() async {
     try {
+      center = widget.center ?? const LatLng(46.7286, 4.8614);
       allImages = await widget.filesFutureFn();
       unawaited(processFiles(allImages));
     } catch (e, s) {
@@ -78,40 +80,15 @@ class _MapScreenState extends State<MapScreen> {
   }
 
   Future<void> processFiles(List<EnteFile> files) async {
-    final List<ImageMarker> tempMarkers = [];
-    bool hasAnyLocation = false;
-    EnteFile? mostRecentFile;
-    for (var file in files) {
-      if (file.hasLocation) {
-        if (!Location.isValidRange(
-          latitude: file.location!.latitude!,
-          longitude: file.location!.longitude!,
-        )) {
-          _logger.warning(
-            'Skipping file with invalid location ${file.toString()}',
-          );
-          continue;
-        }
-        hasAnyLocation = true;
-        if (mostRecentFile == null) {
-          mostRecentFile = file;
-        } else {
-          if ((mostRecentFile.creationTime ?? 0) < (file.creationTime ?? 0)) {
-            mostRecentFile = file;
-          }
-        }
+    final result = await Computer.shared().compute(
+      _findRecentFileAndGenerateTempMarkers,
+      param: {"files": files, "center": widget.center},
+    );
 
-        tempMarkers.add(
-          ImageMarker(
-            latitude: file.location!.latitude!,
-            longitude: file.location!.longitude!,
-            imageFile: file,
-          ),
-        );
-      }
-    }
+    final EnteFile? mostRecentFile = result.$1;
+    final List<ImageMarker> tempMarkers = result.$2;
 
-    if (hasAnyLocation) {
+    if (tempMarkers.isNotEmpty) {
       center = widget.center ??
           LatLng(
             mostRecentFile!.location!.latitude!,
@@ -169,6 +146,50 @@ class _MapScreenState extends State<MapScreen> {
     });
   }
 
+  static (EnteFile?, List<ImageMarker>) _findRecentFileAndGenerateTempMarkers(
+    Map<String, dynamic> args,
+  ) {
+    final Logger logger = Logger("_MapScreenState");
+    final files = args["files"] as List<EnteFile>;
+    final center = args["center"] as LatLng?;
+    final List<ImageMarker> tempMarkers = [];
+    EnteFile? mostRecentFile;
+
+    for (var file in files) {
+      if (file.hasLocation) {
+        if (!Location.isValidRange(
+          latitude: file.location!.latitude!,
+          longitude: file.location!.longitude!,
+        )) {
+          logger.warning(
+            'Skipping file with invalid location ${file.toString()}',
+          );
+          continue;
+        }
+
+        if (center == null) {
+          if (mostRecentFile == null) {
+            mostRecentFile = file;
+          } else {
+            if ((mostRecentFile.creationTime ?? 0) < (file.creationTime ?? 0)) {
+              mostRecentFile = file;
+            }
+          }
+        }
+
+        tempMarkers.add(
+          ImageMarker(
+            latitude: file.location!.latitude!,
+            longitude: file.location!.longitude!,
+            imageFile: file,
+          ),
+        );
+      }
+    }
+
+    return (mostRecentFile, tempMarkers);
+  }
+
   @pragma('vm:entry-point')
   static void _calculateMarkersIsolate(MapIsolate message) async {
     final bounds = message.bounds;
@@ -220,7 +241,6 @@ class _MapScreenState extends State<MapScreen> {
                       initialZoom: widget.initialZoom,
                       minZoom: minZoom,
                       maxZoom: maxZoom,
-                      debounceDuration: debounceDuration,
                       bottomSheetDraggableAreaHeight:
                           bottomSheetDraggableAreaHeight,
                     ),
