@@ -11,6 +11,11 @@ import 'package:photos/utils/file_util.dart';
 
 const kDateTimeOriginal = "EXIF DateTimeOriginal";
 const kImageDateTime = "Image DateTime";
+const kExifOffSetKeys = [
+  "EXIF OffsetTime",
+  "EXIF OffsetTimeOriginal",
+  "EXIF OffsetTimeDigitized",
+];
 const kExifDateTimePattern = "yyyy:MM:dd HH:mm:ss";
 const kEmptyExifDateTime = "0000:00:00 00:00:00";
 
@@ -56,12 +61,45 @@ Future<DateTime?> getCreationTimeFromEXIF(
             ? exif[kImageDateTime]!.printable
             : null;
     if (exifTime != null && exifTime != kEmptyExifDateTime) {
-      return DateFormat(kExifDateTimePattern).parse(exifTime);
+      String? exifOffsetTime;
+      for (final key in kExifOffSetKeys) {
+        if (exif.containsKey(key)) {
+          exifOffsetTime = exif[key]!.printable;
+          break;
+        }
+      }
+      return getDateTimeInDeviceTimezone(exifTime, exifOffsetTime);
     }
   } catch (e) {
     _logger.severe("failed to getCreationTimeFromEXIF", e);
   }
   return null;
+}
+
+DateTime getDateTimeInDeviceTimezone(String exifTime, String? offsetString) {
+  final DateTime result = DateFormat(kExifDateTimePattern).parse(exifTime);
+  if (offsetString == null) {
+    return result;
+  }
+  try {
+    final List<String> splitHHMM = offsetString.split(":");
+    // Parse the offset from the photo's time zone
+    final int offsetHours = int.parse(splitHHMM[0]);
+    final int offsetMinutes =
+        int.parse(splitHHMM[1]) * (offsetHours.isNegative ? -1 : 1);
+    // Adjust the date for the offset to get the photo's correct UTC time
+    final photoUtcDate =
+        result.add(Duration(hours: -offsetHours, minutes: -offsetMinutes));
+    // Getting the current device's time zone offset from UTC
+    final now = DateTime.now();
+    final localOffset = now.timeZoneOffset;
+    // Adjusting the photo's UTC time to the device's local time
+    final deviceLocalTime = photoUtcDate.add(localOffset);
+    return deviceLocalTime;
+  } catch (e, s) {
+    _logger.severe("tz offset adjust failed $offsetString", e, s);
+  }
+  return result;
 }
 
 Location? locationFromExif(Map<String, IfdTag> exif) {
