@@ -5765,6 +5765,16 @@ class S {
     );
   }
 
+  /// `Play album on TV`
+  String get playOnTv {
+    return Intl.message(
+      'Play album on TV',
+      name: 'playOnTv',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Calculating...`
   String get calculating {
     return Intl.message(
