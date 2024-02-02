@@ -51,7 +51,7 @@ class ImportCodePage extends StatelessWidget {
       case ImportType.bitwarden:
         return 'Bitwarden';
       case ImportType.lastpass:
-        return 'Lastpass';
+        return 'LastPass Authenticator';
     }
   }
 
