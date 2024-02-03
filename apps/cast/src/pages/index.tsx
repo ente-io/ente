@@ -45,6 +45,9 @@ export default function PairingMode() {
         if (isCastReady) return;
         const context = cast.framework.CastReceiverContext.getInstance();
 
+        // if there's already a context, don't recreate it to prevent crash
+        if (context) return;
+
         const options = new cast.framework.CastReceiverOptions();
         options.customNamespaces = Object.assign({});
         options.customNamespaces['urn:x-cast:pair-request'] =
