@@ -13,7 +13,6 @@ import 'package:ente_auth/ui/account/login_page.dart';
 import 'package:ente_auth/ui/account/logout_dialog.dart';
 import 'package:ente_auth/ui/account/password_entry_page.dart';
 import 'package:ente_auth/ui/account/password_reentry_page.dart';
-import 'package:ente_auth/ui/common/gradient_button.dart';
 import 'package:ente_auth/ui/components/buttons/button_widget.dart';
 import 'package:ente_auth/ui/components/models/button_result.dart';
 import 'package:ente_auth/ui/home_page.dart';
@@ -127,16 +126,17 @@ class _OnboardingPageState extends State<OnboardingPage> {
                       ],
                     ),
                     const SizedBox(height: 100),
+                    // Container(
+                    //   width: double.infinity,
+                    //   padding: const EdgeInsets.symmetric(horizontal: 20),
+                    //   child: GradientButton(
+                    //     onTap: _navigateToSignUpPage,
+                    //     text: l10n.newUser,
+                    //   ),
+                    // ),
+                    // const SizedBox(height: 4),
                     Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: GradientButton(
-                        onTap: _navigateToSignUpPage,
-                        text: l10n.newUser,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Container(
+                      height: 56,
                       width: double.infinity,
                       padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
                       child: Hero(
