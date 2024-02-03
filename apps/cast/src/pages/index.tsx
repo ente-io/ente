@@ -1,6 +1,7 @@
 import EnteSpinner from '@ente/shared/components/EnteSpinner';
 import { boxSealOpen, toB64 } from '@ente/shared/crypto/internal/libsodium';
 import { useCastReceiver } from '@ente/shared/hooks/useCastReceiver';
+import { addLogLine } from '@ente/shared/logging';
 import castGateway from '@ente/shared/network/cast';
 import LargeType from 'components/LargeType';
 import _sodium from 'libsodium-wrappers';
@@ -45,21 +46,22 @@ export default function PairingMode() {
         if (isCastReady) return;
         const context = cast.framework.CastReceiverContext.getInstance();
 
-        // if there's already a context, don't recreate it to prevent crash
-        if (context) return;
+        try {
+            const options = new cast.framework.CastReceiverOptions();
+            options.customNamespaces = Object.assign({});
+            options.customNamespaces['urn:x-cast:pair-request'] =
+                cast.framework.system.MessageType.JSON;
 
-        const options = new cast.framework.CastReceiverOptions();
-        options.customNamespaces = Object.assign({});
-        options.customNamespaces['urn:x-cast:pair-request'] =
-            cast.framework.system.MessageType.JSON;
+            options.disableIdleTimeout = true;
 
-        options.disableIdleTimeout = true;
-
-        context.addCustomMessageListener(
-            'urn:x-cast:pair-request',
-            messageReceiveHandler
-        );
-        context.start(options);
+            context.addCustomMessageListener(
+                'urn:x-cast:pair-request',
+                messageReceiveHandler
+            );
+            context.start(options);
+        } catch (e) {
+            addLogLine(e, 'failed to create cast context');
+        }
         setIsCastReady(true);
         return () => {
             context.stop();
