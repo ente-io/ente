@@ -135,9 +135,9 @@ class _AppLockState extends State<AppLock> with WidgetsBindingObserver {
   }
 
   Widget get _lockScreen {
-    return WillPopScope(
+    return PopScope(
       child: this.widget.lockScreen,
-      onWillPop: () => Future.value(false),
+      canPop: false,
     );
   }
 

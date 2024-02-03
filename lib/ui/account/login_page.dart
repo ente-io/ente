@@ -25,6 +25,35 @@ class _LoginPageState extends State<LoginPage> {
   Color? _emailInputFieldColor;
   final Logger _logger = Logger('_LoginPageState');
 
+  Future<void> onPressed() async {
+    UserService.instance.setEmail(_email!);
+    SrpAttributes? attr;
+    bool isEmailVerificationEnabled = true;
+    try {
+      attr = await UserService.instance.getSrpAttributes(_email!);
+      isEmailVerificationEnabled = attr.isEmailMFAEnabled;
+    } catch (e) {
+      if (e is! SrpSetupNotCompleteError) {
+        _logger.severe('Error getting SRP attributes', e);
+      }
+    }
+    if (attr != null && !isEmailVerificationEnabled) {
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (BuildContext context) {
+            return LoginPasswordVerificationPage(
+              srpAttributes: attr!,
+            );
+          },
+        ),
+      );
+    } else {
+      await UserService.instance
+          .sendOtt(context, _email!, isCreateAccountScreen: false);
+    }
+    FocusScope.of(context).unfocus();
+  }
+
   @override
   void initState() {
     _email = _config.getEmail();
@@ -60,34 +89,7 @@ class _LoginPageState extends State<LoginPage> {
         isKeypadOpen: isKeypadOpen,
         isFormValid: _emailIsValid,
         buttonText: context.l10n.logInLabel,
-        onPressedFunction: () async {
-          UserService.instance.setEmail(_email!);
-          SrpAttributes? attr;
-          bool isEmailVerificationEnabled = true;
-          try {
-            attr = await UserService.instance.getSrpAttributes(_email!);
-            isEmailVerificationEnabled = attr.isEmailMFAEnabled;
-          } catch (e) {
-            if (e is! SrpSetupNotCompleteError) {
-              _logger.severe('Error getting SRP attributes', e);
-            }
-          }
-          if (attr != null && !isEmailVerificationEnabled) {
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (BuildContext context) {
-                  return LoginPasswordVerificationPage(
-                    srpAttributes: attr!,
-                  );
-                },
-              ),
-            );
-          } else {
-            await UserService.instance
-                .sendOtt(context, _email!, isCreateAccountScreen: false);
-          }
-          FocusScope.of(context).unfocus();
-        },
+        onPressedFunction: onPressed,
       ),
       floatingActionButtonLocation: fabLocation(),
       floatingActionButtonAnimator: NoScalingAnimation(),
@@ -114,6 +116,8 @@ class _LoginPageState extends State<LoginPage> {
                   padding: const EdgeInsets.fromLTRB(20, 24, 20, 0),
                   child: TextFormField(
                     autofillHints: const [AutofillHints.email],
+                    onFieldSubmitted:
+                        _emailIsValid ? (value) => onPressed() : null,
                     decoration: InputDecoration(
                       fillColor: _emailInputFieldColor,
                       filled: true,

@@ -152,8 +152,8 @@ class ProgressDialog {
           barrierColor: _barrierColor,
           builder: (BuildContext context) {
             _dismissingContext = context;
-            return WillPopScope(
-              onWillPop: () async => _barrierDismissible,
+            return PopScope(
+              canPop: _barrierDismissible,
               child: Dialog(
                 backgroundColor: _backgroundColor,
                 insetAnimationCurve: _insetAnimCurve,

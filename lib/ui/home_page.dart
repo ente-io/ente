@@ -146,19 +146,15 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    return WillPopScope(
-      onWillPop: () async {
-        if (_isSettingsOpen) {
+    return PopScope(
+      onPopInvoked: (_) async {
+        if (_isSettingsOpen || !Platform.isAndroid) {
           Navigator.pop(context);
-          return false;
+          return;
         }
-        if (Platform.isAndroid) {
-          MoveToBackground.moveTaskToBack();
-          return false;
-        } else {
-          return true;
-        }
+        if (Platform.isAndroid) MoveToBackground.moveTaskToBack();
       },
+      canPop: false,
       child: Scaffold(
         drawerEnableOpenDragGesture: !Platform.isAndroid,
         drawer: ConstrainedBox(

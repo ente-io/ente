@@ -79,7 +79,7 @@ Future<void> _decryptExportData(
         try {
           await progressDialog.show();
           final derivedKey = await CryptoUtil.deriveKey(
-            utf8.encode(password) as Uint8List,
+            utf8.encode(password),
             CryptoUtil.base642bin(enteAuthExport.kdfParams.salt),
             enteAuthExport.kdfParams.memLimit,
             enteAuthExport.kdfParams.opsLimit,

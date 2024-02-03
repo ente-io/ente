@@ -87,8 +87,8 @@ class _AppUpdateDialogState extends State<AppUpdateDialog> {
     );
     final shouldForceUpdate =
         UpdateService.instance.shouldForceUpdate(widget.latestVersionInfo);
-    return WillPopScope(
-      onWillPop: () async => !shouldForceUpdate,
+    return PopScope(
+      canPop: !shouldForceUpdate,
       child: AlertDialog(
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -131,14 +131,15 @@ class _ApkDownloaderDialogState extends State<ApkDownloaderDialog> {
   @override
   void initState() {
     super.initState();
-    _saveUrl = "${Configuration.instance.getTempDirectory()}ente-${widget.versionInfo!.name!}.apk";
+    _saveUrl =
+        "${Configuration.instance.getTempDirectory()}ente-${widget.versionInfo!.name!}.apk";
     _downloadApk();
   }
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async => false,
+    return PopScope(
+      canPop: false,
       child: AlertDialog(
         title: const Text(
           "Downloading...",

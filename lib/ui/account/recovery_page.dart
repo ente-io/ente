@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:ente_auth/core/configuration.dart';
+import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/ui/account/password_entry_page.dart';
 import 'package:ente_auth/ui/common/dynamic_fab.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
@@ -16,6 +17,36 @@ class RecoveryPage extends StatefulWidget {
 
 class _RecoveryPageState extends State<RecoveryPage> {
   final _recoveryKey = TextEditingController();
+
+  Future<void> onPressed() async {
+    FocusScope.of(context).unfocus();
+    final dialog = createProgressDialog(context, "Decrypting...");
+    await dialog.show();
+    try {
+      await Configuration.instance.recover(_recoveryKey.text.trim());
+      await dialog.hide();
+      showToast(context, "Recovery successful!");
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          builder: (BuildContext context) {
+            return const PopScope(
+              canPop: false,
+              child: PasswordEntryPage(
+                mode: PasswordEntryMode.reset,
+              ),
+            );
+          },
+        ),
+      );
+    } catch (e) {
+      await dialog.hide();
+      String errMessage = 'The recovery key you entered is incorrect';
+      if (e is AssertionError) {
+        errMessage = '$errMessage : ${e.message}';
+      }
+      showErrorDialog(context, "Incorrect recovery key", errMessage);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -44,35 +75,7 @@ class _RecoveryPageState extends State<RecoveryPage> {
         isKeypadOpen: isKeypadOpen,
         isFormValid: _recoveryKey.text.isNotEmpty,
         buttonText: 'Recover',
-        onPressedFunction: () async {
-          FocusScope.of(context).unfocus();
-          final dialog = createProgressDialog(context, "Decrypting...");
-          await dialog.show();
-          try {
-            await Configuration.instance.recover(_recoveryKey.text.trim());
-            await dialog.hide();
-            showToast(context, "Recovery successful!");
-            Navigator.of(context).pushReplacement(
-              MaterialPageRoute(
-                builder: (BuildContext context) {
-                  return WillPopScope(
-                    onWillPop: () async => false,
-                    child: const PasswordEntryPage(
-                      mode: PasswordEntryMode.reset,
-                    ),
-                  );
-                },
-              ),
-            );
-          } catch (e) {
-            await dialog.hide();
-            String errMessage = 'The recovery key you entered is incorrect';
-            if (e is AssertionError) {
-              errMessage = '$errMessage : ${e.message}';
-            }
-            showErrorDialog(context, "Incorrect recovery key", errMessage);
-          }
-        },
+        onPressedFunction: onPressed,
       ),
       floatingActionButtonLocation: fabLocation(),
       floatingActionButtonAnimator: NoScalingAnimation(),
@@ -85,7 +88,7 @@ class _RecoveryPageState extends State<RecoveryPage> {
                   padding:
                       const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
                   child: Text(
-                    'Forgot password',
+                    context.l10n.forgotPassword,
                     style: Theme.of(context).textTheme.headlineMedium,
                   ),
                 ),

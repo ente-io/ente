@@ -35,6 +35,11 @@ class _LoginPasswordVerificationPageState
   bool _passwordInFocus = false;
   bool _passwordVisible = false;
 
+  Future<void> onPressed() async {
+    FocusScope.of(context).unfocus();
+    await verifyPassword(context, _passwordController.text);
+  }
+
   @override
   void initState() {
     super.initState();
@@ -76,10 +81,7 @@ class _LoginPasswordVerificationPageState
         isKeypadOpen: isKeypadOpen,
         isFormValid: _passwordController.text.isNotEmpty,
         buttonText: context.l10n.logInLabel,
-        onPressedFunction: () async {
-          FocusScope.of(context).unfocus();
-          await verifyPassword(context, _passwordController.text);
-        },
+        onPressedFunction: onPressed,
       ),
       floatingActionButtonLocation: fabLocation(),
       floatingActionButtonAnimator: NoScalingAnimation(),
@@ -228,6 +230,9 @@ class _LoginPasswordVerificationPageState
                 Padding(
                   padding: const EdgeInsets.fromLTRB(20, 24, 20, 0),
                   child: TextFormField(
+                    onFieldSubmitted: _passwordController.text.isNotEmpty
+                        ? (_) => onPressed()
+                        : null,
                     key: const ValueKey("passwordInputField"),
                     autofillHints: const [AutofillHints.password],
                     decoration: InputDecoration(

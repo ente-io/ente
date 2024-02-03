@@ -102,7 +102,7 @@ class AuthenticatorService {
   ) async {
     var key = await getOrCreateAuthDataKey(accountMode);
     final encryptedKeyData = await CryptoUtil.encryptData(
-      utf8.encode(plainText) as Uint8List,
+      utf8.encode(plainText),
       key,
     );
     String encryptedData =
@@ -125,7 +125,7 @@ class AuthenticatorService {
   ) async {
     var key = await getOrCreateAuthDataKey(accountMode);
     final encryptedKeyData = await CryptoUtil.encryptData(
-      utf8.encode(plainText) as Uint8List,
+      utf8.encode(plainText),
       key,
     );
     String encryptedData =
