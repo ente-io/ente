@@ -1,5 +1,6 @@
 {
   "account": "アカウント",
+  "unlock": "ロック解除",
   "recoveryKey": "回復キー",
   "counterAppBarTitle": "カウンター",
   "@counterAppBarTitle": {

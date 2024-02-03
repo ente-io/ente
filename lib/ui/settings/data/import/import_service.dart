@@ -5,6 +5,7 @@ import 'package:ente_auth/ui/settings/data/import/google_auth_import.dart';
 import 'package:ente_auth/ui/settings/data/import/plain_text_import.dart';
 import 'package:ente_auth/ui/settings/data/import/raivo_plain_text_import.dart';
 import 'package:ente_auth/ui/settings/data/import/two_fas_import.dart';
+import 'package:ente_auth/ui/settings/data/import/lastpass_import.dart';
 import 'package:ente_auth/ui/settings/data/import_page.dart';
 import 'package:flutter/cupertino.dart';
 
@@ -38,6 +39,9 @@ class ImportService {
         break;
       case ImportType.bitwarden:
         showBitwardenImportInstruction(context);
+        break;
+      case ImportType.lastpass:
+        showLastpassImportInstruction(context);
         break;
     }
   }
