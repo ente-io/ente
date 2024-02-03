@@ -10,8 +10,9 @@
 # so once we're done building we symlink `out/` to the app specific output.
 
 set -o errexit
+set -o xtrace
 
-if test "$CF_PAGES_BRANCH" == "auth-release"
+if test "$CF_PAGES_BRANCH" = "auth-release"
 then
     yarn export:auth
     ln -sf apps/auth/out
