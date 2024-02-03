@@ -23,6 +23,7 @@ import 'package:ente_auth/ui/home/speed_dial_label_widget.dart';
 import 'package:ente_auth/ui/scanner_page.dart';
 import 'package:ente_auth/ui/settings_page.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
+import 'package:ente_auth/utils/platform_util.dart';
 import 'package:ente_auth/utils/totp_util.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -347,6 +348,14 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _getFab() {
+    if (PlatformUtil.isDesktop()) {
+      return FloatingActionButton(
+        onPressed: () => _redirectToManualEntryPage(),
+        child: const Icon(Icons.add),
+        elevation: 8.0,
+        shape: const CircleBorder(),
+      );
+    }
     return SpeedDial(
       icon: Icons.add,
       activeIcon: Icons.close,
