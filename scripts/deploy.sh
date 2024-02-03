@@ -20,5 +20,5 @@ then
     cp -R apps/auth/out .
 else
     yarn export:photos
-    cp -r apps/photos/out .
+    cp -R apps/photos/out .
 fi
