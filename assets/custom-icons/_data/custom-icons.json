@@ -31,6 +31,12 @@
       "title": "Bitwarden"
     },
     {
+      "title": "BorgBase",
+      "altNames": ["borg"],
+      "slug": "BorgBase",
+      "hex": "222C31"
+    },
+    {
       "title": "Brave Creators",
       "slug": "brave_creators"
     },
@@ -51,6 +57,12 @@
       "hex": "5FD800"
     },
     {
+      "title": "Crowdpear"
+    },
+    {
+      "title": "DEGIRO"
+    },
+    {
       "title": "Discourse"
     },
     {
@@ -67,6 +79,12 @@
       "hex": "000000"
     },
     {
+      "title": "Esketit"
+    },
+    {
+      "title": "Estateguru"
+    },
+    {
       "title": "Filen",
       "hex": "858585"
     },
@@ -79,11 +97,16 @@
       "hex": "858585"
     },
     {
-      "title": "GitLab",
-      "slug": "gitlab"
+      "title": "GitLab"
     },
     {
       "title": "Google"
+    },
+    {
+      "title": "Gosuslugi",
+      "altNames": ["Госуслуги"],
+      "slug": "Gosuslugi",
+      "hex": "EE2F53"
     },
     {
       "title": "ING"
@@ -95,8 +118,21 @@
       "title": "Instagram"
     },
     {
+      "title": "IVPN",
+      "slug": "IVPN",
+      "hex": "FA3243"
+    },
+    {
+      "title": "IceDrive",
+      "slug": "Icedrive",
+      "hex": "1F4FD0"
+    },
+    {
       "title": "Jagex",
       "hex": "D3D800"
+    },
+    {
+      "title": "Kagi"
     },
     {
       "title": "KPN",
@@ -105,6 +141,9 @@
     {
       "title": "Kick",
       "hex": "53FC19"
+    },
+    {
+      "title": "Kite"
     },
     {
       "title": "Koofr",
@@ -132,7 +171,16 @@
       "hex": "6364FF"
     },
     {
+      "title": "Murena",
+      "altNames": ["eCloud"],
+      "slug": "ecloud",
+      "hex": "EC6A55"
+    },
+    {
       "title": "Microsoft"
+    },
+    {
+      "title": "Mintos"
     },
     {
       "title": "Mozilla"
@@ -161,6 +209,11 @@
     },
     {
       "title": "PayPal"
+    },
+    {
+      "title": "pCloud",
+      "slug": "pCloud",
+      "hex": "1EBCC5"
     },
     {
       "title": "Peerberry",
@@ -289,6 +342,12 @@
       "title": "X",
       "altNames": ["twitter"],
       "slug": "x"
+    },
+    {
+      "title": "Yandex",
+      "altNames": ["Ya", "Яндекс"],
+      "slug": "Yandex",
+      "hex": "FC3F1D"
     }
   ]
 }
