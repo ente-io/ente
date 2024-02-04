@@ -1,4 +1,13 @@
 updates:
+  - package-ecosystem: "github-actions"
+    commit-message:
+      prefix: "Actions"
+    directory: "/" 
+    schedule:
+      day: "saturday"
+      interval: "weekly"
+      time: "03:00"
+    
   - package-ecosystem: "pub"
     commit-message:
       prefix: "Pub"
