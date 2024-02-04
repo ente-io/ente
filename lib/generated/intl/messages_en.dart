@@ -817,7 +817,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "loadMessage1": MessageLookupByLibrary.simpleMessage(
             "You can share your subscription with your family"),
         "loadMessage2": MessageLookupByLibrary.simpleMessage(
-            "We have preserved over 10 million memories so far"),
+            "We have preserved over 30 million memories so far"),
         "loadMessage3": MessageLookupByLibrary.simpleMessage(
             "We keep 3 copies of your data, one in an underground fallout shelter"),
         "loadMessage4": MessageLookupByLibrary.simpleMessage(
