@@ -7,6 +7,42 @@ updates:
       day: "saturday"
       interval: "weekly"
       time: "03:00"
+
+  - package-ecosystem: "gradle"
+    commit-message:
+      prefix: "Gradle"
+    directory: "/android" 
+    schedule:
+      day: "saturday"
+      interval: "weekly"
+      time: "03:00"
+
+  - package-ecosystem: "gradle"
+    commit-message:
+      prefix: "Gradle"
+    directory: "/android/app"
+    schedule:
+      day: "saturday"
+      interval: "weekly"
+      time: "03:00"
+
+  - package-ecosystem: "maven"
+    commit-message:
+      prefix: "Maven"
+    directory: "/android" 
+    schedule:
+      day: "saturday"
+      interval: "weekly"
+      time: "03:00"
+      
+  - package-ecosystem: "maven"
+    commit-message:
+      prefix: "Maven"
+    directory: "/android/app" 
+    schedule:
+      day: "saturday"
+      interval: "weekly"
+      time: "03:00"
     
   - package-ecosystem: "pub"
     commit-message:
