@@ -6839,10 +6839,10 @@ class S {
     );
   }
 
-  /// `We have preserved over 10 million memories so far`
+  /// `We have preserved over 30 million memories so far`
   String get loadMessage2 {
     return Intl.message(
-      'We have preserved over 10 million memories so far',
+      'We have preserved over 30 million memories so far',
       name: 'loadMessage2',
       desc: '',
       args: [],
