@@ -157,12 +157,9 @@ class _HomePageState extends State<HomePage> {
       canPop: false,
       child: Scaffold(
         drawerEnableOpenDragGesture: !Platform.isAndroid,
-        drawer: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 428),
-          child: Drawer(
-            width: double.infinity,
-            child: _settingsPage,
-          ),
+        drawer: Drawer(
+          width: 428,
+          child: _settingsPage,
         ),
         onDrawerChanged: (isOpened) => _isSettingsOpen = isOpened,
         body: SafeArea(
