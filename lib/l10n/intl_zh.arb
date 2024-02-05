@@ -1187,5 +1187,10 @@
   "selectALocationFirst": "首先选择一个位置",
   "changeLocationOfSelectedItems": "确定要更改所选项目的位置吗？",
   "editsToLocationWillOnlyBeSeenWithinEnte": "对位置的编辑只能在 Ente 内看到",
-  "cleanUncategorized": "清除未分类的"
+  "cleanUncategorized": "清除未分类的",
+  "playOnTv": "在电视上播放相册",
+  "pair": "配对",
+  "deviceNotFound": "未发现设备",
+  "castInstruction": "在您要配对的设备上访问 cast.ente.io。\n输入下面的代码即可在电视上播放相册。",
+  "deviceCodeHint": "输入代码"
 }
