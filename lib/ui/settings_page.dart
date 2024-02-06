@@ -30,8 +30,13 @@ import 'package:flutter/material.dart';
 
 class SettingsPage extends StatelessWidget {
   final ValueNotifier<String?> emailNotifier;
+  final GlobalKey<ScaffoldState> scaffoldKey;
 
-  SettingsPage({super.key, required this.emailNotifier});
+  SettingsPage({
+    super.key,
+    required this.emailNotifier,
+    required this.scaffoldKey,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -161,7 +166,9 @@ class SettingsPage extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const SettingsTitleBarWidget(),
+            SettingsTitleBarWidget(
+              scaffoldKey: scaffoldKey,
+            ),
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
               child: Column(

@@ -40,12 +40,14 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  static final _settingsPage = SettingsPage(
+  late final _settingsPage = SettingsPage(
     emailNotifier: UserService.instance.emailValueNotifier,
+    scaffoldKey: scaffoldKey,
   );
   bool _hasLoaded = false;
   bool _isSettingsOpen = false;
   final Logger _logger = Logger("HomePage");
+  final scaffoldKey = GlobalKey<ScaffoldState>();
 
   final TextEditingController _textController = TextEditingController();
   bool _showSearchBox = false;
@@ -148,14 +150,18 @@ class _HomePageState extends State<HomePage> {
     final l10n = context.l10n;
     return PopScope(
       onPopInvoked: (_) async {
-        if (_isSettingsOpen || !Platform.isAndroid) {
-          Navigator.pop(context);
+        if (_isSettingsOpen) {
+          scaffoldKey.currentState!.closeDrawer();
+          return;
+        } else if (!Platform.isAndroid) {
+          Navigator.of(context).pop();
           return;
         }
-        if (Platform.isAndroid) MoveToBackground.moveTaskToBack();
+        MoveToBackground.moveTaskToBack();
       },
       canPop: false,
       child: Scaffold(
+        key: scaffoldKey,
         drawerEnableOpenDragGesture: !Platform.isAndroid,
         drawer: Drawer(
           width: 428,
