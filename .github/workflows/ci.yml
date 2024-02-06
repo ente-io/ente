@@ -16,7 +16,7 @@ jobs:
         steps:
             # Setup Java environment in order to build the Android app.
             - uses: actions/checkout@v2
-            - uses: actions/setup-java@v2
+            - uses: actions/setup-java@v4
               with:
                   distribution: "adopt"
                   java-version: "11"
