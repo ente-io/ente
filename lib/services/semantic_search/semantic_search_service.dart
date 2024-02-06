@@ -19,6 +19,7 @@ import "package:photos/services/semantic_search/frameworks/ggml.dart";
 import "package:photos/services/semantic_search/frameworks/ml_framework.dart";
 import 'package:photos/services/semantic_search/frameworks/onnx/onnx.dart';
 import "package:photos/utils/debouncer.dart";
+import "package:photos/utils/device_info.dart";
 import "package:photos/utils/local_settings.dart";
 import "package:photos/utils/thumbnail_util.dart";
 
@@ -109,6 +110,7 @@ class SemanticSearchService {
     if (shouldSyncImmediately) {
       unawaited(sync());
     }
+    initDeviceSpec().ignore();
   }
 
   Future<void> release() async {
