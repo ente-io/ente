@@ -41,7 +41,7 @@ class HomeEmptyStateWidget extends StatelessWidget {
                       style: Theme.of(context).textTheme.headlineMedium,
                     ),
                     const SizedBox(height: 64),
-                    if (PlatformUtil.isDesktop())
+                    if (PlatformUtil.isMobile())
                       SizedBox(
                         width: 400,
                         child: OutlinedButton(
