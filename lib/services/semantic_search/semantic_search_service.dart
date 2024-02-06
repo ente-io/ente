@@ -35,6 +35,7 @@ class SemanticSearchService {
   static const kScoreThreshold = 0.23;
   static const kShouldPushEmbeddings = true;
   static const kCurrentModel = Model.onnxClip;
+  static const kIsGraphene = true;
   static const kDebounceDuration = Duration(milliseconds: 4000);
 
   final _logger = Logger("SemanticSearchService");
@@ -77,7 +78,7 @@ class SemanticSearchService {
     _hasInitialized = true;
     final shouldDownloadOverMobileData =
         Configuration.instance.shouldBackupOverMobileData();
-    _mlFramework = kCurrentModel == Model.onnxClip
+    _mlFramework = (kCurrentModel == Model.onnxClip && !kIsGraphene)
         ? ONNX(shouldDownloadOverMobileData)
         : GGML(shouldDownloadOverMobileData);
     await EmbeddingsDB.instance.init();
