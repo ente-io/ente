@@ -138,7 +138,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                     Container(
                       height: 56,
                       width: double.infinity,
-                      padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
+                      padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
                       child: Hero(
                         tag: "log_in",
                         child: ElevatedButton(
