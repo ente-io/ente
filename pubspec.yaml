@@ -53,7 +53,7 @@ dependencies:
   http: ^1.1.0
   intl: ^0.18.0
   json_annotation: ^4.5.0
-  local_auth: ^2.1.7
+  local_auth: ^2.1.8
 
   local_auth_android: ^1.0.31
   local_auth_ios: ^1.1.6
