@@ -43,7 +43,7 @@ class EnteApp extends StatefulWidget {
 }
 
 class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
-  static const initialInteractionTimeout = Duration(seconds: 10);
+  static const initialInteractionTimeout = Duration(seconds: 5);
   static const defaultInteractionTimeout = Duration(seconds: 5);
 
   final _logger = Logger("EnteAppState");
