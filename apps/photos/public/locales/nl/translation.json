@@ -210,7 +210,7 @@
     "SEARCH_TYPE": {
         "COLLECTION": "Album",
         "LOCATION": "Locatie",
-        "CITY": "",
+        "CITY": "Locatie",
         "DATE": "Datum",
         "FILE_NAME": "Bestandsnaam",
         "THING": "Inhoud",
@@ -626,7 +626,7 @@
     "MAGIC_SEARCH_STATUS": "Magische Zoekfunctie Status",
     "INDEXED_ITEMS": "Geïndexeerde bestanden",
     "CACHE_DIRECTORY": "Cache map",
-    "FREEHAND": "",
-    "APPLY_CROP": "",
-    "PHOTO_EDIT_REQUIRED_TO_SAVE": ""
+    "FREEHAND": "Losse hand",
+    "APPLY_CROP": "Bijsnijden toepassen",
+    "PHOTO_EDIT_REQUIRED_TO_SAVE": "Tenminste één transformatie of kleuraanpassing moet worden uitgevoerd voordat u opslaat."
 }
