@@ -6,19 +6,16 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:id="@+id/widget_container">
-
-    <TextView
-        android:id="@+id/widget_title"
+    <ImageView
+        android:id="@+id/widget_placeholder"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textSize="20sp"
-        android:textStyle="bold"
-        android:gravity="center"
-        android:layout_gravity="center"
-        android:background="@drawable/widget_background"
+        android:layout_height="match_parent"
+        android:scaleType="fitCenter"
+        android:adjustViewBounds="true"
+        android:visibility="visible"
         tools:visibility="visible"
-        tools:text="Title" />
-
+        android:background="@drawable/widget_background"
+        />
     <ImageView
         android:id="@+id/widget_img"
         android:layout_width="match_parent"

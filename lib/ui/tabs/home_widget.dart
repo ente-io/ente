@@ -251,11 +251,15 @@ class _HomeWidgetState extends State<HomeWidget> {
       galleryLoadStartTime,
       galleryLoadEndTime,
     );
+    final prefs = await SharedPreferences.getInstance();
 
-    final files = res.files;
+    final previousGeneratedId = prefs.getInt("home_widget_last_img");
+    final files = res.files
+        .where((element) => element.generatedID != previousGeneratedId);
     final randomNumber = Random().nextInt(files.length);
-    final randomFile = files[randomNumber];
+    final randomFile = files.elementAt(randomNumber);
     final cachedThumbnail = await getThumbnailFromServer(randomFile);
+
     var img = Image.memory(cachedThumbnail);
     var imgProvider = img.image;
     await precacheImage(imgProvider, context);
@@ -288,6 +292,10 @@ class _HomeWidgetState extends State<HomeWidget> {
       qualifiedAndroidName: 'io.ente.photos.SlideshowWidgetProvider',
       iOSName: 'SlideshowWidget',
     );
+
+    if (randomFile.generatedID != null) {
+      await prefs.setInt("home_widget_last_img", randomFile.generatedID!);
+    }
 
     _logger
         .info(">>> HomeWidget rendered with size ${img.width}x${img.height}");

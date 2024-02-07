@@ -5,9 +5,11 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.drawable.BitmapDrawable
 import android.util.Log
 import android.view.View
 import android.widget.RemoteViews
+import androidx.core.content.ContextCompat
 import es.antonborri.home_widget.HomeWidgetLaunchIntent
 import es.antonborri.home_widget.HomeWidgetProvider
 import java.io.File
@@ -40,15 +42,22 @@ class SlideshowWidgetProvider : HomeWidgetProvider() {
                         if (imageExists) {
                             Log.d("SlideshowWidgetProvider", "Image exists: $imagePath")
                             setViewVisibility(R.id.widget_img, View.VISIBLE)
-                            setViewVisibility(R.id.widget_title, View.GONE)
+                            setViewVisibility(R.id.widget_placeholder, View.GONE)
 
-                            val myBitmap: Bitmap = BitmapFactory.decodeFile(imagePath)
-                            setImageViewBitmap(R.id.widget_img, myBitmap)
+                            val bitmap: Bitmap = BitmapFactory.decodeFile(imagePath)
+                            setImageViewBitmap(R.id.widget_img, bitmap)
                         } else {
-                            Log.d("SlideshowWidgetProvider", "Image doesn't exists: $imagePath")
+                            Log.d("SlideshowWidgetProvider", "Image doesn't exists")
                             setViewVisibility(R.id.widget_img, View.GONE)
-                            setViewVisibility(R.id.widget_title, View.VISIBLE)
-                            setTextViewText(R.id.widget_title, "No Image Loaded")
+                            setViewVisibility(R.id.widget_placeholder, View.VISIBLE)
+
+                            val drawable =
+                                    ContextCompat.getDrawable(
+                                            context,
+                                            R.drawable.ic_launcher_foreground
+                                    )
+                            val bitmap = (drawable as BitmapDrawable).bitmap
+                            setImageViewBitmap(R.id.widget_placeholder, bitmap)
                         }
                     }
 
