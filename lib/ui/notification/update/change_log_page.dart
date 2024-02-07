@@ -1,3 +1,5 @@
+import "dart:async";
+
 import 'package:flutter/material.dart';
 import "package:photos/generated/l10n.dart";
 import 'package:photos/services/update_service.dart';
@@ -7,6 +9,7 @@ import 'package:photos/ui/components/divider_widget.dart';
 import 'package:photos/ui/components/models/button_type.dart';
 import 'package:photos/ui/components/title_bar_title_widget.dart';
 import 'package:photos/ui/notification/update/change_log_entry.dart';
+import "package:url_launcher/url_launcher_string.dart";
 
 class ChangeLogPage extends StatefulWidget {
   const ChangeLogPage({
@@ -81,13 +84,28 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
                     ButtonWidget(
                       buttonType: ButtonType.trailingIconSecondary,
                       buttonSize: ButtonSize.large,
-                      labelText: S.of(context).rateTheApp,
-                      icon: Icons.favorite_rounded,
+                      labelText: S.of(context).joinDiscord,
+                      icon: Icons.discord_outlined,
                       iconColor: enteColorScheme.primary500,
                       onTap: () async {
-                        await UpdateService.instance.launchReviewUrl();
+                        unawaited(
+                          launchUrlString(
+                            "https://discord.com/invite/z2YVKkycX3",
+                            mode: LaunchMode.externalApplication,
+                          ),
+                        );
                       },
                     ),
+                    // ButtonWidget(
+                    //   buttonType: ButtonType.trailingIconSecondary,
+                    //   buttonSize: ButtonSize.large,
+                    //   labelText: S.of(context).rateTheApp,
+                    //   icon: Icons.favorite_rounded,
+                    //   iconColor: enteColorScheme.primary500,
+                    //   onTap: () async {
+                    //     await UpdateService.instance.launchReviewUrl();
+                    //   },
+                    // ),
                     const SizedBox(height: 8),
                   ],
                 ),
@@ -102,13 +120,18 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
   Widget _getChangeLog() {
     final scrollController = ScrollController();
     final List<ChangeLogEntry> items = [];
-    items.add(
+    items.addAll([
       ChangeLogEntry(
-        "Explore with the new Search Tab ✨",
-        'Introducing a dedicated search tab with distinct sections for effortless discovery.\n'
-            '\nYou can now discover items that come under different Locations, Moments, Contacts, Photo descriptions, Albums and File types with ease.\n',
+        "Map View ✨",
+        'You can now view the location where a photo was clicked.\n'
+            '\nOpen a photo and tap the Info button to view its place on the map!',
       ),
-    );
+      ChangeLogEntry(
+        "Bug Fixes",
+        'Many a bugs were squashed in this release.\n'
+            '\nIf you run into any, please write to team@ente.io, or let us know on Discord! 🙏',
+      ),
+    ]);
 
     return Container(
       padding: const EdgeInsets.only(left: 16),

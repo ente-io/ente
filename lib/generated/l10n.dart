@@ -8357,6 +8357,16 @@ class S {
       args: [],
     );
   }
+
+  /// `Join Discord`
+  String get joinDiscord {
+    return Intl.message(
+      'Join Discord',
+      name: 'joinDiscord',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {
