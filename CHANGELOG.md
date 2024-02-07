@@ -1,5 +1,17 @@
 # CHANGELOG
 
+## v0.8.54
+
+### Added
+* #### Map View ✨
+
+    You can now view the location where a photo was clicked. Open a photo and tap the Info button to view its place on the map!
+
+* #### Bug Fixes
+
+    Many a bugs were squashed in this release. If you run into any, please write to team@ente.io, or let us know on Discord! 🙏
+
+
 
 ## v0.7.118
 

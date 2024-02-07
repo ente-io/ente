@@ -6839,10 +6839,10 @@ class S {
     );
   }
 
-  /// `We have preserved over 10 million memories so far`
+  /// `We have preserved over 30 million memories so far`
   String get loadMessage2 {
     return Intl.message(
-      'We have preserved over 10 million memories so far',
+      'We have preserved over 30 million memories so far',
       name: 'loadMessage2',
       desc: '',
       args: [],
@@ -8303,6 +8303,66 @@ class S {
     return Intl.message(
       'Clean Uncategorized',
       name: 'cleanUncategorized',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Play album on TV`
+  String get playOnTv {
+    return Intl.message(
+      'Play album on TV',
+      name: 'playOnTv',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Pair`
+  String get pair {
+    return Intl.message(
+      'Pair',
+      name: 'pair',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Device not found`
+  String get deviceNotFound {
+    return Intl.message(
+      'Device not found',
+      name: 'deviceNotFound',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Visit cast.ente.io on the device you want to pair.\n\nEnter the code below to play the album on your TV.`
+  String get castInstruction {
+    return Intl.message(
+      'Visit cast.ente.io on the device you want to pair.\n\nEnter the code below to play the album on your TV.',
+      name: 'castInstruction',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Enter the code`
+  String get deviceCodeHint {
+    return Intl.message(
+      'Enter the code',
+      name: 'deviceCodeHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Join Discord`
+  String get joinDiscord {
+    return Intl.message(
+      'Join Discord',
+      name: 'joinDiscord',
       desc: '',
       args: [],
     );

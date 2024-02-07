@@ -965,7 +965,7 @@
   "didYouKnow": "Schon gewusst?",
   "loadingMessage": "Fotos werden geladen...",
   "loadMessage1": "Du kannst dein Abonnement mit deiner Familie teilen",
-  "loadMessage2": "Wir haben bereits mehr als 10 Millionen Erinnerungsstücke gesichert",
+  "loadMessage2": "Wir haben bereits mehr als 30 Millionen Erinnerungsstücke gesichert",
   "loadMessage3": "Wir behalten 3 Kopien Ihrer Daten, eine in einem unterirdischen Schutzbunker",
   "loadMessage4": "Alle unsere Apps sind Open-Source",
   "loadMessage5": "Unser Quellcode und unsere Kryptografie wurden extern geprüft",
@@ -1178,5 +1178,6 @@
   "selectALocationFirst": "Wähle zuerst einen Standort",
   "changeLocationOfSelectedItems": "Standort der gewählten Elemente ändern?",
   "editsToLocationWillOnlyBeSeenWithinEnte": "Änderungen des Standorts werden nur in ente sichtbar sein",
-  "cleanUncategorized": "Unkategorisiert leeren"
+  "cleanUncategorized": "Unkategorisiert leeren",
+  "joinDiscord": "Join Discord"
 }

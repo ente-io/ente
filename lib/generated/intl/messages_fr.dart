@@ -811,6 +811,7 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Les éléments montrent le nombre de jours restants avant la suppression définitive"),
         "itemsWillBeRemovedFromAlbum": MessageLookupByLibrary.simpleMessage(
             "Les éléments sélectionnés seront supprimés de cet album"),
+        "joinDiscord": MessageLookupByLibrary.simpleMessage("Join Discord"),
         "keepPhotos":
             MessageLookupByLibrary.simpleMessage("Conserver les photos"),
         "kiloMeterUnit": MessageLookupByLibrary.simpleMessage("km"),
@@ -843,7 +844,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "loadMessage1": MessageLookupByLibrary.simpleMessage(
             "Vous pouvez partager votre abonnement avec votre famille"),
         "loadMessage2": MessageLookupByLibrary.simpleMessage(
-            "Nous avons conservé plus de 10 millions de souvenirs jusqu\'à présent"),
+            "Nous avons conservé plus de 30 millions de souvenirs jusqu\'à présent"),
         "loadMessage3": MessageLookupByLibrary.simpleMessage(
             "Nous conservons 3 copies de vos données, l\'une dans un abri anti-atomique"),
         "loadMessage4": MessageLookupByLibrary.simpleMessage(

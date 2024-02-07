@@ -473,6 +473,23 @@ class CollectionsService {
     });
   }
 
+  String getCastData(
+    String castToken,
+    Collection collection,
+    String publicKey,
+  ) {
+    final String payload = jsonEncode({
+      "collectionID": collection.id,
+      "castToken": castToken,
+      "collectionKey": CryptoUtil.bin2base64(getCollectionKey(collection.id)),
+    });
+    final encPayload = CryptoUtil.sealSync(
+      CryptoUtil.base642bin(base64Encode(payload.codeUnits)),
+      CryptoUtil.base642bin(publicKey),
+    );
+    return CryptoUtil.bin2base64(encPayload);
+  }
+
   Future<List<User>> share(
     int collectionID,
     String email,

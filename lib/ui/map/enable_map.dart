@@ -48,3 +48,9 @@ Future<bool> requestForMapEnable(BuildContext context) async {
   }
   return false;
 }
+
+//For debugging.
+void disableMap() {
+  UserRemoteFlagService.instance
+      .setBoolValue(UserRemoteFlagService.mapEnabled, false);
+}

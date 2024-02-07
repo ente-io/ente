@@ -897,7 +897,7 @@
   "didYouKnow": "¿Sabías que?",
   "loadingMessage": "Cargando tus fotos...",
   "loadMessage1": "Puedes compartir tu suscripción con tu familia",
-  "loadMessage2": "Hasta ahora hemos conservado más de 10 millones de recuerdos",
+  "loadMessage2": "Hasta ahora hemos conservado más de 30 millones de recuerdos",
   "loadMessage3": "Guardamos 3 copias de sus datos, una en un refugio subterráneo",
   "loadMessage4": "Todas nuestras aplicaciones son de código abierto",
   "loadMessage5": "Nuestro código fuente y criptografía han sido auditados externamente",
@@ -973,5 +973,6 @@
   "selectALocation": "Select a location",
   "selectALocationFirst": "Select a location first",
   "changeLocationOfSelectedItems": "Change location of selected items?",
-  "editsToLocationWillOnlyBeSeenWithinEnte": "Edits to location will only be seen within Ente"
+  "editsToLocationWillOnlyBeSeenWithinEnte": "Edits to location will only be seen within Ente",
+  "joinDiscord": "Join Discord"
 }

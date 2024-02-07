@@ -8,6 +8,7 @@ class InfoItemWidget extends StatelessWidget {
   final IconData leadingIcon;
   final VoidCallback? editOnTap;
   final String? title;
+  final Widget? endSection;
   final Future<List<Widget>> subtitleSection;
   final bool hasChipButtons;
   final VoidCallback? onTap;
@@ -15,6 +16,7 @@ class InfoItemWidget extends StatelessWidget {
     required this.leadingIcon,
     this.editOnTap,
     this.title,
+    this.endSection,
     required this.subtitleSection,
     this.hasChipButtons = false,
     this.onTap,
@@ -70,6 +72,9 @@ class InfoItemWidget extends StatelessWidget {
         ),
       ),
     ]);
+
+    endSection != null ? children.add(endSection!) : null;
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       crossAxisAlignment: CrossAxisAlignment.start,

@@ -1187,5 +1187,11 @@
   "selectALocationFirst": "Selecteer eerst een locatie",
   "changeLocationOfSelectedItems": "Locatie van geselecteerde items wijzigen?",
   "editsToLocationWillOnlyBeSeenWithinEnte": "Bewerkte locatie wordt alleen gezien binnen Ente",
-  "cleanUncategorized": "Ongecategoriseerd opschonen"
+  "cleanUncategorized": "Ongecategoriseerd opschonen",
+  "playOnTv": "Album afspelen op TV",
+  "pair": "Koppelen",
+  "deviceNotFound": "Apparaat niet gevonden",
+  "castInstruction": "Bezoek cast.ente.io op het apparaat dat u wilt koppelen.\n\nVoer de code hieronder in om het album op uw TV af te spelen.",
+  "deviceCodeHint": "Voer de code in",
+  "joinDiscord": "Join Discord"
 }
