@@ -89,6 +89,7 @@ dependencies:
   fluttertoast: ^8.0.6
   freezed_annotation: ^2.2.0
   google_nav_bar: ^5.0.5
+  home_widget: ^0.4.1
   html_unescape: ^2.0.0
   http: ^1.1.0
   image: ^4.0.17
@@ -133,7 +134,7 @@ dependencies:
   pointycastle: ^3.7.3
   provider: ^6.0.0
   quiver: ^3.0.1
-  receive_sharing_intent: ^1.4.5
+  receive_sharing_intent: ^1.6.7
   scrollable_positioned_list: ^0.3.5
   sentry: ^7.9.0
   sentry_flutter: ^7.9.0

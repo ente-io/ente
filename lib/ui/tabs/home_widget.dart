@@ -1,17 +1,21 @@
 import 'dart:async';
 import 'dart:io';
+import "dart:math";
 
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import "package:flutter_animate/flutter_animate.dart";
 import "package:flutter_local_notifications/flutter_local_notifications.dart";
+import 'package:home_widget/home_widget.dart' as hw;
 import 'package:logging/logging.dart';
 import 'package:media_extension/media_extension_action_types.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:move_to_background/move_to_background.dart';
 import 'package:photos/core/configuration.dart';
+import "package:photos/core/constants.dart";
 import 'package:photos/core/event_bus.dart';
+import "package:photos/db/files_db.dart";
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/events/account_configured_event.dart';
 import 'package:photos/events/backup_folders_updated_event.dart';
@@ -29,6 +33,7 @@ import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/app_lifecycle_service.dart';
 import 'package:photos/services/collections_service.dart';
 import "package:photos/services/entity_service.dart";
+import "package:photos/services/favorites_service.dart";
 import 'package:photos/services/local_sync_service.dart';
 import "package:photos/services/notification_service.dart";
 import 'package:photos/services/update_service.dart';
@@ -56,9 +61,12 @@ import "package:photos/ui/viewer/gallery/collection_page.dart";
 import 'package:photos/ui/viewer/search/search_widget.dart';
 import 'package:photos/utils/dialog_util.dart';
 import "package:photos/utils/navigation_util.dart";
+import "package:photos/utils/thumbnail_util.dart";
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import "package:shared_preferences/shared_preferences.dart";
 import 'package:uni_links/uni_links.dart';
+
+final scaffoldKey = GlobalKey<ScaffoldState>();
 
 class HomeWidget extends StatefulWidget {
   const HomeWidget({
@@ -107,6 +115,11 @@ class _HomeWidgetState extends State<HomeWidget> {
   @override
   void initState() {
     _logger.info("Building initstate");
+    if (FavoritesService.instance.hasFavorites()) {
+      WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+        initHomeWidget();
+      });
+    }
     _tabChangedEventSubscription =
         Bus.instance.on<TabChangedEvent>().listen((event) {
       _selectedTabIndex = event.selectedIndex;
@@ -120,11 +133,13 @@ class _HomeWidgetState extends State<HomeWidget> {
         debugPrint(
           "TabChange going from $_selectedTabIndex to ${event.selectedIndex} souce: ${event.source}",
         );
-        _pageController.animateToPage(
-          event.selectedIndex,
-          duration: const Duration(milliseconds: 100),
-          curve: Curves.easeIn,
-        );
+        if (_pageController.hasClients) {
+          _pageController.animateToPage(
+            event.selectedIndex,
+            duration: const Duration(milliseconds: 100),
+            curve: Curves.easeIn,
+          );
+        }
       }
     });
     _subscriptionPurchaseEvent =
@@ -226,6 +241,56 @@ class _HomeWidgetState extends State<HomeWidget> {
     });
 
     super.initState();
+  }
+
+  Future<void> initHomeWidget() async {
+    final collectionID =
+        await FavoritesService.instance.getFavoriteCollectionID();
+    final res = await FilesDB.instance.getFilesInCollection(
+      collectionID!,
+      galleryLoadStartTime,
+      galleryLoadEndTime,
+    );
+
+    final files = res.files;
+    final randomNumber = Random().nextInt(files.length);
+    final randomFile = files[randomNumber];
+    final cachedThumbnail = await getThumbnailFromServer(randomFile);
+    var img = Image.memory(cachedThumbnail);
+    var imgProvider = img.image;
+    await precacheImage(imgProvider, context);
+    img = Image.memory(cachedThumbnail);
+    imgProvider = img.image;
+    final image = await decodeImageFromList(cachedThumbnail);
+    final size = min(image.width.toDouble(), image.height.toDouble());
+
+    final widget = ClipRRect(
+      borderRadius: BorderRadius.circular(32),
+      child: Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          color: Colors.black,
+          image: DecorationImage(image: imgProvider, fit: BoxFit.cover),
+        ),
+      ),
+    );
+
+    await hw.HomeWidget.renderFlutterWidget(
+      widget,
+      logicalSize: Size(size, size),
+      key: "slideshow",
+    );
+
+    await hw.HomeWidget.updateWidget(
+      name: 'SlideshowWidgetProvider',
+      androidName: 'SlideshowWidgetProvider',
+      qualifiedAndroidName: 'io.ente.photos.SlideshowWidgetProvider',
+      iOSName: 'SlideshowWidget',
+    );
+
+    _logger
+        .info(">>> HomeWidget rendered with size ${img.width}x${img.height}");
   }
 
   Future<void> _autoLogoutAlert() async {

@@ -914,6 +914,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.2.0"
+  home_widget:
+    dependency: "direct main"
+    description:
+      name: home_widget
+      sha256: c58a9e6d3b94490f1a8d5ddcbeeeeebc79abd0befe5889c26b0713fb09be6857
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.4.1"
   html:
     dependency: transitive
     description:
@@ -1638,10 +1646,10 @@ packages:
     dependency: "direct main"
     description:
       name: receive_sharing_intent
-      sha256: "0a910f5b91fe88b05a80448124c18753df1952c80fe216f5f3cda8296a646567"
+      sha256: "8fdf5927934041264becf65199ef8057b8b176e879d95ffa0420cd2a6219c0fd"
       url: "https://pub.dev"
     source: hosted
-    version: "1.6.4"
+    version: "1.6.7"
   rxdart:
     dependency: transitive
     description:
