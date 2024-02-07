@@ -1,5 +1,5 @@
 import { DataStream } from 'types/upload';
-import ImportService from 'services/importService';
+import ElectronAPIs from '@ente/shared/electron';
 import { FILE_READER_CHUNK_SIZE, PICKED_UPLOAD_TYPE } from 'constants/upload';
 import { getFileStream, getElectronFileStream } from 'services/readerService';
 import { getFileNameSize } from '@ente/shared/logging/web';
@@ -17,12 +17,12 @@ export const testZipFileReading = async () => {
                 'upload test failed NEXT_PUBLIC_FILE_READING_TEST_ZIP_PATH missing'
             );
         }
-        const files = await ImportService.getElectronFilesFromGoogleZip(
+        const files = await ElectronAPIs.getElectronFilesFromGoogleZip(
             process.env.NEXT_PUBLIC_FILE_READING_TEST_ZIP_PATH
         );
         if (!files?.length) {
             throw Error(
-                `testZipFileReading Check failed ❌ 
+                `testZipFileReading Check failed ❌
                 No files selected`
             );
         }
@@ -84,7 +84,7 @@ export const testZipWithRootFileReadingTest = async () => {
                 'upload test failed NEXT_PUBLIC_ZIP_WITH_ROOT_FILE_PATH missing'
             );
         }
-        const files = await ImportService.getElectronFilesFromGoogleZip(
+        const files = await ElectronAPIs.getElectronFilesFromGoogleZip(
             process.env.NEXT_PUBLIC_ZIP_WITH_ROOT_FILE_PATH
         );
 
