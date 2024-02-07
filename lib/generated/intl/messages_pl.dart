@@ -113,6 +113,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Nieprawidłowy klucz odzyskiwania"),
         "invalidEmailAddress":
             MessageLookupByLibrary.simpleMessage("Nieprawidłowy adres e-mail"),
+        "joinDiscord": MessageLookupByLibrary.simpleMessage("Join Discord"),
         "kindlyHelpUsWithThisInformation":
             MessageLookupByLibrary.simpleMessage("Pomóż nam z tą informacją"),
         "logInLabel": MessageLookupByLibrary.simpleMessage("Zaloguj się"),

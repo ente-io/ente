@@ -780,6 +780,7 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Gli elementi mostrano il numero di giorni rimanenti prima della cancellazione permanente"),
         "itemsWillBeRemovedFromAlbum": MessageLookupByLibrary.simpleMessage(
             "Gli elementi selezionati saranno rimossi da questo album"),
+        "joinDiscord": MessageLookupByLibrary.simpleMessage("Join Discord"),
         "keepPhotos": MessageLookupByLibrary.simpleMessage("Mantieni foto"),
         "kiloMeterUnit": MessageLookupByLibrary.simpleMessage("km"),
         "kindlyHelpUsWithThisInformation": MessageLookupByLibrary.simpleMessage(
