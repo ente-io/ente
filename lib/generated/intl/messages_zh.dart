@@ -336,6 +336,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "cannotAddMorePhotosAfterBecomingViewer": m7,
         "cannotDeleteSharedFiles":
             MessageLookupByLibrary.simpleMessage("无法删除共享文件"),
+        "castInstruction": MessageLookupByLibrary.simpleMessage(
+            "在您要配对的设备上访问 cast.ente.io。\n输入下面的代码即可在电视上播放相册。"),
         "centerPoint": MessageLookupByLibrary.simpleMessage("中心点"),
         "changeEmail": MessageLookupByLibrary.simpleMessage("修改邮箱"),
         "changeLocationOfSelectedItems":
@@ -468,10 +470,12 @@ class MessageLookup extends MessageLookupByLibrary {
         "details": MessageLookupByLibrary.simpleMessage("详情"),
         "devAccountChanged": MessageLookupByLibrary.simpleMessage(
             "我们用于在 App Store 上发布 ente 的开发者账户已更改。 因此，您将需要重新登录。\n\n对于给您带来的不便，我们深表歉意，但这是不可避免的。"),
+        "deviceCodeHint": MessageLookupByLibrary.simpleMessage("输入代码"),
         "deviceFilesAutoUploading":
             MessageLookupByLibrary.simpleMessage("添加到此设备相册的文件将自动上传到 ente。"),
         "deviceLockExplanation": MessageLookupByLibrary.simpleMessage(
             "当 ente 在前台并且正在进行备份时禁用设备屏幕锁定。 这通常不需要，但可以帮助大型库的大上传和初始导入更快地完成。"),
+        "deviceNotFound": MessageLookupByLibrary.simpleMessage("未发现设备"),
         "didYouKnow": MessageLookupByLibrary.simpleMessage("您知道吗？"),
         "disableAutoLock": MessageLookupByLibrary.simpleMessage("禁用自动锁定"),
         "disableDownloadWarningBody":
@@ -662,6 +666,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("项目显示永久删除前剩余的天数"),
         "itemsWillBeRemovedFromAlbum":
             MessageLookupByLibrary.simpleMessage("所选项目将从此相册中移除"),
+        "joinDiscord": MessageLookupByLibrary.simpleMessage("Join Discord"),
         "keepPhotos": MessageLookupByLibrary.simpleMessage("保留照片"),
         "kiloMeterUnit": MessageLookupByLibrary.simpleMessage("公里"),
         "kindlyHelpUsWithThisInformation":
@@ -805,6 +810,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("可选的，按您喜欢的短语..."),
         "orPickAnExistingOne":
             MessageLookupByLibrary.simpleMessage("或者选择一个现有的"),
+        "pair": MessageLookupByLibrary.simpleMessage("配对"),
         "password": MessageLookupByLibrary.simpleMessage("密码"),
         "passwordChangedSuccessfully":
             MessageLookupByLibrary.simpleMessage("密码修改成功"),
@@ -832,6 +838,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("您添加的照片将从相册中移除"),
         "pickCenterPoint": MessageLookupByLibrary.simpleMessage("选择中心点"),
         "pinAlbum": MessageLookupByLibrary.simpleMessage("置顶相册"),
+        "playOnTv": MessageLookupByLibrary.simpleMessage("在电视上播放相册"),
         "playStoreFreeTrialValidTill": m37,
         "playstoreSubscription":
             MessageLookupByLibrary.simpleMessage("PlayStore 订阅"),

@@ -392,6 +392,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "cannotAddMorePhotosAfterBecomingViewer": m7,
         "cannotDeleteSharedFiles": MessageLookupByLibrary.simpleMessage(
             "Kan gedeelde bestanden niet verwijderen"),
+        "castInstruction": MessageLookupByLibrary.simpleMessage(
+            "Bezoek cast.ente.io op het apparaat dat u wilt koppelen.\n\nVoer de code hieronder in om het album op uw TV af te spelen."),
         "centerPoint": MessageLookupByLibrary.simpleMessage("Middelpunt"),
         "changeEmail": MessageLookupByLibrary.simpleMessage("E-mail wijzigen"),
         "changeLocationOfSelectedItems": MessageLookupByLibrary.simpleMessage(
@@ -569,10 +571,14 @@ class MessageLookup extends MessageLookupByLibrary {
         "details": MessageLookupByLibrary.simpleMessage("Details"),
         "devAccountChanged": MessageLookupByLibrary.simpleMessage(
             "Het ontwikkelaarsaccount dat we gebruiken om te publiceren in de App Store is veranderd. Daarom moet je opnieuw inloggen.\n\nOnze excuses voor het ongemak, helaas was dit onvermijdelijk."),
+        "deviceCodeHint":
+            MessageLookupByLibrary.simpleMessage("Voer de code in"),
         "deviceFilesAutoUploading": MessageLookupByLibrary.simpleMessage(
             "Bestanden toegevoegd aan dit album van dit apparaat zullen automatisch geüpload worden naar ente."),
         "deviceLockExplanation": MessageLookupByLibrary.simpleMessage(
             "Schakel de schermvergrendeling van het apparaat uit wanneer ente op de voorgrond is en er een back-up aan de gang is. Dit is normaal gesproken niet nodig, maar kan grote uploads en initiële imports van grote mappen sneller laten verlopen."),
+        "deviceNotFound":
+            MessageLookupByLibrary.simpleMessage("Apparaat niet gevonden"),
         "didYouKnow": MessageLookupByLibrary.simpleMessage("Wist u dat?"),
         "disableAutoLock": MessageLookupByLibrary.simpleMessage(
             "Automatisch vergrendelen uitschakelen"),
@@ -816,6 +822,7 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Bestanden tonen het aantal resterende dagen voordat ze permanent worden verwijderd"),
         "itemsWillBeRemovedFromAlbum": MessageLookupByLibrary.simpleMessage(
             "Geselecteerde items zullen worden verwijderd uit dit album"),
+        "joinDiscord": MessageLookupByLibrary.simpleMessage("Join Discord"),
         "keepPhotos": MessageLookupByLibrary.simpleMessage("Foto\'s behouden"),
         "kiloMeterUnit": MessageLookupByLibrary.simpleMessage("km"),
         "kindlyHelpUsWithThisInformation": MessageLookupByLibrary.simpleMessage(
@@ -987,6 +994,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Optioneel, zo kort als je wilt..."),
         "orPickAnExistingOne":
             MessageLookupByLibrary.simpleMessage("Of kies een bestaande"),
+        "pair": MessageLookupByLibrary.simpleMessage("Koppelen"),
         "password": MessageLookupByLibrary.simpleMessage("Wachtwoord"),
         "passwordChangedSuccessfully": MessageLookupByLibrary.simpleMessage(
             "Wachtwoord succesvol aangepast"),
@@ -1025,6 +1033,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Kies middelpunt"),
         "pinAlbum":
             MessageLookupByLibrary.simpleMessage("Album bovenaan vastzetten"),
+        "playOnTv":
+            MessageLookupByLibrary.simpleMessage("Album afspelen op TV"),
         "playStoreFreeTrialValidTill": m37,
         "playstoreSubscription":
             MessageLookupByLibrary.simpleMessage("PlayStore abonnement"),
