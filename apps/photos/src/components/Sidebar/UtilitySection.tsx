@@ -15,7 +15,6 @@ import { APPS, CLIENT_PACKAGE_NAMES } from '@ente/shared/apps/constants';
 import ThemeSwitcher from '@ente/shared/components/ThemeSwitcher';
 import { getAccountsURL } from '@ente/shared/network/api';
 import { logError } from '@ente/shared/sentry';
-import { LS_KEYS, getData } from '@ente/shared/storage/localStorage';
 import { THEME_COLOR } from '@ente/shared/themes/constants';
 import { EnteMenuItem } from 'components/Menu/EnteMenuItem';
 import WatchFolder from 'components/WatchFolder';
@@ -73,17 +72,12 @@ export default function UtilitySection({ closeSidebar }) {
         closeSidebar();
 
         try {
-            // serialize the user data to pass it over to accounts
-            const userData = getData(LS_KEYS.USER);
-            const serialized = JSON.stringify(userData);
-            const serializedB64 = window.btoa(serialized);
-
             const accountsToken = await getAccountsToken();
 
             window.location.href = `${getAccountsURL()}${ACCOUNTS_PAGES.ACCOUNT_HANDOFF
                 }?package=${CLIENT_PACKAGE_NAMES.get(
                     APPS.PHOTOS
-                )}&jwtToken=${accountsToken}#${serializedB64}`;
+                )}&token=${accountsToken}`;
         } catch (e) {
             logError(e, 'failed to redirect to accounts page');
         }

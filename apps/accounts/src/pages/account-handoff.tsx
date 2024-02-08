@@ -3,7 +3,7 @@ import EnteSpinner from '@ente/shared/components/EnteSpinner';
 import { ACCOUNTS_PAGES } from '@ente/shared/constants/pages';
 import HTTPService from '@ente/shared/network/HTTPService';
 import { logError } from '@ente/shared/sentry';
-import { LS_KEYS, setData } from '@ente/shared/storage/localStorage';
+import { LS_KEYS, getData, setData } from '@ente/shared/storage/localStorage';
 import { useRouter } from 'next/router';
 import { useEffect } from 'react';
 
@@ -12,14 +12,7 @@ const AccountHandoff = () => {
 
     const retrieveAccountData = () => {
         try {
-            // get the data from the fragment
-            const fragment = window.location.hash.substring(1);
-
-            const stringified = window.atob(fragment);
-
-            const deserialized = JSON.parse(stringified);
-
-            setData(LS_KEYS.USER, deserialized);
+            extractAccountsToken();
 
             router.push(ACCOUNTS_PAGES.PASSKEYS);
         } catch (e) {
@@ -36,6 +29,19 @@ const AccountHandoff = () => {
         HTTPService.setHeaders({
             'X-Client-Package': pkg,
         });
+    };
+
+    const extractAccountsToken = () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const token = urlParams.get('token');
+        if (!token) {
+            throw new Error('token not found');
+        }
+
+        let user = getData(LS_KEYS.USER) || {};
+        user.token = token;
+
+        setData(LS_KEYS.USER, user);
     };
 
     useEffect(() => {
