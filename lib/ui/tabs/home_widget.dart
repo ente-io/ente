@@ -205,10 +205,10 @@ class _HomeWidgetState extends State<HomeWidget> {
               final lastDialogShownTime =
                   value.getInt(kUpdateAvailableDialogShownTimeKey) ?? 0;
               final now = DateTime.now().microsecondsSinceEpoch;
-              final hasBeen3DaysSinceLastNotification =
+              final hasBeen3DaysSinceLastShown =
                   (now - lastDialogShownTime) > (3 * microSecondsInDay);
 
-              if (hasBeen3DaysSinceLastNotification) {
+              if (hasBeen3DaysSinceLastShown) {
                 value.setInt(
                   kUpdateAvailableDialogShownTimeKey,
                   DateTime.now().microsecondsSinceEpoch,
