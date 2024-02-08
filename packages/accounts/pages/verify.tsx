@@ -14,6 +14,7 @@ import SingleInputForm, {
     SingleInputFormProps,
 } from '@ente/shared/components/SingleInputForm';
 import { ApiError } from '@ente/shared/error';
+import { getAccountsURL } from '@ente/shared/network/api';
 import InMemoryStore, { MS_KEYS } from '@ente/shared/storage/InMemoryStore';
 import { clearFiles } from '@ente/shared/storage/localForage/helpers';
 import { LS_KEYS, getData, setData } from '@ente/shared/storage/localStorage';
@@ -80,7 +81,8 @@ export default function VerifyPage({ appContext, router, appName }: PageProps) {
                     isTwoFactorPasskeysEnabled: true,
                 });
                 setIsFirstLogin(true);
-                window.location.href = `${process.env.NEXT_PUBLIC_ACCOUNTS_ENDPOINT}/passkeys/flow?passkeySessionID=${passkeySessionID}&redirect=${window.location.origin}/passkeys/finish`;
+                window.location.href = `${getAccountsURL()}/passkeys/flow?passkeySessionID=${passkeySessionID}&redirect=${window.location.origin
+                    }/passkeys/finish`;
                 router.push(PAGES.CREDENTIALS);
             } else if (twoFactorSessionID) {
                 setData(LS_KEYS.USER, {

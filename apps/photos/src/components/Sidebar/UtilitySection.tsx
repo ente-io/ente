@@ -13,6 +13,7 @@ import { AppContext } from 'pages/_app';
 // import mlIDbStorage from 'utils/storage/mlIDbStorage';
 import { APPS, CLIENT_PACKAGE_NAMES } from '@ente/shared/apps/constants';
 import ThemeSwitcher from '@ente/shared/components/ThemeSwitcher';
+import { getAccountsURL } from '@ente/shared/network/api';
 import { LS_KEYS, getData } from '@ente/shared/storage/localStorage';
 import { THEME_COLOR } from '@ente/shared/themes/constants';
 import { EnteMenuItem } from 'components/Menu/EnteMenuItem';
@@ -74,7 +75,7 @@ export default function UtilitySection({ closeSidebar }) {
         const serialized = JSON.stringify(userData);
         const serializedB64 = window.btoa(serialized);
 
-        window.location.href = `${process.env.NEXT_PUBLIC_ACCOUNTS_ENDPOINT}${ACCOUNTS_PAGES.ACCOUNT_HANDOFF
+        window.location.href = `${getAccountsURL()}${ACCOUNTS_PAGES.ACCOUNT_HANDOFF
             }?package=${CLIENT_PACKAGE_NAMES.get(APPS.PHOTOS)}#${serializedB64}`;
     };
 

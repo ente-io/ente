@@ -88,6 +88,14 @@ export const getAuthURL = () => {
     return `https://auth.ente.io`;
 };
 
+export const getAccountsURL = () => {
+    const accountsURL = process.env.NEXT_PUBLIC_ENTE_ACCOUNTS_ENDPOINT;
+    if (isDevDeployment() && accountsURL) {
+        return accountsURL;
+    }
+    return `https://accounts.ente.io`;
+};
+
 export const getSentryTunnelURL = () => {
     return `https://sentry-reporter.ente.io`;
 };
@@ -103,9 +111,9 @@ export const isDevDeployment = () => {
     if (globalThis?.location) {
         return (
             process.env.NEXT_PUBLIC_ENTE_WEB_ENDPOINT ===
-                globalThis.location.origin ||
+            globalThis.location.origin ||
             process.env.NEXT_PUBLIC_ENTE_ALBUM_ENDPOINT ===
-                globalThis.location.origin ||
+            globalThis.location.origin ||
             process.env.NEXT_PUBLIC_IS_TEST_APP === 'true' ||
             process.env.NODE_ENV === 'development'
         );

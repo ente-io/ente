@@ -3,56 +3,56 @@ import { useEffect, useState } from 'react';
 import { t } from 'i18next';
 
 import {
-    clearData,
-    getData,
-    LS_KEYS,
-    setData,
-} from '@ente/shared/storage/localStorage';
-import { PAGES } from '../constants/pages';
-import {
-    SESSION_KEYS,
-    getKey,
-    removeKey,
-    setKey,
-} from '@ente/shared/storage/sessionStorage';
-import {
     decryptAndStoreToken,
     generateAndSaveIntermediateKeyAttributes,
     generateLoginSubKey,
     saveKeyInSessionStore,
 } from '@ente/shared/crypto/helpers';
+import {
+    clearData,
+    getData,
+    LS_KEYS,
+    setData,
+} from '@ente/shared/storage/localStorage';
+import {
+    getKey,
+    removeKey,
+    SESSION_KEYS,
+    setKey,
+} from '@ente/shared/storage/sessionStorage';
+import { PAGES } from '../constants/pages';
 import { generateSRPSetupAttributes } from '../services/srp';
 import { logoutUser } from '../services/user';
 
-import { configureSRP, loginViaSRP } from '../services/srp';
-import { getSRPAttributes } from '../api/srp';
-import { SRPAttributes } from '../types/srp';
-
+import { VerticallyCentered } from '@ente/shared/components/Container';
+import EnteSpinner from '@ente/shared/components/EnteSpinner';
+import FormPaper from '@ente/shared/components/Form/FormPaper';
+import FormPaperFooter from '@ente/shared/components/Form/FormPaper/Footer';
+import FormPaperTitle from '@ente/shared/components/Form/FormPaper/Title';
+import LinkButton from '@ente/shared/components/LinkButton';
+import VerifyMasterPasswordForm, {
+    VerifyMasterPasswordFormProps,
+} from '@ente/shared/components/VerifyMasterPasswordForm';
+import { getAccountsURL } from '@ente/shared/network/api';
 import {
     isFirstLogin,
     setIsFirstLogin,
 } from '@ente/shared/storage/localStorage/helpers';
 import { KeyAttributes, User } from '@ente/shared/user/types';
-import FormPaper from '@ente/shared/components/Form/FormPaper';
-import FormPaperTitle from '@ente/shared/components/Form/FormPaper/Title';
-import FormPaperFooter from '@ente/shared/components/Form/FormPaper/Footer';
-import LinkButton from '@ente/shared/components/LinkButton';
 import isElectron from 'is-electron';
-import { VerticallyCentered } from '@ente/shared/components/Container';
-import EnteSpinner from '@ente/shared/components/EnteSpinner';
-import VerifyMasterPasswordForm, {
-    VerifyMasterPasswordFormProps,
-} from '@ente/shared/components/VerifyMasterPasswordForm';
+import { getSRPAttributes } from '../api/srp';
+import { configureSRP, loginViaSRP } from '../services/srp';
+import { SRPAttributes } from '../types/srp';
 // import { APPS, getAppName } from '@ente/shared/apps';
-import { addLocalLog } from '@ente/shared/logging';
+import { APP_HOMES } from '@ente/shared/apps/constants';
+import { PageProps } from '@ente/shared/apps/types';
 import ComlinkCryptoWorker from '@ente/shared/crypto';
 import { B64EncryptionResult } from '@ente/shared/crypto/types';
-import { CustomError } from '@ente/shared/error';
-import InMemoryStore, { MS_KEYS } from '@ente/shared/storage/InMemoryStore';
-import { PageProps } from '@ente/shared/apps/types';
-import { APP_HOMES } from '@ente/shared/apps/constants';
-import { logError } from '@ente/shared/sentry';
 import ElectronAPIs from '@ente/shared/electron';
+import { CustomError } from '@ente/shared/error';
+import { addLocalLog } from '@ente/shared/logging';
+import { logError } from '@ente/shared/sentry';
+import InMemoryStore, { MS_KEYS } from '@ente/shared/storage/InMemoryStore';
 
 export default function Credentials({
     appContext,
@@ -166,7 +166,8 @@ export default function Credentials({
                         isTwoFactorPasskeysEnabled: true,
                     });
                     InMemoryStore.set(MS_KEYS.REDIRECT_URL, PAGES.ROOT);
-                    window.location.href = `${process.env.NEXT_PUBLIC_ACCOUNTS_ENDPOINT}/passkeys/flow?passkeySessionID=${passkeySessionID}&redirect=${window.location.origin}/passkeys/finish`;
+                    window.location.href = `${getAccountsURL()}/passkeys/flow?passkeySessionID=${passkeySessionID}&redirect=${window.location.origin
+                        }/passkeys/finish`;
                     return;
                 } else if (twoFactorSessionID) {
                     const sessionKeyAttributes =
