@@ -4,7 +4,6 @@ import SingleInputForm from '@ente/shared/components/SingleInputForm';
 import { ACCOUNTS_PAGES } from '@ente/shared/constants/pages';
 import { logError } from '@ente/shared/sentry';
 import { getToken } from '@ente/shared/storage/localStorage/helpers';
-import { SESSION_KEYS, getKey } from '@ente/shared/storage/sessionStorage';
 import { Box, Typography } from '@mui/material';
 import { t } from 'i18next';
 import _sodium from 'libsodium-wrappers';
@@ -50,9 +49,8 @@ const Passkeys = () => {
     const router = useRouter();
 
     const checkLoggedIn = () => {
-        const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
         const token = getToken();
-        if (!key || !token) {
+        if (!token) {
             router.push(ACCOUNTS_PAGES.LOGIN);
         }
     };
