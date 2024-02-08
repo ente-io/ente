@@ -70,11 +70,6 @@
         "transformation-matrix": "^2.15.0",
         "uuid": "^9.0.0",
         "vscode-uri": "^3.0.7",
-        "workbox-precaching": "^6.1.5",
-        "workbox-recipes": "^6.1.5",
-        "workbox-routing": "^6.1.5",
-        "workbox-strategies": "^6.1.5",
-        "workbox-window": "^6.1.5",
         "xml-js": "^1.6.11",
         "yup": "^0.29.3",
         "zxcvbn": "^4.4.2"
