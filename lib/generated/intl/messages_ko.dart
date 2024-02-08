@@ -34,6 +34,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage(
                 "Edits to location will only be seen within Ente"),
         "fileTypes": MessageLookupByLibrary.simpleMessage("File types"),
+        "joinDiscord": MessageLookupByLibrary.simpleMessage("Join Discord"),
         "modifyYourQueryOrTrySearchingFor":
             MessageLookupByLibrary.simpleMessage(
                 "Modify your query, or try searching for"),

@@ -609,9 +609,6 @@ class SearchService {
         result[tag] = [];
       }
     }
-    if (result.isEmpty && !showNoLocationTag) {
-      return searchResults;
-    }
     final allFiles = await getAllFiles();
     for (EnteFile file in allFiles) {
       if (file.hasLocation) {
