@@ -244,6 +244,7 @@ class _HomeWidgetState extends State<HomeWidget> {
   }
 
   Future<void> initHomeWidget() async {
+    await hw.HomeWidget.setAppGroupId("group.io.ente.frame.SlideshowWidget");
     final collectionID =
         await FavoritesService.instance.getFavoriteCollectionID();
     final res = await FilesDB.instance.getFilesInCollection(
@@ -266,7 +267,9 @@ class _HomeWidgetState extends State<HomeWidget> {
     img = Image.memory(cachedThumbnail);
     imgProvider = img.image;
     final image = await decodeImageFromList(cachedThumbnail);
-    final size = min(image.width.toDouble(), image.height.toDouble());
+    final width = image.width.toDouble();
+    final height = image.height.toDouble();
+    final size = min(width, height);
 
     final widget = ClipRRect(
       borderRadius: BorderRadius.circular(32),

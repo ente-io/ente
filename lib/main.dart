@@ -67,7 +67,7 @@ void main() async {
   final savedThemeMode = await AdaptiveTheme.getThemeMode();
   await _runInForeground(savedThemeMode);
   unawaited(BackgroundFetch.registerHeadlessTask(_headlessTaskHandler));
-  FlutterDisplayMode.setHighRefreshRate().ignore();
+  if (Platform.isAndroid) FlutterDisplayMode.setHighRefreshRate().ignore();
 }
 
 Future<void> _runInForeground(AdaptiveThemeMode? savedThemeMode) async {
