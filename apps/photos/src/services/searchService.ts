@@ -16,33 +16,29 @@ import {
     ClipSearchScores,
 } from 'types/search';
 import ObjectService from './machineLearning/objectService';
-import {
-    getFormattedDate,
-    isInsideLocationTag,
-    isSameDayAnyYear,
-} from 'utils/search';
+import { getFormattedDate } from 'utils/search';
 import { Person, Thing } from 'types/machineLearning';
 import { getUniqueFiles } from 'utils/file';
 import { getLatestEntities } from './entityService';
 import { LocationTag, LocationTagData, EntityType } from 'types/entity';
 import { addLogLine } from '@ente/shared/logging';
 import { FILE_TYPE } from 'constants/file';
-import {
-    ClipService,
-    computeClipMatchScore,
-    getLocalClipImageEmbeddings,
-} from './clipService';
+import { ClipService, computeClipMatchScore } from './clipService';
 import { CustomError } from '@ente/shared/error';
+import { Model } from 'types/embedding';
+import { getLocalEmbeddings } from './embeddingService';
+import locationSearchService, { City } from './locationSearchService';
+import ComlinkSearchWorker from 'utils/comlink/ComlinkSearchWorker';
 
 const DIGITS = new Set(['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']);
 
 const CLIP_SCORE_THRESHOLD = 0.23;
 
-export const getDefaultOptions = async (files: EnteFile[]) => {
+export const getDefaultOptions = async () => {
     return [
         await getIndexStatusSuggestion(),
-        ...convertSuggestionsToOptions(await getAllPeopleSuggestion(), files),
-    ];
+        ...(await convertSuggestionsToOptions(await getAllPeopleSuggestion())),
+    ].filter((t) => !!t);
 };
 
 export const getAutoCompleteSuggestions =
@@ -62,47 +58,42 @@ export const getAutoCompleteSuggestions =
                 ...getCollectionSuggestion(searchPhrase, collections),
                 getFileNameSuggestion(searchPhrase, files),
                 getFileCaptionSuggestion(searchPhrase, files),
-                ...(await getLocationTagSuggestions(searchPhrase)),
+                ...(await getLocationSuggestions(searchPhrase)),
                 ...(await getThingSuggestion(searchPhrase)),
             ].filter((suggestion) => !!suggestion);
 
-            return convertSuggestionsToOptions(suggestions, files);
+            return convertSuggestionsToOptions(suggestions);
         } catch (e) {
             logError(e, 'getAutoCompleteSuggestions failed');
             return [];
         }
     };
 
-function convertSuggestionsToOptions(
-    suggestions: Suggestion[],
-    files: EnteFile[]
-) {
-    const previewImageAppendedOptions: SearchOption[] = suggestions
-        .map((suggestion) => ({
-            suggestion,
-            searchQuery: convertSuggestionToSearchQuery(suggestion),
-        }))
-        .map(({ suggestion, searchQuery }) => {
-            const resultFiles = getUniqueFiles(
-                files.filter((file) => isSearchedFile(file, searchQuery))
-            );
-
-            if (searchQuery?.clip) {
-                resultFiles.sort((a, b) => {
-                    const aScore = searchQuery.clip.get(a.id);
-                    const bScore = searchQuery.clip.get(b.id);
-                    return bScore - aScore;
-                });
-            }
-
-            return {
+async function convertSuggestionsToOptions(
+    suggestions: Suggestion[]
+): Promise<SearchOption[]> {
+    const searchWorker = await ComlinkSearchWorker.getInstance();
+    const previewImageAppendedOptions: SearchOption[] = [];
+    for (const suggestion of suggestions) {
+        const searchQuery = convertSuggestionToSearchQuery(suggestion);
+        const resultFiles = getUniqueFiles(
+            await searchWorker.search(searchQuery)
+        );
+        if (searchQuery?.clip) {
+            resultFiles.sort((a, b) => {
+                const aScore = searchQuery.clip.get(a.id);
+                const bScore = searchQuery.clip.get(b.id);
+                return bScore - aScore;
+            });
+        }
+        if (resultFiles.length) {
+            previewImageAppendedOptions.push({
                 ...suggestion,
                 fileCount: resultFiles.length,
                 previewFiles: resultFiles.slice(0, 3),
-            };
-        })
-        .filter((option) => option.fileCount);
-
+            });
+        }
+    }
     return previewImageAppendedOptions;
 }
 function getFileTypeSuggestion(searchPhrase: string): Suggestion[] {
@@ -190,28 +181,32 @@ export async function getAllPeopleSuggestion(): Promise<Array<Suggestion>> {
 }
 
 export async function getIndexStatusSuggestion(): Promise<Suggestion> {
-    const config = await getMLSyncConfig();
-    const indexStatus = await mlIDbStorage.getIndexStatus(config.mlVersion);
+    try {
+        const config = await getMLSyncConfig();
+        const indexStatus = await mlIDbStorage.getIndexStatus(config.mlVersion);
 
-    let label;
-    if (!indexStatus.localFilesSynced) {
-        label = t('INDEXING_SCHEDULED');
-    } else if (indexStatus.outOfSyncFilesExists) {
-        label = t('ANALYZING_PHOTOS', {
-            indexStatus,
-        });
-    } else if (!indexStatus.peopleIndexSynced) {
-        label = t('INDEXING_PEOPLE', { indexStatus });
-    } else {
-        label = t('INDEXING_DONE', { indexStatus });
+        let label;
+        if (!indexStatus.localFilesSynced) {
+            label = t('INDEXING_SCHEDULED');
+        } else if (indexStatus.outOfSyncFilesExists) {
+            label = t('ANALYZING_PHOTOS', {
+                indexStatus,
+            });
+        } else if (!indexStatus.peopleIndexSynced) {
+            label = t('INDEXING_PEOPLE', { indexStatus });
+        } else {
+            label = t('INDEXING_DONE', { indexStatus });
+        }
+
+        return {
+            label,
+            type: SuggestionType.INDEX_STATUS,
+            value: indexStatus,
+            hide: true,
+        };
+    } catch (e) {
+        logError(e, 'getIndexStatusSuggestion failed');
     }
-
-    return {
-        label,
-        type: SuggestionType.INDEX_STATUS,
-        value: indexStatus,
-        hide: true,
-    };
 }
 
 function getDateSuggestion(searchPhrase: string): Suggestion[] {
@@ -264,10 +259,9 @@ function getFileCaptionSuggestion(
     };
 }
 
-async function getLocationTagSuggestions(searchPhrase: string) {
-    const searchResults = await searchLocationTag(searchPhrase);
-
-    return searchResults.map(
+async function getLocationSuggestions(searchPhrase: string) {
+    const locationTagResults = await searchLocationTag(searchPhrase);
+    const locationTagSuggestions = locationTagResults.map(
         (locationTag) =>
             ({
                 type: SuggestionType.LOCATION,
@@ -275,6 +269,28 @@ async function getLocationTagSuggestions(searchPhrase: string) {
                 label: locationTag.data.name,
             } as Suggestion)
     );
+    const locationTagNames = new Set(
+        locationTagSuggestions.map((result) => result.label)
+    );
+
+    const citySearchResults = await locationSearchService.searchCities(
+        searchPhrase
+    );
+
+    const nonConflictingCityResult = citySearchResults.filter(
+        (city) => !locationTagNames.has(city.city)
+    );
+
+    const citySearchSuggestions = nonConflictingCityResult.map(
+        (city) =>
+            ({
+                type: SuggestionType.CITY,
+                value: city,
+                label: city.city,
+            } as Suggestion)
+    );
+
+    return [...locationTagSuggestions, ...citySearchSuggestions];
 }
 
 async function getThingSuggestion(searchPhrase: string): Promise<Suggestion[]> {
@@ -383,7 +399,7 @@ async function searchThing(searchPhrase: string) {
 }
 
 async function searchClip(searchPhrase: string): Promise<ClipSearchScores> {
-    const imageEmbeddings = await getLocalClipImageEmbeddings();
+    const imageEmbeddings = await getLocalEmbeddings(Model.ONNX_CLIP);
     const textEmbedding = await ClipService.getTextEmbedding(searchPhrase);
     const clipSearchResult = new Map<number, number>(
         (
@@ -404,48 +420,6 @@ async function searchClip(searchPhrase: string): Promise<ClipSearchScores> {
     return clipSearchResult;
 }
 
-function isSearchedFile(file: EnteFile, search: Search) {
-    if (search?.collection) {
-        return search.collection === file.collectionID;
-    }
-
-    if (search?.date) {
-        return isSameDayAnyYear(search.date)(
-            new Date(file.metadata.creationTime / 1000)
-        );
-    }
-    if (search?.location) {
-        return isInsideLocationTag(
-            {
-                latitude: file.metadata.latitude,
-                longitude: file.metadata.longitude,
-            },
-            search.location
-        );
-    }
-    if (search?.files) {
-        return search.files.indexOf(file.id) !== -1;
-    }
-    if (search?.person) {
-        return search.person.files.indexOf(file.id) !== -1;
-    }
-
-    if (search?.thing) {
-        return search.thing.files.indexOf(file.id) !== -1;
-    }
-
-    if (search?.text) {
-        return search.text.files.indexOf(file.id) !== -1;
-    }
-    if (typeof search?.fileType !== 'undefined') {
-        return search.fileType === file.metadata.fileType;
-    }
-    if (typeof search?.clip !== 'undefined') {
-        return search.clip.has(file.id);
-    }
-    return false;
-}
-
 function convertSuggestionToSearchQuery(option: Suggestion): Search {
     switch (option.type) {
         case SuggestionType.DATE:
@@ -457,6 +431,9 @@ function convertSuggestionToSearchQuery(option: Suggestion): Search {
             return {
                 location: option.value as LocationTagData,
             };
+
+        case SuggestionType.CITY:
+            return { city: option.value as City };
 
         case SuggestionType.COLLECTION:
             return { collection: option.value as number };

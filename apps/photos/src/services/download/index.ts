@@ -19,6 +19,7 @@ import { PhotosDownloadClient } from './clients/photos';
 import { PublicAlbumsDownloadClient } from './clients/publicAlbums';
 import isElectron from 'is-electron';
 import { isInternalUser } from 'utils/user';
+import { Events, eventBus } from '@ente/shared/events';
 
 export type LivePhotoSourceURL = {
     image: () => Promise<string>;
@@ -89,9 +90,27 @@ class DownloadManagerImpl {
             this.diskFileCache = isElectron() && (await openDiskFileCache());
             this.cryptoWorker = await ComlinkCryptoWorker.getInstance();
             this.ready = true;
+            eventBus.on(Events.LOGOUT, this.logoutHandler.bind(this), this);
         } catch (e) {
             logError(e, 'DownloadManager init failed');
             throw e;
+        }
+    }
+
+    private async logoutHandler() {
+        try {
+            addLogLine('downloadManger logoutHandler started');
+            this.ready = false;
+            this.cryptoWorker = null;
+            this.downloadClient = null;
+            this.fileObjectURLPromises.clear();
+            this.fileConversionPromises.clear();
+            this.thumbnailObjectURLPromises.clear();
+            this.fileDownloadProgress.clear();
+            this.progressUpdater = () => {};
+            addLogLine('downloadManager logoutHandler completed');
+        } catch (e) {
+            logError(e, 'downloadManager logoutHandler failed');
         }
     }
 

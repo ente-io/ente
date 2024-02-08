@@ -62,6 +62,7 @@ import exportService from 'services/export';
 import { REDIRECTS } from 'constants/redirects';
 import {
     getLocalMapEnabled,
+    getToken,
     setLocalMapEnabled,
 } from '@ente/shared/storage/localStorage/helpers';
 import { isExportInProgress } from 'utils/export';
@@ -76,6 +77,7 @@ import { useLocalState } from '@ente/shared/hooks/useLocalState';
 import { PHOTOS_PAGES as PAGES } from '@ente/shared/constants/pages';
 import { getTheme } from '@ente/shared/themes';
 import { AppUpdateInfo } from '@ente/shared/electron/types';
+import DownloadManager from 'services/download';
 
 const redirectMap = new Map([
     [REDIRECTS.ROADMAP, getRoadmapRedirectURL],
@@ -232,6 +234,14 @@ export default function App(props: EnteAppProps) {
         const initExport = async () => {
             try {
                 addLogLine('init export');
+                const token = getToken();
+                if (!token) {
+                    addLogLine(
+                        'User not logged in, not starting export continuous sync job'
+                    );
+                    return;
+                }
+                await DownloadManager.init(APPS.PHOTOS, { token });
                 const exportSettings = exportService.getExportSettings();
                 if (!exportService.exportFolderExists(exportSettings?.folder)) {
                     return;

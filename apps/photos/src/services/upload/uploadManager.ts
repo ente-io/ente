@@ -361,7 +361,9 @@ class UploadManager {
                 try {
                     eventBus.emit(Events.FILE_UPLOADED, {
                         enteFile: decryptedFile,
-                        localFile: fileWithCollection.file,
+                        localFile:
+                            fileWithCollection.file ??
+                            fileWithCollection.livePhotoAssets.image,
                     });
                 } catch (e) {
                     logError(e, 'Error in fileUploaded handlers');

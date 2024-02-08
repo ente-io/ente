@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { Formik, FormikHelpers, FormikState } from 'formik';
+import { Formik, FormikHelpers } from 'formik';
 import * as Yup from 'yup';
 import SubmitButton from '@ente/shared/components/SubmitButton';
 import TextField from '@mui/material/TextField';
@@ -18,11 +18,7 @@ interface formValues {
     selectedOptions: string[];
 }
 export interface AddParticipantFormProps {
-    callback: (
-        emails: string[],
-        setFieldError: (errorMessage: string) => void,
-        resetForm: (nextState?: Partial<FormikState<formValues>>) => void
-    ) => Promise<void>;
+    callback: (props: { email?: string; emails?: string[] }) => Promise<void>;
     fieldType: 'text' | 'email' | 'password';
     placeholder: string;
     buttonText: string;
@@ -43,7 +39,6 @@ export interface AddParticipantFormProps {
 export default function AddParticipantForm(props: AddParticipantFormProps) {
     const { submitButtonProps } = props;
     const { sx: buttonSx, ...restSubmitButtonProps } = submitButtonProps ?? {};
-    const [disableInput, setDisableInput] = useState(false);
 
     const [loading, SetLoading] = useState(false);
 
@@ -51,26 +46,20 @@ export default function AddParticipantForm(props: AddParticipantFormProps) {
         values: formValues,
         { setFieldError, resetForm }: FormikHelpers<formValues>
     ) => {
-        SetLoading(true);
-
-        if (values.inputValue !== '') {
-            await props.callback(
-                [values.inputValue],
-                (message) => setFieldError('inputValue', message),
-                resetForm
-            );
-        } else if (values.selectedOptions.length !== 0) {
-            await props.callback(
-                values.selectedOptions,
-                (message) => setFieldError('inputValue', message),
-                resetForm
-            );
+        try {
+            SetLoading(true);
+            if (values.inputValue !== '') {
+                await props.callback({ email: values.inputValue });
+            } else if (values.selectedOptions.length !== 0) {
+                await props.callback({ emails: values.selectedOptions });
+            }
+            SetLoading(false);
+            props.onClose();
+            resetForm();
+        } catch (e) {
+            setFieldError('inputValue', e?.message);
+            SetLoading(false);
         }
-
-        setDisableInput(false);
-        SetLoading(false);
-
-        props.onClose();
     };
 
     const validationSchema = useMemo(() => {
@@ -129,7 +118,7 @@ export default function AddParticipantForm(props: AddParticipantFormProps) {
                                 error={Boolean(errors.inputValue)}
                                 helperText={errors.inputValue}
                                 value={values.inputValue}
-                                disabled={loading || disableInput}
+                                disabled={loading}
                                 autoFocus={!props.disableAutoFocus}
                                 autoComplete={props.autoComplete}
                             />

@@ -206,6 +206,7 @@
     "SEARCH_TYPE": {
         "COLLECTION": "Album",
         "LOCATION": "Location",
+        "CITY": "Location",
         "DATE": "Date",
         "FILE_NAME": "File name",
         "THING": "Content",

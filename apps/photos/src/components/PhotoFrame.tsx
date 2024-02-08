@@ -11,8 +11,10 @@ import AutoSizer from 'react-virtualized-auto-sizer';
 import PhotoViewer from 'components/PhotoViewer';
 import { TRASH_SECTION } from 'constants/collection';
 import { updateFileMsrcProps, updateFileSrcProps } from 'utils/photoFrame';
-import { SelectedState } from 'types/gallery';
-import { PublicCollectionGalleryContext } from 'utils/publicCollectionGallery';
+import {
+    SelectedState,
+    SetFilesDownloadProgressAttributesCreator,
+} from 'types/gallery';
 import { useRouter } from 'next/router';
 import { logError } from '@ente/shared/sentry';
 import { addLogLine } from '@ente/shared/logging';
@@ -53,8 +55,8 @@ interface Props {
         selected: SelectedState | ((selected: SelectedState) => SelectedState)
     ) => void;
     selected: SelectedState;
-    deletedFileIds?: Set<number>;
-    setDeletedFileIds?: (value: Set<number>) => void;
+    tempDeletedFileIds?: Set<number>;
+    setTempDeletedFileIds?: (value: Set<number>) => void;
     activeCollectionID: number;
     enableDownload?: boolean;
     fileToCollectionsMap: Map<number, number[]>;
@@ -62,6 +64,7 @@ interface Props {
     showAppDownloadBanner?: boolean;
     setIsPhotoSwipeOpen?: (value: boolean) => void;
     isInHiddenSection?: boolean;
+    setFilesDownloadProgressAttributesCreator?: SetFilesDownloadProgressAttributesCreator;
 }
 
 const PhotoFrame = ({
@@ -72,8 +75,8 @@ const PhotoFrame = ({
     favItemIds,
     setSelected,
     selected,
-    deletedFileIds,
-    setDeletedFileIds,
+    tempDeletedFileIds,
+    setTempDeletedFileIds,
     activeCollectionID,
     enableDownload,
     fileToCollectionsMap,
@@ -81,6 +84,7 @@ const PhotoFrame = ({
     showAppDownloadBanner,
     setIsPhotoSwipeOpen,
     isInHiddenSection,
+    setFilesDownloadProgressAttributesCreator,
 }: Props) => {
     const [open, setOpen] = useState(false);
     const [currentIndex, setCurrentIndex] = useState<number>(0);
@@ -89,9 +93,6 @@ const PhotoFrame = ({
         [k: number]: boolean;
     }>({});
     const galleryContext = useContext(GalleryContext);
-    const publicCollectionGalleryContext = useContext(
-        PublicCollectionGalleryContext
-    );
     const [rangeStart, setRangeStart] = useState(null);
     const [currentHover, setCurrentHover] = useState(null);
     const [isShiftKeyPressed, setIsShiftKeyPressed] = useState(false);
@@ -211,7 +212,7 @@ const PhotoFrame = ({
             throw Error(CustomError.FILE_CONVERSION_FAILED);
         }
 
-        await updateFileSrcProps(file, srcURLs);
+        await updateFileSrcProps(file, srcURLs, enableDownload);
     };
 
     const handleClose = (needUpdate) => {
@@ -315,9 +316,7 @@ const PhotoFrame = ({
             file={item}
             updateURL={updateURL(index)}
             onClick={onThumbnailClick(index)}
-            selectable={
-                !publicCollectionGalleryContext?.accessedThroughSharedURL
-            }
+            selectable={enableDownload}
             onSelect={handleSelect(
                 item.id,
                 item.ownerID === galleryContext.user?.id,
@@ -600,13 +599,16 @@ const PhotoFrame = ({
                 gettingData={getSlideData}
                 getConvertedItem={getConvertedItem}
                 favItemIds={favItemIds}
-                deletedFileIds={deletedFileIds}
-                setDeletedFileIds={setDeletedFileIds}
+                tempDeletedFileIds={tempDeletedFileIds}
+                setTempDeletedFileIds={setTempDeletedFileIds}
                 isTrashCollection={activeCollectionID === TRASH_SECTION}
                 isInHiddenSection={isInHiddenSection}
                 enableDownload={enableDownload}
                 fileToCollectionsMap={fileToCollectionsMap}
                 collectionNameMap={collectionNameMap}
+                setFilesDownloadProgressAttributesCreator={
+                    setFilesDownloadProgressAttributesCreator
+                }
             />
         </Container>
     );

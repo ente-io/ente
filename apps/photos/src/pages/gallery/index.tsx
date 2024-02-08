@@ -97,6 +97,8 @@ import { EnteFile } from 'types/file';
 import {
     GalleryContextType,
     SelectedState,
+    SetFilesDownloadProgressAttributes,
+    SetFilesDownloadProgressAttributesCreator,
     UploadTypeSelectorIntent,
 } from 'types/gallery';
 import Collections from 'components/Collections';
@@ -120,7 +122,6 @@ import GalleryEmptyState from 'components/GalleryEmptyState';
 import AuthenticateUserModal from 'components/AuthenticateUserModal';
 import useMemoSingleThreaded from '@ente/shared/hooks/useMemoSingleThreaded';
 import { isArchivedFile } from 'utils/magicMetadata';
-import { isSameDayAnyYear, isInsideLocationTag } from 'utils/search';
 import { getSessionExpiredMessage } from 'utils/ui';
 import { syncEntities } from 'services/entityService';
 import { constructUserIDToEmailMap } from 'services/collectionService';
@@ -131,6 +132,13 @@ import { ClipService } from 'services/clipService';
 import isElectron from 'is-electron';
 import downloadManager from 'services/download';
 import { APPS } from '@ente/shared/apps/constants';
+import {
+    FilesDownloadProgress,
+    FilesDownloadProgressAttributes,
+} from 'components/FilesDownloadProgress';
+import locationSearchService from 'services/locationSearchService';
+import ComlinkSearchWorker from 'utils/comlink/ComlinkSearchWorker';
+import useEffectSingleThreaded from '@ente/shared/hooks/useEffectSingleThreaded';
 
 export const DeadCenter = styled('div')`
     flex: 1;
@@ -225,10 +233,11 @@ export default function Gallery() {
     const syncInProgress = useRef(true);
     const syncInterval = useRef<NodeJS.Timeout>();
     const resync = useRef<{ force: boolean; silent: boolean }>();
-    const [deletedFileIds, setDeletedFileIds] = useState<Set<number>>(
+    // tempDeletedFileIds and tempHiddenFileIds are used to keep track of files that are deleted/hidden in the current session but not yet synced with the server.
+    const [tempDeletedFileIds, setTempDeletedFileIds] = useState<Set<number>>(
         new Set<number>()
     );
-    const [hiddenFileIds, setHiddenFileIds] = useState<Set<number>>(
+    const [tempHiddenFileIds, setTempHiddenFileIds] = useState<Set<number>>(
         new Set<number>()
     );
     const { startLoading, finishLoading, setDialogMessage, ...appContext } =
@@ -242,6 +251,9 @@ export default function Gallery() {
     const [emailList, setEmailList] = useState<string[]>(null);
     const [activeCollectionID, setActiveCollectionID] =
         useState<number>(undefined);
+    const [hiddenFileIds, setHiddenFileIds] = useState<Set<number>>(
+        new Set<number>()
+    );
     const [fixCreationTimeView, setFixCreationTimeView] = useState(false);
     const [fixCreationTimeAttributes, setFixCreationTimeAttributes] =
         useState<FixCreationTimeAttributes>(null);
@@ -279,6 +291,11 @@ export default function Gallery() {
         setAuthenticateUserModalView(false);
 
     const [isInHiddenSection, setIsInHiddenSection] = useState(false);
+
+    const [
+        filesDownloadProgressAttributesList,
+        setFilesDownloadProgressAttributesList,
+    ] = useState<FilesDownloadProgressAttributes[]>([]);
 
     const openHiddenSection: GalleryContextType['openHiddenSection'] = (
         callback
@@ -341,6 +358,7 @@ export default function Gallery() {
             setIsFirstLoad(false);
             setJustSignedUp(false);
             setIsFirstFetch(false);
+            locationSearchService.loadCities();
             syncInterval.current = setInterval(() => {
                 syncWithRemote(false, true);
             }, SYNC_INTERVAL_IN_MICROSECONDS);
@@ -360,6 +378,14 @@ export default function Gallery() {
             }
         };
     }, []);
+
+    useEffectSingleThreaded(
+        async ([files]: [files: EnteFile[]]) => {
+            const searchWorker = await ComlinkSearchWorker.getInstance();
+            await searchWorker.setFiles(files);
+        },
+        [files]
+    );
 
     useEffect(() => {
         if (!user || !files || !collections || !hiddenFiles || !trashedFiles) {
@@ -466,7 +492,9 @@ export default function Gallery() {
         );
     }, [collections, activeCollectionID]);
 
-    const filteredData = useMemoSingleThreaded((): EnteFile[] => {
+    const filteredData = useMemoSingleThreaded(async (): Promise<
+        EnteFile[]
+    > => {
         if (
             !files ||
             !user ||
@@ -480,117 +508,74 @@ export default function Gallery() {
         if (activeCollectionID === TRASH_SECTION && !isInSearchMode) {
             return getUniqueFiles([
                 ...trashedFiles,
-                ...files.filter((file) => deletedFileIds?.has(file.id)),
+                ...files.filter((file) => tempDeletedFileIds?.has(file.id)),
             ]);
         }
 
-        const filteredFiles = getUniqueFiles(
-            (isInHiddenSection ? hiddenFiles : files).filter((item) => {
-                if (deletedFileIds?.has(item.id)) {
-                    return false;
-                }
+        const searchWorker = await ComlinkSearchWorker.getInstance();
 
-                if (!isInHiddenSection && hiddenFileIds?.has(item.id)) {
-                    return false;
-                }
+        let filteredFiles: EnteFile[] = [];
+        if (isInSearchMode) {
+            filteredFiles = getUniqueFiles(await searchWorker.search(search));
+        } else {
+            filteredFiles = getUniqueFiles(
+                (isInHiddenSection ? hiddenFiles : files).filter((item) => {
+                    if (tempDeletedFileIds?.has(item.id)) {
+                        return false;
+                    }
 
-                // SEARCH MODE
-                if (isInSearchMode) {
-                    if (
-                        search?.date &&
-                        !isSameDayAnyYear(search.date)(
-                            new Date(item.metadata.creationTime / 1000)
-                        )
-                    ) {
+                    if (!isInHiddenSection && tempHiddenFileIds?.has(item.id)) {
                         return false;
                     }
-                    if (
-                        search?.location &&
-                        !isInsideLocationTag(
-                            {
-                                latitude: item.metadata.latitude,
-                                longitude: item.metadata.longitude,
-                            },
-                            search.location
-                        )
-                    ) {
-                        return false;
-                    }
-                    if (
-                        search?.person &&
-                        search.person.files.indexOf(item.id) === -1
-                    ) {
-                        return false;
-                    }
-                    if (
-                        search?.thing &&
-                        search.thing.files.indexOf(item.id) === -1
-                    ) {
-                        return false;
-                    }
-                    if (
-                        search?.text &&
-                        search.text.files.indexOf(item.id) === -1
-                    ) {
-                        return false;
-                    }
-                    if (search?.files && search.files.indexOf(item.id) === -1) {
-                        return false;
-                    }
-                    if (
-                        typeof search?.fileType !== 'undefined' &&
-                        search.fileType !== item.metadata.fileType
-                    ) {
-                        return false;
-                    }
-                    if (search?.clip && search.clip.has(item.id) === false) {
-                        return false;
-                    }
-                    return true;
-                }
 
-                // archived collections files can only be seen in their respective collection
-                if (archivedCollections.has(item.collectionID)) {
+                    // archived collections files can only be seen in their respective collection
+                    if (archivedCollections.has(item.collectionID)) {
+                        if (activeCollectionID === item.collectionID) {
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    }
+
+                    // HIDDEN ITEMS SECTION - show all individual hidden files
+                    if (
+                        activeCollectionID === HIDDEN_ITEMS_SECTION &&
+                        defaultHiddenCollectionIDs.has(item.collectionID)
+                    ) {
+                        return true;
+                    }
+
+                    // Archived files can only be seen in archive section or their respective collection
+                    if (isArchivedFile(item)) {
+                        if (
+                            activeCollectionID === ARCHIVE_SECTION ||
+                            activeCollectionID === item.collectionID
+                        ) {
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    }
+
+                    // ALL SECTION - show all files
+                    if (activeCollectionID === ALL_SECTION) {
+                        // show all files except the ones in hidden collections
+                        if (hiddenFileIds.has(item.id)) {
+                            return false;
+                        } else {
+                            return true;
+                        }
+                    }
+
+                    // COLLECTION SECTION - show files in the active collection
                     if (activeCollectionID === item.collectionID) {
                         return true;
                     } else {
                         return false;
                     }
-                }
-
-                // HIDDEN ITEMS SECTION - show all individual hidden files
-                if (
-                    activeCollectionID === HIDDEN_ITEMS_SECTION &&
-                    defaultHiddenCollectionIDs.has(item.collectionID)
-                ) {
-                    return true;
-                }
-
-                // Archived files can only be seen in archive section or their respective collection
-                if (isArchivedFile(item)) {
-                    if (
-                        activeCollectionID === ARCHIVE_SECTION ||
-                        activeCollectionID === item.collectionID
-                    ) {
-                        return true;
-                    } else {
-                        return false;
-                    }
-                }
-
-                // ALL SECTION - show all files
-                if (activeCollectionID === ALL_SECTION) {
-                    return true;
-                }
-
-                // COLLECTION SECTION - show files in the active collection
-                if (activeCollectionID === item.collectionID) {
-                    return true;
-                } else {
-                    return false;
-                }
-            })
-        );
+                })
+            );
+        }
         if (search?.clip) {
             return filteredFiles.sort((a, b) => {
                 return search.clip.get(b.id) - search.clip.get(a.id);
@@ -606,7 +591,8 @@ export default function Gallery() {
         files,
         trashedFiles,
         hiddenFiles,
-        deletedFileIds,
+        tempDeletedFileIds,
+        tempHiddenFileIds,
         hiddenFileIds,
         search,
         activeCollectionID,
@@ -737,8 +723,8 @@ export default function Gallery() {
                     logError(e, 'syncWithRemote failed');
             }
         } finally {
-            setDeletedFileIds(new Set());
-            setHiddenFileIds(new Set());
+            setTempDeletedFileIds(new Set());
+            setTempHiddenFileIds(new Set());
             !silent && finishLoading();
         }
         syncInProgress.current = false;
@@ -783,6 +769,8 @@ export default function Gallery() {
         const defaultHiddenCollectionIDs =
             getDefaultHiddenCollectionIDs(hiddenCollections);
         setDefaultHiddenCollectionIDs(defaultHiddenCollectionIDs);
+        const hiddenFileIds = new Set<number>(hiddenFiles.map((f) => f.id));
+        setHiddenFileIds(hiddenFileIds);
         const collectionSummaries = getCollectionSummaries(
             user,
             collections,
@@ -816,6 +804,39 @@ export default function Gallery() {
         return <div />;
     }
 
+    const setFilesDownloadProgressAttributesCreator: SetFilesDownloadProgressAttributesCreator =
+        (folderName, collectionID, isHidden) => {
+            const id = filesDownloadProgressAttributesList?.length ?? 0;
+            const updater: SetFilesDownloadProgressAttributes = (value) => {
+                setFilesDownloadProgressAttributesList((prev) => {
+                    const attributes = prev?.find((attr) => attr.id === id);
+                    const updatedAttributes =
+                        typeof value === 'function'
+                            ? value(attributes)
+                            : { ...attributes, ...value };
+                    const updatedAttributesList = attributes
+                        ? prev.map((attr) =>
+                              attr.id === id ? updatedAttributes : attr
+                          )
+                        : [...prev, updatedAttributes];
+
+                    return updatedAttributesList;
+                });
+            };
+            updater({
+                id,
+                folderName,
+                collectionID,
+                isHidden,
+                canceller: null,
+                total: 0,
+                success: 0,
+                failed: 0,
+                downloadDirPath: null,
+            });
+            return updater;
+        };
+
     const collectionOpsHelper =
         (ops: COLLECTION_OPS_TYPE) => async (collection: Collection) => {
             startLoading();
@@ -836,13 +857,20 @@ export default function Gallery() {
                         selected.collectionID
                     );
                 }
-
+                if (selected?.ownCount === filteredData?.length) {
+                    if (
+                        ops === COLLECTION_OPS_TYPE.REMOVE ||
+                        ops === COLLECTION_OPS_TYPE.RESTORE ||
+                        ops === COLLECTION_OPS_TYPE.MOVE
+                    ) {
+                        // redirect to all section when no items are left in the current collection.
+                        setActiveCollectionID(ALL_SECTION);
+                    } else if (ops === COLLECTION_OPS_TYPE.UNHIDE) {
+                        exitHiddenSection();
+                    }
+                }
                 clearSelection();
                 await syncWithRemote(false, true);
-                if (isInHiddenSection && ops === COLLECTION_OPS_TYPE.UNHIDE) {
-                    exitHiddenSection();
-                }
-                setActiveCollectionID(collection.id);
             } catch (e) {
                 logError(e, 'collection ops failed', { ops });
                 setDialogMessage({
@@ -872,10 +900,19 @@ export default function Gallery() {
                 await handleFileOps(
                     ops,
                     toProcessFiles,
-                    setDeletedFileIds,
-                    setHiddenFileIds,
-                    setFixCreationTimeAttributes
+                    setTempDeletedFileIds,
+                    setTempHiddenFileIds,
+                    setFixCreationTimeAttributes,
+                    setFilesDownloadProgressAttributesCreator
                 );
+            }
+            if (
+                selected?.ownCount === filteredData?.length &&
+                ops !== FILE_OPS_TYPE.ARCHIVE &&
+                ops !== FILE_OPS_TYPE.DOWNLOAD &&
+                ops !== FILE_OPS_TYPE.FIX_TIME
+            ) {
+                setActiveCollectionID(ALL_SECTION);
             }
             clearSelection();
             await syncWithRemote(false, true);
@@ -1013,6 +1050,10 @@ export default function Gallery() {
                     attributes={collectionSelectorAttributes}
                     collections={collections}
                 />
+                <FilesDownloadProgress
+                    attributesList={filesDownloadProgressAttributesList}
+                    setAttributesList={setFilesDownloadProgressAttributesList}
+                />
                 <FixCreationTime
                     isOpen={fixCreationTimeView}
                     hide={() => setFixCreationTimeView(false)}
@@ -1042,6 +1083,12 @@ export default function Gallery() {
                     hiddenCollectionSummaries={hiddenCollectionSummaries}
                     setCollectionNamerAttributes={setCollectionNamerAttributes}
                     setPhotoListHeader={setPhotoListHeader}
+                    setFilesDownloadProgressAttributesCreator={
+                        setFilesDownloadProgressAttributesCreator
+                    }
+                    filesDownloadProgressAttributesList={
+                        filesDownloadProgressAttributesList
+                    }
                 />
 
                 <Uploader
@@ -1098,8 +1145,8 @@ export default function Gallery() {
                         favItemIds={favItemIds}
                         setSelected={setSelected}
                         selected={selected}
-                        deletedFileIds={deletedFileIds}
-                        setDeletedFileIds={setDeletedFileIds}
+                        tempDeletedFileIds={tempDeletedFileIds}
+                        setTempDeletedFileIds={setTempDeletedFileIds}
                         setIsPhotoSwipeOpen={setIsPhotoSwipeOpen}
                         activeCollectionID={activeCollectionID}
                         enableDownload={true}
@@ -1109,6 +1156,9 @@ export default function Gallery() {
                             files.length < 30 && !isInSearchMode
                         }
                         isInHiddenSection={isInHiddenSection}
+                        setFilesDownloadProgressAttributesCreator={
+                            setFilesDownloadProgressAttributesCreator
+                        }
                     />
                 )}
                 {selected.count > 0 &&

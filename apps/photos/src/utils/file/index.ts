@@ -1,4 +1,8 @@
-import { SelectedState } from 'types/gallery';
+import {
+    SelectedState,
+    SetFilesDownloadProgressAttributes,
+    SetFilesDownloadProgressAttributesCreator,
+} from 'types/gallery';
 import {
     EnteFile,
     EncryptedEnteFile,
@@ -52,6 +56,7 @@ import { getFileExportPath, getUniqueFileExportName } from 'utils/export';
 import imageProcessor from 'services/imageProcessor';
 import ElectronAPIs from '@ente/shared/electron';
 import { downloadUsingAnchor } from '@ente/shared/utils';
+import { t } from 'i18next';
 
 const WAIT_TIME_IMAGE_CONVERSION = 30 * 1000;
 
@@ -625,9 +630,96 @@ export function getUniqueFiles(files: EnteFile[]) {
     return uniqueFiles;
 }
 
+export async function downloadFilesWithProgress(
+    files: EnteFile[],
+    downloadDirPath: string,
+    setFilesDownloadProgressAttributes: SetFilesDownloadProgressAttributes
+) {
+    if (!files.length) {
+        return;
+    }
+    const canceller = new AbortController();
+    const increaseSuccess = () => {
+        if (canceller.signal.aborted) return;
+        setFilesDownloadProgressAttributes((prev) => ({
+            ...prev,
+            success: prev.success + 1,
+        }));
+    };
+    const increaseFailed = () => {
+        if (canceller.signal.aborted) return;
+        setFilesDownloadProgressAttributes((prev) => ({
+            ...prev,
+            failed: prev.failed + 1,
+        }));
+    };
+    const isCancelled = () => canceller.signal.aborted;
+
+    setFilesDownloadProgressAttributes({
+        downloadDirPath,
+        success: 0,
+        failed: 0,
+        total: files.length,
+        canceller,
+    });
+
+    if (isElectron()) {
+        await downloadFilesDesktop(
+            files,
+            { increaseSuccess, increaseFailed, isCancelled },
+            downloadDirPath
+        );
+    } else {
+        await downloadFiles(files, {
+            increaseSuccess,
+            increaseFailed,
+            isCancelled,
+        });
+    }
+}
+
+export async function downloadSelectedFiles(
+    files: EnteFile[],
+    setFilesDownloadProgressAttributes: SetFilesDownloadProgressAttributes
+) {
+    if (!files.length) {
+        return;
+    }
+    let downloadDirPath: string;
+    if (isElectron()) {
+        downloadDirPath = await ElectronAPIs.selectDirectory();
+        if (!downloadDirPath) {
+            return;
+        }
+    }
+    await downloadFilesWithProgress(
+        files,
+        downloadDirPath,
+        setFilesDownloadProgressAttributes
+    );
+}
+
+export async function downloadSingleFile(
+    file: EnteFile,
+    setFilesDownloadProgressAttributes: SetFilesDownloadProgressAttributes
+) {
+    let downloadDirPath: string;
+    if (isElectron()) {
+        downloadDirPath = await ElectronAPIs.selectDirectory();
+        if (!downloadDirPath) {
+            return;
+        }
+    }
+    await downloadFilesWithProgress(
+        [file],
+        downloadDirPath,
+        setFilesDownloadProgressAttributes
+    );
+}
+
 export async function downloadFiles(
     files: EnteFile[],
-    progressBarUpdater?: {
+    progressBarUpdater: {
         increaseSuccess: () => void;
         increaseFailed: () => void;
         isCancelled: () => boolean;
@@ -857,11 +949,11 @@ export const shouldShowAvatar = (file: EnteFile, user: User) => {
 export const handleFileOps = async (
     ops: FILE_OPS_TYPE,
     files: EnteFile[],
-    setDeletedFileIds: (
-        deletedFileIds: Set<number> | ((prev: Set<number>) => Set<number>)
+    setTempDeletedFileIds: (
+        tempDeletedFileIds: Set<number> | ((prev: Set<number>) => Set<number>)
     ) => void,
-    setHiddenFileIds: (
-        hiddenFileIds: Set<number> | ((prev: Set<number>) => Set<number>)
+    setTempHiddenFileIds: (
+        tempHiddenFileIds: Set<number> | ((prev: Set<number>) => Set<number>)
     ) => void,
     setFixCreationTimeAttributes: (
         fixCreationTimeAttributes:
@@ -869,21 +961,30 @@ export const handleFileOps = async (
                   files: EnteFile[];
               }
             | ((prev: { files: EnteFile[] }) => { files: EnteFile[] })
-    ) => void
+    ) => void,
+    setFilesDownloadProgressAttributesCreator: SetFilesDownloadProgressAttributesCreator
 ) => {
     switch (ops) {
         case FILE_OPS_TYPE.TRASH:
-            await deleteFileHelper(files, false, setDeletedFileIds);
+            await deleteFileHelper(files, false, setTempDeletedFileIds);
             break;
         case FILE_OPS_TYPE.DELETE_PERMANENTLY:
-            await deleteFileHelper(files, true, setDeletedFileIds);
+            await deleteFileHelper(files, true, setTempDeletedFileIds);
             break;
         case FILE_OPS_TYPE.HIDE:
-            await hideFilesHelper(files, setHiddenFileIds);
+            await hideFilesHelper(files, setTempHiddenFileIds);
             break;
-        case FILE_OPS_TYPE.DOWNLOAD:
-            await downloadFiles(files);
+        case FILE_OPS_TYPE.DOWNLOAD: {
+            const setSelectedFileDownloadProgressAttributes =
+                setFilesDownloadProgressAttributesCreator(
+                    `${files.length} ${t('FILES')}`
+                );
+            await downloadSelectedFiles(
+                files,
+                setSelectedFileDownloadProgressAttributes
+            );
             break;
+        }
         case FILE_OPS_TYPE.FIX_TIME:
             fixTimeHelper(files, setFixCreationTimeAttributes);
             break;
@@ -899,12 +1000,12 @@ export const handleFileOps = async (
 const deleteFileHelper = async (
     selectedFiles: EnteFile[],
     permanent: boolean,
-    setDeletedFileIds: (
-        deletedFileIds: Set<number> | ((prev: Set<number>) => Set<number>)
+    setTempDeletedFileIds: (
+        tempDeletedFileIds: Set<number> | ((prev: Set<number>) => Set<number>)
     ) => void
 ) => {
     try {
-        setDeletedFileIds((deletedFileIds) => {
+        setTempDeletedFileIds((deletedFileIds) => {
             selectedFiles.forEach((file) => deletedFileIds.add(file.id));
             return new Set(deletedFileIds);
         });
@@ -914,25 +1015,25 @@ const deleteFileHelper = async (
             await trashFiles(selectedFiles);
         }
     } catch (e) {
-        setDeletedFileIds(new Set());
+        setTempDeletedFileIds(new Set());
         throw e;
     }
 };
 
 const hideFilesHelper = async (
     selectedFiles: EnteFile[],
-    setHiddenFileIds: (
-        hiddenFileIds: Set<number> | ((prev: Set<number>) => Set<number>)
+    setTempHiddenFileIds: (
+        tempHiddenFileIds: Set<number> | ((prev: Set<number>) => Set<number>)
     ) => void
 ) => {
     try {
-        setHiddenFileIds((hiddenFileIds) => {
+        setTempHiddenFileIds((hiddenFileIds) => {
             selectedFiles.forEach((file) => hiddenFileIds.add(file.id));
             return new Set(hiddenFileIds);
         });
         await moveToHiddenCollection(selectedFiles);
     } catch (e) {
-        setHiddenFileIds(new Set());
+        setTempHiddenFileIds(new Set());
         throw e;
     }
 };

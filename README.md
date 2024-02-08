@@ -82,7 +82,9 @@ An important part of our journey is to build better software by consistently lis
 
 <br/>
 
----
+## 🙇 Attributions
 
-Cross-browser testing provided by
+- Cross-browser testing provided by
 [<img src="https://d98b8t1nnulk5.cloudfront.net/production/images/layout/logo-header.png?1469004780" width="115" height="25">](https://www.browserstack.com/open-source)
+
+- Location search powered by [Simple Maps](https://simplemaps.com/data/world-cities)

@@ -17,3 +17,5 @@ export const WEB_ROADMAP_URL = 'https://github.com/ente-io/photos-web/issues';
 
 export const DESKTOP_ROADMAP_URL =
     'https://github.com/ente-io/photos-desktop/issues';
+
+export const CITIES_URL = 'https://static.ente.io/world_cities.json';

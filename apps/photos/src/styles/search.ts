@@ -49,11 +49,10 @@ export const SelectStyles = {
         ...style,
         display: 'none',
     }),
-    singleValue: (style, state) => ({
+    singleValue: (style) => ({
         ...style,
         backgroundColor: 'transparent',
         color: '#d1d1d1',
-        display: state.selectProps.menuIsOpen ? 'none' : 'block',
         marginLeft: '36px',
     }),
     placeholder: (style) => ({

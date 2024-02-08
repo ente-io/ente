@@ -1,4 +1,4 @@
-import { CollectionDownloadProgressAttributes } from 'components/Collections/CollectionDownloadProgress';
+import { FilesDownloadProgressAttributes } from 'components/FilesDownloadProgress';
 import { CollectionSelectorAttributes } from 'components/Collections/CollectionSelector';
 import { TimeStampListItem } from 'components/PhotoList';
 import { Collection } from 'types/collection';
@@ -17,9 +17,19 @@ export type SetLoading = React.Dispatch<React.SetStateAction<boolean>>;
 export type SetCollectionSelectorAttributes = React.Dispatch<
     React.SetStateAction<CollectionSelectorAttributes>
 >;
-export type SetCollectionDownloadProgressAttributes = React.Dispatch<
-    React.SetStateAction<CollectionDownloadProgressAttributes>
->;
+export type SetFilesDownloadProgressAttributes = (
+    value:
+        | Partial<FilesDownloadProgressAttributes>
+        | ((
+              prev: FilesDownloadProgressAttributes
+          ) => FilesDownloadProgressAttributes)
+) => void;
+
+export type SetFilesDownloadProgressAttributesCreator = (
+    folderName: string,
+    collectionID?: number,
+    isHidden?: boolean
+) => SetFilesDownloadProgressAttributes;
 
 export type MergedSourceURL = {
     original: string;

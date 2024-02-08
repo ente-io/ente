@@ -29,6 +29,7 @@ import mime from 'mime-types';
 import CloseIcon from '@mui/icons-material/Close';
 import { HorizontalFlex } from '@ente/shared/components/Container';
 import TransformMenu from './TransformMenu';
+import CropMenu from './CropMenu';
 import ColoursMenu from './ColoursMenu';
 import { FileWithCollection } from 'types/upload';
 import uploadManager from 'services/upload/uploadManager';
@@ -44,6 +45,12 @@ import { getEditorCloseConfirmationMessage } from 'utils/ui';
 import { logError } from '@ente/shared/sentry';
 import { getFileType } from 'services/typeDetectionService';
 import { downloadUsingAnchor } from '@ente/shared/utils';
+import { CORNER_THRESHOLD, FILTER_DEFAULT_VALUES } from 'constants/photoEditor';
+import FreehandCropRegion from './FreehandCropRegion';
+import EnteButton from '@ente/shared/components/EnteButton';
+import { CenteredFlex } from '@ente/shared/components/Container';
+import CropIcon from '@mui/icons-material/Crop';
+import { cropRegionOfCanvas, getCropRegionArgs } from './CropMenu';
 
 interface IProps {
     file: EnteFile;
@@ -59,16 +66,11 @@ export const ImageEditorOverlayContext = createContext(
         setTransformationPerformed: Dispatch<SetStateAction<boolean>>;
         setCanvasLoading: Dispatch<SetStateAction<boolean>>;
         canvasLoading: boolean;
+        setCurrentTab: Dispatch<SetStateAction<OperationTab>>;
     }
 );
 
-const filterDefaultValues = {
-    brightness: 100,
-    contrast: 100,
-    blur: 0,
-    saturation: 100,
-    invert: false,
-};
+type OperationTab = 'crop' | 'transform' | 'colours';
 
 const getEditedFileName = (fileName: string) => {
     const fileNameParts = fileName.split('.');
@@ -76,6 +78,13 @@ const getEditedFileName = (fileName: string) => {
     const editedFileName = `${fileNameParts.join('.')}-edited.${extension}`;
     return editedFileName;
 };
+
+export interface CropBoxProps {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+}
 
 const ImageEditorOverlay = (props: IProps) => {
     const appContext = useContext(AppContext);
@@ -88,19 +97,17 @@ const ImageEditorOverlay = (props: IProps) => {
 
     const [currentRotationAngle, setCurrentRotationAngle] = useState(0);
 
-    const [currentTab, setCurrentTab] = useState<'transform' | 'colours'>(
-        'transform'
-    );
+    const [currentTab, setCurrentTab] = useState<OperationTab>('transform');
 
     const [brightness, setBrightness] = useState(
-        filterDefaultValues.brightness
+        FILTER_DEFAULT_VALUES.brightness
     );
-    const [contrast, setContrast] = useState(filterDefaultValues.contrast);
-    const [blur, setBlur] = useState(filterDefaultValues.blur);
+    const [contrast, setContrast] = useState(FILTER_DEFAULT_VALUES.contrast);
+    const [blur, setBlur] = useState(FILTER_DEFAULT_VALUES.blur);
     const [saturation, setSaturation] = useState(
-        filterDefaultValues.saturation
+        FILTER_DEFAULT_VALUES.saturation
     );
-    const [invert, setInvert] = useState(filterDefaultValues.invert);
+    const [invert, setInvert] = useState(FILTER_DEFAULT_VALUES.invert);
 
     const [transformationPerformed, setTransformationPerformed] =
         useState(false);
@@ -110,6 +117,149 @@ const ImageEditorOverlay = (props: IProps) => {
 
     const [showControlsDrawer, setShowControlsDrawer] = useState(true);
 
+    const [previewCanvasScale, setPreviewCanvasScale] = useState(0);
+
+    const [cropBox, setCropBox] = useState<CropBoxProps>({
+        x: 0,
+        y: 0,
+        width: 100,
+        height: 100,
+    });
+
+    const [startX, setStartX] = useState(0);
+    const [startY, setStartY] = useState(0);
+
+    const [beforeGrowthHeight, setBeforeGrowthHeight] = useState(0);
+    const [beforeGrowthWidth, setBeforeGrowthWidth] = useState(0);
+
+    const [isDragging, setIsDragging] = useState(false);
+    const [isGrowing, setIsGrowing] = useState(false);
+
+    const cropBoxRef = useRef<HTMLDivElement>(null);
+
+    const getCanvasBoundsOffsets = () => {
+        const canvasBounds = {
+            height: canvasRef.current.height,
+            width: canvasRef.current.width,
+        };
+        const parentBounds = parentRef.current.getBoundingClientRect();
+
+        // calculate the offset created by centering the canvas in its parent
+        const offsetX = (parentBounds.width - canvasBounds.width) / 2;
+        const offsetY = (parentBounds.height - canvasBounds.height) / 2;
+
+        return {
+            offsetY,
+            offsetX,
+            canvasBounds,
+            parentBounds,
+        };
+    };
+
+    const handleDragStart = (e) => {
+        if (currentTab !== 'crop') return;
+
+        const rect = cropBoxRef.current.getBoundingClientRect();
+        const offsetX = e.pageX - rect.left - rect.width / 2;
+        const offsetY = e.pageY - rect.top - rect.height / 2;
+
+        // check if the cursor is near the corners of the box
+        const isNearLeftOrRightEdge =
+            e.pageX < rect.left + CORNER_THRESHOLD ||
+            e.pageX > rect.right - CORNER_THRESHOLD;
+        const isNearTopOrBottomEdge =
+            e.pageY < rect.top + CORNER_THRESHOLD ||
+            e.pageY > rect.bottom - CORNER_THRESHOLD;
+
+        if (isNearLeftOrRightEdge && isNearTopOrBottomEdge) {
+            // cursor is near a corner, do not initiate dragging
+            setIsGrowing(true);
+            setStartX(e.pageX);
+            setStartY(e.pageY);
+            setBeforeGrowthWidth(cropBox.width);
+            setBeforeGrowthHeight(cropBox.height);
+            return;
+        }
+
+        setIsDragging(true);
+        setStartX(e.pageX - offsetX);
+        setStartY(e.pageY - offsetY);
+    };
+
+    const handleDrag = (e) => {
+        if (!isDragging && !isGrowing) return;
+
+        // d- variables are the delta change between start and now
+        const dx = e.pageX - startX;
+        const dy = e.pageY - startY;
+
+        const { offsetX, offsetY, canvasBounds } = getCanvasBoundsOffsets();
+
+        if (isGrowing) {
+            setCropBox((prev) => {
+                const newWidth = Math.min(
+                    beforeGrowthWidth + dx,
+                    canvasBounds.width - prev.x + offsetX
+                );
+                const newHeight = Math.min(
+                    beforeGrowthHeight + dy,
+                    canvasBounds.height - prev.y + offsetY
+                );
+
+                return {
+                    ...prev,
+                    width: newWidth,
+                    height: newHeight,
+                };
+            });
+        } else {
+            setCropBox((prev) => {
+                let newX = prev.x + dx;
+                let newY = prev.y + dy;
+
+                // constrain the new position to the canvas boundaries, accounting for the offset
+                newX = Math.max(
+                    offsetX,
+                    Math.min(newX, offsetX + canvasBounds.width - prev.width)
+                );
+                newY = Math.max(
+                    offsetY,
+                    Math.min(newY, offsetY + canvasBounds.height - prev.height)
+                );
+
+                return {
+                    ...prev,
+                    x: newX,
+                    y: newY,
+                };
+            });
+            setStartX(e.pageX);
+            setStartY(e.pageY);
+        }
+    };
+
+    const handleDragEnd = () => {
+        setStartX(0);
+        setStartY(0);
+
+        setIsGrowing(false);
+        setIsDragging(false);
+    };
+
+    const resetCropBox = () => {
+        setCropBox((prev) => {
+            const { offsetX, offsetY, canvasBounds } = getCanvasBoundsOffsets();
+
+            return {
+                ...prev,
+                x: offsetX,
+                y: offsetY,
+                height: canvasBounds.height,
+                width: canvasBounds.width,
+            };
+        });
+    };
+
     useEffect(() => {
         if (!canvasRef.current) {
             return;
@@ -117,16 +267,22 @@ const ImageEditorOverlay = (props: IProps) => {
         try {
             applyFilters([canvasRef.current, originalSizeCanvasRef.current]);
             setColoursAdjusted(
-                brightness !== filterDefaultValues.brightness ||
-                    contrast !== filterDefaultValues.contrast ||
-                    blur !== filterDefaultValues.blur ||
-                    saturation !== filterDefaultValues.saturation ||
-                    invert !== filterDefaultValues.invert
+                brightness !== FILTER_DEFAULT_VALUES.brightness ||
+                    contrast !== FILTER_DEFAULT_VALUES.contrast ||
+                    blur !== FILTER_DEFAULT_VALUES.blur ||
+                    saturation !== FILTER_DEFAULT_VALUES.saturation ||
+                    invert !== FILTER_DEFAULT_VALUES.invert
             );
         } catch (e) {
             logError(e, 'Error applying filters');
         }
     }, [brightness, contrast, blur, saturation, invert, canvasRef, fileURL]);
+
+    useEffect(() => {
+        if (currentTab !== 'crop') return;
+        resetCropBox();
+        setShowControlsDrawer(false);
+    }, [currentTab]);
 
     const applyFilters = async (canvases: HTMLCanvasElement[]) => {
         try {
@@ -203,6 +359,7 @@ const ImageEditorOverlay = (props: IProps) => {
             }
 
             setCanvasLoading(true);
+
             resetFilters();
             setCurrentRotationAngle(0);
 
@@ -226,6 +383,7 @@ const ImageEditorOverlay = (props: IProps) => {
                             parentRef.current.clientWidth / img.width,
                             parentRef.current.clientHeight / img.height
                         );
+                        setPreviewCanvasScale(scale);
 
                         const width = img.width * scale;
                         const height = img.height * scale;
@@ -246,6 +404,13 @@ const ImageEditorOverlay = (props: IProps) => {
                         setColoursAdjusted(false);
 
                         setCanvasLoading(false);
+
+                        resetCropBox();
+                        setStartX(0);
+                        setStartY(0);
+                        setIsDragging(false);
+                        setIsGrowing(false);
+
                         resolve(true);
                     } catch (e) {
                         reject(e);
@@ -387,35 +552,97 @@ const ImageEditorOverlay = (props: IProps) => {
                         boxSizing={'border-box'}
                         display="flex"
                         alignItems="center"
-                        justifyContent="center">
+                        justifyContent="center"
+                        position="relative"
+                        onMouseUp={handleDragEnd}
+                        onMouseMove={isDragging ? handleDrag : null}
+                        onMouseDown={handleDragStart}>
                         <Box
-                            height="90%"
-                            width="100%"
-                            ref={parentRef}
-                            display="flex"
-                            alignItems="center"
-                            justifyContent="center">
-                            {(fileURL === null || canvasLoading) && (
-                                <CircularProgress />
-                            )}
+                            style={{
+                                position: 'relative',
+                                width: '100%',
+                                height: '100%',
+                            }}>
+                            <Box
+                                height="90%"
+                                width="100%"
+                                ref={parentRef}
+                                display="flex"
+                                alignItems="center"
+                                justifyContent="center"
+                                position="relative">
+                                {(fileURL === null || canvasLoading) && (
+                                    <CircularProgress />
+                                )}
 
-                            <canvas
-                                ref={canvasRef}
-                                style={{
-                                    objectFit: 'contain',
-                                    display:
-                                        fileURL === null || canvasLoading
-                                            ? 'none'
-                                            : 'block',
-                                    position: 'absolute',
-                                }}
-                            />
-                            <canvas
-                                ref={originalSizeCanvasRef}
-                                style={{
-                                    display: 'none',
-                                }}
-                            />
+                                <canvas
+                                    ref={canvasRef}
+                                    style={{
+                                        objectFit: 'contain',
+                                        display:
+                                            fileURL === null || canvasLoading
+                                                ? 'none'
+                                                : 'block',
+                                        position: 'absolute',
+                                    }}
+                                />
+                                <canvas
+                                    ref={originalSizeCanvasRef}
+                                    style={{
+                                        display: 'none',
+                                    }}
+                                />
+
+                                {currentTab === 'crop' && (
+                                    <FreehandCropRegion
+                                        cropBox={cropBox}
+                                        ref={cropBoxRef}
+                                        setIsDragging={setIsDragging}
+                                    />
+                                )}
+                            </Box>
+                            {currentTab === 'crop' && (
+                                <CenteredFlex marginTop="1rem">
+                                    <EnteButton
+                                        color="accent"
+                                        startIcon={<CropIcon />}
+                                        onClick={() => {
+                                            if (
+                                                !cropBoxRef.current ||
+                                                !canvasRef.current
+                                            )
+                                                return;
+
+                                            const { x1, x2, y1, y2 } =
+                                                getCropRegionArgs(
+                                                    cropBoxRef.current,
+                                                    canvasRef.current
+                                                );
+                                            setCanvasLoading(true);
+                                            setTransformationPerformed(true);
+                                            cropRegionOfCanvas(
+                                                canvasRef.current,
+                                                x1,
+                                                y1,
+                                                x2,
+                                                y2
+                                            );
+                                            cropRegionOfCanvas(
+                                                originalSizeCanvasRef.current,
+                                                x1 / previewCanvasScale,
+                                                y1 / previewCanvasScale,
+                                                x2 / previewCanvasScale,
+                                                y2 / previewCanvasScale
+                                            );
+                                            resetCropBox();
+                                            setCanvasLoading(false);
+
+                                            setCurrentTab('transform');
+                                        }}>
+                                        {t('APPLY_CROP')}
+                                    </EnteButton>
+                                </CenteredFlex>
+                            )}
                         </Box>
                     </Box>
                 </Box>
@@ -441,6 +668,7 @@ const ImageEditorOverlay = (props: IProps) => {
                             onChange={(_, value) => {
                                 setCurrentTab(value);
                             }}>
+                            <Tab label={t('CROP')} value="crop" />
                             <Tab label={t('TRANSFORM')} value="transform" />
                             <Tab
                                 label={t('COLORS')}
@@ -463,18 +691,25 @@ const ImageEditorOverlay = (props: IProps) => {
                             label={t('RESTORE_ORIGINAL')}
                         />
                     </MenuItemGroup>
-                    {currentTab === 'transform' && (
-                        <ImageEditorOverlayContext.Provider
-                            value={{
-                                originalSizeCanvasRef,
-                                canvasRef,
-                                setCanvasLoading,
-                                canvasLoading,
-                                setTransformationPerformed,
-                            }}>
-                            <TransformMenu />
-                        </ImageEditorOverlayContext.Provider>
-                    )}
+                    <ImageEditorOverlayContext.Provider
+                        value={{
+                            originalSizeCanvasRef,
+                            canvasRef,
+                            setCanvasLoading,
+                            canvasLoading,
+                            setTransformationPerformed,
+                            setCurrentTab,
+                        }}>
+                        {currentTab === 'crop' && (
+                            <CropMenu
+                                previewScale={previewCanvasScale}
+                                cropBoxProps={cropBox}
+                                cropBoxRef={cropBoxRef}
+                                resetCropBox={resetCropBox}
+                            />
+                        )}
+                        {currentTab === 'transform' && <TransformMenu />}
+                    </ImageEditorOverlayContext.Provider>
                     {currentTab === 'colours' && (
                         <ColoursMenu
                             brightness={brightness}
@@ -495,14 +730,25 @@ const ImageEditorOverlay = (props: IProps) => {
                             startIcon={<DownloadIcon />}
                             onClick={downloadEditedPhoto}
                             label={t('DOWNLOAD_EDITED')}
+                            disabled={
+                                !transformationPerformed && !coloursAdjusted
+                            }
                         />
                         <MenuItemDivider />
                         <EnteMenuItem
                             startIcon={<CloudUploadIcon />}
                             onClick={saveCopyToEnte}
                             label={t('SAVE_A_COPY_TO_ENTE')}
+                            disabled={
+                                !transformationPerformed && !coloursAdjusted
+                            }
                         />
                     </MenuItemGroup>
+                    {!transformationPerformed && !coloursAdjusted && (
+                        <MenuSectionTitle
+                            title={t('PHOTO_EDIT_REQUIRED_TO_SAVE')}
+                        />
+                    )}
                 </EnteDrawer>
             </Backdrop>
         </>
