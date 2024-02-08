@@ -11,6 +11,7 @@ import 'package:media_extension/media_extension_action_types.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:move_to_background/move_to_background.dart';
 import 'package:photos/core/configuration.dart';
+import "package:photos/core/constants.dart";
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/events/account_configured_event.dart';
@@ -103,6 +104,8 @@ class _HomeWidgetState extends State<HomeWidget> {
   late StreamSubscription<BackupFoldersUpdatedEvent> _backupFoldersUpdatedEvent;
   late StreamSubscription<AccountConfiguredEvent> _accountConfiguredEvent;
   late StreamSubscription<CollectionUpdatedEvent> _collectionUpdatedEvent;
+  static const kUpdateAvailableDialogShownTimeKey =
+      "update_available_dialog_shown_time_key";
 
   @override
   void initState() {
@@ -197,14 +200,30 @@ class _HomeWidgetState extends State<HomeWidget> {
     UpdateService.instance.shouldUpdate().then((shouldUpdate) {
       if (shouldUpdate) {
         Future.delayed(Duration.zero, () {
-          showDialog(
-            context: context,
-            builder: (BuildContext context) {
-              return AppUpdateDialog(
-                UpdateService.instance.getLatestVersionInfo(),
-              );
+          SharedPreferences.getInstance().then(
+            (value) {
+              final lastDialogShownTime =
+                  value.getInt(kUpdateAvailableDialogShownTimeKey) ?? 0;
+              final now = DateTime.now().microsecondsSinceEpoch;
+              final hasBeen3DaysSinceLastNotification =
+                  (now - lastDialogShownTime) > (3 * microSecondsInDay);
+
+              if (hasBeen3DaysSinceLastNotification) {
+                value.setInt(
+                  kUpdateAvailableDialogShownTimeKey,
+                  DateTime.now().microsecondsSinceEpoch,
+                );
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return AppUpdateDialog(
+                      UpdateService.instance.getLatestVersionInfo(),
+                    );
+                  },
+                  barrierColor: Colors.black.withOpacity(0.85),
+                );
+              }
             },
-            barrierColor: Colors.black.withOpacity(0.85),
           );
         });
       }

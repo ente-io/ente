@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
-// import 'package:open_file/open_file.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/network/network.dart';
 import 'package:photos/ente_theme_data.dart';
