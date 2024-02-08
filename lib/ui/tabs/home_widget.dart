@@ -251,9 +251,9 @@ class _HomeWidgetState extends State<HomeWidget> {
       galleryLoadStartTime,
       galleryLoadEndTime,
     );
-    final prefs = await SharedPreferences.getInstance();
 
-    final previousGeneratedId = prefs.getInt("home_widget_last_img");
+    final previousGeneratedId =
+        await hw.HomeWidget.getWidgetData<int>("home_widget_last_img");
     final files = res.files
         .where((element) => element.generatedID != previousGeneratedId);
     final randomNumber = Random().nextInt(files.length);
@@ -294,7 +294,10 @@ class _HomeWidgetState extends State<HomeWidget> {
     );
 
     if (randomFile.generatedID != null) {
-      await prefs.setInt("home_widget_last_img", randomFile.generatedID!);
+      await hw.HomeWidget.saveWidgetData<int>(
+        "home_widget_last_img",
+        randomFile.generatedID!,
+      );
     }
 
     _logger
