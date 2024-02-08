@@ -38,7 +38,7 @@ const AccountHandoff = () => {
             throw new Error('token not found');
         }
 
-        let user = getData(LS_KEYS.USER) || {};
+        const user = getData(LS_KEYS.USER) || {};
         user.token = token;
 
         setData(LS_KEYS.USER, user);
