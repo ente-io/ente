@@ -29,7 +29,6 @@
         "NODE_ENV",
         "SENTRY_RELEASE",
         "SENTRY_AUTH_TOKEN",
-        "NEXT_PUBLIC_SENTRY_DSN",
-        "NEXT_PUBLIC_SENTRY_ENV"
+        "NEXT_PUBLIC_SENTRY_DSN"
     ]
 }
