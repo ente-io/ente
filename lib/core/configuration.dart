@@ -469,8 +469,12 @@ class Configuration {
     return _preferences.setBool(keyShouldShowLockScreen, value);
   }
 
-  void setVolatilePassword(String? volatilePassword) {
+  void setVolatilePassword(String volatilePassword) {
     _volatilePassword = volatilePassword;
+  }
+
+  void resetVolatilePassword() {
+    _volatilePassword = null;
   }
 
   String? getVolatilePassword() {
