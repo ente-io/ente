@@ -28,8 +28,6 @@
         "NEXT_PUBLIC_IS_TEST_APP",
         "NODE_ENV",
         "SENTRY_RELEASE",
-        "SENTRY_AUTH_TOKEN",
-        "NEXT_PUBLIC_SENTRY_DSN",
-        "NEXT_PUBLIC_SENTRY_ENV"
+        "SENTRY_AUTH_TOKEN"
     ]
 }

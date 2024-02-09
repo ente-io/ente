@@ -72,10 +72,6 @@ export const getFamilyPortalURL = () => {
     return `https://family.ente.io`;
 };
 
-export const getSentryTunnelURL = () => {
-    return `https://sentry-reporter.ente.io`;
-};
-
 /*
 It's a dev deployment (and should use the environment override for endpoints ) in three cases:
 1. when the URL opened is that of the staging web app, or
