@@ -1,5 +1,4 @@
 import * as Sentry from '@sentry/nextjs';
-import { getSentryTunnelURL } from '@ente/shared/network/api';
 import { getSentryUserID } from '@ente/shared/sentry/utils';
 import { runningInBrowser } from '@ente/shared/platform';
 import { getHasOptedOutOfCrashReports } from '@ente/shared/storage/localStorage/helpers';
@@ -22,7 +21,7 @@ export const setupSentry = async (dsn: string) => {
             release: SENTRY_RELEASE,
             attachStacktrace: true,
             autoSessionTracking: false,
-            tunnel: getSentryTunnelURL(),
+            tunnel: 'https://sentry-reporter.ente.io',
             beforeSend(event) {
                 event.request = event.request || {};
                 const currentURL = new URL(document.location.href);
