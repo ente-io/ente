@@ -68,3 +68,5 @@ const galleryGridSpacing = 2.0;
 const searchSectionLimit = 7;
 
 bool isInternalUser = false;
+
+const iOSGroupID = "group.io.ente.frame.SlideshowWidget";

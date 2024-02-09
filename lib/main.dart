@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import "dart:math";
 
 import "package:adaptive_theme/adaptive_theme.dart";
 import 'package:background_fetch/background_fetch.dart';
@@ -9,6 +10,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import "package:flutter/rendering.dart";
 import "package:flutter_displaymode/flutter_displaymode.dart";
+import 'package:home_widget/home_widget.dart' as hw;
 import 'package:logging/logging.dart';
 import "package:media_kit/media_kit.dart";
 import 'package:path_provider/path_provider.dart';
@@ -18,6 +20,7 @@ import 'package:photos/core/constants.dart';
 import 'package:photos/core/error-reporting/super_logging.dart';
 import 'package:photos/core/errors.dart';
 import 'package:photos/core/network/network.dart';
+import "package:photos/db/files_db.dart";
 import 'package:photos/db/upload_locks_db.dart';
 import 'package:photos/ente_theme_data.dart';
 import "package:photos/l10n/l10n.dart";
@@ -46,7 +49,10 @@ import 'package:photos/ui/tools/lock_screen.dart';
 import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/file_uploader.dart';
 import 'package:photos/utils/local_settings.dart';
+import "package:photos/utils/preload_util.dart";
+import "package:photos/utils/thumbnail_util.dart";
 import 'package:shared_preferences/shared_preferences.dart';
+import "package:workmanager/workmanager.dart";
 
 final _logger = Logger("main");
 
@@ -60,10 +66,103 @@ const kBGPushTimeout = Duration(seconds: 28);
 const kFGTaskDeathTimeoutInMicroseconds = 5000000;
 const kBackgroundLockLatency = Duration(seconds: 3);
 
+@pragma("vm:entry-point")
+void initSlideshowWidget() {
+  Workmanager().executeTask(
+    (taskName, inputData) async {
+      await _init(true, via: 'runViaSlideshowWidget');
+
+      final collectionID =
+          await FavoritesService.instance.getFavoriteCollectionID();
+      if (collectionID == null) {
+        return false;
+      }
+
+      try {
+        await hw.HomeWidget.setAppGroupId(iOSGroupID);
+        final res = await FilesDB.instance.getFilesInCollection(
+          collectionID,
+          galleryLoadStartTime,
+          galleryLoadEndTime,
+        );
+
+        final previousGeneratedId =
+            await hw.HomeWidget.getWidgetData<int>("home_widget_last_img");
+        final files = res.files
+            .where((element) => element.generatedID != previousGeneratedId);
+        final randomNumber = Random().nextInt(files.length);
+        final randomFile = files.elementAt(randomNumber);
+        final cachedThumbnail = await getThumbnailFromServer(randomFile);
+
+        var img = Image.memory(cachedThumbnail);
+        var imgProvider = img.image;
+        await PreloadImage.loadImage(imgProvider);
+
+        img = Image.memory(cachedThumbnail);
+        imgProvider = img.image;
+        final image = await decodeImageFromList(cachedThumbnail);
+        final width = image.width.toDouble();
+        final height = image.height.toDouble();
+        final size = min(width, height);
+
+        final widget = ClipRRect(
+          borderRadius: BorderRadius.circular(32),
+          child: Container(
+            width: size,
+            height: size,
+            decoration: BoxDecoration(
+              color: Colors.black,
+              image: DecorationImage(image: imgProvider, fit: BoxFit.cover),
+            ),
+          ),
+        );
+
+        await hw.HomeWidget.renderFlutterWidget(
+          widget,
+          logicalSize: Size(size, size),
+          key: "slideshow",
+        );
+
+        await hw.HomeWidget.updateWidget(
+          name: 'SlideshowWidgetProvider',
+          androidName: 'SlideshowWidgetProvider',
+          qualifiedAndroidName: 'io.ente.photos.SlideshowWidgetProvider',
+          iOSName: 'SlideshowWidget',
+        );
+
+        if (randomFile.generatedID != null) {
+          await hw.HomeWidget.saveWidgetData<int>(
+            "home_widget_last_img",
+            randomFile.generatedID!,
+          );
+        }
+
+        _logger.info(
+          ">>> SlideshowWidget rendered with size ${width}x$height",
+        );
+        return true;
+      } catch (e) {
+        return false;
+      }
+    },
+  );
+}
+
 void main() async {
   debugRepaintRainbowEnabled = false;
   WidgetsFlutterBinding.ensureInitialized();
   MediaKit.ensureInitialized();
+
+  try {
+    await Workmanager()
+        .initialize(initSlideshowWidget, isInDebugMode: kDebugMode);
+    await Workmanager().registerPeriodicTask(
+      "slideshow-widget",
+      "updateSlideshowWidget",
+      frequency: const Duration(minutes: 15),
+    );
+  } catch (_) {}
+
   final savedThemeMode = await AdaptiveTheme.getThemeMode();
   await _runInForeground(savedThemeMode);
   unawaited(BackgroundFetch.registerHeadlessTask(_headlessTaskHandler));
@@ -76,6 +175,7 @@ Future<void> _runInForeground(AdaptiveThemeMode? savedThemeMode) async {
     await _init(false, via: 'mainMethod');
     final Locale locale = await getLocale();
     unawaited(_scheduleFGSync('appStart in FG'));
+
     runApp(
       AppLock(
         builder: (args) =>
