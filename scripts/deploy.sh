@@ -16,6 +16,15 @@ rm -rf out
 
 if test "$CF_PAGES_BRANCH" = "auth-release"
 then
+    # By default, for preview deployments the NEXT_PUBLIC_APP_ENV is set to
+    # "test" in the CF environment variables. For production deployments of the
+    # auth app, reset this to "production".
+    #
+    # This is not needed for the default `yarn export:photos` case, because
+    # there the actual production deployment runs without NEXT_PUBLIC_APP_ENV
+    # being set to anything (and the other preview deployments have
+    # NEXT_PUBLIC_APP_ENV set to "test", as is correct).
+    export NEXT_PUBLIC_APP_ENV=production
     yarn export:auth
     cp -R apps/auth/out .
 else
