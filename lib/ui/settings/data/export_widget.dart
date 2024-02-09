@@ -154,7 +154,7 @@ Future<void> _exportCodes(BuildContext context, String fileContent) async {
       sharePositionOrigin: Rect.fromLTWH(0, 0, size.width, size.height / 2),
     );
   }
-  Future.delayed(const Duration(seconds: 15), () async {
+  Future.delayed(const Duration(seconds: 30), () async {
     if (_codeFile.existsSync()) {
       _codeFile.deleteSync();
     }
