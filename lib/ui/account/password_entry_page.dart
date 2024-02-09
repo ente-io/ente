@@ -60,7 +60,10 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
     if (_volatilePassword != null) {
       Future.delayed(
         Duration.zero,
-        () => _showRecoveryCodeDialog(_volatilePassword!),
+        () => _showRecoveryCodeDialog(
+          _volatilePassword!,
+          usingVolatilePassword: true,
+        ),
       );
     }
     _password1FocusNode.addListener(() {
@@ -421,12 +424,18 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
     return logOutFromOther;
   }
 
-  Future<void> _showRecoveryCodeDialog(String password) async {
+  Future<void> _showRecoveryCodeDialog(
+    String password, {
+    bool usingVolatilePassword = false,
+  }) async {
     final l10n = context.l10n;
     final dialog =
         createProgressDialog(context, l10n.generatingEncryptionKeysTitle);
     await dialog.show();
     try {
+      if (usingVolatilePassword) {
+        _logger.info('Using volatile password');
+      }
       final KeyGenResult result =
           await Configuration.instance.generateKey(password);
       Configuration.instance.resetVolatilePassword();
