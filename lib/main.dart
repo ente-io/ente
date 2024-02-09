@@ -141,7 +141,7 @@ void initSlideshowWidget() {
           ">>> SlideshowWidget rendered with size ${width}x$height",
         );
         return true;
-      } catch (e) {
+      } catch (_) {
         return false;
       }
     },
@@ -156,12 +156,18 @@ void main() async {
   try {
     await Workmanager()
         .initialize(initSlideshowWidget, isInDebugMode: kDebugMode);
+
     await Workmanager().registerPeriodicTask(
       "slideshow-widget",
       "updateSlideshowWidget",
-      frequency: const Duration(minutes: 15),
+      initialDelay: const Duration(seconds: 10),
+      frequency: const Duration(
+        minutes: 15,
+      ), // Ignored on iOS, rather set in AppDelegate.swift
     );
-  } catch (_) {}
+  } catch (_) {
+    debugPrint("error in Workmanager: $_");
+  }
 
   final savedThemeMode = await AdaptiveTheme.getThemeMode();
   await _runInForeground(savedThemeMode);

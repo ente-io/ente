@@ -170,7 +170,10 @@ dependencies:
   wallpaper_manager_flutter: ^0.0.2
   wechat_assets_picker: ^8.6.3
   widgets_to_image: ^0.0.2
-  workmanager: ^0.5.2
+  workmanager:
+    git:
+      url: https://github.com/absar/flutter_workmanager
+      ref: ios-bg-tasks-enh-final
 
 dependency_overrides:
   # current fork of tfite_flutter_helper depends on ffi: ^1.x.x
