@@ -429,7 +429,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
     try {
       final KeyGenResult result =
           await Configuration.instance.generateKey(password);
-      Configuration.instance.setVolatilePassword(null);
+      Configuration.instance.resetVolatilePassword();
       await dialog.hide();
       onDone() async {
         final dialog = createProgressDialog(context, l10n.pleaseWait);
@@ -437,7 +437,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
         try {
           await UserService.instance.setAttributes(result);
           await dialog.hide();
-          Configuration.instance.setVolatilePassword(null);
+          Configuration.instance.resetVolatilePassword();
           Navigator.of(context).pushAndRemoveUntil(
             MaterialPageRoute(
               builder: (BuildContext context) {

@@ -40,7 +40,7 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
       _passwordController.text = _volatilePassword!;
       Future.delayed(
         Duration.zero,
-            () => verifyPassword(_volatilePassword!),
+        () => verifyPassword(_volatilePassword!),
       );
     }
     _passwordFocusNode.addListener(() {
@@ -92,8 +92,7 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
 
   Future<void> verifyPassword(String password) async {
     FocusScope.of(context).unfocus();
-    final dialog =
-    createProgressDialog(context, context.l10n.pleaseWait);
+    final dialog = createProgressDialog(context, context.l10n.pleaseWait);
     await dialog.show();
     try {
       final kek = await Configuration.instance.decryptSecretsAndGetKeyEncKey(
@@ -140,8 +139,8 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
       }
       return;
     }
+    Configuration.instance.resetVolatilePassword();
     await dialog.hide();
-    Configuration.instance.setVolatilePassword(null);
     unawaited(
       Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(
@@ -149,7 +148,7 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
             return const HomePage();
           },
         ),
-            (route) => false,
+        (route) => false,
       ),
     );
   }
@@ -183,7 +182,7 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
               children: [
                 Padding(
                   padding:
-                  const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
+                      const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
                   child: Text(
                     context.l10n.welcomeBack,
                     style: Theme.of(context).textTheme.headlineMedium,
@@ -218,19 +217,19 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
                       ),
                       suffixIcon: _passwordInFocus
                           ? IconButton(
-                        icon: Icon(
-                          _passwordVisible
-                              ? Icons.visibility
-                              : Icons.visibility_off,
-                          color: Theme.of(context).iconTheme.color,
-                          size: 20,
-                        ),
-                        onPressed: () {
-                          setState(() {
-                            _passwordVisible = !_passwordVisible;
-                          });
-                        },
-                      )
+                              icon: Icon(
+                                _passwordVisible
+                                    ? Icons.visibility
+                                    : Icons.visibility_off,
+                                color: Theme.of(context).iconTheme.color,
+                                size: 20,
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  _passwordVisible = !_passwordVisible;
+                                });
+                              },
+                            )
                           : null,
                     ),
                     style: const TextStyle(
@@ -276,9 +275,9 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
                                 .textTheme
                                 .titleMedium!
                                 .copyWith(
-                              fontSize: 14,
-                              decoration: TextDecoration.underline,
-                            ),
+                                  fontSize: 14,
+                                  decoration: TextDecoration.underline,
+                                ),
                           ),
                         ),
                       ),
@@ -302,9 +301,9 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
                                 .textTheme
                                 .titleMedium!
                                 .copyWith(
-                              fontSize: 14,
-                              decoration: TextDecoration.underline,
-                            ),
+                                  fontSize: 14,
+                                  decoration: TextDecoration.underline,
+                                ),
                           ),
                         ),
                       ),
