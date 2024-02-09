@@ -62,6 +62,7 @@ class _LoginPageState extends State<LoginPage> {
         buttonText: context.l10n.logInLabel,
         onPressedFunction: () async {
           UserService.instance.setEmail(_email!);
+          Configuration.instance.resetVolatilePassword();
           SrpAttributes? attr;
           bool isEmailVerificationEnabled = true;
           try {
@@ -176,31 +177,33 @@ class _LoginPageState extends State<LoginPage> {
                               .copyWith(fontSize: 12),
                           tags: {
                             'u-terms': StyledTextActionTag(
-                              (String? text, Map<String?, String?> attrs) => Navigator.of(context).push(
-                                  MaterialPageRoute(
-                                    builder: (BuildContext context) {
-                                      return WebPage(
-                                        context.l10n.termsOfServicesTitle,
-                                        "https://ente.io/terms",
-                                      );
-                                    },
-                                  ),
+                              (String? text, Map<String?, String?> attrs) =>
+                                  Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (BuildContext context) {
+                                    return WebPage(
+                                      context.l10n.termsOfServicesTitle,
+                                      "https://ente.io/terms",
+                                    );
+                                  },
                                 ),
+                              ),
                               style: const TextStyle(
                                 decoration: TextDecoration.underline,
                               ),
                             ),
                             'u-policy': StyledTextActionTag(
-                              (String? text, Map<String?, String?> attrs) => Navigator.of(context).push(
-                                  MaterialPageRoute(
-                                    builder: (BuildContext context) {
-                                      return WebPage(
-                                        context.l10n.privacyPolicyTitle,
-                                        "https://ente.io/privacy",
-                                      );
-                                    },
-                                  ),
+                              (String? text, Map<String?, String?> attrs) =>
+                                  Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (BuildContext context) {
+                                    return WebPage(
+                                      context.l10n.privacyPolicyTitle,
+                                      "https://ente.io/privacy",
+                                    );
+                                  },
                                 ),
+                              ),
                               style: const TextStyle(
                                 decoration: TextDecoration.underline,
                               ),
