@@ -1,6 +1,6 @@
 export const getEndpoint = () => {
     const endpoint = process.env.NEXT_PUBLIC_ENTE_ENDPOINT;
-    if (isDevBuild() && endpoint) {
+    if (endpoint) {
         return endpoint;
     }
     return 'https://api.ente.io';
@@ -8,7 +8,7 @@ export const getEndpoint = () => {
 
 export const getFileURL = (id: number) => {
     const endpoint = process.env.NEXT_PUBLIC_ENTE_ENDPOINT;
-    if (isDevBuild() && endpoint) {
+    if (endpoint) {
         return `${endpoint}/files/download/${id}`;
     }
     return `https://files.ente.io/?fileID=${id}`;
@@ -16,7 +16,7 @@ export const getFileURL = (id: number) => {
 
 export const getPublicCollectionFileURL = (id: number) => {
     const endpoint = process.env.NEXT_PUBLIC_ENTE_ENDPOINT;
-    if (isDevBuild() && endpoint) {
+    if (endpoint) {
         return `${endpoint}/public-collection/files/download/${id}`;
     }
     return `https://public-albums.ente.io/download/?fileID=${id}`;
@@ -24,7 +24,7 @@ export const getPublicCollectionFileURL = (id: number) => {
 
 export const getThumbnailURL = (id: number) => {
     const endpoint = process.env.NEXT_PUBLIC_ENTE_ENDPOINT;
-    if (isDevBuild() && endpoint) {
+    if (endpoint) {
         return `${endpoint}/files/preview/${id}`;
     }
     return `https://thumbnails.ente.io/?fileID=${id}`;
@@ -32,15 +32,15 @@ export const getThumbnailURL = (id: number) => {
 
 export const getPublicCollectionThumbnailURL = (id: number) => {
     const endpoint = process.env.NEXT_PUBLIC_ENTE_ENDPOINT;
-    if (isDevBuild() && endpoint) {
+    if (endpoint) {
         return `${endpoint}/public-collection/files/preview/${id}`;
     }
     return `https://public-albums.ente.io/preview/?fileID=${id}`;
 };
 
 export const getUploadEndpoint = () => {
-    const endpoint = process.env.NEXT_PUBLIC_ENTE_UPLOAD_ENDPOINT;
-    if (isDevBuild() && endpoint) {
+    const endpoint = process.env.NEXT_PUBLIC_ENTE_ENDPOINT;
+    if (endpoint) {
         return endpoint;
     }
     return `https://uploader.ente.io`;
@@ -48,7 +48,7 @@ export const getUploadEndpoint = () => {
 
 export const getPaymentsURL = () => {
     const paymentsURL = process.env.NEXT_PUBLIC_ENTE_PAYMENT_ENDPOINT;
-    if (isDevBuild() && paymentsURL) {
+    if (paymentsURL) {
         return paymentsURL;
     }
     return `https://payments.ente.io`;
@@ -56,17 +56,19 @@ export const getPaymentsURL = () => {
 
 export const getAlbumsURL = () => {
     const albumsURL = process.env.NEXT_PUBLIC_ENTE_ALBUM_ENDPOINT;
-    if (isDevBuild() && albumsURL) {
+    if (albumsURL) {
         return albumsURL;
     }
     return `https://albums.ente.io`;
 };
 
-// getFamilyPortalURL returns the endpoint for the family dashboard which can be used to
-// create or manage family.
+/**
+ * Return the URL for the family dashboard which can be used to create or manage
+ * family plans.
+ */
 export const getFamilyPortalURL = () => {
     const familyURL = process.env.NEXT_PUBLIC_ENTE_FAMILY_PORTAL_ENDPOINT;
-    if (isDevBuild() && familyURL) {
+    if (familyURL) {
         return familyURL;
     }
     return `https://family.ente.io`;

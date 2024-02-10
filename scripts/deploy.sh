@@ -36,9 +36,7 @@ else
     # development deployment.
     export NODE_ENV=development
     # Also, we connect all of them to the dev APIs.
-    export NEXT_PUBLIC_APP_ENV=development
     export NEXT_PUBLIC_ENTE_ENDPOINT=https://dev-api.ente.io
-    export NEXT_PUBLIC_ENTE_WEB_ENDPOINT=https://dev-web.ente.io
     export NEXT_PUBLIC_ENTE_ALBUM_ENDPOINT=https://dev-albums.ente.io
 
     yarn export:photos
