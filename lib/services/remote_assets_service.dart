@@ -27,7 +27,7 @@ class RemoteAssetsService {
   }
 
   Future<String> _getLocalPath(String remotePath) async {
-    return (await getTemporaryDirectory()).path +
+    return (await getApplicationSupportDirectory()).path +
         "/assets/" +
         _urlToFileName(remotePath);
   }

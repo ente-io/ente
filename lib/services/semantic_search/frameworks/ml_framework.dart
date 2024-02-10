@@ -2,7 +2,6 @@ import "dart:async";
 import "dart:io";
 
 import "package:connectivity_plus/connectivity_plus.dart";
-import "package:flutter/services.dart";
 import "package:logging/logging.dart";
 import "package:path/path.dart";
 import "package:path_provider/path_provider.dart";
@@ -134,13 +133,13 @@ abstract class MLFramework {
   }
 
   Future<String> _getLocalImageModelPath() async {
-    return (await getTemporaryDirectory()).path +
+    return (await getApplicationSupportDirectory()).path +
         "/models/" +
         basename(getImageModelRemotePath());
   }
 
   Future<String> _getLocalTextModelPath() async {
-    return (await getTemporaryDirectory()).path +
+    return (await getApplicationSupportDirectory()).path +
         "/models/" +
         basename(getTextModelRemotePath());
   }
@@ -175,17 +174,6 @@ abstract class MLFramework {
     final connectivityResult = await (Connectivity().checkConnectivity());
     return connectivityResult != ConnectivityResult.mobile ||
         shouldDownloadOverMobileData;
-  }
-
-  Future<String> getAccessiblePathForAsset(
-    String assetPath,
-    String tempName,
-  ) async {
-    final byteData = await rootBundle.load(assetPath);
-    final tempDir = await getTemporaryDirectory();
-    final file = await File('${tempDir.path}/$tempName')
-        .writeAsBytes(byteData.buffer.asUint8List());
-    return file.path;
   }
 }
 
