@@ -1,8 +1,4 @@
-import {
-    getEndpoint,
-    getFamilyPortalURL,
-    isDevBuild,
-} from '@ente/shared/network/api';
+import { getEndpoint, getFamilyPortalURL } from '@ente/shared/network/api';
 import { getData, LS_KEYS } from '@ente/shared/storage/localStorage';
 import localForage from '@ente/shared/storage/localForage';
 import { getToken } from '@ente/shared/storage/localStorage/helpers';
@@ -323,12 +319,9 @@ export const updateMapEnabledStatus = async (newStatus: boolean) => {
 };
 
 export async function getDisableCFUploadProxyFlag(): Promise<boolean> {
+    if (process.env.NEXT_PUBLIC_ENTE_DIRECT_UPLOAD === 'true') return true;
+
     try {
-        const disableCFUploadProxy =
-            process.env.NEXT_PUBLIC_DISABLE_CF_UPLOAD_PROXY;
-        if (isDevBuild() && typeof disableCFUploadProxy !== 'undefined') {
-            return disableCFUploadProxy === 'true';
-        }
         const featureFlags = (
             await fetch('https://static.ente.io/feature_flags.json')
         ).json() as GetFeatureFlagResponse;
