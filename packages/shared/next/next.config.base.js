@@ -39,6 +39,7 @@ const nextConfig = {
     // Build time Sentry configuration
     sentry: {
         widenClientFileUpload: true,
+        disableServerWebpackPlugin: true,
     },
 };
 
