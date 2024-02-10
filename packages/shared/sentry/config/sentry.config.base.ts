@@ -3,7 +3,7 @@ import { getSentryUserID } from '@ente/shared/sentry/utils';
 import { runningInBrowser } from '@ente/shared/platform';
 import { getHasOptedOutOfCrashReports } from '@ente/shared/storage/localStorage/helpers';
 
-export const setupSentry = async (dsn: string) => {
+export const initSentry = async (dsn: string) => {
     const optedOut = runningInBrowser() && getHasOptedOutOfCrashReports();
     if (optedOut) return;
 
