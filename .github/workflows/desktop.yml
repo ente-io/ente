@@ -84,8 +84,8 @@ jobs:
         run: |
           # create variables
           CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
-          PP_PATH=$RUNNER_TEMP/build_pp.mobileprovision
-          KEYCHAIN_PATH=~/Library/Keychains/build.keychain
+          PP_PATH=$RUNNER_TEMP/build_pp.provisionprofile
+          KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
 
           # import certificate and provisioning profile from secrets
           echo -n "$BUILD_CERTIFICATE_BASE64" | base64 --decode -o $CERTIFICATE_PATH
@@ -93,14 +93,16 @@ jobs:
 
           # create temporary keychain
           security create-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
-          security default-keychain -s $KEYCHAIN_PATH
           security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
           security unlock-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
 
           # import certificate to keychain
-          security import $CERTIFICATE_PATH -k $KEYCHAIN_PATH -P $P12_PASSWORD -T /usr/bin/codesign
+          security import $CERTIFICATE_PATH -P "$P12_PASSWORD" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
+          security list-keychain -d user -s $KEYCHAIN_PATH
+
+          # apply provisioning profile
           mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
-          cp $PP_PATH ~/Library/MobileDevice/Provisioning\ Profiles/
+          cp $PP_PATH ~/Library/MobileDevice/Provisioning\ Profiles
 
       - name: Dmg dependencies
         run: |
@@ -113,13 +115,6 @@ jobs:
           dart pub global activate flutter_distributor
           flutter_distributor package --platform=macos --targets=dmg --skip-clean
           mv dist/**/ente_auth-*-macos.dmg auth-macos-${{ github.event_name == 'release' && github.event.release.tag_name || 'nightly' }}-universal.dmg
-
-      - name: Sign App
-        env:
-          DMG_PATH: auth-macos-${{ github.event_name == 'release' && github.event.release.tag_name || 'nightly' }}-universal.dmg
-          CODESIGN_IDENTITY: ${{ secrets.MAC_OS_CODESIGN_IDENTITY }}
-        run: |
-          /usr/bin/codesign --force -s "$CODESIGN_IDENTITY" "$DMG_PATH" -v
 
       - uses: svenstaro/upload-release-action@latest
         with:
