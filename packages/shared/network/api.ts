@@ -72,8 +72,37 @@ export const getFamilyPortalURL = () => {
     return `https://family.ente.io`;
 };
 
-/*
-It's a dev deployment (and should use the environment override for endpoints ) in three cases:
+/**
+ * A build is considered as a development build if one of the following holds:
+ *
+ * 1. The NODE_ENV environment variable is set to 'development'. This
+ *    automatically happens when we run `yarn dev:foo`, but we can also
+ *    explictly set this to development before invoking the build. From the
+ *    Next.js docs:
+ *
+ *    > If the environment variable NODE_ENV is unassigned, Next.js
+ *    > automatically assigns development when running the `next dev` command,
+ *    > or production for all other commands.
+ *
+ * 2. Sometimes we're building for a remote deployment, but we want the deployed
+      site to behave as a development build. For example, when deploying the
+      main branch to `testing.ente.io`. In these cases, since the build was done
+      using `yarn export` (which in turn invokes `next build`), the NODE_ENV
+      will not get set to 'development'. To handle such cases, we introduce
+      another variable, NEXT_PUBLIC_ENTE_ENV, which has the same semantics as
+ *
+ *
+ * If the environment variable NODE_ENV is unassigned, Next.js automatically
+   assigns development when running the next dev command, or production for all
+   other commands.
+ *    next sets NODE_ENV to `production`.
+ *  When we run
+ *    `yarn dev:foo`, it invokes `next dev`, which sets NODE_ENV to
+ *    'development'. In all other cases (say, `next build`),
+ *
+
+It's a dev deployment (and should use the environment override for endpoints )
+in three cases:
 1. when the URL opened is that of the staging web app, or
 2. when the URL opened is that of the staging album app, or
 3. if the app is running locally (hence node_env is development)
