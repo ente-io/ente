@@ -3,13 +3,12 @@ import "dart:io";
 
 import "package:connectivity_plus/connectivity_plus.dart";
 import "package:logging/logging.dart";
-import "package:path/path.dart";
-import "package:path_provider/path_provider.dart";
 import "package:photos/core/errors.dart";
 
 import "package:photos/core/event_bus.dart";
 import "package:photos/core/network/network.dart";
 import "package:photos/events/event.dart";
+import "package:photos/services/remote_assets_service.dart";
 
 abstract class MLFramework {
   static const kImageEncoderEnabled = true;
@@ -104,44 +103,18 @@ abstract class MLFramework {
       return;
     }
     _initState = InitializationState.initializingImageModel;
-    final path = await _getLocalImageModelPath();
-    if (await File(path).exists()) {
-      await loadImageModel(path);
-    } else {
-      _initState = InitializationState.downloadingImageModel;
-      final tempFile = File(path + ".temp");
-      await _downloadFile(getImageModelRemotePath(), tempFile.path);
-      await tempFile.rename(path);
-      await loadImageModel(path);
-    }
+    final imageModel =
+        await RemoteAssetsService.instance.getAsset(getImageModelRemotePath());
+    await loadImageModel(imageModel.path);
     _initState = InitializationState.initializedImageModel;
   }
 
   Future<void> _initTextModel() async {
-    final path = await _getLocalTextModelPath();
     _initState = InitializationState.initializingTextModel;
-    if (await File(path).exists()) {
-      await loadTextModel(path);
-    } else {
-      _initState = InitializationState.downloadingTextModel;
-      final tempFile = File(path + ".temp");
-      await _downloadFile(getTextModelRemotePath(), tempFile.path);
-      await tempFile.rename(path);
-      await loadTextModel(path);
-    }
+    final textModel =
+        await RemoteAssetsService.instance.getAsset(getTextModelRemotePath());
+    await loadTextModel(textModel.path);
     _initState = InitializationState.initializedTextModel;
-  }
-
-  Future<String> _getLocalImageModelPath() async {
-    return (await getApplicationSupportDirectory()).path +
-        "/models/" +
-        basename(getImageModelRemotePath());
-  }
-
-  Future<String> _getLocalTextModelPath() async {
-    return (await getApplicationSupportDirectory()).path +
-        "/models/" +
-        basename(getTextModelRemotePath());
   }
 
   Future<void> _downloadFile(

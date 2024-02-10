@@ -53,5 +53,6 @@ class RemoteAssetsService {
       await existingFile.delete();
     }
     await NetworkClient.instance.getDio().download(url, savePath);
+    _logger.info("Downloaded " + url);
   }
 }
