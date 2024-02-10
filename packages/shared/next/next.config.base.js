@@ -1,11 +1,4 @@
 const { withSentryConfig } = require('@sentry/nextjs');
-const { PHASE_DEVELOPMENT_SERVER } = require('next/constants');
-const cp = require('child_process');
-
-const gitSHA = cp.execSync('git rev-parse --short HEAD', {
-    cwd: __dirname,
-    encoding: 'utf8',
-});
 
 const nextConfig = {
     compiler: {
@@ -44,10 +37,10 @@ const nextConfig = {
 };
 
 // https://docs.sentry.io/platforms/javascript/guides/nextjs/manual-setup/
-const createSentryWebpackPluginOptions = (phase) => {
+const createSentryWebpackPluginOptions = () => {
     return {
-        dryRun: phase === PHASE_DEVELOPMENT_SERVER,
-        release: gitSHA,
+        // dryRun: phase === PHASE_DEVELOPMENT_SERVER,
+        // release: gitSHA,
     };
 };
 

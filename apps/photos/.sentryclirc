@@ -1,7 +1,0 @@
-# This file is used by sentry-cli and the SentryWebPack plugin to upload
-# sourcemaps. In addition to the configuration specified here, Sentry expects an
-# environment variable named SENTRY_AUTH_TOKEN.
-[defaults]
-url=https://sentry.ente.io/
-org=ente
-project=photos-web
