@@ -8,7 +8,7 @@
     <true/>
 	<!-- <key>keychain-access-groups</key>
 	<array/> -->
-	<!-- <key>com.apple.security.files.downloads.read-write</key>
-	<true/> -->
+	<key>com.apple.security.files.downloads.read-write</key>
+	<true/>
 </dict>
 </plist>

@@ -343,7 +343,7 @@ packages:
     description:
       path: "."
       ref: HEAD
-      resolved-ref: "2986a6a10f967385ddd60e075a2739253cac26a9"
+      resolved-ref: e2e66ffd03f23bef5e0bb138b5f01b32d8e9b7bb
       url: "https://github.com/ente-io/ente_crypto_dart.git"
     source: git
     version: "1.0.0"
@@ -520,6 +520,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.13.1"
+  flutter_local_authentication:
+    dependency: "direct main"
+    description:
+      name: flutter_local_authentication
+      sha256: eb2e471ba77fbc42b6ce8b358939dc9878dc71fcce5a482a8ddcb045563d87cd
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.2.0"
   flutter_local_notifications:
     dependency: "direct main"
     description:

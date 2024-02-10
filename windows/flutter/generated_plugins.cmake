@@ -7,6 +7,7 @@ list(APPEND FLUTTER_PLUGIN_LIST
   connectivity_plus
   desktop_webview_window
   file_saver
+  flutter_local_authentication
   flutter_secure_storage_windows
   local_auth_windows
   sentry_flutter

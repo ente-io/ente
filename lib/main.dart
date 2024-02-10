@@ -36,7 +36,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await _runInForeground();
   await _setupPrivacyScreen();
-  FlutterDisplayMode.setHighRefreshRate();
+  if (Platform.isAndroid) FlutterDisplayMode.setHighRefreshRate();
 }
 
 Future<void> _runInForeground() async {

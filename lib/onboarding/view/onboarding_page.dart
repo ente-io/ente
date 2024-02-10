@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:ente_auth/app/view/app.dart';
 import 'package:ente_auth/core/configuration.dart';
@@ -19,7 +20,6 @@ import 'package:ente_auth/ui/home_page.dart';
 import 'package:ente_auth/ui/settings/language_picker.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
 import 'package:ente_auth/utils/navigation_util.dart';
-import 'package:ente_auth/utils/platform_util.dart';
 import 'package:ente_auth/utils/toast_util.dart';
 import 'package:flutter/foundation.dart';
 import "package:flutter/material.dart";
@@ -183,16 +183,16 @@ class _OnboardingPageState extends State<OnboardingPage> {
   }
 
   Future<void> _optForOfflineMode() async {
-    if (PlatformUtil.isMobile()) {
-      final canCheckBio = await LocalAuthentication().canCheckBiometrics;
+    final canContinue = Platform.isMacOS || Platform.isLinux
+        ? true
+        : await LocalAuthentication().canCheckBiometrics;
 
-      if (!canCheckBio) {
-        showToast(
-          context,
-          "Sorry, biometric authentication is not supported on this device.",
-        );
-        return;
-      }
+    if (!canContinue) {
+      showToast(
+        context,
+        "Sorry, biometric authentication is not supported on this device.",
+      );
+      return;
     }
     final bool hasOptedBefore = Configuration.instance.hasOptedForOfflineMode();
     ButtonResult? result;

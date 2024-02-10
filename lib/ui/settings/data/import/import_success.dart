@@ -11,9 +11,9 @@ Future<void> importSuccessDialog(BuildContext context, int count) async {
     firstButtonLabel: context.l10n.ok,
     firstButtonOnTap: () async {
       Navigator.of(context).pop();
-      if(Navigator.of(context).canPop()) {
-        Navigator.of(context).pop();
-      }
+      // if(Navigator.of(context).canPop()) {
+      //   Navigator.of(context).pop();
+      // }
     },
     firstButtonType: ButtonType.primary,
   );

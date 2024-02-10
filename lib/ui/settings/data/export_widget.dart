@@ -126,10 +126,8 @@ Future<void> _showExportWarningDialog(BuildContext context) async {
 Future<void> _exportCodes(BuildContext context, String fileContent) async {
   DateTime now = DateTime.now().toUtc();
   String formattedDate = DateFormat('yyyy-MM-dd').format(now);
-  String exportFileName = 'ente-auth-codes-$formattedDate.txt';
-  final codeFile = File(
-    Configuration.instance.getTempDirectory() + exportFileName,
-  );
+  String exportFileName = 'ente-auth-codes-$formattedDate';
+  String exportFileExtension = 'txt';
   final hasAuthenticated = await LocalAuthenticationService.instance
       .requestLocalAuthentication(context, context.l10n.authToExportCodes);
   if (!hasAuthenticated) {
@@ -143,12 +141,15 @@ Future<void> _exportCodes(BuildContext context, String fileContent) async {
       saveAction: () async {
         await PlatformUtil.shareFile(
           exportFileName,
-          "txt",
+          exportFileExtension,
           CryptoUtil.strToBin(fileContent),
           MimeType.text,
         );
       },
       sendAction: () async {
+        final codeFile = File(
+          "${Configuration.instance.getTempDirectory()}$exportFileName.$exportFileExtension",
+        );
         if (codeFile.existsSync()) {
           await codeFile.delete();
         }

@@ -61,20 +61,22 @@ class PlatformUtil {
     Uint8List bytes,
     MimeType type,
   ) async {
-    if (Platform.isAndroid || Platform.isIOS || Platform.isMacOS) {
-      await FileSaver.instance.saveAs(
-        name: fileName,
-        ext: extension,
-        bytes: bytes,
-        mimeType: type,
-      );
-    } else {
-      await FileSaver.instance.saveFile(
-        name: fileName,
-        ext: extension,
-        bytes: bytes,
-        mimeType: type,
-      );
-    }
+    try {
+      if (Platform.isAndroid || Platform.isIOS) {
+        await FileSaver.instance.saveAs(
+          name: fileName,
+          ext: extension,
+          bytes: bytes,
+          mimeType: type,
+        );
+      } else {
+        await FileSaver.instance.saveFile(
+          name: fileName,
+          ext: extension,
+          bytes: bytes,
+          mimeType: type,
+        );
+      }
+    } catch (e) {}
   }
 }
