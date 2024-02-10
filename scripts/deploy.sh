@@ -15,16 +15,6 @@ set -o xtrace
 
 rm -rf out
 
-# Cloudflare Pages has two separate environments - Production and Preview.
-#
-# Each of these have their separate environment variables. However, we need to
-# deploy multiple production apps - so while for the "photos-release" branch
-# (which corresponds to Cloudflare's "Production" environment) can have separate
-# environment variables, the rest of the production deployments share the same
-# environment variables (those that are set for the Preview environment in CF).
-#
-# So we instead tune environment variables for specific deployments here.
-
 if test "$CF_PAGES_BRANCH" = "photos-release"; then
     yarn export:photos
     cp -R apps/photos/out .
@@ -32,10 +22,7 @@ elif test "$CF_PAGES_BRANCH" = "auth-release"; then
     yarn export:auth
     cp -R apps/auth/out .
 else
-    # Apart from the named branches, everything else gets treated as a
-    # development deployment.
-    export NODE_ENV=development
-    # Also, we connect all of them to the dev APIs.
+    # Apart from the named branches, everything else connects to the dev APIs.
     export NEXT_PUBLIC_ENTE_ENDPOINT=https://dev-api.ente.io
     export NEXT_PUBLIC_ENTE_ALBUM_ENDPOINT=https://dev-albums.ente.io
 

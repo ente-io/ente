@@ -42,8 +42,8 @@ module.exports = (phase) =>
                 '@mui/icons-material',
             ],
             env: {
+                // Sentry reads this env var to set the "release" value.
                 SENTRY_RELEASE: GIT_SHA,
-                NEXT_PUBLIC_IS_TEST_APP: process.env.IS_TEST_RELEASE || 'false',
             },
 
             // https://dev.to/marcinwosinek/how-to-add-resolve-fallback-to-webpack-5-in-nextjs-10-i6j

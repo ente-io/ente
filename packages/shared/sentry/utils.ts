@@ -4,11 +4,10 @@ import {
     setLocalSentryUserID,
 } from '@ente/shared/storage/localStorage/helpers';
 import isElectron from 'is-electron';
-import { getAppEnv } from '@ente/shared/apps/env';
-import { APP_ENV } from '@ente/shared/apps/constants';
 import { isDisableSentryFlagSet } from '@ente/shared/apps/env';
 import { ApiError } from '../error';
 import { HttpStatusCode } from 'axios';
+import { isDevBuild } from '../network/api';
 
 export async function getSentryUserID() {
     if (isElectron()) {
@@ -49,7 +48,6 @@ export function isErrorUnnecessaryForSentry(error: any) {
 }
 
 export const getIsSentryEnabled = () => {
-    const isAppENVDevelopment = getAppEnv() === APP_ENV.DEVELOPMENT;
     const isSentryDisabled = isDisableSentryFlagSet();
-    return !isAppENVDevelopment && !isSentryDisabled;
+    return !isDevBuild() && !isSentryDisabled;
 };

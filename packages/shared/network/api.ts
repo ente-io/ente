@@ -75,15 +75,15 @@ export const getFamilyPortalURL = () => {
 };
 
 /**
- * A build is considered as a development build if the NODE_ENV environment
- * variable is set to 'development'.
+ * A build is considered as a development build if either the NODE_ENV is
+ * environment variable is set to 'development'.
  *
- * This automatically happens when we run `yarn dev:foo`, but we can also
- * explictly set it to development before invoking the build. From Next.js docs:
+ * NODE_ENV is automatically set to 'development' when we run `yarn dev`. From
+ * Next.js docs:
  *
- * > If the environment variable NODE_ENV is unassigned, Next.js
- *   automatically assigns development when running the `next dev` command,
- *   or production for all other commands.
+ * > If the environment variable NODE_ENV is unassigned, Next.js automatically
+ *   assigns development when running the `next dev` command, or production for
+ *   all other commands.
  */
 export const isDevBuild = () => {
     return process.env.NODE_ENV === 'development';
