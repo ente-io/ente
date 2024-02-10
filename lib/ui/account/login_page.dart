@@ -27,6 +27,7 @@ class _LoginPageState extends State<LoginPage> {
 
   Future<void> onPressed() async {
     UserService.instance.setEmail(_email!);
+    Configuration.instance.resetVolatilePassword();
     SrpAttributes? attr;
     bool isEmailVerificationEnabled = true;
     try {

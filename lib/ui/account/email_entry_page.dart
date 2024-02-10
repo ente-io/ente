@@ -105,8 +105,8 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
         isFormValid: _isFormValid(),
         buttonText: context.l10n.createAccount,
         onPressedFunction: () {
-          _config.setVolatilePassword(_passwordController1.text);
           UserService.instance.setEmail(_email!);
+          _config.setVolatilePassword(_passwordController1.text);
           UserService.instance.setRefSource(_referralSource);
           UserService.instance
               .sendOtt(context, _email!, isCreateAccountScreen: true);

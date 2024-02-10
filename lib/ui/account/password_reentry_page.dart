@@ -40,7 +40,7 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
       _passwordController.text = _volatilePassword!;
       Future.delayed(
         Duration.zero,
-        () => verifyPassword(_volatilePassword!),
+        () => verifyPassword(_volatilePassword!, usingVolatilePassword: true),
       );
     }
     _passwordFocusNode.addListener(() {
@@ -90,10 +90,16 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
     );
   }
 
-  Future<void> verifyPassword(String password) async {
+  Future<void> verifyPassword(
+    String password, {
+    bool usingVolatilePassword = false,
+  }) async {
     FocusScope.of(context).unfocus();
     final dialog = createProgressDialog(context, context.l10n.pleaseWait);
     await dialog.show();
+    if (usingVolatilePassword) {
+      _logger.info("Using volatile password");
+    }
     try {
       final kek = await Configuration.instance.decryptSecretsAndGetKeyEncKey(
         password,
@@ -139,8 +145,8 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
       }
       return;
     }
+    Configuration.instance.resetVolatilePassword();
     await dialog.hide();
-    Configuration.instance.setVolatilePassword(null);
     unawaited(
       Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(

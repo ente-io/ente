@@ -17,6 +17,7 @@ import 'package:ente_crypto_dart/ente_crypto_dart.dart';
 import 'package:file_saver/file_saver.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:logging/logging.dart';
 import 'package:share_plus/share_plus.dart';
 
@@ -123,8 +124,11 @@ Future<void> _showExportWarningDialog(BuildContext context) async {
 }
 
 Future<void> _exportCodes(BuildContext context, String fileContent) async {
+  DateTime now = DateTime.now().toUtc();
+  String formattedDate = DateFormat('yyyy-MM-dd').format(now);
+  String exportFileName = 'ente-auth-codes-$formattedDate.txt';
   final codeFile = File(
-    "${Configuration.instance.getTempDirectory()}ente-authenticator-codes.txt",
+    Configuration.instance.getTempDirectory() + exportFileName,
   );
   final hasAuthenticated = await LocalAuthenticationService.instance
       .requestLocalAuthentication(context, context.l10n.authToExportCodes);
@@ -137,9 +141,8 @@ Future<void> _exportCodes(BuildContext context, String fileContent) async {
       context,
       context.l10n.exportCodes,
       saveAction: () async {
-        final time = DateTime.now().millisecondsSinceEpoch;
         await PlatformUtil.shareFile(
-          "ente-authenticator-codes-$time",
+          exportFileName,
           "txt",
           CryptoUtil.strToBin(fileContent),
           MimeType.text,
@@ -155,7 +158,7 @@ Future<void> _exportCodes(BuildContext context, String fileContent) async {
           [codeFile.path],
           sharePositionOrigin: Rect.fromLTWH(0, 0, size.width, size.height / 2),
         );
-        Future.delayed(const Duration(seconds: 15), () async {
+        Future.delayed(const Duration(seconds: 30), () async {
           if (codeFile.existsSync()) {
             codeFile.deleteSync();
           }
