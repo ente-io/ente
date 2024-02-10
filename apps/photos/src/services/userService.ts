@@ -1,7 +1,7 @@
 import {
     getEndpoint,
     getFamilyPortalURL,
-    isDevDeployment,
+    isDevBuild,
 } from '@ente/shared/network/api';
 import { getData, LS_KEYS } from '@ente/shared/storage/localStorage';
 import localForage from '@ente/shared/storage/localForage';
@@ -326,7 +326,7 @@ export async function getDisableCFUploadProxyFlag(): Promise<boolean> {
     try {
         const disableCFUploadProxy =
             process.env.NEXT_PUBLIC_DISABLE_CF_UPLOAD_PROXY;
-        if (isDevDeployment() && typeof disableCFUploadProxy !== 'undefined') {
+        if (isDevBuild() && typeof disableCFUploadProxy !== 'undefined') {
             return disableCFUploadProxy === 'true';
         }
         const featureFlags = (
