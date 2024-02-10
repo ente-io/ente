@@ -159,10 +159,8 @@ class MLFrameworkInitializationUpdateEvent extends Event {
 enum InitializationState {
   notInitialized,
   waitingForNetwork,
-  downloadingImageModel,
   initializingImageModel,
   initializedImageModel,
-  downloadingTextModel,
   initializingTextModel,
   initializedTextModel,
   initialized,
