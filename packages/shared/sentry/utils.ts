@@ -4,10 +4,8 @@ import {
     setLocalSentryUserID,
 } from '@ente/shared/storage/localStorage/helpers';
 import isElectron from 'is-electron';
-import { isDisableSentryFlagSet } from '@ente/shared/apps/env';
 import { ApiError } from '../error';
 import { HttpStatusCode } from 'axios';
-import { isDevBuild } from '../network/api';
 
 export async function getSentryUserID() {
     if (isElectron()) {
@@ -46,8 +44,3 @@ export function isErrorUnnecessaryForSentry(error: any) {
     }
     return false;
 }
-
-export const getIsSentryEnabled = () => {
-    const isSentryDisabled = isDisableSentryFlagSet();
-    return !isDevBuild() && !isSentryDisabled;
-};

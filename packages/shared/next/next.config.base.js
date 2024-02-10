@@ -1,11 +1,12 @@
 const { withSentryConfig } = require('@sentry/nextjs');
 const { PHASE_DEVELOPMENT_SERVER } = require('next/constants');
 
-const { getGitSha, getIsSentryEnabled } = require('./utils/sentry');
+const cp = require('child_process');
 
-const GIT_SHA = getGitSha();
-
-const IS_SENTRY_ENABLED = getIsSentryEnabled();
+const gitSHA = cp.execSync('git rev-parse --short HEAD', {
+    cwd: __dirname,
+    encoding: 'utf8',
+});
 
 module.exports = (phase) =>
     withSentryConfig(
@@ -43,7 +44,8 @@ module.exports = (phase) =>
             ],
             env: {
                 // Sentry reads this env var to set the "release" value.
-                SENTRY_RELEASE: GIT_SHA,
+                // TODO(MR): We also set this below, are both places required?
+                SENTRY_RELEASE: gitSHA,
             },
 
             // https://dev.to/marcinwosinek/how-to-add-resolve-fallback-to-webpack-5-in-nextjs-10-i6j
@@ -55,7 +57,7 @@ module.exports = (phase) =>
             },
         },
         {
-            dryRun: phase === PHASE_DEVELOPMENT_SERVER || !IS_SENTRY_ENABLED,
-            release: GIT_SHA,
+            dryRun: phase === PHASE_DEVELOPMENT_SERVER,
+            release: gitSHA,
         }
     );

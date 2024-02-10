@@ -171,7 +171,7 @@ export default function App(props: EnteAppProps) {
         const main = async () => {
             addLogLine(`userID: ${(getData(LS_KEYS.USER) as User)?.id}`);
             addLogLine(`sentryID: ${await getSentryUserID()}`);
-            addLogLine(`sentry release ID: ${process.env.SENTRY_RELEASE}`);
+            addLogLine(`sentry release: ${process.env.SENTRY_RELEASE}`);
         };
         main();
     }, []);
