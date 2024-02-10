@@ -90,6 +90,7 @@
   "importBitwardenGuide": "使用 Bitwarden 工具中的“导出保管库”选项并导入未加密的 JSON 文件。",
   "importAegisGuide": "在Aegis的设置中使用\"导出密码库\"选项。\n\n如果您的密码库已加密，您需要输入密码才能解密密码库。",
   "import2FasGuide": "使用 2FAS 中的“设置 -> 备份 - 导出”选项。\n\n如果您的备份已被加密，则需要输入密码才能解密备份",
+  "importLastpassGuide": "使用 Lastpass Authenticator 设置中的“转移账户”选项，然后按“将账户导出到文件”。导入下载的 JSON。",
   "exportCodes": "导出代码",
   "importLabel": "导入",
   "importInstruction": "请以以下格式选择包含代码列表的文件",

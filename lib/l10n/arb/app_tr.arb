@@ -90,6 +90,7 @@
   "importBitwardenGuide": "Bitwarden Tools içindeki \"Kasayı dışa aktar\" seçeneğini kullanın ve şifrelenmemiş JSON dosyasını içe aktarın.",
   "importAegisGuide": "Aegis'in Ayarlarında \"Kasayı dışa aktar\" seçeneğini kullanın.\n\nKasanız şifrelenmişse, kasanın şifresini çözmek için kasa parolasını girmeniz gerekecektir.",
   "import2FasGuide": "2FAS içindeki \"Ayarlar -> Yedekle-Dışa Aktar\" seçeneğini seçin.\n\nEğer yedeğiniz şifreli ise, şifrenin çözülmesi için şifreleme parolasını girmeniz gerekmekte",
+  "importLastpassGuide": "Lastpass Kimlik Doğrulayıcı Ayarları içerisindeki \"Hesapları aktar\" seçeneği kullanın ve \"Hesapları dosyaya dışarı aktar\"a basın. İndirilen JSON'u içeri aktarın.",
   "exportCodes": "Kodu dışa aktar",
   "importLabel": "İçe aktar",
   "importInstruction": "Lütfen aşağıdaki şekilde kodlarınızın listesini içeren dosyayı seçiniz",
