@@ -102,7 +102,7 @@ jobs:
           keychain add-certificates --certificate $CERTIFICATE_PATH --certificate-password $P12_PASSWORD
 
           # Use profile in current project
-          xcode-project use-profiles
+          xcode-project use-profiles --project=macos/**/*.xcodeproj
 
       - name: Dmg dependencies
         run: |
