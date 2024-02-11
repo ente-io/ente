@@ -18,8 +18,9 @@ jobs:
       - uses: actions/checkout@v2
 
       - name: Setup flutter
-        uses: subosito/flutter-action@master
+        uses: subosito/flutter-action@v2
         with:
+          cache-key: "flutter-:os:-:channel:-:version:-:arch:"
           flutter-version: ${{ env.FLUTTER_VERSION  }}
 
       # Fetch sub modules
@@ -64,16 +65,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Setup flutter
-        uses: subosito/flutter-action@master
+        uses: subosito/flutter-action@v2
         with:
+          cache-key: "flutter-:os:-:channel:-:version:-:arch:"
           flutter-version: ${{ env.FLUTTER_VERSION  }}
 
       # Fetch sub modules
       - run: git submodule update --init --recursive
-
-      - name: Get dependencies
-        run: |
-          flutter pub get
 
       - name: Get certificates
         env:
@@ -105,6 +103,11 @@ jobs:
           # apply provisioning profile
           mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
           cp $PP_PATH ~/Library/MobileDevice/Provisioning\ Profiles
+
+          keychain initialize
+          keychain add-certificates --certificate $CERTIFICATE_PATH --certificate-password $P12_PASSWORD
+
+          xcode-project use-profiles --project "macos/Runner.xcodeproj/project.pbxproj" --profile $PP_PATH
 
       - name: Dmg dependencies
         run: |
@@ -143,8 +146,9 @@ jobs:
       - uses: actions/checkout@v2
 
       - name: Setup flutter
-        uses: subosito/flutter-action@master
+        uses: subosito/flutter-action@v2
         with:
+          cache-key: "flutter-:os:-:channel:-:version:-:arch:"
           channel: stable
 
       # Fetch sub modules
