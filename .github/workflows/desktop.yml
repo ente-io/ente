@@ -73,6 +73,10 @@ jobs:
       # Fetch sub modules
       - run: git submodule update --init --recursive
 
+      - name: Install dependencies
+        run: |
+          pip3 install codemagic-cli-tools
+
       - name: Get certificates
         env:
           BUILD_CERTIFICATE_BASE64: ${{ secrets.MAC_OS_CERTIFICATE }}
