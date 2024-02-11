@@ -114,14 +114,22 @@ jobs:
           flutter config --enable-macos-desktop
           dart pub global activate flutter_distributor
           flutter_distributor package --platform=macos --targets=dmg --skip-clean
-          mv dist/**/ente_auth-*-macos.dmg auth-macos-${{ github.event_name == 'release' && github.event.release.tag_name || 'nightly' }}-universal.dmg
+          mv dist/**/ente_auth-*-macos.dmg auth-macos-${{ github.event_name == 'release' && github.event.release.tag_name || 'nightly' }}-unsigned.dmg
 
       - name: Sign App
         env:
           DMG_PATH: auth-macos-${{ github.event_name == 'release' && github.event.release.tag_name || 'nightly' }}-universal.dmg
-          CODESIGN_IDENTITY: ${{ secrets.MAC_OS_CODESIGN_IDENTITY }}
+          DMG_UNSIGNED_PATH: auth-macos-${{ github.event_name == 'release' && github.event.release.tag_name || 'nightly' }}-unsigned.dmg
         run: |
-          /usr/bin/codesign --force -s "$CODESIGN_IDENTITY" "$DMG_PATH" -v
+          # Find the installer certificate common name in keychain
+          INSTALLER_CERT_NAME=$(keychain list-certificates \
+            | jq '.[]
+            | select(.common_name
+            | contains("Mac Developer Installer"))
+            | .common_name' \
+            | xargs)
+
+          xcrun productsign --sign "$INSTALLER_CERT_NAME" "$DMG_UNSIGNED_PATH" "$DMG_PATH"
 
       - uses: svenstaro/upload-release-action@latest
         with:
