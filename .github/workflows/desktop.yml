@@ -125,7 +125,7 @@ jobs:
           INSTALLER_CERT_NAME=$(keychain list-certificates \
             | jq '.[]
             | select(.common_name
-            | contains("Mac Developer Installer"))
+            | contains("Apple Development"))
             | .common_name' \
             | xargs)
 
