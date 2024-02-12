@@ -30,13 +30,18 @@ import 'package:flutter/material.dart';
 
 class SettingsPage extends StatelessWidget {
   final ValueNotifier<String?> emailNotifier;
+  final GlobalKey<ScaffoldState> scaffoldKey;
 
-  SettingsPage({Key? key, required this.emailNotifier}) : super(key: key);
+  SettingsPage({
+    super.key,
+    required this.emailNotifier,
+    required this.scaffoldKey,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final _hasLoggedIn = Configuration.instance.hasConfiguredAccount();
-    if (_hasLoggedIn) {
+    final hasLoggedIn = Configuration.instance.hasConfiguredAccount();
+    if (hasLoggedIn) {
       UserService.instance.getUserDetailsV2().ignore();
     }
     final enteColorScheme = getEnteColorScheme(context);
@@ -49,11 +54,11 @@ class SettingsPage extends StatelessWidget {
   }
 
   Widget _getBody(BuildContext context, EnteColorScheme colorScheme) {
-    final _hasLoggedIn = Configuration.instance.hasConfiguredAccount();
+    final hasLoggedIn = Configuration.instance.hasConfiguredAccount();
     final enteTextTheme = getEnteTextTheme(context);
     const sectionSpacing = SizedBox(height: 8);
     final List<Widget> contents = [];
-    if (_hasLoggedIn) {
+    if (hasLoggedIn) {
       contents.add(
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -161,7 +166,9 @@ class SettingsPage extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const SettingsTitleBarWidget(),
+            SettingsTitleBarWidget(
+              scaffoldKey: scaffoldKey,
+            ),
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
               child: Column(

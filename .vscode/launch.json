@@ -7,7 +7,10 @@
       "type": "dart",
       "flutterMode": "debug",
       "program": "lib/main.dart",
-      "args": ["--dart-define", "endpoint=http://localhost:8080"]
+      "args": [
+        "--dart-define",
+        "endpoint=http://localhost:8080"
+      ]
     },
     {
       "name": "Android Dev",
@@ -26,21 +29,32 @@
       "request": "launch",
       "type": "dart",
       "program": "lib/main.dart",
-      "args": ["--dart-define", "endpoint=http://192.168.1.30:8080"]
+      "args": [
+        "--dart-define",
+        "endpoint=http://192.168.1.30:8080"
+      ]
     },
     {
       "name": "iOS Prod",
       "request": "launch",
       "type": "dart",
       "program": "lib/main.dart",
-      "args": ["--target", "lib/main.dart"]
+      "args": [
+        "--target",
+        "lib/main.dart"
+      ]
     },
     {
       "name": "Android Prod",
       "request": "launch",
       "type": "dart",
       "program": "lib/main.dart",
-      "args": ["--target", "lib/main.dart", "--flavor", "independent"]
-    }
+      "args": [
+        "--target",
+        "lib/main.dart",
+        "--flavor",
+        "independent"
+      ]
+    },
   ]
 }

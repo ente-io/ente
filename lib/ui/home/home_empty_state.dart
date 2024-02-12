@@ -3,6 +3,7 @@ import 'package:ente_auth/theme/ente_theme.dart';
 import 'package:ente_auth/ui/settings/data/import_page.dart';
 import 'package:ente_auth/ui/settings/faq.dart';
 import 'package:ente_auth/utils/navigation_util.dart';
+import 'package:ente_auth/utils/platform_util.dart';
 import 'package:flutter/material.dart';
 
 class HomeEmptyStateWidget extends StatelessWidget {
@@ -10,10 +11,10 @@ class HomeEmptyStateWidget extends StatelessWidget {
   final VoidCallback? onManuallySetupTap;
 
   const HomeEmptyStateWidget({
-    Key? key,
+    super.key,
     required this.onScanTap,
     required this.onManuallySetupTap,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -40,13 +41,14 @@ class HomeEmptyStateWidget extends StatelessWidget {
                       style: Theme.of(context).textTheme.headlineMedium,
                     ),
                     const SizedBox(height: 64),
-                    SizedBox(
-                      width: 400,
-                      child: OutlinedButton(
-                        onPressed: onScanTap,
-                        child: Text(l10n.importScanQrCode),
+                    if (PlatformUtil.isMobile())
+                      SizedBox(
+                        width: 400,
+                        child: OutlinedButton(
+                          onPressed: onScanTap,
+                          child: Text(l10n.importScanQrCode),
+                        ),
                       ),
-                    ),
                     const SizedBox(height: 18),
                     SizedBox(
                       width: 400,
@@ -58,7 +60,7 @@ class HomeEmptyStateWidget extends StatelessWidget {
                     const SizedBox(height: 54),
                     InkWell(
                       onTap: () {
-                        routeToPage(context, ImportCodePage());
+                        routeToPage(context, const ImportCodePage());
                       },
                       child: Text(
                         l10n.importCodes,

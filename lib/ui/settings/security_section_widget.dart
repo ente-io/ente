@@ -15,15 +15,14 @@ import 'package:ente_auth/ui/components/expandable_menu_item_widget.dart';
 import 'package:ente_auth/ui/components/menu_item_widget.dart';
 import 'package:ente_auth/ui/components/toggle_switch_widget.dart';
 import 'package:ente_auth/ui/settings/common_settings.dart';
-import 'package:ente_auth/utils/crypto_util.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
 import 'package:ente_auth/utils/navigation_util.dart';
 import 'package:ente_auth/utils/toast_util.dart';
+import 'package:ente_crypto_dart/ente_crypto_dart.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_sodium/flutter_sodium.dart';
 
 class SecuritySectionWidget extends StatefulWidget {
-  const SecuritySectionWidget({Key? key}) : super(key: key);
+  const SecuritySectionWidget({super.key});
 
   @override
   State<SecuritySectionWidget> createState() => _SecuritySectionWidgetState();
@@ -82,7 +81,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
               String recoveryKey;
               try {
                 recoveryKey =
-                    Sodium.bin2hex(Configuration.instance.getRecoveryKey());
+                    CryptoUtil.bin2hex(Configuration.instance.getRecoveryKey());
               } catch (e) {
                 showGenericErrorDialog(context: context);
                 return;

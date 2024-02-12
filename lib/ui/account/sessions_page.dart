@@ -11,7 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 
 class SessionsPage extends StatefulWidget {
-  const SessionsPage({Key? key}) : super(key: key);
+  const SessionsPage({super.key});
 
   @override
   State<SessionsPage> createState() => _SessionsPageState();

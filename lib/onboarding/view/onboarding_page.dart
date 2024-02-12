@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:ente_auth/app/view/app.dart';
 import 'package:ente_auth/core/configuration.dart';
@@ -13,7 +14,6 @@ import 'package:ente_auth/ui/account/login_page.dart';
 import 'package:ente_auth/ui/account/logout_dialog.dart';
 import 'package:ente_auth/ui/account/password_entry_page.dart';
 import 'package:ente_auth/ui/account/password_reentry_page.dart';
-import 'package:ente_auth/ui/common/gradient_button.dart';
 import 'package:ente_auth/ui/components/buttons/button_widget.dart';
 import 'package:ente_auth/ui/components/models/button_result.dart';
 import 'package:ente_auth/ui/home_page.dart';
@@ -26,7 +26,7 @@ import "package:flutter/material.dart";
 import 'package:local_auth/local_auth.dart';
 
 class OnboardingPage extends StatefulWidget {
-  const OnboardingPage({Key? key}) : super(key: key);
+  const OnboardingPage({super.key});
 
   @override
   State<OnboardingPage> createState() => _OnboardingPageState();
@@ -126,18 +126,19 @@ class _OnboardingPageState extends State<OnboardingPage> {
                       ],
                     ),
                     const SizedBox(height: 100),
+                    // Container(
+                    //   width: double.infinity,
+                    //   padding: const EdgeInsets.symmetric(horizontal: 20),
+                    //   child: GradientButton(
+                    //     onTap: _navigateToSignUpPage,
+                    //     text: l10n.newUser,
+                    //   ),
+                    // ),
+                    // const SizedBox(height: 4),
                     Container(
+                      height: 56,
                       width: double.infinity,
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: GradientButton(
-                        onTap: _navigateToSignUpPage,
-                        text: l10n.newUser,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
+                      padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
                       child: Hero(
                         tag: "log_in",
                         child: ElevatedButton(
@@ -182,14 +183,20 @@ class _OnboardingPageState extends State<OnboardingPage> {
   }
 
   Future<void> _optForOfflineMode() async {
-    bool canCheckBio = await LocalAuthentication().canCheckBiometrics;
-    if(!canCheckBio) {
-      showToast(context, "Sorry, biometric authentication is not supported on this device.");
+    final canContinue = Platform.isMacOS || Platform.isLinux
+        ? true
+        : await LocalAuthentication().canCheckBiometrics;
+
+    if (!canContinue) {
+      showToast(
+        context,
+        "Sorry, biometric authentication is not supported on this device.",
+      );
       return;
     }
     final bool hasOptedBefore = Configuration.instance.hasOptedForOfflineMode();
     ButtonResult? result;
-    if(!hasOptedBefore) {
+    if (!hasOptedBefore) {
       result = await showChoiceActionSheet(
         context,
         title: context.l10n.warning,
@@ -208,7 +215,6 @@ class _OnboardingPageState extends State<OnboardingPage> {
         ),
       );
     }
-
   }
 
   void _navigateToSignUpPage() {

@@ -3,10 +3,11 @@ import 'dart:io';
 
 import 'package:ente_auth/models/authenticator/auth_entity.dart';
 import 'package:ente_auth/models/authenticator/local_auth_entity.dart';
+import 'package:ente_auth/utils/directory_utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:sqflite/sqflite.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 class OfflineAuthenticatorDB {
   static const _databaseName = "ente.offline_authenticator.db";
@@ -15,7 +16,8 @@ class OfflineAuthenticatorDB {
   static const entityTable = 'entities';
 
   OfflineAuthenticatorDB._privateConstructor();
-  static final OfflineAuthenticatorDB instance = OfflineAuthenticatorDB._privateConstructor();
+  static final OfflineAuthenticatorDB instance =
+      OfflineAuthenticatorDB._privateConstructor();
 
   static Future<Database>? _dbFuture;
 
@@ -25,8 +27,18 @@ class OfflineAuthenticatorDB {
   }
 
   Future<Database> _initDatabase() async {
+    if (Platform.isWindows || Platform.isLinux) {
+      var databaseFactory = databaseFactoryFfi;
+      return await databaseFactory.openDatabase(
+        await DirectoryUtils.getDatabasePath(_databaseName),
+        options: OpenDatabaseOptions(
+          version: _databaseVersion,
+          onCreate: _onCreate,
+        ),
+      );
+    }
     final Directory documentsDirectory =
-    await getApplicationDocumentsDirectory();
+        await getApplicationDocumentsDirectory();
     final String path = join(documentsDirectory.path, _databaseName);
     debugPrint(path);
     return await openDatabase(
@@ -70,10 +82,10 @@ class OfflineAuthenticatorDB {
   }
 
   Future<int> updateEntry(
-      int generatedID,
-      String encData,
-      String header,
-      ) async {
+    int generatedID,
+    String encData,
+    String header,
+  ) async {
     final db = await instance.database;
     final int timeInMicroSeconds = DateTime.now().microsecondsSinceEpoch;
     int affectedRows = await db.update(
@@ -151,7 +163,7 @@ class OfflineAuthenticatorDB {
         batch.delete(entityTable, where: whereID, whereArgs: [id]);
       }
     }
-    final result = await batch.commit();
+    final _ = await batch.commit();
     debugPrint("Done");
   }
 

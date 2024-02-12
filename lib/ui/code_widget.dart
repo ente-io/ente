@@ -24,7 +24,7 @@ import 'package:move_to_background/move_to_background.dart';
 class CodeWidget extends StatefulWidget {
   final Code code;
 
-  const CodeWidget(this.code, {Key? key}) : super(key: key);
+  const CodeWidget(this.code, {super.key});
 
   @override
   State<CodeWidget> createState() => _CodeWidgetState();
@@ -372,9 +372,9 @@ class _CodeWidgetState extends State<CodeWidget> {
   }
 
   Future<void> _onEditPressed(_) async {
-    bool _isAuthSuccessful = await LocalAuthenticationService.instance
+    bool isAuthSuccessful = await LocalAuthenticationService.instance
         .requestLocalAuthentication(context, context.l10n.editCodeAuthMessage);
-    if (!_isAuthSuccessful) {
+    if (!isAuthSuccessful) {
       return;
     }
     final Code? code = await Navigator.of(context).push(
@@ -390,9 +390,9 @@ class _CodeWidgetState extends State<CodeWidget> {
   }
 
   Future<void> _onShowQrPressed(_) async {
-    bool _isAuthSuccessful = await LocalAuthenticationService.instance
+    bool isAuthSuccessful = await LocalAuthenticationService.instance
         .requestLocalAuthentication(context, context.l10n.showQRAuthMessage);
-    if (!_isAuthSuccessful) {
+    if (!isAuthSuccessful) {
       return;
     }
     // ignore: unused_local_variable
@@ -406,12 +406,12 @@ class _CodeWidgetState extends State<CodeWidget> {
   }
 
   void _onDeletePressed(_) async {
-    bool _isAuthSuccessful =
+    bool isAuthSuccessful =
         await LocalAuthenticationService.instance.requestLocalAuthentication(
       context,
       context.l10n.deleteCodeAuthMessage,
     );
-    if (!_isAuthSuccessful) {
+    if (!isAuthSuccessful) {
       return;
     }
     final l10n = context.l10n;
@@ -450,7 +450,7 @@ class _CodeWidgetState extends State<CodeWidget> {
       code = code.replaceAll(RegExp(r'\d'), '•');
     }
     if (code.length == 6) {
-      return code.substring(0, 3) + " " + code.substring(3, 6);
+      return "${code.substring(0, 3)} ${code.substring(3, 6)}";
     }
     return code;
   }

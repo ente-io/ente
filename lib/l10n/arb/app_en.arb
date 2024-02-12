@@ -59,7 +59,7 @@
     }
   },
   "contactSupport": "Contact support",
-  "rateUsOnStore" : "Rate us on {storeName}",
+  "rateUsOnStore": "Rate us on {storeName}",
   "blog": "Blog",
   "merchandise": "Merchandise",
   "verifyPassword": "Verify password",
@@ -133,7 +133,6 @@
   "faq_q_5": "How can I enable FaceID lock in ente Auth",
   "faq_a_5": "You can enable FaceID lock under Settings → Security → Lockscreen.",
   "somethingWentWrongMessage": "Something went wrong, please try again",
-
   "leaveFamily": "Leave family",
   "leaveFamilyMessage": "Are you sure that you want to leave the family plan?",
   "inFamilyPlanMessage": "You are on a family plan!",
@@ -198,6 +197,10 @@
   "recoveryKeySaveDescription": "We don't store this key, please save this 24 word key in a safe place.",
   "doThisLater": "Do this later",
   "saveKey": "Save key",
+  "save": "Save",
+  "send": "Send",
+  "saveOrSendDescription": "Do you want to save this to your storage (Downloads folder by default) or send it to other apps?",
+  "saveOnlyDescription": "Do you want to save this to your storage (Downloads folder by default)?",
   "back": "Back",
   "createAccount": "Create account",
   "passwordStrength": "Password strength: {passwordStrengthValue}",
@@ -337,10 +340,10 @@
   "offlineModeWarning": "You have chosen to proceed without backups. Please take manual backups to make sure your codes are safe.",
   "showLargeIcons": "Show large icons",
   "shouldHideCode": "Hide codes",
-  "doubleTapToViewHiddenCode" : "You can double tap on an entry to view code",
+  "doubleTapToViewHiddenCode": "You can double tap on an entry to view code",
   "focusOnSearchBar": "Focus search on app start",
   "confirmUpdatingkey": "Are you sure you want to update the secret key?",
-  "minimizeAppOnCopy":  "Minimize app on copy",
+  "minimizeAppOnCopy": "Minimize app on copy",
   "editCodeAuthMessage": "Authenticate to edit code",
   "deleteCodeAuthMessage": "Authenticate to delete code",
   "showQRAuthMessage": "Authenticate to show QR code",
@@ -405,5 +408,6 @@
   "signOutOtherDevices": "Sign out other devices",
   "doNotSignOut": "Do not sign out",
   "hearUsWhereTitle": "How did you hear about Ente? (optional)",
-  "hearUsExplanation": "We don't track app installs. It'd help if you told us where you found us!"
+  "hearUsExplanation": "We don't track app installs. It'd help if you told us where you found us!",
+  "recoveryKeySaved": "Recovery key saved in Downloads folder!"
 }

@@ -1,0 +1,169 @@
+name: desktop build
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "v*"
+
+env:
+  FLUTTER_VERSION: "3.16.9"
+
+jobs:
+  build-linux:
+    name: Linux
+    runs-on: ubuntu-20.04
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setup flutter
+        uses: subosito/flutter-action@v2
+        with:
+          cache-key: "flutter-:os:-:channel:-:version:-:arch:"
+          flutter-version: ${{ env.FLUTTER_VERSION  }}
+
+      # Fetch sub modules
+      - run: git submodule update --init --recursive
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update -y && sudo apt-get install -y libsecret-1-dev libsodium-dev libwebkit2gtk-4.0-dev libfuse2 ninja-build libgtk-3-dev dpkg-dev pkg-config rpm libsqlite3-dev locate
+
+      - name: Install appimagetool
+        run: |
+          wget -O appimagetool "https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage"
+          chmod +x appimagetool
+          mv appimagetool /usr/local/bin/
+
+      - name: Build Flutter app
+        env:
+          LIBSODIUM_USE_PKGCONFIG: 1
+        run: |
+          flutter config --enable-linux-desktop
+          dart pub global activate flutter_distributor
+          flutter_distributor package --platform=linux --targets=deb --skip-clean
+          flutter_distributor package --platform=linux --targets=rpm --skip-clean
+          flutter_distributor package --platform=linux --targets=appimage --skip-clean
+          mv dist/**/*-*-linux.deb auth-linux-${{ github.event_name == 'release' && github.event.release.tag_name || 'nightly' }}-x86_64.deb
+          mv dist/**/*-*-linux.rpm auth-linux-${{ github.event_name == 'release' && github.event.release.tag_name || 'nightly' }}-x86_64.rpm
+          mv dist/**/*-*-linux.AppImage auth-linux-${{ github.event_name == 'release' && github.event.release.tag_name || 'nightly' }}-x86_64.AppImage
+
+      - uses: svenstaro/upload-release-action@latest
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: auth-linux-*
+          file_glob: true
+          prerelease: ${{ github.event_name != 'release' }}
+          release_name: ${{ github.event_name == 'release' && github.event.release.name || 'Nightly Build' }}
+          tag: ${{ github.event_name == 'release' && github.event.release.tag_name || 'nightly' }}
+          overwrite: true
+
+  build-macos:
+    name: Macos
+    runs-on: macos-13
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup flutter
+        uses: subosito/flutter-action@v2
+        with:
+          cache-key: "flutter-:os:-:channel:-:version:-:arch:"
+          flutter-version: ${{ env.FLUTTER_VERSION  }}
+
+      # Fetch sub modules
+      - run: git submodule update --init --recursive
+
+      - name: Install dependencies
+        run: |
+          pip3 install codemagic-cli-tools
+
+      - name: Set up provisioning profiles from environment variables
+        env:
+          CM_PROVISIONING_PROFILE: ${{ secrets.MAC_OS_BUILD_PROVISION_PROFILE_BASE64 }}
+        run: |
+          PROFILES_HOME="$HOME/Library/MobileDevice/Provisioning Profiles"
+          mkdir -p "$PROFILES_HOME"
+          PROFILE_PATH="$(mktemp "$PROFILES_HOME"/$(uuidgen).provisionprofile)"
+          echo ${CM_PROVISIONING_PROFILE} | base64 --decode > "$PROFILE_PATH"
+          echo "Saved provisioning profile $PROFILE_PATH"
+
+      - name: Get certificates
+        env:
+          BUILD_CERTIFICATE_BASE64: ${{ secrets.MAC_OS_CERTIFICATE }}
+          P12_PASSWORD: ${{ secrets.MAC_OS_CERTIFICATE_PASSWORD }}
+          INSTALLER_CERTIFICATE_BASE64: ${{ secrets.MAC_OS_INSTALLER_CERTIFICATE }}
+        run: |
+          # create variables
+          CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
+          INSTALLER_CERTIFICATE_PATH=$RUNNER_TEMP/installer_certificate.p12
+
+          # copy certificates from base64
+          echo -n "$BUILD_CERTIFICATE_BASE64" | base64 --decode -o $CERTIFICATE_PATH
+          echo -n "$INSTALLER_CERTIFICATE_BASE64" | base64 --decode -o $INSTALLER_CERTIFICATE_PATH
+
+          # add certificate to keychain
+          keychain initialize
+          keychain add-certificates --certificate $CERTIFICATE_PATH --certificate-password $P12_PASSWORD
+          keychain add-certificates --certificate $INSTALLER_CERTIFICATE_PATH
+
+          # Use profile in current project
+          xcode-project use-profiles --project=macos/**/*.xcodeproj
+
+      - name: Dmg dependencies
+        run: |
+          python3 -m pip install setuptools
+          npm install -g appdmg
+
+      - name: Build Macos App
+        run: |
+          flutter config --enable-macos-desktop
+          dart pub global activate flutter_distributor
+          flutter_distributor package --platform=macos --targets=dmg --skip-clean
+          mv dist/**/ente_auth-*-macos.dmg auth-macos-${{ github.event_name == 'release' && github.event.release.tag_name || 'nightly' }}-universal.dmg
+
+      - uses: svenstaro/upload-release-action@latest
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: auth-macos-*.dmg
+          file_glob: true
+          prerelease: ${{ github.event_name != 'release' }}
+          release_name: ${{ github.event_name == 'release' && github.event.release.name || 'Nightly Build' }}
+          tag: ${{ github.event_name == 'release' && github.event.release.tag_name || 'nightly' }}
+          overwrite: true
+
+  build_windows:
+    name: Windows
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setup flutter
+        uses: subosito/flutter-action@v2
+        with:
+          cache-key: "flutter-:os:-:channel:-:version:-:arch:"
+          channel: stable
+
+      # Fetch sub modules
+      - run: git submodule update --init --recursive
+
+      - name: Build Flutter app
+        run: |
+          flutter config --enable-windows-desktop
+          dart pub global activate flutter_distributor
+          make innoinstall
+          flutter_distributor package --platform=windows --targets=exe --skip-clean
+          cp dist/**/* ./auth-windows-${{ github.event_name == 'release' && github.event.release.tag_name || 'nightly' }}.exe
+
+      - run: cp -r build/windows/x64/runner/Release auth-windows-exe
+      - run: tar.exe -a -c -f auth-windows-${{ github.event_name == 'release' && github.event.release.tag_name || 'nightly' }}.zip auth-windows-exe
+
+      - uses: svenstaro/upload-release-action@latest
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: auth-windows-*
+          file_glob: true
+          prerelease: ${{ github.event_name != 'release' }}
+          release_name: ${{ github.event_name == 'release' && github.event.release.name || 'Nightly Build' }}
+          tag: ${{ github.event_name == 'release' && github.event.release.tag_name || 'nightly' }}
+          overwrite: true

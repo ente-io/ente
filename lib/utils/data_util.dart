@@ -14,7 +14,7 @@ String convertBytesToReadableFormat(int bytes) {
     storageUnitIndex++;
     bytes = (bytes / 1024).round();
   }
-  return bytes.toString() + " " + storageUnits[storageUnitIndex];
+  return "$bytes ${storageUnits[storageUnitIndex]}";
 }
 
 String formatBytes(int bytes, [int decimals = 2]) {
@@ -22,5 +22,5 @@ String formatBytes(int bytes, [int decimals = 2]) {
   const k = 1024;
   final int dm = decimals < 0 ? 0 : decimals;
   final int i = (log(bytes) / log(k)).floor();
-  return ((bytes / pow(k, i)).toStringAsFixed(dm)) + ' ' + storageUnits[i];
+  return '${(bytes / pow(k, i)).toStringAsFixed(dm)} ${storageUnits[i]}';
 }

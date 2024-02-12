@@ -17,7 +17,7 @@ import 'package:ente_auth/utils/toast_util.dart';
 import 'package:flutter/material.dart';
 
 class AdvancedSectionWidget extends StatefulWidget {
-  const AdvancedSectionWidget({Key? key}) : super(key: key);
+  const AdvancedSectionWidget({super.key});
 
   @override
   State<AdvancedSectionWidget> createState() => _AdvancedSectionWidgetState();

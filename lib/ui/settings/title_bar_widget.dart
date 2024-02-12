@@ -2,7 +2,12 @@ import 'package:ente_auth/l10n/l10n.dart';
 import 'package:flutter/material.dart';
 
 class SettingsTitleBarWidget extends StatelessWidget {
-  const SettingsTitleBarWidget({Key? key}) : super(key: key);
+  const SettingsTitleBarWidget({
+    super.key,
+    required this.scaffoldKey,
+  });
+
+  final GlobalKey<ScaffoldState> scaffoldKey;
 
   @override
   Widget build(BuildContext context) {
@@ -17,7 +22,7 @@ class SettingsTitleBarWidget extends StatelessWidget {
             IconButton(
               visualDensity: const VisualDensity(horizontal: -2, vertical: -2),
               onPressed: () {
-                Navigator.pop(context);
+                scaffoldKey.currentState?.closeDrawer();
               },
               icon: const Icon(Icons.keyboard_double_arrow_left_outlined),
             ),

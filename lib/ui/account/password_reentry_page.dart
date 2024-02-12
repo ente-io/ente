@@ -9,14 +9,14 @@ import 'package:ente_auth/ui/account/recovery_page.dart';
 import 'package:ente_auth/ui/common/dynamic_fab.dart';
 import 'package:ente_auth/ui/components/buttons/button_widget.dart';
 import 'package:ente_auth/ui/home_page.dart';
-import 'package:ente_auth/utils/crypto_util.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
 import 'package:ente_auth/utils/email_util.dart';
+import 'package:ente_crypto_dart/ente_crypto_dart.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 
 class PasswordReentryPage extends StatefulWidget {
-  const PasswordReentryPage({Key? key}) : super(key: key);
+  const PasswordReentryPage({super.key});
 
   @override
   State<PasswordReentryPage> createState() => _PasswordReentryPageState();

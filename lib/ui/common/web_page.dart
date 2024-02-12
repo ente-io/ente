@@ -6,7 +6,7 @@ class WebPage extends StatefulWidget {
   final String title;
   final String url;
 
-  const WebPage(this.title, this.url, {Key? key}) : super(key: key);
+  const WebPage(this.title, this.url, {super.key});
 
   @override
   State<WebPage> createState() => _WebPageState();
@@ -28,9 +28,9 @@ class _WebPageState extends State<WebPage> {
       ),
       backgroundColor: Colors.black,
       body: InAppWebView(
-        initialUrlRequest: URLRequest(url: Uri.parse(widget.url)),
-        initialOptions: InAppWebViewGroupOptions(
-          crossPlatform: InAppWebViewOptions(transparentBackground: true),
+        initialUrlRequest: URLRequest(url: WebUri(widget.url)),
+        initialSettings: InAppWebViewSettings(
+          transparentBackground: true,
         ),
         onLoadStop: (c, url) {
           setState(() {

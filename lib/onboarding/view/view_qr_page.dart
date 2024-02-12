@@ -1,4 +1,3 @@
-
 import 'dart:math';
 
 import "package:ente_auth/l10n/l10n.dart";
@@ -10,7 +9,7 @@ import 'package:qr_flutter/qr_flutter.dart';
 class ViewQrPage extends StatelessWidget {
   final Code? code;
 
-  ViewQrPage({this.code, Key? key}) : super(key: key);
+  ViewQrPage({this.code, super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -28,9 +27,16 @@ class ViewQrPage extends StatelessWidget {
             padding: const EdgeInsets.symmetric(vertical: 40.0, horizontal: 40),
             child: Column(
               children: [
-                QrImage(
+                QrImageView(
                   data: code!.rawData,
-                  foregroundColor: Theme.of(context).colorScheme.onBackground,
+                  eyeStyle: QrEyeStyle(
+                    eyeShape: QrEyeShape.square,
+                    color: Theme.of(context).colorScheme.onBackground,
+                  ),
+                  dataModuleStyle: QrDataModuleStyle(
+                    dataModuleShape: QrDataModuleShape.square,
+                    color: Theme.of(context).colorScheme.onBackground,
+                  ),
                   version: QrVersions.auto,
                   size: qrSize,
                 ),

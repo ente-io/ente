@@ -3,9 +3,10 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:ente_auth/core/configuration.dart';
 import 'package:ente_auth/core/constants.dart';
+import 'package:ente_auth/utils/package_info_util.dart';
+import 'package:ente_auth/utils/platform_util.dart';
 import 'package:fk_user_agent/fk_user_agent.dart';
 import 'package:flutter/foundation.dart';
-import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 
@@ -21,16 +22,22 @@ class Network {
   late Dio _enteDio;
 
   Future<void> init() async {
-    await FkUserAgent.init();
-    final packageInfo = await PackageInfo.fromPlatform();
+    if (PlatformUtil.isMobile()) await FkUserAgent.init();
+    final packageInfo = await PackageInfoUtil().getPackageInfo();
+    final version = PackageInfoUtil().getVersion(packageInfo);
+    final packageName = PackageInfoUtil().getPackageName(packageInfo);
+
     final preferences = await SharedPreferences.getInstance();
+
     _dio = Dio(
       BaseOptions(
-        connectTimeout: kConnectTimeout,
+        connectTimeout: Duration(milliseconds: kConnectTimeout),
         headers: {
-          HttpHeaders.userAgentHeader: FkUserAgent.userAgent,
-          'X-Client-Version': packageInfo.version,
-          'X-Client-Package': packageInfo.packageName,
+          HttpHeaders.userAgentHeader: PlatformUtil.isMobile()
+              ? FkUserAgent.userAgent
+              : Platform.operatingSystem,
+          'X-Client-Version': version,
+          'X-Client-Package': packageName,
         },
       ),
     );
@@ -38,11 +45,14 @@ class Network {
     _enteDio = Dio(
       BaseOptions(
         baseUrl: apiEndpoint,
-        connectTimeout: kConnectTimeout,
+        connectTimeout: Duration(milliseconds: kConnectTimeout),
         headers: {
-          HttpHeaders.userAgentHeader: FkUserAgent.userAgent,
-          'X-Client-Version': packageInfo.version,
-          'X-Client-Package': packageInfo.packageName,
+          if (PlatformUtil.isMobile())
+            HttpHeaders.userAgentHeader: FkUserAgent.userAgent
+          else
+            HttpHeaders.userAgentHeader: Platform.operatingSystem,
+          'X-Client-Version': version,
+          'X-Client-Package': packageName,
         },
       ),
     );
@@ -76,8 +86,8 @@ class EnteRequestInterceptor extends Interceptor {
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
     if (kDebugMode) {
       assert(
-      options.baseUrl == enteEndpoint,
-      "interceptor should only be used for API endpoint",
+        options.baseUrl == enteEndpoint,
+        "interceptor should only be used for API endpoint",
       );
     }
     // ignore: prefer_const_constructors

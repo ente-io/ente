@@ -9,7 +9,7 @@ import "package:flutter/material.dart";
 class SetupEnterSecretKeyPage extends StatefulWidget {
   final Code? code;
 
-  SetupEnterSecretKeyPage({this.code, Key? key}) : super(key: key);
+  SetupEnterSecretKeyPage({this.code, super.key});
 
   @override
   State<SetupEnterSecretKeyPage> createState() =>
@@ -32,7 +32,7 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
           widget.code != null ? safeDecode(widget.code!.account).trim() : null,
     );
     _secretController = TextEditingController(
-      text: widget.code != null ? widget.code!.secret : null,
+      text: widget.code?.secret,
     );
     _secretKeyObscured = widget.code != null;
     super.initState();

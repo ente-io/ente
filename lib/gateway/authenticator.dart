@@ -10,12 +10,12 @@ class AuthenticatorGateway {
   late String _basedEndpoint;
 
   AuthenticatorGateway(this._dio, this._config) {
-    _basedEndpoint = _config.getHttpEndpoint() + "/authenticator";
+    _basedEndpoint = "${_config.getHttpEndpoint()}/authenticator";
   }
 
   Future<void> createKey(String encKey, String header) async {
     await _dio.post(
-      _basedEndpoint + "/key",
+      "$_basedEndpoint/key",
       data: {
         "encryptedKey": encKey,
         "header": header,
@@ -31,7 +31,7 @@ class AuthenticatorGateway {
   Future<AuthKey> getKey() async {
     try {
       final response = await _dio.get(
-        _basedEndpoint + "/key",
+        "$_basedEndpoint/key",
         options: Options(
           headers: {
             "X-Auth-Token": _config.getToken(),
@@ -39,7 +39,7 @@ class AuthenticatorGateway {
         ),
       );
       return AuthKey.fromMap(response.data);
-    } on DioError catch (e) {
+    } on DioException catch (e) {
       if (e.response != null && (e.response!.statusCode ?? 0) == 404) {
         throw AuthenticatorKeyNotFound();
       } else {
@@ -52,7 +52,7 @@ class AuthenticatorGateway {
 
   Future<AuthEntity> createEntity(String encryptedData, String header) async {
     final response = await _dio.post(
-      _basedEndpoint + "/entity",
+      "$_basedEndpoint/entity",
       data: {
         "encryptedData": encryptedData,
         "header": header,
@@ -72,7 +72,7 @@ class AuthenticatorGateway {
     String header,
   ) async {
     await _dio.put(
-      _basedEndpoint + "/entity",
+      "$_basedEndpoint/entity",
       data: {
         "id": id,
         "encryptedData": encryptedData,
@@ -90,7 +90,7 @@ class AuthenticatorGateway {
     String id,
   ) async {
     await _dio.delete(
-      _basedEndpoint + "/entity",
+      "$_basedEndpoint/entity",
       queryParameters: {
         "id": id,
       },
@@ -105,7 +105,7 @@ class AuthenticatorGateway {
   Future<List<AuthEntity>> getDiff(int sinceTime, {int limit = 500}) async {
     try {
       final response = await _dio.get(
-        _basedEndpoint + "/entity/diff",
+        "$_basedEndpoint/entity/diff",
         queryParameters: {
           "sinceTime": sinceTime,
           "limit": limit,
@@ -124,7 +124,7 @@ class AuthenticatorGateway {
       }
       return authEntities;
     } catch (e) {
-      if (e is DioError && e.response?.statusCode == 401) {
+      if (e is DioException && e.response?.statusCode == 401) {
         throw UnauthorizedError();
       } else {
         rethrow;

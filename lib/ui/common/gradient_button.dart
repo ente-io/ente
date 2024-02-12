@@ -1,5 +1,3 @@
-
-
 import 'package:flutter/material.dart';
 
 class GradientButton extends StatelessWidget {
@@ -15,17 +13,21 @@ class GradientButton extends StatelessWidget {
   // padding between the text and icon
   final double paddingValue;
 
+  // used when two icons are in row
+  final bool reversedGradient;
+
   const GradientButton({
-    Key? key,
+    super.key,
     this.linearGradientColors = const [
       Color.fromARGB(255, 133, 44, 210),
       Color.fromARGB(255, 187, 26, 93),
     ],
+    this.reversedGradient = false,
     this.onTap,
     this.text = '',
     this.iconData,
     this.paddingValue = 0.0,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -71,7 +73,9 @@ class GradientButton extends StatelessWidget {
           gradient: LinearGradient(
             begin: const Alignment(0.1, -0.9),
             end: const Alignment(-0.6, 0.9),
-            colors: linearGradientColors,
+            colors: reversedGradient
+                ? linearGradientColors.reversed.toList()
+                : linearGradientColors,
           ),
           borderRadius: BorderRadius.circular(8),
         ),

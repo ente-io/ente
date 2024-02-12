@@ -8,8 +8,8 @@ import 'package:flutter/material.dart';
 
 class FAQQuestionsWidget extends StatelessWidget {
   const FAQQuestionsWidget({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -64,9 +64,9 @@ class FAQQuestionsWidget extends StatelessWidget {
 
 class FaqWidget extends StatelessWidget {
   const FaqWidget({
-    Key? key,
+    super.key,
     required this.faq,
-  }) : super(key: key);
+  });
 
   final FaqItem? faq;
 
