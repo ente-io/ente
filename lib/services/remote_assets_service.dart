@@ -27,7 +27,7 @@ class RemoteAssetsService {
   }
 
   Future<String> _getLocalPath(String remotePath) async {
-    return (await getTemporaryDirectory()).path +
+    return (await getApplicationSupportDirectory()).path +
         "/assets/" +
         _urlToFileName(remotePath);
   }
@@ -53,5 +53,6 @@ class RemoteAssetsService {
       await existingFile.delete();
     }
     await NetworkClient.instance.getDio().download(url, savePath);
+    _logger.info("Downloaded " + url);
   }
 }
