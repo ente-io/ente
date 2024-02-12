@@ -92,7 +92,6 @@ jobs:
           BUILD_CERTIFICATE_BASE64: ${{ secrets.MAC_OS_CERTIFICATE }}
           P12_PASSWORD: ${{ secrets.MAC_OS_CERTIFICATE_PASSWORD }}
           INSTALLER_CERTIFICATE_BASE64: ${{ secrets.MAC_OS_INSTALLER_CERTIFICATE }}
-          INSTALLER_CERTIFICATE_PASSWORD: ${{ secrets.MAC_OS_INSTALLER_CERTIFICATE_PASSWORD }}
         run: |
           # create variables
           CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
@@ -105,7 +104,7 @@ jobs:
 
           # add installer certificate to keychain for signed distribution
           echo $INSTALLER_CERTIFICATE_BASE64 | base64 --decode > $INSTALLER_CERTIFICATE_PATH
-          keychain add-certificates --certificate $INSTALLER_CERTIFICATE_PATH --certificate-password $INSTALLER_CERTIFICATE_PASSWORD
+          keychain add-certificates --certificate $INSTALLER_CERTIFICATE_PATH
 
           # Use profile in current project
           xcode-project use-profiles --project=macos/**/*.xcodeproj
