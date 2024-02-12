@@ -85,6 +85,4 @@ export const getFamilyPortalURL = () => {
  *   assigns development when running the `next dev` command, or production for
  *   all other commands.
  */
-export const isDevBuild = () => {
-    return process.env.NODE_ENV === 'development';
-};
+export const isDevBuild = process.env.NODE_ENV === 'development';

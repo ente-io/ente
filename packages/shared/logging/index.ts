@@ -13,7 +13,7 @@ export function addLogLine(
 ) {
     try {
         const completeLog = [log, ...optionalParams].join(' ');
-        if (isDevBuild()) {
+        if (isDevBuild) {
             console.log(completeLog);
         }
         if (isElectron()) {
@@ -28,7 +28,7 @@ export function addLogLine(
 }
 
 export const addLocalLog = (getLog: () => string) => {
-    if (isDevBuild()) {
+    if (isDevBuild) {
         console.log(
             formatLog({
                 logLine: getLog(),
