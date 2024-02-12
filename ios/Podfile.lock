@@ -54,6 +54,8 @@ PODS:
   - flutter_inappwebview_ios/Core (0.0.1):
     - Flutter
     - OrderedSet (~> 5.0)
+  - flutter_local_authentication (1.2.0):
+    - Flutter
   - flutter_local_notifications (0.0.1):
     - Flutter
   - flutter_native_splash (0.0.1):
@@ -134,6 +136,7 @@ DEPENDENCIES:
   - Flutter (from `Flutter`)
   - flutter_email_sender (from `.symlinks/plugins/flutter_email_sender/ios`)
   - flutter_inappwebview_ios (from `.symlinks/plugins/flutter_inappwebview_ios/ios`)
+  - flutter_local_authentication (from `.symlinks/plugins/flutter_local_authentication/ios`)
   - flutter_local_notifications (from `.symlinks/plugins/flutter_local_notifications/ios`)
   - flutter_native_splash (from `.symlinks/plugins/flutter_native_splash/ios`)
   - flutter_secure_storage (from `.symlinks/plugins/flutter_secure_storage/ios`)
@@ -187,6 +190,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/flutter_email_sender/ios"
   flutter_inappwebview_ios:
     :path: ".symlinks/plugins/flutter_inappwebview_ios/ios"
+  flutter_local_authentication:
+    :path: ".symlinks/plugins/flutter_local_authentication/ios"
   flutter_local_notifications:
     :path: ".symlinks/plugins/flutter_local_notifications/ios"
   flutter_native_splash:
@@ -235,9 +240,10 @@ SPEC CHECKSUMS:
   file_picker: 15fd9539e4eb735dc54bae8c0534a7a9511a03de
   file_saver: 503e386464dbe118f630e17b4c2e1190fa0cf808
   fk_user_agent: 1f47ec39291e8372b1d692b50084b0d54103c545
-  Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
+  Flutter: f04841e97a9d0b0a8025694d0796dd46242b2854
   flutter_email_sender: 02d7443217d8c41483223627972bfdc09f74276b
   flutter_inappwebview_ios: 97215cf7d4677db55df76782dbd2930c5e1c1ea0
+  flutter_local_authentication: 1172a4dd88f6306dadce067454e2c4caf07977bb
   flutter_local_notifications: 4cde75091f6327eb8517fa068a0a5950212d2086
   flutter_native_splash: 52501b97d1c0a5f898d687f1646226c1f93c56ef
   flutter_secure_storage: 23fc622d89d073675f2eaa109381aefbcf5a49be
