@@ -97,13 +97,13 @@ jobs:
           CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
           INSTALLER_CERTIFICATE_PATH=$RUNNER_TEMP/installer_certificate.p12
 
-          # add certificate to keychain
+          # copy certificates from base64
           echo -n "$BUILD_CERTIFICATE_BASE64" | base64 --decode -o $CERTIFICATE_PATH
+          echo -n "$INSTALLER_CERTIFICATE_BASE64" | base64 --decode -o $INSTALLER_CERTIFICATE_PATH
+
+          # add certificate to keychain
           keychain initialize
           keychain add-certificates --certificate $CERTIFICATE_PATH --certificate-password $P12_PASSWORD
-
-          # add installer certificate to keychain for signed distribution
-          echo $INSTALLER_CERTIFICATE_BASE64 | base64 --decode > $INSTALLER_CERTIFICATE_PATH
           keychain add-certificates --certificate $INSTALLER_CERTIFICATE_PATH
 
           # Use profile in current project
