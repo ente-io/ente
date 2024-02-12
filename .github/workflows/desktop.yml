@@ -2,12 +2,6 @@ name: desktop build
 
 on:
   workflow_dispatch:
-  push:
-    tags:
-      - "v*"
-
-env:
-  FLUTTER_VERSION: "3.16.9"
 
 jobs:
   build-linux:
