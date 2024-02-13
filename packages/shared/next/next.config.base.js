@@ -59,6 +59,8 @@ const nextConfig = {
     },
 };
 
+const sentryWebpackPluginOptions = {};
+
 // withSentryConfig extends the default Next.js usage of webpack to:
 //
 // 1. Initialize the SDK on client page load (See `sentry.client.config.ts`)
@@ -68,4 +70,4 @@ const nextConfig = {
 // Irritatingly, it insists that we also provide it (empty)
 // sentry.server.config.ts and sentry.edge.config.ts files too, even though we
 // are not using those parts.
-module.exports = withSentryConfig(nextConfig, {});
+module.exports = withSentryConfig(nextConfig, sentryWebpackPluginOptions);
