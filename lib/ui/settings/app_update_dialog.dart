@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
-// import 'package:open_file/open_file.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/network/network.dart';
 import 'package:photos/ente_theme_data.dart';
 import "package:photos/generated/l10n.dart";
 import 'package:photos/services/update_service.dart';
 import 'package:photos/theme/ente_theme.dart';
+import "package:photos/ui/components/buttons/button_widget.dart";
+import "package:photos/ui/components/models/button_type.dart";
 import 'package:url_launcher/url_launcher_string.dart';
 
 class AppUpdateDialog extends StatefulWidget {
@@ -63,32 +64,28 @@ class _AppUpdateDialogState extends State<AppUpdateDialog> {
           children: changelog,
         ),
         const Padding(padding: EdgeInsets.all(8)),
-        SizedBox(
-          width: double.infinity,
-          height: 56,
-          child: OutlinedButton(
-            style: Theme.of(context).outlinedButtonTheme.style!.copyWith(
-              textStyle: MaterialStateProperty.resolveWith<TextStyle>(
-                (Set<MaterialState> states) {
-                  return enteTextTheme.bodyBold;
-                },
-              ),
-            ),
-            onPressed: () async {
-              Navigator.pop(context);
-              // ignore: unawaited_futures
-              showDialog(
-                context: context,
-                builder: (BuildContext context) {
-                  return ApkDownloaderDialog(widget.latestVersionInfo);
-                },
-                barrierDismissible: false,
-              );
-            },
-            child: Text(
-              S.of(context).update,
-            ),
-          ),
+        ButtonWidget(
+          buttonType: ButtonType.primary,
+          labelText: S.of(context).update,
+          onTap: () async {
+            Navigator.pop(context);
+            // ignore: unawaited_futures
+            showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return ApkDownloaderDialog(widget.latestVersionInfo);
+              },
+              barrierDismissible: false,
+            );
+          },
+        ),
+        const SizedBox(height: 6),
+        ButtonWidget(
+          buttonType: ButtonType.secondary,
+          labelText: S.of(context).cancel,
+          onTap: () async {
+            Navigator.of(context).pop();
+          },
         ),
         const Padding(padding: EdgeInsets.all(8)),
         Center(
