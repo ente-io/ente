@@ -1,4 +1,5 @@
 import { CollectionInfo } from './CollectionInfo';
+import React, { Dispatch, SetStateAction } from 'react';
 import { Collection, CollectionSummary } from 'types/collection';
 import CollectionOptions from 'components/Collections/CollectionOptions';
 import { SetCollectionNamerAttributes } from 'components/Collections/CollectionNamer';
@@ -20,6 +21,7 @@ interface Iprops {
     setFilesDownloadProgressAttributesCreator: SetFilesDownloadProgressAttributesCreator;
     isActiveCollectionDownloadInProgress: () => boolean;
     setActiveCollectionID: (collectionID: number) => void;
+    setShowAlbumCastDialog: Dispatch<SetStateAction<boolean>>;
 }
 
 export default function CollectionInfoWithOptions({
@@ -49,6 +51,7 @@ export default function CollectionInfoWithOptions({
                 return <></>;
         }
     };
+
     return (
         <CollectionInfoBarWrapper>
             <SpaceBetweenFlex>
