@@ -2,10 +2,14 @@ import * as Sentry from '@sentry/nextjs';
 import { getSentryUserID } from '@ente/shared/sentry/utils';
 import { runningInBrowser } from '@ente/shared/platform';
 import { getHasOptedOutOfCrashReports } from '@ente/shared/storage/localStorage/helpers';
+import { isDevBuild } from '@ente/shared/network/api';
 
 export const initSentry = async (dsn: string) => {
-    const optedOut = runningInBrowser() && getHasOptedOutOfCrashReports();
-    if (optedOut) return;
+    // Don't initialize Sentry on dev builds
+    if (isDevBuild) return;
+
+    // Don't initialize Sentry if the user has opted out of crash reporting
+    if (optedOut()) return;
 
     // [Note: Specifying the Sentry release]
     //
@@ -51,3 +55,6 @@ export const initSentry = async (dsn: string) => {
 
     Sentry.setUser({ id: await getSentryUserID() });
 };
+
+/** Return true if the user has opted out of crash reporting */
+const optedOut = () => runningInBrowser() && getHasOptedOutOfCrashReports();
