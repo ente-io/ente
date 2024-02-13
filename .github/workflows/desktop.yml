@@ -119,6 +119,12 @@ jobs:
           flutter_distributor package --platform=macos --targets=dmg --skip-clean
           mv dist/**/ente_auth-*-macos.dmg $APP_NAME.dmg
 
+      - name: Signing DMG
+        run: |
+          CERT_NAME=$(security find-identity -v -p codesigning | grep "Developer ID Application" | awk -F'"' '{print $2}' | grep -m1 "")
+          codesign --force --timestamp --sign "$CERT_NAME" $APP_NAME.dmg
+          codesign --verify --verbose=4 $APP_NAME.dmg
+
       - name: Notarize and Staple DMG
         env:
           APPLE_ID: ${{ secrets.APPLE_ID }}
