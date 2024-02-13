@@ -52,26 +52,20 @@ const nextConfig = {
     },
 
     // Build time Sentry configuration
+    // https://docs.sentry.io/platforms/javascript/guides/nextjs/manual-setup/
     sentry: {
         widenClientFileUpload: true,
         disableServerWebpackPlugin: true,
     },
 };
 
-// https://docs.sentry.io/platforms/javascript/guides/nextjs/manual-setup/
-const sentryWebpackPluginOptions = {
-    // Sentry supports automatically deducing this, and if running the
-    // sentry-cli release propose-version command directly, it can indeed find
-    // the git SHA, but I've been unable to get that to work here without
-    // explicitly specifying the git SHA.
-    release: gitSHA,
-};
-
-// withSentryConfig extends the default Next.js usage of webpack to
-// 1. Initialize the SDK on client page load (`sentry.client.config.ts`)
+// withSentryConfig extends the default Next.js usage of webpack to:
+//
+// 1. Initialize the SDK on client page load (See `sentry.client.config.ts`)
+//
 // 2. Upload sourcemaps (using the settings defined in `sentry.properties`)
 //
 // Irritatingly, it insists that we also provide it (empty)
 // sentry.server.config.ts and sentry.edge.config.ts files too, even though we
 // are not using those parts.
-module.exports = withSentryConfig(nextConfig, sentryWebpackPluginOptions);
+module.exports = withSentryConfig(nextConfig, {});
