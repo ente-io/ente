@@ -62,6 +62,8 @@ jobs:
   build-macos:
     name: Macos
     runs-on: macos-13
+    env:
+      APP_NAME: auth-macos-${{ github.event_name == 'release' && github.event.release.tag_name || 'nightly' }}-universal
     steps:
       - uses: actions/checkout@v4
       - name: Setup flutter
@@ -115,7 +117,16 @@ jobs:
           flutter config --enable-macos-desktop
           dart pub global activate flutter_distributor
           flutter_distributor package --platform=macos --targets=dmg --skip-clean
-          mv dist/**/ente_auth-*-macos.dmg auth-macos-${{ github.event_name == 'release' && github.event.release.tag_name || 'nightly' }}-universal.dmg
+          mv dist/**/ente_auth-*-macos.dmg $APP_NAME.dmg
+
+      - name: Notarize DMG
+        env:
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: |
+          xcrun altool --notarize-app --primary-bundle-id "io.ente.auth.mac" --username $APPLE_ID --password $APPLE_PASSWORD --asc-provider $APPLE_TEAM_ID --file $APP_NAME.dmg
+          xcrun stapler staple $APP_NAME.dmg
 
       - uses: svenstaro/upload-release-action@latest
         with:
