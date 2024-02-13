@@ -5,7 +5,7 @@ import { getHasOptedOutOfCrashReports } from '@ente/shared/storage/localStorage/
 import { isDevBuild } from '@ente/shared/network/api';
 
 export const initSentry = async (dsn: string) => {
-    // Don't initialize Sentry on dev builds
+    // Don't initialize Sentry for dev builds
     if (isDevBuild) return;
 
     // Don't initialize Sentry if the user has opted out of crash reporting
