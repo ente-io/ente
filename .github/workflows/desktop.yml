@@ -107,7 +107,7 @@ jobs:
           # Use profile in current project
           xcode-project use-profiles --project=macos/**/*.xcodeproj
 
-      - name: Dmg dependencies
+      - name: DMG build dependencies
         run: |
           python3 -m pip install setuptools
           npm install -g appdmg
@@ -119,13 +119,17 @@ jobs:
           flutter_distributor package --platform=macos --targets=dmg --skip-clean
           mv dist/**/ente_auth-*-macos.dmg $APP_NAME.dmg
 
-      - name: Notarize DMG
+      - name: Notarize and Staple DMG
         env:
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
         run: |
-          xcrun altool --notarize-app --primary-bundle-id "io.ente.auth.mac" --username $APPLE_ID --password $APPLE_PASSWORD --asc-provider $APPLE_TEAM_ID --file $APP_NAME.dmg
+          xcrun notarytool submit $APP_NAME.dmg \
+            --wait \
+            --apple-id $APPLE_ID \
+            --password $APPLE_PASSWORD \
+            --team-id $APPLE_TEAM_ID
           xcrun stapler staple $APP_NAME.dmg
 
       - uses: svenstaro/upload-release-action@latest
