@@ -65,9 +65,9 @@ const sentryWebpackPluginOptions = {};
 //
 // 1. Initialize the SDK on client page load (See `sentry.client.config.ts`)
 //
-// 2. Upload sourcemaps (using the settings defined in `sentry.properties`)
+// 2. Upload sourcemaps, using the settings defined in `sentry.properties`.
+//    Sourcemaps are only uploaded if SENTRY_AUTH_TOKEN is defined.
 //
-// Irritatingly, it insists that we also provide it (empty)
-// sentry.server.config.ts and sentry.edge.config.ts files too, even though we
-// are not using those parts.
+// Irritatingly, Sentry insists that we create empty sentry.server.config.ts and
+// sentry.edge.config.ts files, even though we are not using those parts.
 module.exports = withSentryConfig(nextConfig, sentryWebpackPluginOptions);
