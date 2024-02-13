@@ -1,4 +1,4 @@
-import { getAlbumsURL, getAuthURL } from '@ente/shared/network/api';
+import { getAlbumsURL } from '@ente/shared/network/api';
 import { runningInBrowser } from '@ente/shared/platform';
 import { PAGES } from 'constants/pages';
 
@@ -40,11 +40,8 @@ export const getAppNameAndTitle = () => {
     }
     const currentURL = new URL(window.location.href);
     const albumsURL = new URL(getAlbumsURL());
-    const authURL = new URL(getAuthURL());
     if (currentURL.origin === albumsURL.origin) {
         return { name: APPS.ALBUMS, title: 'ente Photos' };
-    } else if (currentURL.origin === authURL.origin) {
-        return { name: APPS.AUTH, title: 'ente Auth' };
     } else {
         return { name: APPS.PHOTOS, title: 'ente Photos' };
     }
