@@ -5,7 +5,7 @@ import { ALL_SECTION } from 'constants/collection';
 import { AppContext } from 'pages/_app';
 import { createContext, useContext, useEffect, useState } from 'react';
 import { getDuplicates, Duplicate } from 'services/deduplicationService';
-import { getLocalFiles, trashFiles } from 'services/fileService';
+import { getLocalFiles, syncFiles, trashFiles } from 'services/fileService';
 import { SelectedState } from 'types/gallery';
 
 import { ApiError } from '@ente/shared/error';
@@ -20,13 +20,17 @@ import { PHOTOS_PAGES as PAGES } from '@ente/shared/constants/pages';
 import router from 'next/router';
 import { getKey, SESSION_KEYS } from '@ente/shared/storage/sessionStorage';
 import { styled } from '@mui/material';
-import { getLocalCollections } from 'services/collectionService';
+import {
+    getAllLatestCollections,
+    getLocalCollections,
+} from 'services/collectionService';
 import EnteSpinner from '@ente/shared/components/EnteSpinner';
 import { VerticallyCentered } from '@ente/shared/components/Container';
 import Typography from '@mui/material/Typography';
 import useMemoSingleThreaded from '@ente/shared/hooks/useMemoSingleThreaded';
 import InMemoryStore, { MS_KEYS } from '@ente/shared/storage/InMemoryStore';
 import { HttpStatusCode } from 'axios';
+import { syncTrash } from 'services/trashService';
 
 export const DeduplicateContext = createContext<DeduplicateContextType>(
     DefaultDeduplicateContext
@@ -118,6 +122,17 @@ export default function Deduplicate() {
             startLoading();
             const selectedFiles = getSelectedFiles(selected, duplicateFiles);
             await trashFiles(selectedFiles);
+
+            // trashFiles above does an API request, we still need to update our
+            // local state.
+            //
+            // Enhancement: This can be done in a more granular manner. Also, it
+            // is better to funnel these syncs instead of adding these here and
+            // there in an ad-hoc manner. For now, this fixes the issue with the
+            // UI not updating if the user deletes only some of the duplicates.
+            const collections = await getAllLatestCollections();
+            await syncFiles('normal', collections, () => {});
+            await syncTrash(collections, () => {});
         } catch (e) {
             if (
                 e instanceof ApiError &&
