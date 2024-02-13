@@ -8,7 +8,6 @@ import 'package:ente_auth/ente_theme_data.dart';
 import 'package:ente_auth/events/trigger_logout_event.dart';
 import "package:ente_auth/l10n/l10n.dart";
 import 'package:ente_auth/locale.dart';
-import 'package:ente_auth/theme/text_style.dart';
 import 'package:ente_auth/ui/account/email_entry_page.dart';
 import 'package:ente_auth/ui/account/login_page.dart';
 import 'package:ente_auth/ui/account/logout_dialog.dart';
@@ -126,6 +125,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                       ],
                     ),
                     const SizedBox(height: 100),
+                    // TODO: Remove After Stable
                     // Container(
                     //   width: double.infinity,
                     //   padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -134,7 +134,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                     //     text: l10n.newUser,
                     //   ),
                     // ),
-                    // const SizedBox(height: 4),
+                    // const SizedBox(height: 24),
                     Container(
                       height: 56,
                       width: double.infinity,
@@ -156,22 +156,23 @@ class _OnboardingPageState extends State<OnboardingPage> {
                       ),
                     ),
                     const SizedBox(height: 4),
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.only(top: 20, bottom: 20),
-                      child: GestureDetector(
-                        onTap: _optForOfflineMode,
-                        child: Center(
-                          child: Text(
-                            l10n.useOffline,
-                            style: body.copyWith(
-                              color:
-                                  Theme.of(context).colorScheme.mutedTextColor,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
+                    // TODO: Remove After Stable
+                    // Container(
+                    //   width: double.infinity,
+                    //   padding: const EdgeInsets.only(top: 20, bottom: 20),
+                    //   child: GestureDetector(
+                    //     onTap: _optForOfflineMode,
+                    //     child: Center(
+                    //       child: Text(
+                    //         l10n.useOffline,
+                    //         style: body.copyWith(
+                    //           color:
+                    //               Theme.of(context).colorScheme.mutedTextColor,
+                    //         ),
+                    //       ),
+                    //     ),
+                    //   ),
+                    // ),
                   ],
                 ),
               ),

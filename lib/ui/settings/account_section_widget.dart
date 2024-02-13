@@ -56,6 +56,7 @@ class AccountSectionWidget extends StatelessWidget {
         },
       ),
       sectionOptionSpacing,
+      // TODO: Remove After Stable
       // MenuItemWidget(
       //   captionedTextWidget: CaptionedTextWidget(
       //     title: l10n.changePassword,
