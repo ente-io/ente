@@ -188,8 +188,8 @@ jobs:
           CERTIFICATE_PASSWORD: ${{ secrets.WINDOWS_CERTIFICATE_PASSWORD }}
           PFX_PATH: ${{ steps.create_pfx.outputs.filePath }}
         run: |
-          "%programfiles(x86)%\Windows Kits\10\App Certification Kit\signtool.exe" sign /tr http://timestamp.digicert.com /td sha256 /fd sha256 /f "$PFX_PATH" /p $CERTIFICATE_PASSWORD "auth-windows-exe/enteauth.exe"
-          "%programfiles(x86)%\Windows Kits\10\App Certification Kit\signtool.exe" sign /tr http://timestamp.digicert.com /td sha256 /fd sha256 /f "$PFX_PATH" /p $CERTIFICATE_PASSWORD "$APP_NAME.exe"
+          SignTool sign /tr http://timestamp.digicert.com /td sha256 /fd sha256 /f "$PFX_PATH" /p $CERTIFICATE_PASSWORD "auth-windows-exe/enteauth.exe"
+          SignTool sign /tr http://timestamp.digicert.com /td sha256 /fd sha256 /f "$PFX_PATH" /p $CERTIFICATE_PASSWORD "$APP_NAME.exe"
 
       - run: tar.exe -a -c -f auth-windows-${{ github.event_name == 'release' && github.event.release.tag_name || 'nightly' }}.zip auth-windows-exe
 
