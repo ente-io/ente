@@ -171,7 +171,7 @@ jobs:
           dart pub global activate flutter_distributor
           make innoinstall
           flutter_distributor package --platform=windows --targets=exe --skip-clean
-          mv dist/**/*.exe $APP_NAME.exe
+          cp dist/**/ente_auth-*-windows-setup.exe ${{ env.APP_NAME }}.exe
 
       - name: Copy Windows release files
         run: cp -r build/windows/x64/runner/Release auth-windows-exe
