@@ -1178,5 +1178,6 @@
   "selectALocationFirst": "Wähle zuerst einen Standort",
   "changeLocationOfSelectedItems": "Standort der gewählten Elemente ändern?",
   "editsToLocationWillOnlyBeSeenWithinEnte": "Änderungen des Standorts werden nur in ente sichtbar sein",
-  "cleanUncategorized": "Unkategorisiert leeren"
+  "cleanUncategorized": "Unkategorisiert leeren",
+  "joinDiscord": "Join Discord"
 }

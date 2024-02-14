@@ -16,7 +16,7 @@ class UpdateService {
   static final UpdateService instance = UpdateService._privateConstructor();
   static const kUpdateAvailableShownTimeKey = "update_available_shown_time_key";
   static const changeLogVersionKey = "update_change_log_key";
-  static const currentChangeLogVersion = 13;
+  static const currentChangeLogVersion = 14;
 
   LatestVersionInfo? _latestVersion;
   final _logger = Logger("UpdateService");
@@ -73,28 +73,37 @@ class UpdateService {
     return _latestVersion;
   }
 
-  Future<void> showUpdateNotification() async {
-    if (!isIndependent()) {
-      return;
-    }
+  Future<bool> shouldShowUpdateNoification() async {
     final shouldUpdate = await this.shouldUpdate();
+
     final lastNotificationShownTime =
         _prefs.getInt(kUpdateAvailableShownTimeKey) ?? 0;
     final now = DateTime.now().microsecondsSinceEpoch;
-    final hasBeen3DaysSinceLastNotification =
-        (now - lastNotificationShownTime) > (3 * microSecondsInDay);
-    if (shouldUpdate &&
-        hasBeen3DaysSinceLastNotification &&
-        _latestVersion!.shouldNotify) {
+    final hasBeenThresholdDaysSinceLastNotification =
+        (now - lastNotificationShownTime) >
+            ((_latestVersion!.shouldNotify ? 1 : 3) * microSecondsInDay);
+
+    return shouldUpdate && hasBeenThresholdDaysSinceLastNotification;
+  }
+
+  Future<void> showUpdateNotification() async {
+    if (await shouldShowUpdateNoification()) {
       // ignore: unawaited_futures
       NotificationService.instance.showNotification(
         "Update available",
         "Click to install our best version yet",
       );
-      await _prefs.setInt(kUpdateAvailableShownTimeKey, now);
+      await resetUpdateAvailableShownTime();
     } else {
       _logger.info("Debouncing notification");
     }
+  }
+
+  Future<void> resetUpdateAvailableShownTime() {
+    return _prefs.setInt(
+      kUpdateAvailableShownTimeKey,
+      DateTime.now().microsecondsSinceEpoch,
+    );
   }
 
   Future<LatestVersionInfo> _getLatestVersionInfo() async {

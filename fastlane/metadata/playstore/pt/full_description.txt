@@ -1,0 +1,30 @@
+Ente é um aplicativo simples para fazer backup e compartilhar suas fotos e vídeos.
+
+Se você está procurando uma alternativa ao Google Photos com foco em privacidade, veio ao lugar certo. Com ente, eles são armazenados com criptografados de ponta a ponta (e2ee). Isso significa que só você pode vê-los.
+
+Temos aplicativos de código aberto em todas as plataformas, Android, iOS, web e desktop, e suas fotos irão sincronizar perfeitamente entre todas elas de forma criptografada (e2ee).
+
+Ente também torna simples compartilhar seus álbuns com seus entes queridos. Você pode compartilhá-los diretamente com outros usuários do Ente, criptografados de ponta a ponta; ou com links publicamente visíveis.
+
+Seus dados criptografados são replicados em locais diferentes, incluindo um abrigo avançado em Paris. Levamos a sério a nossa postura e fazemos com que seja fácil garantir que suas memórias vivam.
+
+Estamos aqui para se tornar o app de fotos mais seguro de todos, venha entrar em nossa jornada!
+
+✨ RECURSOS
+-    Cópia de qualidade original, porque cada pixel é importante
+-    Planos de família, para que você possa compartilhar o armazenamento com sua família
+- Pastas compartilhadas, caso você queira que seu parceiro aproveite seus cliques da "Câmera"
+-    Links de álbuns, que podem ser protegidos com uma senha e definidos para expirar
+-    Capacidade de liberar espaço, removendo arquivos que foram salvos com segurança
+-    Editor de imagens, para adicionar toques finais
+-    Favoritar, esconder e reviver suas memórias, pois elas são preciosas
+-    Importar com um clique do Google, Apple, seu disco rígido e muito mais
+-    Tema escuro, porque suas fotos parecem bem nele
+-    2FA, 3FA, Autenticação biométrica
+-    e MUITO MAIS!
+
+💲 PREÇO
+Não oferecemos planos gratuitos para sempre, porque é importante para nós que permaneçamos sustentáveis e resistamos à prova do tempo. Em vez disso, oferecemos planos acessíveis que você pode compartilhar livremente com sua família. Você pode encontrar mais informações em ente.io.
+
+🙋 SUPORTE
+Temos orgulho em oferecer apoio humano. Temos orgulho em oferecer apoio humano. Se você é o nosso cliente pago, você pode entrar em contato com o team@ente.io e esperar uma resposta da nossa equipe dentro de 24 horas.

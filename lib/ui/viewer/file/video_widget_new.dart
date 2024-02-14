@@ -7,6 +7,8 @@ import "package:logging/logging.dart";
 import "package:media_kit/media_kit.dart";
 import "package:media_kit_video/media_kit_video.dart";
 import "package:photos/core/constants.dart";
+import "package:photos/core/event_bus.dart";
+import "package:photos/events/pause_video_event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/file/extensions/file_props.dart";
 import "package:photos/models/file/file.dart";
@@ -43,6 +45,7 @@ class _VideoWidgetNewState extends State<VideoWidgetNew>
   final _progressNotifier = ValueNotifier<double?>(null);
   late StreamSubscription<bool> playingStreamSubscription;
   bool _isAppInFG = true;
+  late StreamSubscription<PauseVideoEvent> pauseVideoSubscription;
 
   @override
   void initState() {
@@ -83,6 +86,10 @@ class _VideoWidgetNewState extends State<VideoWidgetNew>
         widget.playbackCallback!(event);
       }
     });
+
+    pauseVideoSubscription = Bus.instance.on<PauseVideoEvent>().listen((event) {
+      player.pause();
+    });
   }
 
   @override
@@ -96,6 +103,7 @@ class _VideoWidgetNewState extends State<VideoWidgetNew>
 
   @override
   void dispose() {
+    pauseVideoSubscription.cancel();
     removeCallBack(widget.file);
     _progressNotifier.dispose();
     WidgetsBinding.instance.removeObserver(this);
