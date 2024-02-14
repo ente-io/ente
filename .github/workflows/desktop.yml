@@ -171,7 +171,7 @@ jobs:
           dart pub global activate flutter_distributor
           make innoinstall
           flutter_distributor package --platform=windows --targets=exe --skip-clean
-          cp dist/**/* ./$APP_NAME.exe
+          mv dist/**/*.exe $APP_NAME.exe
 
       - name: Copy Windows release files
         run: cp -r build/windows/x64/runner/Release auth-windows-exe
@@ -182,8 +182,8 @@ jobs:
           certificate: "${{ secrets.WINDOWS_CERTIFICATE }}"
           password: "${{ secrets.WINDOWS_CERTIFICATE_PASSWORD }}"
           files: |
+            ${{ env.APP_NAME }}.exe
             auth-windows-exe/enteauth.exe
-            auth-windows-${{ github.event_name == 'release' && github.event.release.tag_name || 'nightly' }}.exe
 
       - name: Prepare Zip Windows
         run: tar.exe -a -c -f auth-windows-${{ github.event_name == 'release' && github.event.release.tag_name || 'nightly' }}.zip auth-windows-exe
