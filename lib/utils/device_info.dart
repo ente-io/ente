@@ -42,11 +42,12 @@ Future<bool> isLowSpecDevice() async {
   return false;
 }
 
-Future<void> initDeviceSpec() async {
+Future<bool> isGrapheneOS() async {
   if (Platform.isAndroid) {
     final androidInfo = await deviceInfoPlugin.androidInfo;
-    Logger("DeviceInfo").info("androidInfo $androidInfo");
+    return androidInfo.host == "grapheneos";
   }
+  return false;
 }
 
 Future<bool> isAndroidSDKVersionLowerThan(int inputSDK) async {
