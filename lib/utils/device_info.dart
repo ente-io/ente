@@ -42,6 +42,14 @@ Future<bool> isLowSpecDevice() async {
   return false;
 }
 
+Future<bool> isGrapheneOS() async {
+  if (Platform.isAndroid) {
+    final androidInfo = await deviceInfoPlugin.androidInfo;
+    return androidInfo.host.toLowerCase() == "grapheneos";
+  }
+  return false;
+}
+
 Future<bool> isAndroidSDKVersionLowerThan(int inputSDK) async {
   if (Platform.isAndroid) {
     final AndroidDeviceInfo androidInfo = await deviceInfoPlugin.androidInfo;
