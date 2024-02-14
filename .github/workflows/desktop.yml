@@ -181,7 +181,7 @@ jobs:
           cp dist/**/* ./$APP_NAME.exe
 
       - name: Copy Windows release files
-        run: cp -r build/windows/x64/runner/Release auth-windows-exe && github.event.release.tag_name || 'nightly' }}.zip auth-windows-exe
+        run: cp -r build/windows/x64/runner/Release auth-windows-exe
 
       - name: Sign Windows
         env:
