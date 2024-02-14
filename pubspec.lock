@@ -523,10 +523,11 @@ packages:
   flutter_local_authentication:
     dependency: "direct main"
     description:
-      name: flutter_local_authentication
-      sha256: eb2e471ba77fbc42b6ce8b358939dc9878dc71fcce5a482a8ddcb045563d87cd
-      url: "https://pub.dev"
-    source: hosted
+      path: "."
+      ref: patch-1
+      resolved-ref: "37237c55b2b96cfbf141de1d566a8fa6c7e6680f"
+      url: "https://github.com/prateekmedia/flutter_local_authentication"
+    source: git
     version: "1.2.0"
   flutter_local_notifications:
     dependency: "direct main"

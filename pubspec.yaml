@@ -45,7 +45,10 @@ dependencies:
   flutter_email_sender: ^6.0.2
   flutter_inappwebview: ^6.0.0
   flutter_launcher_icons: ^0.13.1
-  flutter_local_authentication: ^1.2.0
+  flutter_local_authentication:
+    git:
+      url: https://github.com/prateekmedia/flutter_local_authentication
+      ref: patch-1
   flutter_local_notifications: ^16.3.1+1
   flutter_localizations:
     sdk: flutter
