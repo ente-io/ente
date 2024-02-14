@@ -177,7 +177,7 @@ jobs:
         run: cp -r build/windows/x64/runner/Release auth-windows-exe
 
       - name: Code Sign Windows
-        uses: dlemstra/code-sign-action@master
+        uses: dlemstra/code-sign-action@main
         with:
           certificate: "${{ secrets.WINDOWS_CERTIFICATE }}"
           password: "${{ secrets.WINDOWS_CERTIFICATE_PASSWORD }}"
