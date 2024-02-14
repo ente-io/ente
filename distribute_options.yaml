@@ -7,34 +7,24 @@ releases:
         package:
           platform: linux
           target: zip
-          build_args:
-            dart-define:
-              APP_ENV: dev
+          build_args: []
       - name: release-dev-linux-deb
         package:
           platform: linux
           target: deb
-          build_args:
-            dart-define:
-              APP_ENV: dev
+          build_args: []
       - name: release-dev-linux-appimage
         package:
           platform: linux
           target: appimage
-          build_args:
-            dart-define:
-              APP_ENV: dev
+          build_args: []
       - name: release-dev-windows-exe
         package:
           platform: windows
           target: exe
-          build_args:
-            dart-define:
-              APP_ENV: dev
+          build_args: []
       - name: release-dev-macos-dmg
         package:
           platform: macos
           target: dmg
-          build_args:
-            dart-define:
-              APP_ENV: dev
+          build_args: []

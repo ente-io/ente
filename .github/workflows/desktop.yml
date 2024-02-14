@@ -151,7 +151,8 @@ jobs:
   build_windows:
     name: Windows
     runs-on: windows-latest
-
+    env:
+      APP_NAME: auth-windows-${{ github.event_name == 'release' && github.event.release.tag_name || 'nightly' }}
     steps:
       - uses: actions/checkout@v2
 
@@ -164,15 +165,32 @@ jobs:
       # Fetch sub modules
       - run: git submodule update --init --recursive
 
+      - name: Create PFX
+        id: create_pfx
+        uses: timheuer/base64-to-file@v1
+        with:
+          fileName: "certificate.pfx"
+          encodedString: ${{ secrets.WINDOWS_CERTIFICATE }}
+
       - name: Build Flutter app
         run: |
           flutter config --enable-windows-desktop
           dart pub global activate flutter_distributor
           make innoinstall
           flutter_distributor package --platform=windows --targets=exe --skip-clean
-          cp dist/**/* ./auth-windows-${{ github.event_name == 'release' && github.event.release.tag_name || 'nightly' }}.exe
+          cp dist/**/* ./$APP_NAME.exe
 
-      - run: cp -r build/windows/x64/runner/Release auth-windows-exe
+      - name: Copy Windows release files
+        run: cp -r build/windows/x64/runner/Release auth-windows-exe && github.event.release.tag_name || 'nightly' }}.zip auth-windows-exe
+
+      - name: Sign Windows
+        env:
+          CERTIFICATE_PASSWORD: ${{ secrets.WINDOWS_CERTIFICATE_PASSWORD }}
+          PFX_PATH: ${{ steps.create_pfx.outputs.filePath }}
+        run: |
+          "%programfiles(x86)%\Windows Kits\10\App Certification Kit\signtool.exe" sign /tr http://timestamp.digicert.com /td sha256 /fd sha256 /f "$PFX_PATH" /p $CERTIFICATE_PASSWORD "auth-windows-exe/enteauth.exe"
+          "%programfiles(x86)%\Windows Kits\10\App Certification Kit\signtool.exe" sign /tr http://timestamp.digicert.com /td sha256 /fd sha256 /f "$PFX_PATH" /p $CERTIFICATE_PASSWORD "$APP_NAME.exe"
+
       - run: tar.exe -a -c -f auth-windows-${{ github.event_name == 'release' && github.event.release.tag_name || 'nightly' }}.zip auth-windows-exe
 
       - uses: svenstaro/upload-release-action@latest
