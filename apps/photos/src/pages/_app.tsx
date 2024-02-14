@@ -39,7 +39,10 @@ import {
 } from 'services/userService';
 import { CustomError } from '@ente/shared/error';
 import { addLogLine } from '@ente/shared/logging';
-import { clearLogsIfLocalStorageLimitExceeded } from '@ente/shared/logging/web';
+import {
+    clearLogsIfLocalStorageLimitExceeded,
+    logStartupMessage,
+} from '@ente/shared/logging/web';
 import isElectron from 'is-electron';
 import ElectronAPIs from '@ente/shared/electron';
 import {
@@ -71,8 +74,6 @@ import createEmotionCache from '@ente/shared/themes/createEmotionCache';
 import { THEME_COLOR } from '@ente/shared/themes/constants';
 import { SetTheme } from '@ente/shared/themes/types';
 import { setupI18n } from '@ente/shared/i18n';
-import { getSentryUserID } from '@ente/shared/sentry/utils';
-import { User } from '@ente/shared/user/types';
 import { useLocalState } from '@ente/shared/hooks/useLocalState';
 import { PHOTOS_PAGES as PAGES } from '@ente/shared/constants/pages';
 import { getTheme } from '@ente/shared/themes';
@@ -168,12 +169,7 @@ export default function App(props: EnteAppProps) {
         });
         // setup logging
         clearLogsIfLocalStorageLimitExceeded();
-        const main = async () => {
-            addLogLine(`userID: ${(getData(LS_KEYS.USER) as User)?.id}`);
-            addLogLine(`sentryID: ${await getSentryUserID()}`);
-            addLogLine(`sentry release ID: ${process.env.SENTRY_RELEASE}`);
-        };
-        main();
+        logStartupMessage();
     }, []);
 
     useEffect(() => {

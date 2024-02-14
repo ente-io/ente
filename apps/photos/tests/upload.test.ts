@@ -100,14 +100,13 @@ const FILE_NAME_TO_JSON_NAME = [
 ];
 
 export async function testUpload() {
-    if (!process.env.NEXT_PUBLIC_EXPECTED_JSON_PATH) {
+    const jsonPath = process.env.NEXT_PUBLIC_ENTE_TEST_EXPECTED_JSON_PATH;
+    if (!jsonPath) {
         throw Error(
-            'upload test failed NEXT_PUBLIC_EXPECTED_JSON_PATH missing'
+            'Please specify the NEXT_PUBLIC_ENTE_TEST_EXPECTED_JSON_PATH to run the upload tests'
         );
     }
-    const expectedState = await import(
-        process.env.NEXT_PUBLIC_EXPECTED_JSON_PATH
-    );
+    const expectedState = await import(jsonPath);
     if (!expectedState) {
         throw Error('upload test failed expectedState missing');
     }
