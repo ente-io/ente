@@ -25,6 +25,7 @@ enum ResultType {
   collection,
   file,
   location,
+  locationSuggestion,
   month,
   year,
   fileType,

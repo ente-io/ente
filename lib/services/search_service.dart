@@ -708,6 +708,7 @@ class SearchService {
       final locationTagEntities =
           (await LocationService.instance.getLocationTags());
       final allFiles = await getAllFiles();
+      final List<EnteFile> filesWithNoLocTag = [];
 
       for (int i = 0; i < locationTagEntities.length; i++) {
         if (limit != null && i >= limit) break;
@@ -716,14 +717,19 @@ class SearchService {
 
       for (EnteFile file in allFiles) {
         if (file.hasLocation) {
+          bool hasLocationTag = false;
           for (LocalEntity<LocationTag> tag in tagToItemsMap.keys) {
             if (isFileInsideLocationTag(
               tag.item.centerPoint,
               file.location!,
               tag.item.radius,
             )) {
+              hasLocationTag = true;
               tagToItemsMap[tag]!.add(file);
             }
+          }
+          if (!hasLocationTag) {
+            filesWithNoLocTag.add(file);
           }
         }
       }
@@ -749,6 +755,23 @@ class SearchService {
                   ),
                 );
               },
+            ),
+          );
+        }
+      }
+      if (limit == null || tagSearchResults.length < limit) {
+        final results = await LocationService.instance
+            .getFilesInCity(filesWithNoLocTag, '');
+        final List<City> sortedByResultCount = results.keys.toList()
+          ..sort((a, b) => results[b]!.length.compareTo(results[a]!.length));
+        for (final city in sortedByResultCount) {
+          if (results[city]!.length <= 1) continue;
+          // If the location tag already exists for a city, don't add it again
+          tagSearchResults.add(
+            GenericSearchResult(
+              ResultType.locationSuggestion,
+              city.city,
+              results[city]!,
             ),
           );
         }
