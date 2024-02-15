@@ -242,30 +242,28 @@ Future<List<City>> parseCities(Map args) async {
 
 Map<City, List<EnteFile>> getCityResults(Map args) {
   final query = (args["query"] as String).toLowerCase();
-  final cities = args["cities"] as List<City>;
-  final files = args["files"] as List<EnteFile>;
+  final List<City> cities = args["cities"] as List<City>;
+  final List<EnteFile> files = args["files"] as List<EnteFile>;
 
-  final matchingCities = cities.where(
-    (city) => city.city.toLowerCase().contains(query),
-  );
+  final matchingCities = cities
+      .where(
+        (city) => city.city.toLowerCase().contains(query),
+      )
+      .toList();
 
   final Map<City, List<EnteFile>> results = {};
-  for (final city in matchingCities) {
-    final List<EnteFile> matchingFiles = [];
-    final cityLocation = Location(latitude: city.lat, longitude: city.lng);
-    for (final file in files) {
-      if (file.hasLocation) {
-        if (isFileInsideLocationTag(
-          cityLocation,
-          file.location!,
-          defaultCityRadius,
-        )) {
-          matchingFiles.add(file);
-        }
+  for (final file in files) {
+    if (!file.hasLocation) continue; // Skip files without location
+    for (final city in matchingCities) {
+      final cityLocation = Location(latitude: city.lat, longitude: city.lng);
+      if (isFileInsideLocationTag(
+        cityLocation,
+        file.location!,
+        defaultCityRadius,
+      )) {
+        results.putIfAbsent(city, () => []).add(file);
+        break; // Stop searching once a file is matched with a city
       }
-    }
-    if (matchingFiles.isNotEmpty) {
-      results[city] = matchingFiles;
     }
   }
   return results;
