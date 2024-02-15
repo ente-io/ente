@@ -54,8 +54,6 @@
 
         /* Speed things up by not type checking `node_modules` */
         "skipLibCheck": true,
-        /* Ensure filename in import has the same casing as the file on disk */
-        "forceConsistentCasingInFileNames": true,
         /* Require the `type` modifier when importing types */
         "verbatimModuleSyntax": true,
         /* Enable importing .json files */
