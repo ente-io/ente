@@ -1,5 +1,8 @@
 {
     "name": "@ente-io/utils",
     "version": "0.0.0",
-    "private": true
+    "private": true,
+    "exports": {
+        "hello": "./src/hello"
+    }
 }
