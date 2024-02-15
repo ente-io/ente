@@ -79,6 +79,7 @@ import { PHOTOS_PAGES as PAGES } from '@ente/shared/constants/pages';
 import { getTheme } from '@ente/shared/themes';
 import { AppUpdateInfo } from '@ente/shared/electron/types';
 import DownloadManager from 'services/download';
+import { sayHello } from '@ente-io/utils/hello';
 
 const redirectMap = new Map([
     [REDIRECTS.ROADMAP, getRoadmapRedirectURL],
@@ -170,6 +171,7 @@ export default function App(props: EnteAppProps) {
         // setup logging
         clearLogsIfLocalStorageLimitExceeded();
         logStartupMessage();
+        sayHello();
     }, []);
 
     useEffect(() => {

@@ -29,6 +29,7 @@
         "comlink": "^4.3.0",
         "debounce": "^2.0.0",
         "density-clustering": "^1.3.0",
+        "@ente-io/utils": "0.0.0",
         "eventemitter3": "^4.0.7",
         "exifr": "^7.1.3",
         "fast-srp-hap": "^2.0.4",
