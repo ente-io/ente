@@ -731,6 +731,8 @@ class SearchService {
               tagToItemsMap[tag]!.add(file);
             }
           }
+          // If the location tag already exists for a city, do not consider
+          // it for the city suggestions
           if (!hasLocationTag) {
             filesWithNoLocTag.add(file);
           }
@@ -769,14 +771,12 @@ class SearchService {
           ..sort((a, b) => results[b]!.length.compareTo(results[a]!.length));
         for (final city in sortedByResultCount) {
           if (results[city]!.length <= 1) continue;
-          // If the location tag already exists for a city, don't add it again
           tagSearchResults.add(
             GenericSearchResult(
               ResultType.locationSuggestion,
               city.city,
               results[city]!,
               onResultTap: (ctx) {
-                Navigator.of(ctx).pop();
                 showAddLocationSheet(
                   ctx,
                   Location(latitude: city.lat, longitude: city.lng),

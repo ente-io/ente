@@ -76,12 +76,13 @@ class _AddLocationSheetState extends State<AddLocationSheet> {
   late ValueNotifier<double> _selectedRadiusNotifier;
   final _focusNode = FocusNode();
   final _textEditingController = TextEditingController();
-  final _isEmptyNotifier = ValueNotifier(true);
+  late final ValueNotifier<bool> _isEmptyNotifier;
   Widget? _keyboardTopButtons;
 
   @override
   void initState() {
     _textEditingController.text = widget.name;
+    _isEmptyNotifier = ValueNotifier(widget.name.isEmpty);
     _focusNode.addListener(_focusNodeListener);
     _selectedRadiusNotifier = ValueNotifier(widget.radius);
     _selectedRadiusNotifier.addListener(_selectedRadiusListener);
@@ -169,11 +170,12 @@ class _AddLocationSheetState extends State<AddLocationSheet> {
                         RadiusPickerWidget(
                           _selectedRadiusNotifier,
                         ),
-                        const SizedBox(height: 16),
-                        Text(
-                          S.of(context).locationTagFeatureDescription,
-                          style: textTheme.smallMuted,
-                        ),
+                        if (widget.name.isEmpty) const SizedBox(height: 16),
+                        if (widget.name.isEmpty)
+                          Text(
+                            S.of(context).locationTagFeatureDescription,
+                            style: textTheme.smallMuted,
+                          ),
                       ],
                     ),
                   ),
