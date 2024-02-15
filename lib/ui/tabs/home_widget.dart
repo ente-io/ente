@@ -194,9 +194,9 @@ class _HomeWidgetState extends State<HomeWidget> {
       },
     );
     _initDeepLinks();
-    UpdateService.instance.shouldUpdate().then((shouldUpdate) {
-      if (shouldUpdate) {
-        Future.delayed(Duration.zero, () {
+    UpdateService.instance.shouldShowUpdateNoification().then((value) {
+      Future.delayed(Duration.zero, () {
+        if (value) {
           showDialog(
             context: context,
             builder: (BuildContext context) {
@@ -206,9 +206,11 @@ class _HomeWidgetState extends State<HomeWidget> {
             },
             barrierColor: Colors.black.withOpacity(0.85),
           );
-        });
-      }
+          UpdateService.instance.resetUpdateAvailableShownTime();
+        }
+      });
     });
+
     // For sharing images coming from outside the app
     _initMediaShareSubscription();
     WidgetsBinding.instance.addPostFrameCallback(

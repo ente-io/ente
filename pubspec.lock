@@ -1390,7 +1390,7 @@ packages:
     description:
       path: "."
       ref: HEAD
-      resolved-ref: "5f26aef45ed9f5e563c26f90c1e21b3339ed906d"
+      resolved-ref: "1318dce97f3aae5ec9bdf7491d5eff0ad6beb378"
       url: "https://github.com/ente-io/onnxruntime.git"
     source: git
     version: "1.1.0"

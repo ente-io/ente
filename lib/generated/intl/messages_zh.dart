@@ -666,7 +666,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("项目显示永久删除前剩余的天数"),
         "itemsWillBeRemovedFromAlbum":
             MessageLookupByLibrary.simpleMessage("所选项目将从此相册中移除"),
-        "joinDiscord": MessageLookupByLibrary.simpleMessage("Join Discord"),
+        "joinDiscord": MessageLookupByLibrary.simpleMessage("加入 Discord"),
         "keepPhotos": MessageLookupByLibrary.simpleMessage("保留照片"),
         "kiloMeterUnit": MessageLookupByLibrary.simpleMessage("公里"),
         "kindlyHelpUsWithThisInformation":

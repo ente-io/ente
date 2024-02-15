@@ -19,6 +19,7 @@ import "package:photos/services/semantic_search/frameworks/ggml.dart";
 import "package:photos/services/semantic_search/frameworks/ml_framework.dart";
 import 'package:photos/services/semantic_search/frameworks/onnx/onnx.dart';
 import "package:photos/utils/debouncer.dart";
+import "package:photos/utils/device_info.dart";
 import "package:photos/utils/local_settings.dart";
 import "package:photos/utils/thumbnail_util.dart";
 
@@ -33,7 +34,6 @@ class SemanticSearchService {
   static const kEmbeddingLength = 512;
   static const kScoreThreshold = 0.23;
   static const kShouldPushEmbeddings = true;
-  static const kCurrentModel = Model.onnxClip;
   static const kDebounceDuration = Duration(milliseconds: 4000);
 
   final _logger = Logger("SemanticSearchService");
@@ -42,6 +42,7 @@ class SemanticSearchService {
   final _embeddingLoaderDebouncer =
       Debouncer(kDebounceDuration, executionInterval: kDebounceDuration);
 
+  late Model _currentModel;
   late MLFramework _mlFramework;
   bool _hasInitialized = false;
   bool _isComputingEmbeddings = false;
@@ -76,7 +77,8 @@ class SemanticSearchService {
     _hasInitialized = true;
     final shouldDownloadOverMobileData =
         Configuration.instance.shouldBackupOverMobileData();
-    _mlFramework = kCurrentModel == Model.onnxClip
+    _currentModel = await _getCurrentModel();
+    _mlFramework = _currentModel == Model.onnxClip
         ? ONNX(shouldDownloadOverMobileData)
         : GGML(shouldDownloadOverMobileData);
     await EmbeddingsDB.instance.init();
@@ -122,7 +124,7 @@ class SemanticSearchService {
       return;
     }
     _isSyncing = true;
-    await EmbeddingStore.instance.pullEmbeddings(kCurrentModel);
+    await EmbeddingStore.instance.pullEmbeddings(_currentModel);
     await _backFill();
     _isSyncing = false;
   }
@@ -171,14 +173,14 @@ class SemanticSearchService {
   }
 
   Future<void> clearIndexes() async {
-    await EmbeddingStore.instance.clearEmbeddings(kCurrentModel);
-    _logger.info("Indexes cleared for $kCurrentModel");
+    await EmbeddingStore.instance.clearEmbeddings(_currentModel);
+    _logger.info("Indexes cleared for $_currentModel");
   }
 
   Future<void> _loadEmbeddings() async {
     _logger.info("Pulling cached embeddings");
     final startTime = DateTime.now();
-    _cachedEmbeddings = await EmbeddingsDB.instance.getAll(kCurrentModel);
+    _cachedEmbeddings = await EmbeddingsDB.instance.getAll(_currentModel);
     final endTime = DateTime.now();
     _logger.info(
       "Loading ${_cachedEmbeddings.length} took: ${(endTime.millisecondsSinceEpoch - startTime.millisecondsSinceEpoch)}ms",
@@ -312,7 +314,7 @@ class SemanticSearchService {
 
       final embedding = Embedding(
         fileID: file.uploadedFileID!,
-        model: kCurrentModel,
+        model: _currentModel,
         embedding: result,
       );
       await EmbeddingStore.instance.storeEmbedding(
@@ -358,6 +360,14 @@ class SemanticSearchService {
           "ms",
     );
     return queryResults;
+  }
+
+  Future<Model> _getCurrentModel() async {
+    if (await isGrapheneOS()) {
+      return Model.ggmlClip;
+    } else {
+      return Model.onnxClip;
+    }
   }
 }
 
