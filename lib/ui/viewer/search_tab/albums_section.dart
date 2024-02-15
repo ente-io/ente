@@ -70,20 +70,35 @@ class AlbumRecommendation extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 2),
-          Text(
-            albumSearchResult.name(),
-            style: enteTextTheme.small,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-          const SizedBox(height: 3),
-          Text(
-            CollectionsService.instance
-                .getCachedFileCount(
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                albumSearchResult.name(),
+                style: enteTextTheme.small,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              const SizedBox(height: 3),
+              FutureBuilder(
+                future: CollectionsService.instance.getFileCount(
                   albumSearchResult.collectionWithThumbnail.collection,
-                )
-                .toString(),
-            style: enteTextTheme.smallMuted,
+                ),
+                builder: (context, snapshot) {
+                  if (snapshot.hasData &&
+                      snapshot.data != null &&
+                      snapshot.data != 0) {
+                    return Text(
+                      snapshot.data.toString(),
+                      style: enteTextTheme.smallMuted,
+                    );
+                  } else {
+                    return const SizedBox.shrink();
+                  }
+                },
+              ),
+            ],
           ),
         ],
       ),
