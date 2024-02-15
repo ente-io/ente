@@ -777,7 +777,6 @@ class SearchService {
               city.city,
               results[city]!,
               onResultTap: (ctx) {
-                Navigator.of(ctx).pop();
                 showAddLocationSheet(
                   ctx,
                   Location(latitude: city.lat, longitude: city.lng),
