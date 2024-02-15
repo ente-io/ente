@@ -3,6 +3,7 @@ import "package:flutter/material.dart";
 import "package:flutter_animate/flutter_animate.dart";
 import "package:photos/core/constants.dart";
 import "package:photos/models/search/album_search_result.dart";
+import "package:photos/models/search/generic_search_result.dart";
 import "package:photos/models/search/index_of_indexed_stack.dart";
 import "package:photos/models/search/search_types.dart";
 import "package:photos/states/all_sections_examples_state.dart";
@@ -12,6 +13,7 @@ import "package:photos/ui/viewer/search/search_section.dart";
 import "package:photos/ui/viewer/search/search_suggestions.dart";
 import "package:photos/ui/viewer/search/tab_empty_state.dart";
 import 'package:photos/ui/viewer/search_tab/albums_section.dart';
+import "package:photos/ui/viewer/search_tab/moments_section.dart";
 
 class SearchTab extends StatefulWidget {
   const SearchTab({Key? key}) : super(key: key);
@@ -100,6 +102,11 @@ class _AllSearchSectionsState extends State<AllSearchSections> {
                         return AlbumsSection(
                           snapshot.data!.elementAt(index)
                               as List<AlbumSearchResult>,
+                        );
+                      case SectionType.moment:
+                        return MomentsSection(
+                          snapshot.data!.elementAt(index)
+                              as List<GenericSearchResult>,
                         );
                       default:
                         return SearchSection(

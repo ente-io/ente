@@ -167,6 +167,7 @@ class AlbumRecommendation extends StatelessWidget {
                         child: ThumbnailWidget(
                           albumSearchResult.previewThumbnail()!,
                           shouldShowArchiveStatus: false,
+                          shouldShowSyncStatus: false,
                         ),
                       )
                     : const NoThumbnailWidget(),
