@@ -14,6 +14,7 @@
         "dev:auth": "turbo run dev --filter=auth",
         "dev:photos": "turbo run dev --filter=photos",
         "dev:accounts": "turbo run dev --filter=accounts",
+        "dev:web": "turbo run dev --filter=web",
         "dev:cast": "turbo run dev --filter=cast",
         "export:photos": "turbo run export --filter=photos",
         "export:auth": "turbo run export --filter=auth",

@@ -36,6 +36,7 @@ const nextConfig = {
         },
     },
     transpilePackages: [
+        "@repo/ui",
         '@ente-io/utils',
         '@mui/material',
         '@mui/system',
