@@ -10,6 +10,7 @@ import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/viewer/file/no_thumbnail_widget.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 import "package:photos/ui/viewer/gallery/collection_page.dart";
+import "package:photos/ui/viewer/search/search_section_cta.dart";
 import "package:photos/ui/viewer/search_tab/search_tab.dart";
 import "package:photos/ui/viewer/search_tab/section_header.dart";
 import "package:photos/utils/navigation_util.dart";
@@ -20,33 +21,68 @@ class AlbumsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final recommendations = <Widget>[
-      ...albumSearchResults.map(
-        (albumSearchResult) => AlbumRecommendation(albumSearchResult),
-      ),
-      const AlbumCTA(),
-    ];
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        SectionHeader(
-          SectionType.album,
-          hasMore: (albumSearchResults.length > SearchTab.hasMoreThreshold),
-        ),
-        const SizedBox(height: 2),
-        SizedBox(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 4.5),
-            physics: const BouncingScrollPhysics(),
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: recommendations,
+    if (albumSearchResults.isEmpty) {
+      final textTheme = getEnteTextTheme(context);
+      return Padding(
+        padding: const EdgeInsets.only(left: 12, right: 8),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    SectionType.album.sectionTitle(context),
+                    style: textTheme.largeBold,
+                  ),
+                  const SizedBox(height: 24),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 4),
+                    child: Text(
+                      SectionType.album.getEmptyStateText(context),
+                      style: textTheme.smallMuted,
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
+            const SizedBox(width: 8),
+            const SearchSectionEmptyCTAIcon(SectionType.album),
+          ],
         ),
-      ],
-    );
+      );
+    } else {
+      final recommendations = <Widget>[
+        ...albumSearchResults.map(
+          (albumSearchResult) => AlbumRecommendation(albumSearchResult),
+        ),
+        const AlbumCTA(),
+      ];
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SectionHeader(
+              SectionType.album,
+              hasMore: (albumSearchResults.length > SearchTab.hasMoreThreshold),
+            ),
+            const SizedBox(height: 2),
+            SizedBox(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 4.5),
+                physics: const BouncingScrollPhysics(),
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: recommendations,
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
   }
 }
 

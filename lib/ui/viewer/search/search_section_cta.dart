@@ -72,7 +72,7 @@ class SearchSectionEmptyCTAIcon extends StatelessWidget {
     return GestureDetector(
       onTap: sectionType.ctaOnTap(context),
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(8, 24, 8, 0),
+        padding: const EdgeInsets.fromLTRB(8, 14, 8, 0),
         child: Column(
           children: [
             DottedBorder(
