@@ -1,5 +1,7 @@
+import "package:dotted_border/dotted_border.dart";
 import "package:figma_squircle/figma_squircle.dart";
 import "package:flutter/material.dart";
+import "package:photos/generated/l10n.dart";
 import "package:photos/models/search/album_search_result.dart";
 import "package:photos/models/search/recent_searches.dart";
 import "package:photos/models/search/search_types.dart";
@@ -18,6 +20,12 @@ class AlbumsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final recommendations = <Widget>[
+      ...albumSearchResults.map(
+        (albumSearchResult) => AlbumRecommendation(albumSearchResult),
+      ),
+      const AlbumCTA(),
+    ];
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -33,12 +41,7 @@ class AlbumsSection extends StatelessWidget {
             scrollDirection: Axis.horizontal,
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: albumSearchResults
-                  .map(
-                    (albumSearchResult) =>
-                        AlbumRecommendation(albumSearchResult),
-                  )
-                  .toList(),
+              children: recommendations,
             ),
           ),
         ),
@@ -119,6 +122,46 @@ class AlbumRecommendation extends StatelessWidget {
                   },
                 ),
               ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class AlbumCTA extends StatelessWidget {
+  const AlbumCTA({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final enteColorScheme = getEnteColorScheme(context);
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 2.5),
+      child: GestureDetector(
+        onTap: SectionType.album.ctaOnTap(context),
+        child: Column(
+          children: [
+            DottedBorder(
+              borderType: BorderType.RRect,
+              strokeWidth: 1.5,
+              borderPadding: const EdgeInsets.all(0.75),
+              dashPattern: const [3.75, 3.75],
+              radius: const Radius.circular(2.35),
+              padding: EdgeInsets.zero,
+              color: enteColorScheme.strokeFaint,
+              child: SizedBox(
+                height: 100,
+                width: 100,
+                child: Icon(
+                  Icons.add,
+                  color: enteColorScheme.strokeFaint,
+                ),
+              ),
+            ),
+            Text(
+              S.of(context).addNew,
+              style: getEnteTextTheme(context).smallFaint,
             ),
           ],
         ),
