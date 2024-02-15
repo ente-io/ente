@@ -3,6 +3,7 @@ import "dart:math";
 import "package:flutter/cupertino.dart";
 import "package:intl/intl.dart";
 import 'package:logging/logging.dart';
+import "package:photos/core/constants.dart";
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/data/holidays.dart';
 import 'package:photos/data/months.dart';
@@ -17,6 +18,7 @@ import "package:photos/models/file/extensions/file_props.dart";
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file/file_type.dart';
 import "package:photos/models/local_entity_data.dart";
+import "package:photos/models/location/location.dart";
 import "package:photos/models/location_tag/location_tag.dart";
 import 'package:photos/models/search/album_search_result.dart';
 import 'package:photos/models/search/generic_search_result.dart';
@@ -25,6 +27,7 @@ import 'package:photos/services/collections_service.dart';
 import "package:photos/services/location_service.dart";
 import 'package:photos/services/semantic_search/semantic_search_service.dart';
 import "package:photos/states/location_screen_state.dart";
+import "package:photos/ui/viewer/location/add_location_sheet.dart";
 import "package:photos/ui/viewer/location/location_screen.dart";
 import 'package:photos/utils/date_time_util.dart';
 import "package:photos/utils/navigation_util.dart";
@@ -772,6 +775,15 @@ class SearchService {
               ResultType.locationSuggestion,
               city.city,
               results[city]!,
+              onResultTap: (ctx) {
+                Navigator.of(ctx).pop();
+                showAddLocationSheet(
+                  ctx,
+                  Location(latitude: city.lat, longitude: city.lng),
+                  name: city.city,
+                  radius: defaultCityRadius,
+                );
+              },
             ),
           );
         }
