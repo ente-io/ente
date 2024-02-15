@@ -676,17 +676,24 @@ class SearchService {
         );
       }
     }
-
+    //todo: remove this later, this hack is for interval+external evaluation
+    // for suggestions
+    final allCitiesSearch = query == '__city';
+    if (allCitiesSearch) {
+      query = '';
+    }
     final results =
         await LocationService.instance.getFilesInCity(allFiles, query);
-    for (final entry in results.entries) {
+    final List<City> sortedByResultCount = results.keys.toList()
+      ..sort((a, b) => results[b]!.length.compareTo(results[a]!.length));
+    for (final city in sortedByResultCount) {
       // If the location tag already exists for a city, don't add it again
-      if (!locationTagNames.contains(entry.key.city)) {
+      if (!locationTagNames.contains(city.city)) {
         searchResults.add(
           GenericSearchResult(
             ResultType.location,
-            entry.key.city,
-            entry.value,
+            city.city,
+            results[city]!,
           ),
         );
       }
