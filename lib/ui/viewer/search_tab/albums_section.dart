@@ -1,13 +1,16 @@
 import "package:figma_squircle/figma_squircle.dart";
 import "package:flutter/material.dart";
 import "package:photos/models/search/album_search_result.dart";
+import "package:photos/models/search/recent_searches.dart";
 import "package:photos/models/search/search_types.dart";
 import "package:photos/services/collections_service.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/viewer/file/no_thumbnail_widget.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
+import "package:photos/ui/viewer/gallery/collection_page.dart";
 import "package:photos/ui/viewer/search_tab/search_tab.dart";
 import "package:photos/ui/viewer/search_tab/section_header.dart";
+import "package:photos/utils/navigation_util.dart";
 
 class AlbumsSection extends StatelessWidget {
   final List<AlbumSearchResult> albumSearchResults;
@@ -50,57 +53,75 @@ class AlbumRecommendation extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final heroTag = albumSearchResult.heroTag() +
+        (albumSearchResult.previewThumbnail()?.tag ?? "");
     final enteTextTheme = getEnteTextTheme(context);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 2.5),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          ClipSmoothRect(
-            radius: SmoothBorderRadius(cornerRadius: 2.35, cornerSmoothing: 1),
-            child: SizedBox(
-              width: 100,
-              height: 100,
-              child: albumSearchResult.previewThumbnail() != null
-                  ? ThumbnailWidget(
-                      albumSearchResult.previewThumbnail()!,
-                      shouldShowArchiveStatus: false,
-                    )
-                  : const NoThumbnailWidget(),
+      child: GestureDetector(
+        onTap: () {
+          RecentSearches().add(albumSearchResult.name());
+          routeToPage(
+            context,
+            CollectionPage(
+              albumSearchResult.collectionWithThumbnail,
+              tagPrefix: albumSearchResult.heroTag(),
             ),
-          ),
-          const SizedBox(height: 2),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                albumSearchResult.name(),
-                style: enteTextTheme.small,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
+          );
+        },
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ClipSmoothRect(
+              radius:
+                  SmoothBorderRadius(cornerRadius: 2.35, cornerSmoothing: 1),
+              child: SizedBox(
+                width: 100,
+                height: 100,
+                child: albumSearchResult.previewThumbnail() != null
+                    ? Hero(
+                        tag: heroTag,
+                        child: ThumbnailWidget(
+                          albumSearchResult.previewThumbnail()!,
+                          shouldShowArchiveStatus: false,
+                        ),
+                      )
+                    : const NoThumbnailWidget(),
               ),
-              const SizedBox(height: 3),
-              FutureBuilder(
-                future: CollectionsService.instance.getFileCount(
-                  albumSearchResult.collectionWithThumbnail.collection,
+            ),
+            const SizedBox(height: 2),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  albumSearchResult.name(),
+                  style: enteTextTheme.small,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
-                builder: (context, snapshot) {
-                  if (snapshot.hasData &&
-                      snapshot.data != null &&
-                      snapshot.data != 0) {
-                    return Text(
-                      snapshot.data.toString(),
-                      style: enteTextTheme.smallMuted,
-                    );
-                  } else {
-                    return const SizedBox.shrink();
-                  }
-                },
-              ),
-            ],
-          ),
-        ],
+                const SizedBox(height: 3),
+                FutureBuilder(
+                  future: CollectionsService.instance.getFileCount(
+                    albumSearchResult.collectionWithThumbnail.collection,
+                  ),
+                  builder: (context, snapshot) {
+                    if (snapshot.hasData &&
+                        snapshot.data != null &&
+                        snapshot.data != 0) {
+                      return Text(
+                        snapshot.data.toString(),
+                        style: enteTextTheme.smallMuted,
+                      );
+                    } else {
+                      return const SizedBox.shrink();
+                    }
+                  },
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
