@@ -1,6 +1,10 @@
+import "dart:async";
+
 import "package:dotted_border/dotted_border.dart";
 import "package:figma_squircle/figma_squircle.dart";
 import "package:flutter/material.dart";
+import "package:photos/core/constants.dart";
+import "package:photos/events/event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/search/album_search_result.dart";
 import "package:photos/models/search/recent_searches.dart";
@@ -15,13 +19,54 @@ import "package:photos/ui/viewer/search_tab/search_tab.dart";
 import "package:photos/ui/viewer/search_tab/section_header.dart";
 import "package:photos/utils/navigation_util.dart";
 
-class AlbumsSection extends StatelessWidget {
+class AlbumsSection extends StatefulWidget {
   final List<AlbumSearchResult> albumSearchResults;
   const AlbumsSection(this.albumSearchResults, {super.key});
 
   @override
+  State<AlbumsSection> createState() => _AlbumsSectionState();
+}
+
+class _AlbumsSectionState extends State<AlbumsSection> {
+  late List<AlbumSearchResult> _albumSearchResults;
+  final streamSubscriptions = <StreamSubscription>[];
+
+  @override
+  void initState() {
+    super.initState();
+    _albumSearchResults = widget.albumSearchResults;
+
+    final streamsToListenTo = SectionType.album.sectionUpdateEvents();
+    for (Stream<Event> stream in streamsToListenTo) {
+      streamSubscriptions.add(
+        stream.listen((event) async {
+          _albumSearchResults = (await SectionType.album.getData(
+            context,
+            limit: kSearchSectionLimit,
+          )) as List<AlbumSearchResult>;
+          setState(() {});
+        }),
+      );
+    }
+  }
+
+  @override
+  void dispose() {
+    for (var subscriptions in streamSubscriptions) {
+      subscriptions.cancel();
+    }
+    super.dispose();
+  }
+
+  @override
+  void didUpdateWidget(covariant AlbumsSection oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _albumSearchResults = widget.albumSearchResults;
+  }
+
+  @override
   Widget build(BuildContext context) {
-    if (albumSearchResults.isEmpty) {
+    if (_albumSearchResults.isEmpty) {
       final textTheme = getEnteTextTheme(context);
       return Padding(
         padding: const EdgeInsets.only(left: 12, right: 8),
@@ -53,7 +98,7 @@ class AlbumsSection extends StatelessWidget {
       );
     } else {
       final recommendations = <Widget>[
-        ...albumSearchResults.map(
+        ..._albumSearchResults.map(
           (albumSearchResult) => AlbumRecommendation(albumSearchResult),
         ),
         const AlbumCTA(),
@@ -65,7 +110,8 @@ class AlbumsSection extends StatelessWidget {
           children: [
             SectionHeader(
               SectionType.album,
-              hasMore: (albumSearchResults.length > SearchTab.hasMoreThreshold),
+              hasMore:
+                  (_albumSearchResults.length >= SearchTab.hasMoreThreshold),
             ),
             const SizedBox(height: 2),
             SizedBox(
