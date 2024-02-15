@@ -14,7 +14,6 @@ import "package:photos/ui/viewer/search/tab_empty_state.dart";
 import 'package:photos/ui/viewer/search_tab/albums_section.dart';
 
 class SearchTab extends StatefulWidget {
-  static const hasMoreThreshold = 6;
   const SearchTab({Key? key}) : super(key: key);
 
   @override
@@ -106,7 +105,7 @@ class _AllSearchSectionsState extends State<AllSearchSections> {
                         return SearchSection(
                           sectionType: searchTypes[index],
                           examples: snapshot.data!.elementAt(index),
-                          limit: searchSectionLimit,
+                          limit: kSearchSectionLimit,
                         );
                     }
                   },

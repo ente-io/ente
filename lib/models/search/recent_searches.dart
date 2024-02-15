@@ -12,7 +12,7 @@ class RecentSearches with ChangeNotifier {
 
   void add(String query) {
     searches.add(query);
-    while (searches.length > searchSectionLimit) {
+    while (searches.length > kSearchSectionLimit) {
       searches.remove(searches.first);
     }
     //buffer for not surfacing a new recent search before going to the next

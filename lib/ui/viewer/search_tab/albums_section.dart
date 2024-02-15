@@ -15,7 +15,6 @@ import "package:photos/ui/viewer/file/no_thumbnail_widget.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 import "package:photos/ui/viewer/gallery/collection_page.dart";
 import "package:photos/ui/viewer/search/search_section_cta.dart";
-import "package:photos/ui/viewer/search_tab/search_tab.dart";
 import "package:photos/ui/viewer/search_tab/section_header.dart";
 import "package:photos/utils/navigation_util.dart";
 
@@ -110,8 +109,7 @@ class _AlbumsSectionState extends State<AlbumsSection> {
           children: [
             SectionHeader(
               SectionType.album,
-              hasMore:
-                  (_albumSearchResults.length >= SearchTab.hasMoreThreshold),
+              hasMore: (_albumSearchResults.length >= kSearchSectionLimit - 1),
             ),
             const SizedBox(height: 2),
             SizedBox(

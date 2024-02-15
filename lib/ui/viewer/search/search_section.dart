@@ -50,7 +50,7 @@ class _SearchSectionState extends State<SearchSection> {
         stream.listen((event) async {
           _examples = await widget.sectionType.getData(
             context,
-            limit: searchSectionLimit,
+            limit: kSearchSectionLimit,
           );
           setState(() {});
         }),
