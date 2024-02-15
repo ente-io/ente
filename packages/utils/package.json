@@ -3,6 +3,6 @@
     "version": "0.0.0",
     "private": true,
     "exports": {
-        "hello": "./src/hello"
+        "./hello": "./src/hello"
     }
 }

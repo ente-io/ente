@@ -35,7 +35,12 @@ const nextConfig = {
             },
         },
     },
-    transpilePackages: ['@mui/material', '@mui/system', '@mui/icons-material'],
+    transpilePackages: [
+        '@ente-io/utils',
+        '@mui/material',
+        '@mui/system',
+        '@mui/icons-material',
+    ],
 
     // Add environment variables to the JavaScript bundle. They will be
     // available as `process.env.VAR_NAME` to our code.

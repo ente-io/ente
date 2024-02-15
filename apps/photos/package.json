@@ -11,7 +11,7 @@
     },
     "dependencies": {
         "@date-io/date-fns": "^2.14.0",
-        "@ente-io/utils": "file:packages/utils",
+        "@ente-io/utils": "*",
         "@mui/x-date-pickers": "^5.0.0-alpha.6",
         "@sentry/nextjs": "^7.77.0",
         "@stripe/stripe-js": "^1.13.2",
