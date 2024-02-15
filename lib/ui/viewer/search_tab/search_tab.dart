@@ -2,6 +2,7 @@ import "package:fade_indexed_stack/fade_indexed_stack.dart";
 import "package:flutter/material.dart";
 import "package:flutter_animate/flutter_animate.dart";
 import "package:photos/core/constants.dart";
+import "package:photos/models/search/album_search_result.dart";
 import "package:photos/models/search/index_of_indexed_stack.dart";
 import "package:photos/models/search/search_types.dart";
 import "package:photos/states/all_sections_examples_state.dart";
@@ -10,8 +11,10 @@ import "package:photos/ui/viewer/search/result/no_result_widget.dart";
 import "package:photos/ui/viewer/search/search_section.dart";
 import "package:photos/ui/viewer/search/search_suggestions.dart";
 import "package:photos/ui/viewer/search/tab_empty_state.dart";
+import 'package:photos/ui/viewer/search_tab/albums_section.dart';
 
 class SearchTab extends StatefulWidget {
+  static const hasMoreThreshold = 6;
   const SearchTab({Key? key}) : super(key: key);
 
   @override
@@ -93,11 +96,19 @@ class _AllSearchSectionsState extends State<AllSearchSections> {
                   physics: const BouncingScrollPhysics(),
                   itemCount: searchTypes.length,
                   itemBuilder: (context, index) {
-                    return SearchSection(
-                      sectionType: searchTypes[index],
-                      examples: snapshot.data!.elementAt(index),
-                      limit: searchSectionLimit,
-                    );
+                    switch (searchTypes[index]) {
+                      case SectionType.album:
+                        return AlbumsSection(
+                          snapshot.data!.elementAt(index)
+                              as List<AlbumSearchResult>,
+                        );
+                      default:
+                        return SearchSection(
+                          sectionType: searchTypes[index],
+                          examples: snapshot.data!.elementAt(index),
+                          limit: searchSectionLimit,
+                        );
+                    }
                   },
                 )
                     .animate(
