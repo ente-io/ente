@@ -10,15 +10,15 @@
          *
          * In our case, we tell it that the code will run in a modern browser,
          * and will have access to a latest JS (esnext) and the DOM (dom). Our
-         * transpiler (Babel via Next.js) will take care that these things hold.
+         * transpiler (Next.js) will ensure that these things hold.
          *
          * Unlike the other individual library components (say how "esnext"
          * implies "esnext.*"), "dom.iterable" (the ability to iterate over DOM
          * elements) is not a subset of "dom" and needs to be listed out
          * explicitly.
          *
-         * Note that we don't need to specify target, since TypeScript isn't
-         * actually generating (emitting) the JavaScript.
+         * Note that we don't need to specify the `target` compilerOption, since
+         * TypeScript isn't actually generating (emitting) the JavaScript.
          */
         "lib": ["esnext", "dom", "dom.iterable"],
 
@@ -47,7 +47,7 @@
         "jsx": "preserve",
 
         /* Ask TypeScript to warn us if we use TypeScript features that cannot
-           be used by single-file transpilers (Babel in our case) */
+           be used by single-file transpilers */
         "isolatedModules": true,
         /* Enable various workarounds to play better with CJS libraries */
         "esModuleInterop": true,
