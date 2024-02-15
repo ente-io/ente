@@ -79,7 +79,8 @@ import { PHOTOS_PAGES as PAGES } from '@ente/shared/constants/pages';
 import { getTheme } from '@ente/shared/themes';
 import { AppUpdateInfo } from '@ente/shared/electron/types';
 import DownloadManager from 'services/download';
-import { sayHello } from '@ente-io/utils/hello';
+// import { sayHello } from '@ente-io/utils/hello';
+import { sayHello } from '@repo/ui/hello';
 
 const redirectMap = new Map([
     [REDIRECTS.ROADMAP, getRoadmapRedirectURL],
