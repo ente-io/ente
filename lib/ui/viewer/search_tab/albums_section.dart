@@ -141,6 +141,7 @@ class AlbumCTA extends StatelessWidget {
       child: GestureDetector(
         onTap: SectionType.album.ctaOnTap(context),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             DottedBorder(
               borderType: BorderType.RRect,
@@ -159,6 +160,7 @@ class AlbumCTA extends StatelessWidget {
                 ),
               ),
             ),
+            const SizedBox(height: 2),
             Text(
               S.of(context).addNew,
               style: getEnteTextTheme(context).smallFaint,
