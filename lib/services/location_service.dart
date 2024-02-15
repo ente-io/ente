@@ -7,6 +7,7 @@ import "package:logging/logging.dart";
 import "package:photos/core/constants.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/location_tag_updated_event.dart";
+import "package:photos/extensions/stop_watch.dart";
 import "package:photos/models/api/entity/type.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/local_entity_data.dart";
@@ -45,6 +46,8 @@ class LocationService {
     List<EnteFile> allFiles,
     String query,
   ) async {
+    final EnteWatch w = EnteWatch("cities_search")..start();
+    w.log('start for files ${allFiles.length} and query $query');
     final result = await _computer.compute(
       getCityResults,
       param: {
@@ -52,6 +55,10 @@ class LocationService {
         "cities": _cities,
         "files": allFiles,
       },
+    );
+    w.log(
+      'end for query: $query  on ${allFiles.length} files, found '
+      '${result.length} cities',
     );
     return result;
   }
