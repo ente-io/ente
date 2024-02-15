@@ -153,6 +153,7 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
     final inheritedData = FullScreenMemoryData.of(context)!;
     final showStepProgressIndicator = inheritedData.memories.length < 60;
     return Scaffold(
+      backgroundColor: Colors.black,
       extendBodyBehindAppBar: true,
       appBar: AppBar(
         toolbarHeight: 84,
