@@ -2,12 +2,8 @@
     "name": "@/utils",
     "version": "0.0.0",
     "private": true,
-    "type": "module",
     "exports": {
         "./components/*": "./src/components/*.tsx",
         "./*": "./src/*.ts"
-    },
-    "devDependencies": {
-        "typescript-eslint": "^7.0.1"
     }
 }
