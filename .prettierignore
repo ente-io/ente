@@ -3,3 +3,8 @@ public/
 node_modules/
 *.md
 *.yml
+
+# TODO (MR): This file might not be needed after we update prettier to v3, since
+# v3 respects .gitignore
+.next/
+out/

@@ -11,7 +11,10 @@
         "noUnusedParameters": false,
         "strictNullChecks": false,
         "target": "es5",
-        "useUnknownInCatchVariables": false
+        "useUnknownInCatchVariables": false,
+
+        /* TODO(MR): Add to auth */
+        "moduleResolution": "bundler"
     },
     "include": [
         "next-env.d.ts",

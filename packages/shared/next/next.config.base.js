@@ -17,6 +17,8 @@ const gitSHA = cp.execSync('git rev-parse --short HEAD', {
 });
 
 const nextConfig = {
+    /* generate a static export when we run `next build` */
+    output: 'export',
     compiler: {
         emotion: {
             importMap: {
@@ -35,7 +37,12 @@ const nextConfig = {
             },
         },
     },
-    transpilePackages: ['@mui/material', '@mui/system', '@mui/icons-material'],
+    transpilePackages: [
+        '@/utils',
+        '@mui/material',
+        '@mui/system',
+        '@mui/icons-material',
+    ],
 
     // Add environment variables to the JavaScript bundle. They will be
     // available as `process.env.VAR_NAME` to our code.
