@@ -52,18 +52,13 @@ class _ZoomableImageState extends State<ZoomableImage>
   bool _loadingFinalImage = false;
   bool _loadedFinalImage = false;
   PhotoViewController _photoViewController = PhotoViewController();
-  bool _isZooming = false;
-  ValueChanged<PhotoViewScaleState>? _scaleStateChangedCallback;
+  double? _initialScale;
 
   @override
   void initState() {
     _photo = widget.photo;
     _logger = Logger("ZoomableImage");
     _logger.info('initState for ${_photo.generatedID} with tag ${_photo.tag}');
-    _scaleStateChangedCallback = (value) {
-      _isZooming = value != PhotoViewScaleState.initial;
-      debugPrint("isZooming = $_isZooming, currentState $value");
-    };
     super.initState();
   }
 
@@ -85,7 +80,6 @@ class _ZoomableImageState extends State<ZoomableImage>
     if (_imageProvider != null) {
       content = PhotoViewGallery.builder(
         gaplessPlayback: true,
-        scaleStateChangedCallback: _scaleStateChangedCallback,
         backgroundDecoration: widget.backgroundDecoration as BoxDecoration?,
         builder: (context, index) {
           return PhotoViewGalleryPageOptions(
@@ -104,21 +98,24 @@ class _ZoomableImageState extends State<ZoomableImage>
     } else {
       content = const EnteLoadingWidget();
     }
-    final GestureDragUpdateCallback? verticalDragCallback = _isZooming
-        ? null
-        : (d) => {
-              if (!_isZooming)
-                {
-                  if (d.delta.dy > dragSensitivity)
-                    {
-                      {Navigator.of(context).pop()},
-                    }
-                  else if (d.delta.dy < (dragSensitivity * -1))
-                    {
-                      showDetailsSheet(context, widget.photo),
-                    },
-                },
-            };
+
+    dragFunction(d) => {
+          if (d.delta.dy > dragSensitivity)
+            {
+              {Navigator.of(context).pop()},
+            }
+          else if (d.delta.dy < (dragSensitivity * -1))
+            {
+              showDetailsSheet(context, widget.photo),
+            },
+        };
+
+    verticalDragCallback(d) {
+      if (_initialScale == null ||
+          _photoViewController.scale! <= _initialScale!) {
+        dragFunction(d);
+      }
+    }
 
     return GestureDetector(
       onVerticalDragUpdate: verticalDragCallback,
@@ -260,7 +257,8 @@ class _ZoomableImageState extends State<ZoomableImage>
     required ImageProvider? previewImageProvider,
     required ImageProvider finalImageProvider,
   }) async {
-    final bool shouldFixPosition = previewImageProvider != null && _isZooming;
+    final bool shouldFixPosition =
+        previewImageProvider != null && _photoViewController.scale != null;
     ImageInfo? finalImageInfo;
     if (shouldFixPosition) {
       final prevImageInfo = await getImageInfo(previewImageProvider);
@@ -277,6 +275,9 @@ class _ZoomableImageState extends State<ZoomableImage>
         initialPosition: newPosition,
         initialScale: scale,
       );
+      setState(() {
+        _initialScale = scale;
+      });
     }
     final bool canUpdateMetadata = _photo.canEditMetaInfo;
     // forcefully get finalImageInfo is dimensions are not available in metadata
