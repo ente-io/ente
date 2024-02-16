@@ -1,22 +1,28 @@
-import { useContext, useState } from 'react';
 import { t } from 'i18next';
+import { useContext, useState } from 'react';
 
 // import FixLargeThumbnails from 'components/FixLargeThumbnail';
 import RecoveryKey from '@ente/shared/components/RecoveryKey';
+import {
+    ACCOUNTS_PAGES,
+    PHOTOS_PAGES as PAGES,
+} from '@ente/shared/constants/pages';
 import TwoFactorModal from 'components/TwoFactor/Modal';
-import { PHOTOS_PAGES as PAGES } from '@ente/shared/constants/pages';
 import { useRouter } from 'next/router';
 import { AppContext } from 'pages/_app';
 // import mlIDbStorage from 'utils/storage/mlIDbStorage';
-import isElectron from 'is-electron';
+import { APPS, CLIENT_PACKAGE_NAMES } from '@ente/shared/apps/constants';
+import ThemeSwitcher from '@ente/shared/components/ThemeSwitcher';
+import { getAccountsURL } from '@ente/shared/network/api';
+import { logError } from '@ente/shared/sentry';
+import { THEME_COLOR } from '@ente/shared/themes/constants';
+import { EnteMenuItem } from 'components/Menu/EnteMenuItem';
 import WatchFolder from 'components/WatchFolder';
+import isElectron from 'is-electron';
+import { getAccountsToken } from 'services/userService';
 import { getDownloadAppMessage } from 'utils/ui';
-
 import { isInternalUser } from 'utils/user';
 import Preferences from './Preferences';
-import { EnteMenuItem } from 'components/Menu/EnteMenuItem';
-import ThemeSwitcher from '@ente/shared/components/ThemeSwitcher';
-import { THEME_COLOR } from '@ente/shared/themes/constants';
 
 export default function UtilitySection({ closeSidebar }) {
     const router = useRouter();
@@ -60,6 +66,21 @@ export default function UtilitySection({ closeSidebar }) {
     const redirectToChangeEmailPage = () => {
         closeSidebar();
         router.push(PAGES.CHANGE_EMAIL);
+    };
+
+    const redirectToAccountsPage = async () => {
+        closeSidebar();
+
+        try {
+            const accountsToken = await getAccountsToken();
+
+            window.location.href = `${getAccountsURL()}${ACCOUNTS_PAGES.ACCOUNT_HANDOFF
+                }?package=${CLIENT_PACKAGE_NAMES.get(
+                    APPS.PHOTOS
+                )}&token=${accountsToken}`;
+        } catch (e) {
+            logError(e, 'failed to redirect to accounts page');
+        }
     };
 
     const redirectToDeduplicatePage = () => router.push(PAGES.DEDUPLICATE);
@@ -110,6 +131,12 @@ export default function UtilitySection({ closeSidebar }) {
                 variant="secondary"
                 onClick={openTwoFactorModal}
                 label={t('TWO_FACTOR')}
+            />
+
+            <EnteMenuItem
+                variant="secondary"
+                onClick={redirectToAccountsPage}
+                label={t('PASSKEYS')}
             />
 
             <EnteMenuItem

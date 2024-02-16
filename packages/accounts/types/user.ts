@@ -6,6 +6,7 @@ export interface UserVerificationResponse {
     encryptedToken?: string;
     token?: string;
     twoFactorSessionID: string;
+    passkeySessionID: string;
     srpM2?: string;
 }
 

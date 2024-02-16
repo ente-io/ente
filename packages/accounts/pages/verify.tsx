@@ -1,35 +1,36 @@
-import { useState, useEffect } from 'react';
-import { Trans } from 'react-i18next';
 import { t } from 'i18next';
+import { useEffect, useState } from 'react';
+import { Trans } from 'react-i18next';
 
-import { LS_KEYS, getData, setData } from '@ente/shared/storage/localStorage';
-import { verifyOtt, sendOtt, putAttributes } from '../api/user';
-import { logoutUser } from '../services/user';
-import { configureSRP } from '../services/srp';
+import { UserVerificationResponse } from '@ente/accounts/types/user';
+import { PageProps } from '@ente/shared/apps/types';
+import { VerticallyCentered } from '@ente/shared/components/Container';
+import EnteSpinner from '@ente/shared/components/EnteSpinner';
+import FormPaper from '@ente/shared/components/Form/FormPaper';
+import FormPaperFooter from '@ente/shared/components/Form/FormPaper/Footer';
+import FormPaperTitle from '@ente/shared/components/Form/FormPaper/Title';
+import LinkButton from '@ente/shared/components/LinkButton';
+import SingleInputForm, {
+    SingleInputFormProps,
+} from '@ente/shared/components/SingleInputForm';
+import { ApiError } from '@ente/shared/error';
+import { getAccountsURL } from '@ente/shared/network/api';
+import InMemoryStore, { MS_KEYS } from '@ente/shared/storage/InMemoryStore';
 import { clearFiles } from '@ente/shared/storage/localForage/helpers';
+import { LS_KEYS, getData, setData } from '@ente/shared/storage/localStorage';
 import {
     getLocalReferralSource,
     setIsFirstLogin,
 } from '@ente/shared/storage/localStorage/helpers';
 import { clearKeys } from '@ente/shared/storage/sessionStorage';
-import { PAGES } from '../constants/pages';
 import { KeyAttributes, User } from '@ente/shared/user/types';
-import { SRPSetupAttributes } from '../types/srp';
 import { Box, Typography } from '@mui/material';
-import FormPaperTitle from '@ente/shared/components/Form/FormPaper/Title';
-import FormPaper from '@ente/shared/components/Form/FormPaper';
-import FormPaperFooter from '@ente/shared/components/Form/FormPaper/Footer';
-import LinkButton from '@ente/shared/components/LinkButton';
-import SingleInputForm, {
-    SingleInputFormProps,
-} from '@ente/shared/components/SingleInputForm';
-import EnteSpinner from '@ente/shared/components/EnteSpinner';
-import { VerticallyCentered } from '@ente/shared/components/Container';
-import InMemoryStore, { MS_KEYS } from '@ente/shared/storage/InMemoryStore';
-import { ApiError } from '@ente/shared/error';
 import { HttpStatusCode } from 'axios';
-import { PageProps } from '@ente/shared/apps/types';
-import { UserVerificationResponse } from '@ente/accounts/types/user';
+import { putAttributes, sendOtt, verifyOtt } from '../api/user';
+import { PAGES } from '../constants/pages';
+import { configureSRP } from '../services/srp';
+import { logoutUser } from '../services/user';
+import { SRPSetupAttributes } from '../types/srp';
 
 export default function VerifyPage({ appContext, router, appName }: PageProps) {
     const [email, setEmail] = useState('');
@@ -69,8 +70,21 @@ export default function VerifyPage({ appContext, router, appName }: PageProps) {
                 token,
                 id,
                 twoFactorSessionID,
+                passkeySessionID,
             } = resp.data as UserVerificationResponse;
-            if (twoFactorSessionID) {
+            if (passkeySessionID) {
+                const user = getData(LS_KEYS.USER);
+                setData(LS_KEYS.USER, {
+                    ...user,
+                    passkeySessionID,
+                    isTwoFactorEnabled: true,
+                    isTwoFactorPasskeysEnabled: true,
+                });
+                setIsFirstLogin(true);
+                window.location.href = `${getAccountsURL()}/passkeys/flow?passkeySessionID=${passkeySessionID}&redirect=${window.location.origin
+                    }/passkeys/finish`;
+                router.push(PAGES.CREDENTIALS);
+            } else if (twoFactorSessionID) {
                 setData(LS_KEYS.USER, {
                     email,
                     twoFactorSessionID,

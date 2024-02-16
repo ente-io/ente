@@ -1,22 +1,24 @@
-import { getEndpoint, getFamilyPortalURL } from '@ente/shared/network/api';
-import { getData, LS_KEYS } from '@ente/shared/storage/localStorage';
-import localForage from '@ente/shared/storage/localForage';
-import { getToken } from '@ente/shared/storage/localStorage/helpers';
-import HTTPService from '@ente/shared/network/HTTPService';
-import { getRecoveryKey } from '@ente/shared/crypto/helpers';
-import { logError } from '@ente/shared/sentry';
-import {
-    UserDetails,
-    DeleteChallengeResponse,
-    GetRemoteStoreValueResponse,
-    GetFeatureFlagResponse,
-} from 'types/user';
-import { ApiError } from '@ente/shared/error';
-import { getLocalFamilyData, isPartOfFamily } from 'utils/user/family';
-import { AxiosResponse, HttpStatusCode } from 'axios';
-import { setLocalMapEnabled } from '@ente/shared/storage/localStorage/helpers';
 import { putAttributes } from '@ente/accounts/api/user';
 import { logoutUser } from '@ente/accounts/services/user';
+import { getRecoveryKey } from '@ente/shared/crypto/helpers';
+import { ApiError } from '@ente/shared/error';
+import HTTPService from '@ente/shared/network/HTTPService';
+import { getEndpoint, getFamilyPortalURL } from '@ente/shared/network/api';
+import { logError } from '@ente/shared/sentry';
+import localForage from '@ente/shared/storage/localForage';
+import { getData, LS_KEYS } from '@ente/shared/storage/localStorage';
+import {
+    getToken,
+    setLocalMapEnabled,
+} from '@ente/shared/storage/localStorage/helpers';
+import { AxiosResponse, HttpStatusCode } from 'axios';
+import {
+    DeleteChallengeResponse,
+    GetFeatureFlagResponse,
+    GetRemoteStoreValueResponse,
+    UserDetails,
+} from 'types/user';
+import { getLocalFamilyData, isPartOfFamily } from 'utils/user/family';
 
 const ENDPOINT = getEndpoint();
 
@@ -62,6 +64,24 @@ export const getFamiliesToken = async () => {
         return resp.data['familiesToken'];
     } catch (e) {
         logError(e, 'failed to get family token');
+        throw e;
+    }
+};
+
+export const getAccountsToken = async () => {
+    try {
+        const token = getToken();
+
+        const resp = await HTTPService.get(
+            `${ENDPOINT}/users/accounts-token`,
+            null,
+            {
+                'X-Auth-Token': token,
+            }
+        );
+        return resp.data['accountsToken'];
+    } catch (e) {
+        logError(e, 'failed to get accounts token');
         throw e;
     }
 };

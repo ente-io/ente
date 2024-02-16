@@ -637,6 +637,7 @@
     "VISIT_CAST_ENTE_IO": "Visit cast.ente.io on the device you want to pair.",
     "CAST_AUTO_PAIR_FAILED": "Chromecast Auto Pair failed. Please try again.",
     "CACHE_DIRECTORY": "Cache folder",
+    "PASSKEYS": "Passkeys",
     "FREEHAND": "Freehand",
     "APPLY_CROP": "Apply Crop",
     "PHOTO_EDIT_REQUIRED_TO_SAVE": "At least one transformation or color adjustment must be performed before saving."

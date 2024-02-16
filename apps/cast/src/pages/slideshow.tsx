@@ -47,7 +47,7 @@ export default function Slideshow() {
                 castCollection.updationTime !== collection.updationTime
             ) {
                 setCastCollection(collection);
-                await syncPublicFiles(token, collection, () => { });
+                await syncPublicFiles(token, collection, () => {});
                 const files = await getLocalFiles(String(collection.id));
                 setCollectionFiles(
                     files.filter((file) => isFileEligibleForCast(file))
