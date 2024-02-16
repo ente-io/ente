@@ -4,9 +4,6 @@ import {
     setLocalSentryUserID,
 } from '@ente/shared/storage/localStorage/helpers';
 import isElectron from 'is-electron';
-import { getAppEnv } from '@ente/shared/apps/env';
-import { APP_ENV } from '@ente/shared/apps/constants';
-import { isDisableSentryFlagSet } from '@ente/shared/apps/env';
 import { ApiError } from '../error';
 import { HttpStatusCode } from 'axios';
 
@@ -47,9 +44,3 @@ export function isErrorUnnecessaryForSentry(error: any) {
     }
     return false;
 }
-
-export const getIsSentryEnabled = () => {
-    const isAppENVDevelopment = getAppEnv() === APP_ENV.DEVELOPMENT;
-    const isSentryDisabled = isDisableSentryFlagSet();
-    return !isAppENVDevelopment && !isSentryDisabled;
-};

@@ -8,6 +8,9 @@ import {
     setData,
 } from '@ente/shared/storage/localStorage';
 import { ElectronFile } from '../upload/types';
+import { addLogLine } from '.';
+import { getSentryUserID } from '../sentry/utils';
+import type { User } from '../user/types';
 
 export const MAX_LOG_SIZE = 5 * 1024 * 1024; // 5MB
 export const MAX_LOG_LINES = 1000;
@@ -65,6 +68,12 @@ export const clearLogsIfLocalStorageLimitExceeded = () => {
             true
         );
     }
+};
+
+export const logStartupMessage = async () => {
+    addLogLine(`User ID: ${(getData(LS_KEYS.USER) as User)?.id}`);
+    addLogLine(`Sentry ID: ${await getSentryUserID()}`);
+    addLogLine(`Git commit: ${process.env.GIT_SHA}`);
 };
 
 function getLogs(): Log[] {

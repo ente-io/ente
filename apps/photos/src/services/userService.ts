@@ -3,14 +3,10 @@ import { logoutUser } from '@ente/accounts/services/user';
 import { getRecoveryKey } from '@ente/shared/crypto/helpers';
 import { ApiError } from '@ente/shared/error';
 import HTTPService from '@ente/shared/network/HTTPService';
-import {
-    getEndpoint,
-    getFamilyPortalURL,
-    isDevDeployment,
-} from '@ente/shared/network/api';
+import { getEndpoint, getFamilyPortalURL } from '@ente/shared/network/api';
 import { logError } from '@ente/shared/sentry';
 import localForage from '@ente/shared/storage/localForage';
-import { LS_KEYS, getData } from '@ente/shared/storage/localStorage';
+import { getData, LS_KEYS } from '@ente/shared/storage/localStorage';
 import {
     getToken,
     setLocalMapEnabled,
@@ -185,8 +181,9 @@ export const getFamilyPortalRedirectURL = async () => {
     try {
         const jwtToken = await getFamiliesToken();
         const isFamilyCreated = isPartOfFamily(getLocalFamilyData());
-        return `${getFamilyPortalURL()}?token=${jwtToken}&isFamilyCreated=${isFamilyCreated}&redirectURL=${window.location.origin
-            }/gallery`;
+        return `${getFamilyPortalURL()}?token=${jwtToken}&isFamilyCreated=${isFamilyCreated}&redirectURL=${
+            window.location.origin
+        }/gallery`;
     } catch (e) {
         logError(e, 'unable to generate to family portal URL');
         throw e;
@@ -342,12 +339,9 @@ export const updateMapEnabledStatus = async (newStatus: boolean) => {
 };
 
 export async function getDisableCFUploadProxyFlag(): Promise<boolean> {
+    if (process.env.NEXT_PUBLIC_ENTE_DIRECT_UPLOAD === 'true') return true;
+
     try {
-        const disableCFUploadProxy =
-            process.env.NEXT_PUBLIC_DISABLE_CF_UPLOAD_PROXY;
-        if (isDevDeployment() && typeof disableCFUploadProxy !== 'undefined') {
-            return disableCFUploadProxy === 'true';
-        }
         const featureFlags = (
             await fetch('https://static.ente.io/feature_flags.json')
         ).json() as GetFeatureFlagResponse;

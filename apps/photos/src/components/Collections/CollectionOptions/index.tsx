@@ -1,5 +1,11 @@
 import { AlbumCollectionOption } from './AlbumCollectionOption';
-import React, { useContext, useRef, useState } from 'react';
+import React, {
+    Dispatch,
+    SetStateAction,
+    useContext,
+    useRef,
+    useState,
+} from 'react';
 import * as CollectionAPI from 'services/collectionService';
 import * as TrashService from 'services/trashService';
 import {
@@ -43,6 +49,7 @@ interface CollectionOptionsProps {
     collectionSummaryType: CollectionSummaryType;
     showCollectionShareModal: () => void;
     setActiveCollectionID: (collectionID: number) => void;
+    setShowAlbumCastDialog: Dispatch<SetStateAction<boolean>>;
 }
 
 export enum CollectionActions {
@@ -65,6 +72,7 @@ export enum CollectionActions {
     UNPIN,
     HIDE,
     UNHIDE,
+    SHOW_ALBUM_CAST_DIALOG,
 }
 
 const CollectionOptions = (props: CollectionOptionsProps) => {
@@ -76,6 +84,7 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
         showCollectionShareModal,
         setFilesDownloadProgressAttributesCreator,
         isActiveCollectionDownloadInProgress,
+        setShowAlbumCastDialog,
     } = props;
 
     const { startLoading, finishLoading, setDialogMessage } =
@@ -96,7 +105,7 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
         action: CollectionActions,
         loader = true
     ) => {
-        let callback;
+        let callback: Function;
         switch (action) {
             case CollectionActions.SHOW_RENAME_DIALOG:
                 callback = showRenameCollectionModal;
@@ -155,6 +164,9 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
             case CollectionActions.UNHIDE:
                 callback = unHideAlbum;
                 break;
+            case CollectionActions.SHOW_ALBUM_CAST_DIALOG:
+                callback = showCastAlbumDialog;
+                break;
 
             default:
                 logError(
@@ -165,7 +177,7 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
                     action;
                 }
         }
-        return async (...args) => {
+        return async (...args: any) => {
             try {
                 loader && startLoading();
                 await callback(...args);
@@ -181,6 +193,10 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
                 loader && finishLoading();
             }
         };
+    };
+
+    const showCastAlbumDialog = () => {
+        setShowAlbumCastDialog(true);
     };
 
     const renameCollection = async (newName: string) => {

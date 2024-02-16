@@ -5,7 +5,7 @@ import { t } from 'i18next';
 import { useRouter } from 'next/router';
 import { Overlay } from '@ente/shared/components/Container';
 import EnteSpinner from '@ente/shared/components/EnteSpinner';
-import { getData, LS_KEYS } from '@ente/shared/storage/localStorage';
+import { LS_KEYS } from '@ente/shared/storage/localStorage';
 import HTTPService from '@ente/shared/network/HTTPService';
 import Head from 'next/head';
 import LoadingBar from 'react-top-loading-bar';
@@ -17,8 +17,10 @@ import {
     DialogBoxAttributesV2,
     SetDialogBoxAttributesV2,
 } from '@ente/shared/components/DialogBoxV2/types';
-import { addLogLine } from '@ente/shared/logging';
-import { clearLogsIfLocalStorageLimitExceeded } from '@ente/shared/logging/web';
+import {
+    clearLogsIfLocalStorageLimitExceeded,
+    logStartupMessage,
+} from '@ente/shared/logging/web';
 
 import { CacheProvider } from '@emotion/react';
 import {
@@ -31,8 +33,6 @@ import createEmotionCache from '@ente/shared/themes/createEmotionCache';
 import { THEME_COLOR } from '@ente/shared/themes/constants';
 import { SetTheme } from '@ente/shared/themes/types';
 import { setupI18n } from '@ente/shared/i18n';
-import { getSentryUserID } from '@ente/shared/sentry/utils';
-import { User } from '@ente/shared/user/types';
 import { useLocalState } from '@ente/shared/hooks/useLocalState';
 import { PHOTOS_PAGES as PAGES } from '@ente/shared/constants/pages';
 import { getTheme } from '@ente/shared/themes';
@@ -87,12 +87,7 @@ export default function App(props: EnteAppProps) {
         });
         // setup logging
         clearLogsIfLocalStorageLimitExceeded();
-        const main = async () => {
-            addLogLine(`userID: ${(getData(LS_KEYS.USER) as User)?.id}`);
-            addLogLine(`sentryID: ${await getSentryUserID()}`);
-            addLogLine(`sentry release ID: ${process.env.SENTRY_RELEASE}`);
-        };
-        main();
+        logStartupMessage();
     }, []);
 
     const setUserOnline = () => setOffline(false);

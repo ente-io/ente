@@ -21,6 +21,7 @@ import {
     isFilesDownloadCompleted,
 } from '../FilesDownloadProgress';
 import { SetFilesDownloadProgressAttributesCreator } from 'types/gallery';
+import AlbumCastDialog from './CollectionOptions/AlbumCastDialog';
 
 interface Iprops {
     activeCollection: Collection;
@@ -54,6 +55,8 @@ export default function Collections(props: Iprops) {
     const [allCollectionView, setAllCollectionView] = useState(false);
     const [collectionShareModalView, setCollectionShareModalView] =
         useState(false);
+
+    const [showAlbumCastDialog, setShowAlbumCastDialog] = useState(false);
 
     const [collectionListSortBy, setCollectionListSortBy] =
         useLocalState<COLLECTION_LIST_SORT_BY>(
@@ -117,6 +120,7 @@ export default function Collections(props: Iprops) {
                         isActiveCollectionDownloadInProgress
                     }
                     setActiveCollectionID={setActiveCollectionID}
+                    setShowAlbumCastDialog={setShowAlbumCastDialog}
                 />
             ),
             itemType: ITEM_TYPE.HEADER,
@@ -136,6 +140,7 @@ export default function Collections(props: Iprops) {
     const closeAllCollections = () => setAllCollectionView(false);
     const openAllCollections = () => setAllCollectionView(true);
     const closeCollectionShare = () => setCollectionShareModalView(false);
+    const closeAlbumCastDialog = () => setShowAlbumCastDialog(false);
 
     return (
         <>
@@ -170,6 +175,11 @@ export default function Collections(props: Iprops) {
                 open={collectionShareModalView}
                 onClose={closeCollectionShare}
                 collection={activeCollection}
+            />
+            <AlbumCastDialog
+                currentCollection={activeCollection}
+                show={showAlbumCastDialog}
+                onHide={closeAlbumCastDialog}
             />
         </>
     );

@@ -7,12 +7,6 @@ export enum APPS {
     ACCOUNTS = 'ACCOUNTS',
 }
 
-export enum APP_ENV {
-    DEVELOPMENT = 'development',
-    PRODUCTION = 'production',
-    TEST = 'test',
-}
-
 export const CLIENT_PACKAGE_NAMES = new Map([
     [APPS.ALBUMS, 'io.ente.albums.web'],
     [APPS.PHOTOS, 'io.ente.photos.web'],

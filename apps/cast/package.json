@@ -1,0 +1,19 @@
+{
+    "name": "cast",
+    "version": "0.1.0",
+    "private": true,
+    "scripts": {
+        "dev": "next dev",
+        "build": "next build",
+        "start": "next start",
+        "lint": "next lint",
+        "export": "next export"
+    },
+    "dependencies": {
+        "mime-types": "^2.1.35",
+        "jszip": "3.10.1"
+    },
+    "devDependencies": {
+        "sass": "^1.69.5"
+    }
+}
