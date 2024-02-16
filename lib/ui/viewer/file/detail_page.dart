@@ -73,6 +73,7 @@ class DetailPage extends StatefulWidget {
 class _DetailPageState extends State<DetailPage> {
   static const kLoadLimit = 100;
   final _logger = Logger("DetailPageState");
+  bool _shouldDisableScroll = false;
   List<EnteFile>? _files;
   late PageController _pageController;
   final _selectedIndexNotifier = ValueNotifier(0);
@@ -171,6 +172,14 @@ class _DetailPageState extends State<DetailPage> {
           file,
           autoPlay: shouldAutoPlay(),
           tagPrefix: widget.config.tagPrefix,
+          shouldDisableScroll: (value) {
+            if (_shouldDisableScroll != value) {
+              setState(() {
+                _logger.fine('setState $_shouldDisableScroll to $value');
+                _shouldDisableScroll = value;
+              });
+            }
+          },
           playbackCallback: (isPlaying) {
             Future.delayed(Duration.zero, () {
               _toggleFullScreen(shouldEnable: isPlaying);
@@ -199,7 +208,9 @@ class _DetailPageState extends State<DetailPage> {
         }
         _preloadEntries();
       },
-      physics: const FastScrollPhysics(speedFactor: 4.0),
+      physics: _shouldDisableScroll
+          ? const NeverScrollableScrollPhysics()
+          : const FastScrollPhysics(speedFactor: 4.0),
       controller: _pageController,
       itemCount: _files!.length,
     );
