@@ -42,7 +42,8 @@
     },
     "devDependencies": {
         "@ente/eslint-config": "*",
-        "@typescript-eslint/parser": "^5.59.2",
+        "@typescript-eslint/eslint-plugin": "^7.0.1",
+        "@typescript-eslint/parser": "^7.0.1",
         "eslint": "^8.56",
         "husky": "^7.0.1",
         "lint-staged": "^13.2.3",
