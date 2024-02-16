@@ -17,15 +17,15 @@ rm -rf out
 
 case "$CF_PAGES_BRANCH" in
     accounts-*)
-        yarn export:accounts
+        yarn build:accounts
         cp -R apps/accounts/out .
         ;;
     auth-*)
-        yarn export:auth
+        yarn build:auth
         cp -R apps/auth/out .
         ;;
     *)
-        yarn export:photos
+        yarn build:photos
         cp -R apps/photos/out .
         ;;
 esac

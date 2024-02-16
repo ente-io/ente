@@ -17,6 +17,8 @@ const gitSHA = cp.execSync('git rev-parse --short HEAD', {
 });
 
 const nextConfig = {
+    /* generate a static export when we run `next build` */
+    output: 'export',
     compiler: {
         emotion: {
             importMap: {
