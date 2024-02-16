@@ -3,6 +3,7 @@
     "version": "0.0.0",
     "private": true,
     "exports": {
-        "./hello": "./src/hello.ts"
+        "./components/*": "./src/components/*.tsx",
+        "./*": "./src/*.ts"
     }
 }

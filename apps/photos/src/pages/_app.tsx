@@ -80,6 +80,7 @@ import { getTheme } from '@ente/shared/themes';
 import { AppUpdateInfo } from '@ente/shared/electron/types';
 import DownloadManager from 'services/download';
 import { sayHello } from '@/utils/hello';
+import { Card } from '@/utils/components/Card';
 // import { sayHello } from '@repo/ui/hello';
 
 const redirectMap = new Map([
@@ -412,6 +413,7 @@ export default function App(props: EnteAppProps) {
 
             <ThemeProvider theme={getTheme(themeColor, APPS.PHOTOS)}>
                 <CssBaseline enableColorScheme />
+                <Card />
                 {showNavbar && <AppNavbar isMobile={isMobile} />}
                 <MessageContainer>
                     {offline && t('OFFLINE_MSG')}
