@@ -45,8 +45,8 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
       appBar: AppBar(
         title: Text(l10n.importAccountPageTitle),
       ),
-      body: SafeArea(
-        child: Center(
+      body: Center(
+        child: SingleChildScrollView(
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 40.0, horizontal: 40),
             child: Column(
