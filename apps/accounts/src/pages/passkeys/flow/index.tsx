@@ -128,19 +128,20 @@ const PasskeysFlow = () => {
     };
 
     const getCredential = async (
-        publicKey: any
+        publicKey: any,
+        timeoutMillis: number = 60000 // Default timeout of 60 seconds
     ): Promise<Credential | null> => {
         publicKey.challenge = _sodium.from_base64(
             publicKey.challenge,
             _sodium.base64_variants.URLSAFE_NO_PADDING
         );
-        publicKey.allowCredentials?.forEach(function(listItem: any) {
+        publicKey.allowCredentials?.forEach(function (listItem: any) {
             listItem.id = _sodium.from_base64(
                 listItem.id,
                 _sodium.base64_variants.URLSAFE_NO_PADDING
             );
         });
-
+        publicKey.timeout = timeoutMillis;
         const credential = await navigator.credentials.get({
             publicKey,
         });
