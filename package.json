@@ -10,6 +10,7 @@
         "build:photos": "turbo run build --filter=photos",
         "build:auth": "turbo run build --filter=auth",
         "build:cast": "turbo run build --filter=cast",
+        "build:accounts": "turbo run build --filter=accounts",
         "dev:auth": "turbo run dev --filter=auth",
         "dev:photos": "turbo run dev --filter=photos",
         "dev:accounts": "turbo run dev --filter=accounts",
