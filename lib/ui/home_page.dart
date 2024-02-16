@@ -29,6 +29,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:logging/logging.dart';
 import 'package:move_to_background/move_to_background.dart';
 
@@ -233,10 +234,12 @@ class _HomePageState extends State<HomePage> {
           onManuallySetupTap: _redirectToManualEntryPage,
         );
       } else {
-        final list = ListView.builder(
+        final list = AlignedGridView.count(
+          crossAxisCount:
+              MediaQuery.sizeOf(context).width ~/ 400.clamp(0, double.infinity),
           itemBuilder: ((context, index) {
             try {
-              return CodeWidget(_filteredCodes[index]);
+              return ClipRect(child: CodeWidget(_filteredCodes[index]));
             } catch (e) {
               return const Text("Failed");
             }
