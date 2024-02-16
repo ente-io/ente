@@ -23,7 +23,8 @@
         "lint": "turbo run lint",
         "albums": "turbo run albums",
         "prepare": "husky install",
-        "photos:dev": "TURBO_NO_UPDATE_NOTIFIER=true turbo run dev --filter=photos"
+        "photos:dev": "TURBO_NO_UPDATE_NOTIFIER=true turbo run dev --filter=photos",
+        "lint-x": "prettier --check ."
     },
     "dependencies": {
         "@emotion/react": "11.10.6",
