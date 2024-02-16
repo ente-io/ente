@@ -235,8 +235,9 @@ class _HomePageState extends State<HomePage> {
         );
       } else {
         final list = AlignedGridView.count(
-          crossAxisCount:
-              MediaQuery.sizeOf(context).width ~/ 400.clamp(0, double.infinity),
+          crossAxisCount: (MediaQuery.sizeOf(context).width ~/ 400)
+              .clamp(1, double.infinity)
+              .toInt(),
           itemBuilder: ((context, index) {
             try {
               return ClipRect(child: CodeWidget(_filteredCodes[index]));
