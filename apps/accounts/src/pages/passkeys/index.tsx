@@ -68,7 +68,8 @@ const Passkeys = () => {
 
     const handleSubmit = async (
         inputValue: string,
-        setFieldError: (errorMessage: string) => void
+        setFieldError: (errorMessage: string) => void,
+        resetForm: (nextState?: unknown) => void
     ) => {
         let response: {
             options: {
@@ -119,7 +120,8 @@ const Passkeys = () => {
             return;
         }
 
-        init();
+        await init();
+        resetForm();
     };
 
     return (

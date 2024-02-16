@@ -1,5 +1,5 @@
 import { CacheProvider } from '@emotion/react';
-import { APPS } from '@ente/shared/apps/constants';
+import { APPS, APP_TITLES } from '@ente/shared/apps/constants';
 import { EnteAppProps } from '@ente/shared/apps/types';
 import { Overlay } from '@ente/shared/components/Container';
 import DialogBoxV2 from '@ente/shared/components/DialogBoxV2';
@@ -18,6 +18,7 @@ import { THEME_COLOR } from '@ente/shared/themes/constants';
 import createEmotionCache from '@ente/shared/themes/createEmotionCache';
 import { CssBaseline, useMediaQuery } from '@mui/material';
 import { ThemeProvider } from '@mui/material/styles';
+import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { createContext, useEffect, useState } from 'react';
 import 'styles/global.css';
@@ -84,8 +85,17 @@ export default function App(props: EnteAppProps) {
 
     const theme = getTheme(themeColor, APPS.PHOTOS);
 
+    // TODO: Localise APP_TITLES
     return (
         <CacheProvider value={emotionCache}>
+            <Head>
+                <title>{APP_TITLES.get(APPS.ACCOUNTS)}</title>
+                <meta
+                    name="viewport"
+                    content="initial-scale=1, width=device-width"
+                />
+            </Head>
+
             <ThemeProvider theme={theme}>
                 <CssBaseline enableColorScheme />
                 <DialogBoxV2
