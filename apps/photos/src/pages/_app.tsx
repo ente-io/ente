@@ -79,8 +79,6 @@ import { PHOTOS_PAGES as PAGES } from '@ente/shared/constants/pages';
 import { getTheme } from '@ente/shared/themes';
 import { AppUpdateInfo } from '@ente/shared/electron/types';
 import DownloadManager from 'services/download';
-import { sayHello } from '@/utils/hello';
-import { Card } from '@/utils/components/Card';
 
 const redirectMap = new Map([
     [REDIRECTS.ROADMAP, getRoadmapRedirectURL],
@@ -172,7 +170,6 @@ export default function App(props: EnteAppProps) {
         // setup logging
         clearLogsIfLocalStorageLimitExceeded();
         logStartupMessage();
-        sayHello();
     }, []);
 
     useEffect(() => {
@@ -412,7 +409,6 @@ export default function App(props: EnteAppProps) {
 
             <ThemeProvider theme={getTheme(themeColor, APPS.PHOTOS)}>
                 <CssBaseline enableColorScheme />
-                <Card />
                 {showNavbar && <AppNavbar isMobile={isMobile} />}
                 <MessageContainer>
                     {offline && t('OFFLINE_MSG')}
