@@ -10,10 +10,10 @@
         "albums": "next dev -p 3002"
     },
     "dependencies": {
+        "@/utils": "*",
         "@date-io/date-fns": "^2.14.0",
-        "@repo/ui": "*",
-        "@ente-io/utils": "*",
         "@mui/x-date-pickers": "^5.0.0-alpha.6",
+        "@repo/ui": "*",
         "@sentry/nextjs": "^7.77.0",
         "@stripe/stripe-js": "^1.13.2",
         "@tensorflow-models/coco-ssd": "^2.2.2",

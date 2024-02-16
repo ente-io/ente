@@ -1,7 +1,7 @@
 {
     /* Docs: https://aka.ms/tsconfig.json */
     "compilerOptions": {
-        /* We use TypeScript as a type checker, not as a build tool */
+        /* We use TypeScript (tsc) as a type checker, not as a build tool */
         "noEmit": true,
 
         /*
@@ -18,17 +18,18 @@
          * explicitly.
          *
          * Note that we don't need to specify the `target` compilerOption, since
-         * TypeScript isn't actually generating (emitting) the JavaScript.
+         * tsc isn't actually generating (emitting) the JavaScript.
          */
         "lib": ["esnext", "dom", "dom.iterable"],
 
         /*
          * The module system to assume the generated JavaScript will use.
          *
-         * Since we're using a bundler, we should set this to esnext
+         * Since we're using a bundler, we should set this to "esnext"
          * https://www.typescriptlang.org/docs/handbook/modules/guides/choosing-compiler-options.html
          */
         "module": "esnext",
+
         /*
          * Tell TypeScript how to lookup the file for a given import
          *
@@ -43,7 +44,7 @@
          */
         "moduleResolution": "bundler",
 
-        /* Allow use of `.tsx` files */
+        /* Allow use of `.tsx` files, but don't tranform them */
         "jsx": "preserve",
 
         /* Ask TypeScript to warn us if we use TypeScript features that cannot
