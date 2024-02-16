@@ -24,7 +24,7 @@
         "albums": "turbo run albums",
         "prepare": "husky install",
         "photos:dev": "TURBO_NO_UPDATE_NOTIFIER=true turbo run dev --filter=photos",
-        "lint-x": "prettier --check ."
+        "lint-x": "yarn prettier --check . && yarn workspaces run eslint ."
     },
     "dependencies": {
         "@emotion/react": "11.10.6",
