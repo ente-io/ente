@@ -12,9 +12,5 @@ baseline for how our code be in all the workspaces in the monorepo.
 They also need some support packages:
 
 * "@typescript-eslint/parser" - Tells ESLint how to read TypeScript syntax
+* "@typescript-eslint/eslint-plugin" - Provides TypeScript rules and presets
 
-   TODO(MR): This is no longer needed with the new flat format.
-
-* "typescript-eslint" - TypeScript support for ESLint
-
-   TODO(MR): Move this to the top level package.json
