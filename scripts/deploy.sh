@@ -21,6 +21,9 @@ if test "$CF_PAGES_BRANCH" = "photos-release"; then
 elif test "$CF_PAGES_BRANCH" = "auth-release"; then
     yarn export:auth
     cp -R apps/auth/out .
+elif test "$CF_PAGES_BRANCH" = "accounts-release"; then
+    yarn export:accounts
+    cp -R apps/accounts/out .
 else
     # Apart from the named branches, everything else connects to the dev APIs.
     export NEXT_PUBLIC_ENTE_ENDPOINT=https://dev-api.ente.io
