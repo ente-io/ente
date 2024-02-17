@@ -42,6 +42,7 @@ const nextConfig = {
             },
         },
     },
+    productionBrowserSourceMaps: true,
     transpilePackages: [
         '@/utils',
         '@mui/material',
