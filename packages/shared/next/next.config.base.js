@@ -1,3 +1,5 @@
+// @ts-check
+
 /**
  * @file Configure the Next.js build
  *
@@ -16,6 +18,9 @@ const gitSHA = cp.execSync('git rev-parse --short HEAD', {
     encoding: 'utf8',
 });
 
+/**
+ * @type {import('next').NextConfig}
+ */
 const nextConfig = {
     /* generate a static export when we run `next build` */
     output: 'export',
