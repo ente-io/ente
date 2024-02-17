@@ -13,7 +13,7 @@ import 'package:photos/ente_theme_data.dart';
 import "package:photos/generated/l10n.dart";
 import "package:photos/l10n/l10n.dart";
 import 'package:photos/services/app_lifecycle_service.dart';
-import "package:photos/services/semantic_search/semantic_search_service.dart";
+import 'package:photos/services/machine_learning/semantic_search/semantic_search_service.dart';
 import 'package:photos/services/sync_service.dart';
 import 'package:photos/ui/tabs/home_widget.dart';
 import "package:photos/ui/viewer/actions/file_viewer.dart";

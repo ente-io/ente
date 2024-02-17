@@ -5,7 +5,7 @@ import "dart:typed_data";
 import "package:flutter/services.dart";
 import "package:logging/logging.dart";
 import "package:onnxruntime/onnxruntime.dart";
-import "package:photos/services/semantic_search/frameworks/onnx/onnx_text_tokenizer.dart";
+import 'package:photos/services/machine_learning/semantic_search/frameworks/onnx/onnx_text_tokenizer.dart';
 
 class OnnxTextEncoder {
   static const kVocabFilePath = "assets/models/clip/bpe_simple_vocab_16e6.txt";
