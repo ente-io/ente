@@ -3,7 +3,12 @@
 The monorepo uses Yarn (classic) workspaces.
 
 To run a command for a workspace `<ws>`, invoke `yarn workspace <ws> <cmd>` from
-the root folder instead the the `yarn <cmd>` you’d have done otherwise.
+the root folder instead the the `yarn <cmd>` you’d have done otherwise. For
+example, to build the `photos` app, we can do
+
+```sh
+yarn workspace photos next build
+```
 
 To add a local package as a dependency, use `<package-name>@*`. The "*" here
 denotes any version.

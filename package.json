@@ -7,18 +7,17 @@
         "packages/*"
     ],
     "scripts": {
-        "build:accounts": "TURBO_NO_UPDATE_NOTIFIER=true turbo run build --filter=accounts",
-        "build:auth": "TURBO_NO_UPDATE_NOTIFIER=true turbo run build --filter=auth",
-        "build:cast": "TURBO_NO_UPDATE_NOTIFIER=true turbo run build --filter=cast",
-        "build:photos": "TURBO_NO_UPDATE_NOTIFIER=true turbo run build --filter=photos",
-        "dev:accounts": "TURBO_NO_UPDATE_NOTIFIER=true turbo run dev --filter=accounts",
-        "dev:auth": "TURBO_NO_UPDATE_NOTIFIER=true turbo run dev --filter=auth",
-        "dev:cast": "TURBO_NO_UPDATE_NOTIFIER=true turbo run dev --filter=cast",
-        "dev:photos": "TURBO_NO_UPDATE_NOTIFIER=true turbo run dev --filter=photos",
-        "lint": "turbo run lint",
-        "albums": "turbo run albums",
+        "build:accounts": "yarn workspace photos next build",
+        "build:auth": "yarn workspace photos next build",
+        "build:cast": "yarn workspace photos next build",
+        "build:photos": "yarn workspace photos next build",
+        "dev:accounts": "yarn workspace accounts next dev",
+        "dev:auth": "yarn workspace auth next dev",
+        "dev:cast": "yarn workspace cast next dev",
+        "dev:photos": "yarn workspace photos next dev",
+        "albums": "yarn workspace photos albums",
         "prepare": "husky install",
-        "lint-x": "yarn prettier --check . && yarn workspaces run eslint .",
+        "lint": "yarn prettier --check . && yarn workspaces run eslint .",
         "lint-fix": "yarn prettier --write . && yarn workspaces run eslint --fix ."
     },
     "dependencies": {
@@ -43,7 +42,6 @@
         "husky": "^7.0.1",
         "lint-staged": "^13.2.3",
         "prettier": "2.3.2",
-        "turbo": "^1.10.3",
         "typescript": "^5.1.3"
     },
     "lint-staged": {
