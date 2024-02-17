@@ -81,8 +81,9 @@ export default function VerifyPage({ appContext, router, appName }: PageProps) {
                     isTwoFactorPasskeysEnabled: true,
                 });
                 setIsFirstLogin(true);
-                window.location.href = `${getAccountsURL()}/passkeys/flow?passkeySessionID=${passkeySessionID}&redirect=${window.location.origin
-                    }/passkeys/finish`;
+                window.location.href = `${getAccountsURL()}/passkeys/flow?passkeySessionID=${passkeySessionID}&redirect=${
+                    window.location.origin
+                }/passkeys/finish`;
                 router.push(PAGES.CREDENTIALS);
             } else if (twoFactorSessionID) {
                 setData(LS_KEYS.USER, {
