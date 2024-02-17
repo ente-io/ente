@@ -49,6 +49,7 @@ const PasskeysFlow = () => {
             }
         }
 
+        let pkg = CLIENT_PACKAGE_NAMES.get(APPS.PHOTOS);
         if (redirectURL.protocol === 'enteauth:') {
             pkg = CLIENT_PACKAGE_NAMES.get(APPS.AUTH);
         } else if (redirectURL.hostname.startsWith('accounts')) {
