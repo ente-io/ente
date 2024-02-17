@@ -1,0 +1,13 @@
+name: Lint
+
+on:
+    # Run on every push (this also covers pull requests)
+    push:
+
+jobs:
+    lint:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+            - run: yarn install
+            - run: yarn lint
