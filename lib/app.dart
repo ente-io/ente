@@ -85,10 +85,10 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
     if (Platform.isAndroid || kDebugMode) {
       _userInteractionTimer = Timer(timeout, () {
         debugPrint("user is not interacting with the app");
-        SemanticSearchService.instance.resumeIndexing();
+        SemanticSearchService.instance.startIndexing();
       });
     } else {
-      SemanticSearchService.instance.resumeIndexing();
+      SemanticSearchService.instance.startIndexing();
     }
   }
 

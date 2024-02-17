@@ -54,8 +54,8 @@ class SemanticSearchService {
 
   get hasInitialized => _hasInitialized;
 
-  void resumeIndexing() {
-    _logger.info("Resuming indexing");
+  void startIndexing() {
+    _logger.info("Start indexing");
     _userInteraction.complete();
   }
 
@@ -66,7 +66,10 @@ class SemanticSearchService {
     }
   }
 
-  Future<void> init({bool shouldSyncImmediately = false}) async {
+  Future<void> init({
+    bool shouldSyncImmediately = false,
+    bool isInBackground = false,
+  }) async {
     if (!LocalSettings.instance.hasEnabledMagicSearch()) {
       return;
     }
@@ -110,6 +113,10 @@ class SemanticSearchService {
     });
     if (shouldSyncImmediately) {
       unawaited(sync());
+    }
+    if (isInBackground) {
+      // Do not block on user interactions
+      startIndexing();
     }
   }
 
