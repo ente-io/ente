@@ -7,9 +7,9 @@
         "packages/*"
     ],
     "scripts": {
-        "build:accounts": "yarn workspace photos next build",
-        "build:auth": "yarn workspace photos next build",
-        "build:cast": "yarn workspace photos next build",
+        "build:accounts": "yarn workspace accounts next build",
+        "build:auth": "yarn workspace auth next build",
+        "build:cast": "yarn workspace cast next build",
         "build:photos": "yarn workspace photos next build",
         "dev:accounts": "yarn workspace accounts next dev",
         "dev:auth": "yarn workspace auth next dev",
