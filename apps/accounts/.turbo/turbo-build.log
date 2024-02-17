@@ -1,0 +1,20 @@
+$ next build
+warn  - You have enabled experimental feature (externalDir) in next.config.js.
+warn  - Experimental features are not covered by semver, and may cause unexpected or broken application behavior. Use at your own risk.
+
+info  - Linting and checking validity of types...
+info  - Creating an optimized production build...
+[@sentry/nextjs] You are using Next.js features that run on the Edge Runtime. Please add a "sentry.edge.config.js" or a "sentry.edge.config.ts" file to your project root in which you initialize the Sentry SDK with "Sentry.init()".
+Failed to compile.
+
+Sentry CLI Plugin: Command failed: /Users/ua741/work/ente-io/photos-web/node_modules/@sentry/cli/sentry-cli releases new 9w3nTrukMjwX3jF6L0jq-
+error: API request failed
+  caused by: sentry reported an error: unknown error (http status: 522)
+
+Add --log-level=[info|debug] or export SENTRY_LOG_LEVEL=[info|debug] to see more output.
+Please attach the full debug log to all bug reports.
+
+
+> Build failed because of webpack errors
+error Command failed with exit code 1.
+info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.

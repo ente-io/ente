@@ -1,0 +1,17 @@
+$ next build
+info  - Loaded env from /Users/ua741/work/ente-io/photos-web/apps/cast/.env.local
+info  - Linting and checking validity of types...
+info  - Creating an optimized production build...
+[@sentry/nextjs] You are using Next.js features that run on the Edge Runtime. Please add a "sentry.edge.config.js" or a "sentry.edge.config.ts" file to your project root in which you initialize the Sentry SDK with "Sentry.init()".
+Failed to compile.
+
+./src/components/FilledCircleCheck/FilledCircleCheck.module.scss
+To use Next.js' built-in Sass support, you first need to install `sass`.
+Run `npm i sass` or `yarn add sass` inside your workspace.
+
+Learn more: https://nextjs.org/docs/messages/install-sass
+
+
+> Build failed because of webpack errors
+error Command failed with exit code 1.
+info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.

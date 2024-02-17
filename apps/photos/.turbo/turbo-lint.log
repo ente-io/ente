@@ -1,0 +1,3 @@
+$ next lint
+info  - Loaded env from /Users/ua741/work/ente-io/photos-web/apps/photos/.env.local
+✔ No ESLint warnings or errors
