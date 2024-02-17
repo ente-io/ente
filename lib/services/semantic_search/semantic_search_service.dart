@@ -54,8 +54,8 @@ class SemanticSearchService {
 
   get hasInitialized => _hasInitialized;
 
-  void resumeIndexing() {
-    _logger.info("Resuming indexing");
+  void startIndexing() {
+    _logger.info("Start indexing");
     _userInteraction.complete();
   }
 
@@ -116,7 +116,7 @@ class SemanticSearchService {
     }
     if (isInBackground) {
       // Do not block on user interactions
-      resumeIndexing();
+      startIndexing();
     }
   }
 
