@@ -42,7 +42,6 @@ const nextConfig = {
             },
         },
     },
-    productionBrowserSourceMaps: true,
     transpilePackages: [
         '@/utils',
         '@mui/material',
@@ -72,14 +71,23 @@ const nextConfig = {
     },
 };
 
-const sentryWebpackPluginOptions = {};
+const sentryWebpackPluginOptions = {
+    // The same release value needs to be used both:
+    // 1. here to create a new release on Sentry and upload sourcemaps to it,
+    // 2. and when initializing Sentry in the browser (`Sentry.init`).
+    release: gitSHA,
+};
 
 // withSentryConfig extends the default Next.js usage of webpack to:
 //
 // 1. Initialize the SDK on client page load (See `sentry.client.config.ts`)
 //
 // 2. Upload sourcemaps, using the settings defined in `sentry.properties`.
-//    Sourcemaps are only uploaded if SENTRY_AUTH_TOKEN is defined.
+//
+// Sourcemaps are only uploaded to Sentry if SENTRY_AUTH_TOKEN is defined. Note
+// that sourcemaps are always generated in the static export; the Sentry Webpack
+// plugin behavies as if the `productionBrowserSourceMaps` Next.js configuration
+// setting is `true`.
 //
 // Irritatingly, Sentry insists that we create empty sentry.server.config.ts and
 // sentry.edge.config.ts files, even though we are not using those parts.
