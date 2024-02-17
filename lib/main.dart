@@ -29,11 +29,24 @@ import 'package:flutter_displaymode/flutter_displaymode.dart';
 import 'package:logging/logging.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:privacy_screen/privacy_screen.dart';
+import 'package:window_manager/window_manager.dart';
 
 final _logger = Logger("main");
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  await windowManager.ensureInitialized();
+
+  if (PlatformUtil.isDesktop()) {
+    WindowOptions windowOptions = const WindowOptions(
+      size: Size(450, 800),
+    );
+    windowManager.waitUntilReadyToShow(windowOptions, () async {
+      await windowManager.show();
+      await windowManager.focus();
+    });
+  }
   await _runInForeground();
   await _setupPrivacyScreen();
   if (Platform.isAndroid) FlutterDisplayMode.setHighRefreshRate();

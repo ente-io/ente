@@ -99,6 +99,7 @@ dependencies:
   url_launcher: ^6.1.5
   uuid: ^4.2.2
   win32: ^5.1.1
+  window_manager: ^0.3.8
 
 dependency_overrides:
   flutter_secure_storage_linux:
