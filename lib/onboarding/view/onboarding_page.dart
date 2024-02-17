@@ -48,14 +48,16 @@ class _OnboardingPageState extends State<OnboardingPage> {
     final l10n = context.l10n;
     return Scaffold(
       body: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
+        child: SingleChildScrollView(
+          child: Center(
             child: ConstrainedBox(
               constraints:
                   const BoxConstraints.tightFor(height: 800, width: 450),
               child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(vertical: 40.0, horizontal: 40),
+                padding: const EdgeInsets.symmetric(
+                  vertical: 40.0,
+                  horizontal: 40,
+                ),
                 child: Column(
                   children: [
                     Column(
