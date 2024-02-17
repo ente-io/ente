@@ -166,8 +166,9 @@ export default function Credentials({
                         isTwoFactorPasskeysEnabled: true,
                     });
                     InMemoryStore.set(MS_KEYS.REDIRECT_URL, PAGES.ROOT);
-                    window.location.href = `${getAccountsURL()}/passkeys/flow?passkeySessionID=${passkeySessionID}&redirect=${window.location.origin
-                        }/passkeys/finish`;
+                    window.location.href = `${getAccountsURL()}/passkeys/flow?passkeySessionID=${passkeySessionID}&redirect=${
+                        window.location.origin
+                    }/passkeys/finish`;
                     return;
                 } else if (twoFactorSessionID) {
                     const sessionKeyAttributes =

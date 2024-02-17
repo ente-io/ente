@@ -5,13 +5,13 @@ import { AppContext } from 'pages/_app';
 import { useContext } from 'react';
 
 export default function Generate() {
-	const appContext = useContext(AppContext);
-	const router = useRouter();
-	return (
-		<GeneratePage
-			appContext={appContext}
-			router={router}
-			appName={APPS.ACCOUNTS}
-		/>
-	);
+    const appContext = useContext(AppContext);
+    const router = useRouter();
+    return (
+        <GeneratePage
+            appContext={appContext}
+            router={router}
+            appName={APPS.ACCOUNTS}
+        />
+    );
 }

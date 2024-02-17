@@ -74,10 +74,11 @@ export default function UtilitySection({ closeSidebar }) {
         try {
             const accountsToken = await getAccountsToken();
 
-            window.location.href = `${getAccountsURL()}${ACCOUNTS_PAGES.ACCOUNT_HANDOFF
-                }?package=${CLIENT_PACKAGE_NAMES.get(
-                    APPS.PHOTOS
-                )}&token=${accountsToken}`;
+            window.location.href = `${getAccountsURL()}${
+                ACCOUNTS_PAGES.ACCOUNT_HANDOFF
+            }?package=${CLIENT_PACKAGE_NAMES.get(
+                APPS.PHOTOS
+            )}&token=${accountsToken}`;
         } catch (e) {
             logError(e, 'failed to redirect to accounts page');
         }
