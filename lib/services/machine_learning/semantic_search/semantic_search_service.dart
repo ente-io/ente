@@ -11,6 +11,7 @@ import "package:photos/db/files_db.dart";
 import "package:photos/events/diff_sync_complete_event.dart";
 import 'package:photos/events/embedding_updated_event.dart';
 import "package:photos/events/file_uploaded_event.dart";
+import "package:photos/events/machine_learning_control_event.dart";
 import "package:photos/models/embedding.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/services/collections_service.dart";
@@ -50,19 +51,19 @@ class SemanticSearchService {
   Future<List<EnteFile>>? _ongoingRequest;
   List<Embedding> _cachedEmbeddings = <Embedding>[];
   PendingQuery? _nextQuery;
-  Completer<void> _userInteraction = Completer<void>();
+  Completer<void> _healthCheckCompleter = Completer<void>();
 
   get hasInitialized => _hasInitialized;
 
   void startIndexing() {
     _logger.info("Start indexing");
-    _userInteraction.complete();
+    _healthCheckCompleter.complete();
   }
 
   void pauseIndexing() {
-    if (_userInteraction.isCompleted) {
+    if (_healthCheckCompleter.isCompleted) {
       _logger.info("Pausing indexing");
-      _userInteraction = Completer<void>();
+      _healthCheckCompleter = Completer<void>();
     }
   }
 
@@ -118,6 +119,13 @@ class SemanticSearchService {
       // Do not block on user interactions
       startIndexing();
     }
+    Bus.instance.on<MachineLearningControlEvent>().listen((event) {
+      if (event.shouldRun) {
+        startIndexing();
+      } else {
+        pauseIndexing();
+      }
+    });
   }
 
   Future<void> release() async {
@@ -301,9 +309,9 @@ class SemanticSearchService {
     if (!_frameworkInitialization.isCompleted) {
       return;
     }
-    if (!_userInteraction.isCompleted) {
-      _logger.info("Waiting for user interactions to stop...");
-      await _userInteraction.future;
+    if (!_healthCheckCompleter.isCompleted) {
+      _logger.info("Waiting for health check to give a green signal...");
+      await _healthCheckCompleter.future;
     }
     try {
       final thumbnail = await getThumbnailForUploadedFile(file);
