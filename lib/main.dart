@@ -30,6 +30,7 @@ import 'package:photos/services/feature_flag_service.dart';
 import 'package:photos/services/local_file_update_service.dart';
 import 'package:photos/services/local_sync_service.dart';
 import "package:photos/services/location_service.dart";
+import "package:photos/services/machine_learning/machine_learning_controller.dart";
 import 'package:photos/services/machine_learning/semantic_search/semantic_search_service.dart';
 import 'package:photos/services/memories_service.dart';
 import 'package:photos/services/push_service.dart';
@@ -194,6 +195,7 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
   }
   unawaited(FeatureFlagService.instance.init());
   unawaited(SemanticSearchService.instance.init(isInBackground: isBackground));
+  MachineLearningController.instance.init();
   // Can not including existing tf/ml binaries as they are not being built
   // from source.
   // See https://gitlab.com/fdroid/fdroiddata/-/merge_requests/12671#note_1294346819
