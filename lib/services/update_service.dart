@@ -154,8 +154,10 @@ class UpdateService {
       );
     }
     return Platform.isAndroid
-        ? const Tuple2("Google Play",
-            "https://play.google.com/store/apps/details?id=io.ente.photos")
+        ? const Tuple2(
+            "Google Play",
+            "https://play.google.com/store/apps/details?id=io.ente.photos",
+          )
         : const Tuple2(
             "App Store",
             "https://apps.apple.com/in/app/ente-photos/id1542026904",
