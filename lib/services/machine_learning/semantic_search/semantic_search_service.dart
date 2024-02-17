@@ -55,18 +55,6 @@ class SemanticSearchService {
 
   get hasInitialized => _hasInitialized;
 
-  void startIndexing() {
-    _logger.info("Start indexing");
-    _healthCheckCompleter.complete();
-  }
-
-  void pauseIndexing() {
-    if (_healthCheckCompleter.isCompleted) {
-      _logger.info("Pausing indexing");
-      _healthCheckCompleter = Completer<void>();
-    }
-  }
-
   Future<void> init({
     bool shouldSyncImmediately = false,
     bool isInBackground = false,
@@ -117,13 +105,13 @@ class SemanticSearchService {
     }
     if (isInBackground) {
       // Do not block on user interactions
-      startIndexing();
+      _startIndexing();
     }
     Bus.instance.on<MachineLearningControlEvent>().listen((event) {
       if (event.shouldRun) {
-        startIndexing();
+        _startIndexing();
       } else {
-        pauseIndexing();
+        _pauseIndexing();
       }
     });
   }
@@ -382,6 +370,18 @@ class SemanticSearchService {
       return Model.ggmlClip;
     } else {
       return Model.onnxClip;
+    }
+  }
+
+  void _startIndexing() {
+    _logger.info("Start indexing");
+    _healthCheckCompleter.complete();
+  }
+
+  void _pauseIndexing() {
+    if (_healthCheckCompleter.isCompleted) {
+      _logger.info("Pausing indexing");
+      _healthCheckCompleter = Completer<void>();
     }
   }
 }

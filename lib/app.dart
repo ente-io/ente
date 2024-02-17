@@ -13,7 +13,7 @@ import 'package:photos/ente_theme_data.dart';
 import "package:photos/generated/l10n.dart";
 import "package:photos/l10n/l10n.dart";
 import 'package:photos/services/app_lifecycle_service.dart';
-import 'package:photos/services/machine_learning/semantic_search/semantic_search_service.dart';
+import "package:photos/services/machine_learning/machine_learning_controller.dart";
 import 'package:photos/services/sync_service.dart';
 import 'package:photos/ui/tabs/home_widget.dart';
 import "package:photos/ui/viewer/actions/file_viewer.dart";
@@ -85,10 +85,10 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
     if (Platform.isAndroid || kDebugMode) {
       _userInteractionTimer = Timer(timeout, () {
         debugPrint("user is not interacting with the app");
-        SemanticSearchService.instance.startIndexing();
+        MachineLearningController.instance.onUserInteractionEvent(false);
       });
     } else {
-      SemanticSearchService.instance.startIndexing();
+      MachineLearningController.instance.onUserInteractionEvent(false);
     }
   }
 
@@ -97,7 +97,7 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
     if (Platform.isAndroid || kDebugMode) {
       return Listener(
         onPointerDown: (event) {
-          SemanticSearchService.instance.pauseIndexing();
+          MachineLearningController.instance.onUserInteractionEvent(true);
           debugPrint("user is interacting with the app");
           _resetTimer();
         },

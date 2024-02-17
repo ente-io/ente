@@ -33,6 +33,10 @@ class MachineLearningController {
     }
   }
 
+  void onUserInteractionEvent(bool isUserInteracting) {
+    Bus.instance.fire(MachineLearningControlEvent(!isUserInteracting));
+  }
+
   bool _shouldRunMachineLearning(AndroidBatteryInfo info) {
     if (info.chargingStatus == ChargingStatus.Charging ||
         info.chargingStatus == ChargingStatus.Full) {
