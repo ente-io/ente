@@ -43,12 +43,8 @@ class EnteApp extends StatefulWidget {
 }
 
 class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
-  static const initialInteractionTimeout = Duration(seconds: 10);
-  static const defaultInteractionTimeout = Duration(seconds: 5);
-
   final _logger = Logger("EnteAppState");
   late Locale locale;
-  late Timer _userInteractionTimer;
 
   @override
   void initState() {
@@ -57,7 +53,6 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
     locale = widget.locale;
     setupIntentAction();
     WidgetsBinding.instance.addObserver(this);
-    _setupInteractionTimer(timeout: initialInteractionTimeout);
   }
 
   setLocale(Locale newLocale) {
@@ -76,30 +71,12 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
     }
   }
 
-  void _resetTimer() {
-    _userInteractionTimer.cancel();
-    _setupInteractionTimer();
-  }
-
-  void _setupInteractionTimer({Duration timeout = defaultInteractionTimeout}) {
-    if (Platform.isAndroid || kDebugMode) {
-      _userInteractionTimer = Timer(timeout, () {
-        debugPrint("user is not interacting with the app");
-        MachineLearningController.instance.onUserInteractionEvent(false);
-      });
-    } else {
-      MachineLearningController.instance.onUserInteractionEvent(false);
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     if (Platform.isAndroid || kDebugMode) {
       return Listener(
         onPointerDown: (event) {
-          MachineLearningController.instance.onUserInteractionEvent(true);
-          debugPrint("user is interacting with the app");
-          _resetTimer();
+          MachineLearningController.instance.onUserInteraction();
         },
         child: AdaptiveTheme(
           light: lightThemeData,
@@ -149,7 +126,6 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-    _userInteractionTimer.cancel();
     super.dispose();
   }
 
