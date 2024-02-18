@@ -1,9 +1,9 @@
 import "package:computer/computer.dart";
 import "package:logging/logging.dart";
 import "package:onnxruntime/onnxruntime.dart";
-import "package:photos/services/semantic_search/frameworks/ml_framework.dart";
-import "package:photos/services/semantic_search/frameworks/onnx/onnx_image_encoder.dart";
-import "package:photos/services/semantic_search/frameworks/onnx/onnx_text_encoder.dart";
+import 'package:photos/services/machine_learning/semantic_search/frameworks/ml_framework.dart';
+import 'package:photos/services/machine_learning/semantic_search/frameworks/onnx/onnx_image_encoder.dart';
+import 'package:photos/services/machine_learning/semantic_search/frameworks/onnx/onnx_text_encoder.dart';
 
 class ONNX extends MLFramework {
   static const kModelBucketEndpoint = "https://models.ente.io/";

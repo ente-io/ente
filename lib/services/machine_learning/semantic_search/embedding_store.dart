@@ -9,7 +9,7 @@ import "package:photos/db/embeddings_db.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/models/embedding.dart";
 import "package:photos/models/file/file.dart";
-import "package:photos/services/semantic_search/remote_embedding.dart";
+import 'package:photos/services/machine_learning/semantic_search/remote_embedding.dart';
 import "package:photos/utils/crypto_util.dart";
 import "package:photos/utils/file_download_util.dart";
 import "package:shared_preferences/shared_preferences.dart";
