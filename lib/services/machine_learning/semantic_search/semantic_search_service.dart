@@ -55,10 +55,7 @@ class SemanticSearchService {
 
   get hasInitialized => _hasInitialized;
 
-  Future<void> init({
-    bool shouldSyncImmediately = false,
-    bool isInBackground = false,
-  }) async {
+  Future<void> init({bool shouldSyncImmediately = false}) async {
     if (!LocalSettings.instance.hasEnabledMagicSearch()) {
       return;
     }
@@ -102,10 +99,6 @@ class SemanticSearchService {
     });
     if (shouldSyncImmediately) {
       unawaited(sync());
-    }
-    if (isInBackground) {
-      // Do not block on user interactions
-      _startIndexing();
     }
     Bus.instance.on<MachineLearningControlEvent>().listen((event) {
       if (event.shouldRun) {

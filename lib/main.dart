@@ -194,7 +194,7 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     });
   }
   unawaited(FeatureFlagService.instance.init());
-  unawaited(SemanticSearchService.instance.init(isInBackground: isBackground));
+  unawaited(SemanticSearchService.instance.init());
   MachineLearningController.instance.init();
   // Can not including existing tf/ml binaries as they are not being built
   // from source.
