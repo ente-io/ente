@@ -133,6 +133,7 @@ Future<void> _exportCodes(BuildContext context, String fileContent) async {
   if (!hasAuthenticated) {
     return;
   }
+  FocusScope.of(context).requestFocus();
   Future.delayed(
     const Duration(milliseconds: 1200),
     () async => await shareDialog(

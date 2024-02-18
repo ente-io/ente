@@ -150,6 +150,7 @@ class DeleteAccountPage extends StatelessWidget {
     );
 
     if (hasAuthenticated) {
+      FocusScope.of(context).requestFocus();
       final choice = await showChoiceDialogOld(
         context,
         l10n.confirmAccountDeleteTitle,

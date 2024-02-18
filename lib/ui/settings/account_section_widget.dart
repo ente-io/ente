@@ -44,6 +44,7 @@ class AccountSectionWidget extends StatelessWidget {
             l10n.authToChangeYourEmail,
           );
           if (hasAuthenticated) {
+            FocusScope.of(context).requestFocus();
             showDialog(
               context: context,
               builder: (BuildContext context) {

@@ -78,6 +78,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
               l10n.authToViewYourRecoveryKey,
             );
             if (hasAuthenticated) {
+              FocusScope.of(context).requestFocus();
               String recoveryKey;
               try {
                 recoveryKey =
@@ -113,6 +114,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
               final isEmailMFAEnabled =
                   UserService.instance.hasEmailMFAEnabled();
               if (hasAuthenticated) {
+                FocusScope.of(context).requestFocus();
                 await updateEmailMFA(!isEmailMFAEnabled);
                 if (mounted) {
                   setState(() {});
@@ -136,6 +138,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
               context.l10n.authToViewYourActiveSessions,
             );
             if (hasAuthenticated) {
+              FocusScope.of(context).requestFocus();
               Navigator.of(context).push(
                 MaterialPageRoute(
                   builder: (BuildContext context) {
@@ -166,6 +169,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
               context.l10n.lockScreenEnablePreSteps,
             );
             if (hasAuthenticated) {
+              FocusScope.of(context).requestFocus();
               setState(() {});
             }
           },

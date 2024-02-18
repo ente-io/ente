@@ -89,6 +89,7 @@ class _VerifyRecoveryPageState extends State<VerifyRecoveryPage> {
       "Please authenticate to view your recovery key",
     );
     if (hasAuthenticated) {
+      FocusScope.of(context).requestFocus();
       String recoveryKey;
       try {
         recoveryKey =

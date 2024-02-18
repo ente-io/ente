@@ -377,6 +377,7 @@ class _CodeWidgetState extends State<CodeWidget> {
     if (!isAuthSuccessful) {
       return;
     }
+    FocusScope.of(context).requestFocus();
     final Code? code = await Navigator.of(context).push(
       MaterialPageRoute(
         builder: (BuildContext context) {
@@ -395,6 +396,7 @@ class _CodeWidgetState extends State<CodeWidget> {
     if (!isAuthSuccessful) {
       return;
     }
+    FocusScope.of(context).requestFocus();
     // ignore: unused_local_variable
     final Code? code = await Navigator.of(context).push(
       MaterialPageRoute(
@@ -414,6 +416,7 @@ class _CodeWidgetState extends State<CodeWidget> {
     if (!isAuthSuccessful) {
       return;
     }
+    FocusScope.of(context).requestFocus();
     final l10n = context.l10n;
     await showChoiceActionSheet(
       context,

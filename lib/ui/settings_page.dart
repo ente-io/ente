@@ -119,6 +119,7 @@ class SettingsPage extends StatelessWidget {
                     return;
                   }
                 }
+                FocusScope.of(context).requestFocus();
                 await routeToPage(
                   context,
                   const OnboardingPage(),
