@@ -58,7 +58,7 @@ jobs:
           path: build/app/outputs/flutter-apk/sha256sum
 
       # Create a pre-release
-      - uses: ncipollo/release-action@v1
+      - uses: ncipollo/release-action@v1.14.0
         with:
           artifacts: "build/app/outputs/flutter-apk/ente.apk,build/app/outputs/flutter-apk/sha256sum"
           token: ${{ secrets.GITHUB_TOKEN }}
