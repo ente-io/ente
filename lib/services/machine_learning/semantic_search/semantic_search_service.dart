@@ -375,7 +375,9 @@ class SemanticSearchService {
 
   void _startIndexing() {
     _logger.info("Start indexing");
-    _healthCheckCompleter.complete();
+    if (!_healthCheckCompleter.isCompleted) {
+      _healthCheckCompleter.complete();
+    }
   }
 
   void _pauseIndexing() {
