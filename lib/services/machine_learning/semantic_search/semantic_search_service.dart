@@ -51,7 +51,7 @@ class SemanticSearchService {
   Future<List<EnteFile>>? _ongoingRequest;
   List<Embedding> _cachedEmbeddings = <Embedding>[];
   PendingQuery? _nextQuery;
-  Completer<void> _healthCheckCompleter = Completer<void>();
+  Completer<void> _mlController = Completer<void>();
 
   get hasInitialized => _hasInitialized;
 
@@ -290,9 +290,9 @@ class SemanticSearchService {
     if (!_frameworkInitialization.isCompleted) {
       return;
     }
-    if (!_healthCheckCompleter.isCompleted) {
-      _logger.info("Waiting for health check to give a green signal...");
-      await _healthCheckCompleter.future;
+    if (!_mlController.isCompleted) {
+      _logger.info("Waiting for a green signal from controller...");
+      await _mlController.future;
     }
     try {
       final thumbnail = await getThumbnailForUploadedFile(file);
@@ -368,15 +368,15 @@ class SemanticSearchService {
 
   void _startIndexing() {
     _logger.info("Start indexing");
-    if (!_healthCheckCompleter.isCompleted) {
-      _healthCheckCompleter.complete();
+    if (!_mlController.isCompleted) {
+      _mlController.complete();
     }
   }
 
   void _pauseIndexing() {
-    if (_healthCheckCompleter.isCompleted) {
+    if (_mlController.isCompleted) {
       _logger.info("Pausing indexing");
-      _healthCheckCompleter = Completer<void>();
+      _mlController = Completer<void>();
     }
   }
 }
