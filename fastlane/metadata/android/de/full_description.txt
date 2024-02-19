@@ -2,7 +2,7 @@ ente ist eine einfache App, um Ihre Fotos und Videos automatisch zu sichern und 
 
 Wenn Sie auf der Suche nach einer datenschutzfreundlichen Alternative zu Google Fotos sind, sind Sie an der richtigen Stelle. Mit Ente werden Ihre Fotos Ende-zu-Ende-verschlüsselt gespeichert (e2ee). Dies bedeutet, dass nur Sie sie sehen können.
 
-Wir haben Open-Source-Apps für Android, iOS, Web und Desktop. Ihre Fotos werden verschlüsselt (e2ee) zwischen allen Geräten synchronisiert.
+Ihre Fotos werden verschlüsselt (e2ee) zwischen allen Geräten synchronisiert.
 
 ente ermöglicht es, deine Alben simpel & schnell mit deinen Geliebten zu teilen. Sie können öffentlich einsehbare Links teilen, sodass andere sogar ohne einen Account oder eine App Ihr Album sehen und darin zusammenarbeiten können, indem sie Fotos hinzufügen.
 
@@ -27,7 +27,7 @@ FEATURES
 - und noch VIELES mehr!
 
 BERECHTIGUNGEN
-ente benötigt bestimmte Berechtigungen, um als Fotospeicher zu funktionieren. Diese können unter folgendem Link überprüft werden: https://github.com/ente-io/photos-app/blob/f-droid/android/permissions.md
+Diese können unter folgendem Link überprüft werden: https://github.com/ente-io/photos-app/blob/f-droid/android/permissions.md
 
 PREIS
 Wir bieten keine lebenslang kostenlosen Abonnements an, da es für uns wichtig ist, einen nachhaltigen Service anzubieten. Wir bieten jedoch bezahlbare Abonemments an, welche auch mit der Familie geteilt werden können. Mehr Informationen sind auf ente.io zu finden.
