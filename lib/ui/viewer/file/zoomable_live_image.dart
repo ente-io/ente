@@ -16,12 +16,14 @@ import 'package:video_player/video_player.dart';
 
 class ZoomableLiveImage extends StatefulWidget {
   final EnteFile enteFile;
+  final Function(bool)? shouldDisableScroll;
   final String? tagPrefix;
   final Decoration? backgroundDecoration;
 
   const ZoomableLiveImage(
     this.enteFile, {
     Key? key,
+    this.shouldDisableScroll,
     required this.tagPrefix,
     this.backgroundDecoration,
   }) : super(key: key);
@@ -43,9 +45,8 @@ class _ZoomableLiveImageState extends State<ZoomableLiveImage>
   @override
   void initState() {
     _enteFile = widget.enteFile;
-    _logger.info(
-      'initState for ${_enteFile.generatedID} with tag ${_enteFile.tag} and name ${_enteFile.displayName}',
-    );
+    _logger.info('initState for ${_enteFile.generatedID} with tag ${_enteFile
+        .tag} and name ${_enteFile.displayName}');
     super.initState();
   }
 
@@ -75,6 +76,7 @@ class _ZoomableLiveImageState extends State<ZoomableLiveImage>
       content = ZoomableImage(
         _enteFile,
         tagPrefix: widget.tagPrefix,
+        shouldDisableScroll: widget.shouldDisableScroll,
         backgroundDecoration: widget.backgroundDecoration,
       );
     }
@@ -136,8 +138,7 @@ class _ZoomableLiveImageState extends State<ZoomableLiveImage>
   }
 
   Future<File?> _getLivePhotoVideo() async {
-    if (_enteFile.isRemoteFile &&
-        !(await isFileCached(_enteFile, liveVideo: true))) {
+    if (_enteFile.isRemoteFile && !(await isFileCached(_enteFile, liveVideo: true))) {
       showShortToast(context, S.of(context).downloading);
     }
 
@@ -205,4 +206,5 @@ class _ZoomableLiveImageState extends State<ZoomableLiveImage>
         }
       });
   }
+
 }
