@@ -106,6 +106,7 @@ class _MomentsSectionState extends State<MomentsSection> {
             const SizedBox(height: 2),
             SizedBox(
               child: SingleChildScrollView(
+                clipBehavior: Clip.none,
                 padding: const EdgeInsets.symmetric(horizontal: 4.5),
                 physics: const BouncingScrollPhysics(),
                 scrollDirection: Axis.horizontal,
@@ -150,65 +151,78 @@ class MomentsRecommendation extends StatelessWidget {
             );
           }
         },
-        child: ClipSmoothRect(
-          radius: SmoothBorderRadius(cornerRadius: 5, cornerSmoothing: 1),
-          child: Stack(
-            alignment: Alignment.bottomCenter,
-            clipBehavior: Clip.none,
-            children: [
-              SizedBox(
-                width: 100,
-                height: 145,
-                child: momentsSearchResult.previewThumbnail() != null
-                    ? Hero(
-                        tag: heroTag,
-                        child: ThumbnailWidget(
-                          momentsSearchResult.previewThumbnail()!,
-                          shouldShowArchiveStatus: false,
-                          shouldShowSyncStatus: false,
-                        ),
-                      )
-                    : const NoThumbnailWidget(),
-              ),
-              Container(
-                height: 145,
-                width: 100,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Colors.black.withOpacity(0),
-                      Colors.black.withOpacity(0),
-                      Colors.black.withOpacity(0.5),
-                    ],
-                    stops: const [
-                      0,
-                      0.1,
-                      1,
-                    ],
-                  ),
-                ),
-              ),
-              ConstrainedBox(
-                constraints: const BoxConstraints(
-                  maxWidth: 76,
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.only(
-                    bottom: 8,
-                  ),
-                  child: Text(
-                    momentsSearchResult.name(),
-                    style: enteTextTheme.small.copyWith(
-                      color: Colors.white,
-                    ),
-                    maxLines: 3,
-                    overflow: TextOverflow.fade,
-                  ),
-                ),
+        child: Container(
+          decoration: BoxDecoration(
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.1),
+                blurRadius: 6.25,
+                offset: const Offset(-1.25, 2.5),
               ),
             ],
+          ),
+          child: Center(
+            child: ClipSmoothRect(
+              radius: SmoothBorderRadius(cornerRadius: 5, cornerSmoothing: 1),
+              child: Stack(
+                alignment: Alignment.bottomCenter,
+                clipBehavior: Clip.none,
+                children: [
+                  SizedBox(
+                    width: 100,
+                    height: 145,
+                    child: momentsSearchResult.previewThumbnail() != null
+                        ? Hero(
+                            tag: heroTag,
+                            child: ThumbnailWidget(
+                              momentsSearchResult.previewThumbnail()!,
+                              shouldShowArchiveStatus: false,
+                              shouldShowSyncStatus: false,
+                            ),
+                          )
+                        : const NoThumbnailWidget(),
+                  ),
+                  Container(
+                    height: 145,
+                    width: 100,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Colors.black.withOpacity(0),
+                          Colors.black.withOpacity(0),
+                          Colors.black.withOpacity(0.5),
+                        ],
+                        stops: const [
+                          0,
+                          0.1,
+                          1,
+                        ],
+                      ),
+                    ),
+                  ),
+                  ConstrainedBox(
+                    constraints: const BoxConstraints(
+                      maxWidth: 76,
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.only(
+                        bottom: 8,
+                      ),
+                      child: Text(
+                        momentsSearchResult.name(),
+                        style: enteTextTheme.small.copyWith(
+                          color: Colors.white,
+                        ),
+                        maxLines: 3,
+                        overflow: TextOverflow.fade,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
         ),
       ),
