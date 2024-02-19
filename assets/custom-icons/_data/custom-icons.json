@@ -109,6 +109,9 @@
       "hex": "EE2F53"
     },
     {
+      "title": "Healthchecks.io"
+    },
+    {
       "title": "ING"
     },
     {
@@ -184,6 +187,9 @@
     },
     {
       "title": "Mozilla"
+    },
+    {
+      "title": "MyFRITZ!Net"
     },
     {
       "title": "NextDNS"
@@ -286,6 +292,9 @@
       "hex": "2173E6"
     },
     {
+      "title": "Synology DSM"
+    },
+    {
       "title": "TCPShield",
       "slug": "tcpshield",
       "hex": "FFFFFF"
@@ -296,6 +305,9 @@
     {
       "title": "Termius",
       "hex": "858585"
+    },
+    {
+      "title": "TorGuard"
     },
     {
       "title": "Trading 212",
