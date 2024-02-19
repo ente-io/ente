@@ -86,17 +86,24 @@
   "importSelectJsonFile": "Wähle eine JSON-Datei",
   "importSelectAppExport": "{appName} Exportdatei auswählen",
   "importEnteEncGuide": "Wähle die von ente exportierte, verschlüsselte JSON-Datei",
+  "importRaivoGuide": "Verwenden Sie die Option \"Export OTPs to Zip archive\" in den Raivo-Einstellungen.\n\nEntpacken Sie die Zip-Datei und importieren Sie die JSON-Datei.",
+  "importBitwardenGuide": "Verwenden Sie die Option \"Tresor exportieren\" innerhalb der Bitwarden Tools und importieren Sie die unverschlüsselte JSON-Datei.",
+  "importAegisGuide": "Verwenden Sie die Option \"Tresor exportieren\" in den Aegis-Einstellungen.\n\nFalls Ihr Tresor verschlüsselt ist, müssen Sie das Passwort für den Tresor eingeben, um ihn zu entschlüsseln.",
+  "import2FasGuide": "Verwenden Sie unter \"Einstellungen → Backup\" die Option \"Exportieren\" in 2FAS.\n\nFalls Ihr Backup verschlüsselt ist, müssen Sie das Passwort eingeben, um das Backup zu entschlüsseln.",
+  "importLastpassGuide": "Verwenden Sie die Option \"Konten übertragen → Konten in Datei exportieren\" in den Lastpass Authenticator Einstellungen. \nImportieren Sie anschließend die heruntergeladene JSON-Datei.",
   "exportCodes": "Codes exportieren",
   "importLabel": "Importieren",
   "importInstruction": "Bitte wählen sie eine Datei die Codes in folgendem Format beinhaltet",
   "importCodeDelimiterInfo": "Codes können in einer neuen Zeile stehen oder durch Kommata getrennt sein",
   "selectFile": "Datei auswählen",
   "emailVerificationToggle": "E-Mail-Verifizierung",
+  "emailVerificationEnableWarning": "Stellen Sie sicher, eine Kopie Ihrer Zwei-Faktor-Authentifizierung an anderer Stelle zu speichern, um zu vermeiden, dass Sie sich versehentlich aus Ihrem Account aussperren.",
   "authToChangeEmailVerificationSetting": "Bitte Authentifizieren um die E-Mail Bestätigung zu ändern",
   "authToViewYourRecoveryKey": "Bitte authentifizieren um ihren Wiederherstellungscode anzuzeigen",
   "authToChangeYourEmail": "Bitte authentifizieren um ihre Emailadresse zu ändern",
   "authToChangeYourPassword": "Bitte authentifizieren um ihr Passwort zu ändern",
   "authToViewSecrets": "Bitte authentifizieren Sie sich, um ihren Wiederherstellungscode anzuzeigen",
+  "authToInitiateSignIn": "Bitte authentifizieren, um die Anmeldung zum Backup zu starten.",
   "ok": "Ok",
   "cancel": "Abbrechen",
   "yes": "Ja",
@@ -124,6 +131,7 @@
   "faq_q_4": "Wie kann ich das Projekt unterstützen?",
   "faq_a_4": "Sie können die Entwicklung dieses Projekts unterstützen, indem Sie unsere Fotos-App auf ente.io abonnieren.",
   "faq_q_5": "Wie kann ich FaceID Sperre in ente Auth aktivieren",
+  "faq_a_5": "Sie können FaceID unter Einstellungen → Sicherheit → Sperrbildschirm aktivieren.",
   "somethingWentWrongMessage": "Ein Fehler ist aufgetreten, bitte versuchen Sie es erneut",
   "leaveFamily": "Familie verlassen",
   "leaveFamilyMessage": "Sind Sie sicher, dass Sie den Familien-Plan verlassen wollen?",
@@ -316,6 +324,7 @@
   "theRecoveryKeyYouEnteredIsIncorrect": "Der eingegebene Wiederherstellungs-Schlüssel ist ungültig",
   "enterPassword": "Passwort eingeben",
   "selectExportFormat": "Exportformat auswählen",
+  "exportDialogDesc": "Verschlüsselte Exporte werden durch ein Passwort Ihrer Wahl geschützt.",
   "encrypted": "Verschlüsselt",
   "plainText": "Klartext",
   "passwordToEncryptExport": "Passwort zum Verschlüssen des Exports",
@@ -323,14 +332,19 @@
   "useOffline": "Ohne Backup verwenden",
   "signInToBackup": "Melde dich an, um deine Codes zu sichern",
   "singIn": "Anmelden",
+  "sigInBackupReminder": "Bitte exportieren Sie Ihre Codes, um sicherzustellen, dass Sie ein Backup haben, aus dem Sie wiederherstellen können.",
+  "offlineModeWarning": "Sie haben sich dafür entschieden, ohne Sicherungen fortzufahren. Bitte führen Sie manuelle Sicherungen durch, um sicherzustellen, dass Ihre Codes sicher sind.",
   "showLargeIcons": "Große Symbole anzeigen",
   "shouldHideCode": "Codes ausblenden",
   "doubleTapToViewHiddenCode": "Sie können auf einen Eintrag doppelt tippen, um den Code anzuzeigen",
+  "focusOnSearchBar": "Suche bei App-Start automatisch öffnen",
+  "confirmUpdatingkey": "Sind Sie sich sicher, dass Sie den Secret Key bearbeiten wollen?",
   "minimizeAppOnCopy": "Beim Kopieren App minimieren",
   "editCodeAuthMessage": "Authentifizieren, um Code zu bearbeiten",
   "deleteCodeAuthMessage": "Authentifizieren, um Code zu löschen",
   "showQRAuthMessage": "Authentifizieren, um QR-Code anzuzeigen",
   "confirmAccountDeleteTitle": "Kontolöschung bestätigen",
+  "confirmAccountDeleteMessage": "Dieses Konto ist mit anderen ente Apps verknüpft, sofern du diese benutzt.\n\nDeine hochgeladenen Daten werden zur permanenten Löschung freigegeben. Dies gilt für alle ente Apps.",
   "androidBiometricHint": "Identität bestätigen",
   "@androidBiometricHint": {
     "description": "Hint message advising the user how to authenticate with biometrics. It is used on Android side. Maximum 60 characters."
@@ -366,6 +380,18 @@
   "goToSettings": "Zu den Einstellungen",
   "@goToSettings": {
     "description": "Message showed on a button that the user can click to go to settings pages from the current dialog. It is used on both Android and iOS side. Maximum 30 characters."
+  },
+  "androidGoToSettingsDescription": "Auf Ihrem Gerät ist keine biometrische Authentifizierung eingerichtet. Gehen Sie „Einstellungen“ > „Sicherheit“, um die biometrische Authentifizierung hinzuzufügen.",
+  "@androidGoToSettingsDescription": {
+    "description": "Message advising the user to go to the settings and configure biometric on their device. It shows in a dialog on Android side."
+  },
+  "iOSLockOut": "Die biometrische Authentifizierung ist deaktiviert. Bitte sperren und entsperren Sie Ihren Bildschirm, um sie wieder zu aktivieren.",
+  "@iOSLockOut": {
+    "description": "Message advising the user to re-enable biometrics on their device. It shows in a dialog on iOS side."
+  },
+  "iOSGoToSettingsDescription": "Auf Ihrem Gerät ist keine biometrische Authentifizierung eingerichtet. Bitte aktivieren Sie entweder Touch ID oder Face ID auf Ihrem Telefon.",
+  "@iOSGoToSettingsDescription": {
+    "description": "Message advising the user to go to the settings and configure Biometrics for their device. It shows in a dialog on iOS side."
   },
   "iOSOkButton": "OK",
   "@iOSOkButton": {
