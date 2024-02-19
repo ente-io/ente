@@ -113,6 +113,14 @@ export default function setupIpcComs(
     });
 
     ipcMain.handle('get-path', (_, message) => {
+        // By default, these paths are at the following locations:
+        //
+        // * macOS: `~/Library/Application Support/ente`
+        // * Linux: `~/.config/ente`
+        // * Windows: `%APPDATA%`, e.g. `C:\Users\<username>\AppData\Local\ente`
+        // * Windows: C:\Users\<you>\AppData\Local\<Your App Name>
+        //
+        // https://www.electronjs.org/docs/latest/api/app
         return app.getPath(message);
     });
 
