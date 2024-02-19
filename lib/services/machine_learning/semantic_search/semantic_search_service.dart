@@ -1,5 +1,6 @@
 import "dart:async";
 import "dart:collection";
+import "dart:io";
 
 import "package:computer/computer.dart";
 import "package:logging/logging.dart";
@@ -100,13 +101,17 @@ class SemanticSearchService {
     if (shouldSyncImmediately) {
       unawaited(sync());
     }
-    Bus.instance.on<MachineLearningControlEvent>().listen((event) {
-      if (event.shouldRun) {
-        _startIndexing();
-      } else {
-        _pauseIndexing();
-      }
-    });
+    if (Platform.isAndroid) {
+      Bus.instance.on<MachineLearningControlEvent>().listen((event) {
+        if (event.shouldRun) {
+          _startIndexing();
+        } else {
+          _pauseIndexing();
+        }
+      });
+    } else {
+      _startIndexing();
+    }
   }
 
   Future<void> release() async {
