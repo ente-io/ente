@@ -25,7 +25,7 @@ import 'package:photos/models/search/generic_search_result.dart';
 import "package:photos/models/search/search_types.dart";
 import 'package:photos/services/collections_service.dart';
 import "package:photos/services/location_service.dart";
-import 'package:photos/services/semantic_search/semantic_search_service.dart';
+import 'package:photos/services/machine_learning/semantic_search/semantic_search_service.dart';
 import "package:photos/states/location_screen_state.dart";
 import "package:photos/ui/viewer/location/add_location_sheet.dart";
 import "package:photos/ui/viewer/location/location_screen.dart";

@@ -11,13 +11,14 @@ import "package:photos/db/files_db.dart";
 import "package:photos/events/diff_sync_complete_event.dart";
 import 'package:photos/events/embedding_updated_event.dart';
 import "package:photos/events/file_uploaded_event.dart";
+import "package:photos/events/machine_learning_control_event.dart";
 import "package:photos/models/embedding.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/services/collections_service.dart";
-import "package:photos/services/semantic_search/embedding_store.dart";
-import "package:photos/services/semantic_search/frameworks/ggml.dart";
-import "package:photos/services/semantic_search/frameworks/ml_framework.dart";
-import 'package:photos/services/semantic_search/frameworks/onnx/onnx.dart';
+import 'package:photos/services/machine_learning/semantic_search/embedding_store.dart';
+import 'package:photos/services/machine_learning/semantic_search/frameworks/ggml.dart';
+import 'package:photos/services/machine_learning/semantic_search/frameworks/ml_framework.dart';
+import 'package:photos/services/machine_learning/semantic_search/frameworks/onnx/onnx.dart';
 import "package:photos/utils/debouncer.dart";
 import "package:photos/utils/device_info.dart";
 import "package:photos/utils/local_settings.dart";
@@ -50,21 +51,9 @@ class SemanticSearchService {
   Future<List<EnteFile>>? _ongoingRequest;
   List<Embedding> _cachedEmbeddings = <Embedding>[];
   PendingQuery? _nextQuery;
-  Completer<void> _userInteraction = Completer<void>();
+  Completer<void> _mlController = Completer<void>();
 
   get hasInitialized => _hasInitialized;
-
-  void resumeIndexing() {
-    _logger.info("Resuming indexing");
-    _userInteraction.complete();
-  }
-
-  void pauseIndexing() {
-    if (_userInteraction.isCompleted) {
-      _logger.info("Pausing indexing");
-      _userInteraction = Completer<void>();
-    }
-  }
 
   Future<void> init({bool shouldSyncImmediately = false}) async {
     if (!LocalSettings.instance.hasEnabledMagicSearch()) {
@@ -111,6 +100,13 @@ class SemanticSearchService {
     if (shouldSyncImmediately) {
       unawaited(sync());
     }
+    Bus.instance.on<MachineLearningControlEvent>().listen((event) {
+      if (event.shouldRun) {
+        _startIndexing();
+      } else {
+        _pauseIndexing();
+      }
+    });
   }
 
   Future<void> release() async {
@@ -294,9 +290,9 @@ class SemanticSearchService {
     if (!_frameworkInitialization.isCompleted) {
       return;
     }
-    if (!_userInteraction.isCompleted) {
-      _logger.info("Waiting for user interactions to stop...");
-      await _userInteraction.future;
+    if (!_mlController.isCompleted) {
+      _logger.info("Waiting for a green signal from controller...");
+      await _mlController.future;
     }
     try {
       final thumbnail = await getThumbnailForUploadedFile(file);
@@ -367,6 +363,20 @@ class SemanticSearchService {
       return Model.ggmlClip;
     } else {
       return Model.onnxClip;
+    }
+  }
+
+  void _startIndexing() {
+    _logger.info("Start indexing");
+    if (!_mlController.isCompleted) {
+      _mlController.complete();
+    }
+  }
+
+  void _pauseIndexing() {
+    if (_mlController.isCompleted) {
+      _logger.info("Pausing indexing");
+      _mlController = Completer<void>();
     }
   }
 }

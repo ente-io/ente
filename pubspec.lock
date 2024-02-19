@@ -89,6 +89,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.2.1"
+  battery_info:
+    dependency: "direct main"
+    description:
+      name: battery_info
+      sha256: "5d5249c87a600a0a20d6b2f5ffdf90d711bccb1bfd3a58e5a6228f270031c680"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.1.1"
   bip39:
     dependency: "direct main"
     description:

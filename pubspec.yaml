@@ -22,6 +22,7 @@ dependencies:
   animated_list_plus: ^0.4.5
   archive: ^3.1.2
   background_fetch: ^1.2.1
+  battery_info: ^1.1.1
   bip39: ^1.0.6
   cached_network_image: ^3.0.0
   chewie:
