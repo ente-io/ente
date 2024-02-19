@@ -30,7 +30,7 @@
   "timeBasedKeyType": "時間ベース (TOTP)",
   "counterBasedKeyType": "カウンターベース (HOTP)",
   "saveAction": "保存",
-  "nextTotpTitle": "次へ",
+  "nextTotpTitle": "次のコード",
   "deleteCodeTitle": "コードを削除しますか？",
   "deleteCodeMessage": "本当にこのコードを削除してもよろしいですか？この決定は元に戻せません。",
   "viewLogsAction": "ログの表示",
