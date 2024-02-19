@@ -8,6 +8,7 @@ import 'package:ente_auth/services/user_service.dart';
 import 'package:ente_auth/ui/common/dialogs.dart';
 import 'package:ente_auth/ui/common/gradient_button.dart';
 import 'package:ente_auth/utils/email_util.dart';
+import 'package:ente_auth/utils/platform_util.dart';
 import 'package:ente_crypto_dart/ente_crypto_dart.dart';
 import 'package:flutter/material.dart';
 
@@ -149,8 +150,9 @@ class DeleteAccountPage extends StatelessWidget {
       l10n.initiateAccountDeleteTitle,
     );
 
+    await PlatformUtil.refocusWindows();
+
     if (hasAuthenticated) {
-      FocusScope.of(context).requestFocus();
       final choice = await showChoiceDialogOld(
         context,
         l10n.confirmAccountDeleteTitle,

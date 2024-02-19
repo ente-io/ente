@@ -7,6 +7,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher_string.dart';
+import 'package:window_manager/window_manager.dart';
 
 class PlatformUtil {
   static bool isDesktop() {
@@ -78,5 +79,15 @@ class PlatformUtil {
         );
       }
     } catch (e) {}
+  }
+
+  // Needed to fix issue with local_auth on Windows
+  // https://github.com/flutter/flutter/issues/122322
+  static Future<void> refocusWindows() async {
+    if (!Platform.isWindows) return;
+    await windowManager.blur();
+    await windowManager.focus();
+    await windowManager.setAlwaysOnTop(true);
+    await windowManager.setAlwaysOnTop(false);
   }
 }

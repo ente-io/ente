@@ -12,6 +12,7 @@ import 'package:ente_auth/ui/common/gradient_button.dart';
 import 'package:ente_auth/ui/components/buttons/button_widget.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
 import 'package:ente_auth/utils/navigation_util.dart';
+import 'package:ente_auth/utils/platform_util.dart';
 import 'package:ente_crypto_dart/ente_crypto_dart.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
@@ -88,8 +89,9 @@ class _VerifyRecoveryPageState extends State<VerifyRecoveryPage> {
       context,
       "Please authenticate to view your recovery key",
     );
+    await PlatformUtil.refocusWindows();
+
     if (hasAuthenticated) {
-      FocusScope.of(context).requestFocus();
       String recoveryKey;
       try {
         recoveryKey =

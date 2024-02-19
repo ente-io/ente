@@ -130,10 +130,10 @@ Future<void> _exportCodes(BuildContext context, String fileContent) async {
   String exportFileExtension = 'txt';
   final hasAuthenticated = await LocalAuthenticationService.instance
       .requestLocalAuthentication(context, context.l10n.authToExportCodes);
+  await PlatformUtil.refocusWindows();
   if (!hasAuthenticated) {
     return;
   }
-  FocusScope.of(context).requestFocus();
   Future.delayed(
     const Duration(milliseconds: 1200),
     () async => await shareDialog(

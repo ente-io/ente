@@ -17,6 +17,7 @@ import 'package:ente_auth/ui/components/toggle_switch_widget.dart';
 import 'package:ente_auth/ui/settings/common_settings.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
 import 'package:ente_auth/utils/navigation_util.dart';
+import 'package:ente_auth/utils/platform_util.dart';
 import 'package:ente_auth/utils/toast_util.dart';
 import 'package:ente_crypto_dart/ente_crypto_dart.dart';
 import 'package:flutter/material.dart';
@@ -77,8 +78,8 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
               context,
               l10n.authToViewYourRecoveryKey,
             );
+            await PlatformUtil.refocusWindows();
             if (hasAuthenticated) {
-              FocusScope.of(context).requestFocus();
               String recoveryKey;
               try {
                 recoveryKey =
@@ -113,8 +114,8 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
               );
               final isEmailMFAEnabled =
                   UserService.instance.hasEmailMFAEnabled();
+              await PlatformUtil.refocusWindows();
               if (hasAuthenticated) {
-                FocusScope.of(context).requestFocus();
                 await updateEmailMFA(!isEmailMFAEnabled);
                 if (mounted) {
                   setState(() {});
@@ -137,8 +138,8 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
               context,
               context.l10n.authToViewYourActiveSessions,
             );
+            await PlatformUtil.refocusWindows();
             if (hasAuthenticated) {
-              FocusScope.of(context).requestFocus();
               Navigator.of(context).push(
                 MaterialPageRoute(
                   builder: (BuildContext context) {

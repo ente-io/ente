@@ -10,6 +10,7 @@ import 'package:ente_auth/ui/components/menu_item_widget.dart';
 import 'package:ente_auth/ui/settings/common_settings.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
 import 'package:ente_auth/utils/navigation_util.dart';
+import 'package:ente_auth/utils/platform_util.dart';
 import 'package:flutter/material.dart';
 
 class AccountSectionWidget extends StatelessWidget {
@@ -43,8 +44,8 @@ class AccountSectionWidget extends StatelessWidget {
             context,
             l10n.authToChangeYourEmail,
           );
+          await PlatformUtil.refocusWindows();
           if (hasAuthenticated) {
-            FocusScope.of(context).requestFocus();
             showDialog(
               context: context,
               builder: (BuildContext context) {

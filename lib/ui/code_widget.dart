@@ -14,6 +14,7 @@ import 'package:ente_auth/store/code_store.dart';
 import 'package:ente_auth/ui/code_timer_progress.dart';
 import 'package:ente_auth/ui/utils/icon_utils.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
+import 'package:ente_auth/utils/platform_util.dart';
 import 'package:ente_auth/utils/toast_util.dart';
 import 'package:ente_auth/utils/totp_util.dart';
 import 'package:flutter/material.dart';
@@ -374,10 +375,10 @@ class _CodeWidgetState extends State<CodeWidget> {
   Future<void> _onEditPressed(_) async {
     bool isAuthSuccessful = await LocalAuthenticationService.instance
         .requestLocalAuthentication(context, context.l10n.editCodeAuthMessage);
+    await PlatformUtil.refocusWindows();
     if (!isAuthSuccessful) {
       return;
     }
-    FocusScope.of(context).requestFocus();
     final Code? code = await Navigator.of(context).push(
       MaterialPageRoute(
         builder: (BuildContext context) {
@@ -393,10 +394,10 @@ class _CodeWidgetState extends State<CodeWidget> {
   Future<void> _onShowQrPressed(_) async {
     bool isAuthSuccessful = await LocalAuthenticationService.instance
         .requestLocalAuthentication(context, context.l10n.showQRAuthMessage);
+    await PlatformUtil.refocusWindows();
     if (!isAuthSuccessful) {
       return;
     }
-    FocusScope.of(context).requestFocus();
     // ignore: unused_local_variable
     final Code? code = await Navigator.of(context).push(
       MaterialPageRoute(
