@@ -183,7 +183,7 @@ jobs:
           password: "${{ secrets.WINDOWS_CERTIFICATE_PASSWORD }}"
           files: |
             ${{ env.APP_NAME }}.exe
-            auth-windows-exe/enteauth.exe
+            auth-windows-exe/auth.exe
 
       - name: Prepare Zip Windows
         run: tar.exe -a -c -f auth-windows-${{ github.event_name == 'release' && github.event.release.tag_name || 'nightly' }}.zip auth-windows-exe
