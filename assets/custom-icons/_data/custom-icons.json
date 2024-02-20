@@ -293,7 +293,8 @@
       "hex": "2173E6"
     },
     {
-      "title": "Synology DSM"
+      "title": "Synology DSM",
+      "slug": "synology_dsm",
     },
     {
       "title": "TCPShield",
