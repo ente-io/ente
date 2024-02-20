@@ -24,7 +24,7 @@ export const getPublicCollectionFileURL = (id: number) => {
 
 export const getCastFileURL = (id: number) => {
     const endpoint = process.env.NEXT_PUBLIC_ENTE_ENDPOINT;
-    if (isDevDeployment() && endpoint) {
+    if (endpoint) {
         return `${endpoint}/cast/files/download/${id}`;
     }
     return `https://cast-albums.ente.io/download/?fileID=${id}`;
@@ -32,7 +32,7 @@ export const getCastFileURL = (id: number) => {
 
 export const getCastThumbnailURL = (id: number) => {
     const endpoint = process.env.NEXT_PUBLIC_ENTE_ENDPOINT;
-    if (isDevDeployment() && endpoint) {
+    if (endpoint) {
         return `${endpoint}/cast/files/preview/${id}`;
     }
     return `https://cast-albums.ente.io/preview/?fileID=${id}`;
@@ -60,6 +60,14 @@ export const getUploadEndpoint = () => {
         return endpoint;
     }
     return `https://uploader.ente.io`;
+};
+
+export const getAccountsURL = () => {
+    const accountsURL = process.env.NEXT_PUBLIC_ENTE_ACCOUNTS_ENDPOINT;
+    if (accountsURL) {
+        return accountsURL;
+    }
+    return `https://accounts.ente.io`;
 };
 
 export const getPaymentsURL = () => {
@@ -90,47 +98,6 @@ export const getFamilyPortalURL = () => {
     return `https://family.ente.io`;
 };
 
-// getAuthenticatorURL returns the endpoint for the authenticator which can be used to
-// view authenticator codes.
-export const getAuthURL = () => {
-    const authURL = process.env.NEXT_PUBLIC_ENTE_AUTH_ENDPOINT;
-    if (isDevDeployment() && authURL) {
-        return authURL;
-    }
-    return `https://auth.ente.io`;
-};
-
-export const getAccountsURL = () => {
-    const accountsURL = process.env.NEXT_PUBLIC_ENTE_ACCOUNTS_ENDPOINT;
-    if (isDevDeployment() && accountsURL) {
-        return accountsURL;
-    }
-    return `https://accounts.ente.io`;
-};
-
-export const getSentryTunnelURL = () => {
-    return `https://sentry-reporter.ente.io`;
-};
-
-/*
-It's a dev deployment (and should use the environment override for endpoints ) in three cases:
-1. when the URL opened is that of the staging web app, or
-2. when the URL opened is that of the staging album app, or
-3. if the app is running locally (hence node_env is development)
-4. if the app is running in test mode
-*/
-export const isDevDeployment = () => {
-    if (globalThis?.location) {
-        return (
-            process.env.NEXT_PUBLIC_ENTE_WEB_ENDPOINT ===
-                globalThis.location.origin ||
-            process.env.NEXT_PUBLIC_ENTE_ALBUM_ENDPOINT ===
-                globalThis.location.origin ||
-            process.env.NEXT_PUBLIC_IS_TEST_APP === 'true' ||
-            process.env.NODE_ENV === 'development'
-        );
-    }
-};
 /**
  * A build is considered as a development build if either the NODE_ENV is
  * environment variable is set to 'development'.
