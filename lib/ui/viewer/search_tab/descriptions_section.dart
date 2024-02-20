@@ -129,10 +129,6 @@ class _DescriptionsSectionState extends State<DescriptionsSection> {
 }
 
 class DescriptionRecommendation extends StatelessWidget {
-  static const _width = 100.0;
-  static const _height = 150.0;
-  static const _cornerRadius = 5.0;
-  static const _cornerSmoothing = 1.0;
   final GenericSearchResult descriptionSearchResult;
   const DescriptionRecommendation(this.descriptionSearchResult, {super.key});
 
@@ -156,85 +152,81 @@ class DescriptionRecommendation extends StatelessWidget {
           }
         },
         child: SizedBox(
-          width: _width,
-          height: _height,
+          width: 100,
+          height: 150,
           child: Stack(
             clipBehavior: Clip.none,
             alignment: Alignment.center,
             children: [
               Container(
-                decoration: BoxDecoration(
+                decoration: const BoxDecoration(
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
-                      blurRadius: 6.25,
-                      offset: const Offset(-1.25, 2.5),
+                      blurRadius: 15,
+                      offset: Offset(0, 7.5),
+                      color: Color.fromRGBO(68, 68, 68, 0.1),
                     ),
                   ],
                 ),
                 child: ClipSmoothRect(
                   radius: SmoothBorderRadius(
-                    cornerRadius: _cornerRadius,
-                    cornerSmoothing: _cornerSmoothing,
+                    cornerRadius: 7.5,
+                    cornerSmoothing: 1,
                   ),
-                  child: Stack(
-                    alignment: Alignment.bottomCenter,
-                    clipBehavior: Clip.none,
-                    children: [
-                      SizedBox(
-                        width: _width,
-                        height: _height,
-                        child: descriptionSearchResult.previewThumbnail() !=
-                                null
-                            ? Hero(
-                                tag: heroTag,
-                                child: ThumbnailWidget(
-                                  descriptionSearchResult.previewThumbnail()!,
-                                  shouldShowArchiveStatus: false,
-                                  shouldShowSyncStatus: false,
-                                ),
-                              )
-                            : const NoThumbnailWidget(),
-                      ),
-                      Container(
-                        height: 145,
-                        width: 100,
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                            colors: [
-                              Colors.black.withOpacity(0),
-                              Colors.black.withOpacity(0),
-                              Colors.black.withOpacity(0.5),
-                            ],
-                            stops: const [
-                              0,
-                              0.1,
-                              1,
-                            ],
+                  child: Container(
+                    color: Theme.of(context).colorScheme.brightness ==
+                            Brightness.light
+                        ? const Color(0xFFFFFFFF)
+                        : const Color(0xFF181818),
+                    child: Column(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(9, 9, 9, 0),
+                          child: SizedBox(
+                            width: 82,
+                            height: 82,
+                            child: descriptionSearchResult.previewThumbnail() !=
+                                    null
+                                ? Hero(
+                                    tag: heroTag,
+                                    child: ClipSmoothRect(
+                                      radius: SmoothBorderRadius(
+                                        cornerRadius: 7.5,
+                                        cornerSmoothing: 1,
+                                      ),
+                                      child: ThumbnailWidget(
+                                        descriptionSearchResult
+                                            .previewThumbnail()!,
+                                        shouldShowArchiveStatus: false,
+                                        shouldShowSyncStatus: false,
+                                      ),
+                                    ),
+                                  )
+                                : const NoThumbnailWidget(),
                           ),
                         ),
-                      ),
-                      ConstrainedBox(
-                        constraints: const BoxConstraints(
-                          maxWidth: 76,
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.only(
-                            bottom: 8,
-                          ),
-                          child: Text(
-                            descriptionSearchResult.name(),
-                            style: enteTextTheme.small.copyWith(
-                              color: Colors.white,
+                        Expanded(
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 5,
+                              vertical: 10,
                             ),
-                            maxLines: 3,
-                            overflow: TextOverflow.fade,
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  descriptionSearchResult.name(),
+                                  style: enteTextTheme.smallMuted,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  textAlign: TextAlign.center,
+                                ),
+                              ],
+                            ),
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),
