@@ -169,6 +169,9 @@
       "slug": "laposte"
     },
     {
+      "title": "Letterboxd"
+    },
+    {
       "title": "Mastodon",
       "altNames": ["mstdn", "fediscience", "mathstodon", "fosstodon"],
       "slug": "mastodon",
