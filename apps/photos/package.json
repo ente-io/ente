@@ -1,12 +1,10 @@
 {
     "name": "photos",
-    "version": "1.0.0",
+    "version": "0.0.0",
     "private": true,
     "scripts": {
         "dev": "next dev",
-        "lint": "next lint",
         "build": "next build",
-        "export": "next export",
         "albums": "next dev -p 3002"
     },
     "dependencies": {
