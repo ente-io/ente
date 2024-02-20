@@ -53,12 +53,21 @@ class EmbeddingStore {
     final fileMap = await FilesDB.instance
         .getFilesFromIDs(pendingItems.map((e) => e.fileID).toList());
     _logger.info("Pushing ${pendingItems.length} embeddings");
+    final deletedEntries = <int>[];
     for (final item in pendingItems) {
       try {
-        await _pushEmbedding(fileMap[item.fileID]!, item);
+        final file = fileMap[item.fileID];
+        if (file != null) {
+          await _pushEmbedding(file, item);
+        } else {
+          deletedEntries.add(item.fileID);
+        }
       } catch (e, s) {
         _logger.severe(e, s);
       }
+    }
+    if (deletedEntries.isNotEmpty) {
+      await EmbeddingsDB.instance.deleteEmbeddings(deletedEntries);
     }
   }
 
