@@ -9,6 +9,11 @@
 # to `out/` (symlinking didn't work).
 #
 # Ref: https://developers.cloudflare.com/pages/how-to/build-commands-branches/
+#
+# To test this script locally, run
+#
+#    CF_PAGES_BRANCH=foo-bar ./scripts/deploy.sh
+#
 
 set -o errexit
 set -o xtrace
@@ -23,6 +28,10 @@ case "$CF_PAGES_BRANCH" in
     auth-*)
         yarn build:auth
         cp -R apps/auth/out .
+        ;;
+    cast-*)
+        yarn build:cast
+        cp -R apps/cast/out .
         ;;
     *)
         yarn build:photos
