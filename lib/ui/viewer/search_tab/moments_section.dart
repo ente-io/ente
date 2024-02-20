@@ -116,7 +116,7 @@ class _MomentsSectionState extends State<MomentsSection> {
                   children: _momentsSearchResults
                       .map(
                         (momentsSearchResult) =>
-                            MomentsRecommendation(momentsSearchResult),
+                            MomentRecommendation(momentsSearchResult),
                       )
                       .toList(),
                 ),
@@ -129,14 +129,14 @@ class _MomentsSectionState extends State<MomentsSection> {
   }
 }
 
-class MomentsRecommendation extends StatelessWidget {
+class MomentRecommendation extends StatelessWidget {
   static const _width = 100.0;
   static const _height = 145.0;
   static const _borderWidth = 1.0;
   static const _cornerRadius = 5.0;
   static const _cornerSmoothing = 1.0;
   final GenericSearchResult momentsSearchResult;
-  const MomentsRecommendation(this.momentsSearchResult, {super.key});
+  const MomentRecommendation(this.momentsSearchResult, {super.key});
 
   @override
   Widget build(BuildContext context) {
