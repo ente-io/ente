@@ -109,7 +109,8 @@
       "hex": "EE2F53"
     },
     {
-      "title": "Healthchecks.io"
+      "title": "Healthchecks.io",
+      "slug": "healthchecks",
     },
     {
       "title": "ING"
