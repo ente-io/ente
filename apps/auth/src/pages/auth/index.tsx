@@ -55,7 +55,6 @@ const AuthenticatorCodesPage = () => {
                 <VerticallyCentered>
                     <EnteSpinner></EnteSpinner>
                 </VerticallyCentered>
-                ;
             </>
         );
     }
