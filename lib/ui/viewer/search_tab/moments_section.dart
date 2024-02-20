@@ -115,8 +115,8 @@ class _MomentsSectionState extends State<MomentsSection> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: _momentsSearchResults
                       .map(
-                        (momentsSearchResult) =>
-                            MomentRecommendation(momentsSearchResult),
+                        (momentSearchResult) =>
+                            MomentRecommendation(momentSearchResult),
                       )
                       .toList(),
                 ),
@@ -135,25 +135,25 @@ class MomentRecommendation extends StatelessWidget {
   static const _borderWidth = 1.0;
   static const _cornerRadius = 5.0;
   static const _cornerSmoothing = 1.0;
-  final GenericSearchResult momentsSearchResult;
-  const MomentRecommendation(this.momentsSearchResult, {super.key});
+  final GenericSearchResult momentSearchResult;
+  const MomentRecommendation(this.momentSearchResult, {super.key});
 
   @override
   Widget build(BuildContext context) {
-    final heroTag = momentsSearchResult.heroTag() +
-        (momentsSearchResult.previewThumbnail()?.tag ?? "");
+    final heroTag = momentSearchResult.heroTag() +
+        (momentSearchResult.previewThumbnail()?.tag ?? "");
     final enteTextTheme = getEnteTextTheme(context);
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: max(2.5 - _borderWidth, 0)),
       child: GestureDetector(
         onTap: () {
-          RecentSearches().add(momentsSearchResult.name());
-          if (momentsSearchResult.onResultTap != null) {
-            momentsSearchResult.onResultTap!(context);
+          RecentSearches().add(momentSearchResult.name());
+          if (momentSearchResult.onResultTap != null) {
+            momentSearchResult.onResultTap!(context);
           } else {
             routeToPage(
               context,
-              SearchResultPage(momentsSearchResult),
+              SearchResultPage(momentSearchResult),
             );
           }
         },
@@ -197,11 +197,11 @@ class MomentRecommendation extends StatelessWidget {
                       SizedBox(
                         width: _width,
                         height: _height,
-                        child: momentsSearchResult.previewThumbnail() != null
+                        child: momentSearchResult.previewThumbnail() != null
                             ? Hero(
                                 tag: heroTag,
                                 child: ThumbnailWidget(
-                                  momentsSearchResult.previewThumbnail()!,
+                                  momentSearchResult.previewThumbnail()!,
                                   shouldShowArchiveStatus: false,
                                   shouldShowSyncStatus: false,
                                 ),
@@ -237,7 +237,7 @@ class MomentRecommendation extends StatelessWidget {
                             bottom: 8,
                           ),
                           child: Text(
-                            momentsSearchResult.name(),
+                            momentSearchResult.name(),
                             style: enteTextTheme.small.copyWith(
                               color: Colors.white,
                             ),
