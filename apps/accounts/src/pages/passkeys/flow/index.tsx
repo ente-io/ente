@@ -38,8 +38,10 @@ const PasskeysFlow = () => {
         if (process.env.NEXT_PUBLIC_DISABLE_REDIRECT_CHECK !== 'true') {
             if (
                 redirect !== '' &&
-                (redirectURL.host.endsWith('.ente.io') ||
-                    redirectURL.host.endsWith('bada-frame.pages.dev')) &&
+                !(
+                    redirectURL.host.endsWith('.ente.io') ||
+                    redirectURL.host.endsWith('bada-frame.pages.dev')
+                ) &&
                 redirectURL.protocol !== 'ente:' &&
                 redirectURL.protocol !== 'enteauth:'
             ) {
@@ -87,7 +89,7 @@ const PasskeysFlow = () => {
             try {
                 credential = await getCredential(beginData.options.publicKey);
             } catch (e) {
-                logError("Couldn't get credential", e);
+                logError(e, "Couldn't get credential");
                 continue;
             } finally {
                 tries++;
@@ -163,7 +165,6 @@ const PasskeysFlow = () => {
         const credential = await navigator.credentials.get(
             publicKeyCredentialCreationOptions
         );
-
         return credential;
     };
 
