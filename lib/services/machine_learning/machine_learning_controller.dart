@@ -15,7 +15,7 @@ class MachineLearningController {
 
   final _logger = Logger("MachineLearningController");
 
-  static const kMaximumTemperature = 36; // 36 degree celsius
+  static const kMaximumTemperature = 42; // 42 degree celsius
   static const kMinimumBatteryLevel = 20; // 20%
   static const kInitialInteractionTimeout = Duration(seconds: 10);
   static const kDefaultInteractionTimeout = Duration(seconds: 5);
