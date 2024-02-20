@@ -26,8 +26,7 @@ export const loadSender = (() => {
                 window.__onGCastApiAvailable = (isAvailable) => {
                     if (isAvailable) {
                         cast.framework.CastContext.getInstance().setOptions({
-                            receiverApplicationId:
-                                process.env.NEXT_PUBLIC_CAST_APP_ID,
+                            receiverApplicationId: 'F5BCEC64',
                             autoJoinPolicy:
                                 chrome.cast.AutoJoinPolicy.ORIGIN_SCOPED,
                         });
