@@ -59,3 +59,48 @@ export const setupI18n = async () => {
         });
     });
 };
+
+/**
+ * Locales are combinations of a language code, and an optional region code.
+ *
+ * For example, "en", "en-US", "en-IN" (Indian English), "pt" (Portuguese),
+ * "pt-BR" (Brazilian Portuguese).
+ *
+ * In our Crowdin Project, we have work-in-progress translations into quite a
+ * few languages. When a translation reaches a high enough coverage, say 90%,
+ * then we manually add it to this list of supported languages.
+ */
+export type SupportedLocale = 'en' | 'fr' | 'zh' | 'nl' | 'es';
+
+/**
+ * List of all {@link SupportedLocale}s.
+ */
+export const supportedLocales: SupportedLocale[] = [
+    'en',
+    'fr',
+    'zh',
+    'nl',
+    'es',
+];
+
+/**
+ * A type guard that returns true if the given string is a
+ * {@link SupportedLocale}.
+ */
+export const isSupportedLocale = (s: string): s is SupportedLocale => {
+    // The `as any` here is needed to work around current TS limitations
+    // https://github.com/microsoft/TypeScript/issues/48247
+    return supportedLocales.includes(s as any);
+};
+
+/**
+ * Return the current locale in which our user interface is being shown.
+ *
+ * Note that this may be different from the user's locale. For example, the
+ * browser might be set to en-GB, but since we don't support that specific
+ * variant of English, this value will be (say) en-US.
+ */
+export const currentLocale = () => {
+    const locale = i18n.resolvedLanguage;
+    return isSupportedLocale(locale) ? locale : 'en';
+};
