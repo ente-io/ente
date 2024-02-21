@@ -49,7 +49,11 @@ class _PaymentWebPageState extends State<PaymentWebPage> {
 
   @override
   Widget build(BuildContext context) {
-    _dialog = createProgressDialog(context, S.of(context).pleaseWait);
+    _dialog = createProgressDialog(
+      context,
+      S.of(context).pleaseWait,
+      isDismissible: true,
+    );
     if (initPaymentUrl == null) {
       return const EnteLoadingWidget();
     }
