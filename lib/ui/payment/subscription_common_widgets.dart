@@ -36,13 +36,9 @@ class _SubscriptionHeaderWidgetState extends State<SubscriptionHeaderWidget> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              children: [
-                Text(
-                  S.of(context).selectYourPlan,
-                  style: Theme.of(context).textTheme.headlineMedium,
-                ),
-              ],
+            Text(
+              S.of(context).selectYourPlan,
+              style: Theme.of(context).textTheme.headlineMedium,
             ),
             const SizedBox(height: 10),
             Text(

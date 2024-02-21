@@ -48,6 +48,19 @@ class EmbeddingsDB {
     return await _isar.embeddings.filter().updationTimeEqualTo(null).findAll();
   }
 
+  Future<void> deleteEmbeddings(List<int> fileIDs) async {
+    await _isar.writeTxn(() async {
+      final embeddings = <Embedding>[];
+      for (final fileID in fileIDs) {
+        embeddings.addAll(
+          await _isar.embeddings.filter().fileIDEqualTo(fileID).findAll(),
+        );
+      }
+      await _isar.embeddings.deleteAll(embeddings.map((e) => e.id).toList());
+      Bus.instance.fire(EmbeddingUpdatedEvent());
+    });
+  }
+
   Future<void> deleteAllForModel(Model model) async {
     await _isar.writeTxn(() async {
       final embeddings =
