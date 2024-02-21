@@ -71,6 +71,7 @@ class FileUploader {
   late ProcessType _processType;
   late bool _isBackground;
   late SharedPreferences _prefs;
+
   // _hasInitiatedForceUpload is used to track if user attempted force upload
   // where files are uploaded directly (without adding them to DB). In such
   // cases, we don't want to clear the stale upload files. See #removeStaleFiles
@@ -457,7 +458,13 @@ class FileUploader {
         encryptedFilePath,
         key: key,
       );
-      final thumbnailData = mediaUploadData.thumbnail;
+      late final Uint8List? thumbnailData;
+      if (mediaUploadData.thumbnail == null &&
+          file.fileType == FileType.video) {
+        thumbnailData = base64Decode(blackThumbnailBase64);
+      } else {
+        thumbnailData = mediaUploadData.thumbnail;
+      }
 
       final EncryptionResult encryptedThumbnailData =
           await CryptoUtil.encryptChaCha(
@@ -519,17 +526,21 @@ class FileUploader {
             CryptoUtil.bin2base64(encryptedFileKeyData.encryptedData!);
         final keyDecryptionNonce =
             CryptoUtil.bin2base64(encryptedFileKeyData.nonce!);
+        final Map<String, dynamic> pubMetadata = {};
         MetadataRequest? pubMetadataRequest;
         if ((mediaUploadData.height ?? 0) != 0 &&
             (mediaUploadData.width ?? 0) != 0) {
-          final pubMetadata = {
-            heightKey: mediaUploadData.height,
-            widthKey: mediaUploadData.width,
-          };
-          if (mediaUploadData.motionPhotoStartIndex != null) {
-            pubMetadata[motionVideoIndexKey] =
-                mediaUploadData.motionPhotoStartIndex;
-          }
+          pubMetadata[heightKey] = mediaUploadData.height;
+          pubMetadata[widthKey] = mediaUploadData.width;
+        }
+        if (mediaUploadData.motionPhotoStartIndex != null) {
+          pubMetadata[motionVideoIndexKey] =
+              mediaUploadData.motionPhotoStartIndex;
+        }
+        if (mediaUploadData.thumbnail == null) {
+          pubMetadata[noThumbKey] = true;
+        }
+        if (pubMetadata.isNotEmpty) {
           pubMetadataRequest = await getPubMetadataRequest(
             file,
             pubMetadata,
