@@ -2,10 +2,10 @@ import "package:dio/dio.dart";
 import "package:flutter/foundation.dart";
 import 'package:flutter/material.dart';
 import "package:flutter/services.dart";
-import "package:photos/core/constants.dart";
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/button_result.dart';
 import 'package:photos/models/typedefs.dart';
+import "package:photos/services/feature_flag_service.dart";
 import 'package:photos/theme/colors.dart';
 import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/common/progress_dialog.dart';
@@ -91,7 +91,8 @@ String parseErrorForUI(
     }
   }
   // return generic error if the user is not internal and the error is not in debug mode
-  if (!(isInternalUser && kDebugMode)) {
+  if (!(FeatureFlagService.instance.isInternalUserOrDebugBuild() &&
+      kDebugMode)) {
     return genericError;
   }
   String errorInfo = "";
