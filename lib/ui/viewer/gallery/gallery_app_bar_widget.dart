@@ -6,7 +6,6 @@ import "package:flutter/cupertino.dart";
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
-import "package:photos/core/constants.dart";
 import 'package:photos/core/event_bus.dart';
 import "package:photos/core/network/network.dart";
 import "package:photos/db/files_db.dart";
@@ -21,6 +20,7 @@ import 'package:photos/models/gallery_type.dart';
 import "package:photos/models/metadata/common_keys.dart";
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/collections_service.dart';
+import "package:photos/services/feature_flag_service.dart";
 import 'package:photos/services/sync_service.dart';
 import 'package:photos/services/update_service.dart';
 import 'package:photos/ui/actions/collection/collection_sharing_actions.dart';
@@ -88,6 +88,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
   late CollectionActions collectionActions;
   final GlobalKey shareButtonKey = GlobalKey();
   bool isQuickLink = false;
+  late bool isInternalUser;
   late GalleryType galleryType;
 
   @override
@@ -96,6 +97,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     _selectedFilesListener = () {
       setState(() {});
     };
+    isInternalUser = FeatureFlagService.instance.isInternalUserOrDebugBuild();
     collectionActions = CollectionActions(CollectionsService.instance);
     widget.selectedFiles.addListener(_selectedFilesListener);
     _userAuthEventSubscription =
