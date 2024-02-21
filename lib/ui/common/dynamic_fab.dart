@@ -1,5 +1,3 @@
-
-
 import 'dart:math' as math;
 
 import 'package:ente_auth/ente_theme_data.dart';
@@ -62,10 +60,10 @@ class DynamicFAB extends StatelessWidget {
     } else {
       return Container(
         width: double.infinity,
-        height: 56,
         padding: const EdgeInsets.symmetric(horizontal: 20),
         child: OutlinedButton(
-          onPressed: isFormValid! ? onPressedFunction as void Function()? : null,
+          onPressed:
+              isFormValid! ? onPressedFunction as void Function()? : null,
           child: Text(buttonText!),
         ),
       );

@@ -260,8 +260,8 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
                 ),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  child: Wrap(
+                    alignment: WrapAlignment.spaceBetween,
                     children: [
                       GestureDetector(
                         behavior: HitTestBehavior.opaque,
@@ -274,17 +274,13 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
                             ),
                           );
                         },
-                        child: Center(
-                          child: Text(
-                            context.l10n.forgotPassword,
-                            style: Theme.of(context)
-                                .textTheme
-                                .titleMedium!
-                                .copyWith(
-                                  fontSize: 14,
-                                  decoration: TextDecoration.underline,
-                                ),
-                          ),
+                        child: Text(
+                          context.l10n.forgotPassword,
+                          style:
+                              Theme.of(context).textTheme.titleMedium!.copyWith(
+                                    fontSize: 14,
+                                    decoration: TextDecoration.underline,
+                                  ),
                         ),
                       ),
                       GestureDetector(
@@ -300,17 +296,13 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
                           Navigator.of(context)
                               .popUntil((route) => route.isFirst);
                         },
-                        child: Center(
-                          child: Text(
-                            context.l10n.changeEmail,
-                            style: Theme.of(context)
-                                .textTheme
-                                .titleMedium!
-                                .copyWith(
-                                  fontSize: 14,
-                                  decoration: TextDecoration.underline,
-                                ),
-                          ),
+                        child: Text(
+                          context.l10n.changeEmail,
+                          style:
+                              Theme.of(context).textTheme.titleMedium!.copyWith(
+                                    fontSize: 14,
+                                    decoration: TextDecoration.underline,
+                                  ),
                         ),
                       ),
                     ],
