@@ -60,7 +60,6 @@ class DynamicFAB extends StatelessWidget {
     } else {
       return Container(
         width: double.infinity,
-        height: 56,
         padding: const EdgeInsets.symmetric(horizontal: 20),
         child: OutlinedButton(
           onPressed:
