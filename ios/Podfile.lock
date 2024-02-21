@@ -1,6 +1,8 @@
 PODS:
   - background_fetch (1.2.1):
     - Flutter
+  - battery_info (0.0.1):
+    - Flutter
   - connectivity_plus (0.0.1):
     - Flutter
     - ReachabilitySwift
@@ -213,6 +215,7 @@ PODS:
 
 DEPENDENCIES:
   - background_fetch (from `.symlinks/plugins/background_fetch/ios`)
+  - battery_info (from `.symlinks/plugins/battery_info/ios`)
   - connectivity_plus (from `.symlinks/plugins/connectivity_plus/ios`)
   - device_info_plus (from `.symlinks/plugins/device_info_plus/ios`)
   - file_saver (from `.symlinks/plugins/file_saver/ios`)
@@ -286,6 +289,8 @@ SPEC REPOS:
 EXTERNAL SOURCES:
   background_fetch:
     :path: ".symlinks/plugins/background_fetch/ios"
+  battery_info:
+    :path: ".symlinks/plugins/battery_info/ios"
   connectivity_plus:
     :path: ".symlinks/plugins/connectivity_plus/ios"
   device_info_plus:
@@ -377,6 +382,7 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   background_fetch: 896944864b038d2837fc750d470e9841e1e6a363
+  battery_info: 09f5c9ee65394f2291c8c6227bedff345b8a730c
   connectivity_plus: 53efb943fc2882c8512d84c45707bcabc4c36076
   device_info_plus: 7545d84d8d1b896cb16a4ff98c19f07ec4b298ea
   file_saver: 503e386464dbe118f630e17b4c2e1190fa0cf808
