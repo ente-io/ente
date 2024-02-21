@@ -2,6 +2,7 @@ import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import Backend from 'i18next-http-backend';
 import { getBestPossibleUserLocale } from './utils';
+import { isDevBuild } from '../network/api';
 
 /**
  * Load translations.
@@ -28,6 +29,7 @@ export const setupI18n = async () => {
         // Initialize i18next
         // Option docs: https://www.i18next.com/overview/configuration-options
         .init({
+            debug: isDevBuild,
             returnEmptyString: false,
             fallbackLng: 'en',
             lng: getBestPossibleUserLocale(),
