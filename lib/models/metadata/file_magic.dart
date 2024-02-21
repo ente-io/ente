@@ -11,6 +11,7 @@ const heightKey = 'h';
 const latKey = "lat";
 const longKey = "long";
 const motionVideoIndexKey = "mvi";
+const noThumbKey = "noThumb";
 
 class MagicMetadata {
   // 0 -> visible
@@ -47,6 +48,13 @@ class PubMagicMetadata {
   // photo
   int? mvi;
 
+  // if true, then the thumbnail is not available
+  // Note: desktop/web sets hasStaticThumbnail in the file metadata.
+  // As we don't want to support updating the og file metadata (yet), adding
+  // this new field to the pub metadata. For static thumbnail, all thumbnails
+  // should have exact same hash with should match the constant `blackThumbnailBase64`
+  bool? noThumb;
+
   PubMagicMetadata({
     this.editedTime,
     this.editedName,
@@ -57,6 +65,7 @@ class PubMagicMetadata {
     this.lat,
     this.long,
     this.mvi,
+    this.noThumb,
   });
 
   factory PubMagicMetadata.fromEncodedJson(String encodedJson) =>
@@ -77,6 +86,7 @@ class PubMagicMetadata {
       lat: map[latKey],
       long: map[longKey],
       mvi: map[motionVideoIndexKey],
+      noThumb: map[noThumbKey],
     );
   }
 }

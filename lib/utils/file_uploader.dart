@@ -10,6 +10,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
+import "package:photos/core/constants.dart";
 import 'package:photos/core/errors.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/core/network/network.dart';
@@ -69,6 +70,8 @@ class FileUploader {
   late ProcessType _processType;
   late bool _isBackground;
   late SharedPreferences _prefs;
+  Uint8List? _staticThumbnailData;
+
   // _hasInitiatedForceUpload is used to track if user attempted force upload
   // where files are uploaded directly (without adding them to DB). In such
   // cases, we don't want to clear the stale upload files. See #removeStaleFiles
@@ -431,7 +434,13 @@ class FileUploader {
         encryptedFilePath,
         key: key,
       );
-      final thumbnailData = mediaUploadData.thumbnail;
+      late final Uint8List? thumbnailData;
+      if (mediaUploadData.thumbnail == null &&
+          file.fileType == FileType.video) {
+        thumbnailData = await getStaticThumbnailData();
+      } else {
+        thumbnailData = mediaUploadData.thumbnail;
+      }
 
       final EncryptionResult encryptedThumbnailData =
           await CryptoUtil.encryptChaCha(
@@ -493,17 +502,21 @@ class FileUploader {
             CryptoUtil.bin2base64(encryptedFileKeyData.encryptedData!);
         final keyDecryptionNonce =
             CryptoUtil.bin2base64(encryptedFileKeyData.nonce!);
+        final Map<String, dynamic> pubMetadata = {};
         MetadataRequest? pubMetadataRequest;
         if ((mediaUploadData.height ?? 0) != 0 &&
             (mediaUploadData.width ?? 0) != 0) {
-          final pubMetadata = {
-            heightKey: mediaUploadData.height,
-            widthKey: mediaUploadData.width,
-          };
-          if (mediaUploadData.motionPhotoStartIndex != null) {
-            pubMetadata[motionVideoIndexKey] =
-                mediaUploadData.motionPhotoStartIndex;
-          }
+          pubMetadata[heightKey] = mediaUploadData.height;
+          pubMetadata[widthKey] = mediaUploadData.width;
+        }
+        if (mediaUploadData.motionPhotoStartIndex != null) {
+          pubMetadata[motionVideoIndexKey] =
+              mediaUploadData.motionPhotoStartIndex;
+        }
+        if (mediaUploadData.thumbnail == null) {
+          pubMetadata[noThumbKey] = true;
+        }
+        if (pubMetadata.isNotEmpty) {
           pubMetadataRequest = await getPubMetadataRequest(
             file,
             pubMetadata,
@@ -1068,6 +1081,14 @@ class FileUploader {
         rethrow;
       }
     }
+  }
+
+  Future<Uint8List?> getStaticThumbnailData() async {
+    if (_staticThumbnailData != null) {
+      return _staticThumbnailData!;
+    }
+    _staticThumbnailData = base64Decode(blackThumbnailBase64);
+    return _staticThumbnailData;
   }
 
   Future<void> _pollBackgroundUploadStatus() async {
