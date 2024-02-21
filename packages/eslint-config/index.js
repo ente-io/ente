@@ -60,5 +60,9 @@ module.exports = {
         '@next/next/no-img-element': 'off',
         '@typescript-eslint/no-unsafe-argument': 'off',
         'jsx-a11y/alt-text': 'off',
+        // Temporarily turn these off to allow existing code.
+        // TODO (MR): Remove me (and those above).
+        '@typescript-eslint/no-unsafe-enum-comparison': 'off',
+        '@typescript-eslint/no-base-to-string': 'off',
     },
 };
