@@ -70,7 +70,6 @@ class FileUploader {
   late ProcessType _processType;
   late bool _isBackground;
   late SharedPreferences _prefs;
-  Uint8List? _staticThumbnailData;
 
   // _hasInitiatedForceUpload is used to track if user attempted force upload
   // where files are uploaded directly (without adding them to DB). In such
@@ -437,7 +436,7 @@ class FileUploader {
       late final Uint8List? thumbnailData;
       if (mediaUploadData.thumbnail == null &&
           file.fileType == FileType.video) {
-        thumbnailData = await getStaticThumbnailData();
+        thumbnailData = base64Decode(blackThumbnailBase64);
       } else {
         thumbnailData = mediaUploadData.thumbnail;
       }
@@ -1081,14 +1080,6 @@ class FileUploader {
         rethrow;
       }
     }
-  }
-
-  Future<Uint8List?> getStaticThumbnailData() async {
-    if (_staticThumbnailData != null) {
-      return _staticThumbnailData!;
-    }
-    _staticThumbnailData = base64Decode(blackThumbnailBase64);
-    return _staticThumbnailData;
   }
 
   Future<void> _pollBackgroundUploadStatus() async {
