@@ -1,3 +1,3 @@
 import { initSentry } from '@ente/shared/sentry/config/sentry.config.base';
 
-initSentry('https://ad075e4713480307bb8bc0811547c65e@sentry.ente.io/8');
+initSentry('https://5d344112b570b1a368b6f5c1d0bb798b@sentry.ente.io/8');
