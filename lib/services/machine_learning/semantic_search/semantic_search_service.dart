@@ -243,14 +243,22 @@ class SemanticSearchService {
 
     final ignoredCollections =
         CollectionsService.instance.getHiddenCollectionIds();
+    final deletedEntries = <int>[];
     for (final result in queryResults) {
       final file = filesMap[result.id];
       if (file != null && !ignoredCollections.contains(file.collectionID)) {
-        results.add(filesMap[result.id]!);
+        results.add(file);
+      }
+      if (file == null) {
+        deletedEntries.add(result.id);
       }
     }
 
     _logger.info(results.length.toString() + " results");
+
+    if (deletedEntries.isNotEmpty) {
+      unawaited(EmbeddingsDB.instance.deleteEmbeddings(deletedEntries));
+    }
 
     return results;
   }
