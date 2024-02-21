@@ -58,121 +58,112 @@ class _OnboardingPageState extends State<OnboardingPage> {
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
-            child: ConstrainedBox(
-              constraints:
-                  const BoxConstraints.tightFor(height: 800, width: 450),
-              child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(vertical: 40.0, horizontal: 40),
-                child: Column(
-                  children: [
-                    Column(
-                      children: [
-                        kDebugMode
-                            ? GestureDetector(
-                                child: const Align(
-                                  alignment: Alignment.topRight,
-                                  child: Text("Lang"),
-                                ),
-                                onTap: () async {
-                                  final locale = await getLocale();
-                                  routeToPage(
-                                    context,
-                                    LanguageSelectorPage(
-                                      appSupportedLocales,
-                                      (locale) async {
-                                        await setLocale(locale);
-                                        App.setLocale(context, locale);
-                                      },
-                                      locale,
-                                    ),
-                                  ).then((value) {
-                                    setState(() {});
-                                  });
-                                },
-                              )
-                            : const SizedBox(),
-                        Image.asset(
-                          "assets/sheild-front-gradient.png",
-                          width: 200,
-                          height: 200,
-                        ),
-                        const SizedBox(height: 12),
-                        const Text(
-                          "ente",
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontFamily: 'Montserrat',
-                            fontSize: 42,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          "Authenticator",
-                          style: Theme.of(context).textTheme.headlineMedium,
-                        ),
-                        const SizedBox(height: 32),
-                        Text(
-                          l10n.onBoardingBody,
-                          textAlign: TextAlign.center,
-                          style:
-                              Theme.of(context).textTheme.titleLarge!.copyWith(
-                                    color: Colors.white38,
-                                    // color: Theme.of(context)
-                                    //                            .colorScheme
-                                    //                            .mutedTextColor,
+            child: Padding(
+              padding:
+                  const EdgeInsets.symmetric(vertical: 40.0, horizontal: 40),
+              child: Column(
+                children: [
+                  Column(
+                    children: [
+                      kDebugMode
+                          ? GestureDetector(
+                              child: const Align(
+                                alignment: Alignment.topRight,
+                                child: Text("Lang"),
+                              ),
+                              onTap: () async {
+                                final locale = await getLocale();
+                                routeToPage(
+                                  context,
+                                  LanguageSelectorPage(
+                                    appSupportedLocales,
+                                    (locale) async {
+                                      await setLocale(locale);
+                                      App.setLocale(context, locale);
+                                    },
+                                    locale,
                                   ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 100),
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: GradientButton(
-                        onTap: _navigateToSignUpPage,
-                        text: l10n.newUser,
+                                ).then((value) {
+                                  setState(() {});
+                                });
+                              },
+                            )
+                          : const SizedBox(),
+                      Image.asset(
+                        "assets/sheild-front-gradient.png",
+                        width: 200,
+                        height: 200,
                       ),
-                    ),
-                    const SizedBox(height: 4),
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
-                      child: Hero(
-                        tag: "log_in",
-                        child: ElevatedButton(
-                          style: Theme.of(context)
-                              .colorScheme
-                              .optionalActionButtonStyle,
-                          onPressed: _navigateToSignInPage,
-                          child: Text(
-                            l10n.existingUser,
-                            style: const TextStyle(
-                              color: Colors.black, // same for both themes
+                      const SizedBox(height: 12),
+                      const Text(
+                        "ente",
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontFamily: 'Montserrat',
+                          fontSize: 42,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        "Authenticator",
+                        style: Theme.of(context).textTheme.headlineMedium,
+                      ),
+                      const SizedBox(height: 32),
+                      Text(
+                        l10n.onBoardingBody,
+                        textAlign: TextAlign.center,
+                        style: Theme.of(context).textTheme.titleLarge!.copyWith(
+                              color: Colors.white38,
                             ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 100),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: GradientButton(
+                      onTap: _navigateToSignUpPage,
+                      text: l10n.newUser,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
+                    child: Hero(
+                      tag: "log_in",
+                      child: ElevatedButton(
+                        style: Theme.of(context)
+                            .colorScheme
+                            .optionalActionButtonStyle,
+                        onPressed: _navigateToSignInPage,
+                        child: Text(
+                          l10n.existingUser,
+                          style: const TextStyle(
+                            color: Colors.black, // same for both themes
                           ),
                         ),
                       ),
                     ),
-                    const SizedBox(height: 4),
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.only(top: 20, bottom: 20),
-                      child: GestureDetector(
-                        onTap: _optForOfflineMode,
-                        child: Center(
-                          child: Text(
-                            l10n.useOffline,
-                            style: body.copyWith(
-                              color:
-                                  Theme.of(context).colorScheme.mutedTextColor,
-                            ),
+                  ),
+                  const SizedBox(height: 4),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.only(top: 20, bottom: 20),
+                    child: GestureDetector(
+                      onTap: _optForOfflineMode,
+                      child: Center(
+                        child: Text(
+                          l10n.useOffline,
+                          style: body.copyWith(
+                            color: Theme.of(context).colorScheme.mutedTextColor,
                           ),
                         ),
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
           ),
@@ -183,13 +174,16 @@ class _OnboardingPageState extends State<OnboardingPage> {
 
   Future<void> _optForOfflineMode() async {
     bool canCheckBio = await LocalAuthentication().canCheckBiometrics;
-    if(!canCheckBio) {
-      showToast(context, "Sorry, biometric authentication is not supported on this device.");
+    if (!canCheckBio) {
+      showToast(
+        context,
+        "Sorry, biometric authentication is not supported on this device.",
+      );
       return;
     }
     final bool hasOptedBefore = Configuration.instance.hasOptedForOfflineMode();
     ButtonResult? result;
-    if(!hasOptedBefore) {
+    if (!hasOptedBefore) {
       result = await showChoiceActionSheet(
         context,
         title: context.l10n.warning,
@@ -208,7 +202,6 @@ class _OnboardingPageState extends State<OnboardingPage> {
         ),
       );
     }
-
   }
 
   void _navigateToSignUpPage() {
