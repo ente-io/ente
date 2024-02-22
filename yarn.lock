@@ -758,10 +758,10 @@
     node-fetch "~2.6.1"
     seedrandom "^3.0.5"
 
-"@tensorflow/tfjs-tflite@^0.0.1-alpha.7":
-  version "0.0.1-alpha.10"
-  resolved "https://registry.yarnpkg.com/@tensorflow/tfjs-tflite/-/tfjs-tflite-0.0.1-alpha.10.tgz#70051209a154e82031b5ee131890c41b368f0af7"
-  integrity sha512-/qmqsRBTg+XCWgNomJ/gdZIKFMpGiTEAwMhqk/7cOZEp/fTV69GuknOoSQjloYGWasQIDIriQO3bpi6T4PTEnA==
+"@tensorflow/tfjs-tflite@0.0.1-alpha.7":
+  version "0.0.1-alpha.7"
+  resolved "https://registry.yarnpkg.com/@tensorflow/tfjs-tflite/-/tfjs-tflite-0.0.1-alpha.7.tgz#647c088689131fee424b7ae0bb9b7fdc74a61475"
+  integrity sha512-aOmmEC/AHzfc/u1Q6ccY6Kr7CfNwjonqyTGVU1OqlQGDrH2IopcCjNSZdatJIB6J2RxlBs979JilCOUpK1LXng==
 
 "@tokenizer/token@^0.3.0":
   version "0.3.0"
@@ -4041,7 +4041,6 @@ streamsearch@^1.1.0:
   integrity sha512-Mcc5wHehp9aXz1ax6bZUyY5afg9u2rv5cqQI3mRrYkGC8rW2hM02jWuwjtL++LS5qinSyhj2QfLyNsuc+VsExg==
 
 "string-width-cjs@npm:string-width@^4.2.0", string-width@^4.1.0:
-  name string-width-cjs
   version "4.2.3"
   resolved "https://registry.yarnpkg.com/string-width/-/string-width-4.2.3.tgz#269c7117d27b05ad2e536830a8ec895ef9c6d010"
   integrity sha512-wKyQRQpjJ0sIp62ErSZdGsjMJWsap5oRNihHhu6G7JVO/9jIB6UyevL+tXuOqrng8j/cxKTWyWUwvSTriiZz/g==
