@@ -25,22 +25,7 @@ const nextConfig = {
     /* generate a static export when we run `next build` */
     output: 'export',
     compiler: {
-        emotion: {
-            importMap: {
-                '@mui/material': {
-                    styled: {
-                        canonicalImport: ['@emotion/styled', 'default'],
-                        styledBaseImport: ['@mui/material', 'styled'],
-                    },
-                },
-                '@mui/material/styles': {
-                    styled: {
-                        canonicalImport: ['@emotion/styled', 'default'],
-                        styledBaseImport: ['@mui/material/styles', 'styled'],
-                    },
-                },
-            },
-        },
+        emotion: true,
     },
     transpilePackages: [
         '@/utils',

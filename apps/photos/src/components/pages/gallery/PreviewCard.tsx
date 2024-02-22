@@ -205,12 +205,16 @@ const Cont = styled('div')<{ disabled: boolean }>`
         pointer-events: none;
     }
 
-    &:hover ${Check} {
-        opacity: 0.5;
+    &:hover {
+        input[type='checkbox'] {
+            opacity: 0.5;
+        }
+
+        .preview-card-hover-overlay {
+            opacity: 1;
+        }
     }
-    &:hover ${HoverOverlay} {
-        opacity: 1;
-    }
+
     border-radius: 4px;
 `;
 
@@ -342,7 +346,10 @@ export default function PreviewCard(props: IProps) {
                 </AvatarOverlay>
             )}
 
-            <HoverOverlay checked={selected} />
+            <HoverOverlay
+                className="preview-card-hover-overlay"
+                checked={selected}
+            />
             <InSelectRangeOverLay
                 $active={isRangeSelectActive && isInsSelectRange}
             />
