@@ -42,5 +42,8 @@
         "eslint": "^8",
         "prettier": "^3",
         "typescript": "^5"
+    },
+    "resolutions": {
+        "@sentry/cli": "1.75.0"
     }
 }
