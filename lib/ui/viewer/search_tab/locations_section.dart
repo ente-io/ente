@@ -95,6 +95,12 @@ class _LocationsSectionState extends State<LocationsSection> {
         ),
       );
     } else {
+      final recommendations = <Widget>[
+        ..._locationsSearchResults.map(
+          (locationSearchResult) =>
+              LocationRecommendation(locationSearchResult),
+        ),
+      ];
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: 8),
         child: Column(
@@ -114,12 +120,7 @@ class _LocationsSectionState extends State<LocationsSection> {
                 scrollDirection: Axis.horizontal,
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: _locationsSearchResults
-                      .map(
-                        (locationSearchResult) =>
-                            LocationRecommendation(locationSearchResult),
-                      )
-                      .toList(),
+                  children: recommendations,
                 ),
               ),
             ),
@@ -181,15 +182,19 @@ class LocationRecommendation extends StatelessWidget {
             SizedBox(
               width: _width,
               height: _height,
-              // height: 145,
-
               child: Container(
                 decoration: const BoxDecoration(
+                  borderRadius: BorderRadius.all(Radius.circular(12)),
                   boxShadow: [
                     BoxShadow(
-                      blurRadius: 15,
-                      offset: Offset(0, 7.5),
-                      color: Color.fromRGBO(68, 68, 68, 0.1),
+                      blurRadius: 1,
+                      offset: Offset(0, 1),
+                      color: Color.fromRGBO(0, 0, 0, 0.09),
+                    ),
+                    BoxShadow(
+                      blurRadius: 1,
+                      offset: Offset(1, 2),
+                      color: Color.fromRGBO(0, 0, 0, 0.05),
                     ),
                   ],
                 ),
