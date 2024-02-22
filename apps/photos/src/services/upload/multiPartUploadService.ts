@@ -28,9 +28,8 @@ export async function uploadStreamUsingMultipart(
 ) {
     const uploadPartCount = calculatePartCount(dataStream.chunkCount);
     logger(`fetching ${uploadPartCount} urls for multipart upload`);
-    const multipartUploadURLs = await uploadService.fetchMultipartUploadURLs(
-        uploadPartCount
-    );
+    const multipartUploadURLs =
+        await uploadService.fetchMultipartUploadURLs(uploadPartCount);
     logger(`fetched ${uploadPartCount} urls for multipart upload`);
 
     const fileObjectKey = await uploadStreamInParts(

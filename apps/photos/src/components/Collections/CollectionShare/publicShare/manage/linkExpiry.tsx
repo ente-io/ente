@@ -74,8 +74,10 @@ export function ManageLinkExpiry({
                         isLinkExpired(publicShareProp?.validTill)
                             ? t('LINK_EXPIRED')
                             : publicShareProp?.validTill
-                            ? formatDateTime(publicShareProp?.validTill / 1000)
-                            : t('NEVER')
+                              ? formatDateTime(
+                                    publicShareProp?.validTill / 1000
+                                )
+                              : t('NEVER')
                     }
                 />
             </MenuItemGroup>

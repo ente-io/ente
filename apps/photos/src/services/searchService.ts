@@ -231,7 +231,7 @@ function getCollectionSuggestion(
                 type: SuggestionType.COLLECTION,
                 value: searchResult.id,
                 label: searchResult.name,
-            } as Suggestion)
+            }) as Suggestion
     );
 }
 
@@ -267,15 +267,14 @@ async function getLocationSuggestions(searchPhrase: string) {
                 type: SuggestionType.LOCATION,
                 value: locationTag.data,
                 label: locationTag.data.name,
-            } as Suggestion)
+            }) as Suggestion
     );
     const locationTagNames = new Set(
         locationTagSuggestions.map((result) => result.label)
     );
 
-    const citySearchResults = await locationSearchService.searchCities(
-        searchPhrase
-    );
+    const citySearchResults =
+        await locationSearchService.searchCities(searchPhrase);
 
     const nonConflictingCityResult = citySearchResults.filter(
         (city) => !locationTagNames.has(city.city)
@@ -287,7 +286,7 @@ async function getLocationSuggestions(searchPhrase: string) {
                 type: SuggestionType.CITY,
                 value: city,
                 label: city.city,
-            } as Suggestion)
+            }) as Suggestion
     );
 
     return [...locationTagSuggestions, ...citySearchSuggestions];
@@ -302,7 +301,7 @@ async function getThingSuggestion(searchPhrase: string): Promise<Suggestion[]> {
                 type: SuggestionType.THING,
                 value: searchResult,
                 label: searchResult.name,
-            } as Suggestion)
+            }) as Suggestion
     );
 }
 

@@ -177,8 +177,8 @@ async function collectionWiseFileCount(expectedState) {
                     `collectionWiseFileCount check failed ❌
                         for collection ${collectionName}
                         expected File count : ${fileCount} ,  got: ${collectionNameToFileCount.get(
-                        collectionName
-                    )}`
+                            collectionName
+                        )}`
                 );
             }
         }
@@ -300,8 +300,8 @@ async function exifDataParsingCheck(expectedState) {
                             for ${fileName}
                             expected: ${JSON.stringify(exifValues['location'])}
                             got: [${matchingFile.metadata.latitude},${
-                matchingFile.metadata.longitude
-            }]`);
+                                matchingFile.metadata.longitude
+                            }]`);
         }
     });
     console.log('exif data parsing check passed ✅');
@@ -371,8 +371,8 @@ async function googleMetadataReadingCheck(expectedState) {
                                     metadata['location']
                                 )}
                                 got: [${matchingFile.metadata.latitude},${
-                    matchingFile.metadata.longitude
-                }]`);
+                                    matchingFile.metadata.longitude
+                                }]`);
             }
         }
     );

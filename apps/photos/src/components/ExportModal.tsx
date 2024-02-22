@@ -110,19 +110,16 @@ export default function ExportModal(props: Props) {
     const syncExportRecord = async (exportFolder: string): Promise<void> => {
         try {
             if (!exportService.exportFolderExists(exportFolder)) {
-                const pendingExports = await exportService.getPendingExports(
-                    null
-                );
+                const pendingExports =
+                    await exportService.getPendingExports(null);
                 setPendingExports(pendingExports);
             }
-            const exportRecord = await exportService.getExportRecord(
-                exportFolder
-            );
+            const exportRecord =
+                await exportService.getExportRecord(exportFolder);
             setExportStage(exportRecord.stage);
             setLastExportTime(exportRecord.lastAttemptTimestamp);
-            const pendingExports = await exportService.getPendingExports(
-                exportRecord
-            );
+            const pendingExports =
+                await exportService.getPendingExports(exportRecord);
             setPendingExports(pendingExports);
         } catch (e) {
             if (e.message !== CustomError.EXPORT_FOLDER_DOES_NOT_EXIST) {

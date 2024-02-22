@@ -8,8 +8,8 @@ class ComlinkSearchWorker {
 
     async getInstance() {
         if (!this.comlinkWorkerInstance) {
-            this.comlinkWorkerInstance = await getDedicatedSearchWorker()
-                .remote;
+            this.comlinkWorkerInstance =
+                await getDedicatedSearchWorker().remote;
         }
         return this.comlinkWorkerInstance;
     }

@@ -468,9 +468,8 @@ export async function getRenderableImage(fileName: string, imageBlob: Blob) {
                             imageBlob.size
                         )}`
                     );
-                    convertedImageBlob = await heicConversionService.convert(
-                        imageBlob
-                    );
+                    convertedImageBlob =
+                        await heicConversionService.convert(imageBlob);
                     addLogLine(`${fileName} successfully converted`);
                 } catch (e) {
                     throw Error(CustomError.NON_PREVIEWABLE_FILE);

@@ -61,9 +61,9 @@ export default function UploadTypeSelector({
                 UploadTypeSelectorIntent.collectPhotos
                     ? t('SELECT_PHOTOS')
                     : uploadTypeSelectorIntent ===
-                      UploadTypeSelectorIntent.import
-                    ? t('IMPORT')
-                    : t('UPLOAD')}
+                        UploadTypeSelectorIntent.import
+                      ? t('IMPORT')
+                      : t('UPLOAD')}
             </DialogTitleWithCloseButton>
             <Box p={1.5} pt={0.5}>
                 <Stack spacing={0.5}>

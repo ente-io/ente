@@ -28,9 +28,8 @@ const EMBEDDINGS_TABLE = 'embeddings_v2';
 const EMBEDDING_SYNC_TIME_TABLE = 'embedding_sync_time';
 
 export const getAllLocalEmbeddings = async () => {
-    const embeddings: Array<Embedding> = await localForage.getItem<Embedding[]>(
-        EMBEDDINGS_TABLE
-    );
+    const embeddings: Array<Embedding> =
+        await localForage.getItem<Embedding[]>(EMBEDDINGS_TABLE);
     if (!embeddings) {
         await localForage.removeItem(EMBEDDINGS_TABLE_V1);
         await localForage.removeItem(EMBEDDING_SYNC_TIME_TABLE);

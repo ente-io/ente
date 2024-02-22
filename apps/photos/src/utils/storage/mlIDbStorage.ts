@@ -177,7 +177,7 @@ class MLIDbStorage {
 
     public async newTransaction<
         Name extends StoreNames<MLDb>,
-        Mode extends IDBTransactionMode = 'readonly'
+        Mode extends IDBTransactionMode = 'readonly',
     >(storeNames: Name, mode?: Mode) {
         const db = await this.db;
         return db.transaction(storeNames, mode);

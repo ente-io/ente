@@ -187,9 +187,8 @@ export const syncPublicFiles = async (
             if (!token) {
                 return sortFiles(files, sortAsc);
             }
-            const lastSyncTime = await getPublicCollectionLastSyncTime(
-                collectionUID
-            );
+            const lastSyncTime =
+                await getPublicCollectionLastSyncTime(collectionUID);
             if (collection.updationTime === lastSyncTime) {
                 return sortFiles(files, sortAsc);
             }

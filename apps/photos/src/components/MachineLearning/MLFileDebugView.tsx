@@ -91,9 +91,8 @@ export default function MLFileDebugView(props: MLFileDebugViewProps) {
         const loadFile = async () => {
             // TODO: go through worker for these apis, to not include ml code in main bundle
             const imageBitmap = await createImageBitmap(props.file);
-            const faceDetections = await blazeFaceDetectionService.detectFaces(
-                imageBitmap
-            );
+            const faceDetections =
+                await blazeFaceDetectionService.detectFaces(imageBitmap);
             addLogLine('detectedFaces: ', faceDetections.length);
 
             const objectDetections = await ssdMobileNetV2Service.detectObjects(

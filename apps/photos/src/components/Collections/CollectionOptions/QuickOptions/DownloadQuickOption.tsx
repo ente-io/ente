@@ -22,12 +22,12 @@ export function DownloadQuickOption({
                 collectionSummaryType === CollectionSummaryType.favorites
                     ? t('DOWNLOAD_FAVORITES')
                     : collectionSummaryType ===
-                      CollectionSummaryType.uncategorized
-                    ? t('DOWNLOAD_UNCATEGORIZED')
-                    : collectionSummaryType ===
-                      CollectionSummaryType.hiddenItems
-                    ? t('DOWNLOAD_HIDDEN_ITEMS')
-                    : t('DOWNLOAD_COLLECTION')
+                        CollectionSummaryType.uncategorized
+                      ? t('DOWNLOAD_UNCATEGORIZED')
+                      : collectionSummaryType ===
+                          CollectionSummaryType.hiddenItems
+                        ? t('DOWNLOAD_HIDDEN_ITEMS')
+                        : t('DOWNLOAD_COLLECTION')
             }>
             <IconButton
                 onClick={handleCollectionAction(

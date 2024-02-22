@@ -110,8 +110,10 @@ function PhotoViewer(props: Iprops) {
         useState<Photoswipe<Photoswipe.Options>>();
     const [isFav, setIsFav] = useState(false);
     const [showInfo, setShowInfo] = useState(false);
-    const [exif, setExif] =
-        useState<{ key: string; value: Record<string, any> }>();
+    const [exif, setExif] = useState<{
+        key: string;
+        value: Record<string, any>;
+    }>();
     const exifCopy = useRef(null);
     const [livePhotoBtnOptions, setLivePhotoBtnOptions] = useState(
         defaultLivePhotoDefaultOptions

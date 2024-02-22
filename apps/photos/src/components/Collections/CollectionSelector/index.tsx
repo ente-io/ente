@@ -131,14 +131,15 @@ function CollectionSelector({
                 {attributes.intent === CollectionSelectorIntent.upload
                     ? t('UPLOAD_TO_COLLECTION')
                     : attributes.intent === CollectionSelectorIntent.add
-                    ? t('ADD_TO_COLLECTION')
-                    : attributes.intent === CollectionSelectorIntent.move
-                    ? t('MOVE_TO_COLLECTION')
-                    : attributes.intent === CollectionSelectorIntent.restore
-                    ? t('RESTORE_TO_COLLECTION')
-                    : attributes.intent === CollectionSelectorIntent.unhide
-                    ? t('UNHIDE_TO_COLLECTION')
-                    : t('SELECT_COLLECTION')}
+                      ? t('ADD_TO_COLLECTION')
+                      : attributes.intent === CollectionSelectorIntent.move
+                        ? t('MOVE_TO_COLLECTION')
+                        : attributes.intent === CollectionSelectorIntent.restore
+                          ? t('RESTORE_TO_COLLECTION')
+                          : attributes.intent ===
+                              CollectionSelectorIntent.unhide
+                            ? t('UNHIDE_TO_COLLECTION')
+                            : t('SELECT_COLLECTION')}
             </DialogTitleWithCloseButton>
             <DialogContent sx={{ '&&&': { padding: 0 } }}>
                 <FlexWrapper flexWrap="wrap" gap={'4px'} padding={'16px'}>

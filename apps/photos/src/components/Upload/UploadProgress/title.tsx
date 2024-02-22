@@ -28,8 +28,8 @@ function UploadProgressSubtitleText() {
             {uploadStage === UPLOAD_STAGES.UPLOADING
                 ? t(`UPLOAD_STAGE_MESSAGE.${uploadStage}`, { uploadCounter })
                 : uploadStage === UPLOAD_STAGES.EXTRACTING_METADATA
-                ? t(`UPLOAD_STAGE_MESSAGE.${uploadStage}`, { uploadCounter })
-                : t(`UPLOAD_STAGE_MESSAGE.${uploadStage}`)}
+                  ? t(`UPLOAD_STAGE_MESSAGE.${uploadStage}`, { uploadCounter })
+                  : t(`UPLOAD_STAGE_MESSAGE.${uploadStage}`)}
         </Typography>
     );
 }

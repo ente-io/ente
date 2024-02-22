@@ -55,11 +55,11 @@ export function toFileWithPath(file: File, path?: string): FileWithPath {
                 typeof path === 'string'
                     ? path
                     : typeof webkitRelativePath === 'string' && // If <input webkitdirectory> is set,
-                      // the File will have a {webkitRelativePath} property
-                      // https://developer.mozilla.org/en-US/docs/Web/API/HTMLInputElement/webkitdirectory
-                      webkitRelativePath.length > 0
-                    ? webkitRelativePath
-                    : file.name,
+                        // the File will have a {webkitRelativePath} property
+                        // https://developer.mozilla.org/en-US/docs/Web/API/HTMLInputElement/webkitdirectory
+                        webkitRelativePath.length > 0
+                      ? webkitRelativePath
+                      : file.name,
             writable: false,
             configurable: false,
             enumerable: true,

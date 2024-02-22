@@ -234,9 +234,8 @@ export default function Credentials({
                 addLocalLog(() => `userSRPSetupPending ${!srpAttributes}`);
                 if (!srpAttributes) {
                     const loginSubKey = await generateLoginSubKey(kek);
-                    const srpSetupAttributes = await generateSRPSetupAttributes(
-                        loginSubKey
-                    );
+                    const srpSetupAttributes =
+                        await generateSRPSetupAttributes(loginSubKey);
                     await configureSRP(srpSetupAttributes);
                 }
             } catch (e) {

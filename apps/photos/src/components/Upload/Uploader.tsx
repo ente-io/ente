@@ -287,8 +287,8 @@ export default function Uploader(props: Props) {
                     electronFiles?.length > 0
                         ? 'electronFiles'
                         : webFiles?.length > 0
-                        ? 'webFiles'
-                        : 'sharedFiles'
+                          ? 'webFiles'
+                          : 'sharedFiles'
                 } count ${
                     electronFiles?.length ??
                     webFiles?.length ??
