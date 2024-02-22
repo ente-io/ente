@@ -2,7 +2,7 @@ import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import Backend from 'i18next-http-backend';
 import { getBestPossibleUserLocale } from './utils';
-import { isDevBuild } from '../network/api';
+import { isDevBuild } from '@/utils/env';
 
 /**
  * Load translations.

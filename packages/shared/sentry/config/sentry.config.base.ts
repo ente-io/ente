@@ -2,7 +2,7 @@ import * as Sentry from '@sentry/nextjs';
 import { getSentryUserID } from '@ente/shared/sentry/utils';
 import { runningInBrowser } from '@ente/shared/platform';
 import { getHasOptedOutOfCrashReports } from '@ente/shared/storage/localStorage/helpers';
-import { isDevBuild } from '@ente/shared/network/api';
+import { isDevBuild } from '@/utils/env';
 
 export const initSentry = async (dsn: string) => {
     // Don't initialize Sentry for dev builds

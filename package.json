@@ -22,18 +22,11 @@
         "lint-fix": "yarn prettier --write . && yarn workspaces run eslint --fix ."
     },
     "dependencies": {
-        "@emotion/react": "^11.11",
-        "@emotion/server": "^11.11",
-        "@emotion/styled": "^11.11",
         "@ente/accounts": "*",
         "@ente/shared": "*",
-        "@mui/icons-material": "^5.15",
-        "@mui/material": "^5.15",
         "axios": "^1.6.0",
         "is-electron": "^2.2.2",
-        "next": "^14.1",
-        "react": "18.2.0",
-        "react-dom": "18.2.0"
+        "next": "^14.1"
     },
     "devDependencies": {
         "@ente/eslint-config": "*",
