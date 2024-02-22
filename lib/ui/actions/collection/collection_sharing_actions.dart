@@ -558,9 +558,9 @@ class CollectionActions {
         );
       } else {
         await collectionsService.move(
-          entry.key,
-          collection.id,
           entry.value,
+          toCollectionID: entry.key,
+          fromCollectionID: collection.id,
         );
       }
     }
