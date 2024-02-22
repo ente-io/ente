@@ -1,8 +1,10 @@
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import Backend from 'i18next-http-backend';
-import { getBestPossibleUserLocale } from './utils';
 import { isDevBuild } from '@/utils/env';
+
+import { getUserLocales } from 'get-user-locale';
+import { getUserLocale } from '@ente/shared/storage/localStorage/helpers';
 
 /**
  * Load translations.
@@ -104,3 +106,34 @@ export const currentLocale = () => {
     const locale = i18n.resolvedLanguage;
     return isSupportedLocale(locale) ? locale : 'en';
 };
+
+/** Enums of supported locale */
+export enum Language {
+    en = 'en',
+    fr = 'fr',
+    zh = 'zh',
+    nl = 'nl',
+    es = 'es',
+}
+
+export function getBestPossibleUserLocale(): Language {
+    const locale = getUserLocale();
+    if (locale) {
+        return locale;
+    }
+    const userLocales = getUserLocales();
+    for (const lc of userLocales) {
+        if (lc.startsWith('en')) {
+            return Language.en;
+        } else if (lc.startsWith('fr')) {
+            return Language.fr;
+        } else if (lc.startsWith('zh')) {
+            return Language.zh;
+        } else if (lc.startsWith('nl')) {
+            return Language.nl;
+        } else if (lc.startsWith('es')) {
+            return Language.es;
+        }
+    }
+    return Language.en;
+}

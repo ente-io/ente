@@ -1,9 +1,8 @@
 import DropdownInput, { DropdownOption } from 'components/DropdownInput';
-import { Language } from '@ente/shared/i18n/locale';
 import { useLocalState } from '@ente/shared/hooks/useLocalState';
 import { t } from 'i18next';
 import { useRouter } from 'next/router';
-import { getBestPossibleUserLocale } from '@ente/shared/i18n/utils';
+import { Language, getBestPossibleUserLocale } from '@ente/shared/i18n';
 import { LS_KEYS } from '@ente/shared/storage/localStorage';
 
 const getLocaleDisplayName = (l: Language) => {
