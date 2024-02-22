@@ -3,6 +3,7 @@ import "dart:async";
 import "package:flutter/material.dart";
 import "package:flutter_animate/flutter_animate.dart";
 import "package:photos/events/event.dart";
+import "package:photos/extensions/list.dart";
 import "package:photos/models/search/album_search_result.dart";
 import "package:photos/models/search/generic_search_result.dart";
 import "package:photos/models/search/recent_searches.dart";
@@ -83,8 +84,6 @@ class _SearchSectionAllPageState extends State<SearchSectionAllPage> {
                   builder: (context, snapshot) {
                     if (snapshot.hasData) {
                       final sectionResults = snapshot.data!;
-                      sectionResults
-                          .sort((a, b) => a.name().compareTo(b.name()));
                       return Text(sectionResults.length.toString())
                           .animate()
                           .fadeIn(
@@ -109,7 +108,15 @@ class _SearchSectionAllPageState extends State<SearchSectionAllPage> {
                 future: sectionData,
                 builder: (context, snapshot) {
                   if (snapshot.hasData) {
-                    final sectionResults = snapshot.data!;
+                    List<SearchResult> sectionResults = snapshot.data!;
+                    sectionResults.sort((a, b) => a.name().compareTo(b.name()));
+                    if (widget.sectionType == SectionType.location) {
+                      final result = sectionResults.splitMatch(
+                        (e) => e.type() == ResultType.location,
+                      );
+                      sectionResults = result.matched;
+                      sectionResults.addAll(result.unmatched);
+                    }
                     return ListView.separated(
                       itemBuilder: (context, index) {
                         if (sectionResults.length == index) {

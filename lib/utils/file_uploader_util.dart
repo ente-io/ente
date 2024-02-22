@@ -208,6 +208,10 @@ Future<Uint8List?> _getThumbnailForUpload(
       quality: thumbnailQuality,
     );
     if (thumbnailData == null) {
+      // allow videos to be uploaded without thumbnails
+      if (asset.type == AssetType.video) {
+        return null;
+      }
       throw InvalidFileError(
         "no thumbnail : ${file.fileType} ${file.tag}",
         InvalidReason.thumbnailMissing,
@@ -227,6 +231,10 @@ Future<Uint8List?> _getThumbnailForUpload(
     final String errMessage =
         "thumbErr for ${file.fileType}, ${extension(file.displayName)} ${file.tag}";
     _logger.warning(errMessage, e);
+    // allow videos to be uploaded without thumbnails
+    if (asset.type == AssetType.video) {
+      return null;
+    }
     throw InvalidFileError(errMessage, InvalidReason.thumbnailMissing);
   }
 }

@@ -73,28 +73,37 @@ class UpdateService {
     return _latestVersion;
   }
 
-  Future<void> showUpdateNotification() async {
-    if (!isIndependent()) {
-      return;
-    }
+  Future<bool> shouldShowUpdateNoification() async {
     final shouldUpdate = await this.shouldUpdate();
+
     final lastNotificationShownTime =
         _prefs.getInt(kUpdateAvailableShownTimeKey) ?? 0;
     final now = DateTime.now().microsecondsSinceEpoch;
-    final hasBeen3DaysSinceLastNotification =
-        (now - lastNotificationShownTime) > (3 * microSecondsInDay);
-    if (shouldUpdate &&
-        hasBeen3DaysSinceLastNotification &&
-        _latestVersion!.shouldNotify) {
+    final hasBeenThresholdDaysSinceLastNotification =
+        (now - lastNotificationShownTime) >
+            ((_latestVersion!.shouldNotify ? 1 : 3) * microSecondsInDay);
+
+    return shouldUpdate && hasBeenThresholdDaysSinceLastNotification;
+  }
+
+  Future<void> showUpdateNotification() async {
+    if (await shouldShowUpdateNoification()) {
       // ignore: unawaited_futures
       NotificationService.instance.showNotification(
         "Update available",
         "Click to install our best version yet",
       );
-      await _prefs.setInt(kUpdateAvailableShownTimeKey, now);
+      await resetUpdateAvailableShownTime();
     } else {
       _logger.info("Debouncing notification");
     }
+  }
+
+  Future<void> resetUpdateAvailableShownTime() {
+    return _prefs.setInt(
+      kUpdateAvailableShownTimeKey,
+      DateTime.now().microsecondsSinceEpoch,
+    );
   }
 
   Future<LatestVersionInfo> _getLatestVersionInfo() async {
@@ -145,9 +154,12 @@ class UpdateService {
       );
     }
     return Platform.isAndroid
-        ? const Tuple2("play store", "market://details?id=io.ente.photos")
+        ? const Tuple2(
+            "Google Play",
+            "https://play.google.com/store/apps/details?id=io.ente.photos",
+          )
         : const Tuple2(
-            "app store",
+            "App Store",
             "https://apps.apple.com/in/app/ente-photos/id1542026904",
           );
   }

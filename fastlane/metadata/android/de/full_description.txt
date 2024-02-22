@@ -1,36 +1,36 @@
 ente ist eine einfache App, um Ihre Fotos und Videos automatisch zu sichern und zu organisieren.
 
-Wenn Sie auf der Suche nach einer privaten Alternative sind, um Ihre Erinnerungen zu bewahren, sind Sie an der richtigen Stelle. Die müssen nicht mal ente haben. ente benötigt bestimmte Berechtigungen um als Anbieter eines Fotospeichers fungieren zu können. Mit Ente werden sie Ende-zu-Ende-verschlüsselt gespeichert (e2ee). Dies bedeutet, dass nur Sie sie sehen können.
+Wenn Sie auf der Suche nach einer datenschutzfreundlichen Alternative zu Google Fotos sind, sind Sie an der richtigen Stelle. Mit Ente werden Ihre Fotos Ende-zu-Ende-verschlüsselt gespeichert (e2ee). Dies bedeutet, dass nur Sie sie sehen können.
 
-Wir haben Open-Source Apps auf allen Plattformen, und Ihre Fotos werden nahtlos zwischen all Ihren Geräten verschlüsselt (e2ee) synchronisiert.
+Ihre Fotos werden verschlüsselt (e2ee) zwischen allen Geräten synchronisiert.
 
-ente ermöglicht es deine Alben simpel & schnell mit deinen Geliebten zu teilen. Du kannst öffentlich einsehbare Links teilen, wo sie dein Album sehen und zusammenarbeiten können, indem sie Fotos hinzufügen, sogar ohne einen Account oder eine App.
+ente ermöglicht es, deine Alben simpel & schnell mit deinen Geliebten zu teilen. Sie können öffentlich einsehbare Links teilen, sodass andere sogar ohne einen Account oder eine App Ihr Album sehen und darin zusammenarbeiten können, indem sie Fotos hinzufügen.
 
-Ihre verschlüsselten Daten werden zu 3 verschiedenen Orten repliziert, unter anderem zu einem Schutzbunker in Paris. Wir nehmen die Erhaltung der Nachwelt ernst und machen es Dir leicht, dafür zu sorgen, dass Deine Erinnerungen Dich überdauern.
+Ihre verschlüsselten Daten werden an 3 verschiedenen Orten gespeichert, unter anderem in einem Schutzbunker in Paris. Wir nehmen die Erhaltung der Nachwelt ernst und machen es Ihnen leicht, dafür zu sorgen, dass Ihre Erinnerungen Sie überdauern.
 
 Wir sind hier, um die sicherste Foto-App aller Zeiten zu entwickeln, begleite uns auf unserem Weg!
 
 FEATURES
-- Sicherungen in Originalqualität, jeder Pixel ist wichtig
-- Familienpläne, damit Du den Speicher mit Deiner Familie teilen kannst
-- Kollaborative Alben, sodass du nach einer Reise Fotos zusammenstellen kannst
-- Geteilte Ordner für den Fall, dass Dein Partner Deine "Kamera" Klicks genießen soll
-- Links zu einem Album, welche mit einem Passwort geschützt werden können
-- Möglichkeit Speicherplatz freizugeben, indem bereits gesicherte Daten auf dem Gerät entfernt werden
-- Menschliche Unterstützung, denn Sie sind es wert
+- Sicherungen in Originalqualität, weil jeder Pixel zählt
+- Familien-Abos, damit Sie den Speicherplatz mit Ihrer Familie teilen können
+- Kollaborative Alben, sodass Sie nach einer Reise Fotos sammeln können
+- Geteilte Ordner für den Fall, dass Ihr Partner Ihre "Kamera" Klicks genießen soll
+- Album-Links, die mit einem Passwort geschützt werden können
+- Möglichkeit, Speicherplatz freizugeben, indem bereits gesicherte Daten auf dem Gerät entfernt werden
+- Menschlicher Support, denn Sie sind es wert
 - Beschreibungen, damit Sie Ihre Erinnerungen beschriften und leicht wiederfinden können
-- Integrierte Bildbearbeitung, um den letzten Schliff zu geben
-- Favorisiere, verstecke und erlebe deine Erinnerungen, denn sie sind kostbar
-- Importieren Sie mit einem Klick von Google, Apple, Ihrer Festplatte und mehr
+- Foto-Editor, um Ihren Fotos den Feinschliff zu verpassen
+- Favorisieren, verstecken und erleben Sie Ihre Erinnerungen, denn sie sind kostbar
+- Ein-Klick-Import von Google, Apple, Ihrer Festplatte und mehr
 - Dunkles Theme, weil Ihre Fotos darin gut aussehen
 - 2FA, 3FA, biometrische Authentifizierung
 - und noch VIELES mehr!
 
 BERECHTIGUNGEN
-Diese können unter folgendem Link betrachtet werden: https://github.com/ente-io/photos-app/blob/f-droid/android/permissions.md
+Diese können unter folgendem Link überprüft werden: https://github.com/ente-io/photos-app/blob/f-droid/android/permissions.md
 
 PREIS
 Wir bieten keine lebenslang kostenlosen Abonnements an, da es für uns wichtig ist, einen nachhaltigen Service anzubieten. Wir bieten jedoch bezahlbare Abonemments an, welche auch mit der Familie geteilt werden können. Mehr Informationen sind auf ente.io zu finden.
 
 SUPPORT
-Wir sind stolz darauf einen persönlichen Support anzubieten. Falls Sie ein Abonnement besitzen, können Sie sich mit Ihrem Anliegen via E-Mail an team@ente.io wenden und erhalten eine Antwort innerhalb von 24 Stunden.
+Wir sind stolz darauf, einen persönlichen Support anzubieten. Falls Sie ein Abonnement besitzen, können Sie sich mit Ihrem Anliegen via E-Mail an team@ente.io wenden und erhalten eine Antwort innerhalb von 24 Stunden.

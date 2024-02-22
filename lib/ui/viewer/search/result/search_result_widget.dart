@@ -131,6 +131,8 @@ class SearchResultWidget extends StatelessWidget {
         return "Day";
       case ResultType.location:
         return "Location";
+      case ResultType.locationSuggestion:
+        return "Add Location";
       case ResultType.fileType:
         return "Type";
       case ResultType.fileExtension:

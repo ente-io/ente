@@ -10,6 +10,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
+import "package:photos/core/constants.dart";
 import 'package:photos/core/errors.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/core/network/network.dart';
@@ -34,6 +35,7 @@ import "package:photos/services/user_service.dart";
 import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/file_download_util.dart';
 import 'package:photos/utils/file_uploader_util.dart';
+import "package:photos/utils/file_util.dart";
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tuple/tuple.dart';
 import "package:uuid/uuid.dart";
@@ -69,6 +71,7 @@ class FileUploader {
   late ProcessType _processType;
   late bool _isBackground;
   late SharedPreferences _prefs;
+
   // _hasInitiatedForceUpload is used to track if user attempted force upload
   // where files are uploaded directly (without adding them to DB). In such
   // cases, we don't want to clear the stale upload files. See #removeStaleFiles
@@ -307,12 +310,36 @@ class FileUploader {
         return file.path.contains(kUploadTempPrefix) &&
             file.path.contains(".encrypted");
       });
-      if (filesToDelete.isEmpty) {
-        return;
+      if (filesToDelete.isNotEmpty) {
+        _logger.info('cleaning up state files ${filesToDelete.length}');
+        for (final file in filesToDelete) {
+          await file.delete();
+        }
       }
-      _logger.info('cleaning up state files ${filesToDelete.length}');
-      for (final file in filesToDelete) {
-        await file.delete();
+
+      if (Platform.isAndroid) {
+        final sharedMediaDir =
+            Configuration.instance.getSharedMediaDirectory() + "/";
+        final sharedFiles = await Directory(sharedMediaDir).list().toList();
+        if (sharedFiles.isNotEmpty) {
+          _logger.info('Shared media directory cleanup ${sharedFiles.length}');
+          final int ownerID = Configuration.instance.getUserID()!;
+          final existingLocalFileIDs =
+              await FilesDB.instance.getExistingLocalFileIDs(ownerID);
+          final Set<String> trackedSharedFilePaths = {};
+          for (String localID in existingLocalFileIDs) {
+            if (localID.contains(sharedMediaIdentifier)) {
+              trackedSharedFilePaths
+                  .add(getSharedMediaPathFromLocalID(localID));
+            }
+          }
+          for (final file in sharedFiles) {
+            if (!trackedSharedFilePaths.contains(file.path)) {
+              _logger.info('Deleting stale shared media file ${file.path}');
+              await file.delete();
+            }
+          }
+        }
       }
     } catch (e, s) {
       _logger.severe("Failed to remove stale files", e, s);
@@ -431,7 +458,13 @@ class FileUploader {
         encryptedFilePath,
         key: key,
       );
-      final thumbnailData = mediaUploadData.thumbnail;
+      late final Uint8List? thumbnailData;
+      if (mediaUploadData.thumbnail == null &&
+          file.fileType == FileType.video) {
+        thumbnailData = base64Decode(blackThumbnailBase64);
+      } else {
+        thumbnailData = mediaUploadData.thumbnail;
+      }
 
       final EncryptionResult encryptedThumbnailData =
           await CryptoUtil.encryptChaCha(
@@ -493,17 +526,21 @@ class FileUploader {
             CryptoUtil.bin2base64(encryptedFileKeyData.encryptedData!);
         final keyDecryptionNonce =
             CryptoUtil.bin2base64(encryptedFileKeyData.nonce!);
+        final Map<String, dynamic> pubMetadata = {};
         MetadataRequest? pubMetadataRequest;
         if ((mediaUploadData.height ?? 0) != 0 &&
             (mediaUploadData.width ?? 0) != 0) {
-          final pubMetadata = {
-            heightKey: mediaUploadData.height,
-            widthKey: mediaUploadData.width,
-          };
-          if (mediaUploadData.motionPhotoStartIndex != null) {
-            pubMetadata[motionVideoIndexKey] =
-                mediaUploadData.motionPhotoStartIndex;
-          }
+          pubMetadata[heightKey] = mediaUploadData.height;
+          pubMetadata[widthKey] = mediaUploadData.width;
+        }
+        if (mediaUploadData.motionPhotoStartIndex != null) {
+          pubMetadata[motionVideoIndexKey] =
+              mediaUploadData.motionPhotoStartIndex;
+        }
+        if (mediaUploadData.thumbnail == null) {
+          pubMetadata[noThumbKey] = true;
+        }
+        if (pubMetadata.isNotEmpty) {
           pubMetadataRequest = await getPubMetadataRequest(
             file,
             pubMetadata,

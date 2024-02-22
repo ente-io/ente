@@ -2,7 +2,7 @@ Ente ist eine einfache Anwendung zur automatischen Sicherung und Organisation Ih
 
 Wenn Sie auf der Suche nach einer datenschutzfreundlichen Alternative sind, um Ihre Erinnerungen zu bewahren, sind Sie hier genau richtig. Mit Ente werden sie Ende-zu-Ende-verschlüsselt (e2ee) gespeichert. Das bedeutet, dass nur Sie sie sehen können.
 
-Wir haben Apps für Android, iOS, Web und Desktop und Ihre Fotos werden nahtlos zwischen all Ihren Geräten auf eine Ende-zu-Ende-verschlüsselte (e2ee) Weise synchronisiert.
+Wir haben Open-Source-Apps für Android, iOS, Web und Desktop. Ihre Fotos werden verschlüsselt (e2ee) zwischen allen Geräten synchronisiert.
 
 Mit Ente ist es auch ganz einfach, Ihre Alben mit Ihren Lieben zu teilen. Sie können sie entweder direkt mit anderen Ente-Benutzern teilen, Ende-zu-Ende-verschlüsselt, oder mit öffentlich einsehbaren Links.
 
@@ -12,11 +12,11 @@ Wir sind hier, um die sicherste Foto-App aller Zeiten zu entwickeln, begleiten S
 
 ✨ FUNKTIONEN
 - Sicherungen in Originalqualität, denn jeder Pixel ist wichtig
--    Familien-Abos, damit Sie den Speicherplatz mit Ihrer Familie teilen können
+- Familien-Abos, damit Sie den Speicherplatz mit Ihrer Familie teilen können
 - Gemeinsame Ordner, falls Sie möchten, dass Ihr Partner Ihre „Kamera“-Klicks genießen kann
 - Album-Links, die mit einem Passwort geschützt werden können und deren Gültigkeit abläuft
 - Möglichkeit, Speicherplatz freizugeben, indem Dateien, die sicher gespeichert wurden, entfernt werden
-- Bildbearbeitungsprogramm, um den letzten Schliff zu geben
+-    Foto-Editor, um Ihren Fotos den Feinschliff zu verpassen
 - Favorisieren, verstecken und erleben Sie Ihre Erinnerungen, denn sie sind kostbar
 - Ein-Klick-Import von Google, Apple, Ihrer Festplatte und mehr
 - Dunkles Theme, weil Ihre Fotos darin gut aussehen
