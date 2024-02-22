@@ -76,6 +76,17 @@ void initSlideshowWidget() {
       final collectionID =
           await FavoritesService.instance.getFavoriteCollectionID();
       if (collectionID == null) {
+        await hw.HomeWidget.saveWidgetData(
+          "slideshow",
+          null,
+        );
+
+        await hw.HomeWidget.updateWidget(
+          name: 'SlideshowWidgetProvider',
+          androidName: 'SlideshowWidgetProvider',
+          qualifiedAndroidName: 'io.ente.photos.SlideshowWidgetProvider',
+          iOSName: 'SlideshowWidget',
+        );
         return false;
       }
 
@@ -143,18 +154,6 @@ void initSlideshowWidget() {
         );
         return true;
       } catch (_) {
-        await hw.HomeWidget.saveWidgetData(
-          "slideshow",
-          null,
-        );
-
-        await hw.HomeWidget.updateWidget(
-          name: 'SlideshowWidgetProvider',
-          androidName: 'SlideshowWidgetProvider',
-          qualifiedAndroidName: 'io.ente.photos.SlideshowWidgetProvider',
-          iOSName: 'SlideshowWidget',
-        );
-
         return false;
       }
     },
