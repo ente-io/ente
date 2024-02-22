@@ -1,2 +1,4 @@
 /** Howdy! */
-export const sayNamaste = () => console.log("Namaste, world");
+export const sayNamaste = () => {
+    console.log("Namaste, world");
+};
