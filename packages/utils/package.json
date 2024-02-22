@@ -4,5 +4,8 @@
     "private": true,
     "exports": {
         "./*": "./src/*.ts"
+    },
+    "devDependencies": {
+        "@/build-config": "*"
     }
 }

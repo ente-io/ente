@@ -1,5 +1,5 @@
 {
-    /* TSConfig for TypeScript projects that get transpiled by Next.js */
+    /* TSConfig for a TypeScript project that'll get transpiled by Next.js */
 
     /* TSConfig docs: https://aka.ms/tsconfig.json */
     "compilerOptions": {
@@ -71,9 +71,5 @@
         /* e.g. makes array indexing returns undefined */
         "noUncheckedIndexedAccess": true,
         "exactOptionalPropertyTypes": true
-    },
-    /*
-     * Typecheck all files (here or in subfolders) with the given extensions
-     */
-    "include": ["**/*.ts", "**/*.tsx"]
+    }
 }

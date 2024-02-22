@@ -19,6 +19,9 @@ const gitSHA = cp.execSync('git rev-parse --short HEAD', {
 });
 
 /**
+ * The base Next.js config. Before exporting this, we wrap this in
+ * {@link withSentryConfig}.
+ *
  * @type {import('next').NextConfig}
  */
 const nextConfig = {
