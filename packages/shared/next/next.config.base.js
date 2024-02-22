@@ -33,6 +33,7 @@ const nextConfig = {
         emotion: true,
     },
     transpilePackages: [
+        '@/ui',
         '@/utils',
         '@mui/material',
         '@mui/system',
