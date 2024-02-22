@@ -4,6 +4,7 @@ import { t } from 'i18next';
 import { useRouter } from 'next/router';
 import { Language, getBestPossibleUserLocale } from '@ente/shared/i18n';
 import { LS_KEYS } from '@ente/shared/storage/localStorage';
+import { getUserLocaleString } from '@ente/shared/storage/localStorage/helpers';
 
 const getLocaleDisplayName = (l: Language) => {
     switch (l) {
@@ -30,7 +31,7 @@ const getLanguageOptions = (): DropdownOption<Language>[] => {
 export const LanguageSelector = () => {
     const [userLocale, setUserLocale] = useLocalState(
         LS_KEYS.LOCALE,
-        getBestPossibleUserLocale()
+        getBestPossibleUserLocale(getUserLocaleString())
     );
 
     const router = useRouter();

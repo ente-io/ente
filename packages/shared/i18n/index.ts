@@ -2,9 +2,7 @@ import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import Backend from 'i18next-http-backend';
 import { isDevBuild } from '@/utils/env';
-
 import { getUserLocales } from 'get-user-locale';
-import { getUserLocale } from '@ente/shared/storage/localStorage/helpers';
 
 /**
  * Load translations.
@@ -19,7 +17,8 @@ import { getUserLocale } from '@ente/shared/storage/localStorage/helpers';
  *
  * - react-i18next, which adds React specific APIs
  */
-export const setupI18n = async () => {
+export const setupI18n = async (savedLocaleString?: string) => {
+    const lng = getBestPossibleUserLocale(savedLocaleString);
     // https://www.i18next.com/overview/api
     await i18n
         // i18next-http-backend: Asynchronously loads translations over HTTP
@@ -34,7 +33,7 @@ export const setupI18n = async () => {
             debug: isDevBuild,
             returnEmptyString: false,
             fallbackLng: 'en',
-            lng: getBestPossibleUserLocale(),
+            lng: lng,
             interpolation: {
                 escapeValue: false, // not needed for react as it escapes by default
             },
@@ -116,11 +115,21 @@ export enum Language {
     es = 'es',
 }
 
-export function getBestPossibleUserLocale(): Language {
-    const locale = getUserLocale();
-    if (locale) {
-        return locale;
+export function getBestPossibleUserLocale(savedLocaleString: string): Language {
+    const locale = savedLocaleString;
+    switch (locale) {
+        case 'en':
+            return Language.en;
+        case 'fr':
+            return Language.fr;
+        case 'zh':
+            return Language.zh;
+        case 'nl':
+            return Language.nl;
+        case 'es':
+            return Language.es;
     }
+
     const userLocales = getUserLocales();
     for (const lc of userLocales) {
         if (lc.startsWith('en')) {

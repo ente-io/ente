@@ -66,6 +66,7 @@ import { REDIRECTS } from 'constants/redirects';
 import {
     getLocalMapEnabled,
     getToken,
+    getUserLocaleString,
     setLocalMapEnabled,
 } from '@ente/shared/storage/localStorage/helpers';
 import { isExportInProgress } from 'utils/export';
@@ -162,7 +163,7 @@ export default function App(props: EnteAppProps) {
 
     useEffect(() => {
         //setup i18n
-        setupI18n().finally(() => setIsI18nReady(true));
+        setupI18n(getUserLocaleString()).finally(() => setIsI18nReady(true));
         // set client package name in headers
         HTTPService.setHeaders({
             'X-Client-Package': CLIENT_PACKAGE_NAMES.get(APPS.PHOTOS),
