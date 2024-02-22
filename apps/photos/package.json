@@ -8,6 +8,7 @@
         "albums": "next dev -p 3002"
     },
     "dependencies": {
+        "@/ui": "*",
         "@/utils": "*",
         "@date-io/date-fns": "^2.14.0",
         "@mui/x-date-pickers": "^5.0.0-alpha.6",
