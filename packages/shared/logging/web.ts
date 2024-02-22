@@ -76,12 +76,9 @@ export const logStartupMessage = async (appId: string) => {
     const appIdL = appId.toLowerCase();
     const userID = (getData(LS_KEYS.USER) as User)?.id;
     const sentryID = await getSentryUserID();
-    const gitCommit = process.env.GIT_SHA;
-    const dev = isDevBuild ? ' dev' : '';
+    const buildId = isDevBuild ? 'dev' : `git ${process.env.GIT_SHA}`;
 
-    addLogLine(
-        `ente-${appIdL}-web${dev} git ${gitCommit} uid ${userID} sid ${sentryID}`
-    );
+    addLogLine(`ente-${appIdL}-web ${buildId} uid ${userID} sid ${sentryID}`);
 };
 
 function getLogs(): Log[] {
