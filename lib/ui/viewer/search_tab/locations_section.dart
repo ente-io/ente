@@ -276,19 +276,24 @@ class LocationRecommendation extends StatelessWidget {
                                 ),
                               ],
                             ),
+                            const SizedBox(height: 4),
                             Expanded(
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Text(
-                                    locationSearchResult.name(),
-                                    style: enteTextTheme.small
-                                        .copyWith(color: Colors.white),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    textAlign: TextAlign.center,
-                                  ),
-                                ],
+                              child: SizedBox(
+                                width: 90,
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      locationSearchResult.name(),
+                                      style: enteTextTheme.mini.copyWith(
+                                        color: Colors.white,
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
                           ],
