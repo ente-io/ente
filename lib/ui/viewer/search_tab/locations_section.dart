@@ -201,15 +201,24 @@ class LocationRecommendation extends StatelessWidget {
                   child: Stack(
                     clipBehavior: Clip.none,
                     children: [
-                      ImageFiltered(
-                        imageFilter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
-                        child: locationSearchResult.previewThumbnail() != null
-                            ? ThumbnailWidget(
-                                locationSearchResult.previewThumbnail()!,
-                                shouldShowArchiveStatus: false,
-                                shouldShowSyncStatus: false,
-                              )
-                            : const NoThumbnailWidget(),
+                      Stack(
+                        children: [
+                          ImageFiltered(
+                            imageFilter:
+                                ImageFilter.blur(sigmaX: 24, sigmaY: 24),
+                            child: locationSearchResult.previewThumbnail() !=
+                                    null
+                                ? ThumbnailWidget(
+                                    locationSearchResult.previewThumbnail()!,
+                                    shouldShowArchiveStatus: false,
+                                    shouldShowSyncStatus: false,
+                                  )
+                                : const NoThumbnailWidget(),
+                          ),
+                          Container(
+                            color: Colors.black.withOpacity(0.2),
+                          ),
+                        ],
                       ),
                       Padding(
                         padding: const EdgeInsets.fromLTRB(
