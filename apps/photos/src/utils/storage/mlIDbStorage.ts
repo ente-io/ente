@@ -12,7 +12,6 @@ import {
     IDBPTransaction,
     StoreNames,
 } from 'idb';
-import { Config } from 'types/common/config';
 import {
     Face,
     MlFileData,
@@ -25,6 +24,8 @@ import { IndexStatus } from 'types/machineLearning/ui';
 import { runningInBrowser, runningInElectron } from 'utils/common';
 import { addLogLine } from '@ente/shared/logging';
 import { logError } from '@ente/shared/sentry';
+
+interface Config {}
 
 export const ML_SYNC_JOB_CONFIG_NAME = 'ml-sync-job';
 export const ML_SYNC_CONFIG_NAME = 'ml-sync';

@@ -11,7 +11,6 @@ import PQueue from 'p-queue';
 
 // import { Point as D3Point, RawNodeDatum } from 'react-d3-tree/lib/types/common';
 import { EnteFile } from 'types/file';
-import { Config } from 'types/common/config';
 import { Dimensions } from 'types/image';
 import { Box, Point } from '../../../thirdparty/face-api/classes';
 
@@ -265,7 +264,7 @@ export interface FaceClusteringConfig extends ClusteringConfig {}
 
 export declare type TSNEMetric = 'euclidean' | 'manhattan';
 
-export interface TSNEConfig extends Config {
+export interface TSNEConfig {
     samples: number;
     dim: number;
     perplexity?: number;
@@ -275,7 +274,7 @@ export interface TSNEConfig extends Config {
     metric?: TSNEMetric;
 }
 
-export interface MLSyncConfig extends Config {
+export interface MLSyncConfig {
     batchSize: number;
     imageSource: ImageType;
     faceDetection: FaceDetectionConfig;
@@ -289,7 +288,7 @@ export interface MLSyncConfig extends Config {
     mlVersion: number;
 }
 
-export interface MLSearchConfig extends Config {
+export interface MLSearchConfig {
     enabled: boolean;
 }
 
