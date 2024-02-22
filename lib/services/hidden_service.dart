@@ -141,11 +141,18 @@ extension HiddenService on CollectionsService {
           _logger.finest('file already part of hidden collection');
           continue;
         }
-        await move(
-          entry.value,
-          toCollectionID: defaultHiddenCollection.id,
-          fromCollectionID: entry.key,
-        );
+        final Collection? c = getCollectionByID(entry.key);
+        // if the collection is not owned by the user, remove the file from the
+        // collection
+        if (c != null && !c.isOwner(userID)) {
+          await removeFromCollection(entry.key, entry.value);
+        } else {
+          await move(
+            entry.value,
+            toCollectionID: defaultHiddenCollection.id,
+            fromCollectionID: entry.key,
+          );
+        }
       }
       Bus.instance.fire(
         LocalPhotosUpdatedEvent(
