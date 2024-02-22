@@ -13,10 +13,12 @@
 const { withSentryConfig } = require('@sentry/nextjs');
 const cp = require('child_process');
 
-const gitSHA = cp.execSync('git rev-parse --short HEAD', {
-    cwd: __dirname,
-    encoding: 'utf8',
-});
+const gitSHA = cp
+    .execSync('git rev-parse --short HEAD', {
+        cwd: __dirname,
+        encoding: 'utf8',
+    })
+    .trimEnd();
 
 /**
  * The base Next.js config. Before exporting this, we wrap this in

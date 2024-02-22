@@ -169,7 +169,7 @@ export default function App(props: EnteAppProps) {
         });
         // setup logging
         clearLogsIfLocalStorageLimitExceeded();
-        logStartupMessage();
+        logStartupMessage(APPS.PHOTOS);
     }, []);
 
     useEffect(() => {
