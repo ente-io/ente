@@ -84,6 +84,7 @@ class MobileFaceNetEmbeddingService implements FaceEmbeddingService {
     private async getFaceEmbedding(
         faceImage: ImageBitmap
     ): Promise<FaceEmbedding> {
+        // @ts-expect-error "TODO: Fix ML related type errors"
         return this.serialQueue.add(() =>
             this.getFaceEmbeddingNoQueue(faceImage)
         );

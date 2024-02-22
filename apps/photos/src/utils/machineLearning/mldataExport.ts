@@ -5,6 +5,7 @@ import { CACHES } from '@ente/shared/storage/cacheStorage/constants';
 import { CacheStorageService } from '@ente/shared/storage/cacheStorage';
 import { addLogLine } from '@ente/shared/logging';
 
+// @ts-expect-error "TODO: Fix ML related type errors"
 class FileSystemWriter extends zip.Writer {
     writableStream: FileSystemWritableFileStream;
 
@@ -23,6 +24,7 @@ class FileSystemWriter extends zip.Writer {
     }
 }
 
+// @ts-expect-error "TODO: Fix ML related type errors"
 class FileReader extends zip.Reader {
     file: File;
 
@@ -32,6 +34,7 @@ class FileReader extends zip.Reader {
     }
 
     public async init() {
+        // @ts-expect-error "TODO: Fix ML related type errors"
         this.size = this.file.size;
         // addLogLine('zipReader init, size: ', this.size);
     }
@@ -52,6 +55,7 @@ export async function exportMlData(
     mlDataZipWritable: FileSystemWritableFileStream
 ) {
     const zipWriter = new zip.ZipWriter(
+        // @ts-expect-error "TODO: Fix ML related type errors"
         new FileSystemWriter(mlDataZipWritable)
     );
 
@@ -70,6 +74,7 @@ export async function exportMlData(
     addLogLine('Ml Data Exported');
 }
 
+// @ts-expect-error "TODO: Fix ML related type errors"
 async function exportMlDataToZipWriter(zipWriter: zip.ZipWriter) {
     const mlDbData = await mlIDbStorage.getAllMLData();
     const faceClusteringResults =
@@ -115,6 +120,7 @@ async function exportMlDataToZipWriter(zipWriter: zip.ZipWriter) {
     }
 }
 export async function importMlData(mlDataZipFile: File) {
+    // @ts-expect-error "TODO: Fix ML related type errors"
     const zipReader = new zip.ZipReader(new FileReader(mlDataZipFile));
 
     try {
@@ -126,6 +132,7 @@ export async function importMlData(mlDataZipFile: File) {
     addLogLine('ML Data Imported');
 }
 
+// @ts-expect-error "TODO: Fix ML related type errors"
 async function importMlDataFromZipReader(zipReader: zip.ZipReader) {
     const zipEntries = await zipReader.getEntries();
     // addLogLine(zipEntries);
