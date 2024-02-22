@@ -1372,10 +1372,10 @@ class CollectionsService {
   }
 
   Future<void> move(
-    int toCollectionID,
-    int fromCollectionID,
-    List<EnteFile> files,
-  ) async {
+    List<EnteFile> files, {
+    required int toCollectionID,
+    required int fromCollectionID,
+  }) async {
     _validateMoveRequest(toCollectionID, fromCollectionID, files);
     files.removeWhere((element) => element.uploadedFileID == null);
     if (files.isEmpty) {
