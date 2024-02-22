@@ -23,8 +23,8 @@ export const PasswordStrengthHint = ({
                         passwordStrength === PasswordStrength.WEAK
                             ? theme.colors.danger.A700
                             : passwordStrength === PasswordStrength.MODERATE
-                            ? theme.colors.warning.A500
-                            : theme.colors.accent.A500,
+                              ? theme.colors.warning.A500
+                              : theme.colors.accent.A500,
                 })}
                 textAlign={'left'}
                 flex={1}>

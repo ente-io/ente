@@ -3,10 +3,9 @@
     "version": "0.0.0",
     "private": true,
     "exports": {
-        "./components/*": "./src/components/*.tsx",
         "./*": "./src/*.ts"
     },
-    "scripts": {
-        "lint": "eslint --debug "
+    "devDependencies": {
+        "@/build-config": "*"
     }
 }

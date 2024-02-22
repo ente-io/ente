@@ -65,8 +65,8 @@ export const testZipFileReading = async () => {
                      ${getFileNameSize(
                          file
                      )}  more than expected chunks, expected: ${
-                        filedata.chunkCount
-                    }`
+                         filedata.chunkCount
+                     }`
                 );
             }
             console.log(`${i}/${files.length} passed ✅`);

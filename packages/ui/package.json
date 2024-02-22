@@ -1,0 +1,12 @@
+{
+    "name": "@/ui",
+    "version": "0.0.0",
+    "private": true,
+    "exports": {
+        "./components/*": "./src/components/*.tsx",
+        "./*": "./src/*.ts"
+    },
+    "devDependencies": {
+        "@/build-config": "*"
+    }
+}

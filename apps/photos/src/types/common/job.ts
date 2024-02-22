@@ -1,8 +1,6 @@
-import { Config } from './config';
-
 export type JobState = 'Scheduled' | 'Running' | 'NotScheduled';
 
-export interface JobConfig extends Config {
+export interface JobConfig {
     intervalSec: number;
     maxItervalSec: number;
     backoffMultiplier: number;

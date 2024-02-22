@@ -179,6 +179,7 @@ class MLWorkManager {
             return mlWorker.syncLocalFile(token, userID, enteFile, localFile);
         });
 
+        // @ts-expect-error "TODO: Fix ML related type errors"
         if ('message' in result) {
             // TODO: redirect/refresh to gallery in case of session_expired
             // may not be required as uploader should anyways take care of this

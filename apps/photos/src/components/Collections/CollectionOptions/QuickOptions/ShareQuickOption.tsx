@@ -26,11 +26,11 @@ export function ShareQuickOption({
                     CollectionSummaryType.incomingShareCollaborator
                     ? t('SHARING_DETAILS')
                     : collectionSummaryType ===
-                          CollectionSummaryType.outgoingShare ||
-                      collectionSummaryType ===
-                          CollectionSummaryType.sharedOnlyViaLink
-                    ? t('MODIFY_SHARING')
-                    : t('SHARE_COLLECTION')
+                            CollectionSummaryType.outgoingShare ||
+                        collectionSummaryType ===
+                            CollectionSummaryType.sharedOnlyViaLink
+                      ? t('MODIFY_SHARING')
+                      : t('SHARE_COLLECTION')
             }>
             <IconButton
                 onClick={handleCollectionAction(

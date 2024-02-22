@@ -14,7 +14,8 @@ export interface Iprops {
 export const StyledMenu = styled(Menu)`
     & .MuiPaper-root {
         margin: 16px auto;
-        box-shadow: 0px 0px 6px rgba(0, 0, 0, 0.16),
+        box-shadow:
+            0px 0px 6px rgba(0, 0, 0, 0.16),
             0px 3px 6px rgba(0, 0, 0, 0.12);
     }
     & .MuiList-root {

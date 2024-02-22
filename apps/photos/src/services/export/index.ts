@@ -1000,9 +1000,8 @@ class ExportService {
             if (!this.exists(exportRecordJSONPath)) {
                 return this.createEmptyExportRecord(exportRecordJSONPath);
             }
-            const recordFile = await ElectronAPIs.readTextFile(
-                exportRecordJSONPath
-            );
+            const recordFile =
+                await ElectronAPIs.readTextFile(exportRecordJSONPath);
             try {
                 return JSON.parse(recordFile);
             } catch (e) {

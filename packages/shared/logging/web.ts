@@ -70,10 +70,15 @@ export const clearLogsIfLocalStorageLimitExceeded = () => {
     }
 };
 
-export const logStartupMessage = async () => {
-    addLogLine(`User ID: ${(getData(LS_KEYS.USER) as User)?.id}`);
-    addLogLine(`Sentry ID: ${await getSentryUserID()}`);
-    addLogLine(`Git commit: ${process.env.GIT_SHA}`);
+export const logStartupMessage = async (appId: string) => {
+    // TODO (MR): Remove the need to lowercase it, change the enum itself.
+    const appIdL = appId.toLowerCase();
+    const userID = (getData(LS_KEYS.USER) as User)?.id;
+    const sentryID = await getSentryUserID();
+    const gitCommit = process.env.GIT_SHA;
+    addLogLine(
+        `ente-${appIdL}-web git ${gitCommit} uid ${userID} sid ${sentryID}`
+    );
 };
 
 function getLogs(): Log[] {

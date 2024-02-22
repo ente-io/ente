@@ -1,7 +1,7 @@
 import { DataStream } from '@ente/shared/upload/types';
 
 export interface LocalFileAttributes<
-    T extends string | Uint8Array | DataStream
+    T extends string | Uint8Array | DataStream,
 > {
     encryptedData: T;
     decryptionHeader: string;

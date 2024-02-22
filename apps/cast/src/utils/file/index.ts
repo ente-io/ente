@@ -335,9 +335,8 @@ export async function getRenderableImage(fileName: string, imageBlob: Blob) {
                             imageBlob.size
                         )}`
                     );
-                    convertedImageBlob = await heicConversionService.convert(
-                        imageBlob
-                    );
+                    convertedImageBlob =
+                        await heicConversionService.convert(imageBlob);
                     addLogLine(`${fileName} successfully converted`);
                 } catch (e) {
                     throw Error(CustomError.NON_PREVIEWABLE_FILE);
@@ -536,9 +535,8 @@ export const getPreviewableImage = async (
 ): Promise<Blob> => {
     try {
         let fileBlob: Blob;
-        const fileURL = await CastDownloadManager.getCachedOriginalFile(
-            file
-        )[0];
+        const fileURL =
+            await CastDownloadManager.getCachedOriginalFile(file)[0];
         if (!fileURL) {
             fileBlob = await new Response(
                 await CastDownloadManager.downloadFile(castToken, file)

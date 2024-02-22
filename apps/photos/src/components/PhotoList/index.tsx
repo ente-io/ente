@@ -429,11 +429,11 @@ export function PhotoList({
                     date: isSameDay(new Date(currentDate), new Date())
                         ? t('TODAY')
                         : isSameDay(
-                              new Date(currentDate),
-                              new Date(Date.now() - A_DAY)
-                          )
-                        ? t('YESTERDAY')
-                        : formatDate(currentDate),
+                                new Date(currentDate),
+                                new Date(Date.now() - A_DAY)
+                            )
+                          ? t('YESTERDAY')
+                          : formatDate(currentDate),
                     id: currentDate.toString(),
                 });
                 timeStampList.push({

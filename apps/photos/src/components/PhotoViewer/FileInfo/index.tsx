@@ -159,9 +159,8 @@ export function FileInfo({
             }
         }
         if (exif['Make'] && exif['Model']) {
-            parsedExifData[
-                'takenOnDevice'
-            ] = `${exif['Make']} ${exif['Model']}`;
+            parsedExifData['takenOnDevice'] =
+                `${exif['Make']} ${exif['Model']}`;
         }
         if (exif['ExposureTime']) {
             parsedExifData['exposureTime'] = `1/${

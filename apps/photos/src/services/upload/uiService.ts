@@ -202,7 +202,7 @@ function convertInProgressUploadsToList(inProgressUploads) {
             ({
                 localFileID,
                 progress,
-            } as InProgressUpload)
+            }) as InProgressUpload
     );
 }
 

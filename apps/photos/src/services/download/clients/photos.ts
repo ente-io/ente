@@ -6,7 +6,10 @@ import { CustomError } from '@ente/shared/error';
 import { retryAsyncFunction } from 'utils/network';
 
 export class PhotosDownloadClient implements DownloadClient {
-    constructor(private token: string, private timeout: number) {}
+    constructor(
+        private token: string,
+        private timeout: number
+    ) {}
     updateTokens(token: string) {
         this.token = token;
     }

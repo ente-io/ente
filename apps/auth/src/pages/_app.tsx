@@ -87,7 +87,7 @@ export default function App(props: EnteAppProps) {
         });
         // setup logging
         clearLogsIfLocalStorageLimitExceeded();
-        logStartupMessage();
+        logStartupMessage(APPS.AUTH);
     }, []);
 
     const setUserOnline = () => setOffline(false);

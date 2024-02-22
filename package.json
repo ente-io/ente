@@ -7,10 +7,12 @@
         "packages/*"
     ],
     "scripts": {
+        "build": "yarn build:photos",
         "build:accounts": "yarn workspace accounts next build",
         "build:auth": "yarn workspace auth next build",
         "build:cast": "yarn workspace cast next build",
         "build:photos": "yarn workspace photos next build",
+        "dev": "yarn dev:photos",
         "dev:accounts": "yarn workspace accounts next dev",
         "dev:auth": "yarn workspace auth next dev",
         "dev:cast": "yarn workspace cast next dev",
@@ -20,13 +22,13 @@
         "lint-fix": "yarn prettier --write . && yarn workspaces run eslint --fix ."
     },
     "dependencies": {
-        "@emotion/react": "11.10.6",
-        "@emotion/server": "11.11.0",
-        "@emotion/styled": "11.11.0",
+        "@emotion/react": "^11.11",
+        "@emotion/server": "^11.11",
+        "@emotion/styled": "^11.11",
         "@ente/accounts": "*",
         "@ente/shared": "*",
-        "@mui/icons-material": "5.14.1",
-        "@mui/material": "5.11.16",
+        "@mui/icons-material": "^5.15",
+        "@mui/material": "^5.15",
         "axios": "^1.6.0",
         "is-electron": "^2.2.2",
         "next": "^14.1",
@@ -38,7 +40,10 @@
         "@typescript-eslint/eslint-plugin": "^7",
         "@typescript-eslint/parser": "^7",
         "eslint": "^8",
-        "prettier": "2.3.2",
-        "typescript": "^5.1.3"
+        "prettier": "^3",
+        "typescript": "^5"
+    },
+    "resolutions": {
+        "@sentry/cli": "1.75.0"
     }
 }

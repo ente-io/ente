@@ -68,9 +68,8 @@ export async function replaceThumbnail(
                     current: idx,
                     total: largeThumbnailFiles.length,
                 });
-                const originalThumbnail = await downloadManager.getThumbnail(
-                    file
-                );
+                const originalThumbnail =
+                    await downloadManager.getThumbnail(file);
                 const dummyImageFile = new File(
                     [originalThumbnail],
                     file.metadata.title
