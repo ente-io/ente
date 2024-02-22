@@ -32,8 +32,3 @@ To see what packages depend on each other locally, use
 ```sh
 yarn workspaces info
 ```
-
-## Tips
-
-- Too see what tsc is seeing (say when it is trying to type-check `@/utils`),
-  use `yarn workspace @/utils tsc --showConfig`.
