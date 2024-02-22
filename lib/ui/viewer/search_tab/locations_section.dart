@@ -299,23 +299,6 @@ class LocationRecommendation extends StatelessWidget {
                           ],
                         ),
                       ),
-                      Positioned(
-                        top: 8,
-                        left: 8,
-                        child: Container(
-                          width: 16,
-                          height: 16,
-                          decoration: BoxDecoration(
-                            color: Colors.black.withOpacity(0.6),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: const Icon(
-                            Icons.location_on_sharp,
-                            color: Colors.white,
-                            size: 11,
-                          ),
-                        ),
-                      ),
                     ],
                   ),
                 ),
