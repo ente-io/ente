@@ -40,10 +40,12 @@ The app is deployed to [web.ente.io](https://web.ente.io)
 1. Clone this repository with `git clone https://github.com/ente-io/photos-web.git`
 2. Pull in all submodules with `git submodule update --init --recursive`
 3. Install dependencies with `yarn install`
-4. Finally, run the development server with `yarn dev:photos`
+4. Finally, run the development server with `yarn dev`
 
 Open [http://localhost:3000](http://localhost:3000) to see the live app (with
 hot reload).
+
+`yarn dev` runs the photos app. To run the auth app, do `yarn dev:auth`.
 
 <br/>
 
