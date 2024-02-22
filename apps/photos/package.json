@@ -72,7 +72,7 @@
         "zxcvbn": "^4.4.2"
     },
     "devDependencies": {
-        "@next/bundle-analyzer": "^13.4.12",
+        "@next/bundle-analyzer": "^14.1",
         "@types/bs58": "^4.0.1",
         "@types/leaflet": "^1.9.3",
         "@types/libsodium-wrappers": "^0.7.8",
