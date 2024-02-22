@@ -11,6 +11,7 @@ import { ElectronFile } from '../upload/types';
 import { addLogLine } from '.';
 import { getSentryUserID } from '../sentry/utils';
 import type { User } from '../user/types';
+import { isDevBuild } from '@/utils/env';
 
 export const MAX_LOG_SIZE = 5 * 1024 * 1024; // 5MB
 export const MAX_LOG_LINES = 1000;
@@ -76,8 +77,10 @@ export const logStartupMessage = async (appId: string) => {
     const userID = (getData(LS_KEYS.USER) as User)?.id;
     const sentryID = await getSentryUserID();
     const gitCommit = process.env.GIT_SHA;
+    const dev = isDevBuild ? ' dev' : '';
+
     addLogLine(
-        `ente-${appIdL}-web git ${gitCommit} uid ${userID} sid ${sentryID}`
+        `ente-${appIdL}-web${dev} git ${gitCommit} uid ${userID} sid ${sentryID}`
     );
 };
 
