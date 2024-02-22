@@ -4,5 +4,17 @@
     "private": true,
     "devDependencies": {
         "@/build-config": "*"
+    },
+    "dependencies": {
+        "@emotion/react": "^11.11",
+        "@emotion/server": "^11.11",
+        "@emotion/styled": "^11.11",
+        "@mui/icons-material": "^5.15",
+        "@mui/material": "^5.15",
+        "i18next": "^23.10.0",
+        "i18next-http-backend": "^2.5.0",
+        "react": "18.2.0",
+        "react-dom": "18.2.0",
+        "react-i18next": "^14"
     }
 }
