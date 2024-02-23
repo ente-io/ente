@@ -2,6 +2,7 @@ import "dart:async";
 import "dart:math";
 import "dart:ui";
 
+import "package:dotted_border/dotted_border.dart";
 import "package:figma_squircle/figma_squircle.dart";
 import "package:flutter/material.dart";
 import "package:photos/core/constants.dart";
@@ -104,6 +105,7 @@ class _LocationsSectionState extends State<LocationsSection> {
           (locationSearchResult) =>
               LocationRecommendation(locationSearchResult),
         ),
+        const LocationCTA(),
       ];
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: 8),
@@ -191,7 +193,7 @@ class LocationRecommendation extends StatelessWidget {
                   boxShadow: [
                     BoxShadow(
                       blurRadius: 1,
-                      offset: Offset(0, 1),
+                      offset: Offset(0, 0),
                       color: Color.fromRGBO(0, 0, 0, 0.09),
                     ),
                     BoxShadow(
@@ -369,7 +371,7 @@ class GoToMap2 extends StatelessWidget {
                   boxShadow: [
                     BoxShadow(
                       blurRadius: 1,
-                      offset: Offset(0, 1),
+                      offset: Offset(0, 0),
                       color: Color.fromRGBO(0, 0, 0, 0.09),
                       blurStyle: BlurStyle.outer,
                     ),
@@ -429,6 +431,122 @@ class GoToMap2 extends StatelessWidget {
                         ),
                       ),
                     ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class LocationCTA extends StatelessWidget {
+  const LocationCTA({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final enteTextTheme = getEnteTextTheme(context);
+    final enteColorScheme = getEnteColorScheme(context);
+    return Padding(
+      padding: EdgeInsets.symmetric(
+        horizontal: max(0, 2.5 - LocationRecommendation.outerStrokeWidth),
+      ),
+      child: GestureDetector(
+        onTap: SectionType.location.ctaOnTap(context),
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            ClipSmoothRect(
+              radius: SmoothBorderRadius(
+                cornerRadius: LocationRecommendation.outerCornerRadius +
+                    LocationRecommendation.outerStrokeWidth,
+                cornerSmoothing: LocationRecommendation.cornerSmoothing,
+              ),
+              child: Container(
+                color: Colors.white.withOpacity(0.1),
+                width: LocationRecommendation.width +
+                    LocationRecommendation.outerStrokeWidth * 2,
+                height: LocationRecommendation.height +
+                    LocationRecommendation.outerStrokeWidth * 2,
+              ),
+            ),
+            SizedBox(
+              width: LocationRecommendation.width,
+              height: LocationRecommendation.height,
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: const BorderRadius.all(Radius.circular(12)),
+                  boxShadow: const [
+                    BoxShadow(
+                      blurRadius: 1,
+                      offset: Offset(0, 0),
+                      color: Color.fromRGBO(0, 0, 0, 0.09),
+                      blurStyle: BlurStyle.outer,
+                    ),
+                    BoxShadow(
+                      blurRadius: 1,
+                      offset: Offset(1, 2),
+                      color: Color.fromRGBO(0, 0, 0, 0.05),
+                      blurStyle: BlurStyle.outer,
+                    ),
+                  ],
+                  color: enteColorScheme.backgroundElevated,
+                ),
+                child: ClipSmoothRect(
+                  radius: SmoothBorderRadius(
+                    cornerRadius: LocationRecommendation.outerCornerRadius,
+                    cornerSmoothing: LocationRecommendation.cornerSmoothing,
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(
+                      LocationRecommendation.outerPadding + 2,
+                      LocationRecommendation.outerPadding + 3,
+                      LocationRecommendation.outerPadding + 2,
+                      LocationRecommendation.outerPadding,
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        DottedBorder(
+                          dashPattern: const [2, 2],
+                          color: enteColorScheme.strokeFaint,
+                          strokeWidth: 1,
+                          padding: const EdgeInsets.all(0),
+                          borderType: BorderType.RRect,
+                          radius: const Radius.circular(4.5),
+                          child: SizedBox(
+                            width: 90,
+                            height: 84,
+                            child: Icon(
+                              Icons.add_location_alt_outlined,
+                              color: enteColorScheme.strokeFaint,
+                              size: 28,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Expanded(
+                          child: SizedBox(
+                            width: 90,
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  "Add new",
+                                  style: enteTextTheme.miniFaint,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  textAlign: TextAlign.center,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
