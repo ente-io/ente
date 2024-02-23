@@ -2,11 +2,6 @@
     "name": "photos",
     "version": "0.0.0",
     "private": true,
-    "scripts": {
-        "dev": "next dev",
-        "build": "next build",
-        "albums": "next dev -p 3002"
-    },
     "dependencies": {
         "@/ui": "*",
         "@/utils": "*",
