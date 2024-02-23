@@ -133,16 +133,16 @@ class _LocationsSectionState extends State<LocationsSection> {
 }
 
 class LocationRecommendation extends StatelessWidget {
-  static const _width = 100.0;
-  static const _height = 123.0;
-  static const _thumbnailBorderWidth = 1.0;
-  static const _outerCornerRadius = 12.0;
-  static const _cornerSmoothing = 1.0;
-  static const _sideOfThumbnail = 90.0;
-  static const _outerStrokeWidth = 1.0;
+  static const width = 100.0;
+  static const height = 123.0;
+  static const thumbnailBorderWidth = 1.0;
+  static const outerCornerRadius = 12.0;
+  static const cornerSmoothing = 1.0;
+  static const sideOfThumbnail = 90.0;
+  static const outerStrokeWidth = 1.0;
   //This is the space between this widget's boundary and the border stroke of
   //thumbnail.
-  static const _outerPadding = 4.0;
+  static const outerPadding = 4.0;
   final GenericSearchResult locationSearchResult;
   const LocationRecommendation(this.locationSearchResult, {super.key});
 
@@ -152,8 +152,7 @@ class LocationRecommendation extends StatelessWidget {
         (locationSearchResult.previewThumbnail()?.tag ?? "");
     final enteTextTheme = getEnteTextTheme(context);
     return Padding(
-      padding:
-          EdgeInsets.symmetric(horizontal: max(0, 2.5 - _outerStrokeWidth)),
+      padding: EdgeInsets.symmetric(horizontal: max(0, 2.5 - outerStrokeWidth)),
       child: GestureDetector(
         onTap: () {
           RecentSearches().add(locationSearchResult.name());
@@ -171,18 +170,18 @@ class LocationRecommendation extends StatelessWidget {
           children: [
             ClipSmoothRect(
               radius: SmoothBorderRadius(
-                cornerRadius: _outerCornerRadius + _outerStrokeWidth,
-                cornerSmoothing: _cornerSmoothing,
+                cornerRadius: outerCornerRadius + outerStrokeWidth,
+                cornerSmoothing: cornerSmoothing,
               ),
               child: Container(
                 color: Colors.white.withOpacity(0.1),
-                width: _width + _outerStrokeWidth * 2,
-                height: _height + _outerStrokeWidth * 2,
+                width: width + outerStrokeWidth * 2,
+                height: height + outerStrokeWidth * 2,
               ),
             ),
             SizedBox(
-              width: _width,
-              height: _height,
+              width: width,
+              height: height,
               child: Container(
                 decoration: const BoxDecoration(
                   borderRadius: BorderRadius.all(Radius.circular(12)),
@@ -201,8 +200,8 @@ class LocationRecommendation extends StatelessWidget {
                 ),
                 child: ClipSmoothRect(
                   radius: SmoothBorderRadius(
-                    cornerRadius: _outerCornerRadius,
-                    cornerSmoothing: _cornerSmoothing,
+                    cornerRadius: outerCornerRadius,
+                    cornerSmoothing: cornerSmoothing,
                   ),
                   child: Stack(
                     clipBehavior: Clip.none,
@@ -228,10 +227,10 @@ class LocationRecommendation extends StatelessWidget {
                       ),
                       Padding(
                         padding: const EdgeInsets.fromLTRB(
-                          _outerPadding,
-                          _outerPadding,
-                          _outerPadding,
-                          _outerPadding,
+                          outerPadding,
+                          outerPadding,
+                          outerPadding,
+                          outerPadding,
                         ),
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
@@ -242,20 +241,20 @@ class LocationRecommendation extends StatelessWidget {
                                 ClipSmoothRect(
                                   radius: SmoothBorderRadius(
                                     cornerRadius:
-                                        _outerCornerRadius - _outerPadding,
-                                    cornerSmoothing: _cornerSmoothing,
+                                        outerCornerRadius - outerPadding,
+                                    cornerSmoothing: cornerSmoothing,
                                   ),
                                   child: Container(
                                     color: Colors.black.withOpacity(0.1),
-                                    width: _sideOfThumbnail +
-                                        _thumbnailBorderWidth * 2,
-                                    height: _sideOfThumbnail +
-                                        _thumbnailBorderWidth * 2,
+                                    width: sideOfThumbnail +
+                                        thumbnailBorderWidth * 2,
+                                    height: sideOfThumbnail +
+                                        thumbnailBorderWidth * 2,
                                   ),
                                 ),
                                 SizedBox(
-                                  width: _sideOfThumbnail,
-                                  height: _sideOfThumbnail,
+                                  width: sideOfThumbnail,
+                                  height: sideOfThumbnail,
                                   child: locationSearchResult
                                               .previewThumbnail() !=
                                           null
@@ -263,10 +262,10 @@ class LocationRecommendation extends StatelessWidget {
                                           tag: heroTag,
                                           child: ClipSmoothRect(
                                             radius: SmoothBorderRadius(
-                                              cornerRadius: _outerCornerRadius -
-                                                  _outerPadding -
-                                                  _thumbnailBorderWidth,
-                                              cornerSmoothing: _cornerSmoothing,
+                                              cornerRadius: outerCornerRadius -
+                                                  outerPadding -
+                                                  thumbnailBorderWidth,
+                                              cornerSmoothing: cornerSmoothing,
                                             ),
                                             clipBehavior:
                                                 Clip.antiAliasWithSaveLayer,
@@ -318,23 +317,15 @@ class LocationRecommendation extends StatelessWidget {
 }
 
 class GoToMap2 extends StatelessWidget {
-  static const _width = 100.0;
-  static const _height = 123.0;
-  static const _outerCornerRadius = 12.0;
-  static const _cornerSmoothing = 1.0;
-  static const _sideOfThumbnail = 90.0;
-  static const _outerStrokeWidth = 1.0;
-  //This is the space between this widget's boundary and the border stroke of
-  //thumbnail.
-  static const _outerPadding = 4.0;
   const GoToMap2({super.key});
 
   @override
   Widget build(BuildContext context) {
     final enteTextTheme = getEnteTextTheme(context);
     return Padding(
-      padding:
-          EdgeInsets.symmetric(horizontal: max(0, 2.5 - _outerStrokeWidth)),
+      padding: EdgeInsets.symmetric(
+        horizontal: max(0, 2.5 - LocationRecommendation.outerStrokeWidth),
+      ),
       child: GestureDetector(
         onTap: () {},
         child: Stack(
@@ -342,18 +333,21 @@ class GoToMap2 extends StatelessWidget {
           children: [
             ClipSmoothRect(
               radius: SmoothBorderRadius(
-                cornerRadius: _outerCornerRadius + _outerStrokeWidth,
-                cornerSmoothing: _cornerSmoothing,
+                cornerRadius: LocationRecommendation.outerCornerRadius +
+                    LocationRecommendation.outerStrokeWidth,
+                cornerSmoothing: LocationRecommendation.cornerSmoothing,
               ),
               child: Container(
                 color: Colors.white.withOpacity(0.1),
-                width: _width + _outerStrokeWidth * 2,
-                height: _height + _outerStrokeWidth * 2,
+                width: LocationRecommendation.width +
+                    LocationRecommendation.outerStrokeWidth * 2,
+                height: LocationRecommendation.height +
+                    LocationRecommendation.outerStrokeWidth * 2,
               ),
             ),
             SizedBox(
-              width: _width,
-              height: _height,
+              width: LocationRecommendation.width,
+              height: LocationRecommendation.height,
               child: Container(
                 decoration: const BoxDecoration(
                   borderRadius: BorderRadius.all(Radius.circular(12)),
@@ -374,8 +368,8 @@ class GoToMap2 extends StatelessWidget {
                 ),
                 child: ClipSmoothRect(
                   radius: SmoothBorderRadius(
-                    cornerRadius: _outerCornerRadius,
-                    cornerSmoothing: _cornerSmoothing,
+                    cornerRadius: LocationRecommendation.outerCornerRadius,
+                    cornerSmoothing: LocationRecommendation.cornerSmoothing,
                   ),
                   child: Stack(
                     clipBehavior: Clip.none,
@@ -383,17 +377,17 @@ class GoToMap2 extends StatelessWidget {
                       Image.asset("assets/earth_blurred.png"),
                       Padding(
                         padding: const EdgeInsets.fromLTRB(
-                          _outerPadding,
-                          _outerPadding,
-                          _outerPadding,
-                          _outerPadding,
+                          LocationRecommendation.outerPadding,
+                          LocationRecommendation.outerPadding,
+                          LocationRecommendation.outerPadding,
+                          LocationRecommendation.outerPadding,
                         ),
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             SizedBox(
-                              width: _sideOfThumbnail,
-                              height: _sideOfThumbnail,
+                              width: LocationRecommendation.sideOfThumbnail,
+                              height: LocationRecommendation.sideOfThumbnail,
                               child: Image.asset("assets/map_world.png"),
                             ),
                             const SizedBox(height: 4),
