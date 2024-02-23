@@ -97,13 +97,13 @@ class _LocationsSectionState extends State<LocationsSection> {
             ),
             const SizedBox(width: 8),
             const SearchSectionEmptyCTAIcon(SectionType.location),
-            const GoToMapWidget(),
+            const GoToMap(),
           ],
         ),
       );
     } else {
       final recommendations = <Widget>[
-        const GoToMap2(),
+        const GoToMapWithBG(),
         ..._locationsSearchResults.map(
           (locationSearchResult) =>
               LocationRecommendation(locationSearchResult),
@@ -361,8 +361,9 @@ class LocationRecommendation extends StatelessWidget {
   }
 }
 
-class GoToMap2 extends StatelessWidget {
-  const GoToMap2({super.key});
+//Used for non-empty state of location section.
+class GoToMapWithBG extends StatelessWidget {
+  const GoToMapWithBG({super.key});
 
   @override
   Widget build(BuildContext context) {

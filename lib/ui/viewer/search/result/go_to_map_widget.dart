@@ -5,19 +5,12 @@ import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/map/enable_map.dart";
 import "package:photos/ui/map/map_screen.dart";
 
-class GoToMapWidget extends StatelessWidget {
-  const GoToMapWidget({super.key});
+//Used for empty state of location section
+class GoToMap extends StatelessWidget {
+  const GoToMap({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final textScaleFactor = MediaQuery.textScaleFactorOf(context);
-    late final double width;
-    if (textScaleFactor <= 1.0) {
-      width = 85.0;
-    } else {
-      width = 85.0 + ((textScaleFactor - 1.0) * 64);
-    }
-
     return GestureDetector(
       onTap: () async {
         final bool result = await requestForMapEnable(context);

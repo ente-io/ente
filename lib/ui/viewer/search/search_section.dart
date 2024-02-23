@@ -149,7 +149,7 @@ class _SearchSectionState extends State<SearchSection> {
                   widget.sectionType == SectionType.location
                       ? const Padding(
                           padding: EdgeInsets.fromLTRB(8, 24, 8, 0),
-                          child: GoToMapWidget(),
+                          child: GoToMap(),
                         )
                       : const SizedBox.shrink(),
                 ],
@@ -170,7 +170,7 @@ class SearchExampleRow extends StatelessWidget {
     //Cannot use listView.builder here
     final scrollableExamples = <Widget>[];
     if (sectionType == SectionType.location) {
-      scrollableExamples.add(const GoToMapWidget());
+      scrollableExamples.add(const GoToMap());
     }
     examples.forEachIndexed((index, element) {
       scrollableExamples.add(
