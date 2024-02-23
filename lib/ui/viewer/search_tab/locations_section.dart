@@ -96,6 +96,7 @@ class _LocationsSectionState extends State<LocationsSection> {
       );
     } else {
       final recommendations = <Widget>[
+        const GoToMap2(),
         ..._locationsSearchResults.map(
           (locationSearchResult) =>
               LocationRecommendation(locationSearchResult),
@@ -290,6 +291,120 @@ class LocationRecommendation extends StatelessWidget {
                                   children: [
                                     Text(
                                       locationSearchResult.name(),
+                                      style: enteTextTheme.mini.copyWith(
+                                        color: Colors.white,
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class GoToMap2 extends StatelessWidget {
+  static const _width = 100.0;
+  static const _height = 123.0;
+  static const _outerCornerRadius = 12.0;
+  static const _cornerSmoothing = 1.0;
+  static const _sideOfThumbnail = 90.0;
+  static const _outerStrokeWidth = 1.0;
+  //This is the space between this widget's boundary and the border stroke of
+  //thumbnail.
+  static const _outerPadding = 4.0;
+  const GoToMap2({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final enteTextTheme = getEnteTextTheme(context);
+    return Padding(
+      padding:
+          EdgeInsets.symmetric(horizontal: max(0, 2.5 - _outerStrokeWidth)),
+      child: GestureDetector(
+        onTap: () {},
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            ClipSmoothRect(
+              radius: SmoothBorderRadius(
+                cornerRadius: _outerCornerRadius + _outerStrokeWidth,
+                cornerSmoothing: _cornerSmoothing,
+              ),
+              child: Container(
+                color: Colors.white.withOpacity(0.1),
+                width: _width + _outerStrokeWidth * 2,
+                height: _height + _outerStrokeWidth * 2,
+              ),
+            ),
+            SizedBox(
+              width: _width,
+              height: _height,
+              child: Container(
+                decoration: const BoxDecoration(
+                  borderRadius: BorderRadius.all(Radius.circular(12)),
+                  boxShadow: [
+                    BoxShadow(
+                      blurRadius: 1,
+                      offset: Offset(0, 1),
+                      color: Color.fromRGBO(0, 0, 0, 0.09),
+                      blurStyle: BlurStyle.outer,
+                    ),
+                    BoxShadow(
+                      blurRadius: 1,
+                      offset: Offset(1, 2),
+                      color: Color.fromRGBO(0, 0, 0, 0.05),
+                      blurStyle: BlurStyle.outer,
+                    ),
+                  ],
+                ),
+                child: ClipSmoothRect(
+                  radius: SmoothBorderRadius(
+                    cornerRadius: _outerCornerRadius,
+                    cornerSmoothing: _cornerSmoothing,
+                  ),
+                  child: Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      Image.asset("assets/earth_blurred.png"),
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(
+                          _outerPadding,
+                          _outerPadding,
+                          _outerPadding,
+                          _outerPadding,
+                        ),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            SizedBox(
+                              width: _sideOfThumbnail,
+                              height: _sideOfThumbnail,
+                              child: Image.asset("assets/map_world.png"),
+                            ),
+                            const SizedBox(height: 4),
+                            Expanded(
+                              child: SizedBox(
+                                width: 90,
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      "Your Map",
                                       style: enteTextTheme.mini.copyWith(
                                         color: Colors.white,
                                       ),
