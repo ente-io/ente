@@ -17,15 +17,15 @@ import { getUserLocaleString } from '@ente/shared/storage/localStorage/helpers';
  */
 export const localeName = (locale: SupportedLocale) => {
     switch (locale) {
-        case 'en':
+        case 'en-US':
             return 'English';
-        case 'fr':
+        case 'fr-FR':
             return 'Français';
-        case 'zh':
+        case 'zh-CH':
             return '中文';
-        case 'nl':
+        case 'nl-NL':
             return 'Nederlands';
-        case 'es':
+        case 'es-ES':
             return 'Español';
     }
 };

@@ -17,8 +17,15 @@ import { includes } from "@/utils/type-guards";
  * languages than this. When a translation reaches a high enough coverage, say
  * 90%, then we manually add it to this list of supported languages.
  */
-export const supportedLocales = ["en", "fr", "zh", "nl", "es"] as const;
-/** The type of  {@link supportedLocale}s. */
+export const supportedLocales = [
+    "en-US",
+    "fr-FR",
+    "zh-CH",
+    "nl-NL",
+    "es-ES",
+] as const;
+
+/** The type of {@link supportedLocale}s. */
 export type SupportedLocale = (typeof supportedLocales)[number];
 
 /**
@@ -49,10 +56,24 @@ export const setupI18n = async (savedLocaleString?: string) => {
         // Option docs: https://www.i18next.com/overview/configuration-options
         .init({
             debug: isDevBuild,
-            returnEmptyString: false,
-            fallbackLng: "en",
             // i18next calls it language, but it really is the locale
             lng: locale,
+            // Tell i18next about the locales we support
+            supportedLngs: supportedLocales,
+            // Ask it to fetch only exact matches
+            //
+            // By default, if the lng was set to, say, en-GB, i18n would make
+            // network requests for ["en-GB", "en", "dev"] (where dev is the
+            // default fallback). By setting `load` to "currentOnly", we ask
+            // i18next to only try and fetch "en-GB" (i.e. the exact match).
+            load: "currentOnly",
+            // Disallow empty strings as valid translations.
+            //
+            // This way, empty strings will fallback to `fallbackLng`
+            returnEmptyString: false,
+            // The language to use if translation for a particular key in the
+            // current `lng` is not available.
+            fallbackLng: "en-US",
             interpolation: {
                 escapeValue: false, // not needed for react as it escapes by default
             },
@@ -68,7 +89,6 @@ export const setupI18n = async (savedLocaleString?: string) => {
                     "br",
                 ],
             },
-            load: "languageOnly",
         });
 
     i18n.services.formatter?.add("dateTime", (value, lng) => {
@@ -78,18 +98,6 @@ export const setupI18n = async (savedLocaleString?: string) => {
             day: "numeric",
         });
     });
-};
-
-/**
- * Return the current locale in which our user interface is being shown.
- *
- * Note that this may be different from the user's locale. For example, the
- * browser might be set to en-GB, but since we don't support that specific
- * variant of English, this value will be (say) en-US.
- */
-export const currentLocale = () => {
-    const locale = i18n.resolvedLanguage;
-    return locale && includes(supportedLocales, locale) ? locale : "en";
 };
 
 /**
@@ -109,20 +117,20 @@ export function closestSupportedLocale(
     const ss = savedLocaleString;
     if (ss && includes(supportedLocales, ss)) return ss;
 
-    /*
+    // An older version of our code had stored only the language code, not the
+    // full locale. Map these to the default region we'd started off with.
     switch (savedLocaleString) {
         case "en":
-            return Language.en;
+            return "en-US";
         case "fr":
-            return Language.fr;
+            return "fr-FR";
         case "zh":
-            return Language.zh;
+            return "zh-CH";
         case "nl":
-            return Language.nl;
+            return "nl-NL";
         case "es":
-            return Language.es;
+            return "es-ES";
     }
-    */
 
     for (const us of getUserLocales()) {
         // Exact match
@@ -130,18 +138,18 @@ export function closestSupportedLocale(
 
         // Language match
         if (us.startsWith("en")) {
-            return "en";
+            return "en-US";
         } else if (us.startsWith("fr")) {
-            return "fr";
+            return "fr-FR";
         } else if (us.startsWith("zh")) {
-            return "zh";
+            return "zh-CH";
         } else if (us.startsWith("nl")) {
-            return "nl";
+            return "nl-NL";
         } else if (us.startsWith("es")) {
-            return "es";
+            return "es-ES";
         }
     }
 
     // Fallback
-    return "en";
+    return "en-US";
 }
