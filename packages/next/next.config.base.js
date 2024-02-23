@@ -10,13 +10,13 @@
  * https://nextjs.org/docs/pages/api-reference/next-config-js
  */
 
-const { withSentryConfig } = require('@sentry/nextjs');
-const cp = require('child_process');
+const { withSentryConfig } = require("@sentry/nextjs");
+const cp = require("child_process");
 
 const gitSHA = cp
-    .execSync('git rev-parse --short HEAD', {
+    .execSync("git rev-parse --short HEAD", {
         cwd: __dirname,
-        encoding: 'utf8',
+        encoding: "utf8",
     })
     .trimEnd();
 
@@ -24,21 +24,21 @@ const gitSHA = cp
  * The base Next.js config. Before exporting this, we wrap this in
  * {@link withSentryConfig}.
  *
- * @type {import('next').NextConfig}
+ * @type {import("next").NextConfig}
  */
 const nextConfig = {
     /* generate a static export when we run `next build` */
-    output: 'export',
+    output: "export",
     compiler: {
         emotion: true,
     },
     transpilePackages: [
-        '@/next',
-        '@/ui',
-        '@/utils',
-        '@mui/material',
-        '@mui/system',
-        '@mui/icons-material',
+        "@/next",
+        "@/ui",
+        "@/utils",
+        "@mui/material",
+        "@mui/system",
+        "@mui/icons-material",
     ],
 
     // Add environment variables to the JavaScript bundle. They will be
