@@ -9,7 +9,10 @@ import "package:photos/events/event.dart";
 import "package:photos/models/search/generic_search_result.dart";
 import "package:photos/models/search/recent_searches.dart";
 import "package:photos/models/search/search_types.dart";
+import "package:photos/services/search_service.dart";
 import "package:photos/theme/ente_theme.dart";
+import "package:photos/ui/map/enable_map.dart";
+import "package:photos/ui/map/map_screen.dart";
 import "package:photos/ui/viewer/file/no_thumbnail_widget.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 import "package:photos/ui/viewer/search/result/search_result_page.dart";
@@ -327,7 +330,19 @@ class GoToMap2 extends StatelessWidget {
         horizontal: max(0, 2.5 - LocationRecommendation.outerStrokeWidth),
       ),
       child: GestureDetector(
-        onTap: () {},
+        onTap: () async {
+          final bool result = await requestForMapEnable(context);
+          if (result) {
+            // ignore: unawaited_futures
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => MapScreen(
+                  filesFutureFn: SearchService.instance.getAllFiles,
+                ),
+              ),
+            );
+          }
+        },
         child: Stack(
           alignment: Alignment.center,
           children: [
