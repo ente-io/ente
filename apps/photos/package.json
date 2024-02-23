@@ -58,7 +58,6 @@
         "uuid": "^9.0.0",
         "vscode-uri": "^3.0.7",
         "xml-js": "^1.6.11",
-        "yup": "^0.29.3",
         "zxcvbn": "^4.4.2"
     },
     "devDependencies": {
@@ -76,7 +75,6 @@
         "@types/react-window-infinite-loader": "^1.0.3",
         "@types/uuid": "^9.0.2",
         "@types/wicg-file-system-access": "^2020.9.5",
-        "@types/yup": "^0.29.7",
         "@types/zxcvbn": "^4.4.1"
     }
 }

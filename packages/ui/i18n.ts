@@ -4,6 +4,14 @@ import Backend from "i18next-http-backend";
 import { isDevBuild } from "@/utils/env";
 import { getUserLocales } from "get-user-locale";
 import { includes } from "@/utils/type-guards";
+import {
+    type LSKey,
+    getLSString,
+    setLSString,
+    removeLSString,
+} from "@/utils/local-storage";
+import { object, string } from "yup";
+import { logError } from "@/utils/logging";
 
 /**
  * List of all {@link SupportedLocale}s.
@@ -41,8 +49,9 @@ export type SupportedLocale = (typeof supportedLocales)[number];
  *
  * - react-i18next, which adds React specific APIs
  */
-export const setupI18n = async (savedLocaleString?: string) => {
-    const locale = closestSupportedLocale(savedLocaleString);
+export const setupI18n = async () => {
+    const localeString = savedLocaleStringMigratingIfNeeded();
+    const locale = closestSupportedLocale(localeString);
 
     // https://www.i18next.com/overview/api
     await i18n
@@ -101,6 +110,70 @@ export const setupI18n = async (savedLocaleString?: string) => {
 };
 
 /**
+ * Read and return the locale (if any) that we'd previously saved in local
+ * storage.
+ *
+ * If it finds a locale stored in the old format, it also updates the saved
+ * value and returns it in the new format.
+ */
+const savedLocaleStringMigratingIfNeeded = () => {
+    const ls = getLSString("locale");
+
+    // An older version of our code had stored only the language code, not the
+    // full locale. Migrate these to the new locale format. Luckily, all such
+    // languages can be unambiguously mapped to locales in our current set.
+    //
+    // This migration is dated Feb 2024. And it can be removed after a few
+    // months, because by then either customers would've opened the app and
+    // their setting migrated to the new format, or the browser would've cleared
+    // the older local storage entry anyway.
+
+    if (!ls) {
+        // Nothing found
+        return ls;
+    }
+
+    if (includes(supportedLocales, ls)) {
+        // Already in the new format
+        return ls;
+    }
+
+    let value: string | undefined;
+    try {
+        const oldFormatData = object({ value: string() }).json().cast(ls);
+        value = oldFormatData.value;
+    } catch (e) {
+        // Not a valid JSON, or not in the format we expected it. This shouldn't
+        // have happened, we're the only one setting it.
+        logError("Failed to parse locale obtained from local storage", e);
+        // Also remove the old key, it is not parseable by us anymore.
+        removeLSString("locale");
+        return undefined;
+    }
+
+    const newValue = mapOldValue(value);
+    if (newValue) setLSString("locale", newValue);
+    return newValue;
+};
+
+const mapOldValue = (value: string | undefined) => {
+    switch (value) {
+        case "en":
+            return "en-US";
+        case "fr":
+            return "fr-FR";
+        case "zh":
+            return "zh-CN";
+        case "nl":
+            return "nl-NL";
+        case "es":
+            return "es-ES";
+        default:
+            return undefined;
+    }
+};
+
+/**
  * Return the closest / best matching {@link SupportedLocale}.
  *
  * It takes as input a {@link savedLocaleString}, which denotes the user's
@@ -116,21 +189,6 @@ export function closestSupportedLocale(
 ): SupportedLocale {
     const ss = savedLocaleString;
     if (ss && includes(supportedLocales, ss)) return ss;
-
-    // An older version of our code had stored only the language code, not the
-    // full locale. Map these to the default region we'd started off with.
-    switch (savedLocaleString) {
-        case "en":
-            return "en-US";
-        case "fr":
-            return "fr-FR";
-        case "zh":
-            return "zh-CN";
-        case "nl":
-            return "nl-NL";
-        case "es":
-            return "es-ES";
-    }
 
     for (const us of getUserLocales()) {
         // Exact match

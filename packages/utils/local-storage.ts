@@ -1,5 +1,5 @@
 /**
- * Keys corresponding to the values that we save in local storage.
+ * Keys corresponding to the items that we save in local storage.
  *
  * The type of each of the these keys is {@link LSKey}.
  *
@@ -17,17 +17,24 @@ export const lsKeys = ["locale"] as const;
 export type LSKey = (typeof lsKeys)[number];
 
 /**
- * Read a previously saved string value from local storage
+ * Read a previously saved string from local storage
  */
 export const getLSString = (key: LSKey) => {
-    const value = localStorage.getItem(key);
-    if (value === null) return undefined;
-    return value;
+    const item = localStorage.getItem(key);
+    if (item === null) return undefined;
+    return item;
 };
 
 /**
- * Save a string value in local storage
+ * Save a string in local storage
  */
 export const setLSString = (key: LSKey, value: string) => {
     localStorage.setItem(key, value);
+};
+
+/**
+ * Remove an string from local storage.
+ */
+export const removeLSString = (key: LSKey) => {
+    localStorage.removeItem(key);
 };
