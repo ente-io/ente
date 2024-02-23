@@ -11,6 +11,7 @@ import "package:photos/models/search/generic_search_result.dart";
 import "package:photos/models/search/recent_searches.dart";
 import "package:photos/models/search/search_types.dart";
 import "package:photos/services/search_service.dart";
+import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/map/enable_map.dart";
 import "package:photos/ui/map/map_screen.dart";
@@ -312,6 +313,43 @@ class LocationRecommendation extends StatelessWidget {
                     ],
                   ),
                 ),
+              ),
+            ),
+            Positioned(
+              left: 8,
+              top: 8,
+              child: Stack(
+                clipBehavior: Clip.none,
+                alignment: Alignment.center,
+                children: [
+                  ClipRRect(
+                    borderRadius: const BorderRadius.all(Radius.circular(8)),
+                    child: BackdropFilter(
+                      filter: ImageFilter.blur(sigmaX: 2, sigmaY: 2),
+                      child: Container(
+                        color: const Color.fromRGBO(0, 0, 0, 0.6),
+                        width: 15,
+                        height: 15,
+                      ),
+                    ),
+                  ),
+                  Container(
+                    width: 16,
+                    height: 16,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        width: 0.5,
+                        color: strokeSolidMutedLight,
+                      ),
+                    ),
+                  ),
+                  const Icon(
+                    Icons.location_on_sharp,
+                    color: Colors.white,
+                    size: 11,
+                  ),
+                ],
               ),
             ),
           ],
