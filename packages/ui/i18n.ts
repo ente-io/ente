@@ -25,7 +25,7 @@ export const supportedLocales = [
     "es-ES" /* Spanish */,
 ] as const;
 
-/** The type of {@link supportedLocale}s. */
+/** The type of {@link supportedLocales}. */
 export type SupportedLocale = (typeof supportedLocales)[number];
 
 /**
