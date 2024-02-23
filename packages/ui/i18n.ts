@@ -6,6 +6,22 @@ import { getUserLocales } from "get-user-locale";
 import { includes } from "@/utils/type-guards";
 
 /**
+ * List of all {@link SupportedLocale}s.
+ *
+ * Locales are combinations of a language code, and an optional region code.
+ *
+ * For example, "en", "en-US", "en-IN" (Indian English), "pt" (Portuguese),
+ * "pt-BR" (Brazilian Portuguese).
+ *
+ * In our Crowdin Project, we have work-in-progress translations into more
+ * languages than this. When a translation reaches a high enough coverage, say
+ * 90%, then we manually add it to this list of supported languages.
+ */
+export const supportedLocales = ["en", "fr", "zh", "nl", "es"] as const;
+/** The type of  {@link supportedLocale}s. */
+export type SupportedLocale = (typeof supportedLocales)[number];
+
+/**
  * Load translations.
  *
  * Localization and related concerns (aka "internationalization", or "i18n") for
@@ -19,7 +35,8 @@ import { includes } from "@/utils/type-guards";
  * - react-i18next, which adds React specific APIs
  */
 export const setupI18n = async (savedLocaleString?: string) => {
-    const lng = getBestPossibleUserLocale(savedLocaleString);
+    const locale = closestSupportedLocale(savedLocaleString);
+
     // https://www.i18next.com/overview/api
     await i18n
         // i18next-http-backend: Asynchronously loads translations over HTTP
@@ -34,7 +51,8 @@ export const setupI18n = async (savedLocaleString?: string) => {
             debug: isDevBuild,
             returnEmptyString: false,
             fallbackLng: "en",
-            lng: lng,
+            // i18next calls it language, but it really is the locale
+            lng: locale,
             interpolation: {
                 escapeValue: false, // not needed for react as it escapes by default
             },
@@ -63,22 +81,6 @@ export const setupI18n = async (savedLocaleString?: string) => {
 };
 
 /**
- * List of all {@link SupportedLocale}s.
- *
- * Locales are combinations of a language code, and an optional region code.
- *
- * For example, "en", "en-US", "en-IN" (Indian English), "pt" (Portuguese),
- * "pt-BR" (Brazilian Portuguese).
- *
- * In our Crowdin Project, we have work-in-progress translations into more
- * languages than this. When a translation reaches a high enough coverage, say
- * 90%, then we manually add it to this list of supported languages.
- */
-export const supportedLocales = ["en", "fr", "zh", "nl", "es"] as const;
-/** The type of  {@link supportedLocale}s. */
-export type SupportedLocale = (typeof supportedLocales)[number];
-
-/**
  * Return the current locale in which our user interface is being shown.
  *
  * Note that this may be different from the user's locale. For example, the
@@ -90,18 +92,24 @@ export const currentLocale = () => {
     return locale && includes(supportedLocales, locale) ? locale : "en";
 };
 
-/** Enums of supported locale */
-export enum Language {
-    en = "en",
-    fr = "fr",
-    zh = "zh",
-    nl = "nl",
-    es = "es",
-}
-
-export function getBestPossibleUserLocale(
+/**
+ * Return the closest / best matching {@link SupportedLocale}.
+ *
+ * It takes as input a {@link savedLocaleString}, which denotes the user's
+ * explicitly chosen preference (which we then persist in local storage).
+ * Subsequently, we use this to (usually literally) return the supported locale
+ * that it represents.
+ *
+ * If {@link savedLocaleString} is `undefined`, it tries to deduce the closest
+ * {@link SupportedLocale} that matches the browser's locale.
+ */
+export function closestSupportedLocale(
     savedLocaleString?: string,
-): Language {
+): SupportedLocale {
+    const ss = savedLocaleString;
+    if (ss && includes(supportedLocales, ss)) return ss;
+
+    /*
     switch (savedLocaleString) {
         case "en":
             return Language.en;
@@ -114,20 +122,26 @@ export function getBestPossibleUserLocale(
         case "es":
             return Language.es;
     }
+    */
 
-    const userLocales = getUserLocales();
-    for (const lc of userLocales) {
-        if (lc.startsWith("en")) {
-            return Language.en;
-        } else if (lc.startsWith("fr")) {
-            return Language.fr;
-        } else if (lc.startsWith("zh")) {
-            return Language.zh;
-        } else if (lc.startsWith("nl")) {
-            return Language.nl;
-        } else if (lc.startsWith("es")) {
-            return Language.es;
+    for (const us of getUserLocales()) {
+        // Exact match
+        if (us && includes(supportedLocales, us)) return us;
+
+        // Language match
+        if (us.startsWith("en")) {
+            return "en";
+        } else if (us.startsWith("fr")) {
+            return "fr";
+        } else if (us.startsWith("zh")) {
+            return "zh";
+        } else if (us.startsWith("nl")) {
+            return "nl";
+        } else if (us.startsWith("es")) {
+            return "es";
         }
     }
-    return Language.en;
+
+    // Fallback
+    return "en";
 }

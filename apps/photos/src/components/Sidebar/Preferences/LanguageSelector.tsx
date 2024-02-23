@@ -2,41 +2,50 @@ import DropdownInput, { DropdownOption } from 'components/DropdownInput';
 import { useLocalState } from '@ente/shared/hooks/useLocalState';
 import { t } from 'i18next';
 import { useRouter } from 'next/router';
-import { Language, getBestPossibleUserLocale } from '@/ui/i18n';
+import {
+    type SupportedLocale,
+    supportedLocales,
+    closestSupportedLocale,
+} from '@/ui/i18n';
 import { LS_KEYS } from '@ente/shared/storage/localStorage';
 import { getUserLocaleString } from '@ente/shared/storage/localStorage/helpers';
 
-const getLocaleDisplayName = (l: Language) => {
-    switch (l) {
-        case Language.en:
+/**
+ * Human readable name for each supported locale
+ *
+ * TODO (MR): This names themselves should be localized.
+ */
+export const localeName = (locale: SupportedLocale) => {
+    switch (locale) {
+        case 'en':
             return 'English';
-        case Language.fr:
+        case 'fr':
             return 'Français';
-        case Language.zh:
+        case 'zh':
             return '中文';
-        case Language.nl:
+        case 'nl':
             return 'Nederlands';
-        case Language.es:
+        case 'es':
             return 'Español';
     }
 };
 
-const getLanguageOptions = (): DropdownOption<Language>[] => {
-    return Object.values(Language).map((lang) => ({
-        label: getLocaleDisplayName(lang),
-        value: lang,
+const getLanguageOptions = (): DropdownOption<SupportedLocale>[] => {
+    return supportedLocales.map((locale) => ({
+        label: localeName(locale),
+        value: locale,
     }));
 };
 
 export const LanguageSelector = () => {
     const [userLocale, setUserLocale] = useLocalState(
         LS_KEYS.LOCALE,
-        getBestPossibleUserLocale(getUserLocaleString())
+        closestSupportedLocale(getUserLocaleString())
     );
 
     const router = useRouter();
 
-    const updateCurrentLocale = (newLocale: Language) => {
+    const updateCurrentLocale = (newLocale: SupportedLocale) => {
         setUserLocale(newLocale);
         router.reload();
     };
