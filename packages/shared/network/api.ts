@@ -79,7 +79,7 @@ export const getPaymentsURL = () => {
 };
 
 export const getAlbumsURL = () => {
-    const albumsURL = process.env.NEXT_PUBLIC_ENTE_ALBUM_ENDPOINT;
+    const albumsURL = process.env.NEXT_PUBLIC_ENTE_ALBUMS_ENDPOINT;
     if (albumsURL) {
         return albumsURL;
     }

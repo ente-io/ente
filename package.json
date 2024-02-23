@@ -17,7 +17,7 @@
         "dev:auth": "yarn workspace auth next dev",
         "dev:cast": "yarn workspace cast next dev",
         "dev:photos": "yarn workspace photos next dev",
-        "albums": "yarn workspace photos albums",
+        "dev:albums": "yarn workspace photos next dev -p 3002",
         "lint": "yarn prettier --check . && yarn workspaces run eslint .",
         "lint-fix": "yarn prettier --write . && yarn workspaces run eslint --fix ."
     },
