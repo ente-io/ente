@@ -17,6 +17,7 @@ import "package:photos/ui/map/enable_map.dart";
 import "package:photos/ui/map/map_screen.dart";
 import "package:photos/ui/viewer/file/no_thumbnail_widget.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
+import "package:photos/ui/viewer/search/result/go_to_map_widget.dart";
 import "package:photos/ui/viewer/search/result/search_result_page.dart";
 import "package:photos/ui/viewer/search/search_section_cta.dart";
 import "package:photos/ui/viewer/search_tab/section_header.dart";
@@ -96,6 +97,7 @@ class _LocationsSectionState extends State<LocationsSection> {
             ),
             const SizedBox(width: 8),
             const SearchSectionEmptyCTAIcon(SectionType.location),
+            const GoToMapWidget(),
           ],
         ),
       );

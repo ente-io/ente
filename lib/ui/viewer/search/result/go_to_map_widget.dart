@@ -32,30 +32,31 @@ class GoToMapWidget extends StatelessWidget {
           );
         }
       },
-      child: SizedBox(
-        width: width,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 10),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Image.asset(
-                "assets/map.png",
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(8, 14, 8, 0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            Transform.scale(
+              scale: 1.2,
+              child: Image.asset(
+                "assets/map_world.png",
                 width: 64,
                 height: 64,
               ),
-              const SizedBox(
-                height: 10,
-              ),
-              Text(
-                S.of(context).yourMap,
-                maxLines: 2,
-                textAlign: TextAlign.center,
-                overflow: TextOverflow.ellipsis,
-                style: getEnteTextTheme(context).mini,
-              ),
-            ],
-          ),
+            ),
+            const SizedBox(
+              height: 11.5,
+            ),
+            Text(
+              S.of(context).yourMap,
+              maxLines: 2,
+              textAlign: TextAlign.center,
+              overflow: TextOverflow.ellipsis,
+              style: getEnteTextTheme(context).mini,
+            ),
+          ],
         ),
       ),
     );
