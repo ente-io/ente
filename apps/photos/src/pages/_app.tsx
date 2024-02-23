@@ -66,6 +66,7 @@ import { REDIRECTS } from 'constants/redirects';
 import {
     getLocalMapEnabled,
     getToken,
+    getUserLocaleString,
     setLocalMapEnabled,
 } from '@ente/shared/storage/localStorage/helpers';
 import { isExportInProgress } from 'utils/export';
@@ -73,7 +74,7 @@ import { EnteAppProps } from '@ente/shared/apps/types';
 import createEmotionCache from '@ente/shared/themes/createEmotionCache';
 import { THEME_COLOR } from '@ente/shared/themes/constants';
 import { SetTheme } from '@ente/shared/themes/types';
-import { setupI18n } from '@ente/shared/i18n';
+import { setupI18n } from '@/ui/i18n';
 import { useLocalState } from '@ente/shared/hooks/useLocalState';
 import { PHOTOS_PAGES as PAGES } from '@ente/shared/constants/pages';
 import { getTheme } from '@ente/shared/themes';
@@ -162,7 +163,7 @@ export default function App(props: EnteAppProps) {
 
     useEffect(() => {
         //setup i18n
-        setupI18n().finally(() => setIsI18nReady(true));
+        setupI18n(getUserLocaleString()).finally(() => setIsI18nReady(true));
         // set client package name in headers
         HTTPService.setHeaders({
             'X-Client-Package': CLIENT_PACKAGE_NAMES.get(APPS.PHOTOS),

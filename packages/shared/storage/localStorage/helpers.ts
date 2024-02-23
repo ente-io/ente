@@ -1,5 +1,4 @@
 import { LS_KEYS, getData, setData } from '.';
-import { Language } from '@ente/shared/i18n/locale';
 
 export const getToken = (): string => {
     const token = getData(LS_KEYS.USER)?.token;
@@ -30,7 +29,7 @@ export function setLivePhotoInfoShownCount(count: boolean) {
     setData(LS_KEYS.LIVE_PHOTO_INFO_SHOWN_COUNT, { count });
 }
 
-export function getUserLocale(): Language {
+export function getUserLocaleString(): string {
     return getData(LS_KEYS.LOCALE)?.value;
 }
 

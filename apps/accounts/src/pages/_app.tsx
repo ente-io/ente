@@ -10,9 +10,10 @@ import {
 import EnteSpinner from '@ente/shared/components/EnteSpinner';
 import AppNavbar from '@ente/shared/components/Navbar/app';
 import { useLocalState } from '@ente/shared/hooks/useLocalState';
-import { setupI18n } from '@ente/shared/i18n';
+import { setupI18n } from '@/ui/i18n';
 import HTTPService from '@ente/shared/network/HTTPService';
 import { LS_KEYS, getData } from '@ente/shared/storage/localStorage';
+import { getUserLocaleString } from '@ente/shared/storage/localStorage/helpers';
 import { getTheme } from '@ente/shared/themes';
 import { THEME_COLOR } from '@ente/shared/themes/constants';
 import createEmotionCache from '@ente/shared/themes/createEmotionCache';
@@ -63,7 +64,7 @@ export default function App(props: EnteAppProps) {
     const [themeColor] = useLocalState(LS_KEYS.THEME, THEME_COLOR.DARK);
 
     useEffect(() => {
-        setupI18n().finally(() => setIsI18nReady(true));
+        setupI18n(getUserLocaleString()).finally(() => setIsI18nReady(true));
     }, []);
 
     const setupPackageName = () => {
