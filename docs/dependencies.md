@@ -33,5 +33,14 @@ Emotion itself comes in many parts, of which we need the following three:
 * "@emotion/react" - React interface to Emotion. In particular, we set this as
   the package that handles the transformation of JSX into JS (via the
   `jsxImportSource` property in `tsconfig.json`).
-* "@emotion/styled"
+
+* "@emotion/styled" - Provides the `styled` utility, a la styled-components. We
+  don't use it directly, instead we import it from `@mui/material`. However, MUI
+  docs
+  [mention](https://mui.com/material-ui/integrations/interoperability/#styled-components)
+  that
+
+  > Keep `@emotion/styled` as a dependency of your project. Even if you never
+  > use it explicitly, it's a peer dependency of `@mui/material`.
+
 * "@emotion/server"
