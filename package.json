@@ -37,6 +37,7 @@
         "typescript": "^5"
     },
     "resolutions": {
-        "@sentry/cli": "1.75.0"
+        "@sentry/cli": "1.75.0",
+        "libsodium": "0.7.9"
     }
 }
