@@ -25,7 +25,6 @@
         "@ente/accounts": "*",
         "@ente/shared": "*",
         "axios": "^1.6.0",
-        "is-electron": "^2.2.2",
         "next": "^14.1"
     },
     "devDependencies": {
