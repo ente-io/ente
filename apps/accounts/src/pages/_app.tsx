@@ -10,7 +10,7 @@ import {
 import EnteSpinner from '@ente/shared/components/EnteSpinner';
 import AppNavbar from '@ente/shared/components/Navbar/app';
 import { useLocalState } from '@ente/shared/hooks/useLocalState';
-import { setupI18n } from '@ente/shared/i18n';
+import { setupI18n } from '@/ui/i18n';
 import HTTPService from '@ente/shared/network/HTTPService';
 import { LS_KEYS, getData } from '@ente/shared/storage/localStorage';
 import { getUserLocaleString } from '@ente/shared/storage/localStorage/helpers';

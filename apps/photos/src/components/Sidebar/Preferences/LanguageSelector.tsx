@@ -2,7 +2,7 @@ import DropdownInput, { DropdownOption } from 'components/DropdownInput';
 import { useLocalState } from '@ente/shared/hooks/useLocalState';
 import { t } from 'i18next';
 import { useRouter } from 'next/router';
-import { Language, getBestPossibleUserLocale } from '@ente/shared/i18n';
+import { Language, getBestPossibleUserLocale } from '@/ui/i18n';
 import { LS_KEYS } from '@ente/shared/storage/localStorage';
 import { getUserLocaleString } from '@ente/shared/storage/localStorage/helpers';
 

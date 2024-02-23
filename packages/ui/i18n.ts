@@ -1,8 +1,9 @@
-import i18n from 'i18next';
-import { initReactI18next } from 'react-i18next';
-import Backend from 'i18next-http-backend';
-import { isDevBuild } from '@/utils/env';
-import { getUserLocales } from 'get-user-locale';
+import i18n from "i18next";
+import { initReactI18next } from "react-i18next";
+import Backend from "i18next-http-backend";
+import { isDevBuild } from "@/utils/env";
+import { getUserLocales } from "get-user-locale";
+import { includes } from "@/utils/type-guards";
 
 /**
  * Load translations.
@@ -32,7 +33,7 @@ export const setupI18n = async (savedLocaleString?: string) => {
         .init({
             debug: isDevBuild,
             returnEmptyString: false,
-            fallbackLng: 'en',
+            fallbackLng: "en",
             lng: lng,
             interpolation: {
                 escapeValue: false, // not needed for react as it escapes by default
@@ -40,23 +41,23 @@ export const setupI18n = async (savedLocaleString?: string) => {
             react: {
                 useSuspense: false,
                 transKeepBasicHtmlNodesFor: [
-                    'div',
-                    'strong',
-                    'h2',
-                    'span',
-                    'code',
-                    'p',
-                    'br',
+                    "div",
+                    "strong",
+                    "h2",
+                    "span",
+                    "code",
+                    "p",
+                    "br",
                 ],
             },
-            load: 'languageOnly',
+            load: "languageOnly",
         });
 
-    i18n.services.formatter.add('dateTime', (value, lng) => {
+    i18n.services.formatter?.add("dateTime", (value, lng) => {
         return new Date(value / 1000).toLocaleDateString(lng, {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
+            year: "numeric",
+            month: "long",
+            day: "numeric",
         });
     });
 };
@@ -71,28 +72,18 @@ export const setupI18n = async (savedLocaleString?: string) => {
  * few languages. When a translation reaches a high enough coverage, say 90%,
  * then we manually add it to this list of supported languages.
  */
-export type SupportedLocale = 'en' | 'fr' | 'zh' | 'nl' | 'es';
+export type SupportedLocale = "en" | "fr" | "zh" | "nl" | "es";
 
 /**
  * List of all {@link SupportedLocale}s.
  */
 export const supportedLocales: SupportedLocale[] = [
-    'en',
-    'fr',
-    'zh',
-    'nl',
-    'es',
+    "en",
+    "fr",
+    "zh",
+    "nl",
+    "es",
 ];
-
-/**
- * A type guard that returns true if the given string is a
- * {@link SupportedLocale}.
- */
-export const isSupportedLocale = (s: string): s is SupportedLocale => {
-    // The `as any` here is needed to work around current TS limitations
-    // https://github.com/microsoft/TypeScript/issues/48247
-    return supportedLocales.includes(s as any);
-};
 
 /**
  * Return the current locale in which our user interface is being shown.
@@ -103,44 +94,45 @@ export const isSupportedLocale = (s: string): s is SupportedLocale => {
  */
 export const currentLocale = () => {
     const locale = i18n.resolvedLanguage;
-    return isSupportedLocale(locale) ? locale : 'en';
+    return locale && includes(supportedLocales, locale) ? locale : "en";
 };
 
 /** Enums of supported locale */
 export enum Language {
-    en = 'en',
-    fr = 'fr',
-    zh = 'zh',
-    nl = 'nl',
-    es = 'es',
+    en = "en",
+    fr = "fr",
+    zh = "zh",
+    nl = "nl",
+    es = "es",
 }
 
-export function getBestPossibleUserLocale(savedLocaleString: string): Language {
-    const locale = savedLocaleString;
-    switch (locale) {
-        case 'en':
+export function getBestPossibleUserLocale(
+    savedLocaleString?: string,
+): Language {
+    switch (savedLocaleString) {
+        case "en":
             return Language.en;
-        case 'fr':
+        case "fr":
             return Language.fr;
-        case 'zh':
+        case "zh":
             return Language.zh;
-        case 'nl':
+        case "nl":
             return Language.nl;
-        case 'es':
+        case "es":
             return Language.es;
     }
 
     const userLocales = getUserLocales();
     for (const lc of userLocales) {
-        if (lc.startsWith('en')) {
+        if (lc.startsWith("en")) {
             return Language.en;
-        } else if (lc.startsWith('fr')) {
+        } else if (lc.startsWith("fr")) {
             return Language.fr;
-        } else if (lc.startsWith('zh')) {
+        } else if (lc.startsWith("zh")) {
             return Language.zh;
-        } else if (lc.startsWith('nl')) {
+        } else if (lc.startsWith("nl")) {
             return Language.nl;
-        } else if (lc.startsWith('es')) {
+        } else if (lc.startsWith("es")) {
             return Language.es;
         }
     }

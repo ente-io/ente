@@ -32,7 +32,7 @@ import { EnteAppProps } from '@ente/shared/apps/types';
 import createEmotionCache from '@ente/shared/themes/createEmotionCache';
 import { THEME_COLOR } from '@ente/shared/themes/constants';
 import { SetTheme } from '@ente/shared/themes/types';
-import { setupI18n } from '@ente/shared/i18n';
+import { setupI18n } from '@/ui/i18n';
 import { useLocalState } from '@ente/shared/hooks/useLocalState';
 import { PHOTOS_PAGES as PAGES } from '@ente/shared/constants/pages';
 import { getTheme } from '@ente/shared/themes';
