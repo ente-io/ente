@@ -3,8 +3,7 @@
     "version": "0.0.0",
     "private": true,
     "dependencies": {
-        "@/ui": "*",
-        "@/utils": "*",
+        "@/next": "*",
         "@sentry/nextjs": "7.77.0",
         "axios": "^1.6.7"
     }

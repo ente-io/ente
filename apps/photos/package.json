@@ -3,9 +3,10 @@
     "version": "0.0.0",
     "private": true,
     "dependencies": {
-        "@/ui": "*",
-        "@/utils": "*",
+        "@/next": "*",
         "@date-io/date-fns": "^2.14.0",
+        "@ente/accounts": "*",
+        "@ente/shared": "*",
         "@mui/x-date-pickers": "^5.0.0-alpha.6",
         "@stripe/stripe-js": "^1.13.2",
         "@tensorflow-models/coco-ssd": "^2.2.2",

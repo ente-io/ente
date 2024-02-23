@@ -2,13 +2,12 @@
     "name": "cast",
     "version": "0.0.0",
     "private": true,
-    "scripts": {
-        "dev": "next dev",
-        "build": "next build"
-    },
     "dependencies": {
-        "mime-types": "^2.1.35",
-        "jszip": "3.10.1"
+        "@/next": "*",
+        "@ente/accounts": "*",
+        "@ente/shared": "*",
+        "jszip": "3.10.1",
+        "mime-types": "^2.1.35"
     },
     "devDependencies": {
         "sass": "^1.69.5"
