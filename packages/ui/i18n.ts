@@ -63,27 +63,20 @@ export const setupI18n = async (savedLocaleString?: string) => {
 };
 
 /**
+ * List of all {@link SupportedLocale}s.
+ *
  * Locales are combinations of a language code, and an optional region code.
  *
  * For example, "en", "en-US", "en-IN" (Indian English), "pt" (Portuguese),
  * "pt-BR" (Brazilian Portuguese).
  *
- * In our Crowdin Project, we have work-in-progress translations into quite a
- * few languages. When a translation reaches a high enough coverage, say 90%,
- * then we manually add it to this list of supported languages.
+ * In our Crowdin Project, we have work-in-progress translations into more
+ * languages than this. When a translation reaches a high enough coverage, say
+ * 90%, then we manually add it to this list of supported languages.
  */
-export type SupportedLocale = "en" | "fr" | "zh" | "nl" | "es";
-
-/**
- * List of all {@link SupportedLocale}s.
- */
-export const supportedLocales: SupportedLocale[] = [
-    "en",
-    "fr",
-    "zh",
-    "nl",
-    "es",
-];
+export const supportedLocales = ["en", "fr", "zh", "nl", "es"] as const;
+/** The type of  {@link supportedLocale}s. */
+export type SupportedLocale = (typeof supportedLocales)[number];
 
 /**
  * Return the current locale in which our user interface is being shown.
