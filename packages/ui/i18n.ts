@@ -18,11 +18,11 @@ import { includes } from "@/utils/type-guards";
  * 90%, then we manually add it to this list of supported languages.
  */
 export const supportedLocales = [
-    "en-US",
-    "fr-FR",
-    "zh-CH",
-    "nl-NL",
-    "es-ES",
+    "en-US" /* English */,
+    "fr-FR" /* French */,
+    "zh-CN" /* Simplified Chinese */,
+    "nl-NL" /* Dutch */,
+    "es-ES" /* Spanish */,
 ] as const;
 
 /** The type of {@link supportedLocale}s. */
@@ -125,7 +125,7 @@ export function closestSupportedLocale(
         case "fr":
             return "fr-FR";
         case "zh":
-            return "zh-CH";
+            return "zh-CN";
         case "nl":
             return "nl-NL";
         case "es":
@@ -142,7 +142,7 @@ export function closestSupportedLocale(
         } else if (us.startsWith("fr")) {
             return "fr-FR";
         } else if (us.startsWith("zh")) {
-            return "zh-CH";
+            return "zh-CN";
         } else if (us.startsWith("nl")) {
             return "nl-NL";
         } else if (us.startsWith("es")) {

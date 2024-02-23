@@ -21,7 +21,7 @@ export const localeName = (locale: SupportedLocale) => {
             return 'English';
         case 'fr-FR':
             return 'Français';
-        case 'zh-CH':
+        case 'zh-CN':
             return '中文';
         case 'nl-NL':
             return 'Nederlands';
