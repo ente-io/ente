@@ -41,6 +41,9 @@ class MachineLearningController {
   }
 
   void onUserInteraction() {
+    if (Platform.isIOS) {
+      return;
+    }
     if (!_isUserInteracting) {
       _logger.info("User is interacting with the app");
       _isUserInteracting = true;
