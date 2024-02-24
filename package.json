@@ -21,11 +21,7 @@
         "lint": "yarn prettier --check . && yarn workspaces run eslint .",
         "lint-fix": "yarn prettier --write . && yarn workspaces run eslint --fix ."
     },
-    "dependencies": {},
     "devDependencies": {
-        "@ente/eslint-config": "*",
-        "@typescript-eslint/eslint-plugin": "^7",
-        "@typescript-eslint/parser": "^7",
         "eslint": "^8",
         "prettier": "^3",
         "typescript": "^5"
