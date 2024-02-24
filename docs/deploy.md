@@ -52,7 +52,7 @@ Apart from this, there are also some subdomains:
 In Cloudflare Pages setting the following environment variables are defined:
 
 - `NODE_VERSION`: Determines which version of Node is used when we do `yarn
-  build:foo`. Currently this is set to `20.10.0`. The major version here should
+  build:foo`. Currently this is set to `20.11.1`. The major version here should
   match that of `@types/node` in our dev dependencies.
 
 - `SENTRY_AUTH_TOKEN`: An encrypted environment variable that is used by the
