@@ -2,10 +2,6 @@
     "name": "@ente/accounts",
     "version": "0.0.0",
     "private": true,
-    "scripts": {
-        "lint": "eslint .",
-        "build": "yarn lint && tsc"
-    },
     "dependencies": {
         "@/next": "*",
         "@ente/eslint-config": "*",
