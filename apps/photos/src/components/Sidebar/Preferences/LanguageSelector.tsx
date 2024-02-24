@@ -25,6 +25,8 @@ export const localeName = (locale: SupportedLocale) => {
             return 'Nederlands';
         case 'es-ES':
             return 'Español';
+        case 'pt-BR':
+            return 'Brazilian Portuguese';
     }
 };
 

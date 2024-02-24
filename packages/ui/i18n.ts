@@ -5,7 +5,6 @@ import { isDevBuild } from "@/utils/env";
 import { getUserLocales } from "get-user-locale";
 import { includes } from "@/utils/type-guards";
 import {
-    type LSKey,
     getLSString,
     setLSString,
     removeLSString,
@@ -31,6 +30,7 @@ export const supportedLocales = [
     "zh-CN" /* Simplified Chinese */,
     "nl-NL" /* Dutch */,
     "es-ES" /* Spanish */,
+    "pt-BR" /* Portuguese, Brazilian */,
 ] as const;
 
 /** The type of {@link supportedLocales}. */
@@ -193,21 +193,25 @@ const closestSupportedLocale = (
     const ss = savedLocaleString;
     if (ss && includes(supportedLocales, ss)) return ss;
 
-    for (const us of getUserLocales()) {
+    for (const ls of getUserLocales()) {
         // Exact match
-        if (us && includes(supportedLocales, us)) return us;
+        if (ls && includes(supportedLocales, ls)) return ls;
 
         // Language match
-        if (us.startsWith("en")) {
+        if (ls.startsWith("en")) {
             return "en-US";
-        } else if (us.startsWith("fr")) {
+        } else if (ls.startsWith("fr")) {
             return "fr-FR";
-        } else if (us.startsWith("zh")) {
+        } else if (ls.startsWith("zh")) {
             return "zh-CN";
-        } else if (us.startsWith("nl")) {
+        } else if (ls.startsWith("nl")) {
             return "nl-NL";
-        } else if (us.startsWith("es")) {
+        } else if (ls.startsWith("es")) {
             return "es-ES";
+        } else if (ls.startsWith("pt-BR")) {
+            // We'll never get here (it'd already be an exact match), just kept
+            // to keep this list consistent.
+            return "pt-BR";
         }
     }
 
