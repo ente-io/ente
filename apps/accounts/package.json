@@ -7,8 +7,5 @@
         "@ente/accounts": "*",
         "@ente/eslint-config": "*",
         "@ente/shared": "*"
-    },
-    "devDependencies": {
-        "@types/node": "^14.6.4"
     }
 }

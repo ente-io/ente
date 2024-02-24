@@ -32,10 +32,31 @@ see the Cloudflare dashboard for the latest:
 - _testing.ente.io_: `main`
 - _web.ente.io_: `photos-release`
 - _auth.ente.io_: `auth-release`
+- _accounts.ente.io_: `accounts-release`
+- _cast.ente.io_: `cast-release`
 
 Thus to trigger a, say, production deployment of the photos app, we can open and
 merge a PR into the `photos-release` branch. Cloudflare will then build and
 deploy the code to _web.ente.io_.
+
+Apart from this, there are also some subdomains:
+
+- `albums.ente.io` is a CNAME alias to the production deployment
+  (`web.ente.io`). However, when the code detects that it is being served from
+  `albums.ente.io`, it redirects to the `/shared-albums` page (Enhancement:
+  serve it as a separate app with a smaller bundle size).
+
+- `payments.ente.io` and `family.ente.io` are currently in a separate
+  repositories (Enhancement: bring them in here).
+
+In Cloudflare Pages setting the following environment variables are defined:
+
+- `NODE_VERSION`: Determines which version of Node is used when we do `yarn
+  build:foo`. Currently this is set to `20.10.0`. The major version here should
+  match that of `@types/node` in our dev dependencies.
+
+- `SENTRY_AUTH_TOKEN`: An encrypted environment variable that is used by the
+  Sentry Webpack Plugin to upload sourcemaps during the build.
 
 ## Adding a new app
 
