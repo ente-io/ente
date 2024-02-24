@@ -1,0 +1,5 @@
+{
+    "extends": "@/build-config/tsconfig.transpile.json",
+    /* Typecheck all files with the given extensions (here or in subfolders) */
+    "include": ["**/*.ts", "**/*.tsx"]
+}

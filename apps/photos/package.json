@@ -3,9 +3,10 @@
     "version": "0.0.0",
     "private": true,
     "dependencies": {
-        "@/ui": "*",
-        "@/utils": "*",
+        "@/next": "*",
         "@date-io/date-fns": "^2.14.0",
+        "@ente/accounts": "*",
+        "@ente/shared": "*",
         "@mui/x-date-pickers": "^5.0.0-alpha.6",
         "@stripe/stripe-js": "^1.13.2",
         "@tensorflow-models/coco-ssd": "^2.2.2",
@@ -32,7 +33,6 @@
         "hdbscan": "0.0.1-alpha.5",
         "heic-convert": "^2.0.0",
         "idb": "^7.1.1",
-        "is-electron": "^2.2.2",
         "jszip": "3.10.1",
         "leaflet": "^1.9.4",
         "leaflet-defaulticon-compatibility": "^0.1.1",
@@ -58,7 +58,6 @@
         "uuid": "^9.0.0",
         "vscode-uri": "^3.0.7",
         "xml-js": "^1.6.11",
-        "yup": "^0.29.3",
         "zxcvbn": "^4.4.2"
     },
     "devDependencies": {
@@ -76,7 +75,6 @@
         "@types/react-window-infinite-loader": "^1.0.3",
         "@types/uuid": "^9.0.2",
         "@types/wicg-file-system-access": "^2020.9.5",
-        "@types/yup": "^0.29.7",
         "@types/zxcvbn": "^4.4.1"
     }
 }

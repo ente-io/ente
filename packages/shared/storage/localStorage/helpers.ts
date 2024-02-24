@@ -29,10 +29,6 @@ export function setLivePhotoInfoShownCount(count: boolean) {
     setData(LS_KEYS.LIVE_PHOTO_INFO_SHOWN_COUNT, { count });
 }
 
-export function getUserLocaleString(): string {
-    return getData(LS_KEYS.LOCALE)?.value;
-}
-
 export function getLocalMapEnabled(): boolean {
     return getData(LS_KEYS.MAP_ENABLED)?.value ?? false;
 }

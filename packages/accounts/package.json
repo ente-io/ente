@@ -6,6 +6,9 @@
         "lint": "eslint .",
         "build": "yarn lint && tsc"
     },
-    "dependencies": {},
+    "dependencies": {
+        "@/next": "*",
+        "@ente/shared": "*"
+    },
     "devDependencies": {}
 }

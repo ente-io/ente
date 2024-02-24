@@ -4,6 +4,13 @@ import Backend from "i18next-http-backend";
 import { isDevBuild } from "@/utils/env";
 import { getUserLocales } from "get-user-locale";
 import { includes } from "@/utils/type-guards";
+import {
+    getLSString,
+    setLSString,
+    removeLSString,
+} from "@/utils/local-storage";
+import { object, string } from "yup";
+import { logError } from "@/utils/logging";
 
 /**
  * List of all {@link SupportedLocale}s.
@@ -17,9 +24,19 @@ import { includes } from "@/utils/type-guards";
  * languages than this. When a translation reaches a high enough coverage, say
  * 90%, then we manually add it to this list of supported languages.
  */
-export const supportedLocales = ["en", "fr", "zh", "nl", "es"] as const;
-/** The type of  {@link supportedLocale}s. */
+export const supportedLocales = [
+    "en-US" /* English */,
+    "fr-FR" /* French */,
+    "zh-CN" /* Simplified Chinese */,
+    "nl-NL" /* Dutch */,
+    "es-ES" /* Spanish */,
+    "pt-BR" /* Portuguese, Brazilian */,
+] as const;
+
+/** The type of {@link supportedLocales}. */
 export type SupportedLocale = (typeof supportedLocales)[number];
+
+const defaultLocale: SupportedLocale = "en-US";
 
 /**
  * Load translations.
@@ -34,8 +51,9 @@ export type SupportedLocale = (typeof supportedLocales)[number];
  *
  * - react-i18next, which adds React specific APIs
  */
-export const setupI18n = async (savedLocaleString?: string) => {
-    const locale = closestSupportedLocale(savedLocaleString);
+export const setupI18n = async () => {
+    const localeString = savedLocaleStringMigratingIfNeeded();
+    const locale = closestSupportedLocale(localeString);
 
     // https://www.i18next.com/overview/api
     await i18n
@@ -49,10 +67,24 @@ export const setupI18n = async (savedLocaleString?: string) => {
         // Option docs: https://www.i18next.com/overview/configuration-options
         .init({
             debug: isDevBuild,
-            returnEmptyString: false,
-            fallbackLng: "en",
             // i18next calls it language, but it really is the locale
             lng: locale,
+            // Tell i18next about the locales we support
+            supportedLngs: supportedLocales,
+            // Ask it to fetch only exact matches
+            //
+            // By default, if the lng was set to, say, en-GB, i18n would make
+            // network requests for ["en-GB", "en", "dev"] (where dev is the
+            // default fallback). By setting `load` to "currentOnly", we ask
+            // i18next to only try and fetch "en-GB" (i.e. the exact match).
+            load: "currentOnly",
+            // Disallow empty strings as valid translations.
+            //
+            // This way, empty strings will fallback to `fallbackLng`
+            returnEmptyString: false,
+            // The language to use if translation for a particular key in the
+            // current `lng` is not available.
+            fallbackLng: defaultLocale,
             interpolation: {
                 escapeValue: false, // not needed for react as it escapes by default
             },
@@ -68,7 +100,6 @@ export const setupI18n = async (savedLocaleString?: string) => {
                     "br",
                 ],
             },
-            load: "languageOnly",
         });
 
     i18n.services.formatter?.add("dateTime", (value, lng) => {
@@ -81,15 +112,68 @@ export const setupI18n = async (savedLocaleString?: string) => {
 };
 
 /**
- * Return the current locale in which our user interface is being shown.
+ * Read and return the locale (if any) that we'd previously saved in local
+ * storage.
  *
- * Note that this may be different from the user's locale. For example, the
- * browser might be set to en-GB, but since we don't support that specific
- * variant of English, this value will be (say) en-US.
+ * If it finds a locale stored in the old format, it also updates the saved
+ * value and returns it in the new format.
  */
-export const currentLocale = () => {
-    const locale = i18n.resolvedLanguage;
-    return locale && includes(supportedLocales, locale) ? locale : "en";
+const savedLocaleStringMigratingIfNeeded = () => {
+    const ls = getLSString("locale");
+
+    // An older version of our code had stored only the language code, not the
+    // full locale. Migrate these to the new locale format. Luckily, all such
+    // languages can be unambiguously mapped to locales in our current set.
+    //
+    // This migration is dated Feb 2024. And it can be removed after a few
+    // months, because by then either customers would've opened the app and
+    // their setting migrated to the new format, or the browser would've cleared
+    // the older local storage entry anyway.
+
+    if (!ls) {
+        // Nothing found
+        return ls;
+    }
+
+    if (includes(supportedLocales, ls)) {
+        // Already in the new format
+        return ls;
+    }
+
+    let value: string | undefined;
+    try {
+        const oldFormatData = object({ value: string() }).json().cast(ls);
+        value = oldFormatData.value;
+    } catch (e) {
+        // Not a valid JSON, or not in the format we expected it. This shouldn't
+        // have happened, we're the only one setting it.
+        logError("Failed to parse locale obtained from local storage", e);
+        // Also remove the old key, it is not parseable by us anymore.
+        removeLSString("locale");
+        return undefined;
+    }
+
+    const newValue = mapOldValue(value);
+    if (newValue) setLSString("locale", newValue);
+
+    return newValue;
+};
+
+const mapOldValue = (value: string | undefined) => {
+    switch (value) {
+        case "en":
+            return "en-US";
+        case "fr":
+            return "fr-FR";
+        case "zh":
+            return "zh-CN";
+        case "nl":
+            return "nl-NL";
+        case "es":
+            return "es-ES";
+        default:
+            return undefined;
+    }
 };
 
 /**
@@ -103,45 +187,65 @@ export const currentLocale = () => {
  * If {@link savedLocaleString} is `undefined`, it tries to deduce the closest
  * {@link SupportedLocale} that matches the browser's locale.
  */
-export function closestSupportedLocale(
+const closestSupportedLocale = (
     savedLocaleString?: string,
-): SupportedLocale {
+): SupportedLocale => {
     const ss = savedLocaleString;
     if (ss && includes(supportedLocales, ss)) return ss;
 
-    /*
-    switch (savedLocaleString) {
-        case "en":
-            return Language.en;
-        case "fr":
-            return Language.fr;
-        case "zh":
-            return Language.zh;
-        case "nl":
-            return Language.nl;
-        case "es":
-            return Language.es;
-    }
-    */
-
-    for (const us of getUserLocales()) {
+    for (const ls of getUserLocales()) {
         // Exact match
-        if (us && includes(supportedLocales, us)) return us;
+        if (ls && includes(supportedLocales, ls)) return ls;
 
         // Language match
-        if (us.startsWith("en")) {
-            return "en";
-        } else if (us.startsWith("fr")) {
-            return "fr";
-        } else if (us.startsWith("zh")) {
-            return "zh";
-        } else if (us.startsWith("nl")) {
-            return "nl";
-        } else if (us.startsWith("es")) {
-            return "es";
+        if (ls.startsWith("en")) {
+            return "en-US";
+        } else if (ls.startsWith("fr")) {
+            return "fr-FR";
+        } else if (ls.startsWith("zh")) {
+            return "zh-CN";
+        } else if (ls.startsWith("nl")) {
+            return "nl-NL";
+        } else if (ls.startsWith("es")) {
+            return "es-ES";
+        } else if (ls.startsWith("pt-BR")) {
+            // We'll never get here (it'd already be an exact match), just kept
+            // to keep this list consistent.
+            return "pt-BR";
         }
     }
 
     // Fallback
-    return "en";
-}
+    return defaultLocale;
+};
+
+/**
+ * Return the locale that is currently being used to show the app's UI.
+ *
+ * Note that this may be different from the user's locale. For example, the
+ * browser might be set to en-GB, but since we don't support that specific
+ * variant of English, this value will be (say) en-US.
+ */
+export const getLocaleInUse = (): SupportedLocale => {
+    const locale = i18n.resolvedLanguage;
+    if (locale && includes(supportedLocales, locale)) {
+        return locale;
+    } else {
+        // This shouldn't have happened. Log an error to attract attention.
+        logError(
+            `Expected the i18next locale to be one of the supported values, but instead found ${locale}`,
+        );
+        return defaultLocale;
+    }
+};
+
+/**
+ * Set the locale that should be used to show the app's UI.
+ *
+ * This updates both the i18next state, and also the corresponding user
+ * preference that is stored in local storage.
+ */
+export const setLocaleInUse = async (locale: SupportedLocale) => {
+    setLSString("locale", locale);
+    return i18n.changeLanguage(locale);
+};

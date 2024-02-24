@@ -21,7 +21,8 @@ export enum LS_KEYS {
     THEME = 'theme',
     WAIT_TIME = 'waitTime',
     API_ENDPOINT = 'apiEndpoint',
-    LOCALE = 'locale',
+    // Moved to the new wrapper @/utils/local-storage
+    // LOCALE = 'locale',
     MAP_ENABLED = 'mapEnabled',
     SRP_SETUP_ATTRIBUTES = 'srpSetupAttributes',
     SRP_ATTRIBUTES = 'srpAttributes',

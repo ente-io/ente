@@ -2,8 +2,9 @@
     "name": "auth",
     "version": "0.0.0",
     "private": true,
-    "scripts": {
-        "dev": "next dev",
-        "build": "next build"
+    "dependencies": {
+        "@/next": "*",
+        "@ente/accounts": "*",
+        "@ente/shared": "*"
     }
 }

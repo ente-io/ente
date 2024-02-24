@@ -2,20 +2,20 @@
     "name": "@/ui",
     "version": "0.0.0",
     "private": true,
-    "devDependencies": {
-        "@/build-config": "*"
-    },
     "dependencies": {
         "@emotion/react": "^11.11",
         "@emotion/server": "^11.11",
         "@emotion/styled": "^11.11",
         "@mui/icons-material": "^5.15",
         "@mui/material": "^5.15",
-        "get-user-locale": "^2.3.1",
-        "i18next": "^23.10.0",
-        "i18next-http-backend": "^2.5.0",
+        "get-user-locale": "^2.3",
+        "i18next": "^23.10",
+        "i18next-http-backend": "^2.5",
         "react": "18.2.0",
         "react-dom": "18.2.0",
         "react-i18next": "^14"
+    },
+    "devDependencies": {
+        "@/build-config": "*"
     }
 }
