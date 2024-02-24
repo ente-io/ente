@@ -31,6 +31,10 @@ denotes any version.
 yarn workspace photos add '@/utils@*'
 ```
 
+> Note: The yarn (classic) command above causes harmless but noisy diffs in
+> `yarn.lock` when adding or removing dependencies to the workspaces. To fix
+> them, run `yarn` again once to reset these unnecessary changes.
+
 To see what packages depend on each other locally, use
 
 ```sh
