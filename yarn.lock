@@ -579,7 +579,7 @@
     "@sentry/types" "7.77.0"
     "@sentry/utils" "7.77.0"
 
-"@sentry/cli@1.75.0", "@sentry/cli@^1.74.6":
+"@sentry/cli@^1.74.6":
   version "1.75.0"
   resolved "https://registry.yarnpkg.com/@sentry/cli/-/cli-1.75.0.tgz#4a5e71b5619cd4e9e6238cc77857c66f6b38d86a"
   integrity sha512-vT8NurHy00GcN8dNqur4CMIYvFH3PaKdkX3qllVvi4syybKqjwoz+aWRCvprbYv0knweneFkLt1SmBWqazUMfA==
@@ -1978,6 +1978,11 @@ eslint-plugin-jsx-a11y@^6.7.1:
   resolved "https://registry.yarnpkg.com/eslint-plugin-react-hooks/-/eslint-plugin-react-hooks-4.6.0.tgz#4c3e697ad95b77e93f8646aaa1630c1ba607edd3"
   integrity sha512-oFc7Itz9Qxh2x4gNHStv3BqJq54ExXmfC+a1NjAta66IAN87Wu0R/QArgIS9qKzX3dXKPI9H5crl9QchNMY9+g==
 
+eslint-plugin-react-namespace-import@^1.0.5:
+  version "1.0.5"
+  resolved "https://registry.yarnpkg.com/eslint-plugin-react-namespace-import/-/eslint-plugin-react-namespace-import-1.0.5.tgz#9da74bb169d13336a187abd3c42e22d2fe10f91d"
+  integrity sha512-0gUj6hSRL8cTxyLtVvbu/Rzr3aEmO4fUyJIc3qkGum2Lth+atx3z/JJgBd+PUpaksdv0D6gmBBHwjmn/nPAobQ==
+
 eslint-plugin-react@^7.33.2, eslint-plugin-react@latest:
   version "7.33.2"
   resolved "https://registry.yarnpkg.com/eslint-plugin-react/-/eslint-plugin-react-7.33.2.tgz#69ee09443ffc583927eafe86ffebb470ee737608"
@@ -2976,7 +2981,7 @@ libsodium-wrappers@0.7.9:
   dependencies:
     libsodium "^0.7.0"
 
-libsodium@0.7.9, libsodium@^0.7.0:
+libsodium@^0.7.0:
   version "0.7.9"
   resolved "https://registry.yarnpkg.com/libsodium/-/libsodium-0.7.9.tgz#4bb7bcbf662ddd920d8795c227ae25bbbfa3821b"
   integrity sha512-gfeADtR4D/CM0oRUviKBViMGXZDgnFdMKMzHsvBdqLBHd9ySi6EtYnmuhHVDDYgYpAO8eU8hEY+F8vIUAPh08A==
