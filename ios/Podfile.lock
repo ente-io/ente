@@ -1,5 +1,5 @@
 PODS:
-  - background_fetch (1.2.2):
+  - background_fetch (1.2.1):
     - Flutter
   - battery_info (0.0.1):
     - Flutter
@@ -161,9 +161,9 @@ PODS:
     - Flutter
   - screen_brightness_ios (0.1.0):
     - Flutter
-  - SDWebImage (5.18.10):
-    - SDWebImage/Core (= 5.18.10)
-  - SDWebImage/Core (5.18.10)
+  - SDWebImage (5.18.11):
+    - SDWebImage/Core (= 5.18.11)
+  - SDWebImage/Core (5.18.11)
   - SDWebImageWebPCoder (0.14.5):
     - libwebp (~> 1.0)
     - SDWebImage/Core (~> 5.17)
@@ -439,7 +439,7 @@ SPEC CHECKSUMS:
   ReachabilitySwift: 985039c6f7b23a1da463388634119492ff86c825
   receive_sharing_intent: 9ca20ae908f83c36ddaaaa8c9bd30ce4700495e8
   screen_brightness_ios: 715ca807df953bf676d339f11464e438143ee625
-  SDWebImage: fc8f2d48bbfd72ef39d70e981bd24a3f3be53fec
+  SDWebImage: a3ba0b8faac7228c3c8eadd1a55c9c9fe5e16457
   SDWebImageWebPCoder: c94f09adbca681822edad9e532ac752db713eabf
   Sentry: 8984a4ffb2b9bd2894d74fb36e6f5833865bc18e
   sentry_flutter: c87a0556eeb6cbf7f9f924d30e878bdedf22d364

@@ -167,20 +167,22 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   MediaKit.ensureInitialized();
 
-  try {
-    await Workmanager()
-        .initialize(initSlideshowWidget, isInDebugMode: kDebugMode);
+  if (Platform.isAndroid) {
+    try {
+      await Workmanager()
+          .initialize(initSlideshowWidget, isInDebugMode: kDebugMode);
 
-    await Workmanager().registerPeriodicTask(
-      "slideshow-widget",
-      "updateSlideshowWidget",
-      initialDelay: const Duration(seconds: 10),
-      frequency: const Duration(
-        minutes: 15,
-      ),
-    );
-  } catch (_) {
-    debugPrint("error in Workmanager: $_");
+      await Workmanager().registerPeriodicTask(
+        "slideshow-widget",
+        "updateSlideshowWidget",
+        initialDelay: const Duration(seconds: 10),
+        frequency: const Duration(
+          minutes: 15,
+        ),
+      );
+    } catch (_) {
+      debugPrint("error in Workmanager: $_");
+    }
   }
 
   final savedThemeMode = await AdaptiveTheme.getThemeMode();
