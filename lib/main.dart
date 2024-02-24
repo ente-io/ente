@@ -49,9 +49,9 @@ import 'package:photos/ui/tools/app_lock.dart';
 import 'package:photos/ui/tools/lock_screen.dart';
 import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/file_uploader.dart';
+import "package:photos/utils/file_util.dart";
 import 'package:photos/utils/local_settings.dart';
 import "package:photos/utils/preload_util.dart";
-import "package:photos/utils/thumbnail_util.dart";
 import 'package:shared_preferences/shared_preferences.dart';
 import "package:workmanager/workmanager.dart";
 
@@ -104,15 +104,17 @@ void initSlideshowWidget() {
             .where((element) => element.generatedID != previousGeneratedId);
         final randomNumber = Random().nextInt(files.length);
         final randomFile = files.elementAt(randomNumber);
-        final cachedThumbnail = await getThumbnailFromServer(randomFile);
+        final fullImage = await getFileFromServer(randomFile);
+        if (fullImage == null) return false;
 
-        var img = Image.memory(cachedThumbnail);
+        Image img = Image.file(fullImage);
         var imgProvider = img.image;
         await PreloadImage.loadImage(imgProvider);
 
-        img = Image.memory(cachedThumbnail);
+        img = Image.file(fullImage);
         imgProvider = img.image;
-        final image = await decodeImageFromList(cachedThumbnail);
+
+        final image = await decodeImageFromList(await fullImage.readAsBytes());
         final width = image.width.toDouble();
         final height = image.height.toDouble();
         final size = min(width, height);
@@ -175,7 +177,7 @@ void main() async {
       initialDelay: const Duration(seconds: 10),
       frequency: const Duration(
         minutes: 15,
-      ), // Ignored on iOS, rather set in AppDelegate.swift
+      ),
     );
   } catch (_) {
     debugPrint("error in Workmanager: $_");
