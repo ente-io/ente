@@ -2,5 +2,5 @@ project_id_env: CROWDIN_PROJECT_ID
 api_token_env: CROWDIN_PERSONAL_TOKEN
 
 files:
-    - source: /apps/photos/public/locales/en/translation.json
+    - source: /apps/photos/public/locales/en-US/translation.json
       translation: /apps/photos/public/locales/%locale%/translation.json
