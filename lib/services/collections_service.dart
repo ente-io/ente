@@ -1372,10 +1372,10 @@ class CollectionsService {
   }
 
   Future<void> move(
-    int toCollectionID,
-    int fromCollectionID,
-    List<EnteFile> files,
-  ) async {
+    List<EnteFile> files, {
+    required int toCollectionID,
+    required int fromCollectionID,
+  }) async {
     _validateMoveRequest(toCollectionID, fromCollectionID, files);
     files.removeWhere((element) => element.uploadedFileID == null);
     if (files.isEmpty) {
@@ -1443,8 +1443,18 @@ class CollectionsService {
     int fromCollectionID,
     List<EnteFile> files,
   ) {
+    final int userID = Configuration.instance.getUserID()!;
     if (toCollectionID == fromCollectionID) {
       throw AssertionError("Can't move to same album");
+    }
+    final Collection? toCollection = _collectionIDToCollections[toCollectionID];
+    final Collection? fromCollection =
+        _collectionIDToCollections[fromCollectionID];
+    if (toCollection != null && !toCollection.isOwner(userID)) {
+      throw AssertionError("Can't move to a collection you don't own");
+    }
+    if (fromCollection != null && !fromCollection.isOwner(userID)) {
+      throw AssertionError("Can't move from a collection you don't own");
     }
     for (final file in files) {
       if (file.uploadedFileID == null) {
