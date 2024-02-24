@@ -1,64 +1,64 @@
-import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
-import Photoswipe from 'photoswipe';
-import PhotoswipeUIDefault from 'photoswipe/dist/photoswipe-ui-default';
-import classnames from 'classnames';
+import { logError } from "@ente/shared/sentry";
+import classnames from "classnames";
+import Photoswipe from "photoswipe";
+import PhotoswipeUIDefault from "photoswipe/dist/photoswipe-ui-default";
+import { useContext, useEffect, useMemo, useRef, useState } from "react";
 import {
     addToFavorites,
     removeFromFavorites,
-} from 'services/collectionService';
-import { EnteFile } from 'types/file';
+} from "services/collectionService";
+import { EnteFile } from "types/file";
 import {
     copyFileToClipboard,
+    downloadSingleFile,
     getFileExtension,
     getFileFromURL,
-    isSupportedRawFormat,
     isRawFile,
-    downloadSingleFile,
-} from 'utils/file';
-import { logError } from '@ente/shared/sentry';
+    isSupportedRawFormat,
+} from "utils/file";
 
-import { FILE_TYPE } from 'constants/file';
-import { isClipboardItemPresent } from 'utils/common';
-import { playVideo, pauseVideo } from 'utils/photoFrame';
-import { PublicCollectionGalleryContext } from 'utils/publicCollectionGallery';
-import { AppContext } from 'pages/_app';
-import { FileInfo } from './FileInfo';
+import { FlexWrapper } from "@ente/shared/components/Container";
+import EnteSpinner from "@ente/shared/components/EnteSpinner";
+import { addLocalLog } from "@ente/shared/logging";
+import AlbumOutlined from "@mui/icons-material/AlbumOutlined";
+import ChevronLeft from "@mui/icons-material/ChevronLeft";
+import ChevronRight from "@mui/icons-material/ChevronRight";
+import CloseIcon from "@mui/icons-material/Close";
+import ContentCopy from "@mui/icons-material/ContentCopy";
+import DeleteIcon from "@mui/icons-material/Delete";
+import EditIcon from "@mui/icons-material/Edit";
+import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorderRounded";
+import FavoriteIcon from "@mui/icons-material/FavoriteRounded";
+import DownloadIcon from "@mui/icons-material/FileDownloadOutlined";
+import FullscreenExitOutlinedIcon from "@mui/icons-material/FullscreenExitOutlined";
+import FullscreenOutlinedIcon from "@mui/icons-material/FullscreenOutlined";
+import InfoIcon from "@mui/icons-material/InfoOutlined";
+import ReplayIcon from "@mui/icons-material/Replay";
+import ZoomInOutlinedIcon from "@mui/icons-material/ZoomInOutlined";
+import { Box, Button, styled } from "@mui/material";
+import { FILE_TYPE } from "constants/file";
 import {
     defaultLivePhotoDefaultOptions,
     photoSwipeV4Events,
-} from 'constants/photoViewer';
-import { LivePhotoBtnContainer } from './styledComponents/LivePhotoBtn';
-import DownloadIcon from '@mui/icons-material/FileDownloadOutlined';
-import CloseIcon from '@mui/icons-material/Close';
-import ZoomInOutlinedIcon from '@mui/icons-material/ZoomInOutlined';
-import FullscreenOutlinedIcon from '@mui/icons-material/FullscreenOutlined';
-import InfoIcon from '@mui/icons-material/InfoOutlined';
-import FavoriteIcon from '@mui/icons-material/FavoriteRounded';
-import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorderRounded';
-import FullscreenExitOutlinedIcon from '@mui/icons-material/FullscreenExitOutlined';
-import ChevronRight from '@mui/icons-material/ChevronRight';
-import DeleteIcon from '@mui/icons-material/Delete';
-import { trashFiles } from 'services/fileService';
-import { getTrashFileMessage } from 'utils/ui';
-import { Box, Button, styled } from '@mui/material';
-import { addLocalLog } from '@ente/shared/logging';
-import ContentCopy from '@mui/icons-material/ContentCopy';
-import ChevronLeft from '@mui/icons-material/ChevronLeft';
-import { t } from 'i18next';
-import { getParsedExifData } from 'services/upload/exifService';
-import { getFileType } from 'services/typeDetectionService';
-import { ConversionFailedNotification } from './styledComponents/ConversionFailedNotification';
-import { GalleryContext } from 'pages/gallery';
-import downloadManager, { LoadedLivePhotoSourceURL } from 'services/download';
-import CircularProgressWithLabel from './styledComponents/CircularProgressWithLabel';
-import EnteSpinner from '@ente/shared/components/EnteSpinner';
-import AlbumOutlined from '@mui/icons-material/AlbumOutlined';
-import { FlexWrapper } from '@ente/shared/components/Container';
-import isElectron from 'is-electron';
-import ReplayIcon from '@mui/icons-material/Replay';
-import ImageEditorOverlay from './ImageEditorOverlay';
-import EditIcon from '@mui/icons-material/Edit';
-import { SetFilesDownloadProgressAttributesCreator } from 'types/gallery';
+} from "constants/photoViewer";
+import { t } from "i18next";
+import isElectron from "is-electron";
+import { AppContext } from "pages/_app";
+import { GalleryContext } from "pages/gallery";
+import downloadManager, { LoadedLivePhotoSourceURL } from "services/download";
+import { trashFiles } from "services/fileService";
+import { getFileType } from "services/typeDetectionService";
+import { getParsedExifData } from "services/upload/exifService";
+import { SetFilesDownloadProgressAttributesCreator } from "types/gallery";
+import { isClipboardItemPresent } from "utils/common";
+import { pauseVideo, playVideo } from "utils/photoFrame";
+import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";
+import { getTrashFileMessage } from "utils/ui";
+import { FileInfo } from "./FileInfo";
+import ImageEditorOverlay from "./ImageEditorOverlay";
+import CircularProgressWithLabel from "./styledComponents/CircularProgressWithLabel";
+import { ConversionFailedNotification } from "./styledComponents/ConversionFailedNotification";
+import { LivePhotoBtnContainer } from "./styledComponents/LivePhotoBtn";
 
 interface PhotoswipeFullscreenAPI {
     enter: () => void;
@@ -66,13 +66,13 @@ interface PhotoswipeFullscreenAPI {
     isFullscreen: () => boolean;
 }
 
-const CaptionContainer = styled('div')(({ theme }) => ({
+const CaptionContainer = styled("div")(({ theme }) => ({
     padding: theme.spacing(2),
-    wordBreak: 'break-word',
-    textAlign: 'right',
-    maxWidth: '375px',
-    fontSize: '14px',
-    lineHeight: '17px',
+    wordBreak: "break-word",
+    textAlign: "right",
+    maxWidth: "375px",
+    fontSize: "14px",
+    lineHeight: "17px",
     backgroundColor: theme.colors.backdrop.faint,
     backdropFilter: `blur(${theme.colors.blur.base})`,
 }));
@@ -100,7 +100,7 @@ function PhotoViewer(props: Iprops) {
     const galleryContext = useContext(GalleryContext);
     const appContext = useContext(AppContext);
     const publicCollectionGalleryContext = useContext(
-        PublicCollectionGalleryContext
+        PublicCollectionGalleryContext,
     );
 
     const { isOpen, items } = props;
@@ -116,7 +116,7 @@ function PhotoViewer(props: Iprops) {
     }>();
     const exifCopy = useRef(null);
     const [livePhotoBtnOptions, setLivePhotoBtnOptions] = useState(
-        defaultLivePhotoDefaultOptions
+        defaultLivePhotoDefaultOptions,
     );
     const [isOwnFile, setIsOwnFile] = useState(false);
     const [showConvertBtn, setShowConvertBtn] = useState(false);
@@ -173,48 +173,48 @@ function PhotoViewer(props: Iprops) {
                 return;
             }
 
-            addLocalLog(() => 'Event: ' + event.key);
+            addLocalLog(() => "Event: " + event.key);
 
             switch (event.key) {
-                case 'i':
-                case 'I':
+                case "i":
+                case "I":
                     setShowInfo(true);
                     break;
-                case 'Backspace':
-                case 'Delete':
+                case "Backspace":
+                case "Delete":
                     confirmTrashFile(photoSwipe?.currItem as EnteFile);
                     break;
-                case 'd':
-                case 'D':
+                case "d":
+                case "D":
                     downloadFileHelper(photoSwipe?.currItem as EnteFile);
                     break;
-                case 'f':
-                case 'F':
+                case "f":
+                case "F":
                     toggleFullscreen(photoSwipe);
                     break;
-                case 'l':
-                case 'L':
+                case "l":
+                case "L":
                     onFavClick(photoSwipe?.currItem as EnteFile);
                     break;
-                case 'ArrowLeft':
-                    handleArrowClick(event, 'left');
+                case "ArrowLeft":
+                    handleArrowClick(event, "left");
                     break;
-                case 'ArrowRight':
-                    handleArrowClick(event, 'right');
+                case "ArrowRight":
+                    handleArrowClick(event, "right");
                     break;
                 default:
                     break;
             }
         }
 
-        window.addEventListener('keyup', handleKeyUp);
+        window.addEventListener("keyup", handleKeyUp);
         if (shouldShowCopyOption) {
-            window.addEventListener('copy', handleCopyEvent);
+            window.addEventListener("copy", handleCopyEvent);
         }
         return () => {
-            window.removeEventListener('keyup', handleKeyUp);
+            window.removeEventListener("keyup", handleKeyUp);
             if (shouldShowCopyOption) {
-                window.removeEventListener('copy', handleCopyEvent);
+                window.removeEventListener("copy", handleCopyEvent);
             }
         };
     }, [isOpen, photoSwipe, showInfo]);
@@ -232,10 +232,10 @@ function PhotoViewer(props: Iprops) {
         if (item.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
             const getVideoAndImage = () => {
                 const video = document.getElementById(
-                    `live-photo-video-${item.id}`
+                    `live-photo-video-${item.id}`,
                 );
                 const image = document.getElementById(
-                    `live-photo-image-${item.id}`
+                    `live-photo-image-${item.id}`,
                 );
                 return { video, image };
             };
@@ -266,19 +266,19 @@ function PhotoViewer(props: Iprops) {
         }
 
         const downloadLivePhotoBtn = document.getElementById(
-            `download-btn-${item.id}`
+            `download-btn-${item.id}`,
         ) as HTMLButtonElement;
         const downloadFile = () => {
             downloadFileHelper(photoSwipe.currItem as unknown as EnteFile);
         };
 
         if (downloadLivePhotoBtn) {
-            downloadLivePhotoBtn.addEventListener('click', downloadFile);
+            downloadLivePhotoBtn.addEventListener("click", downloadFile);
         }
 
         return () => {
             if (downloadLivePhotoBtn) {
-                downloadLivePhotoBtn.removeEventListener('click', downloadFile);
+                downloadLivePhotoBtn.removeEventListener("click", downloadFile);
             }
             setLivePhotoBtnOptions(defaultLivePhotoDefaultOptions);
         };
@@ -347,7 +347,7 @@ function PhotoViewer(props: Iprops) {
         const isSupported =
             !isRawFile(extension) || isSupportedRawFormat(extension);
         setShowEditButton(
-            file.metadata.fileType === FILE_TYPE.IMAGE && isSupported
+            file.metadata.fileType === FILE_TYPE.IMAGE && isSupported,
         );
     }
 
@@ -396,29 +396,29 @@ function PhotoViewer(props: Iprops) {
             pswpElement.current,
             PhotoswipeUIDefault,
             items,
-            options
+            options,
         );
         photoSwipeV4Events.forEach((event) => {
             const callback = props[event];
-            if (callback || event === 'destroy') {
+            if (callback || event === "destroy") {
                 photoSwipe.listen(event, function (...args) {
                     if (callback) {
                         args.unshift(photoSwipe);
                         callback(...args);
                     }
-                    if (event === 'destroy') {
+                    if (event === "destroy") {
                         handleClose();
                     }
-                    if (event === 'close') {
+                    if (event === "close") {
                         handleClose();
                     }
                 });
             }
         });
-        photoSwipe.listen('beforeChange', () => {
+        photoSwipe.listen("beforeChange", () => {
             if (!photoSwipe?.currItem) return;
             const currItem = photoSwipe.currItem as EnteFile;
-            const videoTags = document.getElementsByTagName('video');
+            const videoTags = document.getElementsByTagName("video");
             for (const videoTag of videoTags) {
                 videoTag.pause();
             }
@@ -431,7 +431,7 @@ function PhotoViewer(props: Iprops) {
             updateShowEditButton(currItem);
             updateShowZoomButton(currItem);
         });
-        photoSwipe.listen('resize', () => {
+        photoSwipe.listen("resize", () => {
             if (!photoSwipe?.currItem) return;
             const currItem = photoSwipe.currItem as EnteFile;
             updateExif(currItem);
@@ -451,10 +451,10 @@ function PhotoViewer(props: Iprops) {
 
     const handleClose = () => {
         const { onClose } = props;
-        if (typeof onClose === 'function') {
+        if (typeof onClose === "function") {
             onClose(needUpdate.current);
         }
-        const videoTags = document.getElementsByTagName('video');
+        const videoTags = document.getElementsByTagName("video");
         for (const videoTag of videoTags) {
             videoTag.pause();
         }
@@ -490,7 +490,7 @@ function PhotoViewer(props: Iprops) {
             }
             needUpdate.current = true;
         } catch (e) {
-            logError(e, 'onFavClick failed');
+            logError(e, "onFavClick failed");
         }
     };
 
@@ -505,7 +505,7 @@ function PhotoViewer(props: Iprops) {
             updateItems(props.items.filter((item) => item.id !== file.id));
             needUpdate.current = true;
         } catch (e) {
-            logError(e, 'trashFile failed');
+            logError(e, "trashFile failed");
         }
     };
 
@@ -518,7 +518,7 @@ function PhotoViewer(props: Iprops) {
 
     const handleArrowClick = (
         e: KeyboardEvent,
-        direction: 'left' | 'right'
+        direction: "left" | "right",
     ) => {
         // ignore arrow clicks if the user is typing in a text field
         if (
@@ -527,7 +527,7 @@ function PhotoViewer(props: Iprops) {
         ) {
             return;
         }
-        if (direction === 'left') {
+        if (direction === "left") {
             photoSwipe.prev();
         } else {
             photoSwipe.next();
@@ -556,7 +556,7 @@ function PhotoViewer(props: Iprops) {
                 }
             }
         } catch (e) {
-            logError(e, 'updateItems failed');
+            logError(e, "updateItems failed");
         }
     };
 
@@ -567,7 +567,7 @@ function PhotoViewer(props: Iprops) {
                 photoSwipe.updateSize(true);
             }
         } catch (e) {
-            logError(e, 'refreshPhotoswipe failed');
+            logError(e, "refreshPhotoswipe failed");
         }
     };
 
@@ -582,7 +582,7 @@ function PhotoViewer(props: Iprops) {
                 if (file.metadata.fileType === FILE_TYPE.IMAGE) {
                     fileObject = await getFileFromURL(
                         file.src as string,
-                        file.metadata.title
+                        file.metadata.title,
                     );
                 } else {
                     const url = (file.srcURLs.url as LoadedLivePhotoSourceURL)
@@ -592,7 +592,7 @@ function PhotoViewer(props: Iprops) {
                 const fileTypeInfo = await getFileType(fileObject);
                 const exifData = await getParsedExifData(
                     fileObject,
-                    fileTypeInfo
+                    fileTypeInfo,
                 );
                 if (exifExtractionInProgress.current === file.src) {
                     if (exifData) {
@@ -607,7 +607,7 @@ function PhotoViewer(props: Iprops) {
         } catch (e) {
             setExif({ key: file.src, value: null });
             const fileExtension = getFileExtension(file.metadata.title);
-            logError(e, 'checkExifAvailable failed', {
+            logError(e, "checkExifAvailable failed", {
                 extension: fileExtension,
             });
         }
@@ -637,7 +637,7 @@ function PhotoViewer(props: Iprops) {
             try {
                 const setSingleFileDownloadProgress =
                     props.setFilesDownloadProgressAttributesCreator(
-                        file.metadata.title
+                        file.metadata.title,
                     );
                 await downloadSingleFile(file, setSingleFileDownloadProgress);
             } catch (e) {
@@ -681,7 +681,7 @@ function PhotoViewer(props: Iprops) {
                     x: photoSwipe.viewportSize.x / 2,
                     y: photoSwipe.viewportSize.y / 2,
                 },
-                333
+                333,
             );
         } else {
             photoSwipe.zoomTo(
@@ -690,7 +690,7 @@ function PhotoViewer(props: Iprops) {
                     x: photoSwipe.viewportSize.x / 2,
                     y: photoSwipe.viewportSize.y / 2,
                 },
-                333
+                333,
             );
         }
     };
@@ -699,23 +699,24 @@ function PhotoViewer(props: Iprops) {
         props.getConvertedItem(
             photoSwipe,
             photoSwipe.getCurrentIndex(),
-            photoSwipe.currItem as EnteFile
+            photoSwipe.currItem as EnteFile,
         );
     };
 
     const scheduleUpdate = () => (needUpdate.current = true);
     const { id } = props;
     let { className } = props;
-    className = classnames(['pswp', className]).trim();
+    className = classnames(["pswp", className]).trim();
     return (
         <>
             <div
                 id={id}
                 className={className}
-                tabIndex={Number('-1')}
+                tabIndex={Number("-1")}
                 role="dialog"
                 aria-hidden="true"
-                ref={pswpElement}>
+                ref={pswpElement}
+            >
                 <div className="pswp__bg" />
                 <div className="pswp__scroll-wrap">
                     {livePhotoBtnOptions.visible && (
@@ -725,9 +726,10 @@ function PhotoViewer(props: Iprops) {
                                 onClick={livePhotoBtnOptions.click}
                                 onMouseEnter={livePhotoBtnOptions.show}
                                 onMouseLeave={livePhotoBtnOptions.hide}
-                                disabled={livePhotoBtnOptions.loading}>
-                                <FlexWrapper gap={'4px'}>
-                                    {<AlbumOutlined />} {t('LIVE')}
+                                disabled={livePhotoBtnOptions.loading}
+                            >
+                                <FlexWrapper gap={"4px"}>
+                                    {<AlbumOutlined />} {t("LIVE")}
                                 </FlexWrapper>
                             </Button>
                         </LivePhotoBtnContainer>
@@ -744,17 +746,18 @@ function PhotoViewer(props: Iprops) {
 
                     <Box
                         sx={{
-                            position: 'absolute',
-                            top: '10vh',
-                            right: '2vh',
+                            position: "absolute",
+                            top: "10vh",
+                            right: "2vh",
                             zIndex: 10,
-                        }}>
+                        }}
+                    >
                         {fileDownloadProgress.has(
-                            (photoSwipe?.currItem as EnteFile)?.id
+                            (photoSwipe?.currItem as EnteFile)?.id,
                         ) ? (
                             <CircularProgressWithLabel
                                 value={fileDownloadProgress.get(
-                                    (photoSwipe.currItem as EnteFile)?.id
+                                    (photoSwipe.currItem as EnteFile)?.id,
                                 )}
                             />
                         ) : (
@@ -773,44 +776,48 @@ function PhotoViewer(props: Iprops) {
 
                             <button
                                 className="pswp__button pswp__button--custom"
-                                title={t('CLOSE_OPTION')}
-                                onClick={handleClose}>
+                                title={t("CLOSE_OPTION")}
+                                onClick={handleClose}
+                            >
                                 <CloseIcon />
                             </button>
 
                             {props.enableDownload && (
                                 <button
                                     className="pswp__button pswp__button--custom"
-                                    title={t('DOWNLOAD_OPTION')}
+                                    title={t("DOWNLOAD_OPTION")}
                                     onClick={() =>
                                         downloadFileHelper(
-                                            photoSwipe.currItem as EnteFile
+                                            photoSwipe.currItem as EnteFile,
                                         )
-                                    }>
+                                    }
+                                >
                                     <DownloadIcon />
                                 </button>
                             )}
                             {props.enableDownload && shouldShowCopyOption && (
                                 <button
                                     className="pswp__button pswp__button--custom"
-                                    title={t('COPY_OPTION')}
+                                    title={t("COPY_OPTION")}
                                     onClick={() =>
                                         copyToClipboardHelper(
-                                            photoSwipe.currItem as EnteFile
+                                            photoSwipe.currItem as EnteFile,
                                         )
-                                    }>
+                                    }
+                                >
                                     <ContentCopy fontSize="small" />
                                 </button>
                             )}
                             {isOwnFile && !props.isTrashCollection && (
                                 <button
                                     className="pswp__button pswp__button--custom"
-                                    title={t('DELETE_OPTION')}
+                                    title={t("DELETE_OPTION")}
                                     onClick={() => {
                                         confirmTrashFile(
-                                            photoSwipe?.currItem as EnteFile
+                                            photoSwipe?.currItem as EnteFile,
                                         );
-                                    }}>
+                                    }}
+                                >
                                     <DeleteIcon />
                                 </button>
                             )}
@@ -818,7 +825,8 @@ function PhotoViewer(props: Iprops) {
                                 <button
                                     className="pswp__button pswp__button--custom"
                                     onClick={toggleZoomInAndOut}
-                                    title={t('ZOOM_IN_OUT')}>
+                                    title={t("ZOOM_IN_OUT")}
+                                >
                                     <ZoomInOutlinedIcon />
                                 </button>
                             )}
@@ -827,7 +835,8 @@ function PhotoViewer(props: Iprops) {
                                 onClick={() => {
                                     toggleFullscreen(photoSwipe);
                                 }}
-                                title={t('TOGGLE_FULLSCREEN')}>
+                                title={t("TOGGLE_FULLSCREEN")}
+                            >
                                 {!isInFullScreenMode ? (
                                     <FullscreenOutlinedIcon
                                         sx={{ fontSize: 32 }}
@@ -841,8 +850,9 @@ function PhotoViewer(props: Iprops) {
 
                             <button
                                 className="pswp__button pswp__button--custom"
-                                title={t('INFO_OPTION')}
-                                onClick={handleOpenInfo}>
+                                title={t("INFO_OPTION")}
+                                onClick={handleOpenInfo}
+                            >
                                 <InfoIcon />
                             </button>
                             {isOwnFile &&
@@ -852,22 +862,24 @@ function PhotoViewer(props: Iprops) {
                                         {showEditButton && (
                                             <button
                                                 className="pswp__button pswp__button--custom"
-                                                onClick={handleOpenEditor}>
+                                                onClick={handleOpenEditor}
+                                            >
                                                 <EditIcon />
                                             </button>
                                         )}
                                         <button
                                             title={
                                                 isFav
-                                                    ? t('UNFAVORITE_OPTION')
-                                                    : t('FAVORITE_OPTION')
+                                                    ? t("UNFAVORITE_OPTION")
+                                                    : t("FAVORITE_OPTION")
                                             }
                                             className="pswp__button pswp__button--custom"
                                             onClick={() => {
                                                 onFavClick(
-                                                    photoSwipe?.currItem as EnteFile
+                                                    photoSwipe?.currItem as EnteFile,
                                                 );
-                                            }}>
+                                            }}
+                                        >
                                             {isFav ? (
                                                 <FavoriteIcon />
                                             ) : (
@@ -878,9 +890,10 @@ function PhotoViewer(props: Iprops) {
                                 )}
                             {showConvertBtn && (
                                 <button
-                                    title={t('CONVERT')}
+                                    title={t("CONVERT")}
                                     className="pswp__button pswp__button--custom"
-                                    onClick={triggerManualConvert}>
+                                    onClick={triggerManualConvert}
+                                >
                                     <ReplayIcon fontSize="small" />
                                 </button>
                             )}
@@ -888,13 +901,15 @@ function PhotoViewer(props: Iprops) {
                         </div>
                         <button
                             className="pswp__button pswp__button--arrow--left"
-                            title={t('PREVIOUS')}>
-                            <ChevronLeft sx={{ pointerEvents: 'none' }} />
+                            title={t("PREVIOUS")}
+                        >
+                            <ChevronLeft sx={{ pointerEvents: "none" }} />
                         </button>
                         <button
                             className="pswp__button pswp__button--arrow--right"
-                            title={t('NEXT')}>
-                            <ChevronRight sx={{ pointerEvents: 'none' }} />
+                            title={t("NEXT")}
+                        >
+                            <ChevronRight sx={{ pointerEvents: "none" }} />
                         </button>
                         <div className="pswp__caption pswp-custom-caption-container">
                             <CaptionContainer />

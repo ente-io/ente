@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import styles from './FilledCircleCheck.module.scss'; // Import our CSS module
+import { useEffect, useState } from "react";
+import styles from "./FilledCircleCheck.module.scss"; // Import our CSS module
 
 const FilledCircleCheck = () => {
     const [animate, setAnimate] = useState(false);
@@ -9,11 +9,12 @@ const FilledCircleCheck = () => {
     }, []);
 
     return (
-        <div className={`${styles.circle} ${animate ? styles.animate : ''}`}>
+        <div className={`${styles.circle} ${animate ? styles.animate : ""}`}>
             <svg
                 className={styles.checkmark}
                 xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 52 52">
+                viewBox="0 0 52 52"
+            >
                 <circle
                     className={styles.checkmark__circle}
                     cx="26"

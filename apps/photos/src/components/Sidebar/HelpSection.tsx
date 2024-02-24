@@ -1,20 +1,20 @@
-import { useContext } from 'react';
-import { t } from 'i18next';
+import { t } from "i18next";
+import { useContext } from "react";
 
-import exportService from 'services/export';
-import isElectron from 'is-electron';
-import { AppContext } from 'pages/_app';
-import EnteSpinner from '@ente/shared/components/EnteSpinner';
-import { getDownloadAppMessage } from 'utils/ui';
-import { NoStyleAnchor } from 'components/pages/sharedAlbum/GoToEnte';
-import { openLink } from 'utils/common';
-import { EnteMenuItem } from 'components/Menu/EnteMenuItem';
-import { Typography } from '@mui/material';
-import { GalleryContext } from 'pages/gallery';
+import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import {
     DESKTOP_ROADMAP_URL,
     WEB_ROADMAP_URL,
-} from '@ente/shared/constants/urls';
+} from "@ente/shared/constants/urls";
+import { Typography } from "@mui/material";
+import { EnteMenuItem } from "components/Menu/EnteMenuItem";
+import { NoStyleAnchor } from "components/pages/sharedAlbum/GoToEnte";
+import isElectron from "is-electron";
+import { AppContext } from "pages/_app";
+import { GalleryContext } from "pages/gallery";
+import exportService from "services/export";
+import { openLink } from "utils/common";
+import { getDownloadAppMessage } from "utils/ui";
 
 export default function HelpSection() {
     const { setDialogMessage } = useContext(AppContext);
@@ -42,15 +42,15 @@ export default function HelpSection() {
         <>
             <EnteMenuItem
                 onClick={openRoadmap}
-                label={t('REQUEST_FEATURE')}
+                label={t("REQUEST_FEATURE")}
                 variant="secondary"
             />
             <EnteMenuItem
-                onClick={() => openLink('mailto:contact@ente.io', true)}
+                onClick={() => openLink("mailto:contact@ente.io", true)}
                 labelComponent={
                     <NoStyleAnchor href="mailto:contact@ente.io">
-                        <Typography fontWeight={'bold'}>
-                            {t('SUPPORT')}
+                        <Typography fontWeight={"bold"}>
+                            {t("SUPPORT")}
                         </Typography>
                     </NoStyleAnchor>
                 }
@@ -58,7 +58,7 @@ export default function HelpSection() {
             />
             <EnteMenuItem
                 onClick={handleExportOpen}
-                label={t('EXPORT')}
+                label={t("EXPORT")}
                 endIcon={
                     exportService.isExportInProgress() && (
                         <EnteSpinner size="20px" />

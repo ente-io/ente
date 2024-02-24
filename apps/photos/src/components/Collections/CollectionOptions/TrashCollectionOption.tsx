@@ -1,14 +1,13 @@
-import { OverflowMenuOption } from '@ente/shared/components/OverflowMenu/option';
-import React from 'react';
+import { OverflowMenuOption } from "@ente/shared/components/OverflowMenu/option";
 
-import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined';
-import { CollectionActions } from '.';
-import { t } from 'i18next';
+import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
+import { t } from "i18next";
+import { CollectionActions } from ".";
 
 interface Iprops {
     handleCollectionAction: (
         action: CollectionActions,
-        loader?: boolean
+        loader?: boolean,
     ) => (...args: any[]) => Promise<void>;
 }
 
@@ -19,9 +18,10 @@ export function TrashCollectionOption({ handleCollectionAction }: Iprops) {
             startIcon={<DeleteOutlinedIcon />}
             onClick={handleCollectionAction(
                 CollectionActions.CONFIRM_EMPTY_TRASH,
-                false
-            )}>
-            {t('EMPTY_TRASH')}
+                false,
+            )}
+        >
+            {t("EMPTY_TRASH")}
         </OverflowMenuOption>
     );
 }

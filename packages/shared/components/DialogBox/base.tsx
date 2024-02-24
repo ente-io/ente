@@ -1,38 +1,38 @@
-import { Dialog, styled } from '@mui/material';
+import { Dialog, styled } from "@mui/material";
 
 const DialogBoxBase = styled(Dialog)(({ theme }) => ({
-    '& .MuiDialog-paper': {
+    "& .MuiDialog-paper": {
         padding: theme.spacing(1, 1.5),
-        maxWidth: '346px',
+        maxWidth: "346px",
     },
 
-    '& .DialogIcon': {
+    "& .DialogIcon": {
         padding: theme.spacing(2),
         paddingBottom: theme.spacing(1),
     },
 
-    '& .MuiDialogTitle-root': {
+    "& .MuiDialogTitle-root": {
         padding: theme.spacing(2),
         paddingBottom: theme.spacing(1),
     },
-    '& .MuiDialogContent-root': {
+    "& .MuiDialogContent-root": {
         padding: theme.spacing(2),
     },
 
-    '.DialogIcon + .MuiDialogTitle-root': {
+    ".DialogIcon + .MuiDialogTitle-root": {
         paddingTop: 0,
     },
 
-    '.MuiDialogTitle-root + .MuiDialogContent-root': {
+    ".MuiDialogTitle-root + .MuiDialogContent-root": {
         paddingTop: 0,
     },
-    '.MuiDialogTitle-root + .MuiDialogActions-root': {
+    ".MuiDialogTitle-root + .MuiDialogActions-root": {
         paddingTop: theme.spacing(3),
     },
-    '& .MuiDialogActions-root': {
-        flexWrap: 'wrap-reverse',
+    "& .MuiDialogActions-root": {
+        flexWrap: "wrap-reverse",
     },
-    '& .MuiButton-root': {
+    "& .MuiButton-root": {
         margin: `${theme.spacing(0.5, 0)} !important`,
     },
 }));

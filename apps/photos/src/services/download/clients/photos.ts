@@ -1,14 +1,14 @@
-import HTTPService from '@ente/shared/network/HTTPService';
-import { getFileURL, getThumbnailURL } from '@ente/shared/network/api';
-import { EnteFile } from 'types/file';
-import { DownloadClient } from 'services/download';
-import { CustomError } from '@ente/shared/error';
-import { retryAsyncFunction } from 'utils/network';
+import { CustomError } from "@ente/shared/error";
+import HTTPService from "@ente/shared/network/HTTPService";
+import { getFileURL, getThumbnailURL } from "@ente/shared/network/api";
+import { DownloadClient } from "services/download";
+import { EnteFile } from "types/file";
+import { retryAsyncFunction } from "utils/network";
 
 export class PhotosDownloadClient implements DownloadClient {
     constructor(
         private token: string,
-        private timeout: number
+        private timeout: number,
     ) {}
     updateTokens(token: string) {
         this.token = token;
@@ -26,11 +26,11 @@ export class PhotosDownloadClient implements DownloadClient {
             HTTPService.get(
                 getThumbnailURL(file.id),
                 null,
-                { 'X-Auth-Token': this.token },
-                { responseType: 'arraybuffer', timeout: this.timeout }
-            )
+                { "X-Auth-Token": this.token },
+                { responseType: "arraybuffer", timeout: this.timeout },
+            ),
         );
-        if (typeof resp.data === 'undefined') {
+        if (typeof resp.data === "undefined") {
             throw Error(CustomError.REQUEST_FAILED);
         }
         return new Uint8Array(resp.data);
@@ -38,7 +38,7 @@ export class PhotosDownloadClient implements DownloadClient {
 
     async downloadFile(
         file: EnteFile,
-        onDownloadProgress: (event: { loaded: number; total: number }) => void
+        onDownloadProgress: (event: { loaded: number; total: number }) => void,
     ): Promise<Uint8Array> {
         if (!this.token) {
             throw Error(CustomError.TOKEN_MISSING);
@@ -47,15 +47,15 @@ export class PhotosDownloadClient implements DownloadClient {
             HTTPService.get(
                 getFileURL(file.id),
                 null,
-                { 'X-Auth-Token': this.token },
+                { "X-Auth-Token": this.token },
                 {
-                    responseType: 'arraybuffer',
+                    responseType: "arraybuffer",
                     timeout: this.timeout,
                     onDownloadProgress,
-                }
-            )
+                },
+            ),
         );
-        if (typeof resp.data === 'undefined') {
+        if (typeof resp.data === "undefined") {
             throw Error(CustomError.REQUEST_FAILED);
         }
         return new Uint8Array(resp.data);
@@ -68,9 +68,9 @@ export class PhotosDownloadClient implements DownloadClient {
         return retryAsyncFunction(() =>
             fetch(getFileURL(file.id), {
                 headers: {
-                    'X-Auth-Token': this.token,
+                    "X-Auth-Token": this.token,
                 },
-            })
+            }),
         );
     }
 }

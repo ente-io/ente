@@ -1,11 +1,11 @@
-import HTTPService from '@ente/shared/network/HTTPService';
-import { getEndpoint, getUploadEndpoint } from '@ente/shared/network/api';
-import { getToken } from '@ente/shared/storage/localStorage/helpers';
-import { logError } from '@ente/shared/sentry';
-import { EnteFile } from 'types/file';
-import { CustomError, handleUploadError } from '@ente/shared/error';
-import { UploadFile, UploadURL, MultipartUploadURLs } from 'types/upload';
-import { retryHTTPCall } from 'utils/upload/uploadRetrier';
+import { CustomError, handleUploadError } from "@ente/shared/error";
+import HTTPService from "@ente/shared/network/HTTPService";
+import { getEndpoint, getUploadEndpoint } from "@ente/shared/network/api";
+import { logError } from "@ente/shared/sentry";
+import { getToken } from "@ente/shared/storage/localStorage/helpers";
+import { EnteFile } from "types/file";
+import { MultipartUploadURLs, UploadFile, UploadURL } from "types/upload";
+import { retryHTTPCall } from "utils/upload/uploadRetrier";
 
 const ENDPOINT = getEndpoint();
 const UPLOAD_ENDPOINT = getUploadEndpoint();
@@ -24,13 +24,13 @@ class UploadHttpClient {
             const response = await retryHTTPCall(
                 () =>
                     HTTPService.post(`${ENDPOINT}/files`, uploadFile, null, {
-                        'X-Auth-Token': token,
+                        "X-Auth-Token": token,
                     }),
-                handleUploadError
+                handleUploadError,
             );
             return response.data;
         } catch (e) {
-            logError(e, 'upload Files Failed');
+            logError(e, "upload Files Failed");
             throw e;
         }
     }
@@ -48,10 +48,10 @@ class UploadHttpClient {
                         {
                             count: Math.min(MAX_URL_REQUESTS, count * 2),
                         },
-                        { 'X-Auth-Token': token }
+                        { "X-Auth-Token": token },
                     );
                     const response = await this.uploadURLFetchInProgress;
-                    for (const url of response.data['urls']) {
+                    for (const url of response.data["urls"]) {
                         urlStore.push(url);
                     }
                 } finally {
@@ -60,13 +60,13 @@ class UploadHttpClient {
             }
             return this.uploadURLFetchInProgress;
         } catch (e) {
-            logError(e, 'fetch upload-url failed ');
+            logError(e, "fetch upload-url failed ");
             throw e;
         }
     }
 
     async fetchMultipartUploadURLs(
-        count: number
+        count: number,
     ): Promise<MultipartUploadURLs> {
         try {
             const token = getToken();
@@ -78,12 +78,12 @@ class UploadHttpClient {
                 {
                     count,
                 },
-                { 'X-Auth-Token': token }
+                { "X-Auth-Token": token },
             );
 
-            return response.data['urls'];
+            return response.data["urls"];
         } catch (e) {
-            logError(e, 'fetch multipart-upload-url failed');
+            logError(e, "fetch multipart-upload-url failed");
             throw e;
         }
     }
@@ -91,7 +91,7 @@ class UploadHttpClient {
     async putFile(
         fileUploadURL: UploadURL,
         file: Uint8Array,
-        progressTracker
+        progressTracker,
     ): Promise<string> {
         try {
             await retryHTTPCall(
@@ -101,14 +101,14 @@ class UploadHttpClient {
                         file,
                         null,
                         null,
-                        progressTracker
+                        progressTracker,
                     ),
-                handleUploadError
+                handleUploadError,
             );
             return fileUploadURL.objectKey;
         } catch (e) {
             if (e.message !== CustomError.UPLOAD_CANCELLED) {
-                logError(e, 'putFile to dataStore failed ');
+                logError(e, "putFile to dataStore failed ");
             }
             throw e;
         }
@@ -117,7 +117,7 @@ class UploadHttpClient {
     async putFileV2(
         fileUploadURL: UploadURL,
         file: Uint8Array,
-        progressTracker
+        progressTracker,
     ): Promise<string> {
         try {
             await retryHTTPCall(() =>
@@ -126,15 +126,15 @@ class UploadHttpClient {
                     file,
                     null,
                     {
-                        'UPLOAD-URL': fileUploadURL.url,
+                        "UPLOAD-URL": fileUploadURL.url,
                     },
-                    progressTracker
-                )
+                    progressTracker,
+                ),
             );
             return fileUploadURL.objectKey;
         } catch (e) {
             if (e.message !== CustomError.UPLOAD_CANCELLED) {
-                logError(e, 'putFile to dataStore failed ');
+                logError(e, "putFile to dataStore failed ");
             }
             throw e;
         }
@@ -143,7 +143,7 @@ class UploadHttpClient {
     async putFilePart(
         partUploadURL: string,
         filePart: Uint8Array,
-        progressTracker
+        progressTracker,
     ) {
         try {
             const response = await retryHTTPCall(async () => {
@@ -152,11 +152,11 @@ class UploadHttpClient {
                     filePart,
                     null,
                     null,
-                    progressTracker
+                    progressTracker,
                 );
                 if (!resp?.headers?.etag) {
                     const err = Error(CustomError.ETAG_MISSING);
-                    logError(err, 'putFile in parts failed');
+                    logError(err, "putFile in parts failed");
                     throw err;
                 }
                 return resp;
@@ -164,7 +164,7 @@ class UploadHttpClient {
             return response.headers.etag as string;
         } catch (e) {
             if (e.message !== CustomError.UPLOAD_CANCELLED) {
-                logError(e, 'put filePart failed');
+                logError(e, "put filePart failed");
             }
             throw e;
         }
@@ -173,7 +173,7 @@ class UploadHttpClient {
     async putFilePartV2(
         partUploadURL: string,
         filePart: Uint8Array,
-        progressTracker
+        progressTracker,
     ) {
         try {
             const response = await retryHTTPCall(async () => {
@@ -182,13 +182,13 @@ class UploadHttpClient {
                     filePart,
                     null,
                     {
-                        'UPLOAD-URL': partUploadURL,
+                        "UPLOAD-URL": partUploadURL,
                     },
-                    progressTracker
+                    progressTracker,
                 );
                 if (!resp?.data?.etag) {
                     const err = Error(CustomError.ETAG_MISSING);
-                    logError(err, 'putFile in parts failed');
+                    logError(err, "putFile in parts failed");
                     throw err;
                 }
                 return resp;
@@ -196,7 +196,7 @@ class UploadHttpClient {
             return response.data.etag as string;
         } catch (e) {
             if (e.message !== CustomError.UPLOAD_CANCELLED) {
-                logError(e, 'put filePart failed');
+                logError(e, "put filePart failed");
             }
             throw e;
         }
@@ -206,11 +206,11 @@ class UploadHttpClient {
         try {
             await retryHTTPCall(() =>
                 HTTPService.post(completeURL, reqBody, null, {
-                    'content-type': 'text/xml',
-                })
+                    "content-type": "text/xml",
+                }),
             );
         } catch (e) {
-            logError(e, 'put file in parts failed');
+            logError(e, "put file in parts failed");
             throw e;
         }
     }
@@ -223,13 +223,13 @@ class UploadHttpClient {
                     reqBody,
                     null,
                     {
-                        'content-type': 'text/xml',
-                        'UPLOAD-URL': completeURL,
-                    }
-                )
+                        "content-type": "text/xml",
+                        "UPLOAD-URL": completeURL,
+                    },
+                ),
             );
         } catch (e) {
-            logError(e, 'put file in parts failed');
+            logError(e, "put file in parts failed");
             throw e;
         }
     }

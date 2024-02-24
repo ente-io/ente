@@ -1,28 +1,28 @@
-import { ENTE_METADATA_FOLDER } from 'constants/export';
+import { ENTE_METADATA_FOLDER } from "constants/export";
+import exportService from "services/export";
 import {
     ExportedCollectionPaths,
     ExportRecordV0,
     ExportRecordV1,
     ExportRecordV2,
-} from 'types/export';
-import { EnteFile } from 'types/file';
-import { splitFilenameAndExtension } from 'utils/ffmpeg';
-import { getExportRecordFileUID, sanitizeName } from '.';
-import exportService from 'services/export';
+} from "types/export";
+import { EnteFile } from "types/file";
+import { splitFilenameAndExtension } from "utils/ffmpeg";
+import { getExportRecordFileUID, sanitizeName } from ".";
 
 export const convertCollectionIDFolderPathObjectToMap = (
-    exportedCollectionPaths: ExportedCollectionPaths
+    exportedCollectionPaths: ExportedCollectionPaths,
 ): Map<number, string> => {
     return new Map<number, string>(
         Object.entries(exportedCollectionPaths ?? {}).map((e) => {
             return [Number(e[0]), String(e[1])];
-        })
+        }),
     );
 };
 
 export const getExportedFiles = (
     allFiles: EnteFile[],
-    exportRecord: ExportRecordV0 | ExportRecordV1 | ExportRecordV2
+    exportRecord: ExportRecordV0 | ExportRecordV1 | ExportRecordV2,
 ) => {
     if (!exportRecord?.exportedFiles) {
         return [];
@@ -39,17 +39,17 @@ export const getExportedFiles = (
 };
 
 export const oldSanitizeName = (name: string) =>
-    name.replaceAll('/', '_').replaceAll(' ', '_');
+    name.replaceAll("/", "_").replaceAll(" ", "_");
 
 export const getUniqueCollectionFolderPath = (
     dir: string,
-    collectionName: string
+    collectionName: string,
 ): string => {
     let collectionFolderPath = `${dir}/${sanitizeName(collectionName)}`;
     let count = 1;
     while (exportService.exists(collectionFolderPath)) {
         collectionFolderPath = `${dir}/${sanitizeName(
-            collectionName
+            collectionName,
         )}(${count})`;
         count++;
     }
@@ -61,7 +61,7 @@ export const getMetadataFolderPath = (collectionFolderPath: string) =>
 
 export const getUniqueFileSaveName = (
     collectionPath: string,
-    filename: string
+    filename: string,
 ) => {
     let fileSaveName = sanitizeName(filename);
     let count = 1;
@@ -84,31 +84,31 @@ export const getOldFileSaveName = (filename: string, fileID: number) =>
 
 export const getFileMetadataSavePath = (
     collectionFolderPath: string,
-    fileSaveName: string
+    fileSaveName: string,
 ) => `${collectionFolderPath}/${ENTE_METADATA_FOLDER}/${fileSaveName}.json`;
 
 export const getFileSavePath = (
     collectionFolderPath: string,
-    fileSaveName: string
+    fileSaveName: string,
 ) => `${collectionFolderPath}/${fileSaveName}`;
 
 export const getOldCollectionFolderPath = (
     dir: string,
     collectionID: number,
-    collectionName: string
+    collectionName: string,
 ) => `${dir}/${collectionID}_${oldSanitizeName(collectionName)}`;
 
 export const getOldFileSavePath = (
     collectionFolderPath: string,
-    file: EnteFile
+    file: EnteFile,
 ) =>
     `${collectionFolderPath}/${file.id}_${oldSanitizeName(
-        file.metadata.title
+        file.metadata.title,
     )}`;
 
 export const getOldFileMetadataSavePath = (
     collectionFolderPath: string,
-    file: EnteFile
+    file: EnteFile,
 ) =>
     `${collectionFolderPath}/${ENTE_METADATA_FOLDER}/${
         file.id
@@ -117,7 +117,7 @@ export const getOldFileMetadataSavePath = (
 export const getUniqueFileExportNameForMigration = (
     collectionPath: string,
     filename: string,
-    usedFilePaths: Map<string, Set<string>>
+    usedFilePaths: Map<string, Set<string>>,
 ) => {
     let fileExportName = sanitizeName(filename);
     let count = 1;

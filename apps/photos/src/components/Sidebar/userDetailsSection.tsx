@@ -1,21 +1,21 @@
-import React, { useContext, useEffect, useMemo, useState } from 'react';
-import SubscriptionCard from './SubscriptionCard';
-import { getUserDetailsV2 } from 'services/userService';
-import { UserDetails } from 'types/user';
-import { getData, LS_KEYS, setData } from '@ente/shared/storage/localStorage';
-import { useLocalState } from '@ente/shared/hooks/useLocalState';
-import Typography from '@mui/material/Typography';
-import SubscriptionStatus from './SubscriptionStatus';
-import { Box, Skeleton } from '@mui/material';
-import { MemberSubscriptionManage } from '../MemberSubscriptionManage';
-import { GalleryContext } from 'pages/gallery';
-import { isFamilyAdmin, isPartOfFamily } from 'utils/user/family';
+import { useLocalState } from "@ente/shared/hooks/useLocalState";
+import { LS_KEYS, getData, setData } from "@ente/shared/storage/localStorage";
+import { Box, Skeleton } from "@mui/material";
+import Typography from "@mui/material/Typography";
+import { GalleryContext } from "pages/gallery";
+import { useContext, useEffect, useMemo, useState } from "react";
+import { getUserDetailsV2 } from "services/userService";
+import { UserDetails } from "types/user";
+import { isFamilyAdmin, isPartOfFamily } from "utils/user/family";
+import { MemberSubscriptionManage } from "../MemberSubscriptionManage";
+import SubscriptionCard from "./SubscriptionCard";
+import SubscriptionStatus from "./SubscriptionStatus";
 
 export default function UserDetailsSection({ sidebarView }) {
     const galleryContext = useContext(GalleryContext);
 
     const [userDetails, setUserDetails] = useLocalState<UserDetails>(
-        LS_KEYS.USER_DETAILS
+        LS_KEYS.USER_DETAILS,
     );
     const [memberSubscriptionManageView, setMemberSubscriptionManageView] =
         useState(false);
@@ -47,7 +47,7 @@ export default function UserDetailsSection({ sidebarView }) {
             userDetails &&
             isPartOfFamily(userDetails.familyData) &&
             !isFamilyAdmin(userDetails.familyData),
-        [userDetails]
+        [userDetails],
     );
 
     const handleSubscriptionCardClick = isMemberSubscription

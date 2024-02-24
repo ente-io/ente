@@ -1,7 +1,6 @@
-import { Box } from '@mui/material';
-import { styled } from '@mui/material';
-import { Overlay } from '@ente/shared/components/Container';
-import { IMAGE_CONTAINER_MAX_WIDTH, MIN_COLUMNS } from 'constants/gallery';
+import { Overlay } from "@ente/shared/components/Container";
+import { Box, styled } from "@mui/material";
+import { IMAGE_CONTAINER_MAX_WIDTH, MIN_COLUMNS } from "constants/gallery";
 export const CollectionListWrapper = styled(Box)`
     position: relative;
     overflow: hidden;
@@ -23,7 +22,7 @@ export const CollectionInfoBarWrapper = styled(Box)`
     margin-bottom: 12px;
 `;
 
-export const ScrollContainer = styled('div')`
+export const ScrollContainer = styled("div")`
     width: 100%;
     height: 120px;
     overflow: auto;
@@ -32,7 +31,7 @@ export const ScrollContainer = styled('div')`
     gap: 4px;
 `;
 
-export const CollectionTile = styled('div')`
+export const CollectionTile = styled("div")`
     display: flex;
     position: relative;
     border-radius: 4px;
@@ -47,7 +46,7 @@ export const CollectionTile = styled('div')`
     user-select: none;
 `;
 
-export const ActiveIndicator = styled('div')`
+export const ActiveIndicator = styled("div")`
     height: 3px;
     background-color: ${({ theme }) => theme.palette.primary.main};
     margin-top: 18px;

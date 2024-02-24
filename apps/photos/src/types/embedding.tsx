@@ -1,6 +1,6 @@
 export enum Model {
-    GGML_CLIP = 'ggml-clip',
-    ONNX_CLIP = 'onnx-clip',
+    GGML_CLIP = "ggml-clip",
+    ONNX_CLIP = "onnx-clip",
 }
 
 export interface EncryptedEmbedding {
@@ -14,7 +14,7 @@ export interface EncryptedEmbedding {
 export interface Embedding
     extends Omit<
         EncryptedEmbedding,
-        'encryptedEmbedding' | 'decryptionHeader'
+        "encryptedEmbedding" | "decryptionHeader"
     > {
     embedding: Float32Array;
 }

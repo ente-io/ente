@@ -1,22 +1,22 @@
-import * as Comlink from 'comlink';
-import { LimitedCache } from '@ente/shared/storage/cacheStorage/types';
+import { runningInWorker } from "@ente/shared/platform";
+import { LimitedCache } from "@ente/shared/storage/cacheStorage/types";
+import * as Comlink from "comlink";
+import { wrap } from "comlink";
+import { ElectronAPIsType } from "./types";
 import {
     ProxiedWorkerLimitedCache,
     WorkerSafeElectronClient,
-} from './worker/client';
-import { wrap } from 'comlink';
-import { deserializeToResponse, serializeResponse } from './worker/utils/proxy';
-import { runningInWorker } from '@ente/shared/platform';
-import { ElectronAPIsType } from './types';
+} from "./worker/client";
+import { deserializeToResponse, serializeResponse } from "./worker/utils/proxy";
 
 export interface LimitedElectronAPIs
     extends Pick<
         ElectronAPIsType,
-        | 'openDiskCache'
-        | 'deleteDiskCache'
-        | 'getSentryUserID'
-        | 'convertToJPEG'
-        | 'logToDisk'
+        | "openDiskCache"
+        | "deleteDiskCache"
+        | "getSentryUserID"
+        | "convertToJPEG"
+        | "logToDisk"
     > {}
 
 class WorkerSafeElectronServiceImpl implements LimitedElectronAPIs {
@@ -42,7 +42,7 @@ class WorkerSafeElectronServiceImpl implements LimitedElectronAPIs {
         await this.ready;
         const cache = await this.proxiedElectron.openDiskCache(
             cacheName,
-            cacheLimitInBytes
+            cacheLimitInBytes,
         );
         return {
             match: transformMatch(cache.match.bind(cache)),
@@ -62,7 +62,7 @@ class WorkerSafeElectronServiceImpl implements LimitedElectronAPIs {
     }
     async convertToJPEG(
         inputFileData: Uint8Array,
-        filename: string
+        filename: string,
     ): Promise<Uint8Array> {
         await this.ready;
         return this.proxiedElectron.convertToJPEG(inputFileData, filename);
@@ -76,16 +76,16 @@ class WorkerSafeElectronServiceImpl implements LimitedElectronAPIs {
 export const WorkerSafeElectronService = new WorkerSafeElectronServiceImpl();
 
 function transformMatch(
-    fn: ProxiedWorkerLimitedCache['match']
-): LimitedCache['match'] {
+    fn: ProxiedWorkerLimitedCache["match"],
+): LimitedCache["match"] {
     return async (key: string, options) => {
         return deserializeToResponse(await fn(key, options));
     };
 }
 
 function transformPut(
-    fn: ProxiedWorkerLimitedCache['put']
-): LimitedCache['put'] {
+    fn: ProxiedWorkerLimitedCache["put"],
+): LimitedCache["put"] {
     return async (key: string, data: Response) => {
         fn(key, await serializeResponse(data));
     };

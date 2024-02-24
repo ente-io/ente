@@ -1,9 +1,9 @@
-import { VerticallyCentered } from '@ente/shared/components/Container';
-import React, { useEffect, useState } from 'react';
-import { t } from 'i18next';
+import { VerticallyCentered } from "@ente/shared/components/Container";
+import { t } from "i18next";
+import { useEffect, useState } from "react";
 
-import EnteSpinner from '@ente/shared/components/EnteSpinner';
-import { PageProps } from '@ente/shared/apps/types';
+import { PageProps } from "@ente/shared/apps/types";
+import EnteSpinner from "@ente/shared/components/EnteSpinner";
 
 export default function NotFound({ appContext }: PageProps) {
     const [loading, setLoading] = useState(true);
@@ -13,7 +13,7 @@ export default function NotFound({ appContext }: PageProps) {
     }, []);
     return (
         <VerticallyCentered>
-            {loading ? <EnteSpinner /> : t('NOT_FOUND')}
+            {loading ? <EnteSpinner /> : t("NOT_FOUND")}
         </VerticallyCentered>
     );
 }

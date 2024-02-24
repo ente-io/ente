@@ -1,4 +1,4 @@
-import { Stack, TextField, Typography, TypographyProps } from '@mui/material';
+import { Stack, TextField, Typography, TypographyProps } from "@mui/material";
 
 interface Iprops {
     label: string;
@@ -22,7 +22,7 @@ export default function MultilineInput({
     onChange,
 }: Iprops) {
     return (
-        <Stack spacing={'4px'}>
+        <Stack spacing={"4px"}>
             <Typography {...labelProps}>{label}</Typography>
             <TextField
                 variant="standard"
@@ -32,22 +32,23 @@ export default function MultilineInput({
                 onChange={(e) => onChange(e.target.value)}
                 placeholder={placeholder}
                 sx={(theme) => ({
-                    border: '1px solid',
+                    border: "1px solid",
                     borderColor: theme.colors.stroke.faint,
-                    borderRadius: '8px',
-                    padding: '12px',
-                    '.MuiInputBase-formControl': {
-                        '::before, ::after': {
-                            borderBottom: 'none !important',
+                    borderRadius: "8px",
+                    padding: "12px",
+                    ".MuiInputBase-formControl": {
+                        "::before, ::after": {
+                            borderBottom: "none !important",
                         },
                     },
                 })}
             />
             <Typography
-                px={'8px'}
+                px={"8px"}
                 variant="small"
                 color="text.secondary"
-                {...messageProps}>
+                {...messageProps}
+            >
                 {message}
             </Typography>
         </Stack>

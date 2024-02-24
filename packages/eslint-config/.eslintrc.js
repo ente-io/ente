@@ -1,9 +1,9 @@
 module.exports = {
-    extends: ['@ente/eslint-config'],
-    parser: '@typescript-eslint/parser',
+    extends: ["@ente/eslint-config"],
+    parser: "@typescript-eslint/parser",
     parserOptions: {
         tsconfigRootDir: __dirname,
-        project: './tsconfig.json',
+        project: "./tsconfig.json",
     },
-    ignorePatterns: ['.eslintrc.js'],
+    ignorePatterns: [".eslintrc.js"],
 };

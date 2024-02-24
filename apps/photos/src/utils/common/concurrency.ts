@@ -1,4 +1,4 @@
-import { runningInBrowser } from '.';
+import { runningInBrowser } from ".";
 
 export const getConcurrency = () =>
     runningInBrowser() &&

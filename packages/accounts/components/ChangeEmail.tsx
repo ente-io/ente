@@ -1,18 +1,18 @@
-import { Formik, FormikHelpers } from 'formik';
-import React, { useRef, useState } from 'react';
-import * as Yup from 'yup';
-import SubmitButton from '@ente/shared/components/SubmitButton';
-import { changeEmail, sendOTTForEmailChange } from '@ente/accounts/api/user';
-import { getData, LS_KEYS, setData } from '@ente/shared/storage/localStorage';
-import { Alert, Box, TextField } from '@mui/material';
-import { VerticallyCentered } from '@ente/shared/components/Container';
-import LinkButton from '@ente/shared/components/LinkButton';
-import FormPaperFooter from '@ente/shared/components/Form/FormPaper/Footer';
-import { sleep } from '@ente/shared/utils';
-import { Trans } from 'react-i18next';
-import { t } from 'i18next';
-import { APP_HOMES } from '@ente/shared/apps/constants';
-import { PageProps } from '@ente/shared/apps/types';
+import { changeEmail, sendOTTForEmailChange } from "@ente/accounts/api/user";
+import { APP_HOMES } from "@ente/shared/apps/constants";
+import { PageProps } from "@ente/shared/apps/types";
+import { VerticallyCentered } from "@ente/shared/components/Container";
+import FormPaperFooter from "@ente/shared/components/Form/FormPaper/Footer";
+import LinkButton from "@ente/shared/components/LinkButton";
+import SubmitButton from "@ente/shared/components/SubmitButton";
+import { LS_KEYS, getData, setData } from "@ente/shared/storage/localStorage";
+import { sleep } from "@ente/shared/utils";
+import { Alert, Box, TextField } from "@mui/material";
+import { Formik, FormikHelpers } from "formik";
+import { t } from "i18next";
+import { useRef, useState } from "react";
+import { Trans } from "react-i18next";
+import * as Yup from "yup";
 
 interface formValues {
     email: string;
@@ -29,7 +29,7 @@ function ChangeEmailForm({ appName, router }: PageProps) {
 
     const requestOTT = async (
         { email }: formValues,
-        { setFieldError }: FormikHelpers<formValues>
+        { setFieldError }: FormikHelpers<formValues>,
     ) => {
         try {
             setLoading(true);
@@ -41,14 +41,14 @@ function ChangeEmailForm({ appName, router }: PageProps) {
                 ottInputRef.current?.focus();
             }, 250);
         } catch (e) {
-            setFieldError('email', t('EMAIl_ALREADY_OWNED'));
+            setFieldError("email", t("EMAIl_ALREADY_OWNED"));
         }
         setLoading(false);
     };
 
     const requestEmailChange = async (
         { email, ott }: formValues,
-        { setFieldError }: FormikHelpers<formValues>
+        { setFieldError }: FormikHelpers<formValues>,
     ) => {
         try {
             setLoading(true);
@@ -60,7 +60,7 @@ function ChangeEmailForm({ appName, router }: PageProps) {
             goToApp();
         } catch (e) {
             setLoading(false);
-            setFieldError('ott', t('INCORRECT_CODE'));
+            setFieldError("ott", t("INCORRECT_CODE"));
         }
     };
 
@@ -70,29 +70,31 @@ function ChangeEmailForm({ appName, router }: PageProps) {
 
     return (
         <Formik<formValues>
-            initialValues={{ email: '' }}
+            initialValues={{ email: "" }}
             validationSchema={Yup.object().shape({
                 email: Yup.string()
-                    .email(t('EMAIL_ERROR'))
-                    .required(t('REQUIRED')),
-                ott: ottInputVisible && Yup.string().required(t('REQUIRED')),
+                    .email(t("EMAIL_ERROR"))
+                    .required(t("REQUIRED")),
+                ott: ottInputVisible && Yup.string().required(t("REQUIRED")),
             })}
             validateOnChange={false}
             validateOnBlur={false}
-            onSubmit={!ottInputVisible ? requestOTT : requestEmailChange}>
+            onSubmit={!ottInputVisible ? requestOTT : requestEmailChange}
+        >
             {({ values, errors, handleChange, handleSubmit }) => (
                 <>
                     {showMessage && (
                         <Alert
                             color="success"
-                            onClose={() => setShowMessage(false)}>
+                            onClose={() => setShowMessage(false)}
+                        >
                             <Trans
                                 i18nKey="EMAIL_SENT"
                                 components={{
                                     a: (
                                         <Box
                                             color="text.muted"
-                                            component={'span'}
+                                            component={"span"}
                                         />
                                     ),
                                 }}
@@ -108,9 +110,9 @@ function ChangeEmailForm({ appName, router }: PageProps) {
                                     readOnly: ottInputVisible,
                                 }}
                                 type="email"
-                                label={t('ENTER_EMAIL')}
+                                label={t("ENTER_EMAIL")}
                                 value={values.email}
-                                onChange={handleChange('email')}
+                                onChange={handleChange("email")}
                                 error={Boolean(errors.email)}
                                 helperText={errors.email}
                                 autoFocus
@@ -120,9 +122,9 @@ function ChangeEmailForm({ appName, router }: PageProps) {
                                 <TextField
                                     fullWidth
                                     type="text"
-                                    label={t('ENTER_OTT')}
+                                    label={t("ENTER_OTT")}
                                     value={values.ott}
-                                    onChange={handleChange('ott')}
+                                    onChange={handleChange("ott")}
                                     error={Boolean(errors.ott)}
                                     helperText={errors.ott}
                                     disabled={loading}
@@ -134,8 +136,8 @@ function ChangeEmailForm({ appName, router }: PageProps) {
                                 loading={loading}
                                 buttonText={
                                     !ottInputVisible
-                                        ? t('SEND_OTT')
-                                        : t('VERIFY')
+                                        ? t("SEND_OTT")
+                                        : t("VERIFY")
                                 }
                             />
                         </VerticallyCentered>
@@ -143,18 +145,18 @@ function ChangeEmailForm({ appName, router }: PageProps) {
 
                     <FormPaperFooter
                         style={{
-                            justifyContent: ottInputVisible && 'space-between',
-                        }}>
+                            justifyContent: ottInputVisible && "space-between",
+                        }}
+                    >
                         {ottInputVisible && (
                             <LinkButton
-                                onClick={() =>
-                                    setShowOttInputVisibility(false)
-                                }>
-                                {t('CHANGE_EMAIL')}?
+                                onClick={() => setShowOttInputVisibility(false)}
+                            >
+                                {t("CHANGE_EMAIL")}?
                             </LinkButton>
                         )}
                         <LinkButton onClick={goToApp}>
-                            {t('GO_BACK')}
+                            {t("GO_BACK")}
                         </LinkButton>
                     </FormPaperFooter>
                 </>

@@ -1,10 +1,10 @@
-import { Box, DialogProps } from '@mui/material';
-import { EnteDrawer } from 'components/EnteDrawer';
-import { AppContext } from 'pages/_app';
-import { useContext } from 'react';
-import { logError } from '@ente/shared/sentry';
-import EnableMap from '../EnableMap';
-import DisableMap from '../DisableMap';
+import { logError } from "@ente/shared/sentry";
+import { Box, DialogProps } from "@mui/material";
+import { EnteDrawer } from "components/EnteDrawer";
+import { AppContext } from "pages/_app";
+import { useContext } from "react";
+import DisableMap from "../DisableMap";
+import EnableMap from "../EnableMap";
 
 const ModifyMapEnabled = ({ open, onClose, onRootClose, mapEnabled }) => {
     const { somethingWentWrong, updateMapEnabled } = useContext(AppContext);
@@ -14,7 +14,7 @@ const ModifyMapEnabled = ({ open, onClose, onRootClose, mapEnabled }) => {
             await updateMapEnabled(false);
             onClose();
         } catch (e) {
-            logError(e, 'Disable Map failed');
+            logError(e, "Disable Map failed");
             somethingWentWrong();
         }
     };
@@ -24,7 +24,7 @@ const ModifyMapEnabled = ({ open, onClose, onRootClose, mapEnabled }) => {
             await updateMapEnabled(true);
             onClose();
         } catch (e) {
-            logError(e, 'Enable Map failed');
+            logError(e, "Enable Map failed");
             somethingWentWrong();
         }
     };
@@ -34,8 +34,8 @@ const ModifyMapEnabled = ({ open, onClose, onRootClose, mapEnabled }) => {
         onRootClose();
     };
 
-    const handleDrawerClose: DialogProps['onClose'] = (_, reason) => {
-        if (reason === 'backdropClick') {
+    const handleDrawerClose: DialogProps["onClose"] = (_, reason) => {
+        if (reason === "backdropClick") {
             handleRootClose();
         } else {
             onClose();
@@ -51,9 +51,10 @@ const ModifyMapEnabled = ({ open, onClose, onRootClose, mapEnabled }) => {
                 onClose={handleDrawerClose}
                 slotProps={{
                     backdrop: {
-                        sx: { '&&&': { backgroundColor: 'transparent' } },
+                        sx: { "&&&": { backgroundColor: "transparent" } },
                     },
-                }}>
+                }}
+            >
                 {mapEnabled ? (
                     <DisableMap
                         onClose={onClose}

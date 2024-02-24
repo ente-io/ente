@@ -96,16 +96,16 @@ export function tryToParseDateTime(dateTime: string): Date {
     if (dateComponent.year?.length === 8 && dateComponent.month?.length === 6) {
         // the filename has size 8 consecutive and then 6 consecutive digits
         // high possibility that the it is a date in format YYYYMMDD-HHMMSS
-        const possibleDateTime = dateComponent.year + '-' + dateComponent.month;
+        const possibleDateTime = dateComponent.year + "-" + dateComponent.month;
         return parseDateFromFusedDateString(possibleDateTime);
     }
     return validateAndGetDateFromComponents(
-        convertDateComponentToNumber(dateComponent)
+        convertDateComponentToNumber(dateComponent),
     );
 }
 
 function getDateComponentsFromSymbolJoinedString(
-    dateTime: string
+    dateTime: string,
 ): DateComponent<string> {
     const [year, month, day, hour, minute, second] =
         dateTime.match(/\d+/g) ?? [];
@@ -115,7 +115,7 @@ function getDateComponentsFromSymbolJoinedString(
 
 function validateAndGetDateFromComponents(
     dateComponent: DateComponent<number>,
-    options = { minYear: 1990, maxYear: currentYear + 1 }
+    options = { minYear: 1990, maxYear: currentYear + 1 },
 ) {
     let date = getDateFromComponents(dateComponent);
     if (hasTimeValues(dateComponent) && !isTimePartValid(date, dateComponent)) {
@@ -152,7 +152,7 @@ function isDatePartValid(date: Date, dateComponent: DateComponent<number>) {
 }
 
 function convertDateComponentToNumber(
-    dateComponent: DateComponent<string>
+    dateComponent: DateComponent<string>,
 ): DateComponent<number> {
     return {
         year: Number(dateComponent.year),
@@ -180,7 +180,7 @@ function hasTimeValues(dateComponent: DateComponent<number>) {
 }
 
 function removeTimeValues(
-    dateComponent: DateComponent<number>
+    dateComponent: DateComponent<number>,
 ): DateComponent<number> {
     return { ...dateComponent, hour: 0, minute: 0, second: 0 };
 }

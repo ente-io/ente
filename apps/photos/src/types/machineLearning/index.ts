@@ -1,4 +1,4 @@
-import * as tf from '@tensorflow/tfjs-core';
+import * as tf from "@tensorflow/tfjs-core";
 
 // import {
 //     FaceDetection,
@@ -6,13 +6,13 @@ import * as tf from '@tensorflow/tfjs-core';
 //     WithFaceDescriptor,
 //     WithFaceLandmarks,
 // } from 'face-api.js';
-import { DebugInfo } from 'hdbscan';
-import PQueue from 'p-queue';
+import { DebugInfo } from "hdbscan";
+import PQueue from "p-queue";
 
 // import { Point as D3Point, RawNodeDatum } from 'react-d3-tree/lib/types/common';
-import { EnteFile } from 'types/file';
-import { Dimensions } from 'types/image';
-import { Box, Point } from '../../../thirdparty/face-api/classes';
+import { EnteFile } from "types/file";
+import { Dimensions } from "types/image";
+import { Box, Point } from "../../../thirdparty/face-api/classes";
 
 export interface MLSyncResult {
     nOutOfSyncFiles: number;
@@ -87,24 +87,24 @@ export interface NearestCluster {
 
 export declare type Landmark = Point;
 
-export declare type ImageType = 'Original' | 'Preview';
+export declare type ImageType = "Original" | "Preview";
 
-export declare type FaceDetectionMethod = 'BlazeFace' | 'FaceApiSSD';
+export declare type FaceDetectionMethod = "BlazeFace" | "FaceApiSSD";
 
-export declare type ObjectDetectionMethod = 'SSDMobileNetV2';
+export declare type ObjectDetectionMethod = "SSDMobileNetV2";
 
-export declare type SceneDetectionMethod = 'ImageScene';
+export declare type SceneDetectionMethod = "ImageScene";
 
-export declare type FaceCropMethod = 'ArcFace';
+export declare type FaceCropMethod = "ArcFace";
 
 export declare type FaceAlignmentMethod =
-    | 'ArcFace'
-    | 'FaceApiDlib'
-    | 'RotatedFaceApiDlib';
+    | "ArcFace"
+    | "FaceApiDlib"
+    | "RotatedFaceApiDlib";
 
-export declare type FaceEmbeddingMethod = 'MobileFaceNet' | 'FaceApiDlib';
+export declare type FaceEmbeddingMethod = "MobileFaceNet" | "FaceApiDlib";
 
-export declare type ClusteringMethod = 'Hdbscan' | 'Dbscan';
+export declare type ClusteringMethod = "Hdbscan" | "Dbscan";
 
 export class AlignedBox {
     box: Box;
@@ -262,7 +262,7 @@ export interface FaceEmbeddingConfig {
 
 export interface FaceClusteringConfig extends ClusteringConfig {}
 
-export declare type TSNEMetric = 'euclidean' | 'manhattan';
+export declare type TSNEMetric = "euclidean" | "manhattan";
 
 export interface TSNEConfig {
     samples: number;
@@ -345,7 +345,7 @@ export interface MLLibraryData {
     faceClustersWithNoise?: FacesClustersWithNoise;
 }
 
-export declare type MLIndex = 'files' | 'people';
+export declare type MLIndex = "files" | "people";
 
 export interface FaceDetectionService {
     method: Versioned<FaceDetectionMethod>;
@@ -360,7 +360,7 @@ export interface ObjectDetectionService {
     detectObjects(
         image: ImageBitmap,
         maxNumBoxes: number,
-        minScore: number
+        minScore: number,
     ): Promise<ObjectDetection[]>;
     dispose(): Promise<void>;
 }
@@ -370,7 +370,7 @@ export interface SceneDetectionService {
     // init(): Promise<void>;
     detectScenes(
         image: ImageBitmap,
-        minScore: number
+        minScore: number,
     ): Promise<ObjectDetection[]>;
 }
 
@@ -380,7 +380,7 @@ export interface FaceCropService {
     getFaceCrop(
         imageBitmap: ImageBitmap,
         face: FaceDetection,
-        config: FaceCropConfig
+        config: FaceCropConfig,
     ): Promise<FaceCrop>;
 }
 
@@ -394,7 +394,7 @@ export interface FaceEmbeddingService {
     faceSize: number;
     // init(): Promise<void>;
     getFaceEmbeddings(
-        faceImages: Array<ImageBitmap>
+        faceImages: Array<ImageBitmap>,
     ): Promise<Array<FaceEmbedding>>;
     dispose(): Promise<void>;
 }
@@ -404,7 +404,7 @@ export interface ClusteringService {
 
     cluster(
         input: ClusteringInput,
-        config: ClusteringConfig
+        config: ClusteringConfig,
     ): Promise<ClusteringResults>;
 }
 
@@ -413,7 +413,7 @@ export interface ClusteringConfig {
     minClusterSize: number;
     minSamples?: number;
     clusterSelectionEpsilon?: number;
-    clusterSelectionMethod?: 'eom' | 'leaf';
+    clusterSelectionMethod?: "eom" | "leaf";
     maxDistanceInsideCluster?: number;
     minInputSize?: number;
     generateDebugInfo?: boolean;
@@ -428,7 +428,7 @@ export interface MachineLearningWorker {
         token: string,
         userID: number,
         enteFile: EnteFile,
-        localFile: globalThis.File
+        localFile: globalThis.File,
     ): Promise<MlFileData | Error>;
 
     sync(token: string, userID: number): Promise<MLSyncResult>;

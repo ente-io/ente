@@ -1,10 +1,10 @@
-import { DataStream } from 'types/upload';
-import ElectronAPIs from '@ente/shared/electron';
-import { FILE_READER_CHUNK_SIZE, PICKED_UPLOAD_TYPE } from 'constants/upload';
-import { getFileStream, getElectronFileStream } from 'services/readerService';
-import { getFileNameSize } from '@ente/shared/logging/web';
-import isElectron from 'is-electron';
-import { getImportSuggestion } from 'utils/upload';
+import ElectronAPIs from "@ente/shared/electron";
+import { getFileNameSize } from "@ente/shared/logging/web";
+import { FILE_READER_CHUNK_SIZE, PICKED_UPLOAD_TYPE } from "constants/upload";
+import isElectron from "is-electron";
+import { getElectronFileStream, getFileStream } from "services/readerService";
+import { DataStream } from "types/upload";
+import { getImportSuggestion } from "utils/upload";
 
 // This was for used to verify that converting from the browser readable stream
 // to the node readable stream correctly handles files that align on the 4 MB
@@ -13,24 +13,24 @@ import { getImportSuggestion } from 'utils/upload';
 export const testZipFileReading = async () => {
     try {
         if (!isElectron()) {
-            console.log('testZipFileReading Check is for desktop only');
+            console.log("testZipFileReading Check is for desktop only");
             return;
         }
         if (!process.env.NEXT_PUBLIC_FILE_READING_TEST_ZIP_PATH) {
             throw Error(
-                'upload test failed NEXT_PUBLIC_FILE_READING_TEST_ZIP_PATH missing'
+                "upload test failed NEXT_PUBLIC_FILE_READING_TEST_ZIP_PATH missing",
             );
         }
         const files = await ElectronAPIs.getElectronFilesFromGoogleZip(
-            process.env.NEXT_PUBLIC_FILE_READING_TEST_ZIP_PATH
+            process.env.NEXT_PUBLIC_FILE_READING_TEST_ZIP_PATH,
         );
         if (!files?.length) {
             throw Error(
                 `testZipFileReading Check failed ❌
-                No files selected`
+                No files selected`,
             );
         }
-        console.log('test zip file reading check started');
+        console.log("test zip file reading check started");
         let i = 0;
         for (const file of files) {
             i++;
@@ -40,7 +40,7 @@ export const testZipFileReading = async () => {
             } else {
                 filedata = await getElectronFileStream(
                     file,
-                    FILE_READER_CHUNK_SIZE
+                    FILE_READER_CHUNK_SIZE,
                 );
             }
             const streamReader = filedata.stream.getReader();
@@ -50,10 +50,10 @@ export const testZipFileReading = async () => {
                     throw Error(
                         `testZipFileReading Check failed ❌
                         ${getFileNameSize(
-                            file
+                            file,
                         )} less than expected chunks, expected: ${
                             filedata.chunkCount
-                        }, got ${i - 1}`
+                        }, got ${i - 1}`,
                     );
                 }
             }
@@ -63,15 +63,15 @@ export const testZipFileReading = async () => {
                 throw Error(
                     `testZipFileReading Check failed ❌
                      ${getFileNameSize(
-                         file
+                         file,
                      )}  more than expected chunks, expected: ${
                          filedata.chunkCount
-                     }`
+                     }`,
                 );
             }
             console.log(`${i}/${files.length} passed ✅`);
         }
-        console.log('test zip file reading check passed ✅');
+        console.log("test zip file reading check passed ✅");
     } catch (e) {
         console.log(e);
     }
@@ -82,29 +82,29 @@ export const testZipFileReading = async () => {
 export const testZipWithRootFileReadingTest = async () => {
     try {
         if (!isElectron()) {
-            console.log('testZipFileReading Check is for desktop only');
+            console.log("testZipFileReading Check is for desktop only");
             return;
         }
         if (!process.env.NEXT_PUBLIC_ZIP_WITH_ROOT_FILE_PATH) {
             throw Error(
-                'upload test failed NEXT_PUBLIC_ZIP_WITH_ROOT_FILE_PATH missing'
+                "upload test failed NEXT_PUBLIC_ZIP_WITH_ROOT_FILE_PATH missing",
             );
         }
         const files = await ElectronAPIs.getElectronFilesFromGoogleZip(
-            process.env.NEXT_PUBLIC_ZIP_WITH_ROOT_FILE_PATH
+            process.env.NEXT_PUBLIC_ZIP_WITH_ROOT_FILE_PATH,
         );
 
         const importSuggestion = getImportSuggestion(
             PICKED_UPLOAD_TYPE.ZIPS,
-            files
+            files,
         );
         if (!importSuggestion.rootFolderName) {
             throw Error(
                 `testZipWithRootFileReadingTest Check failed ❌
-            rootFolderName is missing`
+            rootFolderName is missing`,
             );
         }
-        console.log('testZipWithRootFileReadingTest passed ✅');
+        console.log("testZipWithRootFileReadingTest passed ✅");
     } catch (e) {
         console.log(e);
     }

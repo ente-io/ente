@@ -1,9 +1,9 @@
-import { EnteMenuItem } from 'components/Menu/EnteMenuItem';
-import { AppContext } from 'pages/_app';
-import React, { useContext } from 'react';
-import { Trans } from 'react-i18next';
-import { t } from 'i18next';
-import { PublicURL, Collection, UpdatePublicURL } from 'types/collection';
+import { EnteMenuItem } from "components/Menu/EnteMenuItem";
+import { t } from "i18next";
+import { AppContext } from "pages/_app";
+import { useContext } from "react";
+import { Trans } from "react-i18next";
+import { Collection, PublicURL, UpdatePublicURL } from "types/collection";
 interface Iprops {
     publicShareProp: PublicURL;
     collection: Collection;
@@ -30,17 +30,17 @@ export function ManageDownloadAccess({
 
     const disableFileDownload = () => {
         appContext.setDialogMessage({
-            title: t('DISABLE_FILE_DOWNLOAD'),
-            content: <Trans i18nKey={'DISABLE_FILE_DOWNLOAD_MESSAGE'} />,
-            close: { text: t('CANCEL') },
+            title: t("DISABLE_FILE_DOWNLOAD"),
+            content: <Trans i18nKey={"DISABLE_FILE_DOWNLOAD_MESSAGE"} />,
+            close: { text: t("CANCEL") },
             proceed: {
-                text: t('DISABLE'),
+                text: t("DISABLE"),
                 action: () =>
                     updatePublicShareURLHelper({
                         collectionID: collection.id,
                         enableDownload: false,
                     }),
-                variant: 'critical',
+                variant: "critical",
             },
         });
     };
@@ -49,7 +49,7 @@ export function ManageDownloadAccess({
             checked={publicShareProp?.enableDownload ?? true}
             onClick={handleFileDownloadSetting}
             variant="toggle"
-            label={t('FILE_DOWNLOAD')}
+            label={t("FILE_DOWNLOAD")}
         />
     );
 }

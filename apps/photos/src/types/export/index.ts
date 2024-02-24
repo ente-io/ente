@@ -1,5 +1,5 @@
-import { ExportStage } from 'constants/export';
-import { EnteFile } from 'types/file';
+import { ExportStage } from "constants/export";
+import { EnteFile } from "types/file";
 
 export interface ExportProgress {
     success: number;

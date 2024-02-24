@@ -1,13 +1,13 @@
-import React, { useState } from 'react';
-import { Formik } from 'formik';
-import * as Yup from 'yup';
-import SubmitButton from '@ente/shared/components/SubmitButton';
-import { Box, Input, TextField, Typography } from '@mui/material';
-import { PasswordStrengthHint } from './PasswordStrength';
-import { isWeakPassword } from '@ente/accounts/utils';
-import { Trans } from 'react-i18next';
-import { t } from 'i18next';
-import ShowHidePassword from '@ente/shared/components/Form/ShowHidePassword';
+import { isWeakPassword } from "@ente/accounts/utils";
+import ShowHidePassword from "@ente/shared/components/Form/ShowHidePassword";
+import SubmitButton from "@ente/shared/components/SubmitButton";
+import { Box, Input, TextField, Typography } from "@mui/material";
+import { Formik } from "formik";
+import { t } from "i18next";
+import React, { useState } from "react";
+import { Trans } from "react-i18next";
+import * as Yup from "yup";
+import { PasswordStrengthHint } from "./PasswordStrength";
 
 export interface SetPasswordFormProps {
     userEmail: string;
@@ -15,8 +15,8 @@ export interface SetPasswordFormProps {
         passphrase: string,
         setFieldError: (
             field: keyof SetPasswordFormValues,
-            message: string
-        ) => void
+            message: string,
+        ) => void,
     ) => Promise<void>;
     buttonText: string;
 }
@@ -33,7 +33,7 @@ function SetPasswordForm(props: SetPasswordFormProps) {
     };
 
     const handleMouseDownPassword = (
-        event: React.MouseEvent<HTMLButtonElement>
+        event: React.MouseEvent<HTMLButtonElement>,
     ) => {
         event.preventDefault();
     };
@@ -45,9 +45,9 @@ function SetPasswordForm(props: SetPasswordFormProps) {
         }: {
             setFieldError: (
                 field: keyof SetPasswordFormValues,
-                message: string
+                message: string,
             ) => void;
-        }
+        },
     ) => {
         setLoading(true);
         try {
@@ -55,10 +55,10 @@ function SetPasswordForm(props: SetPasswordFormProps) {
             if (passphrase === confirm) {
                 await props.callback(passphrase, setFieldError);
             } else {
-                setFieldError('confirm', t('PASSPHRASE_MATCH_ERROR'));
+                setFieldError("confirm", t("PASSPHRASE_MATCH_ERROR"));
             }
         } catch (e) {
-            setFieldError('confirm', `${t('UNKNOWN_ERROR')} ${e.message}`);
+            setFieldError("confirm", `${t("UNKNOWN_ERROR")} ${e.message}`);
         } finally {
             setLoading(false);
         }
@@ -66,22 +66,23 @@ function SetPasswordForm(props: SetPasswordFormProps) {
 
     return (
         <Formik<SetPasswordFormValues>
-            initialValues={{ passphrase: '', confirm: '' }}
+            initialValues={{ passphrase: "", confirm: "" }}
             validationSchema={Yup.object().shape({
-                passphrase: Yup.string().required(t('REQUIRED')),
-                confirm: Yup.string().required(t('REQUIRED')),
+                passphrase: Yup.string().required(t("REQUIRED")),
+                confirm: Yup.string().required(t("REQUIRED")),
             })}
             validateOnChange={false}
             validateOnBlur={false}
-            onSubmit={onSubmit}>
+            onSubmit={onSubmit}
+        >
             {({ values, errors, handleChange, handleSubmit }) => (
                 <form noValidate onSubmit={handleSubmit}>
                     <Typography mb={2} color="text.muted" variant="small">
-                        {t('ENTER_ENC_PASSPHRASE')}
+                        {t("ENTER_ENC_PASSPHRASE")}
                     </Typography>
 
                     <Input
-                        sx={{ display: 'none' }}
+                        sx={{ display: "none" }}
                         name="email"
                         id="email"
                         autoComplete="username"
@@ -93,10 +94,10 @@ function SetPasswordForm(props: SetPasswordFormProps) {
                         name="password"
                         id="password"
                         autoComplete="new-password"
-                        type={showPassword ? 'text' : 'password'}
-                        label={t('PASSPHRASE_HINT')}
+                        type={showPassword ? "text" : "password"}
+                        label={t("PASSPHRASE_HINT")}
                         value={values.passphrase}
-                        onChange={handleChange('passphrase')}
+                        onChange={handleChange("passphrase")}
                         error={Boolean(errors.passphrase)}
                         helperText={errors.passphrase}
                         autoFocus
@@ -121,9 +122,9 @@ function SetPasswordForm(props: SetPasswordFormProps) {
                         id="confirm-password"
                         autoComplete="new-password"
                         type="password"
-                        label={t('CONFIRM_PASSPHRASE')}
+                        label={t("CONFIRM_PASSPHRASE")}
                         value={values.confirm}
-                        onChange={handleChange('confirm')}
+                        onChange={handleChange("confirm")}
                         disabled={loading}
                         error={Boolean(errors.confirm)}
                         helperText={errors.confirm}
@@ -131,7 +132,7 @@ function SetPasswordForm(props: SetPasswordFormProps) {
                     <PasswordStrengthHint password={values.passphrase} />
 
                     <Typography my={2} variant="small">
-                        <Trans i18nKey={'PASSPHRASE_DISCLAIMER'} />
+                        <Trans i18nKey={"PASSPHRASE_DISCLAIMER"} />
                     </Typography>
 
                     <Box my={4}>
@@ -146,8 +147,9 @@ function SetPasswordForm(props: SetPasswordFormProps) {
                                 textAlign="center"
                                 mt={1}
                                 color="text.muted"
-                                variant="small">
-                                {t('KEY_GENERATION_IN_PROGRESS_MESSAGE')}
+                                variant="small"
+                            >
+                                {t("KEY_GENERATION_IN_PROGRESS_MESSAGE")}
                             </Typography>
                         )}
                     </Box>

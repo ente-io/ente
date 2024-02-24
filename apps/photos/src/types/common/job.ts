@@ -1,4 +1,4 @@
-export type JobState = 'Scheduled' | 'Running' | 'NotScheduled';
+export type JobState = "Scheduled" | "Running" | "NotScheduled";
 
 export interface JobConfig {
     intervalSec: number;

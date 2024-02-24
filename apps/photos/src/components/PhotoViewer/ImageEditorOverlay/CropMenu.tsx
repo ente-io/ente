@@ -1,12 +1,11 @@
-import { EnteMenuItem } from 'components/Menu/EnteMenuItem';
-import { MenuItemGroup } from 'components/Menu/MenuItemGroup';
-import MenuSectionTitle from 'components/Menu/MenuSectionTitle';
-import { useContext } from 'react';
-import { ImageEditorOverlayContext } from './';
-import { CropBoxProps } from './';
-import type { MutableRefObject } from 'react';
-import { t } from 'i18next';
-import CropIcon from '@mui/icons-material/Crop';
+import CropIcon from "@mui/icons-material/Crop";
+import { EnteMenuItem } from "components/Menu/EnteMenuItem";
+import { MenuItemGroup } from "components/Menu/MenuItemGroup";
+import MenuSectionTitle from "components/Menu/MenuSectionTitle";
+import { t } from "i18next";
+import type { MutableRefObject } from "react";
+import { useContext } from "react";
+import { CropBoxProps, ImageEditorOverlayContext } from "./";
 
 interface IProps {
     previewScale: number;
@@ -21,9 +20,9 @@ export const cropRegionOfCanvas = (
     topLeftY: number,
     bottomRightX: number,
     bottomRightY: number,
-    scale: number = 1
+    scale: number = 1,
 ) => {
-    const context = canvas.getContext('2d');
+    const context = canvas.getContext("2d");
     if (!context || !canvas) return;
     context.imageSmoothingEnabled = false;
 
@@ -47,14 +46,14 @@ export const cropRegionOfCanvas = (
             0,
             0,
             width,
-            height
+            height,
         );
     };
 };
 
 export const getCropRegionArgs = (
     cropBoxEle: HTMLDivElement,
-    canvasEle: HTMLCanvasElement
+    canvasEle: HTMLCanvasElement,
 ) => {
     // get the bounding rectangle of the crop box
     const cropBoxRect = cropBoxEle.getBoundingClientRect();
@@ -92,11 +91,12 @@ const CropMenu = (props: IProps) => {
 
     return (
         <>
-            <MenuSectionTitle title={t('FREEHAND')} />
+            <MenuSectionTitle title={t("FREEHAND")} />
             <MenuItemGroup
                 style={{
-                    marginBottom: '0.5rem',
-                }}>
+                    marginBottom: "0.5rem",
+                }}
+            >
                 <EnteMenuItem
                     disabled={canvasLoading}
                     startIcon={<CropIcon />}
@@ -106,7 +106,7 @@ const CropMenu = (props: IProps) => {
 
                         const { x1, x2, y1, y2 } = getCropRegionArgs(
                             props.cropBoxRef.current,
-                            canvasRef.current
+                            canvasRef.current,
                         );
                         setCanvasLoading(true);
                         setTransformationPerformed(true);
@@ -116,14 +116,14 @@ const CropMenu = (props: IProps) => {
                             x1 / props.previewScale,
                             y1 / props.previewScale,
                             x2 / props.previewScale,
-                            y2 / props.previewScale
+                            y2 / props.previewScale,
                         );
                         props.resetCropBox();
                         setCanvasLoading(false);
 
-                        setCurrentTab('transform');
+                        setCurrentTab("transform");
                     }}
-                    label={t('APPLY_CROP')}
+                    label={t("APPLY_CROP")}
                 />
             </MenuItemGroup>
         </>

@@ -1,17 +1,17 @@
-import { Box, DialogProps, Typography } from '@mui/material';
-import { EnteDrawer } from 'components/EnteDrawer';
-import { AppContext } from 'pages/_app';
-import { useContext, useState } from 'react';
-import { Trans } from 'react-i18next';
-import { t } from 'i18next';
+import { logError } from "@ente/shared/sentry";
+import { Box, DialogProps, Typography } from "@mui/material";
+import { EnteDrawer } from "components/EnteDrawer";
+import { t } from "i18next";
+import { AppContext } from "pages/_app";
+import { useContext, useState } from "react";
+import { Trans } from "react-i18next";
 import {
     getFaceSearchEnabledStatus,
     updateFaceSearchEnabledStatus,
-} from 'services/userService';
-import { logError } from '@ente/shared/sentry';
-import EnableFaceSearch from './enableFaceSearch';
-import EnableMLSearch from './enableMLSearch';
-import ManageMLSearch from './manageMLSearch';
+} from "services/userService";
+import EnableFaceSearch from "./enableFaceSearch";
+import EnableMLSearch from "./enableMLSearch";
+import ManageMLSearch from "./manageMLSearch";
 
 const MLSearchSettings = ({ open, onClose, onRootClose }) => {
     const {
@@ -41,7 +41,7 @@ const MLSearchSettings = ({ open, onClose, onRootClose }) => {
                 updateMlSearchEnabled(true);
             }
         } catch (e) {
-            logError(e, 'Enable ML search failed');
+            logError(e, "Enable ML search failed");
             somethingWentWrong();
         }
     };
@@ -54,7 +54,7 @@ const MLSearchSettings = ({ open, onClose, onRootClose }) => {
             closeEnableFaceSearch();
             finishLoading();
         } catch (e) {
-            logError(e, 'Enable face search failed');
+            logError(e, "Enable face search failed");
             somethingWentWrong();
         }
     };
@@ -64,7 +64,7 @@ const MLSearchSettings = ({ open, onClose, onRootClose }) => {
             await updateMlSearchEnabled(false);
             onClose();
         } catch (e) {
-            logError(e, 'Disable ML search failed');
+            logError(e, "Disable ML search failed");
             somethingWentWrong();
         }
     };
@@ -76,23 +76,23 @@ const MLSearchSettings = ({ open, onClose, onRootClose }) => {
             await disableMlSearch();
             finishLoading();
         } catch (e) {
-            logError(e, 'Disable face search failed');
+            logError(e, "Disable face search failed");
             somethingWentWrong();
         }
     };
 
     const confirmDisableFaceSearch = () => {
         setDialogMessage({
-            title: t('DISABLE_FACE_SEARCH_TITLE'),
+            title: t("DISABLE_FACE_SEARCH_TITLE"),
             content: (
                 <Typography>
-                    <Trans i18nKey={'DISABLE_FACE_SEARCH_DESCRIPTION'} />
+                    <Trans i18nKey={"DISABLE_FACE_SEARCH_DESCRIPTION"} />
                 </Typography>
             ),
-            close: { text: t('CANCEL') },
+            close: { text: t("CANCEL") },
             proceed: {
-                variant: 'primary',
-                text: t('DISABLE_FACE_SEARCH'),
+                variant: "primary",
+                text: t("DISABLE_FACE_SEARCH"),
                 action: disableFaceSearch,
             },
         });
@@ -103,8 +103,8 @@ const MLSearchSettings = ({ open, onClose, onRootClose }) => {
         onRootClose();
     };
 
-    const handleDrawerClose: DialogProps['onClose'] = (_, reason) => {
-        if (reason === 'backdropClick') {
+    const handleDrawerClose: DialogProps["onClose"] = (_, reason) => {
+        if (reason === "backdropClick") {
             handleRootClose();
         } else {
             onClose();
@@ -119,8 +119,9 @@ const MLSearchSettings = ({ open, onClose, onRootClose }) => {
                 open={open}
                 onClose={handleDrawerClose}
                 BackdropProps={{
-                    sx: { '&&&': { backgroundColor: 'transparent' } },
-                }}>
+                    sx: { "&&&": { backgroundColor: "transparent" } },
+                }}
+            >
                 {mlSearchEnabled ? (
                     <ManageMLSearch
                         onClose={onClose}

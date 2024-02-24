@@ -1,7 +1,7 @@
-import { FILE_TYPE } from 'constants/file';
-import { EnteFile } from 'types/file';
-import { MergedSourceURL } from 'types/gallery';
-import { logError } from '@ente/shared/sentry';
+import { logError } from "@ente/shared/sentry";
+import { FILE_TYPE } from "constants/file";
+import { EnteFile } from "types/file";
+import { MergedSourceURL } from "types/gallery";
 
 const WAIT_FOR_VIDEO_PLAYBACK = 1 * 1000;
 
@@ -11,8 +11,8 @@ export async function isPlaybackPossible(url: string): Promise<boolean> {
             resolve(false);
         }, WAIT_FOR_VIDEO_PLAYBACK);
 
-        const video = document.createElement('video');
-        video.addEventListener('canplay', function () {
+        const video = document.createElement("video");
+        video.addEventListener("canplay", function () {
             clearTimeout(t);
             video.remove(); // Clean up the video element
             // also check for duration > 0 to make sure it is not a broken video
@@ -22,7 +22,7 @@ export async function isPlaybackPossible(url: string): Promise<boolean> {
                 resolve(false);
             }
         });
-        video.addEventListener('error', function () {
+        video.addEventListener("error", function () {
             clearTimeout(t);
             video.remove();
             resolve(false);
@@ -69,11 +69,11 @@ export function updateFileMsrcProps(file: EnteFile, url: string) {
 
 export async function updateFileSrcProps(
     file: EnteFile,
-    mergedURL: MergedSourceURL
+    mergedURL: MergedSourceURL,
 ) {
     const urls = {
-        original: mergedURL.original.split(','),
-        converted: mergedURL.converted.split(','),
+        original: mergedURL.original.split(","),
+        converted: mergedURL.converted.split(","),
     };
     let originalImageURL;
     let originalVideoURL;
@@ -141,7 +141,7 @@ export async function updateFileSrcProps(
     } else {
         logError(
             Error(`unknown file type - ${file.metadata.fileType}`),
-            'Unknown file type'
+            "Unknown file type",
         );
         file.src = originalURL;
     }

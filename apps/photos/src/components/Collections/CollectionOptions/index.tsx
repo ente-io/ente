@@ -1,13 +1,23 @@
-import { AlbumCollectionOption } from './AlbumCollectionOption';
-import React, {
-    Dispatch,
-    SetStateAction,
-    useContext,
-    useRef,
-    useState,
-} from 'react';
-import * as CollectionAPI from 'services/collectionService';
-import * as TrashService from 'services/trashService';
+import { HorizontalFlex } from "@ente/shared/components/Container";
+import OverflowMenu from "@ente/shared/components/OverflowMenu/menu";
+import { logError } from "@ente/shared/sentry";
+import MoreHoriz from "@mui/icons-material/MoreHoriz";
+import { Box } from "@mui/material";
+import {
+    ALL_SECTION,
+    CollectionSummaryType,
+    HIDDEN_ITEMS_SECTION,
+} from "constants/collection";
+import { t } from "i18next";
+import { AppContext } from "pages/_app";
+import { GalleryContext } from "pages/gallery";
+import { Dispatch, SetStateAction, useContext, useRef, useState } from "react";
+import { Trans } from "react-i18next";
+import * as CollectionAPI from "services/collectionService";
+import * as TrashService from "services/trashService";
+import { Collection } from "types/collection";
+import { SetFilesDownloadProgressAttributesCreator } from "types/gallery";
+import { VISIBILITY_STATE } from "types/magicMetadata";
 import {
     changeCollectionOrder,
     changeCollectionSortOrder,
@@ -15,31 +25,15 @@ import {
     downloadCollectionHelper,
     downloadDefaultHiddenCollectionHelper,
     isHiddenCollection,
-} from 'utils/collection';
-import { SetCollectionNamerAttributes } from '../CollectionNamer';
-import { Collection } from 'types/collection';
-import { isArchivedCollection, isPinnedCollection } from 'utils/magicMetadata';
-import { GalleryContext } from 'pages/gallery';
-import { logError } from '@ente/shared/sentry';
-import { VISIBILITY_STATE } from 'types/magicMetadata';
-import { AppContext } from 'pages/_app';
-import OverflowMenu from '@ente/shared/components/OverflowMenu/menu';
-import {
-    ALL_SECTION,
-    CollectionSummaryType,
-    HIDDEN_ITEMS_SECTION,
-} from 'constants/collection';
-import { TrashCollectionOption } from './TrashCollectionOption';
-import { SharedCollectionOption } from './SharedCollectionOption';
-import { OnlyDownloadCollectionOption } from './OnlyDownloadCollectionOption';
-import { QuickOptions } from './QuickOptions';
-import MoreHoriz from '@mui/icons-material/MoreHoriz';
-import { HorizontalFlex } from '@ente/shared/components/Container';
-import { Trans } from 'react-i18next';
-import { t } from 'i18next';
-import { Box } from '@mui/material';
-import CollectionSortOrderMenu from './CollectionSortOrderMenu';
-import { SetFilesDownloadProgressAttributesCreator } from 'types/gallery';
+} from "utils/collection";
+import { isArchivedCollection, isPinnedCollection } from "utils/magicMetadata";
+import { SetCollectionNamerAttributes } from "../CollectionNamer";
+import { AlbumCollectionOption } from "./AlbumCollectionOption";
+import CollectionSortOrderMenu from "./CollectionSortOrderMenu";
+import { OnlyDownloadCollectionOption } from "./OnlyDownloadCollectionOption";
+import { QuickOptions } from "./QuickOptions";
+import { SharedCollectionOption } from "./SharedCollectionOption";
+import { TrashCollectionOption } from "./TrashCollectionOption";
 
 interface CollectionOptionsProps {
     setCollectionNamerAttributes: SetCollectionNamerAttributes;
@@ -103,7 +97,7 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
 
     const handleCollectionAction = (
         action: CollectionActions,
-        loader = true
+        loader = true,
     ) => {
         let callback: Function;
         switch (action) {
@@ -170,8 +164,8 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
 
             default:
                 logError(
-                    Error('invalid collection action '),
-                    'handleCollectionAction failed'
+                    Error("invalid collection action "),
+                    "handleCollectionAction failed",
                 );
                 {
                     action;
@@ -182,11 +176,11 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
                 loader && startLoading();
                 await callback(...args);
             } catch (e) {
-                logError(e, 'collection action failed', { action });
+                logError(e, "collection action failed", { action });
                 setDialogMessage({
-                    title: t('ERROR'),
-                    content: t('UNKNOWN_ERROR'),
-                    close: { variant: 'critical' },
+                    title: t("ERROR"),
+                    content: t("UNKNOWN_ERROR"),
+                    close: { variant: "critical" },
                 });
             } finally {
                 syncWithRemote(false, true);
@@ -237,21 +231,21 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
                 setFilesDownloadProgressAttributesCreator(
                     activeCollection.name,
                     HIDDEN_ITEMS_SECTION,
-                    true
+                    true,
                 );
             downloadDefaultHiddenCollectionHelper(
-                setFilesDownloadProgressAttributes
+                setFilesDownloadProgressAttributes,
             );
         } else {
             const setFilesDownloadProgressAttributes =
                 setFilesDownloadProgressAttributesCreator(
                     activeCollection.name,
                     activeCollection.id,
-                    isHiddenCollection(activeCollection)
+                    isHiddenCollection(activeCollection),
                 );
             downloadCollectionHelper(
                 activeCollection.id,
-                setFilesDownloadProgressAttributes
+                setFilesDownloadProgressAttributes,
             );
         }
     };
@@ -264,8 +258,8 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
 
     const showRenameCollectionModal = () => {
         setCollectionNamerAttributes({
-            title: t('RENAME_COLLECTION'),
-            buttonText: t('RENAME'),
+            title: t("RENAME_COLLECTION"),
+            buttonText: t("RENAME"),
             autoFilledName: activeCollection.name,
             callback: handleCollectionAction(CollectionActions.RENAME),
         });
@@ -273,61 +267,61 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
 
     const confirmDeleteCollection = () => {
         setDialogMessage({
-            title: t('DELETE_COLLECTION_TITLE'),
+            title: t("DELETE_COLLECTION_TITLE"),
             content: (
                 <Trans
-                    i18nKey={'DELETE_COLLECTION_MESSAGE'}
+                    i18nKey={"DELETE_COLLECTION_MESSAGE"}
                     components={{
-                        a: <Box component={'span'} color="text.base" />,
+                        a: <Box component={"span"} color="text.base" />,
                     }}
                 />
             ),
             proceed: {
-                text: t('DELETE_PHOTOS'),
+                text: t("DELETE_PHOTOS"),
                 action: handleCollectionAction(
-                    CollectionActions.DELETE_WITH_FILES
+                    CollectionActions.DELETE_WITH_FILES,
                 ),
-                variant: 'critical',
+                variant: "critical",
             },
             secondary: {
-                text: t('KEEP_PHOTOS'),
+                text: t("KEEP_PHOTOS"),
                 action: handleCollectionAction(
-                    CollectionActions.DELETE_BUT_KEEP_FILES
+                    CollectionActions.DELETE_BUT_KEEP_FILES,
                 ),
-                variant: 'primary',
+                variant: "primary",
             },
             close: {
-                text: t('CANCEL'),
+                text: t("CANCEL"),
             },
         });
     };
 
     const confirmEmptyTrash = () =>
         setDialogMessage({
-            title: t('EMPTY_TRASH_TITLE'),
-            content: t('EMPTY_TRASH_MESSAGE'),
+            title: t("EMPTY_TRASH_TITLE"),
+            content: t("EMPTY_TRASH_MESSAGE"),
 
             proceed: {
                 action: handleCollectionAction(CollectionActions.EMPTY_TRASH),
-                text: t('EMPTY_TRASH'),
-                variant: 'critical',
+                text: t("EMPTY_TRASH"),
+                variant: "critical",
             },
-            close: { text: t('CANCEL') },
+            close: { text: t("CANCEL") },
         });
 
     const confirmLeaveSharedAlbum = () => {
         setDialogMessage({
-            title: t('LEAVE_SHARED_ALBUM_TITLE'),
-            content: t('LEAVE_SHARED_ALBUM_MESSAGE'),
+            title: t("LEAVE_SHARED_ALBUM_TITLE"),
+            content: t("LEAVE_SHARED_ALBUM_MESSAGE"),
             proceed: {
-                text: t('LEAVE_SHARED_ALBUM'),
+                text: t("LEAVE_SHARED_ALBUM"),
                 action: handleCollectionAction(
-                    CollectionActions.LEAVE_SHARED_ALBUM
+                    CollectionActions.LEAVE_SHARED_ALBUM,
                 ),
-                variant: 'critical',
+                variant: "critical",
             },
             close: {
-                text: t('CANCEL'),
+                text: t("CANCEL"),
             },
         });
     };
@@ -347,20 +341,20 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
     const hideAlbum = async () => {
         await changeCollectionVisibility(
             activeCollection,
-            VISIBILITY_STATE.HIDDEN
+            VISIBILITY_STATE.HIDDEN,
         );
         setActiveCollectionID(ALL_SECTION);
     };
     const unHideAlbum = async () => {
         await changeCollectionVisibility(
             activeCollection,
-            VISIBILITY_STATE.VISIBLE
+            VISIBILITY_STATE.VISIBLE,
         );
         setActiveCollectionID(HIDDEN_ITEMS_SECTION);
     };
 
     return (
-        <HorizontalFlex sx={{ display: 'inline-flex', gap: '16px' }}>
+        <HorizontalFlex sx={{ display: "inline-flex", gap: "16px" }}>
             <QuickOptions
                 handleCollectionAction={handleCollectionAction}
                 collectionSummaryType={collectionSummaryType}
@@ -368,8 +362,9 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
             />
 
             <OverflowMenu
-                ariaControls={'collection-options'}
-                triggerButtonIcon={<MoreHoriz ref={overFlowMenuIconRef} />}>
+                ariaControls={"collection-options"}
+                triggerButtonIcon={<MoreHoriz ref={overFlowMenuIconRef} />}
+            >
                 {collectionSummaryType === CollectionSummaryType.trash ? (
                     <TrashCollectionOption
                         handleCollectionAction={handleCollectionAction}
@@ -379,19 +374,19 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
                     <OnlyDownloadCollectionOption
                         isDownloadInProgress={isActiveCollectionDownloadInProgress()}
                         handleCollectionAction={handleCollectionAction}
-                        downloadOptionText={t('DOWNLOAD_FAVORITES')}
+                        downloadOptionText={t("DOWNLOAD_FAVORITES")}
                     />
                 ) : collectionSummaryType ===
                   CollectionSummaryType.uncategorized ? (
                     <OnlyDownloadCollectionOption
                         handleCollectionAction={handleCollectionAction}
-                        downloadOptionText={t('DOWNLOAD_UNCATEGORIZED')}
+                        downloadOptionText={t("DOWNLOAD_UNCATEGORIZED")}
                     />
                 ) : collectionSummaryType ===
                   CollectionSummaryType.hiddenItems ? (
                     <OnlyDownloadCollectionOption
                         handleCollectionAction={handleCollectionAction}
-                        downloadOptionText={t('DOWNLOAD_HIDDEN_ITEMS')}
+                        downloadOptionText={t("DOWNLOAD_HIDDEN_ITEMS")}
                     />
                 ) : collectionSummaryType ===
                       CollectionSummaryType.incomingShareViewer ||

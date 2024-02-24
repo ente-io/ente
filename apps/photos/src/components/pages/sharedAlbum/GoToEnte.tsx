@@ -1,10 +1,10 @@
-import { ENTE_WEBSITE_LINK } from '@ente/shared/constants/urls';
-import React, { useEffect, useState } from 'react';
-import { Button, styled } from '@mui/material';
-import { getDeviceOS, OS } from 'utils/common/deviceDetection';
-import { t } from 'i18next';
+import { ENTE_WEBSITE_LINK } from "@ente/shared/constants/urls";
+import { Button, styled } from "@mui/material";
+import { t } from "i18next";
+import { useEffect, useState } from "react";
+import { OS, getDeviceOS } from "utils/common/deviceDetection";
 
-export const NoStyleAnchor = styled('a')`
+export const NoStyleAnchor = styled("a")`
     color: inherit;
     text-decoration: none !important;
     &:hover {
@@ -22,9 +22,9 @@ function GoToEnte() {
 
     const getButtonText = (os: OS) => {
         if (os === OS.ANDROID || os === OS.IOS) {
-            return t('INSTALL');
+            return t("INSTALL");
         } else {
-            return t('SIGN_UP');
+            return t("SIGN_UP");
         }
     };
 
@@ -32,7 +32,8 @@ function GoToEnte() {
         <Button
             color="accent"
             LinkComponent={NoStyleAnchor}
-            href={ENTE_WEBSITE_LINK}>
+            href={ENTE_WEBSITE_LINK}
+        >
             {getButtonText(os)}
         </Button>
     );

@@ -1,12 +1,12 @@
-import { StyledMenu } from '@ente/shared/components/OverflowMenu/menu';
-import { CollectionActions } from '.';
-import { OverflowMenuOption } from '@ente/shared/components/OverflowMenu/option';
-import { t } from 'i18next';
+import { StyledMenu } from "@ente/shared/components/OverflowMenu/menu";
+import { OverflowMenuOption } from "@ente/shared/components/OverflowMenu/option";
+import { t } from "i18next";
+import { CollectionActions } from ".";
 
 interface Iprops {
     handleCollectionAction: (
         action: CollectionActions,
-        loader?: boolean
+        loader?: boolean,
     ) => (...args: any[]) => Promise<void>;
     overFlowMenuIconRef: React.MutableRefObject<SVGSVGElement>;
     collectionSortOrderMenuView: boolean;
@@ -34,27 +34,28 @@ const CollectionSortOrderMenu = ({
     };
     return (
         <StyledMenu
-            id={'collection-files-sort'}
+            id={"collection-files-sort"}
             anchorEl={overFlowMenuIconRef.current}
             open={collectionSortOrderMenuView}
             onClose={closeCollectionSortOrderMenu}
             MenuListProps={{
                 disablePadding: true,
-                'aria-labelledby': 'collection-files-sort',
+                "aria-labelledby": "collection-files-sort",
             }}
             anchorOrigin={{
-                vertical: 'bottom',
-                horizontal: 'right',
+                vertical: "bottom",
+                horizontal: "right",
             }}
             transformOrigin={{
-                vertical: 'top',
-                horizontal: 'right',
-            }}>
+                vertical: "top",
+                horizontal: "right",
+            }}
+        >
             <OverflowMenuOption onClick={setCollectionSortOrderToDesc}>
-                {t('NEWEST_FIRST')}
+                {t("NEWEST_FIRST")}
             </OverflowMenuOption>
             <OverflowMenuOption onClick={setCollectionSortOrderToAsc}>
-                {t('OLDEST_FIRST')}
+                {t("OLDEST_FIRST")}
             </OverflowMenuOption>
         </StyledMenu>
     );

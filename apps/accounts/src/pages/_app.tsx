@@ -1,27 +1,27 @@
-import { CacheProvider } from '@emotion/react';
-import { APPS, APP_TITLES } from '@ente/shared/apps/constants';
-import { EnteAppProps } from '@ente/shared/apps/types';
-import { Overlay } from '@ente/shared/components/Container';
-import DialogBoxV2 from '@ente/shared/components/DialogBoxV2';
+import { setupI18n } from "@/ui/i18n";
+import { CacheProvider } from "@emotion/react";
+import { APPS, APP_TITLES } from "@ente/shared/apps/constants";
+import { EnteAppProps } from "@ente/shared/apps/types";
+import { Overlay } from "@ente/shared/components/Container";
+import DialogBoxV2 from "@ente/shared/components/DialogBoxV2";
 import {
     DialogBoxAttributesV2,
     SetDialogBoxAttributesV2,
-} from '@ente/shared/components/DialogBoxV2/types';
-import EnteSpinner from '@ente/shared/components/EnteSpinner';
-import AppNavbar from '@ente/shared/components/Navbar/app';
-import { useLocalState } from '@ente/shared/hooks/useLocalState';
-import { setupI18n } from '@/ui/i18n';
-import HTTPService from '@ente/shared/network/HTTPService';
-import { LS_KEYS, getData } from '@ente/shared/storage/localStorage';
-import { getTheme } from '@ente/shared/themes';
-import { THEME_COLOR } from '@ente/shared/themes/constants';
-import createEmotionCache from '@ente/shared/themes/createEmotionCache';
-import { CssBaseline, useMediaQuery } from '@mui/material';
-import { ThemeProvider } from '@mui/material/styles';
-import Head from 'next/head';
-import { useRouter } from 'next/router';
-import { createContext, useEffect, useState } from 'react';
-import 'styles/global.css';
+} from "@ente/shared/components/DialogBoxV2/types";
+import EnteSpinner from "@ente/shared/components/EnteSpinner";
+import AppNavbar from "@ente/shared/components/Navbar/app";
+import { useLocalState } from "@ente/shared/hooks/useLocalState";
+import HTTPService from "@ente/shared/network/HTTPService";
+import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
+import { getTheme } from "@ente/shared/themes";
+import { THEME_COLOR } from "@ente/shared/themes/constants";
+import createEmotionCache from "@ente/shared/themes/createEmotionCache";
+import { CssBaseline, useMediaQuery } from "@mui/material";
+import { ThemeProvider } from "@mui/material/styles";
+import Head from "next/head";
+import { useRouter } from "next/router";
+import { createContext, useEffect, useState } from "react";
+import "styles/global.css";
 
 interface AppContextProps {
     isMobile: boolean;
@@ -50,7 +50,7 @@ export default function App(props: EnteAppProps) {
 
     const showNavBar = (show: boolean) => setShowNavBar(show);
 
-    const isMobile = useMediaQuery('(max-width:428px)');
+    const isMobile = useMediaQuery("(max-width:428px)");
 
     const router = useRouter();
 
@@ -70,14 +70,14 @@ export default function App(props: EnteAppProps) {
         const pkg = getData(LS_KEYS.CLIENT_PACKAGE);
         if (!pkg) return;
         HTTPService.setHeaders({
-            'X-Client-Package': pkg.name,
+            "X-Client-Package": pkg.name,
         });
     };
 
     useEffect(() => {
-        router.events.on('routeChangeComplete', setupPackageName);
+        router.events.on("routeChangeComplete", setupPackageName);
         return () => {
-            router.events.off('routeChangeComplete', setupPackageName);
+            router.events.off("routeChangeComplete", setupPackageName);
         };
     }, [router.events]);
 
@@ -111,17 +111,19 @@ export default function App(props: EnteAppProps) {
                         showNavBar,
                         setDialogBoxAttributesV2:
                             setDialogBoxAttributesV2 as any,
-                    }}>
+                    }}
+                >
                     {!isI18nReady && (
                         <Overlay
                             sx={(theme) => ({
-                                display: 'flex',
-                                justifyContent: 'center',
-                                alignItems: 'center',
+                                display: "flex",
+                                justifyContent: "center",
+                                alignItems: "center",
                                 zIndex: 2000,
                                 backgroundColor: (theme as any).colors
                                     .background.base,
-                            })}>
+                            })}
+                        >
                             <EnteSpinner />
                         </Overlay>
                     )}

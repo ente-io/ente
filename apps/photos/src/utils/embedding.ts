@@ -1,4 +1,4 @@
-import { Embedding } from 'types/embedding';
+import { Embedding } from "types/embedding";
 
 export const getLatestVersionEmbeddings = (embeddings: Embedding[]) => {
     const latestVersionEntities = new Map<number, Embedding>();

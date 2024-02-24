@@ -1,18 +1,18 @@
-import React, { useRef, useState } from 'react';
-import { COLLECTION_ROLE, Collection } from 'types/collection';
+import { useRef, useState } from "react";
+import { COLLECTION_ROLE, Collection } from "types/collection";
 
-import { Stack } from '@mui/material';
-import MenuSectionTitle from 'components/Menu/MenuSectionTitle';
-import { t } from 'i18next';
-import Workspaces from '@mui/icons-material/Workspaces';
-import { MenuItemGroup } from 'components/Menu/MenuItemGroup';
-import { EnteMenuItem } from 'components/Menu/EnteMenuItem';
-import MenuItemDivider from 'components/Menu/MenuItemDivider';
-import AddIcon from '@mui/icons-material/Add';
-import AddParticipant from './AddParticipant';
-import ManageEmailShare from './ManageEmailShare';
-import AvatarGroup from 'components/pages/gallery/AvatarGroup';
-import ChevronRight from '@mui/icons-material/ChevronRight';
+import AddIcon from "@mui/icons-material/Add";
+import ChevronRight from "@mui/icons-material/ChevronRight";
+import Workspaces from "@mui/icons-material/Workspaces";
+import { Stack } from "@mui/material";
+import { EnteMenuItem } from "components/Menu/EnteMenuItem";
+import MenuItemDivider from "components/Menu/MenuItemDivider";
+import { MenuItemGroup } from "components/Menu/MenuItemGroup";
+import MenuSectionTitle from "components/Menu/MenuSectionTitle";
+import AvatarGroup from "components/pages/gallery/AvatarGroup";
+import { t } from "i18next";
+import AddParticipant from "./AddParticipant";
+import ManageEmailShare from "./ManageEmailShare";
 
 export default function EmailShare({
     collection,
@@ -48,7 +48,7 @@ export default function EmailShare({
         <>
             <Stack>
                 <MenuSectionTitle
-                    title={t('shared_with_people', {
+                    title={t("shared_with_people", {
                         count: collection.sharees?.length ?? 0,
                     })}
                     icon={<Workspaces />}
@@ -57,7 +57,7 @@ export default function EmailShare({
                     {collection.sharees.length > 0 ? (
                         <>
                             <EnteMenuItem
-                                fontWeight={'normal'}
+                                fontWeight={"normal"}
                                 startIcon={
                                     <AvatarGroup sharees={collection.sharees} />
                                 }
@@ -75,13 +75,13 @@ export default function EmailShare({
                     <EnteMenuItem
                         startIcon={<AddIcon />}
                         onClick={openAddViewer}
-                        label={t('ADD_VIEWERS')}
+                        label={t("ADD_VIEWERS")}
                     />
                     <MenuItemDivider hasIcon />
                     <EnteMenuItem
                         startIcon={<AddIcon />}
                         onClick={openAddCollab}
-                        label={t('ADD_COLLABORATORS')}
+                        label={t("ADD_COLLABORATORS")}
                     />
                 </MenuItemGroup>
             </Stack>

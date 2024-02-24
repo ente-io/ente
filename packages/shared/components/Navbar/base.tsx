@@ -1,5 +1,5 @@
-import { FlexWrapper } from '../../components/Container';
-import { styled } from '@mui/material';
+import { styled } from "@mui/material";
+import { FlexWrapper } from "../../components/Container";
 const NavbarBase = styled(FlexWrapper)<{ isMobile: boolean }>`
     min-height: 64px;
     position: sticky;

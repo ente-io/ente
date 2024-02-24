@@ -1,6 +1,5 @@
-import Notification from 'components/Notification';
-import React from 'react';
-import { t } from 'i18next';
+import Notification from "components/Notification";
+import { t } from "i18next";
 
 interface Iprops {
     open: boolean;
@@ -18,8 +17,8 @@ export const ConversionFailedNotification = ({
             open={open}
             onClose={onClose}
             attributes={{
-                variant: 'secondary',
-                subtext: t('CONVERSION_FAILED_NOTIFICATION_MESSAGE'),
+                variant: "secondary",
+                subtext: t("CONVERSION_FAILED_NOTIFICATION_MESSAGE"),
                 onClick: onClick,
             }}
             horizontal="right"

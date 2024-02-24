@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import { dialogCloseHandler } from "@ente/shared/components/DialogBox/TitleWithCloseButton";
+import EnteButton from "@ente/shared/components/EnteButton";
 import {
     Box,
     Button,
@@ -6,14 +7,13 @@ import {
     DialogProps,
     Stack,
     Typography,
-} from '@mui/material';
-import { t } from 'i18next';
-import { dialogCloseHandler } from '@ente/shared/components/DialogBox/TitleWithCloseButton';
-import { DialogBoxAttributesV2 } from './types';
-import EnteButton from '@ente/shared/components/EnteButton';
+} from "@mui/material";
+import { t } from "i18next";
+import React, { useState } from "react";
+import { DialogBoxAttributesV2 } from "./types";
 
 type IProps = React.PropsWithChildren<
-    Omit<DialogProps, 'onClose'> & {
+    Omit<DialogProps, "onClose"> & {
         onClose: () => void;
         attributes: DialogBoxAttributesV2;
     }
@@ -46,26 +46,28 @@ export default function DialogBoxV2({
             PaperProps={{
                 ...PaperProps,
                 sx: {
-                    padding: '8px 12px',
-                    maxWidth: '360px',
+                    padding: "8px 12px",
+                    maxWidth: "360px",
                     ...PaperProps?.sx,
                 },
             }}
-            {...rest}>
-            <Stack spacing={'36px'} p={'16px'}>
-                <Stack spacing={'19px'}>
+            {...rest}
+        >
+            <Stack spacing={"36px"} p={"16px"}>
+                <Stack spacing={"19px"}>
                     {attributes.icon && (
                         <Box
                             sx={{
-                                '& > svg': {
-                                    fontSize: '32px',
+                                "& > svg": {
+                                    fontSize: "32px",
                                 },
-                            }}>
+                            }}
+                        >
                             {attributes.icon}
                         </Box>
                     )}
                     {attributes.title && (
-                        <Typography variant="large" fontWeight={'bold'}>
+                        <Typography variant="large" fontWeight={"bold"}>
                             {attributes.title}
                         </Typography>
                     )}
@@ -80,13 +82,14 @@ export default function DialogBoxV2({
                     attributes.close ||
                     attributes.buttons?.length) && (
                     <Stack
-                        spacing={'8px'}
+                        spacing={"8px"}
                         direction={
-                            attributes.buttonDirection === 'row'
-                                ? 'row-reverse'
-                                : 'column'
+                            attributes.buttonDirection === "row"
+                                ? "row-reverse"
+                                : "column"
                         }
-                        flex={1}>
+                        flex={1}
+                    >
                         {attributes.proceed && (
                             <EnteButton
                                 loading={loading}
@@ -97,20 +100,22 @@ export default function DialogBoxV2({
 
                                     onClose();
                                 }}
-                                disabled={attributes.proceed.disabled}>
+                                disabled={attributes.proceed.disabled}
+                            >
                                 {attributes.proceed.text}
                             </EnteButton>
                         )}
                         {attributes.close && (
                             <Button
                                 size="large"
-                                color={attributes.close?.variant ?? 'secondary'}
+                                color={attributes.close?.variant ?? "secondary"}
                                 onClick={() => {
                                     attributes.close.action &&
                                         attributes.close?.action();
                                     onClose();
-                                }}>
-                                {attributes.close?.text ?? t('OK')}
+                                }}
+                            >
+                                {attributes.close?.text ?? t("OK")}
                             </Button>
                         )}
                         {attributes.buttons &&
@@ -123,7 +128,8 @@ export default function DialogBoxV2({
                                         b.action();
                                         onClose();
                                     }}
-                                    disabled={b.disabled}>
+                                    disabled={b.disabled}
+                                >
                                     {b.text}
                                 </Button>
                             ))}

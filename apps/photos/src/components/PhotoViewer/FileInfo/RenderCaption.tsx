@@ -1,16 +1,16 @@
-import React, { useState } from 'react';
-import { EnteFile } from 'types/file';
-import { changeCaption, updateExistingFilePubMetadata } from 'utils/file';
-import { logError } from '@ente/shared/sentry';
-import { Box, IconButton, TextField } from '@mui/material';
-import { FlexWrapper } from '@ente/shared/components/Container';
-import { MAX_CAPTION_SIZE } from 'constants/file';
-import { Formik } from 'formik';
-import { SmallLoadingSpinner } from '../styledComponents/SmallLoadingSpinner';
-import * as Yup from 'yup';
-import Close from '@mui/icons-material/Close';
-import Done from '@mui/icons-material/Done';
-import { t } from 'i18next';
+import { FlexWrapper } from "@ente/shared/components/Container";
+import { logError } from "@ente/shared/sentry";
+import Close from "@mui/icons-material/Close";
+import Done from "@mui/icons-material/Done";
+import { Box, IconButton, TextField } from "@mui/material";
+import { MAX_CAPTION_SIZE } from "constants/file";
+import { Formik } from "formik";
+import { t } from "i18next";
+import { useState } from "react";
+import { EnteFile } from "types/file";
+import { changeCaption, updateExistingFilePubMetadata } from "utils/file";
+import * as Yup from "yup";
+import { SmallLoadingSpinner } from "../styledComponents/SmallLoadingSpinner";
 
 interface formValues {
     caption: string;
@@ -28,7 +28,7 @@ export function RenderCaption({
     refreshPhotoswipe: () => void;
 }) {
     const [caption, setCaption] = useState(
-        file?.pubMagicMetadata?.data.caption
+        file?.pubMagicMetadata?.data.caption,
     );
 
     const [loading, setLoading] = useState(false);
@@ -48,7 +48,7 @@ export function RenderCaption({
                 scheduleUpdate();
             }
         } catch (e) {
-            logError(e, 'failed to update caption');
+            logError(e, "failed to update caption");
         }
     };
 
@@ -70,11 +70,12 @@ export function RenderCaption({
                 validationSchema={Yup.object().shape({
                     caption: Yup.string().max(
                         MAX_CAPTION_SIZE,
-                        t('CAPTION_CHARACTER_LIMIT')
+                        t("CAPTION_CHARACTER_LIMIT"),
                     ),
                 })}
                 validateOnBlur={false}
-                onSubmit={onSubmit}>
+                onSubmit={onSubmit}
+            >
                 {({
                     values,
                     errors,
@@ -90,15 +91,15 @@ export function RenderCaption({
                             name="caption"
                             type="text"
                             multiline
-                            placeholder={t('CAPTION_PLACEHOLDER')}
+                            placeholder={t("CAPTION_PLACEHOLDER")}
                             value={values.caption}
-                            onChange={handleChange('caption')}
+                            onChange={handleChange("caption")}
                             error={Boolean(errors.caption)}
                             helperText={errors.caption}
                             disabled={loading || shouldDisableEdits}
                         />
                         {values.caption !== caption && (
-                            <FlexWrapper justifyContent={'flex-end'}>
+                            <FlexWrapper justifyContent={"flex-end"}>
                                 <IconButton type="submit" disabled={loading}>
                                     {loading ? (
                                         <SmallLoadingSpinner />
@@ -109,11 +110,12 @@ export function RenderCaption({
                                 <IconButton
                                     onClick={() =>
                                         resetForm({
-                                            values: { caption: caption ?? '' },
+                                            values: { caption: caption ?? "" },
                                             touched: { caption: false },
                                         })
                                     }
-                                    disabled={loading}>
+                                    disabled={loading}
+                                >
                                     <Close />
                                 </IconButton>
                             </FlexWrapper>

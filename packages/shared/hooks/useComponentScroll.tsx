@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect } from 'react';
+import { useEffect, useRef, useState } from "react";
 
 export enum SCROLL_DIRECTION {
     LEFT = -1,
@@ -31,15 +31,15 @@ export default function useComponentScroll({
             return;
         }
         // Add event listener
-        componentRef.current?.addEventListener('scroll', updateScrollObj);
+        componentRef.current?.addEventListener("scroll", updateScrollObj);
 
         // Call handler right away so state gets updated with initial window size
         updateScrollObj();
         // Remove event listener on cleanup
         return () =>
             componentRef.current?.removeEventListener(
-                'resize',
-                updateScrollObj
+                "resize",
+                updateScrollObj,
             );
     }, [componentRef.current]);
 

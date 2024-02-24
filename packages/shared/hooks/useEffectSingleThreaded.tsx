@@ -1,12 +1,12 @@
-import { useEffect, useRef } from 'react';
-import { isPromise } from '../utils';
+import { useEffect, useRef } from "react";
+import { isPromise } from "../utils";
 
 // useEffectSingleThreaded is a useEffect that will only run one at a time, and will
 // caches the latest deps of requests that come in while it is running, and will
 // run that after the current run is complete.
 export default function useEffectSingleThreaded(
     fn: (deps) => void | Promise<void>,
-    deps: any[]
+    deps: any[],
 ): void {
     const updateInProgress = useRef(false);
     const nextRequestDepsRef = useRef<any[]>(null);

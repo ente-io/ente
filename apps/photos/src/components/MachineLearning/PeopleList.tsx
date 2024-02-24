@@ -1,20 +1,20 @@
-import React, { useState, useEffect } from 'react';
-import { Face, Person } from 'types/machineLearning';
+import { addLogLine } from "@ente/shared/logging";
+import { logError } from "@ente/shared/sentry";
+import { CACHES } from "@ente/shared/storage/cacheStorage/constants";
+import { styled } from "@mui/material";
+import { Legend } from "components/PhotoViewer/styledComponents/Legend";
+import { t } from "i18next";
+import React, { useEffect, useState } from "react";
+import { EnteFile } from "types/file";
+import { Face, Person } from "types/machineLearning";
 import {
     getAllPeople,
     getPeopleList,
     getUnidentifiedFaces,
-} from 'utils/machineLearning';
-import { styled } from '@mui/material';
-import { EnteFile } from 'types/file';
-import { ImageCacheView } from './ImageViews';
-import { CACHES } from '@ente/shared/storage/cacheStorage/constants';
-import { Legend } from 'components/PhotoViewer/styledComponents/Legend';
-import { addLogLine } from '@ente/shared/logging';
-import { logError } from '@ente/shared/sentry';
-import { t } from 'i18next';
+} from "utils/machineLearning";
+import { ImageCacheView } from "./ImageViews";
 
-const FaceChipContainer = styled('div')`
+const FaceChipContainer = styled("div")`
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
@@ -24,14 +24,14 @@ const FaceChipContainer = styled('div')`
     overflow: auto;
 `;
 
-const FaceChip = styled('div')<{ clickable?: boolean }>`
+const FaceChip = styled("div")<{ clickable?: boolean }>`
     width: 112px;
     height: 112px;
     margin: 5px;
     border-radius: 50%;
     overflow: hidden;
     position: relative;
-    cursor: ${({ clickable }) => (clickable ? 'pointer' : 'normal')};
+    cursor: ${({ clickable }) => (clickable ? "pointer" : "normal")};
     & > img {
         width: 100%;
         height: 100%;
@@ -54,14 +54,16 @@ export const PeopleList = React.memo((props: PeopleListProps) => {
                 props.maxRows && {
                     maxHeight: props.maxRows * 122 + 28,
                 }
-            }>
+            }
+        >
             {props.people.map((person, index) => (
                 <FaceChip
                     key={person.id}
                     clickable={!!props.onSelect}
                     onClick={() =>
                         props.onSelect && props.onSelect(person, index)
-                    }>
+                    }
+                >
                     <ImageCacheView
                         url={person.displayImageUrl}
                         cacheName={CACHES.FACE_CROPS}
@@ -85,11 +87,11 @@ export function PhotoPeopleList(props: PhotoPeopleListProps) {
         let didCancel = false;
 
         async function updateFaceImages() {
-            addLogLine('calling getPeopleList');
+            addLogLine("calling getPeopleList");
             const startTime = Date.now();
             const people = await getPeopleList(props.file);
-            addLogLine('getPeopleList', Date.now() - startTime, 'ms');
-            addLogLine('getPeopleList done, didCancel: ', didCancel);
+            addLogLine("getPeopleList", Date.now() - startTime, "ms");
+            addLogLine("getPeopleList done, didCancel: ", didCancel);
             !didCancel && setPeople(people);
         }
 
@@ -104,7 +106,7 @@ export function PhotoPeopleList(props: PhotoPeopleListProps) {
 
     return (
         <div>
-            <Legend>{t('PEOPLE')}</Legend>
+            <Legend>{t("PEOPLE")}</Legend>
             <PeopleList people={people} onSelect={props.onSelect}></PeopleList>
         </div>
     );
@@ -128,7 +130,7 @@ export function AllPeopleList(props: AllPeopleListProps) {
                 }
                 !didCancel && setPeople(people);
             } catch (e) {
-                logError(e, 'updateFaceImages failed');
+                logError(e, "updateFaceImages failed");
             }
         }
         updateFaceImages();
@@ -166,7 +168,7 @@ export function UnidentifiedFaces(props: {
     return (
         <>
             <div>
-                <Legend>{t('UNIDENTIFIED_FACES')}</Legend>
+                <Legend>{t("UNIDENTIFIED_FACES")}</Legend>
             </div>
             <FaceChipContainer>
                 {faces &&

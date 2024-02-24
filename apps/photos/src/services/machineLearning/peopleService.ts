@@ -1,27 +1,27 @@
-import { Face, MLSyncContext, Person } from 'types/machineLearning';
-import { addLogLine } from '@ente/shared/logging';
+import { addLogLine } from "@ente/shared/logging";
+import { Face, MLSyncContext, Person } from "types/machineLearning";
 import {
-    isDifferentOrOld,
+    findFirstIfSorted,
     getAllFacesFromMap,
     getLocalFile,
-    findFirstIfSorted,
     getOriginalImageBitmap,
-} from 'utils/machineLearning';
-import mlIDbStorage from 'utils/storage/mlIDbStorage';
-import FaceService from './faceService';
+    isDifferentOrOld,
+} from "utils/machineLearning";
+import mlIDbStorage from "utils/storage/mlIDbStorage";
+import FaceService from "./faceService";
 
 class PeopleService {
     async syncPeopleIndex(syncContext: MLSyncContext) {
-        const filesVersion = await mlIDbStorage.getIndexVersion('files');
+        const filesVersion = await mlIDbStorage.getIndexVersion("files");
         if (
-            filesVersion <= (await mlIDbStorage.getIndexVersion('people')) &&
+            filesVersion <= (await mlIDbStorage.getIndexVersion("people")) &&
             !isDifferentOrOld(
                 syncContext.mlLibraryData?.faceClusteringMethod,
-                syncContext.faceClusteringService.method
+                syncContext.faceClusteringService.method,
             )
         ) {
             addLogLine(
-                '[MLService] Skipping people index as already synced to latest version'
+                "[MLService] Skipping people index as already synced to latest version",
             );
             return;
         }
@@ -35,13 +35,13 @@ class PeopleService {
         await FaceService.runFaceClustering(syncContext, allFaces);
         await this.syncPeopleFromClusters(syncContext, allFacesMap, allFaces);
 
-        await mlIDbStorage.setIndexVersion('people', filesVersion);
+        await mlIDbStorage.setIndexVersion("people", filesVersion);
     }
 
     private async syncPeopleFromClusters(
         syncContext: MLSyncContext,
         allFacesMap: Map<number, Array<Face>>,
-        allFaces: Array<Face>
+        allFaces: Array<Face>,
     ) {
         const clusters =
             syncContext.mlLibraryData.faceClusteringResults?.clusters;
@@ -59,7 +59,7 @@ class PeopleService {
             // TODO: take default display face from last leaves of hdbscan clusters
             const personFace = findFirstIfSorted(
                 faces,
-                (a, b) => b.detection.probability - a.detection.probability
+                (a, b) => b.detection.probability - a.detection.probability,
             );
 
             if (personFace && !personFace.crop?.imageUrl) {
@@ -68,7 +68,7 @@ class PeopleService {
                 await FaceService.saveFaceCrop(
                     imageBitmap,
                     personFace,
-                    syncContext
+                    syncContext,
                 );
             }
 

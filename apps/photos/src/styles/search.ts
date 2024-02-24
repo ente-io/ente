@@ -5,61 +5,61 @@ export const SelectStyles = {
     }),
     control: (style, { isFocused }) => ({
         ...style,
-        backgroundColor: 'rgba(255, 255, 255, 0.1)',
+        backgroundColor: "rgba(255, 255, 255, 0.1)",
 
-        borderColor: isFocused ? '#1dba54' : 'transparent',
-        boxShadow: 'none',
-        ':hover': {
-            borderColor: '#1dba54',
-            cursor: 'text',
+        borderColor: isFocused ? "#1dba54" : "transparent",
+        boxShadow: "none",
+        ":hover": {
+            borderColor: "#1dba54",
+            cursor: "text",
         },
     }),
     input: (style) => ({
         ...style,
-        color: '#fff',
+        color: "#fff",
     }),
     menu: (style) => ({
         ...style,
-        marginTop: '1px',
-        backgroundColor: '#1b1b1b',
+        marginTop: "1px",
+        backgroundColor: "#1b1b1b",
     }),
     option: (style, { isFocused }) => ({
         ...style,
         padding: 0,
-        backgroundColor: 'transparent !important',
-        '& :hover': {
-            cursor: 'pointer',
+        backgroundColor: "transparent !important",
+        "& :hover": {
+            cursor: "pointer",
         },
-        '& .main': {
-            backgroundColor: isFocused && '#202020',
+        "& .main": {
+            backgroundColor: isFocused && "#202020",
         },
-        '&:last-child .MuiDivider-root': {
-            display: 'none',
+        "&:last-child .MuiDivider-root": {
+            display: "none",
         },
     }),
     dropdownIndicator: (style) => ({
         ...style,
-        display: 'none',
+        display: "none",
     }),
     indicatorSeparator: (style) => ({
         ...style,
-        display: 'none',
+        display: "none",
     }),
     clearIndicator: (style) => ({
         ...style,
-        display: 'none',
+        display: "none",
     }),
     singleValue: (style) => ({
         ...style,
-        backgroundColor: 'transparent',
-        color: '#d1d1d1',
-        marginLeft: '36px',
+        backgroundColor: "transparent",
+        color: "#d1d1d1",
+        marginLeft: "36px",
     }),
     placeholder: (style) => ({
         ...style,
-        color: 'rgba(255, 255, 255, 0.7)',
-        wordSpacing: '2px',
-        whiteSpace: 'nowrap',
-        marginLeft: '40px',
+        color: "rgba(255, 255, 255, 0.7)",
+        wordSpacing: "2px",
+        whiteSpace: "nowrap",
+        marginLeft: "40px",
     }),
 };

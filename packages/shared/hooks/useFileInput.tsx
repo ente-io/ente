@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useRef, useState } from "react";
 
 export interface FileWithPath extends File {
     readonly path?: string;
@@ -16,11 +16,11 @@ export default function useFileInput({ directory }: { directory?: boolean }) {
     }, []);
 
     const handleChange: React.ChangeEventHandler<HTMLInputElement> = async (
-        event
+        event,
     ) => {
         if (!!event.target && !!event.target.files) {
             const files = [...event.target.files].map((file) =>
-                toFileWithPath(file)
+                toFileWithPath(file),
             );
             setSelectedFiles(files);
         }
@@ -28,14 +28,14 @@ export default function useFileInput({ directory }: { directory?: boolean }) {
 
     const getInputProps = useCallback(
         () => ({
-            type: 'file',
+            type: "file",
             multiple: true,
-            style: { display: 'none' },
-            ...(directory ? { directory: '', webkitdirectory: '' } : {}),
+            style: { display: "none" },
+            ...(directory ? { directory: "", webkitdirectory: "" } : {}),
             ref: inputRef,
             onChange: handleChange,
         }),
-        []
+        [],
     );
 
     return {
@@ -47,14 +47,14 @@ export default function useFileInput({ directory }: { directory?: boolean }) {
 
 // https://github.com/react-dropzone/file-selector/blob/master/src/file.ts#L88
 export function toFileWithPath(file: File, path?: string): FileWithPath {
-    if (typeof (file as any).path !== 'string') {
+    if (typeof (file as any).path !== "string") {
         // on electron, path is already set to the absolute path
         const { webkitRelativePath } = file;
-        Object.defineProperty(file, 'path', {
+        Object.defineProperty(file, "path", {
             value:
-                typeof path === 'string'
+                typeof path === "string"
                     ? path
-                    : typeof webkitRelativePath === 'string' && // If <input webkitdirectory> is set,
+                    : typeof webkitRelativePath === "string" && // If <input webkitdirectory> is set,
                         // the File will have a {webkitRelativePath} property
                         // https://developer.mozilla.org/en-US/docs/Web/API/HTMLInputElement/webkitdirectory
                         webkitRelativePath.length > 0

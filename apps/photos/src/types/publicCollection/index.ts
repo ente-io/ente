@@ -1,7 +1,7 @@
-import { TimeStampListItem } from 'components/PhotoList';
-import { REPORT_REASON } from 'constants/publicCollection';
-import { PublicURL } from 'types/collection';
-import { EnteFile } from 'types/file';
+import { TimeStampListItem } from "components/PhotoList";
+import { REPORT_REASON } from "constants/publicCollection";
+import { PublicURL } from "types/collection";
+import { EnteFile } from "types/file";
 
 export interface PublicCollectionGalleryContextType {
     token: string;

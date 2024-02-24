@@ -1,22 +1,22 @@
-import React, { useState, useEffect } from 'react';
-import { Skeleton, styled } from '@mui/material';
+import { Skeleton, styled } from "@mui/material";
+import { useEffect, useState } from "react";
 
-import { imageBitmapToBlob } from 'utils/image';
-import { logError } from '@ente/shared/sentry';
-import { cached } from '@ente/shared/storage/cacheStorage/helpers';
-import machineLearningService from 'services/machineLearning/machineLearningService';
-import { LS_KEYS, getData } from '@ente/shared/storage/localStorage';
-import { User } from '@ente/shared/user/types';
-import { addLogLine } from '@ente/shared/logging';
+import { addLogLine } from "@ente/shared/logging";
+import { logError } from "@ente/shared/sentry";
+import { cached } from "@ente/shared/storage/cacheStorage/helpers";
+import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
+import { User } from "@ente/shared/user/types";
+import machineLearningService from "services/machineLearning/machineLearningService";
+import { imageBitmapToBlob } from "utils/image";
 
-export const FaceCropsRow = styled('div')`
+export const FaceCropsRow = styled("div")`
     & > img {
         width: 256px;
         height: 256px;
     }
 `;
 
-export const FaceImagesRow = styled('div')`
+export const FaceImagesRow = styled("div")`
     & > img {
         width: 112px;
         height: 112px;
@@ -45,27 +45,27 @@ export function ImageCacheView(props: {
                         async () => {
                             try {
                                 addLogLine(
-                                    'ImageCacheView: regenerate face crop',
-                                    props.faceID
+                                    "ImageCacheView: regenerate face crop",
+                                    props.faceID,
                                 );
                                 return machineLearningService.regenerateFaceCrop(
                                     user.token,
                                     user.id,
-                                    props.faceID
+                                    props.faceID,
                                 );
                             } catch (e) {
                                 logError(
                                     e,
-                                    'ImageCacheView: regenerate face crop failed'
+                                    "ImageCacheView: regenerate face crop failed",
                                 );
                             }
-                        }
+                        },
                     );
                 }
 
                 !didCancel && setImageBlob(blob);
             } catch (e) {
-                logError(e, 'ImageCacheView useEffect failed');
+                logError(e, "ImageCacheView useEffect failed");
             }
         }
         loadImage();
@@ -113,9 +113,9 @@ export function ImageBlobView(props: { blob: Blob }) {
             setImgUrl(props.blob && URL.createObjectURL(props.blob));
         } catch (e) {
             console.error(
-                'ImageBlobView: can not create object url for blob: ',
+                "ImageBlobView: can not create object url for blob: ",
                 props.blob,
-                e
+                e,
             );
         }
     }, [props.blob]);

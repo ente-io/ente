@@ -1,25 +1,25 @@
-import { APPS, CLIENT_PACKAGE_NAMES } from '@ente/shared/apps/constants';
+import { APPS, CLIENT_PACKAGE_NAMES } from "@ente/shared/apps/constants";
 import {
     CenteredFlex,
     VerticallyCentered,
-} from '@ente/shared/components/Container';
-import EnteButton from '@ente/shared/components/EnteButton';
-import EnteSpinner from '@ente/shared/components/EnteSpinner';
-import FormPaper from '@ente/shared/components/Form/FormPaper';
-import HTTPService from '@ente/shared/network/HTTPService';
-import { logError } from '@ente/shared/sentry';
-import { LS_KEYS, setData } from '@ente/shared/storage/localStorage';
-import InfoIcon from '@mui/icons-material/Info';
-import { Box, Typography } from '@mui/material';
-import { t } from 'i18next';
-import _sodium from 'libsodium-wrappers';
-import Image from 'next/image';
-import { useEffect, useState } from 'react';
+} from "@ente/shared/components/Container";
+import EnteButton from "@ente/shared/components/EnteButton";
+import EnteSpinner from "@ente/shared/components/EnteSpinner";
+import FormPaper from "@ente/shared/components/Form/FormPaper";
+import HTTPService from "@ente/shared/network/HTTPService";
+import { logError } from "@ente/shared/sentry";
+import { LS_KEYS, setData } from "@ente/shared/storage/localStorage";
+import InfoIcon from "@mui/icons-material/Info";
+import { Box, Typography } from "@mui/material";
+import { t } from "i18next";
+import _sodium from "libsodium-wrappers";
+import Image from "next/image";
+import { useEffect, useState } from "react";
 import {
     BeginPasskeyAuthenticationResponse,
     beginPasskeyAuthentication,
     finishPasskeyAuthentication,
-} from 'services/passkeysService';
+} from "services/passkeysService";
 
 const PasskeysFlow = () => {
     const [errored, setErrored] = useState(false);
@@ -32,18 +32,18 @@ const PasskeysFlow = () => {
         const searchParams = new URLSearchParams(window.location.search);
 
         // get redirect from the query params
-        const redirect = searchParams.get('redirect') as string;
+        const redirect = searchParams.get("redirect") as string;
 
         const redirectURL = new URL(redirect);
-        if (process.env.NEXT_PUBLIC_DISABLE_REDIRECT_CHECK !== 'true') {
+        if (process.env.NEXT_PUBLIC_DISABLE_REDIRECT_CHECK !== "true") {
             if (
-                redirect !== '' &&
+                redirect !== "" &&
                 !(
-                    redirectURL.host.endsWith('.ente.io') ||
-                    redirectURL.host.endsWith('bada-frame.pages.dev')
+                    redirectURL.host.endsWith(".ente.io") ||
+                    redirectURL.host.endsWith("bada-frame.pages.dev")
                 ) &&
-                redirectURL.protocol !== 'ente:' &&
-                redirectURL.protocol !== 'enteauth:'
+                redirectURL.protocol !== "ente:" &&
+                redirectURL.protocol !== "enteauth:"
             ) {
                 setInvalidInfo(true);
                 setLoading(false);
@@ -52,19 +52,19 @@ const PasskeysFlow = () => {
         }
 
         let pkg = CLIENT_PACKAGE_NAMES.get(APPS.PHOTOS);
-        if (redirectURL.protocol === 'enteauth:') {
+        if (redirectURL.protocol === "enteauth:") {
             pkg = CLIENT_PACKAGE_NAMES.get(APPS.AUTH);
-        } else if (redirectURL.hostname.startsWith('accounts')) {
+        } else if (redirectURL.hostname.startsWith("accounts")) {
             pkg = CLIENT_PACKAGE_NAMES.get(APPS.ACCOUNTS);
         }
 
         setData(LS_KEYS.CLIENT_PACKAGE, { name: pkg });
         HTTPService.setHeaders({
-            'X-Client-Package': pkg,
+            "X-Client-Package": pkg,
         });
 
         // get passkeySessionID from the query params
-        const passkeySessionID = searchParams.get('passkeySessionID') as string;
+        const passkeySessionID = searchParams.get("passkeySessionID") as string;
 
         setLoading(true);
 
@@ -100,7 +100,7 @@ const PasskeysFlow = () => {
 
         if (!credential) {
             if (!isWebAuthnSupported()) {
-                alert('WebAuthn is not supported in this browser');
+                alert("WebAuthn is not supported in this browser");
             }
             setErrored(true);
             return;
@@ -114,7 +114,7 @@ const PasskeysFlow = () => {
             finishData = await finishAuthentication(
                 credential,
                 passkeySessionID,
-                beginData.ceremonySessionID
+                beginData.ceremonySessionID,
             );
         } catch (e) {
             logError(e, "Couldn't finish passkey authentication");
@@ -142,28 +142,28 @@ const PasskeysFlow = () => {
 
     const getCredential = async (
         publicKey: any,
-        timeoutMillis: number = 60000 // Default timeout of 60 seconds
+        timeoutMillis: number = 60000, // Default timeout of 60 seconds
     ): Promise<Credential | null> => {
         publicKey.challenge = _sodium.from_base64(
             publicKey.challenge,
-            _sodium.base64_variants.URLSAFE_NO_PADDING
+            _sodium.base64_variants.URLSAFE_NO_PADDING,
         );
         publicKey.allowCredentials?.forEach(function (listItem: any) {
             listItem.id = _sodium.from_base64(
                 listItem.id,
-                _sodium.base64_variants.URLSAFE_NO_PADDING
+                _sodium.base64_variants.URLSAFE_NO_PADDING,
             );
             // note: we are orverwriting the transports array with all possible values.
             // This is because the browser will only prompt the user for the transport that is available.
             // Warning: In case of invalid transport value, the webauthn will fail on Safari & iOS browsers
-            listItem.transports = ['usb', 'nfc', 'ble', 'internal'];
+            listItem.transports = ["usb", "nfc", "ble", "internal"];
         });
         publicKey.timeout = timeoutMillis;
         const publicKeyCredentialCreationOptions: CredentialRequestOptions = {
             publicKey: publicKey,
         };
         const credential = await navigator.credentials.get(
-            publicKeyCredentialCreationOptions
+            publicKeyCredentialCreationOptions,
         );
         return credential;
     };
@@ -171,12 +171,12 @@ const PasskeysFlow = () => {
     const finishAuthentication = async (
         credential: Credential,
         sessionId: string,
-        ceremonySessionId: string
+        ceremonySessionId: string,
     ) => {
         const data = await finishPasskeyAuthentication(
             credential,
             sessionId,
-            ceremonySessionId
+            ceremonySessionId,
         );
         return data;
     };
@@ -199,18 +199,20 @@ const PasskeysFlow = () => {
                 display="flex"
                 justifyContent="center"
                 alignItems="center"
-                height="100%">
+                height="100%"
+            >
                 <Box maxWidth="30rem">
                     <FormPaper
                         style={{
-                            padding: '1rem',
-                        }}>
+                            padding: "1rem",
+                        }}
+                    >
                         <InfoIcon />
                         <Typography fontWeight="bold" variant="h1">
-                            {t('PASSKEY_LOGIN_FAILED')}
+                            {t("PASSKEY_LOGIN_FAILED")}
                         </Typography>
                         <Typography marginTop="1rem">
-                            {t('PASSKEY_LOGIN_URL_INVALID')}
+                            {t("PASSKEY_LOGIN_URL_INVALID")}
                         </Typography>
                     </FormPaper>
                 </Box>
@@ -224,18 +226,20 @@ const PasskeysFlow = () => {
                 display="flex"
                 justifyContent="center"
                 alignItems="center"
-                height="100%">
+                height="100%"
+            >
                 <Box maxWidth="30rem">
                     <FormPaper
                         style={{
-                            padding: '1rem',
-                        }}>
+                            padding: "1rem",
+                        }}
+                    >
                         <InfoIcon />
                         <Typography fontWeight="bold" variant="h1">
-                            {t('PASSKEY_LOGIN_FAILED')}
+                            {t("PASSKEY_LOGIN_FAILED")}
                         </Typography>
                         <Typography marginTop="1rem">
-                            {t('PASSKEY_LOGIN_ERRORED')}
+                            {t("PASSKEY_LOGIN_ERRORED")}
                         </Typography>
                         <EnteButton
                             onClick={() => {
@@ -244,12 +248,13 @@ const PasskeysFlow = () => {
                             }}
                             fullWidth
                             style={{
-                                marginTop: '1rem',
+                                marginTop: "1rem",
                             }}
                             color="primary"
                             type="button"
-                            variant="contained">
-                            {t('TRY_AGAIN')}
+                            variant="contained"
+                        >
+                            {t("TRY_AGAIN")}
                         </EnteButton>
                     </FormPaper>
                 </Box>
@@ -263,18 +268,20 @@ const PasskeysFlow = () => {
                 display="flex"
                 justifyContent="center"
                 alignItems="center"
-                height="100%">
+                height="100%"
+            >
                 <Box maxWidth="30rem">
                     <FormPaper
                         style={{
-                            padding: '1rem',
-                        }}>
+                            padding: "1rem",
+                        }}
+                    >
                         <InfoIcon />
                         <Typography fontWeight="bold" variant="h1">
-                            {t('LOGIN_WITH_PASSKEY')}
+                            {t("LOGIN_WITH_PASSKEY")}
                         </Typography>
                         <Typography marginTop="1rem">
-                            {t('PASSKEY_FOLLOW_THE_STEPS_FROM_YOUR_BROWSER')}
+                            {t("PASSKEY_FOLLOW_THE_STEPS_FROM_YOUR_BROWSER")}
                         </Typography>
                         <CenteredFlex marginTop="1rem">
                             <Image

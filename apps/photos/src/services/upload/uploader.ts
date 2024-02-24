@@ -1,26 +1,28 @@
-import { EnteFile } from 'types/file';
-import { handleUploadError, CustomError } from '@ente/shared/error';
-import { logError } from '@ente/shared/sentry';
-import { findMatchingExistingFiles } from 'utils/upload';
-import UIService from './uiService';
-import UploadService from './uploadService';
-import { UPLOAD_RESULT, MAX_FILE_SIZE_SUPPORTED } from 'constants/upload';
+import { DedicatedCryptoWorker } from "@ente/shared/crypto/internal/crypto.worker";
+import { CustomError, handleUploadError } from "@ente/shared/error";
+import { addLocalLog, addLogLine } from "@ente/shared/logging";
+import { logError } from "@ente/shared/sentry";
+import { convertBytesToHumanReadable } from "@ente/shared/utils/size";
+import { Remote } from "comlink";
+import { MAX_FILE_SIZE_SUPPORTED, UPLOAD_RESULT } from "constants/upload";
+import { addToCollection } from "services/collectionService";
+import { EnteFile } from "types/file";
 import {
-    FileWithCollection,
     BackupedFile,
-    UploadFile,
-    FileWithMetadata,
     FileTypeInfo,
+    FileWithCollection,
+    FileWithMetadata,
     Logger,
-} from 'types/upload';
-import { addLocalLog, addLogLine } from '@ente/shared/logging';
-import { convertBytesToHumanReadable } from '@ente/shared/utils/size';
-import { sleep } from 'utils/common';
-import { addToCollection } from 'services/collectionService';
-import uploadCancelService from './uploadCancelService';
-import { Remote } from 'comlink';
-import { DedicatedCryptoWorker } from '@ente/shared/crypto/internal/crypto.worker';
-import uploadService from './uploadService';
+    UploadFile,
+} from "types/upload";
+import { sleep } from "utils/common";
+import { findMatchingExistingFiles } from "utils/upload";
+import UIService from "./uiService";
+import uploadCancelService from "./uploadCancelService";
+import {
+    default as UploadService,
+    default as uploadService,
+} from "./uploadService";
 
 interface UploadResponse {
     fileUploadResult: UPLOAD_RESULT;
@@ -31,11 +33,11 @@ export default async function uploader(
     worker: Remote<DedicatedCryptoWorker>,
     existingFiles: EnteFile[],
     fileWithCollection: FileWithCollection,
-    uploaderName: string
+    uploaderName: string,
 ): Promise<UploadResponse> {
     const { collection, localID, ...uploadAsset } = fileWithCollection;
     const fileNameSize = `${UploadService.getAssetName(
-        fileWithCollection
+        fileWithCollection,
     )}_${convertBytesToHumanReadable(UploadService.getAssetSize(uploadAsset))}`;
 
     addLogLine(`uploader called for  ${fileNameSize}`);
@@ -51,7 +53,7 @@ export default async function uploader(
         addLogLine(`getting filetype for ${fileNameSize}`);
         fileTypeInfo = await UploadService.getAssetFileType(uploadAsset);
         addLogLine(
-            `got filetype for ${fileNameSize} - ${JSON.stringify(fileTypeInfo)}`
+            `got filetype for ${fileNameSize} - ${JSON.stringify(fileTypeInfo)}`,
         );
 
         addLogLine(`extracting  metadata ${fileNameSize}`);
@@ -60,18 +62,18 @@ export default async function uploader(
                 worker,
                 uploadAsset,
                 collection.id,
-                fileTypeInfo
+                fileTypeInfo,
             );
 
         const matchingExistingFiles = findMatchingExistingFiles(
             existingFiles,
-            metadata
+            metadata,
         );
         addLocalLog(
             () =>
                 `matchedFileList: ${matchingExistingFiles
                     .map((f) => `${f.id}-${f.metadata.title}`)
-                    .join(',')}`
+                    .join(",")}`,
         );
         if (matchingExistingFiles?.length) {
             const matchingExistingFilesCollectionIDs =
@@ -79,15 +81,15 @@ export default async function uploader(
             addLocalLog(
                 () =>
                     `matched file collectionIDs:${matchingExistingFilesCollectionIDs}
-                       and collectionID:${collection.id}`
+                       and collectionID:${collection.id}`,
             );
             if (matchingExistingFilesCollectionIDs.includes(collection.id)) {
                 addLogLine(
-                    `file already present in the collection , skipped upload for  ${fileNameSize}`
+                    `file already present in the collection , skipped upload for  ${fileNameSize}`,
                 );
                 const sameCollectionMatchingExistingFile =
                     matchingExistingFiles.find(
-                        (f) => f.collectionID === collection.id
+                        (f) => f.collectionID === collection.id,
                     );
                 return {
                     fileUploadResult: UPLOAD_RESULT.ALREADY_UPLOADED,
@@ -95,7 +97,7 @@ export default async function uploader(
                 };
             } else {
                 addLogLine(
-                    `same file in ${matchingExistingFilesCollectionIDs.length} collection found for  ${fileNameSize} ,adding symlink`
+                    `same file in ${matchingExistingFilesCollectionIDs.length} collection found for  ${fileNameSize} ,adding symlink`,
                 );
                 // any of the matching file can used to add a symlink
                 const resultFile = Object.assign({}, matchingExistingFiles[0]);
@@ -139,7 +141,7 @@ export default async function uploader(
         const encryptedFile = await UploadService.encryptAsset(
             worker,
             fileWithMetadata,
-            collection.key
+            collection.key,
         );
 
         if (uploadCancelService.isUploadCancelationRequested()) {
@@ -151,13 +153,13 @@ export default async function uploader(
         };
         const backupedFile: BackupedFile = await UploadService.uploadToBucket(
             logger,
-            encryptedFile.file
+            encryptedFile.file,
         );
 
         const uploadFile: UploadFile = UploadService.getUploadFile(
             collection,
             backupedFile,
-            encryptedFile.fileKey
+            encryptedFile.fileKey,
         );
         addLogLine(`uploading file to server ${fileNameSize}`);
 
@@ -177,7 +179,7 @@ export default async function uploader(
             e.message !== CustomError.UPLOAD_CANCELLED &&
             e.message !== CustomError.UNSUPPORTED_FILE_FORMAT
         ) {
-            logError(e, 'file upload failed', {
+            logError(e, "file upload failed", {
                 fileFormat: fileTypeInfo?.exactType,
                 fileSize: convertBytesToHumanReadable(fileSize),
             });

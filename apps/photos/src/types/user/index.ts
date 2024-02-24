@@ -1,4 +1,4 @@
-import { Subscription } from 'types/billing';
+import { Subscription } from "types/billing";
 
 export interface FamilyMember {
     email: string;

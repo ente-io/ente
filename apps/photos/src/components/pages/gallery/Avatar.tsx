@@ -1,9 +1,9 @@
-import React, { useState, useContext, useLayoutEffect } from 'react';
-import { EnteFile } from 'types/file';
-import { GalleryContext } from 'pages/gallery';
-import { styled } from '@mui/material';
-import { useTheme } from '@mui/material/styles';
-import { logError } from '@ente/shared/sentry';
+import { logError } from "@ente/shared/sentry";
+import { styled } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
+import { GalleryContext } from "pages/gallery";
+import React, { useContext, useLayoutEffect, useState } from "react";
+import { EnteFile } from "types/file";
 
 interface AvatarProps {
     file?: EnteFile;
@@ -11,9 +11,9 @@ interface AvatarProps {
     opacity?: number;
 }
 
-const PUBLIC_COLLECTED_FILES_AVATAR_COLOR_CODE = '#000000';
+const PUBLIC_COLLECTED_FILES_AVATAR_COLOR_CODE = "#000000";
 
-const AvatarBase = styled('div')<{
+const AvatarBase = styled("div")<{
     colorCode: string;
     size: number;
     opacity: number;
@@ -21,7 +21,7 @@ const AvatarBase = styled('div')<{
     width: ${({ size }) => `${size}px`};
     height: ${({ size }) => `${size}px`};
     background-color: ${({ colorCode, opacity }) =>
-        `${colorCode}${opacity === 100 ? '' : opacity ?? 95}`};
+        `${colorCode}${opacity === 100 ? "" : opacity ?? 95}`};
     border-radius: 50%;
     display: flex;
     justify-content: center;
@@ -35,8 +35,8 @@ const Avatar: React.FC<AvatarProps> = ({ file, email, opacity }) => {
     const { userIDToEmailMap, user } = useContext(GalleryContext);
     const theme = useTheme();
 
-    const [colorCode, setColorCode] = useState('');
-    const [userLetter, setUserLetter] = useState('');
+    const [colorCode, setColorCode] = useState("");
+    const [userLetter, setUserLetter] = useState("");
 
     useLayoutEffect(() => {
         try {
@@ -47,7 +47,7 @@ const Avatar: React.FC<AvatarProps> = ({ file, email, opacity }) => {
                 // getting email from in-memory id-email map
                 const email = userIDToEmailMap.get(file.ownerID);
                 if (!email) {
-                    logError(Error(), 'email not found in userIDToEmailMap');
+                    logError(Error(), "email not found in userIDToEmailMap");
                     return;
                 }
                 const colorIndex =
@@ -60,7 +60,7 @@ const Avatar: React.FC<AvatarProps> = ({ file, email, opacity }) => {
                 if (!uploaderName) {
                     logError(
                         Error(),
-                        'uploaderName not found in file.pubMagicMetadata.data'
+                        "uploaderName not found in file.pubMagicMetadata.data",
                     );
                     return;
                 }
@@ -68,7 +68,7 @@ const Avatar: React.FC<AvatarProps> = ({ file, email, opacity }) => {
                 setColorCode(PUBLIC_COLLECTED_FILES_AVATAR_COLOR_CODE);
             }
         } catch (err) {
-            logError(err, 'AvatarIcon.tsx - useLayoutEffect file failed');
+            logError(err, "AvatarIcon.tsx - useLayoutEffect file failed");
         }
     }, [file]);
 
@@ -84,7 +84,7 @@ const Avatar: React.FC<AvatarProps> = ({ file, email, opacity }) => {
             }
 
             const id = Array.from(userIDToEmailMap.keys()).find(
-                (key) => userIDToEmailMap.get(key) === email
+                (key) => userIDToEmailMap.get(key) === email,
             );
             if (!id) {
                 logError(Error(), `ID not found for email: ${email}`);
@@ -95,7 +95,7 @@ const Avatar: React.FC<AvatarProps> = ({ file, email, opacity }) => {
             setUserLetter(email[0].toUpperCase());
             setColorCode(colorCode);
         } catch (err) {
-            logError(err, 'AvatarIcon.tsx - useLayoutEffect email failed');
+            logError(err, "AvatarIcon.tsx - useLayoutEffect email failed");
         }
     }, [email]);
 

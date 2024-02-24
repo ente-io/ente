@@ -1,20 +1,19 @@
-import { CollectionActions } from '..';
-import React from 'react';
-import { CollectionSummaryType } from 'constants/collection';
-import { FlexWrapper } from '@ente/shared/components/Container';
-import { EmptyTrashQuickOption } from './EmptyTrashQuickOption';
-import { DownloadQuickOption } from './DownloadQuickOption';
-import { ShareQuickOption } from './ShareQuickOption';
+import { FlexWrapper } from "@ente/shared/components/Container";
+import EnteSpinner from "@ente/shared/components/EnteSpinner";
+import { CollectionSummaryType } from "constants/collection";
 import {
     showDownloadQuickOption,
-    showShareQuickOption,
     showEmptyTrashQuickOption,
-} from 'utils/collection';
-import EnteSpinner from '@ente/shared/components/EnteSpinner';
+    showShareQuickOption,
+} from "utils/collection";
+import { CollectionActions } from "..";
+import { DownloadQuickOption } from "./DownloadQuickOption";
+import { EmptyTrashQuickOption } from "./EmptyTrashQuickOption";
+import { ShareQuickOption } from "./ShareQuickOption";
 interface Iprops {
     handleCollectionAction: (
         action: CollectionActions,
-        loader?: boolean
+        loader?: boolean,
     ) => (...args: any[]) => Promise<void>;
     collectionSummaryType: CollectionSummaryType;
     isDownloadInProgress: boolean;
@@ -26,7 +25,7 @@ export function QuickOptions({
     isDownloadInProgress,
 }: Iprops) {
     return (
-        <FlexWrapper sx={{ gap: '16px' }}>
+        <FlexWrapper sx={{ gap: "16px" }}>
             {showEmptyTrashQuickOption(collectionSummaryType) && (
                 <EmptyTrashQuickOption
                     handleCollectionAction={handleCollectionAction}
@@ -39,7 +38,7 @@ export function QuickOptions({
                         collectionSummaryType={collectionSummaryType}
                     />
                 ) : (
-                    <EnteSpinner size="20px" sx={{ cursor: 'not-allowed' }} />
+                    <EnteSpinner size="20px" sx={{ cursor: "not-allowed" }} />
                 ))}
             {showShareQuickOption(collectionSummaryType) && (
                 <ShareQuickOption

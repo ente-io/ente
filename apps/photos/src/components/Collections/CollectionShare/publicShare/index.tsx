@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react';
-import { Collection, PublicURL } from 'types/collection';
-import { appendCollectionKeyToShareURL } from 'utils/collection';
-import EnablePublicShareOptions from './EnablePublicShareOptions';
-import CopyLinkModal from './copyLinkModal';
-import ManagePublicShare from './managePublicShare';
+import { useEffect, useState } from "react";
+import { Collection, PublicURL } from "types/collection";
+import { appendCollectionKeyToShareURL } from "utils/collection";
+import EnablePublicShareOptions from "./EnablePublicShareOptions";
+import CopyLinkModal from "./copyLinkModal";
+import ManagePublicShare from "./managePublicShare";
 
 export default function PublicShare({
     collection,
@@ -26,7 +26,7 @@ export default function PublicShare({
         if (publicShareProp) {
             const url = appendCollectionKeyToShareURL(
                 publicShareProp.url,
-                collection.key
+                collection.key,
             );
             setPublicShareUrl(url);
         } else {

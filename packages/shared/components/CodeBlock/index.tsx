@@ -1,20 +1,20 @@
-import { FreeFlowText } from '@ente/shared/components/Container';
-import React from 'react';
-import EnteSpinner from '@ente/shared/components/EnteSpinner';
-import { Wrapper, CodeWrapper, CopyButtonWrapper } from './styledComponents';
-import CopyButton from './CopyButton';
-import { BoxProps } from '@mui/material';
+import { FreeFlowText } from "@ente/shared/components/Container";
+import EnteSpinner from "@ente/shared/components/EnteSpinner";
+import { BoxProps } from "@mui/material";
+import React from "react";
+import CopyButton from "./CopyButton";
+import { CodeWrapper, CopyButtonWrapper, Wrapper } from "./styledComponents";
 
 type Iprops = React.PropsWithChildren<{
     code: string;
-    wordBreak?: 'normal' | 'break-all' | 'keep-all' | 'break-word';
+    wordBreak?: "normal" | "break-all" | "keep-all" | "break-word";
 }>;
 
 export default function CodeBlock({
     code,
     wordBreak,
     ...props
-}: BoxProps<'div', Iprops>) {
+}: BoxProps<"div", Iprops>) {
     if (!code) {
         return (
             <Wrapper>

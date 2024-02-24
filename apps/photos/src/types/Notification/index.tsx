@@ -1,5 +1,5 @@
-import { ButtonProps } from '@mui/material/Button';
-import { ReactNode } from 'react';
+import { ButtonProps } from "@mui/material/Button";
+import { ReactNode } from "react";
 
 export type NotificationAttributes =
     | MessageSubTextNotificationAttributes
@@ -7,7 +7,7 @@ export type NotificationAttributes =
 
 interface MessageSubTextNotificationAttributes {
     startIcon?: ReactNode;
-    variant: ButtonProps['color'];
+    variant: ButtonProps["color"];
     message?: JSX.Element | string;
     subtext?: JSX.Element | string;
     title?: never;
@@ -18,7 +18,7 @@ interface MessageSubTextNotificationAttributes {
 
 interface TitleCaptionNotificationAttributes {
     startIcon?: ReactNode;
-    variant: ButtonProps['color'];
+    variant: ButtonProps["color"];
     title?: JSX.Element | string;
     caption?: JSX.Element | string;
     message?: never;

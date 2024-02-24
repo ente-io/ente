@@ -1,23 +1,23 @@
-import { FILE_TYPE } from 'constants/file';
-import { ElectronFile, FileTypeInfo } from 'types/upload';
+import { CustomError } from "@ente/shared/error";
+import { logError } from "@ente/shared/sentry";
+import { convertBytesToHumanReadable } from "@ente/shared/utils/size";
+import { FILE_TYPE } from "constants/file";
 import {
-    WHITELISTED_FILE_FORMATS,
     KNOWN_NON_MEDIA_FORMATS,
-} from 'constants/upload';
-import { CustomError } from '@ente/shared/error';
-import { getFileExtension } from 'utils/file';
-import { logError } from '@ente/shared/sentry';
-import { getUint8ArrayView } from './readerService';
-import FileType, { FileTypeResult } from 'file-type';
-import { getFileSize } from './upload/fileService';
-import { convertBytesToHumanReadable } from '@ente/shared/utils/size';
+    WHITELISTED_FILE_FORMATS,
+} from "constants/upload";
+import FileType, { FileTypeResult } from "file-type";
+import { ElectronFile, FileTypeInfo } from "types/upload";
+import { getFileExtension } from "utils/file";
+import { getUint8ArrayView } from "./readerService";
+import { getFileSize } from "./upload/fileService";
 
-const TYPE_VIDEO = 'video';
-const TYPE_IMAGE = 'image';
+const TYPE_VIDEO = "video";
+const TYPE_IMAGE = "image";
 const CHUNK_SIZE_FOR_TYPE_DETECTION = 4100;
 
 export async function getFileType(
-    receivedFile: File | ElectronFile
+    receivedFile: File | ElectronFile,
 ): Promise<FileTypeInfo> {
     try {
         let fileType: FILE_TYPE;
@@ -29,7 +29,7 @@ export async function getFileType(
             typeResult = await extractElectronFileType(receivedFile);
         }
 
-        const mimTypeParts: string[] = typeResult.mime?.split('/');
+        const mimTypeParts: string[] = typeResult.mime?.split("/");
 
         if (mimTypeParts?.length !== 2) {
             throw Error(CustomError.INVALID_MIME_TYPE(typeResult.mime));
@@ -53,7 +53,7 @@ export async function getFileType(
         const fileFormat = getFileExtension(receivedFile.name);
         const fileSize = convertBytesToHumanReadable(getFileSize(receivedFile));
         const whiteListedFormat = WHITELISTED_FILE_FORMATS.find(
-            (a) => a.exactType === fileFormat
+            (a) => a.exactType === fileFormat,
         );
         if (whiteListedFormat) {
             return whiteListedFormat;
@@ -62,13 +62,13 @@ export async function getFileType(
             throw Error(CustomError.UNSUPPORTED_FILE_FORMAT);
         }
         if (e.message === CustomError.NON_MEDIA_FILE) {
-            logError(e, 'unsupported file format', {
+            logError(e, "unsupported file format", {
                 fileFormat,
                 fileSize,
             });
             throw Error(CustomError.UNSUPPORTED_FILE_FORMAT);
         }
-        logError(e, 'type detection failed', {
+        logError(e, "type detection failed", {
             fileFormat,
             fileSize,
         });
@@ -93,11 +93,11 @@ async function extractElectronFileType(file: ElectronFile) {
 async function getFileTypeFromBuffer(buffer: Uint8Array) {
     const result = await FileType.fromBuffer(buffer);
     if (!result?.mime) {
-        let logableInfo = '';
+        let logableInfo = "";
         try {
             logableInfo = `result: ${JSON.stringify(result)}`;
         } catch (e) {
-            logableInfo = 'failed to stringify result';
+            logableInfo = "failed to stringify result";
         }
         throw Error(`mimetype missing from file type result - ${logableInfo}`);
     }

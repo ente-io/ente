@@ -1,8 +1,8 @@
-import { ApiError } from '../error';
-import { logError } from '../sentry';
-import { getToken } from '../storage/localStorage/helpers';
-import HTTPService from './HTTPService';
-import { getEndpoint } from './api';
+import { ApiError } from "../error";
+import { logError } from "../sentry";
+import { getToken } from "../storage/localStorage/helpers";
+import HTTPService from "./HTTPService";
+import { getEndpoint } from "./api";
 
 class CastGateway {
     constructor() {}
@@ -11,10 +11,10 @@ class CastGateway {
         let resp;
         try {
             resp = await HTTPService.get(
-                `${getEndpoint()}/cast/cast-data/${code}`
+                `${getEndpoint()}/cast/cast-data/${code}`,
             );
         } catch (e) {
-            logError(e, 'failed to getCastData');
+            logError(e, "failed to getCastData");
             throw e;
         }
         return resp.data.encCastData;
@@ -24,15 +24,15 @@ class CastGateway {
         try {
             const token = getToken();
             await HTTPService.delete(
-                getEndpoint() + '/cast/revoke-all-tokens/',
+                getEndpoint() + "/cast/revoke-all-tokens/",
                 undefined,
                 undefined,
                 {
-                    'X-Auth-Token': token,
-                }
+                    "X-Auth-Token": token,
+                },
             );
         } catch (e) {
-            logError(e, 'removeAllTokens failed');
+            logError(e, "removeAllTokens failed");
             // swallow error
         }
     }
@@ -45,21 +45,21 @@ class CastGateway {
                 `${getEndpoint()}/cast/device-info/${code}`,
                 undefined,
                 {
-                    'X-Auth-Token': token,
-                }
+                    "X-Auth-Token": token,
+                },
             );
         } catch (e) {
             if (e instanceof ApiError && e.httpStatusCode === 404) {
-                return '';
+                return "";
             }
-            logError(e, 'failed to getPublicKey');
+            logError(e, "failed to getPublicKey");
             throw e;
         }
         return resp.data.publicKey;
     }
 
     public async registerDevice(code: string, publicKey: string) {
-        await HTTPService.post(getEndpoint() + '/cast/device-info/', {
+        await HTTPService.post(getEndpoint() + "/cast/device-info/", {
             deviceCode: `${code}`,
             publicKey: publicKey,
         });
@@ -69,11 +69,11 @@ class CastGateway {
         code: string,
         castPayload: string,
         collectionID: number,
-        castToken: string
+        castToken: string,
     ) {
         const token = getToken();
         await HTTPService.post(
-            getEndpoint() + '/cast/cast-data/',
+            getEndpoint() + "/cast/cast-data/",
             {
                 deviceCode: `${code}`,
                 encPayload: castPayload,
@@ -81,7 +81,7 @@ class CastGateway {
                 castToken: castToken,
             },
             undefined,
-            { 'X-Auth-Token': token }
+            { "X-Auth-Token": token },
         );
     }
 }

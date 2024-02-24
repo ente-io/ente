@@ -1,21 +1,21 @@
-import React, { useContext } from 'react';
-import Close from '@mui/icons-material/Close';
-import { DialogTitle, Box, Typography, Stack } from '@mui/material';
 import {
     IconButtonWithBG,
     SpaceBetweenFlex,
-} from '@ente/shared/components/Container';
-import { UPLOAD_STAGES } from 'constants/upload';
-import { t } from 'i18next';
+} from "@ente/shared/components/Container";
+import Close from "@mui/icons-material/Close";
+import { Box, DialogTitle, Stack, Typography } from "@mui/material";
+import { UPLOAD_STAGES } from "constants/upload";
+import { t } from "i18next";
+import { useContext } from "react";
 
-import UploadProgressContext from 'contexts/uploadProgress';
-import UnfoldLessIcon from '@mui/icons-material/UnfoldLess';
-import UnfoldMoreIcon from '@mui/icons-material/UnfoldMore';
+import UnfoldLessIcon from "@mui/icons-material/UnfoldLess";
+import UnfoldMoreIcon from "@mui/icons-material/UnfoldMore";
+import UploadProgressContext from "contexts/uploadProgress";
 
 const UploadProgressTitleText = ({ expanded }) => {
     return (
-        <Typography variant={expanded ? 'h2' : 'h3'}>
-            {t('FILE_UPLOAD')}
+        <Typography variant={expanded ? "h2" : "h3"}>
+            {t("FILE_UPLOAD")}
         </Typography>
     );
 };
@@ -24,7 +24,7 @@ function UploadProgressSubtitleText() {
     const { uploadStage, uploadCounter } = useContext(UploadProgressContext);
 
     return (
-        <Typography color="text.muted" marginTop={'4px'}>
+        <Typography color="text.muted" marginTop={"4px"}>
             {uploadStage === UPLOAD_STAGES.UPLOADING
                 ? t(`UPLOAD_STAGE_MESSAGE.${uploadStage}`, { uploadCounter })
                 : uploadStage === UPLOAD_STAGES.EXTRACTING_METADATA
@@ -36,7 +36,7 @@ function UploadProgressSubtitleText() {
 
 export function UploadProgressTitle() {
     const { setExpanded, onClose, expanded } = useContext(
-        UploadProgressContext
+        UploadProgressContext,
     );
     const toggleExpanded = () => setExpanded((expanded) => !expanded);
 
@@ -48,7 +48,7 @@ export function UploadProgressTitle() {
                     <UploadProgressSubtitleText />
                 </Box>
                 <Box>
-                    <Stack direction={'row'} spacing={1}>
+                    <Stack direction={"row"} spacing={1}>
                         <IconButtonWithBG onClick={toggleExpanded}>
                             {expanded ? <UnfoldLessIcon /> : <UnfoldMoreIcon />}
                         </IconButtonWithBG>

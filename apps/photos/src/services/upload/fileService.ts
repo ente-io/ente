@@ -1,35 +1,35 @@
-import { MULTIPART_PART_SIZE, FILE_READER_CHUNK_SIZE } from 'constants/upload';
+import { addLogLine } from "@ente/shared/logging";
+import { getFileNameSize } from "@ente/shared/logging/web";
+import { logError } from "@ente/shared/sentry";
+import { FILE_READER_CHUNK_SIZE, MULTIPART_PART_SIZE } from "constants/upload";
 import {
-    FileTypeInfo,
-    FileInMemory,
-    EncryptedFile,
-    FileWithMetadata,
-    ParsedMetadataJSONMap,
     DataStream,
     ElectronFile,
+    EncryptedFile,
     ExtractMetadataResult,
+    FileInMemory,
+    FileTypeInfo,
+    FileWithMetadata,
     ParsedMetadataJSON,
-} from 'types/upload';
-import { logError } from '@ente/shared/sentry';
-import { addLogLine } from '@ente/shared/logging';
-import { getFileNameSize } from '@ente/shared/logging/web';
+    ParsedMetadataJSONMap,
+} from "types/upload";
 
-import { encryptFiledata } from './encryptionService';
+import { DedicatedCryptoWorker } from "@ente/shared/crypto/internal/crypto.worker";
+import { Remote } from "comlink";
+import { EncryptedMagicMetadata } from "types/magicMetadata";
+import {
+    getElectronFileStream,
+    getFileStream,
+    getUint8ArrayView,
+} from "../readerService";
+import { encryptFiledata } from "./encryptionService";
 import {
     MAX_FILE_NAME_LENGTH_GOOGLE_EXPORT,
     extractMetadata,
     getClippedMetadataJSONMapKeyForFile,
     getMetadataJSONMapKeyForFile,
-} from './metadataService';
-import {
-    getFileStream,
-    getElectronFileStream,
-    getUint8ArrayView,
-} from '../readerService';
-import { generateThumbnail } from './thumbnailService';
-import { DedicatedCryptoWorker } from '@ente/shared/crypto/internal/crypto.worker';
-import { Remote } from 'comlink';
-import { EncryptedMagicMetadata } from 'types/magicMetadata';
+} from "./metadataService";
+import { generateThumbnail } from "./thumbnailService";
 
 export function getFileSize(file: File | ElectronFile) {
     return file.size;
@@ -41,11 +41,11 @@ export function getFilename(file: File | ElectronFile) {
 
 export async function readFile(
     fileTypeInfo: FileTypeInfo,
-    rawFile: File | ElectronFile
+    rawFile: File | ElectronFile,
 ): Promise<FileInMemory> {
     const { thumbnail, hasStaticThumbnail } = await generateThumbnail(
         rawFile,
-        fileTypeInfo
+        fileTypeInfo,
     );
     addLogLine(`reading file data ${getFileNameSize(rawFile)} `);
     let filedata: Uint8Array | DataStream;
@@ -53,7 +53,7 @@ export async function readFile(
         if (rawFile.size > MULTIPART_PART_SIZE) {
             filedata = await getElectronFileStream(
                 rawFile,
-                FILE_READER_CHUNK_SIZE
+                FILE_READER_CHUNK_SIZE,
             );
         } else {
             filedata = await getUint8ArrayView(rawFile);
@@ -78,7 +78,7 @@ export async function extractFileMetadata(
     parsedMetadataJSONMap: ParsedMetadataJSONMap,
     collectionID: number,
     fileTypeInfo: FileTypeInfo,
-    rawFile: File | ElectronFile
+    rawFile: File | ElectronFile,
 ): Promise<ExtractMetadataResult> {
     let key = getMetadataJSONMapKeyForFile(collectionID, rawFile.name);
     let googleMetadata: ParsedMetadataJSON = parsedMetadataJSONMap.get(key);
@@ -91,7 +91,7 @@ export async function extractFileMetadata(
     const { metadata, publicMagicMetadata } = await extractMetadata(
         worker,
         rawFile,
-        fileTypeInfo
+        fileTypeInfo,
     );
 
     for (const [key, value] of Object.entries(googleMetadata ?? {})) {
@@ -106,21 +106,21 @@ export async function extractFileMetadata(
 export async function encryptFile(
     worker: Remote<DedicatedCryptoWorker>,
     file: FileWithMetadata,
-    encryptionKey: string
+    encryptionKey: string,
 ): Promise<EncryptedFile> {
     try {
         const { key: fileKey, file: encryptedFiledata } = await encryptFiledata(
             worker,
-            file.filedata
+            file.filedata,
         );
 
         const { file: encryptedThumbnail } = await worker.encryptThumbnail(
             file.thumbnail,
-            fileKey
+            fileKey,
         );
         const { file: encryptedMetadata } = await worker.encryptMetadata(
             file.metadata,
-            fileKey
+            fileKey,
         );
 
         let encryptedPubMagicMetadata: EncryptedMagicMetadata;
@@ -128,7 +128,7 @@ export async function encryptFile(
             const { file: encryptedPubMagicMetadataData } =
                 await worker.encryptMetadata(
                     file.pubMagicMetadata.data,
-                    fileKey
+                    fileKey,
                 );
             encryptedPubMagicMetadata = {
                 version: file.pubMagicMetadata.version,
@@ -152,7 +152,7 @@ export async function encryptFile(
         };
         return result;
     } catch (e) {
-        logError(e, 'Error encrypting files');
+        logError(e, "Error encrypting files");
         throw e;
     }
 }

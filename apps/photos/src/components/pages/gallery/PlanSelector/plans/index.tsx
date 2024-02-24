@@ -1,16 +1,15 @@
-import { FreePlanRow } from './FreePlanRow';
-import { Stack } from '@mui/material';
-import React from 'react';
+import { Stack } from "@mui/material";
+import { PLAN_PERIOD } from "constants/gallery";
+import { Plan, Subscription } from "types/billing";
+import { BonusData } from "types/user";
 import {
     hasAddOnBonus,
     hasPaidSubscription,
     isPopularPlan,
     isUserSubscribedPlan,
-} from 'utils/billing';
-import { PlanRow } from './planRow';
-import { Plan, Subscription } from 'types/billing';
-import { PLAN_PERIOD } from 'constants/gallery';
-import { BonusData } from 'types/user';
+} from "utils/billing";
+import { FreePlanRow } from "./FreePlanRow";
+import { PlanRow } from "./planRow";
 
 interface Iprops {
     plans: Plan[];

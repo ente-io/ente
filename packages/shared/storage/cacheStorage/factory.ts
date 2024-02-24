@@ -1,6 +1,6 @@
-import { LimitedCacheStorage } from './types';
-import { runningInElectron } from '@ente/shared/platform';
-import { WorkerSafeElectronService } from '@ente/shared/electron/service';
+import { WorkerSafeElectronService } from "@ente/shared/electron/service";
+import { runningInElectron } from "@ente/shared/platform";
+import { LimitedCacheStorage } from "./types";
 class cacheStorageFactory {
     getCacheStorage(): LimitedCacheStorage {
         if (runningInElectron()) {
@@ -8,7 +8,7 @@ class cacheStorageFactory {
                 open(cacheName, cacheLimitInBytes?: number) {
                     return WorkerSafeElectronService.openDiskCache(
                         cacheName,
-                        cacheLimitInBytes
+                        cacheLimitInBytes,
                     );
                 },
                 delete(cacheName) {
@@ -24,7 +24,7 @@ class cacheStorageFactory {
 export const CacheStorageFactory = new cacheStorageFactory();
 
 function transformBrowserCacheStorageToLimitedCacheStorage(
-    caches: CacheStorage
+    caches: CacheStorage,
 ): LimitedCacheStorage {
     return {
         async open(cacheName) {

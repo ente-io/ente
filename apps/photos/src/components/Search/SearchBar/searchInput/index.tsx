@@ -1,36 +1,36 @@
-import { IconButton } from '@mui/material';
-import pDebounce from 'p-debounce';
-import { AppContext } from 'pages/_app';
-import { useCallback, useContext, useEffect, useRef, useState } from 'react';
+import CloseIcon from "@mui/icons-material/Close";
+import { IconButton } from "@mui/material";
+import { FILE_TYPE } from "constants/file";
+import { t } from "i18next";
+import memoize from "memoize-one";
+import pDebounce from "p-debounce";
+import { AppContext } from "pages/_app";
+import { useCallback, useContext, useEffect, useRef, useState } from "react";
+import { components } from "react-select";
+import AsyncSelect from "react-select/async";
+import { InputActionMeta } from "react-select/src/types";
+import { City } from "services/locationSearchService";
 import {
     getAutoCompleteSuggestions,
     getDefaultOptions,
-} from 'services/searchService';
+} from "services/searchService";
+import { Collection } from "types/collection";
+import { LocationTagData } from "types/entity";
+import { EnteFile } from "types/file";
+import { Person, Thing, WordGroup } from "types/machineLearning";
 import {
     ClipSearchScores,
     DateValue,
     Search,
     SearchOption,
     SuggestionType,
-} from 'types/search';
-import { ValueContainerWithIcon } from './valueContainerWithIcon';
-import { SelectStyles } from '../../../../styles/search';
-import AsyncSelect from 'react-select/async';
-import CloseIcon from '@mui/icons-material/Close';
-import { UpdateSearch } from 'types/search';
-import { EnteFile } from 'types/file';
-import { Collection } from 'types/collection';
-import { OptionWithInfo } from './optionWithInfo';
-import { SearchInputWrapper } from '../styledComponents';
-import MenuWithPeople from './MenuWithPeople';
-import { Person, Thing, WordGroup } from 'types/machineLearning';
-import { t } from 'i18next';
-import memoize from 'memoize-one';
-import { LocationTagData } from 'types/entity';
-import { FILE_TYPE } from 'constants/file';
-import { InputActionMeta } from 'react-select/src/types';
-import { components } from 'react-select';
-import { City } from 'services/locationSearchService';
+    UpdateSearch,
+} from "types/search";
+import { SelectStyles } from "../../../../styles/search";
+import { SearchInputWrapper } from "../styledComponents";
+import MenuWithPeople from "./MenuWithPeople";
+import { OptionWithInfo } from "./optionWithInfo";
+import { ValueContainerWithIcon } from "./valueContainerWithIcon";
 
 interface Iprops {
     isOpen: boolean;
@@ -61,12 +61,12 @@ export default function SearchInput(props: Iprops) {
         blur();
     };
     const handleInputChange = (value: string, actionMeta: InputActionMeta) => {
-        if (actionMeta.action === 'input-change') {
+        if (actionMeta.action === "input-change") {
             setQuery(value);
         }
     };
     const [defaultOptions, setDefaultOptions] = useState([]);
-    const [query, setQuery] = useState('');
+    const [query, setQuery] = useState("");
 
     useEffect(() => {
         search(value);
@@ -92,16 +92,16 @@ export default function SearchInput(props: Iprops) {
             }, 10);
             props.setIsOpen(false);
             setValue(null);
-            setQuery('');
+            setQuery("");
         }
     };
 
     const getOptions = useCallback(
         pDebounce(
             getAutoCompleteSuggestions(props.files, props.collections),
-            250
+            250,
         ),
-        [props.files, props.collections]
+        [props.files, props.collections],
     );
 
     const blur = () => {
@@ -135,7 +135,7 @@ export default function SearchInput(props: Iprops) {
             case SuggestionType.COLLECTION:
                 search = { collection: selectedOption.value as number };
                 setValue(null);
-                setQuery('');
+                setQuery("");
                 break;
             case SuggestionType.FILE_NAME:
                 search = { files: selectedOption.value as number[] };
@@ -180,14 +180,14 @@ export default function SearchInput(props: Iprops) {
                 selectRef={selectRef}
             />
         ),
-        [setValue, selectRef]
+        [setValue, selectRef],
     );
 
     const components = createComponents(
         OptionWithInfo,
         ValueContainerWithIcon,
         MemoizedMenuWithPeople,
-        VisibleInput
+        VisibleInput,
     );
 
     return (
@@ -196,7 +196,7 @@ export default function SearchInput(props: Iprops) {
                 ref={selectRef}
                 value={value}
                 components={components}
-                placeholder={<span>{t('SEARCH_HINT')}</span>}
+                placeholder={<span>{t("SEARCH_HINT")}</span>}
                 loadOptions={getOptions}
                 onChange={handleChange}
                 onFocus={handleOnFocus}

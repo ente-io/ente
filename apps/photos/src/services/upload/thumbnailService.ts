@@ -1,17 +1,17 @@
-import { FILE_TYPE } from 'constants/file';
-import { CustomError, errorWithContext } from '@ente/shared/error';
-import { logError } from '@ente/shared/sentry';
-import { BLACK_THUMBNAIL_BASE64 } from 'constants/upload';
-import * as FFmpegService from 'services/ffmpeg/ffmpegService';
-import { convertBytesToHumanReadable } from '@ente/shared/utils/size';
-import { ElectronFile, FileTypeInfo } from 'types/upload';
-import { getUint8ArrayView } from '../readerService';
-import { addLogLine } from '@ente/shared/logging';
-import { getFileNameSize } from '@ente/shared/logging/web';
-import HeicConversionService from 'services/heicConversionService';
-import { isFileHEIC } from 'utils/file';
-import isElectron from 'is-electron';
-import imageProcessor from 'services/imageProcessor';
+import { CustomError, errorWithContext } from "@ente/shared/error";
+import { addLogLine } from "@ente/shared/logging";
+import { getFileNameSize } from "@ente/shared/logging/web";
+import { logError } from "@ente/shared/sentry";
+import { convertBytesToHumanReadable } from "@ente/shared/utils/size";
+import { FILE_TYPE } from "constants/file";
+import { BLACK_THUMBNAIL_BASE64 } from "constants/upload";
+import isElectron from "is-electron";
+import * as FFmpegService from "services/ffmpeg/ffmpegService";
+import HeicConversionService from "services/heicConversionService";
+import imageProcessor from "services/imageProcessor";
+import { ElectronFile, FileTypeInfo } from "types/upload";
+import { isFileHEIC } from "utils/file";
+import { getUint8ArrayView } from "../readerService";
 
 const MAX_THUMBNAIL_DIMENSION = 720;
 const MIN_COMPRESSION_PERCENTAGE_SIZE_DIFF = 10;
@@ -28,7 +28,7 @@ interface Dimension {
 
 export async function generateThumbnail(
     file: File | ElectronFile,
-    fileTypeInfo: FileTypeInfo
+    fileTypeInfo: FileTypeInfo,
 ): Promise<{ thumbnail: Uint8Array; hasStaticThumbnail: boolean }> {
     try {
         addLogLine(`generating thumbnail for ${getFileNameSize(file)}`);
@@ -42,54 +42,54 @@ export async function generateThumbnail(
             }
             if (thumbnail.length > 1.5 * MAX_THUMBNAIL_SIZE) {
                 logError(
-                    Error('thumbnail_too_large'),
-                    'thumbnail greater than max limit',
+                    Error("thumbnail_too_large"),
+                    "thumbnail greater than max limit",
                     {
                         thumbnailSize: convertBytesToHumanReadable(
-                            thumbnail.length
+                            thumbnail.length,
                         ),
                         fileSize: convertBytesToHumanReadable(file.size),
                         fileType: fileTypeInfo.exactType,
-                    }
+                    },
                 );
             }
             if (thumbnail.length === 0) {
-                throw Error('EMPTY THUMBNAIL');
+                throw Error("EMPTY THUMBNAIL");
             }
             addLogLine(
-                `thumbnail successfully generated ${getFileNameSize(file)}`
+                `thumbnail successfully generated ${getFileNameSize(file)}`,
             );
         } catch (e) {
-            logError(e, 'uploading static thumbnail', {
+            logError(e, "uploading static thumbnail", {
                 fileFormat: fileTypeInfo.exactType,
             });
             addLogLine(
                 `thumbnail generation failed ${getFileNameSize(file)} error: ${
                     e.message
-                }`
+                }`,
             );
             thumbnail = Uint8Array.from(atob(BLACK_THUMBNAIL_BASE64), (c) =>
-                c.charCodeAt(0)
+                c.charCodeAt(0),
             );
             hasStaticThumbnail = true;
         }
         return { thumbnail, hasStaticThumbnail };
     } catch (e) {
-        logError(e, 'Error generating static thumbnail');
+        logError(e, "Error generating static thumbnail");
         throw e;
     }
 }
 
 async function generateImageThumbnail(
     file: File | ElectronFile,
-    fileTypeInfo: FileTypeInfo
+    fileTypeInfo: FileTypeInfo,
 ) {
     if (isElectron()) {
         try {
             return await imageProcessor.generateImageThumbnail(
                 file,
                 MAX_THUMBNAIL_DIMENSION,
-                MAX_THUMBNAIL_SIZE
+                MAX_THUMBNAIL_SIZE,
             );
         } catch (e) {
             return await generateImageThumbnailUsingCanvas(file, fileTypeInfo);
@@ -101,10 +101,10 @@ async function generateImageThumbnail(
 
 export async function generateImageThumbnailUsingCanvas(
     file: File | ElectronFile,
-    fileTypeInfo: FileTypeInfo
+    fileTypeInfo: FileTypeInfo,
 ) {
-    const canvas = document.createElement('canvas');
-    const canvasCTX = canvas.getContext('2d');
+    const canvas = document.createElement("canvas");
+    const canvasCTX = canvas.getContext("2d");
 
     let imageURL = null;
     let timeout = null;
@@ -112,7 +112,7 @@ export async function generateImageThumbnailUsingCanvas(
     if (isHEIC) {
         addLogLine(`HEICConverter called for ${getFileNameSize(file)}`);
         const convertedBlob = await HeicConversionService.convert(
-            new Blob([await file.arrayBuffer()])
+            new Blob([await file.arrayBuffer()]),
         );
         file = new File([convertedBlob], file.name);
         addLogLine(`${getFileNameSize(file)} successfully converted`);
@@ -120,7 +120,7 @@ export async function generateImageThumbnailUsingCanvas(
     let image = new Image();
     imageURL = URL.createObjectURL(new Blob([await file.arrayBuffer()]));
     await new Promise((resolve, reject) => {
-        image.setAttribute('src', imageURL);
+        image.setAttribute("src", imageURL);
         image.onload = () => {
             try {
                 URL.revokeObjectURL(imageURL);
@@ -130,7 +130,7 @@ export async function generateImageThumbnailUsingCanvas(
                 };
                 const thumbnailDimension = calculateThumbnailDimension(
                     imageDimension,
-                    MAX_THUMBNAIL_DIMENSION
+                    MAX_THUMBNAIL_DIMENSION,
                 );
                 canvas.width = thumbnailDimension.width;
                 canvas.height = thumbnailDimension.height;
@@ -139,7 +139,7 @@ export async function generateImageThumbnailUsingCanvas(
                     0,
                     0,
                     thumbnailDimension.width,
-                    thumbnailDimension.height
+                    thumbnailDimension.height,
                 );
                 image = null;
                 clearTimeout(timeout);
@@ -147,14 +147,14 @@ export async function generateImageThumbnailUsingCanvas(
             } catch (e) {
                 const err = errorWithContext(
                     e,
-                    `${CustomError.THUMBNAIL_GENERATION_FAILED} err: ${e}`
+                    `${CustomError.THUMBNAIL_GENERATION_FAILED} err: ${e}`,
                 );
                 reject(err);
             }
         };
         timeout = setTimeout(
             () => reject(Error(CustomError.WAIT_TIME_EXCEEDED)),
-            WAIT_TIME_THUMBNAIL_GENERATION
+            WAIT_TIME_THUMBNAIL_GENERATION,
         );
     });
     const thumbnailBlob = await getCompressedThumbnailBlobFromCanvas(canvas);
@@ -163,26 +163,26 @@ export async function generateImageThumbnailUsingCanvas(
 
 async function generateVideoThumbnail(
     file: File | ElectronFile,
-    fileTypeInfo: FileTypeInfo
+    fileTypeInfo: FileTypeInfo,
 ) {
     let thumbnail: Uint8Array;
     try {
         addLogLine(
-            `ffmpeg generateThumbnail called for ${getFileNameSize(file)}`
+            `ffmpeg generateThumbnail called for ${getFileNameSize(file)}`,
         );
 
         const thumbnail = await FFmpegService.generateVideoThumbnail(file);
         addLogLine(
-            `ffmpeg thumbnail successfully generated ${getFileNameSize(file)}`
+            `ffmpeg thumbnail successfully generated ${getFileNameSize(file)}`,
         );
         return await getUint8ArrayView(thumbnail);
     } catch (e) {
         addLogLine(
             `ffmpeg thumbnail generated failed  ${getFileNameSize(
-                file
-            )} error: ${e.message}`
+                file,
+            )} error: ${e.message}`,
         );
-        logError(e, 'failed to generate thumbnail using ffmpeg', {
+        logError(e, "failed to generate thumbnail using ffmpeg", {
             fileFormat: fileTypeInfo.exactType,
         });
         thumbnail = await generateVideoThumbnailUsingCanvas(file);
@@ -191,24 +191,24 @@ async function generateVideoThumbnail(
 }
 
 export async function generateVideoThumbnailUsingCanvas(
-    file: File | ElectronFile
+    file: File | ElectronFile,
 ) {
-    const canvas = document.createElement('canvas');
-    const canvasCTX = canvas.getContext('2d');
+    const canvas = document.createElement("canvas");
+    const canvasCTX = canvas.getContext("2d");
 
     let timeout = null;
     let videoURL = null;
 
-    let video = document.createElement('video');
+    let video = document.createElement("video");
     videoURL = URL.createObjectURL(new Blob([await file.arrayBuffer()]));
     await new Promise((resolve, reject) => {
-        video.preload = 'metadata';
+        video.preload = "metadata";
         video.src = videoURL;
-        video.addEventListener('loadeddata', function () {
+        video.addEventListener("loadeddata", function () {
             try {
                 URL.revokeObjectURL(videoURL);
                 if (!video) {
-                    throw Error('video load failed');
+                    throw Error("video load failed");
                 }
                 const videoDimension = {
                     width: video.videoWidth,
@@ -216,7 +216,7 @@ export async function generateVideoThumbnailUsingCanvas(
                 };
                 const thumbnailDimension = calculateThumbnailDimension(
                     videoDimension,
-                    MAX_THUMBNAIL_DIMENSION
+                    MAX_THUMBNAIL_DIMENSION,
                 );
                 canvas.width = thumbnailDimension.width;
                 canvas.height = thumbnailDimension.height;
@@ -225,14 +225,14 @@ export async function generateVideoThumbnailUsingCanvas(
                     0,
                     0,
                     thumbnailDimension.width,
-                    thumbnailDimension.height
+                    thumbnailDimension.height,
                 );
                 video = null;
                 clearTimeout(timeout);
                 resolve(null);
             } catch (e) {
                 const err = Error(
-                    `${CustomError.THUMBNAIL_GENERATION_FAILED} err: ${e}`
+                    `${CustomError.THUMBNAIL_GENERATION_FAILED} err: ${e}`,
                 );
                 logError(e, CustomError.THUMBNAIL_GENERATION_FAILED);
                 reject(err);
@@ -240,7 +240,7 @@ export async function generateVideoThumbnailUsingCanvas(
         });
         timeout = setTimeout(
             () => reject(Error(CustomError.WAIT_TIME_EXCEEDED)),
-            WAIT_TIME_THUMBNAIL_GENERATION
+            WAIT_TIME_THUMBNAIL_GENERATION,
         );
     });
     const thumbnailBlob = await getCompressedThumbnailBlobFromCanvas(canvas);
@@ -261,8 +261,8 @@ async function getCompressedThumbnailBlobFromCanvas(canvas: HTMLCanvasElement) {
                 function (blob) {
                     resolve(blob);
                 },
-                'image/jpeg',
-                quality
+                "image/jpeg",
+                quality,
             );
         });
         thumbnailBlob = thumbnailBlob ?? new Blob([]);
@@ -279,7 +279,7 @@ async function getCompressedThumbnailBlobFromCanvas(canvas: HTMLCanvasElement) {
 
 function percentageSizeDiff(
     newThumbnailSize: number,
-    oldThumbnailSize: number
+    oldThumbnailSize: number,
 ) {
     return ((oldThumbnailSize - newThumbnailSize) * 100) / oldThumbnailSize;
 }
@@ -288,7 +288,7 @@ function percentageSizeDiff(
 // returns {0,0} for invalid inputs
 function calculateThumbnailDimension(
     originalDimension: Dimension,
-    maxDimension: number
+    maxDimension: number,
 ): Dimension {
     if (originalDimension.height === 0 || originalDimension.width === 0) {
         return { width: 0, height: 0 };

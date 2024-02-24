@@ -1,9 +1,9 @@
-import { AppContext } from 'pages/_app';
-import React, { useContext, useState } from 'react';
-import { PublicURL, Collection, UpdatePublicURL } from 'types/collection';
-import { PublicLinkSetPassword } from './setPassword';
-import { EnteMenuItem } from 'components/Menu/EnteMenuItem';
-import { t } from 'i18next';
+import { EnteMenuItem } from "components/Menu/EnteMenuItem";
+import { t } from "i18next";
+import { AppContext } from "pages/_app";
+import { useContext, useState } from "react";
+import { Collection, PublicURL, UpdatePublicURL } from "types/collection";
+import { PublicLinkSetPassword } from "./setPassword";
 
 interface Iprops {
     publicShareProp: PublicURL;
@@ -31,17 +31,17 @@ export function ManageLinkPassword({
 
     const confirmDisablePublicUrlPassword = async () => {
         appContext.setDialogMessage({
-            title: t('DISABLE_PASSWORD'),
-            content: t('DISABLE_PASSWORD_MESSAGE'),
-            close: { text: t('CANCEL') },
+            title: t("DISABLE_PASSWORD"),
+            content: t("DISABLE_PASSWORD_MESSAGE"),
+            close: { text: t("CANCEL") },
             proceed: {
-                text: t('DISABLE'),
+                text: t("DISABLE"),
                 action: () =>
                     updatePublicShareURLHelper({
                         collectionID: collection.id,
                         disablePassword: true,
                     }),
-                variant: 'critical',
+                variant: "critical",
             },
         });
     };
@@ -49,7 +49,7 @@ export function ManageLinkPassword({
     return (
         <>
             <EnteMenuItem
-                label={t('LINK_PASSWORD_LOCK')}
+                label={t("LINK_PASSWORD_LOCK")}
                 onClick={handlePasswordChangeSetting}
                 checked={!!publicShareProp?.passwordEnabled}
                 variant="toggle"

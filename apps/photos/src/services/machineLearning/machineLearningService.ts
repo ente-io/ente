@@ -1,9 +1,9 @@
-import { getLocalFiles } from 'services/fileService';
-import { EnteFile } from 'types/file';
+import { getLocalFiles } from "services/fileService";
+import { EnteFile } from "types/file";
 
-import * as tf from '@tensorflow/tfjs-core';
-import '@tensorflow/tfjs-backend-webgl';
-import '@tensorflow/tfjs-backend-cpu';
+import "@tensorflow/tfjs-backend-cpu";
+import "@tensorflow/tfjs-backend-webgl";
+import * as tf from "@tensorflow/tfjs-core";
 // import '@tensorflow/tfjs-backend-wasm';
 // import { setWasmPaths } from '@tensorflow/tfjs-backend-wasm';
 // import '@tensorflow/tfjs-backend-cpu';
@@ -13,7 +13,7 @@ import {
     MLSyncContext,
     MLSyncFileContext,
     MLSyncResult,
-} from 'types/machineLearning';
+} from "types/machineLearning";
 
 // import { toTSNE } from 'utils/machineLearning/visualization';
 // import {
@@ -21,20 +21,20 @@ import {
 //     mlFilesStore
 // } from 'utils/storage/mlStorage';
 // import { getAllFacesFromMap } from 'utils/machineLearning';
-import { MLFactory } from './machineLearningFactory';
-import mlIDbStorage from 'utils/storage/mlIDbStorage';
-import { getMLSyncConfig } from 'utils/machineLearning/config';
-import { CustomError, parseUploadErrorCodes } from '@ente/shared/error';
-import { MAX_ML_SYNC_ERROR_COUNT } from 'constants/mlConfig';
-import FaceService from './faceService';
-import PeopleService from './peopleService';
-import ObjectService from './objectService';
+import { CustomError, parseUploadErrorCodes } from "@ente/shared/error";
+import { MAX_ML_SYNC_ERROR_COUNT } from "constants/mlConfig";
+import { getMLSyncConfig } from "utils/machineLearning/config";
+import mlIDbStorage from "utils/storage/mlIDbStorage";
+import FaceService from "./faceService";
+import { MLFactory } from "./machineLearningFactory";
+import ObjectService from "./objectService";
+import PeopleService from "./peopleService";
 // import TextService from './textService';
-import ReaderService from './readerService';
-import { logError } from '@ente/shared/sentry';
-import { addLogLine } from '@ente/shared/logging';
-import downloadManager from 'services/download';
-import { APPS } from '@ente/shared/apps/constants';
+import { APPS } from "@ente/shared/apps/constants";
+import { addLogLine } from "@ente/shared/logging";
+import { logError } from "@ente/shared/sentry";
+import downloadManager from "services/download";
+import ReaderService from "./readerService";
 
 class MachineLearningService {
     private initialized = false;
@@ -60,7 +60,7 @@ class MachineLearningService {
 
     public async sync(token: string, userID: number): Promise<MLSyncResult> {
         if (!token) {
-            throw Error('Token needed by ml service to sync file');
+            throw Error("Token needed by ml service to sync file");
         }
 
         await downloadManager.init(APPS.PHOTOS, { token });
@@ -111,7 +111,7 @@ class MachineLearningService {
         // addLogLine('[MLService] sync results: ', mlSyncResult);
 
         // await syncContext.dispose();
-        addLogLine('Final TF Memory stats: ', JSON.stringify(tf.memory()));
+        addLogLine("Final TF Memory stats: ", JSON.stringify(tf.memory()));
 
         return mlSyncResult;
     }
@@ -119,7 +119,7 @@ class MachineLearningService {
     public async regenerateFaceCrop(
         token: string,
         userID: number,
-        faceID: string
+        faceID: string,
     ) {
         await downloadManager.init(APPS.PHOTOS, { token });
         const syncContext = await this.getSyncContext(token, userID);
@@ -139,11 +139,11 @@ class MachineLearningService {
             const localFiles = await getLocalFiles();
 
             const personalFiles = localFiles.filter(
-                (f) => f.ownerID === syncContext.userID
+                (f) => f.ownerID === syncContext.userID,
             );
             syncContext.localFilesMap = new Map<number, EnteFile>();
             personalFiles.forEach((f) =>
-                syncContext.localFilesMap.set(f.id, f)
+                syncContext.localFilesMap.set(f.id, f),
             );
         }
 
@@ -155,7 +155,7 @@ class MachineLearningService {
         const localFilesMap = await this.getLocalFilesMap(syncContext);
 
         const db = await mlIDbStorage.db;
-        const tx = db.transaction('files', 'readwrite');
+        const tx = db.transaction("files", "readwrite");
         const mlFileIdsArr = await mlIDbStorage.getAllFileIdsForUpdate(tx);
         const mlFileIds = new Set<number>();
         mlFileIdsArr.forEach((mlFileId) => mlFileIds.add(mlFileId));
@@ -169,7 +169,7 @@ class MachineLearningService {
 
         let updated = false;
         if (newFileIds.length > 0) {
-            addLogLine('newFiles: ', newFileIds.length);
+            addLogLine("newFiles: ", newFileIds.length);
             const newFiles = newFileIds.map((fileId) => this.newMlData(fileId));
             await mlIDbStorage.putAllFiles(newFiles, tx);
             updated = true;
@@ -183,7 +183,7 @@ class MachineLearningService {
         }
 
         if (removedFileIds.length > 0) {
-            addLogLine('removedFiles: ', removedFileIds.length);
+            addLogLine("removedFiles: ", removedFileIds.length);
             await mlIDbStorage.removeAllFiles(removedFileIds, tx);
             updated = true;
         }
@@ -192,10 +192,10 @@ class MachineLearningService {
 
         if (updated) {
             // TODO: should do in same transaction
-            await mlIDbStorage.incrementIndexVersion('files');
+            await mlIDbStorage.incrementIndexVersion("files");
         }
 
-        addLogLine('syncLocalFiles', Date.now() - startTime, 'ms');
+        addLogLine("syncLocalFiles", Date.now() - startTime, "ms");
     }
 
     // TODO: not required if ml data is stored as field inside ente file object
@@ -227,23 +227,23 @@ class MachineLearningService {
         const fileIds = await mlIDbStorage.getFileIds(
             syncContext.config.batchSize,
             syncContext.config.mlVersion,
-            MAX_ML_SYNC_ERROR_COUNT
+            MAX_ML_SYNC_ERROR_COUNT,
         );
 
-        addLogLine('fileIds: ', JSON.stringify(fileIds));
+        addLogLine("fileIds: ", JSON.stringify(fileIds));
 
         const localFilesMap = await this.getLocalFilesMap(syncContext);
         syncContext.outOfSyncFiles = fileIds.map((fileId) =>
-            localFilesMap.get(fileId)
+            localFilesMap.get(fileId),
         );
-        addLogLine('getOutOfSyncFiles', Date.now() - startTime, 'ms');
+        addLogLine("getOutOfSyncFiles", Date.now() - startTime, "ms");
     }
 
     // TODO: optimize, use indexdb indexes, move facecrops to cache to reduce io
     // remove, already done
     private async getUniqueOutOfSyncFilesNoIdx(
         syncContext: MLSyncContext,
-        files: EnteFile[]
+        files: EnteFile[],
     ) {
         const limit = syncContext.config.batchSize;
         const mlVersion = syncContext.config.mlVersion;
@@ -289,57 +289,57 @@ class MachineLearningService {
                 (outOfSyncfile) => async () => {
                     await this.syncFileWithErrorHandler(
                         syncContext,
-                        outOfSyncfile
+                        outOfSyncfile,
                     );
                     // TODO: just store file and faces count in syncContext
-                }
+                },
             );
-            syncContext.syncQueue.on('error', () => {
+            syncContext.syncQueue.on("error", () => {
                 syncContext.syncQueue.clear();
             });
             await syncContext.syncQueue.addAll(functions);
         } catch (error) {
-            console.error('Error in sync job: ', error);
+            console.error("Error in sync job: ", error);
             syncContext.error = error;
         }
         await syncContext.syncQueue.onIdle();
-        addLogLine('allFaces: ', syncContext.nSyncedFaces);
+        addLogLine("allFaces: ", syncContext.nSyncedFaces);
 
         // TODO: In case syncJob has to use multiple ml workers
         // do in same transaction with each file update
         // or keep in files store itself
-        await mlIDbStorage.incrementIndexVersion('files');
+        await mlIDbStorage.incrementIndexVersion("files");
         // await this.disposeMLModels();
     }
 
     private async getSyncContext(token: string, userID: number) {
         if (!this.syncContext) {
-            addLogLine('Creating syncContext');
+            addLogLine("Creating syncContext");
 
             this.syncContext = getMLSyncConfig().then((mlSyncConfig) =>
-                MLFactory.getMLSyncContext(token, userID, mlSyncConfig, true)
+                MLFactory.getMLSyncContext(token, userID, mlSyncConfig, true),
             );
         } else {
-            addLogLine('reusing existing syncContext');
+            addLogLine("reusing existing syncContext");
         }
         return this.syncContext;
     }
 
     private async getLocalSyncContext(token: string, userID: number) {
         if (!this.localSyncContext) {
-            addLogLine('Creating localSyncContext');
+            addLogLine("Creating localSyncContext");
             this.localSyncContext = getMLSyncConfig().then((mlSyncConfig) =>
-                MLFactory.getMLSyncContext(token, userID, mlSyncConfig, false)
+                MLFactory.getMLSyncContext(token, userID, mlSyncConfig, false),
             );
         } else {
-            addLogLine('reusing existing localSyncContext');
+            addLogLine("reusing existing localSyncContext");
         }
         return this.localSyncContext;
     }
 
     public async closeLocalSyncContext() {
         if (this.localSyncContext) {
-            addLogLine('Closing localSyncContext');
+            addLogLine("Closing localSyncContext");
             const syncContext = await this.localSyncContext;
             await syncContext.dispose();
             this.localSyncContext = undefined;
@@ -351,7 +351,7 @@ class MachineLearningService {
         userID: number,
         enteFile: EnteFile,
         localFile?: globalThis.File,
-        textDetectionTimeoutIndex?: number
+        textDetectionTimeoutIndex?: number,
     ): Promise<MlFileData | Error> {
         const syncContext = await this.getLocalSyncContext(token, userID);
 
@@ -360,7 +360,7 @@ class MachineLearningService {
                 syncContext,
                 enteFile,
                 localFile,
-                textDetectionTimeoutIndex
+                textDetectionTimeoutIndex,
             );
 
             if (syncContext.nSyncedFiles >= syncContext.config.batchSize) {
@@ -369,7 +369,7 @@ class MachineLearningService {
             // await syncContext.dispose();
             return mlFileData;
         } catch (e) {
-            console.error('Error while syncing local file: ', enteFile.id, e);
+            console.error("Error while syncing local file: ", enteFile.id, e);
             return e;
         }
     }
@@ -378,29 +378,29 @@ class MachineLearningService {
         syncContext: MLSyncContext,
         enteFile: EnteFile,
         localFile?: globalThis.File,
-        textDetectionTimeoutIndex?: number
+        textDetectionTimeoutIndex?: number,
     ): Promise<MlFileData> {
         try {
             const mlFileData = await this.syncFile(
                 syncContext,
                 enteFile,
                 localFile,
-                textDetectionTimeoutIndex
+                textDetectionTimeoutIndex,
             );
             syncContext.nSyncedFaces += mlFileData.faces?.length || 0;
             syncContext.nSyncedFiles += 1;
             return mlFileData;
         } catch (e) {
-            logError(e, 'ML syncFile failed');
+            logError(e, "ML syncFile failed");
             let error = e;
             console.error(
-                'Error in ml sync, fileId: ',
+                "Error in ml sync, fileId: ",
                 enteFile.id,
-                'name: ',
+                "name: ",
                 enteFile.metadata.title,
-                error
+                error,
             );
-            if ('status' in error) {
+            if ("status" in error) {
                 const parsedMessage = parseUploadErrorCodes(error);
                 error = parsedMessage;
             }
@@ -417,7 +417,7 @@ class MachineLearningService {
             await this.persistMLFileSyncError(syncContext, enteFile, error);
             syncContext.nSyncedFiles += 1;
         } finally {
-            addLogLine('TF Memory stats: ', JSON.stringify(tf.memory()));
+            addLogLine("TF Memory stats: ", JSON.stringify(tf.memory()));
         }
     }
 
@@ -426,7 +426,7 @@ class MachineLearningService {
         enteFile: EnteFile,
         localFile?: globalThis.File,
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        textDetectionTimeoutIndex?: number
+        textDetectionTimeoutIndex?: number,
     ) {
         const fileContext: MLSyncFileContext = { enteFile, localFile };
         const oldMlFile =
@@ -457,7 +457,7 @@ class MachineLearningService {
                 this.syncFaceDetections(syncContext, fileContext),
                 ObjectService.syncFileObjectDetections(
                     syncContext,
-                    fileContext
+                    fileContext,
                 ),
                 // TextService.syncFileTextDetections(
                 //     syncContext,
@@ -469,7 +469,7 @@ class MachineLearningService {
             newMlFile.lastErrorMessage = undefined;
             await this.persistMLFileData(syncContext, newMlFile);
         } catch (e) {
-            logError(e, 'ml detection failed');
+            logError(e, "ml detection failed");
             newMlFile.mlVersion = oldMlFile.mlVersion;
             throw e;
         } finally {
@@ -494,7 +494,7 @@ class MachineLearningService {
 
         await tf.ready();
 
-        addLogLine('01 TF Memory stats: ', JSON.stringify(tf.memory()));
+        addLogLine("01 TF Memory stats: ", JSON.stringify(tf.memory()));
         // await tfjsFaceDetectionService.init();
         // // addLogLine('02 TF Memory stats: ',JSON.stringify(tf.memory()));
         // await this.faceLandmarkService.init();
@@ -524,7 +524,7 @@ class MachineLearningService {
 
     private async persistMLFileData(
         syncContext: MLSyncContext,
-        mlFileData: MlFileData
+        mlFileData: MlFileData,
     ) {
         // return mlFilesStore.setItem(mlFileData.fileId.toString(), mlFileData);
         mlIDbStorage.putFile(mlFileData);
@@ -533,7 +533,7 @@ class MachineLearningService {
     private async persistMLFileSyncError(
         syncContext: MLSyncContext,
         enteFile: EnteFile,
-        e: Error
+        e: Error,
     ) {
         try {
             await mlIDbStorage.upsertFileInTx(enteFile.id, (mlFileData) => {
@@ -547,7 +547,7 @@ class MachineLearningService {
             });
         } catch (e) {
             // TODO: logError or stop sync job after most of the requests are failed
-            console.error('Error while storing ml sync error', e);
+            console.error("Error while storing ml sync error", e);
         }
     }
 
@@ -587,7 +587,7 @@ class MachineLearningService {
 
     private async syncFaceDetections(
         syncContext: MLSyncContext,
-        fileContext: MLSyncFileContext
+        fileContext: MLSyncFileContext,
     ) {
         const { newMlFile } = fileContext;
         const startTime = Date.now();
@@ -603,7 +603,7 @@ class MachineLearningService {
         addLogLine(
             `face detection time taken ${fileContext.enteFile.id}`,
             Date.now() - startTime,
-            'ms'
+            "ms",
         );
     }
 }

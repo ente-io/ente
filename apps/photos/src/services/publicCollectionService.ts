@@ -1,23 +1,23 @@
-import { getEndpoint } from '@ente/shared/network/api';
-import localForage from '@ente/shared/storage/localForage';
-import { Collection, CollectionPublicMagicMetadata } from 'types/collection';
-import HTTPService from '@ente/shared/network/HTTPService';
-import { logError } from '@ente/shared/sentry';
-import { decryptFile, mergeMetadata, sortFiles } from 'utils/file';
-import { EncryptedEnteFile, EnteFile } from 'types/file';
+import ComlinkCryptoWorker from "@ente/shared/crypto";
+import { CustomError, parseSharingErrorCodes } from "@ente/shared/error";
+import HTTPService from "@ente/shared/network/HTTPService";
+import { getEndpoint } from "@ente/shared/network/api";
+import { logError } from "@ente/shared/sentry";
+import localForage from "@ente/shared/storage/localForage";
+import { REPORT_REASON } from "constants/publicCollection";
+import { Collection, CollectionPublicMagicMetadata } from "types/collection";
+import { EncryptedEnteFile, EnteFile } from "types/file";
 import {
     AbuseReportDetails,
     AbuseReportRequest,
     LocalSavedPublicCollectionFiles,
-} from 'types/publicCollection';
-import { REPORT_REASON } from 'constants/publicCollection';
-import { CustomError, parseSharingErrorCodes } from '@ente/shared/error';
-import ComlinkCryptoWorker from '@ente/shared/crypto';
+} from "types/publicCollection";
+import { decryptFile, mergeMetadata, sortFiles } from "utils/file";
 
 const ENDPOINT = getEndpoint();
-const PUBLIC_COLLECTION_FILES_TABLE = 'public-collection-files';
-const PUBLIC_COLLECTIONS_TABLE = 'public-collections';
-const PUBLIC_REFERRAL_CODE = 'public-referral-code';
+const PUBLIC_COLLECTION_FILES_TABLE = "public-collection-files";
+const PUBLIC_COLLECTIONS_TABLE = "public-collections";
+const PUBLIC_REFERRAL_CODE = "public-referral-code";
 
 export const getPublicCollectionUID = (token: string) => `${token}`;
 
@@ -32,27 +32,27 @@ const getPublicCollectionUploaderNameKey = (collectionUID: string) =>
 
 export const getPublicCollectionUploaderName = async (collectionUID: string) =>
     await localForage.getItem<string>(
-        getPublicCollectionUploaderNameKey(collectionUID)
+        getPublicCollectionUploaderNameKey(collectionUID),
     );
 
 export const savePublicCollectionUploaderName = async (
     collectionUID: string,
-    uploaderName: string
+    uploaderName: string,
 ) =>
     await localForage.setItem(
         getPublicCollectionUploaderNameKey(collectionUID),
-        uploaderName
+        uploaderName,
     );
 
 export const getLocalPublicFiles = async (collectionUID: string) => {
     const localSavedPublicCollectionFiles =
         (
             (await localForage.getItem<LocalSavedPublicCollectionFiles[]>(
-                PUBLIC_COLLECTION_FILES_TABLE
+                PUBLIC_COLLECTION_FILES_TABLE,
             )) || []
         ).find(
             (localSavedPublicCollectionFiles) =>
-                localSavedPublicCollectionFiles.collectionUID === collectionUID
+                localSavedPublicCollectionFiles.collectionUID === collectionUID,
         ) ||
         ({
             collectionUID: null,
@@ -62,38 +62,38 @@ export const getLocalPublicFiles = async (collectionUID: string) => {
 };
 export const savePublicCollectionFiles = async (
     collectionUID: string,
-    files: EnteFile[]
+    files: EnteFile[],
 ) => {
     const publicCollectionFiles =
         (await localForage.getItem<LocalSavedPublicCollectionFiles[]>(
-            PUBLIC_COLLECTION_FILES_TABLE
+            PUBLIC_COLLECTION_FILES_TABLE,
         )) || [];
     await localForage.setItem(
         PUBLIC_COLLECTION_FILES_TABLE,
         dedupeCollectionFiles([
             { collectionUID, files },
             ...publicCollectionFiles,
-        ])
+        ]),
     );
 };
 
 export const getLocalPublicCollectionPassword = async (
-    collectionUID: string
+    collectionUID: string,
 ): Promise<string> => {
     return (
         (await localForage.getItem<string>(
-            getPublicCollectionPasswordKey(collectionUID)
-        )) || ''
+            getPublicCollectionPasswordKey(collectionUID),
+        )) || ""
     );
 };
 
 export const savePublicCollectionPassword = async (
     collectionUID: string,
-    passToken: string
+    passToken: string,
 ): Promise<string> => {
     return await localForage.setItem<string>(
         getPublicCollectionPasswordKey(collectionUID),
-        passToken
+        passToken,
     );
 };
 
@@ -104,7 +104,7 @@ export const getLocalPublicCollection = async (collectionKey: string) => {
     const publicCollection =
         localCollections.find(
             (localSavedPublicCollection) =>
-                localSavedPublicCollection.key === collectionKey
+                localSavedPublicCollection.key === collectionKey,
         ) || null;
     return publicCollection;
 };
@@ -115,7 +115,7 @@ export const savePublicCollection = async (collection: Collection) => {
         [];
     await localForage.setItem(
         PUBLIC_COLLECTIONS_TABLE,
-        dedupeCollections([collection, ...publicCollections])
+        dedupeCollections([collection, ...publicCollections]),
     );
 };
 
@@ -143,7 +143,7 @@ const dedupeCollections = (collections: Collection[]) => {
 };
 
 const dedupeCollectionFiles = (
-    collectionFiles: LocalSavedPublicCollectionFiles[]
+    collectionFiles: LocalSavedPublicCollectionFiles[],
 ) => {
     const keySet = new Set([]);
     return collectionFiles.filter(({ collectionUID }) => {
@@ -158,23 +158,23 @@ const dedupeCollectionFiles = (
 
 const getPublicCollectionLastSyncTime = async (collectionUID: string) =>
     (await localForage.getItem<number>(
-        getPublicCollectionLastSyncTimeKey(collectionUID)
+        getPublicCollectionLastSyncTimeKey(collectionUID),
     )) ?? 0;
 
 const savePublicCollectionLastSyncTime = async (
     collectionUID: string,
-    time: number
+    time: number,
 ) =>
     await localForage.setItem(
         getPublicCollectionLastSyncTimeKey(collectionUID),
-        time
+        time,
     );
 
 export const syncPublicFiles = async (
     token: string,
     passwordToken: string,
     collection: Collection,
-    setPublicFiles: (files: EnteFile[]) => void
+    setPublicFiles: (files: EnteFile[]) => void,
 ) => {
     try {
         let files: EnteFile[] = [];
@@ -198,7 +198,7 @@ export const syncPublicFiles = async (
                 collection,
                 lastSyncTime,
                 files,
-                setPublicFiles
+                setPublicFiles,
             );
 
             files = [...files, ...fetchedFiles];
@@ -223,19 +223,19 @@ export const syncPublicFiles = async (
             await savePublicCollectionFiles(collectionUID, files);
             await savePublicCollectionLastSyncTime(
                 collectionUID,
-                collection.updationTime
+                collection.updationTime,
             );
             setPublicFiles([...sortFiles(mergeMetadata(files), sortAsc)]);
         } catch (e) {
             const parsedError = parseSharingErrorCodes(e);
-            logError(e, 'failed to sync shared collection files');
+            logError(e, "failed to sync shared collection files");
             if (parsedError.message === CustomError.TOKEN_EXPIRED) {
                 throw e;
             }
         }
         return [...sortFiles(mergeMetadata(files), sortAsc)];
     } catch (e) {
-        logError(e, 'failed to get local  or sync shared collection files');
+        logError(e, "failed to get local  or sync shared collection files");
         throw e;
     }
 };
@@ -246,7 +246,7 @@ const getPublicFiles = async (
     collection: Collection,
     sinceTime: number,
     files: EnteFile[],
-    setPublicFiles: (files: EnteFile[]) => void
+    setPublicFiles: (files: EnteFile[]) => void,
 ): Promise<EnteFile[]> => {
     try {
         let decryptedFiles: EnteFile[] = [];
@@ -263,12 +263,12 @@ const getPublicFiles = async (
                     sinceTime: time,
                 },
                 {
-                    'Cache-Control': 'no-cache',
-                    'X-Auth-Access-Token': token,
+                    "Cache-Control": "no-cache",
+                    "X-Auth-Access-Token": token,
                     ...(passwordToken && {
-                        'X-Auth-Access-Token-JWT': passwordToken,
+                        "X-Auth-Access-Token-JWT": passwordToken,
                     }),
-                }
+                },
             );
             decryptedFiles = [
                 ...decryptedFiles,
@@ -279,7 +279,7 @@ const getPublicFiles = async (
                         } else {
                             return file;
                         }
-                    }) as Promise<EnteFile>[]
+                    }) as Promise<EnteFile>[],
                 )),
             ];
 
@@ -290,23 +290,23 @@ const getPublicFiles = async (
                 sortFiles(
                     mergeMetadata(
                         [...(files || []), ...decryptedFiles].filter(
-                            (item) => !item.isDeleted
-                        )
+                            (item) => !item.isDeleted,
+                        ),
                     ),
-                    sortAsc
-                )
+                    sortAsc,
+                ),
             );
         } while (resp.data.hasMore);
         return decryptedFiles;
     } catch (e) {
-        logError(e, 'Get public  files failed');
+        logError(e, "Get public  files failed");
         throw e;
     }
 };
 
 export const getPublicCollection = async (
     token: string,
-    collectionKey: string
+    collectionKey: string,
 ): Promise<[Collection, string]> => {
     try {
         if (!token) {
@@ -315,10 +315,10 @@ export const getPublicCollection = async (
         const resp = await HTTPService.get(
             `${ENDPOINT}/public-collection/info`,
             null,
-            { 'Cache-Control': 'no-cache', 'X-Auth-Access-Token': token }
+            { "Cache-Control": "no-cache", "X-Auth-Access-Token": token },
         );
         const fetchedCollection = resp.data.collection;
-        const referralCode = resp.data.referralCode ?? '';
+        const referralCode = resp.data.referralCode ?? "";
 
         const cryptoWorker = await ComlinkCryptoWorker.getInstance();
 
@@ -327,7 +327,7 @@ export const getPublicCollection = async (
             (await cryptoWorker.decryptToUTF8(
                 fetchedCollection.encryptedName,
                 fetchedCollection.nameDecryptionNonce,
-                collectionKey
+                collectionKey,
             )));
 
         let collectionPublicMagicMetadata: CollectionPublicMagicMetadata;
@@ -337,7 +337,7 @@ export const getPublicCollection = async (
                 data: await cryptoWorker.decryptMetadata(
                     fetchedCollection.pubMagicMetadata.data,
                     fetchedCollection.pubMagicMetadata.header,
-                    collectionKey
+                    collectionKey,
                 ),
             };
         }
@@ -352,26 +352,26 @@ export const getPublicCollection = async (
         await saveReferralCode(referralCode);
         return [collection, referralCode];
     } catch (e) {
-        logError(e, 'failed to get public collection');
+        logError(e, "failed to get public collection");
         throw e;
     }
 };
 
 export const verifyPublicCollectionPassword = async (
     token: string,
-    passwordHash: string
+    passwordHash: string,
 ): Promise<string> => {
     try {
         const resp = await HTTPService.post(
             `${ENDPOINT}/public-collection/verify-password`,
             { passHash: passwordHash },
             null,
-            { 'Cache-Control': 'no-cache', 'X-Auth-Access-Token': token }
+            { "Cache-Control": "no-cache", "X-Auth-Access-Token": token },
         );
         const jwtToken = resp.data.jwtToken;
         return jwtToken;
     } catch (e) {
-        logError(e, 'failed to verify public collection password');
+        logError(e, "failed to verify public collection password");
         throw e;
     }
 };
@@ -380,7 +380,7 @@ export const reportAbuse = async (
     token: string,
     url: string,
     reason: REPORT_REASON,
-    details: AbuseReportDetails
+    details: AbuseReportDetails,
 ) => {
     try {
         if (!token) {
@@ -392,17 +392,17 @@ export const reportAbuse = async (
             `${ENDPOINT}/public-collection/report-abuse`,
             abuseReportRequest,
             null,
-            { 'X-Auth-Access-Token': token }
+            { "X-Auth-Access-Token": token },
         );
     } catch (e) {
-        logError(e, 'failed to post abuse report');
+        logError(e, "failed to post abuse report");
         throw e;
     }
 };
 
 export const removePublicCollectionWithFiles = async (
     collectionUID: string,
-    collectionKey: string
+    collectionKey: string,
 ) => {
     const publicCollections =
         (await localForage.getItem<Collection[]>(PUBLIC_COLLECTIONS_TABLE)) ||
@@ -410,8 +410,8 @@ export const removePublicCollectionWithFiles = async (
     await localForage.setItem(
         PUBLIC_COLLECTIONS_TABLE,
         publicCollections.filter(
-            (collection) => collection.key !== collectionKey
-        )
+            (collection) => collection.key !== collectionKey,
+        ),
     );
     await removePublicFiles(collectionUID);
 };
@@ -419,17 +419,18 @@ export const removePublicCollectionWithFiles = async (
 export const removePublicFiles = async (collectionUID: string) => {
     await localForage.removeItem(getPublicCollectionPasswordKey(collectionUID));
     await localForage.removeItem(
-        getPublicCollectionLastSyncTimeKey(collectionUID)
+        getPublicCollectionLastSyncTimeKey(collectionUID),
     );
 
     const publicCollectionFiles =
         (await localForage.getItem<LocalSavedPublicCollectionFiles[]>(
-            PUBLIC_COLLECTION_FILES_TABLE
+            PUBLIC_COLLECTION_FILES_TABLE,
         )) ?? [];
     await localForage.setItem(
         PUBLIC_COLLECTION_FILES_TABLE,
         publicCollectionFiles.filter(
-            (collectionFiles) => collectionFiles.collectionUID !== collectionUID
-        )
+            (collectionFiles) =>
+                collectionFiles.collectionUID !== collectionUID,
+        ),
     );
 };

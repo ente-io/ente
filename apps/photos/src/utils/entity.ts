@@ -1,4 +1,4 @@
-import { Entity } from 'types/entity';
+import { Entity } from "types/entity";
 
 export const getLatestVersionEntities = <T>(entities: Entity<T>[]) => {
     const latestVersionEntities = new Map<string, Entity<T>>();

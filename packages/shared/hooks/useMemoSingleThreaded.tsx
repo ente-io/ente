@@ -1,8 +1,8 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from "react";
 
 export default function useMemoSingleThreaded<T>(
     fn: () => T | Promise<T>,
-    deps: any[]
+    deps: any[],
 ): T {
     const [result, setResult] = useState<T>(null);
     const updateInProgress = useRef(false);
@@ -34,5 +34,5 @@ export default function useMemoSingleThreaded<T>(
 }
 
 function isPromise<T>(obj: T | Promise<T>): obj is Promise<T> {
-    return obj && typeof (obj as any).then === 'function';
+    return obj && typeof (obj as any).then === "function";
 }

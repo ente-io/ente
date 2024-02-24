@@ -1,11 +1,11 @@
-import { FILE_TYPE } from 'constants/file';
-import { EnteFile } from 'types/file';
-import { Metadata } from 'types/upload';
-import { getEndpoint } from '@ente/shared/network/api';
-import { getToken } from '@ente/shared/storage/localStorage/helpers';
-import { logError } from '@ente/shared/sentry';
-import { hasFileHash } from 'utils/upload';
-import HTTPService from '@ente/shared/network/HTTPService';
+import HTTPService from "@ente/shared/network/HTTPService";
+import { getEndpoint } from "@ente/shared/network/api";
+import { logError } from "@ente/shared/sentry";
+import { getToken } from "@ente/shared/storage/localStorage/helpers";
+import { FILE_TYPE } from "constants/file";
+import { EnteFile } from "types/file";
+import { Metadata } from "types/upload";
+import { hasFileHash } from "utils/upload";
 
 const ENDPOINT = getEndpoint();
 
@@ -23,7 +23,7 @@ export interface Duplicate {
 
 export async function getDuplicates(
     files: EnteFile[],
-    collectionNameMap: Map<number, string>
+    collectionNameMap: Map<number, string>,
 ) {
     try {
         const ascDupes = await fetchDuplicateFileIDs();
@@ -48,7 +48,7 @@ export async function getDuplicates(
             }
             duplicateFiles = await sortDuplicateFiles(
                 duplicateFiles,
-                collectionNameMap
+                collectionNameMap,
             );
 
             if (duplicateFiles.length > 1) {
@@ -64,7 +64,7 @@ export async function getDuplicates(
 
         return result;
     } catch (e) {
-        logError(e, 'failed to get duplicate files');
+        logError(e, "failed to get duplicate files");
     }
 }
 
@@ -86,7 +86,7 @@ function getDupesGroupedBySameFileHashes(dupe: Duplicate) {
             ...groupDupesByFileHashes({
                 files: fileWithHashes,
                 size: dupe.size,
-            })
+            }),
         );
     }
 
@@ -121,7 +121,7 @@ function groupDupesByFileHashes(dupe: Duplicate) {
         if (
             areFileHashesSame(
                 filesSortedByFileHash[i - 1].file.metadata,
-                filesSortedByFileHash[i].file.metadata
+                filesSortedByFileHash[i].file.metadata,
             )
         ) {
             sameHashFiles.push(filesSortedByFileHash[i].file);
@@ -151,18 +151,18 @@ async function fetchDuplicateFileIDs() {
             `${ENDPOINT}/files/duplicates`,
             null,
             {
-                'X-Auth-Token': getToken(),
-            }
+                "X-Auth-Token": getToken(),
+            },
         );
         return (response.data as DuplicatesResponse).duplicates;
     } catch (e) {
-        logError(e, 'failed to fetch duplicate file IDs');
+        logError(e, "failed to fetch duplicate file IDs");
     }
 }
 
 async function sortDuplicateFiles(
     files: EnteFile[],
-    collectionNameMap: Map<number, string>
+    collectionNameMap: Map<number, string>,
 ) {
     return files.sort((firstFile, secondFile) => {
         const firstCollectionName = collectionNameMap

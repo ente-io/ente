@@ -1,8 +1,7 @@
-import React from 'react';
-import { WatchMapping } from 'types/watchFolder';
-import { MappingEntry } from '../mappingEntry';
-import { NoMappingsContent } from './noMappingsContent/noMappingsContent';
-import { MappingsContainer } from '../styledComponents';
+import { WatchMapping } from "types/watchFolder";
+import { MappingEntry } from "../mappingEntry";
+import { MappingsContainer } from "../styledComponents";
+import { NoMappingsContent } from "./noMappingsContent/noMappingsContent";
 interface Iprops {
     mappings: WatchMapping[];
     handleRemoveWatchMapping: (value: WatchMapping) => void;

@@ -1,13 +1,13 @@
-import { COLLECTION_ROLE, Collection } from 'types/collection';
+import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
+import { User } from "@ente/shared/user/types";
 import {
     CollectionSummaryType,
     CollectionType,
     HIDE_FROM_COLLECTION_BAR_TYPES,
     OPTIONS_NOT_HAVING_COLLECTION_TYPES,
-} from 'constants/collection';
-import { SUB_TYPE, VISIBILITY_STATE } from 'types/magicMetadata';
-import { User } from '@ente/shared/user/types';
-import { getData, LS_KEYS } from '@ente/shared/storage/localStorage';
+} from "constants/collection";
+import { COLLECTION_ROLE, Collection } from "types/collection";
+import { SUB_TYPE, VISIBILITY_STATE } from "types/magicMetadata";
 
 export enum COLLECTION_OPS_TYPE {
     ADD,
@@ -19,7 +19,7 @@ export enum COLLECTION_OPS_TYPE {
 
 export function getSelectedCollection(
     collectionID: number,
-    collections: Collection[]
+    collections: Collection[],
 ) {
     return collections.find((collection) => collection.id === collectionID);
 }
@@ -64,7 +64,7 @@ export const shouldBeShownOnCollectionBar = (type: CollectionSummaryType) => {
 export const getUserOwnedCollections = (collections: Collection[]) => {
     const user: User = getData(LS_KEYS.USER);
     if (!user?.id) {
-        throw Error('user missing');
+        throw Error("user missing");
     }
     return collections.filter((collection) => collection.owner.id === user.id);
 };
@@ -103,7 +103,7 @@ export function isSharedOnlyViaLink(collection: Collection) {
 export function isValidMoveTarget(
     sourceCollectionID: number,
     targetCollection: Collection,
-    user: User
+    user: User,
 ) {
     return (
         sourceCollectionID !== targetCollection.id &&
@@ -116,7 +116,7 @@ export function isValidMoveTarget(
 export function isValidReplacementAlbum(
     collection: Collection,
     user: User,
-    wantedCollectionName: string
+    wantedCollectionName: string,
 ) {
     return (
         collection.name === wantedCollectionName &&
@@ -129,15 +129,15 @@ export function isValidReplacementAlbum(
 }
 
 export function getCollectionNameMap(
-    collections: Collection[]
+    collections: Collection[],
 ): Map<number, string> {
     return new Map<number, string>(
-        collections.map((collection) => [collection.id, collection.name])
+        collections.map((collection) => [collection.id, collection.name]),
     );
 }
 
 export function getNonHiddenCollections(
-    collections: Collection[]
+    collections: Collection[],
 ): Collection[] {
     return collections.filter((collection) => !isHiddenCollection(collection));
 }

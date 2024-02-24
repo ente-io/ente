@@ -1,32 +1,32 @@
-import React, { useEffect, useState } from 'react';
-import { getData, LS_KEYS, setData } from '@ente/shared/storage/localStorage';
+import { VerticallyCentered } from "@ente/shared/components/Container";
 import SingleInputForm, {
     SingleInputFormProps,
-} from '@ente/shared/components/SingleInputForm';
-import { VerticallyCentered } from '@ente/shared/components/Container';
-import { logError } from '@ente/shared/sentry';
+} from "@ente/shared/components/SingleInputForm";
+import { logError } from "@ente/shared/sentry";
+import { LS_KEYS, getData, setData } from "@ente/shared/storage/localStorage";
+import { useEffect, useState } from "react";
 
-import { logoutUser } from '@ente/accounts/services/user';
-import { recoverTwoFactor, removeTwoFactor } from '@ente/accounts/api/user';
-import { PAGES } from '@ente/accounts/constants/pages';
-import FormPaper from '@ente/shared/components/Form/FormPaper';
-import FormPaperTitle from '@ente/shared/components/Form/FormPaper/Title';
-import FormPaperFooter from '@ente/shared/components/Form/FormPaper/Footer';
-import LinkButton from '@ente/shared/components/LinkButton';
-import { B64EncryptionResult } from '@ente/shared/crypto/types';
-import ComlinkCryptoWorker from '@ente/shared/crypto';
-import { t } from 'i18next';
-import { Trans } from 'react-i18next';
-import { Link } from '@mui/material';
-import { SUPPORT_EMAIL } from '@ente/shared/constants/urls';
-import { DialogBoxAttributesV2 } from '@ente/shared/components/DialogBoxV2/types';
-import { ApiError } from '@ente/shared/error';
-import { HttpStatusCode } from 'axios';
-import { PageProps } from '@ente/shared/apps/types';
+import { recoverTwoFactor, removeTwoFactor } from "@ente/accounts/api/user";
+import { PAGES } from "@ente/accounts/constants/pages";
+import { logoutUser } from "@ente/accounts/services/user";
+import { PageProps } from "@ente/shared/apps/types";
+import { DialogBoxAttributesV2 } from "@ente/shared/components/DialogBoxV2/types";
+import FormPaper from "@ente/shared/components/Form/FormPaper";
+import FormPaperFooter from "@ente/shared/components/Form/FormPaper/Footer";
+import FormPaperTitle from "@ente/shared/components/Form/FormPaper/Title";
+import LinkButton from "@ente/shared/components/LinkButton";
+import { SUPPORT_EMAIL } from "@ente/shared/constants/urls";
+import ComlinkCryptoWorker from "@ente/shared/crypto";
+import { B64EncryptionResult } from "@ente/shared/crypto/types";
+import { ApiError } from "@ente/shared/error";
+import { Link } from "@mui/material";
+import { HttpStatusCode } from "axios";
+import { t } from "i18next";
+import { Trans } from "react-i18next";
 
-const bip39 = require('bip39');
+const bip39 = require("bip39");
 // mobile client library only supports english.
-bip39.setDefaultWordlist('english');
+bip39.setDefaultWordlist("english");
 
 export default function Recover({ router, appContext }: PageProps) {
     const [encryptedTwoFactorSecret, setEncryptedTwoFactorSecret] =
@@ -53,7 +53,7 @@ export default function Recover({ router, appContext }: PageProps) {
                 setDoesHaveEncryptedRecoveryKey(!!resp.encryptedSecret);
                 if (!resp.encryptedSecret) {
                     showContactSupportDialog({
-                        text: t('GO_BACK'),
+                        text: t("GO_BACK"),
                         action: router.back,
                     });
                 } else {
@@ -70,10 +70,10 @@ export default function Recover({ router, appContext }: PageProps) {
                 ) {
                     logoutUser();
                 } else {
-                    logError(e, 'two factor recovery page setup failed');
+                    logError(e, "two factor recovery page setup failed");
                     setDoesHaveEncryptedRecoveryKey(false);
                     showContactSupportDialog({
-                        text: t('GO_BACK'),
+                        text: t("GO_BACK"),
                         action: router.back,
                     });
                 }
@@ -82,21 +82,21 @@ export default function Recover({ router, appContext }: PageProps) {
         main();
     }, []);
 
-    const recover: SingleInputFormProps['callback'] = async (
+    const recover: SingleInputFormProps["callback"] = async (
         recoveryKey: string,
-        setFieldError
+        setFieldError,
     ) => {
         try {
             recoveryKey = recoveryKey
                 .trim()
-                .split(' ')
+                .split(" ")
                 .map((part) => part.trim())
                 .filter((part) => !!part)
-                .join(' ');
+                .join(" ");
             // check if user is entering mnemonic recovery key
-            if (recoveryKey.indexOf(' ') > 0) {
-                if (recoveryKey.split(' ').length !== 24) {
-                    throw new Error('recovery code should have 24 words');
+            if (recoveryKey.indexOf(" ") > 0) {
+                if (recoveryKey.split(" ").length !== 24) {
+                    throw new Error("recovery code should have 24 words");
                 }
                 recoveryKey = bip39.mnemonicToEntropy(recoveryKey);
             }
@@ -104,7 +104,7 @@ export default function Recover({ router, appContext }: PageProps) {
             const twoFactorSecret = await cryptoWorker.decryptB64(
                 encryptedTwoFactorSecret.encryptedData,
                 encryptedTwoFactorSecret.nonce,
-                await cryptoWorker.fromHex(recoveryKey)
+                await cryptoWorker.fromHex(recoveryKey),
             );
             const resp = await removeTwoFactor(sessionID, twoFactorSecret);
             const { keyAttributes, encryptedToken, token, id } = resp;
@@ -118,20 +118,20 @@ export default function Recover({ router, appContext }: PageProps) {
             setData(LS_KEYS.KEY_ATTRIBUTES, keyAttributes);
             router.push(PAGES.CREDENTIALS);
         } catch (e) {
-            logError(e, 'two factor recovery failed');
-            setFieldError(t('INCORRECT_RECOVERY_KEY'));
+            logError(e, "two factor recovery failed");
+            setFieldError(t("INCORRECT_RECOVERY_KEY"));
         }
     };
 
     const showContactSupportDialog = (
-        dialogClose?: DialogBoxAttributesV2['close']
+        dialogClose?: DialogBoxAttributesV2["close"],
     ) => {
         appContext.setDialogBoxAttributesV2({
-            title: t('CONTACT_SUPPORT'),
+            title: t("CONTACT_SUPPORT"),
             close: dialogClose ?? {},
             content: (
                 <Trans
-                    i18nKey={'NO_TWO_FACTOR_RECOVERY_KEY_MESSAGE'}
+                    i18nKey={"NO_TWO_FACTOR_RECOVERY_KEY_MESSAGE"}
                     values={{ emailID: SUPPORT_EMAIL }}
                     components={{
                         a: <Link href={`mailto:${SUPPORT_EMAIL}`} />,
@@ -148,20 +148,20 @@ export default function Recover({ router, appContext }: PageProps) {
     return (
         <VerticallyCentered>
             <FormPaper>
-                <FormPaperTitle>{t('RECOVER_TWO_FACTOR')}</FormPaperTitle>
+                <FormPaperTitle>{t("RECOVER_TWO_FACTOR")}</FormPaperTitle>
                 <SingleInputForm
                     callback={recover}
                     fieldType="text"
-                    placeholder={t('RECOVERY_KEY_HINT')}
-                    buttonText={t('RECOVER')}
+                    placeholder={t("RECOVERY_KEY_HINT")}
+                    buttonText={t("RECOVER")}
                     disableAutoComplete
                 />
-                <FormPaperFooter style={{ justifyContent: 'space-between' }}>
+                <FormPaperFooter style={{ justifyContent: "space-between" }}>
                     <LinkButton onClick={() => showContactSupportDialog()}>
-                        {t('NO_RECOVERY_KEY')}
+                        {t("NO_RECOVERY_KEY")}
                     </LinkButton>
                     <LinkButton onClick={router.back}>
-                        {t('GO_BACK')}
+                        {t("GO_BACK")}
                     </LinkButton>
                 </FormPaperFooter>
             </FormPaper>

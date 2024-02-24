@@ -2,9 +2,9 @@ import {
     CenteredFlex,
     FlexWrapper,
     FluidContainer,
-} from '@ente/shared/components/Container';
-import { css, styled } from '@mui/material';
-import { IMAGE_CONTAINER_MAX_WIDTH, MIN_COLUMNS } from 'constants/gallery';
+} from "@ente/shared/components/Container";
+import { css, styled } from "@mui/material";
+import { IMAGE_CONTAINER_MAX_WIDTH, MIN_COLUMNS } from "constants/gallery";
 
 export const SearchBarWrapper = styled(FlexWrapper)`
     padding: 0 24px;

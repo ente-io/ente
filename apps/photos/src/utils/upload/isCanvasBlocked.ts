@@ -10,8 +10,8 @@
 export function isCanvasBlocked() {
     // create a 1px image data
     let blocked = false;
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
 
     // some blockers just return an undefined ctx. So let's check that first.
     if (ctx) {

@@ -1,5 +1,5 @@
-import { createContext } from 'react';
-import { PublicCollectionGalleryContextType } from 'types/publicCollection';
+import { createContext } from "react";
+import { PublicCollectionGalleryContextType } from "types/publicCollection";
 
 const defaultPublicCollectionGalleryContext: PublicCollectionGalleryContextType =
     {
@@ -13,5 +13,5 @@ const defaultPublicCollectionGalleryContext: PublicCollectionGalleryContextType 
 
 export const PublicCollectionGalleryContext =
     createContext<PublicCollectionGalleryContextType>(
-        defaultPublicCollectionGalleryContext
+        defaultPublicCollectionGalleryContext,
     );

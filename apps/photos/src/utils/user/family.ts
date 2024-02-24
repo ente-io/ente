@@ -1,7 +1,7 @@
-import { User } from '@ente/shared/user/types';
-import { FamilyData, FamilyMember } from 'types/user';
-import { logError } from '@ente/shared/sentry';
-import { getData, LS_KEYS } from '@ente/shared/storage/localStorage';
+import { logError } from "@ente/shared/sentry";
+import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
+import { User } from "@ente/shared/user/types";
+import { FamilyData, FamilyMember } from "types/user";
 
 export function getLocalFamilyData(): FamilyData {
     return getData(LS_KEYS.FAMILY_DATA);
@@ -10,7 +10,7 @@ export function getLocalFamilyData(): FamilyData {
 // isPartOfFamily return true if the current user is part of some family plan
 export function isPartOfFamily(familyData: FamilyData): boolean {
     return Boolean(
-        familyData && familyData.members && familyData.members.length > 0
+        familyData && familyData.members && familyData.members.length > 0,
     );
 }
 
@@ -31,9 +31,9 @@ export function getFamilyPlanAdmin(familyData: FamilyData): FamilyMember {
     } else {
         logError(
             Error(
-                'verify user is part of family plan before calling this method'
+                "verify user is part of family plan before calling this method",
             ),
-            'invalid getFamilyPlanAdmin call'
+            "invalid getFamilyPlanAdmin call",
         );
     }
 }
@@ -41,6 +41,6 @@ export function getFamilyPlanAdmin(familyData: FamilyData): FamilyMember {
 export function getTotalFamilyUsage(familyData: FamilyData): number {
     return familyData.members.reduce(
         (sum, currentMember) => sum + currentMember.usage,
-        0
+        0,
     );
 }

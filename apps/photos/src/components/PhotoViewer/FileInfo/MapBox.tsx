@@ -1,22 +1,22 @@
-import { useEffect, useRef } from 'react';
-import { styled } from '@mui/material';
-import { runningInBrowser } from 'utils/common';
-import { MapButton } from './MapButton';
+import { styled } from "@mui/material";
+import { useEffect, useRef } from "react";
+import { runningInBrowser } from "utils/common";
+import { MapButton } from "./MapButton";
 
-import 'leaflet/dist/leaflet.css';
-import 'leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.webpack.css'; // Re-uses images from ~leaflet package
-import { t } from 'i18next';
-runningInBrowser() && require('leaflet-defaulticon-compatibility');
+import { t } from "i18next";
+import "leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.webpack.css"; // Re-uses images from ~leaflet package
+import "leaflet/dist/leaflet.css";
+runningInBrowser() && require("leaflet-defaulticon-compatibility");
 const L = runningInBrowser()
-    ? (require('leaflet') as typeof import('leaflet'))
+    ? (require("leaflet") as typeof import("leaflet"))
     : null;
 
-const LAYER_TILE_URL = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+const LAYER_TILE_URL = "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
 const LAYER_TILE_ATTRIBUTION =
     '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
 const ZOOM_LEVEL = 16;
 
-const MapBoxContainer = styled('div')`
+const MapBoxContainer = styled("div")`
     height: 200px;
     width: 100%;
 `;
@@ -69,8 +69,8 @@ const MapBox: React.FC<MapBoxProps> = ({
     ) : (
         <MapBoxEnableContainer>
             <MapButton onClick={openUpdateMapConfirmationDialog}>
-                {' '}
-                {t('ENABLE_MAP')}
+                {" "}
+                {t("ENABLE_MAP")}
             </MapButton>
         </MapBoxEnableContainer>
     );

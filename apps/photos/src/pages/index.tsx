@@ -1,27 +1,27 @@
-import React, { useContext, useEffect, useState } from 'react';
-import Carousel from 'react-bootstrap/Carousel';
-import { styled, Button, Typography, TypographyProps } from '@mui/material';
-import { AppContext } from './_app';
-import Login from '@ente/accounts/components/Login';
-import { useRouter } from 'next/router';
-import { getData, LS_KEYS } from '@ente/shared/storage/localStorage';
-import SignUp from '@ente/accounts/components/SignUp';
-import EnteSpinner from '@ente/shared/components/EnteSpinner';
-import { t } from 'i18next';
+import Login from "@ente/accounts/components/Login";
+import SignUp from "@ente/accounts/components/SignUp";
+import EnteSpinner from "@ente/shared/components/EnteSpinner";
+import { getData, LS_KEYS } from "@ente/shared/storage/localStorage";
+import { Button, styled, Typography, TypographyProps } from "@mui/material";
+import { t } from "i18next";
+import { useRouter } from "next/router";
+import { useContext, useEffect, useState } from "react";
+import Carousel from "react-bootstrap/Carousel";
+import { AppContext } from "./_app";
 
-import localForage from '@ente/shared/storage/localForage';
-import { logError } from '@ente/shared/sentry';
-import { PHOTOS_PAGES as PAGES } from '@ente/shared/constants/pages';
-import { EnteLogo } from '@ente/shared/components/EnteLogo';
-import isElectron from 'is-electron';
-import ElectronAPIs from '@ente/shared/electron';
-import { saveKeyInSessionStore } from '@ente/shared/crypto/helpers';
-import { getKey, SESSION_KEYS } from '@ente/shared/storage/sessionStorage';
-import { getAlbumsURL } from '@ente/shared/network/api';
-import { Trans } from 'react-i18next';
-import { APPS } from '@ente/shared/apps/constants';
+import { APPS } from "@ente/shared/apps/constants";
+import { EnteLogo } from "@ente/shared/components/EnteLogo";
+import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
+import { saveKeyInSessionStore } from "@ente/shared/crypto/helpers";
+import ElectronAPIs from "@ente/shared/electron";
+import { getAlbumsURL } from "@ente/shared/network/api";
+import { logError } from "@ente/shared/sentry";
+import localForage from "@ente/shared/storage/localForage";
+import { getKey, SESSION_KEYS } from "@ente/shared/storage/sessionStorage";
+import isElectron from "is-electron";
+import { Trans } from "react-i18next";
 
-const Container = styled('div')`
+const Container = styled("div")`
     display: flex;
     flex: 1;
     align-items: center;
@@ -33,7 +33,7 @@ const Container = styled('div')`
     }
 `;
 
-const SlideContainer = styled('div')`
+const SlideContainer = styled("div")`
     flex: 1;
     display: flex;
     flex-direction: column;
@@ -46,7 +46,7 @@ const SlideContainer = styled('div')`
     }
 `;
 
-const DesktopBox = styled('div')`
+const DesktopBox = styled("div")`
     flex: 1;
     height: 100%;
     padding: 10px;
@@ -60,7 +60,7 @@ const DesktopBox = styled('div')`
     }
 `;
 
-const MobileBox = styled('div')`
+const MobileBox = styled("div")`
     display: none;
 
     @media (max-width: 1024px) {
@@ -73,21 +73,21 @@ const MobileBox = styled('div')`
     }
 `;
 
-const SideBox = styled('div')`
+const SideBox = styled("div")`
     display: flex;
     flex-direction: column;
     min-width: 320px;
 `;
 
 const TextContainer = (props: TypographyProps) => (
-    <Typography color={'text.muted'} mt={2} mb={3} {...props} />
+    <Typography color={"text.muted"} mt={2} mb={3} {...props} />
 );
 
 const FeatureText = (props: TypographyProps) => (
     <Typography variant="h3" mt={4} {...props} />
 );
 
-const Img = styled('img')`
+const Img = styled("img")`
     height: 250px;
     object-fit: contain;
 
@@ -118,7 +118,7 @@ export default function LandingPage() {
     }, []);
 
     const handleAlbumsRedirect = async (currentURL: URL) => {
-        const end = currentURL.hash.lastIndexOf('&');
+        const end = currentURL.hash.lastIndexOf("&");
         const hash = currentURL.hash.slice(1, end !== -1 ? end : undefined);
         await router.replace({
             pathname: PAGES.SHARED_ALBUMS,
@@ -135,13 +135,13 @@ export default function LandingPage() {
             try {
                 key = await ElectronAPIs.getEncryptionKey();
             } catch (e) {
-                logError(e, 'getEncryptionKey failed');
+                logError(e, "getEncryptionKey failed");
             }
             if (key) {
                 await saveKeyInSessionStore(
                     SESSION_KEYS.ENCRYPTION_KEY,
                     key,
-                    true
+                    true,
                 );
             }
         }
@@ -166,12 +166,12 @@ export default function LandingPage() {
         try {
             await localForage.ready();
         } catch (e) {
-            logError(e, 'usage in incognito mode tried');
+            logError(e, "usage in incognito mode tried");
             appContext.setDialogMessage({
-                title: t('LOCAL_STORAGE_NOT_ACCESSIBLE'),
+                title: t("LOCAL_STORAGE_NOT_ACCESSIBLE"),
 
                 nonClosable: true,
-                content: t('LOCAL_STORAGE_NOT_ACCESSIBLE_MESSAGE'),
+                content: t("LOCAL_STORAGE_NOT_ACCESSIBLE_MESSAGE"),
             });
         } finally {
             setLoading(false);
@@ -200,10 +200,10 @@ export default function LandingPage() {
                                         /images/onboarding-lock/3x.png 3x"
                                 />
                                 <FeatureText>
-                                    <Trans i18nKey={'HERO_SLIDE_1_TITLE'} />
+                                    <Trans i18nKey={"HERO_SLIDE_1_TITLE"} />
                                 </FeatureText>
                                 <TextContainer>
-                                    {t('HERO_SLIDE_1')}
+                                    {t("HERO_SLIDE_1")}
                                 </TextContainer>
                             </Carousel.Item>
                             <Carousel.Item>
@@ -213,10 +213,10 @@ export default function LandingPage() {
                                         /images/onboarding-safe/3x.png 3x"
                                 />
                                 <FeatureText>
-                                    <Trans i18nKey={'HERO_SLIDE_2_TITLE'} />
+                                    <Trans i18nKey={"HERO_SLIDE_2_TITLE"} />
                                 </FeatureText>
                                 <TextContainer>
-                                    {t('HERO_SLIDE_2')}
+                                    {t("HERO_SLIDE_2")}
                                 </TextContainer>
                             </Carousel.Item>
                             <Carousel.Item>
@@ -226,10 +226,10 @@ export default function LandingPage() {
                                         /images/onboarding-sync/3x.png 3x"
                                 />
                                 <FeatureText>
-                                    <Trans i18nKey={'HERO_SLIDE_3_TITLE'} />
+                                    <Trans i18nKey={"HERO_SLIDE_3_TITLE"} />
                                 </FeatureText>
                                 <TextContainer>
-                                    {t('HERO_SLIDE_3')}
+                                    {t("HERO_SLIDE_3")}
                                 </TextContainer>
                             </Carousel.Item>
                         </Carousel>
@@ -238,11 +238,12 @@ export default function LandingPage() {
                         <Button
                             color="accent"
                             size="large"
-                            onClick={redirectToSignupPage}>
-                            {t('NEW_USER')}
+                            onClick={redirectToSignupPage}
+                        >
+                            {t("NEW_USER")}
                         </Button>
                         <Button size="large" onClick={redirectToLoginPage}>
-                            {t('EXISTING_USER')}
+                            {t("EXISTING_USER")}
                         </Button>
                     </MobileBox>
                     <DesktopBox>

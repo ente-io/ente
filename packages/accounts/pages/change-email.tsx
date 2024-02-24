@@ -1,13 +1,13 @@
-import { VerticallyCentered } from '@ente/shared/components/Container';
-import React, { useEffect } from 'react';
-import { t } from 'i18next';
+import { VerticallyCentered } from "@ente/shared/components/Container";
+import { t } from "i18next";
+import { useEffect } from "react";
 
-import ChangeEmailForm from '@ente/accounts/components/ChangeEmail';
-import { PAGES } from '@ente/accounts/constants/pages';
-import { getData, LS_KEYS } from '@ente/shared/storage/localStorage';
-import FormPaper from '@ente/shared/components/Form/FormPaper';
-import FormPaperTitle from '@ente/shared/components/Form/FormPaper/Title';
-import { PageProps } from '@ente/shared/apps/types';
+import ChangeEmailForm from "@ente/accounts/components/ChangeEmail";
+import { PAGES } from "@ente/accounts/constants/pages";
+import { PageProps } from "@ente/shared/apps/types";
+import FormPaper from "@ente/shared/components/Form/FormPaper";
+import FormPaperTitle from "@ente/shared/components/Form/FormPaper/Title";
+import { getData, LS_KEYS } from "@ente/shared/storage/localStorage";
 
 function ChangeEmailPage({ router, appName, appContext }: PageProps) {
     useEffect(() => {
@@ -20,7 +20,7 @@ function ChangeEmailPage({ router, appName, appContext }: PageProps) {
     return (
         <VerticallyCentered>
             <FormPaper>
-                <FormPaperTitle>{t('CHANGE_EMAIL')}</FormPaperTitle>
+                <FormPaperTitle>{t("CHANGE_EMAIL")}</FormPaperTitle>
                 <ChangeEmailForm
                     router={router}
                     appName={appName}

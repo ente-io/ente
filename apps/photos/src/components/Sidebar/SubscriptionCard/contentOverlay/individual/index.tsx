@@ -1,7 +1,6 @@
-import React from 'react';
-import { UserDetails } from 'types/user';
-import StorageSection from '../storageSection';
-import { IndividualUsageSection } from './usageSection';
+import { UserDetails } from "types/user";
+import StorageSection from "../storageSection";
+import { IndividualUsageSection } from "./usageSection";
 
 interface Iprops {
     userDetails: UserDetails;

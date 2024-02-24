@@ -1,38 +1,38 @@
-import localForage from 'localforage';
-import { EnteFile } from 'types/file';
+import localForage from "localforage";
+import { EnteFile } from "types/file";
 import {
     Face,
     MlFileData,
     MLIndex,
     MLSyncContext,
-} from 'types/machineLearning';
+} from "types/machineLearning";
 
 export const mlFilesStore = localForage.createInstance({
     driver: localForage.INDEXEDDB,
-    name: 'ml-data',
+    name: "ml-data",
     version: 1.0,
-    storeName: 'files',
+    storeName: "files",
 });
 
 export const mlPeopleStore = localForage.createInstance({
     driver: localForage.INDEXEDDB,
-    name: 'ml-data',
+    name: "ml-data",
     version: 1.0,
-    storeName: 'people',
+    storeName: "people",
 });
 
 export const mlLibraryStore = localForage.createInstance({
     driver: localForage.INDEXEDDB,
-    name: 'ml-data',
+    name: "ml-data",
     version: 1.0,
-    storeName: 'library',
+    storeName: "library",
 });
 
 export const mlVersionStore = localForage.createInstance({
     driver: localForage.INDEXEDDB,
-    name: 'ml-data',
+    name: "ml-data",
     version: 1.0,
-    storeName: 'versions',
+    storeName: "versions",
 });
 
 export async function clearMLStorage() {
@@ -48,7 +48,7 @@ export async function getIndexVersion(index: MLIndex): Promise<number> {
 
 export async function setIndexVersion(
     index: MLIndex,
-    version: number
+    version: number,
 ): Promise<number> {
     await mlVersionStore.setItem(`${index}`, version);
 
@@ -72,7 +72,7 @@ export async function isVersionOutdated(index: MLIndex, thanIndex: MLIndex) {
 
 export function newMlData(
     syncContext: MLSyncContext,
-    enteFile: EnteFile
+    enteFile: EnteFile,
 ): MlFileData {
     return {
         fileId: enteFile.id,

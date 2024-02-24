@@ -1,8 +1,8 @@
-import { logError } from '@ente/shared/sentry';
-import { CacheStorageFactory } from './cacheStorageFactory';
+import { logError } from "@ente/shared/sentry";
+import { CacheStorageFactory } from "./cacheStorageFactory";
 
-const SecurityError = 'SecurityError';
-const INSECURE_OPERATION = 'The operation is insecure.';
+const SecurityError = "SecurityError";
+const INSECURE_OPERATION = "The operation is insecure.";
 async function openCache(cacheName: string) {
     try {
         return await CacheStorageFactory.getCacheStorage().open(cacheName);
@@ -12,7 +12,7 @@ async function openCache(cacheName: string) {
             // no-op
         } else {
             // log and ignore, we don't want to break the caller flow, when cache is not available
-            logError(e, 'openCache failed');
+            logError(e, "openCache failed");
         }
     }
 }
@@ -25,7 +25,7 @@ async function deleteCache(cacheName: string) {
             // no-op
         } else {
             // log and ignore, we don't want to break the caller flow, when cache is not available
-            logError(e, 'deleteCache failed');
+            logError(e, "deleteCache failed");
         }
     }
 }

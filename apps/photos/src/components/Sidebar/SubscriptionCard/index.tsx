@@ -1,10 +1,9 @@
-import { BackgroundOverlay } from './backgroundOverlay';
-import { ClickOverlay } from './clickOverlay';
-import React from 'react';
-import { Box, Skeleton } from '@mui/material';
-import { UserDetails } from 'types/user';
+import { Box, Skeleton } from "@mui/material";
+import { UserDetails } from "types/user";
+import { BackgroundOverlay } from "./backgroundOverlay";
+import { ClickOverlay } from "./clickOverlay";
 
-import { SubscriptionCardContentOverlay } from './contentOverlay';
+import { SubscriptionCardContentOverlay } from "./contentOverlay";
 
 const SUBSCRIPTION_CARD_SIZE = 152;
 
@@ -20,7 +19,7 @@ export default function SubscriptionCard({ userDetails, onClick }: Iprops) {
                 animation="wave"
                 variant="rectangular"
                 height={SUBSCRIPTION_CARD_SIZE}
-                sx={{ borderRadius: '8px' }}
+                sx={{ borderRadius: "8px" }}
             />
         );
     }

@@ -1,5 +1,5 @@
-import { UserDetails } from 'types/user';
-import { getData, LS_KEYS } from '@ente/shared/storage/localStorage';
+import { getData, LS_KEYS } from "@ente/shared/storage/localStorage";
+import { UserDetails } from "types/user";
 
 export function getLocalUserDetails(): UserDetails {
     return getData(LS_KEYS.USER_DETAILS)?.value;
@@ -10,6 +10,6 @@ export const isInternalUser = () => {
     if (!userEmail) return false;
 
     return (
-        userEmail.endsWith('@ente.io') || userEmail === 'kr.anand619@gmail.com'
+        userEmail.endsWith("@ente.io") || userEmail === "kr.anand619@gmail.com"
     );
 };

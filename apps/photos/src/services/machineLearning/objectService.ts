@@ -1,33 +1,33 @@
+import { addLogLine } from "@ente/shared/logging";
 import {
+    DetectedObject,
     MLSyncContext,
     MLSyncFileContext,
-    DetectedObject,
     Thing,
-} from 'types/machineLearning';
-import { addLogLine } from '@ente/shared/logging';
+} from "types/machineLearning";
 import {
-    isDifferentOrOld,
-    getObjectId,
     getAllObjectsFromMap,
-} from 'utils/machineLearning';
-import mlIDbStorage from 'utils/storage/mlIDbStorage';
-import ReaderService from './readerService';
+    getObjectId,
+    isDifferentOrOld,
+} from "utils/machineLearning";
+import mlIDbStorage from "utils/storage/mlIDbStorage";
+import ReaderService from "./readerService";
 
 class ObjectService {
     async syncFileObjectDetections(
         syncContext: MLSyncContext,
-        fileContext: MLSyncFileContext
+        fileContext: MLSyncFileContext,
     ) {
         const startTime = Date.now();
         const { oldMlFile, newMlFile } = fileContext;
         if (
             !isDifferentOrOld(
                 oldMlFile?.objectDetectionMethod,
-                syncContext.objectDetectionService.method
+                syncContext.objectDetectionService.method,
             ) &&
             !isDifferentOrOld(
                 oldMlFile?.sceneDetectionMethod,
-                syncContext.sceneDetectionService.method
+                syncContext.sceneDetectionService.method,
             ) &&
             oldMlFile?.imageSource === syncContext.config.imageSource
         ) {
@@ -47,19 +47,19 @@ class ObjectService {
         fileContext.newDetection = true;
         const imageBitmap = await ReaderService.getImageBitmap(
             syncContext,
-            fileContext
+            fileContext,
         );
         const objectDetections =
             await syncContext.objectDetectionService.detectObjects(
                 imageBitmap,
                 syncContext.config.objectDetection.maxNumBoxes,
-                syncContext.config.objectDetection.minScore
+                syncContext.config.objectDetection.minScore,
             );
         objectDetections.push(
             ...(await syncContext.sceneDetectionService.detectScenes(
                 imageBitmap,
-                syncContext.config.sceneDetection.minScore
-            ))
+                syncContext.config.sceneDetection.minScore,
+            )),
         );
         // addLogLine('3 TF Memory stats: ',JSON.stringify(tf.memory()));
         // TODO: reenable faces filtering based on width
@@ -80,10 +80,10 @@ class ObjectService {
         addLogLine(
             `object detection time taken ${fileContext.enteFile.id}`,
             Date.now() - startTime,
-            'ms'
+            "ms",
         );
 
-        addLogLine('[MLService] Detected Objects: ', newMlFile.objects?.length);
+        addLogLine("[MLService] Detected Objects: ", newMlFile.objects?.length);
     }
 
     async getAllSyncedObjectsMap(syncContext: MLSyncContext) {
@@ -114,11 +114,11 @@ class ObjectService {
     }
 
     async syncThingsIndex(syncContext: MLSyncContext) {
-        const filesVersion = await mlIDbStorage.getIndexVersion('files');
-        addLogLine('things', await mlIDbStorage.getIndexVersion('things'));
-        if (filesVersion <= (await mlIDbStorage.getIndexVersion('things'))) {
+        const filesVersion = await mlIDbStorage.getIndexVersion("files");
+        addLogLine("things", await mlIDbStorage.getIndexVersion("things"));
+        if (filesVersion <= (await mlIDbStorage.getIndexVersion("things"))) {
             addLogLine(
-                '[MLService] Skipping people index as already synced to latest version'
+                "[MLService] Skipping people index as already synced to latest version",
             );
             return;
         }
@@ -135,7 +135,7 @@ class ObjectService {
             await mlIDbStorage.putThing(thing);
         }
 
-        await mlIDbStorage.setIndexVersion('things', filesVersion);
+        await mlIDbStorage.setIndexVersion("things", filesVersion);
     }
 
     async getAllThings() {

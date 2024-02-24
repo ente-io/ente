@@ -1,15 +1,15 @@
+import { logError } from "@ente/shared/sentry";
 import SingleInputForm, {
     SingleInputFormProps,
-} from '../components/SingleInputForm';
-import { logError } from '@ente/shared/sentry';
+} from "../components/SingleInputForm";
 
-import { CustomError } from '../error';
+import { CustomError } from "../error";
 
-import { ButtonProps, Input } from '@mui/material';
-import { KeyAttributes, User } from '../user/types';
-import { SRPAttributes } from '@ente/accounts/types/srp';
-import ComlinkCryptoWorker from '../crypto';
-import { t } from 'i18next';
+import { SRPAttributes } from "@ente/accounts/types/srp";
+import { ButtonProps, Input } from "@mui/material";
+import { t } from "i18next";
+import ComlinkCryptoWorker from "../crypto";
+import { KeyAttributes, User } from "../user/types";
 
 export interface VerifyMasterPasswordFormProps {
     user: User;
@@ -18,7 +18,7 @@ export interface VerifyMasterPasswordFormProps {
         key: string,
         kek: string,
         keyAttributes: KeyAttributes,
-        passphrase?: string
+        passphrase?: string,
     ) => void;
     buttonText: string;
     submitButtonProps?: ButtonProps;
@@ -35,9 +35,9 @@ export default function VerifyMasterPasswordForm({
     submitButtonProps,
     getKeyAttributes,
 }: VerifyMasterPasswordFormProps) {
-    const verifyPassphrase: SingleInputFormProps['callback'] = async (
+    const verifyPassphrase: SingleInputFormProps["callback"] = async (
         passphrase,
-        setFieldError
+        setFieldError,
     ) => {
         try {
             const cryptoWorker = await ComlinkCryptoWorker.getInstance();
@@ -48,21 +48,21 @@ export default function VerifyMasterPasswordForm({
                         passphrase,
                         srpAttributes.kekSalt,
                         srpAttributes.opsLimit,
-                        srpAttributes.memLimit
+                        srpAttributes.memLimit,
                     );
                 } else {
                     kek = await cryptoWorker.deriveKey(
                         passphrase,
                         keyAttributes.kekSalt,
                         keyAttributes.opsLimit,
-                        keyAttributes.memLimit
+                        keyAttributes.memLimit,
                     );
                 }
             } catch (e) {
-                logError(e, 'failed to derive key');
+                logError(e, "failed to derive key");
                 throw Error(CustomError.WEAK_DEVICE);
             }
-            if (!keyAttributes && typeof getKeyAttributes === 'function') {
+            if (!keyAttributes && typeof getKeyAttributes === "function") {
                 keyAttributes = await getKeyAttributes(kek);
             }
             if (!keyAttributes) {
@@ -72,11 +72,11 @@ export default function VerifyMasterPasswordForm({
                 const key = await cryptoWorker.decryptB64(
                     keyAttributes.encryptedKey,
                     keyAttributes.keyDecryptionNonce,
-                    kek
+                    kek,
                 );
                 callback(key, kek, keyAttributes, passphrase);
             } catch (e) {
-                logError(e, 'user entered a wrong password');
+                logError(e, "user entered a wrong password");
                 throw Error(CustomError.INCORRECT_PASSWORD);
             }
         } catch (e) {
@@ -85,16 +85,16 @@ export default function VerifyMasterPasswordForm({
                     // two factor enabled, user has been redirected to two factor page
                     return;
                 }
-                logError(e, 'failed to verify passphrase');
+                logError(e, "failed to verify passphrase");
                 switch (e.message) {
                     case CustomError.WEAK_DEVICE:
-                        setFieldError(t('WEAK_DEVICE'));
+                        setFieldError(t("WEAK_DEVICE"));
                         break;
                     case CustomError.INCORRECT_PASSWORD:
-                        setFieldError(t('INCORRECT_PASSPHRASE'));
+                        setFieldError(t("INCORRECT_PASSPHRASE"));
                         break;
                     default:
-                        setFieldError(`${t('UNKNOWN_ERROR')} ${e.message}`);
+                        setFieldError(`${t("UNKNOWN_ERROR")} ${e.message}`);
                 }
             }
         }
@@ -103,12 +103,12 @@ export default function VerifyMasterPasswordForm({
     return (
         <SingleInputForm
             callback={verifyPassphrase}
-            placeholder={t('RETURN_PASSPHRASE_HINT')}
+            placeholder={t("RETURN_PASSPHRASE_HINT")}
             buttonText={buttonText}
             submitButtonProps={submitButtonProps}
             hiddenPreInput={
                 <Input
-                    sx={{ display: 'none' }}
+                    sx={{ display: "none" }}
                     id="email"
                     name="email"
                     autoComplete="username"
@@ -116,7 +116,7 @@ export default function VerifyMasterPasswordForm({
                     value={user?.email}
                 />
             }
-            autoComplete={'current-password'}
+            autoComplete={"current-password"}
             fieldType="password"
         />
     );

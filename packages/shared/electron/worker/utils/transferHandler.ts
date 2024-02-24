@@ -1,4 +1,4 @@
-import * as Comlink from 'comlink';
+import * as Comlink from "comlink";
 
 // didn't work kept for reference, so that can try to make it work later in future hopefully
 export function setupResponseObjectTransferHandler() {
@@ -7,5 +7,5 @@ export function setupResponseObjectTransferHandler() {
         serialize: (response: Response) => [response.arrayBuffer() as any, []],
         deserialize: (arrayBuffer: ArrayBuffer) => new Response(arrayBuffer),
     };
-    return Comlink.transferHandlers.set('RESPONSE', transferHandler);
+    return Comlink.transferHandlers.set("RESPONSE", transferHandler);
 }

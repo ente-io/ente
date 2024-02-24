@@ -1,4 +1,4 @@
-import { CustomError } from '@ente/shared/error';
+import { CustomError } from "@ente/shared/error";
 
 interface RequestQueueItem {
     request: (canceller?: RequestCanceller) => Promise<any>;
@@ -28,11 +28,11 @@ export default class QueueProcessor<T> {
 
     constructor(
         private maxParallelProcesses: number,
-        private processingStrategy = PROCESSING_STRATEGY.FIFO
+        private processingStrategy = PROCESSING_STRATEGY.FIFO,
     ) {}
 
     public queueUpRequest(
-        request: (canceller?: RequestCanceller) => Promise<T>
+        request: (canceller?: RequestCanceller) => Promise<T>,
     ) {
         const isCanceled: CancellationStatus = { status: false };
         const canceller: RequestCanceller = {

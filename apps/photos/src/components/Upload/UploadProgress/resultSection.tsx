@@ -1,16 +1,16 @@
-import { useContext } from 'react';
-import ItemList from 'components/ItemList';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import { ResultItemContainer } from './styledComponents';
-import { UPLOAD_RESULT } from 'constants/upload';
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import { CaptionedText } from "components/CaptionedText";
+import ItemList from "components/ItemList";
+import { UPLOAD_RESULT } from "constants/upload";
+import UploadProgressContext from "contexts/uploadProgress";
+import { useContext } from "react";
 import {
     SectionInfo,
     UploadProgressSection,
     UploadProgressSectionContent,
     UploadProgressSectionTitle,
-} from './section';
-import UploadProgressContext from 'contexts/uploadProgress';
-import { CaptionedText } from 'components/CaptionedText';
+} from "./section";
+import { ResultItemContainer } from "./styledComponents";
 
 export interface ResultSectionProps {
     uploadResult: UPLOAD_RESULT;
@@ -19,7 +19,7 @@ export interface ResultSectionProps {
 }
 export const ResultSection = (props: ResultSectionProps) => {
     const { finishedUploads, uploadFileNames } = useContext(
-        UploadProgressContext
+        UploadProgressContext,
     );
     const fileList = finishedUploads.get(props.uploadResult);
 

@@ -1,28 +1,28 @@
-import { CACHES } from '@ente/shared/storage/cacheStorage/constants';
-import { CacheStorageService } from '@ente/shared/storage/cacheStorage';
-import { compose, Matrix, scale, translate } from 'transformation-matrix';
-import { BlobOptions, Dimensions } from 'types/image';
+import { addLogLine } from "@ente/shared/logging";
+import { CacheStorageService } from "@ente/shared/storage/cacheStorage";
+import { CACHES } from "@ente/shared/storage/cacheStorage/constants";
+import { getBlobFromCache } from "@ente/shared/storage/cacheStorage/helpers";
+import { compose, Matrix, scale, translate } from "transformation-matrix";
+import { BlobOptions, Dimensions } from "types/image";
 import {
     AlignedFace,
-    FaceCropConfig,
-    FaceCrop,
-    StoredFaceCrop,
-    MlFileData,
     FaceAlignment,
+    FaceCrop,
+    FaceCropConfig,
     FaceDetection,
-} from 'types/machineLearning';
-import { cropWithRotation, imageBitmapToBlob } from 'utils/image';
-import { addLogLine } from '@ente/shared/logging';
-import { getBlobFromCache } from '@ente/shared/storage/cacheStorage/helpers';
-import { enlargeBox } from '.';
-import { Box } from '../../../thirdparty/face-api/classes';
-import { getAlignedFaceBox } from './faceAlign';
-import { transformBox, transformPoints } from './transform';
+    MlFileData,
+    StoredFaceCrop,
+} from "types/machineLearning";
+import { cropWithRotation, imageBitmapToBlob } from "utils/image";
+import { enlargeBox } from ".";
+import { Box } from "../../../thirdparty/face-api/classes";
+import { getAlignedFaceBox } from "./faceAlign";
+import { transformBox, transformPoints } from "./transform";
 
 export function getFaceCrop(
     imageBitmap: ImageBitmap,
     alignment: FaceAlignment,
-    config: FaceCropConfig
+    config: FaceCropConfig,
 ): FaceCrop {
     const box = getAlignedFaceBox(alignment);
     const scaleForPadding = 1 + config.padding * 2;
@@ -41,7 +41,7 @@ export function getFaceCrop(
 export async function storeFaceCropForBlob(
     faceId: string,
     imageBox: Box,
-    faceCropBlob: Blob
+    faceCropBlob: Blob,
 ) {
     const faceCropUrl = `/${faceId}`;
     const faceCropResponse = new Response(faceCropBlob);
@@ -56,20 +56,20 @@ export async function storeFaceCropForBlob(
 export async function storeFaceCrop(
     faceId: string,
     faceCrop: FaceCrop,
-    blobOptions: BlobOptions
+    blobOptions: BlobOptions,
 ): Promise<StoredFaceCrop> {
     const faceCropBlob = await imageBitmapToBlob(faceCrop.image, blobOptions);
     return storeFaceCropForBlob(faceId, faceCrop.imageBox, faceCropBlob);
 }
 
 export async function getFaceCropBlobFromStorage(
-    storedFaceCrop: StoredFaceCrop
+    storedFaceCrop: StoredFaceCrop,
 ): Promise<Blob> {
     return getBlobFromCache(CACHES.FACE_CROPS, storedFaceCrop.imageUrl);
 }
 
 export async function getFaceCropFromStorage(
-    storedFaceCrop: StoredFaceCrop
+    storedFaceCrop: StoredFaceCrop,
 ): Promise<FaceCrop> {
     const faceCropBlob = await getFaceCropBlobFromStorage(storedFaceCrop);
     const faceCropImage = await createImageBitmap(faceCropBlob);
@@ -82,7 +82,7 @@ export async function getFaceCropFromStorage(
 
 export async function removeOldFaceCrops(
     oldMLFileData: MlFileData,
-    newMLFileData: MlFileData
+    newMLFileData: MlFileData,
 ) {
     const newFaceCropUrls =
         newMLFileData?.faces
@@ -95,7 +95,7 @@ export async function removeOldFaceCrops(
             ?.filter((fc) => fc !== null && fc !== undefined) || [];
 
     const unusedFaceCropUrls = oldFaceCropUrls.filter(
-        (oldUrl) => !newFaceCropUrls.includes(oldUrl)
+        (oldUrl) => !newFaceCropUrls.includes(oldUrl),
     );
     if (!unusedFaceCropUrls || unusedFaceCropUrls.length < 1) {
         return;
@@ -105,10 +105,10 @@ export async function removeOldFaceCrops(
 }
 
 export async function removeFaceCropUrls(faceCropUrls: Array<string>) {
-    addLogLine('Removing face crop urls: ', JSON.stringify(faceCropUrls));
+    addLogLine("Removing face crop urls: ", JSON.stringify(faceCropUrls));
     const faceCropCache = await CacheStorageService.open(CACHES.FACE_CROPS);
     const urlRemovalPromises = faceCropUrls?.map((url) =>
-        faceCropCache.delete(url)
+        faceCropCache.delete(url),
     );
     return urlRemovalPromises && Promise.all(urlRemovalPromises);
 }
@@ -117,12 +117,12 @@ export function extractFaceImageFromCrop(
     faceCrop: FaceCrop,
     box: Box,
     rotation: number,
-    faceSize: number
+    faceSize: number,
 ): ImageBitmap {
     const faceCropImage = faceCrop?.image;
     let imageBox = faceCrop?.imageBox;
     if (!faceCropImage || !imageBox) {
-        throw Error('Face crop not present');
+        throw Error("Face crop not present");
     }
 
     // TODO: Have better serialization to avoid creating new object manually when calling class methods
@@ -143,7 +143,7 @@ export function extractFaceImageFromCrop(
         transformedBox,
         rotation,
         faceSizeDimentions,
-        faceSizeDimentions
+        faceSizeDimentions,
     );
 
     return faceImage;
@@ -152,7 +152,7 @@ export function extractFaceImageFromCrop(
 export async function ibExtractFaceImageFromCrop(
     faceCrop: FaceCrop,
     alignment: FaceAlignment,
-    faceSize: number
+    faceSize: number,
 ): Promise<ImageBitmap> {
     const box = getAlignedFaceBox(alignment);
 
@@ -160,20 +160,20 @@ export async function ibExtractFaceImageFromCrop(
         faceCrop,
         box,
         alignment.rotation,
-        faceSize
+        faceSize,
     );
 }
 
 export async function ibExtractFaceImagesFromCrops(
     faces: Array<AlignedFace>,
-    faceSize: number
+    faceSize: number,
 ): Promise<Array<ImageBitmap>> {
     const faceImagePromises = faces.map(async (alignedFace) => {
         const faceCrop = await getFaceCropFromStorage(alignedFace.crop);
         return ibExtractFaceImageFromCrop(
             faceCrop,
             alignedFace.alignment,
-            faceSize
+            faceSize,
         );
     });
     return Promise.all(faceImagePromises);
@@ -190,13 +190,13 @@ export function transformFace(faceDetection: FaceDetection, transform: Matrix) {
 
 export function transformToFaceCropDims(
     faceCrop: FaceCrop,
-    faceDetection: FaceDetection
+    faceDetection: FaceDetection,
 ) {
     const imageBox = new Box(faceCrop.imageBox);
 
     const transform = compose(
         scale(faceCrop.image.width / imageBox.width),
-        translate(-imageBox.x, -imageBox.y)
+        translate(-imageBox.x, -imageBox.y),
     );
 
     return transformFace(faceDetection, transform);
@@ -204,13 +204,13 @@ export function transformToFaceCropDims(
 
 export function transformToImageDims(
     faceCrop: FaceCrop,
-    faceDetection: FaceDetection
+    faceDetection: FaceDetection,
 ) {
     const imageBox = new Box(faceCrop.imageBox);
 
     const transform = compose(
         translate(imageBox.x, imageBox.y),
-        scale(imageBox.width / faceCrop.image.width)
+        scale(imageBox.width / faceCrop.image.width),
     );
 
     return transformFace(faceDetection, transform);

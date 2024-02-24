@@ -1,14 +1,14 @@
-import ElectronAPIs from '@ente/shared/electron';
-import isElectron from 'is-electron';
-import { ElectronFile } from 'types/upload';
-import ComlinkFFmpegWorker from 'utils/comlink/ComlinkFFmpegWorker';
+import ElectronAPIs from "@ente/shared/electron";
+import isElectron from "is-electron";
+import { ElectronFile } from "types/upload";
+import ComlinkFFmpegWorker from "utils/comlink/ComlinkFFmpegWorker";
 
 export interface IFFmpeg {
     run: (
         cmd: string[],
         inputFile: File | ElectronFile,
         outputFilename: string,
-        dontTimeout?: boolean
+        dontTimeout?: boolean,
     ) => Promise<File | ElectronFile>;
 }
 
@@ -23,7 +23,7 @@ class FFmpegFactory {
                             cmd,
                             inputFile,
                             outputFilename,
-                            dontTimeout
+                            dontTimeout,
                         );
                     },
                 };

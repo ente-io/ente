@@ -1,8 +1,8 @@
-import { generateLoginSubKey } from '@ente/shared/crypto/helpers';
-import { KeyAttributes } from '@ente/shared/user/types';
-import { generateSRPSetupAttributes } from '../services/srp';
-import { SRPSetupAttributes } from '../types/srp';
-import ComlinkCryptoWorker from '@ente/shared/crypto';
+import ComlinkCryptoWorker from "@ente/shared/crypto";
+import { generateLoginSubKey } from "@ente/shared/crypto/helpers";
+import { KeyAttributes } from "@ente/shared/user/types";
+import { generateSRPSetupAttributes } from "../services/srp";
+import { SRPSetupAttributes } from "../types/srp";
 
 export async function generateKeyAndSRPAttributes(passphrase: string): Promise<{
     keyAttributes: KeyAttributes;
@@ -17,21 +17,21 @@ export async function generateKeyAndSRPAttributes(passphrase: string): Promise<{
 
     const masterKeyEncryptedWithKek = await cryptoWorker.encryptToB64(
         masterKey,
-        kek.key
+        kek.key,
     );
     const masterKeyEncryptedWithRecoveryKey = await cryptoWorker.encryptToB64(
         masterKey,
-        recoveryKey
+        recoveryKey,
     );
     const recoveryKeyEncryptedWithMasterKey = await cryptoWorker.encryptToB64(
         recoveryKey,
-        masterKey
+        masterKey,
     );
 
     const keyPair = await cryptoWorker.generateKeyPair();
     const encryptedKeyPairAttributes = await cryptoWorker.encryptToB64(
         keyPair.privateKey,
-        masterKey
+        masterKey,
     );
 
     const loginSubKey = await generateLoginSubKey(kek.key);

@@ -1,13 +1,12 @@
-import { Stack } from '@mui/material';
-import Box from '@mui/material/Box';
-import Typography from '@mui/material/Typography';
-import React from 'react';
-import { t } from 'i18next';
-import { PeriodToggler } from '../periodToggler';
-import Plans from '../plans';
-import { hasAddOnBonus } from 'utils/billing';
-import { BFAddOnRow } from '../plans/BfAddOnRow';
-import { ManageSubscription } from '../manageSubscription';
+import { Stack } from "@mui/material";
+import Box from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
+import { t } from "i18next";
+import { hasAddOnBonus } from "utils/billing";
+import { ManageSubscription } from "../manageSubscription";
+import { PeriodToggler } from "../periodToggler";
+import Plans from "../plans";
+import { BFAddOnRow } from "../plans/BfAddOnRow";
 
 export default function FreeSubscriptionPlanSelectorCard({
     plans,
@@ -21,8 +20,8 @@ export default function FreeSubscriptionPlanSelectorCard({
 }) {
     return (
         <>
-            <Typography variant="h3" fontWeight={'bold'}>
-                {t('CHOOSE_PLAN')}
+            <Typography variant="h3" fontWeight={"bold"}>
+                {t("CHOOSE_PLAN")}
             </Typography>
 
             <Box>
@@ -33,7 +32,7 @@ export default function FreeSubscriptionPlanSelectorCard({
                             togglePeriod={togglePeriod}
                         />
                         <Typography variant="small" mt={0.5} color="text.muted">
-                            {t('TWO_MONTHS_FREE')}
+                            {t("TWO_MONTHS_FREE")}
                         </Typography>
                     </Box>
                     <Plans

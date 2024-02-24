@@ -1,13 +1,11 @@
-import React from 'react';
-import { ButtonProps, IconButton, styled } from '@mui/material';
-import FileUploadOutlinedIcon from '@mui/icons-material/FileUploadOutlined';
-import { Button } from '@mui/material';
-import { t } from 'i18next';
+import FileUploadOutlinedIcon from "@mui/icons-material/FileUploadOutlined";
+import { Button, ButtonProps, IconButton, styled } from "@mui/material";
+import { t } from "i18next";
 
-import uploadManager from 'services/upload/uploadManager';
-import { UploadTypeSelectorIntent } from 'types/gallery';
+import uploadManager from "services/upload/uploadManager";
+import { UploadTypeSelectorIntent } from "types/gallery";
 
-const Wrapper = styled('div')<{ $disableShrink: boolean }>`
+const Wrapper = styled("div")<{ $disableShrink: boolean }>`
     display: flex;
     align-items: center;
     justify-content: center;
@@ -31,7 +29,7 @@ const Wrapper = styled('div')<{ $disableShrink: boolean }>`
 interface Iprops {
     openUploader: (intent?: UploadTypeSelectorIntent) => void;
     text?: string;
-    color?: ButtonProps['color'];
+    color?: ButtonProps["color"];
     disableShrink?: boolean;
     icon?: JSX.Element;
 }
@@ -48,22 +46,25 @@ function UploadButton({
         <Wrapper
             $disableShrink={disableShrink}
             style={{
-                cursor: !uploadManager.shouldAllowNewUpload() && 'not-allowed',
-            }}>
+                cursor: !uploadManager.shouldAllowNewUpload() && "not-allowed",
+            }}
+        >
             <Button
-                sx={{ whiteSpace: 'nowrap' }}
+                sx={{ whiteSpace: "nowrap" }}
                 onClick={onClickHandler}
                 disabled={!uploadManager.shouldAllowNewUpload()}
                 className="desktop-button"
-                color={color ?? 'secondary'}
-                startIcon={icon ?? <FileUploadOutlinedIcon />}>
-                {text ?? t('UPLOAD')}
+                color={color ?? "secondary"}
+                startIcon={icon ?? <FileUploadOutlinedIcon />}
+            >
+                {text ?? t("UPLOAD")}
             </Button>
 
             <IconButton
                 onClick={onClickHandler}
                 disabled={!uploadManager.shouldAllowNewUpload()}
-                className="mobile-button">
+                className="mobile-button"
+            >
                 {icon ?? <FileUploadOutlinedIcon />}
             </IconButton>
         </Wrapper>

@@ -1,7 +1,7 @@
 import {
     UpdatedKey,
     UserVerificationResponse,
-} from '@ente/accounts/types/user';
+} from "@ente/accounts/types/user";
 
 export interface SRPAttributes {
     srpUserID: string;

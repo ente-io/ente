@@ -1,5 +1,5 @@
-import { JobConfig } from 'types/common/job';
-import { MLSearchConfig, MLSyncConfig } from 'types/machineLearning';
+import { JobConfig } from "types/common/job";
+import { MLSearchConfig, MLSyncConfig } from "types/machineLearning";
 
 export const DEFAULT_ML_SYNC_JOB_CONFIG: JobConfig = {
     intervalSec: 5,
@@ -10,46 +10,46 @@ export const DEFAULT_ML_SYNC_JOB_CONFIG: JobConfig = {
 
 export const DEFAULT_ML_SYNC_CONFIG: MLSyncConfig = {
     batchSize: 200,
-    imageSource: 'Original',
+    imageSource: "Original",
     faceDetection: {
-        method: 'BlazeFace',
+        method: "BlazeFace",
         minFaceSize: 32,
     },
     faceCrop: {
         enabled: true,
-        method: 'ArcFace',
+        method: "ArcFace",
         padding: 0.25,
         maxSize: 256,
         blobOptions: {
-            type: 'image/jpeg',
+            type: "image/jpeg",
             quality: 0.8,
         },
     },
     faceAlignment: {
-        method: 'ArcFace',
+        method: "ArcFace",
     },
     faceEmbedding: {
-        method: 'MobileFaceNet',
+        method: "MobileFaceNet",
         faceSize: 112,
         generateTsne: true,
     },
     faceClustering: {
-        method: 'Hdbscan',
+        method: "Hdbscan",
         minClusterSize: 3,
         minSamples: 5,
         clusterSelectionEpsilon: 0.6,
-        clusterSelectionMethod: 'leaf',
+        clusterSelectionMethod: "leaf",
         minInputSize: 50,
         // maxDistanceInsideCluster: 0.4,
         generateDebugInfo: true,
     },
     objectDetection: {
-        method: 'SSDMobileNetV2',
+        method: "SSDMobileNetV2",
         maxNumBoxes: 20,
         minScore: 0.2,
     },
     sceneDetection: {
-        method: 'ImageScene',
+        method: "ImageScene",
         minScore: 0.1,
     },
     // tsne: {

@@ -1,16 +1,16 @@
-import { Formik, FormikHelpers } from 'formik';
-import { useRef, useState } from 'react';
-import OtpInput from 'react-otp-input';
-import { t } from 'i18next';
+import { Formik, FormikHelpers } from "formik";
+import { t } from "i18next";
+import { useRef, useState } from "react";
+import OtpInput from "react-otp-input";
 
-import SubmitButton from '@ente/shared/components/SubmitButton';
+import InvalidInputMessage from "@ente/accounts/components/two-factor/InvalidInputMessage";
 import {
-    VerticallyCentered,
     CenteredFlex,
-} from '@ente/shared/components/Container';
-import { Box, Typography } from '@mui/material';
-import InvalidInputMessage from '@ente/accounts/components/two-factor/InvalidInputMessage';
-import { sleep } from '@ente/shared/utils';
+    VerticallyCentered,
+} from "@ente/shared/components/Container";
+import SubmitButton from "@ente/shared/components/SubmitButton";
+import { sleep } from "@ente/shared/utils";
+import { Box, Typography } from "@mui/material";
 
 interface formValues {
     otp: string;
@@ -22,7 +22,7 @@ interface Props {
 
 export type VerifyTwoFactorCallback = (
     otp: string,
-    markSuccessful: () => Promise<void>
+    markSuccessful: () => Promise<void>,
 ) => Promise<void>;
 
 export default function VerifyTwoFactor(props: Props) {
@@ -38,7 +38,7 @@ export default function VerifyTwoFactor(props: Props) {
 
     const submitForm = async (
         { otp }: formValues,
-        { setFieldError, resetForm }: FormikHelpers<formValues>
+        { setFieldError, resetForm }: FormikHelpers<formValues>,
     ) => {
         try {
             setWaiting(true);
@@ -48,7 +48,7 @@ export default function VerifyTwoFactor(props: Props) {
             for (let i = 0; i < 6; i++) {
                 otpInputRef.current?.focusPrevInput();
             }
-            setFieldError('otp', `${t('UNKNOWN_ERROR')} ${e.message}`);
+            setFieldError("otp", `${t("UNKNOWN_ERROR")} ${e.message}`);
         }
         setWaiting(false);
     };
@@ -62,15 +62,16 @@ export default function VerifyTwoFactor(props: Props) {
         };
     return (
         <Formik<formValues>
-            initialValues={{ otp: '' }}
+            initialValues={{ otp: "" }}
             validateOnChange={false}
             validateOnBlur={false}
-            onSubmit={submitForm}>
+            onSubmit={submitForm}
+        >
             {({ values, errors, handleChange, handleSubmit, submitForm }) => (
                 <VerticallyCentered>
                     <form noValidate onSubmit={handleSubmit}>
                         <Typography mb={2} variant="small" color="text.muted">
-                            {t('ENTER_TWO_FACTOR_OTP')}
+                            {t("ENTER_TWO_FACTOR_OTP")}
                         </Typography>
                         <Box my={2}>
                             <OtpInput
@@ -78,18 +79,18 @@ export default function VerifyTwoFactor(props: Props) {
                                 shouldAutoFocus
                                 value={values.otp}
                                 onChange={onChange(
-                                    handleChange('otp'),
-                                    submitForm
+                                    handleChange("otp"),
+                                    submitForm,
                                 )}
                                 numInputs={6}
-                                separator={'-'}
+                                separator={"-"}
                                 isInputNum
-                                className={'otp-input'}
+                                className={"otp-input"}
                             />
                             {errors.otp && (
                                 <CenteredFlex sx={{ mt: 1 }}>
                                     <InvalidInputMessage>
-                                        {t('INCORRECT_CODE')}
+                                        {t("INCORRECT_CODE")}
                                     </InvalidInputMessage>
                                 </CenteredFlex>
                             )}

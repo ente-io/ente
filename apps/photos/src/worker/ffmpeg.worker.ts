@@ -1,5 +1,5 @@
-import * as Comlink from 'comlink';
-import { WasmFFmpeg } from 'services/wasm/ffmpeg';
+import * as Comlink from "comlink";
+import { WasmFFmpeg } from "services/wasm/ffmpeg";
 
 export class DedicatedFFmpegWorker {
     wasmFFmpeg: WasmFFmpeg;

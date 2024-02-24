@@ -1,29 +1,29 @@
-import { PaletteOptions, ThemeColorsOptions } from '@mui/material';
-import { THEME_COLOR } from '../constants';
+import { PaletteOptions, ThemeColorsOptions } from "@mui/material";
+import { THEME_COLOR } from "../constants";
 
 export const getPallette = (
     themeColor: THEME_COLOR,
-    colors: ThemeColorsOptions
+    colors: ThemeColorsOptions,
 ): PaletteOptions => {
     const paletteOptions = getPalletteOptions(themeColor, colors);
     switch (themeColor) {
         case THEME_COLOR.LIGHT:
-            return { mode: 'light', ...paletteOptions };
+            return { mode: "light", ...paletteOptions };
         default:
-            return { mode: 'dark', ...paletteOptions };
+            return { mode: "dark", ...paletteOptions };
     }
 };
 
 export const getPalletteOptions = (
     themeColor: THEME_COLOR,
-    colors: ThemeColorsOptions
+    colors: ThemeColorsOptions,
 ): PaletteOptions => {
     return {
         primary: {
             main: colors.fill.base,
             dark: colors.fill.basePressed,
             contrastText:
-                themeColor === 'dark' ? colors.black.base : colors.white.base,
+                themeColor === "dark" ? colors.black.base : colors.white.base,
         },
         secondary: {
             main: colors.fill.faint,

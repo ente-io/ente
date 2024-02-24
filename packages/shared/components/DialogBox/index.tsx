@@ -1,4 +1,3 @@
-import React from 'react';
 import {
     Breakpoint,
     Button,
@@ -6,17 +5,18 @@ import {
     DialogContent,
     DialogProps,
     Typography,
-} from '@mui/material';
+} from "@mui/material";
+import { t } from "i18next";
+import React from "react";
+import DialogIcon from "./DialogIcon";
 import DialogTitleWithCloseButton, {
     dialogCloseHandler,
-} from './TitleWithCloseButton';
-import DialogBoxBase from './base';
-import { DialogBoxAttributes } from './types';
-import DialogIcon from './DialogIcon';
-import { t } from 'i18next';
+} from "./TitleWithCloseButton";
+import DialogBoxBase from "./base";
+import { DialogBoxAttributes } from "./types";
 
 type IProps = React.PropsWithChildren<
-    Omit<DialogProps, 'onClose' | 'maxSize'> & {
+    Omit<DialogProps, "onClose" | "maxSize"> & {
         onClose: () => void;
         attributes: DialogBoxAttributes;
         size?: Breakpoint;
@@ -48,7 +48,8 @@ export default function DialogBox({
             open={open}
             maxWidth={size}
             onClose={handleClose}
-            {...props}>
+            {...props}
+        >
             {attributes.icon && <DialogIcon icon={attributes.icon} />}
             {attributes.title && (
                 <DialogTitleWithCloseButton
@@ -56,7 +57,8 @@ export default function DialogBox({
                         titleCloseButton &&
                         !attributes.nonClosable &&
                         handleClose
-                    }>
+                    }
+                >
                     {attributes.title}
                 </DialogTitleWithCloseButton>
             )}
@@ -75,13 +77,14 @@ export default function DialogBox({
                         {attributes.close && (
                             <Button
                                 size="large"
-                                color={attributes.close?.variant ?? 'secondary'}
+                                color={attributes.close?.variant ?? "secondary"}
                                 onClick={() => {
                                     attributes.close.action &&
                                         attributes.close?.action();
                                     onClose();
-                                }}>
-                                {attributes.close?.text ?? t('OK')}
+                                }}
+                            >
+                                {attributes.close?.text ?? t("OK")}
                             </Button>
                         )}
                         {attributes.proceed && (
@@ -92,7 +95,8 @@ export default function DialogBox({
                                     attributes.proceed.action();
                                     onClose();
                                 }}
-                                disabled={attributes.proceed.disabled}>
+                                disabled={attributes.proceed.disabled}
+                            >
                                 {attributes.proceed.text}
                             </Button>
                         )}
@@ -104,7 +108,8 @@ export default function DialogBox({
                                     attributes.secondary.action();
                                     onClose();
                                 }}
-                                disabled={attributes.secondary.disabled}>
+                                disabled={attributes.secondary.disabled}
+                            >
                                 {attributes.secondary.text}
                             </Button>
                         )}

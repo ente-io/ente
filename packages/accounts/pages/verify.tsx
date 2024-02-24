@@ -1,46 +1,46 @@
-import { t } from 'i18next';
-import { useEffect, useState } from 'react';
-import { Trans } from 'react-i18next';
+import { t } from "i18next";
+import { useEffect, useState } from "react";
+import { Trans } from "react-i18next";
 
-import { UserVerificationResponse } from '@ente/accounts/types/user';
-import { PageProps } from '@ente/shared/apps/types';
-import { VerticallyCentered } from '@ente/shared/components/Container';
-import EnteSpinner from '@ente/shared/components/EnteSpinner';
-import FormPaper from '@ente/shared/components/Form/FormPaper';
-import FormPaperFooter from '@ente/shared/components/Form/FormPaper/Footer';
-import FormPaperTitle from '@ente/shared/components/Form/FormPaper/Title';
-import LinkButton from '@ente/shared/components/LinkButton';
+import { UserVerificationResponse } from "@ente/accounts/types/user";
+import { PageProps } from "@ente/shared/apps/types";
+import { VerticallyCentered } from "@ente/shared/components/Container";
+import EnteSpinner from "@ente/shared/components/EnteSpinner";
+import FormPaper from "@ente/shared/components/Form/FormPaper";
+import FormPaperFooter from "@ente/shared/components/Form/FormPaper/Footer";
+import FormPaperTitle from "@ente/shared/components/Form/FormPaper/Title";
+import LinkButton from "@ente/shared/components/LinkButton";
 import SingleInputForm, {
     SingleInputFormProps,
-} from '@ente/shared/components/SingleInputForm';
-import { ApiError } from '@ente/shared/error';
-import { getAccountsURL } from '@ente/shared/network/api';
-import InMemoryStore, { MS_KEYS } from '@ente/shared/storage/InMemoryStore';
-import { clearFiles } from '@ente/shared/storage/localForage/helpers';
-import { LS_KEYS, getData, setData } from '@ente/shared/storage/localStorage';
+} from "@ente/shared/components/SingleInputForm";
+import { ApiError } from "@ente/shared/error";
+import { getAccountsURL } from "@ente/shared/network/api";
+import InMemoryStore, { MS_KEYS } from "@ente/shared/storage/InMemoryStore";
+import { clearFiles } from "@ente/shared/storage/localForage/helpers";
+import { LS_KEYS, getData, setData } from "@ente/shared/storage/localStorage";
 import {
     getLocalReferralSource,
     setIsFirstLogin,
-} from '@ente/shared/storage/localStorage/helpers';
-import { clearKeys } from '@ente/shared/storage/sessionStorage';
-import { KeyAttributes, User } from '@ente/shared/user/types';
-import { Box, Typography } from '@mui/material';
-import { HttpStatusCode } from 'axios';
-import { putAttributes, sendOtt, verifyOtt } from '../api/user';
-import { PAGES } from '../constants/pages';
-import { configureSRP } from '../services/srp';
-import { logoutUser } from '../services/user';
-import { SRPSetupAttributes } from '../types/srp';
+} from "@ente/shared/storage/localStorage/helpers";
+import { clearKeys } from "@ente/shared/storage/sessionStorage";
+import { KeyAttributes, User } from "@ente/shared/user/types";
+import { Box, Typography } from "@mui/material";
+import { HttpStatusCode } from "axios";
+import { putAttributes, sendOtt, verifyOtt } from "../api/user";
+import { PAGES } from "../constants/pages";
+import { configureSRP } from "../services/srp";
+import { logoutUser } from "../services/user";
+import { SRPSetupAttributes } from "../types/srp";
 
 export default function VerifyPage({ appContext, router, appName }: PageProps) {
-    const [email, setEmail] = useState('');
+    const [email, setEmail] = useState("");
     const [resend, setResend] = useState(0);
 
     useEffect(() => {
         const main = async () => {
             const user: User = getData(LS_KEYS.USER);
             const keyAttributes: KeyAttributes = getData(
-                LS_KEYS.KEY_ATTRIBUTES
+                LS_KEYS.KEY_ATTRIBUTES,
             );
             if (!user?.email) {
                 router.push(PAGES.ROOT);
@@ -57,9 +57,9 @@ export default function VerifyPage({ appContext, router, appName }: PageProps) {
         appContext.showNavBar(true);
     }, []);
 
-    const onSubmit: SingleInputFormProps['callback'] = async (
+    const onSubmit: SingleInputFormProps["callback"] = async (
         ott,
-        setFieldError
+        setFieldError,
     ) => {
         try {
             const referralSource = getLocalReferralSource();
@@ -108,12 +108,12 @@ export default function VerifyPage({ appContext, router, appName }: PageProps) {
                     if (getData(LS_KEYS.ORIGINAL_KEY_ATTRIBUTES)) {
                         await putAttributes(
                             token,
-                            getData(LS_KEYS.ORIGINAL_KEY_ATTRIBUTES)
+                            getData(LS_KEYS.ORIGINAL_KEY_ATTRIBUTES),
                         );
                     }
                     if (getData(LS_KEYS.SRP_SETUP_ATTRIBUTES)) {
                         const srpSetupAttributes: SRPSetupAttributes = getData(
-                            LS_KEYS.SRP_SETUP_ATTRIBUTES
+                            LS_KEYS.SRP_SETUP_ATTRIBUTES,
                         );
                         await configureSRP(srpSetupAttributes);
                     }
@@ -132,12 +132,12 @@ export default function VerifyPage({ appContext, router, appName }: PageProps) {
         } catch (e) {
             if (e instanceof ApiError) {
                 if (e?.httpStatusCode === HttpStatusCode.Unauthorized) {
-                    setFieldError(t('INVALID_CODE'));
+                    setFieldError(t("INVALID_CODE"));
                 } else if (e?.httpStatusCode === HttpStatusCode.Gone) {
-                    setFieldError(t('EXPIRED_CODE'));
+                    setFieldError(t("EXPIRED_CODE"));
                 }
             } else {
-                setFieldError(`${t('UNKNOWN_ERROR')} ${JSON.stringify(e)}`);
+                setFieldError(`${t("UNKNOWN_ERROR")} ${JSON.stringify(e)}`);
             }
         }
     };
@@ -160,36 +160,36 @@ export default function VerifyPage({ appContext, router, appName }: PageProps) {
     return (
         <VerticallyCentered>
             <FormPaper>
-                <FormPaperTitle sx={{ mb: 14, wordBreak: 'break-word' }}>
+                <FormPaperTitle sx={{ mb: 14, wordBreak: "break-word" }}>
                     <Trans
                         i18nKey="EMAIL_SENT"
                         components={{
-                            a: <Box color="text.muted" component={'span'} />,
+                            a: <Box color="text.muted" component={"span"} />,
                         }}
                         values={{ email }}
                     />
                 </FormPaperTitle>
-                <Typography color={'text.muted'} mb={2} variant="small">
-                    {t('CHECK_INBOX')}
+                <Typography color={"text.muted"} mb={2} variant="small">
+                    {t("CHECK_INBOX")}
                 </Typography>
                 <SingleInputForm
                     fieldType="text"
                     autoComplete="one-time-code"
-                    placeholder={t('ENTER_OTT')}
-                    buttonText={t('VERIFY')}
+                    placeholder={t("ENTER_OTT")}
+                    buttonText={t("VERIFY")}
                     callback={onSubmit}
                 />
 
-                <FormPaperFooter style={{ justifyContent: 'space-between' }}>
+                <FormPaperFooter style={{ justifyContent: "space-between" }}>
                     {resend === 0 && (
                         <LinkButton onClick={resendEmail}>
-                            {t('RESEND_MAIL')}
+                            {t("RESEND_MAIL")}
                         </LinkButton>
                     )}
-                    {resend === 1 && <span>{t('SENDING')}</span>}
-                    {resend === 2 && <span>{t('SENT')}</span>}
+                    {resend === 1 && <span>{t("SENDING")}</span>}
+                    {resend === 2 && <span>{t("SENT")}</span>}
                     <LinkButton onClick={logoutUser}>
-                        {t('CHANGE_EMAIL')}
+                        {t("CHANGE_EMAIL")}
                     </LinkButton>
                 </FormPaperFooter>
             </FormPaper>

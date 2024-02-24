@@ -7,7 +7,7 @@ declare global {
     }
 }
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from "react";
 
 type Sender = {
     chrome: typeof chrome;
@@ -20,13 +20,13 @@ export const loadSender = (() => {
     return () => {
         if (promise === null) {
             promise = new Promise((resolve) => {
-                const script = document.createElement('script');
+                const script = document.createElement("script");
                 script.src =
-                    'https://www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework=1';
+                    "https://www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework=1";
                 window.__onGCastApiAvailable = (isAvailable) => {
                     if (isAvailable) {
                         cast.framework.CastContext.getInstance().setOptions({
-                            receiverApplicationId: 'F5BCEC64',
+                            receiverApplicationId: "F5BCEC64",
                             autoJoinPolicy:
                                 chrome.cast.AutoJoinPolicy.ORIGIN_SCOPED,
                         });
@@ -49,7 +49,7 @@ export const useCastSender = () => {
         {
             chrome: null,
             cast: null,
-        }
+        },
     );
 
     useEffect(() => {

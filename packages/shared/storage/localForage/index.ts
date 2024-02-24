@@ -1,12 +1,12 @@
-import { runningInBrowser } from '../../platform';
+import { runningInBrowser } from "../../platform";
 
-import localForage from 'localforage';
+import localForage from "localforage";
 
 if (runningInBrowser()) {
     localForage.config({
-        name: 'ente-files',
+        name: "ente-files",
         version: 1.0,
-        storeName: 'files',
+        storeName: "files",
     });
 }
 

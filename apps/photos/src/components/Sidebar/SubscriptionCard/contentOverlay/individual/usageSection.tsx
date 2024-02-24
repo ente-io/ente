@@ -1,10 +1,9 @@
-import { Box, Typography } from '@mui/material';
-import { SpaceBetweenFlex } from '@ente/shared/components/Container';
-import React from 'react';
-import { makeHumanReadableStorage } from 'utils/billing';
-import { t } from 'i18next';
+import { SpaceBetweenFlex } from "@ente/shared/components/Container";
+import { Box, Typography } from "@mui/material";
+import { t } from "i18next";
+import { makeHumanReadableStorage } from "utils/billing";
 
-import { Progressbar } from '../../styledComponents';
+import { Progressbar } from "../../styledComponents";
 
 interface Iprops {
     usage: number;
@@ -18,12 +17,13 @@ export function IndividualUsageSection({ usage, storage, fileCount }: Iprops) {
             <SpaceBetweenFlex
                 sx={{
                     marginTop: 1.5,
-                }}>
+                }}
+            >
                 <Typography variant="mini">{`${makeHumanReadableStorage(
-                    storage - usage
-                )} ${t('FREE')}`}</Typography>
-                <Typography variant="mini" fontWeight={'bold'}>
-                    {t('photos_count', { count: fileCount ?? 0 })}
+                    storage - usage,
+                )} ${t("FREE")}`}</Typography>
+                <Typography variant="mini" fontWeight={"bold"}>
+                    {t("photos_count", { count: fileCount ?? 0 })}
                 </Typography>
             </SpaceBetweenFlex>
         </Box>

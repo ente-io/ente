@@ -1,8 +1,8 @@
-import React, { useMemo } from 'react';
-import { UserDetails } from 'types/user';
-import { isPartOfFamily } from 'utils/user/family';
-import StorageSection from '../storageSection';
-import { FamilyUsageSection } from './usageSection';
+import { useMemo } from "react";
+import { UserDetails } from "types/user";
+import { isPartOfFamily } from "utils/user/family";
+import StorageSection from "../storageSection";
+import { FamilyUsageSection } from "./usageSection";
 
 interface Iprops {
     userDetails: UserDetails;
@@ -12,7 +12,7 @@ export function FamilySubscriptionCardContent({ userDetails }: Iprops) {
         if (isPartOfFamily(userDetails.familyData)) {
             return userDetails.familyData.members.reduce(
                 (sum, currentMember) => sum + currentMember.usage,
-                0
+                0,
             );
         } else {
             return userDetails.usage;

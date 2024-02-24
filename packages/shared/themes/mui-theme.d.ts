@@ -1,7 +1,7 @@
-import { PaletteColor, PaletteColorOptions } from '@mui/material';
-import React from 'react';
+import { PaletteColor, PaletteColorOptions } from "@mui/material";
+import React from "react";
 
-declare module '@mui/material/styles' {
+declare module "@mui/material/styles" {
     interface Theme {
         colors: ThemeColors;
     }
@@ -42,7 +42,7 @@ declare module '@mui/material/styles' {
     }
 }
 
-declare module '@mui/material/Typography' {
+declare module "@mui/material/Typography" {
     interface TypographyPropsVariantOverrides {
         large: true;
         body: true;
@@ -62,7 +62,7 @@ declare module '@mui/material/Typography' {
     }
 }
 
-declare module '@mui/material/Button' {
+declare module "@mui/material/Button" {
     interface ButtonPropsColorOverrides {
         accent: true;
         critical: true;
@@ -72,26 +72,26 @@ declare module '@mui/material/Button' {
         warning: false;
     }
 }
-declare module '@mui/material/Checkbox' {
+declare module "@mui/material/Checkbox" {
     interface CheckboxPropsColorOverrides {
         accent: true;
         critical: true;
     }
 }
 
-declare module '@mui/material/Switch' {
+declare module "@mui/material/Switch" {
     interface SwitchPropsColorOverrides {
         accent: true;
     }
 }
 
-declare module '@mui/material/SvgIcon' {
+declare module "@mui/material/SvgIcon" {
     interface SvgIconPropsColorOverrides {
         accent: true;
     }
 }
 
-declare module '@mui/material/CircularProgress' {
+declare module "@mui/material/CircularProgress" {
     interface CircularProgressPropsColorOverrides {
         accent: true;
     }
@@ -101,7 +101,7 @@ declare module '@mui/material/CircularProgress' {
 // Custom Interfaces
 // =================================================
 
-declare module '@mui/material/styles' {
+declare module "@mui/material/styles" {
     interface ThemeColors {
         background: BackgroundType;
         backdrop: Strength;
@@ -113,8 +113,8 @@ declare module '@mui/material/styles' {
         warning: ColorStrength;
         danger: ColorStrength;
         blur: BlurStrength;
-        white: Omit<Strength, 'faint'>;
-        black: Omit<Strength, 'faint'>;
+        white: Omit<Strength, "faint">;
+        black: Omit<Strength, "faint">;
         avatarColors: AvatarColors;
     }
 
@@ -129,8 +129,8 @@ declare module '@mui/material/styles' {
         warning?: Partial<ColorStrength>;
         danger?: Partial<ColorStrength>;
         blur?: Partial<BlurStrength>;
-        white?: Partial<Omit<Strength, 'faint'>>;
-        black?: Partial<Omit<Strength, 'faint'>>;
+        white?: Partial<Omit<Strength, "faint">>;
+        black?: Partial<Omit<Strength, "faint">>;
         avatarColors?: Partial<AvatarColors>;
     }
 

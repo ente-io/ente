@@ -1,17 +1,17 @@
-import React from 'react';
 import Document, {
-    Html,
+    DocumentContext,
+    DocumentProps,
     Head,
+    Html,
     Main,
     NextScript,
-    DocumentProps,
-    DocumentContext,
-} from 'next/document';
+} from "next/document";
+import React from "react";
 
-import createEmotionServer from '@emotion/server/create-instance';
-import { AppType } from 'next/app';
-import createEmotionCache from '@ente/shared/themes/createEmotionCache';
-import { EnteAppProps } from '@ente/shared/apps/types';
+import createEmotionServer from "@emotion/server/create-instance";
+import { EnteAppProps } from "@ente/shared/apps/types";
+import createEmotionCache from "@ente/shared/themes/createEmotionCache";
+import { AppType } from "next/app";
 
 export interface EnteDocumentProps extends DocumentProps {
     emotionStyleTags: JSX.Element[];
@@ -76,7 +76,7 @@ EnteDocument.getInitialProps = async (ctx: DocumentContext) => {
             enhanceApp: (
                 App: React.ComponentType<
                     React.ComponentProps<AppType> & EnteAppProps
-                >
+                >,
             ) =>
                 function EnhanceApp(props) {
                     return <App emotionCache={cache} {...props} />;
@@ -89,7 +89,7 @@ EnteDocument.getInitialProps = async (ctx: DocumentContext) => {
     const emotionStyles = extractCriticalToChunks(initialProps.html);
     const emotionStyleTags = emotionStyles.styles.map((style) => (
         <style
-            data-emotion={`${style.key} ${style.ids.join(' ')}`}
+            data-emotion={`${style.key} ${style.ids.join(" ")}`}
             key={style.key}
             // eslint-disable-next-line react/no-danger
             dangerouslySetInnerHTML={{ __html: style.css }}

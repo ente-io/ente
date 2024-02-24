@@ -1,21 +1,21 @@
-import { Dialog, DialogContent, Link } from '@mui/material';
-import { t } from 'i18next';
+import { Dialog, DialogContent, Link } from "@mui/material";
+import { t } from "i18next";
 
-import { UPLOAD_STAGES, UPLOAD_RESULT } from 'constants/upload';
-import React, { useContext, useEffect, useState } from 'react';
-import { UploadProgressFooter } from './footer';
-import { UploadProgressHeader } from './header';
-import { InProgressSection } from './inProgressSection';
-import { ResultSection } from './resultSection';
-import { NotUploadSectionHeader } from './styledComponents';
-import UploadProgressContext from 'contexts/uploadProgress';
-import { dialogCloseHandler } from '@ente/shared/components/DialogBox/TitleWithCloseButton';
-import { APP_DOWNLOAD_URL } from '@ente/shared/constants/urls';
-import { Trans } from 'react-i18next';
+import { dialogCloseHandler } from "@ente/shared/components/DialogBox/TitleWithCloseButton";
+import { APP_DOWNLOAD_URL } from "@ente/shared/constants/urls";
+import { UPLOAD_RESULT, UPLOAD_STAGES } from "constants/upload";
+import UploadProgressContext from "contexts/uploadProgress";
+import { useContext, useEffect, useState } from "react";
+import { Trans } from "react-i18next";
+import { UploadProgressFooter } from "./footer";
+import { UploadProgressHeader } from "./header";
+import { InProgressSection } from "./inProgressSection";
+import { ResultSection } from "./resultSection";
+import { NotUploadSectionHeader } from "./styledComponents";
 
 export function UploadProgressDialog() {
     const { open, onClose, uploadStage, finishedUploads } = useContext(
-        UploadProgressContext
+        UploadProgressContext,
     );
 
     const [hasUnUploadedFiles, setHasUnUploadedFiles] = useState(false);
@@ -44,7 +44,7 @@ export function UploadProgressDialog() {
             {(uploadStage === UPLOAD_STAGES.UPLOADING ||
                 uploadStage === UPLOAD_STAGES.FINISH ||
                 uploadStage === UPLOAD_STAGES.EXTRACTING_METADATA) && (
-                <DialogContent sx={{ '&&&': { px: 0 } }}>
+                <DialogContent sx={{ "&&&": { px: 0 } }}>
                     {(uploadStage === UPLOAD_STAGES.UPLOADING ||
                         uploadStage === UPLOAD_STAGES.EXTRACTING_METADATA) && (
                         <InProgressSection />
@@ -54,33 +54,33 @@ export function UploadProgressDialog() {
                         <>
                             <ResultSection
                                 uploadResult={UPLOAD_RESULT.UPLOADED}
-                                sectionTitle={t('SUCCESSFUL_UPLOADS')}
+                                sectionTitle={t("SUCCESSFUL_UPLOADS")}
                             />
                             <ResultSection
                                 uploadResult={
                                     UPLOAD_RESULT.UPLOADED_WITH_STATIC_THUMBNAIL
                                 }
                                 sectionTitle={t(
-                                    'THUMBNAIL_GENERATION_FAILED_UPLOADS'
+                                    "THUMBNAIL_GENERATION_FAILED_UPLOADS",
                                 )}
                                 sectionInfo={t(
-                                    'THUMBNAIL_GENERATION_FAILED_INFO'
+                                    "THUMBNAIL_GENERATION_FAILED_INFO",
                                 )}
                             />
 
                             {uploadStage === UPLOAD_STAGES.FINISH &&
                                 hasUnUploadedFiles && (
                                     <NotUploadSectionHeader>
-                                        {t('FILE_NOT_UPLOADED_LIST')}
+                                        {t("FILE_NOT_UPLOADED_LIST")}
                                     </NotUploadSectionHeader>
                                 )}
 
                             <ResultSection
                                 uploadResult={UPLOAD_RESULT.BLOCKED}
-                                sectionTitle={t('BLOCKED_UPLOADS')}
+                                sectionTitle={t("BLOCKED_UPLOADS")}
                                 sectionInfo={
                                     <Trans
-                                        i18nKey={'ETAGS_BLOCKED'}
+                                        i18nKey={"ETAGS_BLOCKED"}
                                         components={{
                                             a: (
                                                 <Link
@@ -94,33 +94,33 @@ export function UploadProgressDialog() {
                             />
                             <ResultSection
                                 uploadResult={UPLOAD_RESULT.FAILED}
-                                sectionTitle={t('FAILED_UPLOADS')}
+                                sectionTitle={t("FAILED_UPLOADS")}
                             />
                             <ResultSection
                                 uploadResult={UPLOAD_RESULT.ALREADY_UPLOADED}
-                                sectionTitle={t('SKIPPED_FILES')}
-                                sectionInfo={t('SKIPPED_INFO')}
+                                sectionTitle={t("SKIPPED_FILES")}
+                                sectionInfo={t("SKIPPED_INFO")}
                             />
                             <ResultSection
                                 uploadResult={
                                     UPLOAD_RESULT.LARGER_THAN_AVAILABLE_STORAGE
                                 }
                                 sectionTitle={t(
-                                    'LARGER_THAN_AVAILABLE_STORAGE_UPLOADS'
+                                    "LARGER_THAN_AVAILABLE_STORAGE_UPLOADS",
                                 )}
                                 sectionInfo={t(
-                                    'LARGER_THAN_AVAILABLE_STORAGE_INFO'
+                                    "LARGER_THAN_AVAILABLE_STORAGE_INFO",
                                 )}
                             />
                             <ResultSection
                                 uploadResult={UPLOAD_RESULT.UNSUPPORTED}
-                                sectionTitle={t('UNSUPPORTED_FILES')}
-                                sectionInfo={t('UNSUPPORTED_INFO')}
+                                sectionTitle={t("UNSUPPORTED_FILES")}
+                                sectionInfo={t("UNSUPPORTED_INFO")}
                             />
                             <ResultSection
                                 uploadResult={UPLOAD_RESULT.TOO_LARGE}
-                                sectionTitle={t('TOO_LARGE_UPLOADS')}
-                                sectionInfo={t('TOO_LARGE_INFO')}
+                                sectionTitle={t("TOO_LARGE_UPLOADS")}
+                                sectionInfo={t("TOO_LARGE_INFO")}
                             />
                         </>
                     )}

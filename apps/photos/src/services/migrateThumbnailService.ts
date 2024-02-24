@@ -1,19 +1,19 @@
-import downloadManager from 'services/download';
-import { getLocalFiles } from 'services/fileService';
-import { generateThumbnail } from 'services/upload/thumbnailService';
-import { getToken } from '@ente/shared/storage/localStorage/helpers';
-import { logError } from '@ente/shared/sentry';
-import { getEndpoint } from '@ente/shared/network/api';
-import HTTPService from '@ente/shared/network/HTTPService';
-import uploadHttpClient from 'services/upload/uploadHttpClient';
-import { SetProgressTracker } from 'components/FixLargeThumbnail';
-import { getFileType } from 'services/typeDetectionService';
-import { getLocalTrashedFiles } from './trashService';
-import { UploadURL } from 'types/upload';
-import { S3FileAttributes } from 'types/file';
-import { Remote } from 'comlink';
-import { DedicatedCryptoWorker } from '@ente/shared/crypto/internal/crypto.worker';
-import ComlinkCryptoWorker from '@ente/shared/crypto';
+import ComlinkCryptoWorker from "@ente/shared/crypto";
+import { DedicatedCryptoWorker } from "@ente/shared/crypto/internal/crypto.worker";
+import HTTPService from "@ente/shared/network/HTTPService";
+import { getEndpoint } from "@ente/shared/network/api";
+import { logError } from "@ente/shared/sentry";
+import { getToken } from "@ente/shared/storage/localStorage/helpers";
+import { Remote } from "comlink";
+import { SetProgressTracker } from "components/FixLargeThumbnail";
+import downloadManager from "services/download";
+import { getLocalFiles } from "services/fileService";
+import { getFileType } from "services/typeDetectionService";
+import { generateThumbnail } from "services/upload/thumbnailService";
+import uploadHttpClient from "services/upload/uploadHttpClient";
+import { S3FileAttributes } from "types/file";
+import { UploadURL } from "types/upload";
+import { getLocalTrashedFiles } from "./trashService";
 
 const ENDPOINT = getEndpoint();
 const REPLACE_THUMBNAIL_THRESHOLD = 500 * 1024; // 500KB
@@ -29,18 +29,18 @@ export async function getLargeThumbnailFiles() {
                 threshold: REPLACE_THUMBNAIL_THRESHOLD,
             },
             {
-                'X-Auth-Token': token,
-            }
+                "X-Auth-Token": token,
+            },
         );
         return resp.data.largeThumbnailFiles as number[];
     } catch (e) {
-        logError(e, 'failed to get large thumbnail files');
+        logError(e, "failed to get large thumbnail files");
         throw e;
     }
 }
 export async function replaceThumbnail(
     setProgressTracker: SetProgressTracker,
-    largeThumbnailFileIDs: Set<number>
+    largeThumbnailFileIDs: Set<number>,
 ) {
     let completedWithError = false;
     try {
@@ -48,10 +48,10 @@ export async function replaceThumbnail(
         const files = await getLocalFiles();
         const trashFiles = await getLocalTrashedFiles();
         const largeThumbnailFiles = [...files, ...trashFiles].filter((file) =>
-            largeThumbnailFileIDs.has(file.id)
+            largeThumbnailFileIDs.has(file.id),
         );
         if (largeThumbnailFileIDs.size !== largeThumbnailFiles.length) {
-            logError(Error(), 'all large thumbnail files not found locally');
+            logError(Error(), "all large thumbnail files not found locally");
         }
         if (largeThumbnailFiles.length === 0) {
             return completedWithError;
@@ -60,7 +60,7 @@ export async function replaceThumbnail(
         const uploadURLs: UploadURL[] = [];
         await uploadHttpClient.fetchUploadURLs(
             largeThumbnailFiles.length,
-            uploadURLs
+            uploadURLs,
         );
         for (const [idx, file] of largeThumbnailFiles.entries()) {
             try {
@@ -72,27 +72,27 @@ export async function replaceThumbnail(
                     await downloadManager.getThumbnail(file);
                 const dummyImageFile = new File(
                     [originalThumbnail],
-                    file.metadata.title
+                    file.metadata.title,
                 );
                 const fileTypeInfo = await getFileType(dummyImageFile);
                 const { thumbnail: newThumbnail } = await generateThumbnail(
                     dummyImageFile,
-                    fileTypeInfo
+                    fileTypeInfo,
                 );
                 const newUploadedThumbnail = await uploadThumbnail(
                     cryptoWorker,
                     file.key,
                     newThumbnail,
-                    uploadURLs.pop()
+                    uploadURLs.pop(),
                 );
                 await updateThumbnail(file.id, newUploadedThumbnail);
             } catch (e) {
-                logError(e, 'failed to replace a thumbnail');
+                logError(e, "failed to replace a thumbnail");
                 completedWithError = true;
             }
         }
     } catch (e) {
-        logError(e, 'replace Thumbnail function failed');
+        logError(e, "replace Thumbnail function failed");
         completedWithError = true;
     }
     return completedWithError;
@@ -102,16 +102,16 @@ export async function uploadThumbnail(
     worker: Remote<DedicatedCryptoWorker>,
     fileKey: string,
     updatedThumbnail: Uint8Array,
-    uploadURL: UploadURL
+    uploadURL: UploadURL,
 ): Promise<S3FileAttributes> {
     const { file: encryptedThumbnail } = await worker.encryptThumbnail(
         updatedThumbnail,
-        fileKey
+        fileKey,
     );
     const thumbnailObjectKey = await uploadHttpClient.putFile(
         uploadURL,
         encryptedThumbnail.encryptedData,
-        () => {}
+        () => {},
     );
 
     return {
@@ -122,7 +122,7 @@ export async function uploadThumbnail(
 
 export async function updateThumbnail(
     fileID: number,
-    newThumbnail: S3FileAttributes
+    newThumbnail: S3FileAttributes,
 ) {
     try {
         const token = getToken();
@@ -137,11 +137,11 @@ export async function updateThumbnail(
             },
             null,
             {
-                'X-Auth-Token': token,
-            }
+                "X-Auth-Token": token,
+            },
         );
     } catch (e) {
-        logError(e, 'failed to update thumbnail');
+        logError(e, "failed to update thumbnail");
         throw e;
     }
 }

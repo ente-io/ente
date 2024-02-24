@@ -1,13 +1,13 @@
-import { logError } from '@ente/shared/sentry';
-import { CacheStorageFactory } from './factory';
+import { logError } from "@ente/shared/sentry";
+import { CacheStorageFactory } from "./factory";
 
-const SecurityError = 'SecurityError';
-const INSECURE_OPERATION = 'The operation is insecure.';
+const SecurityError = "SecurityError";
+const INSECURE_OPERATION = "The operation is insecure.";
 async function openCache(cacheName: string, cacheLimit?: number) {
     try {
         return await CacheStorageFactory.getCacheStorage().open(
             cacheName,
-            cacheLimit
+            cacheLimit,
         );
     } catch (e) {
         // ignoring insecure operation error, as it is thrown in incognito mode in firefox
@@ -15,7 +15,7 @@ async function openCache(cacheName: string, cacheLimit?: number) {
             // no-op
         } else {
             // log and ignore, we don't want to break the caller flow, when cache is not available
-            logError(e, 'openCache failed');
+            logError(e, "openCache failed");
         }
     }
 }
@@ -28,7 +28,7 @@ async function deleteCache(cacheName: string) {
             // no-op
         } else {
             // log and ignore, we don't want to break the caller flow, when cache is not available
-            logError(e, 'deleteCache failed');
+            logError(e, "deleteCache failed");
         }
     }
 }

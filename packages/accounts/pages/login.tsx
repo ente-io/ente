@@ -1,11 +1,11 @@
-import { useState, useEffect } from 'react';
-import EnteSpinner from '@ente/shared/components/EnteSpinner';
-import Login from '../components/Login';
-import { VerticallyCentered } from '@ente/shared/components/Container';
-import { getData, LS_KEYS } from '@ente/shared/storage/localStorage';
-import { PAGES } from '../constants/pages';
-import FormPaper from '@ente/shared/components/Form/FormPaper';
-import { PageProps } from '@ente/shared/apps/types';
+import { PageProps } from "@ente/shared/apps/types";
+import { VerticallyCentered } from "@ente/shared/components/Container";
+import EnteSpinner from "@ente/shared/components/EnteSpinner";
+import FormPaper from "@ente/shared/components/Form/FormPaper";
+import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
+import { useEffect, useState } from "react";
+import Login from "../components/Login";
+import { PAGES } from "../constants/pages";
 
 export default function LoginPage({ appContext, router, appName }: PageProps) {
     const [loading, setLoading] = useState(true);

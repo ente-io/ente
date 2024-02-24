@@ -1,31 +1,31 @@
-import { FILE_TYPE } from 'constants/file';
-import { LIVE_PHOTO_ASSET_SIZE_LIMIT } from 'constants/upload';
-import { encodeLivePhoto } from 'services/livePhotoService';
-import { getFileType } from 'services/typeDetectionService';
+import { DedicatedCryptoWorker } from "@ente/shared/crypto/internal/crypto.worker";
+import { CustomError } from "@ente/shared/error";
+import { logError } from "@ente/shared/sentry";
+import { Remote } from "comlink";
+import { FILE_TYPE } from "constants/file";
+import { LIVE_PHOTO_ASSET_SIZE_LIMIT } from "constants/upload";
+import { encodeLivePhoto } from "services/livePhotoService";
+import { getFileType } from "services/typeDetectionService";
 import {
     ElectronFile,
+    ExtractMetadataResult,
     FileTypeInfo,
     FileWithCollection,
     LivePhotoAssets,
     ParsedMetadataJSONMap,
-    ExtractMetadataResult,
-} from 'types/upload';
-import { CustomError } from '@ente/shared/error';
-import { getFileTypeFromExtensionForLivePhotoClustering } from 'utils/file/livePhoto';
+} from "types/upload";
 import {
-    splitFilenameAndExtension,
-    isImageOrVideo,
     getFileExtensionWithDot,
     getFileNameWithoutExtension,
-} from 'utils/file';
-import { logError } from '@ente/shared/sentry';
-import { getUint8ArrayView } from '../readerService';
-import { extractFileMetadata } from './fileService';
-import { getFileHash } from './hashService';
-import { generateThumbnail } from './thumbnailService';
-import uploadCancelService from './uploadCancelService';
-import { Remote } from 'comlink';
-import { DedicatedCryptoWorker } from '@ente/shared/crypto/internal/crypto.worker';
+    isImageOrVideo,
+    splitFilenameAndExtension,
+} from "utils/file";
+import { getFileTypeFromExtensionForLivePhotoClustering } from "utils/file/livePhoto";
+import { getUint8ArrayView } from "../readerService";
+import { extractFileMetadata } from "./fileService";
+import { getFileHash } from "./hashService";
+import { generateThumbnail } from "./thumbnailService";
+import uploadCancelService from "./uploadCancelService";
 
 interface LivePhotoIdentifier {
     collectionID: number;
@@ -34,13 +34,13 @@ interface LivePhotoIdentifier {
     size: number;
 }
 
-const UNDERSCORE_THREE = '_3';
+const UNDERSCORE_THREE = "_3";
 // Note: The icloud-photos-downloader library appends _HVEC to the end of the filename in case of live photos
 // https://github.com/icloud-photos-downloader/icloud_photos_downloader
-const UNDERSCORE_HEVC = '_HVEC';
+const UNDERSCORE_HEVC = "_HVEC";
 
 export async function getLivePhotoFileType(
-    livePhotoAssets: LivePhotoAssets
+    livePhotoAssets: LivePhotoAssets,
 ): Promise<FileTypeInfo> {
     const imageFileTypeInfo = await getFileType(livePhotoAssets.image);
     const videoFileTypeInfo = await getFileType(livePhotoAssets.video);
@@ -57,7 +57,7 @@ export async function extractLivePhotoMetadata(
     parsedMetadataJSONMap: ParsedMetadataJSONMap,
     collectionID: number,
     fileTypeInfo: FileTypeInfo,
-    livePhotoAssets: LivePhotoAssets
+    livePhotoAssets: LivePhotoAssets,
 ): Promise<ExtractMetadataResult> {
     const imageFileTypeInfo: FileTypeInfo = {
         fileType: FILE_TYPE.IMAGE,
@@ -71,7 +71,7 @@ export async function extractLivePhotoMetadata(
         parsedMetadataJSONMap,
         collectionID,
         imageFileTypeInfo,
-        livePhotoAssets.image
+        livePhotoAssets.image,
     );
     const videoHash = await getFileHash(worker, livePhotoAssets.video);
     return {
@@ -97,14 +97,14 @@ export function getLivePhotoName(livePhotoAssets: LivePhotoAssets) {
 
 export async function readLivePhoto(
     fileTypeInfo: FileTypeInfo,
-    livePhotoAssets: LivePhotoAssets
+    livePhotoAssets: LivePhotoAssets,
 ) {
     const { thumbnail, hasStaticThumbnail } = await generateThumbnail(
         livePhotoAssets.image,
         {
             exactType: fileTypeInfo.imageType,
             fileType: FILE_TYPE.IMAGE,
-        }
+        },
     );
 
     const image = await getUint8ArrayView(livePhotoAssets.image);
@@ -129,14 +129,14 @@ export async function clusterLivePhotoFiles(mediaFiles: FileWithCollection[]) {
         mediaFiles
             .sort((firstMediaFile, secondMediaFile) =>
                 splitFilenameAndExtension(
-                    firstMediaFile.file.name
+                    firstMediaFile.file.name,
                 )[0].localeCompare(
-                    splitFilenameAndExtension(secondMediaFile.file.name)[0]
-                )
+                    splitFilenameAndExtension(secondMediaFile.file.name)[0],
+                ),
             )
             .sort(
                 (firstMediaFile, secondMediaFile) =>
-                    firstMediaFile.collectionID - secondMediaFile.collectionID
+                    firstMediaFile.collectionID - secondMediaFile.collectionID,
             );
         let index = 0;
         while (index < mediaFiles.length - 1) {
@@ -147,11 +147,11 @@ export async function clusterLivePhotoFiles(mediaFiles: FileWithCollection[]) {
             const secondMediaFile = mediaFiles[index + 1];
             const firstFileType =
                 getFileTypeFromExtensionForLivePhotoClustering(
-                    firstMediaFile.file.name
+                    firstMediaFile.file.name,
                 );
             const secondFileType =
                 getFileTypeFromExtensionForLivePhotoClustering(
-                    secondMediaFile.file.name
+                    secondMediaFile.file.name,
                 );
             const firstFileIdentifier: LivePhotoIdentifier = {
                 collectionID: firstMediaFile.collectionID,
@@ -168,7 +168,7 @@ export async function clusterLivePhotoFiles(mediaFiles: FileWithCollection[]) {
             if (
                 areFilesLivePhotoAssets(
                     firstFileIdentifier,
-                    secondFileIdentifier
+                    secondFileIdentifier,
                 )
             ) {
                 let imageFile: File | ElectronFile;
@@ -213,7 +213,7 @@ export async function clusterLivePhotoFiles(mediaFiles: FileWithCollection[]) {
         if (e.message === CustomError.UPLOAD_CANCELLED) {
             throw e;
         } else {
-            logError(e, 'failed to cluster live photo');
+            logError(e, "failed to cluster live photo");
             throw e;
         }
     }
@@ -221,7 +221,7 @@ export async function clusterLivePhotoFiles(mediaFiles: FileWithCollection[]) {
 
 function areFilesLivePhotoAssets(
     firstFileIdentifier: LivePhotoIdentifier,
-    secondFileIdentifier: LivePhotoIdentifier
+    secondFileIdentifier: LivePhotoIdentifier,
 ) {
     const haveSameCollectionID =
         firstFileIdentifier.collectionID === secondFileIdentifier.collectionID;
@@ -235,18 +235,18 @@ function areFilesLivePhotoAssets(
             getFileNameWithoutExtension(firstFileIdentifier.name),
             // Note: The Google Live Photo image file can have video extension appended as suffix, passing that to removePotentialLivePhotoSuffix to remove it
             // Example: IMG_20210630_0001.mp4.jpg (Google Live Photo image file)
-            getFileExtensionWithDot(secondFileIdentifier.name)
-        );
-        secondFileNameWithoutSuffix = removePotentialLivePhotoSuffix(
-            getFileNameWithoutExtension(secondFileIdentifier.name)
-        );
-    } else {
-        firstFileNameWithoutSuffix = removePotentialLivePhotoSuffix(
-            getFileNameWithoutExtension(firstFileIdentifier.name)
+            getFileExtensionWithDot(secondFileIdentifier.name),
         );
         secondFileNameWithoutSuffix = removePotentialLivePhotoSuffix(
             getFileNameWithoutExtension(secondFileIdentifier.name),
-            getFileExtensionWithDot(firstFileIdentifier.name)
+        );
+    } else {
+        firstFileNameWithoutSuffix = removePotentialLivePhotoSuffix(
+            getFileNameWithoutExtension(firstFileIdentifier.name),
+        );
+        secondFileNameWithoutSuffix = removePotentialLivePhotoSuffix(
+            getFileNameWithoutExtension(secondFileIdentifier.name),
+            getFileExtensionWithDot(firstFileIdentifier.name),
         );
     }
     if (
@@ -273,7 +273,7 @@ function areFilesLivePhotoAssets(
                         firstFileIdentifier.size,
                         secondFileIdentifier.size,
                     ],
-                }
+                },
             );
         }
     }
@@ -282,7 +282,7 @@ function areFilesLivePhotoAssets(
 
 function removePotentialLivePhotoSuffix(
     filenameWithoutExtension: string,
-    suffix?: string
+    suffix?: string,
 ) {
     let presentSuffix: string;
     if (filenameWithoutExtension.endsWith(UNDERSCORE_THREE)) {

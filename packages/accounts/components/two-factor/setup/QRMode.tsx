@@ -1,11 +1,10 @@
-import React from 'react';
-import EnteSpinner from '@ente/shared/components/EnteSpinner';
-import { TwoFactorSecret } from '@ente/accounts/types/user';
-import { t } from 'i18next';
+import { TwoFactorSecret } from "@ente/accounts/types/user";
+import EnteSpinner from "@ente/shared/components/EnteSpinner";
+import { t } from "i18next";
 
-import { LoadingQRCode, QRCode } from '../styledComponents';
-import { Typography } from '@mui/material';
-import LinkButton from '@ente/shared/components/LinkButton';
+import LinkButton from "@ente/shared/components/LinkButton";
+import { Typography } from "@mui/material";
+import { LoadingQRCode, QRCode } from "../styledComponents";
 
 interface Iprops {
     twoFactorSecret: TwoFactorSecret;
@@ -18,7 +17,7 @@ export default function SetupQRMode({
 }: Iprops) {
     return (
         <>
-            <Typography>{t('TWO_FACTOR_QR_INSTRUCTION')}</Typography>
+            <Typography>{t("TWO_FACTOR_QR_INSTRUCTION")}</Typography>
             {!twoFactorSecret ? (
                 <LoadingQRCode>
                     <EnteSpinner />
@@ -29,7 +28,7 @@ export default function SetupQRMode({
                 />
             )}
             <LinkButton onClick={changeToManualMode}>
-                {t('ENTER_CODE_MANUALLY')}
+                {t("ENTER_CODE_MANUALLY")}
             </LinkButton>
         </>
     );

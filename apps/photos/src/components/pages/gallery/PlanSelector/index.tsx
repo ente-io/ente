@@ -1,8 +1,8 @@
-import React, { useContext } from 'react';
-import { SetLoading } from 'types/gallery';
-import { AppContext } from 'pages/_app';
-import { Dialog } from '@mui/material';
-import PlanSelectorCard from './card';
+import { Dialog } from "@mui/material";
+import { AppContext } from "pages/_app";
+import { useContext } from "react";
+import { SetLoading } from "types/gallery";
+import PlanSelectorCard from "./card";
 
 interface Props {
     modalView: boolean;
@@ -23,11 +23,12 @@ function PlanSelector(props: Props) {
             onClose={props.closeModal}
             PaperProps={{
                 sx: (theme) => ({
-                    width: '391px',
+                    width: "391px",
                     p: 1,
                     [theme.breakpoints.down(360)]: { p: 0 },
                 }),
-            }}>
+            }}
+        >
             <PlanSelectorCard
                 closeModal={props.closeModal}
                 setLoading={props.setLoading}

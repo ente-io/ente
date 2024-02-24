@@ -1,8 +1,8 @@
-import { PICKED_UPLOAD_TYPE } from 'constants/upload';
-import { Collection } from 'types/collection';
-import { ElectronFile, FileWithCollection } from 'types/upload';
-import { logError } from '@ente/shared/sentry';
-import ElectronAPIs from '@ente/shared/electron';
+import ElectronAPIs from "@ente/shared/electron";
+import { logError } from "@ente/shared/sentry";
+import { PICKED_UPLOAD_TYPE } from "constants/upload";
+import { Collection } from "types/collection";
+import { ElectronFile, FileWithCollection } from "types/upload";
 
 interface PendingUploads {
     files: ElectronFile[];
@@ -17,10 +17,10 @@ class ImportService {
                 (await ElectronAPIs.getPendingUploads()) as PendingUploads;
             return pendingUploads;
         } catch (e) {
-            if (e?.message?.includes('ENOENT: no such file or directory')) {
+            if (e?.message?.includes("ENOENT: no such file or directory")) {
                 // ignore
             } else {
-                logError(e, 'failed to getPendingUploads ');
+                logError(e, "failed to getPendingUploads ");
             }
             return { files: [], collectionName: null, type: null };
         }
@@ -51,7 +51,7 @@ class ImportService {
                     (fileWithCollection.livePhotoAssets.image as ElectronFile)
                         .path,
                     (fileWithCollection.livePhotoAssets.video as ElectronFile)
-                        .path
+                        .path,
                 );
             } else {
                 filePaths.push((fileWithCollection.file as ElectronFile).path);

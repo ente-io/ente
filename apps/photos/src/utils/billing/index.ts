@@ -1,37 +1,37 @@
-import { t } from 'i18next';
+import { t } from "i18next";
 
-import billingService from 'services/billingService';
-import { Plan, Subscription } from 'types/billing';
-import { NextRouter } from 'next/router';
-import { SetLoading } from 'types/gallery';
-import { getData, LS_KEYS } from '@ente/shared/storage/localStorage';
-import { logError } from '@ente/shared/sentry';
-import { SetDialogBoxAttributes } from '@ente/shared/components/DialogBox/types';
-import { openLink } from 'utils/common';
-import { isPartOfFamily, getTotalFamilyUsage } from 'utils/user/family';
-import { BonusData, UserDetails } from 'types/user';
-import { getSubscriptionPurchaseSuccessMessage } from 'utils/ui';
-import { getRedirectURL, REDIRECTS } from 'constants/redirects';
+import { SetDialogBoxAttributes } from "@ente/shared/components/DialogBox/types";
+import { logError } from "@ente/shared/sentry";
+import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
+import { REDIRECTS, getRedirectURL } from "constants/redirects";
+import { NextRouter } from "next/router";
+import billingService from "services/billingService";
+import { Plan, Subscription } from "types/billing";
+import { SetLoading } from "types/gallery";
+import { BonusData, UserDetails } from "types/user";
+import { openLink } from "utils/common";
+import { getSubscriptionPurchaseSuccessMessage } from "utils/ui";
+import { getTotalFamilyUsage, isPartOfFamily } from "utils/user/family";
 
-const PAYMENT_PROVIDER_STRIPE = 'stripe';
-const PAYMENT_PROVIDER_APPSTORE = 'appstore';
-const PAYMENT_PROVIDER_PLAYSTORE = 'playstore';
-const FREE_PLAN = 'free';
+const PAYMENT_PROVIDER_STRIPE = "stripe";
+const PAYMENT_PROVIDER_APPSTORE = "appstore";
+const PAYMENT_PROVIDER_PLAYSTORE = "playstore";
+const FREE_PLAN = "free";
 
 enum FAILURE_REASON {
-    AUTHENTICATION_FAILED = 'authentication_failed',
-    REQUIRE_PAYMENT_METHOD = 'requires_payment_method',
-    STRIPE_ERROR = 'stripe_error',
-    CANCELED = 'canceled',
-    SERVER_ERROR = 'server_error',
+    AUTHENTICATION_FAILED = "authentication_failed",
+    REQUIRE_PAYMENT_METHOD = "requires_payment_method",
+    STRIPE_ERROR = "stripe_error",
+    CANCELED = "canceled",
+    SERVER_ERROR = "server_error",
 }
 
 enum RESPONSE_STATUS {
-    success = 'success',
-    fail = 'fail',
+    success = "success",
+    fail = "fail",
 }
 
-const StorageUnits = ['B', 'KB', 'MB', 'GB', 'TB'];
+const StorageUnits = ["B", "KB", "MB", "GB", "TB"];
 
 const ONE_GB = 1024 * 1024 * 1024;
 
@@ -41,17 +41,17 @@ export function convertBytesToGBs(bytes: number, precision = 0): string {
 
 export function makeHumanReadableStorage(
     bytes: number,
-    { roundUp } = { roundUp: false }
+    { roundUp } = { roundUp: false },
 ): string {
     if (bytes <= 0) {
-        return `0 ${t('STORAGE_UNITS.MB')}`;
+        return `0 ${t("STORAGE_UNITS.MB")}`;
     }
     const i = Math.floor(Math.log(bytes) / Math.log(1024));
 
     let quantity = bytes / Math.pow(1024, i);
     let unit = StorageUnits[i];
 
-    if (quantity > 100 && unit !== 'GB') {
+    if (quantity > 100 && unit !== "GB") {
         quantity /= 1024;
         unit = StorageUnits[i + 1];
     }
@@ -102,7 +102,7 @@ export function hasAddOnBonus(bonusData?: BonusData) {
         bonusData.storageBonuses &&
         bonusData.storageBonuses.length > 0 &&
         bonusData.storageBonuses.some((bonus) =>
-            bonus.type.startsWith('ADD_ON')
+            bonus.type.startsWith("ADD_ON"),
         )
     );
 }
@@ -159,16 +159,16 @@ export async function updateSubscription(
     plan: Plan,
     setDialogMessage: SetDialogBoxAttributes,
     setLoading: SetLoading,
-    closePlanSelectorModal: () => null
+    closePlanSelectorModal: () => null,
 ) {
     try {
         setLoading(true);
         await billingService.updateSubscription(plan.stripeID);
     } catch (err) {
         setDialogMessage({
-            title: t('ERROR'),
-            content: t('SUBSCRIPTION_UPDATE_FAILED'),
-            close: { variant: 'critical' },
+            title: t("ERROR"),
+            content: t("SUBSCRIPTION_UPDATE_FAILED"),
+            close: { variant: "critical" },
         });
     } finally {
         setLoading(false);
@@ -179,21 +179,21 @@ export async function updateSubscription(
 export async function cancelSubscription(
     setDialogMessage: SetDialogBoxAttributes,
     closePlanSelectorModal: () => void,
-    setLoading: SetLoading
+    setLoading: SetLoading,
 ) {
     try {
         setLoading(true);
         await billingService.cancelSubscription();
         setDialogMessage({
-            title: t('SUCCESS'),
-            content: t('SUBSCRIPTION_CANCEL_SUCCESS'),
-            close: { variant: 'accent' },
+            title: t("SUCCESS"),
+            content: t("SUBSCRIPTION_CANCEL_SUCCESS"),
+            close: { variant: "accent" },
         });
     } catch (e) {
         setDialogMessage({
-            title: t('ERROR'),
-            content: t('SUBSCRIPTION_CANCEL_FAILED'),
-            close: { variant: 'critical' },
+            title: t("ERROR"),
+            content: t("SUBSCRIPTION_CANCEL_FAILED"),
+            close: { variant: "critical" },
         });
     } finally {
         closePlanSelectorModal();
@@ -204,21 +204,21 @@ export async function cancelSubscription(
 export async function activateSubscription(
     setDialogMessage: SetDialogBoxAttributes,
     closePlanSelectorModal: () => void,
-    setLoading: SetLoading
+    setLoading: SetLoading,
 ) {
     try {
         setLoading(true);
         await billingService.activateSubscription();
         setDialogMessage({
-            title: t('SUCCESS'),
-            content: t('SUBSCRIPTION_ACTIVATE_SUCCESS'),
-            close: { variant: 'accent' },
+            title: t("SUCCESS"),
+            content: t("SUBSCRIPTION_ACTIVATE_SUCCESS"),
+            close: { variant: "accent" },
         });
     } catch (e) {
         setDialogMessage({
-            title: t('ERROR'),
-            content: t('SUBSCRIPTION_ACTIVATE_FAILED'),
-            close: { variant: 'critical' },
+            title: t("ERROR"),
+            content: t("SUBSCRIPTION_ACTIVATE_FAILED"),
+            close: { variant: "critical" },
         });
     } finally {
         closePlanSelectorModal();
@@ -228,7 +228,7 @@ export async function activateSubscription(
 
 export async function updatePaymentMethod(
     setDialogMessage: SetDialogBoxAttributes,
-    setLoading: SetLoading
+    setLoading: SetLoading,
 ) {
     try {
         setLoading(true);
@@ -236,27 +236,27 @@ export async function updatePaymentMethod(
     } catch (error) {
         setLoading(false);
         setDialogMessage({
-            title: t('ERROR'),
-            content: t('UNKNOWN_ERROR'),
-            close: { variant: 'critical' },
+            title: t("ERROR"),
+            content: t("UNKNOWN_ERROR"),
+            close: { variant: "critical" },
         });
     }
 }
 
 export async function manageFamilyMethod(
     setDialogMessage: SetDialogBoxAttributes,
-    setLoading: SetLoading
+    setLoading: SetLoading,
 ) {
     try {
         setLoading(true);
         const familyPortalRedirectURL = getRedirectURL(REDIRECTS.FAMILIES);
         openLink(familyPortalRedirectURL, true);
     } catch (error) {
-        logError(error, 'failed to redirect to family portal');
+        logError(error, "failed to redirect to family portal");
         setDialogMessage({
-            title: t('ERROR'),
-            content: t('UNKNOWN_ERROR'),
-            close: { variant: 'critical' },
+            title: t("ERROR"),
+            content: t("UNKNOWN_ERROR"),
+            close: { variant: "critical" },
         });
     } finally {
         setLoading(false);
@@ -266,7 +266,7 @@ export async function manageFamilyMethod(
 export async function checkSubscriptionPurchase(
     setDialogMessage: SetDialogBoxAttributes,
     router: NextRouter,
-    setLoading: SetLoading
+    setLoading: SetLoading,
 ) {
     const { session_id: sessionId, status, reason } = router.query ?? {};
     try {
@@ -275,15 +275,15 @@ export async function checkSubscriptionPurchase(
         } else if (status === RESPONSE_STATUS.success) {
             try {
                 const subscription = await billingService.verifySubscription(
-                    sessionId as string
+                    sessionId as string,
                 );
                 setDialogMessage(
-                    getSubscriptionPurchaseSuccessMessage(subscription)
+                    getSubscriptionPurchaseSuccessMessage(subscription),
                 );
             } catch (e) {
                 setDialogMessage({
-                    title: t('ERROR'),
-                    content: t('SUBSCRIPTION_VERIFICATION_ERROR'),
+                    title: t("ERROR"),
+                    content: t("SUBSCRIPTION_VERIFICATION_ERROR"),
                     close: {},
                 });
             }
@@ -296,60 +296,60 @@ export async function checkSubscriptionPurchase(
 function handleFailureReason(
     reason: string,
     setDialogMessage: SetDialogBoxAttributes,
-    setLoading: SetLoading
+    setLoading: SetLoading,
 ): void {
-    logError(Error(reason), 'subscription purchase failed');
+    logError(Error(reason), "subscription purchase failed");
     switch (reason) {
         case FAILURE_REASON.CANCELED:
             setDialogMessage({
-                title: t('MESSAGE'),
-                content: t('SUBSCRIPTION_PURCHASE_CANCELLED'),
-                close: { variant: 'critical' },
+                title: t("MESSAGE"),
+                content: t("SUBSCRIPTION_PURCHASE_CANCELLED"),
+                close: { variant: "critical" },
             });
             break;
         case FAILURE_REASON.REQUIRE_PAYMENT_METHOD:
             setDialogMessage({
-                title: t('UPDATE_PAYMENT_METHOD'),
-                content: t('UPDATE_PAYMENT_METHOD_MESSAGE'),
+                title: t("UPDATE_PAYMENT_METHOD"),
+                content: t("UPDATE_PAYMENT_METHOD_MESSAGE"),
 
                 proceed: {
-                    text: t('UPDATE_PAYMENT_METHOD'),
-                    variant: 'accent',
+                    text: t("UPDATE_PAYMENT_METHOD"),
+                    variant: "accent",
                     action: updatePaymentMethod.bind(
                         null,
 
                         setDialogMessage,
-                        setLoading
+                        setLoading,
                     ),
                 },
-                close: { text: t('CANCEL') },
+                close: { text: t("CANCEL") },
             });
             break;
 
         case FAILURE_REASON.AUTHENTICATION_FAILED:
             setDialogMessage({
-                title: t('UPDATE_PAYMENT_METHOD'),
-                content: t('STRIPE_AUTHENTICATION_FAILED'),
+                title: t("UPDATE_PAYMENT_METHOD"),
+                content: t("STRIPE_AUTHENTICATION_FAILED"),
 
                 proceed: {
-                    text: t('UPDATE_PAYMENT_METHOD'),
-                    variant: 'accent',
+                    text: t("UPDATE_PAYMENT_METHOD"),
+                    variant: "accent",
                     action: updatePaymentMethod.bind(
                         null,
 
                         setDialogMessage,
-                        setLoading
+                        setLoading,
                     ),
                 },
-                close: { text: t('CANCEL') },
+                close: { text: t("CANCEL") },
             });
             break;
 
         default:
             setDialogMessage({
-                title: t('ERROR'),
-                content: t('SUBSCRIPTION_PURCHASE_FAILED'),
-                close: { variant: 'critical' },
+                title: t("ERROR"),
+                content: t("SUBSCRIPTION_PURCHASE_FAILED"),
+                close: { variant: "critical" },
             });
     }
 }

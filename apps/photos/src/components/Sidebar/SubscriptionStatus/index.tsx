@@ -1,23 +1,23 @@
-import { GalleryContext } from 'pages/gallery';
-import React, { MouseEventHandler, useContext, useMemo } from 'react';
+import Box from "@mui/material/Box";
+import { t } from "i18next";
+import { GalleryContext } from "pages/gallery";
+import { MouseEventHandler, useContext, useMemo } from "react";
+import { Trans } from "react-i18next";
+import { UserDetails } from "types/user";
 import {
-    hasPaidSubscription,
-    isOnFreePlan,
+    hasAddOnBonus,
     hasExceededStorageQuota,
+    hasPaidSubscription,
+    hasStripeSubscription,
+    isOnFreePlan,
     isSubscriptionActive,
     isSubscriptionCancelled,
-    hasStripeSubscription,
-    hasAddOnBonus,
-} from 'utils/billing';
-import Box from '@mui/material/Box';
-import { UserDetails } from 'types/user';
-import { Trans } from 'react-i18next';
-import { t } from 'i18next';
+} from "utils/billing";
 
-import { Typography } from '@mui/material';
-import billingService from 'services/billingService';
-import { isPartOfFamily, isFamilyAdmin } from 'utils/user/family';
-import LinkButton from 'components/pages/gallery/LinkButton';
+import { Typography } from "@mui/material";
+import LinkButton from "components/pages/gallery/LinkButton";
+import billingService from "services/billingService";
+import { isFamilyAdmin, isPartOfFamily } from "utils/user/family";
 
 export default function SubscriptionStatus({
     userDetails,
@@ -75,27 +75,27 @@ export default function SubscriptionStatus({
             if (isOnFreePlan(userDetails.subscription)) {
                 messages.push(
                     <Trans
-                        i18nKey={'FREE_SUBSCRIPTION_INFO'}
+                        i18nKey={"FREE_SUBSCRIPTION_INFO"}
                         values={{
                             date: userDetails.subscription?.expiryTime,
                         }}
-                    />
+                    />,
                 );
             } else if (isSubscriptionCancelled(userDetails.subscription)) {
                 messages.push(
-                    t('RENEWAL_CANCELLED_SUBSCRIPTION_INFO', {
+                    t("RENEWAL_CANCELLED_SUBSCRIPTION_INFO", {
                         date: userDetails.subscription?.expiryTime,
-                    })
+                    }),
                 );
             }
         } else {
             messages.push(
                 <Trans
-                    i18nKey={'SUBSCRIPTION_EXPIRED_MESSAGE'}
+                    i18nKey={"SUBSCRIPTION_EXPIRED_MESSAGE"}
                     components={{
                         a: <LinkButton onClick={handleClick} />,
                     }}
-                />
+                />,
             );
         }
     }
@@ -103,11 +103,11 @@ export default function SubscriptionStatus({
     if (hasExceededStorageQuota(userDetails) && messages.length === 0) {
         messages.push(
             <Trans
-                i18nKey={'STORAGE_QUOTA_EXCEEDED_SUBSCRIPTION_INFO'}
+                i18nKey={"STORAGE_QUOTA_EXCEEDED_SUBSCRIPTION_INFO"}
                 components={{
                     a: <LinkButton onClick={handleClick} />,
                 }}
-            />
+            />,
         );
     }
 
@@ -115,9 +115,10 @@ export default function SubscriptionStatus({
         <Box px={1} pt={0.5}>
             <Typography
                 variant="small"
-                color={'text.muted'}
+                color={"text.muted"}
                 onClick={handleClick && handleClick}
-                sx={{ cursor: handleClick && 'pointer' }}>
+                sx={{ cursor: handleClick && "pointer" }}
+            >
                 {messages}
             </Typography>
         </Box>

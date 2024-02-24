@@ -1,6 +1,12 @@
-import PQueue from 'p-queue';
-import { EnteFile } from 'types/file';
+import { getDedicatedCryptoWorker } from "@ente/shared/crypto";
+import { DedicatedCryptoWorker } from "@ente/shared/crypto/internal/crypto.worker";
+import { addLogLine } from "@ente/shared/logging";
+import { ComlinkWorker } from "@ente/shared/worker/comlinkWorker";
+import PQueue from "p-queue";
+import { EnteFile } from "types/file";
 import {
+    ClusteringMethod,
+    ClusteringService,
     Face,
     FaceAlignmentMethod,
     FaceAlignmentService,
@@ -10,114 +16,108 @@ import {
     FaceDetectionService,
     FaceEmbeddingMethod,
     FaceEmbeddingService,
+    MLLibraryData,
     MLSyncConfig,
     MLSyncContext,
-    ClusteringMethod,
-    ClusteringService,
-    MLLibraryData,
-    ObjectDetectionService,
     ObjectDetectionMethod,
-    SceneDetectionService,
+    ObjectDetectionService,
     SceneDetectionMethod,
-} from 'types/machineLearning';
-import { getConcurrency } from 'utils/common/concurrency';
-import { logQueueStats } from 'utils/machineLearning';
-import arcfaceAlignmentService from './arcfaceAlignmentService';
-import arcfaceCropService from './arcfaceCropService';
-import hdbscanClusteringService from './hdbscanClusteringService';
-import blazeFaceDetectionService from './blazeFaceDetectionService';
-import mobileFaceNetEmbeddingService from './mobileFaceNetEmbeddingService';
-import dbscanClusteringService from './dbscanClusteringService';
-import ssdMobileNetV2Service from './ssdMobileNetV2Service';
-import imageSceneService from './imageSceneService';
-import { getDedicatedCryptoWorker } from '@ente/shared/crypto';
-import { ComlinkWorker } from '@ente/shared/worker/comlinkWorker';
-import { DedicatedCryptoWorker } from '@ente/shared/crypto/internal/crypto.worker';
-import { addLogLine } from '@ente/shared/logging';
+    SceneDetectionService,
+} from "types/machineLearning";
+import { getConcurrency } from "utils/common/concurrency";
+import { logQueueStats } from "utils/machineLearning";
+import arcfaceAlignmentService from "./arcfaceAlignmentService";
+import arcfaceCropService from "./arcfaceCropService";
+import blazeFaceDetectionService from "./blazeFaceDetectionService";
+import dbscanClusteringService from "./dbscanClusteringService";
+import hdbscanClusteringService from "./hdbscanClusteringService";
+import imageSceneService from "./imageSceneService";
+import mobileFaceNetEmbeddingService from "./mobileFaceNetEmbeddingService";
+import ssdMobileNetV2Service from "./ssdMobileNetV2Service";
 
 export class MLFactory {
     public static getFaceDetectionService(
-        method: FaceDetectionMethod
+        method: FaceDetectionMethod,
     ): FaceDetectionService {
-        if (method === 'BlazeFace') {
+        if (method === "BlazeFace") {
             return blazeFaceDetectionService;
         }
 
-        throw Error('Unknon face detection method: ' + method);
+        throw Error("Unknon face detection method: " + method);
     }
 
     public static getObjectDetectionService(
-        method: ObjectDetectionMethod
+        method: ObjectDetectionMethod,
     ): ObjectDetectionService {
-        if (method === 'SSDMobileNetV2') {
+        if (method === "SSDMobileNetV2") {
             return ssdMobileNetV2Service;
         }
 
-        throw Error('Unknown object detection method: ' + method);
+        throw Error("Unknown object detection method: " + method);
     }
 
     public static getSceneDetectionService(
-        method: SceneDetectionMethod
+        method: SceneDetectionMethod,
     ): SceneDetectionService {
-        if (method === 'ImageScene') {
+        if (method === "ImageScene") {
             return imageSceneService;
         }
 
-        throw Error('Unknown scene detection method: ' + method);
+        throw Error("Unknown scene detection method: " + method);
     }
 
     public static getFaceCropService(method: FaceCropMethod) {
-        if (method === 'ArcFace') {
+        if (method === "ArcFace") {
             return arcfaceCropService;
         }
 
-        throw Error('Unknon face crop method: ' + method);
+        throw Error("Unknon face crop method: " + method);
     }
 
     public static getFaceAlignmentService(
-        method: FaceAlignmentMethod
+        method: FaceAlignmentMethod,
     ): FaceAlignmentService {
-        if (method === 'ArcFace') {
+        if (method === "ArcFace") {
             return arcfaceAlignmentService;
         }
 
-        throw Error('Unknon face alignment method: ' + method);
+        throw Error("Unknon face alignment method: " + method);
     }
 
     public static getFaceEmbeddingService(
-        method: FaceEmbeddingMethod
+        method: FaceEmbeddingMethod,
     ): FaceEmbeddingService {
-        if (method === 'MobileFaceNet') {
+        if (method === "MobileFaceNet") {
             return mobileFaceNetEmbeddingService;
         }
 
-        throw Error('Unknon face embedding method: ' + method);
+        throw Error("Unknon face embedding method: " + method);
     }
 
     public static getClusteringService(
-        method: ClusteringMethod
+        method: ClusteringMethod,
     ): ClusteringService {
-        if (method === 'Hdbscan') {
+        if (method === "Hdbscan") {
             return hdbscanClusteringService;
         }
-        if (method === 'Dbscan') {
+        if (method === "Dbscan") {
             return dbscanClusteringService;
         }
 
-        throw Error('Unknon clustering method: ' + method);
+        throw Error("Unknon clustering method: " + method);
     }
 
     public static getMLSyncContext(
         token: string,
         userID: number,
         config: MLSyncConfig,
-        shouldUpdateMLVersion: boolean = true
+        shouldUpdateMLVersion: boolean = true,
     ) {
         return new LocalMLSyncContext(
             token,
             userID,
             config,
-            shouldUpdateMLVersion
+            shouldUpdateMLVersion,
         );
     }
 }
@@ -162,7 +162,7 @@ export class LocalMLSyncContext implements MLSyncContext {
         userID: number,
         config: MLSyncConfig,
         shouldUpdateMLVersion: boolean = true,
-        concurrency?: number
+        concurrency?: number,
     ) {
         this.token = token;
         this.userID = userID;
@@ -170,26 +170,26 @@ export class LocalMLSyncContext implements MLSyncContext {
         this.shouldUpdateMLVersion = shouldUpdateMLVersion;
 
         this.faceDetectionService = MLFactory.getFaceDetectionService(
-            this.config.faceDetection.method
+            this.config.faceDetection.method,
         );
         this.faceCropService = MLFactory.getFaceCropService(
-            this.config.faceCrop.method
+            this.config.faceCrop.method,
         );
         this.faceAlignmentService = MLFactory.getFaceAlignmentService(
-            this.config.faceAlignment.method
+            this.config.faceAlignment.method,
         );
         this.faceEmbeddingService = MLFactory.getFaceEmbeddingService(
-            this.config.faceEmbedding.method
+            this.config.faceEmbedding.method,
         );
         this.faceClusteringService = MLFactory.getClusteringService(
-            this.config.faceClustering.method
+            this.config.faceClustering.method,
         );
 
         this.objectDetectionService = MLFactory.getObjectDetectionService(
-            this.config.objectDetection.method
+            this.config.objectDetection.method,
         );
         this.sceneDetectionService = MLFactory.getSceneDetectionService(
-            this.config.sceneDetection.method
+            this.config.sceneDetection.method,
         );
 
         this.outOfSyncFiles = [];
@@ -198,11 +198,11 @@ export class LocalMLSyncContext implements MLSyncContext {
 
         this.concurrency = concurrency || getConcurrency();
 
-        addLogLine('Using concurrency: ', this.concurrency);
+        addLogLine("Using concurrency: ", this.concurrency);
         // timeout is added on downloads
         // timeout on queue will keep the operation open till worker is terminated
         this.syncQueue = new PQueue({ concurrency: this.concurrency });
-        logQueueStats(this.syncQueue, 'sync');
+        logQueueStats(this.syncQueue, "sync");
         // this.downloadQueue = new PQueue({ concurrency: 1 });
         // logQueueStats(this.downloadQueue, 'download');
 

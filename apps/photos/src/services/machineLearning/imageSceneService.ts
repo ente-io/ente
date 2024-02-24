@@ -1,14 +1,14 @@
-import * as tf from '@tensorflow/tfjs-core';
-import * as tfjsConverter from '@tensorflow/tfjs-converter';
+import { addLogLine } from "@ente/shared/logging";
+import * as tfjsConverter from "@tensorflow/tfjs-converter";
+import * as tf from "@tensorflow/tfjs-core";
+import { SCENE_DETECTION_IMAGE_SIZE } from "constants/mlConfig";
 import {
     ObjectDetection,
     SceneDetectionMethod,
     SceneDetectionService,
     Versioned,
-} from 'types/machineLearning';
-import { SCENE_DETECTION_IMAGE_SIZE } from 'constants/mlConfig';
-import { resizeToSquare } from 'utils/image';
-import { addLogLine } from '@ente/shared/logging';
+} from "types/machineLearning";
+import { resizeToSquare } from "utils/image";
 
 class ImageScene implements SceneDetectionService {
     method: Versioned<SceneDetectionMethod>;
@@ -19,29 +19,29 @@ class ImageScene implements SceneDetectionService {
 
     public constructor() {
         this.method = {
-            value: 'ImageScene',
+            value: "ImageScene",
             version: 1,
         };
         this.workerID = Math.round(Math.random() * 1000);
     }
 
     private async init() {
-        addLogLine(`[${this.workerID}]`, 'ImageScene init called');
+        addLogLine(`[${this.workerID}]`, "ImageScene init called");
         if (this.model) {
             return;
         }
 
         this.sceneMap = await (
-            await fetch('/models/imagescene/sceneMap.json')
+            await fetch("/models/imagescene/sceneMap.json")
         ).json();
 
         this.model = await tfjsConverter.loadGraphModel(
-            '/models/imagescene/model.json'
+            "/models/imagescene/model.json",
         );
         addLogLine(
             `[${this.workerID}]`,
-            'loaded ImageScene model',
-            tf.getBackend()
+            "loaded ImageScene model",
+            tf.getBackend(),
         );
 
         tf.tidy(() => {
@@ -54,7 +54,7 @@ class ImageScene implements SceneDetectionService {
     private async getImageSceneModel() {
         addLogLine(
             `[${this.workerID}]`,
-            'ImageScene getImageSceneModel called'
+            "ImageScene getImageSceneModel called",
         );
         if (!this.ready) {
             this.ready = this.init();
@@ -70,7 +70,7 @@ class ImageScene implements SceneDetectionService {
 
         const output = tf.tidy(() => {
             const tfImage = tf.browser.fromPixels(resized.image);
-            const input = tf.expandDims(tf.cast(tfImage, 'float32'));
+            const input = tf.expandDims(tf.cast(tfImage, "float32"));
             const output = model.predict(input) as tf.Tensor;
             return output;
         });
@@ -82,7 +82,7 @@ class ImageScene implements SceneDetectionService {
             data,
             minScore,
             image.width,
-            image.height
+            image.height,
         );
 
         return scenes;
@@ -92,7 +92,7 @@ class ImageScene implements SceneDetectionService {
         outputData: Float32Array,
         minScore: number,
         width: number,
-        height: number
+        height: number,
     ): ObjectDetection[] {
         const scenes = [];
         for (let i = 0; i < outputData.length; i++) {

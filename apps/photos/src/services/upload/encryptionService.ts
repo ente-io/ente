@@ -1,11 +1,11 @@
-import { Remote } from 'comlink';
-import { EncryptionResult } from '@ente/shared/crypto/types';
-import { DataStream, isDataStream } from 'types/upload';
-import { DedicatedCryptoWorker } from '@ente/shared/crypto/internal/crypto.worker';
+import { DedicatedCryptoWorker } from "@ente/shared/crypto/internal/crypto.worker";
+import { EncryptionResult } from "@ente/shared/crypto/types";
+import { Remote } from "comlink";
+import { DataStream, isDataStream } from "types/upload";
 
 async function encryptFileStream(
     worker: Remote<DedicatedCryptoWorker>,
-    fileData: DataStream
+    fileData: DataStream,
 ) {
     const { stream, chunkCount } = fileData;
     const fileStreamReader = stream.getReader();
@@ -18,7 +18,7 @@ async function encryptFileStream(
             const encryptedFileChunk = await worker.encryptFileChunk(
                 value,
                 pushState,
-                ref.pullCount === chunkCount
+                ref.pullCount === chunkCount,
             );
             controller.enqueue(encryptedFileChunk);
             if (ref.pullCount === chunkCount) {
@@ -38,7 +38,7 @@ async function encryptFileStream(
 
 export async function encryptFiledata(
     worker: Remote<DedicatedCryptoWorker>,
-    filedata: Uint8Array | DataStream
+    filedata: Uint8Array | DataStream,
 ): Promise<EncryptionResult<Uint8Array | DataStream>> {
     return isDataStream(filedata)
         ? await encryptFileStream(worker, filedata)

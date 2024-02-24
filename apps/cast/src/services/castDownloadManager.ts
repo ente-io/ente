@@ -1,19 +1,19 @@
+import { EnteFile } from "types/file";
 import {
+    createTypedObjectURL,
     generateStreamFromArrayBuffer,
     getRenderableFileURL,
-    createTypedObjectURL,
-} from 'utils/file';
-import { EnteFile } from 'types/file';
+} from "utils/file";
 
-import { FILE_TYPE } from 'constants/file';
-import { CustomError } from '@ente/shared/error';
-import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
-import { CACHES } from 'constants/cache';
-import { CacheStorageService } from './cache/cacheStorageService';
-import { LimitedCache } from 'types/cache';
-import { getCastFileURL, getCastThumbnailURL } from '@ente/shared/network/api';
-import HTTPService from '@ente/shared/network/HTTPService';
-import { logError } from '@ente/shared/sentry';
+import { CustomError } from "@ente/shared/error";
+import HTTPService from "@ente/shared/network/HTTPService";
+import { getCastFileURL, getCastThumbnailURL } from "@ente/shared/network/api";
+import { logError } from "@ente/shared/sentry";
+import { CACHES } from "constants/cache";
+import { FILE_TYPE } from "constants/file";
+import { LimitedCache } from "types/cache";
+import ComlinkCryptoWorker from "utils/comlink/ComlinkCryptoWorker";
+import { CacheStorageService } from "./cache/cacheStorageService";
 
 class CastDownloadManager {
     private fileObjectURLPromise = new Map<
@@ -33,7 +33,7 @@ class CastDownloadManager {
     private async getThumbnailCache() {
         try {
             const thumbnailCache = await CacheStorageService.open(
-                CACHES.THUMBS
+                CACHES.THUMBS,
             );
             return thumbnailCache;
         } catch (e) {
@@ -44,14 +44,14 @@ class CastDownloadManager {
 
     public async getCachedThumbnail(
         file: EnteFile,
-        thumbnailCache?: LimitedCache
+        thumbnailCache?: LimitedCache,
     ) {
         try {
             if (!thumbnailCache) {
                 thumbnailCache = await this.getThumbnailCache();
             }
             const cacheResp: Response = await thumbnailCache?.match(
-                file.id.toString()
+                file.id.toString(),
             );
 
             if (cacheResp) {
@@ -59,7 +59,7 @@ class CastDownloadManager {
             }
             return null;
         } catch (e) {
-            logError(e, 'failed to get cached thumbnail');
+            logError(e, "failed to get cached thumbnail");
             throw e;
         }
     }
@@ -71,7 +71,7 @@ class CastDownloadManager {
                     const thumbnailCache = await this.getThumbnailCache();
                     const cachedThumb = await this.getCachedThumbnail(
                         file,
-                        thumbnailCache
+                        thumbnailCache,
                     );
                     if (cachedThumb) {
                         return cachedThumb;
@@ -82,7 +82,7 @@ class CastDownloadManager {
                     try {
                         await thumbnailCache?.put(
                             file.id.toString(),
-                            new Response(thumbBlob)
+                            new Response(thumbBlob),
                         );
                     } catch (e) {
                         // TODO: handle storage full exception.
@@ -95,7 +95,7 @@ class CastDownloadManager {
             return await this.thumbnailObjectURLPromise.get(file.id);
         } catch (e) {
             this.thumbnailObjectURLPromise.delete(file.id);
-            logError(e, 'get castDownloadManager preview Failed');
+            logError(e, "get castDownloadManager preview Failed");
             throw e;
         }
     }
@@ -105,18 +105,18 @@ class CastDownloadManager {
             getCastThumbnailURL(file.id),
             null,
             {
-                'X-Cast-Access-Token': castToken,
+                "X-Cast-Access-Token": castToken,
             },
-            { responseType: 'arraybuffer' }
+            { responseType: "arraybuffer" },
         );
-        if (typeof resp.data === 'undefined') {
+        if (typeof resp.data === "undefined") {
             throw Error(CustomError.REQUEST_FAILED);
         }
         const cryptoWorker = await ComlinkCryptoWorker.getInstance();
         const decrypted = await cryptoWorker.decryptThumbnail(
             new Uint8Array(resp.data),
             await cryptoWorker.fromB64(file.thumbnail.decryptionHeader),
-            file.key
+            file.key,
         );
         return decrypted;
     };
@@ -132,7 +132,7 @@ class CastDownloadManager {
                 } else {
                     const fileURL = await createTypedObjectURL(
                         fileBlob,
-                        file.metadata.title
+                        file.metadata.title,
                     );
                     return { converted: [fileURL], original: [fileURL] };
                 }
@@ -145,7 +145,7 @@ class CastDownloadManager {
             return fileURLs;
         } catch (e) {
             this.fileObjectURLPromise.delete(fileKey);
-            logError(e, 'castDownloadManager failed to get file');
+            logError(e, "castDownloadManager failed to get file");
             throw e;
         }
     };
@@ -166,40 +166,40 @@ class CastDownloadManager {
                 getCastFileURL(file.id),
                 null,
                 {
-                    'X-Cast-Access-Token': castToken,
+                    "X-Cast-Access-Token": castToken,
                 },
-                { responseType: 'arraybuffer' }
+                { responseType: "arraybuffer" },
             );
-            if (typeof resp.data === 'undefined') {
+            if (typeof resp.data === "undefined") {
                 throw Error(CustomError.REQUEST_FAILED);
             }
             const decrypted = await cryptoWorker.decryptFile(
                 new Uint8Array(resp.data),
                 await cryptoWorker.fromB64(file.file.decryptionHeader),
-                file.key
+                file.key,
             );
             return generateStreamFromArrayBuffer(decrypted);
         }
         const resp = await fetch(getCastFileURL(file.id), {
             headers: {
-                'X-Cast-Access-Token': castToken,
+                "X-Cast-Access-Token": castToken,
             },
         });
         const reader = resp.body.getReader();
 
-        const contentLength = +resp.headers.get('Content-Length');
+        const contentLength = +resp.headers.get("Content-Length");
         let downloadedBytes = 0;
 
         const stream = new ReadableStream({
             async start(controller) {
                 const decryptionHeader = await cryptoWorker.fromB64(
-                    file.file.decryptionHeader
+                    file.file.decryptionHeader,
                 );
                 const fileKey = await cryptoWorker.fromB64(file.key);
                 const { pullState, decryptionChunkSize } =
                     await cryptoWorker.initChunkDecryption(
                         decryptionHeader,
-                        fileKey
+                        fileKey,
                     );
                 let data = new Uint8Array();
                 // The following function handles each data chunk
@@ -214,19 +214,19 @@ class CastDownloadManager {
                                 total: contentLength,
                             });
                             const buffer = new Uint8Array(
-                                data.byteLength + value.byteLength
+                                data.byteLength + value.byteLength,
                             );
                             buffer.set(new Uint8Array(data), 0);
                             buffer.set(new Uint8Array(value), data.byteLength);
                             if (buffer.length > decryptionChunkSize) {
                                 const fileData = buffer.slice(
                                     0,
-                                    decryptionChunkSize
+                                    decryptionChunkSize,
                                 );
                                 const { decryptedData } =
                                     await cryptoWorker.decryptFileChunk(
                                         fileData,
-                                        pullState
+                                        pullState,
                                     );
                                 controller.enqueue(decryptedData);
                                 data = buffer.slice(decryptionChunkSize);
@@ -239,7 +239,7 @@ class CastDownloadManager {
                                 const { decryptedData } =
                                     await cryptoWorker.decryptFileChunk(
                                         data,
-                                        pullState
+                                        pullState,
                                     );
                                 controller.enqueue(decryptedData);
                                 data = null;
@@ -262,7 +262,7 @@ class CastDownloadManager {
             } else {
                 this.fileDownloadProgress.set(
                     fileID,
-                    Math.round((event.loaded * 100) / event.total)
+                    Math.round((event.loaded * 100) / event.total),
                 );
             }
             this.progressUpdater(new Map(this.fileDownloadProgress));

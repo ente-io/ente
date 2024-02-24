@@ -1,13 +1,13 @@
-import React, { useState } from 'react';
-import DoneIcon from '@mui/icons-material/Done';
-import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import ContentCopyIcon from "@mui/icons-material/ContentCopy";
+import DoneIcon from "@mui/icons-material/Done";
 import {
     IconButton,
     IconButtonProps,
     SvgIconProps,
     Tooltip,
-} from '@mui/material';
-import { t } from 'i18next';
+} from "@mui/material";
+import { t } from "i18next";
+import { useState } from "react";
 
 export default function CopyButton({
     code,
@@ -15,8 +15,8 @@ export default function CopyButton({
     size,
 }: {
     code: string;
-    color?: IconButtonProps['color'];
-    size?: SvgIconProps['fontSize'];
+    color?: IconButtonProps["color"];
+    size?: SvgIconProps["fontSize"];
 }) {
     const [copied, setCopied] = useState<boolean>(false);
 
@@ -29,13 +29,14 @@ export default function CopyButton({
         <Tooltip
             arrow
             open={copied}
-            title={t('COPIED')}
-            PopperProps={{ sx: { zIndex: 2000 } }}>
+            title={t("COPIED")}
+            PopperProps={{ sx: { zIndex: 2000 } }}
+        >
             <IconButton onClick={copyToClipboardHelper(code)} color={color}>
                 {copied ? (
-                    <DoneIcon fontSize={size ?? 'small'} />
+                    <DoneIcon fontSize={size ?? "small"} />
                 ) : (
-                    <ContentCopyIcon fontSize={size ?? 'small'} />
+                    <ContentCopyIcon fontSize={size ?? "small"} />
                 )}
             </IconButton>
         </Tooltip>

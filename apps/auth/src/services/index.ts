@@ -1,13 +1,13 @@
-import { HttpStatusCode } from 'axios';
-import HTTPService from '@ente/shared/network/HTTPService';
-import { AuthEntity, AuthKey } from 'types/api';
-import { Code } from 'types/code';
-import ComlinkCryptoWorker from '@ente/shared/crypto';
-import { getEndpoint } from '@ente/shared/network/api';
-import { getActualKey } from '@ente/shared/user';
-import { getToken } from '@ente/shared/storage/localStorage/helpers';
-import { ApiError, CustomError } from '@ente/shared/error';
-import { logError } from '@ente/shared/sentry';
+import ComlinkCryptoWorker from "@ente/shared/crypto";
+import { ApiError, CustomError } from "@ente/shared/error";
+import HTTPService from "@ente/shared/network/HTTPService";
+import { getEndpoint } from "@ente/shared/network/api";
+import { logError } from "@ente/shared/sentry";
+import { getToken } from "@ente/shared/storage/localStorage/helpers";
+import { getActualKey } from "@ente/shared/user";
+import { HttpStatusCode } from "axios";
+import { AuthEntity, AuthKey } from "types/api";
+import { Code } from "types/code";
 
 const ENDPOINT = getEndpoint();
 export const getAuthCodes = async (): Promise<Code[]> => {
@@ -18,7 +18,7 @@ export const getAuthCodes = async (): Promise<Code[]> => {
         const authenticatorKey = await cryptoWorker.decryptB64(
             authKeyData.encryptedKey,
             authKeyData.header,
-            masterKey
+            masterKey,
         );
         // always fetch all data from server for now
         const authEntity: AuthEntity[] = await getDiff(0);
@@ -31,21 +31,21 @@ export const getAuthCodes = async (): Promise<Code[]> => {
                             await cryptoWorker.decryptMetadata(
                                 entity.encryptedData,
                                 entity.header,
-                                authenticatorKey
+                                authenticatorKey,
                             );
                         return Code.fromRawData(entity.id, decryptedCode);
                     } catch (e) {
                         logError(
-                            Error('failed to parse code'),
-                            'codeId = ' + entity.id
+                            Error("failed to parse code"),
+                            "codeId = " + entity.id,
                         );
                         return null;
                     }
-                })
+                }),
         );
         // Remove null and undefined values
         const filteredAuthCodes = authCodes.filter(
-            (f) => f !== null && f !== undefined
+            (f) => f !== null && f !== undefined,
         );
         filteredAuthCodes.sort((a, b) => {
             if (a.issuer && b.issuer) {
@@ -62,7 +62,7 @@ export const getAuthCodes = async (): Promise<Code[]> => {
         return filteredAuthCodes;
     } catch (e) {
         if (e.message !== CustomError.AUTH_KEY_NOT_FOUND) {
-            logError(e, 'get authenticator entities failed');
+            logError(e, "get authenticator entities failed");
         }
         throw e;
     }
@@ -74,8 +74,8 @@ export const getAuthKey = async (): Promise<AuthKey> => {
             `${ENDPOINT}/authenticator/key`,
             {},
             {
-                'X-Auth-Token': getToken(),
-            }
+                "X-Auth-Token": getToken(),
+            },
         );
         return resp.data;
     } catch (e) {
@@ -85,7 +85,7 @@ export const getAuthKey = async (): Promise<AuthKey> => {
         ) {
             throw Error(CustomError.AUTH_KEY_NOT_FOUND);
         } else {
-            logError(e, 'Get key failed');
+            logError(e, "Get key failed");
             throw e;
         }
     }
@@ -94,7 +94,7 @@ export const getAuthKey = async (): Promise<AuthKey> => {
 // return a promise which resolves to list of AuthEnitity
 export const getDiff = async (
     sinceTime: number,
-    limit = 2500
+    limit = 2500,
 ): Promise<AuthEntity[]> => {
     try {
         const resp = await HTTPService.get(
@@ -104,12 +104,12 @@ export const getDiff = async (
                 limit,
             },
             {
-                'X-Auth-Token': getToken(),
-            }
+                "X-Auth-Token": getToken(),
+            },
         );
         return resp.data.diff;
     } catch (e) {
-        logError(e, 'Get diff failed');
+        logError(e, "Get diff failed");
         throw e;
     }
 };

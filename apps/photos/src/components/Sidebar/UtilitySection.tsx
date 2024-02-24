@@ -1,28 +1,28 @@
-import { t } from 'i18next';
-import { useContext, useState } from 'react';
+import { t } from "i18next";
+import { useContext, useState } from "react";
 
 // import FixLargeThumbnails from 'components/FixLargeThumbnail';
-import RecoveryKey from '@ente/shared/components/RecoveryKey';
+import RecoveryKey from "@ente/shared/components/RecoveryKey";
 import {
     ACCOUNTS_PAGES,
     PHOTOS_PAGES as PAGES,
-} from '@ente/shared/constants/pages';
-import TwoFactorModal from 'components/TwoFactor/Modal';
-import { useRouter } from 'next/router';
-import { AppContext } from 'pages/_app';
+} from "@ente/shared/constants/pages";
+import TwoFactorModal from "components/TwoFactor/Modal";
+import { useRouter } from "next/router";
+import { AppContext } from "pages/_app";
 // import mlIDbStorage from 'utils/storage/mlIDbStorage';
-import { APPS, CLIENT_PACKAGE_NAMES } from '@ente/shared/apps/constants';
-import ThemeSwitcher from '@ente/shared/components/ThemeSwitcher';
-import { getAccountsURL } from '@ente/shared/network/api';
-import { logError } from '@ente/shared/sentry';
-import { THEME_COLOR } from '@ente/shared/themes/constants';
-import { EnteMenuItem } from 'components/Menu/EnteMenuItem';
-import WatchFolder from 'components/WatchFolder';
-import isElectron from 'is-electron';
-import { getAccountsToken } from 'services/userService';
-import { getDownloadAppMessage } from 'utils/ui';
-import { isInternalUser } from 'utils/user';
-import Preferences from './Preferences';
+import { APPS, CLIENT_PACKAGE_NAMES } from "@ente/shared/apps/constants";
+import ThemeSwitcher from "@ente/shared/components/ThemeSwitcher";
+import { getAccountsURL } from "@ente/shared/network/api";
+import { logError } from "@ente/shared/sentry";
+import { THEME_COLOR } from "@ente/shared/themes/constants";
+import { EnteMenuItem } from "components/Menu/EnteMenuItem";
+import WatchFolder from "components/WatchFolder";
+import isElectron from "is-electron";
+import { getAccountsToken } from "services/userService";
+import { getDownloadAppMessage } from "utils/ui";
+import { isInternalUser } from "utils/user";
+import Preferences from "./Preferences";
 
 export default function UtilitySection({ closeSidebar }) {
     const router = useRouter();
@@ -77,10 +77,10 @@ export default function UtilitySection({ closeSidebar }) {
             window.location.href = `${getAccountsURL()}${
                 ACCOUNTS_PAGES.ACCOUNT_HANDOFF
             }?package=${CLIENT_PACKAGE_NAMES.get(
-                APPS.PHOTOS
+                APPS.PHOTOS,
             )}&token=${accountsToken}`;
         } catch (e) {
-            logError(e, 'failed to redirect to accounts page');
+            logError(e, "failed to redirect to accounts page");
         }
     };
 
@@ -88,16 +88,16 @@ export default function UtilitySection({ closeSidebar }) {
 
     const somethingWentWrong = () =>
         setDialogMessage({
-            title: t('ERROR'),
-            content: t('RECOVER_KEY_GENERATION_FAILED'),
-            close: { variant: 'critical' },
+            title: t("ERROR"),
+            content: t("RECOVER_KEY_GENERATION_FAILED"),
+            close: { variant: "critical" },
         });
 
     const toggleTheme = () => {
         setThemeColor((themeColor) =>
             themeColor === THEME_COLOR.DARK
                 ? THEME_COLOR.LIGHT
-                : THEME_COLOR.DARK
+                : THEME_COLOR.DARK,
         );
     };
 
@@ -107,19 +107,19 @@ export default function UtilitySection({ closeSidebar }) {
                 <EnteMenuItem
                     onClick={openWatchFolder}
                     variant="secondary"
-                    label={t('WATCH_FOLDERS')}
+                    label={t("WATCH_FOLDERS")}
                 />
             )}
             <EnteMenuItem
                 variant="secondary"
                 onClick={openRecoveryKeyModal}
-                label={t('RECOVERY_KEY')}
+                label={t("RECOVERY_KEY")}
             />
             {isInternalUser() && (
                 <EnteMenuItem
                     onClick={toggleTheme}
                     variant="secondary"
-                    label={t('CHOSE_THEME')}
+                    label={t("CHOSE_THEME")}
                     endIcon={
                         <ThemeSwitcher
                             themeColor={themeColor}
@@ -131,37 +131,37 @@ export default function UtilitySection({ closeSidebar }) {
             <EnteMenuItem
                 variant="secondary"
                 onClick={openTwoFactorModal}
-                label={t('TWO_FACTOR')}
+                label={t("TWO_FACTOR")}
             />
 
             <EnteMenuItem
                 variant="secondary"
                 onClick={redirectToAccountsPage}
-                label={t('PASSKEYS')}
+                label={t("PASSKEYS")}
             />
 
             <EnteMenuItem
                 variant="secondary"
                 onClick={redirectToChangePasswordPage}
-                label={t('CHANGE_PASSWORD')}
+                label={t("CHANGE_PASSWORD")}
             />
 
             <EnteMenuItem
                 variant="secondary"
                 onClick={redirectToChangeEmailPage}
-                label={t('CHANGE_EMAIL')}
+                label={t("CHANGE_EMAIL")}
             />
 
             <EnteMenuItem
                 variant="secondary"
                 onClick={redirectToDeduplicatePage}
-                label={t('DEDUPLICATE_FILES')}
+                label={t("DEDUPLICATE_FILES")}
             />
 
             <EnteMenuItem
                 variant="secondary"
                 onClick={openPreferencesOptions}
-                label={t('PREFERENCES')}
+                label={t("PREFERENCES")}
             />
             <RecoveryKey
                 appContext={appContext}

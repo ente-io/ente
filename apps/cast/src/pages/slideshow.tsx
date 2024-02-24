@@ -1,17 +1,17 @@
-import { logError } from '@ente/shared/sentry';
-import PairedSuccessfullyOverlay from 'components/PairedSuccessfullyOverlay';
-import Theatre from 'components/Theatre';
-import { FILE_TYPE } from 'constants/file';
-import { useRouter } from 'next/router';
-import { createContext, useEffect, useState } from 'react';
+import { logError } from "@ente/shared/sentry";
+import PairedSuccessfullyOverlay from "components/PairedSuccessfullyOverlay";
+import Theatre from "components/Theatre";
+import { FILE_TYPE } from "constants/file";
+import { useRouter } from "next/router";
+import { createContext, useEffect, useState } from "react";
 import {
     getCastCollection,
     getLocalFiles,
     syncPublicFiles,
-} from 'services/cast/castService';
-import { Collection } from 'types/collection';
-import { EnteFile } from 'types/file';
-import { getPreviewableImage, isRawFileFromFileName } from 'utils/file';
+} from "services/cast/castService";
+import { Collection } from "types/collection";
+import { EnteFile } from "types/file";
+import { getPreviewableImage, isRawFileFromFileName } from "utils/file";
 
 export const SlideshowContext = createContext<{
     showNextSlide: () => void;
@@ -23,24 +23,24 @@ export default function Slideshow() {
     const [collectionFiles, setCollectionFiles] = useState<EnteFile[]>([]);
 
     const [currentFile, setCurrentFile] = useState<EnteFile | undefined>(
-        undefined
+        undefined,
     );
     const [nextFile, setNextFile] = useState<EnteFile | undefined>(undefined);
 
     const [loading, setLoading] = useState(true);
-    const [castToken, setCastToken] = useState<string>('');
+    const [castToken, setCastToken] = useState<string>("");
     const [castCollection, setCastCollection] = useState<
         Collection | undefined
     >(undefined);
 
     const syncCastFiles = async (token: string) => {
         try {
-            const castToken = window.localStorage.getItem('castToken');
+            const castToken = window.localStorage.getItem("castToken");
             const requestedCollectionKey =
-                window.localStorage.getItem('collectionKey');
+                window.localStorage.getItem("collectionKey");
             const collection = await getCastCollection(
                 castToken,
-                requestedCollectionKey
+                requestedCollectionKey,
             );
             if (
                 castCollection === undefined ||
@@ -50,22 +50,22 @@ export default function Slideshow() {
                 await syncPublicFiles(token, collection, () => {});
                 const files = await getLocalFiles(String(collection.id));
                 setCollectionFiles(
-                    files.filter((file) => isFileEligibleForCast(file))
+                    files.filter((file) => isFileEligibleForCast(file)),
                 );
             }
         } catch (e) {
-            logError(e, 'error during sync');
-            router.push('/');
+            logError(e, "error during sync");
+            router.push("/");
         }
     };
 
     const init = async () => {
         try {
-            const castToken = window.localStorage.getItem('castToken');
+            const castToken = window.localStorage.getItem("castToken");
             setCastToken(castToken);
         } catch (e) {
-            logError(e, 'error during sync');
-            router.push('/');
+            logError(e, "error during sync");
+            router.push("/");
         }
     };
 
@@ -115,7 +115,7 @@ export default function Slideshow() {
 
     const showNextSlide = () => {
         const currentIndex = collectionFiles.findIndex(
-            (file) => file.id === currentFile?.id
+            (file) => file.id === currentFile?.id,
         );
 
         const nextIndex = (currentIndex + 1) % collectionFiles.length;
@@ -128,7 +128,7 @@ export default function Slideshow() {
         setNextFile(nextNextFile);
     };
 
-    const [renderableFileURL, setRenderableFileURL] = useState<string>('');
+    const [renderableFileURL, setRenderableFileURL] = useState<string>("");
 
     const getRenderableFileURL = async () => {
         if (!currentFile) return;
@@ -143,7 +143,7 @@ export default function Slideshow() {
         try {
             const blob = await getPreviewableImage(
                 currentFile as EnteFile,
-                castToken
+                castToken,
             );
 
             const url = URL.createObjectURL(blob);

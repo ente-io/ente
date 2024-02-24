@@ -1,10 +1,10 @@
-import { sleep } from 'utils/common';
+import { sleep } from "utils/common";
 
 const waitTimeBeforeNextAttemptInMilliSeconds = [2000, 5000, 10000];
 
 export async function retryAsyncFunction<T>(
     request: (abort?: () => void) => Promise<T>,
-    waitTimeBeforeNextTry?: number[]
+    waitTimeBeforeNextTry?: number[],
 ): Promise<T> {
     if (!waitTimeBeforeNextTry) {
         waitTimeBeforeNextTry = waitTimeBeforeNextAttemptInMilliSeconds;

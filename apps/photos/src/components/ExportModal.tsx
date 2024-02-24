@@ -1,7 +1,11 @@
-import isElectron from 'is-electron';
-import { useEffect, useState, useContext } from 'react';
-import exportService from 'services/export';
-import { ExportProgress, ExportSettings } from 'types/export';
+import {
+    SpaceBetweenFlex,
+    VerticallyCenteredFlex,
+} from "@ente/shared/components/Container";
+import DialogTitleWithCloseButton from "@ente/shared/components/DialogBox/TitleWithCloseButton";
+import { CustomError } from "@ente/shared/error";
+import { addLogLine } from "@ente/shared/logging";
+import { logError } from "@ente/shared/sentry";
 import {
     Box,
     Button,
@@ -10,25 +14,21 @@ import {
     Divider,
     Switch,
     Typography,
-} from '@mui/material';
-import { logError } from '@ente/shared/sentry';
-import {
-    SpaceBetweenFlex,
-    VerticallyCenteredFlex,
-} from '@ente/shared/components/Container';
-import ExportFinished from './ExportFinished';
-import ExportInit from './ExportInit';
-import ExportInProgress from './ExportInProgress';
-import { ExportStage } from 'constants/export';
-import DialogTitleWithCloseButton from '@ente/shared/components/DialogBox/TitleWithCloseButton';
-import { AppContext } from 'pages/_app';
-import { getExportDirectoryDoesNotExistMessage } from 'utils/ui';
-import { t } from 'i18next';
-import { CustomError } from '@ente/shared/error';
-import { addLogLine } from '@ente/shared/logging';
-import { EnteFile } from 'types/file';
-import ChangeDirectoryOption from './Directory/changeOption';
-import { DirectoryPath } from './Directory';
+} from "@mui/material";
+import { ExportStage } from "constants/export";
+import { t } from "i18next";
+import isElectron from "is-electron";
+import { AppContext } from "pages/_app";
+import { useContext, useEffect, useState } from "react";
+import exportService from "services/export";
+import { ExportProgress, ExportSettings } from "types/export";
+import { EnteFile } from "types/file";
+import { getExportDirectoryDoesNotExistMessage } from "utils/ui";
+import { DirectoryPath } from "./Directory";
+import ChangeDirectoryOption from "./Directory/changeOption";
+import ExportFinished from "./ExportFinished";
+import ExportInProgress from "./ExportInProgress";
+import ExportInit from "./ExportInit";
 
 interface Props {
     show: boolean;
@@ -38,7 +38,7 @@ interface Props {
 export default function ExportModal(props: Props) {
     const appContext = useContext(AppContext);
     const [exportStage, setExportStage] = useState(ExportStage.INIT);
-    const [exportFolder, setExportFolder] = useState('');
+    const [exportFolder, setExportFolder] = useState("");
     const [continuousExport, setContinuousExport] = useState(false);
     const [exportProgress, setExportProgress] = useState<ExportProgress>({
         success: 0,
@@ -68,7 +68,7 @@ export default function ExportModal(props: Props) {
             setContinuousExport(exportSettings?.continuousExport ?? false);
             void syncExportRecord(exportSettings?.folder);
         } catch (e) {
-            logError(e, 'export on mount useEffect failed');
+            logError(e, "export on mount useEffect failed");
         }
     }, []);
 
@@ -101,7 +101,7 @@ export default function ExportModal(props: Props) {
     const verifyExportFolderExists = () => {
         if (!exportService.exportFolderExists(exportFolder)) {
             appContext.setDialogMessage(
-                getExportDirectoryDoesNotExistMessage()
+                getExportDirectoryDoesNotExistMessage(),
             );
             throw Error(CustomError.EXPORT_FOLDER_DOES_NOT_EXIST);
         }
@@ -123,7 +123,7 @@ export default function ExportModal(props: Props) {
             setPendingExports(pendingExports);
         } catch (e) {
             if (e.message !== CustomError.EXPORT_FOLDER_DOES_NOT_EXIST) {
-                logError(e, 'syncExportRecord failed');
+                logError(e, "syncExportRecord failed");
             }
         }
     };
@@ -140,7 +140,7 @@ export default function ExportModal(props: Props) {
             void syncExportRecord(newFolder);
         } catch (e) {
             if (e.message !== CustomError.SELECT_FOLDER_ABORTED) {
-                logError(e, 'handleChangeExportDirectoryClick failed');
+                logError(e, "handleChangeExportDirectoryClick failed");
             }
         }
     };
@@ -156,7 +156,7 @@ export default function ExportModal(props: Props) {
             }
             updateContinuousExport(newContinuousExport);
         } catch (e) {
-            logError(e, 'onContinuousExportChange failed');
+            logError(e, "onContinuousExportChange failed");
         }
     };
 
@@ -166,7 +166,7 @@ export default function ExportModal(props: Props) {
             await exportService.scheduleExport();
         } catch (e) {
             if (e.message !== CustomError.EXPORT_FOLDER_DOES_NOT_EXIST) {
-                logError(e, 'scheduleExport failed');
+                logError(e, "scheduleExport failed");
             }
         }
     };
@@ -178,7 +178,7 @@ export default function ExportModal(props: Props) {
     return (
         <Dialog open={props.show} onClose={props.onHide} maxWidth="xs">
             <DialogTitleWithCloseButton onClose={props.onHide}>
-                {t('EXPORT_DATA')}
+                {t("EXPORT_DATA")}
             </DialogTitleWithCloseButton>
             <DialogContent>
                 <ExportDirectory
@@ -208,14 +208,14 @@ export default function ExportModal(props: Props) {
 
 function ExportDirectory({ exportFolder, changeExportDirectory, exportStage }) {
     return (
-        <SpaceBetweenFlex minHeight={'48px'}>
-            <Typography color="text.muted" mr={'16px'}>
-                {t('DESTINATION')}
+        <SpaceBetweenFlex minHeight={"48px"}>
+            <Typography color="text.muted" mr={"16px"}>
+                {t("DESTINATION")}
             </Typography>
             <>
                 {!exportFolder ? (
-                    <Button color={'accent'} onClick={changeExportDirectory}>
-                        {t('SELECT_FOLDER')}
+                    <Button color={"accent"} onClick={changeExportDirectory}>
+                        {t("SELECT_FOLDER")}
                     </Button>
                 ) : (
                     <VerticallyCenteredFlex>
@@ -226,7 +226,7 @@ function ExportDirectory({ exportFolder, changeExportDirectory, exportStage }) {
                                 changeExportDirectory={changeExportDirectory}
                             />
                         ) : (
-                            <Box sx={{ width: '16px' }} />
+                            <Box sx={{ width: "16px" }} />
                         )}
                     </VerticallyCenteredFlex>
                 )}
@@ -237,8 +237,8 @@ function ExportDirectory({ exportFolder, changeExportDirectory, exportStage }) {
 
 function ContinuousExport({ continuousExport, toggleContinuousExport }) {
     return (
-        <SpaceBetweenFlex minHeight={'48px'}>
-            <Typography color="text.muted">{t('CONTINUOUS_EXPORT')}</Typography>
+        <SpaceBetweenFlex minHeight={"48px"}>
+            <Typography color="text.muted">{t("CONTINUOUS_EXPORT")}</Typography>
             <Box>
                 <Switch
                     color="accent"

@@ -1,19 +1,19 @@
+import { FACE_SEARCH_PRIVACY_POLICY_LINK } from "@ente/shared/constants/urls";
 import {
-    Stack,
     Button,
-    FormGroup,
     Checkbox,
-    FormControlLabel,
     DialogProps,
-    Typography,
+    FormControlLabel,
+    FormGroup,
     Link,
-} from '@mui/material';
-import { EnteDrawer } from 'components/EnteDrawer';
-import Titlebar from 'components/Titlebar';
-import { FACE_SEARCH_PRIVACY_POLICY_LINK } from '@ente/shared/constants/urls';
-import { useEffect, useState } from 'react';
-import { Trans } from 'react-i18next';
-import { t } from 'i18next';
+    Stack,
+    Typography,
+} from "@mui/material";
+import { EnteDrawer } from "components/EnteDrawer";
+import Titlebar from "components/Titlebar";
+import { t } from "i18next";
+import { useEffect, useState } from "react";
+import { Trans } from "react-i18next";
 export default function EnableFaceSearch({
     open,
     onClose,
@@ -31,8 +31,8 @@ export default function EnableFaceSearch({
         onRootClose();
     };
 
-    const handleDrawerClose: DialogProps['onClose'] = (_, reason) => {
-        if (reason === 'backdropClick') {
+    const handleDrawerClose: DialogProps["onClose"] = (_, reason) => {
+        if (reason === "backdropClick") {
             handleRootClose();
         } else {
             onClose();
@@ -44,37 +44,38 @@ export default function EnableFaceSearch({
             open={open}
             onClose={handleDrawerClose}
             BackdropProps={{
-                sx: { '&&&': { backgroundColor: 'transparent' } },
-            }}>
-            <Stack spacing={'4px'} py={'12px'}>
+                sx: { "&&&": { backgroundColor: "transparent" } },
+            }}
+        >
+            <Stack spacing={"4px"} py={"12px"}>
                 <Titlebar
                     onClose={onClose}
-                    title={t('ENABLE_FACE_SEARCH_TITLE')}
+                    title={t("ENABLE_FACE_SEARCH_TITLE")}
                     onRootClose={handleRootClose}
                 />
-                <Stack py={'20px'} px={'8px'} spacing={'32px'}>
-                    <Typography color="text.muted" px={'8px'}>
+                <Stack py={"20px"} px={"8px"} spacing={"32px"}>
+                    <Typography color="text.muted" px={"8px"}>
                         <Trans
-                            i18nKey={'ENABLE_FACE_SEARCH_DESCRIPTION'}
+                            i18nKey={"ENABLE_FACE_SEARCH_DESCRIPTION"}
                             components={{
                                 a: (
                                     <Link
-                                        target={'_blank'}
+                                        target={"_blank"}
                                         href={FACE_SEARCH_PRIVACY_POLICY_LINK}
                                         underline="always"
                                         sx={{
-                                            color: 'inherit',
-                                            textDecorationColor: 'inherit',
+                                            color: "inherit",
+                                            textDecorationColor: "inherit",
                                         }}
                                     />
                                 ),
                             }}
                         />
                     </Typography>
-                    <FormGroup sx={{ width: '100%' }}>
+                    <FormGroup sx={{ width: "100%" }}>
                         <FormControlLabel
                             sx={{
-                                color: 'text.muted',
+                                color: "text.muted",
                                 ml: 0,
                                 mt: 2,
                             }}
@@ -87,22 +88,24 @@ export default function EnableFaceSearch({
                                     }
                                 />
                             }
-                            label={t('FACE_SEARCH_CONFIRMATION')}
+                            label={t("FACE_SEARCH_CONFIRMATION")}
                         />
                     </FormGroup>
-                    <Stack px={'8px'} spacing={'8px'}>
+                    <Stack px={"8px"} spacing={"8px"}>
                         <Button
-                            color={'accent'}
+                            color={"accent"}
                             size="large"
                             disabled={!acceptTerms}
-                            onClick={enableFaceSearch}>
-                            {t('ENABLE_FACE_SEARCH')}
+                            onClick={enableFaceSearch}
+                        >
+                            {t("ENABLE_FACE_SEARCH")}
                         </Button>
                         <Button
-                            color={'secondary'}
+                            color={"secondary"}
                             size="large"
-                            onClick={onClose}>
-                            {t('CANCEL')}
+                            onClick={onClose}
+                        >
+                            {t("CANCEL")}
                         </Button>
                     </Stack>
                 </Stack>

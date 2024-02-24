@@ -1,6 +1,6 @@
-import { EncryptedEnteFile, EnteFile } from 'types/file';
+import { EncryptedEnteFile, EnteFile } from "types/file";
 
-export interface TrashItem extends Omit<EncryptedTrashItem, 'file'> {
+export interface TrashItem extends Omit<EncryptedTrashItem, "file"> {
     file: EnteFile;
 }
 

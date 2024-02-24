@@ -1,14 +1,14 @@
-import { sleep } from 'utils/common';
+import { sleep } from "utils/common";
 
 const retrySleepTimeInMilliSeconds = [2000, 5000, 10000];
 
 export async function retryHTTPCall(
     func: () => Promise<any>,
-    checkForBreakingError?: (error) => void
+    checkForBreakingError?: (error) => void,
 ): Promise<any> {
     const retrier = async (
         func: () => Promise<any>,
-        attemptNumber: number = 0
+        attemptNumber: number = 0,
     ) => {
         try {
             const resp = await func();

@@ -1,29 +1,11 @@
+import { addLogLine } from "@ente/shared/logging";
+import { GraphModel } from "@tensorflow/tfjs-converter";
+import * as tf from "@tensorflow/tfjs-core";
 import {
     load as blazeFaceLoad,
     BlazeFaceModel,
     NormalizedFace,
-} from 'blazeface-back';
-import * as tf from '@tensorflow/tfjs-core';
-import { GraphModel } from '@tensorflow/tfjs-converter';
-import {
-    FaceDetection,
-    FaceDetectionMethod,
-    FaceDetectionService,
-    Versioned,
-} from 'types/machineLearning';
-import { Box, Point } from '../../../thirdparty/face-api/classes';
-import { addPadding, crop, resizeToSquare } from 'utils/image';
-import {
-    computeTransformToBox,
-    transformBox,
-    transformPoints,
-} from 'utils/machineLearning/transform';
-import { enlargeBox, newBox, normFaceBox } from 'utils/machineLearning';
-import {
-    getNearestDetection,
-    removeDuplicateDetections,
-    transformPaddedToImage,
-} from 'utils/machineLearning/faceDetection';
+} from "blazeface-back";
 import {
     BLAZEFACE_FACE_SIZE,
     BLAZEFACE_INPUT_SIZE,
@@ -32,8 +14,26 @@ import {
     BLAZEFACE_PASS1_SCORE_THRESHOLD,
     BLAZEFACE_SCORE_THRESHOLD,
     MAX_FACE_DISTANCE_PERCENT,
-} from 'constants/mlConfig';
-import { addLogLine } from '@ente/shared/logging';
+} from "constants/mlConfig";
+import {
+    FaceDetection,
+    FaceDetectionMethod,
+    FaceDetectionService,
+    Versioned,
+} from "types/machineLearning";
+import { addPadding, crop, resizeToSquare } from "utils/image";
+import { enlargeBox, newBox, normFaceBox } from "utils/machineLearning";
+import {
+    getNearestDetection,
+    removeDuplicateDetections,
+    transformPaddedToImage,
+} from "utils/machineLearning/faceDetection";
+import {
+    computeTransformToBox,
+    transformBox,
+    transformPoints,
+} from "utils/machineLearning/transform";
+import { Box, Point } from "../../../thirdparty/face-api/classes";
 
 class BlazeFaceDetectionService implements FaceDetectionService {
     private blazeFaceModel: Promise<BlazeFaceModel>;
@@ -45,7 +45,7 @@ class BlazeFaceDetectionService implements FaceDetectionService {
 
     public constructor(desiredFaceSize: number = BLAZEFACE_FACE_SIZE) {
         this.method = {
-            value: 'BlazeFace',
+            value: "BlazeFace",
             version: 1,
         };
         this.desiredFaceSize = desiredFaceSize;
@@ -56,15 +56,15 @@ class BlazeFaceDetectionService implements FaceDetectionService {
             maxFaces: BLAZEFACE_MAX_FACES,
             scoreThreshold: BLAZEFACE_PASS1_SCORE_THRESHOLD,
             iouThreshold: BLAZEFACE_IOU_THRESHOLD,
-            modelUrl: '/models/blazeface/back/model.json',
+            modelUrl: "/models/blazeface/back/model.json",
             inputHeight: BLAZEFACE_INPUT_SIZE,
             inputWidth: BLAZEFACE_INPUT_SIZE,
         });
         addLogLine(
-            'loaded blazeFaceModel: ',
+            "loaded blazeFaceModel: ",
             // await this.blazeFaceModel,
             // eslint-disable-next-line @typescript-eslint/await-thenable
-            await tf.getBackend()
+            await tf.getBackend(),
         );
     }
 
@@ -168,7 +168,7 @@ class BlazeFaceDetectionService implements FaceDetectionService {
     }
 
     private async estimateFaces(
-        imageBitmap: ImageBitmap
+        imageBitmap: ImageBitmap,
     ): Promise<Array<FaceDetection>> {
         const resized = resizeToSquare(imageBitmap, BLAZEFACE_INPUT_SIZE);
         const tfImage = tf.browser.fromPixels(resized.image);
@@ -185,7 +185,7 @@ class BlazeFaceDetectionService implements FaceDetectionService {
         const faceDetections: Array<FaceDetection> = faces?.map((f) => {
             const box = transformBox(normFaceBox(f), transform);
             const normLandmarks = (f.landmarks as number[][])?.map(
-                (l) => new Point(l[0], l[1])
+                (l) => new Point(l[0], l[1]),
             );
             const landmarks = transformPoints(normLandmarks, transform);
             return {
@@ -200,7 +200,7 @@ class BlazeFaceDetectionService implements FaceDetectionService {
     }
 
     public async detectFaces(
-        imageBitmap: ImageBitmap
+        imageBitmap: ImageBitmap,
     ): Promise<Array<FaceDetection>> {
         const maxFaceDistance = imageBitmap.width * MAX_FACE_DISTANCE_PERCENT;
         const pass1Detections = await this.estimateFaces(imageBitmap);
@@ -212,21 +212,21 @@ class BlazeFaceDetectionService implements FaceDetectionService {
             const faceImage = crop(
                 imageBitmap,
                 imageBox,
-                BLAZEFACE_INPUT_SIZE / 2
+                BLAZEFACE_INPUT_SIZE / 2,
             );
             const paddedImage = addPadding(faceImage, 0.5);
             const paddedBox = enlargeBox(imageBox, 2);
             const pass2Detections = await this.estimateFaces(paddedImage);
 
             pass2Detections?.forEach((d) =>
-                transformPaddedToImage(d, faceImage, imageBox, paddedBox)
+                transformPaddedToImage(d, faceImage, imageBox, paddedBox),
             );
             let selected = pass2Detections?.[0];
             if (pass2Detections?.length > 1) {
                 // addLogLine('2nd pass >1 face', pass2Detections.length);
                 selected = getNearestDetection(
                     pass1Detection,
-                    pass2Detections
+                    pass2Detections,
                     // maxFaceDistance
                 );
             }

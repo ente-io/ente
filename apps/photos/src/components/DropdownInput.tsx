@@ -1,4 +1,4 @@
-import ExpandMore from '@mui/icons-material/ExpandMore';
+import ExpandMore from "@mui/icons-material/ExpandMore";
 import {
     Box,
     MenuItem,
@@ -7,7 +7,7 @@ import {
     Stack,
     Typography,
     TypographyProps,
-} from '@mui/material';
+} from "@mui/material";
 
 export interface DropdownOption<T> {
     label: string;
@@ -36,7 +36,7 @@ export default function DropdownInput<T extends string>({
     messageProps,
 }: Iprops<T>) {
     return (
-        <Stack spacing={'4px'}>
+        <Stack spacing={"4px"}>
             <Typography {...labelProps}>{label}</Typography>
             <Select
                 IconComponent={ExpandMore}
@@ -54,11 +54,11 @@ export default function DropdownInput<T extends string>({
                     MenuListProps: {
                         sx: (theme) => ({
                             backgroundColor: theme.colors.background.elevated2,
-                            '.MuiMenuItem-root ': {
+                            ".MuiMenuItem-root ": {
                                 color: theme.colors.text.faint,
-                                whiteSpace: 'normal',
+                                whiteSpace: "normal",
                             },
-                            '&&& > .Mui-selected': {
+                            "&&& > .Mui-selected": {
                                 background: theme.colors.background.elevated2,
                                 color: theme.colors.text.base,
                             },
@@ -66,28 +66,28 @@ export default function DropdownInput<T extends string>({
                     },
                 }}
                 sx={(theme) => ({
-                    '::before , ::after': {
-                        borderBottom: 'none !important',
+                    "::before , ::after": {
+                        borderBottom: "none !important",
                     },
-                    '.MuiInput-root': {
+                    ".MuiInput-root": {
                         background: theme.colors.fill.faint,
-                        borderRadius: '8px',
+                        borderRadius: "8px",
                     },
-                    '.MuiSelect-select': {
+                    ".MuiSelect-select": {
                         background: theme.colors.fill.faint,
-                        borderRadius: '8px',
+                        borderRadius: "8px",
                     },
-                    '&&& .MuiSelect-select': {
-                        p: '12px 36px 12px 16px',
+                    "&&& .MuiSelect-select": {
+                        p: "12px 36px 12px 16px",
                     },
-                    '.MuiSelect-icon': {
-                        mr: '12px',
+                    ".MuiSelect-icon": {
+                        mr: "12px",
                         color: theme.colors.stroke.muted,
                     },
                 })}
                 renderValue={(selected) => {
                     return !selected?.length ? (
-                        <Box color={'text.muted'}>{placeholder ?? ''}</Box>
+                        <Box color={"text.muted"}>{placeholder ?? ""}</Box>
                     ) : (
                         options.find((o) => o.value === selected).label
                     );
@@ -95,17 +95,19 @@ export default function DropdownInput<T extends string>({
                 value={selected}
                 onChange={(event: SelectChangeEvent) => {
                     setSelected(event.target.value as T);
-                }}>
+                }}
+            >
                 {options.map((option, index) => (
                     <MenuItem
                         key={option.label}
                         divider={index !== options.length - 1}
                         value={option.value}
                         sx={{
-                            px: '16px',
-                            py: '14px',
+                            px: "16px",
+                            py: "14px",
                             color: (theme) => theme.palette.primary.main,
-                        }}>
+                        }}
+                    >
                         {option.label}
                     </MenuItem>
                 ))}
@@ -113,9 +115,10 @@ export default function DropdownInput<T extends string>({
             {message && (
                 <Typography
                     variant="small"
-                    px={'8px'}
-                    color={'text.muted'}
-                    {...messageProps}>
+                    px={"8px"}
+                    color={"text.muted"}
+                    {...messageProps}
+                >
                     {message}
                 </Typography>
             )}

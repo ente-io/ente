@@ -1,9 +1,9 @@
-import React, { useContext } from 'react';
-import { CircularProgress, Typography } from '@mui/material';
-import watchFolderService from 'services/watchFolder/watchFolderService';
-import { AppContext } from 'pages/_app';
-import { FlexWrapper } from '@ente/shared/components/Container';
-import { WatchMapping } from 'types/watchFolder';
+import { FlexWrapper } from "@ente/shared/components/Container";
+import { CircularProgress, Typography } from "@mui/material";
+import { AppContext } from "pages/_app";
+import { useContext } from "react";
+import watchFolderService from "services/watchFolder/watchFolderService";
+import { WatchMapping } from "types/watchFolder";
 
 interface Iprops {
     mapping: WatchMapping;

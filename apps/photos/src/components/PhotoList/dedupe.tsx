@@ -1,34 +1,34 @@
-import React, { useRef, useEffect, useState, useMemo } from 'react';
+import { FlexWrapper } from "@ente/shared/components/Container";
+import { convertBytesToHumanReadable } from "@ente/shared/utils/size";
+import { Box, styled } from "@mui/material";
+import {
+    DATE_CONTAINER_HEIGHT,
+    GAP_BTW_TILES,
+    IMAGE_CONTAINER_MAX_HEIGHT,
+    IMAGE_CONTAINER_MAX_WIDTH,
+    MIN_COLUMNS,
+    SIZE_AND_COUNT_CONTAINER_HEIGHT,
+    SPACE_BTW_DATES,
+} from "constants/gallery";
+import { t } from "i18next";
+import memoize from "memoize-one";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
     VariableSizeList as List,
     ListChildComponentProps,
     areEqual,
-} from 'react-window';
-import { Box, styled } from '@mui/material';
-import { EnteFile } from 'types/file';
-import {
-    IMAGE_CONTAINER_MAX_HEIGHT,
-    MIN_COLUMNS,
-    DATE_CONTAINER_HEIGHT,
-    GAP_BTW_TILES,
-    SPACE_BTW_DATES,
-    SIZE_AND_COUNT_CONTAINER_HEIGHT,
-    IMAGE_CONTAINER_MAX_WIDTH,
-} from 'constants/gallery';
-import { convertBytesToHumanReadable } from '@ente/shared/utils/size';
-import { FlexWrapper } from '@ente/shared/components/Container';
-import { t } from 'i18next';
-import memoize from 'memoize-one';
-import { Duplicate } from 'services/deduplicationService';
+} from "react-window";
+import { Duplicate } from "services/deduplicationService";
+import { EnteFile } from "types/file";
 
 export enum ITEM_TYPE {
-    TIME = 'TIME',
-    FILE = 'FILE',
-    SIZE_AND_COUNT = 'SIZE_AND_COUNT',
-    HEADER = 'HEADER',
-    FOOTER = 'FOOTER',
-    MARKETING_FOOTER = 'MARKETING_FOOTER',
-    OTHER = 'OTHER',
+    TIME = "TIME",
+    FILE = "FILE",
+    SIZE_AND_COUNT = "SIZE_AND_COUNT",
+    HEADER = "HEADER",
+    FOOTER = "FOOTER",
+    MARKETING_FOOTER = "MARKETING_FOOTER",
+    OTHER = "OTHER",
 }
 
 export interface TimeStampListItem {
@@ -48,7 +48,7 @@ export interface TimeStampListItem {
     fileCount?: number;
 }
 
-const ListItem = styled('div')`
+const ListItem = styled("div")`
     display: flex;
     justify-content: center;
 `;
@@ -56,7 +56,7 @@ const ListItem = styled('div')`
 const getTemplateColumns = (
     columns: number,
     shrinkRatio: number,
-    groups?: number[]
+    groups?: number[],
 ): string => {
     if (groups) {
         // need to confirm why this was there
@@ -67,7 +67,7 @@ const getTemplateColumns = (
         return groups
             .map(
                 (x) =>
-                    `repeat(${x}, ${IMAGE_CONTAINER_MAX_WIDTH * shrinkRatio}px)`
+                    `repeat(${x}, ${IMAGE_CONTAINER_MAX_WIDTH * shrinkRatio}px)`,
             )
             .join(` ${SPACE_BTW_DATES}px `);
     } else {
@@ -143,7 +143,7 @@ interface Props {
     getThumbnail: (
         file: EnteFile,
         index: number,
-        isScrolling?: boolean
+        isScrolling?: boolean,
     ) => JSX.Element;
     activeCollectionID: number;
 }
@@ -154,7 +154,7 @@ interface ItemData {
     shrinkRatio: number;
     renderListItem: (
         timeStampListItem: TimeStampListItem,
-        isScrolling?: boolean
+        isScrolling?: boolean,
     ) => JSX.Element;
 }
 
@@ -165,14 +165,14 @@ const createItemData = memoize(
         shrinkRatio: number,
         renderListItem: (
             timeStampListItem: TimeStampListItem,
-            isScrolling?: boolean
-        ) => JSX.Element
+            isScrolling?: boolean,
+        ) => JSX.Element,
     ): ItemData => ({
         timeStampList,
         columns,
         shrinkRatio,
         renderListItem,
-    })
+    }),
 );
 const PhotoListRow = React.memo(
     ({
@@ -187,13 +187,14 @@ const PhotoListRow = React.memo(
                 <ListContainer
                     columns={columns}
                     shrinkRatio={shrinkRatio}
-                    groups={timeStampList[index].groups}>
+                    groups={timeStampList[index].groups}
+                >
                     {renderListItem(timeStampList[index], isScrolling)}
                 </ListContainer>
             </ListItem>
         );
     },
-    areEqual
+    areEqual,
 );
 
 const getTimeStampListFromDuplicates = (duplicates: Duplicate[], columns) => {
@@ -256,7 +257,7 @@ export function DedupePhotoList({
             refreshInProgress.current = true;
             const timeStampList = getTimeStampListFromDuplicates(
                 duplicates,
-                columns
+                columns,
             );
             setTimeStampList(timeStampList);
             refreshInProgress.current = false;
@@ -298,15 +299,15 @@ export function DedupePhotoList({
 
     const renderListItem = (
         listItem: TimeStampListItem,
-        isScrolling: boolean
+        isScrolling: boolean,
     ) => {
         switch (listItem.itemType) {
             case ITEM_TYPE.SIZE_AND_COUNT:
                 return (
                     <SizeAndCountContainer span={columns}>
-                        {listItem.fileCount} {t('FILES')},{' '}
-                        {convertBytesToHumanReadable(listItem.fileSize || 0)}{' '}
-                        {t('EACH')}
+                        {listItem.fileCount} {t("FILES")},{" "}
+                        {convertBytesToHumanReadable(listItem.fileSize || 0)}{" "}
+                        {t("EACH")}
                     </SizeAndCountContainer>
                 );
             case ITEM_TYPE.FILE: {
@@ -314,8 +315,8 @@ export function DedupePhotoList({
                     getThumbnail(
                         item,
                         listItem.itemStartIndex + idx,
-                        isScrolling
-                    )
+                        isScrolling,
+                    ),
                 );
                 if (listItem.groups) {
                     let sum = 0;
@@ -324,7 +325,7 @@ export function DedupePhotoList({
                         ret.splice(
                             sum,
                             0,
-                            <div key={`${listItem.items[0].id}-gap-${i}`} />
+                            <div key={`${listItem.items[0].id}-gap-${i}`} />,
                         );
                         sum += 1;
                     }
@@ -344,7 +345,7 @@ export function DedupePhotoList({
         timeStampList,
         columns,
         shrinkRatio,
-        renderListItem
+        renderListItem,
     );
 
     return (
@@ -358,7 +359,8 @@ export function DedupePhotoList({
             itemCount={timeStampList.length}
             itemKey={generateKey}
             overscanCount={3}
-            useIsScrolling>
+            useIsScrolling
+        >
             {PhotoListRow}
         </List>
     );

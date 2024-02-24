@@ -3,7 +3,7 @@ export const getEndpoint = () => {
     if (endpoint) {
         return endpoint;
     }
-    return 'https://api.ente.io';
+    return "https://api.ente.io";
 };
 
 export const getFileURL = (id: number) => {

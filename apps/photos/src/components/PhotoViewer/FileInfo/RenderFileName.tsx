@@ -1,31 +1,31 @@
-import React, { useEffect, useState } from 'react';
-import { EnteFile } from 'types/file';
+import { FlexWrapper } from "@ente/shared/components/Container";
+import { logError } from "@ente/shared/sentry";
+import PhotoOutlined from "@mui/icons-material/PhotoOutlined";
+import VideocamOutlined from "@mui/icons-material/VideocamOutlined";
+import Box from "@mui/material/Box";
+import { FILE_TYPE } from "constants/file";
+import { useEffect, useState } from "react";
+import { EnteFile } from "types/file";
+import { makeHumanReadableStorage } from "utils/billing";
 import {
     changeFileName,
     splitFilenameAndExtension,
     updateExistingFilePubMetadata,
-} from 'utils/file';
-import { FlexWrapper } from '@ente/shared/components/Container';
-import { logError } from '@ente/shared/sentry';
-import { FILE_TYPE } from 'constants/file';
-import InfoItem from './InfoItem';
-import { makeHumanReadableStorage } from 'utils/billing';
-import Box from '@mui/material/Box';
-import { FileNameEditDialog } from './FileNameEditDialog';
-import VideocamOutlined from '@mui/icons-material/VideocamOutlined';
-import PhotoOutlined from '@mui/icons-material/PhotoOutlined';
+} from "utils/file";
+import { FileNameEditDialog } from "./FileNameEditDialog";
+import InfoItem from "./InfoItem";
 
 const getFileTitle = (filename, extension) => {
     if (extension) {
-        return filename + '.' + extension;
+        return filename + "." + extension;
     } else {
         return filename;
     }
 };
 
 const getCaption = (file: EnteFile, parsedExifData) => {
-    const megaPixels = parsedExifData?.['megaPixels'];
-    const resolution = parsedExifData?.['resolution'];
+    const megaPixels = parsedExifData?.["megaPixels"];
+    const resolution = parsedExifData?.["resolution"];
     const fileSize = file.info?.fileSize;
 
     const captionParts = [];
@@ -66,7 +66,7 @@ export function RenderFileName({
 
     useEffect(() => {
         const [filename, extension] = splitFilenameAndExtension(
-            file.metadata.title
+            file.metadata.title,
         );
         setFilename(filename);
         setExtension(extension);
@@ -86,7 +86,7 @@ export function RenderFileName({
                 scheduleUpdate();
             }
         } catch (e) {
-            logError(e, 'failed to update file name');
+            logError(e, "failed to update file name");
             throw e;
         }
     };

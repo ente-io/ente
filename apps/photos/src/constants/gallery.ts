@@ -8,8 +8,8 @@ export const SPACE_BTW_DATES = 44;
 export const SPACE_BTW_DATES_TO_IMAGE_CONTAINER_WIDTH_RATIO = 0.244;
 
 export enum PLAN_PERIOD {
-    MONTH = 'month',
-    YEAR = 'year',
+    MONTH = "month",
+    YEAR = "year",
 }
 
 export const SYNC_INTERVAL_IN_MICROSECONDS = 1000 * 60 * 5; // 5 minutes

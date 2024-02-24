@@ -1,8 +1,7 @@
-import { IconButton } from '@mui/material';
-import { FluidContainer } from '@ente/shared/components/Container';
-import React from 'react';
-import { SearchMobileBox } from './styledComponents';
-import SearchIcon from '@mui/icons-material/Search';
+import { FluidContainer } from "@ente/shared/components/Container";
+import SearchIcon from "@mui/icons-material/Search";
+import { IconButton } from "@mui/material";
+import { SearchMobileBox } from "./styledComponents";
 
 export function SearchBarMobile({ show, showSearchInput }) {
     if (!show) {

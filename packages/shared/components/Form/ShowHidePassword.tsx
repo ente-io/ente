@@ -1,13 +1,13 @@
-import React from 'react';
-import { IconButton, InputAdornment } from '@mui/material';
-import VisibilityIcon from '@mui/icons-material/Visibility';
-import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
+import { IconButton, InputAdornment } from "@mui/material";
+import React from "react";
 
 interface Iprops {
     showPassword: boolean;
     handleClickShowPassword: () => void;
     handleMouseDownPassword: (
-        event: React.MouseEvent<HTMLButtonElement>
+        event: React.MouseEvent<HTMLButtonElement>,
     ) => void;
 }
 const ShowHidePassword = ({
@@ -22,7 +22,8 @@ const ShowHidePassword = ({
             aria-label="toggle password visibility"
             onClick={handleClickShowPassword}
             onMouseDown={handleMouseDownPassword}
-            edge="end">
+            edge="end"
+        >
             {showPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
         </IconButton>
     </InputAdornment>

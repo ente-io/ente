@@ -1,17 +1,17 @@
-import { convertBytesToHumanReadable } from '../utils/size';
-import { formatDateTimeShort } from '../time/format';
-import { logError } from '@ente/shared/sentry';
+import { isDevBuild } from "@/utils/env";
+import { logError } from "@ente/shared/sentry";
 import {
     getData,
     LS_KEYS,
     removeData,
     setData,
-} from '@ente/shared/storage/localStorage';
-import { ElectronFile } from '../upload/types';
-import { addLogLine } from '.';
-import { getSentryUserID } from '../sentry/utils';
-import type { User } from '../user/types';
-import { isDevBuild } from '@/utils/env';
+} from "@ente/shared/storage/localStorage";
+import { addLogLine } from ".";
+import { getSentryUserID } from "../sentry/utils";
+import { formatDateTimeShort } from "../time/format";
+import { ElectronFile } from "../upload/types";
+import type { User } from "../user/types";
+import { convertBytesToHumanReadable } from "../utils/size";
 
 export const MAX_LOG_SIZE = 5 * 1024 * 1024; // 5MB
 export const MAX_LOG_LINES = 1000;
@@ -31,9 +31,9 @@ export function logWeb(logLine: string) {
         logs.push(log);
         setLogs(logs);
     } catch (e) {
-        if (e.name === 'QuotaExceededError') {
+        if (e.name === "QuotaExceededError") {
             deleteLogs();
-            logWeb('logs cleared');
+            logWeb("logs cleared");
         }
     }
 }
@@ -52,7 +52,7 @@ export const clearLogsIfLocalStorageLimitExceeded = () => {
         const logSize = getStringSize(logs);
         if (logSize > MAX_LOG_SIZE) {
             deleteLogs();
-            logWeb('Logs cleared due to size limit exceeded');
+            logWeb("Logs cleared due to size limit exceeded");
         } else {
             try {
                 logWeb(`app started`);
@@ -64,9 +64,9 @@ export const clearLogsIfLocalStorageLimitExceeded = () => {
     } catch (e) {
         logError(
             e,
-            'failed to clearLogsIfLocalStorageLimitExceeded',
+            "failed to clearLogsIfLocalStorageLimitExceeded",
             undefined,
-            true
+            true,
         );
     }
 };
@@ -76,7 +76,7 @@ export const logStartupMessage = async (appId: string) => {
     const appIdL = appId.toLowerCase();
     const userID = (getData(LS_KEYS.USER) as User)?.id;
     const sentryID = await getSentryUserID();
-    const buildId = isDevBuild ? 'dev' : `git ${process.env.GIT_SHA}`;
+    const buildId = isDevBuild ? "dev" : `git ${process.env.GIT_SHA}`;
 
     addLogLine(`ente-${appIdL}-web ${buildId} uid ${userID} sid ${sentryID}`);
 };
@@ -102,5 +102,5 @@ export function formatLog(log: Log) {
 }
 
 function combineLogLines(logs: Log[]) {
-    return logs.map(formatLog).join('\n');
+    return logs.map(formatLog).join("\n");
 }

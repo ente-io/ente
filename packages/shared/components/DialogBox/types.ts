@@ -1,4 +1,4 @@
-import { ButtonProps } from '@mui/material';
+import { ButtonProps } from "@mui/material";
 
 export interface DialogBoxAttributes {
     icon?: React.ReactNode;
@@ -8,19 +8,19 @@ export interface DialogBoxAttributes {
     content?: any;
     close?: {
         text?: string;
-        variant?: ButtonProps['color'];
+        variant?: ButtonProps["color"];
         action?: () => void;
     };
     proceed?: {
         text: string;
         action: () => void;
-        variant?: ButtonProps['color'];
+        variant?: ButtonProps["color"];
         disabled?: boolean;
     };
     secondary?: {
         text: string;
         action: () => void;
-        variant: ButtonProps['color'];
+        variant: ButtonProps["color"];
         disabled?: boolean;
     };
 }

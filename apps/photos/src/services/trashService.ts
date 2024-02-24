@@ -1,20 +1,20 @@
-import { SetFiles } from 'types/gallery';
-import { Collection } from 'types/collection';
-import { getEndpoint } from '@ente/shared/network/api';
-import { getToken } from '@ente/shared/storage/localStorage/helpers';
-import { decryptFile, sortTrashFiles } from 'utils/file';
-import { logError } from '@ente/shared/sentry';
-import localForage from '@ente/shared/storage/localForage';
-import { getCollection } from './collectionService';
+import { getEndpoint } from "@ente/shared/network/api";
+import { logError } from "@ente/shared/sentry";
+import localForage from "@ente/shared/storage/localForage";
+import { getToken } from "@ente/shared/storage/localStorage/helpers";
+import { Collection } from "types/collection";
+import { SetFiles } from "types/gallery";
+import { decryptFile, sortTrashFiles } from "utils/file";
+import { getCollection } from "./collectionService";
 
-import HTTPService from '@ente/shared/network/HTTPService';
-import { EncryptedTrashItem, Trash } from 'types/trash';
-import { EnteFile } from 'types/file';
-import { mergeMetadata } from 'utils/file';
+import HTTPService from "@ente/shared/network/HTTPService";
+import { EnteFile } from "types/file";
+import { EncryptedTrashItem, Trash } from "types/trash";
+import { mergeMetadata } from "utils/file";
 
-const TRASH = 'file-trash';
-const TRASH_TIME = 'trash-time';
-const DELETED_COLLECTION = 'deleted-collection';
+const TRASH = "file-trash";
+const TRASH_TIME = "trash-time";
+const DELETED_COLLECTION = "deleted-collection";
 
 const ENDPOINT = getEndpoint();
 
@@ -31,7 +31,7 @@ export async function getLocalDeletedCollections() {
     const trashedCollections: Array<Collection> =
         (await localForage.getItem<Collection[]>(DELETED_COLLECTION)) || [];
     const nonUndefinedCollections = trashedCollections.filter(
-        (collection) => !!collection
+        (collection) => !!collection,
     );
     if (nonUndefinedCollections.length !== trashedCollections.length) {
         await localForage.setItem(DELETED_COLLECTION, nonUndefinedCollections);
@@ -42,10 +42,10 @@ export async function getLocalDeletedCollections() {
 export async function cleanTrashCollections(fileTrash: Trash) {
     const trashedCollections = await getLocalDeletedCollections();
     const neededTrashCollections = new Set<number>(
-        fileTrash.map((item) => item.file.collectionID)
+        fileTrash.map((item) => item.file.collectionID),
     );
     const filterCollections = trashedCollections.filter((item) =>
-        neededTrashCollections.has(item.id)
+        neededTrashCollections.has(item.id),
     );
     await localForage.setItem(DELETED_COLLECTION, filterCollections);
 }
@@ -55,12 +55,12 @@ async function getLastSyncTime() {
 }
 export async function syncTrash(
     collections: Collection[],
-    setTrashedFiles: SetFiles
+    setTrashedFiles: SetFiles,
 ): Promise<void> {
     const trash = await getLocalTrash();
     collections = [...collections, ...(await getLocalDeletedCollections())];
     const collectionMap = new Map<number, Collection>(
-        collections.map((collection) => [collection.id, collection])
+        collections.map((collection) => [collection.id, collection]),
     );
     if (!getToken()) {
         return;
@@ -71,7 +71,7 @@ export async function syncTrash(
         collectionMap,
         lastSyncTime,
         setTrashedFiles,
-        trash
+        trash,
     );
     cleanTrashCollections(updatedTrash);
 }
@@ -80,7 +80,7 @@ export const updateTrash = async (
     collections: Map<number, Collection>,
     sinceTime: number,
     setTrashedFiles: SetFiles,
-    currentTrash: Trash
+    currentTrash: Trash,
 ): Promise<Trash> => {
     try {
         let updatedTrash: Trash = [...currentTrash];
@@ -98,8 +98,8 @@ export const updateTrash = async (
                     sinceTime: time,
                 },
                 {
-                    'X-Auth-Token': token,
-                }
+                    "X-Auth-Token": token,
+                },
             );
             // #Perf: This can be optimized by running the decryption in parallel
             for (const trashItem of resp.data.diff as EncryptedTrashItem[]) {
@@ -115,12 +115,12 @@ export const updateTrash = async (
                 if (!trashItem.isDeleted && !trashItem.isRestored) {
                     const decryptedFile = await decryptFile(
                         trashItem.file,
-                        collection.key
+                        collection.key,
                     );
                     updatedTrash.push({ ...trashItem, file: decryptedFile });
                 } else {
                     updatedTrash = updatedTrash.filter(
-                        (item) => item.file.id !== trashItem.file.id
+                        (item) => item.file.id !== trashItem.file.id,
                     );
                 }
             }
@@ -135,7 +135,7 @@ export const updateTrash = async (
         } while (resp.data.hasMore);
         return updatedTrash;
     } catch (e) {
-        logError(e, 'Get trash files failed');
+        logError(e, "Get trash files failed");
     }
     return currentTrash;
 };
@@ -148,8 +148,8 @@ export function getTrashedFiles(trash: Trash): EnteFile[] {
                 updationTime: trashedFile.updatedAt,
                 deleteBy: trashedFile.deleteBy,
                 isTrashed: true,
-            }))
-        )
+            })),
+        ),
     );
 }
 
@@ -166,11 +166,11 @@ export const emptyTrash = async () => {
             { lastUpdatedAt },
             null,
             {
-                'X-Auth-Token': token,
-            }
+                "X-Auth-Token": token,
+            },
         );
     } catch (e) {
-        logError(e, 'empty trash failed');
+        logError(e, "empty trash failed");
         throw e;
     }
 };

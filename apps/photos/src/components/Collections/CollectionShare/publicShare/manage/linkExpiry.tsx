@@ -1,16 +1,16 @@
-import ChevronRight from '@mui/icons-material/ChevronRight';
-import { DialogProps, Stack } from '@mui/material';
-import { EnteDrawer } from 'components/EnteDrawer';
-import { EnteMenuItem } from 'components/Menu/EnteMenuItem';
-import React, { useMemo, useState } from 'react';
-import { PublicURL, Collection, UpdatePublicURL } from 'types/collection';
-import { shareExpiryOptions } from 'utils/collection';
-import { t } from 'i18next';
-import { MenuItemGroup } from 'components/Menu/MenuItemGroup';
-import { formatDateTime } from '@ente/shared/time/format';
-import Titlebar from 'components/Titlebar';
-import MenuItemDivider from 'components/Menu/MenuItemDivider';
-import { isLinkExpired } from '../managePublicShare';
+import { formatDateTime } from "@ente/shared/time/format";
+import ChevronRight from "@mui/icons-material/ChevronRight";
+import { DialogProps, Stack } from "@mui/material";
+import { EnteDrawer } from "components/EnteDrawer";
+import { EnteMenuItem } from "components/Menu/EnteMenuItem";
+import MenuItemDivider from "components/Menu/MenuItemDivider";
+import { MenuItemGroup } from "components/Menu/MenuItemGroup";
+import Titlebar from "components/Titlebar";
+import { t } from "i18next";
+import { useMemo, useState } from "react";
+import { Collection, PublicURL, UpdatePublicURL } from "types/collection";
+import { shareExpiryOptions } from "utils/collection";
+import { isLinkExpired } from "../managePublicShare";
 
 interface Iprops {
     publicShareProp: PublicURL;
@@ -49,8 +49,8 @@ export function ManageLinkExpiry({
         setShareExpiryOptionsModalView(false);
     };
 
-    const handleDrawerClose: DialogProps['onClose'] = (_, reason) => {
-        if (reason === 'backdropClick') {
+    const handleDrawerClose: DialogProps["onClose"] = (_, reason) => {
+        if (reason === "backdropClick") {
             onRootClose();
         } else {
             closeShareExpiryOptionsModalView();
@@ -64,34 +64,35 @@ export function ManageLinkExpiry({
                     onClick={openShareExpiryOptionsModalView}
                     endIcon={<ChevronRight />}
                     variant="captioned"
-                    label={t('LINK_EXPIRY')}
+                    label={t("LINK_EXPIRY")}
                     color={
                         isLinkExpired(publicShareProp?.validTill)
-                            ? 'critical'
-                            : 'primary'
+                            ? "critical"
+                            : "primary"
                     }
                     subText={
                         isLinkExpired(publicShareProp?.validTill)
-                            ? t('LINK_EXPIRED')
+                            ? t("LINK_EXPIRED")
                             : publicShareProp?.validTill
                               ? formatDateTime(
-                                    publicShareProp?.validTill / 1000
+                                    publicShareProp?.validTill / 1000,
                                 )
-                              : t('NEVER')
+                              : t("NEVER")
                     }
                 />
             </MenuItemGroup>
             <EnteDrawer
                 anchor="right"
                 open={shareExpiryOptionsModalView}
-                onClose={handleDrawerClose}>
-                <Stack spacing={'4px'} py={'12px'}>
+                onClose={handleDrawerClose}
+            >
+                <Stack spacing={"4px"} py={"12px"}>
                     <Titlebar
                         onClose={closeShareExpiryOptionsModalView}
-                        title={t('LINK_EXPIRY')}
+                        title={t("LINK_EXPIRY")}
                         onRootClose={onRootClose}
                     />
-                    <Stack py={'20px'} px={'8px'} spacing={'32px'}>
+                    <Stack py={"20px"} px={"8px"} spacing={"32px"}>
                         <MenuItemGroup>
                             {shareExpireOption.map((item, index) => (
                                 <>
@@ -99,7 +100,7 @@ export function ManageLinkExpiry({
                                         fontWeight="normal"
                                         key={item.value()}
                                         onClick={changeShareExpiryValue(
-                                            item.value()
+                                            item.value(),
                                         )}
                                         label={item.label}
                                     />

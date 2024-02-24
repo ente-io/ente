@@ -1,9 +1,7 @@
-import {
-    euclidean,
-    // TreeNode
-} from 'hdbscan';
+import { euclidean } from "hdbscan";
 // import { RawNodeDatum } from 'react-d3-tree/lib/types/common';
 // import { f32Average, getAllFacesFromMap } from '.';
+import { addLogLine } from "@ente/shared/logging";
 import {
     FacesCluster,
     // Cluster,
@@ -11,8 +9,7 @@ import {
     FaceWithEmbedding,
     MLSyncContext,
     NearestCluster,
-} from 'types/machineLearning';
-import { addLogLine } from '@ente/shared/logging';
+} from "types/machineLearning";
 // import { getAllFacesMap } from 'utils/storage/mlStorage';
 
 // export function getClusterSummary(cluster: Cluster): FaceDescriptor {
@@ -45,14 +42,14 @@ export function updateClusterSummaries(syncContext: MLSyncContext) {
 
 export function getNearestCluster(
     syncContext: MLSyncContext,
-    noise: FaceWithEmbedding
+    noise: FaceWithEmbedding,
 ): NearestCluster {
     let nearest: FacesCluster = null;
     let nearestDist = 100000;
     syncContext.mlLibraryData.faceClustersWithNoise.clusters.forEach((c) => {
         const dist = euclidean(
             Array.from(noise.embedding),
-            Array.from(c.summary)
+            Array.from(c.summary),
         );
         if (dist < nearestDist) {
             nearestDist = dist;
@@ -60,7 +57,7 @@ export function getNearestCluster(
         }
     });
 
-    addLogLine('nearestDist: ', nearestDist);
+    addLogLine("nearestDist: ", nearestDist);
     return { cluster: nearest, distance: nearestDist };
 }
 

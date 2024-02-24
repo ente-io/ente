@@ -1,14 +1,14 @@
-import { expose } from 'comlink';
-import { EnteFile } from 'types/file';
-import mlService from 'services/machineLearning/machineLearningService';
-import { MachineLearningWorker } from 'types/machineLearning';
-import { addLogLine } from '@ente/shared/logging';
+import { addLogLine } from "@ente/shared/logging";
+import { expose } from "comlink";
+import mlService from "services/machineLearning/machineLearningService";
+import { EnteFile } from "types/file";
+import { MachineLearningWorker } from "types/machineLearning";
 // import ReverseProxiedElectronCacheStorageProxy from './electronCacheStorageProxy.proxy';
 // import { setupResponseComlinkTransferHandler } from 'utils/comlink';
 
 export class DedicatedMLWorker implements MachineLearningWorker {
     constructor() {
-        addLogLine('DedicatedMLWorker constructor called');
+        addLogLine("DedicatedMLWorker constructor called");
         // this.init();
     }
 
@@ -28,7 +28,7 @@ export class DedicatedMLWorker implements MachineLearningWorker {
         token: string,
         userID: number,
         enteFile: EnteFile,
-        localFile: globalThis.File
+        localFile: globalThis.File,
     ) {
         return mlService.syncLocalFile(token, userID, enteFile, localFile);
     }
@@ -40,7 +40,7 @@ export class DedicatedMLWorker implements MachineLearningWorker {
     public async regenerateFaceCrop(
         token: string,
         userID: number,
-        faceID: string
+        faceID: string,
     ) {
         return mlService.regenerateFaceCrop(token, userID, faceID);
     }

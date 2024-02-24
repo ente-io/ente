@@ -1,94 +1,97 @@
-import { getEndpoint } from '@ente/shared/network/api';
-import { getData, LS_KEYS } from '@ente/shared/storage/localStorage';
-import localForage from '@ente/shared/storage/localForage';
+import { getEndpoint } from "@ente/shared/network/api";
+import localForage from "@ente/shared/storage/localForage";
+import { getData, LS_KEYS } from "@ente/shared/storage/localStorage";
 
-import { getToken } from '@ente/shared/storage/localStorage/helpers';
-import { getActualKey } from '@ente/shared/user';
-import { getPublicKey } from './userService';
-import HTTPService from '@ente/shared/network/HTTPService';
-import { EnteFile } from 'types/file';
-import { logError } from '@ente/shared/sentry';
-import { CustomError } from '@ente/shared/error';
+import ComlinkCryptoWorker from "@ente/shared/crypto";
+import { CustomError } from "@ente/shared/error";
+import HTTPService from "@ente/shared/network/HTTPService";
+import { logError } from "@ente/shared/sentry";
+import { getToken } from "@ente/shared/storage/localStorage/helpers";
+import { getActualKey } from "@ente/shared/user";
+import { User } from "@ente/shared/user/types";
+import { REQUEST_BATCH_SIZE } from "constants/api";
 import {
-    sortFiles,
-    groupFilesBasedOnCollectionID,
-    getUniqueFiles,
-} from 'utils/file';
+    ALL_SECTION,
+    ARCHIVE_SECTION,
+    COLLECTION_LIST_SORT_BY,
+    COLLECTION_SORT_ORDER,
+    CollectionSummaryType,
+    CollectionType,
+    DUMMY_UNCATEGORIZED_COLLECTION,
+    HIDDEN_ITEMS_SECTION,
+    TRASH_SECTION,
+} from "constants/collection";
+import { t } from "i18next";
 import {
-    Collection,
-    CollectionToFileMap,
     AddToCollectionRequest,
-    MoveToCollectionRequest,
-    EncryptedFileKey,
-    CreatePublicAccessTokenRequest,
-    PublicURL,
-    UpdatePublicURL,
-    CollectionSummaries,
-    CollectionSummary,
+    Collection,
     CollectionFilesCount,
-    EncryptedCollection,
     CollectionMagicMetadata,
     CollectionMagicMetadataProps,
     CollectionPublicMagicMetadata,
-    RemoveFromCollectionRequest,
     CollectionShareeMagicMetadata,
-} from 'types/collection';
+    CollectionSummaries,
+    CollectionSummary,
+    CollectionToFileMap,
+    CreatePublicAccessTokenRequest,
+    EncryptedCollection,
+    EncryptedFileKey,
+    MoveToCollectionRequest,
+    PublicURL,
+    RemoveFromCollectionRequest,
+    UpdatePublicURL,
+} from "types/collection";
+import { EnteFile } from "types/file";
 import {
-    COLLECTION_LIST_SORT_BY,
-    CollectionType,
-    ARCHIVE_SECTION,
-    TRASH_SECTION,
-    COLLECTION_SORT_ORDER,
-    ALL_SECTION,
-    CollectionSummaryType,
-    DUMMY_UNCATEGORIZED_COLLECTION,
-    HIDDEN_ITEMS_SECTION,
-} from 'constants/collection';
-import { SUB_TYPE, UpdateMagicMetadataRequest } from 'types/magicMetadata';
+    EncryptedMagicMetadata,
+    SUB_TYPE,
+    UpdateMagicMetadataRequest,
+    VISIBILITY_STATE,
+} from "types/magicMetadata";
+import { FamilyData } from "types/user";
+import {
+    changeCollectionSubType,
+    getHiddenCollections,
+    getNonHiddenCollections,
+    isDefaultHiddenCollection,
+    isHiddenCollection,
+    isIncomingCollabShare,
+    isIncomingShare,
+    isOutgoingShare,
+    isQuickLinkCollection,
+    isSharedOnlyViaLink,
+    isValidMoveTarget,
+} from "utils/collection";
+import { batch } from "utils/common";
+import {
+    getUniqueFiles,
+    groupFilesBasedOnCollectionID,
+    sortFiles,
+} from "utils/file";
 import {
     isArchivedCollection,
     isArchivedFile,
     isPinnedCollection,
     updateMagicMetadata,
-} from 'utils/magicMetadata';
-import { User } from '@ente/shared/user/types';
-import { FamilyData } from 'types/user';
-import {
-    isQuickLinkCollection,
-    isOutgoingShare,
-    isSharedOnlyViaLink,
-    isValidMoveTarget,
-    isHiddenCollection,
-    getNonHiddenCollections,
-    changeCollectionSubType,
-    isIncomingCollabShare,
-    isIncomingShare,
-    isDefaultHiddenCollection,
-    getHiddenCollections,
-} from 'utils/collection';
-import ComlinkCryptoWorker from '@ente/shared/crypto';
-import { getLocalFiles } from './fileService';
-import { REQUEST_BATCH_SIZE } from 'constants/api';
-import { batch } from 'utils/common';
-import { t } from 'i18next';
-import { EncryptedMagicMetadata } from 'types/magicMetadata';
-import { VISIBILITY_STATE } from 'types/magicMetadata';
+} from "utils/magicMetadata";
+import { getLocalFiles } from "./fileService";
+import { getPublicKey } from "./userService";
 
 const ENDPOINT = getEndpoint();
-const COLLECTION_TABLE = 'collections';
-const COLLECTION_UPDATION_TIME = 'collection-updation-time';
-const HIDDEN_COLLECTION_IDS = 'hidden-collection-ids';
+const COLLECTION_TABLE = "collections";
+const COLLECTION_UPDATION_TIME = "collection-updation-time";
+const HIDDEN_COLLECTION_IDS = "hidden-collection-ids";
 
-const UNCATEGORIZED_COLLECTION_NAME = 'Uncategorized';
-export const HIDDEN_COLLECTION_NAME = '.hidden';
-const FAVORITE_COLLECTION_NAME = 'Favorites';
+const UNCATEGORIZED_COLLECTION_NAME = "Uncategorized";
+export const HIDDEN_COLLECTION_NAME = ".hidden";
+const FAVORITE_COLLECTION_NAME = "Favorites";
 
 export const getCollectionLastSyncTime = async (collection: Collection) =>
     (await localForage.getItem<number>(`${collection.id}-time`)) ?? 0;
 
 export const setCollectionLastSyncTime = async (
     collection: Collection,
-    time: number
+    time: number,
 ) => await localForage.setItem<number>(`${collection.id}-time`, time);
 
 export const removeCollectionLastSyncTime = async (collection: Collection) =>
@@ -96,7 +99,7 @@ export const removeCollectionLastSyncTime = async (collection: Collection) =>
 
 const getCollectionWithSecrets = async (
     collection: EncryptedCollection,
-    masterKey: string
+    masterKey: string,
 ): Promise<Collection> => {
     const cryptoWorker = await ComlinkCryptoWorker.getInstance();
     const userID = getData(LS_KEYS.USER).id;
@@ -105,19 +108,19 @@ const getCollectionWithSecrets = async (
         collectionKey = await cryptoWorker.decryptB64(
             collection.encryptedKey,
             collection.keyDecryptionNonce,
-            masterKey
+            masterKey,
         );
     } else {
         const keyAttributes = getData(LS_KEYS.KEY_ATTRIBUTES);
         const secretKey = await cryptoWorker.decryptB64(
             keyAttributes.encryptedSecretKey,
             keyAttributes.secretKeyDecryptionNonce,
-            masterKey
+            masterKey,
         );
         collectionKey = await cryptoWorker.boxSealOpen(
             collection.encryptedKey,
             keyAttributes.publicKey,
-            secretKey
+            secretKey,
         );
     }
     const collectionName =
@@ -125,7 +128,7 @@ const getCollectionWithSecrets = async (
         (await cryptoWorker.decryptToUTF8(
             collection.encryptedName,
             collection.nameDecryptionNonce,
-            collectionKey
+            collectionKey,
         ));
 
     let collectionMagicMetadata: CollectionMagicMetadata;
@@ -135,7 +138,7 @@ const getCollectionWithSecrets = async (
             data: await cryptoWorker.decryptMetadata(
                 collection.magicMetadata.data,
                 collection.magicMetadata.header,
-                collectionKey
+                collectionKey,
             ),
         };
     }
@@ -146,7 +149,7 @@ const getCollectionWithSecrets = async (
             data: await cryptoWorker.decryptMetadata(
                 collection.pubMagicMetadata.data,
                 collection.pubMagicMetadata.header,
-                collectionKey
+                collectionKey,
             ),
         };
     }
@@ -158,7 +161,7 @@ const getCollectionWithSecrets = async (
             data: await cryptoWorker.decryptMetadata(
                 collection.sharedMagicMetadata.data,
                 collection.sharedMagicMetadata.header,
-                collectionKey
+                collectionKey,
             ),
         };
     }
@@ -176,7 +179,7 @@ const getCollectionWithSecrets = async (
 const getCollections = async (
     token: string,
     sinceTime: number,
-    key: string
+    key: string,
 ): Promise<Collection[]> => {
     try {
         const resp = await HTTPService.get(
@@ -184,7 +187,7 @@ const getCollections = async (
             {
                 sinceTime,
             },
-            { 'X-Auth-Token': token }
+            { "X-Auth-Token": token },
         );
         const decryptedCollections: Collection[] = await Promise.all(
             resp.data.collections.map(
@@ -200,25 +203,25 @@ const getCollections = async (
                         });
                         return collection;
                     }
-                }
-            )
+                },
+            ),
         );
         // only allow deleted or collection with key, filtering out collection whose decryption failed
         const collections = decryptedCollections.filter(
-            (collection) => collection.isDeleted || collection.key
+            (collection) => collection.isDeleted || collection.key,
         );
         return collections;
     } catch (e) {
-        logError(e, 'getCollections failed');
+        logError(e, "getCollections failed");
         throw e;
     }
 };
 
 export const getLocalCollections = async (
-    type: 'normal' | 'hidden' = 'normal'
+    type: "normal" | "hidden" = "normal",
 ): Promise<Collection[]> => {
     const collections = await getAllLocalCollections();
-    return type === 'normal'
+    return type === "normal"
         ? getNonHiddenCollections(collections)
         : getHiddenCollections(collections);
 };
@@ -236,10 +239,10 @@ export const getHiddenCollectionIDs = async (): Promise<number[]> =>
     (await localForage.getItem<number[]>(HIDDEN_COLLECTION_IDS)) ?? [];
 
 export const getLatestCollections = async (
-    type: 'normal' | 'hidden' = 'normal'
+    type: "normal" | "hidden" = "normal",
 ): Promise<Collection[]> => {
     const collections = await getAllLatestCollections();
-    return type === 'normal'
+    return type === "normal"
         ? getNonHiddenCollections(collections)
         : getHiddenCollections(collections);
 };
@@ -297,7 +300,7 @@ export const syncCollections = async () => {
         collections.push(collection);
         lastCollectionUpdationTime = Math.max(
             lastCollectionUpdationTime,
-            collection.updationTime
+            collection.updationTime,
         );
     }
 
@@ -308,17 +311,17 @@ export const syncCollections = async () => {
     await localForage.setItem(COLLECTION_TABLE, collections);
     await localForage.setItem(
         COLLECTION_UPDATION_TIME,
-        lastCollectionUpdationTime
+        lastCollectionUpdationTime,
     );
     await localForage.setItem(
         HIDDEN_COLLECTION_IDS,
-        updatedHiddenCollectionIDs
+        updatedHiddenCollectionIDs,
     );
     return collections;
 };
 
 export const getCollection = async (
-    collectionID: number
+    collectionID: number,
 ): Promise<Collection> => {
     try {
         const token = getToken();
@@ -328,22 +331,22 @@ export const getCollection = async (
         const resp = await HTTPService.get(
             `${ENDPOINT}/collections/${collectionID}`,
             null,
-            { 'X-Auth-Token': token }
+            { "X-Auth-Token": token },
         );
         const key = await getActualKey();
         const collectionWithSecrets = await getCollectionWithSecrets(
             resp.data?.collection,
-            key
+            key,
         );
         return collectionWithSecrets;
     } catch (e) {
-        logError(e, 'failed to get collection');
+        logError(e, "failed to get collection");
         throw e;
     }
 };
 
 export const getCollectionLatestFiles = (
-    files: EnteFile[]
+    files: EnteFile[],
 ): CollectionToFileMap => {
     const latestFiles = new Map<number, EnteFile>();
 
@@ -357,7 +360,7 @@ export const getCollectionLatestFiles = (
 
 export const getCollectionCoverFiles = (
     files: EnteFile[],
-    collections: Collection[]
+    collections: Collection[],
 ): CollectionToFileMap => {
     const collectionIDToFileMap = groupFilesBasedOnCollectionID(files);
 
@@ -369,9 +372,9 @@ export const getCollectionCoverFiles = (
             return;
         }
         const coverID = collection.pubMagicMetadata?.data?.coverID;
-        if (typeof coverID === 'number' && coverID > 0) {
+        if (typeof coverID === "number" && coverID > 0) {
             const coverFile = collectionFiles.find(
-                (file) => file.id === coverID
+                (file) => file.id === coverID,
             );
             if (coverFile) {
                 coverFiles.set(collection.id, coverFile);
@@ -381,7 +384,7 @@ export const getCollectionCoverFiles = (
         if (collection.pubMagicMetadata?.data?.asc) {
             coverFiles.set(
                 collection.id,
-                collectionFiles[collectionFiles.length - 1]
+                collectionFiles[collectionFiles.length - 1],
             );
         } else {
             coverFiles.set(collection.id, collectionFiles[0]);
@@ -391,7 +394,7 @@ export const getCollectionCoverFiles = (
 };
 
 export const getFavItemIds = async (
-    files: EnteFile[]
+    files: EnteFile[],
 ): Promise<Set<number>> => {
     const favCollection = await getFavCollection();
     if (!favCollection) return new Set();
@@ -399,7 +402,7 @@ export const getFavItemIds = async (
     return new Set(
         files
             .filter((file) => file.collectionID === favCollection.id)
-            .map((file): number => file.id)
+            .map((file): number => file.id),
     );
 };
 
@@ -410,7 +413,7 @@ export const createAlbum = (albumName: string) => {
 const createCollection = async (
     collectionName: string,
     type: CollectionType,
-    magicMetadataProps?: CollectionMagicMetadataProps
+    magicMetadataProps?: CollectionMagicMetadataProps,
 ): Promise<Collection> => {
     try {
         const cryptoWorker = await ComlinkCryptoWorker.getInstance();
@@ -427,7 +430,7 @@ const createCollection = async (
             const { file: encryptedMagicMetadataProps } =
                 await cryptoWorker.encryptMetadata(
                     magicMetadataProps,
-                    collectionKey
+                    collectionKey,
                 );
 
             encryptedMagicMetadata = {
@@ -455,29 +458,29 @@ const createCollection = async (
         const createdCollection = await postCollection(newCollection, token);
         const decryptedCreatedCollection = await getCollectionWithSecrets(
             createdCollection,
-            encryptionKey
+            encryptionKey,
         );
         return decryptedCreatedCollection;
     } catch (e) {
-        logError(e, 'create collection failed');
+        logError(e, "create collection failed");
         throw e;
     }
 };
 
 const postCollection = async (
     collectionData: EncryptedCollection,
-    token: string
+    token: string,
 ): Promise<EncryptedCollection> => {
     try {
         const response = await HTTPService.post(
             `${ENDPOINT}/collections`,
             collectionData,
             null,
-            { 'X-Auth-Token': token }
+            { "X-Auth-Token": token },
         );
         return response.data.collection;
     } catch (e) {
-        logError(e, 'post Collection failed ');
+        logError(e, "post Collection failed ");
     }
 };
 
@@ -493,7 +496,7 @@ export const addToFavorites = async (file: EnteFile) => {
         }
         await addToCollection(favCollection, [file]);
     } catch (e) {
-        logError(e, 'failed to add to favorite');
+        logError(e, "failed to add to favorite");
     }
 };
 
@@ -505,13 +508,13 @@ export const removeFromFavorites = async (file: EnteFile) => {
         }
         await removeFromCollection(favCollection.id, [file]);
     } catch (e) {
-        logError(e, 'remove from favorite failed');
+        logError(e, "remove from favorite failed");
     }
 };
 
 export const addToCollection = async (
     collection: Collection,
-    files: EnteFile[]
+    files: EnteFile[],
 ) => {
     try {
         const token = getToken();
@@ -529,19 +532,19 @@ export const addToCollection = async (
                 requestBody,
                 null,
                 {
-                    'X-Auth-Token': token,
-                }
+                    "X-Auth-Token": token,
+                },
             );
         }
     } catch (e) {
-        logError(e, 'Add to collection Failed ');
+        logError(e, "Add to collection Failed ");
         throw e;
     }
 };
 
 export const restoreToCollection = async (
     collection: Collection,
-    files: EnteFile[]
+    files: EnteFile[],
 ) => {
     try {
         const token = getToken();
@@ -559,19 +562,19 @@ export const restoreToCollection = async (
                 requestBody,
                 null,
                 {
-                    'X-Auth-Token': token,
-                }
+                    "X-Auth-Token": token,
+                },
             );
         }
     } catch (e) {
-        logError(e, 'restore to collection Failed ');
+        logError(e, "restore to collection Failed ");
         throw e;
     }
 };
 export const moveToCollection = async (
     fromCollectionID: number,
     toCollection: Collection,
-    files: EnteFile[]
+    files: EnteFile[],
 ) => {
     try {
         const token = getToken();
@@ -590,26 +593,26 @@ export const moveToCollection = async (
                 requestBody,
                 null,
                 {
-                    'X-Auth-Token': token,
-                }
+                    "X-Auth-Token": token,
+                },
             );
         }
     } catch (e) {
-        logError(e, 'move to collection Failed ');
+        logError(e, "move to collection Failed ");
         throw e;
     }
 };
 
 const encryptWithNewCollectionKey = async (
     newCollection: Collection,
-    files: EnteFile[]
+    files: EnteFile[],
 ): Promise<EncryptedFileKey[]> => {
     const fileKeysEncryptedWithNewCollection: EncryptedFileKey[] = [];
     const cryptoWorker = await ComlinkCryptoWorker.getInstance();
     for (const file of files) {
         const newEncryptedKey = await cryptoWorker.encryptToB64(
             file.key,
-            newCollection.key
+            newCollection.key,
         );
         const encryptedKey = newEncryptedKey.encryptedData;
         const keyDecryptionNonce = newEncryptedKey.nonce;
@@ -625,7 +628,7 @@ const encryptWithNewCollectionKey = async (
 export const removeFromCollection = async (
     collectionID: number,
     toRemoveFiles: EnteFile[],
-    allFiles?: EnteFile[]
+    allFiles?: EnteFile[],
 ) => {
     try {
         const user: User = getData(LS_KEYS.USER);
@@ -646,7 +649,7 @@ export const removeFromCollection = async (
             await removeUserFiles(collectionID, userFiles, allFiles);
         }
     } catch (e) {
-        logError(e, 'remove from collection failed ');
+        logError(e, "remove from collection failed ");
         throw e;
     }
 };
@@ -654,7 +657,7 @@ export const removeFromCollection = async (
 export const removeUserFiles = async (
     sourceCollectionID: number,
     toRemoveFiles: EnteFile[],
-    allFiles?: EnteFile[]
+    allFiles?: EnteFile[],
 ) => {
     try {
         if (!allFiles) {
@@ -665,7 +668,7 @@ export const removeUserFiles = async (
             return toRemoveFilesIds.has(f.id);
         });
         const groupiedFiles = groupFilesBasedOnCollectionID(
-            toRemoveFilesCopiesInOtherCollections
+            toRemoveFilesCopiesInOtherCollections,
         );
 
         const collections = await getLocalCollections();
@@ -692,11 +695,11 @@ export const removeUserFiles = async (
             await moveToCollection(
                 sourceCollectionID,
                 targetCollection,
-                toMoveFiles
+                toMoveFiles,
             );
         }
         const leftFiles = toRemoveFiles.filter((f) =>
-            toRemoveFilesIds.has(f.id)
+            toRemoveFilesIds.has(f.id),
         );
 
         if (leftFiles.length === 0) {
@@ -709,17 +712,17 @@ export const removeUserFiles = async (
         await moveToCollection(
             sourceCollectionID,
             uncategorizedCollection,
-            leftFiles
+            leftFiles,
         );
     } catch (e) {
-        logError(e, 'remove user files failed ');
+        logError(e, "remove user files failed ");
         throw e;
     }
 };
 
 export const removeNonUserFiles = async (
     collectionID: number,
-    nonUserFiles: EnteFile[]
+    nonUserFiles: EnteFile[],
 ) => {
     try {
         const fileIDs = nonUserFiles.map((f) => f.id);
@@ -735,18 +738,18 @@ export const removeNonUserFiles = async (
                 `${ENDPOINT}/collections/v3/remove-files`,
                 request,
                 null,
-                { 'X-Auth-Token': token }
+                { "X-Auth-Token": token },
             );
         }
     } catch (e) {
-        logError(e, 'remove non user files failed ');
+        logError(e, "remove non user files failed ");
         throw e;
     }
 };
 
 export const deleteCollection = async (
     collectionID: number,
-    keepFiles: boolean
+    keepFiles: boolean,
 ) => {
     try {
         if (keepFiles) {
@@ -762,10 +765,10 @@ export const deleteCollection = async (
             `${ENDPOINT}/collections/v3/${collectionID}`,
             null,
             { collectionID, keepFiles },
-            { 'X-Auth-Token': token }
+            { "X-Auth-Token": token },
         );
     } catch (e) {
-        logError(e, 'delete collection failed ');
+        logError(e, "delete collection failed ");
         throw e;
     }
 };
@@ -778,17 +781,17 @@ export const leaveSharedAlbum = async (collectionID: number) => {
             `${ENDPOINT}/collections/leave/${collectionID}`,
             null,
             null,
-            { 'X-Auth-Token': token }
+            { "X-Auth-Token": token },
         );
     } catch (e) {
-        logError(e, 'leave shared album failed ');
+        logError(e, "leave shared album failed ");
         throw e;
     }
 };
 
 export const updateCollectionMagicMetadata = async (
     collection: Collection,
-    updatedMagicMetadata: CollectionMagicMetadata
+    updatedMagicMetadata: CollectionMagicMetadata,
 ) => {
     const token = getToken();
     if (!token) {
@@ -799,7 +802,7 @@ export const updateCollectionMagicMetadata = async (
 
     const { file: encryptedMagicMetadata } = await cryptoWorker.encryptMetadata(
         updatedMagicMetadata.data,
-        collection.key
+        collection.key,
     );
 
     const reqBody: UpdateMagicMetadataRequest = {
@@ -817,8 +820,8 @@ export const updateCollectionMagicMetadata = async (
         reqBody,
         null,
         {
-            'X-Auth-Token': token,
-        }
+            "X-Auth-Token": token,
+        },
     );
     const updatedCollection: Collection = {
         ...collection,
@@ -832,7 +835,7 @@ export const updateCollectionMagicMetadata = async (
 
 export const updateSharedCollectionMagicMetadata = async (
     collection: Collection,
-    updatedMagicMetadata: CollectionMagicMetadata
+    updatedMagicMetadata: CollectionMagicMetadata,
 ) => {
     const token = getToken();
     if (!token) {
@@ -843,7 +846,7 @@ export const updateSharedCollectionMagicMetadata = async (
 
     const { file: encryptedMagicMetadata } = await cryptoWorker.encryptMetadata(
         updatedMagicMetadata.data,
-        collection.key
+        collection.key,
     );
 
     const reqBody: UpdateMagicMetadataRequest = {
@@ -861,8 +864,8 @@ export const updateSharedCollectionMagicMetadata = async (
         reqBody,
         null,
         {
-            'X-Auth-Token': token,
-        }
+            "X-Auth-Token": token,
+        },
     );
     const updatedCollection: Collection = {
         ...collection,
@@ -876,7 +879,7 @@ export const updateSharedCollectionMagicMetadata = async (
 
 export const updatePublicCollectionMagicMetadata = async (
     collection: Collection,
-    updatedPublicMagicMetadata: CollectionPublicMagicMetadata
+    updatedPublicMagicMetadata: CollectionPublicMagicMetadata,
 ) => {
     const token = getToken();
     if (!token) {
@@ -887,7 +890,7 @@ export const updatePublicCollectionMagicMetadata = async (
 
     const { file: encryptedMagicMetadata } = await cryptoWorker.encryptMetadata(
         updatedPublicMagicMetadata.data,
-        collection.key
+        collection.key,
     );
 
     const reqBody: UpdateMagicMetadataRequest = {
@@ -905,8 +908,8 @@ export const updatePublicCollectionMagicMetadata = async (
         reqBody,
         null,
         {
-            'X-Auth-Token': token,
-        }
+            "X-Auth-Token": token,
+        },
     );
     const updatedCollection: Collection = {
         ...collection,
@@ -920,7 +923,7 @@ export const updatePublicCollectionMagicMetadata = async (
 
 export const renameCollection = async (
     collection: Collection,
-    newCollectionName: string
+    newCollectionName: string,
 ) => {
     if (isQuickLinkCollection(collection)) {
         // Convert quick link collection to normal collection on rename
@@ -940,15 +943,15 @@ export const renameCollection = async (
         collectionRenameRequest,
         null,
         {
-            'X-Auth-Token': token,
-        }
+            "X-Auth-Token": token,
+        },
     );
 };
 
 export const shareCollection = async (
     collection: Collection,
     withUserEmail: string,
-    role: string
+    role: string,
 ) => {
     try {
         const cryptoWorker = await ComlinkCryptoWorker.getInstance();
@@ -956,7 +959,7 @@ export const shareCollection = async (
         const publicKey: string = await getPublicKey(withUserEmail);
         const encryptedKey = await cryptoWorker.boxSeal(
             collection.key,
-            publicKey
+            publicKey,
         );
         const shareCollectionRequest = {
             collectionID: collection.id,
@@ -969,18 +972,18 @@ export const shareCollection = async (
             shareCollectionRequest,
             null,
             {
-                'X-Auth-Token': token,
-            }
+                "X-Auth-Token": token,
+            },
         );
     } catch (e) {
-        logError(e, 'share collection failed ');
+        logError(e, "share collection failed ");
         throw e;
     }
 };
 
 export const unshareCollection = async (
     collection: Collection,
-    withUserEmail: string
+    withUserEmail: string,
 ) => {
     try {
         const token = getToken();
@@ -993,11 +996,11 @@ export const unshareCollection = async (
             shareCollectionRequest,
             null,
             {
-                'X-Auth-Token': token,
-            }
+                "X-Auth-Token": token,
+            },
         );
     } catch (e) {
-        logError(e, 'unshare collection failed ');
+        logError(e, "unshare collection failed ");
     }
 };
 
@@ -1015,12 +1018,12 @@ export const createShareableURL = async (collection: Collection) => {
             createPublicAccessTokenRequest,
             null,
             {
-                'X-Auth-Token': token,
-            }
+                "X-Auth-Token": token,
+            },
         );
         return resp.data.result as PublicURL;
     } catch (e) {
-        logError(e, 'createShareableURL failed ');
+        logError(e, "createShareableURL failed ");
         throw e;
     }
 };
@@ -1036,17 +1039,17 @@ export const deleteShareableURL = async (collection: Collection) => {
             null,
             null,
             {
-                'X-Auth-Token': token,
-            }
+                "X-Auth-Token": token,
+            },
         );
     } catch (e) {
-        logError(e, 'deleteShareableURL failed ');
+        logError(e, "deleteShareableURL failed ");
         throw e;
     }
 };
 
 export const updateShareableURL = async (
-    request: UpdatePublicURL
+    request: UpdatePublicURL,
 ): Promise<PublicURL> => {
     try {
         const token = getToken();
@@ -1058,12 +1061,12 @@ export const updateShareableURL = async (
             request,
             null,
             {
-                'X-Auth-Token': token,
-            }
+                "X-Auth-Token": token,
+            },
         );
         return res.data.result as PublicURL;
     } catch (e) {
-        logError(e, 'updateShareableURL failed ');
+        logError(e, "updateShareableURL failed ");
         throw e;
     }
 };
@@ -1079,20 +1082,20 @@ export const getFavCollection = async () => {
 
 export const getNonEmptyCollections = (
     collections: Collection[],
-    files: EnteFile[]
+    files: EnteFile[],
 ) => {
     const nonEmptyCollectionsIds = new Set<number>();
     for (const file of files) {
         nonEmptyCollectionsIds.add(file.collectionID);
     }
     return collections.filter((collection) =>
-        nonEmptyCollectionsIds.has(collection.id)
+        nonEmptyCollectionsIds.has(collection.id),
     );
 };
 
 export function sortCollectionSummaries(
     collectionSummaries: CollectionSummary[],
-    sortBy: COLLECTION_LIST_SORT_BY
+    sortBy: COLLECTION_LIST_SORT_BY,
 ) {
     return collectionSummaries
         .sort((a, b) => {
@@ -1112,7 +1115,7 @@ export function sortCollectionSummaries(
         .sort(
             (a, b) =>
                 COLLECTION_SORT_ORDER.get(a.type) -
-                COLLECTION_SORT_ORDER.get(b.type)
+                COLLECTION_SORT_ORDER.get(b.type),
         );
 }
 
@@ -1134,7 +1137,7 @@ function compareCollectionsLatestFile(first: EnteFile, second: EnteFile) {
 export function getCollectionSummaries(
     user: User,
     collections: Collection[],
-    files: EnteFile[]
+    files: EnteFile[],
 ): CollectionSummaries {
     const collectionSummaries: CollectionSummaries = new Map();
     const collectionLatestFiles = getCollectionLatestFiles(files);
@@ -1176,9 +1179,9 @@ export function getCollectionSummaries(
 
             let CollectionSummaryItemName: string;
             if (type === CollectionSummaryType.uncategorized) {
-                CollectionSummaryItemName = t('UNCATEGORIZED');
+                CollectionSummaryItemName = t("UNCATEGORIZED");
             } else if (type === CollectionSummaryType.favorites) {
-                CollectionSummaryItemName = t('FAVORITES');
+                CollectionSummaryItemName = t("FAVORITES");
             } else {
                 CollectionSummaryItemName = collection.name;
             }
@@ -1198,7 +1201,7 @@ export function getCollectionSummaries(
     if (!hasUncategorizedCollection) {
         collectionSummaries.set(
             DUMMY_UNCATEGORIZED_COLLECTION,
-            getDummyUncategorizedCollectionSummary()
+            getDummyUncategorizedCollectionSummary(),
         );
     }
 
@@ -1217,16 +1220,16 @@ function getCollectionsFileCount(files: EnteFile[]): CollectionFilesCount {
 export function getSectionSummaries(
     files: EnteFile[],
     trashedFiles: EnteFile[],
-    archivedCollections: Set<number>
+    archivedCollections: Set<number>,
 ): CollectionSummaries {
     const collectionSummaries: CollectionSummaries = new Map();
     collectionSummaries.set(
         ALL_SECTION,
-        getAllSectionSummary(files, archivedCollections)
+        getAllSectionSummary(files, archivedCollections),
     );
     collectionSummaries.set(
         TRASH_SECTION,
-        getTrashedCollectionSummary(trashedFiles)
+        getTrashedCollectionSummary(trashedFiles),
     );
     collectionSummaries.set(ARCHIVE_SECTION, getArchivedSectionSummary(files));
 
@@ -1235,15 +1238,15 @@ export function getSectionSummaries(
 
 function getAllSectionSummary(
     files: EnteFile[],
-    archivedCollections: Set<number>
+    archivedCollections: Set<number>,
 ): CollectionSummary {
     const allSectionFiles = getAllSectionVisibleFiles(
         files,
-        archivedCollections
+        archivedCollections,
     );
     return {
         id: ALL_SECTION,
-        name: t('ALL_SECTION_NAME'),
+        name: t("ALL_SECTION_NAME"),
         type: CollectionSummaryType.all,
         coverFile: allSectionFiles?.[0],
         latestFile: allSectionFiles?.[0],
@@ -1254,7 +1257,7 @@ function getAllSectionSummary(
 
 function getAllSectionVisibleFiles(
     files: EnteFile[],
-    archivedCollections: Set<number>
+    archivedCollections: Set<number>,
 ): EnteFile[] {
     const allSectionVisibleFiles = getUniqueFiles(
         files.filter((file) => {
@@ -1265,7 +1268,7 @@ function getAllSectionVisibleFiles(
                 return false;
             }
             return true;
-        })
+        }),
     );
     return allSectionVisibleFiles;
 }
@@ -1273,7 +1276,7 @@ function getAllSectionVisibleFiles(
 export function getDummyUncategorizedCollectionSummary(): CollectionSummary {
     return {
         id: DUMMY_UNCATEGORIZED_COLLECTION,
-        name: t('UNCATEGORIZED'),
+        name: t("UNCATEGORIZED"),
         type: CollectionSummaryType.uncategorized,
         latestFile: null,
         coverFile: null,
@@ -1283,14 +1286,14 @@ export function getDummyUncategorizedCollectionSummary(): CollectionSummary {
 }
 
 export function getArchivedSectionSummary(
-    files: EnteFile[]
+    files: EnteFile[],
 ): CollectionSummary {
     const archivedFiles = getUniqueFiles(
-        files.filter((file) => isArchivedFile(file))
+        files.filter((file) => isArchivedFile(file)),
     );
     return {
         id: ARCHIVE_SECTION,
-        name: t('ARCHIVE_SECTION_NAME'),
+        name: t("ARCHIVE_SECTION_NAME"),
         type: CollectionSummaryType.archive,
         coverFile: null,
         latestFile: archivedFiles?.[0],
@@ -1301,21 +1304,21 @@ export function getArchivedSectionSummary(
 
 export function getHiddenItemsSummary(
     hiddenFiles: EnteFile[],
-    hiddenCollections: Collection[]
+    hiddenCollections: Collection[],
 ): CollectionSummary {
     const defaultHiddenCollectionIds = new Set(
         hiddenCollections
             .filter((collection) => isDefaultHiddenCollection(collection))
-            .map((collection) => collection.id)
+            .map((collection) => collection.id),
     );
     const hiddenItems = getUniqueFiles(
         hiddenFiles.filter((file) =>
-            defaultHiddenCollectionIds.has(file.collectionID)
-        )
+            defaultHiddenCollectionIds.has(file.collectionID),
+        ),
     );
     return {
         id: HIDDEN_ITEMS_SECTION,
-        name: t('HIDDEN_ITEMS'),
+        name: t("HIDDEN_ITEMS"),
         type: CollectionSummaryType.hiddenItems,
         coverFile: hiddenItems?.[0],
         latestFile: hiddenItems?.[0],
@@ -1325,11 +1328,11 @@ export function getHiddenItemsSummary(
 }
 
 export function getTrashedCollectionSummary(
-    trashedFiles: EnteFile[]
+    trashedFiles: EnteFile[],
 ): CollectionSummary {
     return {
         id: TRASH_SECTION,
-        name: t('TRASH'),
+        name: t("TRASH"),
         type: CollectionSummaryType.trash,
         coverFile: null,
         latestFile: trashedFiles?.[0],
@@ -1339,13 +1342,13 @@ export function getTrashedCollectionSummary(
 }
 
 export async function getUncategorizedCollection(
-    collections?: Collection[]
+    collections?: Collection[],
 ): Promise<Collection> {
     if (!collections) {
         collections = await getLocalCollections();
     }
     const uncategorizedCollection = collections.find(
-        (collection) => collection.type === CollectionType.uncategorized
+        (collection) => collection.type === CollectionType.uncategorized,
     );
 
     return uncategorizedCollection;
@@ -1354,14 +1357,14 @@ export async function getUncategorizedCollection(
 export function createUnCategorizedCollection() {
     return createCollection(
         UNCATEGORIZED_COLLECTION_NAME,
-        CollectionType.uncategorized
+        CollectionType.uncategorized,
     );
 }
 
 export async function getDefaultHiddenCollection(): Promise<Collection> {
-    const collections = await getLocalCollections('hidden');
+    const collections = await getLocalCollections("hidden");
     const hiddenCollection = collections.find((collection) =>
-        isDefaultHiddenCollection(collection)
+        isDefaultHiddenCollection(collection),
     );
 
     return hiddenCollection;
@@ -1389,14 +1392,14 @@ export async function moveToHiddenCollection(files: EnteFile[]) {
             await moveToCollection(collectionID, hiddenCollection, files);
         }
     } catch (e) {
-        logError(e, 'move to hidden collection failed ');
+        logError(e, "move to hidden collection failed ");
         throw e;
     }
 }
 
 export async function unhideToCollection(
     collection: Collection,
-    files: EnteFile[]
+    files: EnteFile[],
 ) {
     try {
         const groupiedFiles = groupFilesBasedOnCollectionID(files);
@@ -1408,14 +1411,14 @@ export async function unhideToCollection(
             await moveToCollection(collectionID, collection, files);
         }
     } catch (e) {
-        logError(e, 'unhide to collection failed ');
+        logError(e, "unhide to collection failed ");
         throw e;
     }
 }
 
 export const constructUserIDToEmailMap = (
     user: User,
-    collections: Collection[]
+    collections: Collection[],
 ): Map<number, string> => {
     try {
         const userIDToEmailMap = new Map<number, string>();
@@ -1433,7 +1436,7 @@ export const constructUserIDToEmailMap = (
         });
         return userIDToEmailMap;
     } catch (e) {
-        logError('Error Mapping UserId to email:', e);
+        logError("Error Mapping UserId to email:", e);
         return new Map<number, string>();
     }
 };
@@ -1441,7 +1444,7 @@ export const constructUserIDToEmailMap = (
 export const constructEmailList = (
     user: User,
     collections: Collection[],
-    familyData: FamilyData
+    familyData: FamilyData,
 ): string[] => {
     const emails = collections
         .map((item) => {

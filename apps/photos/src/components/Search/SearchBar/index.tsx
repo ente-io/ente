@@ -1,11 +1,10 @@
-import { SearchBarMobile } from './searchBarMobile';
-import React from 'react';
-import { Collection } from 'types/collection';
+import { Collection } from "types/collection";
+import { SearchBarMobile } from "./searchBarMobile";
 
-import { EnteFile } from 'types/file';
-import { SearchBarWrapper } from './styledComponents';
-import SearchInput from './searchInput';
-import { UpdateSearch } from 'types/search';
+import { EnteFile } from "types/file";
+import { UpdateSearch } from "types/search";
+import SearchInput from "./searchInput";
+import { SearchBarWrapper } from "./styledComponents";
 
 interface Props {
     updateSearch: UpdateSearch;

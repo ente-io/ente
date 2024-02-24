@@ -1,4 +1,4 @@
-import { LS_KEYS, getData, setData } from '.';
+import { LS_KEYS, getData, setData } from ".";
 
 export const getToken = (): string => {
     const token = getData(LS_KEYS.USER)?.token;

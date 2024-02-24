@@ -1,15 +1,15 @@
-import React, { useState } from 'react';
-import { EnteFile } from 'types/file';
-import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
+import { FlexWrapper } from "@ente/shared/components/Container";
+import { logError } from "@ente/shared/sentry";
+import { formatDate, formatTime } from "@ente/shared/time/format";
+import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
+import EnteDateTimePicker from "components/EnteDateTimePicker";
+import { useState } from "react";
+import { EnteFile } from "types/file";
 import {
     changeFileCreationTime,
     updateExistingFilePubMetadata,
-} from 'utils/file';
-import { formatDate, formatTime } from '@ente/shared/time/format';
-import { FlexWrapper } from '@ente/shared/components/Container';
-import { logError } from '@ente/shared/sentry';
-import EnteDateTimePicker from 'components/EnteDateTimePicker';
-import InfoItem from './InfoItem';
+} from "utils/file";
+import InfoItem from "./InfoItem";
 
 export function RenderCreationTime({
     shouldDisableEdits,
@@ -38,13 +38,13 @@ export function RenderCreationTime({
                 }
                 const updatedFile = await changeFileCreationTime(
                     file,
-                    unixTimeInMicroSec
+                    unixTimeInMicroSec,
                 );
                 updateExistingFilePubMetadata(file, updatedFile);
                 scheduleUpdate();
             }
         } catch (e) {
-            logError(e, 'failed to update creationTime');
+            logError(e, "failed to update creationTime");
         } finally {
             closeEditMode();
             setLoading(false);

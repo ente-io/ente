@@ -1,6 +1,5 @@
-import React from 'react';
-import { styled } from '@mui/material';
-export const OptionIconWrapper = styled('div')`
+import { styled } from "@mui/material";
+export const OptionIconWrapper = styled("div")`
     display: inline-block;
     opacity: 0;
     font-weight: bold;
@@ -15,13 +14,15 @@ const OptionIcon = ({ onClick }: Props) => (
             onClick();
             e.stopPropagation();
         }}
-        style={{ marginBottom: '2px' }}>
+        style={{ marginBottom: "2px" }}
+    >
         <svg
             xmlns="http://www.w3.org/2000/svg"
             height="20px"
             width="24px"
             viewBox="0 0 24 24"
-            fill="#000000">
+            fill="#000000"
+        >
             <path d="M0 0h24v24H0V0z" fill="none" />
             <path
                 fill="#666"
