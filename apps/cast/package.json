@@ -5,6 +5,7 @@
     "dependencies": {
         "@/next": "*",
         "@ente/accounts": "*",
+        "@ente/eslint-config": "*",
         "@ente/shared": "*",
         "jszip": "3.10.1",
         "mime-types": "^2.1.35"
