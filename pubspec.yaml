@@ -118,7 +118,9 @@ dependencies:
 
   # open_file: ^3.2.1
   onnxruntime:
-    git: "https://github.com/ente-io/onnxruntime.git"
+    git:
+      url: https://github.com/ente-io/onnxruntime.git
+      ref: 5f26aef45ed9f5e563c26f90c1e21b3339ed906d
   open_mail_app: ^0.4.5
   package_info_plus: ^4.1.0
   page_transition: ^2.0.2
