@@ -14,20 +14,20 @@
         "build:photos": "yarn workspace photos next build",
         "dev": "yarn dev:photos",
         "dev:accounts": "yarn workspace accounts next dev",
+        "dev:albums": "yarn workspace photos next dev -p 3002",
         "dev:auth": "yarn workspace auth next dev",
         "dev:cast": "yarn workspace cast next dev",
         "dev:photos": "yarn workspace photos next dev",
-        "dev:albums": "yarn workspace photos next dev -p 3002",
         "lint": "yarn prettier --check . && yarn workspaces run eslint .",
         "lint-fix": "yarn prettier --write . && yarn workspaces run eslint --fix ."
+    },
+    "resolutions": {
+        "@sentry/cli": "1.75.0",
+        "libsodium": "0.7.9"
     },
     "devDependencies": {
         "eslint": "^8",
         "prettier": "^3",
         "typescript": "^5"
-    },
-    "resolutions": {
-        "@sentry/cli": "1.75.0",
-        "libsodium": "0.7.9"
     }
 }

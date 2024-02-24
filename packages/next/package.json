@@ -2,11 +2,11 @@
     "name": "@/next",
     "version": "0.0.0",
     "private": true,
-    "devDependencies": {
-        "@/build-config": "*"
-    },
     "dependencies": {
         "@/ui": "*",
         "next": "^14.1"
+    },
+    "devDependencies": {
+        "@/build-config": "*"
     }
 }
