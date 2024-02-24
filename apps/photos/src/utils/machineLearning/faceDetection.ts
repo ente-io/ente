@@ -1,18 +1,18 @@
-import { getNearestPointIndex, newBox } from '.';
+import { euclidean } from "hdbscan";
+import { FaceDetection } from "types/machineLearning";
+import { getNearestPointIndex, newBox } from ".";
+import { Box, Point } from "../../../thirdparty/face-api/classes";
 import {
     computeTransformToBox,
     transformBox,
     transformPoints,
-} from './transform';
-import { Box, Point } from '../../../thirdparty/face-api/classes';
-import { FaceDetection } from 'types/machineLearning';
-import { euclidean } from 'hdbscan';
+} from "./transform";
 
 export function transformPaddedToImage(
     detection: FaceDetection,
     faceImage: ImageBitmap,
     imageBox: Box,
-    paddedBox: Box
+    paddedBox: Box,
 ) {
     const inBox = newBox(0, 0, faceImage.width, faceImage.height);
     imageBox.x = paddedBox.x;
@@ -38,7 +38,7 @@ export function getDetectionCenter(detection: FaceDetection) {
 export function getNearestDetection(
     toDetection: FaceDetection,
     fromDetections: Array<FaceDetection>,
-    maxDistance?: number
+    maxDistance?: number,
 ) {
     const toCenter = getDetectionCenter(toDetection);
     const centers = fromDetections.map((d) => getDetectionCenter(d));
@@ -50,7 +50,7 @@ export function getNearestDetection(
 // TODO: can also be done through tf.image.nonMaxSuppression
 export function removeDuplicateDetections(
     detections: Array<FaceDetection>,
-    withinDistance: number
+    withinDistance: number,
 ) {
     // console.time('removeDuplicates');
     detections.sort((a, b) => b.probability - a.probability);
@@ -68,7 +68,7 @@ export function removeDuplicateDetections(
             const centerj = getDetectionCenter(detections[j]);
             const dist = euclidean(
                 [centeri.x, centeri.y],
-                [centerj.x, centerj.y]
+                [centerj.x, centerj.y],
             );
             if (dist <= withinDistance) {
                 isSelected.set(j, false);

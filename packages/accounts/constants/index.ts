@@ -1,5 +1,5 @@
 export enum PasswordStrength {
-    WEAK = 'WEAK',
-    MODERATE = 'MODERATE',
-    STRONG = 'STRONG',
+    WEAK = "WEAK",
+    MODERATE = "MODERATE",
+    STRONG = "STRONG",
 }

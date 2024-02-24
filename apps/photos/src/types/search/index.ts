@@ -1,23 +1,23 @@
-import { Person, Thing, WordGroup } from 'types/machineLearning';
-import { IndexStatus } from 'types/machineLearning/ui';
-import { EnteFile } from 'types/file';
-import { LocationTagData } from 'types/entity';
-import { FILE_TYPE } from 'constants/file';
-import { City } from 'services/locationSearchService';
+import { FILE_TYPE } from "constants/file";
+import { City } from "services/locationSearchService";
+import { LocationTagData } from "types/entity";
+import { EnteFile } from "types/file";
+import { Person, Thing, WordGroup } from "types/machineLearning";
+import { IndexStatus } from "types/machineLearning/ui";
 
 export enum SuggestionType {
-    DATE = 'DATE',
-    LOCATION = 'LOCATION',
-    COLLECTION = 'COLLECTION',
-    FILE_NAME = 'FILE_NAME',
-    PERSON = 'PERSON',
-    INDEX_STATUS = 'INDEX_STATUS',
-    THING = 'THING',
-    TEXT = 'TEXT',
-    FILE_CAPTION = 'FILE_CAPTION',
-    FILE_TYPE = 'FILE_TYPE',
-    CLIP = 'CLIP',
-    CITY = 'CITY',
+    DATE = "DATE",
+    LOCATION = "LOCATION",
+    COLLECTION = "COLLECTION",
+    FILE_NAME = "FILE_NAME",
+    PERSON = "PERSON",
+    INDEX_STATUS = "INDEX_STATUS",
+    THING = "THING",
+    TEXT = "TEXT",
+    FILE_CAPTION = "FILE_CAPTION",
+    FILE_TYPE = "FILE_TYPE",
+    CLIP = "CLIP",
+    CITY = "CITY",
 }
 
 export interface DateValue {
@@ -68,7 +68,7 @@ export interface SearchOption extends Suggestion {
 
 export type UpdateSearch = (
     search: Search,
-    summary: SearchResultSummary
+    summary: SearchResultSummary,
 ) => void;
 
 export type ClipSearchScores = Map<number, number>;

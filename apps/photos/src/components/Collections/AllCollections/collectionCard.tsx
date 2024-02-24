@@ -1,9 +1,8 @@
-import { Typography } from '@mui/material';
-import React from 'react';
-import CollectionCard from '../CollectionCard';
-import { CollectionSummary } from 'types/collection';
-import { AllCollectionTile, AllCollectionTileText } from '../styledComponents';
-import { t } from 'i18next';
+import { Typography } from "@mui/material";
+import { t } from "i18next";
+import { CollectionSummary } from "types/collection";
+import CollectionCard from "../CollectionCard";
+import { AllCollectionTile, AllCollectionTileText } from "../styledComponents";
 
 interface Iprops {
     collectionSummary: CollectionSummary;
@@ -21,11 +20,12 @@ export default function AllCollectionCard({
             collectionTile={AllCollectionTile}
             coverFile={collectionSummary.coverFile}
             onClick={() => onCollectionClick(collectionSummary.id)}
-            isScrolling={isScrolling}>
+            isScrolling={isScrolling}
+        >
             <AllCollectionTileText>
                 <Typography>{collectionSummary.name}</Typography>
                 <Typography variant="small" color="text.muted">
-                    {t('photos_count', { count: collectionSummary.fileCount })}
+                    {t("photos_count", { count: collectionSummary.fileCount })}
                 </Typography>
             </AllCollectionTileText>
         </CollectionCard>

@@ -1,3 +1,24 @@
+import ElectronAPIs from "@ente/shared/electron";
+import { CustomError } from "@ente/shared/error";
+import { addLogLine } from "@ente/shared/logging";
+import { getAlbumsURL } from "@ente/shared/network/api";
+import { logError } from "@ente/shared/sentry";
+import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
+import { getUnixTimeInMicroSecondsWithDelta } from "@ente/shared/time";
+import { User } from "@ente/shared/user/types";
+import bs58 from "bs58";
+import {
+    ADD_TO_NOT_ALLOWED_COLLECTION,
+    CollectionSummaryType,
+    CollectionType,
+    DEFAULT_HIDDEN_COLLECTION_USER_FACING_NAME,
+    HIDE_FROM_COLLECTION_BAR_TYPES,
+    MOVE_TO_NOT_ALLOWED_COLLECTION,
+    OPTIONS_NOT_HAVING_COLLECTION_TYPES,
+    SYSTEM_COLLECTION_TYPES,
+} from "constants/collection";
+import { t } from "i18next";
+import isElectron from "is-electron";
 import {
     addToCollection,
     createAlbum,
@@ -11,46 +32,25 @@ import {
     updateCollectionMagicMetadata,
     updatePublicCollectionMagicMetadata,
     updateSharedCollectionMagicMetadata,
-} from 'services/collectionService';
-import { downloadFilesWithProgress } from 'utils/file';
-import { getAllLocalFiles, getLocalFiles } from 'services/fileService';
-import { EnteFile } from 'types/file';
-import { CustomError } from '@ente/shared/error';
-import { User } from '@ente/shared/user/types';
-import { getData, LS_KEYS } from '@ente/shared/storage/localStorage';
-import { logError } from '@ente/shared/sentry';
+} from "services/collectionService";
+import exportService from "services/export";
+import { getAllLocalFiles, getLocalFiles } from "services/fileService";
 import {
     COLLECTION_ROLE,
     Collection,
     CollectionMagicMetadataProps,
     CollectionPublicMagicMetadataProps,
     CollectionSummaries,
-} from 'types/collection';
-import {
-    CollectionSummaryType,
-    CollectionType,
-    HIDE_FROM_COLLECTION_BAR_TYPES,
-    OPTIONS_NOT_HAVING_COLLECTION_TYPES,
-    SYSTEM_COLLECTION_TYPES,
-    MOVE_TO_NOT_ALLOWED_COLLECTION,
-    ADD_TO_NOT_ALLOWED_COLLECTION,
-    DEFAULT_HIDDEN_COLLECTION_USER_FACING_NAME,
-} from 'constants/collection';
-import { getUnixTimeInMicroSecondsWithDelta } from '@ente/shared/time';
-import { SUB_TYPE, VISIBILITY_STATE } from 'types/magicMetadata';
-import { isArchivedCollection, updateMagicMetadata } from 'utils/magicMetadata';
-import { getAlbumsURL } from '@ente/shared/network/api';
-import bs58 from 'bs58';
-import { t } from 'i18next';
-import isElectron from 'is-electron';
-import { SetFilesDownloadProgressAttributes } from 'types/gallery';
-import ElectronAPIs from '@ente/shared/electron';
+} from "types/collection";
+import { EnteFile } from "types/file";
+import { SetFilesDownloadProgressAttributes } from "types/gallery";
+import { SUB_TYPE, VISIBILITY_STATE } from "types/magicMetadata";
 import {
     getCollectionExportPath,
     getUniqueCollectionExportName,
-} from 'utils/export';
-import exportService from 'services/export';
-import { addLogLine } from '@ente/shared/logging';
+} from "utils/export";
+import { downloadFilesWithProgress } from "utils/file";
+import { isArchivedCollection, updateMagicMetadata } from "utils/magicMetadata";
 
 export enum COLLECTION_OPS_TYPE {
     ADD,
@@ -63,7 +63,7 @@ export async function handleCollectionOps(
     type: COLLECTION_OPS_TYPE,
     collection: Collection,
     selectedFiles: EnteFile[],
-    selectedCollectionID: number
+    selectedCollectionID: number,
 ) {
     switch (type) {
         case COLLECTION_OPS_TYPE.ADD:
@@ -73,7 +73,7 @@ export async function handleCollectionOps(
             await moveToCollection(
                 selectedCollectionID,
                 collection,
-                selectedFiles
+                selectedFiles,
             );
             break;
         case COLLECTION_OPS_TYPE.REMOVE:
@@ -92,62 +92,62 @@ export async function handleCollectionOps(
 
 export function getSelectedCollection(
     collectionID: number,
-    collections: Collection[]
+    collections: Collection[],
 ) {
     return collections.find((collection) => collection.id === collectionID);
 }
 
 export async function downloadCollectionHelper(
     collectionID: number,
-    setFilesDownloadProgressAttributes: SetFilesDownloadProgressAttributes
+    setFilesDownloadProgressAttributes: SetFilesDownloadProgressAttributes,
 ) {
     try {
         const allFiles = await getAllLocalFiles();
         const collectionFiles = allFiles.filter(
-            (file) => file.collectionID === collectionID
+            (file) => file.collectionID === collectionID,
         );
         const allCollections = await getAllLocalCollections();
         const collection = allCollections.find(
-            (collection) => collection.id === collectionID
+            (collection) => collection.id === collectionID,
         );
         if (!collection) {
-            throw Error('collection not found');
+            throw Error("collection not found");
         }
         await downloadCollectionFiles(
             collection.name,
             collectionFiles,
-            setFilesDownloadProgressAttributes
+            setFilesDownloadProgressAttributes,
         );
     } catch (e) {
-        logError(e, 'download collection failed ');
+        logError(e, "download collection failed ");
     }
 }
 
 export async function downloadDefaultHiddenCollectionHelper(
-    setFilesDownloadProgressAttributes: SetFilesDownloadProgressAttributes
+    setFilesDownloadProgressAttributes: SetFilesDownloadProgressAttributes,
 ) {
     try {
-        const hiddenCollections = await getLocalCollections('hidden');
+        const hiddenCollections = await getLocalCollections("hidden");
         const defaultHiddenCollectionsIds =
             getDefaultHiddenCollectionIDs(hiddenCollections);
-        const hiddenFiles = await getLocalFiles('hidden');
+        const hiddenFiles = await getLocalFiles("hidden");
         const defaultHiddenCollectionFiles = hiddenFiles.filter((file) =>
-            defaultHiddenCollectionsIds.has(file.collectionID)
+            defaultHiddenCollectionsIds.has(file.collectionID),
         );
         await downloadCollectionFiles(
             DEFAULT_HIDDEN_COLLECTION_USER_FACING_NAME,
             defaultHiddenCollectionFiles,
-            setFilesDownloadProgressAttributes
+            setFilesDownloadProgressAttributes,
         );
     } catch (e) {
-        logError(e, 'download hidden files failed ');
+        logError(e, "download hidden files failed ");
     }
 }
 
 export async function downloadCollectionFiles(
     collectionName: string,
     collectionFiles: EnteFile[],
-    setFilesDownloadProgressAttributes: SetFilesDownloadProgressAttributes
+    setFilesDownloadProgressAttributes: SetFilesDownloadProgressAttributes,
 ) {
     if (!collectionFiles.length) {
         return;
@@ -160,27 +160,27 @@ export async function downloadCollectionFiles(
         }
         downloadDirPath = await createCollectionDownloadFolder(
             selectedDir,
-            collectionName
+            collectionName,
         );
     }
     await downloadFilesWithProgress(
         collectionFiles,
         downloadDirPath,
-        setFilesDownloadProgressAttributes
+        setFilesDownloadProgressAttributes,
     );
 }
 
 async function createCollectionDownloadFolder(
     downloadDirPath: string,
-    collectionName: string
+    collectionName: string,
 ) {
     const collectionDownloadName = getUniqueCollectionExportName(
         downloadDirPath,
-        collectionName
+        collectionName,
     );
     const collectionDownloadPath = getCollectionExportPath(
         downloadDirPath,
-        collectionDownloadName
+        collectionDownloadName,
     );
     await exportService.checkExistsAndCreateDir(collectionDownloadPath);
     return collectionDownloadPath;
@@ -188,7 +188,7 @@ async function createCollectionDownloadFolder(
 
 export function appendCollectionKeyToShareURL(
     url: string,
-    collectionKey: string
+    collectionKey: string,
 ) {
     if (!url) {
         return null;
@@ -201,13 +201,13 @@ export function appendCollectionKeyToShareURL(
     sharableURL.host = albumsURL.host;
     sharableURL.pathname = albumsURL.pathname;
 
-    const bytes = Buffer.from(collectionKey, 'base64');
+    const bytes = Buffer.from(collectionKey, "base64");
     sharableURL.hash = bs58.encode(bytes);
     return sharableURL.href;
 }
 
 const _intSelectOption = (i: number) => {
-    const label = i === 0 ? t('NO_DEVICE_LIMIT') : i.toString();
+    const label = i === 0 ? t("NO_DEVICE_LIMIT") : i.toString();
     return { label, value: i };
 };
 
@@ -216,32 +216,32 @@ export function getDeviceLimitOptions() {
 }
 
 export const shareExpiryOptions = () => [
-    { label: t('NEVER'), value: () => 0 },
+    { label: t("NEVER"), value: () => 0 },
     {
-        label: t('AFTER_TIME.HOUR'),
+        label: t("AFTER_TIME.HOUR"),
         value: () => getUnixTimeInMicroSecondsWithDelta({ hours: 1 }),
     },
     {
-        label: t('AFTER_TIME.DAY'),
+        label: t("AFTER_TIME.DAY"),
         value: () => getUnixTimeInMicroSecondsWithDelta({ days: 1 }),
     },
     {
-        label: t('AFTER_TIME.WEEK'),
+        label: t("AFTER_TIME.WEEK"),
         value: () => getUnixTimeInMicroSecondsWithDelta({ days: 7 }),
     },
     {
-        label: t('AFTER_TIME.MONTH'),
+        label: t("AFTER_TIME.MONTH"),
         value: () => getUnixTimeInMicroSecondsWithDelta({ months: 1 }),
     },
     {
-        label: t('AFTER_TIME.YEAR'),
+        label: t("AFTER_TIME.YEAR"),
         value: () => getUnixTimeInMicroSecondsWithDelta({ years: 1 }),
     },
 ];
 
 export const changeCollectionVisibility = async (
     collection: Collection,
-    visibility: VISIBILITY_STATE
+    visibility: VISIBILITY_STATE,
 ) => {
     try {
         const updatedMagicMetadataProps: CollectionMagicMetadataProps = {
@@ -253,33 +253,33 @@ export const changeCollectionVisibility = async (
             const updatedMagicMetadata = await updateMagicMetadata(
                 updatedMagicMetadataProps,
                 collection.magicMetadata,
-                collection.key
+                collection.key,
             );
 
             await updateCollectionMagicMetadata(
                 collection,
-                updatedMagicMetadata
+                updatedMagicMetadata,
             );
         } else {
             const updatedMagicMetadata = await updateMagicMetadata(
                 updatedMagicMetadataProps,
                 collection.sharedMagicMetadata,
-                collection.key
+                collection.key,
             );
             await updateSharedCollectionMagicMetadata(
                 collection,
-                updatedMagicMetadata
+                updatedMagicMetadata,
             );
         }
     } catch (e) {
-        logError(e, 'change collection visibility failed');
+        logError(e, "change collection visibility failed");
         throw e;
     }
 };
 
 export const changeCollectionSortOrder = async (
     collection: Collection,
-    asc: boolean
+    asc: boolean,
 ) => {
     try {
         const updatedPublicMagicMetadataProps: CollectionPublicMagicMetadataProps =
@@ -290,21 +290,21 @@ export const changeCollectionSortOrder = async (
         const updatedPubMagicMetadata = await updateMagicMetadata(
             updatedPublicMagicMetadataProps,
             collection.pubMagicMetadata,
-            collection.key
+            collection.key,
         );
 
         await updatePublicCollectionMagicMetadata(
             collection,
-            updatedPubMagicMetadata
+            updatedPubMagicMetadata,
         );
     } catch (e) {
-        logError(e, 'change collection sort order failed');
+        logError(e, "change collection sort order failed");
     }
 };
 
 export const changeCollectionOrder = async (
     collection: Collection,
-    order: number
+    order: number,
 ) => {
     try {
         const updatedMagicMetadataProps: CollectionMagicMetadataProps = {
@@ -314,18 +314,18 @@ export const changeCollectionOrder = async (
         const updatedMagicMetadata = await updateMagicMetadata(
             updatedMagicMetadataProps,
             collection.magicMetadata,
-            collection.key
+            collection.key,
         );
 
         await updateCollectionMagicMetadata(collection, updatedMagicMetadata);
     } catch (e) {
-        logError(e, 'change collection order failed');
+        logError(e, "change collection order failed");
     }
 };
 
 export const changeCollectionSubType = async (
     collection: Collection,
-    subType: SUB_TYPE
+    subType: SUB_TYPE,
 ) => {
     try {
         const updatedMagicMetadataProps: CollectionMagicMetadataProps = {
@@ -335,11 +335,11 @@ export const changeCollectionSubType = async (
         const updatedMagicMetadata = await updateMagicMetadata(
             updatedMagicMetadataProps,
             collection.magicMetadata,
-            collection.key
+            collection.key,
         );
         await updateCollectionMagicMetadata(collection, updatedMagicMetadata);
     } catch (e) {
-        logError(e, 'change collection subType failed');
+        logError(e, "change collection subType failed");
         throw e;
     }
 };
@@ -348,7 +348,7 @@ export const getArchivedCollections = (collections: Collection[]) => {
     return new Set<number>(
         collections
             .filter(isArchivedCollection)
-            .map((collection) => collection.id)
+            .map((collection) => collection.id),
     );
 };
 
@@ -356,12 +356,12 @@ export const getDefaultHiddenCollectionIDs = (collections: Collection[]) => {
     return new Set<number>(
         collections
             .filter(isDefaultHiddenCollection)
-            .map((collection) => collection.id)
+            .map((collection) => collection.id),
     );
 };
 
 export const hasNonSystemCollections = (
-    collectionSummaries: CollectionSummaries
+    collectionSummaries: CollectionSummaries,
 ) => {
     for (const collectionSummary of collectionSummaries.values()) {
         if (!isSystemCollection(collectionSummary.type)) return true;
@@ -421,7 +421,7 @@ export const shouldBeShownOnCollectionBar = (type: CollectionSummaryType) => {
 export const getUserOwnedCollections = (collections: Collection[]) => {
     const user: User = getData(LS_KEYS.USER);
     if (!user?.id) {
-        throw Error('user missing');
+        throw Error("user missing");
     }
     return collections.filter((collection) => collection.owner.id === user.id);
 };
@@ -460,7 +460,7 @@ export function isSharedOnlyViaLink(collection: Collection) {
 export function isValidMoveTarget(
     sourceCollectionID: number,
     targetCollection: Collection,
-    user: User
+    user: User,
 ) {
     return (
         sourceCollectionID !== targetCollection.id &&
@@ -473,7 +473,7 @@ export function isValidMoveTarget(
 export function isValidReplacementAlbum(
     collection: Collection,
     user: User,
-    wantedCollectionName: string
+    wantedCollectionName: string,
 ) {
     return (
         collection.name === wantedCollectionName &&
@@ -487,33 +487,33 @@ export function isValidReplacementAlbum(
 }
 
 export function getCollectionNameMap(
-    collections: Collection[]
+    collections: Collection[],
 ): Map<number, string> {
     return new Map<number, string>(
-        collections.map((collection) => [collection.id, collection.name])
+        collections.map((collection) => [collection.id, collection.name]),
     );
 }
 
 export function getNonEmptyPersonalCollections(
     collections: Collection[],
     personalFiles: EnteFile[],
-    user: User
+    user: User,
 ): Collection[] {
     if (!user?.id) {
-        throw Error('user missing');
+        throw Error("user missing");
     }
     const nonEmptyCollections = getNonEmptyCollections(
         collections,
-        personalFiles
+        personalFiles,
     );
     const personalCollections = nonEmptyCollections.filter(
-        (collection) => collection.owner.id === user?.id
+        (collection) => collection.owner.id === user?.id,
     );
     return personalCollections;
 }
 
 export function getNonHiddenCollections(
-    collections: Collection[]
+    collections: Collection[],
 ): Collection[] {
     return collections.filter((collection) => !isHiddenCollection(collection));
 }
@@ -523,7 +523,7 @@ export function getHiddenCollections(collections: Collection[]): Collection[] {
 }
 
 export async function splitNormalAndHiddenCollections(
-    collections: Collection[]
+    collections: Collection[],
 ): Promise<{
     normalCollections: Collection[];
     hiddenCollections: Collection[];
@@ -541,13 +541,13 @@ export async function splitNormalAndHiddenCollections(
 }
 
 export function constructCollectionNameMap(
-    collections: Collection[]
+    collections: Collection[],
 ): Map<number, string> {
     return new Map<number, string>(
         (collections ?? []).map((collection) => [
             collection.id,
             getCollectionUserFacingName(collection),
-        ])
+        ]),
     );
 }
 
@@ -560,16 +560,16 @@ export const getCollectionUserFacingName = (collection: Collection) => {
 
 export const getOrCreateAlbum = async (
     albumName: string,
-    existingCollections: Collection[]
+    existingCollections: Collection[],
 ) => {
     const user: User = getData(LS_KEYS.USER);
     if (!user?.id) {
-        throw Error('user missing');
+        throw Error("user missing");
     }
     for (const collection of existingCollections) {
         if (isValidReplacementAlbum(collection, user, albumName)) {
             addLogLine(
-                `Found existing album ${albumName} with id ${collection.id}`
+                `Found existing album ${albumName} with id ${collection.id}`,
             );
             return collection;
         }

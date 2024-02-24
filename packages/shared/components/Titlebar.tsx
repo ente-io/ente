@@ -1,7 +1,7 @@
-import Close from '@mui/icons-material/Close';
-import ArrowBack from '@mui/icons-material/ArrowBack';
-import { Box, IconButton, Typography } from '@mui/material';
-import { FlexWrapper } from '@ente/shared/components/Container';
+import { FlexWrapper } from "@ente/shared/components/Container";
+import ArrowBack from "@mui/icons-material/ArrowBack";
+import Close from "@mui/icons-material/Close";
+import { Box, IconButton, Typography } from "@mui/material";
 
 interface Iprops {
     title: string;
@@ -24,30 +24,33 @@ export default function Titlebar({
         <>
             <FlexWrapper
                 height={48}
-                alignItems={'center'}
-                justifyContent="space-between">
+                alignItems={"center"}
+                justifyContent="space-between"
+            >
                 <IconButton
                     onClick={onClose}
-                    color={backIsClose ? 'secondary' : 'primary'}>
+                    color={backIsClose ? "secondary" : "primary"}
+                >
                     {backIsClose ? <Close /> : <ArrowBack />}
                 </IconButton>
-                <Box display={'flex'} gap="4px">
+                <Box display={"flex"} gap="4px">
                     {actionButton && actionButton}
                     {!backIsClose && (
-                        <IconButton onClick={onRootClose} color={'secondary'}>
+                        <IconButton onClick={onRootClose} color={"secondary"}>
                             <Close />
                         </IconButton>
                     )}
                 </Box>
             </FlexWrapper>
             <Box py={0.5} px={2}>
-                <Typography variant="h3" fontWeight={'bold'}>
+                <Typography variant="h3" fontWeight={"bold"}>
                     {title}
                 </Typography>
                 <Typography
                     variant="small"
                     color="text.muted"
-                    sx={{ wordBreak: 'break-all', minHeight: '17px' }}>
+                    sx={{ wordBreak: "break-all", minHeight: "17px" }}
+                >
                     {caption}
                 </Typography>
             </Box>

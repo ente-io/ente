@@ -1,28 +1,28 @@
-import React, { useContext, useEffect, useState } from 'react';
-import {
-    Collection,
-    CollectionSummaries,
-    CollectionSummary,
-} from 'types/collection';
-import DialogTitleWithCloseButton from '@ente/shared/components/DialogBox/TitleWithCloseButton';
-import { AppContext } from 'pages/_app';
-import { AllCollectionDialog } from 'components/Collections/AllCollections/dialog';
-import { DialogContent } from '@mui/material';
-import { FlexWrapper } from '@ente/shared/components/Container';
-import CollectionSelectorCard from './CollectionCard';
-import AddCollectionButton from './AddCollectionButton';
-import { CollectionSelectorIntent } from 'types/gallery';
+import { FlexWrapper } from "@ente/shared/components/Container";
+import DialogTitleWithCloseButton from "@ente/shared/components/DialogBox/TitleWithCloseButton";
+import { DialogContent } from "@mui/material";
+import { AllCollectionDialog } from "components/Collections/AllCollections/dialog";
 import {
     COLLECTION_SORT_ORDER,
     CollectionSummaryType,
     DUMMY_UNCATEGORIZED_COLLECTION,
-} from 'constants/collection';
-import { t } from 'i18next';
-import { createUnCategorizedCollection } from 'services/collectionService';
+} from "constants/collection";
+import { t } from "i18next";
+import { AppContext } from "pages/_app";
+import { useContext, useEffect, useState } from "react";
+import { createUnCategorizedCollection } from "services/collectionService";
+import {
+    Collection,
+    CollectionSummaries,
+    CollectionSummary,
+} from "types/collection";
+import { CollectionSelectorIntent } from "types/gallery";
 import {
     isAddToAllowedCollection,
     isMoveToAllowedCollection,
-} from 'utils/collection';
+} from "utils/collection";
+import AddCollectionButton from "./AddCollectionButton";
+import CollectionSelectorCard from "./CollectionCard";
 
 export interface CollectionSelectorAttributes {
     callback: (collection: Collection) => void;
@@ -126,23 +126,24 @@ function CollectionSelector({
             onClose={onUserTriggeredClose}
             open={props.open}
             position="center"
-            fullScreen={appContext.isMobile}>
+            fullScreen={appContext.isMobile}
+        >
             <DialogTitleWithCloseButton onClose={onUserTriggeredClose}>
                 {attributes.intent === CollectionSelectorIntent.upload
-                    ? t('UPLOAD_TO_COLLECTION')
+                    ? t("UPLOAD_TO_COLLECTION")
                     : attributes.intent === CollectionSelectorIntent.add
-                      ? t('ADD_TO_COLLECTION')
+                      ? t("ADD_TO_COLLECTION")
                       : attributes.intent === CollectionSelectorIntent.move
-                        ? t('MOVE_TO_COLLECTION')
+                        ? t("MOVE_TO_COLLECTION")
                         : attributes.intent === CollectionSelectorIntent.restore
-                          ? t('RESTORE_TO_COLLECTION')
+                          ? t("RESTORE_TO_COLLECTION")
                           : attributes.intent ===
                               CollectionSelectorIntent.unhide
-                            ? t('UNHIDE_TO_COLLECTION')
-                            : t('SELECT_COLLECTION')}
+                            ? t("UNHIDE_TO_COLLECTION")
+                            : t("SELECT_COLLECTION")}
             </DialogTitleWithCloseButton>
-            <DialogContent sx={{ '&&&': { padding: 0 } }}>
-                <FlexWrapper flexWrap="wrap" gap={'4px'} padding={'16px'}>
+            <DialogContent sx={{ "&&&": { padding: 0 } }}>
+                <FlexWrapper flexWrap="wrap" gap={"4px"} padding={"16px"}>
                     <AddCollectionButton
                         showNextModal={attributes.showNextModal}
                     />

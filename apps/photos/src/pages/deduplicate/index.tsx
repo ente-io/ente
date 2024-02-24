@@ -1,41 +1,40 @@
-import { t } from 'i18next';
+import { t } from "i18next";
 
-import PhotoFrame from 'components/PhotoFrame';
-import { ALL_SECTION } from 'constants/collection';
-import { AppContext } from 'pages/_app';
-import { createContext, useContext, useEffect, useState } from 'react';
-import { getDuplicates, Duplicate } from 'services/deduplicationService';
-import { getLocalFiles, syncFiles, trashFiles } from 'services/fileService';
-import { SelectedState } from 'types/gallery';
+import PhotoFrame from "components/PhotoFrame";
+import { ALL_SECTION } from "constants/collection";
+import { AppContext } from "pages/_app";
+import { createContext, useContext, useEffect, useState } from "react";
+import { Duplicate, getDuplicates } from "services/deduplicationService";
+import { getLocalFiles, syncFiles, trashFiles } from "services/fileService";
+import { SelectedState } from "types/gallery";
 
-import { ApiError } from '@ente/shared/error';
-import { constructFileToCollectionMap, getSelectedFiles } from 'utils/file';
-import {
-    DeduplicateContextType,
-    DefaultDeduplicateContext,
-} from 'types/deduplicate';
-import Router from 'next/router';
-import DeduplicateOptions from 'components/pages/dedupe/SelectedFileOptions';
-import { PHOTOS_PAGES as PAGES } from '@ente/shared/constants/pages';
-import router from 'next/router';
-import { getKey, SESSION_KEYS } from '@ente/shared/storage/sessionStorage';
-import { styled } from '@mui/material';
+import { VerticallyCentered } from "@ente/shared/components/Container";
+import EnteSpinner from "@ente/shared/components/EnteSpinner";
+import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
+import { ApiError } from "@ente/shared/error";
+import useMemoSingleThreaded from "@ente/shared/hooks/useMemoSingleThreaded";
+import InMemoryStore, { MS_KEYS } from "@ente/shared/storage/InMemoryStore";
+import { SESSION_KEYS, getKey } from "@ente/shared/storage/sessionStorage";
+import { styled } from "@mui/material";
+import Typography from "@mui/material/Typography";
+import { HttpStatusCode } from "axios";
+import DeduplicateOptions from "components/pages/dedupe/SelectedFileOptions";
+import { default as Router, default as router } from "next/router";
 import {
     getAllLatestCollections,
     getLocalCollections,
-} from 'services/collectionService';
-import EnteSpinner from '@ente/shared/components/EnteSpinner';
-import { VerticallyCentered } from '@ente/shared/components/Container';
-import Typography from '@mui/material/Typography';
-import useMemoSingleThreaded from '@ente/shared/hooks/useMemoSingleThreaded';
-import InMemoryStore, { MS_KEYS } from '@ente/shared/storage/InMemoryStore';
-import { HttpStatusCode } from 'axios';
-import { syncTrash } from 'services/trashService';
+} from "services/collectionService";
+import { syncTrash } from "services/trashService";
+import {
+    DeduplicateContextType,
+    DefaultDeduplicateContext,
+} from "types/deduplicate";
+import { constructFileToCollectionMap, getSelectedFiles } from "utils/file";
 
 export const DeduplicateContext = createContext<DeduplicateContextType>(
-    DefaultDeduplicateContext
+    DefaultDeduplicateContext,
 );
-export const Info = styled('div')`
+export const Info = styled("div")`
     padding: 24px;
     font-size: 18px;
 `;
@@ -45,7 +44,7 @@ export default function Deduplicate() {
         useContext(AppContext);
     const [duplicates, setDuplicates] = useState<Duplicate[]>(null);
     const [collectionNameMap, setCollectionNameMap] = useState(
-        new Map<number, string>()
+        new Map<number, string>(),
     );
     const [selected, setSelected] = useState<SelectedState>({
         count: 0,
@@ -131,7 +130,7 @@ export default function Deduplicate() {
             // there in an ad-hoc manner. For now, this fixes the issue with the
             // UI not updating if the user deletes only some of the duplicates.
             const collections = await getAllLatestCollections();
-            await syncFiles('normal', collections, () => {});
+            await syncFiles("normal", collections, () => {});
             await syncTrash(collections, () => {});
         } catch (e) {
             if (
@@ -139,17 +138,17 @@ export default function Deduplicate() {
                 e.httpStatusCode === HttpStatusCode.Forbidden
             ) {
                 setDialogMessage({
-                    title: t('ERROR'),
+                    title: t("ERROR"),
 
-                    close: { variant: 'critical' },
-                    content: t('NOT_FILE_OWNER'),
+                    close: { variant: "critical" },
+                    content: t("NOT_FILE_OWNER"),
                 });
             } else {
                 setDialogMessage({
-                    title: t('ERROR'),
+                    title: t("ERROR"),
 
-                    close: { variant: 'critical' },
-                    content: t('UNKNOWN_ERROR'),
+                    close: { variant: "critical" },
+                    content: t("UNKNOWN_ERROR"),
                 });
             }
         } finally {
@@ -176,14 +175,15 @@ export default function Deduplicate() {
                 ...DefaultDeduplicateContext,
                 collectionNameMap,
                 isOnDeduplicatePage: true,
-            }}>
+            }}
+        >
             {duplicateFiles.length > 0 && (
-                <Info>{t('DEDUPLICATE_BASED_ON_SIZE')}</Info>
+                <Info>{t("DEDUPLICATE_BASED_ON_SIZE")}</Info>
             )}
             {duplicateFiles.length === 0 ? (
                 <VerticallyCentered>
                     <Typography variant="large" color="text.muted">
-                        {t('NO_DUPLICATES_FOUND')}
+                        {t("NO_DUPLICATES_FOUND")}
                     </Typography>
                 </VerticallyCentered>
             ) : (

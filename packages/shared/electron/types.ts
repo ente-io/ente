@@ -1,6 +1,6 @@
-import { LimitedCache } from '@ente/shared/storage/cacheStorage/types';
-import { ElectronFile } from '@ente/shared/upload/types';
-import { WatchMapping } from '@ente/shared/watchFolder/types';
+import { LimitedCache } from "@ente/shared/storage/cacheStorage/types";
+import { ElectronFile } from "@ente/shared/upload/types";
+import { WatchMapping } from "@ente/shared/watchFolder/types";
 
 export interface AppUpdateInfo {
     autoUpdatable: boolean;
@@ -8,8 +8,8 @@ export interface AppUpdateInfo {
 }
 
 export enum Model {
-    GGML_CLIP = 'ggml-clip',
-    ONNX_CLIP = 'onnx-clip',
+    GGML_CLIP = "ggml-clip",
+    ONNX_CLIP = "onnx-clip",
 }
 
 export interface ElectronAPIsType {
@@ -17,7 +17,7 @@ export interface ElectronAPIsType {
     checkExistsAndCreateDir: (dirPath: string) => Promise<void>;
     saveStreamToDisk: (
         path: string,
-        fileStream: ReadableStream<any>
+        fileStream: ReadableStream<any>,
     ) => Promise<void>;
     saveFileToDisk: (path: string, file: any) => Promise<void>;
     selectDirectory: () => Promise<string>;
@@ -36,29 +36,29 @@ export interface ElectronAPIsType {
         files: ElectronFile[];
     }>;
     getElectronFilesFromGoogleZip: (
-        filePath: string
+        filePath: string,
     ) => Promise<ElectronFile[]>;
     setToUploadCollection: (collectionName: string) => void;
     getDirFiles: (dirPath: string) => Promise<ElectronFile[]>;
     getWatchMappings: () => WatchMapping[];
     updateWatchMappingSyncedFiles: (
         folderPath: string,
-        files: WatchMapping['syncedFiles']
+        files: WatchMapping["syncedFiles"],
     ) => void;
     updateWatchMappingIgnoredFiles: (
         folderPath: string,
-        files: WatchMapping['ignoredFiles']
+        files: WatchMapping["ignoredFiles"],
     ) => void;
     addWatchMapping: (
         collectionName: string,
         folderPath: string,
-        uploadStrategy: number
+        uploadStrategy: number,
     ) => Promise<void>;
     removeWatchMapping: (folderPath: string) => Promise<void>;
     registerWatcherFunctions: (
         addFile: (file: ElectronFile) => Promise<void>,
         removeFile: (path: string) => Promise<void>,
-        removeFolder: (folderPath: string) => Promise<void>
+        removeFolder: (folderPath: string) => Promise<void>,
     ) => void;
     isFolder: (dirPath: string) => Promise<boolean>;
     clearElectronStore: () => void;
@@ -66,17 +66,17 @@ export interface ElectronAPIsType {
     getEncryptionKey: () => Promise<string>;
     openDiskCache: (
         cacheName: string,
-        cacheLimitInBytes?: number
+        cacheLimitInBytes?: number,
     ) => Promise<LimitedCache>;
     deleteDiskCache: (cacheName: string) => Promise<boolean>;
     logToDisk: (msg: string) => void;
     convertToJPEG: (
         fileData: Uint8Array,
-        filename: string
+        filename: string,
     ) => Promise<Uint8Array>;
     openLogDirectory: () => void;
     registerUpdateEventListener: (
-        showUpdateDialog: (updateInfo: AppUpdateInfo) => void
+        showUpdateDialog: (updateInfo: AppUpdateInfo) => void,
     ) => void;
     updateAndRestart: () => void;
     skipAppUpdate: (version: string) => void;
@@ -86,13 +86,13 @@ export interface ElectronAPIsType {
         cmd: string[],
         inputFile: File | ElectronFile,
         outputFileName: string,
-        dontTimeout?: boolean
+        dontTimeout?: boolean,
     ) => Promise<File>;
     muteUpdateNotification: (version: string) => void;
     generateImageThumbnail: (
         inputFile: File | ElectronFile,
         maxDimension: number,
-        maxSize: number
+        maxSize: number,
     ) => Promise<Uint8Array>;
     logRendererProcessMemoryUsage: (message: string) => Promise<void>;
     registerForegroundEventListener: (onForeground: () => void) => void;
@@ -104,10 +104,10 @@ export interface ElectronAPIsType {
     updateOptOutOfCrashReports: (optOut: boolean) => Promise<void>;
     computeImageEmbedding: (
         model: Model,
-        imageData: Uint8Array
+        imageData: Uint8Array,
     ) => Promise<Float32Array>;
     computeTextEmbedding: (model: Model, text: string) => Promise<Float32Array>;
-    getPlatform: () => Promise<'mac' | 'windows' | 'linux'>;
+    getPlatform: () => Promise<"mac" | "windows" | "linux">;
     setCustomCacheDirectory: (directory: string) => Promise<void>;
     getCacheDirectory: () => Promise<string>;
 }

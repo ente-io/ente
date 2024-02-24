@@ -1,6 +1,5 @@
-import { Box } from '@mui/material';
-import React from 'react';
-import { Progressbar } from '../../../styledComponents';
+import { Box } from "@mui/material";
+import { Progressbar } from "../../../styledComponents";
 interface Iprops {
     userUsage: number;
     totalUsage: number;
@@ -13,20 +12,20 @@ export function FamilyUsageProgressBar({
     totalStorage,
 }: Iprops) {
     return (
-        <Box position={'relative'} width="100%">
+        <Box position={"relative"} width="100%">
             <Progressbar
-                sx={{ backgroundColor: 'transparent' }}
+                sx={{ backgroundColor: "transparent" }}
                 value={Math.min((userUsage * 100) / totalStorage, 100)}
             />
             <Progressbar
                 sx={{
-                    position: 'absolute',
+                    position: "absolute",
                     top: 0,
                     zIndex: 1,
-                    '.MuiLinearProgress-bar ': {
-                        backgroundColor: 'text.muted',
+                    ".MuiLinearProgress-bar ": {
+                        backgroundColor: "text.muted",
                     },
-                    width: '100%',
+                    width: "100%",
                 }}
                 value={Math.min((totalUsage * 100) / totalStorage, 100)}
             />

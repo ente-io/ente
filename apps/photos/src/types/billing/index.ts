@@ -1,4 +1,4 @@
-import { PLAN_PERIOD } from 'constants/gallery';
+import { PLAN_PERIOD } from "constants/gallery";
 
 export interface Subscription {
     id: number;

@@ -1,16 +1,16 @@
-import { useEffect, useState } from 'react';
-import { getTwoFactorStatus } from 'services/userService';
-import { SetLoading } from 'types/gallery';
-import { getData, LS_KEYS, setData } from '@ente/shared/storage/localStorage';
-import { t } from 'i18next';
+import { LS_KEYS, getData, setData } from "@ente/shared/storage/localStorage";
+import { t } from "i18next";
+import { useEffect, useState } from "react";
+import { getTwoFactorStatus } from "services/userService";
+import { SetLoading } from "types/gallery";
 
-import TwoFactorModalSetupSection from './Setup';
-import TwoFactorModalManageSection from './Manage';
-import { Dialog, DialogContent, styled } from '@mui/material';
-import DialogTitleWithCloseButton from '@ente/shared/components/DialogBox/TitleWithCloseButton';
+import DialogTitleWithCloseButton from "@ente/shared/components/DialogBox/TitleWithCloseButton";
+import { Dialog, DialogContent, styled } from "@mui/material";
+import TwoFactorModalManageSection from "./Manage";
+import TwoFactorModalSetupSection from "./Setup";
 
 const TwoFactorDialog = styled(Dialog)(({ theme }) => ({
-    '& .MuiDialogContent-root': {
+    "& .MuiDialogContent-root": {
         padding: theme.spacing(2, 4),
     },
 }));
@@ -53,7 +53,7 @@ function TwoFactorModal(props: Props) {
     return (
         <TwoFactorDialog maxWidth="xs" open={props.show} onClose={props.onHide}>
             <DialogTitleWithCloseButton onClose={props.onHide}>
-                {t('TWO_FACTOR_AUTHENTICATION')}
+                {t("TWO_FACTOR_AUTHENTICATION")}
             </DialogTitleWithCloseButton>
             <DialogContent sx={{ px: 4 }}>
                 {isTwoFactorEnabled ? (

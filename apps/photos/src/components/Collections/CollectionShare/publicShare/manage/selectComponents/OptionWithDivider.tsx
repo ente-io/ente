@@ -1,6 +1,5 @@
-import React from 'react';
-import { LabelWithDivider } from './LabelWithDivider';
-import { components } from 'react-select';
+import { components } from "react-select";
+import { LabelWithDivider } from "./LabelWithDivider";
 
 const { Option } = components;
 

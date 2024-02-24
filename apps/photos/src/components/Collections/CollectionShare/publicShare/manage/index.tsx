@@ -1,27 +1,26 @@
-import { ManageLinkPassword } from './linkPassword';
-import { ManageDeviceLimit } from './deviceLimit';
-import { ManageLinkExpiry } from './linkExpiry';
-import { Stack, Typography } from '@mui/material';
-import { GalleryContext } from 'pages/gallery';
-import React, { useContext, useState } from 'react';
+import ContentCopyIcon from "@mui/icons-material/ContentCopy";
+import RemoveCircleOutline from "@mui/icons-material/RemoveCircleOutline";
+import { DialogProps, Stack, Typography } from "@mui/material";
+import { EnteDrawer } from "components/EnteDrawer";
+import { EnteMenuItem } from "components/Menu/EnteMenuItem";
+import MenuItemDivider from "components/Menu/MenuItemDivider";
+import { MenuItemGroup } from "components/Menu/MenuItemGroup";
+import Titlebar from "components/Titlebar";
+import { t } from "i18next";
+import { GalleryContext } from "pages/gallery";
+import { useContext, useState } from "react";
 import {
     deleteShareableURL,
     updateShareableURL,
-} from 'services/collectionService';
-import { Collection, PublicURL, UpdatePublicURL } from 'types/collection';
-import { ManageDownloadAccess } from './downloadAccess';
-import { handleSharingErrors } from 'utils/error/ui';
-import { SetPublicShareProp } from 'types/publicCollection';
-import { ManagePublicCollect } from './publicCollect';
-import { EnteDrawer } from 'components/EnteDrawer';
-import RemoveCircleOutline from '@mui/icons-material/RemoveCircleOutline';
-import ContentCopyIcon from '@mui/icons-material/ContentCopy';
-import { EnteMenuItem } from 'components/Menu/EnteMenuItem';
-import { t } from 'i18next';
-import { MenuItemGroup } from 'components/Menu/MenuItemGroup';
-import { DialogProps } from '@mui/material';
-import Titlebar from 'components/Titlebar';
-import MenuItemDivider from 'components/Menu/MenuItemDivider';
+} from "services/collectionService";
+import { Collection, PublicURL, UpdatePublicURL } from "types/collection";
+import { SetPublicShareProp } from "types/publicCollection";
+import { handleSharingErrors } from "utils/error/ui";
+import { ManageDeviceLimit } from "./deviceLimit";
+import { ManageDownloadAccess } from "./downloadAccess";
+import { ManageLinkExpiry } from "./linkExpiry";
+import { ManageLinkPassword } from "./linkPassword";
+import { ManagePublicCollect } from "./publicCollect";
 
 interface Iprops {
     publicShareProp: PublicURL;
@@ -42,8 +41,8 @@ export default function ManagePublicShareOptions({
     onRootClose,
     publicShareUrl,
 }: Iprops) {
-    const handleDrawerClose: DialogProps['onClose'] = (_, reason) => {
-        if (reason === 'backdropClick') {
+    const handleDrawerClose: DialogProps["onClose"] = (_, reason) => {
+        if (reason === "backdropClick") {
             onRootClose();
         } else {
             onClose();
@@ -86,13 +85,13 @@ export default function ManagePublicShareOptions({
     return (
         <>
             <EnteDrawer anchor="right" open={open} onClose={handleDrawerClose}>
-                <Stack spacing={'4px'} py={'12px'}>
+                <Stack spacing={"4px"} py={"12px"}>
                     <Titlebar
                         onClose={onClose}
-                        title={t('SHARE_COLLECTION')}
+                        title={t("SHARE_COLLECTION")}
                         onRootClose={onRootClose}
                     />
-                    <Stack py={'20px'} px={'8px'} spacing={'32px'}>
+                    <Stack py={"20px"} px={"8px"} spacing={"32px"}>
                         <Stack spacing={3}>
                             <ManagePublicCollect
                                 collection={collection}
@@ -139,9 +138,9 @@ export default function ManagePublicShareOptions({
                                 <EnteMenuItem
                                     startIcon={<ContentCopyIcon />}
                                     onClick={copyToClipboardHelper(
-                                        publicShareUrl
+                                        publicShareUrl,
                                     )}
-                                    label={t('COPY_LINK')}
+                                    label={t("COPY_LINK")}
                                 />
                             </MenuItemGroup>
                             <MenuItemGroup>
@@ -149,18 +148,19 @@ export default function ManagePublicShareOptions({
                                     color="critical"
                                     startIcon={<RemoveCircleOutline />}
                                     onClick={disablePublicSharing}
-                                    label={t('REMOVE_LINK')}
+                                    label={t("REMOVE_LINK")}
                                 />
                             </MenuItemGroup>
                         </Stack>
                         {sharableLinkError && (
                             <Typography
-                                textAlign={'center'}
+                                textAlign={"center"}
                                 variant="small"
                                 sx={{
                                     color: (theme) => theme.colors.danger.A700,
                                     mt: 0.5,
-                                }}>
+                                }}
+                            >
                                 {sharableLinkError}
                             </Typography>
                         )}

@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
-import Menu from '@mui/material/Menu';
-import { IconButton, PaperProps, styled } from '@mui/material';
-import { OverflowMenuContext } from './context';
+import { IconButton, PaperProps, styled } from "@mui/material";
+import Menu from "@mui/material/Menu";
+import React, { useState } from "react";
+import { OverflowMenuContext } from "./context";
 
 export interface Iprops {
     triggerButtonIcon: React.ReactNode;
@@ -39,8 +39,9 @@ export default function OverflowMenu({
                 onClick={(event) => setSortByEl(event.currentTarget)}
                 aria-controls={sortByEl ? ariaControls : undefined}
                 aria-haspopup="true"
-                aria-expanded={sortByEl ? 'true' : undefined}
-                {...triggerButtonProps}>
+                aria-expanded={sortByEl ? "true" : undefined}
+                {...triggerButtonProps}
+            >
                 {triggerButtonIcon}
             </IconButton>
             <StyledMenu
@@ -50,17 +51,18 @@ export default function OverflowMenu({
                 onClose={handleClose}
                 MenuListProps={{
                     disablePadding: true,
-                    'aria-labelledby': ariaControls,
+                    "aria-labelledby": ariaControls,
                 }}
                 PaperProps={menuPaperProps}
                 anchorOrigin={{
-                    vertical: 'bottom',
-                    horizontal: 'right',
+                    vertical: "bottom",
+                    horizontal: "right",
                 }}
                 transformOrigin={{
-                    vertical: 'top',
-                    horizontal: 'right',
-                }}>
+                    vertical: "top",
+                    horizontal: "right",
+                }}
+            >
                 {children}
             </StyledMenu>
         </OverflowMenuContext.Provider>

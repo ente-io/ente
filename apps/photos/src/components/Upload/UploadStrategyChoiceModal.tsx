@@ -1,13 +1,12 @@
-import { Button, Dialog, DialogContent, Typography } from '@mui/material';
 import {
     CenteredFlex,
     SpaceBetweenFlex,
-} from '@ente/shared/components/Container';
+} from "@ente/shared/components/Container";
 import DialogTitleWithCloseButton, {
     dialogCloseHandler,
-} from '@ente/shared/components/DialogBox/TitleWithCloseButton';
-import React from 'react';
-import { t } from 'i18next';
+} from "@ente/shared/components/DialogBox/TitleWithCloseButton";
+import { Button, Dialog, DialogContent, Typography } from "@mui/material";
+import { t } from "i18next";
 
 interface Props {
     uploadToMultipleCollection: () => void;
@@ -27,12 +26,12 @@ function UploadStrategyChoiceModal({
     return (
         <Dialog open={props.open} onClose={handleClose}>
             <DialogTitleWithCloseButton onClose={handleClose}>
-                {t('MULTI_FOLDER_UPLOAD')}
+                {t("MULTI_FOLDER_UPLOAD")}
             </DialogTitleWithCloseButton>
             <DialogContent>
                 <CenteredFlex mb={1}>
                     <Typography color="text.muted">
-                        {t('UPLOAD_STRATEGY_CHOICE')}
+                        {t("UPLOAD_STRATEGY_CHOICE")}
                     </Typography>
                 </CenteredFlex>
                 <SpaceBetweenFlex px={2}>
@@ -42,11 +41,12 @@ function UploadStrategyChoiceModal({
                         onClick={() => {
                             props.onClose();
                             uploadToSingleCollection();
-                        }}>
-                        {t('UPLOAD_STRATEGY_SINGLE_COLLECTION')}
+                        }}
+                    >
+                        {t("UPLOAD_STRATEGY_SINGLE_COLLECTION")}
                     </Button>
 
-                    <strong>{t('OR')}</strong>
+                    <strong>{t("OR")}</strong>
 
                     <Button
                         size="medium"
@@ -54,8 +54,9 @@ function UploadStrategyChoiceModal({
                         onClick={() => {
                             props.onClose();
                             uploadToMultipleCollection();
-                        }}>
-                        {t('UPLOAD_STRATEGY_COLLECTION_PER_FOLDER')}
+                        }}
+                    >
+                        {t("UPLOAD_STRATEGY_COLLECTION_PER_FOLDER")}
                     </Button>
                 </SpaceBetweenFlex>
             </DialogContent>

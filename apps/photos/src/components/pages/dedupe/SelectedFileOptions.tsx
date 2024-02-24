@@ -1,14 +1,14 @@
-import { FluidContainer } from '@ente/shared/components/Container';
-import { SelectionBar } from '@ente/shared/components/Navbar/SelectionBar';
-import { useContext } from 'react';
-import { Box, IconButton, Tooltip } from '@mui/material';
-import { AppContext } from 'pages/_app';
-import CloseIcon from '@mui/icons-material/Close';
-import BackButton from '@mui/icons-material/ArrowBackOutlined';
-import DeleteIcon from '@mui/icons-material/Delete';
-import { getTrashFilesMessage } from 'utils/ui';
-import { t } from 'i18next';
-import { formatNumber } from 'utils/number/format';
+import { FluidContainer } from "@ente/shared/components/Container";
+import { SelectionBar } from "@ente/shared/components/Navbar/SelectionBar";
+import BackButton from "@mui/icons-material/ArrowBackOutlined";
+import CloseIcon from "@mui/icons-material/Close";
+import DeleteIcon from "@mui/icons-material/Delete";
+import { Box, IconButton, Tooltip } from "@mui/material";
+import { t } from "i18next";
+import { AppContext } from "pages/_app";
+import { useContext } from "react";
+import { formatNumber } from "utils/number/format";
+import { getTrashFilesMessage } from "utils/ui";
 
 interface IProps {
     deleteFileHelper: () => void;
@@ -41,10 +41,10 @@ export default function DeduplicateOptions({
                     </IconButton>
                 )}
                 <Box ml={1.5}>
-                    {formatNumber(count)} {t('SELECTED')}
+                    {formatNumber(count)} {t("SELECTED")}
                 </Box>
             </FluidContainer>
-            <Tooltip title={t('DELETE')}>
+            <Tooltip title={t("DELETE")}>
                 <IconButton onClick={trashHandler}>
                     <DeleteIcon />
                 </IconButton>

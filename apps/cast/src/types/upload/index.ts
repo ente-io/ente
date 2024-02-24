@@ -1,16 +1,16 @@
 import {
     B64EncryptionResult,
     LocalFileAttributes,
-} from '@ente/shared/crypto/types';
-import { FILE_TYPE } from 'constants/file';
-import { Collection } from 'types/collection';
+} from "@ente/shared/crypto/types";
+import { FILE_TYPE } from "constants/file";
+import { Collection } from "types/collection";
 import {
-    MetadataFileAttributes,
-    S3FileAttributes,
     FilePublicMagicMetadata,
     FilePublicMagicMetadataProps,
-} from 'types/file';
-import { EncryptedMagicMetadata } from 'types/magicMetadata';
+    MetadataFileAttributes,
+    S3FileAttributes,
+} from "types/file";
+import { EncryptedMagicMetadata } from "types/magicMetadata";
 
 export interface DataStream {
     stream: ReadableStream<Uint8Array>;
@@ -18,7 +18,7 @@ export interface DataStream {
 }
 
 export function isDataStream(object: any): object is DataStream {
-    return 'stream' in object;
+    return "stream" in object;
 }
 
 export type Logger = (message: string) => void;
@@ -114,7 +114,7 @@ export interface FileInMemory {
 }
 
 export interface FileWithMetadata
-    extends Omit<FileInMemory, 'hasStaticThumbnail'> {
+    extends Omit<FileInMemory, "hasStaticThumbnail"> {
     metadata: Metadata;
     localID: number;
     pubMagicMetadata: FilePublicMagicMetadata;

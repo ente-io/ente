@@ -1,14 +1,13 @@
-import { NormalizedFace } from 'blazeface-back';
-import * as tf from '@tensorflow/tfjs-core';
-import { BLAZEFACE_FACE_SIZE } from 'constants/mlConfig';
-import { euclidean } from 'hdbscan';
-import PQueue from 'p-queue';
-import DownloadManager from 'services/download';
-import { getLocalFiles } from 'services/fileService';
-import { EnteFile } from 'types/file';
-import { Dimensions } from 'types/image';
+import * as tf from "@tensorflow/tfjs-core";
+import { NormalizedFace } from "blazeface-back";
+import { BLAZEFACE_FACE_SIZE } from "constants/mlConfig";
+import { euclidean } from "hdbscan";
+import PQueue from "p-queue";
+import DownloadManager from "services/download";
+import { getLocalFiles } from "services/fileService";
+import { EnteFile } from "types/file";
+import { Dimensions } from "types/image";
 import {
-    RealWorldObject,
     AlignedFace,
     DetectedFace,
     DetectedObject,
@@ -16,31 +15,32 @@ import {
     FaceImageBlob,
     MlFileData,
     Person,
+    RealWorldObject,
     Versioned,
-} from 'types/machineLearning';
+} from "types/machineLearning";
 // import { mlFilesStore, mlPeopleStore } from 'utils/storage/mlStorage';
-import { getRenderableImage } from 'utils/file';
-import { imageBitmapToBlob } from 'utils/image';
-import { cached } from '@ente/shared/storage/cacheStorage/helpers';
-import mlIDbStorage from 'utils/storage/mlIDbStorage';
-import { Box, Point } from '../../../thirdparty/face-api/classes';
+import { addLogLine } from "@ente/shared/logging";
+import { CACHES } from "@ente/shared/storage/cacheStorage/constants";
+import { cached } from "@ente/shared/storage/cacheStorage/helpers";
+import { FILE_TYPE } from "constants/file";
+import { decodeLivePhoto } from "services/livePhotoService";
+import { getRenderableImage } from "utils/file";
+import { imageBitmapToBlob } from "utils/image";
+import mlIDbStorage from "utils/storage/mlIDbStorage";
+import { Box, Point } from "../../../thirdparty/face-api/classes";
 import {
     getArcfaceAlignment,
     ibExtractFaceImage,
     ibExtractFaceImages,
-} from './faceAlign';
+} from "./faceAlign";
 import {
     getFaceCropBlobFromStorage,
     ibExtractFaceImagesFromCrops,
-} from './faceCrop';
-import { CACHES } from '@ente/shared/storage/cacheStorage/constants';
-import { FILE_TYPE } from 'constants/file';
-import { decodeLivePhoto } from 'services/livePhotoService';
-import { addLogLine } from '@ente/shared/logging';
+} from "./faceCrop";
 
 export function f32Average(descriptors: Float32Array[]) {
     if (descriptors.length < 1) {
-        throw Error('f32Average: input size 0');
+        throw Error("f32Average: input size 0");
     }
 
     if (descriptors.length === 1) {
@@ -83,7 +83,7 @@ export function isTensor4D(tensor: any): tensor is tf.Tensor4D {
 
 export function toTensor4D(
     image: tf.Tensor3D | tf.Tensor4D,
-    dtype?: tf.DataType
+    dtype?: tf.DataType,
 ) {
     return tf.tidy(() => {
         let reshapedImage: tf.Tensor4D;
@@ -92,7 +92,7 @@ export function toTensor4D(
         } else if (isTensor4D(image)) {
             reshapedImage = image;
         } else {
-            throw Error('toTensor4D only supports Tensor3D and Tensor4D input');
+            throw Error("toTensor4D only supports Tensor3D and Tensor4D input");
         }
         if (dtype) {
             reshapedImage = tf.cast(reshapedImage, dtype);
@@ -112,10 +112,10 @@ export function imageBitmapsToTensor4D(imageBitmaps: Array<ImageBitmap>) {
 export function extractFaces(
     image: tf.Tensor3D | tf.Tensor4D,
     facebBoxes: Array<Box>,
-    faceSize: number
+    faceSize: number,
 ) {
     return tf.tidy(() => {
-        const reshapedImage = toTensor4D(image, 'float32');
+        const reshapedImage = toTensor4D(image, "float32");
 
         const boxes = facebBoxes.map((box) => {
             const normalized = box.rescale({
@@ -136,8 +136,8 @@ export function extractFaces(
         const faceImagesTensor = tf.image.cropAndResize(
             reshapedImage,
             boxes,
-            tf.fill([boxes.length], 0, 'int32'),
-            [faceSize, faceSize]
+            tf.fill([boxes.length], 0, "int32"),
+            [faceSize, faceSize],
         );
 
         return faceImagesTensor;
@@ -152,7 +152,7 @@ export function newBoxFromPoints(
     left: number,
     top: number,
     right: number,
-    bottom: number
+    bottom: number,
 ) {
     return new Box({ left, top, right, bottom });
 }
@@ -162,7 +162,7 @@ export function normFaceBox(face: NormalizedFace) {
         face.topLeft[0],
         face.topLeft[1],
         face.bottomRight[0],
-        face.bottomRight[1]
+        face.bottomRight[1],
     );
 }
 
@@ -204,7 +204,7 @@ export function getAllFacesFromMap(allFacesMap: Map<number, Array<Face>>) {
 }
 
 export function getAllObjectsFromMap(
-    allObjectsMap: Map<number, Array<RealWorldObject>>
+    allObjectsMap: Map<number, Array<RealWorldObject>>,
 ) {
     return [...allObjectsMap.values()].flat();
 }
@@ -218,7 +218,7 @@ export async function getFaceImage(
     face: AlignedFace,
     token: string,
     faceSize: number = BLAZEFACE_FACE_SIZE,
-    file?: EnteFile
+    file?: EnteFile,
 ): Promise<FaceImageBlob> {
     if (!file) {
         file = await getLocalFile(face.fileId);
@@ -228,7 +228,7 @@ export async function getFaceImage(
     const faceImageBitmap = ibExtractFaceImage(
         imageBitmap,
         face.alignment,
-        faceSize
+        faceSize,
     );
     const faceImage = imageBitmapToBlob(faceImageBitmap);
     faceImageBitmap.close();
@@ -240,7 +240,7 @@ export async function getFaceImage(
 export async function extractFaceImages(
     faces: Array<AlignedFace>,
     faceSize: number,
-    image?: ImageBitmap
+    image?: ImageBitmap,
 ) {
     if (faces.length === faces.filter((f) => f.crop).length) {
         return ibExtractFaceImagesFromCrops(faces, faceSize);
@@ -249,7 +249,7 @@ export async function extractFaceImages(
         return ibExtractFaceImages(image, faceAlignments, faceSize);
     } else {
         throw Error(
-            'Either face crops or image is required to extract face images'
+            "Either face crops or image is required to extract face images",
         );
     }
 }
@@ -283,12 +283,12 @@ export function getFaceId(detectedFace: DetectedFace, imageDims: Dimensions) {
 
 export function getObjectId(
     detectedObject: DetectedObject,
-    imageDims: Dimensions
+    imageDims: Dimensions,
 ) {
     const imgDimPoint = new Point(imageDims.width, imageDims.height);
     const objectCenterPoint = new Point(
         detectedObject.detection.bbox[2] / 2,
-        detectedObject.detection.bbox[3] / 2
+        detectedObject.detection.bbox[3] / 2,
     );
     const gridPt = objectCenterPoint
         .mul(new Point(100, 100))
@@ -338,7 +338,7 @@ async function getOriginalConvertedFile(file: EnteFile, queue?: PQueue) {
         const livePhoto = await decodeLivePhoto(file, fileBlob);
         return await getRenderableImage(
             livePhoto.imageNameTitle,
-            new Blob([livePhoto.image])
+            new Blob([livePhoto.image]),
         );
     }
 }
@@ -346,7 +346,7 @@ async function getOriginalConvertedFile(file: EnteFile, queue?: PQueue) {
 export async function getOriginalImageBitmap(
     file: EnteFile,
     queue?: PQueue,
-    useCache: boolean = false
+    useCache: boolean = false,
 ) {
     let fileBlob;
 
@@ -357,21 +357,21 @@ export async function getOriginalImageBitmap(
     } else {
         fileBlob = await getOriginalConvertedFile(file, queue);
     }
-    addLogLine('[MLService] Got file: ', file.id.toString());
+    addLogLine("[MLService] Got file: ", file.id.toString());
 
     return getImageBlobBitmap(fileBlob);
 }
 
 export async function getThumbnailImageBitmap(file: EnteFile) {
     const thumb = await DownloadManager.getThumbnail(file);
-    addLogLine('[MLService] Got thumbnail: ', file.id.toString());
+    addLogLine("[MLService] Got thumbnail: ", file.id.toString());
 
     return getImageBlobBitmap(new Blob([thumb]));
 }
 
 export async function getLocalFileImageBitmap(
     enteFile: EnteFile,
-    localFile: globalThis.File
+    localFile: globalThis.File,
 ) {
     let fileBlob = localFile as Blob;
     fileBlob = await getRenderableImage(enteFile.metadata.title, fileBlob);
@@ -382,9 +382,9 @@ export async function getPeopleList(file: EnteFile): Promise<Array<Person>> {
     let startTime = Date.now();
     const mlFileData: MlFileData = await mlIDbStorage.getFile(file.id);
     addLogLine(
-        'getPeopleList:mlFilesStore:getItem',
+        "getPeopleList:mlFilesStore:getItem",
         Date.now() - startTime,
-        'ms'
+        "ms",
     );
     if (!mlFileData?.faces || mlFileData.faces.length < 1) {
         return [];
@@ -399,13 +399,13 @@ export async function getPeopleList(file: EnteFile): Promise<Array<Person>> {
     // addLogLine("peopleIds: ", peopleIds);
     startTime = Date.now();
     const peoplePromises = peopleIds.map(
-        (p) => mlIDbStorage.getPerson(p) as Promise<Person>
+        (p) => mlIDbStorage.getPerson(p) as Promise<Person>,
     );
     const peopleList = await Promise.all(peoplePromises);
     addLogLine(
-        'getPeopleList:mlPeopleStore:getItems',
+        "getPeopleList:mlPeopleStore:getItems",
         Date.now() - startTime,
-        'ms'
+        "ms",
     );
     // addLogLine("peopleList: ", peopleList);
 
@@ -413,17 +413,17 @@ export async function getPeopleList(file: EnteFile): Promise<Array<Person>> {
 }
 
 export async function getUnidentifiedFaces(
-    file: EnteFile
+    file: EnteFile,
 ): Promise<Array<Face>> {
     const mlFileData: MlFileData = await mlIDbStorage.getFile(file.id);
 
     return mlFileData?.faces?.filter(
-        (f) => f.personId === null || f.personId === undefined
+        (f) => f.personId === null || f.personId === undefined,
     );
 }
 
 export async function getFaceCropBlobs(
-    faces: Array<Face>
+    faces: Array<Face>,
 ): Promise<Array<FaceImageBlob>> {
     const faceCrops = faces
         .map((f) => f.crop)
@@ -432,7 +432,7 @@ export async function getFaceCropBlobs(
     return (
         faceCrops &&
         Promise.all(
-            faceCrops.map((faceCrop) => getFaceCropBlobFromStorage(faceCrop))
+            faceCrops.map((faceCrop) => getFaceCropBlobFromStorage(faceCrop)),
         )
     );
 }
@@ -450,7 +450,7 @@ export async function getAllPeople(limit: number = undefined) {
 
 export function findFirstIfSorted<T>(
     elements: Array<T>,
-    comparator: (a: T, b: T) => number
+    comparator: (a: T, b: T) => number,
 ) {
     if (!elements || elements.length < 1) {
         return;
@@ -469,7 +469,7 @@ export function findFirstIfSorted<T>(
 
 export function isDifferentOrOld(
     method: Versioned<string>,
-    thanMethod: Versioned<string>
+    thanMethod: Versioned<string>,
 ) {
     return (
         !method ||
@@ -496,14 +496,14 @@ export function areFaceIdsSame(ofFaces: Array<Face>, toFaces: Array<Face>) {
     }
     return primitiveArrayEquals(
         ofFaces?.map((f) => f.id),
-        toFaces?.map((f) => f.id)
+        toFaces?.map((f) => f.id),
     );
 }
 
 export function getNearestPointIndex(
     toPoint: Point,
     fromPoints: Array<Point>,
-    maxDistance?: number
+    maxDistance?: number,
 ) {
     const dists = fromPoints.map((point, i) => ({
         index: i,
@@ -512,7 +512,7 @@ export function getNearestPointIndex(
     }));
     const nearest = findFirstIfSorted(
         dists,
-        (a, b) => Math.abs(a.distance) - Math.abs(b.distance)
+        (a, b) => Math.abs(a.distance) - Math.abs(b.distance),
     );
 
     // addLogLine('Nearest dist: ', nearest.distance, maxDistance);
@@ -522,13 +522,13 @@ export function getNearestPointIndex(
 }
 
 export function logQueueStats(queue: PQueue, name: string) {
-    queue.on('active', () =>
+    queue.on("active", () =>
         addLogLine(
-            `queuestats: ${name}: Active, Size: ${queue.size} Pending: ${queue.pending}`
-        )
+            `queuestats: ${name}: Active, Size: ${queue.size} Pending: ${queue.pending}`,
+        ),
     );
-    queue.on('idle', () => addLogLine(`queuestats: ${name}: Idle`));
-    queue.on('error', (error) =>
-        console.error(`queuestats: ${name}: Error, `, error)
+    queue.on("idle", () => addLogLine(`queuestats: ${name}: Idle`));
+    queue.on("error", (error) =>
+        console.error(`queuestats: ${name}: Error, `, error),
     );
 }

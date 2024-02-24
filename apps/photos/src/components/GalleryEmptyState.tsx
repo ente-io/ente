@@ -1,16 +1,15 @@
-import { Button, Stack, styled, Typography } from '@mui/material';
 import {
-    VerticallyCentered,
     FlexWrapper,
-} from '@ente/shared/components/Container';
-import { Box } from '@mui/material';
-import uploadManager from 'services/upload/uploadManager';
-import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternateOutlined';
-import FolderIcon from '@mui/icons-material/FolderOutlined';
-import { UploadTypeSelectorIntent } from 'types/gallery';
-import { Trans } from 'react-i18next';
-import { t } from 'i18next';
-import { EnteLogo } from '@ente/shared/components/EnteLogo';
+    VerticallyCentered,
+} from "@ente/shared/components/Container";
+import { EnteLogo } from "@ente/shared/components/EnteLogo";
+import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternateOutlined";
+import FolderIcon from "@mui/icons-material/FolderOutlined";
+import { Box, Button, Stack, Typography, styled } from "@mui/material";
+import { t } from "i18next";
+import { Trans } from "react-i18next";
+import uploadManager from "services/upload/uploadManager";
+import { UploadTypeSelectorIntent } from "types/gallery";
 
 const Wrapper = styled(Box)`
     display: flex;
@@ -18,7 +17,7 @@ const Wrapper = styled(Box)`
     align-items: center;
     text-align: center;
 `;
-const NonDraggableImage = styled('img')`
+const NonDraggableImage = styled("img")`
     pointer-events: none;
 `;
 
@@ -27,11 +26,12 @@ export default function GalleryEmptyState({ openUploader }) {
         <Wrapper>
             <Stack
                 sx={{
-                    flex: 'none',
+                    flex: "none",
                     pt: 1.5,
                     pb: 1.5,
-                }}>
-                <VerticallyCentered sx={{ flex: 'none' }}>
+                }}
+            >
+                <VerticallyCentered sx={{ flex: "none" }}>
                     <Typography variant="h3" color="text.muted" mb={1}>
                         <Trans
                             i18nKey="WELCOME_TO_ENTE_HEADING"
@@ -39,11 +39,11 @@ export default function GalleryEmptyState({ openUploader }) {
                         />
                     </Typography>
                     <Typography variant="h2">
-                        {t('WELCOME_TO_ENTE_SUBHEADING')}
+                        {t("WELCOME_TO_ENTE_SUBHEADING")}
                     </Typography>
                 </VerticallyCentered>
                 <Typography mt={3.5} color="text.muted">
-                    {t('WHERE_YOUR_BEST_PHOTOS_LIVE')}
+                    {t("WHERE_YOUR_BEST_PHOTOS_LIVE")}
                 </Typography>
             </Stack>
             <NonDraggableImage
@@ -58,7 +58,7 @@ export default function GalleryEmptyState({ openUploader }) {
                     style={{
                         cursor:
                             !uploadManager.shouldAllowNewUpload() &&
-                            'not-allowed',
+                            "not-allowed",
                     }}
                     color="accent"
                     onClick={() =>
@@ -70,17 +70,18 @@ export default function GalleryEmptyState({ openUploader }) {
                         p: 1,
                         width: 320,
                         borderRadius: 0.5,
-                    }}>
+                    }}
+                >
                     <FlexWrapper sx={{ gap: 1 }} justifyContent="center">
                         <AddPhotoAlternateIcon />
-                        {t('UPLOAD_FIRST_PHOTO')}
+                        {t("UPLOAD_FIRST_PHOTO")}
                     </FlexWrapper>
                 </Button>
                 <Button
                     style={{
                         cursor:
                             !uploadManager.shouldAllowNewUpload() &&
-                            'not-allowed',
+                            "not-allowed",
                     }}
                     onClick={() =>
                         openUploader(UploadTypeSelectorIntent.import)
@@ -91,10 +92,11 @@ export default function GalleryEmptyState({ openUploader }) {
                         p: 1,
                         width: 320,
                         borderRadius: 0.5,
-                    }}>
+                    }}
+                >
                     <FlexWrapper sx={{ gap: 1 }} justifyContent="center">
                         <FolderIcon />
-                        {t('IMPORT_YOUR_FOLDERS')}
+                        {t("IMPORT_YOUR_FOLDERS")}
                     </FlexWrapper>
                 </Button>
             </VerticallyCentered>

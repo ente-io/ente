@@ -1,17 +1,17 @@
-import React, { useMemo, useState } from 'react';
-import { Formik, FormikHelpers } from 'formik';
-import * as Yup from 'yup';
-import SubmitButton from '@ente/shared/components/SubmitButton';
-import TextField from '@mui/material/TextField';
-import { FlexWrapper } from '@ente/shared/components/Container';
-import { Button, FormHelperText, Stack } from '@mui/material';
-import { t } from 'i18next';
-import { MenuItemGroup } from 'components/Menu/MenuItemGroup';
-import { EnteMenuItem } from 'components/Menu/EnteMenuItem';
-import MenuItemDivider from 'components/Menu/MenuItemDivider';
-import MenuSectionTitle from 'components/Menu/MenuSectionTitle';
-import Avatar from 'components/pages/gallery/Avatar';
-import DoneIcon from '@mui/icons-material/Done';
+import { FlexWrapper } from "@ente/shared/components/Container";
+import SubmitButton from "@ente/shared/components/SubmitButton";
+import DoneIcon from "@mui/icons-material/Done";
+import { Button, FormHelperText, Stack } from "@mui/material";
+import TextField from "@mui/material/TextField";
+import { EnteMenuItem } from "components/Menu/EnteMenuItem";
+import MenuItemDivider from "components/Menu/MenuItemDivider";
+import { MenuItemGroup } from "components/Menu/MenuItemGroup";
+import MenuSectionTitle from "components/Menu/MenuSectionTitle";
+import Avatar from "components/pages/gallery/Avatar";
+import { Formik, FormikHelpers } from "formik";
+import { t } from "i18next";
+import { useMemo, useState } from "react";
+import * as Yup from "yup";
 
 interface formValues {
     inputValue: string;
@@ -19,7 +19,7 @@ interface formValues {
 }
 export interface AddParticipantFormProps {
     callback: (props: { email?: string; emails?: string[] }) => Promise<void>;
-    fieldType: 'text' | 'email' | 'password';
+    fieldType: "text" | "email" | "password";
     placeholder: string;
     buttonText: string;
     submitButtonProps?: any;
@@ -44,11 +44,11 @@ export default function AddParticipantForm(props: AddParticipantFormProps) {
 
     const submitForm = async (
         values: formValues,
-        { setFieldError, resetForm }: FormikHelpers<formValues>
+        { setFieldError, resetForm }: FormikHelpers<formValues>,
     ) => {
         try {
             SetLoading(true);
-            if (values.inputValue !== '') {
+            if (values.inputValue !== "") {
                 await props.callback({ email: values.inputValue });
             } else if (values.selectedOptions.length !== 0) {
                 await props.callback({ emails: values.selectedOptions });
@@ -57,38 +57,39 @@ export default function AddParticipantForm(props: AddParticipantFormProps) {
             props.onClose();
             resetForm();
         } catch (e) {
-            setFieldError('inputValue', e?.message);
+            setFieldError("inputValue", e?.message);
             SetLoading(false);
         }
     };
 
     const validationSchema = useMemo(() => {
         switch (props.fieldType) {
-            case 'text':
+            case "text":
                 return Yup.object().shape({
-                    inputValue: Yup.string().required(t('REQUIRED')),
+                    inputValue: Yup.string().required(t("REQUIRED")),
                 });
-            case 'email':
+            case "email":
                 return Yup.object().shape({
-                    inputValue: Yup.string().email(t('EMAIL_ERROR')),
+                    inputValue: Yup.string().email(t("EMAIL_ERROR")),
                 });
         }
     }, [props.fieldType]);
 
     const handleInputFieldClick = (setFieldValue) => {
-        setFieldValue('selectedOptions', []);
+        setFieldValue("selectedOptions", []);
     };
 
     return (
         <Formik<formValues>
             initialValues={{
-                inputValue: props.initialValue ?? '',
+                inputValue: props.initialValue ?? "",
                 selectedOptions: [],
             }}
             onSubmit={submitForm}
             validationSchema={validationSchema}
             validateOnChange={false}
-            validateOnBlur={false}>
+            validateOnBlur={false}
+        >
             {({
                 values,
                 errors,
@@ -97,17 +98,17 @@ export default function AddParticipantForm(props: AddParticipantFormProps) {
                 setFieldValue,
             }) => (
                 <form noValidate onSubmit={handleSubmit}>
-                    <Stack spacing={'24px'} py={'20px'} px={'12px'}>
+                    <Stack spacing={"24px"} py={"20px"} px={"12px"}>
                         {props.hiddenPreInput}
                         <Stack>
-                            <MenuSectionTitle title={t('ADD_NEW_EMAIL')} />
+                            <MenuSectionTitle title={t("ADD_NEW_EMAIL")} />
                             <TextField
                                 sx={{ marginTop: 0 }}
                                 hiddenLabel={props.hiddenLabel}
                                 fullWidth
                                 type={props.fieldType}
                                 id={props.fieldType}
-                                onChange={handleChange('inputValue')}
+                                onChange={handleChange("inputValue")}
                                 onClick={() =>
                                     handleInputFieldClick(setFieldValue)
                                 }
@@ -127,7 +128,7 @@ export default function AddParticipantForm(props: AddParticipantFormProps) {
                         {props.optionsList.length > 0 && (
                             <Stack>
                                 <MenuSectionTitle
-                                    title={t('OR_ADD_EXISTING')}
+                                    title={t("OR_ADD_EXISTING")}
                                 />
                                 <MenuItemGroup>
                                     {props.optionsList.map((item, index) => (
@@ -138,26 +139,26 @@ export default function AddParticipantForm(props: AddParticipantFormProps) {
                                                 onClick={() => {
                                                     if (
                                                         values.selectedOptions.includes(
-                                                            item
+                                                            item,
                                                         )
                                                     ) {
                                                         setFieldValue(
-                                                            'selectedOptions',
+                                                            "selectedOptions",
                                                             values.selectedOptions.filter(
                                                                 (
-                                                                    selectedOption
+                                                                    selectedOption,
                                                                 ) =>
                                                                     selectedOption !==
-                                                                    item
-                                                            )
+                                                                    item,
+                                                            ),
                                                         );
                                                     } else {
                                                         setFieldValue(
-                                                            'selectedOptions',
+                                                            "selectedOptions",
                                                             [
                                                                 ...values.selectedOptions,
                                                                 item,
-                                                            ]
+                                                            ],
                                                         );
                                                     }
                                                 }}
@@ -167,7 +168,7 @@ export default function AddParticipantForm(props: AddParticipantFormProps) {
                                                 }
                                                 endIcon={
                                                     values.selectedOptions.includes(
-                                                        item
+                                                        item,
                                                     ) ? (
                                                         <DoneIcon />
                                                     ) : null
@@ -184,43 +185,44 @@ export default function AddParticipantForm(props: AddParticipantFormProps) {
 
                         <FormHelperText
                             sx={{
-                                position: 'relative',
-                                top: errors.inputValue ? '-22px' : '0',
-                                float: 'right',
-                                padding: '0 8px',
-                            }}>
+                                position: "relative",
+                                top: errors.inputValue ? "-22px" : "0",
+                                float: "right",
+                                padding: "0 8px",
+                            }}
+                        >
                             {props.caption}
                         </FormHelperText>
                         {props.hiddenPostInput}
                     </Stack>
                     <FlexWrapper
-                        px={'8px'}
-                        justifyContent={'center'}
-                        flexWrap={
-                            props.blockButton ? 'wrap-reverse' : 'nowrap'
-                        }>
-                        <Stack direction={'column'} px={'8px'} width={'100%'}>
+                        px={"8px"}
+                        justifyContent={"center"}
+                        flexWrap={props.blockButton ? "wrap-reverse" : "nowrap"}
+                    >
+                        <Stack direction={"column"} px={"8px"} width={"100%"}>
                             {props.secondaryButtonAction && (
                                 <Button
                                     onClick={props.secondaryButtonAction}
                                     size="large"
                                     color="secondary"
                                     sx={{
-                                        '&&&': {
+                                        "&&&": {
                                             mt: !props.blockButton ? 2 : 0.5,
                                             mb: !props.blockButton ? 4 : 0,
                                             mr: !props.blockButton ? 1 : 0,
                                             ...buttonSx,
                                         },
                                     }}
-                                    {...restSubmitButtonProps}>
-                                    {t('CANCEL')}
+                                    {...restSubmitButtonProps}
+                                >
+                                    {t("CANCEL")}
                                 </Button>
                             )}
 
                             <SubmitButton
                                 sx={{
-                                    '&&&': {
+                                    "&&&": {
                                         mt: 2,
                                         ...buttonSx,
                                     },

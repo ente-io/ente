@@ -1,9 +1,9 @@
-import { EnteMenuItem } from '@ente/shared/components/Menu/EnteMenuItem';
-import { Passkey } from 'types/passkey';
-import ChevronRightIcon from '@mui/icons-material/ChevronRight';
-import { useContext } from 'react';
-import { PasskeysContext } from '.';
-import KeyIcon from '@mui/icons-material/Key';
+import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
+import ChevronRightIcon from "@mui/icons-material/ChevronRight";
+import KeyIcon from "@mui/icons-material/Key";
+import { useContext } from "react";
+import { Passkey } from "types/passkey";
+import { PasskeysContext } from ".";
 
 interface IProps {
     passkey: Passkey;

@@ -1,9 +1,8 @@
-import React from 'react';
-import NavigateNextIcon from '@mui/icons-material/NavigateNext';
-import { SCROLL_DIRECTION } from '@ente/shared/hooks/useComponentScroll';
-import { css, styled } from '@mui/material';
+import { SCROLL_DIRECTION } from "@ente/shared/hooks/useComponentScroll";
+import NavigateNextIcon from "@mui/icons-material/NavigateNext";
+import { css, styled } from "@mui/material";
 
-const Wrapper = styled('button')<{ direction: SCROLL_DIRECTION }>`
+const Wrapper = styled("button")<{ direction: SCROLL_DIRECTION }>`
     position: absolute;
     z-index: 2;
     top: 7px;
@@ -33,7 +32,7 @@ const Wrapper = styled('button')<{ direction: SCROLL_DIRECTION }>`
     & > svg {
         ${(props) =>
             props.direction === SCROLL_DIRECTION.LEFT &&
-            'transform:rotate(180deg);'}
+            "transform:rotate(180deg);"}
         border-radius: 50%;
         height: 30px;
         width: 30px;

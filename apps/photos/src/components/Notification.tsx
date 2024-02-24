@@ -1,4 +1,4 @@
-import CloseIcon from '@mui/icons-material/Close';
+import CloseIcon from "@mui/icons-material/Close";
 import {
     Box,
     Button,
@@ -8,19 +8,19 @@ import {
     SxProps,
     Theme,
     Typography,
-} from '@mui/material';
-import { NotificationAttributes } from 'types/Notification';
+} from "@mui/material";
+import { NotificationAttributes } from "types/Notification";
 
-import InfoIcon from '@mui/icons-material/InfoOutlined';
-import { IconButtonWithBG } from '@ente/shared/components/Container';
+import { IconButtonWithBG } from "@ente/shared/components/Container";
+import InfoIcon from "@mui/icons-material/InfoOutlined";
 
 interface Iprops {
     open: boolean;
     onClose: () => void;
     keepOpenOnClick?: boolean;
     attributes: NotificationAttributes;
-    horizontal?: 'left' | 'right';
-    vertical?: 'top' | 'bottom';
+    horizontal?: "left" | "right";
+    vertical?: "top" | "bottom";
     sx?: SxProps<Theme>;
 }
 
@@ -37,7 +37,7 @@ export default function Notification({
         return <></>;
     }
 
-    const handleClose: ButtonProps['onClick'] = (event) => {
+    const handleClose: ButtonProps["onClick"] = (event) => {
         onClose();
         event.stopPropagation();
     };
@@ -52,33 +52,37 @@ export default function Notification({
         <Snackbar
             open={open}
             anchorOrigin={{
-                horizontal: horizontal ?? 'right',
-                vertical: vertical ?? 'bottom',
+                horizontal: horizontal ?? "right",
+                vertical: vertical ?? "bottom",
             }}
-            sx={{ width: '320px', backgroundColor: '#000', ...sx }}>
+            sx={{ width: "320px", backgroundColor: "#000", ...sx }}
+        >
             <Button
                 color={attributes.variant}
                 onClick={handleClick}
                 sx={{
-                    textAlign: 'left',
-                    flex: '1',
+                    textAlign: "left",
+                    flex: "1",
                     padding: (theme) => theme.spacing(1.5, 2),
-                    borderRadius: '8px',
-                }}>
+                    borderRadius: "8px",
+                }}
+            >
                 <Stack
-                    flex={'1'}
+                    flex={"1"}
                     spacing={2}
                     direction="row"
-                    alignItems={'center'}>
-                    <Box sx={{ svg: { fontSize: '36px' } }}>
+                    alignItems={"center"}
+                >
+                    <Box sx={{ svg: { fontSize: "36px" } }}>
                         {attributes.startIcon ?? <InfoIcon />}
                     </Box>
 
                     <Stack
-                        direction={'column'}
+                        direction={"column"}
                         spacing={0.5}
                         flex={1}
-                        textAlign="left">
+                        textAlign="left"
+                    >
                         {attributes.subtext && (
                             <Typography variant="small">
                                 {attributes.subtext}
@@ -104,7 +108,8 @@ export default function Notification({
                     {attributes.endIcon ? (
                         <IconButtonWithBG
                             onClick={attributes.onClick}
-                            sx={{ fontSize: '36px' }}>
+                            sx={{ fontSize: "36px" }}
+                        >
                             {attributes?.endIcon}
                         </IconButtonWithBG>
                     ) : (

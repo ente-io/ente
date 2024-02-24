@@ -1,11 +1,11 @@
-import * as Comlink from 'comlink';
+import * as Comlink from "comlink";
 import {
-    isInsideLocationTag,
     isInsideCity,
-} from 'services/locationSearchService';
-import { EnteFile } from 'types/file';
-import { isSameDayAnyYear } from 'utils/search';
-import { Search } from 'types/search';
+    isInsideLocationTag,
+} from "services/locationSearchService";
+import { EnteFile } from "types/file";
+import { Search } from "types/search";
+import { isSameDayAnyYear } from "utils/search";
 
 export class DedicatedSearchWorker {
     private files: EnteFile[] = [];
@@ -30,7 +30,7 @@ function isSearchedFile(file: EnteFile, search: Search) {
 
     if (search?.date) {
         return isSameDayAnyYear(search.date)(
-            new Date(file.metadata.creationTime / 1000)
+            new Date(file.metadata.creationTime / 1000),
         );
     }
     if (search?.location) {
@@ -39,7 +39,7 @@ function isSearchedFile(file: EnteFile, search: Search) {
                 latitude: file.metadata.latitude,
                 longitude: file.metadata.longitude,
             },
-            search.location
+            search.location,
         );
     }
     if (search?.city) {
@@ -48,7 +48,7 @@ function isSearchedFile(file: EnteFile, search: Search) {
                 latitude: file.metadata.latitude,
                 longitude: file.metadata.longitude,
             },
-            search.city
+            search.city,
         );
     }
     if (search?.files) {
@@ -65,10 +65,10 @@ function isSearchedFile(file: EnteFile, search: Search) {
     if (search?.text) {
         return search.text.files.indexOf(file.id) !== -1;
     }
-    if (typeof search?.fileType !== 'undefined') {
+    if (typeof search?.fileType !== "undefined") {
         return search.fileType === file.metadata.fileType;
     }
-    if (typeof search?.clip !== 'undefined') {
+    if (typeof search?.clip !== "undefined") {
         return search.clip.has(file.id);
     }
     return false;

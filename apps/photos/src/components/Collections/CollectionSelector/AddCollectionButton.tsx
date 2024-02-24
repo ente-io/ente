@@ -1,12 +1,11 @@
-import CollectionCard from 'components/Collections/CollectionCard';
+import { CenteredFlex, Overlay } from "@ente/shared/components/Container";
+import { styled } from "@mui/material";
+import CollectionCard from "components/Collections/CollectionCard";
 import {
     AllCollectionTile,
     AllCollectionTileText,
-} from 'components/Collections/styledComponents';
-import React from 'react';
-import { styled } from '@mui/material';
-import { CenteredFlex, Overlay } from '@ente/shared/components/Container';
-import { t } from 'i18next';
+} from "components/Collections/styledComponents";
+import { t } from "i18next";
 
 const ImageContainer = styled(Overlay)`
     display: flex;
@@ -22,9 +21,10 @@ export default function AddCollectionButton({ showNextModal }: Iprops) {
         <CollectionCard
             collectionTile={AllCollectionTile}
             onClick={() => showNextModal()}
-            coverFile={null}>
+            coverFile={null}
+        >
             <AllCollectionTileText>
-                {t('CREATE_COLLECTION')}
+                {t("CREATE_COLLECTION")}
             </AllCollectionTileText>
             <ImageContainer>
                 <CenteredFlex>+</CenteredFlex>

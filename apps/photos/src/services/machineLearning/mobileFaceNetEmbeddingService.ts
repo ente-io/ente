@@ -1,15 +1,15 @@
-import * as tf from '@tensorflow/tfjs-core';
-import { TFLiteModel } from '@tensorflow/tfjs-tflite';
-import { MOBILEFACENET_FACE_SIZE } from 'constants/mlConfig';
-import PQueue from 'p-queue';
+import { addLogLine } from "@ente/shared/logging";
+import * as tf from "@tensorflow/tfjs-core";
+import { TFLiteModel } from "@tensorflow/tfjs-tflite";
+import { MOBILEFACENET_FACE_SIZE } from "constants/mlConfig";
+import PQueue from "p-queue";
 import {
     FaceEmbedding,
     FaceEmbeddingMethod,
     FaceEmbeddingService,
     Versioned,
-} from 'types/machineLearning';
-import { addLogLine } from '@ente/shared/logging';
-import { imageBitmapsToTensor4D } from 'utils/machineLearning';
+} from "types/machineLearning";
+import { imageBitmapsToTensor4D } from "utils/machineLearning";
 
 class MobileFaceNetEmbeddingService implements FaceEmbeddingService {
     public method: Versioned<FaceEmbeddingMethod>;
@@ -20,7 +20,7 @@ class MobileFaceNetEmbeddingService implements FaceEmbeddingService {
 
     public constructor(faceSize: number = MOBILEFACENET_FACE_SIZE) {
         this.method = {
-            value: 'MobileFaceNet',
+            value: "MobileFaceNet",
             version: 2,
         };
         this.faceSize = faceSize;
@@ -30,14 +30,14 @@ class MobileFaceNetEmbeddingService implements FaceEmbeddingService {
 
     private async init() {
         // TODO: can also create new instance per new syncContext
-        const tflite = await import('@tensorflow/tfjs-tflite');
-        tflite.setWasmPath('/js/tflite/');
+        const tflite = await import("@tensorflow/tfjs-tflite");
+        tflite.setWasmPath("/js/tflite/");
 
         this.mobileFaceNetModel = tflite.loadTFLiteModel(
-            '/models/mobilefacenet/mobilefacenet.tflite'
+            "/models/mobilefacenet/mobilefacenet.tflite",
         );
 
-        addLogLine('loaded mobileFaceNetModel: ', tf.getBackend());
+        addLogLine("loaded mobileFaceNetModel: ", tf.getBackend());
     }
 
     private async getMobileFaceNetModel() {
@@ -50,7 +50,7 @@ class MobileFaceNetEmbeddingService implements FaceEmbeddingService {
 
     public getFaceEmbeddingTF(
         faceTensor: tf.Tensor4D,
-        mobileFaceNetModel: TFLiteModel
+        mobileFaceNetModel: TFLiteModel,
     ): tf.Tensor2D {
         return tf.tidy(() => {
             const normalizedFace = tf.sub(tf.div(faceTensor, 127.5), 1.0);
@@ -60,7 +60,7 @@ class MobileFaceNetEmbeddingService implements FaceEmbeddingService {
 
     // Do not use this, use getFaceEmbedding which calls this through serialqueue
     private async getFaceEmbeddingNoQueue(
-        faceImage: ImageBitmap
+        faceImage: ImageBitmap,
     ): Promise<FaceEmbedding> {
         const mobileFaceNetModel = await this.getMobileFaceNetModel();
 
@@ -68,7 +68,7 @@ class MobileFaceNetEmbeddingService implements FaceEmbeddingService {
             const faceTensor = imageBitmapsToTensor4D([faceImage]);
             const embeddingsTensor = this.getFaceEmbeddingTF(
                 faceTensor,
-                mobileFaceNetModel
+                mobileFaceNetModel,
             );
             return tf.squeeze(embeddingsTensor, [0]);
         });
@@ -82,19 +82,19 @@ class MobileFaceNetEmbeddingService implements FaceEmbeddingService {
     // TODO: TFLiteModel seems to not work concurrenly,
     // remove serialqueue if that is not the case
     private async getFaceEmbedding(
-        faceImage: ImageBitmap
+        faceImage: ImageBitmap,
     ): Promise<FaceEmbedding> {
         // @ts-expect-error "TODO: Fix ML related type errors"
         return this.serialQueue.add(() =>
-            this.getFaceEmbeddingNoQueue(faceImage)
+            this.getFaceEmbeddingNoQueue(faceImage),
         );
     }
 
     public async getFaceEmbeddings(
-        faceImages: Array<ImageBitmap>
+        faceImages: Array<ImageBitmap>,
     ): Promise<Array<FaceEmbedding>> {
         return Promise.all(
-            faceImages.map((faceImage) => this.getFaceEmbedding(faceImage))
+            faceImages.map((faceImage) => this.getFaceEmbedding(faceImage)),
         );
     }
 

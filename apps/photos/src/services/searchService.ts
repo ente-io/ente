@@ -1,36 +1,36 @@
-import * as chrono from 'chrono-node';
-import { getAllPeople } from 'utils/machineLearning';
-import { t } from 'i18next';
+import * as chrono from "chrono-node";
+import { t } from "i18next";
+import { getAllPeople } from "utils/machineLearning";
 
-import mlIDbStorage from 'utils/storage/mlIDbStorage';
-import { getMLSyncConfig } from 'utils/machineLearning/config';
-import { Collection } from 'types/collection';
-import { EnteFile } from 'types/file';
-import { logError } from '@ente/shared/sentry';
+import { CustomError } from "@ente/shared/error";
+import { addLogLine } from "@ente/shared/logging";
+import { logError } from "@ente/shared/sentry";
+import { FILE_TYPE } from "constants/file";
+import { Collection } from "types/collection";
+import { Model } from "types/embedding";
+import { EntityType, LocationTag, LocationTagData } from "types/entity";
+import { EnteFile } from "types/file";
+import { Person, Thing } from "types/machineLearning";
 import {
+    ClipSearchScores,
     DateValue,
     Search,
     SearchOption,
     Suggestion,
     SuggestionType,
-    ClipSearchScores,
-} from 'types/search';
-import ObjectService from './machineLearning/objectService';
-import { getFormattedDate } from 'utils/search';
-import { Person, Thing } from 'types/machineLearning';
-import { getUniqueFiles } from 'utils/file';
-import { getLatestEntities } from './entityService';
-import { LocationTag, LocationTagData, EntityType } from 'types/entity';
-import { addLogLine } from '@ente/shared/logging';
-import { FILE_TYPE } from 'constants/file';
-import { ClipService, computeClipMatchScore } from './clipService';
-import { CustomError } from '@ente/shared/error';
-import { Model } from 'types/embedding';
-import { getLocalEmbeddings } from './embeddingService';
-import locationSearchService, { City } from './locationSearchService';
-import ComlinkSearchWorker from 'utils/comlink/ComlinkSearchWorker';
+} from "types/search";
+import ComlinkSearchWorker from "utils/comlink/ComlinkSearchWorker";
+import { getUniqueFiles } from "utils/file";
+import { getMLSyncConfig } from "utils/machineLearning/config";
+import { getFormattedDate } from "utils/search";
+import mlIDbStorage from "utils/storage/mlIDbStorage";
+import { ClipService, computeClipMatchScore } from "./clipService";
+import { getLocalEmbeddings } from "./embeddingService";
+import { getLatestEntities } from "./entityService";
+import locationSearchService, { City } from "./locationSearchService";
+import ObjectService from "./machineLearning/objectService";
 
-const DIGITS = new Set(['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']);
+const DIGITS = new Set(["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]);
 
 const CLIP_SCORE_THRESHOLD = 0.23;
 
@@ -64,20 +64,20 @@ export const getAutoCompleteSuggestions =
 
             return convertSuggestionsToOptions(suggestions);
         } catch (e) {
-            logError(e, 'getAutoCompleteSuggestions failed');
+            logError(e, "getAutoCompleteSuggestions failed");
             return [];
         }
     };
 
 async function convertSuggestionsToOptions(
-    suggestions: Suggestion[]
+    suggestions: Suggestion[],
 ): Promise<SearchOption[]> {
     const searchWorker = await ComlinkSearchWorker.getInstance();
     const previewImageAppendedOptions: SearchOption[] = [];
     for (const suggestion of suggestions) {
         const searchQuery = convertSuggestionToSearchQuery(suggestion);
         const resultFiles = getUniqueFiles(
-            await searchWorker.search(searchQuery)
+            await searchWorker.search(searchQuery),
         );
         if (searchQuery?.clip) {
             resultFiles.sort((a, b) => {
@@ -99,49 +99,49 @@ async function convertSuggestionsToOptions(
 function getFileTypeSuggestion(searchPhrase: string): Suggestion[] {
     return [
         {
-            label: t('IMAGE'),
+            label: t("IMAGE"),
             value: FILE_TYPE.IMAGE,
             type: SuggestionType.FILE_TYPE,
         },
         {
-            label: t('VIDEO'),
+            label: t("VIDEO"),
             value: FILE_TYPE.VIDEO,
             type: SuggestionType.FILE_TYPE,
         },
         {
-            label: t('LIVE_PHOTO'),
+            label: t("LIVE_PHOTO"),
             value: FILE_TYPE.LIVE_PHOTO,
             type: SuggestionType.FILE_TYPE,
         },
     ].filter((suggestion) =>
-        suggestion.label.toLowerCase().includes(searchPhrase)
+        suggestion.label.toLowerCase().includes(searchPhrase),
     );
 }
 
 function getHolidaySuggestion(searchPhrase: string): Suggestion[] {
     return [
         {
-            label: t('CHRISTMAS'),
+            label: t("CHRISTMAS"),
             value: { month: 11, date: 25 },
             type: SuggestionType.DATE,
         },
         {
-            label: t('CHRISTMAS_EVE'),
+            label: t("CHRISTMAS_EVE"),
             value: { month: 11, date: 24 },
             type: SuggestionType.DATE,
         },
         {
-            label: t('NEW_YEAR'),
+            label: t("NEW_YEAR"),
             value: { month: 0, date: 1 },
             type: SuggestionType.DATE,
         },
         {
-            label: t('NEW_YEAR_EVE'),
+            label: t("NEW_YEAR_EVE"),
             value: { month: 11, date: 31 },
             type: SuggestionType.DATE,
         },
     ].filter((suggestion) =>
-        suggestion.label.toLowerCase().includes(searchPhrase)
+        suggestion.label.toLowerCase().includes(searchPhrase),
     );
 }
 
@@ -159,7 +159,7 @@ function getYearSuggestion(searchPhrase: string): Suggestion[] {
                 ];
             }
         } catch (e) {
-            logError(e, 'getYearSuggestion failed');
+            logError(e, "getYearSuggestion failed");
         }
     }
     return [];
@@ -175,7 +175,7 @@ export async function getAllPeopleSuggestion(): Promise<Array<Suggestion>> {
             hide: true,
         }));
     } catch (e) {
-        logError(e, 'getAllPeopleSuggestion failed');
+        logError(e, "getAllPeopleSuggestion failed");
         return [];
     }
 }
@@ -187,15 +187,15 @@ export async function getIndexStatusSuggestion(): Promise<Suggestion> {
 
         let label;
         if (!indexStatus.localFilesSynced) {
-            label = t('INDEXING_SCHEDULED');
+            label = t("INDEXING_SCHEDULED");
         } else if (indexStatus.outOfSyncFilesExists) {
-            label = t('ANALYZING_PHOTOS', {
+            label = t("ANALYZING_PHOTOS", {
                 indexStatus,
             });
         } else if (!indexStatus.peopleIndexSynced) {
-            label = t('INDEXING_PEOPLE', { indexStatus });
+            label = t("INDEXING_PEOPLE", { indexStatus });
         } else {
-            label = t('INDEXING_DONE', { indexStatus });
+            label = t("INDEXING_DONE", { indexStatus });
         }
 
         return {
@@ -205,7 +205,7 @@ export async function getIndexStatusSuggestion(): Promise<Suggestion> {
             hide: true,
         };
     } catch (e) {
-        logError(e, 'getIndexStatusSuggestion failed');
+        logError(e, "getIndexStatusSuggestion failed");
     }
 }
 
@@ -221,7 +221,7 @@ function getDateSuggestion(searchPhrase: string): Suggestion[] {
 
 function getCollectionSuggestion(
     searchPhrase: string,
-    collections: Collection[]
+    collections: Collection[],
 ): Suggestion[] {
     const collectionResults = searchCollection(searchPhrase, collections);
 
@@ -231,13 +231,13 @@ function getCollectionSuggestion(
                 type: SuggestionType.COLLECTION,
                 value: searchResult.id,
                 label: searchResult.name,
-            }) as Suggestion
+            }) as Suggestion,
     );
 }
 
 function getFileNameSuggestion(
     searchPhrase: string,
-    files: EnteFile[]
+    files: EnteFile[],
 ): Suggestion {
     const matchedFiles = searchFilesByName(searchPhrase, files);
     return {
@@ -249,7 +249,7 @@ function getFileNameSuggestion(
 
 function getFileCaptionSuggestion(
     searchPhrase: string,
-    files: EnteFile[]
+    files: EnteFile[],
 ): Suggestion {
     const matchedFiles = searchFilesByCaption(searchPhrase, files);
     return {
@@ -267,17 +267,17 @@ async function getLocationSuggestions(searchPhrase: string) {
                 type: SuggestionType.LOCATION,
                 value: locationTag.data,
                 label: locationTag.data.name,
-            }) as Suggestion
+            }) as Suggestion,
     );
     const locationTagNames = new Set(
-        locationTagSuggestions.map((result) => result.label)
+        locationTagSuggestions.map((result) => result.label),
     );
 
     const citySearchResults =
         await locationSearchService.searchCities(searchPhrase);
 
     const nonConflictingCityResult = citySearchResults.filter(
-        (city) => !locationTagNames.has(city.city)
+        (city) => !locationTagNames.has(city.city),
     );
 
     const citySearchSuggestions = nonConflictingCityResult.map(
@@ -286,7 +286,7 @@ async function getLocationSuggestions(searchPhrase: string) {
                 type: SuggestionType.CITY,
                 value: city,
                 label: city.city,
-            }) as Suggestion
+            }) as Suggestion,
     );
 
     return [...locationTagSuggestions, ...citySearchSuggestions];
@@ -301,7 +301,7 @@ async function getThingSuggestion(searchPhrase: string): Promise<Suggestion[]> {
                 type: SuggestionType.THING,
                 value: searchResult,
                 label: searchResult.name,
-            }) as Suggestion
+            }) as Suggestion,
     );
 }
 
@@ -319,7 +319,7 @@ async function getClipSuggestion(searchPhrase: string): Promise<Suggestion> {
         };
     } catch (e) {
         if (!e.message?.includes(CustomError.MODEL_DOWNLOAD_PENDING)) {
-            logError(e, 'getClipSuggestion failed');
+            logError(e, "getClipSuggestion failed");
         }
         return null;
     }
@@ -327,16 +327,16 @@ async function getClipSuggestion(searchPhrase: string): Promise<Suggestion> {
 
 function searchCollection(
     searchPhrase: string,
-    collections: Collection[]
+    collections: Collection[],
 ): Collection[] {
     return collections.filter((collection) =>
-        collection.name.toLowerCase().includes(searchPhrase)
+        collection.name.toLowerCase().includes(searchPhrase),
     );
 }
 
 function searchFilesByName(searchPhrase: string, files: EnteFile[]) {
     return files.filter((file) =>
-        file.metadata.title.toLowerCase().includes(searchPhrase)
+        file.metadata.title.toLowerCase().includes(searchPhrase),
     );
 }
 
@@ -346,7 +346,7 @@ function searchFilesByCaption(searchPhrase: string, files: EnteFile[]) {
             file.pubMagicMetadata &&
             file.pubMagicMetadata.data.caption
                 ?.toLowerCase()
-                .includes(searchPhrase)
+                .includes(searchPhrase),
     );
 }
 
@@ -359,7 +359,7 @@ function parseHumanDate(humanDate: string): DateValue[] {
             { date: date.getDate(), month: date.getMonth() },
         ];
         let reverse = false;
-        humanDate.split('').forEach((c) => {
+        humanDate.split("").forEach((c) => {
             if (DIGITS.has(c)) {
                 reverse = true;
             }
@@ -377,14 +377,14 @@ function parseHumanDate(humanDate: string): DateValue[] {
 
 async function searchLocationTag(searchPhrase: string): Promise<LocationTag[]> {
     const locationTags = await getLatestEntities<LocationTagData>(
-        EntityType.LOCATION_TAG
+        EntityType.LOCATION_TAG,
     );
     const matchedLocationTags = locationTags.filter((locationTag) =>
-        locationTag.data.name.toLowerCase().includes(searchPhrase)
+        locationTag.data.name.toLowerCase().includes(searchPhrase),
     );
     if (matchedLocationTags.length > 0) {
         addLogLine(
-            `Found ${matchedLocationTags.length} location tags for search phrase`
+            `Found ${matchedLocationTags.length} location tags for search phrase`,
         );
     }
     return matchedLocationTags;
@@ -393,7 +393,7 @@ async function searchLocationTag(searchPhrase: string): Promise<LocationTag[]> {
 async function searchThing(searchPhrase: string) {
     const things = await ObjectService.getAllThings();
     return things.filter((thing) =>
-        thing.name.toLocaleLowerCase().includes(searchPhrase)
+        thing.name.toLocaleLowerCase().includes(searchPhrase),
     );
 }
 
@@ -408,12 +408,12 @@ async function searchClip(searchPhrase: string): Promise<ClipSearchScores> {
                         imageEmbedding.fileID,
                         await computeClipMatchScore(
                             imageEmbedding.embedding,
-                            textEmbedding
+                            textEmbedding,
                         ),
-                    ]
-                )
+                    ],
+                ),
             )
-        ).filter(([, score]) => score >= CLIP_SCORE_THRESHOLD)
+        ).filter(([, score]) => score >= CLIP_SCORE_THRESHOLD),
     );
 
     return clipSearchResult;

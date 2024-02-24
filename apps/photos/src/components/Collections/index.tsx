@@ -1,27 +1,27 @@
-import { Collection, CollectionSummaries } from 'types/collection';
-import CollectionListBar from 'components/Collections/CollectionListBar';
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import AllCollections from 'components/Collections/AllCollections';
-import CollectionInfoWithOptions from 'components/Collections/CollectionInfoWithOptions';
-import { ALL_SECTION, COLLECTION_LIST_SORT_BY } from 'constants/collection';
-import CollectionShare from 'components/Collections/CollectionShare';
-import { SetCollectionNamerAttributes } from 'components/Collections/CollectionNamer';
-import { ITEM_TYPE, TimeStampListItem } from 'components/PhotoList';
+import { useLocalState } from "@ente/shared/hooks/useLocalState";
+import { LS_KEYS } from "@ente/shared/storage/localStorage";
+import AllCollections from "components/Collections/AllCollections";
+import CollectionInfoWithOptions from "components/Collections/CollectionInfoWithOptions";
+import CollectionListBar from "components/Collections/CollectionListBar";
+import { SetCollectionNamerAttributes } from "components/Collections/CollectionNamer";
+import CollectionShare from "components/Collections/CollectionShare";
+import { ITEM_TYPE, TimeStampListItem } from "components/PhotoList";
+import { ALL_SECTION, COLLECTION_LIST_SORT_BY } from "constants/collection";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { sortCollectionSummaries } from "services/collectionService";
+import { Collection, CollectionSummaries } from "types/collection";
+import { SetFilesDownloadProgressAttributesCreator } from "types/gallery";
 import {
     hasNonSystemCollections,
     isSystemCollection,
     shouldBeShownOnCollectionBar,
-} from 'utils/collection';
-import { useLocalState } from '@ente/shared/hooks/useLocalState';
-import { sortCollectionSummaries } from 'services/collectionService';
-import { LS_KEYS } from '@ente/shared/storage/localStorage';
+} from "utils/collection";
 import {
     FilesDownloadProgressAttributes,
     isFilesDownloadCancelled,
     isFilesDownloadCompleted,
-} from '../FilesDownloadProgress';
-import { SetFilesDownloadProgressAttributesCreator } from 'types/gallery';
-import AlbumCastDialog from './CollectionOptions/AlbumCastDialog';
+} from "../FilesDownloadProgress";
+import AlbumCastDialog from "./CollectionOptions/AlbumCastDialog";
 
 interface Iprops {
     activeCollection: Collection;
@@ -61,13 +61,13 @@ export default function Collections(props: Iprops) {
     const [collectionListSortBy, setCollectionListSortBy] =
         useLocalState<COLLECTION_LIST_SORT_BY>(
             LS_KEYS.COLLECTION_SORT_BY,
-            COLLECTION_LIST_SORT_BY.UPDATION_TIME_DESCENDING
+            COLLECTION_LIST_SORT_BY.UPDATION_TIME_DESCENDING,
         );
 
     const toShowCollectionSummaries = useMemo(
         () =>
             isInHiddenSection ? hiddenCollectionSummaries : collectionSummaries,
-        [isInHiddenSection, hiddenCollectionSummaries, collectionSummaries]
+        [isInHiddenSection, hiddenCollectionSummaries, collectionSummaries],
     );
 
     const shouldBeHidden = useMemo(
@@ -75,21 +75,21 @@ export default function Collections(props: Iprops) {
             isInSearchMode ||
             (!hasNonSystemCollections(toShowCollectionSummaries) &&
                 activeCollectionID === ALL_SECTION),
-        [isInSearchMode, toShowCollectionSummaries, activeCollectionID]
+        [isInSearchMode, toShowCollectionSummaries, activeCollectionID],
     );
 
     const sortedCollectionSummaries = useMemo(
         () =>
             sortCollectionSummaries(
                 [...toShowCollectionSummaries.values()],
-                collectionListSortBy
+                collectionListSortBy,
             ),
-        [collectionListSortBy, toShowCollectionSummaries]
+        [collectionListSortBy, toShowCollectionSummaries],
     );
 
     const isActiveCollectionDownloadInProgress = useCallback(() => {
         const attributes = filesDownloadProgressAttributesList.find(
-            (attr) => attr.collectionID === activeCollectionID
+            (attr) => attr.collectionID === activeCollectionID,
         );
         return (
             attributes &&
@@ -106,7 +106,7 @@ export default function Collections(props: Iprops) {
             item: (
                 <CollectionInfoWithOptions
                     collectionSummary={toShowCollectionSummaries.get(
-                        activeCollectionID
+                        activeCollectionID,
                     )}
                     activeCollection={activeCollection}
                     setCollectionNamerAttributes={setCollectionNamerAttributes}
@@ -149,7 +149,7 @@ export default function Collections(props: Iprops) {
                 activeCollectionID={activeCollectionID}
                 setActiveCollectionID={setActiveCollectionID}
                 collectionSummaries={sortedCollectionSummaries.filter((x) =>
-                    shouldBeShownOnCollectionBar(x.type)
+                    shouldBeShownOnCollectionBar(x.type),
                 )}
                 showAllCollections={openAllCollections}
                 setCollectionListSortBy={setCollectionListSortBy}
@@ -160,7 +160,7 @@ export default function Collections(props: Iprops) {
                 open={allCollectionView}
                 onClose={closeAllCollections}
                 collectionSummaries={sortedCollectionSummaries.filter(
-                    (x) => !isSystemCollection(x.type)
+                    (x) => !isSystemCollection(x.type),
                 )}
                 setActiveCollectionID={setActiveCollectionID}
                 setCollectionListSortBy={setCollectionListSortBy}
@@ -170,7 +170,7 @@ export default function Collections(props: Iprops) {
 
             <CollectionShare
                 collectionSummary={toShowCollectionSummaries.get(
-                    activeCollectionID
+                    activeCollectionID,
                 )}
                 open={collectionShareModalView}
                 onClose={closeCollectionShare}

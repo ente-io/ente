@@ -1,4 +1,4 @@
-import { Hdbscan } from 'hdbscan';
+import { Hdbscan } from "hdbscan";
 import {
     ClusteringConfig,
     ClusteringInput,
@@ -6,21 +6,21 @@ import {
     ClusteringService,
     HdbscanResults,
     Versioned,
-} from 'types/machineLearning';
+} from "types/machineLearning";
 
 class HdbscanClusteringService implements ClusteringService {
     public method: Versioned<ClusteringMethod>;
 
     constructor() {
         this.method = {
-            value: 'Hdbscan',
+            value: "Hdbscan",
             version: 1,
         };
     }
 
     public async cluster(
         input: ClusteringInput,
-        config: ClusteringConfig
+        config: ClusteringConfig,
     ): Promise<HdbscanResults> {
         // addLogLine('Clustering input: ', input);
         const hdbscan = new Hdbscan({

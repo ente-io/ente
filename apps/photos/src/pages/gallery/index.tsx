@@ -1,51 +1,55 @@
 import {
+    SESSION_KEYS,
+    clearKeys,
+    getKey,
+} from "@ente/shared/storage/sessionStorage";
+import { Typography, styled } from "@mui/material";
+import { t } from "i18next";
+import { useRouter } from "next/router";
+import {
     createContext,
     useContext,
     useEffect,
     useMemo,
     useRef,
     useState,
-} from 'react';
-import { useRouter } from 'next/router';
+} from "react";
 import {
-    clearKeys,
-    getKey,
-    SESSION_KEYS,
-} from '@ente/shared/storage/sessionStorage';
-import { getLocalFiles, syncFiles } from 'services/fileService';
-import { styled, Typography } from '@mui/material';
-import {
-    getAllLatestCollections,
-    getFavItemIds,
-    createAlbum,
-    getCollectionSummaries,
     constructEmailList,
-    getSectionSummaries,
-    getHiddenItemsSummary,
+    createAlbum,
+    getAllLatestCollections,
     getAllLocalCollections,
-} from 'services/collectionService';
-import { t } from 'i18next';
+    getCollectionSummaries,
+    getFavItemIds,
+    getHiddenItemsSummary,
+    getSectionSummaries,
+} from "services/collectionService";
+import { getLocalFiles, syncFiles } from "services/fileService";
 
-import { checkSubscriptionPurchase } from 'utils/billing';
+import { checkSubscriptionPurchase } from "utils/billing";
 
-import FullScreenDropZone from 'components/FullScreenDropZone';
-import Sidebar from 'components/Sidebar';
-import { mergeMaps, preloadImage } from 'utils/common';
+import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import {
     isFirstLogin,
     justSignedUp,
     setIsFirstLogin,
     setJustSignedUp,
-} from '@ente/shared/storage/localStorage/helpers';
+} from "@ente/shared/storage/localStorage/helpers";
+import CollectionSelector, {
+    CollectionSelectorAttributes,
+} from "components/Collections/CollectionSelector";
+import FullScreenDropZone from "components/FullScreenDropZone";
+import { LoadingOverlay } from "components/LoadingOverlay";
+import PhotoFrame from "components/PhotoFrame";
+import Sidebar from "components/Sidebar";
+import SelectedFileOptions from "components/pages/gallery/SelectedFileOptions";
+import { useDropzone } from "react-dropzone";
 import {
     isTokenValid,
     syncMapEnabled,
     validateKey,
-} from 'services/userService';
-import { useDropzone } from 'react-dropzone';
-import EnteSpinner from '@ente/shared/components/EnteSpinner';
-import { LoadingOverlay } from 'components/LoadingOverlay';
-import PhotoFrame from 'components/PhotoFrame';
+} from "services/userService";
+import { mergeMaps, preloadImage } from "utils/common";
 import {
     FILE_OPS_TYPE,
     constructFileToCollectionMap,
@@ -54,93 +58,89 @@ import {
     handleFileOps,
     mergeMetadata,
     sortFiles,
-} from 'utils/file';
-import SelectedFileOptions from 'components/pages/gallery/SelectedFileOptions';
-import CollectionSelector, {
-    CollectionSelectorAttributes,
-} from 'components/Collections/CollectionSelector';
+} from "utils/file";
 
+import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
+import { CustomError } from "@ente/shared/error";
+import { logError } from "@ente/shared/sentry";
 import CollectionNamer, {
     CollectionNamerAttributes,
-} from 'components/Collections/CollectionNamer';
-import PlanSelector from 'components/pages/gallery/PlanSelector';
-import Uploader from 'components/Upload/Uploader';
+} from "components/Collections/CollectionNamer";
+import Uploader from "components/Upload/Uploader";
+import PlanSelector from "components/pages/gallery/PlanSelector";
 import {
     ALL_SECTION,
     ARCHIVE_SECTION,
     CollectionSummaryType,
-    HIDDEN_ITEMS_SECTION,
     DUMMY_UNCATEGORIZED_COLLECTION,
+    HIDDEN_ITEMS_SECTION,
     TRASH_SECTION,
-} from 'constants/collection';
-import { AppContext } from 'pages/_app';
-import { CustomError } from '@ente/shared/error';
-import { PHOTOS_PAGES as PAGES } from '@ente/shared/constants/pages';
+} from "constants/collection";
+import { AppContext } from "pages/_app";
+import { getLocalTrashedFiles, syncTrash } from "services/trashService";
 import {
     COLLECTION_OPS_TYPE,
-    handleCollectionOps,
+    constructCollectionNameMap,
     getArchivedCollections,
+    getDefaultHiddenCollectionIDs,
+    getSelectedCollection,
+    handleCollectionOps,
     hasNonSystemCollections,
     splitNormalAndHiddenCollections,
-    constructCollectionNameMap,
-    getSelectedCollection,
-    getDefaultHiddenCollectionIDs,
-} from 'utils/collection';
-import { logError } from '@ente/shared/sentry';
-import { getLocalTrashedFiles, syncTrash } from 'services/trashService';
+} from "utils/collection";
 
+import { APPS } from "@ente/shared/apps/constants";
+import { CenteredFlex } from "@ente/shared/components/Container";
+import ElectronAPIs from "@ente/shared/electron";
+import useEffectSingleThreaded from "@ente/shared/hooks/useEffectSingleThreaded";
+import useFileInput from "@ente/shared/hooks/useFileInput";
+import useMemoSingleThreaded from "@ente/shared/hooks/useMemoSingleThreaded";
+import InMemoryStore, { MS_KEYS } from "@ente/shared/storage/InMemoryStore";
+import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
+import { getToken } from "@ente/shared/storage/localStorage/helpers";
+import { User } from "@ente/shared/user/types";
+import AuthenticateUserModal from "components/AuthenticateUserModal";
+import Collections from "components/Collections";
+import ExportModal from "components/ExportModal";
+import {
+    FilesDownloadProgress,
+    FilesDownloadProgressAttributes,
+} from "components/FilesDownloadProgress";
 import FixCreationTime, {
     FixCreationTimeAttributes,
-} from 'components/FixCreationTime';
-import { Collection, CollectionSummaries } from 'types/collection';
-import { EnteFile } from 'types/file';
+} from "components/FixCreationTime";
+import GalleryEmptyState from "components/GalleryEmptyState";
+import { ITEM_TYPE, TimeStampListItem } from "components/PhotoList";
+import SearchResultInfo from "components/Search/SearchResultInfo";
+import UploadInputs from "components/UploadSelectorInputs";
+import { GalleryNavbar } from "components/pages/gallery/Navbar";
+import { SYNC_INTERVAL_IN_MICROSECONDS } from "constants/gallery";
+import isElectron from "is-electron";
+import { ClipService } from "services/clipService";
+import { constructUserIDToEmailMap } from "services/collectionService";
+import downloadManager from "services/download";
+import { syncEmbeddings } from "services/embeddingService";
+import { syncEntities } from "services/entityService";
+import locationSearchService from "services/locationSearchService";
+import uploadManager from "services/upload/uploadManager";
+import { Collection, CollectionSummaries } from "types/collection";
+import { EnteFile } from "types/file";
 import {
     GalleryContextType,
     SelectedState,
     SetFilesDownloadProgressAttributes,
     SetFilesDownloadProgressAttributesCreator,
     UploadTypeSelectorIntent,
-} from 'types/gallery';
-import Collections from 'components/Collections';
-import { GalleryNavbar } from 'components/pages/gallery/Navbar';
-import { Search, SearchResultSummary, UpdateSearch } from 'types/search';
-import SearchResultInfo from 'components/Search/SearchResultInfo';
-import { ITEM_TYPE, TimeStampListItem } from 'components/PhotoList';
-import UploadInputs from 'components/UploadSelectorInputs';
-import useFileInput from '@ente/shared/hooks/useFileInput';
-import { User } from '@ente/shared/user/types';
-import { FamilyData } from 'types/user';
-import { getData, LS_KEYS } from '@ente/shared/storage/localStorage';
-import { CenteredFlex } from '@ente/shared/components/Container';
-import { checkConnectivity } from 'utils/common';
-import { SYNC_INTERVAL_IN_MICROSECONDS } from 'constants/gallery';
-import ElectronAPIs from '@ente/shared/electron';
-import uploadManager from 'services/upload/uploadManager';
-import { getToken } from '@ente/shared/storage/localStorage/helpers';
-import ExportModal from 'components/ExportModal';
-import GalleryEmptyState from 'components/GalleryEmptyState';
-import AuthenticateUserModal from 'components/AuthenticateUserModal';
-import useMemoSingleThreaded from '@ente/shared/hooks/useMemoSingleThreaded';
-import { isArchivedFile } from 'utils/magicMetadata';
-import { getSessionExpiredMessage } from 'utils/ui';
-import { syncEntities } from 'services/entityService';
-import { constructUserIDToEmailMap } from 'services/collectionService';
-import { getLocalFamilyData } from 'utils/user/family';
-import InMemoryStore, { MS_KEYS } from '@ente/shared/storage/InMemoryStore';
-import { syncEmbeddings } from 'services/embeddingService';
-import { ClipService } from 'services/clipService';
-import isElectron from 'is-electron';
-import downloadManager from 'services/download';
-import { APPS } from '@ente/shared/apps/constants';
-import {
-    FilesDownloadProgress,
-    FilesDownloadProgressAttributes,
-} from 'components/FilesDownloadProgress';
-import locationSearchService from 'services/locationSearchService';
-import ComlinkSearchWorker from 'utils/comlink/ComlinkSearchWorker';
-import useEffectSingleThreaded from '@ente/shared/hooks/useEffectSingleThreaded';
+} from "types/gallery";
+import { Search, SearchResultSummary, UpdateSearch } from "types/search";
+import { FamilyData } from "types/user";
+import ComlinkSearchWorker from "utils/comlink/ComlinkSearchWorker";
+import { checkConnectivity } from "utils/common";
+import { isArchivedFile } from "utils/magicMetadata";
+import { getSessionExpiredMessage } from "utils/ui";
+import { getLocalFamilyData } from "utils/user/family";
 
-export const DeadCenter = styled('div')`
+export const DeadCenter = styled("div")`
     flex: 1;
     display: flex;
     justify-content: center;
@@ -166,7 +166,7 @@ const defaultGalleryContext: GalleryContextType = {
 };
 
 export const GalleryContext = createContext<GalleryContextType>(
-    defaultGalleryContext
+    defaultGalleryContext,
 );
 
 export default function Gallery() {
@@ -235,10 +235,10 @@ export default function Gallery() {
     const resync = useRef<{ force: boolean; silent: boolean }>();
     // tempDeletedFileIds and tempHiddenFileIds are used to keep track of files that are deleted/hidden in the current session but not yet synced with the server.
     const [tempDeletedFileIds, setTempDeletedFileIds] = useState<Set<number>>(
-        new Set<number>()
+        new Set<number>(),
     );
     const [tempHiddenFileIds, setTempHiddenFileIds] = useState<Set<number>>(
-        new Set<number>()
+        new Set<number>(),
     );
     const { startLoading, finishLoading, setDialogMessage, ...appContext } =
         useContext(AppContext);
@@ -252,7 +252,7 @@ export default function Gallery() {
     const [activeCollectionID, setActiveCollectionID] =
         useState<number>(undefined);
     const [hiddenFileIds, setHiddenFileIds] = useState<Set<number>>(
-        new Set<number>()
+        new Set<number>(),
     );
     const [fixCreationTimeView, setFixCreationTimeView] = useState(false);
     const [fixCreationTimeAttributes, setFixCreationTimeAttributes] =
@@ -266,7 +266,7 @@ export default function Gallery() {
     const [uploadTypeSelectorView, setUploadTypeSelectorView] = useState(false);
     const [uploadTypeSelectorIntent, setUploadTypeSelectorIntent] =
         useState<UploadTypeSelectorIntent>(
-            UploadTypeSelectorIntent.normalUpload
+            UploadTypeSelectorIntent.normalUpload,
         );
 
     const [sidebarView, setSidebarView] = useState(false);
@@ -297,8 +297,8 @@ export default function Gallery() {
         setFilesDownloadProgressAttributesList,
     ] = useState<FilesDownloadProgressAttributes[]>([]);
 
-    const openHiddenSection: GalleryContextType['openHiddenSection'] = (
-        callback
+    const openHiddenSection: GalleryContextType["openHiddenSection"] = (
+        callback,
     ) => {
         authenticateUser(() => {
             setIsInHiddenSection(true);
@@ -319,7 +319,7 @@ export default function Gallery() {
             router.push(PAGES.ROOT);
             return;
         }
-        preloadImage('/images/subscription-card-background');
+        preloadImage("/images/subscription-card-background");
         const main = async () => {
             const valid = await validateKey();
             if (!valid) {
@@ -337,10 +337,10 @@ export default function Gallery() {
             const user = getData(LS_KEYS.USER);
             const familyData = getLocalFamilyData();
             const files = sortFiles(
-                mergeMetadata(await getLocalFiles('normal'))
+                mergeMetadata(await getLocalFiles("normal")),
             );
             const hiddenFiles = sortFiles(
-                mergeMetadata(await getLocalFiles('hidden'))
+                mergeMetadata(await getLocalFiles("hidden")),
             );
             const collections = await getAllLocalCollections();
             const { normalCollections, hiddenCollections } =
@@ -384,7 +384,7 @@ export default function Gallery() {
             const searchWorker = await ComlinkSearchWorker.getInstance();
             await searchWorker.setFiles(files);
         },
-        [files]
+        [files],
     );
 
     useEffect(() => {
@@ -397,7 +397,7 @@ export default function Gallery() {
             hiddenCollections,
             files,
             trashedFiles,
-            hiddenFiles
+            hiddenFiles,
         );
     }, [
         collections,
@@ -436,20 +436,20 @@ export default function Gallery() {
     }, [fixCreationTimeAttributes]);
 
     useEffect(() => {
-        if (typeof activeCollectionID === 'undefined' || !router.isReady) {
+        if (typeof activeCollectionID === "undefined" || !router.isReady) {
             return;
         }
-        let collectionURL = '';
+        let collectionURL = "";
         if (activeCollectionID !== ALL_SECTION) {
-            collectionURL += '?collection=';
+            collectionURL += "?collection=";
             if (activeCollectionID === ARCHIVE_SECTION) {
-                collectionURL += t('ARCHIVE_SECTION_NAME');
+                collectionURL += t("ARCHIVE_SECTION_NAME");
             } else if (activeCollectionID === TRASH_SECTION) {
-                collectionURL += t('TRASH');
+                collectionURL += t("TRASH");
             } else if (activeCollectionID === DUMMY_UNCATEGORIZED_COLLECTION) {
-                collectionURL += t('UNCATEGORIZED');
+                collectionURL += t("UNCATEGORIZED");
             } else if (activeCollectionID === HIDDEN_ITEMS_SECTION) {
-                collectionURL += t('HIDDEN_ITEMS_SECTION_NAME');
+                collectionURL += t("HIDDEN_ITEMS_SECTION_NAME");
             } else {
                 collectionURL += activeCollectionID;
             }
@@ -464,7 +464,7 @@ export default function Gallery() {
             checkSubscriptionPurchase(
                 setDialogMessage,
                 router,
-                setBlockingLoad
+                setBlockingLoad,
             );
         }
     }, [router.isReady]);
@@ -488,7 +488,7 @@ export default function Gallery() {
             return null;
         }
         return [...collections, ...hiddenCollections].find(
-            (collection) => collection.id === activeCollectionID
+            (collection) => collection.id === activeCollectionID,
         );
     }, [collections, activeCollectionID]);
 
@@ -573,7 +573,7 @@ export default function Gallery() {
                     } else {
                         return false;
                     }
-                })
+                }),
             );
         }
         if (search?.clip) {
@@ -699,8 +699,8 @@ export default function Gallery() {
                 await splitNormalAndHiddenCollections(collections);
             setCollections(normalCollections);
             setHiddenCollections(hiddenCollections);
-            await syncFiles('normal', normalCollections, setFiles);
-            await syncFiles('hidden', hiddenCollections, setHiddenFiles);
+            await syncFiles("normal", normalCollections, setFiles);
+            await syncFiles("hidden", hiddenCollections, setHiddenFiles);
             await syncTrash(collections, setTrashedFiles);
             await syncEntities();
             await syncMapEnabled();
@@ -720,7 +720,7 @@ export default function Gallery() {
                 case CustomError.NO_INTERNET_CONNECTION:
                     break;
                 default:
-                    logError(e, 'syncWithRemote failed');
+                    logError(e, "syncWithRemote failed");
             }
         } finally {
             setTempDeletedFileIds(new Set());
@@ -738,19 +738,19 @@ export default function Gallery() {
     const setupSelectAllKeyBoardShortcutHandler = () => {
         const handleKeyUp = (e: KeyboardEvent) => {
             switch (e.key) {
-                case 'Escape':
+                case "Escape":
                     keyboardShortcutHandlerRef.current.clearSelection();
                     break;
-                case 'a':
+                case "a":
                     if (e.ctrlKey || e.metaKey) {
                         keyboardShortcutHandlerRef.current.selectAll(e);
                     }
                     break;
             }
         };
-        document.addEventListener('keydown', handleKeyUp);
+        document.addEventListener("keydown", handleKeyUp);
         return () => {
-            document.removeEventListener('keydown', handleKeyUp);
+            document.removeEventListener("keydown", handleKeyUp);
         };
     };
 
@@ -760,7 +760,7 @@ export default function Gallery() {
         hiddenCollections: Collection[],
         files: EnteFile[],
         trashedFiles: EnteFile[],
-        hiddenFiles: EnteFile[]
+        hiddenFiles: EnteFile[],
     ) => {
         const favItemIds = await getFavItemIds(files);
         setFavItemIds(favItemIds);
@@ -774,28 +774,28 @@ export default function Gallery() {
         const collectionSummaries = getCollectionSummaries(
             user,
             collections,
-            files
+            files,
         );
         const sectionSummaries = getSectionSummaries(
             files,
             trashedFiles,
-            archivedCollections
+            archivedCollections,
         );
         const hiddenCollectionSummaries = getCollectionSummaries(
             user,
             hiddenCollections,
-            hiddenFiles
+            hiddenFiles,
         );
         const hiddenItemsSummaries = getHiddenItemsSummary(
             hiddenFiles,
-            hiddenCollections
+            hiddenCollections,
         );
         hiddenCollectionSummaries.set(
             HIDDEN_ITEMS_SECTION,
-            hiddenItemsSummaries
+            hiddenItemsSummaries,
         );
         setCollectionSummaries(
-            mergeMaps(collectionSummaries, sectionSummaries)
+            mergeMaps(collectionSummaries, sectionSummaries),
         );
         setHiddenCollectionSummaries(hiddenCollectionSummaries);
     };
@@ -811,12 +811,12 @@ export default function Gallery() {
                 setFilesDownloadProgressAttributesList((prev) => {
                     const attributes = prev?.find((attr) => attr.id === id);
                     const updatedAttributes =
-                        typeof value === 'function'
+                        typeof value === "function"
                             ? value(attributes)
                             : { ...attributes, ...value };
                     const updatedAttributesList = attributes
                         ? prev.map((attr) =>
-                              attr.id === id ? updatedAttributes : attr
+                              attr.id === id ? updatedAttributes : attr,
                           )
                         : [...prev, updatedAttributes];
 
@@ -847,14 +847,14 @@ export default function Gallery() {
                     ops === COLLECTION_OPS_TYPE.REMOVE
                         ? selectedFiles
                         : selectedFiles.filter(
-                              (file) => file.ownerID === user.id
+                              (file) => file.ownerID === user.id,
                           );
                 if (toProcessFiles.length > 0) {
                     await handleCollectionOps(
                         ops,
                         collection,
                         toProcessFiles,
-                        selected.collectionID
+                        selected.collectionID,
                     );
                 }
                 if (selected?.ownCount === filteredData?.length) {
@@ -872,12 +872,12 @@ export default function Gallery() {
                 clearSelection();
                 await syncWithRemote(false, true);
             } catch (e) {
-                logError(e, 'collection ops failed', { ops });
+                logError(e, "collection ops failed", { ops });
                 setDialogMessage({
-                    title: t('ERROR'),
+                    title: t("ERROR"),
 
-                    close: { variant: 'critical' },
-                    content: t('UNKNOWN_ERROR'),
+                    close: { variant: "critical" },
+                    content: t("UNKNOWN_ERROR"),
                 });
             } finally {
                 finishLoading();
@@ -890,7 +890,7 @@ export default function Gallery() {
             // passing files here instead of filteredData for hide ops because we want to move all files copies to hidden collection
             const selectedFiles = getSelectedFiles(
                 selected,
-                ops === FILE_OPS_TYPE.HIDE ? files : filteredData
+                ops === FILE_OPS_TYPE.HIDE ? files : filteredData,
             );
             const toProcessFiles =
                 ops === FILE_OPS_TYPE.DOWNLOAD
@@ -903,7 +903,7 @@ export default function Gallery() {
                     setTempDeletedFileIds,
                     setTempHiddenFileIds,
                     setFixCreationTimeAttributes,
-                    setFilesDownloadProgressAttributesCreator
+                    setFilesDownloadProgressAttributesCreator,
                 );
             }
             if (
@@ -917,12 +917,12 @@ export default function Gallery() {
             clearSelection();
             await syncWithRemote(false, true);
         } catch (e) {
-            logError(e, 'file ops failed', { ops });
+            logError(e, "file ops failed", { ops });
             setDialogMessage({
-                title: t('ERROR'),
+                title: t("ERROR"),
 
-                close: { variant: 'critical' },
-                content: t('UNKNOWN_ERROR'),
+                close: { variant: "critical" },
+                content: t("UNKNOWN_ERROR"),
             });
         } finally {
             finishLoading();
@@ -936,12 +936,12 @@ export default function Gallery() {
                 const collection = await createAlbum(collectionName);
                 await collectionOpsHelper(ops)(collection);
             } catch (e) {
-                logError(e, 'create and collection ops failed', { ops });
+                logError(e, "create and collection ops failed", { ops });
                 setDialogMessage({
-                    title: t('ERROR'),
+                    title: t("ERROR"),
 
-                    close: { variant: 'critical' },
-                    content: t('UNKNOWN_ERROR'),
+                    close: { variant: "critical" },
+                    content: t("UNKNOWN_ERROR"),
                 });
             } finally {
                 finishLoading();
@@ -949,9 +949,9 @@ export default function Gallery() {
         };
         return () =>
             setCollectionNamerAttributes({
-                title: t('CREATE_COLLECTION'),
-                buttonText: t('CREATE'),
-                autoFilledName: '',
+                title: t("CREATE_COLLECTION"),
+                buttonText: t("CREATE"),
+                autoFilledName: "",
                 callback,
             });
     };
@@ -1013,9 +1013,11 @@ export default function Gallery() {
                 emailList,
                 openHiddenSection,
                 isClipSearchResult,
-            }}>
+            }}
+        >
             <FullScreenDropZone
-                getDragAndDropRootProps={getDragAndDropRootProps}>
+                getDragAndDropRootProps={getDragAndDropRootProps}
+            >
                 <UploadInputs
                     getDragAndDropInputProps={getDragAndDropInputProps}
                     getFileSelectorInputProps={getFileSelectorInputProps}
@@ -1029,7 +1031,7 @@ export default function Gallery() {
                 {isFirstLoad && (
                     <CenteredFlex>
                         <Typography color="text.muted" variant="small">
-                            {t('INITIAL_LOAD_DELAY_WARNING')}
+                            {t("INITIAL_LOAD_DELAY_WARNING")}
                         </Typography>
                     </CenteredFlex>
                 )}
@@ -1096,18 +1098,18 @@ export default function Gallery() {
                     syncWithRemote={syncWithRemote}
                     showCollectionSelector={setCollectionSelectorView.bind(
                         null,
-                        true
+                        true,
                     )}
                     closeUploadTypeSelector={setUploadTypeSelectorView.bind(
                         null,
-                        false
+                        false,
                     )}
                     setCollectionSelectorAttributes={
                         setCollectionSelectorAttributes
                     }
                     closeCollectionSelector={setCollectionSelectorView.bind(
                         null,
-                        false
+                        false,
                     )}
                     uploadTypeSelectorIntent={uploadTypeSelectorIntent}
                     setLoading={setBlockingLoad}
@@ -1178,7 +1180,7 @@ export default function Gallery() {
                             activeCollectionID={activeCollectionID}
                             selectedCollection={getSelectedCollection(
                                 selected.collectionID,
-                                collections
+                                collections,
                             )}
                             isFavoriteCollection={
                                 collectionSummaries.get(activeCollectionID)

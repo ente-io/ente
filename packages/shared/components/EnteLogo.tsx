@@ -1,7 +1,6 @@
-import React from 'react';
-import { styled } from '@mui/material';
+import { styled } from "@mui/material";
 
-const LogoImage = styled('img')`
+const LogoImage = styled("img")`
     margin: 3px 0;
     pointer-events: none;
 `;

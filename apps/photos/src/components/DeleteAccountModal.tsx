@@ -1,22 +1,22 @@
-import { Button, Link, Stack } from '@mui/material';
-import { AppContext } from 'pages/_app';
-import { useContext, useEffect, useRef, useState } from 'react';
-import { preloadImage, initiateEmail } from 'utils/common';
-import { deleteAccount, getAccountDeleteChallenge } from 'services/userService';
-import { logError } from '@ente/shared/sentry';
-import { decryptDeleteAccountChallenge } from 'utils/crypto';
-import { Trans } from 'react-i18next';
-import { t } from 'i18next';
-import { DELETE_ACCOUNT_EMAIL } from '@ente/shared/constants/urls';
-import DialogBoxV2 from '@ente/shared/components/DialogBoxV2';
-import * as Yup from 'yup';
-import { Formik, FormikHelpers } from 'formik';
-import DropdownInput, { DropdownOption } from './DropdownInput';
-import MultilineInput from './MultilineInput';
-import { CheckboxInput } from './CheckboxInput';
-import EnteButton from '@ente/shared/components/EnteButton';
-import { GalleryContext } from 'pages/gallery';
-import { logoutUser } from '@ente/accounts/services/user';
+import { logoutUser } from "@ente/accounts/services/user";
+import DialogBoxV2 from "@ente/shared/components/DialogBoxV2";
+import EnteButton from "@ente/shared/components/EnteButton";
+import { DELETE_ACCOUNT_EMAIL } from "@ente/shared/constants/urls";
+import { logError } from "@ente/shared/sentry";
+import { Button, Link, Stack } from "@mui/material";
+import { Formik, FormikHelpers } from "formik";
+import { t } from "i18next";
+import { AppContext } from "pages/_app";
+import { GalleryContext } from "pages/gallery";
+import { useContext, useEffect, useRef, useState } from "react";
+import { Trans } from "react-i18next";
+import { deleteAccount, getAccountDeleteChallenge } from "services/userService";
+import { initiateEmail, preloadImage } from "utils/common";
+import { decryptDeleteAccountChallenge } from "utils/crypto";
+import * as Yup from "yup";
+import { CheckboxInput } from "./CheckboxInput";
+import DropdownInput, { DropdownOption } from "./DropdownInput";
+import MultilineInput from "./MultilineInput";
 
 interface Iprops {
     onClose: () => void;
@@ -30,8 +30,8 @@ interface FormValues {
 
 enum DELETE_REASON {
     MISSING_FEATURE = "It's missing a key feature that I need",
-    BROKEN_BEHAVIOR = 'The app or a certain feature does not behave as I think it should',
-    FOUND_ANOTHER_SERVICE = 'I found another service that I like better',
+    BROKEN_BEHAVIOR = "The app or a certain feature does not behave as I think it should",
+    FOUND_ANOTHER_SERVICE = "I found another service that I like better",
     NOT_LISTED = "My reason isn't listed",
 }
 
@@ -52,19 +52,19 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
     const reasonAndFeedbackRef = useRef<{ reason: string; feedback: string }>();
 
     useEffect(() => {
-        preloadImage('/images/delete-account');
+        preloadImage("/images/delete-account");
     }, []);
 
     const somethingWentWrong = () =>
         setDialogBoxAttributesV2({
-            title: t('ERROR'),
-            close: { variant: 'critical' },
-            content: t('UNKNOWN_ERROR'),
+            title: t("ERROR"),
+            close: { variant: "critical" },
+            content: t("UNKNOWN_ERROR"),
         });
 
     const initiateDelete = async (
         { reason, feedback }: FormValues,
-        { setFieldError }: FormikHelpers<FormValues>
+        { setFieldError }: FormikHelpers<FormValues>,
     ) => {
         try {
             feedback = feedback.trim();
@@ -72,12 +72,12 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
                 switch (reason) {
                     case DELETE_REASON.FOUND_ANOTHER_SERVICE:
                         setFieldError(
-                            'feedback',
-                            t('FEEDBACK_REQUIRED_FOUND_ANOTHER_SERVICE')
+                            "feedback",
+                            t("FEEDBACK_REQUIRED_FOUND_ANOTHER_SERVICE"),
                         );
                         break;
                     default:
-                        setFieldError('feedback', t('FEEDBACK_REQUIRED'));
+                        setFieldError("feedback", t("FEEDBACK_REQUIRED"));
                 }
                 return;
             }
@@ -92,7 +92,7 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
                 askToMailForDeletion();
             }
         } catch (e) {
-            logError(e, 'Error while initiating account deletion');
+            logError(e, "Error while initiating account deletion");
             somethingWentWrong();
         } finally {
             setLoading(false);
@@ -101,20 +101,20 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
 
     const confirmAccountDeletion = () => {
         setDialogBoxAttributesV2({
-            title: t('DELETE_ACCOUNT'),
+            title: t("DELETE_ACCOUNT"),
             content: <Trans i18nKey="CONFIRM_ACCOUNT_DELETION_MESSAGE" />,
             proceed: {
-                text: t('DELETE'),
+                text: t("DELETE"),
                 action: solveChallengeAndDeleteAccount,
-                variant: 'critical',
+                variant: "critical",
             },
-            close: { text: t('CANCEL') },
+            close: { text: t("CANCEL") },
         });
     };
 
     const askToMailForDeletion = () => {
         setDialogBoxAttributesV2({
-            title: t('DELETE_ACCOUNT'),
+            title: t("DELETE_ACCOUNT"),
             content: (
                 <Trans
                     i18nKey="DELETE_ACCOUNT_MESSAGE"
@@ -125,29 +125,29 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
                 />
             ),
             proceed: {
-                text: t('DELETE'),
+                text: t("DELETE"),
                 action: () => {
-                    initiateEmail('account-deletion@ente.io');
+                    initiateEmail("account-deletion@ente.io");
                 },
-                variant: 'critical',
+                variant: "critical",
             },
-            close: { text: t('CANCEL') },
+            close: { text: t("CANCEL") },
         });
     };
 
     const solveChallengeAndDeleteAccount = async (
-        setLoading: (value: boolean) => void
+        setLoading: (value: boolean) => void,
     ) => {
         try {
             setLoading(true);
             const decryptedChallenge = await decryptDeleteAccountChallenge(
-                deleteAccountChallenge.current
+                deleteAccountChallenge.current,
             );
             const { reason, feedback } = reasonAndFeedbackRef.current;
             await deleteAccount(decryptedChallenge, reason, feedback);
             logoutUser();
         } catch (e) {
-            logError(e, 'solveChallengeAndDeleteAccount failed');
+            logError(e, "solveChallengeAndDeleteAccount failed");
             somethingWentWrong();
         } finally {
             setLoading(false);
@@ -162,23 +162,25 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
                 onClose={onClose}
                 fullScreen={isMobile}
                 attributes={{
-                    title: t('DELETE_ACCOUNT'),
+                    title: t("DELETE_ACCOUNT"),
                     secondary: {
                         action: onClose,
-                        text: t('CANCEL'),
+                        text: t("CANCEL"),
                     },
-                }}>
+                }}
+            >
                 <Formik<FormValues>
                     initialValues={{
-                        reason: '',
-                        feedback: '',
+                        reason: "",
+                        feedback: "",
                     }}
                     validationSchema={Yup.object().shape({
-                        reason: Yup.string().required(t('REQUIRED')),
+                        reason: Yup.string().required(t("REQUIRED")),
                     })}
                     validateOnChange={false}
                     validateOnBlur={false}
-                    onSubmit={initiateDelete}>
+                    onSubmit={initiateDelete}
+                >
                     {({
                         values,
                         errors,
@@ -186,50 +188,52 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
                         handleSubmit,
                     }): JSX.Element => (
                         <form noValidate onSubmit={handleSubmit}>
-                            <Stack spacing={'24px'}>
+                            <Stack spacing={"24px"}>
                                 <DropdownInput
                                     options={getReasonOptions()}
-                                    label={t('DELETE_ACCOUNT_REASON_LABEL')}
+                                    label={t("DELETE_ACCOUNT_REASON_LABEL")}
                                     placeholder={t(
-                                        'DELETE_ACCOUNT_REASON_PLACEHOLDER'
+                                        "DELETE_ACCOUNT_REASON_PLACEHOLDER",
                                     )}
                                     selected={values.reason}
-                                    setSelected={handleChange('reason')}
-                                    messageProps={{ color: 'critical.main' }}
+                                    setSelected={handleChange("reason")}
+                                    messageProps={{ color: "critical.main" }}
                                     message={errors.reason}
                                 />
                                 <MultilineInput
-                                    label={t('DELETE_ACCOUNT_FEEDBACK_LABEL')}
+                                    label={t("DELETE_ACCOUNT_FEEDBACK_LABEL")}
                                     placeholder={t(
-                                        'DELETE_ACCOUNT_FEEDBACK_PLACEHOLDER'
+                                        "DELETE_ACCOUNT_FEEDBACK_PLACEHOLDER",
                                     )}
                                     value={values.feedback}
-                                    onChange={handleChange('feedback')}
+                                    onChange={handleChange("feedback")}
                                     message={errors.feedback}
-                                    messageProps={{ color: 'critical.main' }}
+                                    messageProps={{ color: "critical.main" }}
                                     rowCount={3}
                                 />
                                 <CheckboxInput
                                     checked={acceptDataDeletion}
                                     onChange={setAcceptDataDeletion}
                                     label={t(
-                                        'CONFIRM_DELETE_ACCOUNT_CHECKBOX_LABEL'
+                                        "CONFIRM_DELETE_ACCOUNT_CHECKBOX_LABEL",
                                     )}
                                 />
-                                <Stack spacing={'8px'}>
+                                <Stack spacing={"8px"}>
                                     <EnteButton
                                         type="submit"
                                         size="large"
                                         color="critical"
                                         disabled={!acceptDataDeletion}
-                                        loading={loading}>
-                                        {t('CONFIRM_DELETE_ACCOUNT')}
+                                        loading={loading}
+                                    >
+                                        {t("CONFIRM_DELETE_ACCOUNT")}
                                     </EnteButton>
                                     <Button
                                         size="large"
-                                        color={'secondary'}
-                                        onClick={onClose}>
-                                        {t('CANCEL')}
+                                        color={"secondary"}
+                                        onClick={onClose}
+                                    >
+                                        {t("CANCEL")}
                                     </Button>
                                 </Stack>
                             </Stack>

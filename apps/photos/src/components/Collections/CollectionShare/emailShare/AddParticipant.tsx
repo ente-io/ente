@@ -1,17 +1,16 @@
-import { Stack } from '@mui/material';
-import { COLLECTION_ROLE, Collection } from 'types/collection';
-import { EnteDrawer } from 'components/EnteDrawer';
-import { t } from 'i18next';
-import { DialogProps } from '@mui/material';
-import Titlebar from 'components/Titlebar';
+import { DialogProps, Stack } from "@mui/material";
+import { EnteDrawer } from "components/EnteDrawer";
+import Titlebar from "components/Titlebar";
+import { t } from "i18next";
+import { COLLECTION_ROLE, Collection } from "types/collection";
 
-import { GalleryContext } from 'pages/gallery';
-import { useContext, useMemo } from 'react';
-import { shareCollection } from 'services/collectionService';
-import { handleSharingErrors } from 'utils/error/ui';
+import { GalleryContext } from "pages/gallery";
+import { useContext, useMemo } from "react";
+import { shareCollection } from "services/collectionService";
+import { handleSharingErrors } from "utils/error/ui";
 import AddParticipantForm, {
     AddParticipantFormProps,
-} from './AddParticipantForm';
+} from "./AddParticipantForm";
 
 interface Iprops {
     collection: Collection;
@@ -34,12 +33,12 @@ export default function AddParticipant({
         () =>
             emailList.filter(
                 (email) =>
-                    !collection.sharees?.find((value) => value.email === email)
+                    !collection.sharees?.find((value) => value.email === email),
             ),
-        [emailList, collection.sharees]
+        [emailList, collection.sharees],
     );
 
-    const collectionShare: AddParticipantFormProps['callback'] = async ({
+    const collectionShare: AddParticipantFormProps["callback"] = async ({
         email,
         emails,
     }) => {
@@ -47,11 +46,11 @@ export default function AddParticipant({
         // and already shared
         if (email) {
             if (email === user.email) {
-                throw new Error(t('SHARE_WITH_SELF'));
+                throw new Error(t("SHARE_WITH_SELF"));
             } else if (
                 collection?.sharees?.find((value) => value.email === email)
             ) {
-                throw new Error(t('ALREADY_SHARED', { email: email }));
+                throw new Error(t("ALREADY_SHARED", { email: email }));
             }
             // set emails to array of one email
             emails = [email];
@@ -79,8 +78,8 @@ export default function AddParticipant({
         onRootClose();
     };
 
-    const handleDrawerClose: DialogProps['onClose'] = (_, reason) => {
-        if (reason === 'backdropClick') {
+    const handleDrawerClose: DialogProps["onClose"] = (_, reason) => {
+        if (reason === "backdropClick") {
             handleRootClose();
         } else {
             onClose();
@@ -90,13 +89,13 @@ export default function AddParticipant({
     return (
         <>
             <EnteDrawer anchor="right" open={open} onClose={handleDrawerClose}>
-                <Stack spacing={'4px'} py={'12px'}>
+                <Stack spacing={"4px"} py={"12px"}>
                     <Titlebar
                         onClose={onClose}
                         title={
                             type === COLLECTION_ROLE.VIEWER
-                                ? t('ADD_VIEWERS')
-                                : t('ADD_COLLABORATORS')
+                                ? t("ADD_VIEWERS")
+                                : t("ADD_COLLABORATORS")
                         }
                         onRootClose={handleRootClose}
                         caption={collection.name}
@@ -105,15 +104,15 @@ export default function AddParticipant({
                         onClose={onClose}
                         callback={collectionShare}
                         optionsList={nonSharedEmails}
-                        placeholder={t('ENTER_EMAIL')}
+                        placeholder={t("ENTER_EMAIL")}
                         fieldType="email"
                         buttonText={
                             type === COLLECTION_ROLE.VIEWER
-                                ? t('ADD_VIEWERS')
-                                : t('ADD_COLLABORATORS')
+                                ? t("ADD_VIEWERS")
+                                : t("ADD_COLLABORATORS")
                         }
                         submitButtonProps={{
-                            size: 'large',
+                            size: "large",
                             sx: { mt: 1, mb: 2 },
                         }}
                         disableAutoFocus

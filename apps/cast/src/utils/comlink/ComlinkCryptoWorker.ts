@@ -1,6 +1,6 @@
-import { Remote } from 'comlink';
-import { DedicatedCryptoWorker } from 'worker/crypto.worker';
-import { ComlinkWorker } from './comlinkWorker';
+import { Remote } from "comlink";
+import { DedicatedCryptoWorker } from "worker/crypto.worker";
+import { ComlinkWorker } from "./comlinkWorker";
 
 class ComlinkCryptoWorker {
     private comlinkWorkerInstance: Promise<Remote<DedicatedCryptoWorker>>;
@@ -16,8 +16,8 @@ class ComlinkCryptoWorker {
 
 export const getDedicatedCryptoWorker = () => {
     const cryptoComlinkWorker = new ComlinkWorker<typeof DedicatedCryptoWorker>(
-        'ente-crypto-worker',
-        new Worker(new URL('worker/crypto.worker.ts', import.meta.url))
+        "ente-crypto-worker",
+        new Worker(new URL("worker/crypto.worker.ts", import.meta.url)),
     );
     return cryptoComlinkWorker;
 };

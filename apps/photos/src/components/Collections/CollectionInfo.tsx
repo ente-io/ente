@@ -1,7 +1,7 @@
-import { Box, Typography } from '@mui/material';
-import { FlexWrapper } from '@ente/shared/components/Container';
-import React from 'react';
-import { t } from 'i18next';
+import { FlexWrapper } from "@ente/shared/components/Container";
+import { Box, Typography } from "@mui/material";
+import { t } from "i18next";
+import React from "react";
 interface Iprops {
     name: string;
     fileCount: number;
@@ -15,17 +15,18 @@ export function CollectionInfo({ name, fileCount, endIcon }: Iprops) {
 
             <FlexWrapper>
                 <Typography variant="small" color="text.muted">
-                    {t('photos_count', { count: fileCount })}
+                    {t("photos_count", { count: fileCount })}
                 </Typography>
                 {endIcon && (
                     <Box
                         sx={{
                             svg: {
-                                fontSize: '17px',
-                                color: 'text.muted',
+                                fontSize: "17px",
+                                color: "text.muted",
                             },
                         }}
-                        ml={1.5}>
+                        ml={1.5}
+                    >
                         {endIcon}
                     </Box>
                 )}

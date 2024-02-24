@@ -1,33 +1,33 @@
+import { addLogLine } from "@ente/shared/logging";
 import {
-    MLSyncContext,
-    MLSyncFileContext,
     DetectedFace,
     Face,
-} from 'types/machineLearning';
-import { addLogLine } from '@ente/shared/logging';
+    MLSyncContext,
+    MLSyncFileContext,
+} from "types/machineLearning";
+import { imageBitmapToBlob } from "utils/image";
 import {
-    isDifferentOrOld,
-    getFaceId,
     areFaceIdsSame,
     extractFaceImages,
+    getFaceId,
     getLocalFile,
     getOriginalImageBitmap,
-} from 'utils/machineLearning';
-import { storeFaceCrop } from 'utils/machineLearning/faceCrop';
-import mlIDbStorage from 'utils/storage/mlIDbStorage';
-import ReaderService from './readerService';
-import { imageBitmapToBlob } from 'utils/image';
+    isDifferentOrOld,
+} from "utils/machineLearning";
+import { storeFaceCrop } from "utils/machineLearning/faceCrop";
+import mlIDbStorage from "utils/storage/mlIDbStorage";
+import ReaderService from "./readerService";
 
 class FaceService {
     async syncFileFaceDetections(
         syncContext: MLSyncContext,
-        fileContext: MLSyncFileContext
+        fileContext: MLSyncFileContext,
     ) {
         const { oldMlFile, newMlFile } = fileContext;
         if (
             !isDifferentOrOld(
                 oldMlFile?.faceDetectionMethod,
-                syncContext.faceDetectionService.method
+                syncContext.faceDetectionService.method,
             ) &&
             oldMlFile?.imageSource === syncContext.config.imageSource
         ) {
@@ -47,7 +47,7 @@ class FaceService {
         fileContext.newDetection = true;
         const imageBitmap = await ReaderService.getImageBitmap(
             syncContext,
-            fileContext
+            fileContext,
         );
         const faceDetections =
             await syncContext.faceDetectionService.detectFaces(imageBitmap);
@@ -66,12 +66,12 @@ class FaceService {
         // ?.filter((f) =>
         //     f.box.width > syncContext.config.faceDetection.minFaceSize
         // );
-        addLogLine('[MLService] Detected Faces: ', newMlFile.faces?.length);
+        addLogLine("[MLService] Detected Faces: ", newMlFile.faces?.length);
     }
 
     async syncFileFaceCrops(
         syncContext: MLSyncContext,
-        fileContext: MLSyncFileContext
+        fileContext: MLSyncFileContext,
     ) {
         const { oldMlFile, newMlFile } = fileContext;
         if (
@@ -79,7 +79,7 @@ class FaceService {
             !fileContext.newDetection &&
             !isDifferentOrOld(
                 oldMlFile?.faceCropMethod,
-                syncContext.faceCropService.method
+                syncContext.faceCropService.method,
             ) &&
             areFaceIdsSame(newMlFile.faces, oldMlFile?.faces)
         ) {
@@ -92,7 +92,7 @@ class FaceService {
 
         const imageBitmap = await ReaderService.getImageBitmap(
             syncContext,
-            fileContext
+            fileContext,
         );
         newMlFile.faceCropMethod = syncContext.faceCropService.method;
 
@@ -103,14 +103,14 @@ class FaceService {
 
     async syncFileFaceAlignments(
         syncContext: MLSyncContext,
-        fileContext: MLSyncFileContext
+        fileContext: MLSyncFileContext,
     ) {
         const { oldMlFile, newMlFile } = fileContext;
         if (
             !fileContext.newDetection &&
             !isDifferentOrOld(
                 oldMlFile?.faceAlignmentMethod,
-                syncContext.faceAlignmentService.method
+                syncContext.faceAlignmentService.method,
             ) &&
             areFaceIdsSame(newMlFile.faces, oldMlFile?.faces)
         ) {
@@ -125,23 +125,23 @@ class FaceService {
         fileContext.newAlignment = true;
         for (const face of newMlFile.faces) {
             face.alignment = syncContext.faceAlignmentService.getFaceAlignment(
-                face.detection
+                face.detection,
             );
         }
-        addLogLine('[MLService] alignedFaces: ', newMlFile.faces?.length);
+        addLogLine("[MLService] alignedFaces: ", newMlFile.faces?.length);
         // addLogLine('4 TF Memory stats: ',JSON.stringify(tf.memory()));
     }
 
     async syncFileFaceEmbeddings(
         syncContext: MLSyncContext,
-        fileContext: MLSyncFileContext
+        fileContext: MLSyncFileContext,
     ) {
         const { oldMlFile, newMlFile } = fileContext;
         if (
             !fileContext.newAlignment &&
             !isDifferentOrOld(
                 oldMlFile?.faceEmbeddingMethod,
-                syncContext.faceEmbeddingService.method
+                syncContext.faceEmbeddingService.method,
             ) &&
             areFaceIdsSame(newMlFile.faces, oldMlFile?.faces)
         ) {
@@ -158,34 +158,34 @@ class FaceService {
         //     (await this.getImageBitmap(syncContext, fileContext));
         const faceImages = await extractFaceImages(
             newMlFile.faces,
-            syncContext.faceEmbeddingService.faceSize
+            syncContext.faceEmbeddingService.faceSize,
         );
 
         const embeddings =
             await syncContext.faceEmbeddingService.getFaceEmbeddings(
-                faceImages
+                faceImages,
             );
         faceImages.forEach((faceImage) => faceImage.close());
         newMlFile.faces.forEach((f, i) => (f.embedding = embeddings[i]));
 
-        addLogLine('[MLService] facesWithEmbeddings: ', newMlFile.faces.length);
+        addLogLine("[MLService] facesWithEmbeddings: ", newMlFile.faces.length);
         // addLogLine('5 TF Memory stats: ',JSON.stringify(tf.memory()));
     }
 
     async saveFaceCrop(
         imageBitmap: ImageBitmap,
         face: Face,
-        syncContext: MLSyncContext
+        syncContext: MLSyncContext,
     ) {
         const faceCrop = await syncContext.faceCropService.getFaceCrop(
             imageBitmap,
             face.detection,
-            syncContext.config.faceCrop
+            syncContext.config.faceCrop,
         );
         face.crop = await storeFaceCrop(
             face.id,
             faceCrop,
-            syncContext.config.faceCrop.blobOptions
+            syncContext.config.faceCrop.blobOptions,
         );
         const blob = await imageBitmapToBlob(faceCrop.image);
         faceCrop.image.close();
@@ -203,7 +203,7 @@ class FaceService {
 
     public async runFaceClustering(
         syncContext: MLSyncContext,
-        allFaces: Array<Face>
+        allFaces: Array<Face>,
     ) {
         // await this.init();
 
@@ -211,23 +211,23 @@ class FaceService {
 
         if (!allFaces || allFaces.length < clusteringConfig.minInputSize) {
             addLogLine(
-                '[MLService] Too few faces to cluster, not running clustering: ',
-                allFaces.length
+                "[MLService] Too few faces to cluster, not running clustering: ",
+                allFaces.length,
             );
             return;
         }
 
-        addLogLine('Running clustering allFaces: ', allFaces.length);
+        addLogLine("Running clustering allFaces: ", allFaces.length);
         syncContext.mlLibraryData.faceClusteringResults =
             await syncContext.faceClusteringService.cluster(
                 allFaces.map((f) => Array.from(f.embedding)),
-                syncContext.config.faceClustering
+                syncContext.config.faceClustering,
             );
         syncContext.mlLibraryData.faceClusteringMethod =
             syncContext.faceClusteringService.method;
         addLogLine(
-            '[MLService] Got face clustering results: ',
-            JSON.stringify(syncContext.mlLibraryData.faceClusteringResults)
+            "[MLService] Got face clustering results: ",
+            JSON.stringify(syncContext.mlLibraryData.faceClusteringResults),
         );
 
         // syncContext.faceClustersWithNoise = {
@@ -242,12 +242,12 @@ class FaceService {
 
     public async regenerateFaceCrop(
         syncContext: MLSyncContext,
-        faceID: string
+        faceID: string,
     ) {
-        const fileID = Number(faceID.split('-')[0]);
+        const fileID = Number(faceID.split("-")[0]);
         const personFace = await mlIDbStorage.getFace(fileID, faceID);
         if (!personFace) {
-            throw Error('Face not found');
+            throw Error("Face not found");
         }
 
         const file = await getLocalFile(personFace.fileId);

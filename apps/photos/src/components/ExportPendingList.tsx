@@ -1,11 +1,11 @@
-import { EnteFile } from 'types/file';
-import ItemList from 'components/ItemList';
-import DialogBoxV2 from '@ente/shared/components/DialogBoxV2';
-import { t } from 'i18next';
-import { FlexWrapper } from '@ente/shared/components/Container';
-import CollectionCard from './Collections/CollectionCard';
-import { ResultPreviewTile } from './Collections/styledComponents';
-import { Box, styled } from '@mui/material';
+import { FlexWrapper } from "@ente/shared/components/Container";
+import DialogBoxV2 from "@ente/shared/components/DialogBoxV2";
+import { Box, styled } from "@mui/material";
+import ItemList from "components/ItemList";
+import { t } from "i18next";
+import { EnteFile } from "types/file";
+import CollectionCard from "./Collections/CollectionCard";
+import { ResultPreviewTile } from "./Collections/styledComponents";
 
 interface Iprops {
     isOpen: boolean;
@@ -14,7 +14,7 @@ interface Iprops {
     pendingExports: EnteFile[];
 }
 
-export const ItemContainer = styled('div')`
+export const ItemContainer = styled("div")`
     position: relative;
     top: 5px;
     display: inline-block;
@@ -28,7 +28,7 @@ const ExportPendingList = (props: Iprops) => {
     const renderListItem = (file: EnteFile) => {
         return (
             <FlexWrapper>
-                <Box sx={{ marginRight: '8px' }}>
+                <Box sx={{ marginRight: "8px" }}>
                     <CollectionCard
                         key={file.id}
                         coverFile={file}
@@ -60,15 +60,16 @@ const ExportPendingList = (props: Iprops) => {
             open={props.isOpen}
             onClose={props.onClose}
             PaperProps={{
-                sx: { maxWidth: '444px' },
+                sx: { maxWidth: "444px" },
             }}
             attributes={{
-                title: t('PENDING_ITEMS'),
+                title: t("PENDING_ITEMS"),
                 close: {
                     action: props.onClose,
-                    text: t('CLOSE'),
+                    text: t("CLOSE"),
                 },
-            }}>
+            }}
+        >
             <ItemList
                 maxHeight={240}
                 itemSize={50}

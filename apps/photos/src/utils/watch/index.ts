@@ -1,6 +1,6 @@
-import { ElectronFile } from 'types/upload';
-import { WatchMapping } from 'types/watchFolder';
-import { isSystemFile } from 'utils/upload';
+import { ElectronFile } from "types/upload";
+import { WatchMapping } from "types/watchFolder";
+import { isSystemFile } from "utils/upload";
 
 function isSyncedOrIgnoredFile(file: ElectronFile, mapping: WatchMapping) {
     return (
@@ -11,7 +11,7 @@ function isSyncedOrIgnoredFile(file: ElectronFile, mapping: WatchMapping) {
 
 export function getValidFilesToUpload(
     files: ElectronFile[],
-    mapping: WatchMapping
+    mapping: WatchMapping,
 ) {
     const uniqueFilePaths = new Set<string>();
     return files.filter((file) => {

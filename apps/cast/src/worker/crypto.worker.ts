@@ -1,6 +1,6 @@
-import * as Comlink from 'comlink';
-import { StateAddress } from 'libsodium-wrappers';
-import * as libsodium from '@ente/shared/crypto/internal/libsodium';
+import * as libsodium from "@ente/shared/crypto/internal/libsodium";
+import * as Comlink from "comlink";
+import { StateAddress } from "libsodium-wrappers";
 
 const textDecoder = new TextDecoder();
 const textEncoder = new TextEncoder();
@@ -8,12 +8,12 @@ export class DedicatedCryptoWorker {
     async decryptMetadata(
         encryptedMetadata: string,
         header: string,
-        key: string
+        key: string,
     ) {
         const encodedMetadata = await libsodium.decryptChaChaOneShot(
             await libsodium.fromB64(encryptedMetadata),
             await libsodium.fromB64(header),
-            key
+            key,
         );
         return JSON.parse(textDecoder.decode(encodedMetadata));
     }
@@ -21,7 +21,7 @@ export class DedicatedCryptoWorker {
     async decryptThumbnail(
         fileData: Uint8Array,
         header: Uint8Array,
-        key: string
+        key: string,
     ) {
         return libsodium.decryptChaChaOneShot(fileData, header, key);
     }
@@ -29,15 +29,15 @@ export class DedicatedCryptoWorker {
     async decryptEmbedding(
         encryptedEmbedding: string,
         header: string,
-        key: string
+        key: string,
     ) {
         const encodedEmbedding = await libsodium.decryptChaChaOneShot(
             await libsodium.fromB64(encryptedEmbedding),
             await libsodium.fromB64(header),
-            key
+            key,
         );
         return Float32Array.from(
-            JSON.parse(textDecoder.decode(encodedEmbedding))
+            JSON.parse(textDecoder.decode(encodedEmbedding)),
         );
     }
 
@@ -66,11 +66,11 @@ export class DedicatedCryptoWorker {
 
     async encryptEmbedding(embedding: Float32Array, key: string) {
         const encodedEmbedding = textEncoder.encode(
-            JSON.stringify(Array.from(embedding))
+            JSON.stringify(Array.from(embedding)),
         );
         const { file: encryptEmbedding } = await libsodium.encryptChaChaOneShot(
             encodedEmbedding,
-            key
+            key,
         );
         const { encryptedData, ...other } = encryptEmbedding;
         return {
@@ -89,7 +89,7 @@ export class DedicatedCryptoWorker {
     async encryptFileChunk(
         data: Uint8Array,
         pushState: StateAddress,
-        isFinalChunk: boolean
+        isFinalChunk: boolean,
     ) {
         return libsodium.encryptFileChunk(data, pushState, isFinalChunk);
     }
@@ -122,7 +122,7 @@ export class DedicatedCryptoWorker {
         passphrase: string,
         salt: string,
         opsLimit: number,
-        memLimit: number
+        memLimit: number,
     ) {
         return libsodium.deriveKey(passphrase, salt, opsLimit, memLimit);
     }
@@ -179,7 +179,7 @@ export class DedicatedCryptoWorker {
         key: string,
         subKeyLength: number,
         subKeyID: number,
-        context: string
+        context: string,
     ) {
         return libsodium.generateSubKey(key, subKeyLength, subKeyID, context);
     }

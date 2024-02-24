@@ -1,13 +1,12 @@
-import React from 'react';
-import CheckIcon from '@mui/icons-material/Check';
+import CheckIcon from "@mui/icons-material/Check";
 
 export function CheckmarkIcon() {
     return (
         <CheckIcon
             fontSize="small"
             sx={{
-                display: 'inline',
-                fontSize: '15px',
+                display: "inline",
+                fontSize: "15px",
 
                 color: (theme) => theme.palette.secondary.main,
             }}

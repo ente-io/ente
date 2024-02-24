@@ -1,30 +1,30 @@
-import i18n, { t } from 'i18next';
+import i18n, { t } from "i18next";
 
 const dateTimeFullFormatter1 = new Intl.DateTimeFormat(i18n.language, {
-    weekday: 'short',
-    month: 'short',
-    day: 'numeric',
+    weekday: "short",
+    month: "short",
+    day: "numeric",
 });
 
 const dateTimeFullFormatter2 = new Intl.DateTimeFormat(i18n.language, {
-    year: 'numeric',
+    year: "numeric",
 });
 const dateTimeShortFormatter = new Intl.DateTimeFormat(i18n.language, {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
 });
 
 const timeFormatter = new Intl.DateTimeFormat(i18n.language, {
-    timeStyle: 'short',
+    timeStyle: "short",
 });
 
 export function formatDateFull(date: number | Date) {
     return [dateTimeFullFormatter1, dateTimeFullFormatter2]
         .map((f) => f.format(date))
-        .join(' ');
+        .join(" ");
 }
 
 export function formatDate(date: number | Date) {
@@ -34,7 +34,7 @@ export function formatDate(date: number | Date) {
     return [dateTimeFullFormatter1, dateTimeFormat2]
         .filter((f) => !!f)
         .map((f) => f.format(date))
-        .join(' ');
+        .join(" ");
 }
 
 export function formatDateTimeShort(date: number | Date) {
@@ -46,11 +46,11 @@ export function formatTime(date: number | Date) {
 }
 
 export function formatDateTimeFull(dateTime: number | Date): string {
-    return [formatDateFull(dateTime), t('at'), formatTime(dateTime)].join(' ');
+    return [formatDateFull(dateTime), t("at"), formatTime(dateTime)].join(" ");
 }
 
 export function formatDateTime(dateTime: number | Date): string {
-    return [formatDate(dateTime), t('at'), formatTime(dateTime)].join(' ');
+    return [formatDate(dateTime), t("at"), formatTime(dateTime)].join(" ");
 }
 
 export function formatDateRelative(date: number) {
@@ -63,16 +63,16 @@ export function formatDateRelative(date: number) {
         second: 1000,
     };
     const relativeDateFormat = new Intl.RelativeTimeFormat(i18n.language, {
-        localeMatcher: 'best fit',
-        numeric: 'always',
-        style: 'long',
+        localeMatcher: "best fit",
+        numeric: "always",
+        style: "long",
     });
     const elapsed = date - Date.now(); // "Math.abs" accounts for both "past" & "future" scenarios
 
     for (const u in units)
-        if (Math.abs(elapsed) > units[u] || u === 'second')
+        if (Math.abs(elapsed) > units[u] || u === "second")
             return relativeDateFormat.format(
                 Math.round(elapsed / units[u]),
-                u as Intl.RelativeTimeFormatUnit
+                u as Intl.RelativeTimeFormatUnit,
             );
 }

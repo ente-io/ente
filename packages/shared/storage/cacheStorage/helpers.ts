@@ -1,12 +1,12 @@
-import { CACHES } from './constants';
-import { CacheStorageService } from '.';
-import { logError } from '@ente/shared/sentry';
-import { LimitedCache } from './types';
+import { logError } from "@ente/shared/sentry";
+import { CacheStorageService } from ".";
+import { CACHES } from "./constants";
+import { LimitedCache } from "./types";
 
 export async function cached(
     cacheName: string,
     id: string,
-    get: () => Promise<Blob>
+    get: () => Promise<Blob>,
 ): Promise<Blob> {
     const cache = await CacheStorageService.open(cacheName);
     const cacheResponse = await cache.match(id);
@@ -21,7 +21,7 @@ export async function cached(
             await cache.put(id, new Response(result));
         } catch (e) {
             // TODO: handle storage full exception.
-            console.error('Error while storing file to cache: ', id);
+            console.error("Error while storing file to cache: ", id);
         }
     }
 
@@ -32,7 +32,7 @@ let thumbCache: LimitedCache;
 
 export async function getBlobFromCache(
     cacheName: string,
-    url: string
+    url: string,
 ): Promise<Blob> {
     if (!thumbCache) {
         thumbCache = await CacheStorageService.open(cacheName);
@@ -50,6 +50,6 @@ export async function deleteAllCache() {
         await CacheStorageService.delete(CACHES.FACE_CROPS);
         await CacheStorageService.delete(CACHES.FILES);
     } catch (e) {
-        logError(e, 'deleteAllCache failed'); // log and ignore
+        logError(e, "deleteAllCache failed"); // log and ignore
     }
 }

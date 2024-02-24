@@ -1,25 +1,25 @@
-import { Stack, Typography } from '@mui/material';
-import { GalleryContext } from 'pages/gallery';
-import React, { useContext, useState } from 'react';
-import { t } from 'i18next';
+import DownloadSharp from "@mui/icons-material/DownloadSharp";
+import LinkIcon from "@mui/icons-material/Link";
+import PublicIcon from "@mui/icons-material/Public";
+import { Stack, Typography } from "@mui/material";
+import { EnteMenuItem } from "components/Menu/EnteMenuItem";
+import MenuItemDivider from "components/Menu/MenuItemDivider";
+import { MenuItemGroup } from "components/Menu/MenuItemGroup";
+import MenuSectionTitle from "components/Menu/MenuSectionTitle";
+import { t } from "i18next";
+import { GalleryContext } from "pages/gallery";
+import { useContext, useState } from "react";
 import {
     createShareableURL,
     updateShareableURL,
-} from 'services/collectionService';
-import { Collection, PublicURL } from 'types/collection';
-import { handleSharingErrors } from 'utils/error/ui';
-import { EnteMenuItem } from 'components/Menu/EnteMenuItem';
-import PublicIcon from '@mui/icons-material/Public';
+} from "services/collectionService";
+import { Collection, PublicURL } from "types/collection";
+import { handleSharingErrors } from "utils/error/ui";
 interface Iprops {
     collection: Collection;
     setPublicShareProp: (value: PublicURL) => void;
     setCopyLinkModalView: (value: boolean) => void;
 }
-import LinkIcon from '@mui/icons-material/Link';
-import { MenuItemGroup } from 'components/Menu/MenuItemGroup';
-import MenuSectionTitle from 'components/Menu/MenuSectionTitle';
-import MenuItemDivider from 'components/Menu/MenuItemDivider';
-import DownloadSharp from '@mui/icons-material/DownloadSharp';
 
 export default function EnablePublicShareOptions({
     collection,
@@ -68,30 +68,31 @@ export default function EnablePublicShareOptions({
     return (
         <Stack>
             <MenuSectionTitle
-                title={t('LINK_SHARE_TITLE')}
+                title={t("LINK_SHARE_TITLE")}
                 icon={<PublicIcon />}
             />
             <MenuItemGroup>
                 <EnteMenuItem
-                    label={t('CREATE_PUBLIC_SHARING')}
+                    label={t("CREATE_PUBLIC_SHARING")}
                     startIcon={<LinkIcon />}
                     onClick={createSharableURLHelper}
                 />
                 <MenuItemDivider hasIcon />
                 <EnteMenuItem
-                    label={t('COLLECT_PHOTOS')}
+                    label={t("COLLECT_PHOTOS")}
                     startIcon={<DownloadSharp />}
                     onClick={createCollectPhotoShareableURLHelper}
                 />
             </MenuItemGroup>
             {sharableLinkError && (
                 <Typography
-                    textAlign={'center'}
+                    textAlign={"center"}
                     variant="small"
                     sx={{
                         color: (theme) => theme.colors.danger.A700,
                         mt: 0.5,
-                    }}>
+                    }}
+                >
                     {sharableLinkError}
                 </Typography>
             )}

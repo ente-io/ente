@@ -1,24 +1,24 @@
-import React, { useContext, useEffect, useState } from 'react';
-import OTPDisplay from 'components/OTPDisplay';
-import { getAuthCodes } from 'services';
-import { CustomError } from '@ente/shared/error';
-import { AUTH_PAGES as PAGES } from '@ente/shared/constants/pages';
-import { useRouter } from 'next/router';
-import { AuthFooter } from 'components/AuthFooter';
-import { AppContext } from 'pages/_app';
-import { TextField } from '@mui/material';
-import AuthNavbar from 'components/Navbar';
-import { t } from 'i18next';
-import EnteSpinner from '@ente/shared/components/EnteSpinner';
-import { VerticallyCentered } from '@ente/shared/components/Container';
-import InMemoryStore, { MS_KEYS } from '@ente/shared/storage/InMemoryStore';
+import { VerticallyCentered } from "@ente/shared/components/Container";
+import EnteSpinner from "@ente/shared/components/EnteSpinner";
+import { AUTH_PAGES as PAGES } from "@ente/shared/constants/pages";
+import { CustomError } from "@ente/shared/error";
+import InMemoryStore, { MS_KEYS } from "@ente/shared/storage/InMemoryStore";
+import { TextField } from "@mui/material";
+import { AuthFooter } from "components/AuthFooter";
+import AuthNavbar from "components/Navbar";
+import OTPDisplay from "components/OTPDisplay";
+import { t } from "i18next";
+import { useRouter } from "next/router";
+import { AppContext } from "pages/_app";
+import { useContext, useEffect, useState } from "react";
+import { getAuthCodes } from "services";
 
 const AuthenticatorCodesPage = () => {
     const appContext = useContext(AppContext);
     const router = useRouter();
     const [codes, setCodes] = useState([]);
     const [hasFetched, setHasFetched] = useState(false);
-    const [searchTerm, setSearchTerm] = useState('');
+    const [searchTerm, setSearchTerm] = useState("");
 
     useEffect(() => {
         const fetchCodes = async () => {
@@ -41,12 +41,12 @@ const AuthenticatorCodesPage = () => {
 
     const filteredCodes = codes.filter(
         (secret) =>
-            (secret.issuer ?? '')
+            (secret.issuer ?? "")
                 .toLowerCase()
                 .includes(searchTerm.toLowerCase()) ||
-            (secret.account ?? '')
+            (secret.account ?? "")
                 .toLowerCase()
-                .includes(searchTerm.toLowerCase())
+                .includes(searchTerm.toLowerCase()),
     );
 
     if (!hasFetched) {
@@ -64,47 +64,50 @@ const AuthenticatorCodesPage = () => {
             <AuthNavbar />
             <div
                 style={{
-                    maxWidth: '800px',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    margin: '0 auto',
-                }}>
-                <div style={{ marginBottom: '1rem' }} />
+                    maxWidth: "800px",
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    margin: "0 auto",
+                }}
+            >
+                <div style={{ marginBottom: "1rem" }} />
                 {filteredCodes.length === 0 && searchTerm.length === 0 ? (
                     <></>
                 ) : (
                     <TextField
                         id="search"
                         name="search"
-                        label={t('SEARCH')}
+                        label={t("SEARCH")}
                         onChange={(e) => setSearchTerm(e.target.value)}
                         variant="filled"
-                        style={{ width: '350px' }}
+                        style={{ width: "350px" }}
                         value={searchTerm}
                         autoFocus
                     />
                 )}
 
-                <div style={{ marginBottom: '1rem' }} />
+                <div style={{ marginBottom: "1rem" }} />
                 <div
                     style={{
-                        display: 'flex',
-                        flexDirection: 'row',
-                        flexWrap: 'wrap',
-                        justifyContent: 'center',
-                    }}>
+                        display: "flex",
+                        flexDirection: "row",
+                        flexWrap: "wrap",
+                        justifyContent: "center",
+                    }}
+                >
                     {filteredCodes.length === 0 ? (
                         <div
                             style={{
-                                alignItems: 'center',
-                                display: 'flex',
-                                textAlign: 'center',
-                                marginTop: '32px',
-                            }}>
+                                alignItems: "center",
+                                display: "flex",
+                                textAlign: "center",
+                                marginTop: "32px",
+                            }}
+                        >
                             {searchTerm.length !== 0 ? (
-                                <p>{t('NO_RESULTS')}</p>
+                                <p>{t("NO_RESULTS")}</p>
                             ) : (
                                 <div />
                             )}
@@ -115,9 +118,9 @@ const AuthenticatorCodesPage = () => {
                         ))
                     )}
                 </div>
-                <div style={{ marginBottom: '2rem' }} />
+                <div style={{ marginBottom: "2rem" }} />
                 <AuthFooter />
-                <div style={{ marginBottom: '4rem' }} />
+                <div style={{ marginBottom: "4rem" }} />
             </div>
             <style jsx>{`
                 @media (min-width: 800px) {

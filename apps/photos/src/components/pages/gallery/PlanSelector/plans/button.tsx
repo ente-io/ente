@@ -1,9 +1,8 @@
-import ChevronRight from '@mui/icons-material/ChevronRight';
-import Done from '@mui/icons-material/Done';
-import { Box, Button } from '@mui/material';
-import { SpaceBetweenFlex } from '@ente/shared/components/Container';
-import React from 'react';
-import { t } from 'i18next';
+import { SpaceBetweenFlex } from "@ente/shared/components/Container";
+import ChevronRight from "@mui/icons-material/ChevronRight";
+import Done from "@mui/icons-material/Done";
+import { Box, Button } from "@mui/material";
+import { t } from "i18next";
 export function PlanIconButton({
     current,
     onClick,
@@ -28,16 +27,17 @@ function CurrentPlanTileButton() {
             color="accent"
             disabled={true}
             sx={(theme) => ({
-                '&&': {
+                "&&": {
                     color: theme.colors.accent.A500,
                     borderColor: theme.colors.accent.A500,
                 },
             })}
             fullWidth
             onClick={() => null}
-            variant={'outlined'}>
+            variant={"outlined"}
+        >
             <SpaceBetweenFlex>
-                {t('ACTIVE')}
+                {t("ACTIVE")}
                 <Done />
             </SpaceBetweenFlex>
         </Button>
@@ -53,9 +53,10 @@ function NormalPlanTileButton({ onClick }) {
             })}
             fullWidth
             onClick={onClick}
-            variant={'contained'}>
+            variant={"contained"}
+        >
             <SpaceBetweenFlex>
-                {t('SUBSCRIBE')}
+                {t("SUBSCRIBE")}
                 <ChevronRight />
             </SpaceBetweenFlex>
         </Button>

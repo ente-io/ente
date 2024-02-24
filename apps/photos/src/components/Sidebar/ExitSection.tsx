@@ -1,10 +1,10 @@
-import React, { useContext, useState } from 'react';
-import { t } from 'i18next';
+import { t } from "i18next";
+import { useContext, useState } from "react";
 
-import { logoutUser } from '@ente/accounts/services/user';
-import { AppContext } from 'pages/_app';
-import DeleteAccountModal from 'components/DeleteAccountModal';
-import { EnteMenuItem } from 'components/Menu/EnteMenuItem';
+import { logoutUser } from "@ente/accounts/services/user";
+import DeleteAccountModal from "components/DeleteAccountModal";
+import { EnteMenuItem } from "components/Menu/EnteMenuItem";
+import { AppContext } from "pages/_app";
 
 export default function ExitSection() {
     const { setDialogMessage } = useContext(AppContext);
@@ -16,13 +16,13 @@ export default function ExitSection() {
 
     const confirmLogout = () => {
         setDialogMessage({
-            title: t('LOGOUT_MESSAGE'),
+            title: t("LOGOUT_MESSAGE"),
             proceed: {
-                text: t('LOGOUT'),
+                text: t("LOGOUT"),
                 action: logoutUser,
-                variant: 'critical',
+                variant: "critical",
             },
-            close: { text: t('CANCEL') },
+            close: { text: t("CANCEL") },
         });
     };
 
@@ -31,14 +31,14 @@ export default function ExitSection() {
             <EnteMenuItem
                 onClick={confirmLogout}
                 color="critical"
-                label={t('LOGOUT')}
+                label={t("LOGOUT")}
                 variant="secondary"
             />
             <EnteMenuItem
                 onClick={openDeleteAccountModal}
                 color="critical"
                 variant="secondary"
-                label={t('DELETE_ACCOUNT')}
+                label={t("DELETE_ACCOUNT")}
             />
             <DeleteAccountModal
                 open={deleteAccountModalView}

@@ -1,9 +1,9 @@
-import React from 'react';
+import DialogBoxV2 from "@ente/shared/components/DialogBoxV2";
 import SingleInputForm, {
     SingleInputFormProps,
-} from '@ente/shared/components/SingleInputForm';
-import { t } from 'i18next';
-import DialogBoxV2 from '@ente/shared/components/DialogBoxV2';
+} from "@ente/shared/components/SingleInputForm";
+import { t } from "i18next";
+import React from "react";
 
 export interface CollectionNamerAttributes {
     callback: (name: string) => void;
@@ -26,15 +26,15 @@ export default function CollectionNamer({ attributes, ...props }: Props) {
     if (!attributes) {
         return <></>;
     }
-    const onSubmit: SingleInputFormProps['callback'] = async (
+    const onSubmit: SingleInputFormProps["callback"] = async (
         albumName,
-        setFieldError
+        setFieldError,
     ) => {
         try {
             attributes.callback(albumName);
             props.onHide();
         } catch (e) {
-            setFieldError(t('UNKNOWN_ERROR'));
+            setFieldError(t("UNKNOWN_ERROR"));
         }
     };
 
@@ -44,12 +44,13 @@ export default function CollectionNamer({ attributes, ...props }: Props) {
             onClose={props.onHide}
             attributes={{
                 title: attributes.title,
-            }}>
+            }}
+        >
             <SingleInputForm
                 callback={onSubmit}
                 fieldType="text"
                 buttonText={attributes.buttonText}
-                placeholder={t('ENTER_ALBUM_NAME')}
+                placeholder={t("ENTER_ALBUM_NAME")}
                 initialValue={attributes.autoFilledName}
                 submitButtonProps={{ sx: { mt: 1, mb: 2 } }}
                 secondaryButtonAction={props.onHide}

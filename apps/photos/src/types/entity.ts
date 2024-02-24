@@ -1,7 +1,7 @@
-import { Location } from 'types/upload';
+import { Location } from "types/upload";
 
 export enum EntityType {
-    LOCATION_TAG = 'location',
+    LOCATION_TAG = "location",
 }
 
 export interface EncryptedEntityKey {
@@ -13,7 +13,7 @@ export interface EncryptedEntityKey {
 }
 
 export interface EntityKey
-    extends Omit<EncryptedEntityKey, 'encryptedKey' | 'header'> {
+    extends Omit<EncryptedEntityKey, "encryptedKey" | "header"> {
     data: string;
 }
 
@@ -38,7 +38,7 @@ export interface LocationTagData {
 export type LocationTag = Entity<LocationTagData>;
 
 export interface Entity<T>
-    extends Omit<EncryptedEntity, 'encryptedData' | 'header'> {
+    extends Omit<EncryptedEntity, "encryptedData" | "header"> {
     data: T;
 }
 

@@ -1,5 +1,5 @@
-import { UPLOAD_STRATEGY } from 'constants/upload';
-import { ElectronFile } from 'types/upload';
+import { UPLOAD_STRATEGY } from "constants/upload";
+import { ElectronFile } from "types/upload";
 
 export interface WatchMappingSyncedFile {
     path: string;
@@ -16,7 +16,7 @@ export interface WatchMapping {
 }
 
 export interface EventQueueItem {
-    type: 'upload' | 'trash';
+    type: "upload" | "trash";
     folderPath: string;
     collectionName?: string;
     paths?: string[];

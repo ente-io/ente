@@ -1,15 +1,14 @@
-import React from 'react';
-import { SearchOption } from 'types/search';
-import { Box, Divider, Stack, Typography } from '@mui/material';
 import {
     FreeFlowText,
     SpaceBetweenFlex,
-} from '@ente/shared/components/Container';
-import CollectionCard from 'components/Collections/CollectionCard';
-import { ResultPreviewTile } from 'components/Collections/styledComponents';
-import { t } from 'i18next';
+} from "@ente/shared/components/Container";
+import { Box, Divider, Stack, Typography } from "@mui/material";
+import CollectionCard from "components/Collections/CollectionCard";
+import { ResultPreviewTile } from "components/Collections/styledComponents";
+import { t } from "i18next";
+import { SearchOption } from "types/search";
 
-import { components } from 'react-select';
+import { components } from "react-select";
 
 const { Option } = components;
 
@@ -30,16 +29,16 @@ const LabelWithInfo = ({ data }: { data: SearchOption }) => {
                     <SpaceBetweenFlex>
                         <Box mr={1}>
                             <FreeFlowText>
-                                <Typography fontWeight={'bold'}>
+                                <Typography fontWeight={"bold"}>
                                     {data.label}
                                 </Typography>
                             </FreeFlowText>
                             <Typography color="text.muted">
-                                {t('photos_count', { count: data.fileCount })}
+                                {t("photos_count", { count: data.fileCount })}
                             </Typography>
                         </Box>
 
-                        <Stack direction={'row'} spacing={1}>
+                        <Stack direction={"row"} spacing={1}>
                             {data.previewFiles.map((file) => (
                                 <CollectionCard
                                     key={file.id}

@@ -1,84 +1,84 @@
-import React, { createContext, useEffect, useRef, useState } from 'react';
-import AppNavbar from '@ente/shared/components/Navbar/app';
-import { t } from 'i18next';
+import AppNavbar from "@ente/shared/components/Navbar/app";
+import { t } from "i18next";
+import { createContext, useEffect, useRef, useState } from "react";
 
-import { useRouter } from 'next/router';
-import { Overlay } from '@ente/shared/components/Container';
-import 'bootstrap/dist/css/bootstrap.min.css';
-import 'photoswipe/dist/photoswipe.css';
-import 'styles/global.css';
-import EnteSpinner from '@ente/shared/components/EnteSpinner';
-import { logError } from '@ente/shared/sentry';
-import { getData, LS_KEYS } from '@ente/shared/storage/localStorage';
-import HTTPService from '@ente/shared/network/HTTPService';
-import Head from 'next/head';
-import { eventBus, Events } from '@ente/shared/events';
-import mlWorkManager from 'services/machineLearning/mlWorkManager';
-import {
-    getMLSearchConfig,
-    updateMLSearchConfig,
-} from 'utils/machineLearning/config';
-import LoadingBar from 'react-top-loading-bar';
-import DialogBox from '@ente/shared/components/DialogBox';
-import DialogBoxV2 from '@ente/shared/components/DialogBoxV2';
-import { ThemeProvider } from '@mui/material/styles';
-import { MessageContainer } from '@ente/shared/components/MessageContainer';
-import { CssBaseline, useMediaQuery } from '@mui/material';
-import {
-    SetDialogBoxAttributes,
-    DialogBoxAttributes,
-} from '@ente/shared/components/DialogBox/types';
-import {
-    DialogBoxAttributesV2,
-    SetDialogBoxAttributesV2,
-} from '@ente/shared/components/DialogBoxV2/types';
-import {
-    getFamilyPortalRedirectURL,
-    getRoadmapRedirectURL,
-    updateMapEnabledStatus,
-} from 'services/userService';
-import { CustomError } from '@ente/shared/error';
-import { addLogLine } from '@ente/shared/logging';
-import {
-    clearLogsIfLocalStorageLimitExceeded,
-    logStartupMessage,
-} from '@ente/shared/logging/web';
-import isElectron from 'is-electron';
-import ElectronAPIs from '@ente/shared/electron';
-import {
-    getUpdateAvailableForDownloadMessage,
-    getUpdateReadyToInstallMessage,
-} from 'utils/ui';
-import Notification from 'components/Notification';
-import {
-    NotificationAttributes,
-    SetNotificationAttributes,
-} from 'types/Notification';
-import ArrowForward from '@mui/icons-material/ArrowForward';
-import { CacheProvider } from '@emotion/react';
+import { setupI18n } from "@/ui/i18n";
+import { CacheProvider } from "@emotion/react";
 import {
     APP_TITLES,
     APPS,
     CLIENT_PACKAGE_NAMES,
-} from '@ente/shared/apps/constants';
-import exportService from 'services/export';
-import { REDIRECTS } from 'constants/redirects';
+} from "@ente/shared/apps/constants";
+import { EnteAppProps } from "@ente/shared/apps/types";
+import { Overlay } from "@ente/shared/components/Container";
+import DialogBox from "@ente/shared/components/DialogBox";
+import {
+    DialogBoxAttributes,
+    SetDialogBoxAttributes,
+} from "@ente/shared/components/DialogBox/types";
+import DialogBoxV2 from "@ente/shared/components/DialogBoxV2";
+import {
+    DialogBoxAttributesV2,
+    SetDialogBoxAttributesV2,
+} from "@ente/shared/components/DialogBoxV2/types";
+import EnteSpinner from "@ente/shared/components/EnteSpinner";
+import { MessageContainer } from "@ente/shared/components/MessageContainer";
+import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
+import ElectronAPIs from "@ente/shared/electron";
+import { AppUpdateInfo } from "@ente/shared/electron/types";
+import { CustomError } from "@ente/shared/error";
+import { eventBus, Events } from "@ente/shared/events";
+import { useLocalState } from "@ente/shared/hooks/useLocalState";
+import { addLogLine } from "@ente/shared/logging";
+import {
+    clearLogsIfLocalStorageLimitExceeded,
+    logStartupMessage,
+} from "@ente/shared/logging/web";
+import HTTPService from "@ente/shared/network/HTTPService";
+import { logError } from "@ente/shared/sentry";
+import { getData, LS_KEYS } from "@ente/shared/storage/localStorage";
 import {
     getLocalMapEnabled,
     getToken,
     setLocalMapEnabled,
-} from '@ente/shared/storage/localStorage/helpers';
-import { isExportInProgress } from 'utils/export';
-import { EnteAppProps } from '@ente/shared/apps/types';
-import createEmotionCache from '@ente/shared/themes/createEmotionCache';
-import { THEME_COLOR } from '@ente/shared/themes/constants';
-import { SetTheme } from '@ente/shared/themes/types';
-import { setupI18n } from '@/ui/i18n';
-import { useLocalState } from '@ente/shared/hooks/useLocalState';
-import { PHOTOS_PAGES as PAGES } from '@ente/shared/constants/pages';
-import { getTheme } from '@ente/shared/themes';
-import { AppUpdateInfo } from '@ente/shared/electron/types';
-import DownloadManager from 'services/download';
+} from "@ente/shared/storage/localStorage/helpers";
+import { getTheme } from "@ente/shared/themes";
+import { THEME_COLOR } from "@ente/shared/themes/constants";
+import createEmotionCache from "@ente/shared/themes/createEmotionCache";
+import { SetTheme } from "@ente/shared/themes/types";
+import ArrowForward from "@mui/icons-material/ArrowForward";
+import { CssBaseline, useMediaQuery } from "@mui/material";
+import { ThemeProvider } from "@mui/material/styles";
+import "bootstrap/dist/css/bootstrap.min.css";
+import Notification from "components/Notification";
+import { REDIRECTS } from "constants/redirects";
+import isElectron from "is-electron";
+import Head from "next/head";
+import { useRouter } from "next/router";
+import "photoswipe/dist/photoswipe.css";
+import LoadingBar from "react-top-loading-bar";
+import DownloadManager from "services/download";
+import exportService from "services/export";
+import mlWorkManager from "services/machineLearning/mlWorkManager";
+import {
+    getFamilyPortalRedirectURL,
+    getRoadmapRedirectURL,
+    updateMapEnabledStatus,
+} from "services/userService";
+import "styles/global.css";
+import {
+    NotificationAttributes,
+    SetNotificationAttributes,
+} from "types/Notification";
+import { isExportInProgress } from "utils/export";
+import {
+    getMLSearchConfig,
+    updateMLSearchConfig,
+} from "utils/machineLearning/config";
+import {
+    getUpdateAvailableForDownloadMessage,
+    getUpdateReadyToInstallMessage,
+} from "utils/ui";
 
 const redirectMap = new Map([
     [REDIRECTS.ROADMAP, getRoadmapRedirectURL],
@@ -128,7 +128,7 @@ export default function App(props: EnteAppProps) {
     const [isI18nReady, setIsI18nReady] = useState<boolean>(false);
     const [loading, setLoading] = useState(false);
     const [offline, setOffline] = useState(
-        typeof window !== 'undefined' && !window.navigator.onLine
+        typeof window !== "undefined" && !window.navigator.onLine,
     );
     const [showNavbar, setShowNavBar] = useState(false);
     const [sharedFiles, setSharedFiles] = useState<File[]>(null);
@@ -146,18 +146,18 @@ export default function App(props: EnteAppProps) {
     const [isFolderSyncRunning, setIsFolderSyncRunning] = useState(false);
     const [watchFolderView, setWatchFolderView] = useState(false);
     const [watchFolderFiles, setWatchFolderFiles] = useState<FileList>(null);
-    const isMobile = useMediaQuery('(max-width:428px)');
+    const isMobile = useMediaQuery("(max-width:428px)");
     const [notificationView, setNotificationView] = useState(false);
     const closeNotification = () => setNotificationView(false);
     const [notificationAttributes, setNotificationAttributes] =
         useState<NotificationAttributes>(null);
     const [themeColor, setThemeColor] = useLocalState(
         LS_KEYS.THEME,
-        THEME_COLOR.DARK
+        THEME_COLOR.DARK,
     );
     const [isCFProxyDisabled, setIsCFProxyDisabled] = useLocalState(
         LS_KEYS.CF_PROXY_DISABLED,
-        false
+        false,
     );
 
     useEffect(() => {
@@ -165,7 +165,7 @@ export default function App(props: EnteAppProps) {
         setupI18n().finally(() => setIsI18nReady(true));
         // set client package name in headers
         HTTPService.setHeaders({
-            'X-Client-Package': CLIENT_PACKAGE_NAMES.get(APPS.PHOTOS),
+            "X-Client-Package": CLIENT_PACKAGE_NAMES.get(APPS.PHOTOS),
         });
         // setup logging
         clearLogsIfLocalStorageLimitExceeded();
@@ -177,16 +177,18 @@ export default function App(props: EnteAppProps) {
             const showUpdateDialog = (updateInfo: AppUpdateInfo) => {
                 if (updateInfo.autoUpdatable) {
                     setDialogMessage(
-                        getUpdateReadyToInstallMessage(updateInfo)
+                        getUpdateReadyToInstallMessage(updateInfo),
                     );
                 } else {
                     setNotificationAttributes({
                         endIcon: <ArrowForward />,
-                        variant: 'secondary',
-                        message: t('UPDATE_AVAILABLE'),
+                        variant: "secondary",
+                        message: t("UPDATE_AVAILABLE"),
                         onClick: () =>
                             setDialogMessage(
-                                getUpdateAvailableForDownloadMessage(updateInfo)
+                                getUpdateAvailableForDownloadMessage(
+                                    updateInfo,
+                                ),
                             ),
                     });
                 }
@@ -205,7 +207,7 @@ export default function App(props: EnteAppProps) {
                 setMlSearchEnabled(mlSearchConfig.enabled);
                 mlWorkManager.setMlSearchEnabled(mlSearchConfig.enabled);
             } catch (e) {
-                logError(e, 'Error while loading mlSearchEnabled');
+                logError(e, "Error while loading mlSearchEnabled");
             }
         };
         loadMlSearchState();
@@ -215,7 +217,7 @@ export default function App(props: EnteAppProps) {
                 mlWorkManager.setMlSearchEnabled(false);
             });
         } catch (e) {
-            logError(e, 'Error while subscribing to logout event');
+            logError(e, "Error while subscribing to logout event");
         }
     }, []);
 
@@ -229,11 +231,11 @@ export default function App(props: EnteAppProps) {
         }
         const initExport = async () => {
             try {
-                addLogLine('init export');
+                addLogLine("init export");
                 const token = getToken();
                 if (!token) {
                     addLogLine(
-                        'User not logged in, not starting export continuous sync job'
+                        "User not logged in, not starting export continuous sync job",
                     );
                     return;
                 }
@@ -243,17 +245,17 @@ export default function App(props: EnteAppProps) {
                     return;
                 }
                 const exportRecord = await exportService.getExportRecord(
-                    exportSettings.folder
+                    exportSettings.folder,
                 );
                 if (exportSettings.continuousExport) {
                     exportService.enableContinuousExport();
                 }
                 if (isExportInProgress(exportRecord.stage)) {
-                    addLogLine('export was in progress, resuming');
+                    addLogLine("export was in progress, resuming");
                     exportService.scheduleExport();
                 }
             } catch (e) {
-                logError(e, 'init export failed');
+                logError(e, "init export failed");
             }
         };
         initExport();
@@ -262,7 +264,7 @@ export default function App(props: EnteAppProps) {
                 exportService.disableContinuousExport();
             });
         } catch (e) {
-            logError(e, 'Error while subscribing to logout event');
+            logError(e, "Error while subscribing to logout event");
         }
     }, []);
 
@@ -273,10 +275,10 @@ export default function App(props: EnteAppProps) {
     useEffect(() => {
         if (isI18nReady) {
             console.log(
-                `%c${t('CONSOLE_WARNING_STOP')}`,
-                'color: red; font-size: 52px;'
+                `%c${t("CONSOLE_WARNING_STOP")}`,
+                "color: red; font-size: 52px;",
             );
-            console.log(`%c${t('CONSOLE_WARNING_DESC')}`, 'font-size: 20px;');
+            console.log(`%c${t("CONSOLE_WARNING_DESC")}`, "font-size: 20px;");
         }
     }, [isI18nReady]);
 
@@ -284,19 +286,19 @@ export default function App(props: EnteAppProps) {
         const redirectTo = async (redirect) => {
             if (
                 redirectMap.has(redirect) &&
-                typeof redirectMap.get(redirect) === 'function'
+                typeof redirectMap.get(redirect) === "function"
             ) {
                 const redirectAction = redirectMap.get(redirect);
                 window.location.href = await redirectAction();
             } else {
-                logError(CustomError.BAD_REQUEST, 'invalid redirection', {
+                logError(CustomError.BAD_REQUEST, "invalid redirection", {
                     redirect,
                 });
             }
         };
 
         const query = new URLSearchParams(window.location.search);
-        const redirectName = query.get('redirect');
+        const redirectName = query.get("redirect");
         if (redirectName) {
             const user = getData(LS_KEYS.USER);
             if (user?.token) {
@@ -306,8 +308,8 @@ export default function App(props: EnteAppProps) {
             }
         }
 
-        router.events.on('routeChangeStart', (url: string) => {
-            const newPathname = url.split('?')[0] as PAGES;
+        router.events.on("routeChangeStart", (url: string) => {
+            const newPathname = url.split("?")[0] as PAGES;
             if (window.location.pathname !== newPathname) {
                 setLoading(true);
             }
@@ -319,21 +321,21 @@ export default function App(props: EnteAppProps) {
 
                     // https://github.com/vercel/next.js/issues/2476#issuecomment-573460710
                     // eslint-disable-next-line no-throw-literal
-                    throw 'Aborting route change, redirection in process....';
+                    throw "Aborting route change, redirection in process....";
                 }
             }
         });
 
-        router.events.on('routeChangeComplete', () => {
+        router.events.on("routeChangeComplete", () => {
             setLoading(false);
         });
 
-        window.addEventListener('online', setUserOnline);
-        window.addEventListener('offline', setUserOffline);
+        window.addEventListener("online", setUserOnline);
+        window.addEventListener("offline", setUserOffline);
 
         return () => {
-            window.removeEventListener('online', setUserOnline);
-            window.removeEventListener('offline', setUserOffline);
+            window.removeEventListener("online", setUserOnline);
+            window.removeEventListener("offline", setUserOffline);
         };
     }, [redirectName]);
 
@@ -358,7 +360,7 @@ export default function App(props: EnteAppProps) {
             setMlSearchEnabled(enabled);
             mlWorkManager.setMlSearchEnabled(enabled);
         } catch (e) {
-            logError(e, 'Error while updating mlSearchEnabled');
+            logError(e, "Error while updating mlSearchEnabled");
         }
     };
 
@@ -368,7 +370,7 @@ export default function App(props: EnteAppProps) {
             setLocalMapEnabled(enabled);
             setMapEnabled(enabled);
         } catch (e) {
-            logError(e, 'Error while updating mapEnabled');
+            logError(e, "Error while updating mapEnabled");
         }
     };
 
@@ -388,9 +390,9 @@ export default function App(props: EnteAppProps) {
 
     const somethingWentWrong = () =>
         setDialogMessage({
-            title: t('ERROR'),
-            close: { variant: 'critical' },
-            content: t('UNKNOWN_ERROR'),
+            title: t("ERROR"),
+            close: { variant: "critical" },
+            content: t("UNKNOWN_ERROR"),
         });
 
     return (
@@ -398,7 +400,7 @@ export default function App(props: EnteAppProps) {
             <Head>
                 <title>
                     {isI18nReady
-                        ? t('TITLE', { context: APPS.PHOTOS })
+                        ? t("TITLE", { context: APPS.PHOTOS })
                         : APP_TITLES.get(APPS.PHOTOS)}
                 </title>
                 <meta
@@ -411,18 +413,18 @@ export default function App(props: EnteAppProps) {
                 <CssBaseline enableColorScheme />
                 {showNavbar && <AppNavbar isMobile={isMobile} />}
                 <MessageContainer>
-                    {offline && t('OFFLINE_MSG')}
+                    {offline && t("OFFLINE_MSG")}
                 </MessageContainer>
                 {sharedFiles &&
-                    (router.pathname === '/gallery' ? (
+                    (router.pathname === "/gallery" ? (
                         <MessageContainer>
-                            {t('files_to_be_uploaded', {
+                            {t("files_to_be_uploaded", {
                                 count: sharedFiles.length,
                             })}
                         </MessageContainer>
                     ) : (
                         <MessageContainer>
-                            {t('login_to_upload_files', {
+                            {t("login_to_upload_files", {
                                 count: sharedFiles.length,
                             })}
                         </MessageContainer>
@@ -475,16 +477,18 @@ export default function App(props: EnteAppProps) {
                         updateMapEnabled,
                         isCFProxyDisabled,
                         setIsCFProxyDisabled,
-                    }}>
+                    }}
+                >
                     {(loading || !isI18nReady) && (
                         <Overlay
                             sx={(theme) => ({
-                                display: 'flex',
-                                justifyContent: 'center',
-                                alignItems: 'center',
+                                display: "flex",
+                                justifyContent: "center",
+                                alignItems: "center",
                                 zIndex: 2000,
                                 backgroundColor: theme.colors.background.base,
-                            })}>
+                            })}
+                        >
                             <EnteSpinner />
                         </Overlay>
                     )}

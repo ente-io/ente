@@ -1,10 +1,10 @@
-import { PAGES } from '@ente/accounts/constants/pages';
-import { VerticallyCentered } from '@ente/shared/components/Container';
-import EnteSpinner from '@ente/shared/components/EnteSpinner';
-import InMemoryStore, { MS_KEYS } from '@ente/shared/storage/InMemoryStore';
-import { LS_KEYS, getData, setData } from '@ente/shared/storage/localStorage';
-import { useRouter } from 'next/router';
-import { useEffect } from 'react';
+import { PAGES } from "@ente/accounts/constants/pages";
+import { VerticallyCentered } from "@ente/shared/components/Container";
+import EnteSpinner from "@ente/shared/components/EnteSpinner";
+import InMemoryStore, { MS_KEYS } from "@ente/shared/storage/InMemoryStore";
+import { LS_KEYS, getData, setData } from "@ente/shared/storage/localStorage";
+import { useRouter } from "next/router";
+import { useEffect } from "react";
 
 const PasskeysFinishPage = () => {
     const router = useRouter();
@@ -12,7 +12,7 @@ const PasskeysFinishPage = () => {
     const init = async () => {
         // get response from query params
         const searchParams = new URLSearchParams(window.location.search);
-        const response = searchParams.get('response');
+        const response = searchParams.get("response");
 
         if (!response) return;
 

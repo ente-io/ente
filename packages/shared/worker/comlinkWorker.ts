@@ -1,7 +1,7 @@
-import { expose, Remote, wrap } from 'comlink';
-import { WorkerSafeElectronClient } from '@ente/shared/electron/worker/client';
-import { addLocalLog } from '@ente/shared/logging';
-import { logError } from '../sentry';
+import { WorkerSafeElectronClient } from "@ente/shared/electron/worker/client";
+import { addLocalLog } from "@ente/shared/logging";
+import { expose, Remote, wrap } from "comlink";
+import { logError } from "../sentry";
 
 export class ComlinkWorker<T extends new () => InstanceType<T>> {
     public remote: Promise<Remote<InstanceType<T>>>;
@@ -13,7 +13,7 @@ export class ComlinkWorker<T extends new () => InstanceType<T>> {
         this.worker = worker;
 
         this.worker.onerror = (errorEvent) => {
-            logError(Error(errorEvent.message), 'Got error event from worker', {
+            logError(Error(errorEvent.message), "Got error event from worker", {
                 errorEvent: JSON.stringify(errorEvent),
                 name: this.name,
             });

@@ -1,8 +1,8 @@
-import GeneratePage from '@ente/accounts/pages/generate';
-import { useRouter } from 'next/router';
-import { AppContext } from 'pages/_app';
-import { useContext } from 'react';
-import { APPS } from '@ente/shared/apps/constants';
+import GeneratePage from "@ente/accounts/pages/generate";
+import { APPS } from "@ente/shared/apps/constants";
+import { useRouter } from "next/router";
+import { AppContext } from "pages/_app";
+import { useContext } from "react";
 
 export default function Generate() {
     const appContext = useContext(AppContext);

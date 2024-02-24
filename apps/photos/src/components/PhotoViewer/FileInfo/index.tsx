@@ -1,49 +1,49 @@
-import React, { useContext, useEffect, useMemo, useState } from 'react';
-import { RenderFileName } from './RenderFileName';
-import { RenderCreationTime } from './RenderCreationTime';
-import { Box, DialogProps, Link, Stack, styled } from '@mui/material';
-import { getEXIFLocation } from 'services/upload/exifService';
-import { RenderCaption } from './RenderCaption';
-import CopyButton from '@ente/shared/components/CodeBlock/CopyButton';
-import { formatDate, formatTime } from '@ente/shared/time/format';
-import Titlebar from 'components/Titlebar';
-import MapBox from './MapBox';
-import InfoItem from './InfoItem';
-import { FlexWrapper } from '@ente/shared/components/Container';
-import EnteSpinner from '@ente/shared/components/EnteSpinner';
-import { EnteFile } from 'types/file';
-import { Chip } from 'components/Chip';
-import LinkButton from 'components/pages/gallery/LinkButton';
-import { ExifData } from './ExifData';
-import { EnteDrawer } from 'components/EnteDrawer';
-import CameraOutlined from '@mui/icons-material/CameraOutlined';
-import LocationOnOutlined from '@mui/icons-material/LocationOnOutlined';
-import TextSnippetOutlined from '@mui/icons-material/TextSnippetOutlined';
-import FolderOutlined from '@mui/icons-material/FolderOutlined';
-import BackupOutlined from '@mui/icons-material/BackupOutlined';
+import CopyButton from "@ente/shared/components/CodeBlock/CopyButton";
+import { FlexWrapper } from "@ente/shared/components/Container";
+import EnteSpinner from "@ente/shared/components/EnteSpinner";
+import { formatDate, formatTime } from "@ente/shared/time/format";
+import BackupOutlined from "@mui/icons-material/BackupOutlined";
+import CameraOutlined from "@mui/icons-material/CameraOutlined";
+import FolderOutlined from "@mui/icons-material/FolderOutlined";
+import LocationOnOutlined from "@mui/icons-material/LocationOnOutlined";
+import TextSnippetOutlined from "@mui/icons-material/TextSnippetOutlined";
+import { Box, DialogProps, Link, Stack, styled } from "@mui/material";
+import { Chip } from "components/Chip";
+import { EnteDrawer } from "components/EnteDrawer";
+import Titlebar from "components/Titlebar";
+import LinkButton from "components/pages/gallery/LinkButton";
+import { useContext, useEffect, useMemo, useState } from "react";
+import { getEXIFLocation } from "services/upload/exifService";
+import { EnteFile } from "types/file";
+import { ExifData } from "./ExifData";
+import InfoItem from "./InfoItem";
+import MapBox from "./MapBox";
+import { RenderCaption } from "./RenderCaption";
+import { RenderCreationTime } from "./RenderCreationTime";
+import { RenderFileName } from "./RenderFileName";
 
 import {
     PhotoPeopleList,
     UnidentifiedFaces,
-} from 'components/MachineLearning/PeopleList';
+} from "components/MachineLearning/PeopleList";
 
-import { ObjectLabelList } from 'components/MachineLearning/ObjectList';
+import { ObjectLabelList } from "components/MachineLearning/ObjectList";
 
 // import MLServiceFileInfoButton from 'components/MachineLearning/MLServiceFileInfoButton';
-import { AppContext } from 'pages/_app';
-import { t } from 'i18next';
-import { GalleryContext } from 'pages/gallery';
+import { t } from "i18next";
+import { AppContext } from "pages/_app";
+import { GalleryContext } from "pages/gallery";
+import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";
 import {
     getMapDisableConfirmationDialog,
     getMapEnableConfirmationDialog,
-} from 'utils/ui';
-import { PublicCollectionGalleryContext } from 'utils/publicCollectionGallery';
+} from "utils/ui";
 
 export const FileInfoSidebar = styled((props: DialogProps) => (
     <EnteDrawer {...props} anchor="right" />
 ))({
     zIndex: 1501,
-    '& .MuiPaper-root': {
+    "& .MuiPaper-root": {
         padding: 8,
     },
 });
@@ -69,9 +69,9 @@ function BasicDeviceCamera({
 }) {
     return (
         <FlexWrapper gap={1}>
-            <Box>{parsedExifData['fNumber']}</Box>
-            <Box>{parsedExifData['exposureTime']}</Box>
-            <Box>{parsedExifData['ISO']}</Box>
+            <Box>{parsedExifData["fNumber"]}</Box>
+            <Box>{parsedExifData["exposureTime"]}</Box>
+            <Box>{parsedExifData["ISO"]}</Box>
         </FlexWrapper>
     );
 }
@@ -99,7 +99,7 @@ export function FileInfo({
     const appContext = useContext(AppContext);
     const galleryContext = useContext(GalleryContext);
     const publicCollectionGalleryContext = useContext(
-        PublicCollectionGalleryContext
+        PublicCollectionGalleryContext,
     );
 
     const [parsedExifData, setParsedExifData] = useState<Record<string, any>>();
@@ -140,35 +140,35 @@ export function FileInfo({
             return;
         }
         const parsedExifData = {};
-        if (exif['fNumber']) {
-            parsedExifData['fNumber'] = `f/${Math.ceil(exif['FNumber'])}`;
-        } else if (exif['ApertureValue'] && exif['FocalLength']) {
-            parsedExifData['fNumber'] = `f/${Math.ceil(
-                exif['FocalLength'] / exif['ApertureValue']
+        if (exif["fNumber"]) {
+            parsedExifData["fNumber"] = `f/${Math.ceil(exif["FNumber"])}`;
+        } else if (exif["ApertureValue"] && exif["FocalLength"]) {
+            parsedExifData["fNumber"] = `f/${Math.ceil(
+                exif["FocalLength"] / exif["ApertureValue"],
             )}`;
         }
-        const imageWidth = exif['ImageWidth'] ?? exif['ExifImageWidth'];
-        const imageHeight = exif['ImageHeight'] ?? exif['ExifImageHeight'];
+        const imageWidth = exif["ImageWidth"] ?? exif["ExifImageWidth"];
+        const imageHeight = exif["ImageHeight"] ?? exif["ExifImageHeight"];
         if (imageWidth && imageHeight) {
-            parsedExifData['resolution'] = `${imageWidth} x ${imageHeight}`;
+            parsedExifData["resolution"] = `${imageWidth} x ${imageHeight}`;
             const megaPixels = Math.round((imageWidth * imageHeight) / 1000000);
             if (megaPixels) {
-                parsedExifData['megaPixels'] = `${Math.round(
-                    (imageWidth * imageHeight) / 1000000
+                parsedExifData["megaPixels"] = `${Math.round(
+                    (imageWidth * imageHeight) / 1000000,
                 )}MP`;
             }
         }
-        if (exif['Make'] && exif['Model']) {
-            parsedExifData['takenOnDevice'] =
-                `${exif['Make']} ${exif['Model']}`;
+        if (exif["Make"] && exif["Model"]) {
+            parsedExifData["takenOnDevice"] =
+                `${exif["Make"]} ${exif["Model"]}`;
         }
-        if (exif['ExposureTime']) {
-            parsedExifData['exposureTime'] = `1/${
-                1 / parseFloat(exif['ExposureTime'])
+        if (exif["ExposureTime"]) {
+            parsedExifData["exposureTime"] = `1/${
+                1 / parseFloat(exif["ExposureTime"])
             }`;
         }
-        if (exif['ISO']) {
-            parsedExifData['ISO'] = `ISO${exif['ISO']}`;
+        if (exif["ISO"]) {
+            parsedExifData["ISO"] = `ISO${exif["ISO"]}`;
         }
         setParsedExifData(parsedExifData);
     }, [exif]);
@@ -185,21 +185,21 @@ export function FileInfo({
     const openEnableMapConfirmationDialog = () =>
         appContext.setDialogBoxAttributesV2(
             getMapEnableConfirmationDialog(() =>
-                appContext.updateMapEnabled(true)
-            )
+                appContext.updateMapEnabled(true),
+            ),
         );
 
     const openDisableMapConfirmationDialog = () =>
         appContext.setDialogBoxAttributesV2(
             getMapDisableConfirmationDialog(() =>
-                appContext.updateMapEnabled(false)
-            )
+                appContext.updateMapEnabled(false),
+            ),
         );
 
     return (
         <FileInfoSidebar open={showInfo} onClose={handleCloseInfo}>
-            <Titlebar onClose={handleCloseInfo} title={t('INFO')} backIsClose />
-            <Stack pt={1} pb={3} spacing={'20px'}>
+            <Titlebar onClose={handleCloseInfo} title={t("INFO")} backIsClose />
+            <Stack pt={1} pb={3} spacing={"20px"}>
                 <RenderCaption
                     shouldDisableEdits={shouldDisableEdits}
                     file={file}
@@ -219,10 +219,10 @@ export function FileInfo({
                     file={file}
                     scheduleUpdate={scheduleUpdate}
                 />
-                {parsedExifData && parsedExifData['takenOnDevice'] && (
+                {parsedExifData && parsedExifData["takenOnDevice"] && (
                     <InfoItem
                         icon={<CameraOutlined />}
-                        title={parsedExifData['takenOnDevice']}
+                        title={parsedExifData["takenOnDevice"]}
                         caption={
                             <BasicDeviceCamera
                                 parsedExifData={parsedExifData}
@@ -236,15 +236,16 @@ export function FileInfo({
                     <>
                         <InfoItem
                             icon={<LocationOnOutlined />}
-                            title={t('LOCATION')}
+                            title={t("LOCATION")}
                             caption={
                                 !appContext.mapEnabled ||
                                 publicCollectionGalleryContext.accessedThroughSharedURL ? (
                                     <Link
                                         href={getOpenStreetMapLink(location)}
                                         target="_blank"
-                                        sx={{ fontWeight: 'bold' }}>
-                                        {t('SHOW_ON_MAP')}
+                                        sx={{ fontWeight: "bold" }}
+                                    >
+                                        {t("SHOW_ON_MAP")}
                                     </Link>
                                 ) : (
                                     <LinkButton
@@ -252,11 +253,12 @@ export function FileInfo({
                                             openDisableMapConfirmationDialog
                                         }
                                         sx={{
-                                            textDecoration: 'none',
-                                            color: 'text.muted',
-                                            fontWeight: 'bold',
-                                        }}>
-                                        {t('DISABLE_MAP')}
+                                            textDecoration: "none",
+                                            color: "text.muted",
+                                            fontWeight: "bold",
+                                        }}
+                                    >
+                                        {t("DISABLE_MAP")}
                                     </LinkButton>
                                 )
                             }
@@ -281,22 +283,23 @@ export function FileInfo({
                 )}
                 <InfoItem
                     icon={<TextSnippetOutlined />}
-                    title={t('DETAILS')}
+                    title={t("DETAILS")}
                     caption={
-                        typeof exif === 'undefined' ? (
+                        typeof exif === "undefined" ? (
                             <EnteSpinner size={11.33} />
                         ) : exif !== null ? (
                             <LinkButton
                                 onClick={openExif}
                                 sx={{
-                                    textDecoration: 'none',
-                                    color: 'text.muted',
-                                    fontWeight: 'bold',
-                                }}>
-                                {t('VIEW_EXIF')}
+                                    textDecoration: "none",
+                                    color: "text.muted",
+                                    fontWeight: "bold",
+                                }}
+                            >
+                                {t("VIEW_EXIF")}
                             </LinkButton>
                         ) : (
-                            t('NO_EXIF')
+                            t("NO_EXIF")
                         )
                     }
                     hideEditOption
@@ -310,22 +313,24 @@ export function FileInfo({
                 {showCollectionChips && (
                     <InfoItem icon={<FolderOutlined />} hideEditOption>
                         <Box
-                            display={'flex'}
+                            display={"flex"}
                             gap={1}
                             flexWrap="wrap"
-                            justifyContent={'flex-start'}
-                            alignItems={'flex-start'}>
+                            justifyContent={"flex-start"}
+                            alignItems={"flex-start"}
+                        >
                             {fileToCollectionsMap
                                 ?.get(file.id)
                                 ?.filter((collectionID) =>
-                                    collectionNameMap.has(collectionID)
+                                    collectionNameMap.has(collectionID),
                                 )
                                 ?.map((collectionID) => (
                                     <Chip
                                         key={collectionID}
                                         onClick={() =>
                                             onCollectionChipClick(collectionID)
-                                        }>
+                                        }
+                                    >
                                         {collectionNameMap.get(collectionID)}
                                     </Chip>
                                 ))}

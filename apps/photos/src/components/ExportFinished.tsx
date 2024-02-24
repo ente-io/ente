@@ -1,18 +1,18 @@
+import { SpaceBetweenFlex } from "@ente/shared/components/Container";
+import { formatDateTime } from "@ente/shared/time/format";
 import {
     Button,
     DialogActions,
     DialogContent,
     Stack,
     Typography,
-} from '@mui/material';
-import { t } from 'i18next';
-import { formatDateTime } from '@ente/shared/time/format';
-import { SpaceBetweenFlex } from '@ente/shared/components/Container';
-import { formatNumber } from 'utils/number/format';
-import ExportPendingList from './ExportPendingList';
-import { useState } from 'react';
-import LinkButton from './pages/gallery/LinkButton';
-import { EnteFile } from 'types/file';
+} from "@mui/material";
+import { t } from "i18next";
+import { useState } from "react";
+import { EnteFile } from "types/file";
+import { formatNumber } from "utils/number/format";
+import ExportPendingList from "./ExportPendingList";
+import LinkButton from "./pages/gallery/LinkButton";
 
 interface Props {
     pendingExports: EnteFile[];
@@ -37,9 +37,9 @@ export default function ExportFinished(props: Props) {
         <>
             <DialogContent>
                 <Stack pr={2}>
-                    <SpaceBetweenFlex minHeight={'48px'}>
-                        <Typography color={'text.muted'}>
-                            {t('PENDING_ITEMS')}
+                    <SpaceBetweenFlex minHeight={"48px"}>
+                        <Typography color={"text.muted"}>
+                            {t("PENDING_ITEMS")}
                         </Typography>
                         {props.pendingExports.length ? (
                             <LinkButton onClick={openPendingFileList}>
@@ -51,27 +51,28 @@ export default function ExportFinished(props: Props) {
                             </Typography>
                         )}
                     </SpaceBetweenFlex>
-                    <SpaceBetweenFlex minHeight={'48px'}>
+                    <SpaceBetweenFlex minHeight={"48px"}>
                         <Typography color="text.muted">
-                            {t('LAST_EXPORT_TIME')}
+                            {t("LAST_EXPORT_TIME")}
                         </Typography>
                         <Typography>
                             {props.lastExportTime
                                 ? formatDateTime(props.lastExportTime)
-                                : t('NEVER')}
+                                : t("NEVER")}
                         </Typography>
                     </SpaceBetweenFlex>
                 </Stack>
             </DialogContent>
             <DialogActions>
                 <Button color="secondary" size="large" onClick={props.onHide}>
-                    {t('CLOSE')}
+                    {t("CLOSE")}
                 </Button>
                 <Button
                     size="large"
                     color="primary"
-                    onClick={props.startExport}>
-                    {t('EXPORT_AGAIN')}
+                    onClick={props.startExport}
+                >
+                    {t("EXPORT_AGAIN")}
                 </Button>
             </DialogActions>
             <ExportPendingList

@@ -1,9 +1,9 @@
-import { Dispatch, SetStateAction } from 'react';
-import MenuSectionTitle from 'components/Menu/MenuSectionTitle';
-import { Box, Slider } from '@mui/material';
-import { t } from 'i18next';
-import { EnteMenuItem } from 'components/Menu/EnteMenuItem';
-import { MenuItemGroup } from 'components/Menu/MenuItemGroup';
+import { Box, Slider } from "@mui/material";
+import { EnteMenuItem } from "components/Menu/EnteMenuItem";
+import { MenuItemGroup } from "components/Menu/MenuItemGroup";
+import MenuSectionTitle from "components/Menu/MenuSectionTitle";
+import { t } from "i18next";
+import { Dispatch, SetStateAction } from "react";
 
 interface IProps {
     brightness: number;
@@ -21,8 +21,8 @@ interface IProps {
 const ColoursMenu = (props: IProps) => {
     return (
         <>
-            <Box px={'8px'}>
-                <MenuSectionTitle title={t('BRIGHTNESS')} />
+            <Box px={"8px"}>
+                <MenuSectionTitle title={t("BRIGHTNESS")} />
                 <Slider
                     min={0}
                     max={200}
@@ -33,14 +33,14 @@ const ColoursMenu = (props: IProps) => {
                     marks={[
                         {
                             value: 100,
-                            label: '100%',
+                            label: "100%",
                         },
                     ]}
                     onChange={(_, value) => {
                         props.setBrightness(value as number);
                     }}
                 />
-                <MenuSectionTitle title={t('CONTRAST')} />
+                <MenuSectionTitle title={t("CONTRAST")} />
                 <Slider
                     min={0}
                     max={200}
@@ -54,11 +54,11 @@ const ColoursMenu = (props: IProps) => {
                     marks={[
                         {
                             value: 100,
-                            label: '100%',
+                            label: "100%",
                         },
                     ]}
                 />
-                <MenuSectionTitle title={t('BLUR')} />
+                <MenuSectionTitle title={t("BLUR")} />
                 <Slider
                     min={0}
                     max={10}
@@ -70,7 +70,7 @@ const ColoursMenu = (props: IProps) => {
                         props.setBlur(value as number);
                     }}
                 />
-                <MenuSectionTitle title={t('SATURATION')} />
+                <MenuSectionTitle title={t("SATURATION")} />
                 <Slider
                     min={0}
                     max={200}
@@ -84,19 +84,20 @@ const ColoursMenu = (props: IProps) => {
                     marks={[
                         {
                             value: 100,
-                            label: '100%',
+                            label: "100%",
                         },
                     ]}
                 />
             </Box>
             <MenuItemGroup
                 style={{
-                    marginBottom: '0.5rem',
-                }}>
+                    marginBottom: "0.5rem",
+                }}
+            >
                 <EnteMenuItem
                     variant="toggle"
                     checked={props.invert}
-                    label={t('INVERT_COLORS')}
+                    label={t("INVERT_COLORS")}
                     onClick={() => {
                         props.setInvert(!props.invert);
                     }}

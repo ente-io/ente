@@ -1,9 +1,9 @@
-import { MlFileData, Face } from 'types/machineLearning';
-import { addLogLine } from '@ente/shared/logging';
-import mlIDbStorage from 'utils/storage/mlIDbStorage';
-import { mlFilesStore } from 'utils/storage/mlStorage';
-import { getFaceId } from '.';
-import { storeFaceCropForBlob } from './faceCrop';
+import { addLogLine } from "@ente/shared/logging";
+import { Face, MlFileData } from "types/machineLearning";
+import mlIDbStorage from "utils/storage/mlIDbStorage";
+import { mlFilesStore } from "utils/storage/mlStorage";
+import { getFaceId } from ".";
+import { storeFaceCropForBlob } from "./faceCrop";
 
 // TODO: for migrating existing data, to be removed
 export async function migrateExistingFiles() {
@@ -14,14 +14,14 @@ export async function migrateExistingFiles() {
             existingFiles.push(mlFileData);
         }
     });
-    addLogLine('existing files: ', existingFiles.length);
+    addLogLine("existing files: ", existingFiles.length);
 
     try {
         for (const file of existingFiles) {
             await mlIDbStorage.putFile(file);
         }
-        await mlIDbStorage.setIndexVersion('files', 1);
-        addLogLine('migrateExistingFiles done');
+        await mlIDbStorage.setIndexVersion("files", 1);
+        addLogLine("migrateExistingFiles done");
     } catch (e) {
         console.error(e);
     }
@@ -29,25 +29,25 @@ export async function migrateExistingFiles() {
 
 export async function migrateFaceCropsToCache() {
     const startTime = Date.now();
-    addLogLine('migrateFaceCropsToCache started');
+    addLogLine("migrateFaceCropsToCache started");
     const allFiles = await mlIDbStorage.getAllFiles();
     const allFilesWithFaces = allFiles.filter(
-        (f) => f.faces && f.faces.length > 0
+        (f) => f.faces && f.faces.length > 0,
     );
     const updatedFacesMap = new Map<number, Array<Face>>();
 
     for (const file of allFilesWithFaces) {
         let updated = false;
         for (const face of file.faces) {
-            if (!face['id']) {
-                const faceCropBlob = face.crop['image'];
+            if (!face["id"]) {
+                const faceCropBlob = face.crop["image"];
                 const faceId = getFaceId(face, file.imageDimensions);
                 face.crop = await storeFaceCropForBlob(
                     faceId,
                     face.crop.imageBox,
-                    faceCropBlob
+                    faceCropBlob,
                 );
-                face['id'] = faceId;
+                face["id"] = faceId;
                 updated = true;
             }
         }
@@ -57,21 +57,21 @@ export async function migrateFaceCropsToCache() {
     }
 
     if (updatedFacesMap.size > 0) {
-        addLogLine('updating face crops: ', updatedFacesMap.size);
+        addLogLine("updating face crops: ", updatedFacesMap.size);
         await mlIDbStorage.updateFaces(updatedFacesMap);
     } else {
-        addLogLine('not updating face crops: ', updatedFacesMap.size);
+        addLogLine("not updating face crops: ", updatedFacesMap.size);
     }
-    addLogLine('migrateFaceCropsToCache', Date.now() - startTime, 'ms');
+    addLogLine("migrateFaceCropsToCache", Date.now() - startTime, "ms");
 }
 
 export async function migrateFaceInterfaceUpdate() {
     const startTime = Date.now();
-    addLogLine('migrateFaceInterfaceUpdate started');
+    addLogLine("migrateFaceInterfaceUpdate started");
 
-    const faceSchemaVersion = await mlIDbStorage.getIndexVersion('faceSchema');
+    const faceSchemaVersion = await mlIDbStorage.getIndexVersion("faceSchema");
     if (faceSchemaVersion) {
-        addLogLine('not running migrateFaceInterfaceUpdate');
+        addLogLine("not running migrateFaceInterfaceUpdate");
         return;
     }
 
@@ -80,20 +80,20 @@ export async function migrateFaceInterfaceUpdate() {
     const updatedFiles = allFiles.map((file) => {
         const updatedFaces = file.faces?.map((f) => {
             const updatedFace = {
-                id: f['faceId'],
+                id: f["faceId"],
                 fileId: f.fileId,
 
                 detection: {
-                    box: f['box'],
-                    landmarks: f['landmarks'],
-                    probability: f['probability'],
+                    box: f["box"],
+                    landmarks: f["landmarks"],
+                    probability: f["probability"],
                 },
-                crop: f['faceCrop'],
+                crop: f["faceCrop"],
                 alignment: {
-                    affineMatrix: f['affineMatrix'],
-                    center: f['center'],
-                    rotation: f['rotation'],
-                    size: f['size'],
+                    affineMatrix: f["affineMatrix"],
+                    center: f["center"],
+                    rotation: f["rotation"],
+                    size: f["size"],
                 },
                 embedding: Float32Array.from(f.embedding),
 
@@ -107,13 +107,13 @@ export async function migrateFaceInterfaceUpdate() {
         const updated: MlFileData = {
             fileId: file.fileId,
 
-            faceDetectionMethod: file['detectionMethod'],
+            faceDetectionMethod: file["detectionMethod"],
             faceCropMethod: {
-                value: 'ArcFace',
+                value: "ArcFace",
                 version: 1,
             },
-            faceAlignmentMethod: file['alignmentMethod'],
-            faceEmbeddingMethod: file['embeddingMethod'],
+            faceAlignmentMethod: file["alignmentMethod"],
+            faceEmbeddingMethod: file["embeddingMethod"],
 
             faces: updatedFaces,
 
@@ -127,10 +127,10 @@ export async function migrateFaceInterfaceUpdate() {
         return updated;
     });
 
-    addLogLine('migrateFaceInterfaceUpdate updating: ', updatedFiles.length);
+    addLogLine("migrateFaceInterfaceUpdate updating: ", updatedFiles.length);
     await mlIDbStorage.putAllFilesInTx(updatedFiles);
 
-    await mlIDbStorage.setIndexVersion('faceSchema', 1);
-    addLogLine('migrateFaceInterfaceUpdate done');
-    addLogLine('migrateFaceInterfaceUpdate', Date.now() - startTime, 'ms');
+    await mlIDbStorage.setIndexVersion("faceSchema", 1);
+    addLogLine("migrateFaceInterfaceUpdate done");
+    addLogLine("migrateFaceInterfaceUpdate", Date.now() - startTime, "ms");
 }

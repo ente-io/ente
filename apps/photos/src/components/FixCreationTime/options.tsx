@@ -1,9 +1,9 @@
-import React, { ChangeEvent } from 'react';
-import { FIX_OPTIONS } from '.';
-import { Form } from 'react-bootstrap';
-import EnteDateTimePicker from 'components/EnteDateTimePicker';
-import { Row, Value } from '@ente/shared/components/Container';
-import { t } from 'i18next';
+import { Row, Value } from "@ente/shared/components/Container";
+import EnteDateTimePicker from "components/EnteDateTimePicker";
+import { t } from "i18next";
+import { ChangeEvent } from "react";
+import { Form } from "react-bootstrap";
+import { FIX_OPTIONS } from ".";
 
 const Option = ({
     value,
@@ -19,9 +19,10 @@ const Option = ({
     <Form.Check
         name="group1"
         style={{
-            margin: '5px 0',
-            color: value !== Number(selected) ? '#aaa' : '#fff',
-        }}>
+            margin: "5px 0",
+            color: value !== Number(selected) ? "#aaa" : "#fff",
+        }}
+    >
         <Form.Check.Input
             id={value.toString()}
             type="radio"
@@ -30,8 +31,9 @@ const Option = ({
             onChange={onChange}
         />
         <Form.Check.Label
-            style={{ cursor: 'pointer' }}
-            htmlFor={value.toString()}>
+            style={{ cursor: "pointer" }}
+            htmlFor={value.toString()}
+        >
             {label}
         </Form.Check.Label>
     </Form.Check>
@@ -40,36 +42,36 @@ const Option = ({
 export default function FixCreationTimeOptions({ handleChange, values }) {
     return (
         <Form noValidate>
-            <Row style={{ margin: '0' }}>
+            <Row style={{ margin: "0" }}>
                 <Option
                     value={FIX_OPTIONS.DATE_TIME_ORIGINAL}
-                    onChange={handleChange('option')}
-                    label={t('DATE_TIME_ORIGINAL')}
+                    onChange={handleChange("option")}
+                    label={t("DATE_TIME_ORIGINAL")}
                     selected={Number(values.option)}
                 />
             </Row>
-            <Row style={{ margin: '0' }}>
+            <Row style={{ margin: "0" }}>
                 <Option
                     value={FIX_OPTIONS.DATE_TIME_DIGITIZED}
-                    onChange={handleChange('option')}
-                    label={t('DATE_TIME_DIGITIZED')}
+                    onChange={handleChange("option")}
+                    label={t("DATE_TIME_DIGITIZED")}
                     selected={Number(values.option)}
                 />
             </Row>
-            <Row style={{ margin: '0' }}>
+            <Row style={{ margin: "0" }}>
                 <Option
                     value={FIX_OPTIONS.METADATA_DATE}
-                    onChange={handleChange('option')}
-                    label={t('METADATA_DATE')}
+                    onChange={handleChange("option")}
+                    label={t("METADATA_DATE")}
                     selected={Number(values.option)}
                 />
             </Row>
-            <Row style={{ margin: '0' }}>
+            <Row style={{ margin: "0" }}>
                 <Value width="50%">
                     <Option
                         value={FIX_OPTIONS.CUSTOM_TIME}
-                        onChange={handleChange('option')}
-                        label={t('CUSTOM_TIME')}
+                        onChange={handleChange("option")}
+                        label={t("CUSTOM_TIME")}
                         selected={Number(values.option)}
                     />
                 </Value>
@@ -77,7 +79,7 @@ export default function FixCreationTimeOptions({ handleChange, values }) {
                     <Value width="40%">
                         <EnteDateTimePicker
                             onSubmit={(x: Date) =>
-                                handleChange('customTime')(x.toUTCString())
+                                handleChange("customTime")(x.toUTCString())
                             }
                         />
                     </Value>

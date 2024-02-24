@@ -1,5 +1,5 @@
-import { addLocalLog } from '@ente/shared/logging';
-import { Remote, wrap } from 'comlink';
+import { addLocalLog } from "@ente/shared/logging";
+import { Remote, wrap } from "comlink";
 // import { WorkerElectronCacheStorageClient } from 'services/workerElectronCache/client';
 
 export class ComlinkWorker<T extends new () => InstanceType<T>> {
@@ -12,7 +12,7 @@ export class ComlinkWorker<T extends new () => InstanceType<T>> {
         this.worker = worker;
 
         this.worker.onerror = (errorEvent) => {
-            console.error('Got error event from worker', errorEvent);
+            console.error("Got error event from worker", errorEvent);
         };
         addLocalLog(() => `Initiated ${this.name}`);
         const comlink = wrap<T>(this.worker);

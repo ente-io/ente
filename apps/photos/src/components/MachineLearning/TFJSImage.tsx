@@ -1,6 +1,6 @@
-import React, { useEffect, useRef } from 'react';
-import * as tf from '@tensorflow/tfjs-core';
-import { FaceImage } from 'types/machineLearning';
+import * as tf from "@tensorflow/tfjs-core";
+import { useEffect, useRef } from "react";
+import { FaceImage } from "types/machineLearning";
 
 interface FaceImageProps {
     faceImage: FaceImage;
@@ -33,7 +33,7 @@ export default function TFJSImage(props: FaceImageProps) {
             ref={canvasRef}
             width={112}
             height={112}
-            style={{ display: 'inline' }}
+            style={{ display: "inline" }}
         />
     );
 }

@@ -1,11 +1,11 @@
-import { MenuItem, ButtonProps, Typography, Box } from '@mui/material';
-import { FluidContainer } from '@ente/shared/components/Container';
-import { OverflowMenuContext } from './context';
-import React, { useContext } from 'react';
+import { FluidContainer } from "@ente/shared/components/Container";
+import { Box, ButtonProps, MenuItem, Typography } from "@mui/material";
+import React, { useContext } from "react";
+import { OverflowMenuContext } from "./context";
 
 interface Iprops {
     onClick: () => void;
-    color?: ButtonProps['color'];
+    color?: ButtonProps["color"];
     startIcon?: React.ReactNode;
     endIcon?: React.ReactNode;
     keepOpenAfterClick?: boolean;
@@ -13,7 +13,7 @@ interface Iprops {
 }
 export function OverflowMenuOption({
     onClick,
-    color = 'primary',
+    color = "primary",
     startIcon,
     endIcon,
     keepOpenAfterClick,
@@ -34,17 +34,19 @@ export function OverflowMenuOption({
                 minWidth: 220,
                 color: (theme) => theme.palette[color].main,
                 padding: 1.5,
-                '& .MuiSvgIcon-root': {
-                    fontSize: '20px',
+                "& .MuiSvgIcon-root": {
+                    fontSize: "20px",
                 },
-            }}>
+            }}
+        >
             <FluidContainer>
                 {startIcon && (
                     <Box
                         sx={{
                             padding: 0,
                             marginRight: 1.5,
-                        }}>
+                        }}
+                    >
                         {startIcon}
                     </Box>
                 )}
@@ -55,7 +57,8 @@ export function OverflowMenuOption({
                     sx={{
                         padding: 0,
                         marginLeft: 1,
-                    }}>
+                    }}
+                >
                     {endIcon}
                 </Box>
             )}

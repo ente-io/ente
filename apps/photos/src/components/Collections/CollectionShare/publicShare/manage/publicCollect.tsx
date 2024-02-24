@@ -1,10 +1,9 @@
-import { Stack } from '@mui/material';
-import { EnteMenuItem } from 'components/Menu/EnteMenuItem';
-import React from 'react';
-import { t } from 'i18next';
-import { PublicURL, Collection, UpdatePublicURL } from 'types/collection';
-import MenuSectionTitle from 'components/Menu/MenuSectionTitle';
-import { MenuItemGroup } from 'components/Menu/MenuItemGroup';
+import { Stack } from "@mui/material";
+import { EnteMenuItem } from "components/Menu/EnteMenuItem";
+import { MenuItemGroup } from "components/Menu/MenuItemGroup";
+import MenuSectionTitle from "components/Menu/MenuSectionTitle";
+import { t } from "i18next";
+import { Collection, PublicURL, UpdatePublicURL } from "types/collection";
 
 interface Iprops {
     publicShareProp: PublicURL;
@@ -31,10 +30,10 @@ export function ManagePublicCollect({
                     onClick={handleFileDownloadSetting}
                     variant="toggle"
                     checked={publicShareProp?.enableCollect}
-                    label={t('PUBLIC_COLLECT')}
+                    label={t("PUBLIC_COLLECT")}
                 />
             </MenuItemGroup>
-            <MenuSectionTitle title={t('PUBLIC_COLLECT_SUBTEXT')} />
+            <MenuSectionTitle title={t("PUBLIC_COLLECT_SUBTEXT")} />
         </Stack>
     );
 }

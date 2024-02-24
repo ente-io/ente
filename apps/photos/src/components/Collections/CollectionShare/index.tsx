@@ -1,12 +1,12 @@
-import { Collection, CollectionSummary } from 'types/collection';
-import { EnteDrawer } from 'components/EnteDrawer';
-import PublicShare from './publicShare';
-import { t } from 'i18next';
-import { DialogProps, Stack } from '@mui/material';
-import Titlebar from 'components/Titlebar';
-import EmailShare from './emailShare';
-import { CollectionSummaryType } from 'constants/collection';
-import SharingDetails from './sharingDetails';
+import { DialogProps, Stack } from "@mui/material";
+import { EnteDrawer } from "components/EnteDrawer";
+import Titlebar from "components/Titlebar";
+import { CollectionSummaryType } from "constants/collection";
+import { t } from "i18next";
+import { Collection, CollectionSummary } from "types/collection";
+import EmailShare from "./emailShare";
+import PublicShare from "./publicShare";
+import SharingDetails from "./sharingDetails";
 
 interface Props {
     open: boolean;
@@ -19,8 +19,8 @@ function CollectionShare({ collectionSummary, ...props }: Props) {
     const handleRootClose = () => {
         props.onClose();
     };
-    const handleDrawerClose: DialogProps['onClose'] = (_, reason) => {
-        if (reason === 'backdropClick') {
+    const handleDrawerClose: DialogProps["onClose"] = (_, reason) => {
+        if (reason === "backdropClick") {
             handleRootClose();
         } else {
             props.onClose();
@@ -38,23 +38,24 @@ function CollectionShare({ collectionSummary, ...props }: Props) {
             onClose={handleDrawerClose}
             slotProps={{
                 backdrop: {
-                    sx: { '&&&': { backgroundColor: 'transparent' } },
+                    sx: { "&&&": { backgroundColor: "transparent" } },
                 },
-            }}>
-            <Stack spacing={'4px'} py={'12px'}>
+            }}
+        >
+            <Stack spacing={"4px"} py={"12px"}>
                 <Titlebar
                     onClose={props.onClose}
                     title={
                         type ===
                             CollectionSummaryType.incomingShareCollaborator ||
                         type === CollectionSummaryType.incomingShareViewer
-                            ? t('SHARING_DETAILS')
-                            : t('SHARE_COLLECTION')
+                            ? t("SHARING_DETAILS")
+                            : t("SHARE_COLLECTION")
                     }
                     onRootClose={handleRootClose}
                     caption={props.collection.name}
                 />
-                <Stack py={'20px'} px={'8px'} gap={'24px'}>
+                <Stack py={"20px"} px={"8px"} gap={"24px"}>
                     {type === CollectionSummaryType.incomingShareCollaborator ||
                     type === CollectionSummaryType.incomingShareViewer ? (
                         <SharingDetails

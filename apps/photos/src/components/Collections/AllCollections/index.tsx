@@ -1,14 +1,14 @@
-import React, { useContext } from 'react';
-import Divider from '@mui/material/Divider';
-import { COLLECTION_LIST_SORT_BY } from 'constants/collection';
+import Divider from "@mui/material/Divider";
 import {
-    Transition,
     AllCollectionDialog,
-} from 'components/Collections/AllCollections/dialog';
-import AllCollectionsHeader from './header';
-import { CollectionSummary } from 'types/collection';
-import AllCollectionContent from './content';
-import { AppContext } from 'pages/_app';
+    Transition,
+} from "components/Collections/AllCollections/dialog";
+import { COLLECTION_LIST_SORT_BY } from "constants/collection";
+import { AppContext } from "pages/_app";
+import { useContext } from "react";
+import { CollectionSummary } from "types/collection";
+import AllCollectionContent from "./content";
+import AllCollectionsHeader from "./header";
 
 interface Iprops {
     open: boolean;
@@ -20,7 +20,7 @@ interface Iprops {
     isInHiddenSection: boolean;
 }
 
-const LeftSlideTransition = Transition('up');
+const LeftSlideTransition = Transition("up");
 
 export default function AllCollections(props: Iprops) {
     const {
@@ -45,7 +45,8 @@ export default function AllCollections(props: Iprops) {
             TransitionComponent={LeftSlideTransition}
             onClose={onClose}
             open={open}
-            fullScreen={isMobile}>
+            fullScreen={isMobile}
+        >
             <AllCollectionsHeader
                 isInHiddenSection={isInHiddenSection}
                 onClose={onClose}

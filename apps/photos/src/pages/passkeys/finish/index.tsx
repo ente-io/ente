@@ -1,4 +1,4 @@
-import PasskeysFinishPage from '@ente/accounts/pages/passkeys/finish';
+import PasskeysFinishPage from "@ente/accounts/pages/passkeys/finish";
 
 const PasskeysFinish = () => {
     return (

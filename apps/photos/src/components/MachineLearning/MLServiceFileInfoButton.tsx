@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
-import { Button, Spinner } from 'react-bootstrap';
-import { EnteFile } from 'types/file';
-import { getToken, getUserID } from '@ente/shared/storage/localStorage/helpers';
-import mlService from '../../services/machineLearning/machineLearningService';
+import { getToken, getUserID } from "@ente/shared/storage/localStorage/helpers";
+import { useState } from "react";
+import { Button, Spinner } from "react-bootstrap";
+import { EnteFile } from "types/file";
+import mlService from "../../services/machineLearning/machineLearningService";
 
 function MLServiceFileInfoButton({
     file,
@@ -30,22 +30,24 @@ function MLServiceFileInfoButton({
     return (
         <div
             style={{
-                marginTop: '18px',
-            }}>
+                marginTop: "18px",
+            }}
+        >
             <Button
                 onClick={runMLService}
                 disabled={mlServiceRunning}
-                variant={mlServiceRunning ? 'secondary' : 'primary'}>
+                variant={mlServiceRunning ? "secondary" : "primary"}
+            >
                 {!mlServiceRunning ? (
-                    'Run ML Service'
+                    "Run ML Service"
                 ) : (
                     <>
-                        ML Service Running{' '}
+                        ML Service Running{" "}
                         <Spinner
                             animation="border"
                             size="sm"
                             style={{
-                                marginLeft: '5px',
+                                marginLeft: "5px",
                             }}
                         />
                     </>

@@ -1,22 +1,22 @@
-import React, { useEffect, useRef, useState } from 'react';
-import '@tensorflow/tfjs-backend-webgl';
-import '@tensorflow/tfjs-backend-cpu';
-import arcfaceAlignmentService from 'services/machineLearning/arcfaceAlignmentService';
-import arcfaceCropService from 'services/machineLearning/arcfaceCropService';
-import blazeFaceDetectionService from 'services/machineLearning/blazeFaceDetectionService';
-import { AlignedFace, FaceCrop, ObjectDetection } from 'types/machineLearning';
-import { getMLSyncConfig } from 'utils/machineLearning/config';
+import { addLogLine } from "@ente/shared/logging";
+import "@tensorflow/tfjs-backend-cpu";
+import "@tensorflow/tfjs-backend-webgl";
+import { DEFAULT_ML_SYNC_CONFIG } from "constants/mlConfig";
+import { useEffect, useRef, useState } from "react";
+import arcfaceAlignmentService from "services/machineLearning/arcfaceAlignmentService";
+import arcfaceCropService from "services/machineLearning/arcfaceCropService";
+import blazeFaceDetectionService from "services/machineLearning/blazeFaceDetectionService";
+import imageSceneService from "services/machineLearning/imageSceneService";
+import ssdMobileNetV2Service from "services/machineLearning/ssdMobileNetV2Service";
+import { AlignedFace, FaceCrop, ObjectDetection } from "types/machineLearning";
+import { getMLSyncConfig } from "utils/machineLearning/config";
 import {
     getAlignedFaceBox,
     ibExtractFaceImage,
     ibExtractFaceImageUsingTransform,
-} from 'utils/machineLearning/faceAlign';
-import { ibExtractFaceImageFromCrop } from 'utils/machineLearning/faceCrop';
-import { FaceCropsRow, FaceImagesRow, ImageBitmapView } from './ImageViews';
-import ssdMobileNetV2Service from 'services/machineLearning/ssdMobileNetV2Service';
-import { DEFAULT_ML_SYNC_CONFIG } from 'constants/mlConfig';
-import imageSceneService from 'services/machineLearning/imageSceneService';
-import { addLogLine } from '@ente/shared/logging';
+} from "utils/machineLearning/faceAlign";
+import { ibExtractFaceImageFromCrop } from "utils/machineLearning/faceCrop";
+import { FaceCropsRow, FaceImagesRow, ImageBitmapView } from "./ImageViews";
 
 interface MLFileDebugViewProps {
     file: File;
@@ -24,34 +24,34 @@ interface MLFileDebugViewProps {
 
 function drawFaceDetection(face: AlignedFace, ctx: CanvasRenderingContext2D) {
     const pointSize = Math.ceil(
-        Math.max(ctx.canvas.width / 512, face.detection.box.width / 32)
+        Math.max(ctx.canvas.width / 512, face.detection.box.width / 32),
     );
 
     ctx.save();
-    ctx.strokeStyle = 'rgba(255, 0, 0, 0.8)';
+    ctx.strokeStyle = "rgba(255, 0, 0, 0.8)";
     ctx.lineWidth = pointSize;
     ctx.strokeRect(
         face.detection.box.x,
         face.detection.box.y,
         face.detection.box.width,
-        face.detection.box.height
+        face.detection.box.height,
     );
     ctx.restore();
 
     ctx.save();
-    ctx.strokeStyle = 'rgba(0, 255, 0, 0.8)';
+    ctx.strokeStyle = "rgba(0, 255, 0, 0.8)";
     ctx.lineWidth = Math.round(pointSize * 1.5);
     const alignedBox = getAlignedFaceBox(face.alignment);
     ctx.strokeRect(
         alignedBox.x,
         alignedBox.y,
         alignedBox.width,
-        alignedBox.height
+        alignedBox.height,
     );
     ctx.restore();
 
     ctx.save();
-    ctx.fillStyle = 'rgba(0, 0, 255, 0.8)';
+    ctx.fillStyle = "rgba(0, 0, 255, 0.8)";
     face.detection.landmarks.forEach((l) => {
         ctx.beginPath();
         ctx.arc(l.x, l.y, pointSize, 0, Math.PI * 2, true);
@@ -61,18 +61,18 @@ function drawFaceDetection(face: AlignedFace, ctx: CanvasRenderingContext2D) {
 }
 
 function drawBbox(object: ObjectDetection, ctx: CanvasRenderingContext2D) {
-    ctx.font = '100px Arial';
+    ctx.font = "100px Arial";
     ctx.save();
     ctx.restore();
     ctx.rect(...object.bbox);
     ctx.lineWidth = 10;
-    ctx.strokeStyle = 'green';
-    ctx.fillStyle = 'green';
+    ctx.strokeStyle = "green";
+    ctx.fillStyle = "green";
     ctx.stroke();
     ctx.fillText(
-        object.score.toFixed(3) + ' ' + object.class,
+        object.score.toFixed(3) + " " + object.class,
         object.bbox[0],
-        object.bbox[1] > 10 ? object.bbox[1] - 5 : 10
+        object.bbox[1] > 10 ? object.bbox[1] - 5 : 10,
     );
 }
 
@@ -93,28 +93,28 @@ export default function MLFileDebugView(props: MLFileDebugViewProps) {
             const imageBitmap = await createImageBitmap(props.file);
             const faceDetections =
                 await blazeFaceDetectionService.detectFaces(imageBitmap);
-            addLogLine('detectedFaces: ', faceDetections.length);
+            addLogLine("detectedFaces: ", faceDetections.length);
 
             const objectDetections = await ssdMobileNetV2Service.detectObjects(
                 imageBitmap,
                 DEFAULT_ML_SYNC_CONFIG.objectDetection.maxNumBoxes,
-                DEFAULT_ML_SYNC_CONFIG.objectDetection.minScore
+                DEFAULT_ML_SYNC_CONFIG.objectDetection.minScore,
             );
-            addLogLine('detectedObjects: ', JSON.stringify(objectDetections));
+            addLogLine("detectedObjects: ", JSON.stringify(objectDetections));
 
             const sceneDetections = await imageSceneService.detectScenes(
                 imageBitmap,
-                DEFAULT_ML_SYNC_CONFIG.sceneDetection.minScore
+                DEFAULT_ML_SYNC_CONFIG.sceneDetection.minScore,
             );
-            addLogLine('detectedScenes: ', JSON.stringify(sceneDetections));
+            addLogLine("detectedScenes: ", JSON.stringify(sceneDetections));
 
             const mlSyncConfig = await getMLSyncConfig();
             const faceCropPromises = faceDetections.map(async (faceDetection) =>
                 arcfaceCropService.getFaceCrop(
                     imageBitmap,
                     faceDetection,
-                    mlSyncConfig.faceCrop
-                )
+                    mlSyncConfig.faceCrop,
+                ),
             );
 
             const faceCrops = await Promise.all(faceCropPromises);
@@ -122,14 +122,14 @@ export default function MLFileDebugView(props: MLFileDebugViewProps) {
             setFaceCrops(faceCrops);
 
             const faceAlignments = faceDetections.map((detection) =>
-                arcfaceAlignmentService.getFaceAlignment(detection)
+                arcfaceAlignmentService.getFaceAlignment(detection),
             );
-            addLogLine('alignedFaces: ', JSON.stringify(faceAlignments));
+            addLogLine("alignedFaces: ", JSON.stringify(faceAlignments));
 
             const canvas: HTMLCanvasElement = canvasRef.current;
             canvas.width = imageBitmap.width;
             canvas.height = imageBitmap.height;
-            const ctx = canvas.getContext('2d');
+            const ctx = canvas.getContext("2d");
             if (didCancel) return;
             ctx.drawImage(imageBitmap, 0, 0);
             const alignedFaces = faceAlignments.map((alignment, i) => {
@@ -139,7 +139,7 @@ export default function MLFileDebugView(props: MLFileDebugViewProps) {
                 } as AlignedFace;
             });
             alignedFaces.forEach((alignedFace) =>
-                drawFaceDetection(alignedFace, ctx)
+                drawFaceDetection(alignedFace, ctx),
             );
 
             objectDetections.forEach((object) => drawBbox(object, ctx));
@@ -149,23 +149,23 @@ export default function MLFileDebugView(props: MLFileDebugViewProps) {
                     return ibExtractFaceImageFromCrop(
                         faceCrops[i],
                         face.alignment,
-                        112
+                        112,
                     );
-                })
+                }),
             );
             const facesUsingImage = await Promise.all(
                 alignedFaces.map((face) => {
                     return ibExtractFaceImage(imageBitmap, face.alignment, 112);
-                })
+                }),
             );
             const facesUsingTransform = await Promise.all(
                 alignedFaces.map((face) => {
                     return ibExtractFaceImageUsingTransform(
                         imageBitmap,
                         face.alignment,
-                        112
+                        112,
                     );
-                })
+                }),
             );
 
             if (didCancel) return;
@@ -188,7 +188,7 @@ export default function MLFileDebugView(props: MLFileDebugViewProps) {
                 ref={canvasRef}
                 width={0}
                 height={0}
-                style={{ maxWidth: '100%' }}
+                style={{ maxWidth: "100%" }}
             />
             <p></p>
             <div>Face Crops:</div>
@@ -196,7 +196,8 @@ export default function MLFileDebugView(props: MLFileDebugViewProps) {
                 {faceCrops?.map((faceCrop, i) => (
                     <ImageBitmapView
                         key={i}
-                        image={faceCrop.image}></ImageBitmapView>
+                        image={faceCrop.image}
+                    ></ImageBitmapView>
                 ))}
             </FaceCropsRow>
 

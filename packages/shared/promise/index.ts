@@ -1,14 +1,14 @@
-import { CustomError } from '../error';
+import { CustomError } from "../error";
 
 export const promiseWithTimeout = async <T>(
     request: Promise<T>,
-    timeout: number
+    timeout: number,
 ): Promise<T> => {
     const timeoutRef = { current: null };
     const rejectOnTimeout = new Promise<null>((_, reject) => {
         timeoutRef.current = setTimeout(
             () => reject(Error(CustomError.WAIT_TIME_EXCEEDED)),
-            timeout
+            timeout,
         );
     });
     const requestWithTimeOutCancellation = async () => {

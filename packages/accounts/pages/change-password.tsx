@@ -1,40 +1,40 @@
-import { useState, useEffect } from 'react';
-import { t } from 'i18next';
+import { t } from "i18next";
+import { useEffect, useState } from "react";
 
-import { getData, LS_KEYS, setData } from '@ente/shared/storage/localStorage';
-import {
-    saveKeyInSessionStore,
-    generateAndSaveIntermediateKeyAttributes,
-    generateLoginSubKey,
-} from '@ente/shared/crypto/helpers';
 import {
     generateSRPClient,
     generateSRPSetupAttributes,
-} from '@ente/accounts/services/srp';
+} from "@ente/accounts/services/srp";
+import {
+    generateAndSaveIntermediateKeyAttributes,
+    generateLoginSubKey,
+    saveKeyInSessionStore,
+} from "@ente/shared/crypto/helpers";
+import { LS_KEYS, getData, setData } from "@ente/shared/storage/localStorage";
 
-import { getActualKey } from '@ente/shared/user';
-import { startSRPSetup, updateSRPAndKeys } from '@ente/accounts/api/srp';
+import { startSRPSetup, updateSRPAndKeys } from "@ente/accounts/api/srp";
 import SetPasswordForm, {
     SetPasswordFormProps,
-} from '@ente/accounts/components/SetPasswordForm';
-import { SESSION_KEYS } from '@ente/shared/storage/sessionStorage';
-import { PAGES } from '@ente/accounts/constants/pages';
-import { KEK, KeyAttributes, User } from '@ente/shared/user/types';
-import { UpdatedKey } from '@ente/accounts/types/user';
+} from "@ente/accounts/components/SetPasswordForm";
+import { PAGES } from "@ente/accounts/constants/pages";
+import { UpdatedKey } from "@ente/accounts/types/user";
+import { SESSION_KEYS } from "@ente/shared/storage/sessionStorage";
+import { getActualKey } from "@ente/shared/user";
+import { KEK, KeyAttributes, User } from "@ente/shared/user/types";
 
-import LinkButton from '@ente/shared/components/LinkButton';
-import { VerticallyCentered } from '@ente/shared/components/Container';
-import FormPaper from '@ente/shared/components/Form/FormPaper';
-import FormPaperFooter from '@ente/shared/components/Form/FormPaper/Footer';
-import FormPaperTitle from '@ente/shared/components/Form/FormPaper/Title';
-import ComlinkCryptoWorker from '@ente/shared/crypto';
-import { APP_HOMES } from '@ente/shared/apps/constants';
 import {
-    convertBufferToBase64,
     convertBase64ToBuffer,
-} from '@ente/accounts/utils';
-import InMemoryStore, { MS_KEYS } from '@ente/shared/storage/InMemoryStore';
-import { PageProps } from '@ente/shared/apps/types';
+    convertBufferToBase64,
+} from "@ente/accounts/utils";
+import { APP_HOMES } from "@ente/shared/apps/constants";
+import { PageProps } from "@ente/shared/apps/types";
+import { VerticallyCentered } from "@ente/shared/components/Container";
+import FormPaper from "@ente/shared/components/Form/FormPaper";
+import FormPaperFooter from "@ente/shared/components/Form/FormPaper/Footer";
+import FormPaperTitle from "@ente/shared/components/Form/FormPaper/Title";
+import LinkButton from "@ente/shared/components/LinkButton";
+import ComlinkCryptoWorker from "@ente/shared/crypto";
+import InMemoryStore, { MS_KEYS } from "@ente/shared/storage/InMemoryStore";
 
 export default function ChangePassword({ appName, router }: PageProps) {
     const [token, setToken] = useState<string>();
@@ -51,9 +51,9 @@ export default function ChangePassword({ appName, router }: PageProps) {
         }
     }, []);
 
-    const onSubmit: SetPasswordFormProps['callback'] = async (
+    const onSubmit: SetPasswordFormProps["callback"] = async (
         passphrase,
-        setFieldError
+        setFieldError,
     ) => {
         const cryptoWorker = await ComlinkCryptoWorker.getInstance();
         const key = await getActualKey();
@@ -63,12 +63,12 @@ export default function ChangePassword({ appName, router }: PageProps) {
         try {
             kek = await cryptoWorker.deriveSensitiveKey(passphrase, kekSalt);
         } catch (e) {
-            setFieldError('confirm', t('PASSWORD_GENERATION_FAILED'));
+            setFieldError("confirm", t("PASSWORD_GENERATION_FAILED"));
             return;
         }
         const encryptedKeyAttributes = await cryptoWorker.encryptToB64(
             key,
-            kek.key
+            kek.key,
         );
         const updatedKey: UpdatedKey = {
             kekSalt,
@@ -86,7 +86,7 @@ export default function ChangePassword({ appName, router }: PageProps) {
         const srpClient = await generateSRPClient(
             srpSalt,
             srpUserID,
-            loginSubKey
+            loginSubKey,
         );
 
         const srpA = convertBufferToBase64(srpClient.computeA());
@@ -112,7 +112,7 @@ export default function ChangePassword({ appName, router }: PageProps) {
         await generateAndSaveIntermediateKeyAttributes(
             passphrase,
             updatedKeyAttributes,
-            key
+            key,
         );
 
         await saveKeyInSessionStore(SESSION_KEYS.ENCRYPTION_KEY, key);
@@ -127,16 +127,16 @@ export default function ChangePassword({ appName, router }: PageProps) {
     return (
         <VerticallyCentered>
             <FormPaper>
-                <FormPaperTitle>{t('CHANGE_PASSWORD')}</FormPaperTitle>
+                <FormPaperTitle>{t("CHANGE_PASSWORD")}</FormPaperTitle>
                 <SetPasswordForm
                     userEmail={user?.email}
                     callback={onSubmit}
-                    buttonText={t('CHANGE_PASSWORD')}
+                    buttonText={t("CHANGE_PASSWORD")}
                 />
                 {(getData(LS_KEYS.SHOW_BACK_BUTTON)?.value ?? true) && (
                     <FormPaperFooter>
                         <LinkButton onClick={router.back}>
-                            {t('GO_BACK')}
+                            {t("GO_BACK")}
                         </LinkButton>
                     </FormPaperFooter>
                 )}

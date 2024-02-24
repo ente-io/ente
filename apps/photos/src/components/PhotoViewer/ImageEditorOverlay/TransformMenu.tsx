@@ -1,17 +1,17 @@
-import { EnteMenuItem } from 'components/Menu/EnteMenuItem';
-import { MenuItemGroup } from 'components/Menu/MenuItemGroup';
-import MenuSectionTitle from 'components/Menu/MenuSectionTitle';
-import { Fragment, useContext } from 'react';
-import { ImageEditorOverlayContext } from '.';
-import CropSquareIcon from '@mui/icons-material/CropSquare';
-import Crop169Icon from '@mui/icons-material/Crop169';
-import Crop32Icon from '@mui/icons-material/Crop32';
-import RotateLeftIcon from '@mui/icons-material/RotateLeft';
-import RotateRightIcon from '@mui/icons-material/RotateRight';
-import FlipIcon from '@mui/icons-material/Flip';
-import MenuItemDivider from 'components/Menu/MenuItemDivider';
-import { t } from 'i18next';
-import { logError } from '@ente/shared/sentry';
+import { logError } from "@ente/shared/sentry";
+import Crop169Icon from "@mui/icons-material/Crop169";
+import Crop32Icon from "@mui/icons-material/Crop32";
+import CropSquareIcon from "@mui/icons-material/CropSquare";
+import FlipIcon from "@mui/icons-material/Flip";
+import RotateLeftIcon from "@mui/icons-material/RotateLeft";
+import RotateRightIcon from "@mui/icons-material/RotateRight";
+import { EnteMenuItem } from "components/Menu/EnteMenuItem";
+import MenuItemDivider from "components/Menu/MenuItemDivider";
+import { MenuItemGroup } from "components/Menu/MenuItemGroup";
+import MenuSectionTitle from "components/Menu/MenuSectionTitle";
+import { t } from "i18next";
+import { Fragment, useContext } from "react";
+import { ImageEditorOverlayContext } from ".";
 
 const PRESET_ASPECT_RATIOS = [
     {
@@ -44,9 +44,9 @@ const TransformMenu = () => {
     const cropCanvas = (
         canvas: HTMLCanvasElement,
         widthRatio: number,
-        heightRatio: number
+        heightRatio: number,
     ) => {
-        const context = canvas.getContext('2d');
+        const context = canvas.getContext("2d");
 
         const aspectRatio = widthRatio / heightRatio;
 
@@ -85,16 +85,16 @@ const TransformMenu = () => {
                 0,
                 0,
                 newWidth,
-                newHeight
+                newHeight,
             );
         };
     };
 
     const flipCanvas = (
         canvas: HTMLCanvasElement,
-        direction: 'vertical' | 'horizontal'
+        direction: "vertical" | "horizontal",
     ) => {
-        const context = canvas.getContext('2d');
+        const context = canvas.getContext("2d");
         if (!context || !canvas) return;
         context.resetTransform();
         context.imageSmoothingEnabled = false;
@@ -106,7 +106,7 @@ const TransformMenu = () => {
 
             context.save();
 
-            if (direction === 'horizontal') {
+            if (direction === "horizontal") {
                 context.translate(canvas.width, 0);
                 context.scale(-1, 1);
             } else {
@@ -121,7 +121,7 @@ const TransformMenu = () => {
     };
 
     const rotateCanvas = (canvas: HTMLCanvasElement, angle: number) => {
-        const context = canvas?.getContext('2d');
+        const context = canvas?.getContext("2d");
         if (!context || !canvas) return;
         context.imageSmoothingEnabled = false;
 
@@ -152,7 +152,7 @@ const TransformMenu = () => {
                 -image.width / 2,
                 -image.height / 2,
                 image.width,
-                image.height
+                image.height,
             );
 
             context.restore();
@@ -167,36 +167,36 @@ const TransformMenu = () => {
                 cropCanvas(
                     originalSizeCanvasRef.current,
                     widthRatio,
-                    heightRatio
+                    heightRatio,
                 );
                 setCanvasLoading(false);
                 setTransformationPerformed(true);
             } catch (e) {
-                logError(e, 'crop handler failed', {
+                logError(e, "crop handler failed", {
                     widthRatio,
                     heightRatio,
                 });
             }
         };
-    const createRotationHandler = (rotation: 'left' | 'right') => () => {
+    const createRotationHandler = (rotation: "left" | "right") => () => {
         try {
             setCanvasLoading(true);
-            rotateCanvas(canvasRef.current, rotation === 'left' ? -90 : 90);
+            rotateCanvas(canvasRef.current, rotation === "left" ? -90 : 90);
             rotateCanvas(
                 originalSizeCanvasRef.current,
-                rotation === 'left' ? -90 : 90
+                rotation === "left" ? -90 : 90,
             );
             setCanvasLoading(false);
             setTransformationPerformed(true);
         } catch (e) {
-            logError(e, 'rotation handler failed', {
+            logError(e, "rotation handler failed", {
                 rotation,
             });
         }
     };
 
     const createFlipCanvasHandler =
-        (direction: 'vertical' | 'horizontal') => () => {
+        (direction: "vertical" | "horizontal") => () => {
             try {
                 setCanvasLoading(true);
                 flipCanvas(canvasRef.current, direction);
@@ -204,7 +204,7 @@ const TransformMenu = () => {
                 setCanvasLoading(false);
                 setTransformationPerformed(true);
             } catch (e) {
-                logError(e, 'flip handler failed', {
+                logError(e, "flip handler failed", {
                     direction,
                 });
             }
@@ -212,22 +212,24 @@ const TransformMenu = () => {
 
     return (
         <>
-            <MenuSectionTitle title={t('ASPECT_RATIO')} />
+            <MenuSectionTitle title={t("ASPECT_RATIO")} />
             <MenuItemGroup
                 style={{
-                    marginBottom: '0.5rem',
-                }}>
+                    marginBottom: "0.5rem",
+                }}
+            >
                 <EnteMenuItem
                     disabled={canvasLoading}
                     startIcon={<CropSquareIcon />}
                     onClick={createCropHandler(1, 1)}
-                    label={t('SQUARE') + ' (1:1)'}
+                    label={t("SQUARE") + " (1:1)"}
                 />
             </MenuItemGroup>
             <MenuItemGroup
                 style={{
-                    marginBottom: '1rem',
-                }}>
+                    marginBottom: "1rem",
+                }}
+            >
                 {PRESET_ASPECT_RATIOS.map((ratio, index) => (
                     <Fragment key={index}>
                         <EnteMenuItem
@@ -235,7 +237,7 @@ const TransformMenu = () => {
                             startIcon={ratio.icon}
                             onClick={createCropHandler(
                                 ratio.width,
-                                ratio.height
+                                ratio.height,
                             )}
                             label={`${ratio.width}:${ratio.height}`}
                         />
@@ -247,8 +249,9 @@ const TransformMenu = () => {
             </MenuItemGroup>
             <MenuItemGroup
                 style={{
-                    marginBottom: '1rem',
-                }}>
+                    marginBottom: "1rem",
+                }}
+            >
                 {PRESET_ASPECT_RATIOS.map((ratio, index) => (
                     <Fragment key={index}>
                         <EnteMenuItem
@@ -257,7 +260,7 @@ const TransformMenu = () => {
                             startIcon={ratio.icon}
                             onClick={createCropHandler(
                                 ratio.height,
-                                ratio.width
+                                ratio.width,
                             )}
                             label={`${ratio.height}:${ratio.width}`}
                         />
@@ -267,42 +270,44 @@ const TransformMenu = () => {
                     </Fragment>
                 ))}
             </MenuItemGroup>
-            <MenuSectionTitle title={t('ROTATION')} />
+            <MenuSectionTitle title={t("ROTATION")} />
             <MenuItemGroup
                 style={{
-                    marginBottom: '1rem',
-                }}>
+                    marginBottom: "1rem",
+                }}
+            >
                 <EnteMenuItem
                     disabled={canvasLoading}
                     startIcon={<RotateLeftIcon />}
-                    onClick={createRotationHandler('left')}
-                    label={t('ROTATE_LEFT') + ' 90˚'}
+                    onClick={createRotationHandler("left")}
+                    label={t("ROTATE_LEFT") + " 90˚"}
                 />
                 <MenuItemDivider />
                 <EnteMenuItem
                     disabled={canvasLoading}
                     startIcon={<RotateRightIcon />}
-                    onClick={createRotationHandler('right')}
-                    label={t('ROTATE_RIGHT') + ' 90˚'}
+                    onClick={createRotationHandler("right")}
+                    label={t("ROTATE_RIGHT") + " 90˚"}
                 />
             </MenuItemGroup>
-            <MenuSectionTitle title={t('FLIP')} />
+            <MenuSectionTitle title={t("FLIP")} />
             <MenuItemGroup
                 style={{
-                    marginBottom: '1rem',
-                }}>
+                    marginBottom: "1rem",
+                }}
+            >
                 <EnteMenuItem
                     disabled={canvasLoading}
                     startIcon={<FlipIcon />}
-                    onClick={createFlipCanvasHandler('vertical')}
-                    label={t('FLIP_VERTICALLY')}
+                    onClick={createFlipCanvasHandler("vertical")}
+                    label={t("FLIP_VERTICALLY")}
                 />
                 <MenuItemDivider />
                 <EnteMenuItem
                     disabled={canvasLoading}
                     startIcon={<FlipIcon />}
-                    onClick={createFlipCanvasHandler('horizontal')}
-                    label={t('FLIP_HORIZONTALLY')}
+                    onClick={createFlipCanvasHandler("horizontal")}
+                    label={t("FLIP_HORIZONTALLY")}
                 />
             </MenuItemGroup>
         </>

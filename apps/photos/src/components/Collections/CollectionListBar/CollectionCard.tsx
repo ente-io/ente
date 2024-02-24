@@ -1,20 +1,19 @@
-import React from 'react';
+import ArchiveIcon from "@mui/icons-material/Archive";
+import Favorite from "@mui/icons-material/FavoriteRounded";
+import LinkIcon from "@mui/icons-material/Link";
+import PeopleIcon from "@mui/icons-material/People";
+import PushPin from "@mui/icons-material/PushPin";
+import { Box } from "@mui/material";
+import TruncateText from "components/TruncateText";
+import { CollectionSummaryType } from "constants/collection";
+import { CollectionSummary } from "types/collection";
+import CollectionCard from "../CollectionCard";
 import {
     ActiveIndicator,
     CollectionBarTile,
     CollectionBarTileIcon,
     CollectionBarTileText,
-} from '../styledComponents';
-import CollectionCard from '../CollectionCard';
-import TruncateText from 'components/TruncateText';
-import { Box } from '@mui/material';
-import { CollectionSummaryType } from 'constants/collection';
-import Favorite from '@mui/icons-material/FavoriteRounded';
-import ArchiveIcon from '@mui/icons-material/Archive';
-import PeopleIcon from '@mui/icons-material/People';
-import LinkIcon from '@mui/icons-material/Link';
-import { CollectionSummary } from 'types/collection';
-import PushPin from '@mui/icons-material/PushPin';
+} from "../styledComponents";
 
 interface Iprops {
     collectionSummary: CollectionSummary;
@@ -33,7 +32,8 @@ const CollectionListBarCard = (props: Iprops) => {
                 coverFile={collectionSummary.coverFile}
                 onClick={() => {
                     onCollectionClick(collectionSummary.id);
-                }}>
+                }}
+            >
                 <CollectionCardText collectionName={collectionSummary.name} />
                 <CollectionCardIcon collectionType={collectionSummary.type} />
             </CollectionCard>

@@ -1,21 +1,21 @@
-import React, { useEffect, useState, useContext } from 'react';
-import { styled } from '@mui/material';
-import CloseIcon from '@mui/icons-material/Close';
-import { AppContext } from 'pages/_app';
-import { t } from 'i18next';
+import CloseIcon from "@mui/icons-material/Close";
+import { styled } from "@mui/material";
+import { t } from "i18next";
+import { AppContext } from "pages/_app";
+import React, { useContext, useEffect, useState } from "react";
 
-const CloseButtonWrapper = styled('div')`
+const CloseButtonWrapper = styled("div")`
     position: absolute;
     top: 10px;
     right: 10px;
     cursor: pointer;
 `;
-const DropDiv = styled('div')`
+const DropDiv = styled("div")`
     flex: 1;
     display: flex;
     flex-direction: column;
 `;
-const Overlay = styled('div')`
+const Overlay = styled("div")`
     border-width: 8px;
     left: 0;
     top: 0;
@@ -49,8 +49,8 @@ export default function FullScreenDropZone(props: Props) {
     const onDragLeave = () => setIsDragActive(false);
 
     useEffect(() => {
-        window.addEventListener('keydown', (event) => {
-            if (event.code === 'Escape') {
+        window.addEventListener("keydown", (event) => {
+            if (event.code === "Escape") {
                 onDragLeave();
             }
         });
@@ -70,9 +70,9 @@ export default function FullScreenDropZone(props: Props) {
             }
         };
 
-        addEventListener('drop', handleWatchFolderDrop);
+        addEventListener("drop", handleWatchFolderDrop);
         return () => {
-            removeEventListener('drop', handleWatchFolderDrop);
+            removeEventListener("drop", handleWatchFolderDrop);
         };
     }, [appContext.watchFolderView]);
 
@@ -80,15 +80,16 @@ export default function FullScreenDropZone(props: Props) {
         <DropDiv
             {...props.getDragAndDropRootProps({
                 onDragEnter,
-            })}>
+            })}
+        >
             {isDragActive && (
                 <Overlay onDrop={onDragLeave} onDragLeave={onDragLeave}>
                     <CloseButtonWrapper onClick={onDragLeave}>
                         <CloseIcon />
                     </CloseButtonWrapper>
                     {appContext.watchFolderView
-                        ? t('WATCH_FOLDER_DROPZONE_MESSAGE')
-                        : t('UPLOAD_DROPZONE_MESSAGE')}
+                        ? t("WATCH_FOLDER_DROPZONE_MESSAGE")
+                        : t("UPLOAD_DROPZONE_MESSAGE")}
                 </Overlay>
             )}
             {props.children}

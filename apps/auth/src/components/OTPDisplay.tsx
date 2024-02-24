@@ -1,98 +1,107 @@
-import React, { useState, useEffect } from 'react';
-import { TOTP, HOTP } from 'otpauth';
-import { Code } from 'types/code';
-import TimerProgress from './TimerProgress';
-import { t } from 'i18next';
-import { ButtonBase, Snackbar } from '@mui/material';
+import { ButtonBase, Snackbar } from "@mui/material";
+import { t } from "i18next";
+import { HOTP, TOTP } from "otpauth";
+import { useEffect, useState } from "react";
+import { Code } from "types/code";
+import TimerProgress from "./TimerProgress";
 
 const TOTPDisplay = ({ issuer, account, code, nextCode, period }) => {
     return (
         <div
             style={{
-                backgroundColor: 'rgba(40, 40, 40, 0.6)',
-                borderRadius: '4px',
-                overflow: 'hidden',
-            }}>
+                backgroundColor: "rgba(40, 40, 40, 0.6)",
+                borderRadius: "4px",
+                overflow: "hidden",
+            }}
+        >
             <TimerProgress period={period ?? Code.defaultPeriod} />
             <div
                 style={{
-                    padding: '12px 20px 0px 20px',
-                    display: 'flex',
-                    alignItems: 'flex-start',
-                    minWidth: '320px',
-                    minHeight: '120px',
-                    justifyContent: 'space-between',
-                }}>
+                    padding: "12px 20px 0px 20px",
+                    display: "flex",
+                    alignItems: "flex-start",
+                    minWidth: "320px",
+                    minHeight: "120px",
+                    justifyContent: "space-between",
+                }}
+            >
                 <div
                     style={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'flex-start',
-                        minWidth: '200px',
-                    }}>
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "flex-start",
+                        minWidth: "200px",
+                    }}
+                >
                     <p
                         style={{
-                            fontWeight: 'bold',
-                            margin: '0px',
-                            fontSize: '14px',
-                            textAlign: 'left',
-                        }}>
+                            fontWeight: "bold",
+                            margin: "0px",
+                            fontSize: "14px",
+                            textAlign: "left",
+                        }}
+                    >
                         {issuer}
                     </p>
                     <p
                         style={{
-                            marginTop: '0px',
-                            marginBottom: '8px',
-                            textAlign: 'left',
-                            fontSize: '12px',
-                            maxWidth: '200px',
-                            minHeight: '16px',
-                            color: 'grey',
-                        }}>
+                            marginTop: "0px",
+                            marginBottom: "8px",
+                            textAlign: "left",
+                            fontSize: "12px",
+                            maxWidth: "200px",
+                            minHeight: "16px",
+                            color: "grey",
+                        }}
+                    >
                         {account}
                     </p>
                     <p
                         style={{
-                            margin: '0px',
-                            marginBottom: '1rem',
-                            fontSize: '24px',
-                            fontWeight: 'bold',
-                            textAlign: 'left',
-                        }}>
+                            margin: "0px",
+                            marginBottom: "1rem",
+                            fontSize: "24px",
+                            fontWeight: "bold",
+                            textAlign: "left",
+                        }}
+                    >
                         {code}
                     </p>
                 </div>
                 <div style={{ flex: 1 }} />
                 <div
                     style={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'flex-end',
-                        minWidth: '120px',
-                        textAlign: 'right',
-                        marginTop: 'auto',
-                        marginBottom: '1rem',
-                    }}>
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "flex-end",
+                        minWidth: "120px",
+                        textAlign: "right",
+                        marginTop: "auto",
+                        marginBottom: "1rem",
+                    }}
+                >
                     <p
                         style={{
-                            fontWeight: 'bold',
-                            marginBottom: '0px',
-                            fontSize: '10px',
-                            marginTop: 'auto',
-                            textAlign: 'right',
-                            color: 'grey',
-                        }}>
-                        {t('AUTH_NEXT')}
+                            fontWeight: "bold",
+                            marginBottom: "0px",
+                            fontSize: "10px",
+                            marginTop: "auto",
+                            textAlign: "right",
+                            color: "grey",
+                        }}
+                    >
+                        {t("AUTH_NEXT")}
                     </p>
                     <p
                         style={{
-                            fontSize: '14px',
-                            fontWeight: 'bold',
-                            marginBottom: '0px',
-                            marginTop: 'auto',
-                            textAlign: 'right',
-                            color: 'grey',
-                        }}>
+                            fontSize: "14px",
+                            fontWeight: "bold",
+                            marginBottom: "0px",
+                            marginTop: "auto",
+                            textAlign: "right",
+                            color: "grey",
+                        }}
+                    >
                         {nextCode}
                     </p>
                 </div>
@@ -111,7 +120,7 @@ function BadCodeInfo({ codeInfo, codeErr }) {
             <div>
                 {showRawData ? (
                     <div onClick={() => setShowRawData(false)}>
-                        {codeInfo.rawData ?? 'no raw data'}
+                        {codeInfo.rawData ?? "no raw data"}
                     </div>
                 ) : (
                     <div onClick={() => setShowRawData(true)}>Show rawData</div>
@@ -127,15 +136,15 @@ interface OTPDisplayProps {
 
 const OTPDisplay = (props: OTPDisplayProps) => {
     const { codeInfo } = props;
-    const [code, setCode] = useState('');
-    const [nextCode, setNextCode] = useState('');
-    const [codeErr, setCodeErr] = useState('');
+    const [code, setCode] = useState("");
+    const [nextCode, setNextCode] = useState("");
+    const [codeErr, setCodeErr] = useState("");
     const [hasCopied, setHasCopied] = useState(false);
 
     const generateCodes = () => {
         try {
             const currentTime = new Date().getTime();
-            if (codeInfo.type.toLowerCase() === 'totp') {
+            if (codeInfo.type.toLowerCase() === "totp") {
                 const totp = new TOTP({
                     secret: codeInfo.secret,
                     algorithm: codeInfo.algorithm ?? Code.defaultAlgo,
@@ -146,9 +155,9 @@ const OTPDisplay = (props: OTPDisplayProps) => {
                 setNextCode(
                     totp.generate({
                         timestamp: currentTime + codeInfo.period * 1000,
-                    })
+                    }),
                 );
-            } else if (codeInfo.type.toLowerCase() === 'hotp') {
+            } else if (codeInfo.type.toLowerCase() === "hotp") {
                 const hotp = new HOTP({
                     secret: codeInfo.secret,
                     counter: 0,
@@ -184,8 +193,8 @@ const OTPDisplay = (props: OTPDisplayProps) => {
             // we need to call generateCodes() once before the interval loop
             // to set the initial code and nextCode
             generateCodes();
-            codeType.toLowerCase() === 'totp' ||
-            codeType.toLowerCase() === 'hotp'
+            codeType.toLowerCase() === "totp" ||
+            codeType.toLowerCase() === "hotp"
                 ? setInterval(() => {
                       generateCodes();
                   }, codePeriodInMs)
@@ -198,13 +207,14 @@ const OTPDisplay = (props: OTPDisplayProps) => {
     }, [codeInfo]);
 
     return (
-        <div style={{ padding: '8px' }}>
-            {codeErr === '' ? (
+        <div style={{ padding: "8px" }}>
+            {codeErr === "" ? (
                 <ButtonBase
                     component="div"
                     onClick={() => {
                         copyCode();
-                    }}>
+                    }}
+                >
                     <TOTPDisplay
                         period={codeInfo.period}
                         issuer={codeInfo.issuer}

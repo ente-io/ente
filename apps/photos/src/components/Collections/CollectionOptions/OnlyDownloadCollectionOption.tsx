@@ -1,14 +1,13 @@
-import { OverflowMenuOption } from '@ente/shared/components/OverflowMenu/option';
-import React from 'react';
+import { OverflowMenuOption } from "@ente/shared/components/OverflowMenu/option";
 
-import FileDownloadOutlinedIcon from '@mui/icons-material/FileDownloadOutlined';
-import { CollectionActions } from '.';
-import { t } from 'i18next';
-import EnteSpinner from '@ente/shared/components/EnteSpinner';
+import EnteSpinner from "@ente/shared/components/EnteSpinner";
+import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
+import { t } from "i18next";
+import { CollectionActions } from ".";
 interface Iprops {
     handleCollectionAction: (
         action: CollectionActions,
-        loader?: boolean
+        loader?: boolean,
     ) => (...args: any[]) => Promise<void>;
     downloadOptionText?: string;
     isDownloadInProgress?: boolean;
@@ -16,7 +15,7 @@ interface Iprops {
 
 export function OnlyDownloadCollectionOption({
     handleCollectionAction,
-    downloadOptionText = t('DOWNLOAD'),
+    downloadOptionText = t("DOWNLOAD"),
     isDownloadInProgress,
 }: Iprops) {
     return (
@@ -25,10 +24,11 @@ export function OnlyDownloadCollectionOption({
                 !isDownloadInProgress ? (
                     <FileDownloadOutlinedIcon />
                 ) : (
-                    <EnteSpinner size="20px" sx={{ cursor: 'not-allowed' }} />
+                    <EnteSpinner size="20px" sx={{ cursor: "not-allowed" }} />
                 )
             }
-            onClick={handleCollectionAction(CollectionActions.DOWNLOAD, false)}>
+            onClick={handleCollectionAction(CollectionActions.DOWNLOAD, false)}
+        >
             {downloadOptionText}
         </OverflowMenuOption>
     );

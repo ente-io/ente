@@ -1,6 +1,6 @@
-import { styled } from '@mui/material';
+import { styled } from "@mui/material";
 
-export const MenuItemGroup = styled('div')(
+export const MenuItemGroup = styled("div")(
     ({ theme }) => `
     & > .MuiMenuItem-root{
         border-radius: 8px;
@@ -16,5 +16,5 @@ export const MenuItemGroup = styled('div')(
     }
     background-color: ${theme.colors.fill.faint};
     border-radius: 8px;
-`
+`,
 );

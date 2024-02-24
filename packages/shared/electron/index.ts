@@ -1,5 +1,5 @@
-import { ElectronAPIsType } from './types';
+import { ElectronAPIsType } from "./types";
 
-const ElectronAPIs: ElectronAPIsType = globalThis['ElectronAPIs'];
+const ElectronAPIs: ElectronAPIsType = globalThis["ElectronAPIs"];
 
 export default ElectronAPIs;

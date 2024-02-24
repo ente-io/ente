@@ -1,9 +1,10 @@
-import { Collection } from 'types/collection';
-import { logError } from '@ente/shared/sentry';
-import UploadHttpClient from './uploadHttpClient';
-import { extractFileMetadata, getFilename } from './fileService';
-import { getFileType } from '../typeDetectionService';
-import { CustomError, handleUploadError } from '@ente/shared/error';
+import { DedicatedCryptoWorker } from "@ente/shared/crypto/internal/crypto.worker";
+import { B64EncryptionResult } from "@ente/shared/crypto/types";
+import { CustomError, handleUploadError } from "@ente/shared/error";
+import { logError } from "@ente/shared/sentry";
+import { Remote } from "comlink";
+import { Collection } from "types/collection";
+import { FilePublicMagicMetadataProps } from "types/file";
 import {
     BackupedFile,
     EncryptedFile,
@@ -11,7 +12,6 @@ import {
     FileTypeInfo,
     FileWithCollection,
     FileWithMetadata,
-    isDataStream,
     Logger,
     ParsedMetadataJSON,
     ParsedMetadataJSONMap,
@@ -20,7 +20,16 @@ import {
     UploadAsset,
     UploadFile,
     UploadURL,
-} from 'types/upload';
+    isDataStream,
+} from "types/upload";
+import { getFileType } from "../typeDetectionService";
+import {
+    encryptFile,
+    extractFileMetadata,
+    getFileSize,
+    getFilename,
+    readFile,
+} from "./fileService";
 import {
     clusterLivePhotoFiles,
     extractLivePhotoMetadata,
@@ -28,16 +37,12 @@ import {
     getLivePhotoName,
     getLivePhotoSize,
     readLivePhoto,
-} from './livePhotoService';
-import { encryptFile, getFileSize, readFile } from './fileService';
-import { uploadStreamUsingMultipart } from './multiPartUploadService';
-import UIService from './uiService';
-import { Remote } from 'comlink';
-import { DedicatedCryptoWorker } from '@ente/shared/crypto/internal/crypto.worker';
-import publicUploadHttpClient from './publicUploadHttpClient';
-import { constructPublicMagicMetadata } from './magicMetadataService';
-import { FilePublicMagicMetadataProps } from 'types/file';
-import { B64EncryptionResult } from '@ente/shared/crypto/types';
+} from "./livePhotoService";
+import { constructPublicMagicMetadata } from "./magicMetadataService";
+import { uploadStreamUsingMultipart } from "./multiPartUploadService";
+import publicUploadHttpClient from "./publicUploadHttpClient";
+import UIService from "./uiService";
+import UploadHttpClient from "./uploadHttpClient";
 
 class UploadService {
     private uploadURLs: UploadURL[] = [];
@@ -56,7 +61,7 @@ class UploadService {
 
     init(
         publicUploadProps: PublicUploadProps,
-        isCFUploadProxyDisabled: boolean
+        isCFUploadProxyDisabled: boolean,
     ) {
         this.publicUploadProps = publicUploadProps;
         this.isCFUploadProxyDisabled = isCFUploadProxyDisabled;
@@ -107,7 +112,7 @@ class UploadService {
 
     async readAsset(
         fileTypeInfo: FileTypeInfo,
-        { isLivePhoto, file, livePhotoAssets }: UploadAsset
+        { isLivePhoto, file, livePhotoAssets }: UploadAsset,
     ) {
         return isLivePhoto
             ? await readLivePhoto(fileTypeInfo, livePhotoAssets)
@@ -118,7 +123,7 @@ class UploadService {
         worker: Remote<DedicatedCryptoWorker>,
         { isLivePhoto, file, livePhotoAssets }: UploadAsset,
         collectionID: number,
-        fileTypeInfo: FileTypeInfo
+        fileTypeInfo: FileTypeInfo,
     ): Promise<ExtractMetadataResult> {
         return isLivePhoto
             ? extractLivePhotoMetadata(
@@ -126,14 +131,14 @@ class UploadService {
                   this.parsedMetadataJSONMap,
                   collectionID,
                   fileTypeInfo,
-                  livePhotoAssets
+                  livePhotoAssets,
               )
             : await extractFileMetadata(
                   worker,
                   this.parsedMetadataJSONMap,
                   collectionID,
                   fileTypeInfo,
-                  file
+                  file,
               );
     }
 
@@ -142,7 +147,7 @@ class UploadService {
     }
 
     constructPublicMagicMetadata(
-        publicMagicMetadataProps: FilePublicMagicMetadataProps
+        publicMagicMetadataProps: FilePublicMagicMetadataProps,
     ) {
         return constructPublicMagicMetadata(publicMagicMetadataProps);
     }
@@ -150,66 +155,66 @@ class UploadService {
     async encryptAsset(
         worker: Remote<DedicatedCryptoWorker>,
         file: FileWithMetadata,
-        encryptionKey: string
+        encryptionKey: string,
     ): Promise<EncryptedFile> {
         return encryptFile(worker, file, encryptionKey);
     }
 
     async uploadToBucket(
         logger: Logger,
-        file: ProcessedFile
+        file: ProcessedFile,
     ): Promise<BackupedFile> {
         try {
             let fileObjectKey: string = null;
-            logger('uploading file to bucket');
+            logger("uploading file to bucket");
             if (isDataStream(file.file.encryptedData)) {
-                logger('uploading using multipart');
+                logger("uploading using multipart");
                 fileObjectKey = await uploadStreamUsingMultipart(
                     logger,
                     file.localID,
-                    file.file.encryptedData
+                    file.file.encryptedData,
                 );
-                logger('uploading using multipart done');
+                logger("uploading using multipart done");
             } else {
-                logger('uploading using single part');
+                logger("uploading using single part");
                 const progressTracker = UIService.trackUploadProgress(
-                    file.localID
+                    file.localID,
                 );
                 const fileUploadURL = await this.getUploadURL();
                 if (!this.isCFUploadProxyDisabled) {
-                    logger('uploading using cf proxy');
+                    logger("uploading using cf proxy");
                     fileObjectKey = await UploadHttpClient.putFileV2(
                         fileUploadURL,
                         file.file.encryptedData as Uint8Array,
-                        progressTracker
+                        progressTracker,
                     );
                 } else {
-                    logger('uploading directly to s3');
+                    logger("uploading directly to s3");
                     fileObjectKey = await UploadHttpClient.putFile(
                         fileUploadURL,
                         file.file.encryptedData as Uint8Array,
-                        progressTracker
+                        progressTracker,
                     );
                 }
-                logger('uploading using single part done');
+                logger("uploading using single part done");
             }
-            logger('uploading thumbnail to bucket');
+            logger("uploading thumbnail to bucket");
             const thumbnailUploadURL = await this.getUploadURL();
             let thumbnailObjectKey: string = null;
             if (!this.isCFUploadProxyDisabled) {
                 thumbnailObjectKey = await UploadHttpClient.putFileV2(
                     thumbnailUploadURL,
                     file.thumbnail.encryptedData,
-                    null
+                    null,
                 );
             } else {
                 thumbnailObjectKey = await UploadHttpClient.putFile(
                     thumbnailUploadURL,
                     file.thumbnail.encryptedData,
-                    null
+                    null,
                 );
             }
-            logger('uploading thumbnail to bucket done');
+            logger("uploading thumbnail to bucket done");
 
             const backupedFile: BackupedFile = {
                 file: {
@@ -226,7 +231,7 @@ class UploadService {
             return backupedFile;
         } catch (e) {
             if (e.message !== CustomError.UPLOAD_CANCELLED) {
-                logError(e, 'error uploading to bucket');
+                logError(e, "error uploading to bucket");
             }
             throw e;
         }
@@ -235,7 +240,7 @@ class UploadService {
     getUploadFile(
         collection: Collection,
         backupedFile: BackupedFile,
-        fileKey: B64EncryptionResult
+        fileKey: B64EncryptionResult,
     ): UploadFile {
         const uploadFile: UploadFile = {
             collectionID: collection.id,
@@ -259,7 +264,7 @@ class UploadService {
             await this.fetchUploadURLs();
             // checking for any subscription related errors
         } catch (e) {
-            logError(e, 'prefetch uploadURL failed');
+            logError(e, "prefetch uploadURL failed");
             handleUploadError(e);
         }
     }
@@ -269,7 +274,7 @@ class UploadService {
             return publicUploadHttpClient.uploadFile(
                 uploadFile,
                 this.publicUploadProps.token,
-                this.publicUploadProps.passwordToken
+                this.publicUploadProps.passwordToken,
             );
         } else {
             return UploadHttpClient.uploadFile(uploadFile);
@@ -282,12 +287,12 @@ class UploadService {
                 this.pendingUploadCount,
                 this.uploadURLs,
                 this.publicUploadProps.token,
-                this.publicUploadProps.passwordToken
+                this.publicUploadProps.passwordToken,
             );
         } else {
             await UploadHttpClient.fetchUploadURLs(
                 this.pendingUploadCount,
-                this.uploadURLs
+                this.uploadURLs,
             );
         }
     }
@@ -297,7 +302,7 @@ class UploadService {
             return await publicUploadHttpClient.fetchMultipartUploadURLs(
                 count,
                 this.publicUploadProps.token,
-                this.publicUploadProps.passwordToken
+                this.publicUploadProps.passwordToken,
             );
         } else {
             return await UploadHttpClient.fetchMultipartUploadURLs(count);

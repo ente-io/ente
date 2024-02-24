@@ -1,12 +1,12 @@
-import { Box, Tooltip } from '@mui/material';
-import React, { ReactElement } from 'react';
+import { Box, Tooltip } from "@mui/material";
+import memoize from "memoize-one";
+import React, { ReactElement } from "react";
 import {
     FixedSizeList as List,
     ListChildComponentProps,
     ListItemKeySelector,
     areEqual,
-} from 'react-window';
-import memoize from 'memoize-one';
+} from "react-window";
 
 export interface ItemListProps<T> {
     items: T[];
@@ -26,7 +26,7 @@ interface ItemData<T> {
 const createItemData: <T>(
     renderListItem: (item: T) => JSX.Element,
     getItemTitle: (item: T) => string,
-    items: T[]
+    items: T[],
 ) => ItemData<T> = memoize((renderListItem, getItemTitle, items) => ({
     renderListItem,
     getItemTitle,
@@ -45,7 +45,7 @@ const Row: <T>({
             <Tooltip
                 PopperProps={{
                     sx: {
-                        '.MuiTooltip-tooltip.MuiTooltip-tooltip.MuiTooltip-tooltip':
+                        ".MuiTooltip-tooltip.MuiTooltip-tooltip.MuiTooltip-tooltip":
                             {
                                 marginTop: 0,
                             },
@@ -54,19 +54,20 @@ const Row: <T>({
                 title={getItemTitle(items[index])}
                 placement="bottom-start"
                 enterDelay={300}
-                enterNextDelay={100}>
+                enterNextDelay={100}
+            >
                 <div style={style}>{renderListItem(items[index])}</div>
             </Tooltip>
         );
     },
-    areEqual
+    areEqual,
 );
 
 export default function ItemList<T>(props: ItemListProps<T>) {
     const itemData = createItemData(
         props.renderListItem,
         props.getItemTitle,
-        props.items
+        props.items,
     );
 
     const getItemKey: ListItemKeySelector<ItemData<T>> = (index, data) => {
@@ -80,12 +81,13 @@ export default function ItemList<T>(props: ItemListProps<T>) {
                 itemData={itemData}
                 height={Math.min(
                     props.itemSize * props.items.length,
-                    props.maxHeight
+                    props.maxHeight,
                 )}
-                width={'100%'}
+                width={"100%"}
                 itemSize={props.itemSize}
                 itemCount={props.items.length}
-                itemKey={getItemKey}>
+                itemKey={getItemKey}
+            >
                 {Row}
             </List>
         </Box>

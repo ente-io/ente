@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useEffect, useState } from "react";
 
 const TimerProgress = ({ period }) => {
     const [progress, setProgress] = useState(0);
@@ -24,14 +24,14 @@ const TimerProgress = ({ period }) => {
         return () => clearInterval(ticker);
     }, []);
 
-    const color = progress > 0.4 ? 'green' : 'orange';
+    const color = progress > 0.4 ? "green" : "orange";
 
     return (
         <div
             style={{
-                borderTopLeftRadius: '3px',
+                borderTopLeftRadius: "3px",
                 width: `${progress * 100}%`,
-                height: '3px',
+                height: "3px",
                 backgroundColor: color,
             }}
         />

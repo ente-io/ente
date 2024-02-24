@@ -1,18 +1,17 @@
-import { MappingList } from './mappingList';
-import React, { useContext, useEffect, useState } from 'react';
-import { Button, Dialog, DialogContent, Stack } from '@mui/material';
-import watchFolderService from 'services/watchFolder/watchFolderService';
-import { WatchMapping } from 'types/watchFolder';
-import { AppContext } from 'pages/_app';
-import { t } from 'i18next';
+import { Button, Dialog, DialogContent, Stack } from "@mui/material";
+import { t } from "i18next";
+import { AppContext } from "pages/_app";
+import { useContext, useEffect, useState } from "react";
+import watchFolderService from "services/watchFolder/watchFolderService";
+import { WatchMapping } from "types/watchFolder";
+import { MappingList } from "./mappingList";
 
-import DialogTitleWithCloseButton from '@ente/shared/components/DialogBox/TitleWithCloseButton';
-import UploadStrategyChoiceModal from 'components/Upload/UploadStrategyChoiceModal';
-import { UPLOAD_STRATEGY } from 'constants/upload';
-import { getImportSuggestion } from 'utils/upload';
-import ElectronAPIs from '@ente/shared/electron';
-import { PICKED_UPLOAD_TYPE } from 'constants/upload';
-import isElectron from 'is-electron';
+import DialogTitleWithCloseButton from "@ente/shared/components/DialogBox/TitleWithCloseButton";
+import ElectronAPIs from "@ente/shared/electron";
+import UploadStrategyChoiceModal from "components/Upload/UploadStrategyChoiceModal";
+import { PICKED_UPLOAD_TYPE, UPLOAD_STRATEGY } from "constants/upload";
+import isElectron from "is-electron";
+import { getImportSuggestion } from "utils/upload";
 
 interface Iprops {
     open: boolean;
@@ -21,7 +20,7 @@ interface Iprops {
 
 export default function WatchFolder({ open, onClose }: Iprops) {
     const [mappings, setMappings] = useState<WatchMapping[]>([]);
-    const [inputFolderPath, setInputFolderPath] = useState('');
+    const [inputFolderPath, setInputFolderPath] = useState("");
     const [choiceModalOpen, setChoiceModalOpen] = useState(false);
     const appContext = useContext(AppContext);
 
@@ -45,7 +44,7 @@ export default function WatchFolder({ open, onClose }: Iprops) {
     const handleFolderDrop = async (folders: FileList) => {
         for (let i = 0; i < folders.length; i++) {
             const folder: any = folders[i];
-            const path = (folder.path as string).replace(/\\/g, '/');
+            const path = (folder.path as string).replace(/\\/g, "/");
             if (await watchFolderService.isFolder(path)) {
                 await addFolderForWatching(path);
             }
@@ -57,7 +56,7 @@ export default function WatchFolder({ open, onClose }: Iprops) {
         const files = await ElectronAPIs.getDirFiles(path);
         const analysisResult = getImportSuggestion(
             PICKED_UPLOAD_TYPE.FOLDERS,
-            files
+            files,
         );
         if (analysisResult.hasNestedFolders) {
             setChoiceModalOpen(true);
@@ -79,15 +78,15 @@ export default function WatchFolder({ open, onClose }: Iprops) {
 
     const handleAddWatchMapping = async (
         uploadStrategy: UPLOAD_STRATEGY,
-        folderPath?: string
+        folderPath?: string,
     ) => {
         folderPath = folderPath || inputFolderPath;
         await watchFolderService.addWatchMapping(
-            folderPath.substring(folderPath.lastIndexOf('/') + 1),
+            folderPath.substring(folderPath.lastIndexOf("/") + 1),
             folderPath,
-            uploadStrategy
+            uploadStrategy,
         );
-        setInputFolderPath('');
+        setInputFolderPath("");
         setMappings(watchFolderService.getWatchMappings());
     };
 
@@ -113,14 +112,16 @@ export default function WatchFolder({ open, onClose }: Iprops) {
             <Dialog
                 open={open}
                 onClose={onClose}
-                PaperProps={{ sx: { height: '448px', maxWidth: '414px' } }}>
+                PaperProps={{ sx: { height: "448px", maxWidth: "414px" } }}
+            >
                 <DialogTitleWithCloseButton
                     onClose={onClose}
-                    sx={{ '&&&': { padding: '32px 16px 16px 24px' } }}>
-                    {t('WATCHED_FOLDERS')}
+                    sx={{ "&&&": { padding: "32px 16px 16px 24px" } }}
+                >
+                    {t("WATCHED_FOLDERS")}
                 </DialogTitleWithCloseButton>
                 <DialogContent sx={{ flex: 1 }}>
-                    <Stack spacing={1} p={1.5} height={'100%'}>
+                    <Stack spacing={1} p={1.5} height={"100%"}>
                         <MappingList
                             mappings={mappings}
                             handleRemoveWatchMapping={handleRemoveWatchMapping}
@@ -128,13 +129,15 @@ export default function WatchFolder({ open, onClose }: Iprops) {
                         <Button
                             fullWidth
                             color="accent"
-                            onClick={handleAddFolderClick}>
+                            onClick={handleAddFolderClick}
+                        >
                             <span>+</span>
                             <span
                                 style={{
-                                    marginLeft: '8px',
-                                }}></span>
-                            {t('ADD_FOLDER')}
+                                    marginLeft: "8px",
+                                }}
+                            ></span>
+                            {t("ADD_FOLDER")}
                         </Button>
                     </Stack>
                 </DialogContent>

@@ -1,10 +1,10 @@
-import { createTheme } from '@mui/material';
-import { THEME_COLOR } from './constants';
-import { getColors } from './colors';
-import { getComponents } from './components';
-import { getPallette } from './palette';
-import { typography } from './typography';
-import { APPS } from '@ente/shared/apps/constants';
+import { APPS } from "@ente/shared/apps/constants";
+import { createTheme } from "@mui/material";
+import { getColors } from "./colors";
+import { getComponents } from "./components";
+import { THEME_COLOR } from "./constants";
+import { getPallette } from "./palette";
+import { typography } from "./typography";
 
 export const getTheme = (themeColor: THEME_COLOR, appName: APPS) => {
     const colors = getColors(themeColor, appName);

@@ -1,10 +1,10 @@
-import Done from '@mui/icons-material/Done';
+import Done from "@mui/icons-material/Done";
 import {
     Button,
     ButtonProps,
     CircularProgress,
     PaletteColor,
-} from '@mui/material';
+} from "@mui/material";
 
 interface Iprops extends ButtonProps {
     loading?: boolean;
@@ -25,7 +25,7 @@ export default function EnteButton({
             sx={{
                 ...sx,
                 ...((loading || success) && {
-                    '&.Mui-disabled': (theme) => ({
+                    "&.Mui-disabled": (theme) => ({
                         backgroundColor: (
                             theme.palette[props.color] as PaletteColor
                         ).main,
@@ -34,9 +34,10 @@ export default function EnteButton({
                     }),
                 }),
             }}
-            {...props}>
+            {...props}
+        >
             {loading ? (
-                <CircularProgress size={20} sx={{ color: 'inherit' }} />
+                <CircularProgress size={20} sx={{ color: "inherit" }} />
             ) : success ? (
                 <Done sx={{ fontSize: 20 }} />
             ) : (

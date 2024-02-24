@@ -1,9 +1,9 @@
-import JSZip from 'jszip';
-import { EnteFile } from 'types/file';
+import JSZip from "jszip";
+import { EnteFile } from "types/file";
 import {
     getFileExtensionWithDot,
     getFileNameWithoutExtension,
-} from 'utils/file';
+} from "utils/file";
 
 class LivePhoto {
     image: Uint8Array;
@@ -18,14 +18,14 @@ export const decodeLivePhoto = async (file: EnteFile, zipBlob: Blob) => {
 
     const livePhoto = new LivePhoto();
     for (const zipFilename in zip.files) {
-        if (zipFilename.startsWith('image')) {
+        if (zipFilename.startsWith("image")) {
             livePhoto.imageNameTitle =
                 originalName + getFileExtensionWithDot(zipFilename);
-            livePhoto.image = await zip.files[zipFilename].async('uint8array');
-        } else if (zipFilename.startsWith('video')) {
+            livePhoto.image = await zip.files[zipFilename].async("uint8array");
+        } else if (zipFilename.startsWith("video")) {
             livePhoto.videoNameTitle =
                 originalName + getFileExtensionWithDot(zipFilename);
-            livePhoto.video = await zip.files[zipFilename].async('uint8array');
+            livePhoto.video = await zip.files[zipFilename].async("uint8array");
         }
     }
     return livePhoto;
@@ -34,12 +34,12 @@ export const decodeLivePhoto = async (file: EnteFile, zipBlob: Blob) => {
 export const encodeLivePhoto = async (livePhoto: LivePhoto) => {
     const zip = new JSZip();
     zip.file(
-        'image' + getFileExtensionWithDot(livePhoto.imageNameTitle),
-        livePhoto.image
+        "image" + getFileExtensionWithDot(livePhoto.imageNameTitle),
+        livePhoto.image,
     );
     zip.file(
-        'video' + getFileExtensionWithDot(livePhoto.videoNameTitle),
-        livePhoto.video
+        "video" + getFileExtensionWithDot(livePhoto.videoNameTitle),
+        livePhoto.video,
     );
-    return await zip.generateAsync({ type: 'uint8array' });
+    return await zip.generateAsync({ type: "uint8array" });
 };

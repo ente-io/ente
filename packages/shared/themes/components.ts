@@ -1,17 +1,17 @@
-import { Shadow, ThemeColorsOptions } from '@mui/material';
-import { Components } from '@mui/material/styles/components';
-import { TypographyOptions } from '@mui/material/styles/createTypography';
+import { Shadow, ThemeColorsOptions } from "@mui/material";
+import { Components } from "@mui/material/styles/components";
+import { TypographyOptions } from "@mui/material/styles/createTypography";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const getComponents = (
     colors: ThemeColorsOptions,
-    typography: TypographyOptions
+    typography: TypographyOptions,
 ): Components => ({
     MuiCssBaseline: {
         styleOverrides: {
             body: {
                 fontFamily: typography.fontFamily,
-                letterSpacing: '-0.011em',
+                letterSpacing: "-0.011em",
             },
             strong: { fontWeight: 700 },
         },
@@ -19,13 +19,13 @@ export const getComponents = (
 
     MuiTypography: {
         defaultProps: {
-            variant: 'body',
+            variant: "body",
             variantMapping: {
-                large: 'p',
-                body: 'p',
-                small: 'p',
-                mini: 'p',
-                tiny: 'p',
+                large: "p",
+                body: "p",
+                small: "p",
+                mini: "p",
+                tiny: "p",
             },
         },
     },
@@ -33,7 +33,7 @@ export const getComponents = (
     MuiDrawer: {
         styleOverrides: {
             root: {
-                '.MuiBackdrop-root': {
+                ".MuiBackdrop-root": {
                     backgroundColor: colors.backdrop.faint,
                 },
             },
@@ -42,44 +42,44 @@ export const getComponents = (
     MuiDialog: {
         styleOverrides: {
             root: {
-                '.MuiBackdrop-root': {
+                ".MuiBackdrop-root": {
                     backgroundColor: colors.backdrop.faint,
                 },
-                '& .MuiDialog-paper': {
+                "& .MuiDialog-paper": {
                     filter: getDropShadowStyle(colors.shadows.float),
                 },
-                '& .MuiDialogTitle-root': {
-                    padding: '16px',
+                "& .MuiDialogTitle-root": {
+                    padding: "16px",
                 },
-                '& .MuiDialogContent-root': {
-                    padding: '16px',
-                    overflowY: 'overlay',
+                "& .MuiDialogContent-root": {
+                    padding: "16px",
+                    overflowY: "overlay",
                 },
-                '& .MuiDialogActions-root': {
-                    padding: '16px',
+                "& .MuiDialogActions-root": {
+                    padding: "16px",
                 },
-                '.MuiDialogTitle-root + .MuiDialogContent-root': {
-                    paddingTop: '16px',
+                ".MuiDialogTitle-root + .MuiDialogContent-root": {
+                    paddingTop: "16px",
                 },
             },
         },
         defaultProps: {
             fullWidth: true,
-            maxWidth: 'sm',
+            maxWidth: "sm",
         },
     },
     MuiPaper: {
-        styleOverrides: { root: { backgroundImage: 'none' } },
+        styleOverrides: { root: { backgroundImage: "none" } },
     },
     MuiLink: {
         defaultProps: {
             color: colors.accent.A500,
-            underline: 'none',
+            underline: "none",
         },
         styleOverrides: {
             root: {
-                '&:hover': {
-                    underline: 'always',
+                "&:hover": {
+                    underline: "always",
                     color: colors.accent.A500,
                 },
             },
@@ -88,40 +88,40 @@ export const getComponents = (
 
     MuiButton: {
         defaultProps: {
-            variant: 'contained',
+            variant: "contained",
         },
         styleOverrides: {
             root: {
-                padding: '12px 16px',
-                borderRadius: '4px',
-                textTransform: 'none',
-                fontWeight: 'bold',
+                padding: "12px 16px",
+                borderRadius: "4px",
+                textTransform: "none",
+                fontWeight: "bold",
                 fontSize: typography.body.fontSize,
                 lineHeight: typography.body.lineHeight,
             },
             startIcon: {
-                marginRight: '12px',
-                '&& >svg': {
-                    fontSize: '20px',
+                marginRight: "12px",
+                "&& >svg": {
+                    fontSize: "20px",
                 },
             },
             endIcon: {
-                marginLeft: '12px',
-                '&& >svg': {
-                    fontSize: '20px',
+                marginLeft: "12px",
+                "&& >svg": {
+                    fontSize: "20px",
                 },
             },
             sizeLarge: {
-                width: '100%',
+                width: "100%",
             },
         },
     },
     MuiInputBase: {
         styleOverrides: {
             formControl: {
-                borderRadius: '8px',
-                '::before': {
-                    borderBottom: 'none !important',
+                borderRadius: "8px",
+                "::before": {
+                    borderBottom: "none !important",
                 },
             },
         },
@@ -129,21 +129,21 @@ export const getComponents = (
     MuiFilledInput: {
         styleOverrides: {
             input: {
-                '&:autofill': {
-                    boxShadow: '#c7fd4f',
+                "&:autofill": {
+                    boxShadow: "#c7fd4f",
                 },
             },
         },
     },
     MuiTextField: {
         defaultProps: {
-            variant: 'filled',
-            margin: 'dense',
+            variant: "filled",
+            margin: "dense",
         },
         styleOverrides: {
             root: {
-                '& .MuiInputAdornment-root': {
-                    marginRight: '8px',
+                "& .MuiInputAdornment-root": {
+                    marginRight: "8px",
                 },
             },
         },
@@ -160,14 +160,14 @@ export const getComponents = (
         styleOverrides: {
             root: ({ ownerState }) => ({
                 ...getIconColor(ownerState, colors),
-                padding: '12px',
+                padding: "12px",
             }),
         },
     },
     MuiSnackbar: {
         styleOverrides: {
             root: {
-                borderRadius: '8px',
+                borderRadius: "8px",
             },
         },
     },
@@ -175,7 +175,7 @@ export const getComponents = (
         styleOverrides: {
             root: {
                 '&:has(> div[style*="opacity: 0"])': {
-                    pointerEvents: 'none',
+                    pointerEvents: "none",
                 },
             },
         },
@@ -184,7 +184,7 @@ export const getComponents = (
         styleOverrides: {
             // don't reduce opacity of disabled items
             root: {
-                '&.Mui-disabled': {
+                "&.Mui-disabled": {
                     opacity: 1,
                 },
             },
@@ -196,18 +196,18 @@ const getDropShadowStyle = (shadows: Shadow[]) => {
     return shadows
         .map(
             (shadow) =>
-                `drop-shadow(${shadow.x}px ${shadow.y}px ${shadow.blur}px ${shadow.color})`
+                `drop-shadow(${shadow.x}px ${shadow.y}px ${shadow.blur}px ${shadow.color})`,
         )
-        .join(' ');
+        .join(" ");
 };
 
 function getIconColor(ownerState, colors: ThemeColorsOptions) {
     switch (ownerState.color) {
-        case 'primary':
+        case "primary":
             return {
                 color: colors.stroke.base,
             };
-        case 'secondary':
+        case "secondary":
             return {
                 color: colors.stroke.muted,
             };

@@ -1,62 +1,64 @@
+import { logError } from "@ente/shared/sentry";
+import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
+import { User } from "@ente/shared/user/types";
 import {
-    SelectedState,
-    SetFilesDownloadProgressAttributes,
-    SetFilesDownloadProgressAttributesCreator,
-} from 'types/gallery';
+    FILE_TYPE,
+    RAW_FORMATS,
+    SUPPORTED_RAW_FORMATS,
+    TYPE_HEIC,
+    TYPE_HEIF,
+    TYPE_JPEG,
+    TYPE_JPG,
+} from "constants/file";
+import DownloadManager, {
+    LivePhotoSourceURL,
+    SourceURLs,
+} from "services/download";
+import * as ffmpegService from "services/ffmpeg/ffmpegService";
+import heicConversionService from "services/heicConversionService";
+import { decodeLivePhoto } from "services/livePhotoService";
+import { getFileType } from "services/typeDetectionService";
+import { updateFileCreationDateInEXIF } from "services/upload/exifService";
 import {
-    EnteFile,
     EncryptedEnteFile,
-    FileWithUpdatedMagicMetadata,
+    EnteFile,
     FileMagicMetadata,
     FileMagicMetadataProps,
     FilePublicMagicMetadata,
     FilePublicMagicMetadataProps,
-} from 'types/file';
-import { decodeLivePhoto } from 'services/livePhotoService';
-import { getFileType } from 'services/typeDetectionService';
-import DownloadManager, {
-    LivePhotoSourceURL,
-    SourceURLs,
-} from 'services/download';
-import { logError } from '@ente/shared/sentry';
-import { User } from '@ente/shared/user/types';
-import { getData, LS_KEYS } from '@ente/shared/storage/localStorage';
-import { updateFileCreationDateInEXIF } from 'services/upload/exifService';
+    FileWithUpdatedMagicMetadata,
+} from "types/file";
 import {
-    TYPE_JPEG,
-    TYPE_JPG,
-    TYPE_HEIC,
-    TYPE_HEIF,
-    FILE_TYPE,
-    SUPPORTED_RAW_FORMATS,
-    RAW_FORMATS,
-} from 'constants/file';
-import heicConversionService from 'services/heicConversionService';
-import * as ffmpegService from 'services/ffmpeg/ffmpegService';
-import { VISIBILITY_STATE } from 'types/magicMetadata';
-import { isArchivedFile, updateMagicMetadata } from 'utils/magicMetadata';
+    SelectedState,
+    SetFilesDownloadProgressAttributes,
+    SetFilesDownloadProgressAttributesCreator,
+} from "types/gallery";
+import { VISIBILITY_STATE } from "types/magicMetadata";
+import { isArchivedFile, updateMagicMetadata } from "utils/magicMetadata";
 
-import { addLocalLog, addLogLine } from '@ente/shared/logging';
-import { CustomError } from '@ente/shared/error';
-import { convertBytesToHumanReadable } from '@ente/shared/utils/size';
-import ComlinkCryptoWorker from '@ente/shared/crypto';
+import ComlinkCryptoWorker from "@ente/shared/crypto";
+import { CustomError } from "@ente/shared/error";
+import { addLocalLog, addLogLine } from "@ente/shared/logging";
+import { convertBytesToHumanReadable } from "@ente/shared/utils/size";
+import isElectron from "is-electron";
+import { moveToHiddenCollection } from "services/collectionService";
 import {
     deleteFromTrash,
     trashFiles,
     updateFileMagicMetadata,
     updateFilePublicMagicMetadata,
-} from 'services/fileService';
-import isElectron from 'is-electron';
-import { isPlaybackPossible } from 'utils/photoFrame';
-import { FileTypeInfo } from 'types/upload';
-import { moveToHiddenCollection } from 'services/collectionService';
+} from "services/fileService";
+import { FileTypeInfo } from "types/upload";
+import { isPlaybackPossible } from "utils/photoFrame";
 
-import ElectronFSService from '@ente/shared/electron';
-import { getFileExportPath, getUniqueFileExportName } from 'utils/export';
-import imageProcessor from 'services/imageProcessor';
-import ElectronAPIs from '@ente/shared/electron';
-import { downloadUsingAnchor } from '@ente/shared/utils';
-import { t } from 'i18next';
+import {
+    default as ElectronAPIs,
+    default as ElectronFSService,
+} from "@ente/shared/electron";
+import { downloadUsingAnchor } from "@ente/shared/utils";
+import { t } from "i18next";
+import imageProcessor from "services/imageProcessor";
+import { getFileExportPath, getUniqueFileExportName } from "utils/export";
 
 const WAIT_TIME_IMAGE_CONVERSION = 30 * 1000;
 
@@ -73,7 +75,7 @@ export enum FILE_OPS_TYPE {
 export async function getUpdatedEXIFFileForDownload(
     fileReader: FileReader,
     file: EnteFile,
-    fileStream: ReadableStream<Uint8Array>
+    fileStream: ReadableStream<Uint8Array>,
 ): Promise<ReadableStream<Uint8Array>> {
     const extension = getFileExtension(file.metadata.title);
     if (
@@ -85,7 +87,7 @@ export async function getUpdatedEXIFFileForDownload(
         const updatedFileBlob = await updateFileCreationDateInEXIF(
             fileReader,
             fileBlob,
-            new Date(file.pubMagicMetadata.data.editedTime / 1000)
+            new Date(file.pubMagicMetadata.data.editedTime / 1000),
         );
         return updatedFileBlob.stream();
     } else {
@@ -97,39 +99,39 @@ export async function downloadFile(file: EnteFile) {
     try {
         const fileReader = new FileReader();
         let fileBlob = await new Response(
-            await DownloadManager.getFile(file)
+            await DownloadManager.getFile(file),
         ).blob();
         if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
             const livePhoto = await decodeLivePhoto(file, fileBlob);
             const image = new File([livePhoto.image], livePhoto.imageNameTitle);
             const imageType = await getFileType(image);
             const tempImageURL = URL.createObjectURL(
-                new Blob([livePhoto.image], { type: imageType.mimeType })
+                new Blob([livePhoto.image], { type: imageType.mimeType }),
             );
             const video = new File([livePhoto.video], livePhoto.videoNameTitle);
             const videoType = await getFileType(video);
             const tempVideoURL = URL.createObjectURL(
-                new Blob([livePhoto.video], { type: videoType.mimeType })
+                new Blob([livePhoto.video], { type: videoType.mimeType }),
             );
             downloadUsingAnchor(tempImageURL, livePhoto.imageNameTitle);
             downloadUsingAnchor(tempVideoURL, livePhoto.videoNameTitle);
         } else {
             const fileType = await getFileType(
-                new File([fileBlob], file.metadata.title)
+                new File([fileBlob], file.metadata.title),
             );
             fileBlob = await new Response(
                 await getUpdatedEXIFFileForDownload(
                     fileReader,
                     file,
-                    fileBlob.stream()
-                )
+                    fileBlob.stream(),
+                ),
             ).blob();
             fileBlob = new Blob([fileBlob], { type: fileType.mimeType });
             const tempURL = URL.createObjectURL(fileBlob);
             downloadUsingAnchor(tempURL, file.metadata.title);
         }
     } catch (e) {
-        logError(e, 'failed to download file');
+        logError(e, "failed to download file");
         throw e;
     }
 }
@@ -148,7 +150,7 @@ export function groupFilesBasedOnCollectionID(files: EnteFile[]) {
 function getSelectedFileIds(selectedFiles: SelectedState) {
     const filesIDs: number[] = [];
     for (const [key, val] of Object.entries(selectedFiles)) {
-        if (typeof val === 'boolean' && val) {
+        if (typeof val === "boolean" && val) {
             filesIDs.push(Number(key));
         }
     }
@@ -156,7 +158,7 @@ function getSelectedFileIds(selectedFiles: SelectedState) {
 }
 export function getSelectedFiles(
     selected: SelectedState,
-    files: EnteFile[]
+    files: EnteFile[],
 ): EnteFile[] {
     const selectedFilesIDs = getSelectedFileIds(selected);
     return files.filter((file) => selectedFilesIDs.has(file.id));
@@ -193,7 +195,7 @@ export function sortTrashFiles(files: EnteFile[]) {
 
 export async function decryptFile(
     file: EncryptedEnteFile,
-    collectionKey: string
+    collectionKey: string,
 ): Promise<EnteFile> {
     try {
         const worker = await ComlinkCryptoWorker.getInstance();
@@ -208,12 +210,12 @@ export async function decryptFile(
         const fileKey = await worker.decryptB64(
             encryptedKey,
             keyDecryptionNonce,
-            collectionKey
+            collectionKey,
         );
         const fileMetadata = await worker.decryptMetadata(
             metadata.encryptedData,
             metadata.decryptionHeader,
-            fileKey
+            fileKey,
         );
         let fileMagicMetadata: FileMagicMetadata;
         let filePubMagicMetadata: FilePublicMagicMetadata;
@@ -223,7 +225,7 @@ export async function decryptFile(
                 data: await worker.decryptMetadata(
                     magicMetadata.data,
                     magicMetadata.header,
-                    fileKey
+                    fileKey,
                 ),
             };
         }
@@ -233,7 +235,7 @@ export async function decryptFile(
                 data: await worker.decryptMetadata(
                     pubMagicMetadata.data,
                     pubMagicMetadata.header,
-                    fileKey
+                    fileKey,
                 ),
             };
         }
@@ -245,25 +247,25 @@ export async function decryptFile(
             pubMagicMetadata: filePubMagicMetadata,
         };
     } catch (e) {
-        logError(e, 'file decryption failed');
+        logError(e, "file decryption failed");
         throw e;
     }
 }
 
 export function getFileNameWithoutExtension(filename: string) {
-    const lastDotPosition = filename.lastIndexOf('.');
+    const lastDotPosition = filename.lastIndexOf(".");
     if (lastDotPosition === -1) return filename;
     else return filename.slice(0, lastDotPosition);
 }
 
 export function getFileExtensionWithDot(filename: string) {
-    const lastDotPosition = filename.lastIndexOf('.');
-    if (lastDotPosition === -1) return '';
+    const lastDotPosition = filename.lastIndexOf(".");
+    if (lastDotPosition === -1) return "";
     else return filename.slice(lastDotPosition);
 }
 
 export function splitFilenameAndExtension(filename: string): [string, string] {
-    const lastDotPosition = filename.lastIndexOf('.');
+    const lastDotPosition = filename.lastIndexOf(".");
     if (lastDotPosition === -1) return [filename, null];
     else
         return [
@@ -289,19 +291,19 @@ export async function getRenderableFileURL(
     file: EnteFile,
     fileBlob: Blob,
     originalFileURL: string,
-    forceConvert: boolean
+    forceConvert: boolean,
 ): Promise<SourceURLs> {
-    let srcURLs: SourceURLs['url'];
+    let srcURLs: SourceURLs["url"];
     switch (file.metadata.fileType) {
         case FILE_TYPE.IMAGE: {
             const convertedBlob = await getRenderableImage(
                 file.metadata.title,
-                fileBlob
+                fileBlob,
             );
             const convertedURL = getFileObjectURL(
                 originalFileURL,
                 fileBlob,
-                convertedBlob
+                convertedBlob,
             );
             srcURLs = convertedURL;
             break;
@@ -310,7 +312,7 @@ export async function getRenderableFileURL(
             srcURLs = await getRenderableLivePhotoURL(
                 file,
                 fileBlob,
-                forceConvert
+                forceConvert,
             );
             break;
         }
@@ -318,12 +320,12 @@ export async function getRenderableFileURL(
             const convertedBlob = await getPlayableVideo(
                 file.metadata.title,
                 fileBlob,
-                forceConvert
+                forceConvert,
             );
             const convertedURL = getFileObjectURL(
                 originalFileURL,
                 fileBlob,
-                convertedBlob
+                convertedBlob,
             );
             srcURLs = convertedURL;
             break;
@@ -348,15 +350,15 @@ export async function getRenderableFileURL(
             file.metadata.fileType !== FILE_TYPE.LIVE_PHOTO && !!srcURLs,
         type:
             file.metadata.fileType === FILE_TYPE.LIVE_PHOTO
-                ? 'livePhoto'
-                : 'normal',
+                ? "livePhoto"
+                : "normal",
     };
 }
 
 async function getRenderableLivePhotoURL(
     file: EnteFile,
     fileBlob: Blob,
-    forceConvert: boolean
+    forceConvert: boolean,
 ): Promise<LivePhotoSourceURL> {
     const livePhoto = await decodeLivePhoto(file, fileBlob);
 
@@ -365,7 +367,7 @@ async function getRenderableLivePhotoURL(
             const imageBlob = new Blob([livePhoto.image]);
             const convertedImageBlob = await getRenderableImage(
                 livePhoto.imageNameTitle,
-                imageBlob
+                imageBlob,
             );
 
             return URL.createObjectURL(convertedImageBlob);
@@ -383,7 +385,7 @@ async function getRenderableLivePhotoURL(
                 livePhoto.videoNameTitle,
                 videoBlob,
                 forceConvert,
-                true
+                true,
             );
             return URL.createObjectURL(convertedVideoBlob);
         } catch (e) {
@@ -402,11 +404,11 @@ export async function getPlayableVideo(
     videoNameTitle: string,
     videoBlob: Blob,
     forceConvert = false,
-    runOnWeb = false
+    runOnWeb = false,
 ) {
     try {
         const isPlayable = await isPlaybackPossible(
-            URL.createObjectURL(videoBlob)
+            URL.createObjectURL(videoBlob),
         );
         if (isPlayable && !forceConvert) {
             return videoBlob;
@@ -415,18 +417,18 @@ export async function getPlayableVideo(
                 return null;
             }
             addLogLine(
-                'video format not supported, converting it name:',
-                videoNameTitle
+                "video format not supported, converting it name:",
+                videoNameTitle,
             );
             const mp4ConvertedVideo = await ffmpegService.convertToMP4(
-                new File([videoBlob], videoNameTitle)
+                new File([videoBlob], videoNameTitle),
             );
-            addLogLine('video successfully converted', videoNameTitle);
+            addLogLine("video successfully converted", videoNameTitle);
             return new Blob([await mp4ConvertedVideo.arrayBuffer()]);
         }
     } catch (e) {
-        addLogLine('video conversion failed', videoNameTitle);
-        logError(e, 'video conversion failed');
+        addLogLine("video conversion failed", videoNameTitle);
+        logError(e, "video conversion failed");
         return null;
     }
 }
@@ -450,12 +452,12 @@ export async function getRenderableImage(fileName: string, imageBlob: Blob) {
                 }
                 addLogLine(
                     `RawConverter called for ${fileName}-${convertBytesToHumanReadable(
-                        imageBlob.size
-                    )}`
+                        imageBlob.size,
+                    )}`,
                 );
                 convertedImageBlob = await imageProcessor.convertToJPEG(
                     imageBlob,
-                    fileName
+                    fileName,
                 );
                 addLogLine(`${fileName} successfully converted`);
             } catch (e) {
@@ -465,8 +467,8 @@ export async function getRenderableImage(fileName: string, imageBlob: Blob) {
                     }
                     addLogLine(
                         `HEICConverter called for ${fileName}-${convertBytesToHumanReadable(
-                            imageBlob.size
-                        )}`
+                            imageBlob.size,
+                        )}`,
                     );
                     convertedImageBlob =
                         await heicConversionService.convert(imageBlob);
@@ -480,7 +482,7 @@ export async function getRenderableImage(fileName: string, imageBlob: Blob) {
             return imageBlob;
         }
     } catch (e) {
-        logError(e, 'get Renderable Image failed', { fileTypeInfo });
+        logError(e, "get Renderable Image failed", { fileTypeInfo });
         return null;
     }
 }
@@ -502,7 +504,7 @@ export function isSupportedRawFormat(exactType: string) {
 
 export async function changeFilesVisibility(
     files: EnteFile[],
-    visibility: VISIBILITY_STATE
+    visibility: VISIBILITY_STATE,
 ): Promise<EnteFile[]> {
     const fileWithUpdatedMagicMetadataList: FileWithUpdatedMagicMetadata[] = [];
     for (const file of files) {
@@ -515,7 +517,7 @@ export async function changeFilesVisibility(
             updatedMagicMetadata: await updateMagicMetadata(
                 updatedMagicMetadataProps,
                 file.magicMetadata,
-                file.key
+                file.key,
             ),
         });
     }
@@ -524,7 +526,7 @@ export async function changeFilesVisibility(
 
 export async function changeFileCreationTime(
     file: EnteFile,
-    editedTime: number
+    editedTime: number,
 ): Promise<EnteFile> {
     const updatedPublicMagicMetadataProps: FilePublicMagicMetadataProps = {
         editedTime,
@@ -533,7 +535,7 @@ export async function changeFileCreationTime(
         await updateMagicMetadata(
             updatedPublicMagicMetadataProps,
             file.pubMagicMetadata,
-            file.key
+            file.key,
         );
     const updateResult = await updateFilePublicMagicMetadata([
         { file, updatedPublicMagicMetadata },
@@ -543,7 +545,7 @@ export async function changeFileCreationTime(
 
 export async function changeFileName(
     file: EnteFile,
-    editedName: string
+    editedName: string,
 ): Promise<EnteFile> {
     const updatedPublicMagicMetadataProps: FilePublicMagicMetadataProps = {
         editedName,
@@ -553,7 +555,7 @@ export async function changeFileName(
         await updateMagicMetadata(
             updatedPublicMagicMetadataProps,
             file.pubMagicMetadata,
-            file.key
+            file.key,
         );
     const updateResult = await updateFilePublicMagicMetadata([
         { file, updatedPublicMagicMetadata },
@@ -563,7 +565,7 @@ export async function changeFileName(
 
 export async function changeCaption(
     file: EnteFile,
-    caption: string
+    caption: string,
 ): Promise<EnteFile> {
     const updatedPublicMagicMetadataProps: FilePublicMagicMetadataProps = {
         caption,
@@ -573,7 +575,7 @@ export async function changeCaption(
         await updateMagicMetadata(
             updatedPublicMagicMetadataProps,
             file.pubMagicMetadata,
-            file.key
+            file.key,
         );
     const updateResult = await updateFilePublicMagicMetadata([
         { file, updatedPublicMagicMetadata },
@@ -603,7 +605,7 @@ export function mergeMetadata(files: EnteFile[]): EnteFile[] {
 
 export function updateExistingFilePubMetadata(
     existingFile: EnteFile,
-    updatedFile: EnteFile
+    updatedFile: EnteFile,
 ) {
     existingFile.pubMagicMetadata = updatedFile.pubMagicMetadata;
     existingFile.metadata = mergeMetadata([existingFile])[0].metadata;
@@ -632,7 +634,7 @@ export function getUniqueFiles(files: EnteFile[]) {
 export async function downloadFilesWithProgress(
     files: EnteFile[],
     downloadDirPath: string,
-    setFilesDownloadProgressAttributes: SetFilesDownloadProgressAttributes
+    setFilesDownloadProgressAttributes: SetFilesDownloadProgressAttributes,
 ) {
     if (!files.length) {
         return;
@@ -666,7 +668,7 @@ export async function downloadFilesWithProgress(
         await downloadFilesDesktop(
             files,
             { increaseSuccess, increaseFailed, isCancelled },
-            downloadDirPath
+            downloadDirPath,
         );
     } else {
         await downloadFiles(files, {
@@ -679,7 +681,7 @@ export async function downloadFilesWithProgress(
 
 export async function downloadSelectedFiles(
     files: EnteFile[],
-    setFilesDownloadProgressAttributes: SetFilesDownloadProgressAttributes
+    setFilesDownloadProgressAttributes: SetFilesDownloadProgressAttributes,
 ) {
     if (!files.length) {
         return;
@@ -694,13 +696,13 @@ export async function downloadSelectedFiles(
     await downloadFilesWithProgress(
         files,
         downloadDirPath,
-        setFilesDownloadProgressAttributes
+        setFilesDownloadProgressAttributes,
     );
 }
 
 export async function downloadSingleFile(
     file: EnteFile,
-    setFilesDownloadProgressAttributes: SetFilesDownloadProgressAttributes
+    setFilesDownloadProgressAttributes: SetFilesDownloadProgressAttributes,
 ) {
     let downloadDirPath: string;
     if (isElectron()) {
@@ -712,7 +714,7 @@ export async function downloadSingleFile(
     await downloadFilesWithProgress(
         [file],
         downloadDirPath,
-        setFilesDownloadProgressAttributes
+        setFilesDownloadProgressAttributes,
     );
 }
 
@@ -722,7 +724,7 @@ export async function downloadFiles(
         increaseSuccess: () => void;
         increaseFailed: () => void;
         isCancelled: () => boolean;
-    }
+    },
 ) {
     for (const file of files) {
         try {
@@ -732,7 +734,7 @@ export async function downloadFiles(
             await downloadFile(file);
             progressBarUpdater?.increaseSuccess();
         } catch (e) {
-            logError(e, 'download fail for file');
+            logError(e, "download fail for file");
             progressBarUpdater?.increaseFailed();
         }
     }
@@ -745,7 +747,7 @@ export async function downloadFilesDesktop(
         increaseFailed: () => void;
         isCancelled: () => boolean;
     },
-    downloadPath: string
+    downloadPath: string,
 ) {
     const fileReader = new FileReader();
     for (const file of files) {
@@ -756,7 +758,7 @@ export async function downloadFilesDesktop(
             await downloadFileDesktop(fileReader, file, downloadPath);
             progressBarUpdater?.increaseSuccess();
         } catch (e) {
-            logError(e, 'download fail for file');
+            logError(e, "download fail for file");
             progressBarUpdater?.increaseFailed();
         }
     }
@@ -765,15 +767,15 @@ export async function downloadFilesDesktop(
 export async function downloadFileDesktop(
     fileReader: FileReader,
     file: EnteFile,
-    downloadPath: string
+    downloadPath: string,
 ) {
     const fileStream = (await DownloadManager.getFile(
-        file
+        file,
     )) as ReadableStream<Uint8Array>;
     const updatedFileStream = await getUpdatedEXIFFileForDownload(
         fileReader,
         file,
-        fileStream
+        fileStream,
     );
 
     if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
@@ -781,37 +783,37 @@ export async function downloadFileDesktop(
         const livePhoto = await decodeLivePhoto(file, fileBlob);
         const imageExportName = getUniqueFileExportName(
             downloadPath,
-            livePhoto.imageNameTitle
+            livePhoto.imageNameTitle,
         );
         const imageStream = generateStreamFromArrayBuffer(livePhoto.image);
         await ElectronAPIs.saveStreamToDisk(
             getFileExportPath(downloadPath, imageExportName),
-            imageStream
+            imageStream,
         );
         try {
             const videoExportName = getUniqueFileExportName(
                 downloadPath,
-                livePhoto.videoNameTitle
+                livePhoto.videoNameTitle,
             );
             const videoStream = generateStreamFromArrayBuffer(livePhoto.video);
             await ElectronAPIs.saveStreamToDisk(
                 getFileExportPath(downloadPath, videoExportName),
-                videoStream
+                videoStream,
             );
         } catch (e) {
             ElectronFSService.deleteFile(
-                getFileExportPath(downloadPath, imageExportName)
+                getFileExportPath(downloadPath, imageExportName),
             );
             throw e;
         }
     } else {
         const fileExportName = getUniqueFileExportName(
             downloadPath,
-            file.metadata.title
+            file.metadata.title,
         );
         await ElectronAPIs.saveStreamToDisk(
             getFileExportPath(downloadPath, fileExportName),
-            updatedFileStream
+            updatedFileStream,
         );
     }
 }
@@ -831,21 +833,21 @@ export const createTypedObjectURL = async (blob: Blob, fileName: string) => {
 export const getUserOwnedFiles = (files: EnteFile[]) => {
     const user: User = getData(LS_KEYS.USER);
     if (!user?.id) {
-        throw Error('user missing');
+        throw Error("user missing");
     }
     return files.filter((file) => file.ownerID === user.id);
 };
 
 // doesn't work on firefox
 export const copyFileToClipboard = async (fileUrl: string) => {
-    const canvas = document.createElement('canvas');
-    const canvasCTX = canvas.getContext('2d');
+    const canvas = document.createElement("canvas");
+    const canvasCTX = canvas.getContext("2d");
     const image = new Image();
 
     const blobPromise = new Promise<Blob>((resolve, reject) => {
         let timeout: NodeJS.Timeout = null;
         try {
-            image.setAttribute('src', fileUrl);
+            image.setAttribute("src", fileUrl);
             image.onload = () => {
                 canvas.width = image.width;
                 canvas.height = image.height;
@@ -854,29 +856,29 @@ export const copyFileToClipboard = async (fileUrl: string) => {
                     (blob) => {
                         resolve(blob);
                     },
-                    'image/png',
-                    1
+                    "image/png",
+                    1,
                 );
 
                 clearTimeout(timeout);
             };
         } catch (e) {
-            void logError(e, 'failed to copy to clipboard');
+            void logError(e, "failed to copy to clipboard");
             reject(e);
         } finally {
             clearTimeout(timeout);
         }
         timeout = setTimeout(
             () => reject(Error(CustomError.WAIT_TIME_EXCEEDED)),
-            WAIT_TIME_IMAGE_CONVERSION
+            WAIT_TIME_IMAGE_CONVERSION,
         );
     });
 
     const { ClipboardItem } = window;
 
     await navigator.clipboard
-        .write([new ClipboardItem({ 'image/png': blobPromise })])
-        .catch((e) => logError(e, 'failed to copy to clipboard'));
+        .write([new ClipboardItem({ "image/png": blobPromise })])
+        .catch((e) => logError(e, "failed to copy to clipboard"));
 };
 
 export function getLatestVersionFiles(files: EnteFile[]) {
@@ -891,23 +893,23 @@ export function getLatestVersionFiles(files: EnteFile[]) {
         }
     });
     return Array.from(latestVersionFiles.values()).filter(
-        (file) => !file.isDeleted
+        (file) => !file.isDeleted,
     );
 }
 
 export function getPersonalFiles(
     files: EnteFile[],
     user: User,
-    collectionIdToOwnerIDMap?: Map<number, number>
+    collectionIdToOwnerIDMap?: Map<number, number>,
 ) {
     if (!user?.id) {
-        throw Error('user missing');
+        throw Error("user missing");
     }
     return files.filter(
         (file) =>
             file.ownerID === user.id &&
             (!collectionIdToOwnerIDMap ||
-                collectionIdToOwnerIDMap.get(file.collectionID) === user.id)
+                collectionIdToOwnerIDMap.get(file.collectionID) === user.id),
     );
 }
 
@@ -949,19 +951,19 @@ export const handleFileOps = async (
     ops: FILE_OPS_TYPE,
     files: EnteFile[],
     setTempDeletedFileIds: (
-        tempDeletedFileIds: Set<number> | ((prev: Set<number>) => Set<number>)
+        tempDeletedFileIds: Set<number> | ((prev: Set<number>) => Set<number>),
     ) => void,
     setTempHiddenFileIds: (
-        tempHiddenFileIds: Set<number> | ((prev: Set<number>) => Set<number>)
+        tempHiddenFileIds: Set<number> | ((prev: Set<number>) => Set<number>),
     ) => void,
     setFixCreationTimeAttributes: (
         fixCreationTimeAttributes:
             | {
                   files: EnteFile[];
               }
-            | ((prev: { files: EnteFile[] }) => { files: EnteFile[] })
+            | ((prev: { files: EnteFile[] }) => { files: EnteFile[] }),
     ) => void,
-    setFilesDownloadProgressAttributesCreator: SetFilesDownloadProgressAttributesCreator
+    setFilesDownloadProgressAttributesCreator: SetFilesDownloadProgressAttributesCreator,
 ) => {
     switch (ops) {
         case FILE_OPS_TYPE.TRASH:
@@ -976,11 +978,11 @@ export const handleFileOps = async (
         case FILE_OPS_TYPE.DOWNLOAD: {
             const setSelectedFileDownloadProgressAttributes =
                 setFilesDownloadProgressAttributesCreator(
-                    `${files.length} ${t('FILES')}`
+                    `${files.length} ${t("FILES")}`,
                 );
             await downloadSelectedFiles(
                 files,
-                setSelectedFileDownloadProgressAttributes
+                setSelectedFileDownloadProgressAttributes,
             );
             break;
         }
@@ -1000,8 +1002,8 @@ const deleteFileHelper = async (
     selectedFiles: EnteFile[],
     permanent: boolean,
     setTempDeletedFileIds: (
-        tempDeletedFileIds: Set<number> | ((prev: Set<number>) => Set<number>)
-    ) => void
+        tempDeletedFileIds: Set<number> | ((prev: Set<number>) => Set<number>),
+    ) => void,
 ) => {
     try {
         setTempDeletedFileIds((deletedFileIds) => {
@@ -1022,8 +1024,8 @@ const deleteFileHelper = async (
 const hideFilesHelper = async (
     selectedFiles: EnteFile[],
     setTempHiddenFileIds: (
-        tempHiddenFileIds: Set<number> | ((prev: Set<number>) => Set<number>)
-    ) => void
+        tempHiddenFileIds: Set<number> | ((prev: Set<number>) => Set<number>),
+    ) => void,
 ) => {
     try {
         setTempHiddenFileIds((hiddenFileIds) => {
@@ -1041,7 +1043,7 @@ const fixTimeHelper = async (
     selectedFiles: EnteFile[],
     setFixCreationTimeAttributes: (fixCreationTimeAttributes: {
         files: EnteFile[];
-    }) => void
+    }) => void,
 ) => {
     setFixCreationTimeAttributes({ files: selectedFiles });
 };
@@ -1049,7 +1051,7 @@ const fixTimeHelper = async (
 const getFileObjectURL = (
     originalFileURL: string,
     originalBlob: Blob,
-    convertedBlob: Blob
+    convertedBlob: Blob,
 ) => {
     const convertedURL = convertedBlob
         ? convertedBlob === originalBlob

@@ -1,6 +1,6 @@
 declare const cast: any;
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from "react";
 
 type Receiver = {
     cast: typeof cast;
@@ -12,11 +12,11 @@ const load = (() => {
     return () => {
         if (promise === null) {
             promise = new Promise((resolve) => {
-                const script = document.createElement('script');
+                const script = document.createElement("script");
                 script.src =
-                    'https://www.gstatic.com/cast/sdk/libs/caf_receiver/v3/cast_receiver_framework.js';
+                    "https://www.gstatic.com/cast/sdk/libs/caf_receiver/v3/cast_receiver_framework.js";
 
-                script.addEventListener('load', () => {
+                script.addEventListener("load", () => {
                     resolve({
                         cast,
                     });

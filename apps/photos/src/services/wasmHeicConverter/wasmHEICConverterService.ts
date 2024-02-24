@@ -1,23 +1,23 @@
-import QueueProcessor from 'services/queueProcessor';
-import { CustomError } from '@ente/shared/error';
-import { retryAsyncFunction } from 'utils/network';
-import { logError } from '@ente/shared/sentry';
-import { addLogLine } from '@ente/shared/logging';
-import { DedicatedConvertWorker } from 'worker/convert.worker';
-import { ComlinkWorker } from '@ente/shared/worker/comlinkWorker';
-import { convertBytesToHumanReadable } from '@ente/shared/utils/size';
-import { getDedicatedConvertWorker } from 'utils/comlink/ComlinkConvertWorker';
+import { CustomError } from "@ente/shared/error";
+import { addLogLine } from "@ente/shared/logging";
+import { logError } from "@ente/shared/sentry";
+import { convertBytesToHumanReadable } from "@ente/shared/utils/size";
+import { ComlinkWorker } from "@ente/shared/worker/comlinkWorker";
+import QueueProcessor from "services/queueProcessor";
+import { getDedicatedConvertWorker } from "utils/comlink/ComlinkConvertWorker";
+import { retryAsyncFunction } from "utils/network";
+import { DedicatedConvertWorker } from "worker/convert.worker";
 
 const WORKER_POOL_SIZE = 2;
 const MAX_CONVERSION_IN_PARALLEL = 1;
 const WAIT_TIME_BEFORE_NEXT_ATTEMPT_IN_MICROSECONDS = [100, 100];
 const WAIT_TIME_IN_MICROSECONDS = 30 * 1000;
 const BREATH_TIME_IN_MICROSECONDS = 1000;
-const CONVERT_FORMAT = 'JPEG';
+const CONVERT_FORMAT = "JPEG";
 
 class HEICConverter {
     private convertProcessor = new QueueProcessor<Blob>(
-        MAX_CONVERSION_IN_PARALLEL
+        MAX_CONVERSION_IN_PARALLEL,
     );
     private workerPool: ComlinkWorker<typeof DedicatedConvertWorker>[] = [];
     private ready: Promise<void>;
@@ -43,22 +43,22 @@ class HEICConverter {
                             const main = async () => {
                                 try {
                                     const timeout = setTimeout(() => {
-                                        reject(Error('wait time exceeded'));
+                                        reject(Error("wait time exceeded"));
                                     }, WAIT_TIME_IN_MICROSECONDS);
                                     const startTime = Date.now();
                                     const convertedHEIC =
                                         await worker.convertHEIC(
                                             fileBlob,
-                                            CONVERT_FORMAT
+                                            CONVERT_FORMAT,
                                         );
                                     addLogLine(
                                         `originalFileSize:${convertBytesToHumanReadable(
-                                            fileBlob?.size
+                                            fileBlob?.size,
                                         )},convertedFileSize:${convertBytesToHumanReadable(
-                                            convertedHEIC?.size
+                                            convertedHEIC?.size,
                                         )},  heic conversion time: ${
                                             Date.now() - startTime
-                                        }ms `
+                                        }ms `,
                                     );
                                     clearTimeout(timeout);
                                     resolve(convertedHEIC);
@@ -67,37 +67,37 @@ class HEICConverter {
                                 }
                             };
                             main();
-                        }
+                        },
                     );
                     if (!convertedHEIC || convertedHEIC?.size === 0) {
                         logError(
                             Error(`converted heic fileSize is Zero`),
-                            'converted heic fileSize is Zero',
+                            "converted heic fileSize is Zero",
                             {
                                 originalFileSize: convertBytesToHumanReadable(
-                                    fileBlob?.size ?? 0
+                                    fileBlob?.size ?? 0,
                                 ),
                                 convertedFileSize: convertBytesToHumanReadable(
-                                    convertedHEIC?.size ?? 0
+                                    convertedHEIC?.size ?? 0,
                                 ),
-                            }
+                            },
                         );
                     }
                     await new Promise((resolve) => {
                         setTimeout(
                             () => resolve(null),
-                            BREATH_TIME_IN_MICROSECONDS
+                            BREATH_TIME_IN_MICROSECONDS,
                         );
                     });
                     this.workerPool.push(convertWorker);
                     return convertedHEIC;
                 } catch (e) {
-                    logError(e, 'heic conversion failed');
+                    logError(e, "heic conversion failed");
                     convertWorker.terminate();
                     this.workerPool.push(getDedicatedConvertWorker());
                     throw e;
                 }
-            }, WAIT_TIME_BEFORE_NEXT_ATTEMPT_IN_MICROSECONDS)
+            }, WAIT_TIME_BEFORE_NEXT_ATTEMPT_IN_MICROSECONDS),
         );
         try {
             return await response.promise;

@@ -1,51 +1,51 @@
-import { getEndpoint } from '@ente/shared/network/api';
-import localForage from '@ente/shared/storage/localForage';
-import HTTPService from '@ente/shared/network/HTTPService';
-import { logError } from '@ente/shared/sentry';
-import { CustomError, parseSharingErrorCodes } from '@ente/shared/error';
-import ComlinkCryptoWorker from '@ente/shared/crypto';
+import ComlinkCryptoWorker from "@ente/shared/crypto";
+import { CustomError, parseSharingErrorCodes } from "@ente/shared/error";
+import HTTPService from "@ente/shared/network/HTTPService";
+import { getEndpoint } from "@ente/shared/network/api";
+import { logError } from "@ente/shared/sentry";
+import localForage from "@ente/shared/storage/localForage";
 
-import { Collection, CollectionPublicMagicMetadata } from 'types/collection';
-import { EncryptedEnteFile, EnteFile } from 'types/file';
-import { decryptFile, mergeMetadata, sortFiles } from 'utils/file';
+import { Collection, CollectionPublicMagicMetadata } from "types/collection";
+import { EncryptedEnteFile, EnteFile } from "types/file";
+import { decryptFile, mergeMetadata, sortFiles } from "utils/file";
 
 export interface SavedCollectionFiles {
     collectionLocalID: string;
     files: EnteFile[];
 }
 const ENDPOINT = getEndpoint();
-const COLLECTION_FILES_TABLE = 'collection-files';
-const COLLECTIONS_TABLE = 'collections';
+const COLLECTION_FILES_TABLE = "collection-files";
+const COLLECTIONS_TABLE = "collections";
 
 const getLastSyncKey = (collectionUID: string) => `${collectionUID}-time`;
 
 export const getLocalFiles = async (
-    collectionUID: string
+    collectionUID: string,
 ): Promise<EnteFile[]> => {
     const localSavedcollectionFiles =
         (await localForage.getItem<SavedCollectionFiles[]>(
-            COLLECTION_FILES_TABLE
+            COLLECTION_FILES_TABLE,
         )) || [];
     const matchedCollection = localSavedcollectionFiles.find(
-        (item) => item.collectionLocalID === collectionUID
+        (item) => item.collectionLocalID === collectionUID,
     );
     return matchedCollection?.files || [];
 };
 
 const savecollectionFiles = async (
     collectionUID: string,
-    files: EnteFile[]
+    files: EnteFile[],
 ) => {
     const collectionFiles =
         (await localForage.getItem<SavedCollectionFiles[]>(
-            COLLECTION_FILES_TABLE
+            COLLECTION_FILES_TABLE,
         )) || [];
     await localForage.setItem(
         COLLECTION_FILES_TABLE,
         dedupeCollectionFiles([
             { collectionLocalID: collectionUID, files },
             ...collectionFiles,
-        ])
+        ]),
     );
 };
 
@@ -55,7 +55,7 @@ export const getLocalCollections = async (collectionKey: string) => {
     const collection =
         localCollections.find(
             (localSavedPublicCollection) =>
-                localSavedPublicCollection.key === collectionKey
+                localSavedPublicCollection.key === collectionKey,
         ) || null;
     return collection;
 };
@@ -65,7 +65,7 @@ const saveCollection = async (collection: Collection) => {
         (await localForage.getItem<Collection[]>(COLLECTIONS_TABLE)) ?? [];
     await localForage.setItem(
         COLLECTIONS_TABLE,
-        dedupeCollections([collection, ...collections])
+        dedupeCollections([collection, ...collections]),
     );
 };
 
@@ -105,7 +105,7 @@ const updateSyncTime = async (collectionUID: string, time: number) =>
 export const syncPublicFiles = async (
     token: string,
     collection: Collection,
-    setPublicFiles: (files: EnteFile[]) => void
+    setPublicFiles: (files: EnteFile[]) => void,
 ) => {
     try {
         let files: EnteFile[] = [];
@@ -123,7 +123,7 @@ export const syncPublicFiles = async (
                 collection,
                 lastSyncTime,
                 files,
-                setPublicFiles
+                setPublicFiles,
             );
 
             files = [...files, ...fetchedFiles];
@@ -150,14 +150,14 @@ export const syncPublicFiles = async (
             setPublicFiles([...sortFiles(mergeMetadata(files), sortAsc)]);
         } catch (e) {
             const parsedError = parseSharingErrorCodes(e);
-            logError(e, 'failed to sync shared collection files');
+            logError(e, "failed to sync shared collection files");
             if (parsedError.message === CustomError.TOKEN_EXPIRED) {
                 throw e;
             }
         }
         return [...sortFiles(mergeMetadata(files), sortAsc)];
     } catch (e) {
-        logError(e, 'failed to get local  or sync shared collection files');
+        logError(e, "failed to get local  or sync shared collection files");
         throw e;
     }
 };
@@ -167,7 +167,7 @@ const fetchFiles = async (
     collection: Collection,
     sinceTime: number,
     files: EnteFile[],
-    setPublicFiles: (files: EnteFile[]) => void
+    setPublicFiles: (files: EnteFile[]) => void,
 ): Promise<EnteFile[]> => {
     try {
         let decryptedFiles: EnteFile[] = [];
@@ -184,9 +184,9 @@ const fetchFiles = async (
                     sinceTime: time,
                 },
                 {
-                    'Cache-Control': 'no-cache',
-                    'X-Cast-Access-Token': castToken,
-                }
+                    "Cache-Control": "no-cache",
+                    "X-Cast-Access-Token": castToken,
+                },
             );
             decryptedFiles = [
                 ...decryptedFiles,
@@ -197,7 +197,7 @@ const fetchFiles = async (
                         } else {
                             return file;
                         }
-                    }) as Promise<EnteFile>[]
+                    }) as Promise<EnteFile>[],
                 )),
             ];
 
@@ -208,28 +208,28 @@ const fetchFiles = async (
                 sortFiles(
                     mergeMetadata(
                         [...(files || []), ...decryptedFiles].filter(
-                            (item) => !item.isDeleted
-                        )
+                            (item) => !item.isDeleted,
+                        ),
                     ),
-                    sortAsc
-                )
+                    sortAsc,
+                ),
             );
         } while (resp.data.hasMore);
         return decryptedFiles;
     } catch (e) {
-        logError(e, 'Get cast files failed');
+        logError(e, "Get cast files failed");
         throw e;
     }
 };
 
 export const getCastCollection = async (
     castToken: string,
-    collectionKey: string
+    collectionKey: string,
 ): Promise<Collection> => {
     try {
         const resp = await HTTPService.get(`${ENDPOINT}/cast/info`, null, {
-            'Cache-Control': 'no-cache',
-            'X-Cast-Access-Token': castToken,
+            "Cache-Control": "no-cache",
+            "X-Cast-Access-Token": castToken,
         });
         const fetchedCollection = resp.data.collection;
 
@@ -240,7 +240,7 @@ export const getCastCollection = async (
             (await cryptoWorker.decryptToUTF8(
                 fetchedCollection.encryptedName,
                 fetchedCollection.nameDecryptionNonce,
-                collectionKey
+                collectionKey,
             )));
 
         let collectionPublicMagicMetadata: CollectionPublicMagicMetadata;
@@ -250,7 +250,7 @@ export const getCastCollection = async (
                 data: await cryptoWorker.decryptMetadata(
                     fetchedCollection.pubMagicMetadata.data,
                     fetchedCollection.pubMagicMetadata.header,
-                    collectionKey
+                    collectionKey,
                 ),
             };
         }
@@ -264,20 +264,20 @@ export const getCastCollection = async (
         await saveCollection(collection);
         return collection;
     } catch (e) {
-        logError(e, 'failed to get cast collection');
+        logError(e, "failed to get cast collection");
         throw e;
     }
 };
 
 export const removeCollection = async (
     collectionUID: string,
-    collectionKey: string
+    collectionKey: string,
 ) => {
     const collections =
         (await localForage.getItem<Collection[]>(COLLECTIONS_TABLE)) || [];
     await localForage.setItem(
         COLLECTIONS_TABLE,
-        collections.filter((collection) => collection.key !== collectionKey)
+        collections.filter((collection) => collection.key !== collectionKey),
     );
     await removeCollectionFiles(collectionUID);
 };
@@ -286,14 +286,14 @@ export const removeCollectionFiles = async (collectionUID: string) => {
     await localForage.removeItem(getLastSyncKey(collectionUID));
     const collectionFiles =
         (await localForage.getItem<SavedCollectionFiles[]>(
-            COLLECTION_FILES_TABLE
+            COLLECTION_FILES_TABLE,
         )) ?? [];
     await localForage.setItem(
         COLLECTION_FILES_TABLE,
         collectionFiles.filter(
             (collectionFiles) =>
-                collectionFiles.collectionLocalID !== collectionUID
-        )
+                collectionFiles.collectionLocalID !== collectionUID,
+        ),
     );
 };
 

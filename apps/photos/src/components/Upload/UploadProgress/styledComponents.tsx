@@ -1,14 +1,14 @@
-import { styled } from '@mui/material';
-export const NotUploadSectionHeader = styled('div')(
+import { styled } from "@mui/material";
+export const NotUploadSectionHeader = styled("div")(
     ({ theme }) => `
     text-align: center;
     color: ${theme.colors.danger.A700};
     border-bottom: 1px solid ${theme.colors.danger.A700};
     margin:${theme.spacing(3, 2, 1)}
-`
+`,
 );
 
-export const InProgressItemContainer = styled('div')`
+export const InProgressItemContainer = styled("div")`
     display: inline-block;
     & > span {
         display: inline-block;
@@ -26,7 +26,7 @@ export const InProgressItemContainer = styled('div')`
     }
 `;
 
-export const ResultItemContainer = styled('div')`
+export const ResultItemContainer = styled("div")`
     position: relative;
     top: 5px;
     display: inline-block;

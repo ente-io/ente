@@ -1,11 +1,11 @@
-import { WorkerSafeElectronService } from '@ente/shared/electron/service';
+import { WorkerSafeElectronService } from "@ente/shared/electron/service";
 import {
     getLocalSentryUserID,
     setLocalSentryUserID,
-} from '@ente/shared/storage/localStorage/helpers';
-import isElectron from 'is-electron';
-import { ApiError } from '../error';
-import { HttpStatusCode } from 'axios';
+} from "@ente/shared/storage/localStorage/helpers";
+import { HttpStatusCode } from "axios";
+import isElectron from "is-electron";
+import { ApiError } from "../error";
 
 export async function getSentryUserID() {
     if (isElectron()) {
@@ -21,20 +21,20 @@ export async function getSentryUserID() {
 }
 
 function makeID(length) {
-    let result = '';
+    let result = "";
     const characters =
-        'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
     const charactersLength = characters.length;
     for (let i = 0; i < length; i++) {
         result += characters.charAt(
-            Math.floor(Math.random() * charactersLength)
+            Math.floor(Math.random() * charactersLength),
         );
     }
     return result;
 }
 
 export function isErrorUnnecessaryForSentry(error: any) {
-    if (error?.message?.includes('Network Error')) {
+    if (error?.message?.includes("Network Error")) {
         return true;
     } else if (
         error instanceof ApiError &&

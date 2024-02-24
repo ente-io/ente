@@ -1,15 +1,15 @@
+import { logError } from "@ente/shared/sentry";
 import {
     FFMPEG_PLACEHOLDER,
     INPUT_PATH_PLACEHOLDER,
     OUTPUT_PATH_PLACEHOLDER,
-} from 'constants/ffmpeg';
-import { ElectronFile } from 'types/upload';
-import { parseFFmpegExtractedMetadata } from 'utils/ffmpeg';
-import { logError } from '@ente/shared/sentry';
-import ffmpegFactory from './ffmpegFactory';
+} from "constants/ffmpeg";
+import { ElectronFile } from "types/upload";
+import { parseFFmpegExtractedMetadata } from "utils/ffmpeg";
+import ffmpegFactory from "./ffmpegFactory";
 
 export async function generateVideoThumbnail(
-    file: File | ElectronFile
+    file: File | ElectronFile,
 ): Promise<File | ElectronFile> {
     try {
         let seekTime = 1;
@@ -19,18 +19,18 @@ export async function generateVideoThumbnail(
                 return await ffmpegClient.run(
                     [
                         FFMPEG_PLACEHOLDER,
-                        '-i',
+                        "-i",
                         INPUT_PATH_PLACEHOLDER,
-                        '-ss',
+                        "-ss",
                         `00:00:0${seekTime}`,
-                        '-vframes',
-                        '1',
-                        '-vf',
-                        'scale=-1:720',
+                        "-vframes",
+                        "1",
+                        "-vf",
+                        "scale=-1:720",
                         OUTPUT_PATH_PLACEHOLDER,
                     ],
                     file,
-                    'thumb.jpeg'
+                    "thumb.jpeg",
                 );
             } catch (e) {
                 if (seekTime === 0) {
@@ -40,7 +40,7 @@ export async function generateVideoThumbnail(
             seekTime--;
         }
     } catch (e) {
-        logError(e, 'ffmpeg generateVideoThumbnail failed');
+        logError(e, "ffmpeg generateVideoThumbnail failed");
         throw e;
     }
 }
@@ -55,24 +55,24 @@ export async function extractVideoMetadata(file: File | ElectronFile) {
         const metadata = await ffmpegClient.run(
             [
                 FFMPEG_PLACEHOLDER,
-                '-i',
+                "-i",
                 INPUT_PATH_PLACEHOLDER,
-                '-c',
-                'copy',
-                '-map_metadata',
-                '0',
-                '-f',
-                'ffmetadata',
+                "-c",
+                "copy",
+                "-map_metadata",
+                "0",
+                "-f",
+                "ffmetadata",
                 OUTPUT_PATH_PLACEHOLDER,
             ],
             file,
-            `metadata.txt`
+            `metadata.txt`,
         );
         return parseFFmpegExtractedMetadata(
-            new Uint8Array(await metadata.arrayBuffer())
+            new Uint8Array(await metadata.arrayBuffer()),
         );
     } catch (e) {
-        logError(e, 'ffmpeg extractVideoMetadata failed');
+        logError(e, "ffmpeg extractVideoMetadata failed");
         throw e;
     }
 }
@@ -83,18 +83,18 @@ export async function convertToMP4(file: File | ElectronFile) {
         return await ffmpegClient.run(
             [
                 FFMPEG_PLACEHOLDER,
-                '-i',
+                "-i",
                 INPUT_PATH_PLACEHOLDER,
-                '-preset',
-                'ultrafast',
+                "-preset",
+                "ultrafast",
                 OUTPUT_PATH_PLACEHOLDER,
             ],
             file,
-            'output.mp4',
-            true
+            "output.mp4",
+            true,
         );
     } catch (e) {
-        logError(e, 'ffmpeg convertToMP4 failed');
+        logError(e, "ffmpeg convertToMP4 failed");
         throw e;
     }
 }

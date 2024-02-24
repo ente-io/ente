@@ -1,4 +1,4 @@
-import SvgIcon from '@mui/material/SvgIcon';
+import SvgIcon from "@mui/material/SvgIcon";
 
 export const UnPinIcon = (props) => {
     return (
@@ -8,7 +8,8 @@ export const UnPinIcon = (props) => {
             viewBox="0 -960 960 960"
             shape-rendering="geometricPrecision"
             text-rendering="geometricPrecision"
-            {...props}>
+            {...props}
+        >
             <defs>
                 <linearGradient
                     id="eNi9tomYy273-fill"
@@ -18,7 +19,8 @@ export const UnPinIcon = (props) => {
                     y2="0.5"
                     spreadMethod="pad"
                     gradientUnits="objectBoundingBox"
-                    gradientTransform="translate(0 0)">
+                    gradientTransform="translate(0 0)"
+                >
                     <stop
                         id="eNi9tomYy273-fill-0"
                         offset="100%"

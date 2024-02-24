@@ -1,7 +1,6 @@
-import { Box, styled, Typography } from '@mui/material';
-import React from 'react';
-import { convertBytesToGBs, makeHumanReadableStorage } from 'utils/billing';
-import { t } from 'i18next';
+import { Box, styled, Typography } from "@mui/material";
+import { t } from "i18next";
+import { convertBytesToGBs, makeHumanReadableStorage } from "utils/billing";
 
 const MobileSmallBox = styled(Box)`
     display: none;
@@ -23,25 +22,27 @@ interface Iprops {
 export default function StorageSection({ usage, storage }: Iprops) {
     return (
         <Box width="100%">
-            <Typography variant="small" color={'text.muted'}>
-                {t('STORAGE')}
+            <Typography variant="small" color={"text.muted"}>
+                {t("STORAGE")}
             </Typography>
             <DefaultBox>
                 <Typography
-                    fontWeight={'bold'}
-                    sx={{ fontSize: '24px', lineHeight: '30px' }}>
+                    fontWeight={"bold"}
+                    sx={{ fontSize: "24px", lineHeight: "30px" }}
+                >
                     {`${makeHumanReadableStorage(usage, { roundUp: true })} ${t(
-                        'OF'
-                    )} ${makeHumanReadableStorage(storage)} ${t('USED')}`}
+                        "OF",
+                    )} ${makeHumanReadableStorage(storage)} ${t("USED")}`}
                 </Typography>
             </DefaultBox>
             <MobileSmallBox>
                 <Typography
-                    fontWeight={'bold'}
-                    sx={{ fontSize: '24px', lineHeight: '30px' }}>
+                    fontWeight={"bold"}
+                    sx={{ fontSize: "24px", lineHeight: "30px" }}
+                >
                     {`${convertBytesToGBs(usage)} /  ${convertBytesToGBs(
-                        storage
-                    )} ${t('GB')} ${t('USED')}`}
+                        storage,
+                    )} ${t("GB")} ${t("USED")}`}
                 </Typography>
             </MobileSmallBox>
         </Box>

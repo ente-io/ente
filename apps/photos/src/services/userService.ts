@@ -1,28 +1,28 @@
-import { putAttributes } from '@ente/accounts/api/user';
-import { logoutUser } from '@ente/accounts/services/user';
-import { getRecoveryKey } from '@ente/shared/crypto/helpers';
-import { ApiError } from '@ente/shared/error';
-import HTTPService from '@ente/shared/network/HTTPService';
-import { getEndpoint, getFamilyPortalURL } from '@ente/shared/network/api';
-import { logError } from '@ente/shared/sentry';
-import localForage from '@ente/shared/storage/localForage';
-import { getData, LS_KEYS } from '@ente/shared/storage/localStorage';
+import { putAttributes } from "@ente/accounts/api/user";
+import { logoutUser } from "@ente/accounts/services/user";
+import { getRecoveryKey } from "@ente/shared/crypto/helpers";
+import { ApiError } from "@ente/shared/error";
+import HTTPService from "@ente/shared/network/HTTPService";
+import { getEndpoint, getFamilyPortalURL } from "@ente/shared/network/api";
+import { logError } from "@ente/shared/sentry";
+import localForage from "@ente/shared/storage/localForage";
+import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import {
     getToken,
     setLocalMapEnabled,
-} from '@ente/shared/storage/localStorage/helpers';
-import { AxiosResponse, HttpStatusCode } from 'axios';
+} from "@ente/shared/storage/localStorage/helpers";
+import { AxiosResponse, HttpStatusCode } from "axios";
 import {
     DeleteChallengeResponse,
     GetFeatureFlagResponse,
     GetRemoteStoreValueResponse,
     UserDetails,
-} from 'types/user';
-import { getLocalFamilyData, isPartOfFamily } from 'utils/user/family';
+} from "types/user";
+import { getLocalFamilyData, isPartOfFamily } from "utils/user/family";
 
 const ENDPOINT = getEndpoint();
 
-const HAS_SET_KEYS = 'hasSetKeys';
+const HAS_SET_KEYS = "hasSetKeys";
 
 export const getPublicKey = async (email: string) => {
     const token = getToken();
@@ -31,8 +31,8 @@ export const getPublicKey = async (email: string) => {
         `${ENDPOINT}/users/public-key`,
         { email },
         {
-            'X-Auth-Token': token,
-        }
+            "X-Auth-Token": token,
+        },
     );
     return resp.data.publicKey;
 };
@@ -44,10 +44,10 @@ export const getPaymentToken = async () => {
         `${ENDPOINT}/users/payment-token`,
         null,
         {
-            'X-Auth-Token': token,
-        }
+            "X-Auth-Token": token,
+        },
     );
-    return resp.data['paymentToken'];
+    return resp.data["paymentToken"];
 };
 
 export const getFamiliesToken = async () => {
@@ -58,12 +58,12 @@ export const getFamiliesToken = async () => {
             `${ENDPOINT}/users/families-token`,
             null,
             {
-                'X-Auth-Token': token,
-            }
+                "X-Auth-Token": token,
+            },
         );
-        return resp.data['familiesToken'];
+        return resp.data["familiesToken"];
     } catch (e) {
-        logError(e, 'failed to get family token');
+        logError(e, "failed to get family token");
         throw e;
     }
 };
@@ -76,12 +76,12 @@ export const getAccountsToken = async () => {
             `${ENDPOINT}/users/accounts-token`,
             null,
             {
-                'X-Auth-Token': token,
-            }
+                "X-Auth-Token": token,
+            },
         );
-        return resp.data['accountsToken'];
+        return resp.data["accountsToken"];
     } catch (e) {
-        logError(e, 'failed to get accounts token');
+        logError(e, "failed to get accounts token");
         throw e;
     }
 };
@@ -94,12 +94,12 @@ export const getRoadmapRedirectURL = async () => {
             `${ENDPOINT}/users/roadmap/v2`,
             null,
             {
-                'X-Auth-Token': token,
-            }
+                "X-Auth-Token": token,
+            },
         );
-        return resp.data['url'];
+        return resp.data["url"];
     } catch (e) {
-        logError(e, 'failed to get roadmap url');
+        logError(e, "failed to get roadmap url");
         throw e;
     }
 };
@@ -114,29 +114,29 @@ export const isTokenValid = async (token: string) => {
             `${ENDPOINT}/users/session-validity/v2`,
             null,
             {
-                'X-Auth-Token': token,
-            }
+                "X-Auth-Token": token,
+            },
         );
         try {
             if (resp.data[HAS_SET_KEYS] === undefined) {
-                throw Error('resp.data.hasSetKey undefined');
+                throw Error("resp.data.hasSetKey undefined");
             }
-            if (!resp.data['hasSetKeys']) {
+            if (!resp.data["hasSetKeys"]) {
                 try {
                     await putAttributes(
                         token,
-                        getData(LS_KEYS.ORIGINAL_KEY_ATTRIBUTES)
+                        getData(LS_KEYS.ORIGINAL_KEY_ATTRIBUTES),
                     );
                 } catch (e) {
-                    logError(e, 'put attribute failed');
+                    logError(e, "put attribute failed");
                 }
             }
         } catch (e) {
-            logError(e, 'hasSetKeys not set in session validity response');
+            logError(e, "hasSetKeys not set in session validity response");
         }
         return true;
     } catch (e) {
-        logError(e, 'session-validity api call failed');
+        logError(e, "session-validity api call failed");
         if (
             e instanceof ApiError &&
             e.httpStatusCode === HttpStatusCode.Unauthorized
@@ -153,10 +153,10 @@ export const getTwoFactorStatus = async () => {
         `${ENDPOINT}/users/two-factor/status`,
         null,
         {
-            'X-Auth-Token': getToken(),
-        }
+            "X-Auth-Token": getToken(),
+        },
     );
-    return resp.data['status'];
+    return resp.data["status"];
 };
 
 export const getUserDetailsV2 = async (): Promise<UserDetails> => {
@@ -167,12 +167,12 @@ export const getUserDetailsV2 = async (): Promise<UserDetails> => {
             `${ENDPOINT}/users/details/v2`,
             null,
             {
-                'X-Auth-Token': token,
-            }
+                "X-Auth-Token": token,
+            },
         );
         return resp.data;
     } catch (e) {
-        logError(e, 'failed to get user details v2');
+        logError(e, "failed to get user details v2");
         throw e;
     }
 };
@@ -185,7 +185,7 @@ export const getFamilyPortalRedirectURL = async () => {
             window.location.origin
         }/gallery`;
     } catch (e) {
-        logError(e, 'unable to generate to family portal URL');
+        logError(e, "unable to generate to family portal URL");
         throw e;
     }
 };
@@ -198,12 +198,12 @@ export const getAccountDeleteChallenge = async () => {
             `${ENDPOINT}/users/delete-challenge`,
             null,
             {
-                'X-Auth-Token': token,
-            }
+                "X-Auth-Token": token,
+            },
         );
         return resp.data as DeleteChallengeResponse;
     } catch (e) {
-        logError(e, 'failed to get account delete challenge');
+        logError(e, "failed to get account delete challenge");
         throw e;
     }
 };
@@ -211,7 +211,7 @@ export const getAccountDeleteChallenge = async () => {
 export const deleteAccount = async (
     challenge: string,
     reason: string,
-    feedback: string
+    feedback: string,
 ) => {
     try {
         const token = getToken();
@@ -224,11 +224,11 @@ export const deleteAccount = async (
             { challenge, reason, feedback },
             null,
             {
-                'X-Auth-Token': token,
-            }
+                "X-Auth-Token": token,
+            },
         );
     } catch (e) {
-        logError(e, 'deleteAccount api call failed');
+        logError(e, "deleteAccount api call failed");
         throw e;
     }
 };
@@ -253,16 +253,16 @@ export const getFaceSearchEnabledStatus = async () => {
             await HTTPService.get(
                 `${ENDPOINT}/remote-store`,
                 {
-                    key: 'faceSearchEnabled',
+                    key: "faceSearchEnabled",
                     defaultValue: false,
                 },
                 {
-                    'X-Auth-Token': token,
-                }
+                    "X-Auth-Token": token,
+                },
             );
-        return resp.data.value === 'true';
+        return resp.data.value === "true";
     } catch (e) {
-        logError(e, 'failed to get face search enabled status');
+        logError(e, "failed to get face search enabled status");
         throw e;
     }
 };
@@ -273,16 +273,16 @@ export const updateFaceSearchEnabledStatus = async (newStatus: boolean) => {
         await HTTPService.post(
             `${ENDPOINT}/remote-store/update`,
             {
-                key: 'faceSearchEnabled',
+                key: "faceSearchEnabled",
                 value: newStatus.toString(),
             },
             null,
             {
-                'X-Auth-Token': token,
-            }
+                "X-Auth-Token": token,
+            },
         );
     } catch (e) {
-        logError(e, 'failed to update face search enabled status');
+        logError(e, "failed to update face search enabled status");
         throw e;
     }
 };
@@ -292,7 +292,7 @@ export const syncMapEnabled = async () => {
         const status = await getMapEnabledStatus();
         setLocalMapEnabled(status);
     } catch (e) {
-        logError(e, 'failed to sync map enabled status');
+        logError(e, "failed to sync map enabled status");
         throw e;
     }
 };
@@ -304,16 +304,16 @@ export const getMapEnabledStatus = async () => {
             await HTTPService.get(
                 `${ENDPOINT}/remote-store`,
                 {
-                    key: 'mapEnabled',
+                    key: "mapEnabled",
                     defaultValue: false,
                 },
                 {
-                    'X-Auth-Token': token,
-                }
+                    "X-Auth-Token": token,
+                },
             );
-        return resp.data.value === 'true';
+        return resp.data.value === "true";
     } catch (e) {
-        logError(e, 'failed to get map enabled status');
+        logError(e, "failed to get map enabled status");
         throw e;
     }
 };
@@ -324,30 +324,30 @@ export const updateMapEnabledStatus = async (newStatus: boolean) => {
         await HTTPService.post(
             `${ENDPOINT}/remote-store/update`,
             {
-                key: 'mapEnabled',
+                key: "mapEnabled",
                 value: newStatus.toString(),
             },
             null,
             {
-                'X-Auth-Token': token,
-            }
+                "X-Auth-Token": token,
+            },
         );
     } catch (e) {
-        logError(e, 'failed to update map enabled status');
+        logError(e, "failed to update map enabled status");
         throw e;
     }
 };
 
 export async function getDisableCFUploadProxyFlag(): Promise<boolean> {
-    if (process.env.NEXT_PUBLIC_ENTE_DIRECT_UPLOAD === 'true') return true;
+    if (process.env.NEXT_PUBLIC_ENTE_DIRECT_UPLOAD === "true") return true;
 
     try {
         const featureFlags = (
-            await fetch('https://static.ente.io/feature_flags.json')
+            await fetch("https://static.ente.io/feature_flags.json")
         ).json() as GetFeatureFlagResponse;
         return featureFlags.disableCFUploadProxy;
     } catch (e) {
-        logError(e, 'failed to get feature flags');
+        logError(e, "failed to get feature flags");
         return false;
     }
 }

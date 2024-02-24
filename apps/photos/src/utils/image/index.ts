@@ -1,16 +1,16 @@
 // these utils only work in env where OffscreenCanvas is available
 
-import { BlobOptions, Dimensions } from 'types/image';
-import { enlargeBox } from 'utils/machineLearning';
-import { Box } from '../../../thirdparty/face-api/classes';
+import { BlobOptions, Dimensions } from "types/image";
+import { enlargeBox } from "utils/machineLearning";
+import { Box } from "../../../thirdparty/face-api/classes";
 
 export function resizeToSquare(img: ImageBitmap, size: number) {
     const scale = size / Math.max(img.height, img.width);
     const width = scale * img.width;
     const height = scale * img.height;
     const offscreen = new OffscreenCanvas(size, size);
-    const ctx = offscreen.getContext('2d');
-    ctx.imageSmoothingQuality = 'high';
+    const ctx = offscreen.getContext("2d");
+    ctx.imageSmoothingQuality = "high";
     ctx.drawImage(img, 0, 0, width, height);
     const resizedImage = offscreen.transferToImageBitmap();
     return { image: resizedImage, width, height };
@@ -20,11 +20,11 @@ export function transform(
     imageBitmap: ImageBitmap,
     affineMat: number[][],
     outputWidth: number,
-    outputHeight: number
+    outputHeight: number,
 ) {
     const offscreen = new OffscreenCanvas(outputWidth, outputHeight);
-    const context = offscreen.getContext('2d');
-    context.imageSmoothingQuality = 'high';
+    const context = offscreen.getContext("2d");
+    context.imageSmoothingQuality = "high";
 
     context.transform(
         affineMat[0][0],
@@ -32,7 +32,7 @@ export function transform(
         affineMat[0][1],
         affineMat[1][1],
         affineMat[0][2],
-        affineMat[1][2]
+        affineMat[1][2],
     );
 
     context.drawImage(imageBitmap, 0, 0);
@@ -53,7 +53,7 @@ export function cropWithRotation(
     cropBox: Box,
     rotation?: number,
     maxSize?: Dimensions,
-    minSize?: Dimensions
+    minSize?: Dimensions,
 ) {
     const box = cropBox.round();
 
@@ -61,7 +61,7 @@ export function cropWithRotation(
     if (maxSize) {
         const minScale = Math.min(
             maxSize.width / box.width,
-            maxSize.height / box.height
+            maxSize.height / box.height,
         );
         if (minScale < 1) {
             outputSize.width = Math.round(minScale * box.width);
@@ -72,7 +72,7 @@ export function cropWithRotation(
     if (minSize) {
         const maxScale = Math.max(
             minSize.width / box.width,
-            minSize.height / box.height
+            minSize.height / box.height,
         );
         if (maxScale > 1) {
             outputSize.width = Math.round(maxScale * box.width);
@@ -83,8 +83,8 @@ export function cropWithRotation(
     // addLogLine({ imageBitmap, box, outputSize });
 
     const offscreen = new OffscreenCanvas(outputSize.width, outputSize.height);
-    const offscreenCtx = offscreen.getContext('2d');
-    offscreenCtx.imageSmoothingQuality = 'high';
+    const offscreenCtx = offscreen.getContext("2d");
+    offscreenCtx.imageSmoothingQuality = "high";
 
     offscreenCtx.translate(outputSize.width / 2, outputSize.height / 2);
     rotation && offscreenCtx.rotate(rotation);
@@ -108,7 +108,7 @@ export function cropWithRotation(
         enlargedOutputBox.x,
         enlargedOutputBox.y,
         enlargedOutputBox.width,
-        enlargedOutputBox.height
+        enlargedOutputBox.height,
     );
 
     return offscreen.transferToImageBitmap();
@@ -119,14 +119,14 @@ export function addPadding(image: ImageBitmap, padding: number) {
     const width = scale * image.width;
     const height = scale * image.height;
     const offscreen = new OffscreenCanvas(width, height);
-    const ctx = offscreen.getContext('2d');
+    const ctx = offscreen.getContext("2d");
     ctx.imageSmoothingEnabled = false;
     ctx.drawImage(
         image,
         width / 2 - image.width / 2,
         height / 2 - image.height / 2,
         image.width,
-        image.height
+        image.height,
     );
 
     return offscreen.transferToImageBitmap();
@@ -134,13 +134,13 @@ export function addPadding(image: ImageBitmap, padding: number) {
 
 export async function imageBitmapToBlob(
     imageBitmap: ImageBitmap,
-    options?: BlobOptions
+    options?: BlobOptions,
 ) {
     const offscreen = new OffscreenCanvas(
         imageBitmap.width,
-        imageBitmap.height
+        imageBitmap.height,
     );
-    offscreen.getContext('2d').drawImage(imageBitmap, 0, 0);
+    offscreen.getContext("2d").drawImage(imageBitmap, 0, 0);
 
     return offscreen.convertToBlob(options);
 }

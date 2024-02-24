@@ -6,51 +6,52 @@ import {
     Tab,
     Tabs,
     Typography,
-} from '@mui/material';
+} from "@mui/material";
 import {
+    Dispatch,
+    MutableRefObject,
+    SetStateAction,
+    createContext,
+    useContext,
     useEffect,
     useRef,
     useState,
-    createContext,
-    Dispatch,
-    SetStateAction,
-    MutableRefObject,
-    useContext,
-} from 'react';
+} from "react";
 
-import { EnteFile } from 'types/file';
-import downloadManager from 'services/download';
-import { MenuItemGroup } from 'components/Menu/MenuItemGroup';
-import { EnteMenuItem } from 'components/Menu/EnteMenuItem';
-import CropOriginalIcon from '@mui/icons-material/CropOriginal';
-import MenuSectionTitle from 'components/Menu/MenuSectionTitle';
-import DownloadIcon from '@mui/icons-material/Download';
-import mime from 'mime-types';
-import CloseIcon from '@mui/icons-material/Close';
-import { HorizontalFlex } from '@ente/shared/components/Container';
-import TransformMenu from './TransformMenu';
-import CropMenu from './CropMenu';
-import ColoursMenu from './ColoursMenu';
-import { FileWithCollection } from 'types/upload';
-import uploadManager from 'services/upload/uploadManager';
-import { getLocalCollections } from 'services/collectionService';
-import CloudUploadIcon from '@mui/icons-material/CloudUpload';
-import MenuItemDivider from 'components/Menu/MenuItemDivider';
-import { t } from 'i18next';
-import { EnteDrawer } from 'components/EnteDrawer';
-import ChevronRightIcon from '@mui/icons-material/ChevronRight';
-import MenuIcon from '@mui/icons-material/Menu';
-import { AppContext } from 'pages/_app';
-import { getEditorCloseConfirmationMessage } from 'utils/ui';
-import { logError } from '@ente/shared/sentry';
-import { getFileType } from 'services/typeDetectionService';
-import { downloadUsingAnchor } from '@ente/shared/utils';
-import { CORNER_THRESHOLD, FILTER_DEFAULT_VALUES } from 'constants/photoEditor';
-import FreehandCropRegion from './FreehandCropRegion';
-import EnteButton from '@ente/shared/components/EnteButton';
-import { CenteredFlex } from '@ente/shared/components/Container';
-import CropIcon from '@mui/icons-material/Crop';
-import { cropRegionOfCanvas, getCropRegionArgs } from './CropMenu';
+import {
+    CenteredFlex,
+    HorizontalFlex,
+} from "@ente/shared/components/Container";
+import EnteButton from "@ente/shared/components/EnteButton";
+import { logError } from "@ente/shared/sentry";
+import { downloadUsingAnchor } from "@ente/shared/utils";
+import ChevronRightIcon from "@mui/icons-material/ChevronRight";
+import CloseIcon from "@mui/icons-material/Close";
+import CloudUploadIcon from "@mui/icons-material/CloudUpload";
+import CropIcon from "@mui/icons-material/Crop";
+import CropOriginalIcon from "@mui/icons-material/CropOriginal";
+import DownloadIcon from "@mui/icons-material/Download";
+import MenuIcon from "@mui/icons-material/Menu";
+import { EnteDrawer } from "components/EnteDrawer";
+import { EnteMenuItem } from "components/Menu/EnteMenuItem";
+import MenuItemDivider from "components/Menu/MenuItemDivider";
+import { MenuItemGroup } from "components/Menu/MenuItemGroup";
+import MenuSectionTitle from "components/Menu/MenuSectionTitle";
+import { CORNER_THRESHOLD, FILTER_DEFAULT_VALUES } from "constants/photoEditor";
+import { t } from "i18next";
+import mime from "mime-types";
+import { AppContext } from "pages/_app";
+import { getLocalCollections } from "services/collectionService";
+import downloadManager from "services/download";
+import { getFileType } from "services/typeDetectionService";
+import uploadManager from "services/upload/uploadManager";
+import { EnteFile } from "types/file";
+import { FileWithCollection } from "types/upload";
+import { getEditorCloseConfirmationMessage } from "utils/ui";
+import ColoursMenu from "./ColoursMenu";
+import CropMenu, { cropRegionOfCanvas, getCropRegionArgs } from "./CropMenu";
+import FreehandCropRegion from "./FreehandCropRegion";
+import TransformMenu from "./TransformMenu";
 
 interface IProps {
     file: EnteFile;
@@ -67,15 +68,15 @@ export const ImageEditorOverlayContext = createContext(
         setCanvasLoading: Dispatch<SetStateAction<boolean>>;
         canvasLoading: boolean;
         setCurrentTab: Dispatch<SetStateAction<OperationTab>>;
-    }
+    },
 );
 
-type OperationTab = 'crop' | 'transform' | 'colours';
+type OperationTab = "crop" | "transform" | "colours";
 
 const getEditedFileName = (fileName: string) => {
-    const fileNameParts = fileName.split('.');
+    const fileNameParts = fileName.split(".");
     const extension = fileNameParts.pop();
-    const editedFileName = `${fileNameParts.join('.')}-edited.${extension}`;
+    const editedFileName = `${fileNameParts.join(".")}-edited.${extension}`;
     return editedFileName;
 };
 
@@ -93,19 +94,19 @@ const ImageEditorOverlay = (props: IProps) => {
     const originalSizeCanvasRef = useRef<HTMLCanvasElement | null>(null);
     const parentRef = useRef<HTMLDivElement | null>(null);
 
-    const [fileURL, setFileURL] = useState<string>('');
+    const [fileURL, setFileURL] = useState<string>("");
 
     const [currentRotationAngle, setCurrentRotationAngle] = useState(0);
 
-    const [currentTab, setCurrentTab] = useState<OperationTab>('transform');
+    const [currentTab, setCurrentTab] = useState<OperationTab>("transform");
 
     const [brightness, setBrightness] = useState(
-        FILTER_DEFAULT_VALUES.brightness
+        FILTER_DEFAULT_VALUES.brightness,
     );
     const [contrast, setContrast] = useState(FILTER_DEFAULT_VALUES.contrast);
     const [blur, setBlur] = useState(FILTER_DEFAULT_VALUES.blur);
     const [saturation, setSaturation] = useState(
-        FILTER_DEFAULT_VALUES.saturation
+        FILTER_DEFAULT_VALUES.saturation,
     );
     const [invert, setInvert] = useState(FILTER_DEFAULT_VALUES.invert);
 
@@ -157,7 +158,7 @@ const ImageEditorOverlay = (props: IProps) => {
     };
 
     const handleDragStart = (e) => {
-        if (currentTab !== 'crop') return;
+        if (currentTab !== "crop") return;
 
         const rect = cropBoxRef.current.getBoundingClientRect();
         const offsetX = e.pageX - rect.left - rect.width / 2;
@@ -199,11 +200,11 @@ const ImageEditorOverlay = (props: IProps) => {
             setCropBox((prev) => {
                 const newWidth = Math.min(
                     beforeGrowthWidth + dx,
-                    canvasBounds.width - prev.x + offsetX
+                    canvasBounds.width - prev.x + offsetX,
                 );
                 const newHeight = Math.min(
                     beforeGrowthHeight + dy,
-                    canvasBounds.height - prev.y + offsetY
+                    canvasBounds.height - prev.y + offsetY,
                 );
 
                 return {
@@ -220,11 +221,11 @@ const ImageEditorOverlay = (props: IProps) => {
                 // constrain the new position to the canvas boundaries, accounting for the offset
                 newX = Math.max(
                     offsetX,
-                    Math.min(newX, offsetX + canvasBounds.width - prev.width)
+                    Math.min(newX, offsetX + canvasBounds.width - prev.width),
                 );
                 newY = Math.max(
                     offsetY,
-                    Math.min(newY, offsetY + canvasBounds.height - prev.height)
+                    Math.min(newY, offsetY + canvasBounds.height - prev.height),
                 );
 
                 return {
@@ -271,15 +272,15 @@ const ImageEditorOverlay = (props: IProps) => {
                     contrast !== FILTER_DEFAULT_VALUES.contrast ||
                     blur !== FILTER_DEFAULT_VALUES.blur ||
                     saturation !== FILTER_DEFAULT_VALUES.saturation ||
-                    invert !== FILTER_DEFAULT_VALUES.invert
+                    invert !== FILTER_DEFAULT_VALUES.invert,
             );
         } catch (e) {
-            logError(e, 'Error applying filters');
+            logError(e, "Error applying filters");
         }
     }, [brightness, contrast, blur, saturation, invert, canvasRef, fileURL]);
 
     useEffect(() => {
-        if (currentTab !== 'crop') return;
+        if (currentTab !== "crop") return;
         resetCropBox();
         setShowControlsDrawer(false);
     }, [currentTab]);
@@ -294,7 +295,7 @@ const ImageEditorOverlay = (props: IProps) => {
                 const filterString = `brightness(${brightness}%) contrast(${contrast}%) blur(${blurRadius}px) saturate(${saturation}%) invert(${
                     invert ? 1 : 0
                 })`;
-                const context = canvas.getContext('2d');
+                const context = canvas.getContext("2d");
                 context.imageSmoothingEnabled = false;
 
                 context.filter = filterString;
@@ -309,7 +310,7 @@ const ImageEditorOverlay = (props: IProps) => {
                                 0,
                                 0,
                                 canvas.width,
-                                canvas.height
+                                canvas.height,
                             );
                             context.save();
                             context.drawImage(
@@ -317,7 +318,7 @@ const ImageEditorOverlay = (props: IProps) => {
                                 0,
                                 0,
                                 canvas.width,
-                                canvas.height
+                                canvas.height,
                             );
                             context.restore();
                             resolve(true);
@@ -328,7 +329,7 @@ const ImageEditorOverlay = (props: IProps) => {
                 });
             }
         } catch (e) {
-            logError(e, 'Error applying filters');
+            logError(e, "Error applying filters");
             throw e;
         }
     };
@@ -364,11 +365,11 @@ const ImageEditorOverlay = (props: IProps) => {
             setCurrentRotationAngle(0);
 
             const img = new Image();
-            const ctx = canvasRef.current.getContext('2d');
+            const ctx = canvasRef.current.getContext("2d");
             ctx.imageSmoothingEnabled = false;
             if (!fileURL) {
                 const srcURLs = await downloadManager.getFileForPreview(
-                    props.file
+                    props.file,
                 );
                 img.src = srcURLs.url as string;
                 setFileURL(srcURLs.url as string);
@@ -381,7 +382,7 @@ const ImageEditorOverlay = (props: IProps) => {
                     try {
                         const scale = Math.min(
                             parentRef.current.clientWidth / img.width,
-                            parentRef.current.clientHeight / img.height
+                            parentRef.current.clientHeight / img.height,
                         );
                         setPreviewCanvasScale(scale);
 
@@ -396,7 +397,7 @@ const ImageEditorOverlay = (props: IProps) => {
                         originalSizeCanvasRef.current.height = img.height;
 
                         const oSCtx =
-                            originalSizeCanvasRef.current.getContext('2d');
+                            originalSizeCanvasRef.current.getContext("2d");
 
                         oSCtx?.drawImage(img, 0, 0, img.width, img.height);
 
@@ -421,7 +422,7 @@ const ImageEditorOverlay = (props: IProps) => {
                 };
             });
         } catch (e) {
-            logError(e, 'Error loading canvas');
+            logError(e, "Error loading canvas");
         }
     };
 
@@ -440,13 +441,13 @@ const ImageEditorOverlay = (props: IProps) => {
             const image = new Image();
             image.src = canvas.toDataURL();
 
-            const context = canvas.getContext('2d');
+            const context = canvas.getContext("2d");
             if (!context) return;
             return new Promise((resolve) => {
                 canvas.toBlob(resolve, mimeType);
             });
         } catch (e) {
-            logError(e, 'Error exporting canvas to blob');
+            logError(e, "Error exporting canvas to blob");
             throw e;
         }
     };
@@ -454,7 +455,7 @@ const ImageEditorOverlay = (props: IProps) => {
     const getEditedFile = async () => {
         const blob = await exportCanvasToBlob();
         if (!blob) {
-            throw Error('no blob');
+            throw Error("no blob");
         }
         const editedFileName = getEditedFileName(props.file.metadata.title);
         const editedFile = new File([blob], editedFileName);
@@ -469,7 +470,7 @@ const ImageEditorOverlay = (props: IProps) => {
     const handleCloseWithConfirmation = () => {
         if (transformationPerformed || coloursAdjusted) {
             appContext.setDialogBoxAttributesV2(
-                getEditorCloseConfirmationMessage(handleClose)
+                getEditorCloseConfirmationMessage(handleClose),
             );
         } else {
             handleClose();
@@ -487,11 +488,11 @@ const ImageEditorOverlay = (props: IProps) => {
             const editedFile = await getEditedFile();
             const fileType = await getFileType(editedFile);
             const tempImgURL = URL.createObjectURL(
-                new Blob([editedFile], { type: fileType.mimeType })
+                new Blob([editedFile], { type: fileType.mimeType }),
             );
             downloadUsingAnchor(tempImgURL, editedFile.name);
         } catch (e) {
-            logError(e, 'Error downloading edited photo');
+            logError(e, "Error downloading edited photo");
         }
     };
 
@@ -502,7 +503,7 @@ const ImageEditorOverlay = (props: IProps) => {
             const collections = await getLocalCollections();
 
             const collection = collections.find(
-                (c) => c.id === props.file.collectionID
+                (c) => c.id === props.file.collectionID,
             );
 
             const editedFile = await getEditedFile();
@@ -519,29 +520,32 @@ const ImageEditorOverlay = (props: IProps) => {
             props.onClose();
             props.closePhotoViewer();
         } catch (e) {
-            logError(e, 'Error saving copy to ente');
+            logError(e, "Error saving copy to ente");
         }
     };
     return (
         <>
             <Backdrop
                 sx={{
-                    background: '#000',
+                    background: "#000",
                     zIndex: 1600,
-                    width: '100%',
+                    width: "100%",
                 }}
-                open>
+                open
+            >
                 <Box padding="1rem" width="100%" height="100%">
                     <HorizontalFlex
-                        justifyContent={'space-between'}
-                        alignItems={'center'}>
+                        justifyContent={"space-between"}
+                        alignItems={"center"}
+                    >
                         <Typography variant="h2" fontWeight="bold">
-                            {t('PHOTO_EDITOR')}
+                            {t("PHOTO_EDITOR")}
                         </Typography>
                         <IconButton
                             onClick={() => {
                                 setShowControlsDrawer(true);
-                            }}>
+                            }}
+                        >
                             <MenuIcon />
                         </IconButton>
                     </HorizontalFlex>
@@ -549,20 +553,22 @@ const ImageEditorOverlay = (props: IProps) => {
                         width="100%"
                         height="100%"
                         overflow="hidden"
-                        boxSizing={'border-box'}
+                        boxSizing={"border-box"}
                         display="flex"
                         alignItems="center"
                         justifyContent="center"
                         position="relative"
                         onMouseUp={handleDragEnd}
                         onMouseMove={isDragging ? handleDrag : null}
-                        onMouseDown={handleDragStart}>
+                        onMouseDown={handleDragStart}
+                    >
                         <Box
                             style={{
-                                position: 'relative',
-                                width: '100%',
-                                height: '100%',
-                            }}>
+                                position: "relative",
+                                width: "100%",
+                                height: "100%",
+                            }}
+                        >
                             <Box
                                 height="90%"
                                 width="100%"
@@ -570,7 +576,8 @@ const ImageEditorOverlay = (props: IProps) => {
                                 display="flex"
                                 alignItems="center"
                                 justifyContent="center"
-                                position="relative">
+                                position="relative"
+                            >
                                 {(fileURL === null || canvasLoading) && (
                                     <CircularProgress />
                                 )}
@@ -578,22 +585,22 @@ const ImageEditorOverlay = (props: IProps) => {
                                 <canvas
                                     ref={canvasRef}
                                     style={{
-                                        objectFit: 'contain',
+                                        objectFit: "contain",
                                         display:
                                             fileURL === null || canvasLoading
-                                                ? 'none'
-                                                : 'block',
-                                        position: 'absolute',
+                                                ? "none"
+                                                : "block",
+                                        position: "absolute",
                                     }}
                                 />
                                 <canvas
                                     ref={originalSizeCanvasRef}
                                     style={{
-                                        display: 'none',
+                                        display: "none",
                                     }}
                                 />
 
-                                {currentTab === 'crop' && (
+                                {currentTab === "crop" && (
                                     <FreehandCropRegion
                                         cropBox={cropBox}
                                         ref={cropBoxRef}
@@ -601,7 +608,7 @@ const ImageEditorOverlay = (props: IProps) => {
                                     />
                                 )}
                             </Box>
-                            {currentTab === 'crop' && (
+                            {currentTab === "crop" && (
                                 <CenteredFlex marginTop="1rem">
                                     <EnteButton
                                         color="accent"
@@ -616,7 +623,7 @@ const ImageEditorOverlay = (props: IProps) => {
                                             const { x1, x2, y1, y2 } =
                                                 getCropRegionArgs(
                                                     cropBoxRef.current,
-                                                    canvasRef.current
+                                                    canvasRef.current,
                                                 );
                                             setCanvasLoading(true);
                                             setTransformationPerformed(true);
@@ -625,21 +632,22 @@ const ImageEditorOverlay = (props: IProps) => {
                                                 x1,
                                                 y1,
                                                 x2,
-                                                y2
+                                                y2,
                                             );
                                             cropRegionOfCanvas(
                                                 originalSizeCanvasRef.current,
                                                 x1 / previewCanvasScale,
                                                 y1 / previewCanvasScale,
                                                 x2 / previewCanvasScale,
-                                                y2 / previewCanvasScale
+                                                y2 / previewCanvasScale,
                                             );
                                             resetCropBox();
                                             setCanvasLoading(false);
 
-                                            setCurrentTab('transform');
-                                        }}>
-                                        {t('APPLY_CROP')}
+                                            setCurrentTab("transform");
+                                        }}
+                                    >
+                                        {t("APPLY_CROP")}
                                     </EnteButton>
                                 </CenteredFlex>
                             )}
@@ -650,12 +658,14 @@ const ImageEditorOverlay = (props: IProps) => {
                     variant="persistent"
                     anchor="right"
                     open={showControlsDrawer}
-                    onClose={handleCloseWithConfirmation}>
-                    <HorizontalFlex justifyContent={'space-between'}>
+                    onClose={handleCloseWithConfirmation}
+                >
+                    <HorizontalFlex justifyContent={"space-between"}>
                         <IconButton
                             onClick={() => {
                                 setShowControlsDrawer(false);
-                            }}>
+                            }}
+                        >
                             <ChevronRightIcon />
                         </IconButton>
                         <IconButton onClick={handleCloseWithConfirmation}>
@@ -667,28 +677,30 @@ const ImageEditorOverlay = (props: IProps) => {
                             value={currentTab}
                             onChange={(_, value) => {
                                 setCurrentTab(value);
-                            }}>
-                            <Tab label={t('CROP')} value="crop" />
-                            <Tab label={t('TRANSFORM')} value="transform" />
+                            }}
+                        >
+                            <Tab label={t("CROP")} value="crop" />
+                            <Tab label={t("TRANSFORM")} value="transform" />
                             <Tab
-                                label={t('COLORS')}
+                                label={t("COLORS")}
                                 value="colours"
                                 disabled={transformationPerformed}
                             />
                         </Tabs>
                     </HorizontalFlex>
-                    <MenuSectionTitle title={t('RESET')} />
+                    <MenuSectionTitle title={t("RESET")} />
                     <MenuItemGroup
                         style={{
-                            marginBottom: '0.5rem',
-                        }}>
+                            marginBottom: "0.5rem",
+                        }}
+                    >
                         <EnteMenuItem
                             disabled={canvasLoading}
                             startIcon={<CropOriginalIcon />}
                             onClick={() => {
                                 loadCanvas();
                             }}
-                            label={t('RESTORE_ORIGINAL')}
+                            label={t("RESTORE_ORIGINAL")}
                         />
                     </MenuItemGroup>
                     <ImageEditorOverlayContext.Provider
@@ -699,8 +711,9 @@ const ImageEditorOverlay = (props: IProps) => {
                             canvasLoading,
                             setTransformationPerformed,
                             setCurrentTab,
-                        }}>
-                        {currentTab === 'crop' && (
+                        }}
+                    >
+                        {currentTab === "crop" && (
                             <CropMenu
                                 previewScale={previewCanvasScale}
                                 cropBoxProps={cropBox}
@@ -708,9 +721,9 @@ const ImageEditorOverlay = (props: IProps) => {
                                 resetCropBox={resetCropBox}
                             />
                         )}
-                        {currentTab === 'transform' && <TransformMenu />}
+                        {currentTab === "transform" && <TransformMenu />}
                     </ImageEditorOverlayContext.Provider>
-                    {currentTab === 'colours' && (
+                    {currentTab === "colours" && (
                         <ColoursMenu
                             brightness={brightness}
                             contrast={contrast}
@@ -724,12 +737,12 @@ const ImageEditorOverlay = (props: IProps) => {
                             setInvert={setInvert}
                         />
                     )}
-                    <MenuSectionTitle title={t('EXPORT')} />
+                    <MenuSectionTitle title={t("EXPORT")} />
                     <MenuItemGroup>
                         <EnteMenuItem
                             startIcon={<DownloadIcon />}
                             onClick={downloadEditedPhoto}
-                            label={t('DOWNLOAD_EDITED')}
+                            label={t("DOWNLOAD_EDITED")}
                             disabled={
                                 !transformationPerformed && !coloursAdjusted
                             }
@@ -738,7 +751,7 @@ const ImageEditorOverlay = (props: IProps) => {
                         <EnteMenuItem
                             startIcon={<CloudUploadIcon />}
                             onClick={saveCopyToEnte}
-                            label={t('SAVE_A_COPY_TO_ENTE')}
+                            label={t("SAVE_A_COPY_TO_ENTE")}
                             disabled={
                                 !transformationPerformed && !coloursAdjusted
                             }
@@ -746,7 +759,7 @@ const ImageEditorOverlay = (props: IProps) => {
                     </MenuItemGroup>
                     {!transformationPerformed && !coloursAdjusted && (
                         <MenuSectionTitle
-                            title={t('PHOTO_EDIT_REQUIRED_TO_SAVE')}
+                            title={t("PHOTO_EDIT_REQUIRED_TO_SAVE")}
                         />
                     )}
                 </EnteDrawer>

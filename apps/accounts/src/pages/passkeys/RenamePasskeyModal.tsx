@@ -1,10 +1,10 @@
-import DialogBoxV2 from '@ente/shared/components/DialogBoxV2';
-import { AppContext } from 'pages/_app';
-import { useContext } from 'react';
-import { PasskeysContext } from '.';
-import SingleInputForm from '@ente/shared/components/SingleInputForm';
-import { t } from 'i18next';
-import { renamePasskey } from 'services/passkeysService';
+import DialogBoxV2 from "@ente/shared/components/DialogBoxV2";
+import SingleInputForm from "@ente/shared/components/SingleInputForm";
+import { t } from "i18next";
+import { AppContext } from "pages/_app";
+import { useContext } from "react";
+import { renamePasskey } from "services/passkeysService";
+import { PasskeysContext } from ".";
 
 interface IProps {
     open: boolean;
@@ -34,17 +34,18 @@ const RenamePasskeyModal = (props: IProps) => {
             onClose={props.onClose}
             fullScreen={isMobile}
             attributes={{
-                title: t('RENAME_PASSKEY'),
+                title: t("RENAME_PASSKEY"),
                 secondary: {
                     action: props.onClose,
-                    text: t('CANCEL'),
+                    text: t("CANCEL"),
                 },
-            }}>
+            }}
+        >
             <SingleInputForm
                 initialValue={selectedPasskey?.friendlyName}
                 callback={onSubmit}
-                placeholder={t('ENTER_PASSKEY_NAME')}
-                buttonText={t('RENAME')}
+                placeholder={t("ENTER_PASSKEY_NAME")}
+                buttonText={t("RENAME")}
                 fieldType="text"
                 secondaryButtonAction={props.onClose}
                 submitButtonProps={{ sx: { mt: 1, mb: 2 } }}

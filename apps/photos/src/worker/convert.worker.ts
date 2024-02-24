@@ -1,5 +1,5 @@
-import * as Comlink from 'comlink';
-import { convertHEIC } from 'services/wasmHeicConverter/wasmHEICConverterClient';
+import * as Comlink from "comlink";
+import { convertHEIC } from "services/wasmHeicConverter/wasmHEICConverterClient";
 
 export class DedicatedConvertWorker {
     async convertHEIC(fileBlob: Blob, format: string) {

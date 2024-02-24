@@ -1,14 +1,14 @@
-import React, { useState } from 'react';
+import { useState } from "react";
 
-import {
-    MIN_EDITED_CREATION_TIME,
-    MAX_EDITED_CREATION_TIME,
-} from 'constants/file';
 import {
     LocalizationProvider,
     MobileDateTimePicker,
-} from '@mui/x-date-pickers';
-import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
+} from "@mui/x-date-pickers";
+import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
+import {
+    MAX_EDITED_CREATION_TIME,
+    MIN_EDITED_CREATION_TIME,
+} from "constants/file";
 
 interface Props {
     initialValue?: Date;
@@ -45,17 +45,17 @@ const EnteDateTimePicker = ({
                 onAccept={onSubmit}
                 DialogProps={{
                     sx: {
-                        zIndex: '1502',
-                        '.MuiPickersToolbar-penIconButton': {
-                            display: 'none',
+                        zIndex: "1502",
+                        ".MuiPickersToolbar-penIconButton": {
+                            display: "none",
                         },
-                        '.MuiDialog-paper': { width: '320px' },
-                        '.MuiClockPicker-root': {
-                            position: 'relative',
-                            minHeight: '292px',
+                        ".MuiDialog-paper": { width: "320px" },
+                        ".MuiClockPicker-root": {
+                            position: "relative",
+                            minHeight: "292px",
                         },
-                        '.PrivatePickersSlideTransition-root': {
-                            minHeight: '200px',
+                        ".PrivatePickersSlideTransition-root": {
+                            minHeight: "200px",
                         },
                     },
                 }}

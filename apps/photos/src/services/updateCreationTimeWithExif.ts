@@ -1,31 +1,31 @@
-import { FIX_OPTIONS } from 'components/FixCreationTime';
-import { SetProgressTracker } from 'components/FixLargeThumbnail';
+import { logError } from "@ente/shared/sentry";
+import { FIX_OPTIONS } from "components/FixCreationTime";
+import { SetProgressTracker } from "components/FixLargeThumbnail";
+import { EnteFile } from "types/file";
 import {
     changeFileCreationTime,
     updateExistingFilePubMetadata,
-} from 'utils/file';
-import { logError } from '@ente/shared/sentry';
-import downloadManager from './download';
-import { EnteFile } from 'types/file';
+} from "utils/file";
+import downloadManager from "./download";
 
-import { getParsedExifData } from './upload/exifService';
-import { getFileType } from 'services/typeDetectionService';
-import { FILE_TYPE } from 'constants/file';
-import { validateAndGetCreationUnixTimeInMicroSeconds } from '@ente/shared/time';
+import { validateAndGetCreationUnixTimeInMicroSeconds } from "@ente/shared/time";
+import { FILE_TYPE } from "constants/file";
+import { getFileType } from "services/typeDetectionService";
+import { getParsedExifData } from "./upload/exifService";
 
 const EXIF_TIME_TAGS = [
-    'DateTimeOriginal',
-    'CreateDate',
-    'ModifyDate',
-    'DateCreated',
-    'MetadataDate',
+    "DateTimeOriginal",
+    "CreateDate",
+    "ModifyDate",
+    "DateCreated",
+    "MetadataDate",
 ];
 
 export async function updateCreationTimeWithExif(
     filesToBeUpdated: EnteFile[],
     fixOption: FIX_OPTIONS,
     customTime: Date,
-    setProgressTracker: SetProgressTracker
+    setProgressTracker: SetProgressTracker,
 ) {
     let completedWithError = false;
     try {
@@ -46,32 +46,32 @@ export async function updateCreationTimeWithExif(
                     const fileBlob = await new Response(fileStream).blob();
                     const fileObject = new File(
                         [fileBlob],
-                        file.metadata.title
+                        file.metadata.title,
                     );
                     const fileTypeInfo = await getFileType(fileObject);
                     const exifData = await getParsedExifData(
                         fileObject,
                         fileTypeInfo,
-                        EXIF_TIME_TAGS
+                        EXIF_TIME_TAGS,
                     );
                     if (fixOption === FIX_OPTIONS.DATE_TIME_ORIGINAL) {
                         correctCreationTime =
                             validateAndGetCreationUnixTimeInMicroSeconds(
                                 exifData?.DateTimeOriginal ??
-                                    exifData?.DateCreated
+                                    exifData?.DateCreated,
                             );
                     } else if (fixOption === FIX_OPTIONS.DATE_TIME_DIGITIZED) {
                         correctCreationTime =
                             validateAndGetCreationUnixTimeInMicroSeconds(
-                                exifData?.CreateDate
+                                exifData?.CreateDate,
                             );
                     } else if (fixOption === FIX_OPTIONS.METADATA_DATE) {
                         correctCreationTime =
                             validateAndGetCreationUnixTimeInMicroSeconds(
-                                exifData?.MetadataDate
+                                exifData?.MetadataDate,
                             );
                     } else {
-                        throw new Error('Invalid fix option');
+                        throw new Error("Invalid fix option");
                     }
                 }
                 if (
@@ -80,12 +80,12 @@ export async function updateCreationTimeWithExif(
                 ) {
                     const updatedFile = await changeFileCreationTime(
                         file,
-                        correctCreationTime
+                        correctCreationTime,
                     );
                     updateExistingFilePubMetadata(file, updatedFile);
                 }
             } catch (e) {
-                logError(e, 'failed to updated a CreationTime With Exif');
+                logError(e, "failed to updated a CreationTime With Exif");
                 completedWithError = true;
             } finally {
                 setProgressTracker({
@@ -95,7 +95,7 @@ export async function updateCreationTimeWithExif(
             }
         }
     } catch (e) {
-        logError(e, 'update CreationTime With Exif failed');
+        logError(e, "update CreationTime With Exif failed");
         completedWithError = true;
     }
     return completedWithError;

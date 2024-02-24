@@ -1,11 +1,11 @@
-import { UPLOAD_STAGES } from 'constants/upload';
-import { createContext } from 'react';
+import { UPLOAD_STAGES } from "constants/upload";
+import { createContext } from "react";
 import {
-    UploadCounter,
     InProgressUpload,
-    UploadFileNames,
     SegregatedFinishedUploads,
-} from 'types/upload/ui';
+    UploadCounter,
+    UploadFileNames,
+} from "types/upload/ui";
 
 interface UploadProgressContextType {
     open: boolean;
@@ -36,7 +36,7 @@ const defaultUploadProgressContext: UploadProgressContextType = {
     setExpanded: () => null,
 };
 const UploadProgressContext = createContext<UploadProgressContextType>(
-    defaultUploadProgressContext
+    defaultUploadProgressContext,
 );
 
 export default UploadProgressContext;

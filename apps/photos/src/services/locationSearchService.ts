@@ -1,7 +1,7 @@
-import { CITIES_URL } from '@ente/shared/constants/urls';
-import { logError } from '@ente/shared/sentry';
-import { LocationTagData } from 'types/entity';
-import { Location } from 'types/upload';
+import { CITIES_URL } from "@ente/shared/constants/urls";
+import { logError } from "@ente/shared/sentry";
+import { LocationTagData } from "types/entity";
+import { Location } from "types/upload";
 
 export interface City {
     city: string;
@@ -24,12 +24,12 @@ class LocationSearchService {
             }
             this.citiesPromise = fetch(CITIES_URL).then((response) => {
                 return response.json().then((data) => {
-                    this.cities = data['data'];
+                    this.cities = data["data"];
                 });
             });
             await this.citiesPromise;
         } catch (e) {
-            logError(e, 'LocationSearchService loadCities failed');
+            logError(e, "LocationSearchService loadCities failed");
             this.citiesPromise = null;
         }
     }
@@ -46,7 +46,7 @@ class LocationSearchService {
                     .startsWith(searchTerm.toLowerCase());
             });
         } catch (e) {
-            logError(e, 'LocationSearchService searchCities failed');
+            logError(e, "LocationSearchService searchCities failed");
             throw e;
         }
     }
@@ -56,12 +56,12 @@ export default new LocationSearchService();
 
 export function isInsideLocationTag(
     location: Location,
-    locationTag: LocationTagData
+    locationTag: LocationTagData,
 ) {
     return isLocationCloseToPoint(
         location,
         locationTag.centerPoint,
-        locationTag.radius
+        locationTag.radius,
     );
 }
 
@@ -69,14 +69,14 @@ export function isInsideCity(location: Location, city: City) {
     return isLocationCloseToPoint(
         { latitude: city.lat, longitude: city.lng },
         location,
-        DEFAULT_CITY_RADIUS
+        DEFAULT_CITY_RADIUS,
     );
 }
 
 function isLocationCloseToPoint(
     centerPoint: Location,
     location: Location,
-    radius: number
+    radius: number,
 ) {
     const a = (radius * _scaleFactor(centerPoint.latitude)) / KMS_PER_DEGREE;
     const b = radius / KMS_PER_DEGREE;

@@ -1,31 +1,31 @@
-import { styled } from '@mui/material';
-import NumberAvatar from '@mui/material/Avatar';
-import Avatar from './Avatar';
-import { Collection } from 'types/collection';
+import { styled } from "@mui/material";
+import NumberAvatar from "@mui/material/Avatar";
+import { Collection } from "types/collection";
+import Avatar from "./Avatar";
 
-const AvatarContainer = styled('div')({
-    position: 'relative',
-    display: 'flex',
-    alignItems: 'center',
+const AvatarContainer = styled("div")({
+    position: "relative",
+    display: "flex",
+    alignItems: "center",
     marginLeft: -5,
 });
 
-const AvatarContainerOuter = styled('div')({
-    position: 'relative',
-    display: 'flex',
-    alignItems: 'center',
+const AvatarContainerOuter = styled("div")({
+    position: "relative",
+    display: "flex",
+    alignItems: "center",
     marginLeft: 8,
 });
 const AvatarCounter = styled(NumberAvatar)({
     height: 20,
     width: 20,
     fontSize: 10,
-    color: '#fff',
+    color: "#fff",
 });
 
 const SHAREE_AVATAR_LIMIT = 6;
 
-const AvatarGroup = ({ sharees }: { sharees: Collection['sharees'] }) => {
+const AvatarGroup = ({ sharees }: { sharees: Collection["sharees"] }) => {
     const hasShareesOverLimit = sharees?.length > SHAREE_AVATAR_LIMIT;
     const countOfShareesOverLimit = sharees?.length - SHAREE_AVATAR_LIMIT;
 

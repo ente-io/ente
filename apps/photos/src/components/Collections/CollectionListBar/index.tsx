@@ -1,32 +1,32 @@
-import React, { useContext, useEffect } from 'react';
-import { ALL_SECTION, COLLECTION_LIST_SORT_BY } from 'constants/collection';
-import { Box, IconButton, Typography } from '@mui/material';
-import {
-    CollectionListBarWrapper,
-    CollectionListWrapper,
-} from 'components/Collections/styledComponents';
-import CollectionListBarCard from 'components/Collections/CollectionListBar/CollectionCard';
 import {
     IconButtonWithBG,
     SpaceBetweenFlex,
-} from '@ente/shared/components/Container';
-import ExpandMore from '@mui/icons-material/ExpandMore';
-import { AppContext } from 'pages/_app';
-import { CollectionSummary } from 'types/collection';
-import CollectionListSortBy from '../CollectionListSortBy';
-import { t } from 'i18next';
+} from "@ente/shared/components/Container";
+import useComponentScroll, {
+    SCROLL_DIRECTION,
+} from "@ente/shared/hooks/useComponentScroll";
+import useWindowSize from "@ente/shared/hooks/useWindowSize";
+import ExpandMore from "@mui/icons-material/ExpandMore";
+import { Box, IconButton, Typography } from "@mui/material";
+import CollectionListBarCard from "components/Collections/CollectionListBar/CollectionCard";
+import {
+    CollectionListBarWrapper,
+    CollectionListWrapper,
+} from "components/Collections/styledComponents";
+import { ALL_SECTION, COLLECTION_LIST_SORT_BY } from "constants/collection";
+import { t } from "i18next";
+import memoize from "memoize-one";
+import { AppContext } from "pages/_app";
+import React, { useContext, useEffect } from "react";
+import AutoSizer from "react-virtualized-auto-sizer";
 import {
     FixedSizeList as List,
     ListChildComponentProps,
     areEqual,
-} from 'react-window';
-import AutoSizer from 'react-virtualized-auto-sizer';
-import memoize from 'memoize-one';
-import useComponentScroll, {
-    SCROLL_DIRECTION,
-} from '@ente/shared/hooks/useComponentScroll';
-import useWindowSize from '@ente/shared/hooks/useWindowSize';
-import ScrollButton from './ScrollButton';
+} from "react-window";
+import { CollectionSummary } from "types/collection";
+import CollectionListSortBy from "../CollectionListSortBy";
+import ScrollButton from "./ScrollButton";
 
 interface IProps {
     activeCollectionID?: number;
@@ -51,7 +51,7 @@ const createItemData = memoize(
         collectionSummaries,
         activeCollectionID,
         onCollectionClick,
-    })
+    }),
 );
 
 const CollectionCardContainer = React.memo(
@@ -78,7 +78,7 @@ const CollectionCardContainer = React.memo(
             </div>
         );
     },
-    areEqual
+    areEqual,
 );
 
 const getItemKey = (index: number, data: ItemData) => {
@@ -115,9 +115,9 @@ const CollectionListBar = (props: IProps) => {
         }
         // scroll the active collection into view
         const activeCollectionIndex = collectionSummaries.findIndex(
-            (item) => item.id === activeCollectionID
+            (item) => item.id === activeCollectionID,
         );
-        collectionListRef.current.scrollToItem(activeCollectionIndex, 'smart');
+        collectionListRef.current.scrollToItem(activeCollectionIndex, "smart");
     }, [activeCollectionID]);
 
     const onCollectionClick = (collectionID?: number) => {
@@ -127,17 +127,17 @@ const CollectionListBar = (props: IProps) => {
     const itemData = createItemData(
         collectionSummaries,
         activeCollectionID,
-        onCollectionClick
+        onCollectionClick,
     );
 
     return (
         <CollectionListBarWrapper>
             <SpaceBetweenFlex mb={1}>
                 <Typography>
-                    {isInHiddenSection ? t('HIDDEN_ALBUMS') : t('ALBUMS')}
+                    {isInHiddenSection ? t("HIDDEN_ALBUMS") : t("ALBUMS")}
                 </Typography>
                 {appContext.isMobile && (
-                    <Box display="flex" alignItems={'center'} gap={1}>
+                    <Box display="flex" alignItems={"center"} gap={1}>
                         <CollectionListSortBy
                             setSortBy={props.setCollectionListSortBy}
                             activeSortBy={props.collectionListSortBy}
@@ -169,7 +169,8 @@ const CollectionListBar = (props: IProps) => {
                                 itemKey={getItemKey}
                                 itemCount={collectionSummaries.length}
                                 itemSize={CollectionListBarCardWidth}
-                                useIsScrolling>
+                                useIsScrolling
+                            >
                                 {CollectionCardContainer}
                             </List>
                         )}
@@ -184,9 +185,10 @@ const CollectionListBar = (props: IProps) => {
                 {!appContext.isMobile && (
                     <Box
                         display="flex"
-                        alignItems={'center'}
+                        alignItems={"center"}
                         gap={1}
-                        height={'64px'}>
+                        height={"64px"}
+                    >
                         <CollectionListSortBy
                             setSortBy={props.setCollectionListSortBy}
                             activeSortBy={props.collectionListSortBy}

@@ -2,8 +2,8 @@ import {
     EncryptedMagicMetadata,
     MagicMetadataCore,
     VISIBILITY_STATE,
-} from 'types/magicMetadata';
-import { Metadata } from 'types/upload';
+} from "types/magicMetadata";
+import { Metadata } from "types/upload";
 
 export interface MetadataFileAttributes {
     encryptedData: string;
@@ -38,11 +38,11 @@ export interface EncryptedEnteFile {
 export interface EnteFile
     extends Omit<
         EncryptedEnteFile,
-        | 'metadata'
-        | 'pubMagicMetadata'
-        | 'magicMetadata'
-        | 'encryptedKey'
-        | 'keyDecryptionNonce'
+        | "metadata"
+        | "pubMagicMetadata"
+        | "magicMetadata"
+        | "encryptedKey"
+        | "keyDecryptionNonce"
     > {
     metadata: Metadata;
     magicMetadata: FileMagicMetadata;

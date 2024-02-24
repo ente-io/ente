@@ -1,6 +1,5 @@
-import React from 'react';
-import { UploadProgressBar } from './progressBar';
-import { UploadProgressTitle } from './title';
+import { UploadProgressBar } from "./progressBar";
+import { UploadProgressTitle } from "./title";
 
 export function UploadProgressHeader() {
     return (

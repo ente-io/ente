@@ -1,4 +1,4 @@
-import { LimitedCacheStorage } from 'types/cache/index';
+import { LimitedCacheStorage } from "types/cache/index";
 // import { ElectronCacheStorage } from 'services/electron/cache';
 // import { runningInElectron, runningInWorker } from 'utils/common';
 // import { WorkerElectronCacheStorageService } from 'services/workerElectronCache/service';
@@ -25,7 +25,7 @@ class cacheStorageFactory {
 export const CacheStorageFactory = new cacheStorageFactory();
 
 function transformBrowserCacheStorageToLimitedCacheStorage(
-    caches: CacheStorage
+    caches: CacheStorage,
 ): LimitedCacheStorage {
     return {
         async open(cacheName) {

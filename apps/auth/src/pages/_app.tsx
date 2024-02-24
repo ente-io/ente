@@ -1,42 +1,42 @@
-import React, { createContext, useEffect, useRef, useState } from 'react';
-import AppNavbar from '@ente/shared/components/Navbar/app';
-import { t } from 'i18next';
+import AppNavbar from "@ente/shared/components/Navbar/app";
+import { t } from "i18next";
+import { createContext, useEffect, useRef, useState } from "react";
 
-import { useRouter } from 'next/router';
-import { Overlay } from '@ente/shared/components/Container';
-import EnteSpinner from '@ente/shared/components/EnteSpinner';
-import { LS_KEYS } from '@ente/shared/storage/localStorage';
-import HTTPService from '@ente/shared/network/HTTPService';
-import Head from 'next/head';
-import LoadingBar from 'react-top-loading-bar';
-import DialogBoxV2 from '@ente/shared/components/DialogBoxV2';
-import { ThemeProvider } from '@mui/material/styles';
-import { MessageContainer } from '@ente/shared/components/MessageContainer';
-import { CssBaseline, useMediaQuery } from '@mui/material';
+import { Overlay } from "@ente/shared/components/Container";
+import DialogBoxV2 from "@ente/shared/components/DialogBoxV2";
 import {
     DialogBoxAttributesV2,
     SetDialogBoxAttributesV2,
-} from '@ente/shared/components/DialogBoxV2/types';
+} from "@ente/shared/components/DialogBoxV2/types";
+import EnteSpinner from "@ente/shared/components/EnteSpinner";
+import { MessageContainer } from "@ente/shared/components/MessageContainer";
 import {
     clearLogsIfLocalStorageLimitExceeded,
     logStartupMessage,
-} from '@ente/shared/logging/web';
+} from "@ente/shared/logging/web";
+import HTTPService from "@ente/shared/network/HTTPService";
+import { LS_KEYS } from "@ente/shared/storage/localStorage";
+import { CssBaseline, useMediaQuery } from "@mui/material";
+import { ThemeProvider } from "@mui/material/styles";
+import Head from "next/head";
+import { useRouter } from "next/router";
+import LoadingBar from "react-top-loading-bar";
 
-import { CacheProvider } from '@emotion/react';
+import { setupI18n } from "@/ui/i18n";
+import { CacheProvider } from "@emotion/react";
 import {
     APP_TITLES,
     APPS,
     CLIENT_PACKAGE_NAMES,
-} from '@ente/shared/apps/constants';
-import { EnteAppProps } from '@ente/shared/apps/types';
-import createEmotionCache from '@ente/shared/themes/createEmotionCache';
-import { THEME_COLOR } from '@ente/shared/themes/constants';
-import { SetTheme } from '@ente/shared/themes/types';
-import { setupI18n } from '@/ui/i18n';
-import { useLocalState } from '@ente/shared/hooks/useLocalState';
-import { PHOTOS_PAGES as PAGES } from '@ente/shared/constants/pages';
-import { getTheme } from '@ente/shared/themes';
-import '../../public/css/global.css';
+} from "@ente/shared/apps/constants";
+import { EnteAppProps } from "@ente/shared/apps/types";
+import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
+import { useLocalState } from "@ente/shared/hooks/useLocalState";
+import { getTheme } from "@ente/shared/themes";
+import { THEME_COLOR } from "@ente/shared/themes/constants";
+import createEmotionCache from "@ente/shared/themes/createEmotionCache";
+import { SetTheme } from "@ente/shared/themes/types";
+import "../../public/css/global.css";
 
 type AppContextType = {
     showNavBar: (show: boolean) => void;
@@ -64,7 +64,7 @@ export default function App(props: EnteAppProps) {
     const [isI18nReady, setIsI18nReady] = useState<boolean>(false);
     const [loading, setLoading] = useState(false);
     const [offline, setOffline] = useState(
-        typeof window !== 'undefined' && !window.navigator.onLine
+        typeof window !== "undefined" && !window.navigator.onLine,
     );
     const [showNavbar, setShowNavBar] = useState(false);
     const isLoadingBarRunning = useRef(false);
@@ -72,10 +72,10 @@ export default function App(props: EnteAppProps) {
     const [dialogBoxAttributeV2, setDialogBoxAttributesV2] =
         useState<DialogBoxAttributesV2>();
     const [dialogBoxV2View, setDialogBoxV2View] = useState(false);
-    const isMobile = useMediaQuery('(max-width:428px)');
+    const isMobile = useMediaQuery("(max-width:428px)");
     const [themeColor, setThemeColor] = useLocalState(
         LS_KEYS.THEME,
-        THEME_COLOR.DARK
+        THEME_COLOR.DARK,
     );
 
     useEffect(() => {
@@ -83,7 +83,7 @@ export default function App(props: EnteAppProps) {
         setupI18n().finally(() => setIsI18nReady(true));
         // set client package name in headers
         HTTPService.setHeaders({
-            'X-Client-Package': CLIENT_PACKAGE_NAMES.get(APPS.AUTH),
+            "X-Client-Package": CLIENT_PACKAGE_NAMES.get(APPS.AUTH),
         });
         // setup logging
         clearLogsIfLocalStorageLimitExceeded();
@@ -96,31 +96,31 @@ export default function App(props: EnteAppProps) {
     useEffect(() => {
         if (isI18nReady) {
             console.log(
-                `%c${t('CONSOLE_WARNING_STOP')}`,
-                'color: red; font-size: 52px;'
+                `%c${t("CONSOLE_WARNING_STOP")}`,
+                "color: red; font-size: 52px;",
             );
-            console.log(`%c${t('CONSOLE_WARNING_DESC')}`, 'font-size: 20px;');
+            console.log(`%c${t("CONSOLE_WARNING_DESC")}`, "font-size: 20px;");
         }
     }, [isI18nReady]);
 
     useEffect(() => {
-        router.events.on('routeChangeStart', (url: string) => {
-            const newPathname = url.split('?')[0] as PAGES;
+        router.events.on("routeChangeStart", (url: string) => {
+            const newPathname = url.split("?")[0] as PAGES;
             if (window.location.pathname !== newPathname) {
                 setLoading(true);
             }
         });
 
-        router.events.on('routeChangeComplete', () => {
+        router.events.on("routeChangeComplete", () => {
             setLoading(false);
         });
 
-        window.addEventListener('online', setUserOnline);
-        window.addEventListener('offline', setUserOffline);
+        window.addEventListener("online", setUserOnline);
+        window.addEventListener("offline", setUserOffline);
 
         return () => {
-            window.removeEventListener('online', setUserOnline);
-            window.removeEventListener('offline', setUserOffline);
+            window.removeEventListener("online", setUserOnline);
+            window.removeEventListener("offline", setUserOffline);
         };
     }, []);
 
@@ -145,9 +145,9 @@ export default function App(props: EnteAppProps) {
 
     const somethingWentWrong = () =>
         setDialogBoxAttributesV2({
-            title: t('ERROR'),
-            close: { variant: 'critical' },
-            content: t('UNKNOWN_ERROR'),
+            title: t("ERROR"),
+            close: { variant: "critical" },
+            content: t("UNKNOWN_ERROR"),
         });
 
     return (
@@ -155,7 +155,7 @@ export default function App(props: EnteAppProps) {
             <Head>
                 <title>
                     {isI18nReady
-                        ? t('TITLE', { context: APPS.AUTH })
+                        ? t("TITLE", { context: APPS.AUTH })
                         : APP_TITLES.get(APPS.AUTH)}
                 </title>
                 <meta
@@ -168,7 +168,7 @@ export default function App(props: EnteAppProps) {
                 <CssBaseline enableColorScheme />
                 {showNavbar && <AppNavbar isMobile={isMobile} />}
                 <MessageContainer>
-                    {offline && t('OFFLINE_MSG')}
+                    {offline && t("OFFLINE_MSG")}
                 </MessageContainer>
 
                 <LoadingBar color="#51cd7c" ref={loadingBar} />
@@ -190,16 +190,18 @@ export default function App(props: EnteAppProps) {
                         setThemeColor,
                         somethingWentWrong,
                         setDialogBoxAttributesV2,
-                    }}>
+                    }}
+                >
                     {(loading || !isI18nReady) && (
                         <Overlay
                             sx={(theme) => ({
-                                display: 'flex',
-                                justifyContent: 'center',
-                                alignItems: 'center',
+                                display: "flex",
+                                justifyContent: "center",
+                                alignItems: "center",
                                 zIndex: 2000,
                                 backgroundColor: theme.colors.background.base,
-                            })}>
+                            })}
+                        >
                             <EnteSpinner />
                         </Overlay>
                     )}

@@ -1,12 +1,12 @@
-import DropdownInput, { DropdownOption } from 'components/DropdownInput';
-import { t } from 'i18next';
-import { useRouter } from 'next/router';
 import {
-    type SupportedLocale,
-    supportedLocales,
     getLocaleInUse,
     setLocaleInUse,
-} from '@/ui/i18n';
+    supportedLocales,
+    type SupportedLocale,
+} from "@/ui/i18n";
+import DropdownInput, { DropdownOption } from "components/DropdownInput";
+import { t } from "i18next";
+import { useRouter } from "next/router";
 
 /**
  * Human readable name for each supported locale
@@ -15,18 +15,18 @@ import {
  */
 export const localeName = (locale: SupportedLocale) => {
     switch (locale) {
-        case 'en-US':
-            return 'English';
-        case 'fr-FR':
-            return 'Français';
-        case 'zh-CN':
-            return '中文';
-        case 'nl-NL':
-            return 'Nederlands';
-        case 'es-ES':
-            return 'Español';
-        case 'pt-BR':
-            return 'Brazilian Portuguese';
+        case "en-US":
+            return "English";
+        case "fr-FR":
+            return "Français";
+        case "zh-CN":
+            return "中文";
+        case "nl-NL":
+            return "Nederlands";
+        case "es-ES":
+            return "Español";
+        case "pt-BR":
+            return "Brazilian Portuguese";
     }
 };
 
@@ -50,8 +50,8 @@ export const LanguageSelector = () => {
     return (
         <DropdownInput
             options={getLanguageOptions()}
-            label={t('LANGUAGE')}
-            labelProps={{ color: 'text.muted' }}
+            label={t("LANGUAGE")}
+            labelProps={{ color: "text.muted" }}
             selected={locale}
             setSelected={updateCurrentLocale}
         />

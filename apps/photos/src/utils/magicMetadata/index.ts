@@ -1,7 +1,7 @@
-import { Collection } from 'types/collection';
-import { EnteFile } from 'types/file';
-import { MagicMetadataCore, VISIBILITY_STATE } from 'types/magicMetadata';
-import ComlinkCryptoWorker from '@ente/shared/crypto';
+import ComlinkCryptoWorker from "@ente/shared/crypto";
+import { Collection } from "types/collection";
+import { EnteFile } from "types/file";
+import { MagicMetadataCore, VISIBILITY_STATE } from "types/magicMetadata";
 
 export function isArchivedFile(item: EnteFile): boolean {
     if (!item || !item.magicMetadata || !item.magicMetadata.data) {
@@ -33,8 +33,8 @@ export function isPinnedCollection(item: Collection) {
         !item ||
         !item.magicMetadata ||
         !item.magicMetadata.data ||
-        typeof item.magicMetadata.data === 'string' ||
-        typeof item.magicMetadata.data.order === 'undefined'
+        typeof item.magicMetadata.data === "string" ||
+        typeof item.magicMetadata.data.order === "undefined"
     ) {
         return false;
     }
@@ -44,7 +44,7 @@ export function isPinnedCollection(item: Collection) {
 export async function updateMagicMetadata<T>(
     magicMetadataUpdates: T,
     originalMagicMetadata?: MagicMetadataCore<T>,
-    decryptionKey?: string
+    decryptionKey?: string,
 ): Promise<MagicMetadataCore<T>> {
     const cryptoWorker = await ComlinkCryptoWorker.getInstance();
 
@@ -52,11 +52,11 @@ export async function updateMagicMetadata<T>(
         originalMagicMetadata = getNewMagicMetadata<T>();
     }
 
-    if (typeof originalMagicMetadata?.data === 'string') {
+    if (typeof originalMagicMetadata?.data === "string") {
         originalMagicMetadata.data = await cryptoWorker.decryptMetadata(
             originalMagicMetadata.data,
             originalMagicMetadata.header,
-            decryptionKey
+            decryptionKey,
         );
     }
     // copies the existing magic metadata properties of the files and updates the visibility value
@@ -91,7 +91,7 @@ export const getNonEmptyMagicMetadataProps = <T>(magicMetadataProps: T): T => {
     return Object.fromEntries(
         Object.entries(magicMetadataProps).filter(
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            ([_, v]) => v !== null && v !== undefined
-        )
+            ([_, v]) => v !== null && v !== undefined,
+        ),
     ) as T;
 };

@@ -1,19 +1,19 @@
-import { EnteDrawer } from '@ente/shared/components/EnteDrawer';
-import { PasskeysContext } from '.';
-import { Stack } from '@mui/material';
-import Titlebar from '@ente/shared/components/Titlebar';
-import { MenuItemGroup } from '@ente/shared/components/Menu/MenuItemGroup';
-import { EnteMenuItem } from '@ente/shared/components/Menu/EnteMenuItem';
-import { useContext, useState } from 'react';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
-import MenuItemDivider from '@ente/shared/components/Menu/MenuItemDivider';
-import DeletePasskeyModal from './DeletePasskeyModal';
-import RenamePasskeyModal from './RenamePasskeyModal';
-import InfoItem from '@ente/shared/components/Info/InfoItem';
-import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
-import { formatDateTimeFull } from '@ente/shared/time/format';
-import { t } from 'i18next';
+import { EnteDrawer } from "@ente/shared/components/EnteDrawer";
+import InfoItem from "@ente/shared/components/Info/InfoItem";
+import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
+import MenuItemDivider from "@ente/shared/components/Menu/MenuItemDivider";
+import { MenuItemGroup } from "@ente/shared/components/Menu/MenuItemGroup";
+import Titlebar from "@ente/shared/components/Titlebar";
+import { formatDateTimeFull } from "@ente/shared/time/format";
+import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
+import DeleteIcon from "@mui/icons-material/Delete";
+import EditIcon from "@mui/icons-material/Edit";
+import { Stack } from "@mui/material";
+import { t } from "i18next";
+import { useContext, useState } from "react";
+import { PasskeysContext } from ".";
+import DeletePasskeyModal from "./DeletePasskeyModal";
+import RenamePasskeyModal from "./RenamePasskeyModal";
 
 interface IProps {
     open: boolean;
@@ -33,10 +33,11 @@ const ManagePasskeyDrawer = (props: IProps) => {
                 open={props.open}
                 onClose={() => {
                     setShowPasskeyDrawer(false);
-                }}>
+                }}
+            >
                 {selectedPasskey && (
                     <>
-                        <Stack spacing={'4px'} py={'12px'}>
+                        <Stack spacing={"4px"} py={"12px"}>
                             <Titlebar
                                 onClose={() => {
                                     setShowPasskeyDrawer(false);
@@ -48,11 +49,11 @@ const ManagePasskeyDrawer = (props: IProps) => {
                             />
                             <InfoItem
                                 icon={<CalendarTodayIcon />}
-                                title={t('CREATED_AT')}
+                                title={t("CREATED_AT")}
                                 caption={
                                     `${formatDateTimeFull(
-                                        selectedPasskey.createdAt / 1000
-                                    )}` || ''
+                                        selectedPasskey.createdAt / 1000,
+                                    )}` || ""
                                 }
                                 loading={!selectedPasskey}
                                 hideEditOption
@@ -63,7 +64,7 @@ const ManagePasskeyDrawer = (props: IProps) => {
                                         setShowRenamePasskeyModal(true);
                                     }}
                                     startIcon={<EditIcon />}
-                                    label={'Rename Passkey'}
+                                    label={"Rename Passkey"}
                                 />
                                 <MenuItemDivider />
                                 <EnteMenuItem
@@ -71,7 +72,7 @@ const ManagePasskeyDrawer = (props: IProps) => {
                                         setShowDeletePasskeyModal(true);
                                     }}
                                     startIcon={<DeleteIcon />}
-                                    label={'Delete Passkey'}
+                                    label={"Delete Passkey"}
                                     color="critical"
                                 />
                             </MenuItemGroup>

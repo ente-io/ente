@@ -1,34 +1,34 @@
-import React, { useContext, useEffect, useMemo, useState } from 'react';
-import { Plan } from 'types/billing';
+import { SUPPORT_EMAIL } from "@ente/shared/constants/urls";
+import { useLocalState } from "@ente/shared/hooks/useLocalState";
+import { logError } from "@ente/shared/sentry";
+import { LS_KEYS } from "@ente/shared/storage/localStorage";
+import { Link, Stack } from "@mui/material";
+import { PLAN_PERIOD } from "constants/gallery";
+import { t } from "i18next";
+import { AppContext } from "pages/_app";
+import { GalleryContext } from "pages/gallery";
+import { useContext, useEffect, useMemo, useState } from "react";
+import { Trans } from "react-i18next";
+import billingService from "services/billingService";
+import { Plan } from "types/billing";
+import { SetLoading } from "types/gallery";
 import {
-    isUserSubscribedPlan,
-    isSubscriptionCancelled,
-    updateSubscription,
+    getLocalUserSubscription,
+    hasMobileSubscription,
+    hasPaidSubscription,
     hasStripeSubscription,
     isOnFreePlan,
-    planForSubscription,
-    hasMobileSubscription,
-    getLocalUserSubscription,
-    hasPaidSubscription,
     isSubscriptionActive,
-} from 'utils/billing';
-import { reverseString } from 'utils/common';
-import { GalleryContext } from 'pages/gallery';
-import billingService from 'services/billingService';
-import { SetLoading } from 'types/gallery';
-import { logError } from '@ente/shared/sentry';
-import { AppContext } from 'pages/_app';
-import { Link, Stack } from '@mui/material';
-import { useLocalState } from '@ente/shared/hooks/useLocalState';
-import { LS_KEYS } from '@ente/shared/storage/localStorage';
-import { getLocalUserDetails } from 'utils/user';
-import { PLAN_PERIOD } from 'constants/gallery';
-import FreeSubscriptionPlanSelectorCard from './free';
-import PaidSubscriptionPlanSelectorCard from './paid';
-import { isPartOfFamily, getTotalFamilyUsage } from 'utils/user/family';
-import { Trans } from 'react-i18next';
-import { t } from 'i18next';
-import { SUPPORT_EMAIL } from '@ente/shared/constants/urls';
+    isSubscriptionCancelled,
+    isUserSubscribedPlan,
+    planForSubscription,
+    updateSubscription,
+} from "utils/billing";
+import { reverseString } from "utils/common";
+import { getLocalUserDetails } from "utils/user";
+import { getTotalFamilyUsage, isPartOfFamily } from "utils/user/family";
+import FreeSubscriptionPlanSelectorCard from "./free";
+import PaidSubscriptionPlanSelectorCard from "./paid";
 
 interface Props {
     closeModal: any;
@@ -40,7 +40,7 @@ function PlanSelectorCard(props: Props) {
     const [plans, setPlans] = useLocalState<Plan[]>(LS_KEYS.PLANS);
 
     const [planPeriod, setPlanPeriod] = useState<PLAN_PERIOD>(
-        subscription?.period || PLAN_PERIOD.MONTH
+        subscription?.period || PLAN_PERIOD.MONTH,
     );
     const galleryContext = useContext(GalleryContext);
     const appContext = useContext(AppContext);
@@ -66,7 +66,7 @@ function PlanSelectorCard(props: Props) {
         setPlanPeriod((prevPeriod) =>
             prevPeriod === PLAN_PERIOD.MONTH
                 ? PLAN_PERIOD.YEAR
-                : PLAN_PERIOD.MONTH
+                : PLAN_PERIOD.MONTH,
         );
     };
     function onReopenClick() {
@@ -81,7 +81,7 @@ function PlanSelectorCard(props: Props) {
                 if (isSubscriptionActive(subscription)) {
                     const planNotListed =
                         plans.filter((plan) =>
-                            isUserSubscribedPlan(plan, subscription)
+                            isUserSubscribedPlan(plan, subscription),
                         ).length === 0;
                     if (
                         subscription &&
@@ -93,15 +93,15 @@ function PlanSelectorCard(props: Props) {
                 }
                 setPlans(plans);
             } catch (e) {
-                logError(e, 'plan selector modal open failed');
+                logError(e, "plan selector modal open failed");
                 props.closeModal();
                 appContext.setDialogMessage({
-                    title: t('OPEN_PLAN_SELECTOR_MODAL_FAILED'),
-                    content: t('UNKNOWN_ERROR'),
-                    close: { text: t('CLOSE'), variant: 'secondary' },
+                    title: t("OPEN_PLAN_SELECTOR_MODAL_FAILED"),
+                    content: t("UNKNOWN_ERROR"),
+                    close: { text: t("CLOSE"), variant: "secondary" },
                     proceed: {
-                        text: t('REOPEN_PLAN_SELECTOR_MODAL'),
-                        variant: 'accent',
+                        text: t("REOPEN_PLAN_SELECTOR_MODAL"),
+                        variant: "accent",
                         action: onReopenClick,
                     },
                 });
@@ -123,49 +123,49 @@ function PlanSelectorCard(props: Props) {
             } catch (e) {
                 props.setLoading(false);
                 appContext.setDialogMessage({
-                    title: t('ERROR'),
-                    content: t('SUBSCRIPTION_PURCHASE_FAILED'),
-                    close: { variant: 'critical' },
+                    title: t("ERROR"),
+                    content: t("SUBSCRIPTION_PURCHASE_FAILED"),
+                    close: { variant: "critical" },
                 });
             }
         } else if (hasStripeSubscription(subscription)) {
             appContext.setDialogMessage({
-                title: `${t('CONFIRM')} ${reverseString(
-                    t('UPDATE_SUBSCRIPTION')
+                title: `${t("CONFIRM")} ${reverseString(
+                    t("UPDATE_SUBSCRIPTION"),
                 )}`,
-                content: t('UPDATE_SUBSCRIPTION_MESSAGE'),
+                content: t("UPDATE_SUBSCRIPTION_MESSAGE"),
                 proceed: {
-                    text: t('UPDATE_SUBSCRIPTION'),
+                    text: t("UPDATE_SUBSCRIPTION"),
                     action: updateSubscription.bind(
                         null,
                         plan,
                         appContext.setDialogMessage,
                         props.setLoading,
-                        props.closeModal
+                        props.closeModal,
                     ),
-                    variant: 'accent',
+                    variant: "accent",
                 },
-                close: { text: t('CANCEL') },
+                close: { text: t("CANCEL") },
             });
         } else if (hasMobileSubscription(subscription)) {
             appContext.setDialogMessage({
-                title: t('CANCEL_SUBSCRIPTION_ON_MOBILE'),
-                content: t('CANCEL_SUBSCRIPTION_ON_MOBILE_MESSAGE'),
-                close: { variant: 'secondary' },
+                title: t("CANCEL_SUBSCRIPTION_ON_MOBILE"),
+                content: t("CANCEL_SUBSCRIPTION_ON_MOBILE_MESSAGE"),
+                close: { variant: "secondary" },
             });
         } else {
             appContext.setDialogMessage({
-                title: t('MANAGE_PLAN'),
+                title: t("MANAGE_PLAN"),
                 content: (
                     <Trans
-                        i18nKey={'MAIL_TO_MANAGE_SUBSCRIPTION'}
+                        i18nKey={"MAIL_TO_MANAGE_SUBSCRIPTION"}
                         components={{
                             a: <Link href={`mailto:${SUPPORT_EMAIL}`} />,
                         }}
                         values={{ emailID: SUPPORT_EMAIL }}
                     />
                 ),
-                close: { variant: 'secondary' },
+                close: { variant: "secondary" },
             });
         }
     }

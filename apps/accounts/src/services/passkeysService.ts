@@ -1,8 +1,8 @@
-import HTTPService from '@ente/shared/network/HTTPService';
-import { getEndpoint } from '@ente/shared/network/api';
-import { logError } from '@ente/shared/sentry';
-import { getToken } from '@ente/shared/storage/localStorage/helpers';
-import _sodium from 'libsodium-wrappers';
+import HTTPService from "@ente/shared/network/HTTPService";
+import { getEndpoint } from "@ente/shared/network/api";
+import { logError } from "@ente/shared/sentry";
+import { getToken } from "@ente/shared/storage/localStorage/helpers";
+import _sodium from "libsodium-wrappers";
 const ENDPOINT = getEndpoint();
 
 export const getPasskeys = async () => {
@@ -12,11 +12,11 @@ export const getPasskeys = async () => {
         const response = await HTTPService.get(
             `${ENDPOINT}/passkeys`,
             {},
-            { 'X-Auth-Token': token }
+            { "X-Auth-Token": token },
         );
         return await response.data;
     } catch (e) {
-        logError(e, 'get passkeys failed');
+        logError(e, "get passkeys failed");
         throw e;
     }
 };
@@ -29,11 +29,11 @@ export const renamePasskey = async (id: string, name: string) => {
             `${ENDPOINT}/passkeys/${id}`,
             {},
             { friendlyName: name },
-            { 'X-Auth-Token': token }
+            { "X-Auth-Token": token },
         );
         return await response.data;
     } catch (e) {
-        logError(e, 'rename passkey failed');
+        logError(e, "rename passkey failed");
         throw e;
     }
 };
@@ -46,11 +46,11 @@ export const deletePasskey = async (id: string) => {
             `${ENDPOINT}/passkeys/${id}`,
             {},
             {},
-            { 'X-Auth-Token': token }
+            { "X-Auth-Token": token },
         );
         return await response.data;
     } catch (e) {
-        logError(e, 'delete passkey failed');
+        logError(e, "delete passkey failed");
         throw e;
     }
 };
@@ -63,12 +63,12 @@ export const getPasskeyRegistrationOptions = async () => {
             `${ENDPOINT}/passkeys/registration/begin`,
             {},
             {
-                'X-Auth-Token': token,
-            }
+                "X-Auth-Token": token,
+            },
         );
         return await response.data;
     } catch (e) {
-        logError(e, 'get passkey registration options failed');
+        logError(e, "get passkey registration options failed");
         throw e;
     }
 };
@@ -76,20 +76,20 @@ export const getPasskeyRegistrationOptions = async () => {
 export const finishPasskeyRegistration = async (
     friendlyName: string,
     credential: Credential,
-    sessionId: string
+    sessionId: string,
 ) => {
     try {
         const attestationObjectB64 = _sodium.to_base64(
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-ignore
             new Uint8Array(credential.response.attestationObject),
-            _sodium.base64_variants.URLSAFE_NO_PADDING
+            _sodium.base64_variants.URLSAFE_NO_PADDING,
         );
         const clientDataJSONB64 = _sodium.to_base64(
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-ignore
             new Uint8Array(credential.response.clientDataJSON),
-            _sodium.base64_variants.URLSAFE_NO_PADDING
+            _sodium.base64_variants.URLSAFE_NO_PADDING,
         );
 
         const token = getToken();
@@ -111,12 +111,12 @@ export const finishPasskeyRegistration = async (
                 sessionID: sessionId,
             },
             {
-                'X-Auth-Token': token,
-            }
+                "X-Auth-Token": token,
+            },
         );
         return await response.data;
     } catch (e) {
-        logError(e, 'finish passkey registration failed');
+        logError(e, "finish passkey registration failed");
         throw e;
     }
 };
@@ -130,19 +130,19 @@ interface Options {
 }
 
 export const beginPasskeyAuthentication = async (
-    sessionId: string
+    sessionId: string,
 ): Promise<BeginPasskeyAuthenticationResponse> => {
     try {
         const data = await HTTPService.post(
             `${ENDPOINT}/users/two-factor/passkeys/begin`,
             {
                 sessionID: sessionId,
-            }
+            },
         );
 
         return data.data;
     } catch (e) {
-        logError(e, 'begin passkey authentication failed');
+        logError(e, "begin passkey authentication failed");
         throw e;
     }
 };
@@ -150,7 +150,7 @@ export const beginPasskeyAuthentication = async (
 export const finishPasskeyAuthentication = async (
     credential: Credential,
     sessionId: string,
-    ceremonySessionId: string
+    ceremonySessionId: string,
 ) => {
     try {
         const data = await HTTPService.post(
@@ -164,37 +164,37 @@ export const finishPasskeyAuthentication = async (
                         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                         // @ts-ignore
                         new Uint8Array(credential.response.authenticatorData),
-                        _sodium.base64_variants.URLSAFE_NO_PADDING
+                        _sodium.base64_variants.URLSAFE_NO_PADDING,
                     ),
                     clientDataJSON: _sodium.to_base64(
                         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                         // @ts-ignore
                         new Uint8Array(credential.response.clientDataJSON),
-                        _sodium.base64_variants.URLSAFE_NO_PADDING
+                        _sodium.base64_variants.URLSAFE_NO_PADDING,
                     ),
                     signature: _sodium.to_base64(
                         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                         // @ts-ignore
                         new Uint8Array(credential.response.signature),
-                        _sodium.base64_variants.URLSAFE_NO_PADDING
+                        _sodium.base64_variants.URLSAFE_NO_PADDING,
                     ),
                     userHandle: _sodium.to_base64(
                         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                         // @ts-ignore
                         new Uint8Array(credential.response.userHandle),
-                        _sodium.base64_variants.URLSAFE_NO_PADDING
+                        _sodium.base64_variants.URLSAFE_NO_PADDING,
                     ),
                 },
             },
             {
                 sessionID: sessionId,
                 ceremonySessionID: ceremonySessionId,
-            }
+            },
         );
 
         return data.data;
     } catch (e) {
-        logError(e, 'finish passkey authentication failed');
+        logError(e, "finish passkey authentication failed");
         throw e;
     }
 };

@@ -1,4 +1,4 @@
-import { KeyAttributes } from '@ente/shared/user/types';
+import { KeyAttributes } from "@ente/shared/user/types";
 
 export interface UserVerificationResponse {
     id: number;

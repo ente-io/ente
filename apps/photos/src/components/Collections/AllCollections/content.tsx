@@ -1,16 +1,16 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { DialogContent } from '@mui/material';
-import { FlexWrapper } from '@ente/shared/components/Container';
-import AllCollectionCard from './collectionCard';
-import { CollectionSummary } from 'types/collection';
+import { FlexWrapper } from "@ente/shared/components/Container";
+import useWindowSize from "@ente/shared/hooks/useWindowSize";
+import { DialogContent } from "@mui/material";
+import memoize from "memoize-one";
+import React, { useEffect, useRef, useState } from "react";
 import {
     FixedSizeList as List,
     ListChildComponentProps,
     areEqual,
-} from 'react-window';
-import memoize from 'memoize-one';
-import useWindowSize from '@ente/shared/hooks/useWindowSize';
-import { AllCollectionMobileBreakpoint } from './dialog';
+} from "react-window";
+import { CollectionSummary } from "types/collection";
+import AllCollectionCard from "./collectionCard";
+import { AllCollectionMobileBreakpoint } from "./dialog";
 
 const MobileColumns = 2;
 const DesktopColumns = 3;
@@ -18,11 +18,11 @@ const DesktopColumns = 3;
 const CollectionRowItemSize = 154;
 const getCollectionRowListHeight = (
     collectionRowList: CollectionSummary[][],
-    windowSize: { height: number; width: number }
+    windowSize: { height: number; width: number },
 ) =>
     Math.min(
         collectionRowList.length * CollectionRowItemSize + 32,
-        windowSize?.height - 177
+        windowSize?.height - 177,
     ) || 0;
 
 interface Iprops {
@@ -60,7 +60,7 @@ const AllCollectionRow = React.memo(
         const collectionRow = collectionRowList[index];
         return (
             <div style={style}>
-                <FlexWrapper gap={'4px'} padding={'16px'}>
+                <FlexWrapper gap={"4px"} padding={"16px"}>
                     {collectionRow.map((item: any) => (
                         <AllCollectionCard
                             isScrolling={isScrolling}
@@ -73,7 +73,7 @@ const AllCollectionRow = React.memo(
             </div>
         );
     },
-    areEqual
+    areEqual,
 );
 
 export default function AllCollectionContent({
@@ -131,16 +131,17 @@ export default function AllCollectionContent({
     const itemData = createItemData(collectionRowList, onCollectionClick);
 
     return (
-        <DialogContent sx={{ '&&': { padding: 0 } }}>
+        <DialogContent sx={{ "&&": { padding: 0 } }}>
             <List
                 height={getCollectionRowListHeight(
                     collectionRowList,
-                    windowSize
+                    windowSize,
                 )}
-                width={'100%'}
+                width={"100%"}
                 itemCount={collectionRowList.length}
                 itemSize={CollectionRowItemSize}
-                itemData={itemData}>
+                itemData={itemData}
+            >
                 {AllCollectionRow}
             </List>
         </DialogContent>

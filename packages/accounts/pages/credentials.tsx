@@ -1,58 +1,58 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from "react";
 
-import { t } from 'i18next';
+import { t } from "i18next";
 
 import {
     decryptAndStoreToken,
     generateAndSaveIntermediateKeyAttributes,
     generateLoginSubKey,
     saveKeyInSessionStore,
-} from '@ente/shared/crypto/helpers';
+} from "@ente/shared/crypto/helpers";
 import {
+    LS_KEYS,
     clearData,
     getData,
-    LS_KEYS,
     setData,
-} from '@ente/shared/storage/localStorage';
+} from "@ente/shared/storage/localStorage";
 import {
+    SESSION_KEYS,
     getKey,
     removeKey,
-    SESSION_KEYS,
     setKey,
-} from '@ente/shared/storage/sessionStorage';
-import { PAGES } from '../constants/pages';
-import { generateSRPSetupAttributes } from '../services/srp';
-import { logoutUser } from '../services/user';
+} from "@ente/shared/storage/sessionStorage";
+import { PAGES } from "../constants/pages";
+import { generateSRPSetupAttributes } from "../services/srp";
+import { logoutUser } from "../services/user";
 
-import { VerticallyCentered } from '@ente/shared/components/Container';
-import EnteSpinner from '@ente/shared/components/EnteSpinner';
-import FormPaper from '@ente/shared/components/Form/FormPaper';
-import FormPaperFooter from '@ente/shared/components/Form/FormPaper/Footer';
-import FormPaperTitle from '@ente/shared/components/Form/FormPaper/Title';
-import LinkButton from '@ente/shared/components/LinkButton';
+import { VerticallyCentered } from "@ente/shared/components/Container";
+import EnteSpinner from "@ente/shared/components/EnteSpinner";
+import FormPaper from "@ente/shared/components/Form/FormPaper";
+import FormPaperFooter from "@ente/shared/components/Form/FormPaper/Footer";
+import FormPaperTitle from "@ente/shared/components/Form/FormPaper/Title";
+import LinkButton from "@ente/shared/components/LinkButton";
 import VerifyMasterPasswordForm, {
     VerifyMasterPasswordFormProps,
-} from '@ente/shared/components/VerifyMasterPasswordForm';
-import { getAccountsURL } from '@ente/shared/network/api';
+} from "@ente/shared/components/VerifyMasterPasswordForm";
+import { getAccountsURL } from "@ente/shared/network/api";
 import {
     isFirstLogin,
     setIsFirstLogin,
-} from '@ente/shared/storage/localStorage/helpers';
-import { KeyAttributes, User } from '@ente/shared/user/types';
-import isElectron from 'is-electron';
-import { getSRPAttributes } from '../api/srp';
-import { configureSRP, loginViaSRP } from '../services/srp';
-import { SRPAttributes } from '../types/srp';
+} from "@ente/shared/storage/localStorage/helpers";
+import { KeyAttributes, User } from "@ente/shared/user/types";
+import isElectron from "is-electron";
+import { getSRPAttributes } from "../api/srp";
+import { configureSRP, loginViaSRP } from "../services/srp";
+import { SRPAttributes } from "../types/srp";
 // import { APPS, getAppName } from '@ente/shared/apps';
-import { APP_HOMES } from '@ente/shared/apps/constants';
-import { PageProps } from '@ente/shared/apps/types';
-import ComlinkCryptoWorker from '@ente/shared/crypto';
-import { B64EncryptionResult } from '@ente/shared/crypto/types';
-import ElectronAPIs from '@ente/shared/electron';
-import { CustomError } from '@ente/shared/error';
-import { addLocalLog } from '@ente/shared/logging';
-import { logError } from '@ente/shared/sentry';
-import InMemoryStore, { MS_KEYS } from '@ente/shared/storage/InMemoryStore';
+import { APP_HOMES } from "@ente/shared/apps/constants";
+import { PageProps } from "@ente/shared/apps/types";
+import ComlinkCryptoWorker from "@ente/shared/crypto";
+import { B64EncryptionResult } from "@ente/shared/crypto/types";
+import ElectronAPIs from "@ente/shared/electron";
+import { CustomError } from "@ente/shared/error";
+import { addLocalLog } from "@ente/shared/logging";
+import { logError } from "@ente/shared/sentry";
+import InMemoryStore, { MS_KEYS } from "@ente/shared/storage/InMemoryStore";
 
 export default function Credentials({
     appContext,
@@ -76,13 +76,13 @@ export default function Credentials({
                 try {
                     key = await ElectronAPIs.getEncryptionKey();
                 } catch (e) {
-                    logError(e, 'getEncryptionKey failed');
+                    logError(e, "getEncryptionKey failed");
                 }
                 if (key) {
                     await saveKeyInSessionStore(
                         SESSION_KEYS.ENCRYPTION_KEY,
                         key,
-                        true
+                        true,
                     );
                 }
             }
@@ -91,10 +91,10 @@ export default function Credentials({
                 return;
             }
             const kekEncryptedAttributes: B64EncryptionResult = getKey(
-                SESSION_KEYS.KEY_ENCRYPTION_KEY
+                SESSION_KEYS.KEY_ENCRYPTION_KEY,
             );
             const keyAttributes: KeyAttributes = getData(
-                LS_KEYS.KEY_ATTRIBUTES
+                LS_KEYS.KEY_ATTRIBUTES,
             );
             if (kekEncryptedAttributes && keyAttributes) {
                 removeKey(SESSION_KEYS.KEY_ENCRYPTION_KEY);
@@ -102,12 +102,12 @@ export default function Credentials({
                 const kek = await cryptoWorker.decryptB64(
                     kekEncryptedAttributes.encryptedData,
                     kekEncryptedAttributes.nonce,
-                    kekEncryptedAttributes.key
+                    kekEncryptedAttributes.key,
                 );
                 const key = await cryptoWorker.decryptB64(
                     keyAttributes.encryptedKey,
                     keyAttributes.keyDecryptionNonce,
-                    kek
+                    kek,
                 );
                 useMasterPassword(key, kek, keyAttributes);
                 return;
@@ -126,7 +126,7 @@ export default function Credentials({
             }
 
             const srpAttributes: SRPAttributes = getData(
-                LS_KEYS.SRP_ATTRIBUTES
+                LS_KEYS.SRP_ATTRIBUTES,
             );
             if (srpAttributes) {
                 setSrpAttributes(srpAttributes);
@@ -138,7 +138,7 @@ export default function Credentials({
         appContext.showNavBar(true);
     }, []);
 
-    const getKeyAttributes: VerifyMasterPasswordFormProps['getKeyAttributes'] =
+    const getKeyAttributes: VerifyMasterPasswordFormProps["getKeyAttributes"] =
         async (kek: string) => {
             try {
                 const cryptoWorker = await ComlinkCryptoWorker.getInstance();
@@ -156,7 +156,7 @@ export default function Credentials({
                         await cryptoWorker.generateKeyAndEncryptToB64(kek);
                     setKey(
                         SESSION_KEYS.KEY_ENCRYPTION_KEY,
-                        sessionKeyAttributes
+                        sessionKeyAttributes,
                     );
                     const user = getData(LS_KEYS.USER);
                     setData(LS_KEYS.USER, {
@@ -175,7 +175,7 @@ export default function Credentials({
                         await cryptoWorker.generateKeyAndEncryptToB64(kek);
                     setKey(
                         SESSION_KEYS.KEY_ENCRYPTION_KEY,
-                        sessionKeyAttributes
+                        sessionKeyAttributes,
                     );
                     const user = getData(LS_KEYS.USER);
                     setData(LS_KEYS.USER, {
@@ -199,31 +199,31 @@ export default function Credentials({
                 }
             } catch (e) {
                 if (e.message !== CustomError.TWO_FACTOR_ENABLED) {
-                    logError(e, 'getKeyAttributes failed');
+                    logError(e, "getKeyAttributes failed");
                 }
                 throw e;
             }
         };
 
-    const useMasterPassword: VerifyMasterPasswordFormProps['callback'] = async (
+    const useMasterPassword: VerifyMasterPasswordFormProps["callback"] = async (
         key,
         kek,
         keyAttributes,
-        passphrase
+        passphrase,
     ) => {
         try {
             if (isFirstLogin() && passphrase) {
                 await generateAndSaveIntermediateKeyAttributes(
                     passphrase,
                     keyAttributes,
-                    key
+                    key,
                 );
             }
             await saveKeyInSessionStore(SESSION_KEYS.ENCRYPTION_KEY, key);
             await decryptAndStoreToken(keyAttributes, key);
             try {
                 let srpAttributes: SRPAttributes = getData(
-                    LS_KEYS.SRP_ATTRIBUTES
+                    LS_KEYS.SRP_ATTRIBUTES,
                 );
                 if (!srpAttributes) {
                     srpAttributes = await getSRPAttributes(user.email);
@@ -239,13 +239,13 @@ export default function Credentials({
                     await configureSRP(srpSetupAttributes);
                 }
             } catch (e) {
-                logError(e, 'migrate to srp failed');
+                logError(e, "migrate to srp failed");
             }
             const redirectURL = InMemoryStore.get(MS_KEYS.REDIRECT_URL);
             InMemoryStore.delete(MS_KEYS.REDIRECT_URL);
             router.push(redirectURL ?? APP_HOMES.get(appName));
         } catch (e) {
-            logError(e, 'useMasterPassword failed');
+            logError(e, "useMasterPassword failed");
         }
     };
 
@@ -261,23 +261,23 @@ export default function Credentials({
 
     return (
         <VerticallyCentered>
-            <FormPaper style={{ minWidth: '320px' }}>
-                <FormPaperTitle>{t('PASSWORD')}</FormPaperTitle>
+            <FormPaper style={{ minWidth: "320px" }}>
+                <FormPaperTitle>{t("PASSWORD")}</FormPaperTitle>
 
                 <VerifyMasterPasswordForm
-                    buttonText={t('VERIFY_PASSPHRASE')}
+                    buttonText={t("VERIFY_PASSPHRASE")}
                     callback={useMasterPassword}
                     user={user}
                     keyAttributes={keyAttributes}
                     getKeyAttributes={getKeyAttributes}
                     srpAttributes={srpAttributes}
                 />
-                <FormPaperFooter style={{ justifyContent: 'space-between' }}>
+                <FormPaperFooter style={{ justifyContent: "space-between" }}>
                     <LinkButton onClick={redirectToRecoverPage}>
-                        {t('FORGOT_PASSWORD')}
+                        {t("FORGOT_PASSWORD")}
                     </LinkButton>
                     <LinkButton onClick={logoutUser}>
-                        {t('CHANGE_EMAIL')}
+                        {t("CHANGE_EMAIL")}
                     </LinkButton>
                 </FormPaperFooter>
             </FormPaper>

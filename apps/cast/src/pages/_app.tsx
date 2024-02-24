@@ -1,9 +1,9 @@
-import type { AppProps } from 'next/app';
-import 'styles/global.css';
-import { ThemeProvider, CssBaseline } from '@mui/material';
-import { getTheme } from '@ente/shared/themes';
-import { THEME_COLOR } from '@ente/shared/themes/constants';
-import { APPS } from '@ente/shared/apps/constants';
+import { APPS } from "@ente/shared/apps/constants";
+import { getTheme } from "@ente/shared/themes";
+import { THEME_COLOR } from "@ente/shared/themes/constants";
+import { CssBaseline, ThemeProvider } from "@mui/material";
+import type { AppProps } from "next/app";
+import "styles/global.css";
 
 export default function App({ Component, pageProps }: AppProps) {
     return (
@@ -12,8 +12,9 @@ export default function App({ Component, pageProps }: AppProps) {
 
             <main
                 style={{
-                    display: 'contents',
-                }}>
+                    display: "contents",
+                }}
+            >
                 <Component {...pageProps} />
             </main>
         </ThemeProvider>

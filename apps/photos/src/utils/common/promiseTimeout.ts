@@ -1,14 +1,14 @@
-import { CustomError } from '@ente/shared/error';
+import { CustomError } from "@ente/shared/error";
 
 export const promiseWithTimeout = async (
     request: Promise<any>,
-    timeout: number
+    timeout: number,
 ) => {
     const timeoutRef = { current: null };
     const rejectOnTimeout = new Promise((_, reject) => {
         timeoutRef.current = setTimeout(
             () => reject(Error(CustomError.WAIT_TIME_EXCEEDED)),
-            timeout
+            timeout,
         );
     });
     return await Promise.race([

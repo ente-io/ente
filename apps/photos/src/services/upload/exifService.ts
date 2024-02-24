@@ -1,13 +1,12 @@
-import { EXIFLESS_FORMATS, NULL_LOCATION } from 'constants/upload';
-import { Location } from 'types/upload';
-import exifr from 'exifr';
-import piexif from 'piexifjs';
-import { FileTypeInfo } from 'types/upload';
-import { logError } from '@ente/shared/sentry';
-import { validateAndGetCreationUnixTimeInMicroSeconds } from '@ente/shared/time';
-import { CustomError } from '@ente/shared/error';
+import { CustomError } from "@ente/shared/error";
+import { logError } from "@ente/shared/sentry";
+import { validateAndGetCreationUnixTimeInMicroSeconds } from "@ente/shared/time";
+import { EXIFLESS_FORMATS, NULL_LOCATION } from "constants/upload";
+import exifr from "exifr";
+import piexif from "piexifjs";
+import { FileTypeInfo, Location } from "types/upload";
 
-const EXIFR_UNSUPPORTED_FILE_FORMAT_MESSAGE = 'Unknown file format';
+const EXIFR_UNSUPPORTED_FILE_FORMAT_MESSAGE = "Unknown file format";
 
 type ParsedEXIFData = Record<string, any> &
     Partial<{
@@ -40,7 +39,7 @@ type RawEXIFData = Record<string, any> &
 export async function getParsedExifData(
     receivedFile: File,
     fileTypeInfo: FileTypeInfo,
-    tags?: string[]
+    tags?: string[],
 ): Promise<ParsedEXIFData> {
     try {
         if (EXIFLESS_FORMATS.includes(fileTypeInfo.exactType)) {
@@ -60,17 +59,19 @@ export async function getParsedExifData(
         }
         const filteredExifData = tags
             ? Object.fromEntries(
-                  Object.entries(exifData).filter(([key]) => tags.includes(key))
+                  Object.entries(exifData).filter(([key]) =>
+                      tags.includes(key),
+                  ),
               )
             : exifData;
         return parseExifData(filteredExifData);
     } catch (e) {
         if (e.message === EXIFR_UNSUPPORTED_FILE_FORMAT_MESSAGE) {
-            logError(e, 'exif library unsupported format', {
+            logError(e, "exif library unsupported format", {
                 fileType: fileTypeInfo.exactType,
             });
         } else {
-            logError(e, 'get parsed exif data failed', {
+            logError(e, "get parsed exif data failed", {
                 fileType: fileTypeInfo.exactType,
             });
             throw e;
@@ -117,57 +118,57 @@ function parseExifData(exifData: RawEXIFData): ParsedEXIFData {
             exifData.GPSLatitude,
             exifData.GPSLatitudeRef,
             exifData.GPSLongitude,
-            exifData.GPSLongitudeRef
+            exifData.GPSLongitudeRef,
         );
         parsedExif.latitude = parsedLocation.latitude;
         parsedExif.longitude = parsedLocation.longitude;
     }
     if (ImageWidth && ImageHeight) {
-        if (typeof ImageWidth === 'number' && typeof ImageHeight === 'number') {
+        if (typeof ImageWidth === "number" && typeof ImageHeight === "number") {
             parsedExif.imageWidth = ImageWidth;
             parsedExif.imageHeight = ImageHeight;
         } else {
             logError(
-                new Error('ImageWidth or ImageHeight is not a number'),
-                'Image dimension parsing failed',
+                new Error("ImageWidth or ImageHeight is not a number"),
+                "Image dimension parsing failed",
                 {
                     ImageWidth,
                     ImageHeight,
-                }
+                },
             );
         }
     } else if (ExifImageWidth && ExifImageHeight) {
         if (
-            typeof ExifImageWidth === 'number' &&
-            typeof ExifImageHeight === 'number'
+            typeof ExifImageWidth === "number" &&
+            typeof ExifImageHeight === "number"
         ) {
             parsedExif.imageWidth = ExifImageWidth;
             parsedExif.imageHeight = ExifImageHeight;
         } else {
             logError(
-                new Error('ExifImageWidth or ExifImageHeight is not a number'),
-                'Image dimension parsing failed',
+                new Error("ExifImageWidth or ExifImageHeight is not a number"),
+                "Image dimension parsing failed",
                 {
                     ExifImageWidth,
                     ExifImageHeight,
-                }
+                },
             );
         }
     } else if (PixelXDimension && PixelYDimension) {
         if (
-            typeof PixelXDimension === 'number' &&
-            typeof PixelYDimension === 'number'
+            typeof PixelXDimension === "number" &&
+            typeof PixelYDimension === "number"
         ) {
             parsedExif.imageWidth = PixelXDimension;
             parsedExif.imageHeight = PixelYDimension;
         } else {
             logError(
-                new Error('PixelXDimension or PixelYDimension is not a number'),
-                'Image dimension parsing failed',
+                new Error("PixelXDimension or PixelYDimension is not a number"),
+                "Image dimension parsing failed",
                 {
                     PixelXDimension,
                     PixelYDimension,
-                }
+                },
             );
         }
     }
@@ -176,7 +177,7 @@ function parseExifData(exifData: RawEXIFData): ParsedEXIFData {
 
 function parseEXIFDate(dateTimeString: string) {
     try {
-        if (typeof dateTimeString !== 'string' || dateTimeString === '') {
+        if (typeof dateTimeString !== "string" || dateTimeString === "") {
             throw Error(CustomError.NOT_A_DATE);
         }
 
@@ -201,22 +202,22 @@ function parseEXIFDate(dateTimeString: string) {
             .map(Number);
 
         if (
-            typeof year === 'undefined' ||
+            typeof year === "undefined" ||
             Number.isNaN(year) ||
-            typeof month === 'undefined' ||
+            typeof month === "undefined" ||
             Number.isNaN(month) ||
-            typeof day === 'undefined' ||
+            typeof day === "undefined" ||
             Number.isNaN(day)
         ) {
             throw Error(CustomError.NOT_A_DATE);
         }
         let date: Date;
         if (
-            typeof hour === 'undefined' ||
+            typeof hour === "undefined" ||
             Number.isNaN(hour) ||
-            typeof minute === 'undefined' ||
+            typeof minute === "undefined" ||
             Number.isNaN(minute) ||
-            typeof second === 'undefined' ||
+            typeof second === "undefined" ||
             Number.isNaN(second)
         ) {
             date = new Date(year, month - 1, day);
@@ -228,7 +229,7 @@ function parseEXIFDate(dateTimeString: string) {
         }
         return date;
     } catch (e) {
-        logError(e, 'parseEXIFDate failed', {
+        logError(e, "parseEXIFDate failed", {
             dateTimeString,
         });
         return null;
@@ -239,7 +240,7 @@ export function parseEXIFLocation(
     gpsLatitude: number[],
     gpsLatitudeRef: string,
     gpsLongitude: number[],
-    gpsLongitudeRef: string
+    gpsLongitudeRef: string,
 ) {
     try {
         if (
@@ -254,17 +255,17 @@ export function parseEXIFLocation(
             gpsLatitude[0],
             gpsLatitude[1],
             gpsLatitude[2],
-            gpsLatitudeRef
+            gpsLatitudeRef,
         );
         const longitude = convertDMSToDD(
             gpsLongitude[0],
             gpsLongitude[1],
             gpsLongitude[2],
-            gpsLongitudeRef
+            gpsLongitudeRef,
         );
         return { latitude, longitude };
     } catch (e) {
-        logError(e, 'parseEXIFLocation failed', {
+        logError(e, "parseEXIFLocation failed", {
             gpsLatitude,
             gpsLatitudeRef,
             gpsLongitude,
@@ -278,10 +279,10 @@ function convertDMSToDD(
     degrees: number,
     minutes: number,
     seconds: number,
-    direction: string
+    direction: string,
 ) {
     let dd = degrees + minutes / 60 + seconds / (60 * 60);
-    if (direction === 'S' || direction === 'W') dd *= -1;
+    if (direction === "S" || direction === "W") dd *= -1;
     return dd;
 }
 
@@ -311,25 +312,25 @@ export function getEXIFTime(exifData: ParsedEXIFData): number {
 export async function updateFileCreationDateInEXIF(
     reader: FileReader,
     fileBlob: Blob,
-    updatedDate: Date
+    updatedDate: Date,
 ) {
     try {
         let imageDataURL = await convertImageToDataURL(reader, fileBlob);
         imageDataURL =
-            'data:image/jpeg;base64' +
-            imageDataURL.slice(imageDataURL.indexOf(','));
+            "data:image/jpeg;base64" +
+            imageDataURL.slice(imageDataURL.indexOf(","));
         const exifObj = piexif.load(imageDataURL);
-        if (!exifObj['Exif']) {
-            exifObj['Exif'] = {};
+        if (!exifObj["Exif"]) {
+            exifObj["Exif"] = {};
         }
-        exifObj['Exif'][piexif.ExifIFD.DateTimeOriginal] =
+        exifObj["Exif"][piexif.ExifIFD.DateTimeOriginal] =
             convertToExifDateFormat(updatedDate);
 
         const exifBytes = piexif.dump(exifObj);
         const exifInsertedFile = piexif.insert(exifBytes, imageDataURL);
         return dataURIToBlob(exifInsertedFile);
     } catch (e) {
-        logError(e, 'updateFileModifyDateInEXIF failed');
+        logError(e, "updateFileModifyDateInEXIF failed");
         return fileBlob;
     }
 }
@@ -345,10 +346,10 @@ async function convertImageToDataURL(reader: FileReader, blob: Blob) {
 function dataURIToBlob(dataURI: string) {
     // convert base64 to raw binary data held in a string
     // doesn't handle URLEncoded DataURIs - see SO answer #6850276 for code that does this
-    const byteString = atob(dataURI.split(',')[1]);
+    const byteString = atob(dataURI.split(",")[1]);
 
     // separate out the mime component
-    const mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0];
+    const mimeString = dataURI.split(",")[0].split(":")[1].split(";")[0];
 
     // write the bytes of the string to an ArrayBuffer
     const ab = new ArrayBuffer(byteString.length);

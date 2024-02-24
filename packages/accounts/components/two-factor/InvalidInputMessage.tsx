@@ -1,5 +1,5 @@
-import { TypographyProps, Typography } from '@mui/material';
-import { FC } from 'react';
+import { Typography, TypographyProps } from "@mui/material";
+import { FC } from "react";
 
 const InvalidInputMessage: FC<TypographyProps> = (props) => {
     return (
@@ -8,7 +8,8 @@ const InvalidInputMessage: FC<TypographyProps> = (props) => {
             sx={{
                 color: (theme) => theme.colors.danger.A700,
             }}
-            {...props}>
+            {...props}
+        >
             {props.children}
         </Typography>
     );

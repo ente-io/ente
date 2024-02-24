@@ -1,14 +1,14 @@
-import DialogBoxBase from '@ente/shared/components/DialogBox/base';
+import { VerticallyCentered } from "@ente/shared/components/Container";
+import DialogBoxBase from "@ente/shared/components/DialogBox/base";
+import Check from "@mui/icons-material/Check";
 import {
-    DialogActions,
-    Button,
-    Typography,
-    DialogContent,
     Box,
-} from '@mui/material';
-import { VerticallyCentered } from '@ente/shared/components/Container';
-import Check from '@mui/icons-material/Check';
-import { t } from 'i18next';
+    Button,
+    DialogActions,
+    DialogContent,
+    Typography,
+} from "@mui/material";
+import { t } from "i18next";
 interface Iprops {
     open: boolean;
     onClose: () => void;
@@ -26,31 +26,33 @@ export default function CopyLinkModal({
             open={open}
             onClose={onClose}
             disablePortal
-            BackdropProps={{ sx: { position: 'absolute' } }}
-            sx={{ position: 'absolute' }}
+            BackdropProps={{ sx: { position: "absolute" } }}
+            sx={{ position: "absolute" }}
             PaperProps={{
                 sx: { p: 1 },
-            }}>
+            }}
+        >
             <DialogContent>
                 <VerticallyCentered>
-                    <Typography fontWeight={'bold'}>
-                        {t('PUBLIC_LINK_CREATED')}
+                    <Typography fontWeight={"bold"}>
+                        {t("PUBLIC_LINK_CREATED")}
                     </Typography>
                     <Box pt={2}>
-                        <Check sx={{ fontSize: '48px' }} />
+                        <Check sx={{ fontSize: "48px" }} />
                     </Box>
                 </VerticallyCentered>
             </DialogContent>
             <DialogActions>
-                <Button onClick={handleCancel} color="secondary" size={'large'}>
-                    {t('DONE')}
+                <Button onClick={handleCancel} color="secondary" size={"large"}>
+                    {t("DONE")}
                 </Button>
                 <Button
                     onClick={copyToClipboardHelper}
-                    size={'large'}
+                    size={"large"}
                     color="primary"
-                    autoFocus>
-                    {t('COPY_LINK')}
+                    autoFocus
+                >
+                    {t("COPY_LINK")}
                 </Button>
             </DialogActions>
         </DialogBoxBase>

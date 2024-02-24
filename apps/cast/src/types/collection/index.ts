@@ -1,17 +1,17 @@
-import { EnteFile } from 'types/file';
-import { CollectionSummaryType, CollectionType } from 'constants/collection';
+import { CollectionSummaryType, CollectionType } from "constants/collection";
+import { EnteFile } from "types/file";
 import {
     EncryptedMagicMetadata,
     MagicMetadataCore,
     SUB_TYPE,
     VISIBILITY_STATE,
-} from 'types/magicMetadata';
+} from "types/magicMetadata";
 
 export enum COLLECTION_ROLE {
-    VIEWER = 'VIEWER',
-    OWNER = 'OWNER',
-    COLLABORATOR = 'COLLABORATOR',
-    UNKNOWN = 'UNKNOWN',
+    VIEWER = "VIEWER",
+    OWNER = "OWNER",
+    COLLABORATOR = "COLLABORATOR",
+    UNKNOWN = "UNKNOWN",
 }
 
 export interface CollectionUser {
@@ -43,13 +43,13 @@ export interface EncryptedCollection {
 export interface Collection
     extends Omit<
         EncryptedCollection,
-        | 'encryptedKey'
-        | 'keyDecryptionNonce'
-        | 'encryptedName'
-        | 'nameDecryptionNonce'
-        | 'magicMetadata'
-        | 'pubMagicMetadata'
-        | 'sharedMagicMetadata'
+        | "encryptedKey"
+        | "keyDecryptionNonce"
+        | "encryptedName"
+        | "nameDecryptionNonce"
+        | "magicMetadata"
+        | "pubMagicMetadata"
+        | "sharedMagicMetadata"
     > {
     key: string;
     name: string;

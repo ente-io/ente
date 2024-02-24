@@ -1,4 +1,4 @@
-import { UPLOAD_RESULT, UPLOAD_STAGES } from 'constants/upload';
+import { UPLOAD_RESULT, UPLOAD_STAGES } from "constants/upload";
 
 export type FileID = number;
 export type FileName = string;

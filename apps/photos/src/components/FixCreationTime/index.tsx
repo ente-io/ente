@@ -1,14 +1,14 @@
-import DialogBox from '@ente/shared/components/DialogBox/';
-import React, { useContext, useEffect, useState } from 'react';
-import { updateCreationTimeWithExif } from 'services/updateCreationTimeWithExif';
-import { GalleryContext } from 'pages/gallery';
-import { EnteFile } from 'types/file';
-import FixCreationTimeRunning from './running';
-import FixCreationTimeFooter from './footer';
-import { Formik } from 'formik';
+import DialogBox from "@ente/shared/components/DialogBox/";
+import { Formik } from "formik";
+import { GalleryContext } from "pages/gallery";
+import { useContext, useEffect, useState } from "react";
+import { updateCreationTimeWithExif } from "services/updateCreationTimeWithExif";
+import { EnteFile } from "types/file";
+import FixCreationTimeFooter from "./footer";
+import FixCreationTimeRunning from "./running";
 
-import FixCreationTimeOptions from './options';
-import { t } from 'i18next';
+import { t } from "i18next";
+import FixCreationTimeOptions from "./options";
 export interface FixCreationTimeAttributes {
     files: EnteFile[];
 }
@@ -42,13 +42,13 @@ function Message({ fixState }: { fixState: FIX_STATE }) {
     let message = null;
     switch (fixState) {
         case FIX_STATE.NOT_STARTED:
-            message = t('UPDATE_CREATION_TIME_NOT_STARTED');
+            message = t("UPDATE_CREATION_TIME_NOT_STARTED");
             break;
         case FIX_STATE.COMPLETED:
-            message = t('UPDATE_CREATION_TIME_COMPLETED');
+            message = t("UPDATE_CREATION_TIME_COMPLETED");
             break;
         case FIX_STATE.COMPLETED_WITH_ERRORS:
-            message = t('UPDATE_CREATION_TIME_COMPLETED_WITH_ERROR');
+            message = t("UPDATE_CREATION_TIME_COMPLETED_WITH_ERROR");
             break;
     }
     return message ? <div>{message}</div> : <></>;
@@ -76,7 +76,7 @@ export default function FixCreationTime(props: Props) {
             props.attributes.files,
             option,
             customTime,
-            setProgressTracker
+            setProgressTracker,
         );
         if (!completedWithoutError) {
             setFixState(FIX_STATE.COMPLETED);
@@ -100,19 +100,21 @@ export default function FixCreationTime(props: Props) {
             attributes={{
                 title:
                     fixState === FIX_STATE.RUNNING
-                        ? t('FIX_CREATION_TIME_IN_PROGRESS')
-                        : t('FIX_CREATION_TIME'),
+                        ? t("FIX_CREATION_TIME_IN_PROGRESS")
+                        : t("FIX_CREATION_TIME"),
                 nonClosable: true,
-            }}>
+            }}
+        >
             <div
                 style={{
-                    marginBottom: '10px',
-                    display: 'flex',
-                    flexDirection: 'column',
+                    marginBottom: "10px",
+                    display: "flex",
+                    flexDirection: "column",
                     ...(fixState === FIX_STATE.RUNNING
-                        ? { alignItems: 'center' }
+                        ? { alignItems: "center" }
                         : {}),
-                }}>
+                }}
+            >
                 <Message fixState={fixState} />
 
                 {fixState === FIX_STATE.RUNNING && (
@@ -124,13 +126,14 @@ export default function FixCreationTime(props: Props) {
                         customTime: new Date(),
                     }}
                     validateOnBlur={false}
-                    onSubmit={onSubmit}>
+                    onSubmit={onSubmit}
+                >
                     {({ values, handleChange, handleSubmit }) => (
                         <>
                             {(fixState === FIX_STATE.NOT_STARTED ||
                                 fixState ===
                                     FIX_STATE.COMPLETED_WITH_ERRORS) && (
-                                <div style={{ marginTop: '10px' }}>
+                                <div style={{ marginTop: "10px" }}>
                                     <FixCreationTimeOptions
                                         handleChange={handleChange}
                                         values={values}

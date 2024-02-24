@@ -1,14 +1,14 @@
-import React, { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from "react";
 
-import { getData, LS_KEYS } from '@ente/shared/storage/localStorage';
-import { AppContext } from 'pages/_app';
-import { KeyAttributes, User } from '@ente/shared/user/types';
+import DialogBoxV2 from "@ente/shared/components/DialogBoxV2";
 import VerifyMasterPasswordForm, {
     VerifyMasterPasswordFormProps,
-} from '@ente/shared/components/VerifyMasterPasswordForm';
-import { logError } from '@ente/shared/sentry';
-import { t } from 'i18next';
-import DialogBoxV2 from '@ente/shared/components/DialogBoxV2';
+} from "@ente/shared/components/VerifyMasterPasswordForm";
+import { logError } from "@ente/shared/sentry";
+import { getData, LS_KEYS } from "@ente/shared/storage/localStorage";
+import { KeyAttributes, User } from "@ente/shared/user/types";
+import { t } from "i18next";
+import { AppContext } from "pages/_app";
 interface Iprops {
     open: boolean;
     onClose: () => void;
@@ -26,9 +26,9 @@ export default function AuthenticateUserModal({
 
     const somethingWentWrong = () =>
         setDialogMessage({
-            title: t('ERROR'),
-            close: { variant: 'critical' },
-            content: t('UNKNOWN_ERROR'),
+            title: t("ERROR"),
+            close: { variant: "critical" },
+            content: t("UNKNOWN_ERROR"),
         });
 
     useEffect(() => {
@@ -36,7 +36,7 @@ export default function AuthenticateUserModal({
             try {
                 const user = getData(LS_KEYS.USER);
                 if (!user) {
-                    throw Error('User not found');
+                    throw Error("User not found");
                 }
                 setUser(user);
                 const keyAttributes = getData(LS_KEYS.KEY_ATTRIBUTES);
@@ -44,14 +44,14 @@ export default function AuthenticateUserModal({
                     (!user?.token && !user?.encryptedToken) ||
                     (keyAttributes && !keyAttributes.memLimit)
                 ) {
-                    throw Error('User not logged in');
+                    throw Error("User not logged in");
                 } else if (!keyAttributes) {
-                    throw Error('Key attributes not found');
+                    throw Error("Key attributes not found");
                 } else {
                     setKeyAttributes(keyAttributes);
                 }
             } catch (e) {
-                logError(e, 'AuthenticateUserModal initialization failed');
+                logError(e, "AuthenticateUserModal initialization failed");
                 onClose();
                 somethingWentWrong();
             }
@@ -59,7 +59,7 @@ export default function AuthenticateUserModal({
         main();
     }, []);
 
-    const useMasterPassword: VerifyMasterPasswordFormProps['callback'] =
+    const useMasterPassword: VerifyMasterPasswordFormProps["callback"] =
         async () => {
             onClose();
             onAuthenticate();
@@ -69,12 +69,13 @@ export default function AuthenticateUserModal({
         <DialogBoxV2
             open={open}
             onClose={onClose}
-            sx={{ position: 'absolute' }}
+            sx={{ position: "absolute" }}
             attributes={{
-                title: t('PASSWORD'),
-            }}>
+                title: t("PASSWORD"),
+            }}
+        >
             <VerifyMasterPasswordForm
-                buttonText={t('AUTHENTICATE')}
+                buttonText={t("AUTHENTICATE")}
                 callback={useMasterPassword}
                 user={user}
                 keyAttributes={keyAttributes}

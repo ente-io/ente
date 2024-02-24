@@ -1,6 +1,6 @@
-import { Remote } from 'comlink';
-import { DedicatedFFmpegWorker } from 'worker/ffmpeg.worker';
-import { ComlinkWorker } from '@ente/shared/worker/comlinkWorker';
+import { ComlinkWorker } from "@ente/shared/worker/comlinkWorker";
+import { Remote } from "comlink";
+import { DedicatedFFmpegWorker } from "worker/ffmpeg.worker";
 
 class ComlinkFFmpegWorker {
     private comlinkWorkerInstance: Promise<Remote<DedicatedFFmpegWorker>>;
@@ -16,8 +16,8 @@ class ComlinkFFmpegWorker {
 
 const getDedicatedFFmpegWorker = () => {
     const cryptoComlinkWorker = new ComlinkWorker<typeof DedicatedFFmpegWorker>(
-        'ente-ffmpeg-worker',
-        new Worker(new URL('worker/ffmpeg.worker.ts', import.meta.url))
+        "ente-ffmpeg-worker",
+        new Worker(new URL("worker/ffmpeg.worker.ts", import.meta.url)),
     );
     return cryptoComlinkWorker;
 };

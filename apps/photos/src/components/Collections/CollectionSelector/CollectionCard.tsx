@@ -1,8 +1,7 @@
-import { Typography } from '@mui/material';
-import React from 'react';
-import CollectionCard from '../CollectionCard';
-import { CollectionSummary } from 'types/collection';
-import { AllCollectionTile, AllCollectionTileText } from '../styledComponents';
+import { Typography } from "@mui/material";
+import { CollectionSummary } from "types/collection";
+import CollectionCard from "../CollectionCard";
+import { AllCollectionTile, AllCollectionTileText } from "../styledComponents";
 
 interface Iprops {
     collectionSummary: CollectionSummary;
@@ -17,7 +16,8 @@ export default function CollectionSelectorCard({
         <CollectionCard
             collectionTile={AllCollectionTile}
             coverFile={collectionSummary.coverFile}
-            onClick={() => onCollectionClick(collectionSummary.id)}>
+            onClick={() => onCollectionClick(collectionSummary.id)}
+        >
             <AllCollectionTileText>
                 <Typography>{collectionSummary.name}</Typography>
             </AllCollectionTileText>

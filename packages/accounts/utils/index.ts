@@ -1,12 +1,12 @@
-import { PasswordStrength } from '@ente/accounts/constants';
-import zxcvbn from 'zxcvbn';
+import { PasswordStrength } from "@ente/accounts/constants";
+import zxcvbn from "zxcvbn";
 
 export const convertBufferToBase64 = (buffer: Buffer) => {
-    return buffer.toString('base64');
+    return buffer.toString("base64");
 };
 
 export const convertBase64ToBuffer = (base64: string) => {
-    return Buffer.from(base64, 'base64');
+    return Buffer.from(base64, "base64");
 };
 
 export function estimatePasswordStrength(password: string): PasswordStrength {

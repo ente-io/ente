@@ -1,9 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from "react";
 
 export default function TimerBar({ percentage }: { percentage: number }) {
-    const okColor = '#75C157';
-    const warningColor = '#FFC000';
-    const lateColor = '#FF0000';
+    const okColor = "#75C157";
+    const warningColor = "#FFC000";
+    const lateColor = "#FF0000";
 
     const [backgroundColor, setBackgroundColor] = useState(okColor);
 
@@ -21,9 +21,9 @@ export default function TimerBar({ percentage }: { percentage: number }) {
         <div
             style={{
                 width: `${percentage}%`, // Set the width based on the time left
-                height: '10px', // Same as the border thickness
+                height: "10px", // Same as the border thickness
                 backgroundColor, // The color of the moving border
-                transition: 'width 1s linear', // Smooth transition for the width change
+                transition: "width 1s linear", // Smooth transition for the width change
             }}
         />
     );

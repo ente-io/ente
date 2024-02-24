@@ -1,8 +1,8 @@
-import { styled } from '@mui/material/styles';
-import LinkButton from '@ente/shared/components/LinkButton';
-import { Tooltip } from '@mui/material';
-import ElectronAPIs from '@ente/shared/electron';
-import { logError } from '@ente/shared/sentry';
+import LinkButton from "@ente/shared/components/LinkButton";
+import ElectronAPIs from "@ente/shared/electron";
+import { logError } from "@ente/shared/sentry";
+import { Tooltip } from "@mui/material";
+import { styled } from "@mui/material/styles";
 
 const DirectoryPathContainer = styled(LinkButton)(
     ({ width }) => `
@@ -13,7 +13,7 @@ const DirectoryPathContainer = styled(LinkButton)(
     /* Beginning of string */
     direction: rtl;
     text-align: left;
-`
+`,
 );
 
 export const DirectoryPath = ({ width, path }) => {
@@ -21,7 +21,7 @@ export const DirectoryPath = ({ width, path }) => {
         try {
             await ElectronAPIs.openDirectory(path);
         } catch (e) {
-            logError(e, 'openDirectory failed');
+            logError(e, "openDirectory failed");
         }
     };
     return (

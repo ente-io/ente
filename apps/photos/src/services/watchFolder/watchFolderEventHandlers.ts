@@ -1,8 +1,8 @@
-import { ElectronFile } from 'types/upload';
-import { EventQueueItem } from 'types/watchFolder';
-import { addLogLine } from '@ente/shared/logging';
-import { logError } from '@ente/shared/sentry';
-import watchFolderService from './watchFolderService';
+import { addLogLine } from "@ente/shared/logging";
+import { logError } from "@ente/shared/sentry";
+import { ElectronFile } from "types/upload";
+import { EventQueueItem } from "types/watchFolder";
+import watchFolderService from "./watchFolderService";
 
 export async function diskFileAddedCallback(file: ElectronFile) {
     try {
@@ -16,17 +16,17 @@ export async function diskFileAddedCallback(file: ElectronFile) {
         const { collectionName, folderPath } = collectionNameAndFolderPath;
 
         const event: EventQueueItem = {
-            type: 'upload',
+            type: "upload",
             collectionName,
             folderPath,
             files: [file],
         };
         watchFolderService.pushEvent(event);
         addLogLine(
-            `added (upload) to event queue, collectionName:${event.collectionName} folderPath:${event.folderPath}, filesCount: ${event.files.length}`
+            `added (upload) to event queue, collectionName:${event.collectionName} folderPath:${event.folderPath}, filesCount: ${event.files.length}`,
         );
     } catch (e) {
-        logError(e, 'error while calling diskFileAddedCallback');
+        logError(e, "error while calling diskFileAddedCallback");
     }
 }
 
@@ -42,17 +42,17 @@ export async function diskFileRemovedCallback(filePath: string) {
         const { collectionName, folderPath } = collectionNameAndFolderPath;
 
         const event: EventQueueItem = {
-            type: 'trash',
+            type: "trash",
             collectionName,
             folderPath,
             paths: [filePath],
         };
         watchFolderService.pushEvent(event);
         addLogLine(
-            `added (trash) to event queue collectionName:${event.collectionName} folderPath:${event.folderPath} , pathsCount: ${event.paths.length}`
+            `added (trash) to event queue collectionName:${event.collectionName} folderPath:${event.folderPath} , pathsCount: ${event.paths.length}`,
         );
     } catch (e) {
-        logError(e, 'error while calling diskFileRemovedCallback');
+        logError(e, "error while calling diskFileRemovedCallback");
     }
 }
 
@@ -60,7 +60,7 @@ export async function diskFolderRemovedCallback(folderPath: string) {
     try {
         const mappings = watchFolderService.getWatchMappings();
         const mapping = mappings.find(
-            (mapping) => mapping.folderPath === folderPath
+            (mapping) => mapping.folderPath === folderPath,
         );
         if (!mapping) {
             addLogLine(`folder not found in mappings, ${folderPath}`);
@@ -69,6 +69,6 @@ export async function diskFolderRemovedCallback(folderPath: string) {
         watchFolderService.pushTrashedDir(folderPath);
         addLogLine(`added trashedDir, ${folderPath}`);
     } catch (e) {
-        logError(e, 'error while calling diskFolderRemovedCallback');
+        logError(e, "error while calling diskFolderRemovedCallback");
     }
 }

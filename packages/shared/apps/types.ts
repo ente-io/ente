@@ -1,8 +1,8 @@
-import { NextRouter } from 'next/router';
-import { APPS } from './constants';
-import { SetDialogBoxAttributesV2 } from '@ente/shared/components/DialogBoxV2/types';
-import { EmotionCache } from '@emotion/react';
-import { AppProps } from 'next/app';
+import { EmotionCache } from "@emotion/react";
+import { SetDialogBoxAttributesV2 } from "@ente/shared/components/DialogBoxV2/types";
+import { AppProps } from "next/app";
+import { NextRouter } from "next/router";
+import { APPS } from "./constants";
 
 export interface EnteAppProps extends AppProps {
     emotionCache?: EmotionCache;

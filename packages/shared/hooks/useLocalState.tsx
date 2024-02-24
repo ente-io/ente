@@ -1,21 +1,21 @@
-import { Dispatch, SetStateAction, useEffect, useState } from 'react';
-import { getData, LS_KEYS, setData } from '@ente/shared/storage/localStorage';
+import { LS_KEYS, getData, setData } from "@ente/shared/storage/localStorage";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
 
 export function useLocalState<T>(
     key: LS_KEYS,
-    initialValue?: T
+    initialValue?: T,
 ): [T, Dispatch<SetStateAction<T>>] {
     const [value, setValue] = useState<T>(initialValue);
 
     useEffect(() => {
         const { value } = getData(key) ?? {};
-        if (typeof value !== 'undefined') {
+        if (typeof value !== "undefined") {
             setValue(value);
         }
     }, []);
 
     useEffect(() => {
-        if (typeof value !== 'undefined') {
+        if (typeof value !== "undefined") {
             setData(key, { value });
         }
     }, [value]);

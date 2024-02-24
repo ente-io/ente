@@ -1,13 +1,13 @@
-import { ThemeColorsOptions } from '@mui/material';
-import { THEME_COLOR } from '../constants';
-import darkThemeColors from './dark';
-import lightThemeColors from './light';
-import { APPS } from '@ente/shared/apps/constants';
-import { getFixesColors } from './fixed';
+import { APPS } from "@ente/shared/apps/constants";
+import { ThemeColorsOptions } from "@mui/material";
+import { THEME_COLOR } from "../constants";
+import darkThemeColors from "./dark";
+import { getFixesColors } from "./fixed";
+import lightThemeColors from "./light";
 
 export const getColors = (
     themeColor: THEME_COLOR,
-    appName: APPS
+    appName: APPS,
 ): ThemeColorsOptions => {
     switch (themeColor) {
         case THEME_COLOR.LIGHT:

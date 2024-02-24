@@ -1,16 +1,16 @@
-import i18n from "i18next";
-import { initReactI18next } from "react-i18next";
-import Backend from "i18next-http-backend";
 import { isDevBuild } from "@/utils/env";
-import { getUserLocales } from "get-user-locale";
-import { includes } from "@/utils/type-guards";
 import {
     getLSString,
-    setLSString,
     removeLSString,
+    setLSString,
 } from "@/utils/local-storage";
-import { object, string } from "yup";
 import { logError } from "@/utils/logging";
+import { includes } from "@/utils/type-guards";
+import { getUserLocales } from "get-user-locale";
+import i18n from "i18next";
+import Backend from "i18next-http-backend";
+import { initReactI18next } from "react-i18next";
+import { object, string } from "yup";
 
 /**
  * List of all {@link SupportedLocale}s.

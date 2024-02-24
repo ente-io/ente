@@ -1,4 +1,4 @@
-import { DBSCAN } from 'density-clustering';
+import { DBSCAN } from "density-clustering";
 import {
     ClusteringConfig,
     ClusteringInput,
@@ -6,28 +6,28 @@ import {
     ClusteringService,
     HdbscanResults,
     Versioned,
-} from 'types/machineLearning';
+} from "types/machineLearning";
 
 class DbscanClusteringService implements ClusteringService {
     public method: Versioned<ClusteringMethod>;
 
     constructor() {
         this.method = {
-            value: 'Dbscan',
+            value: "Dbscan",
             version: 1,
         };
     }
 
     public async cluster(
         input: ClusteringInput,
-        config: ClusteringConfig
+        config: ClusteringConfig,
     ): Promise<HdbscanResults> {
         // addLogLine('Clustering input: ', input);
         const dbscan = new DBSCAN();
         const clusters = dbscan.run(
             input,
             config.clusterSelectionEpsilon,
-            config.minClusterSize
+            config.minClusterSize,
         );
         const noise = dbscan.noise;
         return { clusters, noise };

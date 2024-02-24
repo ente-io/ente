@@ -1,7 +1,7 @@
-import { Remote } from 'comlink';
-import { runningInBrowser } from 'utils/common';
-import { ComlinkWorker } from '@ente/shared/worker/comlinkWorker';
-import { DedicatedSearchWorker } from 'worker/search.worker';
+import { ComlinkWorker } from "@ente/shared/worker/comlinkWorker";
+import { Remote } from "comlink";
+import { runningInBrowser } from "utils/common";
+import { DedicatedSearchWorker } from "worker/search.worker";
 
 class ComlinkSearchWorker {
     private comlinkWorkerInstance: Remote<DedicatedSearchWorker>;
@@ -20,8 +20,8 @@ export const getDedicatedSearchWorker = () => {
         const cryptoComlinkWorker = new ComlinkWorker<
             typeof DedicatedSearchWorker
         >(
-            'ente-search-worker',
-            new Worker(new URL('worker/search.worker.ts', import.meta.url))
+            "ente-search-worker",
+            new Worker(new URL("worker/search.worker.ts", import.meta.url)),
         );
         return cryptoComlinkWorker;
     }

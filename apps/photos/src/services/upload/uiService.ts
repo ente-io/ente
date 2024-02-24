@@ -1,18 +1,18 @@
-import { Canceler } from 'axios';
+import { CustomError } from "@ente/shared/error";
+import { Canceler } from "axios";
 import {
-    UPLOAD_RESULT,
     RANDOM_PERCENTAGE_PROGRESS_FOR_PUT,
+    UPLOAD_RESULT,
     UPLOAD_STAGES,
-} from 'constants/upload';
+} from "constants/upload";
 import {
     FinishedUploads,
     InProgressUpload,
     InProgressUploads,
     ProgressUpdater,
     SegregatedFinishedUploads,
-} from 'types/upload/ui';
-import { CustomError } from '@ente/shared/error';
-import uploadCancelService from './uploadCancelService';
+} from "types/upload/ui";
+import uploadCancelService from "./uploadCancelService";
 
 const REQUEST_TIMEOUT_TIME = 30 * 1000; // 30 sec;
 class UIService {
@@ -42,10 +42,10 @@ class UIService {
             total: this.totalFilesCount,
         });
         this.progressUpdater.setInProgressUploads(
-            convertInProgressUploadsToList(this.inProgressUploads)
+            convertInProgressUploadsToList(this.inProgressUploads),
         );
         this.progressUpdater.setFinishedUploads(
-            segregatedFinishedUploadsToList(this.finishedUploads)
+            segregatedFinishedUploadsToList(this.finishedUploads),
         );
     }
 
@@ -104,7 +104,7 @@ class UIService {
 
     hasFilesInResultList() {
         const finishedUploadsList = segregatedFinishedUploadsToList(
-            this.finishedUploads
+            this.finishedUploads,
         );
         for (const x of finishedUploadsList.values()) {
             if (x.length > 0) {
@@ -141,17 +141,17 @@ class UIService {
 
         setPercentComplete(percentComplete);
         setInProgressUploads(
-            convertInProgressUploadsToList(this.inProgressUploads)
+            convertInProgressUploadsToList(this.inProgressUploads),
         );
         setFinishedUploads(
-            segregatedFinishedUploadsToList(this.finishedUploads)
+            segregatedFinishedUploadsToList(this.finishedUploads),
         );
     }
 
     trackUploadProgress(
         fileLocalID: number,
         percentPerPart = RANDOM_PERCENTAGE_PROGRESS_FOR_PUT(),
-        index = 0
+        index = 0,
     ) {
         const cancel: { exec: Canceler } = { exec: () => {} };
         const cancelTimedOutRequest = () =>
@@ -175,10 +175,10 @@ class UIService {
                     Math.min(
                         Math.round(
                             percentPerPart * index +
-                                (percentPerPart * event.loaded) / event.total
+                                (percentPerPart * event.loaded) / event.total,
                         ),
-                        98
-                    )
+                        98,
+                    ),
                 );
                 this.updateProgressBarUI();
                 if (event.loaded === event.total) {
@@ -202,7 +202,7 @@ function convertInProgressUploadsToList(inProgressUploads) {
             ({
                 localFileID,
                 progress,
-            }) as InProgressUpload
+            }) as InProgressUpload,
     );
 }
 

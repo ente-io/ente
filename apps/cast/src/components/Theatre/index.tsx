@@ -1,5 +1,5 @@
-import { FILE_TYPE } from 'constants/file';
-import PhotoAuditorium from './PhotoAuditorium';
+import { FILE_TYPE } from "constants/file";
+import PhotoAuditorium from "./PhotoAuditorium";
 // import VideoAuditorium from './VideoAuditorium';
 
 interface fileProp {

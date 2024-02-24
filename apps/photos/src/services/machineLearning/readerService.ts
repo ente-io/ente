@@ -1,16 +1,16 @@
-import { FILE_TYPE } from 'constants/file';
-import { MLSyncContext, MLSyncFileContext } from 'types/machineLearning';
+import { logError } from "@ente/shared/sentry";
+import { FILE_TYPE } from "constants/file";
+import { MLSyncContext, MLSyncFileContext } from "types/machineLearning";
 import {
     getLocalFileImageBitmap,
     getOriginalImageBitmap,
     getThumbnailImageBitmap,
-} from 'utils/machineLearning';
-import { logError } from '@ente/shared/sentry';
+} from "utils/machineLearning";
 
 class ReaderService {
     async getImageBitmap(
         syncContext: MLSyncContext,
-        fileContext: MLSyncFileContext
+        fileContext: MLSyncFileContext,
     ) {
         try {
             if (fileContext.imageBitmap) {
@@ -22,25 +22,25 @@ class ReaderService {
                     fileContext.enteFile.metadata.fileType !== FILE_TYPE.IMAGE
                 ) {
                     throw new Error(
-                        'Local file of only image type is supported'
+                        "Local file of only image type is supported",
                     );
                 }
                 fileContext.imageBitmap = await getLocalFileImageBitmap(
                     fileContext.enteFile,
-                    fileContext.localFile
+                    fileContext.localFile,
                 );
             } else if (
-                syncContext.config.imageSource === 'Original' &&
+                syncContext.config.imageSource === "Original" &&
                 [FILE_TYPE.IMAGE, FILE_TYPE.LIVE_PHOTO].includes(
-                    fileContext.enteFile.metadata.fileType
+                    fileContext.enteFile.metadata.fileType,
                 )
             ) {
                 fileContext.imageBitmap = await getOriginalImageBitmap(
-                    fileContext.enteFile
+                    fileContext.enteFile,
                 );
             } else {
                 fileContext.imageBitmap = await getThumbnailImageBitmap(
-                    fileContext.enteFile
+                    fileContext.enteFile,
                 );
             }
 
@@ -51,7 +51,7 @@ class ReaderService {
 
             return fileContext.imageBitmap;
         } catch (e) {
-            logError(e, 'failed to create image bitmap');
+            logError(e, "failed to create image bitmap");
             throw e;
         }
     }

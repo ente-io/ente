@@ -1,14 +1,14 @@
-import { ElectronFile } from 'types/upload';
-import { convertBytesToHumanReadable } from '@ente/shared/utils/size';
-import { logError } from '@ente/shared/sentry';
+import { logError } from "@ente/shared/sentry";
+import { convertBytesToHumanReadable } from "@ente/shared/utils/size";
+import { ElectronFile } from "types/upload";
 
 export async function getUint8ArrayView(
-    file: Blob | ElectronFile
+    file: Blob | ElectronFile,
 ): Promise<Uint8Array> {
     try {
         return new Uint8Array(await file.arrayBuffer());
     } catch (e) {
-        logError(e, 'reading file blob failed', {
+        logError(e, "reading file blob failed", {
             fileSize: convertBytesToHumanReadable(file.size),
         });
         throw e;
@@ -37,7 +37,7 @@ export function getFileStream(file: File, chunkSize: number) {
 
 export async function getElectronFileStream(
     file: ElectronFile,
-    chunkSize: number
+    chunkSize: number,
 ) {
     const chunkCount = Math.ceil(file.size / chunkSize);
     return {
@@ -61,29 +61,29 @@ async function* fileChunkReaderMaker(file: File, chunkSize: number) {
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function getUint8ArrayViewOld(
     reader: FileReader,
-    file: Blob
+    file: Blob,
 ): Promise<Uint8Array> {
     return await new Promise((resolve, reject) => {
         reader.onabort = () =>
             reject(
                 Error(
                     `file reading was aborted, file size= ${convertBytesToHumanReadable(
-                        file.size
-                    )}`
-                )
+                        file.size,
+                    )}`,
+                ),
             );
         reader.onerror = () =>
             reject(
                 Error(
                     `file reading has failed, file size= ${convertBytesToHumanReadable(
-                        file.size
-                    )} , reason= ${reader.error}`
-                )
+                        file.size,
+                    )} , reason= ${reader.error}`,
+                ),
             );
         reader.onload = () => {
             // Do whatever you want with the file contents
             const result =
-                typeof reader.result === 'string'
+                typeof reader.result === "string"
                     ? new TextEncoder().encode(reader.result)
                     : new Uint8Array(reader.result);
             resolve(result);

@@ -1,11 +1,11 @@
-import DialogBoxV2 from '@ente/shared/components/DialogBoxV2';
-import EnteButton from '@ente/shared/components/EnteButton';
-import { Button, Stack, Typography } from '@mui/material';
-import { AppContext } from 'pages/_app';
-import { useContext, useState } from 'react';
-import { deletePasskey } from 'services/passkeysService';
-import { PasskeysContext } from '.';
-import { t } from 'i18next';
+import DialogBoxV2 from "@ente/shared/components/DialogBoxV2";
+import EnteButton from "@ente/shared/components/EnteButton";
+import { Button, Stack, Typography } from "@mui/material";
+import { t } from "i18next";
+import { AppContext } from "pages/_app";
+import { useContext, useState } from "react";
+import { deletePasskey } from "services/passkeysService";
+import { PasskeysContext } from ".";
 
 interface IProps {
     open: boolean;
@@ -41,27 +41,30 @@ const DeletePasskeyModal = (props: IProps) => {
             onClose={props.onClose}
             fullScreen={isMobile}
             attributes={{
-                title: t('DELETE_PASSKEY'),
+                title: t("DELETE_PASSKEY"),
                 secondary: {
                     action: props.onClose,
-                    text: t('CANCEL'),
+                    text: t("CANCEL"),
                 },
-            }}>
-            <Stack spacing={'8px'}>
-                <Typography>{t('DELETE_PASSKEY_CONFIRMATION')}</Typography>
+            }}
+        >
+            <Stack spacing={"8px"}>
+                <Typography>{t("DELETE_PASSKEY_CONFIRMATION")}</Typography>
                 <EnteButton
                     type="submit"
                     size="large"
                     color="critical"
                     loading={loading}
-                    onClick={doDelete}>
-                    {t('DELETE')}
+                    onClick={doDelete}
+                >
+                    {t("DELETE")}
                 </EnteButton>
                 <Button
                     size="large"
-                    color={'secondary'}
-                    onClick={props.onClose}>
-                    {t('CANCEL')}
+                    color={"secondary"}
+                    onClick={props.onClose}
+                >
+                    {t("CANCEL")}
                 </Button>
             </Stack>
         </DialogBoxV2>

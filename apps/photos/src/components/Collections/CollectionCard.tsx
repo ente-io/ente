@@ -1,8 +1,10 @@
-import { useState, useEffect } from 'react';
-import downloadManager from 'services/download';
-import { EnteFile } from 'types/file';
-import { StaticThumbnail } from 'components/PlaceholderThumbnails';
-import { LoadingThumbnail } from 'components/PlaceholderThumbnails';
+import {
+    LoadingThumbnail,
+    StaticThumbnail,
+} from "components/PlaceholderThumbnails";
+import { useEffect, useState } from "react";
+import downloadManager from "services/download";
+import { EnteFile } from "types/file";
 
 export default function CollectionCard(props: {
     children?: any;
@@ -28,7 +30,7 @@ export default function CollectionCard(props: {
             }
             const url = await downloadManager.getThumbnailForPreview(
                 file,
-                isScrolling
+                isScrolling,
             );
             if (url) {
                 setCoverImageURL(url);

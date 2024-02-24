@@ -1,8 +1,8 @@
-import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
-import { addLogLine } from '@ente/shared/logging';
-import { logError } from '@ente/shared/sentry';
+import { addLogLine } from "@ente/shared/logging";
+import { logError } from "@ente/shared/sentry";
+import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 
-import { ApiError, CustomError, isApiErrorResponse } from '../error';
+import { ApiError, CustomError, isApiErrorResponse } from "../error";
 
 interface IHTTPHeaders {
     [headerKey: string]: any;
@@ -28,10 +28,10 @@ class HTTPService {
                     // that falls out of the range of 2xx
                     if (isApiErrorResponse(response.data)) {
                         const responseData = response.data;
-                        logError(error, 'HTTP Service Error', {
+                        logError(error, "HTTP Service Error", {
                             url: config.url,
                             method: config.method,
-                            xRequestId: response.headers['x-request-id'],
+                            xRequestId: response.headers["x-request-id"],
                             httpStatus: response.status,
                             errMessage: responseData.message,
                             errCode: responseData.code,
@@ -39,28 +39,28 @@ class HTTPService {
                         apiError = new ApiError(
                             responseData.message,
                             responseData.code,
-                            response.status
+                            response.status,
                         );
                     } else {
                         if (response.status >= 400 && response.status < 500) {
                             apiError = new ApiError(
                                 CustomError.CLIENT_ERROR,
-                                '',
-                                response.status
+                                "",
+                                response.status,
                             );
                         } else {
                             apiError = new ApiError(
                                 CustomError.ServerError,
-                                '',
-                                response.status
+                                "",
+                                response.status,
                             );
                         }
                     }
-                    logError(apiError, 'HTTP Service Error', {
+                    logError(apiError, "HTTP Service Error", {
                         url: config.url,
                         method: config.method,
-                        cfRay: response.headers['cf-ray'],
-                        xRequestId: response.headers['x-request-id'],
+                        cfRay: response.headers["cf-ray"],
+                        xRequestId: response.headers["x-request-id"],
                         httpStatus: response.status,
                     });
                     throw apiError;
@@ -69,21 +69,21 @@ class HTTPService {
                     // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
                     // http.ClientRequest in node.js
                     addLogLine(
-                        'request failed- no response',
+                        "request failed- no response",
                         `url: ${config.url}`,
-                        `method: ${config.method}`
+                        `method: ${config.method}`,
                     );
                     return Promise.reject(error);
                 } else {
                     // Something happened in setting up the request that triggered an Error
                     addLogLine(
-                        'request failed- axios error',
+                        "request failed- axios error",
                         `url: ${config.url}`,
-                        `method: ${config.method}`
+                        `method: ${config.method}`,
                     );
                     return Promise.reject(error);
                 }
-            }
+            },
         );
     }
 
@@ -91,7 +91,7 @@ class HTTPService {
      * header object to be append to all api calls.
      */
     private headers: IHTTPHeaders = {
-        'content-type': 'application/json',
+        "content-type": "application/json",
     };
 
     /**
@@ -143,7 +143,7 @@ class HTTPService {
         };
         if (customConfig?.cancel) {
             config.cancelToken = new axios.CancelToken(
-                (c) => (customConfig.cancel.exec = c)
+                (c) => (customConfig.cancel.exec = c),
             );
         }
         return await axios({ ...config, ...customConfig });
@@ -156,16 +156,16 @@ class HTTPService {
         url: string,
         params?: IQueryPrams,
         headers?: IHTTPHeaders,
-        customConfig?: any
+        customConfig?: any,
     ) {
         return this.request(
             {
                 headers,
-                method: 'GET',
+                method: "GET",
                 params,
                 url,
             },
-            customConfig
+            customConfig,
         );
     }
 
@@ -177,17 +177,17 @@ class HTTPService {
         data?: any,
         params?: IQueryPrams,
         headers?: IHTTPHeaders,
-        customConfig?: any
+        customConfig?: any,
     ) {
         return this.request(
             {
                 data,
                 headers,
-                method: 'POST',
+                method: "POST",
                 params,
                 url,
             },
-            customConfig
+            customConfig,
         );
     }
 
@@ -199,17 +199,17 @@ class HTTPService {
         data?: any,
         params?: IQueryPrams,
         headers?: IHTTPHeaders,
-        customConfig?: any
+        customConfig?: any,
     ) {
         return this.request(
             {
                 data,
                 headers,
-                method: 'PATCH',
+                method: "PATCH",
                 params,
                 url,
             },
-            customConfig
+            customConfig,
         );
     }
 
@@ -221,17 +221,17 @@ class HTTPService {
         data: any,
         params?: IQueryPrams,
         headers?: IHTTPHeaders,
-        customConfig?: any
+        customConfig?: any,
     ) {
         return this.request(
             {
                 data,
                 headers,
-                method: 'PUT',
+                method: "PUT",
                 params,
                 url,
             },
-            customConfig
+            customConfig,
         );
     }
 
@@ -243,17 +243,17 @@ class HTTPService {
         data: any,
         params?: IQueryPrams,
         headers?: IHTTPHeaders,
-        customConfig?: any
+        customConfig?: any,
     ) {
         return this.request(
             {
                 data,
                 headers,
-                method: 'DELETE',
+                method: "DELETE",
                 params,
                 url,
             },
-            customConfig
+            customConfig,
         );
     }
 }

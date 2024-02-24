@@ -1,7 +1,7 @@
-import React, { useContext } from 'react';
-import { LinearProgress, Divider, Box } from '@mui/material';
-import { UPLOAD_STAGES } from 'constants/upload';
-import UploadProgressContext from 'contexts/uploadProgress';
+import { Box, Divider, LinearProgress } from "@mui/material";
+import { UPLOAD_STAGES } from "constants/upload";
+import UploadProgressContext from "contexts/uploadProgress";
+import { useContext } from "react";
 
 export function UploadProgressBar() {
     const { uploadStage, percentComplete } = useContext(UploadProgressContext);
@@ -13,8 +13,8 @@ export function UploadProgressBar() {
                 <>
                     <LinearProgress
                         sx={{
-                            height: '2px',
-                            backgroundColor: 'transparent',
+                            height: "2px",
+                            backgroundColor: "transparent",
                         }}
                         variant="determinate"
                         value={percentComplete}

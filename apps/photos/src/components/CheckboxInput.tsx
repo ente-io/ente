@@ -1,10 +1,10 @@
 import {
-    FormControlLabel,
     Checkbox,
+    FormControlLabel,
     FormGroup,
     Typography,
     TypographyProps,
-} from '@mui/material';
+} from "@mui/material";
 
 interface Iprops {
     disabled?: boolean;
@@ -21,7 +21,7 @@ export function CheckboxInput({
     labelProps,
 }: Iprops) {
     return (
-        <FormGroup sx={{ width: '100%' }}>
+        <FormGroup sx={{ width: "100%" }}>
             <FormControlLabel
                 control={
                     <Checkbox

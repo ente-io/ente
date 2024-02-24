@@ -1,21 +1,21 @@
-import { AppContext } from 'pages/_app';
-import React, { useContext, useEffect, useState } from 'react';
-import { Trans } from 'react-i18next';
-import { t } from 'i18next';
+import { t } from "i18next";
+import { AppContext } from "pages/_app";
+import { useContext, useEffect, useState } from "react";
+import { Trans } from "react-i18next";
 
-import { addLogLine } from '@ente/shared/logging';
-import { getDebugLogs } from '@ente/shared/logging/web';
-import isElectron from 'is-electron';
-import ElectronAPIs from '@ente/shared/electron';
-import Typography from '@mui/material/Typography';
-import { isInternalUser } from 'utils/user';
-import { testUpload } from '../../../tests/upload.test';
+import ElectronAPIs from "@ente/shared/electron";
+import { addLogLine } from "@ente/shared/logging";
+import { getDebugLogs } from "@ente/shared/logging/web";
+import { downloadAsFile } from "@ente/shared/utils";
+import Typography from "@mui/material/Typography";
+import { EnteMenuItem } from "components/Menu/EnteMenuItem";
+import isElectron from "is-electron";
+import { isInternalUser } from "utils/user";
+import { testUpload } from "../../../tests/upload.test";
 import {
     testZipFileReading,
     testZipWithRootFileReadingTest,
-} from '../../../tests/zip-file-reading.test';
-import { EnteMenuItem } from 'components/Menu/EnteMenuItem';
-import { downloadAsFile } from '@ente/shared/utils';
+} from "../../../tests/zip-file-reading.test";
 
 export default function DebugSection() {
     const appContext = useContext(AppContext);
@@ -33,20 +33,20 @@ export default function DebugSection() {
 
     const confirmLogDownload = () =>
         appContext.setDialogMessage({
-            title: t('DOWNLOAD_LOGS'),
-            content: <Trans i18nKey={'DOWNLOAD_LOGS_MESSAGE'} />,
+            title: t("DOWNLOAD_LOGS"),
+            content: <Trans i18nKey={"DOWNLOAD_LOGS_MESSAGE"} />,
             proceed: {
-                text: t('DOWNLOAD'),
-                variant: 'accent',
+                text: t("DOWNLOAD"),
+                variant: "accent",
                 action: downloadDebugLogs,
             },
             close: {
-                text: t('CANCEL'),
+                text: t("CANCEL"),
             },
         });
 
     const downloadDebugLogs = () => {
-        addLogLine('exporting logs');
+        addLogLine("exporting logs");
         if (isElectron()) {
             ElectronAPIs.openLogDirectory();
         } else {
@@ -61,14 +61,15 @@ export default function DebugSection() {
             <EnteMenuItem
                 onClick={confirmLogDownload}
                 variant="mini"
-                label={t('DOWNLOAD_UPLOAD_LOGS')}
+                label={t("DOWNLOAD_UPLOAD_LOGS")}
             />
             {appVersion && (
                 <Typography
-                    py={'14px'}
-                    px={'16px'}
+                    py={"14px"}
+                    px={"16px"}
                     color="text.muted"
-                    variant="mini">
+                    variant="mini"
+                >
                     {appVersion}
                 </Typography>
             )}
@@ -77,7 +78,7 @@ export default function DebugSection() {
                     <EnteMenuItem
                         variant="secondary"
                         onClick={testUpload}
-                        label={'Test Upload'}
+                        label={"Test Upload"}
                     />
 
                     <EnteMenuItem

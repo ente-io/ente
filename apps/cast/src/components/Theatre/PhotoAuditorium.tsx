@@ -1,5 +1,5 @@
-import { SlideshowContext } from 'pages/slideshow';
-import { useContext, useEffect, useState } from 'react';
+import { SlideshowContext } from "pages/slideshow";
+import { useContext, useEffect, useState } from "react";
 
 export default function PhotoAuditorium({
     url,
@@ -49,38 +49,40 @@ export default function PhotoAuditorium({
     return (
         <div
             style={{
-                width: '100vw',
-                height: '100vh',
+                width: "100vw",
+                height: "100vh",
                 backgroundImage: `url(${url})`,
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
-                backgroundRepeat: 'no-repeat',
-                backgroundBlendMode: 'multiply',
-                backgroundColor: 'rgba(0, 0, 0, 0.5)',
-            }}>
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+                backgroundRepeat: "no-repeat",
+                backgroundBlendMode: "multiply",
+                backgroundColor: "rgba(0, 0, 0, 0.5)",
+            }}
+        >
             <div
                 style={{
-                    height: '100%',
-                    width: '100%',
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    backdropFilter: 'blur(10px)',
-                }}>
+                    height: "100%",
+                    width: "100%",
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    backdropFilter: "blur(10px)",
+                }}
+            >
                 <img
                     src={url}
                     style={{
-                        maxWidth: '100%',
-                        maxHeight: '100%',
-                        display: showPreloadedNextSlide ? 'none' : 'block',
+                        maxWidth: "100%",
+                        maxHeight: "100%",
+                        display: showPreloadedNextSlide ? "none" : "block",
                     }}
                 />
                 <img
                     src={nextSlideUrl}
                     style={{
-                        maxWidth: '100%',
-                        maxHeight: '100%',
-                        display: showPreloadedNextSlide ? 'block' : 'none',
+                        maxWidth: "100%",
+                        maxHeight: "100%",
+                        display: showPreloadedNextSlide ? "block" : "none",
                     }}
                     onLoad={() => {
                         setNextSlidePrerendered(true);

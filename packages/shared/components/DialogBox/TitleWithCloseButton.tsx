@@ -1,12 +1,11 @@
-import React from 'react';
+import { SpaceBetweenFlex } from "@ente/shared/components/Container";
+import CloseIcon from "@mui/icons-material/Close";
 import {
     DialogProps,
     DialogTitle,
     IconButton,
     Typography,
-} from '@mui/material';
-import CloseIcon from '@mui/icons-material/Close';
-import { SpaceBetweenFlex } from '@ente/shared/components/Container';
+} from "@mui/material";
 
 const DialogTitleWithCloseButton = (props) => {
     const { children, onClose, ...other } = props;
@@ -14,15 +13,16 @@ const DialogTitleWithCloseButton = (props) => {
     return (
         <DialogTitle {...other}>
             <SpaceBetweenFlex>
-                <Typography variant="h3" fontWeight={'bold'}>
+                <Typography variant="h3" fontWeight={"bold"}>
                     {children}
                 </Typography>
                 {onClose && (
                     <IconButton
                         aria-label="close"
                         onClick={onClose}
-                        sx={{ float: 'right' }}
-                        color="secondary">
+                        sx={{ float: "right" }}
+                        color="secondary"
+                    >
                         <CloseIcon />
                     </IconButton>
                 )}
@@ -42,11 +42,11 @@ export const dialogCloseHandler =
         staticBackdrop?: boolean;
         nonClosable?: boolean;
         onClose: () => void;
-    }): DialogProps['onClose'] =>
+    }): DialogProps["onClose"] =>
     (_, reason) => {
         if (nonClosable) {
             // no-op
-        } else if (staticBackdrop && reason === 'backdropClick') {
+        } else if (staticBackdrop && reason === "backdropClick") {
             // no-op
         } else {
             onClose();

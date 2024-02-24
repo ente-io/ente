@@ -1,18 +1,18 @@
-import { UploadProgressDialog } from './dialog';
-import { MinimizedUploadProgress } from './minimized';
-import React, { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from "react";
+import { UploadProgressDialog } from "./dialog";
+import { MinimizedUploadProgress } from "./minimized";
 
-import { t } from 'i18next';
+import { t } from "i18next";
 
-import { UPLOAD_STAGES } from 'constants/upload';
-import { AppContext } from 'pages/_app';
+import { UPLOAD_STAGES } from "constants/upload";
+import UploadProgressContext from "contexts/uploadProgress";
+import { AppContext } from "pages/_app";
 import {
-    UploadFileNames,
-    UploadCounter,
-    SegregatedFinishedUploads,
     InProgressUpload,
-} from 'types/upload/ui';
-import UploadProgressContext from 'contexts/uploadProgress';
+    SegregatedFinishedUploads,
+    UploadCounter,
+    UploadFileNames,
+} from "types/upload/ui";
 
 interface Props {
     open: boolean;
@@ -51,16 +51,16 @@ export default function UploadProgress({
 
     function confirmCancelUpload() {
         appContext.setDialogMessage({
-            title: t('STOP_UPLOADS_HEADER'),
-            content: t('STOP_ALL_UPLOADS_MESSAGE'),
+            title: t("STOP_UPLOADS_HEADER"),
+            content: t("STOP_ALL_UPLOADS_MESSAGE"),
             proceed: {
-                text: t('YES_STOP_UPLOADS'),
-                variant: 'critical',
+                text: t("YES_STOP_UPLOADS"),
+                variant: "critical",
                 action: props.cancelUploads,
             },
             close: {
-                text: t('NO'),
-                variant: 'secondary',
+                text: t("NO"),
+                variant: "secondary",
                 action: () => {},
             },
         });
@@ -93,7 +93,8 @@ export default function UploadProgress({
                 hasLivePhotos,
                 expanded,
                 setExpanded,
-            }}>
+            }}
+        >
             {expanded ? <UploadProgressDialog /> : <MinimizedUploadProgress />}
         </UploadProgressContext.Provider>
     );

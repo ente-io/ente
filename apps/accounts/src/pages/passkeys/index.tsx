@@ -1,14 +1,14 @@
-import { CenteredFlex } from '@ente/shared/components/Container';
-import FormPaper from '@ente/shared/components/Form/FormPaper';
-import SingleInputForm from '@ente/shared/components/SingleInputForm';
-import { ACCOUNTS_PAGES } from '@ente/shared/constants/pages';
-import { logError } from '@ente/shared/sentry';
-import { getToken } from '@ente/shared/storage/localStorage/helpers';
-import { Box, Typography } from '@mui/material';
-import { t } from 'i18next';
-import _sodium from 'libsodium-wrappers';
-import { useRouter } from 'next/router';
-import { AppContext } from 'pages/_app';
+import { CenteredFlex } from "@ente/shared/components/Container";
+import FormPaper from "@ente/shared/components/Form/FormPaper";
+import SingleInputForm from "@ente/shared/components/SingleInputForm";
+import { ACCOUNTS_PAGES } from "@ente/shared/constants/pages";
+import { logError } from "@ente/shared/sentry";
+import { getToken } from "@ente/shared/storage/localStorage/helpers";
+import { Box, Typography } from "@mui/material";
+import { t } from "i18next";
+import _sodium from "libsodium-wrappers";
+import { useRouter } from "next/router";
+import { AppContext } from "pages/_app";
 import {
     Dispatch,
     SetStateAction,
@@ -16,15 +16,15 @@ import {
     useContext,
     useEffect,
     useState,
-} from 'react';
-import { Passkey } from 'types/passkey';
+} from "react";
+import { Passkey } from "types/passkey";
 import {
     finishPasskeyRegistration,
     getPasskeyRegistrationOptions,
     getPasskeys,
-} from '../../services/passkeysService';
-import ManagePasskeyDrawer from './ManagePasskeyDrawer';
-import PasskeysList from './PasskeysList';
+} from "../../services/passkeysService";
+import ManagePasskeyDrawer from "./ManagePasskeyDrawer";
+import PasskeysList from "./PasskeysList";
 
 export const PasskeysContext = createContext(
     {} as {
@@ -32,14 +32,14 @@ export const PasskeysContext = createContext(
         setSelectedPasskey: Dispatch<SetStateAction<Passkey | null>>;
         setShowPasskeyDrawer: Dispatch<SetStateAction<boolean>>;
         refreshPasskeys: () => void;
-    }
+    },
 );
 
 const Passkeys = () => {
     const { showNavBar } = useContext(AppContext);
 
     const [selectedPasskey, setSelectedPasskey] = useState<Passkey | null>(
-        null
+        null,
     );
 
     const [showPasskeyDrawer, setShowPasskeyDrawer] = useState(false);
@@ -69,7 +69,7 @@ const Passkeys = () => {
     const handleSubmit = async (
         inputValue: string,
         setFieldError: (errorMessage: string) => void,
-        resetForm: (nextState?: unknown) => void
+        resetForm: (nextState?: unknown) => void,
     ) => {
         let response: {
             options: {
@@ -81,7 +81,7 @@ const Passkeys = () => {
         try {
             response = await getPasskeyRegistrationOptions();
         } catch {
-            setFieldError('Failed to begin registration');
+            setFieldError("Failed to begin registration");
             return;
         }
 
@@ -90,12 +90,12 @@ const Passkeys = () => {
         options.publicKey.challenge = _sodium.from_base64(
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-ignore
-            options.publicKey.challenge
+            options.publicKey.challenge,
         );
         options.publicKey.user.id = _sodium.from_base64(
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-ignore
-            options.publicKey.user.id
+            options.publicKey.user.id,
         );
 
         // create new credential
@@ -104,8 +104,8 @@ const Passkeys = () => {
         try {
             newCredential = await navigator.credentials.create(options);
         } catch (e) {
-            logError(e, 'Error creating credential');
-            setFieldError('Failed to create credential');
+            logError(e, "Error creating credential");
+            setFieldError("Failed to create credential");
             return;
         }
 
@@ -113,10 +113,10 @@ const Passkeys = () => {
             await finishPasskeyRegistration(
                 inputValue,
                 newCredential,
-                response.sessionID
+                response.sessionID,
             );
         } catch {
-            setFieldError('Failed to finish registration');
+            setFieldError("Failed to finish registration");
             return;
         }
 
@@ -132,21 +132,23 @@ const Passkeys = () => {
                     setSelectedPasskey,
                     setShowPasskeyDrawer,
                     refreshPasskeys: init,
-                }}>
+                }}
+            >
                 <CenteredFlex>
                     <Box maxWidth="20rem">
                         <Box marginBottom="1rem">
-                            <Typography>{t('PASSKEYS_DESCRIPTION')}</Typography>
+                            <Typography>{t("PASSKEYS_DESCRIPTION")}</Typography>
                         </Box>
                         <FormPaper
                             style={{
-                                padding: '1rem',
-                            }}>
+                                padding: "1rem",
+                            }}
+                        >
                             <SingleInputForm
                                 fieldType="text"
-                                placeholder={t('ENTER_PASSKEY_NAME')}
-                                buttonText={t('ADD_PASSKEY')}
-                                initialValue={''}
+                                placeholder={t("ENTER_PASSKEY_NAME")}
+                                buttonText={t("ADD_PASSKEY")}
+                                initialValue={""}
                                 callback={handleSubmit}
                                 submitButtonProps={{
                                     sx: {

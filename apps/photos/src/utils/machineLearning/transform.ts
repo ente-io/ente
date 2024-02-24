@@ -1,18 +1,18 @@
-import { Box, Point } from '../../../thirdparty/face-api/classes';
-import { newBoxFromPoints } from '.';
+import { newBoxFromPoints } from ".";
+import { Box, Point } from "../../../thirdparty/face-api/classes";
 
 import {
-    scale,
-    translate,
-    compose,
     Matrix,
     applyToPoint,
-} from 'transformation-matrix';
+    compose,
+    scale,
+    translate,
+} from "transformation-matrix";
 
 export function computeTransformToBox(inBox: Box, toBox: Box): Matrix {
     return compose(
         translate(toBox.x, toBox.y),
-        scale(toBox.width / inBox.width, toBox.height / inBox.height)
+        scale(toBox.width / inBox.width, toBox.height / inBox.height),
     );
 }
 

@@ -1,24 +1,23 @@
-import { styled, ToggleButton, ToggleButtonGroup } from '@mui/material';
-import { PLAN_PERIOD } from 'constants/gallery';
-import React from 'react';
-import { t } from 'i18next';
+import { styled, ToggleButton, ToggleButtonGroup } from "@mui/material";
+import { PLAN_PERIOD } from "constants/gallery";
+import { t } from "i18next";
 
 const CustomToggleButton = styled(ToggleButton)(({ theme }) => ({
-    textTransform: 'none',
-    padding: '12px 16px',
-    borderRadius: '4px',
+    textTransform: "none",
+    padding: "12px 16px",
+    borderRadius: "4px",
     backgroundColor: theme.colors.fill.faint,
     border: `1px solid transparent`,
     color: theme.colors.text.faint,
-    '&.Mui-selected': {
+    "&.Mui-selected": {
         backgroundColor: theme.colors.accent.A500,
         color: theme.colors.text.base,
     },
-    '&.Mui-selected:hover': {
+    "&.Mui-selected:hover": {
         backgroundColor: theme.colors.accent.A500,
         color: theme.colors.text.base,
     },
-    width: '97.433px',
+    width: "97.433px",
 }));
 
 export function PeriodToggler({ planPeriod, togglePeriod }) {
@@ -33,12 +32,13 @@ export function PeriodToggler({ planPeriod, togglePeriod }) {
             value={planPeriod}
             exclusive
             onChange={handleChange}
-            color="primary">
+            color="primary"
+        >
             <CustomToggleButton value={PLAN_PERIOD.MONTH}>
-                {t('MONTHLY')}
+                {t("MONTHLY")}
             </CustomToggleButton>
             <CustomToggleButton value={PLAN_PERIOD.YEAR}>
-                {t('YEARLY')}
+                {t("YEARLY")}
             </CustomToggleButton>
         </ToggleButtonGroup>
     );

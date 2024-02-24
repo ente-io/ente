@@ -1,21 +1,21 @@
-import React, { useEffect, useState } from 'react';
-import { enableTwoFactor, setupTwoFactor } from '@ente/accounts/api/user';
-import { t } from 'i18next';
+import { enableTwoFactor, setupTwoFactor } from "@ente/accounts/api/user";
+import { t } from "i18next";
+import { useEffect, useState } from "react";
 
-import { VerticallyCentered } from '@ente/shared/components/Container';
 import VerifyTwoFactor, {
     VerifyTwoFactorCallback,
-} from '@ente/accounts/components/two-factor/VerifyForm';
-import { encryptWithRecoveryKey } from '@ente/shared/crypto/helpers';
-import { setData, LS_KEYS, getData } from '@ente/shared/storage/localStorage';
-import { TwoFactorSecret } from '@ente/accounts/types/user';
-import Card from '@mui/material/Card';
-import { Box, CardContent, Typography } from '@mui/material';
-import { TwoFactorSetup } from '@ente/accounts/components/two-factor/setup';
-import LinkButton from '@ente/shared/components/LinkButton';
-import { PageProps } from '@ente/shared/apps/types';
-import { logError } from '@ente/shared/sentry';
-import { APP_HOMES } from '@ente/shared/apps/constants';
+} from "@ente/accounts/components/two-factor/VerifyForm";
+import { TwoFactorSetup } from "@ente/accounts/components/two-factor/setup";
+import { TwoFactorSecret } from "@ente/accounts/types/user";
+import { APP_HOMES } from "@ente/shared/apps/constants";
+import { PageProps } from "@ente/shared/apps/types";
+import { VerticallyCentered } from "@ente/shared/components/Container";
+import LinkButton from "@ente/shared/components/LinkButton";
+import { encryptWithRecoveryKey } from "@ente/shared/crypto/helpers";
+import { logError } from "@ente/shared/sentry";
+import { LS_KEYS, getData, setData } from "@ente/shared/storage/localStorage";
+import { Box, CardContent, Typography } from "@mui/material";
+import Card from "@mui/material/Card";
 
 export enum SetupMode {
     QR_CODE,
@@ -35,7 +35,7 @@ export default function SetupTwoFactor({ router, appName }: PageProps) {
                 const twoFactorSecret = await setupTwoFactor();
                 setTwoFactorSecret(twoFactorSecret);
             } catch (e) {
-                logError(e, 'failed to get two factor setup code');
+                logError(e, "failed to get two factor setup code");
             }
         };
         main();
@@ -43,10 +43,10 @@ export default function SetupTwoFactor({ router, appName }: PageProps) {
 
     const onSubmit: VerifyTwoFactorCallback = async (
         otp: string,
-        markSuccessful
+        markSuccessful,
     ) => {
         const recoveryEncryptedTwoFactorSecret = await encryptWithRecoveryKey(
-            twoFactorSecret.secretCode
+            twoFactorSecret.secretCode,
         );
         await enableTwoFactor(otp, recoveryEncryptedTwoFactorSecret);
         await markSuccessful();
@@ -64,16 +64,16 @@ export default function SetupTwoFactor({ router, appName }: PageProps) {
                     <VerticallyCentered sx={{ p: 3 }}>
                         <Box mb={4}>
                             <Typography variant="h2">
-                                {t('TWO_FACTOR')}
+                                {t("TWO_FACTOR")}
                             </Typography>
                         </Box>
                         <TwoFactorSetup twoFactorSecret={twoFactorSecret} />
                         <VerifyTwoFactor
                             onSubmit={onSubmit}
-                            buttonText={t('ENABLE')}
+                            buttonText={t("ENABLE")}
                         />
                         <LinkButton sx={{ mt: 2 }} onClick={router.back}>
-                            {t('GO_BACK')}
+                            {t("GO_BACK")}
                         </LinkButton>
                     </VerticallyCentered>
                 </CardContent>

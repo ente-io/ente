@@ -1,14 +1,14 @@
-import DialogBox from '@ente/shared/components/DialogBox/';
-import React, { useEffect, useState } from 'react';
-import { ProgressBar, Button } from 'react-bootstrap';
-import { ComfySpan } from './ExportInProgress';
+import DialogBox from "@ente/shared/components/DialogBox/";
+import { logError } from "@ente/shared/sentry";
+import { LS_KEYS, getData, setData } from "@ente/shared/storage/localStorage";
+import { t } from "i18next";
+import React, { useEffect, useState } from "react";
+import { Button, ProgressBar } from "react-bootstrap";
 import {
     getLargeThumbnailFiles,
     replaceThumbnail,
-} from 'services/migrateThumbnailService';
-import { getData, LS_KEYS, setData } from '@ente/shared/storage/localStorage';
-import { logError } from '@ente/shared/sentry';
-import { t } from 'i18next';
+} from "services/migrateThumbnailService";
+import { ComfySpan } from "./ExportInProgress";
 
 export type SetProgressTracker = React.Dispatch<
     React.SetStateAction<{
@@ -34,20 +34,20 @@ function Message({ fixState }: { fixState: FIX_STATE }) {
     switch (fixState) {
         case FIX_STATE.NOT_STARTED:
         case FIX_STATE.FIX_LATER:
-            message = t('REPLACE_THUMBNAIL_NOT_STARTED');
+            message = t("REPLACE_THUMBNAIL_NOT_STARTED");
             break;
         case FIX_STATE.COMPLETED:
-            message = t('REPLACE_THUMBNAIL_COMPLETED');
+            message = t("REPLACE_THUMBNAIL_COMPLETED");
             break;
         case FIX_STATE.NOOP:
-            message = t('REPLACE_THUMBNAIL_NOOP');
+            message = t("REPLACE_THUMBNAIL_NOOP");
             break;
         case FIX_STATE.COMPLETED_WITH_ERRORS:
-            message = t('REPLACE_THUMBNAIL_COMPLETED_WITH_ERROR');
+            message = t("REPLACE_THUMBNAIL_COMPLETED_WITH_ERROR");
             break;
     }
     return message ? (
-        <div style={{ marginBottom: '30px' }}>{message}</div>
+        <div style={{ marginBottom: "30px" }}>{message}</div>
     ) : (
         <></>
     );
@@ -59,7 +59,7 @@ export default function FixLargeThumbnails(props: Props) {
         total: 0,
     });
     const [largeThumbnailFiles, setLargeThumbnailFiles] = useState<number[]>(
-        []
+        [],
     );
 
     const init = (): FIX_STATE => {
@@ -95,7 +95,7 @@ export default function FixLargeThumbnails(props: Props) {
             largeThumbnailFiles.length > 0
         ) {
             updateFixState(FIX_STATE.NOT_STARTED);
-            logError(Error(), 'large thumbnail files left after migration');
+            logError(Error(), "large thumbnail files left after migration");
         }
         if (largeThumbnailFiles.length === 0 && fixState !== FIX_STATE.NOOP) {
             updateFixState(FIX_STATE.NOOP);
@@ -118,14 +118,14 @@ export default function FixLargeThumbnails(props: Props) {
         const completedWithError = await replaceThumbnail(
             setProgressTracker,
             new Set(
-                newlyFetchedLargeThumbnailFiles ?? largeThumbnailFiles ?? []
-            )
+                newlyFetchedLargeThumbnailFiles ?? largeThumbnailFiles ?? [],
+            ),
         );
-        if (typeof completedWithError !== 'undefined') {
+        if (typeof completedWithError !== "undefined") {
             updateFixState(
                 completedWithError
                     ? FIX_STATE.COMPLETED_WITH_ERRORS
-                    : FIX_STATE.COMPLETED
+                    : FIX_STATE.COMPLETED,
             );
         }
         await fetchLargeThumbnail();
@@ -140,41 +140,44 @@ export default function FixLargeThumbnails(props: Props) {
             open={props.isOpen}
             onClose={props.hide}
             attributes={{
-                title: t('COMPRESS_THUMBNAILS'),
-            }}>
+                title: t("COMPRESS_THUMBNAILS"),
+            }}
+        >
             <div
                 style={{
-                    marginBottom: '20px',
-                    padding: '0 5%',
-                    display: 'flex',
-                    alignItems: 'center',
-                    flexDirection: 'column',
-                }}>
+                    marginBottom: "20px",
+                    padding: "0 5%",
+                    display: "flex",
+                    alignItems: "center",
+                    flexDirection: "column",
+                }}
+            >
                 <Message fixState={fixState} />
 
                 {fixState === FIX_STATE.RUNNING && (
                     <>
-                        <div style={{ marginBottom: '10px' }}>
+                        <div style={{ marginBottom: "10px" }}>
                             <ComfySpan>
-                                {' '}
-                                {progressTracker.current} /{' '}
-                                {progressTracker.total}{' '}
-                            </ComfySpan>{' '}
-                            <span style={{ marginLeft: '10px' }}>
-                                {' '}
-                                {t('THUMBNAIL_REPLACED')}
+                                {" "}
+                                {progressTracker.current} /{" "}
+                                {progressTracker.total}{" "}
+                            </ComfySpan>{" "}
+                            <span style={{ marginLeft: "10px" }}>
+                                {" "}
+                                {t("THUMBNAIL_REPLACED")}
                             </span>
                         </div>
                         <div
                             style={{
-                                width: '100%',
-                                marginTop: '10px',
-                                marginBottom: '20px',
-                            }}>
+                                width: "100%",
+                                marginTop: "10px",
+                                marginBottom: "20px",
+                            }}
+                        >
                             <ProgressBar
                                 now={Math.round(
                                     (progressTracker.current * 100) /
-                                        progressTracker.total
+                                        progressTracker.total,
                                 )}
                                 animated={true}
                                 variant="upload-progress-bar"
@@ -184,40 +187,44 @@ export default function FixLargeThumbnails(props: Props) {
                 )}
                 <div
                     style={{
-                        width: '100%',
-                        display: 'flex',
-                        justifyContent: 'space-around',
-                    }}>
+                        width: "100%",
+                        display: "flex",
+                        justifyContent: "space-around",
+                    }}
+                >
                     {fixState === FIX_STATE.NOT_STARTED ||
                     fixState === FIX_STATE.FIX_LATER ? (
                         <Button
                             block
-                            variant={'outline-secondary'}
+                            variant={"outline-secondary"}
                             onClick={() => {
                                 updateFixState(FIX_STATE.FIX_LATER);
                                 props.hide();
-                            }}>
-                            {t('FIX_THUMBNAIL_LATER')}
+                            }}
+                        >
+                            {t("FIX_THUMBNAIL_LATER")}
                         </Button>
                     ) : (
                         <Button
                             block
-                            variant={'outline-secondary'}
-                            onClick={props.hide}>
-                            {t('CLOSE')}
+                            variant={"outline-secondary"}
+                            onClick={props.hide}
+                        >
+                            {t("CLOSE")}
                         </Button>
                     )}
                     {(fixState === FIX_STATE.NOT_STARTED ||
                         fixState === FIX_STATE.FIX_LATER ||
                         fixState === FIX_STATE.COMPLETED_WITH_ERRORS) && (
                         <>
-                            <div style={{ width: '30px' }} />
+                            <div style={{ width: "30px" }} />
 
                             <Button
                                 block
-                                variant={'outline-success'}
-                                onClick={() => startFix()}>
-                                {t('FIX_THUMBNAIL')}
+                                variant={"outline-success"}
+                                onClick={() => startFix()}
+                            >
+                                {t("FIX_THUMBNAIL")}
                             </Button>
                         </>
                     )}

@@ -1,18 +1,18 @@
-import HTTPService from '@ente/shared/network/HTTPService';
+import { CustomError } from "@ente/shared/error";
+import HTTPService from "@ente/shared/network/HTTPService";
 import {
     getPublicCollectionFileURL,
     getPublicCollectionThumbnailURL,
-} from '@ente/shared/network/api';
-import { EnteFile } from 'types/file';
-import { DownloadClient } from 'services/download';
-import { CustomError } from '@ente/shared/error';
-import { retryAsyncFunction } from 'utils/network';
+} from "@ente/shared/network/api";
+import { DownloadClient } from "services/download";
+import { EnteFile } from "types/file";
+import { retryAsyncFunction } from "utils/network";
 
 export class PublicAlbumsDownloadClient implements DownloadClient {
     constructor(
         private token: string,
         private passwordToken: string,
-        private timeout: number
+        private timeout: number,
     ) {}
 
     updateTokens(token: string, passwordToken: string) {
@@ -32,15 +32,15 @@ export class PublicAlbumsDownloadClient implements DownloadClient {
             getPublicCollectionThumbnailURL(file.id),
             null,
             {
-                'X-Auth-Access-Token': this.token,
+                "X-Auth-Access-Token": this.token,
                 ...(this.passwordToken && {
-                    'X-Auth-Access-Token-JWT': this.passwordToken,
+                    "X-Auth-Access-Token-JWT": this.passwordToken,
                 }),
             },
-            { responseType: 'arraybuffer' }
+            { responseType: "arraybuffer" },
         );
 
-        if (typeof resp.data === 'undefined') {
+        if (typeof resp.data === "undefined") {
             throw Error(CustomError.REQUEST_FAILED);
         }
         return new Uint8Array(resp.data);
@@ -48,7 +48,7 @@ export class PublicAlbumsDownloadClient implements DownloadClient {
 
     downloadFile = async (
         file: EnteFile,
-        onDownloadProgress: (event: { loaded: number; total: number }) => void
+        onDownloadProgress: (event: { loaded: number; total: number }) => void,
     ) => {
         if (!this.token) {
             throw Error(CustomError.TOKEN_MISSING);
@@ -58,20 +58,20 @@ export class PublicAlbumsDownloadClient implements DownloadClient {
                 getPublicCollectionFileURL(file.id),
                 null,
                 {
-                    'X-Auth-Access-Token': this.token,
+                    "X-Auth-Access-Token": this.token,
                     ...(this.passwordToken && {
-                        'X-Auth-Access-Token-JWT': this.passwordToken,
+                        "X-Auth-Access-Token-JWT": this.passwordToken,
                     }),
                 },
                 {
-                    responseType: 'arraybuffer',
+                    responseType: "arraybuffer",
                     timeout: this.timeout,
                     onDownloadProgress,
-                }
-            )
+                },
+            ),
         );
 
-        if (typeof resp.data === 'undefined') {
+        if (typeof resp.data === "undefined") {
             throw Error(CustomError.REQUEST_FAILED);
         }
         return new Uint8Array(resp.data);
@@ -84,12 +84,12 @@ export class PublicAlbumsDownloadClient implements DownloadClient {
         return retryAsyncFunction(() =>
             fetch(getPublicCollectionFileURL(file.id), {
                 headers: {
-                    'X-Auth-Access-Token': this.token,
+                    "X-Auth-Access-Token": this.token,
                     ...(this.passwordToken && {
-                        'X-Auth-Access-Token-JWT': this.passwordToken,
+                        "X-Auth-Access-Token-JWT": this.passwordToken,
                     }),
                 },
-            })
+            }),
         );
     }
 }

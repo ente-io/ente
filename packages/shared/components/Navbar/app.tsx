@@ -1,6 +1,6 @@
-import { EnteLogo } from '../EnteLogo';
-import { CenteredFlex } from '../../components/Container';
-import NavbarBase from './base';
+import { CenteredFlex } from "../../components/Container";
+import { EnteLogo } from "../EnteLogo";
+import NavbarBase from "./base";
 
 export default function AppNavbar({ isMobile }) {
     return (
