@@ -60,8 +60,6 @@ import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import "package:shared_preferences/shared_preferences.dart";
 import 'package:uni_links/uni_links.dart';
 
-final scaffoldKey = GlobalKey<ScaffoldState>();
-
 class HomeWidget extends StatefulWidget {
   const HomeWidget({
     Key? key,
