@@ -162,27 +162,30 @@ void initSlideshowWidget() {
   );
 }
 
+Future<void> initWorkmanager() async {
+  await Workmanager()
+      .initialize(initSlideshowWidget, isInDebugMode: kDebugMode);
+  await Workmanager().registerPeriodicTask(
+    "slideshow-widget",
+    "updateSlideshowWidget",
+    initialDelay: const Duration(seconds: 10),
+    frequency: const Duration(
+      minutes: 15,
+    ),
+  );
+}
+
 void main() async {
   debugRepaintRainbowEnabled = false;
   WidgetsFlutterBinding.ensureInitialized();
   MediaKit.ensureInitialized();
 
   if (Platform.isAndroid) {
-    try {
-      await Workmanager()
-          .initialize(initSlideshowWidget, isInDebugMode: kDebugMode);
-
-      await Workmanager().registerPeriodicTask(
-        "slideshow-widget",
-        "updateSlideshowWidget",
-        initialDelay: const Duration(seconds: 10),
-        frequency: const Duration(
-          minutes: 15,
-        ),
-      );
-    } catch (_) {
-      debugPrint("error in Workmanager: $_");
-    }
+    unawaited(
+      initWorkmanager().catchError((e, s) {
+        _logger.severe("Error in initWorkmanager", e, s);
+      }),
+    );
   }
 
   final savedThemeMode = await AdaptiveTheme.getThemeMode();
