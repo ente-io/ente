@@ -17,7 +17,7 @@
 
 #Visual Studio Code related
 .vscode/launch.json
-# .vscode/settings.json
+.vscode/settings.json
 
 # Flutter/Dart/Pub related
 **/doc/api/
