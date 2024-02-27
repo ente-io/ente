@@ -155,7 +155,7 @@ class FileTypeRecommendation extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8),
       child: ConstrainedBox(
-        constraints: const BoxConstraints(maxHeight: 60),
+        constraints: const BoxConstraints(maxHeight: 68),
         child: GestureDetector(
           onTap: () {
             RecentSearches().add(fileTypeSearchResult.name());
@@ -177,7 +177,7 @@ class FileTypeRecommendation extends StatelessWidget {
                       "assets/type_unknown.png",
                     ),
                     Positioned(
-                      bottom: 15,
+                      bottom: 18,
                       child: ConstrainedBox(
                         constraints: const BoxConstraints(maxWidth: 48),
                         child: FittedBox(
@@ -187,6 +187,8 @@ class FileTypeRecommendation extends StatelessWidget {
                             style: const TextStyle(
                               fontSize: 14,
                               fontFamily: "Inter",
+                              color: Colors.white,
+                              letterSpacing: 0.75,
                             ),
                             textAlign: TextAlign.center,
                             maxLines: 1,
