@@ -177,7 +177,7 @@ class FileTypeRecommendation extends StatelessWidget {
                       "assets/type_unknown.png",
                     ),
                     Positioned(
-                      bottom: 12,
+                      bottom: 15,
                       child: ConstrainedBox(
                         constraints: const BoxConstraints(maxWidth: 48),
                         child: FittedBox(
@@ -185,7 +185,7 @@ class FileTypeRecommendation extends StatelessWidget {
                           child: Text(
                             fileType,
                             style: const TextStyle(
-                              fontSize: 17.43,
+                              fontSize: 14,
                               fontFamily: "Inter",
                             ),
                             textAlign: TextAlign.center,
