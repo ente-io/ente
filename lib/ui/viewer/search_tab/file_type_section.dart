@@ -129,6 +129,9 @@ class _FileTypeSectionState extends State<FileTypeSection> {
 
 class FileTypeRecommendation extends StatelessWidget {
   static const knownTypesToAssetPath = {
+    "PHOTO": "assets/type_photos.png",
+    "VIDEO": "assets/type_videos.png",
+    "LIVE": "assets/type_live.png",
     "AVI": "assets/type_AVI.png",
     "GIF": "assets/type_GIF.png",
     "HEIC": "assets/type_HEIC.png",
@@ -150,7 +153,8 @@ class FileTypeRecommendation extends StatelessWidget {
         .call()
         .replaceAll(RegExp(r'.$'), "")
         .split(" ")
-        .first;
+        .first
+        .toUpperCase();
     final assetPath = knownTypesToAssetPath[fileType];
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8),
