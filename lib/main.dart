@@ -24,6 +24,7 @@ import "package:photos/db/files_db.dart";
 import 'package:photos/db/upload_locks_db.dart';
 import 'package:photos/ente_theme_data.dart';
 import "package:photos/l10n/l10n.dart";
+import "package:photos/models/file/file_type.dart";
 import 'package:photos/services/app_lifecycle_service.dart';
 import 'package:photos/services/billing_service.dart';
 import 'package:photos/services/collections_service.dart';
@@ -100,8 +101,11 @@ void initSlideshowWidget() {
 
         final previousGeneratedId =
             await hw.HomeWidget.getWidgetData<int>("home_widget_last_img");
-        final files = res.files
-            .where((element) => element.generatedID != previousGeneratedId);
+        final files = res.files.where(
+          (element) =>
+              element.generatedID != previousGeneratedId &&
+              element.fileType == FileType.image,
+        );
         final randomNumber = Random().nextInt(files.length);
         final randomFile = files.elementAt(randomNumber);
         final fullImage = await getFileFromServer(randomFile);
@@ -117,7 +121,7 @@ void initSlideshowWidget() {
         final image = await decodeImageFromList(await fullImage.readAsBytes());
         final width = image.width.toDouble();
         final height = image.height.toDouble();
-        final size = min(width, height);
+        final size = min(min(width, height), 1024.0);
 
         final widget = ClipRRect(
           borderRadius: BorderRadius.circular(32),
