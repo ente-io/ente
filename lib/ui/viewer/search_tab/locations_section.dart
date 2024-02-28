@@ -326,15 +326,11 @@ class LocationRecommendation extends StatelessWidget {
                 clipBehavior: Clip.none,
                 alignment: Alignment.center,
                 children: [
-                  ClipRRect(
-                    borderRadius: const BorderRadius.all(Radius.circular(8)),
-                    child: BackdropFilter(
-                      filter: ImageFilter.blur(sigmaX: 2, sigmaY: 2),
-                      child: Container(
-                        color: const Color.fromRGBO(0, 0, 0, 0.6),
-                        width: 15,
-                        height: 15,
-                      ),
+                  ClipOval(
+                    child: Container(
+                      color: const Color.fromRGBO(0, 0, 0, 0.6),
+                      width: 15,
+                      height: 15,
                     ),
                   ),
                   Container(
