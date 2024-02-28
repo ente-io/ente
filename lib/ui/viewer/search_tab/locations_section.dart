@@ -225,6 +225,7 @@ class LocationRecommendation extends StatelessWidget {
                                     locationSearchResult.previewThumbnail()!,
                                     shouldShowArchiveStatus: false,
                                     shouldShowSyncStatus: false,
+                                    shouldShowFavoriteIcon: false,
                                   )
                                 : const NoThumbnailWidget(),
                           ),
@@ -282,6 +283,7 @@ class LocationRecommendation extends StatelessWidget {
                                                   .previewThumbnail()!,
                                               shouldShowArchiveStatus: false,
                                               shouldShowSyncStatus: false,
+                                              shouldShowFavoriteIcon: false,
                                             ),
                                           ),
                                         )
