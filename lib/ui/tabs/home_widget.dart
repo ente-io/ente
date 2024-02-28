@@ -24,6 +24,7 @@ import 'package:photos/events/tab_changed_event.dart';
 import 'package:photos/events/trigger_logout_event.dart';
 import 'package:photos/events/user_logged_out_event.dart';
 import "package:photos/generated/l10n.dart";
+import "package:photos/main.dart";
 import 'package:photos/models/collection/collection_items.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/app_lifecycle_service.dart';
@@ -107,6 +108,7 @@ class _HomeWidgetState extends State<HomeWidget> {
   @override
   void initState() {
     _logger.info("Building initstate");
+    unawaited(initHomeOnLogin());
     _tabChangedEventSubscription =
         Bus.instance.on<TabChangedEvent>().listen((event) {
       _selectedTabIndex = event.selectedIndex;
