@@ -120,13 +120,11 @@ class _HomeWidgetState extends State<HomeWidget> {
         debugPrint(
           "TabChange going from $_selectedTabIndex to ${event.selectedIndex} souce: ${event.source}",
         );
-        if (_pageController.hasClients) {
-          _pageController.animateToPage(
-            event.selectedIndex,
-            duration: const Duration(milliseconds: 100),
-            curve: Curves.easeIn,
-          );
-        }
+        _pageController.animateToPage(
+          event.selectedIndex,
+          duration: const Duration(milliseconds: 100),
+          curve: Curves.easeIn,
+        );
       }
     });
     _subscriptionPurchaseEvent =
