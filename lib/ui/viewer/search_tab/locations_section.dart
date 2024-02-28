@@ -175,6 +175,7 @@ class LocationRecommendation extends StatelessWidget {
         },
         child: Stack(
           alignment: Alignment.center,
+          clipBehavior: Clip.none,
           children: [
             ClipSmoothRect(
               radius: SmoothBorderRadius(

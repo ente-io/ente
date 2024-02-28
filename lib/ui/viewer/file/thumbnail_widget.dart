@@ -188,6 +188,7 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
     }
 
     return Stack(
+      clipBehavior: Clip.none,
       fit: StackFit.expand,
       children: viewChildren,
     );
