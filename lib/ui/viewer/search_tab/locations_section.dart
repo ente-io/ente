@@ -103,12 +103,12 @@ class _LocationsSectionState extends State<LocationsSection> {
       );
     } else {
       final recommendations = <Widget>[
-        const GoToMapWithBG(),
+        const RepaintBoundary(child: GoToMapWithBG()),
         ..._locationsSearchResults.map(
           (locationSearchResult) =>
               LocationRecommendation(locationSearchResult),
         ),
-        const LocationCTA(),
+        const RepaintBoundary(child: LocationCTA()),
       ];
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: 8),
@@ -173,187 +173,191 @@ class LocationRecommendation extends StatelessWidget {
             );
           }
         },
-        child: Stack(
-          alignment: Alignment.center,
-          clipBehavior: Clip.none,
-          children: [
-            ClipSmoothRect(
-              radius: SmoothBorderRadius(
-                cornerRadius: outerCornerRadius + outerStrokeWidth,
-                cornerSmoothing: cornerSmoothing,
-              ),
-              child: Container(
-                color: Colors.white.withOpacity(0.1),
-                width: width + outerStrokeWidth * 2,
-                height: height + outerStrokeWidth * 2,
-              ),
-            ),
-            SizedBox(
-              width: width,
-              height: height,
-              child: Container(
-                decoration: const BoxDecoration(
-                  borderRadius: BorderRadius.all(Radius.circular(12)),
-                  boxShadow: [
-                    BoxShadow(
-                      blurRadius: 1,
-                      offset: Offset(0, 0),
-                      color: Color.fromRGBO(0, 0, 0, 0.09),
-                    ),
-                    BoxShadow(
-                      blurRadius: 1,
-                      offset: Offset(1, 2),
-                      color: Color.fromRGBO(0, 0, 0, 0.05),
-                    ),
-                  ],
+        child: RepaintBoundary(
+          child: Stack(
+            alignment: Alignment.center,
+            clipBehavior: Clip.none,
+            children: [
+              ClipSmoothRect(
+                radius: SmoothBorderRadius(
+                  cornerRadius: outerCornerRadius + outerStrokeWidth,
+                  cornerSmoothing: cornerSmoothing,
                 ),
-                child: ClipSmoothRect(
-                  radius: SmoothBorderRadius(
-                    cornerRadius: outerCornerRadius,
-                    cornerSmoothing: cornerSmoothing,
-                  ),
-                  child: Stack(
-                    clipBehavior: Clip.none,
-                    children: [
-                      Stack(
-                        children: [
-                          ImageFiltered(
-                            imageFilter:
-                                ImageFilter.blur(sigmaX: 24, sigmaY: 24),
-                            child: locationSearchResult.previewThumbnail() !=
-                                    null
-                                ? ThumbnailWidget(
-                                    locationSearchResult.previewThumbnail()!,
-                                    shouldShowArchiveStatus: false,
-                                    shouldShowSyncStatus: false,
-                                    shouldShowFavoriteIcon: false,
-                                  )
-                                : const NoThumbnailWidget(),
-                          ),
-                          Container(
-                            color: Colors.black.withOpacity(0.2),
-                          ),
-                        ],
+                child: Container(
+                  color: Colors.white.withOpacity(0.1),
+                  width: width + outerStrokeWidth * 2,
+                  height: height + outerStrokeWidth * 2,
+                ),
+              ),
+              SizedBox(
+                width: width,
+                height: height,
+                child: Container(
+                  decoration: const BoxDecoration(
+                    borderRadius: BorderRadius.all(Radius.circular(12)),
+                    boxShadow: [
+                      BoxShadow(
+                        blurRadius: 1,
+                        offset: Offset(0, 0),
+                        color: Color.fromRGBO(0, 0, 0, 0.09),
                       ),
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(
-                          outerPadding,
-                          outerPadding,
-                          outerPadding,
-                          outerPadding,
-                        ),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Stack(
-                              alignment: Alignment.center,
-                              children: [
-                                ClipSmoothRect(
-                                  radius: SmoothBorderRadius(
-                                    cornerRadius:
-                                        outerCornerRadius - outerPadding,
-                                    cornerSmoothing: cornerSmoothing,
-                                  ),
-                                  child: Container(
-                                    color: Colors.black.withOpacity(0.1),
-                                    width: sideOfThumbnail +
-                                        thumbnailBorderWidth * 2,
-                                    height: sideOfThumbnail +
-                                        thumbnailBorderWidth * 2,
-                                  ),
-                                ),
-                                SizedBox(
-                                  width: sideOfThumbnail,
-                                  height: sideOfThumbnail,
-                                  child: locationSearchResult
-                                              .previewThumbnail() !=
-                                          null
-                                      ? Hero(
-                                          tag: heroTag,
-                                          child: ClipSmoothRect(
-                                            radius: SmoothBorderRadius(
-                                              cornerRadius: outerCornerRadius -
-                                                  outerPadding -
-                                                  thumbnailBorderWidth,
-                                              cornerSmoothing: cornerSmoothing,
-                                            ),
-                                            clipBehavior:
-                                                Clip.antiAliasWithSaveLayer,
-                                            child: ThumbnailWidget(
-                                              locationSearchResult
-                                                  .previewThumbnail()!,
-                                              shouldShowArchiveStatus: false,
-                                              shouldShowSyncStatus: false,
-                                              shouldShowFavoriteIcon: false,
-                                            ),
-                                          ),
-                                        )
-                                      : const NoThumbnailWidget(),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 4),
-                            Expanded(
-                              child: SizedBox(
-                                width: 90,
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Text(
-                                      locationSearchResult.name(),
-                                      style: enteTextTheme.mini.copyWith(
-                                        color: Colors.white,
-                                      ),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      textAlign: TextAlign.center,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
+                      BoxShadow(
+                        blurRadius: 1,
+                        offset: Offset(1, 2),
+                        color: Color.fromRGBO(0, 0, 0, 0.05),
                       ),
                     ],
                   ),
+                  child: ClipSmoothRect(
+                    radius: SmoothBorderRadius(
+                      cornerRadius: outerCornerRadius,
+                      cornerSmoothing: cornerSmoothing,
+                    ),
+                    child: Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        Stack(
+                          children: [
+                            ImageFiltered(
+                              imageFilter:
+                                  ImageFilter.blur(sigmaX: 24, sigmaY: 24),
+                              child: locationSearchResult.previewThumbnail() !=
+                                      null
+                                  ? ThumbnailWidget(
+                                      locationSearchResult.previewThumbnail()!,
+                                      shouldShowArchiveStatus: false,
+                                      shouldShowSyncStatus: false,
+                                      shouldShowFavoriteIcon: false,
+                                    )
+                                  : const NoThumbnailWidget(),
+                            ),
+                            Container(
+                              color: Colors.black.withOpacity(0.2),
+                            ),
+                          ],
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(
+                            outerPadding,
+                            outerPadding,
+                            outerPadding,
+                            outerPadding,
+                          ),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Stack(
+                                alignment: Alignment.center,
+                                children: [
+                                  ClipSmoothRect(
+                                    radius: SmoothBorderRadius(
+                                      cornerRadius:
+                                          outerCornerRadius - outerPadding,
+                                      cornerSmoothing: cornerSmoothing,
+                                    ),
+                                    child: Container(
+                                      color: Colors.black.withOpacity(0.1),
+                                      width: sideOfThumbnail +
+                                          thumbnailBorderWidth * 2,
+                                      height: sideOfThumbnail +
+                                          thumbnailBorderWidth * 2,
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    width: sideOfThumbnail,
+                                    height: sideOfThumbnail,
+                                    child: locationSearchResult
+                                                .previewThumbnail() !=
+                                            null
+                                        ? Hero(
+                                            tag: heroTag,
+                                            child: ClipSmoothRect(
+                                              radius: SmoothBorderRadius(
+                                                cornerRadius:
+                                                    outerCornerRadius -
+                                                        outerPadding -
+                                                        thumbnailBorderWidth,
+                                                cornerSmoothing:
+                                                    cornerSmoothing,
+                                              ),
+                                              clipBehavior:
+                                                  Clip.antiAliasWithSaveLayer,
+                                              child: ThumbnailWidget(
+                                                locationSearchResult
+                                                    .previewThumbnail()!,
+                                                shouldShowArchiveStatus: false,
+                                                shouldShowSyncStatus: false,
+                                                shouldShowFavoriteIcon: false,
+                                              ),
+                                            ),
+                                          )
+                                        : const NoThumbnailWidget(),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 4),
+                              Expanded(
+                                child: SizedBox(
+                                  width: 90,
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Text(
+                                        locationSearchResult.name(),
+                                        style: enteTextTheme.mini.copyWith(
+                                          color: Colors.white,
+                                        ),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        textAlign: TextAlign.center,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
               ),
-            ),
-            Positioned(
-              left: 8,
-              top: 8,
-              child: Stack(
-                clipBehavior: Clip.none,
-                alignment: Alignment.center,
-                children: [
-                  ClipOval(
-                    child: Container(
-                      color: const Color.fromRGBO(0, 0, 0, 0.6),
-                      width: 15,
-                      height: 15,
-                    ),
-                  ),
-                  Container(
-                    width: 16,
-                    height: 16,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        width: 0.5,
-                        color: strokeSolidMutedLight,
+              Positioned(
+                left: 8,
+                top: 8,
+                child: Stack(
+                  clipBehavior: Clip.none,
+                  alignment: Alignment.center,
+                  children: [
+                    ClipOval(
+                      child: Container(
+                        color: const Color.fromRGBO(0, 0, 0, 0.6),
+                        width: 15,
+                        height: 15,
                       ),
                     ),
-                  ),
-                  const Icon(
-                    Icons.location_on_sharp,
-                    color: Colors.white,
-                    size: 11,
-                  ),
-                ],
+                    Container(
+                      width: 16,
+                      height: 16,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          width: 0.5,
+                          color: strokeSolidMutedLight,
+                        ),
+                      ),
+                    ),
+                    const Icon(
+                      Icons.location_on_sharp,
+                      color: Colors.white,
+                      size: 11,
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
