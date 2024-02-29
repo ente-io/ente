@@ -398,9 +398,9 @@ class AlbumVerticalListWidget extends StatelessWidget {
     try {
       final int fromCollectionID = selectedFiles!.files.first.collectionID!;
       await CollectionsService.instance.move(
-        toCollectionID,
-        fromCollectionID,
         selectedFiles!.files.toList(),
+        toCollectionID: toCollectionID,
+        fromCollectionID: fromCollectionID,
       );
       await dialog.hide();
       unawaited(RemoteSyncService.instance.sync(silently: true));

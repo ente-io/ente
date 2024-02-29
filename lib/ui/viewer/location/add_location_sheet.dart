@@ -22,14 +22,20 @@ import "package:photos/ui/viewer/location/radius_picker_widget.dart";
 
 showAddLocationSheet(
   BuildContext context,
-  Location coordinates,
-) {
+  Location coordinates, {
+  String name = '',
+  double radius = defaultRadiusValue,
+}) {
   showBarModalBottomSheet(
     context: context,
     builder: (context) {
       return LocationTagStateProvider(
         centerPoint: coordinates,
-        const AddLocationSheet(),
+        AddLocationSheet(
+          radius: radius,
+          name: name,
+        ),
+        radius: radius,
       );
     },
     shape: const RoundedRectangleBorder(
@@ -45,7 +51,13 @@ showAddLocationSheet(
 }
 
 class AddLocationSheet extends StatefulWidget {
-  const AddLocationSheet({super.key});
+  final double radius;
+  final String name;
+  const AddLocationSheet({
+    super.key,
+    this.radius = defaultRadiusValue,
+    this.name = '',
+  });
 
   @override
   State<AddLocationSheet> createState() => _AddLocationSheetState();
@@ -61,17 +73,20 @@ class _AddLocationSheetState extends State<AddLocationSheet> {
   final ValueNotifier<bool> _submitNotifer = ValueNotifier(false);
 
   final ValueNotifier<bool> _cancelNotifier = ValueNotifier(false);
-  final ValueNotifier<double> _selectedRadiusNotifier =
-      ValueNotifier(defaultRadiusValue);
+  late ValueNotifier<double> _selectedRadiusNotifier;
   final _focusNode = FocusNode();
   final _textEditingController = TextEditingController();
-  final _isEmptyNotifier = ValueNotifier(true);
+  late final ValueNotifier<bool> _isEmptyNotifier;
   Widget? _keyboardTopButtons;
 
   @override
   void initState() {
+    _textEditingController.text = widget.name;
+    _isEmptyNotifier = ValueNotifier(widget.name.isEmpty);
     _focusNode.addListener(_focusNodeListener);
+    _selectedRadiusNotifier = ValueNotifier(widget.radius);
     _selectedRadiusNotifier.addListener(_selectedRadiusListener);
+
     super.initState();
   }
 
@@ -155,11 +170,12 @@ class _AddLocationSheetState extends State<AddLocationSheet> {
                         RadiusPickerWidget(
                           _selectedRadiusNotifier,
                         ),
-                        const SizedBox(height: 16),
-                        Text(
-                          S.of(context).locationTagFeatureDescription,
-                          style: textTheme.smallMuted,
-                        ),
+                        if (widget.name.isEmpty) const SizedBox(height: 16),
+                        if (widget.name.isEmpty)
+                          Text(
+                            S.of(context).locationTagFeatureDescription,
+                            style: textTheme.smallMuted,
+                          ),
                       ],
                     ),
                   ),

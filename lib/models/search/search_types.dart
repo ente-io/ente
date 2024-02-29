@@ -9,6 +9,7 @@ import "package:photos/events/location_tag_updated_event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/collection/collection.dart";
 import "package:photos/models/collection/collection_items.dart";
+import "package:photos/models/search/generic_search_result.dart";
 import "package:photos/models/search/search_result.dart";
 import "package:photos/models/typedefs.dart";
 import "package:photos/services/collections_service.dart";
@@ -24,6 +25,7 @@ enum ResultType {
   collection,
   file,
   location,
+  locationSuggestion,
   month,
   year,
   fileType,
@@ -243,10 +245,10 @@ extension SectionTypeExtensions on SectionType {
   }) {
     switch (this) {
       case SectionType.face:
-        return SearchService.instance.getAllLocationTags(limit);
+        return Future.value(List<GenericSearchResult>.empty());
 
       case SectionType.content:
-        return SearchService.instance.getAllLocationTags(limit);
+        return Future.value(List<GenericSearchResult>.empty());
 
       case SectionType.moment:
         return SearchService.instance.getRandomMomentsSearchResults(context);

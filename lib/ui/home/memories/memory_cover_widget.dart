@@ -221,6 +221,7 @@ class _MemoryCoverWidgetState extends State<MemoryCoverWidget> {
         child: ThumbnailWidget(
           memory.file,
           shouldShowArchiveStatus: false,
+          shouldShowSyncStatus: false,
           key: Key("memories" + memory.file.tag),
         ),
       ),

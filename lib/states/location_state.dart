@@ -14,11 +14,14 @@ import "package:photos/utils/debouncer.dart";
 class LocationTagStateProvider extends StatefulWidget {
   final LocalEntity<LocationTag>? locationTagEntity;
   final Location? centerPoint;
+  final double? radius;
   final Widget child;
   const LocationTagStateProvider(
     this.child, {
     this.centerPoint,
     this.locationTagEntity,
+    // if the locationTagEntity is null, we use the centerPoint and radius
+    this.radius,
     super.key,
   });
 
@@ -47,9 +50,12 @@ class _LocationTagStateProviderState extends State<LocationTagStateProvider> {
     ///If the location tag has a custom radius value, we add the custom radius
     ///value to the list of default radius values only for this location tag and
     ///keep it in the state of this widget.
-    _radiusValues = _getRadiusValuesOfLocTag(_locationTagEntity?.item.radius);
+    _radiusValues = _getRadiusValuesOfLocTag(
+      _locationTagEntity?.item.radius ?? widget.radius,
+    );
 
-    _selectedRadius = _locationTagEntity?.item.radius ?? defaultRadiusValue;
+    _selectedRadius =
+        _locationTagEntity?.item.radius ?? widget.radius ?? defaultRadiusValue;
 
     _locTagEntityListener =
         Bus.instance.on<LocationTagUpdatedEvent>().listen((event) {

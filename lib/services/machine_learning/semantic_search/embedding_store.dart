@@ -9,7 +9,7 @@ import "package:photos/db/embeddings_db.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/models/embedding.dart";
 import "package:photos/models/file/file.dart";
-import "package:photos/services/semantic_search/remote_embedding.dart";
+import 'package:photos/services/machine_learning/semantic_search/remote_embedding.dart';
 import "package:photos/utils/crypto_util.dart";
 import "package:photos/utils/file_download_util.dart";
 import "package:shared_preferences/shared_preferences.dart";
@@ -53,12 +53,21 @@ class EmbeddingStore {
     final fileMap = await FilesDB.instance
         .getFilesFromIDs(pendingItems.map((e) => e.fileID).toList());
     _logger.info("Pushing ${pendingItems.length} embeddings");
+    final deletedEntries = <int>[];
     for (final item in pendingItems) {
       try {
-        await _pushEmbedding(fileMap[item.fileID]!, item);
+        final file = fileMap[item.fileID];
+        if (file != null) {
+          await _pushEmbedding(file, item);
+        } else {
+          deletedEntries.add(item.fileID);
+        }
       } catch (e, s) {
         _logger.severe(e, s);
       }
+    }
+    if (deletedEntries.isNotEmpty) {
+      await EmbeddingsDB.instance.deleteEmbeddings(deletedEntries);
     }
   }
 

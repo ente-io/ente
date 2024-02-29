@@ -12,8 +12,7 @@ description: ente photos application
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 
-version: 0.8.58+578
-
+version: 0.8.64+584
 environment:
   sdk: ">=3.0.0 <4.0.0"
 
@@ -23,6 +22,7 @@ dependencies:
   animated_list_plus: ^0.4.5
   archive: ^3.1.2
   background_fetch: ^1.2.1
+  battery_info: ^1.1.1
   bip39: ^1.0.6
   cached_network_image: ^3.0.0
   chewie:
@@ -119,7 +119,9 @@ dependencies:
 
   # open_file: ^3.2.1
   onnxruntime:
-    git: "https://github.com/ente-io/onnxruntime.git"
+    git:
+      url: https://github.com/ente-io/onnxruntime.git
+      ref: 5f26aef45ed9f5e563c26f90c1e21b3339ed906d
   open_mail_app: ^0.4.5
   package_info_plus: ^4.1.0
   page_transition: ^2.0.2

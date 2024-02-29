@@ -77,7 +77,10 @@ class SearchableItemWidget extends StatelessWidget {
                         children: [
                           Text(
                             searchResult.name(),
-                            style: textTheme.body,
+                            style: searchResult.type() ==
+                                    ResultType.locationSuggestion
+                                ? textTheme.bodyFaint
+                                : textTheme.body,
                             overflow: TextOverflow.ellipsis,
                           ),
                           const SizedBox(

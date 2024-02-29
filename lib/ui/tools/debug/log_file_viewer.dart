@@ -42,14 +42,16 @@ class _LogFileViewerState extends State<LogFileViewer> {
     }
     return Container(
       padding: const EdgeInsets.only(left: 12, top: 8, right: 12),
-      child: SingleChildScrollView(
-        child: Text(
-          _logs!,
-          style: const TextStyle(
-            fontFeatures: [
-              FontFeature.tabularFigures(),
-            ],
-            height: 1.2,
+      child: Scrollbar(
+        child: SingleChildScrollView(
+          child: Text(
+            _logs!,
+            style: const TextStyle(
+              fontFeatures: [
+                FontFeature.tabularFigures(),
+              ],
+              height: 1.2,
+            ),
           ),
         ),
       ),

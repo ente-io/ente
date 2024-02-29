@@ -57,21 +57,25 @@ extension HiddenService on CollectionsService {
   Future<Collection> clubAllDefaultHiddenToOne(
     List<Collection> allDefaultHidden,
   ) async {
-    final Collection result = allDefaultHidden.first;
-
-    for (Collection defaultHidden in allDefaultHidden) {
+    // select first collection as default hidden where all files will be clubbed
+    final Collection defaultHidden = allDefaultHidden.first;
+    for (Collection hidden in allDefaultHidden) {
       try {
-        if (defaultHidden.id == result.id) {
+        if (hidden.id == defaultHidden.id) {
           continue;
         }
         final filesInCollection = (await FilesDB.instance.getFilesInCollection(
-          defaultHidden.id,
+          hidden.id,
           galleryLoadStartTime,
           galleryLoadEndTime,
         ))
             .files;
-        await move(result.id, defaultHidden.id, filesInCollection);
-        await CollectionsService.instance.trashEmptyCollection(defaultHidden);
+        await move(
+          filesInCollection,
+          toCollectionID: defaultHidden.id,
+          fromCollectionID: hidden.id,
+        );
+        await CollectionsService.instance.trashEmptyCollection(hidden);
       } catch (e, s) {
         _logger.severe(
           "One iteration of clubbing all default hidden failed",
@@ -82,7 +86,7 @@ extension HiddenService on CollectionsService {
       }
     }
 
-    return result;
+    return defaultHidden;
   }
 
   // getUncategorizedCollection will return the uncategorized collection
@@ -137,7 +141,18 @@ extension HiddenService on CollectionsService {
           _logger.finest('file already part of hidden collection');
           continue;
         }
-        await move(defaultHiddenCollection.id, entry.key, entry.value);
+        final Collection? c = getCollectionByID(entry.key);
+        // if the collection is not owned by the user, remove the file from the
+        // collection
+        if (c != null && !c.isOwner(userID)) {
+          await removeFromCollection(entry.key, entry.value);
+        } else {
+          await move(
+            entry.value,
+            toCollectionID: defaultHiddenCollection.id,
+            fromCollectionID: entry.key,
+          );
+        }
       }
       Bus.instance.fire(
         LocalPhotosUpdatedEvent(
