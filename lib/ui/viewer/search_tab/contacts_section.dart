@@ -249,7 +249,7 @@ class ContactCTA extends StatelessWidget {
                 ),
                 const SizedBox(height: 10.5),
                 Text(
-                  S.of(context).addNew,
+                  S.of(context).invite,
                   style: getEnteTextTheme(context).smallFaint,
                 ),
               ],
