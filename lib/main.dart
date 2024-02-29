@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:io';
-import "dart:math";
 
 import "package:adaptive_theme/adaptive_theme.dart";
 import 'package:background_fetch/background_fetch.dart';
@@ -10,7 +9,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import "package:flutter/rendering.dart";
 import "package:flutter_displaymode/flutter_displaymode.dart";
-import 'package:home_widget/home_widget.dart' as hw;
 import 'package:logging/logging.dart';
 import "package:media_kit/media_kit.dart";
 import 'package:path_provider/path_provider.dart';
@@ -20,11 +18,9 @@ import 'package:photos/core/constants.dart';
 import 'package:photos/core/error-reporting/super_logging.dart';
 import 'package:photos/core/errors.dart';
 import 'package:photos/core/network/network.dart';
-import "package:photos/db/files_db.dart";
 import 'package:photos/db/upload_locks_db.dart';
 import 'package:photos/ente_theme_data.dart';
 import "package:photos/l10n/l10n.dart";
-import "package:photos/models/file/file_type.dart";
 import 'package:photos/services/app_lifecycle_service.dart';
 import 'package:photos/services/billing_service.dart';
 import 'package:photos/services/collections_service.dart';
@@ -50,9 +46,8 @@ import 'package:photos/ui/tools/app_lock.dart';
 import 'package:photos/ui/tools/lock_screen.dart';
 import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/file_uploader.dart';
-import "package:photos/utils/file_util.dart";
+import "package:photos/utils/home_widget_util.dart";
 import 'package:photos/utils/local_settings.dart';
-import "package:photos/utils/preload_util.dart";
 import 'package:shared_preferences/shared_preferences.dart';
 import "package:workmanager/workmanager.dart";
 
@@ -89,113 +84,6 @@ Future initHomeOnLogin() async {
   initHomeWidget().catchError((e, s) {
     _logger.severe("SlideshowWidget: Error in initHomeOnLogin", e, s);
   }).ignore();
-}
-
-Future<void> initHomeWidget() async {
-  final user = Configuration.instance.getUserID();
-
-  if (user == null) {
-    await clearHomeWidget();
-    throw Exception("User not found");
-  }
-
-  final collectionID =
-      await FavoritesService.instance.getFavoriteCollectionID();
-  if (collectionID == null) {
-    await clearHomeWidget();
-    throw Exception("Collection not found");
-  }
-
-  try {
-    await hw.HomeWidget.setAppGroupId(iOSGroupID);
-    final res = await FilesDB.instance.getFilesInCollection(
-      collectionID,
-      galleryLoadStartTime,
-      galleryLoadEndTime,
-    );
-
-    final previousGeneratedId =
-        await hw.HomeWidget.getWidgetData<int>("home_widget_last_img");
-    final files = res.files.where(
-      (element) =>
-          element.generatedID != previousGeneratedId &&
-          element.fileType == FileType.image,
-    );
-    final randomNumber = Random().nextInt(files.length);
-    final randomFile = files.elementAt(randomNumber);
-    final fullImage = await getFileFromServer(randomFile);
-    if (fullImage == null) throw Exception("File not found");
-
-    Image img = Image.file(fullImage);
-    var imgProvider = img.image;
-    await PreloadImage.loadImage(imgProvider);
-
-    img = Image.file(fullImage);
-    imgProvider = img.image;
-
-    final image = await decodeImageFromList(await fullImage.readAsBytes());
-    final width = image.width.toDouble();
-    final height = image.height.toDouble();
-    final size = min(min(width, height), 1024.0);
-
-    final widget = ClipRRect(
-      borderRadius: BorderRadius.circular(32),
-      child: Container(
-        width: size,
-        height: size,
-        decoration: BoxDecoration(
-          color: Colors.black,
-          image: DecorationImage(image: imgProvider, fit: BoxFit.cover),
-        ),
-      ),
-    );
-
-    await hw.HomeWidget.renderFlutterWidget(
-      widget,
-      logicalSize: Size(size, size),
-      key: "slideshow",
-    );
-
-    await hw.HomeWidget.updateWidget(
-      name: 'SlideshowWidgetProvider',
-      androidName: 'SlideshowWidgetProvider',
-      qualifiedAndroidName: 'io.ente.photos.SlideshowWidgetProvider',
-      iOSName: 'SlideshowWidget',
-    );
-
-    if (randomFile.generatedID != null) {
-      await hw.HomeWidget.saveWidgetData<int>(
-        "home_widget_last_img",
-        randomFile.generatedID!,
-      );
-    }
-
-    _logger.info(
-      ">>> SlideshowWidget rendered with size ${width}x$height",
-    );
-  } catch (_) {
-    throw Exception("Error rendering widget");
-  }
-}
-
-Future<void> clearHomeWidget() async {
-  final previousGeneratedId =
-      await hw.HomeWidget.getWidgetData<int>("home_widget_last_img");
-  if (previousGeneratedId == null) return;
-
-  _logger.info("Clearing SlideshowWidget");
-  await hw.HomeWidget.saveWidgetData(
-    "slideshow",
-    null,
-  );
-
-  await hw.HomeWidget.updateWidget(
-    name: 'SlideshowWidgetProvider',
-    androidName: 'SlideshowWidgetProvider',
-    qualifiedAndroidName: 'io.ente.photos.SlideshowWidgetProvider',
-    iOSName: 'SlideshowWidget',
-  );
-  _logger.info(">>> SlideshowWidget cleared");
 }
 
 Future<void> initWorkmanager() async {
