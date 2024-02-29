@@ -147,15 +147,9 @@ class FileTypeRecommendation extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    //remove 's' at end of extensions and use only 1st word if there exists
-    //multiple words.
-    final fileType = fileTypeSearchResult.name
-        .call()
-        .replaceAll(RegExp(r'.$'), "")
-        .split(" ")
-        .first
-        .toUpperCase();
-    final assetPath = knownTypesToAssetPath[fileType];
+    final fileTypeKey =
+        fileTypeKeyFromSearchResult(fileTypeSearchResult.name.call());
+    final assetPath = knownTypesToAssetPath[fileTypeKey];
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8),
       child: ConstrainedBox(
@@ -187,7 +181,7 @@ class FileTypeRecommendation extends StatelessWidget {
                         child: FittedBox(
                           fit: BoxFit.scaleDown,
                           child: Text(
-                            fileType,
+                            fileTypeKey,
                             style: const TextStyle(
                               fontSize: 14,
                               fontFamily: "Inter",
@@ -205,5 +199,17 @@ class FileTypeRecommendation extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  String fileTypeKeyFromSearchResult(String name) {
+    String fileTypeKey = "";
+    //remove 's' at the end of string
+    if (RegExp(r's$').hasMatch(name)) {
+      fileTypeKey = name.substring(0, name.length - 1);
+    }
+    //use only 1st word if there exists multiple words
+    fileTypeKey = fileTypeKey.split(" ").first.toUpperCase();
+
+    return fileTypeKey;
   }
 }
