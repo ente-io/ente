@@ -84,7 +84,7 @@ class _AllSectionsExamplesProviderState
             continue;
           }
           allSectionsExamples.add(
-            sectionType.getData(context, limit: searchSectionLimit),
+            sectionType.getData(context, limit: kSearchSectionLimit),
           );
         }
         allSectionsExamplesFuture =

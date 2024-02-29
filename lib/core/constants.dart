@@ -65,7 +65,7 @@ const defaultCityRadius = 10.0;
 
 const galleryGridSpacing = 2.0;
 
-const searchSectionLimit = 7;
+const kSearchSectionLimit = 7;
 
 const blackThumbnailBase64 = '/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAEBAQEBAQEB' +
     'AQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQH/2wBDAQEBAQEBAQ' +
