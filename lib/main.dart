@@ -79,13 +79,6 @@ void initSlideshowWidget() {
   );
 }
 
-Future initHomeOnLogin() async {
-  _logger.info("Initializing SlideshowWidget on login");
-  initHomeWidget().catchError((e, s) {
-    _logger.severe("SlideshowWidget: Error in initHomeOnLogin", e, s);
-  }).ignore();
-}
-
 Future<void> initWorkmanager() async {
   await Workmanager()
       .initialize(initSlideshowWidget, isInDebugMode: kDebugMode);
