@@ -11,6 +11,16 @@ import "package:photos/services/favorites_service.dart";
 import "package:photos/utils/file_util.dart";
 import "package:photos/utils/preload_util.dart";
 
+Future<int> countHomeWidgets() async {
+  return await hw.HomeWidget.getWidgetCount(
+        name: 'SlideshowWidgetProvider',
+        androidName: 'SlideshowWidgetProvider',
+        qualifiedAndroidName: 'io.ente.photos.SlideshowWidgetProvider',
+        iOSName: 'SlideshowWidget',
+      ) ??
+      0;
+}
+
 Future<void> initHomeWidget() async {
   final Logger logger = Logger("initHomeWidget");
   final user = Configuration.instance.getUserID();

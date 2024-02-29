@@ -925,10 +925,11 @@ packages:
   home_widget:
     dependency: "direct main"
     description:
-      name: home_widget
-      sha256: c58a9e6d3b94490f1a8d5ddcbeeeeebc79abd0befe5889c26b0713fb09be6857
-      url: "https://pub.dev"
-    source: hosted
+      path: "."
+      ref: main
+      resolved-ref: "49158ce4a517e87817dc84c6b96c00639281229a"
+      url: "https://github.com/prateekmedia/FlutterHomeWidget"
+    source: git
     version: "0.4.1"
   html:
     dependency: transitive

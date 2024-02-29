@@ -68,8 +68,10 @@ void initSlideshowWidget() {
   Workmanager().executeTask(
     (taskName, inputData) async {
       try {
-        await _init(true, via: 'runViaSlideshowWidget');
-        await initHomeWidget();
+        if (await countHomeWidgets() != 0) {
+          await _init(true, via: 'runViaSlideshowWidget');
+          await initHomeWidget();
+        }
         return true;
       } catch (e, s) {
         _logger.severe("Error in initSlideshowWidget", e, s);
