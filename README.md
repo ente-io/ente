@@ -64,7 +64,7 @@ You can alternatively install the build from PlayStore or F-Droid.
 
 ## 🧑‍💻 Building from source
 
-1. [Install Flutter v3.13.4](https://flutter.dev/docs/get-started/install)
+1. [Install Flutter v3.13.4](https://flutter.dev/docs/get-started/install) or set the Path of Flutter SDK to `thirdparty/flutter/bin` of photos-app directory after step 3.
 2. Clone this repository with `git clone git@github.com:ente-io/photos-app.git`
 3. Pull in all submodules with `git submodule update --init --recursive`
 4. Enable repo git hooks `git config core.hooksPath hooks`

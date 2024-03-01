@@ -46,8 +46,10 @@ import 'package:photos/ui/tools/app_lock.dart';
 import 'package:photos/ui/tools/lock_screen.dart';
 import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/file_uploader.dart';
+import "package:photos/utils/home_widget_util.dart";
 import 'package:photos/utils/local_settings.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import "package:workmanager/workmanager.dart";
 
 final _logger = Logger("main");
 
@@ -61,14 +63,54 @@ const kBGPushTimeout = Duration(seconds: 28);
 const kFGTaskDeathTimeoutInMicroseconds = 5000000;
 const kBackgroundLockLatency = Duration(seconds: 3);
 
+@pragma("vm:entry-point")
+void initSlideshowWidget() {
+  Workmanager().executeTask(
+    (taskName, inputData) async {
+      try {
+        if (await countHomeWidgets() != 0) {
+          await _init(true, via: 'runViaSlideshowWidget');
+          await initHomeWidget();
+        }
+        return true;
+      } catch (e, s) {
+        _logger.severe("Error in initSlideshowWidget", e, s);
+        return false;
+      }
+    },
+  );
+}
+
+Future<void> initWorkmanager() async {
+  await Workmanager()
+      .initialize(initSlideshowWidget, isInDebugMode: kDebugMode);
+  await Workmanager().registerPeriodicTask(
+    "slideshow-widget",
+    "updateSlideshowWidget",
+    initialDelay: const Duration(seconds: 10),
+    frequency: const Duration(
+      minutes: 15,
+    ),
+  );
+}
+
 void main() async {
   debugRepaintRainbowEnabled = false;
   WidgetsFlutterBinding.ensureInitialized();
   MediaKit.ensureInitialized();
+
+  if (Platform.isAndroid) {
+    unawaited(
+      initWorkmanager().catchError((e, s) {
+        _logger.severe("Error in initWorkmanager", e, s);
+      }),
+    );
+  }
+
   final savedThemeMode = await AdaptiveTheme.getThemeMode();
   await _runInForeground(savedThemeMode);
   unawaited(BackgroundFetch.registerHeadlessTask(_headlessTaskHandler));
-  FlutterDisplayMode.setHighRefreshRate().ignore();
+  if (Platform.isAndroid) FlutterDisplayMode.setHighRefreshRate().ignore();
 }
 
 Future<void> _runInForeground(AdaptiveThemeMode? savedThemeMode) async {
@@ -77,6 +119,7 @@ Future<void> _runInForeground(AdaptiveThemeMode? savedThemeMode) async {
     await _init(false, via: 'mainMethod');
     final Locale locale = await getLocale();
     unawaited(_scheduleFGSync('appStart in FG'));
+
     runApp(
       AppLock(
         builder: (args) =>

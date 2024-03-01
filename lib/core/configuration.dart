@@ -1,3 +1,4 @@
+import "dart:async";
 import 'dart:convert';
 import "dart:io";
 import 'dart:typed_data';
@@ -31,6 +32,7 @@ import 'package:photos/services/search_service.dart';
 import 'package:photos/services/sync_service.dart';
 import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/file_uploader.dart';
+import "package:photos/utils/home_widget_util.dart";
 import 'package:photos/utils/validator_util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import "package:tuple/tuple.dart";
@@ -174,6 +176,7 @@ class Configuration {
       MemoriesService.instance.clearCache();
       BillingService.instance.clearCache();
       SearchService.instance.clearCache();
+      unawaited(clearHomeWidget());
       Bus.instance.fire(UserLoggedOutEvent());
     } else {
       await _preferences.setBool("auto_logout", true);

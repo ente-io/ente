@@ -210,6 +210,11 @@ class FavoritesService {
     return _collectionsService.getCollectionByID(_cachedFavoritesCollectionID!);
   }
 
+  Future<int?> getFavoriteCollectionID() async {
+    final collection = await _getFavoritesCollection();
+    return collection?.id;
+  }
+
   Future<int> _getOrCreateFavoriteCollectionID() async {
     if (_cachedFavoritesCollectionID != null) {
       return _cachedFavoritesCollectionID!;

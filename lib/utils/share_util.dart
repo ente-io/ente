@@ -108,8 +108,8 @@ Future<List<EnteFile>> convertIncomingSharedMediaToFile(
 ) async {
   final List<EnteFile> localFiles = [];
   for (var media in sharedMedia) {
-    if (!(media.type == SharedMediaType.IMAGE ||
-        media.type == SharedMediaType.VIDEO)) {
+    if (!(media.type == SharedMediaType.image ||
+        media.type == SharedMediaType.video)) {
       _logger.warning(
         "ignore unsupported file type ${media.type.toString()} path: ${media.path}",
       );
@@ -149,7 +149,7 @@ Future<List<EnteFile>> convertIncomingSharedMediaToFile(
     enteFile.localID = sharedMediaIdentifier + enteFile.title!;
     enteFile.collectionID = collectionID;
     enteFile.fileType =
-        media.type == SharedMediaType.IMAGE ? FileType.image : FileType.video;
+        media.type == SharedMediaType.image ? FileType.image : FileType.video;
     if (enteFile.fileType == FileType.image) {
       final exifTime = await getCreationTimeFromEXIF(ioFile, null);
       if (exifTime != null) {

@@ -8,5 +8,9 @@
 	<array>
 		<string>webcredentials:web.ente.io</string>
 	</array>
+	<key>com.apple.security.application-groups</key>
+	<array>
+		<string>group.io.ente.frame.SlideshowWidget</string>
+	</array>
 </dict>
 </plist>

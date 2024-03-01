@@ -31,6 +31,7 @@ class _NoResultWidgetState extends State<NoResultWidget> {
     InheritedAllSectionsExamples.of(context)
         .allSectionsExamplesFuture
         .then((value) {
+      if (value.isEmpty) return;
       for (int i = 0; i < searchTypes.length; i++) {
         final querySuggestions = <String>[];
         for (int j = 0; j < 2 && j < value[i].length; j++) {

@@ -13,6 +13,8 @@ description: ente photos application
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 
 version: 0.8.64+584
+publish_to: none
+
 environment:
   sdk: ">=3.0.0 <4.0.0"
 
@@ -89,6 +91,10 @@ dependencies:
   fluttertoast: ^8.0.6
   freezed_annotation: ^2.2.0
   google_nav_bar: ^5.0.5
+  home_widget:
+    git:
+      url: https://github.com/prateekmedia/FlutterHomeWidget
+      ref: main
   html_unescape: ^2.0.0
   http: ^1.1.0
   image: ^4.0.17
@@ -129,13 +135,13 @@ dependencies:
   path: #dart
   path_provider: ^2.1.1
   pedantic: ^1.9.2
-  photo_manager: ^2.5.0
+  photo_manager: ^2.8.1
   photo_view: ^0.14.0
   pinput: ^1.2.2
   pointycastle: ^3.7.3
   provider: ^6.0.0
   quiver: ^3.0.1
-  receive_sharing_intent: ^1.4.5
+  receive_sharing_intent: ^1.6.7
   scrollable_positioned_list: ^0.3.5
   sentry: ^7.9.0
   sentry_flutter: ^7.9.0
@@ -169,12 +175,13 @@ dependencies:
   wallpaper_manager_flutter: ^0.0.2
   wechat_assets_picker: ^8.6.3
   widgets_to_image: ^0.0.2
+  workmanager: ^0.5.2
 
 dependency_overrides:
   # current fork of tfite_flutter_helper depends on ffi: ^1.x.x
   # but we need ffi: ^2.0.1 for newer packages. The original tfite_flutter_helper
   #
-  ffi: ^2.0.1
+  ffi: ^2.0.0
   video_player:
     git:
       url: https://github.com/ente-io/packages.git
@@ -184,8 +191,6 @@ dependency_overrides:
 
 flutter_intl:
   enabled: true
-
-
 
 dev_dependencies:
   build_runner: ^2.4.7
@@ -237,16 +242,16 @@ flutter:
     - assets/models/scenes/
     - assets/models/clip/
   fonts:
-  - family: Inter
-    fonts:
-      - asset: fonts/Inter-Regular.ttf
-      - asset: fonts/Inter-Medium.ttf
-      - asset: fonts/Inter-Light.ttf
-      - asset: fonts/Inter-SemiBold.ttf
-      - asset: fonts/Inter-Bold.ttf
-  - family: Montserrat
-    fonts:
-      - asset: fonts/Montserrat-Bold.ttf
+    - family: Inter
+      fonts:
+        - asset: fonts/Inter-Regular.ttf
+        - asset: fonts/Inter-Medium.ttf
+        - asset: fonts/Inter-Light.ttf
+        - asset: fonts/Inter-SemiBold.ttf
+        - asset: fonts/Inter-Bold.ttf
+    - family: Montserrat
+      fonts:
+        - asset: fonts/Montserrat-Bold.ttf
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
