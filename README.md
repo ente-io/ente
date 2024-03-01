@@ -2,6 +2,12 @@
 
 Help and documentation for Ente's products
 
+> [!CAUTION]
+>
+> **Currently not published**. There are minor bits we need to clean up before
+> publishing these. They'll likely be available at help.ente.io once we wrap
+> those loose ends up.
+
 ## Running
 
 Install dependencies
@@ -24,11 +30,12 @@ local machine.
 
 If you plan on contributing frequently, we recommend using an editor. VSCode is
 a good choice. Also install the Prettier extension for VSCode, and set VSCode to
-format on save. This will use the standard formatting and text wrapping options
-for this project, so you can just focus on the content.
+format on save. This way the editor will automatically format and wrap the text
+using the project's standard, so you can just focus on the content.
 
-We currently don't enforce the prettier formatting to make it easy for people
-unfamiliar with programming to also be able to make edits from GitHub directly.
+Note that we currently don't enforce these formatting standards to make it easy
+for people unfamiliar with programming to also be able to make edits from GitHub
+directly.
 
 This is a common theme - unlike the rest of the codebase where we expect some
 baseline understanding of the tools involved, the docs are meant to be a place

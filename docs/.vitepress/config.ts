@@ -2,7 +2,7 @@ import { defineConfig } from "vitepress";
 
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
-    title: "Ente Help",
+    title: "Ente Docs",
     description: "Help and documentation for Ente's products",
     head: [
         [
@@ -25,7 +25,8 @@ export default defineConfig({
     themeConfig: {
         // https://vitepress.dev/reference/default-theme-config
         editLink: {
-            pattern: "https://github.com/ente-io/docs/edit/main/docs/:path",
+            pattern:
+                "https://github.com/ente-io/ente/edit/main/docs/docs/:path",
         },
         nav: [
             { text: "Photos", link: "/photos/index" },
@@ -44,7 +45,7 @@ export default defineConfig({
             "/authenticator/": sidebarAuth(),
         },
         socialLinks: [
-            { icon: "github", link: "https://github.com/ente-io/docs/" },
+            { icon: "github", link: "https://github.com/ente-io/ente/" },
         ],
     },
 });
