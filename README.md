@@ -4,9 +4,9 @@ Help and documentation for Ente's products
 
 > [!CAUTION]
 >
-> **Currently not published**. There are minor bits we need to clean up before
-> publishing these. They'll likely be available at help.ente.io once we wrap
-> those loose ends up.
+> **Currently not published**. There are bits we need to clean up before
+> publishing these docs. They'll likely be available at help.ente.io once we
+> wrap those loose ends up.
 
 ## Running
 

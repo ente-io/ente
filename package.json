@@ -10,8 +10,5 @@
     "devDependencies": {
         "prettier": "^3",
         "vitepress": "^1.0.0-rc.44"
-    },
-    "dependencies": {
-        "vite-plugin-vitepress-auto-sidebar": "^1.6.2"
     }
 }
