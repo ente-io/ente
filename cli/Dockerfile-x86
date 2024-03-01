@@ -1,0 +1,20 @@
+FROM golang:1.20-alpine3.17@sha256:9c2f89db6fda13c3c480749787f62fed5831699bb2c32881b8f327f1cf7bae42 as builder386
+RUN apt-get  update
+RUN apt-get  install -y gcc
+RUN apt-get  install -y git
+RUN apt-get  install -y  pkg-config
+RUN apt-get  install -y  libsodium-dev
+
+
+ENV GOOS=linux
+
+WORKDIR /etc/ente/
+RUN uname -a
+COPY go.mod .
+COPY go.sum .
+RUN go mod download
+
+
+COPY . .
+RUN --mount=type=cache,target=/root/.cache/go-build \
+     go build -o ente-cli main.go
