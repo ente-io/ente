@@ -1,0 +1,37 @@
+[submodule "auth/thirdparty/sentry-dart"]
+	path = auth/thirdparty/sentry-dart
+	url = https://github.com/ente-io/sentry-dart.git
+	branch = sentry_flutter_ente
+[submodule "auth/flutter"]
+	path = auth/flutter
+	url = https://github.com/flutter/flutter.git
+	branch = stable
+[submodule "auth/assets/simple-icons"]
+	path = auth/assets/simple-icons
+	url = https://github.com/simple-icons/simple-icons.git
+[submodule "desktop/bada-frame"]
+	path = desktop/ui
+	url = https://github.com/ente-io/bada-frame
+	branch = release
+[submodule "desktop/thirdparty/next-electron-server"]
+	path = desktop/thirdparty/next-electron-server
+	url = https://github.com/ente-io/next-electron-server.git
+	branch = desktop
+[submodule "mobile/thirdparty/flutter"]
+	path = mobile/thirdparty/flutter
+	url = https://github.com/flutter/flutter.git
+	branch = stable
+[submodule "mobile/plugins/clip_ggml"]
+	path = mobile/plugins/clip_ggml
+	url = https://github.com/ente-io/clip-ggml.git
+[submodule "mobile/thirdparty/isar"]
+	path = mobile/thirdparty/isar
+	url = https://github.com/isar/isar
+[submodule "web/apps/photos/thirdparty/ffmpeg-wasm"]
+	path = web/apps/photos/thirdparty/ffmpeg-wasm
+	url = https://github.com/abhinavkgrd/ffmpeg.wasm.git
+	branch = master
+[submodule "web/apps/photos/thirdparty/photoswipe"]
+	path = web/apps/photos/thirdparty/photoswipe
+	url = https://github.com/ente-io/PhotoSwipe.git
+	branch = single-thread
