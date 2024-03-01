@@ -5,6 +5,7 @@ export default defineConfig({
     title: "Ente Docs",
     description: "Help and documentation for Ente's products",
     head: [["link", { rel: "icon", type: "image/png", href: "/favicon.png" }]],
+    cleanUrls: true,
     themeConfig: {
         // https://vitepress.dev/reference/default-theme-config
         editLink: {
