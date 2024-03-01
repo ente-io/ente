@@ -101,3 +101,11 @@ thoughts](mailto:feedback@ente.io) with us at any time.
 
 <br/>
 
+> [!NOTE]
+>
+> This folder is supposed to contain all our web related code. Most of it is
+> already here, but some code which is being deployed from our other
+> repositories like the family portal (https://github.com/ente-io/families)
+> still needs to be merged into here. Also, some of the Cloudflare workers we
+> use for fixing headers etc too. Hang tight, we're on it, will bring in the
+> remaining bits one by one.
