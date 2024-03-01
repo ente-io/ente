@@ -2,7 +2,10 @@
 
 ## Overview:
 
-The Location Tags feature allows you to efficiently search and organize your photos based on their geographical location. Instead of sending your queries to our servers, we've implemented a privacy-friendly solution that runs searches locally on your device.
+The Location Tags feature allows you to efficiently search and organize your
+photos based on their geographical location. Instead of sending your queries to
+our servers, we've implemented a privacy-friendly solution that runs searches
+locally on your device.
 
 ## How to Use Location Tags:
 
@@ -22,7 +25,11 @@ The Location Tags feature allows you to efficiently search and organize your pho
 
 ## Note:
 
--   The app will automatically cluster photos falling within a radius under a specified location.
--   Location Tags provide a seamless way to filter photos without compromising your privacy.
--   Location tags are stored end-to-end encrypted, ensuring the security of your data.
--   Enjoy a more organized photo library by tagging important places like home, office, and vacation spots.
+-   The app will automatically cluster photos falling within a radius under a
+    specified location.
+-   Location Tags provide a seamless way to filter photos without compromising
+    your privacy.
+-   Location tags are stored end-to-end encrypted, ensuring the security of your
+    data.
+-   Enjoy a more organized photo library by tagging important places like home,
+    office, and vacation spots.

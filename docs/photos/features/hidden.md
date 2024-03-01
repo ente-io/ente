@@ -1,10 +1,18 @@
 # Hidden
 
-You can further protect extra sensitive photos or albums by hiding them. Hidden photos or albums will **only be viewable** after an extra layer of authentication inside the app. Hidden differs from [Archive](./archive.md) in the fact that hidden photos won't be surfaced anywhere in the app without explicit authentication, whereas Archive only removes them from the home timeline and memories sections.
+You can further protect extra sensitive photos or albums by hiding them. Hidden
+photos or albums will **only be viewable** after an extra layer of
+authentication inside the app. Hidden differs from [Archive](./archive.md) in
+the fact that hidden photos won't be surfaced anywhere in the app without
+explicit authentication, whereas Archive only removes them from the home
+timeline and memories sections.
 
--   Hidden photos and albums will be removed from home timelines, memories, albums tab, search results, and any other visable place in the app.
--   Hidden photos will be removed from all regular albums. If you want to unhide again you will have to specify the album to move it to.
--   You cannot hide photos or albums shared with you. You can archive shared albums instead.
+-   Hidden photos and albums will be removed from home timelines, memories,
+    albums tab, search results, and any other visable place in the app.
+-   Hidden photos will be removed from all regular albums. If you want to unhide
+    again you will have to specify the album to move it to.
+-   You cannot hide photos or albums shared with you. You can archive shared
+    albums instead.
 
 ### How to
 

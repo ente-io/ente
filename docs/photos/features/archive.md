@@ -1,10 +1,14 @@
 # Archive
 
-You can remove a photo (owned by you) or an album from your **home timeline** by archiving it. Archived photos won't be included in the memories section on the mobile app.
+You can remove a photo (owned by you) or an album from your **home timeline** by
+archiving it. Archived photos won't be included in the memories section on the
+mobile app.
 
--   All photos within a archived album will be removed from home timeline, even when some of the photos are also present in a non-archived album.
+-   All photos within a archived album will be removed from home timeline, even
+    when some of the photos are also present in a non-archived album.
 -   You can archive albums that are owned by you or shared with you.
--   Search results will include archived photos. If you want to hide photos from search result, use [Hide](./hidden.md) feature.
+-   Search results will include archived photos. If you want to hide photos from
+    search result, use [Hide](./hidden.md) feature.
 
 ### How to
 
@@ -34,7 +38,8 @@ You can remove a photo (owned by you) or an album from your **home timeline** by
 
 ### Metadata Privacy
 
-Both Ente and the person with whom you are sharing an album or photo have no information about whether you have
+Both Ente and the person with whom you are sharing an album or photo have no
+information about whether you have
 
 -   Archived a photo
 -   Archived an album

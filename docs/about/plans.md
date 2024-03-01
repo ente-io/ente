@@ -1,6 +1,8 @@
 # Ente plans : Tailored for Every User
 
-At ente, we understand that each user is unique, and so are their storage needs. Our range of plans is designed to cater to a diverse to diverse users, ensuring everyone finds the perfect fit for their requirements.
+At ente, we understand that each user is unique, and so are their storage needs.
+Our range of plans is designed to cater to a diverse to diverse users, ensuring
+everyone finds the perfect fit for their requirements.
 
 ## Basic plan
 

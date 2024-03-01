@@ -2,7 +2,9 @@
 
 ## Overview:
 
-The ente desktop app now allows you to "watch" a folder on your computer for any changes, creating a one-way sync from your device to the Ente cloud. This will make photo management and backup a breeze.
+The ente desktop app now allows you to "watch" a folder on your computer for any
+changes, creating a one-way sync from your device to the Ente cloud. This will
+make photo management and backup a breeze.
 
 ## How to add Watch folders?
 
@@ -22,5 +24,7 @@ The ente desktop app now allows you to "watch" a folder on your computer for any
 
 # Note:
 
--   Option to choose whether to sync nested folders to a single album or separate albums.
--   The app continuously monitors changes in the watched folder, such as the addition or removal of files
+-   Option to choose whether to sync nested folders to a single album or
+    separate albums.
+-   The app continuously monitors changes in the watched folder, such as the
+    addition or removal of files

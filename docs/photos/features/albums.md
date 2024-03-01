@@ -1,7 +1,8 @@
 # Albums
 
-This guide will show you how to make the most of your albums with simple yet effective features.
-Below are the features that allow you to personailze your albums according to your preferences:
+This guide will show you how to make the most of your albums with simple yet
+effective features. Below are the features that allow you to personailze your
+albums according to your preferences:
 
 ## 1. Rename album: Personalize your albums by giving them a meaningful name
 
@@ -28,7 +29,8 @@ Below are the features that allow you to personailze your albums according to yo
 -   Tap the three dots button in the top right corner
 -   From the menu options, select Set cover
 -   A new screen will appear, propmpting you to select the cover photo
--   Browse through your photos and tap on the image you want to set as the album cover
+-   Browse through your photos and tap on the image you want to set as the album
+    cover
 -   Then tap on Use selected photo
 
 ## 3. Map: Explore the memories based on their location
