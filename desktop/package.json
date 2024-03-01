@@ -1,0 +1,154 @@
+{
+    "name": "ente",
+    "productName": "ente",
+    "version": "1.6.63",
+    "private": true,
+    "description": "Desktop client for ente.io",
+    "main": "app/main.js",
+    "build": {
+        "appId": "io.ente.bhari-frame",
+        "artifactName": "${productName}-${version}-${arch}.${ext}",
+        "nsis": {
+            "deleteAppDataOnUninstall": true
+        },
+        "linux": {
+            "target": [
+                {
+                    "target": "AppImage",
+                    "arch": [
+                        "x64",
+                        "arm64"
+                    ]
+                },
+                {
+                    "target": "deb",
+                    "arch": [
+                        "x64",
+                        "arm64"
+                    ]
+                },
+                {
+                    "target": "rpm",
+                    "arch": [
+                        "x64",
+                        "arm64"
+                    ]
+                },
+                {
+                    "target": "pacman",
+                    "arch": [
+                        "x64",
+                        "arm64"
+                    ]
+                }
+            ],
+            "icon": "./build/icon.icns",
+            "category": "Photography"
+        },
+        "mac": {
+            "target": {
+                "target": "default",
+                "arch": [
+                    "universal"
+                ]
+            },
+            "category": "public.app-category.photography",
+            "hardenedRuntime": true,
+            "x64ArchFiles": "Contents/Resources/ggmlclip-mac"
+        },
+        "afterSign": "electron-builder-notarize",
+        "extraFiles": [
+            {
+                "from": "build",
+                "to": "resources",
+                "filter": [
+                    "**/*"
+                ]
+            }
+        ],
+        "asarUnpack": [
+            "node_modules/ffmpeg-static/bin/${os}/${arch}/ffmpeg",
+            "node_modules/ffmpeg-static/index.js",
+            "node_modules/ffmpeg-static/package.json"
+        ],
+        "files": [
+            "app/**/*",
+            {
+                "from": "ui/apps/photos",
+                "to": "ui",
+                "filter": [
+                    "!**/*",
+                    "out/**/*"
+                ]
+            }
+        ]
+    },
+    "scripts": {
+        "postinstall": "electron-builder install-app-deps",
+        "prebuild": "eslint \"src/**/*.{js,jsx,ts,tsx}\"",
+        "prepare": "husky install",
+        "lint": "eslint -c .eslintrc --ext .ts src",
+        "watch": "tsc -w",
+        "build-main": "yarn install && tsc",
+        "start-main": "yarn build-main && electron app/main.js",
+        "start-renderer": "cd ui && yarn install && yarn dev:photos",
+        "start": "concurrently \"yarn start-main\" \"yarn start-renderer\"",
+        "build-renderer": "cd ui && yarn install && yarn export:photos",
+        "build": "yarn build-renderer && yarn build-main",
+        "test-release": "cross-env IS_TEST_RELEASE=true yarn build && electron-builder --config.compression=store"
+    },
+    "author": "ente <code@ente.io>",
+    "devDependencies": {
+        "@sentry/cli": "^1.68.0",
+        "@types/auto-launch": "^5.0.2",
+        "@types/ffmpeg-static": "^3.0.1",
+        "@types/get-folder-size": "^2.0.0",
+        "@types/node": "18.15.0",
+        "@types/node-fetch": "^2.6.2",
+        "@types/promise-fs": "^2.1.1",
+        "@typescript-eslint/eslint-plugin": "^5.28.0",
+        "@typescript-eslint/parser": "^5.28.0",
+        "concurrently": "^7.0.0",
+        "cross-env": "^7.0.3",
+        "electron": "^25.8.4",
+        "electron-builder": "^24.6.4",
+        "electron-builder-notarize": "^1.2.0",
+        "electron-download": "^4.1.1",
+        "eslint": "^7.23.0",
+        "eslint-config-google": "^0.14.0",
+        "eslint-config-prettier": "^8.5.0",
+        "husky": "^8.0.1",
+        "lint-staged": "^13.0.1",
+        "prettier": "2.5.1",
+        "typescript": "^4.2.3"
+    },
+    "dependencies": {
+        "@sentry/electron": "^2.5.1",
+        "any-shell-escape": "^0.1.1",
+        "auto-launch": "^5.0.5",
+        "chokidar": "^3.5.3",
+        "compare-versions": "^6.1.0",
+        "electron-log": "^4.3.5",
+        "electron-reload": "^2.0.0-alpha.1",
+        "electron-store": "^8.0.1",
+        "electron-updater": "^4.3.8",
+        "ffmpeg-static": "^5.1.0",
+        "get-folder-size": "^2.0.1",
+        "html-entities": "^2.4.0",
+        "jpeg-js": "^0.4.4",
+        "next-electron-server": "file:./thirdparty/next-electron-server",
+        "node-fetch": "^2.6.7",
+        "node-stream-zip": "^1.15.0",
+        "onnxruntime-node": "^1.16.3",
+        "promise-fs": "^2.1.1"
+    },
+    "standard": {
+        "parser": "babel-eslint"
+    },
+    "lint-staged": {
+        "src/**/*.{js,jsx,ts,tsx}": [
+            "eslint --fix",
+            "prettier --write --ignore-unknown"
+        ]
+    }
+}

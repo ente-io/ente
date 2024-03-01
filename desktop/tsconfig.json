@@ -1,0 +1,15 @@
+{
+    "compilerOptions": {
+        "target": "es2021",
+        "module": "commonjs",
+        "esModuleInterop": true,
+        "noImplicitAny": true,
+        "sourceMap": true,
+        "outDir": "app",
+        "baseUrl": "src",
+        "paths": {
+            "*": ["node_modules/*"]
+        }
+    },
+    "include": ["src/**/*"]
+}

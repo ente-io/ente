@@ -1,0 +1,12 @@
+node_modules
+app
+.next/
+dist
+.vscode
+buildingSteps.md
+.DS_Store
+.idea/
+build/.DS_Store
+.env
+.electron-symbols/
+models/
