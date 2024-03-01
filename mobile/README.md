@@ -1,6 +1,6 @@
-# ente - simple, safe photo storage
+# Ente - simple, safe photo storage
 
-**ente** is a cloud storage provider that provides end-to-end encryption for your data.
+**Ente** is a cloud storage provider that provides end-to-end encryption for your data.
 
 We have open-source apps across Android, iOS, web and desktop that automatically backup your photos and videos.
 
