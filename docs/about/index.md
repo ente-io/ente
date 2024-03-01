@@ -33,7 +33,7 @@ connection sealed the deal! We should ask him why he likes ducks so much, but
 apparently he does, so this dual meaning ("mine" / "duck") led him to finalize
 the name, and also led to the adoption of the duck as Ente's mascot, "Ducky":
 
-![Ente's mascot, Ducky](ducky.png)
+![Ente's mascot, Ducky](ducky.png){width=250px}
 
 
 # Ente products

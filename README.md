@@ -43,3 +43,7 @@ for non-technical people to also provide their input. The reason for this is not
 to increase the number of docs, but to bring more diversity to them. Such
 diversity of viewpoints is essential for evolving documents that can be of help
 to people of varying level of familiarity with tech.
+
+If you're unsure about how to do something, just look around in the other files
+and copy paste whatever seems to match the look of what you're trying to do. And
+remember, writing docs should not be a chore, have fun!
