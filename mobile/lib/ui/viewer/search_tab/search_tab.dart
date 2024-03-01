@@ -98,6 +98,7 @@ class _AllSearchSectionsState extends State<AllSearchSections> {
                   padding: const EdgeInsets.only(bottom: 180),
                   physics: const BouncingScrollPhysics(),
                   itemCount: searchTypes.length,
+                  // ignore: body_might_complete_normally_nullable
                   itemBuilder: (context, index) {
                     switch (searchTypes[index]) {
                       case SectionType.album:
