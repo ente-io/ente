@@ -4,24 +4,7 @@ import { defineConfig } from "vitepress";
 export default defineConfig({
     title: "Ente Docs",
     description: "Help and documentation for Ente's products",
-    head: [
-        [
-            "link",
-            {
-                rel: "apple-touch-icon",
-                sizes: "180x180",
-                href: "/apple-touch-icon.png",
-            },
-        ],
-        [
-            "link",
-            {
-                rel: "icon",
-                type: "image/png",
-                href: "/favicon.png",
-            },
-        ],
-    ],
+    head: [["link", { rel: "icon", type: "image/png", href: "/favicon.png" }]],
     themeConfig: {
         // https://vitepress.dev/reference/default-theme-config
         editLink: {
