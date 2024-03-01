@@ -30,7 +30,7 @@ for this project, so you can just focus on the content.
 We currently don't enforce the prettier formatting to make it easy for people
 unfamiliar with programming to also be able to make edits from GitHub directly.
 
-This is a common theme - unlike the rest of the codebase where expect some
+This is a common theme - unlike the rest of the codebase where we expect some
 baseline understanding of the tools involved, the docs are meant to be a place
 for non-technical people to also provide their input. The reason for this is not
 to increase the number of docs, but to bring more diversity to them. Such
