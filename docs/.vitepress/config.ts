@@ -1,4 +1,5 @@
 import { defineConfig } from "vitepress";
+import AutoSidebar from "vite-plugin-vitepress-auto-sidebar";
 
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
@@ -17,27 +18,32 @@ export default defineConfig({
             pattern:
                 "https://github.com/ente-io/ente/edit/main/docs/docs/:path",
         },
-        nav: [
-            { text: "Photos", link: "/photos/index" },
-            { text: "Authenticator", link: "/authenticator/index" },
-        ],
+        // nav: [
+        //     { text: "Photos", link: "/photos/index" },
+        //     { text: "Authenticator", link: "/authenticator/index" },
+        // ],
         search: {
             provider: "local",
             options: {
                 detailedView: true,
             },
         },
-        sidebar: {
-            "/": sidebarPhotos(),
-            "/photos/": sidebarPhotos(),
-            "/common/": sidebarPhotos(),
-            "/authenticator/": sidebarAuth(),
-        },
+        // sidebar: {
+        //     "/": sidebarPhotos(),
+        //     "/photos/": sidebarPhotos(),
+        //     "/common/": sidebarPhotos(),
+        //     "/authenticator/": sidebarAuth(),
+        // },
         socialLinks: [
             { icon: "github", link: "https://github.com/ente-io/ente/" },
             { icon: "twitter", link: "https://twitter.com/enteio" },
             { icon: "discord", link: "https://discord.gg/z2YVKkycX3" },
         ],
+    },
+    vite: {
+        // Automatically create a sidebar by scanning directories
+        // https://github.com/QC2168/vite-plugin-vitepress-auto-sidebar
+        plugins: [AutoSidebar({})],
     },
 });
 
