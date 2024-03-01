@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+    - name: Feature requests and questions
+      url: https://github.com/ente-io/preview/discussions
+      about: Please use Discussions for everything apart from the above.

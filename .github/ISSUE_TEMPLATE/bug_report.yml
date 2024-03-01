@@ -1,0 +1,54 @@
+name: Report a bug
+description: Let us know if something's not working the way you expected.
+labels: ["triage"]
+body:
+    - type: markdown
+      attributes:
+          value: >
+              Before opening a new issue, please ensure you are on the latest
+              version (it might've already been fixed), and that you've searched
+              for existing issues (please add you observations as a comment
+              there instead of creating a duplicate).
+    - type: textarea
+      attributes:
+          label: Description
+          description: >
+              Please describe the bug. If possible, also include the steps to
+              reproduce the behaviour, and the expected behaviour (sometimes
+              bugs are just expectation mismatches, in which case this would be
+              a good fit for Discussions).
+      validations:
+          required: true
+    - type: input
+      attributes:
+          label: Version
+          description: The version can be seen at the bottom of settings.
+          placeholder: e.g. v1.2.3
+    - type: dropdown
+      attributes:
+          label: What product are you using?
+          description: You can select multiple if needed.
+          multiple: true
+          options:
+              - Ente Photos
+              - Ente Auth
+    - type: dropdown
+      attributes:
+          label: What platform are you using?
+          description: You can select multiple if needed.
+          multiple: true
+          options:
+              - Mobile - iOS
+              - Mobile - Android
+              - Mobile - FDroid
+              - Desktop - Linux
+              - Desktop - Windows
+              - Desktop - macOS
+              - Web - Firefox
+              - Web - Chrome
+              - Web - Safari
+              - Web - Edge
+              - Server
+    - type: markdown
+      attributes:
+          value: Thank you! ❤️
