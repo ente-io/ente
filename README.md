@@ -1,8 +1,17 @@
 # Docs
-Documentation for products made by [Ente](https://ente.io)
+
+Help and documentation for Ente's products
 
 ## Running
+
+Install dependencies
+
+```sh
+yarn install
 ```
-npm install
-npm run docs:dev
+
+Then start a local server
+
+```sh
+yarn dev
 ```
