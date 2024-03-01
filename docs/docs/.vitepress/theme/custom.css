@@ -1,0 +1,19 @@
+:root {
+    --ente-theme-color: #1db954;
+    --ente-theme-color-alt: #00b33c;
+
+    --vp-theme-color: var(--ente-theme-color);
+    --vp-c-brand: var(--ente-theme-color);
+    --vp-c-brand-1: var(--ente-theme-color);
+    --vp-c-brand-2: var(--ente-theme-color-alt);
+    --vp-home-hero-name-color: var(--ente-theme-color);
+    --vp-c-brand-light: var(--ente-theme-color);
+    --vp-button-brand-border: var(--ente-theme-color);
+    --vp-button-brand-bg: var(--ente-theme-color);
+    --vp-button-brand-text: #191919;
+    --vp-button-brand-hover-border: var(--ente-theme-color-alt);
+    --vp-button-brand-hover-bg: #191919;
+    --vp-button-brand-hover-text: #e5e5e5;
+    --vp-local-search-highlight-bg: var(--ente-theme-color);
+    --docsearch-hit-active-color: #191919;
+}
