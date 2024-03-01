@@ -1,10 +1,10 @@
-# ente Authenticator
+# Ente Auth 
 
 ![Build](https://github.com/ente-io/auth/actions/workflows/ci.yml/badge.svg?branch=)
 [![Crowdin](https://badges.crowdin.net/ente-authenticator-app/localized.svg)](https://crowdin.com/project/ente-authenticator-app) 
  [![Matrix](https://img.shields.io/matrix/ente:matrix.org?color=blue)](https://matrix.to/#/#ente:matrix.org)
 
-ente's Authenticator app helps you generate and store 2 step verification (2FA)
+Ente's Authenticator app helps you generate and store 2 step verification (2FA)
 tokens on your mobile devices.
 
 [Download now](#-download)
@@ -15,26 +15,26 @@ tokens on your mobile devices.
 
 ### Secure Backups
 
-ente provides end-to-end encrypted cloud backups so that you don't have to worry
+Ente provides end-to-end encrypted cloud backups so that you don't have to worry
 about losing your tokens. We use the same protocols [ente
 Photos](https://ente.io) uses to encrypt and preserve your data.
 
 
 ### Multi Device Synchronization
 
-ente will automatically sync the 2FA tokens you add to your account, across all
+Ente will automatically sync the 2FA tokens you add to your account, across all
 your devices. Every new device you sign into will have access to these tokens.
 
 
 ### Offline Mode
 
-ente generates 2FA tokens offline, so your network connectivity will not get in
+Ente generates 2FA tokens offline, so your network connectivity will not get in
 the way of your workflow. If you wish to use the app without an account for e2ee
 backups, you can do that as well.
 
 ### Import and Export Tokens
 
-You can add tokens to ente by one of the following methods:
+You can add tokens to Ente by one of the following methods:
 1. Scanning a QR code
 2. Manually entering (copy-pasting) a 2FA secret
 3. Bulk importing from other popular 2FA apps and from a file  that contains a list of codes in the following format:.
@@ -42,7 +42,7 @@ You can add tokens to ente by one of the following methods:
     otpauth://totp/provider.com:you@email.com?secret=YOUR_SECRET
     ```
 
-You can export the codes you have added to ente, to either an **encrypted** or
+You can export the codes you have added to Ente, to either an **encrypted** or
 plain text file. The encrypted backups can be accessed through the app, as well
 as a standalone CLI tool. [Read
 more](migration-guides/encrypted_export.md#how-to-use-the-exported-data).
