@@ -1,0 +1,1 @@
+DROP INDEX IF EXISTS collections_uncategorized_constraint_index;

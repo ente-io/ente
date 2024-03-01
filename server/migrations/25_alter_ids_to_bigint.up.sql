@@ -1,0 +1,46 @@
+ALTER TABLE collection_files ALTER COLUMN collection_id TYPE BIGINT;
+
+ALTER TABLE collection_shares ALTER COLUMN collection_id TYPE BIGINT;
+ALTER TABLE collection_shares ALTER COLUMN from_user_id TYPE BIGINT;
+ALTER TABLE collection_shares ALTER COLUMN to_user_id TYPE BIGINT;
+
+ALTER TABLE collections ALTER COLUMN collection_id TYPE BIGINT;
+ALTER TABLE collections ALTER COLUMN owner_id TYPE BIGINT;
+
+ALTER TABLE files ALTER COLUMN owner_id TYPE BIGINT;
+
+ALTER TABLE key_attributes ALTER COLUMN user_id TYPE BIGINT;
+
+ALTER TABLE location_tag ALTER COLUMN user_id TYPE BIGINT;
+
+ALTER TABLE notification_history ALTER COLUMN user_id TYPE BIGINT;
+
+ALTER TABLE subscription_logs ALTER COLUMN user_id TYPE BIGINT;
+
+ALTER TABLE subscriptions ALTER COLUMN user_id TYPE BIGINT;
+
+ALTER TABLE temp_two_factor ALTER COLUMN user_id TYPE BIGINT;
+
+ALTER TABLE tokens ALTER COLUMN user_id TYPE BIGINT;
+
+ALTER TABLE two_factor ALTER COLUMN user_id TYPE BIGINT;
+
+ALTER TABLE two_factor_sessions ALTER COLUMN user_id TYPE BIGINT;
+
+ALTER TABLE usage ALTER COLUMN user_id TYPE BIGINT;
+
+ALTER TABLE users ALTER COLUMN user_id TYPE BIGINT;
+
+BEGIN;
+ALTER TABLE collections ALTER collection_id DROP DEFAULT;
+DROP SEQUENCE collections_collection_id_seq;
+ALTER TABLE collections
+    ALTER collection_id ADD GENERATED ALWAYS AS IDENTITY (RESTART 1580559962386438);
+COMMIT;
+
+BEGIN;
+ALTER TABLE users ALTER user_id DROP DEFAULT;
+DROP SEQUENCE users_user_id_seq;
+ALTER TABLE users
+    ALTER user_id ADD GENERATED ALWAYS AS IDENTITY (RESTART 1580559962386438);
+COMMIT;

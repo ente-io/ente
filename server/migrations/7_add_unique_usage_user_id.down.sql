@@ -1,0 +1,1 @@
+DROP INDEX usage_user_id_unique_constraint_index;

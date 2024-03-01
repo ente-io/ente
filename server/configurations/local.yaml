@@ -1,0 +1,264 @@
+# Configuring museum
+# ------------------
+#
+# 1. If the environment variable `ENVIRONMENT` is specified, then it is used to
+#    load one of the files from the `configurations/` directory. If not present,
+#    then by default `local.yaml` (this file) will get loaded.
+#
+# 2. Then, museum will look for a file named `museum.yaml` in the current
+#    working directory. If found, this file will also be loaded, and entries
+#    specified therein will override the defaults specified here.
+#
+# 3. If the "credentials-file" config option is set, then museum will also load
+#    that and merge it in.
+#
+# 4. Config can be overridden with via environment variables (details below).
+#
+# Environment variables
+# ---------------------
+#
+# All configuration options can be overridden via environment variables. The
+# environment variable should have the prefix "ENTE_", and any nesting should be
+# replaced by underscores.
+#
+# For example, the nested string "db.user" in the config file can alternatively
+# be specified (or be overridden) by setting an environment variable named
+# ENTE_DB_USER.
+#
+#
+# Empty strings
+# -------------
+#
+# The empty string indicates missing values (to match go convention).
+#
+# This also means that to override a value that is specified in local.yaml in a
+# subsequently loaded config file, you should specify the key as an empty string
+# (`key: ""`) instead of leaving it unset.
+#
+# ---
+
+# If this option is specified, then it is loaded and gets merged-in over the
+# defaults present in default.yaml. This provides a way to inject credentials
+# and other overrides.
+#
+# The default is to look for a file named credentials.yaml in the CWD.
+#credentials-file: credentials.yaml
+
+# Some credentials (e.g. the TLS cert) are cumbersome to provide inline in the
+# YAML configuration file, thus these are loaded at runtime from separate files.
+#
+# This is the directory where museum should look for them.
+#
+# Currently, the following files are loaded (if needed)
+#
+# - credentials/{tls.cert,tls.key}
+# - credentials/pst-service-account.json
+# - credentials/fcm-service-account.json
+#
+# The default is to look for a these files in a directory named credentials
+# under the CWD.
+#credentials-dir: credentials
+
+# By default, museum logs to stdout when running locally. Specify this path to
+# get it to log to a file instead.
+#
+# It must be specified if running in a non-local environment.
+log-file: ""
+
+# Database connection parameters
+db:
+    host: localhost
+    port: 5432
+    name: ente_db
+    # These can be specified here, or alternatively provided via the environment
+    # as ENTE_DB_USER and ENTE_DB_PASSWORD.
+    user:
+    password:
+
+# Map of data centers
+#
+# Each data center also specifies which bucket in that provider should be used.
+s3:
+    # Override the primary and secondary hot storage. The commented out values
+    # are the defaults.
+    #
+    #hot_storage:
+    #    primary: b2-eu-cen
+    #    secondary: wasabi-eu-central-2-v3
+    b2-eu-cen:
+        key:
+        secret:
+        endpoint:
+        region:
+        bucket:
+    wasabi-eu-central-2-v3:
+        key:
+        secret:
+        endpoint:
+        region:
+        bucket:
+        # If enabled, this causes us to opt the object out of the compliance
+        # lock when the object is deleted. See "Wasabi Compliance".
+        #
+        # Currently this flag is only honoured for the Wasabi v3 bucket.
+        compliance: true
+    scw-eu-fr-v3:
+        key:
+        secret:
+        endpoint:
+        region:
+        bucket:
+    # If true, enable some workarounds to allow us to use a local minio instance
+    # for object storage.
+    #
+    # 1. Disable SSL.
+    #
+    # 2. Use "path" style S3 URLs where the bucket is part of the URL path, e.g.
+    #    http://localhost:3200/b2-eu-cen. By default the bucket name is part of
+    #    the (sub)domain, e.g. http://b2-eu-cen.localhost:3200/ and cannot be
+    #    resolved when running locally.
+    #
+    # 3. Directly download the file during replication instead of going via the
+    #    Cloudflare worker.
+    #
+    # 4. Do not specify storage classes when uploading objects (since minio does
+    #    not support them, specifically it doesn't support GLACIER).
+    #
+    #are_local_buckets: true
+
+# Key used for encrypting customer emails before storing them in DB
+#
+# To make it easy to get started, some randomly generated values are provided
+# here. But if you're really going to be using museum, please generate new keys.
+# You can use `go run tools/gen-random-keys/main.go` for that.
+key:
+    encryption: yvmG/RnzKrbCb9L3mgsmoxXr9H7i2Z4qlbT0mL3ln4w=
+    hash: KXYiG07wC7GIgvCSdg+WmyWdXDAn6XKYJtp/wkEU7x573+byBRAYtpTP0wwvi8i/4l37uicX1dVTUzwH3sLZyw==
+
+# JWT secrets
+#
+# To make it easy to get started, a randomly generated values is provided here.
+# But if you're really going to be using museum, please generate new keys. You
+# can use `go run tools/gen-random-keys/main.go` for that.
+jwt:
+    secret: i2DecQmfGreG6q1vBj5tCokhlN41gcfS2cjOs9Po-u8=
+
+# Zoho Zeptomail config (optional)
+# Use case: Sending emails
+transmail:
+    # Transmail token
+    # Mail agent: dev
+    key:
+
+# Apple config (optional)
+# Use case: In-app purchases
+apple:
+    # Secret used when communicating with Apple for validating IAP receipts.
+    shared-secret:
+
+# Stripe config (optional)
+# Use case: Payments
+stripe:
+    us:
+        key:
+        webhook-secret:
+    in:
+        key:
+        webhook-secret:
+    whitelisted-redirect-urls: []
+    path:
+        success: ?status=success&session_id={CHECKOUT_SESSION_ID}
+        cancel: ?status=fail&reason=canceled
+
+# Passkey support (WIP)
+webauthn:
+    rpid: "example.com"
+    rporigins:
+      - "https://example.com:3005"
+
+# Roadmap SSO (optional)
+#
+# Allow the user to sign into an hosted roadmap service using their ente.io
+# credentials. Here we can can configure the URL prefix and service levels
+# credentials for SSO.
+roadmap:
+    # The prefix of the URL the user should be redirected to
+    url-prefix:
+    # This secret can be obtained from the roadmap dashboard
+    sso-secret:
+
+# Discord config (optional)
+# Use case: Devops
+discord:
+    bot:
+        cha-ching:
+            token:
+            channel:
+        mona-lisa:
+            token:
+            channel:
+
+# Zoho Campaigns config (optional)
+# Use case: Sending emails
+zoho:
+    client-id:
+    client-secret:
+    refresh-token:
+    list-key:
+    topic-ids:
+
+# Various low-level configuration options
+internal:
+    # If false (the default), then museum will notify the external world of
+    # various events. E.g, email users about their storage being full, send
+    # alerts to Discord, etc.
+    #
+    # It can be set to true when running a "read only" instance like a backup
+    # restoration test, where we want to be able to access data but otherwise
+    # minimize external side effects.
+    silent: false
+    # If provided, this external healthcheck url is periodically pinged.
+    health-check-url:
+    # Hardcoded verification codes, useful for logging in when developing.
+    hardcoded-ott:
+        emails:
+            - "example@example.org,123456"
+        # When running in a local environment, hardcode the verification code to
+        # 123456 for email addresses ending with @example.org
+        local-domain-suffix: "@example.org"
+        local-domain-value: 123456
+    # List of user IDs that can use the admin API endpoints.
+    admins: []
+
+# Replication config
+#
+# If enabled, replicate each file to 2 other data centers after it gets
+# successfully uploaded to the primary hot storage.
+replication:
+    enabled: false
+    # The Cloudflare worker to use to download files from the primary hot
+    # bucket. Must be specified if replication is enabled.
+    worker-url:
+    # Number of go routines to spawn for replication
+    # This is not related to the worker-url above.
+    # Optional, default value is indicated here.
+    worker-count: 6
+    # Where to store temporary objects during replication v3
+    # Optional, default value is indicated here.
+    tmp-storage: tmp/replication
+
+# Configuration for various background / cron jobs.
+jobs:
+    cron:
+        # Instances run various cleanup, sending emails and other cron jobs. Use
+        # this flag to disable all these cron jobs.
+        skip: false
+    remove-unreported-objects:
+        # Number of go routines to spawn for object cleanup
+        # Optional, default value is indicated here.
+        worker-count: 1
+    clear-orphan-objects:
+        # By default, this job is disabled.
+        enabled: false
+        # If provided, only objects that begin with this prefix are pruned.
+        prefix: ""

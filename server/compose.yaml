@@ -1,0 +1,93 @@
+services:
+  museum:
+    build:
+      context: .
+      args:
+        GIT_COMMIT: development-cluster
+    ports:
+      - 8080:8080 # API
+      - 2112:2112 # Prometheus metrics
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      # Pass-in the config to connect to the DB and MinIO
+      ENTE_CREDENTIALS_FILE: /credentials.yaml
+    volumes:
+      - custom-logs:/var/logs
+      - ./museum.yaml:/museum.yaml:ro
+      - ./scripts/compose/credentials.yaml:/credentials.yaml:ro
+    networks:
+      - internal
+
+  # Resolve "localhost:3200" in the museum container to the minio container.
+  socat:
+    image: alpine/socat
+    network_mode: service:museum
+    depends_on:
+      - museum
+    command: "TCP-LISTEN:3200,fork,reuseaddr TCP:minio:3200"
+
+  postgres:
+    image: postgres:12
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_USER: pguser
+      POSTGRES_PASSWORD: pgpass
+      POSTGRES_DB: ente_db
+    # Wait for postgres to be accept connections before starting museum.
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "pg_isready",
+          "-q",
+          "-d",
+          "ente_db",
+          "-U",
+          "pguser"
+        ]
+      interval: 1s
+      timeout: 5s
+      retries: 20
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - internal
+
+  minio:
+    image: minio/minio
+    # Use different ports than the minio defaults to avoid conflicting
+    # with the ports used by Prometheus.
+    ports:
+      - 3200:3200 # API
+      - 3201:3201 # Console
+    environment:
+      MINIO_ROOT_USER: test
+      MINIO_ROOT_PASSWORD: testtest
+    command: server /data --address ":3200" --console-address ":3201"
+    volumes:
+      - minio-data:/data
+    networks:
+      - internal
+
+  minio-provision:
+    image: minio/mc
+    depends_on:
+      - minio
+    volumes:
+      - ./scripts/compose/minio-provision.sh:/provision.sh:ro
+      - minio-data:/data
+    networks:
+      - internal
+    entrypoint: sh /provision.sh
+
+volumes:
+  custom-logs:
+  postgres-data:
+  minio-data:
+
+
+networks:
+  internal:

@@ -1,0 +1,49 @@
+package api
+
+import (
+	"net/http"
+
+	"github.com/ente-io/museum/ente"
+	"github.com/ente-io/museum/pkg/controller/storagebonus"
+	"github.com/ente-io/museum/pkg/utils/auth"
+	"github.com/ente-io/museum/pkg/utils/handler"
+	"github.com/ente-io/stacktrace"
+	"github.com/gin-gonic/gin"
+)
+
+type StorageBonusHandler struct {
+	Controller *storagebonus.Controller
+}
+
+func (h StorageBonusHandler) GetReferralView(context *gin.Context) {
+	response, err := h.Controller.GetUserReferralView(context)
+	if err != nil {
+		handler.Error(context, stacktrace.Propagate(err, ""))
+		return
+	}
+	context.JSON(http.StatusOK, response)
+}
+
+func (h StorageBonusHandler) GetStorageBonusDetails(context *gin.Context) {
+	response, err := h.Controller.GetStorageBonusDetailResponse(context, auth.GetUserID(context.Request.Header))
+	if err != nil {
+		handler.Error(context, stacktrace.Propagate(err, ""))
+		return
+	}
+	context.JSON(http.StatusOK, response)
+}
+
+func (h StorageBonusHandler) ClaimReferral(c *gin.Context) {
+	code := c.Query("code")
+	if code == "" {
+		handler.Error(c, stacktrace.Propagate(ente.ErrBadRequest, "referral code is required"))
+		return
+	}
+	err := h.Controller.ApplyReferralCode(c, code)
+	if err != nil {
+		handler.Error(c, stacktrace.Propagate(err, ""))
+		return
+	}
+	c.Status(http.StatusOK)
+
+}
