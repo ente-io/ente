@@ -9,10 +9,6 @@
 [submodule "auth/assets/simple-icons"]
 	path = auth/assets/simple-icons
 	url = https://github.com/simple-icons/simple-icons.git
-[submodule "desktop/bada-frame"]
-	path = desktop/ui
-	url = https://github.com/ente-io/bada-frame
-	branch = release
 [submodule "desktop/thirdparty/next-electron-server"]
 	path = desktop/thirdparty/next-electron-server
 	url = https://github.com/ente-io/next-electron-server.git
