@@ -7,8 +7,6 @@ We're glad you're here!
 
 If you're new to Authenticator, our [Quick Start](./getting-started/quick-start.md) and [FAQ](./faq/faq.md) are great places to begin.
 
-
- 
 Feedback about this Authenticator documentation can be shared on our [Discord Server](https://ente.io/discord) in the **\#documentation** channel. We would love to hear your thoughts on anything we can fix or improve.
 
 ## Contributing

@@ -1,16 +1,16 @@
 :root {
-    --vp-theme-color: #1DB954;
-	--vp-c-brand: #1DB954;
-    --vp-c-brand-1: #1DB954;
-    --vp-c-brand-2: #00B33C;
-	--vp-home-hero-name-color: #1DB954;
-	--vp-c-brand-light: #1DB954;
-	--vp-button-brand-border: #1DB954;
-	--vp-button-brand-bg: #1DB954;
-	--vp-button-brand-text: #191919;
-	--vp-button-brand-hover-border: #00B33C;
-	--vp-button-brand-hover-bg: #191919;
-	--vp-button-brand-hover-text: #e5e5e5;
-	--vp-local-search-highlight-bg: #1DB954;
-	--docsearch-hit-active-color: #191919;
+    --vp-theme-color: #1db954;
+    --vp-c-brand: #1db954;
+    --vp-c-brand-1: #1db954;
+    --vp-c-brand-2: #00b33c;
+    --vp-home-hero-name-color: #1db954;
+    --vp-c-brand-light: #1db954;
+    --vp-button-brand-border: #1db954;
+    --vp-button-brand-bg: #1db954;
+    --vp-button-brand-text: #191919;
+    --vp-button-brand-hover-border: #00b33c;
+    --vp-button-brand-hover-bg: #191919;
+    --vp-button-brand-hover-text: #e5e5e5;
+    --vp-local-search-highlight-bg: #1db954;
+    --docsearch-hit-active-color: #191919;
 }

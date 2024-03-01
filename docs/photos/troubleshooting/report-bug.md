@@ -2,7 +2,6 @@
 
 Guide to help the user in sharing logs.
 
-
 ### Mobile
 
 Placeholder
