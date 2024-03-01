@@ -2,8 +2,8 @@ import { defineConfig } from "vitepress";
 
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
-    title: "Ente's Docs",
-    description: "Help guide for apps from Ente",
+    title: "Ente Help",
+    description: "Help and documentation for Ente's products",
     head: [
         [
             "link",
@@ -18,17 +18,7 @@ export default defineConfig({
             {
                 rel: "icon",
                 type: "image/png",
-                sizes: "32x32",
-                href: "/favicon-32x32.png",
-            },
-        ],
-        [
-            "link",
-            {
-                rel: "icon",
-                type: "image/png",
-                sizes: "16x16",
-                href: "/favicon-16x16.png",
+                href: "/favicon.png",
             },
         ],
     ],
