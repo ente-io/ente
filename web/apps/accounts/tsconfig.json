@@ -1,0 +1,25 @@
+{
+    "extends": "../../tsconfig.base.json",
+    "compilerOptions": {
+        "baseUrl": "./src",
+        "downlevelIteration": true,
+        "jsx": "preserve",
+        "jsxImportSource": "@emotion/react",
+        "lib": ["dom", "dom.iterable", "esnext", "webworker"],
+        "noImplicitAny": false,
+        "noUnusedLocals": false,
+        "noUnusedParameters": false,
+        "strictNullChecks": false,
+        "target": "es5",
+        "useUnknownInCatchVariables": false
+    },
+    "include": [
+        "next-env.d.ts",
+        "**/*.ts",
+        "**/*.tsx",
+        "**/*.js",
+        "../../packages/shared/themes/mui-theme.d.ts",
+        "../../packages/accounts/**/*.tsx"
+    ],
+    "exclude": ["node_modules", "out", ".next", "thirdparty"]
+}

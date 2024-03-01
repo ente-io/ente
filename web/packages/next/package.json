@@ -1,0 +1,13 @@
+{
+    "name": "@/next",
+    "version": "0.0.0",
+    "private": true,
+    "dependencies": {
+        "@/ui": "*",
+        "next": "^14.1"
+    },
+    "devDependencies": {
+        "@/build-config": "*",
+        "@types/node": "^20"
+    }
+}

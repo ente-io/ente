@@ -1,0 +1,11 @@
+{
+    "name": "accounts",
+    "version": "0.0.0",
+    "private": true,
+    "dependencies": {
+        "@/next": "*",
+        "@ente/accounts": "*",
+        "@ente/eslint-config": "*",
+        "@ente/shared": "*"
+    }
+}

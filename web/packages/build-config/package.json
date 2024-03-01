@@ -1,0 +1,13 @@
+{
+    "name": "@/build-config",
+    "version": "0.0.0",
+    "private": true,
+    "devDependencies": {
+        "@typescript-eslint/eslint-plugin": "^7",
+        "@typescript-eslint/parser": "^7",
+        "eslint-plugin-react-hooks": "^4.6",
+        "eslint-plugin-react-namespace-import": "^1.0",
+        "prettier-plugin-organize-imports": "^3.2",
+        "prettier-plugin-packagejson": "^2.4"
+    }
+}

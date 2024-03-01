@@ -1,0 +1,14 @@
+{
+    "name": "@/utils",
+    "version": "0.0.0",
+    "private": true,
+    "dependencies": {
+        "is-electron": "^2.2",
+        "libsodium-wrappers": "0.7.9",
+        "yup": "^1.3"
+    },
+    "devDependencies": {
+        "@/build-config": "*",
+        "@types/libsodium-wrappers": "0.7.9"
+    }
+}

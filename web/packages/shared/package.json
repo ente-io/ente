@@ -1,0 +1,11 @@
+{
+    "name": "@ente/shared",
+    "version": "0.0.0",
+    "private": true,
+    "dependencies": {
+        "@/next": "*",
+        "@ente/eslint-config": "*",
+        "@sentry/nextjs": "7.77.0",
+        "axios": "^1.6.7"
+    }
+}
