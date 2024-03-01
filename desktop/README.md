@@ -2,6 +2,12 @@
 
 Desktop app for [ente.io](https://ente.io) build with [electron](https://electronjs.org) and loads of ❤️.
 
+> [!CAUTION]
+>
+> We moved a few things around when switching to a monorepo recently, so this
+> folder might not build with the instructions below. Hang tight, we're on it,
+> will fix things.
+
 ## Disclaimer
 
 We are aware that electron is a sub-optimal choice for building desktop applications.
