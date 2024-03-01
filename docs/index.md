@@ -1,1 +1,0 @@
-photos/index.md

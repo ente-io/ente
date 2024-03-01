@@ -1,10 +1,14 @@
 {
-  "scripts": {
-    "docs:dev": "vitepress dev docs",
-    "docs:build": "vitepress build docs",
-    "docs:preview": "vitepress preview docs"
-  },
-  "devDependencies": {
-    "vitepress": "^1.0.0-rc.31"
-  }
+    "type": "module",
+    "private": true,
+    "scripts": {
+        "dev": "vitepress dev docs",
+        "build": "vitepress build docs",
+        "preview": "vitepress preview docs",
+        "pretty": "prettier --write ."
+    },
+    "devDependencies": {
+        "prettier": "^3",
+        "vitepress": "^1.0.0-rc.44"
+    }
 }
