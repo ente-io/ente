@@ -67,7 +67,7 @@ existing users will be grandfathered in.
 
 <div align="center">
 
-[<img height="42" src=".github/assets/app-store-badge.svg">](https://play.google.com/store/apps/details?id=io.ente.auth)
+[<img height="42" src=".github/assets/app-store-badge.svg">](https://apps.apple.com/app/id6444121398)
 [<img height="42" src=".github/assets/play-store-badge.png">](https://play.google.com/store/apps/details?id=io.ente.auth)
 [<img height="42" src=".github/assets/f-droid-badge.png">](https://f-droid.org/packages/io.ente.auth/)
 [<img height="42" src=".github/assets/web-badge.svg">](https://auth.ente.io)
