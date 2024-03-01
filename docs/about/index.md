@@ -16,11 +16,11 @@ and more products are in the pipeline.
 
 ## History
 
-Ente was the founded by Vishnu Mohandas, who is also the current CEO, in
-response to privacy concerns with major tech companies. The underlying
-motivation was the understanding that big tech had no incentive to fix their
-act, but with end-to-end encrypted cross platform apps, there was a way for
-people to take back control over their own data without sacrificing on features.
+Ente was the founded by Vishnu Mohandas, who is also the Ente's CEO, in response
+to privacy concerns with major tech companies. The underlying motivation was the
+understanding that big tech had no incentive to fix their act, but with
+end-to-end encrypted cross platform apps, there was a way for people to take
+back control over their own data without sacrificing on features.
 
 ### What does Ente mean?
 
@@ -33,44 +33,48 @@ connection sealed the deal! We should ask him why he likes ducks so much, but
 apparently he does, so this dual meaning ("mine" / "duck") led him to finalize
 the name, and also led to the adoption of the duck as Ente's mascot, "Ducky":
 
-![Ente's mascot, Ducky](ducky.png){width=250px}
+<div align="center">
 
+![Ente's mascot, Ducky](ducky.png){width=200px}
 
-# Ente products
+</div>
 
-In the realm of privacy and protection, we currently offer two products—Ente
-Photos and Ente Authenticator—with Ente Lockers set to join our lineup soon
+### How do I pronounce Ente?
 
-# Ente photos
+en-_tay_. Like ca<i>fe</i>.
+
+---
+
+# Products
+
+Ente currently offers Photo and Auth. Additionally, there are some other
+products (Lockers and Legacy) that are being considered.
+
+## Ente Photos
 
 Ente Photos goes beyond traditional cloud storage, prioritizing your privacy and
 the safety of your cherished memories. All your photos, along with their
 metadata, are stored end-to-end encrypted, ensuring that only you have access to
 your data.
 
-To fortify the security of your memories, Ente preserves your encrypted photos
-across three different clouds in three separate locations, including an
-underground fallout shelter. This multi-layered backup strategy guarantees the
-utmost safety for your data.
+Ente preserves your encrypted photos across three different clouds in three
+separate locations, including an underground fallout shelter. This multi-layered
+backup strategy provides a high level of reliability.
 
 Ente photos is available for Android, iOS, Linux, Mac, Windows and the web.
 
-Ente Photos is not just a storage solution; it's a commitment to safeguarding
-your memories.
+# Ente Auth
 
-# Ente auth
-
-Ente auth is not just an authenticator app; it's an open-source initiative
+Ente auth is ust an authenticator app; it's an open-source initiative
 dedicated to securing your 2FA secrets. Now, you can backup and view your
 two-factor authentication secrets seamlessly. find more information about the
 project on GitHub at github.com/ente-io/auth.
 
 As a token of gratitude to the community that has supported us, Ente Auth is
-offered as a free service. In the spirit of transparency, If in the future we
-convert this to a paid service, existing users will be grandfathered in.
+offered as a free service. If in the future we convert this to a paid service,
+existing users will be grandfathered in.
 
 Ente auth is available on Android, iOS, and the web
-
 
 # Connect with Ente
 
