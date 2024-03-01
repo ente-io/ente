@@ -48,7 +48,7 @@ dependencies:
   device_info_plus: ^9.0.3
   dio: ^4.0.6
   dots_indicator: ^2.0.0
-  dotted_border: ^2.0.0+2
+  dotted_border: ^2.1.0
   dropdown_button2: ^2.0.0
   email_validator: ^2.0.1
   equatable: ^2.0.5
@@ -60,6 +60,7 @@ dependencies:
   fade_indexed_stack: ^0.2.2
   fast_base58: ^0.2.1
 
+  figma_squircle: ^0.5.3
   file_saver:
     # Use forked version till this PR is merged: https://github.com/incrediblezayed/file_saver/pull/87
     git: https://github.com/jesims/file_saver.git

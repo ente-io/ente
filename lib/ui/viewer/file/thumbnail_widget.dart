@@ -33,6 +33,7 @@ class ThumbnailWidget extends StatefulWidget {
   final Duration? serverLoadDeferDuration;
   final int thumbnailSize;
   final bool shouldShowOwnerAvatar;
+  final bool shouldShowFavoriteIcon;
 
   ThumbnailWidget(
     this.file, {
@@ -47,6 +48,7 @@ class ThumbnailWidget extends StatefulWidget {
     this.diskLoadDeferDuration,
     this.serverLoadDeferDuration,
     this.thumbnailSize = thumbnailSmallSize,
+    this.shouldShowFavoriteIcon = true,
   }) : super(key: key ?? Key(file.tag));
 
   @override
@@ -128,12 +130,15 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
     Widget? content;
     if (image != null) {
       final List<Widget> contentChildren = [image];
-      if (FavoritesService.instance.isFavoriteCache(
-        widget.file,
-        checkOnlyAlbum: widget.showFavForAlbumOnly,
-      )) {
-        contentChildren.add(const FavoriteOverlayIcon());
+      if (widget.shouldShowFavoriteIcon) {
+        if (FavoritesService.instance.isFavoriteCache(
+          widget.file,
+          checkOnlyAlbum: widget.showFavForAlbumOnly,
+        )) {
+          contentChildren.add(const FavoriteOverlayIcon());
+        }
       }
+
       if (widget.file.fileType == FileType.video) {
         contentChildren.add(const VideoOverlayIcon());
       } else if (widget.shouldShowLivePhotoOverlay &&
@@ -183,6 +188,7 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
     }
 
     return Stack(
+      clipBehavior: Clip.none,
       fit: StackFit.expand,
       children: viewChildren,
     );

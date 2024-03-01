@@ -43,10 +43,10 @@ enum SectionType {
   content,
   // includes year, month , day, event ResultType
   moment,
-  // People section shows the files shared by other persons
-  contacts,
-  fileCaption,
   album,
+  // People section shows the files shared by other persons
+  fileCaption,
+  contacts,
   fileTypesAndExtension,
 }
 
