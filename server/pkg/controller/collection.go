@@ -7,13 +7,11 @@ import (
 	"github.com/ente-io/museum/pkg/repo/cast"
 	"runtime/debug"
 	"strings"
-	t "time"
 
 	"github.com/ente-io/museum/pkg/controller/access"
 	"github.com/gin-contrib/requestid"
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
-	"github.com/prometheus/client_golang/prometheus"
 
 	"github.com/ente-io/museum/pkg/utils/array"
 	"github.com/ente-io/museum/pkg/utils/auth"
@@ -41,7 +39,6 @@ type CollectionController struct {
 	QueueRepo            *repo.QueueRepository
 	CastRepo             *cast.Repository
 	TaskRepo             *repo.TaskLockRepository
-	LatencyLogger        *prometheus.HistogramVec
 }
 
 // Create creates a collection
@@ -469,7 +466,6 @@ func (c *CollectionController) isRemoveAllowed(ctx *gin.Context, actorUserID int
 
 // GetDiffV2 returns the changes in user's collections since a timestamp, along with hasMore bool flag.
 func (c *CollectionController) GetDiffV2(ctx *gin.Context, cID int64, userID int64, sinceTime int64) ([]ente.File, bool, error) {
-	startTime := t.Now()
 	reqContextLogger := log.WithFields(log.Fields{
 		"user_id":       userID,
 		"collection_id": cID,
@@ -477,10 +473,6 @@ func (c *CollectionController) GetDiffV2(ctx *gin.Context, cID int64, userID int
 		"req_id":        requestid.Get(ctx),
 	})
 	reqContextLogger.Info("Start")
-	defer func() {
-		c.LatencyLogger.WithLabelValues("CollectionController.GetDiffV2").
-			Observe(float64(t.Since(startTime).Milliseconds()))
-	}()
 	_, err := c.AccessCtrl.GetCollection(ctx, &access.GetCollectionParams{
 		CollectionID: cID,
 		ActorUserID:  userID,
@@ -533,17 +525,12 @@ func (c *CollectionController) GetFile(ctx *gin.Context, collectionID int64, fil
 // GetPublicDiff returns the changes in the collections since a timestamp, along with hasMore bool flag.
 func (c *CollectionController) GetPublicDiff(ctx *gin.Context, sinceTime int64) ([]ente.File, bool, error) {
 	accessContext := auth.MustGetPublicAccessContext(ctx)
-	startTime := t.Now()
 	reqContextLogger := log.WithFields(log.Fields{
 		"public_id":     accessContext.ID,
 		"collection_id": accessContext.CollectionID,
 		"since_time":    sinceTime,
 		"req_id":        requestid.Get(ctx),
 	})
-	defer func() {
-		c.LatencyLogger.WithLabelValues("CollectionController.GetPublicDiff").
-			Observe(float64(t.Since(startTime).Milliseconds()))
-	}()
 	diff, hasMore, err := c.getDiff(accessContext.CollectionID, sinceTime, CollectionDiffLimit, reqContextLogger)
 	if err != nil {
 		return nil, false, stacktrace.Propagate(err, "")
@@ -574,11 +561,6 @@ func (c *CollectionController) GetPublicDiff(ctx *gin.Context, sinceTime int64) 
 func (c *CollectionController) getDiff(cID int64, sinceTime int64, limit int, logger *log.Entry) ([]ente.File, bool, error) {
 	logger.Info("getDiff")
 	// request for limit +1 files
-	startTime := t.Now()
-	defer func() {
-		c.LatencyLogger.WithLabelValues("CollectionController.getDiff").
-			Observe(float64(t.Since(startTime).Milliseconds()))
-	}()
 	diffLimitPlusOne, err := c.CollectionRepo.GetDiff(cID, sinceTime, limit+1)
 	logger.Info("Got diff from repo")
 	if err != nil {

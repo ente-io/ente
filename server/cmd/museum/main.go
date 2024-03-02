@@ -293,7 +293,6 @@ func main() {
 		BillingCtrl:          billingController,
 		QueueRepo:            queueRepo,
 		TaskRepo:             taskLockingRepo,
-		LatencyLogger:        latencyLogger,
 	}
 
 	kexCtrl := &kexCtrl.Controller{
