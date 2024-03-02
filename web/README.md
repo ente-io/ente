@@ -88,7 +88,3 @@ for your support.
 ## Contribute
 
 For more ways to contribute, see [../CONTRIBUTING.md](../CONTRIBUTING.md).
-
-
-
-
