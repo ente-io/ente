@@ -74,6 +74,7 @@ db:
     # as ENTE_DB_USER and ENTE_DB_PASSWORD.
     user:
     password:
+    sslmode: disable
 
 # Map of data centers
 #
