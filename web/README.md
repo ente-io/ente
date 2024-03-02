@@ -1,111 +1,90 @@
-# Ente – Simple, safe photo storage
+# Ente's web apps
 
-**Ente** is a cloud storage that provides end-to-end encryption for your data.
+Source code for Ente's various web apps and supporting websites.
 
-We have open-source apps across
-[Android](https://github.com/ente-io/photos-app),
-[iOS](https://github.com/ente-io/photos-app),
-[web](https://github.com/ente-io/photos-web) 👋 and
-[desktop](https://github.com/ente-io/photos-desktop) that automatically backup
-your photos and videos.
+Live versions are at:
 
-This repository contains the code for our web app, built with a lot of ❤️, and a
-little bit of TypeScript.
+* Ente Photos: [web.ente.io](https://web.ente.io)
+* Ente Auth: [auth.ente.io](https://auth.ente.io)
 
-<br/><br/><br/>
+To know more about Ente, see [our main README](../README.md) or visit
+[ente.io](https://ente.io).
 
-![App Screenshots](https://user-images.githubusercontent.com/24503581/189914045-9d4e9c44-37c6-4ac6-9e17-d8c37aee1e08.png)
+## Building from source
 
-## ✨ Features
+Fetch submodules
 
-- Client side encryption (only you can view your photos and videos)
-- Bulk uploader (from hard disk, Google Photos, Apple Photos, ...)
-- Shareable links for albums
-- Ability to filter photos by places, days, album and file names
-- 2FA
-- EXIF viewer
-- Many, _many_ more features..., and,
-- Zero third-party tracking / analytics
+```sh
+git submodule update --init --recursive
+```
 
-<br/>
+Install dependencies
 
-## 💻 Production Application
+```sh
+yarn install
+```
 
-The app is deployed to [web.ente.io](https://web.ente.io)
+Start a local development server
 
-<br/>
+```sh
+yarn dev
+```
 
-## 🧑‍💻 Building from source
+That's it. The web app will automatically hot reload when you make changes.
 
-1. Clone this repository with `git clone https://github.com/ente-io/photos-web.git`
-2. Pull in all submodules with `git submodule update --init --recursive`
-3. Install dependencies with `yarn install`
-4. Finally, run the development server with `yarn dev`
+If you're new to web development and unsure about how to get started, see
+[docs/new](docs/new.md).
 
-Open [http://localhost:3000](http://localhost:3000) to see the live app (with
-hot reload).
+## Other apps
 
-`yarn dev` runs the photos app. To run the auth app, do `yarn dev:auth`.
+By default, `yarn dev` builds the Photos app. You can build the auth app by
+doing `yarn dev:auth`.
 
-<br/>
+To see the full list of apps you can run (and other scripts that you can use),
+use `yarn run`.
 
-## 🙋 Help
+For more details about development workflows, see [docs/dev](docs/dev.md).
 
-We provide human support to our customers. Please write to
-[support@ente.io](mailto:support@ente.io) sharing as many details as possible
-about whatever it is that you need help with, and we will get back to you as
-soon as possible.
+## Directory structure
 
-<br/>
+As a brief overview, this directory contains the following apps:
 
-## 🧭 Roadmap
+* `apps/photos`: A fully functional web client for Ente Photos.
+* `apps/auth`: A view only client for Ente Auth. Currently you can only view
+  your 2FA codes using this web app. For adding and editing your 2FA codes,
+  please use the Ente Auth [mobile/desktop app](../auth/README.md) instead.
 
-We maintain a [public roadmap](https://github.com/orgs/ente-io/projects/3)
-driven by our community.
+These two are the public facing apps. There are other part of the code which are
+accessed as features within the main apps, but in terms of code are
+independently maintained and deployed:
 
-<br/>
-
-## 🤗 Support
-
-If you like this project, please consider upgrading to a paid subscription.
-
-And [star this repo](https://github.com/ente-io/photos-web/stargazers)!
-
-<br/>
-
-## 🌍 Translate
-[![Crowdin](https://badges.crowdin.net/ente-photos-web/localized.svg)](https://crowdin.com/project/ente-photos-web)
-
-If you're interested in helping out with translation, please visit our [Crowdin
-project](https://crowdin.com/project/ente-photos-web) to get started. Thank you
-for your support.
-
-<br/>
-
-## 🏙️ Attributions
-
-City coordinates from [Simple Maps](https://simplemaps.com/data/world-cities)
-
-<br/>
-
-## ❤️ Join the Community
-
-Join us on [Twitter](https://twitter.com/enteio) /
-[Mastodon](https://mstdn.social/@ente) /
-[Discord](https://discord.gg/z2YVKkycX3) / [Reddit](https://reddit.com/r/enteio)
-to get regular updates, connect with other customers, and discuss your ideas.
-
-An important part of our journey is to build better software by consistently
-listening to our customers. Please feel free to [share your
-thoughts](mailto:feedback@ente.io) with us at any time.
-
-<br/>
+* `apps/accounts`: Passkey support (Coming soon)
+* `apps/cast`: Chromecast support (Coming soon)
 
 > [!NOTE]
 >
 > This folder is supposed to contain all our web related code. Most of it is
 > already here, but some code which is being deployed from our other
 > repositories like the family portal (https://github.com/ente-io/families)
-> still needs to be merged into here. Also, some of the Cloudflare workers we
-> use for fixing headers etc too. Hang tight, we're on it, will bring in the
+> still needs to be brought here. Also, some of the Cloudflare workers we use
+> for fixing headers etc too. Hang tight, we're on it, will bring in the
 > remaining bits one by one.
+
+You might also find this [overview of dependencies](docs/dependencies.md)
+useful.
+
+## Attributions
+
+City coordinates from [Simple Maps](https://simplemaps.com/data/world-cities)
+
+## 🌍 Translate
+
+[![Crowdin](https://badges.crowdin.net/ente-photos-web/localized.svg)](https://crowdin.com/project/ente-photos-web)
+
+If you're interested in helping out with translation, please visit our [Crowdin
+project](https://crowdin.com/project/ente-photos-web) to get started. Thank you
+for your support.
+
+## Contribute
+
+For more ways to contribute, see [../CONTRIBUTING.md](../CONTRIBUTING.md).
