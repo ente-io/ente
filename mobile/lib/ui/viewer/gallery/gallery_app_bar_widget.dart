@@ -837,13 +837,13 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
       hintText: context.l10n.deviceCodeHint,
       onSubmit: (String text) async {
         try {
-          String code = text.trim();
+          final code = text.trim();
           final String? publicKey = await gw.getPublicKey(code);
           if (publicKey == null) {
             showToast(context, S.of(context).deviceNotFound);
             return;
           }
-          final String castToken = Uuid().v4().toString();
+          final String castToken = const Uuid().v4().toString();
           final castPayload = CollectionsService.instance
               .getCastData(castToken, widget.collection!, publicKey);
           await gw.publishCastPayload(
