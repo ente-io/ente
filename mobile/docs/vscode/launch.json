@@ -5,50 +5,47 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Android Prod",
+            "name": "Photos Android Prod",
             "request": "launch",
             "type": "dart",
             "flutterMode": "debug",
-            "program": "lib/main.dart",
-            "args": [
-                "--flavor",
-                "independent"
-            ]
+            "program": "mobile/lib/main.dart",
+            "args": ["--flavor", "independent"]
         },
         {
-            "name": "Android Local",
+            "name": "Photos Android Local",
             "request": "launch",
             "type": "dart",
             "flutterMode": "debug",
-            "program": "lib/main.dart",
+            "program": "mobile/lib/main.dart",
             "args": [
                 "--flavor",
                 "independent",
                 "--dart-define",
                 "endpoint=http://localhost:8080",
                 "--dart-define",
-                "web-family=http://localhost:3003",
+                "web-family=http://localhost:3003"
             ]
         },
         {
-            "name": "iOS Prod",
+            "name": "Photos iOS Prod",
             "request": "launch",
             "type": "dart",
             "flutterMode": "debug",
-            "program": "lib/main.dart"
+            "program": "mobile/lib/main.dart"
         },
         {
-            "name": "iOS Local",
+            "name": "Photos iOS Local",
             "request": "launch",
             "type": "dart",
             "flutterMode": "debug",
-            "program": "lib/main.dart",
-              "args": [
-                    "--dart-define",
-                    "endpoint=http://localhost:8080",
-                    "--dart-define",
-                    "web-family=http://localhost:3003"
-  ]
-        },
+            "program": "mobile/lib/main.dart",
+            "args": [
+                "--dart-define",
+                "endpoint=http://localhost:8080",
+                "--dart-define",
+                "web-family=http://localhost:3003"
+            ]
+        }
     ]
 }
