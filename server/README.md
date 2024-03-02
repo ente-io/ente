@@ -38,7 +38,7 @@ And ping again
 This time you'll see the updated message.
 
 For more details about how to get museum up and running, see
-[RUNNING.md](/RUNNING.md).
+[RUNNING.md](/server/RUNNING.md).
 
 ## Architecture
 
