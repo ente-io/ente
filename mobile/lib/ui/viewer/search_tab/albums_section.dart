@@ -131,6 +131,7 @@ class _AlbumsSectionState extends State<AlbumsSection> {
 }
 
 class AlbumRecommendation extends StatelessWidget {
+  static const _width = 100.0;
   final AlbumSearchResult albumSearchResult;
   const AlbumRecommendation(this.albumSearchResult, {super.key});
 
@@ -159,7 +160,7 @@ class AlbumRecommendation extends StatelessWidget {
               radius:
                   SmoothBorderRadius(cornerRadius: 2.35, cornerSmoothing: 1),
               child: SizedBox(
-                width: 100,
+                width: _width,
                 height: 100,
                 child: albumSearchResult.previewThumbnail() != null
                     ? Hero(
@@ -174,35 +175,38 @@ class AlbumRecommendation extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 2),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  albumSearchResult.name(),
-                  style: enteTextTheme.small,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 3),
-                FutureBuilder(
-                  future: CollectionsService.instance.getFileCount(
-                    albumSearchResult.collectionWithThumbnail.collection,
+            ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: _width),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    albumSearchResult.name(),
+                    style: enteTextTheme.small,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  builder: (context, snapshot) {
-                    if (snapshot.hasData &&
-                        snapshot.data != null &&
-                        snapshot.data != 0) {
-                      return Text(
-                        snapshot.data.toString(),
-                        style: enteTextTheme.smallMuted,
-                      );
-                    } else {
-                      return const SizedBox.shrink();
-                    }
-                  },
-                ),
-              ],
+                  const SizedBox(height: 3),
+                  FutureBuilder(
+                    future: CollectionsService.instance.getFileCount(
+                      albumSearchResult.collectionWithThumbnail.collection,
+                    ),
+                    builder: (context, snapshot) {
+                      if (snapshot.hasData &&
+                          snapshot.data != null &&
+                          snapshot.data != 0) {
+                        return Text(
+                          snapshot.data.toString(),
+                          style: enteTextTheme.smallMuted,
+                        );
+                      } else {
+                        return const SizedBox.shrink();
+                      }
+                    },
+                  ),
+                ],
+              ),
             ),
           ],
         ),
