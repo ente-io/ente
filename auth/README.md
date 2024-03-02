@@ -1,110 +1,99 @@
-# Ente Auth 
+# Ente Auth
 
-![Build](https://github.com/ente-io/auth/actions/workflows/ci.yml/badge.svg?branch=)
-[![Crowdin](https://badges.crowdin.net/ente-authenticator-app/localized.svg)](https://crowdin.com/project/ente-authenticator-app) 
- [![Matrix](https://img.shields.io/matrix/ente:matrix.org?color=blue)](https://matrix.to/#/#ente:matrix.org)
-
-Ente's Authenticator app helps you generate and store 2 step verification (2FA)
-tokens on your mobile devices.
-
-[Download now](#-download)
+Ente's 2FA app. An end-to-end encrypted, cross platform and free app for
+storing your 2FA codes with cloud backups. Works offline. You can even use it
+without signing up for an account if you don't want the cloud backups or
+multi-device sync.
 
 ![App Screenshots](./screenshots/screenshots.png)
-
-## ✨ Features
-
-### Secure Backups
-
-Ente provides end-to-end encrypted cloud backups so that you don't have to worry
-about losing your tokens. We use the same protocols [ente
-Photos](https://ente.io) uses to encrypt and preserve your data.
-
-
-### Multi Device Synchronization
-
-Ente will automatically sync the 2FA tokens you add to your account, across all
-your devices. Every new device you sign into will have access to these tokens.
-
-
-### Offline Mode
-
-Ente generates 2FA tokens offline, so your network connectivity will not get in
-the way of your workflow. If you wish to use the app without an account for e2ee
-backups, you can do that as well.
-
-### Import and Export Tokens
-
-You can add tokens to Ente by one of the following methods:
-1. Scanning a QR code
-2. Manually entering (copy-pasting) a 2FA secret
-3. Bulk importing from other popular 2FA apps and from a file  that contains a list of codes in the following format:.
-    ```
-    otpauth://totp/provider.com:you@email.com?secret=YOUR_SECRET
-    ```
-
-You can export the codes you have added to Ente, to either an **encrypted** or
-plain text file. The encrypted backups can be accessed through the app, as well
-as a standalone CLI tool. [Read
-more](migration-guides/encrypted_export.md#how-to-use-the-exported-data).
-
 
 ## 📲 Download
 
 ### Android
 
 This repository's [GitHub
-releases](https://github.com/ente-io/auth/releases/latest/download/ente-auth.apk)
+releases](https://github.com/ente-io/ente/releases/latest/download/ente-auth.apk)
 contains APKs, built straight from source. These builds keep themselves updated,
 without relying on third party stores.
 
 You can alternatively install the build from PlayStore or F-Droid.
 
-<a href="https://play.google.com/store/apps/details?id=io.ente.auth"> <img
-  width="197" alt="Get it on Google Play"
-src="https://ente.io/static/ed265c3abdcd3efa5e29f64b927bcb44/e230a/play-store-badge.webp">
+<a href="https://play.google.com/store/apps/details?id=io.ente.auth">
+  <img height="59" src="../.github/assets/play-store-badge.png">
 </a>
-
 <a href="https://f-droid.org/packages/io.ente.auth/">
-  <img width="197" alt="Get it on F-Droid" src="https://ente.io/static/5378d3de690a04a5011268b9caf739f5/e230a/f-droid-badge.webp">
+  <img height="59" src="../.github/assets/f-droid-badge.png">
 </a>
 
-### iPhone / Apple Silicon
+### iOS / Apple Silicon macOS
 
-
-<a href="https://apps.apple.com/us/app/ente-authenticator/id6444121398"> <img
-  width="197" alt="Download on AppStore"
-src="https://user-images.githubusercontent.com/1161789/154795157-c4468ff9-97fd-46f3-87fe-dca789d8733a.png">
+<a href="https://apps.apple.com/us/app/ente-authenticator/id6444121398">
+  <img height="59" src="../.github/assets/app-store-badge.svg">
 </a>
 
-### Web / Desktop
+### Web
 
-You can view your 2FA codes at [auth.ente.io](https://auth.ente.io). For adding or managing your secrets, please use our mobile app.
+You can view your 2FA codes at [auth.ente.io](https://auth.ente.io). For adding
+or managing your secrets, please use our mobile app.
 
+### Desktop
 
-
-## 🔩 Architecture
-
-The architecture that powers end-to-end encrypted storage and sync of your
-tokens has been documented [here](architecture/README.md).
-
+A native desktop app is coming soon!
 
 ## 🧑‍💻 Build from source
 
 1. [Install Flutter](https://flutter.dev/docs/get-started/install)
-2. Clone this repository with `git clone git@github.com:ente-io/auth.git` 
-3. Pull in all submodules with `git submodule update --init --recursive`
-4. For Android, [setup your keystore](https://docs.flutter.dev/deployment/android#create-an-upload-keystore) and run `flutter build apk --release --flavor independent`
-5. For iOS, run `flutter build ios` 
 
-For maintainers, there is [additional documentation](RELEASES.md) on
-automatically publishing the main branch to App store, Play store and GitHub
-releases.
+2. Pull in all submodules with `git submodule update --init --recursive`
 
+3. For Android, [setup your
+   keystore](https://docs.flutter.dev/deployment/android#create-an-upload-keystore)
+   and run `flutter build apk --release --flavor independent`
 
-## 🧑‍🔧 Contribute
+4. For iOS, run `flutter build ios`
 
-Please refer to our [contribution guide](./CONTRIBUTING.md) if you wish to add
-an icon, assist with translation, or develop new features.
+## ⚙️ Develop
+
+For Android, use
+
+```sh
+flutter run -t lib/main.dart --flavor independent
+```
+
+For iOS, use `flutter run`
+
+VSCode users might find it useful to copy [docs/vscode](docs/vscode) into a top
+level `.vscode`.
+
+If the code you're working needs to modify user facing strings, see
+[docs/localization](docs/localization.md).
+
+## 🔩 Architecture
+
+The architecture that powers end-to-end encrypted storage and sync of your
+tokens has been documented [here](../architecture/README.md).
+
+## 🌍 Translate
+
+[![Crowdin](https://badges.crowdin.net/ente-authenticator-app/localized.svg)](https://crowdin.com/project/ente-authenticator-app)
+
+If you're interested in helping out with translation, please visit our [Crowdin
+project](https://crowdin.com/project/ente-photos-app) to get started. Thank you
+for your support.
+
+If your language is not listed for translation, please [create a GitHub
+issue](https://github.com/ente-io/ente/issues/new?title=Request+for+New+Language+Translation&body=Language+name%3A)
+to have it added.
+
+## 🧑‍🎨 Icons
+
+Ente Auth supports the icon pack provided by
+[simple-icons](https://github.com/simple-icons/simple-icons). If you wish to add
+more, see [docs/adding-icons](docs/adding-icons.md).
+
+## 💚 Contribute
+
+For more ways to contribute, see [../CONTRIBUTING.md](../CONTRIBUTING.md).
 
 You can also support us by giving this project a ⭐ star on GitHub or by leaving
 a review on
@@ -112,17 +101,7 @@ a review on
 [AppStore](https://apps.apple.com/us/app/ente-authenticator/id6444121398) or
 [AlternativeTo](https://alternativeto.net/software/ente-authenticator/).
 
+## ⭐️ About
 
-## 🙋‍♂️ Help
-
-If you need help, please reach out to support@ente.io, and a human will get in
-touch with you.
-
-If you have feature requests, please create a [GitHub issue](https://github.com/ente-io/auth/issues/).
-
-
-
-## 💜 Community
-
-- Follow us on [Twitter](https://twitter.com/enteio) / [Mastodon](https://mstdn.social/@ente)
-- Join us on [Discord](https://ente.io/discord) / [Matrix](https://ente.io/matrix)
+To know more about Ente and the ways to get in touch or seek help, see [our main
+README](../README.md) or visit [ente.io](https://ente.io).

@@ -31,16 +31,16 @@ without relying on third party stores.
 You can alternatively install the build from PlayStore or F-Droid.
 
 <a href="https://play.google.com/store/apps/details?id=io.ente.photos">
-  <img height="57" src="../.github/assets/play-store-badge.png">
+  <img height="59" src="../.github/assets/play-store-badge.png">
 </a>
 <a href="https://f-droid.org/packages/io.ente.photos.fdroid/">
-  <img height="57" src="../.github/assets/f-droid-badge.png">
+  <img height="59" src="../.github/assets/f-droid-badge.png">
 </a>
 
 ### iOS
 
 <a href="https://apps.apple.com/in/app/ente-photos/id1542026904">
-  <img height="57" src="../.github/assets/app-store-badge.svg">
+  <img height="59" src="../.github/assets/app-store-badge.svg">
 </a>
 
 ## 🧑‍💻 Building from source
@@ -58,7 +58,7 @@ You can alternatively install the build from PlayStore or F-Droid.
 
 5. On Android:
 
-   * For development, run ```flutter run -t lib/main.dart --flavor independent```
+   * For development, run `flutter run -t lib/main.dart --flavor independent`
 
    * For building APK, [setup your
      keystore](https://docs.flutter.dev/deployment/android#create-an-upload-keystore)
@@ -68,9 +68,8 @@ You can alternatively install the build from PlayStore or F-Droid.
 
 Some common issues and troubleshooting tips are in [docs/dev](docs/dev.md).
 
-If you're using VSCode, you might find it useful to create a top level `.vscode`
-(it will be gitignored) and add relevant sample configuration files from
-[docs/vscode](docs/vscode).
+VSCode users might find it useful to copy [docs/vscode](docs/vscode) into a top
+level `.vscode`.
 
 ## 🏙️ Attributions
 
@@ -83,6 +82,10 @@ City coordinates from [Simple Maps](https://simplemaps.com/data/world-cities)
 If you're interested in helping out with translation, please visit our [Crowdin
 project](https://crowdin.com/project/ente-photos-app) to get started. Thank you
 for your support.
+
+If your language is not listed for translation, please [create a GitHub
+issue](https://github.com/ente-io/ente/issues/new?title=Request+for+New+Language+Translation&body=Language+name%3A)
+to have it added.
 
 ## 💚 Contribute
 
