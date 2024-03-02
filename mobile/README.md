@@ -68,6 +68,10 @@ You can alternatively install the build from PlayStore or F-Droid.
 
 Some common issues and troubleshooting tips are in [docs/dev](docs/dev.md).
 
+If you're using VSCode, you might find it useful to create a top level `.vscode`
+(it will be gitignored) and add relevant sample configuration files from
+[docs/vscode](docs/vscode).
+
 ## 🏙️ Attributions
 
 City coordinates from [Simple Maps](https://simplemaps.com/data/world-cities)
