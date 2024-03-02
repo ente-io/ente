@@ -7,7 +7,6 @@ import (
 	"github.com/gin-contrib/requestid"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
-	t "time"
 )
 
 func (c *CollectionController) GetCastCollection(ctx *gin.Context) (*ente.Collection, error) {
@@ -26,16 +25,11 @@ func (c *CollectionController) GetCastCollection(ctx *gin.Context) (*ente.Collec
 func (c *CollectionController) GetCastDiff(ctx *gin.Context, sinceTime int64) ([]ente.File, bool, error) {
 	castCtx := auth.GetCastCtx(ctx)
 	collectionID := castCtx.CollectionID
-	startTime := t.Now()
 	reqContextLogger := log.WithFields(log.Fields{
 		"collection_id": collectionID,
 		"since_time":    sinceTime,
 		"req_id":        requestid.Get(ctx),
 	})
-	defer func() {
-		c.LatencyLogger.WithLabelValues("CollectionController.GetCastDiff").
-			Observe(float64(t.Since(startTime).Milliseconds()))
-	}()
 	diff, hasMore, err := c.getDiff(collectionID, sinceTime, CollectionDiffLimit, reqContextLogger)
 	if err != nil {
 		return nil, false, stacktrace.Propagate(err, "")
