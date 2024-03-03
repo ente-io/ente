@@ -62,7 +62,7 @@ class _SupportSectionWidgetState extends State<SupportSectionWidget> {
           trailingIconIsMuted: true,
           onTap: () async {
             launchUrlString(
-              githubIssuesUrl,
+              githubDiscussionsUrl,
               mode: LaunchMode.externalApplication,
             );
           },

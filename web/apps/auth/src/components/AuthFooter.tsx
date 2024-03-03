@@ -12,7 +12,7 @@ export const AuthFooter = () => {
             }}
         >
             <p>{t("AUTH_DOWNLOAD_MOBILE_APP")}</p>
-            <a href="https://github.com/ente-io/auth#-download" download>
+            <a href="https://github.com/ente-io/ente/tree/main/auth#-download" download>
                 <Button color="accent">{t("DOWNLOAD")}</Button>
             </a>
         </div>

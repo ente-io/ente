@@ -4,7 +4,7 @@ If the feature requires adding new strings, you can do that by following these
 steps:
 
 1. Add a new entry inside
-   [app_en.arb](https://github.com/ente-io/auth/blob/main/lib/l10n/arb/app_en.arb)
+   [app_en.arb](https://github.com/ente-io/ente/blob/main/auth/lib/l10n/arb/app_en.arb)
    (remember to save!)
 
 2.  In your dart file, add the following import

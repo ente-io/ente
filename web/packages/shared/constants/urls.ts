@@ -13,9 +13,9 @@ export const FEEDBACK_EMAIL = "feedback@ente.io";
 
 export const DELETE_ACCOUNT_EMAIL = "account-deletion@ente.io";
 
-export const WEB_ROADMAP_URL = "https://github.com/ente-io/photos-web/issues";
+export const WEB_ROADMAP_URL = "https://github.com/ente-io/ente/discussions";
 
 export const DESKTOP_ROADMAP_URL =
-    "https://github.com/ente-io/photos-desktop/issues";
+    "https://github.com/ente-io/ente/discussions";
 
 export const CITIES_URL = "https://static.ente.io/world_cities.json";
