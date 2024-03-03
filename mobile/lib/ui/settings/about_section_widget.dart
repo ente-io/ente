@@ -37,7 +37,7 @@ class AboutSectionWidget extends StatelessWidget {
           trailingIconIsMuted: true,
           onTap: () async {
             // ignore: unawaited_futures
-            launchUrl(Uri.parse("https://github.com/ente-io/photos-app"));
+            launchUrl(Uri.parse("https://github.com/ente-io/ente"));
           },
         ),
         sectionOptionSpacing,

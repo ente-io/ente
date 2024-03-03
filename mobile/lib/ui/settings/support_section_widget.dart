@@ -57,7 +57,7 @@ class SupportSectionWidget extends StatelessWidget {
           onTap: () async {
             // ignore: unawaited_futures
             launchUrlString(
-              githubIssuesUrl,
+              githubDiscussionsUrl,
               mode: LaunchMode.externalApplication,
             );
           },
