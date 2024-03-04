@@ -1,10 +1,10 @@
-name: "Sync Crowdin translations (web)"
+name: "Sync Crowdin translations (mobile)"
 
 on:
     push:
-        # Run action when web's en-US/translation.json is changed
+        # Run action when mobiles's intl_en.arb is changed
         paths:
-            - "web/apps/photos/public/locales/en-US/translation.json"
+            - "mobile/lib/l10n/intl_en.arb"
         branches: [main]
     schedule:
         # Run every 24 hours - https://crontab.guru/#0_*/24_*_*_*
@@ -25,13 +25,13 @@ jobs:
                   upload_sources: true
                   upload_translations: true
                   download_translations: true
-                  localization_branch_name: crowdin-translations-web
+                  localization_branch_name: crowdin-translations-mobile
                   create_pull_request: true
                   skip_untranslated_strings: true
-                  pull_request_title: "New translations (web)"
+                  pull_request_title: "New translations (mobile)"
                   pull_request_body: "New translations via [Crowdin GH Action](https://github.com/crowdin/github-action)"
                   pull_request_base_branch_name: "main"
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-                  CROWDIN_PROJECT_ID: ${{ secrets.CROWDIN_PROJECT_ID_WEB }}
+                  CROWDIN_PROJECT_ID: ${{ secrets.CROWDIN_PROJECT_ID_MOBILE }}
                   CROWDIN_PERSONAL_TOKEN: ${{ secrets.CROWDIN_PERSONAL_TOKEN }}

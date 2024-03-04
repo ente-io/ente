@@ -5,7 +5,7 @@ on:
     push:
         # But only if something changes inside web
         paths:
-            - 'web/**''
+            - "web/**"
 
 jobs:
     lint:
