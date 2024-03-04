@@ -15,7 +15,8 @@ class OfflineAuthenticatorDB {
   static const entityTable = 'entities';
 
   OfflineAuthenticatorDB._privateConstructor();
-  static final OfflineAuthenticatorDB instance = OfflineAuthenticatorDB._privateConstructor();
+  static final OfflineAuthenticatorDB instance =
+      OfflineAuthenticatorDB._privateConstructor();
 
   static Future<Database>? _dbFuture;
 
@@ -26,7 +27,7 @@ class OfflineAuthenticatorDB {
 
   Future<Database> _initDatabase() async {
     final Directory documentsDirectory =
-    await getApplicationDocumentsDirectory();
+        await getApplicationDocumentsDirectory();
     final String path = join(documentsDirectory.path, _databaseName);
     debugPrint(path);
     return await openDatabase(
@@ -70,10 +71,10 @@ class OfflineAuthenticatorDB {
   }
 
   Future<int> updateEntry(
-      int generatedID,
-      String encData,
-      String header,
-      ) async {
+    int generatedID,
+    String encData,
+    String header,
+  ) async {
     final db = await instance.database;
     final int timeInMicroSeconds = DateTime.now().microsecondsSinceEpoch;
     int affectedRows = await db.update(

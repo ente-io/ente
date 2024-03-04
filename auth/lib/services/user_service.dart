@@ -26,6 +26,7 @@ import 'package:ente_auth/ui/account/password_reentry_page.dart';
 import 'package:ente_auth/ui/account/recovery_page.dart';
 import 'package:ente_auth/ui/common/progress_dialog.dart';
 import 'package:ente_auth/ui/home_page.dart';
+import 'package:ente_auth/ui/passkey_page.dart';
 import 'package:ente_auth/ui/two_factor_authentication_page.dart';
 import 'package:ente_auth/ui/two_factor_recovery_page.dart';
 import 'package:ente_auth/utils/crypto_util.dart';
@@ -264,6 +265,38 @@ class UserService {
     }
   }
 
+  Future<void> acceptPasskey(
+    BuildContext context,
+    Map response,
+    Uint8List keyEncryptionKey,
+  ) async {
+    final userPassword = Configuration.instance.getVolatilePassword();
+    if (userPassword == null) throw Exception("volatile password is null");
+
+    await _saveConfiguration(response);
+
+    Widget page;
+    if (Configuration.instance.getEncryptedToken() != null) {
+      await Configuration.instance.decryptSecretsAndGetKeyEncKey(
+        userPassword,
+        Configuration.instance.getKeyAttributes()!,
+        keyEncryptionKey: keyEncryptionKey,
+      );
+      page = const HomePage();
+    } else {
+      throw Exception("unexpected response during passkey verification");
+    }
+
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(
+        builder: (BuildContext context) {
+          return page;
+        },
+      ),
+      (route) => route.isFirst,
+    );
+  }
+
   Future<void> verifyEmail(
     BuildContext context,
     String ott, {
@@ -487,9 +520,9 @@ class UserService {
         final clientS = client.calculateSecret(serverB);
         final clientM = client.calculateClientEvidenceMessage();
         // ignore: unused_local_variable
-        late Response srpCompleteResponse;
+        late Response _;
         if (setKeysRequest == null) {
-          srpCompleteResponse = await _enteDio.post(
+          _ = await _enteDio.post(
             "/users/srp/complete",
             data: {
               'setupID': setupSRPResponse.setupID,
@@ -497,7 +530,7 @@ class UserService {
             },
           );
         } else {
-          srpCompleteResponse = await _enteDio.post(
+          _ = await _enteDio.post(
             "/users/srp/update",
             data: {
               'setupID': setupSRPResponse.setupID,
@@ -581,11 +614,18 @@ class UserService {
       },
     );
     if (response.statusCode == 200) {
-      Widget page;
+      Widget? page;
+      final String passkeySessionID = response.data["passkeySessionID"];
       final String twoFASessionID = response.data["twoFactorSessionID"];
       Configuration.instance.setVolatilePassword(userPassword);
+
       if (twoFASessionID.isNotEmpty) {
         page = TwoFactorAuthenticationPage(twoFASessionID);
+      } else if (passkeySessionID.isNotEmpty) {
+        page = PasskeyPage(
+          passkeySessionID,
+          keyEncryptionKey: keyEncryptionKey,
+        );
       } else {
         await _saveConfiguration(response);
         if (Configuration.instance.getEncryptedToken() != null) {
@@ -603,7 +643,7 @@ class UserService {
       Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(
           builder: (BuildContext context) {
-            return page;
+            return page!;
           },
         ),
         (route) => route.isFirst,
@@ -861,16 +901,19 @@ class UserService {
     }
   }
 
-  Future<void> _saveConfiguration(Response response) async {
-    await Configuration.instance.setUserID(response.data["id"]);
-    if (response.data["encryptedToken"] != null) {
+  Future<void> _saveConfiguration(dynamic response) async {
+    final responseData = response is Map ? response : response.data as Map?;
+    if (responseData == null) return;
+
+    await Configuration.instance.setUserID(responseData["id"]);
+    if (responseData["encryptedToken"] != null) {
       await Configuration.instance
-          .setEncryptedToken(response.data["encryptedToken"]);
+          .setEncryptedToken(responseData["encryptedToken"]);
       await Configuration.instance.setKeyAttributes(
-        KeyAttributes.fromMap(response.data["keyAttributes"]),
+        KeyAttributes.fromMap(responseData["keyAttributes"]),
       );
     } else {
-      await Configuration.instance.setToken(response.data["token"]);
+      await Configuration.instance.setToken(responseData["token"]);
     }
   }
 
