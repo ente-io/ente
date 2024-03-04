@@ -6,8 +6,8 @@ on:
         paths:
             # - But only if something changes inside auth
             - "auth/**"
-            # - Or if the there is some change in GitHub workflows themselves
-            - ".github/workflows/**"
+            # - Or if the there is some change in workflow itself
+            - ".github/workflows/auth-lint.yml"
 
 jobs:
     lint:
@@ -16,16 +16,20 @@ jobs:
             run:
                 working-directory: auth
         steps:
+            # Checkout our code, including submodules
+            - uses: actions/checkout@v4
+              with:
+                  submodules: recursive
+
             # Install Flutter
             - uses: subosito/flutter-action@v2
               with:
                   channel: "stable"
                   flutter-version: "3.13.4"
-            # Checkout our code, including submodules
-            - uses: actions/checkout@v4
-              with:
-                  submodules: recursive
+                  cache: true
+
             # Install dependencies
             - run: flutter pub get
+
             # Lint
             - run: flutter analyze --no-fatal-infos
