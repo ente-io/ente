@@ -7,7 +7,7 @@ on:
             # - But only if something changes inside web
             - "web/**"
             # - Or if the there is some change in workflow itself
-            - ".github/workflows/mobile-lint.yml"
+            - ".github/workflows/web-lint.yml"
 
 jobs:
     lint:
