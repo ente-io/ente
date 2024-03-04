@@ -22,6 +22,7 @@ jobs:
             - name: Crowdin's action
               uses: crowdin/github-action@v1
               with:
+                  base_path: "mobile/"
                   upload_sources: true
                   upload_translations: true
                   download_translations: true
