@@ -28,6 +28,7 @@ import 'package:photos/models/set_recovery_key_request.dart';
 import 'package:photos/models/user_details.dart';
 import 'package:photos/ui/account/login_page.dart';
 import 'package:photos/ui/account/ott_verification_page.dart';
+import "package:photos/ui/account/passkey_page.dart";
 import 'package:photos/ui/account/password_entry_page.dart';
 import 'package:photos/ui/account/password_reentry_page.dart';
 import "package:photos/ui/account/recovery_page.dart";
@@ -312,6 +313,30 @@ class UserService {
       _logger.severe(e);
       rethrow;
     }
+  }
+
+  Future<void> acceptPasskey(
+    BuildContext context,
+    Map response,
+    Uint8List keyEncryptionKey,
+  ) async {
+    final userPassword = Configuration.instance.getVolatilePassword();
+    if (userPassword == null) throw Exception("volatile password is null");
+
+    await _saveConfiguration(response);
+
+    if (Configuration.instance.getEncryptedToken() != null) {
+      await Configuration.instance.decryptSecretsAndGetKeyEncKey(
+        userPassword,
+        Configuration.instance.getKeyAttributes()!,
+        keyEncryptionKey: keyEncryptionKey,
+      );
+    } else {
+      throw Exception("unexpected response during passkey verification");
+    }
+
+    Navigator.of(context).popUntil((route) => route.isFirst);
+    Bus.instance.fire(AccountConfiguredEvent());
   }
 
   Future<void> verifyEmail(
@@ -648,10 +673,17 @@ class UserService {
     if (response.statusCode == 200) {
       Widget page;
       final String twoFASessionID = response.data["twoFactorSessionID"];
+      final String passkeySessionID = response.data["passkeySessionID"];
+
       Configuration.instance.setVolatilePassword(userPassword);
       if (twoFASessionID.isNotEmpty) {
         await setTwoFactor(value: true);
         page = TwoFactorAuthenticationPage(twoFASessionID);
+      } else if (passkeySessionID.isNotEmpty) {
+        page = PasskeyPage(
+          passkeySessionID,
+          keyEncryptionKey: keyEncryptionKey,
+        );
       } else {
         await _saveConfiguration(response);
         if (Configuration.instance.getEncryptedToken() != null) {
@@ -1108,16 +1140,19 @@ class UserService {
     }
   }
 
-  Future<void> _saveConfiguration(Response response) async {
-    await Configuration.instance.setUserID(response.data["id"]);
-    if (response.data["encryptedToken"] != null) {
+  Future<void> _saveConfiguration(dynamic response) async {
+    final responseData = response is Map ? response : response.data as Map?;
+    if (responseData == null) return;
+
+    await Configuration.instance.setUserID(responseData["id"]);
+    if (responseData["encryptedToken"] != null) {
       await Configuration.instance
-          .setEncryptedToken(response.data["encryptedToken"]);
+          .setEncryptedToken(responseData["encryptedToken"]);
       await Configuration.instance.setKeyAttributes(
-        KeyAttributes.fromMap(response.data["keyAttributes"]),
+        KeyAttributes.fromMap(responseData["keyAttributes"]),
       );
     } else {
-      await Configuration.instance.setToken(response.data["token"]);
+      await Configuration.instance.setToken(responseData["token"]);
     }
   }
 
