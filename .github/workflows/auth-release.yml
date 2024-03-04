@@ -1,0 +1,123 @@
+name: "Release (auth)"
+
+# To test this out, push a tag with a pre-release version. The version number
+# should be the version number of the next actual release.
+#
+# > When major, minor, and patch are equal, a pre-release version has lower
+# > precedence than a normal version:
+# >
+# > Example: 1.0.0-alpha < 1.0.0.
+# >
+# > - https://semver.org
+#
+# So if the next release we intend to put out is 1.2.3, you can:
+#
+#     git tag auth-v1.2.3-test
+#     git push auth-v1.2.3-test
+#
+# We use a suffix like `-test` to indicate that these are test tags, and that
+# they belong to a pre-release.
+#
+# Once the test is done, also delete the tag please.
+
+on:
+    push:
+        # Run when a tag matching the pattern "auth-v*"" is pushed
+        tags:
+            - "auth-v*"
+
+env:
+    FLUTTER_VERSION: "3.16.9"
+
+jobs:
+    build-ubuntu:
+        runs-on: ubuntu-latest
+        defaults:
+            run:
+                working-directory: auth
+        steps:
+            - name: Checkout code and submodules
+              uses: actions/checkout@v4
+              with:
+                  submodules: recursive
+
+            - name: Install Flutter ${{ env.FLUTTER_VERSION  }}
+              uses: subosito/flutter-action@v2
+              with:
+                  channel: "stable"
+                  flutter-version: ${{ env.FLUTTER_VERSION  }}
+                  cache: true
+
+            - run: flutter pub get
+
+            - name: Setup keys
+              uses: timheuer/base64-to-file@v1
+              with:
+                  fileName: "keystore/ente_auth_key.jks"
+                  encodedString: ${{ secrets.SIGNING_KEY }}
+
+            - name: Build Android APK
+              run: |
+                  flutter build apk --release --flavor independent --dart-define=app.flavor=independent
+                  mv build/app/outputs/flutter-apk/app-independent-release.apk build/app/outputs/flutter-apk/ente-auth.apk
+              env:
+                  SIGNING_KEY_PATH: "/home/runner/work/_temp/keystore/ente_auth_key.jks"
+                  SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
+                  SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
+                  SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD }}
+
+            - name: Checksum APK
+              run: sha256sum build/app/outputs/flutter-apk/ente-auth.apk > build/app/outputs/flutter-apk/sha256sum
+
+            - name: Build PlayStore AAB
+              run: |
+                  flutter build appbundle --release --flavor playstore --dart-define=app.flavor=playstore
+              env:
+                  SIGNING_KEY_PATH: "/home/runner/work/_temp/keystore/ente_auth_key.jks"
+                  SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
+                  SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
+                  SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD }}
+
+            - name: Install dependencies for desktop build
+              run: |
+                  sudo apt-get update -y
+                  sudo apt-get install -y libsecret-1-dev libsodium-dev libwebkit2gtk-4.0-dev libfuse2 ninja-build libgtk-3-dev dpkg-dev pkg-config rpm libsqlite3-dev locate
+
+            - name: Install appimagetool
+              run: |
+                  wget -O appimagetool "https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage"
+                  chmod +x appimagetool
+                  mv appimagetool /usr/local/bin/
+
+            - name: Build desktop app
+              # Temporarily disable desktop builds
+              if: false
+              env:
+                  LIBSODIUM_USE_PKGCONFIG: 1
+              run: |
+                  flutter config --enable-linux-desktop
+                  dart pub global activate flutter_distributor
+                  flutter_distributor package --platform=linux --targets=deb --skip-clean
+                  flutter_distributor package --platform=linux --targets=rpm --skip-clean
+                  flutter_distributor package --platform=linux --targets=appimage --skip-clean
+                  mv dist/**/*-*-linux.deb ente-${{ github.event.release.tag_name }}-x86_64.deb
+                  mv dist/**/*-*-linux.rpm ente-${{ github.event.release.tag_name }}-x86_64.rpm
+                  mv dist/**/*-*-linux.AppImage ente-${{ github.event.release.tag_name }}-x86_64.AppImage
+
+            - name: Create a draft GitHub release
+              uses: ncipollo/release-action@v1
+              with:
+                  artifacts: "build/app/outputs/flutter-apk/*,ente-${{ github.event.release.tag_name }}"
+                  prerelease: true
+                  draft: true
+                  updateOnlyUnreleased: true
+
+            - name: Upload AAB to PlayStore
+              # Temporarily disable GP upload
+              if: false
+              uses: r0adkll/upload-google-play@v1
+              with:
+                  serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
+                  packageName: io.ente.auth
+                  releaseFiles: build/app/outputs/bundle/playstoreRelease/app-playstore-release.aab
+                  track: internal
