@@ -1,4 +1,4 @@
-name: "Lint (mobile)"
+name: "Lint (auth)"
 
 on:
     # Run on every push (this also covers pull requests)
