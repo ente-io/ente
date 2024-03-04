@@ -1,0 +1,19 @@
+name: "Lint (mobile)"
+
+on:
+    # Run on every push (this also covers pull requests)
+    push:
+        # But only if something changes inside mobile
+        paths:
+            - "mobile/**"
+
+jobs:
+    lint:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+              with:
+                  submodules: recursive
+            - run: flutter pub get
+            - run: flutter analyze --no-fatal-infos
+            - run: flutter test
