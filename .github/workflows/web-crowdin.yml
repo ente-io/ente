@@ -32,7 +32,7 @@ jobs:
                   pull_request_title: "New translations (web)"
                   pull_request_body: "New translations via [Crowdin GH Action](https://github.com/crowdin/github-action)"
                   pull_request_base_branch_name: "main"
+                  project_id: 569613
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-                  CROWDIN_PROJECT_ID: ${{ secrets.CROWDIN_PROJECT_ID_WEB }}
                   CROWDIN_PERSONAL_TOKEN: ${{ secrets.CROWDIN_PERSONAL_TOKEN }}
