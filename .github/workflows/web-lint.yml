@@ -21,5 +21,6 @@ jobs:
               with:
                   node-version: 20
                   cache: "yarn"
+                  cache-dependency-path: "web/yarn.lock"
             - run: yarn install
             - run: yarn lint
