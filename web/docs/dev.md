@@ -3,7 +3,7 @@
 The monorepo uses Yarn (classic) workspaces.
 
 To run a command for a workspace `<ws>`, invoke `yarn workspace <ws> <cmd>` from
-the root folder instead the the `yarn <cmd>` you’d have done otherwise. For
+the root folder instead the `yarn <cmd>` you’d have done otherwise. For
 example, to start a development server for the `photos` app, we can do
 
 ```sh
