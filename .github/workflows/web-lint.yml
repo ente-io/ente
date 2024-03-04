@@ -1,8 +1,11 @@
-name: Lint
+name: "Lint (web)"
 
 on:
     # Run on every push (this also covers pull requests)
     push:
+        # But only if something changes inside web
+        paths:
+            - 'web/**''
 
 jobs:
     lint:
