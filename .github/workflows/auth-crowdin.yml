@@ -1,0 +1,38 @@
+name: "Sync Crowdin translations (auth)"
+
+on:
+    push:
+        # Run action when auth's intl_en.arb is changed
+        paths:
+            - "mobile/lib/l10n/arb/app_en.arb"
+        branches: [main]
+    schedule:
+        # Run every 24 hours - https://crontab.guru/#0_*/24_*_*_*
+        - cron: "0 */24 * * *"
+    workflow_dispatch: # Allow manually running the action
+
+jobs:
+    synchronize-with-crowdin:
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            - name: Crowdin's action
+              uses: crowdin/github-action@v1
+              with:
+                  base_path: "auth/"
+                  upload_sources: true
+                  upload_translations: true
+                  download_translations: true
+                  localization_branch_name: crowdin-translations-auth
+                  create_pull_request: true
+                  skip_untranslated_strings: true
+                  pull_request_title: "New translations (auth)"
+                  pull_request_body: "New translations via [Crowdin GH Action](https://github.com/crowdin/github-action)"
+                  pull_request_base_branch_name: "main"
+                  project_id: 575169
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                  CROWDIN_PERSONAL_TOKEN: ${{ secrets.CROWDIN_PERSONAL_TOKEN }}

@@ -1,0 +1,35 @@
+name: "Lint (mobile)"
+
+on:
+    # Run on every push (this also covers pull requests)
+    push:
+        paths:
+            # - But only if something changes inside mobile
+            - "mobile/**"
+            # - Or if the there is some change in workflow itself
+            - ".github/workflows/mobile-lint.yml"
+
+jobs:
+    lint:
+        runs-on: ubuntu-latest
+        defaults:
+            run:
+                working-directory: mobile
+        steps:
+            # Checkout our code, including submodules
+            - uses: actions/checkout@v4
+              with:
+                  submodules: recursive
+
+            # Install Flutter
+            - uses: subosito/flutter-action@v2
+              with:
+                  channel: "stable"
+                  flutter-version: "3.13.4"
+                  cache: true
+
+            # Install dependencies
+            - run: flutter pub get
+
+            # Lint
+            - run: flutter analyze --no-fatal-infos
