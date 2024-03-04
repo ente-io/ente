@@ -2,9 +2,11 @@ name: "Sync Crowdin translations (web)"
 
 on:
     push:
-        # Run action when web's en-US/translation.json is changed
         paths:
+            # Run action when web's en-US/translation.json is changed
             - "web/apps/photos/public/locales/en-US/translation.json"
+            # Or the workflow itself is changed
+            - ".github/workflows/web-crowdin.yml"
         branches: [main]
     schedule:
         # Run every 24 hours - https://crontab.guru/#0_*/24_*_*_*
@@ -23,6 +25,7 @@ jobs:
               uses: crowdin/github-action@v1
               with:
                   base_path: "web/"
+                  config: "web/crowdin.yml"
                   upload_sources: true
                   upload_translations: true
                   download_translations: true
