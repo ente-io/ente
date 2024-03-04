@@ -3,9 +3,11 @@ name: "Lint (web)"
 on:
     # Run on every push (this also covers pull requests)
     push:
-        # But only if something changes inside web
         paths:
+            # - But only if something changes inside web
             - "web/**"
+            # - Or if the there is some change in GitHub workflows themselves
+            - ".github/workflows/**"
 
 jobs:
     lint:
