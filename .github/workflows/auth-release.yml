@@ -60,10 +60,12 @@ jobs:
                   fileName: "keystore/ente_auth_key.jks"
                   encodedString: ${{ secrets.SIGNING_KEY }}
 
+            - name: Create artifacts directory
+              run: mkdir artifacts
+
             - name: Build Android APK
               run: |
                   flutter build apk --release --flavor independent --dart-define=app.flavor=independent
-                  mkdir artifacts
                   mv build/app/outputs/flutter-apk/app-independent-release.apk artifacts/ente-${{ github.ref_name }}.apk
               env:
                   SIGNING_KEY_PATH: "/home/runner/work/_temp/keystore/ente_auth_key.jks"
@@ -100,9 +102,9 @@ jobs:
                   flutter_distributor package --platform=linux --targets=deb --skip-clean
                   flutter_distributor package --platform=linux --targets=rpm --skip-clean
                   flutter_distributor package --platform=linux --targets=appimage --skip-clean
-                  mv dist/**/*-*-linux.deb ente-${{ github.ref_name }}-x86_64.deb
-                  mv dist/**/*-*-linux.rpm ente-${{ github.ref_name }}-x86_64.rpm
-                  mv dist/**/*-*-linux.AppImage ente-${{ github.ref_name }}-x86_64.AppImage
+                  mv dist/**/*-*-linux.deb artifacts/ente-${{ github.ref_name }}-x86_64.deb
+                  mv dist/**/*-*-linux.rpm artifacts/ente-${{ github.ref_name }}-x86_64.rpm
+                  mv dist/**/*-*-linux.AppImage artifacts/ente-${{ github.ref_name }}-x86_64.AppImage
               env:
                   LIBSODIUM_USE_PKGCONFIG: 1
 
@@ -115,6 +117,7 @@ jobs:
                   artifacts: "auth/artifacts/*"
                   prerelease: true
                   draft: true
+                  allowUpdates: true
                   updateOnlyUnreleased: true
 
             - name: Upload AAB to PlayStore
@@ -126,3 +129,62 @@ jobs:
                   packageName: io.ente.auth
                   releaseFiles: build/app/outputs/bundle/playstoreRelease/app-playstore-release.aab
                   track: internal
+
+    build-windows:
+        runs-on: windows-latest
+
+        defaults:
+            run:
+                # Run all the "run" steps inside the auth directory
+                working-directory: auth
+
+        steps:
+            - name: Checkout code and submodules
+              uses: actions/checkout@v4
+              with:
+                  submodules: recursive
+
+            - name: Install Flutter ${{ env.FLUTTER_VERSION  }}
+              uses: subosito/flutter-action@v2
+              with:
+                  channel: "stable"
+                  flutter-version: ${{ env.FLUTTER_VERSION  }}
+                  cache: true
+
+            - name: Create artifacts directory
+              run: mkdir artifacts
+
+            - name: Build Windows installer
+              run: |
+                  flutter config --enable-windows-desktop
+                  dart pub global activate flutter_distributor
+                  make innoinstall
+                  flutter_distributor package --platform=windows --targets=exe --skip-clean
+                  cp dist/**/ente_auth-*-windows-setup.exe artifacts/ente-${{ github.ref_name }}-installer.exe
+
+            - name: Retain Windows EXE and DLLs
+              run: cp -r build/windows/x64/runner/Release ente-${{ github.ref_name }}-windows
+
+            - name: Code Sign for Windows
+              uses: dlemstra/code-sign-action@v1
+              with:
+                  certificate: "${{ secrets.WINDOWS_CERTIFICATE }}"
+                  password: "${{ secrets.WINDOWS_CERTIFICATE_PASSWORD }}"
+                  files: |
+                      auth/artifacts/ente-${{ github.ref_name }}-installer.exe
+                      auth/ente-${{ github.ref_name }}-windows/auth.exe
+
+            - name: Create a Windows ZIP
+              run: tar.exe -a -c -f auth/artifacts/ente-${{ github.ref_name }}-windows.zip auth/ente-${{ github.ref_name }}-windows
+
+            - name: Generate checksums
+              run: sha256sum artifacts/ente-* > artifacts/sha256sum-win
+
+            - name: Create a draft GitHub release
+              uses: ncipollo/release-action@v1
+              with:
+                  artifacts: "auth/artifacts/*"
+                  prerelease: true
+                  draft: true
+                  allowUpdates: true
+                  updateOnlyUnreleased: true
