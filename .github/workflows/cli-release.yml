@@ -18,7 +18,16 @@ jobs:
             - name: Checkout code
               uses: actions/checkout@v4
 
-            - uses: wangyoucao577/go-release-action@v1
+            - name: Create a draft GitHub release
+              uses: ncipollo/release-action@v1
+              with:
+                  prerelease: true
+                  draft: true
+                  allowUpdates: true
+                  updateOnlyUnreleased: true
+
+            - name: Build go binaries and upload to the release
+              uses: wangyoucao577/go-release-action@v1
               with:
                   github_token: ${{ secrets.GITHUB_TOKEN }}
                   goversion: "1.20"
