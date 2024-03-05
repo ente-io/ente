@@ -162,14 +162,14 @@ jobs:
                   dart pub global activate flutter_distributor
                   make innoinstall
                   flutter_distributor package --platform=windows --targets=exe --skip-clean
-                  cp dist/**/ente_auth-*-windows-setup.exe artifacts/ente-${{ github.ref_name }}-installer.exe
+                  mv dist/**/ente_auth-*-windows-setup.exe artifacts/ente-${{ github.ref_name }}-installer.exe
 
             - name: Retain Windows EXE and DLLs
               # Temporarily disable desktop builds
               if: false
               run: cp -r build/windows/x64/runner/Release ente-${{ github.ref_name }}-windows
 
-            - name: Code Sign for Windows
+            - name: Code sign Windows installer and EXE
               # Temporarily disable desktop builds
               if: false
               uses: dlemstra/code-sign-action@v1
@@ -180,7 +180,7 @@ jobs:
                       auth/artifacts/ente-${{ github.ref_name }}-installer.exe
                       auth/ente-${{ github.ref_name }}-windows/auth.exe
 
-            - name: Create a Windows ZIP
+            - name: Zip Windows EXE and DLLs
               # Temporarily disable desktop builds
               if: false
               run: tar.exe -a -c -f auth/artifacts/ente-${{ github.ref_name }}-windows.zip auth/ente-${{ github.ref_name }}-windows
@@ -192,6 +192,113 @@ jobs:
 
             - name: Generate checksums
               run: sha256sum artifacts/ente-* > artifacts/sha256sum-win
+
+            - name: Create a draft GitHub release
+              uses: ncipollo/release-action@v1
+              with:
+                  artifacts: "auth/artifacts/*"
+                  prerelease: true
+                  draft: true
+                  allowUpdates: true
+                  updateOnlyUnreleased: true
+
+    build-macos:
+        runs-on: macos-13 # latest is 12
+
+        defaults:
+            run:
+                # Run all the "run" steps inside the auth directory
+                working-directory: auth
+
+        steps:
+            - name: Checkout code and submodules
+              uses: actions/checkout@v4
+              with:
+                  submodules: recursive
+
+            - name: Install Flutter ${{ env.FLUTTER_VERSION  }}
+              uses: subosito/flutter-action@v2
+              with:
+                  channel: "stable"
+                  flutter-version: ${{ env.FLUTTER_VERSION  }}
+                  cache: true
+
+            - name: Add provisioning profiles
+              run: |
+                  PROFILES_HOME="$HOME/Library/MobileDevice/Provisioning Profiles"
+                  mkdir -p "$PROFILES_HOME"
+                  PROFILE_PATH="$(mktemp "$PROFILES_HOME"/$(uuidgen).provisionprofile)"
+                  echo ${CM_PROVISIONING_PROFILE} | base64 --decode > "$PROFILE_PATH"
+                  echo "Saved provisioning profile $PROFILE_PATH"
+              env:
+                  CM_PROVISIONING_PROFILE: ${{ secrets.MAC_OS_BUILD_PROVISION_PROFILE_BASE64 }}
+
+            - name: Add certificates
+              run: |
+                  # create variables
+                  CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
+
+                  # copy certificates from base64
+                  echo -n "$BUILD_CERTIFICATE_BASE64" | base64 --decode -o $CERTIFICATE_PATH
+
+                  # add certificate to keychain
+                  keychain initialize
+                  keychain add-certificates --certificate $CERTIFICATE_PATH --certificate-password $P12_PASSWORD
+
+                  # Use profile in current project
+                  xcode-project use-profiles --project=macos/**/*.xcodeproj
+              env:
+                  BUILD_CERTIFICATE_BASE64: ${{ secrets.MAC_OS_CERTIFICATE }}
+                  P12_PASSWORD: ${{ secrets.MAC_OS_CERTIFICATE_PASSWORD }}
+
+            - name: Install build dependencies
+              run: |
+                  pip3 install codemagic-cli-tools
+                  python3 -m pip install setuptools
+                  npm install -g appdmg
+
+            - name: Create artifacts directory
+              run: mkdir artifacts
+
+            - name: Build macOS DMG
+              # Temporarily disable desktop builds
+              if: false
+              run: |
+                  flutter config --enable-macos-desktop
+                  dart pub global activate flutter_distributor
+                  flutter_distributor package --platform=macos --targets=dmg --skip-clean
+                  mv dist/**/ente_auth-*-macos.dmg artifacts/ente-${{ github.ref_name }}.dmg
+
+            - name: Code sign DMG
+              # Temporarily disable desktop builds
+              if: false
+              run: |
+                  CERT_NAME=$(security find-identity -v -p codesigning | grep "Developer ID Application" | awk -F'"' '{print $2}' | grep -m1 "")
+                  codesign --force --timestamp --sign "$CERT_NAME" --options runtime artifacts/ente-${{ github.ref_name }}.dmg
+                  codesign --verify --verbose=4 artifacts/ente-${{ github.ref_name }}.dmg
+
+            - name: Notarize and staple DMG
+              # Temporarily disable desktop builds
+              if: false
+              run: |
+                  xcrun notarytool submit artifacts/ente-${{ github.ref_name }}.dmg \
+                    --wait \
+                    --apple-id $APPLE_ID \
+                    --password $APPLE_PASSWORD \
+                    --team-id $APPLE_TEAM_ID
+                  xcrun stapler staple artifacts/ente-${{ github.ref_name }}.dmg
+              env:
+                  APPLE_ID: ${{ secrets.APPLE_ID }}
+                  APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
+                  APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+
+            - name: Temporary action
+              # TODO: Remove me when desktop builds are enabled
+              if: true
+              run: echo test > artifacts/example.txt
+
+            - name: Generate checksums
+              run: sha256sum artifacts/ente-* > artifacts/sha256sum-mac
 
             - name: Create a draft GitHub release
               uses: ncipollo/release-action@v1
