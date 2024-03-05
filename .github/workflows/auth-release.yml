@@ -109,7 +109,7 @@ jobs:
             - name: Create a draft GitHub release
               uses: ncipollo/release-action@v1
               with:
-                  artifacts: "auth/artifacts/ente-*"
+                  artifacts: "auth/artifacts/*"
                   prerelease: true
                   draft: true
                   updateOnlyUnreleased: true
