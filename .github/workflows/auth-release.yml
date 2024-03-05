@@ -185,14 +185,6 @@ jobs:
               if: false
               run: tar.exe -a -c -f auth/artifacts/ente-${{ github.ref_name }}-windows.zip auth/ente-${{ github.ref_name }}-windows
 
-            - name: Temporary action
-              # TODO: Remove me when desktop builds are enabled
-              if: true
-              run: echo test > artifacts/ente-example.txt
-
-            - name: Generate checksums
-              run: sha256sum artifacts/ente-* > artifacts/sha256sum-win
-
             - name: Create a draft GitHub release
               uses: ncipollo/release-action@v1
               with:
@@ -294,14 +286,6 @@ jobs:
                   APPLE_ID: ${{ secrets.APPLE_ID }}
                   APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
                   APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
-
-            - name: Temporary action
-              # TODO: Remove me when desktop builds are enabled
-              if: true
-              run: echo test > artifacts/ente-example.txt
-
-            - name: Generate checksums
-              run: sha256sum artifacts/ente-* > artifacts/sha256sum-mac
 
             - name: Create a draft GitHub release
               uses: ncipollo/release-action@v1
