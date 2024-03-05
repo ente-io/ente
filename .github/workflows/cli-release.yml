@@ -30,7 +30,7 @@ jobs:
               uses: wangyoucao577/go-release-action@v1
               with:
                   github_token: ${{ secrets.GITHUB_TOKEN }}
-                  release_name: ${{ github.ref_name }}
+                  release_tag: ${{ github.ref_name }}
                   goversion: "1.20"
                   project_path: "./cli"
                   sha256sum: true
