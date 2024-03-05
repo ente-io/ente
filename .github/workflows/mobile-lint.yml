@@ -10,6 +10,9 @@ on:
             - "mobile/**"
             - ".github/workflows/mobile-lint.yml"
 
+env:
+    FLUTTER_VERSION: "3.13.4"
+
 jobs:
     lint:
         runs-on: ubuntu-latest
@@ -22,11 +25,11 @@ jobs:
               with:
                   submodules: recursive
 
-            - name: Install Flutter
+            - name: Install Flutter ${{ env.FLUTTER_VERSION  }}
               uses: subosito/flutter-action@v2
               with:
                   channel: "stable"
-                  flutter-version: "3.13.4"
+                  flutter-version: ${{ env.FLUTTER_VERSION  }}
                   cache: true
 
             - run: flutter pub get

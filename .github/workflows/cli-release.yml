@@ -7,6 +7,8 @@ on:
         # Tip: to test this workflow, push at tag with a pre-release version,
         # e.g. `cli-v1.2.3-test`, where 1.2.3 is the expected version number of
         # the next release that'll go out.
+        #
+        # See: [Note: Testing release workflows that are triggered by tags]
         tags:
             - "cli-v*"
 
@@ -17,7 +19,6 @@ jobs:
             - name: Create a draft GitHub release
               uses: ncipollo/release-action@v1
               with:
-                  prerelease: true
                   draft: true
 
     build:
