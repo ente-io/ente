@@ -23,7 +23,7 @@ jobs:
             - name: Setup go
               uses: actions/setup-go@v5
               with:
-                  go-version-file: "go.mod"
+                  go-version-file: "server/go.mod"
                   cache: true
 
             - name: Install dependencies
