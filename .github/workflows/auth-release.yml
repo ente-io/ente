@@ -188,7 +188,7 @@ jobs:
             - name: Temporary action
               # TODO: Remove me when desktop builds are enabled
               if: true
-              run: echo test > artifacts/example.txt
+              run: echo test > artifacts/ente-example.txt
 
             - name: Generate checksums
               run: sha256sum artifacts/ente-* > artifacts/sha256sum-win
@@ -223,6 +223,10 @@ jobs:
                   flutter-version: ${{ env.FLUTTER_VERSION  }}
                   cache: true
 
+            - name: Install code signing dependencies
+              run: |
+                  pip3 install codemagic-cli-tools
+
             - name: Add provisioning profiles
               run: |
                   PROFILES_HOME="$HOME/Library/MobileDevice/Provisioning Profiles"
@@ -253,7 +257,6 @@ jobs:
 
             - name: Install build dependencies
               run: |
-                  pip3 install codemagic-cli-tools
                   python3 -m pip install setuptools
                   npm install -g appdmg
 
@@ -295,7 +298,7 @@ jobs:
             - name: Temporary action
               # TODO: Remove me when desktop builds are enabled
               if: true
-              run: echo test > artifacts/example.txt
+              run: echo test > artifacts/ente-example.txt
 
             - name: Generate checksums
               run: sha256sum artifacts/ente-* > artifacts/sha256sum-mac
