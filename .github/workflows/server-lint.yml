@@ -1,0 +1,33 @@
+name: "Lint (server)"
+
+on:
+    # Run on every push (this also covers pull requests)
+    push:
+        # See: [Note: Specify branch when specifying a path filter]
+        branches: ["**"]
+        # Only run if something changes in these paths
+        paths:
+            - "server/**"
+            - ".github/workflows/server-lint.yml"
+
+jobs:
+    lint:
+        runs-on: ubuntu-latest
+        defaults:
+            run:
+                working-directory: server
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Setup go
+              uses: actions/setup-go@v5
+              with:
+                  go-version-file: "go.mod"
+                  cache: true
+
+            - name: Install dependencies
+              run: sudo apt-get update && sudo apt-get install libsodium-dev
+
+            - name: Lint
+              run: "./scripts/lint.sh"
