@@ -1,5 +1,6 @@
+import 'dart:io';
+
 import 'package:adaptive_theme/adaptive_theme.dart';
-import 'package:computer/computer.dart';
 import "package:ente_auth/app/view/app.dart";
 import 'package:ente_auth/core/configuration.dart';
 import 'package:ente_auth/core/constants.dart';
@@ -18,7 +19,9 @@ import 'package:ente_auth/store/code_store.dart';
 import 'package:ente_auth/ui/tools/app_lock.dart';
 import 'package:ente_auth/ui/tools/lock_screen.dart';
 import 'package:ente_auth/ui/utils/icon_utils.dart';
-import 'package:ente_auth/utils/crypto_util.dart';
+import 'package:ente_auth/utils/platform_util.dart';
+import 'package:ente_auth/utils/window_protocol_handler.dart';
+import 'package:ente_crypto_dart/ente_crypto_dart.dart';
 import 'package:flutter/foundation.dart';
 import "package:flutter/material.dart";
 import 'package:flutter/scheduler.dart';
@@ -26,14 +29,27 @@ import 'package:flutter_displaymode/flutter_displaymode.dart';
 import 'package:logging/logging.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:privacy_screen/privacy_screen.dart';
+import 'package:window_manager/window_manager.dart';
 
 final _logger = Logger("main");
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  await windowManager.ensureInitialized();
+
+  if (PlatformUtil.isDesktop()) {
+    WindowOptions windowOptions = const WindowOptions(
+      size: Size(450, 800),
+    );
+    windowManager.waitUntilReadyToShow(windowOptions, () async {
+      await windowManager.show();
+      await windowManager.focus();
+    });
+  }
   await _runInForeground();
   await _setupPrivacyScreen();
-  FlutterDisplayMode.setHighRefreshRate();
+  if (Platform.isAndroid) FlutterDisplayMode.setHighRefreshRate();
 }
 
 Future<void> _runInForeground() async {
@@ -65,10 +81,14 @@ ThemeMode _themeMode(AdaptiveThemeMode? savedThemeMode) {
 }
 
 Future _runWithLogs(Function() function, {String prefix = ""}) async {
+  String dir = "";
+  try {
+    dir = "${(await getApplicationSupportDirectory()).path}/logs";
+  } catch (_) {}
   await SuperLogging.main(
     LogConfig(
       body: function,
-      logDirPath: (await getApplicationSupportDirectory()).path + "/logs",
+      logDirPath: dir,
       maxLogFiles: 5,
       sentryDsn: sentryDSN,
       enableInDebugMode: true,
@@ -77,10 +97,19 @@ Future _runWithLogs(Function() function, {String prefix = ""}) async {
   );
 }
 
+void _registerWindowsProtocol() {
+  const kWindowsScheme = 'ente';
+  // Register our protocol only on Windows platform
+  if (!kIsWeb && Platform.isWindows) {
+    WindowsProtocolHandler()
+        .register(kWindowsScheme, executable: null, arguments: null);
+  }
+}
+
 Future<void> _init(bool bool, {String? via}) async {
-  // Start workers asynchronously. No need to wait for them to start
-  Computer.shared().turnOn(workersCount: 4, verbose: kDebugMode);
-  CryptoUtil.init();
+  _registerWindowsProtocol();
+  await initCryptoUtil();
+
   await PreferenceService.instance.init();
   await CodeStore.instance.init();
   await Configuration.instance.init();
@@ -95,6 +124,7 @@ Future<void> _init(bool bool, {String? via}) async {
 }
 
 Future<void> _setupPrivacyScreen() async {
+  if (!PlatformUtil.isMobile()) return;
   final brightness =
       SchedulerBinding.instance.platformDispatcher.platformBrightness;
   bool isInDarkMode = brightness == Brightness.dark;

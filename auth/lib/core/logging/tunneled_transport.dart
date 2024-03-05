@@ -46,7 +46,7 @@ class TunneledTransport implements Transport {
         _options.logger(
           SentryLevel.error,
           'API returned an error, statusCode = ${response.statusCode}, '
-              'body = ${response.body}',
+          'body = ${response.body}',
         );
       }
       return const SentryId.empty();
@@ -65,8 +65,8 @@ class TunneledTransport implements Transport {
   }
 
   Future<StreamedRequest> _createStreamedRequest(
-      SentryEnvelope envelope,
-      ) async {
+    SentryEnvelope envelope,
+  ) async {
     final streamedRequest = StreamedRequest('POST', _tunnel);
     envelope
         .envelopeStream(_options)
@@ -91,10 +91,10 @@ class _CredentialBuilder {
         _clock = clock;
 
   factory _CredentialBuilder(
-      Dsn? dsn,
-      String sdkIdentifier,
-      ClockProvider clock,
-      ) {
+    Dsn? dsn,
+    String sdkIdentifier,
+    ClockProvider clock,
+  ) {
     final authHeader = _buildAuthHeader(
       publicKey: dsn?.publicKey,
       secretKey: dsn?.secretKey,

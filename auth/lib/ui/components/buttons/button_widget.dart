@@ -57,7 +57,7 @@ class ButtonWidget extends StatelessWidget {
   final ValueNotifier<String>? progressStatus;
 
   const ButtonWidget({
-    Key? key,
+    super.key,
     required this.buttonType,
     this.buttonSize = ButtonSize.large,
     this.icon,
@@ -71,7 +71,7 @@ class ButtonWidget extends StatelessWidget {
     this.shouldSurfaceExecutionStates = true,
     this.progressStatus,
     this.shouldShowSuccessConfirmation = false,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -155,7 +155,7 @@ class ButtonChildWidget extends StatefulWidget {
   final bool shouldShowSuccessConfirmation;
 
   const ButtonChildWidget({
-    Key? key,
+    super.key,
     required this.buttonStyle,
     required this.buttonType,
     required this.isDisabled,
@@ -168,7 +168,7 @@ class ButtonChildWidget extends StatefulWidget {
     this.labelText,
     this.icon,
     this.buttonAction,
-  }) : super(key: key);
+  });
 
   @override
   State<ButtonChildWidget> createState() => _ButtonChildWidgetState();

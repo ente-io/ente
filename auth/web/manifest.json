@@ -1,6 +1,6 @@
 {
-    "name": "My App",
-    "short_name": "My App",
+    "name": "Auth",
+    "short_name": "Auth",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

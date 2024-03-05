@@ -6,8 +6,8 @@ class SpeedDialLabelWidget extends StatelessWidget {
 
   const SpeedDialLabelWidget(
     this.label, {
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {

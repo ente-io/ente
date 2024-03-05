@@ -1,4 +1,3 @@
-
 import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/theme/ente_theme.dart';
 import 'package:ente_auth/ui/components/captioned_text_widget.dart';
@@ -11,7 +10,9 @@ import 'package:ente_auth/utils/navigation_util.dart';
 import 'package:flutter/material.dart';
 
 class DataSectionWidget extends StatelessWidget {
-  DataSectionWidget({Key? key}) : super(key: key);
+  // final _logger = Logger("AccountSectionWidget");
+
+  DataSectionWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +37,7 @@ class DataSectionWidget extends StatelessWidget {
         trailingIcon: Icons.chevron_right_outlined,
         trailingIconIsMuted: true,
         onTap: () async {
-          routeToPage(context, ImportCodePage());
+          routeToPage(context, const ImportCodePage());
         },
       ),
       sectionOptionSpacing,

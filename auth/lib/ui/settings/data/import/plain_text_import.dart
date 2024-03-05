@@ -48,9 +48,7 @@ class PlainTextImport extends StatelessWidget {
       ],
     );
   }
-
 }
-
 
 Future<void> showImportInstructionDialog(BuildContext context) async {
   final l10n = context.l10n;
@@ -93,7 +91,6 @@ Future<void> showImportInstructionDialog(BuildContext context) async {
     barrierColor: Colors.black12,
   );
 }
-
 
 Future<void> _pickImportFile(BuildContext context) async {
   final l10n = context.l10n;

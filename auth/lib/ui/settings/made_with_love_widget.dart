@@ -4,8 +4,8 @@ import 'package:url_launcher/url_launcher.dart';
 
 class MadeWithLoveWidget extends StatelessWidget {
   const MadeWithLoveWidget({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {

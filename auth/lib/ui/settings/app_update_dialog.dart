@@ -14,7 +14,7 @@ import 'package:url_launcher/url_launcher_string.dart';
 class AppUpdateDialog extends StatefulWidget {
   final LatestVersionInfo? latestVersionInfo;
 
-  const AppUpdateDialog(this.latestVersionInfo, {Key? key}) : super(key: key);
+  const AppUpdateDialog(this.latestVersionInfo, {super.key});
 
   @override
   State<AppUpdateDialog> createState() => _AppUpdateDialogState();
@@ -30,7 +30,7 @@ class _AppUpdateDialogState extends State<AppUpdateDialog> {
         Padding(
           padding: const EdgeInsets.fromLTRB(8, 4, 0, 4),
           child: Text(
-            "- " + log,
+            "- $log",
             style: Theme.of(context).textTheme.bodySmall!.copyWith(
                   fontSize: 14,
                 ),
@@ -87,8 +87,8 @@ class _AppUpdateDialogState extends State<AppUpdateDialog> {
     );
     final shouldForceUpdate =
         UpdateService.instance.shouldForceUpdate(widget.latestVersionInfo);
-    return WillPopScope(
-      onWillPop: () async => !shouldForceUpdate,
+    return PopScope(
+      canPop: !shouldForceUpdate,
       child: AlertDialog(
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -118,7 +118,7 @@ class _AppUpdateDialogState extends State<AppUpdateDialog> {
 class ApkDownloaderDialog extends StatefulWidget {
   final LatestVersionInfo? versionInfo;
 
-  const ApkDownloaderDialog(this.versionInfo, {Key? key}) : super(key: key);
+  const ApkDownloaderDialog(this.versionInfo, {super.key});
 
   @override
   State<ApkDownloaderDialog> createState() => _ApkDownloaderDialogState();
@@ -131,17 +131,15 @@ class _ApkDownloaderDialogState extends State<ApkDownloaderDialog> {
   @override
   void initState() {
     super.initState();
-    _saveUrl = Configuration.instance.getTempDirectory() +
-        "ente-" +
-        widget.versionInfo!.name! +
-        ".apk";
+    _saveUrl =
+        "${Configuration.instance.getTempDirectory()}ente-${widget.versionInfo!.name!}.apk";
     _downloadApk();
   }
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async => false,
+    return PopScope(
+      canPop: false,
       child: AlertDialog(
         title: const Text(
           "Downloading...",

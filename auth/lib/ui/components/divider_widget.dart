@@ -14,12 +14,12 @@ class DividerWidget extends StatelessWidget {
   final bool divColorHasBlur;
   final EdgeInsets? padding;
   const DividerWidget({
-    Key? key,
+    super.key,
     required this.dividerType,
     this.bgColor = Colors.transparent,
     this.divColorHasBlur = true,
     this.padding,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

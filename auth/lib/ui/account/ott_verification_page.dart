@@ -17,8 +17,8 @@ class OTTVerificationPage extends StatefulWidget {
     this.isChangeEmail = false,
     this.isCreateAccountScreen = false,
     this.isResetPasswordScreen = false,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   State<OTTVerificationPage> createState() => _OTTVerificationPageState();
@@ -26,6 +26,23 @@ class OTTVerificationPage extends StatefulWidget {
 
 class _OTTVerificationPageState extends State<OTTVerificationPage> {
   final _verificationCodeController = TextEditingController();
+
+  Future<void> onPressed() async {
+    if (widget.isChangeEmail) {
+      await UserService.instance.changeEmail(
+        context,
+        widget.email,
+        _verificationCodeController.text,
+      );
+    } else {
+      await UserService.instance.verifyEmail(
+        context,
+        _verificationCodeController.text,
+        isResettingPasswordScreen: widget.isResetPasswordScreen,
+      );
+    }
+    FocusScope.of(context).unfocus();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -68,22 +85,9 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
       body: _getBody(),
       floatingActionButton: DynamicFAB(
         isKeypadOpen: isKeypadOpen,
-        isFormValid: !(_verificationCodeController.text.isEmpty),
+        isFormValid: _verificationCodeController.text.isNotEmpty,
         buttonText: l10n.verify,
-        onPressedFunction: () {
-          if (widget.isChangeEmail) {
-            UserService.instance.changeEmail(
-              context,
-              widget.email,
-              _verificationCodeController.text,
-            );
-          } else {
-            UserService.instance
-                .verifyEmail(context, _verificationCodeController.text,
-              isResettingPasswordScreen: widget.isResetPasswordScreen,);
-          }
-          FocusScope.of(context).unfocus();
-        },
+        onPressedFunction: onPressed,
       ),
       floatingActionButtonLocation: fabLocation(),
       floatingActionButtonAnimator: NoScalingAnimation(),
@@ -160,6 +164,9 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
               padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
               child: TextFormField(
                 style: Theme.of(context).textTheme.titleMedium,
+                onFieldSubmitted: _verificationCodeController.text.isNotEmpty
+                    ? (_) => onPressed()
+                    : null,
                 decoration: InputDecoration(
                   filled: true,
                   hintText: l10n.tapToEnterCode,

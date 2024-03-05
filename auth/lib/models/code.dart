@@ -57,14 +57,7 @@ class Code {
       updatedAlgo,
       updatedType,
       updatedCounter,
-      "otpauth://${updatedType.name}/" +
-          updateIssuer +
-          ":" +
-          updateAccount +
-          "?algorithm=${updatedAlgo.name}&digits=$updatedDigits&issuer=" +
-          updateIssuer +
-          "&period=$updatePeriod&secret=" +
-          updatedSecret + (updatedType == Type.hotp ? "&counter=$updatedCounter" : ""),
+      "otpauth://${updatedType.name}/$updateIssuer:$updateAccount?algorithm=${updatedAlgo.name}&digits=$updatedDigits&issuer=$updateIssuer&period=$updatePeriod&secret=$updatedSecret${updatedType == Type.hotp ? "&counter=$updatedCounter" : ""}",
       generatedID: generatedID,
     );
   }
@@ -83,14 +76,7 @@ class Code {
       Algorithm.sha1,
       Type.totp,
       0,
-      "otpauth://totp/" +
-          issuer +
-          ":" +
-          account +
-          "?algorithm=SHA1&digits=6&issuer=" +
-          issuer +
-          "&period=30&secret=" +
-          secret,
+      "otpauth://totp/$issuer:$account?algorithm=SHA1&digits=6&issuer=$issuer&period=30&secret=$secret",
     );
   }
 

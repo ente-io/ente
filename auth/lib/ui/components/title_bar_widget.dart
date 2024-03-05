@@ -14,7 +14,7 @@ class TitleBarWidget extends StatelessWidget {
   final bool isOnTopOfScreen;
   final Color? backgroundColor;
   const TitleBarWidget({
-    Key? key,
+    super.key,
     this.leading,
     this.title,
     this.caption,
@@ -25,7 +25,7 @@ class TitleBarWidget extends StatelessWidget {
     this.isFlexibleSpaceDisabled = false,
     this.isOnTopOfScreen = true,
     this.backgroundColor,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

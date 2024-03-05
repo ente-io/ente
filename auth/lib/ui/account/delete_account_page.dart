@@ -7,15 +7,15 @@ import 'package:ente_auth/services/local_authentication_service.dart';
 import 'package:ente_auth/services/user_service.dart';
 import 'package:ente_auth/ui/common/dialogs.dart';
 import 'package:ente_auth/ui/common/gradient_button.dart';
-import 'package:ente_auth/utils/crypto_util.dart';
 import 'package:ente_auth/utils/email_util.dart';
+import 'package:ente_auth/utils/platform_util.dart';
+import 'package:ente_crypto_dart/ente_crypto_dart.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_sodium/flutter_sodium.dart';
 
 class DeleteAccountPage extends StatelessWidget {
   const DeleteAccountPage({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -150,6 +150,8 @@ class DeleteAccountPage extends StatelessWidget {
       l10n.initiateAccountDeleteTitle,
     );
 
+    await PlatformUtil.refocusWindows();
+
     if (hasAuthenticated) {
       final choice = await showChoiceDialogOld(
         context,
@@ -164,8 +166,10 @@ class DeleteAccountPage extends StatelessWidget {
         return;
       }
       final decryptChallenge = CryptoUtil.openSealSync(
-        Sodium.base642bin(response.encryptedChallenge),
-        Sodium.base642bin(Configuration.instance.getKeyAttributes()!.publicKey),
+        CryptoUtil.base642bin(response.encryptedChallenge),
+        CryptoUtil.base642bin(
+          Configuration.instance.getKeyAttributes()!.publicKey,
+        ),
         Configuration.instance.getSecretKey()!,
       );
       final challengeResponseStr = utf8.decode(decryptChallenge);

@@ -12,7 +12,7 @@ class TrailingWidget extends StatefulWidget {
   final double trailingExtraMargin;
   final bool showExecutionStates;
   const TrailingWidget({
-    Key? key,
+    super.key,
     required this.executionStateNotifier,
     this.trailingIcon,
     this.trailingIconColor,
@@ -20,7 +20,7 @@ class TrailingWidget extends StatefulWidget {
     required this.trailingIconIsMuted,
     required this.trailingExtraMargin,
     required this.showExecutionStates,
-  }) : super(key: key);
+  });
   @override
   State<TrailingWidget> createState() => _TrailingWidgetState();
 }
@@ -101,11 +101,11 @@ class ExpansionTrailingIcon extends StatelessWidget {
   final IconData? trailingIcon;
   final Color? trailingIconColor;
   const ExpansionTrailingIcon({
-    Key? key,
+    super.key,
     required this.isExpanded,
     this.trailingIcon,
     this.trailingIconColor,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -138,12 +138,12 @@ class LeadingWidget extends StatelessWidget {
   // leadIconSize deafult value is 20.
   final double leadingIconSize;
   const LeadingWidget({
-    Key? key,
+    super.key,
     required this.leadingIconSize,
     this.leadingIcon,
     this.leadingIconColor,
     this.leadingIconWidget,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

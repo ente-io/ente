@@ -3,8 +3,7 @@ import 'package:flutter/material.dart';
 
 class MenuSectionDescriptionWidget extends StatelessWidget {
   final String content;
-  const MenuSectionDescriptionWidget({Key? key, required this.content})
-      : super(key: key);
+  const MenuSectionDescriptionWidget({super.key, required this.content});
 
   @override
   Widget build(BuildContext context) {

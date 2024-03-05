@@ -11,8 +11,8 @@ class EnteLoadingWidget extends StatelessWidget {
     this.size = 14,
     this.padding = 5,
     this.alignment = Alignment.center,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
