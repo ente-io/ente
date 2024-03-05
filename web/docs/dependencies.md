@@ -14,6 +14,16 @@ They also need some support packages:
 * "@typescript-eslint/parser" - Tells ESLint how to read TypeScript syntax
 * "@typescript-eslint/eslint-plugin" - Provides TypeScript rules and presets
 
+## Node
+
+Node is used under the hood to build the web apps. We currently use **20.11.1**.
+
+* On production, this is ensured by setting the NODE_VERSION environment
+  variable in Cloudflare Pages settings.
+
+* On your machine, you can install the the latest from the v20 series. e.g., on
+  macOS, you can `brew install node@20`.
+
 ## Utils
 
 ### Crypto
