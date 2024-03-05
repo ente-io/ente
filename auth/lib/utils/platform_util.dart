@@ -78,7 +78,7 @@ class PlatformUtil {
           mimeType: type,
         );
       }
-    } catch (e) {}
+    } catch (_) {}
   }
 
   // Needed to fix issue with local_auth on Windows

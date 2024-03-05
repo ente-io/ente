@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/services/user_service.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
