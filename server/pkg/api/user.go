@@ -244,6 +244,27 @@ func (h *UserHandler) GetTwoFactorStatus(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"status": status})
 }
 
+func (h *UserHandler) GetAccountRecoveryStatus(c *gin.Context) {
+	res, err := h.UserController.GetAccountRecoveryStatus(c)
+	if err != nil {
+		handler.Error(c, stacktrace.Propagate(err, ""))
+		return
+	}
+	c.JSON(http.StatusOK, res)
+}
+
+func (h *UserHandler) ConfigurePassKeyRecovery(c *gin.Context) {
+	c.JSON(http.StatusNotImplemented, gin.H{"message": "Not implemented"})
+}
+
+func (h *UserHandler) GetPasskeyResetChallenge(c *gin.Context) {
+	c.JSON(http.StatusNotImplemented, gin.H{"message": "Not implemented"})
+}
+
+func (h *UserHandler) ResetPasskey(c *gin.Context) {
+	c.JSON(http.StatusNotImplemented, gin.H{"message": "Not implemented"})
+}
+
 // SetupTwoFactor generates a two factor secret and sends it to user to setup his authenticator app with
 func (h *UserHandler) SetupTwoFactor(c *gin.Context) {
 	userID := auth.GetUserID(c.Request.Header)
@@ -349,6 +370,16 @@ func (h *UserHandler) FinishPasskeyAuthenticationCeremony(c *gin.Context) {
 		return
 	}
 
+	c.JSON(http.StatusOK, response)
+}
+
+func (h *UserHandler) IsPasskeyRecoveryEnabled(c *gin.Context) {
+	userID := auth.GetUserID(c.Request.Header)
+	response, err := h.UserController.GetKeyAttributeAndToken(c, userID)
+	if err != nil {
+		handler.Error(c, stacktrace.Propagate(err, ""))
+		return
+	}
 	c.JSON(http.StatusOK, response)
 }
 
