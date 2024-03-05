@@ -31,6 +31,10 @@
       "title": "Bitwarden"
     },
     {
+      "title": "Bloom Host",
+      "slug": "bloom_host"
+    },
+    {
       "title": "BorgBase",
       "altNames": ["borg"],
       "slug": "BorgBase",
