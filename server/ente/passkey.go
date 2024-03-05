@@ -13,25 +13,23 @@ type Passkey struct {
 
 var MaxPasskeys = 10
 
-type EnablePassKeyRecovery struct {
-	UserID      int64   `json:"userID" binding:"required"`
-	ResetKey    string  `json:"resetKey" binding:"required"`
-	EncResetKey EncData `json:"encResetKey" binding:"required"`
+type ConfigurePassKeySkipRequest struct {
+	PassKeySkipSecret    string  `json:"passKeySkipSecret" binding:"required"`
+	EncPassKeySkipSecret EncData `json:"encPassKeySkipSecret" binding:"required"`
 }
 
 type AccountRecoveryStatus struct {
 	// AllowAdminReset is a boolean that determines if the admin can reset the user's MFA.
 	// If true, in the event that the user loses their MFA device, the admin can reset the user's MFA.
-	AllowAdminReset       bool `json:"allowAdminReset" binding:"required"`
-	IsPassKeyResetEnabled bool `json:"isPassKeyResetEnabled" binding:"required"`
+	AllowAdminReset      bool `json:"allowAdminReset" binding:"required"`
+	IsPassKeySkipEnabled bool `json:"isPassKeySkipEnabled" binding:"required"`
 }
 
-type PasseKeyResetChallengeResponse struct {
-	EncResetKey      string `json:"encResetKey" binding:"required"`
-	EncResetKeyNonce string `json:"encResetKeyNonce" binding:"required"`
+type PasseKeySkipChallengeResponse struct {
+	EncData
 }
 
-type ResetPassKey struct {
-	SessionID string `json:"sessionID" binding:"required"`
-	RestKey   string `json:"resetKey" binding:"required"`
+type SkipPassKeyRequest struct {
+	SessionID         string `json:"sessionID" binding:"required"`
+	PassKeySkipSecret string `json:"passKeySkipSecret" binding:"required"`
 }
