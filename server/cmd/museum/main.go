@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	b64 "encoding/base64"
 	"fmt"
+	"github.com/ente-io/museum/pkg/repo/accountrecovery"
 	"net/http"
 	"os"
 	"os/signal"
@@ -137,6 +138,7 @@ func main() {
 
 	twoFactorRepo := &repo.TwoFactorRepository{DB: db, SecretEncryptionKey: secretEncryptionKeyBytes}
 	userAuthRepo := &repo.UserAuthRepository{DB: db}
+	accountRecoveryRepo := &accountrecovery.Repository{Db: db}
 	billingRepo := &repo.BillingRepository{DB: db}
 	userEntityRepo := &userEntityRepo.Repository{DB: db}
 	locationTagRepository := &locationtagRepo.Repository{DB: db}
@@ -304,6 +306,7 @@ func main() {
 		usageRepo,
 		userAuthRepo,
 		twoFactorRepo,
+		accountRecoveryRepo,
 		passkeysRepo,
 		storagBonusRepo,
 		fileRepo,
@@ -429,6 +432,10 @@ func main() {
 	publicAPI.POST("/users/two-factor/remove", userHandler.RemoveTwoFactor)
 	publicAPI.POST("/users/two-factor/passkeys/begin", userHandler.BeginPasskeyAuthenticationCeremony)
 	publicAPI.POST("/users/two-factor/passkeys/finish", userHandler.FinishPasskeyAuthenticationCeremony)
+	privateAPI.GET("/users/two-factor/account-recovery-status", userHandler.GetAccountRecoveryStatus)
+	privateAPI.POST("/users/two-factor/passkeys/set-reset-challenge", userHandler.ConfigurePassKeyRecovery)
+	publicAPI.GET("/users/two-factor/passkeys/reset-challenge", userHandler.GetPasskeyResetChallenge)
+	publicAPI.POST("/users/two-factor/passkeys/reset", userHandler.ResetPasskey)
 	privateAPI.GET("/users/two-factor/status", userHandler.GetTwoFactorStatus)
 	privateAPI.POST("/users/two-factor/setup", userHandler.SetupTwoFactor)
 	privateAPI.POST("/users/two-factor/enable", userHandler.EnableTwoFactor)
