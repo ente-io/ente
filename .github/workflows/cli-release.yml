@@ -10,11 +10,6 @@ on:
         tags:
             - "cli-v*"
 
-permissions:
-    # Allow the action to create a release
-    contents: write
-    packages: write
-
 jobs:
     release-linux-amd64:
         runs-on: ubuntu-latest
@@ -35,7 +30,7 @@ jobs:
               uses: wangyoucao577/go-release-action@v1
               with:
                   github_token: ${{ secrets.GITHUB_TOKEN }}
-                  release_tag: ${{ github.ref_name }}
+                  asset_name: ente-${{ github.ref_name }}-linux-amd64
                   release_name: ${{ github.ref_name }}
                   goversion: "1.20"
                   project_path: "./cli"
