@@ -155,6 +155,8 @@ jobs:
               run: mkdir artifacts
 
             - name: Build Windows installer
+              # Temporarily disable desktop builds
+              if: false
               run: |
                   flutter config --enable-windows-desktop
                   dart pub global activate flutter_distributor
@@ -163,9 +165,13 @@ jobs:
                   cp dist/**/ente_auth-*-windows-setup.exe artifacts/ente-${{ github.ref_name }}-installer.exe
 
             - name: Retain Windows EXE and DLLs
+              # Temporarily disable desktop builds
+              if: false
               run: cp -r build/windows/x64/runner/Release ente-${{ github.ref_name }}-windows
 
             - name: Code Sign for Windows
+              # Temporarily disable desktop builds
+              if: false
               uses: dlemstra/code-sign-action@v1
               with:
                   certificate: "${{ secrets.WINDOWS_CERTIFICATE }}"
@@ -175,7 +181,14 @@ jobs:
                       auth/ente-${{ github.ref_name }}-windows/auth.exe
 
             - name: Create a Windows ZIP
+              # Temporarily disable desktop builds
+              if: false
               run: tar.exe -a -c -f auth/artifacts/ente-${{ github.ref_name }}-windows.zip auth/ente-${{ github.ref_name }}-windows
+
+            - name: Temporary action
+              # TODO: Remove me when desktop builds are enabled
+              if: true
+              run: echo test > artifacts/example.txt
 
             - name: Generate checksums
               run: sha256sum artifacts/ente-* > artifacts/sha256sum-win
