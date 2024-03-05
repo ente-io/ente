@@ -11,30 +11,18 @@ on:
             - "cli-v*"
 
 jobs:
-    goreleaser:
+    release-linux-amd64:
         runs-on: ubuntu-latest
 
         steps:
-            - name: Install latest Syft
-              run: |
-                  wget $(curl -s https://api.github.com/repos/anchore/syft/releases/latest | grep 'browser_' | grep 'linux_amd64.rpm' | cut -d\" -f4) -O syft_latest_linux_amd64.rpm
-                  sudo rpm -i syft_latest_linux_amd64.rpm
-
             - name: Checkout code
               uses: actions/checkout@v4
-              with:
-                  # Required for the changelog to work correctly.
-                  fetch-depth: 0
 
-            - name: Set up Go
-              uses: actions/setup-go@v5
+            - uses: wangyoucao577/go-release-action@v1
               with:
-                  go-version: "1.20"
-
-            - name: Run GoReleaser
-              uses: goreleaser/goreleaser-action@v5
-              with:
-                  workdir: cli
-                  args: release --clean
-              env:
-                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                  github_token: ${{ secrets.GITHUB_TOKEN }}
+                  goversion: "1.20"
+                  project_path: "./cli"
+                  sha256sum: true
+                  goos: linux
+                  goarch: amd64
