@@ -253,16 +253,48 @@ func (h *UserHandler) GetAccountRecoveryStatus(c *gin.Context) {
 	c.JSON(http.StatusOK, res)
 }
 
-func (h *UserHandler) ConfigurePassKeyRecovery(c *gin.Context) {
-	c.JSON(http.StatusNotImplemented, gin.H{"message": "Not implemented"})
+// ConfigurePassKeySkipChallenge configures the passkey skip challenge for a user. In case the user does not
+// have access to passkey, the user can bypass the passkey by providing the recovery key
+func (h *UserHandler) ConfigurePassKeySkipChallenge(c *gin.Context) {
+	var request ente.ConfigurePassKeySkipRequest
+	if err := c.ShouldBindJSON(&request); err != nil {
+		handler.Error(c, stacktrace.Propagate(err, ""))
+		return
+	}
+	err := h.UserController.ConfigurePassKeySkip(c, &request)
+	if err != nil {
+		handler.Error(c, stacktrace.Propagate(err, ""))
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{})
 }
 
-func (h *UserHandler) GetPasskeyResetChallenge(c *gin.Context) {
-	c.JSON(http.StatusNotImplemented, gin.H{"message": "Not implemented"})
+func (h *UserHandler) GetPasskeySkipChallenge(c *gin.Context) {
+	passKeySessionID := c.Query("passKeySessionID")
+	if passKeySessionID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "passKeySessionID is required"})
+		return
+	}
+	resp, err := h.UserController.GetPasskeySkipChallenge(c, passKeySessionID)
+	if err != nil {
+		handler.Error(c, stacktrace.Propagate(err, ""))
+		return
+	}
+	c.JSON(http.StatusOK, resp)
 }
 
-func (h *UserHandler) ResetPasskey(c *gin.Context) {
-	c.JSON(http.StatusNotImplemented, gin.H{"message": "Not implemented"})
+func (h *UserHandler) SkipPassKey(c *gin.Context) {
+	var req ente.SkipPassKeyRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		handler.Error(c, stacktrace.Propagate(err, ""))
+		return
+	}
+	resp, err := h.UserController.SkipPassKey(c, &req)
+	if err != nil {
+		handler.Error(c, stacktrace.Propagate(err, ""))
+		return
+	}
+	c.JSON(http.StatusOK, resp)
 }
 
 // SetupTwoFactor generates a two factor secret and sends it to user to setup his authenticator app with
