@@ -5,7 +5,7 @@ import (
 	"database/sql"
 	b64 "encoding/base64"
 	"fmt"
-	"github.com/ente-io/museum/pkg/repo/accountrecovery"
+	"github.com/ente-io/museum/pkg/repo/two_factor_recovery"
 	"net/http"
 	"os"
 	"os/signal"
@@ -138,7 +138,7 @@ func main() {
 
 	twoFactorRepo := &repo.TwoFactorRepository{DB: db, SecretEncryptionKey: secretEncryptionKeyBytes}
 	userAuthRepo := &repo.UserAuthRepository{DB: db}
-	accountRecoveryRepo := &accountrecovery.Repository{Db: db}
+	twoFactorRecoveryRepo := &two_factor_recovery.Repository{Db: db}
 	billingRepo := &repo.BillingRepository{DB: db}
 	userEntityRepo := &userEntityRepo.Repository{DB: db}
 	locationTagRepository := &locationtagRepo.Repository{DB: db}
@@ -306,7 +306,7 @@ func main() {
 		usageRepo,
 		userAuthRepo,
 		twoFactorRepo,
-		accountRecoveryRepo,
+		twoFactorRecoveryRepo,
 		passkeysRepo,
 		storagBonusRepo,
 		fileRepo,

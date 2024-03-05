@@ -8,14 +8,14 @@ import (
 )
 
 // GetAccountRecoveryStatus returns a user's passkey reset status
-func (c *UserController) GetAccountRecoveryStatus(ctx *gin.Context) (*ente.AccountRecoveryStatus, error) {
+func (c *UserController) GetAccountRecoveryStatus(ctx *gin.Context) (*ente.TwoFactorRecoveryStatus, error) {
 	userID := auth.GetUserID(ctx.Request.Header)
-	return c.AccountRecoveryRepo.GetAccountRecoveryStatus(userID)
+	return c.TwoFactorRecoveryRepo.GetStatus(userID)
 }
 
 func (c *UserController) ConfigurePassKeySkip(ctx *gin.Context, req *ente.ConfigurePassKeySkipRequest) error {
 	userID := auth.GetUserID(ctx.Request.Header)
-	return c.AccountRecoveryRepo.ConfigurePassKeyRecovery(ctx, userID, req)
+	return c.TwoFactorRecoveryRepo.ConfigurePassKeyRecovery(ctx, userID, req)
 }
 
 func (c *UserController) GetPasskeySkipChallenge(ctx *gin.Context, passKeySessionID string) (*ente.EncData, error) {
@@ -23,7 +23,7 @@ func (c *UserController) GetPasskeySkipChallenge(ctx *gin.Context, passKeySessio
 	if err != nil {
 		return nil, err
 	}
-	recoveryStatus, err := c.AccountRecoveryRepo.GetAccountRecoveryStatus(userID)
+	recoveryStatus, err := c.TwoFactorRecoveryRepo.GetStatus(userID)
 	if err != nil {
 		return nil, err
 	}
@@ -31,7 +31,7 @@ func (c *UserController) GetPasskeySkipChallenge(ctx *gin.Context, passKeySessio
 		return nil, ente.NewBadRequestWithMessage("Passkey reset is not configured")
 	}
 
-	result, err := c.AccountRecoveryRepo.GetPasskeyResetChallenge(ctx, userID)
+	result, err := c.TwoFactorRecoveryRepo.GetPasskeyResetChallenge(ctx, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -46,7 +46,7 @@ func (c *UserController) SkipPassKey(context *gin.Context, req *ente.SkipPassKey
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "")
 	}
-	exists, err := c.AccountRecoveryRepo.VerifyRecoveryKeyForPassKey(userID, req.PassKeySkipSecret)
+	exists, err := c.TwoFactorRecoveryRepo.VerifyRecoveryKeyForPassKey(userID, req.PassKeySkipSecret)
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "")
 	}

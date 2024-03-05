@@ -18,7 +18,7 @@ type ConfigurePassKeySkipRequest struct {
 	EncPassKeySkipSecret EncData `json:"encPassKeySkipSecret" binding:"required"`
 }
 
-type AccountRecoveryStatus struct {
+type TwoFactorRecoveryStatus struct {
 	// AllowAdminReset is a boolean that determines if the admin can reset the user's MFA.
 	// If true, in the event that the user loses their MFA device, the admin can reset the user's MFA.
 	AllowAdminReset      bool `json:"allowAdminReset" binding:"required"`
