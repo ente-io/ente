@@ -35,9 +35,12 @@ env:
 jobs:
     build-ubuntu:
         runs-on: ubuntu-latest
+
         defaults:
             run:
+                # Run all the "run" steps inside the auth directory
                 working-directory: auth
+
         steps:
             - name: Checkout code and submodules
               uses: actions/checkout@v4
@@ -61,7 +64,7 @@ jobs:
               run: |
                   flutter build apk --release --flavor independent --dart-define=app.flavor=independent
                   mkdir artifacts
-                  mv build/app/outputs/flutter-apk/app-independent-release.apk artifacts/ente-${{ github.event.release.tag_name }}.apk
+                  mv build/app/outputs/flutter-apk/app-independent-release.apk artifacts/ente-${{ github.ref_name }}.apk
               env:
                   SIGNING_KEY_PATH: "/home/runner/work/_temp/keystore/ente_auth_key.jks"
                   SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
@@ -97,9 +100,9 @@ jobs:
                   flutter_distributor package --platform=linux --targets=deb --skip-clean
                   flutter_distributor package --platform=linux --targets=rpm --skip-clean
                   flutter_distributor package --platform=linux --targets=appimage --skip-clean
-                  mv dist/**/*-*-linux.deb ente-${{ github.event.release.tag_name }}-x86_64.deb
-                  mv dist/**/*-*-linux.rpm ente-${{ github.event.release.tag_name }}-x86_64.rpm
-                  mv dist/**/*-*-linux.AppImage ente-${{ github.event.release.tag_name }}-x86_64.AppImage
+                  mv dist/**/*-*-linux.deb ente-${{ github.ref_name }}-x86_64.deb
+                  mv dist/**/*-*-linux.rpm ente-${{ github.ref_name }}-x86_64.rpm
+                  mv dist/**/*-*-linux.AppImage ente-${{ github.ref_name }}-x86_64.AppImage
               env:
                   LIBSODIUM_USE_PKGCONFIG: 1
 
