@@ -1,7 +1,7 @@
 import { FlexWrapper } from "@ente/shared/components/Container";
 import { ENTE_WEBSITE_LINK } from "@ente/shared/constants/urls";
 import { convertBytesToHumanReadable } from "@ente/shared/utils/size";
-import { Box, Link, Typography,Checkbox, styled } from "@mui/material";
+import { Box, Link, Typography, Checkbox, styled } from "@mui/material";
 import {
     DATE_CONTAINER_HEIGHT,
     GAP_BTW_TILES,
@@ -189,6 +189,7 @@ const NothingContainer = styled(ListItemContainer)`
 const SelectAllCheckBoxContainer = styled(Checkbox)<{ margin: number }>`
     margin-left: ${(props) => props.margin}px;
 `;
+
 interface Props {
     height: number;
     width: number;
