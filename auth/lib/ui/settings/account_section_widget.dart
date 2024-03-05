@@ -4,6 +4,7 @@ import 'package:ente_auth/services/user_service.dart';
 import 'package:ente_auth/theme/ente_theme.dart';
 import 'package:ente_auth/ui/account/change_email_dialog.dart';
 import 'package:ente_auth/ui/account/delete_account_page.dart';
+import 'package:ente_auth/ui/account/password_entry_page.dart';
 import 'package:ente_auth/ui/components/captioned_text_widget.dart';
 import 'package:ente_auth/ui/components/expandable_menu_item_widget.dart';
 import 'package:ente_auth/ui/components/menu_item_widget.dart';
@@ -58,34 +59,33 @@ class AccountSectionWidget extends StatelessWidget {
         },
       ),
       sectionOptionSpacing,
-      // TODO: Remove After Stable
-      // MenuItemWidget(
-      //   captionedTextWidget: CaptionedTextWidget(
-      //     title: l10n.changePassword,
-      //   ),
-      //   pressedColor: getEnteColorScheme(context).fillFaint,
-      //   trailingIcon: Icons.chevron_right_outlined,
-      //   trailingIconIsMuted: true,
-      //   onTap: () async {
-      //     final hasAuthenticated = await LocalAuthenticationService.instance
-      //         .requestLocalAuthentication(
-      //       context,
-      //       l10n.authToChangeYourPassword,
-      //     );
-      //     if (hasAuthenticated) {
-      //       Navigator.of(context).push(
-      //         MaterialPageRoute(
-      //           builder: (BuildContext context) {
-      //             return const PasswordEntryPage(
-      //               mode: PasswordEntryMode.update,
-      //             );
-      //           },
-      //         ),
-      //       );
-      //     }
-      //   },
-      // ),
-      // sectionOptionSpacing,
+      MenuItemWidget(
+        captionedTextWidget: CaptionedTextWidget(
+          title: l10n.changePassword,
+        ),
+        pressedColor: getEnteColorScheme(context).fillFaint,
+        trailingIcon: Icons.chevron_right_outlined,
+        trailingIconIsMuted: true,
+        onTap: () async {
+          final hasAuthenticated = await LocalAuthenticationService.instance
+              .requestLocalAuthentication(
+            context,
+            l10n.authToChangeYourPassword,
+          );
+          if (hasAuthenticated) {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (BuildContext context) {
+                  return const PasswordEntryPage(
+                    mode: PasswordEntryMode.update,
+                  );
+                },
+              ),
+            );
+          }
+        },
+      ),
+      sectionOptionSpacing,
       MenuItemWidget(
         captionedTextWidget: CaptionedTextWidget(
           title: context.l10n.logout,
