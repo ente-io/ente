@@ -13,6 +13,7 @@ on:
 permissions:
     # Allow the action to create a release
     contents: write
+    packages: write
 
 jobs:
     release-linux-amd64:
