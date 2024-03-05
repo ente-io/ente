@@ -1,16 +1,10 @@
-name: Prod CI
+name: "Release (server)"
 
 on:
-    workflow_dispatch:
-    # Enable manual run
-    push:
-        # Sequence of patterns matched against refs/tags
-        tags:
-            - "v*" # Push events to matching v*, i.e. v4.2.0
+    workflow_dispatch: # Run manually
 
 jobs:
     build:
-        # This job will run on ubuntu virtual machine
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v4
@@ -19,6 +13,8 @@ jobs:
             - uses: mr-smithers-excellent/docker-build-push@v6
               name: Build & Push
               with:
+                  dockerfile: server/Dockerfile
+                  directory: server
                   image: ente/museum-prod
                   registry: rg.fr-par.scw.cloud
                   enableBuildKit: true

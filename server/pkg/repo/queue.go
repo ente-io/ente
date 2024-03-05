@@ -48,7 +48,7 @@ type QueueItem struct {
 
 // InsertItem adds entry in the queue with given queueName and item. If entry already exists, it's no-op
 func (repo *QueueRepository) InsertItem(ctx context.Context, queueName string, item string) error {
-	_, err := repo.DB.ExecContext(ctx, `INSERT INTO queue(queue_name, item) VALUES($1, $2) 
+	_, err := repo.DB.ExecContext(ctx, `INSERT INTO queue(queue_name, item) VALUES($1, $2)
 		ON CONFLICT (queue_name, item) DO NOTHING`, queueName, item)
 	if err != nil {
 		return stacktrace.Propagate(err, "")
@@ -83,7 +83,7 @@ func (repo *QueueRepository) RequeueItem(ctx context.Context, queueName string, 
 	if count == 0 {
 		return fmt.Errorf("no item found with queueID: %d for queue %s", queueID, queueName)
 	}
-	logrus.Info("Re-queued %d item with queueID: %d for queue %s", count, queueID, queueName)
+	logrus.Infof("Re-queued %d item with queueID: %d for queue %s", count, queueID, queueName)
 	return nil
 }
 
