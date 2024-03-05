@@ -35,6 +35,6 @@ jobs:
               uses: goreleaser/goreleaser-action@v5
               with:
                   workdir: cli
-                  args: release --rm-dist
+                  args: release --clean
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
