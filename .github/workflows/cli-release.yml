@@ -10,6 +10,10 @@ on:
         tags:
             - "cli-v*"
 
+permissions:
+    # Allow the action to create a release
+    contents: write
+
 jobs:
     release-linux-amd64:
         runs-on: ubuntu-latest
@@ -17,14 +21,6 @@ jobs:
         steps:
             - name: Checkout code
               uses: actions/checkout@v4
-
-            - name: Create a draft GitHub release
-              uses: ncipollo/release-action@v1
-              with:
-                  prerelease: true
-                  draft: true
-                  allowUpdates: true
-                  updateOnlyUnreleased: true
 
             - name: Build go binaries and upload to the release
               uses: wangyoucao577/go-release-action@v1
