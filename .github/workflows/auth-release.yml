@@ -13,7 +13,7 @@ name: "Release (auth)"
 # So if the next release we intend to put out is 1.2.3, you can:
 #
 #     git tag auth-v1.2.3-test
-#     git push auth-v1.2.3-test
+#     git push origin auth-v1.2.3-test
 #
 # We use a suffix like `-test` to indicate that these are test tags, and that
 # they belong to a pre-release.
@@ -48,8 +48,6 @@ jobs:
                   flutter-version: ${{ env.FLUTTER_VERSION  }}
                   cache: true
 
-            - run: flutter pub get
-
             - name: Setup keys
               uses: timheuer/base64-to-file@v1
               with:
@@ -59,15 +57,13 @@ jobs:
             - name: Build Android APK
               run: |
                   flutter build apk --release --flavor independent --dart-define=app.flavor=independent
-                  mv build/app/outputs/flutter-apk/app-independent-release.apk build/app/outputs/flutter-apk/ente-auth.apk
+                  mkdir artifacts
+                  mv build/app/outputs/flutter-apk/app-independent-release.apk artifacts/ente-${{ github.event.release.tag_name }}.apk
               env:
                   SIGNING_KEY_PATH: "/home/runner/work/_temp/keystore/ente_auth_key.jks"
                   SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
                   SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
                   SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD }}
-
-            - name: Checksum APK
-              run: sha256sum build/app/outputs/flutter-apk/ente-auth.apk > build/app/outputs/flutter-apk/sha256sum
 
             - name: Build PlayStore AAB
               run: |
@@ -92,8 +88,6 @@ jobs:
             - name: Build desktop app
               # Temporarily disable desktop builds
               if: false
-              env:
-                  LIBSODIUM_USE_PKGCONFIG: 1
               run: |
                   flutter config --enable-linux-desktop
                   dart pub global activate flutter_distributor
@@ -103,11 +97,16 @@ jobs:
                   mv dist/**/*-*-linux.deb ente-${{ github.event.release.tag_name }}-x86_64.deb
                   mv dist/**/*-*-linux.rpm ente-${{ github.event.release.tag_name }}-x86_64.rpm
                   mv dist/**/*-*-linux.AppImage ente-${{ github.event.release.tag_name }}-x86_64.AppImage
+              env:
+                  LIBSODIUM_USE_PKGCONFIG: 1
+
+            - name: Generate checksums
+              run: sha256sum artifacts/ente-* > artifacts/sha256sum
 
             - name: Create a draft GitHub release
               uses: ncipollo/release-action@v1
               with:
-                  artifacts: "build/app/outputs/flutter-apk/*,ente-${{ github.event.release.tag_name }}"
+                  artifacts: "auth/artifacts/ente-*"
                   prerelease: true
                   draft: true
                   updateOnlyUnreleased: true
