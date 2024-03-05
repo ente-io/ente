@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"github.com/sirupsen/logrus"
 	"strconv"
 	"strings"
 
@@ -67,6 +68,22 @@ func (repo *QueueRepository) UpdateItem(ctx context.Context, queueName string, q
 	if count == 0 {
 		return fmt.Errorf("no item found with queueID: %d for queue %s", queueID, queueName)
 	}
+	return nil
+}
+
+func (repo *QueueRepository) RequeueItem(ctx context.Context, queueName string, queueID int64) error {
+	rows, err := repo.DB.ExecContext(ctx, `UPDATE queue SET is_deleted = false WHERE queue_name = $1 AND queue_id = $2`, queueName, queueID)
+	if err != nil {
+		return stacktrace.Propagate(err, "")
+	}
+	count, err := rows.RowsAffected()
+	if err != nil {
+		return stacktrace.Propagate(err, "")
+	}
+	if count == 0 {
+		return fmt.Errorf("no item found with queueID: %d for queue %s", queueID, queueName)
+	}
+	logrus.Info("Re-queued %d item with queueID: %d for queue %s", count, queueID, queueName)
 	return nil
 }
 

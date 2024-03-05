@@ -33,6 +33,7 @@ import (
 
 // AdminHandler exposes request handlers for all admin related requests
 type AdminHandler struct {
+	QueueRepo               *repo.QueueRepository
 	UserRepo                *repo.UserRepository
 	CollectionRepo          *repo.CollectionRepository
 	UserAuthRepo            *repo.UserAuthRepository
@@ -302,6 +303,24 @@ func (h *AdminHandler) UpdateSubscription(c *gin.Context) {
 		return
 	}
 	logrus.Info("Updated subscription")
+	c.JSON(http.StatusOK, gin.H{})
+}
+
+func (h *AdminHandler) ReQueueItem(c *gin.Context) {
+	var r ente.ReQueueItemRequest
+	if err := c.ShouldBindJSON(&r); err != nil {
+		handler.Error(c, stacktrace.Propagate(ente.ErrBadRequest, "Bad request"))
+		return
+	}
+	adminID := auth.GetUserID(c.Request.Header)
+	go h.DiscordController.NotifyAdminAction(
+		fmt.Sprintf("Admin (%d) requeueing item %d for queue: %s", adminID, r.ID, r.QueueName))
+	err := h.QueueRepo.RequeueItem(c, r.QueueName, r.ID)
+	if err != nil {
+		logrus.WithError(err).Error("Failed to re-queue item")
+		handler.Error(c, stacktrace.Propagate(err, ""))
+		return
+	}
 	c.JSON(http.StatusOK, gin.H{})
 }
 
