@@ -10,6 +10,11 @@ on:
         tags:
             - "cli-v*"
 
+permissions:
+    # Allow the action to create a release
+    contents: write
+    packages: write
+
 jobs:
     release-linux-amd64:
         runs-on: ubuntu-latest
