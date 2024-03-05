@@ -1,0 +1,40 @@
+name: "Release (cli)"
+
+on:
+    push:
+        # Run when a tag matching the pattern "cli-v*"" is pushed
+        #
+        # Tip: to test this workflow, push at tag with a pre-release version,
+        # e.g. `cli-v1.2.3-test`, where 1.2.3 is the expected version number of
+        # the next release that'll go out.
+        tags:
+            - "cli-v*"
+
+jobs:
+    goreleaser:
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Install latest Syft
+              run: |
+                  wget $(curl -s https://api.github.com/repos/anchore/syft/releases/latest | grep 'browser_' | grep 'linux_amd64.rpm' | cut -d\" -f4) -O syft_latest_linux_amd64.rpm
+                  sudo rpm -i syft_latest_linux_amd64.rpm
+
+            - name: Checkout code
+              uses: actions/checkout@v4
+              with:
+                  # Required for the changelog to work correctly.
+                  fetch-depth: 0
+
+            - name: Set up Go
+              uses: actions/setup-go@v5
+              with:
+                  go-version: "1.20"
+
+            - name: Run GoReleaser
+              uses: goreleaser/goreleaser-action@v5
+              with:
+                  workdir: cli
+                  args: release --rm-dist
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
