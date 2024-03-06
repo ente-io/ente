@@ -1,7 +1,7 @@
-import { FILE_TYPE } from "constants/file";
-import { EnteFile } from "types/file";
 import { logError } from "@ente/shared/sentry";
+import { FILE_TYPE } from "constants/file";
 import { LivePhotoSourceURL, SourceURLs } from "services/download";
+import { EnteFile } from "types/file";
 import { SetSelectedState } from "types/gallery";
 
 const WAIT_FOR_VIDEO_PLAYBACK = 1 * 1000;
@@ -135,11 +135,11 @@ export const handleSelectCreator =
     (
         setSelected: SetSelectedState,
         activeCollectionID: number,
-        setRangeStart?
+        setRangeStart?,
     ) =>
     (id: number, isOwnFile: boolean, index?: number) =>
     (checked: boolean) => {
-        if (typeof index !== 'undefined') {
+        if (typeof index !== "undefined") {
             if (checked) {
                 setRangeStart(index);
             } else {

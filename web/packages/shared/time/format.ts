@@ -90,10 +90,10 @@ export const isSameDay = (first, second) => {
 export const getDate = (item) => {
     const currentDate = item.metadata.creationTime / 1000;
     const date = isSameDay(new Date(currentDate), new Date())
-        ? t('TODAY')
+        ? t("TODAY")
         : isSameDay(new Date(currentDate), new Date(Date.now() - A_DAY))
-        ? t('YESTERDAY')
-        : formatDate(currentDate);
+          ? t("YESTERDAY")
+          : formatDate(currentDate);
 
     return date;
 };

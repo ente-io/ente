@@ -17,16 +17,16 @@ import DownloadManager, {
     LivePhotoSourceURL,
     SourceURLs,
 } from "services/download";
-import {
-    handleSelectCreator,
-    updateFileMsrcProps,
-    updateFileSrcProps,
-} from "utils/photoFrame";
 import { EnteFile } from "types/file";
 import {
     SelectedState,
     SetFilesDownloadProgressAttributesCreator,
 } from "types/gallery";
+import {
+    handleSelectCreator,
+    updateFileMsrcProps,
+    updateFileSrcProps,
+} from "utils/photoFrame";
 import { PhotoList } from "./PhotoList";
 import { DedupePhotoList } from "./PhotoList/dedupe";
 import PreviewCard from "./pages/gallery/PreviewCard";
@@ -234,7 +234,7 @@ const PhotoFrame = ({
     const handleSelect = handleSelectCreator(
         setSelected,
         activeCollectionID,
-        setRangeStart
+        setRangeStart,
     );
 
     const onHoverOver = (index: number) => () => {

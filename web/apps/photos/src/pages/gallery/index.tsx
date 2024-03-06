@@ -1017,7 +1017,8 @@ export default function Gallery() {
                 isClipSearchResult,
                 selectedFile: selected,
                 setSelectedFiles: setSelected,
-            }}>
+            }}
+        >
             <FullScreenDropZone
                 getDragAndDropRootProps={getDragAndDropRootProps}
             >
