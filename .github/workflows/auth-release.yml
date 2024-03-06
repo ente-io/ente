@@ -1,14 +1,13 @@
 name: "Release (auth)"
 
+# [Note: Testing release workflows that are triggered by tags]
+#
 # To test this out, push a tag with a pre-release version. The version number
 # should be the version number of the next actual release.
 #
 # > When major, minor, and patch are equal, a pre-release version has lower
-# > precedence than a normal version:
-# >
-# > Example: 1.0.0-alpha < 1.0.0.
-# >
-# > - https://semver.org
+# > precedence than a normal version. Example: 1.0.0-alpha < 1.0.0.
+# > https://semver.org
 #
 # So if the next release we intend to put out is 1.2.3, you can:
 #
@@ -38,7 +37,6 @@ jobs:
 
         defaults:
             run:
-                # Run all the "run" steps inside the auth directory
                 working-directory: auth
 
         steps:
@@ -63,7 +61,7 @@ jobs:
             - name: Create artifacts directory
               run: mkdir artifacts
 
-            - name: Build Android APK
+            - name: Build independent APK
               run: |
                   flutter build apk --release --flavor independent --dart-define=app.flavor=independent
                   mv build/app/outputs/flutter-apk/app-independent-release.apk artifacts/ente-${{ github.ref_name }}.apk
@@ -115,13 +113,13 @@ jobs:
               uses: ncipollo/release-action@v1
               with:
                   artifacts: "auth/artifacts/*"
-                  prerelease: true
                   draft: true
                   allowUpdates: true
                   updateOnlyUnreleased: true
 
             - name: Upload AAB to PlayStore
-              # Temporarily disable GP upload
+              # Temporarily disable GP upload, enable this once desktop build
+              # testing is complete.
               if: false
               uses: r0adkll/upload-google-play@v1
               with:
@@ -135,7 +133,6 @@ jobs:
 
         defaults:
             run:
-                # Run all the "run" steps inside the auth directory
                 working-directory: auth
 
         steps:
@@ -189,7 +186,6 @@ jobs:
               uses: ncipollo/release-action@v1
               with:
                   artifacts: "auth/artifacts/*"
-                  prerelease: true
                   draft: true
                   allowUpdates: true
                   updateOnlyUnreleased: true
@@ -199,7 +195,6 @@ jobs:
 
         defaults:
             run:
-                # Run all the "run" steps inside the auth directory
                 working-directory: auth
 
         steps:
@@ -291,7 +286,6 @@ jobs:
               uses: ncipollo/release-action@v1
               with:
                   artifacts: "auth/artifacts/*"
-                  prerelease: true
                   draft: true
                   allowUpdates: true
                   updateOnlyUnreleased: true
