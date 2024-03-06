@@ -6,6 +6,7 @@ import 'dart:typed_data';
 import 'package:bip39/bip39.dart' as bip39;
 import 'package:ente_auth/core/constants.dart';
 import 'package:ente_auth/core/event_bus.dart';
+import 'package:ente_auth/events/endpoint_updated_event.dart';
 import 'package:ente_auth/events/signed_in_event.dart';
 import 'package:ente_auth/events/signed_out_event.dart';
 import 'package:ente_auth/models/key_attributes.dart';
@@ -42,6 +43,7 @@ class Configuration {
   static const userIDKey = "user_id";
   static const hasMigratedSecureStorageKey = "has_migrated_secure_storage";
   static const hasOptedForOfflineModeKey = "has_opted_for_offline_mode";
+  static const endPointKey = "endpoint";
   final List<String> onlineSecureKeys = [
     keyKey,
     secretKeyKey,
@@ -317,7 +319,12 @@ class Configuration {
   }
 
   String getHttpEndpoint() {
-    return endpoint;
+    return _preferences.getString(endPointKey) ?? endpoint;
+  }
+
+  Future<void> setHttpEndpoint(String endpoint) async {
+    await _preferences.setString(endPointKey, endpoint);
+    Bus.instance.fire(EndpointUpdatedEvent());
   }
 
   String? getToken() {
