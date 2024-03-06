@@ -3,8 +3,8 @@
 ## Install
 
 You can either download the binary from the [GitHub releases
-page](https://github.com/ente-io/ente/releases?q=cli&expanded=true) or build it
-yourself.
+page](https://github.com/ente-io/ente/releases?q=tag%3Acli-v0&expanded=true) or
+build it yourself.
 
 ### Build from source
 
