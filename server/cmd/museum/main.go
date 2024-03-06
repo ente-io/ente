@@ -138,7 +138,7 @@ func main() {
 
 	twoFactorRepo := &repo.TwoFactorRepository{DB: db, SecretEncryptionKey: secretEncryptionKeyBytes}
 	userAuthRepo := &repo.UserAuthRepository{DB: db}
-	twoFactorRecoveryRepo := &two_factor_recovery.Repository{Db: db}
+	twoFactorRecoveryRepo := &two_factor_recovery.Repository{Db: db, SecretEncryptionKey: secretEncryptionKeyBytes}
 	billingRepo := &repo.BillingRepository{DB: db}
 	userEntityRepo := &userEntityRepo.Repository{DB: db}
 	locationTagRepository := &locationtagRepo.Repository{DB: db}

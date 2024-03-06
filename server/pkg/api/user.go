@@ -256,7 +256,7 @@ func (h *UserHandler) GetAccountRecoveryStatus(c *gin.Context) {
 // ConfigurePassKeySkipChallenge configures the passkey skip challenge for a user. In case the user does not
 // have access to passkey, the user can bypass the passkey by providing the recovery key
 func (h *UserHandler) ConfigurePassKeySkipChallenge(c *gin.Context) {
-	var request ente.ConfigurePassKeySkipRequest
+	var request ente.ConfigurePassKeyRecoveryRequest
 	if err := c.ShouldBindJSON(&request); err != nil {
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return
