@@ -412,6 +412,7 @@
   "developerMode":"Developer mode",
   "developerModeWarning":"Are you sure that you want to modify Developer settings?",
   "developerSettings": "Developer settings",
+  "serverEndpoint": "Server endpoint",
   "invalidURL": "Invalid URL",
   "invalidURLMessage": "Sorry, the URL you entered is invalid. Please enter a valid URL and try again.",
   "endpointUpdatedMessage": "Endpoint updated successfully"

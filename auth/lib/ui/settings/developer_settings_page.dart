@@ -39,7 +39,7 @@ class _DeveloperSettingsPageState extends State<DeveloperSettingsPage> {
             TextField(
               controller: _urlController,
               decoration: InputDecoration(
-                labelText: 'Server Endpoint',
+                labelText: context.l10n.serverEndpoint,
                 hintText: Configuration.instance.getHttpEndpoint(),
               ),
               autofocus: true,
