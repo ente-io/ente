@@ -244,8 +244,8 @@ func (h *UserHandler) GetTwoFactorStatus(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"status": status})
 }
 
-func (h *UserHandler) GetAccountRecoveryStatus(c *gin.Context) {
-	res, err := h.UserController.GetAccountRecoveryStatus(c)
+func (h *UserHandler) GetTwoFactorRecoveryStatus(c *gin.Context) {
+	res, err := h.UserController.GetTwoFactorRecoveryStatus(c)
 	if err != nil {
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return

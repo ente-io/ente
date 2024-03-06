@@ -7,8 +7,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// GetAccountRecoveryStatus returns a user's passkey reset status
-func (c *UserController) GetAccountRecoveryStatus(ctx *gin.Context) (*ente.TwoFactorRecoveryStatus, error) {
+// GetTwoFactorRecoveryStatus returns a user's passkey reset status
+func (c *UserController) GetTwoFactorRecoveryStatus(ctx *gin.Context) (*ente.TwoFactorRecoveryStatus, error) {
 	userID := auth.GetUserID(ctx.Request.Header)
 	return c.TwoFactorRecoveryRepo.GetStatus(userID)
 }
