@@ -68,6 +68,18 @@ class FeatureFlagService {
     }
   }
 
+  bool enablePasskey() {
+    try {
+      if (isInternalUserOrDebugBuild()) {
+        return true;
+      }
+      return _getFeatureFlags().enablePasskey;
+    } catch (e) {
+      _logger.info('error in enablePasskey check', e);
+      return FFDefault.enablePasskey;
+    }
+  }
+
   bool isInternalUserOrDebugBuild() {
     final String? email = Configuration.instance.getEmail();
     final userID = Configuration.instance.getUserID();
@@ -94,20 +106,24 @@ class FeatureFlags {
   static FeatureFlags defaultFlags = FeatureFlags(
     disableCFWorker: FFDefault.disableCFWorker,
     enableStripe: FFDefault.enableStripe,
+    enablePasskey: FFDefault.enablePasskey,
   );
 
   final bool disableCFWorker;
   final bool enableStripe;
+  final bool enablePasskey;
 
   FeatureFlags({
     required this.disableCFWorker,
     required this.enableStripe,
+    required this.enablePasskey,
   });
 
   Map<String, dynamic> toMap() {
     return {
       "disableCFWorker": disableCFWorker,
       "enableStripe": enableStripe,
+      "enablePasskey": enablePasskey,
     };
   }
 
@@ -120,6 +136,7 @@ class FeatureFlags {
     return FeatureFlags(
       disableCFWorker: json["disableCFWorker"] ?? FFDefault.disableCFWorker,
       enableStripe: json["enableStripe"] ?? FFDefault.enableStripe,
+      enablePasskey: json["enablePasskey"] ?? FFDefault.enablePasskey,
     );
   }
 }

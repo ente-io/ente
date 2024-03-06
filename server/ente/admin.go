@@ -22,6 +22,12 @@ type AdminOpsForUserRequest struct {
 	UserID int64 `json:"userID" binding:"required"`
 }
 
+// ReQueueItemRequest puts an item back into the queue for processing.
+type ReQueueItemRequest struct {
+	ID        int64  `json:"id" binding:"required"`
+	QueueName string `json:"queueName" binding:"required"`
+}
+
 // RecoverAccount is used to recover accounts which are in soft-delete state.
 type RecoverAccountRequest struct {
 	UserID  int64  `json:"userID" binding:"required"`

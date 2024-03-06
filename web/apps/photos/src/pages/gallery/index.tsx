@@ -163,6 +163,8 @@ const defaultGalleryContext: GalleryContextType = {
     emailList: null,
     openHiddenSection: () => null,
     isClipSearchResult: null,
+    selectedFile: null,
+    setSelectedFiles: () => null,
 };
 
 export const GalleryContext = createContext<GalleryContextType>(
@@ -1013,6 +1015,8 @@ export default function Gallery() {
                 emailList,
                 openHiddenSection,
                 isClipSearchResult,
+                selectedFile: selected,
+                setSelectedFiles: setSelected,
             }}
         >
             <FullScreenDropZone

@@ -38,7 +38,7 @@ And ping again
 This time you'll see the updated message.
 
 For more details about how to get museum up and running, see
-[RUNNING.md](/RUNNING.md).
+[RUNNING.md](RUNNING.md).
 
 ## Architecture
 
@@ -100,12 +100,12 @@ setup we ourselves use in production.
 > service, and use `systemctl start|stop|status museum` to herd it around.
 
 Some people new to Docker/Go/Postgres might have general questions though.
-Unfortunately, because of limited engineering bandwidth **we will currently not be
-able to prioritize support queries related to self hosting**, and we request you
-to please not open issues around self hosting for the time being (feel free to
-create discussions though). The best way to summarize the status of self hosting
-is – **everything you need is here, but it is perhaps not readily documented, or
-flexible enough.**
+Unfortunately, because of limited engineering bandwidth **we will currently not
+be able to prioritize support queries related to self hosting**, and we request
+you to please not open issues around self hosting for the time being (feel free
+to create discussions though). The best way to summarize the status of self
+hosting is – **everything you need is here, but it is perhaps not readily
+documented, or flexible enough.**
 
 That said, we hope community members help each other out, e.g. in this
 repository's [Discussions](https://github.com/ente-io/ente/discussions), or on
@@ -116,6 +116,6 @@ documentation PRs around this too.
 ## Thanks ❤️
 
 We've had great fun with this combination (Golang + Postgres + Docker), and we
-hope you also have fun tinkering with it too. A big thank you to all the people who've
-put in decades of work behind these great technologies. Truly, on the shoulders
-of giants we stand.
+hope you also have fun tinkering with it too. A big thank you to all the people
+who've put in decades of work behind these great technologies. Truly, on the
+shoulders of giants we stand.

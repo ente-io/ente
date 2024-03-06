@@ -1,0 +1,87 @@
+{
+  "account": "Konto",
+  "unlock": "Lås upp",
+  "recoveryKey": "Återställningsnyckel",
+  "onBoardingBody": "Säkerhetskopiera dina 2FA-koder",
+  "onBoardingGetStarted": "Kom igång",
+  "setupFirstAccount": "Konfigurera ditt första konto",
+  "importScanQrCode": "Skanna en QR-kod",
+  "qrCode": "QR-kod",
+  "importEnterSetupKey": "Ange en konfigurationskod",
+  "importAccountPageTitle": "Ange kontodetaljer",
+  "secretCanNotBeEmpty": "Secret kan inte vara tomt",
+  "bothIssuerAndAccountCanNotBeEmpty": "Både utgivare och konto kan inte vara tomma",
+  "incorrectDetails": "Felaktiga uppgifter",
+  "pleaseVerifyDetails": "Kontrollera dina detaljer och försök igen",
+  "codeIssuerHint": "Utfärdare",
+  "codeSecretKeyHint": "Secret Key",
+  "codeAccountHint": "Konto (du@domän.com)",
+  "accountKeyType": "Typ av nyckel",
+  "sessionExpired": "Sessionen har gått ut",
+  "@sessionExpired": {
+    "description": "Title of the dialog when the users current session is invalid/expired"
+  },
+  "pleaseLoginAgain": "Vänligen logga in igen",
+  "loggingOut": "Loggar ut...",
+  "saveAction": "Spara",
+  "nextTotpTitle": "nästa",
+  "deleteCodeMessage": "Vill du ta bort den här koden? Det går inte att ångra den här åtgärden.",
+  "viewLogsAction": "Visa loggar",
+  "emailLogsTitle": "E-posta loggar",
+  "emailLogsMessage": "Skicka loggarna till {email}",
+  "@emailLogsMessage": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "copyEmailAction": "Kopiera e-post",
+  "exportLogsAction": "Exportera loggar",
+  "reportABug": "Rapportera en bugg",
+  "crashAndErrorReporting": "Krasch och felrapportering",
+  "reportBug": "Rapportera bugg",
+  "emailUsMessage": "Skicka e-mail till {email}",
+  "@emailUsMessage": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "contactSupport": "Kontakta support",
+  "rateUsOnStore": "Betygsätt på {storeName}",
+  "blog": "Blogg",
+  "merchandise": "Merchandise",
+  "verifyPassword": "Bekräfta lösenord",
+  "pleaseWait": "Vänligen vänta...",
+  "generatingEncryptionKeysTitle": "Skapar krypteringsnycklar...",
+  "recreatePassword": "Återskapa lösenord",
+  "useRecoveryKey": "Använd återställningsnyckel",
+  "incorrectPasswordTitle": "Felaktigt lösenord",
+  "pleaseTryAgain": "Försök igen",
+  "existingUser": "Befintlig användare",
+  "delete": "Radera",
+  "enterYourPasswordHint": "Ange ditt lösenord",
+  "forgotPassword": "Glömt lösenord",
+  "oops": "Hoppsan",
+  "suggestFeatures": "Föreslå funktionalitet",
+  "faq": "FAQ",
+  "faq_q_1": "Hur säkert är ente Auth?",
+  "weakStrength": "Svag",
+  "strongStrength": "Stark",
+  "moderateStrength": "Måttligt",
+  "searchHint": "Sök...",
+  "search": "Sök",
+  "sorryUnableToGenCode": "Tyvärr, det gick inte att generera en kod för {issuerName}",
+  "noResult": "Inga resultat",
+  "addCode": "Lägg till kod",
+  "scanAQrCode": "Skanna en QR-kod",
+  "enterDetailsManually": "Ange uppgifter manuellt",
+  "edit": "Redigera",
+  "copiedToClipboard": "Kopierat till urklipp",
+  "copiedNextToClipboard": "Kopierade nästa kod till urklipp",
+  "error": "Fel",
+  "recoveryKeyCopiedToClipboard": "Återställningsnyckel kopierad till urklipp",
+  "recoveryKeyOnForgotPassword": "Om du glömmer ditt lösenord är det enda sättet du kan återställa dina data med denna nyckel."
+}

@@ -42,7 +42,7 @@ projects to get started:
 
 
 If your language is not listed for translation, please [create a GitHub
-issue](https://github.com/ente-io/ente/issues/new?title=Request+for+New+Language+Translation&body=Language+name%3A)
+issue](https://github.com/ente-io/ente/issues/new?title=Request+for+New+Language+Translation&body=Language+name%3A+%0AProject%3A+auth%2Fphotos%2Fboth)
 to have it added. It is okay to have partial translations. Once ~90% of the
 strings in a language get translated, we will start surfacing it in the apps.
 
@@ -63,8 +63,9 @@ If you'd like to contribute code, it is best to start small.
 
 Each of the individual product/platform specific directories in this repository
 have instructions on setting up a dev environment and making changes. The issues
-labelled "good first issues" should be good starting points. Once you have a
-bearing, you can head on to issues labelled "help wanted".
+and discussions (feature requests) labelled "good first issues" should be good
+starting points. Once you have a bearing, you can head on to issues or
+discussions labelled "help wanted".
 
 If you're planning on adding a new feature or making any other substantial
 change, please [discuss it with

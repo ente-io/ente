@@ -11,6 +11,9 @@ export type SelectedState = {
     count: number;
     collectionID: number;
 };
+export type SetSelectedState = React.Dispatch<
+    React.SetStateAction<SelectedState>
+>;
 export type SetFiles = React.Dispatch<React.SetStateAction<EnteFile[]>>;
 export type SetCollections = React.Dispatch<React.SetStateAction<Collection[]>>;
 export type SetLoading = React.Dispatch<React.SetStateAction<boolean>>;
@@ -54,6 +57,8 @@ export type GalleryContextType = {
     emailList: string[];
     openHiddenSection: (callback?: () => void) => void;
     isClipSearchResult: boolean;
+    setSelectedFiles: (value) => void;
+    selectedFile: SelectedState;
 };
 
 export enum CollectionSelectorIntent {
