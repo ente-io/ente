@@ -63,8 +63,9 @@ If you'd like to contribute code, it is best to start small.
 
 Each of the individual product/platform specific directories in this repository
 have instructions on setting up a dev environment and making changes. The issues
-labelled "good first issues" should be good starting points. Once you have a
-bearing, you can head on to issues labelled "help wanted".
+and discussions (feature requests) labelled "good first issues" should be good
+starting points. Once you have a bearing, you can head on to issues or
+discussions labelled "help wanted".
 
 If you're planning on adding a new feature or making any other substantial
 change, please [discuss it with
