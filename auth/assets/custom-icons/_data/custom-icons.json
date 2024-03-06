@@ -31,6 +31,10 @@
       "title": "Bitwarden"
     },
     {
+      "title": "Bloom Host",
+      "slug": "bloom_host"
+    },
+    {
       "title": "BorgBase",
       "altNames": ["borg"],
       "slug": "BorgBase",
@@ -110,7 +114,7 @@
     },
     {
       "title": "Healthchecks.io",
-      "slug": "healthchecks",
+      "slug": "healthchecks"
     },
     {
       "title": "ING"
@@ -298,7 +302,7 @@
     },
     {
       "title": "Synology DSM",
-      "slug": "synology_dsm",
+      "slug": "synology_dsm"
     },
     {
       "title": "TCPShield",

@@ -42,7 +42,7 @@ projects to get started:
 
 
 If your language is not listed for translation, please [create a GitHub
-issue](https://github.com/ente-io/ente/issues/new?title=Request+for+New+Language+Translation&body=Language+name%3A)
+issue](https://github.com/ente-io/ente/issues/new?title=Request+for+New+Language+Translation&body=Language+name%3A+%0AProject%3A+auth%2Fphotos%2Fboth)
 to have it added. It is okay to have partial translations. Once ~90% of the
 strings in a language get translated, we will start surfacing it in the apps.
 

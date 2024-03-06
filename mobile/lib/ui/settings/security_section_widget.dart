@@ -11,7 +11,6 @@ import "package:photos/models/user_details.dart";
 import 'package:photos/services/local_authentication_service.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/theme/ente_theme.dart';
-import "package:photos/ui/account/recovery_key_page.dart";
 import "package:photos/ui/account/request_pwd_verification_page.dart";
 import 'package:photos/ui/account/sessions_page.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';
@@ -20,7 +19,6 @@ import 'package:photos/ui/components/menu_item_widget/menu_item_widget.dart';
 import 'package:photos/ui/components/toggle_switch_widget.dart';
 import 'package:photos/ui/settings/common_settings.dart';
 import "package:photos/utils/crypto_util.dart";
-import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/navigation_util.dart";
 import "package:photos/utils/toast_util.dart";
 
@@ -69,43 +67,6 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
     if (_config.hasConfiguredAccount()) {
       children.addAll(
         [
-          sectionOptionSpacing,
-          MenuItemWidget(
-            captionedTextWidget: CaptionedTextWidget(
-              title: S.of(context).recoveryKey,
-            ),
-            pressedColor: getEnteColorScheme(context).fillFaint,
-            trailingIcon: Icons.chevron_right_outlined,
-            trailingIconIsMuted: true,
-            showOnlyLoadingState: true,
-            onTap: () async {
-              final hasAuthenticated = await LocalAuthenticationService.instance
-                  .requestLocalAuthentication(
-                context,
-                S.of(context).authToViewYourRecoveryKey,
-              );
-              if (hasAuthenticated) {
-                String recoveryKey;
-                try {
-                  recoveryKey = await _getOrCreateRecoveryKey(context);
-                } catch (e) {
-                  await showGenericErrorDialog(context: context, error: e);
-                  return;
-                }
-                unawaited(
-                  routeToPage(
-                    context,
-                    RecoveryKeyPage(
-                      recoveryKey,
-                      S.of(context).ok,
-                      showAppBar: true,
-                      onDone: () {},
-                    ),
-                  ),
-                );
-              }
-            },
-          ),
           sectionOptionSpacing,
           MenuItemWidget(
             captionedTextWidget: CaptionedTextWidget(
@@ -252,12 +213,6 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
       builder: (BuildContext context) {
         return alert;
       },
-    );
-  }
-
-  Future<String> _getOrCreateRecoveryKey(BuildContext context) async {
-    return CryptoUtil.bin2hex(
-      await UserService.instance.getOrCreateRecoveryKey(context),
     );
   }
 

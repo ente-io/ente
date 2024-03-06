@@ -1,0 +1,41 @@
+name: "Lint (web)"
+
+on:
+    # Run on every push (this also covers pull requests)
+    push:
+        # [Note: Specify branch when specifying a path filter]
+        #
+        # Path filters are ignored for tag pushes, which causes this workflow to
+        # always run when we push a tag. Defining an explicit branch solves the
+        # issue. From GitHub's docs:
+        #
+        # > if you define both branches/branches-ignore and paths/paths-ignore,
+        # > the workflow will only run when both filters are satisfied.
+        #
+        # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions
+        branches: ["**"]
+        # Only run if something changes in these paths
+        paths:
+            - "web/**"
+            - ".github/workflows/web-lint.yml"
+
+jobs:
+    lint:
+        runs-on: ubuntu-latest
+        defaults:
+            run:
+                working-directory: web
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Setup node and enable yarn caching
+              uses: actions/setup-node@v4
+              with:
+                  node-version: 20
+                  cache: "yarn"
+                  cache-dependency-path: "web/yarn.lock"
+
+            - run: yarn install
+
+            - run: yarn lint

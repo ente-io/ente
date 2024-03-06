@@ -1,0 +1,37 @@
+name: "Lint (auth)"
+
+on:
+    # Run on every push to branches (this also covers pull requests)
+    push:
+        # See: [Note: Specify branch when specifying a path filter]
+        branches: ["**"]
+        # Only run if something changes in these paths
+        paths:
+            - "auth/**"
+            - ".github/workflows/auth-lint.yml"
+
+env:
+    FLUTTER_VERSION: "3.16.9"
+
+jobs:
+    lint:
+        runs-on: ubuntu-latest
+        defaults:
+            run:
+                working-directory: auth
+        steps:
+            - name: Checkout code and submodules
+              uses: actions/checkout@v4
+              with:
+                  submodules: recursive
+
+            - name: Install Flutter ${{ env.FLUTTER_VERSION  }}
+              uses: subosito/flutter-action@v2
+              with:
+                  channel: "stable"
+                  flutter-version: ${{ env.FLUTTER_VERSION  }}
+                  cache: true
+
+            - run: flutter pub get
+
+            - run: flutter analyze --no-fatal-infos

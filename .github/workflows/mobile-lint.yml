@@ -1,0 +1,37 @@
+name: "Lint (mobile)"
+
+on:
+    # Run on every push (this also covers pull requests)
+    push:
+        # See: [Note: Specify branch when specifying a path filter]
+        branches: ["**"]
+        # Only run if something changes in these paths
+        paths:
+            - "mobile/**"
+            - ".github/workflows/mobile-lint.yml"
+
+env:
+    FLUTTER_VERSION: "3.13.4"
+
+jobs:
+    lint:
+        runs-on: ubuntu-latest
+        defaults:
+            run:
+                working-directory: mobile
+        steps:
+            - name: Checkout code and submodules
+              uses: actions/checkout@v4
+              with:
+                  submodules: recursive
+
+            - name: Install Flutter ${{ env.FLUTTER_VERSION  }}
+              uses: subosito/flutter-action@v2
+              with:
+                  channel: "stable"
+                  flutter-version: ${{ env.FLUTTER_VERSION  }}
+                  cache: true
+
+            - run: flutter pub get
+
+            - run: flutter analyze --no-fatal-infos

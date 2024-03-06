@@ -1,0 +1,24 @@
+name: "Release (server)"
+
+on:
+    workflow_dispatch: # Run manually
+
+jobs:
+    build:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+              name: Check out code
+
+            - uses: mr-smithers-excellent/docker-build-push@v6
+              name: Build & Push
+              with:
+                  dockerfile: server/Dockerfile
+                  directory: server
+                  image: ente/museum-prod
+                  registry: rg.fr-par.scw.cloud
+                  enableBuildKit: true
+                  buildArgs: GIT_COMMIT=${GITHUB_SHA}
+                  tags: ${GITHUB_SHA}, latest
+                  username: ${{ secrets.DOCKER_USERNAME }}
+                  password: ${{ secrets.DOCKER_PASSWORD }}

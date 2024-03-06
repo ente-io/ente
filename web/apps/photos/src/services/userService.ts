@@ -338,8 +338,24 @@ export const updateMapEnabledStatus = async (newStatus: boolean) => {
     }
 };
 
+/**
+ * Return true to disable the upload of files via Cloudflare Workers.
+ *
+ * These workers were introduced as a way of make file uploads faster:
+ * https://ente.io/blog/tech/making-uploads-faster/
+ *
+ * By default, that's the route we take. However, during development or when
+ * self-hosting it can be convenient to turn this flag on to directly upload to
+ * the S3-compatible URLs returned by the ente API.
+ *
+ * Note the double negative (Enhancement: maybe remove the double negative,
+ * rename this to say getUseDirectUpload).
+ */
 export async function getDisableCFUploadProxyFlag(): Promise<boolean> {
-    if (process.env.NEXT_PUBLIC_ENTE_DIRECT_UPLOAD === "true") return true;
+    // If NEXT_PUBLIC_ENTE_ENDPOINT is set, that means we're not running a
+    // production deployment. Disable the Cloudflare upload proxy, and instead
+    // just directly use the upload URLs that museum gives us.
+    if (process.env.NEXT_PUBLIC_ENTE_ENDPOINT) return true;
 
     try {
         const featureFlags = (
