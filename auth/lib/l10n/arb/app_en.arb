@@ -408,5 +408,7 @@
   "hearUsExplanation": "We don't track app installs. It'd help if you told us where you found us!",
   "waitingForBrowserRequest": "Waiting for browser request...",
   "launchPasskeyUrlAgain": "Launch passkey URL again",
-  "passkey": "Passkey"
+  "passkey": "Passkey",
+  "developerMode":"Developer mode",
+  "developerModeWarning":"Are you sure that you want to enter Developer mode?"
 }
