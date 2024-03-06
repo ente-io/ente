@@ -76,8 +76,8 @@ class EnteRequestInterceptor extends Interceptor {
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
     if (kDebugMode) {
       assert(
-      options.baseUrl == enteEndpoint,
-      "interceptor should only be used for API endpoint",
+        options.baseUrl == enteEndpoint,
+        "interceptor should only be used for API endpoint",
       );
     }
     // ignore: prefer_const_constructors

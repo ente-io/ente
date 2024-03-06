@@ -8308,6 +8308,46 @@ class S {
     );
   }
 
+  /// `Waiting for browser request...`
+  String get waitingForBrowserRequest {
+    return Intl.message(
+      'Waiting for browser request...',
+      name: 'waitingForBrowserRequest',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Launch passkey URL again`
+  String get launchPasskeyUrlAgain {
+    return Intl.message(
+      'Launch passkey URL again',
+      name: 'launchPasskeyUrlAgain',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Passkey`
+  String get passkey {
+    return Intl.message(
+      'Passkey',
+      name: 'passkey',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Passkey authentication`
+  String get passkeyAuthTitle {
+    return Intl.message(
+      'Passkey authentication',
+      name: 'passkeyAuthTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Play album on TV`
   String get playOnTv {
     return Intl.message(
