@@ -114,7 +114,7 @@
     },
     {
       "title": "Healthchecks.io",
-      "slug": "healthchecks",
+      "slug": "healthchecks"
     },
     {
       "title": "ING"
@@ -302,7 +302,7 @@
     },
     {
       "title": "Synology DSM",
-      "slug": "synology_dsm",
+      "slug": "synology_dsm"
     },
     {
       "title": "TCPShield",
