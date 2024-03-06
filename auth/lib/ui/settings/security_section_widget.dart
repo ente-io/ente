@@ -7,7 +7,6 @@ import 'package:ente_auth/models/user_details.dart';
 import 'package:ente_auth/services/local_authentication_service.dart';
 import 'package:ente_auth/services/user_service.dart';
 import 'package:ente_auth/theme/ente_theme.dart';
-import 'package:ente_auth/ui/account/recovery_key_page.dart';
 import 'package:ente_auth/ui/account/request_pwd_verification_page.dart';
 import 'package:ente_auth/ui/account/sessions_page.dart';
 import 'package:ente_auth/ui/components/captioned_text_widget.dart';
@@ -20,7 +19,6 @@ import 'package:ente_auth/utils/dialog_util.dart';
 import 'package:ente_auth/utils/navigation_util.dart';
 import 'package:ente_auth/utils/toast_util.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_sodium/flutter_sodium.dart';
 
 class SecuritySectionWidget extends StatefulWidget {
   const SecuritySectionWidget({Key? key}) : super(key: key);
@@ -64,41 +62,6 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
         UserService.instance.getUserDetailsV2().ignore();
       }
       children.addAll([
-        sectionOptionSpacing,
-        MenuItemWidget(
-          captionedTextWidget: CaptionedTextWidget(
-            title: l10n.recoveryKey,
-          ),
-          pressedColor: getEnteColorScheme(context).fillFaint,
-          trailingIcon: Icons.chevron_right_outlined,
-          trailingIconIsMuted: true,
-          onTap: () async {
-            final hasAuthenticated = await LocalAuthenticationService.instance
-                .requestLocalAuthentication(
-              context,
-              l10n.authToViewYourRecoveryKey,
-            );
-            if (hasAuthenticated) {
-              String recoveryKey;
-              try {
-                recoveryKey =
-                    Sodium.bin2hex(Configuration.instance.getRecoveryKey());
-              } catch (e) {
-                showGenericErrorDialog(context: context);
-                return;
-              }
-              routeToPage(
-                context,
-                RecoveryKeyPage(
-                  recoveryKey,
-                  l10n.ok,
-                  showAppBar: true,
-                  onDone: () {},
-                ),
-              );
-            }
-          },
-        ),
         MenuItemWidget(
           captionedTextWidget: CaptionedTextWidget(
             title: l10n.emailVerificationToggle,
