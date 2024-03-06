@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:computer/computer.dart';
 import "package:ente_auth/app/view/app.dart";
@@ -33,7 +35,9 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await _runInForeground();
   await _setupPrivacyScreen();
-  FlutterDisplayMode.setHighRefreshRate();
+  if (Platform.isAndroid) {
+    FlutterDisplayMode.setHighRefreshRate().ignore();
+  }
 }
 
 Future<void> _runInForeground() async {
