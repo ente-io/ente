@@ -69,6 +69,7 @@ class _LoginPageState extends State<LoginPage> {
         buttonText: S.of(context).logInLabel,
         onPressedFunction: () async {
           await UserService.instance.setEmail(_email!);
+          Configuration.instance.resetVolatilePassword();
           SrpAttributes? attr;
           bool isEmailVerificationEnabled = true;
           try {
