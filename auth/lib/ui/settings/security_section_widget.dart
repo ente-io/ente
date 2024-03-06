@@ -71,7 +71,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
           pressedColor: getEnteColorScheme(context).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
-          onTap: () => PasskeyService.instance.openPasskeyPage(),
+          onTap: () => PasskeyService.instance.openPasskeyPage(context),
         ),
         sectionOptionSpacing,
         MenuItemWidget(

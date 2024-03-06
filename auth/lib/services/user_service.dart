@@ -265,11 +265,7 @@ class UserService {
     }
   }
 
-  Future<void> acceptPasskey(
-    BuildContext context,
-    Map response,
-    Uint8List keyEncryptionKey,
-  ) async {
+  Future<void> onPassKeyVerified(BuildContext context, Map response) async {
     final userPassword = Configuration.instance.getVolatilePassword();
     if (userPassword == null) throw Exception("volatile password is null");
 
@@ -280,7 +276,6 @@ class UserService {
       await Configuration.instance.decryptSecretsAndGetKeyEncKey(
         userPassword,
         Configuration.instance.getKeyAttributes()!,
-        keyEncryptionKey: keyEncryptionKey,
       );
       page = const HomePage();
     } else {
@@ -622,10 +617,7 @@ class UserService {
       if (twoFASessionID.isNotEmpty) {
         page = TwoFactorAuthenticationPage(twoFASessionID);
       } else if (passkeySessionID.isNotEmpty) {
-        page = PasskeyPage(
-          passkeySessionID,
-          keyEncryptionKey: keyEncryptionKey,
-        );
+        page = PasskeyPage(passkeySessionID);
       } else {
         await _saveConfiguration(response);
         if (Configuration.instance.getEncryptedToken() != null) {

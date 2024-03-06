@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/ente_theme_data.dart';
@@ -12,12 +11,10 @@ import 'package:url_launcher/url_launcher_string.dart';
 
 class PasskeyPage extends StatefulWidget {
   final String sessionID;
-  final Uint8List keyEncryptionKey;
 
   const PasskeyPage(
     this.sessionID, {
     Key? key,
-    required this.keyEncryptionKey,
   }) : super(key: key);
 
   @override
@@ -62,11 +59,7 @@ class _PasskeyPageState extends State<PasskeyPage> {
       final json = jsonDecode(res) as Map<String, dynamic>;
 
       try {
-        await UserService.instance.acceptPasskey(
-          context,
-          json,
-          widget.keyEncryptionKey,
-        );
+        await UserService.instance.onPassKeyVerified(context, json);
       } catch (e) {
         _logger.severe(e);
       }
