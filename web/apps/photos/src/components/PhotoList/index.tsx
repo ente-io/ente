@@ -1,8 +1,8 @@
 import { FlexWrapper } from "@ente/shared/components/Container";
 import { ENTE_WEBSITE_LINK } from "@ente/shared/constants/urls";
-import { formatDate } from "@ente/shared/time/format";
+import { formatDate, getDate, isSameDay } from "@ente/shared/time/format";
 import { convertBytesToHumanReadable } from "@ente/shared/utils/size";
-import { Box, Link, Typography, styled } from "@mui/material";
+import { Box, Checkbox, Link, Typography, styled } from "@mui/material";
 import {
     DATE_CONTAINER_HEIGHT,
     GAP_BTW_TILES,
@@ -24,6 +24,7 @@ import {
     areEqual,
 } from "react-window";
 import { EnteFile } from "types/file";
+import { handleSelectCreator } from "utils/photoFrame";
 import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";
 
 const A_DAY = 24 * 60 * 60 * 1000;
@@ -265,6 +266,8 @@ export function PhotoList({
     const shouldRefresh = useRef(false);
     const listRef = useRef(null);
 
+    const [checkedDates, setCheckedDates] = useState({});
+
     const fittableColumns = getFractionFittableColumns(width);
     let columns = Math.floor(fittableColumns);
 
@@ -471,14 +474,6 @@ export function PhotoList({
                 });
             }
         });
-    };
-
-    const isSameDay = (first, second) => {
-        return (
-            first.getFullYear() === second.getFullYear() &&
-            first.getMonth() === second.getMonth() &&
-            first.getDate() === second.getDate()
-        );
     };
 
     const getPhotoListHeader = (photoListHeader) => {
@@ -722,6 +717,62 @@ export function PhotoList({
         }
     };
 
+    useEffect(() => {
+        const notSelectedFiles = displayFiles?.filter(
+            (item) => !galleryContext.selectedFile[item.id],
+        );
+        const unselectedDates = [
+            ...new Set(notSelectedFiles?.map((item) => getDate(item))), // to get file's date which were manually unselected
+        ];
+
+        const localSelectedFiles = displayFiles.filter(
+            // to get files which were manually selected
+            (item) => !unselectedDates.includes(getDate(item)),
+        );
+
+        const localSelectedDates = [
+            ...new Set(localSelectedFiles?.map((item) => getDate(item))),
+        ]; // to get file's date which were manually selected
+
+        unselectedDates.forEach((date) => {
+            setCheckedDates((prev) => ({
+                ...prev,
+                [date]: false,
+            })); // To uncheck select all checkbox if any of the file on the date is unselected
+        });
+
+        localSelectedDates.map((date) => {
+            setCheckedDates((prev) => ({
+                ...prev,
+                [date]: true,
+            }));
+            // To check select all checkbox if all of the files on the date is selected manually
+        });
+    }, [galleryContext.selectedFile]);
+
+    const handleSelect = handleSelectCreator(
+        galleryContext.setSelectedFiles,
+        activeCollectionID,
+    );
+
+    const onChangeSelectAllCheckBox = (date: string) => {
+        const dates = { ...checkedDates, [date]: !checkedDates[date] };
+        const isDateSelected = !checkedDates[date];
+
+        setCheckedDates(dates);
+
+        const filesOnADay = displayFiles?.filter(
+            (item) => getDate(item) === date,
+        ); // all files on a checked/unchecked day
+
+        filesOnADay.forEach((file) => {
+            handleSelect(
+                file.id,
+                file.ownerID === galleryContext?.user?.id,
+            )(isDateSelected);
+        });
+    };
+
     const renderListItem = (
         listItem: TimeStampListItem,
         isScrolling: boolean,
@@ -732,6 +783,17 @@ export function PhotoList({
                     listItem.dates
                         .map((item) => [
                             <DateContainer key={item.date} span={item.span}>
+                                <Checkbox
+                                    key={item.date}
+                                    name={item.date}
+                                    checked={checkedDates[item.date]}
+                                    onChange={() =>
+                                        onChangeSelectAllCheckBox(item.date)
+                                    }
+                                    size="small"
+                                    sx={{ pl: 0 }}
+                                    disableRipple={true}
+                                />
                                 {item.date}
                             </DateContainer>,
                             <div key={`${item.date}-gap`} />,
@@ -739,6 +801,17 @@ export function PhotoList({
                         .flat()
                 ) : (
                     <DateContainer span={columns}>
+                        <Checkbox
+                            key={listItem.date}
+                            name={listItem.date}
+                            checked={checkedDates[listItem.date]}
+                            onChange={() =>
+                                onChangeSelectAllCheckBox(listItem.date)
+                            }
+                            size="small"
+                            sx={{ pl: 0 }}
+                            disableRipple={true}
+                        />
                         {listItem.date}
                     </DateContainer>
                 );

@@ -1,3 +1,4 @@
+import 'package:ente_auth/core/configuration.dart';
 import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/services/local_authentication_service.dart';
 import 'package:ente_auth/services/user_service.dart';
@@ -5,6 +6,7 @@ import 'package:ente_auth/theme/ente_theme.dart';
 import 'package:ente_auth/ui/account/change_email_dialog.dart';
 import 'package:ente_auth/ui/account/delete_account_page.dart';
 import 'package:ente_auth/ui/account/password_entry_page.dart';
+import 'package:ente_auth/ui/account/recovery_key_page.dart';
 import 'package:ente_auth/ui/components/captioned_text_widget.dart';
 import 'package:ente_auth/ui/components/expandable_menu_item_widget.dart';
 import 'package:ente_auth/ui/components/menu_item_widget.dart';
@@ -12,6 +14,7 @@ import 'package:ente_auth/ui/settings/common_settings.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
 import 'package:ente_auth/utils/navigation_util.dart';
 import 'package:ente_auth/utils/platform_util.dart';
+import 'package:ente_crypto_dart/ente_crypto_dart.dart';
 import 'package:flutter/material.dart';
 
 class AccountSectionWidget extends StatelessWidget {
@@ -80,6 +83,41 @@ class AccountSectionWidget extends StatelessWidget {
                     mode: PasswordEntryMode.update,
                   );
                 },
+              ),
+            );
+          }
+        },
+      ),
+      sectionOptionSpacing,
+      MenuItemWidget(
+        captionedTextWidget: CaptionedTextWidget(
+          title: l10n.recoveryKey,
+        ),
+        pressedColor: getEnteColorScheme(context).fillFaint,
+        trailingIcon: Icons.chevron_right_outlined,
+        trailingIconIsMuted: true,
+        onTap: () async {
+          final hasAuthenticated = await LocalAuthenticationService.instance
+              .requestLocalAuthentication(
+            context,
+            l10n.authToViewYourRecoveryKey,
+          );
+          if (hasAuthenticated) {
+            String recoveryKey;
+            try {
+              recoveryKey =
+                  CryptoUtil.bin2hex(Configuration.instance.getRecoveryKey());
+            } catch (e) {
+              showGenericErrorDialog(context: context);
+              return;
+            }
+            routeToPage(
+              context,
+              RecoveryKeyPage(
+                recoveryKey,
+                l10n.ok,
+                showAppBar: true,
+                onDone: () {},
               ),
             );
           }

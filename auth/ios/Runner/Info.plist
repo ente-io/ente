@@ -37,6 +37,7 @@
 			<key>CFBundleURLSchemes</key>
 			<array>
 				<string>otpauth</string>
+				<string>enteauth</string>
 			</array>
 		</dict>
 	</array>

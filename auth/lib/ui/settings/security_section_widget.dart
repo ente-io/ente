@@ -4,10 +4,11 @@ import 'dart:typed_data';
 import 'package:ente_auth/core/configuration.dart';
 import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/models/user_details.dart';
+import 'package:ente_auth/services/auth_feature_flag.dart';
 import 'package:ente_auth/services/local_authentication_service.dart';
+import 'package:ente_auth/services/passkey_service.dart';
 import 'package:ente_auth/services/user_service.dart';
 import 'package:ente_auth/theme/ente_theme.dart';
-import 'package:ente_auth/ui/account/recovery_key_page.dart';
 import 'package:ente_auth/ui/account/request_pwd_verification_page.dart';
 import 'package:ente_auth/ui/account/sessions_page.dart';
 import 'package:ente_auth/ui/components/captioned_text_widget.dart';
@@ -63,43 +64,21 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
         // We don't know if the user can disable MFA yet, so we fetch the info
         UserService.instance.getUserDetailsV2().ignore();
       }
+      final bool isInternalUser =
+          FeatureFlagService.instance.isInternalUserOrDebugBuild();
       children.addAll([
-        sectionOptionSpacing,
-        MenuItemWidget(
-          captionedTextWidget: CaptionedTextWidget(
-            title: l10n.recoveryKey,
+        if (isInternalUser) sectionOptionSpacing,
+        if (isInternalUser)
+          MenuItemWidget(
+            captionedTextWidget: CaptionedTextWidget(
+              title: l10n.passkey,
+            ),
+            pressedColor: getEnteColorScheme(context).fillFaint,
+            trailingIcon: Icons.chevron_right_outlined,
+            trailingIconIsMuted: true,
+            onTap: () => PasskeyService.instance.openPasskeyPage(context),
           ),
-          pressedColor: getEnteColorScheme(context).fillFaint,
-          trailingIcon: Icons.chevron_right_outlined,
-          trailingIconIsMuted: true,
-          onTap: () async {
-            final hasAuthenticated = await LocalAuthenticationService.instance
-                .requestLocalAuthentication(
-              context,
-              l10n.authToViewYourRecoveryKey,
-            );
-            await PlatformUtil.refocusWindows();
-            if (hasAuthenticated) {
-              String recoveryKey;
-              try {
-                recoveryKey =
-                    CryptoUtil.bin2hex(Configuration.instance.getRecoveryKey());
-              } catch (e) {
-                showGenericErrorDialog(context: context);
-                return;
-              }
-              routeToPage(
-                context,
-                RecoveryKeyPage(
-                  recoveryKey,
-                  l10n.ok,
-                  showAppBar: true,
-                  onDone: () {},
-                ),
-              );
-            }
-          },
-        ),
+        sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: CaptionedTextWidget(
             title: l10n.emailVerificationToggle,

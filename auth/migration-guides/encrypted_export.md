@@ -53,11 +53,11 @@ For encryption, we are using `XChaCha20-Poly1305` algorithm.
 
 ## How to use the exported data
 
-* **ente Authenticator app**: You can directly import the codes in the ente Authenticator app.
+* **Ente Authenticator app**: You can directly import the codes in the Ente Authenticator app.
   > Settings -> Data -> Import Codes -> ente Encrypted export.
 
-* **Decryption Tool** : You can download the prebuilt [decryption tool](decrypt/bin/) (or build it from [source](decrypt)) and run the following command.
+* **Decrypt using Ente CLI** : Download the latest version of [Ente CLI](https://github.com/ente-io/ente/releases?q=CLI&expanded=false), and run the following command
          
 ```
-  ./decrypt <export_file> <password> <output_file>
+  ./ente auth decrypt <export_file> <output_file>
 ```

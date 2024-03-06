@@ -49,7 +49,9 @@ void main() async {
   }
   await _runInForeground();
   await _setupPrivacyScreen();
-  if (Platform.isAndroid) FlutterDisplayMode.setHighRefreshRate();
+  if (Platform.isAndroid) {
+    FlutterDisplayMode.setHighRefreshRate().ignore();
+  }
 }
 
 Future<void> _runInForeground() async {

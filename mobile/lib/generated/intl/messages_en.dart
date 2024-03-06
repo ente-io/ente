@@ -797,6 +797,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Kindly help us with this information"),
         "language": MessageLookupByLibrary.simpleMessage("Language"),
         "lastUpdated": MessageLookupByLibrary.simpleMessage("Last updated"),
+        "launchPasskeyUrlAgain":
+            MessageLookupByLibrary.simpleMessage("Launch passkey URL again"),
         "leave": MessageLookupByLibrary.simpleMessage("Leave"),
         "leaveAlbum": MessageLookupByLibrary.simpleMessage("Leave album"),
         "leaveFamily": MessageLookupByLibrary.simpleMessage("Leave family"),
@@ -954,6 +956,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "orPickAnExistingOne":
             MessageLookupByLibrary.simpleMessage("Or pick an existing one"),
         "pair": MessageLookupByLibrary.simpleMessage("Pair"),
+        "passkey": MessageLookupByLibrary.simpleMessage("Passkey"),
+        "passkeyAuthTitle":
+            MessageLookupByLibrary.simpleMessage("Passkey authentication"),
         "password": MessageLookupByLibrary.simpleMessage("Password"),
         "passwordChangedSuccessfully": MessageLookupByLibrary.simpleMessage(
             "Password changed successfully"),
@@ -1460,6 +1465,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "viewer": MessageLookupByLibrary.simpleMessage("Viewer"),
         "visitWebToManage": MessageLookupByLibrary.simpleMessage(
             "Please visit web.ente.io to manage your subscription"),
+        "waitingForBrowserRequest": MessageLookupByLibrary.simpleMessage(
+            "Waiting for browser request..."),
         "waitingForWifi":
             MessageLookupByLibrary.simpleMessage("Waiting for WiFi..."),
         "weAreOpenSource":

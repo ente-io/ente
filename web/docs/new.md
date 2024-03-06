@@ -9,7 +9,7 @@ development, here is a recommended workflow:
 
 3. Enable the VS Code setting to format on save.
 
-4. Install node on your machine `brew install node`. Our package manager, `yarn`
-   comes with it.
+4. Install node on your machine `brew install node@20`. Our package manager,
+   `yarn` comes with it.
 
 That's it. Enjoy coding!
