@@ -432,7 +432,7 @@ func main() {
 	publicAPI.POST("/users/two-factor/remove", userHandler.RemoveTwoFactor)
 	publicAPI.POST("/users/two-factor/passkeys/begin", userHandler.BeginPasskeyAuthenticationCeremony)
 	publicAPI.POST("/users/two-factor/passkeys/finish", userHandler.FinishPasskeyAuthenticationCeremony)
-	privateAPI.GET("/users/two-factor/account-recovery-status", userHandler.GetAccountRecoveryStatus)
+	privateAPI.GET("/users/two-factor/recovery-status", userHandler.GetTwoFactorRecoveryStatus)
 	privateAPI.POST("/users/two-factor/passkeys/set-skip-challenge", userHandler.ConfigurePassKeySkipChallenge)
 	publicAPI.GET("/users/two-factor/passkeys/skip-challenge", userHandler.GetPasskeySkipChallenge)
 	publicAPI.POST("/users/two-factor/passkeys/skip", userHandler.SkipPassKey)
