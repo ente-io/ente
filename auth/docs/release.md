@@ -20,9 +20,3 @@ Set "Previous tag" to the last release of auth and press "Generate release
 notes". The generated release note will contain all PRs and new contributors
 from all the releases in the monorepo, so you'll need to filter them to keep
 only the things that relate to the auth.
-
----
-
-(TODO(MR): Fix this after the monorepo move) Xcode Cloud has already been
-configured and will automatically build and release to TestFlight when step 1
-was merged to main (you can see logs under the PR checks).
