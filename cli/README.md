@@ -2,7 +2,9 @@
 
 ## Install
 
-You can either download the binary from the [release page](https://github.com/ente-io/cli/releases) or build it yourself.
+You can either download the binary from the [GitHub releases
+page](https://github.com/ente-io/ente/releases?q=cli&expanded=true) or build it
+yourself.
 
 ### Build from source
 
@@ -29,10 +31,10 @@ ente account add
 ```shell
 ente account list
 ```
-  
+
 ##### Change export directory
 ```shell
-ente account update --email email@domain.com --dir ~/photos 
+ente account update --email email@domain.com --dir ~/photos
 ```
 
 ### Export
@@ -58,7 +60,7 @@ docker build -t ente:latest .
 ```
 
 Start the container in detached mode
-```bash 
+```bash
 docker-compose up -d
 ```
 
@@ -66,12 +68,12 @@ docker-compose up -d
 ```shell
 docker-compose exec ente /bin/sh
 ```
-  
-    
+
+
 #### Directly executing commands
 
 ```shell
-docker run -it --rm ente:latest ls 
+docker run -it --rm ente:latest ls
 ```
 
 ---
