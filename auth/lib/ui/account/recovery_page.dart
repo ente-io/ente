@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:ente_auth/core/configuration.dart';
 import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/ui/account/password_entry_page.dart';

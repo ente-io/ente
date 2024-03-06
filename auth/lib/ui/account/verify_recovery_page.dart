@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:bip39/bip39.dart' as bip39;
 import 'package:dio/dio.dart';
 import 'package:ente_auth/core/configuration.dart';

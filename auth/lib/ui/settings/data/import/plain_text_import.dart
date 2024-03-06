@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:ui';
 
 import 'package:ente_auth/ente_theme_data.dart';
 import 'package:ente_auth/l10n/l10n.dart';
