@@ -17,6 +17,7 @@ import 'package:ente_auth/ui/common/gradient_button.dart';
 import 'package:ente_auth/ui/components/buttons/button_widget.dart';
 import 'package:ente_auth/ui/components/models/button_result.dart';
 import 'package:ente_auth/ui/home_page.dart';
+import 'package:ente_auth/ui/settings/developer_settings_page.dart';
 import 'package:ente_auth/ui/settings/language_picker.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
 import 'package:ente_auth/utils/navigation_util.dart';
@@ -73,7 +74,13 @@ class _OnboardingPageState extends State<OnboardingPage> {
                 isDismissible: false,
               );
               if (result?.action == ButtonAction.first) {
-                // TODO: Navigate to developer mode page
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (BuildContext context) {
+                      return const DeveloperSettingsPage();
+                    },
+                  ),
+                );
               }
             }
           },

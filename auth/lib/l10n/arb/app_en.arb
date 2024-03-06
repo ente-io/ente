@@ -410,5 +410,8 @@
   "launchPasskeyUrlAgain": "Launch passkey URL again",
   "passkey": "Passkey",
   "developerMode":"Developer mode",
-  "developerModeWarning":"Are you sure that you want to enter Developer mode?"
+  "developerModeWarning":"Are you sure that you want to modify Developer settings?",
+  "developerSettings": "Developer settings",
+  "invalidURL": "Invalid URL",
+  "invalidURLMessage": "Sorry, the URL you entered is invalid. Please enter a valid URL and try again."
 }
