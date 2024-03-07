@@ -415,5 +415,5 @@
   "invalidEndpoint": "Invalid endpoint",
   "invalidEndpointMessage": "Sorry, the endpoint you entered is invalid. Please enter a valid endpoint and try again.",
   "endpointUpdatedMessage": "Endpoint updated successfully",
-  "customEndpoint": "Connecting to {endpoint}"
+  "customEndpoint": "Connected to {endpoint}"
 }
