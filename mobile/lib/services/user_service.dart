@@ -16,6 +16,7 @@ import "package:photos/events/account_configured_event.dart";
 import 'package:photos/events/two_factor_status_change_event.dart';
 import 'package:photos/events/user_details_changed_event.dart';
 import "package:photos/generated/l10n.dart";
+import "package:photos/models/account/two_factor.dart";
 import "package:photos/models/api/user/srp.dart";
 import 'package:photos/models/delete_account.dart';
 import 'package:photos/models/key_attributes.dart';
@@ -807,7 +808,11 @@ class UserService {
     }
   }
 
-  Future<void> recoverTwoFactor(BuildContext context, String sessionID) async {
+  Future<void> recoverTwoFactor(
+    BuildContext context,
+    String sessionID,
+    TwoFactorType type,
+  ) async {
     final dialog = createProgressDialog(context, S.of(context).pleaseWait);
     await dialog.show();
     try {
@@ -823,6 +828,7 @@ class UserService {
           MaterialPageRoute(
             builder: (BuildContext context) {
               return TwoFactorRecoveryPage(
+                type,
                 sessionID,
                 response.data["encryptedSecret"],
                 response.data["secretDecryptionNonce"],
@@ -868,6 +874,7 @@ class UserService {
 
   Future<void> removeTwoFactor(
     BuildContext context,
+    TwoFactorType type,
     String sessionID,
     String recoveryKey,
     String encryptedSecret,
