@@ -3,6 +3,8 @@ title: Contribute
 description: Details about how to contribute to Ente's docs
 ---
 
+# Contributing
+
 To contribute to these docs, you can use the "Edit this page" button at the
 bottom of each page. This will allow you to directly edit the markdown file that
 is used to generate this documentation and open a quick pull request directly

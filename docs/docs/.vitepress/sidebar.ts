@@ -4,11 +4,23 @@
 export const sidebar = [
     {
         text: "Photos",
-        collapsed: true,
         items: [
+            { text: "Introduction", link: "/photos/" },
             {
                 text: "Features",
+                collapsed: true,
+                items: [{ text: "Introduction", link: "/photos/" }],
             },
+            {
+                text: "FAQ",
+                collapsed: true,
+                items: [{ text: "Introduction", link: "/photos/" }],
+            },
+            {
+                text: "Troubleshooting",
+                collapsed: true,
+                items: [{ text: "Introduction", link: "/photos/" }],
+            }
         ],
     },
     {
