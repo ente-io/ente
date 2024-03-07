@@ -137,7 +137,7 @@ class _RecoveryPageState extends State<RecoveryPage> {
                         padding: const EdgeInsets.symmetric(horizontal: 20),
                         child: Center(
                           child: Text(
-                            "No recovery key?",
+                            context.l10n.noRecoveryKeyTitle,
                             style: Theme.of(context)
                                 .textTheme
                                 .titleMedium!
