@@ -1,7 +1,25 @@
 // When adding new pages, they need to manually inserted into their appropriate
 // place here if you wish them to also appear in the sidebar.
 
-export const sidebar = [];
+export const sidebar = [
+    {
+        text: "Photos",
+        collapsed: true,
+        items: [
+            {
+                text: "Features",
+            },
+        ],
+    },
+    {
+        text: "About",
+        link: "/about/",
+    },
+    {
+        text: "Contribute",
+        link: "/about/contribute",
+    },
+];
 
 function sidebarOld() {
     return [
