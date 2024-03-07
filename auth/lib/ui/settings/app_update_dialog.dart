@@ -174,6 +174,7 @@ class _ApkDownloaderDialogState extends State<ApkDownloaderDialog> {
         );
       }
       Navigator.of(context, rootNavigator: true).pop('dialog');
+      // ignore: unawaited_futures
       OpenFilex.open(_saveUrl);
     } catch (e) {
       Logger("ApkDownloader").severe(e);
@@ -214,7 +215,7 @@ class _ApkDownloaderDialogState extends State<ApkDownloaderDialog> {
           ),
         ],
       );
-
+      // ignore: unawaited_futures
       showDialog(
         context: context,
         builder: (BuildContext context) {

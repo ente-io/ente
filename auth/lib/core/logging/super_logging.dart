@@ -167,7 +167,7 @@ class SuperLogging {
       await setupLogDir();
     }
     if (sentryIsEnabled) {
-      setupSentry();
+      await setupSentry();
     }
 
     Logger.root.level = Level.ALL;
@@ -250,7 +250,7 @@ class SuperLogging {
 
     // add error to sentry queue
     if (sentryIsEnabled && rec.error != null) {
-      _sendErrorToSentry(rec.error!, null);
+      await _sendErrorToSentry(rec.error!, null);
     }
   }
 
@@ -289,7 +289,7 @@ class SuperLogging {
     SuperLogging.setUserID(await _getOrCreateAnonymousUserID());
     await for (final error in sentryQueueControl.stream.asBroadcastStream()) {
       try {
-        Sentry.captureException(
+        await Sentry.captureException(
           error,
         );
       } catch (e) {

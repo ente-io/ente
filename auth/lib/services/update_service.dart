@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:ente_auth/core/constants.dart';
@@ -70,9 +71,11 @@ class UpdateService {
     if (shouldUpdate &&
         hasBeen3DaysSinceLastNotification &&
         _latestVersion!.shouldNotify!) {
-      NotificationService.instance.showNotification(
-        "Update available",
-        "Click to install our best version yet",
+      unawaited(
+        NotificationService.instance.showNotification(
+          "Update available",
+          "Click to install our best version yet",
+        ),
       );
       await _prefs.setInt(kUpdateAvailableShownTimeKey, now);
     } else {

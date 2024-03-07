@@ -54,6 +54,7 @@ class LocalAuthenticationService {
             .setEnabled(Configuration.instance.shouldShowLockScreen());
       }
     } else {
+      // ignore: unawaited_futures
       showErrorDialog(
         context,
         errorDialogTitle,

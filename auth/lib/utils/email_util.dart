@@ -62,6 +62,7 @@ Future<void> sendLogs(
         ],
       ),
       onPressed: () async {
+        // ignore: unawaited_futures
         showDialog(
           context: context,
           builder: (BuildContext context) {
@@ -118,6 +119,7 @@ Future<void> sendLogs(
       ),
     ),
   );
+  // ignore: unawaited_futures
   showDialog(
     context: context,
     builder: (_) {
@@ -159,7 +161,7 @@ Future<String> getZippedLogsFile(BuildContext context) async {
       tempPath + "/logs-${Configuration.instance.getUserID() ?? 0}.zip";
   final encoder = ZipFileEncoder();
   encoder.create(zipFilePath);
-  encoder.addDirectory(logsDirectory);
+  await encoder.addDirectory(logsDirectory);
   encoder.close();
   await dialog.hide();
   return zipFilePath;
