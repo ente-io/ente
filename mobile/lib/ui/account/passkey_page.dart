@@ -6,6 +6,7 @@ import 'package:photos/core/configuration.dart';
 import 'package:photos/ente_theme_data.dart';
 import "package:photos/generated/l10n.dart";
 import 'package:photos/services/user_service.dart';
+import "package:photos/utils/dialog_util.dart";
 import 'package:uni_links/uni_links.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
@@ -49,20 +50,27 @@ class _PasskeyPageState extends State<PasskeyPage> {
     if (!context.mounted ||
         Configuration.instance.hasConfiguredAccount() ||
         link == null) {
+      _logger.warning(
+        'ignored deeplink: contextMounted ${context.mounted} hasConfiguredAccount ${Configuration.instance.hasConfiguredAccount()}',
+      );
       return;
     }
-    if (mounted && link.toLowerCase().startsWith("ente://passkey")) {
-      final uri = Uri.parse(link).queryParameters['response'];
-
-      // response to json
-      final res = utf8.decode(base64.decode(uri!));
-      final json = jsonDecode(res) as Map<String, dynamic>;
-
-      try {
+    try {
+      if (mounted && link.toLowerCase().startsWith("ente://passkey")) {
+        final String? uri = Uri.parse(link).queryParameters['response'];
+        String base64String = uri!.toString();
+        while (base64String.length % 4 != 0) {
+          base64String += '=';
+        }
+        final res = utf8.decode(base64.decode(base64String));
+        final json = jsonDecode(res) as Map<String, dynamic>;
         await UserService.instance.onPassKeyVerified(context, json);
-      } catch (e) {
-        _logger.severe(e);
+      } else {
+        _logger.info('ignored deeplink: $link mounted $mounted');
       }
+    } catch (e, s) {
+      _logger.severe('passKey: failed to handle deeplink', e, s);
+      showGenericErrorDialog(context: context, error: e).ignore();
     }
   }
 
