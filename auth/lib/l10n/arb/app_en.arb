@@ -408,5 +408,12 @@
   "hearUsExplanation": "We don't track app installs. It'd help if you told us where you found us!",
   "waitingForBrowserRequest": "Waiting for browser request...",
   "launchPasskeyUrlAgain": "Launch passkey URL again",
-  "passkey": "Passkey"
+  "passkey": "Passkey",
+  "developerSettingsWarning":"Are you sure that you want to modify Developer settings?",
+  "developerSettings": "Developer settings",
+  "serverEndpoint": "Server endpoint",
+  "invalidEndpoint": "Invalid endpoint",
+  "invalidEndpointMessage": "Sorry, the endpoint you entered is invalid. Please enter a valid endpoint and try again.",
+  "endpointUpdatedMessage": "Endpoint updated successfully",
+  "customEndpoint": "Connected to {endpoint}"
 }

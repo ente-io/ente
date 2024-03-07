@@ -16,6 +16,7 @@ import 'package:ente_auth/ui/settings/account_section_widget.dart';
 import 'package:ente_auth/ui/settings/app_version_widget.dart';
 import 'package:ente_auth/ui/settings/data/data_section_widget.dart';
 import 'package:ente_auth/ui/settings/data/export_widget.dart';
+import 'package:ente_auth/ui/settings/developer_settings_widget.dart';
 import 'package:ente_auth/ui/settings/general_section_widget.dart';
 import 'package:ente_auth/ui/settings/security_section_widget.dart';
 import 'package:ente_auth/ui/settings/social_section_widget.dart';
@@ -149,6 +150,7 @@ class SettingsPage extends StatelessWidget {
       sectionSpacing,
       const AboutSectionWidget(),
       const AppVersionWidget(),
+      const DeveloperSettingsWidget(),
       const SupportDevWidget(),
       const Padding(
         padding: EdgeInsets.only(bottom: 60),
