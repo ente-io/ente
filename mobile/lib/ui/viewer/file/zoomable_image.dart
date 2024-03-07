@@ -41,7 +41,8 @@ class ZoomableImage extends StatefulWidget {
   State<ZoomableImage> createState() => _ZoomableImageState();
 }
 
-class _ZoomableImageState extends State<ZoomableImage> {
+class _ZoomableImageState extends State<ZoomableImage>
+    with SingleTickerProviderStateMixin {
   late Logger _logger;
   late EnteFile _photo;
   ImageProvider? _imageProvider;
