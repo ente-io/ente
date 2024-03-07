@@ -9,17 +9,55 @@ export const sidebar = [
             {
                 text: "Features",
                 collapsed: true,
-                items: [{ text: "Introduction", link: "/photos/" }],
+                items: [
+                    { text: "Albums", link: "/photos/features/albums" },
+                    { text: "Archiving", link: "/photos/features/archive" },
+                    { text: "Cast", link: "/photos/features/cast/" },
+                    {
+                        text: "Collecting photos",
+                        link: "/photos/features/collect",
+                    },
+                    {
+                        text: "Family plans",
+                        link: "/photos/features/family-plans",
+                    },
+                    { text: "Hidden photos", link: "/photos/features/hide" },
+                    {
+                        text: "Location tags",
+                        link: "/photos/features/location-tags",
+                    },
+                    { text: "Map", link: "/photos/features/map" },
+                    {
+                        text: "Public link",
+                        link: "/photos/features/public-link",
+                    },
+                    { text: "Quick link", link: "/photos/features/quick-link" },
+                    { text: "Referrals", link: "/photos/features/referrals" },
+                    { text: "Trash", link: "/photos/features/trash" },
+                    {
+                        text: "Uncategorized",
+                        link: "/photos/features/uncategorized",
+                    },
+                    {
+                        text: "Watch folder",
+                        link: "/photos/features/watch-folder",
+                    },
+                ],
             },
-            {
-                text: "FAQ",
-                collapsed: true,
-                items: [{ text: "Introduction", link: "/photos/" }],
-            },
+            { text: "FAQ", link: "/photos/faq/" },
             {
                 text: "Troubleshooting",
                 collapsed: true,
-                items: [{ text: "Introduction", link: "/photos/" }],
+                items: [
+                    {
+                        text: "Files not uploading",
+                        link: "/photos/troubleshooting/files-not-uploading",
+                    },
+                    {
+                        text: "Sharing debug logs",
+                        link: "/photos/troubleshooting/sharing-logs",
+                    },
+                ],
             },
         ],
     },
@@ -51,20 +89,6 @@ function sidebarOld() {
         {
             text: "Welcome",
             items: [
-                {
-                    text: "About",
-                    collapsed: true,
-                    link: "/about/company",
-                    items: [
-                        { text: "Company", link: "/about/company" },
-                        { text: "Products", link: "/about/products" },
-                        { text: "Plans", link: "/about/plans" },
-                        { text: "Support", link: "/about/support" },
-                        { text: "Community", link: "/about/community" },
-                        { text: "Open source", link: "/about/open-source" },
-                        { text: "Contribute", link: "/about/contribute" },
-                    ],
-                },
                 {
                     text: "Features",
                     collapsed: true,
