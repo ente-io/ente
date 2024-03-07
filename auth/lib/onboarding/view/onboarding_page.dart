@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:ente_auth/app/view/app.dart';
 import 'package:ente_auth/core/configuration.dart';
+import 'package:ente_auth/core/constants.dart';
 import 'package:ente_auth/core/event_bus.dart';
 import 'package:ente_auth/ente_theme_data.dart';
 import 'package:ente_auth/events/trigger_logout_event.dart';
@@ -74,13 +75,14 @@ class _OnboardingPageState extends State<OnboardingPage> {
                 isDismissible: false,
               );
               if (result?.action == ButtonAction.first) {
-                Navigator.of(context).push(
+                await Navigator.of(context).push(
                   MaterialPageRoute(
                     builder: (BuildContext context) {
                       return const DeveloperSettingsPage();
                     },
                   ),
                 );
+                setState(() {});
               }
             }
           },
@@ -193,6 +195,28 @@ class _OnboardingPageState extends State<OnboardingPage> {
                         ),
                       ),
                     ),
+                    Configuration.instance.getHttpEndpoint() ==
+                            kDefaultProductionEndpoint
+                        ? const SizedBox.shrink()
+                        : Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.only(top: 20, bottom: 20),
+                            child: GestureDetector(
+                              onTap: _optForOfflineMode,
+                              child: Center(
+                                child: Text(
+                                  context.l10n.customEndpoint(
+                                    Configuration.instance.getHttpEndpoint(),
+                                  ),
+                                  style: body.copyWith(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .subTextColor,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
                   ],
                 ),
               ),
