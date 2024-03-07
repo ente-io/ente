@@ -27,6 +27,7 @@ linter:
     - use_rethrow_when_possible
     - directives_ordering
     - always_use_package_imports
+    - unawaited_futures
 
 analyzer:
   errors:
@@ -44,6 +45,8 @@ analyzer:
     prefer_const_constructors: warning
     prefer_const_declarations: warning
     prefer_const_constructors_in_immutables: ignore # too many warnings
+
+    unawaited_futures: warning # convert to warning after fixing existing issues
 
     avoid_renaming_method_parameters: ignore # incorrect warnings for `equals` overrides
 
