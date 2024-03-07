@@ -35,9 +35,5 @@ do
     done
 done
 
-# Clean up any environment variables
-unset GOOS
-unset GOARCH
-
 # Print a message indicating the build process is complete
 echo "Build process completed for all platforms and architectures. Binaries are in the 'bin' directory."
