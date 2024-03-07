@@ -409,11 +409,10 @@
   "waitingForBrowserRequest": "Waiting for browser request...",
   "launchPasskeyUrlAgain": "Launch passkey URL again",
   "passkey": "Passkey",
-  "developerMode":"Developer mode",
-  "developerModeWarning":"Are you sure that you want to modify Developer settings?",
+  "developerSettingsWarning":"Are you sure that you want to modify Developer settings?",
   "developerSettings": "Developer settings",
   "serverEndpoint": "Server endpoint",
-  "invalidURL": "Invalid URL",
-  "invalidURLMessage": "Sorry, the URL you entered is invalid. Please enter a valid URL and try again.",
+  "invalidEndpoint": "Invalid endpoint",
+  "invalidEndpointMessage": "Sorry, the endpoint you entered is invalid. Please enter a valid endpoint and try again.",
   "endpointUpdatedMessage": "Endpoint updated successfully"
 }

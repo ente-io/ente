@@ -68,9 +68,9 @@ class _OnboardingPageState extends State<OnboardingPage> {
               _developerModeTapCount = 0;
               final result = await showChoiceDialog(
                 context,
-                title: l10n.developerMode,
+                title: l10n.developerSettings,
                 firstButtonLabel: l10n.yes,
-                body: l10n.developerModeWarning,
+                body: l10n.developerSettingsWarning,
                 isDismissible: false,
               );
               if (result?.action == ButtonAction.first) {

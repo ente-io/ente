@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:ente_auth/core/configuration.dart';
 import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/ui/common/gradient_button.dart';
@@ -52,6 +53,7 @@ class _DeveloperSettingsPageState extends State<DeveloperSettingsPage> {
                 try {
                   final uri = Uri.parse(url);
                   if ((uri.scheme == "http" || uri.scheme == "https")) {
+                    await _ping(url);
                     await Configuration.instance.setHttpEndpoint(url);
                     showToast(context, context.l10n.endpointUpdatedMessage);
                     Navigator.of(context).pop();
@@ -61,8 +63,8 @@ class _DeveloperSettingsPageState extends State<DeveloperSettingsPage> {
                 } catch (e) {
                   showErrorDialog(
                     context,
-                    context.l10n.invalidURL,
-                    context.l10n.invalidURLMessage,
+                    context.l10n.invalidEndpoint,
+                    context.l10n.invalidEndpointMessage,
                   );
                 }
               },
@@ -72,5 +74,16 @@ class _DeveloperSettingsPageState extends State<DeveloperSettingsPage> {
         ),
       ),
     );
+  }
+
+  Future<void> _ping(String endpoint) async {
+    try {
+      final response = await Dio().get(endpoint + '/ping');
+      if (response.data['message'] != 'pong') {
+        throw Exception('Invalid response');
+      }
+    } catch (e) {
+      throw Exception('Error occurred: $e');
+    }
   }
 }
