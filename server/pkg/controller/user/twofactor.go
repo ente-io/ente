@@ -143,9 +143,9 @@ func (c *UserController) RecoverTwoFactor(sessionID string) (*ente.TwoFactorReco
 	return &response, nil
 }
 
-// RemoveTwoFactor handles two factor deactivation request if user lost his device
+// RemoveTOTPTwoFactor handles two factor deactivation request if user lost his device
 // by authenticating him using his twoFactorsessionToken and twoFactor secret
-func (c *UserController) RemoveTwoFactor(context *gin.Context, sessionID string, secret string) (*ente.TwoFactorAuthorizationResponse, error) {
+func (c *UserController) RemoveTOTPTwoFactor(context *gin.Context, sessionID string, secret string) (*ente.TwoFactorAuthorizationResponse, error) {
 	userID, err := c.TwoFactorRepo.GetUserIDWithTwoFactorSession(sessionID)
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "")
