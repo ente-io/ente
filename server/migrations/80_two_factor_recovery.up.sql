@@ -1,5 +1,5 @@
 CREATE TABLE IF NOT EXISTS two_factor_recovery (
-    user_id bigint NOT NULL,
+    user_id bigint NOT NULL PRIMARY KEY,
     -- if false, the support team team will not be able to reset the MFA for the user
     enable_admin_mfa_reset boolean NOT NULL DEFAULT true,
     server_passkey_secret_data bytea,
