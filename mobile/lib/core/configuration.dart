@@ -14,7 +14,6 @@ import 'package:photos/db/collections_db.dart';
 import "package:photos/db/embeddings_db.dart";
 import 'package:photos/db/files_db.dart';
 import 'package:photos/db/memories_db.dart';
-import 'package:photos/db/public_keys_db.dart';
 import 'package:photos/db/trash_db.dart';
 import 'package:photos/db/upload_locks_db.dart';
 import 'package:photos/events/signed_in_event.dart';
@@ -165,7 +164,7 @@ class Configuration {
         : null;
     await CollectionsDB.instance.clearTable();
     await MemoriesDB.instance.clearTable();
-    await PublicKeysDB.instance.clearTable();
+
     await UploadLocksDB.instance.clearTable();
     await IgnoredFilesService.instance.reset();
     await TrashDB.instance.clearTable();
