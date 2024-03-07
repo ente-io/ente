@@ -356,6 +356,7 @@ class _CodeWidgetState extends State<CodeWidget> {
     await FlutterClipboard.copy(content);
     showToast(context, confirmationMessage);
     if (Platform.isAndroid && shouldMinimizeOnCopy) {
+      // ignore: unawaited_futures
       MoveToBackground.moveTaskToBack();
     }
   }
@@ -385,7 +386,7 @@ class _CodeWidgetState extends State<CodeWidget> {
       ),
     );
     if (code != null) {
-      CodeStore.instance.addCode(code);
+      await CodeStore.instance.addCode(code);
     }
   }
 

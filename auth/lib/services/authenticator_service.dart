@@ -208,7 +208,7 @@ class AuthenticatorService {
     if (deletedIDs.isNotEmpty) {
       await _db.deleteByIDs(ids: deletedIDs);
     }
-    _prefs.setInt(_lastEntitySyncTime, maxSyncTime);
+    await _prefs.setInt(_lastEntitySyncTime, maxSyncTime);
     _logger.info("Setting synctime to " + maxSyncTime.toString());
     if (result.length == fetchLimit) {
       _logger.info("Diff limit reached, pulling again");

@@ -103,6 +103,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                                 ),
                                 onTap: () async {
                                   final locale = await getLocale();
+                                  // ignore: unawaited_futures
                                   routeToPage(
                                     context,
                                     LanguageSelectorPage(
@@ -228,6 +229,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
     }
     if (hasOptedBefore || result?.action == ButtonAction.first) {
       await Configuration.instance.optForOfflineMode();
+      // ignore: unawaited_futures
       Navigator.of(context).push(
         MaterialPageRoute(
           builder: (BuildContext context) {

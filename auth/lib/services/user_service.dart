@@ -147,18 +147,18 @@ class UserService {
       final userDetails = UserDetails.fromMap(response.data);
       if (shouldCache) {
         if (userDetails.profileData != null) {
-          _preferences.setBool(
+          await _preferences.setBool(
             kIsEmailMFAEnabled,
             userDetails.profileData!.isEmailMFAEnabled,
           );
-          _preferences.setBool(
+          await _preferences.setBool(
             kCanDisableEmailMFA,
             userDetails.profileData!.canDisableEmailMFA,
           );
         }
         // handle email change from different client
         if (userDetails.email != _config.getEmail()) {
-          setEmail(userDetails.email);
+          await setEmail(userDetails.email);
         }
       }
       return userDetails;
@@ -282,6 +282,7 @@ class UserService {
       throw Exception("unexpected response during passkey verification");
     }
 
+    // ignore: unawaited_futures
     Navigator.of(context).pushAndRemoveUntil(
       MaterialPageRoute(
         builder: (BuildContext context) {
@@ -331,6 +332,7 @@ class UserService {
             );
           }
         }
+        // ignore: unawaited_futures
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(
             builder: (BuildContext context) {
@@ -354,6 +356,7 @@ class UserService {
         );
         Navigator.of(context).pop();
       } else {
+        // ignore: unawaited_futures
         showErrorDialog(
           context,
           context.l10n.incorrectCode,
@@ -363,6 +366,7 @@ class UserService {
     } catch (e) {
       await dialog.hide();
       _logger.severe(e);
+      // ignore: unawaited_futures
       showErrorDialog(
         context,
         context.l10n.oops,
@@ -399,6 +403,7 @@ class UserService {
         Bus.instance.fire(UserDetailsChangedEvent());
         return;
       }
+      // ignore: unawaited_futures
       showErrorDialog(
         context,
         context.l10n.oops,
@@ -407,12 +412,14 @@ class UserService {
     } on DioError catch (e) {
       await dialog.hide();
       if (e.response != null && e.response!.statusCode == 403) {
+        // ignore: unawaited_futures
         showErrorDialog(
           context,
           context.l10n.oops,
           context.l10n.thisEmailIsAlreadyInUse,
         );
       } else {
+        // ignore: unawaited_futures
         showErrorDialog(
           context,
           context.l10n.incorrectCode,
@@ -422,6 +429,7 @@ class UserService {
     } catch (e) {
       await dialog.hide();
       _logger.severe(e);
+      // ignore: unawaited_futures
       showErrorDialog(
         context,
         context.l10n.oops,
@@ -632,6 +640,7 @@ class UserService {
         }
       }
       await dialog.hide();
+      // ignore: unawaited_futures
       Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(
           builder: (BuildContext context) {
@@ -709,6 +718,7 @@ class UserService {
       if (response.statusCode == 200) {
         showShortToast(context, context.l10n.authenticationSuccessful);
         await _saveConfiguration(response);
+        // ignore: unawaited_futures
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(
             builder: (BuildContext context) {
@@ -723,6 +733,7 @@ class UserService {
       _logger.severe(e);
       if (e.response != null && e.response!.statusCode == 404) {
         showToast(context, "Session expired");
+        // ignore: unawaited_futures
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(
             builder: (BuildContext context) {
@@ -732,6 +743,7 @@ class UserService {
           (route) => route.isFirst,
         );
       } else {
+        // ignore: unawaited_futures
         showErrorDialog(
           context,
           context.l10n.incorrectCode,
@@ -741,6 +753,7 @@ class UserService {
     } catch (e) {
       await dialog.hide();
       _logger.severe(e);
+      // ignore: unawaited_futures
       showErrorDialog(
         context,
         context.l10n.oops,
@@ -760,6 +773,7 @@ class UserService {
         },
       );
       if (response.statusCode == 200) {
+        // ignore: unawaited_futures
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(
             builder: (BuildContext context) {
@@ -777,6 +791,7 @@ class UserService {
       _logger.severe(e);
       if (e.response != null && e.response!.statusCode == 404) {
         showToast(context, context.l10n.sessionExpired);
+        // ignore: unawaited_futures
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(
             builder: (BuildContext context) {
@@ -786,6 +801,7 @@ class UserService {
           (route) => route.isFirst,
         );
       } else {
+        // ignore: unawaited_futures
         showErrorDialog(
           context,
           context.l10n.oops,
@@ -794,6 +810,7 @@ class UserService {
       }
     } catch (e) {
       _logger.severe(e);
+      // ignore: unawaited_futures
       showErrorDialog(
         context,
         context.l10n.oops,
@@ -853,6 +870,7 @@ class UserService {
           context.l10n.twofactorAuthenticationSuccessfullyReset,
         );
         await _saveConfiguration(response);
+        // ignore: unawaited_futures
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(
             builder: (BuildContext context) {
@@ -866,6 +884,7 @@ class UserService {
       _logger.severe(e);
       if (e.response != null && e.response!.statusCode == 404) {
         showToast(context, "Session expired");
+        // ignore: unawaited_futures
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(
             builder: (BuildContext context) {
@@ -875,6 +894,7 @@ class UserService {
           (route) => route.isFirst,
         );
       } else {
+        // ignore: unawaited_futures
         showErrorDialog(
           context,
           context.l10n.oops,
@@ -883,6 +903,7 @@ class UserService {
       }
     } catch (e) {
       _logger.severe(e);
+      // ignore: unawaited_futures
       showErrorDialog(
         context,
         context.l10n.oops,
@@ -925,7 +946,7 @@ class UserService {
           "isEnabled": isEnabled,
         },
       );
-      _preferences.setBool(kIsEmailMFAEnabled, isEnabled);
+      await _preferences.setBool(kIsEmailMFAEnabled, isEnabled);
     } catch (e) {
       _logger.severe("Failed to update email mfa", e);
       rethrow;

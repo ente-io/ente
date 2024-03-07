@@ -92,6 +92,7 @@ class _VerifyRecoveryPageState extends State<VerifyRecoveryPage> {
       String recoveryKey;
       try {
         recoveryKey = Sodium.bin2hex(Configuration.instance.getRecoveryKey());
+        // ignore: unawaited_futures
         routeToPage(
           context,
           RecoveryKeyPage(
@@ -104,6 +105,7 @@ class _VerifyRecoveryPageState extends State<VerifyRecoveryPage> {
           ),
         );
       } catch (e) {
+        // ignore: unawaited_futures
         showGenericErrorDialog(context: context);
         return;
       }

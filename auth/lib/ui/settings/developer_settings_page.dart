@@ -61,6 +61,7 @@ class _DeveloperSettingsPageState extends State<DeveloperSettingsPage> {
                     throw const FormatException();
                   }
                 } catch (e) {
+                  // ignore: unawaited_futures
                   showErrorDialog(
                     context,
                     context.l10n.invalidEndpoint,

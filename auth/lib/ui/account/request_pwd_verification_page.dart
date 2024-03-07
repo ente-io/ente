@@ -78,7 +78,7 @@ class _RequestPasswordVerificationPageState
         onPressedFunction: () async {
           FocusScope.of(context).unfocus();
           final dialog = createProgressDialog(context, context.l10n.pleaseWait);
-          dialog.show();
+          await dialog.show();
           try {
             final attributes = Configuration.instance.getKeyAttributes()!;
             final Uint8List keyEncryptionKey = await CryptoUtil.deriveKey(
@@ -92,17 +92,18 @@ class _RequestPasswordVerificationPageState
               keyEncryptionKey,
               Sodium.base642bin(attributes.keyDecryptionNonce),
             );
-            dialog.show();
+            await dialog.show();
             // pop
             await widget.onPasswordVerified(keyEncryptionKey);
-            dialog.hide();
+            await dialog.hide();
             Navigator.of(context).pop(true);
           } catch (e, s) {
             _logger.severe("Error while verifying password", e, s);
-            dialog.hide();
+            await dialog.hide();
             if (widget.onPasswordError != null) {
               widget.onPasswordError!();
             } else {
+              // ignore: unawaited_futures
               showErrorDialog(
                 context,
                 context.l10n.incorrectPasswordTitle,

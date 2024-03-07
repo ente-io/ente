@@ -61,7 +61,7 @@ class _LoginPageState extends State<LoginPage> {
         isFormValid: _emailIsValid,
         buttonText: context.l10n.logInLabel,
         onPressedFunction: () async {
-          UserService.instance.setEmail(_email!);
+          await UserService.instance.setEmail(_email!);
           Configuration.instance.resetVolatilePassword();
           SrpAttributes? attr;
           bool isEmailVerificationEnabled = true;
@@ -74,6 +74,7 @@ class _LoginPageState extends State<LoginPage> {
             }
           }
           if (attr != null && !isEmailVerificationEnabled) {
+            // ignore: unawaited_futures
             Navigator.of(context).push(
               MaterialPageRoute(
                 builder: (BuildContext context) {
