@@ -47,5 +47,8 @@ jobs:
                   release_name: ${{ github.ref_name }}
                   goversion: "1.20"
                   project_path: "./cli"
+                  pre_command: export CGO_ENABLED=0
+                  build_flags: "-trimpath"
+                  ldflags: "-s -w"
                   md5sum: false
                   sha256sum: true
