@@ -29,12 +29,6 @@ type TwoFactorRecoveryStatus struct {
 	IsPassKeySkipEnabled bool `json:"isPassKeyResetEnabled" binding:"required"`
 }
 
-type PasseKeySkipChallengeResponse struct {
-	// The PassKeyEncSecret has SkipSecret encrypted with the user's recoveryKey
-	UserSecretCipher string `json:"userSecretCipher" binding:"required"`
-	UserSecretNonce  string `json:"userSecretNonce" binding:"required"`
-}
-
 type SkipPassKeyRequest struct {
 	SessionID  string `json:"sessionID" binding:"required"`
 	SkipSecret string `json:"resetSecret" binding:"required"`

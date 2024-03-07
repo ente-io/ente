@@ -3,6 +3,7 @@ package two_factor_recovery
 import (
 	"context"
 	"database/sql"
+
 	"github.com/ente-io/museum/ente"
 	"github.com/ente-io/museum/pkg/utils/crypto"
 	"github.com/ente-io/stacktrace"
@@ -46,9 +47,9 @@ func (r *Repository) ConfigurePassKeySkipChallenge(ctx context.Context, userID i
 	return err
 }
 
-func (r *Repository) GetPasskeySkipChallenge(ctx context.Context, userID int64) (*ente.PasseKeySkipChallengeResponse, error) {
-	var result *ente.PasseKeySkipChallengeResponse
-	err := r.Db.QueryRowContext(ctx, "SELECT user_passkey_secret_data, user_passkey_secret_nonce FROM two_factor_recovery WHERE  user_id= $1", userID).Scan(result.UserSecretCipher, result.UserSecretNonce)
+func (r *Repository) GetPasskeySkipChallenge(ctx context.Context, userID int64) (*ente.TwoFactorRecoveryResponse, error) {
+	var result *ente.TwoFactorRecoveryResponse
+	err := r.Db.QueryRowContext(ctx, "SELECT user_passkey_secret_data, user_passkey_secret_nonce FROM two_factor_recovery WHERE  user_id= $1", userID).Scan(result.EncryptedSecret, result.SecretDecryptionNonce)
 	if err != nil {
 		return nil, err
 	}

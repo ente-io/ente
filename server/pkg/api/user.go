@@ -269,34 +269,6 @@ func (h *UserHandler) ConfigurePassKeySkipChallenge(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{})
 }
 
-func (h *UserHandler) GetPasskeySkipChallenge(c *gin.Context) {
-	passKeySessionID := c.Query("passKeySessionID")
-	if passKeySessionID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "passKeySessionID is required"})
-		return
-	}
-	resp, err := h.UserController.GetPasskeySkipChallenge(c, passKeySessionID)
-	if err != nil {
-		handler.Error(c, stacktrace.Propagate(err, ""))
-		return
-	}
-	c.JSON(http.StatusOK, resp)
-}
-
-func (h *UserHandler) SkipPassKey(c *gin.Context) {
-	var req ente.SkipPassKeyRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		handler.Error(c, stacktrace.Propagate(err, ""))
-		return
-	}
-	resp, err := h.UserController.SkipPassKey(c, &req)
-	if err != nil {
-		handler.Error(c, stacktrace.Propagate(err, ""))
-		return
-	}
-	c.JSON(http.StatusOK, resp)
-}
-
 // SetupTwoFactor generates a two factor secret and sends it to user to setup his authenticator app with
 func (h *UserHandler) SetupTwoFactor(c *gin.Context) {
 	userID := auth.GetUserID(c.Request.Header)
@@ -430,7 +402,14 @@ func (h *UserHandler) DisableTwoFactor(c *gin.Context) {
 // recoveryKeyEncryptedTwoFactorSecret for the user to decrypt it and make twoFactor removal api call
 func (h *UserHandler) RecoverTwoFactor(c *gin.Context) {
 	sessionID := c.Query("sessionID")
-	response, err := h.UserController.RecoverTwoFactor(sessionID)
+	twoFactorType := c.Query("type")
+	var response *ente.TwoFactorRecoveryResponse
+	var err error
+	if twoFactorType == "passkey" {
+		response, err = h.UserController.GetPasskeyRecoveryResponse(c, sessionID)
+	} else {
+		response, err = h.UserController.RecoverTwoFactor(sessionID)
+	}
 	if err != nil {
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return
@@ -446,7 +425,13 @@ func (h *UserHandler) RemoveTwoFactor(c *gin.Context) {
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return
 	}
-	response, err := h.UserController.RemoveTwoFactor(c, request.SessionID, request.Secret)
+	var response *ente.TwoFactorAuthorizationResponse
+	var err error
+	if request.TwoFactorType == "passkey" {
+		response, err = h.UserController.SkipPassKey(c, &request)
+	} else {
+		response, err = h.UserController.RemoveTwoFactor(c, request.SessionID, request.Secret)
+	}
 	if err != nil {
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return
