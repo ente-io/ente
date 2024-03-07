@@ -1,5 +1,5 @@
-// When adding new pages, they need to manually inserted into their appropriate
-// place here if you wish them to also appear in the sidebar.
+// When adding new pages, they need to be manually inserted into their
+// appropriate place here.
 
 export const sidebar = [
     {
@@ -20,7 +20,20 @@ export const sidebar = [
                 text: "Troubleshooting",
                 collapsed: true,
                 items: [{ text: "Introduction", link: "/photos/" }],
-            }
+            },
+        ],
+    },
+    {
+        text: "Auth",
+        items: [
+            { text: "Introduction", link: "/auth/" },
+            {
+                text: "Migration guides",
+                collapsed: true,
+                items: [
+                    { text: "Introduction", link: "/auth/migration-guides/" },
+                ],
+            },
         ],
     },
     {

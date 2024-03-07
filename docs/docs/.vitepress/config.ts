@@ -18,10 +18,6 @@ export default defineConfig({
             pattern:
                 "https://github.com/ente-io/ente/edit/main/docs/docs/:path",
         },
-        // nav: [
-        //     { text: "Photos", link: "/photos/index" },
-        //     { text: "Authenticator", link: "/authenticator/index" },
-        // ],
         search: {
             provider: "local",
             options: {
