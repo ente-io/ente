@@ -36,9 +36,8 @@ final _logger = Logger("main");
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await windowManager.ensureInitialized();
-
   if (PlatformUtil.isDesktop()) {
+    await windowManager.ensureInitialized();
     WindowOptions windowOptions = const WindowOptions(
       size: Size(450, 800),
     );
