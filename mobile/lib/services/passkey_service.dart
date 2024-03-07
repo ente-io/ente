@@ -3,6 +3,7 @@ import "package:logging/logging.dart";
 import "package:photos/core/network/network.dart";
 import "package:photos/utils/dialog_util.dart";
 import 'package:url_launcher/url_launcher_string.dart';
+import "package:uuid/uuid.dart";
 
 class PasskeyService {
   PasskeyService._privateConstructor();
@@ -15,6 +16,28 @@ class PasskeyService {
       "/users/accounts-token",
     );
     return response.data!["accountsToken"] as String;
+  }
+
+  Future<bool> isPassKeyRecoveryEnabled() async {
+    final response = await _enteDio.get(
+      "/users/two-factor/recovery-status",
+    );
+    return response.data!["isPassKeyRecoveryEnabled"] as bool;
+  }
+
+  Future<void> configurePasskeyRecovery(
+    String secret,
+    String userEncryptedSecret,
+    String userSecretNonce,
+  ) async {
+    await _enteDio.post(
+      "/users/two-factor/passkeys/configure-reset",
+      data: {
+        "secret": secret,
+        "userSecretCipher": userEncryptedSecret,
+        "userSecretNonce": userSecretNonce,
+      },
+    );
   }
 
   Future<void> openPasskeyPage(BuildContext context) async {
