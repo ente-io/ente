@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import "package:photos/generated/l10n.dart";
+import "package:photos/models/account/two_factor.dart";
 import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/lifecycle_event_handler.dart';
 import 'package:pinput/pin_put/pin_put.dart';
@@ -124,7 +125,11 @@ class _TwoFactorAuthenticationPageState
         GestureDetector(
           behavior: HitTestBehavior.opaque,
           onTap: () {
-            UserService.instance.recoverTwoFactor(context, widget.sessionID);
+            UserService.instance.recoverTwoFactor(
+              context,
+              widget.sessionID,
+              TwoFactorType.totp,
+            );
           },
           child: Container(
             padding: const EdgeInsets.all(10),
