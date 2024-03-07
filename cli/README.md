@@ -81,6 +81,10 @@ Build the docker image
 docker build -t ente:latest .
 ```
 
+Note that [BuildKit](https://docs.docker.com/go/buildkit/) is needed to build
+this image. If you face this issue, a quick fix is to add `DOCKER_BUILDKIT=1` in
+front of the build command.
+
 Start the container in detached mode
 
 ```shell
