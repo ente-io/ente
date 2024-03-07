@@ -860,7 +860,7 @@ func setupAndStartCrons(userAuthRepo *repo.UserAuthRepository, publicCollectionR
 		trashController.DropFileMetadataCron()
 	})
 
-	schedule(c, "@every 2m", func() {
+	schedule(c, "@every 90s", func() {
 		objectController.RemoveComplianceHolds()
 	})
 
