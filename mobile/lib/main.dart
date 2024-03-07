@@ -104,6 +104,7 @@ ThemeMode _themeMode(AdaptiveThemeMode? savedThemeMode) {
 }
 
 Future<void> _homeWidgetSync() async {
+  if (!Platform.isAndroid) return;
   try {
     if (await countHomeWidgets() != 0) {
       await initHomeWidget();
