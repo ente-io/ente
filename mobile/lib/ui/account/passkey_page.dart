@@ -51,7 +51,7 @@ class _PasskeyPageState extends State<PasskeyPage> {
         Configuration.instance.hasConfiguredAccount() ||
         link == null) {
       _logger.warning(
-        'ignored deeplink: $link contextMounted ${context.mounted} hasConfiguredAccount ${Configuration.instance.hasConfiguredAccount()}',
+        'ignored deeplink: contextMounted ${context.mounted} hasConfiguredAccount ${Configuration.instance.hasConfiguredAccount()}',
       );
       return;
     }
