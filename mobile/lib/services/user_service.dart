@@ -160,12 +160,6 @@ class UserService {
         queryParameters: {"email": email},
       );
       final publicKey = response.data["publicKey"];
-      await PublicKeysDB.instance.setKey(
-        public_key.PublicKey(
-          email,
-          publicKey,
-        ),
-      );
       return publicKey;
     } on DioError catch (e) {
       if (e.response != null && e.response?.statusCode == 404) {
