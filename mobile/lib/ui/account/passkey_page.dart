@@ -57,16 +57,19 @@ class _PasskeyPageState extends State<PasskeyPage> {
     }
     try {
       if (mounted && link.toLowerCase().startsWith("ente://passkey")) {
-        final uri = Uri.parse(link).queryParameters['response'];
-        // response to json
-        final res = utf8.decode(base64.decode(uri!));
+        final String? uri = Uri.parse(link).queryParameters['response'];
+        String base64String = uri!.toString();
+        while (base64String.length % 4 != 0) {
+          base64String += '=';
+        }
+        final res = utf8.decode(base64.decode(base64String));
         final json = jsonDecode(res) as Map<String, dynamic>;
         await UserService.instance.onPassKeyVerified(context, json);
       } else {
         _logger.info('ignored deeplink: $link mounted $mounted');
       }
-    } catch (e) {
-      _logger.severe('passKey: failed to handle deeplink', e);
+    } catch (e, s) {
+      _logger.severe('passKey: failed to handle deeplink', e, s);
       showGenericErrorDialog(context: context, error: e).ignore();
     }
   }
