@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	b64 "encoding/base64"
 	"fmt"
-	"github.com/ente-io/museum/pkg/repo/two_factor_recovery"
 	"net/http"
 	"os"
 	"os/signal"
@@ -14,6 +13,8 @@ import (
 	"strings"
 	"syscall"
 	"time"
+
+	"github.com/ente-io/museum/pkg/repo/two_factor_recovery"
 
 	"github.com/ente-io/museum/pkg/controller/cast"
 
@@ -434,8 +435,6 @@ func main() {
 	publicAPI.POST("/users/two-factor/passkeys/finish", userHandler.FinishPasskeyAuthenticationCeremony)
 	privateAPI.GET("/users/two-factor/recovery-status", userHandler.GetTwoFactorRecoveryStatus)
 	privateAPI.POST("/users/two-factor/passkeys/set-skip-challenge", userHandler.ConfigurePassKeySkipChallenge)
-	publicAPI.GET("/users/two-factor/passkeys/skip-challenge", userHandler.GetPasskeySkipChallenge)
-	publicAPI.POST("/users/two-factor/passkeys/skip", userHandler.SkipPassKey)
 	privateAPI.GET("/users/two-factor/status", userHandler.GetTwoFactorStatus)
 	privateAPI.POST("/users/two-factor/setup", userHandler.SetupTwoFactor)
 	privateAPI.POST("/users/two-factor/enable", userHandler.EnableTwoFactor)

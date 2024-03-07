@@ -18,7 +18,7 @@ func (c *UserController) ConfigurePassKeySkip(ctx *gin.Context, req *ente.Config
 	return c.TwoFactorRecoveryRepo.ConfigurePassKeySkipChallenge(ctx, userID, req)
 }
 
-func (c *UserController) GetPasskeySkipChallenge(ctx *gin.Context, passKeySessionID string) (*ente.PasseKeySkipChallengeResponse, error) {
+func (c *UserController) GetPasskeyRecoveryResponse(ctx *gin.Context, passKeySessionID string) (*ente.TwoFactorRecoveryResponse, error) {
 	userID, err := c.PasskeyRepo.GetUserIDWithPasskeyTwoFactorSession(passKeySessionID)
 	if err != nil {
 		return nil, err
@@ -41,12 +41,12 @@ func (c *UserController) GetPasskeySkipChallenge(ctx *gin.Context, passKeySessio
 	return result, nil
 }
 
-func (c *UserController) SkipPassKey(context *gin.Context, req *ente.SkipPassKeyRequest) (*ente.TwoFactorAuthorizationResponse, error) {
+func (c *UserController) SkipPassKey(context *gin.Context, req *ente.TwoFactorRemovalRequest) (*ente.TwoFactorAuthorizationResponse, error) {
 	userID, err := c.PasskeyRepo.GetUserIDWithPasskeyTwoFactorSession(req.SessionID)
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "")
 	}
-	exists, err := c.TwoFactorRecoveryRepo.VerifyPasskeySkipSecret(userID, req.SkipSecret)
+	exists, err := c.TwoFactorRecoveryRepo.VerifyPasskeySkipSecret(userID, req.Secret)
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "")
 	}
