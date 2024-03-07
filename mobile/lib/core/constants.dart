@@ -8,7 +8,8 @@ const String sentryDSN =
 const String sentryDebugDSN =
     "https://ca5e686dd7f149d9bf94e620564cceba@sentry.ente.io/3";
 const String sentryTunnel = "https://sentry-reporter.ente.io";
-const String githubDiscussionsUrl = "https://github.com/ente-io/ente/discussions";
+const String githubDiscussionsUrl =
+    "https://github.com/ente-io/ente/discussions";
 const int microSecondsInDay = 86400000000;
 const int android11SDKINT = 30;
 const int jan011981Time = 347155200000000;
@@ -41,6 +42,7 @@ const supportEmail = 'support@ente.io';
 class FFDefault {
   static const bool enableStripe = true;
   static const bool disableCFWorker = false;
+  static const bool enablePasskey = false;
 }
 
 const kDefaultProductionEndpoint = 'https://api.ente.io';

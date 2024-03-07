@@ -437,7 +437,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
     try {
       final KeyGenResult result =
           await Configuration.instance.generateKey(password);
-      Configuration.instance.setVolatilePassword(null);
+      Configuration.instance.resetVolatilePassword();
       await dialog.hide();
       onDone() async {
         final dialog = createProgressDialog(context, S.of(context).pleaseWait);
@@ -445,7 +445,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
         try {
           await UserService.instance.setAttributes(result);
           await dialog.hide();
-          Configuration.instance.setVolatilePassword(null);
+          Configuration.instance.resetVolatilePassword();
           Bus.instance.fire(AccountConfiguredEvent());
           // ignore: unawaited_futures
           Navigator.of(context).pushAndRemoveUntil(

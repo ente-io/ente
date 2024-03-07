@@ -12,7 +12,7 @@ description: ente photos application
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 
-version: 0.8.64+584
+version: 0.8.65+585
 publish_to: none
 
 environment:
@@ -181,7 +181,7 @@ dependency_overrides:
   # current fork of tfite_flutter_helper depends on ffi: ^1.x.x
   # but we need ffi: ^2.0.1 for newer packages. The original tfite_flutter_helper
   #
-  ffi: ^2.0.0
+  ffi: ^2.1.0
   video_player:
     git:
       url: https://github.com/ente-io/packages.git

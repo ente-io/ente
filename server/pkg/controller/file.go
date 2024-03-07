@@ -652,14 +652,14 @@ func (c *FileController) cleanupDeletedFile(qItem repo.QueueItem) {
 			return
 		}
 	}
-	err = c.QueueRepo.DeleteItem(repo.DeleteObjectQueue, qItem.Item)
-	if err != nil {
-		ctxLogger.WithError(err).Error("Failed to remove item from the queue")
-		return
-	}
 	err = c.ObjectRepo.RemoveObjectsForKey(qItem.Item)
 	if err != nil {
 		ctxLogger.WithError(err).Error("Failed to remove item from object_keys")
+		return
+	}
+	err = c.QueueRepo.DeleteItem(repo.DeleteObjectQueue, qItem.Item)
+	if err != nil {
+		ctxLogger.WithError(err).Error("Failed to remove item from the queue")
 		return
 	}
 	ctxLogger.Info("Successfully deleted item")

@@ -36,9 +36,8 @@ final _logger = Logger("main");
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await windowManager.ensureInitialized();
-
   if (PlatformUtil.isDesktop()) {
+    await windowManager.ensureInitialized();
     WindowOptions windowOptions = const WindowOptions(
       size: Size(450, 800),
     );
@@ -49,7 +48,9 @@ void main() async {
   }
   await _runInForeground();
   await _setupPrivacyScreen();
-  if (Platform.isAndroid) FlutterDisplayMode.setHighRefreshRate();
+  if (Platform.isAndroid) {
+    FlutterDisplayMode.setHighRefreshRate().ignore();
+  }
 }
 
 Future<void> _runInForeground() async {

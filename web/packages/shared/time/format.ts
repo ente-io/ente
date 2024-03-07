@@ -1,5 +1,7 @@
 import i18n, { t } from "i18next";
 
+const A_DAY = 24 * 60 * 60 * 1000;
+
 const dateTimeFullFormatter1 = new Intl.DateTimeFormat(i18n.language, {
     weekday: "short",
     month: "short",
@@ -76,3 +78,22 @@ export function formatDateRelative(date: number) {
                 u as Intl.RelativeTimeFormatUnit,
             );
 }
+
+export const isSameDay = (first, second) => {
+    return (
+        first.getFullYear() === second.getFullYear() &&
+        first.getMonth() === second.getMonth() &&
+        first.getDate() === second.getDate()
+    );
+};
+
+export const getDate = (item) => {
+    const currentDate = item.metadata.creationTime / 1000;
+    const date = isSameDay(new Date(currentDate), new Date())
+        ? t("TODAY")
+        : isSameDay(new Date(currentDate), new Date(Date.now() - A_DAY))
+          ? t("YESTERDAY")
+          : formatDate(currentDate);
+
+    return date;
+};

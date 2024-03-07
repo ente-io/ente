@@ -70,6 +70,7 @@ existing users will be grandfathered in.
 [<img height="42" src=".github/assets/app-store-badge.svg">](https://apps.apple.com/app/id6444121398)
 [<img height="42" src=".github/assets/play-store-badge.png">](https://play.google.com/store/apps/details?id=io.ente.auth)
 [<img height="42" src=".github/assets/f-droid-badge.png">](https://f-droid.org/packages/io.ente.auth/)
+[<img height="42" src=".github/assets/github-badge.png">](https://github.com/ente-io/ente/releases?q=tag%3Av2.0.34&expanded=true)
 [<img height="42" src=".github/assets/web-badge.svg">](https://auth.ente.io)
 
 </div>
@@ -97,6 +98,8 @@ connect with the community.
 
 [![Discord](https://img.shields.io/discord/948937918347608085?style=for-the-badge&logo=Discord&logoColor=white&label=Discord)](https://discord.gg/z2YVKkycX3)
 [![Ente's Blog RSS](https://img.shields.io/badge/blog-rss-F88900?style=for-the-badge&logo=rss&logoColor=white)](https://ente.io/blog/rss.xml)
+
+[![Twitter](.github/assets/twitter.svg)](https://twitter.com/enteio) &nbsp; [![Mastodon](.github/assets/mastodon.svg)](https://mstdn.social/@ente)
 
 ---
 

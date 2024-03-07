@@ -2,6 +2,7 @@ import { logError } from "@ente/shared/sentry";
 import { FILE_TYPE } from "constants/file";
 import { LivePhotoSourceURL, SourceURLs } from "services/download";
 import { EnteFile } from "types/file";
+import { SetSelectedState } from "types/gallery";
 
 const WAIT_FOR_VIDEO_PLAYBACK = 1 * 1000;
 
@@ -129,3 +130,55 @@ export async function updateFileSrcProps(
         file.src = url as string;
     }
 }
+
+export const handleSelectCreator =
+    (
+        setSelected: SetSelectedState,
+        activeCollectionID: number,
+        setRangeStart?,
+    ) =>
+    (id: number, isOwnFile: boolean, index?: number) =>
+    (checked: boolean) => {
+        if (typeof index !== "undefined") {
+            if (checked) {
+                setRangeStart(index);
+            } else {
+                setRangeStart(undefined);
+            }
+        }
+        setSelected((selected) => {
+            if (selected.collectionID !== activeCollectionID) {
+                selected = { ownCount: 0, count: 0, collectionID: 0 };
+            }
+
+            const handleCounterChange = (count: number) => {
+                if (selected[id] === checked) {
+                    return count;
+                }
+                if (checked) {
+                    return count + 1;
+                } else {
+                    return count - 1;
+                }
+            };
+
+            const handleAllCounterChange = () => {
+                if (isOwnFile) {
+                    return {
+                        ownCount: handleCounterChange(selected.ownCount),
+                        count: handleCounterChange(selected.count),
+                    };
+                } else {
+                    return {
+                        count: handleCounterChange(selected.count),
+                    };
+                }
+            };
+            return {
+                ...selected,
+                [id]: checked,
+                collectionID: activeCollectionID,
+                ...handleAllCounterChange(),
+            };
+        });
+    };

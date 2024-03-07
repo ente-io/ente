@@ -28,8 +28,6 @@ class BillingService {
   final _dio = Network.instance.getDio();
   final _config = Configuration.instance;
 
-  bool _isOnSubscriptionPage = false;
-
   Subscription? _cachedSubscription;
 
   Future<BillingPlans>? _future;
@@ -175,9 +173,5 @@ class BillingService {
       _logger.severe(e, s);
       rethrow;
     }
-  }
-
-  void setIsOnSubscriptionPage(bool isOnSubscriptionPage) {
-    _isOnSubscriptionPage = isOnSubscriptionPage;
   }
 }
