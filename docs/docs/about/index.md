@@ -5,19 +5,26 @@ description: >
     that we make.
 ---
 
-Ente is a platform for privately, reliably, and securely storing your data on
-the cloud. On top of this platform, Ente offers two products currently:
+# About
 
-* Ente Photos - An alternative to Google Photos and Apple Photos
+Ente is a end-to-end encrypted platform for privately, reliably, and securely
+storing your data on the cloud. On top of this platform, Ente offers two
+products:
 
-* Ente Auth - A (free!) app for storing your 2FA codes.
+* **Ente Photos** - An alternative to Google Photos and Apple Photos
 
-and more products are in the pipeline.
+* **Ente Auth** - A free 2FA alternative to Authy
+
+Both these apps are available for all desktop (Linux, Mac, Windows) and mobile
+(Android, iOS and F-Droid) platforms. They also work directly in your web
+browser without you needing to install anything.
+
+More products are in the pipeline.
 
 ## History
 
-Ente was the founded by Vishnu Mohandas, who is also the Ente's CEO, in response
-to privacy concerns with major tech companies. The underlying motivation was the
+Ente was the founded by Vishnu Mohandas (he's also Ente's CEO) in response to
+privacy concerns with major tech companies. The underlying motivation was the
 understanding that big tech had no incentive to fix their act, but with
 end-to-end encrypted cross platform apps, there was a way for people to take
 back control over their own data without sacrificing on features.
@@ -29,9 +36,9 @@ has the literal meaning "my photos".
 
 This was a good name, but still Vishnu looked around for better ones. But one
 day, he discovered that "ente" means "duck" in German. This unexpected
-connection sealed the deal! We should ask him why he likes ducks so much, but
+connection sealed the deal. We should ask him why he likes ducks so much, but
 apparently he does, so this dual meaning ("mine" / "duck") led him to finalize
-the name, and also led to the adoption of the duck as Ente's mascot, "Ducky":
+the name, and also led to the adoption of "Ducky", Ente's mascot:
 
 <div align="center">
 
@@ -43,80 +50,20 @@ the name, and also led to the adoption of the duck as Ente's mascot, "Ducky":
 
 en-_tay_. Like ca<i>fe</i>.
 
----
+## Get in touch
 
-# Products
+If you have a support query that is not answered by these docs, please reach out
+to our Customer Support by sending an email to support@ente.io
 
-Ente currently offers Photo and Auth. Additionally, there are some other
-products (Lockers and Legacy) that are being considered.
+To stay up to date with new product launches, and behind the scenes details of
+how we're building Ente, you can read our [blog](https://ente.io/blog) (or
+subscribe to it via [RSS](https://ente.io/blog/rss.xml))
 
-## Ente Photos
+To suggest new features and/or offer your perspective on how we should design
+planned and upcoming features, use our [GitHub
+discussions](https://github.com/ente-io/ente/discussions)
 
-Ente Photos goes beyond traditional cloud storage, prioritizing your privacy and
-the safety of your cherished memories. All your photos, along with their
-metadata, are stored end-to-end encrypted, ensuring that only you have access to
-your data.
-
-Ente preserves your encrypted photos across three different clouds in three
-separate locations, including an underground fallout shelter. This multi-layered
-backup strategy provides a high level of reliability.
-
-Ente photos is available for Android, iOS, Linux, Mac, Windows and the web.
-
-# Ente Auth
-
-Ente auth is ust an authenticator app; it's an open-source initiative
-dedicated to securing your 2FA secrets. Now, you can backup and view your
-two-factor authentication secrets seamlessly. find more information about the
-project on GitHub at github.com/ente-io/auth.
-
-As a token of gratitude to the community that has supported us, Ente Auth is
-offered as a free service. If in the future we convert this to a paid service,
-existing users will be grandfathered in.
-
-Ente auth is available on Android, iOS, and the web
-
-# Connect with Ente
-
-## Customer support
-
-Connect with our support team for swift assistance and expert guidance email us
-@support@ente.io.
-Reach out to our dev team @team@ente.io, even our CEO and CTO personally
-responds here.
-
-## Blog
-
-As Ente continues to evolve, So does our story. Follow our blog @
-https://ente.io/blog As Ente undergoes continuous growth and development, our
-narrative unfolds. Explore our blog for exclusive company updates that offer an
-insider's perspective. Regularly visit the Ente blog to maintain your
-connection, stay well informed, and draw insipration.
-
-## Roadmap
-
-You plays a pivotal role in shaping the future direction of Ente's product, and
-we invite you to be an integral part of it.
-
-Take a look at our roadmap to see where we're headed
-https://roadmap.ente.io/roadmap/
-
-# Community
-
-#### Join our vibrant community and stay updated on all things on Ente! Follow us on various platforms for the latest news, updates, and engaging content
-
-#### Discord
-
-Join our Discord for real-time discussions, solutions to queries, and a thriving
-camaraderie. Stay updated on all things on Ente!
-
-🐦 Twitter: https://twitter.com/enteio
-
-🔗 Reddit: https://www.reddit.com/r/enteio
-
-📸 Instagram: https://www.instagram.com/ente.app/
-
-🐘 Mastodon: https://mstdn.social/@ente
-
-🔗 LinkedIn: https://www.linkedin.com/company/ente-io/
-
+Or if you'd just like to hang out, join our
+[Discord](https://discord.gg/z2YVKkycX3), follow us on
+[Twitter](https://twitter.com/enteio) or give us a shout out on
+[Mastodon](https://mstdn.social/@ente)

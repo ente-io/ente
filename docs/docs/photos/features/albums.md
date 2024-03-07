@@ -1,67 +1,81 @@
+---
+title: Albums
+description: Using albums in Ente Photos
+---
+
 # Albums
 
-This guide will show you how to make the most of your albums with simple yet
-effective features. Below are the features that allow you to personailze your
-albums according to your preferences:
+Make the most of your albums and personalize them to your preferences with these
+simple yet effective features.
 
-## 1. Rename album: Personalize your albums by giving them a meaningful name
+## Rename album
 
-### How to Rename an album on your mobile?
+Personalize your albums by giving them a meaningful name.
+
+### How to rename an album on your mobile?
 
 -   Open the album
 -   Tap the three dots button in the top right corner of the screen
--   Tap rename album, then type in a new name
--   Tap on Rename button
+-   Tap _Rename album_, then type in a new name
+-   Tap on _Rename_ button
 
-### How to Rename an album on your Desktop?
+### How to rename an album on your web / desktop?
 
 -   Open the album
 -   Click on the overflow menu in the top right corner
--   Click the Rename album
+-   Click the _Rename album_ button
 -   Type in a new name
--   Click on Rename or Press enter
+-   Click on _Rename_ or press enter
 
-## 2. Set cover: Select any photo you want to use as the cover for your album.
+## Set album cover
+
+Select any photo you want to use as the cover for your album.
 
 ### How to set an album cover on mobile?
 
 -   Open the album you want to change
 -   Tap the three dots button in the top right corner
--   From the menu options, select Set cover
+-   From the menu options, select _Set cover_
 -   A new screen will appear, propmpting you to select the cover photo
 -   Browse through your photos and tap on the image you want to set as the album
     cover
--   Then tap on Use selected photo
+-   Then tap on _Use selected photo_
 
-## 3. Map: Explore the memories based on their location
+## View your photos on a map
 
-### How to explore the album's photo in map view?
+Explore your memories based on their location.
 
--   Open the album
--   Tap on the three dots button in the top right corner
--   Select map
--   View all photos of the album in map view
-
-## 4. Sort by: Maintain order in your albums by arranging them from the newest to the oldest
-
-### How to sort by on mobile?
+### How to explore the album's photos in map view?
 
 -   Open the album
 -   Tap on the three dots button in the top right corner
--   Select sort by
--   Tap on the Newst first for the latest, Or Oldest first for the oldest
+-   Select _Map_
+-   This will show all photos of the album in a map view
 
-### How to sort by on desktop?
+## Sort albums
+
+Maintain order in your albums by arranging them from the newest to the oldest.
+
+### How to change the sort order on mobile?
+
+-   Open the album
+-   Tap on the three dots button in the top right corner
+-   Select _Sort by_
+-   Tap on the _Newest first_ for the latest, Or _Oldest first_ for the oldest
+
+### How to change the sort order on web / desktop?
 
 -   Open the album
 -   Click on the three dots button in the top right corner
--   Click sort by
--   Click on the Newest first for the latest, Or oldest first for the oldest
+-   Click _Sort by_
+-   Tap on the _Newest first_ for the latest, Or _Oldest first_ for the oldest
 
-## 5. Pin album: Keep your favorite album at the top by pinning them for quick access.
+## Pin albums
 
-### How to Pin/Unpin an album on Mobile?
+Keep your favorite album at the top by pinning them for quick access.
+
+### How to pin/unpin an album on mobile?
 
 -   Open the album
 -   Tap on the three dots button in the top right corner
--   Tap on Pin album/Unpin album
+-   Tap on _Pin album_ / _Unpin album_

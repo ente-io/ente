@@ -1,9 +1,14 @@
+---
+title: Family plans
+description: Share your Ente Photos plan with your family members with no extra cost
+---
+
 # Family plans
 
 Paid subscribers of Ente can share the storage with their family, **at no
 additional cost** as you have already paid for the storage.
 
-In breif,
+In brief,
 
 -   Your family members can use storage space from your plan without paying
     extra.
