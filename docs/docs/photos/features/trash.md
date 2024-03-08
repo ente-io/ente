@@ -1,7 +1,12 @@
+---
+title: Trash
+description: Deleting items and trash
+---
+
 # Trash
 
-Whenever you delete an item from ente, it is moved to Trash. These items will be
-automatically deleted from Trash after 30 days. You can manaully select or
-completely empty the trash, if you wish.
+Whenever you delete an item from Ente, it is moved to Trash. These items will be
+automatically deleted from Trash after 30 days. You can manaully select photos
+to permanently delete or completely empty the trash if you wish.
 
 Items in trash are included in your used storage calculation.

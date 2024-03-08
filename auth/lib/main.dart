@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:adaptive_theme/adaptive_theme.dart';
@@ -46,7 +47,7 @@ Future<void> _runInForeground() async {
     _logger.info("Starting app in foreground");
     await _init(false, via: 'mainMethod');
     final Locale locale = await getLocale();
-    UpdateService.instance.showUpdateNotification();
+    unawaited(UpdateService.instance.showUpdateNotification());
     runApp(
       AppLock(
         builder: (args) => App(locale: locale),
@@ -83,7 +84,7 @@ Future _runWithLogs(Function() function, {String prefix = ""}) async {
 
 Future<void> _init(bool bool, {String? via}) async {
   // Start workers asynchronously. No need to wait for them to start
-  Computer.shared().turnOn(workersCount: 4, verbose: kDebugMode);
+  Computer.shared().turnOn(workersCount: 4, verbose: kDebugMode).ignore();
   CryptoUtil.init();
   await PreferenceService.instance.init();
   await CodeStore.instance.init();

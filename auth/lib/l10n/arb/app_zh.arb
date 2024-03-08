@@ -144,6 +144,7 @@
   "enterCodeHint": "从你的身份验证器应用中\n输入6位数字代码",
   "lostDeviceTitle": "丢失了设备吗？",
   "twoFactorAuthTitle": "双因素认证",
+  "passkeyAuthTitle": "通行密钥认证",
   "recoverAccount": "恢复账户",
   "enterRecoveryKeyHint": "输入您的恢复密钥",
   "recover": "恢复",
@@ -404,5 +405,8 @@
   "signOutOtherDevices": "登出其他设备",
   "doNotSignOut": "不要退登",
   "hearUsWhereTitle": "您是如何知道Ente的？ （可选的）",
-  "hearUsExplanation": "我们不跟踪应用程序安装情况。如果您告诉我们您是在哪里找到我们的，将会有所帮助！"
+  "hearUsExplanation": "我们不跟踪应用程序安装情况。如果您告诉我们您是在哪里找到我们的，将会有所帮助！",
+  "waitingForBrowserRequest": "正在等待浏览器请求...",
+  "launchPasskeyUrlAgain": "再次启动 通行密钥 URL",
+  "passkey": "通行密钥"
 }

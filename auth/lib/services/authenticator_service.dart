@@ -5,7 +5,6 @@ import 'dart:math';
 import 'package:ente_auth/core/configuration.dart';
 import 'package:ente_auth/core/errors.dart';
 import 'package:ente_auth/core/event_bus.dart';
-import 'package:ente_auth/core/network.dart';
 import 'package:ente_auth/events/codes_updated_event.dart';
 import 'package:ente_auth/events/signed_in_event.dart';
 import 'package:ente_auth/events/trigger_logout_event.dart';
@@ -26,6 +25,7 @@ enum AccountMode {
   online,
   offline,
 }
+
 extension on AccountMode {
   bool get isOnline => this == AccountMode.online;
   bool get isOffline => this == AccountMode.offline;
@@ -56,7 +56,7 @@ class AuthenticatorService {
     _prefs = await SharedPreferences.getInstance();
     _db = AuthenticatorDB.instance;
     _offlineDb = OfflineAuthenticatorDB.instance;
-    _gateway = AuthenticatorGateway(Network.instance.getDio(), _config);
+    _gateway = AuthenticatorGateway();
     if (Configuration.instance.hasConfiguredAccount()) {
       unawaited(onlineSync());
     }
@@ -154,7 +154,7 @@ class AuthenticatorService {
     } else {
       debugPrint("Skipping delete since account mode is offline");
     }
-    if(accountMode.isOnline) {
+    if (accountMode.isOnline) {
       await _db.deleteByIDs(generatedIDs: [genID]);
     } else {
       await _offlineDb.deleteByIDs(generatedIDs: [genID]);
@@ -163,7 +163,7 @@ class AuthenticatorService {
 
   Future<bool> onlineSync() async {
     try {
-      if(getAccountMode().isOffline) {
+      if (getAccountMode().isOffline) {
         debugPrint("Skipping sync since account mode is offline");
         return false;
       }
@@ -208,7 +208,7 @@ class AuthenticatorService {
     if (deletedIDs.isNotEmpty) {
       await _db.deleteByIDs(ids: deletedIDs);
     }
-    _prefs.setInt(_lastEntitySyncTime, maxSyncTime);
+    await _prefs.setInt(_lastEntitySyncTime, maxSyncTime);
     _logger.info("Setting synctime to " + maxSyncTime.toString());
     if (result.length == fetchLimit) {
       _logger.info("Diff limit reached, pulling again");
@@ -253,7 +253,7 @@ class AuthenticatorService {
   }
 
   Future<Uint8List> getOrCreateAuthDataKey(AccountMode mode) async {
-    if(mode.isOffline) {
+    if (mode.isOffline) {
       return _config.getOfflineSecretKey()!;
     }
     if (_config.getAuthSecretKey() != null) {

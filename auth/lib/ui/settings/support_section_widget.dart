@@ -42,6 +42,7 @@ class _SupportSectionWidgetState extends State<SupportSectionWidget> {
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
           onTap: () async {
+            // ignore: unawaited_futures
             showModalBottomSheet<void>(
               backgroundColor: Theme.of(context).colorScheme.background,
               barrierColor: Colors.black87,
@@ -61,6 +62,7 @@ class _SupportSectionWidgetState extends State<SupportSectionWidget> {
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
           onTap: () async {
+            // ignore: unawaited_futures
             launchUrlString(
               githubDiscussionsUrl,
               mode: LaunchMode.externalApplication,

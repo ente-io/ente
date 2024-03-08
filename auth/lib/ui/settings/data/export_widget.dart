@@ -98,7 +98,7 @@ Future<void> _requestForEncryptionPassword(
             ),
           );
           // get json value of data
-          _exportCodes(context, jsonEncode(data.toJson()));
+          await _exportCodes(context, jsonEncode(data.toJson()));
         } catch (e, s) {
           Logger("ExportWidget").severe(e, s);
           showToast(context, "Error while exporting codes.");

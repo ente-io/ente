@@ -116,6 +116,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
               context.l10n.authToViewYourActiveSessions,
             );
             if (hasAuthenticated) {
+              // ignore: unawaited_futures
               Navigator.of(context).push(
                 MaterialPageRoute(
                   builder: (BuildContext context) {

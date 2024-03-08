@@ -48,6 +48,7 @@ class _AdvancedSectionWidgetState extends State<AdvancedSectionWidget> {
           trailingIconIsMuted: true,
           onTap: () async {
             final locale = await getLocale();
+            // ignore: unawaited_futures
             routeToPage(
               context,
               LanguageSelectorPage(
