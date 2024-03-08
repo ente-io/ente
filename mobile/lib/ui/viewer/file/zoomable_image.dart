@@ -92,6 +92,7 @@ class _ZoomableImageState extends State<ZoomableImage>
       content = PhotoViewGestureDetectorScope(
         axis: Axis.vertical,
         child: PhotoView(
+          key: ValueKey(_loadedFinalImage),
           imageProvider: _imageProvider,
           controller: _photoViewController,
           scaleStateController: _scaleStateController,
