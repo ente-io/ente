@@ -64,7 +64,14 @@ ente account update --email email@domain.com --dir ~/photos
 ente export
 ```
 
----
+### CLI Docs
+You can view more cli documents at [docs](docs/generated/ente.md).
+To update the docs, run the following command:
+
+```shell
+go run main.go docs
+```
+
 
 ## Docker
 
