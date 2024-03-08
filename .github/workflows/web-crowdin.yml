@@ -3,15 +3,16 @@ name: "Sync Crowdin translations (web)"
 on:
     push:
         paths:
-            # Run action when web's en-US/translation.json is changed
+            # Run workflow when web's en-US/translation.json is changed
             - "web/apps/photos/public/locales/en-US/translation.json"
             # Or the workflow itself is changed
             - ".github/workflows/web-crowdin.yml"
         branches: [main]
     schedule:
-        # Run every 24 hours - https://crontab.guru/#0_*/24_*_*_*
-        - cron: "0 */24 * * *"
-    workflow_dispatch: # Allow manually running the action
+        # See: [Note: Run every 24 hours]
+        - cron: "20 1 * * *"
+    # Also allow manually running the workflow
+    workflow_dispatch:
 
 jobs:
     synchronize-with-crowdin:
