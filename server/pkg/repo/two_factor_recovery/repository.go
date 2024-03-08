@@ -18,7 +18,7 @@ type Repository struct {
 // GetStatus returns `ente.TwoFactorRecoveryStatus` for a user
 func (r *Repository) GetStatus(userID int64) (*ente.TwoFactorRecoveryStatus, error) {
 	var isAdminResetEnabled bool
-	var resetKey sql.NullByte
+	var resetKey []byte
 	row := r.Db.QueryRow(`SELECT enable_admin_mfa_reset, server_passkey_secret_data FROM two_factor_recovery WHERE user_id = $1`, userID)
 	err := row.Scan(&isAdminResetEnabled, &resetKey)
 	if err != nil {
@@ -31,7 +31,7 @@ func (r *Repository) GetStatus(userID int64) (*ente.TwoFactorRecoveryStatus, err
 		}
 		return nil, err
 	}
-	return &ente.TwoFactorRecoveryStatus{AllowAdminReset: isAdminResetEnabled, IsPassKeyRecoveryEnabled: resetKey.Valid}, nil
+	return &ente.TwoFactorRecoveryStatus{AllowAdminReset: isAdminResetEnabled, IsPassKeyRecoveryEnabled: len(resetKey) > 0}, nil
 }
 
 func (r *Repository) SetPassKeyRecovery(ctx context.Context, userID int64, req *ente.SetPassKeyRecoveryRequest) error {
