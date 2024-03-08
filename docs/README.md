@@ -8,7 +8,30 @@ Help and documentation for Ente's products
 > publishing these docs. They'll likely be available at help.ente.io once we
 > wrap those loose ends up.
 
-## Running
+## Quick edits
+
+You can edit these files directly on GitHub and open a pull request.
+[help.ente.io](https://help.ente.io) will automatically get updated with your
+changes in a few minutes after your pull request is merged.
+
+## Running locally
+
+
+The above workflow is great since it doesn't require you to setup anything on
+your local machine. But if you plan on contributing frequently, you might find
+it easier to run everything locally.
+
+Clone this repository
+
+```sh
+git clone https://github.com/ente-io/ente
+```
+
+Change to this directory
+
+```sh
+cd ente/docs
+```
 
 Install dependencies
 
@@ -22,16 +45,12 @@ Then start a local server
 yarn dev
 ```
 
-## Workflow
+For an editor, VSCode is a good choice. Also install the Prettier extension for
+VSCode, and set VSCode to format on save. This way the editor will automatically
+format and wrap the text using the project's standard, so you can just focus on
+the content.
 
-You can edit these files directly on GitHub and open a pull request. That is the
-easiest workflow to get started without needing to install anything on your
-local machine.
-
-If you plan on contributing frequently, we recommend using an editor. VSCode is
-a good choice. Also install the Prettier extension for VSCode, and set VSCode to
-format on save. This way the editor will automatically format and wrap the text
-using the project's standard, so you can just focus on the content.
+## Have fun!
 
 Note that we currently don't enforce these formatting standards to make it easy
 for people unfamiliar with programming to also be able to make edits from GitHub
