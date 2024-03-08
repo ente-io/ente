@@ -164,9 +164,6 @@ class SearchExampleRow extends StatelessWidget {
   Widget build(BuildContext context) {
     //Cannot use listView.builder here
     final scrollableExamples = <Widget>[];
-    if (sectionType == SectionType.location) {
-      scrollableExamples.add(const GoToMapWidget());
-    }
     examples.forEachIndexed((index, element) {
       scrollableExamples.add(
         SearchExample(

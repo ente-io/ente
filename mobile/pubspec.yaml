@@ -77,6 +77,7 @@ dependencies:
   flutter_email_sender: ^5.2.0
   flutter_image_compress: ^1.1.0
   flutter_inappwebview: ^5.8.0
+  flutter_isolate: ^2.0.4
   flutter_launcher_icons: ^0.13.1
   flutter_local_notifications: ^12.0.4
   flutter_localizations:
@@ -113,10 +114,10 @@ dependencies:
   logging: ^1.0.1
   lottie: ^1.2.2
   media_extension: ^1.0.1
-  ml_linalg: ^13.11.31
   media_kit: ^1.1.10+1
   media_kit_libs_video: ^1.0.4
   media_kit_video: ^1.2.4
+  ml_linalg: ^13.11.31
   modal_bottom_sheet: ^3.0.0-pre
   motion_photos:
     git: "https://github.com/ente-io/motion_photo.git"
@@ -140,6 +141,8 @@ dependencies:
   photo_view: ^0.14.0
   pinput: ^1.2.2
   pointycastle: ^3.7.3
+  pool: ^1.5.1
+  protobuf: ^3.1.0
   provider: ^6.0.0
   quiver: ^3.0.1
   receive_sharing_intent: ^1.6.7
@@ -177,9 +180,7 @@ dependencies:
   wallpaper_manager_flutter: ^0.0.2
   wechat_assets_picker: ^8.6.3
   widgets_to_image: ^0.0.2
-  flutter_isolate: ^2.0.4
-  protobuf: ^3.1.0
-  pool: ^1.5.1
+
   workmanager: ^0.5.2
 
 dependency_overrides:

@@ -76,7 +76,7 @@ class PersonFaceWidget extends StatelessWidget {
       EnteFile? fileForFaceCrop = file;
       if (face.fileID != file.uploadedFileID!) {
         fileForFaceCrop =
-            await FilesDB.instance.getAnyUploadedFile(face.fileID!);
+            await FilesDB.instance.getAnyUploadedFile(face.fileID);
       }
       if (fileForFaceCrop == null) {
         return null;

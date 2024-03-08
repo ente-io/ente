@@ -65,7 +65,8 @@ class FaceEmbeddingOnnx {
 
   Future<void> release() async {
     if (isInitialized) {
-      await _computer.compute(_releaseModel, param: {'address': sessionAddress});
+      await _computer
+          .compute(_releaseModel, param: {'address': sessionAddress});
       isInitialized = false;
       sessionAddress = 0;
     }
@@ -106,7 +107,7 @@ class FaceEmbeddingOnnx {
 
     try {
       final stopwatchDecoding = Stopwatch()..start();
-      final (inputImageList, alignmentResults, isBlur, blurValue, _) =
+      final (inputImageList, _, isBlur, blurValue, _) =
           await ImageMlIsolate.instance.preprocessMobileFaceNetOnnx(
         imagePath,
         [face],

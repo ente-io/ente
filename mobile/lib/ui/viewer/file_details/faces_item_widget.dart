@@ -53,7 +53,7 @@ class FacesItemWidget extends StatelessWidget {
       // TODO: add deduplication of faces of same person
       final faceIdsToClusterIds = await FaceMLDataDB.instance
           .getFaceIdsToClusterIds(faces.map((face) => face.faceID));
-      final (clusterIDToPerson, personIdToPerson) =
+      final (clusterIDToPerson, _) =
           await FaceMLDataDB.instance.getClusterIdToPerson();
 
       final faceWidgets = <FaceWidget>[];

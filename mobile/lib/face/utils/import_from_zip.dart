@@ -33,7 +33,7 @@ Future<List<Face>> downloadZip() async {
       }
     }
   }
-  Set<String> faceID = {};
+  final Set<String> faceID = {};
   for (final face in result) {
     if (faceID.contains(face.faceID)) {
       _logger.warning("duplicate faceID ${face.faceID}");

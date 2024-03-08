@@ -11,7 +11,6 @@ import "package:flutter_isolate/flutter_isolate.dart";
 import "package:logging/logging.dart";
 import "package:onnxruntime/onnxruntime.dart";
 import "package:photos/core/configuration.dart";
-import "package:photos/core/constants.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/db/ml_data_db.dart";
 import "package:photos/events/diff_sync_complete_event.dart";
@@ -374,10 +373,10 @@ class FaceMlService {
 
       // Store the updated clusterIDs in the database
       _logger.info(
-        'Updating ${faceIdToCluster?.length} FaceIDs with clusterIDs in the DB',
+        'Updating ${faceIdToCluster.length} FaceIDs with clusterIDs in the DB',
       );
       await FaceMLDataDB.instance
-          .updatePersonIDForFaceIDIFNotSet(faceIdToCluster!);
+          .updatePersonIDForFaceIDIFNotSet(faceIdToCluster);
       _logger.info('Done updating FaceIDs with clusterIDs in the DB, in '
           '${DateTime.now().difference(clusterDoneTime).inSeconds} seconds');
     } catch (e, s) {
@@ -961,14 +960,9 @@ class FaceMlService {
     FaceMlResultBuilder? resultBuilder,
   }) async {
     try {
-      final (
-        alignedFaces,
-        alignmentResults,
-        isBlurs,
-        blurValues,
-        originalImageSize
-      ) = await ImageMlIsolate.instance
-          .preprocessMobileFaceNetOnnx(imagePath, faces);
+      final (alignedFaces, alignmentResults, _, blurValues, originalImageSize) =
+          await ImageMlIsolate.instance
+              .preprocessMobileFaceNetOnnx(imagePath, faces);
 
       if (resultBuilder != null) {
         resultBuilder.addAlignmentResults(
@@ -1000,13 +994,8 @@ class FaceMlService {
   }) async {
     try {
       final stopwatch = Stopwatch()..start();
-      final (
-        alignedFaces,
-        alignmentResults,
-        isBlurs,
-        blurValues,
-        originalImageSize
-      ) = await preprocessToMobileFaceNetFloat32List(imagePath, faces);
+      final (alignedFaces, alignmentResults, _, blurValues, originalImageSize) =
+          await preprocessToMobileFaceNetFloat32List(imagePath, faces);
       stopwatch.stop();
       dev.log(
         "Face alignment image decoding and processing took ${stopwatch.elapsedMilliseconds} ms",

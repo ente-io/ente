@@ -260,6 +260,7 @@ class _ZoomableImageState extends State<ZoomableImage>
     // log("Magnitude: $magnitude");
     // log("Embedding: $embedding");
     if (mounted) {
+      // ignore: unawaited_futures
       precacheImage(imageProvider, context).then((value) async {
         if (mounted) {
           await _updatePhotoViewController(
