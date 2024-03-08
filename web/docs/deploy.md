@@ -32,10 +32,10 @@ deployments, and the action that triggers them:
 | [accounts.ente.io](https://accounts.ente.io) | Production | Push to `deploy/accounts` |
 | [cast.ente.io](https://cast.ente.io) | Production | Push to `deploy/cast` |
 | [help.ente.io](https://help.ente.io) | Production | Push to `main` + changes in `docs/` |
-| [TBD-photos.ente.io](https://photos.ente.sh) | Preview | Nightly deploy of `main` |
-| [TBD-auth.ente.io](https://auth.ente.sh) | Preview | Nightly deploy of `main` |
-| [TBD-accounts.ente.io](https://accounts.ente.sh) | Preview | Nightly deploy of `main` |
-| [TBD-cast.ente.io](https://cast.ente.sh) | Preview | Nightly deploy of `main` |
+| [accounts.ente.sh](https://accounts.ente.sh) | Preview | Nightly deploy of `main` |
+| [auth.ente.sh](https://auth.ente.sh) | Preview | Nightly deploy of `main` |
+| [cast.ente.sh](https://cast.ente.sh) | Preview | Nightly deploy of `main` |
+| [photos.ente.sh](https://photos.ente.sh) | Preview | Nightly deploy of `main` |
 
 ### Other subdomains
 
