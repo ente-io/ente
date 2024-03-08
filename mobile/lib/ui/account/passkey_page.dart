@@ -5,6 +5,7 @@ import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/ente_theme_data.dart';
 import "package:photos/generated/l10n.dart";
+import "package:photos/models/account/two_factor.dart";
 import 'package:photos/services/user_service.dart';
 import "package:photos/utils/dialog_util.dart";
 import 'package:uni_links/uni_links.dart';
@@ -117,6 +118,29 @@ class _PasskeyPageState extends State<PasskeyPage> {
               style: Theme.of(context).colorScheme.optionalActionButtonStyle,
               onPressed: launchPasskey,
               child: Text(S.of(context).launchPasskeyUrlAgain),
+            ),
+          ),
+          const Padding(padding: EdgeInsets.all(30)),
+          GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: () {
+              UserService.instance.recoverTwoFactor(
+                context,
+                widget.sessionID,
+                TwoFactorType.passkey,
+              );
+            },
+            child: Container(
+              padding: const EdgeInsets.all(10),
+              child: Center(
+                child: Text(
+                  S.of(context).lostDevice,
+                  style: const TextStyle(
+                    decoration: TextDecoration.underline,
+                    fontSize: 12,
+                  ),
+                ),
+              ),
             ),
           ),
         ],

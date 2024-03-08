@@ -820,6 +820,7 @@ class UserService {
         _config.getHttpEndpoint() + "/users/two-factor/recover",
         queryParameters: {
           "sessionID": sessionID,
+          "twoFactorType": twoFactorTypeToString(type),
         },
       );
       if (response.statusCode == 200) {
@@ -839,6 +840,7 @@ class UserService {
         );
       }
     } on DioError catch (e) {
+      await dialog.hide();
       _logger.severe(e);
       if (e.response != null && e.response!.statusCode == 404) {
         showToast(context, S.of(context).sessionExpired);
@@ -860,6 +862,7 @@ class UserService {
         );
       }
     } catch (e) {
+      await dialog.hide();
       _logger.severe(e);
       // ignore: unawaited_futures
       showErrorDialog(
@@ -913,7 +916,8 @@ class UserService {
         _config.getHttpEndpoint() + "/users/two-factor/remove",
         data: {
           "sessionID": sessionID,
-          "secret": secret,
+          "secret": utf8.decode(base64.decode(secret)),
+          "twoFactorType": twoFactorTypeToString(type),
         },
       );
       if (response.statusCode == 200) {
@@ -933,7 +937,8 @@ class UserService {
         );
       }
     } on DioError catch (e) {
-      _logger.severe(e);
+      await dialog.hide();
+      _logger.severe("error during recovery", e);
       if (e.response != null && e.response!.statusCode == 404) {
         showToast(context, "Session expired");
         // ignore: unawaited_futures
@@ -954,7 +959,9 @@ class UserService {
         );
       }
     } catch (e) {
-      _logger.severe(e);
+      await dialog.hide();
+      _logger.severe('unexpcted error during recovery', e);
+
       // ignore: unawaited_futures
       showErrorDialog(
         context,
