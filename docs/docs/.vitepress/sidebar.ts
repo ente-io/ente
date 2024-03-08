@@ -89,6 +89,15 @@ export const sidebar = [
                     },
                 ],
             },
+            {
+                text: "Troubleshooting",
+                items: [
+                    {
+                        text: "Yarn",
+                        link: "/self-hosting/troubleshooting/yarn",
+                    },
+                ],
+            },
         ],
     },
     {
