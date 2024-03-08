@@ -19,11 +19,6 @@ jobs:
             run:
                 working-directory: docs
 
-        # cloudflare/pages-action needs these to create deployments
-        permissions:
-            contents: read
-            deployments: write
-
         steps:
             - name: Checkout code
               uses: actions/checkout@v4
@@ -49,5 +44,4 @@ jobs:
                   apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
                   projectName: docs-3d7
                   directory: docs/docs/.vitepress/dist
-                  gitHubToken: ${{ secrets.GITHUB_TOKEN }}
                   wranglerVersion: "3"

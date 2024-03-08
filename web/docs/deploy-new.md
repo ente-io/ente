@@ -68,16 +68,3 @@ As a concrete example, the GitHub workflow that deploys `docs/` passes "help" as
 the branch name. The resulting deployment is available at "help.ente.pages.dev".
 Finally, we add a custom domain to point to it from
 [help.ente.io](https://help.ente.io).
-
-## GitHub deployments
-
-In our workflow we use the `deployments: write` permission and pass the
-resulting `GITHUB_TOKEN` to the Cloudflare Pages Action
-([docs](https://github.com/cloudflare/pages-action)).
-
-This will create "GitHub Deployments" for each deploy. We can see them on the
-[Deployments](https://github.com/ente-io/ente/deployments) dashboard; they also
-appear on the main repository in the right sidebar.
-
-TODO(MR): This document is not complete - all these steps have not been
-integrated yet, this outlines the general plan.
