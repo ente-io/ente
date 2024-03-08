@@ -32,8 +32,8 @@ yarn dev
 
 That's it. The web app will automatically hot reload when you make changes.
 
-If you're new to web development and unsure about how to get started, see
-[docs/new](docs/new.md).
+If you're new to web development and unsure about how to get started,  or are
+facing some problems when running the above steps, see [docs/new](docs/new.md).
 
 ## Other apps
 
