@@ -7,7 +7,7 @@ on:
         paths:
             - "docs/**"
             - ".github/workflows/docs-deploy.yml"
-    # Also allow manually running the action
+    # Also allow manually running the workflow
     workflow_dispatch:
 
 jobs:
