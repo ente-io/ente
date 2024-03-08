@@ -54,6 +54,7 @@ class _ZoomableImageState extends State<ZoomableImage>
   ValueChanged<PhotoViewScaleState>? _scaleStateChangedCallback;
   bool _isZooming = false;
   PhotoViewController _photoViewController = PhotoViewController();
+  late PhotoViewScaleStateController _scaleStateController;
 
   @override
   void initState() {
@@ -68,6 +69,7 @@ class _ZoomableImageState extends State<ZoomableImage>
       debugPrint("isZooming = $_isZooming, currentState $value");
       // _logger.info('is reakky zooming $_isZooming with state $value');
     };
+    _scaleStateController = PhotoViewScaleStateController();
     super.initState();
   }
 
@@ -92,6 +94,7 @@ class _ZoomableImageState extends State<ZoomableImage>
         child: PhotoView(
           imageProvider: _imageProvider,
           controller: _photoViewController,
+          scaleStateController: _scaleStateController,
           scaleStateChangedCallback: _scaleStateChangedCallback,
           minScale: widget.shouldCover
               ? PhotoViewComputedScale.covered
@@ -281,6 +284,7 @@ class _ZoomableImageState extends State<ZoomableImage>
         initialPosition: newPosition,
         initialScale: scale,
       );
+      _scaleStateController.scaleState = PhotoViewScaleState.zoomedIn;
     }
     final bool canUpdateMetadata = _photo.canEditMetaInfo;
     // forcefully get finalImageInfo is dimensions are not available in metadata
