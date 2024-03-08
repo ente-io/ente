@@ -13,9 +13,9 @@ func (c *UserController) GetTwoFactorRecoveryStatus(ctx *gin.Context) (*ente.Two
 	return c.TwoFactorRecoveryRepo.GetStatus(userID)
 }
 
-func (c *UserController) ConfigurePassKeySkip(ctx *gin.Context, req *ente.SetPassKeyRecoveryRequest) error {
+func (c *UserController) ConfigurePasskeyRecovery(ctx *gin.Context, req *ente.SetPasskeyRecoveryRequest) error {
 	userID := auth.GetUserID(ctx.Request.Header)
-	return c.TwoFactorRecoveryRepo.SetPassKeyRecovery(ctx, userID, req)
+	return c.TwoFactorRecoveryRepo.SetPasskeyRecovery(ctx, userID, req)
 }
 
 func (c *UserController) GetPasskeyRecoveryResponse(ctx *gin.Context, passKeySessionID string) (*ente.TwoFactorRecoveryResponse, error) {
@@ -27,11 +27,11 @@ func (c *UserController) GetPasskeyRecoveryResponse(ctx *gin.Context, passKeySes
 	if err != nil {
 		return nil, err
 	}
-	if !recoveryStatus.IsPassKeyRecoveryEnabled {
+	if !recoveryStatus.IsPasskeyRecoveryEnabled {
 		return nil, ente.NewBadRequestWithMessage("Passkey reset is not configured")
 	}
 
-	result, err := c.TwoFactorRecoveryRepo.GetPasskeySkipChallenge(ctx, userID)
+	result, err := c.TwoFactorRecoveryRepo.GetPasskeyRecoveryData(ctx, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -46,7 +46,7 @@ func (c *UserController) SkipPasskeyVerification(context *gin.Context, req *ente
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "")
 	}
-	exists, err := c.TwoFactorRecoveryRepo.VerifyPasskeySkipSecret(userID, req.Secret)
+	exists, err := c.TwoFactorRecoveryRepo.ValidatePasskeyRecoverySecret(userID, req.Secret)
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "")
 	}

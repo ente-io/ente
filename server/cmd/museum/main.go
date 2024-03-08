@@ -434,7 +434,7 @@ func main() {
 	publicAPI.POST("/users/two-factor/passkeys/begin", userHandler.BeginPasskeyAuthenticationCeremony)
 	publicAPI.POST("/users/two-factor/passkeys/finish", userHandler.FinishPasskeyAuthenticationCeremony)
 	privateAPI.GET("/users/two-factor/recovery-status", userHandler.GetTwoFactorRecoveryStatus)
-	privateAPI.POST("/users/two-factor/passkeys/configure-reset", userHandler.ConfigurePassKeySkipChallenge)
+	privateAPI.POST("/users/two-factor/passkeys/configure-recovery", userHandler.ConfigurePasskeyRecovery)
 	privateAPI.GET("/users/two-factor/status", userHandler.GetTwoFactorStatus)
 	privateAPI.POST("/users/two-factor/setup", userHandler.SetupTwoFactor)
 	privateAPI.POST("/users/two-factor/enable", userHandler.EnableTwoFactor)
