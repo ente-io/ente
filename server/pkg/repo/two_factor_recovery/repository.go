@@ -49,12 +49,12 @@ func (r *Repository) SetPasskeyRecovery(ctx context.Context, userID int64, req *
 }
 
 func (r *Repository) GetPasskeyRecoveryData(ctx context.Context, userID int64) (*ente.TwoFactorRecoveryResponse, error) {
-	var result *ente.TwoFactorRecoveryResponse
-	err := r.Db.QueryRowContext(ctx, "SELECT user_passkey_secret_data, user_passkey_secret_nonce FROM two_factor_recovery WHERE  user_id= $1", userID).Scan(result.EncryptedSecret, result.SecretDecryptionNonce)
+	var result ente.TwoFactorRecoveryResponse
+	err := r.Db.QueryRowContext(ctx, "SELECT user_passkey_secret_data, user_passkey_secret_nonce FROM two_factor_recovery WHERE  user_id= $1", userID).Scan(&result.EncryptedSecret, &result.SecretDecryptionNonce)
 	if err != nil {
 		return nil, err
 	}
-	return result, nil
+	return &result, nil
 }
 
 // ValidatePasskeyRecoverySecret checks if the passkey skip secret is valid for a user
@@ -67,7 +67,8 @@ func (r *Repository) ValidatePasskeyRecoverySecret(userID int64, secret string) 
 		return false, stacktrace.Propagate(err, "")
 	}
 	// decrypt server_passkey_secret_data
-	serverSkipSecretKey, decErr := crypto.Decrypt(severSecreteData, serverSecretNonce, r.SecretEncryptionKey)
+	serverSkipSecretKey, decErr := crypto.Decrypt(severSecreteData, r.SecretEncryptionKey, serverSecretNonce)
+	// serverSkipSecretKey, decErr := crypto.Decrypt(severSecreteData,serverSecretNonce, r.SecretEncryptionKey )
 	if decErr != nil {
 		return false, stacktrace.Propagate(decErr, "failed to decrypt passkey reset key")
 	}
