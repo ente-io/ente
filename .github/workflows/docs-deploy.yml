@@ -3,8 +3,7 @@ name: "Deploy (docs)"
 on:
     # Run on every push to main that changes docs/
     push:
-        # TODO (MR): Added testing branch here. Remove.
-        branches: [main, deploy-docs]
+        branches: [main]
         paths:
             - "docs/**"
             - ".github/workflows/docs-deploy.yml"
@@ -42,6 +41,6 @@ jobs:
               with:
                   accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
                   apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-                  projectName: docs-3d7
+                  projectName: ente
                   directory: docs/docs/.vitepress/dist
                   wranglerVersion: "3"

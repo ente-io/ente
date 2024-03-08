@@ -10,7 +10,7 @@ The summary of what happens is:
   something that changes `docs/` gets merged to main.
 
 You likely don't need to know the rest of the details (until you do, but you can
-read this then).
+read on then).
 
 ## First time preparation
 
@@ -53,9 +53,9 @@ However, we wish to deploy multiple sites from this same repository, so the
 standard Cloudflare conception of a single "production" branch doesn't work for
 us.
 
-Instead, we use tie each deployment to a branch names. Note that we don't have
-to actually create the branch or push to it, this branch name is just used as
-the the `branch` parameter that gets passed to `cloudflare/pages-action`.
+Instead, we tie each deployment to a branch name. Note that we don't have to
+actually create the branch or push to it, this branch name is just used as the
+the `branch` parameter that gets passed to `cloudflare/pages-action`.
 
 Since our root pages project is `ente.pages.dev`, so a branch named `foo` would
 be available at `foo.ente.pages.dev`.
