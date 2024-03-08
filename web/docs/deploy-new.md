@@ -6,8 +6,13 @@ how deployments happen on changes.
 
 The summary of what happens is:
 
-* `docs/` get deployed to [help.ente.io](https://help.ente.io) whenever
-  something that changes `docs/` gets merged to main.
+* Production deployments are triggered by pushing to the `deploy/*` branches.
+
+* [help.ente.io](https://help.ente.io) gets deployed whenever `docs/` changes on
+  main.
+
+* Every night, all the web apps are deployed to their nightly URLs using the
+  current code in main. This workflow can also be triggered manually.
 
 You likely don't need to know the rest of the details (until you do, but you can
 read on then).
@@ -68,3 +73,19 @@ As a concrete example, the GitHub workflow that deploys `docs/` passes "help" as
 the branch name. The resulting deployment is available at "help.ente.pages.dev".
 Finally, we add a custom domain to point to it from
 [help.ente.io](https://help.ente.io).
+
+## Deployments
+
+| URL | Type |Deployment action |
+|-----|------|------------------|
+| [web.ente.io](https://web.ente.io) | Production | Push to `deploy/photos` |
+| [photos.ente.io](https://photos.ente.io) | Production | Alias of [web.ente.io](https://web.ente.io) |
+| [auth.ente.io](https://auth.ente.io) | Production | Push to `deploy/auth` |
+| [accounts.ente.io](https://accounts.ente.io) | Production | Push to `deploy/accounts` |
+| [cast.ente.io](https://cast.ente.io) | Production | Push to `deploy/cast` |
+| [help.ente.io](https://help.ente.io) | Production | Push to `main` + changes in `docs/` |
+| [TBD-photos.ente.io](https://photos.ente.sh) | Preview | Nightly deploy of `main` |
+| [TBD-auth.ente.io](https://auth.ente.sh) | Preview | Nightly deploy of `main` |
+| [TBD-accounts.ente.io](https://accounts.ente.sh) | Preview | Nightly deploy of `main` |
+| [TBD-cast.ente.io](https://cast.ente.sh) | Preview | Nightly deploy of `main` |
+
