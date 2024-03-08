@@ -90,6 +90,15 @@ export const sidebar = [
                 ],
             },
             {
+                text: "FAQ",
+                items: [
+                    {
+                        text: "Verification code",
+                        link: "/self-hosting/faq/otp",
+                    },
+                ],
+            },
+            {
                 text: "Troubleshooting",
                 items: [
                     {
