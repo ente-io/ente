@@ -1,40 +1,42 @@
-# Deploying the web apps
+# Deploying
 
-## tl;dr;
+The various web apps and static sites in this repository are deployed on
+Cloudflare Pages.
 
-```sh
-yarn deploy:photos
-```
+The summary of what happens is:
 
-## Details
+* Production deployments are triggered by pushing to the `deploy/*` branches.
+  Use the various `yarn deploy:*` commands to help with this. For example, `yarn
+  deploy:photos` will open a PR to merge the current `main` onto
+  `deploy/photos`, which'll trigger a deployment and deploy the code to
+  [web.ente.io](https://web.ente.io).
 
-The various web apps (Ente Photos, Ente Auth) are deployed on Cloudflare Pages.
+* [help.ente.io](https://help.ente.io) gets deployed whenever a PR that changes
+  anything inside `docs/` gets merged to `main`.
 
-The deployment is done using the GitHub app provided by Cloudflare Pages. The
-Cloudflare integration watches for pushes to all branches named "deploy/*". In
-all cases, it runs the same script, `scripts/deploy.sh`, using the
-`CF_PAGES_BRANCH` environment variable to decide what exactly to build ([CF
-docs](https://developers.cloudflare.com/pages/how-to/build-commands-branches/)).
+* Every night, all the web apps get automatically deployed to a nightly preview
+  URLs using the current code in main. This workflow can also be triggered
+  manually.
 
-For each of these branches, we have configured CNAME aliases (Cloudflare calls
-them Custom Domains) to give a stable URL to the deployments.
+Here is a list of all the deployments, whether or not they are production
+deployments, and the action that triggers them.
 
-- `deploy/photos` → _web.ente.io_
-- `deploy/auth` → _auth.ente.io_
-- `deploy/accounts` → _accounts.ente.io_
-- `deploy/cast` → _cast.ente.io_
+| URL | Type |Deployment action |
+|-----|------|------------------|
+| [web.ente.io](https://web.ente.io) | Production | Push to `deploy/photos` |
+| [photos.ente.io](https://photos.ente.io) | Production | Alias of [web.ente.io](https://web.ente.io) |
+| [auth.ente.io](https://auth.ente.io) | Production | Push to `deploy/auth` |
+| [accounts.ente.io](https://accounts.ente.io) | Production | Push to `deploy/accounts` |
+| [cast.ente.io](https://cast.ente.io) | Production | Push to `deploy/cast` |
+| [help.ente.io](https://help.ente.io) | Production | Push to `main` + changes in `docs/` |
+| [TBD-photos.ente.io](https://photos.ente.sh) | Preview | Nightly deploy of `main` |
+| [TBD-auth.ente.io](https://auth.ente.sh) | Preview | Nightly deploy of `main` |
+| [TBD-accounts.ente.io](https://accounts.ente.sh) | Preview | Nightly deploy of `main` |
+| [TBD-cast.ente.io](https://cast.ente.sh) | Preview | Nightly deploy of `main` |
 
-Thus to trigger a, say, production deployment of the photos app, we can open and
-merge a PR into the `deploy/photos` branch. Cloudflare will then build and
-deploy the code to _web.ente.io_.
+### Other subdomains
 
-The command `yarn deploy:photos` just does that - it'll open a new PR to fast
-forward the current main onto `deploy/photos`. There are similar `yarn deploy:*`
-commands for the other apps.
-
-## Other subdomains
-
-Apart from this, there are also some subdomains:
+Apart from this, there are also some other deployments:
 
 - `albums.ente.io` is a CNAME alias to the production deployment
   (`web.ente.io`). However, when the code detects that it is being served from
@@ -44,22 +46,66 @@ Apart from this, there are also some subdomains:
 - `payments.ente.io` and `family.ente.io` are currently in a separate
   repositories (Enhancement: bring them in here).
 
-## NODE_VERSION
+---
+---
 
-In Cloudflare Pages setting the `NODE_VERSION` environment variables is defined.
+The rest of the document describes details about how things were setup. You
+likely don't need to know them to be able to deploy.
 
-This determines which version of Node is used when we do `yarn build:foo`.
-Currently this is set to `20.11.1`. The major version here should match that of
-`@types/node` in our dev dependencies.
+## First time preparation
 
-It is a good idea to also use the same major version of node on your machine.
-For example, for macOS you can install the the latest from the v20 series using
-`brew install node@20`.
+Create a new Pages project in Cloudflare, setting it up to use [Direct
+Upload](https://developers.cloudflare.com/pages/get-started/direct-upload/).
 
-## Adding a new app
+> [!NOTE]
+>
+> Direct upload doesn't work for existing projects tied to your repository using
+> the [Git
+> integration](https://developers.cloudflare.com/pages/get-started/git-integration/).
+>
+> If you want to keep the pages.dev domain from an existing project, you should
+> be able to delete your existing project and recreate it (assuming no one
+> claims the domain in the middle). I've not seen this documented anywhere, but
+> it worked when I tried, and it seems to have worked for [other people
+> too](https://community.cloudflare.com/t/linking-git-repo-to-existing-cf-pages-project/530888).
 
-1. Add a mapping in `scripts/deploy.sh`.
 
-2. Add a [Custom Domain in
-   Cloudflare](https://developers.cloudflare.com/pages/how-to/custom-branch-aliases/)
-   pointing to this branch's deployment.
+There are two ways to create a new project, using Wrangler
+[[1](https://github.com/cloudflare/pages-action/issues/51)] or using the
+Cloudflare dashboard
+[[2](https://github.com/cloudflare/pages-action/issues/115)]. Since this is one
+time thing, the second option might be easier.
+
+The remaining steps are documented in [Cloudflare's guide for using Direct
+Upload with
+CI](https://developers.cloudflare.com/pages/how-to/use-direct-upload-with-continuous-integration/).
+As a checklist,
+
+- Generate `CLOUDFLARE_API_TOKEN`
+- Add `CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_API_TOKEN` to the GitHub secrets
+- Add your workflow. e.g. see `docs-deploy.yml`.
+
+This is the basic setup, and should already work.
+
+## Deploying multiple sites
+
+However, we wish to deploy multiple sites from this same repository, so the
+standard Cloudflare conception of a single "production" branch doesn't work for
+us.
+
+Instead, we tie each deployment to a branch name. Note that we don't have to
+actually create the branch or push to it, this branch name is just used as the
+the `branch` parameter that gets passed to `cloudflare/pages-action`.
+
+Since our root pages project is `ente.pages.dev`, so a branch named `foo` would
+be available at `foo.ente.pages.dev`.
+
+Finally, we create CNAME aliases using a [Custom Domain in
+Cloudflare](https://developers.cloudflare.com/pages/how-to/custom-branch-aliases/)
+to point to these deployments from our user facing DNS names.
+
+As a concrete example, the GitHub workflow that deploys `docs/` passes "help" as
+the branch name. The resulting deployment is available at "help.ente.pages.dev".
+Finally, we add a custom domain to point to it from
+[help.ente.io](https://help.ente.io).
+
