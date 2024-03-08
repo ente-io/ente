@@ -15,5 +15,5 @@ If you are using VPN, please try disabling the VPN or switching provider.
 
 The desktop/web app tries to detect if a particular file is video or image. If
 the detection fails, then the app skips the upload. Please contact our
-[support](support.ente.io) if you find that a valid file did not get detected
-and uploaded.
+[support](mailto:support@ente.io) if you find that a valid file did not get
+detected and uploaded.
