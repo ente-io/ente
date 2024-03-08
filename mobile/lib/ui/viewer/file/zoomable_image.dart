@@ -52,8 +52,8 @@ class _ZoomableImageState extends State<ZoomableImage> {
   bool _loadedFinalImage = false;
   ValueChanged<PhotoViewScaleState>? _scaleStateChangedCallback;
   bool _isZooming = false;
-  late PhotoViewController _photoViewController;
-  late final PhotoViewScaleStateController _scaleStateController;
+  PhotoViewController _photoViewController = PhotoViewController();
+  final _scaleStateController = PhotoViewScaleStateController();
 
   @override
   void initState() {
@@ -68,8 +68,6 @@ class _ZoomableImageState extends State<ZoomableImage> {
       debugPrint("isZooming = $_isZooming, currentState $value");
       // _logger.info('is reakky zooming $_isZooming with state $value');
     };
-    _photoViewController = PhotoViewController();
-    _scaleStateController = PhotoViewScaleStateController();
     super.initState();
   }
 
