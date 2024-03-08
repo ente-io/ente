@@ -276,13 +276,8 @@ class _ZoomableImageState extends State<ZoomableImage>
       final scale = _photoViewController.scale! /
           (finalImageInfo.image.width / prevImageInfo.image.width);
       final currentPosition = _photoViewController.value.position;
-      final positionScaleFactor = 1 / scale;
-      final newPosition = currentPosition.scale(
-        positionScaleFactor,
-        positionScaleFactor,
-      );
       _photoViewController = PhotoViewController(
-        initialPosition: newPosition,
+        initialPosition: currentPosition,
         initialScale: scale,
       );
       _scaleStateController.scaleState = PhotoViewScaleState.zoomedIn;
