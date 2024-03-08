@@ -958,7 +958,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "pair": MessageLookupByLibrary.simpleMessage("Pair"),
         "passkey": MessageLookupByLibrary.simpleMessage("Passkey"),
         "passkeyAuthTitle":
-            MessageLookupByLibrary.simpleMessage("Passkey authentication"),
+            MessageLookupByLibrary.simpleMessage("Passkey verification"),
         "password": MessageLookupByLibrary.simpleMessage("Password"),
         "passwordChangedSuccessfully": MessageLookupByLibrary.simpleMessage(
             "Password changed successfully"),
@@ -1446,6 +1446,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "verifyEmail": MessageLookupByLibrary.simpleMessage("Verify email"),
         "verifyEmailID": m64,
         "verifyIDLabel": MessageLookupByLibrary.simpleMessage("Verify"),
+        "verifyPasskey": MessageLookupByLibrary.simpleMessage("Verify passkey"),
         "verifyPassword":
             MessageLookupByLibrary.simpleMessage("Verify password"),
         "verifying": MessageLookupByLibrary.simpleMessage("Verifying..."),
@@ -1465,8 +1466,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "viewer": MessageLookupByLibrary.simpleMessage("Viewer"),
         "visitWebToManage": MessageLookupByLibrary.simpleMessage(
             "Please visit web.ente.io to manage your subscription"),
-        "waitingForBrowserRequest": MessageLookupByLibrary.simpleMessage(
-            "Waiting for browser request..."),
+        "waitingForVerification":
+            MessageLookupByLibrary.simpleMessage("Waiting for verification..."),
         "waitingForWifi":
             MessageLookupByLibrary.simpleMessage("Waiting for WiFi..."),
         "weAreOpenSource":
