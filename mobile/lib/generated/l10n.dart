@@ -8308,11 +8308,11 @@ class S {
     );
   }
 
-  /// `Waiting for browser request...`
-  String get waitingForBrowserRequest {
+  /// `Waiting for verification...`
+  String get waitingForVerification {
     return Intl.message(
-      'Waiting for browser request...',
-      name: 'waitingForBrowserRequest',
+      'Waiting for verification...',
+      name: 'waitingForVerification',
       desc: '',
       args: [],
     );
@@ -8338,11 +8338,21 @@ class S {
     );
   }
 
-  /// `Passkey authentication`
+  /// `Passkey verification`
   String get passkeyAuthTitle {
     return Intl.message(
-      'Passkey authentication',
+      'Passkey verification',
       name: 'passkeyAuthTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Verify passkey`
+  String get verifyPasskey {
+    return Intl.message(
+      'Verify passkey',
+      name: 'verifyPasskey',
       desc: '',
       args: [],
     );
