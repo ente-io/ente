@@ -1,12 +1,9 @@
 # Docs
 
-Help and documentation for Ente's products
+Help and documentation for Ente's products.
 
-> [!CAUTION]
->
-> **Currently not published**. There are bits we need to clean up before
-> publishing these docs. They'll likely be available at help.ente.io once we
-> wrap those loose ends up.
+You can find the live version of these at
+**[help.ente.io](https://help.ente.io)**.
 
 ## Quick edits
 
@@ -19,7 +16,7 @@ changes in a few minutes after your pull request is merged.
 
 The above workflow is great since it doesn't require you to setup anything on
 your local machine. But if you plan on contributing frequently, you might find
-it easier to run everything locally.
+it easier to run things locally.
 
 Clone this repository
 
