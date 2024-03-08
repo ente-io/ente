@@ -64,6 +64,15 @@ func main() {
 			panic(err)
 		}
 	}()
+
+	if len(os.Args) == 2 && os.Args[1] == "docs" {
+		log.Println("Generating docs")
+		err = cmd.GenerateDocs()
+		if err != nil {
+			log.Fatal(err)
+		}
+		return
+	}
 	cmd.Execute(&ctrl)
 }
 

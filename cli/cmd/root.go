@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"github.com/ente-io/cli/pkg"
+	"github.com/spf13/cobra/doc"
 	"os"
 	"runtime"
 
@@ -25,6 +26,10 @@ var rootCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Sprintf("Hello World")
 	},
+}
+
+func GenerateDocs() error {
+	return doc.GenMarkdownTree(rootCmd, "./docs/generated")
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
