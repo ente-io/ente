@@ -279,6 +279,8 @@ class _ZoomableImageState extends State<ZoomableImage> {
         initialPosition: currentPosition,
         initialScale: scale,
       );
+      // Fix for auto-zooming when final image is loaded after double tapping
+      //twice.
       _scaleStateController.scaleState = PhotoViewScaleState.zoomedIn;
     }
     final bool canUpdateMetadata = _photo.canEditMetaInfo;
