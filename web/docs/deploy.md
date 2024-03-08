@@ -3,23 +3,26 @@
 The various web apps and static sites in this repository are deployed on
 Cloudflare Pages.
 
-The summary of what happens is:
-
 * Production deployments are triggered by pushing to the `deploy/*` branches.
-  Use the various `yarn deploy:*` commands to help with this. For example, `yarn
-  deploy:photos` will open a PR to merge the current `main` onto
-  `deploy/photos`, which'll trigger a deployment and deploy the code to
-  [web.ente.io](https://web.ente.io).
 
 * [help.ente.io](https://help.ente.io) gets deployed whenever a PR that changes
   anything inside `docs/` gets merged to `main`.
 
 * Every night, all the web apps get automatically deployed to a nightly preview
-  URLs using the current code in main. This workflow can also be triggered
-  manually.
+  URLs using the current code in main.
 
+Use the various `yarn deploy:*` commands to help with production deployments.
+For example, `yarn deploy:photos` will open a PR to merge the current `main`
+onto `deploy/photos`, which'll trigger the deployment workflow, which'll build
+and publish to [web.ente.io](https://web.ente.io).
+
+> When merging these deployment PRs, remember to use rebase and merge so that
+> their HEAD is a fast forward of `main` instead of diverging from it because of
+> the merge commit.
+
+## Deployments
 Here is a list of all the deployments, whether or not they are production
-deployments, and the action that triggers them.
+deployments, and the action that triggers them:
 
 | URL | Type |Deployment action |
 |-----|------|------------------|
@@ -47,7 +50,8 @@ Apart from this, there are also some other deployments:
   repositories (Enhancement: bring them in here).
 
 ---
----
+
+## Details
 
 The rest of the document describes details about how things were setup. You
 likely don't need to know them to be able to deploy.
