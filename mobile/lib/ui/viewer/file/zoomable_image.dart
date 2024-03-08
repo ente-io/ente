@@ -53,7 +53,7 @@ class _ZoomableImageState extends State<ZoomableImage> {
   ValueChanged<PhotoViewScaleState>? _scaleStateChangedCallback;
   bool _isZooming = false;
   PhotoViewController _photoViewController = PhotoViewController();
-  late PhotoViewScaleStateController _scaleStateController;
+  late final PhotoViewScaleStateController _scaleStateController;
 
   @override
   void initState() {
@@ -75,6 +75,7 @@ class _ZoomableImageState extends State<ZoomableImage> {
   @override
   void dispose() {
     _photoViewController.dispose();
+    _scaleStateController.dispose();
     super.dispose();
   }
 
