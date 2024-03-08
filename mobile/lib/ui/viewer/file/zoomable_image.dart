@@ -41,8 +41,7 @@ class ZoomableImage extends StatefulWidget {
   State<ZoomableImage> createState() => _ZoomableImageState();
 }
 
-class _ZoomableImageState extends State<ZoomableImage>
-    with SingleTickerProviderStateMixin {
+class _ZoomableImageState extends State<ZoomableImage> {
   late Logger _logger;
   late EnteFile _photo;
   ImageProvider? _imageProvider;
@@ -54,6 +53,7 @@ class _ZoomableImageState extends State<ZoomableImage>
   ValueChanged<PhotoViewScaleState>? _scaleStateChangedCallback;
   bool _isZooming = false;
   PhotoViewController _photoViewController = PhotoViewController();
+  final _scaleStateController = PhotoViewScaleStateController();
 
   @override
   void initState() {
@@ -74,6 +74,7 @@ class _ZoomableImageState extends State<ZoomableImage>
   @override
   void dispose() {
     _photoViewController.dispose();
+    _scaleStateController.dispose();
     super.dispose();
   }
 
@@ -90,8 +91,10 @@ class _ZoomableImageState extends State<ZoomableImage>
       content = PhotoViewGestureDetectorScope(
         axis: Axis.vertical,
         child: PhotoView(
+          key: ValueKey(_loadedFinalImage),
           imageProvider: _imageProvider,
           controller: _photoViewController,
+          scaleStateController: _scaleStateController,
           scaleStateChangedCallback: _scaleStateChangedCallback,
           minScale: widget.shouldCover
               ? PhotoViewComputedScale.covered
@@ -272,15 +275,13 @@ class _ZoomableImageState extends State<ZoomableImage>
       final scale = _photoViewController.scale! /
           (finalImageInfo.image.width / prevImageInfo.image.width);
       final currentPosition = _photoViewController.value.position;
-      final positionScaleFactor = 1 / scale;
-      final newPosition = currentPosition.scale(
-        positionScaleFactor,
-        positionScaleFactor,
-      );
       _photoViewController = PhotoViewController(
-        initialPosition: newPosition,
+        initialPosition: currentPosition,
         initialScale: scale,
       );
+      // Fix for auto-zooming when final image is loaded after double tapping
+      //twice.
+      _scaleStateController.scaleState = PhotoViewScaleState.zoomedIn;
     }
     final bool canUpdateMetadata = _photo.canEditMetaInfo;
     // forcefully get finalImageInfo is dimensions are not available in metadata
