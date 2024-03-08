@@ -42,5 +42,6 @@ jobs:
                   accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
                   apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
                   projectName: ente
+                  branch: help
                   directory: docs/docs/.vitepress/dist
                   wranglerVersion: "3"
