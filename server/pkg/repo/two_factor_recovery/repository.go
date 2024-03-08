@@ -26,29 +26,29 @@ func (r *Repository) GetStatus(userID int64) (*ente.TwoFactorRecoveryStatus, err
 			// by default, admin
 			return &ente.TwoFactorRecoveryStatus{
 				AllowAdminReset:          true,
-				IsPassKeyRecoveryEnabled: false,
+				IsPasskeyRecoveryEnabled: false,
 			}, nil
 		}
 		return nil, err
 	}
-	return &ente.TwoFactorRecoveryStatus{AllowAdminReset: isAdminResetEnabled, IsPassKeyRecoveryEnabled: len(resetKey) > 0}, nil
+	return &ente.TwoFactorRecoveryStatus{AllowAdminReset: isAdminResetEnabled, IsPasskeyRecoveryEnabled: len(resetKey) > 0}, nil
 }
 
-func (r *Repository) SetPassKeyRecovery(ctx context.Context, userID int64, req *ente.SetPassKeyRecoveryRequest) error {
-	serveEncPassKey, encRrr := crypto.Encrypt(req.Secret.String(), r.SecretEncryptionKey)
-	if encRrr != nil {
-		return stacktrace.Propagate(encRrr, "failed to encrypt passkey secret")
+func (r *Repository) SetPasskeyRecovery(ctx context.Context, userID int64, req *ente.SetPasskeyRecoveryRequest) error {
+	serveEncPasskey, encErr := crypto.Encrypt(req.Secret.String(), r.SecretEncryptionKey)
+	if encErr != nil {
+		return stacktrace.Propagate(encErr, "failed to encrypt passkey secret")
 	}
 	_, err := r.Db.ExecContext(ctx, `INSERT INTO two_factor_recovery 
     (user_id, server_passkey_secret_data, server_passkey_secret_nonce, user_passkey_secret_data, user_passkey_secret_nonce) 
 	VALUES ($1, $2, $3, $4, $5)  ON CONFLICT (user_id) 
 	DO UPDATE SET server_passkey_secret_data = $2, server_passkey_secret_nonce = $3, user_passkey_secret_data = $4, user_passkey_secret_nonce = $5 
 	WHERE two_factor_recovery.user_passkey_secret_data IS NULL AND two_factor_recovery.server_passkey_secret_data IS NULL`,
-		userID, serveEncPassKey.Cipher, serveEncPassKey.Nonce, req.UserSecretCipher, req.UserSecretNonce)
+		userID, serveEncPasskey.Cipher, serveEncPasskey.Nonce, req.UserSecretCipher, req.UserSecretNonce)
 	return err
 }
 
-func (r *Repository) GetPasskeySkipChallenge(ctx context.Context, userID int64) (*ente.TwoFactorRecoveryResponse, error) {
+func (r *Repository) GetPasskeyRecoveryData(ctx context.Context, userID int64) (*ente.TwoFactorRecoveryResponse, error) {
 	var result *ente.TwoFactorRecoveryResponse
 	err := r.Db.QueryRowContext(ctx, "SELECT user_passkey_secret_data, user_passkey_secret_nonce FROM two_factor_recovery WHERE  user_id= $1", userID).Scan(result.EncryptedSecret, result.SecretDecryptionNonce)
 	if err != nil {
@@ -57,8 +57,8 @@ func (r *Repository) GetPasskeySkipChallenge(ctx context.Context, userID int64) 
 	return result, nil
 }
 
-// VerifyPasskeySkipSecret checks if the passkey skip secret is valid for a user
-func (r *Repository) VerifyPasskeySkipSecret(userID int64, skipSecret string) (bool, error) {
+// ValidatePasskeyRecoverySecret checks if the passkey skip secret is valid for a user
+func (r *Repository) ValidatePasskeyRecoverySecret(userID int64, secret string) (bool, error) {
 	// get server_passkey_secret_data and server_passkey_secret_nonce for given user id
 	var severSecreteData, serverSecretNonce []byte
 	row := r.Db.QueryRow(`SELECT server_passkey_secret_data, server_passkey_secret_nonce FROM two_factor_recovery WHERE user_id = $1`, userID)
@@ -71,7 +71,7 @@ func (r *Repository) VerifyPasskeySkipSecret(userID int64, skipSecret string) (b
 	if decErr != nil {
 		return false, stacktrace.Propagate(decErr, "failed to decrypt passkey reset key")
 	}
-	if skipSecret != serverSkipSecretKey {
+	if secret != serverSkipSecretKey {
 		logrus.Warn("invalid passkey skip secret")
 		return false, nil
 	}

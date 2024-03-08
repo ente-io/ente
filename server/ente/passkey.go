@@ -13,7 +13,7 @@ type Passkey struct {
 
 var MaxPasskeys = 10
 
-type SetPassKeyRecoveryRequest struct {
+type SetPasskeyRecoveryRequest struct {
 	Secret uuid.UUID `json:"secret" binding:"required"`
 	// The UserSecretCipher has SkipSecret encrypted with the user's recoveryKey
 	// If the user sends the correct UserSecretCipher, we can be sure that the user has the recoveryKey,
@@ -26,5 +26,5 @@ type TwoFactorRecoveryStatus struct {
 	// AllowAdminReset is a boolean that determines if the admin can reset the user's MFA.
 	// If true, in the event that the user loses their MFA device, the admin can reset the user's MFA.
 	AllowAdminReset          bool `json:"allowAdminReset" binding:"required"`
-	IsPassKeyRecoveryEnabled bool `json:"isPassKeyRecoveryEnabled" binding:"required"`
+	IsPasskeyRecoveryEnabled bool `json:"isPasskeyRecoveryEnabled" binding:"required"`
 }
