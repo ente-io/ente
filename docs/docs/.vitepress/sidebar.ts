@@ -75,6 +75,23 @@ export const sidebar = [
         ],
     },
     {
+        text: "Self hosting",
+        collapsed: true,
+        items: [
+            { text: "Getting started", link: "/self-hosting/" },
+            {
+                text: "Guides",
+                items: [
+                    { text: "Introduction", link: "/self-hosting/guides/" },
+                    {
+                        text: "System requirements",
+                        link: "/self-hosting/guides/system-requirements",
+                    },
+                ],
+            },
+        ],
+    },
+    {
         text: "About",
         link: "/about/",
     },
