@@ -8,6 +8,7 @@ import (
 	"github.com/ente-io/cli/pkg"
 	"github.com/ente-io/cli/pkg/secrets"
 	"github.com/ente-io/cli/utils/constants"
+	"github.com/spf13/viper"
 	"log"
 	"os"
 	"path/filepath"
@@ -23,10 +24,10 @@ func main() {
 			log.Fatalf("Please mount a volume to %s to persist cli data\n%v\n", cliDBPath, err)
 		}
 	}
-
 	if err != nil {
 		log.Fatalf("Could not create cli config path\n%v\n", err)
 	}
+	initConfig(cliDBPath)
 	newCliPath := fmt.Sprintf("%s/ente-cli.db", cliDBPath)
 	if !strings.HasPrefix(cliDBPath, "/") {
 		oldCliPath := fmt.Sprintf("%sente-cli.db", cliDBPath)
@@ -48,8 +49,8 @@ func main() {
 	}
 	ctrl := pkg.ClICtrl{
 		Client: api.NewClient(api.Params{
-			Debug: false,
-			//Host:  "http://localhost:8080",
+			Debug: viper.GetBool("log.http"),
+			Host:  viper.GetString("endpoint.api"),
 		}),
 		DB:        db,
 		KeyHolder: secrets.NewKeyHolder(secrets.GetOrCreateClISecret()),
@@ -64,6 +65,23 @@ func main() {
 		}
 	}()
 	cmd.Execute(&ctrl)
+}
+
+func initConfig(cliConfigPath string) {
+	viper.SetConfigName("config")            // name of config file (without extension)
+	viper.SetConfigType("yaml")              // REQUIRED if the config file does not have the extension in the name
+	viper.AddConfigPath(cliConfigPath + "/") // path to look for the config file in
+	viper.AddConfigPath(".")                 // optionally look for config in the working directory
+
+	viper.SetDefault("endpoint.api", constants.EnteApiUrl)
+	viper.SetDefault("log.http", false)
+	if err := viper.ReadInConfig(); err != nil {
+		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
+			log.Printf("Config file not found; using defaults %s", cliConfigPath)
+		} else {
+			// Config file was found but another error was produced
+		}
+	}
 }
 
 // GetCLIConfigPath returns the path to the .ente-cli folder and creates it if it doesn't exist.
