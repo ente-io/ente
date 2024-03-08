@@ -114,7 +114,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
               pressedColor: getEnteColorScheme(context).fillFaint,
               trailingIcon: Icons.chevron_right_outlined,
               trailingIconIsMuted: true,
-              onTap: () async => await onPassKeyClick(context),
+              onTap: () async => await onPasskeyClick(context),
             ),
           sectionOptionSpacing,
           MenuItemWidget(
@@ -236,14 +236,14 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
     );
   }
 
-  Future<void> onPassKeyClick(BuildContext buildContext) async {
+  Future<void> onPasskeyClick(BuildContext buildContext) async {
     try {
       final isPassKeyResetEnabled =
-          await PasskeyService.instance.isPassKeyRecoveryEnabled();
+          await PasskeyService.instance.isPasskeyRecoveryEnabled();
       if (!isPassKeyResetEnabled) {
         final Uint8List recoveryKey =
             await UserService.instance.getOrCreateRecoveryKey(context);
-        final String resetSecret = const Uuid().v4().toString();
+        final resetSecret = const Uuid().v4().toString();
         final bytes = utf8.encode(resetSecret);
         final base64Str = base64.encode(bytes);
         final encryptionResult = CryptoUtil.encryptSync(
