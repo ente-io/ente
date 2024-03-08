@@ -1,6 +1,8 @@
 import "package:fade_indexed_stack/fade_indexed_stack.dart";
+import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:flutter_animate/flutter_animate.dart";
+import "package:logging/logging.dart";
 import "package:photos/models/search/album_search_result.dart";
 import "package:photos/models/search/generic_search_result.dart";
 import "package:photos/models/search/index_of_indexed_stack.dart";
@@ -73,11 +75,12 @@ class AllSearchSections extends StatefulWidget {
 }
 
 class _AllSearchSectionsState extends State<AllSearchSections> {
+  final Logger _logger = Logger('_AllSearchSectionsState');
   @override
   Widget build(BuildContext context) {
     final searchTypes = SectionType.values.toList(growable: true);
     // remove face and content sectionType
-    searchTypes.remove(SectionType.face);
+    // searchTypes.remove(SectionType.face);
     searchTypes.remove(SectionType.content);
     return Padding(
       padding: const EdgeInsets.only(top: 8),
@@ -150,6 +153,13 @@ class _AllSearchSectionsState extends State<AllSearchSections> {
                       curve: Curves.easeOut,
                     );
               } else if (snapshot.hasError) {
+                _logger.severe('Failed to load sections: ', snapshot.error);
+                if (kDebugMode) {
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 72),
+                    child: Text('Error: ${snapshot.error}'),
+                  );
+                }
                 //Errors are handled and this else if condition will be false always
                 //is the understanding.
                 return const Padding(

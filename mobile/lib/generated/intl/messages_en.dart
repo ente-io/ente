@@ -973,6 +973,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "paymentFailedWithReason": m36,
         "pendingItems": MessageLookupByLibrary.simpleMessage("Pending items"),
         "pendingSync": MessageLookupByLibrary.simpleMessage("Pending sync"),
+        "people": MessageLookupByLibrary.simpleMessage("People"),
         "peopleUsingYourCode":
             MessageLookupByLibrary.simpleMessage("People using your code"),
         "permDeleteWarning": MessageLookupByLibrary.simpleMessage(

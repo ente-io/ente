@@ -7,7 +7,6 @@ import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/opened_settings_event.dart';
 import "package:photos/generated/l10n.dart";
-import 'package:photos/services/feature_flag_service.dart';
 import "package:photos/services/storage_bonus_service.dart";
 import 'package:photos/theme/colors.dart';
 import 'package:photos/theme/ente_theme.dart';
@@ -17,7 +16,8 @@ import 'package:photos/ui/settings/about_section_widget.dart';
 import 'package:photos/ui/settings/account_section_widget.dart';
 import 'package:photos/ui/settings/app_version_widget.dart';
 import 'package:photos/ui/settings/backup/backup_section_widget.dart';
-import 'package:photos/ui/settings/debug_section_widget.dart';
+import 'package:photos/ui/settings/debug/debug_section_widget.dart';
+import "package:photos/ui/settings/debug/face_debug_section_widget.dart";
 import 'package:photos/ui/settings/general_section_widget.dart';
 import 'package:photos/ui/settings/inherited_settings_state.dart';
 import 'package:photos/ui/settings/security_section_widget.dart';
@@ -52,6 +52,10 @@ class SettingsPage extends StatelessWidget {
     final hasLoggedIn = Configuration.instance.isLoggedIn();
     final enteTextTheme = getEnteTextTheme(context);
     final List<Widget> contents = [];
+    const sectionSpacing = SizedBox(height: 8);
+    if (kDebugMode) {
+      contents.addAll([const FaceDebugSectionWidget(), sectionSpacing]);
+    }
     contents.add(
       GestureDetector(
         onDoubleTap: () {
@@ -81,7 +85,7 @@ class SettingsPage extends StatelessWidget {
         ),
       ),
     );
-    const sectionSpacing = SizedBox(height: 8);
+
     contents.add(const SizedBox(height: 8));
     if (hasLoggedIn) {
       final showStorageBonusBanner =
@@ -139,9 +143,9 @@ class SettingsPage extends StatelessWidget {
       const AboutSectionWidget(),
     ]);
 
-    if (hasLoggedIn &&
-        FeatureFlagService.instance.isInternalUserOrDebugBuild()) {
+    if (hasLoggedIn) {
       contents.addAll([sectionSpacing, const DebugSectionWidget()]);
+      contents.addAll([sectionSpacing, const FaceDebugSectionWidget()]);
     }
     contents.add(const AppVersionWidget());
     contents.add(

@@ -66,6 +66,7 @@ class SearchableItemWidget extends StatelessWidget {
                     child: SearchThumbnailWidget(
                       searchResult.previewThumbnail(),
                       heroTagPrefix,
+                      searchResult: searchResult,
                     ),
                   ),
                   const SizedBox(width: 12),

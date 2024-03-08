@@ -27,6 +27,7 @@ class ObjectsItemWidget extends StatelessWidget {
     try {
       final chipButtons = <ChipButtonWidget>[];
       var objectTags = <String, double>{};
+
       // final thumbnail = await getThumbnail(file);
       // if (thumbnail != null) {
       //   objectTags = await ObjectDetectionService.instance.predict(thumbnail);

@@ -11,6 +11,8 @@ import 'package:photos/data/years.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import "package:photos/extensions/string_ext.dart";
+import "package:photos/face/db.dart";
+import "package:photos/face/model/person.dart";
 import "package:photos/models/api/collection/user.dart";
 import 'package:photos/models/collection/collection.dart';
 import 'package:photos/models/collection/collection_items.dart';
@@ -22,6 +24,7 @@ import "package:photos/models/location/location.dart";
 import "package:photos/models/location_tag/location_tag.dart";
 import 'package:photos/models/search/album_search_result.dart';
 import 'package:photos/models/search/generic_search_result.dart';
+import "package:photos/models/search/search_constants.dart";
 import "package:photos/models/search/search_types.dart";
 import 'package:photos/services/collections_service.dart';
 import "package:photos/services/location_service.dart";
@@ -29,6 +32,8 @@ import 'package:photos/services/machine_learning/semantic_search/semantic_search
 import "package:photos/states/location_screen_state.dart";
 import "package:photos/ui/viewer/location/add_location_sheet.dart";
 import "package:photos/ui/viewer/location/location_screen.dart";
+import "package:photos/ui/viewer/people/cluster_page.dart";
+import "package:photos/ui/viewer/people/people_page.dart";
 import 'package:photos/utils/date_time_util.dart';
 import "package:photos/utils/navigation_util.dart";
 import 'package:tuple/tuple.dart';
@@ -702,6 +707,146 @@ class SearchService {
       }
     }
     return searchResults;
+  }
+
+  Future<Map<int, List<EnteFile>>> getClusterFilesForPersonID(
+    String personID,
+  ) async {
+    _logger.info('getClusterFilesForPersonID $personID');
+    final Map<int, Set<int>> fileIdToClusterID =
+        await FaceMLDataDB.instance.getFileIdToClusterIDSet(personID);
+    _logger.info('faceDbDone getClusterFilesForPersonID $personID');
+    final Map<int, List<EnteFile>> clusterIDToFiles = {};
+    final allFiles = await getAllFiles();
+    for (final f in allFiles) {
+      if (!fileIdToClusterID.containsKey(f.uploadedFileID ?? -1)) {
+        continue;
+      }
+      final cluserIds = fileIdToClusterID[f.uploadedFileID ?? -1]!;
+      for (final cluster in cluserIds) {
+        if (clusterIDToFiles.containsKey(cluster)) {
+          clusterIDToFiles[cluster]!.add(f);
+        } else {
+          clusterIDToFiles[cluster] = [f];
+        }
+      }
+    }
+    _logger.info('done getClusterFilesForPersonID $personID');
+    return clusterIDToFiles;
+  }
+
+  Future<List<GenericSearchResult>> getAllFace(int? limit) async {
+    debugPrint("getting faces");
+    final Map<int, Set<int>> fileIdToClusterID =
+        await FaceMLDataDB.instance.getFileIdToClusterIds();
+    final (clusterIDToPerson, personIdToPerson) =
+        await FaceMLDataDB.instance.getClusterIdToPerson();
+
+    debugPrint("building result");
+    final List<GenericSearchResult> facesResult = [];
+    final Map<int, List<EnteFile>> clusterIdToFiles = {};
+    final Map<String, List<EnteFile>> personIdToFiles = {};
+    final allFiles = await getAllFiles();
+    for (final f in allFiles) {
+      if (!fileIdToClusterID.containsKey(f.uploadedFileID ?? -1)) {
+        continue;
+      }
+      final cluserIds = fileIdToClusterID[f.uploadedFileID ?? -1]!;
+      for (final cluster in cluserIds) {
+        final Person? p = clusterIDToPerson[cluster];
+        if (p != null) {
+          if (personIdToFiles.containsKey(p.remoteID)) {
+            personIdToFiles[p.remoteID]!.add(f);
+          } else {
+            personIdToFiles[p.remoteID] = [f];
+          }
+        } else {
+          if (clusterIdToFiles.containsKey(cluster)) {
+            clusterIdToFiles[cluster]!.add(f);
+          } else {
+            clusterIdToFiles[cluster] = [f];
+          }
+        }
+      }
+    }
+    // get sorted personId by files count
+    final sortedPersonIds = personIdToFiles.keys.toList()
+      ..sort(
+        (a, b) => personIdToFiles[b]!.length.compareTo(
+              personIdToFiles[a]!.length,
+            ),
+      );
+    for (final personID in sortedPersonIds) {
+      final files = personIdToFiles[personID]!;
+      if (files.isEmpty) {
+        continue;
+      }
+      final Person p = personIdToPerson[personID]!;
+      facesResult.add(
+        GenericSearchResult(
+          ResultType.faces,
+          p.attr.name,
+          files,
+          params: {
+            kPersonParamID: personID,
+            kFileID: files.first.uploadedFileID,
+          },
+          onResultTap: (ctx) {
+            routeToPage(
+              ctx,
+              PeoplePage(
+                tagPrefix: "${ResultType.faces.toString()}_${p.attr.name}",
+                person: p,
+              ),
+            );
+          },
+        ),
+      );
+    }
+    final sortedClusterIds = clusterIdToFiles.keys.toList()
+      ..sort(
+        (a, b) =>
+            clusterIdToFiles[b]!.length.compareTo(clusterIdToFiles[a]!.length),
+      );
+
+    for (final clusterId in sortedClusterIds) {
+      final files = clusterIdToFiles[clusterId]!;
+      // final String clusterName = "ID:$clusterId,  ${files.length}";
+      final String clusterName = "${files.length}";
+      final Person? p = clusterIDToPerson[clusterId];
+      if (p != null) {
+        throw Exception("Person should  be null");
+      }
+      if (files.length < 3) {
+        continue;
+      }
+      facesResult.add(
+        GenericSearchResult(
+          ResultType.faces,
+          clusterName,
+          files,
+          params: {
+            kClusterParamId: clusterId,
+            kFileID: files.first.uploadedFileID,
+          },
+          onResultTap: (ctx) {
+            routeToPage(
+              ctx,
+              ClusterPage(
+                files,
+                tagPrefix: "${ResultType.faces.toString()}_$clusterName",
+                cluserID: clusterId,
+              ),
+            );
+          },
+        ),
+      );
+    }
+    if (limit != null) {
+      return facesResult.sublist(0, min(limit, facesResult.length));
+    } else {
+      return facesResult;
+    }
   }
 
   Future<List<GenericSearchResult>> getAllLocationTags(int? limit) async {

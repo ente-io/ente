@@ -26,4 +26,5 @@ enum EventType {
   hide,
   unhide,
   coverChanged,
+  peopleChanged,
 }

@@ -47,7 +47,7 @@ android {
 
     defaultConfig {
         applicationId "io.ente.photos"
-        minSdkVersion 21
+        minSdkVersion 26
         targetSdkVersion 33
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
@@ -73,6 +73,10 @@ android {
         dev {
             dimension "default"
             applicationIdSuffix ".dev"
+        }
+        face {
+            dimension "default"
+            applicationIdSuffix ".face"
         }
         playstore {
             dimension "default"

@@ -8158,6 +8158,16 @@ class S {
     );
   }
 
+  /// `People`
+  String get people {
+    return Intl.message(
+      'People',
+      name: 'people',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Contents`
   String get contents {
     return Intl.message(

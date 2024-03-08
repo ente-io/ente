@@ -67,7 +67,6 @@ class DebugSectionWidget extends StatelessWidget {
             showShortToast(context, "Done");
           },
         ),
-        sectionOptionSpacing,
       ],
     );
   }

@@ -6,6 +6,7 @@ import "package:logging/logging.dart";
 import "package:photos/core/constants.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/files_updated_event.dart";
+import "package:photos/events/people_changed_event.dart";
 import "package:photos/events/tab_changed_event.dart";
 import "package:photos/models/search/search_result.dart";
 import "package:photos/models/search/search_types.dart";
@@ -31,6 +32,7 @@ class _AllSectionsExamplesProviderState
   Future<List<List<SearchResult>>> allSectionsExamplesFuture = Future.value([]);
 
   late StreamSubscription<FilesUpdatedEvent> _filesUpdatedEvent;
+  late StreamSubscription<PeopleChangedEvent> _onPeopleChangedEvent;
   late StreamSubscription<TabChangedEvent> _tabChangeEvent;
   bool hasPendingUpdate = false;
   bool isOnSearchTab = false;
@@ -46,16 +48,11 @@ class _AllSectionsExamplesProviderState
     super.initState();
     //add all common events for all search sections to reload to here.
     _filesUpdatedEvent = Bus.instance.on<FilesUpdatedEvent>().listen((event) {
-      if (!isOnSearchTab) {
-        if (kDebugMode) {
-          _logger.finest('Skip reload till user clicks on search tab');
-        }
-        hasPendingUpdate = true;
-        return;
-      } else {
-        hasPendingUpdate = false;
-        reloadAllSections();
-      }
+      onDataUpdate();
+    });
+    _onPeopleChangedEvent =
+        Bus.instance.on<PeopleChangedEvent>().listen((event) {
+      onDataUpdate();
     });
     _tabChangeEvent = Bus.instance.on<TabChangedEvent>().listen((event) {
       if (event.source == TabChangedEventSource.pageView &&
@@ -72,6 +69,18 @@ class _AllSectionsExamplesProviderState
     reloadAllSections();
   }
 
+  void onDataUpdate() {
+    if (!isOnSearchTab) {
+      if (kDebugMode) {
+        _logger.finest('Skip reload till user clicks on search tab');
+      }
+      hasPendingUpdate = true;
+    } else {
+      hasPendingUpdate = false;
+      reloadAllSections();
+    }
+  }
+
   void reloadAllSections() {
     _logger.info('queue reload all sections');
     _debouncer.run(() async {
@@ -79,22 +88,28 @@ class _AllSectionsExamplesProviderState
         _logger.info("'_debounceTimer: reloading all sections in search tab");
         final allSectionsExamples = <Future<List<SearchResult>>>[];
         for (SectionType sectionType in SectionType.values) {
-          if (sectionType == SectionType.face ||
-              sectionType == SectionType.content) {
+          if (sectionType == SectionType.content) {
             continue;
           }
           allSectionsExamples.add(
             sectionType.getData(context, limit: kSearchSectionLimit),
           );
         }
-        allSectionsExamplesFuture =
-            Future.wait<List<SearchResult>>(allSectionsExamples);
+        try {
+          allSectionsExamplesFuture = Future.wait<List<SearchResult>>(
+            allSectionsExamples,
+            eagerError: false,
+          );
+        } catch (e) {
+          _logger.severe("Error reloading all sections: $e");
+        }
       });
     });
   }
 
   @override
   void dispose() {
+    _onPeopleChangedEvent.cancel();
     _filesUpdatedEvent.cancel();
     _tabChangeEvent.cancel();
     _debouncer.cancelDebounce();

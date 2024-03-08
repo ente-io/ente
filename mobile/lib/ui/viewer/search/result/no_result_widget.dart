@@ -21,7 +21,6 @@ class _NoResultWidgetState extends State<NoResultWidget> {
     super.initState();
     searchTypes = SectionType.values.toList(growable: true);
     // remove face and content sectionType
-    searchTypes.remove(SectionType.face);
     searchTypes.remove(SectionType.content);
   }
 

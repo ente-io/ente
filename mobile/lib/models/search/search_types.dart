@@ -33,6 +33,7 @@ enum ResultType {
   fileCaption,
   event,
   shared,
+  faces,
   magic,
 }
 
@@ -55,7 +56,7 @@ extension SectionTypeExtensions on SectionType {
   String sectionTitle(BuildContext context) {
     switch (this) {
       case SectionType.face:
-        return S.of(context).faces;
+        return S.of(context).people;
       case SectionType.content:
         return S.of(context).contents;
       case SectionType.moment:
@@ -99,7 +100,7 @@ extension SectionTypeExtensions on SectionType {
   bool get isCTAVisible {
     switch (this) {
       case SectionType.face:
-        return false;
+        return true;
       case SectionType.content:
         return false;
       case SectionType.moment:
@@ -116,6 +117,8 @@ extension SectionTypeExtensions on SectionType {
         return false;
     }
   }
+
+  bool get sortByName => this != SectionType.face;
 
   bool get isEmptyCTAVisible {
     switch (this) {
@@ -245,8 +248,7 @@ extension SectionTypeExtensions on SectionType {
   }) {
     switch (this) {
       case SectionType.face:
-        return Future.value(List<GenericSearchResult>.empty());
-
+        return SearchService.instance.getAllFace(limit);
       case SectionType.content:
         return Future.value(List<GenericSearchResult>.empty());
 

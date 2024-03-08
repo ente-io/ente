@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'dart:io';
+import 'dart:io' as io;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -198,7 +198,7 @@ class _ZoomableImageState extends State<ZoomableImage>
       _loadingFinalImage = true;
       getFile(
         _photo,
-        isOrigin: Platform.isIOS &&
+        isOrigin: io.Platform.isIOS &&
             _isGIF(), // since on iOS GIFs playback only when origin-files are loaded
       ).then((file) {
         if (file != null && file.existsSync()) {
@@ -240,7 +240,25 @@ class _ZoomableImageState extends State<ZoomableImage>
     }
   }
 
-  void _onFinalImageLoaded(ImageProvider imageProvider) {
+  void _onFinalImageLoaded(ImageProvider imageProvider) async {
+    // // final result = await FaceMlService.instance.analyzeImage(
+    // //   _photo,
+    // //   preferUsingThumbnailForEverything: false,
+    // //   disposeImageIsolateAfterUse: false,
+    // // );
+    // // _logger.info("FaceMlService result: $result");
+    // // _logger.info("Number of faces detected: ${result.faces.length}");
+    // // _logger.info("Box: ${result.faces[0].detection.box}");
+    // // _logger.info("Landmarks: ${result.faces[0].detection.allKeypoints}");
+    // // final embedding = result.faces[0].embedding;
+    // // Calculate the magnitude of the embedding vector
+    // double sum = 0;
+    // for (final double value in embedding) {
+    //   sum += value * value;
+    // }
+    // final magnitude = math.sqrt(sum);
+    // log("Magnitude: $magnitude");
+    // log("Embedding: $embedding");
     if (mounted) {
       precacheImage(imageProvider, context).then((value) async {
         if (mounted) {

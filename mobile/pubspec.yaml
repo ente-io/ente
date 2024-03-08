@@ -113,6 +113,7 @@ dependencies:
   logging: ^1.0.1
   lottie: ^1.2.2
   media_extension: ^1.0.1
+  ml_linalg: ^13.11.31
   media_kit: ^1.1.10+1
   media_kit_libs_video: ^1.0.4
   media_kit_video: ^1.2.4
@@ -147,6 +148,7 @@ dependencies:
   sentry_flutter: ^7.9.0
   share_plus: ^4.0.10
   shared_preferences: ^2.0.5
+  simple_cluster: ^0.3.0
   sqflite: ^2.3.0
   sqflite_migration: ^0.3.0
   sqlite3: ^2.1.0
@@ -155,11 +157,11 @@ dependencies:
   styled_text: ^7.0.0
   syncfusion_flutter_core: ^19.2.49
   syncfusion_flutter_sliders: ^19.2.49
-  # tflite_flutter: ^0.9.0
-  # tflite_flutter_helper:
-  #   git:
-  #     url: https://github.com/pnyompen/tflite_flutter_helper.git
-  #     ref: 43e87d4b9627539266dc20250beb35bf36320dce
+  synchronized: ^3.1.0
+  tflite_flutter: ^0.10.1
+  #  tflite_flutter_helper:
+  #    git:
+  #      url: https://github.com/pnyompen/tflite_flutter_helper.git  # Fixes https://github.com/am15h/tflite_flutter_helper/issues/57
   tuple: ^2.0.0
   uni_links: ^0.5.1
   url_launcher: ^6.0.3
@@ -175,6 +177,9 @@ dependencies:
   wallpaper_manager_flutter: ^0.0.2
   wechat_assets_picker: ^8.6.3
   widgets_to_image: ^0.0.2
+  flutter_isolate: ^2.0.4
+  protobuf: ^3.1.0
+  pool: ^1.5.1
   workmanager: ^0.5.2
 
 dependency_overrides:
@@ -238,8 +243,10 @@ flutter:
   assets:
     - assets/
     - assets/models/cocossd/
+    - assets/models/mobilefacenet/
     - assets/models/mobilenet/
     - assets/models/scenes/
+    - assets/models/yolov5face/
     - assets/models/clip/
   fonts:
     - family: Inter

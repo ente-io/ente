@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:photos/core/constants.dart';
+import "package:photos/face/model/person.dart";
 import 'package:photos/models/collection/collection.dart';
 import "package:photos/models/gallery_type.dart";
 import 'package:photos/models/selected_files.dart';
@@ -11,6 +12,8 @@ import "package:photos/ui/viewer/actions/file_selection_actions_widget.dart";
 class BottomActionBarWidget extends StatelessWidget {
   final GalleryType galleryType;
   final Collection? collection;
+  final Person? person;
+  final int? clusterID;
   final SelectedFiles selectedFiles;
   final VoidCallback? onCancel;
   final Color? backgroundColor;
@@ -19,6 +22,8 @@ class BottomActionBarWidget extends StatelessWidget {
     required this.galleryType,
     required this.selectedFiles,
     this.collection,
+    this.person,
+    this.clusterID,
     this.onCancel,
     this.backgroundColor,
     super.key,
@@ -54,6 +59,8 @@ class BottomActionBarWidget extends StatelessWidget {
             galleryType,
             selectedFiles,
             collection: collection,
+            person: person,
+            clusterID: clusterID,
           ),
           const DividerWidget(dividerType: DividerType.bottomBar),
           ActionBarWidget(

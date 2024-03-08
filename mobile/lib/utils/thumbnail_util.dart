@@ -217,3 +217,11 @@ File cachedThumbnailPath(EnteFile file) {
     thumbnailCacheDirectory + "/" + file.uploadedFileID.toString(),
   );
 }
+
+File cachedFaceCropPath(String faceID) {
+  final thumbnailCacheDirectory =
+      Configuration.instance.getThumbnailCacheDirectory();
+  return File(
+    thumbnailCacheDirectory + "/" + faceID,
+  );
+}

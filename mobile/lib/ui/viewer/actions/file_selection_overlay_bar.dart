@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import "package:photos/face/model/person.dart";
 import 'package:photos/models/collection/collection.dart';
 import 'package:photos/models/gallery_type.dart';
 import 'package:photos/models/selected_files.dart';
@@ -10,12 +11,14 @@ class FileSelectionOverlayBar extends StatefulWidget {
   final SelectedFiles selectedFiles;
   final Collection? collection;
   final Color? backgroundColor;
+  final Person? person;
 
   const FileSelectionOverlayBar(
     this.galleryType,
     this.selectedFiles, {
     this.collection,
     this.backgroundColor,
+    this.person,
     Key? key,
   }) : super(key: key);
 
@@ -65,6 +68,7 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
               selectedFiles: widget.selectedFiles,
               galleryType: widget.galleryType,
               collection: widget.collection,
+              person: widget.person,
               onCancel: () {
                 if (widget.selectedFiles.files.isNotEmpty) {
                   widget.selectedFiles.clearAll();

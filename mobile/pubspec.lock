@@ -686,6 +686,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "5.8.0"
+  flutter_isolate:
+    dependency: "direct main"
+    description:
+      name: flutter_isolate
+      sha256: "994ddec596da4ca12ca52154fd59404077584643eb7e3f1008a55fda9fe0b76b"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.4"
   flutter_launcher_icons:
     dependency: "direct main"
     description:
@@ -1336,6 +1344,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.4"
+  ml_linalg:
+    dependency: "direct main"
+    description:
+      name: ml_linalg
+      sha256: "36b658c6619c4e1b47f8e2edd100308fd75a5b71d1e6359d8be0cbe06214b441"
+      url: "https://pub.dev"
+    source: hosted
+    version: "13.11.31"
   modal_bottom_sheet:
     dependency: "direct main"
     description:
@@ -1604,7 +1620,7 @@ packages:
     source: hosted
     version: "1.0.1"
   pool:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: pool
       sha256: "20fe868b6314b322ea036ba325e6fc0711a22948856475e2c2b6306e8ab39c2a"
@@ -1627,6 +1643,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.0"
+  protobuf:
+    dependency: "direct main"
+    description:
+      name: protobuf
+      sha256: "68645b24e0716782e58948f8467fd42a880f255096a821f9e7d0ec625b00c84d"
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.1.0"
   provider:
     dependency: "direct main"
     description:
@@ -1891,6 +1915,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.4"
+  simple_cluster:
+    dependency: "direct main"
+    description:
+      name: simple_cluster
+      sha256: "64d6b7d60d641299ad8c3f012417c711532792c1bc61ac6a7f52b942cdba65da"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.3.0"
   sky_engine:
     dependency: transitive
     description: flutter
@@ -2057,7 +2089,7 @@ packages:
     source: hosted
     version: "19.4.56"
   synchronized:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: synchronized
       sha256: "539ef412b170d65ecdafd780f924e5be3f60032a1128df156adad6c5b373d558"
@@ -2096,6 +2128,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.5.3"
+  tflite_flutter:
+    dependency: "direct main"
+    description:
+      name: tflite_flutter
+      sha256: ffb8651fdb116ab0131d6dc47ff73883e0f634ad1ab12bb2852eef1bbeab4a6a
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.10.4"
   time:
     dependency: transitive
     description:
