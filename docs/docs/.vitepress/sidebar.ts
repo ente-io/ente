@@ -33,6 +33,7 @@ export const sidebar = [
                     },
                     { text: "Quick link", link: "/photos/features/quick-link" },
                     { text: "Referrals", link: "/photos/features/referrals" },
+                    { text: "Sharing", link: "/photos/features/sharing" },
                     { text: "Trash", link: "/photos/features/trash" },
                     {
                         text: "Uncategorized",
