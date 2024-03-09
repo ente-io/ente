@@ -80,6 +80,15 @@ jobs:
                   SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
                   SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD }}
 
+            # Retain the PlayStore AAB as an workflow artifact so that it can be
+            # used in case the subsequent upload to PlayStore fails for some
+            # temporary reason
+            - name: Retain PlayStore AAB as an artifact
+              uses: actions/upload-artifact@v4
+              with:
+                  name: app-playstore-release.aab
+                  path: auth/build/app/outputs/bundle/playstoreRelease/app-playstore-release.aab
+
             - name: Install dependencies for desktop build
               run: |
                   sudo apt-get update -y
