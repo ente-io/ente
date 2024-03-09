@@ -803,15 +803,15 @@ func (c *FileController) verifyFileAccess(actorUserID int64, fileID int64) error
 }
 
 func (c *FileController) getObjectURL(s3Client *s3.S3, dc string, bucket *string, objectKey string) (ente.UploadURL, error) {
+	err := c.ObjectCleanupCtrl.AddTempObjectKey(objectKey, dc)
+	if err != nil {
+		return ente.UploadURL{}, stacktrace.Propagate(err, "")
+	}
 	r, _ := s3Client.PutObjectRequest(&s3.PutObjectInput{
 		Bucket: bucket,
 		Key:    &objectKey,
 	})
 	url, err := r.Presign(PreSignedRequestValidityDuration)
-	if err != nil {
-		return ente.UploadURL{}, stacktrace.Propagate(err, "")
-	}
-	err = c.ObjectCleanupCtrl.AddTempObjectKey(objectKey, dc)
 	if err != nil {
 		return ente.UploadURL{}, stacktrace.Propagate(err, "")
 	}
