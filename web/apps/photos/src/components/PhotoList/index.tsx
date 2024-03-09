@@ -786,7 +786,7 @@ export function PhotoList({
                                 <Checkbox
                                     key={item.date}
                                     name={item.date}
-                                    checked={checkedDates[item.date]}
+                                    checked={!!checkedDates[item.date]}
                                     onChange={() =>
                                         onChangeSelectAllCheckBox(item.date)
                                     }
@@ -804,7 +804,7 @@ export function PhotoList({
                         <Checkbox
                             key={listItem.date}
                             name={listItem.date}
-                            checked={checkedDates[listItem.date]}
+                            checked={!!checkedDates[listItem.date]}
                             onChange={() =>
                                 onChangeSelectAllCheckBox(listItem.date)
                             }
