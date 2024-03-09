@@ -980,7 +980,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "searchHint3": MessageLookupByLibrary.simpleMessage("相册、文件名和类型"),
         "searchHint4": MessageLookupByLibrary.simpleMessage("位置"),
         "searchHint5": MessageLookupByLibrary.simpleMessage("即将到来：面部和魔法搜索✨"),
-        MessageLookupByLibrary.simpleMessage("在照片的一定半径内拍摄的几组照片"),
+        "searchLocationEmptySection":
+            MessageLookupByLibrary.simpleMessage("在照片的一定半径内拍摄的几组照片"),
         "searchPeopleEmptySection":
             MessageLookupByLibrary.simpleMessage("邀请他人，您将在此看到他们分享的所有照片"),
         "searchResultCount": m44,
