@@ -1194,8 +1194,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "searchHint4": MessageLookupByLibrary.simpleMessage("Emplacement"),
         "searchHint5": MessageLookupByLibrary.simpleMessage(
             "Bientôt: Visages & recherche magique ✨"),
-        "searchHintText": MessageLookupByLibrary.simpleMessage(
-            "Albums, mois, jours, années, ..."),
         "searchLocationEmptySection": MessageLookupByLibrary.simpleMessage(
             "Grouper les photos qui sont prises dans un certain angle d\'une photo"),
         "searchPeopleEmptySection": MessageLookupByLibrary.simpleMessage(

@@ -1213,8 +1213,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "searchHint4": MessageLookupByLibrary.simpleMessage("Local"),
         "searchHint5": MessageLookupByLibrary.simpleMessage(
             "Em breve: Rostos e busca mágica ✨"),
-        "searchHintText": MessageLookupByLibrary.simpleMessage(
-            "Álbuns, meses, dias, anos, ..."),
         "searchLocationEmptySection": MessageLookupByLibrary.simpleMessage(
             "Fotos de grupo que estão sendo tiradas em algum raio da foto"),
         "searchPeopleEmptySection": MessageLookupByLibrary.simpleMessage(

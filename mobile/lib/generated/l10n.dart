@@ -5785,16 +5785,6 @@ class S {
     );
   }
 
-  /// `Albums, months, days, years, ...`
-  String get searchHintText {
-    return Intl.message(
-      'Albums, months, days, years, ...',
-      name: 'searchHintText',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `• Album names (e.g. "Camera")\n• Types of files (e.g. "Videos", ".gif")\n• Years and months (e.g. "2022", "January")\n• Holidays (e.g. "Christmas")\n• Photo descriptions (e.g. “#fun”)`
   String get searchByExamples {
     return Intl.message(
