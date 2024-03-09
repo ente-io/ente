@@ -49,7 +49,6 @@ import 'package:photos/utils/file_uploader.dart';
 import "package:photos/utils/home_widget_util.dart";
 import 'package:photos/utils/local_settings.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import "package:workmanager/workmanager.dart";
 
 final _logger = Logger("main");
 
@@ -58,54 +57,16 @@ const kLastBGTaskHeartBeatTime = "bg_task_hb_time";
 const kLastFGTaskHeartBeatTime = "fg_task_hb_time";
 const kHeartBeatFrequency = Duration(seconds: 1);
 const kFGSyncFrequency = Duration(minutes: 5);
+const kFGHomeWidgetSyncFrequency = Duration(minutes: 15);
 const kBGTaskTimeout = Duration(seconds: 25);
 const kBGPushTimeout = Duration(seconds: 28);
 const kFGTaskDeathTimeoutInMicroseconds = 5000000;
 const kBackgroundLockLatency = Duration(seconds: 3);
 
-@pragma("vm:entry-point")
-void initSlideshowWidget() {
-  Workmanager().executeTask(
-    (taskName, inputData) async {
-      try {
-        if (await countHomeWidgets() != 0) {
-          await _init(true, via: 'runViaSlideshowWidget');
-          await initHomeWidget();
-        }
-        return true;
-      } catch (e, s) {
-        _logger.severe("Error in initSlideshowWidget", e, s);
-        return false;
-      }
-    },
-  );
-}
-
-Future<void> initWorkmanager() async {
-  await Workmanager()
-      .initialize(initSlideshowWidget, isInDebugMode: kDebugMode);
-  await Workmanager().registerPeriodicTask(
-    "slideshow-widget",
-    "updateSlideshowWidget",
-    initialDelay: const Duration(seconds: 10),
-    frequency: const Duration(
-      minutes: 15,
-    ),
-  );
-}
-
 void main() async {
   debugRepaintRainbowEnabled = false;
   WidgetsFlutterBinding.ensureInitialized();
   MediaKit.ensureInitialized();
-
-  if (Platform.isAndroid) {
-    unawaited(
-      initWorkmanager().catchError((e, s) {
-        _logger.severe("Error in initWorkmanager", e, s);
-      }),
-    );
-  }
 
   final savedThemeMode = await AdaptiveTheme.getThemeMode();
   await _runInForeground(savedThemeMode);
@@ -118,6 +79,9 @@ Future<void> _runInForeground(AdaptiveThemeMode? savedThemeMode) async {
     _logger.info("Starting app in foreground");
     await _init(false, via: 'mainMethod');
     final Locale locale = await getLocale();
+    if (Platform.isAndroid) {
+      unawaited(_scheduleFGHomeWidgetSync());
+    }
     unawaited(_scheduleFGSync('appStart in FG'));
 
     runApp(
@@ -141,6 +105,17 @@ ThemeMode _themeMode(AdaptiveThemeMode? savedThemeMode) {
   if (savedThemeMode.isLight) return ThemeMode.light;
   if (savedThemeMode.isDark) return ThemeMode.dark;
   return ThemeMode.system;
+}
+
+Future<void> _homeWidgetSync() async {
+  if (!Platform.isAndroid) return;
+  try {
+    if (await countHomeWidgets() != 0) {
+      await initHomeWidget();
+    }
+  } catch (e, s) {
+    _logger.severe("Error in initSlideshowWidget", e, s);
+  }
 }
 
 Future<void> _runBackgroundTask(String taskId, {String mode = 'normal'}) async {
@@ -176,8 +151,15 @@ Future<void> _runInBackground(String taskId) async {
     _scheduleSuicide(kBGTaskTimeout, taskId); // To prevent OS from punishing us
   }
   await _init(true, via: 'runViaBackgroundTask');
-  UpdateService.instance.showUpdateNotification().ignore();
-  await _sync('bgSync');
+  await Future.wait(
+    [
+      _homeWidgetSync(),
+      () async {
+        UpdateService.instance.showUpdateNotification().ignore();
+        await _sync('bgSync');
+      }(),
+    ],
+  );
   BackgroundFetch.finish(taskId);
 }
 
@@ -289,6 +271,13 @@ Future<void> _scheduleHeartBeat(
   Future.delayed(kHeartBeatFrequency, () async {
     // ignore: unawaited_futures
     _scheduleHeartBeat(prefs, isBackground);
+  });
+}
+
+Future<void> _scheduleFGHomeWidgetSync() async {
+  await _homeWidgetSync();
+  Future.delayed(kFGHomeWidgetSyncFrequency, () async {
+    unawaited(_scheduleFGHomeWidgetSync());
   });
 }
 
