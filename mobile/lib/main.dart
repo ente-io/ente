@@ -79,7 +79,9 @@ Future<void> _runInForeground(AdaptiveThemeMode? savedThemeMode) async {
     _logger.info("Starting app in foreground");
     await _init(false, via: 'mainMethod');
     final Locale locale = await getLocale();
-    unawaited(_scheduleFGHomeWidgetSync());
+    if (Platform.isAndroid) {
+      unawaited(_scheduleFGHomeWidgetSync());
+    }
     unawaited(_scheduleFGSync('appStart in FG'));
 
     runApp(
