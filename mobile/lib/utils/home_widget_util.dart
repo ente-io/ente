@@ -47,11 +47,22 @@ Future<void> initHomeWidget() async {
 
     final previousGeneratedId =
         await hw.HomeWidget.getWidgetData<int>("home_widget_last_img");
+
+    if (res.files.length == 1 &&
+        res.files[0].generatedID == previousGeneratedId) {
+      logger.info("Only one image found and it's the same as the previous one");
+      return;
+    }
+    if (res.files.isEmpty) {
+      await clearHomeWidget();
+      return;
+    }
     final files = res.files.where(
       (element) =>
           element.generatedID != previousGeneratedId &&
           element.fileType == FileType.image,
     );
+
     final randomNumber = Random().nextInt(files.length);
     final randomFile = files.elementAt(randomNumber);
     final fullImage = await getFileFromServer(randomFile);
