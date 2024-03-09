@@ -142,9 +142,7 @@ class SearchWidgetState extends State<SearchWidget> {
                       // hintText: S.of(context).searchHintText,
                       hintText: "Search",
                       filled: true,
-                      contentPadding: const EdgeInsets.symmetric(
-                        vertical: 10,
-                      ),
+
                       border: const UnderlineInputBorder(
                         borderSide: BorderSide.none,
                       ),
