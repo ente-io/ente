@@ -1130,8 +1130,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Nome album"),
         "searchByExamples": MessageLookupByLibrary.simpleMessage(
             "• Nomi degli album (es. \"Camera\")\n• Tipi di file (es. \"Video\", \".gif\")\n• Anni e mesi (e.. \"2022\", \"gennaio\")\n• Vacanze (ad es. \"Natale\")\n• Descrizioni delle foto (ad es. “#mare”)"),
-        "searchHintText": MessageLookupByLibrary.simpleMessage(
-            "Album, mesi, giorni, anni, ..."),
         "security": MessageLookupByLibrary.simpleMessage("Sicurezza"),
         "selectALocation":
             MessageLookupByLibrary.simpleMessage("Select a location"),

@@ -1,4 +1,5 @@
 import "dart:async";
+import "dart:io";
 
 import 'package:flutter/material.dart';
 import "package:photos/generated/l10n.dart";
@@ -84,14 +85,22 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
                     ButtonWidget(
                       buttonType: ButtonType.trailingIconSecondary,
                       buttonSize: ButtonSize.large,
-                      labelText: S.of(context).joinDiscord,
-                      icon: Icons.discord_outlined,
+                      // labelText: S.of(context).joinDiscord,
+                      labelText: "Why we open sourced",
+                      // icon: Icons.discord_outlined,
+                      icon: Icons.rocket_rounded,
                       iconColor: enteColorScheme.primary500,
                       onTap: () async {
+                        // unawaited(
+                        //   launchUrlString(
+                        //     "https://discord.com/invite/z2YVKkycX3",
+                        //     mode: LaunchMode.externalApplication,
+                        //   ),
+                        // );
                         unawaited(
                           launchUrlString(
-                            "https://discord.com/invite/z2YVKkycX3",
-                            mode: LaunchMode.externalApplication,
+                            "https://ente.io/blog/open-sourcing-our-server/",
+                            mode: LaunchMode.inAppBrowserView,
                           ),
                         );
                       },
@@ -120,11 +129,27 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
   Widget _getChangeLog() {
     final scrollController = ScrollController();
     final List<ChangeLogEntry> items = [];
+    if (Platform.isAndroid) {
+      items.add(
+        ChangeLogEntry(
+          "Home Widget ✨",
+          'Introducing our new Android widget! Enjoy your favourite memories directly on your home screen.',
+        ),
+      );
+    }
     items.addAll([
       ChangeLogEntry(
-        "Map View ✨",
-        'You can now view the location where a photo was clicked.\n'
-            '\nOpen a photo and tap the Info button to view its place on the map!',
+        "Redesigned Discovery Tab",
+        'We\'ve given it a fresh new look for improved design and better visual separation between each section.',
+      ),
+      ChangeLogEntry(
+        "Location Clustering ",
+        'Now, see photos automatically organize into clusters around a radius of populated cities.',
+      ),
+      ChangeLogEntry(
+        "Ente is now fully Open Source!",
+        'We took the final step in our open source journey.\n\n'
+            'Our clients had always been open source. Now, we have released the source code for our servers.',
       ),
       ChangeLogEntry(
         "Bug Fixes",

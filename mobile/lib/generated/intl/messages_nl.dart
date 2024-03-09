@@ -1218,8 +1218,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "searchHint4": MessageLookupByLibrary.simpleMessage("Locatie"),
         "searchHint5": MessageLookupByLibrary.simpleMessage(
             "Binnenkort beschikbaar: Gezichten & magische zoekopdrachten ✨"),
-        "searchHintText": MessageLookupByLibrary.simpleMessage(
-            "Albums, maanden, dagen, jaren, ..."),
         "searchLocationEmptySection": MessageLookupByLibrary.simpleMessage(
             "Foto\'s groeperen die in een bepaalde straal van een foto worden genomen"),
         "searchPeopleEmptySection": MessageLookupByLibrary.simpleMessage(

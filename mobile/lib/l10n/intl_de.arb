@@ -810,7 +810,6 @@
   "archiveAlbum": "Album archivieren",
   "calculating": "Wird berechnet...",
   "pleaseWaitDeletingAlbum": "Bitte warten, Album wird gelöscht",
-  "searchHintText": "Alben, Monate, Tage, Jahre, ...",
   "searchByExamples": "• Albumnamen (z.B. \"Kamera\")\n• Dateitypen (z.B. \"Videos\", \".gif\")\n• Jahre und Monate (z.B. \"2022\", \"Januar\")\n• Feiertage (z.B. \"Weihnachten\")\n• Fotobeschreibungen (z.B. \"#fun\")",
   "youCanTrySearchingForADifferentQuery": "Sie können versuchen, nach einer anderen Abfrage suchen.",
   "noResultsFound": "Keine Ergebnisse gefunden",
