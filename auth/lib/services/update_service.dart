@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:ente_auth/core/constants.dart';
 import 'package:ente_auth/core/network.dart';
 import 'package:ente_auth/services/notification_service.dart';
+import 'package:ente_auth/utils/platform_util.dart';
 import 'package:logging/logging.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -127,7 +128,8 @@ class UpdateService {
 
   bool isIndependent() {
     return flavor == "independent" ||
-        _packageInfo.packageName.endsWith("independent");
+        _packageInfo.packageName.endsWith("independent") ||
+        PlatformUtil.isDesktop();
   }
 }
 
