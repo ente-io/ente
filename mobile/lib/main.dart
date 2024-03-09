@@ -57,6 +57,7 @@ const kLastBGTaskHeartBeatTime = "bg_task_hb_time";
 const kLastFGTaskHeartBeatTime = "fg_task_hb_time";
 const kHeartBeatFrequency = Duration(seconds: 1);
 const kFGSyncFrequency = Duration(minutes: 5);
+const kFGHomeWidgetSyncFrequency = Duration(minutes: 15);
 const kBGTaskTimeout = Duration(seconds: 25);
 const kBGPushTimeout = Duration(seconds: 28);
 const kFGTaskDeathTimeoutInMicroseconds = 5000000;
@@ -78,6 +79,7 @@ Future<void> _runInForeground(AdaptiveThemeMode? savedThemeMode) async {
     _logger.info("Starting app in foreground");
     await _init(false, via: 'mainMethod');
     final Locale locale = await getLocale();
+    unawaited(_scheduleFGHomeWidgetSync());
     unawaited(_scheduleFGSync('appStart in FG'));
 
     runApp(
@@ -136,8 +138,6 @@ Future<void> _runInBackground(String taskId) async {
   await Future.delayed(const Duration(seconds: 3));
   if (await _isRunningInForeground()) {
     _logger.info("FG task running, skipping BG taskID: $taskId");
-    await _init(true, via: 'runViaBackgroundTaskForHomeWidget');
-    await _homeWidgetSync();
     BackgroundFetch.finish(taskId);
     return;
   } else {
@@ -269,6 +269,13 @@ Future<void> _scheduleHeartBeat(
   Future.delayed(kHeartBeatFrequency, () async {
     // ignore: unawaited_futures
     _scheduleHeartBeat(prefs, isBackground);
+  });
+}
+
+Future<void> _scheduleFGHomeWidgetSync() async {
+  await _homeWidgetSync();
+  Future.delayed(kFGHomeWidgetSyncFrequency, () async {
+    unawaited(_scheduleFGHomeWidgetSync());
   });
 }
 
