@@ -192,8 +192,9 @@ type TwoFactorRecoveryResponse struct {
 
 // TwoFactorRemovalRequest represents the the body of two factor removal request consist of decrypted two factor secret and sessionID
 type TwoFactorRemovalRequest struct {
-	Secret    string `json:"secret"`
-	SessionID string `json:"sessionID"`
+	Secret        string `json:"secret"`
+	SessionID     string `json:"sessionID"`
+	TwoFactorType string `json:"twoFactorType"`
 }
 
 type ProfileData struct {

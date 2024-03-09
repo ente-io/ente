@@ -1,0 +1,43 @@
+name: "Deploy (cast)"
+
+on:
+    push:
+        # Run workflow on pushes to the deploy/cast
+        branches: [deploy/cast]
+
+jobs:
+    deploy:
+        runs-on: ubuntu-latest
+
+        defaults:
+            run:
+                working-directory: web
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+              with:
+                  submodules: recursive
+
+            - name: Setup node and enable yarn caching
+              uses: actions/setup-node@v4
+              with:
+                  node-version: 20
+                  cache: "yarn"
+                  cache-dependency-path: "docs/yarn.lock"
+
+            - name: Install dependencies
+              run: yarn install
+
+            - name: Build cast
+              run: yarn build:cast
+
+            - name: Publish cast
+              uses: cloudflare/pages-action@1
+              with:
+                  accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+                  apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+                  projectName: ente
+                  branch: deploy/cast
+                  directory: web/apps/cast/out
+                  wranglerVersion: "3"

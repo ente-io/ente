@@ -14,6 +14,8 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/ente-io/museum/pkg/repo/two_factor_recovery"
+
 	"github.com/ente-io/museum/pkg/controller/cast"
 
 	"github.com/ente-io/museum/pkg/controller/commonbilling"
@@ -137,6 +139,7 @@ func main() {
 
 	twoFactorRepo := &repo.TwoFactorRepository{DB: db, SecretEncryptionKey: secretEncryptionKeyBytes}
 	userAuthRepo := &repo.UserAuthRepository{DB: db}
+	twoFactorRecoveryRepo := &two_factor_recovery.Repository{Db: db, SecretEncryptionKey: secretEncryptionKeyBytes}
 	billingRepo := &repo.BillingRepository{DB: db}
 	userEntityRepo := &userEntityRepo.Repository{DB: db}
 	locationTagRepository := &locationtagRepo.Repository{DB: db}
@@ -304,6 +307,7 @@ func main() {
 		usageRepo,
 		userAuthRepo,
 		twoFactorRepo,
+		twoFactorRecoveryRepo,
 		passkeysRepo,
 		storagBonusRepo,
 		fileRepo,
@@ -429,6 +433,8 @@ func main() {
 	publicAPI.POST("/users/two-factor/remove", userHandler.RemoveTwoFactor)
 	publicAPI.POST("/users/two-factor/passkeys/begin", userHandler.BeginPasskeyAuthenticationCeremony)
 	publicAPI.POST("/users/two-factor/passkeys/finish", userHandler.FinishPasskeyAuthenticationCeremony)
+	privateAPI.GET("/users/two-factor/recovery-status", userHandler.GetTwoFactorRecoveryStatus)
+	privateAPI.POST("/users/two-factor/passkeys/configure-recovery", userHandler.ConfigurePasskeyRecovery)
 	privateAPI.GET("/users/two-factor/status", userHandler.GetTwoFactorStatus)
 	privateAPI.POST("/users/two-factor/setup", userHandler.SetupTwoFactor)
 	privateAPI.POST("/users/two-factor/enable", userHandler.EnableTwoFactor)

@@ -1,0 +1,47 @@
+name: "Deploy (docs)"
+
+on:
+    # Run on every push to main that changes docs/
+    push:
+        branches: [main]
+        paths:
+            - "docs/**"
+            - ".github/workflows/docs-deploy.yml"
+    # Also allow manually running the workflow
+    workflow_dispatch:
+
+jobs:
+    deploy:
+        runs-on: ubuntu-latest
+
+        defaults:
+            run:
+                working-directory: docs
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Setup node and enable yarn caching
+              uses: actions/setup-node@v4
+              with:
+                  node-version: 20
+                  cache: "yarn"
+                  cache-dependency-path: "docs/yarn.lock"
+
+            - name: Install dependencies
+              run: yarn install
+
+            - name: Build production site
+              # Will create docs/.vitepress/dist
+              run: yarn build
+
+            - name: Publish
+              uses: cloudflare/pages-action@1
+              with:
+                  accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+                  apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+                  projectName: ente
+                  branch: help
+                  directory: docs/docs/.vitepress/dist
+                  wranglerVersion: "3"
