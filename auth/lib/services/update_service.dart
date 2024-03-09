@@ -140,6 +140,7 @@ class LatestVersionInfo {
   final bool? shouldForceUpdate;
   final int lastSupportedVersionCode;
   final String? url;
+  final String? release;
   final int? size;
   final bool? shouldNotify;
 
@@ -150,6 +151,7 @@ class LatestVersionInfo {
     this.shouldForceUpdate,
     this.lastSupportedVersionCode,
     this.url,
+    this.release,
     this.size,
     this.shouldNotify,
   );
@@ -162,6 +164,7 @@ class LatestVersionInfo {
       map['shouldForceUpdate'],
       map['lastSupportedVersionCode'] ?? 1,
       map['url'],
+      map['release'],
       map['size'],
       map['shouldNotify'],
     );
