@@ -275,9 +275,15 @@ Future<void> _scheduleHeartBeat(
 }
 
 Future<void> _scheduleFGHomeWidgetSync() async {
+  Future.delayed(kFGHomeWidgetSyncFrequency, () async {
+    unawaited(_homeWidgetSyncPeriodic());
+  });
+}
+
+Future<void> _homeWidgetSyncPeriodic() async {
   await _homeWidgetSync();
   Future.delayed(kFGHomeWidgetSyncFrequency, () async {
-    unawaited(_scheduleFGHomeWidgetSync());
+    unawaited(_homeWidgetSyncPeriodic());
   });
 }
 
