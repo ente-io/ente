@@ -98,19 +98,19 @@ Future<void> initHomeWidget() async {
       key: "slideshow",
     );
 
-    await hw.HomeWidget.updateWidget(
-      name: 'SlideshowWidgetProvider',
-      androidName: 'SlideshowWidgetProvider',
-      qualifiedAndroidName: 'io.ente.photos.SlideshowWidgetProvider',
-      iOSName: 'SlideshowWidget',
-    );
-
     if (randomFile.generatedID != null) {
       await hw.HomeWidget.saveWidgetData<int>(
         "home_widget_last_img",
         randomFile.generatedID!,
       );
     }
+
+    await hw.HomeWidget.updateWidget(
+      name: 'SlideshowWidgetProvider',
+      androidName: 'SlideshowWidgetProvider',
+      qualifiedAndroidName: 'io.ente.photos.SlideshowWidgetProvider',
+      iOSName: 'SlideshowWidget',
+    );
 
     logger.info(
       ">>> SlideshowWidget rendered with size ${width}x$height",
