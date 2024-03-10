@@ -15,6 +15,7 @@ import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/remote_sync_service.dart';
 import 'package:photos/ui/actions/collection/collection_sharing_actions.dart';
 import 'package:photos/utils/crypto_util.dart';
+import "package:photos/utils/home_widget_util.dart";
 
 class FavoritesService {
   late Configuration _config;
@@ -51,6 +52,7 @@ class FavoritesService {
       }
     });
     await _warmUpCache();
+    await _checkHomeWidget();
   }
 
   void dispose() {
@@ -63,6 +65,12 @@ class FavoritesService {
       final uploadedIDs =
           await FilesDB.instance.getUploadedFileIDs(favCollection.id);
       _cachedFavUploadedIDs.addAll(uploadedIDs);
+    }
+  }
+
+  Future<void> _checkHomeWidget() async {
+    if (await countHomeWidgets() > 0 && hasFavorites()) {
+      await initHomeWidget();
     }
   }
 
