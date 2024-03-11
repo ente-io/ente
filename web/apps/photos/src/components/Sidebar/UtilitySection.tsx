@@ -11,8 +11,14 @@ import TwoFactorModal from "components/TwoFactor/Modal";
 import { useRouter } from "next/router";
 import { AppContext } from "pages/_app";
 // import mlIDbStorage from 'utils/storage/mlIDbStorage';
+import {
+    configurePasskeyRecovery,
+    isPasskeyRecoveryEnabled,
+} from "@ente/accounts/services/passkey";
 import { APPS, CLIENT_PACKAGE_NAMES } from "@ente/shared/apps/constants";
 import ThemeSwitcher from "@ente/shared/components/ThemeSwitcher";
+import { getRecoveryKey } from "@ente/shared/crypto/helpers";
+import { encryptToB64 } from "@ente/shared/crypto/internal/libsodium";
 import { getAccountsURL } from "@ente/shared/network/api";
 import { logError } from "@ente/shared/sentry";
 import { THEME_COLOR } from "@ente/shared/themes/constants";
@@ -22,6 +28,7 @@ import isElectron from "is-electron";
 import { getAccountsToken } from "services/userService";
 import { getDownloadAppMessage } from "utils/ui";
 import { isInternalUser } from "utils/user";
+import { v4 as uuidv4 } from "uuid";
 import Preferences from "./Preferences";
 
 export default function UtilitySection({ closeSidebar }) {
@@ -72,6 +79,26 @@ export default function UtilitySection({ closeSidebar }) {
         closeSidebar();
 
         try {
+            // check if the user has passkey recovery enabled
+            const recoveryEnabled = await isPasskeyRecoveryEnabled();
+            if (!recoveryEnabled) {
+                // let's create the necessary recovery information
+                const recoveryKey = await getRecoveryKey();
+
+                const resetSecret = uuidv4();
+
+                const encryptionResult = await encryptToB64(
+                    resetSecret,
+                    recoveryKey,
+                );
+
+                await configurePasskeyRecovery(
+                    resetSecret,
+                    encryptionResult.encryptedData,
+                    encryptionResult.nonce,
+                );
+            }
+
             const accountsToken = await getAccountsToken();
 
             window.location.href = `${getAccountsURL()}${
