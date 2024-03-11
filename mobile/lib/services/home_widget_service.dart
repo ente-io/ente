@@ -126,10 +126,11 @@ class HomeWidgetService {
         qualifiedAndroidName: 'io.ente.photos.SlideshowWidgetProvider',
         iOSName: 'SlideshowWidget',
       );
-
       _logger.info(
-        ">>> OG size of SlideshowWidget image: ${width}x$height",
-        ">>> SlideshowWidget image rendered with size ${cacheWidth}x$cacheHeight",
+        ">>> OG size of SlideshowWidget image: ${width} x $height",
+      );
+      _logger.info(
+        ">>> SlideshowWidget image rendered with size ${cacheWidth} x $cacheHeight",
       );
     } catch (e) {
       _logger.severe("Error rendering widget", e);
