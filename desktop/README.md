@@ -14,7 +14,7 @@ To know more about Ente, see [our main README](../README.md) or visit
 >
 > We moved a few things around when switching to a monorepo recently, so this
 > folder might not build with the instructions below. Hang tight, we're on it,
-> will fix things if.
+> and will fix.
 
 Fetch submodules
 
@@ -31,7 +31,7 @@ yarn install
 Run the app
 
 ```sh
-yarn start
+yarn dev
 ```
 
 To recompile automatically using electron-reload, run this in a separate

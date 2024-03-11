@@ -5,11 +5,13 @@
         "esModuleInterop": true,
         "noImplicitAny": true,
         "sourceMap": true,
+        /* Emit the generated JS into app/ */
         "outDir": "app",
         "baseUrl": "src",
         "paths": {
             "*": ["node_modules/*"]
         }
     },
-    "include": ["src/**/*"]
+    /* transpile all ts files in src/ */
+    "include": ["src/**/*.ts"]
 }

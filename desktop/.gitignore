@@ -1,12 +1,18 @@
 # Node
 node_modules/
 
-# electron-builder
-dist/
-
 # macOS
 .DS_Store
+
+# Editors
+.vscode/
 
 # Local env files
 .env
 .env.*.local
+
+# tsc transpiles src/**/*.ts and emits the generated JS into app/
+app/
+
+# electron-builder
+dist/
