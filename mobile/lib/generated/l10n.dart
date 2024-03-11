@@ -6919,16 +6919,6 @@ class S {
     );
   }
 
-  /// `Descriptions`
-  String get descriptions {
-    return Intl.message(
-      'Descriptions',
-      name: 'descriptions',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `File types and names`
   String get fileTypesAndNames {
     return Intl.message(
@@ -6944,16 +6934,6 @@ class S {
     return Intl.message(
       'Location',
       name: 'location',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Locations`
-  String get locations {
-    return Intl.message(
-      'Locations',
-      name: 'locations',
       desc: '',
       args: [],
     );
@@ -8318,6 +8298,16 @@ class S {
     );
   }
 
+  /// `Remove all files from Uncategorized that are present in other albums`
+  String get cleanUncategorizedDescription {
+    return Intl.message(
+      'Remove all files from Uncategorized that are present in other albums',
+      name: 'cleanUncategorizedDescription',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Waiting for verification...`
   String get waitingForVerification {
     return Intl.message(
@@ -8423,6 +8413,26 @@ class S {
     return Intl.message(
       'Join Discord',
       name: 'joinDiscord',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Locations`
+  String get locations {
+    return Intl.message(
+      'Locations',
+      name: 'locations',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Descriptions`
+  String get descriptions {
+    return Intl.message(
+      'Descriptions',
+      name: 'descriptions',
       desc: '',
       args: [],
     );

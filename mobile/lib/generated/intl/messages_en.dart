@@ -404,6 +404,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "claimedStorageSoFar": m8,
         "cleanUncategorized":
             MessageLookupByLibrary.simpleMessage("Clean Uncategorized"),
+        "cleanUncategorizedDescription": MessageLookupByLibrary.simpleMessage(
+            "Remove all files from Uncategorized that are present in other albums"),
         "clearCaches": MessageLookupByLibrary.simpleMessage("Clear caches"),
         "clearIndexes": MessageLookupByLibrary.simpleMessage("Clear indexes"),
         "click": MessageLookupByLibrary.simpleMessage("• Click"),
@@ -548,6 +550,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Delete shared album?"),
         "deleteSharedAlbumDialogBody": MessageLookupByLibrary.simpleMessage(
             "The album will be deleted for everyone\n\nYou will lose access to shared photos in this album that are owned by others"),
+        "descriptions": MessageLookupByLibrary.simpleMessage("Descriptions"),
         "deselectAll": MessageLookupByLibrary.simpleMessage("Deselect all"),
         "designedToOutlive":
             MessageLookupByLibrary.simpleMessage("Designed to outlive"),
@@ -848,6 +851,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "locationName": MessageLookupByLibrary.simpleMessage("Location name"),
         "locationTagFeatureDescription": MessageLookupByLibrary.simpleMessage(
             "A location tag groups all photos that were taken within some radius of a photo"),
+        "locations": MessageLookupByLibrary.simpleMessage("Locations"),
         "lockButtonLabel": MessageLookupByLibrary.simpleMessage("Lock"),
         "lockScreenEnablePreSteps": MessageLookupByLibrary.simpleMessage(
             "To enable lockscreen, please setup device passcode or screen lock in your system settings."),

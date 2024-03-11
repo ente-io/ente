@@ -542,6 +542,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Eliminare l\'album condiviso?"),
         "deleteSharedAlbumDialogBody": MessageLookupByLibrary.simpleMessage(
             "L\'album verrà eliminato per tutti\n\nPerderai l\'accesso alle foto condivise in questo album che sono di proprietà di altri"),
+        "descriptions": MessageLookupByLibrary.simpleMessage("Descriptions"),
         "deselectAll":
             MessageLookupByLibrary.simpleMessage("Deseleziona tutti"),
         "designedToOutlive":
@@ -838,6 +839,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Nome della località"),
         "locationTagFeatureDescription": MessageLookupByLibrary.simpleMessage(
             "Un tag di localizzazione raggruppa tutte le foto scattate entro il raggio di una foto"),
+        "locations": MessageLookupByLibrary.simpleMessage("Locations"),
         "lockButtonLabel": MessageLookupByLibrary.simpleMessage("Blocca"),
         "lockScreenEnablePreSteps": MessageLookupByLibrary.simpleMessage(
             "Per abilitare la schermata di blocco, configura il codice di accesso del dispositivo o il blocco schermo nelle impostazioni di sistema."),
