@@ -682,7 +682,7 @@ func main() {
 	publicAPI.GET("/offers/black-friday", offerHandler.GetBlackFridayOffers)
 
 	setKnownAPIs(server.Routes())
-
+	lockController.ReleaseHostLock()
 	setupAndStartBackgroundJobs(objectCleanupController, replicationController3)
 	setupAndStartCrons(
 		userAuthRepo, publicCollectionRepo, twoFactorRepo, passkeysRepo, fileController, taskLockingRepo, emailNotificationCtrl,
