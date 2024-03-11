@@ -1,12 +1,12 @@
-node_modules
-app
-.next/
-dist
-.vscode
-buildingSteps.md
+# Node
+node_modules/
+
+# electron-builder
+dist/
+
+# macOS
 .DS_Store
-.idea/
-build/.DS_Store
+
+# Local env files
 .env
-.electron-symbols/
-models/
+.env.*.local
