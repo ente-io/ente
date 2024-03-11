@@ -69,17 +69,20 @@ class HomeWidgetService {
       final fullImage = await getFileFromServer(randomFile);
       if (fullImage == null) throw Exception("File not found");
 
-      Image img = Image.file(fullImage);
-      var imgProvider = img.image;
-      await PreloadImage.loadImage(imgProvider);
-
-      img = Image.file(fullImage);
-      imgProvider = img.image;
+      final Image img = Image.file(fullImage);
 
       final image = await decodeImageFromList(await fullImage.readAsBytes());
       final width = image.width.toDouble();
       final height = image.height.toDouble();
       final size = min(min(width, height), 1024.0);
+      final imgProvider = ResizeImage(
+        img.image,
+        width: size.toInt(),
+        height: size.toInt(),
+        policy: ResizeImagePolicy.fit,
+      );
+
+      await PreloadImage.loadImage(imgProvider);
 
       final widget = ClipRRect(
         borderRadius: BorderRadius.circular(32),
