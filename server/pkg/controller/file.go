@@ -605,7 +605,7 @@ func (c *FileController) CleanupDeletedFiles() {
 		c.cleanupCronRunning = false
 	}()
 
-	lockStatus := c.LockController.TryLock(DeletedObjectQueueLock, time.MicrosecondsAfterHours(24))
+	lockStatus := c.LockController.TryLock(DeletedObjectQueueLock, time.MicrosecondsAfterHours(2))
 	if !lockStatus {
 		log.Warning(fmt.Sprintf("Failed to acquire lock %s", DeletedObjectQueueLock))
 		return

@@ -55,7 +55,7 @@ func (c *ObjectController) RemoveComplianceHolds() {
 		c.complianceCronRunning = false
 	}()
 
-	lockStatus := c.LockController.TryLock(RemoveComplianceHoldsLock, time.MicrosecondsAfterHours(24))
+	lockStatus := c.LockController.TryLock(RemoveComplianceHoldsLock, time.MicrosecondsAfterHours(2))
 	if !lockStatus {
 		log.Warning(fmt.Sprintf("Failed to acquire lock %s", RemoveComplianceHoldsLock))
 		return
