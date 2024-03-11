@@ -42,7 +42,7 @@ class HomeWidgetService {
     if (collectionID == null) {
       await clearHomeWidget();
       _logger.info("Favorite collection not found");
-      throw Exception("Favorite collection not found");
+      return;
     }
 
     try {
