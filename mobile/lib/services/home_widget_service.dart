@@ -73,20 +73,27 @@ class HomeWidgetService {
       final width = image.width.toDouble();
       final height = image.height.toDouble();
       final size = min(min(width, height), 1024.0);
+      final aspectRatio = width / height;
+      late final int cacheWidth;
+      late final int cacheHeight;
+      if (aspectRatio > 1) {
+        cacheWidth = 1024;
+        cacheHeight = (1024 / aspectRatio).round();
+      } else if (aspectRatio < 1) {
+        cacheHeight = 1024;
+        cacheWidth = (1024 * aspectRatio).round();
+      } else {
+        cacheWidth = 1024;
+        cacheHeight = 1024;
+      }
       final Image img = Image.file(
         fullImage,
         fit: BoxFit.cover,
-        width: size,
-        height: size,
+        cacheWidth: cacheWidth,
+        cacheHeight: cacheHeight,
       );
 
-      final imgProvider = ResizeImage(
-        img.image,
-        width: size.toInt(),
-        height: size.toInt(),
-      );
-
-      await PreloadImage.loadImage(imgProvider);
+      await PreloadImage.loadImage(img.image);
 
       final widget = ClipRRect(
         borderRadius: BorderRadius.circular(32),
@@ -95,7 +102,7 @@ class HomeWidgetService {
           height: size,
           decoration: BoxDecoration(
             color: Colors.black,
-            image: DecorationImage(image: imgProvider, fit: BoxFit.cover),
+            image: DecorationImage(image: img.image, fit: BoxFit.cover),
           ),
         ),
       );
@@ -121,7 +128,8 @@ class HomeWidgetService {
       );
 
       _logger.info(
-        ">>> SlideshowWidget rendered with size ${width}x$height",
+        ">>> OG size of SlideshowWidget image: ${width}x$height",
+        ">>> SlideshowWidget image rendered with size ${cacheWidth}x$cacheHeight",
       );
     } catch (e) {
       _logger.severe("Error rendering widget", e);
