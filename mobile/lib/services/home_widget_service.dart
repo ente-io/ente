@@ -69,17 +69,21 @@ class HomeWidgetService {
       final fullImage = await getFileFromServer(randomFile);
       if (fullImage == null) throw Exception("File not found");
 
-      final Image img = Image.file(fullImage);
-
       final image = await decodeImageFromList(await fullImage.readAsBytes());
       final width = image.width.toDouble();
       final height = image.height.toDouble();
       final size = min(min(width, height), 1024.0);
+      final Image img = Image.file(
+        fullImage,
+        fit: BoxFit.cover,
+        width: size,
+        height: size,
+      );
+
       final imgProvider = ResizeImage(
         img.image,
         width: size.toInt(),
         height: size.toInt(),
-        policy: ResizeImagePolicy.fit,
       );
 
       await PreloadImage.loadImage(imgProvider);
