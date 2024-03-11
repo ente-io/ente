@@ -667,7 +667,7 @@ func (c *CollectionController) TrashV3(ctx *gin.Context, req ente.TrashCollectio
 		return stacktrace.Propagate(err, "failed to revoke cast token")
 	}
 	// Continue with current delete flow till. This disables sharing for this collection and then queue it up for deletion
-	err = c.CollectionRepo.ScheduleDelete(cID, false)
+	err = c.CollectionRepo.ScheduleDelete(cID)
 	if err != nil {
 		return stacktrace.Propagate(err, "")
 	}
