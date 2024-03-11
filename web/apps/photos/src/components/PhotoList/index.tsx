@@ -718,6 +718,9 @@ export function PhotoList({
     };
 
     useEffect(() => {
+        // Nothing to do here if nothing is selected.
+        if (!galleryContext.selectedFile) return;
+
         const notSelectedFiles = displayFiles?.filter(
             (item) => !galleryContext.selectedFile[item.id],
         );
