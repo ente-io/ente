@@ -1,7 +1,7 @@
 # CHANGELOG
 
 
-## v0.8.66
+## v0.8.67
 
 ### Added
 * #### Home Widget ✨
