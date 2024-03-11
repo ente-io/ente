@@ -1,18 +1,18 @@
-import { isPlatform } from '../utils/common/platform';
-import { AutoLauncherClient } from '../types/autoLauncher';
-import linuxAndWinAutoLauncher from './autoLauncherClients/linuxAndWinAutoLauncher';
-import macAutoLauncher from './autoLauncherClients/macAutoLauncher';
+import { AutoLauncherClient } from "../types/autoLauncher";
+import { isPlatform } from "../utils/common/platform";
+import linuxAndWinAutoLauncher from "./autoLauncherClients/linuxAndWinAutoLauncher";
+import macAutoLauncher from "./autoLauncherClients/macAutoLauncher";
 
 class AutoLauncher {
     private client: AutoLauncherClient;
     async init() {
-        if (isPlatform('linux') || isPlatform('windows')) {
+        if (isPlatform("linux") || isPlatform("windows")) {
             this.client = linuxAndWinAutoLauncher;
         } else {
             this.client = macAutoLauncher;
         }
         // migrate old auto launch settings for windows from mac auto launcher to linux and windows auto launcher
-        if (isPlatform('windows') && (await macAutoLauncher.isEnabled())) {
+        if (isPlatform("windows") && (await macAutoLauncher.isEnabled())) {
             await macAutoLauncher.toggleAutoLaunch();
             await linuxAndWinAutoLauncher.toggleAutoLaunch();
         }

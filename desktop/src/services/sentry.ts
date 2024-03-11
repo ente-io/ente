@@ -1,12 +1,12 @@
-import * as Sentry from '@sentry/electron/dist/main';
-import { makeID } from '../utils/logging';
-import { keysStore } from '../stores/keys.store';
-import { SENTRY_DSN, RELEASE_VERSION } from '../config';
-import { isDev } from '../utils/common';
-import { logToDisk } from './logging';
-import { hasOptedOutOfCrashReports } from '../main';
+import * as Sentry from "@sentry/electron/dist/main";
+import { RELEASE_VERSION, SENTRY_DSN } from "../config";
+import { hasOptedOutOfCrashReports } from "../main";
+import { keysStore } from "../stores/keys.store";
+import { isDev } from "../utils/common";
+import { makeID } from "../utils/logging";
+import { logToDisk } from "./logging";
 
-const ENV_DEVELOPMENT = 'development';
+const ENV_DEVELOPMENT = "development";
 
 const isDEVSentryENV = () =>
     process.env.NEXT_PUBLIC_SENTRY_ENV === ENV_DEVELOPMENT;
@@ -15,7 +15,7 @@ export function initSentry(): void {
     Sentry.init({
         dsn: SENTRY_DSN,
         release: RELEASE_VERSION,
-        environment: isDev ? 'development' : 'production',
+        environment: isDev ? "development" : "production",
     });
     Sentry.setUser({ id: getSentryUserID() });
 }
@@ -52,17 +52,17 @@ export function logErrorSentry(
 function errorWithContext(originalError: Error, context: string) {
     const errorWithContext = new Error(context);
     errorWithContext.stack =
-        errorWithContext.stack.split('\n').slice(2, 4).join('\n') +
-        '\n' +
+        errorWithContext.stack.split("\n").slice(2, 4).join("\n") +
+        "\n" +
         originalError.stack;
     return errorWithContext;
 }
 
 export function getSentryUserID() {
-    let anonymizeUserID = keysStore.get('AnonymizeUserID')?.id;
+    let anonymizeUserID = keysStore.get("AnonymizeUserID")?.id;
     if (!anonymizeUserID) {
         anonymizeUserID = makeID(6);
-        keysStore.set('AnonymizeUserID', { id: anonymizeUserID });
+        keysStore.set("AnonymizeUserID", { id: anonymizeUserID });
     }
     return anonymizeUserID;
 }

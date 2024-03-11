@@ -1,11 +1,11 @@
-import { WatchStoreType } from '../types';
-import { watchStore } from '../stores/watch.store';
+import { watchStore } from "../stores/watch.store";
+import { WatchStoreType } from "../types";
 
 export function getWatchMappings() {
-    const mappings = watchStore.get('mappings') ?? [];
+    const mappings = watchStore.get("mappings") ?? [];
     return mappings;
 }
 
-export function setWatchMappings(watchMappings: WatchStoreType['mappings']) {
-    watchStore.set('mappings', watchMappings);
+export function setWatchMappings(watchMappings: WatchStoreType["mappings"]) {
+    watchStore.set("mappings", watchMappings);
 }

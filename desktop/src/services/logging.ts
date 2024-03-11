@@ -1,22 +1,22 @@
-import log from 'electron-log';
-import { ipcRenderer } from 'electron';
+import { ipcRenderer } from "electron";
+import log from "electron-log";
 
 export function logToDisk(logLine: string) {
     log.info(logLine);
 }
 
 export function openLogDirectory() {
-    ipcRenderer.invoke('open-log-dir');
+    ipcRenderer.invoke("open-log-dir");
 }
 
 export function logError(error: Error, message: string, info?: string): void {
-    ipcRenderer.invoke('log-error', error, message, info);
+    ipcRenderer.invoke("log-error", error, message, info);
 }
 
 export function getSentryUserID(): Promise<string> {
-    return ipcRenderer.invoke('get-sentry-id');
+    return ipcRenderer.invoke("get-sentry-id");
 }
 
 export function updateOptOutOfCrashReports(optOut: boolean) {
-    return ipcRenderer.invoke('update-opt-out-crash-reports', optOut);
+    return ipcRenderer.invoke("update-opt-out-crash-reports", optOut);
 }

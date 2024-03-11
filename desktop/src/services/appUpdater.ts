@@ -1,9 +1,12 @@
-import { app, BrowserWindow } from 'electron';
-import { autoUpdater } from 'electron-updater';
-import log from 'electron-log';
-import { setIsAppQuitting, setIsUpdateAvailable } from '../main';
-import { compareVersions } from 'compare-versions';
-import { AppUpdateInfo, GetFeatureFlagResponse } from '../types';
+import { compareVersions } from "compare-versions";
+import { app, BrowserWindow } from "electron";
+import { default as ElectronLog, default as log } from "electron-log";
+import { autoUpdater } from "electron-updater";
+import fetch from "node-fetch";
+import { setIsAppQuitting, setIsUpdateAvailable } from "../main";
+import { AppUpdateInfo, GetFeatureFlagResponse } from "../types";
+import { isPlatform } from "../utils/common/platform";
+import { logErrorSentry } from "./sentry";
 import {
     clearMuteUpdateNotificationVersion,
     clearSkipAppVersion,
@@ -11,11 +14,7 @@ import {
     getSkipAppVersion,
     setMuteUpdateNotificationVersion,
     setSkipAppVersion,
-} from './userPreference';
-import fetch from 'node-fetch';
-import { logErrorSentry } from './sentry';
-import ElectronLog from 'electron-log';
-import { isPlatform } from '../utils/common/platform';
+} from "./userPreference";
 
 const FIVE_MIN_IN_MICROSECOND = 5 * 60 * 1000;
 const ONE_DAY_IN_MICROSECOND = 1 * 24 * 60 * 60 * 1000;
@@ -36,22 +35,22 @@ export function forceCheckForUpdateAndNotify(mainWindow: BrowserWindow) {
         clearMuteUpdateNotificationVersion();
         checkForUpdateAndNotify(mainWindow);
     } catch (e) {
-        logErrorSentry(e, 'forceCheckForUpdateAndNotify failed');
+        logErrorSentry(e, "forceCheckForUpdateAndNotify failed");
     }
 }
 
 async function checkForUpdateAndNotify(mainWindow: BrowserWindow) {
     try {
-        log.debug('checkForUpdateAndNotify called');
+        log.debug("checkForUpdateAndNotify called");
         const updateCheckResult = await autoUpdater.checkForUpdates();
-        log.debug('update version', updateCheckResult.updateInfo.version);
+        log.debug("update version", updateCheckResult.updateInfo.version);
         if (
             compareVersions(
                 updateCheckResult.updateInfo.version,
                 app.getVersion()
             ) <= 0
         ) {
-            log.debug('already at latest version');
+            log.debug("already at latest version");
             return;
         }
         const skipAppVersion = getSkipAppVersion();
@@ -60,7 +59,7 @@ async function checkForUpdateAndNotify(mainWindow: BrowserWindow) {
             updateCheckResult.updateInfo.version === skipAppVersion
         ) {
             log.info(
-                'user chose to skip version ',
+                "user chose to skip version ",
                 updateCheckResult.updateInfo.version
             );
             return;
@@ -68,20 +67,20 @@ async function checkForUpdateAndNotify(mainWindow: BrowserWindow) {
         const desktopCutoffVersion = await getDesktopCutoffVersion();
         if (
             desktopCutoffVersion &&
-            isPlatform('mac') &&
+            isPlatform("mac") &&
             compareVersions(
                 updateCheckResult.updateInfo.version,
                 desktopCutoffVersion
             ) > 0
         ) {
-            log.debug('auto update not possible due to key change');
+            log.debug("auto update not possible due to key change");
             showUpdateDialog(mainWindow, {
                 autoUpdatable: false,
                 version: updateCheckResult.updateInfo.version,
             });
         } else {
             let timeout: NodeJS.Timeout;
-            log.debug('attempting auto update');
+            log.debug("attempting auto update");
             autoUpdater.downloadUpdate();
             const muteUpdateNotificationVersion =
                 getMuteUpdateNotificationVersion();
@@ -91,12 +90,12 @@ async function checkForUpdateAndNotify(mainWindow: BrowserWindow) {
                     muteUpdateNotificationVersion
             ) {
                 log.info(
-                    'user chose to mute update notification for version ',
+                    "user chose to mute update notification for version ",
                     updateCheckResult.updateInfo.version
                 );
                 return;
             }
-            autoUpdater.on('update-downloaded', () => {
+            autoUpdater.on("update-downloaded", () => {
                 timeout = setTimeout(
                     () =>
                         showUpdateDialog(mainWindow, {
@@ -106,9 +105,9 @@ async function checkForUpdateAndNotify(mainWindow: BrowserWindow) {
                     FIVE_MIN_IN_MICROSECOND
                 );
             });
-            autoUpdater.on('error', (error) => {
+            autoUpdater.on("error", (error) => {
                 clearTimeout(timeout);
-                logErrorSentry(error, 'auto update failed');
+                logErrorSentry(error, "auto update failed");
                 showUpdateDialog(mainWindow, {
                     autoUpdatable: false,
                     version: updateCheckResult.updateInfo.version,
@@ -117,12 +116,12 @@ async function checkForUpdateAndNotify(mainWindow: BrowserWindow) {
         }
         setIsUpdateAvailable(true);
     } catch (e) {
-        logErrorSentry(e, 'checkForUpdateAndNotify failed');
+        logErrorSentry(e, "checkForUpdateAndNotify failed");
     }
 }
 
 export function updateAndRestart() {
-    ElectronLog.log('user quit the app');
+    ElectronLog.log("user quit the app");
     setIsAppQuitting(true);
     autoUpdater.quitAndInstall();
 }
@@ -142,11 +141,11 @@ export function muteUpdateNotification(version: string) {
 async function getDesktopCutoffVersion() {
     try {
         const featureFlags = (
-            await fetch('https://static.ente.io/feature_flags.json')
+            await fetch("https://static.ente.io/feature_flags.json")
         ).json() as GetFeatureFlagResponse;
         return featureFlags.desktopCutoffVersion;
     } catch (e) {
-        logErrorSentry(e, 'failed to get feature flags');
+        logErrorSentry(e, "failed to get feature flags");
         return undefined;
     }
 }
@@ -155,5 +154,5 @@ function showUpdateDialog(
     mainWindow: BrowserWindow,
     updateInfo: AppUpdateInfo
 ) {
-    mainWindow.webContents.send('show-update-dialog', updateInfo);
+    mainWindow.webContents.send("show-update-dialog", updateInfo);
 }

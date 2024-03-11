@@ -1,4 +1,4 @@
-import { webFrame } from 'electron';
+import { webFrame } from "electron";
 
 export const fixHotReloadNext12 = () => {
     webFrame.executeJavaScript(`Object.defineProperty(globalThis, 'WebSocket', {

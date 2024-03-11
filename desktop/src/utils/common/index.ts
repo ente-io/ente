@@ -1,5 +1,5 @@
-import { CustomErrors } from '../../constants/errors';
-import { app } from 'electron';
+import { app } from "electron";
+import { CustomErrors } from "../../constants/errors";
 export const isDev = !app.isPackaged;
 
 export const promiseWithTimeout = async <T>(

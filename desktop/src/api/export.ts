@@ -1,5 +1,5 @@
-import { writeStream } from './../services/fs';
-import * as fs from 'promise-fs';
+import * as fs from "promise-fs";
+import { writeStream } from "./../services/fs";
 
 export const exists = (path: string) => {
     return fs.existsSync(path);

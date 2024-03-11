@@ -1,9 +1,9 @@
-import { keysStore } from '../stores/keys.store';
-import { safeStorageStore } from '../stores/safeStorage.store';
-import { uploadStatusStore } from '../stores/upload.store';
-import { logError } from '../services/logging';
-import { userPreferencesStore } from '../stores/userPreferences.store';
-import { watchStore } from '../stores/watch.store';
+import { logError } from "../services/logging";
+import { keysStore } from "../stores/keys.store";
+import { safeStorageStore } from "../stores/safeStorage.store";
+import { uploadStatusStore } from "../stores/upload.store";
+import { userPreferencesStore } from "../stores/userPreferences.store";
+import { watchStore } from "../stores/watch.store";
 
 export const clearElectronStore = () => {
     try {
@@ -11,9 +11,9 @@ export const clearElectronStore = () => {
         keysStore.clear();
         safeStorageStore.clear();
         watchStore.clear();
-        userPreferencesStore.delete('optOutOfCrashReports');
+        userPreferencesStore.delete("optOutOfCrashReports");
     } catch (e) {
-        logError(e, 'error while clearing electron store');
+        logError(e, "error while clearing electron store");
         throw e;
     }
 };
