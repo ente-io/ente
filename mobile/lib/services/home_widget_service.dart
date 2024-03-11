@@ -18,15 +18,6 @@ class HomeWidgetService {
 
   static final HomeWidgetService instance =
       HomeWidgetService._privateConstructor();
-  Future<int> countHomeWidgets() async {
-    return await hw.HomeWidget.getWidgetCount(
-          name: 'SlideshowWidgetProvider',
-          androidName: 'SlideshowWidgetProvider',
-          qualifiedAndroidName: 'io.ente.photos.SlideshowWidgetProvider',
-          iOSName: 'SlideshowWidget',
-        ) ??
-        0;
-  }
 
   Future<void> initHomeWidget() async {
     final isLoggedIn = Configuration.instance.isLoggedIn();
@@ -125,9 +116,19 @@ class HomeWidgetService {
       _logger.info(
         ">>> SlideshowWidget rendered with size ${width}x$height",
       );
-    } catch (_) {
-      throw Exception("Error rendering widget");
+    } catch (e) {
+      _logger.severe("Error rendering widget", e);
     }
+  }
+
+  Future<int> countHomeWidgets() async {
+    return await hw.HomeWidget.getWidgetCount(
+          name: 'SlideshowWidgetProvider',
+          androidName: 'SlideshowWidgetProvider',
+          qualifiedAndroidName: 'io.ente.photos.SlideshowWidgetProvider',
+          iOSName: 'SlideshowWidget',
+        ) ??
+        0;
   }
 
   Future<void> clearHomeWidget() async {

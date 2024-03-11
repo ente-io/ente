@@ -210,7 +210,7 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
   LocalFileUpdateService.instance.init(preferences);
   SearchService.instance.init();
   StorageBonusService.instance.init(preferences);
-  HomeWidgetService.instance.initHomeWidget();
+  unawaited(HomeWidgetService.instance.initHomeWidget());
   if (Platform.isIOS) {
     // ignore: unawaited_futures
     PushService.instance.init().then((_) {
