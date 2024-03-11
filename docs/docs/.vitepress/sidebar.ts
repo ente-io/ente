@@ -66,6 +66,7 @@ export const sidebar = [
         text: "Auth",
         items: [
             { text: "Introduction", link: "/auth/" },
+            { text: "FAQ", link: "/auth/faq/" },
             {
                 text: "Migration guides",
                 collapsed: true,
