@@ -119,6 +119,14 @@ func main() {
 	if err != nil {
 		log.Fatal("Could not get host name", err)
 	}
+	taskLockingRepo := &repo.TaskLockRepository{DB: db}
+	lockController := &lock.LockController{
+		TaskLockingRepo: taskLockingRepo,
+		HostName:        hostName,
+	}
+	// Note: during boot-up, release any locks that might have been left behind.
+	// This is a safety measure to ensure that no locks are left behind in case of a crash or restart.
+	lockController.ReleaseHostLock()
 
 	var latencyLogger = promauto.NewHistogramVec(prometheus.HistogramOpts{
 		Name:    "museum_method_latency",
@@ -146,7 +154,7 @@ func main() {
 	authRepo := &authenticatorRepo.Repository{DB: db}
 	remoteStoreRepository := &remotestore.Repository{DB: db}
 	dataCleanupRepository := &datacleanup.Repository{DB: db}
-	taskLockingRepo := &repo.TaskLockRepository{DB: db}
+
 	notificationHistoryRepo := &repo.NotificationHistoryRepository{DB: db}
 	queueRepo := &repo.QueueRepository{DB: db}
 	objectRepo := &repo.ObjectRepository{DB: db, QueueRepo: queueRepo}
@@ -172,10 +180,6 @@ func main() {
 	discordController := discord.NewDiscordController(userRepo, hostName, environment)
 	rateLimiter := middleware.NewRateLimitMiddleware(discordController)
 
-	lockController := &lock.LockController{
-		TaskLockingRepo: taskLockingRepo,
-		HostName:        hostName,
-	}
 	emailNotificationCtrl := &email.EmailNotificationController{
 		UserRepo:                userRepo,
 		LockController:          lockController,
@@ -682,7 +686,6 @@ func main() {
 	publicAPI.GET("/offers/black-friday", offerHandler.GetBlackFridayOffers)
 
 	setKnownAPIs(server.Routes())
-	lockController.ReleaseHostLock()
 	setupAndStartBackgroundJobs(objectCleanupController, replicationController3)
 	setupAndStartCrons(
 		userAuthRepo, publicCollectionRepo, twoFactorRepo, passkeysRepo, fileController, taskLockingRepo, emailNotificationCtrl,
