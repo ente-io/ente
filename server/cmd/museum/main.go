@@ -855,14 +855,14 @@ func setupAndStartCrons(userAuthRepo *repo.UserAuthRepository, publicCollectionR
 		}
 	})
 
-	schedule(c, "@every 193s", func() {
+	schedule(c, "@every 2m", func() {
 		fileController.CleanupDeletedFiles()
 	})
 	schedule(c, "@every 101s", func() {
 		embeddingCtrl.CleanupDeletedEmbeddings()
 	})
 
-	schedule(c, "@every 120s", func() {
+	schedule(c, "@every 5m", func() {
 		trashController.DropFileMetadataCron()
 	})
 
