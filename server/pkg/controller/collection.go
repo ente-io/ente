@@ -619,38 +619,6 @@ func (c *CollectionController) GetSharees(ctx *gin.Context, cID int64, userID in
 	return sharees, nil
 }
 
-// Trash deletes a given collection and files exclusive to the collection
-func (c *CollectionController) Trash(ctx *gin.Context, userID int64, cID int64) error {
-	resp, err := c.AccessCtrl.GetCollection(ctx, &access.GetCollectionParams{
-		CollectionID:   cID,
-		ActorUserID:    userID,
-		IncludeDeleted: true,
-		VerifyOwner:    true,
-	})
-	if err != nil {
-		return stacktrace.Propagate(err, "")
-	}
-	if !resp.Collection.AllowDelete() {
-		return stacktrace.Propagate(ente.ErrBadRequest, fmt.Sprintf("deleting albums of type %s is not allowed", resp.Collection.Type))
-	}
-	if resp.Collection.IsDeleted {
-		log.WithFields(log.Fields{
-			"c_id":    cID,
-			"user_id": userID,
-		}).Warning("Collection is already deleted")
-		return nil
-	}
-	err = c.PublicCollectionCtrl.Disable(ctx, cID)
-	if err != nil {
-		return stacktrace.Propagate(err, "failed to disabled public share url")
-	}
-	err = c.CollectionRepo.ScheduleDelete(cID, true)
-	if err != nil {
-		return stacktrace.Propagate(err, "")
-	}
-	return nil
-}
-
 // TrashV3 deletes a given collection and based on user input (TrashCollectionV3Request.KeepFiles as FALSE) , it will move all files present in the underlying collection
 // to trash.
 func (c *CollectionController) TrashV3(ctx *gin.Context, req ente.TrashCollectionV3Request) error {
