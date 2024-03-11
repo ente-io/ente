@@ -13,7 +13,7 @@
 const { withSentryConfig } = require("@sentry/nextjs");
 const cp = require("child_process");
 
-const gitSHA = cp
+const gitSHA = process.env.GIT_SHA || cp
     .execSync("git rev-parse --short HEAD", {
         cwd: __dirname,
         encoding: "utf8",
