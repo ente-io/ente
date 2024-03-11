@@ -35,7 +35,7 @@ func (r *Repository) GetStatus(userID int64) (*ente.TwoFactorRecoveryStatus, err
 }
 
 func (r *Repository) SetPasskeyRecovery(ctx context.Context, userID int64, req *ente.SetPasskeyRecoveryRequest) error {
-	serveEncPasskey, encErr := crypto.Encrypt(req.Secret.String(), r.SecretEncryptionKey)
+	serveEncPasskey, encErr := crypto.Encrypt(req.Secret, r.SecretEncryptionKey)
 	if encErr != nil {
 		return stacktrace.Propagate(encErr, "failed to encrypt passkey secret")
 	}
