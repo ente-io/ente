@@ -729,6 +729,7 @@ Future<List<Uint8List>> preprocessFaceAlignToUint8List(
 /// Preprocesses [imageData] based on [faceLandmarks] to align the faces in the images
 ///
 /// Returns a list of [Num3DInputMatrix] images, one for each face, ready for MobileFaceNet inference
+@Deprecated("Old method used in TensorFlow Lite")
 Future<
     (
       List<Num3DInputMatrix>,
