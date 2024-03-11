@@ -69,6 +69,7 @@ class _TwoFactorAuthenticationPageState
       ),
       borderRadius: BorderRadius.circular(15.0),
     );
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       mainAxisAlignment: MainAxisAlignment.center,
@@ -86,9 +87,10 @@ class _TwoFactorAuthenticationPageState
         Padding(
           padding: const EdgeInsets.fromLTRB(40, 0, 40, 0),
           child: PinPut(
-            fieldsCount: 6,
+            fieldsCount: 6, // Keep fieldsCount as it is for 6 characters
             onSubmit: (String code) {
-              _verifyTwoFactorCode(code);
+              _verifyTwoFactorCode(code.replaceAll(
+                  " ", "")); // Remove spaces before verification
             },
             onChanged: (String pin) {
               setState(() {
@@ -108,6 +110,9 @@ class _TwoFactorAuthenticationPageState
               border: InputBorder.none,
               counterText: '',
             ),
+            // Customize how the pin is displayed
+            separator: " ", // Add a space as separator
+            textStyle: TextStyle(fontSize: 24), // Adjust font size if needed
             autofocus: true,
           ),
         ),
@@ -119,7 +124,8 @@ class _TwoFactorAuthenticationPageState
           child: OutlinedButton(
             onPressed: _code.length == 6
                 ? () async {
-                    await _verifyTwoFactorCode(_code);
+                    await _verifyTwoFactorCode(_code.replaceAll(
+                        " ", "")); // Remove spaces before verification
                   }
                 : null,
             child: Text(l10n.verify),
