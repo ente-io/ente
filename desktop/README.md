@@ -12,9 +12,9 @@ To know more about Ente, see [our main README](../README.md) or visit
 
 > [!CAUTION]
 >
-> We moved a few things around when switching to a monorepo recently, so this
-> folder might not build with the instructions below. Hang tight, we're on it,
-> will fix things if.
+> We moved a few things around when switching to a monorepo recently, and the
+> desktop app is not currently building with these instructions below. Hang
+> tight, we're on it, and will fix soon.
 
 Fetch submodules
 
@@ -31,7 +31,7 @@ yarn install
 Run the app
 
 ```sh
-yarn start
+yarn dev
 ```
 
 To recompile automatically using electron-reload, run this in a separate
@@ -39,4 +39,11 @@ terminal:
 
 ```bash
 yarn watch
+```
+
+`yarn dev` is handy during development, but if you wish, you can also create a
+binary for your platform by using
+
+```sh
+yarn build
 ```
