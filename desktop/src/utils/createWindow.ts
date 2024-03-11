@@ -11,7 +11,7 @@ import { isPlatform } from "./common/platform";
 
 export async function createWindow(): Promise<BrowserWindow> {
     const appImgPath = isDev
-        ? "build/window-icon.png"
+        ? "resources/window-icon.png"
         : path.join(process.resourcesPath, "window-icon.png");
     const appIcon = nativeImage.createFromPath(appImgPath);
     // Create the browser window.
@@ -40,7 +40,7 @@ export async function createWindow(): Promise<BrowserWindow> {
     }
 
     if (isDev) {
-        splash.loadFile(`../build/splash.html`);
+        splash.loadFile(`../resources/splash.html`);
         mainWindow.loadURL(PROD_HOST_URL);
         // Open the DevTools.
         mainWindow.webContents.openDevTools();
@@ -53,7 +53,7 @@ export async function createWindow(): Promise<BrowserWindow> {
     mainWindow.webContents.on("did-fail-load", () => {
         splash.close();
         isDev
-            ? mainWindow.loadFile(`../../build/error.html`)
+            ? mainWindow.loadFile(`../resources/error.html`)
             : splash.loadURL(
                   `file://${path.join(process.resourcesPath, "error.html")}`
               );

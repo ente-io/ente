@@ -74,7 +74,7 @@ const IMAGE_MAGICK_THUMBNAIL_GENERATE_COMMAND_TEMPLATE = [
 
 function getImageMagickStaticPath() {
     return isDev
-        ? "build/image-magick"
+        ? "resources/image-magick"
         : path.join(process.resourcesPath, "image-magick");
 }
 

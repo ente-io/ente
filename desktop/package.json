@@ -4,14 +4,14 @@
     "private": true,
     "description": "Desktop client for Ente Photos",
     "author": "Ente <code@ente.io>",
-    "main": "app/main.js",
+    "main": "build/app/main.js",
     "scripts": {
-        "build": "yarn build-renderer && yarn build-main && electron-builder",
-        "build-main": "tsc",
-        "build-renderer": "cd ../web && yarn install && yarn build:photos",
+        "build": "mkdir -p build && yarn build-renderer && yarn build-main",
+        "build-main": "tsc && electron-builder --config.compression=store",
+        "build-renderer": "cd ../web && yarn install && yarn build:photos && cd ../desktop/build && rm -f out && ln -sf ../../web/apps/photos/out",
         "dev": "concurrently \"yarn dev-main\" \"yarn dev-renderer\"",
-        "dev-main": "yarn build-main && electron app/main.js",
-        "dev-renderer": "cd ../web && yarn install && yarn dev:photos",
+        "dev-main": "tsc && electron build/app/main.js",
+        "dev-renderer": "cd ../web && yarn install && yarn dev:photos && cd ../desktop/build && rm -f out && ln -sf ../../web/apps/photos/out",
         "postinstall": "electron-builder install-app-deps",
         "lint": "yarn prettier --check . && eslint \"src/**/*.ts\"",
         "lint-fix": "yarn prettier --write . && eslint --fix .",
@@ -97,7 +97,7 @@
                     ]
                 }
             ],
-            "icon": "./build/icon.icns",
+            "icon": "./resources/icon.icns",
             "category": "Photography"
         },
         "mac": {
@@ -114,7 +114,7 @@
         "afterSign": "electron-builder-notarize",
         "extraFiles": [
             {
-                "from": "build",
+                "from": "resources",
                 "to": "resources",
                 "filter": [
                     "**/*"
@@ -127,14 +127,10 @@
             "node_modules/ffmpeg-static/package.json"
         ],
         "files": [
-            "app/**/*",
+            "build/app/**/*",
             {
-                "from": "../web/apps/photos",
-                "to": "ui",
-                "filter": [
-                    "!**/*",
-                    "out/**/*"
-                ]
+                "from": "build/out",
+                "to": "out"
             }
         ]
     },

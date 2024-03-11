@@ -11,8 +11,10 @@ node_modules/
 .env
 .env.*.local
 
-# tsc transpiles src/**/*.ts and emits the generated JS into app/
-app/
+# Generated code during build
+# - tsc transpiles src/**/*.ts and emits the generated JS into build/app
+# - The out dir from the photos web app is symlinked to build/out
+build/
 
 # electron-builder
 dist/
