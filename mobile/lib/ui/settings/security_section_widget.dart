@@ -1,5 +1,4 @@
 import 'dart:async';
-import "dart:convert";
 import "dart:typed_data";
 
 import 'package:flutter/material.dart';
@@ -27,7 +26,6 @@ import "package:photos/utils/crypto_util.dart";
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/navigation_util.dart";
 import "package:photos/utils/toast_util.dart";
-import "package:uuid/uuid.dart";
 
 class SecuritySectionWidget extends StatefulWidget {
   const SecuritySectionWidget({Key? key}) : super(key: key);
