@@ -548,6 +548,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Delete shared album?"),
         "deleteSharedAlbumDialogBody": MessageLookupByLibrary.simpleMessage(
             "The album will be deleted for everyone\n\nYou will lose access to shared photos in this album that are owned by others"),
+        "descriptions": MessageLookupByLibrary.simpleMessage("Descriptions"),
         "deselectAll": MessageLookupByLibrary.simpleMessage("Deselect all"),
         "designedToOutlive":
             MessageLookupByLibrary.simpleMessage("Designed to outlive"),
@@ -797,8 +798,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "Kindly help us with this information"),
         "language": MessageLookupByLibrary.simpleMessage("Language"),
         "lastUpdated": MessageLookupByLibrary.simpleMessage("Last updated"),
-        "launchPasskeyUrlAgain":
-            MessageLookupByLibrary.simpleMessage("Launch passkey URL again"),
         "leave": MessageLookupByLibrary.simpleMessage("Leave"),
         "leaveAlbum": MessageLookupByLibrary.simpleMessage("Leave album"),
         "leaveFamily": MessageLookupByLibrary.simpleMessage("Leave family"),
@@ -848,6 +847,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "locationName": MessageLookupByLibrary.simpleMessage("Location name"),
         "locationTagFeatureDescription": MessageLookupByLibrary.simpleMessage(
             "A location tag groups all photos that were taken within some radius of a photo"),
+        "locations": MessageLookupByLibrary.simpleMessage("Locations"),
         "lockButtonLabel": MessageLookupByLibrary.simpleMessage("Lock"),
         "lockScreenEnablePreSteps": MessageLookupByLibrary.simpleMessage(
             "To enable lockscreen, please setup device passcode or screen lock in your system settings."),

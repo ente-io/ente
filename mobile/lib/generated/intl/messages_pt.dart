@@ -558,6 +558,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Excluir álbum compartilhado?"),
         "deleteSharedAlbumDialogBody": MessageLookupByLibrary.simpleMessage(
             "O álbum será apagado para todos\n\nVocê perderá o acesso a fotos compartilhadas neste álbum que pertencem aos outros"),
+        "descriptions": MessageLookupByLibrary.simpleMessage("Descriptions"),
         "deselectAll": MessageLookupByLibrary.simpleMessage("Desmarcar todos"),
         "designedToOutlive":
             MessageLookupByLibrary.simpleMessage("Feito para ter logenvidade"),
@@ -820,8 +821,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "language": MessageLookupByLibrary.simpleMessage("Idioma"),
         "lastUpdated":
             MessageLookupByLibrary.simpleMessage("Última atualização"),
-        "launchPasskeyUrlAgain": MessageLookupByLibrary.simpleMessage(
-            "Iniciar a URL de chave de acesso novamente"),
         "leave": MessageLookupByLibrary.simpleMessage("Sair"),
         "leaveAlbum": MessageLookupByLibrary.simpleMessage("Sair do álbum"),
         "leaveFamily": MessageLookupByLibrary.simpleMessage("Sair da família"),
@@ -873,6 +872,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "locationName": MessageLookupByLibrary.simpleMessage("Nome do Local"),
         "locationTagFeatureDescription": MessageLookupByLibrary.simpleMessage(
             "Uma tag em grupo de todas as fotos que foram tiradas dentro de algum raio de uma foto"),
+        "locations": MessageLookupByLibrary.simpleMessage("Locations"),
         "lockButtonLabel": MessageLookupByLibrary.simpleMessage("Bloquear"),
         "lockScreenEnablePreSteps": MessageLookupByLibrary.simpleMessage(
             "Para ativar o bloqueio de tela, por favor ative um método de autenticação nas configurações do sistema do seu dispositivo."),

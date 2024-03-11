@@ -465,6 +465,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "deleteSharedAlbum": MessageLookupByLibrary.simpleMessage("要删除共享相册吗？"),
         "deleteSharedAlbumDialogBody": MessageLookupByLibrary.simpleMessage(
             "将为所有人删除相册\n\n您将无法访问此相册中他人拥有的共享照片"),
+        "descriptions": MessageLookupByLibrary.simpleMessage("Descriptions"),
         "deselectAll": MessageLookupByLibrary.simpleMessage("取消全选"),
         "designedToOutlive": MessageLookupByLibrary.simpleMessage("经久耐用"),
         "details": MessageLookupByLibrary.simpleMessage("详情"),
@@ -673,8 +674,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("请帮助我们了解这个信息"),
         "language": MessageLookupByLibrary.simpleMessage("语言"),
         "lastUpdated": MessageLookupByLibrary.simpleMessage("最后更新"),
-        "launchPasskeyUrlAgain":
-            MessageLookupByLibrary.simpleMessage("再次启动 通行密钥 URL"),
         "leave": MessageLookupByLibrary.simpleMessage("离开"),
         "leaveAlbum": MessageLookupByLibrary.simpleMessage("离开相册"),
         "leaveFamily": MessageLookupByLibrary.simpleMessage("离开家庭计划"),
@@ -717,6 +716,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "locationName": MessageLookupByLibrary.simpleMessage("地点名称"),
         "locationTagFeatureDescription":
             MessageLookupByLibrary.simpleMessage("位置标签将在照片的某个半径范围内拍摄的所有照片进行分组"),
+        "locations": MessageLookupByLibrary.simpleMessage("Locations"),
         "lockButtonLabel": MessageLookupByLibrary.simpleMessage("锁定"),
         "lockScreenEnablePreSteps":
             MessageLookupByLibrary.simpleMessage("要启用锁屏，请在系统设置中设置设备密码或屏幕锁定。"),

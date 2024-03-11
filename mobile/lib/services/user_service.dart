@@ -912,11 +912,14 @@ class UserService {
       return;
     }
     try {
+      final secretValue = type == TwoFactorType.passkey
+          ? utf8.decode(base64.decode(secret))
+          : secret;
       final response = await _dio.post(
         _config.getHttpEndpoint() + "/users/two-factor/remove",
         data: {
           "sessionID": sessionID,
-          "secret": utf8.decode(base64.decode(secret)),
+          "secret": secretValue,
           "twoFactorType": twoFactorTypeToString(type),
         },
       );

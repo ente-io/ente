@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:ente_auth/core/configuration.dart';
@@ -21,6 +22,8 @@ import 'package:ente_auth/utils/dialog_util.dart';
 import 'package:ente_auth/utils/navigation_util.dart';
 import 'package:ente_auth/utils/toast_util.dart';
 import 'package:flutter/material.dart';
+import 'package:logging/logging.dart';
+import 'package:uuid/uuid.dart';
 
 class SecuritySectionWidget extends StatefulWidget {
   const SecuritySectionWidget({Key? key}) : super(key: key);
@@ -32,6 +35,7 @@ class SecuritySectionWidget extends StatefulWidget {
 class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
   final _config = Configuration.instance;
   late bool _hasLoggedIn;
+  final Logger _logger = Logger('SecuritySectionWidget');
 
   @override
   void initState() {
@@ -75,7 +79,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
             pressedColor: getEnteColorScheme(context).fillFaint,
             trailingIcon: Icons.chevron_right_outlined,
             trailingIconIsMuted: true,
-            onTap: () => PasskeyService.instance.openPasskeyPage(context),
+            onTap: () async => await onPasskeyClick(context),
           ),
         sectionOptionSpacing,
         MenuItemWidget(
@@ -157,6 +161,32 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
     return Column(
       children: children,
     );
+  }
+
+  Future<void> onPasskeyClick(BuildContext buildContext) async {
+    try {
+      final isPassKeyResetEnabled =
+          await PasskeyService.instance.isPasskeyRecoveryEnabled();
+      if (!isPassKeyResetEnabled) {
+        final Uint8List recoveryKey = Configuration.instance.getRecoveryKey();
+        final resetSecret = const Uuid().v4().toString();
+        final bytes = utf8.encode(resetSecret);
+        final base64Str = base64.encode(bytes);
+        final encryptionResult = CryptoUtil.encryptSync(
+          CryptoUtil.base642bin(base64Str),
+          recoveryKey,
+        );
+        await PasskeyService.instance.configurePasskeyRecovery(
+          resetSecret,
+          CryptoUtil.bin2base64(encryptionResult.encryptedData!),
+          CryptoUtil.bin2base64(encryptionResult.nonce!),
+        );
+      }
+      PasskeyService.instance.openPasskeyPage(buildContext).ignore();
+    } catch (e, s) {
+      _logger.severe("failed to open passkey page", e, s);
+      await showGenericErrorDialog(context: context);
+    }
   }
 
   Future<void> updateEmailMFA(bool enableEmailMFA) async {

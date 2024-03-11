@@ -564,6 +564,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Gedeeld album verwijderen?"),
         "deleteSharedAlbumDialogBody": MessageLookupByLibrary.simpleMessage(
             "Het album wordt verwijderd voor iedereen\n\nJe verliest de toegang tot gedeelde foto\'s in dit album die eigendom zijn van anderen"),
+        "descriptions": MessageLookupByLibrary.simpleMessage("Descriptions"),
         "deselectAll":
             MessageLookupByLibrary.simpleMessage("Alles deselecteren"),
         "designedToOutlive": MessageLookupByLibrary.simpleMessage(
@@ -880,6 +881,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "locationName": MessageLookupByLibrary.simpleMessage("Locatie naam"),
         "locationTagFeatureDescription": MessageLookupByLibrary.simpleMessage(
             "Een locatie tag groept alle foto\'s die binnen een bepaalde straal van een foto zijn genomen"),
+        "locations": MessageLookupByLibrary.simpleMessage("Locations"),
         "lockButtonLabel": MessageLookupByLibrary.simpleMessage("Vergrendel"),
         "lockScreenEnablePreSteps": MessageLookupByLibrary.simpleMessage(
             "Om vergrendelscherm in te schakelen, moet u een toegangscode of schermvergrendeling instellen in uw systeeminstellingen."),
