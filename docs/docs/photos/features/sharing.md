@@ -1,6 +1,7 @@
 ---
 title: Sharing
-description: Ente allows you to share albums and collaborate with your loved ones
+description:
+    Ente allows you to share albums and collaborate with your loved ones
 ---
 
 # Sharing
@@ -36,4 +37,5 @@ same album - someone can be added as a `Collaborator`, while someone else as a
 
 If you wish to collect photos from folks who are not Ente, you can do so with
 our Links. Simply tick the box that says "Allow uploads", and anyone who has
-access to the link will be able to add photos to your album. [Read more](https://ente.io/blog/collect-photos/)
+access to the link will be able to add photos to your album.
+[Read more](https://ente.io/blog/collect-photos/)
