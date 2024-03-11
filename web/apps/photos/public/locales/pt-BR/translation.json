@@ -41,8 +41,6 @@
     "REFERRAL_CODE_HINT": "Como você ouviu sobre o Ente? (opcional)",
     "REFERRAL_INFO": "Não rastreamos instalações do aplicativo. Seria útil se você nos contasse onde nos encontrou!",
     "PASSPHRASE_MATCH_ERROR": "As senhas não coincidem",
-    "CONSOLE_WARNING_STOP": "PARAR!",
-    "CONSOLE_WARNING_DESC": "Este é um recurso de navegador destinado a desenvolvedores. Por favor, não copie e cole o código não confirmado aqui.",
     "CREATE_COLLECTION": "Novo álbum",
     "ENTER_ALBUM_NAME": "Nome do álbum",
     "CLOSE_OPTION": "Fechar (Esc)",

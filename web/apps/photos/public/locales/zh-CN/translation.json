@@ -41,8 +41,6 @@
     "REFERRAL_CODE_HINT": "您是如何知道Ente的？ （可选的）",
     "REFERRAL_INFO": "我们不跟踪应用程序安装情况，如果您告诉我们您是在哪里找到我们的，将会有所帮助！",
     "PASSPHRASE_MATCH_ERROR": "两次输入的密码不一致",
-    "CONSOLE_WARNING_STOP": "停止！",
-    "CONSOLE_WARNING_DESC": "这是专为开发人员设计的浏览器功能。 请不要在此处复制粘贴未经验证的代码。",
     "CREATE_COLLECTION": "新建相册",
     "ENTER_ALBUM_NAME": "相册名称",
     "CLOSE_OPTION": "关闭 (或按Esc键)",

@@ -41,8 +41,6 @@
     "REFERRAL_CODE_HINT": "Wie hast du von Ente erfahren? (optional)",
     "REFERRAL_INFO": "Wir tracken keine App-Installationen. Es würde uns jedoch helfen, wenn du uns mitteilst, wie du von uns erfahren hast!",
     "PASSPHRASE_MATCH_ERROR": "Die Passwörter stimmen nicht überein",
-    "CONSOLE_WARNING_STOP": "STOPP!",
-    "CONSOLE_WARNING_DESC": "Dies ist ein Browser-Feature für Entwickler. Bitte füge hier keinen ungeprüften Code ein.",
     "CREATE_COLLECTION": "Neues Album",
     "ENTER_ALBUM_NAME": "Albumname",
     "CLOSE_OPTION": "Schließen (Esc)",
