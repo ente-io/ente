@@ -257,7 +257,7 @@ const PasskeysFlow = () => {
                             {t("TRY_AGAIN")}
                         </EnteButton>
                         <EnteButton
-                            onClick={() => {}}
+                            href="/passkeys/flow/recover"
                             fullWidth
                             style={{
                                 marginTop: "1rem",
