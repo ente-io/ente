@@ -1178,5 +1178,7 @@
   "changeLocationOfSelectedItems": "Standort der gewählten Elemente ändern?",
   "editsToLocationWillOnlyBeSeenWithinEnte": "Änderungen des Standorts werden nur in ente sichtbar sein",
   "cleanUncategorized": "Unkategorisiert leeren",
-  "joinDiscord": "Join Discord"
+  "joinDiscord": "Join Discord",
+  "locations": "Locations",
+  "descriptions": "Descriptions"
 }

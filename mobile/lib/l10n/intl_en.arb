@@ -1197,5 +1197,7 @@
   "deviceNotFound": "Device not found",
   "castInstruction": "Visit cast.ente.io on the device you want to pair.\n\nEnter the code below to play the album on your TV.",
   "deviceCodeHint": "Enter the code",
-  "joinDiscord": "Join Discord"
+  "joinDiscord": "Join Discord",
+  "locations": "Locations",
+  "descriptions": "Descriptions"
 }
