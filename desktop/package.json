@@ -2,18 +2,18 @@
     "name": "ente",
     "version": "1.6.63",
     "private": true,
-    "description": "Desktop client for ente.io",
-    "author": "ente <code@ente.io>",
+    "description": "Desktop client for Ente Photos",
+    "author": "Ente <code@ente.io>",
     "main": "app/main.js",
     "scripts": {
         "build": "yarn build-renderer && yarn build-main",
-        "build-main": "yarn install && tsc",
+        "build-main": "tsc",
         "build-renderer": "cd ../web && yarn install && yarn build:photos",
         "dev": "concurrently \"yarn dev-main\" \"yarn dev-renderer\"",
         "dev-main": "yarn build-main && electron app/main.js",
         "dev-renderer": "cd ../web && yarn install && yarn dev:photos",
         "postinstall": "electron-builder install-app-deps",
-        "lint": "yarn prettier --check . && eslint \"src/**/*.{js,jsx,ts,tsx}\"",
+        "lint": "yarn prettier --check . && eslint \"src/**/*.ts\"",
         "lint-fix": "yarn prettier --write . && eslint --fix .",
         "test-release": "cross-env IS_TEST_RELEASE=true yarn build && electron-builder --config.compression=store",
         "watch": "tsc -w"
@@ -131,7 +131,7 @@
         "files": [
             "app/**/*",
             {
-                "from": "ui/apps/photos",
+                "from": "../web/apps/photos",
                 "to": "ui",
                 "filter": [
                     "!**/*",
