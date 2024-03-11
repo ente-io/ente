@@ -574,7 +574,7 @@ func (c *CollectionController) getDiff(cID int64, sinceTime int64, limit int, lo
 			logger.
 				WithField("last_file_version", lastFileVersion).
 				WithField("filtered_diff_len", filteredDiffLen).
-				Info("returning less than limit files in diff")
+				Info(fmt.Sprintf("less than limit (%d) files in diff", limit))
 		}
 		return filteredDiffs, true, nil
 	}
@@ -583,7 +583,7 @@ func (c *CollectionController) getDiff(cID int64, sinceTime int64, limit int, lo
 	logger.
 		WithField("last_file_version", lastFileVersion).
 		WithField("count", len(diff)).
-		Info(fmt.Sprintf("more than %d files with same version", limit))
+		Info(fmt.Sprintf("more than limit (%d) files with same version", limit))
 	if err != nil {
 		return nil, false, stacktrace.Propagate(err, "")
 	}
