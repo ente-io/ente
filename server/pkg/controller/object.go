@@ -64,7 +64,7 @@ func (c *ObjectController) RemoveComplianceHolds() {
 		c.LockController.ReleaseLock(RemoveComplianceHoldsLock)
 	}()
 
-	items, err := c.QueueRepo.GetItemsReadyForDeletion(repo.RemoveComplianceHoldQueue, 1000)
+	items, err := c.QueueRepo.GetItemsReadyForDeletion(repo.RemoveComplianceHoldQueue, 1500)
 	if err != nil {
 		log.WithError(err).Error("Failed to fetch items from queue")
 		return
