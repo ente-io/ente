@@ -6,7 +6,7 @@
     "author": "Ente <code@ente.io>",
     "main": "app/main.js",
     "scripts": {
-        "build": "yarn build-renderer && yarn build-main",
+        "build": "yarn build-renderer && yarn build-main && electron-builder",
         "build-main": "tsc",
         "build-renderer": "cd ../web && yarn install && yarn build:photos",
         "dev": "concurrently \"yarn dev-main\" \"yarn dev-renderer\"",
@@ -15,7 +15,6 @@
         "postinstall": "electron-builder install-app-deps",
         "lint": "yarn prettier --check . && eslint \"src/**/*.ts\"",
         "lint-fix": "yarn prettier --write . && eslint --fix .",
-        "test-release": "cross-env IS_TEST_RELEASE=true yarn build && electron-builder --config.compression=store",
         "watch": "tsc -w"
     },
     "dependencies": {
@@ -49,7 +48,6 @@
         "@typescript-eslint/eslint-plugin": "^5.28.0",
         "@typescript-eslint/parser": "^5.28.0",
         "concurrently": "^7.0.0",
-        "cross-env": "^7.0.3",
         "electron": "^25.8.4",
         "electron-builder": "^24.6.4",
         "electron-builder-notarize": "^1.2.0",

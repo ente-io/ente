@@ -40,3 +40,9 @@ terminal:
 ```bash
 yarn watch
 ```
+
+To build a binary for your platform, run
+
+```sh
+yarn build
+```
