@@ -286,8 +286,8 @@ class ImageMlIsolate {
         _resetInactivityTimer();
       } else {
         _logger.info(
-        'Clustering Isolate has been inactive for ${_inactivityDuration.inSeconds} seconds with no tasks running. Killing isolate.',
-      );
+          'Clustering Isolate has been inactive for ${_inactivityDuration.inSeconds} seconds with no tasks running. Killing isolate.',
+        );
         dispose();
       }
     });
