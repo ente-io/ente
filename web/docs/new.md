@@ -1,4 +1,4 @@
-## Welcome!
+# Welcome!
 
 If you're new to this sort of stuff or coming back to it after mobile/backend
 development, here is a recommended workflow:
@@ -14,7 +14,7 @@ development, here is a recommended workflow:
 
 That's it. Enjoy coding!
 
-### Yarn
+## Yarn
 
 Note that we use Yarn classic
 

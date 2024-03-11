@@ -1,4 +1,4 @@
-## Developer docs
+# Developer docs
 
 If you just want to run ente locally or develop on it, you can do
 

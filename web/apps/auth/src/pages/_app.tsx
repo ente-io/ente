@@ -94,16 +94,6 @@ export default function App(props: EnteAppProps) {
     const setUserOffline = () => setOffline(true);
 
     useEffect(() => {
-        if (isI18nReady) {
-            console.log(
-                `%c${t("CONSOLE_WARNING_STOP")}`,
-                "color: red; font-size: 52px;",
-            );
-            console.log(`%c${t("CONSOLE_WARNING_DESC")}`, "font-size: 20px;");
-        }
-    }, [isI18nReady]);
-
-    useEffect(() => {
         router.events.on("routeChangeStart", (url: string) => {
             const newPathname = url.split("?")[0] as PAGES;
             if (window.location.pathname !== newPathname) {
