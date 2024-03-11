@@ -82,7 +82,7 @@ export const verifyTwoFactor = async (code: string, sessionID: string) => {
 
 export const recoverTwoFactor = async (
     sessionID: string,
-    twoFactorType: TwoFactorType,
+    twoFactorType: TwoFactorType = TwoFactorType.TOTP,
 ) => {
     const resp = await HTTPService.get(`${ENDPOINT}/users/two-factor/recover`, {
         sessionID,
@@ -94,7 +94,7 @@ export const recoverTwoFactor = async (
 export const removeTwoFactor = async (
     sessionID: string,
     secret: string,
-    twoFactorType: TwoFactorType,
+    twoFactorType: TwoFactorType = TwoFactorType.TOTP,
 ) => {
     const resp = await HTTPService.post(`${ENDPOINT}/users/two-factor/remove`, {
         sessionID,
