@@ -61,7 +61,7 @@ extension SectionTypeExtensions on SectionType {
       case SectionType.moment:
         return S.of(context).moments;
       case SectionType.location:
-        return S.of(context).location;
+        return S.of(context).locations;
       case SectionType.contacts:
         return S.of(context).contacts;
       case SectionType.album:
