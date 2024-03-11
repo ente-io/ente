@@ -210,7 +210,9 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
   LocalFileUpdateService.instance.init(preferences);
   SearchService.instance.init();
   StorageBonusService.instance.init(preferences);
-  if (!isBackground && Platform.isAndroid) {
+  if (!isBackground &&
+      Platform.isAndroid &&
+      await HomeWidgetService.instance.countHomeWidgets() == 0) {
     unawaited(HomeWidgetService.instance.initHomeWidget());
   }
 
