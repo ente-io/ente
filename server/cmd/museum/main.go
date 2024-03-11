@@ -862,7 +862,7 @@ func setupAndStartCrons(userAuthRepo *repo.UserAuthRepository, publicCollectionR
 		embeddingCtrl.CleanupDeletedEmbeddings()
 	})
 
-	schedule(c, "@every 5m", func() {
+	schedule(c, "@every 10m", func() {
 		trashController.DropFileMetadataCron()
 	})
 
