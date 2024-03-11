@@ -14,7 +14,7 @@ type Passkey struct {
 var MaxPasskeys = 10
 
 type SetPasskeyRecoveryRequest struct {
-	Secret uuid.UUID `json:"secret" binding:"required"`
+	Secret string `json:"secret" binding:"required"`
 	// The UserSecretCipher has SkipSecret encrypted with the user's recoveryKey
 	// If the user sends the correct UserSecretCipher, we can be sure that the user has the recoveryKey,
 	// and we can allow the user to recover their MFA.
