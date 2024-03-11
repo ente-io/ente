@@ -504,7 +504,6 @@ func main() {
 	privateAPI.GET("/collections/v2/diff", collectionHandler.GetDiffV2)
 	privateAPI.GET("/collections/file", collectionHandler.GetFile)
 	privateAPI.GET("/collections/sharees", collectionHandler.GetSharees)
-	privateAPI.DELETE("/collections/v2/:collectionID", collectionHandler.Trash)
 	privateAPI.DELETE("/collections/v3/:collectionID", collectionHandler.TrashV3)
 	privateAPI.POST("/collections/rename", collectionHandler.Rename)
 	privateAPI.PUT("/collections/magic-metadata", collectionHandler.PrivateMagicMetadataUpdate)
