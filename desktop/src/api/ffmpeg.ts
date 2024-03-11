@@ -1,8 +1,8 @@
-import { ipcRenderer } from 'electron';
-import { existsSync } from 'fs';
-import { writeStream } from '../services/fs';
-import { logError } from '../services/logging';
-import { ElectronFile } from '../types';
+import { ipcRenderer } from "electron";
+import { existsSync } from "fs";
+import { writeStream } from "../services/fs";
+import { logError } from "../services/logging";
+import { ElectronFile } from "../types";
 
 export async function runFFmpegCmd(
     cmd: string[],
@@ -15,7 +15,7 @@ export async function runFFmpegCmd(
     try {
         if (!existsSync(inputFile.path)) {
             const tempFilePath = await ipcRenderer.invoke(
-                'get-temp-file-path',
+                "get-temp-file-path",
                 inputFile.name
             );
             await writeStream(tempFilePath, await inputFile.stream());
@@ -25,7 +25,7 @@ export async function runFFmpegCmd(
             inputFilePath = inputFile.path;
         }
         const outputFileData = await ipcRenderer.invoke(
-            'run-ffmpeg-cmd',
+            "run-ffmpeg-cmd",
             cmd,
             inputFilePath,
             outputFileName,
@@ -35,9 +35,9 @@ export async function runFFmpegCmd(
     } finally {
         if (createdTempInputFile) {
             try {
-                await ipcRenderer.invoke('remove-temp-file', inputFilePath);
+                await ipcRenderer.invoke("remove-temp-file", inputFilePath);
             } catch (e) {
-                logError(e, 'failed to deleteTempFile');
+                logError(e, "failed to deleteTempFile");
             }
         }
     }

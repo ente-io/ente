@@ -1,11 +1,11 @@
-import { FILE_STREAM_CHUNK_SIZE } from '../config';
-import path from 'path';
-import * as fs from 'promise-fs';
-import { ElectronFile } from '../types';
-import StreamZip from 'node-stream-zip';
-import { Readable } from 'stream';
-import { logError } from './logging';
-import { existsSync } from 'fs';
+import { existsSync } from "fs";
+import StreamZip from "node-stream-zip";
+import path from "path";
+import * as fs from "promise-fs";
+import { Readable } from "stream";
+import { FILE_STREAM_CHUNK_SIZE } from "../config";
+import { ElectronFile } from "../types";
+import { logError } from "./logging";
 
 // https://stackoverflow.com/a/63111390
 export const getDirFilePaths = async (dirPath: string) => {
@@ -25,7 +25,7 @@ export const getDirFilePaths = async (dirPath: string) => {
 };
 
 export const getFileStream = async (filePath: string) => {
-    const file = await fs.open(filePath, 'r');
+    const file = await fs.open(filePath, "r");
     let offset = 0;
     const readableStream = new ReadableStream<Uint8Array>({
         async pull(controller) {
@@ -66,20 +66,20 @@ export async function getElectronFile(filePath: string): Promise<ElectronFile> {
         lastModified: fileStats.mtime.valueOf(),
         stream: async () => {
             if (!existsSync(filePath)) {
-                throw new Error('electronFile does not exist');
+                throw new Error("electronFile does not exist");
             }
             return await getFileStream(filePath);
         },
         blob: async () => {
             if (!existsSync(filePath)) {
-                throw new Error('electronFile does not exist');
+                throw new Error("electronFile does not exist");
             }
             const blob = await fs.readFile(filePath);
             return new Blob([new Uint8Array(blob)]);
         },
         arrayBuffer: async () => {
             if (!existsSync(filePath)) {
-                throw new Error('electronFile does not exist');
+                throw new Error("electronFile does not exist");
             }
             const blob = await fs.readFile(filePath);
             return new Uint8Array(blob);
@@ -113,7 +113,7 @@ export const getZipFileStream = async (
     };
     let resolveObj: (value?: any) => void = null;
     let rejectObj: (reason?: any) => void = null;
-    stream.on('readable', () => {
+    stream.on("readable", () => {
         try {
             if (resolveObj) {
                 inProgress.current = true;
@@ -128,7 +128,7 @@ export const getZipFileStream = async (
             rejectObj(e);
         }
     });
-    stream.on('end', () => {
+    stream.on("end", () => {
         try {
             done.current = true;
             if (resolveObj && !inProgress.current) {
@@ -139,7 +139,7 @@ export const getZipFileStream = async (
             rejectObj(e);
         }
     });
-    stream.on('error', (e) => {
+    stream.on("error", (e) => {
         try {
             done.current = true;
             if (rejectObj) {
@@ -175,7 +175,7 @@ export const getZipFileStream = async (
                     controller.close();
                 }
             } catch (e) {
-                logError(e, 'readableStream pull failed');
+                logError(e, "readableStream pull failed");
                 controller.close();
             }
         },
@@ -190,14 +190,14 @@ export async function isFolder(dirPath: string) {
     } catch (e) {
         let err = e;
         // if code is defined, it's an error from fs.stat
-        if (typeof e.code !== 'undefined') {
+        if (typeof e.code !== "undefined") {
             // ENOENT means the file does not exist
-            if (e.code === 'ENOENT') {
+            if (e.code === "ENOENT") {
                 return false;
             }
             err = Error(`fs error code: ${e.code}`);
         }
-        logError(err, 'isFolder failed');
+        logError(err, "isFolder failed");
         return false;
     }
 }
@@ -219,7 +219,7 @@ export const convertBrowserStreamToNode = (
                 return;
             }
         } catch (e) {
-            rs.emit('error', e);
+            rs.emit("error", e);
         }
     };
 
@@ -232,15 +232,15 @@ export async function writeNodeStream(
 ) {
     const writeable = fs.createWriteStream(filePath);
 
-    fileStream.on('error', (error) => {
+    fileStream.on("error", (error) => {
         writeable.destroy(error); // Close the writable stream with an error
     });
 
     fileStream.pipe(writeable);
 
     await new Promise((resolve, reject) => {
-        writeable.on('finish', resolve);
-        writeable.on('error', async (e) => {
+        writeable.on("finish", resolve);
+        writeable.on("error", async (e) => {
             if (existsSync(filePath)) {
                 await fs.unlink(filePath);
             }
@@ -259,9 +259,9 @@ export async function writeStream(
 
 export async function readTextFile(filePath: string) {
     if (!existsSync(filePath)) {
-        throw new Error('File does not exist');
+        throw new Error("File does not exist");
     }
-    return await fs.readFile(filePath, 'utf-8');
+    return await fs.readFile(filePath, "utf-8");
 }
 
 export async function moveFile(
@@ -269,10 +269,10 @@ export async function moveFile(
     destinationPath: string
 ): Promise<void> {
     if (!existsSync(sourcePath)) {
-        throw new Error('File does not exist');
+        throw new Error("File does not exist");
     }
     if (existsSync(destinationPath)) {
-        throw new Error('Destination file already exists');
+        throw new Error("Destination file already exists");
     }
     // check if destination folder exists
     const destinationFolder = path.dirname(destinationPath);
@@ -287,19 +287,19 @@ export async function deleteFolder(folderPath: string): Promise<void> {
         return;
     }
     if (!fs.statSync(folderPath).isDirectory()) {
-        throw new Error('Path is not a folder');
+        throw new Error("Path is not a folder");
     }
     // check if folder is empty
     const files = await fs.readdir(folderPath);
     if (files.length > 0) {
-        throw new Error('Folder is not empty');
+        throw new Error("Folder is not empty");
     }
     await fs.rmdir(folderPath);
 }
 
 export async function rename(oldPath: string, newPath: string) {
     if (!existsSync(oldPath)) {
-        throw new Error('Path does not exist');
+        throw new Error("Path does not exist");
     }
     await fs.rename(oldPath, newPath);
 }
@@ -309,7 +309,7 @@ export function deleteFile(filePath: string): void {
         return;
     }
     if (!fs.statSync(filePath).isFile()) {
-        throw new Error('Path is not a file');
+        throw new Error("Path is not a file");
     }
     fs.rmSync(filePath);
 }

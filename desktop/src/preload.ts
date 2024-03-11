@@ -1,71 +1,71 @@
 import {
+    deleteDiskCache,
+    getCacheDirectory,
+    openDiskCache,
+    setCustomCacheDirectory,
+} from "./api/cache";
+import { computeImageEmbedding, computeTextEmbedding } from "./api/clip";
+import {
+    getAppVersion,
+    getPlatform,
+    getSentryUserID,
+    logToDisk,
+    openDirectory,
+    openLogDirectory,
+    selectDirectory,
+    updateOptOutOfCrashReports,
+} from "./api/common";
+import { clearElectronStore } from "./api/electronStore";
+import {
+    checkExistsAndCreateDir,
+    exists,
+    saveFileToDisk,
+    saveStreamToDisk,
+} from "./api/export";
+import { runFFmpegCmd } from "./api/ffmpeg";
+import {
+    deleteFile,
+    deleteFolder,
+    getDirFiles,
+    isFolder,
+    moveFile,
+    readTextFile,
+    rename,
+} from "./api/fs";
+import { convertToJPEG, generateImageThumbnail } from "./api/imageProcessor";
+import { getEncryptionKey, setEncryptionKey } from "./api/safeStorage";
+import {
+    muteUpdateNotification,
+    registerForegroundEventListener,
     registerUpdateEventListener,
     reloadWindow,
     sendNotification,
-    updateAndRestart,
     skipAppUpdate,
-    muteUpdateNotification,
-    registerForegroundEventListener,
-} from './api/system';
+    updateAndRestart,
+} from "./api/system";
 import {
+    getElectronFilesFromGoogleZip,
+    getPendingUploads,
+    setToUploadCollection,
+    setToUploadFiles,
     showUploadDirsDialog,
     showUploadFilesDialog,
     showUploadZipDialog,
-    getPendingUploads,
-    setToUploadFiles,
-    getElectronFilesFromGoogleZip,
-    setToUploadCollection,
-} from './api/upload';
+} from "./api/upload";
 import {
-    registerWatcherFunctions,
     addWatchMapping,
-    removeWatchMapping,
-    updateWatchMappingSyncedFiles,
-    updateWatchMappingIgnoredFiles,
     getWatchMappings,
-} from './api/watch';
-import { getEncryptionKey, setEncryptionKey } from './api/safeStorage';
-import { clearElectronStore } from './api/electronStore';
+    registerWatcherFunctions,
+    removeWatchMapping,
+    updateWatchMappingIgnoredFiles,
+    updateWatchMappingSyncedFiles,
+} from "./api/watch";
+import { setupLogging } from "./utils/logging";
+import { fixHotReloadNext12 } from "./utils/preload";
 import {
-    openDiskCache,
-    deleteDiskCache,
-    getCacheDirectory,
-    setCustomCacheDirectory,
-} from './api/cache';
-import {
-    checkExistsAndCreateDir,
-    saveStreamToDisk,
-    saveFileToDisk,
-    exists,
-} from './api/export';
-import {
-    selectDirectory,
-    logToDisk,
-    openLogDirectory,
-    getSentryUserID,
-    getAppVersion,
-    openDirectory,
-    updateOptOutOfCrashReports,
-    getPlatform,
-} from './api/common';
-import { fixHotReloadNext12 } from './utils/preload';
-import {
-    isFolder,
-    getDirFiles,
-    moveFile,
-    deleteFolder,
-    rename,
-    readTextFile,
-    deleteFile,
-} from './api/fs';
-import { convertToJPEG, generateImageThumbnail } from './api/imageProcessor';
-import { setupLogging } from './utils/logging';
-import {
-    setupRendererProcessStatsLogger,
     logRendererProcessMemoryUsage,
-} from './utils/processStats';
-import { runFFmpegCmd } from './api/ffmpeg';
-import { computeImageEmbedding, computeTextEmbedding } from './api/clip';
+    setupRendererProcessStatsLogger,
+} from "./utils/processStats";
 
 fixHotReloadNext12();
 setupLogging();
@@ -73,7 +73,7 @@ setupRendererProcessStatsLogger();
 
 const windowObject: any = window;
 
-windowObject['ElectronAPIs'] = {
+windowObject["ElectronAPIs"] = {
     exists,
     checkExistsAndCreateDir,
     saveStreamToDisk,

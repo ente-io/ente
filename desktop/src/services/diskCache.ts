@@ -1,10 +1,10 @@
-import DiskLRUService from '../services/diskLRU';
-import crypto from 'crypto';
-import { existsSync, unlink, rename, stat } from 'promise-fs';
-import path from 'path';
-import { LimitedCache } from '../types/cache';
-import { logError } from './logging';
-import { getFileStream, writeStream } from './fs';
+import crypto from "crypto";
+import path from "path";
+import { existsSync, rename, stat, unlink } from "promise-fs";
+import DiskLRUService from "../services/diskLRU";
+import { LimitedCache } from "../types/cache";
+import { getFileStream, writeStream } from "./fs";
+import { logError } from "./logging";
 
 const DEFAULT_CACHE_LIMIT = 1000 * 1000 * 1000; // 1GB
 
@@ -33,11 +33,11 @@ export class DiskCache implements LimitedCache {
             if (sizeInBytes && fileStats.size !== sizeInBytes) {
                 logError(
                     Error(),
-                    'Cache key exists but size does not match. Deleting cache key.'
+                    "Cache key exists but size does not match. Deleting cache key."
                 );
                 unlink(cachePath).catch((e) => {
-                    if (e.code === 'ENOENT') return;
-                    logError(e, 'Failed to delete cache key');
+                    if (e.code === "ENOENT") return;
+                    logError(e, "Failed to delete cache key");
                 });
                 return undefined;
             }
@@ -54,11 +54,11 @@ export class DiskCache implements LimitedCache {
                 if (sizeInBytes && fileStats.size !== sizeInBytes) {
                     logError(
                         Error(),
-                        'Old cache key exists but size does not match. Deleting cache key.'
+                        "Old cache key exists but size does not match. Deleting cache key."
                     );
                     unlink(oldCachePath).catch((e) => {
-                        if (e.code === 'ENOENT') return;
-                        logError(e, 'Failed to delete cache key');
+                        if (e.code === "ENOENT") return;
+                        logError(e, "Failed to delete cache key");
                     });
                     return undefined;
                 }
@@ -83,9 +83,9 @@ export class DiskCache implements LimitedCache {
 function getOldAssetCachePath(cacheDir: string, cacheKey: string) {
     // hashing the key to prevent illegal filenames
     const cacheKeyHash = crypto
-        .createHash('sha256')
+        .createHash("sha256")
         .update(cacheKey)
-        .digest('hex');
+        .digest("hex");
     return path.join(cacheDir, cacheKeyHash);
 }
 
@@ -93,6 +93,6 @@ async function migrateOldCacheKey(oldCacheKey: string, newCacheKey: string) {
     try {
         await rename(oldCacheKey, newCacheKey);
     } catch (e) {
-        logError(e, 'Failed to move cache key to new cache key');
+        logError(e, "Failed to move cache key to new cache key");
     }
 }

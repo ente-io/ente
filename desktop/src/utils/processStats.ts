@@ -1,6 +1,6 @@
-import ElectronLog from 'electron-log';
-import { webFrame } from 'electron/renderer';
-import { convertBytesToHumanReadable } from './logging';
+import ElectronLog from "electron-log";
+import { webFrame } from "electron/renderer";
+import { convertBytesToHumanReadable } from "./logging";
 
 const LOGGING_INTERVAL_IN_MICROSECONDS = 30 * 1000; // 30 seconds
 
@@ -23,7 +23,7 @@ async function logMainProcessStats() {
         process.getHeapStatistics()
     );
 
-    ElectronLog.log('main process stats', {
+    ElectronLog.log("main process stats", {
         processMemoryInfo,
         heapStatistics,
         cpuUsage,
@@ -69,7 +69,7 @@ async function logSpikeMainMemoryUsage() {
             process.getHeapStatistics()
         );
 
-        ElectronLog.log('reporting main memory usage spike', {
+        ElectronLog.log("reporting main memory usage spike", {
             currentProcessMemoryInfo: normalizedCurrentProcessMemoryInfo,
             previousProcessMemoryInfo: normalizedPreviousProcessMemoryInfo,
             heapStatistics,
@@ -124,7 +124,7 @@ async function logSpikeRendererMemoryUsage() {
             process.getHeapStatistics()
         );
 
-        ElectronLog.log('reporting renderer memory usage spike', {
+        ElectronLog.log("reporting renderer memory usage spike", {
             currentProcessMemoryInfo: normalizedCurrentProcessMemoryInfo,
             previousProcessMemoryInfo: normalizedPreviousProcessMemoryInfo,
             heapStatistics,
@@ -146,7 +146,7 @@ async function logRendererProcessStats() {
     const processMemoryInfo = await getNormalizedProcessMemoryInfo(
         await process.getProcessMemoryInfo()
     );
-    ElectronLog.log('renderer process stats', {
+    ElectronLog.log("renderer process stats", {
         blinkMemoryInfo,
         heapStatistics,
         processMemoryInfo,
@@ -177,7 +177,7 @@ export async function logRendererProcessMemoryUsage(message: string) {
         processMemoryInfo.residentSet ?? 0
     );
     ElectronLog.log(
-        'renderer ProcessMemory',
+        "renderer ProcessMemory",
         message,
         convertBytesToHumanReadable(processMemory * 1024)
     );
