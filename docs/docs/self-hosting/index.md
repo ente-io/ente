@@ -10,9 +10,9 @@ the same code we use for our own cloud service.
 
 > [!TIP]
 >
-> To get some context, you might find our [blog
-> post](https://ente.io/blog/open-sourcing-our-server/) announcing the open
-> sourcing of our server useful.
+> To get some context, you might find our
+> [blog post](https://ente.io/blog/open-sourcing-our-server/) announcing the
+> open sourcing of our server useful.
 
 ## Getting started
 
@@ -39,24 +39,24 @@ will be connecting to the server running on your local machine at
 localhost:8080.
 
 For the mobile apps, you don't even need to build, and can install normal Ente
-apps and configure them to use your [custom self-hosted
-server](guides/custom-server).
+apps and configure them to use your
+[custom self-hosted server](guides/custom-server).
 
 > If you want to build from source, see the instructions
-[here](guides/mobile-build).
+> [here](guides/mobile-build).
 
 ## Next steps
 
-* More details about the server are in its
-  [README](https://github.com/ente-io/ente/tree/main/server#readme)
+-   More details about the server are in its
+    [README](https://github.com/ente-io/ente/tree/main/server#readme)
 
-* More details about running the server (with or without Docker) are in
-  [RUNNING](https://github.com/ente-io/ente/blob/main/server/RUNNING.md)
+-   More details about running the server (with or without Docker) are in
+    [RUNNING](https://github.com/ente-io/ente/blob/main/server/RUNNING.md)
 
-* If you have questions around self-hosting that are not answered in any of the
-  existing documentation, you can ask in our [GitHub
-  Discussions](https://github.com/ente-io/ente/discussions). **Please remember
-  to search first if the query has been already asked and answered.**
+-   If you have questions around self-hosting that are not answered in any of
+    the existing documentation, you can ask in our
+    [GitHub Discussions](https://github.com/ente-io/ente/discussions). **Please
+    remember to search first if the query has been already asked and answered.**
 
 ## Contributing!
 

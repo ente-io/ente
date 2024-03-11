@@ -13,7 +13,6 @@ changes in a few minutes after your pull request is merged.
 
 ## Running locally
 
-
 The above workflow is great since it doesn't require you to setup anything on
 your local machine. But if you plan on contributing frequently, you might find
 it easier to run things locally.

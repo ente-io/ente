@@ -1,13 +1,15 @@
 ---
 title: Building mobile apps
-description: Connecting to your custom self-hosted server when building the Ente mobile apps from source
+description:
+    Connecting to your custom self-hosted server when building the Ente mobile
+    apps from source
 ---
 
 # Mobile: Build and connect to self-hosted server
 
-The up to date instructions to build the mobile apps are in the [Ente
-Photos](https://github.com/ente-io/ente/tree/main/mobile#readme) and [Ente
-Auth](https://github.com/ente-io/ente/tree/main/auth#readme) READMEs. When
+The up to date instructions to build the mobile apps are in the
+[Ente Photos](https://github.com/ente-io/ente/tree/main/mobile#readme) and
+[Ente Auth](https://github.com/ente-io/ente/tree/main/auth#readme) READMEs. When
 building or running, you can use the
 
 ```sh

@@ -84,8 +84,14 @@ export const sidebar = [
                 text: "Guides",
                 items: [
                     { text: "Introduction", link: "/self-hosting/guides/" },
-                    { text: "Configure custom server", link: "/self-hosting/guides/custom-server/" },
-                    { text: "Mobile build", link: "/self-hosting/guides/mobile-build" },
+                    {
+                        text: "Configure custom server",
+                        link: "/self-hosting/guides/custom-server/",
+                    },
+                    {
+                        text: "Mobile build",
+                        link: "/self-hosting/guides/mobile-build",
+                    },
                     {
                         text: "System requirements",
                         link: "/self-hosting/guides/system-requirements",
