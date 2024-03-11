@@ -27,6 +27,7 @@ import 'package:photos/services/collections_service.dart';
 import "package:photos/services/entity_service.dart";
 import 'package:photos/services/favorites_service.dart';
 import 'package:photos/services/feature_flag_service.dart';
+import 'package:photos/services/home_widget_service.dart';
 import 'package:photos/services/local_file_update_service.dart';
 import 'package:photos/services/local_sync_service.dart';
 import "package:photos/services/location_service.dart";
@@ -46,7 +47,6 @@ import 'package:photos/ui/tools/app_lock.dart';
 import 'package:photos/ui/tools/lock_screen.dart';
 import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/file_uploader.dart';
-import "package:photos/utils/home_widget_util.dart";
 import 'package:photos/utils/local_settings.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -110,8 +110,8 @@ ThemeMode _themeMode(AdaptiveThemeMode? savedThemeMode) {
 Future<void> _homeWidgetSync() async {
   if (!Platform.isAndroid) return;
   try {
-    if (await countHomeWidgets() != 0) {
-      await initHomeWidget();
+    if (await HomeWidgetService.instance.countHomeWidgets() != 0) {
+      await HomeWidgetService.instance.initHomeWidget();
     }
   } catch (e, s) {
     _logger.severe("Error in initSlideshowWidget", e, s);
@@ -210,6 +210,7 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
   LocalFileUpdateService.instance.init(preferences);
   SearchService.instance.init();
   StorageBonusService.instance.init(preferences);
+  HomeWidgetService.instance.initHomeWidget();
   if (Platform.isIOS) {
     // ignore: unawaited_futures
     PushService.instance.init().then((_) {
