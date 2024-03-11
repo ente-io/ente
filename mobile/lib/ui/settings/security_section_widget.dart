@@ -243,15 +243,14 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
       if (!isPassKeyResetEnabled) {
         final Uint8List recoveryKey =
             await UserService.instance.getOrCreateRecoveryKey(context);
-        final resetSecret = const Uuid().v4().toString();
-        final bytes = utf8.encode(resetSecret);
-        final base64Str = base64.encode(bytes);
+        final resetKey = CryptoUtil.generateKey();
+        final resetKeyBase64 = CryptoUtil.bin2base64(resetKey);
         final encryptionResult = CryptoUtil.encryptSync(
-          CryptoUtil.base642bin(base64Str),
+          resetKey,
           recoveryKey,
         );
         await PasskeyService.instance.configurePasskeyRecovery(
-          resetSecret,
+          resetKeyBase64,
           CryptoUtil.bin2base64(encryptionResult.encryptedData!),
           CryptoUtil.bin2base64(encryptionResult.nonce!),
         );
