@@ -17,6 +17,7 @@ import "package:photos/models/collection/collection_items.dart";
 import 'package:photos/services/app_lifecycle_service.dart';
 import "package:photos/services/collections_service.dart";
 import "package:photos/services/favorites_service.dart";
+import "package:photos/services/home_widget_service.dart";
 import "package:photos/services/machine_learning/machine_learning_controller.dart";
 import 'package:photos/services/sync_service.dart';
 import 'package:photos/ui/tabs/home_widget.dart';
@@ -85,13 +86,17 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
     if (collection == null) {
       return;
     }
+    unawaited(HomeWidgetService.instance.initHomeWidget());
+
     final thumbnail = await CollectionsService.instance.getCover(collection);
-    await routeToPage(
-      context,
-      CollectionPage(
-        CollectionWithThumbnail(
-          collection,
-          thumbnail,
+    unawaited(
+      routeToPage(
+        context,
+        CollectionPage(
+          CollectionWithThumbnail(
+            collection,
+            thumbnail,
+          ),
         ),
       ),
     );
