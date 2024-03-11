@@ -69,7 +69,7 @@ extension SectionTypeExtensions on SectionType {
       case SectionType.fileTypesAndExtension:
         return S.of(context).fileTypes;
       case SectionType.fileCaption:
-        return S.of(context).photoDescriptions;
+        return S.of(context).descriptions;
     }
   }
 

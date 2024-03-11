@@ -1117,5 +1117,6 @@
   "changeLocationOfSelectedItems": "Change location of selected items?",
   "editsToLocationWillOnlyBeSeenWithinEnte": "Edits to location will only be seen within Ente",
   "joinDiscord": "Join Discord",
-  "locations": "Locations"
+  "locations": "Locations",
+  "descriptions": "Descriptions"
 }

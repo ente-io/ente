@@ -1193,5 +1193,6 @@
   "castInstruction": "Bezoek cast.ente.io op het apparaat dat u wilt koppelen.\n\nVoer de code hieronder in om het album op uw TV af te spelen.",
   "deviceCodeHint": "Voer de code in",
   "joinDiscord": "Join Discord",
-  "locations": "Locations"
+  "locations": "Locations",
+  "descriptions": "Descriptions"
 }

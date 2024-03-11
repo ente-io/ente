@@ -1197,5 +1197,6 @@
   "castInstruction": "Visite cast.ente.io no dispositivo que você deseja parear.\n\ndigite o código abaixo para reproduzir o álbum em sua TV.",
   "deviceCodeHint": "Insira o código",
   "joinDiscord": "Junte-se ao Discord",
-  "locations": "Locations"
+  "locations": "Locations",
+  "descriptions": "Descriptions"
 }

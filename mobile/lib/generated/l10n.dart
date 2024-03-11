@@ -6919,6 +6919,16 @@ class S {
     );
   }
 
+  /// `Descriptions`
+  String get descriptions {
+    return Intl.message(
+      'Descriptions',
+      name: 'descriptions',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `File types and names`
   String get fileTypesAndNames {
     return Intl.message(

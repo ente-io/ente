@@ -1198,5 +1198,6 @@
   "castInstruction": "Visit cast.ente.io on the device you want to pair.\n\nEnter the code below to play the album on your TV.",
   "deviceCodeHint": "Enter the code",
   "joinDiscord": "Join Discord",
-  "locations": "Locations"
+  "locations": "Locations",
+  "descriptions": "Descriptions"
 }
