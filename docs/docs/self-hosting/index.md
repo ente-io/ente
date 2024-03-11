@@ -40,7 +40,7 @@ localhost:8080.
 
 For the mobile apps, you don't even need to build, and can install normal Ente
 apps and configure them to use your
-[custom self-hosted server](guides/custom-server).
+[custom self-hosted server](guides/custom-server/).
 
 > If you want to build from source, see the instructions
 > [here](guides/mobile-build).
