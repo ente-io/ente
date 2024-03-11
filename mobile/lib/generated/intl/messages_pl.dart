@@ -78,6 +78,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Inna, niewymieniona wyżej przyczyna"),
         "deleteRequestSLAText": MessageLookupByLibrary.simpleMessage(
             "Twoje żądanie zostanie przetworzone w ciągu 72 godzin."),
+        "descriptions": MessageLookupByLibrary.simpleMessage("Descriptions"),
         "doThisLater": MessageLookupByLibrary.simpleMessage("Spróbuj później"),
         "editLocation": MessageLookupByLibrary.simpleMessage("Edit location"),
         "editsToLocationWillOnlyBeSeenWithinEnte":
@@ -116,6 +117,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "joinDiscord": MessageLookupByLibrary.simpleMessage("Join Discord"),
         "kindlyHelpUsWithThisInformation":
             MessageLookupByLibrary.simpleMessage("Pomóż nam z tą informacją"),
+        "locations": MessageLookupByLibrary.simpleMessage("Locations"),
         "logInLabel": MessageLookupByLibrary.simpleMessage("Zaloguj się"),
         "moderateStrength": MessageLookupByLibrary.simpleMessage("Umiarkowana"),
         "modifyYourQueryOrTrySearchingFor":

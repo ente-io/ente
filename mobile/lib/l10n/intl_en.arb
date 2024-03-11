@@ -1187,6 +1187,7 @@
   "changeLocationOfSelectedItems": "Change location of selected items?",
   "editsToLocationWillOnlyBeSeenWithinEnte": "Edits to location will only be seen within Ente",
   "cleanUncategorized": "Clean Uncategorized",
+  "cleanUncategorizedDescription": "Remove all files from Uncategorized that are present in other albums",
   "waitingForVerification": "Waiting for verification...",
   "launchPasskeyUrlAgain": "Launch passkey URL again",
   "passkey": "Passkey",

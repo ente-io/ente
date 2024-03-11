@@ -29,12 +29,14 @@ class MessageLookup extends MessageLookupByLibrary {
         "contacts": MessageLookupByLibrary.simpleMessage("Contacts"),
         "deleteConfirmDialogBody": MessageLookupByLibrary.simpleMessage(
             "This account is linked to other ente apps, if you use any.\\n\\nYour uploaded data, across all ente apps, will be scheduled for deletion, and your account will be permanently deleted."),
+        "descriptions": MessageLookupByLibrary.simpleMessage("Descriptions"),
         "editLocation": MessageLookupByLibrary.simpleMessage("Edit location"),
         "editsToLocationWillOnlyBeSeenWithinEnte":
             MessageLookupByLibrary.simpleMessage(
                 "Edits to location will only be seen within Ente"),
         "fileTypes": MessageLookupByLibrary.simpleMessage("File types"),
         "joinDiscord": MessageLookupByLibrary.simpleMessage("Join Discord"),
+        "locations": MessageLookupByLibrary.simpleMessage("Locations"),
         "modifyYourQueryOrTrySearchingFor":
             MessageLookupByLibrary.simpleMessage(
                 "Modify your query, or try searching for"),
