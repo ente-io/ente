@@ -80,7 +80,6 @@ export interface ElectronAPIsType {
     ) => void;
     updateAndRestart: () => void;
     skipAppUpdate: (version: string) => void;
-    getSentryUserID: () => Promise<string>;
     getAppVersion: () => Promise<string>;
     runFFmpegCmd: (
         cmd: string[],
