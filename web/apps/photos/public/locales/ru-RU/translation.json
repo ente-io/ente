@@ -588,7 +588,6 @@
     "DOWNLOADING_COLLECTION": "Загрузка {{name}}",
     "DOWNLOAD_FAILED": "Загрузка не удалась",
     "DOWNLOAD_PROGRESS": "{{progress.current}} / {{progress.total}} файлов",
-    "CRASH_REPORTING": "Отчеты об ошибках",
     "CHRISTMAS": "Рождество",
     "CHRISTMAS_EVE": "Канун Рождества",
     "NEW_YEAR": "Новый год",

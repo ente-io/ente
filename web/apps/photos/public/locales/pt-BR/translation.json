@@ -588,7 +588,6 @@
     "DOWNLOADING_COLLECTION": "Transferindo {{name}}",
     "DOWNLOAD_FAILED": "Falha ao baixar",
     "DOWNLOAD_PROGRESS": "{{progress.current}} / {{progress.total}} arquivos",
-    "CRASH_REPORTING": "Relatório de falhas",
     "CHRISTMAS": "Natal",
     "CHRISTMAS_EVE": "Véspera de Natal",
     "NEW_YEAR": "Ano Novo",
