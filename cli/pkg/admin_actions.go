@@ -24,7 +24,7 @@ func (c *ClICtrl) GetUserId(ctx context.Context, params model.AdminActionForUser
 	return nil
 }
 
-func (c *ClICtrl) UpdateFreeStorage(ctx context.Context, params model.AdminActionForUser) error {
+func (c *ClICtrl) UpdateFreeStorage(ctx context.Context, params model.AdminActionForUser, noLimit bool) error {
 	accountCtx, err := c.buildAdminContext(ctx, params.AdminEmail)
 	if err != nil {
 		return err
@@ -32,6 +32,16 @@ func (c *ClICtrl) UpdateFreeStorage(ctx context.Context, params model.AdminActio
 	userDetails, err := c.Client.GetUserIdFromEmail(accountCtx, params.UserEmail)
 	if err != nil {
 		return err
+	}
+	if noLimit {
+		// set storage to 100TB and expiry to + 100 years
+		err := c.Client.UpdateFreePlanSub(accountCtx, userDetails, 100*1024*1024*1024*1024, time.Now().AddDate(100, 0, 0).UnixMicro())
+		if err != nil {
+			return err
+		} else {
+			fmt.Println("Successfully updated storage and expiry date for user")
+		}
+		return nil
 	}
 	storageSize, err := internal.GetStorageSize("Enter a storage size (e.g.'5MB', '10GB', '2Tb'): ")
 	if err != nil {

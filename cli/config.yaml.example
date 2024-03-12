@@ -4,7 +4,7 @@
 # - $ENTE_CLI_CONFIG_PATH/config.yaml
 
 endpoint:
-  api: "https://api.ente.io"
+  api: "http://localhost:8080"
 
 log:
- http: false # log http requests and responses
+ http: false # log status code & time taken by requests
