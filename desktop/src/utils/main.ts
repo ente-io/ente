@@ -4,6 +4,7 @@ import os from "os";
 import path from "path";
 import { existsSync } from "promise-fs";
 import util from "util";
+import { rendererURL } from "../main";
 import { setupAutoUpdater } from "../services/appUpdater";
 import autoLauncher from "../services/autoLauncher";
 import { getHideDockIconPreference } from "../services/userPreference";
@@ -43,7 +44,7 @@ export function handleDownloads(mainWindow: BrowserWindow) {
 
 export function handleExternalLinks(mainWindow: BrowserWindow) {
     mainWindow.webContents.setWindowOpenHandler(({ url }) => {
-        if (!url.startsWith("next://app")) {
+        if (!url.startsWith(rendererURL)) {
             require("electron").shell.openExternal(url);
             return { action: "deny" };
         } else {

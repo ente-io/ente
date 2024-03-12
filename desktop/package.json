@@ -11,13 +11,13 @@
         "build-main:quick": "tsc && electron-builder --config.compression=store",
         "build-renderer": "cd ../web && yarn install && yarn build:photos && cd ../desktop && rm -f out && ln -sf ../web/apps/photos/out",
         "build:quick": "yarn build-renderer && yarn build-main:quick",
-        "dev": "concurrently \"yarn dev-main\" \"yarn dev-renderer\"",
+        "dev": "concurrently --names 'main,rndr,tscw' \"yarn dev-main\" \"yarn dev-renderer\" \"yarn dev-main-watch\"",
         "dev-main": "tsc && electron app/main.js",
+        "dev-main-watch": "tsc --watch --preserveWatchOutput",
         "dev-renderer": "cd ../web && yarn install && yarn dev:photos",
         "postinstall": "electron-builder install-app-deps",
         "lint": "yarn prettier --check . && eslint \"src/**/*.ts\"",
-        "lint-fix": "yarn prettier --write . && eslint --fix .",
-        "watch": "tsc -w"
+        "lint-fix": "yarn prettier --write . && eslint --fix ."
     },
     "dependencies": {
         "any-shell-escape": "^0.1.1",

@@ -57,6 +57,11 @@ const setupMainHotReload = () => {
 };
 
 /**
+ * The URL where the renderer HTML is being served from.
+ */
+export const rendererURL = "next://app";
+
+/**
  * next-electron-server allows up to directly use the output of `next build` in
  * production mode and `next dev` in development mode, whilst keeping the rest
  * of our code the same.
@@ -70,7 +75,7 @@ const setupMainHotReload = () => {
  * https://github.com/HaNdTriX/next-electron-server/issues/5
  */
 const setupRendererServer = () => {
-    serveNextAt("next://app");
+    serveNextAt(rendererURL);
 };
 
 setupMainHotReload();
