@@ -588,7 +588,6 @@
     "DOWNLOADING_COLLECTION": "正在下载 {{name}}",
     "DOWNLOAD_FAILED": "下载失败",
     "DOWNLOAD_PROGRESS": "{{progress.current}} / {{progress.total}} 个文件",
-    "CRASH_REPORTING": "崩溃报告",
     "CHRISTMAS": "圣诞",
     "CHRISTMAS_EVE": "平安夜",
     "NEW_YEAR": "新年",
