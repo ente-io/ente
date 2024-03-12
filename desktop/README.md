@@ -10,12 +10,6 @@ To know more about Ente, see [our main README](../README.md) or visit
 
 ## Building from source
 
-> [!CAUTION]
->
-> We moved a few things around when switching to a monorepo recently, and the
-> desktop app is not currently building with these instructions below. Hang
-> tight, we're on it, and will fix soon.
-
 Fetch submodules
 
 ```sh
@@ -28,22 +22,32 @@ Install dependencies
 yarn install
 ```
 
-Run the app
+Create a binary for your platform
+
+```sh
+yarn build
+```
+
+## Developing
+
+Instead of building, you can run the app in development mode
 
 ```sh
 yarn dev
 ```
 
-To recompile automatically using electron-reload, run this in a separate
+> [!CAUTION]
+>
+> `yarn dev` is currently not working (we'll fix soon). If you just want to
+> build from source and use the generated binary, use `yarn build` as described
+> above.
+
+This'll launch a development server to serve the pages loaded by the renderer
+process, and will hot reload on changes.
+
+If you also want hot reload for the main process, run this in a separate
 terminal:
 
-```bash
-yarn watch
-```
-
-`yarn dev` is handy during development, but if you wish, you can also create a
-binary for your platform by using
-
 ```sh
-yarn build
+yarn watch
 ```

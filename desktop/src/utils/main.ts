@@ -79,6 +79,10 @@ export async function setupMainMenu(mainWindow: BrowserWindow) {
 }
 
 export function setupMainHotReload() {
+    // Hot reload the main process if anything changes in the source directory
+    // that we're running from. In particular, this gets triggered when `yarn
+    // watch` rebuilds JS files in the `app/` directory when we change the TS
+    // files in the `src/` directory.
     if (isDev) {
         electronReload(__dirname, {});
     }
