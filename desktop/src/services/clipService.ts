@@ -103,7 +103,7 @@ export async function getClipImageModelPath(type: "ggml" | "onnx") {
                 log.info("clip image model not found, downloading");
                 imageModelDownloadInProgress = downloadModel(
                     modelSavePath,
-                    IMAGE_MODEL_DOWNLOAD_URL[type]
+                    IMAGE_MODEL_DOWNLOAD_URL[type],
                 );
                 await imageModelDownloadInProgress;
             } else {
@@ -111,11 +111,11 @@ export async function getClipImageModelPath(type: "ggml" | "onnx") {
                 if (localFileSize !== IMAGE_MODEL_SIZE_IN_BYTES[type]) {
                     log.info(
                         "clip image model size mismatch, downloading again got:",
-                        localFileSize
+                        localFileSize,
                     );
                     imageModelDownloadInProgress = downloadModel(
                         modelSavePath,
-                        IMAGE_MODEL_DOWNLOAD_URL[type]
+                        IMAGE_MODEL_DOWNLOAD_URL[type],
                     );
                     await imageModelDownloadInProgress;
                 }
@@ -150,7 +150,7 @@ export async function getClipTextModelPath(type: "ggml" | "onnx") {
             if (localFileSize !== TEXT_MODEL_SIZE_IN_BYTES[type]) {
                 log.info(
                     "clip text model size mismatch, downloading again got:",
-                    localFileSize
+                    localFileSize,
                 );
                 textModelDownloadInProgress = true;
                 downloadModel(modelSavePath, TEXT_MODEL_DOWNLOAD_URL[type])
@@ -212,7 +212,7 @@ function getTokenizer() {
 
 export async function computeImageEmbedding(
     model: Model,
-    inputFilePath: string
+    inputFilePath: string,
 ): Promise<Float32Array> {
     if (!existsSync(inputFilePath)) {
         throw Error(CustomErrors.INVALID_FILE_PATH);
@@ -227,7 +227,7 @@ export async function computeImageEmbedding(
 }
 
 export async function computeGGMLImageEmbedding(
-    inputFilePath: string
+    inputFilePath: string,
 ): Promise<Float32Array> {
     try {
         const clipModelPath = await getClipImageModelPath("ggml");
@@ -263,7 +263,7 @@ export async function computeGGMLImageEmbedding(
 }
 
 export async function computeONNXImageEmbedding(
-    inputFilePath: string
+    inputFilePath: string,
 ): Promise<Float32Array> {
     try {
         const imageSession = await getOnnxImageSession();
@@ -277,7 +277,7 @@ export async function computeONNXImageEmbedding(
         log.info(
             `onnx image embedding time: ${Date.now() - t1} ms (prep:${
                 t2 - t1
-            } ms, extraction: ${Date.now() - t2} ms)`
+            } ms, extraction: ${Date.now() - t2} ms)`,
         );
         const imageEmbedding = results["output"].data; // Float32Array
         return normalizeEmbedding(imageEmbedding);
@@ -289,7 +289,7 @@ export async function computeONNXImageEmbedding(
 
 export async function computeTextEmbedding(
     model: Model,
-    text: string
+    text: string,
 ): Promise<Float32Array> {
     if (model === Model.GGML_CLIP) {
         return await computeGGMLTextEmbedding(text);
@@ -299,7 +299,7 @@ export async function computeTextEmbedding(
 }
 
 export async function computeGGMLTextEmbedding(
-    text: string
+    text: string,
 ): Promise<Float32Array> {
     try {
         const clipModelPath = await getClipTextModelPath("ggml");
@@ -339,7 +339,7 @@ export async function computeGGMLTextEmbedding(
 }
 
 export async function computeONNXTextEmbedding(
-    text: string
+    text: string,
 ): Promise<Float32Array> {
     try {
         const imageSession = await getOnnxTextSession();
@@ -354,7 +354,7 @@ export async function computeONNXTextEmbedding(
         log.info(
             `onnx text embedding time: ${Date.now() - t1} ms (prep:${
                 t2 - t1
-            } ms, extraction: ${Date.now() - t2} ms)`
+            } ms, extraction: ${Date.now() - t2} ms)`,
         );
         const textEmbedding = results["output"].data; // Float32Array
         return normalizeEmbedding(textEmbedding);
@@ -444,7 +444,7 @@ async function getRGBData(inputFilePath: string) {
 
 export const computeClipMatchScore = async (
     imageEmbedding: Float32Array,
-    textEmbedding: Float32Array
+    textEmbedding: Float32Array,
 ) => {
     if (imageEmbedding.length !== textEmbedding.length) {
         throw Error("imageEmbedding and textEmbedding length mismatch");

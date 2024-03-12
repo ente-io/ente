@@ -1,13 +1,12 @@
 import { app, BrowserWindow, nativeImage } from "electron";
 import ElectronLog from "electron-log";
 import * as path from "path";
-import { isAppQuitting } from "../main";
+import { isAppQuitting, rendererURL } from "../main";
 import autoLauncher from "../services/autoLauncher";
 import { logErrorSentry } from "../services/sentry";
 import { getHideDockIconPreference } from "../services/userPreference";
 import { isDev } from "./common";
 import { isPlatform } from "./common/platform";
-import { PROD_HOST_URL } from "./main";
 
 export async function createWindow(): Promise<BrowserWindow> {
     const appImgPath = isDev
@@ -41,21 +40,21 @@ export async function createWindow(): Promise<BrowserWindow> {
 
     if (isDev) {
         splash.loadFile(`../resources/splash.html`);
-        mainWindow.loadURL(PROD_HOST_URL);
+        mainWindow.loadURL(rendererURL);
         // Open the DevTools.
         mainWindow.webContents.openDevTools();
     } else {
         splash.loadURL(
-            `file://${path.join(process.resourcesPath, "splash.html")}`
+            `file://${path.join(process.resourcesPath, "splash.html")}`,
         );
-        mainWindow.loadURL(PROD_HOST_URL);
+        mainWindow.loadURL(rendererURL);
     }
     mainWindow.webContents.on("did-fail-load", () => {
         splash.close();
         isDev
             ? mainWindow.loadFile(`../resources/error.html`)
             : splash.loadURL(
-                  `file://${path.join(process.resourcesPath, "error.html")}`
+                  `file://${path.join(process.resourcesPath, "error.html")}`,
               );
         mainWindow.maximize();
         mainWindow.show();
@@ -76,7 +75,7 @@ export async function createWindow(): Promise<BrowserWindow> {
         logErrorSentry(
             Error("render-process-gone"),
             "webContents event render-process-gone",
-            { details }
+            { details },
         );
         ElectronLog.log("webContents event render-process-gone", details);
     });

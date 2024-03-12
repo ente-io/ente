@@ -5,7 +5,7 @@ import { isExecError, parseExecError } from "../utils/error";
 
 export async function computeImageEmbedding(
     model: Model,
-    imageData: Uint8Array
+    imageData: Uint8Array,
 ): Promise<Float32Array> {
     let tempInputFilePath = null;
     try {
@@ -15,7 +15,7 @@ export async function computeImageEmbedding(
         const embedding = await ipcRenderer.invoke(
             "compute-image-embedding",
             model,
-            tempInputFilePath
+            tempInputFilePath,
         );
         return embedding;
     } catch (err) {
@@ -34,13 +34,13 @@ export async function computeImageEmbedding(
 
 export async function computeTextEmbedding(
     model: Model,
-    text: string
+    text: string,
 ): Promise<Float32Array> {
     try {
         const embedding = await ipcRenderer.invoke(
             "compute-text-embedding",
             model,
-            text
+            text,
         );
         return embedding;
     } catch (err) {

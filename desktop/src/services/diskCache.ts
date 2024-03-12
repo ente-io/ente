@@ -11,7 +11,7 @@ const DEFAULT_CACHE_LIMIT = 1000 * 1000 * 1000; // 1GB
 export class DiskCache implements LimitedCache {
     constructor(
         private cacheBucketDir: string,
-        private cacheLimit = DEFAULT_CACHE_LIMIT
+        private cacheLimit = DEFAULT_CACHE_LIMIT,
     ) {}
 
     async put(cacheKey: string, response: Response): Promise<void> {
@@ -19,13 +19,13 @@ export class DiskCache implements LimitedCache {
         await writeStream(cachePath, response.body);
         DiskLRUService.enforceCacheSizeLimit(
             this.cacheBucketDir,
-            this.cacheLimit
+            this.cacheLimit,
         );
     }
 
     async match(
         cacheKey: string,
-        { sizeInBytes }: { sizeInBytes?: number } = {}
+        { sizeInBytes }: { sizeInBytes?: number } = {},
     ): Promise<Response> {
         const cachePath = path.join(this.cacheBucketDir, cacheKey);
         if (existsSync(cachePath)) {
@@ -33,7 +33,7 @@ export class DiskCache implements LimitedCache {
             if (sizeInBytes && fileStats.size !== sizeInBytes) {
                 logError(
                     Error(),
-                    "Cache key exists but size does not match. Deleting cache key."
+                    "Cache key exists but size does not match. Deleting cache key.",
                 );
                 unlink(cachePath).catch((e) => {
                     if (e.code === "ENOENT") return;
@@ -47,14 +47,14 @@ export class DiskCache implements LimitedCache {
             // add fallback for old cache keys
             const oldCachePath = getOldAssetCachePath(
                 this.cacheBucketDir,
-                cacheKey
+                cacheKey,
             );
             if (existsSync(oldCachePath)) {
                 const fileStats = await stat(oldCachePath);
                 if (sizeInBytes && fileStats.size !== sizeInBytes) {
                     logError(
                         Error(),
-                        "Old cache key exists but size does not match. Deleting cache key."
+                        "Old cache key exists but size does not match. Deleting cache key.",
                     );
                     unlink(oldCachePath).catch((e) => {
                         if (e.code === "ENOENT") return;

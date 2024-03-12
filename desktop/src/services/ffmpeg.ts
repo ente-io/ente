@@ -24,7 +24,7 @@ export async function runFFmpegCmd(
     cmd: string[],
     inputFilePath: string,
     outputFileName: string,
-    dontTimeout = false
+    dontTimeout = false,
 ) {
     let tempOutputFilePath: string;
     try {
@@ -49,7 +49,7 @@ export async function runFFmpegCmd(
         } else {
             await promiseWithTimeout(
                 execAsync(escapedCmd),
-                FFMPEG_EXECUTION_WAIT_TIME
+                FFMPEG_EXECUTION_WAIT_TIME,
             );
         }
         if (!existsSync(tempOutputFilePath)) {
@@ -59,7 +59,7 @@ export async function runFFmpegCmd(
             "ffmpeg command execution time ",
             escapedCmd,
             Date.now() - startTime,
-            "ms"
+            "ms",
         );
 
         const outputFile = await readFile(tempOutputFilePath);
@@ -87,7 +87,7 @@ export async function deleteTempFile(tempFilePath: string) {
     if (!tempFilePath.startsWith(tempDirPath)) {
         logErrorSentry(
             Error("not a temp file"),
-            "tried to delete a non temp file"
+            "tried to delete a non temp file",
         );
     }
     rmSync(tempFilePath, { force: true });

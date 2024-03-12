@@ -7,7 +7,7 @@ import { getValidPaths, getZipFileStream } from "./fs";
 export const getSavedFilePaths = (type: FILE_PATH_TYPE) => {
     const paths =
         getValidPaths(
-            uploadStatusStore.get(FILE_PATH_KEYS[type]) as string[]
+            uploadStatusStore.get(FILE_PATH_KEYS[type]) as string[],
         ) ?? [];
 
     setToUploadFiles(type, paths);
@@ -17,7 +17,7 @@ export const getSavedFilePaths = (type: FILE_PATH_TYPE) => {
 export async function getZipEntryAsElectronFile(
     zipName: string,
     zip: StreamZip.StreamZipAsync,
-    entry: StreamZip.ZipEntry
+    entry: StreamZip.ZipEntry,
 ): Promise<ElectronFile> {
     return {
         path: path

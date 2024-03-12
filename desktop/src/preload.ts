@@ -59,13 +59,11 @@ import {
     updateWatchMappingSyncedFiles,
 } from "./api/watch";
 import { setupLogging } from "./utils/logging";
-import { fixHotReloadNext12 } from "./utils/preload";
 import {
     logRendererProcessMemoryUsage,
     setupRendererProcessStatsLogger,
 } from "./utils/processStats";
 
-fixHotReloadNext12();
 setupLogging();
 setupRendererProcessStatsLogger();
 

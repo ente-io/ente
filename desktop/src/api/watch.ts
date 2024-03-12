@@ -9,7 +9,7 @@ import { isMappingPresent } from "../utils/watch";
 export async function addWatchMapping(
     rootFolderName: string,
     folderPath: string,
-    uploadStrategy: number
+    uploadStrategy: number,
 ) {
     ElectronLog.log(`Adding watch mapping: ${folderPath}`);
     const watchMappings = getWatchMappings();
@@ -35,7 +35,7 @@ export async function addWatchMapping(
 export async function removeWatchMapping(folderPath: string) {
     let watchMappings = getWatchMappings();
     const watchMapping = watchMappings.find(
-        (mapping) => mapping.folderPath === folderPath
+        (mapping) => mapping.folderPath === folderPath,
     );
 
     if (!watchMapping) {
@@ -47,7 +47,7 @@ export async function removeWatchMapping(folderPath: string) {
     });
 
     watchMappings = watchMappings.filter(
-        (mapping) => mapping.folderPath !== watchMapping.folderPath
+        (mapping) => mapping.folderPath !== watchMapping.folderPath,
     );
 
     setWatchMappings(watchMappings);
@@ -55,11 +55,11 @@ export async function removeWatchMapping(folderPath: string) {
 
 export function updateWatchMappingSyncedFiles(
     folderPath: string,
-    files: WatchMapping["syncedFiles"]
+    files: WatchMapping["syncedFiles"],
 ): void {
     const watchMappings = getWatchMappings();
     const watchMapping = watchMappings.find(
-        (mapping) => mapping.folderPath === folderPath
+        (mapping) => mapping.folderPath === folderPath,
     );
 
     if (!watchMapping) {
@@ -72,11 +72,11 @@ export function updateWatchMappingSyncedFiles(
 
 export function updateWatchMappingIgnoredFiles(
     folderPath: string,
-    files: WatchMapping["ignoredFiles"]
+    files: WatchMapping["ignoredFiles"],
 ): void {
     const watchMappings = getWatchMappings();
     const watchMapping = watchMappings.find(
-        (mapping) => mapping.folderPath === folderPath
+        (mapping) => mapping.folderPath === folderPath,
     );
 
     if (!watchMapping) {
@@ -90,7 +90,7 @@ export function updateWatchMappingIgnoredFiles(
 export function registerWatcherFunctions(
     addFile: (file: ElectronFile) => Promise<void>,
     removeFile: (path: string) => Promise<void>,
-    removeFolder: (folderPath: string) => Promise<void>
+    removeFolder: (folderPath: string) => Promise<void>,
 ) {
     ipcRenderer.removeAllListeners("watch-add");
     ipcRenderer.removeAllListeners("watch-change");

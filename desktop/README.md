@@ -10,27 +10,13 @@ To know more about Ente, see [our main README](../README.md) or visit
 
 ## Building from source
 
-Fetch submodules
-
-```sh
-git submodule update --init --recursive
-```
-
 Install dependencies
 
 ```sh
 yarn install
 ```
 
-Create a binary for your platform
-
-```sh
-yarn build
-```
-
-## Developing
-
-Instead of building, you can run the app in development mode
+Run in development mode (with hot reload)
 
 ```sh
 yarn dev
@@ -39,15 +25,13 @@ yarn dev
 > [!CAUTION]
 >
 > `yarn dev` is currently not working (we'll fix soon). If you just want to
-> build from source and use the generated binary, use `yarn build` as described
-> above.
+> build from source and use the generated binary, use `yarn build`.
 
-This'll launch a development server to serve the pages loaded by the renderer
-process, and will hot reload on changes.
-
-If you also want hot reload for the main process, run this in a separate
-terminal:
+Or create a binary for your platform
 
 ```sh
-yarn watch
+yarn build
 ```
+
+That's the gist of it. For more development related documentation, see
+[docs](docs/README.md).

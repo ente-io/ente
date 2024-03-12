@@ -64,7 +64,7 @@ export async function buildMenuBar(mainWindow: BrowserWindow): Promise<Menu> {
                     label: "View Changelog",
                     click: () => {
                         shell.openExternal(
-                            "https://github.com/ente-io/ente/blob/main/desktop/CHANGELOG.md"
+                            "https://github.com/ente-io/ente/blob/main/desktop/CHANGELOG.md",
                         );
                     },
                 },

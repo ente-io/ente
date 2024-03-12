@@ -13,7 +13,7 @@ export const checkExistsAndCreateDir = async (dirPath: string) => {
 
 export const saveStreamToDisk = async (
     filePath: string,
-    fileStream: ReadableStream<Uint8Array>
+    fileStream: ReadableStream<Uint8Array>,
 ) => {
     await writeStream(filePath, fileStream);
 };
