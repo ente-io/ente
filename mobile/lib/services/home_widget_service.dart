@@ -1,5 +1,6 @@
 import "dart:math";
 
+import "package:figma_squircle/figma_squircle.dart";
 import "package:flutter/material.dart";
 import 'package:home_widget/home_widget.dart' as hw;
 import "package:logging/logging.dart";
@@ -95,8 +96,8 @@ class HomeWidgetService {
 
       await PreloadImage.loadImage(img.image);
 
-      final widget = ClipRRect(
-        borderRadius: BorderRadius.circular(32),
+      final widget = ClipSmoothRect(
+        radius: SmoothBorderRadius(cornerRadius: 32, cornerSmoothing: 1),
         child: Container(
           width: size,
           height: size,
