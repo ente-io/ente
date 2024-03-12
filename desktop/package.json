@@ -12,7 +12,7 @@
         "build-renderer": "cd ../web && yarn install && yarn build:photos && cd ../desktop && rm -f out && ln -sf ../web/apps/photos/out",
         "build:quick": "yarn build-renderer && yarn build-main:quick",
         "dev": "concurrently \"yarn dev-main\" \"yarn dev-renderer\"",
-        "dev-main": "tsc && electron build/app/main.js",
+        "dev-main": "tsc && electron app/main.js",
         "dev-renderer": "cd ../web && yarn install && yarn dev:photos",
         "postinstall": "electron-builder install-app-deps",
         "lint": "yarn prettier --check . && eslint \"src/**/*.ts\"",
