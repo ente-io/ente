@@ -86,7 +86,6 @@ func initConfig(cliConfigPath string) {
 	viper.SetDefault("log.http", false)
 	if err := viper.ReadInConfig(); err != nil {
 		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
-			log.Printf("Config file not found; using defaults %s", cliConfigPath)
 		} else {
 			// Config file was found but another error was produced
 		}
