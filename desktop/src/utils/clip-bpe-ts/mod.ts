@@ -75,7 +75,7 @@ export default class {
     constructor() {
         this.byteEncoder = bytesToUnicode();
         this.byteDecoder = Object.fromEntries(
-            Object.entries(this.byteEncoder).map(([k, v]) => [v, Number(k)])
+            Object.entries(this.byteEncoder).map(([k, v]) => [v, Number(k)]),
         );
         let merges = bpeVocabData.text.split("\n");
         merges = merges.slice(1, 49152 - 256 - 2 + 1);
@@ -346,10 +346,10 @@ export default class {
         vocab.push("<|startoftext|>", "<|endoftext|>");
         this.encoder = Object.fromEntries(vocab.map((v, i) => [v, i]));
         this.decoder = Object.fromEntries(
-            Object.entries(this.encoder).map(([k, v]) => [v, k])
+            Object.entries(this.encoder).map(([k, v]) => [v, k]),
         );
         this.bpeRanks = Object.fromEntries(
-            mergedMerges.map((v, i) => [v.join("·😎·"), i])
+            mergedMerges.map((v, i) => [v.join("·😎·"), i]),
         ); // ·😎· because js doesn't yet have tuples
         this.cache = {
             "<|startoftext|>": "<|startoftext|>",
@@ -436,7 +436,7 @@ export default class {
             bpeTokens.push(
                 ...this.bpe(token)
                     .split(" ")
-                    .map((bpeToken: string) => this.encoder[bpeToken])
+                    .map((bpeToken: string) => this.encoder[bpeToken]),
             );
         }
         return bpeTokens;

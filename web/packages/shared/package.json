@@ -5,7 +5,6 @@
     "dependencies": {
         "@/next": "*",
         "@ente/eslint-config": "*",
-        "@sentry/nextjs": "7.77.0",
         "axios": "^1.6.7"
     }
 }

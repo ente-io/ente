@@ -7,17 +7,24 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:home_widget/home_widget.dart' as hw;
 import 'package:logging/logging.dart';
 import 'package:media_extension/media_extension_action_types.dart';
 import 'package:photos/ente_theme_data.dart';
 import "package:photos/generated/l10n.dart";
 import "package:photos/l10n/l10n.dart";
+import "package:photos/models/collection/collection_items.dart";
 import 'package:photos/services/app_lifecycle_service.dart';
+import "package:photos/services/collections_service.dart";
+import "package:photos/services/favorites_service.dart";
+import "package:photos/services/home_widget_service.dart";
 import "package:photos/services/machine_learning/machine_learning_controller.dart";
 import 'package:photos/services/sync_service.dart';
 import 'package:photos/ui/tabs/home_widget.dart';
 import "package:photos/ui/viewer/actions/file_viewer.dart";
+import "package:photos/ui/viewer/gallery/collection_page.dart";
 import "package:photos/utils/intent_util.dart";
+import "package:photos/utils/navigation_util.dart";
 
 class EnteApp extends StatefulWidget {
   final Future<void> Function(String) runBackgroundTask;
@@ -53,6 +60,46 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
     locale = widget.locale;
     setupIntentAction();
     WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _checkForWidgetLaunch();
+    hw.HomeWidget.widgetClicked.listen(_launchedFromWidget);
+  }
+
+  void _checkForWidgetLaunch() {
+    hw.HomeWidget.initiallyLaunchedFromHomeWidget().then(_launchedFromWidget);
+  }
+
+  Future<void> _launchedFromWidget(Uri? uri) async {
+    if (uri == null) return;
+    final collectionID =
+        await FavoritesService.instance.getFavoriteCollectionID();
+    if (collectionID == null) {
+      return;
+    }
+    final collection = CollectionsService.instance.getCollectionByID(
+      collectionID,
+    );
+    if (collection == null) {
+      return;
+    }
+    unawaited(HomeWidgetService.instance.initHomeWidget());
+
+    final thumbnail = await CollectionsService.instance.getCover(collection);
+    unawaited(
+      routeToPage(
+        context,
+        CollectionPage(
+          CollectionWithThumbnail(
+            collection,
+            thumbnail,
+          ),
+        ),
+      ),
+    );
   }
 
   setLocale(Locale newLocale) {

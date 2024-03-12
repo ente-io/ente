@@ -1,12 +1,10 @@
 import { app, BrowserWindow, Menu, nativeImage, Tray } from "electron";
 import ElectronLog from "electron-log";
-import electronReload from "electron-reload";
-import serveNextAt from "next-electron-server";
 import os from "os";
 import path from "path";
 import { existsSync } from "promise-fs";
 import util from "util";
-import { PROD_HOST_URL, RENDERER_OUTPUT_DIR } from "../config";
+import { rendererURL } from "../main";
 import { setupAutoUpdater } from "../services/appUpdater";
 import autoLauncher from "../services/autoLauncher";
 import { getHideDockIconPreference } from "../services/userPreference";
@@ -27,7 +25,7 @@ export function setupTrayItem(mainWindow: BrowserWindow) {
         : "taskbar-icon.png";
     const trayImgPath = path.join(
         isDev ? "build" : process.resourcesPath,
-        iconName
+        iconName,
     );
     const trayIcon = nativeImage.createFromPath(trayImgPath);
     const tray = new Tray(trayIcon);
@@ -39,8 +37,19 @@ export function setupTrayItem(mainWindow: BrowserWindow) {
 export function handleDownloads(mainWindow: BrowserWindow) {
     mainWindow.webContents.session.on("will-download", (_, item) => {
         item.setSavePath(
-            getUniqueSavePath(item.getFilename(), app.getPath("downloads"))
+            getUniqueSavePath(item.getFilename(), app.getPath("downloads")),
         );
+    });
+}
+
+export function handleExternalLinks(mainWindow: BrowserWindow) {
+    mainWindow.webContents.setWindowOpenHandler(({ url }) => {
+        if (!url.startsWith(rendererURL)) {
+            require("electron").shell.openExternal(url);
+            return { action: "deny" };
+        } else {
+            return { action: "allow" };
+        }
     });
 }
 
@@ -76,18 +85,6 @@ export async function setupMainMenu(mainWindow: BrowserWindow) {
     Menu.setApplicationMenu(await buildMenuBar(mainWindow));
 }
 
-export function setupMainHotReload() {
-    if (isDev) {
-        electronReload(__dirname, {});
-    }
-}
-
-export function setupNextElectronServe() {
-    serveNextAt(PROD_HOST_URL, {
-        outputDir: RENDERER_OUTPUT_DIR,
-    });
-}
-
 export async function handleDockIconHideOnAutoLaunch() {
     const shouldHideDockIcon = getHideDockIconPreference();
     const wasAutoLaunched = await autoLauncher.wasAutoLaunched();
@@ -108,17 +105,6 @@ export function logSystemInfo() {
     ElectronLog.info({ osName, osRelease, systemVersion });
     const appVersion = app.getVersion();
     ElectronLog.info({ appVersion });
-}
-
-export function handleExternalLinks(mainWindow: BrowserWindow) {
-    mainWindow.webContents.setWindowOpenHandler(({ url }) => {
-        if (!url.startsWith(PROD_HOST_URL)) {
-            require("electron").shell.openExternal(url);
-            return { action: "deny" };
-        } else {
-            return { action: "allow" };
-        }
-    });
 }
 
 export async function checkIfInstalledViaBrew() {

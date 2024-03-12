@@ -60,7 +60,7 @@ class DiskLRUService {
                             if (e.code !== "ENOENT") {
                                 logError(
                                     e,
-                                    "Failed to evict least recently used"
+                                    "Failed to evict least recently used",
                                 );
                             }
                             // ignoring the error, as it would get retried on the next run
@@ -77,7 +77,7 @@ class DiskLRUService {
 
     private async findLeastRecentlyUsed(
         dir: string,
-        result?: LeastRecentlyUsedResult
+        result?: LeastRecentlyUsedResult,
     ): Promise<LeastRecentlyUsedResult> {
         result = result || { atime: new Date(), path: "" };
 

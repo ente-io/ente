@@ -1,11 +1,9 @@
 name: "Lint (server)"
 
 on:
-    # Run on every push (this also covers pull requests)
+    # Run on every push to a branch other than main that changes server/
     push:
-        # See: [Note: Specify branch when specifying a path filter]
-        branches: ["**"]
-        # Only run if something changes in these paths
+        branches-ignore: [main]
         paths:
             - "server/**"
             - ".github/workflows/server-lint.yml"

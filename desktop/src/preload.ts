@@ -8,12 +8,10 @@ import { computeImageEmbedding, computeTextEmbedding } from "./api/clip";
 import {
     getAppVersion,
     getPlatform,
-    getSentryUserID,
     logToDisk,
     openDirectory,
     openLogDirectory,
     selectDirectory,
-    updateOptOutOfCrashReports,
 } from "./api/common";
 import { clearElectronStore } from "./api/electronStore";
 import {
@@ -61,13 +59,11 @@ import {
     updateWatchMappingSyncedFiles,
 } from "./api/watch";
 import { setupLogging } from "./utils/logging";
-import { fixHotReloadNext12 } from "./utils/preload";
 import {
     logRendererProcessMemoryUsage,
     setupRendererProcessStatsLogger,
 } from "./utils/processStats";
 
-fixHotReloadNext12();
 setupLogging();
 setupRendererProcessStatsLogger();
 
@@ -108,7 +104,6 @@ windowObject["ElectronAPIs"] = {
     registerUpdateEventListener,
     updateAndRestart,
     skipAppUpdate,
-    getSentryUserID,
     getAppVersion,
     runFFmpegCmd,
     muteUpdateNotification,
@@ -120,7 +115,6 @@ windowObject["ElectronAPIs"] = {
     deleteFolder,
     rename,
     deleteFile,
-    updateOptOutOfCrashReports,
     computeImageEmbedding,
     computeTextEmbedding,
     getPlatform,

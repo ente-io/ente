@@ -80,7 +80,7 @@ function getImageMagickStaticPath() {
 
 export async function convertToJPEG(
     fileData: Uint8Array,
-    filename: string
+    filename: string,
 ): Promise<Uint8Array> {
     let tempInputFilePath: string;
     let tempOutputFilePath: string;
@@ -96,7 +96,7 @@ export async function convertToJPEG(
             throw new Error("heic convert output file not found");
         }
         const convertedFileData = new Uint8Array(
-            await readFile(tempOutputFilePath)
+            await readFile(tempOutputFilePath),
         );
         return convertedFileData;
     } catch (e) {
@@ -118,11 +118,11 @@ export async function convertToJPEG(
 
 async function runConvertCommand(
     tempInputFilePath: string,
-    tempOutputFilePath: string
+    tempOutputFilePath: string,
 ) {
     const convertCmd = constructConvertCommand(
         tempInputFilePath,
-        tempOutputFilePath
+        tempOutputFilePath,
     );
     const escapedCmd = shellescape(convertCmd);
     log.info("running convert command: " + escapedCmd);
@@ -131,7 +131,7 @@ async function runConvertCommand(
 
 function constructConvertCommand(
     tempInputFilePath: string,
-    tempOutputFilePath: string
+    tempOutputFilePath: string,
 ) {
     let convertCmd: string[];
     if (isPlatform("mac")) {
@@ -157,7 +157,7 @@ function constructConvertCommand(
                     return tempOutputFilePath;
                 }
                 return cmdPart;
-            }
+            },
         );
     } else {
         throw Error(CustomErrors.INVALID_OS(process.platform));
@@ -168,7 +168,7 @@ function constructConvertCommand(
 export async function generateImageThumbnail(
     inputFilePath: string,
     width: number,
-    maxSize: number
+    maxSize: number,
 ): Promise<Uint8Array> {
     let tempOutputFilePath: string;
     let quality = MAX_QUALITY;
@@ -180,7 +180,7 @@ export async function generateImageThumbnail(
                 inputFilePath,
                 tempOutputFilePath,
                 width,
-                quality
+                quality,
             );
 
             if (!existsSync(tempOutputFilePath)) {
@@ -206,14 +206,14 @@ async function runThumbnailGenerationCommand(
     inputFilePath: string,
     tempOutputFilePath: string,
     maxDimension: number,
-    quality: number
+    quality: number,
 ) {
     const thumbnailGenerationCmd: string[] =
         constructThumbnailGenerationCommand(
             inputFilePath,
             tempOutputFilePath,
             maxDimension,
-            quality
+            quality,
         );
     const escapedCmd = shellescape(thumbnailGenerationCmd);
     log.info("running thumbnail generation command: " + escapedCmd);
@@ -223,7 +223,7 @@ function constructThumbnailGenerationCommand(
     inputFilePath: string,
     tempOutputFilePath: string,
     maxDimension: number,
-    quality: number
+    quality: number,
 ) {
     let thumbnailGenerationCmd: string[];
     if (isPlatform("mac")) {
@@ -242,7 +242,7 @@ function constructThumbnailGenerationCommand(
                     return quality.toString();
                 }
                 return cmdPart;
-            }
+            },
         );
     } else if (isPlatform("linux")) {
         thumbnailGenerationCmd =
@@ -259,13 +259,13 @@ function constructThumbnailGenerationCommand(
                 if (cmdPart.includes(SAMPLE_SIZE_PLACEHOLDER)) {
                     return cmdPart.replaceAll(
                         SAMPLE_SIZE_PLACEHOLDER,
-                        (2 * maxDimension).toString()
+                        (2 * maxDimension).toString(),
                     );
                 }
                 if (cmdPart.includes(MAX_DIMENSION_PLACEHOLDER)) {
                     return cmdPart.replaceAll(
                         MAX_DIMENSION_PLACEHOLDER,
-                        maxDimension.toString()
+                        maxDimension.toString(),
                     );
                 }
                 if (cmdPart === QUALITY_PLACEHOLDER) {

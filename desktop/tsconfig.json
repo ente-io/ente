@@ -3,8 +3,8 @@
         "target": "es2021",
         "module": "commonjs",
         "esModuleInterop": true,
-        /* Emit the generated JS into build/app */
-        "outDir": "build/app",
+        /* Emit the generated JS into app */
+        "outDir": "app",
         "noImplicitAny": true,
         "sourceMap": true,
         "baseUrl": "src",

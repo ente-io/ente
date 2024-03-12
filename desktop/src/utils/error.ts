@@ -9,7 +9,7 @@ export const parseExecError = (err: any) => {
     if (errMessage.includes("Bad CPU type in executable")) {
         return CustomErrors.UNSUPPORTED_PLATFORM(
             process.platform,
-            process.arch
+            process.arch,
         );
     } else {
         return errMessage;

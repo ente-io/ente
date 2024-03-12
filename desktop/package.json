@@ -4,21 +4,22 @@
     "private": true,
     "description": "Desktop client for Ente Photos",
     "author": "Ente <code@ente.io>",
-    "main": "build/app/main.js",
+    "main": "app/main.js",
     "scripts": {
-        "build": "mkdir -p build && yarn build-renderer && yarn build-main",
-        "build-main": "tsc && electron-builder --config.compression=store",
-        "build-renderer": "cd ../web && yarn install && yarn build:photos && cd ../desktop/build && rm -f out && ln -sf ../../web/apps/photos/out",
-        "dev": "concurrently \"yarn dev-main\" \"yarn dev-renderer\"",
-        "dev-main": "tsc && electron build/app/main.js",
-        "dev-renderer": "cd ../web && yarn install && yarn dev:photos && cd ../desktop/build && rm -f out && ln -sf ../../web/apps/photos/out",
+        "build": "yarn build-renderer && yarn build-main",
+        "build-main": "tsc && electron-builder",
+        "build-main:quick": "tsc && electron-builder --config.compression=store",
+        "build-renderer": "cd ../web && yarn install && yarn build:photos && cd ../desktop && rm -f out && ln -sf ../web/apps/photos/out",
+        "build:quick": "yarn build-renderer && yarn build-main:quick",
+        "dev": "concurrently --names 'main,rndr,tscw' \"yarn dev-main\" \"yarn dev-renderer\" \"yarn dev-main-watch\"",
+        "dev-main": "tsc && electron app/main.js",
+        "dev-main-watch": "tsc --watch --preserveWatchOutput",
+        "dev-renderer": "cd ../web && yarn install && yarn dev:photos",
         "postinstall": "electron-builder install-app-deps",
         "lint": "yarn prettier --check . && eslint \"src/**/*.ts\"",
-        "lint-fix": "yarn prettier --write . && eslint --fix .",
-        "watch": "tsc -w"
+        "lint-fix": "yarn prettier --write . && eslint --fix src"
     },
     "dependencies": {
-        "@sentry/electron": "^2.5.1",
         "any-shell-escape": "^0.1.1",
         "auto-launch": "^5.0.5",
         "chokidar": "^3.5.3",
@@ -31,14 +32,13 @@
         "get-folder-size": "^2.0.1",
         "html-entities": "^2.4.0",
         "jpeg-js": "^0.4.4",
-        "next-electron-server": "file:./thirdparty/next-electron-server",
+        "next-electron-server": "^1",
         "node-fetch": "^2.6.7",
         "node-stream-zip": "^1.15.0",
         "onnxruntime-node": "^1.16.3",
         "promise-fs": "^2.1.1"
     },
     "devDependencies": {
-        "@sentry/cli": "^1.68.0",
         "@types/auto-launch": "^5.0.2",
         "@types/ffmpeg-static": "^3.0.1",
         "@types/get-folder-size": "^2.0.0",
@@ -55,7 +55,7 @@
         "eslint": "^7.23.0",
         "eslint-config-google": "^0.14.0",
         "eslint-config-prettier": "^8.5.0",
-        "prettier": "2.5.1",
+        "prettier": "^3",
         "prettier-plugin-organize-imports": "^3.2",
         "prettier-plugin-packagejson": "^2.4",
         "typescript": "^4.2.3"
@@ -112,26 +112,20 @@
             "x64ArchFiles": "Contents/Resources/ggmlclip-mac"
         },
         "afterSign": "electron-builder-notarize",
-        "extraFiles": [
-            {
-                "from": "resources",
-                "to": "resources",
-                "filter": [
-                    "**/*"
-                ]
-            }
-        ],
         "asarUnpack": [
             "node_modules/ffmpeg-static/bin/${os}/${arch}/ffmpeg",
             "node_modules/ffmpeg-static/index.js",
             "node_modules/ffmpeg-static/package.json"
         ],
-        "files": [
-            "build/app/**/*",
+        "extraFiles": [
             {
-                "from": "build/out",
-                "to": "out"
+                "from": "build",
+                "to": "resources"
             }
+        ],
+        "files": [
+            "app/**/*",
+            "out"
         ]
     },
     "productName": "ente",

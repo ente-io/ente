@@ -8,7 +8,7 @@ export async function runFFmpegCmd(
     cmd: string[],
     inputFile: File | ElectronFile,
     outputFileName: string,
-    dontTimeout?: boolean
+    dontTimeout?: boolean,
 ) {
     let inputFilePath = null;
     let createdTempInputFile = null;
@@ -16,7 +16,7 @@ export async function runFFmpegCmd(
         if (!existsSync(inputFile.path)) {
             const tempFilePath = await ipcRenderer.invoke(
                 "get-temp-file-path",
-                inputFile.name
+                inputFile.name,
             );
             await writeStream(tempFilePath, await inputFile.stream());
             inputFilePath = tempFilePath;
@@ -29,7 +29,7 @@ export async function runFFmpegCmd(
             cmd,
             inputFilePath,
             outputFileName,
-            dontTimeout
+            dontTimeout,
         );
         return new File([outputFileData], outputFileName);
     } finally {

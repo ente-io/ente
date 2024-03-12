@@ -8,7 +8,7 @@ import { isPlatform } from "../utils/common/platform";
 
 export async function convertToJPEG(
     fileData: Uint8Array,
-    filename: string
+    filename: string,
 ): Promise<Uint8Array> {
     if (isPlatform("windows")) {
         throw Error(CustomErrors.WINDOWS_NATIVE_IMAGE_PROCESSING_NOT_SUPPORTED);
@@ -16,7 +16,7 @@ export async function convertToJPEG(
     const convertedFileData = await ipcRenderer.invoke(
         "convert-to-jpeg",
         fileData,
-        filename
+        filename,
     );
     return convertedFileData;
 }
@@ -24,20 +24,20 @@ export async function convertToJPEG(
 export async function generateImageThumbnail(
     inputFile: File | ElectronFile,
     maxDimension: number,
-    maxSize: number
+    maxSize: number,
 ): Promise<Uint8Array> {
     let inputFilePath = null;
     let createdTempInputFile = null;
     try {
         if (isPlatform("windows")) {
             throw Error(
-                CustomErrors.WINDOWS_NATIVE_IMAGE_PROCESSING_NOT_SUPPORTED
+                CustomErrors.WINDOWS_NATIVE_IMAGE_PROCESSING_NOT_SUPPORTED,
             );
         }
         if (!existsSync(inputFile.path)) {
             const tempFilePath = await ipcRenderer.invoke(
                 "get-temp-file-path",
-                inputFile.name
+                inputFile.name,
             );
             await writeStream(tempFilePath, await inputFile.stream());
             inputFilePath = tempFilePath;
@@ -49,7 +49,7 @@ export async function generateImageThumbnail(
             "generate-image-thumbnail",
             inputFilePath,
             maxDimension,
-            maxSize
+            maxSize,
         );
         return thumbnail;
     } finally {
