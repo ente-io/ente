@@ -5,12 +5,12 @@ import { logToDisk } from "./logging";
 export function logErrorSentry(
     error: any,
     msg: string,
-    info?: Record<string, unknown>
+    info?: Record<string, unknown>,
 ) {
     logToDisk(
         `error: ${error?.name} ${error?.message} ${
             error?.stack
-        } msg: ${msg} info: ${JSON.stringify(info)}`
+        } msg: ${msg} info: ${JSON.stringify(info)}`,
     );
     if (isDev) {
         console.log(error, { msg, info });

@@ -6,7 +6,7 @@ export async function setEncryptionKey(encryptionKey: string) {
     try {
         const encryptedKey: Buffer = await ipcRenderer.invoke(
             "safeStorage-encrypt",
-            encryptionKey
+            encryptionKey,
         );
         const b64EncryptedKey = Buffer.from(encryptedKey).toString("base64");
         safeStorageStore.set("encryptionKey", b64EncryptedKey);
@@ -21,7 +21,7 @@ export async function getEncryptionKey(): Promise<string> {
         const b64EncryptedKey = safeStorageStore.get("encryptionKey");
         if (b64EncryptedKey) {
             const keyBuffer = new Uint8Array(
-                Buffer.from(b64EncryptedKey, "base64")
+                Buffer.from(b64EncryptedKey, "base64"),
             );
             return await ipcRenderer.invoke("safeStorage-decrypt", keyBuffer);
         }

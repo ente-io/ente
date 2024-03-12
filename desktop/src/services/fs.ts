@@ -38,7 +38,7 @@ export const getFileStream = async (filePath: string) => {
                     buff,
                     0,
                     FILE_STREAM_CHUNK_SIZE,
-                    offset
+                    offset,
                 )) as unknown as number;
                 offset += bytesRead;
                 if (bytesRead === 0) {
@@ -103,7 +103,7 @@ export const getValidPaths = (paths: string[]) => {
 
 export const getZipFileStream = async (
     zip: StreamZip.StreamZipAsync,
-    filePath: string
+    filePath: string,
 ) => {
     const stream = await zip.stream(filePath);
     const done = {
@@ -204,7 +204,7 @@ export async function isFolder(dirPath: string) {
 }
 
 export const convertBrowserStreamToNode = (
-    fileStream: ReadableStream<Uint8Array>
+    fileStream: ReadableStream<Uint8Array>,
 ) => {
     const reader = fileStream.getReader();
     const rs = new Readable();
@@ -229,7 +229,7 @@ export const convertBrowserStreamToNode = (
 
 export async function writeNodeStream(
     filePath: string,
-    fileStream: NodeJS.ReadableStream
+    fileStream: NodeJS.ReadableStream,
 ) {
     const writeable = fs.createWriteStream(filePath);
 
@@ -252,7 +252,7 @@ export async function writeNodeStream(
 
 export async function writeStream(
     filePath: string,
-    fileStream: ReadableStream<Uint8Array>
+    fileStream: ReadableStream<Uint8Array>,
 ) {
     const readable = convertBrowserStreamToNode(fileStream);
     await writeNodeStream(filePath, readable);
@@ -267,7 +267,7 @@ export async function readTextFile(filePath: string) {
 
 export async function moveFile(
     sourcePath: string,
-    destinationPath: string
+    destinationPath: string,
 ): Promise<void> {
     if (!existsSync(sourcePath)) {
         throw new Error("File does not exist");

@@ -16,6 +16,6 @@ export function addAllowOriginHeader(mainWindow: BrowserWindow) {
             callback({
                 responseHeaders: details.responseHeaders,
             });
-        }
+        },
     );
 }

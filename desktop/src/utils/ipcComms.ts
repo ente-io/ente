@@ -38,7 +38,7 @@ import { generateTempFilePath } from "./temp";
 export default function setupIpcComs(
     tray: Tray,
     mainWindow: BrowserWindow,
-    watcher: chokidar.FSWatcher
+    watcher: chokidar.FSWatcher,
 ): void {
     ipcMain.handle("select-dir", async () => {
         const result = await dialog.showOpenDialog({
@@ -156,9 +156,9 @@ export default function setupIpcComs(
                 cmd,
                 inputFilePath,
                 outputFileName,
-                dontTimeout
+                dontTimeout,
             );
-        }
+        },
     );
     ipcMain.handle("get-temp-file-path", (_, formatSuffix) => {
         return generateTempFilePath(formatSuffix);
@@ -171,7 +171,7 @@ export default function setupIpcComs(
         "generate-image-thumbnail",
         (_, fileData, maxDimension, maxSize) => {
             return generateImageThumbnail(fileData, maxDimension, maxSize);
-        }
+        },
     );
 
     ipcMain.handle("compute-image-embedding", (_, model, inputFilePath) => {

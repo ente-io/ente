@@ -9,7 +9,7 @@ export const reloadWindow = () => {
 };
 
 export const registerUpdateEventListener = (
-    showUpdateDialog: (updateInfo: AppUpdateInfo) => void
+    showUpdateDialog: (updateInfo: AppUpdateInfo) => void,
 ) => {
     ipcRenderer.removeAllListeners("show-update-dialog");
     ipcRenderer.on("show-update-dialog", (_, updateInfo: AppUpdateInfo) => {

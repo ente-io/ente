@@ -25,7 +25,7 @@ export function setupAutoUpdater(mainWindow: BrowserWindow) {
     checkForUpdateAndNotify(mainWindow);
     setInterval(
         () => checkForUpdateAndNotify(mainWindow),
-        ONE_DAY_IN_MICROSECOND
+        ONE_DAY_IN_MICROSECOND,
     );
 }
 
@@ -47,7 +47,7 @@ async function checkForUpdateAndNotify(mainWindow: BrowserWindow) {
         if (
             compareVersions(
                 updateCheckResult.updateInfo.version,
-                app.getVersion()
+                app.getVersion(),
             ) <= 0
         ) {
             log.debug("already at latest version");
@@ -60,7 +60,7 @@ async function checkForUpdateAndNotify(mainWindow: BrowserWindow) {
         ) {
             log.info(
                 "user chose to skip version ",
-                updateCheckResult.updateInfo.version
+                updateCheckResult.updateInfo.version,
             );
             return;
         }
@@ -70,7 +70,7 @@ async function checkForUpdateAndNotify(mainWindow: BrowserWindow) {
             isPlatform("mac") &&
             compareVersions(
                 updateCheckResult.updateInfo.version,
-                desktopCutoffVersion
+                desktopCutoffVersion,
             ) > 0
         ) {
             log.debug("auto update not possible due to key change");
@@ -91,7 +91,7 @@ async function checkForUpdateAndNotify(mainWindow: BrowserWindow) {
             ) {
                 log.info(
                     "user chose to mute update notification for version ",
-                    updateCheckResult.updateInfo.version
+                    updateCheckResult.updateInfo.version,
                 );
                 return;
             }
@@ -102,7 +102,7 @@ async function checkForUpdateAndNotify(mainWindow: BrowserWindow) {
                             autoUpdatable: true,
                             version: updateCheckResult.updateInfo.version,
                         }),
-                    FIVE_MIN_IN_MICROSECOND
+                    FIVE_MIN_IN_MICROSECOND,
                 );
             });
             autoUpdater.on("error", (error) => {
@@ -152,7 +152,7 @@ async function getDesktopCutoffVersion() {
 
 function showUpdateDialog(
     mainWindow: BrowserWindow,
-    updateInfo: AppUpdateInfo
+    updateInfo: AppUpdateInfo,
 ) {
     mainWindow.webContents.send("show-update-dialog", updateInfo);
 }

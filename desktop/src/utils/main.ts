@@ -25,7 +25,7 @@ export function setupTrayItem(mainWindow: BrowserWindow) {
         : "taskbar-icon.png";
     const trayImgPath = path.join(
         isDev ? "build" : process.resourcesPath,
-        iconName
+        iconName,
     );
     const trayIcon = nativeImage.createFromPath(trayImgPath);
     const tray = new Tray(trayIcon);
@@ -37,7 +37,7 @@ export function setupTrayItem(mainWindow: BrowserWindow) {
 export function handleDownloads(mainWindow: BrowserWindow) {
     mainWindow.webContents.session.on("will-download", (_, item) => {
         item.setSavePath(
-            getUniqueSavePath(item.getFilename(), app.getPath("downloads"))
+            getUniqueSavePath(item.getFilename(), app.getPath("downloads")),
         );
     });
 }

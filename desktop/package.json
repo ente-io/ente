@@ -17,7 +17,7 @@
         "dev-renderer": "cd ../web && yarn install && yarn dev:photos",
         "postinstall": "electron-builder install-app-deps",
         "lint": "yarn prettier --check . && eslint \"src/**/*.ts\"",
-        "lint-fix": "yarn prettier --write . && eslint --fix ."
+        "lint-fix": "yarn prettier --write . && eslint --fix src"
     },
     "dependencies": {
         "any-shell-escape": "^0.1.1",

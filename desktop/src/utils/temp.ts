@@ -21,7 +21,7 @@ function generateTempName(length: number) {
     const charactersLength = CHARACTERS.length;
     for (let i = 0; i < length; i++) {
         result += CHARACTERS.charAt(
-            Math.floor(Math.random() * charactersLength)
+            Math.floor(Math.random() * charactersLength),
         );
     }
     return result;

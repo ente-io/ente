@@ -39,7 +39,7 @@ export const getPendingUploads = async () => {
 export const showUploadDirsDialog = async () => {
     try {
         const filePaths: string[] = await ipcRenderer.invoke(
-            "show-upload-dirs-dialog"
+            "show-upload-dirs-dialog",
         );
         const files = await Promise.all(filePaths.map(getElectronFile));
         return files;
@@ -51,7 +51,7 @@ export const showUploadDirsDialog = async () => {
 export const showUploadFilesDialog = async () => {
     try {
         const filePaths: string[] = await ipcRenderer.invoke(
-            "show-upload-files-dialog"
+            "show-upload-files-dialog",
         );
         const files = await Promise.all(filePaths.map(getElectronFile));
         return files;
@@ -63,7 +63,7 @@ export const showUploadFilesDialog = async () => {
 export const showUploadZipDialog = async () => {
     try {
         const filePaths: string[] = await ipcRenderer.invoke(
-            "show-upload-zip-dialog"
+            "show-upload-zip-dialog",
         );
         let files: ElectronFile[] = [];
 

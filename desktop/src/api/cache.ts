@@ -22,7 +22,7 @@ const getCacheBucketDir = async (cacheName: string) => {
 
 export async function openDiskCache(
     cacheName: string,
-    cacheLimitInBytes?: number
+    cacheLimitInBytes?: number,
 ) {
     const cacheBucketDir = await getCacheBucketDir(cacheName);
     if (!existsSync(cacheBucketDir)) {
@@ -42,7 +42,7 @@ export async function deleteDiskCache(cacheName: string) {
 }
 
 export async function setCustomCacheDirectory(
-    directory: string
+    directory: string,
 ): Promise<void> {
     await ipcRenderer.invoke("set-custom-cache-directory", directory);
 }
