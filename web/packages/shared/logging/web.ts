@@ -76,7 +76,7 @@ export const logStartupMessage = async (appId: string) => {
     const userID = (getData(LS_KEYS.USER) as User)?.id;
     const buildId = isDevBuild ? "dev" : `git ${process.env.GIT_SHA}`;
 
-    addLogLine(`ente-${appIdL} ${buildId} uid ${userID}`);
+    addLogLine(`ente-${appIdL}-web ${buildId} uid ${userID}`);
 };
 
 function getLogs(): Log[] {
