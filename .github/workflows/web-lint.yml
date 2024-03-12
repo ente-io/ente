@@ -1,20 +1,9 @@
 name: "Lint (web)"
 
 on:
-    # Run on every push (this also covers pull requests)
+    # Run on every push to a branch other than main that changes web/
     push:
-        # [Note: Specify branch when specifying a path filter]
-        #
-        # Path filters are ignored for tag pushes, which causes this workflow to
-        # always run when we push a tag. Defining an explicit branch solves the
-        # issue. From GitHub's docs:
-        #
-        # > if you define both branches/branches-ignore and paths/paths-ignore,
-        # > the workflow will only run when both filters are satisfied.
-        #
-        # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions
-        branches: ["**"]
-        # Only run if something changes in these paths
+        branches-ignore: [main]
         paths:
             - "web/**"
             - ".github/workflows/web-lint.yml"
