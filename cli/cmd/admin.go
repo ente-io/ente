@@ -6,6 +6,7 @@ import (
 	"github.com/ente-io/cli/pkg/model"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
+	"strings"
 )
 
 var _adminCmd = &cobra.Command{
@@ -57,6 +58,7 @@ var _updateFreeUserStorage = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		recoverWithLog()
 		var flags = &model.AdminActionForUser{}
+		noLimit := false
 		cmd.Flags().VisitAll(func(f *pflag.Flag) {
 			if f.Name == "admin-user" {
 				flags.AdminEmail = f.Value.String()
@@ -64,8 +66,11 @@ var _updateFreeUserStorage = &cobra.Command{
 			if f.Name == "user" {
 				flags.UserEmail = f.Value.String()
 			}
+			if f.Name == "no-limit" {
+				noLimit = strings.ToLower(f.Value.String()) == "true"
+			}
 		})
-		return ctrl.UpdateFreeStorage(context.Background(), *flags)
+		return ctrl.UpdateFreeStorage(context.Background(), *flags, noLimit)
 	},
 }
 
@@ -79,5 +84,7 @@ func init() {
 	_disable2faCmd.Flags().StringP("user", "u", "", "The email of the user to disable 2FA for. (required)")
 	_updateFreeUserStorage.Flags().StringP("admin-user", "a", "", "The email of the admin user. (required)")
 	_updateFreeUserStorage.Flags().StringP("user", "u", "", "The email of the user to update subscription for. (required)")
+	// add a flag with no value --no-limit
+	_updateFreeUserStorage.Flags().String("no-limit", "True", "Set the storage limit to 100TB unlimited with 100 year expiry")
 	_adminCmd.AddCommand(_userDetailsCmd, _disable2faCmd, _updateFreeUserStorage)
 }
