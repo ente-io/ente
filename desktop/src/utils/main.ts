@@ -14,7 +14,7 @@ import { isPlatform } from "./common/platform";
 import { buildContextMenu, buildMenuBar } from "./menu";
 const execAsync = util.promisify(require("child_process").exec);
 
-const PROD_HOST_URL: string = "ente://app";
+export const PROD_HOST_URL: string = "ente://app";
 const RENDERER_OUTPUT_DIR: string = "./out";
 
 export async function handleUpdates(mainWindow: BrowserWindow) {
@@ -79,6 +79,10 @@ export async function setupMainMenu(mainWindow: BrowserWindow) {
 }
 
 export function setupMainHotReload() {
+    // Hot reload the main process if anything changes in the source directory
+    // that we're running from. In particular, this gets triggered when `yarn
+    // watch` rebuilds JS files in the `app/` directory when we change the TS
+    // files in the `src/` directory.
     if (isDev) {
         electronReload(__dirname, {});
     }

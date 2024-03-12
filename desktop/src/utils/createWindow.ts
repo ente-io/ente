@@ -1,13 +1,13 @@
 import { app, BrowserWindow, nativeImage } from "electron";
 import ElectronLog from "electron-log";
 import * as path from "path";
-import { PROD_HOST_URL } from "../config";
 import { isAppQuitting } from "../main";
 import autoLauncher from "../services/autoLauncher";
 import { logErrorSentry } from "../services/sentry";
 import { getHideDockIconPreference } from "../services/userPreference";
 import { isDev } from "./common";
 import { isPlatform } from "./common/platform";
+import { PROD_HOST_URL } from "./main";
 
 export async function createWindow(): Promise<BrowserWindow> {
     const appImgPath = isDev
