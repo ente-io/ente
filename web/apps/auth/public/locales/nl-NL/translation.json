@@ -418,7 +418,7 @@
     "DOWNLOAD_UPLOAD_LOGS": "Logboeken voor foutmeldingen",
     "UPLOAD_FILES": "Bestand",
     "UPLOAD_DIRS": "Map",
-    "UPLOAD_GOOGLE_TAKEOUT": "Google takeout",
+    "UPLOAD_GOOGLE_TAKEOUT": "Google takeout (ZIP)",
     "DEDUPLICATE_FILES": "Dubbele bestanden verwijderen",
     "AUTHENTICATOR_SECTION": "Verificatie apparaat",
     "NO_DUPLICATES_FOUND": "Je hebt geen dubbele bestanden die kunnen worden gewist",

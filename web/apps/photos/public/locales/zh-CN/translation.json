@@ -416,7 +416,7 @@
     "DOWNLOAD_UPLOAD_LOGS": "调试日志",
     "UPLOAD_FILES": "文件",
     "UPLOAD_DIRS": "文件夹",
-    "UPLOAD_GOOGLE_TAKEOUT": "Google Takeout",
+    "UPLOAD_GOOGLE_TAKEOUT": "Google Takeout (ZIP)",
     "DEDUPLICATE_FILES": "删除重复文件",
     "AUTHENTICATOR_SECTION": "身份验证器",
     "NO_DUPLICATES_FOUND": "您没有可以清除的重复文件",

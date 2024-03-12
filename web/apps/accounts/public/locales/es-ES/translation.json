@@ -418,7 +418,7 @@
     "DOWNLOAD_UPLOAD_LOGS": "Logs de depuración",
     "UPLOAD_FILES": "Archivo",
     "UPLOAD_DIRS": "Carpeta",
-    "UPLOAD_GOOGLE_TAKEOUT": "Google Takeout",
+    "UPLOAD_GOOGLE_TAKEOUT": "Google Takeout (ZIP)",
     "DEDUPLICATE_FILES": "Deduplicar archivos",
     "AUTHENTICATOR_SECTION": "Autenticación",
     "NO_DUPLICATES_FOUND": "No tienes archivos duplicados que puedan ser borrados",

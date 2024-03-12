@@ -416,7 +416,7 @@
     "DOWNLOAD_UPLOAD_LOGS": "Journaux de débugs",
     "UPLOAD_FILES": "Fichier",
     "UPLOAD_DIRS": "Dossier",
-    "UPLOAD_GOOGLE_TAKEOUT": "Google Takeout",
+    "UPLOAD_GOOGLE_TAKEOUT": "Google Takeout (ZIP)",
     "DEDUPLICATE_FILES": "Déduplication de fichiers",
     "AUTHENTICATOR_SECTION": "Authentificateur",
     "NO_DUPLICATES_FOUND": "Vous n'avez aucun fichier dédupliqué pouvant être nettoyé",

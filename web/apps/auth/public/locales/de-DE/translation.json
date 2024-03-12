@@ -418,7 +418,7 @@
     "DOWNLOAD_UPLOAD_LOGS": "Debug logs",
     "UPLOAD_FILES": "Datei",
     "UPLOAD_DIRS": "Ordner",
-    "UPLOAD_GOOGLE_TAKEOUT": "Google Takeout",
+    "UPLOAD_GOOGLE_TAKEOUT": "Google Takeout (ZIP)",
     "DEDUPLICATE_FILES": "Deduplicate files",
     "AUTHENTICATOR_SECTION": "Authenticator",
     "NO_DUPLICATES_FOUND": "Du hast keine Duplikate, die gelöscht werden können",
