@@ -9,7 +9,11 @@ Cloudflare Pages.
   anything inside `docs/` gets merged to `main`.
 
 * Every night, all the web apps get automatically deployed to a nightly preview
-  URLs using the current code in main.
+  URLs (`*.ente.sh`) using the current code in main.
+
+* A preview deployment can be made by triggering the "Preview (web)" workflow.
+  This allows us to deploy a build of any of the apps from an arbitrary branch
+  to [preview.ente.sh](https://preview.ente.sh).
 
 Use the various `yarn deploy:*` commands to help with production deployments.
 For example, `yarn deploy:photos` will open a PR to merge the current `main`
@@ -21,6 +25,7 @@ and publish to [web.ente.io](https://web.ente.io).
 > the merge commit.
 
 ## Deployments
+
 Here is a list of all the deployments, whether or not they are production
 deployments, and the action that triggers them:
 
@@ -36,6 +41,7 @@ deployments, and the action that triggers them:
 | [auth.ente.sh](https://auth.ente.sh) | Preview | Nightly deploy of `main` |
 | [cast.ente.sh](https://cast.ente.sh) | Preview | Nightly deploy of `main` |
 | [photos.ente.sh](https://photos.ente.sh) | Preview | Nightly deploy of `main` |
+| [preview.ente.sh](https://preview.ente.sh) | Preview | Manually triggered |
 
 ### Other subdomains
 
@@ -48,6 +54,19 @@ Apart from this, there are also some other deployments:
 
 - `payments.ente.io` and `family.ente.io` are currently in a separate
   repositories (Enhancement: bring them in here).
+
+### Preview deployments
+
+To trigger a preview deployment, manually trigger the "Preview (web)" workflow
+from the Actions tab on GitHub. You'll need to select the app to build, and the
+branch to use. This'll then build the specified app (e.g. "photos") from that
+branch, and deploy it to [preview.ente.sh](https://preview.ente.sh).
+
+The workflow can also be triggered using GitHub's CLI, gh. e.g.
+
+```sh
+gh workflow run web-preview -F app=cast --ref my-branch
+```
 
 ---
 
