@@ -1,4 +1,6 @@
 import { app, BrowserWindow } from "electron";
+import electronReload from "electron-reload";
+import serveNextAt from "next-electron-server";
 import { initWatcher } from "./services/chokidar";
 import { isDev } from "./utils/common";
 import { addAllowOriginHeader } from "./utils/cors";
@@ -14,9 +16,7 @@ import {
     handleUpdates,
     logSystemInfo,
     setupMacWindowOnDockIconClick,
-    setupMainHotReload,
     setupMainMenu,
-    setupNextElectronServe,
     setupTrayItem,
 } from "./utils/main";
 import { setupMainProcessStatsLogger } from "./utils/processStats";
@@ -38,14 +38,43 @@ export const setIsAppQuitting = (value: boolean): void => {
 export const isUpdateAvailable = (): boolean => {
     return updateIsAvailable;
 };
+
 export const setIsUpdateAvailable = (value: boolean): void => {
     updateIsAvailable = value;
 };
 
+/**
+ * Hot reload the main process if anything changes in the source directory that
+ * we're running from.
+ *
+ * In particular, this gets triggered when the `tsc -w` rebuilds JS files in the
+ * `app/` directory when we change the TS files in the `src/` directory.
+ */
+const setupMainHotReload = () => {
+    if (isDev) {
+        electronReload(__dirname, {});
+    }
+};
+
+/**
+ * next-electron-server allows up to directly use the output of `next build` in
+ * production mode and `next dev` in development mode, whilst keeping the rest
+ * of our code the same.
+ *
+ * It uses protocol handlers to serve files from the "next://app" protocol
+ *
+ * - In development this is proxied to http://localhost:3000
+ * - In production it serves files from the `/out` directory
+ *
+ * For more details, see this comparison:
+ * https://github.com/HaNdTriX/next-electron-server/issues/5
+ */
+const setupRendererServer = () => {
+    serveNextAt("next://app");
+};
+
 setupMainHotReload();
-
-setupNextElectronServe();
-
+setupRendererServer();
 setupLogging(isDev);
 
 const gotTheLock = app.requestSingleInstanceLock();

@@ -2441,8 +2441,10 @@ natural-compare@^1.4.0:
   resolved "https://registry.yarnpkg.com/natural-compare/-/natural-compare-1.4.0.tgz#4abebfeed7541f2c27acfb29bdbbd15c8d5ba4f7"
   integrity sha512-OWND8ei3VtNC9h7V60qff3SVobHr996CTwgxubgyQYEpg290h9J0buyECNNJexkFm5sOajh5G116RYA1c8ZMSw==
 
-"next-electron-server@file:./thirdparty/next-electron-server":
-  version "0.0.8"
+next-electron-server@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/next-electron-server/-/next-electron-server-1.0.0.tgz#03e133ed64a5ef671b6c6409f908c4901b1828cb"
+  integrity sha512-fTUaHwT0Jry2fbdUSIkAiIqgDAInI5BJFF4/j90/okvZCYlyx6yxpXB30KpzmOG6TN/ESwyvsFJVvS2WHT8PAA==
 
 node-addon-api@^1.6.3:
   version "1.7.2"
@@ -2697,10 +2699,10 @@ prettier-plugin-packagejson@^2.4:
     sort-package-json "2.8.0"
     synckit "0.9.0"
 
-prettier@2.5.1:
-  version "2.5.1"
-  resolved "https://registry.yarnpkg.com/prettier/-/prettier-2.5.1.tgz#fff75fa9d519c54cf0fce328c1017d94546bc56a"
-  integrity sha512-vBZcPRUR5MZJwoyi3ZoyQlc1rXeEck8KgeC9AwwOn+exuxLxq5toTRDTSaVrXHxelDMHy9zlicw8u66yxoSUFg==
+prettier@^3:
+  version "3.2.5"
+  resolved "https://registry.yarnpkg.com/prettier/-/prettier-3.2.5.tgz#e52bc3090586e824964a8813b09aba6233b28368"
+  integrity sha512-3/GWa9aOC0YeD7LUfvOG2NiDyhOWRvt1k+rcKhOuYnMY24iiCphgneUfJDyFXd6rZCAnuLBv6UeAULtrhT/F4A==
 
 pretty-bytes@^4.0.2:
   version "4.0.2"
