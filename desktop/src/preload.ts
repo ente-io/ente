@@ -8,12 +8,10 @@ import { computeImageEmbedding, computeTextEmbedding } from "./api/clip";
 import {
     getAppVersion,
     getPlatform,
-    getSentryUserID,
     logToDisk,
     openDirectory,
     openLogDirectory,
     selectDirectory,
-    updateOptOutOfCrashReports,
 } from "./api/common";
 import { clearElectronStore } from "./api/electronStore";
 import {
@@ -108,7 +106,6 @@ windowObject["ElectronAPIs"] = {
     registerUpdateEventListener,
     updateAndRestart,
     skipAppUpdate,
-    getSentryUserID,
     getAppVersion,
     runFFmpegCmd,
     muteUpdateNotification,
@@ -120,7 +117,6 @@ windowObject["ElectronAPIs"] = {
     deleteFolder,
     rename,
     deleteFile,
-    updateOptOutOfCrashReports,
     computeImageEmbedding,
     computeTextEmbedding,
     getPlatform,

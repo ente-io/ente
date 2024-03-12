@@ -18,7 +18,6 @@
         "watch": "tsc -w"
     },
     "dependencies": {
-        "@sentry/electron": "^2.5.1",
         "any-shell-escape": "^0.1.1",
         "auto-launch": "^5.0.5",
         "chokidar": "^3.5.3",
@@ -38,7 +37,6 @@
         "promise-fs": "^2.1.1"
     },
     "devDependencies": {
-        "@sentry/cli": "^1.68.0",
         "@types/auto-launch": "^5.0.2",
         "@types/ffmpeg-static": "^3.0.1",
         "@types/get-folder-size": "^2.0.0",

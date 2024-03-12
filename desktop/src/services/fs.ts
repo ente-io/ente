@@ -3,9 +3,10 @@ import StreamZip from "node-stream-zip";
 import path from "path";
 import * as fs from "promise-fs";
 import { Readable } from "stream";
-import { FILE_STREAM_CHUNK_SIZE } from "../config";
 import { ElectronFile } from "../types";
 import { logError } from "./logging";
+
+const FILE_STREAM_CHUNK_SIZE: number = 4 * 1024 * 1024;
 
 // https://stackoverflow.com/a/63111390
 export const getDirFilePaths = async (dirPath: string) => {

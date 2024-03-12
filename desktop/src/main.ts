@@ -1,7 +1,5 @@
 import { app, BrowserWindow } from "electron";
 import { initWatcher } from "./services/chokidar";
-import { initSentry } from "./services/sentry";
-import { getOptOutOfCrashReports } from "./services/userPreference";
 import { isDev } from "./utils/common";
 import { addAllowOriginHeader } from "./utils/cors";
 import { createWindow } from "./utils/createWindow";
@@ -29,8 +27,6 @@ let appIsQuitting = false;
 
 let updateIsAvailable = false;
 
-let optedOutOfCrashReports = false;
-
 export const isAppQuitting = (): boolean => {
     return appIsQuitting;
 };
@@ -44,14 +40,6 @@ export const isUpdateAvailable = (): boolean => {
 };
 export const setIsUpdateAvailable = (value: boolean): void => {
     updateIsAvailable = value;
-};
-
-export const hasOptedOutOfCrashReports = (): boolean => {
-    return optedOutOfCrashReports;
-};
-
-export const updateOptOutOfCrashReports = (value: boolean): void => {
-    optedOutOfCrashReports = value;
 };
 
 setupMainHotReload();
@@ -83,11 +71,6 @@ if (!gotTheLock) {
     app.on("ready", async () => {
         logSystemInfo();
         setupMainProcessStatsLogger();
-        const hasOptedOutOfCrashReports = getOptOutOfCrashReports();
-        updateOptOutOfCrashReports(hasOptedOutOfCrashReports);
-        if (!hasOptedOutOfCrashReports) {
-            initSentry();
-        }
         mainWindow = await createWindow();
         const tray = setupTrayItem(mainWindow);
         const watcher = initWatcher(mainWindow);

@@ -6,7 +6,6 @@ import os from "os";
 import path from "path";
 import { existsSync } from "promise-fs";
 import util from "util";
-import { PROD_HOST_URL, RENDERER_OUTPUT_DIR } from "../config";
 import { setupAutoUpdater } from "../services/appUpdater";
 import autoLauncher from "../services/autoLauncher";
 import { getHideDockIconPreference } from "../services/userPreference";
@@ -14,6 +13,9 @@ import { isDev } from "./common";
 import { isPlatform } from "./common/platform";
 import { buildContextMenu, buildMenuBar } from "./menu";
 const execAsync = util.promisify(require("child_process").exec);
+
+const PROD_HOST_URL: string = "ente://app";
+const RENDERER_OUTPUT_DIR: string = "./out";
 
 export async function handleUpdates(mainWindow: BrowserWindow) {
     const isInstalledViaBrew = await checkIfInstalledViaBrew();

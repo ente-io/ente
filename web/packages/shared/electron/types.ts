@@ -80,7 +80,6 @@ export interface ElectronAPIsType {
     ) => void;
     updateAndRestart: () => void;
     skipAppUpdate: (version: string) => void;
-    getSentryUserID: () => Promise<string>;
     getAppVersion: () => Promise<string>;
     runFFmpegCmd: (
         cmd: string[],
@@ -101,7 +100,6 @@ export interface ElectronAPIsType {
     deleteFolder: (path: string) => Promise<void>;
     deleteFile: (path: string) => void;
     rename: (oldPath: string, newPath: string) => Promise<void>;
-    updateOptOutOfCrashReports: (optOut: boolean) => Promise<void>;
     computeImageEmbedding: (
         model: Model,
         imageData: Uint8Array,
