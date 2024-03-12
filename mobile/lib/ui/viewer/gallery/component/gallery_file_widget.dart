@@ -73,6 +73,14 @@ class GalleryFileWidget extends StatelessWidget {
             borderRadius: BorderRadius.circular(1),
             child: Hero(
               tag: heroTag,
+              flightShuttleBuilder: (
+                flightContext,
+                animation,
+                flightDirection,
+                fromHeroContext,
+                toHeroContext,
+              ) =>
+                  thumbnailWidget,
               transitionOnUserGestures: true,
               child: isFileSelected
                   ? ColorFiltered(
