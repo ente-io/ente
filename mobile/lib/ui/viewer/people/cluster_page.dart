@@ -1,6 +1,7 @@
 import "dart:async";
 
 import 'package:flutter/material.dart';
+import "package:flutter_animate/flutter_animate.dart";
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
@@ -9,6 +10,7 @@ import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file_load_result.dart';
 import 'package:photos/models/gallery_type.dart';
 import 'package:photos/models/selected_files.dart';
+import "package:photos/ui/components/notification_widget.dart";
 import 'package:photos/ui/viewer/actions/file_selection_overlay_bar.dart';
 import 'package:photos/ui/viewer/gallery/gallery.dart';
 import 'package:photos/ui/viewer/gallery/gallery_app_bar_widget.dart';
@@ -102,36 +104,60 @@ class _ClusterPageState extends State<ClusterPage> {
     return Scaffold(
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(50.0),
-        child: GestureDetector(
-          onTap: () async {
-            if (widget.personID == null) {
-              final result = await showAssignPersonAction(
-                context,
-                clusterID: widget.cluserID,
-              );
-              if (result != null && result is Person) {
-                Navigator.pop(context);
-                // ignore: unawaited_futures
-                routeToPage(context, PeoplePage(person: result));
-              }
-            } else {
-              showShortToast(context, "11No personID or clusterID");
-            }
-          },
-          child: GalleryAppBarWidget(
-            SearchResultPage.appBarType,
-            widget.personID != null ? widget.personID!.attr.name : "Add name",
-            _selectedFiles,
-          ),
+        child: GalleryAppBarWidget(
+          SearchResultPage.appBarType,
+          widget.personID != null
+              ? widget.personID!.attr.name
+              : "${widget.searchResult.length} memories",
+          _selectedFiles,
         ),
       ),
-      body: Stack(
-        alignment: Alignment.bottomCenter,
+      body: Column(
         children: [
-          gallery,
-          FileSelectionOverlayBar(
-            ClusterPage.overlayType,
-            _selectedFiles,
+          const SizedBox(height: 12),
+          RepaintBoundary(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8.0),
+              child: NotificationWidget(
+                startIcon: Icons.person_add_outlined,
+                actionIcon: Icons.add_outlined,
+                text: "Add a name",
+                subText: "Find persons quickly by searching by name",
+                type: NotificationType.notice,
+                onTap: () async {
+                  if (widget.personID == null) {
+                    final result = await showAssignPersonAction(
+                      context,
+                      clusterID: widget.cluserID,
+                    );
+                    if (result != null && result is Person) {
+                      Navigator.pop(context);
+                      // ignore: unawaited_futures
+                      routeToPage(context, PeoplePage(person: result));
+                    }
+                  } else {
+                    showShortToast(context, "No personID or clusterID");
+                  }
+                },
+              ),
+            ).animate(onPlay: (controller) => controller.repeat()).shimmer(
+                  duration: 1000.ms,
+                  delay: 3200.ms,
+                  size: 0.6,
+                ),
+          ),
+          const SizedBox(height: 12),
+          Expanded(
+            child: Stack(
+              alignment: Alignment.bottomCenter,
+              children: [
+                gallery,
+                FileSelectionOverlayBar(
+                  ClusterPage.overlayType,
+                  _selectedFiles,
+                ),
+              ],
+            ),
           ),
         ],
       ),
