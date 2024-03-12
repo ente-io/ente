@@ -4,14 +4,16 @@
     "private": true,
     "description": "Desktop client for Ente Photos",
     "author": "Ente <code@ente.io>",
-    "main": "build/app/main.js",
+    "main": "app/main.js",
     "scripts": {
-        "build": "mkdir -p build && yarn build-renderer && yarn build-main",
-        "build-main": "tsc && electron-builder --config.compression=store",
-        "build-renderer": "cd ../web && yarn install && yarn build:photos && cd ../desktop/build && rm -f out && ln -sf ../../web/apps/photos/out",
+        "build": "yarn build-renderer && yarn build-main",
+        "build-local": "yarn build-renderer && yarn build-main-local",
+        "build-main": "tsc && electron-builder",
+        "build-main-local": "tsc && electron-builder --config.compression=store",
+        "build-renderer": "cd ../web && yarn install && yarn build:photos && cd ../desktop && rm -f out && ln -sf ../web/apps/photos/out",
         "dev": "concurrently \"yarn dev-main\" \"yarn dev-renderer\"",
         "dev-main": "tsc && electron build/app/main.js",
-        "dev-renderer": "cd ../web && yarn install && yarn dev:photos && cd ../desktop/build && rm -f out && ln -sf ../../web/apps/photos/out",
+        "dev-renderer": "cd ../web && yarn install && yarn dev:photos",
         "postinstall": "electron-builder install-app-deps",
         "lint": "yarn prettier --check . && eslint \"src/**/*.ts\"",
         "lint-fix": "yarn prettier --write . && eslint --fix .",
@@ -110,26 +112,20 @@
             "x64ArchFiles": "Contents/Resources/ggmlclip-mac"
         },
         "afterSign": "electron-builder-notarize",
-        "extraFiles": [
-            {
-                "from": "resources",
-                "to": "resources",
-                "filter": [
-                    "**/*"
-                ]
-            }
-        ],
         "asarUnpack": [
             "node_modules/ffmpeg-static/bin/${os}/${arch}/ffmpeg",
             "node_modules/ffmpeg-static/index.js",
             "node_modules/ffmpeg-static/package.json"
         ],
-        "files": [
-            "build/app/**/*",
+        "extraFiles": [
             {
-                "from": "build/out",
-                "to": "out"
+                "from": "build",
+                "to": "resources"
             }
+        ],
+        "files": [
+            "app/**/*",
+            "out"
         ]
     },
     "productName": "ente",
