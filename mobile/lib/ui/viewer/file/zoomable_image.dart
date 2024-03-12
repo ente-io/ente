@@ -106,7 +106,7 @@ class _ZoomableImageState extends State<ZoomableImage> {
           backgroundDecoration: widget.backgroundDecoration as BoxDecoration?,
           loadingBuilder: (context, event) {
             // This is to make sure the hero anitmation animates and fits in the
-            //width of the image on screen.
+            //dimensions of the image on screen.
             final screenDimensions = MediaQuery.sizeOf(context);
             late final double screenRelativeImageWidth;
             late final double screenRelativeImageHeight;
