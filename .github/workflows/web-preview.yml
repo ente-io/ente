@@ -1,6 +1,7 @@
 name: "Preview (web)"
 
 on:
+    push: # <- temporarily added so that we can register the action
     workflow_dispatch:
         inputs:
             app:
