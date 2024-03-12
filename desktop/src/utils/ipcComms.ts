@@ -10,7 +10,6 @@ import {
     Tray,
 } from "electron";
 import path from "path";
-import { updateOptOutOfCrashReports } from "../main";
 import {
     getAppVersion,
     muteUpdateNotification,
@@ -27,11 +26,10 @@ import {
     convertToJPEG,
     generateImageThumbnail,
 } from "../services/imageProcessor";
-import { getSentryUserID, logErrorSentry } from "../services/sentry";
+import { logErrorSentry } from "../services/sentry";
 import {
     getCustomCacheDirectory,
     setCustomCacheDirectory,
-    setOptOutOfCrashReports,
 } from "../services/userPreference";
 import { getPlatform } from "./common/platform";
 import { createWindow } from "./createWindow";
@@ -146,9 +144,6 @@ export default function setupIpcComs(
     ipcMain.on("mute-update-notification", (_, version) => {
         muteUpdateNotification(version);
     });
-    ipcMain.handle("get-sentry-id", () => {
-        return getSentryUserID();
-    });
 
     ipcMain.handle("get-app-version", () => {
         return getAppVersion();
@@ -179,10 +174,6 @@ export default function setupIpcComs(
         }
     );
 
-    ipcMain.handle("update-opt-out-crash-reports", (_, optOut) => {
-        setOptOutOfCrashReports(optOut);
-        updateOptOutOfCrashReports(optOut);
-    });
     ipcMain.handle("compute-image-embedding", (_, model, inputFilePath) => {
         return computeImageEmbedding(model, inputFilePath);
     });

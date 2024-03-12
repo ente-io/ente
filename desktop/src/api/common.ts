@@ -36,9 +36,4 @@ export const getPlatform = async (): Promise<"mac" | "windows" | "linux"> => {
     }
 };
 
-export {
-    getSentryUserID,
-    logToDisk,
-    openLogDirectory,
-    updateOptOutOfCrashReports,
-} from "../services/logging";
+export { logToDisk, openLogDirectory } from "../services/logging";
