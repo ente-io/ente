@@ -134,11 +134,13 @@ export default function UtilitySection({ closeSidebar }) {
                 label={t("TWO_FACTOR")}
             />
 
+            {isInternalUser() && (
             <EnteMenuItem
                 variant="secondary"
                 onClick={redirectToAccountsPage}
                 label={t("PASSKEYS")}
             />
+            )}
 
             <EnteMenuItem
                 variant="secondary"
