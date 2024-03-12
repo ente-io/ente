@@ -1,7 +1,6 @@
 name: "Preview (web)"
 
 on:
-    push: # <- temporarily added so that we can register the action
     workflow_dispatch:
         inputs:
             app:
@@ -39,10 +38,10 @@ jobs:
             - name: Install dependencies
               run: yarn install
 
-            - name: Build accounts
+            - name: Build ${{ inputs.app }}
               run: yarn build:${{ inputs.app }}
 
-            - name: Publish accounts
+            - name: Publish ${{ inputs.app }} to preview
               uses: cloudflare/pages-action@1
               with:
                   accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
