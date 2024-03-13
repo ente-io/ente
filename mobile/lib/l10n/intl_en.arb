@@ -1189,7 +1189,6 @@
   "cleanUncategorized": "Clean Uncategorized",
   "cleanUncategorizedDescription": "Remove all files from Uncategorized that are present in other albums",
   "waitingForVerification": "Waiting for verification...",
-  "launchPasskeyUrlAgain": "Launch passkey URL again",
   "passkey": "Passkey",
   "passkeyAuthTitle": "Passkey verification",
   "verifyPasskey": "Verify passkey",

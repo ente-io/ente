@@ -8318,16 +8318,6 @@ class S {
     );
   }
 
-  /// `Launch passkey URL again`
-  String get launchPasskeyUrlAgain {
-    return Intl.message(
-      'Launch passkey URL again',
-      name: 'launchPasskeyUrlAgain',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `Passkey`
   String get passkey {
     return Intl.message(

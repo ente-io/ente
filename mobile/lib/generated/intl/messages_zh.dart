@@ -674,8 +674,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("请帮助我们了解这个信息"),
         "language": MessageLookupByLibrary.simpleMessage("语言"),
         "lastUpdated": MessageLookupByLibrary.simpleMessage("最后更新"),
-        "launchPasskeyUrlAgain":
-            MessageLookupByLibrary.simpleMessage("再次启动 通行密钥 URL"),
         "leave": MessageLookupByLibrary.simpleMessage("离开"),
         "leaveAlbum": MessageLookupByLibrary.simpleMessage("离开相册"),
         "leaveFamily": MessageLookupByLibrary.simpleMessage("离开家庭计划"),
