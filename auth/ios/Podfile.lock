@@ -71,8 +71,6 @@ PODS:
   - move_to_background (0.0.1):
     - Flutter
   - MTBBarcodeScanner (5.0.11)
-  - open_filex (0.0.2):
-    - Flutter
   - OrderedSet (5.0.0)
   - package_info_plus (0.4.5):
     - Flutter
@@ -126,7 +124,6 @@ DEPENDENCIES:
   - fluttertoast (from `.symlinks/plugins/fluttertoast/ios`)
   - local_auth_ios (from `.symlinks/plugins/local_auth_ios/ios`)
   - move_to_background (from `.symlinks/plugins/move_to_background/ios`)
-  - open_filex (from `.symlinks/plugins/open_filex/ios`)
   - package_info_plus (from `.symlinks/plugins/package_info_plus/ios`)
   - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/darwin`)
   - privacy_screen (from `.symlinks/plugins/privacy_screen/ios`)
@@ -183,8 +180,6 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/local_auth_ios/ios"
   move_to_background:
     :path: ".symlinks/plugins/move_to_background/ios"
-  open_filex:
-    :path: ".symlinks/plugins/open_filex/ios"
   package_info_plus:
     :path: ".symlinks/plugins/package_info_plus/ios"
   path_provider_foundation:
@@ -226,7 +221,6 @@ SPEC CHECKSUMS:
   local_auth_ios: c6cf091ded637a88f24f86a8875d8b0f526e2605
   move_to_background: 39a5b79b26d577b0372cbe8a8c55e7aa9fcd3a2d
   MTBBarcodeScanner: f453b33c4b7dfe545d8c6484ed744d55671788cb
-  open_filex: 6e26e659846ec990262224a12ef1c528bb4edbe4
   OrderedSet: aaeb196f7fef5a9edf55d89760da9176ad40b93c
   package_info_plus: fd030dabf36271f146f1f3beacd48f564b0f17f7
   path_provider_foundation: 29f094ae23ebbca9d3d0cec13889cd9060c0e943
