@@ -10,5 +10,5 @@ dependencies that are used by the Photos desktop app.
 ### next-electron-server
 
 This spins up a server for serving files using a protocol handler inside our
-Electron process. This allows us to directly use the output produced by `next
-build` for loading into our renderer process.
+Electron process. This allows us to directly use the output produced by
+`next build` for loading into our renderer process.
