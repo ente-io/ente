@@ -1,4 +1,4 @@
-## Welcome!
+# Welcome!
 
 If you're new to this sort of stuff or coming back to it after mobile/backend
 development, here is a recommended workflow:
@@ -13,3 +13,14 @@ development, here is a recommended workflow:
    `yarn` comes with it.
 
 That's it. Enjoy coding!
+
+## Yarn
+
+Note that we use Yarn classic
+
+```
+$ yarn --version
+1.22.21
+```
+
+You should be seeing a 1.xx.xx version, otherwise your `yarn install` will fail.

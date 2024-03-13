@@ -33,6 +33,7 @@ export const sidebar = [
                     },
                     { text: "Quick link", link: "/photos/features/quick-link" },
                     { text: "Referrals", link: "/photos/features/referrals" },
+                    { text: "Sharing", link: "/photos/features/sharing" },
                     { text: "Trash", link: "/photos/features/trash" },
                     {
                         text: "Uncategorized",
@@ -65,11 +66,59 @@ export const sidebar = [
         text: "Auth",
         items: [
             { text: "Introduction", link: "/auth/" },
+            { text: "FAQ", link: "/auth/faq/" },
             {
                 text: "Migration guides",
                 collapsed: true,
                 items: [
                     { text: "Introduction", link: "/auth/migration-guides/" },
+                ],
+            },
+        ],
+    },
+    {
+        text: "Self hosting",
+        collapsed: true,
+        items: [
+            { text: "Getting started", link: "/self-hosting/" },
+            {
+                text: "Guides",
+                items: [
+                    { text: "Introduction", link: "/self-hosting/guides/" },
+                    {
+                        text: "Configure custom server",
+                        link: "/self-hosting/guides/custom-server/",
+                    },
+                    {
+                        text: "Mobile build",
+                        link: "/self-hosting/guides/mobile-build",
+                    },
+                    {
+                        text: "System requirements",
+                        link: "/self-hosting/guides/system-requirements",
+                    },
+                    {
+                        text: "Using external S3",
+                        link: "/self-hosting/guides/external-s3",
+                    },
+                ],
+            },
+            {
+                text: "FAQ",
+                items: [
+                    {
+                        text: "Verification code",
+                        link: "/self-hosting/faq/otp",
+                    },
+                ],
+            },
+            {
+                text: "Troubleshooting",
+                items: [
+                    {
+                        text: "Yarn",
+                        link: "/self-hosting/troubleshooting/yarn",
+                    },
                 ],
             },
         ],

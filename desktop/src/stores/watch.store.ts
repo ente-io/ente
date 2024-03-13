@@ -1,39 +1,39 @@
-import Store, { Schema } from 'electron-store';
-import { WatchStoreType } from '../types';
+import Store, { Schema } from "electron-store";
+import { WatchStoreType } from "../types";
 
 const watchStoreSchema: Schema<WatchStoreType> = {
     mappings: {
-        type: 'array',
+        type: "array",
         items: {
-            type: 'object',
+            type: "object",
             properties: {
                 rootFolderName: {
-                    type: 'string',
+                    type: "string",
                 },
                 uploadStrategy: {
-                    type: 'number',
+                    type: "number",
                 },
                 folderPath: {
-                    type: 'string',
+                    type: "string",
                 },
                 syncedFiles: {
-                    type: 'array',
+                    type: "array",
                     items: {
-                        type: 'object',
+                        type: "object",
                         properties: {
                             path: {
-                                type: 'string',
+                                type: "string",
                             },
                             id: {
-                                type: 'number',
+                                type: "number",
                             },
                         },
                     },
                 },
                 ignoredFiles: {
-                    type: 'array',
+                    type: "array",
                     items: {
-                        type: 'string',
+                        type: "string",
                     },
                 },
             },
@@ -42,6 +42,6 @@ const watchStoreSchema: Schema<WatchStoreType> = {
 };
 
 export const watchStore = new Store({
-    name: 'watch-status',
+    name: "watch-status",
     schema: watchStoreSchema,
 });

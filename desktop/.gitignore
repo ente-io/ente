@@ -1,12 +1,21 @@
-node_modules
-app
-.next/
-dist
-.vscode
-buildingSteps.md
+# Node
+node_modules/
+
+# macOS
 .DS_Store
-.idea/
-build/.DS_Store
+
+# Editors
+.vscode/
+
+# Local env files
 .env
-.electron-symbols/
-models/
+.env.*.local
+
+# tsc transpiles src/**/*.ts and emits the generated JS into app
+app/
+
+# out is a symlink to the photos web app's dir
+out
+
+# electron-builder
+dist/

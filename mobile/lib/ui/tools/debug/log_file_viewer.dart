@@ -43,6 +43,9 @@ class _LogFileViewerState extends State<LogFileViewer> {
     return Container(
       padding: const EdgeInsets.only(left: 12, top: 8, right: 12),
       child: Scrollbar(
+        interactive: true,
+        thickness: 4,
+        radius: const Radius.circular(2),
         child: SingleChildScrollView(
           child: Text(
             _logs!,

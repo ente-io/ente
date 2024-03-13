@@ -718,6 +718,9 @@ export function PhotoList({
     };
 
     useEffect(() => {
+        // Nothing to do here if nothing is selected.
+        if (!galleryContext.selectedFile) return;
+
         const notSelectedFiles = displayFiles?.filter(
             (item) => !galleryContext.selectedFile[item.id],
         );
@@ -786,7 +789,7 @@ export function PhotoList({
                                 <Checkbox
                                     key={item.date}
                                     name={item.date}
-                                    checked={checkedDates[item.date]}
+                                    checked={!!checkedDates[item.date]}
                                     onChange={() =>
                                         onChangeSelectAllCheckBox(item.date)
                                     }
@@ -804,7 +807,7 @@ export function PhotoList({
                         <Checkbox
                             key={listItem.date}
                             name={listItem.date}
-                            checked={checkedDates[listItem.date]}
+                            checked={!!checkedDates[listItem.date]}
                             onChange={() =>
                                 onChangeSelectAllCheckBox(listItem.date)
                             }

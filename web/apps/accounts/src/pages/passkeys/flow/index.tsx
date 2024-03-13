@@ -40,6 +40,7 @@ const PasskeysFlow = () => {
                 redirect !== "" &&
                 !(
                     redirectURL.host.endsWith(".ente.io") ||
+                    redirectURL.host.endsWith(".ente.sh") ||
                     redirectURL.host.endsWith("bada-frame.pages.dev")
                 ) &&
                 redirectURL.protocol !== "ente:" &&

@@ -11,9 +11,9 @@ Ente is a end-to-end encrypted platform for privately, reliably, and securely
 storing your data on the cloud. On top of this platform, Ente offers two
 products:
 
-* **Ente Photos** - An alternative to Google Photos and Apple Photos
+-   **Ente Photos** - An alternative to Google Photos and Apple Photos
 
-* **Ente Auth** - A free 2FA alternative to Authy
+-   **Ente Auth** - A free 2FA alternative to Authy
 
 Both these apps are available for all desktop (Linux, Mac, Windows) and mobile
 (Android, iOS and F-Droid) platforms. They also work directly in your web
@@ -60,8 +60,8 @@ how we're building Ente, you can read our [blog](https://ente.io/blog) (or
 subscribe to it via [RSS](https://ente.io/blog/rss.xml))
 
 To suggest new features and/or offer your perspective on how we should design
-planned and upcoming features, use our [GitHub
-discussions](https://github.com/ente-io/ente/discussions)
+planned and upcoming features, use our
+[GitHub discussions](https://github.com/ente-io/ente/discussions)
 
 Or if you'd just like to hang out, join our
 [Discord](https://discord.gg/z2YVKkycX3), follow us on

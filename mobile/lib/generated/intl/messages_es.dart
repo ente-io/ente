@@ -487,6 +487,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("¿Borrar álbum compartido?"),
         "deleteSharedAlbumDialogBody": MessageLookupByLibrary.simpleMessage(
             "El álbum se eliminará para todos\n\nPerderás el acceso a las fotos compartidas en este álbum que son propiedad de otros"),
+        "descriptions": MessageLookupByLibrary.simpleMessage("Descriptions"),
         "deselectAll":
             MessageLookupByLibrary.simpleMessage("Deseleccionar todo"),
         "designedToOutlive":
@@ -761,6 +762,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Nombre de la ubicación"),
         "locationTagFeatureDescription": MessageLookupByLibrary.simpleMessage(
             "Una etiqueta de ubicación agrupa todas las fotos que fueron tomadas dentro de un radio de una foto"),
+        "locations": MessageLookupByLibrary.simpleMessage("Locations"),
         "lockButtonLabel": MessageLookupByLibrary.simpleMessage("Bloquear"),
         "lockScreenEnablePreSteps": MessageLookupByLibrary.simpleMessage(
             "Para activar la pantalla de bloqueo, por favor configure el código de acceso del dispositivo o el bloqueo de pantalla en los ajustes de su sistema."),
@@ -1036,8 +1038,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Nombre del álbum"),
         "searchByExamples": MessageLookupByLibrary.simpleMessage(
             "• Nombres de álbumes (por ejemplo, \"Cámara\")\n• Tipos de archivos (por ejemplo, \"Videos\", \".gif\")\n• Años y meses (por ejemplo, \"2022\", \"Enero\")\n• Vacaciones (por ejemplo, \"Navidad\")\n• Descripciones fotográficas (por ejemplo, \"#diversión\")"),
-        "searchHintText": MessageLookupByLibrary.simpleMessage(
-            "Álbunes, meses, días, años, ..."),
         "security": MessageLookupByLibrary.simpleMessage("Seguridad"),
         "selectALocation":
             MessageLookupByLibrary.simpleMessage("Select a location"),

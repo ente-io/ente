@@ -39,11 +39,11 @@ Chromecast TVs or other Internet-connected large screen devices.
     </div>
 
     On Google Chrome and other Chromium browsers, you will see a button labeled
-    "Auto Pair". This option will prompt you to select a Chromecast supported device
-    on your local network. Note: this option requires connecting to Google servers
-    to load necessary dependencies. This option does not transmit any sensitive data
-    through Google servers, such as your photos. Once your Chromecast device is
-    connected, you're all set.
+    "Auto Pair". This option will prompt you to select a Chromecast supported
+    device on your local network. Note: this option requires connecting to
+    Google servers to load necessary dependencies. This option does not transmit
+    any sensitive data through Google servers, such as your photos. Once your
+    Chromecast device is connected, you're all set.
 
     On all browsers, you'll see the option to "Pair with PIN". This option works
     with all devices, Chromecast-enabled or not. You'll be required to load up

@@ -167,7 +167,7 @@ class SuperLogging {
       await setupLogDir();
     }
     if (sentryIsEnabled) {
-      await setupSentry();
+      setupSentry().ignore();
     }
 
     Logger.root.level = Level.ALL;
@@ -250,7 +250,7 @@ class SuperLogging {
 
     // add error to sentry queue
     if (sentryIsEnabled && rec.error != null) {
-      await _sendErrorToSentry(rec.error!, null);
+      _sendErrorToSentry(rec.error!, null).ignore();
     }
   }
 

@@ -1,6 +1,7 @@
 package model
 
 import (
+	"encoding/base64"
 	"fmt"
 	"github.com/ente-io/cli/internal/api"
 )
@@ -17,7 +18,7 @@ type Account struct {
 	ExportDir string    `json:"exportDir"`
 }
 
-type UpdateAccountParams struct {
+type AccountCommandParams struct {
 	Email     string
 	App       api.App
 	ExportDir *string
@@ -36,4 +37,8 @@ type AccSecretInfo struct {
 	SecretKey []byte
 	Token     []byte
 	PublicKey []byte
+}
+
+func (a *AccSecretInfo) TokenStr() string {
+	return base64.URLEncoding.EncodeToString(a.Token)
 }

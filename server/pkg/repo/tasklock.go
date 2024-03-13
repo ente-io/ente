@@ -71,6 +71,18 @@ func (repo *TaskLockRepository) ReleaseLock(name string) error {
 	return stacktrace.Propagate(err, "")
 }
 
+func (repo *TaskLockRepository) ReleaseLocksBy(lockedBy string) (*int64, error) {
+	result, err := repo.DB.Exec(`DELETE FROM task_lock WHERE locked_by = $1`, lockedBy)
+	if err != nil {
+		return nil, stacktrace.Propagate(err, "")
+	}
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return nil, stacktrace.Propagate(err, "")
+	}
+	return &rowsAffected, nil
+}
+
 func (repo *TaskLockRepository) CleanupExpiredLocks() error {
 	result, err := repo.DB.Exec(`DELETE FROM task_lock WHERE lock_until < $1`, time.Microseconds())
 	if err != nil {

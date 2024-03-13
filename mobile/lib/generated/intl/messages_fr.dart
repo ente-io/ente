@@ -562,6 +562,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Supprimer l\'album partagé ?"),
         "deleteSharedAlbumDialogBody": MessageLookupByLibrary.simpleMessage(
             "L\'album sera supprimé pour tout le monde\n\nVous perdrez l\'accès aux photos partagées dans cet album qui sont détenues par d\'autres personnes"),
+        "descriptions": MessageLookupByLibrary.simpleMessage("Descriptions"),
         "deselectAll":
             MessageLookupByLibrary.simpleMessage("Tout déselectionner"),
         "designedToOutlive":
@@ -870,6 +871,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "locationName": MessageLookupByLibrary.simpleMessage("Nom du lieu"),
         "locationTagFeatureDescription": MessageLookupByLibrary.simpleMessage(
             "Un tag d\'emplacement regroupe toutes les photos qui ont été prises dans un certain rayon d\'une photo"),
+        "locations": MessageLookupByLibrary.simpleMessage("Locations"),
         "lockButtonLabel": MessageLookupByLibrary.simpleMessage("Verrouiller"),
         "lockScreenEnablePreSteps": MessageLookupByLibrary.simpleMessage(
             "Pour activer l\'écran de verrouillage, veuillez configurer le code d\'accès de l\'appareil ou le verrouillage de l\'écran dans les paramètres de votre système."),
@@ -1194,8 +1196,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "searchHint4": MessageLookupByLibrary.simpleMessage("Emplacement"),
         "searchHint5": MessageLookupByLibrary.simpleMessage(
             "Bientôt: Visages & recherche magique ✨"),
-        "searchHintText": MessageLookupByLibrary.simpleMessage(
-            "Albums, mois, jours, années, ..."),
         "searchLocationEmptySection": MessageLookupByLibrary.simpleMessage(
             "Grouper les photos qui sont prises dans un certain angle d\'une photo"),
         "searchPeopleEmptySection": MessageLookupByLibrary.simpleMessage(

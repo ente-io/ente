@@ -7,6 +7,7 @@ export default defineConfig({
     description: "Documentation and help for Ente's products",
     head: [["link", { rel: "icon", type: "image/png", href: "/favicon.png" }]],
     cleanUrls: true,
+    ignoreDeadLinks: "localhostLinks",
     themeConfig: {
         // We use the default theme (with some CSS color overrides). This
         // themeConfig block can be used to further customize the default theme.

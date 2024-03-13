@@ -360,18 +360,6 @@ func (h *CollectionHandler) GetSharees(c *gin.Context) {
 	})
 }
 
-// Trash deletes a given collection and move file exclusive to the collection to trash
-func (h *CollectionHandler) Trash(c *gin.Context) {
-	cID, _ := strconv.ParseInt(c.Param("collectionID"), 10, 64)
-	userID := auth.GetUserID(c.Request.Header)
-	err := h.Controller.Trash(c, userID, cID)
-	if err != nil {
-		handler.Error(c, stacktrace.Propagate(err, ""))
-		return
-	}
-	c.Status(http.StatusOK)
-}
-
 func (h *CollectionHandler) TrashV3(c *gin.Context) {
 	var req ente.TrashCollectionV3Request
 	if err := c.ShouldBindQuery(&req); err != nil {

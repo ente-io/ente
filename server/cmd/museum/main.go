@@ -14,6 +14,8 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/ente-io/museum/pkg/repo/two_factor_recovery"
+
 	"github.com/ente-io/museum/pkg/controller/cast"
 
 	"github.com/ente-io/museum/pkg/controller/commonbilling"
@@ -117,6 +119,14 @@ func main() {
 	if err != nil {
 		log.Fatal("Could not get host name", err)
 	}
+	taskLockingRepo := &repo.TaskLockRepository{DB: db}
+	lockController := &lock.LockController{
+		TaskLockingRepo: taskLockingRepo,
+		HostName:        hostName,
+	}
+	// Note: during boot-up, release any locks that might have been left behind.
+	// This is a safety measure to ensure that no locks are left behind in case of a crash or restart.
+	lockController.ReleaseHostLock()
 
 	var latencyLogger = promauto.NewHistogramVec(prometheus.HistogramOpts{
 		Name:    "museum_method_latency",
@@ -137,13 +147,14 @@ func main() {
 
 	twoFactorRepo := &repo.TwoFactorRepository{DB: db, SecretEncryptionKey: secretEncryptionKeyBytes}
 	userAuthRepo := &repo.UserAuthRepository{DB: db}
+	twoFactorRecoveryRepo := &two_factor_recovery.Repository{Db: db, SecretEncryptionKey: secretEncryptionKeyBytes}
 	billingRepo := &repo.BillingRepository{DB: db}
 	userEntityRepo := &userEntityRepo.Repository{DB: db}
 	locationTagRepository := &locationtagRepo.Repository{DB: db}
 	authRepo := &authenticatorRepo.Repository{DB: db}
 	remoteStoreRepository := &remotestore.Repository{DB: db}
 	dataCleanupRepository := &datacleanup.Repository{DB: db}
-	taskLockingRepo := &repo.TaskLockRepository{DB: db}
+
 	notificationHistoryRepo := &repo.NotificationHistoryRepository{DB: db}
 	queueRepo := &repo.QueueRepository{DB: db}
 	objectRepo := &repo.ObjectRepository{DB: db, QueueRepo: queueRepo}
@@ -169,10 +180,6 @@ func main() {
 	discordController := discord.NewDiscordController(userRepo, hostName, environment)
 	rateLimiter := middleware.NewRateLimitMiddleware(discordController)
 
-	lockController := &lock.LockController{
-		TaskLockingRepo: taskLockingRepo,
-		HostName:        hostName,
-	}
 	emailNotificationCtrl := &email.EmailNotificationController{
 		UserRepo:                userRepo,
 		LockController:          lockController,
@@ -304,6 +311,7 @@ func main() {
 		usageRepo,
 		userAuthRepo,
 		twoFactorRepo,
+		twoFactorRecoveryRepo,
 		passkeysRepo,
 		storagBonusRepo,
 		fileRepo,
@@ -429,6 +437,8 @@ func main() {
 	publicAPI.POST("/users/two-factor/remove", userHandler.RemoveTwoFactor)
 	publicAPI.POST("/users/two-factor/passkeys/begin", userHandler.BeginPasskeyAuthenticationCeremony)
 	publicAPI.POST("/users/two-factor/passkeys/finish", userHandler.FinishPasskeyAuthenticationCeremony)
+	privateAPI.GET("/users/two-factor/recovery-status", userHandler.GetTwoFactorRecoveryStatus)
+	privateAPI.POST("/users/two-factor/passkeys/configure-recovery", userHandler.ConfigurePasskeyRecovery)
 	privateAPI.GET("/users/two-factor/status", userHandler.GetTwoFactorStatus)
 	privateAPI.POST("/users/two-factor/setup", userHandler.SetupTwoFactor)
 	privateAPI.POST("/users/two-factor/enable", userHandler.EnableTwoFactor)
@@ -494,7 +504,6 @@ func main() {
 	privateAPI.GET("/collections/v2/diff", collectionHandler.GetDiffV2)
 	privateAPI.GET("/collections/file", collectionHandler.GetFile)
 	privateAPI.GET("/collections/sharees", collectionHandler.GetSharees)
-	privateAPI.DELETE("/collections/v2/:collectionID", collectionHandler.Trash)
 	privateAPI.DELETE("/collections/v3/:collectionID", collectionHandler.TrashV3)
 	privateAPI.POST("/collections/rename", collectionHandler.Rename)
 	privateAPI.PUT("/collections/magic-metadata", collectionHandler.PrivateMagicMetadataUpdate)
@@ -676,7 +685,6 @@ func main() {
 	publicAPI.GET("/offers/black-friday", offerHandler.GetBlackFridayOffers)
 
 	setKnownAPIs(server.Routes())
-
 	setupAndStartBackgroundJobs(objectCleanupController, replicationController3)
 	setupAndStartCrons(
 		userAuthRepo, publicCollectionRepo, twoFactorRepo, passkeysRepo, fileController, taskLockingRepo, emailNotificationCtrl,
@@ -849,14 +857,14 @@ func setupAndStartCrons(userAuthRepo *repo.UserAuthRepository, publicCollectionR
 		}
 	})
 
-	schedule(c, "@every 193s", func() {
+	schedule(c, "@every 2m", func() {
 		fileController.CleanupDeletedFiles()
 	})
 	schedule(c, "@every 101s", func() {
 		embeddingCtrl.CleanupDeletedEmbeddings()
 	})
 
-	schedule(c, "@every 120s", func() {
+	schedule(c, "@every 10m", func() {
 		trashController.DropFileMetadataCron()
 	})
 

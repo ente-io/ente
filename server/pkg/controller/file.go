@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"runtime/debug"
 	"strconv"
 	"strings"
@@ -54,6 +55,9 @@ const MaxFileSize = int64(1024 * 1024 * 1024 * 5)
 
 // MaxUploadURLsLimit indicates the max number of upload urls which can be request in one go
 const MaxUploadURLsLimit = 50
+const (
+	DeletedObjectQueueLock = "deleted_objects_queue_lock"
+)
 
 // Create adds an entry for a file in the respective tables
 func (c *FileController) Create(ctx context.Context, userID int64, file ente.File, userAgent string, app ente.App) (ente.File, error) {
@@ -600,7 +604,16 @@ func (c *FileController) CleanupDeletedFiles() {
 	defer func() {
 		c.cleanupCronRunning = false
 	}()
-	items, err := c.QueueRepo.GetItemsReadyForDeletion(repo.DeleteObjectQueue, 200)
+
+	lockStatus := c.LockController.TryLock(DeletedObjectQueueLock, time.MicrosecondsAfterHours(2))
+	if !lockStatus {
+		log.Warning(fmt.Sprintf("Failed to acquire lock %s", DeletedObjectQueueLock))
+		return
+	}
+	defer func() {
+		c.LockController.ReleaseLock(DeletedObjectQueueLock)
+	}()
+	items, err := c.QueueRepo.GetItemsReadyForDeletion(repo.DeleteObjectQueue, 2000)
 	if err != nil {
 		log.WithError(err).Error("Failed to fetch items from queue")
 		return

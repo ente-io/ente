@@ -404,6 +404,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "claimedStorageSoFar": m8,
         "cleanUncategorized":
             MessageLookupByLibrary.simpleMessage("Clean Uncategorized"),
+        "cleanUncategorizedDescription": MessageLookupByLibrary.simpleMessage(
+            "Remove all files from Uncategorized that are present in other albums"),
         "clearCaches": MessageLookupByLibrary.simpleMessage("Clear caches"),
         "clearIndexes": MessageLookupByLibrary.simpleMessage("Clear indexes"),
         "click": MessageLookupByLibrary.simpleMessage("• Click"),
@@ -548,6 +550,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Delete shared album?"),
         "deleteSharedAlbumDialogBody": MessageLookupByLibrary.simpleMessage(
             "The album will be deleted for everyone\n\nYou will lose access to shared photos in this album that are owned by others"),
+        "descriptions": MessageLookupByLibrary.simpleMessage("Descriptions"),
         "deselectAll": MessageLookupByLibrary.simpleMessage("Deselect all"),
         "designedToOutlive":
             MessageLookupByLibrary.simpleMessage("Designed to outlive"),
@@ -797,8 +800,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "Kindly help us with this information"),
         "language": MessageLookupByLibrary.simpleMessage("Language"),
         "lastUpdated": MessageLookupByLibrary.simpleMessage("Last updated"),
-        "launchPasskeyUrlAgain":
-            MessageLookupByLibrary.simpleMessage("Launch passkey URL again"),
         "leave": MessageLookupByLibrary.simpleMessage("Leave"),
         "leaveAlbum": MessageLookupByLibrary.simpleMessage("Leave album"),
         "leaveFamily": MessageLookupByLibrary.simpleMessage("Leave family"),
@@ -848,6 +849,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "locationName": MessageLookupByLibrary.simpleMessage("Location name"),
         "locationTagFeatureDescription": MessageLookupByLibrary.simpleMessage(
             "A location tag groups all photos that were taken within some radius of a photo"),
+        "locations": MessageLookupByLibrary.simpleMessage("Locations"),
         "lockButtonLabel": MessageLookupByLibrary.simpleMessage("Lock"),
         "lockScreenEnablePreSteps": MessageLookupByLibrary.simpleMessage(
             "To enable lockscreen, please setup device passcode or screen lock in your system settings."),
@@ -958,7 +960,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "pair": MessageLookupByLibrary.simpleMessage("Pair"),
         "passkey": MessageLookupByLibrary.simpleMessage("Passkey"),
         "passkeyAuthTitle":
-            MessageLookupByLibrary.simpleMessage("Passkey authentication"),
+            MessageLookupByLibrary.simpleMessage("Passkey verification"),
         "password": MessageLookupByLibrary.simpleMessage("Password"),
         "passwordChangedSuccessfully": MessageLookupByLibrary.simpleMessage(
             "Password changed successfully"),
@@ -1172,8 +1174,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "searchHint4": MessageLookupByLibrary.simpleMessage("Location"),
         "searchHint5": MessageLookupByLibrary.simpleMessage(
             "Coming soon: Faces & magic search ✨"),
-        "searchHintText": MessageLookupByLibrary.simpleMessage(
-            "Albums, months, days, years, ..."),
         "searchLocationEmptySection": MessageLookupByLibrary.simpleMessage(
             "Group photos that are taken within some radius of a photo"),
         "searchPeopleEmptySection": MessageLookupByLibrary.simpleMessage(
@@ -1447,6 +1447,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "verifyEmail": MessageLookupByLibrary.simpleMessage("Verify email"),
         "verifyEmailID": m64,
         "verifyIDLabel": MessageLookupByLibrary.simpleMessage("Verify"),
+        "verifyPasskey": MessageLookupByLibrary.simpleMessage("Verify passkey"),
         "verifyPassword":
             MessageLookupByLibrary.simpleMessage("Verify password"),
         "verifying": MessageLookupByLibrary.simpleMessage("Verifying..."),
@@ -1466,8 +1467,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "viewer": MessageLookupByLibrary.simpleMessage("Viewer"),
         "visitWebToManage": MessageLookupByLibrary.simpleMessage(
             "Please visit web.ente.io to manage your subscription"),
-        "waitingForBrowserRequest": MessageLookupByLibrary.simpleMessage(
-            "Waiting for browser request..."),
+        "waitingForVerification":
+            MessageLookupByLibrary.simpleMessage("Waiting for verification..."),
         "waitingForWifi":
             MessageLookupByLibrary.simpleMessage("Waiting for WiFi..."),
         "weAreOpenSource":

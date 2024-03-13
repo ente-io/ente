@@ -29,7 +29,7 @@ on:
             - "auth-v*"
 
 env:
-    FLUTTER_VERSION: "3.16.9"
+    FLUTTER_VERSION: "3.13.4"
 
 jobs:
     build-ubuntu:
@@ -118,14 +118,11 @@ jobs:
                   updateOnlyUnreleased: true
 
             - name: Upload AAB to PlayStore
-              # Temporarily disable GP upload, enable this once desktop build
-              # testing is complete.
-              if: false
               uses: r0adkll/upload-google-play@v1
               with:
                   serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
                   packageName: io.ente.auth
-                  releaseFiles: build/app/outputs/bundle/playstoreRelease/app-playstore-release.aab
+                  releaseFiles: auth/build/app/outputs/bundle/playstoreRelease/app-playstore-release.aab
                   track: internal
 
     build-windows:

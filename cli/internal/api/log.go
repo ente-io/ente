@@ -30,6 +30,16 @@ func logRequest(req *resty.Request) {
 			}
 		}
 	}
+	// log query params if present
+	if len(req.QueryParam) > 0 {
+		fmt.Println(color.GreenString("Query Params:"))
+		for k, v := range req.QueryParam {
+			if k == TokenQuery {
+				v = []string{"REDACTED"}
+			}
+			fmt.Printf("%s: %s\n", color.CyanString(k), color.YellowString(strings.Join(v, ",")))
+		}
+	}
 }
 
 func logResponse(resp *resty.Response) {

@@ -819,7 +819,6 @@
   "archiveAlbum": "存档相册",
   "calculating": "正在计算...",
   "pleaseWaitDeletingAlbum": "请稍候，正在删除相册",
-  "searchHintText": "相册，月，日，年，...",
   "searchByExamples": "• 相册名称（例如“相机”）\n• 文件类型（例如“视频”、“.gif”）\n• 年份和月份（例如“2022”、“一月”）\n• 假期（例如“圣诞节”）\n• 照片说明（例如“#和女儿独居，好开心啊”）",
   "youCanTrySearchingForADifferentQuery": "您可以尝试搜索不同的查询。",
   "noResultsFound": "未找到任何结果",
@@ -1197,5 +1196,7 @@
   "deviceNotFound": "未发现设备",
   "castInstruction": "在您要配对的设备上访问 cast.ente.io。\n输入下面的代码即可在电视上播放相册。",
   "deviceCodeHint": "输入代码",
-  "joinDiscord": "加入 Discord"
+  "joinDiscord": "加入 Discord",
+  "locations": "Locations",
+  "descriptions": "Descriptions"
 }

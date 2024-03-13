@@ -49,6 +49,6 @@ jobs:
                   project_path: "./cli"
                   pre_command: export CGO_ENABLED=0
                   build_flags: "-trimpath"
-                  ldflags: "-s -w"
+                  ldflags: "-X main.AppVersion=${{ github.ref_name }} -s -w"
                   md5sum: false
                   sha256sum: true

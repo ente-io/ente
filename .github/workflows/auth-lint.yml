@@ -1,11 +1,9 @@
 name: "Lint (auth)"
 
 on:
-    # Run on every push to branches (this also covers pull requests)
+    # Run on every push to a branch other than main that changes auth/
     push:
-        # See: [Note: Specify branch when specifying a path filter]
-        branches: ["**"]
-        # Only run if something changes in these paths
+        branches-ignore: [main]
         paths:
             - "auth/**"
             - ".github/workflows/auth-lint.yml"

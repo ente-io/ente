@@ -142,12 +142,9 @@ class SearchWidgetState extends State<SearchWidget> {
                     autocorrect: false,
                     // Above parameters are to disable auto-suggestion
                     decoration: InputDecoration(
-                      // hintText: S.of(context).searchHintText,
+                      //TODO: Extract string
                       hintText: "Search",
                       filled: true,
-                      contentPadding: const EdgeInsets.symmetric(
-                        vertical: 10,
-                      ),
                       border: const UnderlineInputBorder(
                         borderSide: BorderSide.none,
                       ),

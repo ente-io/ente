@@ -1,8 +1,7 @@
-import path from 'path';
-import { readdir, stat, unlink } from 'promise-fs';
-import getFolderSize from 'get-folder-size';
-import { utimes, close, open } from 'promise-fs';
-import { logError } from '../services/logging';
+import getFolderSize from "get-folder-size";
+import path from "path";
+import { close, open, readdir, stat, unlink, utimes } from "promise-fs";
+import { logError } from "../services/logging";
 
 export interface LeastRecentlyUsedResult {
     atime: Date;
@@ -18,11 +17,11 @@ class DiskLRUService {
             const time = new Date();
             await utimes(path, time, time);
         } catch (err) {
-            logError(err, 'utimes method touch failed');
+            logError(err, "utimes method touch failed");
             try {
-                await close(await open(path, 'w'));
+                await close(await open(path, "w"));
             } catch (e) {
-                logError(e, 'open-close method touch failed');
+                logError(e, "open-close method touch failed");
             }
             // log and ignore
         }
@@ -58,10 +57,10 @@ class DiskLRUService {
                         } catch (e) {
                             // ENOENT: File not found
                             // which can be ignored as we are trying to delete the file anyway
-                            if (e.code !== 'ENOENT') {
+                            if (e.code !== "ENOENT") {
                                 logError(
                                     e,
-                                    'Failed to evict least recently used'
+                                    "Failed to evict least recently used",
                                 );
                             }
                             // ignoring the error, as it would get retried on the next run
@@ -72,15 +71,15 @@ class DiskLRUService {
                 });
             });
         } catch (e) {
-            logError(e, 'evictLeastRecentlyUsed failed');
+            logError(e, "evictLeastRecentlyUsed failed");
         }
     }
 
     private async findLeastRecentlyUsed(
         dir: string,
-        result?: LeastRecentlyUsedResult
+        result?: LeastRecentlyUsedResult,
     ): Promise<LeastRecentlyUsedResult> {
-        result = result || { atime: new Date(), path: '' };
+        result = result || { atime: new Date(), path: "" };
 
         const files = await readdir(dir);
         for (const file of files) {

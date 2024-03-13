@@ -1,13 +1,13 @@
-import Store, { Schema } from 'electron-store';
-import { SafeStorageStoreType } from '../types';
+import Store, { Schema } from "electron-store";
+import { SafeStorageStoreType } from "../types";
 
 const safeStorageSchema: Schema<SafeStorageStoreType> = {
     encryptionKey: {
-        type: 'string',
+        type: "string",
     },
 };
 
 export const safeStorageStore = new Store({
-    name: 'safeStorage',
+    name: "safeStorage",
     schema: safeStorageSchema,
 });

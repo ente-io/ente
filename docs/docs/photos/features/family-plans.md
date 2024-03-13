@@ -1,6 +1,7 @@
 ---
 title: Family plans
-description: Share your Ente Photos plan with your family members with no extra cost
+description:
+    Share your Ente Photos plan with your family members with no extra cost
 ---
 
 # Family plans
