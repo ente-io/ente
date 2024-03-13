@@ -12,9 +12,6 @@
 [submodule "mobile/plugins/clip_ggml"]
 	path = mobile/plugins/clip_ggml
 	url = https://github.com/ente-io/clip-ggml.git
-[submodule "mobile/thirdparty/isar"]
-	path = mobile/thirdparty/isar
-	url = https://github.com/isar/isar
 [submodule "web/apps/photos/thirdparty/ffmpeg-wasm"]
 	path = web/apps/photos/thirdparty/ffmpeg-wasm
 	url = https://github.com/abhinavkgrd/ffmpeg.wasm.git
