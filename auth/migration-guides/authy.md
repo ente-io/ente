@@ -58,7 +58,7 @@ This will create a JSON file called `authy-to-bitwarden-export.json`, which cont
 > [!NOTE]  
 > This is intended only for users who successfully exported their codes using the guide, but couldn't import it to ente Authenticator for whatever reason. If the import was successful, or you haven't tried to import the codes yet, ignore this section.
 >
-> If the export itself failed, try using method 1 instead.
+> If the export itself failed, try using [**method 1**](#method-1-use-neerajs-export-tool) instead.
 
 Usually, you should be able to import Bitwarden exports directly into ente Authenticator. In case this didn't work for whatever reason, I've written a program in Python that converts the JSON file into a TXT file that ente Authenticator can use!
 
