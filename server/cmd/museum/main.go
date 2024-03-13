@@ -620,6 +620,7 @@ func main() {
 	adminAPI.POST("/user/disable-2fa", adminHandler.DisableTwoFactor)
 	adminAPI.POST("/user/disable-passkeys", adminHandler.RemovePasskeys)
 	adminAPI.POST("/user/close-family", adminHandler.CloseFamily)
+	adminAPI.PUT("/user/change-email", adminHandler.ChangeEmail)
 	adminAPI.DELETE("/user/delete", adminHandler.DeleteUser)
 	adminAPI.POST("/user/recover", adminHandler.RecoverAccount)
 	adminAPI.GET("/email-hash", adminHandler.GetEmailHash)
