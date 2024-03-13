@@ -49,7 +49,7 @@ jobs:
                   SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD_PHOTOS }}
 
             - name: Checksum
-              run: sha256sum build/app/outputs/flutter-apk/ente.apk > build/app/outputs/flutter-apk/sha256sum
+              run: sha256sum build/app/outputs/flutter-apk/ente-${{ github.ref_name }}.apk > build/app/outputs/flutter-apk/sha256sum
 
             - name: Create a draft GitHub release
               uses: ncipollo/release-action@v1
