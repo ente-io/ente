@@ -6,6 +6,7 @@ import "package:logging/logging.dart";
 import "package:photos/models/search/album_search_result.dart";
 import "package:photos/models/search/generic_search_result.dart";
 import "package:photos/models/search/index_of_indexed_stack.dart";
+import "package:photos/models/search/search_result.dart";
 import "package:photos/models/search/search_types.dart";
 import "package:photos/states/all_sections_examples_state.dart";
 import "package:photos/ui/common/loading_widget.dart";
@@ -80,16 +81,13 @@ class _AllSearchSectionsState extends State<AllSearchSections> {
   @override
   Widget build(BuildContext context) {
     final searchTypes = SectionType.values.toList(growable: true);
-    // remove face and content sectionType
-    // searchTypes.remove(SectionType.face);
-    // TODO: re-add album section
     searchTypes.remove(SectionType.content);
-    searchTypes.remove(SectionType.album);
+
     return Padding(
       padding: const EdgeInsets.only(top: 8),
       child: Stack(
         children: [
-          FutureBuilder(
+          FutureBuilder<List<List<SearchResult>>>(
             future: InheritedAllSectionsExamples.of(context)
                 .allSectionsExamplesFuture,
             builder: (context, snapshot) {
@@ -100,6 +98,14 @@ class _AllSearchSectionsState extends State<AllSearchSections> {
                     child: SearchTabEmptyState(),
                   );
                 }
+                if (snapshot.data!.length != searchTypes.length) {
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 72),
+                    child: Text(
+                      'Sections length mismatch: ${snapshot.data!.length} != ${searchTypes.length}',
+                    ),
+                  );
+                }
                 return ListView.builder(
                   padding: const EdgeInsets.only(bottom: 180),
                   physics: const BouncingScrollPhysics(),
@@ -107,16 +113,17 @@ class _AllSearchSectionsState extends State<AllSearchSections> {
                   // ignore: body_might_complete_normally_nullable
                   itemBuilder: (context, index) {
                     switch (searchTypes[index]) {
-                      case SectionType.album:
-                        return AlbumsSection(
-                          snapshot.data!.elementAt(index)
-                              as List<AlbumSearchResult>,
-                        );
                       case SectionType.face:
                         return SearchSection(
                           sectionType: SectionType.face,
                           examples: snapshot.data!.elementAt(index),
                           limit: 7,
+                        );
+                      case SectionType.album:
+                        // return const SizedBox.shrink();
+                        return AlbumsSection(
+                          snapshot.data!.elementAt(index)
+                              as List<AlbumSearchResult>,
                         );
                       case SectionType.moment:
                         return MomentsSection(

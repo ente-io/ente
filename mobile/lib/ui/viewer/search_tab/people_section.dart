@@ -13,7 +13,6 @@ import "package:photos/models/search/search_types.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/viewer/file/no_thumbnail_widget.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
-import "package:photos/ui/viewer/gallery/collection_page.dart";
 import 'package:photos/ui/viewer/search/result/person_face_widget.dart';
 import "package:photos/ui/viewer/search/result/search_result_page.dart";
 import 'package:photos/ui/viewer/search/result/search_section_all_page.dart';
@@ -215,11 +214,11 @@ class SearchExample extends StatelessWidget {
             );
           }
         } else if (searchResult is AlbumSearchResult) {
-          final albumSearchResult = searchResult as AlbumSearchResult;
+          final albumSearchResult = searchResult as GenericSearchResult;
           routeToPage(
             context,
-            CollectionPage(
-              albumSearchResult.collectionWithThumbnail,
+            SearchResultPage(
+              albumSearchResult,
               tagPrefix: albumSearchResult.heroTag(),
             ),
           );
