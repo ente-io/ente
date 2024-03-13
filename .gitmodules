@@ -23,3 +23,6 @@
 [submodule "mobile/thirdparty/isar"]
 	path = mobile/thirdparty/isar
 	url = https://github.com/isar/isar
+[submodule "mobile/thirdparty/flutter"]
+	path = mobile/thirdparty/flutter
+	url = https://github.com/flutter/flutter
