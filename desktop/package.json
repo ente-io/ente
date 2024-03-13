@@ -8,7 +8,7 @@
     "scripts": {
         "build": "yarn build-renderer && yarn build-main",
         "build-main": "tsc && electron-builder",
-        "build-main:quick": "tsc && electron-builder --config.compression=store",
+        "build-main:quick": "tsc && electron-builder --dir --config.compression=store --config.mac.identity=null",
         "build-renderer": "cd ../web && yarn install && yarn build:photos && cd ../desktop && rm -f out && ln -sf ../web/apps/photos/out",
         "build:quick": "yarn build-renderer && yarn build-main:quick",
         "dev": "concurrently --names 'main,rndr,tscw' \"yarn dev-main\" \"yarn dev-renderer\" \"yarn dev-main-watch\"",

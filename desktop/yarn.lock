@@ -2441,7 +2441,7 @@ natural-compare@^1.4.0:
   resolved "https://registry.yarnpkg.com/natural-compare/-/natural-compare-1.4.0.tgz#4abebfeed7541f2c27acfb29bdbbd15c8d5ba4f7"
   integrity sha512-OWND8ei3VtNC9h7V60qff3SVobHr996CTwgxubgyQYEpg290h9J0buyECNNJexkFm5sOajh5G116RYA1c8ZMSw==
 
-next-electron-server@^1.0.0:
+next-electron-server@^1:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/next-electron-server/-/next-electron-server-1.0.0.tgz#03e133ed64a5ef671b6c6409f908c4901b1828cb"
   integrity sha512-fTUaHwT0Jry2fbdUSIkAiIqgDAInI5BJFF4/j90/okvZCYlyx6yxpXB30KpzmOG6TN/ESwyvsFJVvS2WHT8PAA==
