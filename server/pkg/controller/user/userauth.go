@@ -197,7 +197,13 @@ func (c *UserController) ChangeEmail(ctx *gin.Context, request ente.EmailVerific
 	if err != nil {
 		return stacktrace.Propagate(err, "")
 	}
-	_, err = c.UserRepo.GetUserIDWithEmail(email)
+
+	return c.UpdateEmail(ctx, auth.GetUserID(ctx.Request.Header), email)
+}
+
+// UpdateEmail updates the email address of the user with the provided userID
+func (c *UserController) UpdateEmail(ctx *gin.Context, userID int64, email string) error {
+	_, err := c.UserRepo.GetUserIDWithEmail(email)
 	if err == nil {
 		// email already owned by a user
 		return stacktrace.Propagate(ente.ErrPermissionDenied, "")
@@ -206,7 +212,6 @@ func (c *UserController) ChangeEmail(ctx *gin.Context, request ente.EmailVerific
 		// unknown error, rethrow
 		return stacktrace.Propagate(err, "")
 	}
-	userID := auth.GetUserID(ctx.Request.Header)
 	user, err := c.UserRepo.Get(userID)
 	if err != nil {
 		return stacktrace.Propagate(err, "")
