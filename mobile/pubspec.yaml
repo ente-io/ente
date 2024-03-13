@@ -122,8 +122,6 @@ dependencies:
   motionphoto:
     git: "https://github.com/ente-io/motionphoto.git"
   move_to_background: ^1.0.2
-
-  # open_file: ^3.2.1
   onnxruntime:
     git:
       url: https://github.com/ente-io/onnxruntime.git
