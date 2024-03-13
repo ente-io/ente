@@ -18,10 +18,7 @@ allprojects {
         google()
         jcenter()
         mavenCentral()
-        // mavenLocal() // for FDroid
-        maven {
-            url "${project(':background_fetch').projectDir}/libs"
-        }
+        mavenLocal() // for FDroid
     }
 }
 

@@ -4,7 +4,6 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 // import 'package:flutter/foundation.dart';
 // import 'package:flutter_inapp_purchase/flutter_inapp_purchase.dart';
-import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/errors.dart';
 import 'package:photos/core/network/network.dart';
@@ -35,6 +34,7 @@ class BillingService {
   final _logger = Logger("BillingService");
   final _enteDio = NetworkClient.instance.enteDio;
 
+  // ignore: unused_field
   bool _isOnSubscriptionPage = false;
 
   Future<BillingPlans>? _future;
@@ -44,23 +44,6 @@ class BillingService {
     //   await FlutterInappPurchase.instance.initConnection;
     //   FlutterInappPurchase.instance.clearTransactionIOS();
     // }
-    InAppPurchase.instance.purchaseStream.listen((purchases) {
-      if (_isOnSubscriptionPage) {
-        return;
-      }
-      for (final purchase in purchases) {
-        if (purchase.status == PurchaseStatus.purchased) {
-          verifySubscription(
-            purchase.productID,
-            purchase.verificationData.serverVerificationData,
-          ).then((response) {
-            InAppPurchase.instance.completePurchase(purchase);
-          });
-        } else if (Platform.isIOS && purchase.pendingCompletePurchase) {
-          InAppPurchase.instance.completePurchase(purchase);
-        }
-      }
-    });
   }
 
   void clearCache() {

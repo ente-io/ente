@@ -1,7 +1,3 @@
-# TODO: add `rustup@1.25.2` to `srclibs`
-# TODO: verify if `gcc-multilib` or `libc-dev` is needed
-$$rustup$$/rustup-init.sh -y
-source $HOME/.cargo/env
 cd thirdparty/isar/
 bash tool/build_android.sh x86
 bash tool/build_android.sh x64
@@ -15,3 +11,4 @@ mv libisar_android_x64.so libisar.so
 mv libisar.so $PUB_CACHE/hosted/pub.dev/isar_flutter_libs-*/android/src/main/jniLibs/x86_64/
 mv libisar_android_x86.so libisar.so
 mv libisar.so $PUB_CACHE/hosted/pub.dev/isar_flutter_libs-*/android/src/main/jniLibs/x86/
+cd ../../

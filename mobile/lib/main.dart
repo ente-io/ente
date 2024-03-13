@@ -4,7 +4,6 @@ import 'dart:io';
 import "package:adaptive_theme/adaptive_theme.dart";
 import 'package:background_fetch/background_fetch.dart';
 import "package:computer/computer.dart";
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import "package:flutter/rendering.dart";
@@ -34,7 +33,6 @@ import "package:photos/services/location_service.dart";
 import "package:photos/services/machine_learning/machine_learning_controller.dart";
 import 'package:photos/services/machine_learning/semantic_search/semantic_search_service.dart';
 import 'package:photos/services/memories_service.dart';
-import 'package:photos/services/push_service.dart';
 import 'package:photos/services/remote_sync_service.dart';
 import 'package:photos/services/search_service.dart';
 import "package:photos/services/storage_bonus_service.dart";
@@ -216,14 +214,6 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     unawaited(HomeWidgetService.instance.initHomeWidget());
   }
 
-  if (Platform.isIOS) {
-    // ignore: unawaited_futures
-    PushService.instance.init().then((_) {
-      FirebaseMessaging.onBackgroundMessage(
-        _firebaseMessagingBackgroundHandler,
-      );
-    });
-  }
   unawaited(FeatureFlagService.instance.init());
   unawaited(SemanticSearchService.instance.init());
   MachineLearningController.instance.init();
@@ -331,35 +321,6 @@ Future<void> _killBGTask([String? taskId]) async {
   await prefs.remove(kLastBGTaskHeartBeatTime);
   if (taskId != null) {
     BackgroundFetch.finish(taskId);
-  }
-}
-
-Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  final bool isRunningInFG = await _isRunningInForeground(); // hb
-  final bool isInForeground = AppLifecycleService.instance.isForeground;
-  if (_isProcessRunning) {
-    _logger.info(
-      "Background push received when app is alive and runningInFS: $isRunningInFG inForeground: $isInForeground",
-    );
-    if (PushService.shouldSync(message)) {
-      await _sync('firebaseBgSyncActiveProcess');
-    }
-  } else {
-    // App is dead
-    // ignore: unawaited_futures
-    _runWithLogs(
-      () async {
-        _logger.info("Background push received");
-        if (Platform.isIOS) {
-          _scheduleSuicide(kBGPushTimeout); // To prevent OS from punishing us
-        }
-        await _init(true, via: 'firebasePush');
-        if (PushService.shouldSync(message)) {
-          await _sync('firebaseBgSyncNoActiveProcess');
-        }
-      },
-      prefix: "[fbg]",
-    );
   }
 }
 

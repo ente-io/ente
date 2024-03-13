@@ -6,7 +6,8 @@ import "package:photos/ui/payment/store_subscription_page.dart";
 import 'package:photos/ui/payment/stripe_subscription_page.dart';
 
 StatefulWidget getSubscriptionPage({bool isOnBoarding = false}) {
-  if (UpdateService.instance.isIndependentFlavor()) {
+  if (UpdateService.instance.isIndependentFlavor() ||
+      UpdateService.instance.isFdroidFlavor()) {
     return StripeSubscriptionPage(isOnboarding: isOnBoarding);
   }
   if (FeatureFlagService.instance.enableStripe() &&
