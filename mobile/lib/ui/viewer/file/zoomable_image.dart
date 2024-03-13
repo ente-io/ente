@@ -104,6 +104,40 @@ class _ZoomableImageState extends State<ZoomableImage> {
             tag: widget.tagPrefix! + _photo.tag,
           ),
           backgroundDecoration: widget.backgroundDecoration as BoxDecoration?,
+          loadingBuilder: (context, event) {
+            // This is to make sure the hero anitmation animates and fits in the
+            //dimensions of the image on screen.
+            final screenDimensions = MediaQuery.sizeOf(context);
+            late final double screenRelativeImageWidth;
+            late final double screenRelativeImageHeight;
+            final screenWidth = screenDimensions.width;
+            final screenHeight = screenDimensions.height;
+
+            final aspectRatioOfScreen = screenWidth / screenHeight;
+            final aspectRatioOfImage = _photo.width / _photo.height;
+
+            if (aspectRatioOfImage > aspectRatioOfScreen) {
+              screenRelativeImageWidth = screenWidth;
+              screenRelativeImageHeight = screenWidth / aspectRatioOfImage;
+            } else if (aspectRatioOfImage < aspectRatioOfScreen) {
+              screenRelativeImageHeight = screenHeight;
+              screenRelativeImageWidth = screenHeight * aspectRatioOfImage;
+            } else {
+              screenRelativeImageWidth = screenWidth;
+              screenRelativeImageHeight = screenHeight;
+            }
+
+            return Center(
+              child: SizedBox(
+                width: screenRelativeImageWidth,
+                height: screenRelativeImageHeight,
+                child: Hero(
+                  tag: widget.tagPrefix! + _photo.tag,
+                  child: const EnteLoadingWidget(),
+                ),
+              ),
+            );
+          },
         ),
       );
     } else {
