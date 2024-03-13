@@ -1,6 +1,8 @@
 import "dart:math";
 
+import "package:figma_squircle/figma_squircle.dart";
 import "package:flutter/material.dart";
+import "package:flutter/scheduler.dart";
 import 'package:home_widget/home_widget.dart' as hw;
 import "package:logging/logging.dart";
 import "package:photos/core/configuration.dart";
@@ -95,13 +97,18 @@ class HomeWidgetService {
 
       await PreloadImage.loadImage(img.image);
 
-      final widget = ClipRRect(
-        borderRadius: BorderRadius.circular(32),
+      final platformBrightness =
+          SchedulerBinding.instance.platformDispatcher.platformBrightness;
+
+      final widget = ClipSmoothRect(
+        radius: SmoothBorderRadius(cornerRadius: 32, cornerSmoothing: 1),
         child: Container(
           width: size,
           height: size,
           decoration: BoxDecoration(
-            color: Colors.black,
+            color: platformBrightness == Brightness.light
+                ? const Color.fromRGBO(251, 251, 251, 1)
+                : const Color.fromRGBO(27, 27, 27, 1),
             image: DecorationImage(image: img.image, fit: BoxFit.cover),
           ),
         ),
