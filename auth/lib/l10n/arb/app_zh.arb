@@ -408,5 +408,12 @@
   "hearUsExplanation": "我们不跟踪应用程序安装情况。如果您告诉我们您是在哪里找到我们的，将会有所帮助！",
   "waitingForBrowserRequest": "正在等待浏览器请求...",
   "launchPasskeyUrlAgain": "再次启动 通行密钥 URL",
-  "passkey": "通行密钥"
+  "passkey": "通行密钥",
+  "developerSettingsWarning": "您确定要修改开发者设置吗？",
+  "developerSettings": "开发者设置",
+  "serverEndpoint": "服务器端点",
+  "invalidEndpoint": "端点无效",
+  "invalidEndpointMessage": "抱歉，您输入的端点无效。请输入有效的端点，然后重试。",
+  "endpointUpdatedMessage": "端点更新成功",
+  "customEndpoint": "已连接至 {endpoint}"
 }
