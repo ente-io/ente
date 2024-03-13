@@ -71,7 +71,7 @@ export const sidebar = [
                 text: "Migration guides",
                 collapsed: true,
                 items: [
-                    { text: "Introduction", link: "/auth/migration-guides/" },
+                    { text: "From Authy", link: "/auth/authy/" },
                 ],
             },
         ],
