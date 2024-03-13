@@ -58,7 +58,7 @@
         "prettier": "^3",
         "prettier-plugin-organize-imports": "^3.2",
         "prettier-plugin-packagejson": "^2.4",
-        "typescript": "^4.2.3"
+        "typescript": "^5"
     },
     "build": {
         "appId": "io.ente.bhari-frame",
