@@ -15,6 +15,8 @@ import (
 	"strings"
 )
 
+var AppVersion = "0.1.12"
+
 func main() {
 	cliDBPath, err := GetCLIConfigPath()
 	if secrets.IsRunningInContainer() {
@@ -73,7 +75,7 @@ func main() {
 		}
 		return
 	}
-	cmd.Execute(&ctrl)
+	cmd.Execute(&ctrl, AppVersion)
 }
 
 func initConfig(cliConfigPath string) {
