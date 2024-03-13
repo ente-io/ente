@@ -160,7 +160,10 @@ RUN chmod +x /docker-entrypoint.d/replace_ente_endpoints.sh
 Create a `.credentials.env` file at the root of the project with the following
 content (here you need to set the correct value of each variable):
 
-```env
+<!-- The following code block should have language env, but vitepress currently
+doesn't support that language, so use sh as a reasonable fallback instead. -->
+
+```sh
 # run  `go run tools/gen-random-keys/main.go` in the server directory to generate the keys
 ENTE_KEY_ENCRYPTION=
 ENTE_KEY_HASH=
