@@ -18,6 +18,7 @@ import "package:photos/ui/viewer/search_tab/descriptions_section.dart";
 import "package:photos/ui/viewer/search_tab/file_type_section.dart";
 import "package:photos/ui/viewer/search_tab/locations_section.dart";
 import "package:photos/ui/viewer/search_tab/moments_section.dart";
+import "package:photos/ui/viewer/search_tab/people_section.dart";
 
 class SearchTab extends StatefulWidget {
   const SearchTab({Key? key}) : super(key: key);
@@ -81,7 +82,9 @@ class _AllSearchSectionsState extends State<AllSearchSections> {
     final searchTypes = SectionType.values.toList(growable: true);
     // remove face and content sectionType
     // searchTypes.remove(SectionType.face);
+    // TODO: re-add album section
     searchTypes.remove(SectionType.content);
+    searchTypes.remove(SectionType.album);
     return Padding(
       padding: const EdgeInsets.only(top: 8),
       child: Stack(
@@ -108,6 +111,12 @@ class _AllSearchSectionsState extends State<AllSearchSections> {
                         return AlbumsSection(
                           snapshot.data!.elementAt(index)
                               as List<AlbumSearchResult>,
+                        );
+                      case SectionType.face:
+                        return SearchSection(
+                          sectionType: SectionType.face,
+                          examples: snapshot.data!.elementAt(index),
+                          limit: 7,
                         );
                       case SectionType.moment:
                         return MomentsSection(

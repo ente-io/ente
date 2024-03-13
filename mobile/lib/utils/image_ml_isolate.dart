@@ -286,8 +286,8 @@ class ImageMlIsolate {
         _resetInactivityTimer();
       } else {
         _logger.info(
-        'Clustering Isolate has been inactive for ${_inactivityDuration.inSeconds} seconds with no tasks running. Killing isolate.',
-      );
+          'Clustering Isolate has been inactive for ${_inactivityDuration.inSeconds} seconds with no tasks running. Killing isolate.',
+        );
         dispose();
       }
     });
@@ -403,6 +403,7 @@ class ImageMlIsolate {
   /// Returns a list of [Num3DInputMatrix] images, one for each face.
   ///
   /// Uses [preprocessToMobileFaceNetInput] inside the isolate.
+  @Deprecated("Old method used in TensorFlow Lite")
   Future<
       (
         List<Num3DInputMatrix>,
