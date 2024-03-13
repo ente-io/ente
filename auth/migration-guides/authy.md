@@ -7,19 +7,20 @@ A guide written by Green, an ente.io lover
 
 Migrating from Authy can be tiring, as you cannot export your 2FA codes through the app, meaning that you would have to reconfigure 2FA for all of your accounts for your new 2FA authenticator. But do not fear, as there are much simpler ways to migrate from Authy to ente!
 
-> [!CAUTION]  
-> There is **NO GUARANTEE** that these methods will export ALL of your codes. Make sure that all your accounts have been imported successfully before deleting any codes from your Authy account!
+> [!CAUTION]
+> Under any circumstances, do **NOT** share any JSON and TXT files generated using this guide, as they contain your **unencrypted** TOTP secrets!
+> 
+> Also, there is **NO GUARANTEE** that these methods will export ALL of your codes. Make sure that all your accounts have been imported successfully before deleting any codes from your Authy account!
 
 ---
 
 To export your codes from your Authy account, you can use one of these methods, or any other method you fancy that I haven't provided a guide for if you got it to work.
 
 # Method 1: Use Neeraj's export tool
+**Who should use this?** General users who want to save time by skipping the hard (and rather technical) parts of the process.<br><br>
+
 One way to export is to [use this tool by Neeraj](https://github.com/ua741/authy-export/releases/tag/v0.0.4) to simplify things and skip directly to importing to ente Authenticator.
 
-**Who should use this?** General users who want to save time by skipping the hard (and rather technical) parts of the process.
-
-## Exporting from Authy
 To export from Authy, download the tool for your specific OS, then type the following in your terminal:
 ```
 ./<binary-name> <path_to_export_file>
@@ -44,13 +45,12 @@ For Windows:
 
 This will generate a text file called `authy_codes.txt`, which contains your Authy codes in ente's plaintext export format. You can now import this to ente Authenticator!
 
-# Method 2: Use the GitHub guide
-A user on GitHub has written a guide to export our data from Authy (morpheus on Discord found this and showed it to us), so we are going to be using that for the migration.
+# Method 2: Use gboudreau's GitHub guide
+**Who should use this?** Power users who have spare time on their hands and prefer a more "known and established" solution to exporting Authy codes.<br><br>
 
-**Who should use this?** Power users who have spare time on their hands and prefer a more "known and established" solution to exporting Authy codes.
+A user on GitHub (gboudreau) wrote a guide to export codes from Authy (morpheus on Discord found this and showed it to us), so we are going to be using that for the migration.
 
-## Exporting from Authy
-To export your data, please follow [this guide](https://gist.github.com/gboudreau/94bb0c11a6209c82418d01a59d958c93). This will create a new JSON file with all your Authy TOTP data in it. **Do not share this file with anyone!**
+To export your data, please follow [this guide](https://gist.github.com/gboudreau/94bb0c11a6209c82418d01a59d958c93). 
 
 This will create a JSON file called `authy-to-bitwarden-export.json`, which contains your Authy codes in Bitwarden's export format. You can now import this to ente Authenticator!
 
@@ -97,14 +97,14 @@ We're in the homestretch now! Now that we have the TXT or JSON file, let's impor
 4. Select the "Plain text" option.
 5. Select the TXT file that was made earlier.
 
-# Importing to ente Authenticator (method 2)
+# Importing to ente Authenticator (Method 2)
 1. Copy the JSON file to one of your devices with ente Authenticator.
 2. Log in to your account (if you haven't already), or press "Use without backups".
 3. Open the navigation menu (hamburger button on the top left), then press "Data", then press "Import codes".
 4. Select the "Bitwarden" option.
 5. Select the JSON file that was made earlier.
 
-If this didn't work, refer to [**method 2.1**](#method-21-if-the-export-worked-but-the-import-didnt).
+If this didn't work, refer to [**method 2.1**](#method-21-if-the-export-worked-but-the-import-didnt).<br><br>
 
 And that's it! You have now successfully migrated from Authy to ente Authenticator.
 
