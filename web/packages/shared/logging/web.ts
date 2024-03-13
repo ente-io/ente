@@ -74,9 +74,10 @@ export const logStartupMessage = async (appId: string) => {
     // TODO (MR): Remove the need to lowercase it, change the enum itself.
     const appIdL = appId.toLowerCase();
     const userID = (getData(LS_KEYS.USER) as User)?.id;
-    const buildId = isDevBuild ? "dev" : `git ${process.env.GIT_SHA}`;
+    const sha = process.env.GIT_SHA;
+    const buildId = isDevBuild ? "dev " : sha ? `git ${sha} ` : "";
 
-    addLogLine(`ente-${appIdL}-web ${buildId} uid ${userID}`);
+    addLogLine(`ente-${appIdL}-web ${buildId}uid ${userID}`);
 };
 
 function getLogs(): Log[] {

@@ -69,8 +69,6 @@ services:
     web:
         build:
             context: web
-            args:
-                GIT_SHA: local
         ports:
             - 8081:80
             - 8082:80
@@ -115,8 +113,6 @@ WORKDIR /app
 RUN apt update && apt install -y ca-certificates && rm -rf /var/lib/apt/lists/*
 COPY . .
 RUN yarn install
-ARG GIT_SHA=local
-ENV GIT_SHA=$GIT_SHA
 ENV NEXT_PUBLIC_ENTE_ENDPOINT=DOCKER_RUNTIME_REPLACE_ENDPOINT
 ENV NEXT_PUBLIC_ENTE_ALBUMS_ENDPOINT=DOCKER_RUNTIME_REPLACE_ALBUMS_ENDPOINT
 RUN yarn build
@@ -164,7 +160,10 @@ RUN chmod +x /docker-entrypoint.d/replace_ente_endpoints.sh
 Create a `.credentials.env` file at the root of the project with the following
 content (here you need to set the correct value of each variable):
 
-```env
+<!-- The following code block should have language env, but vitepress currently
+doesn't support that language, so use sh as a reasonable fallback instead. -->
+
+```sh
 # run  `go run tools/gen-random-keys/main.go` in the server directory to generate the keys
 ENTE_KEY_ENCRYPTION=
 ENTE_KEY_HASH=
