@@ -1,17 +1,51 @@
 {
+    /* TSConfig for a set of vanilla TypeScript files that need to be transpiled
+       into JavaScript that'll then be loaded and run by the main (node) process
+       of our Electron app. */
+
+    /* TSConfig docs: https://aka.ms/tsconfig.json */
+
+    /* Recommended target, lib and other settings for code running in the
+       version of Node.js bundled with Electron.
+
+       Currently, with Electron 25, this is Node.js 18
+       https://www.electronjs.org/blog/electron-25-0
+     */
+    // "extends": "@tsconfig/node18/tsconfig.json",
     "compilerOptions": {
+        /* Emit the generated JS into `app/` */
+        "outDir": "app",
+        /* Generate source maps */
+        "sourceMap": true,
+        /* Allow absolute imports starting with src as root */
+        "baseUrl": "src",
+        /* Allow imports of paths in node_modules */
+        "paths": {
+            "*": ["node_modules/*"]
+        },
+
+        /* Temporary overrides to get things to compile with the older config */
         "target": "es2021",
         "module": "commonjs",
         "esModuleInterop": true,
-        /* Emit the generated JS into app */
-        "outDir": "app",
-        "noImplicitAny": true,
-        "sourceMap": true,
-        "baseUrl": "src",
-        "paths": {
-            "*": ["node_modules/*"]
-        }
+        "strict": false,
+        "noImplicitAny": true
+
+        /* Below is the state we want */
+        /* Enable these one by one */
+
+        /* Require the `type` modifier when importing types */
+        // "verbatimModuleSyntax": true
+
+        /* Stricter than strict */
+        // "noImplicitReturns": true,
+        // "noUnusedParameters": true,
+        // "noUnusedLocals": true,
+        // "noFallthroughCasesInSwitch": true,
+        /* e.g. makes array indexing returns undefined */
+        // "noUncheckedIndexedAccess": true,
+        // "exactOptionalPropertyTypes": true,
     },
-    /* Transpile all ts files in src/ */
+    /* Transpile all `.ts` files in `src/` */
     "include": ["src/**/*.ts"]
 }

@@ -1,14 +1,16 @@
 /**
  * @file The preload script
  *
- * The preload script runs in an isolated environment. It has access to some of
- * the Node imports. Its task is to expose these imports and other functions as
- * an object on the DOM, so that the renderer process can invoke functions that
- * live in the main (Node.js) process.
+ * The preload script runs in a renderer process before its web contents begin
+ * loading. During their execution they have access to a subset of Node.js APIs
+ * and imports. Its purpose is to expose the relevant imports and other
+ * functions as an object on the DOM, so that the renderer process can invoke
+ * functions that live in the main (Node.js) process if needed.
  *
- * Note that this script cannot import other code from `src/` - this runs in a
- * separate, third, process (a BrowserWindow context that runs prior to the
- * renderer process).
+ * Note that this script cannot import other code from `src/` - conceptually it
+ * can be thought of as running in a separate, third, process different from
+ * both the main or a renderer process (technically, it runs in a BrowserWindow
+ * context that runs prior to the renderer process).
  *
  * That said, this can be split into multiple files if we wished. However,
  * that'd require us setting up a bundler to package it back up into a single JS
