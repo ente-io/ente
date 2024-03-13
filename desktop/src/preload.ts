@@ -6,11 +6,23 @@
  * an object on the DOM, so that the renderer process can invoke functions that
  * live in the main (Node.js) process.
  *
- * Note that this script cannot import other code from `src/`. This is not an
- * inherent limitation, just that we'll need to transpile our TypeScript and
- * bundle it such that it can be imported from here at runtime, when this
- * preload script is run by Electron inside its half-node half-DOM isolated
- * environment.
+ * Note that this script cannot import other code from `src/` - this runs in a
+ * separate, third, process (a BrowserWindow context that runs prior to the
+ * renderer process).
+ *
+ * That said, this can be split into multiple files if we wished. However,
+ * that'd require us setting up a bundler to package it back up into a single JS
+ * file that can be used at runtime.
+ *
+ * > Since enabling the sandbox disables Node.js integration in your preload
+ * > scripts, you can no longer use require("../my-script"). In other words,
+ * > your preload script needs to be a single file.
+ * >
+ * > https://www.electronjs.org/blog/breach-to-barrier
+ *
+ * Since most of this is just boilerplate code providing a bridge between the
+ * main and renderer, we avoid introducing another moving part into the mix and
+ * just keep the entire preload setup in this single file.
  */
 
 import { contextBridge } from "electron";
