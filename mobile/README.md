@@ -45,8 +45,7 @@ You can alternatively install the build from PlayStore or F-Droid.
 
 ## 🧑‍💻 Building from source
 
-1. [Install Flutter v3.13.4](https://flutter.dev/docs/get-started/install) or
-   set the Path of Flutter SDK to `thirdparty/flutter/bin`.
+1. [Install Flutter v3.13.4](https://flutter.dev/docs/get-started/install).
 
 2. Pull in all submodules with `git submodule update --init --recursive`
 
