@@ -5,7 +5,7 @@ A guide written by Green, an ente.io lover
 
 ---
 
-Migrating from Authy can be tiring, as you cannot export your 2FA codes through the app, meaning that you would have to reconfigure 2FA for all of your accounts for your new 2FA authenticator. But do not fear, as there are much simpler ways to migrate from Authy to ente!
+Migrating from Authy can be tiring, as you cannot export your 2FA codes through the app, meaning that you would have to reconfigure 2FA for all of your accounts for your new 2FA authenticator. However, easier ways exist to export your codes out of Authy. This guide will cover two of the most used methods for mograting from Authy to ente Authenticator.
 
 > [!CAUTION]
 > Under any circumstances, do **NOT** share any JSON and TXT files generated using this guide, as they contain your **unencrypted** TOTP secrets!
@@ -14,19 +14,17 @@ Migrating from Authy can be tiring, as you cannot export your 2FA codes through 
 
 ---
 
-To export your codes from your Authy account, you can use one of these methods, or any other method you fancy that I haven't provided a guide for if you got it to work.
-
 # Method 1: Use Neeraj's export tool
 **Who should use this?** General users who want to save time by skipping the hard (and rather technical) parts of the process.<br><br>
 
-One way to export is to [use this tool by Neeraj](https://github.com/ua741/authy-export/releases/tag/v0.0.4) to simplify things and skip directly to importing to ente Authenticator.
+One way to export is to [use this tool by Neeraj](https://github.com/ua741/authy-export/releases/tag/v0.0.4) to simplify the process and skip directly to importing to ente Authenticator.
 
 To export from Authy, download the tool for your specific OS, then type the following in your terminal:
 ```
 ./<binary-name> <path_to_export_file>
 ```
 
-So assuming you didn't change the filename of the binary and you've changed the working directory to the location of the binary, you should type this for MacOS:
+Assuming the filename of the binary remains unmodified and the working directory of the terminal is the location of the binary, you should type this for MacOS:
 > [!NOTE]  
 > On Apple Silicon devices, Rosetta 2 may be required to run the binary.
 ```
@@ -56,13 +54,13 @@ This will create a JSON file called `authy-to-bitwarden-export.json`, which cont
 
 # Method 2.1: If the export worked, but the import didn't
 > [!NOTE]  
-> This is intended only for users who successfully exported their codes using the guide in method 2, but couldn't import it to ente Authenticator for whatever reason. If the import was successful, or you haven't tried to import the codes yet, ignore this section.
+> This is intended only for users who successfully exported their codes using the guide in method 2, but could not import it to ente Authenticator for whatever reason. If the import was successful, or you haven't tried to import the codes yet, ignore this section.
 >
 > If the export itself failed, try using [**method 1**](#method-1-use-neerajs-export-tool) instead.
 
-Usually, you should be able to import Bitwarden exports directly into ente Authenticator. In case this didn't work for whatever reason, I've written a program in Python that converts the JSON file into a TXT file that ente Authenticator can use!
+Usually, you should be able to import Bitwarden exports directly into ente Authenticator. In case this didn't work for whatever reason, I've written a program in Python that converts the JSON file into a TXT file that ente Authenticator can use, so you can try importing using plain text import instead.
 
-You can download my program [here](https://github.com/gweeeen/ducky/blob/main/duckys_other_stuff/authy_to_ente.py). Or, you can copy and paste this code (it's the exact same code), if you prefer that more for whatever reason:
+You can download my program [here](https://github.com/gweeeen/ducky/blob/main/duckys_other_stuff/authy_to_ente.py), or you can copy the program below:
 ```py
 import json
 import os
@@ -85,10 +83,10 @@ To convert the file with this program, you will need to install [Python](https:/
 
 Before you run the program, make sure that both the Python program and the JSON file are in the same directory, otherwise this will not work!
 
-To run the Python program, open it in your IDE and run the program, or open your terminal and type `python3 authy_to_ente.py` (MacOS/Linux/whatever that uses bash or similar) or `py -3 authy_to_ente.py` (Windows). Once you run it, a new TXT file called `auth_codes.txt` will be generated. You can now import your data to ente Authenticator!
+To run the Python program, open it in your IDE and run the program, or open your terminal and type `python3 authy_to_ente.py` (MacOS/Linux, or any other OS that uses bash) or `py -3 authy_to_ente.py` (Windows). Once you run it, a new TXT file called `auth_codes.txt` will be generated. You can now import your data to ente Authenticator!
 
 ---
-We're in the homestretch now! Now that we have the TXT or JSON file, let's import it. This should be the easiest part of the entire migration process.
+You should now have a TXT file (method 1, method 2.1) or a JSON file (method 2) that countains your TOTP secrets, which can now be imported into ente Authenticator. To import your codes, please follow one of the steps below, depending on which method you used to export your codes.
 
 # Importing to ente Authenticator (Method 1, method 2.1)
 1. Copy the TXT file to one of your devices with ente Authenticator.
