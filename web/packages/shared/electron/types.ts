@@ -93,7 +93,6 @@ export interface ElectronAPIsType {
         maxDimension: number,
         maxSize: number,
     ) => Promise<Uint8Array>;
-    logRendererProcessMemoryUsage: (message: string) => Promise<void>;
     registerForegroundEventListener: (onForeground: () => void) => void;
     openDirectory: (dirPath: string) => Promise<void>;
     moveFile: (oldPath: string, newPath: string) => Promise<void>;

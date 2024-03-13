@@ -1,3 +1,4 @@
+import { contextBridge } from "electron";
 import {
     deleteDiskCache,
     getCacheDirectory,
@@ -59,17 +60,14 @@ import {
     updateWatchMappingSyncedFiles,
 } from "./api/watch";
 import { setupLogging } from "./utils/logging";
-import {
-    logRendererProcessMemoryUsage,
-    setupRendererProcessStatsLogger,
-} from "./utils/processStats";
 
 setupLogging();
-setupRendererProcessStatsLogger();
 
-const windowObject: any = window;
-
-windowObject["ElectronAPIs"] = {
+// These objects exposed here will become available to the JS code in our
+// renderer (the web/ code) as `window.ElectronAPIs.*`
+//
+// https://www.electronjs.org/docs/latest/tutorial/tutorial-preload
+contextBridge.exposeInMainWorld("ElectronAPIs", {
     exists,
     checkExistsAndCreateDir,
     saveStreamToDisk,
@@ -108,7 +106,6 @@ windowObject["ElectronAPIs"] = {
     runFFmpegCmd,
     muteUpdateNotification,
     generateImageThumbnail,
-    logRendererProcessMemoryUsage,
     registerForegroundEventListener,
     openDirectory,
     moveFile,
@@ -120,4 +117,4 @@ windowObject["ElectronAPIs"] = {
     getPlatform,
     getCacheDirectory,
     setCustomCacheDirectory,
-};
+});
