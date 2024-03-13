@@ -24,8 +24,13 @@ As a short summary, you can install Flutter and build the Photos app this way:
 cd ente/mobile
 git submodule update --init --recursive
 flutter pub get
+# Android
+flutter run --dart-define=endpoint=http://localhost:8080 --flavor independent --debug -t lib/main.dart
+# iOS
 flutter run --dart-define=endpoint=http://localhost:8080
 ```
+
+
 
 Or for the auth app:
 
@@ -34,4 +39,16 @@ cd ente/auth
 git submodule update --init --recursive
 flutter pub get
 flutter run --dart-define=endpoint=http://localhost:8080
+# Android
+flutter run --dart-define=endpoint=http://localhost:8080 --flavor independent --debug -t lib/main.dart
+# iOS
+flutter run --dart-define=endpoint=http://localhost:8080
 ```
+
+## How to build non-debug builds
+For building APK, [setup your
+     keystore](https://docs.flutter.dev/deployment/android#create-an-upload-keystore)
+     and run 
+```sh         
+flutter build apk --release --flavor independent -t lib/main.dart
+ ```
