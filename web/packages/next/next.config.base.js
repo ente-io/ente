@@ -12,12 +12,22 @@
 
 const cp = require("child_process");
 
-const gitSHA = cp
-    .execSync("git rev-parse --short HEAD", {
-        cwd: __dirname,
-        encoding: "utf8",
-    })
-    .trimEnd();
+/**
+ * Return the current commit ID if we're running inside a git repository.
+ */
+const gitSHA = () => {
+    // Allow the command to fail. gitSHA will be an empty string in such cases.
+    // This allows us to run the build even when we're outside of a git context.
+    const result = cp
+        .execSync("git rev-parse --short HEAD 2>/dev/null || true", {
+            cwd: __dirname,
+            encoding: "utf8",
+        })
+        .trimEnd();
+    // Convert empty strings (e.g. when the `|| true` part of the above execSync
+    // comes into play) to undefined.
+    return result ? result : undefined;
+};
 
 /**
  * Configuration for the Next.js build
@@ -42,7 +52,7 @@ const nextConfig = {
     // Add environment variables to the JavaScript bundle. They will be
     // available as `process.env.VAR_NAME` to our code.
     env: {
-        GIT_SHA: gitSHA,
+        GIT_SHA: gitSHA(),
     },
 
     // https://dev.to/marcinwosinek/how-to-add-resolve-fallback-to-webpack-5-in-nextjs-10-i6j

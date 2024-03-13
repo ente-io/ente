@@ -69,8 +69,6 @@ services:
     web:
         build:
             context: web
-            args:
-                GIT_SHA: local
         ports:
             - 8081:80
             - 8082:80
@@ -115,8 +113,6 @@ WORKDIR /app
 RUN apt update && apt install -y ca-certificates && rm -rf /var/lib/apt/lists/*
 COPY . .
 RUN yarn install
-ARG GIT_SHA=local
-ENV GIT_SHA=$GIT_SHA
 ENV NEXT_PUBLIC_ENTE_ENDPOINT=DOCKER_RUNTIME_REPLACE_ENDPOINT
 ENV NEXT_PUBLIC_ENTE_ALBUMS_ENDPOINT=DOCKER_RUNTIME_REPLACE_ALBUMS_ENDPOINT
 RUN yarn build
