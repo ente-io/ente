@@ -200,6 +200,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "ackPasswordLostWarning": MessageLookupByLibrary.simpleMessage(
             "我明白，如果我丢失密码，我可能会丢失我的数据，因为我的数据是 <underline>端到端加密的</underline>。"),
         "activeSessions": MessageLookupByLibrary.simpleMessage("已登录的设备"),
+        "addAName": MessageLookupByLibrary.simpleMessage("Add a name"),
         "addANewEmail": MessageLookupByLibrary.simpleMessage("添加新的电子邮件"),
         "addCollaborator": MessageLookupByLibrary.simpleMessage("添加协作者"),
         "addFromDevice": MessageLookupByLibrary.simpleMessage("从设备添加"),
@@ -592,6 +593,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "filesBackedUpFromDevice": m20,
         "filesBackedUpInAlbum": m21,
         "filesDeleted": MessageLookupByLibrary.simpleMessage("文件已删除"),
+        "findPeopleByName": MessageLookupByLibrary.simpleMessage(
+            "Find people quickly by searching by name"),
         "flip": MessageLookupByLibrary.simpleMessage("上下翻转"),
         "forYourMemories": MessageLookupByLibrary.simpleMessage("为您的回忆"),
         "forgotPassword": MessageLookupByLibrary.simpleMessage("忘记密码"),

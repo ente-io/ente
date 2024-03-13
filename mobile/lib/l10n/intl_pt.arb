@@ -1198,5 +1198,7 @@
   "deviceCodeHint": "Insira o código",
   "joinDiscord": "Junte-se ao Discord",
   "locations": "Locations",
-  "descriptions": "Descriptions"
+  "descriptions": "Descriptions",
+  "addAName": "Add a name",
+  "findPeopleByName": "Find people quickly by searching by name"
 }

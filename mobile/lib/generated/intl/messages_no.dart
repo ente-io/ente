@@ -24,6 +24,7 @@ class MessageLookup extends MessageLookupByLibrary {
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
         "accountWelcomeBack":
             MessageLookupByLibrary.simpleMessage("Velkommen tilbake!"),
+        "addAName": MessageLookupByLibrary.simpleMessage("Add a name"),
         "addToHiddenAlbum":
             MessageLookupByLibrary.simpleMessage("Add to hidden album"),
         "askDeleteReason": MessageLookupByLibrary.simpleMessage(
@@ -53,6 +54,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Skriv inn e-postadressen din"),
         "feedback": MessageLookupByLibrary.simpleMessage("Tilbakemelding"),
         "fileTypes": MessageLookupByLibrary.simpleMessage("File types"),
+        "findPeopleByName": MessageLookupByLibrary.simpleMessage(
+            "Find people quickly by searching by name"),
         "invalidEmailAddress":
             MessageLookupByLibrary.simpleMessage("Ugyldig e-postadresse"),
         "joinDiscord": MessageLookupByLibrary.simpleMessage("Join Discord"),

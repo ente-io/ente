@@ -200,6 +200,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Entiendo que si pierdo mi contraseña podría perder mis datos, ya que mis datos están <underline>cifrados de extremo a extremo</underline>."),
         "activeSessions":
             MessageLookupByLibrary.simpleMessage("Sesiónes activas"),
+        "addAName": MessageLookupByLibrary.simpleMessage("Add a name"),
         "addANewEmail": MessageLookupByLibrary.simpleMessage(
             "Agregar nuevo correo electrónico"),
         "addCollaborator":
@@ -634,6 +635,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "filesBackedUpInAlbum": m21,
         "filesDeleted":
             MessageLookupByLibrary.simpleMessage("Archivos eliminados"),
+        "findPeopleByName": MessageLookupByLibrary.simpleMessage(
+            "Find people quickly by searching by name"),
         "flip": MessageLookupByLibrary.simpleMessage("Voltear"),
         "forYourMemories":
             MessageLookupByLibrary.simpleMessage("para tus recuerdos"),

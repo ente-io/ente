@@ -1118,5 +1118,7 @@
   "editsToLocationWillOnlyBeSeenWithinEnte": "Edits to location will only be seen within Ente",
   "joinDiscord": "Join Discord",
   "locations": "Locations",
-  "descriptions": "Descriptions"
+  "descriptions": "Descriptions",
+  "addAName": "Add a name",
+  "findPeopleByName": "Find people quickly by searching by name"
 }

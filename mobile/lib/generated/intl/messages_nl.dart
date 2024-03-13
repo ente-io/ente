@@ -224,6 +224,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Ik begrijp dat als ik mijn wachtwoord verlies, ik mijn gegevens kan verliezen omdat mijn gegevens <underline>end-to-end versleuteld</underline> zijn."),
         "activeSessions":
             MessageLookupByLibrary.simpleMessage("Actieve sessies"),
+        "addAName": MessageLookupByLibrary.simpleMessage("Add a name"),
         "addANewEmail":
             MessageLookupByLibrary.simpleMessage("Nieuw e-mailadres toevoegen"),
         "addCollaborator":
@@ -732,6 +733,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "filesBackedUpInAlbum": m21,
         "filesDeleted":
             MessageLookupByLibrary.simpleMessage("Bestanden verwijderd"),
+        "findPeopleByName": MessageLookupByLibrary.simpleMessage(
+            "Find people quickly by searching by name"),
         "flip": MessageLookupByLibrary.simpleMessage("Omdraaien"),
         "forYourMemories":
             MessageLookupByLibrary.simpleMessage("voor uw herinneringen"),

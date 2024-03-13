@@ -1198,5 +1198,7 @@
   "deviceCodeHint": "输入代码",
   "joinDiscord": "加入 Discord",
   "locations": "Locations",
-  "descriptions": "Descriptions"
+  "descriptions": "Descriptions",
+  "addAName": "Add a name",
+  "findPeopleByName": "Find people quickly by searching by name"
 }

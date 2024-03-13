@@ -28,6 +28,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "accountWelcomeBack":
             MessageLookupByLibrary.simpleMessage("Witaj ponownie!"),
         "activeSessions": MessageLookupByLibrary.simpleMessage("Aktywne sesje"),
+        "addAName": MessageLookupByLibrary.simpleMessage("Add a name"),
         "addToHiddenAlbum":
             MessageLookupByLibrary.simpleMessage("Add to hidden album"),
         "askDeleteReason": MessageLookupByLibrary.simpleMessage(
@@ -101,6 +102,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Wprowadź swój klucz odzyskiwania"),
         "feedback": MessageLookupByLibrary.simpleMessage("Informacja zwrotna"),
         "fileTypes": MessageLookupByLibrary.simpleMessage("File types"),
+        "findPeopleByName": MessageLookupByLibrary.simpleMessage(
+            "Find people quickly by searching by name"),
         "forgotPassword":
             MessageLookupByLibrary.simpleMessage("Nie pamiętam hasła"),
         "generatingEncryptionKeys": MessageLookupByLibrary.simpleMessage(

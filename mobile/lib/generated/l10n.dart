@@ -8437,6 +8437,26 @@ class S {
       args: [],
     );
   }
+
+  /// `Add a name`
+  String get addAName {
+    return Intl.message(
+      'Add a name',
+      name: 'addAName',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Find people quickly by searching by name`
+  String get findPeopleByName {
+    return Intl.message(
+      'Find people quickly by searching by name',
+      name: 'findPeopleByName',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {
