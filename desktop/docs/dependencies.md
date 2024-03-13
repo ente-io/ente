@@ -22,6 +22,11 @@ a _renderer_ process.
     export of the [Photos web app](../web/README.md) in the generated app. This
     gets loaded by the embedded Chromium at runtime, acting as the app's UI.
 
+There is also a third environment that gets temporarily created:
+
+-   The [preload script](../src/preload.ts) acts as a gateway between the _main_
+    and the _renderer_ process. It runs in its own isolated environment.
+
 ### electron-builder
 
 [Electron Builder](https://www.electron.build) is used for packaging the app for

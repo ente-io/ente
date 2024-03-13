@@ -1,3 +1,18 @@
+/**
+ * @file The preload script
+ *
+ * The preload script runs in an isolated environment. It has access to some of
+ * the Node imports. Its task is to expose these imports and other functions as
+ * an object on the DOM, so that the renderer process can invoke functions that
+ * live in the main (Node.js) process.
+ *
+ * Note that this script cannot import other code from `src/`. This is not an
+ * inherent limitation, just that we'll need to transpile our TypeScript and
+ * bundle it such that it can be imported from here at runtime, when this
+ * preload script is run by Electron inside its half-node half-DOM isolated
+ * environment.
+ */
+
 import { contextBridge } from "electron";
 import {
     deleteDiskCache,
