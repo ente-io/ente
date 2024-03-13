@@ -10,6 +10,12 @@ To know more about Ente, see [our main README](../README.md) or visit
 
 ## Building from source
 
+Fetch submodules
+
+```sh
+git submodule update --init --recursive
+```
+
 Install dependencies
 
 ```sh
