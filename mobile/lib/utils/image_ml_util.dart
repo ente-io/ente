@@ -658,7 +658,84 @@ Future<(Num3DInputMatrix, Size, Size)> preprocessImageToMatrix(
   return (imageMatrix, originalSize, newSize);
 }
 
-Future<(Float32List, Size, Size)> preprocessImageToFloat32ChannelsFirst(
+Future<(Float32List, Size, Size)>
+    preprocessImageToFloat32ChannelsFirst(
+  Uint8List imageData, {
+  required int normalization,
+  required int requiredWidth,
+  required int requiredHeight,
+  Color Function(num, num, Image, ByteData) getPixel = getPixelBilinear,
+  maintainAspectRatio = true,
+}) async {
+  final normFunction = normalization == 2
+      ? normalizePixelRange2
+      : normalization == 1
+          ? normalizePixelRange1
+          : normalizePixelNoRange;
+  final Image image = await decodeImageFromData(imageData);
+  final ByteData imgByteData = await getByteDataFromImage(image);
+  final originalSize = Size(image.width.toDouble(), image.height.toDouble());
+
+  if (image.width == requiredWidth && image.height == requiredHeight) {
+    return (
+      createFloat32ListFromImageChannelsFirst(
+        image,
+        imgByteData,
+        normFunction: normFunction,
+      ),
+      originalSize,
+      originalSize
+    );
+  }
+
+  double scaleW = requiredWidth / image.width;
+  double scaleH = requiredHeight / image.height;
+  if (maintainAspectRatio) {
+    final scale =
+        min(requiredWidth / image.width, requiredHeight / image.height);
+    scaleW = scale;
+    scaleH = scale;
+  }
+  final scaledWidth = (image.width * scaleW).round().clamp(0, requiredWidth);
+  final scaledHeight = (image.height * scaleH).round().clamp(0, requiredHeight);
+
+  final processedBytes = Float32List(3 * requiredHeight * requiredWidth);
+
+  final buffer = Float32List.view(processedBytes.buffer);
+  int pixelIndex = 0;
+  final int channelOffsetGreen = requiredHeight * requiredWidth;
+  final int channelOffsetBlue = 2 * requiredHeight * requiredWidth;
+  for (var h = 0; h < requiredHeight; h++) {
+    for (var w = 0; w < requiredWidth; w++) {
+      late Color pixel;
+      if (w >= scaledWidth || h >= scaledHeight) {
+        pixel = const Color.fromRGBO(114, 114, 114, 1.0);
+      } else {
+        pixel = getPixel(
+          w / scaleW,
+          h / scaleH,
+          image,
+          imgByteData,
+        );
+      }
+      buffer[pixelIndex] = normFunction(pixel.red);
+      buffer[pixelIndex + channelOffsetGreen] = normFunction(pixel.green);
+      buffer[pixelIndex + channelOffsetBlue] = normFunction(pixel.blue);
+      pixelIndex++;
+    }
+  }
+
+  return (
+    processedBytes,
+    originalSize,
+    Size(scaledWidth.toDouble(), scaledHeight.toDouble())
+  );
+}
+
+@Deprecated(
+  'Replaced by `preprocessImageToFloat32ChannelsFirst` to avoid issue with iOS canvas',
+)
+Future<(Float32List, Size, Size)> preprocessImageToFloat32ChannelsFirstCanvas(
   Uint8List imageData, {
   required int normalization,
   required int requiredWidth,

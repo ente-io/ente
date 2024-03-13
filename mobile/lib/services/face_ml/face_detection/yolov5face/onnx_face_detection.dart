@@ -330,7 +330,6 @@ class YoloOnnxFaceDetection {
       requiredWidth: kInputWidth,
       requiredHeight: kInputHeight,
       maintainAspectRatio: true,
-      quality: FilterQuality.medium,
     );
 
     // final input = [inputImageList];
