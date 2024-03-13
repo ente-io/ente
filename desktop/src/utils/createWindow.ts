@@ -8,7 +8,12 @@ import { getHideDockIconPreference } from "../services/userPreference";
 import { isDev } from "./common";
 import { isPlatform } from "./common/platform";
 
-export async function createWindow(): Promise<BrowserWindow> {
+/**
+ * Create an return the {@link BrowserWindow} that will form our app's UI.
+ *
+ * This window will show the HTML served from {@link rendererURL}.
+ */
+export const createWindow = async () => {
     const appImgPath = isDev
         ? "resources/window-icon.png"
         : path.join(process.resourcesPath, "window-icon.png");
@@ -16,9 +21,7 @@ export async function createWindow(): Promise<BrowserWindow> {
     // Create the browser window.
     const mainWindow = new BrowserWindow({
         webPreferences: {
-            sandbox: false,
             preload: path.join(__dirname, "../preload.js"),
-            contextIsolation: false,
         },
         icon: appIcon,
         show: false, // don't show the main window on load,
@@ -114,4 +117,4 @@ export async function createWindow(): Promise<BrowserWindow> {
         }
     });
     return mainWindow;
-}
+};
