@@ -219,7 +219,8 @@ class FaceMlService {
               resultBuilder: resultBuilder,
             );
 
-            dev.log("Completed `detectFaces` function, in "
+            dev.log(
+                "${faceDetectionResult.length} faces detected: completed `detectFaces` function, in "
                 "${stopwatch.elapsedMilliseconds} ms");
 
             // If no faces were detected, return a result with no faces. Otherwise, continue.
@@ -477,6 +478,7 @@ class FaceMlService {
       }
       final List<Face> faces = [];
       if (!result.hasFaces) {
+        debugPrint('No faces detected for file with name:${enteFile.displayName}');
         faces.add(
           Face(
             '${result.fileId}-0',

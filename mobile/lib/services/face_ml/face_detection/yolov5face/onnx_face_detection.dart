@@ -696,10 +696,6 @@ class YoloOnnxFaceDetection {
       iouThreshold: kIouThreshold,
     );
 
-    dev.log(
-      '[YOLOFaceDetectionService] ${relativeDetections.length} faces detected',
-    );
-
     return relativeDetections;
   }
 
