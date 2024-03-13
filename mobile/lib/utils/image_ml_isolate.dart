@@ -131,16 +131,13 @@ class ImageMlIsolate {
             final int normalization = normalize ? 1 : -1;
             final requiredWidth = args['requiredWidth'] as int;
             final requiredHeight = args['requiredHeight'] as int;
-            final qualityIndex = args['quality'] as int;
             final maintainAspectRatio = args['maintainAspectRatio'] as bool;
-            final quality = FilterQuality.values[qualityIndex];
             final (result, originalSize, newSize) =
                 await preprocessImageToFloat32ChannelsFirst(
               imageData,
               normalization: normalization,
               requiredWidth: requiredWidth,
               requiredHeight: requiredHeight,
-              quality: quality,
               maintainAspectRatio: maintainAspectRatio,
             );
             sendPort.send({
