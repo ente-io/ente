@@ -1,12 +1,19 @@
-# Auth Encrypted Export format
+---
+title: Exporting your data from Ente Auth
+description: Guide for exporting your 2FA codes out from Ente Auth
+---
 
-## Overview
+# Exporting your data out of Ente Auth
+
+## Auth Encrypted Export format
+
+### Overview
 
 When we export the auth codes, the data is encrypted using a key derived from the user's password.
 This document describes the JSON structure used to organize exported data, including versioning and key derivation
 parameters.
 
-## Export JSON Sample
+### Export JSON Sample
 
 ```json
 {
@@ -28,17 +35,17 @@ The main object used to represent the export data. It contains the following key
 - `encryptedData"`:  The encrypted authentication data.
 - `encryptionNonce`: The nonce used for encryption.
 
-### Version
+#### Version
 
 Export version is used to identify the format of the export data.
 
-#### Ver: 1
+##### Ver: 1
 
 * KDF Algorithm: `ARGON2ID`
 * Decrypted data format: `otpauth://totp/...`, separated by a new line.
 * Encryption Algo: `XChaCha20-Poly1305`
 
-#### Key Derivation Function  Params (KDF)
+##### Key Derivation Function  Params (KDF)
 
 This section contains the parameters that were using during KDF operation:
 
@@ -46,7 +53,7 @@ This section contains the parameters that were using during KDF operation:
 - `opsLimit`: Operations limit for the algorithm.
 - `salt`:  The salt used in the derivation process.
 
-#### Encrypted Data
+##### Encrypted Data
 
 As mentioned above, the auth data is encrypted using a key that's derived by using user provided password & kdf params.
 For encryption, we are using `XChaCha20-Poly1305` algorithm.
@@ -57,7 +64,7 @@ For encryption, we are using `XChaCha20-Poly1305` algorithm.
   > Settings -> Data -> Import Codes -> ente Encrypted export.
 
 * **Decrypt using Ente CLI** : Download the latest version of [Ente CLI](https://github.com/ente-io/ente/releases?q=CLI&expanded=false), and run the following command
-         
+
 ```
   ./ente auth decrypt <export_file> <output_file>
 ```
