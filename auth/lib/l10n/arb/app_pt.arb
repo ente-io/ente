@@ -407,7 +407,6 @@
   "hearUsWhereTitle": "Como você ouviu sobre o Ente? (opcional)",
   "hearUsExplanation": "Não rastreamos instalações do aplicativo. Seria útil se você nos contasse onde nos encontrou!",
   "waitingForBrowserRequest": "Aguardando solicitação do navegador...",
-  "launchPasskeyUrlAgain": "Iniciar a URL de chave de acesso novamente",
   "passkey": "Chave de acesso",
   "developerSettingsWarning": "Tem certeza de que deseja modificar as configurações de Desenvolvedor?",
   "developerSettings": "Configurações de desenvolvedor",
