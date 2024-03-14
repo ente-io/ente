@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/ente-io/cli/internal"
+	"github.com/ente-io/cli/internal/api"
 	"github.com/ente-io/cli/pkg/model"
 	"github.com/ente-io/cli/utils"
 	"log"
@@ -21,6 +22,25 @@ func (c *ClICtrl) GetUserId(ctx context.Context, params model.AdminActionForUser
 		return err
 	}
 	fmt.Println(id.User.ID)
+	return nil
+}
+
+func (c *ClICtrl) ListUsers(ctx context.Context, params model.AdminActionForUser) error {
+	accountCtx, err := c.buildAdminContext(ctx, params.AdminEmail)
+	if err != nil {
+		return err
+	}
+	users, err := c.Client.ListUsers(accountCtx)
+	if err != nil {
+		if apiErr, ok := err.(*api.ApiError); ok && apiErr.StatusCode == 400 && strings.Contains(apiErr.Message, "Token is too old") {
+			fmt.Printf("Old admin token, please re-authenticate using `ente account add` \n")
+			return nil
+		}
+		return err
+	}
+	for _, user := range users {
+		fmt.Printf("Email: %s, ID: %d, Created: %s\n", user.Email, user.ID, time.UnixMicro(user.CreationTime).Format("2006-01-02"))
+	}
 	return nil
 }
 

@@ -25,6 +25,28 @@ func (c *Client) GetUserIdFromEmail(ctx context.Context, email string) (*models.
 	}
 	return &res, nil
 }
+
+func (c *Client) ListUsers(ctx context.Context) ([]models.User, error) {
+	var res struct {
+		Users []models.User `json:"users"`
+	}
+	r, err := c.restClient.R().
+		SetContext(ctx).
+		SetQueryParam("sinceTime", "0").
+		SetResult(&res).
+		Get("/admin/users/")
+	if err != nil {
+		return nil, err
+	}
+	if r.IsError() {
+		return nil, &ApiError{
+			StatusCode: r.StatusCode(),
+			Message:    r.String(),
+		}
+	}
+	return res.Users, nil
+}
+
 func (c *Client) UpdateFreePlanSub(ctx context.Context, userDetails *models.UserDetails, storageInBytes int64, expiryTimeInMicro int64) error {
 	var res interface{}
 	if userDetails.Subscription.ProductID != "free" {
