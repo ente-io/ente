@@ -24,7 +24,7 @@ configure the endpoint the app should be connecting to.
 
 > [!WARNING] The new version of CLI that supports connecting to custom server is
 > still in beta. You can download the beta version from
-> [here](https://github.com/ente-io/ente/releases?q=tag%3Acli-v0&expanded=true)
+> [here](https://github.com/ente-io/ente/releases?q=tag%3Acli-v0)
 
 Define a config.yaml and put it either in the same directory as CLI or path
 defined in env variable `ENTE_CLI_CONFIG_PATH`

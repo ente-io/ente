@@ -68,7 +68,7 @@ using user provided password & kdf params. For encryption, we are using
     > Settings -> Data -> Import Codes -> ente Encrypted export.
 
 -   **Decrypt using Ente CLI** : Download the latest version of
-    [Ente CLI](https://github.com/ente-io/ente/releases?q=CLI&expanded=false),
+    [Ente CLI](https://github.com/ente-io/ente/releases?q=tag%3Acli-v0),
     and run the following command
 
 ```
