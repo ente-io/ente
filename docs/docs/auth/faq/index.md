@@ -1,6 +1,6 @@
 ---
 title: FAQ - Auth
-description:  Frequently asked questions about Ente Auth
+description: Frequently asked questions about Ente Auth
 ---
 
 # Frequently Asked Questions
