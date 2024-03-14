@@ -50,6 +50,7 @@ class _AddParticipantPage extends State<AddParticipantPage> {
   @override
   void dispose() {
     _textController.dispose();
+    textFieldFocusNode.dispose();
     super.dispose();
   }
 
