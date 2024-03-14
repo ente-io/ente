@@ -123,6 +123,10 @@ export const sidebar = [
                         text: "Verification code",
                         link: "/self-hosting/faq/otp",
                     },
+                    {
+                        text: "Increase storage space",
+                        link: "/self-hosting/faq/storage-space",
+                    },
                 ],
             },
             {
