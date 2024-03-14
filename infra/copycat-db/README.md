@@ -1,8 +1,8 @@
 # Copycat DB
 
-Copycat DB is a [service](../service.md) to take a backup of our database. It
-uses the Scaleway CLI to take backups of the database, and uploads them to an
-offsite bucket.
+Copycat DB is a [service](../services/README.md) to take a backup of our
+database. It uses the Scaleway CLI to take backups of the database, and uploads
+them to an offsite bucket.
 
 This bucket has an object lock configured, so backups cannot be deleted before
 expiry. Conversely, the service also deletes backups older than some threshold
@@ -11,9 +11,8 @@ when it creates a new one to avoid indefinite retention.
 In production the service runs as a cron job, scheduled using a systemd timer.
 
 > These backups are in addition to the regular snapshots that we take, and are
-> meant as a second layer of replication. For more details, see our [Reliability
-> and Replication Specification](https://ente.io/reliability).
-
+> meant as a second layer of replication. For more details, see our
+> [Reliability and Replication Specification](https://ente.io/reliability).
 
 ## Quick help
 
@@ -61,7 +60,8 @@ then the Docker image falls back to using `pg_dump` (as outlined next).
 Not needed in production when taking a backup (since we use the Scaleway CLI to
 take backups in production).
 
-These are used when testing a backup using `pg_dump`, and when restoring backups.
+These are used when testing a backup using `pg_dump`, and when restoring
+backups.
 
 ##### RCLONE_CONFIG
 
@@ -70,9 +70,9 @@ to use to save the backups, and the credentials to to access it.
 
 Specifically, the config file contains two remotes:
 
-* The bucket itself, where data will be stored.
+-   The bucket itself, where data will be stored.
 
-* A "crypt" remote that wraps the bucket by applying client side encryption.
+-   A "crypt" remote that wraps the bucket by applying client side encryption.
 
 The configuration file will contain (lightly) obfuscated versions of the
 password, and as long as we have the configuration file we can continue using
@@ -164,9 +164,9 @@ you wish to force the job to service immediately
 
 ## Updating
 
-To update, run the [GitHub
-workflow](../../.github/workflows/copycat-db-release.yaml) to build and push the
-latest image to our Docker Registry, then restart the systemd service on the
-instance
+To update, run the
+[GitHub workflow](../../.github/workflows/copycat-db-release.yaml) to build and
+push the latest image to our Docker Registry, then restart the systemd service
+on the instance
 
     sudo systemctl restart copycat-db
