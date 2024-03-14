@@ -47,6 +47,29 @@ func (c *Client) ListUsers(ctx context.Context) ([]models.User, error) {
 	return res.Users, nil
 }
 
+func (c *Client) Disable2Fa(ctx context.Context, userID int64) error {
+	var res interface{}
+
+	payload := map[string]interface{}{
+		"userID": userID,
+	}
+	r, err := c.restClient.R().
+		SetContext(ctx).
+		SetResult(&res).
+		SetBody(payload).
+		Post("/admin/user/disable-2fa")
+	if err != nil {
+		return err
+	}
+	if r.IsError() {
+		return &ApiError{
+			StatusCode: r.StatusCode(),
+			Message:    r.String(),
+		}
+	}
+	return nil
+}
+
 func (c *Client) UpdateFreePlanSub(ctx context.Context, userDetails *models.UserDetails, storageInBytes int64, expiryTimeInMicro int64) error {
 	var res interface{}
 	if userDetails.Subscription.ProductID != "free" {

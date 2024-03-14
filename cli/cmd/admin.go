@@ -29,6 +29,9 @@ var _userDetailsCmd = &cobra.Command{
 				flags.UserEmail = f.Value.String()
 			}
 		})
+		if flags.UserEmail == "" {
+			return fmt.Errorf("user email is required")
+		}
 		return ctrl.GetUserId(context.Background(), *flags)
 	},
 }
@@ -47,8 +50,11 @@ var _disable2faCmd = &cobra.Command{
 				flags.UserEmail = f.Value.String()
 			}
 		})
-		fmt.Println("Not supported yet")
-		return nil
+		if flags.UserEmail == "" {
+			return fmt.Errorf("user email is required")
+		}
+		return ctrl.Disable2FA(context.Background(), *flags)
+
 	},
 }
 
@@ -86,6 +92,9 @@ var _updateFreeUserStorage = &cobra.Command{
 				noLimit = strings.ToLower(f.Value.String()) == "true"
 			}
 		})
+		if flags.UserEmail == "" {
+			return fmt.Errorf("user email is required")
+		}
 		return ctrl.UpdateFreeStorage(context.Background(), *flags, noLimit)
 	},
 }

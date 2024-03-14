@@ -33,7 +33,7 @@ func (c *ClICtrl) ListUsers(ctx context.Context, params model.AdminActionForUser
 	users, err := c.Client.ListUsers(accountCtx)
 	if err != nil {
 		if apiErr, ok := err.(*api.ApiError); ok && apiErr.StatusCode == 400 && strings.Contains(apiErr.Message, "Token is too old") {
-			fmt.Printf("Old admin token, please re-authenticate using `ente account add` \n")
+			fmt.Printf("Error: old admin token, please re-authenticate using `ente account add` \n")
 			return nil
 		}
 		return err
@@ -41,6 +41,27 @@ func (c *ClICtrl) ListUsers(ctx context.Context, params model.AdminActionForUser
 	for _, user := range users {
 		fmt.Printf("Email: %s, ID: %d, Created: %s\n", user.Email, user.ID, time.UnixMicro(user.CreationTime).Format("2006-01-02"))
 	}
+	return nil
+}
+
+func (c *ClICtrl) Disable2FA(ctx context.Context, params model.AdminActionForUser) error {
+	accountCtx, err := c.buildAdminContext(ctx, params.AdminEmail)
+	if err != nil {
+		return err
+	}
+	userDetails, err := c.Client.GetUserIdFromEmail(accountCtx, params.UserEmail)
+	if err != nil {
+		return err
+	}
+	err = c.Client.Disable2Fa(accountCtx, userDetails.User.ID)
+	if err != nil {
+		if apiErr, ok := err.(*api.ApiError); ok && apiErr.StatusCode == 400 && strings.Contains(apiErr.Message, "Token is too old") {
+			fmt.Printf("Error: Old admin token, please re-authenticate using `ente account add` \n")
+			return nil
+		}
+		return err
+	}
+	fmt.Println("Successfully disabled 2FA for user")
 	return nil
 }
 
