@@ -1,17 +1,17 @@
-## ente admin disable-2fa
+## ente admin delete-user
 
-Disable 2fa for a user
+Delete  a user
 
 ```
-ente admin disable-2fa [flags]
+ente admin delete-user [flags]
 ```
 
 ### Options
 
 ```
   -a, --admin-user string   The email of the admin user. 
-  -h, --help                help for disable-2fa
-  -u, --user string         The email of the user to disable 2FA for. (required)
+  -h, --help                help for delete-user
+  -u, --user string         The email of the user to delete. (required)
 ```
 
 ### SEE ALSO
