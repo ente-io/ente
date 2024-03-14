@@ -30,6 +30,7 @@ class AddParticipantPage extends StatefulWidget {
 }
 
 class _AddParticipantPage extends State<AddParticipantPage> {
+  final _selectedEmails = <String>[];
   String selectedEmail = '';
   String _email = '';
   bool isEmailListEmpty = false;
@@ -86,7 +87,7 @@ class _AddParticipantPage extends State<AddParticipantPage> {
           const SizedBox(height: 4),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: _getEmailField(),
+            child: _enterEmailField(),
           ),
           (isEmailListEmpty && widget.isAddingViewer)
               ? const Expanded(child: SizedBox.shrink())
@@ -102,6 +103,7 @@ class _AddParticipantPage extends State<AddParticipantPage> {
                             : const SizedBox.shrink(),
                         Expanded(
                           child: ListView.builder(
+                            physics: const BouncingScrollPhysics(),
                             itemBuilder: (context, index) {
                               if (index >= suggestedUsers.length) {
                                 return Padding(
@@ -131,16 +133,18 @@ class _AddParticipantPage extends State<AddParticipantPage> {
                                         getEnteColorScheme(context).fillFaint,
                                     pressedColor:
                                         getEnteColorScheme(context).fillFaint,
-                                    trailingIcon:
-                                        (selectedEmail == currentUser.email)
-                                            ? Icons.check
-                                            : null,
+                                    trailingIcon: (_selectedEmails
+                                            .contains(currentUser.email))
+                                        ? Icons.check
+                                        : null,
                                     onTap: () async {
                                       textFieldFocusNode.unfocus();
-                                      if (selectedEmail == currentUser.email) {
-                                        selectedEmail = '';
+                                      if (_selectedEmails
+                                          .contains(currentUser.email)) {
+                                        _selectedEmails
+                                            .remove(currentUser.email);
                                       } else {
-                                        selectedEmail = currentUser.email;
+                                        _selectedEmails.add(currentUser.email);
                                       }
 
                                       setState(() => {});
@@ -162,7 +166,6 @@ class _AddParticipantPage extends State<AddParticipantPage> {
                             },
                             itemCount: suggestedUsers.length +
                                 (widget.isAddingViewer ? 0 : 1),
-                            // physics: const ClampingScrollPhysics(),
                           ),
                         ),
                       ],
@@ -257,7 +260,7 @@ class _AddParticipantPage extends State<AddParticipantPage> {
     setState(() => {});
   }
 
-  Widget _getEmailField() {
+  Widget _enterEmailField() {
     return TextFormField(
       controller: _textController,
       focusNode: textFieldFocusNode,
