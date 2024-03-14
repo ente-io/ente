@@ -102,6 +102,9 @@ func (c *ClICtrl) buildAdminContext(ctx context.Context, adminEmail string) (con
 	if err != nil {
 		return nil, err
 	}
+	if len(accounts) == 0 {
+		return nil, fmt.Errorf("no accounts found, use `account add` to add an account")
+	}
 	var acc *model.Account
 	for _, a := range accounts {
 		if a.Email == adminEmail {
@@ -109,6 +112,14 @@ func (c *ClICtrl) buildAdminContext(ctx context.Context, adminEmail string) (con
 			break
 		}
 	}
+	if (len(accounts) > 1) && (acc == nil) {
+		return nil, fmt.Errorf("multiple accounts found, specify the admin email using --admin-user")
+	}
+	if acc == nil && len(accounts) == 1 {
+		acc = &accounts[0]
+		fmt.Printf("Assuming %s as the Admin \n------------\n", acc.Email)
+	}
+
 	if acc == nil {
 		return nil, fmt.Errorf("account not found for %s, use `account list` to list accounts", adminEmail)
 	}
