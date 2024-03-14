@@ -1,0 +1,20 @@
+[Unit]
+Documentation=https://github.com/ente-io/ente/blob/main/infra/copycat-db
+Requires=docker.service
+After=docker.service
+
+[Service]
+Restart=always
+RestartSec=3600s
+# Don't automatically restart if it fails more than 6 times in 24 hours.
+StartLimitInterval=86400
+StartLimitBurst=6
+ExecStartPre=docker pull rg.fr-par.scw.cloud/ente/copycat-db
+ExecStartPre=-docker stop copycat-db
+ExecStartPre=-docker rm copycat-db
+ExecStart=docker run --name copycat-db \
+     --env-file /root/copycat-db.env \
+     -v /root/var:/var \
+     rg.fr-par.scw.cloud/ente/copycat-db
+StandardOutput=append:/root/var/logs/copycat-db.log
+StandardError=inherit
