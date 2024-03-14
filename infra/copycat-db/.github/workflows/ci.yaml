@@ -1,0 +1,29 @@
+name: Build and push Docker image
+
+on:
+    # Enable manual run
+    workflow_dispatch:
+    push:
+        branches:
+            - release
+        # Sequence of patterns matched against refs/tags
+        tags:
+            - "v*" # Push events to matching v*, i.e. v4.2.0
+
+jobs:
+    build:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+              name: Check out code
+
+            - uses: mr-smithers-excellent/docker-build-push@v6
+              name: Build & Push
+              with:
+                  image: ente/copycat-db
+                  registry: rg.fr-par.scw.cloud
+                  tags: ${GITHUB_SHA}, latest
+                  username: ${{ secrets.DOCKER_USERNAME }}
+                  password: ${{ secrets.DOCKER_PASSWORD }}
+              env:
+                  GIT_COMMIT: ${GITHUB_SHA}
