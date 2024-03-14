@@ -10,9 +10,8 @@ walkthroughs, tutorials and other FAQ pages in this directory.
 
 See the sidebar for existing guides. In particular:
 
-* If you're just looking to get started, see [configure custom
-  server](custom-server/).
+-   If you're just looking to get started, see
+    [configure custom server](custom-server/).
 
-* For self hosting both the server and web app using external S3 buckets for
-  object storage, see [using external S3](external-s3).
-
+-   For self hosting both the server and web app using external S3 buckets for
+    object storage, see [using external S3](external-s3).
