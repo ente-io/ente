@@ -7,7 +7,7 @@ use it to decrypting the export from Ente Auth.
 ## Install
 
 The easiest way is to download a pre-built binary from the [GitHub
-releases](https://github.com/ente-io/ente/releases?q=tag%3Acli-v0&expanded=true).
+releases](https://github.com/ente-io/ente/releases?q=tag%3Acli-v0).
 
 You can also build these binaries yourself
 
