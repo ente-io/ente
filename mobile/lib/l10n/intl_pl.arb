@@ -112,5 +112,7 @@
   "selectALocationFirst": "Select a location first",
   "changeLocationOfSelectedItems": "Change location of selected items?",
   "editsToLocationWillOnlyBeSeenWithinEnte": "Edits to location will only be seen within Ente",
-  "joinDiscord": "Join Discord"
+  "joinDiscord": "Join Discord",
+  "locations": "Locations",
+  "descriptions": "Descriptions"
 }

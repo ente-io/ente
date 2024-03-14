@@ -36,7 +36,8 @@ class AboutSectionWidget extends StatelessWidget {
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
           onTap: () async {
-            launchUrl(Uri.parse("https://github.com/ente-io/auth"));
+            // ignore: unawaited_futures
+            launchUrl(Uri.parse("https://github.com/ente-io/ente"));
           },
         ),
         sectionOptionSpacing,
@@ -68,6 +69,7 @@ class AboutSectionWidget extends StatelessWidget {
                           await UpdateService.instance.shouldUpdate();
                       await dialog.hide();
                       if (shouldUpdate) {
+                        // ignore: unawaited_futures
                         showDialog(
                           context: context,
                           builder: (BuildContext context) {

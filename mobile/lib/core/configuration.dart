@@ -14,7 +14,6 @@ import 'package:photos/db/collections_db.dart';
 import "package:photos/db/embeddings_db.dart";
 import 'package:photos/db/files_db.dart';
 import 'package:photos/db/memories_db.dart';
-import 'package:photos/db/public_keys_db.dart';
 import 'package:photos/db/trash_db.dart';
 import 'package:photos/db/upload_locks_db.dart';
 import 'package:photos/events/signed_in_event.dart';
@@ -25,6 +24,7 @@ import 'package:photos/models/private_key_attributes.dart';
 import 'package:photos/services/billing_service.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/favorites_service.dart';
+import "package:photos/services/home_widget_service.dart";
 import 'package:photos/services/ignored_files_service.dart';
 import 'package:photos/services/machine_learning/semantic_search/semantic_search_service.dart';
 import 'package:photos/services/memories_service.dart';
@@ -32,7 +32,6 @@ import 'package:photos/services/search_service.dart';
 import 'package:photos/services/sync_service.dart';
 import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/file_uploader.dart';
-import "package:photos/utils/home_widget_util.dart";
 import 'package:photos/utils/validator_util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import "package:tuple/tuple.dart";
@@ -165,7 +164,7 @@ class Configuration {
         : null;
     await CollectionsDB.instance.clearTable();
     await MemoriesDB.instance.clearTable();
-    await PublicKeysDB.instance.clearTable();
+
     await UploadLocksDB.instance.clearTable();
     await IgnoredFilesService.instance.reset();
     await TrashDB.instance.clearTable();
@@ -176,7 +175,7 @@ class Configuration {
       MemoriesService.instance.clearCache();
       BillingService.instance.clearCache();
       SearchService.instance.clearCache();
-      unawaited(clearHomeWidget());
+      unawaited(HomeWidgetService.instance.clearHomeWidget());
       Bus.instance.fire(UserLoggedOutEvent());
     } else {
       await _preferences.setBool("auto_logout", true);

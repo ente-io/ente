@@ -11,6 +11,7 @@ import 'package:ente_auth/core/event_bus.dart';
 import 'package:ente_auth/core/network.dart';
 import 'package:ente_auth/events/user_details_changed_event.dart';
 import 'package:ente_auth/l10n/l10n.dart';
+import 'package:ente_auth/models/account/two_factor.dart';
 import 'package:ente_auth/models/api/user/srp.dart';
 import 'package:ente_auth/models/delete_account.dart';
 import 'package:ente_auth/models/key_attributes.dart';
@@ -147,18 +148,18 @@ class UserService {
       final userDetails = UserDetails.fromMap(response.data);
       if (shouldCache) {
         if (userDetails.profileData != null) {
-          _preferences.setBool(
+          await _preferences.setBool(
             kIsEmailMFAEnabled,
             userDetails.profileData!.isEmailMFAEnabled,
           );
-          _preferences.setBool(
+          await _preferences.setBool(
             kCanDisableEmailMFA,
             userDetails.profileData!.canDisableEmailMFA,
           );
         }
         // handle email change from different client
         if (userDetails.email != _config.getEmail()) {
-          setEmail(userDetails.email);
+          await setEmail(userDetails.email);
         }
       }
       return userDetails;
@@ -282,6 +283,7 @@ class UserService {
       throw Exception("unexpected response during passkey verification");
     }
 
+    // ignore: unawaited_futures
     Navigator.of(context).pushAndRemoveUntil(
       MaterialPageRoute(
         builder: (BuildContext context) {
@@ -331,6 +333,7 @@ class UserService {
             );
           }
         }
+        // ignore: unawaited_futures
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(
             builder: (BuildContext context) {
@@ -354,6 +357,7 @@ class UserService {
         );
         Navigator.of(context).pop();
       } else {
+        // ignore: unawaited_futures
         showErrorDialog(
           context,
           context.l10n.incorrectCode,
@@ -363,6 +367,7 @@ class UserService {
     } catch (e) {
       await dialog.hide();
       _logger.severe(e);
+      // ignore: unawaited_futures
       showErrorDialog(
         context,
         context.l10n.oops,
@@ -399,6 +404,7 @@ class UserService {
         Bus.instance.fire(UserDetailsChangedEvent());
         return;
       }
+      // ignore: unawaited_futures
       showErrorDialog(
         context,
         context.l10n.oops,
@@ -407,12 +413,14 @@ class UserService {
     } on DioException catch (e) {
       await dialog.hide();
       if (e.response != null && e.response!.statusCode == 403) {
+        // ignore: unawaited_futures
         showErrorDialog(
           context,
           context.l10n.oops,
           context.l10n.thisEmailIsAlreadyInUse,
         );
       } else {
+        // ignore: unawaited_futures
         showErrorDialog(
           context,
           context.l10n.incorrectCode,
@@ -422,6 +430,7 @@ class UserService {
     } catch (e) {
       await dialog.hide();
       _logger.severe(e);
+      // ignore: unawaited_futures
       showErrorDialog(
         context,
         context.l10n.oops,
@@ -632,6 +641,7 @@ class UserService {
         }
       }
       await dialog.hide();
+      // ignore: unawaited_futures
       Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(
           builder: (BuildContext context) {
@@ -709,6 +719,7 @@ class UserService {
       if (response.statusCode == 200) {
         showShortToast(context, context.l10n.authenticationSuccessful);
         await _saveConfiguration(response);
+        // ignore: unawaited_futures
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(
             builder: (BuildContext context) {
@@ -723,6 +734,7 @@ class UserService {
       _logger.severe(e);
       if (e.response != null && e.response!.statusCode == 404) {
         showToast(context, "Session expired");
+        // ignore: unawaited_futures
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(
             builder: (BuildContext context) {
@@ -732,6 +744,7 @@ class UserService {
           (route) => route.isFirst,
         );
       } else {
+        // ignore: unawaited_futures
         showErrorDialog(
           context,
           context.l10n.incorrectCode,
@@ -741,6 +754,7 @@ class UserService {
     } catch (e) {
       await dialog.hide();
       _logger.severe(e);
+      // ignore: unawaited_futures
       showErrorDialog(
         context,
         context.l10n.oops,
@@ -749,7 +763,11 @@ class UserService {
     }
   }
 
-  Future<void> recoverTwoFactor(BuildContext context, String sessionID) async {
+  Future<void> recoverTwoFactor(
+    BuildContext context,
+    String sessionID,
+    TwoFactorType type,
+  ) async {
     final dialog = createProgressDialog(context, context.l10n.pleaseWait);
     await dialog.show();
     try {
@@ -757,13 +775,16 @@ class UserService {
         "${_config.getHttpEndpoint()}/users/two-factor/recover",
         queryParameters: {
           "sessionID": sessionID,
+          "twoFactorType": twoFactorTypeToString(type),
         },
       );
       if (response.statusCode == 200) {
+        // ignore: unawaited_futures
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(
             builder: (BuildContext context) {
               return TwoFactorRecoveryPage(
+                type,
                 sessionID,
                 response.data["encryptedSecret"],
                 response.data["secretDecryptionNonce"],
@@ -774,9 +795,11 @@ class UserService {
         );
       }
     } on DioException catch (e) {
+      await dialog.hide();
       _logger.severe(e);
       if (e.response != null && e.response!.statusCode == 404) {
         showToast(context, context.l10n.sessionExpired);
+        // ignore: unawaited_futures
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(
             builder: (BuildContext context) {
@@ -786,6 +809,7 @@ class UserService {
           (route) => route.isFirst,
         );
       } else {
+        // ignore: unawaited_futures
         showErrorDialog(
           context,
           context.l10n.oops,
@@ -793,7 +817,9 @@ class UserService {
         );
       }
     } catch (e) {
+      await dialog.hide();
       _logger.severe(e);
+      // ignore: unawaited_futures
       showErrorDialog(
         context,
         context.l10n.oops,
@@ -806,6 +832,7 @@ class UserService {
 
   Future<void> removeTwoFactor(
     BuildContext context,
+    TwoFactorType type,
     String sessionID,
     String recoveryKey,
     String encryptedSecret,
@@ -845,6 +872,7 @@ class UserService {
         data: {
           "sessionID": sessionID,
           "secret": secret,
+          "twoFactorType": twoFactorTypeToString(type),
         },
       );
       if (response.statusCode == 200) {
@@ -853,6 +881,7 @@ class UserService {
           context.l10n.twofactorAuthenticationSuccessfullyReset,
         );
         await _saveConfiguration(response);
+        // ignore: unawaited_futures
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(
             builder: (BuildContext context) {
@@ -863,9 +892,11 @@ class UserService {
         );
       }
     } on DioException catch (e) {
+      await dialog.hide();
       _logger.severe(e);
       if (e.response != null && e.response!.statusCode == 404) {
         showToast(context, "Session expired");
+        // ignore: unawaited_futures
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(
             builder: (BuildContext context) {
@@ -875,6 +906,7 @@ class UserService {
           (route) => route.isFirst,
         );
       } else {
+        // ignore: unawaited_futures
         showErrorDialog(
           context,
           context.l10n.oops,
@@ -882,7 +914,9 @@ class UserService {
         );
       }
     } catch (e) {
+      await dialog.hide();
       _logger.severe(e);
+      // ignore: unawaited_futures
       showErrorDialog(
         context,
         context.l10n.oops,
@@ -925,7 +959,7 @@ class UserService {
           "isEnabled": isEnabled,
         },
       );
-      _preferences.setBool(kIsEmailMFAEnabled, isEnabled);
+      await _preferences.setBool(kIsEmailMFAEnabled, isEnabled);
     } catch (e) {
       _logger.severe("Failed to update email mfa", e);
       rethrow;

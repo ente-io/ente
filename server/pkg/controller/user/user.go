@@ -3,6 +3,7 @@ package user
 import (
 	"errors"
 	"fmt"
+	"github.com/ente-io/museum/pkg/repo/two_factor_recovery"
 	"strings"
 
 	cache2 "github.com/ente-io/museum/ente/cache"
@@ -30,6 +31,7 @@ import (
 // UserController exposes request handlers for all user related requests
 type UserController struct {
 	UserRepo               *repo.UserRepository
+	TwoFactorRecoveryRepo  *two_factor_recovery.Repository
 	UsageRepo              *repo.UsageRepository
 	UserAuthRepo           *repo.UserAuthRepository
 	TwoFactorRepo          *repo.TwoFactorRepository
@@ -99,6 +101,7 @@ func NewUserController(
 	usageRepo *repo.UsageRepository,
 	userAuthRepo *repo.UserAuthRepository,
 	twoFactorRepo *repo.TwoFactorRepository,
+	twoFactorRecoveryRepo *two_factor_recovery.Repository,
 	passkeyRepo *passkey.Repository,
 	storageBonusRepo *storageBonusRepo.Repository,
 	fileRepo *repo.FileRepository,
@@ -121,6 +124,7 @@ func NewUserController(
 	return &UserController{
 		UserRepo:               userRepo,
 		UsageRepo:              usageRepo,
+		TwoFactorRecoveryRepo:  twoFactorRecoveryRepo,
 		UserAuthRepo:           userAuthRepo,
 		StorageBonusRepo:       storageBonusRepo,
 		TwoFactorRepo:          twoFactorRepo,

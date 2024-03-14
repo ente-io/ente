@@ -1,3 +1,1 @@
-const nextConfigBase = require("@/next/next.config.base.js");
-
-module.exports = nextConfigBase;
+module.exports = require("@/next/next.config.base.js");

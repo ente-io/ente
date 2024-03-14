@@ -1,4 +1,5 @@
 import 'package:ente_auth/l10n/l10n.dart';
+import 'package:ente_auth/models/account/two_factor.dart';
 import 'package:ente_auth/services/user_service.dart';
 import 'package:ente_auth/ui/lifecycle_event_handler.dart';
 import 'package:flutter/material.dart';
@@ -121,7 +122,7 @@ class _TwoFactorAuthenticationPageState
           child: OutlinedButton(
             onPressed: _code.length == 6
                 ? () async {
-                    _verifyTwoFactorCode(_code);
+                    await _verifyTwoFactorCode(_code);
                   }
                 : null,
             child: Text(l10n.verify),
@@ -131,7 +132,11 @@ class _TwoFactorAuthenticationPageState
         GestureDetector(
           behavior: HitTestBehavior.opaque,
           onTap: () {
-            UserService.instance.recoverTwoFactor(context, widget.sessionID);
+            UserService.instance.recoverTwoFactor(
+              context,
+              widget.sessionID,
+              TwoFactorType.totp,
+            );
           },
           child: Container(
             padding: const EdgeInsets.all(10),

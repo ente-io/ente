@@ -1,5 +1,31 @@
 # CHANGELOG
 
+
+## v0.8.67
+
+### Added
+* #### Home Widget ✨
+
+    Introducing our new Android widget! Enjoy your favourite memories directly on your home screen.
+
+* #### Redesigned Discovery Tab
+
+    We've given it a fresh new look for improved design and better visual separation between each section.   
+
+* #### Location Clustering 
+
+    Now, see photos automatically organize into clusters around a radius of populated cities.
+
+* #### Ente is now fully Open Source!
+
+    We took the final step in our open source journey. Our clients had always been open source. Now, we have released the source code for our servers.
+
+* #### Bug Fixes
+
+    Many a bugs were squashed in this release. If you run into any, please write to team@ente.io, or let us know on Discord! 🙏
+
+
+
 ## v0.8.54
 
 ### Added
@@ -78,34 +104,3 @@
 * **Translations**: Add support for German language
 * This release contains massive improvements to how smoothly our gallery 
  scrolls. More improvements are on the way!
-
-
-
-## 0.7.62
-
-### Added
-#### Collages ✨
-
-Create collages out of your favorite photos!
-
-Select your photos, and click on "Create collage" to build a single frame that captures your whole memory.
-
-
-#### Album sort order
-
-You can now choose how photos within your albums are ordered – newest or oldest first.
-
-This is useful for albums of trips and events, where you wish to see your stories unfold along their original timelines.
-
-Click on the overflow menu within an album to configure how it's sorted.
-
-
-#### Shared album improvements
-
-Photos in albums that are shared with you will now be shown in your home gallery. You can hide them by simply archiving the shared album.
-
-
-### Improvements
-
-
-We've worked super hard to improve how smoothly our home gallery scrolls. Skimming through your memories should be a lot more enjoyable now.

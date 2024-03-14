@@ -131,47 +131,47 @@ func (c *UserController) DisableTwoFactor(userID int64) error {
 
 // RecoverTwoFactor handles the two factor recovery request by sending the
 // recoveryKeyEncryptedTwoFactorSecret for the user to decrypt it and make twoFactor removal api call
-func (c *UserController) RecoverTwoFactor(sessionID string) (ente.TwoFactorRecoveryResponse, error) {
+func (c *UserController) RecoverTwoFactor(sessionID string) (*ente.TwoFactorRecoveryResponse, error) {
 	userID, err := c.TwoFactorRepo.GetUserIDWithTwoFactorSession(sessionID)
 	if err != nil {
-		return ente.TwoFactorRecoveryResponse{}, stacktrace.Propagate(err, "")
+		return nil, stacktrace.Propagate(err, "")
 	}
 	response, err := c.TwoFactorRepo.GetRecoveryKeyEncryptedTwoFactorSecret(userID)
 	if err != nil {
-		return ente.TwoFactorRecoveryResponse{}, stacktrace.Propagate(err, "")
+		return nil, stacktrace.Propagate(err, "")
 	}
-	return response, nil
+	return &response, nil
 }
 
-// RemoveTwoFactor handles two factor deactivation request if user lost his device
+// RemoveTOTPTwoFactor handles two factor deactivation request if user lost his device
 // by authenticating him using his twoFactorsessionToken and twoFactor secret
-func (c *UserController) RemoveTwoFactor(context *gin.Context, sessionID string, secret string) (ente.TwoFactorAuthorizationResponse, error) {
+func (c *UserController) RemoveTOTPTwoFactor(context *gin.Context, sessionID string, secret string) (*ente.TwoFactorAuthorizationResponse, error) {
 	userID, err := c.TwoFactorRepo.GetUserIDWithTwoFactorSession(sessionID)
 	if err != nil {
-		return ente.TwoFactorAuthorizationResponse{}, stacktrace.Propagate(err, "")
+		return nil, stacktrace.Propagate(err, "")
 	}
 	secretHash, err := crypto.GetHash(secret, c.HashingKey)
 	if err != nil {
-		return ente.TwoFactorAuthorizationResponse{}, stacktrace.Propagate(err, "")
+		return nil, stacktrace.Propagate(err, "")
 
 	}
 	exists, err := c.TwoFactorRepo.VerifyTwoFactorSecret(userID, secretHash)
 	if err != nil {
-		return ente.TwoFactorAuthorizationResponse{}, stacktrace.Propagate(err, "")
+		return nil, stacktrace.Propagate(err, "")
 
 	}
 	if !exists {
-		return ente.TwoFactorAuthorizationResponse{}, stacktrace.Propagate(ente.ErrPermissionDenied, "")
+		return nil, stacktrace.Propagate(ente.ErrPermissionDenied, "")
 	}
 	err = c.TwoFactorRepo.UpdateTwoFactorStatus(userID, false)
 	if err != nil {
-		return ente.TwoFactorAuthorizationResponse{}, stacktrace.Propagate(err, "")
+		return nil, stacktrace.Propagate(err, "")
 	}
 	response, err := c.GetKeyAttributeAndToken(context, userID)
 	if err != nil {
-		return ente.TwoFactorAuthorizationResponse{}, stacktrace.Propagate(err, "")
+		return nil, stacktrace.Propagate(err, "")
 	}
-	return response, nil
+	return &response, nil
 }
 
 func (c *UserController) GetKeyAttributeAndToken(context *gin.Context, userID int64) (ente.TwoFactorAuthorizationResponse, error) {

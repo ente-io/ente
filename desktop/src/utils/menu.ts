@@ -1,34 +1,34 @@
 import {
-    Menu,
     app,
-    shell,
     BrowserWindow,
+    Menu,
     MenuItemConstructorOptions,
-} from 'electron';
+    shell,
+} from "electron";
+import ElectronLog from "electron-log";
+import { setIsAppQuitting } from "../main";
+import { forceCheckForUpdateAndNotify } from "../services/appUpdater";
+import autoLauncher from "../services/autoLauncher";
 import {
     getHideDockIconPreference,
     setHideDockIconPreference,
-} from '../services/userPreference';
-import { setIsAppQuitting } from '../main';
-import autoLauncher from '../services/autoLauncher';
-import { isPlatform } from './common/platform';
-import ElectronLog from 'electron-log';
-import { forceCheckForUpdateAndNotify } from '../services/appUpdater';
+} from "../services/userPreference";
+import { isPlatform } from "./common/platform";
 
 export function buildContextMenu(mainWindow: BrowserWindow): Menu {
     // eslint-disable-next-line camelcase
     const contextMenu = Menu.buildFromTemplate([
         {
-            label: 'Open ente',
+            label: "Open ente",
             click: function () {
                 mainWindow.maximize();
                 mainWindow.show();
             },
         },
         {
-            label: 'Quit ente',
+            label: "Quit ente",
             click: function () {
-                ElectronLog.log('user quit the app');
+                ElectronLog.log("user quit the app");
                 setIsAppQuitting(true);
                 app.quit();
             },
@@ -39,43 +39,43 @@ export function buildContextMenu(mainWindow: BrowserWindow): Menu {
 
 export async function buildMenuBar(mainWindow: BrowserWindow): Promise<Menu> {
     let isAutoLaunchEnabled = await autoLauncher.isEnabled();
-    const isMac = isPlatform('mac');
+    const isMac = isPlatform("mac");
     let shouldHideDockIcon = getHideDockIconPreference();
     const template: MenuItemConstructorOptions[] = [
         {
-            label: 'ente',
+            label: "ente",
             submenu: [
                 ...((isMac
                     ? [
                           {
-                              label: 'About ente',
-                              role: 'about',
+                              label: "About ente",
+                              role: "about",
                           },
                       ]
                     : []) as MenuItemConstructorOptions[]),
-                { type: 'separator' },
+                { type: "separator" },
                 {
-                    label: 'Check for updates...',
+                    label: "Check for updates...",
                     click: () => {
                         forceCheckForUpdateAndNotify(mainWindow);
                     },
                 },
                 {
-                    label: 'View Changelog',
+                    label: "View Changelog",
                     click: () => {
                         shell.openExternal(
-                            'https://github.com/ente-io/ente/blob/main/desktop/CHANGELOG.md'
+                            "https://github.com/ente-io/ente/blob/main/desktop/CHANGELOG.md",
                         );
                     },
                 },
-                { type: 'separator' },
+                { type: "separator" },
 
                 {
-                    label: 'Preferences',
+                    label: "Preferences",
                     submenu: [
                         {
-                            label: 'Open ente on startup',
-                            type: 'checkbox',
+                            label: "Open ente on startup",
+                            type: "checkbox",
                             checked: isAutoLaunchEnabled,
                             click: () => {
                                 autoLauncher.toggleAutoLaunch();
@@ -83,8 +83,8 @@ export async function buildMenuBar(mainWindow: BrowserWindow): Promise<Menu> {
                             },
                         },
                         {
-                            label: 'Hide dock icon',
-                            type: 'checkbox',
+                            label: "Hide dock icon",
+                            type: "checkbox",
                             checked: shouldHideDockIcon,
                             click: () => {
                                 setHideDockIconPreference(!shouldHideDockIcon);
@@ -94,121 +94,121 @@ export async function buildMenuBar(mainWindow: BrowserWindow): Promise<Menu> {
                     ],
                 },
 
-                { type: 'separator' },
+                { type: "separator" },
                 ...((isMac
                     ? [
                           {
-                              label: 'Hide ente',
-                              role: 'hide',
+                              label: "Hide ente",
+                              role: "hide",
                           },
                           {
-                              label: 'Hide others',
-                              role: 'hideOthers',
+                              label: "Hide others",
+                              role: "hideOthers",
                           },
                       ]
                     : []) as MenuItemConstructorOptions[]),
 
-                { type: 'separator' },
+                { type: "separator" },
                 {
-                    label: 'Quit ente',
-                    role: 'quit',
+                    label: "Quit ente",
+                    role: "quit",
                 },
             ],
         },
         {
-            label: 'Edit',
+            label: "Edit",
             submenu: [
-                { role: 'undo', label: 'Undo' },
-                { role: 'redo', label: 'Redo' },
-                { type: 'separator' },
-                { role: 'cut', label: 'Cut' },
-                { role: 'copy', label: 'Copy' },
-                { role: 'paste', label: 'Paste' },
+                { role: "undo", label: "Undo" },
+                { role: "redo", label: "Redo" },
+                { type: "separator" },
+                { role: "cut", label: "Cut" },
+                { role: "copy", label: "Copy" },
+                { role: "paste", label: "Paste" },
                 ...((isMac
                     ? [
                           {
-                              role: 'pasteAndMatchStyle',
-                              label: 'Paste and match style',
+                              role: "pasteAndMatchStyle",
+                              label: "Paste and match style",
                           },
-                          { role: 'delete', label: 'Delete' },
-                          { role: 'selectAll', label: 'Select all' },
-                          { type: 'separator' },
+                          { role: "delete", label: "Delete" },
+                          { role: "selectAll", label: "Select all" },
+                          { type: "separator" },
                           {
-                              label: 'Speech',
+                              label: "Speech",
                               submenu: [
                                   {
-                                      role: 'startSpeaking',
-                                      label: 'start speaking',
+                                      role: "startSpeaking",
+                                      label: "start speaking",
                                   },
                                   {
-                                      role: 'stopSpeaking',
-                                      label: 'stop speaking',
+                                      role: "stopSpeaking",
+                                      label: "stop speaking",
                                   },
                               ],
                           },
                       ]
                     : [
-                          { type: 'separator' },
-                          { role: 'selectAll', label: 'Select all' },
+                          { type: "separator" },
+                          { role: "selectAll", label: "Select all" },
                       ]) as MenuItemConstructorOptions[]),
             ],
         },
         {
-            label: 'View',
+            label: "View",
             submenu: [
-                { role: 'reload', label: 'Reload' },
-                { role: 'forceReload', label: 'Force reload' },
-                { role: 'toggleDevTools', label: 'Toggle dev tools' },
-                { type: 'separator' },
-                { role: 'resetZoom', label: 'Reset zoom' },
-                { role: 'zoomIn', label: 'Zoom in' },
-                { role: 'zoomOut', label: 'Zoom out' },
-                { type: 'separator' },
-                { role: 'togglefullscreen', label: 'Toggle fullscreen' },
+                { role: "reload", label: "Reload" },
+                { role: "forceReload", label: "Force reload" },
+                { role: "toggleDevTools", label: "Toggle dev tools" },
+                { type: "separator" },
+                { role: "resetZoom", label: "Reset zoom" },
+                { role: "zoomIn", label: "Zoom in" },
+                { role: "zoomOut", label: "Zoom out" },
+                { type: "separator" },
+                { role: "togglefullscreen", label: "Toggle fullscreen" },
             ],
         },
         {
-            label: 'Window',
+            label: "Window",
             submenu: [
-                { role: 'close', label: 'Close' },
-                { role: 'minimize', label: 'Minimize' },
+                { role: "close", label: "Close" },
+                { role: "minimize", label: "Minimize" },
                 ...((isMac
                     ? [
-                          { type: 'separator' },
-                          { role: 'front', label: 'Bring to front' },
-                          { type: 'separator' },
-                          { role: 'window', label: 'ente' },
+                          { type: "separator" },
+                          { role: "front", label: "Bring to front" },
+                          { type: "separator" },
+                          { role: "window", label: "ente" },
                       ]
                     : []) as MenuItemConstructorOptions[]),
             ],
         },
         {
-            label: 'Help',
+            label: "Help",
             submenu: [
                 {
-                    label: 'FAQ',
-                    click: () => shell.openExternal('https://ente.io/faq/'),
+                    label: "FAQ",
+                    click: () => shell.openExternal("https://ente.io/faq/"),
                 },
-                { type: 'separator' },
+                { type: "separator" },
                 {
-                    label: 'Support',
-                    click: () => shell.openExternal('mailto:support@ente.io'),
+                    label: "Support",
+                    click: () => shell.openExternal("mailto:support@ente.io"),
                 },
                 {
-                    label: 'Product updates',
-                    click: () => shell.openExternal('https://ente.io/blog/'),
+                    label: "Product updates",
+                    click: () => shell.openExternal("https://ente.io/blog/"),
                 },
-                { type: 'separator' },
+                { type: "separator" },
                 {
-                    label: 'View crash reports',
+                    label: "View crash reports",
                     click: () => {
-                        shell.openPath(app.getPath('crashDumps'));
+                        shell.openPath(app.getPath("crashDumps"));
                     },
                 },
                 {
-                    label: 'View logs',
+                    label: "View logs",
                     click: () => {
-                        shell.openPath(app.getPath('logs'));
+                        shell.openPath(app.getPath("logs"));
                     },
                 },
             ],

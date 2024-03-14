@@ -13,11 +13,6 @@ import 'package:uuid/uuid.dart';
 int kConnectTimeout = 15000;
 
 class Network {
-  // apiEndpoint points to the Ente server's API endpoint
-  static const apiEndpoint = String.fromEnvironment(
-    "endpoint",
-    defaultValue: kDefaultProductionEndpoint,
-  );
   late Dio _dio;
   late Dio _enteDio;
 
@@ -41,7 +36,7 @@ class Network {
         },
       ),
     );
-    _dio.interceptors.add(RequestIdInterceptor());
+
     _enteDio = Dio(
       BaseOptions(
         baseUrl: apiEndpoint,
@@ -56,7 +51,13 @@ class Network {
         },
       ),
     );
-    _enteDio.interceptors.add(EnteRequestInterceptor(preferences, apiEndpoint));
+    _setupInterceptors(endpoint);
+
+    Bus.instance.on<EndpointUpdatedEvent>().listen((event) {
+      final endpoint = Configuration.instance.getHttpEndpoint();
+      _enteDio.options.baseUrl = endpoint;
+      _setupInterceptors(endpoint);
+    });
   }
 
   Network._privateConstructor();
@@ -65,34 +66,41 @@ class Network {
 
   Dio getDio() => _dio;
   Dio get enteDio => _enteDio;
+
+  void _setupInterceptors(String endpoint) {
+    _dio.interceptors.clear();
+    _dio.interceptors.add(RequestIdInterceptor());
+
+    _enteDio.interceptors.clear();
+    _enteDio.interceptors.add(EnteRequestInterceptor(endpoint));
+  }
 }
 
 class RequestIdInterceptor extends Interceptor {
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
-    // ignore: prefer_const_constructors
-    options.headers.putIfAbsent("x-request-id", () => Uuid().v4().toString());
+    options.headers
+        .putIfAbsent("x-request-id", () => const Uuid().v4().toString());
     return super.onRequest(options, handler);
   }
 }
 
 class EnteRequestInterceptor extends Interceptor {
-  final SharedPreferences _preferences;
-  final String enteEndpoint;
+  final String endpoint;
 
-  EnteRequestInterceptor(this._preferences, this.enteEndpoint);
+  EnteRequestInterceptor(this.endpoint);
 
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
     if (kDebugMode) {
       assert(
-        options.baseUrl == enteEndpoint,
+        options.baseUrl == endpoint,
         "interceptor should only be used for API endpoint",
       );
     }
-    // ignore: prefer_const_constructors
-    options.headers.putIfAbsent("x-request-id", () => Uuid().v4().toString());
-    final String? tokenValue = _preferences.getString(Configuration.tokenKey);
+    options.headers
+        .putIfAbsent("x-request-id", () => const Uuid().v4().toString());
+    final String? tokenValue = Configuration.instance.getToken();
     if (tokenValue != null) {
       options.headers.putIfAbsent("X-Auth-Token", () => tokenValue);
     }

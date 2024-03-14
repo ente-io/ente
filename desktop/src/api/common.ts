@@ -1,44 +1,39 @@
-import { ipcRenderer } from 'electron/renderer';
-import { logError } from '../services/logging';
+import { ipcRenderer } from "electron/renderer";
+import { logError } from "../services/logging";
 
 export const selectDirectory = async (): Promise<string> => {
     try {
-        return await ipcRenderer.invoke('select-dir');
+        return await ipcRenderer.invoke("select-dir");
     } catch (e) {
-        logError(e, 'error while selecting root directory');
+        logError(e, "error while selecting root directory");
     }
 };
 
 export const getAppVersion = async (): Promise<string> => {
     try {
-        return await ipcRenderer.invoke('get-app-version');
+        return await ipcRenderer.invoke("get-app-version");
     } catch (e) {
-        logError(e, 'failed to get release version');
+        logError(e, "failed to get release version");
         throw e;
     }
 };
 
 export const openDirectory = async (dirPath: string): Promise<void> => {
     try {
-        await ipcRenderer.invoke('open-dir', dirPath);
+        await ipcRenderer.invoke("open-dir", dirPath);
     } catch (e) {
-        logError(e, 'error while opening directory');
+        logError(e, "error while opening directory");
         throw e;
     }
 };
 
-export const getPlatform = async (): Promise<'mac' | 'windows' | 'linux'> => {
+export const getPlatform = async (): Promise<"mac" | "windows" | "linux"> => {
     try {
-        return await ipcRenderer.invoke('get-platform');
+        return await ipcRenderer.invoke("get-platform");
     } catch (e) {
-        logError(e, 'failed to get platform');
+        logError(e, "failed to get platform");
         throw e;
     }
 };
 
-export {
-    logToDisk,
-    openLogDirectory,
-    getSentryUserID,
-    updateOptOutOfCrashReports,
-} from '../services/logging';
+export { logToDisk, openLogDirectory } from "../services/logging";

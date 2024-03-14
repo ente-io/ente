@@ -50,12 +50,12 @@ Thank you for your support.
 
 ## Document
 
-_Coming soon!_
-
 The help guides and FAQs for users of Ente products are also open source, and
 can be edited in a wiki-esque manner by our community members. More than the
 quantity, we feel this helps improve the quality and approachability of the
 documentation by bringing in more diverse viewpoints and familiarity levels.
+
+See [docs/](docs/README.md) for how to edit these documents.
 
 ## Code contributions
 

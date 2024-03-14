@@ -54,7 +54,7 @@ class SlideshowWidgetProvider : HomeWidgetProvider() {
                             val drawable =
                                     ContextCompat.getDrawable(
                                             context,
-                                            R.drawable.ic_launcher_foreground
+                                            R.drawable.ic_home_widget_default
                                     )
                             val bitmap = (drawable as BitmapDrawable).bitmap
                             setImageViewBitmap(R.id.widget_placeholder, bitmap)

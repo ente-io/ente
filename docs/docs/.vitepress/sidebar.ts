@@ -1,27 +1,160 @@
-// When adding new pages, they need to manually inserted into their appropriate
-// place here if you wish them to also appear in the sidebar.
+// When adding new pages, they need to be manually inserted into their
+// appropriate place here.
 
-export const sidebar = [];
+export const sidebar = [
+    {
+        text: "Photos",
+        items: [
+            { text: "Introduction", link: "/photos/" },
+            {
+                text: "Features",
+                collapsed: true,
+                items: [
+                    { text: "Albums", link: "/photos/features/albums" },
+                    { text: "Archiving", link: "/photos/features/archive" },
+                    { text: "Cast", link: "/photos/features/cast/" },
+                    {
+                        text: "Collecting photos",
+                        link: "/photos/features/collect",
+                    },
+                    {
+                        text: "Family plans",
+                        link: "/photos/features/family-plans",
+                    },
+                    { text: "Hidden photos", link: "/photos/features/hide" },
+                    {
+                        text: "Location tags",
+                        link: "/photos/features/location-tags",
+                    },
+                    { text: "Map", link: "/photos/features/map" },
+                    {
+                        text: "Public link",
+                        link: "/photos/features/public-link",
+                    },
+                    { text: "Quick link", link: "/photos/features/quick-link" },
+                    { text: "Referrals", link: "/photos/features/referrals" },
+                    { text: "Sharing", link: "/photos/features/sharing" },
+                    { text: "Trash", link: "/photos/features/trash" },
+                    {
+                        text: "Uncategorized",
+                        link: "/photos/features/uncategorized",
+                    },
+                    {
+                        text: "Watch folder",
+                        link: "/photos/features/watch-folder",
+                    },
+                ],
+            },
+            { text: "FAQ", link: "/photos/faq/" },
+            {
+                text: "Troubleshooting",
+                collapsed: true,
+                items: [
+                    {
+                        text: "Files not uploading",
+                        link: "/photos/troubleshooting/files-not-uploading",
+                    },
+                    {
+                        text: "Sharing debug logs",
+                        link: "/photos/troubleshooting/sharing-logs",
+                    },
+                ],
+            },
+        ],
+    },
+    {
+        text: "Auth",
+        items: [
+            { text: "Introduction", link: "/auth/" },
+            { text: "FAQ", link: "/auth/faq/" },
+            {
+                text: "Migration guides",
+                collapsed: false,
+                items: [
+                    { text: "Introduction", link: "/auth/migration-guides/" },
+                    {
+                        text: "From Authy",
+                        link: "/auth/migration-guides/authy/",
+                    },
+                    {
+                        text: "Exporting your data",
+                        link: "/auth/migration-guides/export",
+                    },
+                ],
+            },
+        ],
+    },
+    {
+        text: "Self hosting",
+        collapsed: true,
+        items: [
+            { text: "Getting started", link: "/self-hosting/" },
+            {
+                text: "Guides",
+                items: [
+                    { text: "Introduction", link: "/self-hosting/guides/" },
+                    {
+                        text: "Connect to custom server",
+                        link: "/self-hosting/guides/custom-server/",
+                    },
+                    {
+                        text: "Administering your server",
+                        link: "/self-hosting/guides/admin",
+                    },
+
+                    {
+                        text: "Mobile build",
+                        link: "/self-hosting/guides/mobile-build",
+                    },
+                    {
+                        text: "System requirements",
+                        link: "/self-hosting/guides/system-requirements",
+                    },
+                    {
+                        text: "Using external S3",
+                        link: "/self-hosting/guides/external-s3",
+                    },
+                ],
+            },
+            {
+                text: "FAQ",
+                items: [
+                    {
+                        text: "Verification code",
+                        link: "/self-hosting/faq/otp",
+                    },
+                    {
+                        text: "Increase storage space",
+                        link: "/self-hosting/faq/storage-space",
+                    },
+                ],
+            },
+            {
+                text: "Troubleshooting",
+                items: [
+                    {
+                        text: "Yarn",
+                        link: "/self-hosting/troubleshooting/yarn",
+                    },
+                ],
+            },
+        ],
+    },
+    {
+        text: "About",
+        link: "/about/",
+    },
+    {
+        text: "Contribute",
+        link: "/about/contribute",
+    },
+];
 
 function sidebarOld() {
     return [
         {
             text: "Welcome",
             items: [
-                {
-                    text: "About",
-                    collapsed: true,
-                    link: "/about/company",
-                    items: [
-                        { text: "Company", link: "/about/company" },
-                        { text: "Products", link: "/about/products" },
-                        { text: "Plans", link: "/about/plans" },
-                        { text: "Support", link: "/about/support" },
-                        { text: "Community", link: "/about/community" },
-                        { text: "Open source", link: "/about/open-source" },
-                        { text: "Contribute", link: "/about/contribute" },
-                    ],
-                },
                 {
                     text: "Features",
                     collapsed: true,

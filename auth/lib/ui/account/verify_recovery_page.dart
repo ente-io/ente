@@ -106,6 +106,7 @@ class _VerifyRecoveryPageState extends State<VerifyRecoveryPage> {
           ),
         );
       } catch (e) {
+        // ignore: unawaited_futures
         showGenericErrorDialog(context: context);
         return;
       }

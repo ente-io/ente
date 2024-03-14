@@ -472,17 +472,14 @@ func (c *CollectionController) GetDiffV2(ctx *gin.Context, cID int64, userID int
 		"since_time":    sinceTime,
 		"req_id":        requestid.Get(ctx),
 	})
-	reqContextLogger.Info("Start")
 	_, err := c.AccessCtrl.GetCollection(ctx, &access.GetCollectionParams{
 		CollectionID: cID,
 		ActorUserID:  userID,
 	})
-	reqContextLogger.Info("Accessible")
 	if err != nil {
 		return nil, false, stacktrace.Propagate(err, "failed to verify access")
 	}
 	diff, hasMore, err := c.getDiff(cID, sinceTime, CollectionDiffLimit, reqContextLogger)
-	reqContextLogger.Info("Received diff")
 	if err != nil {
 		return nil, false, stacktrace.Propagate(err, "")
 	}
@@ -492,7 +489,6 @@ func (c *CollectionController) GetDiffV2(ctx *gin.Context, cID int64, userID int
 			diff[idx].MagicMetadata = nil
 		}
 	}
-	reqContextLogger.Info("Function end")
 	return diff, hasMore, nil
 }
 
@@ -559,10 +555,8 @@ func (c *CollectionController) GetPublicDiff(ctx *gin.Context, sinceTime int64) 
 // case 4: (sinceTime: v0, limit >=10):
 // The method will all 10 entries in the diff
 func (c *CollectionController) getDiff(cID int64, sinceTime int64, limit int, logger *log.Entry) ([]ente.File, bool, error) {
-	logger.Info("getDiff")
 	// request for limit +1 files
 	diffLimitPlusOne, err := c.CollectionRepo.GetDiff(cID, sinceTime, limit+1)
-	logger.Info("Got diff from repo")
 	if err != nil {
 		return nil, false, stacktrace.Propagate(err, "")
 	}
@@ -572,13 +566,24 @@ func (c *CollectionController) getDiff(cID int64, sinceTime int64, limit int, lo
 	}
 	lastFileVersion := diffLimitPlusOne[limit].UpdationTime
 	filteredDiffs := c.removeFilesWithVersion(diffLimitPlusOne, lastFileVersion)
-	logger.Info("Removed files with out of bounds version")
-	if len(filteredDiffs) > 0 { // case 1 or case 3
+	filteredDiffLen := len(filteredDiffs)
+
+	if filteredDiffLen > 0 { // case 1 or case 3
+		if filteredDiffLen < limit {
+			// logging case 1
+			logger.
+				WithField("last_file_version", lastFileVersion).
+				WithField("filtered_diff_len", filteredDiffLen).
+				Info(fmt.Sprintf("less than limit (%d) files in diff", limit))
+		}
 		return filteredDiffs, true, nil
 	}
 	// case 2
 	diff, err := c.CollectionRepo.GetFilesWithVersion(cID, lastFileVersion)
-	logger.Info("Got diff of files with latest file version")
+	logger.
+		WithField("last_file_version", lastFileVersion).
+		WithField("count", len(diff)).
+		Info(fmt.Sprintf("more than limit (%d) files with same version", limit))
 	if err != nil {
 		return nil, false, stacktrace.Propagate(err, "")
 	}
@@ -612,38 +617,6 @@ func (c *CollectionController) GetSharees(ctx *gin.Context, cID int64, userID in
 		return nil, stacktrace.Propagate(err, "")
 	}
 	return sharees, nil
-}
-
-// Trash deletes a given collection and files exclusive to the collection
-func (c *CollectionController) Trash(ctx *gin.Context, userID int64, cID int64) error {
-	resp, err := c.AccessCtrl.GetCollection(ctx, &access.GetCollectionParams{
-		CollectionID:   cID,
-		ActorUserID:    userID,
-		IncludeDeleted: true,
-		VerifyOwner:    true,
-	})
-	if err != nil {
-		return stacktrace.Propagate(err, "")
-	}
-	if !resp.Collection.AllowDelete() {
-		return stacktrace.Propagate(ente.ErrBadRequest, fmt.Sprintf("deleting albums of type %s is not allowed", resp.Collection.Type))
-	}
-	if resp.Collection.IsDeleted {
-		log.WithFields(log.Fields{
-			"c_id":    cID,
-			"user_id": userID,
-		}).Warning("Collection is already deleted")
-		return nil
-	}
-	err = c.PublicCollectionCtrl.Disable(ctx, cID)
-	if err != nil {
-		return stacktrace.Propagate(err, "failed to disabled public share url")
-	}
-	err = c.CollectionRepo.ScheduleDelete(cID, true)
-	if err != nil {
-		return stacktrace.Propagate(err, "")
-	}
-	return nil
 }
 
 // TrashV3 deletes a given collection and based on user input (TrashCollectionV3Request.KeepFiles as FALSE) , it will move all files present in the underlying collection
@@ -694,7 +667,7 @@ func (c *CollectionController) TrashV3(ctx *gin.Context, req ente.TrashCollectio
 		return stacktrace.Propagate(err, "failed to revoke cast token")
 	}
 	// Continue with current delete flow till. This disables sharing for this collection and then queue it up for deletion
-	err = c.CollectionRepo.ScheduleDelete(cID, false)
+	err = c.CollectionRepo.ScheduleDelete(cID)
 	if err != nil {
 		return stacktrace.Propagate(err, "")
 	}

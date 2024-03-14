@@ -5,7 +5,6 @@ import 'dart:math';
 import 'package:ente_auth/core/configuration.dart';
 import 'package:ente_auth/core/errors.dart';
 import 'package:ente_auth/core/event_bus.dart';
-import 'package:ente_auth/core/network.dart';
 import 'package:ente_auth/events/codes_updated_event.dart';
 import 'package:ente_auth/events/signed_in_event.dart';
 import 'package:ente_auth/events/trigger_logout_event.dart';
@@ -56,7 +55,7 @@ class AuthenticatorService {
     _prefs = await SharedPreferences.getInstance();
     _db = AuthenticatorDB.instance;
     _offlineDb = OfflineAuthenticatorDB.instance;
-    _gateway = AuthenticatorGateway(Network.instance.getDio(), _config);
+    _gateway = AuthenticatorGateway();
     if (Configuration.instance.hasConfiguredAccount()) {
       unawaited(onlineSync());
     }
@@ -210,8 +209,8 @@ class AuthenticatorService {
     if (deletedIDs.isNotEmpty) {
       await _db.deleteByIDs(ids: deletedIDs);
     }
-    _prefs.setInt(_lastEntitySyncTime, maxSyncTime);
-    _logger.info("Setting synctime to $maxSyncTime");
+    await _prefs.setInt(_lastEntitySyncTime, maxSyncTime);
+    _logger.info("Setting synctime to " + maxSyncTime.toString());
     if (result.length == fetchLimit) {
       _logger.info("Diff limit reached, pulling again");
       await _remoteToLocalSync();

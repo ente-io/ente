@@ -125,7 +125,7 @@ class _HomePageState extends State<HomePage> {
       ),
     );
     if (code != null) {
-      CodeStore.instance.addCode(code);
+      await CodeStore.instance.addCode(code);
       // Focus the new code by searching
       if (_codes.length > 2) {
         _focusNewCode(code);
@@ -142,7 +142,7 @@ class _HomePageState extends State<HomePage> {
       ),
     );
     if (code != null) {
-      CodeStore.instance.addCode(code);
+      await CodeStore.instance.addCode(code);
     }
   }
 

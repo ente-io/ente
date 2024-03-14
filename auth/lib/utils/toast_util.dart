@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
-Future showToast(
+void showToast(
   BuildContext context,
   String message, {
   toastLength = Toast.LENGTH_LONG,
@@ -11,7 +11,7 @@ Future showToast(
 }) async {
   try {
     await Fluttertoast.cancel();
-    return Fluttertoast.showToast(
+    await Fluttertoast.showToast(
       msg: message,
       toastLength: toastLength,
       gravity: ToastGravity.BOTTOM,
@@ -47,6 +47,6 @@ Future showToast(
   }
 }
 
-Future<void> showShortToast(context, String message) {
-  return showToast(context, message, toastLength: Toast.LENGTH_SHORT);
+void showShortToast(context, String message) {
+  showToast(context, message, toastLength: Toast.LENGTH_SHORT);
 }

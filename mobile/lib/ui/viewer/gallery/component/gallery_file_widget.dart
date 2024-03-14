@@ -68,11 +68,20 @@ class GalleryFileWidget extends StatelessWidget {
             : _onLongPressNoSelectionLimit(context, file);
       },
       child: Stack(
+        clipBehavior: Clip.none,
         children: [
           ClipRRect(
             borderRadius: BorderRadius.circular(1),
             child: Hero(
               tag: heroTag,
+              flightShuttleBuilder: (
+                flightContext,
+                animation,
+                flightDirection,
+                fromHeroContext,
+                toHeroContext,
+              ) =>
+                  thumbnailWidget,
               transitionOnUserGestures: true,
               child: isFileSelected
                   ? ColorFiltered(

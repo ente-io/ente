@@ -144,6 +144,7 @@
   "enterCodeHint": "Digite o código de 6 dígitos de\nseu aplicativo autenticador",
   "lostDeviceTitle": "Perdeu seu dispositivo?",
   "twoFactorAuthTitle": "Autenticação de dois fatores",
+  "passkeyAuthTitle": "Autenticação via Chave de acesso",
   "recoverAccount": "Recuperar conta",
   "enterRecoveryKeyHint": "Digite sua chave de recuperação",
   "recover": "Recuperar",
@@ -404,5 +405,15 @@
   "signOutOtherDevices": "Terminar sessão em outros dispositivos",
   "doNotSignOut": "Não encerrar sessão",
   "hearUsWhereTitle": "Como você ouviu sobre o Ente? (opcional)",
-  "hearUsExplanation": "Não rastreamos instalações do aplicativo. Seria útil se você nos contasse onde nos encontrou!"
+  "hearUsExplanation": "Não rastreamos instalações do aplicativo. Seria útil se você nos contasse onde nos encontrou!",
+  "waitingForBrowserRequest": "Aguardando solicitação do navegador...",
+  "launchPasskeyUrlAgain": "Iniciar a URL de chave de acesso novamente",
+  "passkey": "Chave de acesso",
+  "developerSettingsWarning": "Tem certeza de que deseja modificar as configurações de Desenvolvedor?",
+  "developerSettings": "Configurações de desenvolvedor",
+  "serverEndpoint": "Endpoint do servidor",
+  "invalidEndpoint": "Endpoint inválido",
+  "invalidEndpointMessage": "Desculpe, o endpoint que você inseriu é inválido. Por favor, insira um endpoint válido e tente novamente.",
+  "endpointUpdatedMessage": "Endpoint atualizado com sucesso",
+  "customEndpoint": "Conectado a {endpoint}"
 }

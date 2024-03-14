@@ -14,7 +14,6 @@
         android:adjustViewBounds="true"
         android:visibility="visible"
         tools:visibility="visible"
-        android:background="@drawable/widget_background"
         />
     <ImageView
         android:id="@+id/widget_img"

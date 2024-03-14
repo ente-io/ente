@@ -7,6 +7,7 @@ export default defineConfig({
     description: "Documentation and help for Ente's products",
     head: [["link", { rel: "icon", type: "image/png", href: "/favicon.png" }]],
     cleanUrls: true,
+    ignoreDeadLinks: "localhostLinks",
     themeConfig: {
         // We use the default theme (with some CSS color overrides). This
         // themeConfig block can be used to further customize the default theme.
@@ -18,10 +19,6 @@ export default defineConfig({
             pattern:
                 "https://github.com/ente-io/ente/edit/main/docs/docs/:path",
         },
-        // nav: [
-        //     { text: "Photos", link: "/photos/index" },
-        //     { text: "Authenticator", link: "/authenticator/index" },
-        // ],
         search: {
             provider: "local",
             options: {

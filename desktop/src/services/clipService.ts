@@ -1,59 +1,59 @@
-import * as log from 'electron-log';
-import util from 'util';
-import { logErrorSentry } from './sentry';
-import { isDev } from '../utils/common';
-import { app } from 'electron';
-import path from 'path';
-import { existsSync } from 'fs';
-import fs from 'fs/promises';
-const shellescape = require('any-shell-escape');
-const execAsync = util.promisify(require('child_process').exec);
-import fetch from 'node-fetch';
-import { writeNodeStream } from './fs';
-import { getPlatform } from '../utils/common/platform';
-import { CustomErrors } from '../constants/errors';
-const jpeg = require('jpeg-js');
+import { app } from "electron";
+import * as log from "electron-log";
+import { existsSync } from "fs";
+import fs from "fs/promises";
+import fetch from "node-fetch";
+import path from "path";
+import { readFile } from "promise-fs";
+import util from "util";
+import { CustomErrors } from "../constants/errors";
+import { Model } from "../types";
+import Tokenizer from "../utils/clip-bpe-ts/mod";
+import { isDev } from "../utils/common";
+import { getPlatform } from "../utils/common/platform";
+import { writeNodeStream } from "./fs";
+import { logErrorSentry } from "./sentry";
+const shellescape = require("any-shell-escape");
+const execAsync = util.promisify(require("child_process").exec);
+const jpeg = require("jpeg-js");
 
-const CLIP_MODEL_PATH_PLACEHOLDER = 'CLIP_MODEL';
-const GGMLCLIP_PATH_PLACEHOLDER = 'GGML_PATH';
-const INPUT_PATH_PLACEHOLDER = 'INPUT';
+const CLIP_MODEL_PATH_PLACEHOLDER = "CLIP_MODEL";
+const GGMLCLIP_PATH_PLACEHOLDER = "GGML_PATH";
+const INPUT_PATH_PLACEHOLDER = "INPUT";
 
 const IMAGE_EMBEDDING_EXTRACT_CMD: string[] = [
     GGMLCLIP_PATH_PLACEHOLDER,
-    '-mv',
+    "-mv",
     CLIP_MODEL_PATH_PLACEHOLDER,
-    '--image',
+    "--image",
     INPUT_PATH_PLACEHOLDER,
 ];
 
 const TEXT_EMBEDDING_EXTRACT_CMD: string[] = [
     GGMLCLIP_PATH_PLACEHOLDER,
-    '-mt',
+    "-mt",
     CLIP_MODEL_PATH_PLACEHOLDER,
-    '--text',
+    "--text",
     INPUT_PATH_PLACEHOLDER,
 ];
-const ort = require('onnxruntime-node');
-import Tokenizer from '../utils/clip-bpe-ts/mod';
-import { readFile } from 'promise-fs';
-import { Model } from '../types';
+const ort = require("onnxruntime-node");
 
 const TEXT_MODEL_DOWNLOAD_URL = {
-    ggml: 'https://models.ente.io/clip-vit-base-patch32_ggml-text-model-f16.gguf',
-    onnx: 'https://models.ente.io/clip-text-vit-32-uint8.onnx',
+    ggml: "https://models.ente.io/clip-vit-base-patch32_ggml-text-model-f16.gguf",
+    onnx: "https://models.ente.io/clip-text-vit-32-uint8.onnx",
 };
 const IMAGE_MODEL_DOWNLOAD_URL = {
-    ggml: 'https://models.ente.io/clip-vit-base-patch32_ggml-vision-model-f16.gguf',
-    onnx: 'https://models.ente.io/clip-image-vit-32-float32.onnx',
+    ggml: "https://models.ente.io/clip-vit-base-patch32_ggml-vision-model-f16.gguf",
+    onnx: "https://models.ente.io/clip-image-vit-32-float32.onnx",
 };
 
 const TEXT_MODEL_NAME = {
-    ggml: 'clip-vit-base-patch32_ggml-text-model-f16.gguf',
-    onnx: 'clip-text-vit-32-uint8.onnx',
+    ggml: "clip-vit-base-patch32_ggml-text-model-f16.gguf",
+    onnx: "clip-text-vit-32-uint8.onnx",
 };
 const IMAGE_MODEL_NAME = {
-    ggml: 'clip-vit-base-patch32_ggml-vision-model-f16.gguf',
-    onnx: 'clip-image-vit-32-float32.onnx',
+    ggml: "clip-vit-base-patch32_ggml-vision-model-f16.gguf",
+    onnx: "clip-image-vit-32-float32.onnx",
 };
 
 const IMAGE_MODEL_SIZE_IN_BYTES = {
@@ -65,14 +65,14 @@ const TEXT_MODEL_SIZE_IN_BYTES = {
     onnx: 64173509, // 61.2 MB
 };
 
-const MODEL_SAVE_FOLDER = 'models';
+const MODEL_SAVE_FOLDER = "models";
 
 function getModelSavePath(modelName: string) {
     let userDataDir: string;
     if (isDev) {
-        userDataDir = '.';
+        userDataDir = ".";
     } else {
-        userDataDir = app.getPath('userData');
+        userDataDir = app.getPath("userData");
     }
     return path.join(userDataDir, MODEL_SAVE_FOLDER, modelName);
 }
@@ -81,41 +81,41 @@ async function downloadModel(saveLocation: string, url: string) {
     // confirm that the save location exists
     const saveDir = path.dirname(saveLocation);
     if (!existsSync(saveDir)) {
-        log.info('creating model save dir');
+        log.info("creating model save dir");
         await fs.mkdir(saveDir, { recursive: true });
     }
-    log.info('downloading clip model');
+    log.info("downloading clip model");
     const resp = await fetch(url);
     await writeNodeStream(saveLocation, resp.body);
-    log.info('clip model downloaded');
+    log.info("clip model downloaded");
 }
 
 let imageModelDownloadInProgress: Promise<void> = null;
 
-export async function getClipImageModelPath(type: 'ggml' | 'onnx') {
+export async function getClipImageModelPath(type: "ggml" | "onnx") {
     try {
         const modelSavePath = getModelSavePath(IMAGE_MODEL_NAME[type]);
         if (imageModelDownloadInProgress) {
-            log.info('waiting for image model download to finish');
+            log.info("waiting for image model download to finish");
             await imageModelDownloadInProgress;
         } else {
             if (!existsSync(modelSavePath)) {
-                log.info('clip image model not found, downloading');
+                log.info("clip image model not found, downloading");
                 imageModelDownloadInProgress = downloadModel(
                     modelSavePath,
-                    IMAGE_MODEL_DOWNLOAD_URL[type]
+                    IMAGE_MODEL_DOWNLOAD_URL[type],
                 );
                 await imageModelDownloadInProgress;
             } else {
                 const localFileSize = (await fs.stat(modelSavePath)).size;
                 if (localFileSize !== IMAGE_MODEL_SIZE_IN_BYTES[type]) {
                     log.info(
-                        'clip image model size mismatch, downloading again got:',
-                        localFileSize
+                        "clip image model size mismatch, downloading again got:",
+                        localFileSize,
                     );
                     imageModelDownloadInProgress = downloadModel(
                         modelSavePath,
-                        IMAGE_MODEL_DOWNLOAD_URL[type]
+                        IMAGE_MODEL_DOWNLOAD_URL[type],
                     );
                     await imageModelDownloadInProgress;
                 }
@@ -129,13 +129,13 @@ export async function getClipImageModelPath(type: 'ggml' | 'onnx') {
 
 let textModelDownloadInProgress: boolean = false;
 
-export async function getClipTextModelPath(type: 'ggml' | 'onnx') {
+export async function getClipTextModelPath(type: "ggml" | "onnx") {
     const modelSavePath = getModelSavePath(TEXT_MODEL_NAME[type]);
     if (textModelDownloadInProgress) {
         throw Error(CustomErrors.MODEL_DOWNLOAD_PENDING);
     } else {
         if (!existsSync(modelSavePath)) {
-            log.info('clip text model not found, downloading');
+            log.info("clip text model not found, downloading");
             textModelDownloadInProgress = true;
             downloadModel(modelSavePath, TEXT_MODEL_DOWNLOAD_URL[type])
                 .catch(() => {
@@ -149,8 +149,8 @@ export async function getClipTextModelPath(type: 'ggml' | 'onnx') {
             const localFileSize = (await fs.stat(modelSavePath)).size;
             if (localFileSize !== TEXT_MODEL_SIZE_IN_BYTES[type]) {
                 log.info(
-                    'clip text model size mismatch, downloading again got:',
-                    localFileSize
+                    "clip text model size mismatch, downloading again got:",
+                    localFileSize,
                 );
                 textModelDownloadInProgress = true;
                 downloadModel(modelSavePath, TEXT_MODEL_DOWNLOAD_URL[type])
@@ -169,7 +169,7 @@ export async function getClipTextModelPath(type: 'ggml' | 'onnx') {
 
 function getGGMLClipPath() {
     return isDev
-        ? path.join('./build', `ggmlclip-${getPlatform()}`)
+        ? path.join("./build", `ggmlclip-${getPlatform()}`)
         : path.join(process.resourcesPath, `ggmlclip-${getPlatform()}`);
 }
 
@@ -185,7 +185,7 @@ let onnxImageSessionPromise: Promise<any> = null;
 async function getOnnxImageSession() {
     if (!onnxImageSessionPromise) {
         onnxImageSessionPromise = (async () => {
-            const clipModelPath = await getClipImageModelPath('onnx');
+            const clipModelPath = await getClipImageModelPath("onnx");
             return createOnnxSession(clipModelPath);
         })();
     }
@@ -196,7 +196,7 @@ let onnxTextSession: any = null;
 
 async function getOnnxTextSession() {
     if (!onnxTextSession) {
-        const clipModelPath = await getClipTextModelPath('onnx');
+        const clipModelPath = await getClipTextModelPath("onnx");
         onnxTextSession = await createOnnxSession(clipModelPath);
     }
     return onnxTextSession;
@@ -212,7 +212,7 @@ function getTokenizer() {
 
 export async function computeImageEmbedding(
     model: Model,
-    inputFilePath: string
+    inputFilePath: string,
 ): Promise<Float32Array> {
     if (!existsSync(inputFilePath)) {
         throw Error(CustomErrors.INVALID_FILE_PATH);
@@ -227,10 +227,10 @@ export async function computeImageEmbedding(
 }
 
 export async function computeGGMLImageEmbedding(
-    inputFilePath: string
+    inputFilePath: string,
 ): Promise<Float32Array> {
     try {
-        const clipModelPath = await getClipImageModelPath('ggml');
+        const clipModelPath = await getClipImageModelPath("ggml");
         const ggmlclipPath = getGGMLClipPath();
         const cmd = IMAGE_EMBEDDING_EXTRACT_CMD.map((cmdPart) => {
             if (cmdPart === GGMLCLIP_PATH_PLACEHOLDER) {
@@ -245,51 +245,51 @@ export async function computeGGMLImageEmbedding(
         });
 
         const escapedCmd = shellescape(cmd);
-        log.info('running clip command', escapedCmd);
+        log.info("running clip command", escapedCmd);
         const startTime = Date.now();
         const { stdout } = await execAsync(escapedCmd);
-        log.info('clip command execution time ', Date.now() - startTime);
+        log.info("clip command execution time ", Date.now() - startTime);
         // parse stdout and return embedding
         // get the last line of stdout
-        const lines = stdout.split('\n');
+        const lines = stdout.split("\n");
         const lastLine = lines[lines.length - 1];
         const embedding = JSON.parse(lastLine);
         const embeddingArray = new Float32Array(embedding);
         return embeddingArray;
     } catch (err) {
-        logErrorSentry(err, 'Error in computeGGMLImageEmbedding');
+        logErrorSentry(err, "Error in computeGGMLImageEmbedding");
         throw err;
     }
 }
 
 export async function computeONNXImageEmbedding(
-    inputFilePath: string
+    inputFilePath: string,
 ): Promise<Float32Array> {
     try {
         const imageSession = await getOnnxImageSession();
         const t1 = Date.now();
         const rgbData = await getRGBData(inputFilePath);
         const feeds = {
-            input: new ort.Tensor('float32', rgbData, [1, 3, 224, 224]),
+            input: new ort.Tensor("float32", rgbData, [1, 3, 224, 224]),
         };
         const t2 = Date.now();
         const results = await imageSession.run(feeds);
         log.info(
             `onnx image embedding time: ${Date.now() - t1} ms (prep:${
                 t2 - t1
-            } ms, extraction: ${Date.now() - t2} ms)`
+            } ms, extraction: ${Date.now() - t2} ms)`,
         );
-        const imageEmbedding = results['output'].data; // Float32Array
+        const imageEmbedding = results["output"].data; // Float32Array
         return normalizeEmbedding(imageEmbedding);
     } catch (err) {
-        logErrorSentry(err, 'Error in computeONNXImageEmbedding');
+        logErrorSentry(err, "Error in computeONNXImageEmbedding");
         throw err;
     }
 }
 
 export async function computeTextEmbedding(
     model: Model,
-    text: string
+    text: string,
 ): Promise<Float32Array> {
     if (model === Model.GGML_CLIP) {
         return await computeGGMLTextEmbedding(text);
@@ -299,10 +299,10 @@ export async function computeTextEmbedding(
 }
 
 export async function computeGGMLTextEmbedding(
-    text: string
+    text: string,
 ): Promise<Float32Array> {
     try {
-        const clipModelPath = await getClipTextModelPath('ggml');
+        const clipModelPath = await getClipTextModelPath("ggml");
         const ggmlclipPath = getGGMLClipPath();
         const cmd = TEXT_EMBEDDING_EXTRACT_CMD.map((cmdPart) => {
             if (cmdPart === GGMLCLIP_PATH_PLACEHOLDER) {
@@ -317,13 +317,13 @@ export async function computeGGMLTextEmbedding(
         });
 
         const escapedCmd = shellescape(cmd);
-        log.info('running clip command', escapedCmd);
+        log.info("running clip command", escapedCmd);
         const startTime = Date.now();
         const { stdout } = await execAsync(escapedCmd);
-        log.info('clip command execution time ', Date.now() - startTime);
+        log.info("clip command execution time ", Date.now() - startTime);
         // parse stdout and return embedding
         // get the last line of stdout
-        const lines = stdout.split('\n');
+        const lines = stdout.split("\n");
         const lastLine = lines[lines.length - 1];
         const embedding = JSON.parse(lastLine);
         const embeddingArray = new Float32Array(embedding);
@@ -332,14 +332,14 @@ export async function computeGGMLTextEmbedding(
         if (err.message === CustomErrors.MODEL_DOWNLOAD_PENDING) {
             log.info(CustomErrors.MODEL_DOWNLOAD_PENDING);
         } else {
-            logErrorSentry(err, 'Error in computeGGMLTextEmbedding');
+            logErrorSentry(err, "Error in computeGGMLTextEmbedding");
         }
         throw err;
     }
 }
 
 export async function computeONNXTextEmbedding(
-    text: string
+    text: string,
 ): Promise<Float32Array> {
     try {
         const imageSession = await getOnnxTextSession();
@@ -347,22 +347,22 @@ export async function computeONNXTextEmbedding(
         const tokenizer = getTokenizer();
         const tokenizedText = Int32Array.from(tokenizer.encodeForCLIP(text));
         const feeds = {
-            input: new ort.Tensor('int32', tokenizedText, [1, 77]),
+            input: new ort.Tensor("int32", tokenizedText, [1, 77]),
         };
         const t2 = Date.now();
         const results = await imageSession.run(feeds);
         log.info(
             `onnx text embedding time: ${Date.now() - t1} ms (prep:${
                 t2 - t1
-            } ms, extraction: ${Date.now() - t2} ms)`
+            } ms, extraction: ${Date.now() - t2} ms)`,
         );
-        const textEmbedding = results['output'].data; // Float32Array
+        const textEmbedding = results["output"].data; // Float32Array
         return normalizeEmbedding(textEmbedding);
     } catch (err) {
         if (err.message === CustomErrors.MODEL_DOWNLOAD_PENDING) {
             log.info(CustomErrors.MODEL_DOWNLOAD_PENDING);
         } else {
-            logErrorSentry(err, 'Error in computeONNXTextEmbedding');
+            logErrorSentry(err, "Error in computeONNXTextEmbedding");
         }
         throw err;
     }
@@ -377,7 +377,7 @@ async function getRGBData(inputFilePath: string) {
             formatAsRGBA: false,
         });
     } catch (err) {
-        logErrorSentry(err, 'JPEG decode error');
+        logErrorSentry(err, "JPEG decode error");
         throw err;
     }
 
@@ -444,10 +444,10 @@ async function getRGBData(inputFilePath: string) {
 
 export const computeClipMatchScore = async (
     imageEmbedding: Float32Array,
-    textEmbedding: Float32Array
+    textEmbedding: Float32Array,
 ) => {
     if (imageEmbedding.length !== textEmbedding.length) {
-        throw Error('imageEmbedding and textEmbedding length mismatch');
+        throw Error("imageEmbedding and textEmbedding length mismatch");
     }
     let score = 0;
     for (let index = 0; index < imageEmbedding.length; index++) {

@@ -12,7 +12,7 @@ var versionCmd = &cobra.Command{
 	Short: "Prints the current version",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Printf("Version %s\n", AppVersion)
+		fmt.Printf("Version %s\n", version)
 	},
 }
 

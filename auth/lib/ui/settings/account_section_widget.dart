@@ -50,6 +50,7 @@ class AccountSectionWidget extends StatelessWidget {
           );
           await PlatformUtil.refocusWindows();
           if (hasAuthenticated) {
+            // ignore: unawaited_futures
             showDialog(
               context: context,
               builder: (BuildContext context) {
@@ -76,6 +77,7 @@ class AccountSectionWidget extends StatelessWidget {
             l10n.authToChangeYourPassword,
           );
           if (hasAuthenticated) {
+            // ignore: unawaited_futures
             Navigator.of(context).push(
               MaterialPageRoute(
                 builder: (BuildContext context) {
@@ -108,9 +110,11 @@ class AccountSectionWidget extends StatelessWidget {
               recoveryKey =
                   CryptoUtil.bin2hex(Configuration.instance.getRecoveryKey());
             } catch (e) {
+              // ignore: unawaited_futures
               showGenericErrorDialog(context: context);
               return;
             }
+            // ignore: unawaited_futures
             routeToPage(
               context,
               RecoveryKeyPage(
@@ -144,6 +148,7 @@ class AccountSectionWidget extends StatelessWidget {
         trailingIcon: Icons.chevron_right_outlined,
         trailingIconIsMuted: true,
         onTap: () async {
+          // ignore: unawaited_futures
           routeToPage(context, const DeleteAccountPage());
         },
       ),

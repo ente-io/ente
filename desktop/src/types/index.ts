@@ -39,15 +39,15 @@ export interface WatchStoreType {
 }
 
 export enum FILE_PATH_TYPE {
-    FILES = 'files',
-    ZIPS = 'zips',
+    FILES = "files",
+    ZIPS = "zips",
 }
 
 export const FILE_PATH_KEYS: {
     [k in FILE_PATH_TYPE]: keyof UploadStoreType;
 } = {
-    [FILE_PATH_TYPE.ZIPS]: 'zipPaths',
-    [FILE_PATH_TYPE.FILES]: 'filePaths',
+    [FILE_PATH_TYPE.ZIPS]: "zipPaths",
+    [FILE_PATH_TYPE.FILES]: "filePaths",
 };
 
 export interface SafeStorageStoreType {
@@ -58,7 +58,6 @@ export interface UserPreferencesType {
     hideDockIcon: boolean;
     skipAppVersion: string;
     muteUpdateNotificationVersion: string;
-    optOutOfCrashReports: boolean;
     customCacheDirectory: string;
 }
 
@@ -72,6 +71,6 @@ export interface GetFeatureFlagResponse {
 }
 
 export enum Model {
-    GGML_CLIP = 'ggml-clip',
-    ONNX_CLIP = 'onnx-clip',
+    GGML_CLIP = "ggml-clip",
+    ONNX_CLIP = "onnx-clip",
 }

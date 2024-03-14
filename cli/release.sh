@@ -1,5 +1,16 @@
 #!/bin/bash
 
+# Fetch the latest tag that starts with "cli-"
+# shellcheck disable=SC2046
+# shellcheck disable=SC2006
+LATEST_TAG=$(git describe --tags `git rev-list --tags='cli-*' --max-count=1`)
+
+# Check if the LATEST_TAG variable is empty
+if [ -z "$LATEST_TAG" ]; then
+    echo "No 'cli-' tag found. Exiting..."
+    exit 1
+fi
+VERSION=${LATEST_TAG#cli-}
 # Create a "bin" directory if it doesn't exist
 mkdir -p bin
 
@@ -9,6 +20,7 @@ OS_TARGETS=("windows" "linux" "darwin")
 # Corresponding architectures for each OS
 ARCH_TARGETS=("386 amd64" "386 amd64 arm arm64" "amd64 arm64")
 
+export CGO_ENABLED=0
 # Loop through each OS target
 for index in "${!OS_TARGETS[@]}"
 do
@@ -28,16 +40,12 @@ do
         fi
 
         # Build the binary and place it in the "bin" directory
-        go build -o "bin/$BINARY_NAME" main.go
+        go build -ldflags="-X main.AppVersion=${VERSION} -s -w" -trimpath -o "bin/$BINARY_NAME" main.go
 
         # Print a message indicating the build is complete for the current OS and architecture
         echo "Built for $OS ($ARCH) as bin/$BINARY_NAME"
     done
 done
-
-# Clean up any environment variables
-unset GOOS
-unset GOARCH
 
 # Print a message indicating the build process is complete
 echo "Build process completed for all platforms and architectures. Binaries are in the 'bin' directory."

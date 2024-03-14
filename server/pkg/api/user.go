@@ -244,6 +244,31 @@ func (h *UserHandler) GetTwoFactorStatus(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"status": status})
 }
 
+func (h *UserHandler) GetTwoFactorRecoveryStatus(c *gin.Context) {
+	res, err := h.UserController.GetTwoFactorRecoveryStatus(c)
+	if err != nil {
+		handler.Error(c, stacktrace.Propagate(err, ""))
+		return
+	}
+	c.JSON(http.StatusOK, res)
+}
+
+// ConfigurePasskeyRecovery configures the passkey skip challenge for a user. In case the user does not
+// have access to passkey, the user can bypass the passkey by providing the recovery key
+func (h *UserHandler) ConfigurePasskeyRecovery(c *gin.Context) {
+	var request ente.SetPasskeyRecoveryRequest
+	if err := c.ShouldBindJSON(&request); err != nil {
+		handler.Error(c, stacktrace.Propagate(err, ""))
+		return
+	}
+	err := h.UserController.ConfigurePasskeyRecovery(c, &request)
+	if err != nil {
+		handler.Error(c, stacktrace.Propagate(err, ""))
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{})
+}
+
 // SetupTwoFactor generates a two factor secret and sends it to user to setup his authenticator app with
 func (h *UserHandler) SetupTwoFactor(c *gin.Context) {
 	userID := auth.GetUserID(c.Request.Header)
@@ -352,6 +377,16 @@ func (h *UserHandler) FinishPasskeyAuthenticationCeremony(c *gin.Context) {
 	c.JSON(http.StatusOK, response)
 }
 
+func (h *UserHandler) IsPasskeyRecoveryEnabled(c *gin.Context) {
+	userID := auth.GetUserID(c.Request.Header)
+	response, err := h.UserController.GetKeyAttributeAndToken(c, userID)
+	if err != nil {
+		handler.Error(c, stacktrace.Propagate(err, ""))
+		return
+	}
+	c.JSON(http.StatusOK, response)
+}
+
 // DisableTwoFactor disables the two factor authentication for a user
 func (h *UserHandler) DisableTwoFactor(c *gin.Context) {
 	userID := auth.GetUserID(c.Request.Header)
@@ -367,7 +402,14 @@ func (h *UserHandler) DisableTwoFactor(c *gin.Context) {
 // recoveryKeyEncryptedTwoFactorSecret for the user to decrypt it and make twoFactor removal api call
 func (h *UserHandler) RecoverTwoFactor(c *gin.Context) {
 	sessionID := c.Query("sessionID")
-	response, err := h.UserController.RecoverTwoFactor(sessionID)
+	twoFactorType := c.Query("twoFactorType")
+	var response *ente.TwoFactorRecoveryResponse
+	var err error
+	if twoFactorType == "passkey" {
+		response, err = h.UserController.GetPasskeyRecoveryResponse(c, sessionID)
+	} else {
+		response, err = h.UserController.RecoverTwoFactor(sessionID)
+	}
 	if err != nil {
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return
@@ -383,7 +425,13 @@ func (h *UserHandler) RemoveTwoFactor(c *gin.Context) {
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return
 	}
-	response, err := h.UserController.RemoveTwoFactor(c, request.SessionID, request.Secret)
+	var response *ente.TwoFactorAuthorizationResponse
+	var err error
+	if request.TwoFactorType == "passkey" {
+		response, err = h.UserController.SkipPasskeyVerification(c, &request)
+	} else {
+		response, err = h.UserController.RemoveTOTPTwoFactor(c, request.SessionID, request.Secret)
+	}
 	if err != nil {
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return

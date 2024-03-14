@@ -105,7 +105,7 @@ class ImportCodePage extends StatelessWidget {
                               index != importOptions.length - 1,
                           isTopBorderRadiusRemoved: index != 0,
                           onTap: () async {
-                            ImportService().initiateImport(context, type);
+                            await ImportService().initiateImport(context, type);
                             // routeToPage(context, ImportCodePage());
                             // _showImportInstructionDialog(context);
                           },

@@ -146,6 +146,7 @@ class ProgressDialog {
     try {
       if (!_isShowing) {
         _dialog = _Body();
+        // ignore: unawaited_futures
         showDialog<dynamic>(
           context: _context!,
           barrierDismissible: _barrierDismissible,

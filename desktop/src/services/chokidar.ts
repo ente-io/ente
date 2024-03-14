@@ -1,7 +1,7 @@
-import chokidar from 'chokidar';
-import { BrowserWindow } from 'electron';
-import { logError } from '../services/logging';
-import { getWatchMappings } from '../api/watch';
+import chokidar from "chokidar";
+import { BrowserWindow } from "electron";
+import { getWatchMappings } from "../api/watch";
+import { logError } from "../services/logging";
 
 export function initWatcher(mainWindow: BrowserWindow) {
     const mappings = getWatchMappings();
@@ -13,20 +13,20 @@ export function initWatcher(mainWindow: BrowserWindow) {
         awaitWriteFinish: true,
     });
     watcher
-        .on('add', (path) => {
-            mainWindow.webContents.send('watch-add', path);
+        .on("add", (path) => {
+            mainWindow.webContents.send("watch-add", path);
         })
-        .on('change', (path) => {
-            mainWindow.webContents.send('watch-change', path);
+        .on("change", (path) => {
+            mainWindow.webContents.send("watch-change", path);
         })
-        .on('unlink', (path) => {
-            mainWindow.webContents.send('watch-unlink', path);
+        .on("unlink", (path) => {
+            mainWindow.webContents.send("watch-unlink", path);
         })
-        .on('unlinkDir', (path) => {
-            mainWindow.webContents.send('watch-unlink-dir', path);
+        .on("unlinkDir", (path) => {
+            mainWindow.webContents.send("watch-unlink-dir", path);
         })
-        .on('error', (error) => {
-            logError(error, 'error while watching files');
+        .on("error", (error) => {
+            logError(error, "error while watching files");
         });
 
     return watcher;

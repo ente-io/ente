@@ -394,6 +394,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
     } catch (e, s) {
       _logger.severe(e, s);
       await dialog.hide();
+      // ignore: unawaited_futures
       showGenericErrorDialog(context: context);
     }
   }
@@ -441,6 +442,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
           await UserService.instance.setAttributes(result);
           await dialog.hide();
           Configuration.instance.resetVolatilePassword();
+          // ignore: unawaited_futures
           Navigator.of(context).pushAndRemoveUntil(
             MaterialPageRoute(
               builder: (BuildContext context) {
@@ -452,10 +454,11 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
         } catch (e, s) {
           _logger.severe(e, s);
           await dialog.hide();
+          // ignore: unawaited_futures
           showGenericErrorDialog(context: context);
         }
       }
-
+      // ignore: unawaited_futures
       routeToPage(
         context,
         RecoveryKeyPage(
@@ -471,12 +474,14 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
       _logger.severe(e);
       await dialog.hide();
       if (e is UnsupportedError) {
+        // ignore: unawaited_futures
         showErrorDialog(
           context,
           context.l10n.insecureDevice,
           context.l10n.sorryWeCouldNotGenerateSecureKeysOnThisDevicennplease,
         );
       } else {
+        // ignore: unawaited_futures
         showGenericErrorDialog(context: context);
       }
     }

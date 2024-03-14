@@ -122,7 +122,7 @@ jobs:
               with:
                   serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
                   packageName: io.ente.auth
-                  releaseFiles: build/app/outputs/bundle/playstoreRelease/app-playstore-release.aab
+                  releaseFiles: auth/build/app/outputs/bundle/playstoreRelease/app-playstore-release.aab
                   track: internal
 
     build-windows:

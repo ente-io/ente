@@ -1,10 +1,10 @@
-import { CustomErrors } from '../../constants/errors';
-import { app } from 'electron';
+import { app } from "electron";
+import { CustomErrors } from "../../constants/errors";
 export const isDev = !app.isPackaged;
 
 export const promiseWithTimeout = async <T>(
     request: Promise<T>,
-    timeout: number
+    timeout: number,
 ): Promise<T> => {
     const timeoutRef: {
         current: NodeJS.Timeout;
@@ -12,7 +12,7 @@ export const promiseWithTimeout = async <T>(
     const rejectOnTimeout = new Promise<null>((_, reject) => {
         timeoutRef.current = setTimeout(
             () => reject(Error(CustomErrors.WAIT_TIME_EXCEEDED)),
-            timeout
+            timeout,
         );
     });
     const requestWithTimeOutCancellation = async () => {

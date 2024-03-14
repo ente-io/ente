@@ -12,16 +12,15 @@ import 'package:photos/core/constants.dart';
 import "package:photos/core/errors.dart";
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/core/network/network.dart';
-import 'package:photos/db/public_keys_db.dart';
 import "package:photos/events/account_configured_event.dart";
 import 'package:photos/events/two_factor_status_change_event.dart';
 import 'package:photos/events/user_details_changed_event.dart';
 import "package:photos/generated/l10n.dart";
+import "package:photos/models/account/two_factor.dart";
 import "package:photos/models/api/user/srp.dart";
 import 'package:photos/models/delete_account.dart';
 import 'package:photos/models/key_attributes.dart';
 import 'package:photos/models/key_gen_result.dart';
-import 'package:photos/models/public_key.dart' as public_key;
 import 'package:photos/models/sessions.dart';
 import 'package:photos/models/set_keys_request.dart';
 import 'package:photos/models/set_recovery_key_request.dart';
@@ -160,12 +159,6 @@ class UserService {
         queryParameters: {"email": email},
       );
       final publicKey = response.data["publicKey"];
-      await PublicKeysDB.instance.setKey(
-        public_key.PublicKey(
-          email,
-          publicKey,
-        ),
-      );
       return publicKey;
     } on DioError catch (e) {
       if (e.response != null && e.response?.statusCode == 404) {
@@ -815,7 +808,11 @@ class UserService {
     }
   }
 
-  Future<void> recoverTwoFactor(BuildContext context, String sessionID) async {
+  Future<void> recoverTwoFactor(
+    BuildContext context,
+    String sessionID,
+    TwoFactorType type,
+  ) async {
     final dialog = createProgressDialog(context, S.of(context).pleaseWait);
     await dialog.show();
     try {
@@ -823,6 +820,7 @@ class UserService {
         _config.getHttpEndpoint() + "/users/two-factor/recover",
         queryParameters: {
           "sessionID": sessionID,
+          "twoFactorType": twoFactorTypeToString(type),
         },
       );
       if (response.statusCode == 200) {
@@ -831,6 +829,7 @@ class UserService {
           MaterialPageRoute(
             builder: (BuildContext context) {
               return TwoFactorRecoveryPage(
+                type,
                 sessionID,
                 response.data["encryptedSecret"],
                 response.data["secretDecryptionNonce"],
@@ -841,6 +840,7 @@ class UserService {
         );
       }
     } on DioError catch (e) {
+      await dialog.hide();
       _logger.severe(e);
       if (e.response != null && e.response!.statusCode == 404) {
         showToast(context, S.of(context).sessionExpired);
@@ -862,6 +862,7 @@ class UserService {
         );
       }
     } catch (e) {
+      await dialog.hide();
       _logger.severe(e);
       // ignore: unawaited_futures
       showErrorDialog(
@@ -876,6 +877,7 @@ class UserService {
 
   Future<void> removeTwoFactor(
     BuildContext context,
+    TwoFactorType type,
     String sessionID,
     String recoveryKey,
     String encryptedSecret,
@@ -915,6 +917,7 @@ class UserService {
         data: {
           "sessionID": sessionID,
           "secret": secret,
+          "twoFactorType": twoFactorTypeToString(type),
         },
       );
       if (response.statusCode == 200) {
@@ -934,7 +937,8 @@ class UserService {
         );
       }
     } on DioError catch (e) {
-      _logger.severe(e);
+      await dialog.hide();
+      _logger.severe("error during recovery", e);
       if (e.response != null && e.response!.statusCode == 404) {
         showToast(context, "Session expired");
         // ignore: unawaited_futures
@@ -955,7 +959,9 @@ class UserService {
         );
       }
     } catch (e) {
-      _logger.severe(e);
+      await dialog.hide();
+      _logger.severe('unexpcted error during recovery', e);
+
       // ignore: unawaited_futures
       showErrorDialog(
         context,

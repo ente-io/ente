@@ -10,33 +10,28 @@ To know more about Ente, see [our main README](../README.md) or visit
 
 ## Building from source
 
-> [!CAUTION]
->
-> We moved a few things around when switching to a monorepo recently, so this
-> folder might not build with the instructions below. Hang tight, we're on it,
-> will fix things if.
-
-Fetch submodules
-
-```sh
-git submodule update --init --recursive
-```
-
 Install dependencies
 
 ```sh
 yarn install
 ```
 
-Run the app
+Run in development mode (with hot reload)
 
 ```sh
-yarn start
+yarn dev
 ```
 
-To recompile automatically using electron-reload, run this in a separate
-terminal:
+> [!CAUTION]
+>
+> `yarn dev` is currently not working (we'll fix soon). If you just want to
+> build from source and use the generated binary, use `yarn build`.
 
-```bash
-yarn watch
+Or create a binary for your platform
+
+```sh
+yarn build
 ```
+
+That's the gist of it. For more development related documentation, see
+[docs](docs/README.md).

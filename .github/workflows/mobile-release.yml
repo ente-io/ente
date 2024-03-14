@@ -39,7 +39,9 @@ jobs:
                   encodedString: ${{ secrets.SIGNING_KEY_PHOTOS }}
 
             - name: Build independent APK
-              run: flutter build apk --release --flavor independent && mv build/app/outputs/flutter-apk/app-independent-release.apk build/app/outputs/flutter-apk/ente.apk
+              run: |
+                flutter build apk --release --flavor independent
+                mv build/app/outputs/flutter-apk/app-independent-release.apk build/app/outputs/flutter-apk/ente-${{ github.ref_name }}.apk
               env:
                   SIGNING_KEY_PATH: "/home/runner/work/_temp/keystore/ente_photos_key.jks"
                   SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS_PHOTOS }}
@@ -47,10 +49,10 @@ jobs:
                   SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD_PHOTOS }}
 
             - name: Checksum
-              run: sha256sum build/app/outputs/flutter-apk/ente.apk > build/app/outputs/flutter-apk/sha256sum
+              run: sha256sum build/app/outputs/flutter-apk/ente-${{ github.ref_name }}.apk > build/app/outputs/flutter-apk/sha256sum
 
             - name: Create a draft GitHub release
               uses: ncipollo/release-action@v1
               with:
-                  artifacts: "mobile/build/app/outputs/flutter-apk/ente.apk,mobile/build/app/outputs/flutter-apk/sha256sum"
+                  artifacts: "mobile/build/app/outputs/flutter-apk/ente-${{ github.ref_name }}.apk,mobile/build/app/outputs/flutter-apk/sha256sum"
                   draft: true

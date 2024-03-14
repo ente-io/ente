@@ -101,13 +101,70 @@ Future<void> sendLogs(
           );
         },
       ),
-      ButtonWidget(
-        isInAlert: true,
-        buttonType: ButtonType.secondary,
-        labelText: l10n.cancel,
-        buttonAction: ButtonAction.cancel,
+      onPressed: () async {
+        // ignore: unawaited_futures
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return LogFileViewer(SuperLogging.logFile!);
+          },
+          barrierColor: Colors.black87,
+          barrierDismissible: false,
+        );
+      },
+    ),
+    TextButton(
+      child: Text(
+        title,
+        style: TextStyle(
+          color: Theme.of(context).colorScheme.alternativeColor,
+        ),
+      ),
+      onPressed: () async {
+        Navigator.of(context, rootNavigator: true).pop('dialog');
+        await _sendLogs(context, toEmail, subject, body);
+        if (postShare != null) {
+          postShare();
+        }
+      },
+    ),
+  ];
+  final List<Widget> content = [];
+  content.addAll(
+    [
+      Text(
+        l10n.sendLogsDescription,
+        style: const TextStyle(
+          height: 1.5,
+          fontSize: 16,
+        ),
+      ),
+      const Padding(padding: EdgeInsets.all(12)),
+      Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: actions,
       ),
     ],
+  );
+  final confirmation = AlertDialog(
+    title: Text(
+      title,
+      style: const TextStyle(
+        fontSize: 18,
+      ),
+    ),
+    content: SingleChildScrollView(
+      child: ListBody(
+        children: content,
+      ),
+    ),
+  );
+  // ignore: unawaited_futures
+  showDialog(
+    context: context,
+    builder: (_) {
+      return confirmation;
+    },
   );
 }
 

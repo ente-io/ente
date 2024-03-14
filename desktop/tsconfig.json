@@ -3,13 +3,15 @@
         "target": "es2021",
         "module": "commonjs",
         "esModuleInterop": true,
+        /* Emit the generated JS into app */
+        "outDir": "app",
         "noImplicitAny": true,
         "sourceMap": true,
-        "outDir": "app",
         "baseUrl": "src",
         "paths": {
             "*": ["node_modules/*"]
         }
     },
-    "include": ["src/**/*"]
+    /* Transpile all ts files in src/ */
+    "include": ["src/**/*.ts"]
 }

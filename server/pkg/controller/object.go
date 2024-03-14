@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"fmt"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/ente-io/museum/pkg/controller/lock"
@@ -30,6 +31,10 @@ type ObjectController struct {
 	complianceCronRunning bool
 }
 
+const (
+	RemoveComplianceHoldsLock = "remove_compliance_holds_lock"
+)
+
 // RemoveComplianceHolds removes the Wasabi compliance hold from objects in
 // Wasabi for files which have been deleted.
 //
@@ -41,7 +46,6 @@ func (c *ObjectController) RemoveComplianceHolds() {
 		// Wasabi compliance is currently disabled in config, nothing to do.
 		return
 	}
-
 	if c.complianceCronRunning {
 		log.Info("Skipping RemoveComplianceHolds cron run as another instance is still running")
 		return
@@ -51,7 +55,16 @@ func (c *ObjectController) RemoveComplianceHolds() {
 		c.complianceCronRunning = false
 	}()
 
-	items, err := c.QueueRepo.GetItemsReadyForDeletion(repo.RemoveComplianceHoldQueue, 200)
+	lockStatus := c.LockController.TryLock(RemoveComplianceHoldsLock, time.MicrosecondsAfterHours(2))
+	if !lockStatus {
+		log.Warning(fmt.Sprintf("Failed to acquire lock %s", RemoveComplianceHoldsLock))
+		return
+	}
+	defer func() {
+		c.LockController.ReleaseLock(RemoveComplianceHoldsLock)
+	}()
+
+	items, err := c.QueueRepo.GetItemsReadyForDeletion(repo.RemoveComplianceHoldQueue, 1500)
 	if err != nil {
 		log.WithError(err).Error("Failed to fetch items from queue")
 		return
@@ -62,7 +75,7 @@ func (c *ObjectController) RemoveComplianceHolds() {
 		c.removeComplianceHold(i)
 	}
 
-	log.Infof("Revmoed compliance holds on %d deleted files", len(items))
+	log.Infof("Removed compliance holds on %d deleted files", len(items))
 }
 
 func (c *ObjectController) removeComplianceHold(qItem repo.QueueItem) {

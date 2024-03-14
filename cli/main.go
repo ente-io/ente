@@ -8,11 +8,14 @@ import (
 	"github.com/ente-io/cli/pkg"
 	"github.com/ente-io/cli/pkg/secrets"
 	"github.com/ente-io/cli/utils/constants"
+	"github.com/spf13/viper"
 	"log"
 	"os"
 	"path/filepath"
 	"strings"
 )
+
+var AppVersion = "0.1.12"
 
 func main() {
 	cliDBPath, err := GetCLIConfigPath()
@@ -23,10 +26,10 @@ func main() {
 			log.Fatalf("Please mount a volume to %s to persist cli data\n%v\n", cliDBPath, err)
 		}
 	}
-
 	if err != nil {
 		log.Fatalf("Could not create cli config path\n%v\n", err)
 	}
+	initConfig(cliDBPath)
 	newCliPath := fmt.Sprintf("%s/ente-cli.db", cliDBPath)
 	if !strings.HasPrefix(cliDBPath, "/") {
 		oldCliPath := fmt.Sprintf("%sente-cli.db", cliDBPath)
@@ -48,8 +51,8 @@ func main() {
 	}
 	ctrl := pkg.ClICtrl{
 		Client: api.NewClient(api.Params{
-			Debug: false,
-			//Host:  "http://localhost:8080",
+			Debug: viper.GetBool("log.http"),
+			Host:  viper.GetString("endpoint.api"),
 		}),
 		DB:        db,
 		KeyHolder: secrets.NewKeyHolder(secrets.GetOrCreateClISecret()),
@@ -63,7 +66,32 @@ func main() {
 			panic(err)
 		}
 	}()
-	cmd.Execute(&ctrl)
+
+	if len(os.Args) == 2 && os.Args[1] == "docs" {
+		log.Println("Generating docs")
+		err = cmd.GenerateDocs()
+		if err != nil {
+			log.Fatal(err)
+		}
+		return
+	}
+	cmd.Execute(&ctrl, AppVersion)
+}
+
+func initConfig(cliConfigPath string) {
+	viper.SetConfigName("config")            // name of config file (without extension)
+	viper.SetConfigType("yaml")              // REQUIRED if the config file does not have the extension in the name
+	viper.AddConfigPath(cliConfigPath + "/") // path to look for the config file in
+	viper.AddConfigPath(".")                 // optionally look for config in the working directory
+
+	viper.SetDefault("endpoint.api", constants.EnteApiUrl)
+	viper.SetDefault("log.http", false)
+	if err := viper.ReadInConfig(); err != nil {
+		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
+		} else {
+			// Config file was found but another error was produced
+		}
+	}
 }
 
 // GetCLIConfigPath returns the path to the .ente-cli folder and creates it if it doesn't exist.

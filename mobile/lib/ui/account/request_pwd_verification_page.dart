@@ -16,8 +16,11 @@ class RequestPasswordVerificationPage extends StatefulWidget {
   final OnPasswordVerifiedFn onPasswordVerified;
   final Function? onPasswordError;
 
-  const RequestPasswordVerificationPage(
-      {super.key, required this.onPasswordVerified, this.onPasswordError,});
+  const RequestPasswordVerificationPage({
+    super.key,
+    required this.onPasswordVerified,
+    this.onPasswordError,
+  });
 
   @override
   State<RequestPasswordVerificationPage> createState() =>
