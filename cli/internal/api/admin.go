@@ -47,6 +47,24 @@ func (c *Client) ListUsers(ctx context.Context) ([]models.User, error) {
 	return res.Users, nil
 }
 
+func (c *Client) DeleteUser(ctx context.Context, email string) error {
+
+	r, err := c.restClient.R().
+		SetContext(ctx).
+		SetQueryParam("email", email).
+		Delete("/admin/user/delete")
+	if err != nil {
+		return err
+	}
+	if r.IsError() {
+		return &ApiError{
+			StatusCode: r.StatusCode(),
+			Message:    r.String(),
+		}
+	}
+	return nil
+}
+
 func (c *Client) Disable2Fa(ctx context.Context, userID int64) error {
 	var res interface{}
 

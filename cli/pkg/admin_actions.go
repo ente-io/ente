@@ -44,6 +44,23 @@ func (c *ClICtrl) ListUsers(ctx context.Context, params model.AdminActionForUser
 	return nil
 }
 
+func (c *ClICtrl) DeleteUser(ctx context.Context, params model.AdminActionForUser) error {
+	accountCtx, err := c.buildAdminContext(ctx, params.AdminEmail)
+	if err != nil {
+		return err
+	}
+	err = c.Client.DeleteUser(accountCtx, params.UserEmail)
+	if err != nil {
+		if apiErr, ok := err.(*api.ApiError); ok && apiErr.StatusCode == 400 && strings.Contains(apiErr.Message, "Token is too old") {
+			fmt.Printf("Error: old admin token, please re-authenticate using `ente account add` \n")
+			return nil
+		}
+		return err
+	}
+	fmt.Println("Successfully deleted user")
+	return nil
+}
+
 func (c *ClICtrl) Disable2FA(ctx context.Context, params model.AdminActionForUser) error {
 	accountCtx, err := c.buildAdminContext(ctx, params.AdminEmail)
 	if err != nil {
