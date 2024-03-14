@@ -56,7 +56,7 @@ class _AddParticipantPage extends State<AddParticipantPage> {
 
   @override
   Widget build(BuildContext context) {
-    isKeypadOpen = MediaQuery.of(context).viewInsets.bottom > 100;
+    isKeypadOpen = MediaQuery.viewInsetsOf(context).bottom > 100;
     final enteTextTheme = getEnteTextTheme(context);
     final enteColorScheme = getEnteColorScheme(context);
     final List<User> suggestedUsers = _getSuggestedUser();
