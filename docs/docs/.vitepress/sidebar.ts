@@ -77,7 +77,7 @@ export const sidebar = [
                         link: "/auth/migration-guides/authy/",
                     },
                     {
-                        text: "Out of Ente",
+                        text: "Exporting your data",
                         link: "/auth/migration-guides/export",
                     },
                 ],
