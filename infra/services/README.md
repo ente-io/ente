@@ -2,26 +2,26 @@
 
 "Services" are Docker images we run on our instances and manage using systemd.
 
-All our services (including museum itself) follow the same
-pattern:
+All our services (including museum itself) follow the same pattern:
 
-* They're run on vanilla Ubuntu instances. The only expectation they have is for
-  Docker to be installed.
+-   They're run on vanilla Ubuntu instances. The only expectation they have is
+    for Docker to be installed.
 
-* They log to fixed, known, locations - `/root/var/log/foo.log` - so that these
-  logs can get ingested by Promtail if needed.
+-   They log to fixed, known, locations - `/root/var/log/foo.log` - so that
+    these logs can get ingested by Promtail if needed.
 
-* Each service should consist of a Docker image (or a Docker compose file), and a
-  systemd unit file.
+-   Each service should consist of a Docker image (or a Docker compose file),
+    and a systemd unit file.
 
-* To start / stop / schedule the service, we use systemd.
+-   To start / stop / schedule the service, we use systemd.
 
-* Each time the service runs it should pull the latest Docker image, so there is
-  no separate installation/upgrade step needed. We can just restart the service,
-  and it'll use the latest code.
+-   Each time the service runs it should pull the latest Docker image, so there
+    is no separate installation/upgrade step needed. We can just restart the
+    service, and it'll use the latest code.
 
-* Any credentials and/or configuration should be read by mounting the
-  appropriate file from `/root/service-name` into the running Docker container.
+-   Any credentials and/or configuration should be read by mounting the
+    appropriate file from `/root/service-name` into the running Docker
+    container.
 
 ## Systemd cheatsheet
 
@@ -46,9 +46,9 @@ service file (_note_: starting on boot requires one more step later):
 WantedBy=multi-user.target
 ```
 
-Copy the service file to the instance where we want to run the service.
-Services might also have some additional configuration or env files, also copy
-those to the instance.
+Copy the service file to the instance where we want to run the service. Services
+might also have some additional configuration or env files, also copy those to
+the instance.
 
 ```sh
 scp services/example.service example.env <instance>:
