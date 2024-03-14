@@ -98,6 +98,11 @@ export const sidebar = [
                         link: "/self-hosting/guides/custom-server/",
                     },
                     {
+                        text: "Administering your server",
+                        link: "/self-hosting/guides/admin",
+                    },
+
+                    {
                         text: "Mobile build",
                         link: "/self-hosting/guides/mobile-build",
                     },
