@@ -1,8 +1,8 @@
 # Copycat DB
 
-Copycat DB is a [service](../service.md) to take a backup of our database. It
-uses the Scaleway CLI to take backups of the database, and uploads them to an
-offsite bucket.
+Copycat DB is a [service](../services/README.md) to take a backup of our
+database. It uses the Scaleway CLI to take backups of the database, and uploads
+them to an offsite bucket.
 
 This bucket has an object lock configured, so backups cannot be deleted before
 expiry. Conversely, the service also deletes backups older than some threshold
@@ -13,7 +13,6 @@ In production the service runs as a cron job, scheduled using a systemd timer.
 > These backups are in addition to the regular snapshots that we take, and are
 > meant as a second layer of replication. For more details, see our [Reliability
 > and Replication Specification](https://ente.io/reliability).
-
 
 ## Quick help
 
