@@ -7,9 +7,11 @@ description: Guide for importing your existing Authy 2FA tokens into Ente Auth
 
 A guide written by Green, an ente.io lover
 
-> [!WARNING] Authy will soon be dropping support for its desktop apps in the
-> near future. If you are looking to switch to ente Authenticator from Authy, I
-> heavily recommend you export your codes as soon as you can.
+> [!WARNING]
+>
+> Authy will soon be dropping support for its desktop apps in the near future.
+> If you are looking to switch to ente Authenticator from Authy, I heavily
+> recommend you export your codes as soon as you can.
 
 ---
 
@@ -19,8 +21,10 @@ for your new 2FA authenticator. However, easier ways exist to export your codes
 out of Authy. This guide will cover two of the most used methods for mograting
 from Authy to ente Authenticator.
 
-> [!CAUTION] Under any circumstances, do **NOT** share any JSON and TXT files
-> generated using this guide, as they contain your **unencrypted** TOTP secrets!
+> [!CAUTION]
+>
+> Under any circumstances, do **NOT** share any JSON and TXT files generated
+> using this guide, as they contain your **unencrypted** TOTP secrets!
 >
 > Also, there is **NO GUARANTEE** that these methods will export ALL of your
 > codes. Make sure that all your accounts have been imported successfully before
@@ -28,7 +32,7 @@ from Authy to ente Authenticator.
 
 ---
 
-# Method 1: Use Neeraj's export tool
+## Method 1: Use Neeraj's export tool
 
 **Who should use this?** General users who want to save time by skipping the
 hard (and rather technical) parts of the process.<br><br>
@@ -69,7 +73,7 @@ This will generate a text file called `authy_codes.txt`, which contains your
 Authy codes in ente's plaintext export format. You can now import this to ente
 Authenticator!
 
-# Method 2: Use gboudreau's GitHub guide
+## Method 2: Use gboudreau's GitHub guide
 
 **Who should use this?** Power users who have spare time on their hands and
 prefer a more "known and established" solution to exporting Authy codes.<br><br>
@@ -85,7 +89,7 @@ This will create a JSON file called `authy-to-bitwarden-export.json`, which
 contains your Authy codes in Bitwarden's export format. You can now import this
 to ente Authenticator!
 
-# Method 2.1: If the export worked, but the import didn't
+### Method 2.1: If the export worked, but the import didn't
 
 > [!NOTE] This is intended only for users who successfully exported their codes
 > using the guide in method 2, but could not import it to ente Authenticator for
@@ -141,7 +145,7 @@ that countains your TOTP secrets, which can now be imported into ente
 Authenticator. To import your codes, please follow one of the steps below,
 depending on which method you used to export your codes.
 
-# Importing to ente Authenticator (Method 1, method 2.1)
+## Importing to ente Authenticator (Method 1, method 2.1)
 
 1. Copy the TXT file to one of your devices with ente Authenticator.
 2. Log in to your account (if you haven't already), or press "Use without
@@ -151,7 +155,7 @@ depending on which method you used to export your codes.
 4. Select the "Plain text" option.
 5. Select the TXT file that was made earlier.
 
-# Importing to ente Authenticator (Method 2)
+## Importing to ente Authenticator (Method 2)
 
 1. Copy the JSON file to one of your devices with ente Authenticator.
 2. Log in to your account (if you haven't already), or press "Use without

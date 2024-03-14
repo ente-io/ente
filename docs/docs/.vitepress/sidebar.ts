@@ -94,7 +94,7 @@ export const sidebar = [
                 items: [
                     { text: "Introduction", link: "/self-hosting/guides/" },
                     {
-                        text: "Configure custom server",
+                        text: "Connect to custom server",
                         link: "/self-hosting/guides/custom-server/",
                     },
                     {
