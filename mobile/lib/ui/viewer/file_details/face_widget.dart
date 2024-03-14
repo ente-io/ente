@@ -76,7 +76,8 @@ class FaceWidget extends StatelessWidget {
             child: Column(
               children: [
                 ClipRRect(
-                  borderRadius: const BorderRadius.all(Radius.circular(5)),
+                  borderRadius:
+                      const BorderRadius.all(Radius.elliptical(16, 12)),
                   child: SizedBox(
                     width: 60,
                     height: 60,
@@ -100,7 +101,7 @@ class FaceWidget extends StatelessWidget {
         } else {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const ClipRRect(
-              borderRadius: BorderRadius.all(Radius.circular(5)),
+              borderRadius: BorderRadius.all(Radius.elliptical(16, 12)),
               child: SizedBox(
                 width: 60, // Ensure consistent sizing
                 height: 60,
@@ -112,7 +113,7 @@ class FaceWidget extends StatelessWidget {
             log('Error getting face: ${snapshot.error}');
           }
           return const ClipRRect(
-            borderRadius: BorderRadius.all(Radius.circular(5)),
+            borderRadius: BorderRadius.all(Radius.elliptical(16, 12)),
             child: SizedBox(
               width: 60, // Ensure consistent sizing
               height: 60,
