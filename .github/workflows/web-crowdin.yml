@@ -9,8 +9,14 @@ on:
             - ".github/workflows/web-crowdin.yml"
         branches: [main]
     schedule:
-        # See: [Note: Run every 24 hours]
-        - cron: "20 1 * * *"
+        # [Note: Run workflow on specific days of the week]
+        #
+        # The last (5th) component of the cron syntax denotes the day of the
+        # week, with 0 == SUN and 6 == SAT. So, for example, to run on every TUE
+        # and FRI, this can be set to `2,5`.
+        #
+        # See also: [Note: Run workflow every 24 hours]
+        - cron: "20 1 * * 2,5"
     # Also allow manually running the workflow
     workflow_dispatch:
 
