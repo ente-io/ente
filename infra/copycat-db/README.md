@@ -1,14 +1,40 @@
-## Introduction
+# Copycat DB
 
-Copycat DB is a [service](https://github.com/ente-io/infra) to take a backup of
-our database. It uses the Scaleway CLI to take backups of the database, and
-uploads them to an offsite bucket.
+Copycat DB is a [service](../service.md) to take a backup of our database. It
+uses the Scaleway CLI to take backups of the database, and uploads them to an
+offsite bucket.
 
 This bucket has an object lock configured, so backups cannot be deleted before
 expiry. Conversely, the service also deletes backups older than some threshold
 when it creates a new one to avoid indefinite retention.
 
 In production the service runs as a cron job, scheduled using a systemd timer.
+
+> These backups are in addition to the regular snapshots that we take, and are
+> meant as a second layer of replication. For more details, see our [Reliability
+> and Replication Specification](https://ente.io/reliability).
+
+
+## Quick help
+
+View service status (it gets invoked as a timer automatically, doesn't need to
+be started/stopped manually):
+
+```sh
+sudo systemctl status copycat-db
+```
+
+View logs locally (they'll also be available on Grafana):
+
+```sh
+sudo tail /root/var/logs/copycat-db.log
+```
+
+## Name
+
+The name copycat-db is a riff on "copycat", which is what we call our museum
+instance that does the object replication. This one replicates the DB, so,
+copycat-db.
 
 ## Required environment variables
 
@@ -90,8 +116,8 @@ For more thorough testing, run this service as part of a local test-cluster.
 ## Restoring
 
 The service also knows how to restore the latest backup into a Postgres
-instance. This functionality is used to periodically verify that the backups are
-restorable.
+instance. This functionality by a separate service (Phoenix) to periodically
+verify that the backups are restorable.
 
 To invoke this, use "./restore.sh" as the command when running the container
 (e.g. `./test.sh ./restore.sh`). This will restore the latest backup into the
@@ -101,7 +127,7 @@ environment variables.
 ## Preparing the bucket
 
 The database dumps are stored in a bucket that has object lock enabled
-(Compliance mode), and has a default bucket level retention time of 30 days.
+(compliance mode), and has a default bucket level retention time of 30 days.
 
 ## Deploying
 
@@ -127,9 +153,9 @@ Add the service definition, and start the service
     sudo mv copycat-db.{service,timer} /etc/systemd/system
     sudo systemctl daemon-reload
 
-To enable the cron job
+To start the cron job
 
-    sudo systemctl enable --now copycat-db.timer
+    sudo systemctl start copycat-db.timer
 
 The timer will trigger the service on the specified schedule. In addition, if
 you wish to force the job to service immediately
@@ -138,7 +164,9 @@ you wish to force the job to service immediately
 
 ## Updating
 
-To update, run the [Github action](.github/workflows/ci.yaml) to push the latest
-image to our Docker Registry, then restart the systemd service on the instance
+To update, run the [GitHub
+workflow](../../.github/workflows/copycat-db-release.yaml) to build and push the
+latest image to our Docker Registry, then restart the systemd service on the
+instance
 
     sudo systemctl restart copycat-db
