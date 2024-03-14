@@ -93,7 +93,7 @@ dependencies:
   google_nav_bar: ^5.0.5
   home_widget:
     git:
-      url: https://github.com/prateekmedia/FlutterHomeWidget
+      url: https://github.com/ente-io/FlutterHomeWidget
       ref: main
   html_unescape: ^2.0.0
   http: ^1.1.0
