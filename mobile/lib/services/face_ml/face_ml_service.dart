@@ -195,8 +195,7 @@ class FaceMlService {
         switch (function) {
           case FaceMlOperation.analyzeImage:
             final int enteFileID = args["enteFileID"] as int;
-            final String smallDataPath = args["smallDataPath"] as String;
-            final String largeDataPath = args["largeDataPath"] as String;
+            final String imagePath = args["filePath"] as String;
             final int faceDetectionAddress =
                 args["faceDetectionAddress"] as int;
             final int faceEmbeddingAddress =
@@ -214,13 +213,13 @@ class FaceMlService {
             // Get the faces
             final List<FaceDetectionRelative> faceDetectionResult =
                 await FaceMlService.detectFacesSync(
-              smallDataPath,
+              imagePath,
               faceDetectionAddress,
               resultBuilder: resultBuilder,
             );
 
             dev.log(
-                "${faceDetectionResult.length} faces detected: completed `detectFaces` function, in "
+                "${faceDetectionResult.length} faces detected: completed `detectFacesSync` function, in "
                 "${stopwatch.elapsedMilliseconds} ms");
 
             // If no faces were detected, return a result with no faces. Otherwise, continue.
@@ -236,7 +235,7 @@ class FaceMlService {
             // Align the faces
             final Float32List faceAlignmentResult =
                 await FaceMlService.alignFacesSync(
-              largeDataPath,
+              imagePath,
               faceDetectionResult,
               resultBuilder: resultBuilder,
             );
@@ -478,7 +477,9 @@ class FaceMlService {
       }
       final List<Face> faces = [];
       if (!result.hasFaces) {
-        debugPrint('No faces detected for file with name:${enteFile.displayName}');
+        debugPrint(
+          'No faces detected for file with name:${enteFile.displayName}',
+        );
         faces.add(
           Face(
             '${result.fileId}-0',
@@ -721,22 +722,15 @@ class FaceMlService {
     _checkEnteFileForID(enteFile);
     await ensureInitialized();
 
-    final String? thumbnailPath = await _getImagePathForML(
-      enteFile,
-      typeOfData: FileDataForML.thumbnailData,
-    );
     final String? filePath =
         await _getImagePathForML(enteFile, typeOfData: FileDataForML.fileData);
 
-    if (thumbnailPath == null && filePath == null) {
+    if (filePath == null) {
       _logger.severe(
         "Failed to get any data for enteFile with uploadedFileID ${enteFile.uploadedFileID}",
       );
       throw CouldNotRetrieveAnyFileData();
     }
-
-    final String smallDataPath = thumbnailPath ?? filePath!;
-    final String largeDataPath = filePath ?? thumbnailPath!;
 
     final Stopwatch stopwatch = Stopwatch()..start();
     late FaceMlResult result;
@@ -747,8 +741,7 @@ class FaceMlService {
           FaceMlOperation.analyzeImage,
           {
             "enteFileID": enteFile.uploadedFileID ?? -1,
-            "smallDataPath": smallDataPath,
-            "largeDataPath": largeDataPath,
+            "filePath": filePath,
             "faceDetectionAddress":
                 YoloOnnxFaceDetection.instance.sessionAddress,
             "faceEmbeddingAddress": FaceEmbeddingOnnx.instance.sessionAddress,

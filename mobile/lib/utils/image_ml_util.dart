@@ -658,8 +658,7 @@ Future<(Num3DInputMatrix, Size, Size)> preprocessImageToMatrix(
   return (imageMatrix, originalSize, newSize);
 }
 
-Future<(Float32List, Size, Size)>
-    preprocessImageToFloat32ChannelsFirst(
+Future<(Float32List, Size, Size)> preprocessImageToFloat32ChannelsFirst(
   Uint8List imageData, {
   required int normalization,
   required int requiredWidth,

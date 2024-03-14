@@ -34,7 +34,7 @@ class YoloOnnxFaceDetection {
   static const kInputWidth = 640;
   static const kInputHeight = 640;
   static const kIouThreshold = 0.4;
-  static const kMinScoreSigmoidThreshold = 0.8;
+  static const kMinScoreSigmoidThreshold = 0.7;
 
   bool isInitialized = false;
 
@@ -372,6 +372,10 @@ class YoloOnnxFaceDetection {
     );
 
     final relativeDetections = _yoloPostProcessOutputs(outputs, newSize);
+
+    dev.log(
+      '${relativeDetections.length} faces detected, with scores ${relativeDetections.map((e) => e.score).toList()}',
+    );
 
     stopwatch.stop();
     _logger.info(

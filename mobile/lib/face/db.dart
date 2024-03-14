@@ -1,6 +1,5 @@
 import 'dart:async';
 import "dart:math";
-import "dart:typed_data";
 
 import "package:collection/collection.dart";
 import "package:flutter/foundation.dart";
@@ -335,7 +334,7 @@ class FaceMLDataDB {
   ///
   /// Only selects faces with score greater than [minScore] and blur score greater than [minClarity]
   Future<Map<String, (int?, Uint8List)>> getFaceEmbeddingMap({
-    double minScore = 0.8,
+    double minScore = 0.78,
     int minClarity = kLaplacianThreshold,
     int maxRows = 20000,
   }) async {

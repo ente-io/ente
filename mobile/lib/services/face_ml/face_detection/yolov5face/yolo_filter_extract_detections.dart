@@ -1,3 +1,5 @@
+import 'dart:developer' as dev show log;
+
 import "package:photos/services/face_ml/face_detection/detection.dart";
 
 List<FaceDetectionRelative> yoloOnnxFilterExtractDetections(
@@ -21,6 +23,18 @@ List<FaceDetectionRelative> yoloOnnxFilterExtractDetections(
 
     // Append the processed raw detection to the output
     output.add(rawDetection);
+  }
+
+  if (output.isEmpty) {
+    double maxScore = 0;
+    for (final result in results) {
+      if (result[4] > maxScore) {
+        maxScore = result[4];
+      }
+    }
+    dev.log(
+      'No face detections found above the minScoreSigmoidThreshold of $minScoreSigmoidThreshold. The max score was $maxScore.',
+    );
   }
 
   for (final List<double> rawDetection in output) {
