@@ -25,6 +25,69 @@ func (c *Client) GetUserIdFromEmail(ctx context.Context, email string) (*models.
 	}
 	return &res, nil
 }
+
+func (c *Client) ListUsers(ctx context.Context) ([]models.User, error) {
+	var res struct {
+		Users []models.User `json:"users"`
+	}
+	r, err := c.restClient.R().
+		SetContext(ctx).
+		SetQueryParam("sinceTime", "0").
+		SetResult(&res).
+		Get("/admin/users/")
+	if err != nil {
+		return nil, err
+	}
+	if r.IsError() {
+		return nil, &ApiError{
+			StatusCode: r.StatusCode(),
+			Message:    r.String(),
+		}
+	}
+	return res.Users, nil
+}
+
+func (c *Client) DeleteUser(ctx context.Context, email string) error {
+
+	r, err := c.restClient.R().
+		SetContext(ctx).
+		SetQueryParam("email", email).
+		Delete("/admin/user/delete")
+	if err != nil {
+		return err
+	}
+	if r.IsError() {
+		return &ApiError{
+			StatusCode: r.StatusCode(),
+			Message:    r.String(),
+		}
+	}
+	return nil
+}
+
+func (c *Client) Disable2Fa(ctx context.Context, userID int64) error {
+	var res interface{}
+
+	payload := map[string]interface{}{
+		"userID": userID,
+	}
+	r, err := c.restClient.R().
+		SetContext(ctx).
+		SetResult(&res).
+		SetBody(payload).
+		Post("/admin/user/disable-2fa")
+	if err != nil {
+		return err
+	}
+	if r.IsError() {
+		return &ApiError{
+			StatusCode: r.StatusCode(),
+			Message:    r.String(),
+		}
+	}
+	return nil
+}
+
 func (c *Client) UpdateFreePlanSub(ctx context.Context, userDetails *models.UserDetails, storageInBytes int64, expiryTimeInMicro int64) error {
 	var res interface{}
 	if userDetails.Subscription.ProductID != "free" {
