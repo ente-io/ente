@@ -1,6 +1,6 @@
 # Migrating from Authy
 A guide written by Green, an ente.io lover
-> [!WARNING]  
+> [!WARNING]
 > Authy will soon be dropping support for its desktop apps in the near future. If you are looking to switch to ente Authenticator from Authy, I heavily recommend you export your codes as soon as you can.
 
 ---
@@ -9,7 +9,7 @@ Migrating from Authy can be tiring, as you cannot export your 2FA codes through 
 
 > [!CAUTION]
 > Under any circumstances, do **NOT** share any JSON and TXT files generated using this guide, as they contain your **unencrypted** TOTP secrets!
-> 
+>
 > Also, there is **NO GUARANTEE** that these methods will export ALL of your codes. Make sure that all your accounts have been imported successfully before deleting any codes from your Authy account!
 
 ---
@@ -25,7 +25,7 @@ To export from Authy, download the tool for your specific OS, then type the foll
 ```
 
 Assuming the filename of the binary remains unmodified and the working directory of the terminal is the location of the binary, you should type this for MacOS:
-> [!NOTE]  
+> [!NOTE]
 > On Apple Silicon devices, Rosetta 2 may be required to run the binary.
 ```
 ./authy-export-darwin-amd64 authy_codes.txt
@@ -48,12 +48,12 @@ This will generate a text file called `authy_codes.txt`, which contains your Aut
 
 A user on GitHub (gboudreau) wrote a guide to export codes from Authy (morpheus on Discord found this and showed it to us), so we are going to be using that for the migration.
 
-To export your data, please follow [this guide](https://gist.github.com/gboudreau/94bb0c11a6209c82418d01a59d958c93). 
+To export your data, please follow [this guide](https://gist.github.com/gboudreau/94bb0c11a6209c82418d01a59d958c93).
 
 This will create a JSON file called `authy-to-bitwarden-export.json`, which contains your Authy codes in Bitwarden's export format. You can now import this to ente Authenticator!
 
 # Method 2.1: If the export worked, but the import didn't
-> [!NOTE]  
+> [!NOTE]
 > This is intended only for users who successfully exported their codes using the guide in method 2, but could not import it to ente Authenticator for whatever reason. If the import was successful, or you haven't tried to import the codes yet, ignore this section.
 >
 > If the export itself failed, try using [**method 1**](#method-1-use-neerajs-export-tool) instead.

@@ -69,9 +69,16 @@ export const sidebar = [
             { text: "FAQ", link: "/auth/faq/" },
             {
                 text: "Migration guides",
-                collapsed: true,
+                collapsed: false,
                 items: [
-                    { text: "From Authy", link: "/auth/migration-guides/authy/" },
+                    {
+                        text: "From Authy",
+                        link: "/auth/migration-guides/authy/",
+                    },
+                    {
+                        text: "Out of Ente",
+                        link: "/auth/migration-guides/export",
+                    },
                 ],
             },
         ],
