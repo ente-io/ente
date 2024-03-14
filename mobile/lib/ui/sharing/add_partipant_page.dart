@@ -43,8 +43,8 @@ class _AddParticipantPage extends State<AddParticipantPage> {
 
   @override
   void initState() {
-    collectionActions = CollectionActions(CollectionsService.instance);
     super.initState();
+    collectionActions = CollectionActions(CollectionsService.instance);
   }
 
   @override
