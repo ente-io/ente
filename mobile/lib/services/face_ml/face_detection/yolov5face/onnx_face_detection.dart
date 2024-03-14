@@ -373,10 +373,6 @@ class YoloOnnxFaceDetection {
 
     final relativeDetections = _yoloPostProcessOutputs(outputs, newSize);
 
-    dev.log(
-      '${relativeDetections.length} faces detected, with scores ${relativeDetections.map((e) => e.score).toList()}',
-    );
-
     stopwatch.stop();
     _logger.info(
       'predict() face detection executed in ${stopwatch.elapsedMilliseconds}ms',

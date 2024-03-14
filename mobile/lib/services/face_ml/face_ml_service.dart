@@ -219,7 +219,7 @@ class FaceMlService {
             );
 
             dev.log(
-                "${faceDetectionResult.length} faces detected: completed `detectFacesSync` function, in "
+                "${faceDetectionResult.length} faces detected with scores ${faceDetectionResult.map((e) => e.score).toList()}: completed `detectFacesSync` function, in "
                 "${stopwatch.elapsedMilliseconds} ms");
 
             // If no faces were detected, return a result with no faces. Otherwise, continue.
