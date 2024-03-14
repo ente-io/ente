@@ -42,7 +42,7 @@ void main() async {
     WindowOptions windowOptions = const WindowOptions(
       size: Size(450, 800),
     );
-    windowManager.waitUntilReadyToShow(windowOptions, () async {
+    await windowManager.waitUntilReadyToShow(windowOptions, () async {
       await windowManager.show();
       await windowManager.focus();
     });

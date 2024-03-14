@@ -254,7 +254,7 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
     childrens.add(
       GradientButton(
         onTap: () async {
-          shareDialog(
+          await shareDialog(
             context,
             context.l10n.recoveryKey,
             saveAction: () async {

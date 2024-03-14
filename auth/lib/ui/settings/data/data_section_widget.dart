@@ -37,7 +37,7 @@ class DataSectionWidget extends StatelessWidget {
         trailingIcon: Icons.chevron_right_outlined,
         trailingIconIsMuted: true,
         onTap: () async {
-          routeToPage(context, const ImportCodePage());
+          await routeToPage(context, const ImportCodePage());
         },
       ),
       sectionOptionSpacing,

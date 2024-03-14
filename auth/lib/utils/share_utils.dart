@@ -13,7 +13,7 @@ Future<void> shareDialog(
   required Function sendAction,
 }) async {
   final l10n = context.l10n;
-  showDialogWidget(
+  await showDialogWidget(
     context: context,
     title: title,
     body: Platform.isLinux || Platform.isWindows

@@ -32,7 +32,7 @@ class PlatformUtil {
   static openWebView(BuildContext context, String title, String url) async {
     if (PlatformUtil.isDesktop()) {
       if (!await WebviewWindow.isWebviewAvailable()) {
-        launchUrlString(url);
+        await launchUrlString(url);
         return;
       }
 
@@ -44,7 +44,7 @@ class PlatformUtil {
       webview.launch(url);
       return;
     }
-    Navigator.of(context).push(
+    await Navigator.of(context).push(
       MaterialPageRoute(
         builder: (BuildContext context) {
           return WebPage(

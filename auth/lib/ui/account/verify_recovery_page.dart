@@ -94,7 +94,7 @@ class _VerifyRecoveryPageState extends State<VerifyRecoveryPage> {
       try {
         recoveryKey =
             CryptoUtil.bin2hex(Configuration.instance.getRecoveryKey());
-        routeToPage(
+        await routeToPage(
           context,
           RecoveryKeyPage(
             recoveryKey,

@@ -2,12 +2,12 @@ import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:ente_auth/core/configuration.dart';
-import 'package:ente_auth/core/constants.dart';
+import 'package:ente_auth/core/event_bus.dart';
+import 'package:ente_auth/events/endpoint_updated_event.dart';
 import 'package:ente_auth/utils/package_info_util.dart';
 import 'package:ente_auth/utils/platform_util.dart';
 import 'package:fk_user_agent/fk_user_agent.dart';
 import 'package:flutter/foundation.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 
 int kConnectTimeout = 15000;
@@ -21,8 +21,6 @@ class Network {
     final packageInfo = await PackageInfoUtil().getPackageInfo();
     final version = PackageInfoUtil().getVersion(packageInfo);
     final packageName = PackageInfoUtil().getPackageName(packageInfo);
-
-    final preferences = await SharedPreferences.getInstance();
 
     _dio = Dio(
       BaseOptions(
@@ -39,7 +37,7 @@ class Network {
 
     _enteDio = Dio(
       BaseOptions(
-        baseUrl: apiEndpoint,
+        baseUrl: Configuration.endpoint,
         connectTimeout: Duration(milliseconds: kConnectTimeout),
         headers: {
           if (PlatformUtil.isMobile())
@@ -51,7 +49,7 @@ class Network {
         },
       ),
     );
-    _setupInterceptors(endpoint);
+    _setupInterceptors(Configuration.endpoint);
 
     Bus.instance.on<EndpointUpdatedEvent>().listen((event) {
       final endpoint = Configuration.instance.getHttpEndpoint();

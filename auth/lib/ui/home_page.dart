@@ -158,7 +158,7 @@ class _HomePageState extends State<HomePage> {
           Navigator.of(context).pop();
           return;
         }
-        MoveToBackground.moveTaskToBack();
+        await MoveToBackground.moveTaskToBack();
       },
       canPop: false,
       child: Scaffold(

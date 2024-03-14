@@ -26,7 +26,7 @@ class _LoginPageState extends State<LoginPage> {
   final Logger _logger = Logger('_LoginPageState');
 
   Future<void> onPressed() async {
-    UserService.instance.setEmail(_email!);
+    await UserService.instance.setEmail(_email!);
     Configuration.instance.resetVolatilePassword();
     SrpAttributes? attr;
     bool isEmailVerificationEnabled = true;
@@ -39,7 +39,7 @@ class _LoginPageState extends State<LoginPage> {
       }
     }
     if (attr != null && !isEmailVerificationEnabled) {
-      Navigator.of(context).push(
+      await Navigator.of(context).push(
         MaterialPageRoute(
           builder: (BuildContext context) {
             return LoginPasswordVerificationPage(

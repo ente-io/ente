@@ -24,7 +24,7 @@ class _RecoveryPageState extends State<RecoveryPage> {
       await Configuration.instance.recover(_recoveryKey.text.trim());
       await dialog.hide();
       showToast(context, "Recovery successful!");
-      Navigator.of(context).pushReplacement(
+      await Navigator.of(context).pushReplacement(
         MaterialPageRoute(
           builder: (BuildContext context) {
             return const PopScope(
@@ -42,7 +42,7 @@ class _RecoveryPageState extends State<RecoveryPage> {
       if (e is AssertionError) {
         errMessage = '$errMessage : ${e.message}';
       }
-      showErrorDialog(context, "Incorrect recovery key", errMessage);
+      await showErrorDialog(context, "Incorrect recovery key", errMessage);
     }
   }
 
