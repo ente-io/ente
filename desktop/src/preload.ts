@@ -29,6 +29,7 @@
 
 import { contextBridge, ipcRenderer } from "electron";
 import { existsSync } from "fs";
+import path from "path";
 import * as fs from "promise-fs";
 import { Readable } from "stream";
 import { deleteDiskCache, openDiskCache } from "./api/cache";
@@ -47,15 +48,7 @@ import {
     saveStreamToDisk,
 } from "./api/export";
 import { runFFmpegCmd } from "./api/ffmpeg";
-import {
-    deleteFile,
-    deleteFolder,
-    getDirFiles,
-    isFolder,
-    moveFile,
-    readTextFile,
-    rename,
-} from "./api/fs";
+import { getDirFiles } from "./api/fs";
 import { convertToJPEG, generateImageThumbnail } from "./api/imageProcessor";
 import { getEncryptionKey, setEncryptionKey } from "./api/safeStorage";
 import {
@@ -86,9 +79,15 @@ import {
 } from "./api/watch";
 import { setupLogging } from "./utils/logging";
 
-/* preload: duplicated writeStream */
 /* Some of the code below has been duplicated to make this file self contained.
-   Enhancement: consider alternatives */
+Enhancement: consider alternatives */
+
+/* preload: duplicated logError */
+export function logError(error: Error, message: string, info?: string): void {
+    ipcRenderer.invoke("log-error", error, message, info);
+}
+
+// -
 
 export const convertBrowserStreamToNode = (
     fileStream: ReadableStream<Uint8Array>,
@@ -137,12 +136,91 @@ export async function writeNodeStream(
     });
 }
 
+/* preload: duplicated writeStream */
 export async function writeStream(
     filePath: string,
     fileStream: ReadableStream<Uint8Array>,
 ) {
     const readable = convertBrowserStreamToNode(fileStream);
     await writeNodeStream(filePath, readable);
+}
+
+// -
+
+async function readTextFile(filePath: string) {
+    if (!existsSync(filePath)) {
+        throw new Error("File does not exist");
+    }
+    return await fs.readFile(filePath, "utf-8");
+}
+
+async function moveFile(
+    sourcePath: string,
+    destinationPath: string,
+): Promise<void> {
+    if (!existsSync(sourcePath)) {
+        throw new Error("File does not exist");
+    }
+    if (existsSync(destinationPath)) {
+        throw new Error("Destination file already exists");
+    }
+    // check if destination folder exists
+    const destinationFolder = path.dirname(destinationPath);
+    if (!existsSync(destinationFolder)) {
+        await fs.mkdir(destinationFolder, { recursive: true });
+    }
+    await fs.rename(sourcePath, destinationPath);
+}
+
+export async function isFolder(dirPath: string) {
+    try {
+        const stats = await fs.stat(dirPath);
+        return stats.isDirectory();
+    } catch (e) {
+        let err = e;
+        // if code is defined, it's an error from fs.stat
+        if (typeof e.code !== "undefined") {
+            // ENOENT means the file does not exist
+            if (e.code === "ENOENT") {
+                return false;
+            }
+            err = Error(`fs error code: ${e.code}`);
+        }
+        logError(err, "isFolder failed");
+        return false;
+    }
+}
+
+async function deleteFolder(folderPath: string): Promise<void> {
+    if (!existsSync(folderPath)) {
+        return;
+    }
+    if (!fs.statSync(folderPath).isDirectory()) {
+        throw new Error("Path is not a folder");
+    }
+    // check if folder is empty
+    const files = await fs.readdir(folderPath);
+    if (files.length > 0) {
+        throw new Error("Folder is not empty");
+    }
+    await fs.rmdir(folderPath);
+}
+
+async function rename(oldPath: string, newPath: string) {
+    if (!existsSync(oldPath)) {
+        throw new Error("Path does not exist");
+    }
+    await fs.rename(oldPath, newPath);
+}
+
+function deleteFile(filePath: string): void {
+    if (!existsSync(filePath)) {
+        return;
+    }
+    if (!fs.statSync(filePath).isFile()) {
+        throw new Error("Path is not a file");
+    }
+    fs.rmSync(filePath);
 }
 
 // -
