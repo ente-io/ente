@@ -174,7 +174,7 @@ stripe:
 webauthn:
     rpid: "example.com"
     rporigins:
-      - "https://example.com:3005"
+        - "https://example.com:3005"
 
 # Roadmap SSO (optional)
 #
@@ -220,13 +220,17 @@ internal:
     # If provided, this external healthcheck url is periodically pinged.
     health-check-url:
     # Hardcoded verification codes, useful for logging in when developing.
-    hardcoded-ott:
-        emails:
-            - "example@example.org,123456"
-        # When running in a local environment, hardcode the verification code to
-        # 123456 for email addresses ending with @example.org
-        local-domain-suffix: "@example.org"
-        local-domain-value: 123456
+    #
+    # Uncomment this and set these to your email ID or domain so that you don't
+    # need to peek into the server logs for obtaining the OTP when trying to log
+    # into an instance you're developing on.
+    # hardcoded-ott:
+    #     emails:
+    #         - "example@example.org,123456"
+    #     # When running in a local environment, hardcode the verification code to
+    #     # 123456 for email addresses ending with @example.org
+    #     local-domain-suffix: "@example.org"
+    #     local-domain-value: 123456
     # List of user IDs that can use the admin API endpoints.
     admins: []
 
