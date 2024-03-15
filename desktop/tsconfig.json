@@ -41,7 +41,9 @@
         "target": "es2022",
         "module": "node16",
 
+        /* Enable various workarounds to play better with CJS libraries */
         "esModuleInterop": true,
+        /* Speed things up by not type checking `node_modules` */
         "skipLibCheck": true,
 
         /* Emit the generated JS into `app/` */
