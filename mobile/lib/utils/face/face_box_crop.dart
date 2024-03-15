@@ -16,15 +16,19 @@ Future<Map<String, Uint8List>?> getFaceCrops(
   EnteFile file,
   Map<String, FaceBox> faceBoxeMap,
 ) async {
-  late Uint8List? ioFileBytes;
+  late String? imagePath;
   if (file.fileType != FileType.video) {
     final File? ioFile = await getFile(file);
     if (ioFile == null) {
       return null;
     }
-    ioFileBytes = await ioFile.readAsBytes();
+    imagePath = ioFile.path;
   } else {
-    ioFileBytes = await getThumbnail(file);
+    final thumbnail = await getThumbnailForUploadedFile(file);
+    if (thumbnail == null) {
+      return null;
+    }
+    imagePath = thumbnail.path;
   }
   final List<String> faceIds = [];
   final List<FaceBox> faceBoxes = [];
@@ -34,7 +38,7 @@ Future<Map<String, Uint8List>?> getFaceCrops(
   }
   final List<Uint8List> faceCrop =
       await ImageMlIsolate.instance.generateFaceThumbnailsForImage(
-    ioFileBytes!,
+    imagePath,
     faceBoxes,
   );
   final Map<String, Uint8List> result = {};

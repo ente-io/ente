@@ -15,6 +15,7 @@ import "dart:ui";
 //         ImageConfiguration;
 // import 'package:flutter/material.dart' as material show Image;
 import 'package:flutter/painting.dart' as paint show decodeImageFromList;
+import 'package:image/image.dart' as img_lib;
 import 'package:ml_linalg/linalg.dart';
 import "package:photos/face/model/box.dart";
 import 'package:photos/models/ml/ml_typedefs.dart';
@@ -36,7 +37,7 @@ Color readPixelColor(
   if (x < 0 || x >= image.width || y < 0 || y >= image.height) {
     // throw ArgumentError('Invalid pixel coordinates.');
     log('[WARNING] `readPixelColor`: Invalid pixel coordinates, out of bounds');
-    return const Color(0x00000000);
+    return const Color.fromARGB(255, 208, 16, 208);
   }
   assert(byteData.lengthInBytes == 4 * image.width * image.height);
 
@@ -44,11 +45,38 @@ Color readPixelColor(
   return Color(_rgbaToArgb(byteData.getUint32(byteOffset)));
 }
 
+void setPixelColor(
+  Size imageSize,
+  ByteData byteData,
+  int x,
+  int y,
+  Color color,
+) {
+  if (x < 0 || x >= imageSize.width || y < 0 || y >= imageSize.height) {
+    log('[WARNING] `setPixelColor`: Invalid pixel coordinates, out of bounds');
+    return;
+  }
+  assert(byteData.lengthInBytes == 4 * imageSize.width * imageSize.height);
+
+  final int byteOffset = 4 * (imageSize.width.toInt() * y + x);
+  byteData.setUint32(byteOffset, _argbToRgba(color.value));
+}
+
 int _rgbaToArgb(int rgbaColor) {
   final int a = rgbaColor & 0xFF;
   final int rgb = rgbaColor >> 8;
   return rgb + (a << 24);
 }
+
+int _argbToRgba(int argbColor) {
+  final int r = (argbColor >> 16) & 0xFF;
+  final int g = (argbColor >> 8) & 0xFF;
+  final int b = argbColor & 0xFF;
+  final int a = (argbColor >> 24) & 0xFF;
+  return (r << 24) + (g << 16) + (b << 8) + a;
+}
+
+@Deprecated('Used in TensorFlow Lite only, no longer needed')
 
 /// Creates an empty matrix with the specified shape.
 ///
@@ -465,10 +493,52 @@ Future<Image> resizeAndCenterCropImage(
 }
 
 /// Crops an [image] based on the specified [x], [y], [width] and [height].
+Future<Uint8List> cropImage(
+  Image image,
+  ByteData imgByteData, {
+  required int x,
+  required int y,
+  required int width,
+  required int height,
+}) async {
+  // final newByteData = ByteData(width * height * 4);
+  // for (var h = y; h < y + height; h++) {
+  //   for (var w = x; w < x + width; w++) {
+  //     final pixel = readPixelColor(image, imgByteData, w, y);
+  //     setPixelColor(
+  //       Size(width.toDouble(), height.toDouble()),
+  //       newByteData,
+  //       w,
+  //       h,
+  //       pixel,
+  //     );
+  //   }
+  // }
+  // final newImage =
+  //     decodeImageFromRgbaBytes(newByteData.buffer.asUint8List(), width, height);
+
+  final newImage = img_lib.Image(width: width, height: height);
+
+  for (var h = y; h < y + height; h++) {
+    for (var w = x; w < x + width; w++) {
+      final pixel = readPixelColor(image, imgByteData, w, h);
+      newImage.setPixel(
+        w - x,
+        h - y,
+        img_lib.ColorRgb8(pixel.red, pixel.green, pixel.blue),
+      );
+    }
+  }
+  final newImageDataPng = img_lib.encodePng(newImage);
+
+  return newImageDataPng;
+}
+
+/// Crops an [image] based on the specified [x], [y], [width] and [height].
 /// Optionally, the cropped image can be resized to comply with a [maxSize] and/or [minSize].
 /// Optionally, the cropped image can be rotated from the center by [rotation] radians.
 /// Optionally, the [quality] of the resizing interpolation can be specified.
-Future<Image> cropImage(
+Future<Image> cropImageWithCanvas(
   Image image, {
   required double x,
   required double y,
@@ -798,7 +868,7 @@ Future<List<Uint8List>> preprocessFaceAlignToUint8List(
       continue;
     }
     final alignmentBox = getAlignedFaceBox(alignmentResult);
-    final Image alignedFace = await cropImage(
+    final Image alignedFace = await cropImageWithCanvas(
       image,
       x: alignmentBox[0],
       y: alignmentBox[1],
@@ -886,7 +956,7 @@ Future<
       continue;
     }
     final alignmentBox = getAlignedFaceBox(alignmentResult);
-    final Image alignedFace = await cropImage(
+    final Image alignedFace = await cropImageWithCanvas(
       image,
       x: alignmentBox[0],
       y: alignmentBox[1],
@@ -970,7 +1040,7 @@ Future<(Float32List, List<AlignmentResult>, List<bool>, List<double>, Size)>
       continue;
     }
     final alignmentBox = getAlignedFaceBox(alignmentResult);
-    final Image alignedFace = await cropImage(
+    final Image alignedFace = await cropImageWithCanvas(
       image,
       x: alignmentBox[0],
       y: alignmentBox[1],
@@ -1168,28 +1238,51 @@ void warpAffineFloat32List(
   }
 }
 
-/// Generates a face thumbnail from [imageData] and a [faceDetection].
-///
-/// Returns a [Uint8List] image, in png format.
-Future<Uint8List> generateFaceThumbnailFromData(
+Future<List<Uint8List>> generateFaceThumbnails(
   Uint8List imageData,
-  FaceDetectionRelative faceDetection,
+  List<FaceBox> faceBoxes,
 ) async {
+  final stopwatch = Stopwatch()..start();
+
   final Image image = await decodeImageFromData(imageData);
+  final ByteData imgByteData = await getByteDataFromImage(image);
 
-  final Image faceThumbnail = await cropImage(
-    image,
-    x: (faceDetection.xMinBox * image.width).round() - 20,
-    y: (faceDetection.yMinBox * image.height).round() - 30,
-    width: (faceDetection.width * image.width).round() + 40,
-    height: (faceDetection.height * image.height).round() + 60,
-  );
+  // int i = 0;
+  try {
+    final List<Uint8List> faceThumbnails = [];
 
-  return await encodeImageToUint8List(
-    faceThumbnail,
-    format: ImageByteFormat.png,
-  );
+    for (final faceBox in faceBoxes) {
+      final xCrop = (faceBox.x - faceBox.width / 2).round();
+      final yCrop = (faceBox.y - faceBox.height / 2).round();
+      final widthCrop = (faceBox.width * 2).round();
+      final heightCrop = (faceBox.height * 2).round();
+      final Uint8List faceThumbnail = await cropImage(
+        image,
+        imgByteData,
+        x: xCrop,
+        y: yCrop,
+        width: widthCrop,
+        height: heightCrop,
+      );
+      // final Uint8List faceThumbnailPng = await encodeImageToUint8List(
+      //   faceThumbnail,
+      //   format: ImageByteFormat.png,
+      // );
+      faceThumbnails.add(faceThumbnail);
+      // i++;
+    }
+    stopwatch.stop();
+    log('Face thumbnail generation took: ${stopwatch.elapsedMilliseconds} ms');
+
+    return faceThumbnails;
+  } catch (e, s) {
+    log('[ImageMlUtils] Error generating face thumbnails: $e, \n stackTrace: $s');
+    // log('[ImageMlUtils] cropImage problematic input argument: ${faceBoxes[i]}');
+    rethrow;
+  }
 }
+
+@Deprecated("Old method using canvas, replaced by `generateFaceThumbnails`")
 
 /// Generates a face thumbnail from [imageData] and a [faceDetection].
 ///
@@ -1205,7 +1298,7 @@ Future<List<Uint8List>> generateFaceThumbnailsFromDataAndDetections(
     final List<Uint8List> faceThumbnails = [];
 
     for (final faceBox in faceBoxes) {
-      final Image faceThumbnail = await cropImage(
+      final Image faceThumbnail = await cropImageWithCanvas(
         image,
         x: faceBox.x - faceBox.width / 2,
         y: faceBox.y - faceBox.height / 2,
@@ -1227,6 +1320,8 @@ Future<List<Uint8List>> generateFaceThumbnailsFromDataAndDetections(
   }
 }
 
+@Deprecated('For second pass of BlazeFace, no longer used')
+
 /// Generates cropped and padded image data from [imageData] and a [faceBox].
 ///
 /// The steps are:
@@ -1241,7 +1336,7 @@ Future<Uint8List> cropAndPadFaceData(
 ) async {
   final Image image = await decodeImageFromData(imageData);
 
-  final Image faceCrop = await cropImage(
+  final Image faceCrop = await cropImageWithCanvas(
     image,
     x: (faceBox[0] * image.width),
     y: (faceBox[1] * image.height),
@@ -1390,6 +1485,7 @@ Color getPixelBicubic(num fx, num fy, Image image, ByteData byteDataRgba) {
   return Color.fromRGBO(c0, c1, c2, 1.0);
 }
 
+@Deprecated('Old method only used in other deprecated methods')
 List<double> getAlignedFaceBox(AlignmentResult alignment) {
   final List<double> box = [
     // [xMinBox, yMinBox, xMaxBox, yMaxBox]

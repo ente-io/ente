@@ -1,8 +1,10 @@
 import 'dart:async';
+import "dart:io" show File;
 import 'dart:isolate';
 import 'dart:typed_data' show Float32List, Uint8List;
 import 'dart:ui';
 
+import "package:flutter/rendering.dart";
 import 'package:flutter_isolate/flutter_isolate.dart';
 import "package:logging/logging.dart";
 import "package:photos/face/model/box.dart";
@@ -13,13 +15,13 @@ import "package:photos/utils/image_ml_util.dart";
 import "package:synchronized/synchronized.dart";
 
 enum ImageOperation {
+  @Deprecated("No longer using BlazeFace`")
   preprocessBlazeFace,
   preprocessYoloOnnx,
   preprocessFaceAlign,
   preprocessMobileFaceNet,
   preprocessMobileFaceNetOnnx,
-  generateFaceThumbnail,
-  generateFaceThumbnailsForImage,
+  generateFaceThumbnails,
   cropAndPadFace,
 }
 
@@ -205,23 +207,14 @@ class ImageMlIsolate {
               'originalWidth': originalSize.width,
               'originalHeight': originalSize.height,
             });
-          case ImageOperation.generateFaceThumbnail:
-            final imageData = args['imageData'] as Uint8List;
-            final faceDetectionJson =
-                args['faceDetection'] as Map<String, dynamic>;
-            final faceDetection =
-                FaceDetectionRelative.fromJson(faceDetectionJson);
-            final Uint8List result =
-                await generateFaceThumbnailFromData(imageData, faceDetection);
-            sendPort.send(<dynamic>[result]);
-          case ImageOperation.generateFaceThumbnailsForImage:
-            final imageData = args['imageData'] as Uint8List;
+          case ImageOperation.generateFaceThumbnails:
+            final imagePath = args['imagePath'] as String;
+            final Uint8List imageData = await File(imagePath).readAsBytes();
             final faceBoxesJson =
                 args['faceBoxesList'] as List<Map<String, dynamic>>;
             final List<FaceBox> faceBoxes =
                 faceBoxesJson.map((json) => FaceBox.fromJson(json)).toList();
-            final List<Uint8List> results =
-                await generateFaceThumbnailsFromDataAndDetections(
+            final List<Uint8List> results = await generateFaceThumbnails(
               imageData,
               faceBoxes,
             );
@@ -471,43 +464,27 @@ class ImageMlIsolate {
     return (inputs, alignmentResults, isBlurs, blurValues, originalSize);
   }
 
-  /// Generates a face thumbnail from [imageData] and a [faceDetection].
-  ///
-  /// Uses [generateFaceThumbnailFromData] inside the isolate.
-  Future<Uint8List> generateFaceThumbnail(
-    Uint8List imageData,
-    FaceDetectionRelative faceDetection,
-  ) async {
-    return await _runInIsolate(
-      (
-        ImageOperation.generateFaceThumbnail,
-        {
-          'imageData': imageData,
-          'faceDetection': faceDetection.toJson(),
-        },
-      ),
-    ).then((value) => value[0] as Uint8List);
-  }
-
   /// Generates face thumbnails for all [faceBoxes] in [imageData].
   ///
-  /// Uses [generateFaceThumbnailsFromDataAndDetections] inside the isolate.
+  /// Uses [generateFaceThumbnails] inside the isolate.
   Future<List<Uint8List>> generateFaceThumbnailsForImage(
-    Uint8List imageData,
+    String imagePath,
     List<FaceBox> faceBoxes,
   ) async {
     final List<Map<String, dynamic>> faceBoxesJson =
         faceBoxes.map((box) => box.toJson()).toList();
     return await _runInIsolate(
       (
-        ImageOperation.generateFaceThumbnailsForImage,
+        ImageOperation.generateFaceThumbnails,
         {
-          'imageData': imageData,
+          'imagePath': imagePath,
           'faceBoxesList': faceBoxesJson,
         },
       ),
     ).then((value) => value.cast<Uint8List>());
   }
+
+  @Deprecated('For second pass of BlazeFace, no longer used')
 
   /// Generates cropped and padded image data from [imageData] and a [faceBox].
   ///
