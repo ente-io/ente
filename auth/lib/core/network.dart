@@ -21,6 +21,7 @@ class Network {
     final packageInfo = await PackageInfoUtil().getPackageInfo();
     final version = PackageInfoUtil().getVersion(packageInfo);
     final packageName = PackageInfoUtil().getPackageName(packageInfo);
+    final endpoint = Configuration.instance.getHttpEndpoint();
 
     _dio = Dio(
       BaseOptions(
@@ -37,7 +38,7 @@ class Network {
 
     _enteDio = Dio(
       BaseOptions(
-        baseUrl: Configuration.endpoint,
+        baseUrl: endpoint,
         connectTimeout: Duration(milliseconds: kConnectTimeout),
         headers: {
           if (PlatformUtil.isMobile())
@@ -49,7 +50,7 @@ class Network {
         },
       ),
     );
-    _setupInterceptors(Configuration.endpoint);
+    _setupInterceptors(endpoint);
 
     Bus.instance.on<EndpointUpdatedEvent>().listen((event) {
       final endpoint = Configuration.instance.getHttpEndpoint();
