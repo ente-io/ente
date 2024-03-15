@@ -717,7 +717,8 @@ Future<(Num3DInputMatrix, Size, Size)> preprocessImageToMatrix(
 }
 
 Future<(Float32List, Size, Size)> preprocessImageToFloat32ChannelsFirst(
-  Uint8List imageData, {
+  Image image,
+  ByteData imgByteData, {
   required int normalization,
   required int requiredWidth,
   required int requiredHeight,
@@ -729,8 +730,6 @@ Future<(Float32List, Size, Size)> preprocessImageToFloat32ChannelsFirst(
       : normalization == 1
           ? normalizePixelRange1
           : normalizePixelNoRange;
-  final Image image = await decodeImageFromData(imageData);
-  final ByteData imgByteData = await getByteDataFromImage(image);
   final originalSize = Size(image.width.toDouble(), image.height.toDouble());
 
   if (image.width == requiredWidth && image.height == requiredHeight) {
@@ -1078,17 +1077,14 @@ Future<(Float32List, List<AlignmentResult>, List<bool>, List<double>, Size)>
 
 Future<(Float32List, List<AlignmentResult>, List<bool>, List<double>, Size)>
     preprocessToMobileFaceNetFloat32List(
-  String imagePath,
+  Image image,
+  ByteData imageByteData,
   List<FaceDetectionRelative> relativeFaces, {
   int width = 112,
   int height = 112,
 }) async {
-  final Uint8List imageData = await File(imagePath).readAsBytes();
   final stopwatch = Stopwatch()..start();
-  final Image image = await decodeImageFromData(imageData);
-  final imageByteData = await getByteDataFromImage(image);
-  stopwatch.stop();
-  log("Face Alignment decoding ui image took: ${stopwatch.elapsedMilliseconds} ms");
+  
   final Size originalSize =
       Size(image.width.toDouble(), image.height.toDouble());
 
@@ -1147,6 +1143,8 @@ Future<(Float32List, List<AlignmentResult>, List<bool>, List<double>, Size)>
     isBlurs.add(isBlur);
     blurValues.add(blurValue);
   }
+  stopwatch.stop();
+  log("Face Alignment took: ${stopwatch.elapsedMilliseconds} ms");
   return (
     alignedImagesFloat32List,
     alignmentResults,

@@ -134,9 +134,12 @@ class ImageMlIsolate {
             final requiredWidth = args['requiredWidth'] as int;
             final requiredHeight = args['requiredHeight'] as int;
             final maintainAspectRatio = args['maintainAspectRatio'] as bool;
+            final Image image = await decodeImageFromData(imageData);
+            final imageByteData = await getByteDataFromImage(image);
             final (result, originalSize, newSize) =
                 await preprocessImageToFloat32ChannelsFirst(
-              imageData,
+              image,
+              imageByteData,
               normalization: normalization,
               requiredWidth: requiredWidth,
               requiredHeight: requiredHeight,
@@ -187,6 +190,9 @@ class ImageMlIsolate {
             final List<FaceDetectionRelative> relativeFaces = facesJson
                 .map((face) => FaceDetectionRelative.fromJson(face))
                 .toList();
+            final imageData = await File(imagePath).readAsBytes();
+            final Image image = await decodeImageFromData(imageData);
+            final imageByteData = await getByteDataFromImage(image);
             final (
               inputs,
               alignmentResults,
@@ -194,7 +200,8 @@ class ImageMlIsolate {
               blurValues,
               originalSize
             ) = await preprocessToMobileFaceNetFloat32List(
-              imagePath,
+              image,
+              imageByteData,
               relativeFaces,
             );
             final List<Map<String, dynamic>> alignmentResultsJson =

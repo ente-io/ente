@@ -2,10 +2,11 @@ import "dart:async";
 import "dart:developer" as dev show log;
 import "dart:io" show File;
 import "dart:isolate";
-import "dart:typed_data" show Uint8List, Float32List;
+import "dart:typed_data" show Uint8List, Float32List, ByteData;
+import "dart:ui" show Image;
 
 import "package:computer/computer.dart";
-import "package:flutter/foundation.dart";
+import "package:flutter/foundation.dart" show debugPrint, kDebugMode;
 import "package:flutter_image_compress/flutter_image_compress.dart";
 import "package:flutter_isolate/flutter_isolate.dart";
 import "package:logging/logging.dart";
@@ -210,10 +211,19 @@ class FaceMlService {
             final stopwatchTotal = Stopwatch()..start();
             final stopwatch = Stopwatch()..start();
 
+            // Decode the image once to use for both face detection and alignment
+            final imageData = await File(imagePath).readAsBytes();
+            final image = await decodeImageFromData(imageData);
+            final ByteData imgByteData = await getByteDataFromImage(image);
+            dev.log('Reading and decoding image took '
+                '${stopwatch.elapsedMilliseconds} ms');
+            stopwatch.reset();
+
             // Get the faces
             final List<FaceDetectionRelative> faceDetectionResult =
                 await FaceMlService.detectFacesSync(
-              imagePath,
+              image,
+              imgByteData,
               faceDetectionAddress,
               resultBuilder: resultBuilder,
             );
@@ -235,12 +245,13 @@ class FaceMlService {
             // Align the faces
             final Float32List faceAlignmentResult =
                 await FaceMlService.alignFacesSync(
-              imagePath,
+              image,
+              imgByteData,
               faceDetectionResult,
               resultBuilder: resultBuilder,
             );
 
-            dev.log("Completed `alignFaces` function, in "
+            dev.log("Completed `alignFacesSync` function, in "
                 "${stopwatch.elapsedMilliseconds} ms");
 
             stopwatch.reset();
@@ -251,7 +262,7 @@ class FaceMlService {
               resultBuilder: resultBuilder,
             );
 
-            dev.log("Completed `embedBatchFaces` function, in "
+            dev.log("Completed `embedFacesSync` function, in "
                 "${stopwatch.elapsedMilliseconds} ms");
 
             stopwatch.stop();
@@ -899,7 +910,8 @@ class FaceMlService {
   ///
   /// Throws [CouldNotInitializeFaceDetector], [CouldNotRunFaceDetector] or [GeneralFaceMlException] if something goes wrong.
   static Future<List<FaceDetectionRelative>> detectFacesSync(
-    String imagePath,
+    Image image,
+    ByteData imageByteData,
     int interpreterAddress, {
     FaceMlResultBuilder? resultBuilder,
   }) async {
@@ -907,7 +919,8 @@ class FaceMlService {
       // Get the bounding boxes of the faces
       final (List<FaceDetectionRelative> faces, dataSize) =
           await YoloOnnxFaceDetection.predictSync(
-        imagePath,
+        image,
+        imageByteData,
         interpreterAddress,
       );
 
@@ -969,14 +982,19 @@ class FaceMlService {
   ///
   /// Throws [CouldNotWarpAffine] or [GeneralFaceMlException] if the face alignment fails.
   static Future<Float32List> alignFacesSync(
-    String imagePath,
+    Image image,
+    ByteData imageByteData,
     List<FaceDetectionRelative> faces, {
     FaceMlResultBuilder? resultBuilder,
   }) async {
     try {
       final stopwatch = Stopwatch()..start();
       final (alignedFaces, alignmentResults, _, blurValues, originalImageSize) =
-          await preprocessToMobileFaceNetFloat32List(imagePath, faces);
+          await preprocessToMobileFaceNetFloat32List(
+        image,
+        imageByteData,
+        faces,
+      );
       stopwatch.stop();
       dev.log(
         "Face alignment image decoding and processing took ${stopwatch.elapsedMilliseconds} ms",

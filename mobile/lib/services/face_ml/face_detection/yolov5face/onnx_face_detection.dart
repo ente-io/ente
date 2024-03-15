@@ -2,7 +2,8 @@ import "dart:async";
 import "dart:developer" as dev show log;
 import "dart:io" show File;
 import "dart:isolate";
-import 'dart:typed_data' show Float32List, Uint8List;
+import 'dart:typed_data' show ByteData, Float32List, Uint8List;
+import 'dart:ui' as ui show Image;
 
 import "package:computer/computer.dart";
 import 'package:flutter/material.dart';
@@ -314,18 +315,19 @@ class YoloOnnxFaceDetection {
 
   /// Detects faces in the given image data.
   static Future<(List<FaceDetectionRelative>, Size)> predictSync(
-    String imagePath,
+    ui.Image image,
+    ByteData imageByteData,
     int sessionAddress,
   ) async {
     assert(sessionAddress != 0 && sessionAddress != -1);
 
     final stopwatch = Stopwatch()..start();
 
-    final stopwatchDecoding = Stopwatch()..start();
-    final imageData = await File(imagePath).readAsBytes();
+    final stopwatchPreprocessing = Stopwatch()..start();
     final (inputImageList, originalSize, newSize) =
         await preprocessImageToFloat32ChannelsFirst(
-      imageData,
+      image,
+      imageByteData,
       normalization: 1,
       requiredWidth: kInputWidth,
       requiredHeight: kInputHeight,
@@ -344,12 +346,12 @@ class YoloOnnxFaceDetection {
       inputShape,
     );
     final inputs = {'input': inputOrt};
-    stopwatchDecoding.stop();
+    stopwatchPreprocessing.stop();
     dev.log(
-      'Face detection image decoding and preprocessing is finished, in ${stopwatchDecoding.elapsedMilliseconds}ms',
+      'Face detection image preprocessing is finished, in ${stopwatchPreprocessing.elapsedMilliseconds}ms',
     );
     _logger.info(
-      'Image decoding and preprocessing is finished, in ${stopwatchDecoding.elapsedMilliseconds}ms',
+      'Image decoding and preprocessing is finished, in ${stopwatchPreprocessing.elapsedMilliseconds}ms',
     );
     _logger.info('original size: $originalSize \n new size: $newSize');
 
