@@ -25,17 +25,6 @@ bool sqlIntToBool(int? value, {bool defaultValue = false}) {
   }
 }
 
-Map<String, dynamic> mapToFaceDB(PersonFace personFace) {
-  return {
-    faceIDColumn: personFace.face.faceID,
-    faceDetectionColumn: json.encode(personFace.face.detection.toJson()),
-    faceConfirmedColumn: boolToSQLInt(personFace.confirmed),
-    faceClusterId: personFace.personID,
-    faceClosestDistColumn: personFace.closeDist,
-    faceClosestFaceID: personFace.closeFaceID,
-  };
-}
-
 Map<String, dynamic> mapPersonToRow(Person p) {
   return {
     idColumn: p.remoteID,
