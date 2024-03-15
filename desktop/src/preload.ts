@@ -55,7 +55,6 @@ import {
     muteUpdateNotification,
     registerForegroundEventListener,
     registerUpdateEventListener,
-    reloadWindow,
     skipAppUpdate,
     updateAndRestart,
 } from "./api/system";
@@ -327,7 +326,6 @@ contextBridge.exposeInMainWorld("ElectronAPIs", {
     saveFileToDisk,
     selectDirectory,
     clearElectronStore,
-    reloadWindow,
     readTextFile,
     showUploadFilesDialog,
     showUploadDirsDialog,

@@ -26,7 +26,6 @@ import {
     generateImageThumbnail,
 } from "../services/imageProcessor";
 import { logErrorSentry } from "../services/sentry";
-import { createWindow } from "./createWindow";
 import { generateTempFilePath } from "./temp";
 
 export default function setupIpcComs(
@@ -41,12 +40,6 @@ export default function setupIpcComs(
         if (result.filePaths && result.filePaths.length > 0) {
             return result.filePaths[0]?.split(path.sep)?.join(path.posix.sep);
         }
-    });
-
-    ipcMain.on("reload-window", async () => {
-        const secondWindow = await createWindow();
-        mainWindow.destroy();
-        mainWindow = secondWindow;
     });
 
     ipcMain.handle("show-upload-files-dialog", async () => {

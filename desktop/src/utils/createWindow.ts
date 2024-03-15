@@ -52,16 +52,6 @@ export const createWindow = async () => {
         );
         mainWindow.loadURL(rendererURL);
     }
-    mainWindow.webContents.on("did-fail-load", () => {
-        splash.close();
-        isDev
-            ? mainWindow.loadFile(`../resources/error.html`)
-            : splash.loadURL(
-                  `file://${path.join(process.resourcesPath, "error.html")}`,
-              );
-        mainWindow.maximize();
-        mainWindow.show();
-    });
     mainWindow.once("ready-to-show", async () => {
         try {
             splash.destroy();

@@ -1,10 +1,6 @@
 import { ipcRenderer } from "electron";
 import { AppUpdateInfo } from "../types";
 
-export const reloadWindow = () => {
-    ipcRenderer.send("reload-window");
-};
-
 export const registerUpdateEventListener = (
     showUpdateDialog: (updateInfo: AppUpdateInfo) => void,
 ) => {
