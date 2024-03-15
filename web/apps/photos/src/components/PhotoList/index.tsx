@@ -780,23 +780,28 @@ export function PhotoList({
         listItem: TimeStampListItem,
         isScrolling: boolean,
     ) => {
+        // Enhancement: This logic doesn't work on the shared album screen, the
+        // galleryContext.selectedFile is always null there.
+        const haveSelection = (galleryContext.selectedFile?.count ?? 0) > 0;
         switch (listItem.itemType) {
             case ITEM_TYPE.TIME:
                 return listItem.dates ? (
                     listItem.dates
                         .map((item) => [
                             <DateContainer key={item.date} span={item.span}>
-                                <Checkbox
-                                    key={item.date}
-                                    name={item.date}
-                                    checked={!!checkedDates[item.date]}
-                                    onChange={() =>
-                                        onChangeSelectAllCheckBox(item.date)
-                                    }
-                                    size="small"
-                                    sx={{ pl: 0 }}
-                                    disableRipple={true}
-                                />
+                                {haveSelection && (
+                                    <Checkbox
+                                        key={item.date}
+                                        name={item.date}
+                                        checked={!!checkedDates[item.date]}
+                                        onChange={() =>
+                                            onChangeSelectAllCheckBox(item.date)
+                                        }
+                                        size="small"
+                                        sx={{ pl: 0 }}
+                                        disableRipple={true}
+                                    />
+                                )}
                                 {item.date}
                             </DateContainer>,
                             <div key={`${item.date}-gap`} />,
@@ -804,17 +809,19 @@ export function PhotoList({
                         .flat()
                 ) : (
                     <DateContainer span={columns}>
-                        <Checkbox
-                            key={listItem.date}
-                            name={listItem.date}
-                            checked={!!checkedDates[listItem.date]}
-                            onChange={() =>
-                                onChangeSelectAllCheckBox(listItem.date)
-                            }
-                            size="small"
-                            sx={{ pl: 0 }}
-                            disableRipple={true}
-                        />
+                        {haveSelection && (
+                            <Checkbox
+                                key={listItem.date}
+                                name={listItem.date}
+                                checked={!!checkedDates[listItem.date]}
+                                onChange={() =>
+                                    onChangeSelectAllCheckBox(listItem.date)
+                                }
+                                size="small"
+                                sx={{ pl: 0 }}
+                                disableRipple={true}
+                            />
+                        )}
                         {listItem.date}
                     </DateContainer>
                 );

@@ -1,17 +1,16 @@
-## ente admin disable-2fa
+## ente admin list-users
 
-Disable 2fa for a user
+List all users
 
 ```
-ente admin disable-2fa [flags]
+ente admin list-users [flags]
 ```
 
 ### Options
 
 ```
   -a, --admin-user string   The email of the admin user. 
-  -h, --help                help for disable-2fa
-  -u, --user string         The email of the user to disable 2FA for. (required)
+  -h, --help                help for list-users
 ```
 
 ### SEE ALSO

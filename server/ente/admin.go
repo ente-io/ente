@@ -46,6 +46,11 @@ type UpdateSubscriptionRequest struct {
 	Attributes      SubscriptionAttributes `json:"attributes"`
 }
 
+type ChangeEmailRequest struct {
+	UserID int64  `json:"userID" binding:"required"`
+	Email  string `json:"email" binding:"required"`
+}
+
 type AddOnAction string
 
 const (

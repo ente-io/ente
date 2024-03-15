@@ -1,9 +1,7 @@
 package models
 
 type UserDetails struct {
-	User struct {
-		ID int64 `json:"id"`
-	} `json:"user"`
+	User  User   `json:"user"`
 	Usage int64  `json:"usage"`
 	Email string `json:"email"`
 
@@ -13,4 +11,11 @@ type UserDetails struct {
 		ProductID       string `json:"productID"`
 		PaymentProvider string `json:"paymentProvider"`
 	} `json:"subscription"`
+}
+
+type User struct {
+	ID           int64
+	Email        string `json:"email"`
+	Hash         string `json:"hash"`
+	CreationTime int64  `json:"creationTime"`
 }
