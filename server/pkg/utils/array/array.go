@@ -47,3 +47,36 @@ func Int64InList(a int64, list []int64) bool {
 	}
 	return false
 }
+
+// FindMissingElementsInSecondList identifies elements in 'sourceList' that are not present in 'targetList'.
+//
+// This function creates a set from 'targetList' for efficient lookup, then iterates through 'sourceList'
+// to identify which elements are missing in 'targetList'. This method is particularly efficient for large
+// lists, as it avoids the quadratic complexity of nested iterations by utilizing a hash set for O(1) lookups.
+//
+// Parameters:
+// - sourceList: An array of int64 elements to check against 'targetList'.
+// - targetList: An array of int64 elements used as the reference set to identify missing elements from 'sourceList'.
+//
+// Returns:
+//   - A slice of int64 representing the elements found in 'sourceList' but not in 'targetList'.
+//     If all elements of 'sourceList' are present in 'targetList', an empty slice is returned.
+//
+// Example usage:
+// missingElements := FindMissingElementsInSecondList([]int64{1, 2, 3, 4}, []int64{2, 4, 6})
+// fmt.Println(missingElements) // Output: [1, 3]
+func FindMissingElementsInSecondList(sourceList []int64, targetList []int64) []int64 {
+	targetSet := make(map[int64]struct{})
+	for _, item := range targetList {
+		targetSet[item] = struct{}{}
+	}
+
+	var missingElements []int64
+	for _, item := range sourceList {
+		if _, found := targetSet[item]; !found {
+			missingElements = append(missingElements, item)
+		}
+	}
+
+	return missingElements
+}
