@@ -1,4 +1,6 @@
-// Class for the 'landmark' sub-object
+/// Landmark coordinate data. 
+/// 
+/// WARNING: All coordinates are relative to the image size, so in the range [0, 1]!
 class Landmark {
   double x;
   double y;

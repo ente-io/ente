@@ -496,35 +496,21 @@ class FaceMlService {
           _logger.severe(
               "faceDetectionImageSize or faceDetectionImageSize is null for image with "
               "ID: ${enteFile.uploadedFileID}");
-        }
-        final bool useAlign = result.faceAlignmentImageSize != null &&
-            result.faceAlignmentImageSize!.width > 0 &&
-            result.faceAlignmentImageSize!.height > 0 &&
-            result.onlyThumbnailUsed == false;
-        if (useAlign) {
           _logger.info(
             "Using aligned image size for image with ID: ${enteFile.uploadedFileID}. This size is ${result.faceAlignmentImageSize!.width}x${result.faceAlignmentImageSize!.height} compared to size of ${enteFile.width}x${enteFile.height} in the metadata",
           );
         }
         for (int i = 0; i < result.faces.length; ++i) {
           final FaceResult faceRes = result.faces[i];
-          final FaceDetectionAbsolute absoluteDetection =
-              faceRes.detection.toAbsolute(
-            imageWidth: useAlign
-                ? result.faceAlignmentImageSize!.width.toInt()
-                : enteFile.width,
-            imageHeight: useAlign
-                ? result.faceAlignmentImageSize!.height.toInt()
-                : enteFile.height,
-          );
+          final FaceDetectionRelative relativeDetection = faceRes.detection;
           final detection = face_detection.Detection(
             box: FaceBox(
-              x: absoluteDetection.xMinBox,
-              y: absoluteDetection.yMinBox,
-              width: absoluteDetection.width,
-              height: absoluteDetection.height,
+              xMin: relativeDetection.xMinBox,
+              yMin: relativeDetection.yMinBox,
+              width: relativeDetection.width,
+              height: relativeDetection.height,
             ),
-            landmarks: absoluteDetection.allKeypoints
+            landmarks: relativeDetection.allKeypoints
                 .map(
                   (keypoint) => Landmark(
                     x: keypoint[0],

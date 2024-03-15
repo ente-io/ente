@@ -1,6 +1,9 @@
 import "package:photos/face/model/box.dart";
 import "package:photos/face/model/landmark.dart";
 
+/// Stores the face detection data, notably the bounding box and landmarks.
+///
+/// WARNING: All coordinates are relative to the image size, so in the range [0, 1]!
 class Detection {
   FaceBox box;
   List<Landmark> landmarks;
@@ -10,11 +13,13 @@ class Detection {
     required this.landmarks,
   });
 
+  bool get isEmpty => box.width == 0 && box.height == 0 && landmarks.isEmpty;
+
   // emoty box
   Detection.empty()
       : box = FaceBox(
-          x: 0,
-          y: 0,
+          xMin: 0,
+          yMin: 0,
           width: 0,
           height: 0,
         ),

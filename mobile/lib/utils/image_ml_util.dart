@@ -1232,23 +1232,25 @@ Future<List<Uint8List>> generateFaceThumbnails(
 ) async {
   final stopwatch = Stopwatch()..start();
 
-  final Image image = await decodeImageFromData(imageData);
-  final ByteData imgByteData = await getByteDataFromImage(image);
+  final Image img = await decodeImageFromData(imageData);
+  final ByteData imgByteData = await getByteDataFromImage(img);
 
   try {
     final List<Uint8List> faceThumbnails = [];
 
     for (final faceBox in faceBoxes) {
-      final int xCrop =
-          (faceBox.x - faceBox.width / 2).round().clamp(0, image.width);
-      final int yCrop =
-          (faceBox.y - faceBox.height / 2).round().clamp(0, image.height);
-      final int widthCrop =
-          min((faceBox.width * 2).round(), image.width - xCrop);
-      final int heightCrop =
-          min((faceBox.height * 2).round(), image.height - yCrop);
+      // Note that the faceBox values are relative to the image size, so we need to convert them to absolute values first
+      final double xMinAbs = faceBox.xMin * img.width;
+      final double yMinAbs = faceBox.yMin * img.height;
+      final double widthAbs = faceBox.width * img.width;
+      final double heightAbs = faceBox.height * img.height;
+
+      final int xCrop = (xMinAbs - widthAbs / 2).round().clamp(0, img.width);
+      final int yCrop = (yMinAbs - heightAbs / 2).round().clamp(0, img.height);
+      final int widthCrop = min((widthAbs * 2).round(), img.width - xCrop);
+      final int heightCrop = min((heightAbs * 2).round(), img.height - yCrop);
       final Image faceThumbnail = await cropImage(
-        image,
+        img,
         imgByteData,
         x: xCrop,
         y: yCrop,
@@ -1280,19 +1282,25 @@ Future<List<Uint8List>> generateFaceThumbnailsFromDataAndDetections(
   Uint8List imageData,
   List<FaceBox> faceBoxes,
 ) async {
-  final Image image = await decodeImageFromData(imageData);
+  final Image img = await decodeImageFromData(imageData);
   int i = 0;
 
   try {
     final List<Uint8List> faceThumbnails = [];
 
     for (final faceBox in faceBoxes) {
+      // Note that the faceBox values are relative to the image size, so we need to convert them to absolute values first
+      final double xMinAbs = faceBox.xMin * img.width;
+      final double yMinAbs = faceBox.yMin * img.height;
+      final double widthAbs = faceBox.width * img.width;
+      final double heightAbs = faceBox.height * img.height;
+
       final Image faceThumbnail = await cropImageWithCanvas(
-        image,
-        x: faceBox.x - faceBox.width / 2,
-        y: faceBox.y - faceBox.height / 2,
-        width: faceBox.width * 2,
-        height: faceBox.height * 2,
+        img,
+        x: xMinAbs - widthAbs / 2,
+        y: yMinAbs - heightAbs / 2,
+        width: widthAbs * 2,
+        height: heightAbs * 2,
       );
       final Uint8List faceThumbnailPng = await encodeImageToUint8List(
         faceThumbnail,

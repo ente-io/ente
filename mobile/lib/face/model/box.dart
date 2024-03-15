@@ -1,29 +1,30 @@
-/// Bounding box of a face. 
-/// 
-/// [`x`] and [y] are the coordinates of the top left corner of the box, so the minimim values
+/// Bounding box of a face.
+///
+/// [xMin] and [yMin] are the coordinates of the top left corner of the box, and
 /// [width] and [height] are the width and height of the box.
-/// All values are in absolute pixels relative to the original image size.
+///
+/// WARNING: All values are relative to the original image size, so in the range [0, 1].
 class FaceBox {
-  final double x;
-  final double y;
+  final double xMin;
+  final double yMin;
   final double width;
   final double height;
 
   FaceBox({
-    required this.x,
-    required this.y,
+    required this.xMin,
+    required this.yMin,
     required this.width,
     required this.height,
   });
 
   factory FaceBox.fromJson(Map<String, dynamic> json) {
     return FaceBox(
-      x: (json['x'] is int
-          ? (json['x'] as int).toDouble()
-          : json['x'] as double),
-      y: (json['y'] is int
-          ? (json['y'] as int).toDouble()
-          : json['y'] as double),
+      xMin: (json['xMin'] is int
+          ? (json['xMin'] as int).toDouble()
+          : json['xMin'] as double),
+      yMin: (json['yMin'] is int
+          ? (json['yMin'] as int).toDouble()
+          : json['yMin'] as double),
       width: (json['width'] is int
           ? (json['width'] as int).toDouble()
           : json['width'] as double),
@@ -34,8 +35,8 @@ class FaceBox {
   }
 
   Map<String, dynamic> toJson() => {
-        'x': x,
-        'y': y,
+        'xMin': xMin,
+        'yMin': yMin,
         'width': width,
         'height': height,
       };
