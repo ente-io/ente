@@ -20,7 +20,13 @@ typedef String MessageIfAbsent(String messageStr, List<dynamic> args);
 class MessageLookup extends MessageLookupByLibrary {
   String get localeName => 'pl';
 
-  static String m34(passwordStrengthValue) =>
+  static String m0(count) =>
+      "${Intl.plural(count, zero: 'Add collaborator', one: 'Add collaborator', other: 'Add collaborators')}";
+
+  static String m1(count) =>
+      "${Intl.plural(count, zero: 'Add viewer', one: 'Add viewer', other: 'Add viewers')}";
+
+  static String m36(passwordStrengthValue) =>
       "Siła hasła: ${passwordStrengthValue}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
@@ -28,8 +34,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "accountWelcomeBack":
             MessageLookupByLibrary.simpleMessage("Witaj ponownie!"),
         "activeSessions": MessageLookupByLibrary.simpleMessage("Aktywne sesje"),
+        "addCollaborators": m0,
         "addToHiddenAlbum":
             MessageLookupByLibrary.simpleMessage("Add to hidden album"),
+        "addViewers": m1,
         "askDeleteReason": MessageLookupByLibrary.simpleMessage(
             "Jaka jest przyczyna usunięcia konta?"),
         "cancel": MessageLookupByLibrary.simpleMessage("Anuluj"),
@@ -119,6 +127,9 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Pomóż nam z tą informacją"),
         "locations": MessageLookupByLibrary.simpleMessage("Locations"),
         "logInLabel": MessageLookupByLibrary.simpleMessage("Zaloguj się"),
+        "longPressAnEmailToVerifyEndToEndEncryption":
+            MessageLookupByLibrary.simpleMessage(
+                "Long press an email to verify end to end encryption."),
         "moderateStrength": MessageLookupByLibrary.simpleMessage("Umiarkowana"),
         "modifyYourQueryOrTrySearchingFor":
             MessageLookupByLibrary.simpleMessage(
@@ -134,7 +145,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "password": MessageLookupByLibrary.simpleMessage("Hasło"),
         "passwordChangedSuccessfully": MessageLookupByLibrary.simpleMessage(
             "Hasło zostało pomyślnie zmienione"),
-        "passwordStrength": m34,
+        "passwordStrength": m36,
         "passwordWarning": MessageLookupByLibrary.simpleMessage(
             "Nie przechowujemy tego hasła, więc jeśli go zapomnisz, <underline>nie będziemy w stanie odszyfrować Twoich danych</underline>"),
         "pleaseTryAgain":

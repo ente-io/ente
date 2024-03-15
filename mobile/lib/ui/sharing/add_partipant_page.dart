@@ -117,9 +117,10 @@ class _AddParticipantPage extends State<AddParticipantPage> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 filterSuggestedUsers.isNotEmpty
-                                    ? const MenuSectionDescriptionWidget(
-                                        content:
-                                            "Long press an email to verify.",
+                                    ? MenuSectionDescriptionWidget(
+                                        content: S
+                                            .of(context)
+                                            .longPressAnEmailToVerifyEndToEndEncryption,
                                       )
                                     : const SizedBox.shrink(),
                                 widget.isAddingViewer
@@ -213,8 +214,10 @@ class _AddParticipantPage extends State<AddParticipantPage> {
                     buttonType: ButtonType.primary,
                     buttonSize: ButtonSize.large,
                     labelText: widget.isAddingViewer
-                        ? S.of(context).addViewer
-                        : S.of(context).addCollaborator,
+                        ? S.of(context).addViewers(_selectedEmails.length)
+                        : S
+                            .of(context)
+                            .addCollaborators(_selectedEmails.length),
                     isDisabled: _selectedEmails.isEmpty,
                     onTap: () async {
                       final results = <bool>[];
