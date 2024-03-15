@@ -198,6 +198,62 @@ class CollectionActions {
     return false;
   }
 
+  Future<bool> doesEmailHaveAccount(
+    BuildContext context,
+    String email, {
+    bool showProgress = false,
+  }) async {
+    ProgressDialog? dialog;
+    String? publicKey;
+    if (showProgress) {
+      dialog = createProgressDialog(
+        context,
+        S.of(context).sharing,
+        isDismissible: true,
+      );
+      await dialog.show();
+    }
+    try {
+      publicKey = await UserService.instance.getPublicKey(email);
+    } catch (e) {
+      await dialog?.hide();
+      logger.severe("Failed to get public key", e);
+      await showGenericErrorDialog(context: context, error: e);
+      return false;
+    }
+    // getPublicKey can return null when no user is associated with given
+    // email id
+    if (publicKey == null || publicKey == '') {
+      // todo: neeraj replace this as per the design where a new screen
+      // is used for error. Do this change along with handling of network errors
+      await showDialogWidget(
+        context: context,
+        title: S.of(context).inviteToEnte,
+        icon: Icons.info_outline,
+        body: S.of(context).emailNoEnteAccount(email),
+        isDismissible: true,
+        buttons: [
+          ButtonWidget(
+            buttonType: ButtonType.neutral,
+            icon: Icons.adaptive.share,
+            labelText: S.of(context).sendInvite,
+            isInAlert: true,
+            onTap: () async {
+              unawaited(
+                shareText(
+                  S.of(context).shareTextRecommendUsingEnte,
+                ),
+              );
+            },
+          ),
+        ],
+      );
+      return false;
+    } else {
+      return true;
+    }
+  }
+
   // addEmailToCollection returns true if add operation was successful
   Future<bool> addEmailToCollection(
     BuildContext context,

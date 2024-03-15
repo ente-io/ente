@@ -262,54 +262,81 @@ class _AddParticipantPage extends State<AddParticipantPage> {
   }
 
   Widget _enterEmailField() {
-    return TextFormField(
-      controller: _textController,
-      focusNode: textFieldFocusNode,
-      style: getEnteTextTheme(context).body,
-      autofillHints: const [AutofillHints.email],
-      decoration: InputDecoration(
-        focusedBorder: OutlineInputBorder(
-          borderRadius: const BorderRadius.all(Radius.circular(4.0)),
-          borderSide:
-              BorderSide(color: getEnteColorScheme(context).strokeMuted),
-        ),
-        fillColor: getEnteColorScheme(context).fillFaint,
-        filled: true,
-        hintText: S.of(context).enterEmail,
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 14,
-        ),
-        border: UnderlineInputBorder(
-          borderSide: BorderSide.none,
-          borderRadius: BorderRadius.circular(4),
-        ),
-        prefixIcon: Icon(
-          Icons.email_outlined,
-          color: getEnteColorScheme(context).strokeMuted,
-        ),
-        suffixIcon: _email == ''
-            ? null
-            : IconButton(
-                onPressed: clearFocus,
-                icon: Icon(
-                  Icons.cancel,
-                  color: getEnteColorScheme(context).strokeMuted,
-                ),
+    return Row(
+      children: [
+        Expanded(
+          child: TextFormField(
+            controller: _textController,
+            focusNode: textFieldFocusNode,
+            style: getEnteTextTheme(context).body,
+            autofillHints: const [AutofillHints.email],
+            decoration: InputDecoration(
+              focusedBorder: OutlineInputBorder(
+                borderRadius: const BorderRadius.all(Radius.circular(4.0)),
+                borderSide:
+                    BorderSide(color: getEnteColorScheme(context).strokeMuted),
               ),
-      ),
-      onChanged: (value) {
-        if (selectedEmail != '') {
-          selectedEmail = '';
-        }
-        _email = value.trim();
-        _emailIsValid = EmailValidator.validate(_email);
-        setState(() {});
-      },
-      autocorrect: false,
-      keyboardType: TextInputType.emailAddress,
-      //initialValue: _email,
-      textInputAction: TextInputAction.next,
+              fillColor: getEnteColorScheme(context).fillFaint,
+              filled: true,
+              hintText: S.of(context).enterEmail,
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 14,
+              ),
+              border: UnderlineInputBorder(
+                borderSide: BorderSide.none,
+                borderRadius: BorderRadius.circular(4),
+              ),
+              prefixIcon: Icon(
+                Icons.email_outlined,
+                color: getEnteColorScheme(context).strokeMuted,
+              ),
+              suffixIcon: _email == ''
+                  ? null
+                  : IconButton(
+                      onPressed: clearFocus,
+                      icon: Icon(
+                        Icons.cancel,
+                        color: getEnteColorScheme(context).strokeMuted,
+                      ),
+                    ),
+            ),
+            onChanged: (value) {
+              if (selectedEmail != '') {
+                selectedEmail = '';
+              }
+              _email = value.trim();
+              _emailIsValid = EmailValidator.validate(_email);
+              setState(() {});
+            },
+            autocorrect: false,
+            keyboardType: TextInputType.emailAddress,
+            //initialValue: _email,
+            textInputAction: TextInputAction.next,
+          ),
+        ),
+        const SizedBox(width: 8),
+        ButtonWidget(
+          buttonType: ButtonType.secondary,
+          buttonSize: ButtonSize.small,
+          labelText: "Add",
+          isDisabled: !_emailIsValid,
+          onTap: () async {
+            if (_emailIsValid) {
+              final result = await collectionActions.doesEmailHaveAccount(
+                context,
+                _email,
+              );
+              if (result && mounted) {
+                setState(() {
+                  _suggestedUsers.insert(0, User(email: _email));
+                  _selectedEmails.add(_email);
+                });
+              }
+            }
+          },
+        ),
+      ],
     );
   }
 
