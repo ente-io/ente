@@ -32,8 +32,30 @@ There is also a third environment that gets temporarily created:
 [Electron Builder](https://www.electron.build) is used for packaging the app for
 distribution.
 
+During the build it uses
+[electron-builder-notarize](https://github.com/karaggeorge/electron-builder-notarize)
+to notarize the macOS binary.
+
 ### next-electron-server
 
 This spins up a server for serving files using a protocol handler inside our
 Electron process. This allows us to directly use the output produced by
 `next build` for loading into our renderer process.
+
+### electron-reload
+
+Reloads contents of the BrowserWindow (renderer process) when source files are
+changed.
+
+* TODO (MR): Do we need this? Isn't the next-electron-server HMR covering this?
+
+## DX
+
+See [web/docs/dependencies#DX](../../web/docs/dependencies.md#dx) for the
+general development experience related dependencies like TypeScript etc, which
+are similar to that in the web code.
+
+Some extra ones specific to the code here are:
+
+* [concurrently](https://github.com/open-cli-tools/concurrently) for spawning
+  parallel tasks when we do `yarn dev`.
