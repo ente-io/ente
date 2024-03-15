@@ -37,7 +37,7 @@ Color readPixelColor(
   if (x < 0 || x >= image.width || y < 0 || y >= image.height) {
     // throw ArgumentError('Invalid pixel coordinates.');
     log('[WARNING] `readPixelColor`: Invalid pixel coordinates, out of bounds');
-    return const Color.fromARGB(255, 208, 16, 208);
+    return const Color.fromARGB(0, 0, 0, 0);
   }
   assert(byteData.lengthInBytes == 4 * image.width * image.height);
 
@@ -1252,10 +1252,14 @@ Future<List<Uint8List>> generateFaceThumbnails(
     final List<Uint8List> faceThumbnails = [];
 
     for (final faceBox in faceBoxes) {
-      final xCrop = (faceBox.x - faceBox.width / 2).round();
-      final yCrop = (faceBox.y - faceBox.height / 2).round();
-      final widthCrop = (faceBox.width * 2).round();
-      final heightCrop = (faceBox.height * 2).round();
+      final int xCrop =
+          (faceBox.x - faceBox.width / 2).round().clamp(0, image.width);
+      final int yCrop =
+          (faceBox.y - faceBox.height / 2).round().clamp(0, image.height);
+      final int widthCrop =
+          min((faceBox.width * 2).round(), image.width - xCrop);
+      final int heightCrop =
+          min((faceBox.height * 2).round(), image.height - yCrop);
       final Uint8List faceThumbnail = await cropImage(
         image,
         imgByteData,
