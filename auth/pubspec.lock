@@ -407,10 +407,10 @@ packages:
     dependency: "direct main"
     description:
       name: file_saver
-      sha256: eb16c32d3eb5e4b6318ab9fa97138d6ea0b2d47a25c0af6540263e46979e1c57
+      sha256: bdebc720e17b3e01aba59da69b6d47020a7e5ba7d5c75bd9194f9618d5f16ef4
       url: "https://pub.dev"
     source: hosted
-    version: "0.2.11"
+    version: "0.2.12"
   fixnum:
     dependency: "direct main"
     description:
@@ -627,10 +627,10 @@ packages:
     dependency: "direct main"
     description:
       name: flutter_slidable
-      sha256: "19ed4813003a6ff4e9c6bcce37e792a2a358919d7603b2b31ff200229191e44c"
+      sha256: "673403d2eeef1f9e8483bd6d8d92aae73b1d8bd71f382bc3930f699c731bc27c"
       url: "https://pub.dev"
     source: hosted
-    version: "3.0.1"
+    version: "3.1.0"
   flutter_speed_dial:
     dependency: "direct main"
     description:
@@ -941,10 +941,10 @@ packages:
     dependency: "direct main"
     description:
       name: modal_bottom_sheet
-      sha256: "3bba63c62d35c931bce7f8ae23a47f9a05836d8cb3c11122ada64e0b2f3d718f"
+      sha256: eac66ef8cb0461bf069a38c5eb0fa728cee525a531a8304bd3f7b2185407c67e
       url: "https://pub.dev"
     source: hosted
-    version: "3.0.0-pre"
+    version: "3.0.0"
   move_to_background:
     dependency: "direct main"
     description:
@@ -1205,18 +1205,18 @@ packages:
     dependency: "direct main"
     description:
       name: sentry
-      sha256: a524a87d096799b775530176c8c082afe7aa1f10cc31ba078fecdd74e9afc923
+      sha256: a460aa48568d47140dd0557410b624d344ffb8c05555107ac65035c1097cf1ad
       url: "https://pub.dev"
     source: hosted
-    version: "7.17.0"
+    version: "7.18.0"
   sentry_flutter:
     dependency: "direct main"
     description:
       name: sentry_flutter
-      sha256: e0f8367f8f7c74dba9f7521f71700bce6c6ee065cf342f065d4fce411b84fc7b
+      sha256: "3d0d1d4e0e407d276ae8128d123263ccbc37e988bae906765efd6f37d544f4c6"
       url: "https://pub.dev"
     source: hosted
-    version: "7.17.0"
+    version: "7.18.0"
   share_plus:
     dependency: "direct main"
     description:
@@ -1322,18 +1322,18 @@ packages:
     dependency: transitive
     description:
       name: sodium
-      sha256: ad436bdd889ec5b0a86e1a0b49a1c714b94c87c08c759defab10717239f39879
+      sha256: d9830a388e37c82891888e64cfd4c6764fa3ac716bed80ac6eab89ee42c3cd76
       url: "https://pub.dev"
     source: hosted
-    version: "2.3.0+2"
+    version: "2.3.1+1"
   sodium_libs:
     dependency: transitive
     description:
       name: sodium_libs
-      sha256: a3399776deac73767bff9dd3da041b9553dce2da432912a6134b8441995df285
+      sha256: "05b9e2de0f850a5315f596379f0c617aa1f938ed5e099126f8919c55499fed46"
       url: "https://pub.dev"
     source: hosted
-    version: "2.2.0+11"
+    version: "2.2.1"
   source_gen:
     dependency: transitive
     description:

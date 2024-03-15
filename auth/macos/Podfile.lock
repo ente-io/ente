@@ -29,13 +29,13 @@ PODS:
   - ReachabilitySwift (5.0.0)
   - screen_retriever (0.0.1):
     - FlutterMacOS
-  - Sentry/HybridSDK (8.19.0):
-    - SentryPrivate (= 8.19.0)
+  - Sentry/HybridSDK (8.21.0):
+    - SentryPrivate (= 8.21.0)
   - sentry_flutter (0.0.1):
     - Flutter
     - FlutterMacOS
-    - Sentry/HybridSDK (= 8.19.0)
-  - SentryPrivate (8.19.0)
+    - Sentry/HybridSDK (= 8.21.0)
+  - SentryPrivate (8.21.0)
   - share_plus (0.0.1):
     - FlutterMacOS
   - shared_preferences_foundation (0.0.1):
@@ -147,7 +147,7 @@ EXTERNAL SOURCES:
     :path: Flutter/ephemeral/.symlinks/plugins/window_manager/macos
 
 SPEC CHECKSUMS:
-  app_links: 4481ed4d71f384b0c3ae5016f4633aa73d32ff67
+  app_links: 10e0a0ab602ffaf34d142cd4862f29d34b303b2a
   connectivity_plus: 18d3c32514c886e046de60e9c13895109866c747
   desktop_webview_window: d4365e71bcd4e1aa0c14cf0377aa24db0c16a7e2
   device_info_plus: 5401765fde0b8d062a2f8eb65510fb17e77cf07f
@@ -162,9 +162,9 @@ SPEC CHECKSUMS:
   path_provider_foundation: 3784922295ac71e43754bd15e0653ccfd36a147c
   ReachabilitySwift: 985039c6f7b23a1da463388634119492ff86c825
   screen_retriever: 59634572a57080243dd1bf715e55b6c54f241a38
-  Sentry: 1ebcaef678a27c8ac515f974cb5425dd1bbdec2f
-  sentry_flutter: ecdfbedee55337205561cfa782ee02d31ec83e1f
-  SentryPrivate: 765c9b4ebe9ac1a5fcdc067c5a1cfbf3f10e1677
+  Sentry: ebc12276bd17613a114ab359074096b6b3725203
+  sentry_flutter: dff1df05dc39c83d04f9330b36360fc374574c5e
+  SentryPrivate: d651efb234cf385ec9a1cdd3eff94b5e78a0e0fe
   share_plus: 76dd39142738f7a68dd57b05093b5e8193f220f7
   shared_preferences_foundation: b4c3b4cddf1c21f02770737f147a3f5da9d39695
   smart_auth: b38e3ab4bfe089eacb1e233aca1a2340f96c28e9
