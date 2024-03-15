@@ -936,7 +936,7 @@ packages:
       path: "."
       ref: main
       resolved-ref: "49158ce4a517e87817dc84c6b96c00639281229a"
-      url: "https://github.com/prateekmedia/FlutterHomeWidget"
+      url: "https://github.com/ente-io/FlutterHomeWidget"
     source: git
     version: "0.4.1"
   html:
