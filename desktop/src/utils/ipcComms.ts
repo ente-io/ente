@@ -27,7 +27,6 @@ import {
     generateImageThumbnail,
 } from "../services/imageProcessor";
 import { logErrorSentry } from "../services/sentry";
-import { getPlatform } from "./common/platform";
 import { createWindow } from "./createWindow";
 import { generateTempFilePath } from "./temp";
 
@@ -175,8 +174,5 @@ export default function setupIpcComs(
     });
     ipcMain.handle("compute-text-embedding", (_, model, text) => {
         return computeTextEmbedding(model, text);
-    });
-    ipcMain.handle("get-platform", () => {
-        return getPlatform();
     });
 }

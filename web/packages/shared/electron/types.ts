@@ -104,5 +104,4 @@ export interface ElectronAPIsType {
         imageData: Uint8Array,
     ) => Promise<Float32Array>;
     computeTextEmbedding: (model: Model, text: string) => Promise<Float32Array>;
-    getPlatform: () => Promise<"mac" | "windows" | "linux">;
 }

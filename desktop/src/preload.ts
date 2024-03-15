@@ -32,7 +32,6 @@ import { deleteDiskCache, openDiskCache } from "./api/cache";
 import { computeImageEmbedding, computeTextEmbedding } from "./api/clip";
 import {
     getAppVersion,
-    getPlatform,
     logToDisk,
     openDirectory,
     openLogDirectory,
@@ -138,5 +137,4 @@ contextBridge.exposeInMainWorld("ElectronAPIs", {
     deleteFile,
     computeImageEmbedding,
     computeTextEmbedding,
-    getPlatform,
 });
