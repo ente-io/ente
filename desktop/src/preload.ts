@@ -27,9 +27,11 @@
  * just keep the entire preload setup in this single file.
  */
 
-import { contextBridge } from "electron";
+import { contextBridge, ipcRenderer } from "electron";
+import { existsSync } from "fs";
+import * as fs from "promise-fs";
+import { Readable } from "stream";
 import { deleteDiskCache, openDiskCache } from "./api/cache";
-import { computeImageEmbedding, computeTextEmbedding } from "./api/clip";
 import {
     getAppVersion,
     logToDisk,
@@ -83,6 +85,157 @@ import {
     updateWatchMappingSyncedFiles,
 } from "./api/watch";
 import { setupLogging } from "./utils/logging";
+
+/* preload: duplicated writeStream */
+/* Some of the code below has been duplicated to make this file self contained.
+   Enhancement: consider alternatives */
+
+export const convertBrowserStreamToNode = (
+    fileStream: ReadableStream<Uint8Array>,
+) => {
+    const reader = fileStream.getReader();
+    const rs = new Readable();
+
+    rs._read = async () => {
+        try {
+            const result = await reader.read();
+
+            if (!result.done) {
+                rs.push(Buffer.from(result.value));
+            } else {
+                rs.push(null);
+                return;
+            }
+        } catch (e) {
+            rs.emit("error", e);
+        }
+    };
+
+    return rs;
+};
+
+export async function writeNodeStream(
+    filePath: string,
+    fileStream: NodeJS.ReadableStream,
+) {
+    const writeable = fs.createWriteStream(filePath);
+
+    fileStream.on("error", (error) => {
+        writeable.destroy(error); // Close the writable stream with an error
+    });
+
+    fileStream.pipe(writeable);
+
+    await new Promise((resolve, reject) => {
+        writeable.on("finish", resolve);
+        writeable.on("error", async (e) => {
+            if (existsSync(filePath)) {
+                await fs.unlink(filePath);
+            }
+            reject(e);
+        });
+    });
+}
+
+export async function writeStream(
+    filePath: string,
+    fileStream: ReadableStream<Uint8Array>,
+) {
+    const readable = convertBrowserStreamToNode(fileStream);
+    await writeNodeStream(filePath, readable);
+}
+
+// -
+
+/* preload: duplicated Model */
+export enum Model {
+    GGML_CLIP = "ggml-clip",
+    ONNX_CLIP = "onnx-clip",
+}
+
+const computeImageEmbedding = async (
+    model: Model,
+    imageData: Uint8Array,
+): Promise<Float32Array> => {
+    let tempInputFilePath = null;
+    try {
+        tempInputFilePath = await ipcRenderer.invoke("get-temp-file-path", "");
+        const imageStream = new Response(imageData.buffer).body;
+        await writeStream(tempInputFilePath, imageStream);
+        const embedding = await ipcRenderer.invoke(
+            "compute-image-embedding",
+            model,
+            tempInputFilePath,
+        );
+        return embedding;
+    } catch (err) {
+        if (isExecError(err)) {
+            const parsedExecError = parseExecError(err);
+            throw Error(parsedExecError);
+        } else {
+            throw err;
+        }
+    } finally {
+        if (tempInputFilePath) {
+            await ipcRenderer.invoke("remove-temp-file", tempInputFilePath);
+        }
+    }
+};
+
+export async function computeTextEmbedding(
+    model: Model,
+    text: string,
+): Promise<Float32Array> {
+    try {
+        const embedding = await ipcRenderer.invoke(
+            "compute-text-embedding",
+            model,
+            text,
+        );
+        return embedding;
+    } catch (err) {
+        if (isExecError(err)) {
+            const parsedExecError = parseExecError(err);
+            throw Error(parsedExecError);
+        } else {
+            throw err;
+        }
+    }
+}
+
+// -
+
+/* preload: duplicated CustomErrors */
+const CustomErrorsP = {
+    WINDOWS_NATIVE_IMAGE_PROCESSING_NOT_SUPPORTED:
+        "Windows native image processing is not supported",
+    INVALID_OS: (os: string) => `Invalid OS - ${os}`,
+    WAIT_TIME_EXCEEDED: "Wait time exceeded",
+    UNSUPPORTED_PLATFORM: (platform: string, arch: string) =>
+        `Unsupported platform - ${platform} ${arch}`,
+    MODEL_DOWNLOAD_PENDING:
+        "Model download pending, skipping clip search request",
+    INVALID_FILE_PATH: "Invalid file path",
+    INVALID_CLIP_MODEL: (model: string) => `Invalid Clip model - ${model}`,
+};
+
+const isExecError = (err: any) => {
+    return err.message.includes("Command failed:");
+};
+
+const parseExecError = (err: any) => {
+    const errMessage = err.message;
+    if (errMessage.includes("Bad CPU type in executable")) {
+        return CustomErrorsP.UNSUPPORTED_PLATFORM(
+            process.platform,
+            process.arch,
+        );
+    } else {
+        return errMessage;
+    }
+};
+
+// -
 
 setupLogging();
 
