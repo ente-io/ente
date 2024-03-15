@@ -30,7 +30,7 @@ class AddParticipantPage extends StatefulWidget {
 }
 
 class _AddParticipantPage extends State<AddParticipantPage> {
-  final _selectedEmails = <String>[];
+  final _selectedEmails = <String>{};
   String selectedEmail = '';
   String _email = '';
   bool isEmailListEmpty = false;
@@ -332,11 +332,14 @@ class _AddParticipantPage extends State<AddParticipantPage> {
                   for (var suggestedUser in _suggestedUsers) {
                     if (suggestedUser.email == _email) {
                       _selectedEmails.add(suggestedUser.email);
+                      clearFocus();
+
                       return;
                     }
                   }
                   _suggestedUsers.insert(0, User(email: _email));
                   _selectedEmails.add(_email);
+                  clearFocus();
                 });
               }
             }
