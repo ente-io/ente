@@ -1118,5 +1118,8 @@
   "editsToLocationWillOnlyBeSeenWithinEnte": "Edits to location will only be seen within Ente",
   "joinDiscord": "Join Discord",
   "locations": "Locations",
-  "descriptions": "Descriptions"
+  "descriptions": "Descriptions",
+  "addViewers": "{count, plural, zero {Add viewer} one {Add viewer} other {Add viewers}}",
+  "addCollaborators": "{count, plural, zero {Add collaborator} one {Add collaborator} other {Add collaborators}}",
+  "longPressAnEmailToVerifyEndToEndEncryption": "Long press an email to verify end to end encryption."
 }
