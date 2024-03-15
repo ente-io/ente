@@ -31,9 +31,7 @@ class AddParticipantPage extends StatefulWidget {
 
 class _AddParticipantPage extends State<AddParticipantPage> {
   final _selectedEmails = <String>{};
-  String selectedEmail = '';
-  String _email = '';
-  bool isEmailListEmpty = false;
+  String _newEmail = '';
   bool _emailIsValid = false;
   bool isKeypadOpen = false;
   late CollectionActions collectionActions;
@@ -69,7 +67,6 @@ class _AddParticipantPage extends State<AddParticipantPage> {
     isKeypadOpen = MediaQuery.viewInsetsOf(context).bottom > 100;
     final enteTextTheme = getEnteTextTheme(context);
     final enteColorScheme = getEnteColorScheme(context);
-    isEmailListEmpty = _suggestedUsers.isEmpty;
     return Scaffold(
       resizeToAvoidBottomInset: isKeypadOpen,
       appBar: AppBar(
@@ -258,7 +255,7 @@ class _AddParticipantPage extends State<AddParticipantPage> {
 
   void clearFocus() {
     _textController.clear();
-    _email = _textController.text;
+    _newEmail = _textController.text;
     _emailIsValid = false;
     textFieldFocusNode.unfocus();
     setState(() => {});
@@ -294,7 +291,7 @@ class _AddParticipantPage extends State<AddParticipantPage> {
                 Icons.email_outlined,
                 color: getEnteColorScheme(context).strokeMuted,
               ),
-              suffixIcon: _email == ''
+              suffixIcon: _newEmail == ''
                   ? null
                   : IconButton(
                       onPressed: clearFocus,
@@ -305,11 +302,8 @@ class _AddParticipantPage extends State<AddParticipantPage> {
                     ),
             ),
             onChanged: (value) {
-              if (selectedEmail != '') {
-                selectedEmail = '';
-              }
-              _email = value.trim();
-              _emailIsValid = EmailValidator.validate(_email);
+              _newEmail = value.trim();
+              _emailIsValid = EmailValidator.validate(_newEmail);
               setState(() {});
             },
             autocorrect: false,
@@ -328,20 +322,20 @@ class _AddParticipantPage extends State<AddParticipantPage> {
             if (_emailIsValid) {
               final result = await collectionActions.doesEmailHaveAccount(
                 context,
-                _email,
+                _newEmail,
               );
               if (result && mounted) {
                 setState(() {
                   for (var suggestedUser in _suggestedUsers) {
-                    if (suggestedUser.email == _email) {
+                    if (suggestedUser.email == _newEmail) {
                       _selectedEmails.add(suggestedUser.email);
                       clearFocus();
 
                       return;
                     }
                   }
-                  _suggestedUsers.insert(0, User(email: _email));
-                  _selectedEmails.add(_email);
+                  _suggestedUsers.insert(0, User(email: _newEmail));
+                  _selectedEmails.add(_newEmail);
                   clearFocus();
                 });
               }
