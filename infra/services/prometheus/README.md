@@ -27,6 +27,6 @@ automatically start on boot going forward), and start them.
 
 ```sh
 sudo systemctl daemon-reload
-sudo systemctl enable node-exporter prometheus
-sudo systemctl start node-exporter prometheus
+sudo systemctl enable --now node-exporter
+sudo systemctl enable --now prometheus
 ```
