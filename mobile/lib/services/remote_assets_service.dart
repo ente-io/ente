@@ -26,6 +26,11 @@ class RemoteAssetsService {
     }
   }
 
+  Future<bool> hasAsset(String remotePath) async {
+    final path = await _getLocalPath(remotePath);
+    return File(path).exists();
+  }
+
   Future<String> _getLocalPath(String remotePath) async {
     return (await getApplicationSupportDirectory()).path +
         "/assets/" +
