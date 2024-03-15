@@ -37,6 +37,7 @@ class _AddParticipantPage extends State<AddParticipantPage> {
   bool _emailIsValid = false;
   bool isKeypadOpen = false;
   late CollectionActions collectionActions;
+  late List<User> _suggestedUsers;
 
   // Focus nodes are necessary
   final textFieldFocusNode = FocusNode();
@@ -46,6 +47,7 @@ class _AddParticipantPage extends State<AddParticipantPage> {
   void initState() {
     super.initState();
     collectionActions = CollectionActions(CollectionsService.instance);
+    _suggestedUsers = _getSuggestedUser();
   }
 
   @override
@@ -60,8 +62,7 @@ class _AddParticipantPage extends State<AddParticipantPage> {
     isKeypadOpen = MediaQuery.viewInsetsOf(context).bottom > 100;
     final enteTextTheme = getEnteTextTheme(context);
     final enteColorScheme = getEnteColorScheme(context);
-    final List<User> suggestedUsers = _getSuggestedUser();
-    isEmailListEmpty = suggestedUsers.isEmpty;
+    isEmailListEmpty = _suggestedUsers.isEmpty;
     return Scaffold(
       resizeToAvoidBottomInset: isKeypadOpen,
       appBar: AppBar(
@@ -105,7 +106,7 @@ class _AddParticipantPage extends State<AddParticipantPage> {
                           child: ListView.builder(
                             physics: const BouncingScrollPhysics(),
                             itemBuilder: (context, index) {
-                              if (index >= suggestedUsers.length) {
+                              if (index >= _suggestedUsers.length) {
                                 return Padding(
                                   padding: const EdgeInsets.symmetric(
                                     vertical: 8.0,
@@ -117,7 +118,7 @@ class _AddParticipantPage extends State<AddParticipantPage> {
                                   ),
                                 );
                               }
-                              final currentUser = suggestedUsers[index];
+                              final currentUser = _suggestedUsers[index];
                               return Column(
                                 children: [
                                   MenuItemWidget(
@@ -152,9 +153,9 @@ class _AddParticipantPage extends State<AddParticipantPage> {
                                     },
                                     isTopBorderRadiusRemoved: index > 0,
                                     isBottomBorderRadiusRemoved:
-                                        index < (suggestedUsers.length - 1),
+                                        index < (_suggestedUsers.length - 1),
                                   ),
-                                  (index == (suggestedUsers.length - 1))
+                                  (index == (_suggestedUsers.length - 1))
                                       ? const SizedBox.shrink()
                                       : DividerWidget(
                                           dividerType: DividerType.menu,
@@ -164,7 +165,7 @@ class _AddParticipantPage extends State<AddParticipantPage> {
                                 ],
                               );
                             },
-                            itemCount: suggestedUsers.length +
+                            itemCount: _suggestedUsers.length +
                                 (widget.isAddingViewer ? 0 : 1),
                           ),
                         ),
