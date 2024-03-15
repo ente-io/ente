@@ -4,7 +4,6 @@ import 'package:photos/face/db_fields.dart';
 import "package:photos/face/model/detection.dart";
 import "package:photos/face/model/face.dart";
 import "package:photos/face/model/person.dart";
-import 'package:photos/face/model/person_face.dart';
 import "package:photos/generated/protos/ente/common/vector.pb.dart";
 
 int boolToSQLInt(bool? value, {bool defaultValue = false}) {
