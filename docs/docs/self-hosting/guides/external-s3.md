@@ -17,6 +17,14 @@ have the keys and secrets for the S3 bucket. The plan is as follows:
 4. Create an account and increase storage quota
 5. Fix potential CORS issue with your bucket
 
+> [!NOTE]
+>
+> This is a community contributed guide, and some of these steps might be out of
+> sync with the upstream documentation. If something is not working correctly,
+> please also see the latest
+> [READMEs](https://github.com/ente-io/ente/blob/main/server/README.md) in the
+> repository and/or other guides in [self-hosting](/self-hosting/).
+
 ## 1. Create a `compose.yaml` file
 
 After cloning the main repository with
@@ -25,6 +33,7 @@ After cloning the main repository with
 git clone https://github.com/ente-io/ente.git
 # Or git clone git@github.com:ente-io/ente.git
 cd ente
+git submodule update --init --recursive
 ```
 
 Create a `compose.yaml` file at the root of the project with the following
