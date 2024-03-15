@@ -1084,7 +1084,7 @@ Future<(Float32List, List<AlignmentResult>, List<bool>, List<double>, Size)>
   int height = 112,
 }) async {
   final stopwatch = Stopwatch()..start();
-  
+
   final Size originalSize =
       Size(image.width.toDouble(), image.height.toDouble());
 

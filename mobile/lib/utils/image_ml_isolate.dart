@@ -305,6 +305,7 @@ class ImageMlIsolate {
   /// Returns a [Num3DInputMatrix] image usable for ML inference with BlazeFace.
   ///
   /// Uses [preprocessImageToMatrix] inside the isolate.
+  @Deprecated("No longer using BlazeFace")
   Future<(Num3DInputMatrix, Size, Size)> preprocessImageBlazeFace(
     Uint8List imageData, {
     required bool normalize,
@@ -339,6 +340,9 @@ class ImageMlIsolate {
   }
 
   /// Uses [preprocessImageToFloat32ChannelsFirst] inside the isolate.
+  @Deprecated(
+    "Old method, not needed since we now run the whole ML pipeline for faces in a single isolate",
+  )
   Future<(Float32List, Size, Size)> preprocessImageYoloOnnx(
     Uint8List imageData, {
     required bool normalize,
@@ -379,6 +383,9 @@ class ImageMlIsolate {
   /// Uses [preprocessFaceAlignToUint8List] inside the isolate.
   ///
   /// WARNING: For preprocessing for MobileFaceNet, use [preprocessMobileFaceNet] instead!
+  @Deprecated(
+    "Old method, not needed since we now run the whole ML pipeline for faces in a single isolate",
+  )
   Future<List<Uint8List>> preprocessFaceAlign(
     Uint8List imageData,
     List<FaceDetectionAbsolute> faces,
@@ -439,6 +446,9 @@ class ImageMlIsolate {
   }
 
   /// Uses [preprocessToMobileFaceNetFloat32List] inside the isolate.
+  @Deprecated(
+    "Old method, not needed since we now run the whole ML pipeline for faces in a single isolate",
+  )
   Future<(Float32List, List<AlignmentResult>, List<bool>, List<double>, Size)>
       preprocessMobileFaceNetOnnx(
     String imagePath,
