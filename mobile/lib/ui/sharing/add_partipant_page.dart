@@ -329,6 +329,12 @@ class _AddParticipantPage extends State<AddParticipantPage> {
               );
               if (result && mounted) {
                 setState(() {
+                  for (var suggestedUser in _suggestedUsers) {
+                    if (suggestedUser.email == _email) {
+                      _selectedEmails.add(suggestedUser.email);
+                      return;
+                    }
+                  }
                   _suggestedUsers.insert(0, User(email: _email));
                   _selectedEmails.add(_email);
                 });
