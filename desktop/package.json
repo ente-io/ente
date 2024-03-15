@@ -124,8 +124,5 @@
             "out"
         ]
     },
-    "productName": "ente",
-    "standard": {
-        "parser": "babel-eslint"
-    }
+    "productName": "ente"
 }
