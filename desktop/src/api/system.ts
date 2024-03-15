@@ -1,9 +1,6 @@
 import { ipcRenderer } from "electron";
 import { AppUpdateInfo } from "../types";
 
-export const sendNotification = (content: string) => {
-    ipcRenderer.send("send-notification", content);
-};
 export const reloadWindow = () => {
     ipcRenderer.send("reload-window");
 };

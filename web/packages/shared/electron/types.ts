@@ -21,7 +21,6 @@ export interface ElectronAPIsType {
     ) => Promise<void>;
     saveFileToDisk: (path: string, file: any) => Promise<void>;
     selectDirectory: () => Promise<string>;
-    sendNotification: (content: string) => void;
     readTextFile: (path: string) => Promise<string>;
     showUploadFilesDialog: () => Promise<ElectronFile[]>;
     showUploadDirsDialog: () => Promise<ElectronFile[]>;

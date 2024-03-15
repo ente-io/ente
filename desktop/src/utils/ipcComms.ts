@@ -4,7 +4,6 @@ import {
     BrowserWindow,
     dialog,
     ipcMain,
-    Notification,
     safeStorage,
     shell,
     Tray,
@@ -44,13 +43,6 @@ export default function setupIpcComs(
         }
     });
 
-    ipcMain.on("send-notification", (_, args) => {
-        const notification = {
-            title: "ente",
-            body: args,
-        };
-        new Notification(notification).show();
-    });
     ipcMain.on("reload-window", async () => {
         const secondWindow = await createWindow();
         mainWindow.destroy();
