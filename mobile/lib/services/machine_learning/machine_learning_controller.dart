@@ -17,8 +17,7 @@ class MachineLearningController {
 
   static const kMaximumTemperature = 42; // 42 degree celsius
   static const kMinimumBatteryLevel = 20; // 20%
-  static const kInitialInteractionTimeout = Duration(seconds: 10);
-  static const kDefaultInteractionTimeout = Duration(seconds: 5);
+  static const kDefaultInteractionTimeout = Duration(seconds: 15);
   static const kUnhealthyStates = ["over_heat", "over_voltage", "dead"];
 
   bool _isDeviceHealthy = true;
@@ -28,7 +27,7 @@ class MachineLearningController {
 
   void init() {
     if (Platform.isAndroid) {
-      _startInteractionTimer(timeout: kInitialInteractionTimeout);
+      _startInteractionTimer();
       BatteryInfoPlugin()
           .androidBatteryInfoStream
           .listen((AndroidBatteryInfo? batteryInfo) {
