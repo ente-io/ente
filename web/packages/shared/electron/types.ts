@@ -105,6 +105,4 @@ export interface ElectronAPIsType {
     ) => Promise<Float32Array>;
     computeTextEmbedding: (model: Model, text: string) => Promise<Float32Array>;
     getPlatform: () => Promise<"mac" | "windows" | "linux">;
-    setCustomCacheDirectory: (directory: string) => Promise<void>;
-    getCacheDirectory: () => Promise<string>;
 }

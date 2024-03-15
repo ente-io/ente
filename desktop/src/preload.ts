@@ -28,12 +28,7 @@
  */
 
 import { contextBridge } from "electron";
-import {
-    deleteDiskCache,
-    getCacheDirectory,
-    openDiskCache,
-    setCustomCacheDirectory,
-} from "./api/cache";
+import { deleteDiskCache, openDiskCache } from "./api/cache";
 import { computeImageEmbedding, computeTextEmbedding } from "./api/clip";
 import {
     getAppVersion,
@@ -144,6 +139,4 @@ contextBridge.exposeInMainWorld("ElectronAPIs", {
     computeImageEmbedding,
     computeTextEmbedding,
     getPlatform,
-    getCacheDirectory,
-    setCustomCacheDirectory,
 });

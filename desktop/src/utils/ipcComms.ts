@@ -27,10 +27,6 @@ import {
     generateImageThumbnail,
 } from "../services/imageProcessor";
 import { logErrorSentry } from "../services/sentry";
-import {
-    getCustomCacheDirectory,
-    setCustomCacheDirectory,
-} from "../services/userPreference";
 import { getPlatform } from "./common/platform";
 import { createWindow } from "./createWindow";
 import { generateTempFilePath } from "./temp";
@@ -182,13 +178,5 @@ export default function setupIpcComs(
     });
     ipcMain.handle("get-platform", () => {
         return getPlatform();
-    });
-
-    ipcMain.handle("set-custom-cache-directory", (_, directory: string) => {
-        setCustomCacheDirectory(directory);
-    });
-
-    ipcMain.handle("get-custom-cache-directory", async () => {
-        return getCustomCacheDirectory();
     });
 }
