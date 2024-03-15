@@ -39,11 +39,9 @@
         "promise-fs": "^2.1.1"
     },
     "devDependencies": {
-        "@tsconfig/node18": "^18.2.2",
         "@types/auto-launch": "^5.0.2",
         "@types/ffmpeg-static": "^3.0.1",
         "@types/get-folder-size": "^2.0.0",
-        "@types/node": "18.15.0",
         "@types/node-fetch": "^2.6.2",
         "@types/promise-fs": "^2.1.1",
         "@typescript-eslint/eslint-plugin": "^5.28.0",
