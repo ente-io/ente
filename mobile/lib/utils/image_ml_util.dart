@@ -15,7 +15,6 @@ import "dart:ui";
 //         ImageConfiguration;
 // import 'package:flutter/material.dart' as material show Image;
 import 'package:flutter/painting.dart' as paint show decodeImageFromList;
-import 'package:image/image.dart' as img_lib;
 import 'package:ml_linalg/linalg.dart';
 import "package:photos/face/model/box.dart";
 import 'package:photos/models/ml/ml_typedefs.dart';
@@ -493,7 +492,7 @@ Future<Image> resizeAndCenterCropImage(
 }
 
 /// Crops an [image] based on the specified [x], [y], [width] and [height].
-Future<Uint8List> cropImage(
+Future<Image> cropImage(
   Image image,
   ByteData imgByteData, {
   required int x,
@@ -501,37 +500,26 @@ Future<Uint8List> cropImage(
   required int width,
   required int height,
 }) async {
-  // final newByteData = ByteData(width * height * 4);
-  // for (var h = y; h < y + height; h++) {
-  //   for (var w = x; w < x + width; w++) {
-  //     final pixel = readPixelColor(image, imgByteData, w, y);
-  //     setPixelColor(
-  //       Size(width.toDouble(), height.toDouble()),
-  //       newByteData,
-  //       w,
-  //       h,
-  //       pixel,
-  //     );
-  //   }
-  // }
-  // final newImage =
-  //     decodeImageFromRgbaBytes(newByteData.buffer.asUint8List(), width, height);
-
-  final newImage = img_lib.Image(width: width, height: height);
-
+  final newByteData = ByteData(width * height * 4);
   for (var h = y; h < y + height; h++) {
     for (var w = x; w < x + width; w++) {
       final pixel = readPixelColor(image, imgByteData, w, h);
-      newImage.setPixel(
+      setPixelColor(
+        Size(width.toDouble(), height.toDouble()),
+        newByteData,
         w - x,
         h - y,
-        img_lib.ColorRgb8(pixel.red, pixel.green, pixel.blue),
+        pixel,
       );
     }
   }
-  final newImageDataPng = img_lib.encodePng(newImage);
+  final newImage = await decodeImageFromRgbaBytes(
+    newByteData.buffer.asUint8List(),
+    width,
+    height,
+  );
 
-  return newImageDataPng;
+  return newImage;
 }
 
 /// Crops an [image] based on the specified [x], [y], [width] and [height].
@@ -1247,7 +1235,6 @@ Future<List<Uint8List>> generateFaceThumbnails(
   final Image image = await decodeImageFromData(imageData);
   final ByteData imgByteData = await getByteDataFromImage(image);
 
-  // int i = 0;
   try {
     final List<Uint8List> faceThumbnails = [];
 
@@ -1260,7 +1247,7 @@ Future<List<Uint8List>> generateFaceThumbnails(
           min((faceBox.width * 2).round(), image.width - xCrop);
       final int heightCrop =
           min((faceBox.height * 2).round(), image.height - yCrop);
-      final Uint8List faceThumbnail = await cropImage(
+      final Image faceThumbnail = await cropImage(
         image,
         imgByteData,
         x: xCrop,
@@ -1268,12 +1255,11 @@ Future<List<Uint8List>> generateFaceThumbnails(
         width: widthCrop,
         height: heightCrop,
       );
-      // final Uint8List faceThumbnailPng = await encodeImageToUint8List(
-      //   faceThumbnail,
-      //   format: ImageByteFormat.png,
-      // );
-      faceThumbnails.add(faceThumbnail);
-      // i++;
+      final Uint8List faceThumbnailPng = await encodeImageToUint8List(
+        faceThumbnail,
+        format: ImageByteFormat.png,
+      );
+      faceThumbnails.add(faceThumbnailPng);
     }
     stopwatch.stop();
     log('Face thumbnail generation took: ${stopwatch.elapsedMilliseconds} ms');
@@ -1281,7 +1267,6 @@ Future<List<Uint8List>> generateFaceThumbnails(
     return faceThumbnails;
   } catch (e, s) {
     log('[ImageMlUtils] Error generating face thumbnails: $e, \n stackTrace: $s');
-    // log('[ImageMlUtils] cropImage problematic input argument: ${faceBoxes[i]}');
     rethrow;
   }
 }
