@@ -9,6 +9,7 @@ import {
     Tray,
 } from "electron";
 import path from "path";
+import { clearElectronStore } from "../api/electronStore";
 import {
     getAppVersion,
     muteUpdateNotification,
@@ -88,6 +89,10 @@ export default function setupIpcComs(
 
     ipcMain.handle("safeStorage-decrypt", (_, message) => {
         return safeStorage.decryptString(message);
+    });
+
+    ipcMain.on("clear-electron-store", () => {
+        clearElectronStore();
     });
 
     ipcMain.handle("get-path", (_, message) => {

@@ -34,7 +34,6 @@ import * as fs from "promise-fs";
 import { Readable } from "stream";
 import { deleteDiskCache, openDiskCache } from "./api/cache";
 import { logToDisk, openLogDirectory } from "./api/common";
-import { clearElectronStore } from "./api/electronStore";
 import {
     checkExistsAndCreateDir,
     exists,
@@ -328,6 +327,12 @@ const openDirectory = async (dirPath: string): Promise<void> => {
         logError(e, "error while opening directory");
         throw e;
     }
+};
+
+// -
+
+const clearElectronStore = () => {
+    ipcRenderer.send("clear-electron-store");
 };
 
 // -
