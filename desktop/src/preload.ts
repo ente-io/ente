@@ -33,13 +33,7 @@ import path from "path";
 import * as fs from "promise-fs";
 import { Readable } from "stream";
 import { deleteDiskCache, openDiskCache } from "./api/cache";
-import {
-    getAppVersion,
-    logToDisk,
-    openDirectory,
-    openLogDirectory,
-    selectDirectory,
-} from "./api/common";
+import { logToDisk, openLogDirectory } from "./api/common";
 import { clearElectronStore } from "./api/electronStore";
 import {
     checkExistsAndCreateDir,
@@ -52,11 +46,8 @@ import { getDirFiles } from "./api/fs";
 import { convertToJPEG, generateImageThumbnail } from "./api/imageProcessor";
 import { getEncryptionKey, setEncryptionKey } from "./api/safeStorage";
 import {
-    muteUpdateNotification,
     registerForegroundEventListener,
     registerUpdateEventListener,
-    skipAppUpdate,
-    updateAndRestart,
 } from "./api/system";
 import {
     getElectronFilesFromGoogleZip,
@@ -309,6 +300,48 @@ const parseExecError = (err: any) => {
     } else {
         return errMessage;
     }
+};
+
+// -
+
+const selectDirectory = async (): Promise<string> => {
+    try {
+        return await ipcRenderer.invoke("select-dir");
+    } catch (e) {
+        logError(e, "error while selecting root directory");
+    }
+};
+
+const getAppVersion = async (): Promise<string> => {
+    try {
+        return await ipcRenderer.invoke("get-app-version");
+    } catch (e) {
+        logError(e, "failed to get release version");
+        throw e;
+    }
+};
+
+const openDirectory = async (dirPath: string): Promise<void> => {
+    try {
+        await ipcRenderer.invoke("open-dir", dirPath);
+    } catch (e) {
+        logError(e, "error while opening directory");
+        throw e;
+    }
+};
+
+// -
+
+const updateAndRestart = () => {
+    ipcRenderer.send("update-and-restart");
+};
+
+const skipAppUpdate = (version: string) => {
+    ipcRenderer.send("skip-app-update", version);
+};
+
+const muteUpdateNotification = (version: string) => {
+    ipcRenderer.send("mute-update-notification", version);
 };
 
 // -
