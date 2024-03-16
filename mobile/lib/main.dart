@@ -33,6 +33,8 @@ import 'package:photos/services/local_file_update_service.dart';
 import 'package:photos/services/local_sync_service.dart';
 import "package:photos/services/location_service.dart";
 import "package:photos/services/machine_learning/machine_learning_controller.dart";
+import "package:photos/services/machine_learning/remote_embedding_service.dart";
+import "package:photos/services/machine_learning/semantic_search/remote_embedding.dart";
 import 'package:photos/services/machine_learning/semantic_search/semantic_search_service.dart';
 import 'package:photos/services/memories_service.dart';
 import 'package:photos/services/push_service.dart';
@@ -211,6 +213,7 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
   LocalFileUpdateService.instance.init(preferences);
   SearchService.instance.init();
   StorageBonusService.instance.init(preferences);
+  RemoteEmbeddingService.instance.init(preferences);
   if (!isBackground &&
       Platform.isAndroid &&
       await HomeWidgetService.instance.countHomeWidgets() == 0) {

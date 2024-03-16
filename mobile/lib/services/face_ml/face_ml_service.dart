@@ -20,6 +20,7 @@ import "package:photos/face/db.dart";
 import "package:photos/face/model/box.dart";
 import "package:photos/face/model/detection.dart" as face_detection;
 import "package:photos/face/model/face.dart";
+import "package:photos/face/model/file_ml.dart";
 import "package:photos/face/model/landmark.dart";
 import "package:photos/models/file/extensions/file_props.dart";
 import "package:photos/models/file/file.dart";
@@ -33,6 +34,7 @@ import "package:photos/services/face_ml/face_embedding/face_embedding_exceptions
 import 'package:photos/services/face_ml/face_embedding/onnx_face_embedding.dart';
 import "package:photos/services/face_ml/face_ml_exceptions.dart";
 import "package:photos/services/face_ml/face_ml_result.dart";
+import "package:photos/services/machine_learning/remote_embedding_service.dart";
 import "package:photos/services/search_service.dart";
 import "package:photos/utils/file_util.dart";
 import 'package:photos/utils/image_ml_isolate.dart';
@@ -543,6 +545,13 @@ class FaceMlService {
         }
       }
       _logger.info("inserting ${faces.length} faces for ${result.fileId}");
+      await RemoteEmbeddingService.instance.putFaceEmbedding(
+        enteFile,
+        FileMl(
+          enteFile.uploadedFileID!,
+          FaceEmbeddings(faces, result.mlVersion),
+        ),
+      );
       await FaceMLDataDB.instance.bulkInsertFaces(faces);
     } catch (e, s) {
       _logger.severe(
