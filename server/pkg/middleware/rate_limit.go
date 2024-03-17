@@ -50,10 +50,7 @@ func NewRateLimitMiddleware(discordCtrl *discord.DiscordController, limit int64,
 func (r *RateLimitMiddleware) Increment() bool {
 	// Atomically increment the count
 	newCount := atomic.AddInt64(&r.count, 1)
-	if newCount > r.limit {
-		return false
-	}
-	return true
+	return newCount <= r.limit
 }
 
 // Stop the internal ticker, effectively stopping the rate limiter.
@@ -78,7 +75,7 @@ func rateLimiter(interval string) *limiter.Limiter {
 // GlobalRateLimiter rate limits all requests to the server, regardless of the endpoint.
 func (r *RateLimitMiddleware) GlobalRateLimiter() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		if r.Increment() == false {
+		if !r.Increment() {
 			go r.discordCtrl.NotifyPotentialAbuse("Global rate limit breached")
 			c.AbortWithStatusJSON(http.StatusTooManyRequests, gin.H{"error": "Rate limit breached, try later"})
 			return
