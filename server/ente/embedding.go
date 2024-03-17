@@ -1,11 +1,12 @@
 package ente
 
 type Embedding struct {
-	FileID             int64  `json:"fileID"`
-	Model              string `json:"model"`
-	EncryptedEmbedding string `json:"encryptedEmbedding"`
-	DecryptionHeader   string `json:"decryptionHeader"`
-	UpdatedAt          int64  `json:"updatedAt"`
+	FileID             int64   `json:"fileID"`
+	Model              string  `json:"model"`
+	EncryptedEmbedding string  `json:"encryptedEmbedding"`
+	DecryptionHeader   string  `json:"decryptionHeader"`
+	UpdatedAt          int64   `json:"updatedAt"`
+	Client             *string `json:"client,omitempty"`
 }
 
 type InsertOrUpdateEmbeddingRequest struct {
@@ -22,11 +23,23 @@ type GetEmbeddingDiffRequest struct {
 	Limit     int16  `form:"limit" binding:"required"`
 }
 
+type GetFilesEmbeddingRequest struct {
+	Model   Model   `form:"model" binding:"required"`
+	FileIDs []int64 `form:"fileIDs" binding:"required"`
+}
+
+type GetFilesEmbeddingResponse struct {
+	Embeddings    []Embedding `json:"embeddings"`
+	NoDataFileIDs []int64     `json:"noDataFileIDs"`
+	ErrFileIDs    []int64     `json:"errFileIDs"`
+}
+
 type Model string
 
 const (
-	OnnxClip Model = "onnx-clip"
-	GgmlClip Model = "ggml-clip"
+	OnnxClip           Model = "onnx-clip"
+	GgmlClip           Model = "ggml-clip"
+	OnnxYolo5MobileNet Model = "onnx-yolo5-mobile"
 )
 
 type EmbeddingObject struct {

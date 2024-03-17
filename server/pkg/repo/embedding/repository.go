@@ -55,6 +55,16 @@ func (r *Repository) GetDiff(ctx context.Context, ownerID int64, model ente.Mode
 	return convertRowsToEmbeddings(rows)
 }
 
+func (r *Repository) GetFilesEmbedding(ctx context.Context, ownerID int64, model ente.Model, fileIDs []int64) ([]ente.Embedding, error) {
+	rows, err := r.DB.QueryContext(ctx, `SELECT file_id, model, encrypted_embedding, decryption_header, updated_at
+										FROM embeddings
+										WHERE owner_id = $1 AND model = $2 AND file_id = ANY($3)`, ownerID, model, fileIDs)
+	if err != nil {
+		return nil, stacktrace.Propagate(err, "")
+	}
+	return convertRowsToEmbeddings(rows)
+}
+
 func (r *Repository) DeleteAll(ctx context.Context, ownerID int64) error {
 	_, err := r.DB.ExecContext(ctx, "DELETE FROM embeddings WHERE owner_id = $1", ownerID)
 	if err != nil {
