@@ -15,6 +15,7 @@ import { logError } from "@ente/shared/sentry";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
 import { KeyAttributes } from "@ente/shared/user/types";
 import { HttpStatusCode } from "axios";
+import { TwoFactorType } from "../constants/twofactor";
 
 const ENDPOINT = getEndpoint();
 
@@ -79,17 +80,26 @@ export const verifyTwoFactor = async (code: string, sessionID: string) => {
     return resp.data as UserVerificationResponse;
 };
 
-export const recoverTwoFactor = async (sessionID: string) => {
+export const recoverTwoFactor = async (
+    sessionID: string,
+    twoFactorType: TwoFactorType = TwoFactorType.TOTP,
+) => {
     const resp = await HTTPService.get(`${ENDPOINT}/users/two-factor/recover`, {
         sessionID,
+        twoFactorType,
     });
     return resp.data as TwoFactorRecoveryResponse;
 };
 
-export const removeTwoFactor = async (sessionID: string, secret: string) => {
+export const removeTwoFactor = async (
+    sessionID: string,
+    secret: string,
+    twoFactorType: TwoFactorType = TwoFactorType.TOTP,
+) => {
     const resp = await HTTPService.post(`${ENDPOINT}/users/two-factor/remove`, {
         sessionID,
         secret,
+        twoFactorType,
     });
     return resp.data as TwoFactorVerificationResponse;
 };

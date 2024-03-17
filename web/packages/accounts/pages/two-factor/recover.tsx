@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 
 import { recoverTwoFactor, removeTwoFactor } from "@ente/accounts/api/user";
 import { PAGES } from "@ente/accounts/constants/pages";
+import { TwoFactorType } from "@ente/accounts/constants/twofactor";
 import { logoutUser } from "@ente/accounts/services/user";
 import { PageProps } from "@ente/shared/apps/types";
 import { DialogBoxAttributesV2 } from "@ente/shared/components/DialogBoxV2/types";
@@ -28,7 +29,11 @@ const bip39 = require("bip39");
 // mobile client library only supports english.
 bip39.setDefaultWordlist("english");
 
-export default function Recover({ router, appContext }: PageProps) {
+export default function Recover({
+    router,
+    appContext,
+    twoFactorType = TwoFactorType.TOTP,
+}: PageProps) {
     const [encryptedTwoFactorSecret, setEncryptedTwoFactorSecret] =
         useState<B64EncryptionResult>(null);
     const [sessionID, setSessionID] = useState(null);
@@ -49,7 +54,10 @@ export default function Recover({ router, appContext }: PageProps) {
         }
         const main = async () => {
             try {
-                const resp = await recoverTwoFactor(user.twoFactorSessionID);
+                const resp = await recoverTwoFactor(
+                    user.twoFactorSessionID,
+                    twoFactorType,
+                );
                 setDoesHaveEncryptedRecoveryKey(!!resp.encryptedSecret);
                 if (!resp.encryptedSecret) {
                     showContactSupportDialog({
@@ -106,7 +114,11 @@ export default function Recover({ router, appContext }: PageProps) {
                 encryptedTwoFactorSecret.nonce,
                 await cryptoWorker.fromHex(recoveryKey),
             );
-            const resp = await removeTwoFactor(sessionID, twoFactorSecret);
+            const resp = await removeTwoFactor(
+                sessionID,
+                twoFactorSecret,
+                twoFactorType,
+            );
             const { keyAttributes, encryptedToken, token, id } = resp;
             setData(LS_KEYS.USER, {
                 ...getData(LS_KEYS.USER),
