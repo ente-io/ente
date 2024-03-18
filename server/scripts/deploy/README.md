@@ -1,8 +1,5 @@
 # Production Deployments
 
-Museum runs using Docker + systemd on production instances, load balanced via
-Cloudflare.
-
 This document outlines how we ourselves deploy museum. Note that this is very
 specific to our use case, and while this might be useful as an example, this is
 likely overkill for simple self hosted deployments.

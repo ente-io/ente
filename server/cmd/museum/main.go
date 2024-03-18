@@ -712,7 +712,7 @@ func main() {
 }
 
 func runServer(environment string, server *gin.Engine) {
-	if environment == "local" {
+	if environment == "local" || environment == "proxy" {
 		server.Run(":8080")
 	} else {
 		certPath, err := config.CredentialFilePath("tls.cert")

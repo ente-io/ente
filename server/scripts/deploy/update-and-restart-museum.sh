@@ -3,7 +3,7 @@
 # This script is meant to be run on the production instances.
 #
 # It will pull the latest Docker image, restart the museum process and start
-# tailing the logs.
+# tailing the logs as a sanity check.
 
 set -o errexit
 
