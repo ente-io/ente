@@ -178,7 +178,8 @@ func main() {
 	authCache := cache.New(1*time.Minute, 15*time.Minute)
 	accessTokenCache := cache.New(1*time.Minute, 15*time.Minute)
 	discordController := discord.NewDiscordController(userRepo, hostName, environment)
-	rateLimiter := middleware.NewRateLimitMiddleware(discordController)
+	rateLimiter := middleware.NewRateLimitMiddleware(discordController, 1000, 1*time.Second)
+	defer rateLimiter.Stop()
 
 	emailNotificationCtrl := &email.EmailNotificationController{
 		UserRepo:                userRepo,
@@ -360,22 +361,22 @@ func main() {
 	server.Use(requestid.New(), middleware.Logger(urlSanitizer), cors(), gzip.Gzip(gzip.DefaultCompression), middleware.PanicRecover())
 
 	publicAPI := server.Group("/")
-	publicAPI.Use(rateLimiter.APIRateLimitMiddleware(urlSanitizer))
+	publicAPI.Use(rateLimiter.GlobalRateLimiter(), rateLimiter.APIRateLimitMiddleware(urlSanitizer))
 
 	privateAPI := server.Group("/")
-	privateAPI.Use(authMiddleware.TokenAuthMiddleware(nil), rateLimiter.APIRateLimitForUserMiddleware(urlSanitizer))
+	privateAPI.Use(rateLimiter.GlobalRateLimiter(), authMiddleware.TokenAuthMiddleware(nil), rateLimiter.APIRateLimitForUserMiddleware(urlSanitizer))
 
 	adminAPI := server.Group("/admin")
-	adminAPI.Use(authMiddleware.TokenAuthMiddleware(nil), authMiddleware.AdminAuthMiddleware())
+	adminAPI.Use(rateLimiter.GlobalRateLimiter(), authMiddleware.TokenAuthMiddleware(nil), authMiddleware.AdminAuthMiddleware())
 	paymentJwtAuthAPI := server.Group("/")
-	paymentJwtAuthAPI.Use(authMiddleware.TokenAuthMiddleware(jwt.PAYMENT.Ptr()))
+	paymentJwtAuthAPI.Use(rateLimiter.GlobalRateLimiter(), authMiddleware.TokenAuthMiddleware(jwt.PAYMENT.Ptr()))
 
 	familiesJwtAuthAPI := server.Group("/")
 	//The middleware order matters. First, the userID must be set in the context, so that we can apply limit for user.
-	familiesJwtAuthAPI.Use(authMiddleware.TokenAuthMiddleware(jwt.FAMILIES.Ptr()), rateLimiter.APIRateLimitForUserMiddleware(urlSanitizer))
+	familiesJwtAuthAPI.Use(rateLimiter.GlobalRateLimiter(), authMiddleware.TokenAuthMiddleware(jwt.FAMILIES.Ptr()), rateLimiter.APIRateLimitForUserMiddleware(urlSanitizer))
 
 	publicCollectionAPI := server.Group("/public-collection")
-	publicCollectionAPI.Use(accessTokenMiddleware.AccessTokenAuthMiddleware(urlSanitizer))
+	publicCollectionAPI.Use(rateLimiter.GlobalRateLimiter(), accessTokenMiddleware.AccessTokenAuthMiddleware(urlSanitizer))
 
 	healthCheckHandler := &api.HealthCheckHandler{
 		DB: db,
@@ -472,7 +473,7 @@ func main() {
 	privateAPI.DELETE("/users/delete", userHandler.DeleteUser)
 
 	accountsJwtAuthAPI := server.Group("/")
-	accountsJwtAuthAPI.Use(authMiddleware.TokenAuthMiddleware(jwt.ACCOUNTS.Ptr()), rateLimiter.APIRateLimitForUserMiddleware(urlSanitizer))
+	accountsJwtAuthAPI.Use(rateLimiter.GlobalRateLimiter(), authMiddleware.TokenAuthMiddleware(jwt.ACCOUNTS.Ptr()), rateLimiter.APIRateLimitForUserMiddleware(urlSanitizer))
 	passkeysHandler := &api.PasskeyHandler{
 		Controller: passkeyCtrl,
 	}
@@ -531,7 +532,7 @@ func main() {
 
 	castCtrl := cast.NewController(&castDb, accessCtrl)
 	castMiddleware := middleware.CastMiddleware{CastCtrl: castCtrl, Cache: authCache}
-	castAPI.Use(castMiddleware.CastAuthMiddleware())
+	castAPI.Use(rateLimiter.GlobalRateLimiter(), castMiddleware.CastAuthMiddleware())
 
 	castHandler := &api.CastHandler{
 		CollectionCtrl: collectionController,
@@ -620,6 +621,7 @@ func main() {
 	adminAPI.POST("/user/disable-2fa", adminHandler.DisableTwoFactor)
 	adminAPI.POST("/user/disable-passkeys", adminHandler.RemovePasskeys)
 	adminAPI.POST("/user/close-family", adminHandler.CloseFamily)
+	adminAPI.PUT("/user/change-email", adminHandler.ChangeEmail)
 	adminAPI.DELETE("/user/delete", adminHandler.DeleteUser)
 	adminAPI.POST("/user/recover", adminHandler.RecoverAccount)
 	adminAPI.GET("/email-hash", adminHandler.GetEmailHash)

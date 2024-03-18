@@ -113,6 +113,11 @@ repository's [Discussions](https://github.com/ente-io/ente/discussions), or on
 try to clarify, and also document such FAQs. Please feel free to open
 documentation PRs around this too.
 
+> [!TIP]
+>
+> You can find more guides and documentation around self-hosting at
+> [help.ente.io/self-hosting](https://help.ente.io/self-hosting).
+
 ## Thanks ❤️
 
 We've had great fun with this combination (Golang + Postgres + Docker), and we

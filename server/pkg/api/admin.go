@@ -306,6 +306,25 @@ func (h *AdminHandler) UpdateSubscription(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{})
 }
 
+func (h *AdminHandler) ChangeEmail(c *gin.Context) {
+	var r ente.ChangeEmailRequest
+	if err := c.ShouldBindJSON(&r); err != nil {
+		handler.Error(c, stacktrace.Propagate(ente.ErrBadRequest, "Bad request"))
+		return
+	}
+	adminID := auth.GetUserID(c.Request.Header)
+	go h.DiscordController.NotifyAdminAction(
+		fmt.Sprintf("Admin (%d) updating email for user: %d", adminID, r.UserID))
+	err := h.UserController.UpdateEmail(c, r.UserID, r.Email)
+	if err != nil {
+		logrus.WithError(err).Error("Failed to update email")
+		handler.Error(c, stacktrace.Propagate(err, ""))
+		return
+	}
+	logrus.Info("Updated email")
+	c.JSON(http.StatusOK, gin.H{})
+}
+
 func (h *AdminHandler) ReQueueItem(c *gin.Context) {
 	var r ente.ReQueueItemRequest
 	if err := c.ShouldBindJSON(&r); err != nil {

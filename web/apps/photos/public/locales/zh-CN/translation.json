@@ -634,8 +634,21 @@
     "VISIT_CAST_ENTE_IO": "在您要配对的设备上访问 cast.ente.io 。",
     "CAST_AUTO_PAIR_FAILED": "Chromecast 自动配对失败。请再试一次。",
     "CACHE_DIRECTORY": "缓存文件夹",
-    "PASSKEYS": "通行密钥",
     "FREEHAND": "手画",
     "APPLY_CROP": "应用裁剪",
-    "PHOTO_EDIT_REQUIRED_TO_SAVE": "保存之前必须至少执行一项转换或颜色调整。"
+    "PHOTO_EDIT_REQUIRED_TO_SAVE": "保存之前必须至少执行一项转换或颜色调整。",
+    "PASSKEYS": "通行密钥",
+    "DELETE_PASSKEY": "",
+    "DELETE_PASSKEY_CONFIRMATION": "",
+    "RENAME_PASSKEY": "",
+    "ADD_PASSKEY": "",
+    "ENTER_PASSKEY_NAME": "",
+    "PASSKEYS_DESCRIPTION": "",
+    "CREATED_AT": "",
+    "PASSKEY_LOGIN_FAILED": "",
+    "PASSKEY_LOGIN_URL_INVALID": "",
+    "PASSKEY_LOGIN_ERRORED": "",
+    "TRY_AGAIN": "",
+    "PASSKEY_FOLLOW_THE_STEPS_FROM_YOUR_BROWSER": "",
+    "LOGIN_WITH_PASSKEY": ""
 }

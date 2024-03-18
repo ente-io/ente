@@ -23,7 +23,8 @@ If you're looking for Ente Auth instead, see [../auth](../auth/README.md).
 
 ### Android
 
-The [GitHub releases](https://github.com/ente-io/photos-app/releases) contain
+The [GitHub
+releases](https://github.com/ente-io/ente/releases?q=tag%3Aphotos-v0) contain
 APKs, built straight from source. The latest build is available at
 [ente.io/apk](https://ente.io/apk). These builds keep themselves updated,
 without relying on third party stores.

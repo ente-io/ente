@@ -2,6 +2,11 @@
 
 Tag main, and push the tag.
 
+> [!NOTE]
+>
+> See [auth/docs/release](../../auth/docs/release.md) for more details about the
+> tag format. The prefix for cli releases should be `cli-`.
+
 ```sh
 git tag cli-v1.2.3
 git push origin cli-v1.2.3

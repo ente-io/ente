@@ -12,7 +12,7 @@ description: ente photos application
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 
-version: 0.8.70+590
+version: 0.8.71+591
 publish_to: none
 
 environment:
@@ -93,7 +93,7 @@ dependencies:
   google_nav_bar: ^5.0.5
   home_widget:
     git:
-      url: https://github.com/prateekmedia/FlutterHomeWidget
+      url: https://github.com/ente-io/FlutterHomeWidget
       ref: main
   html_unescape: ^2.0.0
   http: ^1.1.0

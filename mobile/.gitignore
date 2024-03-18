@@ -9,6 +9,9 @@
 .history
 .svn/
 
+# Editors
+.vscode/
+
 # IntelliJ related
 *.iml
 *.ipr
@@ -25,7 +28,6 @@
 .pub/
 /build/
 
-
 # Web related
 lib/generated_plugin_registrant.dart
 
@@ -36,7 +38,6 @@ android/key.properties
 android/app/.settings/*
 android/.settings/
 .env
-
 
 fastlane/report.xml
 TensorFlowLiteC.framework
