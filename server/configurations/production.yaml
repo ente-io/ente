@@ -1,7 +1,7 @@
 log-file: /var/logs/museum.log
 
 http:
-    use_tls: true
+    use-tls: true
 
 stripe:
     path:

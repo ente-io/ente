@@ -712,7 +712,7 @@ func main() {
 }
 
 func runServer(environment string, server *gin.Engine) {
-	useTLS := viper.GetBool("http.use_tls")
+	useTLS := viper.GetBool("http.use-tls")
 	if useTLS {
 		certPath, err := config.CredentialFilePath("tls.cert")
 		if err != nil {

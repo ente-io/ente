@@ -69,7 +69,7 @@ log-file: ""
 http:
     # If true, bind to 443 and use TLS.
     # By default, this is false, and museum will bind to 8080 without TLS.
-    # use_tls: true
+    # use-tls: true
 
 # Database connection parameters
 db:
