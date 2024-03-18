@@ -3,9 +3,10 @@
 Install `prometheus.service` on an instance if it is running something that
 exports custom Prometheus metrics. In particular, museum does.
 
-Also install `node-exporter.service` (after installing
-[node-exporter](https://prometheus.io/docs/guides/node-exporter/) itself) if it
-is a production instance whose metrics (CPU, disk, RAM etc) we want to monitor.
+If it is an instance whose metrics (CPU, disk, RAM etc) we want to monitor, also
+install `node-exporter.service` after installing
+[node-exporter](https://prometheus.io/docs/guides/node-exporter/) itself (Note
+that our prepare-instance script already installs node-exporter) .
 
 ## Installing
 
@@ -14,7 +15,7 @@ remember to change the hardcoded `XX-HOSTNAME` too in addition to adding the
 `remote_write` configuration.
 
 ```sh
-scp -P 7426 services/prometheus/* <instance>:
+scp services/prometheus/* <instance>:
 
 nano prometheus.yml
 sudo mv prometheus.yml /root/prometheus.yml
