@@ -16,12 +16,16 @@ sudo mv nginx.service /etc/systemd/system/nginx.service
 
 Create a directory to house service specific configuration
 
-    sudo mkdir -p /root/nginx/conf.d
+```sh
+sudo mkdir -p /root/nginx/conf.d
+```
 
 Add the SSL certificate provided by Cloudflare
 
-    sudo tee /root/nginx/cert.pem
-    sudo tee /root/nginx/key.pem
+```sh
+sudo tee /root/nginx/cert.pem
+sudo tee /root/nginx/key.pem
+```
 
 Tell systemd to pick up new service definition, enable it (so that it
 automatically starts on boot going forward), and start it.
