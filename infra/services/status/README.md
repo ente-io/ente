@@ -32,8 +32,8 @@ sudo systemctl daemon-reload
 sudo systemctl enable --now uptime-kuma
 ```
 
-Restart nginx
+Tell nginx to pick up the new configuration.
 
 ```sh
-sudo systemctl restart nginx
+sudo systemctl reload nginx
 ```
