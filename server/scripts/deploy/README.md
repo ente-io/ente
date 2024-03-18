@@ -42,7 +42,8 @@ To bring up an additional museum node:
 
 * Prepare the instance to run our services
 
-* Setup [promtail](../../../infra/services/promtail/README.md), [prometheus and node-exporter](../../../infra/services/prometheus/README.md) services
+* Setup [promtail](../../../infra/services/promtail/README.md), [prometheus and
+  node-exporter](../../../infra/services/prometheus/README.md) services
 
 * If running behind Nginx, install the
   [nginx](../../../infra/services/nginx/README.md) service.
