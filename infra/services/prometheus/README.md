@@ -15,7 +15,8 @@ remember to change the hardcoded `XX-HOSTNAME` too in addition to adding the
 `remote_write` configuration.
 
 ```sh
-scp services/prometheus/* <instance>:
+scp services/prometheus/prometheus.* <instance>:
+scp services/prometheus/node-exporter.service <instance>:
 
 nano prometheus.yml
 sudo mv prometheus.yml /root/prometheus.yml

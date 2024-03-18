@@ -6,6 +6,14 @@ proxy for arbitrary services by adding new entries in `/root/nginx/conf.d` and
 
 ## Installation
 
+Copy the service definition
+
+```sh
+scp services/nginx/nginx.service <instance>:
+
+sudo mv nginx.service /etc/systemd/system/nginx.service
+```
+
 Create a directory to house service specific configuration
 
     sudo mkdir -p /root/nginx/conf.d

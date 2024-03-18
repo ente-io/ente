@@ -9,7 +9,7 @@ Replace `client.url` in the config file with the Loki URL that Promtail should
 connect to, and move the files to their expected place.
 
 ```sh
-scp services/promtail/* <instance>:
+scp services/promtail/promtail.* <instance>:
 
 nano promtail.yaml
 sudo mv promtail.yaml /root/promtail.yaml
