@@ -1,10 +1,7 @@
 [Unit]
-Documentation=https://github.com/ente-io/museum
+Documentation=https://github.com/ente-io/ente/tree/main/server#readme
 Requires=docker.service
 After=docker.service
-# Don't automatically restart if it fails more than 5 times in 10 minutes.
-StartLimitIntervalSec=600
-StartLimitBurst=5
 
 [Service]
 Restart=on-failure

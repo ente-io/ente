@@ -712,9 +712,8 @@ func main() {
 }
 
 func runServer(environment string, server *gin.Engine) {
-	if environment == "local" {
-		server.Run(":8080")
-	} else {
+	useTLS := viper.GetBool("http.use-tls")
+	if useTLS {
 		certPath, err := config.CredentialFilePath("tls.cert")
 		if err != nil {
 			log.Fatal(err)
@@ -726,6 +725,8 @@ func runServer(environment string, server *gin.Engine) {
 		}
 
 		log.Fatal(server.RunTLS(":443", certPath, keyPath))
+	} else {
+		server.Run(":8080")
 	}
 }
 

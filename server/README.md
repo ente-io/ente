@@ -95,9 +95,10 @@ setup we ourselves use in production.
 > [!TIP]
 >
 > On our production servers, we wrap museum in a [systemd
-> service](scripts/museum.service). Our production machines are vanilla Ubuntu
-> images, with Docker and Promtail installed. We then plonk in this systemd
-> service, and use `systemctl start|stop|status museum` to herd it around.
+> service](scripts/deploy/museum.service). Our production machines are vanilla
+> Ubuntu images, with Docker and Promtail installed. We then plonk in this
+> systemd service, and use `systemctl start|stop|status museum` to herd it
+> around.
 
 Some people new to Docker/Go/Postgres might have general questions though.
 Unfortunately, because of limited engineering bandwidth **we will currently not
