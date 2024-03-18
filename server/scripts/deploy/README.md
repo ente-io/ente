@@ -57,7 +57,7 @@ To bring up an additional museum node:
       sudo tee /root/museum/credentials/fcm-service-account.json
       sudo tee /root/museum/credentials.yaml
 
-* If not running behind Nginx, add the TLS credentials (otherwise add them to
+* If not running behind Nginx, add the TLS credentials (otherwise add the to
   Nginx)
 
       sudo tee /root/museum/credentials/tls.cert
@@ -67,18 +67,21 @@ To bring up an additional museum node:
   restart script can remain in the ente user's home directory. Move the service
   definition to its proper place.
 
-      scp scripts/deploy/{museum.service,update-and-restart-museum.sh} <instance>:
+      # If using nginx
+      scp scripts/deploy/museum.nginx.service <instance>:museum.service
+      # otherwise
+      scp scripts/deploy/museum.service <instance>:
+
+      scp scripts/deploy/update-and-restart-museum.sh <instance>:
 
       sudo mv museum.service /etc/systemd/system
       sudo systemctl daemon-reload
 
-* If running behind Nginx, a separate set of service definition and convenience
-  scripts need to be added.
+* If running behind Nginx, tell it about museum
 
-      scp scripts/deploy/{museum-nginx.service,update-and-restart-museum-nginx.sh} <instance>:
+      scp scripts/deploy/museum.nginx.conf <instance>:
 
-      sudo mv museum-nginx.service /etc/systemd/system
-      sudo systemctl daemon-reload
+      sudo mv museum.nginx.conf /etc/systemd/system
       sudo systemctl restart nginx
 
 ## Starting
