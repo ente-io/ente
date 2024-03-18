@@ -259,7 +259,11 @@ class _HomePageState extends State<HomePage> {
             children: [
               Expanded(
                 child: _filteredCodes.isNotEmpty
-                    ? ListView.builder(
+                    ? AlignedGridView.count(
+                        crossAxisCount:
+                            (MediaQuery.sizeOf(context).width ~/ 400)
+                                .clamp(1, double.infinity)
+                                .toInt(),
                         itemBuilder: ((context, index) {
                           Code? code;
                           try {
