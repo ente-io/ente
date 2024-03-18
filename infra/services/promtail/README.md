@@ -9,7 +9,7 @@ Replace `client.url` in the config file with the Loki URL that Promtail should
 connect to, and move the files to their expected place.
 
 ```sh
-scp -P 7426 services/promtail/* <instance>:
+scp services/promtail/promtail.* <instance>:
 
 nano promtail.yaml
 sudo mv promtail.yaml /root/promtail.yaml
@@ -21,6 +21,5 @@ automatically starts on boot), and start it this time around.
 
 ```sh
 sudo systemctl daemon-reload
-sudo systemctl enable promtail
-sudo systemctl start promtail
+sudo systemctl enable --now promtail
 ```

@@ -1199,5 +1199,8 @@
   "deviceCodeHint": "输入代码",
   "joinDiscord": "加入 Discord",
   "locations": "位置",
-  "descriptions": "描述"
+  "descriptions": "描述",
+  "addViewers": "{count, plural, zero {Add viewer} one {Add viewer} other {Add viewers}}",
+  "addCollaborators": "{count, plural, zero {Add collaborator} one {Add collaborator} other {Add collaborators}}",
+  "longPressAnEmailToVerifyEndToEndEncryption": "Long press an email to verify end to end encryption."
 }

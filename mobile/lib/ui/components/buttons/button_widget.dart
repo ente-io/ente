@@ -202,14 +202,14 @@ class _ButtonChildWidgetState extends State<ButtonChildWidget> {
 
   @override
   void initState() {
-    _setButtonTheme();
     super.initState();
+    _setButtonTheme();
   }
 
   @override
   void didUpdateWidget(covariant ButtonChildWidget oldWidget) {
-    _setButtonTheme();
     super.didUpdateWidget(oldWidget);
+    _setButtonTheme();
   }
 
   @override
