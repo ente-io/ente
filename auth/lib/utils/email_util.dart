@@ -187,7 +187,21 @@ Future<void> shareLogs(
     ],
   );
   if (result?.action != null && result!.action == ButtonAction.second) {
-    await exportLogs(context, zipFilePath);
+    Future.delayed(
+      const Duration(milliseconds: 200),
+      () => shareDialog(
+        context,
+        context.l10n.exportLogs,
+        saveAction: () async {
+          final zipFilePath = await getZippedLogsFile(context);
+          await exportLogs(context, zipFilePath);
+        },
+        sendAction: () async {
+          final zipFilePath = await getZippedLogsFile(context);
+          await exportLogs(context, zipFilePath, true);
+        },
+      ),
+    );
   }
 }
 
