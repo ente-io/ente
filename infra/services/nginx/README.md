@@ -38,3 +38,22 @@ When adding new services that sit behind Nginx,
 1. Add its nginx conf file to `/root/nginx/conf.d`
 
 2. Restart nginx (`sudo systemctl restart nginx`)
+
+## Configuration files
+
+All the files we put into `/root/nginx/conf.d` get included in an `http` block.
+We can see this in the default configuration of nginx:
+
+   http {
+       ...
+       include /etc/nginx/conf.d/*.conf;
+   }
+
+> To view the default configuration, run the following command against the
+> [official Docker image for Nginx](https://hub.docker.com/_/nginx), which is
+> also what we use:
+>
+>     docker run --rm --entrypoint=cat nginx /etc/nginx/nginx.conf > /tmp/nginx.conf
+
+This is a [handy tool](https://nginx-playground.wizardzines.com) to check the
+syntax of the configuration files.
