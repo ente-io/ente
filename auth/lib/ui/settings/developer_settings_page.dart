@@ -11,7 +11,7 @@ class DeveloperSettingsPage extends StatefulWidget {
   const DeveloperSettingsPage({super.key});
 
   @override
-  _DeveloperSettingsPageState createState() => _DeveloperSettingsPageState();
+  State<DeveloperSettingsPage> createState() => _DeveloperSettingsPageState();
 }
 
 class _DeveloperSettingsPageState extends State<DeveloperSettingsPage> {
