@@ -156,8 +156,8 @@ Future<void> _exportCodes(BuildContext context, String fileContent) async {
         }
         codeFile.writeAsStringSync(fileContent);
         final Size size = MediaQuery.of(context).size;
-        await Share.shareFiles(
-          [codeFile.path],
+        await Share.shareXFiles(
+          [XFile(codeFile.path)],
           sharePositionOrigin: Rect.fromLTWH(0, 0, size.width, size.height / 2),
         );
         Future.delayed(const Duration(seconds: 30), () async {
