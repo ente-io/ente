@@ -76,7 +76,9 @@ func rateLimiter(interval string) *limiter.Limiter {
 func (r *RateLimitMiddleware) GlobalRateLimiter() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		if !r.Increment() {
-			go r.discordCtrl.NotifyPotentialAbuse("Global rate limit breached")
+			if r.count%100 == 0 {
+				go r.discordCtrl.NotifyPotentialAbuse(fmt.Sprintf("Global ratelimit (%d) breached %d", r.limit, r.count))
+			}
 			c.AbortWithStatusJSON(http.StatusTooManyRequests, gin.H{"error": "Rate limit breached, try later"})
 			return
 		}
