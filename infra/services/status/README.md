@@ -20,7 +20,7 @@ Add the service definition and nginx configuration.
 ```sh
 scp services/status/uptime-kuma.* <instance>:
 
-sudo mv uptime-kuma.service /etc/systemd/system/uptime-kuma.service
+sudo mv uptime-kuma.service /etc/systemd/system/
 sudo mv uptime-kuma.nginx.conf /root/nginx/conf.d
 ```
 
