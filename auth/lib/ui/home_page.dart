@@ -206,6 +206,7 @@ class _HomePageState extends State<HomePage> {
                     _showSearchBox = !_showSearchBox;
                     if (!_showSearchBox) {
                       _textController.clear();
+                      _searchText = "";
                     } else {
                       _searchText = _textController.text;
                     }
