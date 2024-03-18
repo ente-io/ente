@@ -10,7 +10,8 @@ ExecStartPre=docker pull rg.fr-par.scw.cloud/ente/museum-prod
 ExecStartPre=-docker stop museum
 ExecStartPre=-docker rm museum
 ExecStart=docker run --name museum \
-     -e ENVIRONMENT=proxy \
+     -e ENVIRONMENT=production \
+     -e ENTE_HTTP-USE_TLS=0 \
      --hostname "%H" \
      -p 8080:8080 \
      -p 2112:2112 \
