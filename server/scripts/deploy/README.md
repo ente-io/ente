@@ -36,6 +36,9 @@ using systemd as "services". More examples and details
   convenience [script](update-and-restart-museum.sh) that pre-downloads the
   latest image to further reduce the delay during a restart.
 
+* Optionally and alternatively, museum can also be run behind an Nginx. This
+  option has a separate service definition.
+
 ## Installation
 
 To bring up an additional museum node:
@@ -44,24 +47,39 @@ To bring up an additional museum node:
 
 * Setup [promtail](../../../infra/services/promtail/README.md), [prometheus and node-exporter](../../../infra/services/prometheus/README.md) services
 
+* If running behind Nginx, install the
+  [nginx](../../../infra/services/nginx/README.md) service.
+
 * Add credentials
 
       sudo mkdir -p /root/museum/credentials
-      sudo tee /root/museum/credentials/tls.cert
-      sudo tee /root/museum/credentials/tls.key
       sudo tee /root/museum/credentials/pst-service-account.json
       sudo tee /root/museum/credentials/fcm-service-account.json
       sudo tee /root/museum/credentials.yaml
+
+* If not running behind Nginx, add the TLS credentials (otherwise add them to
+  Nginx)
+
+      sudo tee /root/museum/credentials/tls.cert
+      sudo tee /root/museum/credentials/tls.key
 
 * Copy the service definition and restart script to the new instance. The
   restart script can remain in the ente user's home directory. Move the service
   definition to its proper place.
 
-      scp </path-to-museum>/scripts/museum.service <instance>:
-      scp update-and-restart-museum.sh <instance>:
+      scp scripts/deploy/{museum.service,update-and-restart-museum.sh} <instance>:
 
       sudo mv museum.service /etc/systemd/system
       sudo systemctl daemon-reload
+
+* If running behind Nginx, a separate set of service definition and convenience
+  scripts need to be added.
+
+      scp scripts/deploy/{museum-nginx.service,update-and-restart-museum-nginx.sh} <instance>:
+
+      sudo mv museum-nginx.service /etc/systemd/system
+      sudo systemctl daemon-reload
+      sudo systemctl restart nginx
 
 ## Starting
 
