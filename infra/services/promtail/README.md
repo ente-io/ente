@@ -21,6 +21,5 @@ automatically starts on boot), and start it this time around.
 
 ```sh
 sudo systemctl daemon-reload
-sudo systemctl enable promtail
-sudo systemctl start promtail
+sudo systemctl enable --now promtail
 ```
