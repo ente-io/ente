@@ -1,6 +1,6 @@
 Ente é um aplicativo simples para fazer backup e compartilhar suas fotos e vídeos.
 
-Se você esteve procurando uma alternativa amigável à privacidade para preservar suas memórias, você veio ao lugar certo. Com ente, eles são armazenados com criptografados de ponta a ponta (e2ee). Isso significa que só você pode vê-los.
+Se você esteve procurando uma alternativa amigável à privacidade para preservar suas memórias, você veio ao lugar certo. Com Ente, elas são armazenadas com criptografia de ponta a ponta (e2ee). Isso significa que só você pode vê-las.
 
 Temos aplicativos de código aberto em todas as plataformas, Android, iOS, web e desktop, e suas fotos irão sincronizar perfeitamente entre todas elas de forma criptografada (e2ee).
 

@@ -1,11 +1,9 @@
 name: "Lint (mobile)"
 
 on:
-    # Run on every push (this also covers pull requests)
+    # Run on every push to a branch other than main that changes mobile/
     push:
-        # See: [Note: Specify branch when specifying a path filter]
-        branches: ["**"]
-        # Only run if something changes in these paths
+        branches-ignore: [main, f-droid]
         paths:
             - "mobile/**"
             - ".github/workflows/mobile-lint.yml"

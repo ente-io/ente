@@ -1,5 +1,4 @@
 export enum MS_KEYS {
-    OPT_OUT_OF_CRASH_REPORTS = "optOutOfCrashReports",
     SRP_CONFIGURE_IN_PROGRESS = "srpConfigureInProgress",
     REDIRECT_URL = "redirectUrl",
 }

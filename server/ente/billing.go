@@ -176,11 +176,6 @@ type SubscriptionUpdateResponse struct {
 	ClientSecret string `json:"clientSecret"`
 }
 
-type StripeSubscriptionInfo struct {
-	PlanCountry    string
-	AccountCountry StripeAccountCountry
-}
-
 type StripeEventLog struct {
 	UserID             int64
 	StripeSubscription stripe.Subscription

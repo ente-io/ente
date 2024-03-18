@@ -12,11 +12,7 @@ import { deserializeToResponse, serializeResponse } from "./worker/utils/proxy";
 export interface LimitedElectronAPIs
     extends Pick<
         ElectronAPIsType,
-        | "openDiskCache"
-        | "deleteDiskCache"
-        | "getSentryUserID"
-        | "convertToJPEG"
-        | "logToDisk"
+        "openDiskCache" | "deleteDiskCache" | "convertToJPEG" | "logToDisk"
     > {}
 
 class WorkerSafeElectronServiceImpl implements LimitedElectronAPIs {
@@ -56,10 +52,6 @@ class WorkerSafeElectronServiceImpl implements LimitedElectronAPIs {
         return await this.proxiedElectron.deleteDiskCache(cacheName);
     }
 
-    async getSentryUserID() {
-        await this.ready;
-        return this.proxiedElectron.getSentryUserID();
-    }
     async convertToJPEG(
         inputFileData: Uint8Array,
         filename: string,

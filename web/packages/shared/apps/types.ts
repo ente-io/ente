@@ -1,4 +1,5 @@
 import { EmotionCache } from "@emotion/react";
+import { TwoFactorType } from "@ente/accounts/constants/twofactor";
 import { SetDialogBoxAttributesV2 } from "@ente/shared/components/DialogBoxV2/types";
 import { AppProps } from "next/app";
 import { NextRouter } from "next/router";
@@ -16,4 +17,5 @@ export interface PageProps {
     };
     router: NextRouter;
     appName: APPS;
+    twoFactorType?: TwoFactorType;
 }

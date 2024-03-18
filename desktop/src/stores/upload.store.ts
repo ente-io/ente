@@ -1,25 +1,25 @@
-import Store, { Schema } from 'electron-store';
-import { UploadStoreType } from '../types';
+import Store, { Schema } from "electron-store";
+import { UploadStoreType } from "../types";
 
 const uploadStoreSchema: Schema<UploadStoreType> = {
     filePaths: {
-        type: 'array',
+        type: "array",
         items: {
-            type: 'string',
+            type: "string",
         },
     },
     zipPaths: {
-        type: 'array',
+        type: "array",
         items: {
-            type: 'string',
+            type: "string",
         },
     },
     collectionName: {
-        type: 'string',
+        type: "string",
     },
 };
 
 export const uploadStatusStore = new Store({
-    name: 'upload-status',
+    name: "upload-status",
     schema: uploadStoreSchema,
 });

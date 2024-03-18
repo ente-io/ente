@@ -55,7 +55,7 @@ func (c *ObjectController) RemoveComplianceHolds() {
 		c.complianceCronRunning = false
 	}()
 
-	lockStatus := c.LockController.TryLock(RemoveComplianceHoldsLock, time.MicrosecondsAfterHours(24))
+	lockStatus := c.LockController.TryLock(RemoveComplianceHoldsLock, time.MicrosecondsAfterHours(2))
 	if !lockStatus {
 		log.Warning(fmt.Sprintf("Failed to acquire lock %s", RemoveComplianceHoldsLock))
 		return
@@ -64,7 +64,7 @@ func (c *ObjectController) RemoveComplianceHolds() {
 		c.LockController.ReleaseLock(RemoveComplianceHoldsLock)
 	}()
 
-	items, err := c.QueueRepo.GetItemsReadyForDeletion(repo.RemoveComplianceHoldQueue, 1000)
+	items, err := c.QueueRepo.GetItemsReadyForDeletion(repo.RemoveComplianceHoldQueue, 1500)
 	if err != nil {
 		log.WithError(err).Error("Failed to fetch items from queue")
 		return

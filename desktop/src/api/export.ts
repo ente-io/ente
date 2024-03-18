@@ -1,5 +1,5 @@
-import { writeStream } from './../services/fs';
-import * as fs from 'promise-fs';
+import * as fs from "promise-fs";
+import { writeStream } from "./../services/fs";
 
 export const exists = (path: string) => {
     return fs.existsSync(path);
@@ -13,7 +13,7 @@ export const checkExistsAndCreateDir = async (dirPath: string) => {
 
 export const saveStreamToDisk = async (
     filePath: string,
-    fileStream: ReadableStream<Uint8Array>
+    fileStream: ReadableStream<Uint8Array>,
 ) => {
     await writeStream(filePath, fileStream);
 };

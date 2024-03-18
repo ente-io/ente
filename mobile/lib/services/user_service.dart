@@ -916,7 +916,7 @@ class UserService {
         _config.getHttpEndpoint() + "/users/two-factor/remove",
         data: {
           "sessionID": sessionID,
-          "secret": utf8.decode(base64.decode(secret)),
+          "secret": secret,
           "twoFactorType": twoFactorTypeToString(type),
         },
       );

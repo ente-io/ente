@@ -1,4 +1,4 @@
-import { BrowserWindow } from 'electron';
+import { BrowserWindow } from "electron";
 
 function lowerCaseHeaders(responseHeaders: Record<string, string[]>) {
     const headers: Record<string, string[]> = {};
@@ -12,10 +12,10 @@ export function addAllowOriginHeader(mainWindow: BrowserWindow) {
     mainWindow.webContents.session.webRequest.onHeadersReceived(
         (details, callback) => {
             details.responseHeaders = lowerCaseHeaders(details.responseHeaders);
-            details.responseHeaders['access-control-allow-origin'] = ['*'];
+            details.responseHeaders["access-control-allow-origin"] = ["*"];
             callback({
                 responseHeaders: details.responseHeaders,
             });
-        }
+        },
     );
 }

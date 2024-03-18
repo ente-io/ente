@@ -1,6 +1,8 @@
 ---
 title: Public links
-description: Share photos with your friends and family without them needing to install Ente Photos
+description:
+    Share photos with your friends and family without them needing to install
+    Ente Photos
 ---
 
 # Public Links

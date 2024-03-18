@@ -631,10 +631,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
             } else if (value == AlbumPopupAction.map) {
               await showOnMap();
             } else if (value == AlbumPopupAction.cleanUncategorized) {
-              await collectionActions.removeFromUncatIfPresentInOtherAlbum(
-                widget.collection!,
-                context,
-              );
+              await onCleanUncategorizedClick(context);
             } else {
               showToast(context, S.of(context).somethingWentWrong);
             }
@@ -644,6 +641,24 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     }
 
     return actions;
+  }
+
+  Future<void> onCleanUncategorizedClick(BuildContext buildContext) async {
+    final actionResult = await showChoiceActionSheet(
+      context,
+      isCritical: true,
+      title: S.of(context).cleanUncategorized,
+      firstButtonLabel: S.of(context).confirm,
+      body: S.of(context).cleanUncategorizedDescription,
+    );
+    if (actionResult?.action != null && mounted) {
+      if (actionResult!.action == ButtonAction.first) {
+        await collectionActions.removeFromUncatIfPresentInOtherAlbum(
+          widget.collection!,
+          buildContext,
+        );
+      }
+    }
   }
 
   Future<void> setCoverPhoto(BuildContext context) async {

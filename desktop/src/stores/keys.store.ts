@@ -1,18 +1,18 @@
-import Store, { Schema } from 'electron-store';
-import { KeysStoreType } from '../types';
+import Store, { Schema } from "electron-store";
+import { KeysStoreType } from "../types";
 
 const keysStoreSchema: Schema<KeysStoreType> = {
     AnonymizeUserID: {
-        type: 'object',
+        type: "object",
         properties: {
             id: {
-                type: 'string',
+                type: "string",
             },
         },
     },
 };
 
 export const keysStore = new Store({
-    name: 'keys',
+    name: "keys",
     schema: keysStoreSchema,
 });

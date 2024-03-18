@@ -15,7 +15,7 @@ the logs just make the process a bit faster and easier.
 
 ### Mobile
 
-Placeholder
+Steps for mobile. Still a placeholder.
 
 ### Desktop
 

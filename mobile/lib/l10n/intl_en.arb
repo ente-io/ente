@@ -819,7 +819,6 @@
   "archiveAlbum": "Archive album",
   "calculating": "Calculating...",
   "pleaseWaitDeletingAlbum": "Please wait, deleting album",
-  "searchHintText": "Albums, months, days, years, ...",
   "searchByExamples": "• Album names (e.g. \"Camera\")\n• Types of files (e.g. \"Videos\", \".gif\")\n• Years and months (e.g. \"2022\", \"January\")\n• Holidays (e.g. \"Christmas\")\n• Photo descriptions (e.g. “#fun”)",
   "youCanTrySearchingForADifferentQuery": "You can try searching for a different query.",
   "noResultsFound": "No results found",
@@ -1188,8 +1187,8 @@
   "changeLocationOfSelectedItems": "Change location of selected items?",
   "editsToLocationWillOnlyBeSeenWithinEnte": "Edits to location will only be seen within Ente",
   "cleanUncategorized": "Clean Uncategorized",
+  "cleanUncategorizedDescription": "Remove all files from Uncategorized that are present in other albums",
   "waitingForVerification": "Waiting for verification...",
-  "launchPasskeyUrlAgain": "Launch passkey URL again",
   "passkey": "Passkey",
   "passkeyAuthTitle": "Passkey verification",
   "verifyPasskey": "Verify passkey",
@@ -1198,5 +1197,10 @@
   "deviceNotFound": "Device not found",
   "castInstruction": "Visit cast.ente.io on the device you want to pair.\n\nEnter the code below to play the album on your TV.",
   "deviceCodeHint": "Enter the code",
-  "joinDiscord": "Join Discord"
+  "joinDiscord": "Join Discord",
+  "locations": "Locations",
+  "descriptions": "Descriptions",
+  "addViewers": "{count, plural, zero {Add viewer} one {Add viewer} other {Add viewers}}",
+  "addCollaborators": "{count, plural, zero {Add collaborator} one {Add collaborator} other {Add collaborators}}",
+  "longPressAnEmailToVerifyEndToEndEncryption": "Long press an email to verify end to end encryption."
 }

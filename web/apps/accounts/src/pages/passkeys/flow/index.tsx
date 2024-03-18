@@ -40,6 +40,7 @@ const PasskeysFlow = () => {
                 redirect !== "" &&
                 !(
                     redirectURL.host.endsWith(".ente.io") ||
+                    redirectURL.host.endsWith(".ente.sh") ||
                     redirectURL.host.endsWith("bada-frame.pages.dev")
                 ) &&
                 redirectURL.protocol !== "ente:" &&
@@ -255,6 +256,18 @@ const PasskeysFlow = () => {
                             variant="contained"
                         >
                             {t("TRY_AGAIN")}
+                        </EnteButton>
+                        <EnteButton
+                            href="/passkeys/flow/recover"
+                            fullWidth
+                            style={{
+                                marginTop: "1rem",
+                            }}
+                            color="primary"
+                            type="button"
+                            variant="text"
+                        >
+                            {t("RECOVER_TWO_FACTOR")}
                         </EnteButton>
                     </FormPaper>
                 </Box>

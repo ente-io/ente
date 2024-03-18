@@ -12,7 +12,7 @@ multi-device sync.
 ### Android
 
 This repository's [GitHub
-releases](https://github.com/ente-io/ente/releases/latest/download/ente-auth.apk)
+releases](https://github.com/ente-io/ente/releases?q=tag%3Aauth-v2)
 contains APKs, built straight from source. These builds keep themselves updated,
 without relying on third party stores.
 

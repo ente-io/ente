@@ -1,4 +1,4 @@
-import { getElectronFile, getDirFilePaths } from '../services/fs';
+import { getDirFilePaths, getElectronFile } from "../services/fs";
 
 export async function getDirFiles(dirPath: string) {
     const files = await getDirFilePaths(dirPath);
@@ -6,10 +6,10 @@ export async function getDirFiles(dirPath: string) {
     return electronFiles;
 }
 export {
+    deleteFile,
+    deleteFolder,
     isFolder,
     moveFile,
-    deleteFolder,
-    deleteFile,
-    rename,
     readTextFile,
-} from '../services/fs';
+    rename,
+} from "../services/fs";

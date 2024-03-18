@@ -1,49 +1,41 @@
-import { userPreferencesStore } from '../stores/userPreferences.store';
+import { userPreferencesStore } from "../stores/userPreferences.store";
 
 export function getHideDockIconPreference() {
-    return userPreferencesStore.get('hideDockIcon');
+    return userPreferencesStore.get("hideDockIcon");
 }
 
 export function setHideDockIconPreference(shouldHideDockIcon: boolean) {
-    userPreferencesStore.set('hideDockIcon', shouldHideDockIcon);
+    userPreferencesStore.set("hideDockIcon", shouldHideDockIcon);
 }
 
 export function getSkipAppVersion() {
-    return userPreferencesStore.get('skipAppVersion');
+    return userPreferencesStore.get("skipAppVersion");
 }
 
 export function setSkipAppVersion(version: string) {
-    userPreferencesStore.set('skipAppVersion', version);
+    userPreferencesStore.set("skipAppVersion", version);
 }
 
 export function getMuteUpdateNotificationVersion() {
-    return userPreferencesStore.get('muteUpdateNotificationVersion');
+    return userPreferencesStore.get("muteUpdateNotificationVersion");
 }
 
 export function setMuteUpdateNotificationVersion(version: string) {
-    userPreferencesStore.set('muteUpdateNotificationVersion', version);
-}
-
-export function getOptOutOfCrashReports() {
-    return userPreferencesStore.get('optOutOfCrashReports') ?? false;
-}
-
-export function setOptOutOfCrashReports(optOut: boolean) {
-    userPreferencesStore.set('optOutOfCrashReports', optOut);
+    userPreferencesStore.set("muteUpdateNotificationVersion", version);
 }
 
 export function clearSkipAppVersion() {
-    userPreferencesStore.delete('skipAppVersion');
+    userPreferencesStore.delete("skipAppVersion");
 }
 
 export function clearMuteUpdateNotificationVersion() {
-    userPreferencesStore.delete('muteUpdateNotificationVersion');
+    userPreferencesStore.delete("muteUpdateNotificationVersion");
 }
 
 export function setCustomCacheDirectory(directory: string) {
-    userPreferencesStore.set('customCacheDirectory', directory);
+    userPreferencesStore.set("customCacheDirectory", directory);
 }
 
 export function getCustomCacheDirectory(): string {
-    return userPreferencesStore.get('customCacheDirectory');
+    return userPreferencesStore.get("customCacheDirectory");
 }

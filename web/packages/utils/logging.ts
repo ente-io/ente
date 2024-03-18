@@ -17,7 +17,7 @@
  *
  * TODO (MR): Currently this is a placeholder function to funnel error logs
  * through. This needs to do what the existing logError in @ente/shared does,
- * but it cannot have a direct Electron/Sentry dependency here. For now, we just
+ * but it cannot have a direct Electron dependency here. For now, we just
  * log on the console.
  */
 export const logError = (message: string, e?: unknown) => {
@@ -35,5 +35,7 @@ export const logError = (message: string, e?: unknown) => {
         // For the rest rare cases, use the default string serialization of e.
         es = String(e);
     }
+
+    // TODO(MR): Use addLogLine
     console.error(`${message}: ${es}`);
 };

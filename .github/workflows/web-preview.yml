@@ -1,0 +1,52 @@
+name: "Preview (web)"
+
+on:
+    workflow_dispatch:
+        inputs:
+            app:
+                description: "App to build and deploy"
+                type: choice
+                required: true
+                default: "photos"
+                options:
+                    - "accounts"
+                    - "auth"
+                    - "cast"
+                    - "photos"
+
+jobs:
+    deploy:
+        runs-on: ubuntu-latest
+
+        defaults:
+            run:
+                working-directory: web
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+              with:
+                  submodules: recursive
+
+            - name: Setup node and enable yarn caching
+              uses: actions/setup-node@v4
+              with:
+                  node-version: 20
+                  cache: "yarn"
+                  cache-dependency-path: "docs/yarn.lock"
+
+            - name: Install dependencies
+              run: yarn install
+
+            - name: Build ${{ inputs.app }}
+              run: yarn build:${{ inputs.app }}
+
+            - name: Publish ${{ inputs.app }} to preview
+              uses: cloudflare/pages-action@1
+              with:
+                  accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+                  apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+                  projectName: ente
+                  branch: preview
+                  directory: web/apps/${{ inputs.app }}/out
+                  wranglerVersion: "3"

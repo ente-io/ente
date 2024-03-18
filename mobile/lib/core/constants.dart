@@ -67,7 +67,7 @@ const defaultCityRadius = 10.0;
 
 const galleryGridSpacing = 2.0;
 
-const kSearchSectionLimit = 7;
+const kSearchSectionLimit = 9;
 
 const iOSGroupID = "group.io.ente.frame.SlideshowWidget";
 

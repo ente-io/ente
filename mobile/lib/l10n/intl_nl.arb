@@ -819,7 +819,6 @@
   "archiveAlbum": "Album archiveren",
   "calculating": "Berekenen...",
   "pleaseWaitDeletingAlbum": "Een ogenblik geduld, album wordt verwijderd",
-  "searchHintText": "Albums, maanden, dagen, jaren, ...",
   "searchByExamples": "• Albumnamen (bijv. \"Camera\")\n• Types van bestanden (bijv. \"Video's\", \".gif\")\n• Jaren en maanden (bijv. \"2022\", \"januari\")\n• Feestdagen (bijv. \"Kerstmis\")\n• Fotobeschrijvingen (bijv. \"#fun\")",
   "youCanTrySearchingForADifferentQuery": "U kunt proberen een andere zoekopdracht te vinden.",
   "noResultsFound": "Geen resultaten gevonden",
@@ -1193,5 +1192,10 @@
   "deviceNotFound": "Apparaat niet gevonden",
   "castInstruction": "Bezoek cast.ente.io op het apparaat dat u wilt koppelen.\n\nVoer de code hieronder in om het album op uw TV af te spelen.",
   "deviceCodeHint": "Voer de code in",
-  "joinDiscord": "Join Discord"
+  "joinDiscord": "Join Discord",
+  "locations": "Locations",
+  "descriptions": "Descriptions",
+  "addViewers": "{count, plural, zero {Add viewer} one {Add viewer} other {Add viewers}}",
+  "addCollaborators": "{count, plural, zero {Add collaborator} one {Add collaborator} other {Add collaborators}}",
+  "longPressAnEmailToVerifyEndToEndEncryption": "Long press an email to verify end to end encryption."
 }

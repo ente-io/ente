@@ -1,9 +1,11 @@
 import 'dart:convert';
 
 import 'package:ente_auth/core/configuration.dart';
-import 'package:ente_auth/ente_theme_data.dart';
 import 'package:ente_auth/l10n/l10n.dart';
+import 'package:ente_auth/models/account/two_factor.dart';
 import 'package:ente_auth/services/user_service.dart';
+import 'package:ente_auth/ui/components/buttons/button_widget.dart';
+import 'package:ente_auth/ui/components/models/button_type.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
@@ -99,30 +101,50 @@ class _PasskeyPageState extends State<PasskeyPage> {
   }
 
   Widget _getBody() {
-    final l10n = context.l10n;
-
     return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            l10n.waitingForBrowserRequest,
-            style: const TextStyle(
-              height: 1.4,
-              fontSize: 16,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              context.l10n.waitingForVerification,
+              style: const TextStyle(
+                height: 1.4,
+                fontSize: 16,
+              ),
             ),
-          ),
-          const SizedBox(height: 16),
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(horizontal: 32),
-            child: ElevatedButton(
-              style: Theme.of(context).colorScheme.optionalActionButtonStyle,
-              onPressed: launchPasskey,
-              child: Text(l10n.launchPasskeyUrlAgain),
+            const SizedBox(height: 16),
+            ButtonWidget(
+              buttonType: ButtonType.primary,
+              labelText: context.l10n.verifyPasskey,
+              onTap: () => launchPasskey(),
             ),
-          ),
-        ],
+            const Padding(padding: EdgeInsets.all(30)),
+            GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: () {
+                UserService.instance.recoverTwoFactor(
+                  context,
+                  widget.sessionID,
+                  TwoFactorType.passkey,
+                );
+              },
+              child: Container(
+                padding: const EdgeInsets.all(10),
+                child: Center(
+                  child: Text(
+                    context.l10n.recoverAccount,
+                    style: const TextStyle(
+                      decoration: TextDecoration.underline,
+                      fontSize: 12,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

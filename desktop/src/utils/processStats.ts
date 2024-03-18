@@ -1,6 +1,6 @@
-import ElectronLog from 'electron-log';
-import { webFrame } from 'electron/renderer';
-import { convertBytesToHumanReadable } from './logging';
+import ElectronLog from "electron-log";
+import { webFrame } from "electron/renderer";
+import { convertBytesToHumanReadable } from "./logging";
 
 const LOGGING_INTERVAL_IN_MICROSECONDS = 30 * 1000; // 30 seconds
 
@@ -16,14 +16,14 @@ const HIGH_RENDERER_MEMORY_USAGE_THRESHOLD_IN_KILOBYTES = 1024 * 1024; // 1 GB
 
 async function logMainProcessStats() {
     const processMemoryInfo = await getNormalizedProcessMemoryInfo(
-        await process.getProcessMemoryInfo()
+        await process.getProcessMemoryInfo(),
     );
     const cpuUsage = process.getCPUUsage();
     const heapStatistics = getNormalizedHeapStatistics(
-        process.getHeapStatistics()
+        process.getHeapStatistics(),
     );
 
-    ElectronLog.log('main process stats', {
+    ElectronLog.log("main process stats", {
         processMemoryInfo,
         heapStatistics,
         cpuUsage,
@@ -42,11 +42,11 @@ async function logSpikeMainMemoryUsage() {
     const processMemoryInfo = await process.getProcessMemoryInfo();
     const currentMemoryUsage = Math.max(
         processMemoryInfo.residentSet ?? 0,
-        processMemoryInfo.private
+        processMemoryInfo.private,
     );
     const previousMemoryUsage = Math.max(
         previousMainProcessMemoryInfo.residentSet ?? 0,
-        previousMainProcessMemoryInfo.private
+        previousMainProcessMemoryInfo.private,
     );
     const isSpiking =
         currentMemoryUsage - previousMemoryUsage >=
@@ -66,10 +66,10 @@ async function logSpikeMainMemoryUsage() {
             await getNormalizedProcessMemoryInfo(previousMainProcessMemoryInfo);
         const cpuUsage = process.getCPUUsage();
         const heapStatistics = getNormalizedHeapStatistics(
-            process.getHeapStatistics()
+            process.getHeapStatistics(),
         );
 
-        ElectronLog.log('reporting main memory usage spike', {
+        ElectronLog.log("reporting main memory usage spike", {
             currentProcessMemoryInfo: normalizedCurrentProcessMemoryInfo,
             previousProcessMemoryInfo: normalizedPreviousProcessMemoryInfo,
             heapStatistics,
@@ -94,12 +94,12 @@ async function logSpikeRendererMemoryUsage() {
     const processMemoryInfo = await process.getProcessMemoryInfo();
     const currentMemoryUsage = Math.max(
         processMemoryInfo.residentSet ?? 0,
-        processMemoryInfo.private
+        processMemoryInfo.private,
     );
 
     const previousMemoryUsage = Math.max(
         previousRendererProcessMemoryInfo.private,
-        previousRendererProcessMemoryInfo.residentSet ?? 0
+        previousRendererProcessMemoryInfo.residentSet ?? 0,
     );
     const isSpiking =
         currentMemoryUsage - previousMemoryUsage >=
@@ -117,14 +117,14 @@ async function logSpikeRendererMemoryUsage() {
             await getNormalizedProcessMemoryInfo(processMemoryInfo);
         const normalizedPreviousProcessMemoryInfo =
             await getNormalizedProcessMemoryInfo(
-                previousRendererProcessMemoryInfo
+                previousRendererProcessMemoryInfo,
             );
         const cpuUsage = process.getCPUUsage();
         const heapStatistics = getNormalizedHeapStatistics(
-            process.getHeapStatistics()
+            process.getHeapStatistics(),
         );
 
-        ElectronLog.log('reporting renderer memory usage spike', {
+        ElectronLog.log("reporting renderer memory usage spike", {
             currentProcessMemoryInfo: normalizedCurrentProcessMemoryInfo,
             previousProcessMemoryInfo: normalizedPreviousProcessMemoryInfo,
             heapStatistics,
@@ -140,13 +140,13 @@ async function logSpikeRendererMemoryUsage() {
 async function logRendererProcessStats() {
     const blinkMemoryInfo = getNormalizedBlinkMemoryInfo();
     const heapStatistics = getNormalizedHeapStatistics(
-        process.getHeapStatistics()
+        process.getHeapStatistics(),
     );
     const webFrameResourceUsage = getNormalizedWebFrameResourceUsage();
     const processMemoryInfo = await getNormalizedProcessMemoryInfo(
-        await process.getProcessMemoryInfo()
+        await process.getProcessMemoryInfo(),
     );
-    ElectronLog.log('renderer process stats', {
+    ElectronLog.log("renderer process stats", {
         blinkMemoryInfo,
         heapStatistics,
         processMemoryInfo,
@@ -157,7 +157,7 @@ async function logRendererProcessStats() {
 export function setupMainProcessStatsLogger() {
     setInterval(
         logSpikeMainMemoryUsage,
-        SPIKE_DETECTION_INTERVAL_IN_MICROSECONDS
+        SPIKE_DETECTION_INTERVAL_IN_MICROSECONDS,
     );
     setInterval(logMainProcessStats, LOGGING_INTERVAL_IN_MICROSECONDS);
 }
@@ -165,7 +165,7 @@ export function setupMainProcessStatsLogger() {
 export function setupRendererProcessStatsLogger() {
     setInterval(
         logSpikeRendererMemoryUsage,
-        SPIKE_DETECTION_INTERVAL_IN_MICROSECONDS
+        SPIKE_DETECTION_INTERVAL_IN_MICROSECONDS,
     );
     setInterval(logRendererProcessStats, LOGGING_INTERVAL_IN_MICROSECONDS);
 }
@@ -174,21 +174,21 @@ export async function logRendererProcessMemoryUsage(message: string) {
     const processMemoryInfo = await process.getProcessMemoryInfo();
     const processMemory = Math.max(
         processMemoryInfo.private,
-        processMemoryInfo.residentSet ?? 0
+        processMemoryInfo.residentSet ?? 0,
     );
     ElectronLog.log(
-        'renderer ProcessMemory',
+        "renderer ProcessMemory",
         message,
-        convertBytesToHumanReadable(processMemory * 1024)
+        convertBytesToHumanReadable(processMemory * 1024),
     );
 }
 
 const getNormalizedProcessMemoryInfo = async (
-    processMemoryInfo: Electron.ProcessMemoryInfo
+    processMemoryInfo: Electron.ProcessMemoryInfo,
 ) => {
     return {
         residentSet: convertBytesToHumanReadable(
-            processMemoryInfo.residentSet * 1024
+            processMemoryInfo.residentSet * 1024,
         ),
         private: convertBytesToHumanReadable(processMemoryInfo.private * 1024),
         shared: convertBytesToHumanReadable(processMemoryInfo.shared * 1024),
@@ -199,40 +199,40 @@ const getNormalizedBlinkMemoryInfo = () => {
     const blinkMemoryInfo = process.getBlinkMemoryInfo();
     return {
         allocated: convertBytesToHumanReadable(
-            blinkMemoryInfo.allocated * 1024
+            blinkMemoryInfo.allocated * 1024,
         ),
         total: convertBytesToHumanReadable(blinkMemoryInfo.total * 1024),
     };
 };
 
 const getNormalizedHeapStatistics = (
-    heapStatistics: Electron.HeapStatistics
+    heapStatistics: Electron.HeapStatistics,
 ) => {
     return {
         totalHeapSize: convertBytesToHumanReadable(
-            heapStatistics.totalHeapSize * 1024
+            heapStatistics.totalHeapSize * 1024,
         ),
         totalHeapSizeExecutable: convertBytesToHumanReadable(
-            heapStatistics.totalHeapSizeExecutable * 1024
+            heapStatistics.totalHeapSizeExecutable * 1024,
         ),
         totalPhysicalSize: convertBytesToHumanReadable(
-            heapStatistics.totalPhysicalSize * 1024
+            heapStatistics.totalPhysicalSize * 1024,
         ),
         totalAvailableSize: convertBytesToHumanReadable(
-            heapStatistics.totalAvailableSize * 1024
+            heapStatistics.totalAvailableSize * 1024,
         ),
         usedHeapSize: convertBytesToHumanReadable(
-            heapStatistics.usedHeapSize * 1024
+            heapStatistics.usedHeapSize * 1024,
         ),
 
         heapSizeLimit: convertBytesToHumanReadable(
-            heapStatistics.heapSizeLimit * 1024
+            heapStatistics.heapSizeLimit * 1024,
         ),
         mallocedMemory: convertBytesToHumanReadable(
-            heapStatistics.mallocedMemory * 1024
+            heapStatistics.mallocedMemory * 1024,
         ),
         peakMallocedMemory: convertBytesToHumanReadable(
-            heapStatistics.peakMallocedMemory * 1024
+            heapStatistics.peakMallocedMemory * 1024,
         ),
         doesZapGarbage: heapStatistics.doesZapGarbage,
     };
@@ -244,51 +244,51 @@ const getNormalizedWebFrameResourceUsage = () => {
         images: {
             count: webFrameResourceUsage.images.count,
             size: convertBytesToHumanReadable(
-                webFrameResourceUsage.images.size
+                webFrameResourceUsage.images.size,
             ),
             liveSize: convertBytesToHumanReadable(
-                webFrameResourceUsage.images.liveSize
+                webFrameResourceUsage.images.liveSize,
             ),
         },
         scripts: {
             count: webFrameResourceUsage.scripts.count,
             size: convertBytesToHumanReadable(
-                webFrameResourceUsage.scripts.size
+                webFrameResourceUsage.scripts.size,
             ),
             liveSize: convertBytesToHumanReadable(
-                webFrameResourceUsage.scripts.liveSize
+                webFrameResourceUsage.scripts.liveSize,
             ),
         },
         cssStyleSheets: {
             count: webFrameResourceUsage.cssStyleSheets.count,
             size: convertBytesToHumanReadable(
-                webFrameResourceUsage.cssStyleSheets.size
+                webFrameResourceUsage.cssStyleSheets.size,
             ),
             liveSize: convertBytesToHumanReadable(
-                webFrameResourceUsage.cssStyleSheets.liveSize
+                webFrameResourceUsage.cssStyleSheets.liveSize,
             ),
         },
         xslStyleSheets: {
             count: webFrameResourceUsage.xslStyleSheets.count,
             size: convertBytesToHumanReadable(
-                webFrameResourceUsage.xslStyleSheets.size
+                webFrameResourceUsage.xslStyleSheets.size,
             ),
             liveSize: convertBytesToHumanReadable(
-                webFrameResourceUsage.xslStyleSheets.liveSize
+                webFrameResourceUsage.xslStyleSheets.liveSize,
             ),
         },
         fonts: {
             count: webFrameResourceUsage.fonts.count,
             size: convertBytesToHumanReadable(webFrameResourceUsage.fonts.size),
             liveSize: convertBytesToHumanReadable(
-                webFrameResourceUsage.fonts.liveSize
+                webFrameResourceUsage.fonts.liveSize,
             ),
         },
         other: {
             count: webFrameResourceUsage.other.count,
             size: convertBytesToHumanReadable(webFrameResourceUsage.other.size),
             liveSize: convertBytesToHumanReadable(
-                webFrameResourceUsage.other.liveSize
+                webFrameResourceUsage.other.liveSize,
             ),
         },
     };

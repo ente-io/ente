@@ -1,8 +1,9 @@
-## Developer docs
+# Developer docs
 
-If you just want to run ente locally or develop on it, you can do
+If you just want to run Ente's web apps locally or develop them, you can do
 
-    yarn
+    yarn install
     yarn dev
 
-The docs in this directory are for more advanced or infrequently needed details.
+The docs in this directory provide more details that some developers might find
+useful.

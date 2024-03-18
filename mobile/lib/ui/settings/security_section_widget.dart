@@ -1,5 +1,4 @@
 import 'dart:async';
-import "dart:convert";
 import "dart:typed_data";
 
 import 'package:flutter/material.dart';
@@ -27,7 +26,6 @@ import "package:photos/utils/crypto_util.dart";
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/navigation_util.dart";
 import "package:photos/utils/toast_util.dart";
-import "package:uuid/uuid.dart";
 
 class SecuritySectionWidget extends StatefulWidget {
   const SecuritySectionWidget({Key? key}) : super(key: key);
@@ -243,15 +241,14 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
       if (!isPassKeyResetEnabled) {
         final Uint8List recoveryKey =
             await UserService.instance.getOrCreateRecoveryKey(context);
-        final resetSecret = const Uuid().v4().toString();
-        final bytes = utf8.encode(resetSecret);
-        final base64Str = base64.encode(bytes);
+        final resetKey = CryptoUtil.generateKey();
+        final resetKeyBase64 = CryptoUtil.bin2base64(resetKey);
         final encryptionResult = CryptoUtil.encryptSync(
-          CryptoUtil.base642bin(base64Str),
+          resetKey,
           recoveryKey,
         );
         await PasskeyService.instance.configurePasskeyRecovery(
-          resetSecret,
+          resetKeyBase64,
           CryptoUtil.bin2base64(encryptionResult.encryptedData!),
           CryptoUtil.bin2base64(encryptionResult.nonce!),
         );

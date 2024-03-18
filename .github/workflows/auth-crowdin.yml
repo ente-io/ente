@@ -9,8 +9,8 @@ on:
             - ".github/workflows/auth-crowdin.yml"
         branches: [main]
     schedule:
-        # See: [Note: Run every 24 hours]
-        - cron: "50 1 * * *"
+        # See: [Note: Run workflow on specific days of the week]
+        - cron: "50 1 * * 2,5"
     # Also allow manually running the workflow
     workflow_dispatch:
 

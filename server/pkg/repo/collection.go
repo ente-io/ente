@@ -775,27 +775,6 @@ func (repo *CollectionRepository) GetSharees(cID int64) ([]ente.CollectionUser, 
 	return users, nil
 }
 
-// getCollectionExclusiveFiles return a list of filesIDs that are exclusive to the collection
-func (repo *CollectionRepository) getCollectionExclusiveFiles(collectionID int64, collectionOwnerID int64) ([]int64, error) {
-	rows, err := repo.DB.Query(`
-	SELECT file_id
-	FROM collection_files
-	WHERE is_deleted=false
-		AND file_id IN (
-			SELECT file_id   
-			FROM collection_files
-			WHERE is_deleted=false
-				AND collection_id =$1
-		)
-	AND collection_id IN (SELECT collection_id from collections where owner_id = $2)
-	GROUP BY file_id
-	HAVING COUNT(file_id) = 1`, collectionID, collectionOwnerID)
-	if err != nil {
-		return make([]int64, 0), stacktrace.Propagate(err, "")
-	}
-	return convertRowsToFileId(rows)
-}
-
 // GetCollectionFileIDs return list of fileIDs are  currently present in the given collection
 // and fileIDs are owned by the collection owner
 func (repo *CollectionRepository) GetCollectionFileIDs(collectionID int64, collectionOwnerID int64) ([]int64, error) {
@@ -822,41 +801,6 @@ func convertRowsToFileId(rows *sql.Rows) ([]int64, error) {
 		fileIDs = append(fileIDs, fileID)
 	}
 	return fileIDs, nil
-}
-
-// TrashV2 removes an entry in the database for the collection referred to by `collectionID` and move all files
-// which are exclusive to this collection to trash
-// Deprecated. Please use TrashV3
-func (repo *CollectionRepository) TrashV2(collectionID int64, userID int64) error {
-	ctx := context.Background()
-	tx, err := repo.DB.BeginTx(ctx, nil)
-	if err != nil {
-		return stacktrace.Propagate(err, "")
-	}
-	fileIDs, err := repo.getCollectionExclusiveFiles(collectionID, userID)
-	if err != nil {
-		tx.Rollback()
-		return stacktrace.Propagate(err, "")
-	}
-	items := make([]ente.TrashItemRequest, 0)
-	for _, fileID := range fileIDs {
-		items = append(items, ente.TrashItemRequest{
-			FileID:       fileID,
-			CollectionID: collectionID,
-		})
-	}
-	_, err = tx.ExecContext(ctx, `UPDATE collection_files SET is_deleted = true WHERE collection_id = $1`, collectionID)
-	if err != nil {
-		tx.Rollback()
-		return stacktrace.Propagate(err, "")
-	}
-	err = repo.TrashRepo.InsertItems(ctx, tx, userID, items)
-
-	if err != nil {
-		tx.Rollback()
-		return stacktrace.Propagate(err, "")
-	}
-	return tx.Commit()
 }
 
 // TrashV3  move the files belonging to the collection owner to the trash
@@ -949,11 +893,8 @@ func (repo *CollectionRepository) removeAllFilesAddedByOthers(collectionID int64
 
 // ScheduleDelete marks the collection as deleted and queue up an operation to
 // move the collection files to user's trash.
-// The deleteOnlyExcluiveFiles flag is true for v2 collection delete and is false for v3 version.
 // See [Collection Delete Versions] for more details
-func (repo *CollectionRepository) ScheduleDelete(
-	collectionID int64,
-	deleteOnlyExcluiveFiles bool) error {
+func (repo *CollectionRepository) ScheduleDelete(collectionID int64) error {
 	updationTime := time.Microseconds()
 	ctx := context.Background()
 	tx, err := repo.DB.BeginTx(ctx, nil)
@@ -974,12 +915,7 @@ func (repo *CollectionRepository) ScheduleDelete(
 		tx.Rollback()
 		return stacktrace.Propagate(err, "")
 	}
-	if deleteOnlyExcluiveFiles {
-		err = repo.QueueRepo.AddItems(ctx, tx, TrashCollectionQueue, []string{strconv.FormatInt(collectionID, 10)})
-	} else {
-		err = repo.QueueRepo.AddItems(ctx, tx, TrashCollectionQueueV3, []string{strconv.FormatInt(collectionID, 10)})
-	}
-
+	err = repo.QueueRepo.AddItems(ctx, tx, TrashCollectionQueueV3, []string{strconv.FormatInt(collectionID, 10)})
 	if err != nil {
 		tx.Rollback()
 		return stacktrace.Propagate(err, "")

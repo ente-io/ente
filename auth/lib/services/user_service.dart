@@ -11,6 +11,7 @@ import 'package:ente_auth/core/event_bus.dart';
 import 'package:ente_auth/core/network.dart';
 import 'package:ente_auth/events/user_details_changed_event.dart';
 import 'package:ente_auth/l10n/l10n.dart';
+import 'package:ente_auth/models/account/two_factor.dart';
 import 'package:ente_auth/models/api/user/srp.dart';
 import 'package:ente_auth/models/delete_account.dart';
 import 'package:ente_auth/models/key_attributes.dart';
@@ -762,7 +763,11 @@ class UserService {
     }
   }
 
-  Future<void> recoverTwoFactor(BuildContext context, String sessionID) async {
+  Future<void> recoverTwoFactor(
+    BuildContext context,
+    String sessionID,
+    TwoFactorType type,
+  ) async {
     final dialog = createProgressDialog(context, context.l10n.pleaseWait);
     await dialog.show();
     try {
@@ -770,6 +775,7 @@ class UserService {
         _config.getHttpEndpoint() + "/users/two-factor/recover",
         queryParameters: {
           "sessionID": sessionID,
+          "twoFactorType": twoFactorTypeToString(type),
         },
       );
       if (response.statusCode == 200) {
@@ -778,6 +784,7 @@ class UserService {
           MaterialPageRoute(
             builder: (BuildContext context) {
               return TwoFactorRecoveryPage(
+                type,
                 sessionID,
                 response.data["encryptedSecret"],
                 response.data["secretDecryptionNonce"],
@@ -788,6 +795,7 @@ class UserService {
         );
       }
     } on DioError catch (e) {
+      await dialog.hide();
       _logger.severe(e);
       if (e.response != null && e.response!.statusCode == 404) {
         showToast(context, context.l10n.sessionExpired);
@@ -809,6 +817,7 @@ class UserService {
         );
       }
     } catch (e) {
+      await dialog.hide();
       _logger.severe(e);
       // ignore: unawaited_futures
       showErrorDialog(
@@ -823,6 +832,7 @@ class UserService {
 
   Future<void> removeTwoFactor(
     BuildContext context,
+    TwoFactorType type,
     String sessionID,
     String recoveryKey,
     String encryptedSecret,
@@ -862,6 +872,7 @@ class UserService {
         data: {
           "sessionID": sessionID,
           "secret": secret,
+          "twoFactorType": twoFactorTypeToString(type),
         },
       );
       if (response.statusCode == 200) {
@@ -881,6 +892,7 @@ class UserService {
         );
       }
     } on DioError catch (e) {
+      await dialog.hide();
       _logger.severe(e);
       if (e.response != null && e.response!.statusCode == 404) {
         showToast(context, "Session expired");
@@ -902,6 +914,7 @@ class UserService {
         );
       }
     } catch (e) {
+      await dialog.hide();
       _logger.severe(e);
       // ignore: unawaited_futures
       showErrorDialog(

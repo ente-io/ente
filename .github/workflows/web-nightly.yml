@@ -2,7 +2,7 @@ name: "Nightly (web)"
 
 on:
     schedule:
-        # [Note: Run every 24 hours]
+        # [Note: Run workflow every 24 hours]
         #
         # Run every 24 hours - First field is minute, second is hour of the day
         # This runs 23:15 UTC everyday - 1 and 15 are just arbitrary offset to
@@ -80,6 +80,8 @@ jobs:
 
             - name: Build photos
               run: yarn build:photos
+              env:
+                  NEXT_PUBLIC_ENTE_ALBUMS_ENDPOINT: https://albums.ente.sh
 
             - name: Publish photos
               uses: cloudflare/pages-action@1

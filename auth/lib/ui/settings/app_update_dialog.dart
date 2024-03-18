@@ -1,14 +1,7 @@
-import 'dart:io';
-
-import 'package:ente_auth/core/configuration.dart';
-import 'package:ente_auth/core/network.dart';
-import 'package:ente_auth/ente_theme_data.dart';
 import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/services/update_service.dart';
 import 'package:ente_auth/theme/ente_theme.dart';
 import 'package:flutter/material.dart';
-import 'package:logging/logging.dart';
-import 'package:open_filex/open_filex.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 class AppUpdateDialog extends StatefulWidget {
@@ -112,118 +105,5 @@ class _AppUpdateDialogState extends State<AppUpdateDialog> {
         content: content,
       ),
     );
-  }
-}
-
-class ApkDownloaderDialog extends StatefulWidget {
-  final LatestVersionInfo? versionInfo;
-
-  const ApkDownloaderDialog(this.versionInfo, {Key? key}) : super(key: key);
-
-  @override
-  State<ApkDownloaderDialog> createState() => _ApkDownloaderDialogState();
-}
-
-class _ApkDownloaderDialogState extends State<ApkDownloaderDialog> {
-  String? _saveUrl;
-  double? _downloadProgress;
-
-  @override
-  void initState() {
-    super.initState();
-    _saveUrl = Configuration.instance.getTempDirectory() +
-        "ente-" +
-        widget.versionInfo!.name! +
-        ".apk";
-    _downloadApk();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async => false,
-      child: AlertDialog(
-        title: const Text(
-          "Downloading...",
-          style: TextStyle(
-            fontSize: 16,
-          ),
-          textAlign: TextAlign.center,
-        ),
-        content: LinearProgressIndicator(
-          value: _downloadProgress,
-          valueColor: AlwaysStoppedAnimation<Color>(
-            Theme.of(context).colorScheme.alternativeColor,
-          ),
-        ),
-      ),
-    );
-  }
-
-  Future<void> _downloadApk() async {
-    try {
-      if (!File(_saveUrl!).existsSync()) {
-        await Network.instance.getDio().download(
-          widget.versionInfo!.url!,
-          _saveUrl,
-          onReceiveProgress: (count, _) {
-            setState(() {
-              _downloadProgress = count / widget.versionInfo!.size!;
-            });
-          },
-        );
-      }
-      Navigator.of(context, rootNavigator: true).pop('dialog');
-      // ignore: unawaited_futures
-      OpenFilex.open(_saveUrl);
-    } catch (e) {
-      Logger("ApkDownloader").severe(e);
-      final AlertDialog alert = AlertDialog(
-        title: const Text("Sorry"),
-        content: const Text("The download could not be completed"),
-        actions: [
-          TextButton(
-            child: const Text(
-              "Ignore",
-              style: TextStyle(
-                color: Colors.white,
-              ),
-            ),
-            onPressed: () {
-              Navigator.of(context, rootNavigator: true).pop('dialog');
-              Navigator.of(context, rootNavigator: true).pop('dialog');
-            },
-          ),
-          TextButton(
-            child: Text(
-              "Retry",
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.alternativeColor,
-              ),
-            ),
-            onPressed: () {
-              Navigator.of(context, rootNavigator: true).pop('dialog');
-              Navigator.of(context, rootNavigator: true).pop('dialog');
-              showDialog(
-                context: context,
-                builder: (BuildContext context) {
-                  return ApkDownloaderDialog(widget.versionInfo);
-                },
-                barrierDismissible: false,
-              );
-            },
-          ),
-        ],
-      );
-      // ignore: unawaited_futures
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return alert;
-        },
-        barrierColor: Colors.black87,
-      );
-      return;
-    }
   }
 }

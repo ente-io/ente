@@ -794,7 +794,6 @@
   "archiveAlbum": "Archivia album",
   "calculating": "Calcolando...",
   "pleaseWaitDeletingAlbum": "Attendere, sto eliminando l'album",
-  "searchHintText": "Album, mesi, giorni, anni, ...",
   "searchByExamples": "• Nomi degli album (es. \"Camera\")\n• Tipi di file (es. \"Video\", \".gif\")\n• Anni e mesi (e.. \"2022\", \"gennaio\")\n• Vacanze (ad es. \"Natale\")\n• Descrizioni delle foto (ad es. “#mare”)",
   "youCanTrySearchingForADifferentQuery": "Prova con una ricerca differente.",
   "noResultsFound": "Nessun risultato trovato",
@@ -1117,5 +1116,10 @@
   "selectALocationFirst": "Select a location first",
   "changeLocationOfSelectedItems": "Change location of selected items?",
   "editsToLocationWillOnlyBeSeenWithinEnte": "Edits to location will only be seen within Ente",
-  "joinDiscord": "Join Discord"
+  "joinDiscord": "Join Discord",
+  "locations": "Locations",
+  "descriptions": "Descriptions",
+  "addViewers": "{count, plural, zero {Add viewer} one {Add viewer} other {Add viewers}}",
+  "addCollaborators": "{count, plural, zero {Add collaborator} one {Add collaborator} other {Add collaborators}}",
+  "longPressAnEmailToVerifyEndToEndEncryption": "Long press an email to verify end to end encryption."
 }

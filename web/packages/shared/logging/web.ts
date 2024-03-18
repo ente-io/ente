@@ -7,7 +7,6 @@ import {
     setData,
 } from "@ente/shared/storage/localStorage";
 import { addLogLine } from ".";
-import { getSentryUserID } from "../sentry/utils";
 import { formatDateTimeShort } from "../time/format";
 import { ElectronFile } from "../upload/types";
 import type { User } from "../user/types";
@@ -75,10 +74,10 @@ export const logStartupMessage = async (appId: string) => {
     // TODO (MR): Remove the need to lowercase it, change the enum itself.
     const appIdL = appId.toLowerCase();
     const userID = (getData(LS_KEYS.USER) as User)?.id;
-    const sentryID = await getSentryUserID();
-    const buildId = isDevBuild ? "dev" : `git ${process.env.GIT_SHA}`;
+    const sha = process.env.GIT_SHA;
+    const buildId = isDevBuild ? "dev " : sha ? `git ${sha} ` : "";
 
-    addLogLine(`ente-${appIdL}-web ${buildId} uid ${userID} sid ${sentryID}`);
+    addLogLine(`ente-${appIdL}-web ${buildId}uid ${userID}`);
 };
 
 function getLogs(): Log[] {

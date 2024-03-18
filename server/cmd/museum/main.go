@@ -119,6 +119,14 @@ func main() {
 	if err != nil {
 		log.Fatal("Could not get host name", err)
 	}
+	taskLockingRepo := &repo.TaskLockRepository{DB: db}
+	lockController := &lock.LockController{
+		TaskLockingRepo: taskLockingRepo,
+		HostName:        hostName,
+	}
+	// Note: during boot-up, release any locks that might have been left behind.
+	// This is a safety measure to ensure that no locks are left behind in case of a crash or restart.
+	lockController.ReleaseHostLock()
 
 	var latencyLogger = promauto.NewHistogramVec(prometheus.HistogramOpts{
 		Name:    "museum_method_latency",
@@ -146,7 +154,7 @@ func main() {
 	authRepo := &authenticatorRepo.Repository{DB: db}
 	remoteStoreRepository := &remotestore.Repository{DB: db}
 	dataCleanupRepository := &datacleanup.Repository{DB: db}
-	taskLockingRepo := &repo.TaskLockRepository{DB: db}
+
 	notificationHistoryRepo := &repo.NotificationHistoryRepository{DB: db}
 	queueRepo := &repo.QueueRepository{DB: db}
 	objectRepo := &repo.ObjectRepository{DB: db, QueueRepo: queueRepo}
@@ -170,12 +178,9 @@ func main() {
 	authCache := cache.New(1*time.Minute, 15*time.Minute)
 	accessTokenCache := cache.New(1*time.Minute, 15*time.Minute)
 	discordController := discord.NewDiscordController(userRepo, hostName, environment)
-	rateLimiter := middleware.NewRateLimitMiddleware(discordController)
+	rateLimiter := middleware.NewRateLimitMiddleware(discordController, 1000, 1*time.Second)
+	defer rateLimiter.Stop()
 
-	lockController := &lock.LockController{
-		TaskLockingRepo: taskLockingRepo,
-		HostName:        hostName,
-	}
 	emailNotificationCtrl := &email.EmailNotificationController{
 		UserRepo:                userRepo,
 		LockController:          lockController,
@@ -356,22 +361,22 @@ func main() {
 	server.Use(requestid.New(), middleware.Logger(urlSanitizer), cors(), gzip.Gzip(gzip.DefaultCompression), middleware.PanicRecover())
 
 	publicAPI := server.Group("/")
-	publicAPI.Use(rateLimiter.APIRateLimitMiddleware(urlSanitizer))
+	publicAPI.Use(rateLimiter.GlobalRateLimiter(), rateLimiter.APIRateLimitMiddleware(urlSanitizer))
 
 	privateAPI := server.Group("/")
-	privateAPI.Use(authMiddleware.TokenAuthMiddleware(nil), rateLimiter.APIRateLimitForUserMiddleware(urlSanitizer))
+	privateAPI.Use(rateLimiter.GlobalRateLimiter(), authMiddleware.TokenAuthMiddleware(nil), rateLimiter.APIRateLimitForUserMiddleware(urlSanitizer))
 
 	adminAPI := server.Group("/admin")
-	adminAPI.Use(authMiddleware.TokenAuthMiddleware(nil), authMiddleware.AdminAuthMiddleware())
+	adminAPI.Use(rateLimiter.GlobalRateLimiter(), authMiddleware.TokenAuthMiddleware(nil), authMiddleware.AdminAuthMiddleware())
 	paymentJwtAuthAPI := server.Group("/")
-	paymentJwtAuthAPI.Use(authMiddleware.TokenAuthMiddleware(jwt.PAYMENT.Ptr()))
+	paymentJwtAuthAPI.Use(rateLimiter.GlobalRateLimiter(), authMiddleware.TokenAuthMiddleware(jwt.PAYMENT.Ptr()))
 
 	familiesJwtAuthAPI := server.Group("/")
 	//The middleware order matters. First, the userID must be set in the context, so that we can apply limit for user.
-	familiesJwtAuthAPI.Use(authMiddleware.TokenAuthMiddleware(jwt.FAMILIES.Ptr()), rateLimiter.APIRateLimitForUserMiddleware(urlSanitizer))
+	familiesJwtAuthAPI.Use(rateLimiter.GlobalRateLimiter(), authMiddleware.TokenAuthMiddleware(jwt.FAMILIES.Ptr()), rateLimiter.APIRateLimitForUserMiddleware(urlSanitizer))
 
 	publicCollectionAPI := server.Group("/public-collection")
-	publicCollectionAPI.Use(accessTokenMiddleware.AccessTokenAuthMiddleware(urlSanitizer))
+	publicCollectionAPI.Use(rateLimiter.GlobalRateLimiter(), accessTokenMiddleware.AccessTokenAuthMiddleware(urlSanitizer))
 
 	healthCheckHandler := &api.HealthCheckHandler{
 		DB: db,
@@ -468,7 +473,7 @@ func main() {
 	privateAPI.DELETE("/users/delete", userHandler.DeleteUser)
 
 	accountsJwtAuthAPI := server.Group("/")
-	accountsJwtAuthAPI.Use(authMiddleware.TokenAuthMiddleware(jwt.ACCOUNTS.Ptr()), rateLimiter.APIRateLimitForUserMiddleware(urlSanitizer))
+	accountsJwtAuthAPI.Use(rateLimiter.GlobalRateLimiter(), authMiddleware.TokenAuthMiddleware(jwt.ACCOUNTS.Ptr()), rateLimiter.APIRateLimitForUserMiddleware(urlSanitizer))
 	passkeysHandler := &api.PasskeyHandler{
 		Controller: passkeyCtrl,
 	}
@@ -500,7 +505,6 @@ func main() {
 	privateAPI.GET("/collections/v2/diff", collectionHandler.GetDiffV2)
 	privateAPI.GET("/collections/file", collectionHandler.GetFile)
 	privateAPI.GET("/collections/sharees", collectionHandler.GetSharees)
-	privateAPI.DELETE("/collections/v2/:collectionID", collectionHandler.Trash)
 	privateAPI.DELETE("/collections/v3/:collectionID", collectionHandler.TrashV3)
 	privateAPI.POST("/collections/rename", collectionHandler.Rename)
 	privateAPI.PUT("/collections/magic-metadata", collectionHandler.PrivateMagicMetadataUpdate)
@@ -528,7 +532,7 @@ func main() {
 
 	castCtrl := cast.NewController(&castDb, accessCtrl)
 	castMiddleware := middleware.CastMiddleware{CastCtrl: castCtrl, Cache: authCache}
-	castAPI.Use(castMiddleware.CastAuthMiddleware())
+	castAPI.Use(rateLimiter.GlobalRateLimiter(), castMiddleware.CastAuthMiddleware())
 
 	castHandler := &api.CastHandler{
 		CollectionCtrl: collectionController,
@@ -617,6 +621,7 @@ func main() {
 	adminAPI.POST("/user/disable-2fa", adminHandler.DisableTwoFactor)
 	adminAPI.POST("/user/disable-passkeys", adminHandler.RemovePasskeys)
 	adminAPI.POST("/user/close-family", adminHandler.CloseFamily)
+	adminAPI.PUT("/user/change-email", adminHandler.ChangeEmail)
 	adminAPI.DELETE("/user/delete", adminHandler.DeleteUser)
 	adminAPI.POST("/user/recover", adminHandler.RecoverAccount)
 	adminAPI.GET("/email-hash", adminHandler.GetEmailHash)
@@ -682,7 +687,6 @@ func main() {
 	publicAPI.GET("/offers/black-friday", offerHandler.GetBlackFridayOffers)
 
 	setKnownAPIs(server.Routes())
-
 	setupAndStartBackgroundJobs(objectCleanupController, replicationController3)
 	setupAndStartCrons(
 		userAuthRepo, publicCollectionRepo, twoFactorRepo, passkeysRepo, fileController, taskLockingRepo, emailNotificationCtrl,
@@ -708,9 +712,8 @@ func main() {
 }
 
 func runServer(environment string, server *gin.Engine) {
-	if environment == "local" {
-		server.Run(":8080")
-	} else {
+	useTLS := viper.GetBool("http.use-tls")
+	if useTLS {
 		certPath, err := config.CredentialFilePath("tls.cert")
 		if err != nil {
 			log.Fatal(err)
@@ -722,6 +725,8 @@ func runServer(environment string, server *gin.Engine) {
 		}
 
 		log.Fatal(server.RunTLS(":443", certPath, keyPath))
+	} else {
+		server.Run(":8080")
 	}
 }
 
@@ -855,14 +860,14 @@ func setupAndStartCrons(userAuthRepo *repo.UserAuthRepository, publicCollectionR
 		}
 	})
 
-	schedule(c, "@every 193s", func() {
+	schedule(c, "@every 2m", func() {
 		fileController.CleanupDeletedFiles()
 	})
 	schedule(c, "@every 101s", func() {
 		embeddingCtrl.CleanupDeletedEmbeddings()
 	})
 
-	schedule(c, "@every 120s", func() {
+	schedule(c, "@every 10m", func() {
 		trashController.DropFileMetadataCron()
 	})
 

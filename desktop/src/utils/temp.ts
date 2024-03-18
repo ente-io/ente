@@ -1,14 +1,14 @@
-import { app } from 'electron';
-import path from 'path';
-import { existsSync, mkdir } from 'promise-fs';
+import { app } from "electron";
+import path from "path";
+import { existsSync, mkdir } from "promise-fs";
 
-const ENTE_TEMP_DIRECTORY = 'ente';
+const ENTE_TEMP_DIRECTORY = "ente";
 
 const CHARACTERS =
-    'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
 export async function getTempDirPath() {
-    const tempDirPath = path.join(app.getPath('temp'), ENTE_TEMP_DIRECTORY);
+    const tempDirPath = path.join(app.getPath("temp"), ENTE_TEMP_DIRECTORY);
     if (!existsSync(tempDirPath)) {
         await mkdir(tempDirPath);
     }
@@ -16,12 +16,12 @@ export async function getTempDirPath() {
 }
 
 function generateTempName(length: number) {
-    let result = '';
+    let result = "";
 
     const charactersLength = CHARACTERS.length;
     for (let i = 0; i < length; i++) {
         result += CHARACTERS.charAt(
-            Math.floor(Math.random() * charactersLength)
+            Math.floor(Math.random() * charactersLength),
         );
     }
     return result;
@@ -32,7 +32,7 @@ export async function generateTempFilePath(formatSuffix: string) {
     do {
         const tempDirPath = await getTempDirPath();
         const namePrefix = generateTempName(10);
-        tempFilePath = path.join(tempDirPath, namePrefix + '-' + formatSuffix);
+        tempFilePath = path.join(tempDirPath, namePrefix + "-" + formatSuffix);
     } while (existsSync(tempFilePath));
     return tempFilePath;
 }

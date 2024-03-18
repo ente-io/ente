@@ -273,16 +273,6 @@ export default function App(props: EnteAppProps) {
     const resetSharedFiles = () => setSharedFiles(null);
 
     useEffect(() => {
-        if (isI18nReady) {
-            console.log(
-                `%c${t("CONSOLE_WARNING_STOP")}`,
-                "color: red; font-size: 52px;",
-            );
-            console.log(`%c${t("CONSOLE_WARNING_DESC")}`, "font-size: 20px;");
-        }
-    }, [isI18nReady]);
-
-    useEffect(() => {
         const redirectTo = async (redirect) => {
             if (
                 redirectMap.has(redirect) &&

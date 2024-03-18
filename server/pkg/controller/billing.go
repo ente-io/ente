@@ -85,30 +85,27 @@ func (c *BillingController) GetPlansV2(countryCode string, stripeAccountCountry 
 // GetStripeAccountCountry returns the stripe account country the user's existing plan is from
 // if he doesn't have a stripe subscription then ente.DefaultStripeAccountCountry is returned
 func (c *BillingController) GetStripeAccountCountry(userID int64) (ente.StripeAccountCountry, error) {
-	stipeSubInfo, hasStripeSub, err := c.GetUserStripeSubscriptionInfo(userID)
+	subscription, err := c.BillingRepo.GetUserSubscription(userID)
 	if err != nil {
 		return "", stacktrace.Propagate(err, "")
 	}
-	if hasStripeSub {
-		return stipeSubInfo.AccountCountry, nil
-	} else {
+	if subscription.PaymentProvider != ente.Stripe {
 		//if user doesn't have a stripe subscription, return the default stripe account country
 		return ente.DefaultStripeAccountCountry, nil
+	} else {
+		return subscription.Attributes.StripeAccountCountry, nil
 	}
 }
 
 // GetUserPlans returns the active plans for a user
 func (c *BillingController) GetUserPlans(ctx *gin.Context, userID int64) ([]ente.BillingPlan, error) {
-	stripeSubInfo, hasStripeSub, err := c.GetUserStripeSubscriptionInfo(userID)
+	stripeAccountCountry, err := c.GetStripeAccountCountry(userID)
 	if err != nil {
-		return []ente.BillingPlan{}, stacktrace.Propagate(err, "Failed to get user's subscription country and stripe account")
+		return []ente.BillingPlan{}, stacktrace.Propagate(err, "Failed to get user's country stripe account")
 	}
-	if hasStripeSub {
-		return c.GetPlansV2(stripeSubInfo.PlanCountry, stripeSubInfo.AccountCountry), nil
-	} else {
-		// user doesn't have a stipe subscription, so return the default account plans for the country the user is from
-		return c.GetPlansV2(network.GetClientCountry(ctx), ente.DefaultStripeAccountCountry), nil
-	}
+	// always return the plans based on the user's country determined by the IP
+	return c.GetPlansV2(network.GetClientCountry(ctx), stripeAccountCountry), nil
+
 }
 
 // GetSubscription returns the current subscription for a user if any
@@ -206,23 +203,6 @@ func (c *BillingController) HasActiveSelfOrFamilySubscription(userID int64) erro
 		return stacktrace.Propagate(err, "")
 	}
 	return nil
-}
-
-func (c *BillingController) GetUserStripeSubscriptionInfo(userID int64) (ente.StripeSubscriptionInfo, bool, error) {
-	s, err := c.BillingRepo.GetUserSubscription(userID)
-	if err != nil {
-		return ente.StripeSubscriptionInfo{}, false, stacktrace.Propagate(err, "")
-	}
-	// skipping country code extraction for non-stripe subscriptions
-	// as they have same product id across countries and hence can't be distinquished
-	if s.PaymentProvider != ente.Stripe {
-		return ente.StripeSubscriptionInfo{}, false, nil
-	}
-	_, countryCode, err := c.getPlanWithCountry(s)
-	if err != nil {
-		return ente.StripeSubscriptionInfo{}, false, stacktrace.Propagate(err, "")
-	}
-	return ente.StripeSubscriptionInfo{PlanCountry: countryCode, AccountCountry: s.Attributes.StripeAccountCountry}, true, nil
 }
 
 // VerifySubscription verifies and returns the verified subscription

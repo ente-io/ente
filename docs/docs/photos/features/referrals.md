@@ -1,6 +1,8 @@
 ---
 title: Referral plan
-description: Earn and expand your storage by referring Ente Photos to your friends and family
+description:
+    Earn and expand your storage by referring Ente Photos to your friends and
+    family
 ---
 
 # Referral plan

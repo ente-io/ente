@@ -121,17 +121,6 @@ func (t *TrashController) CleanupTrashedCollections() {
 		t.collectionTrashRunning = false
 	}()
 
-	// process delete collection request for DELETE V2
-	items, err := t.QueueRepo.GetItemsReadyForDeletion(repo.TrashCollectionQueue, 100)
-	if err != nil {
-		log.Error("Could not fetch from collection trash queue", err)
-		return
-	}
-	item_processed_count += len(items)
-	for _, item := range items {
-		t.trashCollection(item, repo.TrashCollectionQueue, true, ctxLogger)
-	}
-
 	// process delete collection request for DELETE V3
 	itemsV3, err2 := t.QueueRepo.GetItemsReadyForDeletion(repo.TrashCollectionQueueV3, 100)
 	if err2 != nil {
@@ -140,7 +129,7 @@ func (t *TrashController) CleanupTrashedCollections() {
 	}
 	item_processed_count += len(itemsV3)
 	for _, item := range itemsV3 {
-		t.trashCollection(item, repo.TrashCollectionQueueV3, false, ctxLogger)
+		t.trashCollection(item, repo.TrashCollectionQueueV3, ctxLogger)
 	}
 }
 
@@ -221,7 +210,7 @@ func (t *TrashController) removeFilesWithVersion(trashedFiles []ente.Trash, vers
 	return trashedFiles[0 : i+1]
 }
 
-func (t *TrashController) trashCollection(item repo.QueueItem, queueName string, trashOnlyExclusiveFiles bool, logger *log.Entry) {
+func (t *TrashController) trashCollection(item repo.QueueItem, queueName string, logger *log.Entry) {
 	cID, _ := strconv.ParseInt(item.Item, 10, 64)
 	collection, err := t.CollectionRepo.Get(cID)
 	if err != nil {
@@ -252,11 +241,7 @@ func (t *TrashController) trashCollection(item repo.QueueItem, queueName string,
 		}
 	}()
 	ctxLogger.Info("start trashing collection")
-	if trashOnlyExclusiveFiles {
-		err = t.CollectionRepo.TrashV2(cID, collection.Owner.ID)
-	} else {
-		err = t.CollectionRepo.TrashV3(context.Background(), cID)
-	}
+	err = t.CollectionRepo.TrashV3(context.Background(), cID)
 	if err != nil {
 		ctxLogger.WithError(err).Error("failed to trash collection")
 		return

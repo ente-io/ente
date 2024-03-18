@@ -1,6 +1,7 @@
 ---
 title: Family plans
-description: Share your Ente Photos plan with your family members with no extra cost
+description:
+    Share your Ente Photos plan with your family members with no extra cost
 ---
 
 # Family plans
@@ -21,3 +22,10 @@ In brief,
 
 -   You can invite 5 family members. So including yourself, it will be 6 people
     who can share a single subscription, paying only once.
+
+
+## FAQ
+
+* **Can you assign a storage quota for each individual member in the family plan?**   
+   Unfortunately, at this moment, assigning a storage quota for each individual member in the family plan is not supported. For updates on this feature request, please follow  [this thread](https://github.com/ente-io/ente/discussions/857).
+ 

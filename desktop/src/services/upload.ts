@@ -1,13 +1,13 @@
-import StreamZip from 'node-stream-zip';
-import path from 'path';
-import { uploadStatusStore } from '../stores/upload.store';
-import { FILE_PATH_TYPE, FILE_PATH_KEYS, ElectronFile } from '../types';
-import { getValidPaths, getZipFileStream } from './fs';
+import StreamZip from "node-stream-zip";
+import path from "path";
+import { uploadStatusStore } from "../stores/upload.store";
+import { ElectronFile, FILE_PATH_KEYS, FILE_PATH_TYPE } from "../types";
+import { getValidPaths, getZipFileStream } from "./fs";
 
 export const getSavedFilePaths = (type: FILE_PATH_TYPE) => {
     const paths =
         getValidPaths(
-            uploadStatusStore.get(FILE_PATH_KEYS[type]) as string[]
+            uploadStatusStore.get(FILE_PATH_KEYS[type]) as string[],
         ) ?? [];
 
     setToUploadFiles(type, paths);
@@ -17,7 +17,7 @@ export const getSavedFilePaths = (type: FILE_PATH_TYPE) => {
 export async function getZipEntryAsElectronFile(
     zipName: string,
     zip: StreamZip.StreamZipAsync,
-    entry: StreamZip.ZipEntry
+    entry: StreamZip.ZipEntry,
 ): Promise<ElectronFile> {
     return {
         path: path
@@ -52,9 +52,9 @@ export const setToUploadFiles = (type: FILE_PATH_TYPE, filePaths: string[]) => {
 
 export const setToUploadCollection = (collectionName: string) => {
     if (collectionName) {
-        uploadStatusStore.set('collectionName', collectionName);
+        uploadStatusStore.set("collectionName", collectionName);
     } else {
-        uploadStatusStore.delete('collectionName');
+        uploadStatusStore.delete("collectionName");
     }
 };
 
@@ -62,14 +62,14 @@ export const getElectronFilesFromGoogleZip = async (filePath: string) => {
     const zip = new StreamZip.async({
         file: filePath,
     });
-    const zipName = path.basename(filePath, '.zip');
+    const zipName = path.basename(filePath, ".zip");
 
     const entries = await zip.entries();
     const files: ElectronFile[] = [];
 
     for (const entry of Object.values(entries)) {
         const basename = path.basename(entry.name);
-        if (entry.isFile && basename.length > 0 && basename[0] !== '.') {
+        if (entry.isFile && basename.length > 0 && basename[0] !== ".") {
             files.push(await getZipEntryAsElectronFile(zipName, zip, entry));
         }
     }

@@ -12,7 +12,7 @@ description: ente photos application
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 
-version: 0.8.65+585
+version: 0.8.71+591
 publish_to: none
 
 environment:
@@ -93,7 +93,7 @@ dependencies:
   google_nav_bar: ^5.0.5
   home_widget:
     git:
-      url: https://github.com/prateekmedia/FlutterHomeWidget
+      url: https://github.com/ente-io/FlutterHomeWidget
       ref: main
   html_unescape: ^2.0.0
   http: ^1.1.0
@@ -122,8 +122,6 @@ dependencies:
   motionphoto:
     git: "https://github.com/ente-io/motionphoto.git"
   move_to_background: ^1.0.2
-
-  # open_file: ^3.2.1
   onnxruntime:
     git:
       url: https://github.com/ente-io/onnxruntime.git
@@ -175,7 +173,6 @@ dependencies:
   wallpaper_manager_flutter: ^0.0.2
   wechat_assets_picker: ^8.6.3
   widgets_to_image: ^0.0.2
-  workmanager: ^0.5.2
 
 dependency_overrides:
   # current fork of tfite_flutter_helper depends on ffi: ^1.x.x

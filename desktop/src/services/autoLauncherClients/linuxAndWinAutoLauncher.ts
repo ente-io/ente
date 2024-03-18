@@ -1,14 +1,14 @@
-import AutoLaunch from 'auto-launch';
-import { AutoLauncherClient } from '../../types/autoLauncher';
-import { app } from 'electron';
+import AutoLaunch from "auto-launch";
+import { app } from "electron";
+import { AutoLauncherClient } from "../../types/autoLauncher";
 
-const LAUNCHED_AS_HIDDEN_FLAG = 'hidden';
+const LAUNCHED_AS_HIDDEN_FLAG = "hidden";
 
 class LinuxAndWinAutoLauncher implements AutoLauncherClient {
     private instance: AutoLaunch;
     constructor() {
         const autoLauncher = new AutoLaunch({
-            name: 'ente',
+            name: "ente",
             isHidden: true,
         });
         this.instance = autoLauncher;

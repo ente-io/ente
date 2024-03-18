@@ -17,6 +17,28 @@ class PasskeyService {
     return response.data!["accountsToken"] as String;
   }
 
+  Future<bool> isPasskeyRecoveryEnabled() async {
+    final response = await _enteDio.get(
+      "/users/two-factor/recovery-status",
+    );
+    return response.data!["isPasskeyRecoveryEnabled"] as bool;
+  }
+
+  Future<void> configurePasskeyRecovery(
+    String secret,
+    String userEncryptedSecret,
+    String userSecretNonce,
+  ) async {
+    await _enteDio.post(
+      "/users/two-factor/passkeys/configure-recovery",
+      data: {
+        "secret": secret,
+        "userSecretCipher": userEncryptedSecret,
+        "userSecretNonce": userSecretNonce,
+      },
+    );
+  }
+
   Future<void> openPasskeyPage(BuildContext context) async {
     try {
       final jwtToken = await getJwtToken();

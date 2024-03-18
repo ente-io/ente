@@ -144,6 +144,8 @@
   "enterCodeHint": "認証アプリに表示された 6 桁のコードを入力してください",
   "lostDeviceTitle": "デバイスを紛失しましたか？",
   "twoFactorAuthTitle": "2 要素認証",
+  "passkeyAuthTitle": "パスキー認証",
+  "verifyPasskey": "パスキーの認証",
   "recoverAccount": "アカウントを回復",
   "enterRecoveryKeyHint": "回復キーを入力",
   "recover": "回復",
@@ -404,5 +406,15 @@
   "signOutOtherDevices": "他のデバイスからサインアウトする",
   "doNotSignOut": "サインアウトしない",
   "hearUsWhereTitle": "Ente についてどのようにお聞きになりましたか？（任意）",
-  "hearUsExplanation": "私たちはアプリのインストールを追跡していません。私たちをお知りになった場所を教えてください！"
+  "hearUsExplanation": "私たちはアプリのインストールを追跡していません。私たちをお知りになった場所を教えてください！",
+  "waitingForBrowserRequest": "ブラウザのリクエストを待っています...",
+  "waitingForVerification": "認証を待っています...",
+  "passkey": "パスキー",
+  "developerSettingsWarning": "開発者向け設定を変更してもよろしいですか？",
+  "developerSettings": "開発者向け設定",
+  "serverEndpoint": "サーバーエンドポイント",
+  "invalidEndpoint": "無効なエンドポイントです",
+  "invalidEndpointMessage": "入力されたエンドポイントは無効です。有効なエンドポイントを入力して再試行してください。",
+  "endpointUpdatedMessage": "エンドポイントの更新に成功しました",
+  "customEndpoint": "{endpoint} に接続しました"
 }

@@ -1,4 +1,4 @@
-import { CustomError, errorWithContext } from "@ente/shared/error";
+import { CustomError } from "@ente/shared/error";
 import { addLogLine } from "@ente/shared/logging";
 import { getFileNameSize } from "@ente/shared/logging/web";
 import { logError } from "@ente/shared/sentry";
@@ -145,10 +145,9 @@ export async function generateImageThumbnailUsingCanvas(
                 clearTimeout(timeout);
                 resolve(null);
             } catch (e) {
-                const err = errorWithContext(
-                    e,
-                    `${CustomError.THUMBNAIL_GENERATION_FAILED} err: ${e}`,
-                );
+                const err = new Error(CustomError.THUMBNAIL_GENERATION_FAILED, {
+                    cause: e,
+                });
                 reject(err);
             }
         };

@@ -37,8 +37,7 @@
     {
       "title": "BorgBase",
       "altNames": ["borg"],
-      "slug": "BorgBase",
-      "hex": "222C31"
+      "slug": "BorgBase"
     },
     {
       "title": "Brave Creators",
@@ -109,8 +108,7 @@
     {
       "title": "Gosuslugi",
       "altNames": ["Госуслуги"],
-      "slug": "Gosuslugi",
-      "hex": "EE2F53"
+      "slug": "Gosuslugi"
     },
     {
       "title": "Healthchecks.io",
@@ -127,13 +125,11 @@
     },
     {
       "title": "IVPN",
-      "slug": "IVPN",
-      "hex": "FA3243"
+      "slug": "IVPN"
     },
     {
       "title": "IceDrive",
-      "slug": "Icedrive",
-      "hex": "1F4FD0"
+      "slug": "Icedrive"
     },
     {
       "title": "Jagex",
@@ -154,8 +150,7 @@
       "title": "Kite"
     },
     {
-      "title": "Koofr",
-      "hex": "71BA05"
+      "title": "Koofr"
     },
     {
       "title": "Kraken",
@@ -184,8 +179,7 @@
     {
       "title": "Murena",
       "altNames": ["eCloud"],
-      "slug": "ecloud",
-      "hex": "EC6A55"
+      "slug": "ecloud"
     },
     {
       "title": "Microsoft"
@@ -230,8 +224,7 @@
     },
     {
       "title": "pCloud",
-      "slug": "pCloud",
-      "hex": "1EBCC5"
+      "slug": "pCloud"
     },
     {
       "title": "Peerberry",
@@ -273,6 +266,10 @@
     {
       "title": "Revolt",
       "hex": "858585"
+    },
+    {
+      "title": "Rockstar Games",
+      "slug": "rockstar_games"
     },
     {
       "title": "Rust Language Forum",
@@ -371,8 +368,7 @@
     {
       "title": "Yandex",
       "altNames": ["Ya", "Яндекс"],
-      "slug": "Yandex",
-      "hex": "FC3F1D"
+      "slug": "Yandex"
     }
   ]
 }

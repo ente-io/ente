@@ -56,7 +56,8 @@ class _LockScreenState extends State<LockScreen> with WidgetsBindingObserver {
                     text: context.l10n.unlock,
                     iconData: Icons.lock_open_outlined,
                     onTap: () async {
-                      await _showLockScreen(source: "tapUnlock");
+                      // ignore: unawaited_futures
+                      _showLockScreen(source: "tapUnlock");
                     },
                   ),
                 ),

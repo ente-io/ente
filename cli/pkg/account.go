@@ -142,7 +142,7 @@ func (c *ClICtrl) ListAccounts(cxt context.Context) error {
 	return nil
 }
 
-func (c *ClICtrl) UpdateAccount(ctx context.Context, params model.UpdateAccountParams) error {
+func (c *ClICtrl) UpdateAccount(ctx context.Context, params model.AccountCommandParams) error {
 	accounts, err := c.GetAccounts(ctx)
 	if err != nil {
 		return err
@@ -177,5 +177,27 @@ func (c *ClICtrl) UpdateAccount(ctx context.Context, params model.UpdateAccountP
 		return b.Put([]byte(accountKey), accInfoBytes)
 	})
 	return err
+}
 
+func (c *ClICtrl) GetToken(ctx context.Context, params model.AccountCommandParams) error {
+	accounts, err := c.GetAccounts(ctx)
+	if err != nil {
+		return err
+	}
+	var acc *model.Account
+	for _, a := range accounts {
+		if a.Email == params.Email && a.App == params.App {
+			acc = &a
+			break
+		}
+	}
+	if acc == nil {
+		return fmt.Errorf("account not found, use `account list` to list accounts")
+	}
+	secretInfo, err := c.KeyHolder.LoadSecrets(*acc)
+	if err != nil {
+		return err
+	}
+	fmt.Println(secretInfo.TokenStr())
+	return nil
 }

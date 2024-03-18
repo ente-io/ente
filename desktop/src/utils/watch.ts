@@ -1,11 +1,11 @@
-import { WatchMapping } from '../types';
+import { WatchMapping } from "../types";
 
 export function isMappingPresent(
     watchMappings: WatchMapping[],
-    folderPath: string
+    folderPath: string,
 ) {
     const watchMapping = watchMappings?.find(
-        (mapping) => mapping.folderPath === folderPath
+        (mapping) => mapping.folderPath === folderPath,
     );
     return !!watchMapping;
 }

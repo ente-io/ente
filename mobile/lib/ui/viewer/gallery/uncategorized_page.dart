@@ -68,6 +68,7 @@ class UnCategorizedPage extends StatelessWidget {
       ],
       tagPrefix: tagPrefix,
       selectedFiles: _selectedFiles,
+      sortAsyncFn: () => collection.pubMagicMetadata.asc ?? false,
       initialFiles: null,
       albumName: S.of(context).uncategorized,
     );

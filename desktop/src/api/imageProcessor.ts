@@ -1,22 +1,22 @@
-import { CustomErrors } from '../constants/errors';
-import { ipcRenderer } from 'electron/renderer';
-import { existsSync } from 'fs';
-import { writeStream } from '../services/fs';
-import { logError } from '../services/logging';
-import { ElectronFile } from '../types';
-import { isPlatform } from '../utils/common/platform';
+import { ipcRenderer } from "electron/renderer";
+import { existsSync } from "fs";
+import { CustomErrors } from "../constants/errors";
+import { writeStream } from "../services/fs";
+import { logError } from "../services/logging";
+import { ElectronFile } from "../types";
+import { isPlatform } from "../utils/common/platform";
 
 export async function convertToJPEG(
     fileData: Uint8Array,
-    filename: string
+    filename: string,
 ): Promise<Uint8Array> {
-    if (isPlatform('windows')) {
+    if (isPlatform("windows")) {
         throw Error(CustomErrors.WINDOWS_NATIVE_IMAGE_PROCESSING_NOT_SUPPORTED);
     }
     const convertedFileData = await ipcRenderer.invoke(
-        'convert-to-jpeg',
+        "convert-to-jpeg",
         fileData,
-        filename
+        filename,
     );
     return convertedFileData;
 }
@@ -24,20 +24,20 @@ export async function convertToJPEG(
 export async function generateImageThumbnail(
     inputFile: File | ElectronFile,
     maxDimension: number,
-    maxSize: number
+    maxSize: number,
 ): Promise<Uint8Array> {
     let inputFilePath = null;
     let createdTempInputFile = null;
     try {
-        if (isPlatform('windows')) {
+        if (isPlatform("windows")) {
             throw Error(
-                CustomErrors.WINDOWS_NATIVE_IMAGE_PROCESSING_NOT_SUPPORTED
+                CustomErrors.WINDOWS_NATIVE_IMAGE_PROCESSING_NOT_SUPPORTED,
             );
         }
         if (!existsSync(inputFile.path)) {
             const tempFilePath = await ipcRenderer.invoke(
-                'get-temp-file-path',
-                inputFile.name
+                "get-temp-file-path",
+                inputFile.name,
             );
             await writeStream(tempFilePath, await inputFile.stream());
             inputFilePath = tempFilePath;
@@ -46,18 +46,18 @@ export async function generateImageThumbnail(
             inputFilePath = inputFile.path;
         }
         const thumbnail = await ipcRenderer.invoke(
-            'generate-image-thumbnail',
+            "generate-image-thumbnail",
             inputFilePath,
             maxDimension,
-            maxSize
+            maxSize,
         );
         return thumbnail;
     } finally {
         if (createdTempInputFile) {
             try {
-                await ipcRenderer.invoke('remove-temp-file', inputFilePath);
+                await ipcRenderer.invoke("remove-temp-file", inputFilePath);
             } catch (e) {
-                logError(e, 'failed to deleteTempFile');
+                logError(e, "failed to deleteTempFile");
             }
         }
     }

@@ -1,25 +1,22 @@
-import Store, { Schema } from 'electron-store';
-import { UserPreferencesType } from '../types';
+import Store, { Schema } from "electron-store";
+import { UserPreferencesType } from "../types";
 
 const userPreferencesSchema: Schema<UserPreferencesType> = {
     hideDockIcon: {
-        type: 'boolean',
+        type: "boolean",
     },
     skipAppVersion: {
-        type: 'string',
+        type: "string",
     },
     muteUpdateNotificationVersion: {
-        type: 'string',
-    },
-    optOutOfCrashReports: {
-        type: 'boolean',
+        type: "string",
     },
     customCacheDirectory: {
-        type: 'string',
+        type: "string",
     },
 };
 
 export const userPreferencesStore = new Store({
-    name: 'userPreferences',
+    name: "userPreferences",
     schema: userPreferencesSchema,
 });

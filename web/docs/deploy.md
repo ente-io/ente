@@ -3,23 +3,31 @@
 The various web apps and static sites in this repository are deployed on
 Cloudflare Pages.
 
-The summary of what happens is:
-
 * Production deployments are triggered by pushing to the `deploy/*` branches.
-  Use the various `yarn deploy:*` commands to help with this. For example, `yarn
-  deploy:photos` will open a PR to merge the current `main` onto
-  `deploy/photos`, which'll trigger a deployment and deploy the code to
-  [web.ente.io](https://web.ente.io).
 
 * [help.ente.io](https://help.ente.io) gets deployed whenever a PR that changes
   anything inside `docs/` gets merged to `main`.
 
 * Every night, all the web apps get automatically deployed to a nightly preview
-  URLs using the current code in main. This workflow can also be triggered
-  manually.
+  URLs (`*.ente.sh`) using the current code in main.
+
+* A preview deployment can be made by triggering the "Preview (web)" workflow.
+  This allows us to deploy a build of any of the apps from an arbitrary branch
+  to [preview.ente.sh](https://preview.ente.sh).
+
+Use the various `yarn deploy:*` commands to help with production deployments.
+For example, `yarn deploy:photos` will open a PR to merge the current `main`
+onto `deploy/photos`, which'll trigger the deployment workflow, which'll build
+and publish to [web.ente.io](https://web.ente.io).
+
+> When merging these deployment PRs, remember to use rebase and merge so that
+> their HEAD is a fast forward of `main` instead of diverging from it because of
+> the merge commit.
+
+## Deployments
 
 Here is a list of all the deployments, whether or not they are production
-deployments, and the action that triggers them.
+deployments, and the action that triggers them:
 
 | URL | Type |Deployment action |
 |-----|------|------------------|
@@ -29,10 +37,11 @@ deployments, and the action that triggers them.
 | [accounts.ente.io](https://accounts.ente.io) | Production | Push to `deploy/accounts` |
 | [cast.ente.io](https://cast.ente.io) | Production | Push to `deploy/cast` |
 | [help.ente.io](https://help.ente.io) | Production | Push to `main` + changes in `docs/` |
-| [TBD-photos.ente.io](https://photos.ente.sh) | Preview | Nightly deploy of `main` |
-| [TBD-auth.ente.io](https://auth.ente.sh) | Preview | Nightly deploy of `main` |
-| [TBD-accounts.ente.io](https://accounts.ente.sh) | Preview | Nightly deploy of `main` |
-| [TBD-cast.ente.io](https://cast.ente.sh) | Preview | Nightly deploy of `main` |
+| [accounts.ente.sh](https://accounts.ente.sh) | Preview | Nightly deploy of `main` |
+| [auth.ente.sh](https://auth.ente.sh) | Preview | Nightly deploy of `main` |
+| [cast.ente.sh](https://cast.ente.sh) | Preview | Nightly deploy of `main` |
+| [photos.ente.sh](https://photos.ente.sh) | Preview | Nightly deploy of `main` |
+| [preview.ente.sh](https://preview.ente.sh) | Preview | Manually triggered |
 
 ### Other subdomains
 
@@ -46,8 +55,22 @@ Apart from this, there are also some other deployments:
 - `payments.ente.io` and `family.ente.io` are currently in a separate
   repositories (Enhancement: bring them in here).
 
+### Preview deployments
+
+To trigger a preview deployment, manually trigger the "Preview (web)" workflow
+from the Actions tab on GitHub. You'll need to select the app to build, and the
+branch to use. This'll then build the specified app (e.g. "photos") from that
+branch, and deploy it to [preview.ente.sh](https://preview.ente.sh).
+
+The workflow can also be triggered using GitHub's CLI, gh. e.g.
+
+```sh
+gh workflow run web-preview -F app=cast --ref my-branch
+```
+
 ---
----
+
+## Details
 
 The rest of the document describes details about how things were setup. You
 likely don't need to know them to be able to deploy.

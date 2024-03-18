@@ -95,9 +95,10 @@ setup we ourselves use in production.
 > [!TIP]
 >
 > On our production servers, we wrap museum in a [systemd
-> service](scripts/museum.service). Our production machines are vanilla Ubuntu
-> images, with Docker and Promtail installed. We then plonk in this systemd
-> service, and use `systemctl start|stop|status museum` to herd it around.
+> service](scripts/deploy/museum.service). Our production machines are vanilla
+> Ubuntu images, with Docker and Promtail installed. We then plonk in this
+> systemd service, and use `systemctl start|stop|status museum` to herd it
+> around.
 
 Some people new to Docker/Go/Postgres might have general questions though.
 Unfortunately, because of limited engineering bandwidth **we will currently not
@@ -112,6 +113,11 @@ repository's [Discussions](https://github.com/ente-io/ente/discussions), or on
 [our Discord](https://discord.gg/z2YVKkycX3). And whenever time permits, we will
 try to clarify, and also document such FAQs. Please feel free to open
 documentation PRs around this too.
+
+> [!TIP]
+>
+> You can find more guides and documentation around self-hosting at
+> [help.ente.io/self-hosting](https://help.ente.io/self-hosting).
 
 ## Thanks ❤️
 

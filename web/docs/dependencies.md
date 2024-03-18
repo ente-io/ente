@@ -45,6 +45,8 @@ of React, but those are contingent and can be replaced, or even removed. But the
 usage of React is deep rooted. React also has a sibling "react-dom" package that
 renders "React" interfaces to the DOM.
 
+### MUI and Emotion
+
 Currently, we use MUI ("@mui/material"), which is a React component library, to
 get a base set of components. MUI uses Emotion (a styled-component variant) as
 its preferred CSS-in-JS library and to keep things simple, that's also what we
@@ -66,3 +68,18 @@ Emotion itself comes in many parts, of which we need the following three:
   > use it explicitly, it's a peer dependency of `@mui/material`.
 
 * "@emotion/server"
+
+### Translations
+
+For showing the app's UI in multiple languages, we use the i18next library,
+specifically its three components
+
+* "i18next": The core `i18next` library.
+* "i18next-http-backend": Adds support for initializing `i18next` with JSON file
+  containing the translation in a particular language, fetched at runtime.
+* "react-i18next": React specific support in `i18next`.
+
+Note that inspite of the "next" in the name of the library, it has nothing to do
+with Next.js.
+
+For more details, see [translations.md](translations.md).

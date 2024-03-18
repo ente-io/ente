@@ -56,3 +56,11 @@ func (c *LockController) ReleaseLock(lockID string) {
 		log.Errorf("Error while releasing lock %v: %s", lockID, err)
 	}
 }
+
+func (c *LockController) ReleaseHostLock() {
+	count, err := c.TaskLockingRepo.ReleaseLocksBy(c.HostName)
+	if err != nil {
+		log.Errorf("Error while releasing host lock: %s", err)
+	}
+	log.Infof("Released %d locks held by %s", *count, c.HostName)
+}

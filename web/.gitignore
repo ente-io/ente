@@ -1,14 +1,17 @@
 # Node
 node_modules/
 
-# Next.js
-.next/
-out/
-next-env.d.ts
-
 # macOS
 .DS_Store
+
+# Editors
+.vscode/
 
 # Local env files
 .env
 .env.*.local
+
+# Next.js
+.next/
+out/
+next-env.d.ts

@@ -127,7 +127,7 @@ func (c *DeleteUserCleanupController) deleteCollections(ctx context.Context, ite
 	for collectionID, isAlreadyDeleted := range collectionsMap {
 		if !isAlreadyDeleted {
 			// Delete all files in the collection
-			err = c.CollectionRepo.ScheduleDelete(collectionID, false)
+			err = c.CollectionRepo.ScheduleDelete(collectionID)
 			if err != nil {
 				return stacktrace.Propagate(err, fmt.Sprintf("error while deleting collection %d", collectionID))
 			}
