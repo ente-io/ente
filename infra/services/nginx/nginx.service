@@ -2,7 +2,6 @@
 Documentation=https://www.docker.com/blog/how-to-use-the-official-nginx-docker-image/
 Requires=docker.service
 After=docker.service
-Requires=nginx.service
 
 [Install]
 WantedBy=multi-user.target

@@ -3,6 +3,7 @@ Documentation=https://github.com/ente-io/ente/tree/main/server#readme
 Requires=docker.service
 After=docker.service
 Requires=nginx.service
+After=nginx.service
 
 [Service]
 Restart=on-failure
