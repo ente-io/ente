@@ -1,0 +1,3 @@
+ALTER TABLE embeddings
+    DROP COLUMN IF EXISTS size,
+    DROP COLUMN IF EXISTS version;

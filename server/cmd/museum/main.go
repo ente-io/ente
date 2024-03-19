@@ -681,6 +681,7 @@ func main() {
 
 	privateAPI.PUT("/embeddings", embeddingHandler.InsertOrUpdate)
 	privateAPI.GET("/embeddings/diff", embeddingHandler.GetDiff)
+	privateAPI.POST("/embeddings/files", embeddingHandler.GetFilesEmbedding)
 	privateAPI.DELETE("/embeddings", embeddingHandler.DeleteAll)
 
 	offerHandler := &api.OfferHandler{Controller: offerController}
