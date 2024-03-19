@@ -37,3 +37,7 @@ Tell nginx to pick up the new configuration.
 ```sh
 sudo systemctl reload nginx
 ```
+
+## Administration
+
+Login into the [dashboard](https://status.ente.io/dashboard) for administration.
