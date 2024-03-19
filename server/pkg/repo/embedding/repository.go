@@ -19,12 +19,8 @@ type Repository struct {
 
 // Create inserts a new embedding
 
-func (r *Repository) InsertOrUpdate(ctx context.Context, ownerID int64, entry ente.InsertOrUpdateEmbeddingRequest, size int) (ente.Embedding, error) {
+func (r *Repository) InsertOrUpdate(ctx context.Context, ownerID int64, entry ente.InsertOrUpdateEmbeddingRequest, size int, version int) (ente.Embedding, error) {
 	var updatedAt int64
-	version := 1
-	if entry.Version != nil {
-		version = *entry.Version
-	}
 	err := r.DB.QueryRowContext(ctx, `INSERT INTO embeddings 
 								(file_id, owner_id, model, size, version) 
 								VALUES ($1, $2, $3, $4, $5)
@@ -49,7 +45,7 @@ func (r *Repository) InsertOrUpdate(ctx context.Context, ownerID int64, entry en
 
 // GetDiff returns the embeddings that have been updated since the given time
 func (r *Repository) GetDiff(ctx context.Context, ownerID int64, model ente.Model, sinceTime int64, limit int16) ([]ente.Embedding, error) {
-	rows, err := r.DB.QueryContext(ctx, `SELECT file_id, model, encrypted_embedding, decryption_header, updated_at
+	rows, err := r.DB.QueryContext(ctx, `SELECT file_id, model, encrypted_embedding, decryption_header, updated_at, version,
 										FROM embeddings
 										WHERE owner_id = $1 AND model = $2 AND updated_at > $3
 										ORDER BY updated_at ASC
@@ -61,7 +57,7 @@ func (r *Repository) GetDiff(ctx context.Context, ownerID int64, model ente.Mode
 }
 
 func (r *Repository) GetFilesEmbedding(ctx context.Context, ownerID int64, model ente.Model, fileIDs []int64) ([]ente.Embedding, error) {
-	rows, err := r.DB.QueryContext(ctx, `SELECT file_id, model, encrypted_embedding, decryption_header, updated_at
+	rows, err := r.DB.QueryContext(ctx, `SELECT file_id, model, encrypted_embedding, decryption_header, updated_at, version
 										FROM embeddings
 										WHERE owner_id = $1 AND model = $2 AND file_id = ANY($3)`, ownerID, model, pq.Array(fileIDs))
 	if err != nil {
@@ -97,13 +93,19 @@ func convertRowsToEmbeddings(rows *sql.Rows) ([]ente.Embedding, error) {
 	for rows.Next() {
 		embedding := ente.Embedding{}
 		var encryptedEmbedding, decryptionHeader sql.NullString
-		err := rows.Scan(&embedding.FileID, &embedding.Model, &encryptedEmbedding, &decryptionHeader, &embedding.UpdatedAt)
+		var version sql.NullInt32
+		err := rows.Scan(&embedding.FileID, &embedding.Model, &encryptedEmbedding, &decryptionHeader, &embedding.UpdatedAt, &version)
 		if encryptedEmbedding.Valid && len(encryptedEmbedding.String) > 0 {
 			embedding.EncryptedEmbedding = encryptedEmbedding.String
 		}
 		if decryptionHeader.Valid && len(decryptionHeader.String) > 0 {
 			embedding.DecryptionHeader = decryptionHeader.String
 		}
+		v := 1
+		if version.Valid {
+			v = int(version.Int32)
+		}
+		embedding.Version = &v
 		if err != nil {
 			return nil, stacktrace.Propagate(err, "")
 		}

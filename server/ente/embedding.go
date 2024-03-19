@@ -1,12 +1,12 @@
 package ente
 
 type Embedding struct {
-	FileID             int64   `json:"fileID"`
-	Model              string  `json:"model"`
-	EncryptedEmbedding string  `json:"encryptedEmbedding"`
-	DecryptionHeader   string  `json:"decryptionHeader"`
-	UpdatedAt          int64   `json:"updatedAt"`
-	Client             *string `json:"client,omitempty"`
+	FileID             int64  `json:"fileID"`
+	Model              string `json:"model"`
+	EncryptedEmbedding string `json:"encryptedEmbedding"`
+	DecryptionHeader   string `json:"decryptionHeader"`
+	UpdatedAt          int64  `json:"updatedAt"`
+	Version            *int   `json:"version,omitempty"`
 }
 
 type InsertOrUpdateEmbeddingRequest struct {

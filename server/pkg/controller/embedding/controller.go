@@ -74,7 +74,8 @@ func (c *Controller) InsertOrUpdate(ctx *gin.Context, req ente.InsertOrUpdateEmb
 		log.Error(uploadErr)
 		return nil, stacktrace.Propagate(uploadErr, "")
 	}
-	embedding, err := c.Repo.InsertOrUpdate(ctx, userID, req, size)
+	embedding, err := c.Repo.InsertOrUpdate(ctx, userID, req, size, version)
+	embedding.Version = &version
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "")
 	}
@@ -159,7 +160,7 @@ func (c *Controller) GetFilesEmbedding(ctx *gin.Context, req ente.GetFilesEmbedd
 				EncryptedEmbedding: obj.embeddingObject.EncryptedEmbedding,
 				DecryptionHeader:   obj.embeddingObject.DecryptionHeader,
 				UpdatedAt:          obj.dbEmbeddingRow.UpdatedAt,
-				Client:             obj.dbEmbeddingRow.Client,
+				Version:            obj.dbEmbeddingRow.Version,
 			})
 		}
 	}

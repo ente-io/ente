@@ -49,15 +49,6 @@ func Int64InList(a int64, list []int64) bool {
 }
 
 // FindMissingElementsInSecondList identifies elements in 'sourceList' that are not present in 'targetList'.
-//
-// This function creates a set from 'targetList' for efficient lookup, then iterates through 'sourceList'
-// to identify which elements are missing in 'targetList'. This method is particularly efficient for large
-// lists, as it avoids the quadratic complexity of nested iterations by utilizing a hash set for O(1) lookups.
-//
-// Parameters:
-// - sourceList: An array of int64 elements to check against 'targetList'.
-// - targetList: An array of int64 elements used as the reference set to identify missing elements from 'sourceList'.
-//
 // Returns:
 //   - A slice of int64 representing the elements found in 'sourceList' but not in 'targetList'.
 //     If all elements of 'sourceList' are present in 'targetList', an empty slice is returned.
