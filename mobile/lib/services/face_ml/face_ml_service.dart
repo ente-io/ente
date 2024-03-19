@@ -461,13 +461,9 @@ class FaceMlService {
             if (fileMl.faceEmbedding.version != faceMlVersion) continue;
             if (fileMl.faceEmbedding.faces.isEmpty) {
               faces.add(
-                Face(
-                  '${fileMl.fileID}-0',
+                Face.empty(
                   fileMl.fileID,
-                  <double>[],
-                  (fileMl.faceEmbedding.error ?? false) ? -1.0 : 0.0,
-                  face_detection.Detection.empty(),
-                  0.0,
+                  error: (fileMl.faceEmbedding.error ?? false),
                 ),
               );
             } else {

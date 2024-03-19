@@ -20,6 +20,17 @@ class Face {
     this.blur,
   );
 
+  factory Face.empty(int fileID, {bool error = false}) {
+    return Face(
+      "$fileID-0",
+      fileID,
+      <double>[],
+      error ? -1.0 : 0.0,
+      Detection.empty(),
+      0.0,
+    );
+  }
+
   factory Face.fromJson(Map<String, dynamic> json) {
     return Face(
       json['faceID'] as String,
