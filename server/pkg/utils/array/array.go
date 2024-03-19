@@ -71,7 +71,7 @@ func FindMissingElementsInSecondList(sourceList []int64, targetList []int64) []i
 		targetSet[item] = struct{}{}
 	}
 
-	var missingElements []int64
+	var missingElements = make([]int64, 0)
 	for _, item := range sourceList {
 		if _, found := targetSet[item]; !found {
 			missingElements = append(missingElements, item)

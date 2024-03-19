@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"github.com/lib/pq"
 
 	"github.com/ente-io/museum/ente"
 	"github.com/ente-io/stacktrace"
@@ -58,7 +59,7 @@ func (r *Repository) GetDiff(ctx context.Context, ownerID int64, model ente.Mode
 func (r *Repository) GetFilesEmbedding(ctx context.Context, ownerID int64, model ente.Model, fileIDs []int64) ([]ente.Embedding, error) {
 	rows, err := r.DB.QueryContext(ctx, `SELECT file_id, model, encrypted_embedding, decryption_header, updated_at
 										FROM embeddings
-										WHERE owner_id = $1 AND model = $2 AND file_id = ANY($3)`, ownerID, model, fileIDs)
+										WHERE owner_id = $1 AND model = $2 AND file_id = ANY($3)`, ownerID, model, pq.Array(fileIDs))
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "")
 	}

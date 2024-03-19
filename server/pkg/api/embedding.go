@@ -53,7 +53,7 @@ func (h *EmbeddingHandler) GetDiff(c *gin.Context) {
 // GetFilesEmbedding returns the embeddings for the files
 func (h *EmbeddingHandler) GetFilesEmbedding(c *gin.Context) {
 	var request ente.GetFilesEmbeddingRequest
-	if err := c.ShouldBindQuery(&request); err != nil {
+	if err := c.ShouldBindJSON(&request); err != nil {
 		handler.Error(c,
 			stacktrace.Propagate(ente.ErrBadRequest, fmt.Sprintf("Request binding failed %s", err)))
 		return
