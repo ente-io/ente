@@ -45,7 +45,7 @@ func (r *Repository) InsertOrUpdate(ctx context.Context, ownerID int64, entry en
 
 // GetDiff returns the embeddings that have been updated since the given time
 func (r *Repository) GetDiff(ctx context.Context, ownerID int64, model ente.Model, sinceTime int64, limit int16) ([]ente.Embedding, error) {
-	rows, err := r.DB.QueryContext(ctx, `SELECT file_id, model, encrypted_embedding, decryption_header, updated_at, version,
+	rows, err := r.DB.QueryContext(ctx, `SELECT file_id, model, encrypted_embedding, decryption_header, updated_at, version
 										FROM embeddings
 										WHERE owner_id = $1 AND model = $2 AND updated_at > $3
 										ORDER BY updated_at ASC
