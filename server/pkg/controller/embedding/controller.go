@@ -58,19 +58,23 @@ func (c *Controller) InsertOrUpdate(ctx *gin.Context, req ente.InsertOrUpdateEmb
 	if count < 1 {
 		return nil, stacktrace.Propagate(ente.ErrNotFound, "")
 	}
+	version := 1
+	if req.Version != nil {
+		version = *req.Version
+	}
 
 	obj := ente.EmbeddingObject{
-		Version:            1,
+		Version:            version,
 		EncryptedEmbedding: req.EncryptedEmbedding,
 		DecryptionHeader:   req.DecryptionHeader,
 		Client:             network.GetPrettyUA(ctx.GetHeader("User-Agent")) + "/" + ctx.GetHeader("X-Client-Version"),
 	}
-	err = c.uploadObject(obj, c.getObjectKey(userID, req.FileID, req.Model))
-	if err != nil {
-		log.Error(err)
-		return nil, stacktrace.Propagate(err, "")
+	size, uploadErr := c.uploadObject(obj, c.getObjectKey(userID, req.FileID, req.Model))
+	if uploadErr != nil {
+		log.Error(uploadErr)
+		return nil, stacktrace.Propagate(uploadErr, "")
 	}
-	embedding, err := c.Repo.InsertOrUpdate(ctx, userID, req)
+	embedding, err := c.Repo.InsertOrUpdate(ctx, userID, req, size)
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "")
 	}
@@ -258,7 +262,8 @@ func (c *Controller) getEmbeddingObjectPrefix(userID int64, fileID int64) string
 	return strconv.FormatInt(userID, 10) + "/ml-data/" + strconv.FormatInt(fileID, 10) + "/"
 }
 
-func (c *Controller) uploadObject(obj ente.EmbeddingObject, key string) error {
+// uploadObject uploads the embedding object to the object store and returns the object size
+func (c *Controller) uploadObject(obj ente.EmbeddingObject, key string) (int, error) {
 	embeddingObj, _ := json.Marshal(obj)
 	uploader := s3manager.NewUploaderWithClient(c.S3Config.GetHotS3Client())
 	up := s3manager.UploadInput{
@@ -269,10 +274,11 @@ func (c *Controller) uploadObject(obj ente.EmbeddingObject, key string) error {
 	result, err := uploader.Upload(&up)
 	if err != nil {
 		log.Error(err)
-		return stacktrace.Propagate(err, "")
+		return -1, stacktrace.Propagate(err, "")
 	}
+
 	log.Infof("Uploaded to bucket %s", result.Location)
-	return nil
+	return len(embeddingObj), nil
 }
 
 var globalFetchSemaphore = make(chan struct{}, 300)

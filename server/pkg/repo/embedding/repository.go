@@ -19,14 +19,18 @@ type Repository struct {
 
 // Create inserts a new embedding
 
-func (r *Repository) InsertOrUpdate(ctx context.Context, ownerID int64, entry ente.InsertOrUpdateEmbeddingRequest) (ente.Embedding, error) {
+func (r *Repository) InsertOrUpdate(ctx context.Context, ownerID int64, entry ente.InsertOrUpdateEmbeddingRequest, size int) (ente.Embedding, error) {
 	var updatedAt int64
+	version := 1
+	if entry.Version != nil {
+		version = *entry.Version
+	}
 	err := r.DB.QueryRowContext(ctx, `INSERT INTO embeddings 
-								(file_id, owner_id, model) 
-								VALUES ($1, $2, $3)
+								(file_id, owner_id, model, size, version) 
+								VALUES ($1, $2, $3, $4, $5)
 								ON CONFLICT ON CONSTRAINT unique_embeddings_file_id_model
-								DO UPDATE SET updated_at = now_utc_micro_seconds()
-								RETURNING updated_at`, entry.FileID, ownerID, entry.Model).Scan(&updatedAt)
+								DO UPDATE SET updated_at = now_utc_micro_seconds(), size = $4, version = $5
+								RETURNING updated_at`, entry.FileID, ownerID, entry.Model, size, version).Scan(&updatedAt)
 	if err != nil {
 		// check if error is due to model enum invalid value
 		if err.Error() == fmt.Sprintf("pq: invalid input value for enum model: \"%s\"", entry.Model) {

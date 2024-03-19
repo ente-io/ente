@@ -14,6 +14,7 @@ type InsertOrUpdateEmbeddingRequest struct {
 	Model              string `json:"model" binding:"required"`
 	EncryptedEmbedding string `json:"encryptedEmbedding" binding:"required"`
 	DecryptionHeader   string `json:"decryptionHeader" binding:"required"`
+	Version            *int   `json:"version,omitempty"`
 }
 
 type GetEmbeddingDiffRequest struct {
@@ -37,9 +38,10 @@ type GetFilesEmbeddingResponse struct {
 type Model string
 
 const (
-	OnnxClip           Model = "onnx-clip"
-	GgmlClip           Model = "ggml-clip"
-	OnnxYolo5MobileNet Model = "onnx-yolo5-mobile"
+	OnnxClip            Model = "onnx-clip"
+	GgmlClip            Model = "ggml-clip"
+	OnnxYoloV5MobileNet Model = "onnx-yolov5-mobile"
+	FileMlClipFace      Model = "file-ml-clip-face"
 )
 
 type EmbeddingObject struct {
