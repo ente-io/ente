@@ -141,13 +141,6 @@ func (c *Controller) GetFilesEmbedding(ctx *gin.Context, req ente.GetFilesEmbedd
 	missingFileIds := array.FindMissingElementsInSecondList(req.FileIDs, dbFileIds)
 	errFileIds := make([]int64, 0)
 
-	// Collect object keys for userFileEmbeddings with missing data
-	var objectKeys []string
-	for i := range userFileEmbeddings {
-		objectKey := c.getObjectKey(userID, userFileEmbeddings[i].FileID, userFileEmbeddings[i].Model)
-		objectKeys = append(objectKeys, objectKey)
-	}
-
 	// Fetch missing userFileEmbeddings in parallel
 	embeddingObjects, err := c.getEmbeddingObjectsParallelV2(userID, userFileEmbeddings)
 	if err != nil {
