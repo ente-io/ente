@@ -78,12 +78,16 @@ class FaceMLDataDB {
     }
   }
 
-  Future<Set<int>> getIndexedFileIds() async {
+  Future<Map<int, int>> getIndexedFileIds() async {
     final db = await instance.database;
     final List<Map<String, dynamic>> maps = await db.rawQuery(
-      'SELECT DISTINCT $fileIDColumn FROM $facesTable',
+      'SELECT $fileIDColumn, $mlVersionColumn FROM $facesTable',
     );
-    return maps.map((e) => e[fileIDColumn] as int).toSet();
+    final Map<int, int> result = {};
+    for (final map in maps) {
+      result[map[fileIDColumn] as int] = map[mlVersionColumn] as int;
+    }
+    return result;
   }
 
   Future<Map<int, int>> clusterIdToFaceCount() async {

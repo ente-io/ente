@@ -8,6 +8,7 @@ import "package:photos/events/people_changed_event.dart";
 import "package:photos/extensions/stop_watch.dart";
 import "package:photos/face/db.dart";
 import "package:photos/face/model/person.dart";
+import "package:photos/models/ml/ml_versions.dart";
 import "package:photos/services/face_ml/face_ml_service.dart";
 import "package:photos/services/face_ml/feedback/cluster_feedback.dart";
 import 'package:photos/theme/ente_theme.dart';
@@ -58,7 +59,7 @@ class _FaceDebugSectionWidgetState extends State<FaceDebugSectionWidget> {
     return Column(
       children: [
         MenuItemWidget(
-          captionedTextWidget: FutureBuilder<Set<int>>(
+          captionedTextWidget: FutureBuilder<Map<int, int>>(
             future: FaceMLDataDB.instance.getIndexedFileIds(),
             builder: (context, snapshot) {
               if (snapshot.hasData) {
@@ -182,7 +183,7 @@ class _FaceDebugSectionWidgetState extends State<FaceDebugSectionWidget> {
         if (kDebugMode) sectionOptionSpacing,
         if (kDebugMode)
           MenuItemWidget(
-            captionedTextWidget: FutureBuilder<Set<int>>(
+            captionedTextWidget: FutureBuilder<Map<int, int>>(
               future: FaceMLDataDB.instance.getIndexedFileIds(),
               builder: (context, snapshot) {
                 if (snapshot.hasData) {
@@ -204,7 +205,7 @@ class _FaceDebugSectionWidgetState extends State<FaceDebugSectionWidget> {
               watch.logAndReset('read embeddings ${result.length} ');
               showShortToast(
                 context,
-                "Done in ${watch.elapsed.inSeconds} secs",
+                "Read ${result.length} face embeddings in ${watch.elapsed.inSeconds} secs",
               );
             },
           ),

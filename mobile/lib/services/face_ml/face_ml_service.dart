@@ -415,7 +415,7 @@ class FaceMlService {
       _logger.info('starting image indexing');
       final List<EnteFile> enteFiles =
           await SearchService.instance.getAllFiles();
-      final Set<int> alreadyIndexedFiles =
+      final Map<int, int> alreadyIndexedFiles =
           await FaceMLDataDB.instance.getIndexedFileIds();
 
       // Make sure the image conversion isolate is spawned
@@ -456,7 +456,7 @@ class FaceMlService {
           final res =
               await RemoteFileMLService.instance.getFilessEmbedding(fileIds);
           final List<Face> faces = [];
-          final indexedFileIds = <int>{};
+          final remoteFileIdToVersion = <int, int>{};
           for (FileMl fileMl in res.mlData.values) {
             if (fileMl.faceEmbedding.version != faceMlVersion) continue;
             if (fileMl.faceEmbedding.faces.isEmpty) {
@@ -473,11 +473,13 @@ class FaceMlService {
             } else {
               faces.addAll(fileMl.faceEmbedding.faces);
             }
-            indexedFileIds.add(fileMl.fileID);
+            remoteFileIdToVersion[fileMl.fileID] = fileMl.faceEmbedding.version;
           }
           await FaceMLDataDB.instance.bulkInsertFaces(faces);
-          alreadyIndexedFiles.addAll(indexedFileIds);
-          _logger.info('already indexed files ${indexedFileIds.length}');
+          for (final entry in remoteFileIdToVersion.entries) {
+            alreadyIndexedFiles[entry.key] = entry.value;
+          }
+          _logger.info('already indexed files ${remoteFileIdToVersion.length}');
         } catch (e, s) {
           _logger.severe("err while getting files embeddings", e, s);
           rethrow;
@@ -1147,7 +1149,7 @@ class FaceMlService {
 
   /// Checks if the ente file to be analyzed actually can be analyzed: it must be uploaded and in the correct format.
   void _checkEnteFileForID(EnteFile enteFile) {
-    if (_skipAnalysisEnteFile(enteFile, <int>{})) {
+    if (_skipAnalysisEnteFile(enteFile, <int, int>{})) {
       _logger.severe(
         "Skipped analysis of image with enteFile ${enteFile.toString()} because it is the wrong format or has no uploadedFileID",
       );
@@ -1155,7 +1157,7 @@ class FaceMlService {
     }
   }
 
-  bool _skipAnalysisEnteFile(EnteFile enteFile, Set<int> indexedFileIds) {
+  bool _skipAnalysisEnteFile(EnteFile enteFile, Map<int, int> indexedFileIds) {
     // Skip if the file is not uploaded or not owned by the user
     if (!enteFile.isUploaded || enteFile.isOwner == false) {
       return true;
@@ -1171,7 +1173,9 @@ class FaceMlService {
     }
     // Skip if the file is already analyzed with the latest ml version
     final id = enteFile.uploadedFileID!;
-    return indexedFileIds.contains(id);
+
+    return indexedFileIds.containsKey(id) &&
+        indexedFileIds[id]! >= faceMlVersion;
   }
 
   Future<FaceMlResult?> _checkForExistingUpToDateResult(

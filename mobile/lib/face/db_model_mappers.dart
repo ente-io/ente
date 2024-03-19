@@ -5,6 +5,7 @@ import "package:photos/face/model/detection.dart";
 import "package:photos/face/model/face.dart";
 import "package:photos/face/model/person.dart";
 import "package:photos/generated/protos/ente/common/vector.pb.dart";
+import "package:photos/models/ml/ml_versions.dart";
 
 int boolToSQLInt(bool? value, {bool defaultValue = false}) {
   final bool v = value ?? defaultValue;
@@ -58,7 +59,7 @@ Map<String, dynamic> mapRemoteToFaceDB(Face face) {
     ).writeToBuffer(),
     faceScore: face.score,
     faceBlur: face.blur,
-    mlVersionColumn: 1,
+    mlVersionColumn: faceMlVersion,
   };
 }
 
