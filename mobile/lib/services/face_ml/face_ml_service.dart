@@ -425,11 +425,24 @@ class FaceMlService {
       int fileAnalyzedCount = 0;
       int fileSkippedCount = 0;
       final stopwatch = Stopwatch()..start();
-      final split = enteFiles.splitMatch((e) => (e.localID ?? '') == '');
+      final List<EnteFile> filesWithLocalID = <EnteFile>[];
+      final List<EnteFile> filesWithoutLocalID = <EnteFile>[];
+      for (final EnteFile enteFile in enteFiles) {
+        if (_skipAnalysisEnteFile(enteFile, alreadyIndexedFiles)) {
+          fileSkippedCount++;
+          continue;
+        }
+        if ((enteFile.localID ?? '').isEmpty) {
+          filesWithoutLocalID.add(enteFile);
+        } else {
+          filesWithLocalID.add(enteFile);
+        }
+      }
+
       // list of files where files with localID are first
       final sortedBylocalID = <EnteFile>[];
-      sortedBylocalID.addAll(split.unmatched);
-      sortedBylocalID.addAll(split.matched);
+      sortedBylocalID.addAll(filesWithLocalID);
+      sortedBylocalID.addAll(filesWithoutLocalID);
       final List<List<EnteFile>> chunks = sortedBylocalID.chunks(kParallelism);
       outerLoop:
       for (final chunk in chunks) {
@@ -437,9 +450,7 @@ class FaceMlService {
         final List<int> fileIds = [];
         // Try to find embeddings on the remote server
         for (final f in chunk) {
-          if (!alreadyIndexedFiles.contains(f.uploadedFileID)) {
-            fileIds.add(f.uploadedFileID!);
-          }
+          fileIds.add(f.uploadedFileID!);
         }
         try {
           final res =
