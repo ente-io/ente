@@ -20,7 +20,6 @@ import "package:photos/face/db.dart";
 import "package:photos/face/model/box.dart";
 import "package:photos/face/model/detection.dart" as face_detection;
 import "package:photos/face/model/face.dart";
-import "package:photos/face/model/file_ml.dart";
 import "package:photos/face/model/landmark.dart";
 import "package:photos/models/file/extensions/file_props.dart";
 import "package:photos/models/file/file.dart";
@@ -34,7 +33,8 @@ import "package:photos/services/face_ml/face_embedding/face_embedding_exceptions
 import 'package:photos/services/face_ml/face_embedding/onnx_face_embedding.dart';
 import "package:photos/services/face_ml/face_ml_exceptions.dart";
 import "package:photos/services/face_ml/face_ml_result.dart";
-import "package:photos/services/machine_learning/remote_embedding_service.dart";
+import 'package:photos/services/machine_learning/file_ml/file_ml.dart';
+import 'package:photos/services/machine_learning/file_ml/remote_fileml_service.dart';
 import "package:photos/services/search_service.dart";
 import "package:photos/utils/file_util.dart";
 import 'package:photos/utils/image_ml_isolate.dart';
@@ -413,7 +413,6 @@ class FaceMlService {
     try {
       isImageIndexRunning = true;
       _logger.info('starting image indexing');
-
       final List<EnteFile> enteFiles =
           await SearchService.instance.getAllFiles();
       final Set<int> alreadyIndexedFiles =
@@ -435,6 +434,44 @@ class FaceMlService {
       outerLoop:
       for (final chunk in chunks) {
         final futures = <Future>[];
+        final List<int> fileIds = [];
+        // Try to find embeddings on the remote server
+        for (final f in chunk) {
+          if (!alreadyIndexedFiles.contains(f.uploadedFileID)) {
+            fileIds.add(f.uploadedFileID!);
+          }
+        }
+        try {
+          final res =
+              await RemoteFileMLService.instance.getFilessEmbedding(fileIds);
+          final List<Face> faces = [];
+          final indexedFileIds = <int>{};
+          for (FileMl fileMl in res.mlData.values) {
+            if (fileMl.faceEmbedding.version != faceMlVersion) continue;
+            if (fileMl.faceEmbedding.faces.isEmpty) {
+              faces.add(
+                Face(
+                  '${fileMl.fileID}-0',
+                  fileMl.fileID,
+                  <double>[],
+                  (fileMl.faceEmbedding.error ?? false) ? -1.0 : 0.0,
+                  face_detection.Detection.empty(),
+                  0.0,
+                ),
+              );
+            } else {
+              faces.addAll(fileMl.faceEmbedding.faces);
+            }
+            indexedFileIds.add(fileMl.fileID);
+          }
+          await FaceMLDataDB.instance.bulkInsertFaces(faces);
+          alreadyIndexedFiles.addAll(indexedFileIds);
+          _logger.info('already indexed files ${indexedFileIds.length}');
+        } catch (e, s) {
+          _logger.severe("err while getting files embeddings", e, s);
+          rethrow;
+        }
+
         for (final enteFile in chunk) {
           if (isImageIndexRunning == false) {
             _logger.info("indexAllImages() was paused, stopping");
@@ -447,7 +484,7 @@ class FaceMlService {
             fileSkippedCount++;
             continue;
           }
-          futures.add(processImage(enteFile, alreadyIndexedFiles));
+          futures.add(processImage(enteFile));
         }
         await Future.wait(futures);
         fileAnalyzedCount += futures.length;
@@ -468,10 +505,7 @@ class FaceMlService {
     }
   }
 
-  Future<void> processImage(
-    EnteFile enteFile,
-    Set<int> alreadyIndexedFiles,
-  ) async {
+  Future<void> processImage(EnteFile enteFile) async {
     _logger.info(
       "`indexAllImages()` on file number  start processing image with uploadedFileID: ${enteFile.uploadedFileID}",
     );
@@ -545,11 +579,15 @@ class FaceMlService {
         }
       }
       _logger.info("inserting ${faces.length} faces for ${result.fileId}");
-      await RemoteEmbeddingService.instance.putFaceEmbedding(
+      await RemoteFileMLService.instance.putFileEmbedding(
         enteFile,
         FileMl(
           enteFile.uploadedFileID!,
-          FaceEmbeddings(faces, result.mlVersion),
+          FaceEmbeddings(
+            faces,
+            result.mlVersion,
+            error: result.errorOccured ? true : null,
+          ),
         ),
       );
       await FaceMLDataDB.instance.bulkInsertFaces(faces);

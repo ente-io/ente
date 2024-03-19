@@ -1,5 +1,39 @@
 import "package:photos/face/model/face.dart";
 
+class FileMl {
+  final int fileID;
+  // json: face
+  final FaceEmbeddings faceEmbedding;
+  final ClipEmbedding? clipEmbedding;
+  // int updationTime that is not serialized
+  int? updationTime;
+
+  FileMl(
+    this.fileID,
+    this.faceEmbedding, {
+    this.clipEmbedding,
+  });
+
+  // toJson
+  Map<String, dynamic> toJson() => {
+        'fileID': fileID,
+        'faceEmbedding': faceEmbedding.toJson(),
+        'clipEmbedding': clipEmbedding?.toJson(),
+      };
+  // fromJson
+  factory FileMl.fromJson(Map<String, dynamic> json) {
+    return FileMl(
+      json['fileID'] as int,
+      FaceEmbeddings.fromJson(json['faceEmbedding'] as Map<String, dynamic>),
+      clipEmbedding: json['clipEmbedding'] == null
+          ? null
+          : ClipEmbedding.fromJson(
+              json['clipEmbedding'] as Map<String, dynamic>,
+            ),
+    );
+  }
+}
+
 class FaceEmbeddings {
   final List<Face> faces;
   final int version;
@@ -36,49 +70,18 @@ class FaceEmbeddings {
 
 class ClipEmbedding {
   final int? version;
-  final String framwork;
   final List<double> embedding;
-  ClipEmbedding(this.embedding, this.framwork, {this.version});
+  ClipEmbedding(this.embedding, {this.version});
   // toJson
   Map<String, dynamic> toJson() => {
         'version': version,
-        'framwork': framwork,
         'embedding': embedding,
       };
   // fromJson
   factory ClipEmbedding.fromJson(Map<String, dynamic> json) {
     return ClipEmbedding(
       List<double>.from(json['embedding'] as List),
-      json['framwork'] as String,
       version: json['version'] as int?,
-    );
-  }
-}
-
-class FileMl {
-  final int fileID;
-  final FaceEmbeddings face;
-  final ClipEmbedding? clip;
-  final String? last4Hash;
-
-  FileMl(this.fileID, this.face, {this.clip, this.last4Hash});
-
-  // toJson
-  Map<String, dynamic> toJson() => {
-        'fileID': fileID,
-        'face': face.toJson(),
-        'clip': clip?.toJson(),
-        'last4Hash': last4Hash,
-      };
-  // fromJson
-  factory FileMl.fromJson(Map<String, dynamic> json) {
-    return FileMl(
-      json['fileID'] as int,
-      FaceEmbeddings.fromJson(json['face'] as Map<String, dynamic>),
-      clip: json['clip'] == null
-          ? null
-          : ClipEmbedding.fromJson(json['clip'] as Map<String, dynamic>),
-      last4Hash: json['last4Hash'] as String?,
     );
   }
 }
