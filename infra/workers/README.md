@@ -13,7 +13,7 @@ Each worker is a self contained directory with its each `package.json`.
 
 * Login into wrangler (if needed) using `yarn wrangler login`
 
-* Deploy! `yarn wrangler publish`
+* Deploy! `yarn wrangler deploy`
 
 Wrangler is the CLI provided by Cloudflare to manage workers. Apart from
 deploying, it also allows us to stream logs from running workers by using `yarn
