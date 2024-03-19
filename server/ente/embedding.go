@@ -38,10 +38,11 @@ type GetFilesEmbeddingResponse struct {
 type Model string
 
 const (
-	OnnxClip            Model = "onnx-clip"
-	GgmlClip            Model = "ggml-clip"
-	OnnxYoloV5MobileNet Model = "onnx-yolov5-mobile"
-	FileMlClipFace      Model = "file-ml-clip-face"
+	OnnxClip Model = "onnx-clip"
+	GgmlClip Model = "ggml-clip"
+
+	// FileMlClipFace is a model for face embeddings, it is used in request validation.
+	FileMlClipFace Model = "file-ml-clip-face"
 )
 
 type EmbeddingObject struct {
