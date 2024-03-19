@@ -7,7 +7,7 @@ Each worker is a self contained directory with its each `package.json`.
 
 ## Deploying
 
-* Switch to a worker directory, e.g. `cd health-check`.
+* Switch to a worker directory, e.g. `cd github-discord-notifier`.
 
 * Install dependencies (if needed) with `yarn`
 
@@ -21,8 +21,8 @@ wrangler tail`.
 
 ## Creating a new worker
 
-Copy paste an existing one. Unironically this is a good option because the
-Cloudflare template has a lot of unnecessary noise, but if really do want to
+Copy paste an existing one. Unironically this is a good option because
+Cloudflare's template has a lot of unnecessary noise, but if really do want to
 create one from scratch, use `npm create cloudflare@latest`.
 
 To import an existing worker from the Cloudflare dashboard, use
