@@ -220,7 +220,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "Eu entendo que se eu perder minha senha, posso perder meus dados, já que meus dados são <underline>criptografados de ponta a ponta</underline>."),
         "activeSessions":
             MessageLookupByLibrary.simpleMessage("Sessões ativas"),
-        "addAName": MessageLookupByLibrary.simpleMessage("Add a name"),
         "addANewEmail":
             MessageLookupByLibrary.simpleMessage("Adicionar um novo email"),
         "addCollaborator":
@@ -415,6 +414,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "claimedStorageSoFar": m8,
         "cleanUncategorized":
             MessageLookupByLibrary.simpleMessage("Limpar Sem Categoria"),
+        "cleanUncategorizedDescription": MessageLookupByLibrary.simpleMessage(
+            "Remover todos os arquivos de Não Categorizados que estão presentes em outros álbuns"),
         "clearCaches": MessageLookupByLibrary.simpleMessage("Limpar cache"),
         "clearIndexes": MessageLookupByLibrary.simpleMessage("Limpar índices"),
         "click": MessageLookupByLibrary.simpleMessage("Clique"),
@@ -559,7 +560,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Excluir álbum compartilhado?"),
         "deleteSharedAlbumDialogBody": MessageLookupByLibrary.simpleMessage(
             "O álbum será apagado para todos\n\nVocê perderá o acesso a fotos compartilhadas neste álbum que pertencem aos outros"),
-        "descriptions": MessageLookupByLibrary.simpleMessage("Descriptions"),
+        "descriptions": MessageLookupByLibrary.simpleMessage("Descrições"),
         "deselectAll": MessageLookupByLibrary.simpleMessage("Desmarcar todos"),
         "designedToOutlive":
             MessageLookupByLibrary.simpleMessage("Feito para ter logenvidade"),
@@ -875,7 +876,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "locationName": MessageLookupByLibrary.simpleMessage("Nome do Local"),
         "locationTagFeatureDescription": MessageLookupByLibrary.simpleMessage(
             "Uma tag em grupo de todas as fotos que foram tiradas dentro de algum raio de uma foto"),
-        "locations": MessageLookupByLibrary.simpleMessage("Locations"),
+        "locations": MessageLookupByLibrary.simpleMessage("Locais"),
         "lockButtonLabel": MessageLookupByLibrary.simpleMessage("Bloquear"),
         "lockScreenEnablePreSteps": MessageLookupByLibrary.simpleMessage(
             "Para ativar o bloqueio de tela, por favor ative um método de autenticação nas configurações do sistema do seu dispositivo."),
@@ -1501,6 +1502,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "verifyEmail": MessageLookupByLibrary.simpleMessage("Verificar email"),
         "verifyEmailID": m64,
         "verifyIDLabel": MessageLookupByLibrary.simpleMessage("Verificar"),
+        "verifyPasskey":
+            MessageLookupByLibrary.simpleMessage("Verificar chave de acesso"),
         "verifyPassword":
             MessageLookupByLibrary.simpleMessage("Verificar senha"),
         "verifying": MessageLookupByLibrary.simpleMessage("Verificando..."),
@@ -1521,6 +1524,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "viewer": MessageLookupByLibrary.simpleMessage("Visualizador"),
         "visitWebToManage": MessageLookupByLibrary.simpleMessage(
             "Por favor visite web.ente.io para gerenciar sua assinatura"),
+        "waitingForVerification": MessageLookupByLibrary.simpleMessage(
+            "Esperando por verificação..."),
         "waitingForWifi":
             MessageLookupByLibrary.simpleMessage("Esperando por Wi-Fi..."),
         "weAreOpenSource":

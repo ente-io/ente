@@ -355,6 +355,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "claimed": MessageLookupByLibrary.simpleMessage("已领取"),
         "claimedStorageSoFar": m8,
         "cleanUncategorized": MessageLookupByLibrary.simpleMessage("清除未分类的"),
+        "cleanUncategorizedDescription":
+            MessageLookupByLibrary.simpleMessage("从“未分类”中删除其他相册中存在的所有文件"),
         "clearCaches": MessageLookupByLibrary.simpleMessage("清除缓存"),
         "clearIndexes": MessageLookupByLibrary.simpleMessage("清空索引"),
         "click": MessageLookupByLibrary.simpleMessage("• 点击"),
@@ -466,7 +468,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "deleteSharedAlbum": MessageLookupByLibrary.simpleMessage("要删除共享相册吗？"),
         "deleteSharedAlbumDialogBody": MessageLookupByLibrary.simpleMessage(
             "将为所有人删除相册\n\n您将无法访问此相册中他人拥有的共享照片"),
-        "descriptions": MessageLookupByLibrary.simpleMessage("Descriptions"),
         "deselectAll": MessageLookupByLibrary.simpleMessage("取消全选"),
         "designedToOutlive": MessageLookupByLibrary.simpleMessage("经久耐用"),
         "details": MessageLookupByLibrary.simpleMessage("详情"),
@@ -719,7 +720,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "locationName": MessageLookupByLibrary.simpleMessage("地点名称"),
         "locationTagFeatureDescription":
             MessageLookupByLibrary.simpleMessage("位置标签将在照片的某个半径范围内拍摄的所有照片进行分组"),
-        "locations": MessageLookupByLibrary.simpleMessage("Locations"),
         "lockButtonLabel": MessageLookupByLibrary.simpleMessage("锁定"),
         "lockScreenEnablePreSteps":
             MessageLookupByLibrary.simpleMessage("要启用锁屏，请在系统设置中设置设备密码或屏幕锁定。"),
@@ -1214,6 +1214,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "verifyEmail": MessageLookupByLibrary.simpleMessage("验证电子邮件"),
         "verifyEmailID": m64,
         "verifyIDLabel": MessageLookupByLibrary.simpleMessage("验证"),
+        "verifyPasskey": MessageLookupByLibrary.simpleMessage("验证通行密钥"),
         "verifyPassword": MessageLookupByLibrary.simpleMessage("验证密码"),
         "verifying": MessageLookupByLibrary.simpleMessage("正在验证..."),
         "verifyingRecoveryKey":
@@ -1229,6 +1230,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "viewer": MessageLookupByLibrary.simpleMessage("查看者"),
         "visitWebToManage":
             MessageLookupByLibrary.simpleMessage("请访问 web.ente.io 来管理您的订阅"),
+        "waitingForVerification":
+            MessageLookupByLibrary.simpleMessage("等待验证..."),
         "waitingForWifi": MessageLookupByLibrary.simpleMessage("正在等待 WiFi..."),
         "weAreOpenSource": MessageLookupByLibrary.simpleMessage("我们是开源的 ！"),
         "weDontSupportEditingPhotosAndAlbumsThatYouDont":

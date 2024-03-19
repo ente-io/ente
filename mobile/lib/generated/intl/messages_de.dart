@@ -394,6 +394,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "cannotAddMorePhotosAfterBecomingViewer": m7,
         "cannotDeleteSharedFiles": MessageLookupByLibrary.simpleMessage(
             "Konnte geteilte Dateien nicht löschen"),
+        "castInstruction": MessageLookupByLibrary.simpleMessage(
+            "Besuche cast.ente.io auf dem Gerät, das du verbinden möchtest.\n\nGib den unten angegebenen Code ein, um das Album auf deinem Fernseher abzuspielen."),
         "centerPoint": MessageLookupByLibrary.simpleMessage("Mittelpunkt"),
         "changeEmail":
             MessageLookupByLibrary.simpleMessage("E-Mail-Adresse ändern"),
@@ -417,7 +419,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "claimedStorageSoFar": m8,
         "cleanUncategorized":
             MessageLookupByLibrary.simpleMessage("Unkategorisiert leeren"),
+        "cleanUncategorizedDescription": MessageLookupByLibrary.simpleMessage(
+            "Entferne alle Dateien von \"Unkategorisiert\" die in anderen Alben vorhanden sind"),
         "clearCaches": MessageLookupByLibrary.simpleMessage("Cache löschen"),
+        "clearIndexes": MessageLookupByLibrary.simpleMessage("Indexe löschen"),
         "click": MessageLookupByLibrary.simpleMessage("• Klick"),
         "clickOnTheOverflowMenu": MessageLookupByLibrary.simpleMessage(
             "• Klicken Sie auf das Überlaufmenü"),
@@ -563,17 +568,20 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Geteiltes Album löschen?"),
         "deleteSharedAlbumDialogBody": MessageLookupByLibrary.simpleMessage(
             "Dieses Album wird für alle gelöscht\n\nDu wirst den Zugriff auf geteilte Fotos in diesem Album, die anderen gehören, verlieren"),
-        "descriptions": MessageLookupByLibrary.simpleMessage("Descriptions"),
+        "descriptions": MessageLookupByLibrary.simpleMessage("Beschreibungen"),
         "deselectAll": MessageLookupByLibrary.simpleMessage("Alle abwählen"),
         "designedToOutlive":
             MessageLookupByLibrary.simpleMessage("Entwickelt um zu bewahren"),
         "details": MessageLookupByLibrary.simpleMessage("Details"),
         "devAccountChanged": MessageLookupByLibrary.simpleMessage(
             "Das Entwicklerkonto, das wir verwenden, um ente im App Store zu veröffentlichen, hat sich geändert. Aus diesem Grund musst du dich erneut anmelden.\n\nWir entschuldigen uns für die Unannehmlichkeiten, aber das war unvermeidlich."),
+        "deviceCodeHint": MessageLookupByLibrary.simpleMessage("Code eingeben"),
         "deviceFilesAutoUploading": MessageLookupByLibrary.simpleMessage(
             "Dateien, die zu diesem Album hinzugefügt werden, werden automatisch zu ente hochgeladen."),
         "deviceLockExplanation": MessageLookupByLibrary.simpleMessage(
             "Das Sperren des Gerätes verhindern, solange \'ente\' im Vordergrund geöffnet ist und eine Sicherung läuft. \nDies wird für gewöhnlich nicht benötigt, kann aber dabei helfen große Transfers schneller durchzuführen."),
+        "deviceNotFound":
+            MessageLookupByLibrary.simpleMessage("Gerät nicht gefunden"),
         "didYouKnow": MessageLookupByLibrary.simpleMessage("Schon gewusst?"),
         "disableAutoLock": MessageLookupByLibrary.simpleMessage(
             "Automatische Sperre deaktivieren"),
@@ -793,6 +801,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Der eingegebene Schlüssel ist ungültig"),
         "incorrectRecoveryKeyTitle": MessageLookupByLibrary.simpleMessage(
             "Falscher Wiederherstellungs-Schlüssel"),
+        "indexedItems":
+            MessageLookupByLibrary.simpleMessage("Indizierte Elemente"),
         "insecureDevice":
             MessageLookupByLibrary.simpleMessage("Unsicheres Gerät"),
         "installManually":
@@ -819,7 +829,8 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Elemente zeigen die Anzahl der Tage bis zum dauerhaften Löschen an"),
         "itemsWillBeRemovedFromAlbum": MessageLookupByLibrary.simpleMessage(
             "Ausgewählte Elemente werden aus diesem Album entfernt"),
-        "joinDiscord": MessageLookupByLibrary.simpleMessage("Join Discord"),
+        "joinDiscord":
+            MessageLookupByLibrary.simpleMessage("Discord beitreten"),
         "keepPhotos": MessageLookupByLibrary.simpleMessage("Fotos behalten"),
         "kiloMeterUnit": MessageLookupByLibrary.simpleMessage("km"),
         "kindlyHelpUsWithThisInformation":
@@ -871,12 +882,14 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Lade Galerie …"),
         "loadingMessage":
             MessageLookupByLibrary.simpleMessage("Fotos werden geladen..."),
+        "loadingModel":
+            MessageLookupByLibrary.simpleMessage("Lade Modelle herunter..."),
         "localGallery": MessageLookupByLibrary.simpleMessage("Lokale Galerie"),
         "location": MessageLookupByLibrary.simpleMessage("Standort"),
         "locationName": MessageLookupByLibrary.simpleMessage("Standortname"),
         "locationTagFeatureDescription": MessageLookupByLibrary.simpleMessage(
             "Ein Standort-Tag gruppiert alle Fotos, die in einem Radius eines Fotos aufgenommen wurden"),
-        "locations": MessageLookupByLibrary.simpleMessage("Locations"),
+        "locations": MessageLookupByLibrary.simpleMessage("Orte"),
         "lockButtonLabel": MessageLookupByLibrary.simpleMessage("Sperren"),
         "lockScreenEnablePreSteps": MessageLookupByLibrary.simpleMessage(
             "Um den Sperrbildschirm zu aktivieren, legen Sie bitte den Geräte-Passcode oder die Bildschirmsperre in den Systemeinstellungen fest."),
@@ -891,6 +904,11 @@ class MessageLookup extends MessageLookupByLibrary {
         "longpressOnAnItemToViewInFullscreen": MessageLookupByLibrary.simpleMessage(
             "Drücken Sie lange auf ein Element, um es im Vollbildmodus anzuzeigen"),
         "lostDevice": MessageLookupByLibrary.simpleMessage("Gerät verloren?"),
+        "machineLearning":
+            MessageLookupByLibrary.simpleMessage("Maschinelles Lernen"),
+        "magicSearch": MessageLookupByLibrary.simpleMessage("Magische Suche"),
+        "magicSearchDescription": MessageLookupByLibrary.simpleMessage(
+            "Bitte beachten Sie, dass dies mehr Bandbreite nutzt und zu einem höheren Akkuverbrauch führt, bis alle Elemente indiziert sind."),
         "manage": MessageLookupByLibrary.simpleMessage("Verwalten"),
         "manageDeviceStorage":
             MessageLookupByLibrary.simpleMessage("Gerätespeicher verwalten"),
@@ -984,6 +1002,10 @@ class MessageLookup extends MessageLookupByLibrary {
             "Bei Bedarf auch so kurz wie Sie wollen..."),
         "orPickAnExistingOne": MessageLookupByLibrary.simpleMessage(
             "Oder eine Vorherige auswählen"),
+        "pair": MessageLookupByLibrary.simpleMessage("Koppeln"),
+        "passkey": MessageLookupByLibrary.simpleMessage("Passkey"),
+        "passkeyAuthTitle":
+            MessageLookupByLibrary.simpleMessage("Passkey-Verifizierung"),
         "password": MessageLookupByLibrary.simpleMessage("Passwort"),
         "passwordChangedSuccessfully": MessageLookupByLibrary.simpleMessage(
             "Passwort erfolgreich geändert"),
@@ -997,6 +1019,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Zahlung fehlgeschlagen"),
         "paymentFailedTalkToProvider": m35,
         "paymentFailedWithReason": m36,
+        "pendingItems":
+            MessageLookupByLibrary.simpleMessage("Ausstehende Elemente"),
         "pendingSync":
             MessageLookupByLibrary.simpleMessage("Synchronisation anstehend"),
         "peopleUsingYourCode": MessageLookupByLibrary.simpleMessage(
@@ -1019,6 +1043,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "pickCenterPoint":
             MessageLookupByLibrary.simpleMessage("Mittelpunkt auswählen"),
         "pinAlbum": MessageLookupByLibrary.simpleMessage("Album anheften"),
+        "playOnTv": MessageLookupByLibrary.simpleMessage(
+            "Album auf dem Fernseher wiedergeben"),
         "playStoreFreeTrialValidTill": m37,
         "playstoreSubscription":
             MessageLookupByLibrary.simpleMessage("PlayStore Abo"),
@@ -1336,6 +1362,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("✨ Abgeschlossen"),
         "startBackup":
             MessageLookupByLibrary.simpleMessage("Sicherung starten"),
+        "status": MessageLookupByLibrary.simpleMessage("Status"),
         "storage": MessageLookupByLibrary.simpleMessage("Speicherplatz"),
         "storageBreakupFamily": MessageLookupByLibrary.simpleMessage("Familie"),
         "storageBreakupYou": MessageLookupByLibrary.simpleMessage("Sie"),
@@ -1490,6 +1517,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("E-Mail-Adresse verifizieren"),
         "verifyEmailID": m64,
         "verifyIDLabel": MessageLookupByLibrary.simpleMessage("Überprüfen"),
+        "verifyPasskey":
+            MessageLookupByLibrary.simpleMessage("Passkey verifizieren"),
         "verifyPassword":
             MessageLookupByLibrary.simpleMessage("Passwort überprüfen"),
         "verifying": MessageLookupByLibrary.simpleMessage("Verifiziere …"),
@@ -1510,6 +1539,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "viewer": MessageLookupByLibrary.simpleMessage("Zuschauer"),
         "visitWebToManage": MessageLookupByLibrary.simpleMessage(
             "Bitte rufen Sie \"web.ente.io\" auf um ihr Abo zu verwalten"),
+        "waitingForVerification":
+            MessageLookupByLibrary.simpleMessage("Warte auf Bestätigung..."),
+        "waitingForWifi":
+            MessageLookupByLibrary.simpleMessage("Warte auf WLAN..."),
         "weAreOpenSource": MessageLookupByLibrary.simpleMessage(
             "Unser Quellcode ist offen einsehbar!"),
         "weDontSupportEditingPhotosAndAlbumsThatYouDont":
