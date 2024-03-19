@@ -25,46 +25,51 @@ class LanguageSelectorPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     return Scaffold(
-      body: CustomScrollView(
-        primary: false,
-        slivers: <Widget>[
-          TitleBarWidget(
-            flexibleSpaceTitle: TitleBarTitleWidget(
-              title: l10n.selectLanguage,
-            ),
-          ),
-          SliverList(
-            delegate: SliverChildBuilderDelegate(
-              (context, index) {
-                return Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 20,
-                  ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      ClipRRect(
-                        borderRadius:
-                            const BorderRadius.all(Radius.circular(8)),
-                        child: ItemsWidget(
-                          supportedLocales,
-                          onLocaleChanged,
-                          currentLocale,
-                        ),
+      body: Center(
+        child: Container(
+          constraints: const BoxConstraints.tightFor(width: 450),
+          child: CustomScrollView(
+            primary: false,
+            slivers: <Widget>[
+              TitleBarWidget(
+                flexibleSpaceTitle: TitleBarTitleWidget(
+                  title: l10n.selectLanguage,
+                ),
+              ),
+              SliverList(
+                delegate: SliverChildBuilderDelegate(
+                  (context, index) {
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 20,
                       ),
-                      // MenuSectionDescriptionWidget(
-                      //   content: context.l10n.maxDeviceLimitSpikeHandling(50),
-                      // )
-                    ],
-                  ),
-                );
-              },
-              childCount: 1,
-            ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          ClipRRect(
+                            borderRadius:
+                                const BorderRadius.all(Radius.circular(8)),
+                            child: ItemsWidget(
+                              supportedLocales,
+                              onLocaleChanged,
+                              currentLocale,
+                            ),
+                          ),
+                          // MenuSectionDescriptionWidget(
+                          //   content: context.l10n.maxDeviceLimitSpikeHandling(50),
+                          // )
+                        ],
+                      ),
+                    );
+                  },
+                  childCount: 1,
+                ),
+              ),
+              const SliverPadding(padding: EdgeInsets.symmetric(vertical: 12)),
+            ],
           ),
-          const SliverPadding(padding: EdgeInsets.symmetric(vertical: 12)),
-        ],
+        ),
       ),
     );
   }
