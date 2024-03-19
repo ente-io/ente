@@ -3,7 +3,7 @@ name: "Lint (mobile)"
 on:
     # Run on every push to a branch other than main that changes mobile/
     push:
-        branches-ignore: [main, f-droid]
+        branches-ignore: [main, f-droid, "deploy/**"]
         paths:
             - "mobile/**"
             - ".github/workflows/mobile-lint.yml"
