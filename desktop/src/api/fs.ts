@@ -5,11 +5,3 @@ export async function getDirFiles(dirPath: string) {
     const electronFiles = await Promise.all(files.map(getElectronFile));
     return electronFiles;
 }
-export {
-    deleteFile,
-    deleteFolder,
-    isFolder,
-    moveFile,
-    readTextFile,
-    rename,
-} from "../services/fs";

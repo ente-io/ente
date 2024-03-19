@@ -130,11 +130,6 @@ class DownloadManagerImpl {
         this.progressUpdater = progressUpdater;
     }
 
-    async reloadCaches() {
-        this.thumbnailCache = await openThumbnailCache();
-        this.diskFileCache = isElectron() && (await openDiskFileCache());
-    }
-
     private async getCachedThumbnail(fileID: number) {
         try {
             const cacheResp: Response = await this.thumbnailCache?.match(

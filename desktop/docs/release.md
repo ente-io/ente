@@ -20,11 +20,11 @@ So the process for doing a release would be.
 
 4. Commit and push to remote
 
-   ```sh
-   git add package.json && git commit -m 'Release v1.x.x'
-   git tag v1.x.x
-   git push && git push --tags
-   ```
+    ```sh
+    git add package.json && git commit -m 'Release v1.x.x'
+    git tag v1.x.x
+    git push && git push --tags
+    ```
 
 This by itself will already trigger a new release. The GitHub action will create
 a new draft release that can then be used as descibed below.
@@ -42,9 +42,9 @@ To wrap up, we also need to merge back these changes into main. So for that,
 The GitHub Action runs on Windows, Linux and macOS. It produces the artifacts
 defined in the `build` value in `package.json`.
 
-* Windows - An NSIS installer.
-* Linux - An AppImage, and 3 other packages (`.rpm`, `.deb`, `.pacman`)
-* macOS - A universal DMG
+-   Windows - An NSIS installer.
+-   Linux - An AppImage, and 3 other packages (`.rpm`, `.deb`, `.pacman`)
+-   macOS - A universal DMG
 
 Additionally, the GitHub action notarizes the macOS DMG. For this it needs
 credentials provided via GitHub secrets.
@@ -70,19 +70,19 @@ If everything goes well, we'll have a release on GitHub, and the corresponding
 source maps for the renderer process uploaded to Sentry. There isn't anything
 else to do:
 
-* The website automatically redirects to the latest release on GitHub when
-  people try to download.
+-   The website automatically redirects to the latest release on GitHub when
+    people try to download.
 
-* The file formats with support auto update (Windows `exe`, the Linux AppImage
-  and the macOS DMG) also check the latest GitHub release automatically to
-  download and apply the update (the rest of the formats don't support auto
-  updates).
+-   The file formats with support auto update (Windows `exe`, the Linux AppImage
+    and the macOS DMG) also check the latest GitHub release automatically to
+    download and apply the update (the rest of the formats don't support auto
+    updates).
 
-* We're not putting the desktop app in other stores currently. It is available
-  as a `brew cask`, but we only had to open a PR to add the initial formula, now
-  their maintainers automatically bump the SHA, version number and the (derived
-  from the version) URL in the formula when their tools notice a new release on
-  our GitHub.
+-   We're not putting the desktop app in other stores currently. It is available
+    as a `brew cask`, but we only had to open a PR to add the initial formula,
+    now their maintainers automatically bump the SHA, version number and the
+    (derived from the version) URL in the formula when their tools notice a new
+    release on our GitHub.
 
 We can also publish the draft releases by checking the "pre-release" option.
 Such releases don't cause any of the channels (our website, or the desktop app

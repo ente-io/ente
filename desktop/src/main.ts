@@ -19,7 +19,6 @@ import {
     setupMainMenu,
     setupTrayItem,
 } from "./utils/main";
-import { setupMainProcessStatsLogger } from "./utils/processStats";
 
 let mainWindow: BrowserWindow;
 
@@ -104,7 +103,6 @@ if (!gotTheLock) {
     // Some APIs can only be used after this event occurs.
     app.on("ready", async () => {
         logSystemInfo();
-        setupMainProcessStatsLogger();
         mainWindow = await createWindow();
         const tray = setupTrayItem(mainWindow);
         const watcher = initWatcher(mainWindow);

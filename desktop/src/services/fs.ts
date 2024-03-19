@@ -184,25 +184,6 @@ export const getZipFileStream = async (
     return readableStream;
 };
 
-export async function isFolder(dirPath: string) {
-    try {
-        const stats = await fs.stat(dirPath);
-        return stats.isDirectory();
-    } catch (e) {
-        let err = e;
-        // if code is defined, it's an error from fs.stat
-        if (typeof e.code !== "undefined") {
-            // ENOENT means the file does not exist
-            if (e.code === "ENOENT") {
-                return false;
-            }
-            err = Error(`fs error code: ${e.code}`);
-        }
-        logError(err, "isFolder failed");
-        return false;
-    }
-}
-
 export const convertBrowserStreamToNode = (
     fileStream: ReadableStream<Uint8Array>,
 ) => {
@@ -256,61 +237,4 @@ export async function writeStream(
 ) {
     const readable = convertBrowserStreamToNode(fileStream);
     await writeNodeStream(filePath, readable);
-}
-
-export async function readTextFile(filePath: string) {
-    if (!existsSync(filePath)) {
-        throw new Error("File does not exist");
-    }
-    return await fs.readFile(filePath, "utf-8");
-}
-
-export async function moveFile(
-    sourcePath: string,
-    destinationPath: string,
-): Promise<void> {
-    if (!existsSync(sourcePath)) {
-        throw new Error("File does not exist");
-    }
-    if (existsSync(destinationPath)) {
-        throw new Error("Destination file already exists");
-    }
-    // check if destination folder exists
-    const destinationFolder = path.dirname(destinationPath);
-    if (!existsSync(destinationFolder)) {
-        await fs.mkdir(destinationFolder, { recursive: true });
-    }
-    await fs.rename(sourcePath, destinationPath);
-}
-
-export async function deleteFolder(folderPath: string): Promise<void> {
-    if (!existsSync(folderPath)) {
-        return;
-    }
-    if (!fs.statSync(folderPath).isDirectory()) {
-        throw new Error("Path is not a folder");
-    }
-    // check if folder is empty
-    const files = await fs.readdir(folderPath);
-    if (files.length > 0) {
-        throw new Error("Folder is not empty");
-    }
-    await fs.rmdir(folderPath);
-}
-
-export async function rename(oldPath: string, newPath: string) {
-    if (!existsSync(oldPath)) {
-        throw new Error("Path does not exist");
-    }
-    await fs.rename(oldPath, newPath);
-}
-
-export function deleteFile(filePath: string): void {
-    if (!existsSync(filePath)) {
-        return;
-    }
-    if (!fs.statSync(filePath).isFile()) {
-        throw new Error("Path is not a file");
-    }
-    fs.rmSync(filePath);
 }

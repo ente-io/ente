@@ -10,8 +10,5 @@
         "eslint-config-next": "latest",
         "eslint-config-prettier": "latest",
         "eslint-plugin-react": "latest"
-    },
-    "standard": {
-        "parser": "babel-eslint"
     }
 }
