@@ -95,10 +95,19 @@ sudo journalctl --follow --unit example
 
 ## Logging
 
-Services should log to files in `/var/logs` within the container. This should be
-mounted to `/root/var/logs` on the instance (using the `-v` flag in the service
-file which launches the Docker container or the Docker compose cluster).
+Simple services can log to their standard output: these are captured by Docker,
+and by default promtail is setup to injest Docker logs and send them to Grafana.
 
-If these logs need to be sent to Grafana, then ensure that there is an entry for
-this log file in the `promtail/promtail.yaml` on that instance. The logs will
-then get scraped by Promtail and sent over to Grafana.
+One issue with the above simple setup is that we cannot attach job names.
+
+If the service needs to to attach a specific job name, or if the service wants
+more control over the log retention etc, then then services can log to to its
+own files.
+
+* Such files should be in `/var/logs` within the container, and this should be
+  mounted to `/root/var/logs` on the instance (using the `-v` flag in the
+  service file which launches the Docker container or the Docker compose cluster).
+
+* There should be entry for this log file in the `promtail/promtail.yaml` on
+  that instance. The logs will then get scraped by Promtail and sent over to
+  Grafana.
