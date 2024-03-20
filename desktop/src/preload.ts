@@ -370,7 +370,18 @@ setupLogging();
 // These objects exposed here will become available to the JS code in our
 // renderer (the web/ code) as `window.ElectronAPIs.*`
 //
-// https://www.electronjs.org/docs/latest/tutorial/tutorial-preload
+// - Introduction
+//   https://www.electronjs.org/docs/latest/tutorial/tutorial-preload
+//
+// There are a few related concepts at play here, and it might be worthwhile to
+// read their (excellent) documentation to get an understanding;
+//
+// - ContextIsolation:
+//   https://www.electronjs.org/docs/latest/tutorial/context-isolation
+//
+// - IPC
+//   https://www.electronjs.org/docs/latest/tutorial/ipc
+//
 contextBridge.exposeInMainWorld("ElectronAPIs", {
     exists,
     checkExistsAndCreateDir,
