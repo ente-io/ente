@@ -12,14 +12,31 @@ export const sidebar = [
                 items: [
                     { text: "Albums", link: "/photos/features/albums" },
                     { text: "Archiving", link: "/photos/features/archive" },
+                    {
+                        text: "Background sync",
+                        link: "/photos/features/background",
+                    },
+                    { text: "Backup", link: "/photos/features/backup" },
                     { text: "Cast", link: "/photos/features/cast/" },
+                    {
+                        text: "Collaboration",
+                        link: "/photos/features/collaborate",
+                    },
                     {
                         text: "Collecting photos",
                         link: "/photos/features/collect",
                     },
                     {
+                        text: "Deduplicate",
+                        link: "/photos/features/deduplicate",
+                    },
+                    {
                         text: "Family plans",
                         link: "/photos/features/family-plans",
+                    },
+                    {
+                        text: "Free up space",
+                        link: "/photos/features/free-up-space/",
                     },
                     { text: "Hidden photos", link: "/photos/features/hide" },
                     {
@@ -33,15 +50,15 @@ export const sidebar = [
                     },
                     { text: "Quick link", link: "/photos/features/quick-link" },
                     { text: "Referrals", link: "/photos/features/referrals" },
-                    { text: "Sharing", link: "/photos/features/sharing" },
+                    { text: "Sharing", link: "/photos/features/share" },
                     { text: "Trash", link: "/photos/features/trash" },
                     {
                         text: "Uncategorized",
                         link: "/photos/features/uncategorized",
                     },
                     {
-                        text: "Watch folder",
-                        link: "/photos/features/watch-folder",
+                        text: "Watch folders",
+                        link: "/photos/features/watch-folders",
                     },
                 ],
             },
@@ -76,7 +93,17 @@ export const sidebar = [
                     },
                 ],
             },
-            { text: "FAQ", link: "/photos/faq/" },
+            {
+                text: "FAQ",
+                collapsed: true,
+                items: [
+                    { text: "General", link: "/photos/faq/general" },
+                    {
+                        text: "Hide & archive",
+                        link: "/photos/faq/hidden-and-archive",
+                    },
+                ],
+            },
             {
                 text: "Troubleshooting",
                 collapsed: true,
@@ -216,7 +243,7 @@ function sidebarOld() {
                         },
                         {
                             text: "Watch folder",
-                            link: "/photos/features/watch-folder",
+                            link: "/photos/features/watch-folders",
                         },
                         { text: "Trash", link: "/photos/features/trash" },
                         {
