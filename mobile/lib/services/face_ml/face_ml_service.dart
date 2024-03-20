@@ -458,7 +458,7 @@ class FaceMlService {
           final List<Face> faces = [];
           final remoteFileIdToVersion = <int, int>{};
           for (FileMl fileMl in res.mlData.values) {
-            if (fileMl.faceEmbedding.version != faceMlVersion) continue;
+            if (fileMl.faceEmbedding.version < faceMlVersion) continue;
             if (fileMl.faceEmbedding.faces.isEmpty) {
               faces.add(
                 Face.empty(
