@@ -8,6 +8,6 @@ description:
 
 -   [Import from Google Photos](from-google-photos/)
 -   [Import from Apple Photos](from-apple-photos/)
--   [Import from Apple Photos](from-amazon-photos)
--   [Import from Apple Photos](from-local-hard-disk)
--   [Export your data out of Ente Photos](export)
+-   [Import from Amazon Photos](from-amazon-photos)
+-   [Import from local hard disk](from-local-hard-disk)
+-   [Export out of Ente Photos](export/)
