@@ -464,8 +464,9 @@ func (c *StripeController) handlePaymentIntentFailed(event stripe.Event, country
 		return ente.StripeEventLog{}, stacktrace.Propagate(err, "")
 	}
 	err = email.SendTemplatedEmail([]string{user.Email}, "ente", "support@ente.io",
-		ente.SubscriptionEndedEmailSubject, ente.SubscriptionEndedEmailTemplate,
-		map[string]interface{}{}, nil)
+		ente.AccountOnHoldEmailSubject, ente.OnHoldTemplate, map[string]interface{}{
+			"PaymentProvider": "Stripe",
+		}, nil)
 	if err != nil {
 		return ente.StripeEventLog{}, stacktrace.Propagate(err, "")
 	}
