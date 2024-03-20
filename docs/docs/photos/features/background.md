@@ -30,10 +30,10 @@ Note that the Ente app will not be able to backup in the background if you force
 kill the app.
 
 > If you're curious, the way this works is, our servers "tickle" your device
-  every once in a while by sending a silent push notification, which wakes up
-  our app and gives it 30 seconds to execute a background sync. However, if you
-  have killed the app from recents, iOS will not deliver the push to the app,
-  breaking the background sync.
+> every once in a while by sending a silent push notification, which wakes up
+> our app and gives it 30 seconds to execute a background sync. However, if you
+> have killed the app from recents, iOS will not deliver the push to the app,
+> breaking the background sync.
 
 ### Android
 
@@ -52,6 +52,6 @@ app, though the [way that works](watch-folders) is a bit different.
 
 ## Troubleshooting
 
-* On iOS, make sure that you're not killing the Ente app.
-* On Android, make sure that "Optimize battery usage" is not turned on in system
-  settings for the Ente app.
+-   On iOS, make sure that you're not killing the Ente app.
+-   On Android, make sure that "Optimize battery usage" is not turned on in
+    system settings for the Ente app.

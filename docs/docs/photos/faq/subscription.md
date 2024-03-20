@@ -12,16 +12,17 @@ Yes we do! Please check out our announcement post
 
 In brief,
 
-* Your family members can use storage space from your plan without paying extra.
+-   Your family members can use storage space from your plan without paying
+    extra.
 
-* Ask them to sign up for Ente, and then just add them to your existing plan
-  using the "Manage family" option within your Subscription settings.
+-   Ask them to sign up for Ente, and then just add them to your existing plan
+    using the "Manage family" option within your Subscription settings.
 
-* Each member gets their own private space, and cannot see each other's files
-  unless they're shared.
+-   Each member gets their own private space, and cannot see each other's files
+    unless they're shared.
 
-* You can invite 5 family members. So including yourself, it will be 6 people
-  who can share a single subscription, paying only once.
+-   You can invite 5 family members. So including yourself, it will be 6 people
+    who can share a single subscription, paying only once.
 
 Note that family plans are meant as a way to share storage. For sharing photos,
 you can create [shared albums and links](/photos/features/share).
@@ -68,13 +69,13 @@ Once the payment is completed, your account will be upgraded to the chosen plan.
 
 We accept the following crypto currencies:
 
-- Bitcoin
-- Ethereum
-- Dogecoin
+-   Bitcoin
+-   Ethereum
+-   Dogecoin
 
 To purchase a subscription with any of the above mentioned currencies, please
-write to crypto@ente.io from your registered email address, citing the [storage
-plan](https://ente.io#pricing) of your choice.
+write to crypto@ente.io from your registered email address, citing the
+[storage plan](https://ente.io#pricing) of your choice.
 
 In case you have any further questions or need support, please reach out to
 [support@ente.io](mailto:support@ente.io), and we'll be happy to help!
@@ -92,9 +93,8 @@ Ente does not store any of your sensitive payment related information.
 We use [Stripe](https://stripe.com) to handle our card payments, and all of your
 payment information is sent directly to Stripe's PCI DSS validated servers.
 
-Stripe has been audited by a PCI-certified auditor and is certified to [PCI
-Service Provider Level
-1](https://www.visa.com/splisting/searchGrsp.do?companyNameCriteria=stripe).
+Stripe has been audited by a PCI-certified auditor and is certified to
+[PCI Service Provider Level 1](https://www.visa.com/splisting/searchGrsp.do?companyNameCriteria=stripe).
 This is the most stringent level of certification available in the payments
 industry.
 
@@ -126,10 +126,11 @@ invoicing you for the new plan.
 For example, if you are half way through the year on the 100 GB yearly plan, and
 upgrade to the 500 GB yearly plan, then
 
-* The new 500 GB yearly plan will go into effect immediately.
+-   The new 500 GB yearly plan will go into effect immediately.
 
-* But we will reduce the charges for the first year by subtracting the remaining
-  half year balance of the 100 GB yearly plan that you'd already paid.
+-   But we will reduce the charges for the first year by subtracting the
+    remaining half year balance of the 100 GB yearly plan that you'd already
+    paid.
 
 The same applies to monthly plans.
 

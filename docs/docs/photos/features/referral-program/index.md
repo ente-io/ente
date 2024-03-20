@@ -1,7 +1,6 @@
 ---
 title: Referral program
 description: Earn free storage by referring Ente Photos to your friends
-
 ---
 
 # Referral program

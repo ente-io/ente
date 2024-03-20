@@ -1,7 +1,8 @@
 ---
 title: Migrating
 description:
-    Guides for migrating your existing photos into Ente Photos and exporting your data out of Ente Photos
+    Guides for migrating your existing photos into Ente Photos and exporting
+    your data out of Ente Photos
 ---
 
 # Migrating to/from Ente Photos

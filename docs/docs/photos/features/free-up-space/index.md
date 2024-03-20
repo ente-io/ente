@@ -16,4 +16,3 @@ all backed up photos and videos from your phone's internal storage.
 
 > Note: You might have to clear the device's trash to realize this cleared
 > space.
-

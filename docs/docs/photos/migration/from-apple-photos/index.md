@@ -21,9 +21,10 @@ portions of your Live Photos correctly.
 Finally, choose an export directory and confirm by clicking `Export Originals`.
 You will receive a notification from the app once your export is complete.
 
-Now simply drag and drop the downloaded folders into [our desktop
-app](https://ente.io/download/desktop) and grab a cup of coffee (or a good
-night's sleep, depending on the size of your library) while we handle the rest.
+Now simply drag and drop the downloaded folders into
+[our desktop app](https://ente.io/download/desktop) and grab a cup of coffee (or
+a good night's sleep, depending on the size of your library) while we handle the
+rest.
 
 > Note: In case your uploads get interrupted, just drag and drop the folders
 > into the same albums again, and we will ignore already backed up files and

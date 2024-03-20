@@ -1,6 +1,7 @@
 ---
 title: Security and privacy FAQ
-description: Frequently asked questions about security and privacy of Ente Photos
+description:
+    Frequently asked questions about security and privacy of Ente Photos
 ---
 
 # Security and privacy
@@ -33,9 +34,9 @@ Your data is replicated to multiple providers in different countries in the EU.
 
 Currently we have datacenters in the following locations:
 
-- Amsterdam, Netherlands
-- Paris, France
-- Frankfurt, Germany
+-   Amsterdam, Netherlands
+-   Paris, France
+-   Frankfurt, Germany
 
 Much more details about our replication and reliability are documented
 [here](https://ente.io/reliability).
