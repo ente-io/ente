@@ -558,15 +558,14 @@ class FaceMlService {
         }
         for (int i = 0; i < result.faces.length; ++i) {
           final FaceResult faceRes = result.faces[i];
-          final FaceDetectionRelative relativeDetection = faceRes.detection;
           final detection = face_detection.Detection(
             box: FaceBox(
-              xMin: relativeDetection.xMinBox,
-              yMin: relativeDetection.yMinBox,
-              width: relativeDetection.width,
-              height: relativeDetection.height,
+              xMin: faceRes.detection.xMinBox,
+              yMin: faceRes.detection.yMinBox,
+              width: faceRes.detection.width,
+              height: faceRes.detection.height,
             ),
-            landmarks: relativeDetection.allKeypoints
+            landmarks: faceRes.detection.allKeypoints
                 .map(
                   (keypoint) => Landmark(
                     x: keypoint[0],
