@@ -876,6 +876,7 @@ class FaceMlService {
     return imagePath;
   }
 
+  @Deprecated('Deprecated in favor of `_getImagePathForML`')
   Future<Uint8List?> _getDataForML(
     EnteFile enteFile, {
     FileDataForML typeOfData = FileDataForML.fileData,
