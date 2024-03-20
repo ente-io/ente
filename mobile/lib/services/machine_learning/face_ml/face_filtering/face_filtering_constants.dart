@@ -1,4 +1,4 @@
-import "package:photos/services/face_ml/face_detection/yolov5face/onnx_face_detection.dart";
+import 'package:photos/services/machine_learning/face_ml/face_detection/yolov5face/onnx_face_detection.dart';
 
 /// Blur detection threshold
 const kLaplacianThreshold = 15;

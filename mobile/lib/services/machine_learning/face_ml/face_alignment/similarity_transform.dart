@@ -1,7 +1,7 @@
 import 'dart:math' show atan2;
 import 'package:ml_linalg/linalg.dart';
 import 'package:photos/extensions/ml_linalg_extensions.dart';
-import "package:photos/services/face_ml/face_alignment/alignment_result.dart";
+import 'package:photos/services/machine_learning/face_ml/face_alignment/alignment_result.dart';
 
 /// Class to compute the similarity transform between two sets of points.
 ///

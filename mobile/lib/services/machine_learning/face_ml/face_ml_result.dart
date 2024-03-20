@@ -6,12 +6,12 @@ import "package:photos/db/ml_data_db.dart";
 import "package:photos/models/file/file.dart";
 import 'package:photos/models/ml/ml_typedefs.dart';
 import "package:photos/models/ml/ml_versions.dart";
-import "package:photos/services/face_ml/face_alignment/alignment_result.dart";
-import "package:photos/services/face_ml/face_clustering/cosine_distance.dart";
-import "package:photos/services/face_ml/face_detection/detection.dart";
-import "package:photos/services/face_ml/face_feedback.dart/cluster_feedback.dart";
-import 'package:photos/services/face_ml/face_filtering/face_filtering_constants.dart';
-import "package:photos/services/face_ml/face_ml_methods.dart";
+import 'package:photos/services/machine_learning/face_ml/face_alignment/alignment_result.dart';
+import 'package:photos/services/machine_learning/face_ml/face_clustering/cosine_distance.dart';
+import 'package:photos/services/machine_learning/face_ml/face_detection/detection.dart';
+import 'package:photos/services/machine_learning/face_ml/face_feedback.dart/cluster_feedback.dart';
+import 'package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart';
+import 'package:photos/services/machine_learning/face_ml/face_ml_methods.dart';
 
 final _logger = Logger('ClusterResult_FaceMlResult');
 

@@ -1,5 +1,5 @@
 // Faces Table Fields & Schema Queries
-import 'package:photos/services/face_ml/face_filtering/face_filtering_constants.dart';
+import 'package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart';
 
 const facesTable = 'faces';
 const fileIDColumn = 'file_id';

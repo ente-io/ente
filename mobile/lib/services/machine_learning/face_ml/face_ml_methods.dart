@@ -1,4 +1,4 @@
-import "package:photos/services/face_ml/face_ml_version.dart";
+import 'package:photos/services/machine_learning/face_ml/face_ml_version.dart';
 
 /// Represents a face detection method with a specific version.
 class FaceDetectionMethod extends VersionedMethod {

@@ -4,9 +4,9 @@ import 'package:logging/logging.dart';
 import 'package:path/path.dart' show join;
 import 'package:path_provider/path_provider.dart';
 import 'package:photos/models/ml/ml_typedefs.dart';
-import "package:photos/services/face_ml/face_feedback.dart/cluster_feedback.dart";
-import "package:photos/services/face_ml/face_feedback.dart/feedback_types.dart";
-import "package:photos/services/face_ml/face_ml_result.dart";
+import 'package:photos/services/machine_learning/face_ml/face_feedback.dart/cluster_feedback.dart';
+import 'package:photos/services/machine_learning/face_ml/face_feedback.dart/feedback_types.dart';
+import 'package:photos/services/machine_learning/face_ml/face_ml_result.dart';
 import 'package:sqflite/sqflite.dart';
 
 /// Stores all data for the ML-related features. The database can be accessed by `MlDataDB.instance.database`.

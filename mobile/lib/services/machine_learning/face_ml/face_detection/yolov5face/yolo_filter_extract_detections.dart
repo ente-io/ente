@@ -1,6 +1,6 @@
 import 'dart:developer' as dev show log;
 
-import "package:photos/services/face_ml/face_detection/detection.dart";
+import 'package:photos/services/machine_learning/face_ml/face_detection/detection.dart';
 
 List<FaceDetectionRelative> yoloOnnxFilterExtractDetections(
   double minScoreSigmoidThreshold,

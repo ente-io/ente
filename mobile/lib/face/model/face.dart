@@ -1,5 +1,5 @@
 import "package:photos/face/model/detection.dart";
-import 'package:photos/services/face_ml/face_filtering/face_filtering_constants.dart';
+import 'package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart';
 
 class Face {
   final int fileID;

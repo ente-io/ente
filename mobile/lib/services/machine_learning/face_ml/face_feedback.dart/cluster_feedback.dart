@@ -1,8 +1,8 @@
 import "dart:convert";
 
-import "package:photos/services/face_ml/face_clustering/cosine_distance.dart";
-import "package:photos/services/face_ml/face_feedback.dart/feedback.dart";
-import "package:photos/services/face_ml/face_feedback.dart/feedback_types.dart";
+import 'package:photos/services/machine_learning/face_ml/face_clustering/cosine_distance.dart';
+import 'package:photos/services/machine_learning/face_ml/face_feedback.dart/feedback.dart';
+import 'package:photos/services/machine_learning/face_ml/face_feedback.dart/feedback_types.dart';
 
 abstract class ClusterFeedback extends Feedback {
   static final Map<FeedbackType, Function(String)> fromJsonStringRegistry = {

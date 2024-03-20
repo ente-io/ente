@@ -11,7 +11,7 @@ import "package:photos/face/db_model_mappers.dart";
 import "package:photos/face/model/face.dart";
 import "package:photos/face/model/person.dart";
 import "package:photos/models/file/file.dart";
-import 'package:photos/services/face_ml/face_filtering/face_filtering_constants.dart';
+import 'package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart';
 import 'package:sqflite/sqflite.dart';
 
 /// Stores all data for the ML-related features. The database can be accessed by `MlDataDB.instance.database`.
