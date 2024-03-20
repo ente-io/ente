@@ -88,10 +88,6 @@ class FaceWidget extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 8),
-                Text(
-                  (face.score).toStringAsFixed(2),
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
                 if (person != null)
                   Text(
                     person!.attr.name.trim(),
