@@ -1,3 +1,15 @@
+/**
+ * Deprecated - Use File + webUtils.getPathForFile instead
+ *
+ * Electron used to augment the standard web
+ * [File](https://developer.mozilla.org/en-US/docs/Web/API/File) object with an
+ * additional `path` property. This is now deprecated, and will be removed in a
+ * future release.
+ * https://www.electronjs.org/docs/latest/api/file-object
+ *
+ * The alternative to the `path` property is to use `webUtils.getPathForFile`
+ * https://www.electronjs.org/docs/latest/api/web-utils
+ */
 export interface ElectronFile {
     name: string;
     path: string;
