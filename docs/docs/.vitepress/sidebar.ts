@@ -7,6 +7,37 @@ export const sidebar = [
         items: [
             { text: "Introduction", link: "/photos/" },
             {
+                text: "Migration",
+                collapsed: true,
+                items: [
+                    {
+                        text: "Introduction",
+                        link: "/photos/migration/",
+                    },
+
+                    {
+                        text: "From Google Photos",
+                        link: "/photos/migration/from-google-photos/",
+                    },
+                    {
+                        text: "From Apple Photos",
+                        link: "/photos/migration/from-apple-photos/",
+                    },
+                    {
+                        text: "From Amazon Photos",
+                        link: "/photos/migration/from-amazon-photos",
+                    },
+                    {
+                        text: "From your hard disk",
+                        link: "/photos/migration/from-local-hard-disk",
+                    },
+                    {
+                        text: "Exporting your data",
+                        link: "/photos/migration/export/",
+                    },
+                ],
+            },
+            {
                 text: "Features",
                 collapsed: true,
                 items: [
@@ -68,7 +99,7 @@ export const sidebar = [
             { text: "Introduction", link: "/auth/" },
             { text: "FAQ", link: "/auth/faq/" },
             {
-                text: "Migration guides",
+                text: "Migration",
                 collapsed: false,
                 items: [
                     { text: "Introduction", link: "/auth/migration-guides/" },
