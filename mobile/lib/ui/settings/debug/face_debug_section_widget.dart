@@ -8,7 +8,6 @@ import "package:photos/events/people_changed_event.dart";
 import "package:photos/extensions/stop_watch.dart";
 import "package:photos/face/db.dart";
 import "package:photos/face/model/person.dart";
-import "package:photos/models/ml/ml_versions.dart";
 import "package:photos/services/face_ml/face_ml_service.dart";
 import "package:photos/services/face_ml/feedback/cluster_feedback.dart";
 import 'package:photos/theme/ente_theme.dart';
