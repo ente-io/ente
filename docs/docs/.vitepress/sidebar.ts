@@ -49,7 +49,10 @@ export const sidebar = [
                         link: "/photos/features/public-link",
                     },
                     { text: "Quick link", link: "/photos/features/quick-link" },
-                    { text: "Referrals", link: "/photos/features/referrals" },
+                    {
+                        text: "Referral program",
+                        link: "/photos/features/referral-program/",
+                    },
                     { text: "Sharing", link: "/photos/features/share" },
                     { text: "Trash", link: "/photos/features/trash" },
                     {
@@ -99,7 +102,12 @@ export const sidebar = [
                 items: [
                     { text: "General", link: "/photos/faq/general" },
                     {
-                        text: "Hide & archive",
+                        text: "Security and privacy",
+                        link: "/photos/faq/security-and-privacy",
+                    },
+                    { text: "Subscription", link: "/photos/faq/subsciption" },
+                    {
+                        text: "Hide vs archive",
                         link: "/photos/faq/hidden-and-archive",
                     },
                 ],
