@@ -11,7 +11,7 @@ import "package:photos/face/db_model_mappers.dart";
 import "package:photos/face/model/face.dart";
 import "package:photos/face/model/person.dart";
 import "package:photos/models/file/file.dart";
-import "package:photos/services/face_ml/blur_detection/blur_constants.dart";
+import 'package:photos/services/face_ml/face_filtering/face_filtering_constants.dart';
 import 'package:sqflite/sqflite.dart';
 
 /// Stores all data for the ML-related features. The database can be accessed by `MlDataDB.instance.database`.
@@ -226,7 +226,7 @@ class FaceMLDataDB {
     return null;
   }
 
-  Future<List<Face>> getFacesForGivenFileID(int fileUploadID) async {
+  Future<List<Face>?> getFacesForGivenFileID(int fileUploadID) async {
     final db = await instance.database;
     final List<Map<String, dynamic>> maps = await db.query(
       facesTable,
@@ -246,6 +246,9 @@ class FaceMLDataDB {
       where: '$fileIDColumn = ?',
       whereArgs: [fileUploadID],
     );
+    if (maps.isEmpty) {
+      return null;
+    }
     return maps.map((e) => mapRowToFace(e)).toList();
   }
 
@@ -338,7 +341,7 @@ class FaceMLDataDB {
   ///
   /// Only selects faces with score greater than [minScore] and blur score greater than [minClarity]
   Future<Map<String, (int?, Uint8List)>> getFaceEmbeddingMap({
-    double minScore = 0.78,
+    double minScore = kMinFaceScore,
     int minClarity = kLaplacianThreshold,
     int maxRows = 20000,
   }) async {

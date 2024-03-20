@@ -31,6 +31,7 @@ import 'package:photos/services/face_ml/face_detection/yolov5face/onnx_face_dete
 import "package:photos/services/face_ml/face_detection/yolov5face/yolo_face_detection_exceptions.dart";
 import "package:photos/services/face_ml/face_embedding/face_embedding_exceptions.dart";
 import 'package:photos/services/face_ml/face_embedding/onnx_face_embedding.dart';
+import "package:photos/services/face_ml/face_filtering/face_filtering_constants.dart";
 import "package:photos/services/face_ml/face_ml_exceptions.dart";
 import "package:photos/services/face_ml/face_ml_result.dart";
 import 'package:photos/services/machine_learning/file_ml/file_ml.dart';
@@ -361,7 +362,7 @@ class FaceMlService {
     await clusterAllImages();
   }
 
-  Future<void> clusterAllImages({double minFaceScore = 0.75}) async {
+  Future<void> clusterAllImages({double minFaceScore = kMinFaceScore}) async {
     _logger.info("`clusterAllImages()` called");
 
     try {

@@ -18,10 +18,10 @@ import 'package:flutter/painting.dart' as paint show decodeImageFromList;
 import 'package:ml_linalg/linalg.dart';
 import "package:photos/face/model/box.dart";
 import 'package:photos/models/ml/ml_typedefs.dart';
-import "package:photos/services/face_ml/blur_detection/blur_detection_service.dart";
 import "package:photos/services/face_ml/face_alignment/alignment_result.dart";
 import "package:photos/services/face_ml/face_alignment/similarity_transform.dart";
 import "package:photos/services/face_ml/face_detection/detection.dart";
+import 'package:photos/services/face_ml/face_filtering/blur_detection_service.dart';
 
 /// All of the functions in this file are helper functions for the [ImageMlIsolate] isolate.
 /// Don't use them outside of the isolate, unless you are okay with UI jank!!!!
