@@ -42,7 +42,7 @@ const (
 	OnHoldTemplate = "on_hold.html"
 
 	// AccountOnHoldEmailSubject is the subject of account on hold email
-	AccountOnHoldEmailSubject = "ente account on hold"
+	AccountOnHoldEmailSubject = "Ente account on hold"
 
 	// Template for the email we send out when the user's subscription ends,
 	// either because the user cancelled their subscription, or because it
