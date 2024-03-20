@@ -30,5 +30,5 @@ In brief,
 
     Unfortunately, at this moment, assigning a storage quota for each individual
     member in the family plan is not supported. For updates on this feature
-    request, please follow [this
-    thread](https://github.com/ente-io/ente/discussions/857).
+    request, please follow
+    [this thread](https://github.com/ente-io/ente/discussions/857).

@@ -105,7 +105,10 @@ export const sidebar = [
                         text: "Security and privacy",
                         link: "/photos/faq/security-and-privacy",
                     },
-                    { text: "Subscription", link: "/photos/faq/subsciption" },
+                    {
+                        text: "Subscription and plans",
+                        link: "/photos/faq/subscription",
+                    },
                     {
                         text: "Hide vs archive",
                         link: "/photos/faq/hidden-and-archive",

@@ -5,6 +5,9 @@ description: Frequently asked questions about Ente Photos subscription and plans
 
 # Subscription and plans
 
+See our [website](https://ente.io#pricing) for the list of supported plans and
+pricing.
+
 ## Does Ente have Family Plans?
 
 Yes we do! Please check out our announcement post
