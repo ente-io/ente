@@ -446,7 +446,7 @@ class FaceMlService {
       final List<List<EnteFile>> chunks = sortedBylocalID.chunks(kParallelism);
       outerLoop:
       for (final chunk in chunks) {
-        final futures = <Future>[];
+        final futures = <Future<bool>>[];
         final List<int> fileIds = [];
         // Try to find embeddings on the remote server
         for (final f in chunk) {
@@ -495,8 +495,12 @@ class FaceMlService {
           }
           futures.add(processImage(enteFile));
         }
-        await Future.wait(futures);
-        fileAnalyzedCount += futures.length;
+        final awaitedFutures = await Future.wait(futures);
+        final sumFutures = awaitedFutures.fold<int>(
+          0,
+          (previousValue, element) => previousValue + (element ? 1 : 0),
+        );
+        fileAnalyzedCount += sumFutures;
       }
 
       stopwatch.stop();
@@ -514,7 +518,7 @@ class FaceMlService {
     }
   }
 
-  Future<void> processImage(EnteFile enteFile) async {
+  Future<bool> processImage(EnteFile enteFile) async {
     _logger.info(
       "`indexAllImages()` on file number  start processing image with uploadedFileID: ${enteFile.uploadedFileID}",
     );
@@ -526,10 +530,7 @@ class FaceMlService {
         // disposeImageIsolateAfterUse: false,
       );
       if (result == null) {
-        _logger.warning(
-          "Image not analyzed with uploadedFileID: ${enteFile.uploadedFileID}",
-        );
-        return;
+        return false;
       }
       final List<Face> faces = [];
       if (!result.hasFaces) {
@@ -599,12 +600,14 @@ class FaceMlService {
         ),
       );
       await FaceMLDataDB.instance.bulkInsertFaces(faces);
+      return true;
     } catch (e, s) {
       _logger.severe(
         "Failed to analyze using FaceML for image with ID: ${enteFile.uploadedFileID}",
         e,
         s,
       );
+      return true;
     }
   }
 
@@ -1153,6 +1156,9 @@ class FaceMlService {
   }
 
   bool _skipAnalysisEnteFile(EnteFile enteFile, Map<int, int> indexedFileIds) {
+    if (isImageIndexRunning == false) {
+      return true;
+    }
     // Skip if the file is not uploaded or not owned by the user
     if (!enteFile.isUploaded || enteFile.isOwner == false) {
       return true;
