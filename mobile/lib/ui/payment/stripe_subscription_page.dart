@@ -331,6 +331,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
     await _dialog.show();
     try {
       final String url = await _billingService.getStripeCustomerPortalUrl();
+      await _dialog.hide();
       await Navigator.of(context).push(
         MaterialPageRoute(
           builder: (BuildContext context) {
@@ -342,7 +343,6 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
       await _dialog.hide();
       await showGenericErrorDialog(context: context, error: e);
     }
-    await _dialog.hide();
   }
 
   Widget _stripeRenewOrCancelButton() {

@@ -16,7 +16,11 @@ import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/common/web_page.dart';
 import 'package:photos/utils/dialog_util.dart';
 
-const kWebPaymentRedirectUrl = "https://payments.ente.io/frameRedirect";
+const kWebPaymentRedirectUrl = String.fromEnvironment(
+  "web-payment-redirect",
+  defaultValue: "https://payments.ente.io/frameRedirect",
+);
+
 const kWebPaymentBaseEndpoint = String.fromEnvironment(
   "web-payment",
   defaultValue: "https://payments.ente.io",

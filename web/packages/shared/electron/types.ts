@@ -21,7 +21,6 @@ export interface ElectronAPIsType {
     ) => Promise<void>;
     saveFileToDisk: (path: string, file: any) => Promise<void>;
     selectDirectory: () => Promise<string>;
-    sendNotification: (content: string) => void;
     readTextFile: (path: string) => Promise<string>;
     showUploadFilesDialog: () => Promise<ElectronFile[]>;
     showUploadDirsDialog: () => Promise<ElectronFile[]>;
@@ -93,7 +92,6 @@ export interface ElectronAPIsType {
         maxDimension: number,
         maxSize: number,
     ) => Promise<Uint8Array>;
-    logRendererProcessMemoryUsage: (message: string) => Promise<void>;
     registerForegroundEventListener: (onForeground: () => void) => void;
     openDirectory: (dirPath: string) => Promise<void>;
     moveFile: (oldPath: string, newPath: string) => Promise<void>;
@@ -105,7 +103,4 @@ export interface ElectronAPIsType {
         imageData: Uint8Array,
     ) => Promise<Float32Array>;
     computeTextEmbedding: (model: Model, text: string) => Promise<Float32Array>;
-    getPlatform: () => Promise<"mac" | "windows" | "linux">;
-    setCustomCacheDirectory: (directory: string) => Promise<void>;
-    getCacheDirectory: () => Promise<string>;
 }

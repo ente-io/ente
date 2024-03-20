@@ -1,13 +1,6 @@
 import { ipcRenderer } from "electron";
 import { AppUpdateInfo } from "../types";
 
-export const sendNotification = (content: string) => {
-    ipcRenderer.send("send-notification", content);
-};
-export const reloadWindow = () => {
-    ipcRenderer.send("reload-window");
-};
-
 export const registerUpdateEventListener = (
     showUpdateDialog: (updateInfo: AppUpdateInfo) => void,
 ) => {
@@ -22,16 +15,4 @@ export const registerForegroundEventListener = (onForeground: () => void) => {
     ipcRenderer.on("app-in-foreground", () => {
         onForeground();
     });
-};
-
-export const updateAndRestart = () => {
-    ipcRenderer.send("update-and-restart");
-};
-
-export const skipAppUpdate = (version: string) => {
-    ipcRenderer.send("skip-app-update", version);
-};
-
-export const muteUpdateNotification = (version: string) => {
-    ipcRenderer.send("mute-update-notification", version);
 };

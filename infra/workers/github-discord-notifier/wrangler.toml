@@ -4,4 +4,4 @@ compatibility_date = "2024-03-14"
 
 [vars]
 # Added as a secret via the Cloudflare dashboard
-# DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/{webhook.id}/{webhook.token}/github"
+# DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/{webhook.id}/{webhook.token}"

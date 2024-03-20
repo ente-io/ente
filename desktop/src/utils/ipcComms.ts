@@ -4,12 +4,12 @@ import {
     BrowserWindow,
     dialog,
     ipcMain,
-    Notification,
     safeStorage,
     shell,
     Tray,
 } from "electron";
 import path from "path";
+import { clearElectronStore } from "../api/electronStore";
 import {
     getAppVersion,
     muteUpdateNotification,
@@ -27,12 +27,6 @@ import {
     generateImageThumbnail,
 } from "../services/imageProcessor";
 import { logErrorSentry } from "../services/sentry";
-import {
-    getCustomCacheDirectory,
-    setCustomCacheDirectory,
-} from "../services/userPreference";
-import { getPlatform } from "./common/platform";
-import { createWindow } from "./createWindow";
 import { generateTempFilePath } from "./temp";
 
 export default function setupIpcComs(
@@ -47,19 +41,6 @@ export default function setupIpcComs(
         if (result.filePaths && result.filePaths.length > 0) {
             return result.filePaths[0]?.split(path.sep)?.join(path.posix.sep);
         }
-    });
-
-    ipcMain.on("send-notification", (_, args) => {
-        const notification = {
-            title: "ente",
-            body: args,
-        };
-        new Notification(notification).show();
-    });
-    ipcMain.on("reload-window", async () => {
-        const secondWindow = await createWindow();
-        mainWindow.destroy();
-        mainWindow = secondWindow;
     });
 
     ipcMain.handle("show-upload-files-dialog", async () => {
@@ -108,6 +89,10 @@ export default function setupIpcComs(
 
     ipcMain.handle("safeStorage-decrypt", (_, message) => {
         return safeStorage.decryptString(message);
+    });
+
+    ipcMain.on("clear-electron-store", () => {
+        clearElectronStore();
     });
 
     ipcMain.handle("get-path", (_, message) => {
@@ -179,16 +164,5 @@ export default function setupIpcComs(
     });
     ipcMain.handle("compute-text-embedding", (_, model, text) => {
         return computeTextEmbedding(model, text);
-    });
-    ipcMain.handle("get-platform", () => {
-        return getPlatform();
-    });
-
-    ipcMain.handle("set-custom-cache-directory", (_, directory: string) => {
-        setCustomCacheDirectory(directory);
-    });
-
-    ipcMain.handle("get-custom-cache-directory", async () => {
-        return getCustomCacheDirectory();
     });
 }

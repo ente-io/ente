@@ -300,6 +300,11 @@ func (c *StripeController) handleCustomerSubscriptionDeleted(event stripe.Event,
 		return ente.StripeEventLog{}, stacktrace.Propagate(err, "")
 	}
 
+	err = c.BillingRepo.UpdateSubscriptionCancellationStatus(userID, true)
+	if err != nil {
+		return ente.StripeEventLog{}, stacktrace.Propagate(err, "")
+	}
+
 	skipMail := stripeSubscription.Metadata[SkipMailKey]
 	// Send a cancellation notification email for folks who are either on
 	// individual plan or admin of a family plan.

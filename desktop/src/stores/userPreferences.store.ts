@@ -11,9 +11,6 @@ const userPreferencesSchema: Schema<UserPreferencesType> = {
     muteUpdateNotificationVersion: {
         type: "string",
     },
-    customCacheDirectory: {
-        type: "string",
-    },
 };
 
 export const userPreferencesStore = new Store({

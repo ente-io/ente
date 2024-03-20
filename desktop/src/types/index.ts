@@ -58,7 +58,6 @@ export interface UserPreferencesType {
     hideDockIcon: boolean;
     skipAppVersion: string;
     muteUpdateNotificationVersion: string;
-    customCacheDirectory: string;
 }
 
 export interface AppUpdateInfo {
