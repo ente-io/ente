@@ -3,7 +3,7 @@ name: "Deploy (docs)"
 on:
     # Run on every push to main that changes docs/
     push:
-        branches-ignore: [main, "deploy/**"]
+        branches: [main]
         paths:
             - "docs/**"
             - ".github/workflows/docs-deploy.yml"
