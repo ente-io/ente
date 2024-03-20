@@ -382,24 +382,27 @@ setupLogging();
 // - IPC https://www.electronjs.org/docs/latest/tutorial/ipc
 //
 //
-// [Note: Transferring Files over IPC]
+// [Note: Transferring large amount of data over IPC]
 //
 // Electron's IPC implementation uses the HTML standard Structured Clone
 // Algorithm to serialize objects passed between processes. [1]
 // https://www.electronjs.org/docs/latest/tutorial/ipc#object-serialization
 //
-// In particular, both ArrayBuffer and the web File types can be passed.
+// In particular, both ArrayBuffer and the web File types are eligible for
+// structured cloning.
 // https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Structured_clone_algorithm
 //
 // Also, ArrayBuffer is "transferable", which means it is a zero-copy operation
 // operation when it happens across threads.
 // https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Transferable_objects
 //
-// In our case though, we're not dealing with threads but separate processes, so
-// I'm not yet aware if the transfer involves copying or not. I haven't found
-// any explicit documentation stating one way or the other.
+// In our case though, we're not dealing with threads but separate processes,
+// and it seems like there is a copy involved since the documentation for
+// contextBridge explicitly calls out that "parameters, errors and return values
+// are **copied** when they're sent over the bridge".
+// https://www.electronjs.org/docs/latest/api/context-bridge#methods
 //
-// Closest is a note from one of the Electron committers stating that even with
+// Related is a note from one of Electron's committers stating that even with
 // copying, the IPC should be fast enough for even moderately large data:
 // https://github.com/electron/electron/issues/1948#issuecomment-864191345
 //
