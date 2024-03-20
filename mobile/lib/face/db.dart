@@ -154,7 +154,7 @@ class FaceMLDataDB {
     final Map<int, int> result = {};
     final db = await instance.database;
     final List<Map<String, dynamic>> maps = await db.rawQuery(
-      'SELECT $fileIDColumn, COUNT(*) as count FROM $facesTable where $faceScore > 0.8 GROUP BY $fileIDColumn',
+      'SELECT $fileIDColumn, COUNT(*) as count FROM $facesTable where $faceScore > $kMinFaceDetectionScore GROUP BY $fileIDColumn',
     );
 
     for (final map in maps) {
@@ -197,7 +197,7 @@ class FaceMLDataDB {
       final clusterIDs =
           cluterRows.map((e) => e[cluserIDColumn] as int).toList();
       final List<Map<String, dynamic>> faceMaps = await db.rawQuery(
-        'SELECT * FROM $facesTable where $faceClusterId IN (${clusterIDs.join(",")}) AND $fileIDColumn in (${fileId.join(",")}) AND $faceScore > 0.8 ORDER BY $faceScore DESC',
+        'SELECT * FROM $facesTable where $faceClusterId IN (${clusterIDs.join(",")}) AND $fileIDColumn in (${fileId.join(",")}) AND $faceScore > $kMinHighQualityFaceScore ORDER BY $faceScore DESC',
       );
       if (faceMaps.isNotEmpty) {
         if (avatarFileId != null) {
@@ -341,7 +341,7 @@ class FaceMLDataDB {
   ///
   /// Only selects faces with score greater than [minScore] and blur score greater than [minClarity]
   Future<Map<String, (int?, Uint8List)>> getFaceEmbeddingMap({
-    double minScore = kMinFaceScore,
+    double minScore = kMinHighQualityFaceScore,
     int minClarity = kLaplacianThreshold,
     int maxRows = 20000,
   }) async {
@@ -398,7 +398,7 @@ class FaceMLDataDB {
         facesTable,
         columns: [faceIDColumn, faceEmbeddingBlob],
         where:
-            '$faceScore > 0.8 AND $faceBlur > $kLaplacianThreshold AND $fileIDColumn IN (${fileIDs.join(",")})',
+            '$faceScore > $kMinHighQualityFaceScore AND $faceBlur > $kLaplacianThreshold AND $fileIDColumn IN (${fileIDs.join(",")})',
         limit: batchSize,
         offset: offset,
         orderBy: '$faceIDColumn DESC',

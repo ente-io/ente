@@ -11,7 +11,7 @@ class Face {
 
   bool get isBlurry => blur < kLaplacianThreshold;
 
-  bool get hasHighScore => score > kMinFaceScore;
+  bool get hasHighScore => score > kMinHighQualityFaceScore;
 
   bool get isHighQuality => (!isBlurry) && hasHighScore;
 
