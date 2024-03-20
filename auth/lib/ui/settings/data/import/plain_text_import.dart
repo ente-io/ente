@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:ente_auth/ente_theme_data.dart';
@@ -104,7 +105,7 @@ Future<void> _pickImportFile(BuildContext context) async {
     final codes = await file.readAsString();
     List<String> splitCodes = codes.split(",");
     if (splitCodes.length == 1) {
-      splitCodes = codes.split("\n");
+      splitCodes = const LineSplitter().convert(codes);
     }
     final parsedCodes = [];
     for (final code in splitCodes) {
