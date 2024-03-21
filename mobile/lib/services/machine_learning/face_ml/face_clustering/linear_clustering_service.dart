@@ -131,12 +131,13 @@ class FaceLinearClustering {
         final errorStackTrace = receivedMessage['stackTrace'];
         final exception = Exception(errorMessage);
         final stackTrace = StackTrace.fromString(errorStackTrace);
+        _activeTasks--;
         completer.completeError(exception, stackTrace);
       } else {
+        _activeTasks--;
         completer.complete(receivedMessage);
       }
     });
-    _activeTasks--;
 
     return completer.future;
   }

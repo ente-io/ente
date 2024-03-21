@@ -374,11 +374,16 @@ class FaceMlService {
       final faceIdToEmbedding = await FaceMLDataDB.instance.getFaceEmbeddingMap(
         minScore: minFaceScore,
       );
-      _logger.info('read embeddings ${faceIdToEmbedding.length} ');
+      final gotFaceEmbeddingsTime = DateTime.now();
+      _logger.info(
+        'read embeddings ${faceIdToEmbedding.length} in ${gotFaceEmbeddingsTime.difference(clusterStartTime).inMilliseconds} ms',
+      );
 
       // Read the creation times from Files DB, in a map from fileID to creation time
       final fileIDToCreationTime =
           await FilesDB.instance.getFileIDToCreationTime();
+      _logger.info('read creation times from FilesDB in '
+          '${DateTime.now().difference(gotFaceEmbeddingsTime).inMilliseconds} ms');
 
       // Cluster the embeddings using the linear clustering algorithm, returning a map from faceID to clusterID
       final faceIdToCluster = await FaceLinearClustering.instance.predict(
