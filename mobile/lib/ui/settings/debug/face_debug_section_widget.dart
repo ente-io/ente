@@ -10,6 +10,7 @@ import "package:photos/face/db.dart";
 import "package:photos/face/model/person.dart";
 import 'package:photos/services/machine_learning/face_ml/face_ml_service.dart';
 import 'package:photos/services/machine_learning/face_ml/feedback/cluster_feedback.dart';
+import "package:photos/services/search_service.dart";
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';
 import 'package:photos/ui/components/expandable_menu_item_widget.dart';
@@ -89,6 +90,39 @@ class _FaceDebugSectionWidgetState extends State<FaceDebugSectionWidget> {
             } catch (e, s) {
               _logger.warning('indexing failed ', e, s);
               await showGenericErrorDialog(context: context, error: e);
+            }
+          },
+        ),
+        MenuItemWidget(
+          captionedTextWidget: const CaptionedTextWidget(
+            title: "Analyze file ID 25728869",
+          ),
+          pressedColor: getEnteColorScheme(context).fillFaint,
+          trailingIcon: Icons.chevron_right_outlined,
+          trailingIconIsMuted: true,
+          onTap: () async {
+            try {
+              final enteFile = await SearchService.instance.getAllFiles().then(
+                    (value) => value.firstWhere(
+                      (element) => element.uploadedFileID == 25728869,
+                    ),
+                  );
+              _logger.info(
+                'File with ID ${enteFile.uploadedFileID} has name ${enteFile.displayName}',
+              );
+              FaceMlService.instance.isImageIndexRunning = true;
+              final result = await FaceMlService.instance
+                  .analyzeImageInSingleIsolate(enteFile);
+              if (result != null) {
+                final resultJson = result.toJsonString();
+                _logger.info('result: $resultJson');
+              }
+              FaceMlService.instance.isImageIndexRunning = false;
+            } catch (e, s) {
+              _logger.severe('indexing failed ', e, s);
+              await showGenericErrorDialog(context: context, error: e);
+            } finally {
+              FaceMlService.instance.isImageIndexRunning = false;
             }
           },
         ),
