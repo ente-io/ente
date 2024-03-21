@@ -5,36 +5,23 @@ nsis:
 linux:
     target:
         - target: AppImage
-          arch:
-              - x64
-              - arm64
+          arch: [x64, arm64]
         - target: deb
-          arch:
-              - x64
-              - arm64
+          arch: [x64, arm64]
         - target: rpm
-          arch:
-              - x64
-              - arm64
+          arch: [x64, arm64]
         - target: pacman
-          arch:
-              - x64
-              - arm64
+          arch: [x64, arm64]
     icon: ./resources/icon.icns
     category: Photography
 mac:
     target:
         target: default
-        arch:
-            - universal
+        arch: [universal]
     category: public.app-category.photography
     hardenedRuntime: true
     x64ArchFiles: Contents/Resources/ggmlclip-mac
 afterSign: electron-builder-notarize
-asarUnpack:
-    - node_modules/ffmpeg-static/bin/${os}/${arch}/ffmpeg
-    - node_modules/ffmpeg-static/index.js
-    - node_modules/ffmpeg-static/package.json
 extraFiles:
     - from: build
       to: resources

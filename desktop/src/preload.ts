@@ -370,7 +370,45 @@ setupLogging();
 // These objects exposed here will become available to the JS code in our
 // renderer (the web/ code) as `window.ElectronAPIs.*`
 //
-// https://www.electronjs.org/docs/latest/tutorial/tutorial-preload
+// - Introduction
+//   https://www.electronjs.org/docs/latest/tutorial/tutorial-preload
+//
+// There are a few related concepts at play here, and it might be worthwhile to
+// read their (excellent) documentation to get an understanding;
+//
+// - ContextIsolation:
+//   https://www.electronjs.org/docs/latest/tutorial/context-isolation
+//
+// - IPC https://www.electronjs.org/docs/latest/tutorial/ipc
+//
+//
+// [Note: Transferring large amount of data over IPC]
+//
+// Electron's IPC implementation uses the HTML standard Structured Clone
+// Algorithm to serialize objects passed between processes.
+// https://www.electronjs.org/docs/latest/tutorial/ipc#object-serialization
+//
+// In particular, both ArrayBuffer and the web File types are eligible for
+// structured cloning.
+// https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Structured_clone_algorithm
+//
+// Also, ArrayBuffer is "transferable", which means it is a zero-copy operation
+// operation when it happens across threads.
+// https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Transferable_objects
+//
+// In our case though, we're not dealing with threads but separate processes,
+// and it seems like there is a copy involved since the documentation for
+// contextBridge explicitly calls out that "parameters, errors and return values
+// are **copied** when they're sent over the bridge".
+// https://www.electronjs.org/docs/latest/api/context-bridge#methods
+//
+// Related is a note from one of Electron's committers stating that even with
+// copying, the IPC should be fast enough for even moderately large data:
+// https://github.com/electron/electron/issues/1948#issuecomment-864191345
+//
+// The main problem with transfering large amounts of data is potentially
+// running out of memory, causing the app to crash as it copies it over across
+// the processes.
 contextBridge.exposeInMainWorld("ElectronAPIs", {
     exists,
     checkExistsAndCreateDir,
