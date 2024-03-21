@@ -16,10 +16,6 @@ const INPUT_PATH_PLACEHOLDER = "INPUT";
 const FFMPEG_PLACEHOLDER = "FFMPEG";
 const OUTPUT_PATH_PLACEHOLDER = "OUTPUT";
 
-function getFFmpegStaticPath() {
-    return pathToFfmpeg.replace("app.asar", "app.asar.unpacked");
-}
-
 /**
  * Run a ffmpeg command
  *
@@ -39,6 +35,13 @@ function getFFmpegStaticPath() {
  * ffmpeg fork maintained by Chromium).
  * https://chromium.googlesource.com/chromium/third_party/ffmpeg
  * https://stackoverflow.com/questions/53963672/what-version-of-ffmpeg-is-bundled-inside-electron
+ *
+ * This can be found in (e.g. on macOS) at
+ *
+ *     $ file ente.app/Contents/Frameworks/Electron\ Framework.framework/Versions/Current/Libraries/libffmpeg.dylib
+ *     .../libffmpeg.dylib: Mach-O 64-bit dynamically linked shared library arm64
+ *
+ * I'm not sure if our code is supposed to be able to use it, and how.
  */
 export async function runFFmpegCmd(
     cmd: string[],
@@ -52,7 +55,7 @@ export async function runFFmpegCmd(
 
         cmd = cmd.map((cmdPart) => {
             if (cmdPart === FFMPEG_PLACEHOLDER) {
-                return getFFmpegStaticPath();
+                return ffmpegBinaryPath();
             } else if (cmdPart === INPUT_PATH_PLACEHOLDER) {
                 return inputFilePath;
             } else if (cmdPart === OUTPUT_PATH_PLACEHOLDER) {
@@ -95,6 +98,19 @@ export async function runFFmpegCmd(
         }
     }
 }
+
+/**
+ * Return the path to the `ffmpeg` binary.
+ *
+ * At runtime, the ffmpeg binary is present in a path like (macOS example):
+ * `ente.app/Contents/Resources/app.asar.unpacked/node_modules/ffmpeg-static/ffmpeg`
+ */
+const ffmpegBinaryPath = () => {
+    // This substitution of app.asar by app.asar.unpacked is suggested by the
+    // ffmpeg-static library author themselves:
+    // https://github.com/eugeneware/ffmpeg-static/issues/16
+    return pathToFfmpeg.replace("app.asar", "app.asar.unpacked");
+};
 
 export async function writeTempFile(fileStream: Uint8Array, fileName: string) {
     const tempFilePath = await generateTempFilePath(fileName);
