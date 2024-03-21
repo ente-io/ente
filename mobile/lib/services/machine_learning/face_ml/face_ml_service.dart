@@ -511,6 +511,14 @@ class FaceMlService {
           (previousValue, element) => previousValue + (element ? 1 : 0),
         );
         fileAnalyzedCount += sumFutures;
+
+        // TODO: remove this cooldown later. Cooldown of one minute every 400 images
+        if (fileAnalyzedCount > 400 && fileAnalyzedCount % 400 < kParallelism) {
+          _logger.info(
+            "indexAllImages() analyzed $fileAnalyzedCount images, cooldown for 1 minute",
+          );
+          await Future.delayed(const Duration(minutes: 1));
+        }
       }
 
       stopwatch.stop();
