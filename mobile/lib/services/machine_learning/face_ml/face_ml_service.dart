@@ -831,7 +831,9 @@ class FaceMlService {
         e,
         s,
       );
-      debugPrint("This image with ID ${enteFile.uploadedFileID} has name ${enteFile.displayName}.");
+      debugPrint(
+        "This image with ID ${enteFile.uploadedFileID} has name ${enteFile.displayName}.",
+      );
       final resultBuilder = FaceMlResultBuilder.fromEnteFile(enteFile);
       return resultBuilder.buildErrorOccurred();
     }
