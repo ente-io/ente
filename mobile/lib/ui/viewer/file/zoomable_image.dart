@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import "package:flutter_image_compress/flutter_image_compress.dart";
 import 'package:logging/logging.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:photos/core/cache/thumbnail_in_memory_cache.dart';
@@ -50,6 +51,7 @@ class _ZoomableImageState extends State<ZoomableImage> {
   bool _loadedLargeThumbnail = false;
   bool _loadingFinalImage = false;
   bool _loadedFinalImage = false;
+  bool _convertToSupportedFormat = false;
   ValueChanged<PhotoViewScaleState>? _scaleStateChangedCallback;
   bool _isZooming = false;
   PhotoViewController _photoViewController = PhotoViewController();
@@ -199,6 +201,7 @@ class _ZoomableImageState extends State<ZoomableImage> {
               file,
               gaplessPlayback: true,
             ).image,
+            file,
           );
         } else {
           _loadingFinalImage = false;
@@ -239,7 +242,10 @@ class _ZoomableImageState extends State<ZoomableImage> {
             _isGIF(), // since on iOS GIFs playback only when origin-files are loaded
       ).then((file) {
         if (file != null && file.existsSync()) {
-          _onFinalImageLoaded(Image.file(file).image);
+          _onFinalImageLoaded(
+            Image.file(file).image,
+            file,
+          );
         } else {
           _logger.info("File was deleted " + _photo.toString());
           if (_photo.uploadedFileID != null) {
@@ -277,10 +283,22 @@ class _ZoomableImageState extends State<ZoomableImage> {
     }
   }
 
-  void _onFinalImageLoaded(ImageProvider imageProvider) {
+  void _onFinalImageLoaded(ImageProvider imageProvider, File file) {
     if (mounted) {
-      precacheImage(imageProvider, context).then((value) async {
-        if (mounted) {
+      precacheImage(
+        imageProvider,
+        context,
+        onError: (exception, _) async {
+          _logger
+              .info(exception.toString() + ". Filename: ${_photo.displayName}");
+          if (exception.toString().contains(
+                "Codec failed to produce an image, possibly due to invalid image data",
+              )) {
+            unawaited(_loadInSupportedFormat(file));
+          }
+        },
+      ).then((value) async {
+        if (mounted && !_loadedFinalImage && !_convertToSupportedFormat) {
           await _updatePhotoViewController(
             previewImageProvider: _imageProvider,
             finalImageProvider: imageProvider,
@@ -348,4 +366,36 @@ class _ZoomableImageState extends State<ZoomableImage> {
   }
 
   bool _isGIF() => _photo.displayName.toLowerCase().endsWith(".gif");
+
+  Future<void> _loadInSupportedFormat(File file) async {
+    _logger.info("Compressing ${_photo.displayName} to viewable format");
+    _convertToSupportedFormat = true;
+
+    final compressedFile =
+        await FlutterImageCompress.compressWithFile(file.path);
+
+    if (compressedFile != null) {
+      final imageProvider = MemoryImage(compressedFile);
+
+      unawaited(
+        precacheImage(imageProvider, context).then((value) async {
+          if (mounted) {
+            await _updatePhotoViewController(
+              previewImageProvider: _imageProvider,
+              finalImageProvider: imageProvider,
+            );
+            setState(() {
+              _imageProvider = imageProvider;
+              _loadedFinalImage = true;
+              _logger.info("Final image loaded");
+            });
+          }
+        }),
+      );
+    } else {
+      _logger.severe(
+        "Failed to compress image ${_photo.displayName} to viewable format",
+      );
+    }
+  }
 }
