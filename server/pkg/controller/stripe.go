@@ -328,8 +328,12 @@ func (c *StripeController) handleCustomerSubscriptionDeleted(event stripe.Event,
 	return ente.StripeEventLog{UserID: userID, StripeSubscription: stripeSubscription, Event: event}, nil
 }
 
-// Occurs whenever a subscription changes (e.g., switching from one plan to
-// another, or changing the status from trial to active).
+// Stripe fires this when a subscription starts or changes. For example,
+// renewing a subscription, adding a coupon, applying a discount, adding an
+// invoice item, and changing plans all trigger this event. In our case, we use
+// this only to track plan changes or subscriptions going past due. The rest
+// (subscription creations, deletions, renewals and failures) are tracked by
+// individual events.
 func (c *StripeController) handleCustomerSubscriptionUpdated(event stripe.Event, country ente.StripeAccountCountry) (ente.StripeEventLog, error) {
 	var stripeSubscription stripe.Subscription
 	json.Unmarshal(event.Data.Raw, &stripeSubscription)
@@ -348,13 +352,6 @@ func (c *StripeController) handleCustomerSubscriptionUpdated(event stripe.Event,
 	if err != nil {
 		return ente.StripeEventLog{}, stacktrace.Propagate(err, "")
 	}
-	if currentSubscription.ProductID == newSubscription.ProductID {
-		// Webhook is reporting an outdated update that was already verified
-		// no-op
-		log.Warn("Webhook is reporting an outdated purchase that was already verified stripeSubscriptionID:", stripeSubscription.ID)
-		return ente.StripeEventLog{UserID: userID, StripeSubscription: stripeSubscription, Event: event}, nil
-	}
-	c.BillingRepo.ReplaceSubscription(currentSubscription.ID, newSubscription)
 	if stripeSubscription.Status == stripe.SubscriptionStatusPastDue {
 		user, err := c.UserRepo.Get(userID)
 		if err != nil {
@@ -367,6 +364,12 @@ func (c *StripeController) handleCustomerSubscriptionUpdated(event stripe.Event,
 		if err != nil {
 			return ente.StripeEventLog{}, stacktrace.Propagate(err, "")
 		}
+	}
+	// If the customer has changed the plan, we update state in the database. If
+	// the plan has not changed, we will ignore this webhook and rely on other
+	// events to update the state
+	if currentSubscription.ProductID != newSubscription.ProductID {
+		c.BillingRepo.ReplaceSubscription(currentSubscription.ID, newSubscription)
 	}
 	return ente.StripeEventLog{UserID: userID, StripeSubscription: stripeSubscription, Event: event}, nil
 }
