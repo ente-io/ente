@@ -5,28 +5,19 @@ nsis:
 linux:
     target:
         - target: AppImage
-          arch:
-              - x64
-              - arm64
+          arch: [x64, arm64]
         - target: deb
-          arch:
-              - x64
-              - arm64
+          arch: [x64, arm64]
         - target: rpm
-          arch:
-              - x64
-              - arm64
+          arch: [x64, arm64]
         - target: pacman
-          arch:
-              - x64
-              - arm64
+          arch: [x64, arm64]
     icon: ./resources/icon.icns
     category: Photography
 mac:
     target:
         target: default
-        arch:
-            - universal
+        arch: [universal]
     category: public.app-category.photography
     hardenedRuntime: true
     x64ArchFiles: Contents/Resources/ggmlclip-mac
