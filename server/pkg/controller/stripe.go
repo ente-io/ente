@@ -782,35 +782,3 @@ func (c *StripeController) CancelSubAndDeleteCustomer(subscription ente.Subscrip
 	}
 	return nil
 }
-
-// cancel the earlier past_due subscription
-// and add skip mail metadata entry to avoid sending account deletion mail while re-subscription
-func (c *StripeController) cancelExistingStripeSubscription(subscription ente.Subscription, userID int64) error {
-	updateParams := &stripe.SubscriptionParams{}
-	updateParams.AddMetadata(SkipMailKey, "true")
-	client := c.StripeClients[subscription.Attributes.StripeAccountCountry]
-	_, err := client.Subscriptions.Update(subscription.OriginalTransactionID, updateParams)
-	if err != nil {
-		stripeError := err.(*stripe.Error)
-		log.Warn(fmt.Sprintf("subscription updation failed msg= %s for userID=%d", stripeError.Msg, userID))
-		// ignore if subscription doesn't exist, already deleted
-		if stripeError.HTTPStatusCode != 404 {
-			return stacktrace.Propagate(err, "")
-		}
-	} else {
-		_, err = client.Subscriptions.Cancel(subscription.OriginalTransactionID, nil)
-		if err != nil {
-			stripeError := err.(*stripe.Error)
-			log.Warn(fmt.Sprintf("subscription cancel failed msg= %s for userID=%d", stripeError.Msg, userID))
-			// ignore if subscription doesn't exist, already deleted
-			if stripeError.HTTPStatusCode != 404 {
-				return stacktrace.Propagate(err, "")
-			}
-		}
-		err = c.BillingRepo.UpdateSubscriptionCancellationStatus(userID, true)
-		if err != nil {
-			return stacktrace.Propagate(err, "")
-		}
-	}
-	return nil
-}
