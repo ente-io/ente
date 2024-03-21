@@ -1,11 +1,11 @@
 ---
-title: Public links
+title: Public link
 description:
     Share photos with your friends and family without them needing to install
     Ente Photos
 ---
 
-# Public Links
+# Public link
 
 Ente lets you share your photos via links, that can be accessed by anyone,
 without an app or account.
