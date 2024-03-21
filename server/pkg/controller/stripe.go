@@ -87,11 +87,8 @@ func (c *StripeController) GetCheckoutSession(productID string, userID int64, re
 		}
 	}
 	if subscription.PaymentProvider == ente.Stripe && !subscription.Attributes.IsCancelled {
-		// user had bought a stripe subscription earlier,
-		err := c.cancelExistingStripeSubscription(subscription, userID)
-		if err != nil {
-			return "", stacktrace.Propagate(err, "")
-		}
+		// TODO: Check Stripe's cancellation state instead of our own
+		return "", stacktrace.Propagate(err, "")
 	}
 	stripeSuccessURL := redirectRootURL + viper.GetString("stripe.path.success")
 	stripeCancelURL := redirectRootURL + viper.GetString("stripe.path.cancel")
@@ -466,7 +463,8 @@ func (c *StripeController) handlePaymentIntentFailed(event stripe.Event, country
 	}
 	// If the current subscription is the same as the one in the webhook, then
 	// we need to expire the subscription, and send an email to the user.
-	newExpiryTime := time.Now().UnixMicro() // Set the expiry time to 7 days from now
+	// TODO: Set the expiry time to 7 days from now
+	newExpiryTime := time.Now().UnixMicro()
 	err = c.BillingRepo.UpdateSubscriptionExpiryTime(
 		currentSubscription.ID, newExpiryTime)
 	if err != nil {
@@ -481,7 +479,7 @@ func (c *StripeController) handlePaymentIntentFailed(event stripe.Event, country
 	err = email.SendTemplatedEmail([]string{user.Email}, "ente", "support@ente.io",
 		ente.AccountOnHoldEmailSubject, ente.OnHoldTemplate, map[string]interface{}{
 			"PaymentProvider": "Stripe",
-			"InvoiceURL": invoice.HostedInvoiceURL,
+			"InvoiceURL":      invoice.HostedInvoiceURL,
 		}, nil)
 	if err != nil {
 		return ente.StripeEventLog{}, stacktrace.Propagate(err, "")
