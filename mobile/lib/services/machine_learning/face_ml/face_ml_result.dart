@@ -37,7 +37,7 @@ class ClusterResult {
 
   String get thumbnailFaceId => _thumbnailFaceId;
 
-  int get thumbnailFileId => _getFileIdFromFaceId(_thumbnailFaceId);
+  int get thumbnailFileId => getFileIdFromFaceId(_thumbnailFaceId);
 
   /// Sets the thumbnail faceId to the given faceId.
   /// Throws an exception if the faceId is not in the list of faceIds.
@@ -89,7 +89,7 @@ class ClusterResult {
     int removedCount = 0;
     for (var i = 0; i < _fileIds.length; i++) {
       if (_fileIds[i] == fileId) {
-        assert(_getFileIdFromFaceId(_faceIds[i]) == fileId);
+        assert(getFileIdFromFaceId(_faceIds[i]) == fileId);
         _fileIds.removeAt(i);
         _faceIds.removeAt(i);
         debugPrint(
@@ -748,6 +748,6 @@ class FaceResultBuilder {
   }
 }
 
-int _getFileIdFromFaceId(String faceId) {
+int getFileIdFromFaceId(String faceId) {
   return int.parse(faceId.split("_")[0]);
 }

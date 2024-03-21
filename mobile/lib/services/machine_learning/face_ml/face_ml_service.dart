@@ -13,6 +13,7 @@ import "package:logging/logging.dart";
 import "package:onnxruntime/onnxruntime.dart";
 import "package:photos/core/configuration.dart";
 import "package:photos/core/event_bus.dart";
+import "package:photos/db/files_db.dart";
 import "package:photos/db/ml_data_db.dart";
 import "package:photos/events/diff_sync_complete_event.dart";
 import "package:photos/extensions/list.dart";
@@ -375,9 +376,15 @@ class FaceMlService {
       );
       _logger.info('read embeddings ${faceIdToEmbedding.length} ');
 
+      // Read the creation times from Files DB, in a map from fileID to creation time
+      final fileIDToCreationTime =
+          await FilesDB.instance.getFileIDToCreationTime();
+
       // Cluster the embeddings using the linear clustering algorithm, returning a map from faceID to clusterID
-      final faceIdToCluster =
-          await FaceLinearClustering.instance.predict(faceIdToEmbedding);
+      final faceIdToCluster = await FaceLinearClustering.instance.predict(
+        faceIdToEmbedding,
+        fileIDToCreationTime: fileIDToCreationTime,
+      );
       if (faceIdToCluster == null) {
         _logger.warning("faceIdToCluster is null");
         return;

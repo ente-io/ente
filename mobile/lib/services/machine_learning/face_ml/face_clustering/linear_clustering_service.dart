@@ -94,7 +94,12 @@ class FaceLinearClustering {
         switch (function) {
           case ClusterOperation.linearIncrementalClustering:
             final input = args['input'] as Map<String, (int?, Uint8List)>;
-            final result = FaceLinearClustering._runLinearClustering(input);
+            final fileIDToCreationTime =
+                args['fileIDToCreationTime'] as Map<int, int>?;
+            final result = FaceLinearClustering._runLinearClustering(
+              input,
+              fileIDToCreationTime: fileIDToCreationTime,
+            );
             sendPort.send(result);
             break;
         }
@@ -169,8 +174,9 @@ class FaceLinearClustering {
   ///
   /// WARNING: Make sure to always input data in the same ordering, otherwise the clustering can less less deterministic.
   Future<Map<String, int>?> predict(
-    Map<String, (int?, Uint8List)> input,
-  ) async {
+    Map<String, (int?, Uint8List)> input, {
+    Map<int, int>? fileIDToCreationTime,
+  }) async {
     if (input.isEmpty) {
       _logger.warning(
         "Clustering dataset of embeddings is empty, returning empty list.",
@@ -192,7 +198,10 @@ class FaceLinearClustering {
     // final Map<String, int> faceIdToCluster =
     //     await _runLinearClusteringInComputer(input);
     final Map<String, int> faceIdToCluster = await _runInIsolate(
-      (ClusterOperation.linearIncrementalClustering, {'input': input}),
+      (
+        ClusterOperation.linearIncrementalClustering,
+        {'input': input, 'fileIDToCreationTime': fileIDToCreationTime}
+      ),
     );
     // return _runLinearClusteringInComputer(input);
     _logger.info(
@@ -205,8 +214,9 @@ class FaceLinearClustering {
   }
 
   static Map<String, int> _runLinearClustering(
-    Map<String, (int?, Uint8List)> x,
-  ) {
+    Map<String, (int?, Uint8List)> x, {
+    Map<int, int>? fileIDToCreationTime,
+  }) {
     log(
       "[ClusterIsolate] ${DateTime.now()} Copied to isolate ${x.length} faces",
     );
@@ -217,9 +227,27 @@ class FaceLinearClustering {
           faceID: entry.key,
           embedding: EVector.fromBuffer(entry.value.$2).values,
           clusterId: entry.value.$1,
+          fileCreationTime:
+              fileIDToCreationTime?[getFileIdFromFaceId(entry.key)],
         ),
       );
     }
+
+    // Sort the faceInfos based on fileCreationTime, in ascending order, so oldest faces are first
+    if (fileIDToCreationTime != null) {
+      faceInfos.sort((a, b) {
+        if (a.fileCreationTime == null && b.fileCreationTime == null) {
+          return 0;
+        } else if (a.fileCreationTime == null) {
+          return 1;
+        } else if (b.fileCreationTime == null) {
+          return -1;
+        } else {
+          return a.fileCreationTime!.compareTo(b.fileCreationTime!);
+        }
+      });
+    }
+
     // Sort the faceInfos such that the ones with null clusterId are at the end
     faceInfos.sort((a, b) {
       if (a.clusterId == null && b.clusterId == null) {
