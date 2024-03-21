@@ -26,7 +26,6 @@ import (
 	"github.com/spf13/viper"
 	"github.com/stripe/stripe-go/v72"
 	"github.com/stripe/stripe-go/v72/client"
-	"github.com/stripe/stripe-go/v72/invoice"
 	"github.com/stripe/stripe-go/v72/webhook"
 	"golang.org/x/text/currency"
 )
@@ -527,7 +526,7 @@ func (c *StripeController) UpdateSubscription(stripeID string, userID int64) (en
 			return ente.SubscriptionUpdateResponse{Status: "requires_action", ClientSecret: newStripeSubscription.LatestInvoice.PaymentIntent.ClientSecret}, nil
 		} else if newStripeSubscription.LatestInvoice.PaymentIntent.Status == stripe.PaymentIntentStatusRequiresPaymentMethod {
 			inv := newStripeSubscription.LatestInvoice
-			invoice.VoidInvoice(inv.ID, nil)
+			client.Invoices.VoidInvoice(inv.ID, nil)
 			return ente.SubscriptionUpdateResponse{Status: "requires_payment_method"}, nil
 		} else if newStripeSubscription.LatestInvoice.PaymentIntent.Status == stripe.PaymentIntentStatusProcessing {
 			return ente.SubscriptionUpdateResponse{Status: "success"}, nil
